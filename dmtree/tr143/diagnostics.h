@@ -27,6 +27,7 @@ extern DMLEAF tIPDiagnosticsUploadDiagnosticsPerConnectionResultParams[];
 extern DMLEAF tIPDiagnosticsUDPEchoConfigParams[];
 extern DMLEAF tIPDiagnosticsUDPEchoDiagnosticsParams[];
 extern DMLEAF tIPDiagnosticsServerSelectionDiagnosticsParams[];
+extern DMLEAF XIopsysEuBBKSpeedTestParams[];
 
 int browseIPDiagnosticsTraceRouteRouteHopsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);
 int browseIPDiagnosticsDownloadDiagnosticsPerConnectionResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);
@@ -228,5 +229,9 @@ int get_IPDiagnosticsServerSelectionDiagnostics_FastestHost(char *refparam, stru
 int get_IPDiagnosticsServerSelectionDiagnostics_MinimumResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int get_IPDiagnosticsServerSelectionDiagnostics_AverageResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int get_IPDiagnosticsServerSelectionDiagnostics_MaximumResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-
+int get_x_iopsys_eu_bbk_speedtest_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
+int set_x_iopsys_eu_bbk_speedtest_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
+int get_x_iopsys_eu_bbk_speedtest_latency(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
+int get_x_iopsys_eu_bbk_speedtest_download(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
+int get_x_iopsys_eu_bbk_speedtest_upload(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 #endif

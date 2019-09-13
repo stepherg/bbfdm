@@ -29641,9 +29641,53 @@
 						"read": true, 
 						"write": false
 					}
+				},
+				"Device.IP.Diagnostics.X_IOPSYS_EU_BBKSpeedTest.": {
+					"type": "object",
+					"protocols": [
+						"cwmp"
+					],
+					"access": false,
+					"array": false,
+					"DiagnosticsState": {
+						"type": "string",
+						"protocols": [
+							"cwmp"
+						],
+						"read": true,
+						"write": true
+					},
+					"Latency": {
+						"type": "",
+						"protocols": [
+							"cwmp"
+						],
+						"unit": "milliseconds",
+						"read": true,
+						"write": false
+					},
+					"Download": {
+						"type": "string",
+						"protocols": [
+							"cwmp"
+						],
+						"unit": "mbitspersecond",
+						"read": true,
+						"write": false
+					},
+					"Upload": {
+						"type": "string",
+						"protocols": [
+							"cwmp"
+						],
+						"unit": "mbitspersecond",
+						"read": true,
+						"write": false
+					}
 				}
+
 			}
-		}, 
+		},
 		"Device.LLDP.": {
 			"type": "object", 
 			"protocols": [

@@ -30,6 +30,7 @@ DMOBJ tIPDiagnosticsObj[] = {
 {"UDPEchoConfig", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsUDPEchoConfigParams, NULL, BBFDM_CWMP},
 {"UDPEchoDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsUDPEchoDiagnosticsParams, NULL, BBFDM_CWMP},
 {"ServerSelectionDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsServerSelectionDiagnosticsParams, NULL, BBFDM_CWMP},
+{"X_IOPSYS_EU_BBKSpeedTest", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, XIopsysEuBBKSpeedTestParams, NULL, BBFDM_CWMP},
 {0}
 };
 
@@ -69,6 +70,17 @@ DMLEAF tIPDiagnosticsIPPingParams[] = {
 {"AverageResponseTimeDetailed", &DMREAD, DMT_UNINT, get_ip_ping_AverageResponseTimeDetailed, NULL, NULL, NULL, BBFDM_CWMP},
 {"MinimumResponseTimeDetailed", &DMREAD, DMT_UNINT, get_ip_ping_MinimumResponseTimeDetailed, NULL, NULL, NULL, BBFDM_CWMP},
 {"MaximumResponseTimeDetailed", &DMREAD, DMT_UNINT, get_ip_ping_MaximumResponseTimeDetailed, NULL, NULL, NULL, BBFDM_CWMP},
+{0}
+};
+
+/* *** Device.IP.Diagnostics.X_IOPSYS_EU_BBKSpeedTest.*** */
+DMLEAF XIopsysEuBBKSpeedTestParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"DiagnosticsState", &DMWRITE, DMT_STRING, get_x_iopsys_eu_bbk_speedtest_diagnostics_state,
+	set_x_iopsys_eu_bbk_speedtest_diagnostics_state, NULL, NULL, BBFDM_CWMP},
+{"Latency", &DMREAD, DMT_STRING, get_x_iopsys_eu_bbk_speedtest_latency, NULL, NULL, NULL, BBFDM_CWMP},
+{"Download", &DMREAD, DMT_STRING, get_x_iopsys_eu_bbk_speedtest_download, NULL, NULL, NULL, BBFDM_CWMP},
+{"Upload", &DMREAD, DMT_STRING, get_x_iopsys_eu_bbk_speedtest_upload, NULL, NULL, NULL, BBFDM_CWMP},
 {0}
 };
 
@@ -2465,5 +2477,90 @@ int browseIPDiagnosticsUploadDiagnosticsPerConnectionResultInst(struct dmctx *dm
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, instance) == DM_STOP)
 			break;
 	}
+	return 0;
+}
+
+static int execute_bbk_speedtest()
+{
+	json_object *res;
+	char *latency, *download, *upload = NULL;
+#ifdef DM_USE_LIBUBUS
+	int timeout = dmubus_get_timeout();
+	dmubus_set_timeout(90000);
+#endif
+
+	dmubus_call("bbk", "start", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		dmuci_set_varstate_value("cwmp", "@bbkspeedtest[0]", "DiagnosticState", "Complete");
+		latency=dmjson_get_value(res, 1, "latency");
+		if(latency!=NULL && strlen(latency)>0)
+			dmuci_set_varstate_value("cwmp", "@bbkspeedtest[0]", "Latency", latency);
+		download=dmjson_get_value(res, 1, "download");
+		if(download!=NULL && strlen(latency)>0)
+			dmuci_set_varstate_value("cwmp", "@bbkspeedtest[0]", "Download", download);
+		upload=dmjson_get_value(res, 1, "upload");
+		if(upload!=NULL && strlen(upload)>0)
+			dmuci_set_varstate_value("cwmp", "@bbkspeedtest[0]", "Upload", upload);
+	}
+#ifdef DM_USE_LIBUBUS
+	dmubus_set_timeout(timeout);
+#endif
+	return 0;
+}
+
+static inline char *bbk_speedtest_get(char *option, char *def)
+{
+	char *tmp;
+	dmuci_get_varstate_string("cwmp", "@bbkspeedtest[0]", option, &tmp);
+	if(tmp && tmp[0] == '\0')
+		return dmstrdup(def);
+	else
+		return tmp;
+}
+
+int get_x_iopsys_eu_bbk_speedtest_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = bbk_speedtest_get("DiagnosticState", "None");
+	return 0;
+}
+
+int set_x_iopsys_eu_bbk_speedtest_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *tmp;
+	struct uci_section *curr_section = NULL;
+
+	switch (action) {
+		case VALUECHECK:
+			return 0;
+		case VALUESET:
+			if (strcmp(value, "Requested") == 0) {
+				curr_section = dmuci_walk_state_section("cwmp", "bbkspeedtest", NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
+				if(!curr_section)
+				{
+					dmuci_add_state_section("cwmp", "bbkspeedtest", &curr_section, &tmp);
+				}
+				dmuci_set_varstate_value("cwmp", "@bbkspeedtest[0]", "DiagnosticState", value);
+				execute_bbk_speedtest();
+			}
+			return 0;
+	}
+	return 0;
+}
+
+int get_x_iopsys_eu_bbk_speedtest_latency(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = bbk_speedtest_get("Latency", "0");
+	return 0;
+}
+
+int get_x_iopsys_eu_bbk_speedtest_download(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = bbk_speedtest_get("Download", "0");
+	return 0;
+}
+
+int get_x_iopsys_eu_bbk_speedtest_upload(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = bbk_speedtest_get("Upload", "0");
 	return 0;
 }
