@@ -366,6 +366,30 @@ static opr_ret_t fetch_neighboring_wifi_diagnostic(struct dmctx *dmctx, char *pa
 	return SUCCESS;
 }
 
+static opr_ret_t bbk_speedtest(struct dmctx *dmctx, char *path, char *input)
+{
+	json_object *ubus_res = NULL;
+
+#ifdef DM_USE_LIBUBUS
+	int timeout = dmubus_get_timeout();
+	dmubus_set_timeout(90000);
+#endif
+	dmubus_call("bbk", "start", UBUS_ARGS{}, 0, &ubus_res);
+
+	char *param_latency = (char *) dmjson_get_value(ubus_res, 1, "latency");
+	char *param_download = (char *) dmjson_get_value(ubus_res, 1, "download");
+	char *param_upload = (char *) dmjson_get_value(ubus_res, 1, "upload");
+
+	add_list_paramameter(dmctx, dmstrdup("Latency"), param_latency, "string", NULL, 0);
+	add_list_paramameter(dmctx, dmstrdup("Download"), param_download, "string", NULL, 0);
+	add_list_paramameter(dmctx, dmstrdup("Upload"), param_upload, "string", NULL, 0);
+
+#ifdef DM_USE_LIBUBUS
+	dmubus_set_timeout(timeout);
+#endif
+	return SUCCESS;
+}
+
 static opr_ret_t ip_diagnostics_ipping(struct dmctx *dmctx, char *path, char *input)
 {
 	json_object *json_res = NULL;
@@ -829,6 +853,7 @@ static struct op_cmd operate_helper[] = {
 	{"Device.IP.Diagnostics.UploadDiagnostics", ip_diagnostics_upload},
 	{"Device.IP.Diagnostics.UDPEchoDiagnostics", ip_diagnostics_udpecho},
 	{"Device.IP.Diagnostics.ServerSelectionDiagnostics", ip_diagnostics_serverselection},
+	{"Device.BBKSpeedTest", bbk_speedtest},
 	{"Device.DNS.Diagnostics.NSLookupDiagnostics", ip_diagnostics_nslookup}
 };
 

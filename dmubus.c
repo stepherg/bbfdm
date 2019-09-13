@@ -34,6 +34,16 @@ static int timeout = 1000;
 const char *ubus_socket = NULL;
 json_object *json_res = NULL;
 
+int dmubus_get_timeout()
+{
+	return (timeout);
+}
+
+void dmubus_set_timeout(int val)
+{
+	timeout = val;
+}
+
 static inline bool dmblobmsg_add_object(struct blob_buf *b, json_object *obj)
 {
 	json_object_object_foreach(obj, key, val) {

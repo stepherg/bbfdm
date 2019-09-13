@@ -61,6 +61,8 @@ enum ubus_args_enum {
 extern struct dmubus_ctx dmubus_ctx;
 extern struct ubus_context *ubus_ctx;
 
+int dmubus_get_timeout();
+void dmubus_set_timeout(int time);
 #define dm_ubus_get_value(jobj,ARGC,args...) \
 		dmjson_get_value(jobj, ARGC, ##args)
 int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
