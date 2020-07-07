@@ -207,9 +207,8 @@ static int ppp_read_sysfs(struct uci_section *sect, const char *name, char **val
 
 	dmuci_get_value_by_section_string(sect, "proto", &proto);
 	if (!strcmp(proto, "pppoe")) {
-		char *ifname;
-		dmuci_get_value_by_section_string(sect, "ifname", &ifname);
-		rc = get_net_device_sysfs(ifname, name, value);
+		char *l3_device = get_l3_device(section_name(sect));
+		rc = get_net_device_sysfs(l3_device, name, value);
 	}
 	return rc;
 }

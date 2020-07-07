@@ -1262,6 +1262,14 @@ char *get_device(char *interface_name)
 	return dmjson_get_value(res, 1, "device");
 }
 
+char *get_l3_device(char *interface_name)
+{
+	json_object *res;
+
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", interface_name, String}}, 1, &res);
+	return dmjson_get_value(res, 1, "l3_device");
+}
+
 char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_section)
 {
 	json_object *jobj;
