@@ -1100,7 +1100,10 @@ static int set_RoutingRouterIPv6Forwarding_Alias(char *refparam, struct dmctx *c
 
 static char *get_routing_perm(char *refparam, struct dmctx *dmctx, void *data, char *instance)
 {
-	return ((struct routingfwdargs *)data)->permission;
+	if (data != NULL)
+		return ((struct routingfwdargs *)data)->permission;
+
+	return NULL;
 }
 
 struct dm_permession_s DMRouting = {"0", &get_routing_perm};
