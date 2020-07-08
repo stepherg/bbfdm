@@ -997,6 +997,7 @@ void operate_list_cmds(struct dmctx *dmctx)
 	}
 	if (save_pointer) dynamic_operate = save_pointer;
 }
+
 opr_ret_t operate_on_node(struct dmctx *dmctx, char *path, char *input)
 {
 	uint8_t len = 0, i;

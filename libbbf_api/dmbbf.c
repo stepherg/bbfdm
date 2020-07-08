@@ -20,7 +20,7 @@
 static char *get_parameter_notification(struct dmctx *ctx, char *param);
 static int remove_parameter_notification(char *param);
 static int set_parameter_notification(struct dmctx *ctx, char *param,char *value);
-int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance);
+static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance);
 static int get_value_obj(DMOBJECT_ARGS);
 static int get_value_param(DMPARAM_ARGS);
 static int mobj_get_value_in_param(DMOBJECT_ARGS);
@@ -31,6 +31,8 @@ static int mparam_get_name_in_param(DMPARAM_ARGS);
 static int mobj_get_name_in_param(DMOBJECT_ARGS);
 static int mparam_get_name_in_obj(DMPARAM_ARGS);
 static int mobj_get_name_in_obj(DMOBJECT_ARGS);
+static int mobj_get_schema_name(DMOBJECT_ARGS);
+static int mparam_get_schema_name(DMPARAM_ARGS);
 static int inform_check_obj(DMOBJECT_ARGS);
 static int inform_check_param(DMPARAM_ARGS);
 static int mparam_add_object(DMPARAM_ARGS);
@@ -47,8 +49,7 @@ static int mparam_set_notification_in_obj(DMPARAM_ARGS);
 static int mobj_set_notification_in_param(DMOBJECT_ARGS);
 static int mparam_set_notification_in_param(DMPARAM_ARGS);
 static int mobj_set_notification_in_obj(DMOBJECT_ARGS);
-static int dm_browse_schema(struct dmctx *dmctx, DMNODE *parent_node,
-			    DMOBJ *entryobj, void *data, char *instance);
+static int dm_browse_schema(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance);
 #ifdef BBF_TR064
 static int mparam_upnp_get_instances(DMPARAM_ARGS);
 static int mobj_upnp_get_instances(DMOBJECT_ARGS);
@@ -159,7 +160,7 @@ struct dm_notif_s DMNONE = { "0", NULL };
 struct dm_notif_s DMPASSIVE = { "1", NULL };
 struct dm_notif_s DMACTIVE = { "2", NULL };
 
-int plugin_obj_match(DMOBJECT_ARGS)
+static int plugin_obj_match(DMOBJECT_ARGS)
 {
 	if (node->matched)
 		return 0;
@@ -174,7 +175,7 @@ int plugin_obj_match(DMOBJECT_ARGS)
 	return FAULT_9005;
 }
 
-int plugin_leaf_match(DMOBJECT_ARGS)
+static int plugin_leaf_match(DMOBJECT_ARGS)
 {
 	char *str;
 	if (node->matched)
@@ -187,7 +188,7 @@ int plugin_leaf_match(DMOBJECT_ARGS)
 	return FAULT_9005;
 }
 
-int plugin_obj_forcedinform_match(DMOBJECT_ARGS)
+static int plugin_obj_forcedinform_match(DMOBJECT_ARGS)
 {
 	unsigned char fi;
 	if (forced_inform) {
@@ -201,12 +202,12 @@ int plugin_obj_forcedinform_match(DMOBJECT_ARGS)
 	return FAULT_9005;
 }
 
-int plugin_leaf_onlyobj_match(DMOBJECT_ARGS)
+static int plugin_leaf_onlyobj_match(DMOBJECT_ARGS)
 {
 	return FAULT_9005;
 }
 
-int plugin_obj_nextlevel_match(DMOBJECT_ARGS)
+static int plugin_obj_nextlevel_match(DMOBJECT_ARGS)
 {
 	if (node->matched > 1)
 		return FAULT_9005;
@@ -225,7 +226,7 @@ int plugin_obj_nextlevel_match(DMOBJECT_ARGS)
 	return FAULT_9005;
 }
 
-int plugin_leaf_nextlevel_match(DMOBJECT_ARGS)
+static int plugin_leaf_nextlevel_match(DMOBJECT_ARGS)
 {
 	char *str;
 	if (node->matched > 1)
@@ -275,7 +276,7 @@ static bool check_dependency(const char *conf_obj)
 	return true;
 }
 
-int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf, void *data, char *instance)
+static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf, void *data, char *instance)
 {
 	int err = 0;
 	if (!leaf)
@@ -291,7 +292,7 @@ int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf, void 
 	return err;
 }
 
-void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance, char *parent_obj, int *err)
+static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance, char *parent_obj, int *err)
 {
 	DMNODE node = {0};
 
@@ -384,6 +385,75 @@ int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *d
 	}
 
 	return err;
+}
+
+static void dm_browse_schema_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance, char *parent_obj, int *err)
+{
+	DMNODE node = {0};
+
+	node.obj = entryobj;
+	node.parent = parent_node;
+	node.instance_level = parent_node->instance_level;
+	node.matched = parent_node->matched;
+
+	if (!bbfdatamodel_matches(entryobj->bbfdm_type))
+		return;
+
+	if (entryobj->browseinstobj) {
+		dmasprintf(&(node.current_object), "%s%s%c{i}%c", parent_obj, entryobj->obj, dm_delim, dm_delim);
+		if (dmctx->method_obj) {
+			*err = dmctx->method_obj(dmctx, &node, entryobj->permission,
+						 entryobj->addobj, entryobj->delobj,
+						 entryobj->forced_inform,
+						 entryobj->notification,
+						 entryobj->get_linker,
+						 data, instance);
+		}
+	} else {
+		dmasprintf(&(node.current_object), "%s%s%c", parent_obj, entryobj->obj, dm_delim);
+	}
+
+	if (entryobj->leaf)
+		*err = dm_browse_leaf(dmctx, &node, entryobj->leaf, data, instance);
+
+	if (entryobj->nextobj || entryobj->nextdynamicobj)
+		*err = dm_browse_schema(dmctx, &node, entryobj->nextobj, data, instance);
+}
+
+static int dm_browse_schema(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance)
+{
+	DMOBJ *jentryobj;
+	struct dm_dynamic_obj *next_dyn_array;
+	int i, j, err = 0;
+
+	char *parent_obj = parent_node->current_object;
+
+	if (entryobj) {
+		for (; entryobj->obj; entryobj++) {
+			dm_browse_schema_entry(dmctx, parent_node, entryobj, data, instance, parent_obj, &err);
+			if (dmctx->stop)
+				return err;
+		}
+	}
+
+	if (parent_node->obj) {
+		if (parent_node->obj->nextdynamicobj) {
+			for (i = 0; i < __INDX_DYNAMIC_MAX; i++) {
+				next_dyn_array = parent_node->obj->nextdynamicobj + i;
+				if (next_dyn_array->nextobj) {
+					for (j = 0; next_dyn_array->nextobj[j]; j++) {
+						jentryobj = next_dyn_array->nextobj[j];
+						for (; (jentryobj && jentryobj->obj); jentryobj++) {
+							dm_browse_schema_entry(dmctx, parent_node, jentryobj, data, instance, parent_obj, &err);
+							if (dmctx->stop)
+								return err;
+						}
+					}
+				}
+			}
+		}
+	}
+	return 0;
 }
 
 int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)
@@ -506,7 +576,7 @@ int free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj
 	return 0;
 }
 
-int rootcmp(char *inparam, char *rootobj)
+static int rootcmp(char *inparam, char *rootobj)
 {
 	char buf[32];
 	snprintf(buf, sizeof(buf), "%s%c", rootobj, dm_delim);
@@ -1224,130 +1294,6 @@ int dm_entry_get_name(struct dmctx *ctx)
 		return err;
 }
 
-
-static void dm_browse_schema_entry(struct dmctx *dmctx, DMNODE *parent_node,
-				   DMOBJ *entryobj, void *data, char *instance,
-				   char *parent_obj, int *err)
-{
-	DMNODE node = {0};
-
-	node.obj = entryobj;
-	node.parent = parent_node;
-	node.instance_level = parent_node->instance_level;
-	node.matched = parent_node->matched;
-
-	if (!bbfdatamodel_matches(entryobj->bbfdm_type))
-		return;
-
-	if (entryobj->browseinstobj) {
-		dmasprintf(&(node.current_object), "%s%s%c{i}%c", parent_obj, entryobj->obj, dm_delim, dm_delim);
-		if (dmctx->method_obj) {
-			*err = dmctx->method_obj(dmctx, &node, entryobj->permission,
-						 entryobj->addobj, entryobj->delobj,
-						 entryobj->forced_inform,
-						 entryobj->notification,
-						 entryobj->get_linker,
-						 data, instance);
-		}
-	} else {
-		dmasprintf(&(node.current_object), "%s%s%c", parent_obj, entryobj->obj, dm_delim);
-	}
-
-
-	if (entryobj->leaf) {
-		*err = dm_browse_leaf(dmctx, &node, entryobj->leaf, data, instance);
-	}
-
-	if (entryobj->nextobj || entryobj->nextdynamicobj) {
-		*err = dm_browse_schema(dmctx, &node, entryobj->nextobj, data, instance);
-	}
-}
-
-static int dm_browse_schema(struct dmctx *dmctx, DMNODE *parent_node,
-			    DMOBJ *entryobj, void *data, char *instance)
-{
-	DMOBJ *jentryobj;
-	struct dm_dynamic_obj *next_dyn_array;
-	int i, j, err = 0;
-
-	char *parent_obj = parent_node->current_object;
-
-	if (entryobj) {
-		for (; entryobj->obj; entryobj++) {
-			dm_browse_schema_entry(dmctx, parent_node, entryobj, data, instance, parent_obj, &err);
-			if (dmctx->stop)
-				return err;
-		}
-	}
-
-	if (parent_node->obj) {
-		if (parent_node->obj->nextdynamicobj) {
-			for (i = 0; i < __INDX_DYNAMIC_MAX; i++) {
-				next_dyn_array = parent_node->obj->nextdynamicobj + i;
-				if (next_dyn_array->nextobj) {
-					for (j = 0; next_dyn_array->nextobj[j]; j++) {
-						jentryobj = next_dyn_array->nextobj[j];
-						for (; (jentryobj && jentryobj->obj); jentryobj++) {
-							dm_browse_schema_entry(dmctx, parent_node, jentryobj, data, instance, parent_obj, &err);
-							if (dmctx->stop)
-								return err;
-						}
-					}
-				}
-			}
-		}
-	}
-	return 0;
-}
-
-// get schema
-static int mobj_get_schema_name(DMOBJECT_ARGS)
-{
-	char *refparam;
-	char *perm = permission->val;
-	refparam = node->current_object;
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
-
-	add_list_paramameter(dmctx, refparam, perm, "xsd:object", NULL, 0);
-	return 0;
-}
-
-static int mparam_get_schema_name(DMPARAM_ARGS)
-{
-	char *refparam;
-
-	char *perm = permission->val;
-
-	dmastrcat(&refparam, node->current_object, lastname);
-
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
-
-	add_list_paramameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0);
-	return 0;
-}
-
-int dm_entry_get_schema(struct dmctx *ctx)
-{
-	DMOBJ *root = ctx->dm_entryobj;
-	DMNODE node = {.current_object = ""};
-	unsigned char findparam_check = 0;
-	int err;
-	ctx->inparam_isparam = 0;
-	ctx->findparam = 0;
-	ctx->stop = 0;
-	ctx->checkobj = NULL;
-	ctx->checkleaf = NULL;
-	ctx->method_obj = mobj_get_schema_name;
-	ctx->method_param = mparam_get_schema_name;
-	err = dm_browse_schema(ctx, &node, root, NULL, NULL);
-	if (findparam_check && ctx->findparam)
-		return 0;
-	else
-		return err;
-}
-
 static int mparam_get_name(DMPARAM_ARGS)
 {
 	char *refparam;
@@ -1430,6 +1376,50 @@ static int mobj_get_name_in_obj(DMOBJECT_ARGS)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
 	add_list_paramameter(dmctx, refparam, perm, "xsd:object", NULL, 0);
+	return 0;
+}
+
+/* **********
+ * get schema
+ * **********/
+int dm_entry_get_schema(struct dmctx *ctx)
+{
+	DMOBJ *root = ctx->dm_entryobj;
+	DMNODE node = {.current_object = ""};
+	int err;
+
+	ctx->inparam_isparam = 0;
+	ctx->findparam = 0;
+	ctx->stop = 0;
+	ctx->checkobj = NULL;
+	ctx->checkleaf = NULL;
+	ctx->method_obj = mobj_get_schema_name;
+	ctx->method_param = mparam_get_schema_name;
+	err = dm_browse_schema(ctx, &node, root, NULL, NULL);
+	return err;
+}
+
+static int mobj_get_schema_name(DMOBJECT_ARGS)
+{
+	char *refparam;
+	char *perm = permission->val;
+	refparam = node->current_object;
+	if (permission->get_permission != NULL)
+		perm = permission->get_permission(refparam, dmctx, data, instance);
+
+	add_list_paramameter(dmctx, refparam, perm, "xsd:object", NULL, 0);
+	return 0;
+}
+
+static int mparam_get_schema_name(DMPARAM_ARGS)
+{
+	char *refparam;
+	char *perm = permission->val;
+	dmastrcat(&refparam, node->current_object, lastname);
+	if (permission->get_permission != NULL)
+		perm = permission->get_permission(refparam, dmctx, data, instance);
+
+	add_list_paramameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0);
 	return 0;
 }
 

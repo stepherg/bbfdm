@@ -290,14 +290,10 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			ctx->in_value = arg1 ? arg1 : "";
 			fault = operate_on_node(ctx, ctx->in_param, ctx->in_value);
 			break;
-
 		case CMD_USP_LIST_OPERATE:
-			ctx->in_value = arg1 ? arg1 : "";
 			operate_list_cmds(ctx);
 			break;
-
 		case CMD_GET_SCHEMA:
-			ctx->in_value = arg1 ? arg1 : "";
 			fault = dm_entry_get_schema(ctx);
 			break;
 #ifdef BBF_TR064
