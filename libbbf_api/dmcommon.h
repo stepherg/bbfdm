@@ -267,9 +267,6 @@ void free_dmmap_config_dup_list(struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap_filter(char *package, char *section_type,
 					void *data, char *dmmap_package, char *dmmap_sec,
 					char *proto, struct list_head *dup_list);
-void synchronize_specific_config_sections_with_dmmap_mcast_iface(char *package, char *section_type,
-					void *data, char *dmmap_package, char *dmmap_sec, char *proto,
-					struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap_eq(char *package, char *section_type, char *dmmap_package,char* option_name, char* option_value, struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap_eq_no_delete(char *package, char *section_type, char *dmmap_package,char* option_name, char* option_value, struct list_head *dup_list);
@@ -331,4 +328,6 @@ int get_br_key_from_lower_layer(char *lower_layer, char *key, size_t s_key);
 int get_igmp_snooping_interface_val(char *value, char *ifname, size_t s_ifname);
 void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *value, bool b);
 void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, char *value);
+struct uci_section *get_origin_section_from_config(char *package, char *section_type, char *orig_section_name);
+void add_sectons_list_paramameter(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section, void* additional_attribute);
 #endif

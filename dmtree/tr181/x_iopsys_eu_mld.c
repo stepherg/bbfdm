@@ -11,6 +11,10 @@
 #include "dmentry.h"
 #include "x_iopsys_eu_mld.h"
 
+extern void synchronize_specific_config_sections_with_dmmap_mcast_iface(char *package, char *section_type,
+                                       void *data, char *dmmap_package, char *dmmap_sec, char *proto,
+                                       struct list_head *dup_list);
+
 static int add_mld_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	char *inst, *value, *v, *s_name;
