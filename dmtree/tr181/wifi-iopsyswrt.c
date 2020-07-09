@@ -464,32 +464,49 @@ int os__get_neighboring_wifi_diagnostics_result_noise(char *refparam, struct dmc
 /*#Device.WiFi.Radio.{i}.PossibleChannels!UBUS:wifi.radio.@Name/status//supp_channels[0].channels*/
 int os__get_radio_possible_channels(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *supp_channels = NULL;
-	char object[32];
+	json_object *res = NULL, *supp_channels = NULL, *arrobj = NULL;
+	char object[32], *cur_opclass = NULL;
+	int i = 0;
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
-	supp_channels = dmjson_select_obj_in_array_idx(res, 0, 1, "supp_channels");
-	if (supp_channels)
+	cur_opclass = dmjson_get_value(res, 1, "opclass");
+	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
+		char *opclass = dmjson_get_value(supp_channels, 1, "opclass");
+		if (opclass && strcmp(opclass, cur_opclass) != 0)
+			continue;
+
 		*value = dmjson_get_value_array_all(supp_channels, DELIMITOR, 1, "channels");
+		break;
+	}
 	return 0;
 }
 
 /*#Device.WiFi.Radio.{i}.SupportedOperatingChannelBandwidths!UBUS:wifi.radio.@Name/status//supp_channels[0].bandwidth*/
 int os__get_WiFiRadio_SupportedOperatingChannelBandwidths(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *supp_channels = NULL;
-	char object[32], *bandwidth = NULL;
+	json_object *res = NULL, *supp_channels = NULL, *arrobj = NULL;
+	char object[32], *bandwidth = NULL, *bandwidth_list = "";
+	int i = 0;
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
-	supp_channels = dmjson_select_obj_in_array_idx(res, 0, 1, "supp_channels");
-	if (supp_channels)
+	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
 		bandwidth = dmjson_get_value(supp_channels, 1, "bandwidth");
-	if (bandwidth)
-		dmasprintf(value, "%sMHz", bandwidth);
+		if (bandwidth && !strstr(bandwidth_list, bandwidth)) {
+			if (*bandwidth_list == '\0')
+				dmasprintf(&bandwidth_list, "%sMHz", bandwidth);
+			else {
+				char *tmp = dmstrdup(bandwidth_list);
+				dmfree(bandwidth_list);
+				dmasprintf(&bandwidth_list, "%s,%sMHz", tmp, bandwidth);
+				dmfree(tmp);
+			}
+		}
+	}
+	*value = bandwidth_list;
 	return 0;
 }
 
