@@ -1310,6 +1310,50 @@ static int set_dhcp_staticaddress_yiaddr(char *refparam, struct dmctx *ctx, void
 	return 0;
 }
 
+static int get_dhcp_client_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	const struct client_args *args = data;
+	struct uci_section *s = NULL;
+
+	char *hwaddr = (char *)args->lease->hwaddr;
+	uci_path_foreach_sections(bbfdm, "dmmap", "dhcpv4clients", s) {
+		char *macaddr;
+		dmuci_get_value_by_section_string(s, "macaddr", &macaddr);
+		if (strcmp(hwaddr, macaddr) == 0) {
+			dmuci_get_value_by_section_string(s, "alias", value);
+			break;
+		}
+	}
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+	return 0;
+}
+
+static int set_dhcp_client_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	const struct client_args *args = data;
+	struct uci_section *s = NULL, *dmmap = NULL;
+	char *macaddr, *v;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			macaddr = (char *)args->lease->hwaddr;
+			uci_path_foreach_option_eq(bbfdm, "dmmap", "dhcpv4clients", "macaddr", macaddr, s) {
+				dmuci_set_value_by_section_bbfdm(s, "alias", value);
+				return 0;
+			}
+			dmuci_add_section_bbfdm("dmmap", "dhcpv4clients", &dmmap, &v);
+			dmuci_set_value_by_section(dmmap, "macaddr", macaddr);
+			dmuci_set_value_by_section(dmmap, "alias", value);
+			break;
+	}
+	return 0;
+}
+
 static int get_dhcp_client_chaddr(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	const struct client_args *args = data;
@@ -3009,6 +3053,7 @@ DMLEAF tDHCPv4ServerPoolStaticAddressParams[] = {
 /*** DHCPv4.Server.Pool.{i}.Client.{i}. ***/
 DMLEAF tDHCPv4ServerPoolClientParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING,  get_dhcp_client_alias, set_dhcp_client_alias, NULL, NULL, BBFDM_BOTH},
 {"Chaddr", &DMREAD, DMT_STRING,  get_dhcp_client_chaddr, NULL, NULL, NULL, BBFDM_BOTH},
 {"Active", &DMREAD, DMT_BOOL,  get_dhcp_client_active, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
