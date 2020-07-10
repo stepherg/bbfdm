@@ -773,6 +773,45 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 				// Update ifname list
 				dmuci_set_value_by_section(((struct ip_args *)data)->ip_sec, "ifname", linker);
+
+			} else if (strncmp(lower_layer, "Device.Ethernet.Link.", 21) == 0) {
+				adm_entry_get_linker_value(ctx, lower_layer, &linker);
+
+				if (linker == NULL || *linker == '\0')
+					return -1;
+
+				// Get interface name from Ethernet.Link. object
+				struct uci_section *s = NULL;
+				char *interface;
+				get_dmmap_section_of_config_section_eq("dmmap", "link", "device", linker, &s);
+				dmuci_get_value_by_section_string(s, "section_name", &interface);
+
+				// Update the new interface section with proto=dhcp
+				uci_foreach_sections("network", "interface", s) {
+					if (strcmp(section_name(s), interface) == 0) {
+						dmuci_set_value_by_section(s, "proto", "dhcp");
+						break;
+					}
+				}
+
+				// Get dmmap section related to this interface section and remove it
+				struct uci_section *dmmap_section = NULL;
+				get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(((struct ip_args *)data)->ip_sec), &dmmap_section);
+
+				// Get the current ip instance
+				char *ip_int_instance;
+				dmuci_get_value_by_section_string(dmmap_section, "ip_int_instance", &ip_int_instance);
+
+				// Get the new dmmap section related to the new interface section and update ip instance option
+				struct uci_section *new_dmmap_section = NULL;
+				get_dmmap_section_of_config_section("dmmap_network", "interface", interface, &new_dmmap_section);
+				dmuci_set_value_by_section(new_dmmap_section, "ip_int_instance", ip_int_instance);
+
+				// remove dmmap section
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				// remove the current interface section
+				dmuci_delete_by_section(((struct ip_args *)data)->ip_sec, NULL, NULL);
 			}
 			return 0;
 	}
