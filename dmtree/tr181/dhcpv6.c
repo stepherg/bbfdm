@@ -1104,6 +1104,47 @@ static int get_DHCPv6ServerPool_OptionNumberOfEntries(char *refparam, struct dmc
 	return 0;
 }
 
+static int get_DHCPv6ServerPoolClient_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *s = NULL;
+	char *src_addr = ""; //should be updated when SourceAddress parameter is implemented
+
+	uci_path_foreach_sections(bbfdm, "dmmap", "dhcpv6clients", s) {
+		char *srcaddr;
+		dmuci_get_value_by_section_string(s, "srcaddr", &srcaddr);
+		if (strcmp(src_addr, srcaddr) == 0) {
+			dmuci_get_value_by_section_string(s, "alias", value);
+			break;
+		}
+	}
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+	return 0;
+}
+
+static int set_DHCPv6ServerPoolClient_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *s = NULL, *dmmap = NULL;
+	char *src_addr = "", *v;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			uci_path_foreach_option_eq(bbfdm, "dmmap", "dhcpv6clients", "srcaddr", src_addr, s) {
+				dmuci_set_value_by_section_bbfdm(s, "alias", value);
+				return 0;
+			}
+			dmuci_add_section_bbfdm("dmmap", "dhcpv6clients", &dmmap, &v);
+			dmuci_set_value_by_section(dmmap, "srcaddr", src_addr);
+			dmuci_set_value_by_section(dmmap, "alias", value);
+			break;
+	}
+	return 0;
+}
+
 static int get_DHCPv6ServerPoolClient_IPv6AddressNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *address_obj = NULL;
@@ -1473,7 +1514,7 @@ DMOBJ tDHCPv6ServerPoolClientObj[] = {
 
 DMLEAF tDHCPv6ServerPoolClientParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"Alias", &DMWRITE, DMT_STRING, get_DHCPv6ServerPoolClient_Alias, set_DHCPv6ServerPoolClient_Alias, NULL, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv6ServerPoolClient_Alias, set_DHCPv6ServerPoolClient_Alias, NULL, NULL, BBFDM_BOTH},
 //{"SourceAddress", &DMREAD, DMT_STRING, get_DHCPv6ServerPoolClient_SourceAddress, NULL, NULL, NULL, BBFDM_BOTH},
 //{"Active", &DMREAD, DMT_BOOL, get_DHCPv6ServerPoolClient_Active, NULL, NULL, NULL, BBFDM_BOTH},
 {"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6ServerPoolClient_IPv6AddressNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},

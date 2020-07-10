@@ -61618,6 +61618,21 @@
 							{
 								"max": 64
 							}
+						],
+						"mapping": [
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "dmmap_firewall", 
+									"section": {
+										"type": "rule", 
+										"index": "@i-1"
+									}, 
+									"option": {
+										"name": "firewall_chain_rule_alias"
+									}
+								}
+							}
 						]
 					}, 
 					"Description": {

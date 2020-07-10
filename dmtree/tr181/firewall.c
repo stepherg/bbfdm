@@ -151,6 +151,14 @@ static int get_firewall_chain_number_of_entries(char *refparam, struct dmctx *ct
     return 0;
 }
 
+static int get_level_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "firewall_level_alias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+    return 0;
+}
+
 static int get_level_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "name", value);
@@ -207,6 +215,14 @@ static int get_chain_enable(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
+static int get_chain_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "firewall_chain_alias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+    return 0;
+}
+
 static int get_chain_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
     dmuci_get_value_by_section_string((struct uci_section *)data, "name", value);
@@ -257,6 +273,18 @@ static int get_rule_order(char *refparam, struct dmctx *ctx, void *data, char *i
 	if (dms)
 		dmuci_get_value_by_section_string(dms, "firewall_chain_rule_instance", value);
 	return 0;
+}
+
+/*#Device.Firewall.Chain.{i}.Rule.{i}.Alias!UCI:dmmap_firewall/rule,@i-1/user_alias*/
+static int get_rule_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *dmmap_section = NULL;
+
+	get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
+	dmuci_get_value_by_section_string(dmmap_section, "firewall_chain_rule_alias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+    return 0;
 }
 
 /*#Device.Firewall.Chain.{i}.Rule.{i}.Target!UCI:firewall/rule,@i-1/name*/
@@ -646,6 +674,20 @@ static int set_firewall_advanced_level(char *refparam, struct dmctx *ctx, void *
         return 0;
 }
 
+static int set_level_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section_bbfdm((struct uci_section *)data, "firewall_level_alias", value);
+			return 0;
+	}
+	return 0;
+}
+
 static int set_level_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action) {
@@ -745,6 +787,20 @@ static int set_chain_enable(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
+static int set_chain_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section_bbfdm((struct uci_section *)data, "firewall_chain_alias", value);
+			return 0;
+	}
+	return 0;
+}
+
 static int set_chain_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action) {
@@ -787,6 +843,23 @@ static int set_rule_order(char *refparam, struct dmctx *ctx, void *data, char *i
 			break;
 	}
         return 0;
+}
+
+static int set_rule_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *dmmap_section = NULL;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "firewall_chain_rule_alias", value);
+			return 0;
+	}
+	return 0;
 }
 
 static int set_rule_description(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -1224,6 +1297,7 @@ DMLEAF tFirewallParams[] = {
 /* *** Device.Firewall.Level.{i}. *** */
 DMLEAF tFirewallLevelParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING, get_level_alias, set_level_alias, NULL, NULL, BBFDM_BOTH},
 {"Name", &DMWRITE, DMT_STRING, get_level_name, set_level_name, NULL, NULL, BBFDM_BOTH},
 {"Description", &DMWRITE, DMT_STRING, get_level_description, set_level_description, NULL, NULL, BBFDM_BOTH},
 {"Chain", &DMREAD, DMT_STRING, get_level_chain, NULL, NULL, NULL, BBFDM_BOTH},
@@ -1242,6 +1316,7 @@ DMOBJ tFirewallChainObj[] = {
 DMLEAF tFirewallChainParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
 {"Enable", &DMWRITE, DMT_BOOL, get_chain_enable, set_chain_enable, NULL, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_chain_alias, set_chain_alias, NULL, NULL, BBFDM_BOTH},
 {"Name", &DMWRITE, DMT_STRING, get_chain_name, set_chain_name, NULL, NULL, BBFDM_BOTH},
 {"Creator", &DMREAD, DMT_STRING, get_chain_creator, NULL, NULL, NULL, BBFDM_BOTH},
 {"RuleNumberOfEntries", &DMREAD, DMT_UNINT, get_chain_rule_number_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
@@ -1260,6 +1335,7 @@ DMLEAF tFirewallChainRuleParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_rule_enable, set_rule_enable, NULL, NULL, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_rule_status, NULL, NULL, NULL, BBFDM_BOTH},
 {"Order", &DMWRITE, DMT_UNINT, get_rule_order, set_rule_order, NULL, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_rule_alias, set_rule_alias, NULL, NULL, BBFDM_BOTH},
 {"Description", &DMWRITE, DMT_STRING, get_rule_description, set_rule_description, NULL, NULL, BBFDM_BOTH},
 {"Target", &DMWRITE, DMT_STRING, get_rule_target, set_rule_target, NULL, NULL, BBFDM_BOTH},
 //{"TargetChain", &DMWRITE, DMT_STRING, get_rule_target_chain, set_rule_target_chain, NULL, NULL, BBFDM_BOTH},
