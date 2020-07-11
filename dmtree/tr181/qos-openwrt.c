@@ -1172,7 +1172,7 @@ int os_set_QoSClassification_SourceMACAddress(char *refparam, struct dmctx *ctx,
 	}
 	return 0;
 }
-#endif
+
 int get_QoSClassification_SourceMACMask(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -3156,7 +3156,6 @@ int get_QoSPolicer_NonConformingCountedBytes(char *refparam, struct dmctx *ctx, 
 	//TODO
 	return 0;
 }
-#endif
 
 int os_get_QoSQueue_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
