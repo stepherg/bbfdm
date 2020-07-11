@@ -300,10 +300,10 @@ static int get_WiFiRadio_AutoChannelSupported(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.AutoChannelRefreshPeriod!UCI:wireless/wifi-device,@i-1/scantimer*/
+/*#Device.WiFi.Radio.{i}.AutoChannelRefreshPeriod!UCI:wireless/wifi-device,@i-1/acs_refresh_time*/
 static int get_WiFiRadio_AutoChannelRefreshPeriod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "scantimer", value);
+	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "acs_refresh_time", value);
 	return 0;
 }
 
@@ -315,7 +315,7 @@ static int set_WiFiRadio_AutoChannelRefreshPeriod(char *refparam, struct dmctx *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "scantimer", value);
+			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "acs_refresh_time", value);
 			break;
 	}
 	return 0;
@@ -529,34 +529,19 @@ static int set_WiFiRadio_TransmitPower(char *refparam, struct dmctx *ctx, void *
 /*#Device.WiFi.Radio.{i}.RegulatoryDomain!UCI:wireless/wifi-device,@i-1/country*/
 static int get_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *country, **arr;
-	size_t length;
-
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "country", &country);
-	arr = strsplit(country, "/", &length);
-	if (arr && arr[0])
-		dmasprintf(value, "%s ", arr[0]);
+	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "country", value);
 	return 0;
 }
 
 static int set_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *country, **arr;
-	size_t length;
-
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, 3, 3, NULL, 0, RegulatoryDomain, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "country", &country);
-			if (strlen(country) > 0) {
-				arr = strsplit(country, "/", &length);
-				dmasprintf(&country, "%s/%s", value, arr[1]);
-			} else
-				dmasprintf(&country, "%s/1", value);
-			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "country", country);
+			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "country", value);
 			break;
 	}
 	return 0;

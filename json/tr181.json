@@ -29458,7 +29458,7 @@
 									"index": "@i-1"
 								}, 
 								"option": {
-									"name": "scantimer"
+									"name": "acs_refresh_time"
 								}
 							}
 						}
