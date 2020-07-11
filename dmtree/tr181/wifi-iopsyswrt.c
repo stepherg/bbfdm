@@ -495,13 +495,13 @@ int os__get_WiFiRadio_SupportedOperatingChannelBandwidths(char *refparam, struct
 	DM_ASSERT(res, *value = "");
 	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
 		bandwidth = dmjson_get_value(supp_channels, 1, "bandwidth");
-		if (bandwidth && !strstr(bandwidth_list, bandwidth)) {
+		if (bandwidth && !strstr(bandwidth_list, !strcmp(bandwidth, "8080") ? "80+80" : !strcmp(bandwidth, "80") ? ",80MHz" : bandwidth)) {
 			if (*bandwidth_list == '\0')
-				dmasprintf(&bandwidth_list, "%sMHz", bandwidth);
+				dmasprintf(&bandwidth_list, "%sMHz", !strcmp(bandwidth, "8080") ? "80+80" : bandwidth);
 			else {
 				char *tmp = dmstrdup(bandwidth_list);
 				dmfree(bandwidth_list);
-				dmasprintf(&bandwidth_list, "%s,%sMHz", tmp, bandwidth);
+				dmasprintf(&bandwidth_list, "%s,%sMHz", tmp, !strcmp(bandwidth, "8080") ? "80+80" : bandwidth);
 				dmfree(tmp);
 			}
 		}
