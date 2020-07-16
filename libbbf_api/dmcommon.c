@@ -1618,7 +1618,7 @@ int dm_validate_boolean(char *value)
 {
 	/* check format */
 	if ((value[0] == '1' && value[1] == '\0') || (value[0] == '0' && value[1] == '\0')
-		|| (strcmp(value, "true") == 0) || (strcmp(value, "false") == 0)) {
+		|| !strcasecmp(value, "true") || !strcasecmp(value, "false")) {
 		return 0;
 	}
 	return -1;
