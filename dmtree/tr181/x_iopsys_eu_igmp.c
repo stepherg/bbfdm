@@ -393,7 +393,7 @@ static int add_igmps_filter_obj(char *refparam, struct dmctx *ctx, void *data, c
 	return 0;
 }
 
-static int del_igmps_filter_obj(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+int del_mcasts_filter_obj(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *d_sec = NULL;
 	char *f_inst, *ip_addr;
@@ -460,7 +460,7 @@ static int browse_igmps_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	return 0;
 }
 
-static int get_igmps_filter_no_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcasts_filter_no_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
 	int cnt = 0;
@@ -490,7 +490,7 @@ static int get_igmp_cgrps_no_of_entries(char *refparam, struct dmctx *ctx, void 
 	return 0;
 }
 
-static int get_igmps_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcasts_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *f_sec;
 	char *f_inst, *f_enable;
@@ -513,8 +513,7 @@ static int get_igmps_filter_enable(char *refparam, struct dmctx *ctx, void *data
 	return 0;
 }
 
-
-static int set_igmps_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcasts_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *f_sec;
 	char *f_inst, *ip_addr;
@@ -545,7 +544,7 @@ static int set_igmps_filter_enable(char *refparam, struct dmctx *ctx, void *data
 	return 0;
 }
 
-static int get_igmps_filter_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcasts_filter_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *d_sec;
 	char *f_inst, *ip_addr;
@@ -568,7 +567,7 @@ static int get_igmps_filter_address(char *refparam, struct dmctx *ctx, void *dat
 	return 0;
 }
 
-static int set_igmps_filter_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcasts_filter_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s = NULL;
 	char *s_inst, *up;
@@ -600,7 +599,7 @@ static int set_igmps_filter_address(char *refparam, struct dmctx *ctx, void *dat
 	return 0;
 }
 
-static int get_igmp_snooping_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcast_snooping_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *val;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &val);
@@ -613,7 +612,7 @@ static int get_igmp_snooping_enable(char *refparam, struct dmctx *ctx, void *dat
 	return 0;
 }
 
-static int set_igmp_snooping_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcast_snooping_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
 
@@ -666,7 +665,7 @@ static int set_igmp_snooping_version(char *refparam, struct dmctx *ctx, void *da
 	return 0;
 }
 
-static int get_igmp_snooping_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcast_snooping_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *val;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "snooping_mode", &val);
@@ -681,7 +680,7 @@ static int get_igmp_snooping_mode(char *refparam, struct dmctx *ctx, void *data,
 	return 0;
 }
 
-static int set_igmp_snooping_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcast_snooping_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char val[4];
 
@@ -707,13 +706,13 @@ static int set_igmp_snooping_mode(char *refparam, struct dmctx *ctx, void *data,
 	return 0;
 }
 
-static int get_igmp_snooping_robustness(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcast_snooping_robustness(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "robustness", value);
 	return 0;
 }
 
-static int set_igmp_snooping_robustness(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcast_snooping_robustness(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 
 	switch (action) {
@@ -729,7 +728,7 @@ static int set_igmp_snooping_robustness(char *refparam, struct dmctx *ctx, void 
 	return 0;
 }
 
-static int get_igmp_snooping_aggregation(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcast_snooping_aggregation(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *val;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "aggregation", &val);
@@ -742,7 +741,7 @@ static int get_igmp_snooping_aggregation(char *refparam, struct dmctx *ctx, void
 	return 0;
 }
 
-static int set_igmp_snooping_aggregation(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcast_snooping_aggregation(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
 
@@ -760,7 +759,7 @@ static int set_igmp_snooping_aggregation(char *refparam, struct dmctx *ctx, void
 	return 0;
 }
 
-static int get_igmp_snooping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char val[16] = {0}, sec_name[16] = {0}; // taking 16 here is same as that is size of linux names usually supported
 	char *val1;
@@ -809,7 +808,7 @@ static int get_igmp_snooping_interface(char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
-static int set_igmp_snooping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char ifname[16];
 	switch (action)	{
@@ -979,7 +978,7 @@ static int add_igmpp_filter_obj(char *refparam, struct dmctx *ctx, void *data, c
 	return 0;
 }
 
-static int del_igmpp_filter_obj(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+int del_mcastp_filter_obj(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *d_sec = NULL;
 	char *f_inst, *ip_addr;
@@ -1046,7 +1045,7 @@ static int browse_igmpp_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	return 0;
 }
 
-static int get_igmpp_interface_no_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcastp_interface_no_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
 	int cnt = 0;
@@ -1060,7 +1059,7 @@ static int get_igmpp_interface_no_of_entries(char *refparam, struct dmctx *ctx, 
 	return 0;
 }
 
-static int get_igmpp_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcastp_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *f_sec;
 	char *f_inst, *f_enable;
@@ -1082,7 +1081,7 @@ static int get_igmpp_filter_enable(char *refparam, struct dmctx *ctx, void *data
 	return 0;
 }
 
-static int set_igmpp_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcastp_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *f_sec;
 	char *f_inst, *ip_addr;
@@ -1111,7 +1110,7 @@ static int set_igmpp_filter_enable(char *refparam, struct dmctx *ctx, void *data
 	return 0;
 }
 
-static int get_igmpp_filter_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcastp_filter_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *d_sec;
 	char *f_inst, *ip_addr;
@@ -1312,7 +1311,7 @@ static int get_igmpp_cgrp_stats_lrcvd(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
-static int get_igmp_proxy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcast_proxy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *val;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &val);
@@ -1324,7 +1323,7 @@ static int get_igmp_proxy_enable(char *refparam, struct dmctx *ctx, void *data, 
 
 	return 0;
 }
-static int set_igmp_proxy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcast_proxy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
 
@@ -1377,31 +1376,31 @@ static int set_igmp_proxy_version(char *refparam, struct dmctx *ctx, void *data,
 	return 0;
 }
 
-static int get_igmp_proxy_robustness(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcast_proxy_robustness(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "robustness", value);
 	return 0;
 }
 
-static int get_igmpp_query_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcastp_query_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "query_interval", value);
 	return 0;
 }
 
-static int get_igmpp_q_response_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcastp_q_response_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "query_response_interval", value);
 	return 0;
 }
 
-static int get_igmpp_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcastp_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "last_member_query_interval", value);
 	return 0;
 }
 
-static int set_igmpp_query_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcastp_query_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 
 	switch (action) {
@@ -1417,7 +1416,7 @@ static int set_igmpp_query_interval(char *refparam, struct dmctx *ctx, void *dat
 	return 0;
 }
 
-static int set_igmpp_q_response_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcastp_q_response_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 
 	switch (action) {
@@ -1433,7 +1432,7 @@ static int set_igmpp_q_response_interval(char *refparam, struct dmctx *ctx, void
 	return 0;
 }
 
-static int set_igmpp_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcastp_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 
 	switch (action) {
@@ -1449,7 +1448,7 @@ static int set_igmpp_last_mq_interval(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
-static int set_igmp_proxy_robustness(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcast_proxy_robustness(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 
 	switch (action) {
@@ -1465,7 +1464,7 @@ static int set_igmp_proxy_robustness(char *refparam, struct dmctx *ctx, void *da
 	return 0;
 }
 
-static int get_igmp_proxy_aggregation(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcast_proxy_aggregation(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *val;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "aggregation", &val);
@@ -1478,7 +1477,7 @@ static int get_igmp_proxy_aggregation(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
-static int get_igmp_proxy_fast_leave(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcast_proxy_fast_leave(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *val;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "fast_leave", &val);
@@ -1491,7 +1490,7 @@ static int get_igmp_proxy_fast_leave(char *refparam, struct dmctx *ctx, void *da
 	return 0;
 }
 
-static int set_igmp_proxy_fast_leave(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcast_proxy_fast_leave(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
 
@@ -1509,7 +1508,7 @@ static int set_igmp_proxy_fast_leave(char *refparam, struct dmctx *ctx, void *da
 	return 0;
 }
 
-static int set_igmp_proxy_aggregation(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcast_proxy_aggregation(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
 
@@ -1527,7 +1526,7 @@ static int set_igmp_proxy_aggregation(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
-static int get_igmpp_filter_no_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcastp_filter_no_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
 	int cnt = 0;
@@ -1541,7 +1540,7 @@ static int get_igmpp_filter_no_of_entries(char *refparam, struct dmctx *ctx, voi
 	return 0;
 }
 
-static void update_snooping_mode(struct uci_section *s)
+void update_snooping_mode(struct uci_section *s)
 {
 	// Update snooping mode as per downstream interface
 	struct uci_list *v = NULL;
@@ -1843,7 +1842,7 @@ static int set_igmpp_interface_upstream(char *refparam, struct dmctx *ctx, void 
 	return 0;
 }
 
-static int get_igmpp_interface_upstream(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcastp_interface_upstream(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *d_sec;
 	char *f_inst, *up;
@@ -1866,7 +1865,7 @@ static int get_igmpp_interface_upstream(char *refparam, struct dmctx *ctx, void 
 	return 0;
 }
 
-static int get_igmpp_iface_snoop_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int get_mcastp_iface_snoop_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *d_sec;
 	char *f_inst, *val;
@@ -1890,7 +1889,7 @@ static int get_igmpp_iface_snoop_mode(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
-static int set_igmpp_iface_snoop_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int set_mcastp_iface_snoop_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *f_inst, *up;
 	struct uci_section *d_sec;
@@ -1948,7 +1947,7 @@ DMLEAF X_IOPSYS_EU_IGMPParams[] = {
 
 DMOBJ X_IOPSYS_EU_IGMPSnoopingObj[] = {
 {"ClientGroup", &DMREAD, NULL, NULL, NULL, browse_igmp_cgrp_inst, NULL, NULL, NULL, IGMPSnoopingCLientGroupObj, IGMPSnoopingClientGroupParams, NULL, BBFDM_BOTH},
-{"Filter", &DMWRITE, add_igmps_filter_obj, del_igmps_filter_obj, NULL, browse_igmps_filter_inst, NULL, NULL, NULL, NULL, IGMPSnoopingFilterParams, NULL, BBFDM_BOTH},
+{"Filter", &DMWRITE, add_igmps_filter_obj, del_mcasts_filter_obj, NULL, browse_igmps_filter_inst, NULL, NULL, NULL, NULL, IGMPSnoopingFilterParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -1965,8 +1964,8 @@ DMLEAF IGMPSnoopingClientGroupParams[] = {
 };
 
 DMLEAF IGMPSnoopingFilterParams[] = {
-{"Enable", &DMWRITE, DMT_BOOL, get_igmps_filter_enable, set_igmps_filter_enable, NULL, NULL, BBFDM_BOTH},
-{"IPAddress", &DMWRITE, DMT_STRING, get_igmps_filter_address, set_igmps_filter_address, NULL, NULL, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_mcasts_filter_enable, set_mcasts_filter_enable, NULL, NULL, BBFDM_BOTH},
+{"IPAddress", &DMWRITE, DMT_STRING, get_mcasts_filter_address, set_mcasts_filter_address, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -1988,13 +1987,13 @@ DMLEAF IGMPSnoopingClientGroupStatsParams[] = {
 };
 
 DMLEAF X_IOPSYS_EU_IGMPSnoopingParams[] = {
-{"Enable", &DMWRITE, DMT_BOOL, get_igmp_snooping_enable, set_igmp_snooping_enable, NULL, NULL, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_mcast_snooping_enable, set_mcast_snooping_enable, NULL, NULL, BBFDM_BOTH},
 {"Version", &DMWRITE, DMT_STRING, get_igmp_snooping_version, set_igmp_snooping_version, NULL, NULL, BBFDM_BOTH},
-{"Robustness", &DMWRITE, DMT_UNINT, get_igmp_snooping_robustness, set_igmp_snooping_robustness, NULL, NULL, BBFDM_BOTH},
-{"Aggregation", &DMWRITE, DMT_BOOL, get_igmp_snooping_aggregation, set_igmp_snooping_aggregation, NULL, NULL, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_igmp_snooping_interface, set_igmp_snooping_interface, NULL, NULL, BBFDM_BOTH},
-{"Mode", &DMWRITE, DMT_STRING, get_igmp_snooping_mode, set_igmp_snooping_mode, NULL, NULL, BBFDM_BOTH},
-{"FilterNumberOfEntries", &DMREAD, DMT_UNINT, get_igmps_filter_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+{"Robustness", &DMWRITE, DMT_UNINT, get_mcast_snooping_robustness, set_mcast_snooping_robustness, NULL, NULL, BBFDM_BOTH},
+{"Aggregation", &DMWRITE, DMT_BOOL, get_mcast_snooping_aggregation, set_mcast_snooping_aggregation, NULL, NULL, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_mcast_snooping_interface, set_mcast_snooping_interface, NULL, NULL, BBFDM_BOTH},
+{"Mode", &DMWRITE, DMT_STRING, get_mcast_snooping_mode, set_mcast_snooping_mode, NULL, NULL, BBFDM_BOTH},
+{"FilterNumberOfEntries", &DMREAD, DMT_UNINT, get_mcasts_filter_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
 {"ClientGroupNumberOfEntries", &DMREAD, DMT_UNINT, get_igmp_cgrps_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
@@ -2002,7 +2001,7 @@ DMLEAF X_IOPSYS_EU_IGMPSnoopingParams[] = {
 DMOBJ X_IOPSYS_EU_IGMPProxyObj[] = {
 {"Interface", &DMWRITE, add_igmpp_interface_obj, del_igmpp_interface_obj, NULL, browse_igmpp_interface_inst, NULL, NULL, NULL, NULL, IGMPProxyInterfaceParams, NULL, BBFDM_BOTH},
 {"ClientGroup", &DMREAD, NULL, NULL, NULL, browse_igmp_cgrp_inst, NULL, NULL, NULL, IGMPProxyCLientGroupObj, IGMPProxyClientGroupParams, NULL, BBFDM_BOTH},
-{"Filter", &DMWRITE, add_igmpp_filter_obj, del_igmpp_filter_obj, NULL, browse_igmpp_filter_inst, NULL, NULL, NULL, NULL, IGMPProxyFilterParams, NULL, BBFDM_BOTH},
+{"Filter", &DMWRITE, add_igmpp_filter_obj, del_mcastp_filter_obj, NULL, browse_igmpp_filter_inst, NULL, NULL, NULL, NULL, IGMPProxyFilterParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -2019,8 +2018,8 @@ DMLEAF IGMPProxyClientGroupParams[] = {
 };
 
 DMLEAF IGMPProxyFilterParams[] = {
-{"Enable", &DMWRITE, DMT_BOOL, get_igmpp_filter_enable, set_igmpp_filter_enable, NULL, NULL, BBFDM_BOTH},
-{"IPPrefix", &DMWRITE, DMT_STRING, get_igmpp_filter_address, set_igmpp_filter_address, NULL, NULL, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_mcastp_filter_enable, set_mcastp_filter_enable, NULL, NULL, BBFDM_BOTH},
+{"IPPrefix", &DMWRITE, DMT_STRING, get_mcastp_filter_address, set_igmpp_filter_address, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -2043,22 +2042,22 @@ DMLEAF IGMPProxyClientGroupStatsParams[] = {
 
 DMLEAF IGMPProxyInterfaceParams[] = {
 {"Interface", &DMWRITE, DMT_STRING, get_igmpp_interface_iface, set_igmpp_interface_iface, NULL, NULL, BBFDM_BOTH},
-{"Upstream", &DMWRITE, DMT_BOOL, get_igmpp_interface_upstream, set_igmpp_interface_upstream, NULL, NULL, BBFDM_BOTH},
-{"SnoopingMode", &DMWRITE, DMT_STRING, get_igmpp_iface_snoop_mode, set_igmpp_iface_snoop_mode, NULL, NULL, BBFDM_BOTH},
+{"Upstream", &DMWRITE, DMT_BOOL, get_mcastp_interface_upstream, set_igmpp_interface_upstream, NULL, NULL, BBFDM_BOTH},
+{"SnoopingMode", &DMWRITE, DMT_STRING, get_mcastp_iface_snoop_mode, set_mcastp_iface_snoop_mode, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF X_IOPSYS_EU_IGMPProxyParams[] = {
-{"Enable", &DMWRITE, DMT_BOOL, get_igmp_proxy_enable, set_igmp_proxy_enable, NULL, NULL, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_mcast_proxy_enable, set_mcast_proxy_enable, NULL, NULL, BBFDM_BOTH},
 {"Version", &DMWRITE, DMT_STRING, get_igmp_proxy_version, set_igmp_proxy_version, NULL, NULL, BBFDM_BOTH},
-{"QueryInterval",&DMWRITE, DMT_UNINT, get_igmpp_query_interval, set_igmpp_query_interval, NULL, NULL, BBFDM_BOTH},
-{"QueryResponseInterval",&DMWRITE, DMT_UNINT, get_igmpp_q_response_interval, set_igmpp_q_response_interval, NULL, NULL, BBFDM_BOTH},
-{"LastMemberQueryInterval",&DMWRITE, DMT_UNINT, get_igmpp_last_mq_interval, set_igmpp_last_mq_interval, NULL, NULL, BBFDM_BOTH},
-{"ImmediateLeave", &DMWRITE, DMT_BOOL, get_igmp_proxy_fast_leave, set_igmp_proxy_fast_leave, NULL, NULL, BBFDM_BOTH},
-{"Robustness", &DMWRITE, DMT_UNINT, get_igmp_proxy_robustness, set_igmp_proxy_robustness, NULL, NULL, BBFDM_BOTH},
-{"Aggregation", &DMWRITE, DMT_BOOL, get_igmp_proxy_aggregation, set_igmp_proxy_aggregation, NULL, NULL, BBFDM_BOTH},
+{"QueryInterval",&DMWRITE, DMT_UNINT, get_mcastp_query_interval, set_mcastp_query_interval, NULL, NULL, BBFDM_BOTH},
+{"QueryResponseInterval",&DMWRITE, DMT_UNINT, get_mcastp_q_response_interval, set_mcastp_q_response_interval, NULL, NULL, BBFDM_BOTH},
+{"LastMemberQueryInterval",&DMWRITE, DMT_UNINT, get_mcastp_last_mq_interval, set_mcastp_last_mq_interval, NULL, NULL, BBFDM_BOTH},
+{"ImmediateLeave", &DMWRITE, DMT_BOOL, get_mcast_proxy_fast_leave, set_mcast_proxy_fast_leave, NULL, NULL, BBFDM_BOTH},
+{"Robustness", &DMWRITE, DMT_UNINT, get_mcast_proxy_robustness, set_mcast_proxy_robustness, NULL, NULL, BBFDM_BOTH},
+{"Aggregation", &DMWRITE, DMT_BOOL, get_mcast_proxy_aggregation, set_mcast_proxy_aggregation, NULL, NULL, BBFDM_BOTH},
 {"ClientGroupNumberOfEntries", &DMREAD, DMT_UNINT, get_igmp_cgrps_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
-{"FilterNumberOfEntries", &DMREAD, DMT_UNINT, get_igmpp_filter_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
-{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_igmpp_interface_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+{"FilterNumberOfEntries", &DMREAD, DMT_UNINT, get_mcastp_filter_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_mcastp_interface_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
