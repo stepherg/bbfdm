@@ -626,8 +626,7 @@ static int set_wlan_ssid_advertisement_enable(char *refparam, struct dmctx *ctx,
 /*#Device.WiFi.AccessPoint.{i}.WMMEnable!UCI:wireless/wifi-device,@i-1/wmm*/
 static int get_wmm_enabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "device", value);
-	dmuci_get_option_value_string("wireless", *value, "wmm", value);
+	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "wmm", value);
 	return 0;
 }
 
@@ -643,10 +642,7 @@ static int set_wmm_enabled(char *refparam, struct dmctx *ctx, void *data, char *
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "device", &device);
-			dmuci_set_value("wireless", device, "wmm", b ? "1" : "0");
-			dmuci_set_value("wireless", device, "wmm_noack", b ? "1" : "");
-			dmuci_set_value("wireless", device, "wmm_apsd", b ? "1" : "");
+			dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, "wmm", value);
 			return 0;
 	}
 	return 0;
@@ -655,8 +651,7 @@ static int set_wmm_enabled(char *refparam, struct dmctx *ctx, void *data, char *
 /*#Device.WiFi.AccessPoint.{i}.MaxAssociatedDevices!UCI:wireless/wifi-iface,@i-1/maxassoc*/
 static int get_access_point_maxassoc(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->wifi_ssid_sec, "device", value);
-	dmuci_get_option_value_string("wireless", *value, "maxassoc", value);
+	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "maxassoc", value);
 	return 0;
 }
 
@@ -670,8 +665,7 @@ static int set_access_point_maxassoc(char *refparam, struct dmctx *ctx, void *da
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "device", &device);
-			dmuci_set_value("wireless", device, "maxassoc", value);
+			dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, "maxassoc", value);
 			return 0;
 	}
 	return 0;
@@ -699,8 +693,7 @@ static int get_WiFiAccessPoint_WMMCapability(char *refparam, struct dmctx *ctx, 
 /*#Device.WiFi.AccessPoint.{i}.MaxAllowedAssociations!UCI:wireless/wifi-iface,@i-1/maxassoc*/
 static int get_WiFiAccessPoint_MaxAllowedAssociations(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "device", value);
-	dmuci_get_option_value_string("wireless", *value, "maxassoc", value);
+	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "maxassoc", value);
 	return 0;
 }
 
@@ -714,8 +707,7 @@ static int set_WiFiAccessPoint_MaxAllowedAssociations(char *refparam, struct dmc
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "device", &device);
-			dmuci_set_value("wireless", device, "maxassoc", value);
+			dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, "maxassoc", value);
 			break;
 	}
 	return 0;
