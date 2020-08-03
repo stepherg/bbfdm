@@ -90,7 +90,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 		higheralias = get_alias_by_section("dmmap_network", "interface", s, "ip_int_alias");
 		if (*higheralias == '\0')
-			snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", layer_inst);
+			if (*layer_inst == '\0')
+				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
+			else
+				snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", layer_inst);
 		else
 			snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", higheralias);
 
@@ -130,7 +133,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 			snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "%s", value);
 			if (*loweralias == '\0')
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", layer_inst);
+				if (*layer_inst == '\0')
+					snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
+				else
+					snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", layer_inst);
 			else
 				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
 		}
@@ -166,7 +172,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 		higheralias = get_alias_by_section("dmmap_network", "interface", s, "ppp_int_alias");
 		if (*higheralias == '\0')
-			snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", layer_inst);
+			if (*layer_inst == '\0')
+				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
+			else
+				snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", layer_inst);
 		else
 			snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", higheralias);
 
@@ -238,7 +247,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		higheralias = get_alias_by_section("dmmap_network", "device", s, "vlan_term_alias");
 		if (*higheralias == '\0')
 			if (*layer_inst == '\0')
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
+				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
 			else
 				snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", layer_inst);
 		else
@@ -294,7 +303,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmuci_get_value_by_section_string(s, "link_alias", &higheralias);
 		if (*higheralias == '\0')
 			if (*layer_inst == '\0')
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
+				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
 			else
 				snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", layer_inst);
 		else
@@ -388,7 +397,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				dmuci_get_value_by_section_string(port, "bridge_port_instance", &bridge_port_inst);
 				if (*higheralias == '\0')
 					if (*bridge_port_inst == '\0')
-						snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
+						snprintf(buf_mngr, sizeof(buf_mngr), "%s", "");
 					else
 						snprintf(buf_mngr, sizeof(buf_mngr), "cpe-%s", bridge_port_inst);
 				else
@@ -444,7 +453,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 			if (*loweralias == '\0')
 				if (*bridge_port_inst == '\0')
-					snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
+					snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
 				else
 					snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", bridge_port_inst);
 			else
@@ -564,7 +573,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			if(strcmp(package, "wireless") == 0) {
 				if (*loweralias == '\0')
 					if (*bridge_port_inst == '\0')
-						snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
+						snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
 					else
 						snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", bridge_port_inst);
 				else
@@ -620,7 +629,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			if(strcmp(package, "dsl:atm") == 0) {
 				if (*loweralias == '\0')
 					if (*bridge_port_inst == '\0')
-						snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
+						snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
 					else
 						snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", bridge_port_inst);
 				else
@@ -666,7 +675,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			if(strcmp(package, "dsl:ptm") == 0) {
 				if (*loweralias == '\0')
 					if (*bridge_port_inst == '\0')
-						snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
+						snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
 					else
 						snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", bridge_port_inst);
 				else
