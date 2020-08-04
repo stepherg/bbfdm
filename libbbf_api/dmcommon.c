@@ -1005,6 +1005,17 @@ void get_dmmap_section_of_config_section_eq(char* dmmap_package, char* section_t
 	*dmmap_section = NULL;
 }
 
+void get_dmmap_section_of_config_section_cont(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section)
+{
+	struct uci_section* s;
+
+	uci_path_foreach_option_cont(bbfdm, dmmap_package, section_type, opt, value, s) {
+		*dmmap_section = s;
+		return;
+	}
+	*dmmap_section = NULL;
+}
+
 void get_config_section_of_dmmap_section(char* package, char* section_type, char *section_name, struct uci_section **config_section)
 {
 	struct uci_section* s;
