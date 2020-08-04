@@ -36,6 +36,21 @@ static char *get_instance_by_section(int mode, char *dmmap_config, char *section
 	return instance;
 }
 
+static char *get_instance_by_section_option_condition(int mode, char *dmmap_config, char *section, struct uci_section *s, char *option, char *value, char *instance_option, char *alias_option)
+{
+	struct uci_section *dmmap_section;
+	char *instance = "";
+
+	get_dmmap_section_of_config_section_cont(dmmap_config, section, option, value, &dmmap_section);
+
+	if (mode == INSTANCE_MODE_NUMBER)
+		dmuci_get_value_by_section_string(dmmap_section, instance_option, &instance);
+	else
+		dmuci_get_value_by_section_string(dmmap_section, alias_option, &instance);
+
+	return instance;
+}
+
 static char *get_alias_by_section(char *dmmap_config, char *section, struct uci_section *s, char *alias_option)
 {
 	struct uci_section *dmmap_section;
@@ -126,7 +141,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				if (vid) *vid = '\0';
 				adm_entry_get_linker_param(dmctx, dm_print_path("%s%cEthernet%cLink%c", dmroot, dm_delim, dm_delim, dm_delim), linker, &value);
 				loweralias = get_alias_by_section("dmmap", "link", s, "link_alias");
-				layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap", "link", s, "section_name", section_name(s), "link_instance", "link_alias");
+				layer_inst = get_instance_by_section_option_condition(dmctx->instance_mode, "dmmap", "link", s, "section_name", section_name(s), "link_instance", "link_alias");
 				if (value == NULL)
 					value = "";
 			}
@@ -201,7 +216,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			if (vid) *vid = '\0';
 			adm_entry_get_linker_param(dmctx, dm_print_path("%s%cEthernet%cLink%c", dmroot, dm_delim, dm_delim, dm_delim), linker, &value);
 			loweralias = get_alias_by_section("dmmap", "link", s, "link_alias");
-			layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap", "link", s, "section_name", section_name(s), "link_instance", "link_alias");
+			layer_inst = get_instance_by_section_option_condition(dmctx->instance_mode, "dmmap", "link", s, "section_name", section_name(s), "link_instance", "link_alias");
 			if (value == NULL)
 				value = "";
 		}
