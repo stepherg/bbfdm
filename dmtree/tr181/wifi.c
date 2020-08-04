@@ -303,7 +303,7 @@ static int get_WiFiRadio_AutoChannelSupported(char *refparam, struct dmctx *ctx,
 /*#Device.WiFi.Radio.{i}.AutoChannelRefreshPeriod!UCI:wireless/wifi-device,@i-1/acs_refresh_time*/
 static int get_WiFiRadio_AutoChannelRefreshPeriod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "acs_refresh_time", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "acs_refresh_time", "3600");
 	return 0;
 }
 
@@ -324,14 +324,14 @@ static int set_WiFiRadio_AutoChannelRefreshPeriod(char *refparam, struct dmctx *
 /*#Device.WiFi.Radio.{i}.MaxSupportedAssociations!UCI:wireless/wifi-device,@i-1/maxassoc*/
 static int get_WiFiRadio_MaxSupportedAssociations(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "maxassoc", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "maxassoc", "32");
 	return 0;
 }
 
 /*#Device.WiFi.Radio.{i}.FragmentationThreshold!UCI:wireless/wifi-device,@i-1/frag*/
 static int get_WiFiRadio_FragmentationThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "frag", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "frag_threshold", "2346");
 	return 0;
 }
 
@@ -343,7 +343,7 @@ static int set_WiFiRadio_FragmentationThreshold(char *refparam, struct dmctx *ct
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "frag", value);
+			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "frag_threshold", value);
 			break;
 	}
 	return 0;
@@ -352,7 +352,7 @@ static int set_WiFiRadio_FragmentationThreshold(char *refparam, struct dmctx *ct
 /*#Device.WiFi.Radio.{i}.RTSThreshold!UCI:wireless/wifi-device,@i-1/rts*/
 static int get_WiFiRadio_RTSThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "rts", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "rts_threshold", "2347");
 	return 0;
 }
 
@@ -364,7 +364,7 @@ static int set_WiFiRadio_RTSThreshold(char *refparam, struct dmctx *ctx, void *d
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "rts", value);
+			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "rts_threshold", value);
 			break;
 	}
 	return 0;
@@ -373,7 +373,7 @@ static int set_WiFiRadio_RTSThreshold(char *refparam, struct dmctx *ctx, void *d
 /*#Device.WiFi.Radio.{i}.BeaconPeriod!UCI:wireless/wifi-device,@i-1/beacon_int*/
 static int get_WiFiRadio_BeaconPeriod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "beacon_int", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "beacon_int", "100");
 	return 0;
 }
 
@@ -394,7 +394,7 @@ static int set_WiFiRadio_BeaconPeriod(char *refparam, struct dmctx *ctx, void *d
 /*#Device.WiFi.Radio.{i}.DTIMPeriod!UCI:wireless/wifi-device,@i-1/dtim_period*/
 static int get_WiFiRadio_DTIMPeriod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "dtim_period", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "dtim_period", "2");
 	return 0;
 }
 
@@ -485,7 +485,7 @@ static int get_WiFiRadio_IEEE80211hSupported(char *refparam, struct dmctx *ctx, 
 /*#Device.WiFi.Radio.{i}.IEEE80211hEnabled!UCI:wireless/wifi-device,@i-1/doth*/
 static int get_WiFiRadio_IEEE80211hEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "doth", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "doth", "0");
 	return 0;
 }
 
@@ -508,7 +508,7 @@ static int set_WiFiRadio_IEEE80211hEnabled(char *refparam, struct dmctx *ctx, vo
 /*#Device.WiFi.Radio.{i}.TransmitPower!UCI:wireless/wifi-device,@i-1/txpower*/
 static int get_WiFiRadio_TransmitPower(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "txpower", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "txpower", "100");
 	return 0;
 }
 
@@ -626,7 +626,7 @@ static int set_wlan_ssid_advertisement_enable(char *refparam, struct dmctx *ctx,
 /*#Device.WiFi.AccessPoint.{i}.WMMEnable!UCI:wireless/wifi-device,@i-1/wmm*/
 static int get_wmm_enabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "wmm", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_acp_args *)data)->wifi_acp_sec, "wmm", "1");
 	return 0;
 }
 
@@ -650,7 +650,7 @@ static int set_wmm_enabled(char *refparam, struct dmctx *ctx, void *data, char *
 /*#Device.WiFi.AccessPoint.{i}.MaxAssociatedDevices!UCI:wireless/wifi-iface,@i-1/maxassoc*/
 static int get_access_point_maxassoc(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "maxassoc", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_acp_args *)data)->wifi_acp_sec, "maxassoc", "32");
 	return 0;
 }
 
@@ -690,7 +690,7 @@ static int get_WiFiAccessPoint_WMMCapability(char *refparam, struct dmctx *ctx, 
 /*#Device.WiFi.AccessPoint.{i}.MaxAllowedAssociations!UCI:wireless/wifi-iface,@i-1/maxassoc*/
 static int get_WiFiAccessPoint_MaxAllowedAssociations(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "maxassoc", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_acp_args *)data)->wifi_acp_sec, "maxassoc", "32");
 	return 0;
 }
 
@@ -711,9 +711,7 @@ static int set_WiFiAccessPoint_MaxAllowedAssociations(char *refparam, struct dmc
 /*#Device.WiFi.AccessPoint.{i}.IsolationEnable!UCI:wireless/wifi-iface,@i-1/isolate*/
 static int get_WiFiAccessPoint_IsolationEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "isolate", value);
-	if(!*value || *value[0] == 0)
-		*value = "0";
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_acp_args *)data)->wifi_acp_sec, "isolate", "0");
 	return 0;
 }
 
