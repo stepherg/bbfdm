@@ -119,7 +119,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				continue;
 			snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "Device.PPP.Interface.%s.", layer_inst);
 			loweralias = get_alias_by_section("dmmap_network", "interface", s, "ppp_int_alias");
-			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
+			if (*loweralias == '\0')
+				snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", layer_inst);
+			else
+				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
 		} else {
 			// The lower layer is Device.Ethernet.VLANTermination.{i}.
 			char *value = NULL;
@@ -208,7 +211,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				found = 1;
 		}
 
-		if (device[0] != '\0' && found == 0) {
+		if (found == 0) {
 			// The lower layer is Device.Ethernet.Link.{i}.
 			char linker[32] = {0};
 			strncpy(linker, device, sizeof(linker) - 1);
@@ -350,6 +353,8 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 						dmuci_get_value_by_section_string(port, "device", &device);
 						snprintf(linker, sizeof(linker), "br_%s:%s+%s", br_inst, section_name(port), device);
 						adm_entry_get_linker_param(dmctx, dm_print_path("%s%cBridging%cBridge%c", dmroot, dm_delim, dm_delim, dm_delim), linker, &value);
+						dmuci_get_value_by_section_string(port, "bridge_port_alias", &loweralias);
+						dmuci_get_value_by_section_string(port, "bridge_port_instance", &layer_inst);
 						break;
 					}
 				}
@@ -359,7 +364,19 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			char *vid = strchr(linker, '.');
 			if (vid) *vid = '\0';
 			char *macvlan = strchr(linker, '_');
-			if (macvlan) *macvlan = '\0';
+			if (macvlan)
+				*macvlan = '\0';
+			struct uci_section *eth_port_sect = NULL, *eth_port_dmms = NULL;
+			uci_foreach_option_eq("ports", "ethport", "ifname", linker, eth_port_sect) {
+				break;
+			}
+			if (eth_port_sect != NULL) {
+				get_dmmap_section_of_config_section_eq("dmmap_ports", eth_port_sect, "section_name", section_name(eth_port_sect), &eth_port_dmms);
+				if (eth_port_dmms) {
+					dmuci_get_value_by_section_string(eth_port_dmms, "eth_port_alias", &loweralias);
+					dmuci_get_value_by_section_string(eth_port_dmms, "eth_port_instance", &layer_inst);
+				}
+			}
 			adm_entry_get_linker_param(dmctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, &value);
 		}
 
@@ -476,19 +493,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
 				goto end;
 
-			if (*loweralias == '\0')
-				if (*bridge_port_inst == '\0')
-					snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
-				else
-					snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", bridge_port_inst);
-			else
-				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", loweralias);
-
 			char package[32] = {0};
 			int found = 0;
 			// The lower layer is Device.Ethernet.Interface.{i}.
 			adm_entry_get_linker_param(dmctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), device, &value);
-
 			if (value != NULL) {
 				strncpy(package, "ports", sizeof(package) - 1);
 				struct uci_section *port_s = NULL;
@@ -588,14 +596,12 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			// create dmmap section
 			snprintf(buf_instance, sizeof(buf_instance), "%d", ++instance);
 			dmmap_s = create_dmmap_interface_stack_section(buf_instance);
-
 			// link instance to interface stack data
 			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
 				   dmmap_s, "interface_stack_instance", "interface_stack_alias", "dmmap_interface_stack", "interface_stack");
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
 				goto end;
-
 			// The lower layer is Device.WiFi.Radio.{i}.
 			if(strcmp(package, "wireless") == 0) {
 				if (*loweralias == '\0')
@@ -605,7 +611,6 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 						snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", bridge_port_inst);
 				else
 					snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", loweralias);
-
 				struct uci_section *wl_s = NULL;
 				char *wl_device;
 				uci_foreach_option_eq("wireless", "wifi-iface", "ifname", device, wl_s) {
