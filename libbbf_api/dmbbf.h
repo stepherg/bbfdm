@@ -336,6 +336,7 @@ enum {
 	CMD_USP_OPERATE,
 	CMD_USP_LIST_OPERATE,
 	CMD_GET_SCHEMA,
+	CMD_GET_INSTANCES,
 #ifdef BBF_TR064
 	CMD_UPNP_GET_SUPPORTED_PARAMETERS,
 	CMD_UPNP_GET_INSTANCES,
@@ -557,6 +558,7 @@ void dmentry_instance_lookup_inparam(struct dmctx *ctx);
 int dm_entry_get_value(struct dmctx *ctx);
 int dm_entry_get_name(struct dmctx *ctx);
 int dm_entry_get_schema(struct dmctx *ctx);
+int dm_entry_get_instances(struct dmctx *dmctx);
 int dm_entry_get_notification(struct dmctx *ctx);
 int dm_entry_inform(struct dmctx *ctx);
 int dm_entry_add_object(struct dmctx *ctx);

@@ -1423,6 +1423,59 @@ static int mparam_get_schema_name(DMPARAM_ARGS)
 	return 0;
 }
 
+/* **************
+ * get_instances
+ * **************/
+static int mobj_get_instances_in_obj(DMOBJECT_ARGS)
+{
+	if (node->matched && node->is_instanceobj) {
+		char *name = dmstrdup(node->current_object);
+
+		if (name) {
+			name[strlen(name) - 1] = 0;
+			add_list_paramameter(dmctx, name, NULL, "xsd:object", NULL, 0);
+		}
+	}
+
+	return 0;
+}
+
+static int mparam_get_instances_in_obj(DMPARAM_ARGS)
+{
+	return 0;
+}
+
+int dm_entry_get_instances(struct dmctx *dmctx)
+{
+	DMOBJ *root = dmctx->dm_entryobj;
+	DMNODE node = { .current_object = "" };
+	char buf[4] = { dm_delim, 0 };
+	size_t plen;
+	int err;
+
+	if (dmctx->in_param[0] == 0)
+		dmctx->in_param = buf;
+
+	plen = strlen(dmctx->in_param);
+	if (dmctx->in_param[plen - 1] != dm_delim)
+		return FAULT_9005;
+
+	dmctx->inparam_isparam = 0;
+	dmctx->findparam = 0;
+	dmctx->stop = 0;
+	dmctx->checkobj = plugin_obj_match;
+	dmctx->checkleaf = plugin_leaf_match;
+	dmctx->method_obj = mobj_get_instances_in_obj;
+	dmctx->method_param = mparam_get_instances_in_obj;
+
+	err = dm_browse(dmctx, &node, root, NULL, NULL);
+	if (dmctx->findparam == 0)
+		return err;
+
+	return 0;
+}
+
+
 /* ********************
  * get notification
  * ********************/

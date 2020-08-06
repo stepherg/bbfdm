@@ -296,6 +296,9 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 		case CMD_GET_SCHEMA:
 			fault = dm_entry_get_schema(ctx);
 			break;
+		case CMD_GET_INSTANCES:
+			fault = dm_entry_get_instances(ctx);
+			break;
 #ifdef BBF_TR064
 		case CMD_UPNP_GET_SUPPORTED_PARAMETERS:
 			ctx->depth = atoi(arg1);
