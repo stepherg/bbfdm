@@ -204,9 +204,13 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		// The lower layer is Device.Ethernet.VLANTermination.{i}.
 		char *device = get_device(section_name(s));
 		if (device[0] != '\0') {
+			struct uci_section *vlan_sect = NULL;
 			adm_entry_get_linker_param(dmctx, dm_print_path("%s%cEthernet%cVLANTermination%c", dmroot, dm_delim, dm_delim, dm_delim), device, &value);
-			loweralias = get_alias_by_section("dmmap_network", "device", s, "vlan_term_alias");
-			layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_network", "device", s, "section_name", section_name(s), "vlan_term_instance", "vlan_term_alias");
+			uci_foreach_option_eq("network", "device", "name", device, vlan_sect) {
+				break;
+			}
+			loweralias = get_alias_by_section("dmmap_network", "device", vlan_sect, "vlan_term_alias");
+			layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_network", "device", s, "section_name", section_name(vlan_sect), "vlan_term_instance", "vlan_term_alias");
 			if (value != NULL)
 				found = 1;
 		}
