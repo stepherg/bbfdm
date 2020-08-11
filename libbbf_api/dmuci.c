@@ -626,6 +626,9 @@ int dmuci_get_value_by_section_list(struct uci_section *s, char *option, struct 
 	struct uci_list *list;
 	char *pch = NULL, *spch = NULL, *dup;
 
+	if (s == NULL || option == NULL)
+		return -1;
+
 	*value = NULL;
 	uci_foreach_element(&s->options, e) {
 		o = (uci_to_option(e));

@@ -1545,8 +1545,7 @@ int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_si
 
 static int dm_validate_size_list(int min_item, int max_item, int nbr_item)
 {
-	if (((min_item > 0) && (max_item > 0) && (min_item == max_item) && (nbr_item != 2 * max_item)) ||
-		((min_item > 0) && (nbr_item < min_item)) ||
+	if (((min_item > 0) && (nbr_item < min_item)) ||
 		((max_item > 0) && (nbr_item > max_item))) {
 		return -1;
 	}

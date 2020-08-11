@@ -13,6 +13,10 @@
 #include "dmentry.h"
 #include "bridging.h"
 
+#define MAX_QOS_MAP_ELEMENTS 8
+#define MIN_QOS_MAP_ELEMENTS 8
+#define MAX_STRING_LEN 15
+
 struct bridge_args
 {
 	struct uci_section *bridge_sec;
@@ -1591,6 +1595,95 @@ static int set_BridgingBridgePort_DefaultUserPriority(char *refparam, struct dmc
 	return 0;
 }
 
+static void get_priority(char *uci_opt_name, void *data, char **value)
+{
+	struct uci_list *v= NULL;
+	struct uci_element *e = NULL;
+	char uci_value[17], priority[2];
+	int n;
+
+	dmuci_get_value_by_section_list(((struct bridge_port_args *)data)->bridge_port_sec, uci_opt_name, &v);
+	if (v == NULL)
+		return;
+
+	uci_value[0] = '\0';
+	/* traverse each list value and create comma separated output */
+	uci_foreach_element(v, e) {
+		priority[0] = e->name[2];
+		priority[1] = '\0';
+		strcat(uci_value, priority);
+		strcat(uci_value, ",");
+	}
+	n = strlen(uci_value);
+	if (n != 0)
+		uci_value[n-1] = '\0';
+
+	dmasprintf(value, "%s", uci_value);
+}
+
+static void set_priority(char *uci_opt_name, void *data, char *value)
+{
+	char buf[4];
+	char *pch, *pchr;
+	int i;
+
+	/* delete current list values */
+	dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, uci_opt_name, "");
+
+	/* set new values */
+	i = 0;
+	buf[0] = '\0';
+	/* tokenize each value from received comma separated string and add it to uci file in the format x:y
+	x being priority and y being priority to be mapped to */
+	for (pch = strtok_r(value, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr), i++) {
+		/* convert values to uci format (x:y) and add */
+		snprintf(buf, sizeof(buf), "%d%c%s", i, ':', pch);
+		dmuci_add_list_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, uci_opt_name, buf);
+	}
+}
+
+static int get_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	get_priority("ingress_qos_mapping", data, value);
+	return 0;
+}
+
+static int set_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt_list(value, MIN_QOS_MAP_ELEMENTS, MAX_QOS_MAP_ELEMENTS, MAX_STRING_LEN, RANGE_ARGS{{"0","7"}}, 1))
+				return FAULT_9007;
+			break;
+
+		case VALUESET:
+			set_priority("ingress_qos_mapping", data, value);
+			break;
+	}
+	return 0;
+}
+
+static int get_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	get_priority("egress_qos_mapping", data, value);
+	return 0;
+}
+
+static int set_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt_list(value, MIN_QOS_MAP_ELEMENTS, MAX_QOS_MAP_ELEMENTS, MAX_STRING_LEN, RANGE_ARGS{{"0","7"}}, 1))
+				return FAULT_9007;
+			return 0;
+
+		case VALUESET:
+			set_priority("egress_qos_mapping", data, value);
+			return 0;
+	}
+	return 0;
+}
+
 static int get_BridgingBridgePort_PVID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "vid", value);
@@ -2270,7 +2363,8 @@ DMLEAF tBridgingBridgePortParams[] = {
 {"ManagementPort", &DMWRITE, DMT_BOOL, get_BridgingBridgePort_ManagementPort, set_BridgingBridgePort_ManagementPort, NULL, NULL, BBFDM_BOTH},
 //{"Type", &DMWRITE, DMT_STRING, get_BridgingBridgePort_Type, set_BridgingBridgePort_Type, NULL, NULL, BBFDM_BOTH},
 {"DefaultUserPriority", &DMWRITE, DMT_UNINT, get_BridgingBridgePort_DefaultUserPriority, set_BridgingBridgePort_DefaultUserPriority, NULL, NULL, BBFDM_BOTH},
-//{"PriorityRegeneration", &DMWRITE, DMT_STRING, get_BridgingBridgePort_PriorityRegeneration, set_BridgingBridgePort_PriorityRegeneration, NULL, NULL, BBFDM_BOTH},
+{"PriorityRegeneration", &DMWRITE, DMT_STRING, get_BridgingBridgePort_PriorityRegeneration, set_BridgingBridgePort_PriorityRegeneration, NULL, NULL, BBFDM_BOTH},
+{"X_IOPSYS_EU_EgressPriorityRegeneration", &DMWRITE, DMT_STRING, get_BridgingBridgePort_Egress_PriorityRegeneration, set_BridgingBridgePort_Egress_PriorityRegeneration, NULL, NULL, BBFDM_BOTH},
 //{"PortState", &DMREAD, DMT_STRING, get_BridgingBridgePort_PortState, NULL, NULL, NULL, BBFDM_BOTH},
 {"PVID", &DMWRITE, DMT_INT, get_BridgingBridgePort_PVID, set_BridgingBridgePort_PVID, NULL, NULL, BBFDM_BOTH},
 {"TPID", &DMWRITE, DMT_UNINT, get_BridgingBridgePort_TPID, set_BridgingBridgePort_TPID, NULL, NULL, BBFDM_BOTH},
