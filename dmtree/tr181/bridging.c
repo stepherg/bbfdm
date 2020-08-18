@@ -1623,7 +1623,7 @@ static void get_priority(char *uci_opt_name, void *data, char **value)
 
 static void set_priority(char *uci_opt_name, void *data, char *value)
 {
-	char buf[4];
+	char buf[16];
 	char *pch, *pchr;
 	int i;
 

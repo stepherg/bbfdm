@@ -219,7 +219,13 @@ static int set_IP_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char
 			char *buffer = dmcalloc(1, length+1);
 			if (buffer) {
 				fseek(fp, 0, SEEK_SET);
-				fread(buffer, 1, length, fp);
+				size_t len = fread(buffer, 1, length, fp);
+				if (len != length) {
+					dmfree(buffer);
+					fclose(fp);
+					break;
+				}
+
 				char *ptr = strstr(buffer, "net.ipv6.conf.all.disable_ipv6");
 				if (ptr) {
 					*(ptr+31) = (b) ? '0' : '1';
