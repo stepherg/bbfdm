@@ -544,7 +544,7 @@ void add_sectons_list_paramameter(struct list_head *dup_list, struct uci_section
 	dmmap_config->additional_attribute = additional_attribute;
 }
 
-void dmmap_config_dup_delete(struct dmmap_dup *dmmap_config)
+static void dmmap_config_dup_delete(struct dmmap_dup *dmmap_config)
 {
 	list_del(&dmmap_config->list);
 }
@@ -608,77 +608,6 @@ struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* secti
 	return NULL;
 }
 
-void synchronize_specific_config_sections_with_dmmap_filter(char *package, char *section_type, void *data,
-							char *dmmap_package, char *dmmap_sec, char *proto,
-							struct list_head *dup_list)
-{
-	struct uci_section *s, *dmmap_sect, *d_sec, *stmp;
-	char *v;
-	char *s_name;
-
-	dmmap_file_path_get(dmmap_package);
-
-	uci_foreach_option_eq(package, section_type, "proto", proto, s) {
-		if (strcmp(section_name(s), section_name((struct uci_section *)data)) != 0)
-			continue;
-		/*
-		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
-		 */
-		struct uci_list *l = NULL;
-
-		dmuci_get_value_by_section_list(s, "filter", &l);
-		if (l != NULL) {
-			struct uci_element *e;
-			uci_foreach_element(l, e) {
-				char *ip_addr = dmstrdup(e->name);
-				int found = 0;
-				uci_path_foreach_option_eq(bbfdm, dmmap_package, dmmap_sec, "ipaddr",
-						ip_addr, d_sec) {
-					dmuci_get_value_by_section_string(d_sec, "section_name", &s_name);
-					if (strcmp(s_name, section_name(s)) == 0) {
-						add_sectons_list_paramameter(dup_list, s, d_sec, NULL);
-						found = 1;
-						break;
-					}
-				}
-
-				if (found == 0) {
-					// add entry in dmmap for this
-					dmuci_add_section_bbfdm(dmmap_package, dmmap_sec, &d_sec, &v);
-					DMUCI_SET_VALUE_BY_SECTION(bbfdm, d_sec, "section_name",
-							section_name(s));
-					DMUCI_SET_VALUE_BY_SECTION(bbfdm, d_sec, "ipaddr",
-							ip_addr);
-					DMUCI_SET_VALUE_BY_SECTION(bbfdm, d_sec, "enable",
-							"1");
-					add_sectons_list_paramameter(dup_list, s, d_sec, NULL);
-				}
-			}
-		}
-
-		char *f_ip, *f_enable;
-		// There can be entries in the dmmap_mcast file that do not have an IP address set.
-		// For such entries, now add to dup_list
-		uci_path_foreach_option_eq(bbfdm, dmmap_package, dmmap_sec, "section_name",
-				section_name(s), dmmap_sect) {
-			dmuci_get_value_by_section_string(dmmap_sect, "ipaddr", &f_ip);
-			dmuci_get_value_by_section_string(dmmap_sect, "enable", &f_enable);
-
-			if ((f_ip[0] == '\0') || (strcmp(f_enable, "0") == 0))
-				add_sectons_list_paramameter(dup_list, s, dmmap_sect, NULL);
-		}
-	}
-
-	/*
-	 * Delete unused dmmap sections
-	 */
-	uci_path_foreach_sections_safe(bbfdm, dmmap_package, dmmap_sec, stmp, s) {
-		dmuci_get_value_by_section_string(s, "section_name", &v);
-		if (get_origin_section_from_config(package, section_type, v) == NULL)
-			dmuci_delete_by_section_unnamed_bbfdm(s, NULL, NULL);
-	}
-}
-
 void synchronize_specific_config_sections_with_dmmap(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list)
 {
 	struct uci_section *s, *stmp, *dmmap_sect;
@@ -693,14 +622,6 @@ void synchronize_specific_config_sections_with_dmmap(char *package, char *sectio
 		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
 			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect, &v);
 			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "section_name", section_name(s));
-		}
-
-		/* Change to fix multiple IP interface creation. */
-		if (strcmp(package, "network") == 0  && strcmp(section_type, "interface") == 0 && strcmp(dmmap_package, "dmmap_network") == 0) {
-			char *value;
-			dmuci_get_value_by_section_string(s, "proto", &value);
-			if (*value == '\0')
-				continue;
 		}
 
 		/*
@@ -1809,8 +1730,7 @@ void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, ch
 	}
 }
 
-void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section,
-				char *value, bool b)
+void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *value, bool b)
 {
 	struct uci_list *v = NULL;
 	struct uci_element *e;
@@ -1837,73 +1757,4 @@ void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section,
 	if (b) {
 		dmuci_add_list_value_by_section(s, section, value);
 	}
-}
-
-int get_br_key_from_lower_layer(char *lower_layer, char *key, size_t s_key)
-{
-	char *p = strstr(lower_layer, "Port");
-
-	if (!p)
-		return -1;
-
-	/* Get the bridge_key. */
-	int len = strlen(p);
-	char new_if[250] = {0};
-	int i;
-	for (i = 0; i < strlen(lower_layer) - len; i++) {
-		new_if[i] = lower_layer[i];
-	}
-
-	char br_key = new_if[strlen(new_if) - 2];
-
-	snprintf(key, s_key, "%c", br_key);
-
-	return 0;
-}
-
-int get_igmp_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
-{
-	char lower_layer[250] = {0};
-
-	if (value[strlen(value)-1] != '.')
-		snprintf(lower_layer, sizeof(lower_layer), "%s.", value);
-	else
-		strncpy(lower_layer, value, sizeof(lower_layer) - 1);
-
-	/* Check if the value is valid or not. */
-	if (strncmp(lower_layer, "Device.Bridging.Bridge.", 23) != 0)
-		return -1;
-
-	char key[10] = {0};
-	if (get_br_key_from_lower_layer(lower_layer, key, sizeof(key)) != 0)
-		return -1;
-
-	/* Find out bridge section name using bridge key. */
-	struct uci_section *s = NULL;
-	char *sec_name;
-	uci_path_foreach_option_eq(bbfdm, "dmmap_network", "interface", "bridge_instance", key, s) {
-		dmuci_get_value_by_section_string(s, "section_name", &sec_name);
-		break;
-	}
-
-	// Check if network uci file has this section, if yes, then
-	// update the snooping interface with value as br-<section name>
-	struct uci_section *intf_s = NULL;
-	uci_foreach_sections("network", "interface", intf_s) {
-		char  sec[20] = {0};
-		strncpy(sec, section_name(intf_s), sizeof(sec) - 1);
-		if (strncmp(sec, sec_name, sizeof(sec)) != 0)
-			continue;
-
-		char *type;
-		dmuci_get_value_by_section_string(intf_s, "type", &type);
-		if (*type == '\0' || strcmp(type, "bridge") != 0)
-			continue;
-
-		snprintf(ifname, s_ifname, "br-%s", sec_name);
-		break;
-
-	}
-
-	return 0;
 }

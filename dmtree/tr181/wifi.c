@@ -633,7 +633,6 @@ static int get_wmm_enabled(char *refparam, struct dmctx *ctx, void *data, char *
 static int set_wmm_enabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
-	char *device;
 
 	switch (action) {
 		case VALUECHECK:
@@ -657,8 +656,6 @@ static int get_access_point_maxassoc(char *refparam, struct dmctx *ctx, void *da
 
 static int set_access_point_maxassoc(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *device;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
@@ -699,8 +696,6 @@ static int get_WiFiAccessPoint_MaxAllowedAssociations(char *refparam, struct dmc
 
 static int set_WiFiAccessPoint_MaxAllowedAssociations(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *device;
-
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
