@@ -114,12 +114,15 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 static int browseServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *instance, *instnbr = NULL;
+	char *inst, *max_inst = NULL;
 
 	dmmap_synchronizeDNSClientRelayServer(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_dns", "dns_server", s) {
-		instance = handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, s, "dns_server_instance", "dns_server_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, instance) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "dns_server_instance", "dns_server_alias", "dmmap_dns", "dns_server");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -128,14 +131,16 @@ static int browseServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 static int browseRelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *instance, *instnbr = NULL;
+	char *inst, *max_inst = NULL;
 
 	dmmap_synchronizeDNSClientRelayServer(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_dns", "dns_server", s) {
-		instance = handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, s, "dns_server_instance", "dns_server_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, instance) == DM_STOP)
-			break;
 
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "dns_server_instance", "dns_server_alias", "dmmap_dns", "dns_server");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
@@ -143,11 +148,14 @@ static int browseRelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, v
 static int browseResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *instance, *idx_last = NULL;
+	char *inst, *max_inst = NULL;
 
 	uci_foreach_sections_state("cwmp", "NSLookupResult", s) {
-		instance = handle_update_instance(2, dmctx, &idx_last, update_instance_alias, 3, (void *)s, "nslookup_res_instance", "nslookup_res_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, instance) == DM_STOP)
+
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "nslookup_res_instance", "nslookup_res_alias", "cwmp", "NSLookupResult");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -166,7 +174,7 @@ static int add_client_server(char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_set_value_by_section(s, "ip", "0.0.0.0");
 	dmuci_set_value_by_section(s, "interface", "lan");
 	dmuci_set_value_by_section(s, "enable", "1");
-	*instance = update_instance_bbfdm(s, inst, "dns_server_instance");
+	*instance = update_instance(s, inst, "dns_server_instance");
 	return 0;
 }
 
@@ -182,7 +190,7 @@ static int add_relay_forwarding(char *refparam, struct dmctx *ctx, void *data, c
 	dmuci_set_value_by_section(s, "ip", "0.0.0.0");
 	dmuci_set_value_by_section(s, "interface", "lan");
 	dmuci_set_value_by_section(s, "enable", "1");
-	*instance = update_instance_bbfdm(s, inst, "dns_server_instance");
+	*instance = update_instance(s, inst, "dns_server_instance");
 	return 0;
 }
 
@@ -922,7 +930,7 @@ static int set_nslookupdiagnostics_number_of_repetitions(char *refparam, struct 
 
 /* *** Device.DNS. *** */
 DMOBJ tDNSObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Client", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDNSClientObj, tDNSClientParams, NULL, BBFDM_BOTH},
 {"Relay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDNSRelayObj, tDNSRelayParams, NULL, BBFDM_BOTH},
 {"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsObj, NULL, NULL, BBFDM_BOTH},
@@ -937,7 +945,7 @@ DMLEAF tDNSParams[] = {
 
 /* *** Device.DNS.Client. *** */
 DMOBJ tDNSClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Server", &DMWRITE, add_client_server, delete_client_server, NULL, browseServerInst, NULL, NULL, NULL, NULL, tDNSClientServerParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -964,7 +972,7 @@ DMLEAF tDNSClientServerParams[] = {
 
 /* *** Device.DNS.Relay. *** */
 DMOBJ tDNSRelayObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Forwarding", &DMWRITE, add_relay_forwarding, delete_relay_forwarding, NULL, browseRelayForwardingInst, NULL, NULL, NULL, NULL, tDNSRelayForwardingParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -991,14 +999,14 @@ DMLEAF tDNSRelayForwardingParams[] = {
 
 /* *** Device.DNS.Diagnostics. *** */
 DMOBJ tDNSDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"NSLookupDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsObj, tDNSDiagnosticsNSLookupDiagnosticsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DNS.Diagnostics.NSLookupDiagnostics. *** */
 DMOBJ tDNSDiagnosticsNSLookupDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Result", &DMREAD, NULL, NULL, NULL, browseResultInst, NULL, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsResultParams, NULL, BBFDM_BOTH},
 {0}
 };

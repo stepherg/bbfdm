@@ -62,14 +62,17 @@ int get_linker_qos_queue(char *refparam, struct dmctx *dmctx, void *data, char *
 /*#Device.QoS.Classification.{i}.!UCI:qos/classify/dmmap_qos*/
 int os_browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *wnum = NULL, *wnum_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("qos", "classify", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		wnum =  handle_update_instance(1, dmctx, &wnum_last, update_instance_alias, 3, p->dmmap_section, "classifinstance", "classifalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, wnum) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "classifinstance", "classifalias", "dmmap_qos", "classify");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -98,7 +101,6 @@ int os_browseQoSQueueInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 	return 0;
 }
 
-
 struct uci_section *get_dup_qos_stats_section_in_dmmap(char *dmmap_package, char *section_type, char *dev)
 {
 	struct uci_section *s;
@@ -113,7 +115,7 @@ struct uci_section *get_dup_qos_stats_section_in_dmmap(char *dmmap_package, char
 int os_browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *dmmap_sect;
-	char *questatsout[256], *instance = NULL, *inst_last = NULL, *v, *lastinstancestore = NULL, dev[50] = "", user[50] = "";
+	char *questatsout[256], *inst = NULL, *max_inst = NULL, *v, *lastinstancestore = NULL, dev[50] = "", user[50] = "";
 	int length, i, ret;
 	struct queuestats queuests = {0}, emptyquestats = {0};
 	regex_t regex1 = {}, regex2 = {};
@@ -143,11 +145,15 @@ int os_browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 					}
 					queuests.dmsect= dmmap_sect;
 
-					if(lastinstancestore != NULL && inst_last !=NULL)
-						inst_last= dmstrdup(lastinstancestore);
-					instance = handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3, dmmap_sect, "queuestatsinstance", "queuestatsalias");
-					lastinstancestore= dmstrdup(inst_last);
-					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&queuests, instance) == DM_STOP)
+					if(lastinstancestore != NULL && max_inst != NULL)
+						max_inst = dmstrdup(lastinstancestore);
+
+					inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+						   dmmap_sect, "queuestatsinstance", "queuestatsalias", "dmmap_qos", "qos_queue_stats");
+
+					lastinstancestore = dmstrdup(max_inst);
+
+					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&queuests, inst) == DM_STOP)
 						goto end;
 					queuests = emptyquestats;
 					break;
@@ -183,7 +189,7 @@ int os_addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, ch
 
 	dmuci_add_section_bbfdm("dmmap_qos", "classify", &dmmap_qos_classify, &v);
 	dmuci_set_value_by_section(dmmap_qos_classify, "section_name", sect_name);
-	*instance = update_instance_bbfdm(dmmap_qos_classify, last_inst, "classifinstance");
+	*instance = update_instance(dmmap_qos_classify, last_inst, "classifinstance");
 	return 0;
 }
 
@@ -304,7 +310,7 @@ int os_addObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char **inst
 
 	dmuci_add_section_bbfdm("dmmap_qos", "class", &dmmap_qos_class, &v);
 	dmuci_set_value_by_section(dmmap_qos_class, "section_name", sect_name);
-	*instance = update_instance_bbfdm(dmmap_qos_class, last_inst, "queueinstance");
+	*instance = update_instance(dmmap_qos_class, last_inst, "queueinstance");
 	return 0;
 }
 
@@ -401,7 +407,7 @@ int addObjQoSShaper(char *refparam, struct dmctx *ctx, void *data, char **instan
 
 	dmuci_add_section_bbfdm("dmmap_qos", "class", &dmmap_qos_class, &v);
 	dmuci_set_value_by_section(dmmap_qos_class, "section_name", sect_name);
-	*instance = update_instance_bbfdm(dmmap_qos_class, last_inst, "shaperinstance");
+	*instance = update_instance(dmmap_qos_class, last_inst, "shaperinstance");
 	return 0;
 }
 
@@ -3396,14 +3402,17 @@ int os_set_QoSShaper_ShapingBurstSize(char *refparam, struct dmctx *ctx, void *d
 /*#Device.QoS.Queue.{i}.!UCI:qos/class/dmmap_qos*/
 int browseQoSQueueInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *wnum = NULL, *wnum_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("qos", "class", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		wnum =  handle_update_instance(1, dmctx, &wnum_last, update_instance_alias, 3, p->dmmap_section, "queueinstance", "queuealias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, wnum) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "queueinstance", "queuealias", "dmmap_qos", "class");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -3702,7 +3711,7 @@ int get_QoSQueueStats_QueueOccupancyPercentage(char *refparam, struct dmctx *ctx
 
 int browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *wnum = NULL, *wnum_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	char *limitrate = NULL;
 	LIST_HEAD(dup_list);
@@ -3712,8 +3721,11 @@ int browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_dat
 		dmuci_get_value_by_section_string(p->config_section, "limitrate", &limitrate);
 		if (limitrate == NULL || strlen(limitrate) == 0)
 			continue;
-		wnum = handle_update_instance(1, dmctx, &wnum_last, update_instance_alias, 3, p->dmmap_section, "shaperinstance", "shaperalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, wnum) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "shaperinstance", "shaperalias", "dmmap_qos", "class");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);

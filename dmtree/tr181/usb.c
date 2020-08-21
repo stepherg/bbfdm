@@ -119,7 +119,7 @@ static int browseUSBInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void
 {
 	DIR *dir;
 	struct dirent *ent;
-	char *iface_path, *statistics_path, *instnbr = NULL, *instance = NULL;
+	char *iface_path, *statistics_path, *max_inst = NULL, *inst = NULL;
 	size_t length;
 	char **foldersplit;
 	struct usb_interface iface= {};
@@ -160,8 +160,11 @@ static int browseUSBInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void
 
 		dmasprintf(&statistics_path, "%s/statistics", iface_path);
 		init_usb_interface(p->dm, iface_name, iface_path, statistics_path, port_link, &iface);
-		instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 3, p->dm, "usb_iface_instance", "usb_iface_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, &iface, instance) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dm, "usb_iface_instance", "usb_iface_alias", "dmmap_usb", "dmmap_interface");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, &iface, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -170,7 +173,7 @@ static int browseUSBInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void
 
 static int browseUSBPortInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *instnbr = NULL, *instance = NULL;
+	char *max_inst = NULL, *inst = NULL;
 	struct usb_port port = {0};
 	struct sysfs_dmsection *p;
 	LIST_HEAD(dup_list);
@@ -191,10 +194,11 @@ static int browseUSBPortInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			continue;
 		}
 		init_usb_port(p->dm, p->sysfs_folder_name, p->sysfs_folder_path, &port);
-		instance =  handle_update_instance(1, dmctx, &instnbr,
-					update_instance_alias_bbfdm, 3, p->dm,
-					"usb_port_instance", "usb_port_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, instance) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dm, "usb_port_instance", "usb_port_alias", "dmmap_usb", "dmmap_port");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -206,7 +210,7 @@ static int browseUSBPortInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 static int browseUSBUSBHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct sysfs_dmsection *p;
-	char *instance = NULL, *instnbr = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct usb_port port= {};
 	LIST_HEAD(dup_list);
 
@@ -218,9 +222,11 @@ static int browseUSBUSBHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, v
 
 		init_usb_port(p->dm, p->sysfs_folder_name, p->sysfs_folder_path, &port);
 		port.dmsect= p->dm;
-		instance = handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, p->dm, "usb_host_instance", "usb_host_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, instance) == DM_STOP)
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dm, "usb_host_instance", "usb_host_alias", "dmmap_usb", "dmmap_host");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -318,7 +324,8 @@ static int browseUSBUSBHostsHostDeviceInst(struct dmctx *dmctx, DMNODE *parent_n
 			DMUCI_SET_VALUE_BY_SECTION(bbfdm, p->dm, "usb_host_device_parent_host_instance", parent_host_instance);
 		}
 		port.dmsect= prev_port->dmsect;
-		instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, p->dm, "usb_host_device_instance", "usb_host_device_alias");
+		instance = handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 5,
+				   p->dm, "usb_host_device_instance", "usb_host_device_alias", "dmmap_usb", "dmmap_host_device");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, instance) == DM_STOP)
 			break;
 	}
@@ -331,7 +338,7 @@ static int browseUSBUSBHostsHostDeviceConfigurationInst(struct dmctx *dmctx, DMN
 	const struct usb_port *usb_dev = prev_data;
 	struct usb_port port = {};
 	struct uci_section *s;
-	char nbre[16], *v, *instnbr = NULL;
+	char nbre[16], *v, *max_inst = NULL;
 
 	__read_sysfs_usb_port(usb_dev, "bNumConfigurations", nbre, sizeof(nbre));
 	if(nbre[0] == '0')
@@ -344,7 +351,10 @@ static int browseUSBUSBHostsHostDeviceConfigurationInst(struct dmctx *dmctx, DMN
 	DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, "usb_parent_device", usb_dev->folder_path);
 
 	init_usb_port(s, usb_dev->folder_name, usb_dev->folder_path, &port);
-	handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 3, s, "usb_device_conf_instance", "usb_device_conf_alias");
+
+	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			s, "usb_device_conf_instance", "usb_device_conf_alias", "dmmap_usb", "usb_device_conf");
+
 	DM_LINK_INST_OBJ(dmctx, parent_node, &port, "1");
 	return 0;
 }
@@ -355,7 +365,7 @@ static int browseUSBUSBHostsHostDeviceConfigurationInterfaceInst(struct dmctx *d
 	struct dirent *ent;
 	struct usb_port *usb_dev = (struct usb_port*)prev_data;
 	struct usb_port port = {0};
-	char *sysfs_rep_path, *v, *instance = NULL, *instnbr = NULL;
+	char *sysfs_rep_path, *v, *inst = NULL, *max_inst = NULL;
 	struct uci_section *dmmap_sect;
 	regex_t regex1 = {};
 	regex_t regex2 = {};
@@ -374,8 +384,11 @@ static int browseUSBUSBHostsHostDeviceConfigurationInterfaceInst(struct dmctx *d
 			}
 
 			init_usb_port(dmmap_sect, ent->d_name, sysfs_rep_path, &port);
-			instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "usb_device_conf_iface_instance", "usb_device_conf_iface_alias");
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, instance) == DM_STOP)
+
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_sect, "usb_device_conf_iface_instance", "usb_device_conf_iface_alias", "dmmap_usb", "usb_device_conf_interface");
+
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, inst) == DM_STOP)
 				break;
 		}
 	}
@@ -1068,7 +1081,7 @@ static int get_linker_usb_host_device(char *refparam, struct dmctx *dmctx, void 
 
 /* *** Device.USB. *** */
 DMOBJ tUSBObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Interface", &DMREAD, NULL, NULL, NULL, browseUSBInterfaceInst, NULL, NULL, NULL, tUSBInterfaceObj, tUSBInterfaceParams, NULL, BBFDM_BOTH},
 {"Port", &DMREAD, NULL, NULL, NULL, browseUSBPortInst, NULL, NULL, NULL, NULL, tUSBPortParams, get_linker_usb_port, BBFDM_BOTH},
 {"USBHosts", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUSBUSBHostsObj, tUSBUSBHostsParams, NULL, BBFDM_BOTH},
@@ -1084,7 +1097,7 @@ DMLEAF tUSBParams[] = {
 
 /* *** Device.USB.Interface.{i}. *** */
 DMOBJ tUSBInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUSBInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1140,7 +1153,7 @@ DMLEAF tUSBPortParams[] = {
 
 /* *** Device.USB.USBHosts. *** */
 DMOBJ tUSBUSBHostsObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Host", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostInst, NULL, NULL, NULL, tUSBUSBHostsHostObj, tUSBUSBHostsHostParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1153,7 +1166,7 @@ DMLEAF tUSBUSBHostsParams[] = {
 
 /* *** Device.USB.USBHosts.Host.{i}. *** */
 DMOBJ tUSBUSBHostsHostObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Device", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceInst, NULL, NULL, NULL, tUSBUSBHostsHostDeviceObj, tUSBUSBHostsHostDeviceParams, get_linker_usb_host_device, BBFDM_BOTH},
 {0}
 };
@@ -1173,7 +1186,7 @@ DMLEAF tUSBUSBHostsHostParams[] = {
 
 /* *** Device.USB.USBHosts.Host.{i}.Device.{i}. *** */
 DMOBJ tUSBUSBHostsHostDeviceObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Configuration", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInst, NULL, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationObj, tUSBUSBHostsHostDeviceConfigurationParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1204,7 +1217,7 @@ DMLEAF tUSBUSBHostsHostDeviceParams[] = {
 
 /* *** Device.USB.USBHosts.Host.{i}.Device.{i}.Configuration.{i}. *** */
 DMOBJ tUSBUSBHostsHostDeviceConfigurationObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Interface", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInterfaceInst, NULL, NULL, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationInterfaceParams, NULL, BBFDM_BOTH},
 {0}
 };

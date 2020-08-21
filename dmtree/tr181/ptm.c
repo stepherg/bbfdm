@@ -145,7 +145,7 @@ static int add_ptm_link(char *refparam, struct dmctx *ctx, void *data, char **in
 	dmuci_set_value("dsl", ptm_device, "portid", "1");
 	dmuci_add_section_bbfdm("dmmap_dsl", "ptm-device", &dmmap_ptm, &v);
 	dmuci_set_value_by_section(dmmap_ptm, "section_name", ptm_device);
-	*instancepara = update_instance_bbfdm(dmmap_ptm, instance, "ptmlinkinstance");
+	*instancepara = update_instance(dmmap_ptm, instance, "ptmlinkinstance");
 	return 0;
 }
 
@@ -243,7 +243,7 @@ static int set_ptm_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 /*#Device.PTM.Link.{i}.!UCI:dsl/ptm-device/dmmap_dsl*/
 static int browsePtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *wnum = NULL, *channel_last = NULL, *ifname;
+	char *inst = NULL, *max_inst = NULL, *ifname;
 	struct ptm_args curr_ptm_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
@@ -252,8 +252,11 @@ static int browsePtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	list_for_each_entry(p, &dup_list, list) {
 		dmuci_get_value_by_section_string(p->config_section, "device", &ifname);
 		init_ptm_link(&curr_ptm_args, p->config_section, ifname);
-		wnum = handle_update_instance(1, dmctx, &channel_last, update_instance_alias, 3, p->dmmap_section, "ptmlinkinstance", "ptmlinkalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ptm_args, wnum) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "ptmlinkinstance", "ptmlinkalias", "dmmap_dsl", "ptm-device");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ptm_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -262,14 +265,14 @@ static int browsePtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 /* *** Device.PTM. *** */
 DMOBJ tPTMObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Link", &DMWRITE, add_ptm_link, delete_ptm_link, NULL, browsePtmLinkInst, NULL, NULL, NULL, tPTMLinkObj, tPTMLinkParams, get_ptm_linker, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.PTM.Link.{i}. *** */
 DMOBJ tPTMLinkObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPTMLinkStatsParams, NULL, BBFDM_BOTH},
 {0}
 };

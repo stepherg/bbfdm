@@ -22,14 +22,17 @@ int os_get_linker_qos_queue(char *refparam, struct dmctx *dmctx, void *data, cha
 }
 int os_browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL, *value = NULL;
+	char *inst = NULL, *max_inst = NULL, *value = NULL;
 	char *ret = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("qos", "classify", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3, p->dmmap_section, "classify_instance", "classifyalias");
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "classify_instance", "classifyalias", "dmmap_qos", "classify");
+
 		//synchronizing option src_ip of uci classify section to src_mask/src_ip of dmmap's classify section
 		dmuci_get_value_by_section_string(p->config_section, "src_ip", &value);
 		//checking if src_ip is an ip-prefix or ip address and synchronizing accordingly
@@ -59,13 +62,16 @@ int os_browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, voi
 /*#Device.QoS.Classification.{i}.!UCI:qos/classify/dmmap_qos*/
 int browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("qos", "classify", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3, p->dmmap_section, "classificationinstance", "classificationalias");
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "classificationinstance", "classificationalias", "dmmap_qos", "classify");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -94,13 +100,16 @@ int browseQoSPolicerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 /*#Device.QoS.Queue.{i}.!UCI:qos/queue/dmmap_qos*/
 int os_browseQoSQueueInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("qos", "queue", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3, p->dmmap_section, "queueinstance", "queuealias");
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "queueinstance", "queuealias", "dmmap_qos", "queue");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -115,13 +124,16 @@ int os_browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 
 int os_browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("qos", "shaper", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3, p->dmmap_section, "shaperinstance", "shaperalias");
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "shaperinstance", "shaperalias", "dmmap_qos", "shaper");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -145,7 +157,7 @@ int os_addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, ch
 
 	dmuci_add_section_bbfdm("dmmap_qos", "classify", &dmmap, &v);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance_bbfdm(dmmap, inst, "classify_instance");
+	*instance = update_instance(dmmap, inst, "classify_instance");
 	return 0;
 }
 
@@ -265,7 +277,7 @@ int os_addObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char **inst
 
 	dmuci_add_section_bbfdm("dmmap_qos", "queue", &dmmap, &v);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance_bbfdm(dmmap, inst, "queueinstance");
+	*instance = update_instance(dmmap, inst, "queueinstance");
 	return 0;
 }
 
@@ -344,7 +356,7 @@ int os_addObjQoSShaper(char *refparam, struct dmctx *ctx, void *data, char **ins
 
 	dmuci_add_section_bbfdm("dmmap_qos", "shaper", &dmmap, &v);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance_bbfdm(dmmap, inst, "shaperinstance");
+	*instance = update_instance(dmmap, inst, "shaperinstance");
 	return 0;
 }
 

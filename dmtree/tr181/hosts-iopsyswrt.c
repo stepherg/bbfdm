@@ -18,14 +18,14 @@
 int os__browseHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *host_obj = NULL, *arrobj = NULL;
-	char *idx = NULL, *idx_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
 
 	dmubus_call("router.network", "hosts", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, host_obj, i, 1, "hosts") {
-			idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)host_obj, idx) == DM_STOP)
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)host_obj, inst) == DM_STOP)
 				break;
 		}
 	}
@@ -36,12 +36,12 @@ int os__browseHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 int os__browseHostsHostIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *ip_arr, *host_obj = (json_object *)prev_data;
-	char *idx = NULL, *idx_last = NULL, *ipv4addr = NULL;
+	char *inst = NULL, *max_inst = NULL, *ipv4addr = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_value_in_array(host_obj, ip_arr, ipv4addr, i, 1, "ipv4addr") {
-		idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv4addr, idx) == DM_STOP)
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv4addr, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -51,12 +51,12 @@ int os__browseHostsHostIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node,
 int os__browseHostsHostIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *ip_arr, *host_obj = (json_object *)prev_data;
-	char *idx = NULL, *idx_last = NULL, *ipv6addr = NULL;
+	char *inst = NULL, *max_inst = NULL, *ipv6addr = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_value_in_array(host_obj, ip_arr, ipv6addr, i, 1, "ipv6addr") {
-		idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv6addr, idx) == DM_STOP)
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv6addr, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -68,7 +68,7 @@ int os__browseHostsHostIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node,
 int get_linker_host(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
 	*linker = dmjson_get_value((json_object *)data, 1, "ipaddr");
-        return 0;
+	return 0;
 }
 
 /*************************************************************

@@ -35,13 +35,16 @@ static int get_linker_dynamicdns_server(char *refparam, struct dmctx *dmctx, voi
 /*#Device.DynamicDNS.Client.{i}.!UCI:ddns/service/dmmap_ddns*/
 static int browseDynamicDNSClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("ddns", "service", "dmmap_ddns", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3, p->dmmap_section, "clientinstance", "clientalias");
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "clientinstance", "clientalias", "dmmap_ddns", "service");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -125,13 +128,15 @@ static int dmmap_synchronizeDynamicDNSServer(struct dmctx *dmctx, DMNODE *parent
 /*#Device.DynamicDNS.Server.{i}.!UCI:ddns/service/dmmap_ddns*/
 static int browseDynamicDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct uci_section *s = NULL;
 
 	dmmap_synchronizeDynamicDNSServer(dmctx, NULL, NULL, NULL);
-	uci_path_foreach_sections(bbfdm, "dmmap_ddns", "ddns_server", s)
-	{
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3, s, "serverinstance", "serveralias");
+	uci_path_foreach_sections(bbfdm, "dmmap_ddns", "ddns_server", s) {
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "serverinstance", "serveralias", "dmmap_ddns", "ddns_server");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
@@ -172,7 +177,7 @@ static int addObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 
 	dmuci_add_section_bbfdm("dmmap_ddns", "service", &dmmap, &v);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance_bbfdm(dmmap, last_inst, "clientinstance");
+	*instance = update_instance(dmmap, last_inst, "clientinstance");
 	return 0;
 }
 
@@ -235,7 +240,7 @@ static int addObjDynamicDNSServer(char *refparam, struct dmctx *ctx, void *data,
 
 	dmuci_add_section_bbfdm("dmmap_ddns", "ddns_server", &dmmap, &v);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance_bbfdm(dmmap, last_inst, "serverinstance");
+	*instance = update_instance(dmmap, last_inst, "serverinstance");
 	return 0;
 }
 
@@ -1059,7 +1064,7 @@ static int set_DynamicDNSServer_MaxRetries(char *refparam, struct dmctx *ctx, vo
 
 /* *** Device.DynamicDNS. *** */
 DMOBJ tDynamicDNSObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Client", &DMWRITE, addObjDynamicDNSClient, delObjDynamicDNSClient, NULL, browseDynamicDNSClientInst, NULL, NULL, NULL, tDynamicDNSClientObj, tDynamicDNSClientParams, NULL, BBFDM_BOTH},
 {"Server", &DMWRITE, addObjDynamicDNSServer, delObjDynamicDNSServer, NULL, browseDynamicDNSServerInst, NULL, NULL, NULL, NULL, tDynamicDNSServerParams, get_linker_dynamicdns_server, BBFDM_BOTH},
 {0}
@@ -1075,7 +1080,7 @@ DMLEAF tDynamicDNSParams[] = {
 
 /* *** Device.DynamicDNS.Client.{i}. *** */
 DMOBJ tDynamicDNSClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Hostname", &DMWRITE, NULL, NULL, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH},
 {0}
 };

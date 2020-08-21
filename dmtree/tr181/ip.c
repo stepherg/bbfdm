@@ -1587,7 +1587,7 @@ static char *get_last_instance_cond(char* dmmap_package, char *package, char *se
 			continue;
 		}
 		get_dmmap_section_of_config_section(dmmap_package, section, section_name(s), &dmmap_section);
-		inst = update_instance_bbfdm(dmmap_section, inst, opt_inst);
+		inst = update_instance(dmmap_section, inst, opt_inst);
 	}
 	return inst;
 }
@@ -1609,7 +1609,7 @@ static int add_ip_interface(char *refparam, struct dmctx *ctx, void *data, char 
 
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ip_interface, &v);
 	dmuci_set_value_by_section(dmmap_ip_interface, "section_name", ip_name);
-	*instance = update_instance_bbfdm(dmmap_ip_interface, last_inst, "ip_int_instance");
+	*instance = update_instance(dmmap_ip_interface, last_inst, "ip_int_instance");
 	return 0;
 }
 
@@ -1663,7 +1663,7 @@ static int add_ipv4(char *refparam, struct dmctx *ctx, void *data, char **instan
 
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(((struct ip_args *)data)->ip_sec), &dmmap_section);
 	dmuci_get_value_by_section_string(dmmap_section, "ipv4_instance", &instance);
-	*instancepara = update_instance_bbfdm(dmmap_section, instance, "ipv4_instance");
+	*instancepara = update_instance(dmmap_section, instance, "ipv4_instance");
 	if(instance[0] == '\0') {
 		dmuci_set_value_by_section(dmmap_section, "ipv4_instance", *instancepara);
 		dmuci_set_value_by_section(((struct ip_args *)data)->ip_sec, "ipaddr", "0.0.0.0");
@@ -1877,7 +1877,7 @@ static int get_linker_ipv6_prefix(char *refparam, struct dmctx *dmctx, void *dat
 /*#Device.IP.Interface.{i}.!UCI:network/interface/dmmap_network*/
 static int browseIPIfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *ip_int = NULL, *ip_int_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	char *proto, *ipv4addr = "";
 	struct ip_args curr_ip_args = {0};
 	struct dmmap_dup *p;
@@ -1895,8 +1895,11 @@ static int browseIPIfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			ipv4addr = ubus_call_get_value(section_name(p->config_section), "ipv4-address", "address");
 
 		init_ip_args(&curr_ip_args, p->config_section, ipv4addr);
-		ip_int = handle_update_instance(1, dmctx, &ip_int_last, update_instance_alias, 3, p->dmmap_section, "ip_int_instance", "ip_int_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ip_args, ip_int) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "ip_int_instance", "ip_int_alias", "dmmap_network", "interface");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ip_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -1905,13 +1908,21 @@ static int browseIPIfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 static int browseIfaceIPv4Inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *ipv4_inst = NULL, *ipv4_inst_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct uci_section *dmmap_section;
+	struct browse_args browse_args = {0};
 
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(((struct ip_args *)prev_data)->ip_sec), &dmmap_section);
 	if(((struct ip_args *)prev_data)->ip_4address[0] != '\0') {
-		ipv4_inst = handle_update_instance(2, dmctx, &ipv4_inst_last, update_instance_alias, 3, dmmap_section, "ipv4_instance", "ipv4_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, ipv4_inst) == DM_STOP)
+
+		browse_args.option = "section_name";
+		browse_args.value = section_name(((struct ip_args *)prev_data)->ip_sec);
+
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
+			   dmmap_section, "ipv4_instance", "ipv4_alias", "dmmap_network", "interface",
+			   check_browse_section, (void *)&browse_args);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, inst) == DM_STOP)
 			goto end;
 	}
 end:
@@ -1939,12 +1950,17 @@ static struct uci_section *update_dmmap_network_ipv6(char *curr_inst, char *sect
 static int browseIfaceIPv6Inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s;
-	char *ipv6_int = NULL, *ipv6_int_last = NULL, *ipv6addr = "", *ipv6mask = "", *ipv6_preferred = "", *ipv6_valid = "", buf[16]="";
+	char *inst = NULL, *max_inst = NULL, *ipv6addr = "", *ipv6mask = "", *ipv6_preferred = "", *ipv6_valid = "", buf[16]="";
 	struct ipv6_args curr_ipv6_args = {0};
+	struct browse_args browse_args = {0};
 	json_object *res, *jobj, *jobj1;
 	int entries = 0;
 
 	if(prev_data && ((struct ip_args *)prev_data)->ip_sec) {
+
+		browse_args.option = "section_name";
+		browse_args.value = section_name(((struct ip_args *)prev_data)->ip_sec);
+
 		dmuci_get_value_by_section_string(((struct ip_args *)prev_data)->ip_sec, "ip6addr", &ipv6addr);
 		dmuci_get_value_by_section_string(((struct ip_args *)prev_data)->ip_sec, "adv_preferred_lifetime", &ipv6_preferred);
 		dmuci_get_value_by_section_string(((struct ip_args *)prev_data)->ip_sec, "adv_valid_lifetime", &ipv6_valid);
@@ -1972,8 +1988,12 @@ static int browseIfaceIPv6Inst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 					snprintf(buf, sizeof(buf), "%d", entries);
 					s = update_dmmap_network_ipv6(buf, section_name(((struct ip_args *)prev_data)->ip_sec));
 					init_ipv6_args(&curr_ipv6_args, ((struct ip_args *)prev_data)->ip_sec, ipv6addr, ipv6mask, ipv6_preferred, ipv6_valid);
-					ipv6_int = handle_update_instance(1, dmctx, &ipv6_int_last, update_instance_alias, 3, s, "ipv6_instance", "ipv6_alias");
-					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ipv6_args, ipv6_int) == DM_STOP)
+
+					inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
+						   s, "ipv6_instance", "ipv6_alias", "dmmap_network", "ipv6",
+						   check_browse_section, (void *)&browse_args);
+
+					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ipv6_args, inst) == DM_STOP)
 						goto end;
 				} else
 					goto end;
@@ -1982,8 +2002,12 @@ static int browseIfaceIPv6Inst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 browse:
 		s = update_dmmap_network_ipv6("1", section_name(((struct ip_args *)prev_data)->ip_sec));
 		init_ipv6_args(&curr_ipv6_args, ((struct ip_args *)prev_data)->ip_sec, ipv6addr, ipv6mask, ipv6_preferred, ipv6_valid);
-		ipv6_int = handle_update_instance(1, dmctx, &ipv6_int_last, update_instance_alias, 3, s, "ipv6_instance", "ipv6_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ipv6_args, ipv6_int) == DM_STOP)
+
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
+			   s, "ipv6_instance", "ipv6_alias", "dmmap_network", "ipv6",
+			   check_browse_section, (void *)&browse_args);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ipv6_args, inst) == DM_STOP)
 			goto end;
 	}
 end:
@@ -2012,12 +2036,17 @@ static struct uci_section *update_dmmap_network_ipv6prefix(char *curr_inst, char
 static int browseIfaceIPv6PrefixInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s;
-	char *ipv6prefix_int = NULL, *ipv6prefix_int_last = NULL, *ipv6prefixaddr = "", *ipv6prefixmask = "", *ipv6prefix_preferred = "", *ipv6prefix_valid = "", buf[16] = "";
+	char *inst = NULL, *max_inst = NULL, *ipv6prefixaddr = "", *ipv6prefixmask = "", *ipv6prefix_preferred = "", *ipv6prefix_valid = "", buf[16] = "";
 	struct ipv6prefix_args curr_ipv6prefix_args = {0};
+	struct browse_args browse_args = {0};
 	json_object *res, *jobj;
 	int entries = 0;
 
 	if(prev_data && ((struct ip_args *)prev_data)->ip_sec) {
+
+		browse_args.option = "section_name";
+		browse_args.value = section_name(((struct ip_args *)prev_data)->ip_sec);
+
 		dmuci_get_value_by_section_string(((struct ip_args *)prev_data)->ip_sec, "ip6prefix", &ipv6prefixaddr);
 		if (ipv6prefixaddr[0] == '\0') {
 			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct ip_args *)prev_data)->ip_sec), String}}, 1, &res);
@@ -2040,8 +2069,12 @@ static int browseIfaceIPv6PrefixInst(struct dmctx *dmctx, DMNODE *parent_node, v
 					snprintf(buf, sizeof(buf), "%d", entries);
 					s = update_dmmap_network_ipv6prefix(buf, section_name(((struct ip_args *)prev_data)->ip_sec));
 					init_ipv6prefix_args(&curr_ipv6prefix_args, ((struct ip_args *)prev_data)->ip_sec, ipv6prefixaddr, ipv6prefixmask, ipv6prefix_preferred, ipv6prefix_valid);
-					ipv6prefix_int = handle_update_instance(1, dmctx, &ipv6prefix_int_last, update_instance_alias, 3, s, "ipv6prefix_instance", "ipv6prefix_alias");
-					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ipv6prefix_args, ipv6prefix_int) == DM_STOP)
+
+					inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
+						   s, "ipv6prefix_instance", "ipv6prefix_alias", "dmmap_network", "ipv6prefix",
+						   check_browse_section, (void *)&browse_args);
+
+					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ipv6prefix_args, inst) == DM_STOP)
 						goto end;
 				} else
 					goto end;
@@ -2050,8 +2083,12 @@ static int browseIfaceIPv6PrefixInst(struct dmctx *dmctx, DMNODE *parent_node, v
 browse:
 		s = update_dmmap_network_ipv6prefix("1", section_name(((struct ip_args *)prev_data)->ip_sec));
 		init_ipv6prefix_args(&curr_ipv6prefix_args, ((struct ip_args *)prev_data)->ip_sec, ipv6prefixaddr, ipv6prefixmask, ipv6prefix_preferred, ipv6prefix_valid);
-		ipv6prefix_int = handle_update_instance(1, dmctx, &ipv6prefix_int_last, update_instance_alias, 3, s, "ipv6prefix_instance", "ipv6prefix_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ipv6prefix_args, ipv6prefix_int) == DM_STOP)
+
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
+			   s, "ipv6prefix_instance", "ipv6prefix_alias", "dmmap_network", "ipv6prefix",
+			   check_browse_section, (void *)&browse_args);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ipv6prefix_args, inst) == DM_STOP)
 			goto end;
 	}
 end:
@@ -2061,11 +2098,14 @@ end:
 static int browseIPInterfaceTWAMPReflectorInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *twamp_inst = NULL, *twamp_inst_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	uci_foreach_option_eq("cwmp_twamp", "twamp_reflector", "interface", section_name(((struct ip_args *)prev_data)->ip_sec), s) {
-		twamp_inst = handle_update_instance(2, dmctx, &twamp_inst_last, update_instance_alias, 3, (void *)s, "twamp_inst", "twamp_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, twamp_inst) == DM_STOP)
+
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "twamp_inst", "twamp_alias", "cwmp_twamp", "twamp_reflector");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -2076,7 +2116,7 @@ static struct dm_forced_inform_s IPv6INFRM = {0, get_ipv6_finform};
 
 /* *** Device.IP. *** */
 DMOBJ tIPObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Interface", &DMWRITE, add_ip_interface, delete_ip_interface, NULL, browseIPIfaceInst, NULL, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH},
 #ifdef BBF_TR143
 {"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsObj, tIPDiagnosticsParams, NULL, BBFDM_BOTH},
@@ -2099,7 +2139,7 @@ DMLEAF tIPParams[] = {
 
 /* *** Device.IP.Interface. *** */
 DMOBJ tIPInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"IPv4Address", &DMWRITE, add_ipv4, delete_ipv4, NULL, browseIfaceIPv4Inst, NULL, NULL, NULL, NULL, tIPInterfaceIPv4AddressParams, NULL, BBFDM_BOTH},
 {"IPv6Address", &DMWRITE, add_ipv6, delete_ipv6, NULL, browseIfaceIPv6Inst, NULL, NULL, NULL, NULL, tIPInterfaceIPv6AddressParams, NULL, BBFDM_BOTH},
 {"IPv6Prefix", &DMWRITE, add_ipv6_prefix, delete_ipv6_prefix, NULL, browseIfaceIPv6PrefixInst, NULL, NULL, NULL, NULL, tIPInterfaceIPv6PrefixParams, get_linker_ipv6_prefix, BBFDM_BOTH},

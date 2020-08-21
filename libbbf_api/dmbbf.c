@@ -33,6 +33,8 @@ static int mparam_get_name_in_obj(DMPARAM_ARGS);
 static int mobj_get_name_in_obj(DMOBJECT_ARGS);
 static int mobj_get_schema_name(DMOBJECT_ARGS);
 static int mparam_get_schema_name(DMPARAM_ARGS);
+static int mobj_get_instances_in_obj(DMOBJECT_ARGS);
+static int mparam_get_instances_in_obj(DMPARAM_ARGS);
 static int inform_check_obj(DMOBJECT_ARGS);
 static int inform_check_param(DMPARAM_ARGS);
 static int mparam_add_object(DMPARAM_ARGS);
@@ -593,12 +595,13 @@ char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **last_
 	char *instance;
 	int i = 0;
 	unsigned int action, pos = instance_ranck - 1;
-	void *argv[argc];
+	void *argv[argc+1];
 
 	va_start(arg, argc);
 	for (i = 0; i < argc; i++) {
 		argv[i] = va_arg(arg, void*);
 	}
+	argv[argc] = NULL;
 	va_end(arg);
 	if (ctx->amd_version >= AMD_4) {
 		if(pos < ctx->nbrof_instance) {
@@ -611,11 +614,12 @@ char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **last_
 	}
 
 	instance = up_instance(action, last_inst, argv);
-	if(*last_inst)
+	if (*last_inst)
 		ctx->inst_buf[pos] = dmstrdup(*last_inst);
 
 	return instance;
 }
+
 char *update_instance(struct uci_section *s, char *last_inst, char *inst_opt)
 {
 	char *instance;
@@ -625,69 +629,58 @@ char *update_instance(struct uci_section *s, char *last_inst, char *inst_opt)
 	argv[1] = inst_opt;
 	argv[2] = "";
 
-	instance = update_instance_alias_bbfdm(0, &last_inst, argv);
+	instance = update_instance_alias(0, &last_inst, argv);
 	return instance;
 }
 
-char *update_instance_bbfdm(struct uci_section *s, char *last_inst, char *inst_opt)
+static int get_max_instance(char *dmmap_package, char *section_type, char *inst_opt, int (*check_browse)(struct uci_section *section, void *data), void *data)
 {
-	char *instance;
-	void *argv[3];
+	struct uci_section *s;
+	char *inst;
+	int max = 0;
 
-	argv[0]= s;
-	argv[1]= inst_opt;
-	argv[2]= "";
-	instance = update_instance_alias_bbfdm(0, &last_inst, argv);
-	return instance;
+	uci_path_foreach_sections(bbfdm, dmmap_package, section_type, s) {
+		if (check_browse && check_browse(s, data) != 0)
+			continue;
+
+		dmuci_get_value_by_section_string(s, inst_opt, &inst);
+		if (inst[0] == '\0')
+			continue;
+
+		max = max > atoi(inst) ? max : atoi(inst);
+	}
+
+	return max;
 }
 
-char *update_instance_alias_bbfdm(int action, char **last_inst , void *argv[])
+char *update_instance_alias(int action, char **max_inst, void *argv[])
 {
 	char *instance, *alias;
 	char buf[64] = {0};
-	struct uci_section *s = (struct uci_section *) argv[0];
-	char *inst_opt = (char *) argv[1];
-	char *alias_opt = (char *) argv[2];
-
-	dmuci_get_value_by_section_string(s, inst_opt, &instance);
-	if (instance[0] == '\0') {
-		if (*last_inst == NULL)
-			snprintf(buf, sizeof(buf), "%d", 1);
-		else
-			snprintf(buf, sizeof(buf), "%d", atoi(*last_inst)+1);
-		instance = dmuci_set_value_by_section_bbfdm(s, inst_opt, buf);
-	}
-	*last_inst = instance;
-	if (action == INSTANCE_MODE_ALIAS) {
-		dmuci_get_value_by_section_string(s, alias_opt, &alias);
-		if (alias[0] == '\0') {
-			snprintf(buf, sizeof(buf), "cpe-%s", instance);
-			alias = dmuci_set_value_by_section_bbfdm(s, alias_opt, buf);
-		}
-		snprintf(buf, sizeof(buf), "[%s]", alias);
-		instance = dmstrdup(buf);
-	}
-	return instance;
-}
-
-char *update_instance_alias(int action, char **last_inst, void *argv[])
-{
-	char *instance, *alias;
-	char buf[64] = {0};
+	int max_instance = 0;
 
 	struct uci_section *s = (struct uci_section *) argv[0];
 	char *inst_opt = (char *) argv[1];
 	char *alias_opt = (char *) argv[2];
+	char *dmmap_package = (char *) argv[3];
+	char *section_type = (char *) argv[4];
+	int (*check_browse)(struct uci_section *section, void *data) = argv[5];
+	void *data = (void *) argv[6];
+
+	if (*max_inst == NULL)
+		max_instance = get_max_instance(dmmap_package, section_type, inst_opt, check_browse, data);
+	else
+		max_instance = atoi(*max_inst);
 
 	dmuci_get_value_by_section_string(s, inst_opt, &instance);
 	if (instance[0] == '\0') {
-		if (*last_inst == NULL)
-			snprintf(buf, sizeof(buf), "%d", 1);
-		else
-			snprintf(buf, sizeof(buf), "%d", atoi(*last_inst) + 1);
+		snprintf(buf, sizeof(buf), "%d", max_instance + 1);
 		instance = dmuci_set_value_by_section(s, inst_opt, buf);
+		*max_inst = instance;
+	} else {
+		dmasprintf(max_inst, "%d", max_instance);
 	}
-	*last_inst = instance;
+
 	if (action == INSTANCE_MODE_ALIAS) {
 		dmuci_get_value_by_section_string(s, alias_opt, &alias);
 		if (alias[0] == '\0') {
@@ -721,7 +714,7 @@ char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst)
 	char *inst = NULL, *last_inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, package, section, s) {
-		inst = update_instance_bbfdm(s, last_inst, opt_inst);
+		inst = update_instance(s, last_inst, opt_inst);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(inst);
@@ -750,7 +743,7 @@ char *get_last_instance(char *package, char *section, char *opt_inst)
 
 	if (strcmp(package, DMMAP) == 0) {
 		uci_path_foreach_sections(bbfdm, "dmmap", section, s) {
-			inst = update_instance_bbfdm(s, last_inst, opt_inst);
+			inst = update_instance(s, last_inst, opt_inst);
 			if(last_inst)
 				dmfree(last_inst);
 			last_inst = dmstrdup(inst);
@@ -770,7 +763,7 @@ char *get_last_instance_lev2_bbfdm_dmmap_opt(char* dmmap_package, char *section,
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section, opt_check, value_check, s) {
 		dmuci_get_value_by_section_string(s, "section_name", &section_name);
-		instance = update_instance_bbfdm(s, last_inst, opt_inst);
+		instance = update_instance(s, last_inst, opt_inst);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(instance);
@@ -789,7 +782,7 @@ char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_pac
 			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section, &v);
 			dmuci_set_value_by_section(dmmap_section, "section_name", section_name(s));
 		}
-		instance = update_instance_bbfdm(dmmap_section, last_inst, opt_inst);
+		instance = update_instance(dmmap_section, last_inst, opt_inst);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(instance);
@@ -804,7 +797,7 @@ char *get_last_instance_lev2(char *package, char *section, char *opt_inst, char 
 
 	if (strcmp(package, DMMAP) == 0) {
 		uci_path_foreach_option_cont(bbfdm, package, section, opt_check, value_check, s) {
-			instance = update_instance_bbfdm(s, last_inst, opt_inst);
+			instance = update_instance(s, last_inst, opt_inst);
 			if(last_inst)
 				dmfree(last_inst);
 			last_inst = dmstrdup(instance);
@@ -1426,25 +1419,6 @@ static int mparam_get_schema_name(DMPARAM_ARGS)
 /* **************
  * get_instances
  * **************/
-static int mobj_get_instances_in_obj(DMOBJECT_ARGS)
-{
-	if (node->matched && node->is_instanceobj) {
-		char *name = dmstrdup(node->current_object);
-
-		if (name) {
-			name[strlen(name) - 1] = 0;
-			add_list_paramameter(dmctx, name, NULL, "xsd:object", NULL, 0);
-		}
-	}
-
-	return 0;
-}
-
-static int mparam_get_instances_in_obj(DMPARAM_ARGS)
-{
-	return 0;
-}
-
 int dm_entry_get_instances(struct dmctx *dmctx)
 {
 	DMOBJ *root = dmctx->dm_entryobj;
@@ -1469,12 +1443,27 @@ int dm_entry_get_instances(struct dmctx *dmctx)
 	dmctx->method_param = mparam_get_instances_in_obj;
 
 	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (dmctx->findparam == 0)
-		return err;
+	return err;
+}
+
+static int mobj_get_instances_in_obj(DMOBJECT_ARGS)
+{
+	if (node->matched && node->is_instanceobj) {
+		char *name = dmstrdup(node->current_object);
+
+		if (name) {
+			name[strlen(name) - 1] = 0;
+			add_list_paramameter(dmctx, name, NULL, "xsd:object", NULL, 0);
+		}
+	}
 
 	return 0;
 }
 
+static int mparam_get_instances_in_obj(DMPARAM_ARGS)
+{
+	return 0;
+}
 
 /* ********************
  * get notification

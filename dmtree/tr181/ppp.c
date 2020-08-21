@@ -417,7 +417,7 @@ static int add_ppp_interface(char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_set_value("network", name, "password", name);
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ppp, &v);
 	dmuci_set_value_by_section(dmmap_ppp, "section_name", name);
-	*instance = update_instance_bbfdm(dmmap_ppp, inst, "ppp_int_instance");
+	*instance = update_instance(dmmap_ppp, inst, "ppp_int_instance");
 	return 0;
 }
 
@@ -458,7 +458,7 @@ static int delete_ppp_interface(char *refparam, struct dmctx *ctx, void *data, c
 /*#Device.PPP.Interface.{i}.!UCI:network/interface/dmmap_network*/
 static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *ppp_int = NULL, *ppp_int_last = NULL, *proto;
+	char *inst = NULL, *max_inst = NULL, *proto;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
@@ -467,8 +467,11 @@ static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 		dmuci_get_value_by_section_string(p->config_section, "proto", &proto);
 		if (!strstr(proto, "ppp"))
 			continue;
-		ppp_int = handle_update_instance(1, dmctx, &ppp_int_last, update_instance_alias, 3, p->dmmap_section, "ppp_int_instance", "ppp_int_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, ppp_int) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "ppp_int_instance", "ppp_int_alias", "dmmap_network", "interface");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -477,7 +480,7 @@ static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 
 /* *** Device.PPP. *** */
 DMOBJ tPPPObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Interface", &DMWRITE, add_ppp_interface, delete_ppp_interface, NULL, browseInterfaceInst, NULL, NULL, NULL, tPPPInterfaceObj, tPPPInterfaceParams, get_linker_ppp_interface, BBFDM_BOTH},
 {0}
 };
@@ -490,7 +493,7 @@ DMLEAF tPPPParams[] = {
 
 /* *** Device.PPP.Interface.{i}. *** */
 DMOBJ tPPPInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"PPPoE", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfacePPPoEParams, NULL, BBFDM_BOTH},
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}

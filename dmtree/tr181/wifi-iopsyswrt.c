@@ -530,7 +530,7 @@ int os__browseWifiNeighboringWiFiDiagnosticResultInst(struct dmctx *dmctx, DMNOD
 {
 	struct uci_section *ss;
 	json_object *res = NULL, *accesspoints = NULL, *arrobj = NULL;
-	char object[32], *idx, *idx_last = NULL;
+	char object[32], *inst, *max_inst = NULL;
 	int id = 0, i = 0;
 
 	uci_foreach_sections("wireless", "wifi-device", ss) {
@@ -538,8 +538,8 @@ int os__browseWifiNeighboringWiFiDiagnosticResultInst(struct dmctx *dmctx, DMNOD
 		dmubus_call(object, "scanresults", UBUS_ARGS{}, 0, &res);
 		if (res) {
 			dmjson_foreach_obj_in_array(res, arrobj, accesspoints, i, 1, "accesspoints") {
-				idx = handle_update_instance(3, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)accesspoints, idx) == DM_STOP)
+				inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)accesspoints, inst) == DM_STOP)
 					return 0;
 			}
 		}
@@ -619,15 +619,15 @@ int os__get_access_point_total_associations(char *refparam, struct dmctx *ctx, v
 int os__browse_wifi_associated_device(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *stations = NULL, *arrobj = NULL;
-	char object[32], *idx, *idx_last = NULL;
+	char object[32], *inst, *max_inst = NULL;
 	int id = 0, i = 0;
 
 	snprintf(object, sizeof(object), "wifi.ap.%s", ((struct wifi_acp_args *)prev_data)->ifname);
 	dmubus_call(object, "stations", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, stations, i, 1, "stations") {
-			idx = handle_update_instance(3, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)stations, idx) == DM_STOP)
+			inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)stations, inst) == DM_STOP)
 				return 0;
 		}
 	}

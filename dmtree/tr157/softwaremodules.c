@@ -43,14 +43,14 @@ static int get_du_linker(char *refparam, struct dmctx *dmctx, void *data, char *
 static int browseSoftwareModulesExecEnvInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
-	char *idx, *idx_last = NULL;
+	char *inst, *max_inst = NULL;
 	int id = 0, j = 0;
 
 	dmubus_call("swmodules", "environment", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, du_obj, j, 1, "environment") {
-			idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, idx) == DM_STOP)
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, inst) == DM_STOP)
 				break;
 		}
 	}
@@ -60,14 +60,14 @@ static int browseSoftwareModulesExecEnvInst(struct dmctx *dmctx, DMNODE *parent_
 static int browseSoftwareModulesDeploymentUnitInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
-	char *idx, *idx_last = NULL;
+	char *inst, *max_inst = NULL;
 	int id = 0, j = 0;
 
 	dmubus_call("swmodules", "du_list", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, du_obj, j, 1, "deployment_unit") {
-			idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, idx) == DM_STOP)
+			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, inst) == DM_STOP)
 				break;
 		}
 	}
@@ -77,14 +77,14 @@ static int browseSoftwareModulesDeploymentUnitInst(struct dmctx *dmctx, DMNODE *
 static int browseSoftwareModulesExecutionUnitInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
-	char *idx, *idx_last = NULL;
+	char *inst, *max_inst = NULL;
 	int id = 0, j = 0;
 
 	dmubus_call("swmodules", "eu_list", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, du_obj, j, 1, "execution_unit") {
-			idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, idx) == DM_STOP)
+			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, inst) == DM_STOP)
 				break;
 		}
 	}
@@ -793,7 +793,7 @@ char *get_softwaremodules_url(char *uuid)
 
 /* *** Device.SoftwareModules. *** */
 DMOBJ tSoftwareModulesObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"ExecEnv", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecEnvInst, NULL, NULL, NULL, NULL, tSoftwareModulesExecEnvParams, get_exe_cenv_linker, BBFDM_BOTH},
 {"DeploymentUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesDeploymentUnitInst, NULL, NULL, NULL, NULL, tSoftwareModulesDeploymentUnitParams, get_du_linker, BBFDM_BOTH},
 {"ExecutionUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecutionUnitInst, NULL, NULL, NULL, tSoftwareModulesExecutionUnitObj, tSoftwareModulesExecutionUnitParams, NULL, BBFDM_BOTH},
@@ -855,7 +855,7 @@ DMLEAF tSoftwareModulesDeploymentUnitParams[] = {
 
 /* *** Device.SoftwareModules.ExecutionUnit.{i}. *** */
 DMOBJ tSoftwareModulesExecutionUnitObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 //{"Extensions", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };

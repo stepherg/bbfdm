@@ -282,7 +282,7 @@ int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *
 		//UCI: arg1=type :: arg2=uci_file :: arg3=uci_section_type :: arg4=uci_dmmap_file :: arg5="" :: arg6=""
 
 		char buf_instance[64] = "", buf_alias[64] = "", *prefix_obj = NULL, *object = NULL;
-		char *instance = NULL, *instnbr = NULL;
+		char *inst = NULL, *max_inst = NULL;
 		struct dmmap_dup *p;
 		LIST_HEAD(dup_list);
 
@@ -298,8 +298,11 @@ int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *
 		if(arg2 && arg3 && arg4) {
 			synchronize_specific_config_sections_with_dmmap(arg2, arg3, arg4, &dup_list);
 			list_for_each_entry(p, &dup_list, list) {
-				instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 3, p->dmmap_section, buf_instance, buf_alias);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, instance) == DM_STOP)
+
+				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+						   p->dmmap_section, buf_instance, buf_alias, arg4, arg3);
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 					break;
 			}
 		}
@@ -309,7 +312,7 @@ int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *
 		//UBUS: arg1=type :: arg2=ubus_object :: arg3=ubus_method :: arg4=ubus_args1 :: arg5=ubus_args2 :: arg6=ubus_key
 
 		json_object *res = NULL, *dyn_obj = NULL, *arrobj = NULL;
-		char *idx, *idx_last = NULL;
+		char *inst, *max_inst = NULL;
 		int id = 0, j = 0;
 
 		if (arg2 && arg3 && arg4 && arg5)
@@ -318,8 +321,8 @@ int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *
 			dmubus_call(arg2, arg3, UBUS_ARGS{{}}, 0, &res);
 		if (res && arg6) {
 			dmjson_foreach_obj_in_array(res, arrobj, dyn_obj, j, 1, arg6) {
-				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)dyn_obj, idx) == DM_STOP)
+				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)dyn_obj, inst) == DM_STOP)
 					break;
 			}
 		}
@@ -363,7 +366,7 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 
 			dmuci_add_section_bbfdm(arg4, arg3, &dmmap, &v);
 			dmuci_set_value_by_section(dmmap, "section_name", sect_name);
-			*instance = update_instance_bbfdm(dmmap, inst, buf_instance);
+			*instance = update_instance(dmmap, inst, buf_instance);
 		}
 	}
 	return 0;

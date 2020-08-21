@@ -16,14 +16,17 @@
 *************************************************************/
 static int browseGRETunnelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *gretun_inst= NULL, *gretun_inst_last= NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p= NULL;
 
 	LIST_HEAD(dup_list);
 	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_network", "proto", "gre", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		gretun_inst = handle_update_instance(1, dmctx, &gretun_inst_last, update_instance_alias, 3, p->dmmap_section, "gretunnel_instance", "gretunnel_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, gretun_inst) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "gretunnel_instance", "gretunnel_alias", "dmmap_network", "interface");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -42,9 +45,10 @@ struct uci_section *has_tunnel_interface_route(char *interface)
 
 static int browseGRETunnelInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *greiface_inst= NULL, *greiface_inst_last= NULL, *ifname= NULL;
-	struct dmmap_dup *p, *dm= (struct dmmap_dup *)prev_data;
+	char *inst = NULL, *max_inst = NULL, *ifname= NULL;
+	struct dmmap_dup *p, *dm = (struct dmmap_dup *)prev_data;
 	struct uci_section *s;
+	struct browse_args browse_args = {0};
 
 	LIST_HEAD(dup_list);
 	dmasprintf(&ifname, "@%s", section_name(dm->config_section));
@@ -52,9 +56,17 @@ static int browseGRETunnelInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node
 	list_for_each_entry(p, &dup_list, list) {
 		if ((s = has_tunnel_interface_route(section_name(p->config_section))) == NULL)
 			continue;
-		greiface_inst = handle_update_instance(1, dmctx, &greiface_inst_last, update_instance_alias, 3, p->dmmap_section, "greiface_instance", "greiface_alias");
-		p->additional_attribute= dm->config_section;
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, greiface_inst) == DM_STOP)
+
+		p->additional_attribute = dm->config_section;
+
+		browse_args.option = "section_name";
+		browse_args.value = section_name(dm->config_section);
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+			   p->dmmap_section, "greiface_instance", "greiface_alias", "dmmap_network", "interface",
+			   check_browse_section, (void *)&browse_args);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -77,7 +89,7 @@ static int addObjGRETunnel(char *refparam, struct dmctx *ctx, void *data, char *
 
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_sec, &v);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(gre_sec));
-	*instancepara = update_instance_bbfdm(dmmap_sec, instance, "gretunnel_instance");
+	*instancepara = update_instance(dmmap_sec, instance, "gretunnel_instance");
 	return 0;
 }
 
@@ -139,7 +151,7 @@ static int addObjGRETunnelInterface(char *refparam, struct dmctx *ctx, void *dat
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_sec, &v);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(greiface_sec));
 	dmuci_set_value_by_section(dmmap_sec, "gre_tunnel_sect", section_name(((struct dmmap_dup *)data)->config_section));
-	*instancepara = update_instance_bbfdm(dmmap_sec, instance, "greiface_instance");
+	*instancepara = update_instance(dmmap_sec, instance, "greiface_instance");
 	return 0;
 }
 
@@ -403,7 +415,7 @@ static int get_GRETunnelInterfaceStats_ErrorsReceived(char *refparam, struct dmc
 
 /* *** Device.GRE. *** */
 DMOBJ tGREObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nexjsontobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Tunnel", &DMWRITE, addObjGRETunnel, delObjGRETunnel, NULL, browseGRETunnelInst, NULL, NULL, NULL, tGRETunnelObj, tGRETunnelParams, NULL, BBFDM_BOTH},
 //{"Filter", &DMWRITE, addObjGREFilter, delObjGREFilter, NULL, browseGREFilterInst, NULL, NULL, NULL, NULL, tGREFilterParams, NULL, BBFDM_BOTH},
 {0}
@@ -418,7 +430,7 @@ DMLEAF tGREParams[] = {
 
 /* *** Device.GRE.Tunnel.{i}. *** */
 DMOBJ tGRETunnelObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nexjsontobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGRETunnelStatsParams, NULL, BBFDM_BOTH},
 {"Interface", &DMWRITE, addObjGRETunnelInterface, delObjGRETunnelInterface, NULL, browseGRETunnelInterfaceInst, NULL, NULL, NULL, tGRETunnelInterfaceObj, tGRETunnelInterfaceParams, NULL, BBFDM_BOTH},
 {0}
@@ -456,7 +468,7 @@ DMLEAF tGRETunnelStatsParams[] = {
 
 /* *** Device.GRE.Tunnel.{i}.Interface.{i}. *** */
 DMOBJ tGRETunnelInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nexjsontobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGRETunnelInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };

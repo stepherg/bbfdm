@@ -106,7 +106,7 @@ static int browseDSLLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	json_object *res = NULL, *line_obj = NULL;
 	struct dsl_line_args cur_dsl_line_args = {0};
 	struct uci_section *s = NULL;
-	char *dsl_int = NULL, *dsl_int_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int entries = 0;
 
 	dmubus_call("dsl", "status", UBUS_ARGS{}, 0, &res);
@@ -117,8 +117,11 @@ static int browseDSLLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			entries++;
 			s = update_create_dmmap_dsl_line(cur_dsl_line_args.id);
 			init_dsl_line(&cur_dsl_line_args, s);
-			dsl_int = handle_update_instance(1, dmctx, &dsl_int_last, update_instance_alias, 3, s, "dsl_line_instance", "dsl_line_alias");
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&cur_dsl_line_args, dsl_int) == DM_STOP)
+
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				   s, "dsl_line_instance", "dsl_line_alias", "dmmap", "dsl_line");
+
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&cur_dsl_line_args, inst) == DM_STOP)
 				break;
 		}
 		else
@@ -132,7 +135,7 @@ static int browseDSLChannelInst(struct dmctx *dmctx, DMNODE *parent_node, void *
 	json_object *res = NULL, *line_obj = NULL, *channel_obj = NULL;
 	struct dsl_channel_args cur_dsl_channel_args = {0};
 	struct uci_section *s = NULL;
-	char *dsl_int = NULL, *dsl_int_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int entries_line = 0, entries_channel = 0;
 
 	dmubus_call("dsl", "status", UBUS_ARGS{}, 0, &res);
@@ -145,8 +148,11 @@ static int browseDSLChannelInst(struct dmctx *dmctx, DMNODE *parent_node, void *
 				entries_channel++;
 				s = update_create_dmmap_dsl_channel(cur_dsl_channel_args.id);
 				init_dsl_channel(&cur_dsl_channel_args, s);
-				dsl_int = handle_update_instance(1, dmctx, &dsl_int_last, update_instance_alias, 3, s, "dsl_channel_instance", "dsl_channel_alias");
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&cur_dsl_channel_args, dsl_int) == DM_STOP)
+
+				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+						  s, "dsl_channel_instance", "dsl_channel_alias", "dmmap", "dsl_line");
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&cur_dsl_channel_args, inst) == DM_STOP)
 					break;
 			}
 			else
@@ -1321,7 +1327,7 @@ static int get_DSLChannelStatsQuarterHour_XTUCCRCErrors(char *refparam, struct d
 
 /* *** Device.DSL. *** */
 DMOBJ tDSLObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Line", &DMREAD, NULL, NULL, NULL, browseDSLLineInst, NULL, NULL, NULL, tDSLLineObj, tDSLLineParams, get_dsl_line_linker, BBFDM_BOTH},
 {"Channel", &DMREAD, NULL, NULL, NULL, browseDSLChannelInst, NULL, NULL, NULL, tDSLChannelObj, tDSLChannelParams, get_dsl_channel_linker, BBFDM_BOTH},
 {0}
@@ -1336,7 +1342,7 @@ DMLEAF tDSLParams[] = {
 
 /* *** Device.DSL.Line.{i}. *** */
 DMOBJ tDSLLineObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsObj, tDSLLineStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1396,7 +1402,7 @@ DMLEAF tDSLLineParams[] = {
 
 /* *** Device.DSL.Line.{i}.Stats. *** */
 DMOBJ tDSLLineStatsObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsTotalParams, NULL, BBFDM_BOTH},
 {"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsShowtimeParams, NULL, BBFDM_BOTH},
 {"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsLastShowtimeParams, NULL, BBFDM_BOTH},
@@ -1457,7 +1463,7 @@ DMLEAF tDSLLineStatsQuarterHourParams[] = {
 
 /* *** Device.DSL.Channel.{i}. *** */
 DMOBJ tDSLChannelObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsObj, tDSLChannelStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1489,7 +1495,7 @@ DMLEAF tDSLChannelParams[] = {
 
 /* *** Device.DSL.Channel.{i}.Stats. *** */
 DMOBJ tDSLChannelStatsObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsTotalParams, NULL, BBFDM_BOTH},
 {"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsShowtimeParams, NULL, BBFDM_BOTH},
 {"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsLastShowtimeParams, NULL, BBFDM_BOTH},

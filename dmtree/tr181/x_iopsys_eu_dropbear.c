@@ -14,14 +14,17 @@
 
 int browseXIopsysEuDropbear(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *idropbear = NULL, *idropbear_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("dropbear", "dropbear", "dmmap_dropbear", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		idropbear =  handle_update_instance(1, dmctx, &idropbear_last, update_instance_alias_bbfdm, 3, p->dmmap_section, "dropbearinstance", "dropbearalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, idropbear) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "dropbearinstance", "dropbearalias", "dmmap_dropbear", "dropbear");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -339,7 +342,7 @@ int add_dropbear_instance(char *refparam, struct dmctx *ctx, void *data, char **
 
 	dmuci_add_section_bbfdm("dmmap_dropbear", "dropbear", &dmmap_sec, &v);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(dropbear_sec));
-	*instancepara = update_instance_bbfdm(dmmap_sec, instance, "dropbearinstance");
+	*instancepara = update_instance(dmmap_sec, instance, "dropbearinstance");
 	return 0;
 }
 

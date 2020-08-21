@@ -282,7 +282,7 @@ static int get_vlf_persistent(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *vcf = NULL, *vcf_last = NULL, *name;
+	char *inst = NULL, *max_inst = NULL, *name;
 	struct uci_section *s = NULL, *del_sec = NULL;
 	DIR *dir;
 	struct dirent *d_file;
@@ -305,8 +305,11 @@ static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 			del_sec = s;
 			continue;
 		}
-		vcf = handle_update_instance(1, dmctx, &vcf_last, update_instance_alias_bbfdm, 3, s, "vcf_instance", "vcf_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, vcf) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			  s, "vcf_instance", "vcf_alias", "dmmap", "vcf");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
 	if(del_sec)
@@ -337,10 +340,12 @@ static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 		}
 	}
 	uci_path_foreach_sections(bbfdm, "dmmap", "vlf", dm_sec) {
-		char *instance, *last_instance = NULL;
+		char *inst, *max_inst = NULL;
 
-		instance = handle_update_instance(1, dmctx, &last_instance, update_instance_alias_bbfdm, 3, dm_sec, "vlf_instance", "vlf_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)dm_sec, instance) == DM_STOP){
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				   dm_sec, "vlf_instance", "vlf_alias", "dmmap", "vlf");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)dm_sec, inst) == DM_STOP){
 			break;
 		}
 	}
@@ -349,12 +354,12 @@ static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 
 static int browseDeviceInfoProcessorInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *idx = NULL, *idx_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int i;
 
 	for (i = 0; i < get_number_of_cpus(); i++) {
-		idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, i+1);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, NULL, idx) == DM_STOP)
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, i+1);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, NULL, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -415,12 +420,12 @@ static int get_DeviceInfoProcessor_Architecture(char *refparam, struct dmctx *ct
 
 static int browseDeviceInfoSupportedDataModelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *idx = NULL, *idx_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int i;
 
 	for (i = 0; i < sizeof(Data_Models)/sizeof(struct Supported_Data_Models); i++) {
-		idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, i+1);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&Data_Models[i], idx) == DM_STOP)
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, i+1);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&Data_Models[i], inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -482,7 +487,7 @@ static int get_DeviceInfoSupportedDataModel_Features(char *refparam, struct dmct
 
 /* *** Device.DeviceInfo. *** */
 DMOBJ tDeviceInfoObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"VendorConfigFile", &DMREAD, NULL, NULL, NULL, browseVcfInst, NULL, NULL, NULL, NULL, tDeviceInfoVendorConfigFileParams, NULL, BBFDM_BOTH},
 {"MemoryStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoMemoryStatusParams, NULL, BBFDM_BOTH},
 {"ProcessStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoProcessStatusObj, tDeviceInfoProcessStatusParams, NULL, BBFDM_BOTH},
@@ -535,7 +540,7 @@ DMLEAF tDeviceInfoMemoryStatusParams[] = {
 
 /* *** Device.DeviceInfo.ProcessStatus. *** */
 DMOBJ tDeviceInfoProcessStatusObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Process", &DMREAD, NULL, NULL, NULL, os__browseProcessEntriesInst, NULL, NULL, NULL, NULL, tDeviceInfoProcessStatusProcessParams, NULL, BBFDM_BOTH},
 {0}
 };

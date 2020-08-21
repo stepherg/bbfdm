@@ -1757,3 +1757,14 @@ void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *val
 		dmuci_add_list_value_by_section(s, section, value);
 	}
 }
+
+int check_browse_section(struct uci_section *s, void *data)
+{
+	struct browse_args *browse_args = (struct browse_args *)data;
+	char *opt_val;
+
+	dmuci_get_value_by_section_string(s, browse_args->option, &opt_val);
+	if (strcmp(opt_val, browse_args->value) == 0)
+		return 0;
+	return -1;
+}

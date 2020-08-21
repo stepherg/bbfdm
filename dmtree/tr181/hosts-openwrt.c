@@ -29,7 +29,7 @@ int os__browseHostsHostIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node,
 **************************************************************/
 int get_linker_host(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-        return 0;
+	return 0;
 }
 
 /*************************************************************

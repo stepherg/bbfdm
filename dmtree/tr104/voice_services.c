@@ -312,7 +312,7 @@ static int add_profile_object(char *refparam, struct dmctx *ctx, void *data, cha
 
 	dmuci_add_section_bbfdm("dmmap_asterisk", "sip_service_provider", &dmmap_voice_section, &v);
 	dmuci_set_value_by_section(dmmap_voice_section, "section_name", sname);
-	*instancepara = update_instance_bbfdm(dmmap_voice_section, instance, "profileinstance");
+	*instancepara = update_instance(dmmap_voice_section, instance, "profileinstance");
 
 	return 0;
 }
@@ -2139,12 +2139,15 @@ static void set_voice_profile_key_of_line(struct uci_section *dmmap_line_section
 static int browseVoiceServiceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *vs = NULL, *vs_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	update_section_list(DMMAP,"voice_service", NULL, 1, NULL, NULL, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap", "voice_service", s) {
-		vs = handle_update_instance(1, dmctx, &vs_last, update_instance_alias_bbfdm, 3, s, "vsinstance", "vsalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, vs) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				s, "vsinstance", "vsalias", "dmmap", "voice_service");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -2153,7 +2156,7 @@ static int browseVoiceServiceInst(struct dmctx *dmctx, DMNODE *parent_node, void
 static int browseCodecsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	int i = 0;
-	char *id, *id_last = NULL;
+	char *inst, *max_inst = NULL;
 	struct uci_section *code_sec;
 	struct codec_args curr_codec_args = {0};
 
@@ -2161,11 +2164,15 @@ static int browseCodecsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 	codec_update_id();
 	uci_path_foreach_sections(bbfdm, "dmmap", "codec_id", code_sec) {
 		init_codec_args(&curr_codec_args, allowed_sip_codecs[i].allowed_cdc, allowed_sip_codecs[i].id, allowed_sip_codecs[i].enumid, code_sec);
-		id = handle_update_instance(2, dmctx, &id_last, update_instance_alias_bbfdm, 3, code_sec, "codecinstance", "codecalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_codec_args, id) == DM_STOP) {
+
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			 code_sec, "codecinstance", "codecalias", "dmmap", "codec_id");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_codec_args, inst) == DM_STOP) {
 			fini_codec_args(&curr_codec_args);
 			break;
 		}
+
 		fini_codec_args(&curr_codec_args);
 		i++;
 	}
@@ -2175,7 +2182,7 @@ static int browseCodecsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 /*#Device.Services.VoiceService.{i}.VoiceProfile.{i}.!UCI:asterisk/sip_service_provider/dmmap_asterisk*/
 static int browseProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *profile_num = NULL, *profile_num_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct sip_args curr_sip_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
@@ -2183,9 +2190,13 @@ static int browseProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	wait_voice_service_up();
 	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		profile_num = handle_update_instance(2, dmctx, &profile_num_last, update_instance_alias_bbfdm, 3, p->dmmap_section, "profileinstance", "profilealias");
-		init_sip_args(&curr_sip_args, p->config_section, profile_num_last);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_sip_args, profile_num) == DM_STOP)
+
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+					  p->dmmap_section, "profileinstance", "profilealias", "dmmap_asterisk", "sip_service_provider");
+
+		init_sip_args(&curr_sip_args, p->config_section, inst);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_sip_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -2196,9 +2207,10 @@ static int browseProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 static int browseLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	int maxLine, line_id = 0;
-	char *line_num = NULL, *last_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct sip_args *sipargs = (struct sip_args *)prev_data;
 	struct tel_args curr_tel_args = {0};
+	struct browse_args browse_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
@@ -2210,9 +2222,17 @@ static int browseLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 		if ( line_id >= maxLine )
 			continue;
 		set_voice_profile_key_of_line(p->dmmap_section, prev_instance);
-		line_num = handle_update_instance(3, dmctx, &last_inst, update_instance_alias_bbfdm, 3, p->dmmap_section, "lineinstance", "linealias");
+
+		browse_args.option = "voice_profile_key";
+		browse_args.value = sipargs->profile_num;
+
+		inst = handle_update_instance(3, dmctx, &max_inst, update_instance_alias, 7,
+				   p->dmmap_section, "lineinstance", "linealias", "dmmap_asterisk", "tel_line",
+				   check_browse_section, (void *)&browse_args);
+
 		init_tel_args(&curr_tel_args, p->config_section, sipargs->sip_section, sipargs->profile_num); //check difference between sipargs->profile_num and profile_num
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_tel_args, line_num) == DM_STOP)
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_tel_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -2222,7 +2242,7 @@ static int browseLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 static int browseLineCodecListInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	int i = 0;
-	char *id = NULL , *id_last = NULL;
+	char *inst = NULL , *max_inst = NULL;
 	struct tel_args *telargs = (struct tel_args *)prev_data;
 	struct uci_section *code_sec = NULL;
 	struct line_codec_args curr_line_codec_args = {0};
@@ -2232,8 +2252,11 @@ static int browseLineCodecListInst(struct dmctx *dmctx, DMNODE *parent_node, voi
 	codec_priority_update(telargs->sip_section);
 	uci_path_foreach_sections(bbfdm, "dmmap", "codec_id", code_sec) {
 		init_line_code_args(&curr_line_codec_args, i, telargs->sip_section, code_sec);
-		id = handle_update_instance(4, dmctx, &id_last, update_instance_alias_bbfdm, 3, code_sec, "codecinstance", "codecalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_line_codec_args, id) == DM_STOP)
+
+		inst = handle_update_instance(4, dmctx, &max_inst, update_instance_alias, 5,
+			 code_sec, "codecinstance", "codecalias", "dmmap", "codec_id");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_line_codec_args, inst) == DM_STOP)
 			break;
 		i++;
 	}
@@ -2242,14 +2265,14 @@ static int browseLineCodecListInst(struct dmctx *dmctx, DMNODE *parent_node, voi
 
 /* *** Device.Services. *** */
 DMOBJ tServicesObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"VoiceService", &DMREAD, NULL, NULL, NULL, browseVoiceServiceInst, NULL, NULL, NULL, tServicesVoiceServiceObj, tServicesVoiceServiceParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}. *** */
 DMOBJ tServicesVoiceServiceObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesObj, tServicesVoiceServiceCapabilitiesParams, NULL, BBFDM_BOTH},
 {"VoiceProfile", &DMWRITE, add_profile_object, delete_profile_object, NULL, browseProfileInst, NULL, NULL, NULL, tServicesVoiceServiceVoiceProfileObj, tServicesVoiceServiceVoiceProfileParams, NULL, BBFDM_BOTH},
 {0}
@@ -2263,7 +2286,7 @@ DMLEAF tServicesVoiceServiceParams[] = {
 
 /* *** Device.Services.VoiceService.{i}.Capabilities. *** */
 DMOBJ tServicesVoiceServiceCapabilitiesObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesSIPParams, NULL, BBFDM_BOTH},
 {"Codecs", &DMREAD, NULL, NULL, NULL, browseCodecsInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesCodecsParams, NULL, BBFDM_BOTH},
 {0}
@@ -2331,7 +2354,7 @@ DMLEAF tServicesVoiceServiceCapabilitiesCodecsParams[] = {
 
 /* *** Device.Services.VoiceService.{i}.VoiceProfile.{i}. *** */
 DMOBJ tServicesVoiceServiceVoiceProfileObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoiceProfileSIPParams, NULL, BBFDM_BOTH},
 {"ServiceProviderInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoiceProfileServiceProviderInfoParams, NULL, BBFDM_BOTH},
 {"FaxT38", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoiceProfileFaxT38Params, NULL, BBFDM_BOTH},
@@ -2392,7 +2415,7 @@ DMLEAF tServicesVoiceServiceVoiceProfileFaxT38Params[] = {
 
 /* *** Device.Services.VoiceService.{i}.VoiceProfile.{i}.RTP. *** */
 DMOBJ tServicesVoiceServiceVoiceProfileRTPObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"RTCP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoiceProfileRTPRTCPParams, NULL, BBFDM_BOTH},
 {"SRTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoiceProfileRTPSRTPParams, NULL, BBFDM_BOTH},
 {0}
@@ -2423,7 +2446,7 @@ DMLEAF tServicesVoiceServiceVoiceProfileRTPSRTPParams[] = {
 
 /* *** Device.Services.VoiceService.{i}.VoiceProfile.{i}.Line.{i}. *** */
 DMOBJ tServicesVoiceServiceVoiceProfileLineObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"VoiceProcessing", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoiceProfileLineVoiceProcessingParams, NULL, BBFDM_BOTH},
 {"CallingFeatures", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoiceProfileLineCallingFeaturesParams, NULL, BBFDM_BOTH},
 {"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoiceProfileLineSIPParams, NULL, BBFDM_BOTH},
@@ -2470,7 +2493,7 @@ DMLEAF tServicesVoiceServiceVoiceProfileLineSIPParams[] = {
 
 /* *** Device.Services.VoiceService.{i}.VoiceProfile.{i}.Line.{i}.Codec. *** */
 DMOBJ tServicesVoiceServiceVoiceProfileLineCodecObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"List", &DMREAD, NULL, NULL, NULL, browseLineCodecListInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoiceProfileLineCodecListParams, NULL, BBFDM_BOTH},
 {0}
 };

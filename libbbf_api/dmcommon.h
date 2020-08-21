@@ -243,6 +243,11 @@ struct sysfs_dmsection {
 	struct uci_section *dm;
 };
 
+struct browse_args {
+	char *option;
+	char *value;
+};
+
 char *cut_fx(char *str, char *delimiter, int occurence);
 pid_t get_pid(char *pname);
 int check_file(char *path);
@@ -326,5 +331,5 @@ char *replace_char(char *str, char find, char replace);
 int is_vlan_termination_section(char *name);
 void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *value, bool b);
 void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, char *value);
-
+int check_browse_section(struct uci_section *s, void *data);
 #endif

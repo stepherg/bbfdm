@@ -15,14 +15,17 @@
 /*#Device.Users.User.{i}.!UCI:users/user/dmmap_users*/
 static int browseUserInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *instance, *instnbr = NULL;
+	char *inst, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("users", "user", "dmmap_users", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 3, p->dmmap_section, "user_instance", "user_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, instance) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "user_instance", "user_alias", "dmmap_users", "user");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -45,7 +48,7 @@ static int add_users_user(char *refparam, struct dmctx *ctx, void *data, char **
 
 	dmuci_add_section_bbfdm("dmmap_users", "user", &dmmap_user, &v);
 	dmuci_set_value_by_section(dmmap_user, "section_name", sect_name);
-	*instance = update_instance_bbfdm(dmmap_user, last_inst, "user_instance");
+	*instance = update_instance(dmmap_user, last_inst, "user_instance");
 	return 0;
 }
 
@@ -239,7 +242,7 @@ static int set_user_language(char *refparam, struct dmctx *ctx, void *data, char
 
 /* *** Device.Users. *** */
 DMOBJ tUsersObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"User", &DMWRITE, add_users_user, delete_users_user, NULL, browseUserInst, NULL, NULL, NULL, NULL, tUsersUserParams, NULL, BBFDM_BOTH},
 {0}
 };

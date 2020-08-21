@@ -1998,7 +1998,7 @@ static int add_wifi_ssid(char *refparam, struct dmctx *ctx, void *data, char **i
 
 	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_wifi, &v);
 	dmuci_set_value_by_section(dmmap_wifi, "section_name", section_name(s));
-	*instance = update_instance_bbfdm(dmmap_wifi, inst, "ssidinstance");
+	*instance = update_instance(dmmap_wifi, inst, "ssidinstance");
 	return 0;
 }
 
@@ -2049,7 +2049,7 @@ static int add_wifi_accesspoint(char *refparam, struct dmctx *ctx, void *data, c
 
 	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_wifi, &v);
 	dmuci_set_value_by_section(dmmap_wifi, "section_name", section_name(s));
-	*instance = update_instance_bbfdm(dmmap_wifi, inst, "ap_instance");
+	*instance = update_instance(dmmap_wifi, inst, "ap_instance");
 	return 0;
 }
 
@@ -2100,7 +2100,7 @@ static int addObjWiFiEndPoint(char *refparam, struct dmctx *ctx, void *data, cha
 
 	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_sec, &v);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(endpoint_sec));
-	*instance = update_instance_bbfdm(dmmap_sec, instancepara, "endpointinstance");
+	*instance = update_instance(dmmap_sec, instancepara, "endpointinstance");
 	return 0;
 }
 
@@ -2135,7 +2135,7 @@ static int delObjWiFiEndPoint(char *refparam, struct dmctx *ctx, void *data, cha
 /*#Device.WiFi.Radio.{i}.!UCI:wireless/wifi-device/dmmap_wireless*/
 static int browseWifiRadioInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *wnum = NULL, *wnum_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct wifi_radio_args curr_wifi_radio_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
@@ -2143,8 +2143,11 @@ static int browseWifiRadioInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 	synchronize_specific_config_sections_with_dmmap("wireless", "wifi-device", "dmmap_wireless", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		init_wifi_radio(&curr_wifi_radio_args, p->config_section);
-		wnum =  handle_update_instance(1, dmctx, &wnum_last, update_instance_alias, 3, p->dmmap_section, "radioinstance", "radioalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_radio_args, wnum) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "radioinstance", "radioalias", "dmmap_wireless", "wifi-device");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_radio_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -2154,7 +2157,7 @@ static int browseWifiRadioInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 /*#Device.WiFi.SSID.{i}.!UCI:wireless/wifi-iface/dmmap_wireless*/
 static int browseWifiSsidInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *wnum = NULL, *ssid_last = NULL, *ifname, *linker;
+	char *inst = NULL, *max_inst = NULL, *ifname, *linker;
 	struct wifi_ssid_args curr_wifi_ssid_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
@@ -2168,8 +2171,11 @@ static int browseWifiSsidInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
 #endif
 		init_wifi_ssid(&curr_wifi_ssid_args, p->config_section, ifname, linker);
-		wnum =  handle_update_instance(1, dmctx, &ssid_last, update_instance_alias, 3, p->dmmap_section, "ssidinstance", "ssidalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_ssid_args, wnum) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "ssidinstance", "ssidalias", "dmmap_wireless", "wifi-iface");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_ssid_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -2179,7 +2185,7 @@ static int browseWifiSsidInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 /*#Device.WiFi.AccessPoint.{i}.!UCI:wireless/wifi-iface/dmmap_wireless*/
 static int browseWifiAccessPointInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *wnum = NULL, *ifname, *acpt_last = NULL, *mode = NULL;
+	char *inst = NULL, *ifname, *max_inst = NULL, *mode = NULL;
 	struct wifi_acp_args curr_wifi_acp_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
@@ -2191,8 +2197,11 @@ static int browseWifiAccessPointInst(struct dmctx *dmctx, DMNODE *parent_node, v
 			continue;
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
 		init_wifi_acp(&curr_wifi_acp_args, p->config_section, ifname);
-		wnum =  handle_update_instance(1, dmctx, &acpt_last, update_instance_alias, 3, p->dmmap_section, "ap_instance", "ap_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_acp_args, wnum) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "ap_instance", "ap_alias", "dmmap_wireless", "wifi-iface");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_acp_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -2202,7 +2211,7 @@ static int browseWifiAccessPointInst(struct dmctx *dmctx, DMNODE *parent_node, v
 /*#Device.WiFi.EndPoint.{i}.!UCI:wireless/wifi-iface/dmmap_wireless*/
 static int browseWiFiEndPointInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *wnum = NULL, *ifname, *acpt_last = NULL, *mode= NULL;
+	char *inst = NULL, *ifname, *max_inst = NULL, *mode= NULL;
 	struct wifi_enp_args curr_wifi_enp_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
@@ -2214,8 +2223,11 @@ static int browseWiFiEndPointInst(struct dmctx *dmctx, DMNODE *parent_node, void
 			continue;
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
 		init_wifi_enp(&curr_wifi_enp_args, p->config_section, ifname);
-		wnum =  handle_update_instance(1, dmctx, &acpt_last, update_instance_alias, 3, p->dmmap_section, "endpointinstance", "endpointalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_enp_args, wnum) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "endpointinstance", "endpointalias", "dmmap_wireless", "wifi-iface");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_enp_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -2225,7 +2237,7 @@ static int browseWiFiEndPointInst(struct dmctx *dmctx, DMNODE *parent_node, void
 static int browseWiFiEndPointProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s= NULL;
-	char *v, *instnbr = NULL, *ep_instance;
+	char *v, *max_inst = NULL, *ep_instance;
 	struct wifi_enp_args *ep_args = (struct wifi_enp_args *)prev_data;
 	struct uci_section *dmmap_section = NULL;
 
@@ -2237,7 +2249,9 @@ static int browseWiFiEndPointProfileInst(struct dmctx *dmctx, DMNODE *parent_nod
 	if(!s)
 		dmuci_add_section_bbfdm("dmmap_wireless", "ep_profile", &s, &v);
 	DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, "ep_key", ep_instance);
-	handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 3, s, "ep_profile_instance", "ep_profile_alias");
+
+	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			s, "ep_profile_instance", "ep_profile_alias", "dmmap_wireless", "wifi-iface");
 
 	DM_LINK_INST_OBJ(dmctx, parent_node, ep_args->wifi_enp_sec, "1");
 	return 0;
@@ -2266,7 +2280,7 @@ int set_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, struct dm
 
 /* *** Device.WiFi. *** */
 DMOBJ tWiFiObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Radio", &DMREAD, NULL, NULL, NULL, browseWifiRadioInst, NULL, NULL, NULL, tWiFiRadioObj, tWiFiRadioParams, get_linker_Wifi_Radio, BBFDM_BOTH},
 {"SSID", &DMWRITE, add_wifi_ssid, delete_wifi_ssid, NULL, browseWifiSsidInst, NULL, NULL, NULL, tWiFiSSIDObj, tWiFiSSIDParams, get_linker_Wifi_Ssid, BBFDM_BOTH},
 {"AccessPoint", &DMWRITE, add_wifi_accesspoint, delete_wifi_accesspoint, NULL, browseWifiAccessPointInst, NULL, NULL, NULL, tWiFiAccessPointObj, tWiFiAccessPointParams, NULL, BBFDM_BOTH},
@@ -2286,7 +2300,7 @@ DMLEAF tWiFiParams[] = {
 
 /* *** Device.WiFi.Radio.{i}. *** */
 DMOBJ tWiFiRadioObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiRadioStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -2342,7 +2356,7 @@ DMLEAF tWiFiRadioStatsParams[] = {
 
 /* *** Device.WiFi.NeighboringWiFiDiagnostic. *** */
 DMOBJ tWiFiNeighboringWiFiDiagnosticObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Result", &DMREAD, NULL, NULL, NULL, os__browseWifiNeighboringWiFiDiagnosticResultInst, NULL, NULL, NULL, NULL, tWiFiNeighboringWiFiDiagnosticResultParams, NULL, BBFDM_CWMP},
 {0}
 };
@@ -2368,7 +2382,7 @@ DMLEAF tWiFiNeighboringWiFiDiagnosticResultParams[] = {
 
 /* *** Device.WiFi.SSID.{i}. *** */
 DMOBJ tWiFiSSIDObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiSSIDStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -2415,7 +2429,7 @@ DMLEAF tWiFiSSIDStatsParams[] = {
 
 /* *** Device.WiFi.AccessPoint.{i}. *** */
 DMOBJ tWiFiAccessPointObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Security", &DMWRITE, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiAccessPointSecurityParams, NULL, BBFDM_BOTH},
 {"AssociatedDevice", &DMREAD, NULL, NULL, NULL, os__browse_wifi_associated_device, NULL, NULL, NULL, tWiFiAccessPointAssociatedDeviceObj, tWiFiAccessPointAssociatedDeviceParams, get_linker_associated_device, BBFDM_BOTH},
 {"WPS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiAccessPointWPSParams, NULL, BBFDM_BOTH},
@@ -2473,7 +2487,7 @@ DMLEAF tWiFiAccessPointWPSParams[] = {
 
 /* *** Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}. *** */
 DMOBJ tWiFiAccessPointAssociatedDeviceObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiAccessPointAssociatedDeviceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -2522,7 +2536,7 @@ DMLEAF tWiFiAccessPointAccountingParams[] = {
 
 /* *** Device.WiFi.EndPoint.{i}. *** */
 DMOBJ tWiFiEndPointObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiEndPointStatsParams, NULL, BBFDM_BOTH},
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiEndPointSecurityParams, NULL, BBFDM_BOTH},
 {"Profile", &DMREAD, NULL, NULL, NULL, browseWiFiEndPointProfileInst, NULL, NULL, NULL, tWiFiEndPointProfileObj, tWiFiEndPointProfileParams, NULL, BBFDM_BOTH},
@@ -2560,7 +2574,7 @@ DMLEAF tWiFiEndPointSecurityParams[] = {
 
 /* *** Device.WiFi.EndPoint.{i}.Profile.{i}. *** */
 DMOBJ tWiFiEndPointProfileObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiEndPointProfileSecurityParams, NULL, BBFDM_BOTH},
 {0}
 };

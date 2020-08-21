@@ -120,7 +120,7 @@ static int browseDHCPv6ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 	struct dmmap_dup *p;
 	struct dhcpv6_client_args dhcpv6_client_arg = {0};
 	json_object *res, *jobj;
-	char *instance, *instnbr = NULL, *ipv6addr = NULL;
+	char *inst, *max_inst = NULL, *ipv6addr = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_eq_no_delete("network", "interface", "dmmap_dhcpv6", "proto", "dhcpv6", &dup_list);
@@ -133,8 +133,11 @@ static int browseDHCPv6ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 		dhcpv6_client_arg.dhcp_client_conf = p->config_section;
 		dhcpv6_client_arg.dhcp_client_dm = p->dmmap_section;
 		dhcpv6_client_arg.ip = dmstrdup(ipv6addr?ipv6addr:"");
-		instance = handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 3, p->dmmap_section, "bbf_dhcpv6client_instance", "bbf_dhcpv6client_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, &dhcpv6_client_arg, instance) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				   p->dmmap_section, "bbf_dhcpv6client_instance", "bbf_dhcpv6client_alias", "dmmap_dhcpv6", "interface");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&dhcpv6_client_arg, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -144,7 +147,7 @@ static int browseDHCPv6ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 /*#Device.DHCPv6.Server.Pool.{i}.!UCI:dhcp/dhcp/dmmap_dhcpv6*/
 static int browseDHCPv6ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *interface, *idhcp = NULL, *idhcp_last = NULL, *v;
+	char *interface, *inst = NULL, *max_inst = NULL, *v;
 	struct dhcpv6_args curr_dhcp6_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
@@ -153,14 +156,17 @@ static int browseDHCPv6ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, 
 	list_for_each_entry(p, &dup_list, list) {
 		dmuci_get_value_by_section_string(p->config_section, "interface", &interface);
 		init_dhcpv6_args(&curr_dhcp6_args, p->config_section, interface);
-		idhcp = handle_update_instance(1, dmctx, &idhcp_last, update_instance_alias_bbfdm, 3, p->dmmap_section, "dhcpv6_serv_pool_instance", "dhcpv6_serv_pool_alias");
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				p->dmmap_section, "dhcpv6_serv_pool_instance", "dhcpv6_serv_pool_alias", "dmmap_dhcpv6", "dhcp");
+
 		dmuci_get_value_by_section_string(p->dmmap_section, "order", &v);
 		if (v == NULL || strlen(v) == 0)
-			set_section_dhcp6_order("dhcp", "dmmap_dhcpv6", "dhcp", p->dmmap_section, p->config_section, 0, idhcp);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcp6_args, idhcp) == DM_STOP)
+			set_section_dhcp6_order("dhcp", "dmmap_dhcpv6", "dhcp", p->dmmap_section, p->config_section, 0, inst);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcp6_args, inst) == DM_STOP)
 			break;
 	}
-
 	free_dmmap_config_dup_list(&dup_list);
 
 	return 0;
@@ -172,7 +178,7 @@ static int browseDHCPv6ServerPoolClientInst(struct dmctx *dmctx, DMNODE *parent_
 	json_object *res, *res1, *jobj, *dev_obj= NULL, *net_obj= NULL;
 	struct clientv6_args curr_dhcp_client_args = {0};
 	int i = 0;
-	char *idx = NULL, *idx_last = NULL, *device;
+	char *inst = NULL, *max_inst = NULL, *device;
 
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(dhcp_arg->dhcp_sec), String}}, 1, &res1);
 	if (!res1) return 0;
@@ -189,8 +195,8 @@ static int browseDHCPv6ServerPoolClientInst(struct dmctx *dmctx, DMNODE *parent_
 		if (!jobj) break;
 		init_dhcpv6_client_args(&curr_dhcp_client_args, jobj, NULL, i);
 		i++;
-		idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, i);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcp_client_args, idx) == DM_STOP)
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, i);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcp_client_args, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -202,7 +208,8 @@ static int browseDHCPv6ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 	struct uci_element *e;
 	struct dhcpv6_args *curr_dhcp_args = (struct dhcpv6_args*)prev_data;
 	struct uci_section *dmmap_sect;
-	char **tagvalue = NULL, *instance, *instnbr = NULL, *optionvalue= NULL, *tmp, *v1, *v2, *v;
+	struct browse_args browse_args = {0};
+	char **tagvalue = NULL, *inst, *max_inst = NULL, *optionvalue= NULL, *tmp, *v1, *v2, *v;
 	size_t length;
 	int j;
 	struct dhcpv6_client_option_args dhcp_client_opt_args = {0};
@@ -238,8 +245,15 @@ static int browseDHCPv6ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 		dhcp_client_opt_args.option_tag = dmstrdup(v1);
 		dhcp_client_opt_args.value = dmstrdup(v2);
 		dhcp_client_opt_args.opt_sect = dmmap_sect;
-		instance= handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "bbf_dhcpv6_servpool_option_instance", "bbf_dhcpv6_servpool_option_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, &dhcp_client_opt_args, instance) == DM_STOP)
+
+		browse_args.option = "section_name";
+		browse_args.value = section_name(curr_dhcp_args->dhcp_sec);
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+				  dmmap_sect, "bbf_dhcpv6_servpool_option_instance", "bbf_dhcpv6_servpool_option_alias", "dmmap_dhcpv6", "servpool_option",
+				  check_browse_section, (void *)&browse_args);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&dhcp_client_opt_args, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -250,7 +264,7 @@ static int browseDHCPv6ServerPoolClientIPv6AddressInst(struct dmctx *dmctx, DMNO
 	struct clientv6_args *dhcpv6_serv_pool_client = (struct clientv6_args *)prev_data;
 	json_object *address_obj= NULL;
 	struct clientv6_args curr_dhcv6_address_args = {0};
-	char *idx = NULL, *idx_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int i = 0;
 
 	while (1) {
@@ -259,8 +273,8 @@ static int browseDHCPv6ServerPoolClientIPv6AddressInst(struct dmctx *dmctx, DMNO
 			break;
 		init_dhcpv6_client_args(&curr_dhcv6_address_args, dhcpv6_serv_pool_client->client, address_obj, i);
 		i++;
-		idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, i);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcv6_address_args, idx) == DM_STOP)
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, i);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcv6_address_args, inst) == DM_STOP)
 			break;
 	}
 
@@ -272,7 +286,7 @@ static int browseDHCPv6ServerPoolClientIPv6PrefixInst(struct dmctx *dmctx, DMNOD
 	struct clientv6_args *dhcpv6_serv_pool_client = (struct clientv6_args *)prev_data;
 	json_object *address_obj = NULL;
 	struct clientv6_args curr_dhcv6_address_args = {0};
-	char *idx = NULL, *idx_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int i = 0;
 
 	while (1) {
@@ -281,8 +295,8 @@ static int browseDHCPv6ServerPoolClientIPv6PrefixInst(struct dmctx *dmctx, DMNOD
 			break;
 		init_dhcpv6_client_args(&curr_dhcv6_address_args, dhcpv6_serv_pool_client->client, address_obj, i);
 		i++;
-		idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, i);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcv6_address_args, idx) == DM_STOP)
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, i);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcv6_address_args, inst) == DM_STOP)
 			break;
 	}
 
@@ -302,7 +316,7 @@ static int addObjDHCPv6Client(char *refparam, struct dmctx *ctx, void *data, cha
 	dmuci_set_value_by_section(s, "type", "anywan");
 	dmuci_add_section_bbfdm("dmmap_dhcpv6", "interface", &dmmap_sect, &v);
 	dmuci_set_value_by_section(dmmap_sect, "section_name", section_name(s));
-	*instance = update_instance_bbfdm(dmmap_sect, instancepara, "bbf_dhcpv6client_instance");
+	*instance = update_instance(dmmap_sect, instancepara, "bbf_dhcpv6client_instance");
 	return 0;
 }
 
@@ -367,7 +381,7 @@ static int addObjDHCPv6ServerPool(char *refparam, struct dmctx *ctx, void *data,
 
 	dmuci_add_section_bbfdm("dmmap_dhcpv6", "dhcp", &dmmap_dhcp, &v);
 	dmuci_set_value_by_section(dmmap_dhcp, "section_name", section_name(s));
-	*instance = update_instance_bbfdm(dmmap_dhcp, instancepara, "dhcpv6_serv_pool_instance");
+	*instance = update_instance(dmmap_dhcp, instancepara, "dhcpv6_serv_pool_instance");
 	return 0;
 }
 
@@ -428,7 +442,7 @@ static int addObjDHCPv6ServerPoolOption(char *refparam, struct dmctx *ctx, void 
 	if (dhcp_arg->dhcp_sec != NULL)
 		DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "section_name", section_name(dhcp_arg->dhcp_sec));
 	DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "option_tag", "0");
-	*instance = update_instance_bbfdm(dmmap_sect, instancepara, "bbf_dhcpv6_servpool_option_instance");
+	*instance = update_instance(dmmap_sect, instancepara, "bbf_dhcpv6_servpool_option_instance");
 	return 0;
 }
 
@@ -1383,7 +1397,7 @@ static int set_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 
 /* *** Device.DHCPv6. *** */
 DMOBJ tDHCPv6Obj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Client", &DMWRITE, addObjDHCPv6Client, delObjDHCPv6Client, NULL, browseDHCPv6ClientInst, NULL, NULL, NULL, tDHCPv6ClientObj, tDHCPv6ClientParams, NULL, BBFDM_BOTH},
 {"Server", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDHCPv6ServerObj, tDHCPv6ServerParams, NULL, BBFDM_BOTH},
 {0}
@@ -1397,7 +1411,7 @@ DMLEAF tDHCPv6Params[] = {
 
 /* *** Device.DHCPv6.Client.{i}. *** */
 DMOBJ tDHCPv6ClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 //{"Server", &DMREAD, NULL, NULL, NULL, browseDHCPv6ClientServerInst, NULL, NULL, NULL, NULL, tDHCPv6ClientServerParams, NULL, BBFDM_BOTH},
 //{"SentOption", &DMWRITE, addObjDHCPv6ClientSentOption, delObjDHCPv6ClientSentOption, NULL, browseDHCPv6ClientSentOptionInst, NULL, NULL, NULL, NULL, tDHCPv6ClientSentOptionParams, NULL, BBFDM_BOTH},
 //{"ReceivedOption", &DMREAD, NULL, NULL, NULL, browseDHCPv6ClientReceivedOptionInst, NULL, NULL, NULL, NULL, tDHCPv6ClientReceivedOptionParams, NULL, BBFDM_BOTH},
@@ -1455,7 +1469,7 @@ DMLEAF tDHCPv6ClientReceivedOptionParams[] = {
 
 /* *** Device.DHCPv6.Server. *** */
 DMOBJ tDHCPv6ServerObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Pool", &DMWRITE, addObjDHCPv6ServerPool, delObjDHCPv6ServerPool, NULL, browseDHCPv6ServerPoolInst, NULL, NULL, NULL, tDHCPv6ServerPoolObj, tDHCPv6ServerPoolParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1469,7 +1483,7 @@ DMLEAF tDHCPv6ServerParams[] = {
 
 /* *** Device.DHCPv6.Server.Pool.{i}. *** */
 DMOBJ tDHCPv6ServerPoolObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Client", &DMREAD, NULL, NULL, NULL, browseDHCPv6ServerPoolClientInst, NULL, NULL, NULL, tDHCPv6ServerPoolClientObj, tDHCPv6ServerPoolClientParams, NULL, BBFDM_BOTH},
 {"Option", &DMWRITE, addObjDHCPv6ServerPoolOption, delObjDHCPv6ServerPoolOption, NULL, browseDHCPv6ServerPoolOptionInst, NULL, NULL, NULL, NULL, tDHCPv6ServerPoolOptionParams, NULL, BBFDM_BOTH},
 {0}
@@ -1505,7 +1519,7 @@ DMLEAF tDHCPv6ServerPoolParams[] = {
 
 /* *** Device.DHCPv6.Server.Pool.{i}.Client.{i}. *** */
 DMOBJ tDHCPv6ServerPoolClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"IPv6Address", &DMREAD, NULL, NULL, NULL, browseDHCPv6ServerPoolClientIPv6AddressInst, NULL, NULL, NULL, NULL, tDHCPv6ServerPoolClientIPv6AddressParams, NULL, BBFDM_BOTH},
 {"IPv6Prefix", &DMREAD, NULL, NULL, NULL, browseDHCPv6ServerPoolClientIPv6PrefixInst, NULL, NULL, NULL, NULL, tDHCPv6ServerPoolClientIPv6PrefixParams, NULL, BBFDM_BOTH},
 //{"Option", &DMREAD, NULL, NULL, NULL, browseDHCPv6ServerPoolClientOptionInst, NULL, NULL, NULL, NULL, tDHCPv6ServerPoolClientOptionParams, NULL, BBFDM_BOTH},

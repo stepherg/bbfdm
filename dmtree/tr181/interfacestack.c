@@ -67,7 +67,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	struct interfacestack_data intf_stack_data = {0};
 	struct uci_section *s = NULL, *dmmap_s = NULL;
 	char *layer_inst = "", *loweralias = "", *higheralias = "";
-	char *intf_stack_inst = NULL, *intf_stack_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	char buf_lowerlayer[128] = {0};
 	char buf_higherlayer[128] = {0};
 	char buf_higheralias[64] = {0};
@@ -152,8 +152,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmmap_s = create_dmmap_interface_stack_section(buf_instance);
 
 		// link instance to interface stack data
-		intf_stack_inst = handle_update_instance(1, dmctx, &intf_stack_last, update_instance_alias, 3, dmmap_s, "interface_stack_instance", "interface_stack_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, intf_stack_inst) == DM_STOP)
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   dmmap_s, "interface_stack_instance", "interface_stack_alias", "dmmap_interface_stack", "interface_stack");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
 			goto end;
 	}
 
@@ -224,8 +226,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmmap_s = create_dmmap_interface_stack_section(buf_instance);
 
 		// link instance to interface stack data
-		intf_stack_inst = handle_update_instance(1, dmctx, &intf_stack_last, update_instance_alias, 3, dmmap_s, "interface_stack_instance", "interface_stack_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, intf_stack_inst) == DM_STOP)
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   dmmap_s, "interface_stack_instance", "interface_stack_alias", "dmmap_interface_stack", "interface_stack");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
 			goto end;
 	}
 
@@ -285,8 +289,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmmap_s = create_dmmap_interface_stack_section(buf_instance);
 
 		// link instance to interface stack data
-		intf_stack_inst = handle_update_instance(1, dmctx, &intf_stack_last, update_instance_alias, 3, dmmap_s, "interface_stack_instance", "interface_stack_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, intf_stack_inst) == DM_STOP)
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   dmmap_s, "interface_stack_instance", "interface_stack_alias", "dmmap_interface_stack", "interface_stack");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
 			goto end;
 	}
 
@@ -365,8 +371,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmmap_s = create_dmmap_interface_stack_section(buf_instance);
 
 		// link instance to interface stack data
-		intf_stack_inst = handle_update_instance(1, dmctx, &intf_stack_last, update_instance_alias, 3, dmmap_s, "interface_stack_instance", "interface_stack_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, intf_stack_inst) == DM_STOP)
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   dmmap_s, "interface_stack_instance", "interface_stack_alias", "dmmap_interface_stack", "interface_stack");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
 			goto end;
 	}
 
@@ -447,8 +455,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			dmmap_s = create_dmmap_interface_stack_section(buf_instance);
 
 			// link instance to interface stack data
-			intf_stack_inst = handle_update_instance(1, dmctx, &intf_stack_last, update_instance_alias, 3, dmmap_s, "interface_stack_instance", "interface_stack_alias");
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, intf_stack_inst) == DM_STOP)
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_s, "interface_stack_instance", "interface_stack_alias", "dmmap_interface_stack", "interface_stack");
+
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
 				goto end;
 
 			if (*loweralias == '\0')
@@ -565,8 +575,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			dmmap_s = create_dmmap_interface_stack_section(buf_instance);
 
 			// link instance to interface stack data
-			intf_stack_inst = handle_update_instance(1, dmctx, &intf_stack_last, update_instance_alias, 3, dmmap_s, "interface_stack_instance", "interface_stack_alias");
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, intf_stack_inst) == DM_STOP)
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_s, "interface_stack_instance", "interface_stack_alias", "dmmap_interface_stack", "interface_stack");
+
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
 				goto end;
 
 			// The lower layer is Device.WiFi.Radio.{i}.
@@ -620,8 +632,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				dmmap_s = create_dmmap_interface_stack_section(buf_instance);
 
 				// link instance to interface stack data
-				intf_stack_inst = handle_update_instance(1, dmctx, &intf_stack_last, update_instance_alias, 3, dmmap_s, "interface_stack_instance", "interface_stack_alias");
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, intf_stack_inst) == DM_STOP)
+				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+					   dmmap_s, "interface_stack_instance", "interface_stack_alias", "dmmap_interface_stack", "interface_stack");
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
 					goto end;
 			}
 
@@ -665,10 +679,11 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				dmmap_s = create_dmmap_interface_stack_section(buf_instance);
 
 				// link instance to interface stack data
-				intf_stack_inst = handle_update_instance(1, dmctx, &intf_stack_last, update_instance_alias, 3, dmmap_s, "interface_stack_instance", "interface_stack_alias");
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, intf_stack_inst) == DM_STOP)
-					goto end;
+				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+					   dmmap_s, "interface_stack_instance", "interface_stack_alias", "dmmap_interface_stack", "interface_stack");
 
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
+					goto end;
 			}
 
 			// The lower layer is Device.DSL.Line.{i}.
@@ -711,8 +726,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				dmmap_s = create_dmmap_interface_stack_section(buf_instance);
 
 				// link instance to interface stack data
-				intf_stack_inst = handle_update_instance(1, dmctx, &intf_stack_last, update_instance_alias, 3, dmmap_s, "interface_stack_instance", "interface_stack_alias");
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, intf_stack_inst) == DM_STOP)
+				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+					   dmmap_s, "interface_stack_instance", "interface_stack_alias", "dmmap_interface_stack", "interface_stack");
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
 					goto end;
 			}
 		}

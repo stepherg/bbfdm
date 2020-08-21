@@ -255,7 +255,7 @@ static int add_atm_link(char *refparam, struct dmctx *ctx, void *data, char **in
 	dmuci_set_value("dsl", atm_device, "qos_class", "ubr");
 	dmuci_add_section_bbfdm("dmmap_dsl", "atm-device", &dmmap_atm, &v);
 	dmuci_set_value_by_section(dmmap_atm, "section_name", atm_device);
-	*instancepara = update_instance_bbfdm(dmmap_atm, instance, "atmlinkinstance");
+	*instancepara = update_instance(dmmap_atm, instance, "atmlinkinstance");
 	return 0;
 }
 
@@ -353,7 +353,7 @@ static int set_atm_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 /*#Device.ATM.Link.{i}.!UCI:dsl/atm-device/dmmap_dsl*/
 static int browseAtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *wnum = NULL, *channel_last = NULL, *ifname;
+	char *inst = NULL, *max_inst = NULL, *ifname;
 	struct atm_args curr_atm_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
@@ -362,8 +362,11 @@ static int browseAtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	list_for_each_entry(p, &dup_list, list) {
 		dmuci_get_value_by_section_string(p->config_section, "device", &ifname);
 		init_atm_link(&curr_atm_args, p->config_section, ifname);
-		wnum = handle_update_instance(1, dmctx, &channel_last, update_instance_alias, 3, p->dmmap_section, "atmlinkinstance", "atmlinkalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_atm_args, wnum) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "atmlinkinstance", "atmlinkalias", "dmmap_dsl", "atm-device");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_atm_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -372,14 +375,14 @@ static int browseAtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 /*** ATM. ***/
 DMOBJ tATMObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Link", &DMWRITE, add_atm_link, delete_atm_link, NULL, browseAtmLinkInst, NULL, NULL, NULL, tATMLinkObj, tATMLinkParams, get_atm_linker, BBFDM_BOTH},
 {0}
 };
 
 /*** ATM.Link. ***/
 DMOBJ tATMLinkObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tATMLinkStatsParams, NULL, BBFDM_BOTH},
 {0}
 };

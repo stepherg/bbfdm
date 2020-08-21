@@ -33,7 +33,7 @@ LIB_MAP_OPERATE tRootDynamicOperate[] = {
 
 /* *** Device.IP.Diagnostics. *** */
 DMOBJ tdynamicIPDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextjsonobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"X_IOPSYS_EU_BBKSpeedTest", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tdynamicIPDiagnosticsX_IOPSYS_EU_BBKSpeedTestParams, NULL, BBFDM_BOTH},
 {0}
 };

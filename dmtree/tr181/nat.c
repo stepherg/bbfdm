@@ -33,7 +33,7 @@ static int add_NAT_InterfaceSetting(char *refparam, struct dmctx *ctx, void *dat
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "zone", &dmmap_firewall, &v);
 	dmuci_set_value_by_section(dmmap_firewall, "section_name", section_name(s));
-	*instance = update_instance_bbfdm(dmmap_firewall, inst, "interface_setting_instance");
+	*instance = update_instance(dmmap_firewall, inst, "interface_setting_instance");
 	return 0;
 
 }
@@ -89,7 +89,7 @@ static int add_NAT_PortMapping(char *refparam, struct dmctx *ctx, void *data, ch
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "redirect", &dmmap_firewall, &v);
 	dmuci_set_value_by_section(dmmap_firewall, "section_name", section_name(s));
-	*instance = update_instance_bbfdm(dmmap_firewall, inst, "port_mapping_instance");
+	*instance = update_instance(dmmap_firewall, inst, "port_mapping_instance");
 	return 0;
 
 }
@@ -581,14 +581,17 @@ static int set_nat_port_mapping_description(char *refparam, struct dmctx *ctx, v
 /*#Device.NAT.InterfaceSetting.{i}.!UCI:firewall/zone/dmmap_firewall*/
 static int browseInterfaceSettingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *nati, *nati_last = NULL;
+	char *inst, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("firewall", "zone", "dmmap_firewall", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		nati =  handle_update_instance(1, dmctx, &nati_last, update_instance_alias, 3, p->dmmap_section, "interface_setting_instance", "interface_setting_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, nati) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "interface_setting_instance", "interface_setting_alias", "dmmap_firewall", "zone");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -598,7 +601,7 @@ static int browseInterfaceSettingInst(struct dmctx *dmctx, DMNODE *parent_node, 
 /*#Device.NAT.PortMapping.{i}.!UCI:firewall/redirect/dmmap_firewall*/
 static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *natp, *natp_last = NULL, *target;
+	char *inst, *max_inst = NULL, *target;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
@@ -607,8 +610,11 @@ static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 		dmuci_get_value_by_section_string(p->config_section, "target", &target);
 		if (*target != '\0' && strcmp(target, "DNAT") != 0)
 			continue;
-		natp =  handle_update_instance(1, dmctx, &natp_last, update_instance_alias, 3, p->dmmap_section, "port_mapping_instance", "port_mapping_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, natp) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "port_mapping_instance", "port_mapping_alias", "dmmap_firewall", "redirect");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -617,7 +623,7 @@ static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 
 /* *** Device.NAT. *** */
 DMOBJ tNATObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"InterfaceSetting", &DMWRITE, add_NAT_InterfaceSetting, delete_NAT_InterfaceSetting, NULL, browseInterfaceSettingInst, NULL, NULL, NULL, NULL, tNATInterfaceSettingParams, NULL, BBFDM_BOTH},
 {"PortMapping", &DMWRITE, add_NAT_PortMapping, delete_NAT_PortMapping, NULL, browsePortMappingInst, NULL, NULL, NULL, NULL, tNATPortMappingParams, NULL, BBFDM_BOTH},
 {0}

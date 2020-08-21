@@ -349,7 +349,7 @@ def printheaderObjCommon( objname ):
 def cprintheaderOBJS( objname ):
 	fp = open('./.objparamarray.c', 'a')
 	print >> fp,  "DMOBJ %s[] = {" % ("t" + getname(objname) + "Obj")
-	print >> fp,  "/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/"
+	print >> fp,  "/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/"
 	fp.close()
 
 def hprintheaderOBJS( objname ):
@@ -410,7 +410,7 @@ def cprintAddDelObj( faddobj, fdelobj, name, mappingobj, dmobject ):
 			print >> fp, ""
 			print >> fp, "	dmuci_add_section_bbfdm(\"%s\", \"%s\", &dmmap, &v);" % (dmmapfile, sectiontype)
 			print >> fp, "	dmuci_set_value_by_section(dmmap, \"section_name\", section_name(s));"
-			print >> fp, "	*instance = update_instance_bbfdm(dmmap, inst, \"%s\");" % (name+"instance")
+			print >> fp, "	*instance = update_instance(dmmap, inst, \"%s\");" % (name+"instance")
 	else:
 		print >> fp, "	//TODO"
 	print >> fp, "	return 0;"
@@ -483,13 +483,16 @@ def cprintBrowseObj( fbrowse, name, mappingobj, dmobject ):
 
 		############################## UCI ########################################
 		if type == "uci" :
-			print >> fp, "	char *inst = NULL, *inst_last = NULL;"
+			print >> fp, "	char *inst = NULL, *max_inst = NULL;"
 			print >> fp, "	struct dmmap_dup *p;"
 			print >> fp, "	LIST_HEAD(dup_list);"
 			print >> fp, ""
 			print >> fp, "	synchronize_specific_config_sections_with_dmmap(\"%s\", \"%s\", \"%s\", &dup_list);" % (res1, res2, res3)
 			print >> fp, "	list_for_each_entry(p, &dup_list, list) {"
-			print >> fp, "		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3, p->dmmap_section, \"%s\", \"%s\");" % (name+"instance", name+"alias")
+			print >> fp, ""
+			print >> fp, "		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,"
+			print >> fp, "			   p->dmmap_section, \"%s\", \"%s\", \"%s\", \"%s\");" % (name+"instance", name+"alias", res3, res2)
+			print >> fp, ""
 			print >> fp, "		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)"
 			print >> fp, "			break;"
 			print >> fp, "	}"
@@ -499,7 +502,7 @@ def cprintBrowseObj( fbrowse, name, mappingobj, dmobject ):
 		############################## UBUS ########################################
 		elif type == "ubus" :
 			print >> fp, "	json_object *res = NULL, *obj = NULL, *arrobj = NULL;"
-			print >> fp, "	char *idx = NULL, *idx_last = NULL;"
+			print >> fp, "	char *inst = NULL, *max_inst = NULL;"
 			print >> fp, "	int id = 0, i = 0;"
 			print >> fp, ""
 			if res3 == None and res4 == None:
@@ -508,8 +511,10 @@ def cprintBrowseObj( fbrowse, name, mappingobj, dmobject ):
 				print >> fp, "	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{{\"%s\", \"%s\", String}}, 1, &res);" % (res1, res2, res3, res4)
 			print >> fp, "	if (res) {"
 			print >> fp, "		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, \"%s\") {" % res5
-			print >> fp, "			idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);"
-			print >> fp, "			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, idx) == DM_STOP)"
+			print >> fp, ""
+			print >> fp, "			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);"
+			print >> fp, ""
+			print >> fp, "			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)"
 			print >> fp, "				break;"
 			print >> fp, "		}"
 			print >> fp, "	}"

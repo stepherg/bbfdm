@@ -100,7 +100,7 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 {
 	json_object *res = NULL,  *devices = NULL, *device = NULL;
 	struct upnpdiscovery upnp_dev = {};
-	char *descurl = NULL, *st = NULL, *usn = NULL, *is_root_device = NULL, *instance = NULL, *instnbr = NULL, *v = NULL;
+	char *descurl = NULL, *st = NULL, *usn = NULL, *is_root_device = NULL, *inst = NULL, *max_inst = NULL, *v = NULL;
 	char **stparams = NULL, **uuid, **urn;
 	int i;
 	size_t length;
@@ -138,8 +138,10 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 			}
 			upnp_dev.dmmap_sect = dmmap_sect;
 
-			instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "upnp_root_device_instance", "upnp_root_device_alias");
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, instance) == DM_STOP)
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_sect, "upnp_root_device_instance", "upnp_root_device_alias", "dmmap_upnp", "upnp_root_device");
+
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, inst) == DM_STOP)
 				return 0;
 		}
 	}
@@ -150,7 +152,7 @@ static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_nod
 {
 	json_object *res = NULL,  *devices = NULL, *device = NULL;
 	struct upnpdiscovery upnp_dev = {};
-	char *descurl = NULL, *st = NULL, *usn = NULL, *instance = NULL, *instnbr = NULL, *v = NULL;
+	char *descurl = NULL, *st = NULL, *usn = NULL, *inst = NULL, *max_inst = NULL, *v = NULL;
 	char **stparams= NULL, **uuid, **urn;
 	int i;
 	size_t lengthuuid, lengthurn;
@@ -185,8 +187,10 @@ static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_nod
 			}
 			upnp_dev.dmmap_sect = dmmap_sect;
 
-			instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "upnp_evice_instance", "upnp_device_alias");
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, instance) == DM_STOP)
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+					   dmmap_sect, "upnp_evice_instance", "upnp_device_alias", "dmmap_upnp", "upnp_device");
+
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, inst) == DM_STOP)
 				return 0;
 		}
 	}
@@ -197,7 +201,7 @@ static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_no
 {
 	json_object *res = NULL,  *services = NULL, *service = NULL;
 	struct upnpdiscovery upnp_dev = {};
-	char *descurl = NULL, *st = NULL, *usn = NULL, *instance = NULL, *instnbr = NULL, *v = NULL;
+	char *descurl = NULL, *st = NULL, *usn = NULL, *inst = NULL, *max_inst = NULL, *v = NULL;
 	char **stparams = NULL, **uuid, **urn;
 	int i;
 	size_t lengthuuid, lengthurn;
@@ -232,8 +236,10 @@ static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_no
 			}
 			upnp_dev.dmmap_sect = dmmap_sect;
 
-			instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "upnp_service_instance", "upnp_service_alias");
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, instance) == DM_STOP)
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_sect, "upnp_service_instance", "upnp_service_alias", "dmmap_upnp", "upnp_service");
+
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, inst) == DM_STOP)
 				return 0;
 		}
 	}
@@ -244,7 +250,7 @@ static int browseUPnPDescriptionDeviceDescriptionInst(struct dmctx *dmctx, DMNOD
 {
 	json_object *res = NULL,  *descriptions = NULL, *description = NULL;
 	struct upnp_description_file_info upnp_desc= {};
-	char *descurl = NULL, *instance = NULL, *instnbr = NULL, *v = NULL;
+	char *descurl = NULL, *inst = NULL, *max_inst = NULL, *v = NULL;
 	int i;
 	struct uci_section* dmmap_sect = NULL;
 
@@ -268,8 +274,10 @@ static int browseUPnPDescriptionDeviceDescriptionInst(struct dmctx *dmctx, DMNOD
 			}
 			upnp_desc.dmmap_sect = dmmap_sect;
 
-			instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "upnp_service_instance", "upnp_service_alias");
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_desc, instance) == DM_STOP)
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_sect, "upnp_service_instance", "upnp_service_alias", "dmmap_upnp", "upnp_description");
+
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_desc, inst) == DM_STOP)
 				return 0;
 		}
 	}
@@ -280,7 +288,7 @@ static int browseUPnPDescriptionDeviceInstanceInst(struct dmctx *dmctx, DMNODE *
 {
 	json_object *res = NULL,  *devices_instances = NULL, *device_inst = NULL;
 	struct upnp_device_inst upnp_dev_inst = {};
-	char *instance = NULL, *instnbr = NULL, *v;
+	char *inst = NULL, *max_inst = NULL, *v;
 	int i;
 	struct uci_section* dmmap_sect = NULL;
 
@@ -314,8 +322,10 @@ static int browseUPnPDescriptionDeviceInstanceInst(struct dmctx *dmctx, DMNODE *
 			}
 			upnp_dev_inst.dmmap_sect = dmmap_sect;
 
-			instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "upnp_device_inst_instance", "upnp_device_inst_alias");
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev_inst, instance) == DM_STOP)
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_sect, "upnp_device_inst_instance", "upnp_device_inst_alias", "dmmap_upnp", "upnp_device_inst");
+
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev_inst, inst) == DM_STOP)
 				return 0;
 		}
 	}
@@ -326,7 +336,7 @@ static int browseUPnPDescriptionServiceInstanceInst(struct dmctx *dmctx, DMNODE 
 {
 	json_object *res = NULL,  *services_instances = NULL, *service_inst = NULL;
 	struct upnp_service_inst upnp_services_inst = {};
-	char *instance = NULL, *instnbr = NULL, *v;
+	char *inst = NULL, *max_inst = NULL, *v;
 	int i;
 	struct uci_section* dmmap_sect = NULL;
 
@@ -354,8 +364,10 @@ static int browseUPnPDescriptionServiceInstanceInst(struct dmctx *dmctx, DMNODE 
 			}
 			upnp_services_inst.dmmap_sect = dmmap_sect;
 
-			instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "upnp_service_inst_instance", "upnp_service_inst_alias");
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_services_inst, instance) == DM_STOP)
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_sect, "upnp_service_inst_instance", "upnp_service_inst_alias", "dmmap_upnp", "upnp_service_inst");
+
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_services_inst, inst) == DM_STOP)
 				return 0;
 		}
 	}
@@ -819,7 +831,7 @@ static int get_UPnPDescriptionServiceInstance_EventSubURL(char *refparam, struct
 
 /* *** Device.UPnP. *** */
 DMOBJ tUPnPObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceObj, tUPnPDeviceParams, NULL, BBFDM_BOTH},
 {"Discovery", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDiscoveryObj, tUPnPDiscoveryParams, NULL, BBFDM_BOTH},
 {"Description", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDescriptionObj, tUPnPDescriptionParams, NULL, BBFDM_BOTH},
@@ -828,7 +840,7 @@ DMOBJ tUPnPObj[] = {
 
 /* *** Device.UPnP.Device. *** */
 DMOBJ tUPnPDeviceObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceCapabilitiesParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -869,7 +881,7 @@ DMLEAF tUPnPDeviceCapabilitiesParams[] = {
 
 /* *** Device.UPnP.Discovery. *** */
 DMOBJ tUPnPDiscoveryObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"RootDevice", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryRootDeviceInst, NULL, NULL, NULL, NULL, tUPnPDiscoveryRootDeviceParams, get_root_device_linker, BBFDM_BOTH},
 {"Device", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryDeviceInst, NULL, NULL, NULL, NULL, tUPnPDiscoveryDeviceParams, get_device_linker, BBFDM_BOTH},
 {"Service", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryServiceInst, NULL, NULL, NULL, NULL, tUPnPDiscoveryServiceParams, get_service_linker, BBFDM_BOTH},
@@ -928,7 +940,7 @@ DMLEAF tUPnPDiscoveryServiceParams[] = {
 
 /* *** Device.UPnP.Description. *** */
 DMOBJ tUPnPDescriptionObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"DeviceDescription", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceDescriptionInst, NULL, NULL, NULL, NULL, tUPnPDescriptionDeviceDescriptionParams, NULL, BBFDM_BOTH},
 {"DeviceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceInstanceInst, NULL, NULL, NULL, NULL, tUPnPDescriptionDeviceInstanceParams, get_device_instance_linker, BBFDM_BOTH},
 {"ServiceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionServiceInstanceInst, NULL, NULL, NULL, NULL, tUPnPDescriptionServiceInstanceParams, NULL, BBFDM_BOTH},

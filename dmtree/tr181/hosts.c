@@ -13,7 +13,7 @@
 
 /* *** Device.Hosts. *** */
 DMOBJ tHostsObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Host", &DMREAD, NULL, NULL, NULL, os__browseHostsHostInst, NULL, NULL, NULL, tHostsHostObj, tHostsHostParams, get_linker_host, BBFDM_BOTH},
 {0}
 };
@@ -26,7 +26,7 @@ DMLEAF tHostsParams[] = {
 
 /* *** Device.Hosts.Host.{i}. *** */
 DMOBJ tHostsHostObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"IPv4Address", &DMREAD, NULL, NULL, NULL, os__browseHostsHostIPv4AddressInst, NULL, NULL, NULL, NULL, tHostsHostIPv4AddressParams, NULL, BBFDM_BOTH},
 {"IPv6Address", &DMREAD, NULL, NULL, NULL, os__browseHostsHostIPv6AddressInst, NULL, NULL, NULL, NULL, tHostsHostIPv6AddressParams, NULL, BBFDM_BOTH},
 {"WANStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHostsHostWANStatsParams, NULL, BBFDM_BOTH},

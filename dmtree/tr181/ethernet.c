@@ -205,7 +205,7 @@ static char *get_vlan_last_instance_bbfdm(char *package, char *section, char *op
 			dmuci_set_value_by_section(s, "vlan_term_instance", "");
 			continue;
 		}
-		inst = update_instance_bbfdm(s, last_inst, opt_inst);
+		inst = update_instance(s, last_inst, opt_inst);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(inst);
@@ -219,7 +219,7 @@ static char *get_vlan_last_instance_bbfdm(char *package, char *section, char *op
 /*#Device.Ethernet.Interface.{i}.!UCI:ports/ethport/dmmap_ports*/
 static int browseEthernetInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *int_num = NULL, *int_num_last = NULL, *ifname;
+	char *inst = NULL, *max_inst = NULL, *ifname;
 	struct eth_port_args curr_eth_port_args = {0};
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
@@ -228,8 +228,11 @@ static int browseEthernetInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node,
 	list_for_each_entry(p, &dup_list, list) {
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
 		init_eth_port(&curr_eth_port_args, p->config_section, ifname);
-		int_num =  handle_update_instance(1, dmctx, &int_num_last, update_instance_alias, 3, p->dmmap_section, "eth_port_instance", "eth_port_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_eth_port_args, int_num) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "eth_port_instance", "eth_port_alias", "dmmap_ports", "ethport");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_eth_port_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -240,13 +243,16 @@ static int browseEthernetLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void
 {
 	struct dm_args args = {0};
 	struct uci_section *s = NULL;
-	char *id_last = NULL, *id = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	dmmap_synchronizeEthernetLink(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, DMMAP, "link", s) {
 		args.section = s;
-		id = handle_update_instance(1, dmctx, &id_last, update_instance_alias_bbfdm, 3, s, "link_instance", "link_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&args, id) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "link_instance", "link_alias", "dmmap", "link");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&args, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -255,7 +261,7 @@ static int browseEthernetLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void
 /*#Device.Ethernet.VLANTermination.{i}.!UCI:network/device/dmmap_network*/
 static int browseEthernetVLANTerminationInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *type, *name, *vlan_term = NULL, *vlan_term_last = NULL;
+	char *type, *name, *inst = NULL, *max_inst = NULL;
 	struct dm_args curr_vlan_term_args = {0};
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
@@ -267,8 +273,11 @@ static int browseEthernetVLANTerminationInst(struct dmctx *dmctx, DMNODE *parent
 		if (strcmp(type, "untagged") == 0 || (*name != '\0' && !is_vlan_termination_section(name)))
 			continue;
 		curr_vlan_term_args.section = p->config_section;
-		vlan_term = handle_update_instance(1, dmctx, &vlan_term_last, update_instance_alias, 3, p->dmmap_section, "vlan_term_instance", "vlan_term_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_vlan_term_args, vlan_term) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "vlan_term_instance", "vlan_term_alias", "dmmap_network", "device");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_vlan_term_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -277,7 +286,7 @@ static int browseEthernetVLANTerminationInst(struct dmctx *dmctx, DMNODE *parent
 
 static int browseEthernetRMONStatsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *idx = NULL, *idx_last = NULL, *ifname;
+	char *inst = NULL, *max_inst = NULL, *ifname;
 	struct eth_rmon_args curr_eth_rmon_args = {0};
 	struct dmmap_dup *p = NULL;
 	json_object *res = NULL;
@@ -289,8 +298,11 @@ static int browseEthernetRMONStatsInst(struct dmctx *dmctx, DMNODE *parent_node,
 		dmubus_call("ethernet", "rmonstats", UBUS_ARGS{{"ifname", ifname, String}}, 1, &res);
 		if (!res) continue;
 		init_eth_rmon(&curr_eth_rmon_args, p->config_section, res);
-		idx =  handle_update_instance(1, dmctx, &idx_last, update_instance_alias, 3, p->dmmap_section, "eth_rmon_instance", "eth_rmon_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_eth_rmon_args, idx) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "eth_rmon_instance", "eth_rmon_alias", "dmmap_eth_rmon", "ethport");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_eth_rmon_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -342,7 +354,7 @@ static int addObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 	/* Add link section in dmmap file */
 	dmuci_add_section_bbfdm(DMMAP, "link", &dmmap_link, &v);
 	dmuci_set_value_by_section(dmmap_link, "section_name", interface_name);
-	*instance = update_instance_bbfdm(dmmap_link, inst, "link_instance");
+	*instance = update_instance(dmmap_link, inst, "link_instance");
 	return 0;
 }
 
@@ -406,7 +418,7 @@ static int addObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 	// Add device section in dmmap_network file
 	dmuci_add_section_bbfdm("dmmap_network", "device", &dmmap_network, &v);
 	dmuci_set_value_by_section(dmmap_network, "section_name", device_name);
-	*instance = update_instance_bbfdm(dmmap_network, inst, "vlan_term_instance");
+	*instance = update_instance(dmmap_network, inst, "vlan_term_instance");
 	return 0;
 }
 

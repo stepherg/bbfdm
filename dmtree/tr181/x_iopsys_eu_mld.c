@@ -37,7 +37,7 @@ static int add_mld_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_add_section_bbfdm("dmmap_mcast", "proxy", &dmmap, &v);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	dmuci_set_value_by_section(dmmap, "proto", "mld");
-	*instance = update_instance_bbfdm(dmmap, inst, "proxy_instance");
+	*instance = update_instance(dmmap, inst, "proxy_instance");
 
 	return 0;
 }
@@ -89,13 +89,16 @@ static int del_mld_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char
 
 static int browse_mld_proxy_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_cont("mcast", "proxy", "dmmap_mcast", "proto", "mld", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3, p->dmmap_section, "proxy_instance", "proxy_alias");
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "proxy_instance", "proxy_alias", "dmmap_mcast", "proxy");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -128,7 +131,7 @@ static int add_mld_snooping_obj(char *refparam, struct dmctx *ctx, void *data, c
 	dmuci_add_section_bbfdm("dmmap_mcast", "snooping", &dmmap, &v);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	dmuci_set_value_by_section(dmmap, "proto", "mld");
-	*instance = update_instance_bbfdm(dmmap, inst, "snooping_instance");
+	*instance = update_instance(dmmap, inst, "snooping_instance");
 
 	return 0;
 }
@@ -178,13 +181,16 @@ static int del_mld_snooping_obj(char *refparam, struct dmctx *ctx, void *data, c
 
 static int browse_mld_snooping_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_cont("mcast", "snooping", "dmmap_mcast", "proto", "mld", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3, p->dmmap_section, "snooping_instance", "snooping_alias");
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "snooping_instance", "snooping_alias", "dmmap_mcast", "snooping");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -243,7 +249,7 @@ static int add_mlds_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 	dmuci_add_section_bbfdm("dmmap_mcast", "snooping_filter", &dmmap_mlds_filter, &v);
 	dmuci_set_value_by_section(dmmap_mlds_filter, "section_name", section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_mlds_filter, "enable", "0");
-	*instance = update_instance_bbfdm(dmmap_mlds_filter, last_inst, "filter_instance");
+	*instance = update_instance(dmmap_mlds_filter, last_inst, "filter_instance");
 
 	return 0;
 }
@@ -251,17 +257,23 @@ static int add_mlds_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 static int browse_mlds_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct dmmap_dup *p = NULL;
-	char *inst = NULL, *inst_last = NULL;
+	struct browse_args browse_args = {0};
+	char *inst = NULL, *max_inst = NULL;
 	LIST_HEAD(dup_list);
 
-	synchronize_specific_config_sections_with_dmmap_mcast_filter("mcast", "snooping", prev_data, "dmmap_mcast",
-			"snooping_filter", "mld", &dup_list);
+	synchronize_specific_config_sections_with_dmmap_mcast_filter("mcast", "snooping", prev_data,
+			"dmmap_mcast", "snooping_filter", "mld", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		if (!p->config_section)
 			break;
 
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3,
-				p->dmmap_section, "filter_instance", "filter_alias");
+		browse_args.option = "section_name";
+		browse_args.value = section_name((struct uci_section *)prev_data);
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+			   p->dmmap_section, "filter_instance", "filter_alias", "dmmap_mcast", "snooping_filter",
+			   check_browse_section, (void *)&browse_args);
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -307,7 +319,7 @@ static int add_mldp_interface_obj(char *refparam, struct dmctx *ctx, void *data,
 	dmuci_set_value_by_section(dmmap_mldp_interface, "upstream", "0");
 	dmuci_set_value_by_section(dmmap_mldp_interface, "snooping_mode", "0");
 
-	*instance = update_instance_bbfdm(dmmap_mldp_interface, last_inst, "iface_instance");
+	*instance = update_instance(dmmap_mldp_interface, last_inst, "iface_instance");
 	return 0;
 }
 
@@ -366,7 +378,8 @@ static int del_mldp_interface_obj(char *refparam, struct dmctx *ctx, void *data,
 static int browse_mldp_interface_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct dmmap_dup *p = NULL;
-	char *inst = NULL, *inst_last = NULL;
+	struct browse_args browse_args = {0};
+	char *inst = NULL, *max_inst = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_mcast_iface("mcast", "proxy", prev_data,
@@ -375,8 +388,13 @@ static int browse_mldp_interface_inst(struct dmctx *dmctx, DMNODE *parent_node, 
 		if (!p->config_section)
 			break;
 
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3,
-				p->dmmap_section, "iface_instance", "iface_alias");
+		browse_args.option = "section_name";
+		browse_args.value = section_name((struct uci_section *)prev_data);
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+			   p->dmmap_section, "iface_instance", "iface_alias", "dmmap_mcast", "proxy_interface",
+			   check_browse_section, (void *)&browse_args);
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -397,7 +415,7 @@ static int add_mldp_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 	dmuci_set_value_by_section(dmmap_mldp_filter, "section_name", section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_mldp_filter, "enable", "0");
 
-	*instance = update_instance_bbfdm(dmmap_mldp_filter, last_inst, "filter_instance");
+	*instance = update_instance(dmmap_mldp_filter, last_inst, "filter_instance");
 
 	return 0;
 }
@@ -405,17 +423,23 @@ static int add_mldp_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 static int browse_mldp_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct dmmap_dup *p = NULL;
-	char *inst = NULL, *inst_last = NULL;
+	struct browse_args browse_args = {0};
+	char *inst = NULL, *max_inst = NULL;
 	LIST_HEAD(dup_list);
 
-	synchronize_specific_config_sections_with_dmmap_mcast_filter("mcast", "proxy", prev_data, "dmmap_mcast",
-			"proxy_filter", "mld", &dup_list);
+	synchronize_specific_config_sections_with_dmmap_mcast_filter("mcast", "proxy", prev_data,
+			"dmmap_mcast", "proxy_filter", "mld", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		if (!p->config_section)
 			break;
 
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3,
-				p->dmmap_section, "filter_instance", "filter_alias");
+		browse_args.option = "section_name";
+		browse_args.value = section_name((struct uci_section *)prev_data);
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+			   p->dmmap_section, "filter_instance", "filter_alias", "dmmap_mcast", "proxy_filter",
+			   check_browse_section, (void *)&browse_args);
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -792,7 +816,7 @@ static int set_mldp_interface_upstream(char *refparam, struct dmctx *ctx, void *
 
 /* ***Device.X_IOPSYS_EU_MLD. *** */
 DMOBJ X_IOPSYS_EU_MLDObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Snooping", &DMWRITE, add_mld_snooping_obj, del_mld_snooping_obj, NULL, browse_mld_snooping_inst, NULL, NULL, NULL, X_IOPSYS_EU_MLDSnoopingObj, X_IOPSYS_EU_MLDSnoopingParams, NULL, BBFDM_BOTH},
 {"Proxy", &DMWRITE, add_mld_proxy_obj, del_mld_proxy_obj, NULL, browse_mld_proxy_inst, NULL, NULL, NULL, X_IOPSYS_EU_MLDProxyObj, X_IOPSYS_EU_MLDProxyParams, NULL, BBFDM_BOTH},
 {0}

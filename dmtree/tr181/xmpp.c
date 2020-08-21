@@ -517,12 +517,15 @@ static int  get_xmpp_connection_linker(char *refparam, struct dmctx *dmctx, void
 /*#Device.XMPP.Connection.{i}.!UCI:cwmp_xmpp/xmpp_connection/dmmap_cwmp_xmpp*/
 static int browsexmpp_connectionInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *iconnection = NULL, *iconnection_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct uci_section *s = NULL;
 
 	uci_foreach_sections("cwmp_xmpp", "xmpp_connection", s) {
-		iconnection = handle_update_instance(1, dmctx, &iconnection_last, update_instance_alias, 3, s, "connection_instance", "connection_instance_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, iconnection) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "connection_instance", "connection_instance_alias""cwmp_xmpp", "xmpp_connection");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -531,13 +534,21 @@ static int browsexmpp_connectionInst(struct dmctx *dmctx, DMNODE *parent_node, v
 /*#Device.XMPP.Connection.{i}.!UCI:cwmp_xmpp/xmpp_connection_server/dmmap_cwmp_xmpp*/
 static int browsexmpp_connection_serverInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *iconnectionserver = NULL, *iconnectionserver_last = NULL, *prev_connection_instance;
+	char *inst = NULL, *max_inst = NULL, *prev_connection_instance;
 	struct uci_section *s = NULL, *connsection = (struct uci_section *)prev_data;
+	struct browse_args browse_args = {0};
 
 	dmuci_get_value_by_section_string(connsection, "connection_instance", &prev_connection_instance);
 	uci_foreach_option_eq("cwmp_xmpp", "xmpp_connection_server", "id_connection", prev_connection_instance, s) {
-		iconnectionserver = handle_update_instance(1, dmctx, &iconnectionserver_last, update_instance_alias, 3, s, "connection_server_instance", "connection_server_instance_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, iconnectionserver) == DM_STOP)
+
+		browse_args.option = "id_connection";
+		browse_args.value = prev_connection_instance;
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "connection_server_instance", "connection_server_instance_alias", "cwmp_xmpp", "xmpp_connection_server",
+			   check_browse_section, (void *)&browse_args);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -545,7 +556,7 @@ static int browsexmpp_connection_serverInst(struct dmctx *dmctx, DMNODE *parent_
 
 /* *** Device.XMPP. *** */
 DMOBJ tXMPPObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Connection", &DMWRITE, add_xmpp_connection, delete_xmpp_connection, NULL, browsexmpp_connectionInst, NULL, NULL, NULL, tXMPPConnectionObj, tXMPPConnectionParams, get_xmpp_connection_linker, BBFDM_BOTH},
 {0}
 };
@@ -559,7 +570,7 @@ DMLEAF tXMPPParams[] = {
 
 /* *** Device.XMPP.Connection.{i}. *** */
 DMOBJ tXMPPConnectionObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Server", &DMREAD, NULL, NULL, NULL, browsexmpp_connection_serverInst, NULL, NULL, NULL, NULL, tXMPPConnectionServerParams, NULL, BBFDM_BOTH},
 {0}
 };

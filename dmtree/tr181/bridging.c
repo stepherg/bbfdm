@@ -13,10 +13,6 @@
 #include "dmentry.h"
 #include "bridging.h"
 
-#define MAX_QOS_MAP_ELEMENTS 8
-#define MIN_QOS_MAP_ELEMENTS 8
-#define MAX_STRING_LEN 15
-
 struct bridge_args
 {
 	struct uci_section *bridge_sec;
@@ -836,7 +832,7 @@ static int addObjBridgingBridge(char *refparam, struct dmctx *ctx, void *data, c
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_bridge, &v);
 	dmuci_set_value_by_section(dmmap_bridge, "section_name", bridge_name);
 	dmuci_set_value_by_section(dmmap_bridge, "added_by_user", "1");
-	*instance = update_instance_bbfdm(dmmap_bridge, last_inst, "bridge_instance");
+	*instance = update_instance(dmmap_bridge, last_inst, "bridge_instance");
 
 	return 0;
 }
@@ -1652,7 +1648,7 @@ static int set_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dm
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt_list(value, MIN_QOS_MAP_ELEMENTS, MAX_QOS_MAP_ELEMENTS, MAX_STRING_LEN, RANGE_ARGS{{"0","7"}}, 1))
+			if (dm_validate_unsignedInt_list(value, 8, 8, -1, RANGE_ARGS{{"0","7"}}, 1))
 				return FAULT_9007;
 			break;
 
@@ -1673,7 +1669,7 @@ static int set_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, st
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt_list(value, MIN_QOS_MAP_ELEMENTS, MAX_QOS_MAP_ELEMENTS, MAX_STRING_LEN, RANGE_ARGS{{"0","7"}}, 1))
+			if (dm_validate_unsignedInt_list(value, 8, 8, -1, RANGE_ARGS{{"0","7"}}, 1))
 				return FAULT_9007;
 			return 0;
 
@@ -2227,17 +2223,20 @@ static int set_BridgingBridgeVLANPort_Untagged(char *refparam, struct dmctx *ctx
 /*#Device.Bridging.Bridge.{i}.!UCI:network/interface/dmmap_network*/
 static int browseBridgingBridgeInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *br_inst = NULL, *br_inst_last = NULL, *ifname;
+	char *inst = NULL, *max_inst = NULL, *ifname;
 	struct bridge_args curr_bridging_args = {0};
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_network", "type", "bridge", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		br_inst = handle_update_instance(1, dmctx, &br_inst_last, update_instance_alias, 3, p->dmmap_section, "bridge_instance", "bridge_alias");
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+				  p->dmmap_section, "bridge_instance", "bridge_alias", "dmmap_network", "interface");
+
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
-		init_bridging_args(&curr_bridging_args, p->config_section, ifname, br_inst);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridging_args, br_inst) == DM_STOP)
+		init_bridging_args(&curr_bridging_args, p->config_section, ifname, inst);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridging_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -2246,11 +2245,11 @@ static int browseBridgingBridgeInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 
 static int browseBridgingBridgePortInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-
 	struct bridge_port_args curr_bridge_port_args = {0};
 	struct bridge_args *br_args = (struct bridge_args *)prev_data;
+	struct browse_args browse_args = {0};
 	struct uci_section *s = NULL, *deviceport_s = NULL;
-	char *port_inst = NULL, *port_last = NULL, *device;
+	char *inst = NULL, *max_inst = NULL, *device;
 
 	check_create_dmmap_package("dmmap_bridge_port");
 	dmmap_synchronizeBridgingBridgePort(dmctx, parent_node, prev_data, prev_instance);
@@ -2258,8 +2257,15 @@ static int browseBridgingBridgePortInst(struct dmctx *dmctx, DMNODE *parent_node
 		get_bridge_port_device_section(s, &deviceport_s);
 		dmuci_get_value_by_section_string(s, "device", &device);
 		init_bridge_port_args(&curr_bridge_port_args, deviceport_s, s, br_args->bridge_sec, device, br_args->br_inst);
-		port_inst = handle_update_instance(1, dmctx, &port_last, update_instance_alias_bbfdm, 3, s, "bridge_port_instance", "bridge_port_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_port_args, port_inst) == DM_STOP)
+
+		browse_args.option = "br_inst";
+		browse_args.value = br_args->br_inst;
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+					s, "bridge_port_instance", "bridge_port_alias", "dmmap_bridge_port", "bridge_port",
+					check_browse_section, (void *)&browse_args);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_port_args, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -2269,15 +2275,23 @@ static int browseBridgingBridgeVLANInst(struct dmctx *dmctx, DMNODE *parent_node
 {
 	struct bridge_vlan_args curr_bridge_vlan_args = {0};
 	struct bridge_args *br_args = (struct bridge_args *)prev_data;
+	struct browse_args browse_args = {0};
 	struct uci_section *s = NULL;
-	char *vlan_inst = NULL, *vlan_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	check_create_dmmap_package("dmmap_bridge_vlan");
 	dmmap_synchronizeBridgingBridgeVLAN(dmctx, parent_node, prev_data, prev_instance);
 	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_vlan", "bridge_vlan", "br_inst", br_args->br_inst, s) {
 		init_bridge_vlan_args(&curr_bridge_vlan_args, s, br_args->bridge_sec, br_args->br_inst);
-		vlan_inst = handle_update_instance(1, dmctx, &vlan_last, update_instance_alias_bbfdm, 3, s, "bridge_vlan_instance", "bridge_vlan_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_vlan_args, vlan_inst) == DM_STOP)
+
+		browse_args.option = "br_inst";
+		browse_args.value = br_args->br_inst;
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+					s, "bridge_vlan_instance", "bridge_vlan_alias", "dmmap_bridge_vlanport", "bridge_vlan",
+					check_browse_section, (void *)&browse_args);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_vlan_args, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -2287,16 +2301,24 @@ static int browseBridgingBridgeVLANPortInst(struct dmctx *dmctx, DMNODE *parent_
 {
 	struct bridge_vlanport_args curr_bridge_vlanport_args = {0};
 	struct bridge_args *br_args = (struct bridge_args *)prev_data;
+	struct browse_args browse_args = {0};
 	struct uci_section *s = NULL, *device_s = NULL;
-	char *vlanport_inst = NULL, *vlanport_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	check_create_dmmap_package("dmmap_bridge_vlanport");
 	dmmap_synchronizeBridgingBridgeVLANPort(dmctx, parent_node, prev_data, prev_instance);
 	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_vlanport", "bridge_vlanport", "br_inst", br_args->br_inst, s) {
 		get_bridge_vlanport_device_section(s, &device_s);
 		init_bridge_vlanport_args(&curr_bridge_vlanport_args, device_s, s, br_args->bridge_sec, br_args->br_inst);
-		vlanport_inst = handle_update_instance(1, dmctx, &vlanport_last, update_instance_alias_bbfdm, 3, s, "bridge_vlanport_instance", "bridge_vlanport_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_vlanport_args, vlanport_inst) == DM_STOP)
+
+		browse_args.option = "br_inst";
+		browse_args.value = br_args->br_inst;
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+						s, "bridge_vlanport_instance", "bridge_vlanport_alias", "dmmap_bridge_vlanport", "bridge_vlanport",
+						check_browse_section, (void *)&browse_args);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_vlanport_args, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -2307,7 +2329,7 @@ static int browseBridgingBridgeVLANPortInst(struct dmctx *dmctx, DMNODE *parent_
 ***********************************************************************************************************************************/
 /* *** Device.Bridging. *** */
 DMOBJ tBridgingObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Bridge", &DMWRITE, addObjBridgingBridge, delObjBridgingBridge, NULL, browseBridgingBridgeInst, NULL, NULL, NULL, tBridgingBridgeObj, tBridgingBridgeParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -2326,7 +2348,7 @@ DMLEAF tBridgingParams[] = {
 
 /*** Bridging.Bridge.{i}. ***/
 DMOBJ tBridgingBridgeObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Port", &DMWRITE, addObjBridgingBridgePort, delObjBridgingBridgePort, NULL, browseBridgingBridgePortInst, NULL, NULL, NULL, tBridgingBridgePortObj, tBridgingBridgePortParams, get_linker_br_port, BBFDM_BOTH},
 {"VLAN", &DMWRITE, addObjBridgingBridgeVLAN, delObjBridgingBridgeVLAN, NULL, browseBridgingBridgeVLANInst, NULL, NULL, NULL, NULL, tBridgingBridgeVLANParams, get_linker_br_vlan, BBFDM_BOTH},
 {"VLANPort", &DMWRITE, addObjBridgingBridgeVLANPort, delObjBridgingBridgeVLANPort, NULL, browseBridgingBridgeVLANPortInst, NULL, NULL, NULL, NULL, tBridgingBridgeVLANPortParams, NULL, BBFDM_BOTH},
@@ -2347,7 +2369,7 @@ DMLEAF tBridgingBridgeParams[] = {
 
 /*** Bridging.Bridge.{i}.Port.{i}. ***/
 DMOBJ tBridgingBridgePortObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tBridgingBridgePortStatsParams, NULL, BBFDM_BOTH},
 {0}
 };

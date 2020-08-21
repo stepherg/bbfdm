@@ -14,14 +14,17 @@
 
 int browseXIopsysEuButton(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *ibutton = NULL, *ibutton_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("buttons", "button", "dmmap_buttons", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		ibutton =  handle_update_instance(1, dmctx, &ibutton_last, update_instance_alias, 3, p->dmmap_section, "buttoninstance", "buttonalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, ibutton) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "buttoninstance", "buttonalias", "dmmap_buttons", "button");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);

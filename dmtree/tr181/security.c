@@ -209,7 +209,7 @@ static void get_certificate_paths(void)
 static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 #if defined(LOPENSSL) || defined(LMBEDTLS)
-	char *cert_inst= NULL, *cert_inst_last= NULL, *v = NULL;
+	char *inst = NULL, *max_inst = NULL, *v = NULL;
 	struct uci_section *dmmap_sect = NULL;
 	struct certificate_profile certificateprofile = {};
 
@@ -234,8 +234,11 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "path", certifcates_paths[i]);
 		}
 		init_certificate(certifcates_paths[i], cert, dmmap_sect, &certificateprofile);
-		cert_inst = handle_update_instance(1, dmctx, &cert_inst_last, update_instance_alias, 3, dmmap_sect, "security_certificate_instance", "security_certificate_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, cert_inst) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   dmmap_sect, "security_certificate_instance", "security_certificate_alias", "dmmap_security", "security_certificate");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst) == DM_STOP)
 			break;
 
 		X509_free(cert);
@@ -253,8 +256,11 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "path", certifcates_paths[i]);
 		}
 		init_certificate(certifcates_paths[i], cacert, dmmap_sect, &certificateprofile);
-		cert_inst = handle_update_instance(1, dmctx, &cert_inst_last, update_instance_alias, 3, dmmap_sect, "security_certificate_instance", "security_certificate_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, cert_inst) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   dmmap_sect, "security_certificate_instance", "security_certificate_alias", "dmmap_security", "security_certificate");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst) == DM_STOP)
 			break;
 #endif
 	}
@@ -424,7 +430,7 @@ static int get_SecurityCertificate_SignatureAlgorithm(char *refparam, struct dmc
 
 /* *** Device.Security. *** */
 DMOBJ tSecurityObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Certificate", &DMREAD, NULL, NULL, NULL, browseSecurityCertificateInst, NULL, NULL, NULL, NULL, tSecurityCertificateParams, NULL, BBFDM_BOTH},
 {0}
 };

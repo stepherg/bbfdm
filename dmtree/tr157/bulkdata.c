@@ -16,12 +16,15 @@
 /*#Device.BulkData.Profile.{i}.!UCI:cwmp_bulkdata/profile/dmmap_cwmp_profile*/
 static int browseBulkDataProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *profile = NULL, *profile_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct uci_section *s = NULL;
 
 	uci_foreach_sections("cwmp_bulkdata", "profile", s) {
-		profile = handle_update_instance(1, dmctx, &profile_last, update_instance_alias, 3, s, "profile_instance", "profile_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, profile) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "profile_instance", "profile_alias", "cwmp_bulkdata", "profile");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -30,16 +33,21 @@ static int browseBulkDataProfileInst(struct dmctx *dmctx, DMNODE *parent_node, v
 /*#Device.BulkData.Profile.{i}.Parameter.{i}.!UCI:cwmp_bulkdata/profile_parameter/dmmap_cwmp_profile_parameter*/
 static int browseBulkDataProfileParameterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *profile_parameter = NULL, *profile_parameter_last = NULL, *profile_id, *prev_profile_id;
+	char *inst = NULL, *max_inst = NULL, *prev_profile_id;
 	struct uci_section *s = NULL, *prev_section = (struct uci_section *)prev_data;
+	struct browse_args browse_args = {0};
 
 	dmuci_get_value_by_section_string(prev_section, "profile_id", &prev_profile_id);
-	uci_foreach_sections("cwmp_bulkdata", "profile_parameter", s) {
-		dmuci_get_value_by_section_string(s, "profile_id", &profile_id);
-		if(strcmp(profile_id, prev_profile_id) != 0)
-			continue;
-		profile_parameter = handle_update_instance(1, dmctx, &profile_parameter_last, update_instance_alias, 3, s, "parameter_instance", "parameter_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, profile_parameter) == DM_STOP)
+	uci_foreach_option_eq("cwmp_bulkdata", "profile_parameter", "profile_id", prev_profile_id, s) {
+
+		browse_args.option = "profile_id";
+		browse_args.value = prev_profile_id;
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+			   s, "parameter_instance", "parameter_alias", "cwmp_bulkdata", "profile_parameter",
+			   check_browse_section, (void *)&browse_args);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -48,16 +56,21 @@ static int browseBulkDataProfileParameterInst(struct dmctx *dmctx, DMNODE *paren
 /*#Device.BulkData.Profile.{i}.HTTP.RequestURIParameter.{i}.!UCI:cwmp_bulkdata/profile_http_request_uri_parameter/dmmap_cwmp_profile_http_request_uri_parameter*/
 static int browseBulkDataProfileHTTPRequestURIParameterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *profile_http_request_uri_parameter = NULL, *profile_http_request_uri_parameter_last = NULL, *profile_id, *prev_profile_id;
+	char *inst = NULL, *max_inst = NULL, *prev_profile_id;
 	struct uci_section *s = NULL, *prev_section = (struct uci_section *)prev_data;
+	struct browse_args browse_args = {0};
 
 	dmuci_get_value_by_section_string(prev_section, "profile_id", &prev_profile_id);
-	uci_foreach_sections("cwmp_bulkdata", "profile_http_request_uri_parameter", s) {
-		dmuci_get_value_by_section_string(s, "profile_id", &profile_id);
-		if(strcmp(profile_id, prev_profile_id) != 0)
-			continue;
-		profile_http_request_uri_parameter = handle_update_instance(1, dmctx, &profile_http_request_uri_parameter_last, update_instance_alias, 3, s, "requesturiparameter_instance", "requesturiparameter_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, profile_http_request_uri_parameter) == DM_STOP)
+	uci_foreach_option_eq("cwmp_bulkdata", "profile_http_request_uri_parameter", "profile_id", prev_profile_id, s) {
+
+		browse_args.option = "profile_id";
+		browse_args.value = prev_profile_id;
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+			   s, "requesturiparameter_instance", "requesturiparameter_alias", "cwmp_bulkdata", "profile_http_request_uri_parameter",
+			   check_browse_section, (void *)&browse_args);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -1071,7 +1084,7 @@ static int set_BulkDataProfileHTTPRequestURIParameter_Reference(char *refparam, 
 
 /* *** Device.BulkData. *** */
 DMOBJ tBulkDataObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Profile", &DMWRITE, addObjBulkDataProfile, delObjBulkDataProfile, NULL, browseBulkDataProfileInst, NULL, NULL, NULL, tBulkDataProfileObj, tBulkDataProfileParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1092,7 +1105,7 @@ DMLEAF tBulkDataParams[] = {
 
 /* *** Device.BulkData.Profile.{i}. *** */
 DMOBJ tBulkDataProfileObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Parameter", &DMWRITE, addObjBulkDataProfileParameter, delObjBulkDataProfileParameter, NULL, browseBulkDataProfileParameterInst, NULL, NULL, NULL, NULL, tBulkDataProfileParameterParams, NULL, BBFDM_BOTH},
 {"CSVEncoding", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tBulkDataProfileCSVEncodingParams, NULL, BBFDM_BOTH},
 {"JSONEncoding", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tBulkDataProfileJSONEncodingParams, NULL, BBFDM_BOTH},
@@ -1151,7 +1164,7 @@ DMLEAF tBulkDataProfileJSONEncodingParams[] = {
 
 /* *** Device.BulkData.Profile.{i}.HTTP. *** */
 DMOBJ tBulkDataProfileHTTPObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"RequestURIParameter", &DMWRITE, addObjBulkDataProfileHTTPRequestURIParameter, delObjBulkDataProfileHTTPRequestURIParameter, NULL, browseBulkDataProfileHTTPRequestURIParameterInst, NULL, NULL, NULL, NULL, tBulkDataProfileHTTPRequestURIParameterParams, NULL, BBFDM_BOTH},
 {0}
 };

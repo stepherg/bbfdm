@@ -16,12 +16,13 @@
 static int browseLevelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s;
-	char *v, *instnbr = NULL;
+	char *v, *max_inst = NULL;
 
 	check_create_dmmap_package("dmmap_firewall");
 	s = is_dmmap_section_exist("dmmap_firewall", "level");
 	if (!s) dmuci_add_section_bbfdm("dmmap_firewall", "level", &s, &v);
-	handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 3, s, "firewall_level_instance", "firewall_level_alias");
+	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			s, "firewall_level_instance", "firewall_level_alias", "dmmap_firewall", "level");
 	DM_LINK_INST_OBJ(dmctx, parent_node, s, "1");
 	return 0;
 }
@@ -29,12 +30,13 @@ static int browseLevelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 static int browseChainInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s;
-	char *v, *instnbr = NULL;
+	char *v, *max_inst = NULL;
 
 	check_create_dmmap_package("dmmap_firewall");
 	s = is_dmmap_section_exist("dmmap_firewall", "chain");
 	if (!s) dmuci_add_section_bbfdm("dmmap_firewall", "chain", &s, &v);
-	handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 3, s, "firewall_chain_instance", "firewall_chain_alias");
+	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			s, "firewall_chain_instance", "firewall_chain_alias", "dmmap_firewall", "chain");
 	DM_LINK_INST_OBJ(dmctx, parent_node, s, "1");
 	return 0;
 }
@@ -42,14 +44,17 @@ static int browseChainInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 /*#Device.Firewall.Chain.{i}.Rule.{i}.!UCI:firewall/rule/dmmap_firewall*/
 static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *instance, *instnbr = NULL;
+	char *inst, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("firewall", "rule", "dmmap_firewall", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 3, p->dmmap_section, "firewall_chain_rule_instance", "firewall_chain_rule_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, instance) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "firewall_chain_rule_instance", "firewall_chain_rule_alias", "dmmap_firewall", "rule");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -72,7 +77,7 @@ static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "rule", &dmmap_firewall_rule, &v);
 	dmuci_set_value_by_section(dmmap_firewall_rule, "section_name", sect_name);
-	*instance = update_instance_bbfdm(dmmap_firewall_rule, last_inst, "firewall_chain_rule_instance");
+	*instance = update_instance(dmmap_firewall_rule, last_inst, "firewall_chain_rule_instance");
 	return 0;
 }
 
@@ -1278,7 +1283,7 @@ static int set_time_span_stop_time(char *refparam, struct dmctx *ctx, void *data
 
 /* *** Device.Firewall. *** */
 DMOBJ tFirewallObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH},
 {"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, NULL, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH},
 {0}
@@ -1308,7 +1313,7 @@ DMLEAF tFirewallLevelParams[] = {
 
 /* *** Device.Firewall.Chain.{i}. *** */
 DMOBJ tFirewallChainObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Rule", &DMWRITE, add_firewall_rule, delete_firewall_rule, NULL, browseRuleInst, NULL, NULL, NULL, tFirewallChainRuleObj, tFirewallChainRuleParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1325,7 +1330,7 @@ DMLEAF tFirewallChainParams[] = {
 
 /* *** Device.Firewall.Chain.{i}.Rule.{i}. *** */
 DMOBJ tFirewallChainRuleObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {CUSTOM_PREFIX"TimeSpan", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tTimeSpanParams, NULL, BBFDM_BOTH},
 {0}
 };

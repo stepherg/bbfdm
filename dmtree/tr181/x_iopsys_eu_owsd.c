@@ -15,14 +15,17 @@
 
 static int browseXIopsysEuOWSDVirtualHost(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *iowsd_listen = NULL, *iowsd_listen_last = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("owsd", "owsd-listen", "dmmap_owsd", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		iowsd_listen =  handle_update_instance(1, dmctx, &iowsd_listen_last, update_instance_alias_bbfdm, 3, p->dmmap_section, "olisteninstance", "olistenalias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, iowsd_listen) == DM_STOP)
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "olisteninstance", "olistenalias", "dmmap_owsd", "owsd-listen");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -397,7 +400,7 @@ static int add_owsd_listen(char *refparam, struct dmctx *ctx, void *data, char *
 
 	dmuci_add_section_bbfdm("dmmap_owsd", "owsd-listen", &dmmap_sec, &v);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(listen_sec));
-	*instancepara = update_instance_bbfdm(dmmap_sec, instance, "olisteninstance");
+	*instancepara = update_instance(dmmap_sec, instance, "olisteninstance");
 
 	return 0;
 }
@@ -452,7 +455,7 @@ DMLEAF X_IOPSYS_EU_OWSDParams[] = {
 };
 
 DMOBJ X_IOPSYS_EU_OWSDObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"UbusProxy", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, UbusProxyParams, NULL, BBFDM_BOTH},
 {"VirtualHost", &DMWRITE, add_owsd_listen, delete_owsd_listen_instance, NULL, browseXIopsysEuOWSDVirtualHost, NULL, NULL, NULL, NULL, VirtualHostParams, NULL, BBFDM_BOTH},
 {0}
