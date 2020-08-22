@@ -324,9 +324,9 @@ static void fill_wireless_scan_results(struct dmctx *dmctx, char *radio)
 		neighboring.ssid = dmjson_get_value(array_obj, 1, "ssid");
 		neighboring.bssid = dmjson_get_value(array_obj, 1, "bssid");
 		neighboring.channel = dmjson_get_value(array_obj, 1, "channel");
-		neighboring.frequency = dmjson_get_value(array_obj, 1, "frequency");
+		neighboring.frequency = dmjson_get_value(array_obj, 1, "band");
 		neighboring.signal_strength = dmjson_get_value(array_obj, 1, "rssi");
-		neighboring.noise = dmjson_get_value(array_obj, 1, "snr");
+		neighboring.noise = dmjson_get_value(array_obj, 1, "noise");
 
 		dmasprintf(&ssid, "Result.%d.SSID", wifi_neighbor_count);
 		dmasprintf(&bssid, "Result.%d.BSSID", wifi_neighbor_count);
