@@ -919,6 +919,16 @@ static opr_ret_t swmodules_uninstall_du(struct dmctx *dmctx, char *path, char *i
 
 }
 
+static opr_ret_t firmware_image_download(struct dmctx *dmctx, char *path, char *input)
+{
+	return SUCCESS;
+}
+
+static opr_ret_t firmware_image_activate(struct dmctx *dmctx, char *path, char *input)
+{
+	return SUCCESS;
+}
+
 static int get_index_of_available_dynamic_operate(struct op_cmd *operate)
 {
 	int idx = 0;
@@ -961,6 +971,8 @@ static struct op_cmd operate_helper[] = {
 	{"Device.DHCPv6.Client.*.Renew", dhcp_client_renew, "sync"},
 	{"Device.DeviceInfo.VendorConfigFile.*.Backup", vendor_conf_backup, "async"},
 	{"Device.DeviceInfo.VendorConfigFile.*.Restore", vendor_conf_restore, "async"},
+	{"Device.DeviceInfo.FirmwareImage.*.Download", firmware_image_download, "async"},
+	{"Device.DeviceInfo.FirmwareImage.*.Activate", firmware_image_activate, "async"},
 	{"Device.WiFi.NeighboringWiFiDiagnostic", fetch_neighboring_wifi_diagnostic, "async"},
 	//{"Device.DeviceInfo.VendorLogFile.*.Upload", blob_parser},
 	{"Device.IP.Diagnostics.IPPing", ip_diagnostics_ipping, "async"},

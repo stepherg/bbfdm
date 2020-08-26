@@ -25,6 +25,7 @@ extern DMOBJ tDeviceInfoObj[];
 extern DMLEAF tDeviceInfoProcessStatusProcessParams[];
 extern DMLEAF tDeviceInfoProcessorParams[];
 extern DMLEAF tDeviceInfoSupportedDataModelParams[];
+extern DMLEAF tDeviceInfoFirmwareImageParams[];
 
 char *get_deviceid_manufacturer();
 char *get_deviceid_manufactureroui();
