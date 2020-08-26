@@ -107,13 +107,14 @@ static int get_x_iopsys_eu_owsd_virtualhost_interface(char *refparam, struct dmc
 
 static int set_x_iopsys_eu_owsd_virtualhost_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker;
+	char interface[256] = {0}, *linker;
 
 	switch (action) {
 		case VALUECHECK:
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &linker);
 			if (linker) {
 				dmuci_set_value_by_section((struct uci_section *)data, "interface", linker);
 				dmfree(linker);

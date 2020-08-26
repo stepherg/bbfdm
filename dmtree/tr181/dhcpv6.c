@@ -557,23 +557,19 @@ static int get_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s;
-	char *linker = NULL, *newvalue = NULL, *v;
+	char *linker = NULL, *v;
+	char interface[256] = {0};
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 
-			if (strlen(value) == 0 || strcmp(value, "") == 0) {
+			if (strlen(value) == 0 || strcmp(value, "") == 0)
 				return FAULT_9007;
-			}
 
-			if (value[strlen(value)-1] != '.') {
-				dmasprintf(&newvalue, "%s.", value);
-				adm_entry_get_linker_value(ctx, newvalue, &linker);
-			} else {
-				adm_entry_get_linker_value(ctx, value, &linker);
-			}
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &linker);
 			uci_path_foreach_sections(bbfdm, "dmmap_dhcpv6", "interface", s) {
 				dmuci_get_value_by_section_string(s, "section_name", &v);
 				if (strcmp(v, linker) == 0)
@@ -588,12 +584,8 @@ static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 			}
 			break;
 		case VALUESET:
-			if (value[strlen(value)-1]!='.') {
-				dmasprintf(&newvalue, "%s.", value);
-				adm_entry_get_linker_value(ctx, newvalue, &linker);
-			} else {
-				adm_entry_get_linker_value(ctx, value, &linker);
-			}
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &linker);
 			DMUCI_SET_VALUE_BY_SECTION(bbfdm, ((struct dhcpv6_client_args *)data)->dhcp_client_dm, "section_name", linker);
 			break;
 	}
@@ -914,7 +906,7 @@ static int get_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 
 static int set_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker;
+	char interface[256] = {0}, *linker;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -922,7 +914,8 @@ static int set_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &linker);
 			if (linker) {
 				dmuci_set_value_by_section(((struct dhcpv6_args *)data)->dhcp_sec, "interface", linker);
 				dmfree(linker);

@@ -654,6 +654,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct
 {
 	char *linker = NULL, *tmp, *device = NULL;
 	struct uci_section *curr_section = NULL;
+	char interface[256] = {0};
 	json_object *res;
 
 	switch (action) {
@@ -662,7 +663,8 @@ static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &linker);
 			if (linker) {
 				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", linker, String}}, 1, &res);
 				if (!res) return 0;
@@ -1043,6 +1045,7 @@ static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct d
 {
 	char *linker = NULL, *tmp, *device = NULL;
 	struct uci_section *curr_section = NULL;
+	char interface[256] = {0};
 	json_object *res;
 
 	switch (action) {
@@ -1051,7 +1054,8 @@ static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct d
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &linker);
 			if (linker) {
 				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", linker, String}}, 1, &res);
 				if (!res) return 0;

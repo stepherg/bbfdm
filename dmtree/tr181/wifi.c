@@ -1948,7 +1948,7 @@ static int get_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 
 static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker, *newvalue = NULL;
+	char lower_layer[256] = {0}, *linker;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1956,11 +1956,8 @@ static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (value[strlen(value)-1] != '.') {
-				dmasprintf(&newvalue, "%s.", value);
-				adm_entry_get_linker_value(ctx, newvalue, &linker);
-			} else
-				adm_entry_get_linker_value(ctx, value, &linker);
+			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
+			adm_entry_get_linker_value(ctx, lower_layer, &linker);
 			if (linker) {
 				dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->wifi_ssid_sec, "device", linker);
 				dmfree(linker);

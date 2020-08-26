@@ -2053,6 +2053,8 @@ static int get_linker_check_obj(DMOBJECT_ARGS)
 		return  FAULT_9005;
 	}
 	if (link_val && link_val[0] != '\0' && strcmp(link_val, dmctx->linker) == 0) {
+		if (node->current_object[strlen(node->current_object) - 1] == '.')
+			node->current_object[strlen(node->current_object) - 1] = 0;
 		dmctx->linker_param = dmstrdup(node->current_object);
 		dmctx->stop = true;
 		return 0;

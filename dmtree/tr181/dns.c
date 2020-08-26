@@ -639,6 +639,7 @@ static int set_server_dns_server(char *refparam, struct dmctx *ctx, void *data, 
 static int set_server_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *str, *ointerface, *ip, *interface;
+	char intf[256] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -646,8 +647,9 @@ static int set_server_interface(char *refparam, struct dmctx *ctx, void *data, c
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			append_dot_to_string(intf, value, sizeof(intf));
+			adm_entry_get_linker_value(ctx, intf, &interface);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &ointerface);
-			adm_entry_get_linker_value(ctx, value, &interface);
 			if (strcmp(ointerface, interface) == 0)
 				return 0;
 			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &str);
@@ -774,6 +776,7 @@ static int set_forwarding_dns_server(char *refparam, struct dmctx *ctx, void *da
 static int set_forwarding_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *str, *ointerface, *ip, *interface;
+	char intf[256] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -781,8 +784,9 @@ static int set_forwarding_interface(char *refparam, struct dmctx *ctx, void *dat
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			append_dot_to_string(intf, value, sizeof(intf));
+			adm_entry_get_linker_value(ctx, intf, &interface);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &ointerface);
-			adm_entry_get_linker_value(ctx, value, &interface);
 			if (strcmp(ointerface, interface) == 0)
 				return 0;
 			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &str);

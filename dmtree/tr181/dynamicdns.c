@@ -473,7 +473,7 @@ static int get_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *
 
 static int set_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker = NULL;
+	char lower_layer[256] = {0}, *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -481,7 +481,8 @@ static int set_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
+			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
+			adm_entry_get_linker_value(ctx, lower_layer, &linker);
 			if (linker)
 				dmuci_set_value_by_section((struct uci_section *)data, "service_name", linker);
 			else
@@ -504,7 +505,7 @@ static int get_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, voi
 
 static int set_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker = NULL;
+	char interface[256] = {0}, *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -512,7 +513,8 @@ static int set_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &linker);
 			if (linker)
 				dmuci_set_value_by_section((struct uci_section *)data, "interface", linker);
 			else

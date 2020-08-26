@@ -401,7 +401,7 @@ static int get_IPInterface_LastChange(char *refparam, struct dmctx *ctx, void *d
 
 static int get_IPInterface_Router(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "Device.Routing.Router.1.";
+	*value = "Device.Routing.Router.1";
 	return 0;
 }
 
@@ -731,10 +731,7 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (value[strlen(value)-1] != '.')
-				snprintf(lower_layer, sizeof(lower_layer), "%s.", value);
-			else
-				strncpy(lower_layer, value, sizeof(lower_layer) - 1);
+			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
 
 			if (strncmp(lower_layer, "Device.Ethernet.VLANTermination.", 32) == 0) {
 				adm_entry_get_linker_value(ctx, lower_layer, &linker);
@@ -914,7 +911,7 @@ static int get_IPInterfaceIPv6Address_Prefix(char *refparam, struct dmctx *ctx, 
 
 	*value = "";
 	if(((struct ipv6prefix_args *)data)->ip_6prefixaddress[0] != '\0')
-		dmasprintf(value, "Device.IP.Interface.%s.IPv6Prefix.1.", inst);
+		dmasprintf(value, "Device.IP.Interface.%s.IPv6Prefix.1", inst);
 	return 0;
 }
 

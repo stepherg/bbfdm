@@ -649,7 +649,7 @@ static int get_router_ipv4forwarding_interface_linker_parameter(char *refparam, 
 
 static int set_router_ipv4forwarding_interface_linker_parameter(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker;
+	char interface[256] = {0}, *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -657,7 +657,8 @@ static int set_router_ipv4forwarding_interface_linker_parameter(char *refparam, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &linker);
 			if (linker) {
 				dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "interface", linker);
 				dmfree(linker);
@@ -790,7 +791,7 @@ static int get_RoutingRouterIPv6Forwarding_Interface(char *refparam, struct dmct
 
 static int set_RoutingRouterIPv6Forwarding_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker;
+	char interface[256] = {0}, *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -798,7 +799,8 @@ static int set_RoutingRouterIPv6Forwarding_Interface(char *refparam, struct dmct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &linker);
 			if (linker) {
 				dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "interface", linker);
 				dmfree(linker);

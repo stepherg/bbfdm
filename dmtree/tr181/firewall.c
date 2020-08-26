@@ -140,7 +140,7 @@ static int get_firewall_config(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_firewall_advanced_level(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "Device.Firewall.Level.1.";
+	*value = "Device.Firewall.Level.1";
     return 0;
 }
 
@@ -178,7 +178,7 @@ static int get_level_description(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_level_chain(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "Device.Firewall.Chain.1.";
+	*value = "Device.Firewall.Chain.1";
     return 0;
 }
 
@@ -906,18 +906,21 @@ static int set_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 {
 	char *iface, *zone, *net;
 	struct uci_section *s = NULL;
+	char interface[256] = {0};
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 
-			adm_entry_get_linker_value(ctx, value, &iface);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &iface);
 			if (iface == NULL ||  iface[0] == '\0')
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &iface);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &iface);
 			if (iface && iface[0] != '\0') {
 				uci_foreach_sections("firewall", "zone", s) {
 					dmuci_get_value_by_section_string(s, "network", &net);
@@ -937,6 +940,7 @@ static int set_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 {
 	char *iface, *zone, *net;
 	struct uci_section *s = NULL;
+	char interface[256] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -948,7 +952,9 @@ static int set_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 				dmuci_set_value_by_section((struct uci_section *)data, "dest", "");
 				break;
 			}
-			adm_entry_get_linker_value(ctx, value, &iface);
+
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &iface);
 			if (iface != NULL && iface[0] != '\0') {
 				uci_foreach_sections("firewall", "zone", s) {
 					dmuci_get_value_by_section_string(s, "name", &net);

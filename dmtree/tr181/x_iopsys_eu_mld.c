@@ -651,7 +651,10 @@ static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 		if (get_mcast_snooping_interface_val(value, ifname, sizeof(ifname)) == 0) {
 			interface_linker = dmstrdup(ifname);
 		} else {
-			adm_entry_get_linker_value(ctx, value, &linker);
+			char interface[256] = {0};
+
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &linker);
 			uci_foreach_sections("network", "interface", s) {
 				if(strcmp(section_name(s), linker) != 0) {
 					continue;

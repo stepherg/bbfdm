@@ -245,6 +245,7 @@ static int get_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 static int set_nat_interface_setting_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *iface, *pch, *pchr, buf[256] = "";
+	char interface[256] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -255,7 +256,8 @@ static int set_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 			strcpy(buf, value);
 			dmuci_set_value_by_section((struct uci_section *)data, "network", "");
 			for(pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
-				adm_entry_get_linker_value(ctx, pch, &iface);
+				append_dot_to_string(interface, pch, sizeof(interface));
+				adm_entry_get_linker_value(ctx, interface, &iface);
 				if (iface) {
 					dmuci_add_list_value_by_section((struct uci_section *)data, "network", iface);
 					dmfree(iface);
@@ -363,6 +365,7 @@ static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 {
 	char *iface, *network, *zone;
 	struct uci_section *s = NULL;
+	char interface[256] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -370,7 +373,8 @@ static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &iface);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &iface);
 			if (iface[0] != '\0') {
 				uci_foreach_sections("firewall", "zone", s) {
 					dmuci_get_value_by_section_string(s, "network", &network);

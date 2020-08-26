@@ -992,10 +992,7 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (value[strlen(value)-1] != '.')
-				snprintf(lower_layer, sizeof(lower_layer), "%s.", value);
-			else
-				strncpy(lower_layer, value, sizeof(lower_layer) - 1);
+			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
 
 			if (strncmp(lower_layer, "Device.Ethernet.Interface.", 26) == 0) {
 				char *linker, *int_name;
@@ -1218,10 +1215,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (value[strlen(value)-1] != '.')
-				snprintf(lower_layer, sizeof(lower_layer), "%s.", value);
-			else
-				strncpy(lower_layer, value, sizeof(lower_layer) - 1);
+			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
 
 			if (strncmp(lower_layer, "Device.Ethernet.Link.", 21) == 0) {
 				char new_name[16] = {0}, *linker = NULL, *type;

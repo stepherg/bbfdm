@@ -652,10 +652,7 @@ static void set_lowerlayers_management_port(struct dmctx *ctx, void *data, char 
 	p = new_device;
 	for (pch = strtok_r(value, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 
-		if (pch[strlen(pch)-1] != '.')
-			snprintf(lower_layer, sizeof(lower_layer), "%s.", pch);
-		else
-			strncpy(lower_layer, pch, sizeof(lower_layer) - 1);
+		append_dot_to_string(lower_layer, pch, sizeof(lower_layer));
 
 		snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.Port.", ((struct bridge_port_args *)data)->br_inst);
 
@@ -1451,10 +1448,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 			} else {
 				/* Management Port ==> false */
 
-				if (value[strlen(value)-1] != '.')
-					snprintf(lower_layer, sizeof(lower_layer), "%s.", value);
-				else
-					strncpy(lower_layer, value, sizeof(lower_layer) - 1);
+				append_dot_to_string(lower_layer, value, sizeof(lower_layer));
 
 				char *linker = NULL;
 				adm_entry_get_linker_value(ctx, lower_layer, &linker);
@@ -2026,11 +2020,7 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (value[strlen(value)-1] != '.')
-				snprintf(lower_layer, sizeof(lower_layer), "%s.", value);
-			else
-				strncpy(lower_layer, value, sizeof(lower_layer) - 1);
-
+			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
 			snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.VLAN.", ((struct bridge_vlanport_args *)data)->br_inst);
 
 			/* Check the path object is correct or no */
@@ -2114,11 +2104,7 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (value[strlen(value)-1] != '.')
-				snprintf(lower_layer, sizeof(lower_layer), "%s.", value);
-			else
-				strncpy(lower_layer, value, sizeof(lower_layer) - 1);
-
+			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
 			snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.Port.", ((struct bridge_vlanport_args *)data)->br_inst);
 
 			if (strncmp(lower_layer, lower_layer_path, strlen(lower_layer_path)) == 0) {

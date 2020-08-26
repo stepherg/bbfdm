@@ -228,12 +228,9 @@ static int get_br_key_from_lower_layer(char *lower_layer, char *key, size_t s_ke
 
 int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
 {
-	char lower_layer[250] = {0};
+	char lower_layer[256] = {0};
 
-	if (value[strlen(value)-1] != '.')
-		snprintf(lower_layer, sizeof(lower_layer), "%s.", value);
-	else
-		strncpy(lower_layer, value, sizeof(lower_layer) - 1);
+	append_dot_to_string(lower_layer, value, sizeof(lower_layer));
 
 	/* Check if the value is valid or not. */
 	if (strncmp(lower_layer, "Device.Bridging.Bridge.", 23) != 0)
@@ -1781,7 +1778,10 @@ static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 			interface_linker = dmstrdup(ifname);
 			is_br = true;
 		} else {
-			adm_entry_get_linker_value(ctx, value, &linker);
+			char interface[256] = {0};
+
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &linker);
 			uci_foreach_sections("network", "interface", s) {
 				if(strcmp(section_name(s), linker) != 0) {
 					continue;

@@ -596,6 +596,7 @@ int get_QoS_DefaultQueue(char *refparam, struct dmctx *ctx, void *data, char *in
 int set_QoS_DefaultQueue(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *linker;
+	char lower_layer[256] = {0};
 
 	switch (action)	{
 		case VALUECHECK:
@@ -603,7 +604,8 @@ int set_QoS_DefaultQueue(char *refparam, struct dmctx *ctx, void *data, char *in
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
+			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
+			adm_entry_get_linker_value(ctx, lower_layer, &linker);
 			dmuci_set_value("qos", "Default", "default", linker);
 			break;
 	}

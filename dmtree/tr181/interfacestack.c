@@ -111,7 +111,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_network", "interface", s, "section_name", section_name(s), "ip_int_instance", "ip_int_alias");
 		if (*layer_inst == '\0')
 			continue;
-		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.IP.Interface.%s.", layer_inst);
+		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.IP.Interface.%s", layer_inst);
 
 		higheralias = get_alias_by_section("dmmap_network", "interface", s, "ip_int_alias");
 		if (*higheralias == '\0')
@@ -127,7 +127,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_network", "interface", s, "section_name", section_name(s), "ppp_int_instance", "ppp_int_alias");
 			if (*layer_inst == '\0')
 				continue;
-			snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "Device.PPP.Interface.%s.", layer_inst);
+			snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "Device.PPP.Interface.%s", layer_inst);
 			loweralias = get_alias_by_section("dmmap_network", "interface", s, "ppp_int_alias");
 			if (*loweralias == '\0')
 				snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", layer_inst);
@@ -197,7 +197,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_network", "interface", s, "section_name", section_name(s), "ppp_int_instance", "ppp_int_alias");
 		if (*layer_inst == '\0')
 			continue;
-		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.PPP.Interface.%s.", layer_inst);
+		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.PPP.Interface.%s", layer_inst);
 
 		higheralias = get_alias_by_section("dmmap_network", "interface", s, "ppp_int_alias");
 		if (*higheralias == '\0')
@@ -277,7 +277,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		if (*layer_inst == '\0')
 			continue;
 
-		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.Ethernet.VLANTermination.%s.", layer_inst);
+		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.Ethernet.VLANTermination.%s", layer_inst);
 
 		higheralias = get_alias_by_section("dmmap_network", "device", s, "vlan_term_alias");
 		if (*higheralias == '\0')
@@ -335,7 +335,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		if (*layer_inst == '\0')
 			continue;
 
-		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.Ethernet.Link.%s.", layer_inst);
+		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.Ethernet.Link.%s", layer_inst);
 
 		dmuci_get_value_by_section_string(s, "link_alias", &higheralias);
 		if (*higheralias == '\0')

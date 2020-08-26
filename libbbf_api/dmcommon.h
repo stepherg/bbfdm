@@ -333,4 +333,5 @@ int is_vlan_termination_section(char *name);
 void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *value, bool b);
 void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, char *value);
 int check_browse_section(struct uci_section *s, void *data);
+void append_dot_to_string(char *new_string, const char *string, size_t len);
 #endif

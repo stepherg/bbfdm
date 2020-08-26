@@ -925,13 +925,16 @@ int os_get_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *
 int os_set_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *interface_linker = NULL;
+	char interface[256] = {0};
+
 	switch (action)	{
 	case VALUECHECK:
 		if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		adm_entry_get_linker_value(ctx, value, &interface_linker);
+		append_dot_to_string(interface, value, sizeof(interface));
+		adm_entry_get_linker_value(ctx, interface, &interface_linker);
 		if (interface_linker)
 			dmuci_set_value_by_section((struct uci_section *)data, "ifname", interface_linker);
 		break;
@@ -3073,13 +3076,16 @@ int os_get_QoSQueue_Interface(char *refparam, struct dmctx *ctx, void *data, cha
 int os_set_QoSQueue_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *interface_linker = NULL;
+	char interface[256] = {0};
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &interface_linker);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &interface_linker);
 			if (interface_linker)
 				dmuci_set_value_by_section((struct uci_section *)data, "ifname", interface_linker);
 			break;
@@ -3484,13 +3490,16 @@ int os_get_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, ch
 int os_set_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *interface_linker = NULL;
+	char interface[256] = {0};
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &interface_linker);
+			append_dot_to_string(interface, value, sizeof(interface));
+			adm_entry_get_linker_value(ctx, interface, &interface_linker);
 			dmuci_set_value_by_section((struct uci_section *)data, "ifname", interface_linker);
 			break;
 	}
