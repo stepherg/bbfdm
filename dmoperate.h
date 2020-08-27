@@ -211,9 +211,9 @@ struct deployment_unit_update {
 };
 
 struct op_cmd {
-	char *name;
+	const char *name;
 	operation opt;
-	char *type;
+	const char *type;
 };
 
 int add_dynamic_operate(char *path, operation operate, char *optype);

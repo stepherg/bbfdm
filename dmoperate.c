@@ -156,7 +156,7 @@ static char *get_param_val_from_op_cmd(char *op_cmd, const char *param)
 }
 
 // Operate function definitions
-static opr_ret_t reboot_device(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t reboot_device(struct dmctx *dmctx, char *path, json_object *input)
 {
 	if(0 == dmubus_call_set(SYSTEM_UBUS_PATH, "reboot", UBUS_ARGS{}, 0))
 		return SUCCESS;
@@ -164,7 +164,7 @@ static opr_ret_t reboot_device(struct dmctx *dmctx, char *path, char *input)
 		return FAIL;
 }
 
-static opr_ret_t factory_reset(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t factory_reset(struct dmctx *dmctx, char *path, json_object *input)
 {
 	if(0 == dmcmd_no_wait("/sbin/defaultreset", 0))
 		return SUCCESS;
@@ -172,7 +172,7 @@ static opr_ret_t factory_reset(struct dmctx *dmctx, char *path, char *input)
 		return FAIL;
 }
 
-static opr_ret_t network_interface_reset(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t network_interface_reset(struct dmctx *dmctx, char *path, json_object *input)
 {
 	char cmd[NAME_MAX] = NETWORK_INTERFACE_UBUS_PATH;
 	bool status = false;
@@ -198,7 +198,7 @@ static opr_ret_t network_interface_reset(struct dmctx *dmctx, char *path, char *
 		return FAIL;
 }
 
-static opr_ret_t wireless_reset(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t wireless_reset(struct dmctx *dmctx, char *path, json_object *input)
 {
 	if(0 == dmcmd_no_wait("/sbin/wifi", 2, "reload", "&"))
 		return SUCCESS;
@@ -212,7 +212,7 @@ struct wifi_security_params reset_params[] = {
 	{"", "KeyPassphrase", ""}
 };
 
-static opr_ret_t ap_security_reset(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t ap_security_reset(struct dmctx *dmctx, char *path, json_object *input)
 {
 	char *wpakey = NULL;
 	char node[255] = {'\0'};
@@ -245,7 +245,7 @@ static opr_ret_t ap_security_reset(struct dmctx *dmctx, char *path, char *input)
 	return SUCCESS;
 }
 
-static opr_ret_t dhcp_client_renew(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t dhcp_client_renew(struct dmctx *dmctx, char *path, json_object *input)
 {
 	if(SUCCESS == bbf_set_value(path, "true"))
 		return SUCCESS;
@@ -253,23 +253,21 @@ static opr_ret_t dhcp_client_renew(struct dmctx *dmctx, char *path, char *input)
 		return FAIL;
 }
 
-static opr_ret_t vendor_conf_backup(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t vendor_conf_backup(struct dmctx *dmctx, char *path, json_object *input)
 {
 	struct file_server fserver = {0};
-	json_object *json_res = NULL;
 	char *vcf_name = NULL;
 
 	vcf_name = get_param_val_from_op_cmd(path, "Name");
 	if (!vcf_name)
 		return FAIL;
 
-	json_res = json_tokener_parse((const char *)input);
-	fserver.url = dmjson_get_value(json_res, 1, "URL");
+	fserver.url = dmjson_get_value(input, 1, "URL");
 	if(fserver.url[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
 
-	fserver.user = dmjson_get_value(json_res, 1, "Username");
-	fserver.pass = dmjson_get_value(json_res, 1, "Password");
+	fserver.user = dmjson_get_value(input, 1, "Username");
+	fserver.pass = dmjson_get_value(input, 1, "Password");
 
 	dmcmd("/bin/sh", 7, ICWMP_SCRIPT, "upload", fserver.url, VCF_FILE_TYPE, fserver.user, fserver.pass, vcf_name);
 	dmfree(vcf_name);
@@ -277,20 +275,18 @@ static opr_ret_t vendor_conf_backup(struct dmctx *dmctx, char *path, char *input
 	return SUCCESS;
 }
 
-static opr_ret_t vendor_conf_restore(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t vendor_conf_restore(struct dmctx *dmctx, char *path, json_object *input)
 {
 	struct file_server fserver = {0};
-	json_object *json_res = NULL;
 	char *file_size = NULL;
 
-	json_res = json_tokener_parse((const char *)input);
-	fserver.url = dmjson_get_value(json_res, 1, "URL");
+	fserver.url = dmjson_get_value(input, 1, "URL");
 	if(fserver.url[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
 
-	fserver.user = dmjson_get_value(json_res, 1, "Username");
-	fserver.pass = dmjson_get_value(json_res, 1, "Password");
-	file_size = dmjson_get_value(json_res, 1, "FileSize");
+	fserver.user = dmjson_get_value(input, 1, "Username");
+	fserver.pass = dmjson_get_value(input, 1, "Password");
+	file_size = dmjson_get_value(input, 1, "FileSize");
 
 	dmcmd("/bin/sh", 7, ICWMP_SCRIPT, "download", fserver.url, file_size, VCF_FILE_TYPE, fserver.user, fserver.pass);
 
@@ -344,7 +340,7 @@ static void fill_wireless_scan_results(struct dmctx *dmctx, char *radio)
 	}
 }
 
-static opr_ret_t fetch_neighboring_wifi_diagnostic(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t fetch_neighboring_wifi_diagnostic(struct dmctx *dmctx, char *path, json_object *input)
 {
 	json_object *res = NULL, *radios = NULL, *arrobj = NULL;
 	int j = 0;
@@ -359,21 +355,19 @@ static opr_ret_t fetch_neighboring_wifi_diagnostic(struct dmctx *dmctx, char *pa
 	return SUCCESS;
 }
 
-static opr_ret_t ip_diagnostics_ipping(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t ip_diagnostics_ipping(struct dmctx *dmctx, char *path, json_object *input)
 {
-	json_object *json_res = NULL;
 	struct ipping_diagnostics ipping = {0};
 
-	json_res = json_tokener_parse((const char *)input);
-	ipping.host = dmjson_get_value(json_res, 1, "Host");
+	ipping.host = dmjson_get_value(input, 1, "Host");
 	if(ipping.host[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
-	ipping.interface = dmjson_get_value(json_res, 1, "Interface");
-	ipping.proto = dmjson_get_value(json_res, 1, "ProtocolVersion");
-	ipping.nbofrepetition = dmjson_get_value(json_res, 1, "NumberOfRepetitions");
-	ipping.timeout = dmjson_get_value(json_res, 1, "Timeout");
-	ipping.datablocksize = dmjson_get_value(json_res, 1, "DataBlockSize");
-	ipping.dscp = dmjson_get_value(json_res, 1, "DSCP");
+	ipping.interface = dmjson_get_value(input, 1, "Interface");
+	ipping.proto = dmjson_get_value(input, 1, "ProtocolVersion");
+	ipping.nbofrepetition = dmjson_get_value(input, 1, "NumberOfRepetitions");
+	ipping.timeout = dmjson_get_value(input, 1, "Timeout");
+	ipping.datablocksize = dmjson_get_value(input, 1, "DataBlockSize");
+	ipping.dscp = dmjson_get_value(input, 1, "DSCP");
 
 	set_param_diagnostics("ippingdiagnostic", "Host", ipping.host);
 	set_param_diagnostics("ippingdiagnostic", "interface", ipping.interface);
@@ -421,25 +415,23 @@ static opr_ret_t ip_diagnostics_ipping(struct dmctx *dmctx, char *path, char *in
 	return SUCCESS;
 }
 
-static opr_ret_t ip_diagnostics_traceroute(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t ip_diagnostics_traceroute(struct dmctx *dmctx, char *path, json_object *input)
 {
-	json_object *json_res = NULL;
 	struct traceroute_diagnostics traceroute = {0};
 	struct uci_section *s = NULL;
 	char *host, *host_address, *errorcode, *rttimes;
 	int i = 1;
 
-	json_res = json_tokener_parse((const char *)input);
-	traceroute.host = dmjson_get_value(json_res, 1, "Host");
+	traceroute.host = dmjson_get_value(input, 1, "Host");
 	if(traceroute.host[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
-	traceroute.interface = dmjson_get_value(json_res, 1, "Interface");
-	traceroute.proto = dmjson_get_value(json_res, 1, "ProtocolVersion");
-	traceroute.nboftries = dmjson_get_value(json_res, 1, "NumberOfTries");
-	traceroute.timeout = dmjson_get_value(json_res, 1, "Timeout");
-	traceroute.datablocksize = dmjson_get_value(json_res, 1, "DataBlockSize");
-	traceroute.dscp = dmjson_get_value(json_res, 1, "DSCP");
-	traceroute.maxhops = dmjson_get_value(json_res, 1, "MaxHopCount");
+	traceroute.interface = dmjson_get_value(input, 1, "Interface");
+	traceroute.proto = dmjson_get_value(input, 1, "ProtocolVersion");
+	traceroute.nboftries = dmjson_get_value(input, 1, "NumberOfTries");
+	traceroute.timeout = dmjson_get_value(input, 1, "Timeout");
+	traceroute.datablocksize = dmjson_get_value(input, 1, "DataBlockSize");
+	traceroute.dscp = dmjson_get_value(input, 1, "DSCP");
+	traceroute.maxhops = dmjson_get_value(input, 1, "MaxHopCount");
 
 	set_param_diagnostics("traceroutediagnostic", "Host", traceroute.host);
 	set_param_diagnostics("traceroutediagnostic", "interface", traceroute.interface);
@@ -483,21 +475,19 @@ static opr_ret_t ip_diagnostics_traceroute(struct dmctx *dmctx, char *path, char
 	return SUCCESS;
 }
 
-static opr_ret_t ip_diagnostics_download(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t ip_diagnostics_download(struct dmctx *dmctx, char *path, json_object *input)
 {
-	json_object *json_res = NULL;
 	struct download_diagnostics download = {0};
 
-	json_res = json_tokener_parse((const char *)input);
-	download.download_url = dmjson_get_value(json_res, 1, "DownloadURL");
+	download.download_url = dmjson_get_value(input, 1, "DownloadURL");
 	if(download.download_url[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
-	download.interface = dmjson_get_value(json_res, 1, "Interface");
-	download.dscp = dmjson_get_value(json_res, 1, "DSCP");
-	download.ethernet_priority = dmjson_get_value(json_res, 1, "EthernetPriority");
-	download.proto = dmjson_get_value(json_res, 1, "ProtocolVersion");
-	download.num_of_connections = dmjson_get_value(json_res, 1, "NumberOfConnections");
-	download.enable_per_connection_results = dmjson_get_value(json_res, 1, "EnablePerConnectionResults");
+	download.interface = dmjson_get_value(input, 1, "Interface");
+	download.dscp = dmjson_get_value(input, 1, "DSCP");
+	download.ethernet_priority = dmjson_get_value(input, 1, "EthernetPriority");
+	download.proto = dmjson_get_value(input, 1, "ProtocolVersion");
+	download.num_of_connections = dmjson_get_value(input, 1, "NumberOfConnections");
+	download.enable_per_connection_results = dmjson_get_value(input, 1, "EnablePerConnectionResults");
 
 	set_param_diagnostics("downloaddiagnostic", "url", download.download_url);
 	set_param_diagnostics("downloaddiagnostic", "device", download.interface);
@@ -552,24 +542,22 @@ static opr_ret_t ip_diagnostics_download(struct dmctx *dmctx, char *path, char *
 	return SUCCESS;
 }
 
-static opr_ret_t ip_diagnostics_upload(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t ip_diagnostics_upload(struct dmctx *dmctx, char *path, json_object *input)
 {
-	json_object *json_res = NULL;
 	struct upload_diagnostics upload = {0};
 
-	json_res = json_tokener_parse((const char *)input);
-	upload.upload_url = dmjson_get_value(json_res, 1, "UploadURL");
+	upload.upload_url = dmjson_get_value(input, 1, "UploadURL");
 	if(upload.upload_url[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
-	upload.test_file_length = dmjson_get_value(json_res, 1, "TestFileLength");
+	upload.test_file_length = dmjson_get_value(input, 1, "TestFileLength");
 	if(upload.test_file_length[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
-	upload.interface = dmjson_get_value(json_res, 1, "Interface");
-	upload.dscp = dmjson_get_value(json_res, 1, "DSCP");
-	upload.ethernet_priority = dmjson_get_value(json_res, 1, "EthernetPriority");
-	upload.proto = dmjson_get_value(json_res, 1, "ProtocolVersion");
-	upload.num_of_connections = dmjson_get_value(json_res, 1, "NumberOfConnections");
-	upload.enable_per_connection_results = dmjson_get_value(json_res, 1, "EnablePerConnectionResults");
+	upload.interface = dmjson_get_value(input, 1, "Interface");
+	upload.dscp = dmjson_get_value(input, 1, "DSCP");
+	upload.ethernet_priority = dmjson_get_value(input, 1, "EthernetPriority");
+	upload.proto = dmjson_get_value(input, 1, "ProtocolVersion");
+	upload.num_of_connections = dmjson_get_value(input, 1, "NumberOfConnections");
+	upload.enable_per_connection_results = dmjson_get_value(input, 1, "EnablePerConnectionResults");
 
 	set_param_diagnostics("uploaddiagnostic", "url", upload.upload_url);
 	set_param_diagnostics("uploaddiagnostic", "TestFileLength", upload.test_file_length);
@@ -625,26 +613,24 @@ static opr_ret_t ip_diagnostics_upload(struct dmctx *dmctx, char *path, char *in
 	return SUCCESS;
 }
 
-static opr_ret_t ip_diagnostics_udpecho(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t ip_diagnostics_udpecho(struct dmctx *dmctx, char *path, json_object *input)
 {
-	json_object *json_res = NULL;
 	struct udpecho_diagnostics udpecho = {0};
 
-	json_res = json_tokener_parse((const char *)input);
-	udpecho.host = dmjson_get_value(json_res, 1, "Host");
+	udpecho.host = dmjson_get_value(input, 1, "Host");
 	if(udpecho.host[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
-	udpecho.port = dmjson_get_value(json_res, 1, "Port");
+	udpecho.port = dmjson_get_value(input, 1, "Port");
 	if(udpecho.port[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
 
-	udpecho.interface = dmjson_get_value(json_res, 1, "Interface");
-	udpecho.proto = dmjson_get_value(json_res, 1, "ProtocolVersion");
-	udpecho.nbofrepetition = dmjson_get_value(json_res, 1, "NumberOfRepetitions");
-	udpecho.timeout = dmjson_get_value(json_res, 1, "Timeout");
-	udpecho.datablocksize = dmjson_get_value(json_res, 1, "DataBlockSize");
-	udpecho.dscp = dmjson_get_value(json_res, 1, "DSCP");
-	udpecho.inter_transmission_time = dmjson_get_value(json_res, 1, "InterTransmissionTime");
+	udpecho.interface = dmjson_get_value(input, 1, "Interface");
+	udpecho.proto = dmjson_get_value(input, 1, "ProtocolVersion");
+	udpecho.nbofrepetition = dmjson_get_value(input, 1, "NumberOfRepetitions");
+	udpecho.timeout = dmjson_get_value(input, 1, "Timeout");
+	udpecho.datablocksize = dmjson_get_value(input, 1, "DataBlockSize");
+	udpecho.dscp = dmjson_get_value(input, 1, "DSCP");
+	udpecho.inter_transmission_time = dmjson_get_value(input, 1, "InterTransmissionTime");
 
 	set_param_diagnostics("udpechodiagnostic", "Host", udpecho.host);
 	set_param_diagnostics("udpechodiagnostic", "port", udpecho.port);
@@ -685,26 +671,23 @@ static opr_ret_t ip_diagnostics_udpecho(struct dmctx *dmctx, char *path, char *i
 	return SUCCESS;
 }
 
-static opr_ret_t ip_diagnostics_serverselection(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t ip_diagnostics_serverselection(struct dmctx *dmctx, char *path, json_object *input)
 {
-
-	json_object *json_res = NULL;
 	struct serverselection_diagnostics serverselection = {0};
 
-	json_res = json_tokener_parse((const char *)input);
-	serverselection.hostlist = dmjson_get_value(json_res, 1, "HostList");
+	serverselection.hostlist = dmjson_get_value(input, 1, "HostList");
 	if(serverselection.hostlist[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
-	serverselection.port = dmjson_get_value(json_res, 1, "Port");
-	serverselection.proto = dmjson_get_value(json_res, 1, "Protocol");
+	serverselection.port = dmjson_get_value(input, 1, "Port");
+	serverselection.proto = dmjson_get_value(input, 1, "Protocol");
 	if (strcmp(serverselection.proto, "ICMP")) {
 		if(serverselection.port[0] == '\0')
 			return UBUS_INVALID_ARGUMENTS;
 	}
-	serverselection.protocol_version = dmjson_get_value(json_res, 1, "ProtocolVersion");
-	serverselection.interface = dmjson_get_value(json_res, 1, "Interface");
-	serverselection.nbofrepetition = dmjson_get_value(json_res, 1, "NumberOfRepetitions");
-	serverselection.timeout = dmjson_get_value(json_res, 1, "Timeout");
+	serverselection.protocol_version = dmjson_get_value(input, 1, "ProtocolVersion");
+	serverselection.interface = dmjson_get_value(input, 1, "Interface");
+	serverselection.nbofrepetition = dmjson_get_value(input, 1, "NumberOfRepetitions");
+	serverselection.timeout = dmjson_get_value(input, 1, "Timeout");
 
 	set_param_diagnostics("serverselectiondiagnostic", "HostList", serverselection.hostlist);
 	set_param_diagnostics("serverselectiondiagnostic", "interface", serverselection.interface);
@@ -740,22 +723,20 @@ static opr_ret_t ip_diagnostics_serverselection(struct dmctx *dmctx, char *path,
 	return SUCCESS;
 }
 
-static opr_ret_t ip_diagnostics_nslookup(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t ip_diagnostics_nslookup(struct dmctx *dmctx, char *path, json_object *input)
 {
-	json_object *json_res = NULL;
 	struct nslookup_diagnostics nslookup = {0};
 	struct uci_section *s = NULL;
 	char *status, *answertype, *hostname, *ipaddress, *dnsserverip, *responsetime;
 	int i = 1;
 
-	json_res = json_tokener_parse((const char *)input);
-	nslookup.hostname = dmjson_get_value(json_res, 1, "HostName");
+	nslookup.hostname = dmjson_get_value(input, 1, "HostName");
 	if(nslookup.hostname[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
-	nslookup.interface = dmjson_get_value(json_res, 1, "Interface");
-	nslookup.dnsserver = dmjson_get_value(json_res, 1, "DNSServer");
-	nslookup.timeout = dmjson_get_value(json_res, 1, "Timeout");
-	nslookup.nbofrepetition = dmjson_get_value(json_res, 1, "NumberOfRepetitions");
+	nslookup.interface = dmjson_get_value(input, 1, "Interface");
+	nslookup.dnsserver = dmjson_get_value(input, 1, "DNSServer");
+	nslookup.timeout = dmjson_get_value(input, 1, "Timeout");
+	nslookup.nbofrepetition = dmjson_get_value(input, 1, "NumberOfRepetitions");
 
 	set_param_diagnostics("nslookupdiagnostic", "HostName", nslookup.hostname);
 	set_param_diagnostics("nslookupdiagnostic", "interface", nslookup.interface);
@@ -803,7 +784,7 @@ static opr_ret_t ip_diagnostics_nslookup(struct dmctx *dmctx, char *path, char *
 	return SUCCESS;
 }
 
-static opr_ret_t swmodules_exec_env_reset(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t swmodules_exec_env_reset(struct dmctx *dmctx, char *path, json_object *input)
 {
 	char *exec_env = get_param_val_from_op_cmd(path, "Name");
 	if (exec_env) {
@@ -819,19 +800,18 @@ static opr_ret_t swmodules_exec_env_reset(struct dmctx *dmctx, char *path, char 
 	return SUCCESS;
 }
 
-static opr_ret_t swmodules_install_du(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t swmodules_install_du(struct dmctx *dmctx, char *path, json_object *input)
 {
-	json_object *json_res = NULL, *res = NULL;
+	json_object *res = NULL;
 	struct deployment_unit_install du_install = {0};
 
-	json_res = json_tokener_parse((const char *)input);
-	du_install.url = dmjson_get_value(json_res, 1, "URL");
+	du_install.url = dmjson_get_value(input, 1, "URL");
 	if (du_install.url[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
-	du_install.uuid = dmjson_get_value(json_res, 1, "UUID");
-	du_install.username = dmjson_get_value(json_res, 1, "Username");
-	du_install.password = dmjson_get_value(json_res, 1, "Password");
-	du_install.environment = dmjson_get_value(json_res, 1, "ExecutionEnvRef");
+	du_install.uuid = dmjson_get_value(input, 1, "UUID");
+	du_install.username = dmjson_get_value(input, 1, "Username");
+	du_install.password = dmjson_get_value(input, 1, "Password");
+	du_install.environment = dmjson_get_value(input, 1, "ExecutionEnvRef");
 	if (du_install.environment[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
 
@@ -856,17 +836,16 @@ static opr_ret_t swmodules_install_du(struct dmctx *dmctx, char *path, char *inp
 	return (strcmp(status, "true") == 0) ? SUCCESS : FAIL;
 }
 
-static opr_ret_t swmodules_update_du(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t swmodules_update_du(struct dmctx *dmctx, char *path, json_object *input)
 {
-	json_object *json_res = NULL, *res = NULL;
+	json_object *res = NULL;
 	struct deployment_unit_update du_update = {0};
 
-	json_res = json_tokener_parse((const char *)input);
-	du_update.url = dmjson_get_value(json_res, 1, "URL");
+	du_update.url = dmjson_get_value(input, 1, "URL");
 	if (du_update.url[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
-	du_update.username = dmjson_get_value(json_res, 1, "Username");
-	du_update.password = dmjson_get_value(json_res, 1, "Password");
+	du_update.username = dmjson_get_value(input, 1, "Username");
+	du_update.password = dmjson_get_value(input, 1, "Password");
 
 	char *du_uuid = get_param_val_from_op_cmd(path, "UUID");
 	if (!du_uuid)
@@ -888,7 +867,7 @@ static opr_ret_t swmodules_update_du(struct dmctx *dmctx, char *path, char *inpu
 	return (strcmp(status, "true") == 0) ? SUCCESS : FAIL;
 }
 
-static opr_ret_t swmodules_uninstall_du(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t swmodules_uninstall_du(struct dmctx *dmctx, char *path, json_object *input)
 {
 	json_object *res = NULL;
 
@@ -919,12 +898,12 @@ static opr_ret_t swmodules_uninstall_du(struct dmctx *dmctx, char *path, char *i
 
 }
 
-static opr_ret_t firmware_image_download(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t firmware_image_download(struct dmctx *dmctx, char *path, json_object *input)
 {
 	return SUCCESS;
 }
 
-static opr_ret_t firmware_image_activate(struct dmctx *dmctx, char *path, char *input)
+static opr_ret_t firmware_image_activate(struct dmctx *dmctx, char *path, json_object *input)
 {
 	return SUCCESS;
 }
@@ -960,7 +939,7 @@ int add_dynamic_operate(char *path, operation operate, char *type)
 	return 0;
 }
 
-static struct op_cmd operate_helper[] = {
+static const struct op_cmd operate_helper[] = {
 	{"Device.Reboot", reboot_device, "sync"},
 	{"Device.FactoryReset", factory_reset, "sync"},
 	{"Device.IP.Interface.*.Reset", network_interface_reset, "sync"},
@@ -991,45 +970,69 @@ static struct op_cmd operate_helper[] = {
 void operate_list_cmds(struct dmctx *dmctx)
 {
 	char *param, *type;
-	uint8_t len = 0, i;
+	const size_t n = ARRAY_SIZE(operate_helper);
+	size_t i;
 	struct op_cmd *save_pointer = NULL;
+
 	if (dynamic_operate) save_pointer = dynamic_operate;
 
-	len = ARRAY_SIZE(operate_helper);
-	for(i = 0; i < len; i++) {
+	for(i = 0; i < n; i++) {
 		param = dmstrdup(operate_helper[i].name);
-		type = operate_helper[i].type;
+		type = (char *)operate_helper[i].type;
 		add_list_paramameter(dmctx, param, NULL, type, NULL, 0);
 	}
 
 	for (; (dynamic_operate && dynamic_operate->name); dynamic_operate++) {
 		param = dmstrdup(dynamic_operate->name);
-		type = dynamic_operate->type;
+		type = (char *)dynamic_operate->type;
 		add_list_paramameter(dmctx, param, NULL, type, NULL, 0);
 	}
-	if (save_pointer) dynamic_operate = save_pointer;
+
+	if (save_pointer)dynamic_operate = save_pointer;
+}
+
+static opr_ret_t do_operate(struct dmctx *dmctx, char *path, operation func, const char *input)
+{
+	json_object *j_input;
+	opr_ret_t rc;
+
+	if (input)
+		j_input = json_tokener_parse(input);
+	else
+		j_input = NULL;
+
+	rc = func(dmctx, path, j_input);
+	json_object_put(j_input);
+	return rc;
 }
 
 opr_ret_t operate_on_node(struct dmctx *dmctx, char *path, char *input)
 {
-	uint8_t len = 0, i;
 	struct op_cmd *save_pointer = NULL;
-	if (dynamic_operate) save_pointer = dynamic_operate;
+	const struct op_cmd *op;
+	const size_t n = ARRAY_SIZE(operate_helper);
+	size_t i;
 
-	len = ARRAY_SIZE(operate_helper);
-	for(i = 0; i < len; i++) {
-		if (match(path, operate_helper[i].name))
-			return(operate_helper[i].opt(dmctx, path, input));
+	if (dynamic_operate)
+		save_pointer = dynamic_operate;
+
+	for (i = 0; i < n; i++) {
+		op = &operate_helper[i];
+
+		if (match(path, op->name))
+			return do_operate(dmctx, path, op->opt, input);
 	}
 
 	for (; (dynamic_operate && dynamic_operate->name); dynamic_operate++) {
 		if (match(path, dynamic_operate->name)) {
-			opr_ret_t res = dynamic_operate->opt(dmctx, path, input);
+			opr_ret_t res = do_operate(dmctx, path, dynamic_operate->opt, input);
 			if (save_pointer) dynamic_operate = save_pointer;
 			return res;
 		}
 	}
-	if (save_pointer) dynamic_operate = save_pointer;
+
+	if (save_pointer)
+		dynamic_operate = save_pointer;
 
 	return CMD_NOT_FOUND;
 }

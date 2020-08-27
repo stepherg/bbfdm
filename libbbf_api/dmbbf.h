@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <libubox/list.h>
+#include <json-c/json.h>
 #include "dmuci.h"
 #include "dmmem.h"
 
@@ -306,7 +307,7 @@ enum operate_ret_status{
 
 typedef enum operate_ret_status opr_ret_t;
 
-typedef opr_ret_t (*operation) (struct dmctx *dmctx, char *p, char *input);
+typedef opr_ret_t (*operation) (struct dmctx *dmctx, char *p, json_object *input);
 
 typedef struct lib_map_operate {
 	char *path;
