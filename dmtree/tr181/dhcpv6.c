@@ -117,13 +117,13 @@ static inline int init_dhcpv6_args(struct dhcpv6_args *args, struct uci_section 
 /*#Device.DHCPv6.Client.{i}.!UCI:network/interface/dmmap_dhcpv6*/
 static int browseDHCPv6ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	struct dhcpv6_client_args dhcpv6_client_arg = {0};
 	json_object *res, *jobj;
 	char *inst, *max_inst = NULL, *ipv6addr = NULL;
 	LIST_HEAD(dup_list);
 
-	synchronize_specific_config_sections_with_dmmap_eq_no_delete("network", "interface", "dmmap_dhcpv6", "proto", "dhcpv6", &dup_list);
+	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_dhcpv6", "proto", "dhcpv6", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(p->config_section), String}}, 1, &res);
 		if (res) {
