@@ -1405,11 +1405,8 @@ int dm_entry_get_schema(struct dmctx *ctx)
 
 static int mobj_get_schema_name(DMOBJECT_ARGS)
 {
-	char *refparam;
 	char *perm = permission->val;
-	refparam = node->current_object;
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
+	char *refparam = node->current_object;
 
 	add_list_paramameter(dmctx, refparam, perm, "xsd:object", NULL, 0);
 	return 0;
@@ -1420,8 +1417,6 @@ static int mparam_get_schema_name(DMPARAM_ARGS)
 	char *refparam;
 	char *perm = permission->val;
 	dmastrcat(&refparam, node->current_object, lastname);
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
 
 	add_list_paramameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0);
 	return 0;
