@@ -189,7 +189,7 @@ int os_addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, ch
 
 	dmuci_add_section_bbfdm("dmmap_qos", "classify", &dmmap_qos_classify, &v);
 	dmuci_set_value_by_section(dmmap_qos_classify, "section_name", sect_name);
-	*instance = update_instance(dmmap_qos_classify, last_inst, "classifinstance");
+	*instance = update_instance(last_inst, 4, dmmap_qos_classify, "classifinstance", "dmmap_qos", "classify");
 	return 0;
 }
 
@@ -310,7 +310,7 @@ int os_addObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char **inst
 
 	dmuci_add_section_bbfdm("dmmap_qos", "class", &dmmap_qos_class, &v);
 	dmuci_set_value_by_section(dmmap_qos_class, "section_name", sect_name);
-	*instance = update_instance(dmmap_qos_class, last_inst, "queueinstance");
+	*instance = update_instance(last_inst, 4, dmmap_qos_class, "queueinstance", "dmmap_qos", "class");
 	return 0;
 }
 
@@ -407,7 +407,7 @@ int addObjQoSShaper(char *refparam, struct dmctx *ctx, void *data, char **instan
 
 	dmuci_add_section_bbfdm("dmmap_qos", "class", &dmmap_qos_class, &v);
 	dmuci_set_value_by_section(dmmap_qos_class, "section_name", sect_name);
-	*instance = update_instance(dmmap_qos_class, last_inst, "shaperinstance");
+	*instance = update_instance(last_inst, 4, dmmap_qos_class, "shaperinstance", "dmmap_qos", "class");
 	return 0;
 }
 

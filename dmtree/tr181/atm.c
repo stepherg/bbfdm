@@ -253,9 +253,10 @@ static int add_atm_link(char *refparam, struct dmctx *ctx, void *data, char **in
 	dmuci_set_value("dsl", atm_device, "link_type", "eoa");
 	dmuci_set_value("dsl", atm_device, "encapsulation", "llc");
 	dmuci_set_value("dsl", atm_device, "qos_class", "ubr");
+
 	dmuci_add_section_bbfdm("dmmap_dsl", "atm-device", &dmmap_atm, &v);
 	dmuci_set_value_by_section(dmmap_atm, "section_name", atm_device);
-	*instancepara = update_instance(dmmap_atm, instance, "atmlinkinstance");
+	*instancepara = update_instance(instance, 4, dmmap_atm, "atmlinkinstance", "dmmap_dsl", "atm-device");
 	return 0;
 }
 

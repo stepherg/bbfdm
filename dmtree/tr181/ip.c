@@ -1548,7 +1548,7 @@ static int set_IPInterfaceIPv6Prefix_Alias(char *refparam, struct dmctx *ctx, vo
 /*************************************************************
 * ADD & DEL OBJ
 **************************************************************/
-static char *get_last_instance_cond(char* dmmap_package, char *package, char *section, char *opt_inst, char *opt_cond, char *cond_val, char *opt_filter, char *filter_val, char *refused_interface)
+static char *get_last_instance_cond(char *dmmap_package, char *package, char *section, char *opt_inst, char *opt_cond, char *cond_val, char *opt_filter, char *filter_val, char *refused_interface)
 {
 	struct uci_section *s, *dmmap_section;
 	char *inst = NULL, *val, *val_f;
@@ -1584,7 +1584,7 @@ static char *get_last_instance_cond(char* dmmap_package, char *package, char *se
 			continue;
 		}
 		get_dmmap_section_of_config_section(dmmap_package, section, section_name(s), &dmmap_section);
-		inst = update_instance(dmmap_section, inst, opt_inst);
+		inst = update_instance(inst, 4, dmmap_section, opt_inst, dmmap_package, section);
 	}
 	return inst;
 }
@@ -1606,7 +1606,7 @@ static int add_ip_interface(char *refparam, struct dmctx *ctx, void *data, char 
 
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ip_interface, &v);
 	dmuci_set_value_by_section(dmmap_ip_interface, "section_name", ip_name);
-	*instance = update_instance(dmmap_ip_interface, last_inst, "ip_int_instance");
+	*instance = update_instance(last_inst, 4, dmmap_ip_interface, "ip_int_instance", "dmmap_network", "interface");
 	return 0;
 }
 
@@ -1660,7 +1660,7 @@ static int add_ipv4(char *refparam, struct dmctx *ctx, void *data, char **instan
 
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(((struct ip_args *)data)->ip_sec), &dmmap_section);
 	dmuci_get_value_by_section_string(dmmap_section, "ipv4_instance", &instance);
-	*instancepara = update_instance(dmmap_section, instance, "ipv4_instance");
+	*instancepara = update_instance(instance, 4, dmmap_section, "ipv4_instance", "dmmap_network", "interface");
 	if(instance[0] == '\0') {
 		dmuci_set_value_by_section(dmmap_section, "ipv4_instance", *instancepara);
 		dmuci_set_value_by_section(((struct ip_args *)data)->ip_sec, "ipaddr", "0.0.0.0");
@@ -1777,7 +1777,7 @@ static char *get_last_instance_with_option(char *package, char *section, char *o
 	char *inst = NULL;
 
 	uci_foreach_option_eq(package, section, option, val, s) {
-		inst = update_instance(s, inst, opt_inst);
+		inst = update_instance(inst, 4, s, opt_inst, package, section);
 	}
 	return inst;
 }

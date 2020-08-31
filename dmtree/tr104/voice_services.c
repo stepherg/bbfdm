@@ -312,7 +312,7 @@ static int add_profile_object(char *refparam, struct dmctx *ctx, void *data, cha
 
 	dmuci_add_section_bbfdm("dmmap_asterisk", "sip_service_provider", &dmmap_voice_section, &v);
 	dmuci_set_value_by_section(dmmap_voice_section, "section_name", sname);
-	*instancepara = update_instance(dmmap_voice_section, instance, "profileinstance");
+	*instancepara = update_instance(instance, 4, dmmap_voice_section, "profileinstance", "dmmap_asterisk", "sip_service_provider");
 
 	return 0;
 }

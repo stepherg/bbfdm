@@ -145,7 +145,7 @@ static int add_ptm_link(char *refparam, struct dmctx *ctx, void *data, char **in
 	dmuci_set_value("dsl", ptm_device, "portid", "1");
 	dmuci_add_section_bbfdm("dmmap_dsl", "ptm-device", &dmmap_ptm, &v);
 	dmuci_set_value_by_section(dmmap_ptm, "section_name", ptm_device);
-	*instancepara = update_instance(dmmap_ptm, instance, "ptmlinkinstance");
+	*instancepara = update_instance(instance, 4, dmmap_ptm, "ptmlinkinstance", "dmmap_dsl", "ptm-device");
 	return 0;
 }
 

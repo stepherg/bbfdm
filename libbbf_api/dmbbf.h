@@ -538,8 +538,7 @@ extern char dm_delim;
 extern char dmroot[64];
 extern int bbfdatamodel_type;
 
-
-char *update_instance(struct uci_section *s, char *last_inst, char *inst_opt);
+char *update_instance(char *last_inst, int argc, ...);
 char *update_instance_alias(int action, char **last_inst , void *argv[]);
 char *update_instance_without_section(int action, char **last_inst, void *argv[]);
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);

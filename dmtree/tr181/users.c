@@ -47,8 +47,8 @@ static int add_users_user(char *refparam, struct dmctx *ctx, void *data, char **
 	dmuci_set_value_by_section(s, "password", username);
 
 	dmuci_add_section_bbfdm("dmmap_users", "user", &dmmap_user, &v);
-	dmuci_set_value_by_section(dmmap_user, "section_name", sect_name);
-	*instance = update_instance(dmmap_user, last_inst, "user_instance");
+	dmuci_set_value_by_section(dmmap_user, "section_name", username);
+	*instance = update_instance(last_inst, 4, dmmap_user, "user_instance", "dmmap_users", "user");
 	return 0;
 }
 
@@ -186,12 +186,18 @@ static int set_user_enable(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int set_user_username(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *dmmap_section = NULL;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			// Update dmmap_users file
+			get_dmmap_section_of_config_section("dmmap_users", "user", section_name((struct uci_section *)data), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "section_name", value);
+			// Update users config
 			dmuci_rename_section_by_section((struct uci_section *)data, value);
 			break;
 	}

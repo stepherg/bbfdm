@@ -1108,7 +1108,7 @@ static int add_ipv4forwarding(char *refparam, struct dmctx *ctx, void *data, cha
 
 	dmuci_add_section_bbfdm("dmmap_route_forwarding", "route", &dmmap_route, &v);
 	dmuci_set_value_by_section(dmmap_route, "section_name", section_name(s));
-	*instancepara = update_instance(dmmap_route, instance, "routeinstance");
+	*instancepara = update_instance(instance, 4, dmmap_route, "routeinstance", "dmmap_route_forwarding", "route");
 	return 0;
 }
 
@@ -1148,7 +1148,7 @@ static int add_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, cha
 
 	dmuci_add_section_bbfdm("dmmap_route_forwarding", "route6", &dmmap_route, &v);
 	dmuci_set_value_by_section(dmmap_route, "section_name", section_name(s));
-	*instancepara = update_instance(dmmap_route, instance, "route6instance");
+	*instancepara = update_instance(instance, 4, dmmap_route, "route6instance", "dmmap_route_forwarding", "route6");
 	return 0;
 }
 

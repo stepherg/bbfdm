@@ -401,7 +401,7 @@ static int add_owsd_listen(char *refparam, struct dmctx *ctx, void *data, char *
 
 	dmuci_add_section_bbfdm("dmmap_owsd", "owsd-listen", &dmmap_sec, &v);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(listen_sec));
-	*instancepara = update_instance(dmmap_sec, instance, "olisteninstance");
+	*instancepara = update_instance(instance, 4, dmmap_sec, "olisteninstance", "dmmap_owsd", "owsd-listen");
 
 	return 0;
 }

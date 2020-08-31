@@ -177,7 +177,7 @@ static int addObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 
 	dmuci_add_section_bbfdm("dmmap_ddns", "service", &dmmap, &v);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(dmmap, last_inst, "clientinstance");
+	*instance = update_instance(last_inst, 4, dmmap, "clientinstance", "dmmap_ddns", "service");
 	return 0;
 }
 
@@ -240,7 +240,7 @@ static int addObjDynamicDNSServer(char *refparam, struct dmctx *ctx, void *data,
 
 	dmuci_add_section_bbfdm("dmmap_ddns", "ddns_server", &dmmap, &v);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(dmmap, last_inst, "serverinstance");
+	*instance = update_instance(last_inst, 4, dmmap, "serverinstance", "dmmap_ddns", "ddns_server");
 	return 0;
 }
 

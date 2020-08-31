@@ -366,7 +366,7 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 
 			dmuci_add_section_bbfdm(arg4, arg3, &dmmap, &v);
 			dmuci_set_value_by_section(dmmap, "section_name", sect_name);
-			*instance = update_instance(dmmap, inst, buf_instance);
+			*instance = update_instance(inst, 4, dmmap, buf_instance, arg4, arg3);
 		}
 	}
 	return 0;

@@ -620,16 +620,22 @@ char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **last_
 	return instance;
 }
 
-char *update_instance(struct uci_section *s, char *last_inst, char *inst_opt)
+char *update_instance(char *last_inst, int argc, ...)
 {
+	va_list arg;
 	char *instance;
-	void *argv[3];
+	int i = 0;
+	void *argv[argc+1];
 
-	argv[0] = s;
-	argv[1] = inst_opt;
-	argv[2] = "";
+	va_start(arg, argc);
+	for (i = 0; i < argc; i++) {
+		argv[i] = va_arg(arg, void*);
+	}
+	argv[argc] = NULL;
+	va_end(arg);
 
 	instance = update_instance_alias(0, &last_inst, argv);
+
 	return instance;
 }
 
@@ -714,11 +720,12 @@ char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst)
 	char *inst = NULL, *last_inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, package, section, s) {
-		inst = update_instance(s, last_inst, opt_inst);
+		inst = update_instance(last_inst, 4, s, opt_inst, package, section);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(inst);
 	}
+
 	return inst;
 }
 
@@ -743,33 +750,37 @@ char *get_last_instance(char *package, char *section, char *opt_inst)
 
 	if (strcmp(package, DMMAP) == 0) {
 		uci_path_foreach_sections(bbfdm, "dmmap", section, s) {
-			inst = update_instance(s, last_inst, opt_inst);
+			inst = update_instance(last_inst, 4, s, opt_inst, package, section);
 			if(last_inst)
 				dmfree(last_inst);
 			last_inst = dmstrdup(inst);
 		}
 	} else {
 		uci_foreach_sections(package, section, s) {
-			inst = update_instance(s, inst, opt_inst);
+			inst = update_instance(inst, 4, s, opt_inst, package, section);
 		}
 	}
 	return inst;
 }
 
-char *get_last_instance_lev2_bbfdm_dmmap_opt(char* dmmap_package, char *section,  char *opt_inst, char *opt_check, char *value_check)
+char *get_last_instance_lev2_bbfdm_dmmap_opt(char *dmmap_package, char *section, char *opt_inst, char *opt_check, char *value_check)
 {
 	struct uci_section *s;
-	char *instance = NULL, *section_name = NULL, *last_inst = NULL;
+	char *instance = NULL, *last_inst = NULL;
+	struct browse_args browse_args = {0};
+
+	browse_args.option = opt_check;
+	browse_args.value = value_check;
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section, opt_check, value_check, s) {
-		dmuci_get_value_by_section_string(s, "section_name", &section_name);
-		instance = update_instance(s, last_inst, opt_inst);
+		instance = update_instance(last_inst, 6, s, opt_inst, dmmap_package, section, check_browse_section, (void *)&browse_args);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(instance);
 	}
 	return instance;
 }
+
 char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check)
 {
 	struct uci_section *s, *dmmap_section;
@@ -778,11 +789,11 @@ char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_pac
 	check_create_dmmap_package(dmmap_package);
 	uci_foreach_option_cont(package, section, opt_check, value_check, s) {
 		get_dmmap_section_of_config_section(dmmap_package, section, section_name(s), &dmmap_section);
-		if(dmmap_section == NULL){
+		if (dmmap_section == NULL) {
 			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section, &v);
 			dmuci_set_value_by_section(dmmap_section, "section_name", section_name(s));
 		}
-		instance = update_instance(dmmap_section, last_inst, opt_inst);
+		instance = update_instance(last_inst, 4, dmmap_section, opt_inst, dmmap_package, section);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(instance);
@@ -797,14 +808,14 @@ char *get_last_instance_lev2(char *package, char *section, char *opt_inst, char 
 
 	if (strcmp(package, DMMAP) == 0) {
 		uci_path_foreach_option_cont(bbfdm, package, section, opt_check, value_check, s) {
-			instance = update_instance(s, last_inst, opt_inst);
+			instance = update_instance(last_inst, 4, s, opt_inst, package, section);
 			if(last_inst)
 				dmfree(last_inst);
 			last_inst = dmstrdup(instance);
 		}
 	} else {
 		uci_foreach_option_cont(package, section, opt_check, value_check, s) {
-			instance = update_instance(s, instance, opt_inst);
+			instance = update_instance(instance, 4, s, opt_inst, package, section);
 		}
 	}
 	return instance;

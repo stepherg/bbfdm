@@ -17,14 +17,11 @@ static int add_mld_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char
 {
 	char *inst, *value, *v, *s_name;
 	struct uci_section  *dmmap = NULL, *s = NULL;
-	char i_no[16];
+	struct browse_args browse_args = {0};
 
 	check_create_dmmap_package("dmmap_mcast");
-	inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "proxy", "proxy_instance",
-						"proto", "mld");
-	snprintf(i_no, sizeof(i_no), "%d", inst ? atoi(inst)+1 : 1);
-
-	dmasprintf(&s_name, "mld_proxy_%s", i_no);
+	inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "proxy", "proxy_instance", "proto", "mld");
+	dmasprintf(&s_name, "mld_proxy_%d", inst ? atoi(inst)+1 : 1);
 
 	dmuci_add_section("mcast", "proxy", &s, &value);
 	dmuci_rename_section_by_section(s, s_name);
@@ -34,10 +31,13 @@ static int add_mld_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_set_value_by_section(s, "robustness", "2");
 	dmuci_set_value_by_section(s, "aggregation", "0");
 
+	browse_args.option = "proto";
+	browse_args.value = "mld";
+
 	dmuci_add_section_bbfdm("dmmap_mcast", "proxy", &dmmap, &v);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	dmuci_set_value_by_section(dmmap, "proto", "mld");
-	*instance = update_instance(dmmap, inst, "proxy_instance");
+	*instance = update_instance(inst, 6, dmmap, "proxy_instance", "dmmap_mcast", "proxy", check_browse_section, (void *)&browse_args);
 
 	return 0;
 }
@@ -90,14 +90,19 @@ static int del_mld_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char
 static int browse_mld_proxy_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL;
+	struct browse_args browse_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_cont("mcast", "proxy", "dmmap_mcast", "proto", "mld", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "proxy_instance", "proxy_alias", "dmmap_mcast", "proxy");
+		browse_args.option = "proto";
+		browse_args.value = "mld";
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+			   p->dmmap_section, "proxy_instance", "proxy_alias", "dmmap_mcast", "proxy",
+			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -111,14 +116,11 @@ static int add_mld_snooping_obj(char *refparam, struct dmctx *ctx, void *data, c
 {
 	char *inst, *value, *v, *s_name;
 	struct uci_section  *dmmap = NULL, *s = NULL;
-	char i_no[16];
+	struct browse_args browse_args = {0};
 
 	check_create_dmmap_package("dmmap_mcast");
-	inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "snooping",
-					"snooping_instance", "proto", "mld");
-	snprintf(i_no, sizeof(i_no), "%d", inst ? atoi(inst)+1 : 1);
-
-	dmasprintf(&s_name, "mld_snoop_%s", i_no);
+	inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "snooping", "snooping_instance", "proto", "mld");
+	dmasprintf(&s_name, "mld_snoop_%d", inst ? atoi(inst)+1 : 1);
 
 	dmuci_add_section("mcast", "snooping", &s, &value);
 	dmuci_rename_section_by_section(s, s_name);
@@ -128,10 +130,13 @@ static int add_mld_snooping_obj(char *refparam, struct dmctx *ctx, void *data, c
 	dmuci_set_value_by_section(s, "robustness", "2");
 	dmuci_set_value_by_section(s, "aggregation", "0");
 
+	browse_args.option = "proto";
+	browse_args.value = "mld";
+
 	dmuci_add_section_bbfdm("dmmap_mcast", "snooping", &dmmap, &v);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	dmuci_set_value_by_section(dmmap, "proto", "mld");
-	*instance = update_instance(dmmap, inst, "snooping_instance");
+	*instance = update_instance(inst, 6, dmmap, "snooping_instance", "dmmap_mcast", "snooping", check_browse_section, (void *)&browse_args);
 
 	return 0;
 }
@@ -182,14 +187,19 @@ static int del_mld_snooping_obj(char *refparam, struct dmctx *ctx, void *data, c
 static int browse_mld_snooping_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL;
+	struct browse_args browse_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_cont("mcast", "snooping", "dmmap_mcast", "proto", "mld", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "snooping_instance", "snooping_alias", "dmmap_mcast", "snooping");
+		browse_args.option = "proto";
+		browse_args.value = "mld";
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+			   p->dmmap_section, "snooping_instance", "snooping_alias", "dmmap_mcast", "snooping",
+			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -242,6 +252,7 @@ static int add_mlds_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	char *last_inst, *v;
 	struct uci_section *dmmap_mlds_filter = NULL;
+	struct browse_args browse_args = {0};
 
 	last_inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "snooping_filter", "filter_instance",
 					"section_name", section_name((struct uci_section *)data));
@@ -249,7 +260,11 @@ static int add_mlds_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 	dmuci_add_section_bbfdm("dmmap_mcast", "snooping_filter", &dmmap_mlds_filter, &v);
 	dmuci_set_value_by_section(dmmap_mlds_filter, "section_name", section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_mlds_filter, "enable", "0");
-	*instance = update_instance(dmmap_mlds_filter, last_inst, "filter_instance");
+
+	browse_args.option = "section_name";
+	browse_args.value = section_name((struct uci_section *)data);
+
+	*instance = update_instance(last_inst, 6, dmmap_mlds_filter, "filter_instance", "dmmap_mcast", "snooping_filter", check_browse_section, (void *)&browse_args);
 
 	return 0;
 }
@@ -310,6 +325,7 @@ static int add_mldp_interface_obj(char *refparam, struct dmctx *ctx, void *data,
 	// This section works but commented for now as it is tested not much yet.
 	char *last_inst, *v;
 	struct uci_section *dmmap_mldp_interface = NULL;
+	struct browse_args browse_args = {0};
 
 	last_inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "proxy_interface", "iface_instance",
 					"section_name", section_name((struct uci_section *)data));
@@ -319,7 +335,10 @@ static int add_mldp_interface_obj(char *refparam, struct dmctx *ctx, void *data,
 	dmuci_set_value_by_section(dmmap_mldp_interface, "upstream", "0");
 	dmuci_set_value_by_section(dmmap_mldp_interface, "snooping_mode", "0");
 
-	*instance = update_instance(dmmap_mldp_interface, last_inst, "iface_instance");
+	browse_args.option = "section_name";
+	browse_args.value = section_name((struct uci_section *)data);
+
+	*instance = update_instance(last_inst, 6, dmmap_mldp_interface, "iface_instance", "dmmap_mcast", "proxy_interface", check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -407,6 +426,7 @@ static int add_mldp_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	char *last_inst, *v;
 	struct uci_section *dmmap_mldp_filter = NULL;
+	struct browse_args browse_args = {0};
 
 	last_inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "proxy_filter", "filter_instance",
 			"section_name", section_name((struct uci_section *)data));
@@ -415,7 +435,10 @@ static int add_mldp_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 	dmuci_set_value_by_section(dmmap_mldp_filter, "section_name", section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_mldp_filter, "enable", "0");
 
-	*instance = update_instance(dmmap_mldp_filter, last_inst, "filter_instance");
+	browse_args.option = "section_name";
+	browse_args.value = section_name((struct uci_section *)data);
+
+	*instance = update_instance(last_inst, 6, dmmap_mldp_filter, "filter_instance", "dmmap_mcast", "proxy_filter", check_browse_section, (void *)&browse_args);
 
 	return 0;
 }
