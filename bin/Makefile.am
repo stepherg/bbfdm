@@ -82,6 +82,7 @@ libbbfdm_la_SOURCES +=							\
 	../dmtree/tr181/dynamicdns.c				\
 	../dmtree/tr181/security.c					\
 	../dmtree/tr181/lanconfigsecurity.c			\
+	../dmtree/tr181/ieee1905.c				\
 	../dmtree/tr181/qos.c
 	
 endif
