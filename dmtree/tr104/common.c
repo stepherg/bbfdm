@@ -1,0 +1,281 @@
+/*
+ * Copyright (C) 2020 iopsys Software Solutions AB
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License version 2.1
+ * as published by the Free Software Foundation
+ *
+ *	Author: Yalu Zhang, yalu.zhang@iopsys.eu
+ */
+
+#include "common.h"
+
+char *RFPowerControl[] = {"Normal", "Reduced"};
+char *ProxyServerTransport[] = {"UDP", "TCP", "TLS", "SCTP"};
+char *RegistrarServerTransport[] = {"UDP", "TCP", "TLS", "SCTP"};
+char *DTMFMethod[] = {"InBand", "RFC4733", "SIPInfo"};
+char *JitterBufferType[] = {"Static", "Dynamic"};
+
+struct codec_info supported_codecs[MAX_SUPPORTED_CODECS];
+int codecs_num;
+
+LIST_HEAD(call_log_list);
+static int call_log_list_size = 0;
+int call_log_count = 0;
+
+int init_supported_codecs()
+{
+	json_object *res = NULL;
+
+	dmubus_call("voice.asterisk", "codecs", UBUS_ARGS{}, 0, &res);
+	if (!res)
+		return -1;
+
+	int num = json_object_object_length(res);
+	if (num <= 0)
+		return -1;
+
+	json_object_object_foreach(res, key, value) {
+		if (value) {
+			const char *codec;
+			int min = 0, max = 0, increment = 0, ptime_default = 0, duration, total_len, len;
+			int size = sizeof(supported_codecs[codecs_num].packetization_period);
+
+			strncpy(supported_codecs[codecs_num].uci_name, key, sizeof(supported_codecs[codecs_num].uci_name) - 1);
+			json_object_object_foreach(value, sub_key, sub_value) {
+				if (sub_value && !strcasecmp(sub_key, "name") && (codec = json_object_get_string(sub_value)) != NULL) {
+					strncpy(supported_codecs[codecs_num].codec, codec, sizeof(supported_codecs[codecs_num].codec));
+				} else if (sub_value && !strcasecmp(sub_key, "bitrate")) {
+					supported_codecs[codecs_num].bit_rate = json_object_get_int(sub_value);
+				} else if (sub_value && !strcasecmp(sub_key, "ptime_min")) {
+					min = json_object_get_int(sub_value);
+				} else if (sub_value && !strcasecmp(sub_key, "ptime_max")) {
+					max = json_object_get_int(sub_value);
+				} else if (sub_value && !strcasecmp(sub_key, "ptime_increment")) {
+					increment = json_object_get_int(sub_value);
+				} else if (sub_value && !strcasecmp(sub_key, "ptime_default")) {
+					ptime_default = json_object_get_int(sub_value);
+				}
+			}
+
+			// Construct packetization period
+			if (min > 0 && max > min) {
+				if (increment <= 0)
+					increment = 10;
+				for (total_len = 0, duration = min; duration <= max; duration += increment) {
+					supported_codecs[codecs_num].ptime_default = (unsigned int)ptime_default;
+					len = snprintf(supported_codecs[codecs_num].packetization_period + total_len, size,
+							"%s%d", (duration == min) ? "" : ",", duration);
+					if (len > 0 && len < size) {
+						total_len += len;
+						size -= len;
+					} else {
+						TR104_DEBUG("supported_codecs[codecs_num].packetization_period = %s, "
+								"the size is too small\n", supported_codecs[codecs_num].packetization_period);
+						break;
+					}
+				}
+			}
+
+			++codecs_num;
+			if (codecs_num >= num || codecs_num >= MAX_SUPPORTED_CODECS)
+				break;
+		}
+	}
+
+	return 0;
+}
+
+#define CALL_LOG_FILE "/var/log/asterisk/cdr-csv/Master.csv"
+#define SEPARATOR "\",\""
+#define SEPARATOR_SIZE strlen(SEPARATOR)
+int init_call_log()
+{
+#define CHECK_RESULT(cond) if (!(cond)) { \
+	TR104_DEBUG("Invalid cdr [%s]\ncalling_number = [%s], called_number = [%s], " \
+		"start_time = [%s], end_time = %s\n", line, \
+		cdr.calling_num, cdr.called_num, cdr.start_time, end_time); \
+		continue; \
+}
+	static struct stat prev_stat = { 0 };
+	struct stat cur_stat;
+	int res = 0, i = 0;
+	struct call_log_entry *entry;
+	struct list_head *pos = NULL;
+	FILE *fp = NULL;
+	char line[320];
+
+	// Check if there are any new call logs since the last time
+	if (stat(CALL_LOG_FILE, &cur_stat) == 0) {
+		if (memcmp(&cur_stat, &prev_stat, sizeof(cur_stat)) == 0) {
+			TR104_DEBUG("There are no new call log since the last time. Exit.\n");
+			return 0;
+		} else {
+			prev_stat = cur_stat;
+		}
+	}
+
+	fp = fopen(CALL_LOG_FILE, "r");
+	if (!fp) {
+		TR104_DEBUG("Call log file %s doesn't exist\n", CALL_LOG_FILE);
+		res = -1;
+		goto __ret;
+	}
+
+	while (fgets(line, sizeof(line), fp) != NULL) {
+		struct call_log_entry cdr = { {NULL, NULL}, };
+		char end_time[sizeof(cdr.start_time)] = "";
+		char *token, *end;
+		/*
+		 * Parse the line for one call record. Examples of call log is below
+		 *
+		 * Tel 1 --> Tel 2, busy
+		 * "","8001","8002","sip0","""8001"" <8001>","TELCHAN/5/22","SIP/sip0-00000013","Dial","SIP/8002@sip0,,gT", \
+		 * "2020-08-27 11:02:40",,"2020-08-27 11:02:40",0,0,"BUSY","DOCUMENTATION","1598518960.99",""
+		 *
+		 * Tel 1 --> Tel 2
+		 * "","8001","8002","sip0","""8001"" <8001>","TELCHAN/5/19","SIP/sip0-00000011","Dial","SIP/8002@sip0,,gT", \
+		 * "2020-08-27 11:02:16","2020-08-27 11:02:20","2020-08-27 11:02:25",8,5,"ANSWERED","DOCUMENTATION", \
+		 * "1598518936.86",""
+		 *
+		 * External --> Tel 1
+		 * "","7001","8001","call_line",""""" <7001>","SIP/sip0-00000015","TELCHAN/5/25","Dial", \
+		 * "TELCHAN\/5,,tF(hangup,h,2)","2020-08-27 11:09:40","2020-08-27 11:09:45","2020-08-27 11:20:40", \
+		 * 660,654,"ANSWERED","DOCUMENTATION","1598519380.114",""
+		 *
+		 * Tel 1 --> External
+		 * "","8001","7001","sip0","""8001"" <8001>","TELCHAN/5/1","SIP/sip0-00000001","Dial","SIP/7001@sip0,,gT", \
+		 * "2020-08-25 16:11:41","2020-08-25 16:11:50","2020-08-25 16:12:02",21,11,"ANSWERED","DOCUMENTATION", \
+		 * "1598364701.4",""
+		 */
+		// calling number
+		token = strstr(line, SEPARATOR);
+		CHECK_RESULT(token);
+		token += SEPARATOR_SIZE;
+		end = strstr(token, SEPARATOR);
+		CHECK_RESULT(end);
+		strncpy(cdr.calling_num, token, end - token);
+		// called number
+		token = end + SEPARATOR_SIZE;
+		end = strstr(token, SEPARATOR);
+		CHECK_RESULT(end);
+		strncpy(cdr.called_num, token, end - token);
+		// source
+		token = end + SEPARATOR_SIZE; // sip0 in the last example
+		token = strstr(token, SEPARATOR);
+		CHECK_RESULT(token);
+		token += SEPARATOR_SIZE; // ""8001"" <8001> in the last example
+		token = strstr(token, SEPARATOR);
+		CHECK_RESULT(token);
+		token += SEPARATOR_SIZE; // TELCHAN/5/1 in the last example
+		end = strstr(token, SEPARATOR);
+		CHECK_RESULT(end);
+		strncpy(cdr.source, token, end - token);
+		// destination
+		token = end + SEPARATOR_SIZE; // SIP/sip0-00000001 in the last example
+		end = strstr(token, SEPARATOR);
+		CHECK_RESULT(end);
+		strncpy(cdr.destination, token, end - token);
+		// start time and end time
+		token = end + SEPARATOR_SIZE; // Dial in the last example
+		token = strstr(token, SEPARATOR);
+		CHECK_RESULT(token);
+		token += SEPARATOR_SIZE; // SIP/7001@sip0,,gT in the last example
+		token = strstr(token, SEPARATOR);
+		CHECK_RESULT(token);
+		token += SEPARATOR_SIZE; // The first date
+		end = strstr(token, "\",,\"");
+		if (end) {
+			// Not answered, e.g. "2020-08-27 11:02:40",,"2020-08-27 11:02:40",21,11,
+			strncpy(cdr.start_time, token, end - token);
+			token = end + 4;
+		} else {
+			// Answered, e.g. "2020-08-25 16:11:41","2020-08-25 16:11:50","2020-08-25 16:12:02",21,11,
+			end = strstr(token, SEPARATOR);
+			CHECK_RESULT(end);
+			strncpy(cdr.start_time, token, end - token);
+			token = strstr(end + SEPARATOR_SIZE, SEPARATOR); // Skip the middle date and come to the last date
+			CHECK_RESULT(token);
+			token += SEPARATOR_SIZE;
+		}
+		end = strstr(token, "\",");
+		CHECK_RESULT(end);
+		strncpy(end_time, token, end - token);
+		// termination cause
+		token = strstr(end + 2, ",\""); // ANSWERED in the last example
+		CHECK_RESULT(token);
+		token += 2;
+		end = strstr(token, SEPARATOR);
+		CHECK_RESULT(end);
+		strncpy(cdr.termination_cause, token, end - token);
+		if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||
+			cdr.start_time[0] == '\0' || end_time[0] == '\0') {
+			TR104_DEBUG("Invalid cdr [%s]\ncalling_number = [%s], called_number = [%s], "
+					"start_time = [%s], end_time = [%s]\n", line,
+					cdr.calling_num, cdr.called_num, cdr.start_time, end_time);
+			continue;
+		}
+
+		// Calculate the call duration
+		struct tm tm_start, tm_end;
+		char *r1 = strptime(cdr.start_time, "%Y-%m-%d %H:%M:%S", &tm_start);
+		char *r2 = strptime(end_time, "%Y-%m-%d %H:%M:%S", &tm_end);
+		if (r1 && *r1 == '\0' && r2 && *r2 == '\0') {
+			time_t time_start, time_end;
+			time_start = mktime(&tm_start);
+			time_end = mktime(&tm_end);
+			snprintf(cdr.duration, sizeof(cdr.duration), "%u", (unsigned int)(time_end - time_start));
+		} else {
+			TR104_DEBUG("Wrong start time and/or end time, [%s], [%s]\n", cdr.start_time, end_time);
+		}
+
+		// Determine the call direction and used line
+		char *line;
+		if ((line = strcasestr(cdr.source, "TELCHAN")) != NULL) {
+			strncpy(cdr.direction, "Outgoing", sizeof(cdr.direction));
+		} else if ((line = strcasestr(cdr.destination, "TELCHAN")) != NULL) {
+			strncpy(cdr.direction, "Incoming", sizeof(cdr.direction));
+		}
+		if (line) {
+			snprintf(cdr.used_line, sizeof(cdr.used_line), "%d", atoi(line + strlen("TELCHAN/")));
+		}
+
+		// Find out an existing call log entry or create a new one
+		if (i < call_log_list_size) {
+			if (i > 0) {
+				pos = pos->next;
+				entry = list_entry(pos, struct call_log_entry, list);
+			} else {
+				entry = list_first_entry(&call_log_list, struct call_log_entry, list);
+				pos = &entry->list;
+			}
+		} else {
+			// NOTE: dmmalloc() caused uspd crash when reusing the existing list entries!!!
+			entry = malloc(sizeof(struct call_log_entry));
+			if (!entry)
+				return -1;
+
+			list_add_tail(&entry->list, &call_log_list);
+			call_log_list_size++;
+		}
+
+		// Fill out the entry
+		struct list_head tmp = entry->list;
+		memcpy(entry, &cdr, sizeof(*entry));
+		entry->list = tmp;
+
+		// Increase the call log count
+		i++;
+	}
+
+	// The total number of call logs could be less than the list size in case that old call logs have been removed
+	call_log_count = i;
+
+__ret:
+	if (res != 0)
+		call_log_count = 0;
+	if (fp)
+		fclose(fp);
+	return res;
+#undef CHECK_RESULT
+}

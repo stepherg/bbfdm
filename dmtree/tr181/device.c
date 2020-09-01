@@ -48,7 +48,7 @@
 #include "lanconfigsecurity.h"
 #include "security.h"
 #ifdef BBF_TR104
-#include "voice_services.h"
+#include "servicesvoiceservice.h"
 #endif
 #ifdef BBF_TR157
 #include "bulkdata.h"

@@ -101,8 +101,18 @@ libbbfdm_la_SOURCES += \
 endif
 
 if BBF_TR104
-libbbfdm_la_SOURCES +=							\
-	../dmtree/tr104/voice_services.c
+libbbfdm_la_SOURCES +=	\
+	../dmtree/tr104/common.c				\
+	../dmtree/tr104/servicesvoiceservicecalllog.c		\
+	../dmtree/tr104/servicesvoiceservicedect.c		\
+	../dmtree/tr104/servicesvoiceservicesip.c		\
+	../dmtree/tr104/servicesvoiceservice.c			\
+	../dmtree/tr104/servicesvoiceservicecapabilities.c	\
+	../dmtree/tr104/servicesvoiceservicepots.c		\
+	../dmtree/tr104/servicesvoiceservicevoipprofile.c	\
+	../dmtree/tr104/servicesvoiceservicecallcontrol.c	\
+	../dmtree/tr104/servicesvoiceservicecodecprofile.c	\
+	../dmtree/tr104/servicesvoiceservicereservedports.c
 endif
 
 if BBF_TR143

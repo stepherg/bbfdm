@@ -35,8 +35,6 @@ COPYING
 json/tr*/
 json/tr*.xls
 tools/tr*/
-tools/iopsys*.xml
 *.gcov
 *.gcno
 *.log
-*.xml
