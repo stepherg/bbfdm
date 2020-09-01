@@ -1405,14 +1405,14 @@ static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TCPOpenResponse
 
 static int get_IPDiagnosticsUDPEchoConfig_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp_udpechoserver", "udpechoserver", "enable", value);
+	dmuci_get_option_value_string("udpechoserver", "udpechoserver", "enable", value);
 	return 0;
 }
 
 static int set_IPDiagnosticsUDPEchoConfig_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
-	char file[32] = "/var/state/cwmp_udpechoserver";
+	char file[32] = "/var/state/udpechoserver";
 
 	switch (action) {
 		case VALUECHECK:
@@ -1424,9 +1424,9 @@ static int set_IPDiagnosticsUDPEchoConfig_Enable(char *refparam, struct dmctx *c
 			if (b) {
 				if( access( file, F_OK ) != -1 )
 					dmcmd("/bin/rm", 1, file);
-				dmuci_set_value("cwmp_udpechoserver", "udpechoserver", "enable", "1");
+				dmuci_set_value("udpechoserver", "udpechoserver", "enable", "1");
 			} else
-				dmuci_set_value("cwmp_udpechoserver", "udpechoserver", "enable", "0");
+				dmuci_set_value("udpechoserver", "udpechoserver", "enable", "0");
 			return 0;
 	}
 	return 0;
@@ -1434,7 +1434,7 @@ static int set_IPDiagnosticsUDPEchoConfig_Enable(char *refparam, struct dmctx *c
 
 static int get_IPDiagnosticsUDPEchoConfig_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp_udpechoserver", "udpechoserver", "interface", value);
+	dmuci_get_option_value_string("udpechoserver", "udpechoserver", "interface", value);
 	return 0;
 }
 
@@ -1446,7 +1446,7 @@ static int set_IPDiagnosticsUDPEchoConfig_Interface(char *refparam, struct dmctx
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value("cwmp_udpechoserver", "udpechoserver", "interface", value);
+			dmuci_set_value("udpechoserver", "udpechoserver", "interface", value);
 			return 0;
 	}
 	return 0;
@@ -1454,7 +1454,7 @@ static int set_IPDiagnosticsUDPEchoConfig_Interface(char *refparam, struct dmctx
 
 static int get_IPDiagnosticsUDPEchoConfig_SourceIPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp_udpechoserver", "udpechoserver", "address", value);
+	dmuci_get_option_value_string("udpechoserver", "udpechoserver", "address", value);
 	return 0;
 }
 
@@ -1466,7 +1466,7 @@ static int set_IPDiagnosticsUDPEchoConfig_SourceIPAddress(char *refparam, struct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value("cwmp_udpechoserver", "udpechoserver", "address", value);
+			dmuci_set_value("udpechoserver", "udpechoserver", "address", value);
 			return 0;
 	}
 	return 0;
@@ -1474,7 +1474,7 @@ static int set_IPDiagnosticsUDPEchoConfig_SourceIPAddress(char *refparam, struct
 
 static int get_IPDiagnosticsUDPEchoConfig_UDPPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp_udpechoserver", "udpechoserver", "server_port", value);
+	dmuci_get_option_value_string("udpechoserver", "udpechoserver", "server_port", value);
 	return 0;
 }
 
@@ -1486,7 +1486,7 @@ static int set_IPDiagnosticsUDPEchoConfig_UDPPort(char *refparam, struct dmctx *
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value("cwmp_udpechoserver", "udpechoserver", "server_port", value);
+			dmuci_set_value("udpechoserver", "udpechoserver", "server_port", value);
 			return 0;
 	}
 	return 0;
@@ -1494,7 +1494,7 @@ static int set_IPDiagnosticsUDPEchoConfig_UDPPort(char *refparam, struct dmctx *
 
 static int get_IPDiagnosticsUDPEchoConfig_EchoPlusEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp_udpechoserver", "udpechoserver", "plus", value);
+	dmuci_get_option_value_string("udpechoserver", "udpechoserver", "plus", value);
 	return 0;
 }
 
@@ -1509,7 +1509,7 @@ static int set_IPDiagnosticsUDPEchoConfig_EchoPlusEnabled(char *refparam, struct
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value("cwmp_udpechoserver", "udpechoserver", "plus", b ? "1" : "0");
+			dmuci_set_value("udpechoserver", "udpechoserver", "plus", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -1524,7 +1524,7 @@ static int get_IPDiagnosticsUDPEchoConfig_EchoPlusSupported(char *refparam, stru
 static inline char *udpechoconfig_get(char *option, char *def)
 {
 	char *tmp;
-	dmuci_get_varstate_string("cwmp_udpechoserver", "udpechoserver", option, &tmp);
+	dmuci_get_varstate_string("udpechoserver", "udpechoserver", option, &tmp);
 	if(tmp && tmp[0] == '\0')
 		return dmstrdup(def);
 	else

@@ -2637,7 +2637,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_stun", 
+							"file": "stun", 
 							"section": {
 								"type": "stun", 
 								"name": "stun"
@@ -2675,7 +2675,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_stun", 
+							"file": "stun", 
 							"section": {
 								"type": "stun", 
 								"name": "stun"
@@ -2705,7 +2705,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_stun", 
+							"file": "stun", 
 							"section": {
 								"type": "stun", 
 								"name": "stun"
@@ -2734,7 +2734,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_stun", 
+							"file": "stun", 
 							"section": {
 								"type": "stun", 
 								"name": "stun"
@@ -2763,7 +2763,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_stun", 
+							"file": "stun", 
 							"section": {
 								"type": "stun", 
 								"name": "stun"
@@ -2793,7 +2793,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_stun", 
+							"file": "stun", 
 							"section": {
 								"type": "stun", 
 								"name": "stun"
@@ -2818,7 +2818,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_stun", 
+							"file": "stun", 
 							"section": {
 								"type": "stun", 
 								"name": "stun"
@@ -2842,7 +2842,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_stun", 
+							"file": "stun", 
 							"section": {
 								"type": "stun", 
 								"name": "stun"
@@ -2998,9 +2998,9 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_xmpp", 
+							"file": "xmpp", 
 							"section": {
-								"type": "cwmp", 
+								"type": "xmpp", 
 								"name": "xmpp"
 							}, 
 							"option": {
@@ -65309,7 +65309,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_bulkdata", 
+							"file": "bulkdata", 
 							"section": {
 								"type": "bulkdata", 
 								"name": "bulkdata"
@@ -65339,7 +65339,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_bulkdata", 
+							"file": "bulkdata", 
 							"section": {
 								"type": "bulkdata", 
 								"name": "bulkdata"
@@ -65450,7 +65450,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_bulkdata", 
+							"file": "bulkdata", 
 							"section": {
 								"type": "profile"
 							}
@@ -65469,7 +65469,7 @@
 				"mapping": {
 					"type": "uci", 
 					"uci": {
-						"file": "cwmp_bulkdata", 
+						"file": "bulkdata", 
 						"section": {
 							"type": "profile"
 						}, 
@@ -65489,7 +65489,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_bulkdata", 
+								"file": "bulkdata", 
 								"section": {
 									"type": "profile", 
 									"index": "@i-1"
@@ -65519,7 +65519,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_bulkdata", 
+								"file": "bulkdata", 
 								"section": {
 									"type": "profile", 
 									"index": "@i-1"
@@ -65549,7 +65549,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_bulkdata", 
+								"file": "bulkdata", 
 								"section": {
 									"type": "profile", 
 									"index": "@i-1"
@@ -65579,7 +65579,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_bulkdata", 
+								"file": "bulkdata", 
 								"section": {
 									"type": "profile", 
 									"index": "@i-1"
@@ -65604,7 +65604,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_bulkdata", 
+								"file": "bulkdata", 
 								"section": {
 									"type": "profile", 
 									"index": "@i-1"
@@ -65629,7 +65629,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_bulkdata", 
+								"file": "bulkdata", 
 								"section": {
 									"type": "profile", 
 									"index": "@i-1"
@@ -65660,7 +65660,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_bulkdata", 
+								"file": "bulkdata", 
 								"section": {
 									"type": "profile", 
 									"index": "@i-1"
@@ -65685,7 +65685,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_bulkdata", 
+								"file": "bulkdata", 
 								"section": {
 									"type": "profile", 
 									"index": "@i-1"
@@ -65821,7 +65821,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_bulkdata", 
+								"file": "bulkdata", 
 								"section": {
 									"type": "profile_parameter", 
 									"name": "false"
@@ -65853,7 +65853,7 @@
 					"mapping": {
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_bulkdata", 
+							"file": "bulkdata", 
 							"section": {
 								"type": "profile_parameter"
 							}, 
@@ -65878,7 +65878,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile_parameter", 
 										"index": "@i-1"
@@ -65908,7 +65908,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile_parameter", 
 										"index": "@i-1"
@@ -65942,7 +65942,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -65967,7 +65967,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -65992,7 +65992,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66021,7 +66021,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66051,7 +66051,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66089,7 +66089,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66119,7 +66119,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66158,7 +66158,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66188,7 +66188,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66218,7 +66218,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66260,7 +66260,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66301,7 +66301,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66326,7 +66326,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66351,7 +66351,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66382,7 +66382,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66413,7 +66413,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66438,7 +66438,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile_http_request_uri_parameter", 
 										"name": "false"
@@ -66463,7 +66463,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_bulkdata", 
+									"file": "bulkdata", 
 									"section": {
 										"type": "profile", 
 										"index": "@i-1"
@@ -66486,7 +66486,7 @@
 						"mapping": {
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_bulkdata", 
+								"file": "bulkdata", 
 								"section": {
 									"type": "profile_http_request_uri_parameter"
 								}, 
@@ -66511,7 +66511,7 @@
 								{
 									"type": "uci", 
 									"uci": {
-										"file": "cwmp_bulkdata", 
+										"file": "bulkdata", 
 										"section": {
 											"type": "profile_http_request_uri_parameter", 
 											"index": "@i-1"
@@ -66541,7 +66541,7 @@
 								{
 									"type": "uci", 
 									"uci": {
-										"file": "cwmp_bulkdata", 
+										"file": "bulkdata", 
 										"section": {
 											"type": "profile_http_request_uri_parameter", 
 											"index": "@i-1"
@@ -66578,7 +66578,7 @@
 					{
 						"type": "uci", 
 						"uci": {
-							"file": "cwmp_xmpp", 
+							"file": "xmpp", 
 							"section": {
 								"type": "xmpp_connection"
 							}
@@ -66615,7 +66615,7 @@
 				"mapping": {
 					"type": "uci", 
 					"uci": {
-						"file": "cwmp_xmpp", 
+						"file": "xmpp", 
 						"section": {
 							"type": "xmpp_connection"
 						}, 
@@ -66635,7 +66635,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -66665,7 +66665,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -66695,7 +66695,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -66725,7 +66725,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -66755,7 +66755,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -66785,7 +66785,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -66831,7 +66831,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -66866,7 +66866,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -66897,7 +66897,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -66922,7 +66922,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -66954,7 +66954,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -66985,7 +66985,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -67016,7 +67016,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -67041,7 +67041,7 @@
 						{
 							"type": "uci", 
 							"uci": {
-								"file": "cwmp_xmpp", 
+								"file": "xmpp", 
 								"section": {
 									"type": "xmpp_connection", 
 									"index": "@i-1"
@@ -67094,7 +67094,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_xmpp", 
+									"file": "xmpp", 
 									"section": {
 										"type": "xmpp_connection", 
 										"index": "@i-1"
@@ -67124,7 +67124,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_xmpp", 
+									"file": "xmpp", 
 									"section": {
 										"type": "xmpp_connection", 
 										"index": "@i-1"
@@ -67186,7 +67186,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_xmpp", 
+									"file": "xmpp", 
 									"section": {
 										"type": "xmpp_connection", 
 										"index": "@i-1"
@@ -67217,7 +67217,7 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "cwmp_xmpp", 
+									"file": "xmpp", 
 									"section": {
 										"type": "xmpp_connection", 
 										"index": "@i-1"

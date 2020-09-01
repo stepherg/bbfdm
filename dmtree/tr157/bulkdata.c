@@ -13,16 +13,16 @@
 /*************************************************************
 * ENTRY METHOD
 *************************************************************/
-/*#Device.BulkData.Profile.{i}.!UCI:cwmp_bulkdata/profile/dmmap_cwmp_profile*/
+/*#Device.BulkData.Profile.{i}.!UCI:bulkdata/profile/dmmap_cwmp_profile*/
 static int browseBulkDataProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL;
 	struct uci_section *s = NULL;
 
-	uci_foreach_sections("cwmp_bulkdata", "profile", s) {
+	uci_foreach_sections("bulkdata", "profile", s) {
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   s, "profile_instance", "profile_alias", "cwmp_bulkdata", "profile");
+			   s, "profile_instance", "profile_alias", "bulkdata", "profile");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -30,7 +30,7 @@ static int browseBulkDataProfileInst(struct dmctx *dmctx, DMNODE *parent_node, v
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.Parameter.{i}.!UCI:cwmp_bulkdata/profile_parameter/dmmap_cwmp_profile_parameter*/
+/*#Device.BulkData.Profile.{i}.Parameter.{i}.!UCI:bulkdata/profile_parameter/dmmap_cwmp_profile_parameter*/
 static int browseBulkDataProfileParameterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL, *prev_profile_id;
@@ -38,13 +38,13 @@ static int browseBulkDataProfileParameterInst(struct dmctx *dmctx, DMNODE *paren
 	struct browse_args browse_args = {0};
 
 	dmuci_get_value_by_section_string(prev_section, "profile_id", &prev_profile_id);
-	uci_foreach_option_eq("cwmp_bulkdata", "profile_parameter", "profile_id", prev_profile_id, s) {
+	uci_foreach_option_eq("bulkdata", "profile_parameter", "profile_id", prev_profile_id, s) {
 
 		browse_args.option = "profile_id";
 		browse_args.value = prev_profile_id;
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
-			   s, "parameter_instance", "parameter_alias", "cwmp_bulkdata", "profile_parameter",
+			   s, "parameter_instance", "parameter_alias", "bulkdata", "profile_parameter",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
@@ -53,7 +53,7 @@ static int browseBulkDataProfileParameterInst(struct dmctx *dmctx, DMNODE *paren
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.RequestURIParameter.{i}.!UCI:cwmp_bulkdata/profile_http_request_uri_parameter/dmmap_cwmp_profile_http_request_uri_parameter*/
+/*#Device.BulkData.Profile.{i}.HTTP.RequestURIParameter.{i}.!UCI:bulkdata/profile_http_request_uri_parameter/dmmap_cwmp_profile_http_request_uri_parameter*/
 static int browseBulkDataProfileHTTPRequestURIParameterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL, *prev_profile_id;
@@ -61,13 +61,13 @@ static int browseBulkDataProfileHTTPRequestURIParameterInst(struct dmctx *dmctx,
 	struct browse_args browse_args = {0};
 
 	dmuci_get_value_by_section_string(prev_section, "profile_id", &prev_profile_id);
-	uci_foreach_option_eq("cwmp_bulkdata", "profile_http_request_uri_parameter", "profile_id", prev_profile_id, s) {
+	uci_foreach_option_eq("bulkdata", "profile_http_request_uri_parameter", "profile_id", prev_profile_id, s) {
 
 		browse_args.option = "profile_id";
 		browse_args.value = prev_profile_id;
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
-			   s, "requesturiparameter_instance", "requesturiparameter_alias", "cwmp_bulkdata", "profile_http_request_uri_parameter",
+			   s, "requesturiparameter_instance", "requesturiparameter_alias", "bulkdata", "profile_http_request_uri_parameter",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
@@ -84,8 +84,8 @@ static int addObjBulkDataProfile(char *refparam, struct dmctx *ctx, void *data, 
 	struct uci_section *profile;
 	char *value, *last_inst;
 
-	last_inst = get_last_instance("cwmp_bulkdata", "profile", "profile_instance");
-	dmuci_add_section_and_rename("cwmp_bulkdata", "profile", &profile, &value);
+	last_inst = get_last_instance("bulkdata", "profile", "profile_instance");
+	dmuci_add_section_and_rename("bulkdata", "profile", &profile, &value);
 	dmasprintf(instance, "%d", last_inst ? atoi(last_inst)+1 : 1);
 	dmuci_set_value_by_section(profile, "profile_instance", *instance);
 	dmuci_set_value_by_section(profile, "profile_id", *instance);
@@ -119,18 +119,18 @@ static int delObjBulkDataProfile(char *refparam, struct dmctx *ctx, void *data, 
 	switch (del_action) {
 		case DEL_INST:
 			dmuci_get_value_by_section_string(profile_section, "profile_id", &prev_profile_id);
-			uci_foreach_option_eq("cwmp_bulkdata", "profile_parameter", "profile_id", prev_profile_id, s) {
+			uci_foreach_option_eq("bulkdata", "profile_parameter", "profile_id", prev_profile_id, s) {
 				dmuci_delete_by_section(s, NULL, NULL);
 				break;
 			}
-			uci_foreach_option_eq("cwmp_bulkdata", "profile_http_request_uri_parameter", "profile_id", prev_profile_id, s) {
+			uci_foreach_option_eq("bulkdata", "profile_http_request_uri_parameter", "profile_id", prev_profile_id, s) {
 				dmuci_delete_by_section(s, NULL, NULL);
 				break;
 			}
 			dmuci_delete_by_section(profile_section, NULL, NULL);
 			return 0;
 		case DEL_ALL:
-			uci_foreach_sections("cwmp_bulkdata", "profile_parameter", s) {
+			uci_foreach_sections("bulkdata", "profile_parameter", s) {
 				if (found != 0)
 					dmuci_delete_by_section(ss, NULL, NULL);
 				ss = s;
@@ -140,7 +140,7 @@ static int delObjBulkDataProfile(char *refparam, struct dmctx *ctx, void *data, 
 				dmuci_delete_by_section(ss, NULL, NULL);
 
 			found = 0;
-			uci_foreach_sections("cwmp_bulkdata", "profile_http_request_uri_parameter", s) {
+			uci_foreach_sections("bulkdata", "profile_http_request_uri_parameter", s) {
 				if (found != 0)
 					dmuci_delete_by_section(ss, NULL, NULL);
 				ss = s;
@@ -150,7 +150,7 @@ static int delObjBulkDataProfile(char *refparam, struct dmctx *ctx, void *data, 
 				dmuci_delete_by_section(ss, NULL, NULL);
 
 			found = 0;
-			uci_foreach_sections("cwmp_bulkdata", "profile", s) {
+			uci_foreach_sections("bulkdata", "profile", s) {
 				if (found != 0)
 					dmuci_delete_by_section(ss, NULL, NULL);
 				ss = s;
@@ -170,8 +170,8 @@ static int addObjBulkDataProfileParameter(char *refparam, struct dmctx *ctx, voi
 	char *value, *last_inst, *prev_profile_id;
 
 	dmuci_get_value_by_section_string(profile_section, "profile_id", &prev_profile_id);
-	last_inst = get_last_instance_lev2("cwmp_bulkdata", "profile_parameter", "parameter_instance", "profile_id", prev_profile_id);
-	dmuci_add_section_and_rename("cwmp_bulkdata", "profile_parameter", &profile_parameter, &value);
+	last_inst = get_last_instance_lev2("bulkdata", "profile_parameter", "parameter_instance", "profile_id", prev_profile_id);
+	dmuci_add_section_and_rename("bulkdata", "profile_parameter", &profile_parameter, &value);
 	dmasprintf(instance, "%d", last_inst ? atoi(last_inst)+1 : 1);
 	dmuci_set_value_by_section(profile_parameter, "parameter_instance", *instance);
 	dmuci_set_value_by_section(profile_parameter, "profile_id", prev_profile_id);
@@ -190,7 +190,7 @@ static int delObjBulkDataProfileParameter(char *refparam, struct dmctx *ctx, voi
 			return 0;
 		case DEL_ALL:
 			dmuci_get_value_by_section_string(profile_section, "profile_id", &prev_profile_id);
-			uci_foreach_option_eq("cwmp_bulkdata", "profile_parameter", "profile_id", prev_profile_id, s) {
+			uci_foreach_option_eq("bulkdata", "profile_parameter", "profile_id", prev_profile_id, s) {
 				if (found != 0)
 					dmuci_delete_by_section(ss, NULL, NULL);
 				ss = s;
@@ -209,8 +209,8 @@ static int addObjBulkDataProfileHTTPRequestURIParameter(char *refparam, struct d
 	char *value, *last_inst, *prev_profile_id;
 
 	dmuci_get_value_by_section_string(profile_section, "profile_id", &prev_profile_id);
-	last_inst = get_last_instance_lev2("cwmp_bulkdata", "profile_http_request_uri_parameter", "requesturiparameter_instance", "profile_id", prev_profile_id);
-	dmuci_add_section_and_rename("cwmp_bulkdata", "profile_http_request_uri_parameter", &profile_http_request_uri_parameter, &value);
+	last_inst = get_last_instance_lev2("bulkdata", "profile_http_request_uri_parameter", "requesturiparameter_instance", "profile_id", prev_profile_id);
+	dmuci_add_section_and_rename("bulkdata", "profile_http_request_uri_parameter", &profile_http_request_uri_parameter, &value);
 	dmasprintf(instance, "%d", last_inst ? atoi(last_inst)+1 : 1);
 	dmuci_set_value_by_section(profile_http_request_uri_parameter, "requesturiparameter_instance", *instance);
 	dmuci_set_value_by_section(profile_http_request_uri_parameter, "profile_id", prev_profile_id);
@@ -229,7 +229,7 @@ static int delObjBulkDataProfileHTTPRequestURIParameter(char *refparam, struct d
 			return 0;
 		case DEL_ALL:
 			dmuci_get_value_by_section_string(profile_section, "profile_id", &prev_profile_id);
-			uci_foreach_option_eq("cwmp_bulkdata", "profile_http_request_uri_parameter", "profile_id", prev_profile_id, s) {
+			uci_foreach_option_eq("bulkdata", "profile_http_request_uri_parameter", "profile_id", prev_profile_id, s) {
 				if (found != 0)
 					dmuci_delete_by_section(ss, NULL, NULL);
 				ss = s;
@@ -245,10 +245,10 @@ static int delObjBulkDataProfileHTTPRequestURIParameter(char *refparam, struct d
 /*************************************************************
 * GET & SET PARAM
 *************************************************************/
-/*#Device.BulkData.Enable!UCI:cwmp_bulkdata/bulkdata,bulkdata/enable*/
+/*#Device.BulkData.Enable!UCI:bulkdata/bulkdata,bulkdata/enable*/
 static int get_BulkData_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp_bulkdata", "bulkdata", "enable", value);
+	dmuci_get_option_value_string("bulkdata", "bulkdata", "enable", value);
 	return 0;
 }
 
@@ -263,16 +263,16 @@ static int set_BulkData_Enable(char *refparam, struct dmctx *ctx, void *data, ch
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value("cwmp_bulkdata", "bulkdata", "enable", b ? "1" : "0");
+			dmuci_set_value("bulkdata", "bulkdata", "enable", b ? "1" : "0");
 			break;
 	}
 	return 0;
 }
 
-/*#Device.BulkData.Status!UCI:cwmp_bulkdata/bulkdata,bulkdata/enable*/
+/*#Device.BulkData.Status!UCI:bulkdata/bulkdata,bulkdata/enable*/
 static int get_BulkData_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp_bulkdata", "bulkdata", "enable", value);
+	dmuci_get_option_value_string("bulkdata", "bulkdata", "enable", value);
 	if (strcmp(*value, "1") == 0)
 		*value = "Enabled";
 	else
@@ -316,20 +316,20 @@ static int get_BulkData_MaxNumberOfParameterReferences(char *refparam, struct dm
 	return 0;
 }
 
-/*#Device.BulkData.ProfileNumberOfEntries!UCI:cwmp_bulkdata/profile/*/
+/*#Device.BulkData.ProfileNumberOfEntries!UCI:bulkdata/profile/*/
 static int get_BulkData_ProfileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
 	int cnt = 0;
 
-	uci_foreach_sections("cwmp_bulkdata", "profile", s) {
+	uci_foreach_sections("bulkdata", "profile", s) {
 		cnt++;
 	}
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.Enable!UCI:cwmp_bulkdata/profile,@i-1/enable*/
+/*#Device.BulkData.Profile.{i}.Enable!UCI:bulkdata/profile,@i-1/enable*/
 static int get_BulkDataProfile_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "enable", value);
@@ -353,7 +353,7 @@ static int set_BulkDataProfile_Enable(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.Alias!UCI:cwmp_bulkdata/profile,@i-1/profile_alias*/
+/*#Device.BulkData.Profile.{i}.Alias!UCI:bulkdata/profile,@i-1/profile_alias*/
 static int get_BulkDataProfile_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "profile_alias", value);
@@ -376,7 +376,7 @@ static int set_BulkDataProfile_Alias(char *refparam, struct dmctx *ctx, void *da
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.Name!UCI:cwmp_bulkdata/profile,@i-1/name*/
+/*#Device.BulkData.Profile.{i}.Name!UCI:bulkdata/profile,@i-1/name*/
 static int get_BulkDataProfile_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "name", value);
@@ -397,7 +397,7 @@ static int set_BulkDataProfile_Name(char *refparam, struct dmctx *ctx, void *dat
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.NumberOfRetainedFailedReports!UCI:cwmp_bulkdata/profile,@i-1/nbre_of_retained_failed_reports*/
+/*#Device.BulkData.Profile.{i}.NumberOfRetainedFailedReports!UCI:bulkdata/profile,@i-1/nbre_of_retained_failed_reports*/
 static int get_BulkDataProfile_NumberOfRetainedFailedReports(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "nbre_of_retained_failed_reports", value);
@@ -418,7 +418,7 @@ static int set_BulkDataProfile_NumberOfRetainedFailedReports(char *refparam, str
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.Protocol!UCI:cwmp_bulkdata/profile,@i-1/protocol*/
+/*#Device.BulkData.Profile.{i}.Protocol!UCI:bulkdata/profile,@i-1/protocol*/
 static int get_BulkDataProfile_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "protocol", value);
@@ -442,7 +442,7 @@ static int set_BulkDataProfile_Protocol(char *refparam, struct dmctx *ctx, void 
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.EncodingType!UCI:cwmp_bulkdata/profile,@i-1/encoding_type*/
+/*#Device.BulkData.Profile.{i}.EncodingType!UCI:bulkdata/profile,@i-1/encoding_type*/
 static int get_BulkDataProfile_EncodingType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "encoding_type", value);
@@ -470,7 +470,7 @@ static int set_BulkDataProfile_EncodingType(char *refparam, struct dmctx *ctx, v
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.ReportingInterval!UCI:cwmp_bulkdata/profile,@i-1/reporting_interval*/
+/*#Device.BulkData.Profile.{i}.ReportingInterval!UCI:bulkdata/profile,@i-1/reporting_interval*/
 static int get_BulkDataProfile_ReportingInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "reporting_interval", value);
@@ -491,7 +491,7 @@ static int set_BulkDataProfile_ReportingInterval(char *refparam, struct dmctx *c
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.TimeReference!UCI:cwmp_bulkdata/profile,@i-1/time_reference*/
+/*#Device.BulkData.Profile.{i}.TimeReference!UCI:bulkdata/profile,@i-1/time_reference*/
 static int get_BulkDataProfile_TimeReference(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	time_t time_value;
@@ -528,7 +528,7 @@ static int set_BulkDataProfile_TimeReference(char *refparam, struct dmctx *ctx, 
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.ParameterNumberOfEntries!UCI:cwmp_bulkdata/profile_parameter,false/false*/
+/*#Device.BulkData.Profile.{i}.ParameterNumberOfEntries!UCI:bulkdata/profile_parameter,false/false*/
 static int get_BulkDataProfile_ParameterNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *profile_id, *curr_profile_id;
@@ -536,7 +536,7 @@ static int get_BulkDataProfile_ParameterNumberOfEntries(char *refparam, struct d
 	int cnt = 0;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "profile_id", &curr_profile_id);
-	uci_foreach_sections("cwmp_bulkdata", "profile_parameter", s) {
+	uci_foreach_sections("bulkdata", "profile_parameter", s) {
 		dmuci_get_value_by_section_string(s, "profile_id", &profile_id);
 		if(strcmp(curr_profile_id, profile_id) != 0)
 			continue;
@@ -546,7 +546,7 @@ static int get_BulkDataProfile_ParameterNumberOfEntries(char *refparam, struct d
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.Parameter.{i}.Name!UCI:cwmp_bulkdata/profile_parameter,@i-1/name*/
+/*#Device.BulkData.Profile.{i}.Parameter.{i}.Name!UCI:bulkdata/profile_parameter,@i-1/name*/
 static int get_BulkDataProfileParameter_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "name", value);
@@ -567,7 +567,7 @@ static int set_BulkDataProfileParameter_Name(char *refparam, struct dmctx *ctx, 
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.Parameter.{i}.Reference!UCI:cwmp_bulkdata/profile_parameter,@i-1/reference*/
+/*#Device.BulkData.Profile.{i}.Parameter.{i}.Reference!UCI:bulkdata/profile_parameter,@i-1/reference*/
 static int get_BulkDataProfileParameter_Reference(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "reference", value);
@@ -588,7 +588,7 @@ static int set_BulkDataProfileParameter_Reference(char *refparam, struct dmctx *
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.CSVEncoding.FieldSeparator!UCI:cwmp_bulkdata/profile,@i-1/csv_encoding_field_separator*/
+/*#Device.BulkData.Profile.{i}.CSVEncoding.FieldSeparator!UCI:bulkdata/profile,@i-1/csv_encoding_field_separator*/
 static int get_BulkDataProfileCSVEncoding_FieldSeparator(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "csv_encoding_field_separator", value);
@@ -609,7 +609,7 @@ static int set_BulkDataProfileCSVEncoding_FieldSeparator(char *refparam, struct 
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.CSVEncoding.RowSeparator!UCI:cwmp_bulkdata/profile,@i-1/csv_encoding_row_separator*/
+/*#Device.BulkData.Profile.{i}.CSVEncoding.RowSeparator!UCI:bulkdata/profile,@i-1/csv_encoding_row_separator*/
 static int get_BulkDataProfileCSVEncoding_RowSeparator(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "csv_encoding_row_separator", value);
@@ -631,7 +631,7 @@ static int set_BulkDataProfileCSVEncoding_RowSeparator(char *refparam, struct dm
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.CSVEncoding.EscapeCharacter!UCI:cwmp_bulkdata/profile,@i-1/csv_encoding_escape_character*/
+/*#Device.BulkData.Profile.{i}.CSVEncoding.EscapeCharacter!UCI:bulkdata/profile,@i-1/csv_encoding_escape_character*/
 static int get_BulkDataProfileCSVEncoding_EscapeCharacter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "csv_encoding_escape_character", value);
@@ -653,7 +653,7 @@ static int set_BulkDataProfileCSVEncoding_EscapeCharacter(char *refparam, struct
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.CSVEncoding.ReportFormat!UCI:cwmp_bulkdata/profile,@i-1/csv_encoding_report_format*/
+/*#Device.BulkData.Profile.{i}.CSVEncoding.ReportFormat!UCI:bulkdata/profile,@i-1/csv_encoding_report_format*/
 static int get_BulkDataProfileCSVEncoding_ReportFormat(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "csv_encoding_report_format", value);
@@ -681,7 +681,7 @@ static int set_BulkDataProfileCSVEncoding_ReportFormat(char *refparam, struct dm
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.CSVEncoding.RowTimestamp!UCI:cwmp_bulkdata/profile,@i-1/csv_encoding_row_time_stamp*/
+/*#Device.BulkData.Profile.{i}.CSVEncoding.RowTimestamp!UCI:bulkdata/profile,@i-1/csv_encoding_row_time_stamp*/
 static int get_BulkDataProfileCSVEncoding_RowTimestamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "csv_encoding_row_time_stamp", value);
@@ -713,7 +713,7 @@ static int set_BulkDataProfileCSVEncoding_RowTimestamp(char *refparam, struct dm
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.JSONEncoding.ReportFormat!UCI:cwmp_bulkdata/profile,@i-1/json_encoding_report_format*/
+/*#Device.BulkData.Profile.{i}.JSONEncoding.ReportFormat!UCI:bulkdata/profile,@i-1/json_encoding_report_format*/
 static int get_BulkDataProfileJSONEncoding_ReportFormat(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "json_encoding_report_format", value);
@@ -741,7 +741,7 @@ static int set_BulkDataProfileJSONEncoding_ReportFormat(char *refparam, struct d
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.JSONEncoding.ReportTimestamp!UCI:cwmp_bulkdata/profile,@i-1/json_encoding_report_time_stamp*/
+/*#Device.BulkData.Profile.{i}.JSONEncoding.ReportTimestamp!UCI:bulkdata/profile,@i-1/json_encoding_report_time_stamp*/
 static int get_BulkDataProfileJSONEncoding_ReportTimestamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "json_encoding_report_time_stamp", value);
@@ -773,7 +773,7 @@ static int set_BulkDataProfileJSONEncoding_ReportTimestamp(char *refparam, struc
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.URL!UCI:cwmp_bulkdata/profile,@i-1/http_url*/
+/*#Device.BulkData.Profile.{i}.HTTP.URL!UCI:bulkdata/profile,@i-1/http_url*/
 static int get_BulkDataProfileHTTP_URL(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "http_url", value);
@@ -794,7 +794,7 @@ static int set_BulkDataProfileHTTP_URL(char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.Username!UCI:cwmp_bulkdata/profile,@i-1/http_username*/
+/*#Device.BulkData.Profile.{i}.HTTP.Username!UCI:bulkdata/profile,@i-1/http_username*/
 static int get_BulkDataProfileHTTP_Username(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "http_username", value);
@@ -815,7 +815,7 @@ static int set_BulkDataProfileHTTP_Username(char *refparam, struct dmctx *ctx, v
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.Password!UCI:cwmp_bulkdata/profile,@i-1/http_password*/
+/*#Device.BulkData.Profile.{i}.HTTP.Password!UCI:bulkdata/profile,@i-1/http_password*/
 static int get_BulkDataProfileHTTP_Password(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "";
@@ -842,7 +842,7 @@ static int get_BulkDataProfileHTTP_CompressionsSupported(char *refparam, struct 
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.Compression!UCI:cwmp_bulkdata/profile,@i-1/http_compression*/
+/*#Device.BulkData.Profile.{i}.HTTP.Compression!UCI:bulkdata/profile,@i-1/http_compression*/
 static int get_BulkDataProfileHTTP_Compression(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "http_compression", value);
@@ -880,7 +880,7 @@ static int get_BulkDataProfileHTTP_MethodsSupported(char *refparam, struct dmctx
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.Method!UCI:cwmp_bulkdata/profile,@i-1/http_method*/
+/*#Device.BulkData.Profile.{i}.HTTP.Method!UCI:bulkdata/profile,@i-1/http_method*/
 static int get_BulkDataProfileHTTP_Method(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "http_method", value);
@@ -908,7 +908,7 @@ static int set_BulkDataProfileHTTP_Method(char *refparam, struct dmctx *ctx, voi
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.UseDateHeader!UCI:cwmp_bulkdata/profile,@i-1/http_use_date_header*/
+/*#Device.BulkData.Profile.{i}.HTTP.UseDateHeader!UCI:bulkdata/profile,@i-1/http_use_date_header*/
 static int get_BulkDataProfileHTTP_UseDateHeader(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "http_use_date_header", value);
@@ -932,7 +932,7 @@ static int set_BulkDataProfileHTTP_UseDateHeader(char *refparam, struct dmctx *c
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.RetryEnable!UCI:cwmp_bulkdata/profile,@i-1/http_retry_enable*/
+/*#Device.BulkData.Profile.{i}.HTTP.RetryEnable!UCI:bulkdata/profile,@i-1/http_retry_enable*/
 static int get_BulkDataProfileHTTP_RetryEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "http_retry_enable", value);
@@ -956,7 +956,7 @@ static int set_BulkDataProfileHTTP_RetryEnable(char *refparam, struct dmctx *ctx
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.RetryMinimumWaitInterval!UCI:cwmp_bulkdata/profile,@i-1/http_retry_minimum_wait_interval*/
+/*#Device.BulkData.Profile.{i}.HTTP.RetryMinimumWaitInterval!UCI:bulkdata/profile,@i-1/http_retry_minimum_wait_interval*/
 static int get_BulkDataProfileHTTP_RetryMinimumWaitInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "http_retry_minimum_wait_interval", value);
@@ -977,7 +977,7 @@ static int set_BulkDataProfileHTTP_RetryMinimumWaitInterval(char *refparam, stru
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.RetryIntervalMultiplier!UCI:cwmp_bulkdata/profile,@i-1/http_retry_interval_multiplier*/
+/*#Device.BulkData.Profile.{i}.HTTP.RetryIntervalMultiplier!UCI:bulkdata/profile,@i-1/http_retry_interval_multiplier*/
 static int get_BulkDataProfileHTTP_RetryIntervalMultiplier(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "http_retry_interval_multiplier", value);
@@ -998,7 +998,7 @@ static int set_BulkDataProfileHTTP_RetryIntervalMultiplier(char *refparam, struc
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.RequestURIParameterNumberOfEntries!UCI:cwmp_bulkdata/profile_http_request_uri_parameter,false/false*/
+/*#Device.BulkData.Profile.{i}.HTTP.RequestURIParameterNumberOfEntries!UCI:bulkdata/profile_http_request_uri_parameter,false/false*/
 static int get_BulkDataProfileHTTP_RequestURIParameterNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *profile_id, *curr_profile_id;
@@ -1006,7 +1006,7 @@ static int get_BulkDataProfileHTTP_RequestURIParameterNumberOfEntries(char *refp
 	int cnt = 0;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "profile_id", &curr_profile_id);
-	uci_foreach_sections("cwmp_bulkdata", "profile_http_request_uri_parameter", s) {
+	uci_foreach_sections("bulkdata", "profile_http_request_uri_parameter", s) {
 		dmuci_get_value_by_section_string(s, "profile_id", &profile_id);
 		if(strcmp(curr_profile_id, profile_id) != 0)
 			continue;
@@ -1016,7 +1016,7 @@ static int get_BulkDataProfileHTTP_RequestURIParameterNumberOfEntries(char *refp
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.PersistAcrossReboot!UCI:cwmp_bulkdata/profile,@i-1/http_persist_across_reboot*/
+/*#Device.BulkData.Profile.{i}.HTTP.PersistAcrossReboot!UCI:bulkdata/profile,@i-1/http_persist_across_reboot*/
 static int get_BulkDataProfileHTTP_PersistAcrossReboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "http_persist_across_reboot", value);
@@ -1040,7 +1040,7 @@ static int set_BulkDataProfileHTTP_PersistAcrossReboot(char *refparam, struct dm
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.RequestURIParameter.{i}.Name!UCI:cwmp_bulkdata/profile_http_request_uri_parameter,@i-1/name*/
+/*#Device.BulkData.Profile.{i}.HTTP.RequestURIParameter.{i}.Name!UCI:bulkdata/profile_http_request_uri_parameter,@i-1/name*/
 static int get_BulkDataProfileHTTPRequestURIParameter_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "name", value);
@@ -1061,7 +1061,7 @@ static int set_BulkDataProfileHTTPRequestURIParameter_Name(char *refparam, struc
 	return 0;
 }
 
-/*#Device.BulkData.Profile.{i}.HTTP.RequestURIParameter.{i}.Reference!UCI:cwmp_bulkdata/profile_http_request_uri_parameter,@i-1/reference*/
+/*#Device.BulkData.Profile.{i}.HTTP.RequestURIParameter.{i}.Reference!UCI:bulkdata/profile_http_request_uri_parameter,@i-1/reference*/
 static int get_BulkDataProfileHTTPRequestURIParameter_Reference(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "reference", value);

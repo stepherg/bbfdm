@@ -541,7 +541,7 @@ static int get_IPInterface_TWAMPReflectorNumberOfEntries(char *refparam, struct 
 {
 	struct uci_section *s = NULL;
 	int cnt = 0;
-	uci_foreach_option_eq("cwmp_twamp", "twamp_reflector", "interface", section_name(((struct ip_args *)data)->ip_sec), s) {
+	uci_foreach_option_eq("twamp", "twamp_reflector", "interface", section_name(((struct ip_args *)data)->ip_sec), s) {
 			cnt++;
 	}
 	dmasprintf(value, "%d", cnt);
@@ -1261,7 +1261,7 @@ static int set_IPInterfaceTWAMPReflector_Enable(char *refparam, struct dmctx *ct
 				dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
 				dmuci_get_value_by_section_string((struct uci_section *)data, "id", &id);
 				dmuci_set_value_by_section((struct uci_section *)data, "enable", "1");
-				dmuci_set_value("cwmp_twamp", "twamp", "id", id);
+				dmuci_set_value("twamp", "twamp", "id", id);
 				uci_foreach_sections("network", "interface", s) {
 					if(strcmp(section_name(s), interface) != 0)
 						continue;
@@ -1800,9 +1800,9 @@ static int addObjIPInterfaceTWAMPReflector(char *refparam, struct dmctx *ctx, vo
 	struct uci_section *connection;
 	char *value1, *last_inst, *id;
 
-	last_inst = get_last_instance_with_option("cwmp_twamp", "twamp_reflector", "interface", section_name(((struct ip_args *)data)->ip_sec), "twamp_inst");
-	id = get_last_id("cwmp_twamp", "twamp_reflector");
-	dmuci_add_section("cwmp_twamp", "twamp_reflector", &connection, &value1);
+	last_inst = get_last_instance_with_option("twamp", "twamp_reflector", "interface", section_name(((struct ip_args *)data)->ip_sec), "twamp_inst");
+	id = get_last_id("twamp", "twamp_reflector");
+	dmuci_add_section("twamp", "twamp_reflector", &connection, &value1);
 	dmasprintf(instance, "%d", last_inst?atoi(last_inst)+1:1);
 	dmuci_set_value_by_section(connection, "twamp_inst", *instance);
 	dmuci_set_value_by_section(connection, "id", id);
@@ -1825,7 +1825,7 @@ static int delObjIPInterfaceTWAMPReflector(char *refparam, struct dmctx *ctx, vo
 			dmuci_delete_by_section(section, NULL, NULL);
 			return 0;
 		case DEL_ALL:
-			uci_foreach_sections("cwmp_twamp", "twamp_reflector", s) {
+			uci_foreach_sections("twamp", "twamp_reflector", s) {
 				dmuci_get_value_by_section_string(s, "interface", &interface);
 				if(strcmp(interface, section_name(((struct ip_args *)data)->ip_sec)) != 0)
 					continue;
@@ -2097,10 +2097,10 @@ static int browseIPInterfaceTWAMPReflectorInst(struct dmctx *dmctx, DMNODE *pare
 	struct uci_section *s = NULL;
 	char *inst = NULL, *max_inst = NULL;
 
-	uci_foreach_option_eq("cwmp_twamp", "twamp_reflector", "interface", section_name(((struct ip_args *)prev_data)->ip_sec), s) {
+	uci_foreach_option_eq("twamp", "twamp_reflector", "interface", section_name(((struct ip_args *)prev_data)->ip_sec), s) {
 
 		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
-			   s, "twamp_inst", "twamp_alias", "cwmp_twamp", "twamp_reflector");
+			   s, "twamp_inst", "twamp_alias", "twamp", "twamp_reflector");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;

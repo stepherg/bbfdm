@@ -112,10 +112,10 @@ DMOBJ tRoot_181_Obj[] = {
 {"GRE", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/gre.sh", NULL, NULL, NULL,  NULL, tGREObj, tGREParams, NULL, BBFDM_BOTH},
 {"DynamicDNS", &DMREAD, NULL, NULL, "file:/etc/config/ddns", NULL, NULL, NULL, NULL, tDynamicDNSObj, tDynamicDNSParams, NULL, BBFDM_BOTH},
 {"QoS", &DMREAD, NULL, NULL, "file:/etc/config/qos", NULL, NULL, NULL, NULL, tQoSObj, tQoSParams, NULL, BBFDM_BOTH},
-{"XMPP", &DMREAD, NULL, NULL, "file:/etc/config/cwmp_xmpp", NULL, NULL, NULL, NULL, tXMPPObj, tXMPPParams, NULL, BBFDM_BOTH},
+{"XMPP", &DMREAD, NULL, NULL, "file:/etc/config/xmpp", NULL, NULL, NULL, NULL, tXMPPObj, tXMPPParams, NULL, BBFDM_BOTH},
 {"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH},
 #ifdef BBF_TR157
-{"BulkData", &DMREAD, NULL, NULL, "file:/etc/config/cwmp_bulkdata", NULL, NULL, NULL, NULL, tBulkDataObj, tBulkDataParams, NULL, BBFDM_BOTH},
+{"BulkData", &DMREAD, NULL, NULL, "file:/etc/config/bulkdata", NULL, NULL, NULL, NULL, tBulkDataObj, tBulkDataParams, NULL, BBFDM_BOTH},
 {"SoftwareModules", &DMREAD, NULL, NULL, "ubus:swmodules", NULL, NULL, NULL, NULL, tSoftwareModulesObj, tSoftwareModulesParams, NULL, BBFDM_BOTH},
 #endif
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,  NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_BOTH},
