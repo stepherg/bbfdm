@@ -1050,6 +1050,9 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 					// Get the device name
 					char *device = get_device(interface);
 
+					//Generate the device name for bridge as br-<NETWORK> if it is not available via ubus yet.
+					if (*device == '\0')
+						dmasprintf(&device, "br-%s", interface);
 					// Get dmmap section
 					dmuci_set_value_by_section(((struct dm_args *)data)->section, "device", device);
 					dmuci_set_value_by_section(((struct dm_args *)data)->section, "section_name", interface);
