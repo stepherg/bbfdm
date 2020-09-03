@@ -129,7 +129,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_TelephoneEventPayloadType(char
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","128"}}, 1))
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"96","127"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
