@@ -1,23 +1,21 @@
-LIB_EXAMPLE := lib/libexample.so
+LIB_EXAMPLE := libexample.so
 
 OBJS  := example.o
 
-PROG_CFLAGS = $(CFLAGS) -fstrict-aliasing
-PROG_LDFLAGS = $(LDFLAGS) -lbbfdm
+LIB_CFLAGS = $(CFLAGS) -fstrict-aliasing
+LIB_LDFLAGS = $(LDFLAGS) -lbbf_api
 FPIC := -fPIC
 
 .PHONY: all
 
 %.o: %.c
-	$(CC) $(PROG_CFLAGS) $(FPIC) -c -o $@ $<
+	$(CC) $(LIB_CFLAGS) $(FPIC) -c -o $@ $<
 
 all: $(LIB_EXAMPLE)
 
 $(LIB_EXAMPLE): $(OBJS)
-	$(shell mkdir -p lib)
-	$(CC) -shared -Wl,-soname,libexample.so $^ -o $@
+	$(CC) $(LIB_CFLAGS) $(LIB_LDFLAGS) -shared -o $@ $^
 
 clean:
-	rm -f *.o
-	rm -f $(LIB_EXAMPLE)
+	rm -f *.o $(LIB_EXAMPLE)
 

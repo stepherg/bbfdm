@@ -158,13 +158,11 @@ def cprinttopfile ( fp ):
 	print >> fp, " *	Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>"
 	print >> fp, " */"
 	print >> fp, ""
-	print >> fp, "#include <libbbfdm/dmbbf.h>"
-	print >> fp, "#include <libbbfdm/dmcommon.h>"
-	print >> fp, "#include <libbbfdm/dmuci.h>"
-	print >> fp, "#include <libbbfdm/dmubus.h>"
-	print >> fp, "#include <libbbfdm/dmjson.h>"
-	print >> fp, "#include <libbbfdm/dmentry.h>"
-	print >> fp, "#include <libbbfdm/dmoperate.h>"
+	print >> fp, "#include <libbbf_api/dmbbf.h>"
+	print >> fp, "#include <libbbf_api/dmcommon.h>"
+	print >> fp, "#include <libbbf_api/dmuci.h>"
+	print >> fp, "#include <libbbf_api/dmubus.h>"
+	print >> fp, "#include <libbbf_api/dmjson.h>"
 	print >> fp, "#include \"example.h\""
 	print >> fp, ""
 
@@ -184,28 +182,26 @@ def hprinttopfile ( fp ):
 	print >> fp, ""
 
 def printmakefile ( fp ):
-	print >> fp, "LIB_EXAMPLE := lib/libexample.so"
+	print >> fp, "LIB_EXAMPLE := libexample.so"
 	print >> fp, ""
 	print >> fp, "OBJS  := example.o"
 	print >> fp, ""
-	print >> fp, "PROG_CFLAGS = $(CFLAGS) -fstrict-aliasing"
-	print >> fp, "PROG_LDFLAGS = $(LDFLAGS) -lbbfdm"
+	print >> fp, "LIB_CFLAGS = $(CFLAGS) -fstrict-aliasing"
+	print >> fp, "LIB_LDFLAGS = $(LDFLAGS) -lbbf_api"
 	print >> fp, "FPIC := -fPIC"
 	print >> fp, ""
 	print >> fp, ".PHONY: all"
 	print >> fp, ""
 	print >> fp, "%.o: %.c"
-	print >> fp, "	$(CC) $(PROG_CFLAGS) $(FPIC) -c -o $@ $<"
+	print >> fp, "	$(CC) $(LIB_CFLAGS) $(FPIC) -c -o $@ $<"
 	print >> fp, ""
 	print >> fp, "all: $(LIB_EXAMPLE)"
 	print >> fp, ""
 	print >> fp, "$(LIB_EXAMPLE): $(OBJS)"
-	print >> fp, "	$(shell mkdir -p lib)"
-	print >> fp, "	$(CC) -shared -Wl,-soname,libexample.so $^ -o $@"
+	print >> fp, "	$(CC) $(LIB_CFLAGS) $(LIB_LDFLAGS) -shared -o $@ $^"
 	print >> fp, ""
 	print >> fp, "clean:"
-	print >> fp, "	rm -f *.o"
-	print >> fp, "	rm -f $(LIB_EXAMPLE)"
+	print >> fp, "	rm -f *.o $(LIB_EXAMPLE)"
 	print >> fp, ""
 
 def hprintfootfile ( fp ):
@@ -215,13 +211,13 @@ def hprintfootfile ( fp ):
 
 def cprintAddDelObj( faddobj, fdelobj, name, mappingobj, dmobject ):
 	fp = open('./.objadddel.c', 'a')
-	print >> fp, "int %s(char *refparam, struct dmctx *ctx, void *data, char **instance)" % faddobj
+	print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char **instance)" % faddobj
 	print >> fp, "{"
 	print >> fp, "	//TODO"
 	print >> fp, "	return 0;"
 	print >> fp, "}"
 	print >> fp, ""
-	print >> fp, "int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)" % fdelobj
+	print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)" % fdelobj
 	print >> fp, "{"
 	print >> fp, "	switch (del_action) {"
 	print >> fp, "		case DEL_INST:"
@@ -236,15 +232,9 @@ def cprintAddDelObj( faddobj, fdelobj, name, mappingobj, dmobject ):
 	print >> fp, ""
 	fp.close()
 
-def hprintAddDelObj( faddobj, fdelobj ):
-	fp = open('./.objadddel.h', 'a')
-	print >> fp, "int %s(char *refparam, struct dmctx *ctx, void *data, char **instance);" % faddobj
-	print >> fp, "int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action);" % fdelobj
-	fp.close()
-
 def cprintBrowseObj( fbrowse, name, mappingobj, dmobject ):
 	fp = open('./.objbrowse.c', 'a')
-	print >> fp, "int %s(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)" % fbrowse
+	print >> fp, "static int %s(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)" % fbrowse
 	print >> fp, "{"
 	print >> fp, "	//TODO"
 	print >> fp, "	return 0;"
@@ -252,21 +242,16 @@ def cprintBrowseObj( fbrowse, name, mappingobj, dmobject ):
 	print >> fp, ""
 	fp.close()
 
-def hprintBrowseObj( fbrowse ):
-	fp = open('./.objbrowse.h', 'a')
-	print >> fp, "int %s(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);" % fbrowse
-	fp.close()
-
 def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, parentname, dmparam):
 	fp = open('./.getstevalue.c', 'a')
-	print >> fp, "int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)" % getvalue
+	print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)" % getvalue
 	print >> fp, "{"
 	print >> fp, "	//TODO"
 	print >> fp, "	return 0;"
 	print >> fp, "}"
 	print >> fp, ""
 	if setvalue != "NULL":
-		print >> fp, "int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)" % setvalue
+		print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)" % setvalue
 		print >> fp, "{"
 		print >> fp, "	switch (action)	{"
 		print >> fp, "		case VALUECHECK:"
@@ -280,16 +265,9 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
 		print >> fp, ""
 	fp.close()
 
-def hprintGetSetValue( getvalue, setvalue ):
-	fp = open('./.getstevalue.h', 'a')
-	print >> fp, "int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);" % getvalue
-	if setvalue != "NULL":
-		print >> fp, "int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);" % setvalue
-	fp.close()
-
 def cprintOperate( get_operate ):
 	fp = open('./.operate.c', 'a')
-	print >> fp, "opr_ret_t %s(struct dmctx *dmctx, char *path, char *input)" % ("dynamic" + get_operate + "Operate")
+	print >> fp, "opr_ret_t %s(struct dmctx *dmctx, char *path, json_object *input)" % ("dynamic" + get_operate + "Operate")
 	print >> fp, "{"
 	print >> fp, "	return SUCCESS;"
 	print >> fp, "}"
@@ -299,11 +277,6 @@ def cprintheaderPARAMS( objname ):
 	fp = open('./.objparamarray.c', 'a')
 	print >> fp,  "DMLEAF %s[] = {" % ("tdynamic" + getname(objname) + "Params")
 	print >> fp,  "/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/"
-	fp.close()
-
-def hprintOperate( get_operate ):
-	fp = open('./.operate.h', 'a')
-	print >> fp, "opr_ret_t %s(struct dmctx *dmctx, char *path, char *input);" % ("dynamic" + get_operate + "Operate")
 	fp.close()
 
 def hprintheaderPARAMS( objname ):
@@ -333,7 +306,6 @@ def printPARAMline( parentname, dmparam, value ):
 		instance = "FALSE"
 
 	cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, parentname, dmparam)
-	hprintGetSetValue(getvalue, setvalue)
 
 	fp = open('./.objparamarray.c', 'a')
 	print >> fp,  "{\"%s\", %s, %s, %s, %s, NULL, NULL, %s}," % (dmparam, access, ptype, getvalue, setvalue, bbfdm)
@@ -452,13 +424,6 @@ def generatecfiles( pdir ):
 	except:
 		pass
 	try:
-		tmpf = open("./.objparamarray.c", "r")
-		tmpd = tmpf.read()
-		tmpf.close()
-		dmfpc.write(tmpd)
-	except:
-		pass
-	try:
 		tmpf = open("./.objparamarray.h", "r")
 		tmpd = tmpf.read()
 		tmpf.close()
@@ -479,14 +444,6 @@ def generatecfiles( pdir ):
 	except:
 		pass
 	try:
-		tmpf = open("./.objbrowse.h", "r")
-		tmpd = tmpf.read()
-		tmpf.close()
-		dmfph.write(tmpd)
-		print >> dmfph,  ""
-	except:
-		pass
-	try:
 		exists = os.path.isfile("./.objadddel.c")
 		if exists:
 			print >> dmfpc,  "/*************************************************************"
@@ -496,14 +453,6 @@ def generatecfiles( pdir ):
 		tmpd = tmpf.read()
 		tmpf.close()
 		dmfpc.write(tmpd)
-	except:
-		pass
-	try:
-		tmpf = open("./.objadddel.h", "r")
-		tmpd = tmpf.read()
-		tmpf.close()
-		dmfph.write(tmpd)
-		print >> dmfph,  ""
 	except:
 		pass
 	try:
@@ -519,13 +468,6 @@ def generatecfiles( pdir ):
 	except:
 		pass
 	try:
-		tmpf = open("./.getstevalue.h", "r")
-		tmpd = tmpf.read()
-		tmpf.close()
-		dmfph.write(tmpd)
-	except:
-		pass
-	try:
 		exists = os.path.isfile("./.operate.c")
 		if exists:
 			print >> dmfpc,  "/*************************************************************"
@@ -538,10 +480,10 @@ def generatecfiles( pdir ):
 	except:
 		pass
 	try:
-		tmpf = open("./.operate.h", "r")
+		tmpf = open("./.objparamarray.c", "r")
 		tmpd = tmpf.read()
 		tmpf.close()
-		dmfph.write(tmpd)
+		dmfpc.write(tmpd)
 	except:
 		pass
 	hprintfootfile(dmfph)
@@ -571,20 +513,15 @@ def generateRootDynamicarray( ):
 		commonname = getname(x)
 		printOperateRootDynamic(x, commonname, DictOperate[x])
 		cprintOperate(commonname)
-		hprintOperate(commonname)
 	printtailArrayRootDynamic()	
 
 def removetmpfiles( ):
 	removefile("./.objparamarray.c")
 	removefile("./.objparamarray.h")
 	removefile("./.objadddel.c")
-	removefile("./.objadddel.h")
 	removefile("./.objbrowse.c")
-	removefile("./.objbrowse.h")
 	removefile("./.getstevalue.c")
-	removefile("./.getstevalue.h")
 	removefile("./.operate.c")
-	removefile("./.operate.h")
 	removefile("./.objroot.c")
 
 ### main ###

@@ -14,12 +14,6 @@
 DMOBJ tdynamicIPDiagnosticsObj[];
 DMLEAF tdynamicIPDiagnosticsX_IOPSYS_EU_BBKSpeedTestParams[];
 
-int getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-int setdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
-int getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_Latency(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-int getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_Download(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-int getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_Upload(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-opr_ret_t dynamicDeviceOperate(struct dmctx *dmctx, char *path, char *input);
 
 #endif //__EXAMPLE_H
 
