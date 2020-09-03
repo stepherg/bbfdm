@@ -18,7 +18,6 @@
 #include "x_iopsys_eu_igmp.h"
 #include "x_iopsys_eu_mld.h"
 #include "x_iopsys_eu_syslog.h"
-#include "xmpp.h"
 #include "x_iopsys_eu_owsd.h"
 #include "x_iopsys_eu_dropbear.h"
 #include "x_iopsys_eu_buttons.h"
@@ -112,7 +111,6 @@ DMOBJ tRoot_181_Obj[] = {
 {"GRE", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/gre.sh", NULL, NULL, NULL,  NULL, tGREObj, tGREParams, NULL, BBFDM_BOTH},
 {"DynamicDNS", &DMREAD, NULL, NULL, "file:/etc/config/ddns", NULL, NULL, NULL, NULL, tDynamicDNSObj, tDynamicDNSParams, NULL, BBFDM_BOTH},
 {"QoS", &DMREAD, NULL, NULL, "file:/etc/config/qos", NULL, NULL, NULL, NULL, tQoSObj, tQoSParams, NULL, BBFDM_BOTH},
-{"XMPP", &DMREAD, NULL, NULL, "file:/etc/config/xmpp", NULL, NULL, NULL, NULL, tXMPPObj, tXMPPParams, NULL, BBFDM_BOTH},
 {"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH},
 #ifdef BBF_TR157
 {"BulkData", &DMREAD, NULL, NULL, "file:/etc/config/bulkdata", NULL, NULL, NULL, NULL, tBulkDataObj, tBulkDataParams, NULL, BBFDM_BOTH},
