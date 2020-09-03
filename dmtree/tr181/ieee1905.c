@@ -13,7 +13,7 @@
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
-/*#Device.IEEE1905.AL.Interface.{i}.!UBUS:ieee1905/info/None,None/interfaces*/
+/*#Device.IEEE1905.AL.Interface.{i}.!UBUS:ieee1905/interfaces//names*/
 static int browseIEEE1905ALInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *result = NULL, *interfaces = NULL, *interface_id = NULL;
@@ -45,7 +45,7 @@ static int browseIEEE1905ALInterfaceVendorPropertiesInst(struct dmctx *dmctx, DM
 }
 #endif
 
-/*#Device.IEEE1905.AL.Interface.{i}.Link.{i}.!UBUS:ieee1905.al.Name/link_info/None,None/Links*/
+/*#Device.IEEE1905.AL.Interface.{i}.Link.{i}.!UBUS:ieee1905.al.Name/link_info//Links*/
 static int browseIEEE1905ALInterfaceLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *link_obj = NULL, *arrobj = NULL;
@@ -536,7 +536,7 @@ static int set_IEEE1905ALForwardingTable_SetForwardingEnabled(char *refparam, st
 	return 0;
 }
 
-/*#Device.IEEE1905.AL.ForwardingTable.ForwardingRuleNumberOfEntries!UCI:ieee1905/forwarding_rule,None/forwarding_rule_nr*/
+/*#Device.IEEE1905.AL.ForwardingTable.ForwardingRuleNumberOfEntries!UCI:ieee1905/forwarding_rule*/
 static int get_IEEE1905ALForwardingTable_ForwardingRuleNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
@@ -1239,7 +1239,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceLis
 }
 #endif
 
-/*#Device.IEEE1905.AL.Security.SetupMethod!UCI:ieee1905/security,security/None*/
+/*#Device.IEEE1905.AL.Security.SetupMethod!UCI:ieee1905/security,security/method*/
 static int get_IEEE1905ALSecurity_SetupMethod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_option_value_string("ieee1905", "security", "method", value);

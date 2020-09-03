@@ -29232,7 +29232,7 @@
 							"2.4GHz", 
 							"5GHz"
 						]
-					},
+					}, 
 					"mapping": [
 						{
 							"type": "ubus", 
@@ -32066,22 +32066,7 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "string",
-						"mapping": [
-							{
-								"type": "uci",
-								"uci": {
-									"file": "wireless",
-									"section": {
-										"type": "wifi-iface",
-										"index": "@i-1"
-									},
-									"option": {
-										"name": "auth_secret"
-									}
-								}
-							}
-						]
+						"datatype": "string"
 					}, 
 					"SecondaryRadiusSecret": {
 						"type": "string", 
@@ -49947,7 +49932,7 @@
 						"uci": {
 							"file": "qos", 
 							"section": {
-								"type": "class"
+								"type": "queue"
 							}
 						}
 					}
@@ -51942,7 +51927,7 @@
 					"uci": {
 						"file": "qos", 
 						"section": {
-							"type": "class"
+							"type": "queue"
 						}, 
 						"dmmapfile": "dmmap_qos"
 					}
@@ -52186,7 +52171,7 @@
 									"index": "@i-1"
 								}, 
 								"option": {
-									"name": "limitrate"
+									"name": "rate"
 								}
 							}
 						}
@@ -52870,14 +52855,14 @@
 						"cwmp", 
 						"usp"
 					], 
-					"datatype": "dateTime",
+					"datatype": "dateTime", 
 					"mapping": [
 						{
-							"type": "ubus",
+							"type": "ubus", 
 							"ubus": {
-								"object": "router.network",
-								"method": "hosts",
-								"args": {},
+								"object": "router.network", 
+								"method": "hosts", 
+								"args": {}, 
 								"key": "hosts[@i-1].activelstch"
 							}
 						}
@@ -61618,7 +61603,7 @@
 							{
 								"max": 64
 							}
-						],
+						], 
 						"mapping": [
 							{
 								"type": "uci", 
@@ -61647,6 +61632,21 @@
 						"range": [
 							{
 								"max": 256
+							}
+						], 
+						"mapping": [
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "firewall", 
+									"section": {
+										"type": "rule", 
+										"index": "@i-1"
+									}, 
+									"option": {
+										"name": "name"
+									}
+								}
 							}
 						]
 					}, 
@@ -67301,18 +67301,18 @@
 				"enumerations": [
 					"1905.1", 
 					"1905.1a"
-				],
+				], 
 				"mapping": [
 					{
-						"type": "ubus",
-                                                "ubus": {
-                                                            "object": "ieee1905",
-                                                            "method": "info",
-                                                            "args": {},
-                                                            "key": "Version"
-                                                }
-                                        }
-                                ]
+						"type": "ubus", 
+						"ubus": {
+							"object": "ieee1905", 
+							"method": "info", 
+							"args": {}, 
+							"key": "version"
+						}
+					}
+				]
 			}, 
 			"Device.IEEE1905.AL.": {
 				"type": "object", 
@@ -67338,15 +67338,15 @@
 					], 
 					"pattern": [
 						"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-					],
+					], 
 					"mapping": [
 						{
-							"type": "ubus",
+							"type": "ubus", 
 							"ubus": {
-								    "object": "ieee1905",
-								    "method": "info",
-								    "args": {},
-								    "key": "IEEE1905Id"
+								"object": "ieee1905", 
+								"method": "info", 
+								"args": {}, 
+								"key": "ieee1905id"
 							}
 						}
 					]
@@ -67371,18 +67371,18 @@
 						"NotPresent", 
 						"LowerLayerDown", 
 						"Error"
-					],
+					], 
 					"mapping": [
-                                                {
-                                                        "type": "ubus",
-                                                        "ubus": {
-									"object": "ieee1905",
-									"method": "info",
-									"args": {},
-									"key": "Status"
-                                                         }
-                                                }
-                                        ]
+						{
+							"type": "ubus", 
+							"ubus": {
+								"object": "ieee1905", 
+								"method": "info", 
+								"args": {}, 
+								"key": "status"
+							}
+						}
+					]
 				}, 
 				"LastChange": {
 					"type": "unsignedInt", 
@@ -67393,18 +67393,18 @@
 						"usp"
 					], 
 					"datatype": "unsignedInt", 
-					"unit": "seconds",
+					"unit": "seconds", 
 					"mapping": [
-                                                {
-                                                        "type": "ubus",
-                                                        "ubus": {
-                                                                        "object": "ieee1905",
-                                                                        "method": "info",
-                                                                        "args": {},
-                                                                        "key": "LastChange"
-                                                         }
-                                                }
-                                        ]
+						{
+							"type": "ubus", 
+							"ubus": {
+								"object": "ieee1905", 
+								"method": "info", 
+								"args": {}, 
+								"key": "last_change"
+							}
+						}
+					]
 				}, 
 				"LowerLayers": {
 					"type": "string", 
@@ -67435,18 +67435,18 @@
 							"802.11 5 GHz", 
 							"802.11 60 GHz"
 						]
-					},
+					}, 
 					"mapping": [
-                                                {
-                                                        "type": "ubus",
-                                                        "ubus": {
-                                                                        "object": "ieee1905",
-                                                                        "method": "info",
-                                                                        "args": {},
-                                                                        "key": "RegistrarFreqBand"
-                                                         }
-                                                }
-                                        ]
+						{
+							"type": "ubus", 
+							"ubus": {
+								"object": "ieee1905", 
+								"method": "info", 
+								"args": {}, 
+								"key": "registrar_freq_band"
+							}
+						}
+					]
 				}, 
 				"InterfaceNumberOfEntries": {
 					"type": "unsignedInt", 
@@ -67456,18 +67456,18 @@
 						"cwmp", 
 						"usp"
 					], 
-					"datatype": "unsignedInt",
+					"datatype": "unsignedInt", 
 					"mapping": [
-                                                {
-                                                        "type": "ubus",
-                                                        "ubus": {
-                                                                        "object": "ieee1905",
-                                                                        "method": "info",
-                                                                        "args": {},
-                                                                        "key": "interface_num"
-                                                         }
-                                                }
-                                        ]
+						{
+							"type": "ubus", 
+							"ubus": {
+								"object": "ieee1905", 
+								"method": "info", 
+								"args": {}, 
+								"key": "interface_num"
+							}
+						}
+					]
 				}, 
 				"Device.IEEE1905.AL.Interface.{i}.": {
 					"type": "object", 
@@ -67478,14 +67478,14 @@
 					"access": false, 
 					"array": true, 
 					"mapping": {
-                                                "type": "ubus",
-                                                "ubus": {
-                                                        "object": "ieee1905",
-                                                        "method": "info",
-                                                        "args": {},
-                                                        "key": "interfaces"
-                                                }
-                                        },
+						"type": "ubus", 
+						"ubus": {
+							"object": "ieee1905", 
+							"method": "interfaces", 
+							"args": {}, 
+							"key": "names"
+						}
+					}, 
 					"InterfaceId": {
 						"type": "string", 
 						"read": true, 
@@ -67502,15 +67502,15 @@
 						], 
 						"pattern": [
 							"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-						],
+						], 
 						"mapping": [
 							{
-								"type": "ubus",
+								"type": "ubus", 
 								"ubus": {
-										"object": "ieee1905",
-										"method": "info",
-										"args": {},
-										"key": "interfaces[@i-1].mac"
+									"object": "ieee1905.al.Name", 
+									"method": "info", 
+									"args": {}, 
+									"key": "mac"
 								}
 							}
 						]
@@ -67597,17 +67597,17 @@
 							"IEEE 1901 FFT", 
 							"MoCAv1.1", 
 							"Generic PHY"
-						],
+						], 
 						"mapping": [
-								{
-									"type": "ubus",
-									"ubus": {
-											"object": "ieee1905",
-											"method": "info",
-											"args": {},
-											"key": "interfaces[@i-1].interface_type"
-									}
+							{
+								"type": "ubus", 
+								"ubus": {
+									"object": "ieee1905.al.Name", 
+									"method": "info", 
+									"args": {}, 
+									"key": "interface_type"
 								}
+							}
 						]
 					}, 
 					"GenericPhyOUI": {
@@ -67684,18 +67684,18 @@
 							"Power_Save", 
 							"Off", 
 							"Unsupported"
-						],
+						], 
 						"mapping": [
-                                                                {
-                                                                        "type": "ubus",
-                                                                        "ubus": {
-                                                                                        "object": "ieee1905",
-                                                                                        "method": "info",
-                                                                                        "args": {},
-                                                                                        "key": "interfaces[@i-1].power_state"
-                                                                        }
-                                                                }
-                                                ]
+							{
+								"type": "ubus", 
+								"ubus": {
+									"object": "ieee1905.al.Name", 
+									"method": "info", 
+									"args": {}, 
+									"key": "power_state"
+								}
+							}
+						]
 					}, 
 					"VendorPropertiesNumberOfEntries": {
 						"type": "unsignedInt", 
@@ -67705,19 +67705,18 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedInt",
+						"datatype": "unsignedInt", 
 						"mapping": [
-                                                                {
-                                                                        "type": "ubus",
-                                                                        "ubus": {
-                                                                                        "object": "ieee1905",
-                                                                                        "method": "info",
-                                                                                        "args": {},
-                                                                                        "key": "interfaces[@i-1].vendor_nr"
-                                                                        }
-                                                                }
-                                                ]
-
+							{
+								"type": "ubus", 
+								"ubus": {
+									"object": "ieee1905.al.Name", 
+									"method": "info", 
+									"args": {}, 
+									"key": "vendor_nr"
+								}
+							}
+						]
 					}, 
 					"LinkNumberOfEntries": {
 						"type": "unsignedInt", 
@@ -67727,18 +67726,7 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedInt",
-						"mapping": [
-                                                                {
-                                                                        "type": "ubus",
-                                                                        "ubus": {
-                                                                                        "object": "ieee1905",
-                                                                                        "method": "info",
-                                                                                        "args": {},
-                                                                                        "key": "interfaces[@i-1].neighbour_nr"
-                                                                        }
-                                                                }
-                                                ]
+						"datatype": "unsignedInt"
 					}, 
 					"Device.IEEE1905.AL.Interface.{i}.VendorProperties.{i}.": {
 						"type": "object", 
@@ -67792,14 +67780,14 @@
 						"access": false, 
 						"array": true, 
 						"mapping": {
-                                                        "type": "ubus",
-                                                        "ubus": {
-                                                                "object": "ieee1905.al.Name",
-                                                                "method": "link_info",
-                                                                "args": {},
-                                                                "key": "Links"
-                                                        }
-                                                },
+							"type": "ubus", 
+							"ubus": {
+								"object": "ieee1905.al.Name", 
+								"method": "link_info", 
+								"args": {}, 
+								"key": "Links"
+							}
+						}, 
 						"InterfaceId": {
 							"type": "string", 
 							"read": true, 
@@ -67816,18 +67804,18 @@
 							], 
 							"pattern": [
 								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-							],
+							], 
 							"mapping": [
-                                                                        {
-                                                                                "type": "ubus",
-                                                                                "ubus": {
-                                                                                        "object": "ieee1905.al.Name",
-                                                                                        "method": "link_info",
-                                                                                        "args": {},
-                                                                                        "key": "Links[@i-1].InterfaceId"
-                                                                                }
-                                                                        }
-                                                        ]
+								{
+									"type": "ubus", 
+									"ubus": {
+										"object": "ieee1905.al.Name", 
+										"method": "link_info", 
+										"args": {}, 
+										"key": "Links[@i-1].interfaceid"
+									}
+								}
+							]
 						}, 
 						"IEEE1905Id": {
 							"type": "string", 
@@ -67845,18 +67833,18 @@
 							], 
 							"pattern": [
 								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-							],
+							], 
 							"mapping": [
-                                                                        {
-                                                                                "type": "ubus",
-                                                                                "ubus": {
-                                                                                        "object": "ieee1905.al.Name",
-                                                                                        "method": "link_info",
-                                                                                        "args": {},
-                                                                                        "key": "Links[@i-1].IEEE1905Id"
-                                                                                }
-                                                                        }
-                                                        ]
+								{
+									"type": "ubus", 
+									"ubus": {
+										"object": "ieee1905.al.Name", 
+										"method": "link_info", 
+										"args": {}, 
+										"key": "Links[@i-1].ieee1905id"
+									}
+								}
+							]
 						}, 
 						"MediaType": {
 							"type": "string", 
@@ -67882,18 +67870,18 @@
 								"IEEE 1901 FFT", 
 								"MoCAv1.1", 
 								"Generic PHY"
-							],
+							], 
 							"mapping": [
-                                                                        {
-                                                                                "type": "ubus",
-                                                                                "ubus": {
-                                                                                        "object": "ieee1905.al.Name",
-                                                                                        "method": "link_info",
-                                                                                        "args": {},
-                                                                                        "key": "Links[@i-1].MediaType"
-                                                                                }
-                                                                        }
-                                                        ]
+								{
+									"type": "ubus", 
+									"ubus": {
+										"object": "ieee1905.al.Name", 
+										"method": "link_info", 
+										"args": {}, 
+										"key": "Links[@i-1].media_type"
+									}
+								}
+							]
 						}, 
 						"GenericPhyOUI": {
 							"type": "string", 
@@ -67961,7 +67949,18 @@
 									"cwmp", 
 									"usp"
 								], 
-								"datatype": "boolean"
+								"datatype": "boolean", 
+								"mapping": [
+									{
+										"type": "ubus", 
+										"ubus": {
+											"object": "ieee1905.al.Name", 
+											"method": "link_info", 
+											"args": {}, 
+											"key": "Links[@i-1].ieee802dot1bridge"
+										}
+									}
+								]
 							}, 
 							"PacketErrors": {
 								"type": "unsignedInt", 
@@ -67971,7 +67970,18 @@
 									"cwmp", 
 									"usp"
 								], 
-								"datatype": "StatsCounter32"
+								"datatype": "StatsCounter32", 
+								"mapping": [
+									{
+										"type": "ubus", 
+										"ubus": {
+											"object": "ieee1905.al.Name", 
+											"method": "link_info", 
+											"args": {}, 
+											"key": "Links[@i-1].packet_errors_tx"
+										}
+									}
+								]
 							}, 
 							"PacketErrorsReceived": {
 								"type": "unsignedInt", 
@@ -67981,7 +67991,18 @@
 									"cwmp", 
 									"usp"
 								], 
-								"datatype": "StatsCounter32"
+								"datatype": "StatsCounter32", 
+								"mapping": [
+									{
+										"type": "ubus", 
+										"ubus": {
+											"object": "ieee1905.al.Name", 
+											"method": "link_info", 
+											"args": {}, 
+											"key": "Links[@i-1].packet_errors_rx"
+										}
+									}
+								]
 							}, 
 							"TransmittedPackets": {
 								"type": "unsignedInt", 
@@ -67991,7 +68012,18 @@
 									"cwmp", 
 									"usp"
 								], 
-								"datatype": "StatsCounter32"
+								"datatype": "StatsCounter32", 
+								"mapping": [
+									{
+										"type": "ubus", 
+										"ubus": {
+											"object": "ieee1905.al.Name", 
+											"method": "link_info", 
+											"args": {}, 
+											"key": "Links[@i-1].transmitted_packets"
+										}
+									}
+								]
 							}, 
 							"PacketsReceived": {
 								"type": "unsignedInt", 
@@ -68001,7 +68033,18 @@
 									"cwmp", 
 									"usp"
 								], 
-								"datatype": "StatsCounter32"
+								"datatype": "StatsCounter32", 
+								"mapping": [
+									{
+										"type": "ubus", 
+										"ubus": {
+											"object": "ieee1905.al.Name", 
+											"method": "link_info", 
+											"args": {}, 
+											"key": "Links[@i-1].packets_received"
+										}
+									}
+								]
 							}, 
 							"MACThroughputCapacity": {
 								"type": "unsignedInt", 
@@ -68012,7 +68055,18 @@
 									"usp"
 								], 
 								"datatype": "unsignedInt", 
-								"unit": "Mb/s"
+								"unit": "Mb/s", 
+								"mapping": [
+									{
+										"type": "ubus", 
+										"ubus": {
+											"object": "ieee1905.al.Name", 
+											"method": "link_info", 
+											"args": {}, 
+											"key": "Links[@i-1].mac_throughput_capacity"
+										}
+									}
+								]
 							}, 
 							"LinkAvailability": {
 								"type": "unsignedInt", 
@@ -68029,7 +68083,18 @@
 										"max": 100
 									}
 								], 
-								"unit": "percent"
+								"unit": "percent", 
+								"mapping": [
+									{
+										"type": "ubus", 
+										"ubus": {
+											"object": "ieee1905.al.Name", 
+											"method": "link_info", 
+											"args": {}, 
+											"key": "Links[@i-1].link_availability"
+										}
+									}
+								]
 							}, 
 							"PHYRate": {
 								"type": "unsignedInt", 
@@ -68040,7 +68105,18 @@
 									"usp"
 								], 
 								"datatype": "unsignedInt", 
-								"unit": "Mb/s"
+								"unit": "Mb/s", 
+								"mapping": [
+									{
+										"type": "ubus", 
+										"ubus": {
+											"object": "ieee1905.al.Name", 
+											"method": "link_info", 
+											"args": {}, 
+											"key": "Links[@i-1].phy_rate"
+										}
+									}
+								]
 							}, 
 							"RSSI": {
 								"type": "unsignedInt", 
@@ -68057,7 +68133,18 @@
 										"max": 255
 									}
 								], 
-								"unit": "dB"
+								"unit": "dB", 
+								"mapping": [
+									{
+										"type": "ubus", 
+										"ubus": {
+											"object": "ieee1905.al.Name", 
+											"method": "link_info", 
+											"args": {}, 
+											"key": "Links[@i-1].rssi"
+										}
+									}
+								]
 							}
 						}
 					}
@@ -68078,16 +68165,16 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "boolean",
+						"datatype": "boolean", 
 						"mapping": [
 							{
-								"type": "uci",
+								"type": "uci", 
 								"uci": {
-									"file": "ieee1905",
+									"file": "ieee1905", 
 									"section": {
-										"type": "forwarding_table",
+										"type": "forwarding_table", 
 										"name": "forwarding_table"
-									},
+									}, 
 									"option": {
 										"name": "forwarding_enabled"
 									}
@@ -68103,21 +68190,18 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedInt",
+						"datatype": "unsignedInt", 
 						"mapping": [
-                                                    {
-                                                        "type": "uci",
-                                                        "uci": {
-                                                                "file": "ieee1905",
-                                                                "section": {
-                                                                        "type": "forwarding_rule"
-                                                                },
-                                                                "option": {
-                                                                        "name": "forwarding_rule_nr"
-                                                                }
-                                                        }
-                                                    }
-                                                ]
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "ieee1905", 
+									"section": {
+										"type": "forwarding_rule"
+									}
+								}
+							}
+						]
 					}, 
 					"Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.": {
 						"type": "object", 
@@ -68128,15 +68212,15 @@
 						"access": true, 
 						"array": true, 
 						"mapping": {
-								"type": "uci",
-								"uci": {
-									"file": "ieee1905",
-									"section": {
-										"type": "forwarding_rule"
-									},
-									"dmmapfile": "dmmap_forwarding_rule"
-								}
-						},
+							"type": "uci", 
+							"uci": {
+								"file": "ieee1905", 
+								"section": {
+									"type": "forwarding_rule"
+								}, 
+								"dmmapfile": "dmmap_forwarding_rule"
+							}
+						}, 
 						"InterfaceList": {
 							"type": "string", 
 							"read": true, 
@@ -68152,21 +68236,21 @@
 										"max": 256
 									}
 								]
-							},
+							}, 
 							"mapping": [
-									{
-										"type": "uci",
-										"uci": {
-												"file": "dmmap_forwarding_rule",
-												"section": {
-													"type": "forwarding_rule",
-													"index": "@i-1"
-												},
-												"option": {
-													"name": "interface_list"
-												}
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dmmap_forwarding_rule", 
+										"section": {
+											"type": "forwarding_rule", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "interface_list"
 										}
 									}
+								}
 							]
 						}, 
 						"MACDestinationAddress": {
@@ -68185,22 +68269,22 @@
 							], 
 							"pattern": [
 								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-							],
+							], 
 							"mapping": [
-                                                                       {
-                                                                            "type": "uci",
-                                                                            "uci": {
-                                                                                        "file": "dmmap_forwarding_rule",
-                                                                                        "section": {
-                                                                                                "type": "forwarding_rule",
-                                                                                                "index": "@i-1"
-                                                                                        },
-                                                                                        "option": {
-                                                                                                "name": "mac_destination_addr"
-                                                                                        }
-                                                                            }
-                                                                        }
-                                                        ]
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dmmap_forwarding_rule", 
+										"section": {
+											"type": "forwarding_rule", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "mac_destination_addr"
+										}
+									}
+								}
+							]
 						}, 
 						"MACDestinationAddressFlag": {
 							"type": "boolean", 
@@ -68210,22 +68294,22 @@
 								"cwmp", 
 								"usp"
 							], 
-							"datatype": "boolean",
+							"datatype": "boolean", 
 							"mapping": [
-                                                                       {
-                                                                            "type": "uci",
-                                                                            "uci": {
-                                                                                        "file": "dmmap_forwarding_rule",
-                                                                                        "section": {
-                                                                                                "type": "forwarding_rule",
-                                                                                                "index": "@i-1"
-                                                                                        },
-                                                                                        "option": {
-                                                                                                "name": "mac_destination_addr_flag"
-                                                                                        }
-                                                                            }
-                                                                        }
-                                                        ]
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dmmap_forwarding_rule", 
+										"section": {
+											"type": "forwarding_rule", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "mac_destination_addr_flag"
+										}
+									}
+								}
+							]
 						}, 
 						"MACSourceAddress": {
 							"type": "string", 
@@ -68243,22 +68327,22 @@
 							], 
 							"pattern": [
 								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-							],
+							], 
 							"mapping": [
-                                                                       {
-                                                                            "type": "uci",
-                                                                            "uci": {
-                                                                                        "file": "dmmap_forwarding_rule",
-                                                                                        "section": {
-                                                                                                "type": "forwarding_rule",
-                                                                                                "index": "@i-1"
-                                                                                        },
-                                                                                        "option": {
-                                                                                                "name": "mac_source_addr"
-                                                                                        }
-                                                                            }
-                                                                        }
-                                                        ]
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dmmap_forwarding_rule", 
+										"section": {
+											"type": "forwarding_rule", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "mac_source_addr"
+										}
+									}
+								}
+							]
 						}, 
 						"MACSourceAddressFlag": {
 							"type": "boolean", 
@@ -68268,22 +68352,22 @@
 								"cwmp", 
 								"usp"
 							], 
-							"datatype": "boolean",
+							"datatype": "boolean", 
 							"mapping": [
-                                                                       {
-                                                                            "type": "uci",
-                                                                            "uci": {
-                                                                                        "file": "dmmap_forwarding_rule",
-                                                                                        "section": {
-                                                                                                "type": "forwarding_rule",
-                                                                                                "index": "@i-1"
-                                                                                        },
-                                                                                        "option": {
-                                                                                                "name": "mac_source_addr_flag"
-                                                                                        }
-                                                                            }
-                                                                        }
-                                                        ]
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dmmap_forwarding_rule", 
+										"section": {
+											"type": "forwarding_rule", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "mac_source_addr_flag"
+										}
+									}
+								}
+							]
 						}, 
 						"EtherType": {
 							"type": "unsignedInt", 
@@ -68293,22 +68377,22 @@
 								"cwmp", 
 								"usp"
 							], 
-							"datatype": "unsignedInt",
+							"datatype": "unsignedInt", 
 							"mapping": [
-                                                                       {
-                                                                            "type": "uci",
-                                                                            "uci": {
-                                                                                        "file": "dmmap_forwarding_rule",
-                                                                                        "section": {
-                                                                                                "type": "forwarding_rule",
-                                                                                                "index": "@i-1"
-                                                                                        },
-                                                                                        "option": {
-                                                                                                "name": "ether_type"
-                                                                                        }
-                                                                            }
-                                                                        }
-                                                        ]
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dmmap_forwarding_rule", 
+										"section": {
+											"type": "forwarding_rule", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "ether_type"
+										}
+									}
+								}
+							]
 						}, 
 						"EtherTypeFlag": {
 							"type": "boolean", 
@@ -68318,22 +68402,22 @@
 								"cwmp", 
 								"usp"
 							], 
-							"datatype": "boolean",
+							"datatype": "boolean", 
 							"mapping": [
-                                                                       {
-                                                                            "type": "uci",
-                                                                            "uci": {
-                                                                                        "file": "dmmap_forwarding_rule",
-                                                                                        "section": {
-                                                                                                "type": "forwarding_rule",
-                                                                                                "index": "@i-1"
-                                                                                        },
-                                                                                        "option": {
-                                                                                                "name": "ether_type_flag"
-                                                                                        }
-                                                                            }
-                                                                        }
-                                                        ]
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dmmap_forwarding_rule", 
+										"section": {
+											"type": "forwarding_rule", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "ether_type_flag"
+										}
+									}
+								}
+							]
 						}, 
 						"Vid": {
 							"type": "unsignedInt", 
@@ -68349,22 +68433,22 @@
 									"min": 0, 
 									"max": 4095
 								}
-							],
+							], 
 							"mapping": [
-                                                                       {
-                                                                            "type": "uci",
-                                                                            "uci": {
-                                                                                        "file": "dmmap_forwarding_rule",
-                                                                                        "section": {
-                                                                                                "type": "forwarding_rule",
-                                                                                                "index": "@i-1"
-                                                                                        },
-                                                                                        "option": {
-                                                                                                "name": "vid"
-                                                                                        }
-                                                                            }
-                                                                        }
-                                                        ]
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dmmap_forwarding_rule", 
+										"section": {
+											"type": "forwarding_rule", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "vid"
+										}
+									}
+								}
+							]
 						}, 
 						"VidFlag": {
 							"type": "boolean", 
@@ -68374,22 +68458,22 @@
 								"cwmp", 
 								"usp"
 							], 
-							"datatype": "boolean",
+							"datatype": "boolean", 
 							"mapping": [
-                                                                       {
-                                                                            "type": "uci",
-                                                                            "uci": {
-                                                                                        "file": "dmmap_forwarding_rule",
-                                                                                        "section": {
-                                                                                                "type": "forwarding_rule",
-                                                                                                "index": "@i-1"
-                                                                                        },
-                                                                                        "option": {
-                                                                                                "name": "vid_flag"
-                                                                                        }
-                                                                            }
-                                                                        }
-                                                        ]
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dmmap_forwarding_rule", 
+										"section": {
+											"type": "forwarding_rule", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "vid_flag"
+										}
+									}
+								}
+							]
 						}, 
 						"PCP": {
 							"type": "unsignedInt", 
@@ -68405,22 +68489,22 @@
 									"min": 0, 
 									"max": 7
 								}
-							],
+							], 
 							"mapping": [
-                                                                       {
-                                                                            "type": "uci",
-                                                                            "uci": {
-                                                                                        "file": "dmmap_forwarding_rule",
-                                                                                        "section": {
-                                                                                                "type": "forwarding_rule",
-                                                                                                "index": "@i-1"
-                                                                                        },
-                                                                                        "option": {
-                                                                                                "name": "pcp"
-                                                                                        }
-                                                                            }
-                                                                        }
-                                                        ]
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dmmap_forwarding_rule", 
+										"section": {
+											"type": "forwarding_rule", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "pcp"
+										}
+									}
+								}
+							]
 						}, 
 						"PCPFlag": {
 							"type": "boolean", 
@@ -68430,22 +68514,22 @@
 								"cwmp", 
 								"usp"
 							], 
-							"datatype": "boolean",
+							"datatype": "boolean", 
 							"mapping": [
-                                                                       {
-                                                                            "type": "uci",
-                                                                            "uci": {
-                                                                                        "file": "dmmap_forwarding_rule",
-                                                                                        "section": {
-                                                                                                "type": "forwarding_rule",
-                                                                                                "index": "@i-1"
-                                                                                        },
-                                                                                        "option": {
-                                                                                                "name": "pcp_flag"
-                                                                                        }
-                                                                            }
-                                                                        }
-                                                        ]
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dmmap_forwarding_rule", 
+										"section": {
+											"type": "forwarding_rule", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "pcp_flag"
+										}
+									}
+								}
+							]
 						}
 					}
 				}, 
@@ -69595,22 +69679,22 @@
 								"PBC", 
 								"NFCNK"
 							]
-						},
+						}, 
 						"mapping": [
-                                                    {
-                                                        "type": "uci",
-                                                        "uci": {
-                                                                "file": "ieee1905",
-                                                                "section": {
-                                                                        "type": "security",
-                                                                        "name": "security"
-                                                                },
-                                                                "option": {
-                                                                        "name": "method"
-                                                                }
-                                                        }
-                                                    }
-                                                ]
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "ieee1905", 
+									"section": {
+										"type": "security", 
+										"name": "security"
+									}, 
+									"option": {
+										"name": "method"
+									}
+								}
+							}
+						]
 					}, 
 					"Password": {
 						"type": "string", 
@@ -69620,22 +69704,22 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "string",
+						"datatype": "string", 
 						"mapping": [
-                                                    {
-                                                        "type": "uci",
-                                                        "uci": {
-                                                                "file": "ieee1905",
-                                                                "section": {
-                                                                        "type": "security",
-                                                                        "name": "security"
-                                                                },
-                                                                "option": {
-                                                                        "name": "key"
-                                                                }
-                                                        }
-                                                    }
-	                                        ]
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "ieee1905", 
+									"section": {
+										"type": "security", 
+										"name": "security"
+									}, 
+									"option": {
+										"name": "key"
+									}
+								}
+							}
+						]
 					}
 				}, 
 				"Device.IEEE1905.AL.NetworkingRegistrar.": {

@@ -280,7 +280,7 @@ static int get_rule_order(char *refparam, struct dmctx *ctx, void *data, char *i
 	return 0;
 }
 
-/*#Device.Firewall.Chain.{i}.Rule.{i}.Alias!UCI:dmmap_firewall/rule,@i-1/user_alias*/
+/*#Device.Firewall.Chain.{i}.Rule.{i}.Alias!UCI:dmmap_firewall/rule,@i-1/firewall_chain_rule_alias*/
 static int get_rule_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *dmmap_section = NULL;
@@ -292,7 +292,7 @@ static int get_rule_alias(char *refparam, struct dmctx *ctx, void *data, char *i
     return 0;
 }
 
-/*#Device.Firewall.Chain.{i}.Rule.{i}.Target!UCI:firewall/rule,@i-1/name*/
+/*#Device.Firewall.Chain.{i}.Rule.{i}.Description!UCI:firewall/rule,@i-1/name*/
 static int get_rule_description(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "name", value);

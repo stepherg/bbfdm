@@ -404,6 +404,7 @@ int os_delObjQoSShaper(char *refparam, struct dmctx *ctx, void *data, char *inst
 /*************************************************************
  * GET & SET PARAM
 *************************************************************/
+/*#Device.QoS.ClassificationNumberOfEntries!UCI:qos/classify/*/
 int os_get_QoS_ClassificationNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
@@ -423,7 +424,6 @@ int os_get_QoS_MaxClassificationEntries(char *refparam, struct dmctx *ctx, void 
 	return 0;
 }
 
-/*#Device.QoS.ClassificationNumberOfEntries!UCI:qos/classify,false/false*/
 int os_get_QoS_ClassificationNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
@@ -479,7 +479,7 @@ int os_get_QoS_MaxQueueEntries(char *refparam, struct dmctx *ctx, void *data, ch
 }
 #endif
 
-/*#Device.QoS.QueueNumberOfEntries!UCI:qos/queue,false/false*/
+/*#Device.QoS.QueueNumberOfEntries!UCI:qos/queue*/
 int os_get_QoS_QueueNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;

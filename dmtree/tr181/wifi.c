@@ -1905,7 +1905,7 @@ static int set_ssid_alias(char *refparam, struct dmctx *ctx, void *data, char *i
 	return 0;
 }
 
-/*#Device.WiFi.AccessPoint.{i}.Alias!UCI:dmmap_wireless/wifi-iface,@i-1/accesspointalias*/
+/*#Device.WiFi.AccessPoint.{i}.Alias!UCI:dmmap_wireless/wifi-iface,@i-1/ap_alias*/
 static int get_access_point_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *dmmap_section = NULL;

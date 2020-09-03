@@ -216,8 +216,8 @@ listmapping = []
 def generatelistfromfile(dmobject):
 	obj = dmobject.get('name').split(".")
 	if "tr-104" in sys.argv[1]:
-		pathfilename = "../dmtree/tr104/voice_services.c"
-		pathiopsyswrtfilename = "../dmtree/tr104/voice_services-iopsyswrt.c"
+		pathfilename = "../dmtree/tr104/" + obj[1].lower() + ".c"
+		pathiopsyswrtfilename = "../dmtree/tr104/" + obj[1].lower() + "-iopsyswrt.c"
 	elif obj[1] == "SoftwareModules" or obj[1] == "BulkData" :
 		pathfilename = "../dmtree/tr157/" + obj[1].lower() + ".c"
 		pathiopsyswrtfilename = "../dmtree/tr157/" + obj[1].lower() + "-iopsyswrt.c"
@@ -578,21 +578,17 @@ def printCOMMAND( dmparam, dmobject, bbfdm_type ):
 	fp.close()
 
 def printusage():
-	if "tr-181" in sys.argv[1]:
-		print "Usage: " + sys.argv[0] + " <tr-181 cwmp xml data model> <tr-181 usp xml data model> [Object path]"
-		print "Examples:"
-		print "  - " + sys.argv[0] + " tr-181-2-13-0-cwmp-full.xml tr-181-2-13-0-usp-full.xml Device."
-		print "    ==> Generate the json file of the sub tree Device. in tr181.json"
-	else:
-		print "Usage: " + sys.argv[0] + " <xml data model> [Object path]"
-		print "Examples:"
-		print "  - " + sys.argv[0] + " tr-104-1-1-0-full.xml VoiceService."
-		print "    ==> Generate the json file of the sub tree VoiceService. in tr104.json"
-		print "  - " + sys.argv[0] + " tr-106-1-2-0-full.xml Device."
-		print "    ==> Generate the json file of the sub tree Device. in tr106.json"
-
+	print "Usage: " + sys.argv[0] + " <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]"
+	print "Examples:"
+	print "  - " + sys.argv[0] + " tr-181-2-13-0-cwmp-full.xml tr-181-2-13-0-usp-full.xml Device."
+	print "    ==> Generate the json file of the sub tree Device. in tr181.json"
+	print "  - " + sys.argv[0] + " tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml VoiceService."
+	print "    ==> Generate the json file of the sub tree VoiceService. in tr104.json"
+	print "  - " + sys.argv[0] + " tr-106-1-2-0-full.xml Device."
+	print "    ==> Generate the json file of the sub tree Device. in tr106.json"
 	print ""
 	print "Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-13-0-cwmp-full.xml"
+	exit(1)
 
 def getobjectpointer( objname ):
 	obj = None
@@ -658,7 +654,7 @@ def chech_obj_with_other_obj(obj, dmobject):
 def object_parse_childs(dmobject, level, generatelist, check_obj):
 	if generatelist == 0 and (dmobject.get('name')).count(".") == 2:
 		generatelistfromfile(dmobject)
-	if check_obj == 1 and "tr-181" in sys.argv[1]:
+	if check_obj == 1 and ("tr-181" in sys.argv[1] or "tr-104" in sys.argv[1]):
 		obj, exist = check_if_obj_exist_in_other_xml_file(dmobject) 
 
 	hasobj = objhaschild(dmobject.get('name'), level, check_obj)
@@ -752,18 +748,11 @@ def generatejsonfromobj(pobj, pdir):
 
 
 ### main ###
-if "tr-181" in sys.argv[1]:
-	if len(sys.argv) < 4:
-		printusage()
-		exit(1)
-else:
-	if len(sys.argv) < 3:
-		printusage()
-		exit(1)
+if len(sys.argv) < 4:
+	printusage()
 
 if (sys.argv[1]).lower() == "-h" or (sys.argv[1]).lower() == "--help":
 	printusage()
-	exit(1)
 
 is_service_model = 0
 model_root_name = "Root"
@@ -798,7 +787,7 @@ if dmroot1 == None:
 	print "Wrong %s XML Data model format!" % sys.argv[1]
 	exit(1)
 
-if "tr-181" in sys.argv[1]:
+if "tr-181" in sys.argv[1] or "tr-104" in sys.argv[1]:
 	tree2 = xml.parse(sys.argv[2])
 	xmlroot2 = tree2.getroot()
 	model2 = xmlroot2
@@ -817,6 +806,13 @@ if "tr-181" in sys.argv[1]:
 			dmroot2 = c
 			break
 
+	#If it is service data model
+	if dmroot2 == None:
+		for c in model2:
+			if c.tag == "object" and c.get("name").count(".") == 2:
+				dmroot2 = c
+				break
+
 	if dmroot2 == None:
 		print "Wrong %s XML Data model format!" % sys.argv[2]
 		exit(1)
@@ -830,12 +826,10 @@ elif "tr-106" in sys.argv[1]:
 else:
 	gendir = "source_" + time.strftime("%Y-%m-%d_%H-%M-%S")
 
-if "tr-181" in sys.argv[1]:
-	Root = sys.argv[3]
-	objstart = getobjectpointer(Root)
-else:
-	Root = sys.argv[2]
-	objstart = getobjectpointer(Root)
+
+Root = sys.argv[3]
+objstart = getobjectpointer(Root)
+
 
 if objstart == None:
 	print "Wrong Object Name! %s" % Root

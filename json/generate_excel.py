@@ -45,33 +45,49 @@ def getprotocols( value ):
 
 def check_obj(dmobject):
 	dmobject = dmobject.replace(".{i}.", ".")
+	count = dmobject.count('.')
 	obj = dmobject.split(".")
-	if dmobject.count('.') == 2:
+	if count == 2:
 		cmd = 'awk \'/DMOBJ tRoot_181_Obj/,/^{0}$/\' ../dmtree/tr181/device.c'
 		res = os.popen(cmd).read()
 		string = "\n{\"%s\"," % obj[1]
+	elif "Device.Services." in dmobject and count == 3:
+		cmd = 'awk \'/DMOBJ tServicesObj/,/^{0}$/\' ../dmtree/tr104/servicesvoiceservice.c'
+		res = os.popen(cmd).read()
+		string = "\n{\"%s\"," % obj[2]
+	elif "Device.Services." in dmobject and count == 4:
+		cmd = 'awk \'/DMOBJ tServicesVoiceServiceObj/,/^{0}$/\' ../dmtree/tr104/servicesvoiceservice.c'
+		res = os.popen(cmd).read()
+		string = "\n{\"%s\"," % obj[3]
+	elif "Device.Services." in dmobject and count >= 5:
+		array_name = ""
+		file = "../dmtree/tr104/servicesvoiceservice%s.c" % obj[3].lower()
+		if (os.path.isfile(file)):
+			for i in range(count-2):
+				array_name += obj[i+1]
+			cmd = 'awk \'/DMOBJ t%sObj/,/^{0}$/\' %s' % (array_name, file)
+			res = os.popen(cmd).read()
+			string = "\n{\"%s\"," % obj[count - 1]
+		else:
+			return "No"
 	else:
 		array_name = ""
 		if "Device.IP.Diagnostics." == dmobject:
 			file = "../dmtree/tr181/ip.c"
 		elif "Device.IP.Diagnostics." in dmobject:
 			file = "../dmtree/tr143/diagnostics.c"
-		elif "Device.Services." in dmobject:
-			file = "../dmtree/tr104/voice_services.c"
 		elif "Device.SoftwareModules." in dmobject:
 			file = "../dmtree/tr157/softwaremodules.c"
 		elif "Device.BulkData." in dmobject:
 			file = "../dmtree/tr157/bulkdata.c"
 		else:
 			file = "../dmtree/tr181/%s.c" % obj[1].lower()
-		if(os.path.isfile(file)):
-			count = dmobject.count('.')
-			obj1 = dmobject.split(".")
+		if (os.path.isfile(file)):
 			for i in range(count-2):
-				array_name += obj1[i+1]
+				array_name += obj[i+1]
 			cmd = 'awk \'/DMOBJ t%sObj/,/^{0}$/\' %s' % (array_name, file)
 			res = os.popen(cmd).read()
-			string = "\n{\"%s\"," % obj1[count - 1]
+			string = "\n{\"%s\"," % obj[count - 1]
 		else:
 			return "No"
 
@@ -88,7 +104,7 @@ def check_param(param, res):
 		return "No"
 
 def check_commands(param):
-	cmd = 'awk \'/static struct op_cmd operate_helper/,/^};$/\' ../dmoperate.c'
+	cmd = 'awk \'/static const struct op_cmd operate_helper/,/^};$/\' ../dmoperate.c'
 	res = os.popen(cmd).read()
 	param = param.replace(".{i}.", ".*.")
 	param = param.replace("()", "")
@@ -99,18 +115,32 @@ def check_commands(param):
 		return "No"
 
 def load_param(dmobject):
-	if dmobject.count('.') == 1:
+	dmobject = dmobject.replace(".{i}.", ".")
+	count = dmobject.count('.')
+	obj = dmobject.split(".")
+	if count == 1:
 		cmd = 'awk \'/DMLEAF tRoot_181_Params/,/^{0}$/\' ../dmtree/tr181/device.c'
 		res = os.popen(cmd).read()
+	elif "Device.Services." in dmobject and count == 3:
+		cmd = 'awk \'/DMLEAF tServicesVoiceServiceParams/,/^{0}$/\' ../dmtree/tr104/servicesvoiceservice.c'
+		res = os.popen(cmd).read()
+	elif "Device.Services." in dmobject and count >= 4:
+		array_name = ""
+		file = "../dmtree/tr104/servicesvoiceservice%s.c" % obj[3].lower()
+		if (os.path.isfile(file)):
+			for i in range(count-1):
+				array_name += obj[i+1]
+			cmd = 'awk \'/DMLEAF t%sParams/,/^{0}$/\' %s' % (array_name, file)
+			res = os.popen(cmd).read()
+
+		else:
+			res = ""
 	else:
 		array_name = ""
-		obj = dmobject.split(".")
 		if "Device.IP.Diagnostics." in dmobject:
 			file = "../dmtree/tr143/diagnostics.c"
 		elif "Device.Time." in dmobject:
 			file = "../dmtree/tr181/times.c"
-		elif "Device.Services." in dmobject:
-			file = "../dmtree/tr104/voice_services.c"
 		elif "Device.SoftwareModules." in dmobject:
 			file = "../dmtree/tr157/softwaremodules.c"
 		elif "Device.BulkData." in dmobject:
@@ -118,11 +148,8 @@ def load_param(dmobject):
 		else:
 			file = "../dmtree/tr181/%s.c" % obj[1].lower()
 		if(os.path.isfile(file)):
-			dmobject = dmobject.replace(".{i}.", ".")
-			count = dmobject.count('.')
-			obj1 = dmobject.split(".")
 			for i in range(count-1):
-				array_name += obj1[i+1]
+				array_name += obj[i+1]
 			cmd = 'awk \'/DMLEAF t%sParams/,/^{0}$/\' %s' % (array_name, file)
 			res = os.popen(cmd).read()
 		else:
