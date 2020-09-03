@@ -13,6 +13,10 @@
 #ifndef __DM_COMMON_H
 #define __DM_COMMON_H
 
+#ifndef __USE_XOPEN
+#define __USE_XOPEN
+#endif
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif

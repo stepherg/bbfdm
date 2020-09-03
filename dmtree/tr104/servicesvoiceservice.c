@@ -17,7 +17,7 @@
 static int browseServicesVoiceServiceCallLogInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct call_log_entry *entry;
-	char inst[8];
+	char inst[16];
 	int i = 0;
 
 	init_call_log();

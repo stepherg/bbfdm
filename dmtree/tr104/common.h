@@ -8,7 +8,6 @@
  *	Author: Yalu Zhang, yalu.zhang@iopsys.eu
  */
 
-#include <stdio.h>
 #include <libbbf_api/dmcommon.h>
 
 #define ENABLE_TR104_DEBUG 0

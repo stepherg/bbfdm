@@ -17,7 +17,7 @@
 static int browseServicesVoiceServiceCapabilitiesCodecInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	int i;
-	char inst[8];
+	char inst[16];
 
 	if (codecs_num <= 0)
 		init_supported_codecs();

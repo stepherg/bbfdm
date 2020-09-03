@@ -252,7 +252,7 @@ static int get_ServicesVoiceServiceCallControlLine_CallStatus(char *refparam, st
 {
 	json_object *res = NULL;
 	int line_num = atoi(instance) - 1;
-	char line_str[8];
+	char line_str[16];
 
 	snprintf(line_str, sizeof(line_str), "%d", line_num);
 	dmubus_call("endpt", "status", UBUS_ARGS{{"line", line_str, Integer}}, 1, &res);
