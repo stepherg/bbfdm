@@ -122,7 +122,6 @@ endif
 
 if BBF_TR157
 libbbfdm_la_SOURCES +=							\
-	../dmtree/tr157/bulkdata.c 					\
 	../dmtree/tr157/softwaremodules.c
 endif
 
