@@ -666,13 +666,13 @@ static int get_management_server_conn_req_xmpp_connection(char *refparam, struct
 	char *id;
 
 	dmuci_get_option_value_string("xmpp", "xmpp", "id", &id);
-	if (strlen(id)) dmasprintf(value, "Device.XMPP.Connection.%s", id);
+	if (*id != '\0' && *id != '0') dmasprintf(value, "Device.XMPP.Connection.%s", id);
 	return 0;
 }
 
 static int set_management_server_conn_req_xmpp_connection(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *str, *connection_instance;
+	char *str, *xmpp_id;
 	struct uci_section *s = NULL;
 
 	switch (action) {
@@ -684,9 +684,9 @@ static int set_management_server_conn_req_xmpp_connection(char *refparam, struct
 			if ((str = strstr(value, "Device.XMPP.Connection."))) {
 				value = dmstrdup(str + sizeof("Device.XMPP.Connection.") - 1); //MEM WILL BE FREED IN DMMEMCLEAN
 			}
-			uci_foreach_sections("xmpp", "xmpp_connection", s) {
-				dmuci_get_value_by_section_string(s, "connection_instance", &connection_instance);
-				if(strcmp(value, connection_instance) == 0) {
+			uci_foreach_sections("xmpp", "connection", s) {
+				dmuci_get_value_by_section_string(s, "xmpp_id", &xmpp_id);
+				if(strcmp(value, xmpp_id) == 0) {
 					dmuci_set_value("xmpp", "xmpp", "id", value);
 					break;
 				}
