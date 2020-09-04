@@ -2656,7 +2656,22 @@
 				"protocols": [
 					"cwmp"
 				], 
-				"datatype": "boolean"
+				"datatype": "boolean", 
+				"mapping": [
+					{
+						"type": "uci", 
+						"uci": {
+							"file": "stun", 
+							"section": {
+								"type": "stun", 
+								"name": "stun"
+							}, 
+							"option": {
+								"name": "enable"
+							}
+						}
+					}
+				]
 			}, 
 			"STUNServerAddress": {
 				"type": "string", 

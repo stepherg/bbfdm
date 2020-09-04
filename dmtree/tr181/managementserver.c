@@ -448,13 +448,10 @@ static int get_upd_cr_address(char *refparam, struct dmctx *ctx, void *data, cha
 	return 0;
 }
 
+/*#Device.ManagementServer.STUNEnable!UCI:stun/stun,stun/enable*/
 static int get_stun_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *path = "/etc/rc.d/*icwmp_stund";
-	if (check_file(path))
-		*value = "1";
-	else
-		*value = "0";
+	dmuci_get_option_value_string("stun", "stun", "enable", value);
 	return 0;
 }
 
@@ -469,14 +466,7 @@ static int set_stun_enable(char *refparam, struct dmctx *ctx, void *data, char *
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			if(b) {
-				DMCMD("/etc/rc.common", 2, "/etc/init.d/icwmp_stund", "enable");
-				DMCMD("/etc/rc.common", 2, "/etc/init.d/icwmp_stund", "start");
-			}
-			else {
-				DMCMD("/etc/rc.common", 2, "/etc/init.d/icwmp_stund", "disable");
-				DMCMD("/etc/rc.common", 2, "/etc/init.d/icwmp_stund", "stop");
-			}
+			dmuci_set_value("stun", "stun", "enable", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -611,10 +601,11 @@ static int set_stun_minimum_keepalive_period(char *refparam, struct dmctx *ctx, 
 /*#Device.ManagementServer.NATDetected!UCI:stun/stun,stun/nat_detected*/
 static int get_nat_detected(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *path = "/etc/rc.d/*icwmp_stund";
 	char *v;
 
-	if (check_file(path)) { //stun is enabled
+	dmuci_get_option_value_string("stun", "stun", "enable", &v);
+
+	if (*v == '1') { //stun is enabled
 		dmuci_get_varstate_string("stun", "stun", "nat_detected", &v);
 		*value = (*v == '1') ? "true" : "false";
 	} else
