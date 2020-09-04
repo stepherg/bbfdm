@@ -1003,6 +1003,7 @@ static int addObjBridgingBridgeVLANPort(char *refparam, struct dmctx *ctx, void 
 	struct uci_section *s = NULL, *br_vlanport_s = NULL;
 	char *s_name, *br_vlanport_name, *device_name;
 
+	check_create_dmmap_package("dmmap_bridge_vlanport");
 	int inst = get_last_inst("dmmap_bridge_vlanport", "bridge_vlanport", "br_inst", "bridge_vlanport_instance", ((struct bridge_args *)data)->br_inst);
 	dmasprintf(instance, "%d", inst+1);
 	dmasprintf(&device_name, "br_%s_port_%s", ((struct bridge_args *)data)->br_inst, *instance);
@@ -1059,7 +1060,6 @@ static int addObjBridgingBridgeVLAN(char *refparam, struct dmctx *ctx, void *dat
 
 	int inst = get_last_inst("dmmap_bridge_vlan", "bridge_vlan", "br_inst", "bridge_vlan_instance", ((struct bridge_args *)data)->br_inst);
 	dmasprintf(instance, "%d", inst+1);
-
 	dmuci_add_section_bbfdm("dmmap_bridge_vlan", "bridge_vlan", &br_vlan_s, &v);
 	dmuci_set_value_by_section(br_vlan_s, "br_inst", ((struct bridge_args *)data)->br_inst);
 	dmuci_set_value_by_section(br_vlan_s, "bridge_vlan_instance", *instance);
@@ -1586,11 +1586,12 @@ static int set_BridgingBridgePort_DefaultUserPriority(char *refparam, struct dmc
 	return 0;
 }
 
-static void get_priority(char *uci_opt_name, void *data, char **value)
+static void get_priority_list(char *uci_opt_name, void *data, char **value)
 {
 	struct uci_list *v= NULL;
 	struct uci_element *e = NULL;
-	char uci_value[17], priority[2];
+	char uci_value[130], **priority = NULL;
+	size_t length;
 	int n;
 
 	dmuci_get_value_by_section_list(((struct bridge_port_args *)data)->bridge_port_sec, uci_opt_name, &v);
@@ -1600,9 +1601,9 @@ static void get_priority(char *uci_opt_name, void *data, char **value)
 	uci_value[0] = '\0';
 	/* traverse each list value and create comma separated output */
 	uci_foreach_element(v, e) {
-		priority[0] = e->name[2];
-		priority[1] = '\0';
-		strcat(uci_value, priority);
+		//delimiting priority which is in the form of x:y where y is the priority
+		priority = strsplit(e->name, ":", &length);
+		strcat(uci_value, priority[1]);
 		strcat(uci_value, ",");
 	}
 	n = strlen(uci_value);
@@ -1612,7 +1613,7 @@ static void get_priority(char *uci_opt_name, void *data, char **value)
 	dmasprintf(value, "%s", uci_value);
 }
 
-static void set_priority(char *uci_opt_name, void *data, char *value)
+static void set_priority_list(char *uci_opt_name, void *data, char *value)
 {
 	char buf[16];
 	char *pch, *pchr;
@@ -1635,7 +1636,7 @@ static void set_priority(char *uci_opt_name, void *data, char *value)
 
 static int get_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	get_priority("ingress_qos_mapping", data, value);
+	get_priority_list("ingress_qos_mapping", data, value);
 	return 0;
 }
 
@@ -1648,7 +1649,7 @@ static int set_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dm
 			break;
 
 		case VALUESET:
-			set_priority("ingress_qos_mapping", data, value);
+			set_priority_list("ingress_qos_mapping", data, value);
 			break;
 	}
 	return 0;
@@ -1656,7 +1657,7 @@ static int set_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dm
 
 static int get_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	get_priority("egress_qos_mapping", data, value);
+	get_priority_list("egress_qos_mapping", data, value);
 	return 0;
 }
 
@@ -1669,7 +1670,28 @@ static int set_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, st
 			return 0;
 
 		case VALUESET:
-			set_priority("egress_qos_mapping", data, value);
+			set_priority_list("egress_qos_mapping", data, value);
+			return 0;
+	}
+	return 0;
+}
+
+static int get_BridgingBridgePort_DSCP_Eth_Priority_Map(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	get_priority_list("dscp2pbit", data, value);
+	return 0;
+}
+
+static int set_BridgingBridgePort_DSCP_Eth_Priority_Map(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt_list(value, 1, 64, -1, RANGE_ARGS{{"0","7"}}, 1))
+				return FAULT_9007;
+			return 0;
+
+		case VALUESET:
+			set_priority_list("dscp2pbit", data, value);
 			return 0;
 	}
 	return 0;
@@ -2380,6 +2402,7 @@ DMLEAF tBridgingBridgePortParams[] = {
 {"DefaultUserPriority", &DMWRITE, DMT_UNINT, get_BridgingBridgePort_DefaultUserPriority, set_BridgingBridgePort_DefaultUserPriority, NULL, NULL, BBFDM_BOTH},
 {"PriorityRegeneration", &DMWRITE, DMT_STRING, get_BridgingBridgePort_PriorityRegeneration, set_BridgingBridgePort_PriorityRegeneration, NULL, NULL, BBFDM_BOTH},
 {"X_IOPSYS_EU_EgressPriorityRegeneration", &DMWRITE, DMT_STRING, get_BridgingBridgePort_Egress_PriorityRegeneration, set_BridgingBridgePort_Egress_PriorityRegeneration, NULL, NULL, BBFDM_BOTH},
+{"X_IOPSYS_EU_DscpEthernetPriorityMapping", &DMWRITE, DMT_STRING, get_BridgingBridgePort_DSCP_Eth_Priority_Map, set_BridgingBridgePort_DSCP_Eth_Priority_Map, NULL, NULL, BBFDM_BOTH},
 //{"PortState", &DMREAD, DMT_STRING, get_BridgingBridgePort_PortState, NULL, NULL, NULL, BBFDM_BOTH},
 {"PVID", &DMWRITE, DMT_INT, get_BridgingBridgePort_PVID, set_BridgingBridgePort_PVID, NULL, NULL, BBFDM_BOTH},
 {"TPID", &DMWRITE, DMT_UNINT, get_BridgingBridgePort_TPID, set_BridgingBridgePort_TPID, NULL, NULL, BBFDM_BOTH},
