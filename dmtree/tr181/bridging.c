@@ -2135,11 +2135,17 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "port_name", section_name);
 						} else {
 							/* Create the new ifname */
-							char *tag = strchr(new_linker, '.');
-							if (tag) tag[0] = '\0';
+							char *tag = NULL;
+							if(new_linker[0] != '\0'){
+								tag = strchr(new_linker, '.');
+								if (tag) tag[0] = '\0';
+							}
 
-							char *new_name;
-							dmasprintf(&new_name, "%s.%s", new_linker, vid);
+							char *new_name = NULL;
+							if(new_linker[0] != '\0')
+								dmasprintf(&new_name, "%s.%s", new_linker, vid);
+							else
+								new_name=dmstrdup(new_linker);
 
 							/* Update device section */
 							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "name", new_name);
