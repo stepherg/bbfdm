@@ -24,7 +24,7 @@
 #include <uci.h>
 #include <libubox/list.h>
 
-#define DB_CONFIG "/lib/db/config"
+#define DB_CONFIG "/etc/board-db/config"
 #define VARSTATE_CONFIG "/var/state"
 #define BBFDM_CONFIG "/etc/bbfdm"
 #define BBFDM_SAVEDIR "/tmp/.bbfdm"
