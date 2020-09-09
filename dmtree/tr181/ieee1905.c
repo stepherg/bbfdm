@@ -10,6 +10,12 @@
 
 #include "ieee1905.h"
 
+struct param_node {
+	json_object *data;
+	json_object *interface;
+	int node_num;
+};
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -83,73 +89,303 @@ static int browseIEEE1905ALForwardingTableForwardingRuleInst(struct dmctx *dmctx
 	return 0;
 }
 
-#if 0
+
 static int browseIEEE1905ALNetworkTopologyChangeLogInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *res = NULL, *obj = NULL, *arrobj = NULL;
+	char *inst = NULL, *max_inst = NULL;
+	int id = 0, i = 0;
+
+	dmubus_call("topology", "changelog", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "changelog") {
+
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
+				break;
+		}
+	}
 	return 0;
 }
 
+
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *res = NULL, *obj = NULL, *arrobj = NULL;
+	char *inst = NULL, *max_inst = NULL;
+	int id = 0, i = 0;
+
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "nodes") {
+
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
+				break;
+		}
+	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *res = NULL, *param = NULL;
+	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
+	char *idx = NULL, *idx_last = NULL;
+	int id = 0, i = 0;
+
+	if(prev_instance == NULL)
+		return 0;
+
+	int ins = atoi(prev_instance) - 1;
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		json_object_object_get_ex(res, "nodes", &nodes);
+		size_t num_links = json_object_array_length(nodes);
+		if(num_links != 0) {
+			node_id = json_object_array_get_idx(nodes, ins);
+			json_object_object_get_ex(node_id, "ipv4_params", &param);
+			size_t num_params = json_object_array_length(param);
+			for(i = 0; i < num_params; i++) {
+				param_id = json_object_array_get_idx(param, i);
+				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)param_id, idx) == DM_STOP)
+					continue;
+			}
+		}
+	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *res = NULL, *param = NULL;
+	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
+	char *idx = NULL, *idx_last = NULL;
+	int id = 0, i = 0;
+
+	if(prev_instance == NULL)
+		return 0;
+
+	int ins = atoi(prev_instance) - 1;
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		json_object_object_get_ex(res, "nodes", &nodes);
+		size_t num_links = json_object_array_length(nodes);
+		if(num_links != 0) {
+			node_id = json_object_array_get_idx(nodes, ins);
+			json_object_object_get_ex(node_id, "ipv6_params", &param);
+			size_t num_params = json_object_array_length(param);
+			for(i = 0; i < num_params; i++) {
+				param_id = json_object_array_get_idx(param, i);
+				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)param_id, idx) == DM_STOP)
+					continue;
+			}
+		}
+	}
 	return 0;
 }
-
+#if 0
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	//TODO
 	return 0;
 }
-
+#endif
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *res = NULL, *param = NULL;
+	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
+	char *idx = NULL, *idx_last = NULL;
+	int id = 0, i = 0;
+
+	if(prev_instance == NULL)
+		return 0;
+
+	int ins = atoi(prev_instance) - 1;
+
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		json_object_object_get_ex(res, "nodes", &nodes);
+		size_t num_links = json_object_array_length(nodes);
+		if(num_links != 0) {
+			node_id = json_object_array_get_idx(nodes, ins);
+			json_object_object_get_ex(node_id, "interfaces", &param);
+			size_t num_params = json_object_array_length(param);
+			for(i = 0; i < num_params; i++) {
+				param_id = json_object_array_get_idx(param, i);
+				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)param_id, idx) == DM_STOP)
+					continue;
+			}
+		}
+	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *res = NULL, *param = NULL;
+	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
+	char *idx = NULL, *idx_last = NULL;
+	int id = 0, i = 0;
+	struct param_node param_st;
+
+	if(prev_instance == NULL)
+		return 0;
+
+	int ins = atoi(prev_instance) - 1;
+
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		json_object_object_get_ex(res, "nodes", &nodes);
+		size_t num_links = json_object_array_length(nodes);
+		if(num_links != 0) {
+			node_id = json_object_array_get_idx(nodes, ins);
+			param_st.node_num = ins;
+			json_object_object_get_ex(node_id, "non1905_neighbors", &param);
+			json_object_object_get_ex(node_id, "interfaces", &param_st.interface);
+			size_t num_params = json_object_array_length(param);
+			for(i = 0; i < num_params; i++) {
+				param_id = json_object_array_get_idx(param, i);
+				param_st.data = param_id;
+				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, idx) == DM_STOP)
+					continue;
+			}
+		}
+	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *res = NULL, *param = NULL;
+	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
+	char *idx = NULL, *idx_last = NULL;
+	int id = 0, i = 0;
+	struct param_node param_st;
+
+	if(prev_instance == NULL)
+		return 0;
+
+	int ins = atoi(prev_instance) - 1;
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		json_object_object_get_ex(res, "nodes", &nodes);
+		size_t num_links = json_object_array_length(nodes);
+		if(num_links != 0) {
+			node_id = json_object_array_get_idx(nodes, ins);
+			param_st.node_num = ins;
+			json_object_object_get_ex(node_id, "l2_neighbor", &param);
+			json_object_object_get_ex(node_id, "interfaces", &param_st.interface);
+			size_t num_params = json_object_array_length(param);
+			for(i = 0; i < num_params; i++) {
+				param_id = json_object_array_get_idx(param, i);
+				param_st.data = param_id;
+				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, idx) == DM_STOP)
+					continue;
+			}
+		}
+	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *res = NULL, *param = NULL;
+	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
+	char *idx = NULL, *idx_last = NULL;
+	int id = 0, i = 0;
+	struct param_node param_st;
+
+	if(prev_instance == NULL)
+		return 0;
+
+	int ins = atoi(prev_instance) - 1;
+
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		json_object_object_get_ex(res, "nodes", &nodes);
+		size_t num_links = json_object_array_length(nodes);
+		if(num_links != 0) {
+			node_id = json_object_array_get_idx(nodes, ins);
+			param_st.node_num = ins;
+			json_object_object_get_ex(node_id, "neighbors", &param);
+			json_object_object_get_ex(node_id, "interfaces", &param_st.interface);
+			size_t num_params = json_object_array_length(param);
+			for(i = 0; i < num_params; i++) {
+				param_id = json_object_array_get_idx(param, i);
+				param_st.data = param_id;
+				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, idx) == DM_STOP)
+					continue;
+			}
+		}
+	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *res = NULL, *param = NULL;
+	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
+	char *idx = NULL, *idx_last = NULL;
+	int id = 0, i = 0;
+	struct param_node param_st;
+
+	if(prev_instance == NULL)
+		return 0;
+
+	int ins = atoi(prev_instance) - 1;
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		json_object_object_get_ex(res, "nodes", &nodes);
+		size_t num_links = json_object_array_length(nodes);
+		if(num_links != 0) {
+			node_id = json_object_array_get_idx(nodes, ins);
+			param_st.node_num = ins;
+			json_object_object_get_ex(node_id, "bridge_tuple", &param);
+			json_object_object_get_ex(node_id, "interfaces", &param_st.interface);
+			size_t num_params = json_object_array_length(param);
+			for(i = 0; i < num_params; i++) {
+				param_id = json_object_array_get_idx(param, i);
+				param_st.data = param_id;
+				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, idx) == DM_STOP)
+					continue;
+			}
+		}
+	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *nodes = NULL, *param_id = NULL;
+	char *idx = NULL, *idx_last = NULL;
+	int id = 0, i = 0;
+	struct param_node *param_st = NULL;
+
+	if(prev_data == NULL)
+		return 0;
+
+	param_st = (struct param_node *)prev_data;
+
+	json_object_object_get_ex(param_st->data, "link_metrics", &nodes);
+	size_t num_links = json_object_array_length(nodes);
+	for(i = 0; i < num_links; i++) {
+		param_id = json_object_array_get_idx(nodes, i);
+		idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)param_id, idx) == DM_STOP)
+			continue;
+	}
 	return 0;
 }
-#endif
+
 
 /*************************************************************
 * ADD & DEL OBJ
@@ -795,149 +1031,200 @@ static int set_IEEE1905ALForwardingTableForwardingRule_PCPFlag(char *refparam, s
 	return 0;
 }
 
-#if 0
+
 static int get_IEEE1905ALNetworkTopology_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	struct uci_section *s;
+	char *mode = NULL;
+
+	uci_foreach_sections("topology", "topology", s) {
+		dmuci_get_value_by_section_string(s, "enabled", &mode);
+	}
+	dmasprintf(value, "%s", mode);
 	return 0;
 }
 
 static int set_IEEE1905ALNetworkTopology_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	bool b;
+	struct uci_section *s;
 	switch (action) {
-	case VALUECHECK:
-		if (dm_validate_boolean(value))
-			return FAULT_9007;
-		break;
-	case VALUESET:
-		//TODO
-		break;
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			uci_foreach_sections("topology", "topology", s) {
+				dmuci_set_value_by_section(s, "enabled", b ? "1" : "0");
+			}
+			break;
 	}
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopology_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *res;
+	dmubus_call("topology", "status", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "");
+	if (res)
+		*value = dmjson_get_value(res, 1, "status");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopology_MaxChangeLogEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	struct uci_section *s;
+	char *log_val = NULL;
+
+	uci_foreach_sections("topology", "topology", s) {
+		dmuci_get_value_by_section_string(s, "maxlog", &log_val);
+	}
+	dmasprintf(value, "%s", log_val);
 	return 0;
 }
 
 static int set_IEEE1905ALNetworkTopology_MaxChangeLogEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *s;
 	switch (action) {
-	case VALUECHECK:
-		if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
-			return FAULT_9007;
-		break;
-	case VALUESET:
-		//TODO
-		break;
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			uci_foreach_sections("topology", "topology", s) {
+				dmuci_set_value_by_section(s, "maxlog", value);
+			}
+			break;
 	}
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopology_LastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+
+	json_object *res = NULL, *obj = NULL;
+	size_t num = 0;
+
+	dmubus_call("topology", "changelog", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "");
+	if (res) {
+		json_object_object_get_ex(res, "changelog", &obj);
+		if (obj) {
+			num = json_object_array_length(obj);
+			if(num != 0)
+				dmasprintf(value, "Device.IEEE1905.AL.NetworkTopology.ChangeLog.%d", num);
+		}
+	}
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopology_IEEE1905DeviceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *res = NULL, *obj = NULL;
+	size_t num_nodes = 0;
+
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		json_object_object_get_ex(res, "nodes", &obj);
+		if (obj) {
+			num_nodes = json_object_array_length(obj);
+		}
+	}
+	dmasprintf(value, "%d", num_nodes);
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopology_ChangeLogNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *res;
+	dmubus_call("topology", "changelog", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "");
+	*value = dmjson_get_value(res, 1, "num_changelog");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyChangeLog_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "timestamp");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyChangeLog_EventType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "event_type");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyChangeLog_ReporterDeviceId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "reporter");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyChangeLog_ReporterInterfaceId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "reporter_interface");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyChangeLog_NeighborType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "is1905_neighbor");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyChangeLog_NeighborId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "neighbor");
 	return 0;
 }
 
+
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_IEEE1905Id(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "ieee1905_macaddr");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_Version(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "version");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_RegistrarFreqBand(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "registrar_freq_band");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_FriendlyName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "friendly_name");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_ManufacturerName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "manufacturer_name");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_ManufacturerModel(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "manufacturer_model");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_ControlURL(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "control_url");
 	return 0;
 }
-
+#if 0
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_AssocWiFiNetworkDeviceRef(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -949,97 +1236,97 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905Device_VendorPropertiesNumberOfE
 	//TODO
 	return 0;
 }
-
+#endif
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_IPv4AddressNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "ipv4_itfr_num");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_IPv6AddressNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "ipv6_itfr_num");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_InterfaceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "local_interface_nbr");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_NonIEEE1905NeighborNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "num_non1905_neighbors");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_IEEE1905NeighborNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "num_neighbors");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_L2NeighborNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "l2_neighbor_num");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_BridgingTupleNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "bridging_tuple_num");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "mac_address");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_IPv4Address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "ipv4_address");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_IPv4AddressType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "ipv4_addr_type");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_DHCPServer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "dhcp_addr");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "mac_address");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6Address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "ipv6_address");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6AddressType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "ipv6_addr_type");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6AddressOrigin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "origin");
 	return 0;
 }
-
+#if 0
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceVendorProperties_MessageType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -1057,19 +1344,20 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceVendorProperties_Informati
 	//TODO
 	return 0;
 }
-
+#endif
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_InterfaceId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "interface_id");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_MediaType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "media_type");
 	return 0;
 }
 
+#if 0
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_PowerState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -1093,153 +1381,313 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyURL(ch
 	//TODO
 	return 0;
 }
-
+#endif
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_NetworkMembership(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "network_membership");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_Role(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "role");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_APChannelBand(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "ap_channel_band");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex1(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "freq_index1");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex2(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "freq_index2");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_LocalInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *res = NULL, *nodes = NULL, *node_id = NULL;
+	char* val = NULL;
+	char* val_intf = NULL;
+	json_object  *param_id = NULL;
+	struct param_node *node_val;
+	int i = 0;
+
+	*value = "";
+	if (data == NULL)
+		return 0;
+	node_val = (struct param_node *)data;
+	if (node_val->interface == NULL)
+		return 0;
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "");
+	if (res) {
+		json_object_object_get_ex(res, "nodes", &nodes);
+		size_t num_links = json_object_array_length(nodes);
+		if(num_links != 0) {
+			node_id = json_object_array_get_idx(nodes, node_val->node_num);
+			val = dmjson_get_value((json_object *)node_id, 1, "non1905_nbr_localintf");
+			size_t num_params = json_object_array_length(node_val->interface);
+			for(i = 0; i < num_params; i++) {
+				param_id = json_object_array_get_idx(node_val->interface, i);
+				val_intf = dmjson_get_value((json_object *)param_id, 1, "interface_id");
+				if (strncmp(val, val_intf,strlen(val)) == 0) {
+					dmasprintf(value, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.%d.Interface.%d", (node_val->node_num)+1, i+1);
+					break;
+				}
+			}
+		}
+	}
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_NeighborInterfaceId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	struct param_node *node_val;
+	*value = "";
+	if (data == NULL)
+		return 0;
+
+	node_val = (struct param_node *)data;
+
+	if (node_val->data == NULL)
+		return 0;
+	*value = (char *) json_object_get_string((json_object *)node_val->data);
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_LocalInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	char* val = NULL;
+	char* val_intf = NULL;
+	json_object *param_id = NULL;
+	struct param_node *node_val;
+	int i = 0;
+
+	*value = "";
+	if (data == NULL)
+		return 0;
+	node_val = (struct param_node *)data;
+	if (node_val->data == NULL || node_val->interface == NULL)
+		return 0;
+	val = dmjson_get_value((json_object *)node_val->data, 1, "local_intf_id");
+	size_t num_params = json_object_array_length(node_val->interface);
+	for(i = 0; i < num_params; i++) {
+		param_id = json_object_array_get_idx(node_val->interface, i);
+		val_intf = dmjson_get_value((json_object *)param_id, 1, "interface_id");
+		if (strncmp(val, val_intf,strlen(val)) == 0) {
+			dmasprintf(value, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.%d.Interface.%d", (node_val->node_num)+1, i+1);
+			break;
+		}
+	}
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_NeighborInterfaceId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	struct param_node *node_val;
+
+	if (data == NULL)
+                return 0;
+
+	node_val = (struct param_node *)data;
+	*value = dmjson_get_value((json_object *)node_val->data, 1, "local_nbr_id");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_BehindInterfaceIds(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	struct param_node *node_val;
+
+	if (data == NULL)
+		return 0;
+
+	node_val = (struct param_node *)data;
+	*value = dmjson_get_value((json_object *)node_val->data, 1, "behind_mac_id");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_LocalInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
-	return 0;
+	json_object *res = NULL, *nodes = NULL, *node_id = NULL;
+	char* val = NULL;
+	char* val_intf = NULL;
+	json_object *param_id = NULL;
+	struct param_node *node_val;
+	int i = 0;
+
+	*value = "";
+	if (data == NULL)
+		return 0;
+	node_val = (struct param_node *)data;
+	if (node_val-> interface == NULL)
+		return 0;
+
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "");
+	if(res) {
+		json_object_object_get_ex(res, "nodes", &nodes);
+		size_t num_links = json_object_array_length(nodes);
+		if(num_links != 0) {
+			node_id = json_object_array_get_idx(nodes, node_val->node_num);
+			val = dmjson_get_value((json_object *)node_id, 1, "1905_nbr_localintf");
+			size_t num_params = json_object_array_length(node_val->interface);
+			for(i = 0; i < num_params; i++) {
+				param_id = json_object_array_get_idx(node_val->interface, i);
+				val_intf = dmjson_get_value((json_object *)param_id, 1, "interface_id");
+				if (strncmp(val, val_intf,strlen(val)) == 0) {
+					dmasprintf(value, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.%d.Interface.%d", (node_val->node_num)+1, i+1);
+					break;
+				}
+			}
+		}
+	}
+        return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_NeighborDeviceId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	struct param_node *node_val;
+
+	if (data == NULL)
+		return 0;
+
+	node_val = (struct param_node *)data;
+	*value = dmjson_get_value((json_object *)node_val->data, 1, "nbr_mac_id");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_MetricNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *obj = NULL;
+	size_t num = 0;
+	struct param_node *node_val;
+
+	*value = " ";
+	if (data == NULL)
+		return 0;
+
+	node_val = (struct param_node *)data;
+	if (node_val->data == NULL)
+		return 0;
+
+	json_object_object_get_ex((json_object *)node_val->data, "link_metrics", &obj);
+	if (obj) {
+		num = json_object_array_length(obj);
+		dmasprintf(value, "%d", num);
+	}
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_NeighborMACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "nbr_intf_macid");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_IEEE802dot1Bridge(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "ieee_bridge");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "tx_packet_error");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "rx_packet_error");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_TransmittedPackets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "tx_packet_ok");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "rx_packet_ok");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_MACThroughputCapacity(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "mac_thrput_capacity");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_LinkAvailability(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "link_availability");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PHYRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "phy_rate");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_RSSI(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "rssi");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *tuple = NULL, *tuple_mac = NULL;
+	char* val = NULL;
+	char* value_mac;
+	char list_val[256] = {0};
+	char* val_intf = NULL;
+	json_object  *param_id = NULL;
+	struct param_node *node_val;
+	int i = 0, j = 0;
+	*value = "";
+	if (data == NULL)
+		return 0;
+	node_val = (struct param_node *)data;
+
+	if (node_val->data == NULL)
+		return 0;
+
+	json_object_object_get_ex((json_object *)node_val->data, "br_mac", &tuple);
+        size_t tuple_len = json_object_array_length(tuple);
+	for (j = 0; j < tuple_len; j++) {
+		tuple_mac = json_object_array_get_idx(tuple, j);
+		val  = (char*) json_object_get_string((json_object *)tuple_mac);
+		size_t num_params = json_object_array_length(node_val->interface);
+		for (i = 0; i < num_params; i++) {
+			param_id = json_object_array_get_idx(node_val->interface, i);
+			val_intf = dmjson_get_value((json_object *)param_id, 1, "interface_id");
+			if (strncmp(val, val_intf,strlen(val)) == 0) {
+				if (i != 0)
+					strncat(list_val, ",", 1);
+				dmasprintf(&value_mac, "IEEE1905Device.%d.Interface.%d", (node_val->node_num)+1, i+1);
+				strncat(list_val, value_mac, strlen(value_mac));
+				break;
+			}
+		}
+	}
+	dmasprintf(value, "%s",list_val);
 	return 0;
 }
-#endif
 
-/*#Device.IEEE1905.AL.Security.SetupMethod!UCI:ieee1905/security,security/method*/
+/*#Device.IEEE1905.AL.Security.SetupMethod!UCI:ieee1905/security,security/None*/
 static int get_IEEE1905ALSecurity_SetupMethod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_option_value_string("ieee1905", "security", "method", value);
@@ -1317,7 +1765,7 @@ DMOBJ tIEEE1905ALObj[] = {
 /* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALInterfaceInst, NULL, NULL, NULL, tIEEE1905ALInterfaceObj, tIEEE1905ALInterfaceParams, NULL, BBFDM_BOTH},
 {"ForwardingTable", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALForwardingTableObj, tIEEE1905ALForwardingTableParams, NULL, BBFDM_BOTH},
-//{"NetworkTopology", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyObj, tIEEE1905ALNetworkTopologyParams, NULL, BBFDM_BOTH},
+{"NetworkTopology", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyObj, tIEEE1905ALNetworkTopologyParams, NULL, BBFDM_BOTH},
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALSecurityParams, NULL, BBFDM_BOTH},
 {"NetworkingRegistrar", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkingRegistrarParams, NULL, BBFDM_BOTH},
 {0}
@@ -1435,86 +1883,86 @@ DMLEAF tIEEE1905ALForwardingTableForwardingRuleParams[] = {
 /* *** Device.IEEE1905.AL.NetworkTopology. *** */
 DMOBJ tIEEE1905ALNetworkTopologyObj[] = {
 /* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-//{"ChangeLog", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyChangeLogInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyChangeLogParams, NULL, BBFDM_BOTH},
-//{"IEEE1905Device", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceParams, NULL, BBFDM_BOTH},
+{"ChangeLog", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyChangeLogInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyChangeLogParams, NULL, BBFDM_BOTH},
+{"IEEE1905Device", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tIEEE1905ALNetworkTopologyParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"Enable", &DMWRITE, DMT_BOOL, get_IEEE1905ALNetworkTopology_Enable, set_IEEE1905ALNetworkTopology_Enable, NULL, NULL, BBFDM_BOTH},
-//{"Status", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopology_Status, NULL, NULL, NULL, BBFDM_BOTH},
-//{"MaxChangeLogEntries", &DMWRITE, DMT_UNINT, get_IEEE1905ALNetworkTopology_MaxChangeLogEntries, set_IEEE1905ALNetworkTopology_MaxChangeLogEntries, NULL, NULL, BBFDM_BOTH},
-//{"LastChange", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopology_LastChange, NULL, NULL, NULL, BBFDM_BOTH},
-//{"IEEE1905DeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopology_IEEE1905DeviceNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-//{"ChangeLogNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopology_ChangeLogNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_IEEE1905ALNetworkTopology_Enable, set_IEEE1905ALNetworkTopology_Enable, NULL, NULL, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopology_Status, NULL, NULL, NULL, BBFDM_BOTH},
+{"MaxChangeLogEntries", &DMWRITE, DMT_UNINT, get_IEEE1905ALNetworkTopology_MaxChangeLogEntries, set_IEEE1905ALNetworkTopology_MaxChangeLogEntries, NULL, NULL, BBFDM_BOTH},
+{"LastChange", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopology_LastChange, NULL, NULL, NULL, BBFDM_BOTH},
+{"IEEE1905DeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopology_IEEE1905DeviceNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"ChangeLogNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopology_ChangeLogNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.ChangeLog.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyChangeLogParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"TimeStamp", &DMREAD, DMT_TIME, get_IEEE1905ALNetworkTopologyChangeLog_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
-//{"EventType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_EventType, NULL, NULL, NULL, BBFDM_BOTH},
-//{"ReporterDeviceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_ReporterDeviceId, NULL, NULL, NULL, BBFDM_BOTH},
-//{"ReporterInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_ReporterInterfaceId, NULL, NULL, NULL, BBFDM_BOTH},
-//{"NeighborType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_NeighborType, NULL, NULL, NULL, BBFDM_BOTH},
-//{"NeighborId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_NeighborId, NULL, NULL, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_TIME, get_IEEE1905ALNetworkTopologyChangeLog_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
+{"EventType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_EventType, NULL, NULL, NULL, BBFDM_BOTH},
+{"ReporterDeviceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_ReporterDeviceId, NULL, NULL, NULL, BBFDM_BOTH},
+{"ReporterInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_ReporterInterfaceId, NULL, NULL, NULL, BBFDM_BOTH},
+{"NeighborType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_NeighborType, NULL, NULL, NULL, BBFDM_BOTH},
+{"NeighborId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_NeighborId, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}. *** */
 DMOBJ tIEEE1905ALNetworkTopologyIEEE1905DeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-//{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressParams, NULL, BBFDM_BOTH},
-//{"IPv6Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressParams, NULL, BBFDM_BOTH},
+{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressParams, NULL, BBFDM_BOTH},
+{"IPv6Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressParams, NULL, BBFDM_BOTH},
 //{"VendorProperties", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesParams, NULL, BBFDM_BOTH},
-//{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceParams, NULL, BBFDM_BOTH},
-//{"NonIEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborParams, NULL, BBFDM_BOTH},
-//{"L2Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborParams, NULL, BBFDM_BOTH},
-//{"IEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborParams, NULL, BBFDM_BOTH},
-//{"BridgingTuple", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleParams, NULL, BBFDM_BOTH},
+{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceParams, NULL, BBFDM_BOTH},
+{"NonIEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborParams, NULL, BBFDM_BOTH},
+{"L2Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborParams, NULL, BBFDM_BOTH},
+{"IEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborParams, NULL, BBFDM_BOTH},
+{"BridgingTuple", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"IEEE1905Id", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_IEEE1905Id, NULL, NULL, NULL, BBFDM_BOTH},
-//{"Version", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_Version, NULL, NULL, NULL, BBFDM_BOTH},
-//{"RegistrarFreqBand", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_RegistrarFreqBand, NULL, NULL, NULL, BBFDM_BOTH},
-//{"FriendlyName", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_FriendlyName, NULL, NULL, NULL, BBFDM_BOTH},
-//{"ManufacturerName", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ManufacturerName, NULL, NULL, NULL, BBFDM_BOTH},
-//{"ManufacturerModel", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ManufacturerModel, NULL, NULL, NULL, BBFDM_BOTH},
-//{"ControlURL", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ControlURL, NULL, NULL, NULL, BBFDM_BOTH},
+{"IEEE1905Id", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_IEEE1905Id, NULL, NULL, NULL, BBFDM_BOTH},
+{"Version", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_Version, NULL, NULL, NULL, BBFDM_BOTH},
+{"RegistrarFreqBand", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_RegistrarFreqBand, NULL, NULL, NULL, BBFDM_BOTH},
+{"FriendlyName", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_FriendlyName, NULL, NULL, NULL, BBFDM_BOTH},
+{"ManufacturerName", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ManufacturerName, NULL, NULL, NULL, BBFDM_BOTH},
+{"ManufacturerModel", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ManufacturerModel, NULL, NULL, NULL, BBFDM_BOTH},
+{"ControlURL", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ControlURL, NULL, NULL, NULL, BBFDM_BOTH},
 //{"AssocWiFiNetworkDeviceRef", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_AssocWiFiNetworkDeviceRef, NULL, NULL, NULL, BBFDM_BOTH},
 //{"VendorPropertiesNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_VendorPropertiesNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-//{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IPv4AddressNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-//{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IPv6AddressNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-//{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_InterfaceNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-//{"NonIEEE1905NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_NonIEEE1905NeighborNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-//{"IEEE1905NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IEEE1905NeighborNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-//{"L2NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_L2NeighborNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-//{"BridgingTupleNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_BridgingTupleNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IPv4AddressNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IPv6AddressNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_InterfaceNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"NonIEEE1905NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_NonIEEE1905NeighborNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"IEEE1905NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IEEE1905NeighborNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"L2NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_L2NeighborNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"BridgingTupleNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_BridgingTupleNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IPv4Address.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"MACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_MACAddress, NULL, NULL, NULL, BBFDM_BOTH},
-//{"IPv4Address", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_IPv4Address, NULL, NULL, NULL, BBFDM_BOTH},
-//{"IPv4AddressType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_IPv4AddressType, NULL, NULL, NULL, BBFDM_BOTH},
-//{"DHCPServer", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_DHCPServer, NULL, NULL, NULL, BBFDM_BOTH},
+{"MACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_MACAddress, NULL, NULL, NULL, BBFDM_BOTH},
+{"IPv4Address", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_IPv4Address, NULL, NULL, NULL, BBFDM_BOTH},
+{"IPv4AddressType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_IPv4AddressType, NULL, NULL, NULL, BBFDM_BOTH},
+{"DHCPServer", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_DHCPServer, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IPv6Address.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"MACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_MACAddress, NULL, NULL, NULL, BBFDM_BOTH},
-//{"IPv6Address", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6Address, NULL, NULL, NULL, BBFDM_BOTH},
-//{"IPv6AddressType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6AddressType, NULL, NULL, NULL, BBFDM_BOTH},
-//{"IPv6AddressOrigin", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6AddressOrigin, NULL, NULL, NULL, BBFDM_BOTH},
+{"MACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_MACAddress, NULL, NULL, NULL, BBFDM_BOTH},
+{"IPv6Address", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6Address, NULL, NULL, NULL, BBFDM_BOTH},
+{"IPv6AddressType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6AddressType, NULL, NULL, NULL, BBFDM_BOTH},
+{"IPv6AddressOrigin", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6AddressOrigin, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -1530,72 +1978,72 @@ DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesParams[] = {
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.Interface.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"InterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_InterfaceId, NULL, NULL, NULL, BBFDM_BOTH},
-//{"MediaType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_MediaType, NULL, NULL, NULL, BBFDM_BOTH},
+{"InterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_InterfaceId, NULL, NULL, NULL, BBFDM_BOTH},
+{"MediaType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_MediaType, NULL, NULL, NULL, BBFDM_BOTH},
 //{"PowerState", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_PowerState, NULL, NULL, NULL, BBFDM_BOTH},
 //{"GenericPhyOUI", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyOUI, NULL, NULL, NULL, BBFDM_BOTH},
 //{"GenericPhyVariant", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyVariant, NULL, NULL, NULL, BBFDM_BOTH},
 //{"GenericPhyURL", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyURL, NULL, NULL, NULL, BBFDM_BOTH},
-//{"NetworkMembership", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_NetworkMembership, NULL, NULL, NULL, BBFDM_BOTH},
-//{"Role", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_Role, NULL, NULL, NULL, BBFDM_BOTH},
-//{"APChannelBand", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_APChannelBand, NULL, NULL, NULL, BBFDM_BOTH},
-//{"FrequencyIndex1", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex1, NULL, NULL, NULL, BBFDM_BOTH},
-//{"FrequencyIndex2", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex2, NULL, NULL, NULL, BBFDM_BOTH},
+{"NetworkMembership", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_NetworkMembership, NULL, NULL, NULL, BBFDM_BOTH},
+{"Role", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_Role, NULL, NULL, NULL, BBFDM_BOTH},
+{"APChannelBand", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_APChannelBand, NULL, NULL, NULL, BBFDM_BOTH},
+{"FrequencyIndex1", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex1, NULL, NULL, NULL, BBFDM_BOTH},
+{"FrequencyIndex2", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex2, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.NonIEEE1905Neighbor.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_LocalInterface, NULL, NULL, NULL, BBFDM_BOTH},
-//{"NeighborInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_NeighborInterfaceId, NULL, NULL, NULL, BBFDM_BOTH},
+{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_LocalInterface, NULL, NULL, NULL, BBFDM_BOTH},
+{"NeighborInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_NeighborInterfaceId, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.L2Neighbor.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_LocalInterface, NULL, NULL, NULL, BBFDM_BOTH},
-//{"NeighborInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_NeighborInterfaceId, NULL, NULL, NULL, BBFDM_BOTH},
-//{"BehindInterfaceIds", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_BehindInterfaceIds, NULL, NULL, NULL, BBFDM_BOTH},
+{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_LocalInterface, NULL, NULL, NULL, BBFDM_BOTH},
+{"NeighborInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_NeighborInterfaceId, NULL, NULL, NULL, BBFDM_BOTH},
+{"BehindInterfaceIds", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_BehindInterfaceIds, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IEEE1905Neighbor.{i}. *** */
 DMOBJ tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborObj[] = {
 /* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-//{"Metric", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricParams, NULL, BBFDM_BOTH},
+{"Metric", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_LocalInterface, NULL, NULL, NULL, BBFDM_BOTH},
-//{"NeighborDeviceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_NeighborDeviceId, NULL, NULL, NULL, BBFDM_BOTH},
-//{"MetricNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_MetricNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_LocalInterface, NULL, NULL, NULL, BBFDM_BOTH},
+{"NeighborDeviceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_NeighborDeviceId, NULL, NULL, NULL, BBFDM_BOTH},
+{"MetricNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_MetricNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IEEE1905Neighbor.{i}.Metric.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"NeighborMACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_NeighborMACAddress, NULL, NULL, NULL, BBFDM_BOTH},
-//{"IEEE802dot1Bridge", &DMREAD, DMT_BOOL, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_IEEE802dot1Bridge, NULL, NULL, NULL, BBFDM_BOTH},
-//{"PacketErrors", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketErrors, NULL, NULL, NULL, BBFDM_BOTH},
-//{"PacketErrorsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketErrorsReceived, NULL, NULL, NULL, BBFDM_BOTH},
-//{"TransmittedPackets", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_TransmittedPackets, NULL, NULL, NULL, BBFDM_BOTH},
-//{"PacketsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
-//{"MACThroughputCapacity", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_MACThroughputCapacity, NULL, NULL, NULL, BBFDM_BOTH},
-//{"LinkAvailability", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_LinkAvailability, NULL, NULL, NULL, BBFDM_BOTH},
-//{"PHYRate", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PHYRate, NULL, NULL, NULL, BBFDM_BOTH},
-//{"RSSI", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_RSSI, NULL, NULL, NULL, BBFDM_BOTH},
+{"NeighborMACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_NeighborMACAddress, NULL, NULL, NULL, BBFDM_BOTH},
+{"IEEE802dot1Bridge", &DMREAD, DMT_BOOL, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_IEEE802dot1Bridge, NULL, NULL, NULL, BBFDM_BOTH},
+{"PacketErrors", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketErrors, NULL, NULL, NULL, BBFDM_BOTH},
+{"PacketErrorsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketErrorsReceived, NULL, NULL, NULL, BBFDM_BOTH},
+{"TransmittedPackets", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_TransmittedPackets, NULL, NULL, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
+{"MACThroughputCapacity", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_MACThroughputCapacity, NULL, NULL, NULL, BBFDM_BOTH},
+{"LinkAvailability", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_LinkAvailability, NULL, NULL, NULL, BBFDM_BOTH},
+{"PHYRate", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PHYRate, NULL, NULL, NULL, BBFDM_BOTH},
+{"RSSI", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_RSSI, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.BridgingTuple.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"InterfaceList", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceList, NULL, NULL, NULL, BBFDM_BOTH},
+{"InterfaceList", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceList, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
