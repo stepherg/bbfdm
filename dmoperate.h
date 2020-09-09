@@ -214,6 +214,7 @@ struct op_cmd {
 	const char *name;
 	operation opt;
 	const char *type;
+	const operation_args args;
 };
 
 int add_dynamic_operate(char *path, operation operate, char *optype);

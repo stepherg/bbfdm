@@ -305,6 +305,11 @@ enum operate_ret_status{
 	__STATUS_MAX,
 };
 
+typedef struct {
+	const char **in;
+	const char **out;
+} operation_args;
+
 typedef enum operate_ret_status opr_ret_t;
 
 typedef opr_ret_t (*operation) (struct dmctx *dmctx, char *p, json_object *input);

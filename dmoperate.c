@@ -926,36 +926,313 @@ int add_dynamic_operate(char *path, operation operate, char *type)
 }
 
 static const struct op_cmd operate_helper[] = {
-	{"Device.Reboot", reboot_device, "sync"},
-	{"Device.FactoryReset", factory_reset, "sync"},
-	{"Device.IP.Interface.*.Reset", network_interface_reset, "sync"},
-	{"Device.PPP.Interface.*.Reset", network_interface_reset, "sync"},
-	{"Device.WiFi.Reset", wireless_reset, "sync"},
-	{"Device.WiFi.AccessPoint.*.Security.Reset", ap_security_reset, "sync"},
-	{"Device.DHCPv4.Client.*.Renew", dhcp_client_renew, "sync"},
-	{"Device.DHCPv6.Client.*.Renew", dhcp_client_renew, "sync"},
-	{"Device.DeviceInfo.VendorConfigFile.*.Backup", vendor_conf_backup, "async"},
-	{"Device.DeviceInfo.VendorConfigFile.*.Restore", vendor_conf_restore, "async"},
-	{"Device.DeviceInfo.FirmwareImage.*.Download", firmware_image_download, "async"},
-	{"Device.DeviceInfo.FirmwareImage.*.Activate", firmware_image_activate, "async"},
-	{"Device.WiFi.NeighboringWiFiDiagnostic", fetch_neighboring_wifi_diagnostic, "async"},
-	//{"Device.DeviceInfo.VendorLogFile.*.Upload", blob_parser},
-	{"Device.IP.Diagnostics.IPPing", ip_diagnostics_ipping, "async"},
-	{"Device.IP.Diagnostics.TraceRoute", ip_diagnostics_traceroute, "async"},
-	{"Device.IP.Diagnostics.DownloadDiagnostics", ip_diagnostics_download, "async"},
-	{"Device.IP.Diagnostics.UploadDiagnostics", ip_diagnostics_upload, "async"},
-	{"Device.IP.Diagnostics.UDPEchoDiagnostics", ip_diagnostics_udpecho, "async"},
-	{"Device.IP.Diagnostics.ServerSelectionDiagnostics", ip_diagnostics_serverselection, "async"},
-	{"Device.DNS.Diagnostics.NSLookupDiagnostics", ip_diagnostics_nslookup, "async"},
-	{"Device.SoftwareModules.ExecEnv.*.Reset", swmodules_exec_env_reset, "sync"},
-	{"Device.SoftwareModules.InstallDU", swmodules_install_du, "async"},
-	{"Device.SoftwareModules.DeploymentUnit.*.Update", swmodules_update_du, "async"},
-	{"Device.SoftwareModules.DeploymentUnit.*.Uninstall", swmodules_uninstall_du, "async"}
+	{
+		"Device.Reboot", reboot_device, "sync"
+	},
+	{
+		"Device.FactoryReset", factory_reset, "sync"
+	},
+	{
+		"Device.IP.Interface.*.Reset", network_interface_reset, "sync"
+	},
+	{
+		"Device.PPP.Interface.*.Reset", network_interface_reset, "sync"
+	},
+	{
+		"Device.WiFi.Reset", wireless_reset, "sync"
+	},
+	{
+		"Device.WiFi.AccessPoint.*.Security.Reset", ap_security_reset, "sync"
+	},
+	{
+		"Device.DHCPv4.Client.*.Renew", dhcp_client_renew, "sync"
+	},
+	{
+		"Device.DHCPv6.Client.*.Renew", dhcp_client_renew, "sync"
+	},
+	{
+		"Device.DeviceInfo.VendorConfigFile.*.Backup", vendor_conf_backup, "async",
+		{
+			.in = (const char *[]) {
+				"URL",
+				"Username",
+				"Password",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.DeviceInfo.VendorConfigFile.*.Restore", vendor_conf_restore, "async",
+		{
+			.in = (const char *[]) {
+				"URL",
+				"Username",
+				"Password",
+				"FileSize",
+				"TargetFileName",
+				"CheckSumAlgorithm",
+				"CheckSum",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.DeviceInfo.FirmwareImage.*.Download", firmware_image_download, "async",
+		{
+			.in = (const char *[]) {
+				"URL",
+				"AutoActivate",
+				"Username",
+				"Password",
+				"FileSize",
+				"CheckSumAlgorithm",
+				"CheckSum",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.DeviceInfo.FirmwareImage.*.Activate", firmware_image_activate, "async"
+	},
+	{
+		"Device.WiFi.NeighboringWiFiDiagnostic", fetch_neighboring_wifi_diagnostic, "async",
+		{
+			.out = (const char *[]) {
+				"Status",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.IP.Diagnostics.IPPing", ip_diagnostics_ipping, "async",
+		{
+			.in = (const char *[]) {
+				"Interface",
+				"ProtocolVersion",
+				"Host",
+				"NumberOfRepetitions",
+				"Timeout",
+				"DataBlockSize",
+				"DSCP",
+				NULL
+			},
+			.out = (const char *[]) {
+				"Status",
+				"IPAddressUsed",
+				"SuccessCount",
+				"FailureCount",
+				"AverageResponseTime",
+				"MinimumResponseTime",
+				"MaximumResponseTime",
+				"AverageResponseTimeDetailed",
+				"MinimumResponseTimeDetailed",
+				"MaximumResponseTimeDetailed",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.IP.Diagnostics.TraceRoute", ip_diagnostics_traceroute, "async",
+		{
+			.in = (const char *[]) {
+				"Interface",
+				"ProtocolVersion",
+				"Host",
+				"NumberOfTries",
+				"Timeout",
+				"DataBlockSize",
+				"DSCP",
+				"MaxHopCount",
+				NULL
+			},
+			.out = (const char *[]) {
+				"Status",
+				"IPAddressUsed",
+				"ResponseTime",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.IP.Diagnostics.DownloadDiagnostics", ip_diagnostics_download, "async",
+		{
+			.in = (const char *[]) {
+				"Interface",
+				"DownloadURL",
+				"DSCP",
+				"EthernetPriority",
+				"TimeBasedTestDuration",
+				"TimeBasedTestMeasurementInterval",
+				"TimeBasedTestMeasurementOffset",
+				"ProtocolVersion",
+				"NumberOfConnections",
+				"EnablePerConnectionResults",
+				NULL
+			},
+			.out = (const char *[]) {
+				"Status",
+				"IPAddressUsed",
+				"ROMTime",
+				"BOMTime",
+				"EOMTime",
+				"TestBytesReceived",
+				"TotalBytesReceived",
+				"TotalBytesSent",
+				"TestBytesReceivedUnderFullLoading",
+				"TotalBytesReceivedUnderFullLoading",
+				"TotalBytesSentUnderFullLoading",
+				"PeriodOfFullLoading",
+				"TCPOpenRequestTime",
+				"TCPOpenResponseTime",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.IP.Diagnostics.UploadDiagnostics", ip_diagnostics_upload, "async",
+		{
+			.in = (const char *[]) {
+				"Interface",
+				"UploadURL",
+				"DSCP",
+				"EthernetPriority",
+				"TestFileLength",
+				"TimeBasedTestDuration",
+				"TimeBasedTestMeasurementInterval",
+				"TimeBasedTestMeasurementOffset",
+				"ProtocolVersion",
+				"NumberOfConnections",
+				"EnablePerConnectionResults",
+				NULL
+			},
+			.out = (const char *[]) {
+				"Status",
+				"IPAddressUsed",
+				"ROMTime",
+				"BOMTime",
+				"EOMTime",
+				"TestBytesSent",
+				"TotalBytesReceived",
+				"TotalBytesSent",
+				"TestBytesSentUnderFullLoading",
+				"TotalBytesReceivedUnderFullLoading",
+				"TotalBytesSentUnderFullLoading",
+				"PeriodOfFullLoading",
+				"TCPOpenRequestTime",
+				"TCPOpenResponseTime",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.IP.Diagnostics.UDPEchoDiagnostics", ip_diagnostics_udpecho, "async",
+		{
+			.in = (const char *[]) {
+				"Interface",
+				"Host",
+				"Port",
+				"NumberOfRepetitions",
+				"Timeout",
+				"DataBlockSize",
+				"DSCP",
+				"InterTransmissionTime",
+				"ProtocolVersion",
+				"EnableIndividualPacketResults",
+				NULL
+			},
+			.out = (const char *[]) {
+				"Status",
+				"IPAddressUsed",
+				"SuccessCount",
+				"FailureCount",
+				"AverageResponseTime",
+				"MinimumResponseTime",
+				"MaximumResponseTime",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.IP.Diagnostics.ServerSelectionDiagnostics", ip_diagnostics_serverselection, "async",
+		{
+			.in = (const char *[]) {
+				"Interface",
+				"ProtocolVersion",
+				"Protocol",
+				"HostList",
+				"NumberOfRepetitions",
+				"Timeout",
+				NULL
+			},
+			.out = (const char *[]) {
+				"Status",
+				"FastestHost",
+				"MinimumResponseTime",
+				"AverageResponseTime",
+				"MaximumResponseTime",
+				"IPAddressUsed",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.DNS.Diagnostics.NSLookupDiagnostics", ip_diagnostics_nslookup, "async",
+		{
+			.in = (const char *[]) {
+				"HostName",
+				"Interface",
+				"DNSServer",
+				"Timeout",
+				"NumberOfRepetitions",
+				NULL
+			},
+			.out = (const char *[]) {
+				"Status",
+				"AnswerType",
+				"HostNameReturned",
+				"IPAddresses",
+				"DNSServerIP",
+				"ResponseTime",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.SoftwareModules.ExecEnv.*.Reset", swmodules_exec_env_reset, "sync"
+	},
+	{
+		"Device.SoftwareModules.InstallDU", swmodules_install_du, "async",
+		{
+			.in = (const char *[]) {
+				"URL",
+				"UUID",
+				"Username",
+				"Password",
+				"ExecutionEnvRef",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.SoftwareModules.DeploymentUnit.*.Update", swmodules_update_du, "async",
+		{
+			.in = (const char *[]) {
+				"URL",
+				"Username",
+				"Password",
+				NULL
+			}
+		}
+	},
+	{
+		"Device.SoftwareModules.DeploymentUnit.*.Uninstall", swmodules_uninstall_du, "async"
+	}
 };
 
 void operate_list_cmds(struct dmctx *dmctx)
 {
 	char *param, *type;
+	const operation_args *args;
 	const size_t n = ARRAY_SIZE(operate_helper);
 	size_t i;
 	struct op_cmd *save_pointer = NULL;
@@ -965,13 +1242,15 @@ void operate_list_cmds(struct dmctx *dmctx)
 	for(i = 0; i < n; i++) {
 		param = dmstrdup(operate_helper[i].name);
 		type = (char *)operate_helper[i].type;
-		add_list_paramameter(dmctx, param, NULL, type, NULL, 0);
+		args = &operate_helper[i].args;
+		add_list_paramameter(dmctx, param, (char *)args, type, NULL, 0);
 	}
 
 	for (; (dynamic_operate && dynamic_operate->name); dynamic_operate++) {
 		param = dmstrdup(dynamic_operate->name);
 		type = (char *)dynamic_operate->type;
-		add_list_paramameter(dmctx, param, NULL, type, NULL, 0);
+		args = &dynamic_operate->args;
+		add_list_paramameter(dmctx, param, (char *)args, type, NULL, 0);
 	}
 
 	if (save_pointer)dynamic_operate = save_pointer;
