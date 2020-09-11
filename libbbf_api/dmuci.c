@@ -12,6 +12,7 @@
  *
  */
 
+#include "dmcommon.h"
 #include "dmuci.h"
 #include "dmmem.h"
 
@@ -261,7 +262,8 @@ end:
 int db_get_value_string(char *package, char *section, char *option, char **value)
 {
 	struct uci_option *o;
-	o = dmuci_get_option_ptr(DB_CONFIG, package, section, option);
+
+	o = dmuci_get_option_ptr((folder_exists(LIB_DB_CONFIG)) ? LIB_DB_CONFIG : ETC_DB_CONFIG, package, section, option);
 	if (o) {
 		*value = o->v.string ? dmstrdup(o->v.string) : ""; // MEM WILL BE FREED IN DMMEMCLEAN
 	} else {
@@ -276,7 +278,7 @@ int db_get_value_list(char *package, char *section, char *option, struct uci_lis
 	struct uci_option *o;
 	*value = NULL;
 
-	o = dmuci_get_option_ptr(DB_CONFIG, package, section, option);
+	o = dmuci_get_option_ptr((folder_exists(LIB_DB_CONFIG)) ? LIB_DB_CONFIG : ETC_DB_CONFIG, package, section, option);
 	if (o) {
 		*value = &o->v.list;
 	} else {
