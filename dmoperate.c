@@ -41,25 +41,11 @@ bool is_str_eq(const char *s1, const char *s2)
 
 static void bbf_init(struct dmctx *dm_ctx, char *path)
 {
-	char *uci_amd = NULL, *uci_instance = NULL;
-	int amd = AMD_2, instance = INSTANCE_MODE_ALIAS;
+	unsigned int amd = AMD_5, instance = INSTANCE_MODE_NUMBER;
 
-	if(match(path, "[[]+")) {
-		if(!match(path, GLOB_EXPR)) {
-			amd = AMD_5;
-		}
-	} else {
-		dmuci_get_option_value_string("cwmp", "cpe", "amd_version", &uci_amd);
-		if(uci_amd) {
-			amd = atoi(uci_amd);
-			dmfree(uci_amd);
-		}
-		dmuci_get_option_value_string("cwmp", "cpe", "instance_mode", &uci_instance);
-		if(uci_instance) {
-			if(!is_str_eq(uci_instance, "InstanceAlias"))
-				instance = INSTANCE_MODE_NUMBER;
-			dmfree(uci_instance);
-		}
+	if (match(path, "[[]+")) {
+		if (!match(path, GLOB_EXPR))
+			instance = INSTANCE_MODE_ALIAS;
 	}
 	dm_ctx_init_sub(dm_ctx, DM_CWMP, amd, instance);
 }
