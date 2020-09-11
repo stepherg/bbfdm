@@ -158,6 +158,7 @@ int dmuci_get_option_value_string(char *package, char *section, char *option, ch
 char *dmuci_get_option_value_fallback_def(char *package, char *section, char *option, char *default_value);
 int dmuci_get_option_value_list(char *package, char *section, char *option, struct uci_list **value);
 struct uci_option *dmuci_get_option_ptr(char *cfg_path, char *package, char *section, char *option);
+void get_db_config_path(void);
 int db_get_value_string(char *package, char *section, char *option, char **value);
 int db_get_value_list(char *package, char *section, char *option, struct uci_list **value);
 int dmuci_get_varstate_string(char *package, char *section, char *option, char **value);

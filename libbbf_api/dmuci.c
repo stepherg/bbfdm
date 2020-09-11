@@ -18,6 +18,7 @@
 
 struct uci_context *uci_ctx;
 struct uci_context *uci_varstate_ctx;
+static char *db_config = NULL;
 
 NEW_UCI_PATH(bbfdm, BBFDM_CONFIG, BBFDM_SAVEDIR)
 struct uci_section *dmuci_walk_state_section (char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk)
@@ -259,11 +260,16 @@ end:
 	return o;
 }
 
+void get_db_config_path(void)
+{
+	db_config = (folder_exists(LIB_DB_CONFIG)) ? LIB_DB_CONFIG : ETC_DB_CONFIG;
+}
+
 int db_get_value_string(char *package, char *section, char *option, char **value)
 {
 	struct uci_option *o;
 
-	o = dmuci_get_option_ptr((folder_exists(LIB_DB_CONFIG)) ? LIB_DB_CONFIG : ETC_DB_CONFIG, package, section, option);
+	o = dmuci_get_option_ptr((db_config) ? db_config : LIB_DB_CONFIG, package, section, option);
 	if (o) {
 		*value = o->v.string ? dmstrdup(o->v.string) : ""; // MEM WILL BE FREED IN DMMEMCLEAN
 	} else {
@@ -278,7 +284,7 @@ int db_get_value_list(char *package, char *section, char *option, struct uci_lis
 	struct uci_option *o;
 	*value = NULL;
 
-	o = dmuci_get_option_ptr((folder_exists(LIB_DB_CONFIG)) ? LIB_DB_CONFIG : ETC_DB_CONFIG, package, section, option);
+	o = dmuci_get_option_ptr((db_config) ? db_config : LIB_DB_CONFIG, package, section, option);
 	if (o) {
 		*value = &o->v.list;
 	} else {

@@ -123,6 +123,7 @@ static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int dm_type, unsigned 
 		uci_ctx = uci_alloc_context();
 		uci_varstate_ctx = uci_alloc_context();
 		DMUCI_INIT(bbfdm);
+		get_db_config_path();
 	}
 	INIT_LIST_HEAD(&ctx->list_parameter);
 	INIT_LIST_HEAD(&ctx->set_list_tmp);
