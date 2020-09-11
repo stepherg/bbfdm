@@ -1448,7 +1448,10 @@ int dm_entry_get_instances(struct dmctx *dmctx)
 	dmctx->method_obj = mobj_get_instances_in_obj;
 	dmctx->method_param = mparam_get_instances_in_obj;
 
-	dm_browse(dmctx, &node, root, NULL, NULL);
+	err = dm_browse(dmctx, &node, root, NULL, NULL);
+	if (dmctx->findparam == 0)
+		return err;
+
 	return 0;
 }
 
