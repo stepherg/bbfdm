@@ -108,7 +108,7 @@ def check_commands(param):
 	res = os.popen(cmd).read()
 	param = param.replace(".{i}.", ".*.")
 	param = param.replace("()", "")
-	string = "\n\t{\"%s\"," % param
+	string = "\n\t{\n\t\t\"%s\"," % param
 	if string in res:
 		return "Yes"
 	else:
