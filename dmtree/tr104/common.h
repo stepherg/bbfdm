@@ -60,6 +60,7 @@ extern char *ProxyServerTransport[];
 extern char *RegistrarServerTransport[];
 extern char *DTMFMethod[];
 extern char *JitterBufferType[];
+extern char *KeyingMethods[];
 
 int init_supported_codecs();
 int init_call_log();

@@ -15,6 +15,7 @@ char *ProxyServerTransport[] = {"UDP", "TCP", "TLS", "SCTP"};
 char *RegistrarServerTransport[] = {"UDP", "TCP", "TLS", "SCTP"};
 char *DTMFMethod[] = {"InBand", "RFC4733", "SIPInfo"};
 char *JitterBufferType[] = {"Static", "Dynamic"};
+char *KeyingMethods[] = {"Null", "Static", "SDP", "IKE"};
 
 struct codec_info supported_codecs[MAX_SUPPORTED_CODECS];
 int codecs_num;

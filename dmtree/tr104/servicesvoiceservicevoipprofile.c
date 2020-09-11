@@ -226,6 +226,46 @@ static int set_ServicesVoiceServiceVoIPProfileRTPSRTP_Enable(char *refparam, str
 	return 0;
 }
 
+static int get_ServicesVoiceServiceVoIPProfileRTPSRTP_KeyingMethods(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "SDP";
+	return 0;
+}
+
+static int set_ServicesVoiceServiceVoIPProfileRTPSRTP_KeyingMethods(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, KeyingMethods, 4, NULL, 0))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			// To be supported in the future perhaps
+			return FAULT_9000;
+	}
+	return 0;
+}
+
+static int get_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "128";
+	return 0;
+}
+
+static int set_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_unsignedInt_list(value, -1, -1, -1, RANGE_ARGS{{NULL,NULL}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			// To be supported in the future perhaps
+			return FAULT_9000;
+	}
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -272,6 +312,8 @@ DMLEAF tServicesVoiceServiceVoIPProfileRTPRTCPParams[] = {
 DMLEAF tServicesVoiceServiceVoIPProfileRTPSRTPParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
 {"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceVoIPProfileRTPSRTP_Enable, set_ServicesVoiceServiceVoIPProfileRTPSRTP_Enable, NULL, NULL, BBFDM_BOTH},
+{"KeyingMethods", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfileRTPSRTP_KeyingMethods, set_ServicesVoiceServiceVoIPProfileRTPSRTP_KeyingMethods, NULL, NULL, BBFDM_BOTH},
+{"EncryptionKeySizes", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes, set_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 

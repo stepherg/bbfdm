@@ -3566,7 +3566,23 @@
 						"cwmp", 
 						"usp"
 					], 
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci", 
+							"uci": {
+								"file": "asterisk", 
+								"section": {
+									"type": "sip_service_provider", 
+									"index": "@i-1"
+								}, 
+								"option": {
+									"name": "enabled"
+								}
+							}
+						}
+					]
+
 				}, 
 				"QuiescentMode": {
 					"type": "boolean", 

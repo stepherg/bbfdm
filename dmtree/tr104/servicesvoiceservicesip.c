@@ -416,6 +416,30 @@ static int get_ServicesVoiceServiceSIPClientContact_UserAgent(char *refparam, st
 	return 0;
 }
 
+/*#Device.Services.VoiceService.{i}.SIP.Network.{i}.Enable!UCI:asterisk/sip_service_provider,@i-1/enabled*/
+static int get_ServicesVoiceServiceSIPNetwork_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", value);
+	return 0;
+}
+
+static int set_ServicesVoiceServiceSIPNetwork_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section((struct uci_section *)data, "enabled", b ? "1" : "0");
+			break;
+	}
+	return 0;
+}
+
 static int get_ServicesVoiceServiceSIPNetwork_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "Up";
@@ -1003,6 +1027,7 @@ DMOBJ tServicesVoiceServiceSIPNetworkObj[] = {
 
 DMLEAF tServicesVoiceServiceSIPNetworkParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceSIPNetwork_Enable, set_ServicesVoiceServiceSIPNetwork_Enable, NULL, NULL, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_Status, NULL, NULL, NULL, BBFDM_BOTH},
 {"ProxyServer", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_ProxyServer, set_ServicesVoiceServiceSIPNetwork_ProxyServer, NULL, NULL, BBFDM_BOTH},
 {"ProxyServerPort", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_ProxyServerPort, set_ServicesVoiceServiceSIPNetwork_ProxyServerPort, NULL, NULL, BBFDM_BOTH},
