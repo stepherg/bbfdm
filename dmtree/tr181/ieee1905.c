@@ -8,12 +8,17 @@
  *      Author: <Nevadita> <Chatterjee> <nevadita.chatterjee@iopsys.eu>
  */
 
+#include "dmentry.h"
 #include "ieee1905.h"
 
-struct param_node {
+struct obj_node {
+	json_object *node;
 	json_object *data;
-	json_object *interface;
-	int node_num;
+};
+
+struct param_node {
+	json_object *node;
+	char *data;
 };
 
 /*************************************************************
@@ -111,17 +116,16 @@ static int browseIEEE1905ALNetworkTopologyChangeLogInst(struct dmctx *dmctx, DMN
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *obj = NULL, *arrobj = NULL;
+	json_object *res = NULL, *node = NULL, *arrobj = NULL;
 	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
 
 	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
 	if (res) {
-		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "nodes") {
+		dmjson_foreach_obj_in_array(res, arrobj, node, i, 1, "nodes") {
 
 			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)node, inst) == DM_STOP)
 				break;
 		}
 	}
@@ -130,63 +134,34 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst(struct dmctx *dmctx
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *param = NULL;
-	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
-	char *idx = NULL, *idx_last = NULL;
+	json_object *arrobj = NULL, *ipv4_param = NULL, *node = (json_object *)prev_data;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
 
-	if(prev_instance == NULL)
-		return 0;
+	dmjson_foreach_obj_in_array(node, arrobj, ipv4_param, i, 1, "ipv4_params") {
 
-	int ins = atoi(prev_instance) - 1;
-	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		json_object_object_get_ex(res, "nodes", &nodes);
-		size_t num_links = json_object_array_length(nodes);
-		if(num_links != 0) {
-			node_id = json_object_array_get_idx(nodes, ins);
-			json_object_object_get_ex(node_id, "ipv4_params", &param);
-			size_t num_params = json_object_array_length(param);
-			for(i = 0; i < num_params; i++) {
-				param_id = json_object_array_get_idx(param, i);
-				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)param_id, idx) == DM_STOP)
-					continue;
-			}
-		}
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv4_param, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *param = NULL;
-	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
-	char *idx = NULL, *idx_last = NULL;
+	json_object *arrobj = NULL, *ipv6_param = NULL, *node = (json_object *)prev_data;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
 
-	if(prev_instance == NULL)
-		return 0;
+	dmjson_foreach_obj_in_array(node, arrobj, ipv6_param, i, 1, "ipv6_params") {
 
-	int ins = atoi(prev_instance) - 1;
-	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		json_object_object_get_ex(res, "nodes", &nodes);
-		size_t num_links = json_object_array_length(nodes);
-		if(num_links != 0) {
-			node_id = json_object_array_get_idx(nodes, ins);
-			json_object_object_get_ex(node_id, "ipv6_params", &param);
-			size_t num_params = json_object_array_length(param);
-			for(i = 0; i < num_params; i++) {
-				param_id = json_object_array_get_idx(param, i);
-				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)param_id, idx) == DM_STOP)
-					continue;
-			}
-		}
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv6_param, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
+
 #if 0
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -194,194 +169,100 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesInst(str
 	return 0;
 }
 #endif
+
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *param = NULL;
-	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
-	char *idx = NULL, *idx_last = NULL;
+	json_object *arrobj = NULL, *interface = NULL, *node = (json_object *)prev_data;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
 
-	if(prev_instance == NULL)
-		return 0;
+	dmjson_foreach_obj_in_array(node, arrobj, interface, i, 1, "interfaces") {
 
-	int ins = atoi(prev_instance) - 1;
-
-	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		json_object_object_get_ex(res, "nodes", &nodes);
-		size_t num_links = json_object_array_length(nodes);
-		if(num_links != 0) {
-			node_id = json_object_array_get_idx(nodes, ins);
-			json_object_object_get_ex(node_id, "interfaces", &param);
-			size_t num_params = json_object_array_length(param);
-			for(i = 0; i < num_params; i++) {
-				param_id = json_object_array_get_idx(param, i);
-				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)param_id, idx) == DM_STOP)
-					continue;
-			}
-		}
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)interface, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *param = NULL;
-	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
-	char *idx = NULL, *idx_last = NULL;
+	json_object *arrobj, *node = (json_object *)prev_data;
+	struct param_node param_st = {.node = node};
+	char *inst = NULL, *max_inst = NULL, *non1905_neighbor = NULL;
 	int id = 0, i = 0;
-	struct param_node param_st;
 
-	if(prev_instance == NULL)
-		return 0;
+	dmjson_foreach_value_in_array(node, arrobj, non1905_neighbor, i, 1, "non1905_neighbors") {
 
-	int ins = atoi(prev_instance) - 1;
+		param_st.data = non1905_neighbor;
 
-	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		json_object_object_get_ex(res, "nodes", &nodes);
-		size_t num_links = json_object_array_length(nodes);
-		if(num_links != 0) {
-			node_id = json_object_array_get_idx(nodes, ins);
-			param_st.node_num = ins;
-			json_object_object_get_ex(node_id, "non1905_neighbors", &param);
-			json_object_object_get_ex(node_id, "interfaces", &param_st.interface);
-			size_t num_params = json_object_array_length(param);
-			for(i = 0; i < num_params; i++) {
-				param_id = json_object_array_get_idx(param, i);
-				param_st.data = param_id;
-				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, idx) == DM_STOP)
-					continue;
-			}
-		}
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *param = NULL;
-	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
-	char *idx = NULL, *idx_last = NULL;
+	json_object *arrobj = NULL, *l2_neighbor = NULL, *node = (json_object *)prev_data;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
-	struct param_node param_st;
 
-	if(prev_instance == NULL)
-		return 0;
+	dmjson_foreach_obj_in_array(node, arrobj, l2_neighbor, i, 1, "l2_neighbor") {
 
-	int ins = atoi(prev_instance) - 1;
-	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		json_object_object_get_ex(res, "nodes", &nodes);
-		size_t num_links = json_object_array_length(nodes);
-		if(num_links != 0) {
-			node_id = json_object_array_get_idx(nodes, ins);
-			param_st.node_num = ins;
-			json_object_object_get_ex(node_id, "l2_neighbor", &param);
-			json_object_object_get_ex(node_id, "interfaces", &param_st.interface);
-			size_t num_params = json_object_array_length(param);
-			for(i = 0; i < num_params; i++) {
-				param_id = json_object_array_get_idx(param, i);
-				param_st.data = param_id;
-				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, idx) == DM_STOP)
-					continue;
-			}
-		}
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)l2_neighbor, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *param = NULL;
-	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
-	char *idx = NULL, *idx_last = NULL;
+	json_object *arrobj = NULL, *neighbor = NULL, *node = (json_object *)prev_data;
+	struct obj_node param_st = { .node = node };
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
-	struct param_node param_st;
 
-	if(prev_instance == NULL)
-		return 0;
+	dmjson_foreach_obj_in_array(node, arrobj, neighbor, i, 1, "neighbors") {
 
-	int ins = atoi(prev_instance) - 1;
+		param_st.data = neighbor;
 
-	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		json_object_object_get_ex(res, "nodes", &nodes);
-		size_t num_links = json_object_array_length(nodes);
-		if(num_links != 0) {
-			node_id = json_object_array_get_idx(nodes, ins);
-			param_st.node_num = ins;
-			json_object_object_get_ex(node_id, "neighbors", &param);
-			json_object_object_get_ex(node_id, "interfaces", &param_st.interface);
-			size_t num_params = json_object_array_length(param);
-			for(i = 0; i < num_params; i++) {
-				param_id = json_object_array_get_idx(param, i);
-				param_st.data = param_id;
-				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, idx) == DM_STOP)
-					continue;
-			}
-		}
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *param = NULL;
-	json_object *nodes = NULL, *node_id = NULL, *param_id = NULL;
-	char *idx = NULL, *idx_last = NULL;
+	json_object *arrobj = NULL, *bridge_tuple = NULL, *node = (json_object *)prev_data;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
-	struct param_node param_st;
 
-	if(prev_instance == NULL)
-		return 0;
+	dmjson_foreach_obj_in_array(node, arrobj, bridge_tuple, i, 1, "bridge_tuple") {
 
-	int ins = atoi(prev_instance) - 1;
-	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		json_object_object_get_ex(res, "nodes", &nodes);
-		size_t num_links = json_object_array_length(nodes);
-		if(num_links != 0) {
-			node_id = json_object_array_get_idx(nodes, ins);
-			param_st.node_num = ins;
-			json_object_object_get_ex(node_id, "bridge_tuple", &param);
-			json_object_object_get_ex(node_id, "interfaces", &param_st.interface);
-			size_t num_params = json_object_array_length(param);
-			for(i = 0; i < num_params; i++) {
-				param_id = json_object_array_get_idx(param, i);
-				param_st.data = param_id;
-				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, idx) == DM_STOP)
-					continue;
-			}
-		}
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)bridge_tuple, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *nodes = NULL, *param_id = NULL;
-	char *idx = NULL, *idx_last = NULL;
+	struct obj_node *param_st = (struct obj_node *)prev_data;
+	json_object *arrobj = NULL, *link_metric = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
-	struct param_node *param_st = NULL;
 
-	if(prev_data == NULL)
-		return 0;
+	dmjson_foreach_obj_in_array(param_st->data, arrobj, link_metric, i, 1, "link_metrics") {
 
-	param_st = (struct param_node *)prev_data;
-
-	json_object_object_get_ex(param_st->data, "link_metrics", &nodes);
-	size_t num_links = json_object_array_length(nodes);
-	for(i = 0; i < num_links; i++) {
-		param_id = json_object_array_get_idx(nodes, i);
-		idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)param_id, idx) == DM_STOP)
-			continue;
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)link_metric, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
@@ -436,6 +317,15 @@ static int delObjIEEE1905ALForwardingTableForwardingRule(char *refparam, struct 
 		}
 		break;
 	}
+	return 0;
+}
+
+/*************************************************************
+* LINKER
+**************************************************************/
+static int get_linker_topology_interface(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	*linker = dmjson_get_value((json_object *)data, 1, "interface_id");
 	return 0;
 }
 
@@ -1034,20 +924,14 @@ static int set_IEEE1905ALForwardingTableForwardingRule_PCPFlag(char *refparam, s
 
 static int get_IEEE1905ALNetworkTopology_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s;
-	char *mode = NULL;
-
-	uci_foreach_sections("topology", "topology", s) {
-		dmuci_get_value_by_section_string(s, "enabled", &mode);
-	}
-	dmasprintf(value, "%s", mode);
+	dmuci_get_option_value_string("topology", "topology", "enabled", value);
 	return 0;
 }
 
 static int set_IEEE1905ALNetworkTopology_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
-	struct uci_section *s;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
@@ -1055,9 +939,7 @@ static int set_IEEE1905ALNetworkTopology_Enable(char *refparam, struct dmctx *ct
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			uci_foreach_sections("topology", "topology", s) {
-				dmuci_set_value_by_section(s, "enabled", b ? "1" : "0");
-			}
+			dmuci_set_value("topology", "topology", "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -1068,35 +950,25 @@ static int get_IEEE1905ALNetworkTopology_Status(char *refparam, struct dmctx *ct
 	json_object *res;
 	dmubus_call("topology", "status", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
-	if (res)
-		*value = dmjson_get_value(res, 1, "status");
+	*value = dmjson_get_value(res, 1, "status");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopology_MaxChangeLogEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s;
-	char *log_val = NULL;
-
-	uci_foreach_sections("topology", "topology", s) {
-		dmuci_get_value_by_section_string(s, "maxlog", &log_val);
-	}
-	dmasprintf(value, "%s", log_val);
+	dmuci_get_option_value_string("topology", "topology", "maxlog", value);
 	return 0;
 }
 
 static int set_IEEE1905ALNetworkTopology_MaxChangeLogEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s;
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			uci_foreach_sections("topology", "topology", s) {
-				dmuci_set_value_by_section(s, "maxlog", value);
-			}
+			dmuci_set_value("topology", "topology", "maxlog", value);
 			break;
 	}
 	return 0;
@@ -1104,20 +976,18 @@ static int set_IEEE1905ALNetworkTopology_MaxChangeLogEntries(char *refparam, str
 
 static int get_IEEE1905ALNetworkTopology_LastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-
 	json_object *res = NULL, *obj = NULL;
 	size_t num = 0;
 
 	dmubus_call("topology", "changelog", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
-	if (res) {
-		json_object_object_get_ex(res, "changelog", &obj);
-		if (obj) {
-			num = json_object_array_length(obj);
-			if(num != 0)
-				dmasprintf(value, "Device.IEEE1905.AL.NetworkTopology.ChangeLog.%d", num);
-		}
+	json_object_object_get_ex(res, "changelog", &obj);
+	if (obj) {
+		num = json_object_array_length(obj);
+		if (num != 0)
+			dmasprintf(value, "Device.IEEE1905.AL.NetworkTopology.ChangeLog.%d", num);
 	}
+
 	return 0;
 }
 
@@ -1127,12 +997,11 @@ static int get_IEEE1905ALNetworkTopology_IEEE1905DeviceNumberOfEntries(char *ref
 	size_t num_nodes = 0;
 
 	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		json_object_object_get_ex(res, "nodes", &obj);
-		if (obj) {
-			num_nodes = json_object_array_length(obj);
-		}
-	}
+	DM_ASSERT(res, *value = "0");
+	json_object_object_get_ex(res, "nodes", &obj);
+	if (obj)
+		num_nodes = json_object_array_length(obj);
+
 	dmasprintf(value, "%d", num_nodes);
 	return 0;
 }
@@ -1141,7 +1010,7 @@ static int get_IEEE1905ALNetworkTopology_ChangeLogNumberOfEntries(char *refparam
 {
 	json_object *res;
 	dmubus_call("topology", "changelog", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "num_changelog");
 	return 0;
 }
@@ -1414,176 +1283,74 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex2(
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_LocalInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *nodes = NULL, *node_id = NULL;
-	char* val = NULL;
-	char* val_intf = NULL;
-	json_object  *param_id = NULL;
-	struct param_node *node_val;
-	int i = 0;
+	const struct param_node *node_val = (struct param_node *)data;
+	char *linker = dmjson_get_value(node_val->node, 1, "non1905_nbr_localintf");
 
-	*value = "";
-	if (data == NULL)
-		return 0;
-	node_val = (struct param_node *)data;
-	if (node_val->interface == NULL)
-		return 0;
-	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
-	if (res) {
-		json_object_object_get_ex(res, "nodes", &nodes);
-		size_t num_links = json_object_array_length(nodes);
-		if(num_links != 0) {
-			node_id = json_object_array_get_idx(nodes, node_val->node_num);
-			val = dmjson_get_value((json_object *)node_id, 1, "non1905_nbr_localintf");
-			size_t num_params = json_object_array_length(node_val->interface);
-			for(i = 0; i < num_params; i++) {
-				param_id = json_object_array_get_idx(node_val->interface, i);
-				val_intf = dmjson_get_value((json_object *)param_id, 1, "interface_id");
-				if (strncmp(val, val_intf,strlen(val)) == 0) {
-					dmasprintf(value, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.%d.Interface.%d", (node_val->node_num)+1, i+1);
-					break;
-				}
-			}
-		}
-	}
+	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIEEE1905%cAL%cNetworkTopology%cIEEE1905Device%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_NeighborInterfaceId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct param_node *node_val;
-	*value = "";
-	if (data == NULL)
-		return 0;
+	const struct param_node *node_val = (struct param_node *)data;
 
-	node_val = (struct param_node *)data;
-
-	if (node_val->data == NULL)
-		return 0;
-	*value = (char *) json_object_get_string((json_object *)node_val->data);
+	*value = node_val->data;
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_LocalInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char* val = NULL;
-	char* val_intf = NULL;
-	json_object *param_id = NULL;
-	struct param_node *node_val;
-	int i = 0;
-
-	*value = "";
-	if (data == NULL)
-		return 0;
-	node_val = (struct param_node *)data;
-	if (node_val->data == NULL || node_val->interface == NULL)
-		return 0;
-	val = dmjson_get_value((json_object *)node_val->data, 1, "local_intf_id");
-	size_t num_params = json_object_array_length(node_val->interface);
-	for(i = 0; i < num_params; i++) {
-		param_id = json_object_array_get_idx(node_val->interface, i);
-		val_intf = dmjson_get_value((json_object *)param_id, 1, "interface_id");
-		if (strncmp(val, val_intf,strlen(val)) == 0) {
-			dmasprintf(value, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.%d.Interface.%d", (node_val->node_num)+1, i+1);
-			break;
-		}
-	}
+	char *linker = dmjson_get_value((json_object *)data, 1, "local_intf_id");
+	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIEEE1905%cAL%cNetworkTopology%cIEEE1905Device%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_NeighborInterfaceId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct param_node *node_val;
-
-	if (data == NULL)
-                return 0;
-
-	node_val = (struct param_node *)data;
-	*value = dmjson_get_value((json_object *)node_val->data, 1, "local_nbr_id");
+	*value = dmjson_get_value((json_object *)data, 1, "local_nbr_id");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_BehindInterfaceIds(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct param_node *node_val;
-
-	if (data == NULL)
-		return 0;
-
-	node_val = (struct param_node *)data;
-	*value = dmjson_get_value((json_object *)node_val->data, 1, "behind_mac_id");
+	*value = dmjson_get_value((json_object *)data, 1, "behind_mac_id");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_LocalInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *nodes = NULL, *node_id = NULL;
-	char* val = NULL;
-	char* val_intf = NULL;
-	json_object *param_id = NULL;
-	struct param_node *node_val;
-	int i = 0;
+	const struct obj_node *node_val = (struct obj_node *)data;
+	char *linker = dmjson_get_value(node_val->node, 1, "1905_nbr_localintf");
 
-	*value = "";
-	if (data == NULL)
-		return 0;
-	node_val = (struct param_node *)data;
-	if (node_val-> interface == NULL)
-		return 0;
-
-	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
-	if(res) {
-		json_object_object_get_ex(res, "nodes", &nodes);
-		size_t num_links = json_object_array_length(nodes);
-		if(num_links != 0) {
-			node_id = json_object_array_get_idx(nodes, node_val->node_num);
-			val = dmjson_get_value((json_object *)node_id, 1, "1905_nbr_localintf");
-			size_t num_params = json_object_array_length(node_val->interface);
-			for(i = 0; i < num_params; i++) {
-				param_id = json_object_array_get_idx(node_val->interface, i);
-				val_intf = dmjson_get_value((json_object *)param_id, 1, "interface_id");
-				if (strncmp(val, val_intf,strlen(val)) == 0) {
-					dmasprintf(value, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.%d.Interface.%d", (node_val->node_num)+1, i+1);
-					break;
-				}
-			}
-		}
-	}
-        return 0;
+	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIEEE1905%cAL%cNetworkTopology%cIEEE1905Device%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+	if (*value == NULL)
+		*value = "";
+	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_NeighborDeviceId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct param_node *node_val;
+	const struct obj_node *node_val = (struct obj_node *)data;
 
-	if (data == NULL)
-		return 0;
-
-	node_val = (struct param_node *)data;
-	*value = dmjson_get_value((json_object *)node_val->data, 1, "nbr_mac_id");
+	*value = dmjson_get_value(node_val->data, 1, "nbr_mac_id");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_MetricNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *obj = NULL;
+	json_object *link_metrics = NULL;
 	size_t num = 0;
-	struct param_node *node_val;
+	const struct obj_node *node_val = (struct obj_node *)data;
 
-	*value = " ";
-	if (data == NULL)
-		return 0;
+	json_object_object_get_ex(node_val->data, "link_metrics", &link_metrics);
+	if (link_metrics)
+		num = json_object_array_length(link_metrics);
 
-	node_val = (struct param_node *)data;
-	if (node_val->data == NULL)
-		return 0;
-
-	json_object_object_get_ex((json_object *)node_val->data, "link_metrics", &obj);
-	if (obj) {
-		num = json_object_array_length(obj);
-		dmasprintf(value, "%d", num);
-	}
+	dmasprintf(value, "%d", num);
 	return 0;
 }
 
@@ -1649,41 +1416,26 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_RSS
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *tuple = NULL, *tuple_mac = NULL;
-	char* val = NULL;
-	char* value_mac;
-	char list_val[256] = {0};
-	char* val_intf = NULL;
-	json_object  *param_id = NULL;
-	struct param_node *node_val;
-	int i = 0, j = 0;
-	*value = "";
-	if (data == NULL)
-		return 0;
-	node_val = (struct param_node *)data;
+	json_object *tuple;
+	char *tuple_mac = NULL, *interface = NULL;
+	char list_val[512] = {0};
+	int i = 0;
 
-	if (node_val->data == NULL)
-		return 0;
+	dmjson_foreach_value_in_array((json_object *)data, tuple, tuple_mac, i, 1, "br_mac") {
 
-	json_object_object_get_ex((json_object *)node_val->data, "br_mac", &tuple);
-        size_t tuple_len = json_object_array_length(tuple);
-	for (j = 0; j < tuple_len; j++) {
-		tuple_mac = json_object_array_get_idx(tuple, j);
-		val  = (char*) json_object_get_string((json_object *)tuple_mac);
-		size_t num_params = json_object_array_length(node_val->interface);
-		for (i = 0; i < num_params; i++) {
-			param_id = json_object_array_get_idx(node_val->interface, i);
-			val_intf = dmjson_get_value((json_object *)param_id, 1, "interface_id");
-			if (strncmp(val, val_intf,strlen(val)) == 0) {
-				if (i != 0)
-					strncat(list_val, ",", 1);
-				dmasprintf(&value_mac, "IEEE1905Device.%d.Interface.%d", (node_val->node_num)+1, i+1);
-				strncat(list_val, value_mac, strlen(value_mac));
-				break;
-			}
+		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIEEE1905%cAL%cNetworkTopology%cIEEE1905Device%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim, dm_delim), tuple_mac, &interface);
+		if (interface == NULL)
+			continue;
+
+		if (*list_val == '\0')
+			strncat(list_val, interface, strlen(interface));
+		else {
+			strncat(list_val, ",", 1);
+			strncat(list_val, interface, strlen(interface));
 		}
 	}
-	dmasprintf(value, "%s",list_val);
+
+	dmasprintf(value, "%s", list_val);
 	return 0;
 }
 
@@ -1917,7 +1669,7 @@ DMOBJ tIEEE1905ALNetworkTopologyIEEE1905DeviceObj[] = {
 {"IPv4Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressParams, NULL, BBFDM_BOTH},
 {"IPv6Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressParams, NULL, BBFDM_BOTH},
 //{"VendorProperties", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesParams, NULL, BBFDM_BOTH},
-{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceParams, NULL, BBFDM_BOTH},
+{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceParams, get_linker_topology_interface, BBFDM_BOTH},
 {"NonIEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborParams, NULL, BBFDM_BOTH},
 {"L2Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborParams, NULL, BBFDM_BOTH},
 {"IEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborParams, NULL, BBFDM_BOTH},
