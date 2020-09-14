@@ -1425,31 +1425,31 @@ static int mparam_get_schema_name(DMPARAM_ARGS)
 /* **************
  * get_instances
  * **************/
-int dm_entry_get_instances(struct dmctx *dmctx)
+int dm_entry_get_instances(struct dmctx *ctx)
 {
-	DMOBJ *root = dmctx->dm_entryobj;
+	DMOBJ *root = ctx->dm_entryobj;
 	DMNODE node = { .current_object = "" };
 	char buf[4] = { dm_delim, 0 };
 	size_t plen;
 	int err;
 
-	if (dmctx->in_param[0] == 0)
-		dmctx->in_param = buf;
+	if (ctx->in_param[0] == 0)
+		ctx->in_param = buf;
 
-	plen = strlen(dmctx->in_param);
-	if (dmctx->in_param[plen - 1] != dm_delim)
+	plen = strlen(ctx->in_param);
+	if (ctx->in_param[plen - 1] != dm_delim)
 		return FAULT_9005;
 
-	dmctx->inparam_isparam = 0;
-	dmctx->findparam = 0;
-	dmctx->stop = 0;
-	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_match;
-	dmctx->method_obj = mobj_get_instances_in_obj;
-	dmctx->method_param = mparam_get_instances_in_obj;
+	ctx->inparam_isparam = 0;
+	ctx->findparam = 0;
+	ctx->stop = 0;
+	ctx->checkobj = (ctx->nextlevel) ? plugin_obj_nextlevel_match : plugin_obj_match;
+	ctx->checkleaf = (ctx->nextlevel) ? plugin_leaf_nextlevel_match : plugin_leaf_match;
+	ctx->method_obj = mobj_get_instances_in_obj;
+	ctx->method_param = mparam_get_instances_in_obj;
 
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (dmctx->findparam == 0)
+	err = dm_browse(ctx, &node, root, NULL, NULL);
+	if (ctx->findparam == 0)
 		return err;
 
 	return 0;

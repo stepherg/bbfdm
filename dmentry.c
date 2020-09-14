@@ -298,6 +298,9 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			fault = dm_entry_get_schema(ctx);
 			break;
 		case CMD_GET_INSTANCES:
+			if (arg1)
+				string_to_bool(arg1, &ctx->nextlevel);
+
 			fault = dm_entry_get_instances(ctx);
 			break;
 #ifdef BBF_TR064
