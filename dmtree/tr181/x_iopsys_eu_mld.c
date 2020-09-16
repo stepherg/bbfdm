@@ -303,7 +303,7 @@ static int browse_mlds_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, voi
 		if (!p->config_section)
 			break;
 
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3,
+		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
 				p->dmmap_section, "filter_instance", "filter_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -754,7 +754,7 @@ static int browse_mldp_interface_inst(struct dmctx *dmctx, DMNODE *parent_node, 
 		if (!p->config_section)
 			break;
 
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3,
+		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
 				p->dmmap_section, "iface_instance", "iface_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -839,7 +839,7 @@ static int browse_mldp_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, voi
 		if (!p->config_section)
 			break;
 
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 3,
+		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
 				p->dmmap_section, "filter_instance", "filter_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;

@@ -1218,7 +1218,7 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	synchronize_specific_config_sections_with_dmmap("network", "route", "dmmap_route_forwarding", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		init_args_ipv4forward(&curr_routefwdargs, p->config_section, "1", ROUTE_STATIC);
-		iroute =  handle_update_instance(1, dmctx, &iroute_last, forwarding_update_instance_alias_bbfdm, 4, p->dmmap_section, "routeinstance", "routealias", &find_max);
+		iroute =  handle_update_instance(2, dmctx, &iroute_last, forwarding_update_instance_alias_bbfdm, 4, p->dmmap_section, "routeinstance", "routealias", &find_max);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, iroute) == DM_STOP)
 			goto end;
 	}
@@ -1226,7 +1226,7 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	synchronize_specific_config_sections_with_dmmap("network", "route_disabled", "dmmap_route_forwarding", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		init_args_ipv4forward(&curr_routefwdargs, p->config_section, "1", ROUTE_DISABLED);
-		iroute =  handle_update_instance(1, dmctx, &iroute_last, forwarding_update_instance_alias_bbfdm, 4, p->dmmap_section, "routeinstance", "routealias", &find_max);
+		iroute =  handle_update_instance(2, dmctx, &iroute_last, forwarding_update_instance_alias_bbfdm, 4, p->dmmap_section, "routeinstance", "routealias", &find_max);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, iroute) == DM_STOP)
 			goto end;
 	}
@@ -1234,7 +1234,7 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	dmmap_synchronizeRoutingRouterIPv4Forwarding(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route_dynamic", ss) {
 		init_args_ipv4forward(&curr_routefwdargs, ss, "0", ROUTE_DYNAMIC);
-		iroute =  handle_update_instance(1, dmctx, &iroute_last, forwarding_update_instance_alias_bbfdm, 4, ss, "routeinstance", "routealias", &find_max);
+		iroute =  handle_update_instance(2, dmctx, &iroute_last, forwarding_update_instance_alias_bbfdm, 4, ss, "routeinstance", "routealias", &find_max);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, iroute) == DM_STOP)
 			goto end;
 	}
@@ -1255,7 +1255,7 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	synchronize_specific_config_sections_with_dmmap("network", "route6", "dmmap_route_forwarding", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		init_args_ipv6forward(&curr_route6fwdargs, p->config_section, "1", ROUTE_STATIC);
-		iroute =  handle_update_instance(1, dmctx, &iroute_last, forwarding6_update_instance_alias_bbfdm, 4, p->dmmap_section, "route6instance", "route6alias", &find_max);
+		iroute =  handle_update_instance(2, dmctx, &iroute_last, forwarding6_update_instance_alias_bbfdm, 4, p->dmmap_section, "route6instance", "route6alias", &find_max);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, iroute) == DM_STOP)
 			goto end;
 	}
@@ -1263,7 +1263,7 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	dmmap_synchronizeRoutingRouterIPv6Forwarding(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route6_dynamic", ss) {
 		init_args_ipv6forward(&curr_route6fwdargs, ss, "0", ROUTE_DYNAMIC);
-		iroute =  handle_update_instance(1, dmctx, &iroute_last, forwarding6_update_instance_alias_bbfdm, 4, ss, "route6instance", "route6alias", &find_max);
+		iroute =  handle_update_instance(2, dmctx, &iroute_last, forwarding6_update_instance_alias_bbfdm, 4, ss, "route6instance", "route6alias", &find_max);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, iroute) == DM_STOP)
 			goto end;
 	}
@@ -1287,7 +1287,7 @@ static int browseRoutingRouteInformationInterfaceSettingInst(struct dmctx *dmctx
 				route_obj = dmjson_select_obj_in_array_idx(res, entries, 1, "route");
 				if(route_obj) {
 					entries++;
-					idx = handle_update_instance(3, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+					idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
 					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)route_obj, idx) == DM_STOP)
 						break;
 				}

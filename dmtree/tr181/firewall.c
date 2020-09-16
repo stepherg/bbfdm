@@ -48,7 +48,7 @@ static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 
 	synchronize_specific_config_sections_with_dmmap("firewall", "rule", "dmmap_firewall", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 3, p->dmmap_section, "firewall_chain_rule_instance", "firewall_chain_rule_alias");
+		instance =  handle_update_instance(2, dmctx, &instnbr, update_instance_alias, 3, p->dmmap_section, "firewall_chain_rule_instance", "firewall_chain_rule_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, instance) == DM_STOP)
 			break;
 	}

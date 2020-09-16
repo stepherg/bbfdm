@@ -318,7 +318,7 @@ static int browseUSBUSBHostsHostDeviceInst(struct dmctx *dmctx, DMNODE *parent_n
 			DMUCI_SET_VALUE_BY_SECTION(bbfdm, p->dm, "usb_host_device_parent_host_instance", parent_host_instance);
 		}
 		port.dmsect= prev_port->dmsect;
-		instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, p->dm, "usb_host_device_instance", "usb_host_device_alias");
+		instance =  handle_update_instance(2, dmctx, &instnbr, update_instance_alias_bbfdm, 3, p->dm, "usb_host_device_instance", "usb_host_device_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, instance) == DM_STOP)
 			break;
 	}
@@ -344,7 +344,7 @@ static int browseUSBUSBHostsHostDeviceConfigurationInst(struct dmctx *dmctx, DMN
 	DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, "usb_parent_device", usb_dev->folder_path);
 
 	init_usb_port(s, usb_dev->folder_name, usb_dev->folder_path, &port);
-	handle_update_instance(1, dmctx, &instnbr, update_instance_alias, 3, s, "usb_device_conf_instance", "usb_device_conf_alias");
+	handle_update_instance(3, dmctx, &instnbr, update_instance_alias, 3, s, "usb_device_conf_instance", "usb_device_conf_alias");
 	DM_LINK_INST_OBJ(dmctx, parent_node, &port, "1");
 	return 0;
 }
@@ -374,7 +374,7 @@ static int browseUSBUSBHostsHostDeviceConfigurationInterfaceInst(struct dmctx *d
 			}
 
 			init_usb_port(dmmap_sect, ent->d_name, sysfs_rep_path, &port);
-			instance =  handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "usb_device_conf_iface_instance", "usb_device_conf_iface_alias");
+			instance =  handle_update_instance(4, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "usb_device_conf_iface_instance", "usb_device_conf_iface_alias");
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, instance) == DM_STOP)
 				break;
 		}

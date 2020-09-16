@@ -38,7 +38,7 @@ static int browseBulkDataProfileParameterInst(struct dmctx *dmctx, DMNODE *paren
 		dmuci_get_value_by_section_string(s, "profile_id", &profile_id);
 		if(strcmp(profile_id, prev_profile_id) != 0)
 			continue;
-		profile_parameter = handle_update_instance(1, dmctx, &profile_parameter_last, update_instance_alias, 3, s, "parameter_instance", "parameter_alias");
+		profile_parameter = handle_update_instance(2, dmctx, &profile_parameter_last, update_instance_alias, 3, s, "parameter_instance", "parameter_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, profile_parameter) == DM_STOP)
 			break;
 	}
@@ -56,7 +56,7 @@ static int browseBulkDataProfileHTTPRequestURIParameterInst(struct dmctx *dmctx,
 		dmuci_get_value_by_section_string(s, "profile_id", &profile_id);
 		if(strcmp(profile_id, prev_profile_id) != 0)
 			continue;
-		profile_http_request_uri_parameter = handle_update_instance(1, dmctx, &profile_http_request_uri_parameter_last, update_instance_alias, 3, s, "requesturiparameter_instance", "requesturiparameter_alias");
+		profile_http_request_uri_parameter = handle_update_instance(2, dmctx, &profile_http_request_uri_parameter_last, update_instance_alias, 3, s, "requesturiparameter_instance", "requesturiparameter_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, profile_http_request_uri_parameter) == DM_STOP)
 			break;
 	}

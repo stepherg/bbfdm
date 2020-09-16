@@ -52,7 +52,7 @@ static int browseGRETunnelInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node
 	list_for_each_entry(p, &dup_list, list) {
 		if ((s = has_tunnel_interface_route(section_name(p->config_section))) == NULL)
 			continue;
-		greiface_inst = handle_update_instance(1, dmctx, &greiface_inst_last, update_instance_alias, 3, p->dmmap_section, "greiface_instance", "greiface_alias");
+		greiface_inst = handle_update_instance(2, dmctx, &greiface_inst_last, update_instance_alias, 3, p->dmmap_section, "greiface_instance", "greiface_alias");
 		p->additional_attribute= dm->config_section;
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, greiface_inst) == DM_STOP)
 			break;

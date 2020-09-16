@@ -2165,7 +2165,7 @@ static int browseBridgingBridgePortInst(struct dmctx *dmctx, DMNODE *parent_node
 		get_bridge_port_device_section(s, &deviceport_s);
 		dmuci_get_value_by_section_string(s, "device", &device);
 		init_bridge_port_args(&curr_bridge_port_args, deviceport_s, s, br_args->bridge_sec, device, br_args->br_inst);
-		port_inst = handle_update_instance(1, dmctx, &port_last, update_instance_alias_bbfdm, 3, s, "bridge_port_instance", "bridge_port_alias");
+		port_inst = handle_update_instance(2, dmctx, &port_last, update_instance_alias_bbfdm, 3, s, "bridge_port_instance", "bridge_port_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_port_args, port_inst) == DM_STOP)
 			break;
 	}
@@ -2183,7 +2183,7 @@ static int browseBridgingBridgeVLANInst(struct dmctx *dmctx, DMNODE *parent_node
 	dmmap_synchronizeBridgingBridgeVLAN(dmctx, parent_node, prev_data, prev_instance);
 	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_vlan", "bridge_vlan", "br_inst", br_args->br_inst, s) {
 		init_bridge_vlan_args(&curr_bridge_vlan_args, s, br_args->bridge_sec, br_args->br_inst);
-		vlan_inst = handle_update_instance(1, dmctx, &vlan_last, update_instance_alias_bbfdm, 3, s, "bridge_vlan_instance", "bridge_vlan_alias");
+		vlan_inst = handle_update_instance(2, dmctx, &vlan_last, update_instance_alias_bbfdm, 3, s, "bridge_vlan_instance", "bridge_vlan_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_vlan_args, vlan_inst) == DM_STOP)
 			break;
 	}
@@ -2202,7 +2202,7 @@ static int browseBridgingBridgeVLANPortInst(struct dmctx *dmctx, DMNODE *parent_
 	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_vlanport", "bridge_vlanport", "br_inst", br_args->br_inst, s) {
 		get_bridge_vlanport_device_section(s, &device_s);
 		init_bridge_vlanport_args(&curr_bridge_vlanport_args, device_s, s, br_args->bridge_sec, br_args->br_inst);
-		vlanport_inst = handle_update_instance(1, dmctx, &vlanport_last, update_instance_alias_bbfdm, 3, s, "bridge_vlanport_instance", "bridge_vlanport_alias");
+		vlanport_inst = handle_update_instance(2, dmctx, &vlanport_last, update_instance_alias_bbfdm, 3, s, "bridge_vlanport_instance", "bridge_vlanport_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_vlanport_args, vlanport_inst) == DM_STOP)
 			break;
 	}

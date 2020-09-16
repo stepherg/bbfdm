@@ -538,7 +538,7 @@ int os__browseWifiNeighboringWiFiDiagnosticResultInst(struct dmctx *dmctx, DMNOD
 		dmubus_call(object, "scanresults", UBUS_ARGS{}, 0, &res);
 		if (res) {
 			dmjson_foreach_obj_in_array(res, arrobj, accesspoints, i, 1, "accesspoints") {
-				idx = handle_update_instance(3, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+				idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)accesspoints, idx) == DM_STOP)
 					return 0;
 			}
@@ -626,7 +626,7 @@ int os__browse_wifi_associated_device(struct dmctx *dmctx, DMNODE *parent_node, 
 	dmubus_call(object, "stations", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, stations, i, 1, "stations") {
-			idx = handle_update_instance(3, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+			idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, ++id);
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)stations, idx) == DM_STOP)
 				return 0;
 		}

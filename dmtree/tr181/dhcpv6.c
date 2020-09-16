@@ -189,7 +189,7 @@ static int browseDHCPv6ServerPoolClientInst(struct dmctx *dmctx, DMNODE *parent_
 		if (!jobj) break;
 		init_dhcpv6_client_args(&curr_dhcp_client_args, jobj, NULL, i);
 		i++;
-		idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, i);
+		idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, i);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcp_client_args, idx) == DM_STOP)
 			break;
 	}
@@ -259,7 +259,7 @@ static int browseDHCPv6ServerPoolClientIPv6AddressInst(struct dmctx *dmctx, DMNO
 			break;
 		init_dhcpv6_client_args(&curr_dhcv6_address_args, dhcpv6_serv_pool_client->client, address_obj, i);
 		i++;
-		idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, i);
+		idx = handle_update_instance(3, dmctx, &idx_last, update_instance_without_section, 1, i);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcv6_address_args, idx) == DM_STOP)
 			break;
 	}
@@ -281,7 +281,7 @@ static int browseDHCPv6ServerPoolClientIPv6PrefixInst(struct dmctx *dmctx, DMNOD
 			break;
 		init_dhcpv6_client_args(&curr_dhcv6_address_args, dhcpv6_serv_pool_client->client, address_obj, i);
 		i++;
-		idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, i);
+		idx = handle_update_instance(3, dmctx, &idx_last, update_instance_without_section, 1, i);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcv6_address_args, idx) == DM_STOP)
 			break;
 	}

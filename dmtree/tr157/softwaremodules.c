@@ -66,7 +66,7 @@ static int browseSoftwareModulesDeploymentUnitInst(struct dmctx *dmctx, DMNODE *
 	dmubus_call("swmodules", "du_list", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, du_obj, j, 1, "deployment_unit") {
-			idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+			idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, idx) == DM_STOP)
 				break;
 		}
@@ -83,7 +83,7 @@ static int browseSoftwareModulesExecutionUnitInst(struct dmctx *dmctx, DMNODE *p
 	dmubus_call("swmodules", "eu_list", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, du_obj, j, 1, "execution_unit") {
-			idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+			idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, idx) == DM_STOP)
 				break;
 		}

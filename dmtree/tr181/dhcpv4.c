@@ -2612,7 +2612,7 @@ static int browseDhcpClientIPv4Inst(struct dmctx *dmctx, DMNODE *parent_node, vo
 {
 	char *idx, *idx_last = NULL;
 
-	idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, 1);
+	idx = handle_update_instance(3, dmctx, &idx_last, update_instance_without_section, 1, 1);
 	DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, idx);
 	return 0;
 }
@@ -2725,7 +2725,7 @@ static int browseDHCPv4ClientSentOptionInst(struct dmctx *dmctx, DMNODE *parent_
 		dhcp_client_opt_args.value= dmstrdup(v2);
 		dhcp_client_opt_args.opt_sect= dmmap_sect;
 
-		instance = handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "bbf_dhcpv4_sentopt_instance", "bbf_dhcpv4_sentopt_alias");
+		instance = handle_update_instance(2, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "bbf_dhcpv4_sentopt_instance", "bbf_dhcpv4_sentopt_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &dhcp_client_opt_args, instance) == DM_STOP)
 			break;
 	}
@@ -2760,7 +2760,7 @@ static int browseDHCPv4ClientReqOptionInst(struct dmctx *dmctx, DMNODE *parent_n
 		dhcp_client_opt_args.value = dmstrdup("");
 		dhcp_client_opt_args.opt_sect = dmmap_sect;
 
-		instance = handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "bbf_dhcpv4_reqtopt_instance", "bbf_dhcpv4_reqtopt_alias");
+		instance = handle_update_instance(2, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "bbf_dhcpv4_reqtopt_instance", "bbf_dhcpv4_reqtopt_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &dhcp_client_opt_args, instance) == DM_STOP)
 			break;
 	}
@@ -2808,7 +2808,7 @@ static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 		dhcp_client_opt_args.option_tag = dmstrdup(v1);
 		dhcp_client_opt_args.value = dmstrdup(v2);
 		dhcp_client_opt_args.opt_sect = dmmap_sect;
-		instance = handle_update_instance(1, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "bbf_dhcpv4_servpool_option_instance", "bbf_dhcpv4_servpool_option_alias");
+		instance = handle_update_instance(2, dmctx, &instnbr, update_instance_alias_bbfdm, 3, dmmap_sect, "bbf_dhcpv4_servpool_option_instance", "bbf_dhcpv4_servpool_option_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &dhcp_client_opt_args, instance) == DM_STOP)
 			break;
 	}

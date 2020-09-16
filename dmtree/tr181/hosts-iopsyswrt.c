@@ -40,7 +40,7 @@ int os__browseHostsHostIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node,
 	int id = 0, i = 0;
 
 	dmjson_foreach_value_in_array(host_obj, ip_arr, ipv4addr, i, 1, "ipv4addr") {
-		idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+		idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv4addr, idx) == DM_STOP)
 			break;
 	}
@@ -55,7 +55,7 @@ int os__browseHostsHostIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node,
 	int id = 0, i = 0;
 
 	dmjson_foreach_value_in_array(host_obj, ip_arr, ipv6addr, i, 1, "ipv6addr") {
-		idx = handle_update_instance(1, dmctx, &idx_last, update_instance_without_section, 1, ++id);
+		idx = handle_update_instance(2, dmctx, &idx_last, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv6addr, idx) == DM_STOP)
 			break;
 	}
