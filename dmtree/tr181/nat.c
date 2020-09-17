@@ -82,9 +82,7 @@ static int add_NAT_PortMapping(char *refparam, struct dmctx *ctx, void *data, ch
 	snprintf(name, sizeof(name), "port_map_%d", inst ? (atoi(inst)+1) : 1);
 	dmuci_add_section_and_rename("firewall", "redirect", &s, &value);
 	dmuci_set_value_by_section(s, "name", name);
-	dmuci_set_value_by_section(s, "src", "wan");
 	dmuci_set_value_by_section(s, "target", "DNAT");
-	dmuci_set_value_by_section(s, "dest", "lan");
 	dmuci_set_value_by_section(s, "enabled", "0");
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "redirect", &dmmap_firewall, &v);
@@ -222,7 +220,7 @@ static int set_nat_interface_setting_alias(char *refparam, struct dmctx *ctx, vo
 
 static int get_nat_interface_setting_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_list *v;
+	struct uci_list *v = NULL;
 	struct uci_element *e;
 	char *ifaceobj, buf[256] = "";
 
@@ -335,7 +333,7 @@ static int set_nat_port_mapping_alias(char *refparam, struct dmctx *ctx, void *d
 static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
-	struct uci_list *v;
+	struct uci_list *v = NULL;
 	struct uci_element *e;
 	char *zone, *name, *ifaceobj, buf[256] = "";
 
