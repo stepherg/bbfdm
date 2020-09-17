@@ -25,10 +25,12 @@ static int browseServicesVoiceServicePOTSFXSInst(struct dmctx *dmctx, DMNODE *pa
 	list_for_each_entry(p, &dup_list, list) {
 		char *line_name = NULL;
 
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 5, p->dmmap_section,
-					"fxsinstance", "fxsalias", "dmmap_asterisk", "tel_line");
 		dmuci_get_value_by_section_string(p->config_section, "name", &line_name);
-		if (line_name == NULL || strcasestr(line_name, "DECT") == NULL) {
+		if (*line_name == '\0' || strcasestr(line_name, "DECT") == NULL) {
+
+			inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 5, p->dmmap_section,
+					"fxsinstance", "fxsalias", "dmmap_asterisk", "tel_line");
+
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 				break;
 		}
