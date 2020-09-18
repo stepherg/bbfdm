@@ -20,11 +20,11 @@ static int get_reserved_port_range(char **value)
 
 	dmuci_get_option_value_string("asterisk", "sip_options", "rtpstart", &start);
 	dmuci_get_option_value_string("asterisk", "sip_options", "rtpend", &end);
-	if (start && *start && end && *end)
+	if (start && *start && end && *end) {
 		dmasprintf(value, "%s-%s", start, end);
-
-	dmfree(start);
-	dmfree(end);
+		dmfree(start);
+		dmfree(end);
+	}
 
 	return 0;
 }

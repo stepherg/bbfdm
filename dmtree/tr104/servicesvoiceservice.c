@@ -240,8 +240,8 @@ static int set_service_alias(char *refparam, struct dmctx *ctx, void *data, char
 ***********************************************************************************************************************************/
 /* *** Device.Services. *** */
 DMOBJ tServicesObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"VoiceService", &DMREAD, NULL, NULL, NULL, browseVoiceServiceInst, NULL, NULL, NULL, tServicesVoiceServiceObj, tServicesVoiceServiceParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+{"VoiceService", &DMREAD, NULL, NULL, "file:/etc/config/asterisk", browseVoiceServiceInst, NULL, NULL, NULL, tServicesVoiceServiceObj, tServicesVoiceServiceParams, NULL, BBFDM_BOTH},
 {0}
 };
 
