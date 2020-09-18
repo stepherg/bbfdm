@@ -62,7 +62,7 @@ static int browseGRETunnelInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node
 		browse_args.option = "section_name";
 		browse_args.value = section_name(dm->config_section);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
 			   p->dmmap_section, "greiface_instance", "greiface_alias", "dmmap_network", "interface",
 			   check_browse_section, (void *)&browse_args);
 

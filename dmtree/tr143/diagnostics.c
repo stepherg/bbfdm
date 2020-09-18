@@ -1980,7 +1980,7 @@ static int browseIPDiagnosticsTraceRouteRouteHopsInst(struct dmctx *dmctx, DMNOD
 
 	uci_foreach_sections_state("cwmp", "RouteHops", s) {
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
 				   (void *)s, "routehop_instance", "routehop_alias", "cwmp", "RouteHops");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
@@ -1996,7 +1996,7 @@ static int browseIPDiagnosticsDownloadDiagnosticsPerConnectionResultInst(struct 
 
 	uci_foreach_sections_state("cwmp", "DownloadPerConnection", s) {
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
 				   (void *)s, "perconnection_instance", "perconnection_alias", "cwmp", "DownloadPerConnection");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
@@ -2012,7 +2012,7 @@ static int browseIPDiagnosticsUploadDiagnosticsPerConnectionResultInst(struct dm
 
 	uci_foreach_sections_state("cwmp", "UploadPerConnection", s) {
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
 				   (void *)s, "perconnection_instance", "perconnection_alias", "cwmp", "UploadPerConnection");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)

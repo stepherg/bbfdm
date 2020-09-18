@@ -152,7 +152,7 @@ static int browseResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 
 	uci_foreach_sections_state("cwmp", "NSLookupResult", s) {
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
 			   s, "nslookup_res_instance", "nslookup_res_alias", "cwmp", "NSLookupResult");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)

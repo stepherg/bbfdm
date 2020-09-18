@@ -2276,7 +2276,7 @@ static int browseBridgingBridgePortInst(struct dmctx *dmctx, DMNODE *parent_node
 		browse_args.option = "br_inst";
 		browse_args.value = br_args->br_inst;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
 					s, "bridge_port_instance", "bridge_port_alias", "dmmap_bridge_port", "bridge_port",
 					check_browse_section, (void *)&browse_args);
 
@@ -2302,7 +2302,7 @@ static int browseBridgingBridgeVLANInst(struct dmctx *dmctx, DMNODE *parent_node
 		browse_args.option = "br_inst";
 		browse_args.value = br_args->br_inst;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
 					s, "bridge_vlan_instance", "bridge_vlan_alias", "dmmap_bridge_vlanport", "bridge_vlan",
 					check_browse_section, (void *)&browse_args);
 
@@ -2329,7 +2329,7 @@ static int browseBridgingBridgeVLANPortInst(struct dmctx *dmctx, DMNODE *parent_
 		browse_args.option = "br_inst";
 		browse_args.value = br_args->br_inst;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
 						s, "bridge_vlanport_instance", "bridge_vlanport_alias", "dmmap_bridge_vlanport", "bridge_vlanport",
 						check_browse_section, (void *)&browse_args);
 

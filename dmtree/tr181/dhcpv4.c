@@ -2635,7 +2635,7 @@ static int browseDhcpClientIPv4Inst(struct dmctx *dmctx, DMNODE *parent_node, vo
 {
 	char *inst, *max_inst = NULL;
 
-	inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, 1);
+	inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, 1);
 	DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, inst);
 	return 0;
 }
@@ -2754,7 +2754,7 @@ static int browseDHCPv4ClientSentOptionInst(struct dmctx *dmctx, DMNODE *parent_
 		browse_args.option = "section_name";
 		browse_args.value = section_name(dhcp_client_args->dhcp_client_conf);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
 			   dmmap_sect, "bbf_dhcpv4_sentopt_instance", "bbf_dhcpv4_sentopt_alias", "dmmap_dhcp_client", "send_option",
 			   check_browse_section, (void *)&browse_args);
 
@@ -2796,7 +2796,7 @@ static int browseDHCPv4ClientReqOptionInst(struct dmctx *dmctx, DMNODE *parent_n
 		browse_args.option = "section_name";
 		browse_args.value = section_name(dhcp_client_args->dhcp_client_conf);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
 			   dmmap_sect, "bbf_dhcpv4_reqtopt_instance", "bbf_dhcpv4_reqtopt_alias", "dmmap_dhcp_client", "req_option",
 			   check_browse_section, (void *)&browse_args);
 
@@ -2852,7 +2852,7 @@ static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 		browse_args.option = "section_name";
 		browse_args.value = section_name(curr_dhcp_args->dhcp_sec);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
 			   dmmap_sect, "bbf_dhcpv4_servpool_option_instance", "bbf_dhcpv4_servpool_option_alias", "dmmap_dhcp", "servpool_option",
 			   check_browse_section, (void *)&browse_args);
 
