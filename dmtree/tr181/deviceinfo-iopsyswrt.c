@@ -198,7 +198,7 @@ int os__browseProcessEntriesInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 	dmubus_call("router.system", "processes", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, processes, i, 1, "processes") {
-			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)processes, inst) == DM_STOP)
 				break;
 		}

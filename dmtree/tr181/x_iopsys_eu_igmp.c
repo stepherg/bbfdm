@@ -589,7 +589,7 @@ static int browse_igmps_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		browse_args.option = "section_name";
 		browse_args.value = section_name((struct uci_section *)prev_data);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
 			   p->dmmap_section, "filter_instance", "filter_alias", "dmmap_mcast", "snooping_filter",
 			   check_browse_section, (void *)&browse_args);
 
@@ -1081,7 +1081,7 @@ static int browse_igmpp_interface_inst(struct dmctx *dmctx, DMNODE *parent_node,
 		browse_args.option = "section_name";
 		browse_args.value = section_name((struct uci_section *)prev_data);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
 			   p->dmmap_section, "iface_instance", "iface_alias", "dmmap_mcast", "proxy_interface",
 			   check_browse_section, (void *)&browse_args);
 
@@ -1176,7 +1176,7 @@ static int browse_igmpp_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		browse_args.option = "section_name";
 		browse_args.value = section_name((struct uci_section *)prev_data);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
 			   p->dmmap_section, "filter_instance", "filter_alias", "dmmap_mcast", "proxy_filter",
 			   check_browse_section, (void *)&browse_args);
 

@@ -2245,7 +2245,7 @@ static int browseWiFiEndPointProfileInst(struct dmctx *dmctx, DMNODE *parent_nod
 		dmuci_add_section_bbfdm("dmmap_wireless", "ep_profile", &s, &v);
 	DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, "ep_key", ep_instance);
 
-	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+	handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
 			s, "ep_profile_instance", "ep_profile_alias", "dmmap_wireless", "wifi-iface");
 
 	DM_LINK_INST_OBJ(dmctx, parent_node, ep_args->wifi_enp_sec, "1");
