@@ -328,7 +328,7 @@ static int get_WiFiRadio_MaxSupportedAssociations(char *refparam, struct dmctx *
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.FragmentationThreshold!UCI:wireless/wifi-device,@i-1/frag*/
+/*#Device.WiFi.Radio.{i}.FragmentationThreshold!UCI:wireless/wifi-device,@i-1/frag_threshold*/
 static int get_WiFiRadio_FragmentationThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "frag_threshold", "2346");
@@ -349,7 +349,7 @@ static int set_WiFiRadio_FragmentationThreshold(char *refparam, struct dmctx *ct
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.RTSThreshold!UCI:wireless/wifi-device,@i-1/rts*/
+/*#Device.WiFi.Radio.{i}.RTSThreshold!UCI:wireless/wifi-device,@i-1/rts_threshold*/
 static int get_WiFiRadio_RTSThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "rts_threshold", "2347");
@@ -458,7 +458,7 @@ static int set_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx 
 static int get_WiFiRadio_PreambleType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "short_preamble", value);
-	*value = ((*value)[0] == '0') ? "short" : "long";
+	*value = ((*value)[0] == '1') ? "short" : "long";
 	return 0;
 }
 
