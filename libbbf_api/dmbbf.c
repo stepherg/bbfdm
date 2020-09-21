@@ -940,14 +940,16 @@ int bbf_api_dm_update_file_enabled_notify(char *param, char *new_value)
 		if (len)
 			buf[len-1] = '\0';
 		bbf_api_dmjson_parse_init(buf);
-		bbf_api_dmjson_get_var("parameter", &jval);
-		parameter = dmstrdup(jval);
-		bbf_api_dmjson_get_var("value", &jval);
-		value = dmstrdup(jval);
-		bbf_api_dmjson_get_var("notification", &jval);
-		notification = dmstrdup(jval);
-		bbf_api_dmjson_get_var("type", &jval);
-		type = dmstrdup(jval);
+		bbf_api_dmjson_get_string("parameter", &jval);
+		if (jval == NULL || strlen(jval) == 0)
+			continue;
+		parameter = dmstrdup(jval?jval:"");
+		bbf_api_dmjson_get_string("value", &jval);
+		value = dmstrdup(jval?jval:"");
+		bbf_api_dmjson_get_string("notification", &jval);
+		notification = dmstrdup(jval?jval:"");
+		bbf_api_dmjson_get_string("type", &jval);
+		type = dmstrdup(jval?jval:"");
 		bbf_api_dmjson_parse_fini();
 		if (strcmp(parameter, param) == 0)
 			dmjson_fprintf(ftmp, 4, DMJSON_ARGS{{"parameter", parameter}, {"notification", notification}, {"value", new_value}, {"type", type}});
@@ -1982,12 +1984,14 @@ int dm_entry_enabled_notify_check_value_change(struct dmctx *dmctx, void (*add_l
 		if (len)
 			buf[len-1] = '\0';
 		bbf_api_dmjson_parse_init(buf);
-		bbf_api_dmjson_get_var("parameter", &jval);
-		dmctx->in_param = dmstrdup(jval);
-		bbf_api_dmjson_get_var("value", &jval);
-		dmctx->in_value = dmstrdup(jval);
-		bbf_api_dmjson_get_var("notification", &jval);
-		dmctx->in_notification = dmstrdup(jval);
+		bbf_api_dmjson_get_string("parameter", &jval);
+		if (jval == NULL || strlen(jval) == 0)
+			continue;
+		dmctx->in_param = dmstrdup(jval?jval:"");
+		bbf_api_dmjson_get_string("value", &jval);
+		dmctx->in_value = dmstrdup(jval?jval:"");
+		bbf_api_dmjson_get_string("notification", &jval);
+		dmctx->in_notification = dmstrdup(jval?jval:"");
 		bbf_api_dmjson_parse_fini();
 		dmctx->checkobj = NULL ;
 		dmctx->checkleaf = NULL;
@@ -2007,15 +2011,14 @@ static int enabled_notify_check_value_change_obj(DMOBJECT_ARGS)
 static int enabled_notify_check_value_change_param(DMPARAM_ARGS)
 {
 	char *refparam, *value = "";
-
 	dmastrcat(&refparam, node->current_object, lastname);
 	if (strcmp(refparam, dmctx->in_param) != 0) {
 		dmfree(refparam);
 		return FAULT_9005;
 	}
 	(get_cmd)(refparam, dmctx, data, instance, &value);
-
-	if (strcmp(value, dmctx->in_value) != 0) {
+	
+	if (value && strcmp(value, dmctx->in_value) != 0) {
 		if (api_add_list_value_change) {
 			api_add_list_value_change(refparam, value, DMT_TYPE[type]);
 		}

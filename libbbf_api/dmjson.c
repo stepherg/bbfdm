@@ -6,6 +6,7 @@
  * as published by the Free Software Foundation
  *
  *	  Author: MOHAMED Kallel <mohamed.kallel@pivasoftware.com>
+ *	  Authro: Omar Kallel <omar.kallel@pivasoftware.com>
  *
  */
 
@@ -15,8 +16,10 @@ static json_object *dmjson_jobj = NULL;
 
 void dm_add_json_obj(json_object *json_obj_out, char *object, char *string)
 {
-	json_object *json_obj_tmp = json_object_new_string(string);
-	json_object_object_add(json_obj_out, object, json_obj_tmp);
+	if (object != NULL && string != NULL) {
+		json_object *json_obj_tmp = json_object_new_string(string);
+		json_object_object_add(json_obj_out, object, json_obj_tmp);
+	}
 }
 
 static void inline __dmjson_fprintf(FILE *fp, int argc, struct dmjson_arg dmarg[])
@@ -288,5 +291,17 @@ void bbf_api_dmjson_get_var(char *jkey, char **jval)
 			*jval = dmjson_print_value(val);
 			return;
 		}
+	}
+}
+
+void bbf_api_dmjson_get_string(char *jkey, char **jval)
+{
+	*jval = "";
+	if (dmjson_jobj == NULL)
+		return;
+
+	struct json_object *get_obj = json_object_object_get(dmjson_jobj, jkey);
+	if (get_obj) {
+		*jval = json_object_get_string(get_obj);
 	}
 }
