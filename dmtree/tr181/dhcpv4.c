@@ -1247,6 +1247,30 @@ end:
 	return 0;
 }
 
+/*#Device.DHCPv4.Server.Pool.{i}.StaticAddress.{i}.Enable!UCI:dhcp/host,@i-1/enable*/
+static int get_dhcp_static_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dhcp_static_args *)data)->dhcpsection, "enable", "1");
+	return 0;
+}
+
+static int set_dhcp_static_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section(((struct dhcp_static_args *)data)->dhcpsection, "enable", b ? "1" : "0");
+			return 0;
+	}
+	return 0;
+}
+
 /*#Device.DHCPv4.Server.Pool.{i}.StaticAddress.{i}.Alias!UCI:dmmap_dhcp/host,@i-1/ldhcpalias*/
 static int get_dhcp_static_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -3095,6 +3119,7 @@ DMLEAF tDHCPv4ServerPoolParams[] = {
 /*** DHCPv4.Server.Pool.{i}.StaticAddress.{i}. ***/
 DMLEAF tDHCPv4ServerPoolStaticAddressParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_dhcp_static_enable, set_dhcp_static_enable, NULL, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_dhcp_static_alias, set_dhcp_static_alias, NULL, NULL, BBFDM_BOTH},
 {"Chaddr", &DMWRITE, DMT_STRING,  get_dhcp_staticaddress_chaddr, set_dhcp_staticaddress_chaddr, NULL, NULL, BBFDM_BOTH},
 {"Yiaddr", &DMWRITE, DMT_STRING,  get_dhcp_staticaddress_yiaddr, set_dhcp_staticaddress_yiaddr, NULL, NULL, BBFDM_BOTH},

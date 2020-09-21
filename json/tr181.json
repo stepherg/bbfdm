@@ -56843,7 +56843,22 @@
 								"cwmp", 
 								"usp"
 							], 
-							"datatype": "boolean"
+							"datatype": "boolean",
+							"mapping": [
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "dhcp", 
+										"section": {
+											"type": "host", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "enable"
+										}
+									}
+								}
+							]
 						}, 
 						"Alias": {
 							"type": "string", 
