@@ -132,3 +132,8 @@ void dm_update_enabled_notify(struct dm_enabled_notify *p, char *new_value)
 	free(p->value); // Should be free and not dmfree
 	p->value = strdup(new_value);
 }
+
+void dmjson_get_string(char *jkey, char **jval)
+{
+	bbf_api_dmjson_get_string(jkey, jval);
+}
