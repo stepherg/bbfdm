@@ -68,6 +68,46 @@ static int browseServicesVoiceServiceCallControlOutgoingMapInst(struct dmctx *dm
 	return 0;
 }
 
+/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.!UCI:asterisk/tel_advanced/dmmap_asterisk*/
+static int browseServicesVoiceServiceCallControlNumberingPlanInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL, *max_inst = NULL;
+	struct dmmap_dup *p;
+	LIST_HEAD(dup_list);
+
+	synchronize_specific_config_sections_with_dmmap("asterisk", "tel_advanced", "dmmap_asterisk", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "numberingplaninstance", "numberingplanalias", "dmmap_asterisk", "tel_advanced");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.!UCI:asterisk/advanced_features/dmmap_asterisk*/
+static int browseServicesVoiceServiceCallControlCallingFeaturesSetInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL, *max_inst = NULL;
+	struct dmmap_dup *p;
+	LIST_HEAD(dup_list);
+
+	synchronize_specific_config_sections_with_dmmap("asterisk", "advanced_features", "dmmap_asterisk", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "setinstance", "setalias", "dmmap_asterisk", "advanced_features");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
 /*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.SCREJ.{i}.!UCI:asterisk/call_filter_rule_incoming/dmmap_asterisk*/
 static int browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -143,50 +183,13 @@ static int delObjServicesVoiceServiceCallControlNumberingPlan(char *refparam, st
 
 static int addObjServicesVoiceServiceCallControlCallingFeaturesSet(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *value, *v;
-	struct uci_section *dmmap = NULL, *s = NULL;
-
-	check_create_dmmap_package("dmmap_asterisk");
-	inst = get_last_instance_bbfdm("dmmap_asterisk", "advanced_features", "setinstance");
-	dmuci_add_section_and_rename("asterisk", "advanced_features", &s, &value);
-
-	dmuci_add_section_bbfdm("dmmap_asterisk", "advanced_features", &dmmap, &v);
-	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 4, dmmap, "setinstance", "dmmap_asterisk", "advanced_features");
+	TR104_DEBUG("VoiceService.1.CallControl.CallingFeatures.Set. has only one instance so it can't be added or deleted\n");
 	return 0;
 }
 
 static int delObjServicesVoiceServiceCallControlCallingFeaturesSet(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;
-	int found = 0;
-
-	switch (del_action) {
-		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_asterisk", "advanced_features", section_name((struct uci_section *)data), &dmmap_section);
-			if (dmmap_section != NULL)
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
-			break;
-		case DEL_ALL:
-			uci_foreach_sections("asterisk", "advanced_features", s) {
-				if (found != 0) {
-					get_dmmap_section_of_config_section("dmmap_asterisk", "advanced_features", section_name(ss), &dmmap_section);
-					if (dmmap_section != NULL)
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = s;
-				found++;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_asterisk", "advanced_features", section_name(ss), &dmmap_section);
-				if (dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
-			}
-			break;
-	}
+	TR104_DEBUG("VoiceService.1.CallControl.CallingFeatures.Set. has only one instance so it can't be added or deleted\n");
 	return 0;
 }
 
@@ -294,42 +297,114 @@ static int set_ServicesVoiceServiceCallControlLine_DirectoryNumber(char *refpara
 }
 
 /*#Device.Services.VoiceService.{i}.CallControl.Line.{i}.Provider!UCI:asterisk/tel_line,@i-1/sip_account*/
+#define SIP_CLIENT_PATH "Device.Services.VoiceService.1.SIP.Client."
+#define SIP_CLIENT_PATH_LEN strlen(SIP_CLIENT_PATH)
 static int get_ServicesVoiceServiceCallControlLine_Provider(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "sip_account", value);
+	char *tmp = NULL;
+
+	*value = "";
+	dmuci_get_value_by_section_string((struct uci_section *)data, "sip_account", &tmp);
+	if (tmp && strlen(tmp) > 3 && strncmp(tmp, "sip", 3) == 0) {
+		dmasprintf(value, SIP_CLIENT_PATH"%d", atoi(tmp + 3) + 1);
+		dmfree(tmp);
+	}
 	return 0;
 }
 
 static int set_ServicesVoiceServiceCallControlLine_Provider(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *tmp;
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
-			break;
+			if (strlen(value) > SIP_CLIENT_PATH_LEN &&
+				strncmp(value, SIP_CLIENT_PATH, SIP_CLIENT_PATH_LEN) == 0 &&
+				atoi(value + SIP_CLIENT_PATH_LEN) > 0) {
+				return 0;
+			}
+			return FAULT_9007;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "sip_account", value);
+			dmasprintf(&tmp, "sip%d", atoi(value + SIP_CLIENT_PATH_LEN) - 1);
+			dmuci_set_value_by_section((struct uci_section *)data, "sip_account", tmp);
 			break;
 	}
 	return 0;
 }
 
 /*#Device.Services.VoiceService.{i}.CallControl.IncomingMap.{i}.Line!UCI:asterisk/sip_service_provider,@i-1/call_lines*/
+#define CALL_CONTROL_LINE "Device.Services.VoiceService.1.CallControl.Line."
+#define CALL_CONTROL_LINE_LEN strlen(CALL_CONTROL_LINE)
 static int get_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "call_lines", value);
+	char *tmp = NULL;
+	char buf[256] = "";
+
+	*value = "";
+	dmuci_get_value_by_section_string((struct uci_section *)data, "call_lines", &tmp);
+	if (tmp && *tmp) {
+		char *token, *saveptr;
+		int len = 0;
+		for (token = strtok_r(tmp, " ", &saveptr); token; token = strtok_r(NULL, " ", &saveptr)) {
+			int line_index = atoi(token);
+			if (line_index >= 0 && len < sizeof(buf)) {
+				int res = snprintf(buf + len, sizeof(buf) - len, "%s"CALL_CONTROL_LINE"%d",
+						len == 0 ? "" : ",", line_index + 1);
+				if (res <= 0) {
+					TR104_DEBUG("buf might be too small\n");
+					dmfree(tmp);
+					return FAULT_9002;
+				}
+				len += res;
+			}
+		}
+		if (buf[0] != '\0')
+			*value = dmstrdup(buf);
+		dmfree(tmp);
+	}
 	return 0;
 }
 
 static int set_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *token, *saveptr, *dup;
+	char buf[256] = "";
+	int len = 0;
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
+			// Duplicate the original value because strtok_r() might truncate it if there are multiple lines to set
+			if ((dup = dmstrdup(value)) == NULL)
+				return FAULT_9002;
+			for (token = strtok_r(dup, ", ", &saveptr); token; token = strtok_r(NULL, ", ", &saveptr)) {
+				if (strlen(token) <= CALL_CONTROL_LINE_LEN ||
+					strncmp(token, CALL_CONTROL_LINE, CALL_CONTROL_LINE_LEN) != 0 ||
+					atoi(token + CALL_CONTROL_LINE_LEN) <= 0) {
+					TR104_DEBUG("wrong CallControl.Line format: [%s]\n", token);
+					dmfree(dup);
+					return FAULT_9007;
+				}
+			}
+			dmfree(dup);
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "call_lines", value);
+			for (token = strtok_r(value, ", ", &saveptr); token; token = strtok_r(NULL, ", ", &saveptr)) {
+				int inst = atoi(token + CALL_CONTROL_LINE_LEN);
+				if (inst > 0 && len < sizeof(buf)) {
+					int res = snprintf(buf + len, sizeof(buf) - len, "%s%d", len == 0 ? "" : " ", inst - 1);
+					if (res <= 0) {
+						TR104_DEBUG("buf might be too small\n");
+						return FAULT_9002;
+					}
+					len += res;
+				}
+			}
+			if (buf[0] != '\0')
+				dmuci_set_value_by_section((struct uci_section *)data, "call_lines", buf);
 			break;
 	}
 	return 0;
@@ -458,7 +533,7 @@ DMOBJ tServicesVoiceServiceCallControlObj[] = {
 {"Line", &DMWRITE, addObjServicesVoiceServiceCallControlLine, delObjServicesVoiceServiceCallControlLine, NULL, browseServicesVoiceServiceCallControlLineInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineParams, NULL, BBFDM_BOTH},
 {"IncomingMap", &DMWRITE, addObjServicesVoiceServiceCallControlIncomingMap, delObjServicesVoiceServiceCallControlIncomingMap, NULL, browseServicesVoiceServiceCallControlIncomingMapInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlIncomingMapParams, NULL, BBFDM_BOTH},
 {"OutgoingMap", &DMWRITE, addObjServicesVoiceServiceCallControlOutgoingMap, delObjServicesVoiceServiceCallControlOutgoingMap, NULL, browseServicesVoiceServiceCallControlOutgoingMapInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlOutgoingMapParams, NULL, BBFDM_BOTH},
-{"NumberingPlan", &DMWRITE, addObjServicesVoiceServiceCallControlNumberingPlan, delObjServicesVoiceServiceCallControlNumberingPlan, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlNumberingPlanParams, NULL, BBFDM_BOTH},
+{"NumberingPlan", &DMWRITE, addObjServicesVoiceServiceCallControlNumberingPlan, delObjServicesVoiceServiceCallControlNumberingPlan, NULL, browseServicesVoiceServiceCallControlNumberingPlanInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlNumberingPlanParams, NULL, BBFDM_BOTH},
 {"CallingFeatures", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesObj, NULL, NULL, BBFDM_BOTH},
 {0}
 };
@@ -498,7 +573,7 @@ DMLEAF tServicesVoiceServiceCallControlNumberingPlanParams[] = {
 /* *** Device.Services.VoiceService.{i}.CallControl.CallingFeatures. *** */
 DMOBJ tServicesVoiceServiceCallControlCallingFeaturesObj[] = {
 /* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Set", &DMWRITE, addObjServicesVoiceServiceCallControlCallingFeaturesSet, delObjServicesVoiceServiceCallControlCallingFeaturesSet, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesSetObj, tServicesVoiceServiceCallControlCallingFeaturesSetParams, NULL, BBFDM_BOTH},
+{"Set", &DMWRITE, addObjServicesVoiceServiceCallControlCallingFeaturesSet, delObjServicesVoiceServiceCallControlCallingFeaturesSet, NULL, browseServicesVoiceServiceCallControlCallingFeaturesSetInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesSetObj, tServicesVoiceServiceCallControlCallingFeaturesSetParams, NULL, BBFDM_BOTH},
 {0}
 };
 

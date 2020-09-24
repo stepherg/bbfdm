@@ -142,19 +142,33 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_TelephoneEventPayloadType(char
 /*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.JitterBufferType!UCI:asterisk/tel_advanced,tel_options/jbimpl*/
 static int get_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "tel_options", "jbimpl", value);
+	char *tmp = NULL;
+
+	dmuci_get_option_value_string("asterisk", "tel_options", "jbimpl", &tmp);
+	if (tmp && *tmp) {
+		if (strcasecmp(tmp, "adaptive") == 0)
+			*value = "Dynamic";
+		else
+			*value = "Static";
+		dmfree(tmp);
+	} else {
+		*value = "";
+	}
 	return 0;
 }
 
 static int set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *uci_value = "fixed";
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, JitterBufferType, 2, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value("asterisk", "tel_options", "jbimpl", value);
+			if (strcasecmp(value, "Dynamic") == 0)
+				uci_value = "adaptive";
+			dmuci_set_value("asterisk", "tel_options", "jbimpl", uci_value);
 			break;
 	}
 	return 0;

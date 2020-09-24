@@ -109,7 +109,6 @@ int init_call_log()
 	// Check if there are any new call logs since the last time
 	if (stat(CALL_LOG_FILE, &cur_stat) == 0) {
 		if (memcmp(&cur_stat, &prev_stat, sizeof(cur_stat)) == 0) {
-			TR104_DEBUG("There are no new call log since the last time. Exit.\n");
 			return 0;
 		} else {
 			prev_stat = cur_stat;
@@ -279,4 +278,30 @@ __ret:
 		fclose(fp);
 	return res;
 #undef CHECK_RESULT
+}
+
+// Get the UCI section name of a codec, e.g. G.711ALaw --> alaw
+const char *get_codec_uci_name(const char *codec)
+{
+	if (codec && *codec) {
+		for (int i = 0; i < codecs_num; i++) {
+			if (!strcasecmp(supported_codecs[i].codec, codec))
+				return supported_codecs[i].uci_name;
+		}
+	}
+
+	return NULL;
+}
+
+// Get the codec name in TR-104 from UCI section name, e.g. alaw --> G.711ALaw
+const char *get_codec_name(const char *codec_profile)
+{
+	if (codec_profile && *codec_profile) {
+		for (int i = 0; i < codecs_num; i++) {
+			if (!strcasecmp(supported_codecs[i].uci_name, codec_profile))
+				return supported_codecs[i].codec;
+		}
+	}
+
+	return NULL;
 }
