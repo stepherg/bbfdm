@@ -13,6 +13,19 @@ ipping_get() {
 	echo ${val:-$2}
 }
 
+ipping_error()
+{
+	local cnt=`ipping_get cwmp.@ippingdiagnostic[0].NumberOfRepetitions 3`
+	$UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].SuccessCount=0
+	$UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].FailureCount=$cnt
+	$UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].AverageResponseTime=0
+	$UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].MinimumResponseTime=9999
+	$UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].MaximumResponseTime=0
+	$UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].AverageResponseTimeDetailed=0
+	$UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].MinimumResponseTimeDetailed=999999999
+	$UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].MaximumResponseTimeDetailed=0	
+}
+
 ipping_launch() {
 	local i res ba stc times sc1 success_count failure_count min_time avg_time max_time avg_time_sum min max micros avg_time_det min_time_det max_time_det avg_time_sum_det min_det max_det
 	[ "$1" == "cwmp" ] && [ "`$UCI_GET_VARSTATE cwmp.@ippingdiagnostic[0].DiagnosticState`" != "Requested" ] && return
@@ -20,9 +33,7 @@ ipping_launch() {
 	local cnt=`ipping_get cwmp.@ippingdiagnostic[0].NumberOfRepetitions 3`
 	local dsize=`ipping_get cwmp.@ippingdiagnostic[0].DataBlockSize 64`
 	local timeout=`ipping_get cwmp.@ippingdiagnostic[0].Timeout 1000`
-	local dscp=`ipping_get cwmp.@ippingdiagnostic[0].DSCP 0`
 	local proto=`ipping_get cwmp.@ippingdiagnostic[0].ProtocolVersion Any`
-	local tos=$((dscp<<2))
 	[ "$host" = "" ] && return
 	timeout=$((timeout/1000))
 	[ "$timeout" = "0" ] && timeout="1"
@@ -38,19 +49,21 @@ ipping_launch() {
 
 	while [ $i -lt $cnt ]; do
 		let i++
-		[ "$proto" = "Any" ] && res=$(fping -o -c 1 -b $dsize -t $timeout -O $tos $host 2>&1)
-		[ "$proto" = "IPv4" ] && res=$(fping -4 -o -c 1 -b $dsize -t $timeout -O $tos $host 2>&1)
-		[ "$proto" = "IPv6" ] && res=$(fping -6 -o -c 1 -b $dsize -t $timeout -O $tos $host 2>&1)
-		ba=`echo "$res" | grep "not known"`
-		[ -n "$ba" ] && { $UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].DiagnosticState=Error_CannotResolveHostName; return; }
-		stc=`echo "$res" | grep "loss"`
-		[ -z "$stc" ] && { $UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].DiagnosticState=Error_Other; return; }
+		[ "$proto" = "Any" ] && res=$(ping -q -c 1 -s $dsize -W $timeout $host 2>&1)
+		[ "$proto" = "IPv4" ] && res=$(ping -q -4 -c 1 -s $dsize -W $timeout $host 2>&1)
+		[ "$proto" = "IPv6" ] && res=$(ping -q -6 -c 1 -s $dsize -W $timeout $host 2>&1)
+		ba=`echo "$res" | grep "bad address"`
+		[ -n "$ba" ] && { $UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].DiagnosticState=Error_CannotResolveHostName; ipping_error; return; }
+		ba=`echo "$res" | grep "unknown host"`
+		[ -n "$ba" ] && { $UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].DiagnosticState=Error_CannotResolveHostName; ipping_error; return; }
+		stc=`echo "$res" | grep "received"`
+		[ -z "$stc" ] && { $UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].DiagnosticState=Error_Other; ipping_error; return; }
 		times=`echo "$res" | grep "min/avg/max"`
 		[ -z "$times" ] && continue
-		sc1=`echo $stc |  awk -F'/' '{ print $4 }'`
+		sc1=`echo $stc | awk '{print $4}'`
 		sc1=${sc1:-0}
 		success_count=$((success_count+sc1))
-		times=`echo $times | awk -F'=' '{ print $4 }'`
+		times=`echo $times | awk -F'=' '{ print $2 }'`
 		min_time=`echo $times | awk -F'[=/ ]' '{ print $1 }'`	
 		avg_time=`echo $times | awk -F'[=/ ]' '{ print $2 }'`
 		max_time=`echo $times | awk -F'[=/ ]' '{ print $3 }'`
