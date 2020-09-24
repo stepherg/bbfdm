@@ -98,19 +98,19 @@ static int get_ServicesVoiceServiceCapabilitiesSIPClient_TLSAuthenticationKeySiz
 
 static int get_ServicesVoiceServiceCapabilitiesSIPClient_TLSEncryptionProtocols(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "AES,Blowfish,Camellia,SEED,CAST-128,IDEA,RC5,3DES,SM4";
+	*value = "AES,Camellia,3DES";
 	return 0;
 }
 
 static int get_ServicesVoiceServiceCapabilitiesSIPClient_TLSEncryptionKeySizes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "256,32-448,256,128,40-128,128,128,168,128";
+	*value = "256,256,168";
 	return 0;
 }
 
 static int get_ServicesVoiceServiceCapabilitiesSIPClient_TLSKeyExchangeProtocols(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "RSA,DSA,Diffie–Hellman key exchange,Elliptic curve,X25519,Ed25519,X448,Ed448,SM2";
+	*value = "RSA";
 	return 0;
 }
 

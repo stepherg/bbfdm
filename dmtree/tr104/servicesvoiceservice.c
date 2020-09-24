@@ -61,29 +61,43 @@ static int browseServicesVoiceServiceCodecProfileInst(struct dmctx *dmctx, DMNOD
 	char *inst = NULL, *inst_last = NULL;
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
-	int i;
+	int i, j;
+	int has_codec_profile = 0;
 
 	// Initialize supported codecs if it has not been done
 	if (codecs_num <= 0)
 		init_supported_codecs();
 
-	// Populate all supported codecs in UCI
-	for (i = 0; i < codecs_num; i++) {
-		struct codec_info *codec = &supported_codecs[i];
-		char *value = NULL;
+	// Populate all supported codecs to UCI if there is none
+	for (j = 0; j < 2; j++) {
+		for (i = 0; i < codecs_num; i++) {
+			struct codec_info *codec = &supported_codecs[i];
+			char *value = NULL;
 
-		dmuci_get_option_value_string(TR104_UCI_PACKAGE, codec->uci_name, "name", &value);
-		if (!value || !*value) {
-			char str[16];
-			// Not found. Add this codec in the UCI
-			dmuci_set_value(TR104_UCI_PACKAGE, codec->uci_name, "", "codec_profile");
-			TR104_DEBUG("Created a UCI section: %s\n", str);
-			dmuci_set_value(TR104_UCI_PACKAGE, codec->uci_name, "name", codec->codec);
-			snprintf(str, sizeof(str), "%u", codec->ptime_default);
-			dmuci_set_value(TR104_UCI_PACKAGE, codec->uci_name, "ptime", str);
-		} else {
-			dmfree(value);
+			dmuci_get_option_value_string(TR104_UCI_PACKAGE, codec->uci_name, "name", &value);
+			if (!value || !*value) {
+				if (j == 1) {
+					char str[16];
+					// Not found. Add this codec in the UCI
+					dmuci_set_value(TR104_UCI_PACKAGE, codec->uci_name, "", "codec_profile");
+					TR104_DEBUG("Created a UCI section: %s\n", str);
+					dmuci_set_value(TR104_UCI_PACKAGE, codec->uci_name, "name", codec->codec);
+					snprintf(str, sizeof(str), "%u", codec->ptime_default);
+					dmuci_set_value(TR104_UCI_PACKAGE, codec->uci_name, "ptime", str);
+				}
+			} else {
+				dmfree(value);
+				if (j == 0) {
+					// At least there is one codec profile configured in UCI
+					has_codec_profile = 1;
+					break;
+				}
+			}
 		}
+
+		// Don't add any profile if there is any in UCI which has been configured
+		if (has_codec_profile)
+			break;
 	}
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "codec_profile", "dmmap_asterisk", &dup_list);
@@ -149,7 +163,7 @@ static int delObjServicesVoiceServiceVoIPProfile(char *refparam, struct dmctx *c
 	return 0;
 }
 
-int addObjServicesVoiceServiceCodecProfile(char *refparam, struct dmctx *ctx, void *data, char **instance)
+static int addObjServicesVoiceServiceCodecProfile(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	char *inst, *value, *v;
 	struct uci_section *dmmap = NULL, *s = NULL;
@@ -164,7 +178,7 @@ int addObjServicesVoiceServiceCodecProfile(char *refparam, struct dmctx *ctx, vo
 	return 0;
 }
 
-int delObjServicesVoiceServiceCodecProfile(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+static int delObjServicesVoiceServiceCodecProfile(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;
 	int found = 0;
@@ -256,7 +270,7 @@ DMOBJ tServicesVoiceServiceObj[] = {
 {"CallControl", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlObj, NULL, NULL, BBFDM_BOTH},
 {"CallLog", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCallLogInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogParams, NULL, BBFDM_BOTH},
 {"VoIPProfile", &DMWRITE, addObjServicesVoiceServiceVoIPProfile, delObjServicesVoiceServiceVoIPProfile, NULL, browseServicesVoiceServiceVoIPProfileInst, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileObj, tServicesVoiceServiceVoIPProfileParams, NULL, BBFDM_BOTH},
-{"CodecProfile", &DMWRITE, NULL, NULL, NULL, browseServicesVoiceServiceCodecProfileInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCodecProfileParams, NULL, BBFDM_BOTH},
+{"CodecProfile", &DMWRITE, addObjServicesVoiceServiceCodecProfile, delObjServicesVoiceServiceCodecProfile, NULL, browseServicesVoiceServiceCodecProfileInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCodecProfileParams, NULL, BBFDM_BOTH},
 {0}
 };
 

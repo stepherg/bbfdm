@@ -64,3 +64,5 @@ extern char *KeyingMethods[];
 
 int init_supported_codecs();
 int init_call_log();
+const char *get_codec_uci_name(const char *codec);
+const char *get_codec_name(const char *codec_profile);

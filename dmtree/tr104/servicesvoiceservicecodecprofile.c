@@ -21,6 +21,31 @@ static int get_ServicesVoiceServiceCodecProfile_Codec(char *refparam, struct dmc
 	return 0;
 }
 
+static int set_ServicesVoiceServiceCodecProfile_Codec(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	int i;
+	const char *uci_name;
+
+	switch (action)	{
+		case VALUECHECK:
+			for (i = 0; i < codecs_num; i++) {
+				if (strcmp(supported_codecs[i].codec, value) == 0)
+					return 0;
+			}
+			TR104_DEBUG("Wrong codec: [%s]\n", value);
+			return FAULT_9007;
+		case VALUESET:
+			dmuci_set_value_by_section((struct uci_section *)data, "name", value);
+			// The UCI section name must be changed accordingly. Otherwise it can not be referenced correctly
+			uci_name = get_codec_uci_name(value);
+			if (uci_name) {
+				dmuci_rename_section_by_section((struct uci_section *)data, (char *)uci_name);
+			}
+			break;
+	}
+	return 0;
+}
+
 /*#Device.Services.VoiceService.{i}.CodecProfile.{i}.PacketizationPeriod!UCI:asterisk/codec_profile,@i-1/ptime*/
 static int get_ServicesVoiceServiceCodecProfile_PacketizationPeriod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -48,7 +73,7 @@ static int set_ServicesVoiceServiceCodecProfile_PacketizationPeriod(char *refpar
 /* *** Device.Services.VoiceService.{i}.CodecProfile.{i}. *** */
 DMLEAF tServicesVoiceServiceCodecProfileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Codec", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCodecProfile_Codec, NULL, NULL, NULL, BBFDM_BOTH},
+{"Codec", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCodecProfile_Codec, set_ServicesVoiceServiceCodecProfile_Codec, NULL, NULL, BBFDM_BOTH},
 {"PacketizationPeriod", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCodecProfile_PacketizationPeriod, set_ServicesVoiceServiceCodecProfile_PacketizationPeriod, NULL, NULL, BBFDM_BOTH},
 {0}
 };
