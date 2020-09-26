@@ -66,7 +66,7 @@ static int browseIEEE1905ALInterfaceLinkInst(struct dmctx *dmctx, DMNODE *parent
 	dmubus_call((char *)prev_data, "link_info", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, link_obj, i, 1, "links") {
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)link_obj, inst) == DM_STOP)
 				break;
 		}
@@ -140,7 +140,7 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst(struct d
 
 	dmjson_foreach_obj_in_array(node, arrobj, ipv4_param, i, 1, "ipv4_params") {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv4_param, inst) == DM_STOP)
 			break;
 	}
@@ -155,7 +155,7 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst(struct d
 
 	dmjson_foreach_obj_in_array(node, arrobj, ipv6_param, i, 1, "ipv6_params") {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv6_param, inst) == DM_STOP)
 			break;
 	}
@@ -178,7 +178,7 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst(struct dmc
 
 	dmjson_foreach_obj_in_array(node, arrobj, interface, i, 1, "interfaces") {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)interface, inst) == DM_STOP)
 			break;
 	}
@@ -196,7 +196,7 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst(
 
 		param_st.data = non1905_neighbor;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, inst) == DM_STOP)
 			break;
 	}
@@ -211,7 +211,7 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborInst(struct dm
 
 	dmjson_foreach_obj_in_array(node, arrobj, l2_neighbor, i, 1, "l2_neighbor") {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)l2_neighbor, inst) == DM_STOP)
 			break;
 	}
@@ -229,7 +229,7 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst(str
 
 		param_st.data = neighbor;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&param_st, inst) == DM_STOP)
 			break;
 	}
@@ -244,7 +244,7 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleInst(struct
 
 	dmjson_foreach_obj_in_array(node, arrobj, bridge_tuple, i, 1, "bridge_tuple") {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)bridge_tuple, inst) == DM_STOP)
 			break;
 	}
@@ -260,7 +260,7 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricIn
 
 	dmjson_foreach_obj_in_array(param_st->data, arrobj, link_metric, i, 1, "link_metrics") {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)link_metric, inst) == DM_STOP)
 			break;
 	}

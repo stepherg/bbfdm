@@ -33,8 +33,10 @@ static int browseServicesVoiceServiceCallControlLineInst(struct dmctx *dmctx, DM
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "tel_line", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 5,
+
+		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 5,
 				p->dmmap_section, "lineinstance", "linealias", "dmmap_asterisk", "tel_line");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -51,8 +53,10 @@ static int browseServicesVoiceServiceCallControlIncomingMapInst(struct dmctx *dm
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 5,
+
+		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 5,
 				p->dmmap_section, "clientinstance", "clientalias", "dmmap_asterisk", "sip_service_provider");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -69,8 +73,10 @@ static int browseServicesVoiceServiceCallControlOutgoingMapInst(struct dmctx *dm
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 5,
+
+		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 5,
 				p->dmmap_section, "clientinstance", "clientalias", "dmmap_asterisk", "sip_service_provider");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -88,7 +94,7 @@ static int browseServicesVoiceServiceCallControlNumberingPlanInst(struct dmctx *
 	synchronize_specific_config_sections_with_dmmap("asterisk", "tel_advanced", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
 			   p->dmmap_section, "numberingplaninstance", "numberingplanalias", "dmmap_asterisk", "tel_advanced");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
@@ -108,7 +114,7 @@ static int browseServicesVoiceServiceCallControlCallingFeaturesSetInst(struct dm
 	synchronize_specific_config_sections_with_dmmap("asterisk", "advanced_features", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
 			   p->dmmap_section, "setinstance", "setalias", "dmmap_asterisk", "advanced_features");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
@@ -118,7 +124,7 @@ static int browseServicesVoiceServiceCallControlCallingFeaturesSetInst(struct dm
 	return 0;
 }
 
-/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.SCREJ.{i}.!UCI:asterisk/call_filter_rule_incoming/dmmap_asterisk*/
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.SCREJ.{i}.!UCI:asterisk/call_filter_rule_incoming/dmmap_asterisk*/
 static int browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *inst_last = NULL;
@@ -127,8 +133,10 @@ static int browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst(stru
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "call_filter_rule_incoming", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 5,
+
+		inst =  handle_update_instance(3, dmctx, &inst_last, update_instance_alias, 5,
 				p->dmmap_section, "screjinstance", "screjalias", "dmmap_asterisk", "call_filter_rule_incoming");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -583,7 +591,7 @@ DMOBJ tServicesVoiceServiceCallControlCallingFeaturesObj[] = {
 {0}
 };
 
-/* *** Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set. *** */
+/* *** Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}. *** */
 DMOBJ tServicesVoiceServiceCallControlCallingFeaturesSetObj[] = {
 /* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"SCREJ", &DMWRITE, addObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ, delObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ, NULL, browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesSetSCREJParams, NULL, BBFDM_BOTH},
@@ -597,7 +605,7 @@ DMLEAF tServicesVoiceServiceCallControlCallingFeaturesSetParams[] = {
 {0}
 };
 
-/* *** Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.SCREJ.{i}. *** */
+/* *** Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.SCREJ.{i}. *** */
 DMLEAF tServicesVoiceServiceCallControlCallingFeaturesSetSCREJParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
 {"CallingNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNumber, set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNumber, NULL, NULL, BBFDM_BOTH},
