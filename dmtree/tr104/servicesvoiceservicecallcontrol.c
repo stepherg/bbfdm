@@ -10,6 +10,16 @@
 
 #include "servicesvoiceservicecallcontrol.h"
 #include "common.h"
+#include "dmentry.h"
+
+/**************************************************************************
+* LINKER
+***************************************************************************/
+static int get_voice_service_line_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	*linker = data ? section_name((struct uci_section *)data) : "";
+	return 0;
+}
 
 /*************************************************************
 * ENTRY METHOD
@@ -297,69 +307,65 @@ static int set_ServicesVoiceServiceCallControlLine_DirectoryNumber(char *refpara
 }
 
 /*#Device.Services.VoiceService.{i}.CallControl.Line.{i}.Provider!UCI:asterisk/tel_line,@i-1/sip_account*/
-#define SIP_CLIENT_PATH "Device.Services.VoiceService.1.SIP.Client."
-#define SIP_CLIENT_PATH_LEN strlen(SIP_CLIENT_PATH)
 static int get_ServicesVoiceServiceCallControlLine_Provider(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *tmp = NULL;
+	char *linker = NULL;
 
-	*value = "";
-	dmuci_get_value_by_section_string((struct uci_section *)data, "sip_account", &tmp);
-	if (tmp && strlen(tmp) > 3 && strncmp(tmp, "sip", 3) == 0) {
-		dmasprintf(value, SIP_CLIENT_PATH"%d", atoi(tmp + 3) + 1);
-		dmfree(tmp);
-	}
+	dmuci_get_value_by_section_string((struct uci_section *)data, "sip_account", &linker);
+	adm_entry_get_linker_param(ctx, dm_print_path("%s%cServices%cVoiceService%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
 static int set_ServicesVoiceServiceCallControlLine_Provider(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *tmp;
+	char sip_client[64] = "Device.Services.VoiceService.1.SIP.Client.";
+	size_t client_len = strlen(sip_client);
+	char lower_layer[64] = {0};
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
-			if (strlen(value) > SIP_CLIENT_PATH_LEN &&
-				strncmp(value, SIP_CLIENT_PATH, SIP_CLIENT_PATH_LEN) == 0 &&
-				atoi(value + SIP_CLIENT_PATH_LEN) > 0) {
-				return 0;
-			}
-			return FAULT_9007;
+			break;
 		case VALUESET:
-			dmasprintf(&tmp, "sip%d", atoi(value + SIP_CLIENT_PATH_LEN) - 1);
-			dmuci_set_value_by_section((struct uci_section *)data, "sip_account", tmp);
+			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
+			if (strncmp(lower_layer, sip_client, client_len) == 0) {
+				/* check linker is available */
+				char *linker = NULL;
+				adm_entry_get_linker_value(ctx, lower_layer, &linker);
+				if (linker && *linker) {
+					dmuci_set_value_by_section((struct uci_section *)data, "sip_account", linker);
+					dmfree(linker);
+				}
+			}
 			break;
 	}
 	return 0;
 }
 
 /*#Device.Services.VoiceService.{i}.CallControl.IncomingMap.{i}.Line!UCI:asterisk/sip_service_provider,@i-1/call_lines*/
-#define CALL_CONTROL_LINE "Device.Services.VoiceService.1.CallControl.Line."
-#define CALL_CONTROL_LINE_LEN strlen(CALL_CONTROL_LINE)
 static int get_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *tmp = NULL;
-	char buf[256] = "";
 
-	*value = "";
 	dmuci_get_value_by_section_string((struct uci_section *)data, "call_lines", &tmp);
 	if (tmp && *tmp) {
-		char *token, *saveptr;
-		int len = 0;
-		for (token = strtok_r(tmp, " ", &saveptr); token; token = strtok_r(NULL, " ", &saveptr)) {
-			int line_index = atoi(token);
-			if (line_index >= 0 && len < sizeof(buf)) {
-				int res = snprintf(buf + len, sizeof(buf) - len, "%s"CALL_CONTROL_LINE"%d",
-						len == 0 ? "" : ",", line_index + 1);
-				if (res <= 0) {
-					TR104_DEBUG("buf might be too small\n");
-					dmfree(tmp);
-					return FAULT_9002;
-				}
-				len += res;
-			}
+		char *token = NULL, *saveptr = NULL, *p, buf[512] = { 0, 0 }, linker[16] = {0};
+
+		p = buf;
+		for (token = strtok_r(tmp, " ", &saveptr); token != NULL; token = strtok_r(NULL, " ", &saveptr)) {
+			snprintf(linker, sizeof(linker), "telline%s", token);
+			adm_entry_get_linker_param(ctx, dm_print_path("%s%cServices%cVoiceService%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+			if (*value == NULL)
+				continue;
+			dmstrappendstr(p, *value);
+			dmstrappendchr(p, ',');
 		}
+		p = p -1;
+		dmstrappendend(p);
+
 		if (buf[0] != '\0')
 			*value = dmstrdup(buf);
 		dmfree(tmp);
@@ -369,40 +375,40 @@ static int get_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, s
 
 static int set_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *token, *saveptr, *dup;
-	char buf[256] = "";
-	int len = 0;
+	char *dup = NULL, *token = NULL, *saveptr = NULL, *p, buf[16] = { 0, 0 }, lower_layer[64] = {0};
+	char call_line[64] = "Device.Services.VoiceService.1.CallControl.Line.";
+	size_t line_len = strlen(call_line);
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
-			// Duplicate the original value because strtok_r() might truncate it if there are multiple lines to set
+
 			if ((dup = dmstrdup(value)) == NULL)
 				return FAULT_9002;
-			for (token = strtok_r(dup, ", ", &saveptr); token; token = strtok_r(NULL, ", ", &saveptr)) {
-				if (strlen(token) <= CALL_CONTROL_LINE_LEN ||
-					strncmp(token, CALL_CONTROL_LINE, CALL_CONTROL_LINE_LEN) != 0 ||
-					atoi(token + CALL_CONTROL_LINE_LEN) <= 0) {
-					TR104_DEBUG("wrong CallControl.Line format: [%s]\n", token);
-					dmfree(dup);
-					return FAULT_9007;
-				}
-			}
 			dmfree(dup);
+
 			break;
 		case VALUESET:
-			for (token = strtok_r(value, ", ", &saveptr); token; token = strtok_r(NULL, ", ", &saveptr)) {
-				int inst = atoi(token + CALL_CONTROL_LINE_LEN);
-				if (inst > 0 && len < sizeof(buf)) {
-					int res = snprintf(buf + len, sizeof(buf) - len, "%s%d", len == 0 ? "" : " ", inst - 1);
-					if (res <= 0) {
-						TR104_DEBUG("buf might be too small\n");
-						return FAULT_9002;
-					}
-					len += res;
+			p = buf;
+			for (token = strtok_r(value, ",", &saveptr); token != NULL; token = strtok_r(NULL, ",", &saveptr)) {
+
+				append_dot_to_string(lower_layer, token, sizeof(lower_layer));
+
+				if (strncmp(lower_layer, call_line, line_len) == 0) {
+					/* check linker is available */
+					char *linker = NULL;
+					adm_entry_get_linker_value(ctx, lower_layer, &linker);
+					if (!linker || linker[0] == '\0')
+						continue;
+
+					dmstrappendstr(p, linker+7);
+					dmstrappendchr(p, ' ');
 				}
 			}
+			p = p -1;
+			dmstrappendend(p);
+
 			if (buf[0] != '\0')
 				dmuci_set_value_by_section((struct uci_section *)data, "call_lines", buf);
 			break;
@@ -530,7 +536,7 @@ static int set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNum
 /* *** Device.Services.VoiceService.{i}.CallControl. *** */
 DMOBJ tServicesVoiceServiceCallControlObj[] = {
 /* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Line", &DMWRITE, addObjServicesVoiceServiceCallControlLine, delObjServicesVoiceServiceCallControlLine, NULL, browseServicesVoiceServiceCallControlLineInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineParams, NULL, BBFDM_BOTH},
+{"Line", &DMWRITE, addObjServicesVoiceServiceCallControlLine, delObjServicesVoiceServiceCallControlLine, NULL, browseServicesVoiceServiceCallControlLineInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineParams, get_voice_service_line_linker, BBFDM_BOTH},
 {"IncomingMap", &DMWRITE, addObjServicesVoiceServiceCallControlIncomingMap, delObjServicesVoiceServiceCallControlIncomingMap, NULL, browseServicesVoiceServiceCallControlIncomingMapInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlIncomingMapParams, NULL, BBFDM_BOTH},
 {"OutgoingMap", &DMWRITE, addObjServicesVoiceServiceCallControlOutgoingMap, delObjServicesVoiceServiceCallControlOutgoingMap, NULL, browseServicesVoiceServiceCallControlOutgoingMapInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlOutgoingMapParams, NULL, BBFDM_BOTH},
 {"NumberingPlan", &DMWRITE, addObjServicesVoiceServiceCallControlNumberingPlan, delObjServicesVoiceServiceCallControlNumberingPlan, NULL, browseServicesVoiceServiceCallControlNumberingPlanInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlNumberingPlanParams, NULL, BBFDM_BOTH},

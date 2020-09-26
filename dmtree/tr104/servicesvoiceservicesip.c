@@ -10,6 +10,16 @@
 
 #include "servicesvoiceservicesip.h"
 #include "common.h"
+#include "dmentry.h"
+
+/**************************************************************************
+* LINKER
+***************************************************************************/
+static int get_voice_service_sip_client_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	*linker = data ? section_name((struct uci_section *)data) : "";
+	return 0;
+}
 
 /*************************************************************
 * ENTRY METHOD
@@ -32,7 +42,7 @@ static int browseServicesVoiceServiceSIPClientInst(struct dmctx *dmctx, DMNODE *
 	return 0;
 }
 
-/*#Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.1*/
+/*#Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.{i}.*/
 static int browseServicesVoiceServiceSIPClientContactInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	// prev_data is from its parent node SIP.Client.{i}. i.e. the UCI section of asterisk.sip_service_provider
@@ -59,7 +69,7 @@ static int browseServicesVoiceServiceSIPNetworkInst(struct dmctx *dmctx, DMNODE 
 	return 0;
 }
 
-/*#Device.Services.VoiceService.{i}.SIP.Network.{i}.FQDNServer.1*/
+/*#Device.Services.VoiceService.{i}.SIP.Network.{i}.FQDNServer.{i}.*/
 static int browseServicesVoiceServiceSIPNetworkFQDNServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	// prev_data is from its parent node SIP.Network.{i}. i.e. a UCI section of asterisk.sip_service_provider
@@ -959,6 +969,7 @@ static int set_ServicesVoiceServiceSIPNetwork_CodecList(char *refparam, struct d
 static int get_ServicesVoiceServiceSIPNetworkFQDNServer_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_option_value_string("asterisk", "sip_options", "srvlookup", value);
+	*value = (strcmp(*value, "yes") == 0) ? "1" : "0";
 	return 0;
 }
 
@@ -973,7 +984,7 @@ static int set_ServicesVoiceServiceSIPNetworkFQDNServer_Enable(char *refparam, s
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value("asterisk", "sip_options", "srvlookup", b ? "1" : "0");
+			dmuci_set_value("asterisk", "sip_options", "srvlookup", b ? "yes" : "no");
 			break;
 	}
 	return 0;
@@ -1047,7 +1058,7 @@ static int set_ServicesVoiceServiceSIPNetworkFQDNServer_Port(char *refparam, str
 /* *** Device.Services.VoiceService.{i}.SIP. *** */
 DMOBJ tServicesVoiceServiceSIPObj[] = {
 /* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Client", &DMWRITE, addObjServicesVoiceServiceSIPClient, delObjServicesVoiceServiceSIPClient, NULL, browseServicesVoiceServiceSIPClientInst, NULL, NULL, NULL, tServicesVoiceServiceSIPClientObj, tServicesVoiceServiceSIPClientParams, NULL, BBFDM_BOTH},
+{"Client", &DMWRITE, addObjServicesVoiceServiceSIPClient, delObjServicesVoiceServiceSIPClient, NULL, browseServicesVoiceServiceSIPClientInst, NULL, NULL, NULL, tServicesVoiceServiceSIPClientObj, tServicesVoiceServiceSIPClientParams, get_voice_service_sip_client_linker, BBFDM_BOTH},
 {"Network", &DMWRITE, addObjServicesVoiceServiceSIPNetwork, delObjServicesVoiceServiceSIPNetwork, NULL, browseServicesVoiceServiceSIPNetworkInst, NULL, NULL, NULL, tServicesVoiceServiceSIPNetworkObj, tServicesVoiceServiceSIPNetworkParams, NULL, BBFDM_BOTH},
 {0}
 };
