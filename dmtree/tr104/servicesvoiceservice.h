@@ -21,7 +21,6 @@ extern DMLEAF tServicesVoiceServiceCapabilitiesParams[];
 extern DMLEAF tServicesVoiceServiceReservedPortsParams[];
 extern DMOBJ tServicesVoiceServicePOTSObj[];
 extern DMLEAF tServicesVoiceServicePOTSParams[];
-extern DMOBJ tServicesVoiceServiceDECTObj[];
 extern DMOBJ tServicesVoiceServiceSIPObj[];
 extern DMOBJ tServicesVoiceServiceCallControlObj[];
 extern DMLEAF tServicesVoiceServiceCallLogParams[];
