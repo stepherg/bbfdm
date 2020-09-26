@@ -46,8 +46,10 @@ static int browseServicesVoiceServiceVoIPProfileInst(struct dmctx *dmctx, DMNODE
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 5,
+
+		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 5,
 				p->dmmap_section, "clientinstance", "clientalias", "dmmap_asterisk", "sip_service_provider");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
@@ -102,8 +104,10 @@ static int browseServicesVoiceServiceCodecProfileInst(struct dmctx *dmctx, DMNOD
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "codec_profile", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		inst =  handle_update_instance(1, dmctx, &inst_last, update_instance_alias, 5,
+
+		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 5,
 				p->dmmap_section, "codecprofileinstance", "codecprofilealias", "dmmap_asterisk", "codec_profile");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
