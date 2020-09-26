@@ -159,16 +159,13 @@ static int get_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType(char *refpara
 
 static int set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *uci_value = "fixed";
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, JitterBufferType, 2, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (strcasecmp(value, "Dynamic") == 0)
-				uci_value = "adaptive";
-			dmuci_set_value("asterisk", "tel_options", "jbimpl", uci_value);
+			dmuci_set_value("asterisk", "tel_options", "jbimpl", (strcasecmp(value, "Dynamic") == 0) ? "adaptive" : "fixed");
 			break;
 	}
 	return 0;
