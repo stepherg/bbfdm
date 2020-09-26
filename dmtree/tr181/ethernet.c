@@ -1196,13 +1196,22 @@ static int get_EthernetVLANTermination_LastChange(char *refparam, struct dmctx *
 
 static int get_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *name;
+	char *name, *type, *inner_vid, *dev_name;
 
 	dmuci_get_value_by_section_string(((struct dm_args *)data)->section, "name", &name);
+	dmuci_get_value_by_section_string(((struct dm_args *)data)->section, "type", &type);
 	char *vid = strchr(name, '.');
 	if (vid) *vid = '\0';
 
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cLink%c", dmroot, dm_delim, dm_delim, dm_delim), name, value);
+	if (strncmp(type, "8021ad", 6) == 0) {
+		// 8021ad device, will have a vlan termination object as its lowerlayer
+		dmuci_get_value_by_section_string(((struct dm_args *)data)->section, "inner_vid", &inner_vid);
+		dmasprintf(&dev_name, "%s.%s", name, inner_vid);
+		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cVLANTermination%c", dmroot, dm_delim, dm_delim, dm_delim), dev_name, value);
+	} else {
+		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cLink%c", dmroot, dm_delim, dm_delim, dm_delim), name, value);
+	}
+
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -1255,7 +1264,6 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 
 				} else {
 					/* type != macvlan */
-
 					char *vid;
 					dmuci_get_value_by_section_string(((struct dm_args *)data)->section, "vid", &vid);
 					if (*vid != '\0')
@@ -1270,6 +1278,30 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 				// Set ifname and name options of device section
 				dmuci_set_value_by_section(((struct dm_args *)data)->section, "ifname", linker);
 				dmuci_set_value_by_section(((struct dm_args *)data)->section, "name", new_name);
+			} else if (strncmp(lower_layer, "Device.Ethernet.VLANTermination.", 32) == 0) {
+				char new_name[16] = {0}, *linker = NULL;
+				struct uci_section *ss = NULL;
+				char *dev_name, *inner_vid, *vid;
+
+				adm_entry_get_linker_value(ctx, lower_layer, &linker);
+				if (linker == NULL || *linker == '\0')
+					return -1;
+
+
+				dmuci_get_value_by_section_string(((struct dm_args *)data)->section, "vid", &vid);
+
+				uci_foreach_option_eq("network", "device", "name", linker, ss) {
+					dmuci_get_value_by_section_string(ss, "vid", &inner_vid);
+					dmuci_get_value_by_section_string(ss, "ifname", &dev_name);
+					break;
+				}
+				snprintf(new_name, sizeof(new_name), "%s.%s.%s", dev_name, inner_vid, vid);
+				if (is_name_exist_in_devices(new_name))
+					return -1;
+
+				dmuci_set_value_by_section(((struct dm_args *)data)->section, "ifname", dev_name);
+				dmuci_set_value_by_section(((struct dm_args *)data)->section, "name", new_name);
+				dmuci_set_value_by_section(((struct dm_args *)data)->section, "inner_vid", inner_vid);
 			}
 			break;
 	}
@@ -1286,8 +1318,9 @@ static int get_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 
 static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *ifname, *name, *curr_ifname, *type;
-	struct uci_section *s = NULL;
+	char *ifname, *name, *curr_ifname, *type, *inner_vid, *old_vid, *old_name, *sec_name, *ad_vid;
+	char *ad_itf_ifname;
+	struct uci_section *s = NULL, *d_sec = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1303,7 +1336,14 @@ static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 
 				dmuci_get_value_by_section_string(((struct dm_args *)data)->section, "ifname", &ifname);
 				if (*ifname != '\0') {
-					dmasprintf(&name, "%s.%s", ifname, value);
+					if (strcmp(type, "8021ad") == 0) {
+						dmuci_get_value_by_section_string(((struct dm_args *)data)->section, "inner_vid", &inner_vid);
+						dmasprintf(&name, "%s.%s.%s", ifname, inner_vid, value);
+					} else {
+						dmuci_get_value_by_section_string(((struct dm_args *)data)->section, "vid", &old_vid);
+						dmasprintf(&old_name, "%s.%s.", ifname, old_vid);
+						dmasprintf(&name, "%s.%s", ifname, value);
+					}
 
 					if (is_name_exist_in_devices(name))
 						return -1;
@@ -1312,6 +1352,30 @@ static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 					dmuci_get_value_by_section_string(((struct dm_args *)data)->section, "name", &curr_ifname);
 					uci_foreach_option_eq("network", "interface", "ifname", curr_ifname, s) {
 						dmuci_set_value_by_section(s, "ifname", name);
+					}
+
+					if (strncmp(type, "8021q", 5) == 0) {
+						// Update the 8021ad instance with vid of lower layer
+						uci_foreach_sections("network", "device", d_sec) {
+							// We do not need to get the type here since we have the name
+							// already with us, we  can use that as a key
+							dmuci_get_value_by_section_string(d_sec, "name", &sec_name);
+							if (strncmp(sec_name, old_name, strlen(old_name)) == 0) {
+								dmuci_get_value_by_section_string(d_sec, "vid", &ad_vid);
+								dmasprintf(&ad_itf_ifname, "%s.%s.%s", ifname, value, ad_vid);
+								dmasprintf(&old_name, "%s.%s.%s", ifname, old_vid, ad_vid);
+
+								dmuci_set_value_by_section(d_sec, "inner_vid", value);
+								dmuci_set_value_by_section(d_sec, "name", ad_itf_ifname);
+								// if this 8021ad instance is lowerlayer to an ip interface, then
+								// the ifname of the ip interface also needs to be updated
+								uci_foreach_option_eq("network", "interface", "ifname", old_name, s) {
+									dmuci_set_value_by_section(s, "ifname", ad_itf_ifname);
+								}
+								break;
+							}
+						}
+
 					}
 
 					// set name option of the device section
