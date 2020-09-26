@@ -104,7 +104,6 @@ if BBF_TR104
 libbbfdm_la_SOURCES +=	\
 	../dmtree/tr104/common.c				\
 	../dmtree/tr104/servicesvoiceservicecalllog.c		\
-	../dmtree/tr104/servicesvoiceservicedect.c		\
 	../dmtree/tr104/servicesvoiceservicesip.c		\
 	../dmtree/tr104/servicesvoiceservice.c			\
 	../dmtree/tr104/servicesvoiceservicecapabilities.c	\

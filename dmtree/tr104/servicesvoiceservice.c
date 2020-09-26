@@ -265,7 +265,6 @@ DMOBJ tServicesVoiceServiceObj[] = {
 {"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesObj, tServicesVoiceServiceCapabilitiesParams, NULL, BBFDM_BOTH},
 {"ReservedPorts", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceReservedPortsParams, NULL, BBFDM_BOTH},
 {"POTS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServicePOTSObj, tServicesVoiceServicePOTSParams, NULL, BBFDM_BOTH},
-//{"DECT", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceDECTObj, NULL, NULL, BBFDM_BOTH},
 {"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceSIPObj, NULL, NULL, BBFDM_BOTH},
 {"CallControl", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlObj, NULL, NULL, BBFDM_BOTH},
 {"CallLog", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCallLogInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogParams, NULL, BBFDM_BOTH},
