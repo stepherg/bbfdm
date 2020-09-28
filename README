@@ -1,29 +1,14 @@
-configure autotools
+BBF Compilation
 ===================
 
-$ autoreconf -if
-
-clean it all up
-===============
-
-$ make distclean
-
-or 
-
-$ git clean -df
-
-development environment
-=======================
-
-Make sure you have all the packages installed from packages-arch-tr069 git
-repository.
-
-$ ln -sf `pwd`/scripts/defaults /usr/share/bbfdm/defaults
-
-
-run icwmpd
-=============
-
-$ export UCI_CONFIG_DIR="`pwd`/config/" 
-$ export UBUS_SOCKET="/tmp/ubus.sock"
-$ ./bin/icwmpd -f
+autoreconf -i
+./configure CC="gcc-9" --enable-tr181 --enable-tr104 --enable-tr143 --enable-tr157 --enable-libopenssl CPPFLAGS=-DCUSTOM_PREFIX=\\\"X_IOPSYS_EU_\\\"
+make 
+cp bin/.libs/libbbfdm.so* /usr/lib/
+cp bin/.libs/libbbf_api.so* /usr/lib/
+mkdir /usr/include/libbbfdm
+mkdir /usr/include/libbbf_api
+cp *.h /usr/include/libbbfdm/
+cp dmtree/tr181/*.h /usr/include/libbbfdm/
+cp dmtree/tr157/*.h /usr/include/libbbfdm/
+cp libbbf_api/*.h /usr/include/libbbf_api/

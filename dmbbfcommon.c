@@ -36,22 +36,13 @@ int dm_add_end_session(struct dmctx *ctx, void(*function)(struct execute_end_ses
 	return 0;
 }
 
-int cwmp_free_dm_end_session(struct execute_end_session *execute_end_session)
-{
-	if(execute_end_session != NULL)
-	{
-		FREE(execute_end_session);
-	}
-	return 0;
-}
-
 void apply_end_session()
 {
 	struct execute_end_session *p, *q;
 	list_for_each_entry_safe(p, q, &(list_execute_end_session), list) {
 		p->function(p);
 		list_del(&(p->list));
-		cwmp_free_dm_end_session(p);
+		FREE(p);
 	}
 }
 

@@ -39,25 +39,37 @@ static int execute_bbk_speedtest()
 
 	dmubus_call("bbk", "start", UBUS_ARGS{}, 0, &res);
 	if (res) {
-		dmuci_set_varstate_value("cwmp", "@bbkspeedtest[0]", "DiagnosticState", "Complete");
+		dmuci_set_value_bbfdm("dmmap_diagnostics", "bbkspeedtest", "DiagnosticState", "Complete");
 		latency = dmjson_get_value(res, 1, "latency");
 		if (latency != NULL && strlen(latency) > 0)
-			dmuci_set_varstate_value("cwmp", "@bbkspeedtest[0]", "Latency", latency);
+			dmuci_set_value_bbfdm("dmmap_diagnostics", "bbkspeedtest", "Latency", latency);
 		download = dmjson_get_value(res, 1, "download");
 		if (download != NULL && strlen(latency) > 0)
-			dmuci_set_varstate_value("cwmp", "@bbkspeedtest[0]", "Download", download);
+			dmuci_set_value_bbfdm("dmmap_diagnostics", "bbkspeedtest", "Download", download);
 		upload=dmjson_get_value(res, 1, "upload");
 		if (upload != NULL && strlen(upload) > 0)
-			dmuci_set_varstate_value("cwmp", "@bbkspeedtest[0]", "Upload", upload);
+			dmuci_set_value_bbfdm("dmmap_diagnostics", "bbkspeedtest", "Upload", upload);
 	}
 	return 0;
 }
 
-static inline char *bbk_speedtest_get(char *option, char *def)
+static char *bbk_speedtest_get(char *option, char *default_value)
 {
-	char *tmp;
-	dmuci_get_varstate_string("cwmp", "@bbkspeedtest[0]", option, &tmp);
-	return tmp[0] == '\0' ? dmstrdup(def) : tmp;
+	char *value;
+	dmuci_get_option_value_string_bbfdm("dmmap_diagnostics", "bbkspeedtest", option, &value);
+	return (*value != '\0') ? value : default_value;
+}
+
+void bbk_speedtest_set(char *option, char *value)
+{
+	struct uci_section *section = NULL;
+
+	check_create_dmmap_package("dmmap_diagnostics");
+	section = dmuci_walk_section_bbfdm("dmmap_diagnostics", "bbkspeedtest", NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
+	if (!section)
+		dmuci_set_value_bbfdm("dmmap_diagnostics", "bbkspeedtest", "", "bbkspeedtest");
+
+	dmuci_set_value_bbfdm("dmmap_diagnostics", "bbkspeedtest", option, value);
 }
 
 static int getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -76,10 +88,7 @@ static int setdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_DiagnosticsState(cha
 			break;
 		case VALUESET:
 			if (strcmp(value, "Requested") == 0) {
-				curr_section = dmuci_walk_state_section("cwmp", "bbkspeedtest", NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
-				if (!curr_section)
-					dmuci_add_state_section("cwmp", "bbkspeedtest", &curr_section, &tmp);
-				dmuci_set_varstate_value("cwmp", "@bbkspeedtest[0]", "DiagnosticState", value);
+				bbk_speedtest_set("DiagnosticState", value);
 				execute_bbk_speedtest();
 			}
 			break;

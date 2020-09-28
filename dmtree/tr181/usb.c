@@ -156,7 +156,7 @@ static int browseUSBInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void
 
 		dmasprintf(&iface_path, "%s/%s", netfolderpath, iface_name);
 		if (p->dm)
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, p->dm, "usb_iface_path", iface_path);
+			dmuci_set_value_by_section_bbfdm(p->dm, "usb_iface_path", iface_path);
 
 		dmasprintf(&statistics_path, "%s/statistics", iface_path);
 		init_usb_interface(p->dm, iface_name, iface_path, statistics_path, port_link, &iface);
@@ -271,7 +271,7 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 			dmasprintf(&sysfs_rep_path, "%s/%s", sysfsrep, ent->d_name);
 			if ((dmmap_sect = get_dup_section_in_dmmap_opt(dmmap_package, dmmap_section, opt_name, sysfs_rep_path)) == NULL) {
 				dmuci_add_section_bbfdm(dmmap_package, dmmap_section, &dmmap_sect, &v);
-				DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, opt_name, sysfs_rep_path);
+				dmuci_set_value_by_section_bbfdm(dmmap_sect, opt_name, sysfs_rep_path);
 			}
 			dmuci_get_value_by_section_string(dmmap_sect, inst_opt, &instance);
 			/*
@@ -321,7 +321,7 @@ static int browseUSBUSBHostsHostDeviceInst(struct dmctx *dmctx, DMNODE *parent_n
 		init_usb_port(p->dm, p->sysfs_folder_name, p->sysfs_folder_path, &port);
 		if (p->dm && prev_port->dmsect ) {
 			dmuci_get_value_by_section_string(prev_port->dmsect, "usb_host_instance", &parent_host_instance);
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, p->dm, "usb_host_device_parent_host_instance", parent_host_instance);
+			dmuci_set_value_by_section_bbfdm(p->dm, "usb_host_device_parent_host_instance", parent_host_instance);
 		}
 		port.dmsect= prev_port->dmsect;
 		instance = handle_update_instance(2, dmctx, &instnbr, update_instance_alias, 5,
@@ -348,7 +348,7 @@ static int browseUSBUSBHostsHostDeviceConfigurationInst(struct dmctx *dmctx, DMN
 	s = is_dmmap_section_exist("dmmap_usb", "usb_device_conf");
 	if (!s)
 		dmuci_add_section_bbfdm("dmmap_usb", "usb_device_conf", &s, &v);
-	DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, "usb_parent_device", usb_dev->folder_path);
+	dmuci_set_value_by_section_bbfdm(s, "usb_parent_device", usb_dev->folder_path);
 
 	init_usb_port(s, usb_dev->folder_name, usb_dev->folder_path, &port);
 
@@ -380,7 +380,7 @@ static int browseUSBUSBHostsHostDeviceConfigurationInterfaceInst(struct dmctx *d
 			dmasprintf(&sysfs_rep_path, "%s/%s", usb_dev->folder_path, ent->d_name);
 			if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_usb", "usb_device_conf_interface", "port_link", sysfs_rep_path)) == NULL) {
 				dmuci_add_section_bbfdm("dmmap_usb", "usb_device_conf_interface", &dmmap_sect, &v);
-				DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "port_link", sysfs_rep_path);
+				dmuci_set_value_by_section_bbfdm(dmmap_sect, "port_link", sysfs_rep_path);
 			}
 
 			init_usb_port(dmmap_sect, ent->d_name, sysfs_rep_path, &port);
@@ -516,7 +516,7 @@ static int set_USBInterface_Alias(char *refparam, struct dmctx *ctx, void *data,
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, usbiface->dm_usb_iface, "usb_iface_alias", value);
+			dmuci_set_value_by_section_bbfdm(usbiface->dm_usb_iface, "usb_iface_alias", value);
 			break;
 	}
 	return 0;

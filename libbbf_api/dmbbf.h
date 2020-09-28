@@ -465,7 +465,7 @@ enum dmt_type_enum {
 	DMT_HEXBIN,
 };
 
-enum amd_version_enum{
+enum amd_version_enum {
 	AMD_1 = 1,
 	AMD_2,
 	AMD_3,
@@ -473,12 +473,12 @@ enum amd_version_enum{
 	AMD_5,
 };
 
-enum dm_type_enum{
+enum dm_type_enum {
 	DM_CWMP,
 	DM_UPNP,
 };
 
-enum bbfdm_type_enum{
+enum bbfdm_type_enum {
 	BBFDM_BOTH,
 	BBFDM_CWMP,
 	BBFDM_USP,

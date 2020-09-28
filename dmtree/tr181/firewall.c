@@ -701,7 +701,7 @@ static int set_level_name(char *refparam, struct dmctx *ctx, void *data, char *i
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, (struct uci_section *)data, "name", value);
+			dmuci_set_value_by_section_bbfdm((struct uci_section *)data, "name", value);
 			break;
 	}
         return 0;
@@ -715,7 +715,7 @@ static int set_level_description(char *refparam, struct dmctx *ctx, void *data, 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, (struct uci_section *)data, "description", value);
+			dmuci_set_value_by_section_bbfdm((struct uci_section *)data, "description", value);
 			break;
 	}
         return 0;
@@ -814,7 +814,7 @@ static int set_chain_name(char *refparam, struct dmctx *ctx, void *data, char *i
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, (struct uci_section *)data, "name", value);
+			dmuci_set_value_by_section_bbfdm((struct uci_section *)data, "name", value);
 			break;
 	}
         return 0;

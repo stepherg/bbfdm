@@ -134,7 +134,7 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 			dmasprintf(&upnp_dev.urn, "%s", urn[1]);
 			if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_root_device", "uuid", uuid[1])) == NULL) {
 				dmuci_add_section_bbfdm("dmmap_upnp", "upnp_root_device", &dmmap_sect, &v);
-				DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "uuid", uuid[1]);
+				dmuci_set_value_by_section_bbfdm(dmmap_sect, "uuid", uuid[1]);
 			}
 			upnp_dev.dmmap_sect = dmmap_sect;
 
@@ -183,7 +183,7 @@ static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_nod
 			dmasprintf(&upnp_dev.urn, "%s", lengthurn>0?urn[1]:"");
 			if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_device", "uuid", uuid[1])) == NULL) {
 				dmuci_add_section_bbfdm("dmmap_upnp", "upnp_device", &dmmap_sect, &v);
-				DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "uuid", uuid[1]);
+				dmuci_set_value_by_section_bbfdm(dmmap_sect, "uuid", uuid[1]);
 			}
 			upnp_dev.dmmap_sect = dmmap_sect;
 
@@ -232,7 +232,7 @@ static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_no
 			dmasprintf(&upnp_dev.urn, "%s", lengthurn>0?urn[1]:"");
 			if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_service", "usn", usn)) == NULL) {
 				dmuci_add_section_bbfdm("dmmap_upnp", "upnp_service", &dmmap_sect, &v);
-				DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "usn", usn);
+				dmuci_set_value_by_section_bbfdm(dmmap_sect, "usn", usn);
 			}
 			upnp_dev.dmmap_sect = dmmap_sect;
 
@@ -270,7 +270,7 @@ static int browseUPnPDescriptionDeviceDescriptionInst(struct dmctx *dmctx, DMNOD
 			dmasprintf(&upnp_desc.desc_url, "%s", descurl?descurl:"");
 			if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_description", "descurl", descurl)) == NULL) {
 				dmuci_add_section_bbfdm("dmmap_upnp", "upnp_description", &dmmap_sect, &v);
-				DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "descurl", descurl);
+				dmuci_set_value_by_section_bbfdm(dmmap_sect, "descurl", descurl);
 			}
 			upnp_desc.dmmap_sect = dmmap_sect;
 
@@ -318,7 +318,7 @@ static int browseUPnPDescriptionDeviceInstanceInst(struct dmctx *dmctx, DMNODE *
 			dmasprintf(&upnp_dev_inst.upc, "%s", dmjson_get_value(device_inst, 1, "UPC"));
 			if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_device_inst", "udn", dmjson_get_value(device_inst, 1, "UDN"))) == NULL) {
 				dmuci_add_section_bbfdm("dmmap_upnp", "upnp_device_inst", &dmmap_sect, &v);
-				DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "udn", dmjson_get_value(device_inst, 1, "UDN"));
+				dmuci_set_value_by_section_bbfdm(dmmap_sect, "udn", dmjson_get_value(device_inst, 1, "UDN"));
 			}
 			upnp_dev_inst.dmmap_sect = dmmap_sect;
 
@@ -360,7 +360,7 @@ static int browseUPnPDescriptionServiceInstanceInst(struct dmctx *dmctx, DMNODE 
 			dmasprintf(&upnp_services_inst.eventsuburl, "%s", dmjson_get_value(service_inst, 1, "eventSubURL"));
 			if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_service_inst", "serviceid", dmjson_get_value(service_inst, 1, "serviceId"))) == NULL) {
 				dmuci_add_section_bbfdm("dmmap_upnp", "upnp_service_inst", &dmmap_sect, &v);
-				DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "serviceid", dmjson_get_value(service_inst, 1, "serviceId"));
+				dmuci_set_value_by_section_bbfdm(dmmap_sect, "serviceid", dmjson_get_value(service_inst, 1, "serviceId"));
 			}
 			upnp_services_inst.dmmap_sect = dmmap_sect;
 

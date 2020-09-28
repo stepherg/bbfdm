@@ -73,9 +73,9 @@ static struct uci_section *update_create_dmmap_dsl_line(char *curr_id)
 	}
 	if (!s) {
 		dmasprintf(&instance, "%d", atoi(curr_id)+1);
-		DMUCI_ADD_SECTION(bbfdm, "dmmap", "dsl_line", &s, &name);
-		DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, "id", curr_id);
-		DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, "dsl_line_instance", instance);
+		dmuci_add_section_bbfdm("dmmap", "dsl_line", &s, &name);
+		dmuci_set_value_by_section_bbfdm(s, "id", curr_id);
+		dmuci_set_value_by_section_bbfdm(s, "dsl_line_instance", instance);
 		dmfree(instance);
 	}
 	return s;
@@ -91,9 +91,9 @@ static struct uci_section *update_create_dmmap_dsl_channel(char *curr_id)
 	}
 	if (!s) {
 		dmasprintf(&instance, "%d", atoi(curr_id)+1);
-		DMUCI_ADD_SECTION(bbfdm, "dmmap", "dsl_channel", &s, &name);
-		DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, "id", curr_id);
-		DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, "dsl_channel_instance", instance);
+		dmuci_add_section_bbfdm("dmmap", "dsl_channel", &s, &name);
+		dmuci_set_value_by_section_bbfdm(s, "id", curr_id);
+		dmuci_set_value_by_section_bbfdm(s, "dsl_channel_instance", instance);
 		dmfree(instance);
 	}
 	return s;

@@ -2,26 +2,24 @@
 # Copyright (C) 2019 iopsys Software Solutions AB
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-
-UCI_CONFIG_DIR="/etc/config/"
-UCI_GET_VARSTATE="/sbin/uci -q ${UCI_CONFIG_DIR:+-c $UCI_CONFIG_DIR} -P /var/state get"
-UCI_SET_VARSTATE="/sbin/uci -q ${UCI_CONFIG_DIR:+-c $UCI_CONFIG_DIR} -P /var/state set"
+UCI_GET_BBFDM="/sbin/uci -q -c /etc/bbfdm get"
+UCI_SET_BBFDM="/sbin/uci -q -c /etc/bbfdm set"
 
 serverselection_get() {
-	local val=`$UCI_GET_VARSTATE $1`
+	local val=`$UCI_GET_BBFDM $1`
 	echo ${val:-$2}
 }
 
 serverselection_launch() {
 	local i res ba stc times sc1 success_count min_time avg_time max_time avg_time_sum min max micros
 	local fasthost avg_time_host min_time_host max_time_host
-	[ "$1" == "cwmp" ] && [ "`$UCI_GET_VARSTATE cwmp.@serverselectiondiagnostic[0].DiagnosticState`" != "Requested" ] && return
-	local hostlist=`serverselection_get cwmp.@serverselectiondiagnostic[0].HostList`
-	local cnt=`serverselection_get cwmp.@serverselectiondiagnostic[0].NumberOfRepetitions 3`
-	local timeout=`serverselection_get cwmp.@serverselectiondiagnostic[0].Timeout 1000`
-	local port=`serverselection_get cwmp.@serverselectiondiagnostic[0].port`
-	local protoversion=`serverselection_get cwmp.@serverselectiondiagnostic[0].ProtocolVersion Any`
-	local proto=`serverselection_get cwmp.@serverselectiondiagnostic[0].Protocol ICMP`
+	[ "$1" == "cwmp" ] && [ "`$UCI_GET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState`" != "Requested" ] && return
+	local hostlist=`serverselection_get dmmap_diagnostics.serverselection.HostList`
+	local cnt=`serverselection_get dmmap_diagnostics.serverselection.NumberOfRepetitions 3`
+	local timeout=`serverselection_get dmmap_diagnostics.serverselection.Timeout 1000`
+	local port=`serverselection_get dmmap_diagnostics.serverselection.port`
+	local protoversion=`serverselection_get dmmap_diagnostics.serverselection.ProtocolVersion Any`
+	local proto=`serverselection_get dmmap_diagnostics.serverselection.Protocol ICMP`
 	[ "$hostlist" = "" ] && return
 	timeout=$((timeout/1000))
 	[ "$timeout" = "0" ] && timeout="1"
@@ -41,11 +39,11 @@ serverselection_launch() {
 				[ "$protoversion" = "IPv4" ] && res=$(ping -q -4 -c 1 -W $timeout $host 2>&1)
 				[ "$protoversion" = "IPv6" ] && res=$(ping -q -6 -c 1 -W $timeout $host 2>&1)
 				ba=`echo "$res" | grep "bad address"`
-				[ -n "$ba" ] && { $UCI_SET_VARSTATE cwmp.@serverselectiondiagnostic[0].DiagnosticState=Error_CannotResolveHostName; break; }
+				[ -n "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; break; }
 				ba=`echo "$res" | grep "unknown host"`
-				[ -n "$ba" ] && { $UCI_SET_VARSTATE cwmp.@serverselectiondiagnostic[0].DiagnosticState=Error_CannotResolveHostName; break; }
+				[ -n "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; break; }
 				stc=`echo "$res" | grep "received"`
-				[ -z "$stc" ] && { $UCI_SET_VARSTATE cwmp.@serverselectiondiagnostic[0].DiagnosticState=Error_Other; break; }
+				[ -z "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Error_Other; break; }
 				times=`echo "$res" | grep "min/avg/max"`
 				[ -z "$times" ] && break
 				sc1=`echo $stc | awk '{print $4}'`
@@ -73,9 +71,9 @@ serverselection_launch() {
 				[ "$protoversion" = "IPv4" ] && res=$(nping -4 -c 1 --udp --dest-port $port --data-length 24 $host 2>&1)
 				[ "$protoversion" = "IPv6" ] && res=$(nping -6 -c 1 --udp --dest-port $port --data-length 24 $host 2>&1)
 				ba=`echo "$res" | grep "RCVD"`
-				[ -z "$ba" ] && { $UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].DiagnosticState=Error_CannotResolveHostName; return; }
+				[ -z "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; return; }
 				stc=`echo "$res" | grep "RCVD" | grep "unreachable"`
-				[ -n "$stc" ] && { $UCI_SET_VARSTATE cwmp.@ippingdiagnostic[0].DiagnosticState=Error_Other; return; }
+				[ -n "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Error_Other; return; }
 				times=`echo "$res" | grep "rtt"`
 				[ -z "$times" ] && continue
 				sc1=`echo "$res" | grep "Rcvd" | awk -F': ' '{print $3}' | awk -F'(' '{ print $1 }'`
@@ -103,11 +101,11 @@ serverselection_launch() {
 		max=0
 		i=0
 	done
-	$UCI_SET_VARSTATE cwmp.@serverselectiondiagnostic[0].DiagnosticState=Complete
-	$UCI_SET_VARSTATE cwmp.@serverselectiondiagnostic[0].FastestHost=$fasthost
-	$UCI_SET_VARSTATE cwmp.@serverselectiondiagnostic[0].AverageResponseTime=$avg_time_host
-	$UCI_SET_VARSTATE cwmp.@serverselectiondiagnostic[0].MinimumResponseTime=$min_time_host
-	$UCI_SET_VARSTATE cwmp.@serverselectiondiagnostic[0].MaximumResponseTime=$max_time_host
+	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Complete
+	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.FastestHost=$fasthost
+	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.AverageResponseTime=$avg_time_host
+	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.MinimumResponseTime=$min_time_host
+	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.MaximumResponseTime=$max_time_host
 	[ "$1" == "cwmp" ] && event_dignostic
 }
 
@@ -126,7 +124,7 @@ serverselection_stop_diagnostic() {
 	local pids=`ps | grep serverselection_launch | grep -v grep | awk '{print $1}'`
 	if [ -n "$pids" ]; then
 		kill -9 $pids &>/dev/null
-		$UCI_SET_VARSTATE cwmp.@serverselectiondiagnostic[0].DiagnosticState=None
+		$UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=None
 	fi
 }
 

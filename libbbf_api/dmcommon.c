@@ -432,10 +432,16 @@ void update_section_list(char *config, char *section, char *option, int number, 
 			}
 		}
 		while (i < number) {
-			DMUCI_ADD_SECTION(bbfdm, config, section, &s, &add_value);
-			if (option)DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, option, filter);
-			if (option1)DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, option1, val1);
-			if (option2)DMUCI_SET_VALUE_BY_SECTION(bbfdm, s, option2, val2);
+			dmuci_add_section_bbfdm(config, section, &s, &add_value);
+			if (option)
+				dmuci_set_value_by_section_bbfdm(s, option, filter);
+
+			if (option1)
+				dmuci_set_value_by_section_bbfdm(s, option1, val1);
+
+			if (option2)
+				dmuci_set_value_by_section_bbfdm(s, option2, val2);
+
 			i++;
 		}
 	} else {
@@ -449,10 +455,16 @@ void update_section_list(char *config, char *section, char *option, int number, 
 			}
 		}
 		while (i < number) {
-			dmuci_add_section_and_rename(config, section, &s, &add_value);
-			if (option)dmuci_set_value_by_section(s, option, filter);
-			if (option1)dmuci_set_value_by_section(s, option1, val1);
-			if (option2)dmuci_set_value_by_section(s, option2, val2);
+			dmuci_add_section(config, section, &s, &add_value);
+			if (option)
+				dmuci_set_value_by_section(s, option, filter);
+
+			if (option1)
+				dmuci_set_value_by_section(s, option1, val1);
+
+			if (option2)
+				dmuci_set_value_by_section(s, option2, val2);
+
 			i++;
 		}
 	}
@@ -621,7 +633,7 @@ void synchronize_specific_config_sections_with_dmmap(char *package, char *sectio
 		 */
 		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
 			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect, &v);
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "section_name", section_name(s));
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
 		}
 
 		/*
@@ -653,7 +665,7 @@ void synchronize_specific_config_sections_with_dmmap_eq(char *package, char *sec
 		 */
 		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
 			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect, &v);
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "section_name", section_name(s));
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
 		}
 
 		/*
@@ -685,7 +697,7 @@ void synchronize_specific_config_sections_with_dmmap_eq_no_delete(char *package,
 		 */
 		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
 			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect, &v);
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "section_name", section_name(s));
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
 		}
 	}
 
@@ -711,7 +723,7 @@ void synchronize_specific_config_sections_with_dmmap_cont(char *package, char *s
 		 */
 		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
 			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect, &v);
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "section_name", section_name(s));
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
 		}
 
 		/*
@@ -763,7 +775,7 @@ int synchronize_system_folders_with_dmmap_opt(char *sysfsrep, char *dmmap_packag
 		dmasprintf(&sysfs_rep_path, "%s/%s", sysfsrep, ent->d_name);
 		if ((dmmap_sect = get_dup_section_in_dmmap_opt(dmmap_package, dmmap_section, opt_name, sysfs_rep_path)) == NULL) {
 			dmuci_add_section_bbfdm(dmmap_package, dmmap_section, &dmmap_sect, &v);
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, opt_name, sysfs_rep_path);
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, opt_name, sysfs_rep_path);
 		}
 
 		dmuci_get_value_by_section_string(dmmap_sect, inst_opt, &instance);

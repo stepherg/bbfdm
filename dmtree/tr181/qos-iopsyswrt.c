@@ -38,18 +38,18 @@ int os_browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, voi
 		//checking if src_ip is an ip-prefix or ip address and synchronizing accordingly
 		ret = strstr(value, "/");
 		if (ret)
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, p->dmmap_section, "src_mask", value);
+			dmuci_set_value_by_section_bbfdm(p->dmmap_section, "src_mask", value);
 		else
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, p->dmmap_section, "src_ip", value);
+			dmuci_set_value_by_section_bbfdm(p->dmmap_section, "src_ip", value);
 
 		//synchronizing option dest_ip of uci classify section to dest_mask/dest_ip of dmmap's classify section
 		dmuci_get_value_by_section_string(p->config_section, "dest_ip", &value);
 		//checking if src_ip is an ip-prefix or ip address and synchronizing accordingly
 		ret = strstr(value, "/");
 		if (ret)
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, p->dmmap_section, "dest_mask", value);
+			dmuci_set_value_by_section_bbfdm(p->dmmap_section, "dest_mask", value);
 		else
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, p->dmmap_section, "dest_ip", value);
+			dmuci_set_value_by_section_bbfdm(p->dmmap_section, "dest_ip", value);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -151,7 +151,7 @@ int os_addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, ch
 
 	check_create_dmmap_package("dmmap_qos");
 	inst = get_last_instance_bbfdm("dmmap_qos", "classify", "classify_instance");
-	dmuci_add_section_and_rename("qos", "classify", &s, &value);
+	dmuci_add_section("qos", "classify", &s, &value);
 	//adding Classification object's parameter entries with default values
 	dmuci_set_value_by_section(s, "enable", "0");
 
@@ -898,7 +898,7 @@ int os_set_QoSClassification_Alias(char *refparam, struct dmctx *ctx, void *data
 		break;
 	case VALUESET:
 		get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name((struct uci_section *)data), &dmmap_section);
-		DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_section, "classifyalias", value);
+		dmuci_set_value_by_section_bbfdm(dmmap_section, "classifyalias", value);
 		break;
 	}
 	return 0;
@@ -3031,7 +3031,7 @@ int os_set_QoSQueue_Alias(char *refparam, struct dmctx *ctx, void *data, char *i
 			break;
 		case VALUESET:
 			get_dmmap_section_of_config_section("dmmap_qos", "queue", section_name((struct uci_section *)data), &dmmap_section);
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_section, "queuealias", value);
+			dmuci_set_value_by_section_bbfdm(dmmap_section, "queuealias", value);
 			break;
 	}
 	return 0;
@@ -3464,7 +3464,7 @@ int os_set_QoSShaper_Alias(char *refparam, struct dmctx *ctx, void *data, char *
 			break;
 		case VALUESET:
 			get_dmmap_section_of_config_section("dmmap_qos", "shaper", section_name((struct uci_section *)data), &dmmap_section);
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_section, "shaperalias", value);
+			dmuci_set_value_by_section_bbfdm(dmmap_section, "shaperalias", value);
 			break;
 	}
 	return 0;

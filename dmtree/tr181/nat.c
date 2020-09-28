@@ -25,7 +25,7 @@ static int add_NAT_InterfaceSetting(char *refparam, struct dmctx *ctx, void *dat
 	check_create_dmmap_package("dmmap_firewall");
 	inst = get_last_instance_bbfdm("dmmap_firewall", "zone", "interface_setting_instance");
 	snprintf(name, sizeof(name), "iface_set_%d", inst ? (atoi(inst)+1) : 1);
-	dmuci_add_section_and_rename("firewall", "zone", &s, &value);
+	dmuci_add_section("firewall", "zone", &s, &value);
 	dmuci_set_value_by_section(s, "input", "REJECT");
 	dmuci_set_value_by_section(s, "output", "ACCEPT");
 	dmuci_set_value_by_section(s, "forward", "REJECT");
@@ -80,7 +80,7 @@ static int add_NAT_PortMapping(char *refparam, struct dmctx *ctx, void *data, ch
 	check_create_dmmap_package("dmmap_firewall");
 	inst = get_last_instance_bbfdm("dmmap_firewall", "redirect", "port_mapping_instance");
 	snprintf(name, sizeof(name), "port_map_%d", inst ? (atoi(inst)+1) : 1);
-	dmuci_add_section_and_rename("firewall", "redirect", &s, &value);
+	dmuci_add_section("firewall", "redirect", &s, &value);
 	dmuci_set_value_by_section(s, "name", name);
 	dmuci_set_value_by_section(s, "target", "DNAT");
 	dmuci_set_value_by_section(s, "enabled", "0");

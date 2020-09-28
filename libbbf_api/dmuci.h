@@ -31,9 +31,6 @@
 #define BBFDM_SAVEDIR "/tmp/.bbfdm"
 #define UCI_CONFIG_DIR "/etc/config/"
 
-extern struct uci_context *uci_ctx;
-extern struct uci_context *uci_varstate_ctx;
-
 enum dm_uci_cmp {
 	CMP_SECTION,
 	CMP_OPTION_EQUAL,
@@ -124,11 +121,6 @@ struct package_change
 		section != NULL; \
 		section = dmuci_walk_section(package, stype, arg, NULL, CMP_FILTER_FUNC, func, section, GET_NEXT_SECTION))
 
-#define uci_foreach_sections_state(package, stype, section) \
-	for (section = dmuci_walk_state_section(package, stype, NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION); \
-		section != NULL; \
-		section = dmuci_walk_state_section(package, stype, NULL, NULL, CMP_SECTION, NULL, section, GET_NEXT_SECTION))
-
 #define section_name(s) (s)->e.name
 
 static inline void uci_list_insert(struct uci_list *list, struct uci_list *ptr)
@@ -149,59 +141,6 @@ static inline void uci_list_init(struct uci_list *ptr)
 	ptr->prev = ptr;
 	ptr->next = ptr;
 }
-char *dmuci_list_to_string(struct uci_list *list, char *delimitor);
-void add_list_package_change(struct list_head *clist, char *package);
-void free_all_list_package_change(struct list_head *clist);
-int dmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);
-int dmuci_get_section_type(char *package, char *section,char **value);
-int dmuci_get_option_value_string(char *package, char *section, char *option, char **value);
-char *dmuci_get_option_value_fallback_def(char *package, char *section, char *option, char *default_value);
-int dmuci_get_option_value_list(char *package, char *section, char *option, struct uci_list **value);
-struct uci_option *dmuci_get_option_ptr(char *cfg_path, char *package, char *section, char *option);
-void get_db_config_path(void);
-int db_get_value_string(char *package, char *section, char *option, char **value);
-int db_get_value_list(char *package, char *section, char *option, struct uci_list **value);
-int dmuci_get_varstate_string(char *package, char *section, char *option, char **value);
-int dmuci_get_varstate_list(char *package, char *section, char *option, struct uci_list **value);
-int dmuci_commit_package(char *package);
-int dmuci_commit(void);
-int dmuci_revert_package(char *package);
-int dmuci_revert(void);
-int dmuci_change_packages(struct list_head *clist);
-char *dmuci_set_value(char *package, char *section, char *option, char *value);
-int dmuci_add_list_value(char *package, char *section, char *option, char *value);
-int dmuci_del_list_value(char *package, char *section, char *option, char *value);
-char * dmuci_add_section(char *package, char *stype, struct uci_section **s, char **value);
-char * dmuci_add_section_and_rename(char *package, char *stype, struct uci_section **s, char **value);
-int dmuci_delete(char *package, char *section, char *option, char *value);
-int dmuci_lookup_ptr_by_section(struct uci_context *ctx, struct uci_ptr *ptr, struct uci_section *s, char *option, char *value);
-int dmuci_get_value_by_section_string(struct uci_section *s, char *option, char **value);
-char *dmuci_get_value_by_section_fallback_def(struct uci_section *s, char *option, char *default_value);
-int dmuci_get_value_by_section_list(struct uci_section *s, char *option, struct uci_list **value);
-char *dmuci_set_value_by_section(struct uci_section *s, char *option, char *value);
-int dmuci_delete_by_section(struct uci_section *s, char *option, char *value);
-int dmuci_delete_by_section_unnamed(struct uci_section *s, char *option, char *value);
-int dmuci_add_list_value_by_section(struct uci_section *s, char *option, char *value);
-int dmuci_del_list_value_by_section(struct uci_section *s, char *option, char *value);
-struct uci_section *dmuci_walk_section(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
-struct uci_section *dmuci_walk_state_section(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
-struct uci_section *dmuci_walk_section_bbfdm(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
-char *dmuci_set_value_by_section_bbfdm(struct uci_section *s, char *option, char *value);
-int dmuci_delete_by_section_unnamed_bbfdm(struct uci_section *s, char *option, char *value);
-char * dmuci_add_section_bbfdm(char *package, char *stype, struct uci_section **s, char **value);
-int dmuci_delete_bbfdm(char *package, char *section, char *option, char *value);
-int dmuci_add_state_section(char *package, char *stype, struct uci_section **s, char **value);
-char *dmuci_set_varstate_value(char *package, char *section, char *option, char *value);
-char *dmuci_set_value_bbfdm(char *package, char *section, char *option, char *value);
-int dmuci_delete_by_section_bbfdm(struct uci_section *s, char *option, char *value);
-int dmuci_rename_section_by_section(struct uci_section *s, char *value);
-int dmuci_exit_bbfdm(void);
-int dmuci_init_bbfdm(void);
-void init_uci_varstate_ctx(void);
-void end_uci_varstate_ctx(void);
-void uci_add_list_to_list(struct uci_list *addlist, struct uci_list *list);
-char *bbf_uci_get_value(char *path, char *package, char *section, char *option);
-char *bbf_uci_set_value(char *path, char *package, char *section, char *option, char *value);
 
 #define NEW_UCI_PATH(UCI_PATH, CPATH, DPATH)		\
 struct uci_context *uci_ctx_##UCI_PATH;			\
@@ -342,19 +281,55 @@ int dmuci_commit_package_##UCI_PATH(char *package) \
 	return res;						\
 }\
 
-#define DMUCI_GET_SECTION_TYPE(UCI_PATH, package, section, value) dmuci_get_section_type_##UCI_PATH(package, section, value)
-#define DMUCI_GET_OPTION_VALUE_STRING(UCI_PATH, package, section, option, value) dmuci_get_option_value_string_##UCI_PATH(package, section, option, value)
-#define DMUCI_GET_OPTION_VALUE_LIST(UCI_PATH, package, section, option, value) dmuci_get_option_value_list_##UCI_PATH(package, section, option, value)
-#define DMUCI_SET_VALUE(UCI_PATH, package, section, option, value) dmuci_set_value_##UCI_PATH(package, section, option, value)
-#define DMUCI_ADD_LIST_VALUE(UCI_PATH, package, section, option, value) dmuci_add_list_value_##UCI_PATH(package, section, option, value)
-#define DMUCI_DEL_LIST_VALUE(UCI_PATH, package, section, option, value) dmuci_del_list_value_##UCI_PATH(package, section, option, value)
-#define DMUCI_ADD_SECTION(UCI_PATH, package, stype, s, value) dmuci_add_section_##UCI_PATH(package, stype, s, value)
-#define DMUCI_DEL_SECTION(UCI_PATH, package, section, option, value) dmuci_delete_##UCI_PATH(package, section, option, value)
-#define DMUCI_SET_VALUE_BY_SECTION(UCI_PATH, s, option, value) dmuci_set_value_by_section_##UCI_PATH(s, option, value)
-#define DMUCI_DELETE_BY_SECTION(UCI_PATH, s, option, value) dmuci_delete_by_section_##UCI_PATH(s, option, value)
-#define DMUCI_WALK_SECTION(UCI_PATH, package, stype, arg1, arg2, cmp , filter, value), struct uci_section *prev_section, int walk)\) dmuci_walk_section_##UCI_PATH(package, stype, arg1, arg2, cmp , filter, value)
-#define DMUCI_COMMIT_PACKAGE(UCI_PATH, package) dmuci_commit_package_##UCI_PATH(package)
-#define DMUCI_INIT(UCI_PATH) dmuci_init_##UCI_PATH()
-#define DMUCI_EXIT(UCI_PATH) dmuci_exit_##UCI_PATH()
+int dmuci_init(void);
+int dmuci_end(void);
+char *dmuci_list_to_string(struct uci_list *list, char *delimitor);
+void uci_add_list_to_list(struct uci_list *addlist, struct uci_list *list);
+void free_all_list_package_change(struct list_head *clist);
+int dmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);
+int dmuci_commit(void);
+int dmuci_revert(void);
+int dmuci_change_packages(struct list_head *clist);
+
+int dmuci_get_section_type(char *package, char *section, char **value);
+int dmuci_get_option_value_string(char *package, char *section, char *option, char **value);
+char *dmuci_get_option_value_fallback_def(char *package, char *section, char *option, char *default_value);
+int dmuci_get_option_value_list(char *package, char *section, char *option, struct uci_list **value);
+char *dmuci_set_value(char *package, char *section, char *option, char *value);
+int dmuci_add_list_value(char *package, char *section, char *option, char *value);
+int dmuci_del_list_value(char *package, char *section, char *option, char *value);
+char *dmuci_add_section(char *package, char *stype, struct uci_section **s, char **value);
+int dmuci_delete(char *package, char *section, char *option, char *value);
+int dmuci_get_value_by_section_string(struct uci_section *s, char *option, char **value);
+char *dmuci_get_value_by_section_fallback_def(struct uci_section *s, char *option, char *default_value);
+int dmuci_get_value_by_section_list(struct uci_section *s, char *option, struct uci_list **value);
+char *dmuci_set_value_by_section(struct uci_section *s, char *option, char *value);
+int dmuci_delete_by_section(struct uci_section *s, char *option, char *value);
+int dmuci_delete_by_section_unnamed(struct uci_section *s, char *option, char *value);
+int dmuci_add_list_value_by_section(struct uci_section *s, char *option, char *value);
+int dmuci_del_list_value_by_section(struct uci_section *s, char *option, char *value);
+int dmuci_rename_section_by_section(struct uci_section *s, char *value);
+struct uci_section *dmuci_walk_section(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
+int dmuci_commit_package(char *package);
+
+int dmuci_get_option_value_string_bbfdm(char *package, char *section, char *option, char **value);
+char *dmuci_set_value_bbfdm(char *package, char *section, char *option, char *value);
+char *dmuci_set_value_by_section_bbfdm(struct uci_section *s, char *option, char *value);
+char * dmuci_add_section_bbfdm(char *package, char *stype, struct uci_section **s, char **value);
+int dmuci_delete_bbfdm(char *package, char *section, char *option, char *value);
+int dmuci_delete_by_section_unnamed_bbfdm(struct uci_section *s, char *option, char *value);
+int dmuci_delete_by_section_bbfdm(struct uci_section *s, char *option, char *value);
+int dmuci_commit_package_bbfdm(char *package);
+struct uci_section *dmuci_walk_section_bbfdm(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
+
+void alloc_uci_ctx_bbfdm(void);
+void commit_and_free_uci_ctx_bbfdm(char *dmmap_config);
+
+int db_get_value_string(char *package, char *section, char *option, char **value);
+int varstate_get_value_string(char *package, char *section, char *option, char **value);
+
+char *bbf_uci_get_value(char *path, char *package, char *section, char *option);
+char *bbf_uci_set_value(char *path, char *package, char *section, char *option, char *value);
+
 #endif
 

@@ -302,6 +302,6 @@ void bbf_api_dmjson_get_string(char *jkey, char **jval)
 
 	struct json_object *get_obj = json_object_object_get(dmjson_jobj, jkey);
 	if (get_obj) {
-		*jval = json_object_get_string(get_obj);
+		*jval = (char *)json_object_get_string(get_obj);
 	}
 }

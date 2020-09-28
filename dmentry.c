@@ -119,12 +119,9 @@ static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int dm_type, unsigned 
 #ifdef BBF_TR064
 	UPNP_SUPPORTED_DM *tUPNPSupportedDM = NULL;
 #endif
-	if (custom == CTX_INIT_ALL) {
-		uci_ctx = uci_alloc_context();
-		uci_varstate_ctx = uci_alloc_context();
-		DMUCI_INIT(bbfdm);
-		get_db_config_path();
-	}
+	if (custom == CTX_INIT_ALL)
+		dmuci_init();
+
 	INIT_LIST_HEAD(&ctx->list_parameter);
 	INIT_LIST_HEAD(&ctx->set_list_tmp);
 	INIT_LIST_HEAD(&ctx->list_fault_param);
@@ -165,11 +162,7 @@ static int dm_ctx_clean_custom(struct dmctx *ctx, int custom)
 	free_all_list_fault_param(ctx);
 	DMFREE(ctx->addobj_instance);
 	if (custom == CTX_INIT_ALL) {
-		if (uci_ctx) uci_free_context(uci_ctx);
-		uci_ctx = NULL;
-		if (uci_varstate_ctx) uci_free_context(uci_varstate_ctx);
-		uci_varstate_ctx = NULL;
-		DMUCI_EXIT(bbfdm);
+		dmuci_end();
 		dmubus_free();
 		dmcleanmem();
 	}

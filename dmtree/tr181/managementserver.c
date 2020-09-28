@@ -20,7 +20,7 @@ static int get_management_server_url(char *refparam, struct dmctx *ctx, void *da
 
 	dmuci_get_option_value_string("cwmp", "acs", "dhcp_discovery", &dhcp);
 	dmuci_get_option_value_string("cwmp", "acs", "url", &url);
-	dmuci_get_varstate_string("cwmp", "acs", "dhcp_url", &provisioning_value);
+	varstate_get_value_string("cwmp", "acs", "dhcp_url", &provisioning_value);
 
 	if ( ((dhcp && strcmp(dhcp, "enable") == 0 ) || ((url == NULL) || (url[0] == '\0'))) && ((provisioning_value != NULL) && (provisioning_value[0] != '\0')) )
 		*value = provisioning_value;
@@ -444,7 +444,7 @@ static int set_instance_mode(char *refparam, struct dmctx *ctx, void *data, char
 /*#Device.ManagementServer.UDPConnectionRequestAddress!UCI:stun/stun,stun/crudp_address*/
 static int get_upd_cr_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_varstate_string("stun", "stun", "crudp_address", value);
+	varstate_get_value_string("stun", "stun", "crudp_address", value);
 	return 0;
 }
 
@@ -606,7 +606,7 @@ static int get_nat_detected(char *refparam, struct dmctx *ctx, void *data, char 
 	dmuci_get_option_value_string("stun", "stun", "enable", &v);
 
 	if (*v == '1') { //stun is enabled
-		dmuci_get_varstate_string("stun", "stun", "nat_detected", &v);
+		varstate_get_value_string("stun", "stun", "nat_detected", &v);
 		*value = (*v == '1') ? "true" : "false";
 	} else
 		*value = "false";

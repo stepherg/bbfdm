@@ -342,7 +342,7 @@ static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 	uci_path_foreach_sections(bbfdm, DMMAP, "vcf", s) {
 		dmuci_get_value_by_section_string(s, "name", &name);
 		if(del_sec) {
-			DMUCI_DELETE_BY_SECTION(bbfdm, del_sec, NULL, NULL);
+			dmuci_delete_by_section_bbfdm(del_sec, NULL, NULL);
 			del_sec = NULL;
 		}
 		if (check_file_dir(name) == 0) {
@@ -356,8 +356,10 @@ static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
+
 	if(del_sec)
-		DMUCI_DELETE_BY_SECTION(bbfdm, del_sec, NULL, NULL);
+		dmuci_delete_by_section_bbfdm(del_sec, NULL, NULL);
+
 	return 0;
 }
 
@@ -379,8 +381,8 @@ static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 		if (!dm_sec) {
 			update_section_list(DMMAP,"vlf", NULL, i++, NULL, "log_file", log_file, "log_size", log_size);
 		} else {
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dm_sec, "log_file", log_file);
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dm_sec, "log_size", log_size);
+			dmuci_set_value_by_section_bbfdm(dm_sec, "log_file", log_file);
+			dmuci_set_value_by_section_bbfdm(dm_sec, "log_size", log_size);
 		}
 	}
 	uci_path_foreach_sections(bbfdm, "dmmap", "vlf", dm_sec) {

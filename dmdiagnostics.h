@@ -23,6 +23,7 @@
 #define FTP_TRANSFERT_COMPLETE "226 Transfer"
 #define FTP_RETR_REQUEST "RETR"
 #define FTP_STOR_REQUEST "STOR"
+#define DMMAP_DIAGNOSTIGS "dmmap_diagnostics"
 
 struct download_diag
 {
@@ -70,8 +71,9 @@ enum diagnostic_type {
 	UPLOAD_DIAGNOSTIC
 };
 
-char *get_param_diagnostics(char *diag, char *option);
-void set_param_diagnostics(char *diag, char *option, char *value);
+char *get_diagnostics_option(char *sec_name, char *option);
+char *get_diagnostics_option_fallback_def(char *sec_name, char *option, char *default_value);
+void set_diagnostics_option(char *sec_name, char *option, char *value);
 void init_download_stats(void);
 void init_upload_stats(void);
 int extract_stats(char *dump_file, int proto, int diagnostic_type, char *protocol);

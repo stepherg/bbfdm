@@ -405,7 +405,7 @@ def cprintAddDelObj( faddobj, fdelobj, name, mappingobj, dmobject ):
 			print >> fp, ""
 			print >> fp, "	check_create_dmmap_package(\"%s\");" % dmmapfile
 			print >> fp, "	inst = get_last_instance_bbfdm(\"%s\", \"%s\", \"%s\");" % (dmmapfile, sectiontype, name+"instance")
-			print >> fp, "	dmuci_add_section_and_rename(\"%s\", \"%s\", &s, &value);" % (file, sectiontype)
+			print >> fp, "	dmuci_add_section(\"%s\", \"%s\", &s, &value);" % (file, sectiontype)
 			print >> fp, "	//dmuci_set_value_by_section(s, \"option\", \"value\");"
 			print >> fp, ""
 			print >> fp, "	dmuci_add_section_bbfdm(\"%s\", \"%s\", &dmmap, &v);" % (dmmapfile, sectiontype)

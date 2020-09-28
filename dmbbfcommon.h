@@ -15,7 +15,6 @@ extern int end_session_flag;
 extern unsigned int upnp_in_user_mask;
 extern struct list_head list_execute_end_session;
 
-int bbfdmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);
 void bbf_apply_end_session(void);
 int set_bbfdatamodel_type(int bbf_type);
 int bbf_set_ip_version(int ipversion);

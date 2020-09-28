@@ -9,18 +9,9 @@
  */
 
 #include "dmentry.h"
-#include "dns.h"
+#include "dmdiagnostics.h"
 #include "dmbbfcommon.h"
-
-static inline char *nslookup_get(char *option, char *def)
-{
-	char *tmp;
-	dmuci_get_varstate_string("cwmp", "@nslookupdiagnostic[0]", option, &tmp);
-	if (tmp && tmp[0] == '\0')
-		return dmstrdup(def);
-	else
-		return tmp;
-}
+#include "dns.h"
 
 static unsigned char is_dns_server_in_dmmap(char *chk_ip, char *chk_interface)
 {
@@ -150,10 +141,10 @@ static int browseResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 	struct uci_section *s = NULL;
 	char *inst, *max_inst = NULL;
 
-	uci_foreach_sections_state("cwmp", "NSLookupResult", s) {
+	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "NSLookupResult", s) {
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   s, "nslookup_res_instance", "nslookup_res_alias", "cwmp", "NSLookupResult");
+			   s, "nslookup_res_instance", "nslookup_res_alias", DMMAP_DIAGNOSTIGS, "NSLookupResult");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -445,43 +436,43 @@ static int get_forwarding_type(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = nslookup_get("DiagnosticState", "None");
+	*value = get_diagnostics_option_fallback_def("nslookup", "DiagnosticState", "None");
 	return 0;
 }
 
 static int get_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_varstate_string("cwmp", "@nslookupdiagnostic[0]", "interface", value);
+	*value = get_diagnostics_option("nslookup", "interface");
 	return 0;
 }
 
 static int get_nslookupdiagnostics_host_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_varstate_string("cwmp", "@nslookupdiagnostic[0]", "HostName", value);
+	*value = get_diagnostics_option("nslookup", "HostName");
 	return 0;
 }
 
 static int get_nslookupdiagnostics_d_n_s_server(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_varstate_string("cwmp", "@nslookupdiagnostic[0]", "DNSServer", value);
+	*value = get_diagnostics_option("nslookup", "DNSServer");
 	return 0;
 }
 
 static int get_nslookupdiagnostics_timeout(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = nslookup_get("Timeout", "5000");
+	*value = get_diagnostics_option_fallback_def("nslookup", "Timeout", "5000");
 	return 0;
 }
 
 static int get_nslookupdiagnostics_number_of_repetitions(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = nslookup_get("NumberOfRepetitions", "1");
+	*value = get_diagnostics_option_fallback_def("nslookup", "NumberOfRepetitions", "1");
 	return 0;
 }
 
 static int get_nslookupdiagnostics_success_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = nslookup_get("SuccessCount", "0");
+	*value = get_diagnostics_option_fallback_def("nslookup", "SuccessCount", "0");
 	return 0;
 }
 
@@ -490,7 +481,7 @@ static int get_nslookupdiagnostics_result_number_of_entries(char *refparam, stru
 	struct uci_section *s = NULL;
 	int cnt = 0;
 
-	uci_foreach_sections_state("cwmp", "NSLookupResult", s) {
+	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "NSLookupResult", s) {
 		cnt++;
 	}
 	dmasprintf(value, "%d", cnt); // MEM WILL BE FREED IN DMMEMCLEAN
@@ -805,9 +796,6 @@ static int set_forwarding_interface(char *refparam, struct dmctx *ctx, void *dat
 
 static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *tmp;
-	struct uci_section *curr_section = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, DiagnosticsState, 5, NULL, 0))
@@ -816,10 +804,7 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 		case VALUESET:
 			if (strcmp(value, "Requested") == 0) {
 				NSLOOKUP_STOP
-				curr_section = (struct uci_section *)dmuci_walk_state_section("cwmp", "nslookupdiagnostic", NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
-				if (!curr_section)
-					dmuci_add_state_section("cwmp", "nslookupdiagnostic", &curr_section, &tmp);
-				dmuci_set_varstate_value("cwmp", "@nslookupdiagnostic[0]", "DiagnosticState", value);
+				set_diagnostics_option("nslookup", "DiagnosticState", value);
 				cwmp_set_end_session(END_SESSION_NSLOOKUP_DIAGNOSTIC);
 			}
 			return 0;
@@ -829,9 +814,6 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 
 static int set_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *tmp;
-	struct uci_section *curr_section = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
@@ -839,10 +821,7 @@ static int set_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, 
 			return 0;
 		case VALUESET:
 			NSLOOKUP_STOP
-			curr_section = dmuci_walk_state_section("cwmp", "nslookupdiagnostic", NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
-			if (!curr_section)
-				dmuci_add_state_section("cwmp", "nslookupdiagnostic", &curr_section, &tmp);
-			dmuci_set_varstate_value("cwmp", "@nslookupdiagnostic[0]", "interface", value);
+			set_diagnostics_option("nslookup", "interface", value);
 			return 0;
 	}
 	return 0;
@@ -850,9 +829,6 @@ static int set_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, 
 
 static int set_nslookupdiagnostics_host_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *tmp;
-	struct uci_section *curr_section = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
@@ -860,10 +836,7 @@ static int set_nslookupdiagnostics_host_name(char *refparam, struct dmctx *ctx, 
 			return 0;
 		case VALUESET:
 			NSLOOKUP_STOP
-			curr_section = dmuci_walk_state_section("cwmp", "nslookupdiagnostic", NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
-			if (!curr_section)
-				dmuci_add_state_section("cwmp", "nslookupdiagnostic", &curr_section, &tmp);
-			dmuci_set_varstate_value("cwmp", "@nslookupdiagnostic[0]", "HostName", value);
+			set_diagnostics_option("nslookup", "HostName", value);
 			return 0;
 	}
 	return 0;
@@ -871,9 +844,6 @@ static int set_nslookupdiagnostics_host_name(char *refparam, struct dmctx *ctx, 
 
 static int set_nslookupdiagnostics_d_n_s_server(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *tmp;
-	struct uci_section *curr_section = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
@@ -881,10 +851,7 @@ static int set_nslookupdiagnostics_d_n_s_server(char *refparam, struct dmctx *ct
 			return 0;
 		case VALUESET:
 			NSLOOKUP_STOP
-			curr_section = dmuci_walk_state_section("cwmp", "nslookupdiagnostic", NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
-			if (!curr_section)
-				dmuci_add_state_section("cwmp", "nslookupdiagnostic", &curr_section, &tmp);
-			dmuci_set_varstate_value("cwmp", "@nslookupdiagnostic[0]", "DNSServer", value);
+			set_diagnostics_option("nslookup", "DNSServer", value);
 			return 0;
 	}
 	return 0;
@@ -892,9 +859,6 @@ static int set_nslookupdiagnostics_d_n_s_server(char *refparam, struct dmctx *ct
 
 static int set_nslookupdiagnostics_timeout(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *tmp;
-	struct uci_section *curr_section = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
@@ -902,10 +866,7 @@ static int set_nslookupdiagnostics_timeout(char *refparam, struct dmctx *ctx, vo
 			return 0;
 		case VALUESET:
 			NSLOOKUP_STOP
-			curr_section = dmuci_walk_state_section("cwmp", "nslookupdiagnostic", NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
-			if (!curr_section)
-				dmuci_add_state_section("cwmp", "nslookupdiagnostic", &curr_section, &tmp);
-			dmuci_set_varstate_value("cwmp", "@nslookupdiagnostic[0]", "Timeout", value);
+			set_diagnostics_option("nslookup", "Timeout", value);
 			return 0;
 	}
 	return 0;
@@ -913,9 +874,6 @@ static int set_nslookupdiagnostics_timeout(char *refparam, struct dmctx *ctx, vo
 
 static int set_nslookupdiagnostics_number_of_repetitions(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *tmp;
-	struct uci_section *curr_section = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
@@ -923,10 +881,7 @@ static int set_nslookupdiagnostics_number_of_repetitions(char *refparam, struct 
 			return 0;
 		case VALUESET:
 			NSLOOKUP_STOP
-			curr_section = dmuci_walk_state_section("cwmp", "nslookupdiagnostic", NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
-			if (!curr_section)
-				dmuci_add_state_section("cwmp", "nslookupdiagnostic", &curr_section, &tmp);
-			dmuci_set_varstate_value("cwmp", "@nslookupdiagnostic[0]", "NumberOfRepetitions", value);
+			set_diagnostics_option("nslookup", "NumberOfRepetitions", value);
 			return 0;
 	}
 	return 0;

@@ -231,7 +231,7 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 		}
 		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_security", "security_certificate", "path", certifcates_paths[i])) == NULL) {
 			dmuci_add_section_bbfdm("dmmap_security", "security_certificate", &dmmap_sect, &v);
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "path", certifcates_paths[i]);
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "path", certifcates_paths[i]);
 		}
 		init_certificate(certifcates_paths[i], cert, dmmap_sect, &certificateprofile);
 
@@ -253,7 +253,7 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 			continue;
 		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_security", "security_certificate", "path", certifcates_paths[i])) == NULL) {
 			dmuci_add_section_bbfdm("dmmap_security", "security_certificate", &dmmap_sect, &v);
-			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "path", certifcates_paths[i]);
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "path", certifcates_paths[i]);
 		}
 		init_certificate(certifcates_paths[i], cacert, dmmap_sect, &certificateprofile);
 
