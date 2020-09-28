@@ -771,8 +771,7 @@ int varstate_get_value_string(char *package, char *section, char *option, char *
 
 void alloc_uci_ctx_bbfdm(void)
 {
-	if (!uci_ctx_bbfdm)
-		uci_ctx_bbfdm = uci_alloc_context();
+	dmuci_init_bbfdm();
 }
 
 void commit_and_free_uci_ctx_bbfdm(char *dmmap_config)
