@@ -87,6 +87,24 @@ int init_supported_codecs()
 	return 0;
 }
 
+// Convert the format of source/destination/used_line in a call log to which is defined in TR-104
+#define TEL_LINE_PREFIX "TELCHAN/"
+#define SIP_ACCOUNT_PREFIX "SIP/sip"
+static void convert_src_dst(char *src_or_dst, size_t buf_size)
+{
+	char *token;
+	int inst;
+
+	// Examples, "TELCHAN/5/2", "SIP/sip0-00000000",
+	if ((token = strstr(src_or_dst, TEL_LINE_PREFIX))) {
+		inst = atoi(token + strlen(TEL_LINE_PREFIX)) + 1;
+		snprintf(src_or_dst, buf_size, "Device.Services.VoiceService.1.CallControl.Line.%d", inst);
+	} else if ((token = strstr(src_or_dst, SIP_ACCOUNT_PREFIX))) {
+		inst = atoi(token + strlen(SIP_ACCOUNT_PREFIX)) + 1;
+		snprintf(src_or_dst, buf_size, "Device.Services.VoiceService.1.SIP.Client.%d", inst);
+	}
+}
+
 #define CALL_LOG_FILE "/var/log/asterisk/cdr-csv/Master.csv"
 #define SEPARATOR "\",\""
 #define SEPARATOR_SIZE strlen(SEPARATOR)
@@ -208,11 +226,17 @@ int init_call_log()
 		end = strstr(token, SEPARATOR);
 		CHECK_RESULT(end);
 		strncpy(cdr.termination_cause, token, end - token);
+
+		// Skip invalid call logs
 		if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||
 			cdr.start_time[0] == '\0' || end_time[0] == '\0') {
-			TR104_DEBUG("Invalid cdr [%s]\ncalling_number = [%s], called_number = [%s], "
-					"start_time = [%s], end_time = [%s]\n", line,
-					cdr.calling_num, cdr.called_num, cdr.start_time, end_time);
+			TR104_DEBUG("Invalid CDR: [%s]\ncalling_number = [%s], called_number = [%s], "
+				"start_time = [%s], end_time = [%s]\n", line,
+				cdr.calling_num, cdr.called_num, cdr.start_time, end_time);
+			continue;
+		} else if (cdr.destination[0] == '\0' && strcasecmp(cdr.called_num, "h") == 0) {
+			TR104_DEBUG("Invalid CDR: [%s]\ncalled_number = [%s], destination = [%s]\n", line,
+				cdr.called_num, cdr.destination);
 			continue;
 		}
 
@@ -226,19 +250,47 @@ int init_call_log()
 			time_end = mktime(&tm_end);
 			snprintf(cdr.duration, sizeof(cdr.duration), "%u", (unsigned int)(time_end - time_start));
 		} else {
-			TR104_DEBUG("Wrong start time and/or end time, [%s], [%s]\n", cdr.start_time, end_time);
+			TR104_DEBUG("Invalid CDR: [%s]\nWrong start time and/or end time, [%s], [%s]\n",
+				line, cdr.start_time, end_time);
+			continue;
 		}
 
 		// Determine the call direction and used line
-		char *line;
-		if ((line = strcasestr(cdr.source, "TELCHAN")) != NULL) {
+		char *tel_line = NULL;
+		if ((tel_line = strcasestr(cdr.source, "TELCHAN")) != NULL) {
 			strncpy(cdr.direction, "Outgoing", sizeof(cdr.direction));
-		} else if ((line = strcasestr(cdr.destination, "TELCHAN")) != NULL) {
+		} else if ((tel_line = strcasestr(cdr.destination, "TELCHAN")) != NULL) {
 			strncpy(cdr.direction, "Incoming", sizeof(cdr.direction));
+		} else {
+			TR104_DEBUG("Invalid CDR: [%s]\ndirection = [%s]\n", line, cdr.direction);
+			continue;
 		}
-		if (line) {
-			snprintf(cdr.used_line, sizeof(cdr.used_line), "%d", atoi(line + strlen("TELCHAN/")));
-		}
+		strncpy(cdr.used_line, tel_line, sizeof(cdr.used_line));
+
+		/*
+		 * Convert the termination cause to a value specified in TR-104.
+		 *
+		 * Note that some of the current causes provided by call log (CDR) can not be well mapped to those
+		 * specified in TR-104.
+		 *
+		 * TODO: Asterisk needs to be changed in order to provide more TR-104 compliant call termination causes.
+		 */
+		if (strcasecmp(cdr.termination_cause, "NO ANSWER") == 0)
+			strncpy(cdr.termination_cause, "LocalTimeout", sizeof(cdr.termination_cause));
+		else if (strcasecmp(cdr.termination_cause, "FAILED") == 0)
+			strncpy(cdr.termination_cause, "LocalInternalError", sizeof(cdr.termination_cause));
+		else if (strcasecmp(cdr.termination_cause, "BUSY") == 0)
+			strncpy(cdr.termination_cause, "RemoteBusy", sizeof(cdr.termination_cause));
+		else if (strcasecmp(cdr.termination_cause, "ANSWERED") == 0)
+			strncpy(cdr.termination_cause, "RemoteDisconnect", sizeof(cdr.termination_cause));
+		else if (strcasecmp(cdr.termination_cause, "CONGESTION") == 0)
+			strncpy(cdr.termination_cause, "RemoteNetworkFailure", sizeof(cdr.termination_cause));
+		else
+			strncpy(cdr.termination_cause, "LocalInternalError", sizeof(cdr.termination_cause));
+		// Convert source and destination
+		convert_src_dst(cdr.source, sizeof(cdr.source));
+		convert_src_dst(cdr.destination, sizeof(cdr.destination));
+		convert_src_dst(cdr.used_line, sizeof(cdr.used_line));
 
 		// Find out an existing call log entry or create a new one
 		if (i < call_log_list_size) {

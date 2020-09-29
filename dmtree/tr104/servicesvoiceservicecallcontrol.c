@@ -278,8 +278,16 @@ static int get_ServicesVoiceServiceCallControlLine_CallStatus(char *refparam, st
 	snprintf(line_str, sizeof(line_str), "%d", line_num);
 	dmubus_call("endpt", "status", UBUS_ARGS{{"line", line_str, Integer}}, 1, &res);
 	if (res) {
+		/*
+		 * Convert the status to a value specified in TR-104.
+		 *
+		 * Note that the current status provided by UBUS "endpt status" can not be mapped to those values
+		 * specified in TR-104.
+		 *
+		 * TODO: the corresponding UBUS RPC will be enhanced in order to provide more TR-104 compliant values
+		 */
 		char *offhook = dmjson_get_value(res, 1, "offhook");
-		*value = *offhook == '1' ? "Off-hook" : "On-hook";
+		*value = *offhook == '1' ? "Connected" : "Idle";
 	} else {
 		TR104_DEBUG("dmubus_call() failed\n");
 	}

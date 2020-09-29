@@ -40,8 +40,7 @@ struct call_log_entry {
 	struct list_head list;
 
 	char calling_num[20], called_num[20];
-	char source[20], destination[20];
-	char used_line[16];
+	char source[64], destination[64], used_line[64];
 	char direction[16];
 	char start_time[32];
 	char duration[8];
