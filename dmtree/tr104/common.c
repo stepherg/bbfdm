@@ -336,6 +336,11 @@ __ret:
 const char *get_codec_uci_name(const char *codec)
 {
 	if (codec && *codec) {
+
+		// Initialize supported codecs if it has not been done
+		if (codecs_num <= 0)
+			init_supported_codecs();
+
 		for (int i = 0; i < codecs_num; i++) {
 			if (!strcasecmp(supported_codecs[i].codec, codec))
 				return supported_codecs[i].uci_name;
@@ -349,6 +354,11 @@ const char *get_codec_uci_name(const char *codec)
 const char *get_codec_name(const char *codec_profile)
 {
 	if (codec_profile && *codec_profile) {
+
+		// Initialize supported codecs if it has not been done
+		if (codecs_num <= 0)
+			init_supported_codecs();
+
 		for (int i = 0; i < codecs_num; i++) {
 			if (!strcasecmp(supported_codecs[i].uci_name, codec_profile))
 				return supported_codecs[i].codec;

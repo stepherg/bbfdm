@@ -910,22 +910,6 @@ static int get_ServicesVoiceServiceSIPNetwork_CodecList(char *refparam, struct d
 	return 0;
 }
 
-static int del_codec_list(struct uci_section * section)
-{
-	char *codec_list = NULL, *token, *saveptr;
-
-	dmuci_get_value_by_section_string(section, "codecs", &codec_list);
-	if (codec_list && *codec_list) {
-		for (token = strtok_r(codec_list, ", ", &saveptr); token; token = strtok_r(NULL, ", ", &saveptr)) {
-			dmuci_del_list_value_by_section(section, "codecs", token);
-		}
-
-		dmfree(codec_list);
-	}
-
-	return 0;
-}
-
 static int set_ServicesVoiceServiceSIPNetwork_CodecList(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	int res = 0;
@@ -948,7 +932,7 @@ static int set_ServicesVoiceServiceSIPNetwork_CodecList(char *refparam, struct d
 		case VALUESET:
 			if (value) {
 				// Empty the existing code list first
-				del_codec_list((struct uci_section *)data);
+				dmuci_set_value_by_section((struct uci_section *)data, "codecs", "");
 
 				if (*value) {
 					codec_list = dmstrdup(value);
