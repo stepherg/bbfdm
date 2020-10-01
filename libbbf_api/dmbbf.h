@@ -66,7 +66,6 @@ extern struct dm_notif_s DMNONE;
 extern struct dm_notif_s DMACTIVE;
 extern struct dm_notif_s DMPASSIVE;
 
-extern void (*api_add_list_value_change)(char *param_name, char *param_data, char *param_type);
 extern void (*api_send_active_value_change)(void);
 extern void (*api_add_list_enabled_lwnotify)(char *param, char *notification, char *value);
 #define DMPARAM_ARGS \
@@ -569,7 +568,6 @@ int dm_entry_delete_object(struct dmctx *ctx);
 int dm_entry_set_value(struct dmctx *ctx);
 int dm_entry_set_notification(struct dmctx *ctx);
 int dm_entry_enabled_notify(struct dmctx *dmctx, void (*add_list_enabled_lwnotify_arg)(char *param, char *notification, char *value));
-int dm_entry_enabled_notify_check_value_change(struct dmctx *dmctx, void (*add_list_value_change_arg)(char *param_name, char *param_data, char *param_type), void (*send_active_value_change_arg)(void));
 int dm_entry_get_linker(struct dmctx *ctx);
 int dm_entry_get_linker_value(struct dmctx *ctx);
 #ifdef BBF_TR064
