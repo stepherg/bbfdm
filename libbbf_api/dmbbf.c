@@ -81,8 +81,6 @@ static int enabled_tracked_param_check_param(DMPARAM_ARGS);
 #endif
 static int enabled_notify_check_obj(DMOBJECT_ARGS);
 static int enabled_notify_check_param(DMPARAM_ARGS);
-static int enabled_notify_check_value_change_param(DMPARAM_ARGS);
-static int enabled_notify_check_value_change_obj(DMOBJECT_ARGS);
 static int get_linker_check_obj(DMOBJECT_ARGS);
 static int get_linker_check_param(DMPARAM_ARGS);
 static int get_linker_value_check_obj(DMOBJECT_ARGS);
@@ -106,7 +104,6 @@ char dmroot[64] = "Device";
 int bbfdatamodel_type = BBFDM_BOTH;
 
 
-void (*api_add_list_value_change)(char *param_name, char *param_data, char *param_type) = NULL;
 void (*api_send_active_value_change)(void) = NULL;
 void (*api_add_list_enabled_lwnotify)(char *param, char *notification, char *value) = NULL;
 
@@ -1977,75 +1974,6 @@ static int enabled_notify_check_param(DMPARAM_ARGS)
 
 	if (api_add_list_enabled_lwnotify != NULL && notif[0] >= '3') {
 		api_add_list_enabled_lwnotify(refparam, notif, value);
-	}
-	dmfree(refparam);
-	return 0;
-}
-
-/*********************
- * Check enabled notify value change
- ********************/
-int dm_entry_enabled_notify_check_value_change(struct dmctx *dmctx, void (*add_list_value_change_arg)(char *param_name, char *param_data, char *param_type), void (*send_active_value_change_arg)(void))
-{
-	DMOBJ *root = dmctx->dm_entryobj;
-	FILE *fp;
-	char buf[512];
-	char *jval;
-
-	fp = fopen(DM_ENABLED_NOTIFY, "r");
-	if (fp == NULL) {
-		return 0;
-	}
-	api_add_list_value_change = add_list_value_change_arg;
-	api_send_active_value_change = send_active_value_change_arg;
-
-	while (fgets(buf, 512, fp) != NULL) {
-		DMNODE node = {.current_object = ""};
-		int len = strlen(buf);
-		if (len)
-			buf[len-1] = '\0';
-		bbf_api_dmjson_parse_init(buf);
-		bbf_api_dmjson_get_string("parameter", &jval);
-		if (jval == NULL || strlen(jval) == 0)
-			continue;
-		dmctx->in_param = dmstrdup(jval?jval:"");
-		bbf_api_dmjson_get_string("value", &jval);
-		dmctx->in_value = dmstrdup(jval?jval:"");
-		bbf_api_dmjson_get_string("notification", &jval);
-		dmctx->in_notification = dmstrdup(jval?jval:"");
-		bbf_api_dmjson_parse_fini();
-		dmctx->checkobj = NULL ;
-		dmctx->checkleaf = NULL;
-		dmctx->method_obj = enabled_notify_check_value_change_obj;
-		dmctx->method_param = enabled_notify_check_value_change_param;
-		dm_browse(dmctx, &node, root, NULL, NULL);
-	}
-	fclose(fp);
-	return 0;
-}
-
-static int enabled_notify_check_value_change_obj(DMOBJECT_ARGS)
-{
-	return FAULT_9005;
-}
-
-static int enabled_notify_check_value_change_param(DMPARAM_ARGS)
-{
-	char *refparam, *value = "";
-	dmastrcat(&refparam, node->current_object, lastname);
-	if (strcmp(refparam, dmctx->in_param) != 0) {
-		dmfree(refparam);
-		return FAULT_9005;
-	}
-	(get_cmd)(refparam, dmctx, data, instance, &value);
-	
-	if (value && strcmp(value, dmctx->in_value) != 0) {
-		if (api_add_list_value_change) {
-			api_add_list_value_change(refparam, value, DMT_TYPE[type]);
-		}
-		if(dmctx->in_notification[0] =='2' && api_send_active_value_change) {
-			api_send_active_value_change();
-		}
 	}
 	dmfree(refparam);
 	return 0;

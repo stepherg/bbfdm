@@ -479,21 +479,6 @@ void free_all_list_enabled_lwnotify()
 	}
 }
 
-int dm_entry_load_enabled_notify(unsigned int dm_type, unsigned int amd_version, int instance_mode, void (*add_list_value_change)(char *param_name, char *param_data, char *param_type), void (*send_active_value_change)(void))
-{
-	struct dmctx dmctx = {0};
-
-	dm_ctx_init(&dmctx, dm_type, amd_version, instance_mode);
-	dmctx.in_param = "";
-
-	free_all_list_enabled_lwnotify();
-	dm_entry_enabled_notify_check_value_change(&dmctx, add_list_value_change, send_active_value_change);
-	dm_entry_enabled_notify(&dmctx, add_list_enabled_lwnotify);
-
-	dm_ctx_clean(&dmctx);
-	return 0;
-}
-
 int dm_entry_reload_enabled_notify(unsigned int dm_type, unsigned int amd_version, int instance_mode)
 {
 	struct dmctx dmctx = {0};
