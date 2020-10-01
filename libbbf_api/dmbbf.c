@@ -1169,6 +1169,27 @@ void dmentry_instance_lookup_inparam(struct dmctx *ctx)
 /* **********
  * get value 
  * **********/
+
+int dm_entry_get_full_param_value(struct dmctx *dmctx)
+{
+	int err = 0;
+	unsigned char findparam_check = 0;
+	DMOBJ *root = dmctx->dm_entryobj;
+	DMNODE node = {.current_object = ""};
+	dmctx->inparam_isparam = 1;
+	dmctx->findparam = 0;
+	dmctx->stop = 0;
+	dmctx->checkobj = plugin_obj_match;
+	dmctx->checkleaf = plugin_leaf_match;
+	dmctx->method_obj = mobj_get_value_in_param;
+	dmctx->method_param = mparam_get_value_in_param;
+	err = dm_browse(dmctx, &node, root, NULL, NULL);
+	if (findparam_check && dmctx->findparam)
+		return 0;
+	else
+		return err;
+}
+
 int dm_entry_get_value(struct dmctx *dmctx)
 {
 	int err = 0;

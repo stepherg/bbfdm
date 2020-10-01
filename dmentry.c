@@ -200,6 +200,19 @@ int dm_ctx_clean_sub(struct dmctx *ctx)
 	return 0;
 }
 
+int dmentry_get_parameter_leaf_value(struct dmctx *ctx, int cmd, char *inparam)
+{
+	int err = 0, fault = 0;
+	bool setnotif = true;
+	if (!inparam) inparam = "";
+	ctx->in_param = inparam;
+
+	if (ctx->dm_type == DM_CWMP && ctx->in_param[0] == dm_delim && strlen(ctx->in_param) == 1)
+		fault = FAULT_9005;
+	else
+		fault = dm_entry_get_full_param_value(ctx);
+}
+
 int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2)
 {
 	int err = 0, fault = 0;
