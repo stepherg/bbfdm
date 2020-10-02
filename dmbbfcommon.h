@@ -10,6 +10,7 @@
  */
 
 #include <libbbf_api/dmcommon.h>
+#include "dmentry.h"
 
 extern int end_session_flag;
 extern unsigned int upnp_in_user_mask;

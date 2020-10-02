@@ -300,8 +300,7 @@ void bbf_api_dmjson_get_string(char *jkey, char **jval)
 	if (dmjson_jobj == NULL)
 		return;
 
-	struct json_object *get_obj = json_object_object_get(dmjson_jobj, jkey);
-	if (get_obj) {
-		*jval = json_object_get_string(get_obj);
-	}
+	struct json_object *get_obj;
+	if (json_object_object_get_ex(dmjson_jobj, jkey, &get_obj))
+		*jval = (char*)json_object_get_string(get_obj);
 }
