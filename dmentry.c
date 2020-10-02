@@ -193,10 +193,10 @@ int dm_ctx_clean_sub(struct dmctx *ctx)
 	return 0;
 }
 
-int dmentry_get_parameter_leaf_value(struct dmctx *ctx, int cmd, char *inparam)
+int dmentry_get_parameter_leaf_value(struct dmctx *ctx, char *inparam)
 {
-	int err = 0, fault = 0;
-	bool setnotif = true;
+	int fault = 0;
+
 	if (!inparam) inparam = "";
 	ctx->in_param = inparam;
 
@@ -204,6 +204,7 @@ int dmentry_get_parameter_leaf_value(struct dmctx *ctx, int cmd, char *inparam)
 		fault = FAULT_9005;
 	else
 		fault = dm_entry_get_full_param_value(ctx);
+	return fault;
 }
 
 int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2)
