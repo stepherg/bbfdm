@@ -41,7 +41,7 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 			if (strcmp(value, "Requested") == 0) {
 				IPPING_STOP
 				set_diagnostics_option("ipping", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_IPPING_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_IPPING_DIAGNOSTIC);
 			}
 			return 0;
 	}
@@ -264,7 +264,7 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 			if (strcmp(value, "Requested") == 0) {
 				TRACEROUTE_STOP
 				set_diagnostics_option("traceroute", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_TRACEROUTE_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_TRACEROUTE_DIAGNOSTIC);
 			}
 			return 0;
 	}
@@ -496,7 +496,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 			if (strcmp(value, "Requested") == 0) {
 				DOWNLOAD_DIAGNOSTIC_STOP
 				set_diagnostics_option("download", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_DOWNLOAD_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_DOWNLOAD_DIAGNOSTIC);
 			}
 			return 0;
 	}
@@ -829,7 +829,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 			if (strcmp(value, "Requested") == 0) {
 				UPLOAD_DIAGNOSTIC_STOP
 				set_diagnostics_option("upload", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_UPLOAD_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_UPLOAD_DIAGNOSTIC);
 			}
 			return 0;
 	}
@@ -1178,7 +1178,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 			if (strcmp(value, "Requested") == 0) {
 				UDPECHO_STOP;
 				set_diagnostics_option("udpechodiag", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_UDPECHO_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_UDPECHO_DIAGNOSTIC);
 			}
 			return 0;
 	}
@@ -1425,7 +1425,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 			if (strcmp(value, "Requested") == 0) {
 				SERVERSELECTION_STOP
 				set_diagnostics_option("serverselection", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_SERVERSELECTION_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_SERVERSELECTION_DIAGNOSTIC);
 			}
 			return 0;
 	}

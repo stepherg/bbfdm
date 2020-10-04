@@ -46,13 +46,9 @@ void apply_end_session()
 	}
 }
 
-void cwmp_set_end_session (unsigned int flag)
+void bbf_set_end_session_flag (struct dmctx *ctx, unsigned int flag)
 {
-	if (end_session_flag_ptr != NULL)
-		end_session_flag = *end_session_flag_ptr;
-	end_session_flag_ptr = &end_session_flag;
-
-	end_session_flag |= flag;
+	ctx->end_session_flag |= flag;
 }
 
 int set_bbfdatamodel_type(int bbf_type)

@@ -41,7 +41,7 @@ static int set_management_server_url(char *refparam, struct dmctx *ctx, void *da
 		case VALUESET:
 			dmuci_set_value("cwmp", "acs", "dhcp_discovery", "disable");
 			dmuci_set_value("cwmp", "acs", "url", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			break;
 	}
 	return 0;
@@ -63,7 +63,7 @@ static int set_management_server_username(char *refparam, struct dmctx *ctx, voi
 			return 0;
 		case VALUESET:
 			dmuci_set_value("cwmp", "acs", "userid", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;	
@@ -79,7 +79,7 @@ static int set_management_server_passwd(char *refparam, struct dmctx *ctx, void 
 			return 0;
 		case VALUESET:
 			dmuci_set_value("cwmp", "acs", "passwd", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;	
@@ -111,7 +111,7 @@ static int set_management_server_periodic_inform_enable(char *refparam, struct d
 		case VALUESET:
 			string_to_bool(value, &b);
 			dmuci_set_value("cwmp", "acs", "periodic_inform_enable", b ? "1" : "0");
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;	
@@ -133,7 +133,7 @@ static int set_management_server_periodic_inform_interval(char *refparam, struct
 			return 0;
 		case VALUESET:
 			dmuci_set_value("cwmp", "acs", "periodic_inform_interval", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;
@@ -170,7 +170,7 @@ static int set_management_server_periodic_inform_time(char *refparam, struct dmc
 			strptime(value, "%Y-%m-%dT%H:%M:%SZ", &tm);
 			snprintf(buf, sizeof(buf), "%ld", mktime(&tm));
 			dmuci_set_value("cwmp", "acs", "periodic_inform_time", buf);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;	
@@ -210,7 +210,7 @@ static int set_management_server_connection_request_username(char *refparam, str
 			return 0;
 		case VALUESET:
 			dmuci_set_value("cwmp", "cpe", "userid", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;
@@ -226,7 +226,7 @@ static int set_management_server_connection_request_passwd(char *refparam, struc
 			return 0;
 		case VALUESET:
 			dmuci_set_value("cwmp", "cpe", "passwd", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;
@@ -248,7 +248,7 @@ static int set_upgrades_managed(char *refparam, struct dmctx *ctx, void *data, c
 			return 0;
 		case VALUESET:
 			dmuci_set_value("cwmp", "cpe", "upgrades_managed", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;
@@ -284,7 +284,7 @@ static int set_lwn_protocol_used(char *refparam, struct dmctx *ctx, void *data, 
 				dmuci_set_value("cwmp", "lwn", "enable", "1");
 			else
 				dmuci_set_value("cwmp", "lwn", "enable", "0");
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;
@@ -306,7 +306,7 @@ static int set_lwn_host(char *refparam, struct dmctx *ctx, void *data, char *ins
 			return 0;
 		case VALUESET:
 			dmuci_set_value("cwmp", "lwn", "hostname", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;
@@ -328,7 +328,7 @@ static int set_lwn_port(char *refparam, struct dmctx *ctx, void *data, char *ins
 			return 0;
 		case VALUESET:
 			dmuci_set_value("cwmp", "lwn", "port", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;
@@ -357,7 +357,7 @@ static int set_management_server_http_compression(char *refparam, struct dmctx *
 		case VALUESET:
 			if (strcasecmp(value, "gzip") == 0 || strcasecmp(value, "deflate") == 0 || strncasecmp(value, "disable", 7) == 0) {
 				dmuci_set_value("cwmp", "acs", "compression", value);
-				cwmp_set_end_session(END_SESSION_RELOAD);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			}
 			return 0;
 	}
@@ -380,7 +380,7 @@ static int set_management_server_retry_min_wait_interval(char *refparam, struct 
 			return 0;
 		case VALUESET:
 			dmuci_set_value("cwmp", "acs", "retry_min_wait_interval", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;
@@ -402,7 +402,7 @@ static int set_management_server_retry_interval_multiplier(char *refparam, struc
 			return 0;
 		case VALUESET:
 			dmuci_set_value("cwmp", "acs", "retry_interval_multiplier", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;
@@ -432,7 +432,7 @@ static int set_instance_mode(char *refparam, struct dmctx *ctx, void *data, char
 			return 0;
 		case VALUESET:
 			dmuci_set_value("cwmp", "cpe", "instance_mode", value);
-			cwmp_set_end_session(END_SESSION_RELOAD);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
 	return 0;

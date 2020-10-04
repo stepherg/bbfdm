@@ -12,7 +12,6 @@
 #include <libbbf_api/dmcommon.h>
 #include "dmentry.h"
 
-extern int end_session_flag;
 extern unsigned int upnp_in_user_mask;
 extern struct list_head list_execute_end_session;
 
@@ -32,7 +31,7 @@ void dm_update_enabled_notify(struct dm_enabled_notify *p, char *new_value);
 
 void apply_end_session(void);
 int dm_add_end_session(struct dmctx *ctx, void(*function)(struct execute_end_session *), int action, void *data);
-void cwmp_set_end_session (unsigned int flag);
+void bbf_set_end_session_flag (struct dmctx *ctx, unsigned int flag);
 int bbfdmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);
 void bbf_apply_end_session(void);
 void dmbbf_update_enabled_notify_file(unsigned int dm_type, unsigned int amd_version, int instance_mode);
