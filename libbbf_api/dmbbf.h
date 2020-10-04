@@ -251,6 +251,7 @@ struct dmctx
 	char all_instances[512];
 	char *inst_buf[16];
 	char *instance_wildchar;
+	unsigned int end_session_flag;
 };
 
 
@@ -432,19 +433,19 @@ enum instance_mode {
 	INSTANCE_MODE_ALIAS
 };
 
-enum end_session_enum {
-	END_SESSION_REBOOT = 1,
-	END_SESSION_EXTERNAL_ACTION = 1<<1,
-	END_SESSION_RELOAD = 1<<2,
-	END_SESSION_FACTORY_RESET = 1<<3,
-	END_SESSION_IPPING_DIAGNOSTIC = 1<<4,
-	END_SESSION_DOWNLOAD_DIAGNOSTIC = 1<<5,
-	END_SESSION_UPLOAD_DIAGNOSTIC = 1<<6,
-	END_SESSION_X_FACTORY_RESET_SOFT = 1<<7,
-	END_SESSION_NSLOOKUP_DIAGNOSTIC = 1<<8,
-	END_SESSION_TRACEROUTE_DIAGNOSTIC = 1<<9,
-	END_SESSION_UDPECHO_DIAGNOSTIC = 1<<10,
-	END_SESSION_SERVERSELECTION_DIAGNOSTIC = 1<<11
+enum bbf_end_session_enum {
+	BBF_END_SESSION_REBOOT = 1,
+	BBF_END_SESSION_EXTERNAL_ACTION = 1<<1,
+	BBF_END_SESSION_RELOAD = 1<<2,
+	BBF_END_SESSION_FACTORY_RESET = 1<<3,
+	BBF_END_SESSION_IPPING_DIAGNOSTIC = 1<<4,
+	BBF_END_SESSION_DOWNLOAD_DIAGNOSTIC = 1<<5,
+	BBF_END_SESSION_UPLOAD_DIAGNOSTIC = 1<<6,
+	BBF_END_SESSION_X_FACTORY_RESET_SOFT = 1<<7,
+	BBF_END_SESSION_NSLOOKUP_DIAGNOSTIC = 1<<8,
+	BBF_END_SESSION_TRACEROUTE_DIAGNOSTIC = 1<<9,
+	BBF_END_SESSION_UDPECHO_DIAGNOSTIC = 1<<10,
+	BBF_END_SESSION_SERVERSELECTION_DIAGNOSTIC = 1<<11
 };
 
 enum dm_browse_enum {
@@ -536,7 +537,6 @@ extern struct list_head list_upnp_changed_onalarm;
 extern struct list_head list_upnp_changed_version;
 #endif
 
-extern int* end_session_flag_ptr;
 extern int ip_version;
 extern char dm_delim;
 extern char dmroot[64];
@@ -593,7 +593,6 @@ char *get_last_instance_lev2_bbfdm_dmmap_opt(char* dmmap_package, char *section,
 char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check);
 char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **last_inst, char * (*up_instance)(int action, char **last_inst, void *argv[]), int argc, ...);
 int dm_add_end_session(struct dmctx *ctx, void(*function)(struct execute_end_session *), int action, void *data);
-void bbf_api_cwmp_set_end_session (unsigned int flag);
 char *dm_print_path(char *fpath, ...);
 int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
 void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found);

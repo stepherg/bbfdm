@@ -56,7 +56,7 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 				if (!curr_section)
 					dmuci_add_state_section("cwmp", "ippingdiagnostic", &curr_section, &tmp);
 				dmuci_set_varstate_value("cwmp", "@ippingdiagnostic[0]", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_IPPING_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_IPPING_DIAGNOSTIC);
 			}
 			return 0;
 	}
@@ -337,7 +337,7 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 				if (!curr_section)
 					dmuci_add_state_section("cwmp", "traceroutediagnostic", &curr_section, &tmp);
 				dmuci_set_varstate_value("cwmp", "@traceroutediagnostic[0]", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_TRACEROUTE_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_TRACEROUTE_DIAGNOSTIC);
 			}
 			return 0;
 	}
@@ -633,7 +633,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 				if (!curr_section)
 					dmuci_add_state_section("cwmp", "downloaddiagnostic", &curr_section, &tmp);
 				dmuci_set_varstate_value("cwmp", "@downloaddiagnostic[0]", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_DOWNLOAD_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_DOWNLOAD_DIAGNOSTIC);
 			}
 			return 0;
 	}
@@ -1024,7 +1024,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 				if (!curr_section)
 					dmuci_add_state_section("cwmp", "uploaddiagnostic", &curr_section, &tmp);
 				dmuci_set_varstate_value("cwmp", "@uploaddiagnostic[0]", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_UPLOAD_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_UPLOAD_DIAGNOSTIC);
 			}
 			return 0;
 	}
@@ -1436,7 +1436,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 				if (!curr_section)
 					dmuci_add_state_section("cwmp", "udpechodiagnostic", &curr_section, &tmp);
 				dmuci_set_varstate_value("cwmp", "@udpechodiagnostic[0]", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_UDPECHO_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_UDPECHO_DIAGNOSTIC);
 			}
 			return 0;
 	}
@@ -1753,7 +1753,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 				if (!curr_section)
 					dmuci_add_state_section("cwmp", "serverselectiondiagnostic", &curr_section, &tmp);
 				dmuci_set_varstate_value("cwmp", "@serverselectiondiagnostic[0]", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_SERVERSELECTION_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_SERVERSELECTION_DIAGNOSTIC);
 			}
 			return 0;
 	}

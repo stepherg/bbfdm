@@ -9,7 +9,7 @@
  *	  Author Imen Bhiri <imen.bhiri@pivasoftware.com>
  *	  Author Feten Besbes <feten.besbes@pivasoftware.com>
  *	  Author Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
- *
+ *	  Author Omar Kallel <omar.kallel@pivasoftware.com>
  */
 
 #include "dmentry.h"
@@ -155,6 +155,7 @@ static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int dm_type, unsigned 
 	dm_delim = DMDELIM_CWMP;
 	ctx->dm_entryobj = tEntry181Obj;
 #endif
+	ctx->end_session_flag = 0;
 	return 0;
 }
 

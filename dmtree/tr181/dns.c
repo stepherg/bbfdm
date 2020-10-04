@@ -820,7 +820,7 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 				if (!curr_section)
 					dmuci_add_state_section("cwmp", "nslookupdiagnostic", &curr_section, &tmp);
 				dmuci_set_varstate_value("cwmp", "@nslookupdiagnostic[0]", "DiagnosticState", value);
-				cwmp_set_end_session(END_SESSION_NSLOOKUP_DIAGNOSTIC);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_NSLOOKUP_DIAGNOSTIC);
 			}
 			return 0;
 	}
