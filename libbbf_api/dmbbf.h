@@ -150,7 +150,8 @@ typedef struct dm_obj_s {
 	struct dm_obj_s *nextobj;
 	struct dm_leaf_s *leaf;
 	int (*get_linker)(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker);
-	int bbfdm_type;	
+	int bbfdm_type;
+	const char **unique_keys;
 } DMOBJ;
 
 #ifdef BBF_TR064

@@ -1426,8 +1426,12 @@ static int mobj_get_schema_name(DMOBJECT_ARGS)
 {
 	char *perm = permission->val;
 	char *refparam = node->current_object;
+	const char **unique_keys = NULL;
 
-	add_list_paramameter(dmctx, refparam, perm, "xsd:object", NULL, 0);
+	if (node->obj)
+		unique_keys = node->obj->unique_keys;
+
+	add_list_paramameter(dmctx, refparam, perm, "xsd:object", (char *) unique_keys, 0);
 	return 0;
 }
 

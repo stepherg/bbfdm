@@ -1328,8 +1328,8 @@ static int get_DSLChannelStatsQuarterHour_XTUCCRCErrors(char *refparam, struct d
 /* *** Device.DSL. *** */
 DMOBJ tDSLObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Line", &DMREAD, NULL, NULL, NULL, browseDSLLineInst, NULL, NULL, NULL, tDSLLineObj, tDSLLineParams, get_dsl_line_linker, BBFDM_BOTH},
-{"Channel", &DMREAD, NULL, NULL, NULL, browseDSLChannelInst, NULL, NULL, NULL, tDSLChannelObj, tDSLChannelParams, get_dsl_channel_linker, BBFDM_BOTH},
+{"Line", &DMREAD, NULL, NULL, NULL, browseDSLLineInst, NULL, NULL, NULL, tDSLLineObj, tDSLLineParams, get_dsl_line_linker, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
+{"Channel", &DMREAD, NULL, NULL, NULL, browseDSLChannelInst, NULL, NULL, NULL, tDSLChannelObj, tDSLChannelParams, get_dsl_channel_linker, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
 {0}
 };
 

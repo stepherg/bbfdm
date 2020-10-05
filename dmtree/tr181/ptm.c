@@ -266,7 +266,7 @@ static int browsePtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 /* *** Device.PTM. *** */
 DMOBJ tPTMObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Link", &DMWRITE, add_ptm_link, delete_ptm_link, NULL, browsePtmLinkInst, NULL, NULL, NULL, tPTMLinkObj, tPTMLinkParams, get_ptm_linker, BBFDM_BOTH},
+{"Link", &DMWRITE, add_ptm_link, delete_ptm_link, NULL, browsePtmLinkInst, NULL, NULL, NULL, tPTMLinkObj, tPTMLinkParams, get_ptm_linker, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
 {0}
 };
 

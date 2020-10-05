@@ -436,7 +436,7 @@ DMLEAF tGREParams[] = {
 DMOBJ tGRETunnelObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGRETunnelStatsParams, NULL, BBFDM_BOTH},
-{"Interface", &DMWRITE, addObjGRETunnelInterface, delObjGRETunnelInterface, NULL, browseGRETunnelInterfaceInst, NULL, NULL, NULL, tGRETunnelInterfaceObj, tGRETunnelInterfaceParams, NULL, BBFDM_BOTH},
+{"Interface", &DMWRITE, addObjGRETunnelInterface, delObjGRETunnelInterface, NULL, browseGRETunnelInterfaceInst, NULL, NULL, NULL, tGRETunnelInterfaceObj, tGRETunnelInterfaceParams, NULL, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
 {0}
 };
 

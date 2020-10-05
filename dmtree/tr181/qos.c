@@ -20,7 +20,7 @@ DMOBJ tQoSObj[] = {
 //{"Flow", &DMWRITE, addObjQoSFlow, delObjQoSFlow, NULL, browseQoSFlowInst, NULL, NULL, NULL, NULL, tQoSFlowParams, NULL, BBFDM_BOTH},
 {"Policer", &DMWRITE, os_addObjQoSPolicer, os_delObjQoSPolicer, NULL, os_browseQoSPolicerInst, NULL, NULL, NULL, NULL, tQoSPolicerParams, NULL, BBFDM_BOTH},
 {"Queue", &DMWRITE, os_addObjQoSQueue, os_delObjQoSQueue, NULL, os_browseQoSQueueInst, NULL, NULL, NULL, NULL, tQoSQueueParams, os_get_linker_qos_queue, BBFDM_BOTH},
-{"Shaper", &DMWRITE, os_addObjQoSShaper, os_delObjQoSShaper, NULL, os_browseQoSShaperInst, NULL, NULL, NULL, NULL, tQoSShaperParams, NULL, BBFDM_BOTH},
+{"Shaper", &DMWRITE, os_addObjQoSShaper, os_delObjQoSShaper, NULL, os_browseQoSShaperInst, NULL, NULL, NULL, NULL, tQoSShaperParams, NULL, BBFDM_BOTH, (const char *[]){"Interface", "Alias", NULL}},
 {0}
 };
 

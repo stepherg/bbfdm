@@ -905,7 +905,7 @@ DMLEAF tDNSParams[] = {
 /* *** Device.DNS.Client. *** */
 DMOBJ tDNSClientObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Server", &DMWRITE, add_client_server, delete_client_server, NULL, browseServerInst, NULL, NULL, NULL, NULL, tDNSClientServerParams, NULL, BBFDM_BOTH},
+{"Server", &DMWRITE, add_client_server, delete_client_server, NULL, browseServerInst, NULL, NULL, NULL, NULL, tDNSClientServerParams, NULL, BBFDM_BOTH, (const char *[]){"DNSServer", "Alias", NULL}},
 {0}
 };
 
@@ -932,7 +932,7 @@ DMLEAF tDNSClientServerParams[] = {
 /* *** Device.DNS.Relay. *** */
 DMOBJ tDNSRelayObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Forwarding", &DMWRITE, add_relay_forwarding, delete_relay_forwarding, NULL, browseRelayForwardingInst, NULL, NULL, NULL, NULL, tDNSRelayForwardingParams, NULL, BBFDM_BOTH},
+{"Forwarding", &DMWRITE, add_relay_forwarding, delete_relay_forwarding, NULL, browseRelayForwardingInst, NULL, NULL, NULL, NULL, tDNSRelayForwardingParams, NULL, BBFDM_BOTH, (const char *[]){"DNSServer", "Alias", NULL}},
 {0}
 };
 

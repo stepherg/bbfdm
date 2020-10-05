@@ -1290,8 +1290,8 @@ static int set_time_span_stop_time(char *refparam, struct dmctx *ctx, void *data
 /* *** Device.Firewall. *** */
 DMOBJ tFirewallObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH},
-{"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, NULL, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH},
+{"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
+{"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, NULL, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
 {0}
 };
 

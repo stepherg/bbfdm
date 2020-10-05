@@ -1082,8 +1082,8 @@ static int get_linker_usb_host_device(char *refparam, struct dmctx *dmctx, void 
 /* *** Device.USB. *** */
 DMOBJ tUSBObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Interface", &DMREAD, NULL, NULL, NULL, browseUSBInterfaceInst, NULL, NULL, NULL, tUSBInterfaceObj, tUSBInterfaceParams, NULL, BBFDM_BOTH},
-{"Port", &DMREAD, NULL, NULL, NULL, browseUSBPortInst, NULL, NULL, NULL, NULL, tUSBPortParams, get_linker_usb_port, BBFDM_BOTH},
+{"Interface", &DMREAD, NULL, NULL, NULL, browseUSBInterfaceInst, NULL, NULL, NULL, tUSBInterfaceObj, tUSBInterfaceParams, NULL, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
+{"Port", &DMREAD, NULL, NULL, NULL, browseUSBPortInst, NULL, NULL, NULL, NULL, tUSBPortParams, get_linker_usb_port, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
 {"USBHosts", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUSBUSBHostsObj, tUSBUSBHostsParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1154,7 +1154,7 @@ DMLEAF tUSBPortParams[] = {
 /* *** Device.USB.USBHosts. *** */
 DMOBJ tUSBUSBHostsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Host", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostInst, NULL, NULL, NULL, tUSBUSBHostsHostObj, tUSBUSBHostsHostParams, NULL, BBFDM_BOTH},
+{"Host", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostInst, NULL, NULL, NULL, tUSBUSBHostsHostObj, tUSBUSBHostsHostParams, NULL, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
 {0}
 };
 
@@ -1167,7 +1167,7 @@ DMLEAF tUSBUSBHostsParams[] = {
 /* *** Device.USB.USBHosts.Host.{i}. *** */
 DMOBJ tUSBUSBHostsHostObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Device", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceInst, NULL, NULL, NULL, tUSBUSBHostsHostDeviceObj, tUSBUSBHostsHostDeviceParams, get_linker_usb_host_device, BBFDM_BOTH},
+{"Device", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceInst, NULL, NULL, NULL, tUSBUSBHostsHostDeviceObj, tUSBUSBHostsHostDeviceParams, get_linker_usb_host_device, BBFDM_BOTH, (const char *[]){"DeviceNumber", NULL}},
 {0}
 };
 
@@ -1187,7 +1187,7 @@ DMLEAF tUSBUSBHostsHostParams[] = {
 /* *** Device.USB.USBHosts.Host.{i}.Device.{i}. *** */
 DMOBJ tUSBUSBHostsHostDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Configuration", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInst, NULL, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationObj, tUSBUSBHostsHostDeviceConfigurationParams, NULL, BBFDM_BOTH},
+{"Configuration", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInst, NULL, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationObj, tUSBUSBHostsHostDeviceConfigurationParams, NULL, BBFDM_BOTH, (const char *[]){"ConfigurationNumber", NULL}},
 {0}
 };
 
@@ -1218,7 +1218,7 @@ DMLEAF tUSBUSBHostsHostDeviceParams[] = {
 /* *** Device.USB.USBHosts.Host.{i}.Device.{i}.Configuration.{i}. *** */
 DMOBJ tUSBUSBHostsHostDeviceConfigurationObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Interface", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInterfaceInst, NULL, NULL, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationInterfaceParams, NULL, BBFDM_BOTH},
+{"Interface", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInterfaceInst, NULL, NULL, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationInterfaceParams, NULL, BBFDM_BOTH, (const char *[]){"InterfaceNumber", NULL}},
 {0}
 };
 

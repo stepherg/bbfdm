@@ -74,6 +74,18 @@ def getprotocolsparam( value, option ):
 					return "BBFDM_CWMP"
 	return "BBFDM_BOTH"
 
+def getuniquekey( value, option ):
+	if isinstance(value, dict):
+		for obj, val in value.items():
+			if obj == option and isinstance(val, list):
+                                buf = "(const char *[]){"
+                                for key in val:
+                                    buf = buf + "\"%s\"" % key + ", "
+                                buf = buf + "NULL" + "}"
+                                #print(buf)
+                                return buf
+        return None 
+
 def getargsparam( value ):
 	if isinstance(value, dict):
 		for obj, val in value.items():
@@ -349,7 +361,7 @@ def printheaderObjCommon( objname ):
 def cprintheaderOBJS( objname ):
 	fp = open('./.objparamarray.c', 'a')
 	print >> fp,  "DMOBJ %s[] = {" % ("t" + getname(objname) + "Obj")
-	print >> fp,  "/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/"
+	print >> fp,  "/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKey*/"
 	fp.close()
 
 def hprintheaderOBJS( objname ):
@@ -815,6 +827,7 @@ def printOBJline( dmobject, value ):
 	accessobj = getoptionparam(value, "access")
 	mappingobj = getoptionparam(value, "mapping")
 	bbfdm = getprotocolsparam(value, "protocols")
+        uniquekey = getuniquekey(value, "uniqueKey")
 
 	if accessobj:
 		access = "&DMWRITE"
@@ -843,7 +856,10 @@ def printOBJline( dmobject, value ):
 		paramarray = "NULL"
 
 	fp = open('./.objparamarray.c', 'a')
-	print >> fp,  "{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, NULL, %s, %s, NULL, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm)
+        if uniquekey:
+	        print >> fp,  "{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, NULL, %s, %s, NULL, %s, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm, uniquekey)
+        else:
+	        print >> fp,  "{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, NULL, %s, %s, NULL, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm)
 	fp.close()
 
 def printusage():

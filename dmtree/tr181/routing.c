@@ -1316,8 +1316,8 @@ DMLEAF tRoutingParams[] = {
 /* *** Device.Routing.Router.{i}. *** */
 DMOBJ tRoutingRouterObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"IPv4Forwarding", &DMWRITE, add_ipv4forwarding, delete_ipv4forwarding, NULL, browseIPv4ForwardingInst, NULL, NULL, NULL, NULL, tRoutingRouterIPv4ForwardingParams, NULL, BBFDM_BOTH},
-{"IPv6Forwarding", &DMWRITE, add_ipv6Forwarding, delete_ipv6Forwarding, NULL, browseIPv6ForwardingInst, NULL, NULL, NULL, NULL, tRoutingRouterIPv6ForwardingParams, NULL, BBFDM_BOTH},
+{"IPv4Forwarding", &DMWRITE, add_ipv4forwarding, delete_ipv4forwarding, NULL, browseIPv4ForwardingInst, NULL, NULL, NULL, NULL, tRoutingRouterIPv4ForwardingParams, NULL, BBFDM_BOTH, (const char *[]){"DestIPAddress", "DestSubnetMask", "ForwardingPolicy", "GatewayIPAddress", "Interface", "ForwardingMetric", "Alias", NULL}},
+{"IPv6Forwarding", &DMWRITE, add_ipv6Forwarding, delete_ipv6Forwarding, NULL, browseIPv6ForwardingInst, NULL, NULL, NULL, NULL, tRoutingRouterIPv6ForwardingParams, NULL, BBFDM_BOTH, (const char *[]){"DestIPPrefix", "ForwardingPolicy", "NextHop", "Interface", "ForwardingMetric", "Alias", NULL}},
 {0}
 };
 
@@ -1367,7 +1367,7 @@ DMLEAF tRoutingRouterIPv6ForwardingParams[] = {
 /* *** Device.Routing.RouteInformation. *** */
 DMOBJ tRoutingRouteInformationObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"InterfaceSetting", &DMREAD, NULL, NULL, NULL, browseRoutingRouteInformationInterfaceSettingInst, NULL, NULL, NULL, NULL, tRoutingRouteInformationInterfaceSettingParams, NULL, BBFDM_BOTH},
+{"InterfaceSetting", &DMREAD, NULL, NULL, NULL, browseRoutingRouteInformationInterfaceSettingInst, NULL, NULL, NULL, NULL, tRoutingRouteInformationInterfaceSettingParams, NULL, BBFDM_BOTH, (const char *[]){"Interface", NULL}},
 {0}
 };
 

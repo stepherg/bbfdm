@@ -377,7 +377,7 @@ static int browseAtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 /*** ATM. ***/
 DMOBJ tATMObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Link", &DMWRITE, add_atm_link, delete_atm_link, NULL, browseAtmLinkInst, NULL, NULL, NULL, tATMLinkObj, tATMLinkParams, get_atm_linker, BBFDM_BOTH},
+{"Link", &DMWRITE, add_atm_link, delete_atm_link, NULL, browseAtmLinkInst, NULL, NULL, NULL, tATMLinkObj, tATMLinkParams, get_atm_linker, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
 {0}
 };
 
