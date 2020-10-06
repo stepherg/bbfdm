@@ -18,7 +18,7 @@ DMOBJ tQoSObj[] = {
 {"QueueStats", &DMWRITE, os_addObjQoSQueueStats, os_delObjQoSQueueStats, NULL, os_browseQoSQueueStatsInst, NULL, NULL, NULL, NULL, tQoSQueueStatsParams, NULL, BBFDM_BOTH},
 //{"App", &DMWRITE, addObjQoSApp, delObjQoSApp, NULL, browseQoSAppInst, NULL, NULL, NULL, NULL, tQoSAppParams, NULL, BBFDM_BOTH},
 //{"Flow", &DMWRITE, addObjQoSFlow, delObjQoSFlow, NULL, browseQoSFlowInst, NULL, NULL, NULL, NULL, tQoSFlowParams, NULL, BBFDM_BOTH},
-//{"Policer", &DMWRITE, addObjQoSPolicer, delObjQoSPolicer, NULL, browseQoSPolicerInst, NULL, NULL, NULL, NULL, tQoSPolicerParams, NULL, BBFDM_BOTH},
+{"Policer", &DMWRITE, os_addObjQoSPolicer, os_delObjQoSPolicer, NULL, os_browseQoSPolicerInst, NULL, NULL, NULL, NULL, tQoSPolicerParams, NULL, BBFDM_BOTH},
 {"Queue", &DMWRITE, os_addObjQoSQueue, os_delObjQoSQueue, NULL, os_browseQoSQueueInst, NULL, NULL, NULL, NULL, tQoSQueueParams, os_get_linker_qos_queue, BBFDM_BOTH},
 {"Shaper", &DMWRITE, os_addObjQoSShaper, os_delObjQoSShaper, NULL, os_browseQoSShaperInst, NULL, NULL, NULL, NULL, tQoSShaperParams, NULL, BBFDM_BOTH},
 {0}
@@ -36,7 +36,7 @@ DMLEAF tQoSParams[] = {
 //{"MaxFlowEntries", &DMREAD, DMT_UNINT, get_QoS_MaxFlowEntries, NULL, NULL, NULL, BBFDM_BOTH},
 //{"FlowNumberOfEntries", &DMREAD, DMT_UNINT, get_QoS_FlowNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 //{"MaxPolicerEntries", &DMREAD, DMT_UNINT, get_QoS_MaxPolicerEntries, NULL, NULL, NULL, BBFDM_BOTH},
-//{"PolicerNumberOfEntries", &DMREAD, DMT_UNINT, get_QoS_PolicerNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"PolicerNumberOfEntries", &DMREAD, DMT_UNINT, os_get_QoS_PolicerNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 //{"MaxQueueEntries", &DMREAD, DMT_UNINT, get_QoS_MaxQueueEntries, NULL, NULL, NULL, BBFDM_BOTH},
 //{"MaxShaperEntries", &DMREAD, DMT_UNINT, get_QoS_MaxShaperEntries, NULL, NULL, NULL, BBFDM_BOTH},
 //{"DefaultForwardingPolicy", &DMWRITE, DMT_UNINT, get_QoS_DefaultForwardingPolicy, set_QoS_DefaultForwardingPolicy, NULL, NULL, BBFDM_BOTH},
@@ -135,7 +135,7 @@ DMLEAF tQoSClassificationParams[] = {
 //{"OutOfBandInfo", &DMWRITE, DMT_INT, get_QoSClassification_OutOfBandInfo, set_QoSClassification_OutOfBandInfo, NULL, NULL, BBFDM_BOTH},
 //{"ForwardingPolicy", &DMWRITE, DMT_UNINT, get_QoSClassification_ForwardingPolicy, set_QoSClassification_ForwardingPolicy, NULL, NULL, BBFDM_BOTH},
 {"TrafficClass", &DMWRITE, DMT_INT, os_get_QoSClassification_TrafficClass, os_set_QoSClassification_TrafficClass, NULL, NULL, BBFDM_BOTH},
-//{"Policer", &DMWRITE, DMT_STRING, get_QoSClassification_Policer, set_QoSClassification_Policer, NULL, NULL, BBFDM_BOTH},
+{"Policer", &DMWRITE, DMT_STRING, os_get_QoSClassification_Policer, os_set_QoSClassification_Policer, NULL, NULL, BBFDM_BOTH},
 //{"App", &DMWRITE, DMT_STRING, get_QoSClassification_App, set_QoSClassification_App, NULL, NULL, BBFDM_BOTH},
 {0}
 };
@@ -179,16 +179,16 @@ DMLEAF tQoSFlowParams[] = {
 /* *** Device.QoS.Policer.{i}. *** */
 DMLEAF tQoSPolicerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"Enable", &DMWRITE, DMT_BOOL, get_QoSPolicer_Enable, set_QoSPolicer_Enable, NULL, NULL, BBFDM_BOTH},
-//{"Status", &DMREAD, DMT_STRING, get_QoSPolicer_Status, NULL, NULL, NULL, BBFDM_BOTH},
-//{"Alias", &DMWRITE, DMT_STRING, get_QoSPolicer_Alias, set_QoSPolicer_Alias, NULL, NULL, BBFDM_BOTH},
-//{"CommittedRate", &DMWRITE, DMT_UNINT, get_QoSPolicer_CommittedRate, set_QoSPolicer_CommittedRate, NULL, NULL, BBFDM_BOTH},
-//{"CommittedBurstSize", &DMWRITE, DMT_UNINT, get_QoSPolicer_CommittedBurstSize, set_QoSPolicer_CommittedBurstSize, NULL, NULL, BBFDM_BOTH},
-//{"ExcessBurstSize", &DMWRITE, DMT_UNINT, get_QoSPolicer_ExcessBurstSize, set_QoSPolicer_ExcessBurstSize, NULL, NULL, BBFDM_BOTH},
-//{"PeakRate", &DMWRITE, DMT_UNINT, get_QoSPolicer_PeakRate, set_QoSPolicer_PeakRate, NULL, NULL, BBFDM_BOTH},
-//{"PeakBurstSize", &DMWRITE, DMT_UNINT, get_QoSPolicer_PeakBurstSize, set_QoSPolicer_PeakBurstSize, NULL, NULL, BBFDM_BOTH},
-//{"MeterType", &DMWRITE, DMT_STRING, get_QoSPolicer_MeterType, set_QoSPolicer_MeterType, NULL, NULL, BBFDM_BOTH},
-//{"PossibleMeterTypes", &DMREAD, DMT_STRING, get_QoSPolicer_PossibleMeterTypes, NULL, NULL, NULL, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, os_get_QoSPolicer_Enable, os_set_QoSPolicer_Enable, NULL, NULL, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, os_get_QoSPolicer_Status, NULL, NULL, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, os_get_QoSPolicer_Alias, os_set_QoSPolicer_Alias, NULL, NULL, BBFDM_BOTH},
+{"CommittedRate", &DMWRITE, DMT_UNINT, os_get_QoSPolicer_CommittedRate, os_set_QoSPolicer_CommittedRate, NULL, NULL, BBFDM_BOTH},
+{"CommittedBurstSize", &DMWRITE, DMT_UNINT, os_get_QoSPolicer_CommittedBurstSize, os_set_QoSPolicer_CommittedBurstSize, NULL, NULL, BBFDM_BOTH},
+{"ExcessBurstSize", &DMWRITE, DMT_UNINT, os_get_QoSPolicer_ExcessBurstSize, os_set_QoSPolicer_ExcessBurstSize, NULL, NULL, BBFDM_BOTH},
+{"PeakRate", &DMWRITE, DMT_UNINT, os_get_QoSPolicer_PeakRate, os_set_QoSPolicer_PeakRate, NULL, NULL, BBFDM_BOTH},
+{"PeakBurstSize", &DMWRITE, DMT_UNINT, os_get_QoSPolicer_PeakBurstSize, os_set_QoSPolicer_PeakBurstSize, NULL, NULL, BBFDM_BOTH},
+{"MeterType", &DMWRITE, DMT_STRING, os_get_QoSPolicer_MeterType, os_set_QoSPolicer_MeterType, NULL, NULL, BBFDM_BOTH},
+{"PossibleMeterTypes", &DMREAD, DMT_STRING, os_get_QoSPolicer_PossibleMeterTypes, NULL, NULL, NULL, BBFDM_BOTH},
 //{"ConformingAction", &DMWRITE, DMT_STRING, get_QoSPolicer_ConformingAction, set_QoSPolicer_ConformingAction, NULL, NULL, BBFDM_BOTH},
 //{"PartialConformingAction", &DMWRITE, DMT_STRING, get_QoSPolicer_PartialConformingAction, set_QoSPolicer_PartialConformingAction, NULL, NULL, BBFDM_BOTH},
 //{"NonConformingAction", &DMWRITE, DMT_STRING, get_QoSPolicer_NonConformingAction, set_QoSPolicer_NonConformingAction, NULL, NULL, BBFDM_BOTH},
