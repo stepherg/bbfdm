@@ -97,6 +97,26 @@ int browseQoSPolicerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 	return 0;
 }
 #endif
+
+int os_browseQoSPolicerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL, *max_inst = NULL;
+	struct dmmap_dup *p;
+	LIST_HEAD(dup_list);
+
+	synchronize_specific_config_sections_with_dmmap("qos", "policer", "dmmap_qos", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "policer_instance", "policeralias", "dmmap_qos", "policer");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
 /*#Device.QoS.Queue.{i}.!UCI:qos/queue/dmmap_qos*/
 int os_browseQoSQueueInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -258,6 +278,89 @@ int delObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char *instan
 	return 0;
 }
 #endif
+
+int os_addObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	char *inst, *value, *v;
+	struct uci_section  *dmmap = NULL, *s = NULL;
+
+	check_create_dmmap_package("dmmap_qos");
+	inst = get_last_instance_bbfdm("dmmap_qos", "policer", "policer_instance");
+	dmuci_add_section("qos", "policer", &s, &value);
+
+	dmuci_set_value_by_section(s, "enable", "0");
+	dmuci_set_value_by_section(s, "committed_rate", "0");
+	dmuci_set_value_by_section(s, "committed_burst_size", "0");
+	dmuci_set_value_by_section(s, "excess_burst_size", "0");
+	dmuci_set_value_by_section(s, "peak_rate", "0");
+	dmuci_set_value_by_section(s, "peak_burst_size", "0");
+	dmuci_set_value_by_section(s, "meter_type", "0");
+	dmuci_set_value_by_section(s, "name", section_name(s));
+
+	dmuci_add_section_bbfdm("dmmap_qos", "policer", &dmmap, &v);
+	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
+	*instance = update_instance(inst, 4, dmmap, "policer_instance", "dmmap_qos", "policer");
+	return 0;
+}
+
+int os_delObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL, *sec = NULL;
+	int found = 0;
+	char *p_name = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			// store section name to update corresponding classification
+			// section if any
+			dmuci_get_value_by_section_string((struct uci_section *)data, "name", &p_name);
+
+			// Now delete the policer instance
+			if (is_section_unnamed(section_name((struct uci_section *)data))){
+				LIST_HEAD(dup_list);
+				delete_sections_save_next_sections("dmmap_qos", "policer", "policer_instance", section_name((struct uci_section *)data), atoi(instance), &dup_list);
+				update_dmmap_sections(&dup_list, "policer_instance", "dmmap_qos", "policer");
+				dmuci_delete_by_section_unnamed((struct uci_section *)data, NULL, NULL);
+			} else {
+				get_dmmap_section_of_config_section("dmmap_qos", "policer", section_name((struct uci_section *)data), &dmmap_section);
+				if (dmmap_section != NULL)
+					dmuci_delete_by_section_unnamed_bbfdm(dmmap_section, NULL, NULL);
+				dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+			}
+
+			// Set the Classification.Policer to blank if corresponding
+			// Policer instance has been deleted
+			uci_foreach_option_eq("qos", "classify", "policer", p_name, sec) {
+				dmuci_set_value_by_section(sec, "policer", "");
+			}
+			break;
+		case DEL_ALL:
+			uci_foreach_sections("qos", "policer", s) {
+				if (found != 0){
+					get_dmmap_section_of_config_section("dmmap_qos", "policer", section_name(ss), &dmmap_section);
+					if (dmmap_section != NULL)
+						dmuci_delete_by_section(dmmap_section, NULL, NULL);
+					dmuci_delete_by_section(ss, NULL, NULL);
+				}
+				ss = s;
+				found++;
+			}
+			if (ss != NULL) {
+				get_dmmap_section_of_config_section("dmmap_qos", "policer", section_name(ss), &dmmap_section);
+				if (dmmap_section != NULL)
+					dmuci_delete_by_section(dmmap_section, NULL, NULL);
+				dmuci_delete_by_section(ss, NULL, NULL);
+			}
+
+			// Since all policer have been deleted, we can safely set the
+			// value of all Classification.Policer params to empty
+			uci_foreach_sections("qos", "classify", sec) {
+				dmuci_set_value_by_section(sec, "policer", "");
+			}
+			break;
+	}
+	return 0;
+}
 
 int os_addObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
@@ -478,6 +581,18 @@ int os_get_QoS_MaxQueueEntries(char *refparam, struct dmctx *ctx, void *data, ch
 	return 0;
 }
 #endif
+
+int os_get_QoS_PolicerNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *s = NULL;
+	int cnt = 0;
+
+	uci_foreach_sections("qos", "policer", s) {
+		cnt++;
+	}
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
 
 /*#Device.QoS.QueueNumberOfEntries!UCI:qos/queue*/
 int os_get_QoS_QueueNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -2276,25 +2391,57 @@ int os_set_QoSClassification_TrafficClass(char *refparam, struct dmctx *ctx, voi
 	}
 	return 0;
 }
-#if 0
+
 int os_get_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	char *linker = NULL;
+	char *p_inst = NULL;
+	struct uci_section *dmmap_s = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "policer", &linker);
+	get_dmmap_section_of_config_section_eq("dmmap_qos", "policer", "section_name", linker, &dmmap_s);
+	if (dmmap_s != NULL) {
+		dmuci_get_value_by_section_string(dmmap_s, "policer_instance", &p_inst);
+		dmasprintf(value, "%s%cQoS%cPolicer%c%s", dmroot, dm_delim, dm_delim, dm_delim, p_inst);
+	}
+
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
 int os_set_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *linker = NULL;
+	char policer[256] = {0};
 	switch (action)	{
 		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			append_dot_to_string(policer, value, sizeof(policer));
+
+			if (strncmp(policer, "Device.QoS.Policer.", 19) != 0)
+				return 0;
+
+			struct uci_section *dmmap_s = NULL;
+			char link_inst[8] = {0};
+			snprintf(link_inst, sizeof(link_inst), "%c", policer[strlen(policer)-2]);
+			get_dmmap_section_of_config_section_eq("dmmap_qos", "policer", "policer_instance", link_inst, &dmmap_s);
+
+			if (dmmap_s == NULL)
+				break;
+
+			dmuci_get_value_by_section_string(dmmap_s, "section_name", &linker);
+
+			dmuci_set_value_by_section((struct uci_section *)data, "policer", linker);
 			break;
 	}
 	return 0;
 }
 
+#if 0
 int os_get_QoSClassification_App(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -2721,19 +2868,26 @@ int os_set_QoSFlow_InnerEthernetPriorityMark(char *refparam, struct dmctx *ctx, 
 	return 0;
 }
 
+#endif
+
 int os_get_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "enable", value);
+	*value = (*value[0] == '1') ? "1" : "0";
 	return 0;
 }
 
 int os_set_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	bool b;
 	switch (action)	{
 		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section((struct uci_section *)data, "enable", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -2741,23 +2895,33 @@ int os_set_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, char
 
 int os_get_QoSPolicer_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "enable", value);
+	*value = (*value[0] == '1') ? "Enabled" : "Disabled";
 	return 0;
 }
 
 int os_get_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	struct uci_section *dmmap_section = NULL;
+
+	get_dmmap_section_of_config_section("dmmap_qos", "policer", section_name((struct uci_section *)data), &dmmap_section);
+	dmuci_get_value_by_section_string(dmmap_section, "policeralias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
 	return 0;
 }
 
 int os_set_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *dmmap_section = NULL;
 	switch (action)	{
 		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			get_dmmap_section_of_config_section("dmmap_qos", "policer", section_name((struct uci_section *)data), &dmmap_section);
+			dmuci_set_value_by_section_bbfdm(dmmap_section, "policeralias", value);
 			break;
 	}
 	return 0;
@@ -2765,7 +2929,7 @@ int os_set_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char 
 
 int os_get_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "committed_rate", value);
 	return 0;
 }
 
@@ -2773,9 +2937,11 @@ int os_set_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void *dat
 {
 	switch (action)	{
 		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			dmuci_set_value_by_section((struct uci_section *)data, "committed_rate", value);
 			break;
 	}
 	return 0;
@@ -2783,7 +2949,7 @@ int os_set_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void *dat
 
 int os_get_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "committed_burst_size", value);
 	return 0;
 }
 
@@ -2791,9 +2957,11 @@ int os_set_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, void
 {
 	switch (action)	{
 		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			dmuci_set_value_by_section((struct uci_section *)data, "committed_burst_size", value);
 			break;
 	}
 	return 0;
@@ -2801,7 +2969,7 @@ int os_set_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, void
 
 int os_get_QoSPolicer_ExcessBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "excess_burst_size", value);
 	return 0;
 }
 
@@ -2809,9 +2977,11 @@ int os_set_QoSPolicer_ExcessBurstSize(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action)	{
 		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			dmuci_set_value_by_section((struct uci_section *)data, "excess_burst_size", value);
 			break;
 	}
 	return 0;
@@ -2819,7 +2989,7 @@ int os_set_QoSPolicer_ExcessBurstSize(char *refparam, struct dmctx *ctx, void *d
 
 int os_get_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "peak_rate", value);
 	return 0;
 }
 
@@ -2827,9 +2997,11 @@ int os_set_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action)	{
 		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			dmuci_set_value_by_section((struct uci_section *)data, "peak_rate", value);
 			break;
 	}
 	return 0;
@@ -2837,7 +3009,7 @@ int os_set_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data, ch
 
 int os_get_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "peak_burst_size", value);
 	return 0;
 }
 
@@ -2845,9 +3017,11 @@ int os_set_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void *dat
 {
 	switch (action)	{
 		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			dmuci_set_value_by_section((struct uci_section *)data, "peak_burst_size", value);
 			break;
 	}
 	return 0;
@@ -2855,7 +3029,14 @@ int os_set_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void *dat
 
 int os_get_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "meter_type", value);
+	if (strncmp(*value, "1", 1) == 0)
+		*value = "SingleRateThreeColor";
+	else if (strncmp(*value, "2", 1) == 0)
+		*value = "TwoRateThreeColor";
+	else
+		*value = "SimpleTokenBucket";
+
 	return 0;
 }
 
@@ -2863,9 +3044,16 @@ int os_set_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *data, c
 {
 	switch (action)	{
 		case VALUECHECK:
+			if ((strcmp("SimpleTokenBucket", value) != 0) && (strcmp("SingleRateThreeColor", value) != 0) && (strcmp("TwoRateThreeColor", value) != 0))
+				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			if (strcmp("SimpleTokenBucket", value) == 0)
+				dmuci_set_value_by_section((struct uci_section *)data, "meter_type", "0");
+			else if (strcmp("SingleRateThreeColor", value) == 0)
+				dmuci_set_value_by_section((struct uci_section *)data, "meter_type", "1");
+			else if (strcmp("TwoRateThreeColor", value) == 0)
+				dmuci_set_value_by_section((struct uci_section *)data, "meter_type", "2");
 			break;
 	}
 	return 0;
@@ -2873,7 +3061,7 @@ int os_set_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *data, c
 
 int os_get_QoSPolicer_PossibleMeterTypes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = "SimpleTokenBucket,SingleRateThreeColor,TwoRateThreeColor";
 	return 0;
 }
 
@@ -2978,7 +3166,6 @@ int os_get_QoSPolicer_NonConformingCountedBytes(char *refparam, struct dmctx *ct
 	//TODO
 	return 0;
 }
-#endif
 
 int os_get_QoSQueue_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
