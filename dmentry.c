@@ -155,7 +155,18 @@ static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int dm_type, unsigned 
 	ctx->end_session_flag = 0;
 	return 0;
 }
-
+void dm_ctx_init_list_parameter(struct dmctx *ctx)
+{
+	INIT_LIST_HEAD(&ctx->list_parameter);
+	INIT_LIST_HEAD(&ctx->set_list_tmp);
+	INIT_LIST_HEAD(&ctx->list_fault_param);
+}
+void dm_ctx_clean_list_parameter(struct dmctx *ctx)
+{
+	free_all_list_parameter(ctx);
+	free_all_set_list_tmp(ctx);
+	free_all_list_fault_param(ctx);
+}
 static int dm_ctx_clean_custom(struct dmctx *ctx, int custom)
 {
 	free_all_list_parameter(ctx);
