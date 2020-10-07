@@ -56,6 +56,8 @@ void dm_execute_cli_command(char *file, unsigned int dmtype, unsigned int amd_ve
 void wepkey_cli(int argc, char** argv);
 int free_dynamic_arrays(void);
 int dmentry_get_parameter_leaf_value(struct dmctx *ctx, char *inparam);
+void dm_ctx_init_list_parameter(struct dmctx *ctx);
+void dm_ctx_clean_list_parameter(struct dmctx *ctx);
 #ifdef BBF_TR064
 #define DM_ENTRY_UPNP_CHECK_CHANGES() \
 	do { \
