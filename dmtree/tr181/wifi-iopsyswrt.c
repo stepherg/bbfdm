@@ -363,7 +363,7 @@ char * os__get_radio_frequency_nocache(const struct wifi_radio_args *args)
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(args->wifi_radio_sec));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
 	if (res)
-		freq = dmjson_get_value(res, 1, "frequency");
+		freq = dmjson_get_value(res, 1, "band");
 
 	return freq;
 }
@@ -547,43 +547,22 @@ int os__browseWifiNeighboringWiFiDiagnosticResultInst(struct dmctx *dmctx, DMNOD
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.SupportedStandards!UBUS:wifi/status//radio[i-1].standard*/
-int os__get_radio_supported_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	json_object *res = NULL, *radios = NULL, *arrobj = NULL;
-	char *name;
-	int i = 0;
-
-	dmubus_call("wifi", "status", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
-	dmjson_foreach_obj_in_array(res, arrobj, radios, i, 1, "radios") {
-		name = dmjson_get_value(radios, 1, "name");
-		if (strcmp(name, section_name(((struct wifi_radio_args *)data)->wifi_radio_sec)) == 0) {
-			*value = dmjson_get_value(radios, 1, "standard");
-			return 0;
-		}
-	}
-	return 0;
-}
-
-/*#Device.WiFi.Radio.{i}.OperatingStandards!UBUS:wifi.radio.@Name/status//standard*/
-int os_get_radio_operating_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_radio_standards(struct uci_section *section, char **value)
 {
 	json_object *res;
 	char object[32], *standard = NULL;
-	char  **standards = NULL, *str_append= NULL;
+	char **standards = NULL, *str_append = NULL;
 	int i;
 	size_t length;
 
-	*value = "";
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(section));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "");
 
-	DM_ASSERT(res, standard = "");
 	standard = dmjson_get_value(res, 1, "standard");
 	standards = strsplit(standard, "/", &length);
 
-	for (i=0; i<length;i++) {
+	for (i = 0; i < length; i++) {
 		if (strstr(standards[i], "802.11") == standards[i])
 			str_append = dmstrdup(strstr(standards[i], "802.11") + strlen("802.11"));
 		else
@@ -597,6 +576,18 @@ int os_get_radio_operating_standard(char *refparam, struct dmctx *ctx, void *dat
 	}
 
 	return 0;
+}
+
+/*#Device.WiFi.Radio.{i}.SupportedStandards!UBUS:wifi.radio.@Name/status//standard*/
+int os__get_radio_supported_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_radio_standards(((struct wifi_radio_args *)data)->wifi_radio_sec, value);
+}
+
+/*#Device.WiFi.Radio.{i}.OperatingStandards!UBUS:wifi.radio.@Name/status//standard*/
+int os_get_radio_operating_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_radio_standards(((struct wifi_radio_args *)data)->wifi_radio_sec, value);
 }
 
 int os__get_access_point_total_associations(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

@@ -29304,10 +29304,10 @@
 						{
 							"type": "ubus", 
 							"ubus": {
-								"object": "wifi", 
+								"object": "wifi.radio.@Name", 
 								"method": "status", 
 								"args": {}, 
-								"key": "radio[i-1].standard"
+								"key": "standard"
 							}
 						}
 					]
@@ -33503,7 +33503,22 @@
 								"cwmp", 
 								"usp"
 							], 
-							"datatype": "string"
+							"datatype": "string", 
+							"mapping": [
+								{
+									"type": "uci", 
+									"uci": {
+										"file": "wireless", 
+										"section": {
+											"type": "wifi-iface", 
+											"index": "@i-1"
+										}, 
+										"option": {
+											"name": "encryption"
+										}
+									}
+								}
+							]
 						}, 
 						"WEPKey": {
 							"type": "hexBinary", 
