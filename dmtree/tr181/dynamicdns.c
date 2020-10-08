@@ -686,8 +686,12 @@ static int get_DynamicDNSClientHostname_LastUpdate(char *refparam, struct dmctx 
 		uptime = "0";
 
 	epoch_time = now - atoi(uptime) + atoi(last_time);
-	ts = localtime(&epoch_time);
-	strftime(current_time, sizeof(current_time), "%Y-%m-%dT%H:%M:%S%Z", ts);
+	if ((ts = localtime(&epoch_time)) == NULL)
+		return -1;
+
+	if (strftime(current_time, sizeof(current_time), "%Y-%m-%dT%H:%M:%SZ", ts) == 0)
+		return -1;
+
 	*value = dmstrdup(current_time);
 	return 0;
 }
@@ -815,10 +819,27 @@ static int get_DynamicDNSServer_ServerAddress(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
+static void set_server_address(struct uci_section *section, char *value)
+{
+	char new[64], *dns_server;
+
+	dmuci_get_value_by_section_string(section, "dns_server", &dns_server);
+	if (*dns_server == '\0') {
+		dmuci_set_value_by_section(section, "dns_server", value);
+	} else {
+		char *addr = strchr(dns_server, ':');
+		if (addr)
+			snprintf(new, sizeof(new), "%s%s", value, addr);
+		else
+			strcpy(new, value);
+		dmuci_set_value_by_section(section, "dns_server", new);
+	}
+}
+
 static int set_DynamicDNSServer_ServerAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s;
-	char new[64], *dns_server, *service_name;
+	char *service_name;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -826,30 +847,11 @@ static int set_DynamicDNSServer_ServerAddress(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "dns_server", &dns_server);
-			if (*dns_server == '\0') {
-				dmuci_set_value_by_section((struct uci_section *)data, "dns_server", value);
-			} else {
-				char *addr = strchr(dns_server, ':');
-				if (addr)
-					snprintf(new, sizeof(new), "%s%s", value, addr);
-				else
-					strcpy(new, value);
-				dmuci_set_value_by_section((struct uci_section *)data, "dns_server", new);
-			}
+			set_server_address((struct uci_section *)data, value);
+
 			dmuci_get_value_by_section_string((struct uci_section *)data, "service_name", &service_name);
 			uci_foreach_option_eq("ddns", "service", "service_name", service_name, s) {
-				dmuci_get_value_by_section_string(s, "dns_server", &dns_server);
-				if (*dns_server == '\0') {
-					dmuci_set_value_by_section(s, "dns_server", value);
-				} else {
-					char *addr = strchr(dns_server, ':');
-					if (addr)
-						snprintf(new, sizeof(new), "%s%s", value, addr);
-					else
-						strcpy(new, value);
-					dmuci_set_value_by_section(s, "dns_server", new);
-				}
+				set_server_address(s, value);
 			}
 			break;
 	}
@@ -868,14 +870,29 @@ static int get_DynamicDNSServer_ServerPort(char *refparam, struct dmctx *ctx, vo
 
 	char *port = strchr(dns_server, ':');
 	if (port)
-		*value = dmstrdup(port);
+		*value = dmstrdup(port+1);
 	return 0;
+}
+
+static void set_server_port(struct uci_section *section, char *value)
+{
+	char new[64], *dns_server;
+
+	dmuci_get_value_by_section_string(section, "dns_server", &dns_server);
+	if (*dns_server == '\0') {
+		snprintf(new, sizeof(new), ":%s", value);
+	} else {
+		char *addr = strchr(dns_server, ':');
+		if (addr) *addr = '\0';
+		snprintf(new, sizeof(new), "%s:%s", dns_server, value);
+	}
+	dmuci_set_value_by_section(section, "dns_server", new);
 }
 
 static int set_DynamicDNSServer_ServerPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s;
-	char new[64], *dns_server, *service_name;
+	char *service_name;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -883,34 +900,11 @@ static int set_DynamicDNSServer_ServerPort(char *refparam, struct dmctx *ctx, vo
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "dns_server", &dns_server);
-			if (*dns_server == '\0') {
-				dmuci_set_value_by_section((struct uci_section *)data, "dns_server", value);
-			} else {
-				char *addr = strchr(dns_server, ':');
-				if (addr) {
-					*addr = '\0';
-					snprintf(new, sizeof(new), "%s%s", dns_server, value);
-				} else {
-					snprintf(new, sizeof(new), "%s:%s", dns_server, value);
-				}
-				dmuci_set_value_by_section((struct uci_section *)data, "dns_server", new);
-			}
+			set_server_port((struct uci_section *)data, value);
+
 			dmuci_get_value_by_section_string((struct uci_section *)data, "service_name", &service_name);
 			uci_foreach_option_eq("ddns", "service", "service_name", service_name, s) {
-				dmuci_get_value_by_section_string(s, "dns_server", &dns_server);
-				if (*dns_server == '\0') {
-					dmuci_set_value_by_section(s, "dns_server", value);
-				} else {
-					char *addr = strchr(dns_server, ':');
-					if (addr) {
-						*addr = '\0';
-						snprintf(new, sizeof(new), "%s%s", dns_server, value);
-					} else {
-						snprintf(new, sizeof(new), "%s:%s", dns_server, value);
-					}
-					dmuci_set_value_by_section(s, "dns_server", new);
-				}
+				set_server_port(s, value);
 			}
 			break;
 	}
@@ -945,16 +939,10 @@ static int set_DynamicDNSServer_Protocol(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (strcmp(value, "HTTP") == 0)
-				dmuci_set_value_by_section((struct uci_section *)data, "use_https", "0");
-			else if (strcmp(value, "HTTPS") == 0)
-				dmuci_set_value_by_section((struct uci_section *)data, "use_https", "1");
+			dmuci_set_value_by_section((struct uci_section *)data, "use_https", (strcmp(value, "HTTPS") == 0) ? "1" : "0");
 			dmuci_get_value_by_section_string((struct uci_section *)data, "service_name", &service_name);
 			uci_foreach_option_eq("ddns", "service", "service_name", service_name, s) {
-				if (strcmp(value, "HTTP") == 0)
-					dmuci_set_value_by_section(s, "use_https", "0");
-				else if (strcmp(value, "HTTPS") == 0)
-					dmuci_set_value_by_section(s, "use_https", "1");
+				dmuci_set_value_by_section(s, "use_https", (strcmp(value, "HTTPS") == 0) ? "1" : "0");
 			}
 			break;
 	}
