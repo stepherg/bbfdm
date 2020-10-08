@@ -113,6 +113,25 @@ static int browseIEEE1905ALNetworkTopologyChangeLogInst(struct dmctx *dmctx, DMN
 	return 0;
 }
 
+static int browseIEEE1905ALNetworkTopologyNonIEEE1905NeighborInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	json_object *res = NULL, *arrobj = NULL, *res_self = NULL;
+	char *inst = NULL, *max_inst = NULL, *obj = NULL;
+	int id = 0, i = 0;
+
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res_self);
+	if (res_self)
+		json_object_object_get_ex(res_self, "self", &res);
+	if (res) {
+		dmjson_foreach_value_in_array(res, arrobj, obj, i, 1, "non1905_neighbors") {
+
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
+				break;
+		}
+	}
+	return 0;
+}
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -1015,6 +1034,23 @@ static int get_IEEE1905ALNetworkTopology_ChangeLogNumberOfEntries(char *refparam
 	return 0;
 }
 
+static int get_IEEE1905ALNetworkTopology_NonIEEE1905NeighborNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL, *obj = NULL, *obj_nbr = NULL;
+	size_t num_nodes = 0;
+
+	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "0");
+	json_object_object_get_ex(res, "self", &obj);
+	if (obj) {
+		json_object_object_get_ex(obj, "non1905_neighbors", &obj_nbr);
+		if (obj_nbr != NULL)
+			num_nodes = json_object_array_length(obj_nbr);
+	}
+	dmasprintf(value, "%d", num_nodes);
+	return 0;
+}
+
 static int get_IEEE1905ALNetworkTopologyChangeLog_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "timestamp");
@@ -1051,6 +1087,11 @@ static int get_IEEE1905ALNetworkTopologyChangeLog_NeighborId(char *refparam, str
 	return 0;
 }
 
+static int get_IEEE1905ALNetworkTopologyNonIEEE1905Neighbor(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)data;
+	return 0;
+}
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_IEEE1905Id(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1637,6 +1678,7 @@ DMOBJ tIEEE1905ALNetworkTopologyObj[] = {
 /* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"ChangeLog", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyChangeLogInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyChangeLogParams, NULL, BBFDM_BOTH},
 {"IEEE1905Device", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceParams, NULL, BBFDM_BOTH},
+{CUSTOM_PREFIX"NonIEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyNonIEEE1905NeighborInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyNonIEEE1905NeighborParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -1648,6 +1690,7 @@ DMLEAF tIEEE1905ALNetworkTopologyParams[] = {
 {"LastChange", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopology_LastChange, NULL, NULL, NULL, BBFDM_BOTH},
 {"IEEE1905DeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopology_IEEE1905DeviceNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {"ChangeLogNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopology_ChangeLogNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{CUSTOM_PREFIX"NonIEEE1905NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopology_NonIEEE1905NeighborNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -1660,6 +1703,13 @@ DMLEAF tIEEE1905ALNetworkTopologyChangeLogParams[] = {
 {"ReporterInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_ReporterInterfaceId, NULL, NULL, NULL, BBFDM_BOTH},
 {"NeighborType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_NeighborType, NULL, NULL, NULL, BBFDM_BOTH},
 {"NeighborId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_NeighborId, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.IEEE1905.AL.NetworkTopology.{CUSTOM_PREFIX}NonIEEE1905Neighbor.{i} *** */
+DMLEAF tIEEE1905ALNetworkTopologyNonIEEE1905NeighborParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"NonIEEE1905NeighborId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyNonIEEE1905Neighbor, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
