@@ -1862,7 +1862,7 @@ DMLEAF tEthernetInterfaceStatsParams[] = {
 {"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetInterfaceStats_UnicastPacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
 {"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_EthernetInterfaceStats_BroadcastPacketsSent, NULL, NULL, NULL, BBFDM_BOTH},
 {"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetInterfaceStats_BroadcastPacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
-{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetInterfaceStats_UnknownProtoPacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
+{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_EthernetInterfaceStats_UnknownProtoPacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
 #endif
 {0}
 };
