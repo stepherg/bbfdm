@@ -337,7 +337,7 @@ int ipcalc(char *ip_str, char *mask_str, char *start_str, char *end_str, char *i
 
 	if (end_str) {
 		end = atoi(end_str);
-		upe.s_addr = htonl(ntohl(ups.s_addr) + end);
+		upe.s_addr = htonl(ntohl(ups.s_addr) + end - 1);
 		strcpy(ipend_str, inet_ntoa(upe));
 	}
 	return 0;
@@ -989,7 +989,7 @@ char *dm_strword(char *src, char *str)
 	return NULL;
 }
 
-char **strsplit(const char* str, const char* delim, size_t* numtokens)
+char **strsplit(const char *str, const char *delim, size_t *numtokens)
 {
 	char *s = strdup(str);
 	size_t tokens_alloc = 1;
@@ -1145,67 +1145,78 @@ char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_sectio
  * Manage string lists
  */
 
-int is_elt_exit_in_str_list(char *str_list, char *elt)
+bool elt_exits_in_str_list(char *str_list, char *elt)
 {
-	char *pch, *spch, *list;
-	list= dmstrdup(str_list);
+	if (str_list == NULL || *str_list == '\0')
+		return false;
+
+	char *pch, *spch;
+
+	char *list = dmstrdup(str_list);
 	for (pch = strtok_r(list, " ", &spch); pch != NULL; pch = strtok_r(NULL, " ", &spch)) {
 		if(strcmp(pch, elt) == 0)
-			return 1;
+			return true;
 	}
-	return 0;
+	return false;
 }
 
 void add_elt_to_str_list(char **str_list, char *elt)
 {
-	if (*str_list == NULL || strlen(*str_list) == 0) {
+	if (*str_list == NULL || **str_list == '\0') {
 		dmasprintf(str_list, "%s", elt);
 		return;
 	}
+
 	char *list = dmstrdup(*str_list);
 	dmfree(*str_list);
 	*str_list = NULL;
 	dmasprintf(str_list, "%s %s", list, elt);
 }
 
-void remove_elt_from_str_list(char **iface_list, char *ifname)
+void remove_elt_from_str_list(char **str_list, char *ifname)
 {
 	char *list = NULL, *tmp = NULL, *pch = NULL, *spch = NULL;
 
-	if (*iface_list == NULL || strlen(*iface_list) == 0)
+	if (*str_list == NULL || **str_list == '\0')
 		return;
-	list = dmstrdup(*iface_list);
-	dmfree(*iface_list);
-	*iface_list = NULL;
+
+	list = dmstrdup(*str_list);
+	dmfree(*str_list);
+	*str_list = NULL;
+
 	for (pch = strtok_r(list, " ", &spch); pch != NULL; pch = strtok_r(NULL, " ", &spch)) {
 		if (strcmp(pch, ifname) == 0)
 			continue;
+
 		if (tmp == NULL)
-			dmasprintf(iface_list, "%s", pch);
+			dmasprintf(str_list, "%s", pch);
 		else
-			dmasprintf(iface_list, "%s %s", tmp, pch);
+			dmasprintf(str_list, "%s %s", tmp, pch);
+
 		if (tmp) {
 			dmfree(tmp);
 			tmp = NULL;
 		}
-		if(*iface_list){
-			tmp = dmstrdup(*iface_list);
-			dmfree(*iface_list);
-			*iface_list = NULL;
+
+		if (*str_list) {
+			tmp = dmstrdup(*str_list);
+			dmfree(*str_list);
+			*str_list = NULL;
 		}
 	}
-	dmasprintf(iface_list, "%s", tmp);
+
+	dmasprintf(str_list, "%s", tmp ? tmp : "");
 }
 
-int is_array_elt_exist(char **str_array, char *str, int length)
+bool elt_exists_in_array(char **str_array, char *str, int length)
 {
 	int i;
 
-	for (i = 0; i < length; i++){
+	for (i = 0; i < length; i++) {
 		if (strcmp(str_array[i], str) == 0)
-			return 1;
+			return true;
 	}
-	return 0;
+	return false;
 }
 
 int get_shift_time_time(int shift_time, char *local_time, int size)
@@ -1567,14 +1578,25 @@ int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_si
 
 	/* check size */
 	for (i = 0; i < r_args_size; i++) {
-		if ((r_args[i].min && r_args[i].max && (atoi(r_args[i].min) == atoi(r_args[i].max)) && (strlen(value) == 2 * atoi(r_args[i].max))) ||
-			(r_args[i].min && !r_args[i].max && (strlen(value) >= atoi(r_args[i].min))) ||
-			(!r_args[i].min && r_args[i].max && (strlen(value) <= atoi(r_args[i].max)))) {
-			return 0;
+
+		if (r_args[i].min && r_args[i].max && (atoi(r_args[i].min) == atoi(r_args[i].max))) {
+
+			if (strlen(value) == 2 * atoi(r_args[i].max))
+				break;
+
+			if (i == r_args_size - 1)
+				return -1;
+
+			continue;
+		}
+
+		if ((r_args[i].min && !r_args[i].max && (strlen(value) < atoi(r_args[i].min))) ||
+			(!r_args[i].min && r_args[i].max && (strlen(value) > atoi(r_args[i].max)))) {
+			return -1;
 		}
 	}
 
-	return -1;
+	return 0;
 }
 
 static int dm_validate_size_list(int min_item, int max_item, int nbr_item)
