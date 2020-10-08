@@ -1434,6 +1434,17 @@ int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_
 
 		if ((*endval != 0) || (errno != 0)) return -1;
 
+		if (r_args[i].min && r_args[i].max && minval == maxval) {
+
+			if (strlen(value) == minval)
+				break;
+
+			if (i == r_args_size - 1)
+				return -1;
+
+			continue;
+		}
+
 		/* check size */
 		if ((r_args[i].min && val < minval) || (r_args[i].max && val > maxval) || (val < 0) || (val > (unsigned int)UINT_MAX))
 			return -1;
@@ -1544,14 +1555,14 @@ int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_si
 
 	/* check size */
 	for (i = 0; i < r_args_size; i++) {
-		if ((r_args[i].min && r_args[i].max && (atoi(r_args[i].min) == atoi(r_args[i].max)) && (strlen(value) != 2 * atoi(r_args[i].max))) ||
-			(r_args[i].min && !r_args[i].max && (strlen(value) < atoi(r_args[i].min))) ||
-			(!r_args[i].min && r_args[i].max && (strlen(value) > atoi(r_args[i].max)))) {
-			return -1;
+		if ((r_args[i].min && r_args[i].max && (atoi(r_args[i].min) == atoi(r_args[i].max)) && (strlen(value) == 2 * atoi(r_args[i].max))) ||
+			(r_args[i].min && !r_args[i].max && (strlen(value) >= atoi(r_args[i].min))) ||
+			(!r_args[i].min && r_args[i].max && (strlen(value) <= atoi(r_args[i].max)))) {
+			return 0;
 		}
 	}
 
-	return 0;
+	return -1;
 }
 
 static int dm_validate_size_list(int min_item, int max_item, int nbr_item)
