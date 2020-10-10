@@ -794,7 +794,7 @@ int os_get_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *
 	uci_foreach_sections("qos", "classgroup", s) {
 		dmuci_get_value_by_section_string(s, "classes", &classes);
 		classesarr = strsplit(classes, " ", &length);
-		if (classes != NULL && is_array_elt_exist(classesarr, targetclass, length)) {
+		if (classes != NULL && elt_exists_in_array(classesarr, targetclass, length)) {
 			dmasprintf(&classgroup, "%s", section_name(s));
 			break;
 		}
@@ -3793,7 +3793,7 @@ int get_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, char 
 	uci_foreach_sections("qos", "classgroup", s) {
 		dmuci_get_value_by_section_string(s, "classes", &classes);
 		classesarr= strsplit(classes, " ", &length);
-		if (classes != NULL && is_array_elt_exist(classesarr, section_name(p->config_section), length)){
+		if (classes != NULL && elt_exists_in_array(classesarr, section_name(p->config_section), length)){
 			dmasprintf(&classgroup, "%s", section_name(s));
 			break;
 		}

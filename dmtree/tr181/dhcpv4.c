@@ -1509,6 +1509,7 @@ static int get_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 		*value = "";
 		return 0;
 	}
+
 	char *linker = dmstrdup(section_name(((struct dhcp_client_args *)data)->dhcp_client_conf));
 	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
 	if (*value == NULL)
@@ -1689,10 +1690,7 @@ static int get_DHCPv4Client_LeaseTimeRemaining(char *refparam, struct dmctx *ctx
 		return 0;
 
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dhcp_client_args *)data)->dhcp_client_conf), String}}, 1, &res);
-	if (!res) {
-		*value = "";
-		return 0;
-	}
+	DM_ASSERT(res, *value = "");
 	*value = dmjson_get_value(res, 2, "data", "leasetime");
 	return 0;
 }
@@ -1741,7 +1739,7 @@ static int get_DHCPv4ClientSentOption_Enable(char *refparam, struct dmctx *ctx, 
 	}
 	dmasprintf(&opttagvalue, "%s:%s", ((struct dhcp_client_option_args *)data)->option_tag, ((struct dhcp_client_option_args *)data)->value);
 	dmuci_get_value_by_section_string(((struct dhcp_client_option_args *)data)->client_sect, "sendopts", &v);
-	if (is_elt_exit_in_str_list(v, opttagvalue))
+	if (elt_exits_in_str_list(v, opttagvalue))
 		*value = "1";
 	else
 		*value = "0";
@@ -1766,7 +1764,7 @@ static int set_DHCPv4ClientSentOption_Enable(char *refparam, struct dmctx *ctx, 
 				return 0;
 			dmasprintf(&opttagvalue, "%s:%s", ((struct dhcp_client_option_args *)data)->option_tag, ((struct dhcp_client_option_args *)data)->value);
 			if (b) {
-				if (!is_elt_exit_in_str_list(v, opttagvalue)) {
+				if (!elt_exits_in_str_list(v, opttagvalue)) {
 					add_elt_to_str_list(&v, opttagvalue);
 					dmuci_set_value_by_section(((struct dhcp_client_option_args *)data)->client_sect, "sendopts", v);
 				}
@@ -1877,7 +1875,7 @@ static int get_DHCPv4ClientReqOption_Enable(char *refparam, struct dmctx *ctx, v
 		return 0;
 	}
 	dmuci_get_value_by_section_string(((struct dhcp_client_option_args *)data)->client_sect, "reqopts", &v);
-	if (is_elt_exit_in_str_list(v, ((struct dhcp_client_option_args *)data)->option_tag))
+	if (elt_exits_in_str_list(v, ((struct dhcp_client_option_args *)data)->option_tag))
 		*value = "1";
 	else
 		*value = "0";
@@ -1900,7 +1898,7 @@ static int set_DHCPv4ClientReqOption_Enable(char *refparam, struct dmctx *ctx, v
 			if (strcmp(((struct dhcp_client_option_args *)data)->option_tag, "0") == 0)
 				return 0;
 			if (b) {
-				if (!is_elt_exit_in_str_list(v, ((struct dhcp_client_option_args *)data)->option_tag)) {
+				if (!elt_exits_in_str_list(v, ((struct dhcp_client_option_args *)data)->option_tag)) {
 					add_elt_to_str_list(&v,  ((struct dhcp_client_option_args *)data)->option_tag);
 					dmuci_set_value_by_section(((struct dhcp_client_option_args *)data)->client_sect, "reqopts", v);
 				}
@@ -2669,7 +2667,7 @@ static int browseDHCPv4ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 {
 	char *inst, *max_inst = NULL;
 	struct dmmap_dup *p;
-	char *type, *ipv4addr = "", *ipv6addr = "", *proto, *ip_inst, *mask4 = NULL;
+	char *type, *ipv4addr = "", *ipv6addr = "", *proto, *mask4 = NULL;
 	json_object *res, *jobj;
 	struct dhcp_client_args dhcp_client_arg = {0};
 	LIST_HEAD(dup_list);
@@ -2688,7 +2686,7 @@ static int browseDHCPv4ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 				if (res) {
 					jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
 					ipv4addr = dmjson_get_value(jobj, 1, "address");
-					mask4= dmjson_get_value(jobj, 1, "mask");
+					mask4 = dmjson_get_value(jobj, 1, "mask");
 				}
 			}
 
@@ -2702,10 +2700,13 @@ static int browseDHCPv4ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 			}
 
 			dmuci_get_value_by_section_string(p->config_section, "proto", &proto);
-			dmuci_get_value_by_section_string(p->config_section, "ip_int_instance", &ip_inst);
 
-			if (ipv4addr[0] == '\0' && ipv6addr[0] == '\0' && strcmp(proto, "dhcp") != 0 && strcmp(proto, "dhcpv6") != 0 && strcmp(ip_inst, "") == 0 && strcmp(type, "bridge") != 0) {
-				p->config_section=NULL;
+			if (ipv4addr[0] == '\0' &&
+				ipv6addr[0] == '\0' &&
+				strcmp(proto, "dhcp") != 0 &&
+				strcmp(proto, "dhcpv6") != 0 &&
+				strcmp(type, "bridge") != 0) {
+				p->config_section = NULL;
 				DMUCI_SET_VALUE_BY_SECTION(bbfdm, p->dmmap_section, "section_name", "");
 			}
 		}
@@ -2720,7 +2721,7 @@ static int browseDHCPv4ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 			dhcp_client_arg.mask = dmstrdup(mask4);
 
 		dhcp_client_arg.dhcp_client_conf = p->config_section;
-		dhcp_client_arg.dhcp_client_dm= p->dmmap_section;
+		dhcp_client_arg.dhcp_client_dm = p->dmmap_section;
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
 			   p->dmmap_section, "bbf_dhcpv4client_instance", "bbf_dhcpv4client_alias", "dmmap_dhcp_client", "interface");
@@ -2770,10 +2771,10 @@ static int browseDHCPv4ClientSentOptionInst(struct dmctx *dmctx, DMNODE *parent_
 	uci_path_foreach_option_eq(bbfdm, "dmmap_dhcp_client", "send_option", "section_name", dhcp_client_args->dhcp_client_conf?section_name(dhcp_client_args->dhcp_client_conf):"", dmmap_sect) {
 		dmuci_get_value_by_section_string(dmmap_sect, "option_tag", &v1);
 		dmuci_get_value_by_section_string(dmmap_sect, "option_value", &v2);
-		dhcp_client_opt_args.client_sect= dhcp_client_args->dhcp_client_conf;
-		dhcp_client_opt_args.option_tag= dmstrdup(v1);
-		dhcp_client_opt_args.value= dmstrdup(v2);
-		dhcp_client_opt_args.opt_sect= dmmap_sect;
+		dhcp_client_opt_args.client_sect = dhcp_client_args->dhcp_client_conf;
+		dhcp_client_opt_args.option_tag = dmstrdup(v1);
+		dhcp_client_opt_args.value = dmstrdup(v2);
+		dhcp_client_opt_args.opt_sect = dmmap_sect;
 
 		browse_args.option = "section_name";
 		browse_args.value = section_name(dhcp_client_args->dhcp_client_conf);
@@ -3103,7 +3104,7 @@ DMLEAF tDHCPv4ServerPoolParams[] = {
 {"Order", &DMWRITE, DMT_UNINT, get_dhcp_sever_pool_order, set_dhcp_sever_pool_order, NULL, NULL, BBFDM_BOTH},
 {"Enable", &DMWRITE, DMT_BOOL,  get_dhcp_enable, set_dhcp_enable, NULL, NULL, BBFDM_BOTH},
 {"MinAddress", &DMWRITE, DMT_STRING, get_dhcp_interval_address_min, set_dhcp_address_min, NULL, NULL, BBFDM_BOTH},
-{"MaxAddress", &DMWRITE, DMT_STRING,get_dhcp_interval_address_max, set_dhcp_address_max, NULL, NULL, BBFDM_BOTH},
+{"MaxAddress", &DMWRITE, DMT_STRING, get_dhcp_interval_address_max, set_dhcp_address_max, NULL, NULL, BBFDM_BOTH},
 {"ReservedAddresses", &DMWRITE, DMT_STRING, get_dhcp_reserved_addresses, set_dhcp_reserved_addresses, NULL, NULL, BBFDM_BOTH},
 {"SubnetMask", &DMWRITE, DMT_STRING,get_dhcp_subnetmask, set_dhcp_subnetmask, NULL, NULL, BBFDM_BOTH},
 {"IPRouters", &DMWRITE, DMT_STRING, get_dhcp_iprouters, set_dhcp_iprouters, NULL, NULL, BBFDM_BOTH},
@@ -3175,6 +3176,7 @@ DMLEAF tDHCPv4RelayParams[] = {
 {"ForwardingNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Relay_ForwardingNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
+
 /* *** Device.DHCPv4.Relay.Forwarding.{i}. *** */
 DMLEAF tDHCPv4RelayForwardingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
