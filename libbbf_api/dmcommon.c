@@ -337,7 +337,7 @@ int ipcalc(char *ip_str, char *mask_str, char *start_str, char *end_str, char *i
 
 	if (end_str) {
 		end = atoi(end_str);
-		upe.s_addr = htonl(ntohl(ups.s_addr) + end);
+		upe.s_addr = htonl(ntohl(ups.s_addr) + end - 1);
 		strcpy(ipend_str, inet_ntoa(upe));
 	}
 	return 0;
