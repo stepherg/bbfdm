@@ -44,6 +44,7 @@ int os_get_linker_qos_queue(char *refparam, struct dmctx *dmctx, void *data, cha
 {
 	return not_implemented(linker);
 }
+
 #if 0
 int get_linker_qos_queue(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
@@ -56,6 +57,7 @@ int get_linker_qos_queue(char *refparam, struct dmctx *dmctx, void *data, char *
 	}
 }
 #endif
+
 /**************************************************************************
 * Browse functions
 ***************************************************************************/
@@ -78,6 +80,7 @@ int os_browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, voi
 	free_dmmap_config_dup_list(&dup_list);
 	return 0;
 }
+
 #if 0
 int browseQoSAppInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -88,13 +91,12 @@ int browseQoSFlowInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 {
 	return 0;
 }
+#endif
 
-int browseQoSPolicerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+int os_browseQoSPolicerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	return 0;
 }
-#endif
-
 
 int os_browseQoSQueueInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -141,7 +143,7 @@ int os_browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 			case 2: sscanf(questatsout[i], " backlog %db %dp requeues %d\n", &queuests.backlog_b, &queuests.backlog_p, &queuests.backlog_requeues);
 					if ((dmmap_sect = get_dup_qos_stats_section_in_dmmap("dmmap_qos", "qos_queue_stats", queuests.dev)) == NULL) {
 						dmuci_add_section_bbfdm("dmmap_qos", "qos_queue_stats", &dmmap_sect, &v);
-						DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "dev_link", queuests.dev);
+						dmuci_set_value_by_section_bbfdm(dmmap_sect, "dev_link", queuests.dev);
 					}
 					queuests.dmsect= dmmap_sect;
 
@@ -164,7 +166,6 @@ int os_browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 	end:
 		return 0;
 }
-
 
 int os_browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -273,14 +274,15 @@ int delObjQoSFlow(char *refparam, struct dmctx *ctx, void *data, char *instance,
 	}
 	return 0;
 }
+#endif
 
-int addObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char **instance)
+int os_addObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	//TODO
 	return 0;
 }
 
-int delObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+int os_delObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	switch (del_action) {
 		case DEL_INST:
@@ -293,6 +295,7 @@ int delObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char *instan
 	return 0;
 }
 
+#if 0
 int os_addObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s, *dmmap_qos_class;
@@ -481,18 +484,18 @@ int get_QoS_MaxPolicerEntries(char *refparam, struct dmctx *ctx, void *data, cha
 	return 0;
 }
 
-int get_QoS_PolicerNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
 int get_QoS_MaxQueueEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
 	return 0;
 }
 #endif
+
+int os_get_QoS_PolicerNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
 /*#Device.QoS.QueueNumberOfEntries!UCI:qos/class/*/
 int os_get_QoS_QueueNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2393,13 +2396,13 @@ int os_set_QoSClassification_TrafficClass(char *refparam, struct dmctx *ctx, voi
 	return 0;
 }
 
-int get_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
 	return 0;
 }
 
-int set_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -2885,13 +2888,12 @@ int set_QoSFlow_InnerEthernetPriorityMark(char *refparam, struct dmctx *ctx, voi
 	return 0;
 }
 
-int get_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
-	return 0;
+	return not_implemented(value);
 }
 
-int set_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -2905,19 +2907,17 @@ int set_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, char *i
 	return 0;
 }
 
-int get_QoSPolicer_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSPolicer_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
-	return 0;
+	return not_implemented(value);
 }
 
-int get_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
-	return 0;
+	return not_implemented(value);
 }
 
-int set_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -2931,33 +2931,12 @@ int set_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char *in
 	return 0;
 }
 
-int get_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
-	return 0;
+	return not_implemented(value);
 }
 
-int set_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			//TODO
-			break;
-	}
-	return 0;
-}
-
-int get_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-int set_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -2971,33 +2950,12 @@ int set_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
-int get_QoSPolicer_ExcessBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
-	return 0;
+	return not_implemented(value);
 }
 
-int set_QoSPolicer_ExcessBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			//TODO
-			break;
-	}
-	return 0;
-}
-
-int get_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-int set_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -3011,13 +2969,12 @@ int set_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
-int get_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSPolicer_ExcessBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
-	return 0;
+	return not_implemented(value);
 }
 
-int set_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSPolicer_ExcessBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -3031,13 +2988,50 @@ int set_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void *data, 
 	return 0;
 }
 
-int get_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	return not_implemented(value);
+}
+
+int os_set_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			//TODO
+			break;
+	}
 	return 0;
 }
 
-int set_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_get_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
+int os_set_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			//TODO
+			break;
+	}
+	return 0;
+}
+
+int os_get_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
+int os_set_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -3051,10 +3045,9 @@ int set_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
-int get_QoSPolicer_PossibleMeterTypes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSPolicer_PossibleMeterTypes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
-	return 0;
+	return not_implemented(value);
 }
 
 int get_QoSPolicer_ConformingAction(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
