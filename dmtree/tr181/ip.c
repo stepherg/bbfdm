@@ -828,8 +828,6 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 static int get_IPInterfaceIPv6Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = ((struct ipv6_args *)data)->ip_6address;
-	if(((struct ipv6_args *)data)->ip_6mask[0] != '\0')
-		dmasprintf(value, "%s/%s", ((struct ipv6_args *)data)->ip_6address, ((struct ipv6_args *)data)->ip_6mask);
 	return 0;
 }
 

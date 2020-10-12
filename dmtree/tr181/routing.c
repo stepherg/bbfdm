@@ -967,7 +967,7 @@ static int get_RoutingRouteInformationInterfaceSetting_Interface(char *refparam,
 
 static int get_RoutingRouteInformationInterfaceSetting_SourceRouter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((struct json_object *)data, 1, "source");
+	*value = dmjson_get_value((struct json_object *)data, 1, "target");
 	return 0;
 }
 
