@@ -660,19 +660,19 @@ static int set_IPDiagnosticsDownloadDiagnostics_NumberOfConnections(char *refpar
 
 static int get_IPDiagnosticsDownloadDiagnostics_ROMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "ROMtime", "0");
+	*value = get_diagnostics_option_fallback_def("download", "ROMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_BOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "BOMtime", "0");
+	*value = get_diagnostics_option_fallback_def("download", "BOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_EOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "EOMtime", "0");
+	*value = get_diagnostics_option_fallback_def("download", "EOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -720,13 +720,13 @@ static int get_IPDiagnosticsDownloadDiagnostics_PeriodOfFullLoading(char *refpar
 
 static int get_IPDiagnosticsDownloadDiagnostics_TCPOpenRequestTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TCPOpenRequestTime", "0");
+	*value = get_diagnostics_option_fallback_def("download", "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_TCPOpenResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TCPOpenResponseTime", "0");
+	*value = get_diagnostics_option_fallback_def("download", "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -762,19 +762,19 @@ static int set_IPDiagnosticsDownloadDiagnostics_EnablePerConnectionResults(char 
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_ROMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "ROMtime", "0");
+	*value = get_diagnostics_option_fallback_def("download", "ROMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_BOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "BOMtime", "0");
+	*value = get_diagnostics_option_fallback_def("download", "BOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_EOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "EOMtime", "0");
+	*value = get_diagnostics_option_fallback_def("download", "EOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -798,13 +798,13 @@ static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_TotalBytesSen
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_TCPOpenRequestTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TCPOpenRequestTime", "0");
+	*value = get_diagnostics_option_fallback_def("download", "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_TCPOpenResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TCPOpenResponseTime", "0");
+	*value = get_diagnostics_option_fallback_def("download", "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -1008,19 +1008,19 @@ static int set_IPDiagnosticsUploadDiagnostics_NumberOfConnections(char *refparam
 
 static int get_IPDiagnosticsUploadDiagnostics_ROMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "ROMtime", "0");
+	*value = get_diagnostics_option_fallback_def("upload", "ROMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_BOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "BOMtime", "0");
+	*value = get_diagnostics_option_fallback_def("upload", "BOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_EOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "EOMtime", "0");
+	*value = get_diagnostics_option_fallback_def("upload", "EOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -1068,13 +1068,13 @@ static int get_IPDiagnosticsUploadDiagnostics_PeriodOfFullLoading(char *refparam
 
 static int get_IPDiagnosticsUploadDiagnostics_TCPOpenRequestTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenRequestTime", "0");
+	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_TCPOpenResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenResponseTime", "0");
+	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -1110,19 +1110,19 @@ static int set_IPDiagnosticsUploadDiagnostics_EnablePerConnectionResults(char *r
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_ROMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "ROMtime", "0");
+	*value = get_diagnostics_option_fallback_def("upload", "ROMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_BOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "BOMtime", "0");
+	*value = get_diagnostics_option_fallback_def("upload", "BOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_EOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "EOMtime", "0");
+	*value = get_diagnostics_option_fallback_def("upload", "EOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -1147,13 +1147,13 @@ static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TotalBytesSent(
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TCPOpenRequestTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenRequestTime", "0");
+	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TCPOpenResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenResponseTime", "0");
+	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 

@@ -385,6 +385,7 @@ static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, s
 	struct uci_section *section = (struct uci_section *)data;
 	json_object *res = NULL, *sip, *client;
 
+	*value = "0001-01-01T00:00:00Z";
 	if (!section) {
 		TR104_DEBUG("section shall NOT be null\n");
 		return 0;
@@ -402,7 +403,7 @@ static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, s
 
 					// The format of last_reg_time is like "Wed, 26 Aug 2020 11:50:13"
 					if (strptime(last_reg_time, "%a, %d %b %Y %H:%M:%S", &tm_last)) {
-						char *period_str = NULL, buf[40];
+						char *period_str = NULL, buf[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
 						int period = 0;
 						// Let mktime determine the DST setting according to the system configuration
 						tm_last.tm_isdst = -1;
@@ -418,19 +419,17 @@ static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, s
 							period = atoi(DEFAULT_SIP_REGISTER_EXPIRY_STR);
 						}
 						time_expires = time_last + period;
-						*value = dmstrdup(ctime_r(&time_expires, buf));
-						// ctime_r() strangely adds a return at the end, e.g. "Fri Sep 25 12:24:39 2020\n". Remove it
-						char *tmp = strchr(*value, '\n');
-						if (tmp)
-							*tmp = '\0';
+
+						if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", localtime(&time_expires)) == 0)
+							return -1;
+
+						*value = dmstrdup(buf);
 					} else {
 						TR104_DEBUG("Unexpected time format: %s\n", last_reg_time);
 					}
 				}
 			}
 		}
-	} else {
-		TR104_DEBUG("dmubus_call() failed\n");
 	}
 
 	return 0;

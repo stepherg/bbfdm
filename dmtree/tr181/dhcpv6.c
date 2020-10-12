@@ -1195,14 +1195,36 @@ static int get_DHCPv6ServerPoolClientIPv6Address_IPAddress(char *refparam, struc
 
 static int get_DHCPv6ServerPoolClientIPv6Address_PreferredLifetime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct clientv6_args *)data)->clientparam, 1, "preferred-lifetime");
+	*value = "0001-01-01T00:00:00Z";
+
+	char *preferred = dmjson_get_value(((struct clientv6_args *)data)->clientparam, 1, "preferred-lifetime");
+	if (preferred && *preferred != '\0' && atoi(preferred) > 0) {
+		time_t time_value = atoi(preferred);
+		char s_now[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
+		if (strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", localtime(&time_value)) == 0)
+			return -1;
+		*value = dmstrdup(s_now); // MEM WILL BE FREED IN DMMEMCLEAN
+	}
+
 	return 0;
+
 }
 
 static int get_DHCPv6ServerPoolClientIPv6Address_ValidLifetime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct clientv6_args *)data)->clientparam, 1, "valid-lifetime");
+	*value = "0001-01-01T00:00:00Z";
+
+	char *valid = dmjson_get_value(((struct clientv6_args *)data)->clientparam, 1, "valid-lifetime");
+	if (valid && *valid != '\0' && atoi(valid) > 0) {
+		time_t time_value = atoi(valid);
+		char s_now[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
+		if (strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", localtime(&time_value)) == 0)
+			return -1;
+		*value = dmstrdup(s_now);
+	}
+
 	return 0;
+
 }
 
 static int get_DHCPv6ServerPoolClientIPv6Prefix_Prefix(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1213,13 +1235,33 @@ static int get_DHCPv6ServerPoolClientIPv6Prefix_Prefix(char *refparam, struct dm
 
 static int get_DHCPv6ServerPoolClientIPv6Prefix_PreferredLifetime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct clientv6_args *)data)->clientparam, 1, "preferred-lifetime");
+	*value = "0001-01-01T00:00:00Z";
+
+	char *preferred = dmjson_get_value(((struct clientv6_args *)data)->clientparam, 1, "preferred-lifetime");
+	if (preferred && *preferred != '\0' && atoi(preferred) > 0) {
+		time_t time_value = atoi(preferred);
+		char s_now[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
+		if (strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", localtime(&time_value)) == 0)
+			return -1;
+		*value = dmstrdup(s_now); // MEM WILL BE FREED IN DMMEMCLEAN
+	}
+
 	return 0;
 }
 
 static int get_DHCPv6ServerPoolClientIPv6Prefix_ValidLifetime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct clientv6_args *)data)->clientparam, 1, "valid-lifetime");
+	*value = "0001-01-01T00:00:00Z";
+
+	char *valid = dmjson_get_value(((struct clientv6_args *)data)->clientparam, 1, "valid-lifetime");
+	if (valid && *valid != '\0' && atoi(valid) > 0) {
+		time_t time_value = atoi(valid);
+		char s_now[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
+		if (strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", localtime(&time_value)) == 0)
+			return -1;
+		*value = dmstrdup(s_now);
+	}
+
 	return 0;
 }
 
