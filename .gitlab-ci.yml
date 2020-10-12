@@ -4,7 +4,19 @@ include:
 
 stages:
     - static_code_analysis
+    - uspd
    
 variables:
   DEBUG: 'TRUE'
   SOURCE_FOLDER: "."
+
+run_uspd:
+  stage: uspd
+  variables:
+    UPSTREAM_BBF_SHA: $CI_COMMIT_SHA
+    SOURCE_FOLDER: "src"
+  allow_failure: false
+  trigger:
+    project: iopsys/uspd
+    branch: devel
+    strategy: depend
