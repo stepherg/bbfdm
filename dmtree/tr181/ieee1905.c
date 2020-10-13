@@ -1267,31 +1267,31 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_MediaType(char *
 	return 0;
 }
 
-#if 0
+
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_PowerState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "power_status");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyOUI(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "generic_phy_oui");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyVariant(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "generic_phy_variant");
 	return 0;
 }
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyURL(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmjson_get_value((json_object *)data, 1, "generic_phy_url");
 	return 0;
 }
-#endif
+
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_NetworkMembership(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "network_membership");
@@ -1782,10 +1782,10 @@ DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
 {"InterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_InterfaceId, NULL, NULL, NULL, BBFDM_BOTH},
 {"MediaType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_MediaType, NULL, NULL, NULL, BBFDM_BOTH},
-//{"PowerState", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_PowerState, NULL, NULL, NULL, BBFDM_BOTH},
-//{"GenericPhyOUI", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyOUI, NULL, NULL, NULL, BBFDM_BOTH},
-//{"GenericPhyVariant", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyVariant, NULL, NULL, NULL, BBFDM_BOTH},
-//{"GenericPhyURL", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyURL, NULL, NULL, NULL, BBFDM_BOTH},
+{"PowerState", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_PowerState, NULL, NULL, NULL, BBFDM_BOTH},
+{"GenericPhyOUI", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyOUI, NULL, NULL, NULL, BBFDM_BOTH},
+{"GenericPhyVariant", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyVariant, NULL, NULL, NULL, BBFDM_BOTH},
+{"GenericPhyURL", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyURL, NULL, NULL, NULL, BBFDM_BOTH},
 {"NetworkMembership", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_NetworkMembership, NULL, NULL, NULL, BBFDM_BOTH},
 {"Role", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_Role, NULL, NULL, NULL, BBFDM_BOTH},
 {"APChannelBand", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_APChannelBand, NULL, NULL, NULL, BBFDM_BOTH},
