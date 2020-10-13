@@ -27662,8 +27662,19 @@
 					"cwmp", 
 					"usp"
 				], 
-				"access": false, 
-				"array": false, 
+				"access": false,
+				"array": true,
+				"mapping": [
+					{
+						"type": "ubus",
+						"ubus": {
+							"object": "wifi.dataelements.collector",
+							"method": "dump",
+							"args": {},
+							"key": "data[0]"
+						}
+					}
+				],
 				"Device.WiFi.DataElements.Network.": {
 					"type": "object", 
 					"protocols": [
@@ -27671,7 +27682,18 @@
 						"usp"
 					], 
 					"access": false, 
-					"array": false, 
+					"array": false,
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "wifi.dataelements.collector",
+								"method": "dump",
+								"args": {},
+								"key": "data[0].wfa-dataelements:Network"
+							}
+						}
+					],
 					"ID": {
 						"type": "string", 
 						"read": true, 
@@ -27680,7 +27702,18 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "string"
+						"datatype": "string",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "wifi.dataelements.collector",
+									"method": "dump",
+									"args": {},
+									"key": "data[0].wfa-dataelements:Network.ID"
+								}
+							}
+						]
 					}, 
 					"TimeStamp": {
 						"type": "string", 
@@ -27690,7 +27723,18 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "string"
+						"datatype": "string",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "wifi.dataelements.collector",
+									"method": "dump",
+									"args": {},
+									"key": "data[0].wfa-dataelements:Network.TimeStamp"
+								}
+							}
+						]
 					}, 
 					"ControllerID": {
 						"type": "string", 
@@ -27700,7 +27744,18 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "string"
+						"datatype": "string",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "wifi.dataelements.collector",
+									"method": "dump",
+									"args": {},
+									"key": "data[0].wfa-dataelements:Network.ControllerID"
+								}
+							}
+						]
 					}, 
 					"DeviceNumberOfEntries": {
 						"type": "unsignedInt", 
@@ -27710,7 +27765,18 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "wifi.dataelements.collector",
+									"method": "dump",
+									"args": {},
+									"key": "data[0].wfa-dataelements:Network.NumberOfDevices"
+								}
+							}
+						]
 					}, 
 					"Device.WiFi.DataElements.Network.Device.{i}.": {
 						"type": "object", 
@@ -27739,6 +27805,17 @@
 							], 
 							"pattern": [
 								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "wifi.dataelements.collector",
+										"method": "dump",
+										"args": {},
+										"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].ID"
+									}
+								}
 							]
 						}, 
 						"MultiAPCapabilities": {
@@ -27766,7 +27843,18 @@
 								"usp"
 							], 
 							"datatype": "unsignedInt", 
-							"unit": "milliseconds"
+							"unit": "milliseconds",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "wifi.dataelements.collector",
+										"method": "dump",
+										"args": {},
+										"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].CollectionInterval"
+									}
+								}
+							]
 						}, 
 						"RadioNumberOfEntries": {
 							"type": "unsignedInt", 
@@ -27776,7 +27864,18 @@
 								"cwmp", 
 								"usp"
 							], 
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "wifi.dataelements.collector",
+										"method": "dump",
+										"args": {},
+										"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].NumberOfRadios"
+									}
+								}
+							]
 						}, 
 						"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.": {
 							"type": "object", 
@@ -27789,6 +27888,17 @@
 							],
 							"access": false, 
 							"array": true, 
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "wifi.dataelements.collector",
+										"method": "dump",
+										"args": {},
+										"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList"
+									}
+								}
+							],
 							"ID": {
 								"type": "base64", 
 								"read": true, 
@@ -27803,6 +27913,17 @@
 										"min": 6, 
 										"max": 6
 									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].ID"
+										}
+									}
 								]
 							}, 
 							"Enabled": {
@@ -27813,7 +27934,18 @@
 									"cwmp", 
 									"usp"
 								], 
-								"datatype": "boolean"
+								"datatype": "boolean",
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Enabled"
+										}
+									}
+								]
 							}, 
 							"Noise": {
 								"type": "unsignedInt", 
@@ -27827,6 +27959,17 @@
 								"range": [
 									{
 										"max": 255
+									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Noise"
+										}
 									}
 								]
 							}, 
@@ -27844,6 +27987,17 @@
 										"min": 0, 
 										"max": 255
 									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Utilization"
+										}
+									}
 								]
 							}, 
 							"Transmit": {
@@ -27860,6 +28014,17 @@
 										"min": 0, 
 										"max": 255
 									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Transmit"
+										}
+									}
 								]
 							}, 
 							"ReceiveSelf": {
@@ -27874,6 +28039,17 @@
 								"range": [
 									{
 										"max": 255
+									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].ReceiveSelf"
+										}
 									}
 								]
 							}, 
@@ -27891,6 +28067,17 @@
 										"min": 0, 
 										"max": 255
 									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].RecieveOther"
+										}
+									}
 								]
 							}, 
 							"CurrentOperatingClassProfileNumberOfEntries": {
@@ -27901,7 +28088,18 @@
 									"cwmp", 
 									"usp"
 								], 
-								"datatype": "unsignedInt"
+								"datatype": "unsignedInt",
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].NumberOfCurrOpClass"
+										}
+									}
+								]
 							}, 
 							"UnassociatedSTANumberOfEntries": {
 								"type": "unsignedInt", 
@@ -27911,7 +28109,18 @@
 									"cwmp", 
 									"usp"
 								], 
-								"datatype": "unsignedInt"
+								"datatype": "unsignedInt",
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].NumberOfUnassocSta"
+										}
+									}
+								]
 							}, 
 							"BSSNumberOfEntries": {
 								"type": "unsignedInt", 
@@ -27921,7 +28130,18 @@
 									"cwmp", 
 									"usp"
 								], 
-								"datatype": "unsignedInt"
+								"datatype": "unsignedInt",
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].NumberOfBSS"
+										}
+									}
+								]
 							}, 
 							"ScanResultNumberOfEntries": {
 								"type": "unsignedInt", 
@@ -27931,7 +28151,18 @@
 									"cwmp", 
 									"usp"
 								], 
-								"datatype": "unsignedInt"
+								"datatype": "unsignedInt",
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].NumberOfScanRes"
+										}
+									}
+								]
 							}, 
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BackhaulSta.": {
 								"type": "object", 
@@ -27957,6 +28188,17 @@
 									], 
 									"pattern": [
 										"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BackhaulSta.MACAddress"
+											}
+										}
 									]
 								}
 							}, 
@@ -27982,6 +28224,17 @@
 											"min": 1, 
 											"max": 1
 										}
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.HTCapabilities"
+											}
+										}
 									]
 								}, 
 								"VHTCapabilities": {
@@ -27997,6 +28250,17 @@
 										{
 											"min": 2, 
 											"max": 6
+										}
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.VHTCapabilities"
+											}
 										}
 									]
 								}, 
@@ -28014,6 +28278,17 @@
 											"min": 4, 
 											"max": 14
 										}
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.HECapabilities"
+											}
+										}
 									]
 								}, 
 								"CapableOperatingClassProfileNumberOfEntries": {
@@ -28024,7 +28299,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "unsignedInt"
+									"datatype": "unsignedInt",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.NumberOfOpClass"
+											}
+										}
+									]
 								}, 
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.CapableOperatingClassProfile.{i}.": {
 									"type": "object", 
@@ -28037,6 +28323,17 @@
 									],
 									"access": false, 
 									"array": true, 
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.OperatingClasses"
+											}
+										}
+									],
 									"Class": {
 										"type": "unsignedInt", 
 										"read": true, 
@@ -28049,6 +28346,17 @@
 										"range": [
 											{
 												"max": 255
+											}
+										],
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.OperatingClasses[@i-1].Class"
+												}
 											}
 										]
 									}, 
@@ -28067,7 +28375,18 @@
 												"max": 127
 											}
 										], 
-										"unit": "dBm"
+										"unit": "dBm",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.OperatingClasses[@i-1].MaxTxPower"
+												}
+											}
+										]
 									}, 
 									"NonOperable": {
 										"type": "string", 
@@ -28084,7 +28403,18 @@
 													"max": 255
 												}
 											]
-										}
+										},
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.OperatingClasses[@i-1].NonOperable"
+												}
+											}
+										]
 									}, 
 									"NumberOfNonOperChan": {
 										"type": "unsignedInt", 
@@ -28094,7 +28424,18 @@
 											"cwmp", 
 											"usp"
 										], 
-										"datatype": "unsignedInt"
+										"datatype": "unsignedInt",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.OperatingClasses[@i-1].NumberOfNonOperChan"
+												}
+											}
+										]
 									}
 								}
 							}, 
@@ -28109,6 +28450,17 @@
 								],
 								"access": false, 
 								"array": true, 
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].CurrentOperatingClasses"
+										}
+									}
+								],
 								"Class": {
 									"type": "unsignedInt", 
 									"read": true, 
@@ -28121,6 +28473,17 @@
 									"range": [
 										{
 											"max": 255
+										}
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].CurrentOperatingClasses[@i-1].Class"
+											}
 										}
 									]
 								}, 
@@ -28136,6 +28499,17 @@
 									"range": [
 										{
 											"max": 255
+										}
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].CurrentOperatingClasses[@i-1].Channel"
+											}
 										}
 									]
 								}, 
@@ -28154,7 +28528,18 @@
 											"max": 127
 										}
 									], 
-									"unit": "dBm"
+									"unit": "dBm",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].CurrentOperatingClasses[@i-1].TxPower"
+											}
+										}
+									]
 								}, 
 								"TimeStamp": {
 									"type": "string", 
@@ -28164,7 +28549,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "string"
+									"datatype": "string",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].CurrentOperatingClasses[@i-1].TimeStamp"
+											}
+										}
+									]
 								}
 							}, 
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.": {
@@ -28178,6 +28574,17 @@
 								],
 								"access": false, 
 								"array": true, 
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList"
+										}
+									}
+								],
 								"BSSID": {
 									"type": "string", 
 									"read": true, 
@@ -28194,6 +28601,17 @@
 									], 
 									"pattern": [
 										"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].BSSID"
+											}
+										}
 									]
 								}, 
 								"SSID": {
@@ -28204,7 +28622,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "string"
+									"datatype": "string",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].SSID"
+											}
+										}
+									]
 								}, 
 								"Enabled": {
 									"type": "boolean", 
@@ -28214,7 +28643,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "boolean"
+									"datatype": "boolean",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].Enabled"
+											}
+										}
+									]
 								}, 
 								"LastChange": {
 									"type": "unsignedInt", 
@@ -28225,7 +28665,18 @@
 										"usp"
 									], 
 									"datatype": "unsignedInt", 
-									"unit": "seconds"
+									"unit": "seconds",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].LastChange"
+											}
+										}
+									]
 								}, 
 								"TimeStamp": {
 									"type": "string", 
@@ -28235,7 +28686,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "string"
+									"datatype": "string",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].TimeStamp"
+											}
+										}
+									]
 								}, 
 								"UnicastBytesSent": {
 									"type": "unsignedInt", 
@@ -28245,7 +28707,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "StatsCounter64"
+									"datatype": "StatsCounter64",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].UnicastBytesSent"
+											}
+										}
+									]
 								}, 
 								"UnicastBytesReceived": {
 									"type": "unsignedInt", 
@@ -28255,7 +28728,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "StatsCounter64"
+									"datatype": "StatsCounter64",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].UnicastBytesReceived"
+											}
+										}
+									]
 								}, 
 								"MulticastBytesSent": {
 									"type": "unsignedInt", 
@@ -28265,7 +28749,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "StatsCounter64"
+									"datatype": "StatsCounter64",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].MulticastBytesSent"
+											}
+										}
+									]
 								}, 
 								"MulticastBytesReceived": {
 									"type": "unsignedInt", 
@@ -28275,7 +28770,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "StatsCounter64"
+									"datatype": "StatsCounter64",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].MulticastBytesReceived"
+											}
+										}
+									]
 								}, 
 								"BroadcastBytesSent": {
 									"type": "unsignedInt", 
@@ -28285,7 +28791,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "StatsCounter64"
+									"datatype": "StatsCounter64",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].BroadcastBytesSent"
+											}
+										}
+									]
 								}, 
 								"BroadcastBytesReceived": {
 									"type": "unsignedInt", 
@@ -28295,7 +28812,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "StatsCounter64"
+									"datatype": "StatsCounter64",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].BroadcastBytesReceived"
+											}
+										}
+									]
 								}, 
 								"EstServiceParametersBE": {
 									"type": "base64", 
@@ -28310,6 +28838,17 @@
 										{
 											"min": 0, 
 											"max": 3
+										}
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].EstServiceParametersBE"
+											}
 										}
 									]
 								}, 
@@ -28327,6 +28866,17 @@
 											"min": 0, 
 											"max": 3
 										}
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].EstServiceParametersBK"
+											}
+										}
 									]
 								}, 
 								"EstServiceParametersVI": {
@@ -28342,6 +28892,17 @@
 										{
 											"min": 0, 
 											"max": 3
+										}
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].EstServiceParametersVI"
+											}
 										}
 									]
 								}, 
@@ -28359,6 +28920,17 @@
 											"min": 0, 
 											"max": 3
 										}
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].EstServiceParametersVO"
+											}
+										}
 									]
 								}, 
 								"STANumberOfEntries": {
@@ -28369,7 +28941,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "unsignedInt"
+									"datatype": "unsignedInt",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].NumberofSTA"
+											}
+										}
+									]
 								}, 
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.": {
 									"type": "object", 
@@ -28382,6 +28965,17 @@
 									],
 									"access": false, 
 									"array": true, 
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList"
+											}
+										}
+									],
 									"MACAddress": {
 										"type": "string", 
 										"read": true, 
@@ -28398,6 +28992,17 @@
 										], 
 										"pattern": [
 											"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+										],
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].MACAddress"
+												}
+											}
 										]
 									}, 
 									"TimeStamp": {
@@ -28408,7 +29013,18 @@
 											"cwmp", 
 											"usp"
 										], 
-										"datatype": "string"
+										"datatype": "string",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].TimeStamp"
+												}
+											}
+										]
 									}, 
 									"HTCapabilities": {
 										"type": "base64", 
@@ -28423,6 +29039,17 @@
 											{
 												"min": 1, 
 												"max": 1
+											}
+										],
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].HTCapabilities"
+												}
 											}
 										]
 									}, 
@@ -28440,6 +29067,17 @@
 												"min": 2, 
 												"max": 6
 											}
+										],
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].VHTCapabilities"
+												}
+											}
 										]
 									}, 
 									"HECapabilities": {
@@ -28456,6 +29094,17 @@
 												"min": 4, 
 												"max": 14
 											}
+										],
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].HECapabilities"
+												}
+											}
 										]
 									}, 
 									"LastDataDownlinkRate": {
@@ -28467,7 +29116,18 @@
 											"usp"
 										], 
 										"datatype": "unsignedInt", 
-										"unit": "kbps"
+										"unit": "kbps",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].LastDataDownlinkRate"
+												}
+											}
+										]
 									}, 
 									"LastDataUplinkRate": {
 										"type": "unsignedInt", 
@@ -28478,7 +29138,18 @@
 											"usp"
 										], 
 										"datatype": "unsignedInt", 
-										"unit": "kbps"
+										"unit": "kbps",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].LastDataUplinkRate"
+												}
+											}
+										]
 									}, 
 									"UtilizationReceive": {
 										"type": "unsignedLong", 
@@ -28489,7 +29160,18 @@
 											"usp"
 										], 
 										"datatype": "unsignedLong", 
-										"unit": "milliseconds"
+										"unit": "milliseconds",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].UtilizationReceive"
+												}
+											}
+										]
 									}, 
 									"UtilizationTransmit": {
 										"type": "unsignedLong", 
@@ -28500,7 +29182,18 @@
 											"usp"
 										], 
 										"datatype": "unsignedLong", 
-										"unit": "milliseconds"
+										"unit": "milliseconds",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].UtilizationTransmit"
+												}
+											}
+										]
 									}, 
 									"EstMACDataRateDownlink": {
 										"type": "unsignedInt", 
@@ -28511,7 +29204,18 @@
 											"usp"
 										], 
 										"datatype": "unsignedInt", 
-										"unit": "Mbps"
+										"unit": "Mbps",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].EstMACDataRateDownlink"
+												}
+											}
+										]
 									}, 
 									"EstMACDataRateUplink": {
 										"type": "unsignedInt", 
@@ -28522,7 +29226,18 @@
 											"usp"
 										], 
 										"datatype": "unsignedInt", 
-										"unit": "Mbps"
+										"unit": "Mbps",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].EstMACDataRateUplink"
+												}
+											}
+										]
 									}, 
 									"SignalStrength": {
 										"type": "unsignedInt", 
@@ -28538,7 +29253,18 @@
 												"max": 255
 											}
 										], 
-										"unit": "dBm"
+										"unit": "dBm",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].SignalStrength"
+												}
+											}
+										]
 									}, 
 									"LastConnectTime": {
 										"type": "unsignedInt", 
@@ -28549,7 +29275,18 @@
 											"usp"
 										], 
 										"datatype": "unsignedInt", 
-										"unit": "seconds"
+										"unit": "seconds",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].LastConnectTime"
+												}
+											}
+										]
 									}, 
 									"BytesSent": {
 										"type": "unsignedInt", 
@@ -28559,7 +29296,18 @@
 											"cwmp", 
 											"usp"
 										], 
-										"datatype": "StatsCounter64"
+										"datatype": "StatsCounter64",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].BytesSent"
+												}
+											}
+										]
 									}, 
 									"BytesReceived": {
 										"type": "unsignedInt", 
@@ -28569,7 +29317,18 @@
 											"cwmp", 
 											"usp"
 										], 
-										"datatype": "StatsCounter64"
+										"datatype": "StatsCounter64",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].BytesReceived"
+												}
+											}
+										]
 									}, 
 									"PacketsSent": {
 										"type": "unsignedInt", 
@@ -28579,7 +29338,18 @@
 											"cwmp", 
 											"usp"
 										], 
-										"datatype": "StatsCounter64"
+										"datatype": "StatsCounter64",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].PacketsSent"
+												}
+											}
+										]
 									}, 
 									"PacketsReceived": {
 										"type": "unsignedInt", 
@@ -28589,7 +29359,18 @@
 											"cwmp", 
 											"usp"
 										], 
-										"datatype": "StatsCounter64"
+										"datatype": "StatsCounter64",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].PacketsReceived"
+												}
+											}
+										]
 									}, 
 									"ErrorsSent": {
 										"type": "unsignedInt", 
@@ -28599,7 +29380,18 @@
 											"cwmp", 
 											"usp"
 										], 
-										"datatype": "StatsCounter64"
+										"datatype": "StatsCounter64",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].ErrorsSent"
+												}
+											}
+										]
 									}, 
 									"ErrorsReceived": {
 										"type": "unsignedInt", 
@@ -28609,7 +29401,18 @@
 											"cwmp", 
 											"usp"
 										], 
-										"datatype": "StatsCounter64"
+										"datatype": "StatsCounter64",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].ErrorsReceived"
+												}
+											}
+										]
 									}, 
 									"RetransCount": {
 										"type": "unsignedInt", 
@@ -28631,7 +29434,18 @@
 										], 
 										"list": {
 											"datatype": "base64"
-										}
+										},
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].Measurementreport"
+												}
+											}
+										]
 									}, 
 									"NumberOfMeasureReports": {
 										"type": "unsignedInt", 
@@ -28641,7 +29455,18 @@
 											"cwmp", 
 											"usp"
 										], 
-										"datatype": "unsignedInt"
+										"datatype": "unsignedInt",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].NumberOfMeasureReports"
+												}
+											}
+										]
 									}, 
 									"IPV4Address": {
 										"type": "string", 
@@ -28684,7 +29509,18 @@
 											"cwmp", 
 											"usp"
 										], 
-										"datatype": "string"
+										"datatype": "string",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].Hostname"
+												}
+											}
+										]
 									}
 								}
 							}, 
@@ -28696,6 +29532,17 @@
 								], 
 								"access": false, 
 								"array": true, 
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList"
+										}
+									}
+								],
 								"TimeStamp": {
 									"type": "string", 
 									"read": true, 
@@ -28704,7 +29551,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "string"
+									"datatype": "string",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].TimeStamp"
+											}
+										}
+									]
 								}, 
 								"OpClassScanNumberOfEntries": {
 									"type": "unsignedInt", 
@@ -28714,7 +29572,18 @@
 										"cwmp", 
 										"usp"
 									], 
-									"datatype": "unsignedInt"
+									"datatype": "unsignedInt",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].NumberOfOpClassScans"
+											}
+										}
+									]
 								}, 
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}.": {
 									"type": "object", 
@@ -28727,6 +29596,17 @@
 									],
 									"access": false, 
 									"array": true, 
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList"
+											}
+										}
+									],
 									"OperatingClass": {
 										"type": "unsignedInt", 
 										"read": true, 
@@ -28740,6 +29620,17 @@
 											{
 												"max": 255
 											}
+										],
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].OperatingClass"
+												}
+											}
 										]
 									}, 
 									"ChannelScanNumberOfEntries": {
@@ -28750,7 +29641,18 @@
 											"cwmp", 
 											"usp"
 										], 
-										"datatype": "unsignedInt"
+										"datatype": "unsignedInt",
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].NumberOfChannelScans"
+												}
+											}
+										]
 									}, 
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}.ChannelScan.{i}.": {
 										"type": "object", 
@@ -28763,6 +29665,17 @@
 										],
 										"access": false, 
 										"array": true, 
+										"mapping": [
+											{
+												"type": "ubus",
+												"ubus": {
+													"object": "wifi.dataelements.collector",
+													"method": "dump",
+													"args": {},
+													"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList"
+												}
+											}
+										],
 										"Channel": {
 											"type": "unsignedInt", 
 											"read": true, 
@@ -28776,6 +29689,17 @@
 												{
 													"max": 255
 												}
+											],
+											"mapping": [
+												{
+													"type": "ubus",
+													"ubus": {
+														"object": "wifi.dataelements.collector",
+														"method": "dump",
+														"args": {},
+														"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].Channel"
+													}
+												}
 											]
 										}, 
 										"TimeStamp": {
@@ -28786,7 +29710,18 @@
 												"cwmp", 
 												"usp"
 											], 
-											"datatype": "string"
+											"datatype": "string",
+											"mapping": [
+												{
+													"type": "ubus",
+													"ubus": {
+														"object": "wifi.dataelements.collector",
+														"method": "dump",
+														"args": {},
+														"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].TimeStamp"
+													}
+												}
+											]
 										}, 
 										"Utilization": {
 											"type": "unsignedInt", 
@@ -28800,6 +29735,17 @@
 											"range": [
 												{
 													"max": 255
+												}
+											],
+											"mapping": [
+												{
+													"type": "ubus",
+													"ubus": {
+														"object": "wifi.dataelements.collector",
+														"method": "dump",
+														"args": {},
+														"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].Utilization"
+													}
 												}
 											]
 										}, 
@@ -28816,6 +29762,17 @@
 												{
 													"max": 255
 												}
+											],
+											"mapping": [
+												{
+													"type": "ubus",
+													"ubus": {
+														"object": "wifi.dataelements.collector",
+														"method": "dump",
+														"args": {},
+														"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].Noise"
+													}
+												}
 											]
 										}, 
 										"NeighborBSSNumberOfEntries": {
@@ -28826,7 +29783,18 @@
 												"cwmp", 
 												"usp"
 											], 
-											"datatype": "unsignedInt"
+											"datatype": "unsignedInt",
+											"mapping": [
+												{
+													"type": "ubus",
+													"ubus": {
+														"object": "wifi.dataelements.collector",
+														"method": "dump",
+														"args": {},
+														"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].NumberofNeighbors"
+													}
+												}
+											]
 										}, 
 										"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}.ChannelScan.{i}.NeighborBSS.{i}.": {
 											"type": "object", 
@@ -28839,6 +29807,17 @@
 											],
 											"access": false, 
 											"array": true, 
+											"mapping": [
+												{
+													"type": "ubus",
+													"ubus": {
+														"object": "wifi.dataelements.collector",
+														"method": "dump",
+														"args": {},
+														"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].NeighborList"
+													}
+												}
+											],
 											"BSSID": {
 												"type": "string", 
 												"read": true, 
@@ -28855,6 +29834,17 @@
 												], 
 												"pattern": [
 													"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+												],
+												"mapping": [
+													{
+														"type": "ubus",
+														"ubus": {
+															"object": "wifi.dataelements.collector",
+															"method": "dump",
+															"args": {},
+															"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].NeighborList[@i-1].BSSID"
+														}
+													}
 												]
 											}, 
 											"SSID": {
@@ -28865,7 +29855,18 @@
 													"cwmp", 
 													"usp"
 												], 
-												"datatype": "string"
+												"datatype": "string",
+												"mapping": [
+													{
+														"type": "ubus",
+														"ubus": {
+															"object": "wifi.dataelements.collector",
+															"method": "dump",
+															"args": {},
+															"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].NeighborList[@i-1].SSID"
+														}
+													}
+												]
 											}, 
 											"SignalStrength": {
 												"type": "unsignedInt", 
@@ -28881,7 +29882,18 @@
 														"max": 255
 													}
 												], 
-												"unit": "dBm"
+												"unit": "dBm",
+												"mapping": [
+													{
+														"type": "ubus",
+														"ubus": {
+															"object": "wifi.dataelements.collector",
+															"method": "dump",
+															"args": {},
+															"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].NeighborList[@i-1].SignalStrengh"
+														}
+													}
+												]
 											}, 
 											"ChannelBandwidth": {
 												"type": "string", 
@@ -28891,7 +29903,18 @@
 													"cwmp", 
 													"usp"
 												], 
-												"datatype": "string"
+												"datatype": "string",
+												"mapping": [
+													{
+														"type": "ubus",
+														"ubus": {
+															"object": "wifi.dataelements.collector",
+															"method": "dump",
+															"args": {},
+															"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].NeighborList[@i-1].ChannelBandwidth"
+														}
+													}
+												]
 											}, 
 											"ChannelUtilization": {
 												"type": "unsignedInt", 
@@ -28906,6 +29929,17 @@
 													{
 														"max": 255
 													}
+												],
+												"mapping": [
+													{
+														"type": "ubus",
+														"ubus": {
+															"object": "wifi.dataelements.collector",
+															"method": "dump",
+															"args": {},
+															"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].NeighborList[@i-1].ChannelUtilization"
+														}
+													}
 												]
 											}, 
 											"StationCount": {
@@ -28916,7 +29950,18 @@
 													"cwmp", 
 													"usp"
 												], 
-												"datatype": "unsignedInt"
+												"datatype": "unsignedInt",
+												"mapping": [
+													{
+														"type": "ubus",
+														"ubus": {
+															"object": "wifi.dataelements.collector",
+															"method": "dump",
+															"args": {},
+															"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].ScanResultList[@i-1].OpClassScanList[@i-1].ChannelScanList[@i-1].NeighborList[@i-1].StationCount"
+														}
+													}
+												]
 											}
 										}
 									}
@@ -28933,6 +29978,17 @@
 								],
 								"access": false, 
 								"array": true, 
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "wifi.dataelements.collector",
+											"method": "dump",
+											"args": {},
+											"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].UnassociatedStaList"
+										}
+									}
+								],
 								"MACAddress": {
 									"type": "string", 
 									"read": true, 
@@ -28949,6 +30005,17 @@
 									], 
 									"pattern": [
 										"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].UnassociatedStaList[@i-1].MACAddress"
+											}
+										}
 									]
 								}, 
 								"SignalStrength": {
@@ -28965,7 +30032,18 @@
 											"max": 255
 										}
 									], 
-									"unit": "dBm"
+									"unit": "dBm",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "wifi.dataelements.collector",
+												"method": "dump",
+												"args": {},
+												"key": "data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].UnassociatedStaList[@i-1].SignalStrength"
+											}
+										}
+									]
 								}
 							}
 						}

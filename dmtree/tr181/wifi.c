@@ -15,6 +15,7 @@
 #include "wepkey.h"
 #include "wifi.h"
 #include "os.h"
+#include "wifi-dataelements.h"
 
 
 /**************************************************************************
@@ -2196,6 +2197,7 @@ int set_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, struct dm
 /* *** Device.WiFi. *** */
 DMOBJ tWiFiObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+{"DataElements", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsObj, NULL, NULL, BBFDM_BOTH},
 {"Radio", &DMREAD, NULL, NULL, NULL, browseWifiRadioInst, NULL, NULL, NULL, tWiFiRadioObj, tWiFiRadioParams, get_linker_Wifi_Radio, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
 {"SSID", &DMWRITE, add_wifi_ssid, delete_wifi_ssid, NULL, browseWifiSsidInst, NULL, NULL, NULL, tWiFiSSIDObj, tWiFiSSIDParams, get_linker_Wifi_Ssid, BBFDM_BOTH, (const char *[]){"Name", "Alias", "BSSID", NULL}},
 {"AccessPoint", &DMWRITE, add_wifi_accesspoint, delete_wifi_accesspoint, NULL, browseWifiAccessPointInst, NULL, NULL, NULL, tWiFiAccessPointObj, tWiFiAccessPointParams, NULL, BBFDM_BOTH, (const char *[]){"SSIDReference", "Alias", NULL}},
