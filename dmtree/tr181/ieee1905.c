@@ -1459,24 +1459,23 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceLis
 {
 	json_object *tuple;
 	char *tuple_mac = NULL, *interface = NULL;
-	char list_val[512] = {0};
+	char list_val[512];
 	int i = 0;
+	unsigned pos = 0;
 
+	list_val[0] = 0;
 	dmjson_foreach_value_in_array((json_object *)data, tuple, tuple_mac, i, 1, "br_mac") {
 
 		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIEEE1905%cAL%cNetworkTopology%cIEEE1905Device%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim, dm_delim), tuple_mac, &interface);
-		if (interface == NULL)
-			continue;
-
-		if (*list_val == '\0')
-			strncat(list_val, interface, strlen(interface));
-		else {
-			strncat(list_val, ",", 1);
-			strncat(list_val, interface, strlen(interface));
-		}
+		if (interface)
+			pos += snprintf(&list_val[pos], sizeof(list_val) - pos, "%s,", interface);
 	}
 
-	dmasprintf(value, "%s", list_val);
+	/* cut tailing ',' */
+	if (pos)
+		list_val[pos - 1] = 0;
+
+	*value = dmstrdup(list_val);
 	return 0;
 }
 
