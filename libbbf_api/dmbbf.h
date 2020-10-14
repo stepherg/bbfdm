@@ -542,6 +542,7 @@ extern struct list_head list_upnp_changed_version;
 extern int ip_version;
 extern char dm_delim;
 extern char dmroot[64];
+extern char *DMT_TYPE[];
 extern int bbfdatamodel_type;
 
 char *update_instance(char *last_inst, int argc, ...);

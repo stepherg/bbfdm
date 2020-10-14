@@ -137,6 +137,7 @@ char *DMT_TYPE[] = {
 [DMT_BOOL] = "xsd:boolean",
 [DMT_TIME] = "xsd:dateTime",
 [DMT_HEXBIN] = "xsd:hexBinary",
+[DMT_BASE64] = "xsd:base64",
 };
 
 #ifdef BBF_TR064

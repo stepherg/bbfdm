@@ -728,7 +728,7 @@ int os__get_WiFiDataElementsNetwork_DeviceNumberOfEntries(char *refparam, struct
 	json_object *res, *data_arr = NULL, *data_obj = NULL, *net_obj = NULL;
 
 	dmubus_call("wifi.dataelements.collector", "dump", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "0");
 	dmjson_foreach_obj_in_array(res, data_arr, data_obj, i, 1, "data") {
 		json_object_object_get_ex(data_obj, "wfa-dataelements:Network", &net_obj);
 		*value = dmjson_get_value(net_obj, 1, "NumberOfDevices");
@@ -1540,7 +1540,7 @@ int os__browseWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileInst
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array((json_object *)prev_data, opclass_arr, opclass_obj, i, 1, "CurrentOperatingClasses") {
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)opclass_obj, inst) == DM_STOP)
 			break;
 	}
@@ -1554,7 +1554,7 @@ int os__browseWiFiDataElementsNetworkDeviceRadioBSSInst(struct dmctx *dmctx, DMN
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array((json_object *)prev_data, bss_arr, bss_obj, i, 1, "BSSList") {
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)bss_obj, inst) == DM_STOP)
 			break;
 	}
@@ -1568,7 +1568,7 @@ int os__browseWiFiDataElementsNetworkDeviceRadioScanResultInst(struct dmctx *dmc
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array((json_object *)prev_data, scanres_arr, scanres_obj, i, 1, "ScanResultList") {
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)scanres_obj, inst) == DM_STOP)
 			break;
 	}
@@ -1582,7 +1582,7 @@ int os__browseWiFiDataElementsNetworkDeviceRadioUnassociatedSTAInst(struct dmctx
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array((json_object *)prev_data, unassoc_arr, unassoc_obj, i, 1, "UnassociatedStaList") {
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)unassoc_obj, inst) == DM_STOP)
 			break;
 	}
@@ -1598,7 +1598,7 @@ int os__browseWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClas
 	json_object_object_get_ex((json_object *)prev_data, "Capabilites", &caps_obj);
 	if (caps_obj) {
 		dmjson_foreach_obj_in_array(caps_obj, opclass_arr, opclass_obj, i, 1, "OperatingClasses") {
-			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)opclass_obj, inst) == DM_STOP)
 				break;
 		}
@@ -1613,7 +1613,7 @@ int os__browseWiFiDataElementsNetworkDeviceRadioBSSSTAInst(struct dmctx *dmctx, 
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array((json_object *)prev_data, sta_arr, sta_obj, i, 1, "STAList") {
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(4, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)sta_obj, inst) == DM_STOP)
 			break;
 	}
@@ -1627,7 +1627,7 @@ int os__browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanInst(struct
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array((json_object *)prev_data, opclass_scan_arr, opclass_scan_obj, i, 1, "OpClassScanList") {
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(4, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)opclass_scan_obj, inst) == DM_STOP)
 			break;
 	}
@@ -1641,7 +1641,7 @@ int os__browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array((json_object *)prev_data, chscan_arr, chscan_obj, i, 1, "ChannelScanList") {
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(5, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)chscan_obj, inst) == DM_STOP)
 			break;
 	}
@@ -1655,7 +1655,7 @@ int os__browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array((json_object *)prev_data, neigh_arr, neigh_obj, i, 1, "NeighborList") {
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_update_instance(6, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)neigh_obj, inst) == DM_STOP)
 			break;
 	}

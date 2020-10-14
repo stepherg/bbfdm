@@ -17,27 +17,8 @@
 
 #define GLOB_EXPR "[=><]+"
 
-char *DMT_TYPE[] = {
-[DMT_STRING] = "xsd:string",
-[DMT_UNINT] = "xsd:unsignedInt",
-[DMT_INT] = "xsd:int",
-[DMT_UNLONG] = "xsd:unsignedLong",
-[DMT_LONG] = "xsd:long",
-[DMT_BOOL] = "xsd:boolean",
-[DMT_TIME] = "xsd:dateTime",
-[DMT_HEXBIN] = "xsd:hexBinary",
-};
-
 static uint8_t wifi_neighbor_count = 0;
 struct op_cmd *dynamic_operate = NULL;
-
-bool is_str_eq(const char *s1, const char *s2)
-{
-	if (0==strcmp(s1, s2))
-		return true;
-
-	return false;
-}
 
 static void bbf_init(struct dmctx *dm_ctx, char *path)
 {
