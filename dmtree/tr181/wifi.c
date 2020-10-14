@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 iopsys Software Solutions AB
+ * Copyright (C) 2020 iopsys Software Solutions AB
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 2.1
@@ -8,6 +8,7 @@
  *	Author: Omar Kallel <omar.kallel@pivasoftware.com>
  *	Author: Anis Ellouze <anis.ellouze@pivasoftware.com>
  *	Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+ *	Author: Saurabh Verma <saurabh.verma@iopsys.eu>
  *
  */
 
@@ -15,8 +16,6 @@
 #include "wepkey.h"
 #include "wifi.h"
 #include "os.h"
-#include "wifi-dataelements.h"
-
 
 /**************************************************************************
 * LINKER
@@ -47,6 +46,7 @@ static int get_linker_associated_device(char *refparam, struct dmctx *dmctx, voi
 		*linker = "";
 	return 0;
 }
+
 /**************************************************************************
 * INIT
 ***************************************************************************/
@@ -2527,5 +2527,297 @@ DMLEAF tWiFiEndPointWPSParams[] = {
 {"Status", &DMREAD, DMT_STRING, get_WiFiEndPointWPS_Status, NULL, NULL, NULL, BBFDM_BOTH},
 //{"Version", &DMREAD, DMT_STRING, get_WiFiEndPointWPS_Version, NULL, NULL, NULL, BBFDM_BOTH},
 {"PIN", &DMWRITE, DMT_UNINT, get_WiFiEndPointWPS_PIN, set_WiFiEndPointWPS_PIN, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements. *** */
+DMOBJ tWiFiDataElementsObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+{"Network", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkObj, tWiFiDataElementsNetworkParams, NULL, BBFDM_BOTH},
+{"AssociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsAssociationEventObj, tWiFiDataElementsAssociationEventParams, NULL, BBFDM_BOTH},
+{"DisassociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsDisassociationEventObj, tWiFiDataElementsDisassociationEventParams, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network. *** */
+DMOBJ tWiFiDataElementsNetworkObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+{"Device", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsNetworkDeviceInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceObj, tWiFiDataElementsNetworkDeviceParams, NULL, BBFDM_BOTH, (const char *[]){"ID", NULL}},
+{0}
+};
+
+DMLEAF tWiFiDataElementsNetworkParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"ID", &DMWRITE, DMT_STRING, os__get_WiFiDataElementsNetwork_ID, os__set_WiFiDataElementsNetwork_ID, NULL, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetwork_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
+{"ControllerID", &DMWRITE, DMT_STRING, os__get_WiFiDataElementsNetwork_ControllerID, os__set_WiFiDataElementsNetwork_ControllerID, NULL, NULL, BBFDM_BOTH},
+{"DeviceNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetwork_DeviceNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}. *** */
+DMOBJ tWiFiDataElementsNetworkDeviceObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+{"Radio", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsNetworkDeviceRadioInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioObj, tWiFiDataElementsNetworkDeviceRadioParams, NULL, BBFDM_BOTH, (const char *[]){"ID", NULL}},
+{0}
+};
+
+DMLEAF tWiFiDataElementsNetworkDeviceParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"ID", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDevice_ID, NULL, NULL, NULL, BBFDM_BOTH},
+//{"MultiAPCapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDevice_MultiAPCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"CollectionInterval", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDevice_CollectionInterval, NULL, NULL, NULL, BBFDM_BOTH},
+{"RadioNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDevice_RadioNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}. *** */
+DMOBJ tWiFiDataElementsNetworkDeviceRadioObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+{"BackhaulSta", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBackhaulStaParams, NULL, BBFDM_BOTH},
+{"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesObj, tWiFiDataElementsNetworkDeviceRadioCapabilitiesParams, NULL, BBFDM_BOTH},
+{"CurrentOperatingClassProfile", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileInst, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileParams, NULL, BBFDM_BOTH, (const char *[]){"Class", NULL}},
+{"BSS", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsNetworkDeviceRadioBSSInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSObj, tWiFiDataElementsNetworkDeviceRadioBSSParams, NULL, BBFDM_BOTH, (const char *[]){"BSSID", NULL}},
+{"ScanResult", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsNetworkDeviceRadioScanResultInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultObj, tWiFiDataElementsNetworkDeviceRadioScanResultParams, NULL, BBFDM_BOTH},
+{"UnassociatedSTA", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsNetworkDeviceRadioUnassociatedSTAInst, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioUnassociatedSTAParams, NULL, BBFDM_BOTH, (const char *[]){"MACAddress", NULL}},
+{0}
+};
+
+DMLEAF tWiFiDataElementsNetworkDeviceRadioParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"ID", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDeviceRadio_ID, NULL, NULL, NULL, BBFDM_BOTH},
+{"Enabled", &DMREAD, DMT_BOOL, os__get_WiFiDataElementsNetworkDeviceRadio_Enabled, NULL, NULL, NULL, BBFDM_BOTH},
+{"Noise", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadio_Noise, NULL, NULL, NULL, BBFDM_BOTH},
+{"Utilization", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadio_Utilization, NULL, NULL, NULL, BBFDM_BOTH},
+{"Transmit", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadio_Transmit, NULL, NULL, NULL, BBFDM_BOTH},
+{"ReceiveSelf", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadio_ReceiveSelf, NULL, NULL, NULL, BBFDM_BOTH},
+{"ReceiveOther", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadio_ReceiveOther, NULL, NULL, NULL, BBFDM_BOTH},
+{"CurrentOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadio_CurrentOperatingClassProfileNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"UnassociatedSTANumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadio_UnassociatedSTANumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"BSSNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadio_BSSNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"ScanResultNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadio_ScanResultNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BackhaulSta. *** */
+DMLEAF tWiFiDataElementsNetworkDeviceRadioBackhaulStaParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"MACAddress", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioBackhaulSta_MACAddress, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities. *** */
+DMOBJ tWiFiDataElementsNetworkDeviceRadioCapabilitiesObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+{"CapableOperatingClassProfile", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfileInst, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfileParams, NULL, BBFDM_BOTH, (const char *[]){"Class", NULL}},
+{0}
+};
+
+DMLEAF tWiFiDataElementsNetworkDeviceRadioCapabilitiesParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"HTCapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDeviceRadioCapabilities_HTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"VHTCapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDeviceRadioCapabilities_VHTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"HECapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDeviceRadioCapabilities_HECapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"CapableOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioCapabilities_CapableOperatingClassProfileNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.CapableOperatingClassProfile.{i}. *** */
+DMLEAF tWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfileParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"Class", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_Class, NULL, NULL, NULL, BBFDM_BOTH},
+{"MaxTxPower", &DMREAD, DMT_INT, os__get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_MaxTxPower, NULL, NULL, NULL, BBFDM_BOTH},
+{"NonOperable", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_NonOperable, NULL, NULL, NULL, BBFDM_BOTH},
+{"NumberOfNonOperChan", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_NumberOfNonOperChan, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.CurrentOperatingClassProfile.{i}. *** */
+DMLEAF tWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"Class", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_Class, NULL, NULL, NULL, BBFDM_BOTH},
+{"Channel", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_Channel, NULL, NULL, NULL, BBFDM_BOTH},
+{"TxPower", &DMREAD, DMT_INT, os__get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_TxPower, NULL, NULL, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}. *** */
+DMOBJ tWiFiDataElementsNetworkDeviceRadioBSSObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+{"STA", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsNetworkDeviceRadioBSSSTAInst, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAParams, NULL, BBFDM_BOTH, (const char *[]){"MACAddress", NULL}},
+{0}
+};
+
+DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"BSSID", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioBSS_BSSID, NULL, NULL, NULL, BBFDM_BOTH},
+{"SSID", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioBSS_SSID, NULL, NULL, NULL, BBFDM_BOTH},
+{"Enabled", &DMREAD, DMT_BOOL, os__get_WiFiDataElementsNetworkDeviceRadioBSS_Enabled, NULL, NULL, NULL, BBFDM_BOTH},
+{"LastChange", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSS_LastChange, NULL, NULL, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioBSS_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
+{"UnicastBytesSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSS_UnicastBytesSent, NULL, NULL, NULL, BBFDM_BOTH},
+{"UnicastBytesReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSS_UnicastBytesReceived, NULL, NULL, NULL, BBFDM_BOTH},
+{"MulticastBytesSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSS_MulticastBytesSent, NULL, NULL, NULL, BBFDM_BOTH},
+{"MulticastBytesReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSS_MulticastBytesReceived, NULL, NULL, NULL, BBFDM_BOTH},
+{"BroadcastBytesSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSS_BroadcastBytesSent, NULL, NULL, NULL, BBFDM_BOTH},
+{"BroadcastBytesReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSS_BroadcastBytesReceived, NULL, NULL, NULL, BBFDM_BOTH},
+{"EstServiceParametersBE", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBE, NULL, NULL, NULL, BBFDM_BOTH},
+{"EstServiceParametersBK", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBK, NULL, NULL, NULL, BBFDM_BOTH},
+{"EstServiceParametersVI", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVI, NULL, NULL, NULL, BBFDM_BOTH},
+{"EstServiceParametersVO", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVO, NULL, NULL, NULL, BBFDM_BOTH},
+{"STANumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSS_STANumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}. *** */
+DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"MACAddress", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_MACAddress, NULL, NULL, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
+{"HTCapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_HTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"VHTCapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_VHTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"HECapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_HECapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"LastDataDownlinkRate", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastDataDownlinkRate, NULL, NULL, NULL, BBFDM_BOTH},
+{"LastDataUplinkRate", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastDataUplinkRate, NULL, NULL, NULL, BBFDM_BOTH},
+{"UtilizationReceive", &DMREAD, DMT_UNLONG, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_UtilizationReceive, NULL, NULL, NULL, BBFDM_BOTH},
+{"UtilizationTransmit", &DMREAD, DMT_UNLONG, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_UtilizationTransmit, NULL, NULL, NULL, BBFDM_BOTH},
+{"EstMACDataRateDownlink", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_EstMACDataRateDownlink, NULL, NULL, NULL, BBFDM_BOTH},
+{"EstMACDataRateUplink", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_EstMACDataRateUplink, NULL, NULL, NULL, BBFDM_BOTH},
+{"SignalStrength", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_SignalStrength, NULL, NULL, NULL, BBFDM_BOTH},
+{"LastConnectTime", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastConnectTime, NULL, NULL, NULL, BBFDM_BOTH},
+{"BytesSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_BytesSent, NULL, NULL, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_BytesReceived, NULL, NULL, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_PacketsSent, NULL, NULL, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_PacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
+{"ErrorsSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ErrorsSent, NULL, NULL, NULL, BBFDM_BOTH},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ErrorsReceived, NULL, NULL, NULL, BBFDM_BOTH},
+//{"RetransCount", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_RetransCount, NULL, NULL, NULL, BBFDM_BOTH},
+{"MeasurementReport", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_MeasurementReport, NULL, NULL, NULL, BBFDM_BOTH},
+{"NumberOfMeasureReports", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_NumberOfMeasureReports, NULL, NULL, NULL, BBFDM_BOTH},
+//{"IPV4Address", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV4Address, NULL, NULL, NULL, BBFDM_BOTH},
+//{"IPV6Address", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV6Address, NULL, NULL, NULL, BBFDM_BOTH},
+{"Hostname", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioBSSSTA_Hostname, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}. *** */
+DMOBJ tWiFiDataElementsNetworkDeviceRadioScanResultObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+{"OpClassScan", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanObj, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanParams, NULL, BBFDM_BOTH, (const char *[]){"OperatingClass", NULL}},
+{0}
+};
+
+DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioScanResult_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
+{"OpClassScanNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioScanResult_OpClassScanNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}. *** */
+DMOBJ tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+{"ChannelScan", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanObj, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanParams, NULL, BBFDM_BOTH, (const char *[]){"Channel", NULL}},
+{0}
+};
+
+DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"OperatingClass", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScan_OperatingClass, NULL, NULL, NULL, BBFDM_BOTH},
+{"ChannelScanNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScan_ChannelScanNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}.ChannelScan.{i}. *** */
+DMOBJ tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+{"NeighborBSS", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSSInst, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSSParams, NULL, BBFDM_BOTH, (const char *[]){"BSSID", NULL}},
+{0}
+};
+
+DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"Channel", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_Channel, NULL, NULL, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
+{"Utilization", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_Utilization, NULL, NULL, NULL, BBFDM_BOTH},
+{"Noise", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_Noise, NULL, NULL, NULL, BBFDM_BOTH},
+{"NeighborBSSNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_NeighborBSSNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}.ChannelScan.{i}.NeighborBSS.{i}. *** */
+DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSSParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"BSSID", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_BSSID, NULL, NULL, NULL, BBFDM_BOTH},
+{"SSID", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_SSID, NULL, NULL, NULL, BBFDM_BOTH},
+{"SignalStrength", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_SignalStrength, NULL, NULL, NULL, BBFDM_BOTH},
+{"ChannelBandwidth", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_ChannelBandwidth, NULL, NULL, NULL, BBFDM_BOTH},
+{"ChannelUtilization", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_ChannelUtilization, NULL, NULL, NULL, BBFDM_BOTH},
+{"StationCount", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_StationCount, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.UnassociatedSTA.{i}. *** */
+DMLEAF tWiFiDataElementsNetworkDeviceRadioUnassociatedSTAParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"MACAddress", &DMREAD, DMT_STRING, os__get_WiFiDataElementsNetworkDeviceRadioUnassociatedSTA_MACAddress, NULL, NULL, NULL, BBFDM_BOTH},
+{"SignalStrength", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsNetworkDeviceRadioUnassociatedSTA_SignalStrength, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.AssociationEvent. *** */
+DMOBJ tWiFiDataElementsAssociationEventObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+//{"AssociationEventData", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsAssociationEventAssociationEventDataInst, NULL, NULL, NULL, NULL, tWiFiDataElementsAssociationEventAssociationEventDataParams, NULL, BBFDM_BOTH},
+{0}
+};
+
+DMLEAF tWiFiDataElementsAssociationEventParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+//{"AssociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.AssociationEvent.AssociationEventData.{i}. *** */
+DMLEAF tWiFiDataElementsAssociationEventAssociationEventDataParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+//{"BSSID", &DMREAD, DMT_STRING, os__get_WiFiDataElementsAssociationEventAssociationEventData_BSSID, NULL, NULL, NULL, BBFDM_BOTH},
+//{"MACAddress", &DMREAD, DMT_STRING, os__get_WiFiDataElementsAssociationEventAssociationEventData_MACAddress, NULL, NULL, NULL, BBFDM_BOTH},
+//{"StatusCode", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsAssociationEventAssociationEventData_StatusCode, NULL, NULL, NULL, BBFDM_BOTH},
+//{"HTCapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsAssociationEventAssociationEventData_HTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+//{"VHTCapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsAssociationEventAssociationEventData_VHTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+//{"HECapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsAssociationEventAssociationEventData_HECapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+//{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.DisassociationEvent. *** */
+DMOBJ tWiFiDataElementsDisassociationEventObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+//{"DisassociationEventData", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsDisassociationEventDisassociationEventDataInst, NULL, NULL, NULL, NULL, tWiFiDataElementsDisassociationEventDisassociationEventDataParams, NULL, BBFDM_BOTH},
+{0}
+};
+
+DMLEAF tWiFiDataElementsDisassociationEventParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+//{"DisassociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.WiFi.DataElements.DisassociationEvent.DisassociationEventData.{i}. *** */
+DMLEAF tWiFiDataElementsDisassociationEventDisassociationEventDataParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+//{"BSSID", &DMREAD, DMT_STRING, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BSSID, NULL, NULL, NULL, BBFDM_BOTH},
+//{"MACAddress", &DMREAD, DMT_STRING, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_MACAddress, NULL, NULL, NULL, BBFDM_BOTH},
+//{"ReasonCode", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ReasonCode, NULL, NULL, NULL, BBFDM_BOTH},
+//{"BytesSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesSent, NULL, NULL, NULL, BBFDM_BOTH},
+//{"BytesReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesReceived, NULL, NULL, NULL, BBFDM_BOTH},
+//{"PacketsSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsSent, NULL, NULL, NULL, BBFDM_BOTH},
+//{"PacketsReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
+//{"ErrorsSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsSent, NULL, NULL, NULL, BBFDM_BOTH},
+//{"ErrorsReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsReceived, NULL, NULL, NULL, BBFDM_BOTH},
+//{"RetransCount", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_RetransCount, NULL, NULL, NULL, BBFDM_BOTH},
+//{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };

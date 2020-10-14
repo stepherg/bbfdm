@@ -43,6 +43,35 @@ extern DMLEAF tWiFiEndPointWPSParams[];
 extern DMOBJ tWiFiEndPointProfileObj[];
 extern DMLEAF tWiFiEndPointProfileParams[];
 extern DMLEAF tWiFiEndPointProfileSecurityParams[];
+extern DMOBJ tWiFiDataElementsObj[];
+extern DMOBJ tWiFiDataElementsNetworkObj[];
+extern DMLEAF tWiFiDataElementsNetworkParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceRadioObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioBackhaulStaParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceRadioCapabilitiesObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioCapabilitiesParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfileParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceRadioBSSObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceRadioScanResultObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSSParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioUnassociatedSTAParams[];
+extern DMOBJ tWiFiDataElementsAssociationEventObj[];
+extern DMLEAF tWiFiDataElementsAssociationEventParams[];
+extern DMLEAF tWiFiDataElementsAssociationEventAssociationEventDataParams[];
+extern DMOBJ tWiFiDataElementsDisassociationEventObj[];
+extern DMLEAF tWiFiDataElementsDisassociationEventParams[];
+extern DMLEAF tWiFiDataElementsDisassociationEventDisassociationEventDataParams[];
 
 struct wifi_radio_args
 {
