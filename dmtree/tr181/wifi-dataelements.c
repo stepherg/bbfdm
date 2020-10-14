@@ -1068,7 +1068,7 @@ DMOBJ tWiFiDataElementsNetworkDeviceObj[] = {
 DMLEAF tWiFiDataElementsNetworkDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
 {"ID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_ID, NULL, NULL, NULL, BBFDM_BOTH},
-{"MultiAPCapabilities", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_MultiAPCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"MultiAPCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDevice_MultiAPCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
 {"CollectionInterval", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_CollectionInterval, NULL, NULL, NULL, BBFDM_BOTH},
 {"RadioNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_RadioNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
@@ -1088,7 +1088,7 @@ DMOBJ tWiFiDataElementsNetworkDeviceRadioObj[] = {
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"ID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadio_ID, NULL, NULL, NULL, BBFDM_BOTH},
+{"ID", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadio_ID, NULL, NULL, NULL, BBFDM_BOTH},
 {"Enabled", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_Enabled, NULL, NULL, NULL, BBFDM_BOTH},
 {"Noise", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_Noise, NULL, NULL, NULL, BBFDM_BOTH},
 {"Utilization", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_Utilization, NULL, NULL, NULL, BBFDM_BOTH},
@@ -1118,9 +1118,9 @@ DMOBJ tWiFiDataElementsNetworkDeviceRadioCapabilitiesObj[] = {
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioCapabilitiesParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"HTCapabilities", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioCapabilities_HTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
-{"VHTCapabilities", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioCapabilities_VHTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
-{"HECapabilities", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioCapabilities_HECapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"HTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilities_HTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"VHTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilities_VHTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"HECapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilities_HECapabilities, NULL, NULL, NULL, BBFDM_BOTH},
 {"CapableOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilities_CapableOperatingClassProfileNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1165,10 +1165,10 @@ DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSParams[] = {
 {"MulticastBytesReceived", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_MulticastBytesReceived, NULL, NULL, NULL, BBFDM_BOTH},
 {"BroadcastBytesSent", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_BroadcastBytesSent, NULL, NULL, NULL, BBFDM_BOTH},
 {"BroadcastBytesReceived", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_BroadcastBytesReceived, NULL, NULL, NULL, BBFDM_BOTH},
-{"EstServiceParametersBE", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBE, NULL, NULL, NULL, BBFDM_BOTH},
-{"EstServiceParametersBK", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBK, NULL, NULL, NULL, BBFDM_BOTH},
-{"EstServiceParametersVI", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVI, NULL, NULL, NULL, BBFDM_BOTH},
-{"EstServiceParametersVO", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVO, NULL, NULL, NULL, BBFDM_BOTH},
+{"EstServiceParametersBE", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBE, NULL, NULL, NULL, BBFDM_BOTH},
+{"EstServiceParametersBK", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBK, NULL, NULL, NULL, BBFDM_BOTH},
+{"EstServiceParametersVI", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVI, NULL, NULL, NULL, BBFDM_BOTH},
+{"EstServiceParametersVO", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVO, NULL, NULL, NULL, BBFDM_BOTH},
 {"STANumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_STANumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1178,9 +1178,9 @@ DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
 {"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_MACAddress, NULL, NULL, NULL, BBFDM_BOTH},
 {"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
-{"HTCapabilities", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_HTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
-{"VHTCapabilities", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_VHTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
-{"HECapabilities", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_HECapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"HTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_HTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"VHTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_VHTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"HECapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_HECapabilities, NULL, NULL, NULL, BBFDM_BOTH},
 {"LastDataDownlinkRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastDataDownlinkRate, NULL, NULL, NULL, BBFDM_BOTH},
 {"LastDataUplinkRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastDataUplinkRate, NULL, NULL, NULL, BBFDM_BOTH},
 {"UtilizationReceive", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_UtilizationReceive, NULL, NULL, NULL, BBFDM_BOTH},
@@ -1288,9 +1288,9 @@ DMLEAF tWiFiDataElementsAssociationEventAssociationEventDataParams[] = {
 {"BSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_BSSID, NULL, NULL, NULL, BBFDM_BOTH},
 {"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_MACAddress, NULL, NULL, NULL, BBFDM_BOTH},
 {"StatusCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventData_StatusCode, NULL, NULL, NULL, BBFDM_BOTH},
-{"HTCapabilities", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_HTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
-{"VHTCapabilities", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_VHTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
-{"HECapabilities", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_HECapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"HTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_HTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"VHTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_VHTCapabilities, NULL, NULL, NULL, BBFDM_BOTH},
+{"HECapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_HECapabilities, NULL, NULL, NULL, BBFDM_BOTH},
 {"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
