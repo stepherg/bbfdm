@@ -794,9 +794,9 @@ char *get_softwaremodules_url(char *uuid)
 /* *** Device.SoftwareModules. *** */
 DMOBJ tSoftwareModulesObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"ExecEnv", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecEnvInst, NULL, NULL, NULL, NULL, tSoftwareModulesExecEnvParams, get_exe_cenv_linker, BBFDM_BOTH},
-{"DeploymentUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesDeploymentUnitInst, NULL, NULL, NULL, NULL, tSoftwareModulesDeploymentUnitParams, get_du_linker, BBFDM_BOTH},
-{"ExecutionUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecutionUnitInst, NULL, NULL, NULL, tSoftwareModulesExecutionUnitObj, tSoftwareModulesExecutionUnitParams, NULL, BBFDM_BOTH},
+{"ExecEnv", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecEnvInst, NULL, NULL, NULL, NULL, tSoftwareModulesExecEnvParams, get_exe_cenv_linker, BBFDM_BOTH, (const char *[]){"Alias", "Name", NULL}},
+{"DeploymentUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesDeploymentUnitInst, NULL, NULL, NULL, NULL, tSoftwareModulesDeploymentUnitParams, get_du_linker, BBFDM_BOTH, (const char *[]){"UUID", "Version", "ExecutionEnvRef", "Alias", NULL}},
+{"ExecutionUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecutionUnitInst, NULL, NULL, NULL, tSoftwareModulesExecutionUnitObj, tSoftwareModulesExecutionUnitParams, NULL, BBFDM_BOTH, (const char *[]){"EUID", "Alias", NULL}},
 {0}
 };
 

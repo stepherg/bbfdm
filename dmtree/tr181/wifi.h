@@ -25,7 +25,6 @@ extern DMLEAF tWiFiSSIDParams[];
 extern DMLEAF tWiFiRadioParams[];
 extern DMLEAF tWiFiAccessPointSecurityParams[];
 extern DMLEAF tWiFiAccessPointAssociatedDeviceParams[];
-extern DMLEAF tWiFiAcessPointIEEE80211rParams[];
 extern DMOBJ tWiFiAccessPointAssociatedDeviceObj[];
 extern DMLEAF tWiFiAccessPointAssociatedDeviceStatsParams[];
 extern DMLEAF tWiFiRadioStatsParams[];

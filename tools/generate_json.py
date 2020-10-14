@@ -292,6 +292,18 @@ def objhasparam (dmobject):
 
 	return hasparam
 
+def getuniquekeys (dmobject):
+	uniquekeys = None
+	for c in dmobject:
+		if c.tag == "uniqueKey":
+			for s in c:
+				if s.tag == "parameter":
+					if uniquekeys == None:
+						uniquekeys = "\"%s\"" % s.get('ref')
+					else:
+						uniquekeys = uniquekeys + "," + "\"%s\"" % s.get('ref')
+	return uniquekeys
+
 def printopenobject (obj):
 	fp = open('./.json_tmp', 'a')
 	if "tr-104" in sys.argv[1]:
@@ -437,6 +449,7 @@ def removetmpfiles():
 	removefile("./.json_tmp_1")
 
 def printOBJ( dmobject, hasobj, hasparam, bbfdm_type ):
+	uniquekeys = getuniquekeys(dmobject)
 	hasmapping, mapping = getobjmapping(dmobject)
 	if (dmobject.get('name')).endswith(".{i}."):
 		fbrowse = "true"
@@ -446,6 +459,8 @@ def printOBJ( dmobject, hasobj, hasparam, bbfdm_type ):
 	fp = open('./.json_tmp', 'a')
 	print >> fp,  "\"type\" : \"object\","
 	print >> fp,  "\"protocols\" : [%s]," % bbfdm_type
+	if uniquekeys != None:
+		print >> fp,  "\"uniqueKeys\" : [%s]," % uniquekeys
 	if (dmobject.get('access') == "readOnly"):
 		print >> fp,  "\"access\" : false,"	
 	else:
@@ -829,7 +844,6 @@ else:
 
 Root = sys.argv[3]
 objstart = getobjectpointer(Root)
-
 
 if objstart == None:
 	print "Wrong Object Name! %s" % Root

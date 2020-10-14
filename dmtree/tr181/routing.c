@@ -1302,7 +1302,7 @@ static int browseRoutingRouteInformationInterfaceSettingInst(struct dmctx *dmctx
 /* *** Device.Routing. *** */
 DMOBJ tRoutingObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Router", &DMREAD, NULL, NULL, NULL, browseRouterInst, NULL, NULL, NULL, tRoutingRouterObj, tRoutingRouterParams, NULL, BBFDM_BOTH},
+{"Router", &DMREAD, NULL, NULL, NULL, browseRouterInst, NULL, NULL, NULL, tRoutingRouterObj, tRoutingRouterParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
 {"RouteInformation", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tRoutingRouteInformationObj, tRoutingRouteInformationParams, NULL, BBFDM_BOTH},
 {0}
 };

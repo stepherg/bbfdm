@@ -420,8 +420,8 @@ static int get_GRETunnelInterfaceStats_ErrorsReceived(char *refparam, struct dmc
 /* *** Device.GRE. *** */
 DMOBJ tGREObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Tunnel", &DMWRITE, addObjGRETunnel, delObjGRETunnel, NULL, browseGRETunnelInst, NULL, NULL, NULL, tGRETunnelObj, tGRETunnelParams, NULL, BBFDM_BOTH},
-//{"Filter", &DMWRITE, addObjGREFilter, delObjGREFilter, NULL, browseGREFilterInst, NULL, NULL, NULL, NULL, tGREFilterParams, NULL, BBFDM_BOTH},
+{"Tunnel", &DMWRITE, addObjGRETunnel, delObjGRETunnel, NULL, browseGRETunnelInst, NULL, NULL, NULL, tGRETunnelObj, tGRETunnelParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+//{"Filter", &DMWRITE, addObjGREFilter, delObjGREFilter, NULL, browseGREFilterInst, NULL, NULL, NULL, NULL, tGREFilterParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
 {0}
 };
 

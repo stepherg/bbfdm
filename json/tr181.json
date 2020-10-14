@@ -740,10 +740,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -1090,9 +1090,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"PID"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"mapping": {
@@ -1275,11 +1275,11 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
-					],
-			        	"uniqueKey":[
-						"Name",
+					], 
+					"uniqueKeys": [
+						"Name", 
 						"Alias"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"Alias": {
@@ -1549,6 +1549,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -1595,10 +1598,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -1709,10 +1712,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Source",
+				"uniqueKeys": [
+					"Source", 
 					"ExternalSource"
-				],
+				], 
 				"access": true, 
 				"array": true, 
 				"Source": {
@@ -1797,10 +1800,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Location",
+				"uniqueKeys": [
+					"Location", 
 					"Alias"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -1853,9 +1856,9 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name"
-				],
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -2048,6 +2051,11 @@
 				"type": "object", 
 				"protocols": [
 					"cwmp"
+				], 
+				"uniqueKeys": [
+					"URL", 
+					"Alias", 
+					"UUID"
 				], 
 				"access": false, 
 				"array": true, 
@@ -3240,6 +3248,12 @@
 				"protocols": [
 					"cwmp"
 				], 
+				"uniqueKeys": [
+					"Alias", 
+					"ManufacturerOUI", 
+					"SerialNumber", 
+					"ProductClass"
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -3430,6 +3444,10 @@
 						"protocols": [
 							"cwmp"
 						], 
+						"uniqueKeys": [
+							"URL", 
+							"Alias"
+						], 
 						"access": true, 
 						"array": true, 
 						"Alias": {
@@ -3615,6 +3633,10 @@
 				"protocols": [
 					"cwmp"
 				], 
+				"uniqueKeys": [
+					"ControllerID", 
+					"ProxiedDeviceID"
+				], 
 				"access": false, 
 				"array": true, 
 				"ControllerID": {
@@ -3774,6 +3796,11 @@
 				"type": "object", 
 				"protocols": [
 					"cwmp"
+				], 
+				"uniqueKeys": [
+					"ManufacturerOUI", 
+					"ProductClass", 
+					"SerialNumber"
 				], 
 				"access": false, 
 				"array": true, 
@@ -3985,6 +4012,10 @@
 				"type": "object", 
 				"protocols": [
 					"cwmp"
+				], 
+				"uniqueKeys": [
+					"Alias", 
+					"ParameterName"
 				], 
 				"access": true, 
 				"array": true, 
@@ -4205,10 +4236,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -4626,12 +4657,12 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"UUID",
-					"Version",
-					"ExecutionEnvRef",
+				"uniqueKeys": [
+					"UUID", 
+					"Version", 
+					"ExecutionEnvRef", 
 					"Alias"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"UUID": {
@@ -5000,10 +5031,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"EUID",
+				"uniqueKeys": [
+					"EUID", 
 					"Alias"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"EUID": {
@@ -5463,6 +5494,9 @@
 				"protocols": [
 					"cwmp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -5652,6 +5686,9 @@
 					"protocols": [
 						"cwmp"
 					], 
+					"uniqueKeys": [
+						"Alias"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -5701,6 +5738,10 @@
 						"type": "object", 
 						"protocols": [
 							"cwmp"
+						], 
+						"uniqueKeys": [
+							"ANName", 
+							"Alias"
 						], 
 						"access": true, 
 						"array": true, 
@@ -5759,6 +5800,10 @@
 							"protocols": [
 								"cwmp"
 							], 
+							"uniqueKeys": [
+								"Alias", 
+								"FailedAttempts"
+							], 
 							"access": true, 
 							"array": true, 
 							"Enable": {
@@ -5809,6 +5854,10 @@
 							"protocols": [
 								"cwmp"
 							], 
+							"uniqueKeys": [
+								"RCAT", 
+								"Alias"
+							], 
 							"access": true, 
 							"array": true, 
 							"Enable": {
@@ -5856,6 +5905,9 @@
 								"type": "object", 
 								"protocols": [
 									"cwmp"
+								], 
+								"uniqueKeys": [
+									"Alias"
 								], 
 								"access": true, 
 								"array": true, 
@@ -5906,6 +5958,9 @@
 									"type": "object", 
 									"protocols": [
 										"cwmp"
+									], 
+									"uniqueKeys": [
+										"Alias"
 									], 
 									"access": true, 
 									"array": true, 
@@ -5983,6 +6038,10 @@
 							"type": "object", 
 							"protocols": [
 								"cwmp"
+							], 
+							"uniqueKeys": [
+								"RCAT", 
+								"Alias"
 							], 
 							"access": true, 
 							"array": true, 
@@ -6072,6 +6131,9 @@
 					"type": "object", 
 					"protocols": [
 						"cwmp"
+					], 
+					"uniqueKeys": [
+						"ID"
 					], 
 					"access": false, 
 					"array": true, 
@@ -7149,6 +7211,11 @@
 				"cwmp", 
 				"usp"
 			], 
+			"uniqueKeys": [
+				"HigherLayer", 
+				"LowerLayer", 
+				"Alias"
+			], 
 			"access": false, 
 			"array": true, 
 			"Alias": {
@@ -7271,10 +7338,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -9485,10 +9552,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -10824,11 +10891,11 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias",
+				"uniqueKeys": [
+					"Alias", 
+					"Name", 
 					"GroupID"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -11084,10 +11151,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Channel",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Channel"
+					], 
 					"access": false, 
 					"array": true, 
 					"Alias": {
@@ -13764,10 +13831,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -15198,10 +15265,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -15506,10 +15573,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -16024,11 +16091,11 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Interface",
-					"Alias",
-					"APN"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"APN", 
+					"Interface"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -16168,10 +16235,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -17036,10 +17103,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -17492,10 +17559,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"mapping": {
@@ -18118,11 +18185,11 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"MACAddress",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name", 
+					"MACAddress"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -18402,10 +18469,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -18805,12 +18872,12 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Interface",
-					"VLANID",
-					"Queue",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Interface", 
+					"VLANID", 
+					"Queue"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -19367,11 +19434,11 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"MACAddress",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name", 
+					"MACAddress"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -19670,10 +19737,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -19979,10 +20046,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -20118,10 +20185,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Name",
+					"uniqueKeys": [
+						"Name", 
 						"Alias"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"Alias": {
@@ -20236,9 +20303,9 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
+						"uniqueKeys": [
 							"DeviceNumber"
-						],
+						], 
 						"access": false, 
 						"array": true, 
 						"DeviceNumber": {
@@ -20498,9 +20565,9 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
+							"uniqueKeys": [
 								"ConfigurationNumber"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"ConfigurationNumber": {
@@ -20529,9 +20596,9 @@
 									"cwmp", 
 									"usp"
 								], 
-			        				"uniqueKey":[
+								"uniqueKeys": [
 									"InterfaceNumber"
-								],
+								], 
 								"access": false, 
 								"array": true, 
 								"InterfaceNumber": {
@@ -20624,10 +20691,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -21153,6 +21220,9 @@
 							"cwmp", 
 							"usp"
 						], 
+						"uniqueKeys": [
+							"Alias"
+						], 
 						"access": true, 
 						"array": true, 
 						"Enable": {
@@ -21349,9 +21419,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"MACAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"MACAddress": {
@@ -21762,6 +21832,10 @@
 						"protocols": [
 							"cwmp"
 						], 
+						"uniqueKeys": [
+							"SrcMACAddress", 
+							"DestMACAddress"
+						], 
 						"access": false, 
 						"array": true, 
 						"SrcMACAddress": {
@@ -21934,6 +22008,9 @@
 							"type": "object", 
 							"protocols": [
 								"cwmp"
+							], 
+							"uniqueKeys": [
+								"MACAddress"
 							], 
 							"access": false, 
 							"array": true, 
@@ -22227,6 +22304,10 @@
 							"protocols": [
 								"cwmp"
 							], 
+							"uniqueKeys": [
+								"HostSrcMACAddress", 
+								"HostDestMACAddress"
+							], 
 							"access": false, 
 							"array": true, 
 							"HostSrcMACAddress": {
@@ -22396,6 +22477,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
 				], 
 				"access": false, 
 				"array": true, 
@@ -23076,9 +23161,9 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
+						"uniqueKeys": [
 							"FlowID"
-						],
+						], 
 						"access": false, 
 						"array": true, 
 						"FlowID": {
@@ -23169,10 +23254,10 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
-					],
-			        	"uniqueKey":[
+					], 
+					"uniqueKeys": [
 						"MACAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"MACAddress": {
@@ -23401,6 +23486,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
 				], 
 				"access": false, 
 				"array": true, 
@@ -24085,10 +24174,10 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
-					],
-			        	"uniqueKey":[
+					], 
+					"uniqueKeys": [
 						"MACAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"MACAddress": {
@@ -24370,9 +24459,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"BandNumber"
-					],
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -24751,6 +24840,9 @@
 							"protocols": [
 								"cwmp"
 							], 
+							"uniqueKeys": [
+								"DestinationMACAddress"
+							], 
 							"access": false, 
 							"array": true, 
 							"DestinationMACAddress": {
@@ -25009,6 +25101,9 @@
 							"protocols": [
 								"cwmp"
 							], 
+							"uniqueKeys": [
+								"DestinationMACAddress"
+							], 
 							"access": false, 
 							"array": true, 
 							"DestinationMACAddress": {
@@ -25068,6 +25163,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
 				], 
 				"access": false, 
 				"array": true, 
@@ -25501,9 +25600,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"MACAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"MACAddress": {
@@ -25632,6 +25731,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
 				], 
 				"access": false, 
 				"array": true, 
@@ -26074,9 +26177,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"MACAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"MACAddress": {
@@ -26234,6 +26337,9 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -26301,10 +26407,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Alias",
+					"uniqueKeys": [
+						"Alias", 
 						"MACAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"Alias": {
@@ -26803,9 +26909,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"MACAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"MACAddress": {
@@ -27026,9 +27132,9 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
+						"uniqueKeys": [
 							"MACAddress"
-						],
+						], 
 						"access": false, 
 						"array": true, 
 						"MACAddress": {
@@ -27183,9 +27289,9 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
+							"uniqueKeys": [
 								"BSSID"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"BSSID": {
@@ -27262,9 +27368,9 @@
 									"cwmp", 
 									"usp"
 								], 
-			        				"uniqueKey":[
+								"uniqueKeys": [
 									"MACAddress"
-								],
+								], 
 								"access": false, 
 								"array": true, 
 								"MACAddress": {
@@ -27571,11 +27677,11 @@
 										"cwmp", 
 										"usp"
 									], 
-			        					"uniqueKey":[
-										"Time",
-										"APOrigin",
+									"uniqueKeys": [
+										"Time", 
+										"APOrigin", 
 										"APDestination"
-									],
+									], 
 									"access": false, 
 									"array": true, 
 									"Time": {
@@ -27784,9 +27890,9 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
+						"uniqueKeys": [
 							"ID"
-						],
+						], 
 						"access": false, 
 						"array": true, 
 						"ID": {
@@ -27883,9 +27989,9 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
+							"uniqueKeys": [
 								"ID"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"mapping": [
@@ -28318,9 +28424,9 @@
 										"cwmp", 
 										"usp"
 									], 
-			        					"uniqueKey":[
+									"uniqueKeys": [
 										"Class"
-									],
+									], 
 									"access": false, 
 									"array": true, 
 									"mapping": [
@@ -28445,9 +28551,9 @@
 									"cwmp", 
 									"usp"
 								], 
-			        				"uniqueKey":[
+								"uniqueKeys": [
 									"Class"
-								],
+								], 
 								"access": false, 
 								"array": true, 
 								"mapping": [
@@ -28569,9 +28675,9 @@
 									"cwmp", 
 									"usp"
 								], 
-			        				"uniqueKey":[
+								"uniqueKeys": [
 									"BSSID"
-								],
+								], 
 								"access": false, 
 								"array": true, 
 								"mapping": [
@@ -28960,9 +29066,9 @@
 										"cwmp", 
 										"usp"
 									], 
-			        					"uniqueKey":[
+									"uniqueKeys": [
 										"MACAddress"
-									],
+									], 
 									"access": false, 
 									"array": true, 
 									"mapping": [
@@ -29590,10 +29696,10 @@
 									"protocols": [
 										"cwmp", 
 										"usp"
-									],
-			        					"uniqueKey":[
+									], 
+									"uniqueKeys": [
 										"OperatingClass"
-									],
+									], 
 									"access": false, 
 									"array": true, 
 									"mapping": [
@@ -29660,9 +29766,9 @@
 											"cwmp", 
 											"usp"
 										], 
-			        						"uniqueKey":[
+										"uniqueKeys": [
 											"Channel"
-										],
+										], 
 										"access": false, 
 										"array": true, 
 										"mapping": [
@@ -29802,9 +29908,9 @@
 												"cwmp", 
 												"usp"
 											], 
-			        							"uniqueKey":[
+											"uniqueKeys": [
 												"BSSID"
-											],
+											], 
 											"access": false, 
 											"array": true, 
 											"mapping": [
@@ -29973,9 +30079,9 @@
 									"cwmp", 
 									"usp"
 								], 
-			        				"uniqueKey":[
+								"uniqueKeys": [
 									"MACAddress"
-								],
+								], 
 								"access": false, 
 								"array": true, 
 								"mapping": [
@@ -30342,10 +30448,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": false, 
 				"array": true, 
 				"mapping": {
@@ -31747,6 +31853,9 @@
 					"protocols": [
 						"cwmp"
 					], 
+					"uniqueKeys": [
+						"BSSID"
+					], 
 					"access": false, 
 					"array": true, 
 					"mapping": {
@@ -32072,11 +32181,11 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"BSSID",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name", 
+					"BSSID"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -32774,10 +32883,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"SSIDReference",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"SSIDReference"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -33587,9 +33696,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"MACAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"MACAddress": {
@@ -33990,9 +34099,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"AccessCategory"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"AccessCategory": {
@@ -34433,10 +34542,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"SSIDReference",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"SSIDReference"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -34693,11 +34802,12 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"SSID",
-						"Profile",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"SSID", 
+						"Location", 
+						"Priority"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -35077,9 +35187,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"AccessCategory"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"AccessCategory": {
@@ -35361,10 +35471,11 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name", 
+					"ZDOReference"
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -35675,11 +35786,11 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
-					],
-					"uniqueKey":[
-						"IEEEAddress",
+					], 
+					"uniqueKeys": [
+						"IEEEAddress", 
 						"NetworkAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"IEEEAddress": {
@@ -35751,10 +35862,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"IEEEAddress",
+				"uniqueKeys": [
+					"IEEEAddress", 
 					"NetworkAddress"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -36314,9 +36425,9 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
+						"uniqueKeys": [
 							"Neighbor"
-						],
+						], 
 						"access": false, 
 						"array": true, 
 						"Neighbor": {
@@ -36412,9 +36523,9 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
+						"uniqueKeys": [
 							"DestinationAddress"
-						],
+						], 
 						"access": false, 
 						"array": true, 
 						"DestinationAddress": {
@@ -36507,6 +36618,9 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias"
 					], 
 					"access": true, 
 					"array": true, 
@@ -36655,6 +36769,10 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"GroupId", 
+						"Alias"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -36723,6 +36841,10 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"EndpointId", 
+						"Alias"
 					], 
 					"access": true, 
 					"array": true, 
@@ -36879,6 +37001,10 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Coordinator"
 					], 
 					"access": true, 
 					"array": true, 
@@ -37099,6 +37225,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -37243,10 +37372,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Name",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Name"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -37830,10 +37959,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"VLANID",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"VLANID"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -37899,11 +38028,11 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"VLAN",
-						"Port",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"VLAN", 
+						"Port"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -37978,6 +38107,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -38575,6 +38707,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -38709,10 +38844,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -39728,10 +39863,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -40058,11 +40193,11 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"IPAddress",
-						"SubnetMask",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"IPAddress", 
+						"SubnetMask"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -40410,6 +40545,10 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Port"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -40516,10 +40655,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"IPAddress",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"IPAddress"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -40708,10 +40847,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Prefix",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Prefix"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -40908,12 +41047,12 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"LocalIPAddress",
-					"LocalPort",
-					"RemoteIPAddress",
+				"uniqueKeys": [
+					"LocalIPAddress", 
+					"LocalPort", 
+					"RemoteIPAddress", 
 					"RemotePort"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"LocalIPAddress": {
@@ -44753,10 +44892,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"ChassisIDSubtype",
+					"uniqueKeys": [
+						"ChassisIDSubtype", 
 						"ChassisID"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"Interface": {
@@ -44834,10 +44973,10 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"PortIDSubtype",
+						"uniqueKeys": [
+							"PortIDSubtype", 
 							"PortID"
-						],
+						], 
 						"access": false, 
 						"array": true, 
 						"PortIDSubtype": {
@@ -45063,10 +45202,10 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
-								"OrganizationCode",
+							"uniqueKeys": [
+								"OrganizationCode", 
 								"InformationType"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"OrganizationCode": {
@@ -45511,6 +45650,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -45815,6 +45957,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -46132,10 +46277,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Type",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Type"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -46202,11 +46347,11 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"TunnelInterface",
-					"TunneledInterface",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"TunnelInterface", 
+					"TunneledInterface"
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -46322,9 +46467,9 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
+				"uniqueKeys": [
 					"Tunnel"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"Status": {
@@ -46651,6 +46796,10 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"InboundSPI", 
+						"OutboundSPI"
+					], 
 					"access": false, 
 					"array": true, 
 					"Status": {
@@ -46860,6 +47009,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -47117,10 +47269,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Name",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Name"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -47373,6 +47525,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -47532,6 +47687,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -47837,6 +47995,10 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Name"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -48064,6 +48226,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -48223,6 +48388,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -48495,10 +48663,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Name",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Name"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -48701,6 +48869,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -48860,6 +49031,11 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias", 
+					"WANInterface", 
+					"IPv6Prefix"
 				], 
 				"access": true, 
 				"array": true, 
@@ -49044,6 +49220,11 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias", 
+						"IPv6Prefix", 
+						"IPv4Prefix"
 					], 
 					"access": true, 
 					"array": true, 
@@ -49553,6 +49734,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -49643,15 +49827,15 @@
 						"cwmp", 
 						"usp"
 					], 
-					"uniqueKey":[
-						"DestIPAddress",
-						"DestSubnetMask",
-						"ForwardingPolicy",
-						"GatewayIPAddress",
-						"Interface",
-						"ForwardingMetric",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"DestIPAddress", 
+						"DestSubnetMask", 
+						"ForwardingPolicy", 
+						"GatewayIPAddress", 
+						"Interface", 
+						"ForwardingMetric"
+					], 
 					"access": true, 
 					"array": true, 
 					"mapping": {
@@ -49898,14 +50082,14 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"DestIPPrefix",
-						"ForwardingPolicy",
-						"NextHop",
-						"Interface",
-						"ForwardingMetric",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"DestIPPrefix", 
+						"ForwardingPolicy", 
+						"NextHop", 
+						"Interface", 
+						"ForwardingMetric"
+					], 
 					"access": true, 
 					"array": true, 
 					"mapping": {
@@ -50157,6 +50341,10 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Interface"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -50271,9 +50459,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"Interface"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"Status": {
@@ -50398,10 +50586,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Alias",
+				"uniqueKeys": [
+					"Alias", 
 					"Interface"
-				],
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -50563,10 +50751,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Alias",
+				"uniqueKeys": [
+					"Alias", 
 					"Interface"
-				],
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -50823,10 +51011,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Tag",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Tag"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -50922,6 +51110,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": false, 
 				"array": true, 
@@ -51110,6 +51301,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": false, 
 				"array": true, 
@@ -51545,6 +51739,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -52777,6 +52974,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -52935,6 +53135,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -53124,6 +53327,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -53383,6 +53589,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -53658,6 +53867,11 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Queue", 
+					"Interface"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -53804,10 +54018,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Interface",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Interface"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -53967,10 +54181,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"PhysAddress",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"PhysAddress"
+				], 
 				"access": false, 
 				"array": true, 
 				"mapping": {
@@ -54388,9 +54602,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"IPAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"mapping": {
@@ -54438,9 +54652,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"IPAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"mapping": {
@@ -54679,10 +54893,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"DNSServer",
+					"uniqueKeys": [
+						"DNSServer", 
 						"Alias"
-					],
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -54824,10 +55038,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"DNSServer",
+					"uniqueKeys": [
+						"DNSServer", 
 						"Alias"
-					],
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -55268,12 +55482,12 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"InstanceName",
-						"ApplicationProtocol",
-						"TransportProtocol",
+					"uniqueKeys": [
+						"InstanceName", 
+						"ApplicationProtocol", 
+						"TransportProtocol", 
 						"Domain"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"InstanceName": {
@@ -55469,9 +55683,6 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"Key"
-						],
 						"access": false, 
 						"array": true, 
 						"Key": {
@@ -55564,10 +55775,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Interface",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Interface"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -55722,12 +55933,12 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"RemoteHost",
-					"ExternalPort",
-					"Protocol",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"RemoteHost", 
+					"ExternalPort", 
+					"Protocol"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -56147,6 +56358,10 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias", 
+					"WANInterface"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -56363,6 +56578,10 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias", 
+						"ServerNameOrAddress"
 					], 
 					"access": true, 
 					"array": true, 
@@ -56591,6 +56810,12 @@
 						"protocols": [
 							"cwmp", 
 							"usp"
+						], 
+						"uniqueKeys": [
+							"Alias", 
+							"InternalPort", 
+							"ProtocolNumber", 
+							"ThirdPartyAddress"
 						], 
 						"access": true, 
 						"array": true, 
@@ -56850,6 +57075,9 @@
 								"cwmp", 
 								"usp"
 							], 
+							"uniqueKeys": [
+								"Alias"
+							], 
 							"access": true, 
 							"array": true, 
 							"Alias": {
@@ -56937,6 +57165,14 @@
 						"protocols": [
 							"cwmp", 
 							"usp"
+						], 
+						"uniqueKeys": [
+							"Alias", 
+							"InternalPort", 
+							"ProtocolNumber", 
+							"ThirdPartyAddress", 
+							"RemoteHostIPAddress", 
+							"RemotePort"
 						], 
 						"access": true, 
 						"array": true, 
@@ -57207,10 +57443,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Interface",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Interface"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -57587,10 +57823,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Tag",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Tag"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -57657,10 +57893,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Tag",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Tag"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -57770,6 +58006,9 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias"
 					], 
 					"access": true, 
 					"array": true, 
@@ -58325,10 +58564,10 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"Chaddr",
-							"Alias"
-						],
+						"uniqueKeys": [
+							"Alias", 
+							"Chaddr"
+						], 
 						"access": true, 
 						"array": true, 
 						"mapping": {
@@ -58349,7 +58588,7 @@
 								"cwmp", 
 								"usp"
 							], 
-							"datatype": "boolean",
+							"datatype": "boolean", 
 							"mapping": [
 								{
 									"type": "uci", 
@@ -58469,10 +58708,10 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"Tag",
-							"Alias"
-						],
+						"uniqueKeys": [
+							"Alias", 
+							"Tag"
+						], 
 						"access": true, 
 						"array": true, 
 						"Enable": {
@@ -58539,10 +58778,10 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"Chaddr",
-							"Alias"
-						],
+						"uniqueKeys": [
+							"Alias", 
+							"Chaddr"
+						], 
 						"access": false, 
 						"array": true, 
 						"Alias": {
@@ -58614,9 +58853,9 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
+							"uniqueKeys": [
 								"IPAddress"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"IPAddress": {
@@ -58654,9 +58893,6 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
-								"Tag"
-							],
 							"access": false, 
 							"array": true, 
 							"Tag": {
@@ -58743,6 +58979,9 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias"
 					], 
 					"access": true, 
 					"array": true, 
@@ -59109,10 +59348,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Interface",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Interface"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -59421,9 +59660,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"SourceAddress"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"SourceAddress": {
@@ -59473,10 +59712,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Tag",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Tag"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -59543,9 +59782,6 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Tag"
-					],
 					"access": false, 
 					"array": true, 
 					"Tag": {
@@ -59626,10 +59862,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Order",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Order"
+					], 
 					"access": true, 
 					"array": true, 
 					"mapping": {
@@ -60024,10 +60260,10 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"SourceAddress",
-							"Alias"
-						],
+						"uniqueKeys": [
+							"Alias", 
+							"SourceAddress"
+						], 
 						"access": false, 
 						"array": true, 
 						"Alias": {
@@ -60106,9 +60342,9 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
+							"uniqueKeys": [
 								"IPAddress"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"IPAddress": {
@@ -60153,9 +60389,9 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
+							"uniqueKeys": [
 								"Prefix"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"Prefix": {
@@ -60199,10 +60435,7 @@
 							"protocols": [
 								"cwmp", 
 								"usp"
-							],
-			        			"uniqueKey":[
-								"Tag"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"Tag": {
@@ -60245,10 +60478,10 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"Tag",
-							"Alias"
-						],
+						"uniqueKeys": [
+							"Alias", 
+							"Tag"
+						], 
 						"access": true, 
 						"array": true, 
 						"Enable": {
@@ -60350,6 +60583,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Interface"
 				], 
 				"access": true, 
 				"array": true, 
@@ -60814,11 +61051,11 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
-				],
-			        "uniqueKey":[
-					"Username",
+				], 
+				"uniqueKeys": [
+					"Username", 
 					"Alias"
-				],
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -61012,10 +61249,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
+				"uniqueKeys": [
+					"Name", 
 					"Alias"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -61521,9 +61758,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"UUID"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"Status": {
@@ -61683,9 +61920,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"UUID"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"Status": {
@@ -61845,9 +62082,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"USN"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"Status": {
@@ -62032,9 +62269,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"URLBase"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"URLBase": {
@@ -62106,9 +62343,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"UDN"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"UDN": {
@@ -62495,10 +62732,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"ParentDevice",
+					"uniqueKeys": [
+						"ParentDevice", 
 						"ServiceId"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"ParentDevice": {
@@ -62918,10 +63155,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": true, 
 				"array": true, 
 				"Alias": {
@@ -63036,10 +63273,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -63126,6 +63363,9 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias"
 					], 
 					"access": true, 
 					"array": true, 
@@ -63957,10 +64197,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
+				"uniqueKeys": [
+					"Name", 
 					"Alias"
-				],
+				], 
 				"access": true, 
 				"array": true, 
 				"Alias": {
@@ -64133,10 +64373,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Reference",
+					"uniqueKeys": [
+						"Reference", 
 						"Alias"
-					],
+					], 
 					"access": true, 
 					"array": true, 
 					"Alias": {
@@ -64358,12 +64598,12 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"EventType",
-					"ProbableCause",
-					"SpecificProblem",
+				"uniqueKeys": [
+					"EventType", 
+					"ProbableCause", 
+					"SpecificProblem", 
 					"PerceivedSeverity"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"EventType": {
@@ -64454,12 +64694,12 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"AlarmIdentifier",
-					"EventType",
-					"ProbableCause",
+				"uniqueKeys": [
+					"AlarmIdentifier", 
+					"EventType", 
+					"ProbableCause", 
 					"SpecificProblem"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"AlarmIdentifier": {
@@ -64611,10 +64851,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"EventTime",
+				"uniqueKeys": [
+					"EventTime", 
 					"AlarmIdentifier"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"EventTime": {
@@ -64772,9 +65012,9 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
+				"uniqueKeys": [
 					"AlarmIdentifier"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"EventTime": {
@@ -64932,9 +65172,9 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
+				"uniqueKeys": [
 					"AlarmIdentifier"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"EventTime": {
@@ -65110,6 +65350,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"SerialNumber", 
+					"Issuer"
 				], 
 				"access": false, 
 				"array": true, 
@@ -65759,12 +66003,12 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"URL",
-						"PeriodicUploadInterval",
-						"PeriodicUploadTime",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"URL", 
+						"PeriodicUploadInterval", 
+						"PeriodicUploadTime"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -67120,6 +67364,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -68266,12 +68513,12 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Username",
-					"Domain",
-					"Resource",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Username", 
+					"Domain", 
+					"Resource"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -68741,11 +68988,11 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"ServerAddress",
-						"Port",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"ServerAddress", 
+						"Port"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -69142,9 +69389,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"InterfaceId"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"mapping": {
@@ -69447,10 +69694,10 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"InterfaceId",
+						"uniqueKeys": [
+							"InterfaceId", 
 							"IEEE1905Id"
-						],
+						], 
 						"access": false, 
 						"array": true, 
 						"mapping": {
@@ -70397,9 +70644,9 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
+						"uniqueKeys": [
 							"IEEE1905Id"
-						],
+						], 
 						"access": false, 
 						"array": true, 
 						"IEEE1905Id": {
@@ -70608,10 +70855,10 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
-								"MACAddress",
+							"uniqueKeys": [
+								"MACAddress", 
 								"IPv4Address"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"MACAddress": {
@@ -70688,10 +70935,10 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
-								"MACAddress",
+							"uniqueKeys": [
+								"MACAddress", 
 								"IPv6Address"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"MACAddress": {
@@ -70826,9 +71073,9 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
+							"uniqueKeys": [
 								"InterfaceId"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"InterfaceId": {
@@ -71031,10 +71278,10 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
-								"LocalInterface",
+							"uniqueKeys": [
+								"LocalInterface", 
 								"NeighborInterfaceId"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"LocalInterface": {
@@ -71077,10 +71324,10 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
-								"LocalInterface",
+							"uniqueKeys": [
+								"LocalInterface", 
 								"NeighborInterfaceId"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"LocalInterface": {
@@ -71144,10 +71391,10 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
-								"LocalInterface",
+							"uniqueKeys": [
+								"LocalInterface", 
 								"NeighborDeviceId"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"LocalInterface": {
@@ -71199,9 +71446,9 @@
 									"cwmp", 
 									"usp"
 								], 
-			        				"uniqueKey":[
+								"uniqueKeys": [
 									"NeighborMACAddress"
-								],
+								], 
 								"access": false, 
 								"array": true, 
 								"NeighborMACAddress": {
@@ -71605,6 +71852,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
 				], 
 				"access": true, 
 				"array": true, 
@@ -72131,6 +72382,10 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Topic"
+					], 
 					"access": true, 
 					"array": true, 
 					"Alias": {
@@ -72212,6 +72467,10 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Name"
 					], 
 					"access": true, 
 					"array": true, 
@@ -72422,6 +72681,10 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": true, 
 				"array": true, 
 				"Alias": {
@@ -72556,6 +72819,10 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Name"
 					], 
 					"access": true, 
 					"array": true, 
@@ -72818,6 +73085,11 @@
 							"cwmp", 
 							"usp"
 						], 
+						"uniqueKeys": [
+							"Alias", 
+							"Address", 
+							"Port"
+						], 
 						"access": true, 
 						"array": true, 
 						"Enable": {
@@ -72914,6 +73186,11 @@
 						"protocols": [
 							"cwmp", 
 							"usp"
+						], 
+						"uniqueKeys": [
+							"Alias", 
+							"Topic", 
+							"Direction"
 						], 
 						"access": true, 
 						"array": true, 
@@ -73193,11 +73470,11 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Server",
-					"Username",
+				"uniqueKeys": [
+					"Server", 
+					"Username", 
 					"Alias"
-				],
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -73453,9 +73730,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"Name"
-					],
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -73563,10 +73840,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
+				"uniqueKeys": [
+					"Name", 
 					"Alias"
-				],
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -73874,10 +74151,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
+				"uniqueKeys": [
+					"Name", 
 					"Alias"
-				],
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -74000,10 +74277,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Order",
+					"uniqueKeys": [
+						"Order", 
 						"Alias"
-					],
+					], 
 					"access": true, 
 					"array": true, 
 					"Alias": {
@@ -74157,10 +74434,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"MeasurementAgent",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"MeasurementAgent"
+				], 
 				"access": true, 
 				"array": true, 
 				"Alias": {
@@ -74376,10 +74653,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Identifier",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Identifier"
+				], 
 				"access": true, 
 				"array": true, 
 				"Alias": {
@@ -74604,9 +74881,9 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
+					"uniqueKeys": [
 						"Name"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"Name": {
@@ -74655,9 +74932,9 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
+						"uniqueKeys": [
 							"RegistryEntry"
-						],
+						], 
 						"access": false, 
 						"array": true, 
 						"RegistryEntry": {
@@ -74756,10 +75033,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Name",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Name"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -74973,6 +75250,9 @@
 						"protocols": [
 							"cwmp", 
 							"usp"
+						], 
+						"uniqueKeys": [
+							"Alias"
 						], 
 						"access": true, 
 						"array": true, 
@@ -75219,10 +75499,10 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
-								"Name",
-								"Alias"
-							],
+							"uniqueKeys": [
+								"Alias", 
+								"Name"
+							], 
 							"access": true, 
 							"array": true, 
 							"Enable": {
@@ -75289,10 +75569,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Name",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Name"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -75373,10 +75653,10 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"RegistryEntry",
+						"uniqueKeys": [
+							"RegistryEntry", 
 							"Alias"
-						],
+						], 
 						"access": true, 
 						"array": true, 
 						"Enable": {
@@ -75438,10 +75718,10 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"Name",
-							"Alias"
-						],
+						"uniqueKeys": [
+							"Alias", 
+							"Name"
+						], 
 						"access": true, 
 						"array": true, 
 						"Enable": {
@@ -75507,10 +75787,10 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"Name",
-						"Alias"
-					],
+					"uniqueKeys": [
+						"Alias", 
+						"Name"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -75615,6 +75895,9 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -75704,10 +75987,10 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"Name",
-							"Alias"
-						],
+						"uniqueKeys": [
+							"Alias", 
+							"Name"
+						], 
 						"access": true, 
 						"array": true, 
 						"Enable": {
@@ -75888,11 +76171,11 @@
 						"cwmp", 
 						"usp"
 					], 
-			        	"uniqueKey":[
-						"ScheduleName",
-						"ActionName",
+					"uniqueKeys": [
+						"ScheduleName", 
+						"ActionName", 
 						"StartTime"
-					],
+					], 
 					"access": false, 
 					"array": true, 
 					"TaskName": {
@@ -76041,9 +76324,9 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
+						"uniqueKeys": [
 							"Name"
-						],
+						], 
 						"access": false, 
 						"array": true, 
 						"Order": {
@@ -76083,9 +76366,11 @@
 							"cwmp", 
 							"usp"
 						], 
-			        		"uniqueKey":[
-							"Name"
-						],
+						"uniqueKeys": [
+							"ScheduleName", 
+							"ActionName", 
+							"TaskName"
+						], 
 						"access": false, 
 						"array": true, 
 						"TaskName": {
@@ -76201,9 +76486,9 @@
 								"cwmp", 
 								"usp"
 							], 
-			        			"uniqueKey":[
+							"uniqueKeys": [
 								"RegistryEntry"
-							],
+							], 
 							"access": false, 
 							"array": true, 
 							"RegistryEntry": {
@@ -76243,10 +76528,10 @@
 					"cwmp", 
 					"usp"
 				], 
-			        "uniqueKey":[
-					"Name",
-					"Alias"
-				],
+				"uniqueKeys": [
+					"Alias", 
+					"Name"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -76724,6 +77009,9 @@
 				"protocols": [
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Alias": {
@@ -76986,6 +77274,9 @@
 				"protocols": [
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Alias": {
@@ -77065,6 +77356,10 @@
 				"type": "object", 
 				"protocols": [
 					"usp"
+				], 
+				"uniqueKeys": [
+					"EndpointID", 
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -77301,6 +77596,10 @@
 					"type": "object", 
 					"protocols": [
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Protocol"
 					], 
 					"access": true, 
 					"array": true, 
@@ -77592,6 +77891,10 @@
 					"protocols": [
 						"usp"
 					], 
+					"uniqueKeys": [
+						"ParameterName", 
+						"Alias"
+					], 
 					"access": true, 
 					"array": true, 
 					"Alias": {
@@ -77777,6 +78080,11 @@
 				"protocols": [
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Recipient", 
+					"ID"
+				], 
 				"access": true, 
 				"array": true, 
 				"Alias": {
@@ -77910,6 +78218,12 @@
 				"protocols": [
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Originator", 
+					"Command", 
+					"CommandKey", 
+					"Alias"
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -77981,6 +78295,11 @@
 				"type": "object", 
 				"protocols": [
 					"usp"
+				], 
+				"uniqueKeys": [
+					"SerialNumber", 
+					"Issuer", 
+					"Alias"
 				], 
 				"access": false, 
 				"array": true, 
@@ -78259,6 +78578,10 @@
 					"protocols": [
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Name"
+					], 
 					"access": true, 
 					"array": true, 
 					"Alias": {
@@ -78306,6 +78629,10 @@
 						"type": "object", 
 						"protocols": [
 							"usp"
+						], 
+						"uniqueKeys": [
+							"Alias", 
+							"Order"
 						], 
 						"access": true, 
 						"array": true, 
@@ -78419,6 +78746,10 @@
 					"protocols": [
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Credential"
+					], 
 					"access": true, 
 					"array": true, 
 					"Alias": {
@@ -78483,6 +78814,9 @@
 					"type": "object", 
 					"protocols": [
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias"
 					], 
 					"access": true, 
 					"array": true, 
@@ -78633,6 +78967,12 @@
 				"type": "object", 
 				"protocols": [
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Host", 
+					"Username", 
+					"VirtualHost", 
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -78875,6 +79215,9 @@
 			"protocols": [
 				"usp"
 			], 
+			"uniqueKeys": [
+				"Alias"
+			], 
 			"access": false, 
 			"array": true, 
 			"Alias": {
@@ -78983,6 +79326,9 @@
 				"protocols": [
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -79029,10 +79375,10 @@
 			"protocols": [
 				"usp"
 			], 
-			"uniqueKey":[
-				"Name",
-				"Alias"
-			],
+			"uniqueKeys": [
+				"Alias", 
+				"Name"
+			], 
 			"access": false, 
 			"array": true, 
 			"Alias": {
@@ -79624,6 +79970,9 @@
 			"type": "object", 
 			"protocols": [
 				"usp"
+			], 
+			"uniqueKeys": [
+				"Alias"
 			], 
 			"access": false, 
 			"array": true, 

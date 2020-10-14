@@ -193,7 +193,7 @@ static int set_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable
 /* *** Device.Services.VoiceService.{i}.POTS. *** */
 DMOBJ tServicesVoiceServicePOTSObj[] = {
 /* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"FXS", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServicePOTSFXSInst, NULL, NULL, NULL, tServicesVoiceServicePOTSFXSObj, tServicesVoiceServicePOTSFXSParams, NULL, BBFDM_BOTH},
+{"FXS", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServicePOTSFXSInst, NULL, NULL, NULL, tServicesVoiceServicePOTSFXSObj, tServicesVoiceServicePOTSFXSParams, NULL, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
 {0}
 };
 

@@ -249,8 +249,7 @@ static int set_user_language(char *refparam, struct dmctx *ctx, void *data, char
 /* *** Device.Users. *** */
 DMOBJ tUsersObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"User", &DMWRITE, add_users_user, delete_users_user, NULL, browseUserInst, NULL, NULL, NULL, NULL, tUsersUserParams, NULL, BBFDM_BOTH,
-	(const char *[]){"Username", "Alias", NULL}},
+{"User", &DMWRITE, add_users_user, delete_users_user, NULL, browseUserInst, NULL, NULL, NULL, NULL, tUsersUserParams, NULL, BBFDM_BOTH, (const char *[]){"Username", "Alias", NULL}},
 {0}
 };
 

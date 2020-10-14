@@ -271,9 +271,9 @@ DMOBJ tServicesVoiceServiceObj[] = {
 {"POTS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServicePOTSObj, tServicesVoiceServicePOTSParams, NULL, BBFDM_BOTH},
 {"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceSIPObj, NULL, NULL, BBFDM_BOTH},
 {"CallControl", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlObj, NULL, NULL, BBFDM_BOTH},
-{"CallLog", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCallLogInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogParams, NULL, BBFDM_BOTH},
-{"VoIPProfile", &DMWRITE, addObjServicesVoiceServiceVoIPProfile, delObjServicesVoiceServiceVoIPProfile, NULL, browseServicesVoiceServiceVoIPProfileInst, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileObj, tServicesVoiceServiceVoIPProfileParams, NULL, BBFDM_BOTH},
-{"CodecProfile", &DMWRITE, addObjServicesVoiceServiceCodecProfile, delObjServicesVoiceServiceCodecProfile, NULL, browseServicesVoiceServiceCodecProfileInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCodecProfileParams, NULL, BBFDM_BOTH},
+{"CallLog", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCallLogInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+{"VoIPProfile", &DMWRITE, addObjServicesVoiceServiceVoIPProfile, delObjServicesVoiceServiceVoIPProfile, NULL, browseServicesVoiceServiceVoIPProfileInst, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileObj, tServicesVoiceServiceVoIPProfileParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+{"CodecProfile", &DMWRITE, addObjServicesVoiceServiceCodecProfile, delObjServicesVoiceServiceCodecProfile, NULL, browseServicesVoiceServiceCodecProfileInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCodecProfileParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
 {0}
 };
 

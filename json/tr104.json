@@ -5,6 +5,9 @@
 			"cwmp", 
 			"usp"
 		], 
+		"uniqueKeys": [
+			"Alias"
+		], 
 		"access": false, 
 		"array": true, 
 		"Alias": {
@@ -789,6 +792,11 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Codec", 
+					"BitRate"
+				], 
 				"access": false, 
 				"array": true, 
 				"Alias": {
@@ -1037,6 +1045,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Name", 
+					"Alias"
 				], 
 				"access": false, 
 				"array": true, 
@@ -1314,6 +1326,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Name", 
+					"Alias"
 				], 
 				"access": false, 
 				"array": true, 
@@ -1653,6 +1669,10 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Name", 
+					"Alias"
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -1914,6 +1934,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Name", 
+					"Alias"
 				], 
 				"access": false, 
 				"array": true, 
@@ -2307,6 +2331,10 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Function"
+					], 
 					"access": false, 
 					"array": true, 
 					"Alias": {
@@ -2394,6 +2422,11 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"RFPI", 
+					"Name", 
+					"Alias"
 				], 
 				"access": false, 
 				"array": true, 
@@ -2706,6 +2739,10 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"IPEI", 
+					"Alias"
+				], 
 				"access": false, 
 				"array": true, 
 				"Enable": {
@@ -3011,6 +3048,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"mapping": {
@@ -3285,6 +3325,9 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -3466,6 +3509,10 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Event"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -3545,6 +3592,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -4707,6 +4757,10 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Domain"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -4865,6 +4919,10 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias", 
+						"Event"
+					], 
 					"access": true, 
 					"array": true, 
 					"Enable": {
@@ -4972,6 +5030,10 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias", 
+						"SIPResponseNumber"
+					], 
 					"access": true, 
 					"array": true, 
 					"Alias": {
@@ -5052,6 +5114,11 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias", 
+					"ProxyIPAddress", 
+					"ProxyPort"
 				], 
 				"access": true, 
 				"array": true, 
@@ -5176,6 +5243,11 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias", 
+					"RegistrarPort", 
+					"RegistrarIPAddress"
 				], 
 				"access": true, 
 				"array": true, 
@@ -5372,6 +5444,10 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"URI", 
+						"Alias"
 					], 
 					"access": true, 
 					"array": true, 
@@ -5585,6 +5661,9 @@
 							"cwmp", 
 							"usp"
 						], 
+						"uniqueKeys": [
+							"Alias"
+						], 
 						"access": true, 
 						"array": true, 
 						"Enable": {
@@ -5750,6 +5829,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -5899,6 +5981,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -6235,6 +6320,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -6369,6 +6457,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -6602,6 +6693,9 @@
 			"protocols": [
 				"cwmp", 
 				"usp"
+			], 
+			"uniqueKeys": [
+				"Alias"
 			], 
 			"access": true, 
 			"array": true, 
@@ -6883,6 +6977,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"DirectoryNumber", 
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -7248,6 +7346,10 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"ExtensionNumber", 
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -7695,6 +7797,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Alias": {
@@ -7756,6 +7861,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -7915,6 +8023,11 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Line", 
+					"Extension", 
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -8019,6 +8132,11 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Extension", 
+					"Line", 
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -8138,6 +8256,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -8302,6 +8423,9 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias"
 					], 
 					"access": true, 
 					"array": true, 
@@ -8479,6 +8603,9 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias"
 					], 
 					"access": true, 
 					"array": true, 
@@ -8830,6 +8957,9 @@
 							"cwmp", 
 							"usp"
 						], 
+						"uniqueKeys": [
+							"Alias"
+						], 
 						"access": true, 
 						"array": true, 
 						"Enable": {
@@ -8929,6 +9059,10 @@
 							"cwmp", 
 							"usp"
 						], 
+						"uniqueKeys": [
+							"CallingNumber", 
+							"Alias"
+						], 
 						"access": true, 
 						"array": true, 
 						"Enable": {
@@ -8993,6 +9127,10 @@
 							"cwmp", 
 							"usp"
 						], 
+						"uniqueKeys": [
+							"CallingNumber", 
+							"Alias"
+						], 
 						"access": true, 
 						"array": true, 
 						"Enable": {
@@ -9041,6 +9179,11 @@
 						"protocols": [
 							"cwmp", 
 							"usp"
+						], 
+						"uniqueKeys": [
+							"Alias", 
+							"Number", 
+							"Order"
 						], 
 						"access": true, 
 						"array": true, 
@@ -9174,6 +9317,9 @@
 			"protocols": [
 				"cwmp", 
 				"usp"
+			], 
+			"uniqueKeys": [
+				"Alias"
 			], 
 			"access": true, 
 			"array": true, 
@@ -9484,6 +9630,10 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Registrar"
+				], 
 				"access": true, 
 				"array": true, 
 				"Enable": {
@@ -9547,6 +9697,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -9705,6 +9858,9 @@
 			"protocols": [
 				"cwmp", 
 				"usp"
+			], 
+			"uniqueKeys": [
+				"Alias"
 			], 
 			"access": false, 
 			"array": true, 
@@ -9925,6 +10081,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Protocol"
+				], 
 				"access": false, 
 				"array": true, 
 				"Protocol": {
@@ -9980,6 +10139,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"SessionID"
 				], 
 				"access": false, 
 				"array": true, 
@@ -11134,6 +11296,9 @@
 				"cwmp", 
 				"usp"
 			], 
+			"uniqueKeys": [
+				"Alias"
+			], 
 			"access": true, 
 			"array": true,
 			"mapping": {
@@ -11869,6 +12034,9 @@
 				"cwmp", 
 				"usp"
 			], 
+			"uniqueKeys": [
+				"Alias"
+			], 
 			"access": true, 
 			"array": true, 
 			"mapping": {
@@ -12038,6 +12206,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"ToneEnable": {
@@ -12147,6 +12318,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": true, 
 				"array": true, 
@@ -12358,6 +12532,9 @@
 					"cwmp", 
 					"usp"
 				], 
+				"uniqueKeys": [
+					"Alias"
+				], 
 				"access": true, 
 				"array": true, 
 				"Alias": {
@@ -12390,6 +12567,9 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias"
 					], 
 					"access": true, 
 					"array": true, 
@@ -12464,6 +12644,9 @@
 			"protocols": [
 				"cwmp", 
 				"usp"
+			], 
+			"uniqueKeys": [
+				"Alias"
 			], 
 			"access": false, 
 			"array": true, 
@@ -12552,6 +12735,9 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias"
 				], 
 				"access": false, 
 				"array": true, 
@@ -12671,6 +12857,9 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias"
 					], 
 					"access": false, 
 					"array": true, 
@@ -12810,6 +12999,9 @@
 						"cwmp", 
 						"usp"
 					], 
+					"uniqueKeys": [
+						"Alias"
+					], 
 					"access": true, 
 					"array": true, 
 					"RingEnable": {
@@ -12888,6 +13080,9 @@
 					"protocols": [
 						"cwmp", 
 						"usp"
+					], 
+					"uniqueKeys": [
+						"Alias"
 					], 
 					"access": true, 
 					"array": true, 
@@ -13067,6 +13262,11 @@
 				"protocols": [
 					"cwmp", 
 					"usp"
+				], 
+				"uniqueKeys": [
+					"Alias", 
+					"Order", 
+					"Interface"
 				], 
 				"access": false, 
 				"array": true, 

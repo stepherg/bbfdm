@@ -167,7 +167,7 @@ DMOBJ tServicesVoiceServiceCapabilitiesObj[] = {
 /* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
 {"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesSIPObj, NULL, NULL, BBFDM_BOTH},
 {"POTS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesPOTSParams, NULL, BBFDM_BOTH},
-{"Codec", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCapabilitiesCodecInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesCodecParams, NULL, BBFDM_BOTH},
+{"Codec", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCapabilitiesCodecInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesCodecParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", "Codec", "BitRate", NULL}},
 {0}
 };
 

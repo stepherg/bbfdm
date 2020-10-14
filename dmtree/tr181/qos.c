@@ -14,12 +14,12 @@
 /* *** Device.QoS. *** */
 DMOBJ tQoSObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Classification", &DMWRITE, os_addObjQoSClassification, os_delObjQoSClassification, NULL, os_browseQoSClassificationInst, NULL, NULL, NULL, NULL, tQoSClassificationParams, NULL, BBFDM_BOTH},
-{"QueueStats", &DMWRITE, os_addObjQoSQueueStats, os_delObjQoSQueueStats, NULL, os_browseQoSQueueStatsInst, NULL, NULL, NULL, NULL, tQoSQueueStatsParams, NULL, BBFDM_BOTH},
-//{"App", &DMWRITE, addObjQoSApp, delObjQoSApp, NULL, browseQoSAppInst, NULL, NULL, NULL, NULL, tQoSAppParams, NULL, BBFDM_BOTH},
-//{"Flow", &DMWRITE, addObjQoSFlow, delObjQoSFlow, NULL, browseQoSFlowInst, NULL, NULL, NULL, NULL, tQoSFlowParams, NULL, BBFDM_BOTH},
-{"Policer", &DMWRITE, os_addObjQoSPolicer, os_delObjQoSPolicer, NULL, os_browseQoSPolicerInst, NULL, NULL, NULL, NULL, tQoSPolicerParams, NULL, BBFDM_BOTH},
-{"Queue", &DMWRITE, os_addObjQoSQueue, os_delObjQoSQueue, NULL, os_browseQoSQueueInst, NULL, NULL, NULL, NULL, tQoSQueueParams, os_get_linker_qos_queue, BBFDM_BOTH},
+{"Classification", &DMWRITE, os_addObjQoSClassification, os_delObjQoSClassification, NULL, os_browseQoSClassificationInst, NULL, NULL, NULL, NULL, tQoSClassificationParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+{"QueueStats", &DMWRITE, os_addObjQoSQueueStats, os_delObjQoSQueueStats, NULL, os_browseQoSQueueStatsInst, NULL, NULL, NULL, NULL, tQoSQueueStatsParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", "Queue", "Interface", NULL}},
+//{"App", &DMWRITE, addObjQoSApp, delObjQoSApp, NULL, browseQoSAppInst, NULL, NULL, NULL, NULL, tQoSAppParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+//{"Flow", &DMWRITE, addObjQoSFlow, delObjQoSFlow, NULL, browseQoSFlowInst, NULL, NULL, NULL, NULL, tQoSFlowParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+{"Policer", &DMWRITE, os_addObjQoSPolicer, os_delObjQoSPolicer, NULL, os_browseQoSPolicerInst, NULL, NULL, NULL, NULL, tQoSPolicerParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+{"Queue", &DMWRITE, os_addObjQoSQueue, os_delObjQoSQueue, NULL, os_browseQoSQueueInst, NULL, NULL, NULL, NULL, tQoSQueueParams, os_get_linker_qos_queue, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
 {"Shaper", &DMWRITE, os_addObjQoSShaper, os_delObjQoSShaper, NULL, os_browseQoSShaperInst, NULL, NULL, NULL, NULL, tQoSShaperParams, NULL, BBFDM_BOTH, (const char *[]){"Interface", "Alias", NULL}},
 {0}
 };

@@ -1480,7 +1480,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceLis
 	return 0;
 }
 
-/*#Device.IEEE1905.AL.Security.SetupMethod!UCI:ieee1905/security,security/None*/
+/*#Device.IEEE1905.AL.Security.SetupMethod!UCI:ieee1905/security,security/method*/
 static int get_IEEE1905ALSecurity_SetupMethod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_option_value_string("ieee1905", "security", "method", value);
