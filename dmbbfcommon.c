@@ -67,7 +67,6 @@ void bbf_apply_end_session(void)
 	apply_end_session();
 }
 
-
 int bbf_set_ip_version(int ipversion)
 {
 	ip_version = ipversion;
@@ -135,4 +134,33 @@ void dmbbf_update_enabled_notify_file(unsigned int dm_type, unsigned int amd_ver
 	dm_entry_enabled_notify(&dmctx, NULL);
 
 	dm_ctx_clean(&dmctx);
+}
+
+int get_dm_type(char *dm_str)
+{
+	if (dm_str == NULL)
+		return DMT_STRING;
+
+	if (strcmp(dm_str, DMT_TYPE[DMT_STRING]) == 0)
+		return DMT_STRING;
+	else if (strcmp(dm_str, DMT_TYPE[DMT_UNINT]) == 0)
+		return DMT_UNINT;
+	else if (strcmp(dm_str, DMT_TYPE[DMT_INT]) == 0)
+		return DMT_INT;
+	else if (strcmp(dm_str, DMT_TYPE[DMT_UNLONG]) == 0)
+		return DMT_UNLONG;
+	else if (strcmp(dm_str, DMT_TYPE[DMT_LONG]) == 0)
+		return DMT_LONG;
+	else if (strcmp(dm_str, DMT_TYPE[DMT_BOOL]) == 0)
+		return DMT_BOOL;
+	else if (strcmp(dm_str, DMT_TYPE[DMT_TIME]) == 0)
+		return DMT_TIME;
+	else if (strcmp(dm_str, DMT_TYPE[DMT_HEXBIN]) == 0)
+		return DMT_HEXBIN;
+	else if (strcmp(dm_str, DMT_TYPE[DMT_BASE64]) == 0)
+		return DMT_BASE64;
+	else
+		return DMT_STRING;
+
+	return DMT_STRING;
 }

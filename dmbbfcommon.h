@@ -9,6 +9,9 @@
  *    Author Omar Kallel <omar.kallel@pivasoftware.com>
  */
 
+#ifndef __DMBBFCOMMON_H__
+#define __DMBBFCOMMON_H__
+
 #include <libbbf_api/dmcommon.h>
 #include "dmentry.h"
 
@@ -35,3 +38,6 @@ void bbf_set_end_session_flag (struct dmctx *ctx, unsigned int flag);
 int bbfdmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);
 void bbf_apply_end_session(void);
 void dmbbf_update_enabled_notify_file(unsigned int dm_type, unsigned int amd_version, int instance_mode);
+int get_dm_type(char *dm_str);
+
+#endif //__DMBBFCOMMON_H__
