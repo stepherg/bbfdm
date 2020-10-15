@@ -1486,13 +1486,13 @@ int set_QoSClassification_SNAPOUIExclude(char *refparam, struct dmctx *ctx, void
 	return 0;
 }
 
-int get_QoSClassification_SourceVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSClassification_SourceVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
 	return 0;
 }
 
-int set_QoSClassification_SourceVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSClassification_SourceVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -1566,13 +1566,13 @@ int set_QoSClassification_SourceVendorClassIDMode(char *refparam, struct dmctx *
 	return 0;
 }
 
-int get_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
 	return 0;
 }
 
-int set_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -1646,13 +1646,13 @@ int set_QoSClassification_DestVendorClassIDMode(char *refparam, struct dmctx *ct
 	return 0;
 }
 
-int get_QoSClassification_SourceClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSClassification_SourceClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
 	return 0;
 }
 
-int set_QoSClassification_SourceClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSClassification_SourceClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -1686,13 +1686,13 @@ int set_QoSClassification_SourceClientIDExclude(char *refparam, struct dmctx *ct
 	return 0;
 }
 
-int get_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
 	return 0;
 }
 
-int set_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -1726,13 +1726,13 @@ int set_QoSClassification_DestClientIDExclude(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
-int get_QoSClassification_SourceUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSClassification_SourceUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
 	return 0;
 }
 
-int set_QoSClassification_SourceUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSClassification_SourceUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:
@@ -1766,13 +1766,13 @@ int set_QoSClassification_SourceUserClassIDExclude(char *refparam, struct dmctx 
 	return 0;
 }
 
-int get_QoSClassification_DestUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_QoSClassification_DestUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
 	return 0;
 }
 
-int set_QoSClassification_DestUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+int os_set_QoSClassification_DestUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
 		case VALUECHECK:

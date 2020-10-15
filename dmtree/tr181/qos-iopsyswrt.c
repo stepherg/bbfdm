@@ -840,7 +840,6 @@ int os_get_QoSClassification_AllInterfaces(char *refparam, struct dmctx *ctx, vo
 	//TODO
 	return 0;
 }
-
 int os_set_QoSClassification_AllInterfaces(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
@@ -852,6 +851,7 @@ int os_set_QoSClassification_AllInterfaces(char *refparam, struct dmctx *ctx, vo
 	}
 	return 0;
 }
+
 #endif
 
 int os_get_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1568,25 +1568,35 @@ int os_set_QoSClassification_SNAPOUIExclude(char *refparam, struct dmctx *ctx, v
 	}
 	return 0;
 }
+#endif
 
 int os_get_QoSClassification_SourceVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "src_vendor_class_id", value);
 	return 0;
 }
 
 int os_set_QoSClassification_SourceVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *src_vendor_class_id = NULL;
+	struct uci_section *dmmap_section = NULL;
+
 	switch (action)	{
-		case VALUECHECK:
+	case VALUECHECK:
+		if (value[0] == '\0')
 			break;
-		case VALUESET:
-			//TODO
-			break;
+		if (dm_validate_string(value, -1, 255, NULL, 0, NULL, 0))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		// Set received value of source Vendor ClassID in /etc/config/qos.
+		dmuci_set_value_by_section((struct uci_section *)data, "src_vendor_class_id", value);
+		break;
 	}
 	return 0;
 }
 
+#if 0
 int os_get_QoSClassification_SourceVendorClassIDv6(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -1640,25 +1650,35 @@ int os_set_QoSClassification_SourceVendorClassIDMode(char *refparam, struct dmct
 	}
 	return 0;
 }
+#endif
 
 int os_get_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "dst_vendor_class_id", value);
 	return 0;
 }
 
 int os_set_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *dst_vendor_class_id = NULL;
+	struct uci_section *dmmap_section = NULL;
+
 	switch (action)	{
-		case VALUECHECK:
+	case VALUECHECK:
+		if (value[0] == '\0')
 			break;
-		case VALUESET:
-			//TODO
-			break;
+		if (dm_validate_string(value, -1, 255, NULL, 0, NULL, 0))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		// Set received value of Destination Vendor ClassID in /etc/config/qos.
+		dmuci_set_value_by_section((struct uci_section *)data, "dst_vendor_class_id", value);
+		break;
 	}
 	return 0;
 }
 
+#if 0
 int os_get_QoSClassification_DestVendorClassIDv6(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -1712,25 +1732,35 @@ int os_set_QoSClassification_DestVendorClassIDMode(char *refparam, struct dmctx 
 	}
 	return 0;
 }
+#endif
 
 int os_get_QoSClassification_SourceClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "src_client_id", value);
 	return 0;
 }
 
 int os_set_QoSClassification_SourceClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *src_client_id = NULL;
+	struct uci_section *dmmap_section = NULL;
+
 	switch (action)	{
 		case VALUECHECK:
+			if (value[0] == '\0')
+				break;
+			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			// Set received value of source Client ID in /etc/config/qos.
+			dmuci_set_value_by_section((struct uci_section *)data, "src_client_id", value);
 			break;
 	}
 	return 0;
 }
 
+#if 0
 int os_get_QoSClassification_SourceClientIDExclude(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -1748,25 +1778,35 @@ int os_set_QoSClassification_SourceClientIDExclude(char *refparam, struct dmctx 
 	}
 	return 0;
 }
+#endif
 
 int os_get_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "dst_client_id", value);
 	return 0;
 }
 
 int os_set_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *dst_client_id = NULL;
+	struct uci_section *dmmap_section = NULL;
+
 	switch (action)	{
 		case VALUECHECK:
+			if (value[0] == '\0')
+				break;
+			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			// Set received value of Destination Client ID in /etc/config/qos.
+			dmuci_set_value_by_section((struct uci_section *)data, "dst_client_id", value);
 			break;
 	}
 	return 0;
 }
 
+#if 0
 int os_get_QoSClassification_DestClientIDExclude(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -1784,25 +1824,35 @@ int os_set_QoSClassification_DestClientIDExclude(char *refparam, struct dmctx *c
 	}
 	return 0;
 }
+#endif
 
 int os_get_QoSClassification_SourceUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "src_user_class_id", value);
 	return 0;
 }
 
 int os_set_QoSClassification_SourceUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *src_user_class_id = NULL;
+	struct uci_section *dmmap_section = NULL;
+
 	switch (action)	{
-		case VALUECHECK:
+	case VALUECHECK:
+		if (value[0] == '\0')
 			break;
-		case VALUESET:
-			//TODO
-			break;
+		if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		// Set received value of source user ClassID in /etc/config/qos.
+		dmuci_set_value_by_section((struct uci_section *)data, "src_user_class_id", value);
+		break;
 	}
 	return 0;
 }
 
+#if 0
 int os_get_QoSClassification_SourceUserClassIDExclude(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -1820,26 +1870,36 @@ int os_set_QoSClassification_SourceUserClassIDExclude(char *refparam, struct dmc
 	}
 	return 0;
 }
+#endif
 
 int os_get_QoSClassification_DestUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	dmuci_get_value_by_section_string((struct uci_section *)data, "dst_user_class_id", value);
 	return 0;
 }
 
 int os_set_QoSClassification_DestUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *dst_user_class_id = NULL;
+	struct uci_section *dmmap_section = NULL;
+
 	switch (action)	{
-		case VALUECHECK:
+	case VALUECHECK:
+		if (value[0] == '\0')
 			break;
-		case VALUESET:
-			//TODO
-			break;
+		if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		// Set received value of destination user ClassID in /etc/config/qos.
+		dmuci_set_value_by_section((struct uci_section *)data, "dst_user_class_id", value);
+		break;
 	}
 	return 0;
 }
 
-int os_get_QoSClassification_DestUserClassIDExclude(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+#if 0
+int os_get_QoSClassification_DestUserClassIDExclude(char *refparam, struct dmctdstctx, void *data, char *instance, char **value)
 {
 	//TODO
 	return 0;
