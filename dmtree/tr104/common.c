@@ -265,7 +265,7 @@ int init_call_log()
 			TR104_DEBUG("Invalid CDR: [%s]\ndirection = [%s]\n", line, cdr.direction);
 			continue;
 		}
-		strncpy(cdr.used_line, tel_line, sizeof(cdr.used_line));
+		strncpy(cdr.used_line, tel_line, sizeof(cdr.used_line) - 1);
 
 		/*
 		 * Convert the termination cause to a value specified in TR-104.
