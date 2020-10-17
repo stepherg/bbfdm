@@ -419,9 +419,9 @@ static int get_GRETunnelInterfaceStats_ErrorsReceived(char *refparam, struct dmc
 
 /* *** Device.GRE. *** */
 DMOBJ tGREObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Tunnel", &DMWRITE, addObjGRETunnel, delObjGRETunnel, NULL, browseGRETunnelInst, NULL, NULL, NULL, tGRETunnelObj, tGRETunnelParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
-//{"Filter", &DMWRITE, addObjGREFilter, delObjGREFilter, NULL, browseGREFilterInst, NULL, NULL, NULL, NULL, tGREFilterParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Tunnel", &DMWRITE, addObjGRETunnel, delObjGRETunnel, NULL, browseGRETunnelInst, NULL, NULL, NULL, tGRETunnelObj, tGRETunnelParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+//{"Filter", &DMWRITE, addObjGREFilter, delObjGREFilter, NULL, browseGREFilterInst, NULL, NULL, NULL, NULL, tGREFilterParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
@@ -434,9 +434,9 @@ DMLEAF tGREParams[] = {
 
 /* *** Device.GRE.Tunnel.{i}. *** */
 DMOBJ tGRETunnelObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGRETunnelStatsParams, NULL, BBFDM_BOTH},
-{"Interface", &DMWRITE, addObjGRETunnelInterface, delObjGRETunnelInterface, NULL, browseGRETunnelInterfaceInst, NULL, NULL, NULL, tGRETunnelInterfaceObj, tGRETunnelInterfaceParams, NULL, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
+{"Interface", &DMWRITE, addObjGRETunnelInterface, delObjGRETunnelInterface, NULL, browseGRETunnelInterfaceInst, NULL, NULL, NULL, tGRETunnelInterfaceObj, tGRETunnelInterfaceParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
@@ -472,7 +472,7 @@ DMLEAF tGRETunnelStatsParams[] = {
 
 /* *** Device.GRE.Tunnel.{i}.Interface.{i}. *** */
 DMOBJ tGRETunnelInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGRETunnelInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };

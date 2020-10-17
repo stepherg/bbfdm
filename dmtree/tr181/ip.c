@@ -1862,8 +1862,8 @@ static struct dm_forced_inform_s IPv6INFRM = {0, get_ipv6_finform};
 
 /* *** Device.IP. *** */
 DMOBJ tIPObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Interface", &DMWRITE, add_ip_interface, delete_ip_interface, NULL, browseIPIfaceInst, NULL, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Interface", &DMWRITE, add_ip_interface, delete_ip_interface, NULL, browseIPIfaceInst, NULL, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 #ifdef BBF_TR143
 {"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsObj, tIPDiagnosticsParams, NULL, BBFDM_BOTH},
 #endif
@@ -1885,10 +1885,10 @@ DMLEAF tIPParams[] = {
 
 /* *** Device.IP.Interface. *** */
 DMOBJ tIPInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"IPv4Address", &DMWRITE, add_ipv4, delete_ipv4, NULL, browseIfaceIPv4Inst, NULL, NULL, NULL, NULL, tIPInterfaceIPv4AddressParams, NULL, BBFDM_BOTH, (const char *[]){"IPAddress", "SubnetMast", "Alias", NULL}},
-{"IPv6Address", &DMWRITE, add_ipv6, delete_ipv6, NULL, browseIfaceIPv6Inst, NULL, NULL, NULL, NULL, tIPInterfaceIPv6AddressParams, NULL, BBFDM_BOTH, (const char *[]){"IPAddress", "Alias", NULL}},
-{"IPv6Prefix", &DMWRITE, add_ipv6_prefix, delete_ipv6_prefix, NULL, browseIfaceIPv6PrefixInst, NULL, NULL, NULL, NULL, tIPInterfaceIPv6PrefixParams, get_linker_ipv6_prefix, BBFDM_BOTH, (const char *[]){"Prefix", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"IPv4Address", &DMWRITE, add_ipv4, delete_ipv4, NULL, browseIfaceIPv4Inst, NULL, NULL, NULL, NULL, tIPInterfaceIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", "SubnetMast", "Alias", NULL}},
+{"IPv6Address", &DMWRITE, add_ipv6, delete_ipv6, NULL, browseIfaceIPv6Inst, NULL, NULL, NULL, NULL, tIPInterfaceIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", "Alias", NULL}},
+{"IPv6Prefix", &DMWRITE, add_ipv6_prefix, delete_ipv6_prefix, NULL, browseIfaceIPv6PrefixInst, NULL, NULL, NULL, NULL, tIPInterfaceIPv6PrefixParams, get_linker_ipv6_prefix, BBFDM_BOTH, LIST_KEY{"Prefix", "Alias", NULL}},
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };

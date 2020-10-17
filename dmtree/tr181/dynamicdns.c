@@ -1054,9 +1054,9 @@ static int set_DynamicDNSServer_MaxRetries(char *refparam, struct dmctx *ctx, vo
 
 /* *** Device.DynamicDNS. *** */
 DMOBJ tDynamicDNSObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Client", &DMWRITE, addObjDynamicDNSClient, delObjDynamicDNSClient, NULL, browseDynamicDNSClientInst, NULL, NULL, NULL, tDynamicDNSClientObj, tDynamicDNSClientParams, NULL, BBFDM_BOTH, (const char *[]){"Server", "Username", "Alias", NULL}},
-{"Server", &DMWRITE, addObjDynamicDNSServer, delObjDynamicDNSServer, NULL, browseDynamicDNSServerInst, NULL, NULL, NULL, NULL, tDynamicDNSServerParams, get_linker_dynamicdns_server, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Client", &DMWRITE, addObjDynamicDNSClient, delObjDynamicDNSClient, NULL, browseDynamicDNSClientInst, NULL, NULL, NULL, tDynamicDNSClientObj, tDynamicDNSClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Server", "Username", "Alias", NULL}},
+{"Server", &DMWRITE, addObjDynamicDNSServer, delObjDynamicDNSServer, NULL, browseDynamicDNSServerInst, NULL, NULL, NULL, NULL, tDynamicDNSServerParams, get_linker_dynamicdns_server, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
@@ -1070,8 +1070,8 @@ DMLEAF tDynamicDNSParams[] = {
 
 /* *** Device.DynamicDNS.Client.{i}. *** */
 DMOBJ tDynamicDNSClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Hostname", &DMWRITE, NULL, NULL, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, (const char *[]){"Name", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Hostname", &DMWRITE, NULL, NULL, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", NULL}},
 {0}
 };
 

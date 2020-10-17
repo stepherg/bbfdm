@@ -1044,16 +1044,16 @@ static int set_ServicesVoiceServiceSIPNetworkFQDNServer_Port(char *refparam, str
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.SIP. *** */
 DMOBJ tServicesVoiceServiceSIPObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Client", &DMWRITE, addObjServicesVoiceServiceSIPClient, delObjServicesVoiceServiceSIPClient, NULL, browseServicesVoiceServiceSIPClientInst, NULL, NULL, NULL, tServicesVoiceServiceSIPClientObj, tServicesVoiceServiceSIPClientParams, get_voice_service_sip_client_linker, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
-{"Network", &DMWRITE, addObjServicesVoiceServiceSIPNetwork, delObjServicesVoiceServiceSIPNetwork, NULL, browseServicesVoiceServiceSIPNetworkInst, NULL, NULL, NULL, tServicesVoiceServiceSIPNetworkObj, tServicesVoiceServiceSIPNetworkParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Client", &DMWRITE, addObjServicesVoiceServiceSIPClient, delObjServicesVoiceServiceSIPClient, NULL, browseServicesVoiceServiceSIPClientInst, NULL, NULL, NULL, tServicesVoiceServiceSIPClientObj, tServicesVoiceServiceSIPClientParams, get_voice_service_sip_client_linker, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"Network", &DMWRITE, addObjServicesVoiceServiceSIPNetwork, delObjServicesVoiceServiceSIPNetwork, NULL, browseServicesVoiceServiceSIPNetworkInst, NULL, NULL, NULL, tServicesVoiceServiceSIPNetworkObj, tServicesVoiceServiceSIPNetworkParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.SIP.Client.{i}. *** */
 DMOBJ tServicesVoiceServiceSIPClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Contact", &DMWRITE, addObjServicesVoiceServiceSIPClientContact, delObjServicesVoiceServiceSIPClientContact, NULL, browseServicesVoiceServiceSIPClientContactInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceSIPClientContactParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Contact", &DMWRITE, addObjServicesVoiceServiceSIPClientContact, delObjServicesVoiceServiceSIPClientContact, NULL, browseServicesVoiceServiceSIPClientContactInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceSIPClientContactParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
@@ -1080,8 +1080,8 @@ DMLEAF tServicesVoiceServiceSIPClientContactParams[] = {
 
 /* *** Device.Services.VoiceService.{i}.SIP.Network.{i}. *** */
 DMOBJ tServicesVoiceServiceSIPNetworkObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"FQDNServer", &DMWRITE, addObjServicesVoiceServiceSIPNetworkFQDNServer, delObjServicesVoiceServiceSIPNetworkFQDNServer, NULL, browseServicesVoiceServiceSIPNetworkFQDNServerInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceSIPNetworkFQDNServerParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", "Domain", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"FQDNServer", &DMWRITE, addObjServicesVoiceServiceSIPNetworkFQDNServer, delObjServicesVoiceServiceSIPNetworkFQDNServer, NULL, browseServicesVoiceServiceSIPNetworkFQDNServerInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceSIPNetworkFQDNServerParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Domain", NULL}},
 {0}
 };
 

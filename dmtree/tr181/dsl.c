@@ -1329,9 +1329,9 @@ static int get_DSLChannelStatsQuarterHour_XTUCCRCErrors(char *refparam, struct d
 
 /* *** Device.DSL. *** */
 DMOBJ tDSLObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Line", &DMREAD, NULL, NULL, NULL, browseDSLLineInst, NULL, NULL, NULL, tDSLLineObj, tDSLLineParams, get_dsl_line_linker, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
-{"Channel", &DMREAD, NULL, NULL, NULL, browseDSLChannelInst, NULL, NULL, NULL, tDSLChannelObj, tDSLChannelParams, get_dsl_channel_linker, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Line", &DMREAD, NULL, NULL, NULL, browseDSLLineInst, NULL, NULL, NULL, tDSLLineObj, tDSLLineParams, get_dsl_line_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Channel", &DMREAD, NULL, NULL, NULL, browseDSLChannelInst, NULL, NULL, NULL, tDSLChannelObj, tDSLChannelParams, get_dsl_channel_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
@@ -1344,7 +1344,7 @@ DMLEAF tDSLParams[] = {
 
 /* *** Device.DSL.Line.{i}. *** */
 DMOBJ tDSLLineObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsObj, tDSLLineStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1404,7 +1404,7 @@ DMLEAF tDSLLineParams[] = {
 
 /* *** Device.DSL.Line.{i}.Stats. *** */
 DMOBJ tDSLLineStatsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsTotalParams, NULL, BBFDM_BOTH},
 {"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsShowtimeParams, NULL, BBFDM_BOTH},
 {"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsLastShowtimeParams, NULL, BBFDM_BOTH},
@@ -1465,7 +1465,7 @@ DMLEAF tDSLLineStatsQuarterHourParams[] = {
 
 /* *** Device.DSL.Channel.{i}. *** */
 DMOBJ tDSLChannelObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsObj, tDSLChannelStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1497,7 +1497,7 @@ DMLEAF tDSLChannelParams[] = {
 
 /* *** Device.DSL.Channel.{i}.Stats. *** */
 DMOBJ tDSLChannelStatsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsTotalParams, NULL, BBFDM_BOTH},
 {"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsShowtimeParams, NULL, BBFDM_BOTH},
 {"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsLastShowtimeParams, NULL, BBFDM_BOTH},

@@ -458,7 +458,7 @@ DMLEAF X_IOPSYS_EU_OWSDParams[] = {
 };
 
 DMOBJ X_IOPSYS_EU_OWSDObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"UbusProxy", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, UbusProxyParams, NULL, BBFDM_BOTH},
 {"VirtualHost", &DMWRITE, add_owsd_listen, delete_owsd_listen_instance, NULL, browseXIopsysEuOWSDVirtualHost, NULL, NULL, NULL, NULL, VirtualHostParams, NULL, BBFDM_BOTH},
 {0}

@@ -1535,7 +1535,7 @@ static int get_IEEE1905ALNetworkingRegistrar_Registrar60(char *refparam, struct 
 ***********************************************************************************************************************************/
 /* *** Device.IEEE1905. *** */
 DMOBJ tIEEE1905Obj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"AL", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALObj, tIEEE1905ALParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1548,8 +1548,8 @@ DMLEAF tIEEE1905Params[] = {
 
 /* *** Device.IEEE1905.AL. *** */
 DMOBJ tIEEE1905ALObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALInterfaceInst, NULL, NULL, NULL, tIEEE1905ALInterfaceObj, tIEEE1905ALInterfaceParams, NULL, BBFDM_BOTH, (const char *[]){"InterfaceId", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALInterfaceInst, NULL, NULL, NULL, tIEEE1905ALInterfaceObj, tIEEE1905ALInterfaceParams, NULL, BBFDM_BOTH, LIST_KEY{"InterfaceId", NULL}},
 {"ForwardingTable", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALForwardingTableObj, tIEEE1905ALForwardingTableParams, NULL, BBFDM_BOTH},
 {"NetworkTopology", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyObj, tIEEE1905ALNetworkTopologyParams, NULL, BBFDM_BOTH},
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALSecurityParams, NULL, BBFDM_BOTH},
@@ -1570,9 +1570,9 @@ DMLEAF tIEEE1905ALParams[] = {
 
 /* *** Device.IEEE1905.AL.Interface.{i}. *** */
 DMOBJ tIEEE1905ALInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 //{"VendorProperties", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALInterfaceVendorPropertiesInst, NULL, NULL, NULL, NULL, tIEEE1905ALInterfaceVendorPropertiesParams, NULL, BBFDM_BOTH},
-{"Link", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALInterfaceLinkInst, NULL, NULL, NULL, tIEEE1905ALInterfaceLinkObj, tIEEE1905ALInterfaceLinkParams, NULL, BBFDM_BOTH, (const char *[]){"InterfaceId", "IEEE1905Id", NULL}},
+{"Link", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALInterfaceLinkInst, NULL, NULL, NULL, tIEEE1905ALInterfaceLinkObj, tIEEE1905ALInterfaceLinkParams, NULL, BBFDM_BOTH, LIST_KEY{"InterfaceId", "IEEE1905Id", NULL}},
 {0}
 };
 
@@ -1604,7 +1604,7 @@ DMLEAF tIEEE1905ALInterfaceVendorPropertiesParams[] = {
 
 /* *** Device.IEEE1905.AL.Interface.{i}.Link.{i}. *** */
 DMOBJ tIEEE1905ALInterfaceLinkObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Metric", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALInterfaceLinkMetricParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1637,7 +1637,7 @@ DMLEAF tIEEE1905ALInterfaceLinkMetricParams[] = {
 
 /* *** Device.IEEE1905.AL.ForwardingTable. *** */
 DMOBJ tIEEE1905ALForwardingTableObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"ForwardingRule", &DMWRITE, addObjIEEE1905ALForwardingTableForwardingRule, delObjIEEE1905ALForwardingTableForwardingRule, NULL, browseIEEE1905ALForwardingTableForwardingRuleInst, NULL, NULL, NULL, NULL, tIEEE1905ALForwardingTableForwardingRuleParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1668,9 +1668,9 @@ DMLEAF tIEEE1905ALForwardingTableForwardingRuleParams[] = {
 
 /* *** Device.IEEE1905.AL.NetworkTopology. *** */
 DMOBJ tIEEE1905ALNetworkTopologyObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"ChangeLog", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyChangeLogInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyChangeLogParams, NULL, BBFDM_BOTH},
-{"IEEE1905Device", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceParams, NULL, BBFDM_BOTH, (const char *[]){"IEEE1905Id", NULL}},
+{"IEEE1905Device", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceParams, NULL, BBFDM_BOTH, LIST_KEY{"IEEE1905Id", NULL}},
 {CUSTOM_PREFIX"NonIEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyNonIEEE1905NeighborInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyNonIEEE1905NeighborParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1708,14 +1708,14 @@ DMLEAF tIEEE1905ALNetworkTopologyNonIEEE1905NeighborParams[] = {
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}. *** */
 DMOBJ tIEEE1905ALNetworkTopologyIEEE1905DeviceObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressParams, NULL, BBFDM_BOTH, (const char *[]){"MACAddress", "IPv4Address", NULL}},
-{"IPv6Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressParams, NULL, BBFDM_BOTH, (const char *[]){"MACAddress", "IPv6Address", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"MACAddress", "IPv4Address", NULL}},
+{"IPv6Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"MACAddress", "IPv6Address", NULL}},
 //{"VendorProperties", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesParams, NULL, BBFDM_BOTH},
-{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceParams, get_linker_topology_interface, BBFDM_BOTH, (const char *[]){"InterfaceId", NULL}},
-{"NonIEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborParams, NULL, BBFDM_BOTH, (const char *[]){"LocalInterface", "NeighborInterfaceId", NULL}},
+{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceParams, get_linker_topology_interface, BBFDM_BOTH, LIST_KEY{"InterfaceId", NULL}},
+{"NonIEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborParams, NULL, BBFDM_BOTH, LIST_KEY{"LocalInterface", "NeighborInterfaceId", NULL}},
 {"L2Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborParams, NULL, BBFDM_BOTH, (const char*[]){"LocalInterface", "NeighborInterfaceId", NULL}},
-{"IEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborParams, NULL, BBFDM_BOTH, (const char *[]){"LocalInterface", "NeighborDeviceId", NULL}},
+{"IEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborParams, NULL, BBFDM_BOTH, LIST_KEY{"LocalInterface", "NeighborDeviceId", NULL}},
 {"BridgingTuple", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1806,8 +1806,8 @@ DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborParams[] = {
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IEEE1905Neighbor.{i}. *** */
 DMOBJ tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Metric", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricParams, NULL, BBFDM_BOTH, (const char *[]){"NeighborMACAddress", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Metric", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricInst, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricParams, NULL, BBFDM_BOTH, LIST_KEY{"NeighborMACAddress", NULL}},
 {0}
 };
 

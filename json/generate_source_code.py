@@ -78,7 +78,7 @@ def getuniquekeys( value, option ):
 	if isinstance(value, dict):
 		for obj, val in value.items():
 			if obj == option and isinstance(val, list):
-				buf = "(const char *[]){"
+				buf = "LIST_KEY{"
 				for key in val:
 					buf = buf + "\"%s\"" % key + ", "
 				buf = buf + "NULL" + "}"

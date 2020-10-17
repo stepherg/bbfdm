@@ -430,8 +430,8 @@ static int get_SecurityCertificate_SignatureAlgorithm(char *refparam, struct dmc
 
 /* *** Device.Security. *** */
 DMOBJ tSecurityObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Certificate", &DMREAD, NULL, NULL, NULL, browseSecurityCertificateInst, NULL, NULL, NULL, NULL, tSecurityCertificateParams, NULL, BBFDM_BOTH, (const char *[]){"SerialNumber", "Issuer", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Certificate", &DMREAD, NULL, NULL, NULL, browseSecurityCertificateInst, NULL, NULL, NULL, NULL, tSecurityCertificateParams, NULL, BBFDM_BOTH, LIST_KEY{"SerialNumber", "Issuer", NULL}},
 {0}
 };
 

@@ -56,7 +56,7 @@
 
 /* *** BBFDM *** */
 DMOBJ tEntry181Obj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Device", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, NULL, NULL, tRoot_181_Obj, tRoot_181_Params, NULL, BBFDM_BOTH},
 {0}
 };
@@ -69,7 +69,7 @@ DMLEAF tRoot_181_Params[] = {
 };
 
 DMOBJ tRoot_181_Obj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, NULL, NULL, tDeviceInfoObj, tDeviceInfoParams, NULL, BBFDM_BOTH},
 {"ManagementServer", &DMREAD, NULL, NULL, "file:/etc/config/cwmp", NULL, &DMFINFRM, NULL, NULL, NULL, tManagementServerParams, NULL, BBFDM_BOTH},
 {"Time", &DMREAD, NULL, NULL, "file:/etc/config/system", NULL, NULL, NULL, NULL, NULL, tTimeParams, NULL, BBFDM_BOTH},

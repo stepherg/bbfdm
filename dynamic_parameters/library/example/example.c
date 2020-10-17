@@ -136,7 +136,7 @@ opr_ret_t dynamicDeviceOperate(struct dmctx *dmctx, char *path, json_object *inp
 
 /* *** Device.IP.Diagnostics. *** */
 DMOBJ tdynamicIPDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"X_IOPSYS_EU_BBKSpeedTest", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tdynamicIPDiagnosticsX_IOPSYS_EU_BBKSpeedTestParams, NULL, BBFDM_BOTH},
 {0}
 };

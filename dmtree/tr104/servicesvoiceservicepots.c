@@ -192,8 +192,8 @@ static int set_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.POTS. *** */
 DMOBJ tServicesVoiceServicePOTSObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"FXS", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServicePOTSFXSInst, NULL, NULL, NULL, tServicesVoiceServicePOTSFXSObj, tServicesVoiceServicePOTSFXSParams, NULL, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"FXS", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServicePOTSFXSInst, NULL, NULL, NULL, tServicesVoiceServicePOTSFXSObj, tServicesVoiceServicePOTSFXSParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
@@ -205,7 +205,7 @@ DMLEAF tServicesVoiceServicePOTSParams[] = {
 
 /* *** Device.Services.VoiceService.{i}.POTS.FXS.{i}. *** */
 DMOBJ tServicesVoiceServicePOTSFXSObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"VoiceProcessing", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServicePOTSFXSVoiceProcessingParams, NULL, BBFDM_BOTH},
 {0}
 };

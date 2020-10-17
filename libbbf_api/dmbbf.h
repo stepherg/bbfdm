@@ -137,7 +137,7 @@ typedef struct dm_leaf_s {
 } DMLEAF;
 
 typedef struct dm_obj_s {
-	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type(13)*/
+	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys(14)*/
 	char *obj;
 	struct dm_permession_s *permission;
 	int (*addobj)(char *refparam, struct dmctx *ctx, void *data, char **instance);

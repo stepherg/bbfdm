@@ -625,9 +625,9 @@ static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 
 /* *** Device.NAT. *** */
 DMOBJ tNATObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"InterfaceSetting", &DMWRITE, add_NAT_InterfaceSetting, delete_NAT_InterfaceSetting, NULL, browseInterfaceSettingInst, NULL, NULL, NULL, NULL, tNATInterfaceSettingParams, NULL, BBFDM_BOTH, (const char *[]){"Interface", "Alias", NULL}},
-{"PortMapping", &DMWRITE, add_NAT_PortMapping, delete_NAT_PortMapping, NULL, browsePortMappingInst, NULL, NULL, NULL, NULL, tNATPortMappingParams, NULL, BBFDM_BOTH, (const char *[]){"RemoteHost", "ExternalPort", "Protocol", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"InterfaceSetting", &DMWRITE, add_NAT_InterfaceSetting, delete_NAT_InterfaceSetting, NULL, browseInterfaceSettingInst, NULL, NULL, NULL, NULL, tNATInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
+{"PortMapping", &DMWRITE, add_NAT_PortMapping, delete_NAT_PortMapping, NULL, browsePortMappingInst, NULL, NULL, NULL, NULL, tNATPortMappingParams, NULL, BBFDM_BOTH, LIST_KEY{"RemoteHost", "ExternalPort", "Protocol", "Alias", NULL}},
 {0}
 };
 

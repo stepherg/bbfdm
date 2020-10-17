@@ -842,7 +842,7 @@ static int set_mldp_interface_upstream(char *refparam, struct dmctx *ctx, void *
 
 /* ***Device.X_IOPSYS_EU_MLD. *** */
 DMOBJ X_IOPSYS_EU_MLDObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Snooping", &DMWRITE, add_mld_snooping_obj, del_mld_snooping_obj, NULL, browse_mld_snooping_inst, NULL, NULL, NULL, X_IOPSYS_EU_MLDSnoopingObj, X_IOPSYS_EU_MLDSnoopingParams, NULL, BBFDM_BOTH},
 {"Proxy", &DMWRITE, add_mld_proxy_obj, del_mld_proxy_obj, NULL, browse_mld_proxy_inst, NULL, NULL, NULL, X_IOPSYS_EU_MLDProxyObj, X_IOPSYS_EU_MLDProxyParams, NULL, BBFDM_BOTH},
 {0}

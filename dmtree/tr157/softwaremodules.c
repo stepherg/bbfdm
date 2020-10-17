@@ -793,10 +793,10 @@ char *get_softwaremodules_url(char *uuid)
 
 /* *** Device.SoftwareModules. *** */
 DMOBJ tSoftwareModulesObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"ExecEnv", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecEnvInst, NULL, NULL, NULL, NULL, tSoftwareModulesExecEnvParams, get_exe_cenv_linker, BBFDM_BOTH, (const char *[]){"Alias", "Name", NULL}},
-{"DeploymentUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesDeploymentUnitInst, NULL, NULL, NULL, NULL, tSoftwareModulesDeploymentUnitParams, get_du_linker, BBFDM_BOTH, (const char *[]){"UUID", "Version", "ExecutionEnvRef", "Alias", NULL}},
-{"ExecutionUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecutionUnitInst, NULL, NULL, NULL, tSoftwareModulesExecutionUnitObj, tSoftwareModulesExecutionUnitParams, NULL, BBFDM_BOTH, (const char *[]){"EUID", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"ExecEnv", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecEnvInst, NULL, NULL, NULL, NULL, tSoftwareModulesExecEnvParams, get_exe_cenv_linker, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}},
+{"DeploymentUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesDeploymentUnitInst, NULL, NULL, NULL, NULL, tSoftwareModulesDeploymentUnitParams, get_du_linker, BBFDM_BOTH, LIST_KEY{"UUID", "Version", "ExecutionEnvRef", "Alias", NULL}},
+{"ExecutionUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecutionUnitInst, NULL, NULL, NULL, tSoftwareModulesExecutionUnitObj, tSoftwareModulesExecutionUnitParams, NULL, BBFDM_BOTH, LIST_KEY{"EUID", "Alias", NULL}},
 {0}
 };
 
@@ -855,7 +855,7 @@ DMLEAF tSoftwareModulesDeploymentUnitParams[] = {
 
 /* *** Device.SoftwareModules.ExecutionUnit.{i}. *** */
 DMOBJ tSoftwareModulesExecutionUnitObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 //{"Extensions", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };

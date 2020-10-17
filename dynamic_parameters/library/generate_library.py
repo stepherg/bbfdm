@@ -107,7 +107,7 @@ def printheaderObjCommon( objname ):
 def cprintheaderOBJS( objname ):
 	fp = open('./.objparamarray.c', 'a')
 	print >> fp,  "DMOBJ %s[] = {" % ("tdynamic" + getname(objname) + "Obj")
-	print >> fp,  "/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/"
+	print >> fp,  "/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/"
 	fp.close()
 
 def cprintheaderRootDynamicObj( ):

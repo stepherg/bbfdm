@@ -889,7 +889,7 @@ static int set_nslookupdiagnostics_number_of_repetitions(char *refparam, struct 
 
 /* *** Device.DNS. *** */
 DMOBJ tDNSObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Client", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDNSClientObj, tDNSClientParams, NULL, BBFDM_BOTH},
 {"Relay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDNSRelayObj, tDNSRelayParams, NULL, BBFDM_BOTH},
 {"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsObj, NULL, NULL, BBFDM_BOTH},
@@ -904,8 +904,8 @@ DMLEAF tDNSParams[] = {
 
 /* *** Device.DNS.Client. *** */
 DMOBJ tDNSClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Server", &DMWRITE, add_client_server, delete_client_server, NULL, browseServerInst, NULL, NULL, NULL, NULL, tDNSClientServerParams, NULL, BBFDM_BOTH, (const char *[]){"DNSServer", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Server", &DMWRITE, add_client_server, delete_client_server, NULL, browseServerInst, NULL, NULL, NULL, NULL, tDNSClientServerParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}},
 {0}
 };
 
@@ -931,8 +931,8 @@ DMLEAF tDNSClientServerParams[] = {
 
 /* *** Device.DNS.Relay. *** */
 DMOBJ tDNSRelayObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Forwarding", &DMWRITE, add_relay_forwarding, delete_relay_forwarding, NULL, browseRelayForwardingInst, NULL, NULL, NULL, NULL, tDNSRelayForwardingParams, NULL, BBFDM_BOTH, (const char *[]){"DNSServer", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Forwarding", &DMWRITE, add_relay_forwarding, delete_relay_forwarding, NULL, browseRelayForwardingInst, NULL, NULL, NULL, NULL, tDNSRelayForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}},
 {0}
 };
 
@@ -958,14 +958,14 @@ DMLEAF tDNSRelayForwardingParams[] = {
 
 /* *** Device.DNS.Diagnostics. *** */
 DMOBJ tDNSDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"NSLookupDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsObj, tDNSDiagnosticsNSLookupDiagnosticsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DNS.Diagnostics.NSLookupDiagnostics. *** */
 DMOBJ tDNSDiagnosticsNSLookupDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Result", &DMREAD, NULL, NULL, NULL, browseResultInst, NULL, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsResultParams, NULL, BBFDM_BOTH},
 {0}
 };

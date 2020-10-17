@@ -258,22 +258,22 @@ static int set_service_alias(char *refparam, struct dmctx *ctx, void *data, char
 ***********************************************************************************************************************************/
 /* *** Device.Services. *** */
 DMOBJ tServicesObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"VoiceService", &DMREAD, NULL, NULL, "file:/etc/config/asterisk", browseVoiceServiceInst, NULL, NULL, NULL, tServicesVoiceServiceObj, tServicesVoiceServiceParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}. *** */
 DMOBJ tServicesVoiceServiceObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesObj, tServicesVoiceServiceCapabilitiesParams, NULL, BBFDM_BOTH},
 {"ReservedPorts", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceReservedPortsParams, NULL, BBFDM_BOTH},
 {"POTS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServicePOTSObj, tServicesVoiceServicePOTSParams, NULL, BBFDM_BOTH},
 {"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceSIPObj, NULL, NULL, BBFDM_BOTH},
 {"CallControl", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlObj, NULL, NULL, BBFDM_BOTH},
-{"CallLog", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCallLogInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
-{"VoIPProfile", &DMWRITE, addObjServicesVoiceServiceVoIPProfile, delObjServicesVoiceServiceVoIPProfile, NULL, browseServicesVoiceServiceVoIPProfileInst, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileObj, tServicesVoiceServiceVoIPProfileParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
-{"CodecProfile", &DMWRITE, addObjServicesVoiceServiceCodecProfile, delObjServicesVoiceServiceCodecProfile, NULL, browseServicesVoiceServiceCodecProfileInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCodecProfileParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+{"CallLog", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCallLogInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"VoIPProfile", &DMWRITE, addObjServicesVoiceServiceVoIPProfile, delObjServicesVoiceServiceVoIPProfile, NULL, browseServicesVoiceServiceVoIPProfileInst, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileObj, tServicesVoiceServiceVoIPProfileParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"CodecProfile", &DMWRITE, addObjServicesVoiceServiceCodecProfile, delObjServicesVoiceServiceCodecProfile, NULL, browseServicesVoiceServiceCodecProfileInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCodecProfileParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 

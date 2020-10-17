@@ -1288,9 +1288,9 @@ static int set_time_span_stop_time(char *refparam, struct dmctx *ctx, void *data
 
 /* *** Device.Firewall. *** */
 DMOBJ tFirewallObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
-{"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, NULL, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH, (const char *[]){"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, NULL, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
@@ -1318,8 +1318,8 @@ DMLEAF tFirewallLevelParams[] = {
 
 /* *** Device.Firewall.Chain.{i}. *** */
 DMOBJ tFirewallChainObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
-{"Rule", &DMWRITE, add_firewall_rule, delete_firewall_rule, NULL, browseRuleInst, NULL, NULL, NULL, tFirewallChainRuleObj, tFirewallChainRuleParams, NULL, BBFDM_BOTH, (const char *[]){"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Rule", &DMWRITE, add_firewall_rule, delete_firewall_rule, NULL, browseRuleInst, NULL, NULL, NULL, tFirewallChainRuleObj, tFirewallChainRuleParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
@@ -1335,7 +1335,7 @@ DMLEAF tFirewallChainParams[] = {
 
 /* *** Device.Firewall.Chain.{i}.Rule.{i}. *** */
 DMOBJ tFirewallChainRuleObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {CUSTOM_PREFIX"TimeSpan", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tTimeSpanParams, NULL, BBFDM_BOTH},
 {0}
 };

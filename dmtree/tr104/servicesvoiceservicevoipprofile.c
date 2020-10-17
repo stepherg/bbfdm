@@ -282,7 +282,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes(char *r
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.VoIPProfile.{i}. *** */
 DMOBJ tServicesVoiceServiceVoIPProfileObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileRTPObj, tServicesVoiceServiceVoIPProfileRTPParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -295,7 +295,7 @@ DMLEAF tServicesVoiceServiceVoIPProfileParams[] = {
 
 /* *** Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP. *** */
 DMOBJ tServicesVoiceServiceVoIPProfileRTPObj[] = {
-/* OBJ, permission, addobj, delobj, checkobj, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"RTCP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileRTPRTCPParams, NULL, BBFDM_BOTH},
 {"SRTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileRTPSRTPParams, NULL, BBFDM_BOTH},
 {0}

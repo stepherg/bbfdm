@@ -206,7 +206,7 @@ static int set_userint_remoteaccesss_protocol(char *refparam, struct dmctx *ctx,
 
 /* *** Device.UserInterface. *** */
 DMOBJ tUserInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"RemoteAccess", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUserInterfaceRemoteAccessParams, NULL, BBFDM_BOTH},
 {0}
 };
