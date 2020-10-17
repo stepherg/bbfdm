@@ -665,8 +665,7 @@ static int get_dhcp_sever_pool_order(char *refparam, struct dmctx *ctx, void *da
 	struct uci_section *dmmap_sect = NULL;
 
 	get_dmmap_section_of_config_section("dmmap_dhcp", "dhcp", section_name(((struct dhcp_args *)data)->dhcp_sec), &dmmap_sect);
-	if (dmmap_sect)
-		dmuci_get_value_by_section_string(dmmap_sect, "order", value);
+	dmuci_get_value_by_section_string(dmmap_sect, "order", value);
 	return 0;
 }
 
@@ -1447,20 +1446,9 @@ static int get_DHCPv4_ClientNumberOfEntries(char *refparam, struct dmctx *ctx, v
 /*#Device.DHCPv4.Client.{i}.Enable!UCI:network/interface,@i-1/disabled*/
 static int get_DHCPv4Client_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *v = NULL;
-
-	if(((struct dhcp_client_args *)data)->dhcp_client_conf == NULL) {
-		*value = "0";
-		return 0;
-	}
-
-	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "disabled", &v);
-
-	if (v == NULL || strlen(v) == 0 || strcmp(v, "1") != 0)
-		*value = "1";
-	else
-		*value = "0";
-
+	char *disabled = NULL;
+	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "disabled", &disabled);
+	*value = (disabled[0] == '1') ? "0" : "1";	
 	return 0;
 }
 
@@ -1505,15 +1493,12 @@ static int set_DHCPv4Client_Alias(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	if(((struct dhcp_client_args *)data)->dhcp_client_conf == NULL) {
-		*value = "";
-		return 0;
+	if (((struct dhcp_client_args *)data)->dhcp_client_conf) {
+		char *linker = dmstrdup(section_name(((struct dhcp_client_args *)data)->dhcp_client_conf));
+		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+		if (*value == NULL)
+			*value = "";
 	}
-
-	char *linker = dmstrdup(section_name(((struct dhcp_client_args *)data)->dhcp_client_conf));
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -1558,40 +1543,24 @@ static int set_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 /*#Device.DHCPv4.Client.{i}.Status!UCI:network/interface,@i-1/disabled*/
 static int get_DHCPv4Client_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *v = NULL;
-	if (((struct dhcp_client_args *)data)->dhcp_client_conf == NULL) {
-		*value = "Error_Misconfigured";
-		return 0;
-	}
-
-	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "disabled", &v);
-	if (v == NULL || strlen(v) == 0 || strcmp(v, "1") != 0)
-		*value = "Enabled";
-	else
-		*value = "Disabled";
-
+	char *disabled = NULL;
+	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "disabled", &disabled);
+	*value = (disabled[0] == '1') ? "Disabled" : "Enabled";
 	return 0;
 }
 
 /*#Device.DHCPv4.Client.{i}.DHCPStatus!UBUS:network.interface/status/interface,@Name/ipv4-address[@i-1].address*/
 static int get_DHCPv4Client_DHCPStatus(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ipaddr = "";
-	json_object *res, *jobj;
-
 	if (((struct dhcp_client_args *)data)->dhcp_client_conf == NULL)
 		return 0;
 
+	json_object *res;
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dhcp_client_args *)data)->dhcp_client_conf), String}}, 1, &res);
-	if (res) {
-		jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
-		ipaddr = dmjson_get_value(jobj, 1, "address");
-	}
-
-	if (ipaddr[0] == '\0')
-		*value = "Requesting";
-	else
-		*value = "Bound";
+	DM_ASSERT(res, *value = "Requesting");
+	json_object *jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
+	char *ipaddr = dmjson_get_value(jobj, 1, "address");
+	*value = (ipaddr[0] == '\0') ? "Requesting" : "Bound";
 
 	return 0;
 }
@@ -1690,7 +1659,7 @@ static int get_DHCPv4Client_LeaseTimeRemaining(char *refparam, struct dmctx *ctx
 		return 0;
 
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dhcp_client_args *)data)->dhcp_client_conf), String}}, 1, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "-1");
 	*value = dmjson_get_value(res, 2, "data", "leasetime");
 	return 0;
 }
@@ -1698,16 +1667,13 @@ static int get_DHCPv4Client_LeaseTimeRemaining(char *refparam, struct dmctx *ctx
 /*#Device.DHCPv4.Client.{i}.SentOptionNumberOfEntries!UCI:network/interface,@i-1/sendopts*/
 static int get_DHCPv4Client_SentOptionNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *v = NULL;
-	size_t length;
+	char *sendopts = NULL;
+	size_t length = 0;
 
-	if (((struct dhcp_client_args *)data)->dhcp_client_conf != NULL)
-		dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "sendopts", &v);
-	if (v == NULL) {
-		*value = "0";
-		return 0;
-	}
-	strsplit(v, " ", &length);
+	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "sendopts", &sendopts);
+	if (sendopts && *sendopts)
+		strsplit(sendopts, " ", &length);
+
 	dmasprintf(value, "%d", length);
 	return 0;
 }
@@ -1715,16 +1681,13 @@ static int get_DHCPv4Client_SentOptionNumberOfEntries(char *refparam, struct dmc
 /*#Device.DHCPv4.Client.{i}.ReqOptionNumberOfEntries!UCI:network/interface,@i-1/reqopts*/
 static int get_DHCPv4Client_ReqOptionNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *v = NULL;
-	size_t length;
+	char *reqopts = NULL;
+	size_t length = 0;
 
-	if (((struct dhcp_client_args *)data)->dhcp_client_conf != NULL)
-		dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "reqopts", &v);
-	if (v == NULL) {
-		*value = "0";
-		return 0;
-	}
-	strsplit(v, " ", &length);
+	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "reqopts", &reqopts);
+	if (reqopts && *reqopts)
+		strsplit(reqopts, " ", &length);
+
 	dmasprintf(value, "%d", length);
 	return 0;
 }
@@ -2033,7 +1996,7 @@ static int set_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 static int get_DHCPv4Server_PoolNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s;
-	int i= 0;
+	int i = 0;
 
 	uci_foreach_sections("dhcp", "dhcp", s) {
 		i++;
@@ -2145,19 +2108,9 @@ static int set_DHCPv4ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 /*#Device.DHCPv4.Relay.Forwarding.{i}.Enable!UCI:network/interface,@i-1/disabled*/
 static int get_DHCPv4RelayForwarding_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *v = NULL;
-
-	if(((struct dhcp_client_args *)data)->dhcp_client_conf == NULL) {
-		*value = "0";
-		return 0;
-	}
-
-	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "disabled", &v);
-	if (v == NULL || strlen(v) == 0 || strcmp(v, "1") != 0)
-		*value = "1";
-	else
-		*value = "0";
-
+	char *disabled = NULL;
+	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "disabled", &disabled);
+	*value = (disabled[0] == '1') ? "0" : "1";
 	return 0;
 }
 
@@ -2387,18 +2340,9 @@ static int set_DHCPv4RelayForwarding_ChaddrExclude(char *refparam, struct dmctx 
 /*#Device.DHCPv4.Relay.Forwarding.{i}.Status!UCI:network/interface,@i-1/disabled*/
 static int get_DHCPv4RelayForwarding_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *v = NULL;
-
-	if (((struct dhcp_client_args *)data)->dhcp_client_conf == NULL) {
-		*value= "Error_Misconfigured";
-		return 0;
-	}
-	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "disabled", &v);
-	if (v == NULL || strlen(v) == 0 || strcmp(v, "1") != 0)
-		*value= "Enabled";
-	else
-		*value= "Disabled";
-
+	char *disabled = NULL;
+	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dhcp_client_conf, "disabled", &disabled);
+	*value = (disabled[0] == '1') ? "Disabled" : "Enabled";
 	return 0;
 }
 

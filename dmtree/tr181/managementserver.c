@@ -95,7 +95,7 @@ static int get_management_server_key(char *refparam, struct dmctx *ctx, void *da
 /*#Device.ManagementServer.PeriodicInformEnable!UCI:cwmp/acs,acs/periodic_inform_enable*/
 static int get_management_server_periodic_inform_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp", "acs", "periodic_inform_enable", value);
+	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "periodic_inform_enable", "1");
 	return 0;	
 }
 
@@ -120,7 +120,7 @@ static int set_management_server_periodic_inform_enable(char *refparam, struct d
 /*#Device.ManagementServer.PeriodicInformInterval!UCI:cwmp/acs,acs/periodic_inform_interval*/
 static int get_management_server_periodic_inform_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp", "acs", "periodic_inform_interval", value);
+	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "periodic_inform_interval", "1800");
 	return 0;
 }
 
@@ -142,16 +142,15 @@ static int set_management_server_periodic_inform_interval(char *refparam, struct
 /*#Device.ManagementServer.PeriodicInformTime!UCI:cwmp/acs,acs/periodic_inform_time*/
 static int get_management_server_periodic_inform_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	time_t time_value;
+	*value = "0001-01-01T00:00:00Z";
 	
-	dmuci_get_option_value_string("cwmp", "acs", "periodic_inform_time", value);
-	if ((*value)[0] != '0' && (*value)[0] != '\0') {
-		time_value = atoi(*value);
+	char *periodic_inform_time;
+	dmuci_get_option_value_string("cwmp", "acs", "periodic_inform_time", &periodic_inform_time);
+	if (periodic_inform_time && *periodic_inform_time != '\0' && atoi(periodic_inform_time) > 0) {
+		time_t time_value = atoi(periodic_inform_time);
 		char s_now[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
 		strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", localtime(&time_value));
 		*value = dmstrdup(s_now); // MEM WILL BE FREED IN DMMEMCLEAN
-	} else {
-		*value = "0001-01-01T00:00:00Z";
 	}		
 	return 0;	
 }
@@ -315,7 +314,7 @@ static int set_lwn_host(char *refparam, struct dmctx *ctx, void *data, char *ins
 /*#Device.ManagementServer.UDPLightweightNotificationPort!UCI:cwmp/lwn,lwn/port*/
 static int get_lwn_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp", "lwn", "port", value);
+	*value = dmuci_get_option_value_fallback_def("cwmp", "lwn", "port", "7547");
 	return 0;
 }
 
@@ -367,7 +366,7 @@ static int set_management_server_http_compression(char *refparam, struct dmctx *
 /*#Device.ManagementServer.CWMPRetryMinimumWaitInterval!UCI:cwmp/acs,acs/retry_min_wait_interval*/
 static int get_management_server_retry_min_wait_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp", "acs", "retry_min_wait_interval", value);
+	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "retry_min_wait_interval", "5");
 	return 0;
 }
 
@@ -389,7 +388,7 @@ static int set_management_server_retry_min_wait_interval(char *refparam, struct 
 /*#Device.ManagementServer.CWMPRetryIntervalMultiplier!UCI:cwmp/acs,acs/retry_interval_multiplier*/
 static int get_management_server_retry_interval_multiplier(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp", "acs", "retry_interval_multiplier", value);
+	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "retry_interval_multiplier", "2000");
 	return 0;
 }
 
@@ -451,7 +450,7 @@ static int get_upd_cr_address(char *refparam, struct dmctx *ctx, void *data, cha
 /*#Device.ManagementServer.STUNEnable!UCI:stun/stun,stun/enable*/
 static int get_stun_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("stun", "stun", "enable", value);
+	*value = dmuci_get_option_value_fallback_def("stun", "stun", "enable", "1");
 	return 0;
 }
 
@@ -496,7 +495,7 @@ static int set_stun_server_address(char *refparam, struct dmctx *ctx, void *data
 /*#Device.ManagementServer.STUNServerPort!UCI:stun/stun,stun/server_port*/
 static int get_stun_server_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("stun", "stun", "server_port", value);
+	*value = dmuci_get_option_value_fallback_def("stun", "stun", "server_port", "3478");
 	return 0;
 }
 
@@ -559,7 +558,7 @@ static int set_stun_password(char *refparam, struct dmctx *ctx, void *data, char
 /*#Device.ManagementServer.STUNMaximumKeepAlivePeriod!UCI:stun/stun,stun/max_keepalive*/
 static int get_stun_maximum_keepalive_period(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("stun", "stun", "max_keepalive", value);
+	*value = dmuci_get_option_value_fallback_def("stun", "stun", "max_keepalive", "-1");
 	return 0;
 }
 
@@ -580,7 +579,7 @@ static int set_stun_maximum_keepalive_period(char *refparam, struct dmctx *ctx, 
 /*#Device.ManagementServer.STUNMinimumKeepAlivePeriod!UCI:stun/stun,stun/min_keepalive*/
 static int get_stun_minimum_keepalive_period(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("stun", "stun", "min_keepalive", value);
+	*value = dmuci_get_option_value_fallback_def("stun", "stun", "min_keepalive", "30");
 	return 0;
 }
 

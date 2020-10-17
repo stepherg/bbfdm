@@ -122,7 +122,7 @@ static int get_user_alias(char *refparam, struct dmctx *ctx, void *data, char *i
 /*#Device.Users.User.{i}.Enable!UCI:users/user,@i-1/enabled*/
 static int get_user_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "1");
     return 0;
 }
 
@@ -142,7 +142,7 @@ static int get_user_password(char *refparam, struct dmctx *ctx, void *data, char
 /*#Device.Users.User.{i}.RemoteAccessCapable!UCI:users/user,@i-1/remote_access*/
 static int get_user_remote_accessable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "remote_access", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "remote_access", "1");
     return 0;
 }
 
@@ -172,13 +172,15 @@ static int set_user_alias(char *refparam, struct dmctx *ctx, void *data, char *i
 
 static int set_user_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	bool b;
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "enabled", value);
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section((struct uci_section *)data, "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -220,13 +222,15 @@ static int set_user_password(char *refparam, struct dmctx *ctx, void *data, char
 
 static int set_user_remote_accessable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	bool b;
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "remote_access", value);
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section((struct uci_section *)data, "remote_access", b ? "1" : "0");
 			break;
 	}
 	return 0;

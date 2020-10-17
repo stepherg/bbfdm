@@ -631,7 +631,7 @@ static int get_DHCPv6Client_RequestAddresses(char *refparam, struct dmctx *ctx, 
 {
 	char *v = NULL;
 	if(((struct dhcpv6_client_args *)data)->dhcp_client_conf == NULL) {
-		*value = "";
+		*value = "0";
 		return 0;
 	}
 
@@ -665,7 +665,7 @@ static int get_DHCPv6Client_RequestPrefixes(char *refparam, struct dmctx *ctx, v
 {
 	char *v = "";
 	if (((struct dhcpv6_client_args *)data)->dhcp_client_conf == NULL) {
-		*value = "";
+		*value = "0";
 		return 0;
 	}
 
@@ -875,8 +875,7 @@ static int get_DHCPv6ServerPool_Order(char *refparam, struct dmctx *ctx, void *d
 	struct uci_section *dmmap_sect = NULL;
 
 	get_dmmap_section_of_config_section("dmmap_dhcpv6", "dhcp", section_name(((struct dhcpv6_args *)data)->dhcp_sec), &dmmap_sect);
-	if (dmmap_sect)
-		dmuci_get_value_by_section_string(dmmap_sect, "order", value);
+	dmuci_get_value_by_section_string(dmmap_sect, "order", value);
 	return 0;
 }
 
@@ -1273,7 +1272,7 @@ static int get_DHCPv6ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 	size_t length;
 
 	if(strcmp(((struct dhcpv6_client_option_args *)data)->option_tag, "0") == 0){
-		*value= "0";
+		*value = "0";
 		return 0;
 	}
 
@@ -1282,7 +1281,7 @@ static int get_DHCPv6ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 		uci_foreach_element(dhcp_option_list, e) {
 			buf = strsplit(e->name, ",", &length);
 			if (strcmp(buf[0], ((struct dhcpv6_client_option_args *)data)->option_tag) == 0) {
-				*value= "1";
+				*value = "1";
 				return 0;
 			}
 		}

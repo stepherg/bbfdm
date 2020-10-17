@@ -37,7 +37,7 @@ static int browseIEEE1905ALInterfaceInst(struct dmctx *dmctx, DMNODE *parent_nod
 	if (result == NULL)
 		return 0;
 	json_object_object_get_ex(result, "names", &interfaces);
-	size_t num_interface = json_object_array_length(interfaces);
+	size_t num_interface = (interfaces) ? json_object_array_length(interfaces) : 0;
 	for (i = 0; i < num_interface; i++) {
 		interface_id = json_object_array_get_idx(interfaces, i);
 		snprintf(object, sizeof(object), "ieee1905.al.%s", json_object_get_string(interface_id));
@@ -355,7 +355,7 @@ static int ubus_ieee1905_info(const char *option, char **value)
 {
 	json_object *res = NULL;
 	dmubus_call("ieee1905", "info", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, option);
 	return 0;
 }
@@ -519,7 +519,7 @@ static int get_IEEE1905ALInterface_VendorPropertiesNumberOfEntries(char *refpara
 {
 	json_object *res = NULL;
 	dmubus_call((char *)data, "info", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "vendor_nr");
 	return 0;
 }
@@ -532,8 +532,7 @@ static int get_IEEE1905ALInterface_LinkNumberOfEntries(char *refparam, struct dm
 	dmubus_call((char *)data, "link_info", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	json_object_object_get_ex(res, "links", &links);
-	if (links)
-		num_links = json_object_array_length(links);
+	num_links = (links) ? json_object_array_length(links) : 0;
 
 	dmasprintf(value, "%d", num_links);
 	return 0;
@@ -808,7 +807,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag(char
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.EtherType!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/ether_type*/
 static int get_IEEE1905ALForwardingTableForwardingRule_EtherType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ether_type", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ether_type", "0");
 	return 0;
 }
 
@@ -853,7 +852,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag(char *refpa
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.Vid!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/vid*/
 static int get_IEEE1905ALForwardingTableForwardingRule_Vid(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "vid", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "vid", "0");
 	return 0;
 }
 
@@ -898,7 +897,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_VidFlag(char *refparam, s
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.PCP!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/pcp*/
 static int get_IEEE1905ALForwardingTableForwardingRule_PCP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "pcp", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "pcp", "0");
 	return 0;
 }
 
@@ -975,7 +974,7 @@ static int get_IEEE1905ALNetworkTopology_Status(char *refparam, struct dmctx *ct
 
 static int get_IEEE1905ALNetworkTopology_MaxChangeLogEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("topology", "topology", "maxlog", value);
+	*value = dmuci_get_option_value_fallback_def("topology", "topology", "maxlog", "1");
 	return 0;
 }
 
@@ -1001,11 +1000,9 @@ static int get_IEEE1905ALNetworkTopology_LastChange(char *refparam, struct dmctx
 	dmubus_call("topology", "changelog", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	json_object_object_get_ex(res, "changelog", &obj);
-	if (obj) {
-		num = json_object_array_length(obj);
-		if (num != 0)
-			dmasprintf(value, "Device.IEEE1905.AL.NetworkTopology.ChangeLog.%d", num);
-	}
+	num = (obj) ? json_object_array_length(obj) : 0;
+	if (num != 0)
+		dmasprintf(value, "Device.IEEE1905.AL.NetworkTopology.ChangeLog.%d", num);
 
 	return 0;
 }
@@ -1018,8 +1015,7 @@ static int get_IEEE1905ALNetworkTopology_IEEE1905DeviceNumberOfEntries(char *ref
 	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	json_object_object_get_ex(res, "nodes", &obj);
-	if (obj)
-		num_nodes = json_object_array_length(obj);
+	num_nodes = (obj) ? json_object_array_length(obj) : 0;
 
 	dmasprintf(value, "%d", num_nodes);
 	return 0;
@@ -1044,8 +1040,7 @@ static int get_IEEE1905ALNetworkTopology_NonIEEE1905NeighborNumberOfEntries(char
 	json_object_object_get_ex(res, "self", &obj);
 	if (obj) {
 		json_object_object_get_ex(obj, "non1905_neighbors", &obj_nbr);
-		if (obj_nbr != NULL)
-			num_nodes = json_object_array_length(obj_nbr);
+		num_nodes = (obj_nbr) ? json_object_array_length(obj_nbr) : 0;
 	}
 	dmasprintf(value, "%d", num_nodes);
 	return 0;
@@ -1388,8 +1383,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_MetricNum
 	const struct obj_node *node_val = (struct obj_node *)data;
 
 	json_object_object_get_ex(node_val->data, "link_metrics", &link_metrics);
-	if (link_metrics)
-		num = json_object_array_length(link_metrics);
+	num = (link_metrics) ? json_object_array_length(link_metrics) : 0;
 
 	dmasprintf(value, "%d", num);
 	return 0;

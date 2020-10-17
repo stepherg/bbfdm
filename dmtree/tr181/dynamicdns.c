@@ -658,7 +658,7 @@ static int get_DynamicDNSClientHostname_LastUpdate(char *refparam, struct dmctx 
 	FILE* fp = NULL;
 	char *pch = NULL, *spch = NULL, *last_time = NULL, *uptime = NULL, *rundir = NULL;
 	char current_time[32] = "", buf[16] = "", path[64] = "";
-	*value = "0";
+	*value = "0001-01-01T00:00:00Z";
 
 	dmuci_get_option_value_string("ddns", "global", "ddns_rundir", &rundir);
 	if (*rundir == '\0')

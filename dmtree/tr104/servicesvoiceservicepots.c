@@ -124,7 +124,7 @@ static int get_ServicesVoiceServicePOTSFXS_TerminalType(char *refparam, struct d
 /*#Device.Services.VoiceService.{i}.POTS.FXS.{i}.VoiceProcessing.TransmitGain!UCI:asterisk/tel_line,@i-1/txgain*/
 static int get_ServicesVoiceServicePOTSFXSVoiceProcessing_TransmitGain(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "txgain", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "txgain", "0");
 	return 0;
 }
 
@@ -145,7 +145,7 @@ static int set_ServicesVoiceServicePOTSFXSVoiceProcessing_TransmitGain(char *ref
 /*#Device.Services.VoiceService.{i}.POTS.FXS.{i}.VoiceProcessing.ReceiveGain!UCI:asterisk/tel_line,@i-1/rxgain*/
 static int get_ServicesVoiceServicePOTSFXSVoiceProcessing_ReceiveGain(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "rxgain", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "rxgain", "0");
 	return 0;
 }
 
@@ -166,7 +166,7 @@ static int set_ServicesVoiceServicePOTSFXSVoiceProcessing_ReceiveGain(char *refp
 /*#Device.Services.VoiceService.{i}.POTS.FXS.{i}.VoiceProcessing.EchoCancellationEnable!UCI:asterisk/tel_line,@i-1/echo_cancel*/
 static int get_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "echo_cancel", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "echo_cancel", "1");
 	return 0;
 }
 

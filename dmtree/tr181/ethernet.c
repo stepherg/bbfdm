@@ -522,7 +522,7 @@ static int get_Ethernet_RMONStatsNumberOfEntries(char *refparam, struct dmctx *c
 /*#Device.Ethernet.Interface.{i}.Enable!UCI:ports/ethport,@i-1/enabled*/
 static int get_EthernetInterface_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct eth_port_args *)data)->eth_port_sec, "enabled", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct eth_port_args *)data)->eth_port_sec, "enabled", "1");
 	return 0;
 }
 
@@ -754,7 +754,7 @@ static int get_EthernetInterface_EEECapability(char *refparam, struct dmctx *ctx
 /*#Device.Ethernet.Interface.{i}.EEEEnable!UCI:ports/ethport,@i-1/eee*/
 static int get_EthernetInterface_EEEEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct eth_port_args *)data)->eth_port_sec, "eee", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct eth_port_args *)data)->eth_port_sec, "eee", "1");
 	return 0;
 }
 
@@ -1311,8 +1311,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 /*#Device.Ethernet.VLANTermination.{i}.VLANID!UCI:network/device,@i-1/vid*/
 static int get_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "0";
-	dmuci_get_value_by_section_string(((struct dm_args *)data)->section, "vid", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_args *)data)->section, "vid", "1");
 	return 0;
 }
 

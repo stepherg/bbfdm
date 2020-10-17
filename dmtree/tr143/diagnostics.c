@@ -597,7 +597,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DSCP(char *refparam, struct dmct
 
 static int get_IPDiagnosticsDownloadDiagnostics_EthernetPriority(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("download", "ethernetpriority");
+	*value = get_diagnostics_option_fallback_def("download", "ethernetpriority", "0");
 	return 0;
 }
 
@@ -786,13 +786,13 @@ static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_TestBytesRece
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_TotalBytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "TotalBytesReceived", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "TotalBytesReceived", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_TotalBytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "TotalBytesSent", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "TotalBytesSent", "0");
 	return 0;
 }
 
@@ -1128,19 +1128,19 @@ static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_EOMTime(char *r
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TestBytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "TestBytesSent", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "TestBytesSent", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TotalBytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "TotalBytesReceived", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "TotalBytesReceived", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TotalBytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "TotalBytesSent", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "TotalBytesSent", "0");
 	return 0;
 
 }
@@ -1229,7 +1229,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Host(char *refparam, struct dmctx
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("udpechodiag", "port");
+	*value = get_diagnostics_option_fallback_def("udpechodiag", "port", "1");
 	return 0;
 }
 

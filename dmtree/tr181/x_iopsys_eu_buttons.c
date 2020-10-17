@@ -67,7 +67,7 @@ static int get_x_iopsys_eu_button_hotplug_long(char *refparam, struct dmctx *ctx
 
 static int get_x_iopsys_eu_button_minpress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "minpress", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "minpress", "0");
 	return 0;
 }
 
@@ -86,7 +86,7 @@ static int set_x_iopsys_eu_button_minpress(char *refparam, struct dmctx *ctx, vo
 
 static int get_x_iopsys_eu_button_longpress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "longpress", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "longpress", "0");
 	return 0;
 }
 

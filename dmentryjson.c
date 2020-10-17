@@ -687,6 +687,8 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 		pleaf[i].type = DMT_LONG;
 	else if (strcmp(json_object_get_string(type), "dateTime") == 0)
 		pleaf[i].type = DMT_TIME;
+	else if (strcmp(json_object_get_string(type), "base64") == 0)
+		pleaf[i].type = DMT_BASE64;
 	else
 		pleaf[i].type = DMT_STRING;
 

@@ -671,7 +671,7 @@ static int set_router_ipv4forwarding_interface_linker_parameter(char *refparam, 
 /*#Device.Routing.Router.{i}.IPv4Forwarding.{i}.ForwardingMetric!UCI:network/route,@i-1/metric*/
 static int get_router_ipv4forwarding_metric(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct routingfwdargs *)data)->routefwdsection, "metric", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct routingfwdargs *)data)->routefwdsection, "metric", "-1");
 	return 0;
 }
 
@@ -820,7 +820,7 @@ static int get_RoutingRouterIPv6Forwarding_Origin(char *refparam, struct dmctx *
 /*#Device.Routing.Router.{i}.IPv6Forwarding.{i}.ForwardingMetric!UCI:network/route,@i-1/metric*/
 static int get_RoutingRouterIPv6Forwarding_ForwardingMetric(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct routingfwdargs *)data)->routefwdsection, "metric", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct routingfwdargs *)data)->routefwdsection, "metric", "-1");
 	return 0;
 }
 
@@ -973,12 +973,16 @@ static int get_RoutingRouteInformationInterfaceSetting_SourceRouter(char *refpar
 
 static int get_RoutingRouteInformationInterfaceSetting_RouteLifetime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char local_time[32] = {0};
-	char *valid = dmjson_get_value((struct json_object *)data, 1, "valid");
 	*value = "0001-01-01T00:00:00Z";
-	if (get_shift_time_time(atoi(valid), local_time, sizeof(local_time)) == -1)
-		return 0;
-	*value = dmstrdup(local_time);
+
+	char *valid = dmjson_get_value((struct json_object *)data, 1, "valid");
+	if (valid && *valid != '\0' && atoi(valid) > 0) {
+		char local_time[32] = {0};
+
+		if (get_shift_time_time(atoi(valid), local_time, sizeof(local_time)) == -1)
+			return 0;
+		*value = dmstrdup(local_time);
+	}
 	return 0;
 }
 

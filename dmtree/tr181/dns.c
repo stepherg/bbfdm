@@ -293,7 +293,7 @@ static int get_client_server_number_of_entries(char *refparam, struct dmctx *ctx
 
 static int get_server_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-    dmuci_get_value_by_section_string((struct uci_section *)data, "enable", value);
+    *value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enable", "1");
     return 0;
 }
 
@@ -381,7 +381,7 @@ static int get_relay_forward_number_of_entries(char *refparam, struct dmctx *ctx
 
 static int get_forwarding_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-    dmuci_get_value_by_section_string((struct uci_section *)data, "enable", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enable", "1");
     return 0;
 }
 
@@ -520,7 +520,7 @@ static int get_result_d_n_s_server_i_p(char *refparam, struct dmctx *ctx, void *
 
 static int get_result_response_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ResponseTime", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ResponseTime", "0");
 	return 0;
 }
 

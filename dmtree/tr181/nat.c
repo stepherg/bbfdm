@@ -484,7 +484,7 @@ static int set_nat_port_mapping_external_port_end_range(char *refparam, struct d
 /*#Device.NAT.PortMapping.{i}.InternalPort!UCI:firewall/redirect,@i-1/dest_port*/
 static int get_nat_port_mapping_internal_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "dest_port", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "dest_port", "0");
 	return 0;
 }
 

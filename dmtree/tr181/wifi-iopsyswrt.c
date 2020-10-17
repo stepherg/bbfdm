@@ -32,10 +32,7 @@ static int ssid_read_ubus(const struct wifi_ssid_args *args, const char *name, c
 
 	snprintf(object, sizeof(object), "wifi.ap.%s", args->ifname);
 	dmubus_call(object, "stats", UBUS_ARGS{}, 0, &res);
-	if (!res) {
-		*value = "0";
-		return 0;
-	}
+	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, name);
 	return 0;
 }
@@ -47,10 +44,7 @@ static int radio_read_ubus(const struct wifi_radio_args *args, const char *name,
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(args->wifi_radio_sec));
 	dmubus_call(object, "stats", UBUS_ARGS{}, 0, &res);
-	if (!res) {
-		*value = "0";
-		return 0;
-	}
+	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, name);
 	return 0;
 }
@@ -305,7 +299,7 @@ int os__get_radio_max_bit_rate (char *refparam, struct dmctx *ctx, void *data, c
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "maxrate");
 	return 0;
 }
@@ -346,7 +340,7 @@ int os__get_radio_channel(char *refparam, struct dmctx *ctx, void *data, char *i
 		char object[32];
 		snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
 		dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
-		DM_ASSERT(res, *value = "");
+		DM_ASSERT(res, *value = "1");
 		*value = dmjson_get_value(res, 1, "channel");
 	}
 	return 0;
@@ -413,8 +407,7 @@ int os__get_neighboring_wifi_diagnostics_result_number_entries(char *refparam, s
 		dmubus_call(object, "scanresults", UBUS_ARGS{}, 0, &res);
 		if (res) {
 			json_object_object_get_ex(res, "accesspoints", &accesspoints);
-			if (accesspoints)
-				entries = json_object_array_length(accesspoints);
+			entries = (accesspoints) ? json_object_array_length(accesspoints) : 0;
 		}
 		result = result + entries;
 		entries = 0;
@@ -842,8 +835,7 @@ int os__get_WiFiDataElementsNetworkDeviceRadio_ScanResultNumberOfEntries(char *r
 	json_object *scanres_arr = NULL;
 
 	json_object_object_get_ex((json_object *)data, "ScanResultList", &scanres_arr);
-	if (scanres_arr)
-		num_scanres = json_object_array_length(scanres_arr);
+	num_scanres = (scanres_arr) ? json_object_array_length(scanres_arr) : 0;
 
 	dmasprintf(value, "%d", num_scanres);
 	return 0;
@@ -856,8 +848,7 @@ int os__get_WiFiDataElementsNetworkDeviceRadioBackhaulSta_MACAddress(char *refpa
 
 	if (data) {
 		json_object_object_get_ex((json_object *)data, "BackhaulSta", &backsta_obj);
-		if (backsta_obj)
-			*value = dmjson_get_value(backsta_obj, 1, "MACAddress");
+		*value = (backsta_obj) ? dmjson_get_value(backsta_obj, 1, "MACAddress") : "";
 	}
 	return 0;
 }
@@ -868,8 +859,7 @@ int os__get_WiFiDataElementsNetworkDeviceRadioCapabilities_HTCapabilities(char *
 	json_object *caps_obj = NULL;
 
 	json_object_object_get_ex((json_object *)data, "Capabilites", &caps_obj);
-	if (caps_obj)
-		*value = dmjson_get_value(caps_obj, 1, "HTCapabilities");
+	*value = (caps_obj) ? dmjson_get_value(caps_obj, 1, "HTCapabilities") : "";
 
 	return 0;
 }
@@ -880,8 +870,7 @@ int os__get_WiFiDataElementsNetworkDeviceRadioCapabilities_VHTCapabilities(char 
 	json_object *caps_obj = NULL;
 
 	json_object_object_get_ex((json_object *)data, "Capabilites", &caps_obj);
-	if (caps_obj)
-		*value = dmjson_get_value(caps_obj, 1, "VHTCapabilities");
+	*value = (caps_obj) ? dmjson_get_value(caps_obj, 1, "VHTCapabilities") : "";
 
 	return 0;
 }
@@ -892,8 +881,7 @@ int os__get_WiFiDataElementsNetworkDeviceRadioCapabilities_HECapabilities(char *
 	json_object *caps_obj = NULL;
 
 	json_object_object_get_ex((json_object *)data, "Capabilites", &caps_obj);
-	if (caps_obj)
-		*value = dmjson_get_value(caps_obj, 1, "HECapabilities");
+	*value = (caps_obj) ? dmjson_get_value(caps_obj, 1, "HECapabilities") : "";
 
 	return 0;
 }
@@ -904,8 +892,7 @@ int os__get_WiFiDataElementsNetworkDeviceRadioCapabilities_CapableOperatingClass
 	json_object *caps_obj = NULL;
 
 	json_object_object_get_ex((json_object *)data, "Capabilites", &caps_obj);
-	if (caps_obj)
-		*value = dmjson_get_value(caps_obj, 1, "NumberOfOpClass");
+	*value = (caps_obj) ? dmjson_get_value(caps_obj, 1, "NumberOfOpClass") : "0";
 
 	return 0;
 }

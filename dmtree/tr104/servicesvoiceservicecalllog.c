@@ -94,11 +94,7 @@ static int get_ServicesVoiceServiceCallLog_Start(char *refparam, struct dmctx *c
 static int get_ServicesVoiceServiceCallLog_Duration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
-
-	if (entry) {
-		*value = dmstrdup(entry->duration);
-	}
-
+	*value = (entry) ? dmstrdup(entry->duration) : "0";
 	return 0;
 }
 

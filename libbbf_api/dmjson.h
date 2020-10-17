@@ -47,6 +47,7 @@ char *__dmjson_get_value_array_all(json_object *mainjobj, char *delim, int argc,
 
 #define dmjson_get_value(JOBJ,ARGC,args...) \
 	__dmjson_get_value_in_obj(JOBJ, ARGC, ##args)
+
 #define dmjson_get_obj(JOBJ,ARGC,args...) \
 	__dmjson_get_obj(JOBJ, ARGC, ##args)
 

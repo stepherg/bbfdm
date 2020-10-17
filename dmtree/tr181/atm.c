@@ -27,7 +27,7 @@ static int get_atm_linker(char *refparam, struct dmctx *dmctx, void *data, char 
 		*linker = ((struct atm_args *)data)->ifname;
 		return 0;
 	}
-	*linker = "" ;
+	*linker = "";
 	return 0;
 }
 

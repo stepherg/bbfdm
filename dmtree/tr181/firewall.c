@@ -275,8 +275,7 @@ static int get_rule_order(char *refparam, struct dmctx *ctx, void *data, char *i
 {
 	struct uci_section *dms = NULL;
 	get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dms);
-	if (dms)
-		dmuci_get_value_by_section_string(dms, "firewall_chain_rule_instance", value);
+	dmuci_get_value_by_section_string(dms, "firewall_chain_rule_instance", value);
 	return 0;
 }
 

@@ -790,9 +790,7 @@ static int set_access_point_control_enable(char *refparam, struct dmctx *ctx, vo
 /*#Device.WiFi.AccessPoint.{i}.UAPSDEnable!UCI:wireless/wifi-iface,@i-1/wmm_apsd*/
 static int get_WiFiAccessPoint_UAPSDEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "wmm_apsd", value);
-	if (!*value || *value[0] == 0)
-		*value = "0";
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_acp_args *)data)->wifi_acp_sec, "wmm_apsd", "0");
 	return 0;
 }
 
@@ -1012,9 +1010,7 @@ static int set_access_point_security_passphrase(char *refparam, struct dmctx *ct
 /*#Device.WiFi.AccessPoint.{i}.Security.RekeyingInterval!UCI:wireless/wifi-iface,@i-1/wpa_group_rekey*/
 static int get_access_point_security_rekey_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "wpa_group_rekey", value);
-	if (!*value || *value[0] == 0)
-		*value = "0";
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_acp_args *)data)->wifi_acp_sec, "wpa_group_rekey", "0");
 	return 0;
 }
 
@@ -1064,7 +1060,7 @@ static int set_access_point_security_radius_ip_address(char *refparam, struct dm
 /*#Device.WiFi.AccessPoint.{i}.Security.RadiusServerPort!UCI:wireless/wifi-iface,@i-1/auth_port*/
 static int get_access_point_security_radius_server_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "auth_port", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_acp_args *)data)->wifi_acp_sec, "auth_port", "1812");
 	return 0;
 }
 
@@ -1298,7 +1294,7 @@ static int set_WiFiAccessPointAccounting_ServerIPAddr(char *refparam, struct dmc
 /*#Device.WiFi.AccessPoint.{i}.Accounting.ServerPort!UCI:wireless/wifi-iface,@i-1/acct_port*/
 static int get_WiFiAccessPointAccounting_ServerPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "acct_port", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_acp_args *)data)->wifi_acp_sec, "acct_port", "1813");
 	return 0;
 }
 
@@ -1382,19 +1378,21 @@ static int get_WiFiAccessPointAssociatedDevice_Retransmissions(char *refparam, s
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.AssociationTime!UBUS:wifi.ap.@Name/stations//stations[i-1].in_network*/
 static int get_WiFiAccessPointAssociatedDevice_AssociationTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char local_time[32] = {0};
-	time_t t_time;
-
 	*value = "0001-01-01T00:00:00Z";
+
 	char *in_network = dmjson_get_value((json_object *)data, 1, "in_network");
-	t_time = time(NULL) - atoi(in_network);
-	if (localtime(&t_time) == NULL)
-		return -1;
+	if (in_network && *in_network != '\0' && atoi(in_network) > 0) {
+		time_t t_time = time(NULL) - atoi(in_network);
+		if (localtime(&t_time) == NULL)
+			return -1;
 
-	if (strftime(local_time, sizeof(local_time), "%Y-%m-%dT%H:%M:%SZ", localtime(&t_time)) == 0)
-		return -1;
+		char local_time[32] = {0};
 
-	*value = dmstrdup(local_time);
+		if (strftime(local_time, sizeof(local_time), "%Y-%m-%dT%H:%M:%SZ", localtime(&t_time)) == 0)
+			return -1;
+
+		*value = dmstrdup(local_time);
+	}
 	return 0;
 }
 

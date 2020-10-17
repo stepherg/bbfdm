@@ -767,9 +767,7 @@ int os_get_QoS_AvailableAppList(char *refparam, struct dmctx *ctx, void *data, c
 #endif
 int os_get_QoSClassification_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "enable", value);
-	if(*value[0] == '\0')
-		*value = "0";
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enable", "1");
 	return 0;
 }
 
@@ -783,10 +781,7 @@ int os_set_QoSClassification_Enable(char *refparam, struct dmctx *ctx, void *dat
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		if (b)
-			dmuci_set_value_by_section((struct uci_section *)data, "enable", "1");
-		else
-			dmuci_set_value_by_section((struct uci_section *)data, "enable", "0");
+		dmuci_set_value_by_section((struct uci_section *)data, "enable", (b) ? "1" : "0");
 		break;
 	}
 	return 0;
@@ -1139,7 +1134,7 @@ int os_set_QoSClassification_SourceIP(char *refparam, struct dmctx *ctx, void *d
 
 int os_get_QoSClassification_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "proto", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "proto", "-1");
 	return 0;
 }
 
@@ -1160,7 +1155,7 @@ int os_set_QoSClassification_Protocol(char *refparam, struct dmctx *ctx, void *d
 
 int os_get_QoSClassification_DestPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "dest_port", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "dest_port", "-1");
 	return 0;
 }
 
@@ -1180,7 +1175,7 @@ int os_set_QoSClassification_DestPort(char *refparam, struct dmctx *ctx, void *d
 
 int os_get_QoSClassification_DestPortRangeMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "dest_port_range", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "dest_port_range", "-1");
 	return 0;
 }
 
@@ -1218,7 +1213,7 @@ int os_set_QoSClassification_DestPortExclude(char *refparam, struct dmctx *ctx, 
 
 int os_get_QoSClassification_SourcePort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "src_port", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "src_port", "-1");
 	return 0;
 }
 
@@ -1238,7 +1233,7 @@ int os_set_QoSClassification_SourcePort(char *refparam, struct dmctx *ctx, void 
 
 int os_get_QoSClassification_SourcePortRangeMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "src_port_range", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "src_port_range", "-1");
 	return 0;
 }
 
@@ -1388,7 +1383,7 @@ int os_set_QoSClassification_DestMACExclude(char *refparam, struct dmctx *ctx, v
 #endif
 int os_get_QoSClassification_Ethertype(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ethertype", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ethertype", "-1");
 	return 0;
 }
 
@@ -2038,7 +2033,7 @@ int os_set_QoSClassification_TCPACKExclude(char *refparam, struct dmctx *ctx, vo
 #endif
 int os_get_QoSClassification_IPLengthMin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ip_len_min", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ip_len_min", "0");
 	return 0;
 }
 
@@ -2058,7 +2053,7 @@ int os_set_QoSClassification_IPLengthMin(char *refparam, struct dmctx *ctx, void
 
 int os_get_QoSClassification_IPLengthMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ip_len_max", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ip_len_max", "0");
 	return 0;
 }
 
@@ -2096,7 +2091,7 @@ int os_set_QoSClassification_IPLengthExclude(char *refparam, struct dmctx *ctx, 
 #endif
 int os_get_QoSClassification_DSCPCheck(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "dscp_filter", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "dscp_filter", "-1");
 	return 0;
 }
 
@@ -2135,7 +2130,7 @@ int os_set_QoSClassification_DSCPExclude(char *refparam, struct dmctx *ctx, void
 /*#Device.QoS.Classification.{i}.DSCPMark!UCI:qos/classify,@i-1/dscp*/
 int os_get_QoSClassification_DSCPMark(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "dscp_mark", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "dscp_mark", "-1");
 	return 0;
 }
 
@@ -2154,7 +2149,7 @@ int os_set_QoSClassification_DSCPMark(char *refparam, struct dmctx *ctx, void *d
 }
 int os_get_QoSClassification_EthernetPriorityCheck(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "pcp_check", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "pcp_check", "-1");
 	return 0;
 }
 
@@ -2300,7 +2295,7 @@ int os_set_QoSClassification_EthernetDEIExclude(char *refparam, struct dmctx *ct
 #endif
 int os_get_QoSClassification_VLANIDCheck(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "vid_check", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "vid_check", "-1");
 	return 0;
 }
 
@@ -2374,7 +2369,7 @@ int os_set_QoSClassification_ForwardingPolicy(char *refparam, struct dmctx *ctx,
 #endif
 int os_get_QoSClassification_TrafficClass(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "traffic_class", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "traffic_class", "-1");
 	return 0;
 }
 
@@ -3317,7 +3312,7 @@ int os_get_QoSQueue_BufferLength(char *refparam, struct dmctx *ctx, void *data, 
 
 int os_get_QoSQueue_Weight(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "weight", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "weight", "0");
 	return 0;
 }
 
@@ -3338,7 +3333,7 @@ int os_set_QoSQueue_Weight(char *refparam, struct dmctx *ctx, void *data, char *
 /*#Device.QoS.Queue.{i}.Precedence!UCI:qos/queue,@i-1/precedence*/
 int os_get_QoSQueue_Precedence(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "precedence", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "precedence", "1");
 	return 0;
 }
 
@@ -3467,7 +3462,7 @@ int os_set_QoSQueue_ShapingRate(char *refparam, struct dmctx *ctx, void *data, c
 
 int os_get_QoSQueue_ShapingBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "burst_size", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "burst_size", "0");
 	return 0;
 }
 
@@ -3565,44 +3560,43 @@ int os_set_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *data
 
 int os_get_QoSQueueStats_OutputPackets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
+	*value = "0";
 	return 0;
 }
 
 int os_get_QoSQueueStats_OutputBytes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
+	*value = "0";
 	return 0;
 }
 
 int os_get_QoSQueueStats_DroppedPackets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
+	*value = "0";
 	return 0;
 }
 
 int os_get_QoSQueueStats_DroppedBytes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
+	*value = "0";
 	return 0;
 }
 
 int os_get_QoSQueueStats_QueueOccupancyPackets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
+	*value = "0";
 	return 0;
 }
 
 int os_get_QoSQueueStats_QueueOccupancyPercentage(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
+	*value = "0";
 	return 0;
 }
 
 int os_get_QoSShaper_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "enable", value);
-	*value = (*value[0] == '1') ? "1" : "0";
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enable", "1");
 	return 0;
 }
 
@@ -3695,7 +3689,7 @@ int os_set_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, ch
 
 int os_get_QoSShaper_ShapingRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "rate", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "rate", "-1");
 	return 0;
 }
 
@@ -3715,7 +3709,7 @@ int os_set_QoSShaper_ShapingRate(char *refparam, struct dmctx *ctx, void *data, 
 
 int os_get_QoSShaper_ShapingBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "burst_size", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "burst_size", "0");
 	return 0;
 }
 

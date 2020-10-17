@@ -58,7 +58,7 @@ static int set_ServicesVoiceServiceVoIPProfile_DTMFMethod(char *refparam, struct
 /*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.LocalPortMin!UCI:asterisk/sip_advanced,sip_options/rtpstart*/
 static int get_ServicesVoiceServiceVoIPProfileRTP_LocalPortMin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "sip_options", "rtpstart", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "rtpstart", "1024");
 	return 0;
 }
 
@@ -79,7 +79,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_LocalPortMin(char *refparam, s
 /*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.LocalPortMax!UCI:asterisk/sip_advanced,sip_options/rtpend*/
 static int get_ServicesVoiceServiceVoIPProfileRTP_LocalPortMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "sip_options", "rtpend", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "rtpend", "1024");
 	return 0;
 }
 
@@ -100,7 +100,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_LocalPortMax(char *refparam, s
 /*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.DSCPMark!UCI:asterisk/sip_advanced,sip_options/tos_audio*/
 static int get_ServicesVoiceServiceVoIPProfileRTP_DSCPMark(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "sip_options", "tos_audio", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "tos_audio", "0");
 	return 0;
 }
 
@@ -121,7 +121,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_DSCPMark(char *refparam, struc
 /*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.TelephoneEventPayloadType!UCI:asterisk/tel_advanced,tel_options/tel_event_pt*/
 static int get_ServicesVoiceServiceVoIPProfileRTP_TelephoneEventPayloadType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "tel_options", "tel_event_pt", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "tel_options", "tel_event_pt", "0");
 	return 0;
 }
 
@@ -174,7 +174,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType(char *refpara
 /*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.JitterBufferMaxSize!UCI:asterisk/tel_advanced,tel_options/jbmaxsize*/
 static int get_ServicesVoiceServiceVoIPProfileRTP_JitterBufferMaxSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "tel_options", "jbmaxsize", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "tel_options", "jbmaxsize", "0");
 	return 0;
 }
 
@@ -195,7 +195,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferMaxSize(char *refp
 /*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.RTCP.TxRepeatInterval!UCI:asterisk/sip_advanced,sip_options/rtcpinterval*/
 static int get_ServicesVoiceServiceVoIPProfileRTPRTCP_TxRepeatInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "sip_options", "rtcpinterval", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "rtcpinterval", "1");
 	return 0;
 }
 
@@ -216,7 +216,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTPRTCP_TxRepeatInterval(char *ref
 /*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.SRTP.Enable!UCI:asterisk/sip_service_provider,@i-1/encryption*/
 static int get_ServicesVoiceServiceVoIPProfileRTPSRTP_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "encryption", "1");
 	return 0;
 }
 

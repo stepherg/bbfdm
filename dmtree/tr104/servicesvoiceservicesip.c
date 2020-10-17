@@ -218,7 +218,7 @@ static int delObjServicesVoiceServiceSIPNetworkFQDNServer(char *refparam, struct
 /*#Device.Services.VoiceService.{i}.SIP.Client.{i}.Enable!UCI:asterisk/sip_service_provider,@i-1/enabled*/
 static int get_ServicesVoiceServiceSIPClient_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "1");
 	return 0;
 }
 
@@ -361,7 +361,7 @@ static int get_ServicesVoiceServiceSIPClientContact_Origin(char *refparam, struc
 /*#Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.Port!UCI:asterisk/sip_advanced,sip_options/bindport*/
 static int get_ServicesVoiceServiceSIPClientContact_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "sip_options", "bindport", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "bindport", "0");
 	return 0;
 }
 
@@ -463,7 +463,7 @@ static int get_ServicesVoiceServiceSIPClientContact_UserAgent(char *refparam, st
 /*#Device.Services.VoiceService.{i}.SIP.Network.{i}.Enable!UCI:asterisk/sip_service_provider,@i-1/enabled*/
 static int get_ServicesVoiceServiceSIPNetwork_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "1");
 	return 0;
 }
 
@@ -858,7 +858,7 @@ static int set_ServicesVoiceServiceSIPNetwork_RegisterExpires(char *refparam, st
 /*#Device.Services.VoiceService.{i}.SIP.Network.{i}.DSCPMark!UCI:asterisk/sip_advanced,sip_options/tos_sip*/
 static int get_ServicesVoiceServiceSIPNetwork_DSCPMark(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "sip_options", "tos_sip", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "tos_sip", "0");
 	return 0;
 }
 

@@ -96,7 +96,7 @@ static int get_PPPInterface_LastChange(char *refparam, struct dmctx *ctx, void *
 {
 	json_object *res;
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "uptime");
 	return 0;
 }
@@ -308,7 +308,7 @@ static int get_PPP_InterfaceNumberOfEntries(char *refparam, struct dmctx *ctx, v
 {
 	struct uci_section *s;
 	char *proto;
-	int nbre= 0;
+	int nbre = 0;
 
 	uci_foreach_sections("network", "interface", s) {
 		dmuci_get_value_by_section_string(s, "proto", &proto);

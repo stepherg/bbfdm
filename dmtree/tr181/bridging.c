@@ -1564,7 +1564,7 @@ static int set_BridgingBridgePort_ManagementPort(char *refparam, struct dmctx *c
 
 static int get_BridgingBridgePort_DefaultUserPriority(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "priority", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct bridge_port_args *)data)->bridge_port_sec, "priority", "0");
 	return 0;
 }
 
@@ -1699,7 +1699,7 @@ static int set_BridgingBridgePort_DSCP_Eth_Priority_Map(char *refparam, struct d
 
 static int get_BridgingBridgePort_PVID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "vid", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct bridge_port_args *)data)->bridge_port_sec, "vid", "1");
 	return 0;
 }
 

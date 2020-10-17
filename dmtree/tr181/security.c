@@ -316,9 +316,9 @@ static int get_SecurityCertificate_LastModif(char *refparam, struct dmctx *ctx, 
 {
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	struct stat b;
-	char t[ 100 ] = "";
+	char t[sizeof("AAAA-MM-JJTHH:MM:SSZ")] = "0001-01-01T00:00:00Z";
 	if (!stat(cert_profile->path, &b))
-		strftime(t, 100, "%Y-%m-%dT%H:%M:%SZ", localtime( &b.st_mtime));
+		strftime(t, sizeof(t), "%Y-%m-%dT%H:%M:%SZ", localtime(&b.st_mtime));
 	*value = dmstrdup(t);
 	return 0;
 }
@@ -360,7 +360,7 @@ static int get_SecurityCertificate_Issuer(char *refparam, struct dmctx *ctx, voi
 
 static int get_SecurityCertificate_NotBefore(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
+	*value = "0001-01-01T00:00:00Z";
 #ifdef LOPENSSL
 	struct tm not_before_time;
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
@@ -378,7 +378,7 @@ static int get_SecurityCertificate_NotBefore(char *refparam, struct dmctx *ctx, 
 
 static int get_SecurityCertificate_NotAfter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
+	*value = "0001-01-01T00:00:00Z";
 #ifdef LOPENSSL
 	struct tm not_after_time;
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;

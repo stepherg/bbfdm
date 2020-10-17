@@ -83,7 +83,7 @@ int os__get_Hosts_HostNumberOfEntries(char *refparam, struct dmctx *ctx, void *d
 	dmubus_call("router.network", "hosts", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	json_object_object_get_ex(res, "hosts", &hosts);
-	nbre_hosts = json_object_array_length(hosts);
+	nbre_hosts = (hosts) ? json_object_array_length(hosts) : 0;
 	dmasprintf(value, "%d", nbre_hosts);
 	return 0;
 }
@@ -245,19 +245,21 @@ int os__get_HostsHost_Active(char *refparam, struct dmctx *ctx, void *data, char
 /*#Device.Hosts.Host.{i}.ActiveLastChange!UBUS:router.network/hosts//hosts[@i-1].activelstch*/
 int os__get_HostsHost_ActiveLastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char local_time[32] = {0};
-	time_t t_time;
-
 	*value = "0001-01-01T00:00:00Z";
+
 	char *lastchange = dmjson_get_value((json_object *)data, 1, "activelstch");
-	t_time = atoi(lastchange);
-	if (localtime(&t_time) == NULL)
-		return -1;
+	if (lastchange && *lastchange != '\0' && atoi(lastchange) > 0) {
+		time_t t_time = atoi(lastchange);
+		if (localtime(&t_time) == NULL)
+			return -1;
 
-	if (strftime(local_time, sizeof(local_time), "%Y-%m-%dT%H:%M:%SZ", localtime(&t_time)) == 0)
-		return -1;
+		char local_time[32] = {0};
 
-	*value = dmstrdup(local_time);
+		if (strftime(local_time, sizeof(local_time), "%Y-%m-%dT%H:%M:%SZ", localtime(&t_time)) == 0)
+			return -1;
+
+		*value = dmstrdup(local_time);
+	}
 	return 0;
 }
 
@@ -268,7 +270,7 @@ int os__get_HostsHost_IPv4AddressNumberOfEntries(char *refparam, struct dmctx *c
 	size_t nbre_addr = 0;
 
 	json_object_object_get_ex((json_object *)data, "ipv4addr", &ipv4addr);
-	nbre_addr = json_object_array_length(ipv4addr);
+	nbre_addr = (ipv4addr) ? json_object_array_length(ipv4addr) : 0;
 	dmasprintf(value, "%d", nbre_addr);
 	return 0;
 }
@@ -280,7 +282,7 @@ int os__get_HostsHost_IPv6AddressNumberOfEntries(char *refparam, struct dmctx *c
 	size_t nbre_addr = 0;
 
 	json_object_object_get_ex((json_object *)data, "ipv6addr", &ipv6addr);
-	nbre_addr = json_object_array_length(ipv6addr);
+	nbre_addr = (ipv6addr) ? json_object_array_length(ipv6addr) : 0;
 	dmasprintf(value, "%d", nbre_addr);
 	return 0;
 }

@@ -37,6 +37,8 @@ static int browseServicesVoiceServiceCapabilitiesCodecInst(struct dmctx *dmctx, 
 static int get_ServicesVoiceServiceCapabilities_MaxLineCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	db_get_value_string("hw", "board", "VoicePorts", value);
+	if ((*value)[0] == '\0')
+		*value = "-1";
 	return 0;
 }
 
@@ -54,7 +56,8 @@ static int get_ServicesVoiceServiceCapabilities_MaxSessionCount(char *refparam, 
 	if (max_line && *max_line) {
 		int max_session = 2 * atoi(max_line);
 		dmasprintf(value, "%d", max_session);
-	}
+	} else
+		*value = "-1";
 
 	return 0;
 }
@@ -146,7 +149,8 @@ static int get_ServicesVoiceServiceCapabilitiesCodec_BitRate(char *refparam, str
 	if (data) {
 		struct codec_info *codec = (struct codec_info *)data;
 		dmasprintf(value, "%d", codec->bit_rate);
-	}
+	} else
+		*value = "0";
 	return 0;
 }
 

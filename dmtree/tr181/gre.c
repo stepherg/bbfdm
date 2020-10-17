@@ -272,7 +272,7 @@ static int set_GRETunnel_Alias(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_GRETunnel_KeepAliveThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "keepalive", value);
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "keepalive", "3");
 	return 0;
 }
 

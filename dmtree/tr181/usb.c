@@ -918,7 +918,7 @@ static int get_USBUSBHostsHostDevice_ProductID(char *refparam, struct dmctx *ctx
 	char *idproduct = NULL;
 	unsigned int ui_idproduct;
 
-	*value = "";
+	*value = "0";
 	int rc =  read_sysfs_usb_port(data, "idProduct", &idproduct);
 
 	if(idproduct != NULL) {

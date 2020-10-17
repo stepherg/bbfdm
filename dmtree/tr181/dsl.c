@@ -440,19 +440,20 @@ static int get_DSLLine_StandardsSupported(char *refparam, struct dmctx *ctx, voi
 /*#Device.DSL.Line.{i}.XTSE!UBUS:dsl.line.0/status//xtse*/
 static int get_DSLLine_XTSE(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *xtse,*pch, *spch, *tmpPtr, *str = "";
+	char *xtse, *pch, *spch, *tmpPtr = NULL, *str = NULL;
 
-	*value = "";
+	*value = "0000000000000000";
 	xtse = get_dsl_value_array_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "xtse");
 	if(xtse[0] == '\0')
 		return 0;
-	for (pch = strtok_r(xtse, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch))
-	{
-		if(*str == '\0')
+	for (pch = strtok_r(xtse, ",", &spch); pch; pch = strtok_r(NULL, ",", &spch)) {
+		if(!str)
 			dmasprintf(&str, "%s", pch);
 		else {
-			tmpPtr = str;
+			tmpPtr = dmstrdup(str);
+			dmfree(str);
 			dmasprintf(&str, "%s%s", tmpPtr, pch);
+			dmfree(tmpPtr);
 		}
 	}
 	*value = str;
@@ -470,19 +471,20 @@ static int get_DSLLine_StandardUsed(char *refparam, struct dmctx *ctx, void *dat
 /*#Device.DSL.Line.{i}.XTSUsed!UBUS:dsl.line.0/status//xtse_used*/
 static int get_DSLLine_XTSUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *xtse_used,*pch, *spch, *tmpPtr, *str = "";
+	char *xtse_used,*pch, *spch, *tmpPtr = NULL, *str = NULL;
 
-	*value = "";
+	*value = "0000000000000000";
 	xtse_used = get_dsl_value_array_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "xtse_used");
-	if(xtse_used[0] == '\0')
+	if (xtse_used[0] == '\0')
 		return 0;
-	for (pch = strtok_r(xtse_used, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch))
-	{
-		if(*str == '\0')
+	for (pch = strtok_r(xtse_used, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+		if(!str)
 			dmasprintf(&str, "%s", pch);
 		else {
-			tmpPtr = str;
+			tmpPtr = dmstrdup(str);
+			dmfree(str);
 			dmasprintf(&str, "%s%s", tmpPtr, pch);
+			dmfree(tmpPtr);
 		}
 	}
 	*value = str;

@@ -187,7 +187,7 @@ static int get_DeviceInfo_ProcessorNumberOfEntries(char *refparam, struct dmctx 
 
 static int get_DeviceInfo_SupportedDataModelNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmasprintf(value, "%d", sizeof(Data_Models)/sizeof(struct Supported_Data_Models));
+	dmasprintf(value, "%d", ARRAY_SIZE(Data_Models));
 	return 0;
 }
 
@@ -213,15 +213,16 @@ static int get_vcf_date(char *refparam, struct dmctx *ctx, void *data, char *ins
 {
 	DIR *dir;
 	struct dirent *d_file;
-	struct stat attr;
-	char path[280];
-	char date[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
+	char *config_name;
 
-	*value = "";
-	dmuci_get_value_by_section_string((struct uci_section *)data, "name", value);
+	*value = "0001-01-01T00:00:00Z";
+	dmuci_get_value_by_section_string((struct uci_section *)data, "name", &config_name);
 	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
 		while ((d_file = readdir (dir)) != NULL) {
-			if(strcmp(*value, d_file->d_name) == 0) {
+			if (strcmp(config_name, d_file->d_name) == 0) {
+				char date[sizeof("AAAA-MM-JJTHH:MM:SSZ")], path[128] = {0};
+				struct stat attr;
+
 				snprintf(path, sizeof(path), DEFAULT_CONFIG_DIR"%s", d_file->d_name);
 				stat(path, &attr);
 				strftime(date, sizeof(date), "%Y-%m-%dT%H:%M:%SZ", localtime(&attr.st_mtime));

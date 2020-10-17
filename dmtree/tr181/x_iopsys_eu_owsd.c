@@ -76,7 +76,7 @@ static int set_x_iopsys_eu_owsd_global_redirect(char *refparam, struct dmctx *ct
 **************************************************************************************/
 static int get_x_iopsys_eu_owsd_virtualhost_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "port", "");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "port", "0");
 	return 0;
 }
 
@@ -258,19 +258,21 @@ static int set_x_iopsys_eu_owsd_virtualhost_alias(char *refparam, struct dmctx *
 
 static int get_x_iopsys_eu_owsd_ubus_proxy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("owsd","ubusproxy","enable", value);
+	*value = dmuci_get_option_value_fallback_def("owsd","ubusproxy","enable", "1");
 	return 0;
 }
 
 static int set_x_iopsys_eu_owsd_ubus_proxy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	bool b;
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value("owsd", "ubusproxy", "enable", value);
+			string_to_bool(value, &b);
+			dmuci_set_value("owsd", "ubusproxy", "enable", b ? "1" : "0");
 			return 0;
 	}
 	return 0;

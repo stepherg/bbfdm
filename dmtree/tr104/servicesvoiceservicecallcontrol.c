@@ -456,7 +456,7 @@ static int set_ServicesVoiceServiceCallControlOutgoingMap_CLIPNoScreeningNumber(
 /*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.InterDigitTimerStd!UCI:asterisk/tel_advanced,tel_options/interdigit*/
 static int get_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "tel_options", "interdigit", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "tel_options", "interdigit", "15000");
 	return 0;
 }
 
@@ -477,7 +477,7 @@ static int set_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd(c
 /*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.CallWaitingEnable!UCI:asterisk/advanced_features,call_features/callwaiting_enabled*/
 static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_CallWaitingEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "call_features", "callwaiting_enabled", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "call_features", "callwaiting_enabled", "1");
 	return 0;
 }
 
@@ -501,7 +501,7 @@ static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CallWaitingEnab
 /*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.CallForwardUnconditionalEnable!UCI:asterisk/advanced_features,call_features/callforward_enabled*/
 static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_CallForwardUnconditionalEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "call_features", "callforward_enabled", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "call_features", "callforward_enabled", "1");
 	return 0;
 }
 
