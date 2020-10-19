@@ -14,8 +14,8 @@
 
 #include <libbbf_api/dmcommon.h>
 
-#define DOWNLOAD_UPLOAD_PROTOCOL_HTTP		"http://"
-#define DOWNLOAD_UPLOAD_PROTOCOL_FTP		"ftp://"
+#define DOWNLOAD_UPLOAD_PROTOCOL_HTTP "http://"
+#define DOWNLOAD_UPLOAD_PROTOCOL_FTP "ftp://"
 #define default_date_format "AAAA-MM-JJTHH:MM:SS.000000Z"
 #define default_date_size sizeof(default_date_format) + 1
 #define FTP_SIZE_RESPONSE "213"
@@ -74,10 +74,8 @@ enum diagnostic_type {
 char *get_diagnostics_option(char *sec_name, char *option);
 char *get_diagnostics_option_fallback_def(char *sec_name, char *option, char *default_value);
 void set_diagnostics_option(char *sec_name, char *option, char *value);
-void init_download_stats(void);
-void init_upload_stats(void);
-int extract_stats(char *dump_file, int proto, int diagnostic_type, char *protocol);
-int get_default_gateway_device( char **gw );
-int start_upload_download_diagnostic(int diagnostic_type);
+void init_diagnostics_operation(char *sec_name, char *operation_path);
+void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value);
+int start_upload_download_diagnostic(int diagnostic_type, char *proto);
 
 #endif

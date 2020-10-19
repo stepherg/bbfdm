@@ -622,16 +622,13 @@ static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, voi
 }
 
 #ifndef TRACE
-#define TRACE_TYPE 0
+#define TRACE_TYPE 2
 static inline void trace_empty_func()
 {
 }
 #if TRACE_TYPE == 2
-#define TRACE(MESSAGE,args...) do { \
-	const char *A[] = {MESSAGE}; \
-	fprintf(stderr, "TRACE: %s %s %d ",__FUNCTION__,__FILE__,__LINE__); \
-	if(sizeof(A) > 0) \
-		fprintf(stderr, *A,##args); \
+#define TRACE(MESSAGE, ...) do { \
+	fprintf(stderr, "TRACE: %s@%s:%d " MESSAGE, __FUNCTION__,__FILE__,__LINE__, ##__VA_ARGS__); \
 	fprintf(stderr, "\n"); \
 	fflush(stderr); \
 } while(0)

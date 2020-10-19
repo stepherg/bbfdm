@@ -6,6 +6,7 @@ UCI_GET_BBFDM="/sbin/uci -q -c /etc/bbfdm get"
 UCI_SET_BBFDM="/sbin/uci -q -c /etc/bbfdm set"
 UCI_ADD_BBFDM="/sbin/uci -q -c /etc/bbfdm add"
 UCI_DELETE_BBFDM="/sbin/uci -q -c /etc/bbfdm delete"
+UCI_COMMIT_BBFDM="/sbin/uci -q -c /etc/bbfdm commit"
 UCI_SHOW_BBFDM="/sbin/uci -q -c /etc/bbfdm show"
 
 traceroute_get() {
@@ -14,23 +15,24 @@ traceroute_get() {
 }
 
 traceroute_launch() {
-	local i res host ip time=0
+	local i proto device res host ip time=0
 	[ "$1" == "cwmp" ] && [ "`$UCI_GET_BBFDM dmmap_diagnostics.traceroute.DiagnosticState`" != "Requested" ] && return
 	local host=`traceroute_get dmmap_diagnostics.traceroute.Host`
 	local cnt=`traceroute_get dmmap_diagnostics.traceroute.NumberOfTries 3`
 	local dsize=`traceroute_get dmmap_diagnostics.traceroute.DataBlockSize 38`
 	local timeout=`traceroute_get dmmap_diagnostics.traceroute.Timeout 5000`
 	local maxhop=`traceroute_get dmmap_diagnostics.traceroute.MaxHops 30`
-	local proto=`traceroute_get dmmap_diagnostics.traceroute.ProtocolVersion Any`
+	local interface=`traceroute_get dmmap_diagnostics.traceroute.interface`
+	local protocol=`traceroute_get dmmap_diagnostics.traceroute.ProtocolVersion Any`
+	[ ! -z "$interface" ] && device=`ifstatus $interface | jsonfilter -e @.device` && device="-i $device" || device=""
+	if [ "$protocol" == "IPv4" ]; then proto="-4"; elif [ "$protocol" == "IPv6" ]; then proto="-6"; else proto=""; fi
 	[ "$host" = "" ] && return
 	timeout=$((timeout/1000))
 	[ "$timeout" = "0" ] && timeout = "1"
 	i=-2
 	delete_all_route_hops
 	rm -f /tmp/traceres
-	[ "$proto" = "Any" ] && traceroute -m $maxhop -w $timeout -q $cnt $host $dsize 2>&1 >/tmp/traceres
-	[ "$proto" = "IPv4" ] && traceroute -m $maxhop -w $timeout -q $cnt -4 $host $dsize 2>&1 >/tmp/traceres
-	[ "$proto" = "IPv6" ] && traceroute -m $maxhop -w $timeout -q $cnt -6 $host $dsize 2>&1 >/tmp/traceres
+	traceroute -m $maxhop -w $timeout -q $cnt $proto $device $host $dsize 2>&1 >/tmp/traceres
 	while read _ host ip time _; do
 		[ "$host" = "*" -a "$ip" = "*" ] && continue
 		let i++
@@ -48,6 +50,7 @@ traceroute_launch() {
 	[ "$1" == "cwmp" ] && $UCI_SET_BBFDM dmmap_diagnostics.traceroute.DiagnosticState=Complete
 	$UCI_SET_BBFDM dmmap_diagnostics.traceroute.NumberOfHops=$i
 	$UCI_SET_BBFDM dmmap_diagnostics.traceroute.ResponseTime=$($UCI_GET_BBFDM dmmap_diagnostics.@RouteHops[-1].time)
+	$UCI_COMMIT_BBFDM
 	[ "$1" == "cwmp" ] && event_diagnostic
 }
 
@@ -55,6 +58,7 @@ delete_all_route_hops() {
 	local j
 	for j in $($UCI_SHOW_BBFDM dmmap_diagnostics | grep "dmmap_diagnostics.@RouteHops.*=RouteHops"); do
 		$UCI_DELETE_BBFDM dmmap_diagnostics.@RouteHops[-1]
+		$UCI_COMMIT_BBFDM
 	done
 }
 
@@ -76,6 +80,7 @@ traceroute_stop() {
 	if [ -n "$pids" ]; then
 		kill -9 $pids 2>/dev/null
 		$UCI_SET_BBFDM dmmap_diagnostics.traceroute.DiagnosticState=None
+		$UCI_COMMIT_BBFDM
 	fi
 }
 

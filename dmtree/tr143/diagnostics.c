@@ -50,7 +50,10 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 
 static int get_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("ipping", "interface");
+	char *linker = get_diagnostics_option("ipping", "interface");
+	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
@@ -63,7 +66,7 @@ static int set_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, 
 			return 0;
 		case VALUESET:
 			IPPING_STOP
-			set_diagnostics_option("ipping", "interface", value);
+			set_diagnostics_interface_option(ctx, "ipping", value);
 			return 0;
 	}
 	return 0;
@@ -273,7 +276,10 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 
 static int get_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("traceroute", "interface");
+	char *linker = get_diagnostics_option("traceroute", "interface");
+	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
@@ -286,7 +292,7 @@ static int set_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *c
 			return 0;
 		case VALUESET:
 			TRACEROUTE_STOP
-			set_diagnostics_option("traceroute", "interface", value);
+			set_diagnostics_interface_option(ctx, "traceroute", value);
 			return 0;
 	}
 	return 0;
@@ -514,28 +520,14 @@ static int get_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct
 
 static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char interface[256] = {0}, *linker = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
-			if (linker) {
-				json_object *res = NULL;
-				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", linker, String}}, 1, &res);
-				if (!res) return 0;
-				char *device = dmjson_get_value(res, 1, "device");
-				if (device && *device) {
-					DOWNLOAD_DIAGNOSTIC_STOP
-					set_diagnostics_option("download", "interface", linker);
-					set_diagnostics_option("download", "device", device);
-				}
-				dmfree(linker);
-			}
+			DOWNLOAD_DIAGNOSTIC_STOP
+			set_diagnostics_interface_option(ctx, "download", value);
 			return 0;
 	}
 	return 0;
@@ -847,28 +839,14 @@ static int get_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct d
 
 static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char interface[256] = {0}, *linker = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
-			if (linker) {
-				json_object *res = NULL;
-				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", linker, String}}, 1, &res);
-				if (!res) return 0;
-				char *device = dmjson_get_value(res, 1, "device");
-				if (device && *device) {
-					UPLOAD_DIAGNOSTIC_STOP
-					set_diagnostics_option("upload", "interface", linker);
-					set_diagnostics_option("upload", "device", device);
-				}
-				dmfree(linker);
-			}
+			UPLOAD_DIAGNOSTIC_STOP
+			set_diagnostics_interface_option(ctx, "upload", value);
 			return 0;
 	}
 	return 0;
@@ -1187,7 +1165,10 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("udpechodiag", "Interface");
+	char *linker = get_diagnostics_option("udpechodiag", "interface");
+	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
@@ -1200,7 +1181,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct 
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
-			set_diagnostics_option("udpechodiag", "Interface", value);
+			set_diagnostics_interface_option(ctx, "udpechodiag", value);
 			return 0;
 	}
 	return 0;
@@ -1434,7 +1415,10 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("serverselection", "interface");
+	char *linker = get_diagnostics_option("serverselection", "interface");
+	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
@@ -1447,7 +1431,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam,
 			return 0;
 		case VALUESET:
 			SERVERSELECTION_STOP
-			set_diagnostics_option("serverselection", "interface", value);
+			set_diagnostics_interface_option(ctx, "serverselection", value);
 			return 0;
 	}
 	return 0;

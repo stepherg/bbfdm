@@ -6,6 +6,7 @@ UCI_GET_BBFDM="/sbin/uci -q -c /etc/bbfdm get"
 UCI_SET_BBFDM="/sbin/uci -q -c /etc/bbfdm set"
 UCI_ADD_BBFDM="/sbin/uci -q -c /etc/bbfdm add"
 UCI_DELETE_BBFDM="/sbin/uci -q -c /etc/bbfdm delete"
+UCI_COMMIT_BBFDM="/sbin/uci -q -c /etc/bbfdm commit"
 UCI_SHOW_BBFDM="/sbin/uci -q -c /etc/bbfdm show"
 LOG_FILE="/tmp/nslookup.log"
 
@@ -81,6 +82,7 @@ nslookup_launch() {
 	rm -f ${LOG_FILE}
 	$UCI_SET_BBFDM dmmap_diagnostics.nslookup.SuccessCount=$success_count
 	[ "$1" == "cwmp" ] && $UCI_SET_BBFDM dmmap_diagnostics.nslookup.DiagnosticState=Complete
+	$UCI_COMMIT_BBFDM
 	[ "$1" == "cwmp" ] && event_dignostic
 }
 
@@ -89,6 +91,7 @@ delete_all_results() {
 	for j in $($UCI_SHOW_BBFDM dmmap_diagnostics | grep "dmmap_diagnostics.@NSLookupResult.*=NSLookupResult"); do
 		$UCI_DELETE_BBFDM dmmap_diagnostics.@NSLookupResult[-1]
 	done
+	$UCI_COMMIT_BBFDM
 }
 
 event_dignostic() {
@@ -108,6 +111,7 @@ nslookup_stop_diagnostic() {
 	if [ -n "$pids" ]; then
 		kill -9 $pids &>/dev/null
 		$UCI_SET_BBFDM dmmap_diagnostics.nslookup.DiagnosticState=None
+		$UCI_COMMIT_BBFDM
 	fi
 }
 

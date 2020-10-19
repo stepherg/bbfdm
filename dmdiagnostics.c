@@ -10,6 +10,7 @@
  */
 
 #include <libtrace.h>
+#include "dmentry.h"
 #include "dmdiagnostics.h"
 
 int read_next;
@@ -41,12 +42,44 @@ void set_diagnostics_option(char *sec_name, char *option, char *value)
 	dmuci_set_value_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, option, value);
 }
 
-void init_download_stats(void)
+void init_diagnostics_operation(char *sec_name, char *operation_path)
+{
+	struct uci_section *section = NULL;
+
+	check_create_dmmap_package(DMMAP_DIAGNOSTIGS);
+	section = dmuci_walk_section_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
+	if (section)
+		dmuci_delete_by_section_bbfdm(section, NULL, NULL);
+
+	DMCMD("/bin/sh", 2, operation_path, "stop");
+}
+
+void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value)
+{
+	char interface[64] = {0}, *linker = NULL;
+
+	if (value[0] == 0)
+		return;
+
+	append_dot_to_string(interface, value, sizeof(interface));
+
+	if (strncmp(interface, "Device.IP.Interface.", 20) != 0)
+		return;
+
+	adm_entry_get_linker_value(ctx, interface, &linker);
+
+	if (linker && *linker) {
+		set_diagnostics_option(sec_name, "interface", linker);
+		dmfree(linker);
+	}
+}
+
+static void init_download_stats(void)
 {
 	memset(&download_stats, 0, sizeof(download_stats));
 }
 
-void init_upload_stats(void)
+static void init_upload_stats(void)
 {
 	memset(&upload_stats, 0, sizeof(upload_stats));
 }
@@ -249,34 +282,22 @@ static void set_download_stats(char *protocol)
 {
 	char buf[16] = {0};
 
-	if (strcmp(protocol, "cwmp")== 0)
-		alloc_uci_ctx_bbfdm();
-
-	set_diagnostics_option("download", "ROMtime", download_stats.romtime);
-	set_diagnostics_option("download", "BOMtime", download_stats.bomtime);
-	set_diagnostics_option("download", "EOMtime", download_stats.eomtime);
-	set_diagnostics_option("download", "TCPOpenRequestTime", download_stats.tcpopenrequesttime);
-	set_diagnostics_option("download", "TCPOpenResponseTime", download_stats.tcpopenresponsetime);
+	set_diagnostics_option("download", "ROMtime", ((download_stats.romtime)[0] != 0) ? download_stats.romtime : "0001-01-01T00:00:00.000000Z");
+	set_diagnostics_option("download", "BOMtime", ((download_stats.bomtime)[0] != 0) ? download_stats.bomtime : "0001-01-01T00:00:00.000000Z");
+	set_diagnostics_option("download", "EOMtime", ((download_stats.eomtime)[0] != 0) ? download_stats.eomtime : "0001-01-01T00:00:00.000000Z");
+	set_diagnostics_option("download", "TCPOpenRequestTime", ((download_stats.tcpopenrequesttime)[0] != 0) ? download_stats.tcpopenrequesttime : "0001-01-01T00:00:00.000000Z");
+	set_diagnostics_option("download", "TCPOpenResponseTime",((download_stats.tcpopenresponsetime)[0] != 0) ? download_stats.tcpopenresponsetime : "0001-01-01T00:00:00.000000Z");
 	snprintf(buf, sizeof(buf), "%d", download_stats.test_bytes_received);
 	set_diagnostics_option("download", "TestBytesReceived", buf);
-
-	if (strcmp(protocol, "cwmp")== 0)
-		commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
 }
 
 static void set_upload_stats(char *protocol)
 {
-	if (strcmp(protocol, "cwmp")== 0)
-		alloc_uci_ctx_bbfdm();
-
-	set_diagnostics_option("upload", "ROMtime", upload_stats.romtime);
-	set_diagnostics_option("upload", "BOMtime", upload_stats.bomtime);
-	set_diagnostics_option("upload", "EOMtime", upload_stats.eomtime);
-	set_diagnostics_option("upload", "TCPOpenRequestTime", upload_stats.tcpopenrequesttime);
-	set_diagnostics_option("upload", "TCPOpenResponseTime", upload_stats.tcpopenresponsetime);
-
-	if (strcmp(protocol, "cwmp")== 0)
-		commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
+	set_diagnostics_option("upload", "ROMtime", ((upload_stats.romtime)[0] != 0) ? upload_stats.romtime : "0001-01-01T00:00:00.000000Z");
+	set_diagnostics_option("upload", "BOMtime", ((upload_stats.bomtime)[0] != 0) ? upload_stats.bomtime : "0001-01-01T00:00:00.000000Z");
+	set_diagnostics_option("upload", "EOMtime", ((upload_stats.eomtime)[0] != 0) ? upload_stats.eomtime : "0001-01-01T00:00:00.000000Z");
+	set_diagnostics_option("upload", "TCPOpenRequestTime", ((upload_stats.tcpopenrequesttime)[0] != 0) ? upload_stats.tcpopenrequesttime : "0001-01-01T00:00:00.000000Z");
+	set_diagnostics_option("upload", "TCPOpenResponseTime", ((upload_stats.tcpopenresponsetime)[0] != 0) ? upload_stats.tcpopenresponsetime : "0001-01-01T00:00:00.000000Z");
 }
 
 static void http_upload_per_packet(libtrace_packet_t *packet)
@@ -472,7 +493,7 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 	}
 }
 
-int extract_stats(char *dump_file, int proto, int diagnostic_type, char *protocol)
+static int extract_stats(char *dump_file, int proto, int diagnostic_type, char *protocol)
 {
 	libtrace_t *trace = NULL;
 	libtrace_packet_t *packet = NULL;
@@ -536,52 +557,55 @@ int extract_stats(char *dump_file, int proto, int diagnostic_type, char *protoco
 	return 0;
 }
 
-int get_default_gateway_device(char **gw)
+static char *get_default_gateway_device(void)
 {
-    FILE *f = fopen("/proc/net/route" , "r");
+	char *device = "";
+
+    FILE *f = fopen(ROUTING_FILE, "r");
 	if (f != NULL) {
 		char line[100], *p, *c, *saveptr;
 		while(fgets(line , 100 , f)) {
 			p = strtok_r(line, " \t", &saveptr);
 			c = strtok_r(NULL, " \t", &saveptr);
-			if (p!=NULL && c!=NULL) {
-				if (strcmp(c, "00000000") == 0) {
-					dmasprintf(gw, "%s", p);
-					fclose(f);
-					return 0;
-				}
+			if (p && c && strcmp(c, "00000000") == 0) {
+				device = dmstrdup(p);
+				break;
 			}
 		}
 		fclose(f);
 	}
-    return -1;
+
+    return device;
 }
 
-int start_upload_download_diagnostic(int diagnostic_type)
+int start_upload_download_diagnostic(int diagnostic_type, char *proto)
 {
-	char *url, *interface, *size, *status;
-	int error;
+	char *url, *interface, *device, *size, *status;
 
 	if (diagnostic_type == DOWNLOAD_DIAGNOSTIC) {
 		url = get_diagnostics_option("download", "url");
-		interface = get_diagnostics_option("download", "device");
+		interface = get_diagnostics_option("download", "interface");
 	} else {
 		url = get_diagnostics_option("upload", "url");
 		size = get_diagnostics_option("upload", "TestFileLength");
-		interface = get_diagnostics_option("upload", "device");
+		interface = get_diagnostics_option("upload", "interface");
 	}
 
-	if (interface[0] == '\0') {
-		error = get_default_gateway_device(&interface);
-		if (error == -1)
-			return -1;
-	}
+	if ((url[0] == '\0') ||
+		(strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_HTTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_HTTP)) != 0 &&
+		strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_FTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_FTP)) != 0 &&
+		strstr(url,"@") != NULL))
+		return -1;
+
+	device = (interface && *interface) ? get_device(interface) : get_default_gateway_device();
+	if (device[0] == '\0')
+		return -1;
 
 	if (diagnostic_type == DOWNLOAD_DIAGNOSTIC) {
 		// Commit and Free uci_ctx_bbfdm
 		commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
 
-		dmcmd("/bin/sh", 5, DOWNLOAD_DIAGNOSTIC_PATH, "run", "usp", url, interface);
+		dmcmd("/bin/sh", 5, DOWNLOAD_DIAGNOSTIC_PATH, "run", proto, url, device);
 
 		// Allocate uci_ctx_bbfdm
 		alloc_uci_ctx_bbfdm();
@@ -591,16 +615,16 @@ int start_upload_download_diagnostic(int diagnostic_type)
 		if (status && strcmp(status, "Complete") == 0) {
 			init_download_stats();
 			if (strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_HTTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_HTTP)) == 0)
-				extract_stats(DOWNLOAD_DUMP_FILE, DOWNLOAD_DIAGNOSTIC_HTTP, DOWNLOAD_DIAGNOSTIC, "usp");
+				extract_stats(DOWNLOAD_DUMP_FILE, DOWNLOAD_DIAGNOSTIC_HTTP, DOWNLOAD_DIAGNOSTIC, proto);
 			if (strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_FTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_FTP)) == 0)
-				extract_stats(DOWNLOAD_DUMP_FILE, DOWNLOAD_DIAGNOSTIC_FTP, DOWNLOAD_DIAGNOSTIC, "usp");
+				extract_stats(DOWNLOAD_DUMP_FILE, DOWNLOAD_DIAGNOSTIC_FTP, DOWNLOAD_DIAGNOSTIC, proto);
 		} else if (status && strncmp(status, "Error_", strlen("Error_")) == 0)
 			return -1;
 	} else {
 		// Commit and Free uci_ctx_bbfdm
 		commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
 
-		dmcmd("/bin/sh", 6, UPLOAD_DIAGNOSTIC_PATH, "run", "usp", url, interface, size);
+		dmcmd("/bin/sh", 6, UPLOAD_DIAGNOSTIC_PATH, "run", proto, url, device, size);
 
 		// Allocate uci_ctx_bbfdm
 		alloc_uci_ctx_bbfdm();
@@ -610,9 +634,9 @@ int start_upload_download_diagnostic(int diagnostic_type)
 		if (status && strcmp(status, "Complete") == 0) {
 			init_upload_stats();
 			if (strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_HTTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_HTTP)) == 0)
-				extract_stats(UPLOAD_DUMP_FILE, DOWNLOAD_DIAGNOSTIC_HTTP, UPLOAD_DIAGNOSTIC, "usp");
+				extract_stats(UPLOAD_DUMP_FILE, DOWNLOAD_DIAGNOSTIC_HTTP, UPLOAD_DIAGNOSTIC, proto);
 			if (strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_FTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_FTP)) == 0)
-				extract_stats(UPLOAD_DUMP_FILE, DOWNLOAD_DIAGNOSTIC_FTP, UPLOAD_DIAGNOSTIC, "usp");
+				extract_stats(UPLOAD_DUMP_FILE, DOWNLOAD_DIAGNOSTIC_FTP, UPLOAD_DIAGNOSTIC, proto);
 		} else if (status && strncmp(status, "Error_", strlen("Error_")) == 0)
 			return -1;
 	}

@@ -4,6 +4,7 @@
 
 UCI_GET_BBFDM="/sbin/uci -q -c /etc/bbfdm get"
 UCI_SET_BBFDM="/sbin/uci -q -c /etc/bbfdm set"
+UCI_COMMIT_BBFDM="/sbin/uci -q -c /etc/bbfdm commit"
 
 udpecho_get() {
 	local val=`$UCI_GET_BBFDM $1`
@@ -11,15 +12,18 @@ udpecho_get() {
 }
 
 udpecho_launch() {
-	local i res ba stc times sc1 success_count failure_count min_time avg_time max_time avg_time_sum min max micros
+	local i proto device res ba stc times sc1 success_count failure_count min_time avg_time max_time avg_time_sum min max micros
 	[ "$1" == "cwmp" ] && [ "`$UCI_GET_BBFDM dmmap_diagnostics.udpechodiag.DiagnosticState`" != "Requested" ] && return
 	local host=`udpecho_get dmmap_diagnostics.udpechodiag.Host`
 	local port=`udpecho_get dmmap_diagnostics.udpechodiag.port`
 	local cnt=`udpecho_get dmmap_diagnostics.udpechodiag.NumberOfRepetitions 1`
 	local dsize=`udpecho_get dmmap_diagnostics.udpechodiag.DataBlockSize 24`
 	local dscp=`udpecho_get dmmap_diagnostics.udpechodiag.DSCP 0`
-	local proto=`udpecho_get dmmap_diagnostics.udpechodiag.ProtocolVersion Any`
+	local interface=`udpecho_get dmmap_diagnostics.udpechodiag.interface`
+	local protocol=`udpecho_get dmmap_diagnostics.udpechodiag.ProtocolVersion Any`
 	local inter_time=`udpecho_get dmmap_diagnostics.udpechodiag.InterTransmissionTime 1000`
+	[ ! -z "$interface" ] && device=`ifstatus $interface | jsonfilter -e @.device` && device="-e $device" || device=""
+	if [ "$protocol" == "IPv4" ]; then proto="-4"; elif [ "$protocol" == "IPv6" ]; then proto="-6"; else proto=""; fi
 	local tos=$((dscp<<2))
 	inter_time=$((inter_time/1000))
 	[ "$inter_time" = "0" ] && inter_time="1"
@@ -34,13 +38,11 @@ udpecho_launch() {
 
 	while [ $i -lt $cnt ]; do
 		let i++
-		[ "$proto" = "Any" ] && res=$(nping -c 1 --tos $tos --udp --dest-port $port --data-length $dsize $host 2>&1)
-		[ "$proto" = "IPv4" ] && res=$(nping -4 -c 1 --tos $tos --udp --dest-port $port --data-length $dsize $host 2>&1)
-		[ "$proto" = "IPv6" ] && res=$(nping -6 -c 1 --tos $tos --udp --dest-port $port --data-length $dsize $host 2>&1)
+		res=$(nping $proto -c 1 --tos $tos --udp --dest-port $port --data-length $dsize $device $host 2>&1)
 		ba=`echo "$res" | grep "RCVD"`
-		[ -z "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.udpechodiag.DiagnosticState=Error_CannotResolveHostName; return; }
+		[ -z "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.udpechodiag.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBFDM; return; }
 		stc=`echo "$res" | grep "RCVD" | grep "unreachable"`
-		[ -n "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.udpechodiag.DiagnosticState=Error_Other; return; }
+		[ -n "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.udpechodiag.DiagnosticState=Error_Other; $UCI_COMMIT_BBFDM; return; }
 		times=`echo "$res" | grep "rtt"`
 		[ -z "$times" ] && continue
 		sc1=`echo "$res" | grep "Rcvd" | awk -F': ' '{print $3}' | awk -F'(' '{ print $1 }'`
@@ -70,6 +72,7 @@ udpecho_launch() {
 	$UCI_SET_BBFDM dmmap_diagnostics.udpechodiag.AverageResponseTime=$avg_time
 	$UCI_SET_BBFDM dmmap_diagnostics.udpechodiag.MinimumResponseTime=$min_time
 	$UCI_SET_BBFDM dmmap_diagnostics.udpechodiag.MaximumResponseTime=$max_time
+	$UCI_COMMIT_BBFDM
 	[ "$1" == "cwmp" ] && event_dignostic
 }
 
@@ -89,6 +92,7 @@ udpecho_stop_diagnostic() {
 	if [ -n "$pids" ]; then
 		kill -9 $pids &>/dev/null
 		$UCI_SET_BBFDM dmmap_diagnostics.udpechodiag.DiagnosticState=None
+		$UCI_COMMIT_BBFDM
 	fi
 }
 

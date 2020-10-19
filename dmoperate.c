@@ -325,6 +325,8 @@ static opr_ret_t ip_diagnostics_ipping(struct dmctx *dmctx, char *path, json_obj
 {
 	struct ipping_diagnostics ipping = {0};
 
+	init_diagnostics_operation("ipping", IPPING_PATH);
+
 	ipping.host = dmjson_get_value(input, 1, "Host");
 	if (ipping.host[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
@@ -336,7 +338,7 @@ static opr_ret_t ip_diagnostics_ipping(struct dmctx *dmctx, char *path, json_obj
 	ipping.dscp = dmjson_get_value(input, 1, "DSCP");
 
 	set_diagnostics_option("ipping", "Host", ipping.host);
-	set_diagnostics_option("ipping", "interface", ipping.interface);
+	set_diagnostics_interface_option(dmctx, "ipping", ipping.interface);
 	set_diagnostics_option("ipping", "ProtocolVersion", ipping.proto);
 	set_diagnostics_option("ipping", "NumberOfRepetitions", ipping.nbofrepetition);
 	set_diagnostics_option("ipping", "Timeout", ipping.timeout);
@@ -379,6 +381,8 @@ static opr_ret_t ip_diagnostics_traceroute(struct dmctx *dmctx, char *path, json
 	char *host, *host_address, *errorcode, *rttimes;
 	int i = 1;
 
+	init_diagnostics_operation("traceroute", TRACEROUTE_PATH);
+
 	traceroute.host = dmjson_get_value(input, 1, "Host");
 	if (traceroute.host[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
@@ -391,7 +395,7 @@ static opr_ret_t ip_diagnostics_traceroute(struct dmctx *dmctx, char *path, json
 	traceroute.maxhops = dmjson_get_value(input, 1, "MaxHopCount");
 
 	set_diagnostics_option("traceroute", "Host", traceroute.host);
-	set_diagnostics_option("traceroute", "interface", traceroute.interface);
+	set_diagnostics_interface_option(dmctx, "traceroute", traceroute.interface);
 	set_diagnostics_option("traceroute", "ProtocolVersion", traceroute.proto);
 	set_diagnostics_option("traceroute", "NumberOfTries", traceroute.nboftries);
 	set_diagnostics_option("traceroute", "Timeout", traceroute.timeout);
@@ -434,6 +438,8 @@ static opr_ret_t ip_diagnostics_download(struct dmctx *dmctx, char *path, json_o
 {
 	struct download_diagnostics download = {0};
 
+	init_diagnostics_operation("download", DOWNLOAD_DIAGNOSTIC_PATH);
+
 	download.download_url = dmjson_get_value(input, 1, "DownloadURL");
 	if (download.download_url[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
@@ -445,14 +451,14 @@ static opr_ret_t ip_diagnostics_download(struct dmctx *dmctx, char *path, json_o
 	download.enable_per_connection_results = dmjson_get_value(input, 1, "EnablePerConnectionResults");
 
 	set_diagnostics_option("download", "url", download.download_url);
-	set_diagnostics_option("download", "device", download.interface);
+	set_diagnostics_interface_option(dmctx, "download", download.interface);
 	set_diagnostics_option("download", "DSCP", download.dscp);
 	set_diagnostics_option("download", "ethernetpriority", download.ethernet_priority);
 	set_diagnostics_option("download", "ProtocolVersion", download.proto);
 	set_diagnostics_option("download", "NumberOfConnections", download.num_of_connections);
 	set_diagnostics_option("download", "EnablePerConnection", download.enable_per_connection_results);
 
-	if (start_upload_download_diagnostic(DOWNLOAD_DIAGNOSTIC) == -1)
+	if (start_upload_download_diagnostic(DOWNLOAD_DIAGNOSTIC, "usp") == -1)
 		return FAIL;
 
 	download.romtime = get_diagnostics_option("download", "ROMtime");
@@ -465,7 +471,7 @@ static opr_ret_t ip_diagnostics_download(struct dmctx *dmctx, char *path, json_o
 	download.total_bytes_received_under_full_loading = get_diagnostics_option("download", "TotalBytesReceived");
 	download.total_bytes_sent_under_full_loading = get_diagnostics_option("download", "TotalBytesSent");
 	download.period_of_full_loading = get_diagnostics_option("download", "PeriodOfFullLoading");
-	download.tcp_open_request_time = get_diagnostics_option("download", "TCPOpenRequestTimes");
+	download.tcp_open_request_time = get_diagnostics_option("download", "TCPOpenRequestTime");
 	download.tcp_open_response_time = get_diagnostics_option("download", "TCPOpenResponseTime");
 
 	add_list_paramameter(dmctx, dmstrdup("ROMTime"), download.romtime, DMT_TYPE[DMT_TIME], NULL, 0);
@@ -488,6 +494,8 @@ static opr_ret_t ip_diagnostics_upload(struct dmctx *dmctx, char *path, json_obj
 {
 	struct upload_diagnostics upload = {0};
 
+	init_diagnostics_operation("upload", UPLOAD_DIAGNOSTIC_PATH);
+
 	upload.upload_url = dmjson_get_value(input, 1, "UploadURL");
 	if (upload.upload_url[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
@@ -503,14 +511,14 @@ static opr_ret_t ip_diagnostics_upload(struct dmctx *dmctx, char *path, json_obj
 
 	set_diagnostics_option("upload", "url", upload.upload_url);
 	set_diagnostics_option("upload", "TestFileLength", upload.test_file_length);
-	set_diagnostics_option("upload", "device", upload.interface);
+	set_diagnostics_interface_option(dmctx, "upload", upload.interface);
 	set_diagnostics_option("upload", "DSCP", upload.dscp);
 	set_diagnostics_option("upload", "ethernetpriority", upload.ethernet_priority);
 	set_diagnostics_option("upload", "ProtocolVersion", upload.proto);
 	set_diagnostics_option("upload", "NumberOfConnections", upload.num_of_connections);
 	set_diagnostics_option("upload", "EnablePerConnection", upload.enable_per_connection_results);
 
-	if (start_upload_download_diagnostic(UPLOAD_DIAGNOSTIC) == -1)
+	if (start_upload_download_diagnostic(UPLOAD_DIAGNOSTIC, "usp") == -1)
 		return FAIL;
 
 	upload.romtime = get_diagnostics_option("upload", "ROMtime");
@@ -523,7 +531,7 @@ static opr_ret_t ip_diagnostics_upload(struct dmctx *dmctx, char *path, json_obj
 	upload.total_bytes_received_under_full_loading = get_diagnostics_option("upload", "TotalBytesReceived");
 	upload.total_bytes_sent_under_full_loading = get_diagnostics_option("upload", "TotalBytesSent");
 	upload.period_of_full_loading = get_diagnostics_option("upload", "PeriodOfFullLoading");
-	upload.tcp_open_request_time = get_diagnostics_option("upload", "TCPOpenRequestTimes");
+	upload.tcp_open_request_time = get_diagnostics_option("upload", "TCPOpenRequestTime");
 	upload.tcp_open_response_time = get_diagnostics_option("upload", "TCPOpenResponseTime");
 
 	add_list_paramameter(dmctx, dmstrdup("ROMTime"), upload.romtime, DMT_TYPE[DMT_TIME], NULL, 0);
@@ -546,9 +554,12 @@ static opr_ret_t ip_diagnostics_udpecho(struct dmctx *dmctx, char *path, json_ob
 {
 	struct udpecho_diagnostics udpecho = {0};
 
+	init_diagnostics_operation("udpechodiag", UDPECHO_PATH);
+
 	udpecho.host = dmjson_get_value(input, 1, "Host");
 	if (udpecho.host[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
+
 	udpecho.port = dmjson_get_value(input, 1, "Port");
 	if (udpecho.port[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
@@ -563,7 +574,7 @@ static opr_ret_t ip_diagnostics_udpecho(struct dmctx *dmctx, char *path, json_ob
 
 	set_diagnostics_option("udpechodiag", "Host", udpecho.host);
 	set_diagnostics_option("udpechodiag", "port", udpecho.port);
-	set_diagnostics_option("udpechodiag", "interface", udpecho.interface);
+	set_diagnostics_interface_option(dmctx, "udpechodiag", udpecho.interface);
 	set_diagnostics_option("udpechodiag", "ProtocolVersion", udpecho.proto);
 	set_diagnostics_option("udpechodiag", "NumberOfRepetitions", udpecho.nbofrepetition);
 	set_diagnostics_option("udpechodiag", "Timeout", udpecho.timeout);
@@ -598,6 +609,8 @@ static opr_ret_t ip_diagnostics_serverselection(struct dmctx *dmctx, char *path,
 {
 	struct serverselection_diagnostics serverselection = {0};
 
+	init_diagnostics_operation("serverselection", SERVERSELECTION_PATH);
+
 	serverselection.hostlist = dmjson_get_value(input, 1, "HostList");
 	if (serverselection.hostlist[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
@@ -613,7 +626,7 @@ static opr_ret_t ip_diagnostics_serverselection(struct dmctx *dmctx, char *path,
 	serverselection.timeout = dmjson_get_value(input, 1, "Timeout");
 
 	set_diagnostics_option("serverselection", "HostList", serverselection.hostlist);
-	set_diagnostics_option("serverselection", "interface", serverselection.interface);
+	set_diagnostics_interface_option(dmctx, "serverselection", serverselection.interface);
 	set_diagnostics_option("serverselection", "ProtocolVersion", serverselection.protocol_version);
 	set_diagnostics_option("serverselection", "NumberOfRepetitions", serverselection.nbofrepetition);
 	set_diagnostics_option("serverselection", "port", serverselection.port);
@@ -648,6 +661,8 @@ static opr_ret_t ip_diagnostics_nslookup(struct dmctx *dmctx, char *path, json_o
 	char *status, *answertype, *hostname, *ipaddress, *dnsserverip, *responsetime;
 	int i = 1;
 
+	init_diagnostics_operation("nslookup", NSLOOKUP_PATH);
+
 	nslookup.hostname = dmjson_get_value(input, 1, "HostName");
 	if (nslookup.hostname[0] == '\0')
 		return UBUS_INVALID_ARGUMENTS;
@@ -657,7 +672,7 @@ static opr_ret_t ip_diagnostics_nslookup(struct dmctx *dmctx, char *path, json_o
 	nslookup.nbofrepetition = dmjson_get_value(input, 1, "NumberOfRepetitions");
 
 	set_diagnostics_option("nslookup", "HostName", nslookup.hostname);
-	set_diagnostics_option("nslookup", "interface", nslookup.interface);
+	set_diagnostics_interface_option(dmctx, "nslookup", nslookup.interface);
 	set_diagnostics_option("nslookup", "DNSServer", nslookup.dnsserver);
 	set_diagnostics_option("nslookup", "Timeout", nslookup.timeout);
 	set_diagnostics_option("nslookup", "NumberOfRepetitions", nslookup.nbofrepetition);

@@ -46,7 +46,7 @@ void apply_end_session()
 	}
 }
 
-void bbf_set_end_session_flag (struct dmctx *ctx, unsigned int flag)
+void bbf_set_end_session_flag(struct dmctx *ctx, unsigned int flag)
 {
 	ctx->end_session_flag |= flag;
 }

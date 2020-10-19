@@ -220,7 +220,7 @@ static int get_vcf_date(char *refparam, struct dmctx *ctx, void *data, char *ins
 	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
 		while ((d_file = readdir (dir)) != NULL) {
 			if (strcmp(config_name, d_file->d_name) == 0) {
-				char date[sizeof("AAAA-MM-JJTHH:MM:SSZ")], path[128] = {0};
+				char date[sizeof("AAAA-MM-JJTHH:MM:SSZ")], path[280] = {0};
 				struct stat attr;
 
 				snprintf(path, sizeof(path), DEFAULT_CONFIG_DIR"%s", d_file->d_name);
