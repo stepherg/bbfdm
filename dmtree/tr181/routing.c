@@ -160,7 +160,7 @@ static int get_forwarding_last_inst()
 	return max;
 }
 
-static char *forwarding_update_instance_alias_bbfdm(int action, char **last_inst, void *argv[])
+static char *forwarding_update_instance_alias_bbfdm(int action, char **last_inst, char **max_inst, void *argv[])
 {
 	char *instance, *alias;
 	char buf[64] = {0};
@@ -176,13 +176,14 @@ static char *forwarding_update_instance_alias_bbfdm(int action, char **last_inst
 			int m = get_forwarding_last_inst();
 			snprintf(buf, sizeof(buf), "%d", m+1);
 			*find_max = false;
-		} else if (last_inst == NULL) {
+		} else if (max_inst == NULL) {
 			snprintf(buf, sizeof(buf), "%d", 1);
 		} else {
-			snprintf(buf, sizeof(buf), "%d", atoi(*last_inst)+1);
+			snprintf(buf, sizeof(buf), "%d", atoi(*max_inst)+1);
 		}
 		instance = dmuci_set_value_by_section_bbfdm(s, inst_opt, buf);
 	}
+	*max_inst = instance;
 	*last_inst = instance;
 	if (action == INSTANCE_MODE_ALIAS) {
 		dmuci_get_value_by_section_string(s, alias_opt, &alias);
@@ -220,7 +221,7 @@ static int get_forwarding6_last_inst()
 	return max;
 }
 
-static char *forwarding6_update_instance_alias_bbfdm(int action, char **last_inst, void *argv[])
+static char *forwarding6_update_instance_alias_bbfdm(int action, char **last_inst, char **max_inst, void *argv[])
 {
 	char *instance, *alias;
 	char buf[64] = {0};
@@ -236,13 +237,14 @@ static char *forwarding6_update_instance_alias_bbfdm(int action, char **last_ins
 			int m = get_forwarding6_last_inst();
 			snprintf(buf, sizeof(buf), "%d", m+1);
 			*find_max = false;
-		} else if (last_inst == NULL) {
+		} else if (max_inst == NULL) {
 			snprintf(buf, sizeof(buf), "%d", 1);
 		} else {
-			snprintf(buf, sizeof(buf), "%d", atoi(*last_inst)+1);
+			snprintf(buf, sizeof(buf), "%d", atoi(*max_inst)+1);
 		}
 		instance = dmuci_set_value_by_section_bbfdm(s, inst_opt, buf);
 	}
+	*max_inst = instance;
 	*last_inst = instance;
 	if (action == INSTANCE_MODE_ALIAS) {
 		dmuci_get_value_by_section_string(s, alias_opt, &alias);

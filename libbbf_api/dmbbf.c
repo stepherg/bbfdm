@@ -586,10 +586,10 @@ static int rootcmp(char *inparam, char *rootobj)
 /***************************
  * update instance & alias
  ***************************/
-char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **last_inst, char * (*up_instance)(int action, char **last_inst, void *argv[]), int argc, ...)
+char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...)
 {
 	va_list arg;
-	char *instance;
+	char *instance, *last_inst = NULL;;
 	int i = 0;
 	unsigned int action, pos = instance_ranck - 1;
 	void *argv[argc+1];
@@ -610,19 +610,20 @@ char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **last_
 		action = INSTANCE_UPDATE_NUMBER;
 	}
 
-	instance = up_instance(action, last_inst, argv);
-	if (*last_inst)
-		ctx->inst_buf[pos] = dmstrdup(*last_inst);
+	instance = up_instance(action, &last_inst, max_inst, argv);
+	if (last_inst)
+		ctx->inst_buf[pos] = dmstrdup(last_inst);
 
 	return instance;
 }
 
-char *update_instance(char *last_inst, int argc, ...)
+char *update_instance(char *max_inst, int argc, ...)
 {
 	va_list arg;
 	char *instance;
 	int i = 0;
 	void *argv[argc+1];
+	char *last_inst;
 
 	va_start(arg, argc);
 	for (i = 0; i < argc; i++) {
@@ -631,7 +632,7 @@ char *update_instance(char *last_inst, int argc, ...)
 	argv[argc] = NULL;
 	va_end(arg);
 
-	instance = update_instance_alias(0, &last_inst, argv);
+	instance = update_instance_alias(0, &last_inst, &max_inst, argv);
 
 	return instance;
 }
@@ -656,7 +657,7 @@ static int get_max_instance(char *dmmap_package, char *section_type, char *inst_
 	return max;
 }
 
-char *update_instance_alias(int action, char **max_inst, void *argv[])
+char *update_instance_alias(int action, char **last_inst, char **max_inst, void *argv[])
 {
 	char *instance, *alias;
 	char buf[64] = {0};
@@ -683,6 +684,7 @@ char *update_instance_alias(int action, char **max_inst, void *argv[])
 	} else {
 		dmasprintf(max_inst, "%d", max_instance);
 	}
+	*last_inst = instance;
 
 	if (action == INSTANCE_MODE_ALIAS) {
 		dmuci_get_value_by_section_string(s, alias_opt, &alias);
@@ -696,18 +698,20 @@ char *update_instance_alias(int action, char **max_inst, void *argv[])
 	return instance;
 }
 
-char *update_instance_without_section(int action, char **last_inst, void *argv[])
+char *update_instance_without_section(int action, char **last_inst, char **max_inst, void *argv[])
 {
 	char *instance, buf[64] = {0};
 	int instnbr = (int)(long)argv[0];
 
+	snprintf(buf, sizeof(buf), "%d", instnbr);
+	instance = dmstrdup(buf);
+	*last_inst = instance;
+
 	if (action == INSTANCE_MODE_ALIAS) {
 		snprintf(buf, sizeof(buf), "[cpe-%d]", instnbr);
 		instance = dmstrdup(buf);
-	} else {
-		snprintf(buf, sizeof(buf), "%d", instnbr);
-		instance = dmstrdup(buf);
 	}
+
 	return instance;
 }
 
@@ -987,7 +991,7 @@ int update_param_instance_alias(struct dmctx *ctx, char *param, char **new_param
 			i++;
 		} else if (pch[0]== '[') {
 			dmstrappendchr(p, dm_delim);
-			dmstrappendstr(p, ctx->inst_buf[i]);
+			dmstrappendstr(p, (ctx->inst_buf[i]) ? ctx->inst_buf[i] : "1");
 			i++;
 		} else {
 			if (j > 0) {
