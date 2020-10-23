@@ -195,7 +195,7 @@ static int browseDHCPv6ServerPoolClientInst(struct dmctx *dmctx, DMNODE *parent_
 		if (!jobj) break;
 		init_dhcpv6_client_args(&curr_dhcp_client_args, jobj, NULL, i);
 		i++;
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, i);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, i);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcp_client_args, inst) == DM_STOP)
 			break;
 	}
@@ -249,7 +249,7 @@ static int browseDHCPv6ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 		browse_args.option = "section_name";
 		browse_args.value = section_name(curr_dhcp_args->dhcp_sec);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
 				  dmmap_sect, "bbf_dhcpv6_servpool_option_instance", "bbf_dhcpv6_servpool_option_alias", "dmmap_dhcpv6", "servpool_option",
 				  check_browse_section, (void *)&browse_args);
 

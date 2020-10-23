@@ -1205,7 +1205,7 @@ int get_mcastp_interface_no_of_entries(char *refparam, struct dmctx *ctx, void *
 int get_mcastp_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *f_sec;
-	char *f_inst, *f_enable;
+	char *f_inst, *f_enable = NULL;
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_filter",
 			"section_name", section_name((struct uci_section *)data), f_sec) {
 		dmuci_get_value_by_section_string(f_sec, "filter_instance", &f_inst);
@@ -1215,7 +1215,7 @@ int get_mcastp_filter_enable(char *refparam, struct dmctx *ctx, void *data, char
 		}
 	}
 
-	if (strcmp(f_enable, "1") == 0) {
+	if (f_enable && strcmp(f_enable, "1") == 0) {
 		*value = "true";
 	} else {
 		*value = "false";
@@ -1256,21 +1256,15 @@ int set_mcastp_filter_enable(char *refparam, struct dmctx *ctx, void *data, char
 int get_mcastp_filter_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *d_sec;
-	char *f_inst, *ip_addr;
+	char *f_inst;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_filter",
 			"section_name", section_name((struct uci_section *)data), d_sec) {
 		dmuci_get_value_by_section_string(d_sec, "filter_instance", &f_inst);
 		if (strcmp(instance, f_inst) == 0) {
-			dmuci_get_value_by_section_string(d_sec, "ipaddr", &ip_addr);
+			dmuci_get_value_by_section_string(d_sec, "ipaddr", value);
 			break;
 		}
-	}
-
-	if (ip_addr[0] == '\0') {
-		*value = "";
-	} else {
-		*value = dmstrdup(ip_addr);
 	}
 
 	return 0;
@@ -1971,7 +1965,7 @@ static int set_igmpp_interface_upstream(char *refparam, struct dmctx *ctx, void 
 int get_mcastp_interface_upstream(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *d_sec;
-	char *f_inst, *up;
+	char *f_inst, *up = NULL;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface",
 			"section_name", section_name((struct uci_section *)data), d_sec) {
@@ -1982,14 +1976,14 @@ int get_mcastp_interface_upstream(char *refparam, struct dmctx *ctx, void *data,
 		}
 	}
 
-	*value = (strcmp(up, "1") == 0) ? "true" : "false";
+	*value = (up && strcmp(up, "1") == 0) ? "true" : "false";
 	return 0;
 }
 
 int get_mcastp_iface_snoop_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *d_sec;
-	char *f_inst, *val;
+	char *f_inst, *val = NULL;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface",
 			"section_name", section_name((struct uci_section *)data), d_sec) {
@@ -2000,9 +1994,9 @@ int get_mcastp_iface_snoop_mode(char *refparam, struct dmctx *ctx, void *data, c
 		}
 	}
 
-	if (strcmp(val, "1") == 0)
+	if (val && strcmp(val, "1") == 0)
 		*value = "Standard";
-	else if (strcmp(val, "2") == 0)
+	else if (val && strcmp(val, "2") == 0)
 		*value = "Blocking";
 	else
 		*value = "Disabled";
