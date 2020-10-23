@@ -422,9 +422,21 @@ int dmuci_del_list_value(char *package, char *section, char *option, char *value
 char *dmuci_add_section(char *package, char *stype, struct uci_section **s, char **value)
 {
 	struct uci_ptr ptr = {0};
-	char *val = "";
+	char *fname, *val = "";
 
 	*s = NULL;
+
+	dmasprintf(&fname, "%s/%s", uci_ctx->confdir, package);
+	if (access(fname, F_OK ) == -1 ) {
+		FILE *fptr = fopen(fname, "w");
+		dmfree(fname);
+		if (fptr)
+			fclose(fptr);
+		else
+			return val;
+	} else {
+		dmfree(fname);
+	}
 
 	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, NULL, NULL, NULL) == 0
 		&& uci_add_section(uci_ctx, ptr.p, stype, s) == UCI_OK)

@@ -1229,7 +1229,6 @@ void dm_execute_cli_shell(int argc, char** argv, unsigned int dmtype, unsigned i
 	output = atoi(argv[2]);
 	cmd = argv[3];
 
-	check_create_dmmap_package(DMMAP);
 	/* GET NAME */
 	if (strcmp(cmd, "get_name") == 0) {
 		if (argc < 6) goto invalid_arguments;
@@ -1551,7 +1550,6 @@ int dmentry_cli(int argc, char *argv[], unsigned int dmtype, unsigned int amd_ve
 		return -1;
 	}
 
-	check_create_dmmap_package(DMMAP);
 	dm_ctx_init(&cli_dmctx, dmtype, amd_version, instance_mode);
 	if (strcmp(argv[2], "get_value") == 0) {
 		char *param = "";
