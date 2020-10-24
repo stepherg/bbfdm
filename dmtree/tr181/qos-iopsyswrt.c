@@ -609,7 +609,7 @@ int os_get_QoS_QueueNumberOfEntries(char *refparam, struct dmctx *ctx, void *dat
 
 int os_get_QoS_QueueStatsNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = "0";
 	return 0;
 }
 
@@ -853,6 +853,7 @@ int os_set_QoSClassification_AllInterfaces(char *refparam, struct dmctx *ctx, vo
 	return 0;
 }
 #endif
+
 int os_get_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section  *dmmap_section = NULL;
@@ -2036,6 +2037,7 @@ int os_set_QoSClassification_TCPACKExclude(char *refparam, struct dmctx *ctx, vo
 	return 0;
 }
 #endif
+
 int os_get_QoSClassification_IPLengthMin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "ip_len_min", value);
@@ -2872,8 +2874,7 @@ int os_set_QoSFlow_InnerEthernetPriorityMark(char *refparam, struct dmctx *ctx, 
 
 int os_get_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "enable", value);
-	*value = (*value[0] == '1') ? "1" : "0";
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enable", "1");
 	return 0;
 }
 
@@ -3169,8 +3170,7 @@ int os_get_QoSPolicer_NonConformingCountedBytes(char *refparam, struct dmctx *ct
 
 int os_get_QoSQueue_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "enable", value);
-	*value = (*value[0] == '1') ? "1" : "0";
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enable", "1");
 	return 0;
 }
 
@@ -3487,7 +3487,7 @@ int os_set_QoSQueue_ShapingBurstSize(char *refparam, struct dmctx *ctx, void *da
 
 int os_get_QoSQueueStats_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
+	*value = "1";
 	return 0;
 }
 
@@ -3505,13 +3505,13 @@ int os_set_QoSQueueStats_Enable(char *refparam, struct dmctx *ctx, void *data, c
 
 int os_get_QoSQueueStats_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
+	*value = "";
 	return 0;
 }
 
 int os_get_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
+	*value = "";
 	return 0;
 }
 
@@ -3529,7 +3529,7 @@ int os_set_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data, ch
 
 int os_get_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
+	*value = "";
 	return 0;
 }
 
