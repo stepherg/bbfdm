@@ -1573,13 +1573,8 @@ int os_get_QoSClassification_SourceVendorClassID(char *refparam, struct dmctx *c
 
 int os_set_QoSClassification_SourceVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *src_vendor_class_id = NULL;
-	struct uci_section *dmmap_section = NULL;
-
 	switch (action)	{
 	case VALUECHECK:
-		if (value[0] == '\0')
-			break;
 		if (dm_validate_string(value, -1, 255, NULL, 0, NULL, 0))
 			return FAULT_9007;
 		break;
@@ -1655,13 +1650,8 @@ int os_get_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx
 
 int os_set_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *dst_vendor_class_id = NULL;
-	struct uci_section *dmmap_section = NULL;
-
 	switch (action)	{
 	case VALUECHECK:
-		if (value[0] == '\0')
-			break;
 		if (dm_validate_string(value, -1, 255, NULL, 0, NULL, 0))
 			return FAULT_9007;
 		break;
@@ -1737,13 +1727,8 @@ int os_get_QoSClassification_SourceClientID(char *refparam, struct dmctx *ctx, v
 
 int os_set_QoSClassification_SourceClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *src_client_id = NULL;
-	struct uci_section *dmmap_section = NULL;
-
 	switch (action)	{
 		case VALUECHECK:
-			if (value[0] == '\0')
-				break;
 			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
 				return FAULT_9007;
 			break;
@@ -1783,13 +1768,8 @@ int os_get_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx, voi
 
 int os_set_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *dst_client_id = NULL;
-	struct uci_section *dmmap_section = NULL;
-
 	switch (action)	{
 		case VALUECHECK:
-			if (value[0] == '\0')
-				break;
 			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
 				return FAULT_9007;
 			break;
@@ -1829,13 +1809,8 @@ int os_get_QoSClassification_SourceUserClassID(char *refparam, struct dmctx *ctx
 
 int os_set_QoSClassification_SourceUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *src_user_class_id = NULL;
-	struct uci_section *dmmap_section = NULL;
-
 	switch (action)	{
 	case VALUECHECK:
-		if (value[0] == '\0')
-			break;
 		if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
@@ -1875,13 +1850,8 @@ int os_get_QoSClassification_DestUserClassID(char *refparam, struct dmctx *ctx, 
 
 int os_set_QoSClassification_DestUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *dst_user_class_id = NULL;
-	struct uci_section *dmmap_section = NULL;
-
 	switch (action)	{
 	case VALUECHECK:
-		if (value[0] == '\0')
-			break;
 		if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
@@ -1894,7 +1864,7 @@ int os_set_QoSClassification_DestUserClassID(char *refparam, struct dmctx *ctx, 
 }
 
 #if 0
-int os_get_QoSClassification_DestUserClassIDExclude(char *refparam, struct dmctdstctx, void *data, char *instance, char **value)
+int os_get_QoSClassification_DestUserClassIDExclude(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
 	return 0;
