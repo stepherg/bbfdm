@@ -760,6 +760,7 @@ def generatejsonfromobj(pobj, pdir):
 		pass
 
 	removetmpfiles()
+	return dmfp.name
 
 
 ### main ###
@@ -849,9 +850,6 @@ if objstart == None:
 	print "Wrong Object Name! %s" % Root
 	exit(1)
 
-generatejsonfromobj(objstart, gendir)
+filename = generatejsonfromobj(objstart, gendir)
 
-if (os.path.isdir(gendir)):
-	print "Json file generated under \"./%s\"" % gendir
-else:
-	print "No json file generated!"
+print(filename)
