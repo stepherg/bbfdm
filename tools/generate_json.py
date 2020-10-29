@@ -597,8 +597,8 @@ def printusage():
 	print "Examples:"
 	print "  - " + sys.argv[0] + " tr-181-2-13-0-cwmp-full.xml tr-181-2-13-0-usp-full.xml Device."
 	print "    ==> Generate the json file of the sub tree Device. in tr181.json"
-	print "  - " + sys.argv[0] + " tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml VoiceService."
-	print "    ==> Generate the json file of the sub tree VoiceService. in tr104.json"
+	print "  - " + sys.argv[0] + " tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService."
+	print "    ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json"
 	print "  - " + sys.argv[0] + " tr-106-1-2-0-full.xml Device."
 	print "    ==> Generate the json file of the sub tree Device. in tr106.json"
 	print ""
@@ -833,17 +833,18 @@ if "tr-181" in sys.argv[1] or "tr-104" in sys.argv[1]:
 		print "Wrong %s XML Data model format!" % sys.argv[2]
 		exit(1)
 
+Root = sys.argv[3]
+
 if "tr-181" in sys.argv[1]:
 	gendir = "tr181_" + time.strftime("%Y-%m-%d_%H-%M-%S")
 elif "tr-104" in sys.argv[1]:
 	gendir = "tr104_" + time.strftime("%Y-%m-%d_%H-%M-%S")
+	Root = (sys.argv[3])[len("Device.Services."):]
 elif "tr-106" in sys.argv[1]:
 	gendir = "tr106_" + time.strftime("%Y-%m-%d_%H-%M-%S")
 else:
 	gendir = "source_" + time.strftime("%Y-%m-%d_%H-%M-%S")
 
-
-Root = sys.argv[3]
 objstart = getobjectpointer(Root)
 
 if objstart == None:
