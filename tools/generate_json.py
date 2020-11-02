@@ -307,110 +307,110 @@ def getuniquekeys (dmobject):
 def printopenobject (obj):
 	fp = open('./.json_tmp', 'a')
 	if "tr-104" in sys.argv[1]:
-		print >> fp, "\"Device.Services.%s\" : {" % obj.get('name').replace(" ", "")
+		print("\"Device.Services.%s\" : {" % obj.get('name').replace(" ", ""), file=fp)
 	else:
-		print >> fp, "\"%s\" : {" % obj.get('name').replace(" ", "")
+		print("\"%s\" : {" % obj.get('name').replace(" ", ""), file=fp)
 	fp.close()
 
 def printopenfile ():
 	fp = open('./.json_tmp', 'a')
-	print >> fp, "{"
+	print("{", file=fp)
 	fp.close()
 
 def printclosefile ():
 	fp = open('./.json_tmp', 'a')
-	print >> fp, "}"
+	print("}", file=fp)
 	fp.close()
 
 def printOBJMaPPING (mapping):
 	fp = open('./.json_tmp', 'a')
 	config_type = mapping.split(":")
 	config = config_type[1].split("/")
-	print >> fp, "\"mapping\": {"
-	print >> fp, "\"type\": \"%s\"," % config_type[0].lower()
-	print >> fp, "\"%s\": {" % config_type[0].lower()
+	print("\"mapping\": {", file=fp)
+	print("\"type\": \"%s\"," % config_type[0].lower(), file=fp)
+	print("\"%s\": {" % config_type[0].lower(), file=fp)
 	
 	# UCI
 	if config_type[0] == "UCI":
-		print >> fp, "\"file\": \"%s\"," % config[0]
-		print >> fp, "\"section\": {"
-		print >> fp, "\"type\": \"%s\"" % config[1]
-		print >> fp, "},"
-		print >> fp, "\"dmmapfile\": \"%s\"" % config[2]
+		print("\"file\": \"%s\"," % config[0], file=fp)
+		print("\"section\": {", file=fp)
+		print("\"type\": \"%s\"" % config[1], file=fp)
+		print("},", file=fp)
+		print("\"dmmapfile\": \"%s\"" % config[2], file=fp)
 
 	# UBUS
 	elif config_type[0] == "UBUS":
-		print >> fp, "\"object\": \"%s\"," % config[0]
-		print >> fp, "\"method\": \"%s\"," % config[1]
-		print >> fp, "\"args\": {"
+		print("\"object\": \"%s\"," % config[0], file=fp)
+		print("\"method\": \"%s\"," % config[1], file=fp)
+		print("\"args\": {", file=fp)
 		if config[2] != "":
 			args = config[2].split(",")
-			print >> fp, "\"%s\": \"%s\"" % (args[0], args[1])
-		print >> fp, "}"
-		print >> fp, "\"key\": \"%s\"" % config[3]
+			print("\"%s\": \"%s\"" % (args[0], args[1]), file=fp)
+		print("}", file=fp)
+		print("\"key\": \"%s\"" % config[3], file=fp)
 
-	print >> fp, "}\n}"
+	print("}\n}", file=fp)
 	fp.close()
 
 def printPARAMMaPPING (mapping):
 	fp = open('./.json_tmp', 'a')
 	lst = mapping.split("&")
-	print >> fp, "\"mapping\": ["
+	print("\"mapping\": [", file=fp)
 	for i in range(len(lst)):
 		config_type = lst[i].split(":")
 		config = config_type[1].split("/")
 
-		print >> fp, "{"
-		print >> fp, "\"type\": \"%s\"," % config_type[0].lower()
+		print("{", file=fp)
+		print("\"type\": \"%s\"," % config_type[0].lower(), file=fp)
 		
 		# SYSFS || PROCFS
 		if config_type[0] == "SYSFS" or config_type[0] == "PROCFS":
-			print >> fp, "\"file\": \"%s\"" % config_type[1]
+			print("\"file\": \"%s\"" % config_type[1], file=fp)
 		
 		# UCI, UBUS, CLI
 		else:
 			# Only for UCI, UBUS, CLI
-			print >> fp, "\"%s\": {" % config_type[0].lower()
+			print("\"%s\": {" % config_type[0].lower(), file=fp)
 	
 			# UCI
 			if config_type[0] == "UCI":
-				print >> fp, "\"file\": \"%s\"," % config[0]
-				print >> fp, "\"section\": {"
+				print("\"file\": \"%s\"," % config[0], file=fp)
+				print("\"section\": {", file=fp)
 				var = config[1].split(",")
 				if len(var) == 1:
-					print >> fp, "\"type\": \"%s\"" % var[0]
+					print("\"type\": \"%s\"" % var[0], file=fp)
 				elif len(var) > 1 and "@i" in var[1]:
-					print >> fp, "\"type\": \"%s\"," % var[0]
-					print >> fp, "\"index\": \"%s\"" % var[1]
+					print("\"type\": \"%s\"," % var[0], file=fp)
+					print("\"index\": \"%s\"" % var[1], file=fp)
 				elif len(var) > 1:
-					print >> fp, "\"type\": \"%s\"," % var[0]
-					print >> fp, "\"name\": \"%s\"" % var[1]	
-				print >> fp, "}"
+					print("\"type\": \"%s\"," % var[0], file=fp)
+					print("\"name\": \"%s\"" % var[1], file=fp)
+				print("}", file=fp)
 				if len(var) > 1:
-					print >> fp, "\"option\": {"
-					print >> fp, "\"name\": \"%s\"" % config[2]
-					print >> fp, "}"
+					print("\"option\": {", file=fp)
+					print("\"name\": \"%s\"" % config[2], file=fp)
+					print("}", file=fp)
 			
 			# UBUS
 			elif config_type[0] == "UBUS":
-				print >> fp, "\"object\": \"%s\"," % config[0]
-				print >> fp, "\"method\": \"%s\"," % config[1]
-				print >> fp, "\"args\": {"
+				print("\"object\": \"%s\"," % config[0], file=fp)
+				print("\"method\": \"%s\"," % config[1], file=fp)
+				print("\"args\": {", file=fp)
 				if config[2] != "":
 					args = config[2].split(",")
-					print >> fp, "\"%s\": \"%s\"" % (args[0], args[1])
-				print >> fp, "}"
-				print >> fp, "\"key\": \"%s\"" % config[3]
+					print("\"%s\": \"%s\"" % (args[0], args[1]), file=fp)
+				print("}", file=fp)
+				print("\"key\": \"%s\"" % config[3], file=fp)
 	
 			# CLI
 			elif config_type[0] == "CLI":
-				print >> fp, "\"command\": \"%s\"," % config[0]
-				print >> fp, "\"args\": \"%s\"" % config[1]
+				print("\"command\": \"%s\"," % config[0], file=fp)
+				print("\"args\": \"%s\"" % config[1], file=fp)
 	
-			print >> fp, "}"
+			print("}", file=fp)
 			
-		print >> fp, "}"
-	print >> fp, "]\n}"
+		print("}", file=fp)
+	print("]\n}", file=fp)
 	fp.close()
 
 def removelastline ():
@@ -457,18 +457,18 @@ def printOBJ( dmobject, hasobj, hasparam, bbfdm_type ):
 		fbrowse = "false"
 
 	fp = open('./.json_tmp', 'a')
-	print >> fp,  "\"type\" : \"object\","
-	print >> fp,  "\"protocols\" : [%s]," % bbfdm_type
+	print("\"type\" : \"object\",", file=fp)
+	print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
 	if uniquekeys != None:
-		print >> fp,  "\"uniqueKeys\" : [%s]," % uniquekeys
+		print("\"uniqueKeys\" : [%s]," % uniquekeys, file=fp)
 	if (dmobject.get('access') == "readOnly"):
-		print >> fp,  "\"access\" : false,"	
+		print("\"access\" : false,", file=fp)
 	else:
-		print >> fp,  "\"access\" : true,"
+		print("\"access\" : true,", file=fp)
 	if hasparam or hasobj:
-		print >> fp,  "\"array\" : %s," % fbrowse
+		print("\"array\" : %s," % fbrowse, file=fp)
 	else:
-		print >> fp,  "\"array\" : %s" % fbrowse
+		print("\"array\" : %s" % fbrowse, file=fp)
 	fp.close()
 	if hasmapping:
 		printOBJMaPPING (mapping)
@@ -478,88 +478,88 @@ def printPARAM( dmparam, dmobject, bbfdm_type ):
 	islist, datatype, paramvalrange, paramenum, paramunit, parampattern, listminItem, listmaxItem, listmaxsize = getparamoption(dmparam)
 
 	fp = open('./.json_tmp', 'a')
-	print >> fp,  "\"%s\" : {" % dmparam.get('name').replace(" ", "")
-	print >> fp,  "\"type\" : \"%s\"," % getparamtype(dmparam)
-	print >> fp,  "\"read\" : true,"
-	print >> fp,  "\"write\" : %s," % ("false" if dmparam.get('access') == "readOnly" else "true")
-	print >> fp,  "\"protocols\" : [%s]," % bbfdm_type
+	print("\"%s\" : {" % dmparam.get('name').replace(" ", ""), file=fp)
+	print("\"type\" : \"%s\"," % getparamtype(dmparam), file=fp)
+	print("\"read\" : true,", file=fp)
+	print("\"write\" : %s," % ("false" if dmparam.get('access') == "readOnly" else "true"), file=fp)
+	print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
 
 	# create list
 	if islist == 1:
-		print >> fp,  "\"list\" : {"
+		print("\"list\" : {", file=fp)
 
 	# add datatype
-	print >> fp,  ("\"datatype\" : \"%s\"," % datatype) if (listmaxsize != None or listminItem != None or listmaxItem != None or paramvalrange != None or paramunit != None or paramenum != None or parampattern != None or (hasmapping and islist == 0)) else ("\"datatype\" : \"%s\"" % datatype)
+	print(("\"datatype\" : \"%s\"," % datatype) if (listmaxsize != None or listminItem != None or listmaxItem != None or paramvalrange != None or paramunit != None or paramenum != None or parampattern != None or (hasmapping and islist == 0)) else ("\"datatype\" : \"%s\"" % datatype), file=fp)
 
 	if islist == 1:
 		# add maximum size of list
 		if listmaxsize != None:
-			print >> fp,  ("\"maxsize\" : %s," % listmaxsize) if (listminItem != None or listmaxItem != None or paramvalrange != None or paramunit != None or paramenum != None or parampattern != None) else ("\"maxsize\" : %s" % listmaxsize)
+			print(("\"maxsize\" : %s," % listmaxsize) if (listminItem != None or listmaxItem != None or paramvalrange != None or paramunit != None or paramenum != None or parampattern != None) else ("\"maxsize\" : %s" % listmaxsize), file=fp)
 
 		# add minimun and maximum item values
 		if listminItem != None and listmaxItem != None:
-			print >> fp,  "\"item\" : {"
-			print >> fp,  "\"min\" : %s," % listminItem
-			print >> fp,  "\"max\" : %s" % listmaxItem
-			print >> fp,  ("},") if (paramvalrange != None or paramunit != None or paramenum != None or parampattern != None) else ("}")
+			print("\"item\" : {", file=fp)
+			print("\"min\" : %s," % listminItem, file=fp)
+			print("\"max\" : %s" % listmaxItem, file=fp)
+			print(("},") if (paramvalrange != None or paramunit != None or paramenum != None or parampattern != None) else ("}"), file=fp)
 		elif listminItem != None and listmaxItem == None:
-			print >> fp,  "\"item\" : {"
-			print >> fp,  "\"min\" : %s" % listminItem
-			print >> fp,  ("},") if (paramvalrange != None or paramunit != None or paramenum != None or parampattern != None) else ("}")
+			print("\"item\" : {", file=fp)
+			print("\"min\" : %s" % listminItem, file=fp)
+			print(("},") if (paramvalrange != None or paramunit != None or paramenum != None or parampattern != None) else ("}"), file=fp)
 		elif listminItem == None and listmaxItem != None:
-			print >> fp,  "\"item\" : {"
-			print >> fp,  "\"max\" : %s" % listmaxItem
-			print >> fp,  ("},") if (paramvalrange != None or paramunit != None or paramenum != None or parampattern != None) else ("}")
+			print("\"item\" : {", file=fp)
+			print("\"max\" : %s" % listmaxItem, file=fp)
+			print(("},") if (paramvalrange != None or paramunit != None or paramenum != None or parampattern != None) else ("}"), file=fp)
 
 	# add minimun and maximum values
 	if paramvalrange != None: 
 		valranges = paramvalrange.split(";")
-		print >> fp,  "\"range\" : ["
+		print("\"range\" : [", file=fp)
 		for eachvalrange in valranges:
 			valrange = eachvalrange.split(",")
 			if valrange[0] != "None" and valrange[1] != "None":
-				print >> fp,  "{"
-				print >> fp,  "\"min\" : %s," % valrange[0]
-				print >> fp,  "\"max\" : %s" % valrange[1]
-				print >> fp,  ("},") if (eachvalrange == valranges[len(valranges)-1]) else ("}")
+				print("{", file=fp)
+				print("\"min\" : %s," % valrange[0], file=fp)
+				print("\"max\" : %s" % valrange[1], file=fp)
+				print(("},") if (eachvalrange == valranges[len(valranges)-1]) else ("}"), file=fp)
 			elif valrange[0] != "None" and valrange[1] == "None":
-				print >> fp,  "{"
-				print >> fp,  "\"min\" : %s" % valrange[0]
-				print >> fp,  ("},") if (eachvalrange == valranges[len(valranges)-1]) else ("}")
+				print("{", file=fp)
+				print("\"min\" : %s" % valrange[0], file=fp)
+				print(("},") if (eachvalrange == valranges[len(valranges)-1]) else ("}"), file=fp)
 			elif valrange[0] == "None" and valrange[1] != "None":
-				print >> fp,  "{"
-				print >> fp,  "\"max\" : %s" % valrange[1]
-				print >> fp,  ("},") if (eachvalrange == valranges[len(valranges)-1]) else ("}")
-		print >> fp,  ("],") if (paramunit != None or paramenum != None or parampattern != None or (hasmapping and islist == 0)) else ("]")
+				print("{", file=fp)
+				print("\"max\" : %s" % valrange[1], file=fp)
+				print(("},") if (eachvalrange == valranges[len(valranges)-1]) else ("}"), file=fp)
+		print(("],") if (paramunit != None or paramenum != None or parampattern != None or (hasmapping and islist == 0)) else ("]"), file=fp)
 
 	# add unit
 	if paramunit != None: 
-		print >> fp,  ("\"unit\" : \"%s\"," % paramunit) if (paramenum != None or parampattern != None or (hasmapping and islist == 0)) else ("\"unit\" : \"%s\"" % paramunit)
+		print(("\"unit\" : \"%s\"," % paramunit) if (paramenum != None or parampattern != None or (hasmapping and islist == 0)) else ("\"unit\" : \"%s\"" % paramunit), file=fp)
 
 	# add enumaration
 	if paramenum != None: 
-		print >> fp,  ("\"enumerations\" : [%s]," % paramenum) if (parampattern != None or (hasmapping and islist == 0)) else ("\"enumerations\" : [%s]" % paramenum)
+		print(("\"enumerations\" : [%s]," % paramenum) if (parampattern != None or (hasmapping and islist == 0)) else ("\"enumerations\" : [%s]" % paramenum), file=fp)
 
 	# add pattern
 	if parampattern != None:
-		print >> fp,  ("\"pattern\" : [%s]," % parampattern.replace("\\", "\\\\")) if (hasmapping and islist == 0) else ("\"pattern\" : [%s]" % parampattern.replace("\\", "\\\\"))
+		print(("\"pattern\" : [%s]," % parampattern.replace("\\", "\\\\")) if (hasmapping and islist == 0) else ("\"pattern\" : [%s]" % parampattern.replace("\\", "\\\\")), file=fp)
 
 	# close list
 	if islist == 1:
-		print >> fp,  ("},") if hasmapping else ("}")
+		print(("},") if hasmapping else ("}"), file=fp)
 
 	# add mapping
 	if hasmapping:
 		fp.close()
 		printPARAMMaPPING(mapping)
 	else:
-		print >> fp,  "}"
+		print("}", file=fp)
 		fp.close()
 
 def printCOMMAND( dmparam, dmobject, bbfdm_type ):
 	fp = open('./.json_tmp', 'a')
-	print >> fp,  "\"%s\" : {" % dmparam.get('name')
-	print >> fp,  "\"type\" : \"command\","
+	print("\"%s\" : {" % dmparam.get('name'), file=fp)
+	print("\"type\" : \"command\",", file=fp)
 	inputfound = 0
 	outputfound = 0
 	for c in dmparam:
@@ -568,41 +568,41 @@ def printCOMMAND( dmparam, dmobject, bbfdm_type ):
 		elif c.tag == "output":
 			outputfound = 1
 
-	print >> fp, ("\"protocols\" : [\"usp\"],") if (inputfound or outputfound) else ("\"protocols\" : [\"usp\"]")
+	print(("\"protocols\" : [\"usp\"],") if (inputfound or outputfound) else ("\"protocols\" : [\"usp\"]"), file=fp)
 
 	for c in dmparam:
 		if c.tag == "input":
-			print >> fp,  "\"input\" : {"
+			print("\"input\" : {", file=fp)
 			for param in c:
 				if param.tag == "parameter":
 					fp.close()
 					printPARAM(param, dmobject, "\"usp\"")
 			fp = open('./.json_tmp', 'a')
-			print >> fp,  "}" if outputfound else "},"
+			print("}" if outputfound else "},", file=fp)
 
 		if c.tag == "output":
-			print >> fp,  "\"output\" : {"
+			print("\"output\" : {", file=fp)
 			for param in c:
 				if param.tag == "parameter":
 					fp.close()
 					printPARAM(param, dmobject, "\"usp\"")
 			fp = open('./.json_tmp', 'a')
-			print >> fp,  "}"
+			print("}", file=fp)
 
-	print >> fp,  "}"
+	print("}", file=fp)
 	fp.close()
 
 def printusage():
-	print "Usage: " + sys.argv[0] + " <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]"
-	print "Examples:"
-	print "  - " + sys.argv[0] + " tr-181-2-13-0-cwmp-full.xml tr-181-2-13-0-usp-full.xml Device."
-	print "    ==> Generate the json file of the sub tree Device. in tr181.json"
-	print "  - " + sys.argv[0] + " tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService."
-	print "    ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json"
-	print "  - " + sys.argv[0] + " tr-106-1-2-0-full.xml Device."
-	print "    ==> Generate the json file of the sub tree Device. in tr106.json"
-	print ""
-	print "Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-13-0-cwmp-full.xml"
+	print("Usage: " + sys.argv[0] + " <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]")
+	print("Examples:")
+	print("  - " + sys.argv[0] + " tr-181-2-13-0-cwmp-full.xml tr-181-2-13-0-usp-full.xml Device.")
+	print("    ==> Generate the json file of the sub tree Device. in tr181.json")
+	print("  - " + sys.argv[0] + " tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.")
+	print("    ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json")
+	print("  - " + sys.argv[0] + " tr-106-1-2-0-full.xml Device.")
+	print("    ==> Generate the json file of the sub tree Device. in tr106.json")
+	print("")
+	print("Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-13-0-cwmp-full.xml")
 	exit(1)
 
 def getobjectpointer( objname ):
@@ -751,10 +751,10 @@ def generatejsonfromobj(pobj, pdir):
 	f = open("./.json_tmp", "r")
 	obj = json.load(f, object_pairs_hook=OrderedDict)
 	dump = json.dumps(obj, indent=4)
-	tabs = re.sub('\n +', lambda match: '\n' + '\t' * (len(match.group().strip('\n')) / 4), dump)
+	tabs = re.sub('\n +', lambda match: '\n' + '\t' * int(len(match.group().strip('\n')) / 4), dump)
 
 	try:
-		print >> dmfp, "%s" % tabs
+		print("%s" % tabs, file=dmfp)
 		dmfp.close()
 	except:
 		pass
@@ -782,7 +782,7 @@ for child in model1:
 		model1 = child
 
 if model1.tag != "model":
-	print "Wrong %s XML Data model format!" % sys.argv[1]
+	print("Wrong %s XML Data model format!" % sys.argv[1])
 	exit(1)
 
 dmroot1 = None
@@ -800,7 +800,7 @@ if dmroot1 == None:
 			break
 
 if dmroot1 == None:
-	print "Wrong %s XML Data model format!" % sys.argv[1]
+	print("Wrong %s XML Data model format!" % sys.argv[1])
 	exit(1)
 
 if "tr-181" in sys.argv[1] or "tr-104" in sys.argv[1]:
@@ -813,7 +813,7 @@ if "tr-181" in sys.argv[1] or "tr-104" in sys.argv[1]:
 			model2 = child
 
 	if model2.tag != "model":
-		print "Wrong %s XML Data model format!" % sys.argv[2]
+		print("Wrong %s XML Data model format!" % sys.argv[2])
 		exit(1)
 
 	dmroot2 = None
@@ -830,7 +830,7 @@ if "tr-181" in sys.argv[1] or "tr-104" in sys.argv[1]:
 				break
 
 	if dmroot2 == None:
-		print "Wrong %s XML Data model format!" % sys.argv[2]
+		print("Wrong %s XML Data model format!" % sys.argv[2])
 		exit(1)
 
 Root = sys.argv[3]
@@ -848,7 +848,7 @@ else:
 objstart = getobjectpointer(Root)
 
 if objstart == None:
-	print "Wrong Object Name! %s" % Root
+	print("Wrong Object Name! %s" % Root)
 	exit(1)
 
 filename = generatejsonfromobj(objstart, gendir)

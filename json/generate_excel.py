@@ -162,18 +162,18 @@ def load_param(dmobject):
 def printOBJPARAM(obj, supported, protocols, types):
 	fp = open('./.tmp', 'a')
 	if CUSTOM_PREFIX in obj:
-		print >> fp,  "%s::%s::%s::%s::" % (obj, protocols, "Yes", types)
+		print("%s::%s::%s::%s::" % (obj, protocols, "Yes", types), file=fp)
 	else:
-		print >> fp,  "%s::%s::%s::%s::" % (obj, protocols, supported, types)
+		print("%s::%s::%s::%s::" % (obj, protocols, supported, types), file=fp)
 	fp.close()
 
 def printusage():
-	print "Usage: " + sys.argv[0] + " <json data model>"
-	print "Examples:"
-	print "  - " + sys.argv[0] + " tr181.json"
-	print "    ==> Generate excel file in tr181.xls"
-	print "  - " + sys.argv[0] + " tr104.json"
-	print "    ==> Generate excel file in tr104.xls"
+	print("Usage: " + sys.argv[0] + " <json data model>")
+	print("Examples:")
+	print("  - " + sys.argv[0] + " tr181.json")
+	print("    ==> Generate excel file in tr181.xls")
+	print("  - " + sys.argv[0] + " tr104.json")
+	print("    ==> Generate excel file in tr104.xls")
 
 def object_parse_childs( dmobject , value ):
 	hasobj = objhaschild(value)
@@ -283,12 +283,12 @@ with open(sys.argv[1]) as file:
 
 for obj, value in data.items():
 	if obj == None:
-		print "Wrong JSON Data model format!"
+		print("Wrong JSON Data model format!")
 		exit(1)
 
 	generatecfromobj(excel_file, obj, value)
 
 if (os.path.isfile(excel_file)):
-	print "%s excel file generated" % excel_file
+	print("%s excel file generated" % excel_file)
 else:
-	print "No Excel file generated!"
+	print("No Excel file generated!")

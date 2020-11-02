@@ -83,7 +83,7 @@ def getuniquekeys( value, option ):
 					buf = buf + "\"%s\"" % key + ", "
 				buf = buf + "NULL" + "}"
 				return buf
-        return None 
+	return None
 
 def getargsparam( value ):
 	if isinstance(value, dict):
@@ -161,7 +161,7 @@ def printGlobalstrCommon( str_exp ):
 	else:
 		common = "tr181/common.c"
 	fp = open(common, 'a')
-	print >> fp, "%s" % str_exp
+	print("%s" % str_exp, file=fp)
 	fp.close()
 
 def get_mapping_obj( mappingobj ):
@@ -354,124 +354,124 @@ def generate_validate_value(dmparam, value):
 
 def printheaderObjCommon( objname ):
 	fp = open('./.objparamarray.c', 'a')
-	print >> fp, "/* *** %s *** */" % objname
+	print("/* *** %s *** */" % objname, file=fp)
 	fp.close()
 
 def cprintheaderOBJS( objname ):
 	fp = open('./.objparamarray.c', 'a')
-	print >> fp,  "DMOBJ %s[] = {" % ("t" + getname(objname) + "Obj")
-	print >> fp,  "/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/"
+	print("DMOBJ %s[] = {" % ("t" + getname(objname) + "Obj"), file=fp)
+	print("/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/", file=fp)
 	fp.close()
 
 def hprintheaderOBJS( objname ):
 	fp = open('./.objparamarray.h', 'a')
-	print >> fp,  "extern DMOBJ %s[];" % ("t" + getname(objname) + "Obj")
+	print("extern DMOBJ %s[];" % ("t" + getname(objname) + "Obj"), file=fp)
 	fp.close()
 
 def cprinttopfile (fp, filename):
-	print >> fp, "/*"
-	print >> fp, " * Copyright (C) 2020 iopsys Software Solutions AB"
-	print >> fp, " *"
-	print >> fp, " * This program is free software; you can redistribute it and/or modify"
-	print >> fp, " * it under the terms of the GNU Lesser General Public License version 2.1"
-	print >> fp, " * as published by the Free Software Foundation"
-	print >> fp, " *"
-	print >> fp, " *	Author: <Name> <Surname> <name.surname@iopsys.eu>"
-	print >> fp, " */"
-	print >> fp, ""
-	print >> fp, "#include \"%s.h\"" % filename.lower()
-	print >> fp, ""
+	print("/*", file=fp)
+	print(" * Copyright (C) 2020 iopsys Software Solutions AB", file=fp)
+	print(" *", file=fp)
+	print(" * This program is free software; you can redistribute it and/or modify", file=fp)
+	print(" * it under the terms of the GNU Lesser General Public License version 2.1", file=fp)
+	print(" * as published by the Free Software Foundation", file=fp)
+	print(" *", file=fp)
+	print(" *	Author: <Name> <Surname> <name.surname@iopsys.eu>", file=fp)
+	print(" */", file=fp)
+	print("", file=fp)
+	print("#include \"%s.h\"" % filename.lower(), file=fp)
+	print("", file=fp)
 
 def hprinttopfile (fp, filename):
-	print >> fp, "/*"
-	print >> fp, " * Copyright (C) 2020 iopsys Software Solutions AB"
-	print >> fp, " *"
-	print >> fp, " * This program is free software; you can redistribute it and/or modify"
-	print >> fp, " * it under the terms of the GNU Lesser General Public License version 2.1"
-	print >> fp, " * as published by the Free Software Foundation"
-	print >> fp, " *"
-	print >> fp, " *	Author: <Name> <Surname> <name.surname@iopsys.eu>"
-	print >> fp, " */"
-	print >> fp, ""
-	print >> fp, "#ifndef __%s_H" % filename.upper()
-	print >> fp, "#define __%s_H" % filename.upper()
-	print >> fp, ""
-	print >> fp, "#include <libbbf_api/dmcommon.h>"
-	print >> fp, ""
+	print("/*", file=fp)
+	print(" * Copyright (C) 2020 iopsys Software Solutions AB", file=fp)
+	print(" *", file=fp)
+	print(" * This program is free software; you can redistribute it and/or modify", file=fp)
+	print(" * it under the terms of the GNU Lesser General Public License version 2.1", file=fp)
+	print(" * as published by the Free Software Foundation", file=fp)
+	print(" *", file=fp)
+	print(" *	Author: <Name> <Surname> <name.surname@iopsys.eu>", file=fp)
+	print(" */", file=fp)
+	print("", file=fp)
+	print("#ifndef __%s_H" % filename.upper(), file=fp)
+	print("#define __%s_H" % filename.upper(), file=fp)
+	print("", file=fp)
+	print("#include <libbbf_api/dmcommon.h>", file=fp)
+	print("", file=fp)
 
 def hprintfootfile (fp, filename):
-	print >> fp, ""
-	print >> fp, "#endif //__%s_H" % filename.upper()
-	print >> fp, ""
+	print("", file=fp)
+	print("#endif //__%s_H" % filename.upper(), file=fp)
+	print("", file=fp)
 
 def cprintAddDelObj( faddobj, fdelobj, name, mappingobj, dmobject ):
 	fp = open('./.objadddel.c', 'a')
-	print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char **instance)" % faddobj
-	print >> fp, "{"
+	print("static int %s(char *refparam, struct dmctx *ctx, void *data, char **instance)" % faddobj, file=fp)
+	print("{", file=fp)
 	if mappingobj != None:
 		type, file, sectiontype, dmmapfile, path, ref = get_mapping_obj(mappingobj)
 		if type == "uci":
-			print >> fp, "	char *inst, *value, *v;"
-			print >> fp, "	struct uci_section *dmmap = NULL, *s = NULL;"
-			print >> fp, ""
-			print >> fp, "	check_create_dmmap_package(\"%s\");" % dmmapfile
-			print >> fp, "	inst = get_last_instance_bbfdm(\"%s\", \"%s\", \"%s\");" % (dmmapfile, sectiontype, name+"instance")
-			print >> fp, "	dmuci_add_section(\"%s\", \"%s\", &s, &value);" % (file, sectiontype)
-			print >> fp, "	//dmuci_set_value_by_section(s, \"option\", \"value\");"
-			print >> fp, ""
-			print >> fp, "	dmuci_add_section_bbfdm(\"%s\", \"%s\", &dmmap, &v);" % (dmmapfile, sectiontype)
-			print >> fp, "	dmuci_set_value_by_section(dmmap, \"section_name\", section_name(s));"
-			print >> fp, "	*instance = update_instance(inst, 4, dmmap, \"%s\");" % (name+"instance")
+			print("	char *inst, *value, *v;", file=fp)
+			print("	struct uci_section *dmmap = NULL, *s = NULL;", file=fp)
+			print("", file=fp)
+			print("	check_create_dmmap_package(\"%s\");" % dmmapfile, file=fp)
+			print("	inst = get_last_instance_bbfdm(\"%s\", \"%s\", \"%s\");" % (dmmapfile, sectiontype, name+"instance"), file=fp)
+			print("	dmuci_add_section(\"%s\", \"%s\", &s, &value);" % (file, sectiontype), file=fp)
+			print("	//dmuci_set_value_by_section(s, \"option\", \"value\");", file=fp)
+			print("", file=fp)
+			print("	dmuci_add_section_bbfdm(\"%s\", \"%s\", &dmmap, &v);" % (dmmapfile, sectiontype), file=fp)
+			print("	dmuci_set_value_by_section(dmmap, \"section_name\", section_name(s));", file=fp)
+			print("	*instance = update_instance(inst, 4, dmmap, \"%s\");" % (name+"instance"), file=fp)
 	else:
-		print >> fp, "	//TODO"
-	print >> fp, "	return 0;"
-	print >> fp, "}"
-	print >> fp, ""
-	print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)" % fdelobj
-	print >> fp, "{"
+		print("	//TODO", file=fp)
+	print("	return 0;", file=fp)
+	print("}", file=fp)
+	print("", file=fp)
+	print("static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)" % fdelobj, file=fp)
+	print("{", file=fp)
 	if mappingobj != None:
 		if type == "uci":
-			print >> fp, "	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;"
-			print >> fp, "	int found = 0;"
-			print >> fp, ""
-	print >> fp, "	switch (del_action) {"
+			print("	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;", file=fp)
+			print("	int found = 0;", file=fp)
+			print("", file=fp)
+	print("	switch (del_action) {", file=fp)
 	if mappingobj != None:
 		if type == "uci":
-			print >> fp, "		case DEL_INST:"
-			print >> fp, "			get_dmmap_section_of_config_section(\"%s\", \"%s\", section_name((struct uci_section *)data), &dmmap_section);" % (dmmapfile, sectiontype)
-			print >> fp, "			if (dmmap_section != NULL)"
-			print >> fp, "				dmuci_delete_by_section(dmmap_section, NULL, NULL);"
-			print >> fp, "			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);"
-			print >> fp, "			break;"
-			print >> fp, "		case DEL_ALL:"
-			print >> fp, "			uci_foreach_sections(\"%s\", \"%s\", s) {" % (file, sectiontype)
-			print >> fp, "				if (found != 0) {"
-			print >> fp, "					get_dmmap_section_of_config_section(\"%s\", \"%s\", section_name(ss), &dmmap_section);" % (dmmapfile, sectiontype)
-			print >> fp, "					if (dmmap_section != NULL)"
-			print >> fp, "						dmuci_delete_by_section(dmmap_section, NULL, NULL);"
-			print >> fp, "					dmuci_delete_by_section(ss, NULL, NULL);"
-			print >> fp, "				}"
-			print >> fp, "				ss = s;"
-			print >> fp, "				found++;"
-			print >> fp, "			}"
-			print >> fp, "			if (ss != NULL) {"
-			print >> fp, "				get_dmmap_section_of_config_section(\"%s\", \"%s\", section_name(ss), &dmmap_section);" % (dmmapfile, sectiontype)
-			print >> fp, "				if (dmmap_section != NULL)"
-			print >> fp, "					dmuci_delete_by_section(dmmap_section, NULL, NULL);"
-			print >> fp, "				dmuci_delete_by_section(ss, NULL, NULL);"
-			print >> fp, "			}"
-			print >> fp, "			break;"
+			print("		case DEL_INST:", file=fp)
+			print("			get_dmmap_section_of_config_section(\"%s\", \"%s\", section_name((struct uci_section *)data), &dmmap_section);" % (dmmapfile, sectiontype), file=fp)
+			print("			if (dmmap_section != NULL)", file=fp)
+			print("				dmuci_delete_by_section(dmmap_section, NULL, NULL);", file=fp)
+			print("			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);", file=fp)
+			print("			break;", file=fp)
+			print("		case DEL_ALL:", file=fp)
+			print("			uci_foreach_sections(\"%s\", \"%s\", s) {" % (file, sectiontype), file=fp)
+			print("				if (found != 0) {", file=fp)
+			print("					get_dmmap_section_of_config_section(\"%s\", \"%s\", section_name(ss), &dmmap_section);" % (dmmapfile, sectiontype), file=fp)
+			print("					if (dmmap_section != NULL)", file=fp)
+			print("						dmuci_delete_by_section(dmmap_section, NULL, NULL);", file=fp)
+			print("					dmuci_delete_by_section(ss, NULL, NULL);", file=fp)
+			print("				}", file=fp)
+			print("				ss = s;", file=fp)
+			print("				found++;", file=fp)
+			print("			}", file=fp)
+			print("			if (ss != NULL) {", file=fp)
+			print("				get_dmmap_section_of_config_section(\"%s\", \"%s\", section_name(ss), &dmmap_section);" % (dmmapfile, sectiontype), file=fp)
+			print("				if (dmmap_section != NULL)", file=fp)
+			print("					dmuci_delete_by_section(dmmap_section, NULL, NULL);", file=fp)
+			print("				dmuci_delete_by_section(ss, NULL, NULL);", file=fp)
+			print("			}", file=fp)
+			print("			break;", file=fp)
 	else:
-		print >> fp, "		case DEL_INST:"
-		print >> fp, "			//TODO"
-		print >> fp, "			break;"
-		print >> fp, "		case DEL_ALL:"
-		print >> fp, "			//TODO"
-		print >> fp, "			break;"
-	print >> fp, "	}"
-	print >> fp, "	return 0;"
-	print >> fp, "}"
-	print >> fp, ""
+		print("		case DEL_INST:", file=fp)
+		print("			//TODO", file=fp)
+		print("			break;", file=fp)
+		print("		case DEL_ALL:", file=fp)
+		print("			//TODO", file=fp)
+		print("			break;", file=fp)
+	print("	}", file=fp)
+	print("	return 0;", file=fp)
+	print("}", file=fp)
+	print("", file=fp)
 	fp.close()
 
 def cprintBrowseObj( fbrowse, name, mappingobj, dmobject ):
@@ -482,60 +482,60 @@ def cprintBrowseObj( fbrowse, name, mappingobj, dmobject ):
 	if mappingobj != None:
 		type, res1, res2, res3, res4, res5 = get_mapping_obj(mappingobj)
 		if type == "uci" :
-			print >> fp, "/*#%s!%s:%s/%s/%s*/" % (dmobject, type.upper(), res1, res2, res3)
+			print("/*#%s!%s:%s/%s/%s*/" % (dmobject, type.upper(), res1, res2, res3), file=fp)
 		elif type == "ubus" :
-			print >> fp, "/*#%s!%s:%s/%s/%s,%s/%s*/" % (dmobject, type.upper(), res1, res2, res3, res4, res5)
+			print("/*#%s!%s:%s/%s/%s,%s/%s*/" % (dmobject, type.upper(), res1, res2, res3, res4, res5), file=fp)
 
-	print >> fp, "static int %s(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)" % fbrowse
-	print >> fp, "{"
+	print("static int %s(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)" % fbrowse, file=fp)
+	print("{", file=fp)
 
 	# Mapping exist
 	if mappingobj != None:
 
 		############################## UCI ########################################
 		if type == "uci" :
-			print >> fp, "	char *inst = NULL, *max_inst = NULL;"
-			print >> fp, "	struct dmmap_dup *p;"
-			print >> fp, "	LIST_HEAD(dup_list);"
-			print >> fp, ""
-			print >> fp, "	synchronize_specific_config_sections_with_dmmap(\"%s\", \"%s\", \"%s\", &dup_list);" % (res1, res2, res3)
-			print >> fp, "	list_for_each_entry(p, &dup_list, list) {"
-			print >> fp, ""
-			print >> fp, "		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,"
-			print >> fp, "			   p->dmmap_section, \"%s\", \"%s\", \"%s\", \"%s\");" % (name+"instance", name+"alias", res3, res2)
-			print >> fp, ""
-			print >> fp, "		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)"
-			print >> fp, "			break;"
-			print >> fp, "	}"
-			print >> fp, "	free_dmmap_config_dup_list(&dup_list);"
+			print("	char *inst = NULL, *max_inst = NULL;", file=fp)
+			print("	struct dmmap_dup *p;", file=fp)
+			print("	LIST_HEAD(dup_list);", file=fp)
+			print("", file=fp)
+			print("	synchronize_specific_config_sections_with_dmmap(\"%s\", \"%s\", \"%s\", &dup_list);" % (res1, res2, res3), file=fp)
+			print("	list_for_each_entry(p, &dup_list, list) {", file=fp)
+			print("", file=fp)
+			print("		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,", file=fp)
+			print("			   p->dmmap_section, \"%s\", \"%s\", \"%s\", \"%s\");" % (name+"instance", name+"alias", res3, res2), file=fp)
+			print("", file=fp)
+			print("		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)", file=fp)
+			print("			break;", file=fp)
+			print("	}", file=fp)
+			print("	free_dmmap_config_dup_list(&dup_list);", file=fp)
 
 
 		############################## UBUS ########################################
 		elif type == "ubus" :
-			print >> fp, "	json_object *res = NULL, *obj = NULL, *arrobj = NULL;"
-			print >> fp, "	char *inst = NULL, *max_inst = NULL;"
-			print >> fp, "	int id = 0, i = 0;"
-			print >> fp, ""
+			print("	json_object *res = NULL, *obj = NULL, *arrobj = NULL;", file=fp)
+			print("	char *inst = NULL, *max_inst = NULL;", file=fp)
+			print("	int id = 0, i = 0;", file=fp)
+			print("", file=fp)
 			if res3 == None and res4 == None:
-				print >> fp, "	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{}, 0, &res);" % (res1, res2)
+				print("	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{}, 0, &res);" % (res1, res2), file=fp)
 			else:
-				print >> fp, "	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{{\"%s\", \"%s\", String}}, 1, &res);" % (res1, res2, res3, res4)
-			print >> fp, "	if (res) {"
-			print >> fp, "		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, \"%s\") {" % res5
-			print >> fp, ""
-			print >> fp, "			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);"
-			print >> fp, ""
-			print >> fp, "			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)"
-			print >> fp, "				break;"
-			print >> fp, "		}"
-			print >> fp, "	}"
+				print("	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{{\"%s\", \"%s\", String}}, 1, &res);" % (res1, res2, res3, res4), file=fp)
+			print("	if (res) {", file=fp)
+			print("		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, \"%s\") {" % res5, file=fp)
+			print("", file=fp)
+			print("			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);", file=fp)
+			print("", file=fp)
+			print("			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)", file=fp)
+			print("				break;", file=fp)
+			print("		}", file=fp)
+			print("	}", file=fp)
 
 	# Mapping doesn't exist
 	else:
-		print >> fp, "	//TODO"
-	print >> fp, "	return 0;"
-	print >> fp, "}"
-	print >> fp, ""
+		print("	//TODO", file=fp)
+	print("	return 0;", file=fp)
+	print("}", file=fp)
+	print("", file=fp)
 
 	# Close file
 	fp.close()
@@ -712,77 +712,77 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
 				tmpgetvalue = get_value
 				tmpsetvalue = set_value
 			elif count == 2 and i == 2:
-				print >> fp, "/*#%s!%s&%s*/" % (parentname+dmparam, tmpmapping, mapping)
-				print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)" % getvalue
-				print >> fp, "{"
-				print >> fp, "%s" % tmpgetvalue
-				print >> fp, "%s" % get_value
-				print >> fp, "	return 0;"
-				print >> fp, "}"
-				print >> fp, ""
+				print("/*#%s!%s&%s*/" % (parentname+dmparam, tmpmapping, mapping), file=fp)
+				print("static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)" % getvalue, file=fp)
+				print("{", file=fp)
+				print("%s" % tmpgetvalue, file=fp)
+				print("%s" % get_value, file=fp)
+				print("	return 0;", file=fp)
+				print("}", file=fp)
+				print("", file=fp)
 				if setvalue != "NULL":
-					print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)" % setvalue
-					print >> fp, "{"
-					print >> fp, "%s" % tmpsetvalue
-					print >> fp, "			break;"
-					print >> fp, "	}"
-					print >> fp, "	return 0;"
-					print >> fp, "}"
-					print >> fp, ""
+					print("static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)" % setvalue, file=fp)
+					print("{", file=fp)
+					print("%s" % tmpsetvalue, file=fp)
+					print("			break;", file=fp)
+					print("	}", file=fp)
+					print("	return 0;", file=fp)
+					print("}", file=fp)
+					print("", file=fp)
 			else:
-				print >> fp, "/*#%s!%s*/" % (parentname+dmparam, mapping)
-				print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)" % getvalue
-				print >> fp, "{"
-				print >> fp, "%s" % get_value
-				print >> fp, "	return 0;"
-				print >> fp, "}"
-				print >> fp, ""
+				print("/*#%s!%s*/" % (parentname+dmparam, mapping), file=fp)
+				print("static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)" % getvalue, file=fp)
+				print("{", file=fp)
+				print("%s" % get_value, file=fp)
+				print("	return 0;", file=fp)
+				print("}", file=fp)
+				print("", file=fp)
 				if setvalue != "NULL":
-					print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)" % setvalue
-					print >> fp, "{"
-					print >> fp, "%s" % set_value
-					print >> fp, "			break;"
-					print >> fp, "	}"
-					print >> fp, "	return 0;"
-					print >> fp, "}"
-					print >> fp, ""
+					print("static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)" % setvalue, file=fp)
+					print("{", file=fp)
+					print("%s" % set_value, file=fp)
+					print("			break;", file=fp)
+					print("	}", file=fp)
+					print("	return 0;", file=fp)
+					print("}", file=fp)
+					print("", file=fp)
 	
 
 	# Mapping doesn't exist
 	else:
-		print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)" % getvalue
-		print >> fp, "{"
-		print >> fp, "	//TODO"
-		print >> fp, "	return 0;"
-		print >> fp, "}"
-		print >> fp, ""
+		print("static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)" % getvalue, file=fp)
+		print("{", file=fp)
+		print("	//TODO", file=fp)
+		print("	return 0;", file=fp)
+		print("}", file=fp)
+		print("", file=fp)
 		if setvalue != "NULL":
-			print >> fp, "static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)" % setvalue
-			print >> fp, "{"
-			print >> fp, "	switch (action)	{"
-			print >> fp, "		case VALUECHECK:"
-			print >> fp, "%s" % validate_value
-			print >> fp, "			break;"
-			print >> fp, "		case VALUESET:"
-			print >> fp, "			//TODO"
-			print >> fp, "			break;"
-			print >> fp, "	}"
-			print >> fp, "	return 0;"
-			print >> fp, "}"
-			print >> fp, ""
+			print("static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)" % setvalue, file=fp)
+			print("{", file=fp)
+			print("	switch (action)	{", file=fp)
+			print("		case VALUECHECK:", file=fp)
+			print("%s" % validate_value, file=fp)
+			print("			break;", file=fp)
+			print("		case VALUESET:", file=fp)
+			print("			//TODO", file=fp)
+			print("			break;", file=fp)
+			print("	}", file=fp)
+			print("	return 0;", file=fp)
+			print("}", file=fp)
+			print("", file=fp)
 
 	# Close file
 	fp.close()
 
 def cprintheaderPARAMS( objname ):
 	fp = open('./.objparamarray.c', 'a')
-	print >> fp,  "DMLEAF %s[] = {" % ("t" + getname(objname) + "Params")
-	print >> fp,  "/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/"
+	print("DMLEAF %s[] = {" % ("t" + getname(objname) + "Params"), file=fp)
+	print("/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/", file=fp)
 	fp.close()
 
 def hprintheaderPARAMS( objname ):
 	fp = open('./.objparamarray.h', 'a')
-	print >> fp,  "extern DMLEAF %s[];" % ("t" + getname(objname) + "Params")
+	print("extern DMLEAF %s[];" % ("t" + getname(objname) + "Params"), file=fp)
 	fp.close()
 
 def printPARAMline( parentname, dmparam, value ):
@@ -809,14 +809,14 @@ def printPARAMline( parentname, dmparam, value ):
 	cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, parentname, dmparam, value)
 
 	fp = open('./.objparamarray.c', 'a')
-	print >> fp,  "{\"%s\", %s, %s, %s, %s, NULL, NULL, %s}," % (dmparam, access, ptype, getvalue, setvalue, bbfdm)
+	print("{\"%s\", %s, %s, %s, %s, NULL, NULL, %s}," % (dmparam, access, ptype, getvalue, setvalue, bbfdm), file=fp)
 	fp.close()
 
 def printtailArray( ):
 	fp = open('./.objparamarray.c', 'a')
-	print >> fp,  "{0}"
-	print >> fp,  "};"
-	print >> fp,  ""
+	print("{0}", file=fp)
+	print("};", file=fp)
+	print("", file=fp)
 	fp.close()
 
 def printOBJline( dmobject, value ):
@@ -826,7 +826,7 @@ def printOBJline( dmobject, value ):
 	accessobj = getoptionparam(value, "access")
 	mappingobj = getoptionparam(value, "mapping")
 	bbfdm = getprotocolsparam(value, "protocols")
-        uniquekeys = getuniquekeys(value, "uniqueKeys")
+	uniquekeys = getuniquekeys(value, "uniqueKeys")
 
 	if accessobj:
 		access = "&DMWRITE"
@@ -855,25 +855,25 @@ def printOBJline( dmobject, value ):
 		paramarray = "NULL"
 
 	fp = open('./.objparamarray.c', 'a')
-        if uniquekeys:
-	        print >> fp,  "{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, NULL, %s, %s, NULL, %s, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm, uniquekeys)
-        else:
-	        print >> fp,  "{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, NULL, %s, %s, NULL, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm)
+	if uniquekeys:
+		print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, NULL, %s, %s, NULL, %s, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm, uniquekeys), file=fp)
+	else:
+		print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, NULL, %s, %s, NULL, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm), file=fp)
 	fp.close()
 
 def printusage():
-	print "Usage: " + sys.argv[0] + " <json data model>" + " [Object path]"
-	print "Examples:"
-	print "  - " + sys.argv[0] + " tr181.json"
-	print "    ==> Generate the C code of all data model in tr181/ folder"
-	print "  - " + sys.argv[0] + " tr104.json"
-	print "    ==> Generate the C code of all data model in tr104/ folder"
-	print "  - " + sys.argv[0] + " tr181.json" + " Device.DeviceInfo."
-	print "    ==> Generate the C code of DeviceInfo object in tr181/ folder"
-	print "  - " + sys.argv[0] + " tr181.json" + " Device.WiFi."
-	print "    ==> Generate the C code of WiFi object in tr181/ folder"
-	print "  - " + sys.argv[0] + " tr104.json" + " Device.Services.VoiceService.{i}.Capabilities."
-	print "    ==> Generate the C code of Services.VoiceService.{i}.Capabilities. object in tr104/ folder"
+	print("Usage: " + sys.argv[0] + " <json data model>" + " [Object path]")
+	print("Examples:")
+	print("  - " + sys.argv[0] + " tr181.json")
+	print("    ==> Generate the C code of all data model in tr181/ folder")
+	print("  - " + sys.argv[0] + " tr104.json")
+	print("    ==> Generate the C code of all data model in tr104/ folder")
+	print("  - " + sys.argv[0] + " tr181.json" + " Device.DeviceInfo.")
+	print("    ==> Generate the C code of DeviceInfo object in tr181/ folder")
+	print("  - " + sys.argv[0] + " tr181.json" + " Device.WiFi.")
+	print("    ==> Generate the C code of WiFi object in tr181/ folder")
+	print("  - " + sys.argv[0] + " tr104.json" + " Device.Services.VoiceService.{i}.Capabilities.")
+	print("    ==> Generate the C code of Services.VoiceService.{i}.Capabilities. object in tr104/ folder")
 
 def object_parse_childs( dmobject , value, nextlevel ):
 	hasobj = objhaschild(value)
@@ -930,9 +930,9 @@ def generatecfromobj( pobj, pvalue, pdir, nextlevel ):
 	try:
 		exists = os.path.isfile("./.objbrowse.c")
 		if exists:
-			print >> dmfpc,  "/*************************************************************"
-			print >> dmfpc,  "* ENTRY METHOD"
-			print >> dmfpc,  "**************************************************************/"
+			print("/*************************************************************", file=dmfpc)
+			print("* ENTRY METHOD", file=dmfpc)
+			print("**************************************************************/", file=dmfpc)
 		tmpf = open("./.objbrowse.c", "r")
 		tmpd = tmpf.read()
 		tmpf.close()
@@ -942,9 +942,9 @@ def generatecfromobj( pobj, pvalue, pdir, nextlevel ):
 	try:
 		exists = os.path.isfile("./.objadddel.c")
 		if exists:
-			print >> dmfpc,  "/*************************************************************"
-			print >> dmfpc,  "* ADD & DEL OBJ"
-			print >> dmfpc,  "**************************************************************/"
+			print("/*************************************************************", file=dmfpc)
+			print("* ADD & DEL OBJ", file=dmfpc)
+			print("**************************************************************/", file=dmfpc)
 		tmpf = open("./.objadddel.c", "r")
 		tmpd = tmpf.read()
 		tmpf.close()
@@ -954,9 +954,9 @@ def generatecfromobj( pobj, pvalue, pdir, nextlevel ):
 	try:
 		exists = os.path.isfile("./.getstevalue.c")
 		if exists:
-			print >> dmfpc,  "/*************************************************************"
-			print >> dmfpc,  "* GET & SET PARAM"
-			print >> dmfpc,  "**************************************************************/"
+			print("/*************************************************************", file=dmfpc)
+			print("* GET & SET PARAM", file=dmfpc)
+			print("**************************************************************/", file=dmfpc)
 		tmpf = open("./.getstevalue.c", "r")
 		tmpd = tmpf.read()
 		tmpf.close()
@@ -964,9 +964,9 @@ def generatecfromobj( pobj, pvalue, pdir, nextlevel ):
 	except:
 		pass
 	try:
-		print >> dmfpc,  "/**********************************************************************************************************************************"
-		print >> dmfpc,  "*                                            OBJ & PARAM DEFINITION"
-		print >> dmfpc,  "***********************************************************************************************************************************/"
+		print("/**********************************************************************************************************************************", file=dmfpc)
+		print("*                                            OBJ & PARAM DEFINITION", file=dmfpc)
+		print("***********************************************************************************************************************************/", file=dmfpc)
 		tmpf = open("./.objparamarray.c", "r")
 		tmpd = tmpf.read()
 		tmpf.close()
@@ -1020,7 +1020,7 @@ else:
 
 for obj, value in data.items():
 	if obj == None:
-		print "Wrong JSON Data model format!"
+		print("Wrong JSON Data model format!")
 		exit(1)
 
 	# Generate the object file if it is defined by "sys.argv[2]" argument
@@ -1049,6 +1049,6 @@ for obj, value in data.items():
 						generatecfromobj(obj1, value1, gendir, 0)
 
 if (os.path.isdir(gendir)):
-	print "Source code generated under \"./%s\" folder" % gendir
+	print("Source code generated under \"./%s\" folder" % gendir)
 else:
-	print "No source code generated!"
+	print("No source code generated!")
