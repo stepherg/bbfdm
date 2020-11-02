@@ -238,13 +238,13 @@ static int get_atm_status(char *refparam, struct dmctx *ctx, void *data, char *i
 *************************************************************/
 static int add_atm_link(char *refparam, struct dmctx *ctx, void *data, char **instancepara)
 {
-	char *instance = NULL, *atm_device = NULL, *v = NULL, *instance_update = NULL;
+	char *instance = NULL, *atm_device = NULL, *v = NULL;
 	struct uci_section *dmmap_atm = NULL;
 
 	check_create_dmmap_package("dmmap_dsl");
 	instance = get_last_instance_bbfdm("dmmap_dsl", "atm-device", "atmlinkinstance");
 	dmasprintf(&atm_device, "atm%d", instance ? atoi(instance) : 0);
-	dmasprintf(&instance_update, "%d", instance ? atoi(instance)+ 1 : 1);
+
 	dmuci_set_value("dsl", atm_device, "", "atm-device");
 	dmuci_set_value("dsl", atm_device, "name", "ATM");
 	dmuci_set_value("dsl", atm_device, "vpi", "8");

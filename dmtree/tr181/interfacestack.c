@@ -102,9 +102,14 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 	/* Higher layers are Device.IP.Interface.{i}. */
 	uci_foreach_sections("network", "interface", s) {
-		char *proto;
+		char *proto, *ifname;
+
 		dmuci_get_value_by_section_string(s, "proto", &proto);
-		if (strcmp(section_name(s), "loopback") == 0 || *proto == '\0')
+		dmuci_get_value_by_section_string(s, "ifname", &ifname);
+
+		if (strcmp(section_name(s), "loopback") == 0 ||
+			*proto == '\0' ||
+			strchr(ifname, '@'))
 			continue;
 
 		// The higher layer is Device.IP.Interface.{i}.

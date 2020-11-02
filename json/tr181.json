@@ -39835,6 +39835,21 @@
 					{
 						"max": 49
 					}
+				], 
+				"mapping": [
+					{
+						"type": "uci", 
+						"uci": {
+							"file": "network", 
+							"section": {
+								"type": "globals", 
+								"name": "globals"
+							}, 
+							"option": {
+								"name": "ula_prefix"
+							}
+						}
+					}
 				]
 			}, 
 			"InterfaceNumberOfEntries": {
@@ -39912,7 +39927,22 @@
 						"cwmp", 
 						"usp"
 					], 
-					"datatype": "boolean"
+					"datatype": "boolean", 
+					"mapping": [
+						{
+							"type": "uci", 
+							"uci": {
+								"file": "network", 
+								"section": {
+									"type": "interface", 
+									"index": "@i-1"
+								}, 
+								"option": {
+									"name": "disabled"
+								}
+							}
+						}
+					]
 				}, 
 				"IPv6Enable": {
 					"type": "boolean", 
@@ -40103,6 +40133,12 @@
 							"min": 64, 
 							"max": 65535
 						}
+					], 
+					"mapping": [
+						{
+							"type": "sysfs", 
+							"file": "/sys/class/net/@Name/mtu"
+						}
 					]
 				}, 
 				"Type": {
@@ -40208,7 +40244,22 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "boolean"
+						"datatype": "boolean", 
+						"mapping": [
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "network", 
+									"section": {
+										"type": "interface", 
+										"index": "@i-1"
+									}, 
+									"option": {
+										"name": "disabled"
+									}
+								}
+							}
+						]
 					}, 
 					"Status": {
 						"type": "string", 
@@ -40259,9 +40310,9 @@
 							{
 								"type": "uci", 
 								"uci": {
-									"file": "dmmap_network", 
+									"file": "dmmap_network_ipv4", 
 									"section": {
-										"type": "interface", 
+										"type": "intf_ipv4", 
 										"index": "@i-1"
 									}, 
 									"option": {
@@ -40396,7 +40447,13 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong", 
+						"mapping": [
+							{
+								"type": "sysfs", 
+								"file": "/sys/class/net/@Name/statistics/tx_bytes"
+							}
+						]
 					}, 
 					"BytesReceived": {
 						"type": "unsignedLong", 
@@ -40406,7 +40463,13 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong", 
+						"mapping": [
+							{
+								"type": "sysfs", 
+								"file": "/sys/class/net/@Name/statistics/rx_bytes"
+							}
+						]
 					}, 
 					"PacketsSent": {
 						"type": "unsignedLong", 
@@ -40416,7 +40479,13 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong", 
+						"mapping": [
+							{
+								"type": "sysfs", 
+								"file": "/sys/class/net/@Name/statistics/tx_packets"
+							}
+						]
 					}, 
 					"PacketsReceived": {
 						"type": "unsignedLong", 
@@ -40426,7 +40495,13 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong", 
+						"mapping": [
+							{
+								"type": "sysfs", 
+								"file": "/sys/class/net/@Name/statistics/rx_packets"
+							}
+						]
 					}, 
 					"ErrorsSent": {
 						"type": "unsignedInt", 
@@ -40436,7 +40511,13 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt", 
+						"mapping": [
+							{
+								"type": "sysfs", 
+								"file": "/sys/class/net/@Name/statistics/tx_errors"
+							}
+						]
 					}, 
 					"ErrorsReceived": {
 						"type": "unsignedInt", 
@@ -40446,7 +40527,13 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt", 
+						"mapping": [
+							{
+								"type": "sysfs", 
+								"file": "/sys/class/net/@Name/statistics/rx_errors"
+							}
+						]
 					}, 
 					"UnicastPacketsSent": {
 						"type": "unsignedLong", 
@@ -40476,7 +40563,13 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt", 
+						"mapping": [
+							{
+								"type": "sysfs", 
+								"file": "/sys/class/net/@Name/statistics/tx_dropped"
+							}
+						]
 					}, 
 					"DiscardPacketsReceived": {
 						"type": "unsignedInt", 
@@ -40486,7 +40579,13 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt", 
+						"mapping": [
+							{
+								"type": "sysfs", 
+								"file": "/sys/class/net/@Name/statistics/rx_dropped"
+							}
+						]
 					}, 
 					"MulticastPacketsSent": {
 						"type": "unsignedLong", 
@@ -40506,7 +40605,13 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong", 
+						"mapping": [
+							{
+								"type": "sysfs", 
+								"file": "/sys/class/net/@Name/statistics/multicast"
+							}
+						]
 					}, 
 					"BroadcastPacketsSent": {
 						"type": "unsignedLong", 
@@ -40669,7 +40774,22 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "boolean"
+						"datatype": "boolean", 
+						"mapping": [
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "network", 
+									"section": {
+										"type": "interface", 
+										"index": "@i-1"
+									}, 
+									"option": {
+										"name": "ipv6"
+									}
+								}
+							}
+						]
 					}, 
 					"Status": {
 						"type": "string", 
@@ -40685,6 +40805,21 @@
 							"Enabled", 
 							"Error_Misconfigured", 
 							"Error"
+						], 
+						"mapping": [
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "network", 
+									"section": {
+										"type": "interface", 
+										"index": "@i-1"
+									}, 
+									"option": {
+										"name": "ipv6"
+									}
+								}
+							}
 						]
 					}, 
 					"IPAddressStatus": {
@@ -40719,6 +40854,21 @@
 						"range": [
 							{
 								"max": 64
+							}
+						], 
+						"mapping": [
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "dmmap_network_ipv6", 
+									"section": {
+										"type": "intf_ipv6", 
+										"index": "@i-1"
+									}, 
+									"option": {
+										"name": "ipv6_alias"
+									}
+								}
 							}
 						]
 					}, 
@@ -40788,22 +40938,7 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "dateTime", 
-						"mapping": [
-							{
-								"type": "uci", 
-								"uci": {
-									"file": "network", 
-									"section": {
-										"type": "interface", 
-										"index": "@i-1"
-									}, 
-									"option": {
-										"name": "adv_preferred_lifetime"
-									}
-								}
-							}
-						]
+						"datatype": "dateTime"
 					}, 
 					"ValidLifetime": {
 						"type": "dateTime", 
@@ -40813,22 +40948,7 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "dateTime", 
-						"mapping": [
-							{
-								"type": "uci", 
-								"uci": {
-									"file": "network", 
-									"section": {
-										"type": "interface", 
-										"index": "@i-1"
-									}, 
-									"option": {
-										"name": "adv_valid_lifetime"
-									}
-								}
-							}
-						]
+						"datatype": "dateTime"
 					}, 
 					"Anycast": {
 						"type": "boolean", 
@@ -40861,7 +40981,22 @@
 							"cwmp", 
 							"usp"
 						], 
-						"datatype": "boolean"
+						"datatype": "boolean", 
+						"mapping": [
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "network", 
+									"section": {
+										"type": "interface", 
+										"index": "@i-1"
+									}, 
+									"option": {
+										"name": "ipv6"
+									}
+								}
+							}
+						]
 					}, 
 					"Status": {
 						"type": "string", 
@@ -40876,6 +41011,21 @@
 							"Disabled", 
 							"Enabled", 
 							"Error"
+						], 
+						"mapping": [
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "network", 
+									"section": {
+										"type": "interface", 
+										"index": "@i-1"
+									}, 
+									"option": {
+										"name": "ipv6"
+									}
+								}
+							}
 						]
 					}, 
 					"PrefixStatus": {
@@ -40907,6 +41057,21 @@
 						"range": [
 							{
 								"max": 64
+							}
+						], 
+						"mapping": [
+							{
+								"type": "uci", 
+								"uci": {
+									"file": "dmmap_network_ipv6_prefix", 
+									"section": {
+										"type": "intf_ipv6_prefix", 
+										"index": "@i-1"
+									}, 
+									"option": {
+										"name": "ipv6_prefix_alias"
+									}
+								}
 							}
 						]
 					}, 

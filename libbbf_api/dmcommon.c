@@ -811,7 +811,7 @@ int synchronize_system_folders_with_dmmap_opt(char *sysfsrep, char *dmmap_packag
 
 void get_dmmap_section_of_config_section(char* dmmap_package, char* section_type, char *section_name, struct uci_section **dmmap_section)
 {
-	struct uci_section* s;
+	struct uci_section *s;
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section_type, "section_name", section_name, s) {
 		*dmmap_section = s;
@@ -822,7 +822,7 @@ void get_dmmap_section_of_config_section(char* dmmap_package, char* section_type
 
 void get_dmmap_section_of_config_section_eq(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section)
 {
-	struct uci_section* s;
+	struct uci_section *s;
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section_type, opt, value, s) {
 		*dmmap_section = s;
@@ -833,7 +833,7 @@ void get_dmmap_section_of_config_section_eq(char* dmmap_package, char* section_t
 
 void get_dmmap_section_of_config_section_cont(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section)
 {
-	struct uci_section* s;
+	struct uci_section *s;
 
 	uci_path_foreach_option_cont(bbfdm, dmmap_package, section_type, opt, value, s) {
 		*dmmap_section = s;
@@ -844,7 +844,7 @@ void get_dmmap_section_of_config_section_cont(char* dmmap_package, char* section
 
 void get_config_section_of_dmmap_section(char* package, char* section_type, char *section_name, struct uci_section **config_section)
 {
-	struct uci_section* s;
+	struct uci_section *s;
 
 	uci_foreach_sections(package, section_type, s) {
 		if (strcmp(section_name(s), section_name) == 0) {
@@ -1231,16 +1231,6 @@ int get_shift_time_time(int shift_time, char *local_time, int size)
 
 	if (strftime(local_time, size, "%Y-%m-%dT%H:%M:%SZ", t_tm) == 0)
 		return -1;
-
-	return 0;
-}
-
-int get_shift_time_shift(char *local_time, char *shift)
-{
-	struct tm tm = {0};
-
-	strptime(local_time,"%Y-%m-%dT%H:%M:%SZ", &tm);
-	sprintf(shift, "%u", (unsigned int)(mktime(&tm) - time(NULL)));
 
 	return 0;
 }

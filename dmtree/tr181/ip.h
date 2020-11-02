@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 iopsys Software Solutions AB
+ * Copyright (C) 2020 iopsys Software Solutions AB
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 2.1
@@ -23,6 +23,6 @@ extern DMLEAF tIPInterfaceIPv4AddressParams[];
 extern DMLEAF tIPInterfaceIPv6AddressParams[];
 extern DMLEAF tIPInterfaceIPv6PrefixParams[];
 extern DMLEAF tIPInterfaceStatsParams[];
-extern DMLEAF tIPInterfaceTWAMPReflectorParams[];
 
-#endif
+#endif //__IP_H
+
