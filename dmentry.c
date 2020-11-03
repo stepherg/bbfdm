@@ -29,7 +29,7 @@ LIST_HEAD(list_enabled_lw_notify);
 unsigned char dmcli_timetrack = 0;
 unsigned char dmcli_evaluatetest = 0;
 
-static int usp_fault_map(int fault)
+int usp_fault_map(int fault)
 {
 	int usp_fault;
 

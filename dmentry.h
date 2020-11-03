@@ -35,6 +35,7 @@ int dm_entry_reload_enabled_notify(unsigned int dm_type, unsigned int amd_versio
 int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value);
 int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
 int dm_entry_restart_services(void);
+int usp_fault_map(int fault);
 #ifdef BBF_TR064
 int dm_entry_upnp_restart_services(void);
 void dm_upnp_apply_config(void);
