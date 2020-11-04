@@ -20,6 +20,7 @@ extern struct list_head list_execute_end_session;
 
 void bbf_apply_end_session(void);
 int set_bbfdatamodel_type(int bbf_type);
+int get_bbfdatamodel_type(void);
 int bbf_set_ip_version(int ipversion);
 void del_list_parameter(struct dm_parameter *dm_parameter);
 int dm_update_file_enabled_notify(char *param, char *new_value);

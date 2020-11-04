@@ -57,6 +57,11 @@ int set_bbfdatamodel_type(int bbf_type)
 	return 0;
 }
 
+int get_bbfdatamodel_type(void)
+{
+	return bbfdatamodel_type;
+}
+
 int bbfdmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value)
 {
 	return dmuci_lookup_ptr(ctx, ptr, package, section, option, value);
