@@ -104,7 +104,7 @@ DMOBJ tDeviceObj[] = {
 {"Firewall", &DMREAD, NULL, NULL, "file:/etc/config/firewall", NULL, NULL, NULL, NULL, tFirewallObj, tFirewallParams, NULL, BBFDM_BOTH},
 {"DNS", &DMREAD, NULL, NULL, "file:/etc/config/dhcp", NULL, NULL, NULL, NULL, tDNSObj, tDNSParams, NULL, BBFDM_BOTH},
 {"Users", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, tUsersObj, tUsersParams, NULL, BBFDM_BOTH},
-{"IEEE1905", &DMREAD, NULL, NULL, "file:/etc/config/ieee1905,/etc/config/topology;ubus:ieee1905->info,topology->dump", NULL, NULL, NULL, NULL, tIEEE1905Obj , tIEEE1905Params, NULL, BBFDM_BOTH},
+{"IEEE1905", &DMREAD, NULL, NULL, "file:/etc/config/ieee1905,/etc/config/topology;ubus:ieee1905->info,topology->dump", NULL, NULL, NULL, NULL, tIEEE1905Obj, tIEEE1905Params, NULL, BBFDM_BOTH},
 {"InterfaceStack", &DMREAD, NULL, NULL, "file:/etc/config/network", browseInterfaceStackInst, NULL, NULL, NULL, NULL, tInterfaceStackParams, NULL, BBFDM_BOTH},
 {"USB", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUSBObj, tUSBParams, NULL, BBFDM_BOTH},
 {"GRE", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/gre.sh", NULL, NULL, NULL,  NULL, tGREObj, tGREParams, NULL, BBFDM_BOTH},

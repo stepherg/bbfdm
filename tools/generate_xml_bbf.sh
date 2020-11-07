@@ -54,18 +54,19 @@ get_param_type(){
 			echo "int"
 			;;
 		"DMT_HEXBIN" )
-			echo "hexbin"
+			echo "hexBinary"
 			;;
+		"DMT_UNLONG" )
+			echo "unsignedLong"
+			;;
+		"DMT_BASE64" )
+			echo "base64"
+			;;			
 	esac
-	
 }
 
 get_leaf_obj_line_number(){
-	if [ "$1" !=  "device.c" ]; then
-		echo `grep -nE DMOBJ\|DMLEAF $1 | grep -v UPNP |cut -f1 -d: | tr "\n" " "`
-	else
-		echo `grep -nE DMOBJ\|DMLEAF $1 |grep "181" |grep -v UPNP | cut -f1 -d: | tr "\n" " "`
-	fi
+	echo `grep -nE DMOBJ\|DMLEAF $1 | grep -v UPNP |cut -f1 -d: | tr "\n" " "`
 }
 
 add_item_to_list(){
@@ -182,14 +183,13 @@ gen_dm_tree(){
 			name=`echo ${f1//{} | sed 's/^"\(.*\)"$/\1/'`
 			permission=${f2// &}
 			type=${f3// }
-			browse=${f6// }
+			browse=${f5// }
 
 			if [ "$permission" == "DMWRITE" ]; then
 				instance="readWrite"
 			else
 				instance="readOnly"
 			fi
-
 
 			if [ "$o_found" == "1" ]; then
 				name=`set_obj_object_child "$father_name" "$name"`
@@ -213,8 +213,8 @@ gen_dm_tree(){
 			fi
 
 			if [ -n "$str" ]; then
-				child_objects=${f10// }
-				child_parameters=${f11// }
+				child_objects=${f9// }
+				child_parameters=${f10// }
 				obj_name=${name}
 				#Add the actual object to the list of objects looking for their children objects ########
 				if [ "$child_objects" != "NULL" ]; then
@@ -228,7 +228,7 @@ gen_dm_tree(){
 				fi
 			fi
 
-		done <<<"`sed -n $line_number',/{0}/p' $file | sed -e '/{0}/d' | sed -e '/^{/!d'`"
+		done <<<"`sed -n $line_number',/{0}/p' $file | cut -d \" \" -f 1-4,6- | sed '/#ifdef GENERIC_OPENWRT/,/#else/d' | sed -e '/{0}/d' | sed -e '/^{/!d'`"
 		
 		######### Remove object from list of object looking there childs
 		for obj in $obj_look_obj_child_list; do

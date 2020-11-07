@@ -77,11 +77,7 @@ get_param_type(){
 }
 
 get_leaf_obj_line_number(){
-	if [ "$1" !=  "device.c" ]; then
-		echo `grep -nE DMOBJ\|DMLEAF $1 | grep -v UPNP |cut -f1 -d: | tr "\n" " "`
-	else
-		echo `grep -nE DMOBJ\|DMLEAF $1 |grep "181" |grep -v UPNP | cut -f1 -d: | tr "\n" " "`
-	fi
+	echo `grep -nE DMOBJ\|DMLEAF $1 | grep -v UPNP | cut -f1 -d: | tr "\n" " "`
 }
 
 add_item_to_list(){
@@ -143,10 +139,9 @@ gen_dm_tree(){
 	
 		######## Create Childs list
 		while IFS=, read -r f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13; do
-			name=`echo ${f1//{} | sed 's/^"\(.*\)"$/\1/'`
-			permission=${f2// &}
+			name=`echo ${f1/CUSTOM_PREFIX/$CUSTOM_PREFIX} | sed 's/{//' | sed 's/"//g'`
 			type=${f3// }
-			multiinstance=${f6// }
+			multiinstance=${f5// }
 			if [ "$multiinstance" != "NULL" ]; then
 				instance="true"
 			else
@@ -156,22 +151,16 @@ gen_dm_tree(){
 				name=`set_obj_object_child "$father_name" "$name"`
 				oname=`set_obj_object_line $instance "$name"`
 				echo "$oname," >> $TREE_TXT
-#				if [ "$instance" == "true" ]; then
-#					objinst=`set_obj_instance_line $name`
-#					echo $objinst >> $TREE_TXT
-#				fi
-				#tree=`add_item_to_list "$oname" "$tree"`
 			fi
 			if [ "$p_found" == "1" ]; then
 				name=`set_obj_param_child "$father_name" "$name"`
 				otype=`get_param_type $type`
 				pname=`set_obj_param_line "$otype" "$name"`
-				#tree=`add_item_to_list "$pname" "$tree"`
 				echo $pname >> $TREE_TXT
 			fi
 			if [ -n "$str" ]; then
-				child_objects=${f10// }
-				child_parameters=${f11// }
+				child_objects=${f9// }
+				child_parameters=${f10// }
 				obj_name=${name}
 				#Add the actual object to the list of objects looking for their children objects ########
 				if [ "$child_objects" != "NULL" ]; then
@@ -184,7 +173,7 @@ gen_dm_tree(){
 					obj_look_param_child_list=`add_item_to_list "$new_item" "$obj_look_param_child_list"`
 				fi
 			fi
-		done <<<"`sed -n $line_number',/{0}/p' $file | sed -e '/{0}/d' | sed -e '/^{/!d'`"
+		done <<<"`sed -n $line_number',/{0}/p' $file | cut -d \" \" -f 1-4,6- | sed '/#ifdef GENERIC_OPENWRT/,/#else/d' | sed -e '/{0}/d' | sed -e '/^{/!d'`"
 		
 		######### Remove object from list of object looking there childs
 		for obj in $obj_look_obj_child_list; do
@@ -322,9 +311,9 @@ OUT_STREAM="tmp.txt"
 ROOT_FILE="device.c"
 TREE_TXT=$CURRENT_PATH"/"$OUT_STREAM
 DM_PATH=${2:-"$(pwd)/../dmtree/"}
-PRODUCT_CLASS=${3:-"DG301"}
+PRODUCT_CLASS=${3:-"DG400PRIME"}
 DEVICE_PROTOCOL=${4:-"DEVICE_PROTOCOL_DSLFTR069v1"}
-MODEL_NAME=${5:-"DG301-A"}
+MODEL_NAME=${5:-"DG400PRIME-A"}
 SOFTWARE_VERSION=${6:-"1.2.3.4B"}
 cnt_obj=0
 cnt_param=0
@@ -339,6 +328,7 @@ SCRIPTS_PATH_TR157=${DM_PATH}/${DM_TR157}
 DIR_LIST="$SCRIPTS_PATH_TR181 $SCRIPTS_PATH_TR104 $SCRIPTS_PATH_TR143 $SCRIPTS_PATH_TR157"
 XML_OUT_STREAM_BBF="iopsys.xml"
 ROOT_PATH="Device"
+CUSTOM_PREFIX="X_IOPSYS_EU_"
 
 ############## GEN BBF Data Models TREE ##############
 echo "Start Generation of BBF Data Models..."
