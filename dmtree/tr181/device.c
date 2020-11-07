@@ -57,18 +57,18 @@
 /* *** BBFDM *** */
 DMOBJ tEntry181Obj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Device", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, NULL, NULL, tRoot_181_Obj, tRoot_181_Params, NULL, BBFDM_BOTH},
+{"Device", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, NULL, NULL, tDeviceObj, tDeviceParams, NULL, BBFDM_BOTH},
 {0}
 };
 
-DMLEAF tRoot_181_Params[] = {
+DMLEAF tDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
 {"InterfaceStackNumberOfEntries", &DMREAD, DMT_UNINT, get_Device_InterfaceStackNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {"RootDataModelVersion", &DMREAD, DMT_STRING, get_Device_RootDataModelVersion, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
-DMOBJ tRoot_181_Obj[] = {
+DMOBJ tDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, NULL, NULL, tDeviceInfoObj, tDeviceInfoParams, NULL, BBFDM_BOTH},
 {"ManagementServer", &DMREAD, NULL, NULL, "file:/etc/config/cwmp", NULL, &DMFINFRM, NULL, NULL, NULL, tManagementServerParams, NULL, BBFDM_BOTH},

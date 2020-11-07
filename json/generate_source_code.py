@@ -32,18 +32,13 @@ def getlastname( name ):
 	return name.replace(".{i}", "").split('.')[-2];
 
 def getname( objname ):
-	global model_root_name
 	OBJSname = objname
 	if (objname.count('.') > 1 and (objname.count('.') != 2 or objname.count('{i}') != 1) ):
 		OBJSname = objname.replace("Device", "", 1)
-	OBJSname = OBJSname.replace("{i}", "")
-	OBJSname = OBJSname.replace(".", "")
+	OBJSname = OBJSname.replace("{i}", "").replace(".", "")
 	if (objname.count('.') == 1):
-		model_root_name = OBJSname
-		OBJSname = "Root" + OBJSname
 		return OBJSname
 	if (objname.count('.') == 2 and objname.count('{i}') == 1):
-		model_root_name = OBJSname
 		OBJSname = "Services" + OBJSname
 		return OBJSname
 	return OBJSname;
@@ -1002,7 +997,6 @@ if (sys.argv[1]).lower() == "-h" or (sys.argv[1]).lower() == "--help":
 	printusage()
 	exit(1)
 
-model_root_name = "Root"
 json_file = sys.argv[1] # tr181.json
 
 # load json file

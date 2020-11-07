@@ -3,7 +3,7 @@
 # Copyright (C) 2020 iopsys Software Solutions AB
 # Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-import os, sys, time, json, xlwt
+import os, sys, shutil, subprocess, getopt, time, json, xlwt
 from xlwt import Workbook 
 from collections import OrderedDict
 
@@ -11,6 +11,12 @@ def removefile( filename ):
 	try:
 		os.remove(filename)
 	except OSError:
+		pass
+
+def removefolder( foldername ):
+	try:
+		shutil.rmtree(foldername)
+	except:
 		pass
 
 def objhaschild( value ):
@@ -47,133 +53,105 @@ def check_obj(dmobject):
 	dmobject = dmobject.replace(".{i}.", ".")
 	count = dmobject.count('.')
 	obj = dmobject.split(".")
-	if count == 2:
-		cmd = 'awk \'/DMOBJ tRoot_181_Obj/,/^{0}$/\' ../dmtree/tr181/device.c'
-		res = os.popen(cmd).read()
-		string = "\n{\"%s\"," % obj[1]
-	elif "Device.Services." in dmobject and count == 3:
+	array_name = ""
+
+	if "tr181" in sys.argv[1] and count == 2:
+		cmd = 'awk \'/DMOBJ tDeviceObj/,/^{0}$/\' ../dmtree/tr181/device.c'
+	elif "tr104" in sys.argv[1] and count == 3:
 		cmd = 'awk \'/DMOBJ tServicesObj/,/^{0}$/\' ../dmtree/tr104/servicesvoiceservice.c'
-		res = os.popen(cmd).read()
-		string = "\n{\"%s\"," % obj[2]
-	elif "Device.Services." in dmobject and count == 4:
-		cmd = 'awk \'/DMOBJ tServicesVoiceServiceObj/,/^{0}$/\' ../dmtree/tr104/servicesvoiceservice.c'
-		res = os.popen(cmd).read()
-		string = "\n{\"%s\"," % obj[3]
-	elif "Device.Services." in dmobject and count >= 5:
-		array_name = ""
-		file = "../dmtree/tr104/servicesvoiceservice%s.c" % obj[3].lower()
-		if (os.path.isfile(file)):
-			for i in range(count-2):
-				array_name += obj[i+1]
-			cmd = 'awk \'/DMOBJ t%sObj/,/^{0}$/\' %s' % (array_name, file)
-			res = os.popen(cmd).read()
-			string = "\n{\"%s\"," % obj[count - 1]
-		else:
-			return "No"
 	else:
-		array_name = ""
 		if "Device.IP.Diagnostics." == dmobject:
-			file = "../dmtree/tr181/ip.c"
+			obj_name = obj[1].lower()
 		elif "Device.IP.Diagnostics." in dmobject:
-			file = "../dmtree/tr143/diagnostics.c"
-		elif "Device.SoftwareModules." in dmobject:
-			file = "../dmtree/tr157/softwaremodules.c"
-		elif "Device.BulkData." in dmobject:
-			file = "../dmtree/tr157/bulkdata.c"
+			obj_name = obj[2].lower()
 		else:
-			file = "../dmtree/tr181/%s.c" % obj[1].lower()
-		if (os.path.isfile(file)):
-			for i in range(count-2):
-				array_name += obj[i+1]
-			cmd = 'awk \'/DMOBJ t%sObj/,/^{0}$/\' %s' % (array_name, file)
-			res = os.popen(cmd).read()
-			string = "\n{\"%s\"," % obj[count - 1]
-		else:
-			return "No"
+			obj_name = obj[1].lower()
 
-	if string in res:
-		return "Yes"
-	else:
-		return "No"
+		for i in range(count-2):
+			array_name += obj[i+1]
+		cmd = 'find ../dmtree/ -name *%s*.c -exec awk \'/DMOBJ t%sObj/,/^{0}$/\' {} \;' % (obj_name, array_name)
 
-def check_param(param, res):
-	string = "\n{\"%s\"," % param
-	if string in res:
-		return "Yes"
-	else:
-		return "No"
-
-def check_commands(param):
-	cmd = 'awk \'/static const struct op_cmd operate_helper/,/^};$/\' ../dmoperate.c'
 	res = os.popen(cmd).read()
-	param = param.replace(".{i}.", ".*.")
-	param = param.replace("()", "")
-	string = "\n\t{\n\t\t\"%s\"," % param
-	if string in res:
-		return "Yes"
-	else:
-		return "No"
+	string = "\n{\"%s\"," % obj[count - 1]
+	supported = "Yes" if string in res else "No"
 
-def load_param(dmobject):
+	if remotedm != None and res != "" and supported == "No":
+		for i in range(remotedm.count(',') + 1):
+			if os.path.isdir("./.repo" + str(i)):
+				cmd = 'find ./.repo%s/ -name datamodel.c -exec awk \'/DMOBJ tDevice%sObj/,/^{0}$/\' {} \;' % (str(i), obj[count - 1])
+				res = os.popen(cmd).read()
+				if res != "":
+					break;
+
+	if res == "" and remotedm != None:
+		for i in range(remotedm.count(',') + 1):
+			if os.path.isdir("./.repo" + str(i)):
+				cmd = 'find ./.repo%s/ -name datamodel.c -exec awk \'/DMOBJ t%sObj/,/^{0}$/\' {} \;' % (str(i), array_name)
+				res = os.popen(cmd).read()
+				if res != "":
+					break;
+
+	return "Yes" if string in res else "No"
+
+def load_param_array(dmobject):
 	dmobject = dmobject.replace(".{i}.", ".")
 	count = dmobject.count('.')
 	obj = dmobject.split(".")
-	if count == 1:
-		cmd = 'awk \'/DMLEAF tRoot_181_Params/,/^{0}$/\' ../dmtree/tr181/device.c'
-		res = os.popen(cmd).read()
-	elif "Device.Services." in dmobject and count == 3:
-		cmd = 'awk \'/DMLEAF tServicesVoiceServiceParams/,/^{0}$/\' ../dmtree/tr104/servicesvoiceservice.c'
-		res = os.popen(cmd).read()
-	elif "Device.Services." in dmobject and count >= 4:
-		array_name = ""
-		file = "../dmtree/tr104/servicesvoiceservice%s.c" % obj[3].lower()
-		if (os.path.isfile(file)):
-			for i in range(count-1):
-				array_name += obj[i+1]
-			cmd = 'awk \'/DMLEAF t%sParams/,/^{0}$/\' %s' % (array_name, file)
-			res = os.popen(cmd).read()
 
-		else:
-			res = ""
+	if "tr181" in sys.argv[1] and count == 1:
+		cmd = 'awk \'/DMLEAF tDeviceParams/,/^{0}$/\' ../dmtree/tr181/device.c'
+	elif "tr104" in sys.argv[1] and  count == 3:
+		cmd = 'awk \'/DMLEAF tServicesVoiceServiceParams/,/^{0}$/\' ../dmtree/tr104/servicesvoiceservice.c'
 	else:
 		array_name = ""
-		if "Device.IP.Diagnostics." in dmobject:
-			file = "../dmtree/tr143/diagnostics.c"
-		elif "Device.Time." in dmobject:
-			file = "../dmtree/tr181/times.c"
-		elif "Device.SoftwareModules." in dmobject:
-			file = "../dmtree/tr157/softwaremodules.c"
-		elif "Device.BulkData." in dmobject:
-			file = "../dmtree/tr157/bulkdata.c"
-		else:
-			file = "../dmtree/tr181/%s.c" % obj[1].lower()
-		if(os.path.isfile(file)):
-			for i in range(count-1):
-				array_name += obj[i+1]
-			cmd = 'awk \'/DMLEAF t%sParams/,/^{0}$/\' %s' % (array_name, file)
-			res = os.popen(cmd).read()
-		else:
-			res = ""
-	if res == "":
-		return "", 0
-	else:
-		return res, 1
+		for i in range(count-1):
+			array_name += obj[i+1]
+		cmd = 'find ../dmtree/ -name *%s*.c -exec awk \'/DMLEAF t%sParams/,/^{0}$/\' {} \;' % (obj[2].lower() if "Device.IP.Diagnostics." in dmobject else obj[1].lower(), array_name)
+
+	res = os.popen(cmd).read()
+	if res == "" and remotedm != None:
+		for i in range(remotedm.count(',') + 1):
+			if os.path.isdir("./.repo" + str(i)):
+				cmd = 'find ./.repo%s/ -name datamodel.c -exec awk \'/DMLEAF t%sParams/,/^{0}$/\' {} \;' % (str(i), array_name)
+				res = os.popen(cmd).read()
+				if res != "":
+					break;
+
+	return res
+
+def check_param(param, res):
+	string = "\n{\"%s\"," % param
+	return "Yes" if string in res else "No"
+
+def check_commands(param):
+	cmd = 'awk \'/static const struct op_cmd operate_helper/,/^};$/\' ../dmoperate.c'
+	param = param.replace(".{i}.", ".*.").replace("()", "")
+
+	res = os.popen(cmd).read()
+	string = "\n\t{\n\t\t\"%s\"," % param
+
+	return "Yes" if string in res else "No"
 
 def printOBJPARAM(obj, supported, protocols, types):
 	fp = open('./.tmp', 'a')
-	if CUSTOM_PREFIX in obj:
-		print("%s::%s::%s::%s::" % (obj, protocols, "Yes", types), file=fp)
-	else:
-		print("%s::%s::%s::%s::" % (obj, protocols, supported, types), file=fp)
+	print("%s::%s::%s::%s::" % (obj, protocols, "Yes" if CUSTOM_PREFIX in obj else supported, types), file=fp)
 	fp.close()
 
 def printusage():
-	print("Usage: " + sys.argv[0] + " <json data model>")
+	print("Usage: " + sys.argv[0] + " <json data model> [options...] <urls>")
+	print("Options: ")
+	print(" -r, --remote-dm     Check OBJ/PARAM under these repositories if it is not found under bbf repo")
+	print(" -h, --help          This help text")
+	print("")
 	print("Examples:")
-	print("  - " + sys.argv[0] + " tr181.json")
+	print("  - python " + sys.argv[0] + " tr181.json")
 	print("    ==> Generate excel file in tr181.xls")
-	print("  - " + sys.argv[0] + " tr104.json")
+	print("  - python " + sys.argv[0] + " tr104.json")
 	print("    ==> Generate excel file in tr104.xls")
+	print("  - python " + sys.argv[0] + " tr181.json -r https://dev.iopsys.eu/feed/iopsys.git,https://dev.iopsys.eu/abc/def.git")
+	print("    ==> Generate excel file in tr181.xls")
+	print("  - python " + sys.argv[0] + " tr181.json --remote-dm https://dev.iopsys.eu/feed/iopsys.git")
+	print("    ==> Generate excel file in tr181.xls")
 
 def object_parse_childs( dmobject , value ):
 	hasobj = objhaschild(value)
@@ -186,23 +164,20 @@ def object_parse_childs( dmobject , value ):
 		printOBJPARAM(dmobject, supported, getprotocols(value), "object")		
 
 	if hasparam:
-		res, load = load_param(dmobject)
+		res = load_param_array(dmobject)
 		if isinstance(value,dict):
 			for k,v in value.items():
 				if k == "mapping":
 					continue
 				if isinstance(v,dict):
-					param_proto = getprotocols(v)
 					for k1,v1 in v.items():
 						if k1 == "type" and v1 != "object":
 							if "()" in k:
 								supported = check_commands(dmobject + k)
-								printOBJPARAM(dmobject + k, supported, param_proto, "operate")
-							elif load == "0":
-								printOBJPARAM(dmobject + k, "No", param_proto, "parameter")
+								printOBJPARAM(dmobject + k, supported, getprotocols(v), "operate")
 							else:
 								supported = check_param(k, res)
-								printOBJPARAM(dmobject + k, supported, param_proto, "parameter")
+								printOBJPARAM(dmobject + k, supported, getprotocols(v), "parameter")
 							break
 
 	if hasobj:
@@ -214,6 +189,8 @@ def object_parse_childs( dmobject , value ):
 							object_parse_childs(k , v)
 
 def generatecfromobj(excel_file, pobj, pvalue):
+	print("Start Generation of BBF Data Models Excel...")
+	print("Please wait...")
 	removefile("./.tmp")
 	removefile("./"+excel_file)
 	object_parse_childs(pobj, pvalue)
@@ -259,20 +236,36 @@ def generatecfromobj(excel_file, pobj, pvalue):
 	sheet.col(0).width = 1300*20
 	sheet.col(1).width = 175*20
 	sheet.col(2).width = 175*20
-	wb.save(excel_file) 
-	removefile("./.tmp")
+	wb.save(excel_file)
 
 ### main ###
 if len(sys.argv) < 2:
 	printusage()
 	exit(1)
-	
-if (sys.argv[1]).lower() == "-h" or (sys.argv[1]).lower() == "--help":
+
+try:
+	opts, args = getopt.getopt(sys.argv[2:], "hr:", ["remote-dm="])
+except getopt.GetoptError:
 	printusage()
 	exit(1)
 
 CUSTOM_PREFIX = "X_IOPSYS_EU"
-model_root_name = "Root"
+remotedm = None
+
+for opt, arg in opts:
+	if opt in ("-h", "--help"):
+		printusage()
+		exit(1)
+	elif opt in ("-r", "--remote-dm"):
+		remotedm = arg
+
+if remotedm != None:
+	print("Start downloading remote data models...")
+	print("Download in progress........")
+	url = remotedm.split(",")
+	for i in range(remotedm.count(',') + 1):
+		subprocess.run(["git", "clone", url[i], ".repo" + str(i)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
 if "tr181" in sys.argv[1]:
 	excel_file = "tr181.xls"
 elif "tr104" in sys.argv[1]:
@@ -288,7 +281,13 @@ for obj, value in data.items():
 
 	generatecfromobj(excel_file, obj, value)
 
+if remotedm != None:
+	for i in range(remotedm.count(',') + 1):
+		removefolder("./.repo" + str(i))
+
+removefile("./.tmp")
+
 if (os.path.isfile(excel_file)):
-	print("%s excel file generated" % excel_file)
+	print("%s Excel file generated" % excel_file)
 else:
 	print("No Excel file generated!")
