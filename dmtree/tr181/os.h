@@ -37,8 +37,6 @@ int os__browseHostsHostIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node,
 int os__browseHostsHostIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);
 int get_linker_host(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker);
 int os__get_Hosts_HostNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-int os__get_HostsHost_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-int os__set_HostsHost_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
 int os__get_HostsHost_PhysAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os__get_HostsHost_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os__get_HostsHost_AddressSource(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);

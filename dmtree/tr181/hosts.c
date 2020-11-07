@@ -14,7 +14,7 @@
 /* *** Device.Hosts. *** */
 DMOBJ tHostsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Host", &DMREAD, NULL, NULL, NULL, os__browseHostsHostInst, NULL, NULL, NULL, tHostsHostObj, tHostsHostParams, get_linker_host, BBFDM_BOTH, LIST_KEY{"PhysAddress", "Alias", NULL}},
+{"Host", &DMREAD, NULL, NULL, NULL, os__browseHostsHostInst, NULL, NULL, NULL, tHostsHostObj, tHostsHostParams, get_linker_host, BBFDM_BOTH, LIST_KEY{"PhysAddress", NULL}},
 {0}
 };
 
@@ -35,7 +35,6 @@ DMOBJ tHostsHostObj[] = {
 
 DMLEAF tHostsHostParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, os__get_HostsHost_Alias, os__set_HostsHost_Alias, NULL, NULL, BBFDM_BOTH},
 {"PhysAddress", &DMREAD, DMT_STRING, os__get_HostsHost_PhysAddress, NULL, NULL, NULL, BBFDM_BOTH},
 {"IPAddress", &DMREAD, DMT_STRING, os__get_HostsHost_IPAddress, NULL, NULL, NULL, BBFDM_BOTH},
 {"AddressSource", &DMREAD, DMT_STRING, os__get_HostsHost_AddressSource, NULL, NULL, NULL, BBFDM_BOTH},

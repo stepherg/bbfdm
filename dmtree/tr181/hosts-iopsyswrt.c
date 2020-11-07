@@ -88,48 +88,6 @@ int os__get_Hosts_HostNumberOfEntries(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
-int os__get_HostsHost_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct uci_section *s = NULL;
-
-	char *macaddr = dmjson_get_value((json_object *)data, 1, "macaddr");
-	uci_path_foreach_sections(bbfdm, "dmmap", "hosts", s) {
-		char *mac;
-		dmuci_get_value_by_section_string(s, "mac", &mac);
-		if (strcmp(mac, macaddr) == 0) {
-			dmuci_get_value_by_section_string(s, "alias", value);
-			break;
-		}
-	}
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
-}
-
-int os__set_HostsHost_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	struct uci_section *s = NULL, *dmmap = NULL;
-	char *macaddr, *v;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			macaddr = dmjson_get_value((json_object *)data, 1, "macaddr");
-			uci_path_foreach_option_eq(bbfdm, "dmmap", "hosts", "mac", macaddr, s) {
-				dmuci_set_value_by_section_bbfdm(s, "alias", value);
-				return 0;
-			}
-			dmuci_add_section_bbfdm("dmmap", "hosts", &dmmap, &v);
-			dmuci_set_value_by_section(dmmap, "mac", macaddr);
-			dmuci_set_value_by_section(dmmap, "alias", value);
-			break;
-	}
-	return 0;
-}
-
 /*#Device.Hosts.Host.{i}.PhysAddress!UBUS:router.network/hosts//hosts[@i-1].macaddr*/
 int os__get_HostsHost_PhysAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
