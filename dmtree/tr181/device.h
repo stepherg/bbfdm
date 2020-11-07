@@ -16,7 +16,7 @@
 #include <libbbf_api/dmcommon.h>
 
 extern DMOBJ tEntry181Obj[];
-extern DMOBJ tRoot_181_Obj[];
-extern DMLEAF tRoot_181_Params[];
+extern DMOBJ tDeviceObj[];
+extern DMLEAF tDeviceParams[];
 
 #endif
