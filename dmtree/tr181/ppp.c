@@ -144,7 +144,7 @@ static int get_ppp_status(char *refparam, struct dmctx *ctx, void *data, char *i
 	bool bstatus = false, bpend = false;
 
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct uci_section *)data)), String}}, 1, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "Unconfigured");
 	jobj = dmjson_get_obj(res, 1, "up");
 	if (jobj) {
 		status = dmjson_get_value(res, 1, "up");

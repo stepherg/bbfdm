@@ -830,14 +830,15 @@ static int set_DHCPv6ServerPool_Enable(char *refparam, struct dmctx *ctx, void *
 static int get_DHCPv6ServerPool_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
-	char *v= NULL;
+	char *v = NULL;
+	*value = "Error_Misconfigured";
 
 	uci_foreach_option_eq("dhcp", "dhcp", "interface", ((struct dhcpv6_args *)data)->interface, s) {
 		dmuci_get_value_by_section_string(s, "ignore", &v);
 		*value = (v && *v == '1') ? "Disabled" : "Enabled";
 		return 0;
 	}
-	*value="Error_Misconfigured";
+
 	return 0;
 }
 

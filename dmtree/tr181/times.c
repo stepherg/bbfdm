@@ -55,12 +55,7 @@ static int set_time_enable(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int get_time_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *path = "/etc/rc.d/*ntpd";
-
-	if (check_file(path))
-		*value = "Synchronized";
-	else
-		*value = "Disabled";
+	*value = (check_file("/etc/rc.d/*ntpd")) ? "Synchronized" : "Disabled";
 	return 0;
 }
 

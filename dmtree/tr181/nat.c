@@ -512,7 +512,7 @@ static int get_nat_port_mapping_protocol(char *refparam, struct dmctx *ctx, void
 	else if (strcmp(proto, "udp") == 0)
 		*value = "UDP";
 	else
-		*value = "TCP/UDP";
+		*value = "TCP,UDP";
 	return 0;
 }
 

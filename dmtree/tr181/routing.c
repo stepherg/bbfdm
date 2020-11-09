@@ -611,6 +611,8 @@ static int get_router_ipv4forwarding_origin(char *refparam, struct dmctx *ctx, v
 {
 	if (((struct routingfwdargs *)data)->type != ROUTE_DYNAMIC)
 		*value = "Static";
+	else
+		*value = "DHCPv4";
 	return 0;
 }
 

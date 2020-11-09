@@ -3450,7 +3450,7 @@ int os_set_QoSQueue_DropAlgorithm(char *refparam, struct dmctx *ctx, void *data,
 
 int os_get_QoSQueue_SchedulerAlgorithm(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "scheduling", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "scheduling", "SP");
 	return 0;
 }
 

@@ -418,7 +418,7 @@ static int get_alias_based_addressing(char *refparam, struct dmctx *ctx, void *d
 /*#Device.ManagementServer.InstanceMode!UCI:cwmp/cpe,cpe/instance_mode*/
 static int get_instance_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp", "cpe", "instance_mode", value);
+	*value = dmuci_get_option_value_fallback_def("cwmp", "cpe", "instance_mode", "InstanceNumber");
 	return 0;
 }
 

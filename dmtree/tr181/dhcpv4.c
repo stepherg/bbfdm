@@ -651,12 +651,13 @@ static int get_dhcp_status(char *refparam, struct dmctx *ctx, void *data, char *
 {
 	struct uci_section *s = NULL;
 	char *v = NULL;
+	*value = "Error_Misconfigured";
+
 	uci_foreach_option_eq("dhcp", "dhcp", "interface", ((struct dhcp_args *)data)->interface, s) {
 		dmuci_get_value_by_section_string(s, "ignore", &v);
 		*value = (v && *v == '1') ? "Disabled" : "Enabled";
 		return 0;
 	}
-	*value = "Error_Misconfigured";
 	return 0;
 }
 
@@ -1552,6 +1553,8 @@ static int get_DHCPv4Client_Status(char *refparam, struct dmctx *ctx, void *data
 /*#Device.DHCPv4.Client.{i}.DHCPStatus!UBUS:network.interface/status/interface,@Name/ipv4-address[@i-1].address*/
 static int get_DHCPv4Client_DHCPStatus(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+	*value = "Init";
+
 	if (((struct dhcp_client_args *)data)->dhcp_client_conf == NULL)
 		return 0;
 

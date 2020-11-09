@@ -281,7 +281,7 @@ int os_get_wifi_access_point_status (char *refparam, struct dmctx *ctx, void *da
 	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->wifi_ssid_sec, "device", &iface);
 	snprintf(object, sizeof(object), "wifi.ap.%s", iface);
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, status = "");
+	DM_ASSERT(res, status = "Error_Misconfigured");
 	status = dmjson_get_value(res, 1, "status");
 
 	if (strcmp(status, "running") == 0 || strcmp(status, "up") == 0)
@@ -325,7 +325,7 @@ int os__get_radio_supported_frequency_bands(char *refparam, struct dmctx *ctx, v
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "2.4GHz,5GHz");
 	*value = dmjson_get_value_array_all(res, DELIMITOR, 1, "supp_bands");
 	return 0;
 }
@@ -380,6 +380,7 @@ int os__get_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, struc
 	json_object *res = NULL, *neighboring_wifi_obj = NULL;
 	char object[32];
 
+	*value = "None";
 	uci_foreach_sections("wireless", "wifi-device", ss) {
 		snprintf(object, sizeof(object), "wifi.radio.%s", section_name(ss));
 		dmubus_call(object, "scanresults", UBUS_ARGS{}, 0, &res);
@@ -497,7 +498,7 @@ int os__get_WiFiRadio_SupportedOperatingChannelBandwidths(char *refparam, struct
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "Auto");
 	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
 		bandwidth = dmjson_get_value(supp_channels, 1, "bandwidth");
 		if (bandwidth && !strstr(bandwidth_list, !strcmp(bandwidth, "8080") ? "80+80" : !strcmp(bandwidth, "80") ? ",80MHz" : bandwidth)) {
@@ -523,7 +524,7 @@ int os__get_WiFiRadio_CurrentOperatingChannelBandwidth(char *refparam, struct dm
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "20MHz");
 	bandwidth = dmjson_get_value(res, 1, "bandwidth");
 	if (bandwidth)
 		dmasprintf(value, "%sMHz", bandwidth);
@@ -562,7 +563,7 @@ static int get_radio_standards(struct uci_section *section, char **value)
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(section));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "n,ax");
 
 	standard = dmjson_get_value(res, 1, "standard");
 	standards = strsplit(standard, "/", &length);

@@ -358,11 +358,7 @@ static int get_relay_enable(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int get_relay_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *path = "/etc/rc.d/*dnsmasq";
-	if (check_file(path))
-		*value = "Enabled";
-	else
-		*value = "Disabled";
+	*value = (check_file("/etc/rc.d/*dnsmasq")) ? "Enabled" : "Disabled";
 	return 0;
 }
 
@@ -493,7 +489,7 @@ static int get_nslookupdiagnostics_result_number_of_entries(char *refparam, stru
 
 static int get_result_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "Status", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "Status", "Error_Other");
 	return 0;
 }
 

@@ -819,9 +819,7 @@ static int get_access_point_security_supported_modes(char *refparam, struct dmct
 
 static void get_security_mode(char **value, char *encryption)
 {
-	if (strcmp(encryption, "none") == 0)
-		*value = "None";
-	else if (strcmp(encryption, "wep-open") == 0 || strcmp(encryption, "wep-shared") == 0)
+	if (strcmp(encryption, "wep-open") == 0 || strcmp(encryption, "wep-shared") == 0)
 		*value = "WEP-64";
 	else if (strcmp(encryption, "psk") == 0)
 		*value = "WPA-Personal";
@@ -836,7 +834,7 @@ static void get_security_mode(char **value, char *encryption)
 	else if (strcmp(encryption, "wpa-mixed") == 0 || strcmp(encryption, "mixed-wpa") == 0)
 		*value = "WPA-WPA2-Enterprise";
 	else
-		*value = "unknown";
+		*value = "None";
 }
 
 static void reset_wlan(struct uci_section *s)
@@ -1105,12 +1103,12 @@ static int get_WiFiAccessPointSecurity_MFPConfig(char *refparam, struct dmctx *c
 {
 	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "ieee80211w", value);
 
-	if(!*value || *value[0] == 0 || *value[0] == '0')
-		*value = "Disabled";
-	else if (*value[0] == '1')
+	if (*value[0] == '1')
 		*value = "Optional";
 	else if (*value[0] == '2')
 		*value = "Required";
+	else
+		*value = "Disabled";
 	return 0;
 }
 

@@ -685,7 +685,7 @@ static int get_USBPort_Power(char *refparam, struct dmctx *ctx, void *data, char
 	__read_sysfs_usb_port(data, "power/control", pwrctl, sizeof(pwrctl));
 
 	if (pwrctl[0] == 0)
-		*value = "";
+		*value = "Unknown";
 	else if (!strcmp(pwrctl, "auto"))
 		*value ="Self";
 	else

@@ -90,12 +90,8 @@ static int get_atm_encapsulation(char *refparam, struct dmctx *ctx, void *data, 
 	char *encapsulation;
 
 	dmuci_get_value_by_section_string(((struct atm_args *)data)->atm_sec, "encapsulation", &encapsulation);
-	if (strcmp(encapsulation, "vcmux") == 0)
-		*value = "VCMUX";
-	else if (strcmp(encapsulation, "llc") == 0)
-		*value = "LLC";
-	else
-		*value = "";
+
+	*value = (strcmp(encapsulation, "vcmux") == 0) ? "VCMUX" : "LLC";
 	return 0;
 }
 

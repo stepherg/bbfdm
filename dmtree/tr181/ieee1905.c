@@ -363,7 +363,11 @@ static int ubus_ieee1905_info(const char *option, char **value)
 /*#Device.IEEE1905.Version!UBUS:ieee1905/info//version*/
 static int get_IEEE1905_Version(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_ieee1905_info("version", value);
+	char *version = NULL;
+	ubus_ieee1905_info("version", &version);
+	if (version && *version == '0')
+		*value = "1905.1";
+	return 0;
 }
 
 /*#Device.IEEE1905.AL.IEEE1905Id!UBUS:ieee1905/info//ieee1905id*/
@@ -375,7 +379,11 @@ static int get_IEEE1905AL_IEEE1905Id(char *refparam, struct dmctx *ctx, void *da
 /*#Device.IEEE1905.AL.Status!UBUS:ieee1905/info//status*/
 static int get_IEEE1905AL_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_ieee1905_info("status", value);
+	char *version = NULL;
+	ubus_ieee1905_info("status", &version);
+	if (version && *version == '0')
+		*value = "Disabled";
+	return 0;
 }
 
 /*#Device.IEEE1905.AL.LastChange!UBUS:ieee1905/info//last_change*/
@@ -445,7 +453,7 @@ static int get_IEEE1905ALInterface_MediaType(char *refparam, struct dmctx *ctx, 
 {
 	json_object *res = NULL;
 	dmubus_call((char *)data, "info", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "Generic PHY");
 	*value = dmjson_get_value(res, 1, "interface_type");
 	return 0;
 }
@@ -495,7 +503,7 @@ static int get_IEEE1905ALInterface_PowerState(char *refparam, struct dmctx *ctx,
 {
 	json_object *res = NULL;
 	dmubus_call((char *)data, "info", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "Unsupported");
 	*value = dmjson_get_value(res, 1, "power_state");
 	return 0;
 }
@@ -967,7 +975,7 @@ static int get_IEEE1905ALNetworkTopology_Status(char *refparam, struct dmctx *ct
 {
 	json_object *res;
 	dmubus_call("topology", "status", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
+	DM_ASSERT(res, *value = "Error_Misconfigured");
 	*value = dmjson_get_value(res, 1, "status");
 	return 0;
 }
@@ -1262,7 +1270,6 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_MediaType(char *
 	return 0;
 }
 
-
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_PowerState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "power_status");
@@ -1476,7 +1483,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceLis
 /*#Device.IEEE1905.AL.Security.SetupMethod!UCI:ieee1905/security,security/method*/
 static int get_IEEE1905ALSecurity_SetupMethod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("ieee1905", "security", "method", value);
+	*value = dmuci_get_option_value_fallback_def("ieee1905", "security", "method", "PBC");
 	return 0;
 }
 

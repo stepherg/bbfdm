@@ -417,20 +417,21 @@ static char *get_dsl_standard(char *str)
 /*#Device.DSL.Line.{i}.StandardsSupported!UBUS:dsl.line.0/status//standards_supported*/
 static int get_DSLLine_StandardsSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *standards_supported,*pch, *spch, *tmp, *tmpPtr, *str = "";
+	char *standards_supported, *pch, *spch, *tmp, *tmpPtr = NULL, *str = NULL;
 
-	*value = "";
+	*value = "G.992.1_Annex_A";
 	standards_supported = get_dsl_value_array_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "standards_supported");
-	if(standards_supported[0] == '\0')
+	if (standards_supported[0] == '\0')
 		return 0;
-	for (pch = strtok_r(standards_supported, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch))
-	{
+	for (pch = strtok_r(standards_supported, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 		tmp = get_dsl_standard(pch);
-		if(*str == '\0')
+		if(!str)
 			dmasprintf(&str, "%s", tmp);
 		else {
-			tmpPtr = str;
+			tmpPtr = dmstrdup(str);
+			dmfree(str);
 			dmasprintf(&str, "%s,%s", tmpPtr, tmp);
+			dmfree(tmpPtr);
 		}
 	}
 	*value = str;
@@ -529,19 +530,19 @@ static int get_DSLLine_CurrentProfile(char *refparam, struct dmctx *ctx, void *d
 /*#Device.DSL.Line.{i}.PowerManagementState!UBUS:dsl.line.0/status//power_management_state*/
 static int get_DSLLine_PowerManagementState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *power_management_state = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "power_management_state");
-	if(strcmp(power_management_state, "l0") == 0)
+	char *power_mng_state = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "power_management_state");
+	if(strcmp(power_mng_state, "l0") == 0)
 		*value = "L0";
-	else if(strcmp(power_management_state, "l1") == 0)
+	else if(strcmp(power_mng_state, "l1") == 0)
 		*value = "L1";
-	else if(strcmp(power_management_state, "l2") == 0)
+	else if(strcmp(power_mng_state, "l2") == 0)
 		*value = "L2";
-	else if(strcmp(power_management_state, "l3") == 0)
+	else if(strcmp(power_mng_state, "l3") == 0)
 		*value = "L3";
-	else if(strcmp(power_management_state, "l4") == 0)
+	else if(strcmp(power_mng_state, "l4") == 0)
 		*value = "L4";
 	else
-		*value = power_management_state;
+		*value = power_mng_state;
 	return 0;
 }
 
@@ -953,10 +954,8 @@ static char *get_dsl_link_encapsulation_standard(char *str)
 		dsl_link_encapsulation_standard = "G.993.2_Annex_K_ATM";
 	else if(strcmp(str, "vdsl2_ptm") == 0)
 		dsl_link_encapsulation_standard = "G.993.2_Annex_K_PTM";
-	else if(strcmp(str, "auto") == 0)
-		dsl_link_encapsulation_standard = "G.994.1";
 	else
-		dsl_link_encapsulation_standard = "unknown";
+		dsl_link_encapsulation_standard = "G.994.1";
 
 	return dsl_link_encapsulation_standard;
 }
@@ -964,20 +963,21 @@ static char *get_dsl_link_encapsulation_standard(char *str)
 /*#Device.DSL.Channel.{i}.LinkEncapsulationSupported!UBUS:dsl.channel.0/status//link_encapsulation_supported*/
 static int get_DSLChannel_LinkEncapsulationSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *link_encapsulation_supported,*pch, *spch, *tmp, *tmpPtr, *str = "";
+	char *link_encap,*pch, *spch, *tmp, *tmpPtr = NULL, *str = NULL;
 
-	*value = "";
-	link_encapsulation_supported = get_dsl_value_array_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "status", "link_encapsulation_supported");
-	if(link_encapsulation_supported[0] == '\0')
+	*value = "G.994.1";
+	link_encap = get_dsl_value_array_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "status", "link_encapsulation_supported");
+	if(link_encap[0] == '\0')
 		return 0;
-	for (pch = strtok_r(link_encapsulation_supported, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch))
-	{
+	for (pch = strtok_r(link_encap, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 		tmp = get_dsl_link_encapsulation_standard(pch);
-		if(*str == '\0')
+		if(!str)
 			dmasprintf(&str, "%s", tmp);
 		else {
-			tmpPtr = str;
+			tmpPtr = dmstrdup(str);
+			dmfree(str);
 			dmasprintf(&str, "%s,%s", tmpPtr, tmp);
+			dmfree(tmpPtr);
 		}
 	}
 	*value = str;
