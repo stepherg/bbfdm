@@ -165,27 +165,6 @@ int os__get_HostsHost_InterfaceType(char *refparam, struct dmctx *ctx, void *dat
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.VendorClassID!UBUS:router.network/hosts//hosts[@i-1].dhcpopts.vcid*/
-int os__get_HostsHost_VendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 2, "dhcpopts", "vcid");
-	return 0;
-}
-
-/*#Device.Hosts.Host.{i}.ClientID!UBUS:router.network/hosts//hosts[@i-1].dhcpopts.clid*/
-int os__get_HostsHost_ClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 2, "dhcpopts", "clid");
-	return 0;
-}
-
-/*#Device.Hosts.Host.{i}.UserClassID!UBUS:router.network/hosts//hosts[@i-1].dhcpopts.ucid*/
-int os__get_HostsHost_UserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 2, "dhcpopts", "ucid");
-	return 0;
-}
-
 /*#Device.Hosts.Host.{i}.HostName!UBUS:router.network/hosts//hosts[@i-1].hostname*/
 int os__get_HostsHost_HostName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
