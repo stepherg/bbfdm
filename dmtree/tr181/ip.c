@@ -263,51 +263,80 @@ static char *get_ip_interface_last_instance(char *package, char *section, char* 
 
 static int delete_ip_intertace_instance(struct uci_section *s)
 {
-	// Get dmmap section related to this interface section
-	struct uci_section *dmmap_section = NULL;
-	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(s), &dmmap_section);
+	struct uci_section *int_ss = NULL, *int_stmp = NULL;
+	char buf[32], *ifname;
 
-	// Read the type option from interface section
-	char *type;
-	dmuci_get_value_by_section_string(s, "type", &type);
+	snprintf(buf, sizeof(buf), "@%s", section_name(s));
 
-	// Check the type value ==> if bridge : there is a Bridging.Bridge. object mapped to this interface, remove only proto option from the section
-	// Check the type value ==> else : there is no Bridging.Bridge. object mapped to this interface, remove the section
-	if (strcmp(type, "bridge") == 0) {
-		/* type is bridge ==> remove only proto option from the interface section and ip instance option from dmmap section */
-		dmuci_set_value_by_section(s, "proto", "");
-		dmuci_set_value_by_section(dmmap_section, "ip_int_instance", "");
-	} else {
-		/* Remove the device section corresponding to this interface if exists */
-		char *device = get_device( section_name(s));
-		struct uci_section *ss = NULL, *stmp = NULL;
-		uci_foreach_option_eq_safe("network", "device", "name", device, stmp, ss) {
-			char *device_type;
-			dmuci_get_value_by_section_string(ss, "type", &device_type);
-			if (strcmp(device_type, "untagged") == 0) dmuci_delete_by_section(ss, NULL, NULL);
-			break;
+	uci_foreach_sections_safe("network", "interface", int_stmp, int_ss) {
+
+		dmuci_get_value_by_section_string(int_ss, "ifname", &ifname);
+		if (strcmp(section_name(int_ss), section_name(s)) != 0 && strcmp(ifname, buf) != 0)
+			continue;
+
+		// Get dmmap section related to this interface section
+		struct uci_section *dmmap_section = NULL;
+		get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(int_ss), &dmmap_section);
+
+		// Read the type option from interface section
+		char *type;
+		dmuci_get_value_by_section_string(int_ss, "type", &type);
+
+		// Check the type value ==> if bridge : there is a Bridging.Bridge. object mapped to this interface, remove only proto option from the section
+		// Check the type value ==> else : there is no Bridging.Bridge. object mapped to this interface, remove the section
+		if (strcmp(type, "bridge") == 0) {
+			/* type is bridge ==> remove only proto option from the interface section and ip instance option from dmmap section */
+			dmuci_set_value_by_section(int_ss, "proto", "");
+			dmuci_set_value_by_section(dmmap_section, "ip_int_instance", "");
+		} else {
+			/* Remove the device section corresponding to this interface if exists and no interface used it */
+			char *device = get_device( section_name(int_ss));
+			struct uci_section *ss = NULL, *stmp = NULL;
+
+			if (device && *device) {
+				bool device_found = false;
+
+				uci_foreach_sections("network", "interface", ss) {
+					dmuci_get_value_by_section_string(ss, "ifname", &ifname);
+					if (strcmp(section_name(ss), section_name(int_ss)) != 0 && strcmp(ifname, buf) != 0 && strstr(ifname, device)) {
+						device_found = true;
+						break;
+					}
+				}
+
+				if (!device_found) {
+					uci_foreach_option_eq_safe("network", "device", "name", device, stmp, ss) {
+						char *device_type;
+						dmuci_get_value_by_section_string(ss, "type", &device_type);
+						if (strcmp(device_type, "untagged") == 0) dmuci_delete_by_section(ss, NULL, NULL);
+						break;
+					}
+				}
+			}
+
+			/* type is not bridge */
+			/* remove dmmap section related to this interface */
+			dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+			/* Remove "IPv4Address" child section related to this "IP.Interface." object */
+			uci_foreach_option_eq_safe("dmmap_network_ipv4", "intf_ipv4", "parent_section", section_name(int_ss), stmp, ss) {
+				dmuci_delete_by_section(ss, NULL, NULL);
+			}
+
+			/* Remove "IPv6Address" child section related to this "IP.Interface." object */
+			uci_foreach_option_eq_safe("dmmap_network_ipv6", "intf_ipv6", "parent_section", section_name(int_ss), stmp, ss) {
+				dmuci_delete_by_section(ss, NULL, NULL);
+			}
+
+			/* Remove "IPv6PrefixAddress" child section related to this "IP.Interface." object */
+			uci_foreach_option_eq_safe("dmmap_network_ipv6_prefix", "intf_ipv6_prefix", "parent_section", section_name(int_ss), stmp, ss) {
+				dmuci_delete_by_section(ss, NULL, NULL);
+			}
+
+			/* remove interface section */
+			dmuci_delete_by_section(int_ss, NULL, NULL);
 		}
-		/* type is not bridge */
-		/* remove dmmap section related to this interface */
-		dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
-		/* Remove "IPv4Address" child section related to this "IP.Interface." object */
-		uci_foreach_option_eq_safe("dmmap_network_ipv4", "intf_ipv4", "parent_section", section_name(s), stmp, ss) {
-			dmuci_delete_by_section(ss, NULL, NULL);
-		}
-
-		/* Remove "IPv6Address" child section related to this "IP.Interface." object */
-		uci_foreach_option_eq_safe("dmmap_network_ipv6", "intf_ipv6", "parent_section", section_name(s), stmp, ss) {
-			dmuci_delete_by_section(ss, NULL, NULL);
-		}
-
-		/* Remove "IPv6PrefixAddress" child section related to this "IP.Interface." object */
-		uci_foreach_option_eq_safe("dmmap_network_ipv6_prefix", "intf_ipv6_prefix", "parent_section", section_name(s), stmp, ss) {
-			dmuci_delete_by_section(ss, NULL, NULL);
-		}
-
-		/* remove interface section */
-		dmuci_delete_by_section(s, NULL, NULL);
 	}
 	return 0;
 }
