@@ -258,17 +258,54 @@ static char *get_ip_interface_last_instance(char *package, char *section, char* 
 	return instance;
 }
 
+static int remove_interface_name_from_interface_list(struct uci_section *dmmap_sec, char *int_sec)
+{
+	char *sec_name, intf_list[256], *p, *pch = NULL, *spch = NULL;
+
+	intf_list[0] = '\0';
+	dmuci_get_value_by_section_string(dmmap_sec, "section_name", &sec_name);
+
+	p = intf_list;
+	for (pch = strtok_r(sec_name, ",", &spch); pch; pch = strtok_r(NULL, ",", &spch)) {
+		if (strcmp(pch, int_sec) != 0) {
+			if (intf_list[0] != '\0')
+				dmstrappendchr(p, ',');
+			dmstrappendstr(p, pch);
+		}
+	}
+	dmstrappendend(p);
+
+	if (*intf_list != '\0') {
+		/* set section_name list */
+		dmuci_set_value_by_section(dmmap_sec, "section_name", intf_list);
+	} else {
+		/* remove dmmap section */
+		dmuci_delete_by_section(dmmap_sec, NULL, NULL);
+	}
+	return 0;
+}
+
 static int delete_ip_intertace_instance(struct uci_section *s)
 {
 	struct uci_section *int_ss = NULL, *int_stmp = NULL;
-	char buf[32], *ifname;
+	char buf[32], *ifname, *int_sec_name = dmstrdup(section_name(s));
 
-	snprintf(buf, sizeof(buf), "@%s", section_name(s));
+	snprintf(buf, sizeof(buf), "@%s", int_sec_name);
+
+	/* remove section name from the list of dmmap ethernet link */
+	uci_path_foreach_sections_safe(bbfdm, DMMAP, "link", int_stmp, int_ss) {
+		char *sec_list;
+		dmuci_get_value_by_section_string(int_ss, "section_name", &sec_list);
+		if (strstr(sec_list, int_sec_name)) {
+			remove_interface_name_from_interface_list(int_ss, int_sec_name);
+			break;
+		}
+	}
 
 	uci_foreach_sections_safe("network", "interface", int_stmp, int_ss) {
 
 		dmuci_get_value_by_section_string(int_ss, "ifname", &ifname);
-		if (strcmp(section_name(int_ss), section_name(s)) != 0 && strcmp(ifname, buf) != 0)
+		if (strcmp(section_name(int_ss), int_sec_name) != 0 && strcmp(ifname, buf) != 0)
 			continue;
 
 		// Get dmmap section related to this interface section
@@ -282,10 +319,14 @@ static int delete_ip_intertace_instance(struct uci_section *s)
 		// Check the type value ==> if bridge : there is a Bridging.Bridge. object mapped to this interface, remove only proto option from the section
 		// Check the type value ==> else : there is no Bridging.Bridge. object mapped to this interface, remove the section
 		if (strcmp(type, "bridge") == 0) {
-			/* type is bridge ==> remove only proto option from the interface section and ip instance option from dmmap section */
+			/* type is bridge */
+
+			/* remove only proto option from the interface section and ip instance option from dmmap section */
 			dmuci_set_value_by_section(int_ss, "proto", "");
 			dmuci_set_value_by_section(dmmap_section, "ip_int_instance", "");
 		} else {
+			/* type is not bridge */
+
 			/* Remove the device section corresponding to this interface if exists and no interface used it */
 			char *device = get_device( section_name(int_ss));
 			struct uci_section *ss = NULL, *stmp = NULL;
@@ -311,7 +352,6 @@ static int delete_ip_intertace_instance(struct uci_section *s)
 				}
 			}
 
-			/* type is not bridge */
 			/* remove dmmap section related to this interface */
 			dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
@@ -358,6 +398,36 @@ static bool interface_section_with_dhcpv6_exists(const char *sec_name)
 	}
 
 	return false;
+}
+
+static void set_ip_interface_ifname_option(struct uci_section *section, char *linker, char *instance)
+{
+	struct uci_section *s = NULL;
+	bool device_exists = false;
+	char ifname[64];
+
+	snprintf(ifname, sizeof(ifname), "%s.1", linker);
+
+	// Check if device exists
+	uci_foreach_option_eq("network", "device", "name", ifname, s) {
+		device_exists = true;
+		break;
+	}
+
+	// if device dosn't exist ==> create a new device section
+	if (!device_exists) {
+		char device_name[32], *val;
+
+		snprintf(device_name, sizeof(device_name), "dev_ip_int_%s", instance);
+
+		dmuci_add_section("network", "device", &s, &val);
+		dmuci_rename_section_by_section(s, device_name);
+		dmuci_set_value_by_section(s, "type", "untagged");
+		dmuci_set_value_by_section(s, "ifname", linker);
+		dmuci_set_value_by_section(s, "name", ifname);
+	}
+
+	dmuci_set_value_by_section(section, "ifname", ifname);
 }
 
 /*************************************************************
@@ -1263,43 +1333,54 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 				// Get interface name from Ethernet.Link. object
 				struct uci_section *s = NULL;
-				char *interface, *ifname = NULL;
+				char *interface_list;
 				get_dmmap_section_of_config_section_eq("dmmap", "link", "device", linker, &s);
-				dmuci_get_value_by_section_string(s, "section_name", &interface);
+				dmuci_get_value_by_section_string(s, "section_name", &interface_list);
+				char *interface = strchr(interface_list, ',');
 
-				dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
-				if (ifname && *ifname) {
-
-					// Update the new interface section with proto=dhcp
+				if (!interface) {
+					bool ip_interface_s = false;
+					// Update the new interface section with proto=dhcp if its proto is empty
 					uci_foreach_sections("network", "interface", s) {
-						if (strcmp(section_name(s), interface) == 0) {
-							dmuci_set_value_by_section(s, "proto", "dhcp");
+						if (strcmp(section_name(s), interface_list) == 0) {
+							char *proto, *type;
+							dmuci_get_value_by_section_string(s, "proto", &proto);
+							dmuci_get_value_by_section_string(s, "type", &type);
+							if (*proto == '\0') {
+								dmuci_set_value_by_section(s, "proto", "dhcp");
+								if (strcmp(type, "bridge") != 0)
+									set_ip_interface_ifname_option(s, linker, instance);
+							} else {
+								ip_interface_s = true;
+							}
 							break;
 						}
 					}
 
-					// Get dmmap section related to this interface section and remove it
-					struct uci_section *dmmap_section = NULL;
-					get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
+					if (!ip_interface_s) {
+						// Get dmmap section related to this interface section and remove it
+						struct uci_section *dmmap_section = NULL;
+						get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
 
-					// Get the current ip instance
-					char *ip_int_instance;
-					dmuci_get_value_by_section_string(dmmap_section, "ip_int_instance", &ip_int_instance);
+						// Get the current ip instance
+						char *ip_int_instance;
+						dmuci_get_value_by_section_string(dmmap_section, "ip_int_instance", &ip_int_instance);
 
-					// Get the new dmmap section related to the new interface section and update ip instance option
-					struct uci_section *new_dmmap_section = NULL;
-					get_dmmap_section_of_config_section("dmmap_network", "interface", interface, &new_dmmap_section);
-					dmuci_set_value_by_section(new_dmmap_section, "ip_int_instance", ip_int_instance);
+						// Get the new dmmap section related to the new interface section and update ip instance option
+						struct uci_section *new_dmmap_section = NULL;
+						get_dmmap_section_of_config_section("dmmap_network", "interface", interface_list, &new_dmmap_section);
+						dmuci_set_value_by_section(new_dmmap_section, "ip_int_instance", ip_int_instance);
 
-					// remove dmmap section
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
+						// remove dmmap section
+						dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
-					// remove the current interface section
-					dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
-
+						// remove the current interface section
+						dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+					} else {
+						set_ip_interface_ifname_option((struct uci_section *)data, linker, instance);
+					}
 				} else {
-					char *device = get_device(interface);
-					dmuci_set_value_by_section((struct uci_section *)data, "ifname", device);
+					set_ip_interface_ifname_option((struct uci_section *)data, linker, instance);
 				}
 			}
 			break;
