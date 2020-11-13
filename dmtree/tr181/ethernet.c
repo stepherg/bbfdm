@@ -85,7 +85,7 @@ static int check_section_in_curr_section(char *curr_section, char *section)
 
 static void add_section_in_curr_section(struct uci_section *dmmap_section, char *curr_section, char *section)
 {
-	char section_list[128] = {0}, *p = section_list;
+	char section_list[256] = {0}, *p = section_list;
 	dmstrappendstr(p, curr_section);
 	dmstrappendchr(p, ',');
 	dmstrappendstr(p, section);
@@ -127,9 +127,10 @@ static void create_link(char *sec_name, char *mac_addr)
 	/* For all the Ethernet link objects pointing to same Ethernet Interface, only one ethernet link */
 	char intf[32] = {0};
 	strncpy(intf, device, sizeof(intf) - 1);
-	char *p = strchr(intf, '.');
-	if (p != NULL) {
-		*p = '\0';
+	char *vid = strchr(intf, '.');
+	char *macvlan = strchr(intf, '_');
+	if (vid != NULL || !macvlan) {
+		if (vid) *vid = '\0';
 		struct uci_section *dmmap_section = is_device_section_exist(intf);
 		if (dmmap_section) {
 			char *section_name;
