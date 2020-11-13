@@ -233,13 +233,6 @@ struct dmmap_sect {
 	char *instance;
 };
 
-struct dm_args
-{
-	struct uci_section *section;
-	struct uci_section *dmmap_section;
-	char *name;
-};
-
 struct sysfs_dmsection {
 	struct list_head list;
 	char *sysfs_folder_path;
@@ -305,7 +298,6 @@ struct uci_section *get_dup_section_in_dmmap_opt(char *dmmap_package, char *sect
 struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* section_type, char*sect_name, char *opt_name, char* opt_value);
 bool elt_exists_in_array(char **str_array, char *str, int length);
 int get_shift_time_time(int shift_time, char *local_time, int size);
-int get_shift_time_shift(char *local_time, char *shift);
 int command_exec_output_to_array(char *cmd, char **output, int *length);
 int bbf_api_copy_temporary_file_to_original_file(char *f1, char *f2);
 struct uci_section *is_dmmap_section_exist(char* package, char* section);

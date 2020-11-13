@@ -588,7 +588,7 @@ static int rootcmp(char *inparam, char *rootobj)
 char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...)
 {
 	va_list arg;
-	char *instance, *last_inst = NULL;;
+	char *instance, *last_inst = NULL;
 	int i = 0;
 	unsigned int action, pos = instance_ranck - 1;
 	void *argv[argc+1];
@@ -619,10 +619,9 @@ char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_i
 char *update_instance(char *max_inst, int argc, ...)
 {
 	va_list arg;
-	char *instance;
+	char *instance, *last_inst = NULL;
 	int i = 0;
 	void *argv[argc+1];
-	char *last_inst;
 
 	va_start(arg, argc);
 	for (i = 0; i < argc; i++) {

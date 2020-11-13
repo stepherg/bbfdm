@@ -1223,16 +1223,6 @@ int get_shift_time_time(int shift_time, char *local_time, int size)
 	return 0;
 }
 
-int get_shift_time_shift(char *local_time, char *shift)
-{
-	struct tm tm = {0};
-
-	strptime(local_time,"%Y-%m-%dT%H:%M:%SZ", &tm);
-	sprintf(shift, "%u", (unsigned int)(mktime(&tm) - time(NULL)));
-
-	return 0;
-}
-
 int command_exec_output_to_array(char *cmd, char **output, int *length)
 {
 	FILE *fp;
