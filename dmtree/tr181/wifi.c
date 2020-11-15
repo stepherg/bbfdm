@@ -648,27 +648,6 @@ static int set_wmm_enabled(char *refparam, struct dmctx *ctx, void *data, char *
 	return 0;
 }
 
-/*#Device.WiFi.AccessPoint.{i}.MaxAssociatedDevices!UCI:wireless/wifi-iface,@i-1/maxassoc*/
-static int get_access_point_maxassoc(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_acp_args *)data)->wifi_acp_sec, "maxassoc", "32");
-	return 0;
-}
-
-static int set_access_point_maxassoc(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, "maxassoc", value);
-			return 0;
-	}
-	return 0;
-}
-
 /*#Device.WiFi.AccessPoint.{i}.MACAddressControlEnabled!UCI:wireless/wifi-iface,@i-1/macfilter*/
 static int get_access_point_control_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2360,7 +2339,6 @@ DMLEAF tWiFiAccessPointParams[] = {
 {"WMMEnable", &DMWRITE, DMT_BOOL, get_wmm_enabled, set_wmm_enabled, NULL, NULL, BBFDM_BOTH},
 {"UAPSDEnable", &DMWRITE, DMT_BOOL, get_WiFiAccessPoint_UAPSDEnable, set_WiFiAccessPoint_UAPSDEnable, NULL, NULL, BBFDM_BOTH},
 {"AssociatedDeviceNumberOfEntries", &DMREAD, DMT_UNINT, os__get_access_point_total_associations, NULL, NULL, NULL, BBFDM_BOTH},
-{"MaxAssociatedDevices", &DMWRITE, DMT_UNINT, get_access_point_maxassoc, set_access_point_maxassoc, NULL, NULL, BBFDM_BOTH},
 {"MACAddressControlEnabled", &DMWRITE, DMT_BOOL, get_access_point_control_enable, set_access_point_control_enable, NULL, NULL, BBFDM_BOTH},
 {"UAPSDCapability", &DMREAD, DMT_BOOL, get_WiFiAccessPoint_UAPSDCapability, NULL, NULL, NULL, BBFDM_BOTH},
 {"WMMCapability", &DMREAD, DMT_BOOL, get_WiFiAccessPoint_WMMCapability, NULL, NULL, NULL, BBFDM_BOTH},

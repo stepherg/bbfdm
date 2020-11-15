@@ -33110,22 +33110,7 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "unsignedInt",
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "wireless",
-								"section": {
-									"type": "wifi-iface",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "maxassoc"
-								}
-							}
-						}
-					]
+					"datatype": "unsignedInt"
 				},
 				"IsolationEnable": {
 					"type": "boolean",
