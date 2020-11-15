@@ -18,5 +18,5 @@ run_uspd:
   allow_failure: false
   trigger:
     project: iopsys/uspd
-    branch: devel
+    branch: bbf_pipeline
     strategy: depend
