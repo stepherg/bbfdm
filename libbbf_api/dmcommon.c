@@ -1364,6 +1364,16 @@ int dm_time_format(time_t ts, char **dst)
 	return 0;
 }
 
+void convert_string_to_hex(const char *str, char *hex)
+{
+	int i, j, len = strlen(str);
+
+	for (i = 0, j = 0; i < len; i++, j += 2) {
+		sprintf((char *)hex+j, "%02X", str[i]);
+	}
+	hex[j] = '\0';
+}
+
 bool match(const char *string, const char *pattern)
 {
 	regex_t re;

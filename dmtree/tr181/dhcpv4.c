@@ -36,6 +36,11 @@ struct client_args {
 	const struct dhcp_lease *lease;
 };
 
+struct client_options_args {
+	char *tag;
+	char *value;
+};
+
 struct dhcp_client_args {
 	struct uci_section *dhcp_client_conf;
 	struct uci_section *dhcp_client_dm;
@@ -83,6 +88,12 @@ static inline void init_args_dhcp_host(struct dhcp_static_args *args, struct uci
 static inline void init_dhcp_client_args(struct client_args *args, const struct dhcp_lease *lease)
 {
 	args->lease = lease;
+}
+
+static inline void init_client_options_args(struct client_options_args *args, char *tag, char *val)
+{
+	args->tag = tag;
+	args->value = val;
 }
 
 /*************************************************************
@@ -1411,6 +1422,51 @@ static int get_dhcp_client_active(char *refparam, struct dmctx *ctx, void *data,
 	return 0;
 }
 
+static int get_DHCPv4ServerPoolClient_IPv4AddressNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "1";
+	return 0;
+}
+
+static int get_DHCPv4ServerPoolClient_OptionNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	FILE *f = fopen(DHCP_CLIENT_OPTIONS_FILE, "r");
+	if (f == NULL) {
+		*value = "0";
+		return 0;
+	}
+
+	const struct client_args *args = (struct client_args *)data;
+	char line[2048], macaddr[24], vcid[128], clid[128], ucid[128];
+	char *inst = NULL, *max_inst = NULL;
+	int nbre_options = 0;
+
+	while (fgets(line, sizeof(line), f) != NULL) {
+		remove_new_line(line);
+
+		sscanf(line, "%24s vcid=%128s clid=%128s ucid=%128s",
+				macaddr, vcid, clid, ucid);
+
+		if (strncmp(macaddr, (char *)args->lease->hwaddr, 24) == 0) {
+
+			if (strcmp(vcid, "-") != 0)
+				nbre_options++;
+
+			if (strcmp(clid, "-") != 0)
+				nbre_options++;
+
+			if (strcmp(ucid, "-") != 0)
+				nbre_options++;
+
+			break;
+		}
+	}
+	fclose(f);
+
+	dmasprintf(value, "%d", nbre_options);
+	return 0;
+}
+
 static int get_dhcp_client_ipv4address_leasetime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	const struct client_args *args = data;
@@ -1423,6 +1479,24 @@ static int get_dhcp_client_ipv4address_ip_address(char *refparam, struct dmctx *
 	const struct client_args *args = data;
 
 	*value = (char *)args->lease->ipaddr;
+	return 0;
+}
+
+static int get_DHCPv4ServerPoolClientOption_Tag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = ((struct client_options_args *)data)->tag;
+	return 0;
+}
+
+static int get_DHCPv4ServerPoolClientOption_Value(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	const char *tag_value = ((struct client_options_args *)data)->value;
+	char hex[256] = {0};
+
+	if (tag_value && *tag_value)
+		convert_string_to_hex(tag_value, hex);
+
+	*value = dmstrdup(hex);
 	return 0;
 }
 
@@ -2609,6 +2683,61 @@ static int browseDhcpClientIPv4Inst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	return 0;
 }
 
+static int browseDHCPv4ServerPoolClientOptionInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	FILE *f = fopen(DHCP_CLIENT_OPTIONS_FILE, "r");
+	if (f == NULL)
+		return 0;
+
+	const struct client_args *args = (struct client_args *)prev_data;
+	struct client_options_args curr_client_options_args = {0};
+	char line[2048], macaddr[24], vcid[128], clid[128], ucid[128];
+	char *inst = NULL, *max_inst = NULL;
+	int id = 0;
+
+	while (fgets(line, sizeof(line), f) != NULL) {
+		remove_new_line(line);
+
+		sscanf(line, "%24s vcid=%128s clid=%128s ucid=%128s",
+				macaddr, vcid, clid, ucid);
+
+		if (strncmp(macaddr, (char *)args->lease->hwaddr, 24) == 0) {
+
+			if (strcmp(vcid, "-") != 0) {
+				init_client_options_args(&curr_client_options_args, "60", dmstrdup(vcid));
+
+				inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
+					break;
+			}
+
+			if (strcmp(clid, "-") != 0) {
+				init_client_options_args(&curr_client_options_args, "61", dmstrdup(clid));
+
+				inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
+					break;
+			}
+
+
+			if (strcmp(ucid, "-") != 0) {
+				init_client_options_args(&curr_client_options_args, "77", dmstrdup(ucid));
+
+				inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
+					break;
+			}
+
+			break;
+		}
+	}
+	fclose(f);
+	return 0;
+}
+
 /*#Device.DHCPv4.Client.{i}.!UCI:network/interface/dmmap_dhcp_client*/
 static int browseDHCPv4ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -2947,7 +3076,10 @@ static int browseDHCPv4RelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_n
 	return 0;
 }
 
-/*** DHCPv4. ***/
+/**********************************************************************************************************************************
+*                                            OBJ & PARAM DEFINITION
+***********************************************************************************************************************************/
+/* *** Device.DHCPv4. *** */
 DMOBJ tDHCPv4Obj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Client", &DMWRITE, addObjDHCPv4Client, delObjDHCPv4Client, NULL, browseDHCPv4ClientInst, NULL, NULL, NULL, tDHCPv4ClientObj, tDHCPv4ClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
@@ -3012,6 +3144,13 @@ DMLEAF tDHCPv4ClientReqOptionParams[] = {
 {0}
 };
 
+/* *** Device.DHCPv4.Server. *** */
+DMOBJ tDHCPv4ServerObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Pool", &DMWRITE, add_dhcp_server, delete_dhcp_server, NULL, browseDhcpInst, NULL, NULL, NULL, tDHCPv4ServerPoolObj, tDHCPv4ServerPoolParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{0}
+};
+
 DMLEAF tDHCPv4ServerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
 //{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4Server_Enable, set_DHCPv4Server_Enable, NULL, NULL, BBFDM_BOTH},
@@ -3019,27 +3158,12 @@ DMLEAF tDHCPv4ServerParams[] = {
 {0}
 };
 
-/*** DHCPv4.Server. ***/
-DMOBJ tDHCPv4ServerObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Pool", &DMWRITE, add_dhcp_server, delete_dhcp_server, NULL, browseDhcpInst, NULL, NULL, NULL, tDHCPv4ServerPoolObj, tDHCPv4ServerPoolParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{0}
-};
-
-/*** DHCPv4.Server.Pool.{i}. ***/
+/* *** Device.DHCPv4.Server.Pool.{i}. *** */
 DMOBJ tDHCPv4ServerPoolObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"StaticAddress", &DMWRITE, add_dhcp_staticaddress, delete_dhcp_staticaddress, NULL, browseDhcpStaticInst, NULL, NULL, NULL, NULL, tDHCPv4ServerPoolStaticAddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Chaddr", "Alias", NULL}},
 {"Option", &DMWRITE, addObjDHCPv4ServerPoolOption, delObjDHCPv4ServerPoolOption, NULL, browseDHCPv4ServerPoolOptionInst, NULL, NULL, NULL, NULL, tDHCPv4ServerPoolOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
 {"Client", &DMREAD, NULL, NULL, NULL, browseDhcpClientInst, NULL, NULL, NULL, tDHCPv4ServerPoolClientObj, tDHCPv4ServerPoolClientParams, get_dhcp_client_linker, BBFDM_BOTH, LIST_KEY{"Chaddr", "Alias", NULL}},
-{0}
-};
-
-/*** DHCPv4.Server.Pool.{i}.Client.{i}. ***/
-DMOBJ tDHCPv4ServerPoolClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseDhcpClientIPv4Inst, NULL, NULL, NULL, NULL, tDHCPv4ServerPoolClientIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
-//{"Option", &DMREAD, NULL, NULL, NULL, browseDHCPv4ServerPoolClientOptionInst, NULL, NULL, NULL, NULL, tDHCPv4ServerPoolClientOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", NULL}},
 {0}
 };
 
@@ -3064,30 +3188,13 @@ DMLEAF tDHCPv4ServerPoolParams[] = {
 {0}
 };
 
-/*** DHCPv4.Server.Pool.{i}.StaticAddress.{i}. ***/
+/* *** Device.DHCPv4.Server.Pool.{i}.StaticAddress.{i}. *** */
 DMLEAF tDHCPv4ServerPoolStaticAddressParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
 {"Enable", &DMWRITE, DMT_BOOL, get_dhcp_static_enable, set_dhcp_static_enable, NULL, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_dhcp_static_alias, set_dhcp_static_alias, NULL, NULL, BBFDM_BOTH},
 {"Chaddr", &DMWRITE, DMT_STRING,  get_dhcp_staticaddress_chaddr, set_dhcp_staticaddress_chaddr, NULL, NULL, BBFDM_BOTH},
 {"Yiaddr", &DMWRITE, DMT_STRING,  get_dhcp_staticaddress_yiaddr, set_dhcp_staticaddress_yiaddr, NULL, NULL, BBFDM_BOTH},
-{0}
-};
-
-/*** DHCPv4.Server.Pool.{i}.Client.{i}. ***/
-DMLEAF tDHCPv4ServerPoolClientParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING,  get_dhcp_client_alias, set_dhcp_client_alias, NULL, NULL, BBFDM_BOTH},
-{"Chaddr", &DMREAD, DMT_STRING,  get_dhcp_client_chaddr, NULL, NULL, NULL, BBFDM_BOTH},
-{"Active", &DMREAD, DMT_BOOL,  get_dhcp_client_active, NULL, NULL, NULL, BBFDM_BOTH},
-{0}
-};
-
-/*** DHCPv4.Server.Pool.{i}.Client.{i}.IPv4Address.{i}. ***/
-DMLEAF tDHCPv4ServerPoolClientIPv4AddressParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"LeaseTimeRemaining", &DMREAD, DMT_TIME,  get_dhcp_client_ipv4address_leasetime, NULL, NULL, NULL, BBFDM_BOTH},
-{"IPAddress", &DMREAD, DMT_STRING,  get_dhcp_client_ipv4address_ip_address, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -3101,11 +3208,37 @@ DMLEAF tDHCPv4ServerPoolOptionParams[] = {
 {0}
 };
 
+/* *** Device.DHCPv4.Server.Pool.{i}.Client.{i}. *** */
+DMOBJ tDHCPv4ServerPoolClientObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseDhcpClientIPv4Inst, NULL, NULL, NULL, NULL, tDHCPv4ServerPoolClientIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
+{"Option", &DMREAD, NULL, NULL, NULL, browseDHCPv4ServerPoolClientOptionInst, NULL, NULL, NULL, NULL, tDHCPv4ServerPoolClientOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", NULL}},
+{0}
+};
+
+DMLEAF tDHCPv4ServerPoolClientParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING,  get_dhcp_client_alias, set_dhcp_client_alias, NULL, NULL, BBFDM_BOTH},
+{"Chaddr", &DMREAD, DMT_STRING,  get_dhcp_client_chaddr, NULL, NULL, NULL, BBFDM_BOTH},
+{"Active", &DMREAD, DMT_BOOL,  get_dhcp_client_active, NULL, NULL, NULL, BBFDM_BOTH},
+{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClient_IPv4AddressNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"OptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClient_OptionNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.DHCPv4.Server.Pool.{i}.Client.{i}.IPv4Address.{i}. *** */
+DMLEAF tDHCPv4ServerPoolClientIPv4AddressParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
+{"LeaseTimeRemaining", &DMREAD, DMT_TIME,  get_dhcp_client_ipv4address_leasetime, NULL, NULL, NULL, BBFDM_BOTH},
+{"IPAddress", &DMREAD, DMT_STRING,  get_dhcp_client_ipv4address_ip_address, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
 /* *** Device.DHCPv4.Server.Pool.{i}.Client.{i}.Option.{i}. *** */
 DMLEAF tDHCPv4ServerPoolClientOptionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-//{"Tag", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClientOption_Tag, NULL, NULL, NULL, BBFDM_BOTH},
-//{"Value", &DMREAD, DMT_HEXBIN, get_DHCPv4ServerPoolClientOption_Value, NULL, NULL, NULL, BBFDM_BOTH},
+{"Tag", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClientOption_Tag, NULL, NULL, NULL, BBFDM_BOTH},
+{"Value", &DMREAD, DMT_HEXBIN, get_DHCPv4ServerPoolClientOption_Value, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 

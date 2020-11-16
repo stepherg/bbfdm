@@ -115,6 +115,7 @@ extern char *SupportedFrequencyBands[];
 #define MAX_PROC_ROUTING 256
 #define ROUTING_FILE "/proc/net/route"
 #define DHCP_LEASES_FILE "/tmp/dhcp.leases"
+#define DHCP_CLIENT_OPTIONS_FILE "/var/dhcp.client.options"
 #define DMMAP "dmmap"
 #define DHCPSTATICADDRESS_DISABLED_CHADDR "00:00:00:00:00:01"
 #define RANGE_ARGS (struct range_args[])
@@ -251,6 +252,7 @@ pid_t get_pid(char *pname);
 int check_file(char *path);
 char *cidr2netmask(int bits);
 bool is_strword_in_optionvalue(char *optionvalue, char *str);
+void remove_new_line(char *buf);
 int dmcmd(char *cmd, int n, ...);
 int dmcmd_read(int pipe, char *buffer, int size);
 void dmcmd_read_alloc(int pipe, char **value);
@@ -309,6 +311,7 @@ int get_net_iface_sysfs(const char *uci_iface, const char *name, char **value);
 int get_net_device_sysfs(const char *uci_iface, const char *name, char **value);
 char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_section);
 int dm_time_format(time_t ts, char **dst);
+void convert_string_to_hex(const char *str, char *hex);
 bool match(const char *string, const char *pattern);
 int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], int enumeration_size, char *pattern[], int pattern_size);
 int dm_validate_boolean(char *value);
