@@ -54427,17 +54427,6 @@
 						"Static",
 						"AutoIP",
 						"None"
-					],
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "router.network",
-								"method": "hosts",
-								"args": {},
-								"key": "hosts[@i-1].addrsrc"
-							}
-						}
 					]
 				},
 				"DHCPClient": {
@@ -54469,18 +54458,7 @@
 							"min": -1
 						}
 					],
-					"unit": "seconds",
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "router.network",
-								"method": "hosts",
-								"args": {},
-								"key": "hosts[@i-1].leasetmrmn"
-							}
-						}
-					]
+					"unit": "seconds"
 				},
 				"AssociatedDevice": {
 					"type": "string",
@@ -54571,17 +54549,6 @@
 						{
 							"max": 255
 						}
-					],
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "router.network",
-								"method": "hosts",
-								"args": {},
-								"key": "hosts[@i-1].dhcpopts.vcid"
-							}
-						}
 					]
 				},
 				"ClientID": {
@@ -54597,17 +54564,6 @@
 						{
 							"max": 65535
 						}
-					],
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "router.network",
-								"method": "hosts",
-								"args": {},
-								"key": "hosts[@i-1].dhcpopts.clid"
-							}
-						}
 					]
 				},
 				"UserClassID": {
@@ -54622,17 +54578,6 @@
 					"range": [
 						{
 							"max": 65535
-						}
-					],
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "router.network",
-								"method": "hosts",
-								"args": {},
-								"key": "hosts[@i-1].dhcpopts.ucid"
-							}
 						}
 					]
 				},

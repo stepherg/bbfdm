@@ -102,27 +102,12 @@ int os__get_HostsHost_IPAddress(char *refparam, struct dmctx *ctx, void *data, c
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.AddressSource!UBUS:router.network/hosts//hosts[@i-1].addrsrc*/
-int os__get_HostsHost_AddressSource(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "addrsrc");
-	*value = (strcmp(*value, "dhcp") == 0) ? "DHCP" : "Static";
-	return 0;
-}
-
 int os__get_HostsHost_DHCPClient(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "macaddr");
 	adm_entry_get_linker_param(ctx, dm_print_path("%s%cDHCPv4%cServer%cPool%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
 	if (*value == NULL)
 		*value = "";
-	return 0;
-}
-
-/*#Device.Hosts.Host.{i}.LeaseTimeRemaining!UBUS:router.network/hosts//hosts[@i-1].leasetmrmn*/
-int os__get_HostsHost_LeaseTimeRemaining(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "leasetmrmn");
 	return 0;
 }
 

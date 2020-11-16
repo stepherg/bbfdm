@@ -37,9 +37,7 @@ DMLEAF tHostsHostParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
 {"PhysAddress", &DMREAD, DMT_STRING, os__get_HostsHost_PhysAddress, NULL, NULL, NULL, BBFDM_BOTH},
 {"IPAddress", &DMREAD, DMT_STRING, os__get_HostsHost_IPAddress, NULL, NULL, NULL, BBFDM_BOTH},
-{"AddressSource", &DMREAD, DMT_STRING, os__get_HostsHost_AddressSource, NULL, NULL, NULL, BBFDM_BOTH},
 {"DHCPClient", &DMREAD, DMT_STRING, os__get_HostsHost_DHCPClient, NULL, NULL, NULL, BBFDM_BOTH},
-{"LeaseTimeRemaining", &DMREAD, DMT_INT, os__get_HostsHost_LeaseTimeRemaining, NULL, NULL, NULL, BBFDM_BOTH},
 {"AssociatedDevice", &DMREAD, DMT_STRING, os__get_HostsHost_AssociatedDevice, NULL, NULL, NULL, BBFDM_BOTH},
 {"Layer1Interface", &DMREAD, DMT_STRING, os__get_HostsHost_Layer1Interface, NULL, NULL, NULL, BBFDM_BOTH},
 {"Layer3Interface", &DMREAD, DMT_STRING, os__get_HostsHost_Layer3Interface, NULL, NULL, NULL, BBFDM_BOTH},

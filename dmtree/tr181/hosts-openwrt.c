@@ -50,17 +50,7 @@ int os__get_HostsHost_IPAddress(char *refparam, struct dmctx *ctx, void *data, c
 	return not_implemented(value);
 }
 
-int os__get_HostsHost_AddressSource(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	return not_implemented(value);
-}
-
 int os__get_HostsHost_DHCPClient(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	return not_implemented(value);
-}
-
-int os__get_HostsHost_LeaseTimeRemaining(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return not_implemented(value);
 }
