@@ -249,6 +249,8 @@ int init_call_log()
 			time_start = mktime(&tm_start);
 			time_end = mktime(&tm_end);
 			snprintf(cdr.duration, sizeof(cdr.duration), "%u", (unsigned int)(time_end - time_start));
+			// Convert start time to ISO 8601 date-time format as per TR-181 data model
+			strftime(cdr.start_time, sizeof(cdr.start_time), "%Y-%m-%dT%H:%M:%SZ", &tm_start);
 		} else {
 			TR104_DEBUG("Invalid CDR: [%s]\nWrong start time and/or end time, [%s], [%s]\n",
 				line, cdr.start_time, end_time);
