@@ -31,47 +31,84 @@ unsigned char dmcli_evaluatetest = 0;
 
 int usp_fault_map(int fault)
 {
-	int usp_fault;
+	int out_fault;
 
-	if (bbfdatamodel_type != BBFDM_USP)
-		return fault;
-
-	switch(fault) {
-	case FAULT_9000:
-		usp_fault = 7001;
-		break;
-	case FAULT_9001:
-		usp_fault = 7002;
-		break;
-	case FAULT_9002:
-		usp_fault = 7003;
-		break;
-	case FAULT_9003:
-		usp_fault = 7004;
-		break;
-	case FAULT_9004:
-		usp_fault = 7005;
-		break;
-	case FAULT_9005:
-		usp_fault = 7026;
-		break;
-	case FAULT_9006:
-		usp_fault = 7011;
-		break;
-	case FAULT_9007:
-		usp_fault = 7012;
-		break;
-	case FAULT_9008:
-		usp_fault = 7013;
-		break;
-	case FAULT_9027:
-		usp_fault = 7013;
-		break;
-	default:
-		usp_fault = fault;
+	if (bbfdatamodel_type == BBFDM_USP) {
+		switch(fault) {
+		case FAULT_9000:
+			out_fault = USP_FAULT_MESSAGE_NOT_UNDERSTOOD;
+			break;
+		case FAULT_9001:
+			out_fault = USP_FAULT_REQUEST_DENIED;
+			break;
+		case FAULT_9002:
+			out_fault = USP_FAULT_INTERNAL_ERROR;
+			break;
+		case FAULT_9003:
+			out_fault = USP_FAULT_INVALID_ARGUMENT;
+			break;
+		case FAULT_9004:
+		case FAULT_9027:
+			out_fault = USP_FAULT_RESOURCES_EXCEEDED;
+			break;
+		case FAULT_9005:
+			out_fault = USP_FAULT_INVALID_PATH;
+			break;
+		case FAULT_9006:
+			out_fault = USP_FAULT_INVALID_TYPE;
+			break;
+		case FAULT_9007:
+			out_fault = USP_FAULT_INVALID_VALUE;
+			break;
+		case FAULT_9008:
+			out_fault = USP_FAULT_PARAM_READ_ONLY;
+			break;
+		default:
+			if (fault)
+				out_fault = USP_FAULT_GENERAL_FAILURE;
+			else
+				out_fault = fault;
+		}
+	} else if (bbfdatamodel_type == BBFDM_CWMP) {
+		switch(fault) {
+		case USP_FAULT_GENERAL_FAILURE:
+			out_fault = FAULT_9002;
+			break;
+		case USP_FAULT_MESSAGE_NOT_UNDERSTOOD:
+			out_fault = FAULT_9000;
+			break;
+		case USP_FAULT_REQUEST_DENIED:
+			out_fault = FAULT_9001;
+			break;
+		case USP_FAULT_INTERNAL_ERROR:
+			out_fault = FAULT_9002;
+			break;
+		case USP_FAULT_INVALID_ARGUMENT:
+			out_fault = FAULT_9003;
+			break;
+		case USP_FAULT_RESOURCES_EXCEEDED:
+			out_fault = FAULT_9004;
+			break;
+		case USP_FAULT_INVALID_TYPE:
+			out_fault = FAULT_9006;
+			break;
+		case USP_FAULT_INVALID_VALUE:
+			out_fault = FAULT_9007;
+			break;
+		case USP_FAULT_PARAM_READ_ONLY:
+			out_fault =  FAULT_9008;
+			break;
+		case USP_FAULT_INVALID_PATH:
+			out_fault = FAULT_9005;
+			break;
+		default:
+			out_fault = fault;
+		}
+	} else {
+		out_fault = fault;
 	}
 
-	return usp_fault;
+	return out_fault;
 }
 
 static void print_dm_help(void)
