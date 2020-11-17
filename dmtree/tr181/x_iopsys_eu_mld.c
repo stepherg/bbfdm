@@ -842,126 +842,127 @@ static int set_mldp_interface_upstream(char *refparam, struct dmctx *ctx, void *
 
 /* ***Device.X_IOPSYS_EU_MLD. *** */
 DMOBJ X_IOPSYS_EU_MLDObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Snooping", &DMWRITE, add_mld_snooping_obj, del_mld_snooping_obj, NULL, browse_mld_snooping_inst, NULL, NULL, NULL, X_IOPSYS_EU_MLDSnoopingObj, X_IOPSYS_EU_MLDSnoopingParams, NULL, BBFDM_BOTH},
-{"Proxy", &DMWRITE, add_mld_proxy_obj, del_mld_proxy_obj, NULL, browse_mld_proxy_inst, NULL, NULL, NULL, X_IOPSYS_EU_MLDProxyObj, X_IOPSYS_EU_MLDProxyParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Snooping", &DMWRITE, add_mld_snooping_obj, del_mld_snooping_obj, NULL, browse_mld_snooping_inst, NULL, X_IOPSYS_EU_MLDSnoopingObj, X_IOPSYS_EU_MLDSnoopingParams, NULL, BBFDM_BOTH},
+{"Proxy", &DMWRITE, add_mld_proxy_obj, del_mld_proxy_obj, NULL, browse_mld_proxy_inst, NULL, X_IOPSYS_EU_MLDProxyObj, X_IOPSYS_EU_MLDProxyParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF X_IOPSYS_EU_MLDParams[] = {
-{"SnoopingNumberOfEntries", &DMREAD, DMT_UNINT, get_mlds_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
-{"ProxyNumberOfEntries", &DMREAD, DMT_UNINT, get_mldp_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+{"SnoopingNumberOfEntries", &DMREAD, DMT_UNINT, get_mlds_no_of_entries, NULL, BBFDM_BOTH},
+{"ProxyNumberOfEntries", &DMREAD, DMT_UNINT, get_mldp_no_of_entries, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ X_IOPSYS_EU_MLDSnoopingObj[] = {
-//{"ClientGroup", &DMREAD, NULL, NULL, NULL, browse_mlds_cgrp_inst, NULL, NULL, NULL, MLDSnoopingCLientGroupObj, MLDSnoopingClientGroupParams, NULL, BBFDM_BOTH},
-{"Filter", &DMWRITE, add_mlds_filter_obj, del_mcasts_filter_obj, NULL, browse_mlds_filter_inst, NULL, NULL, NULL, NULL, MLDSnoopingFilterParams, NULL, BBFDM_BOTH},
+//{"ClientGroup", &DMREAD, NULL, NULL, NULL, browse_mlds_cgrp_inst, NULL, NULL, MLDSnoopingCLientGroupObj, MLDSnoopingClientGroupParams, NULL, BBFDM_BOTH},
+{"Filter", &DMWRITE, add_mlds_filter_obj, del_mcasts_filter_obj, NULL, browse_mlds_filter_inst, NULL, NULL, MLDSnoopingFilterParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ MLDSnoopingCLientGroupObj[] = {
-//{"AssociatedDevice", &DMREAD, NULL, NULL, NULL, browse_mlds_cgrp_assoc_dev_inst, NULL, NULL, NULL, NULL, MLDSnoopingClientGroupAssociatedDeviceParams, NULL, BBFDM_BOTH},
-//{"ClientGroupStats", &DMREAD, NULL, NULL, NULL, browse_mlds_cgrp_stats_inst, NULL, NULL, NULL, NULL, MLDSnoopingClientGroupStatsParams, NULL, BBFDM_BOTH},
+//{"AssociatedDevice", &DMREAD, NULL, NULL, NULL, browse_mlds_cgrp_assoc_dev_inst, NULL, NULL, MLDSnoopingClientGroupAssociatedDeviceParams, NULL, BBFDM_BOTH},
+//{"ClientGroupStats", &DMREAD, NULL, NULL, NULL, browse_mlds_cgrp_stats_inst, NULL, NULL, MLDSnoopingClientGroupStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF MLDSnoopingClientGroupParams[] = {
-//{"GroupAddress", &DMREAD, DMT_STRING, get_mlds_cgrp_gaddr, NULL, NULL, NULL, BBFDM_BOTH},
-//{"AssociatedDeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_mlds_cgrp_assoc_dev_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+//{"GroupAddress", &DMREAD, DMT_STRING, get_mlds_cgrp_gaddr, NULL, BBFDM_BOTH},
+//{"AssociatedDeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_mlds_cgrp_assoc_dev_no_of_entries, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF MLDSnoopingFilterParams[] = {
-{"Enable", &DMWRITE, DMT_BOOL, get_mcasts_filter_enable, set_mcasts_filter_enable, NULL, NULL, BBFDM_BOTH},
-{"IPAddress", &DMWRITE, DMT_STRING, get_mcasts_filter_address, set_mcasts_filter_address, NULL, NULL, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_mcasts_filter_enable, set_mcasts_filter_enable, BBFDM_BOTH},
+{"IPAddress", &DMWRITE, DMT_STRING, get_mcasts_filter_address, set_mcasts_filter_address, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF MLDSnoopingClientGroupAssociatedDeviceParams[] = {
-//{"Interface", &DMREAD, DMT_STRING, get_mlds_cgrp_adev_iface, NULL, NULL, NULL, BBFDM_BOTH},
+//{"Interface", &DMREAD, DMT_STRING, get_mlds_cgrp_adev_iface, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF MLDSnoopingClientGroupStatsParams[] = {
-//{"ReportsSent", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_rsent, NULL, NULL, NULL, BBFDM_BOTH},
-//{"ReportsReceived", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_rrcvd, NULL, NULL, NULL, BBFDM_BOTH},
-//{"QueriesSent", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_qsent, NULL, NULL, NULL, BBFDM_BOTH},
-//{"QueriesReceived", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_qrcvd, NULL, NULL, NULL, BBFDM_BOTH},
-//{"LeavesSent", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_lsent, NULL, NULL, NULL, BBFDM_BOTH},
-//{"LeavesReceived", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_lrcvd, NULL, NULL, NULL, BBFDM_BOTH},
+//{"ReportsSent", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_rsent, NULL, BBFDM_BOTH},
+//{"ReportsReceived", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_rrcvd, NULL, BBFDM_BOTH},
+//{"QueriesSent", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_qsent, NULL, BBFDM_BOTH},
+//{"QueriesReceived", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_qrcvd, NULL, BBFDM_BOTH},
+//{"LeavesSent", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_lsent, NULL, BBFDM_BOTH},
+//{"LeavesReceived", &DMREAD, DMT_UNINT, get_mlds_cgrp_stats_lrcvd, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF X_IOPSYS_EU_MLDSnoopingParams[] = {
-{"Enable", &DMWRITE, DMT_BOOL, get_mcast_snooping_enable, set_mcast_snooping_enable, NULL, NULL, BBFDM_BOTH},
-{"Version", &DMWRITE, DMT_STRING, get_mld_snooping_version, set_mld_snooping_version, NULL, NULL, BBFDM_BOTH},
-{"Robustness", &DMWRITE, DMT_UNINT, get_mcast_snooping_robustness, set_mcast_snooping_robustness, NULL, NULL, BBFDM_BOTH},
-{"Aggregation", &DMWRITE, DMT_BOOL, get_mcast_snooping_aggregation, set_mcast_snooping_aggregation, NULL, NULL, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_mcast_snooping_interface, set_mcast_snooping_interface, NULL, NULL, BBFDM_BOTH},
-{"Mode", &DMWRITE, DMT_STRING, get_mcast_snooping_mode, set_mcast_snooping_mode, NULL, NULL, BBFDM_BOTH},
-{"FilterNumberOfEntries", &DMREAD, DMT_UNINT, get_mcasts_filter_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
-//{"ClientGroupNumberOfEntries", &DMREAD, DMT_UNINT, get_mldp_cgrps_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_mcast_snooping_enable, set_mcast_snooping_enable, BBFDM_BOTH},
+{"Version", &DMWRITE, DMT_STRING, get_mld_snooping_version, set_mld_snooping_version, BBFDM_BOTH},
+{"Robustness", &DMWRITE, DMT_UNINT, get_mcast_snooping_robustness, set_mcast_snooping_robustness, BBFDM_BOTH},
+{"Aggregation", &DMWRITE, DMT_BOOL, get_mcast_snooping_aggregation, set_mcast_snooping_aggregation, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_mcast_snooping_interface, set_mcast_snooping_interface, BBFDM_BOTH},
+{"Mode", &DMWRITE, DMT_STRING, get_mcast_snooping_mode, set_mcast_snooping_mode, BBFDM_BOTH},
+{"FilterNumberOfEntries", &DMREAD, DMT_UNINT, get_mcasts_filter_no_of_entries, NULL, BBFDM_BOTH},
+//{"ClientGroupNumberOfEntries", &DMREAD, DMT_UNINT, get_mldp_cgrps_no_of_entries, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ X_IOPSYS_EU_MLDProxyObj[] = {
-{"Interface", &DMWRITE, add_mldp_interface_obj, del_mldp_interface_obj, NULL, browse_mldp_interface_inst, NULL, NULL, NULL, NULL, MLDProxyInterfaceParams, NULL, BBFDM_BOTH},
-//{"ClientGroup", &DMREAD, NULL, NULL, NULL, browse_mldp_cgrp_inst, NULL, NULL, NULL, MLDProxyCLientGroupObj, MLDProxyClientGroupParams, NULL, BBFDM_BOTH},
-{"Filter", &DMWRITE, add_mldp_filter_obj, del_mcastp_filter_obj, NULL, browse_mldp_filter_inst, NULL, NULL, NULL, NULL, MLDProxyFilterParams, NULL, BBFDM_BOTH},
+{"Interface", &DMWRITE, add_mldp_interface_obj, del_mldp_interface_obj, NULL, browse_mldp_interface_inst, NULL, NULL, MLDProxyInterfaceParams, NULL, BBFDM_BOTH},
+//{"ClientGroup", &DMREAD, NULL, NULL, NULL, browse_mldp_cgrp_inst, NULL, MLDProxyCLientGroupObj, MLDProxyClientGroupParams, NULL, BBFDM_BOTH},
+{"Filter", &DMWRITE, add_mldp_filter_obj, del_mcastp_filter_obj, NULL, browse_mldp_filter_inst, NULL, NULL, MLDProxyFilterParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ MLDProxyCLientGroupObj[] = {
-//{"AssociatedDevice", &DMREAD, NULL, NULL, NULL, browse_mldp_cgrp_assoc_dev_inst, NULL, NULL, NULL, NULL, MLDProxyClientGroupAssociatedDeviceParams, NULL, BBFDM_BOTH},
-//{"ClientGroupStats", &DMREAD, NULL, NULL, NULL, browse_mldp_cgrp_stats_inst, NULL, NULL, NULL, NULL, MLDProxyClientGroupStatsParams, NULL, BBFDM_BOTH},
+//{"AssociatedDevice", &DMREAD, NULL, NULL, NULL, browse_mldp_cgrp_assoc_dev_inst, NULL, NULL, MLDProxyClientGroupAssociatedDeviceParams, NULL, BBFDM_BOTH},
+//{"ClientGroupStats", &DMREAD, NULL, NULL, NULL, browse_mldp_cgrp_stats_inst, NULL, NULL, MLDProxyClientGroupStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
+
 DMLEAF MLDProxyClientGroupParams[] = {
-//{"GroupAddress", &DMREAD, DMT_STRING, get_mldp_cgrp_gaddr, NULL, NULL, NULL, BBFDM_BOTH},
-//{"AssociatedDeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_mldp_cgrp_assoc_dev_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+//{"GroupAddress", &DMREAD, DMT_STRING, get_mldp_cgrp_gaddr, NULL, BBFDM_BOTH},
+//{"AssociatedDeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_mldp_cgrp_assoc_dev_no_of_entries, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF MLDProxyFilterParams[] = {
-{"Enable", &DMWRITE, DMT_BOOL, get_mcastp_filter_enable, set_mcastp_filter_enable, NULL, NULL, BBFDM_BOTH},
-{"IPAddress", &DMWRITE, DMT_STRING, get_mcastp_filter_address, set_mldp_filter_address, NULL, NULL, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_mcastp_filter_enable, set_mcastp_filter_enable, BBFDM_BOTH},
+{"IPAddress", &DMWRITE, DMT_STRING, get_mcastp_filter_address, set_mldp_filter_address, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF MLDProxyClientGroupAssociatedDeviceParams[] = {
-//{"Interface", &DMREAD, DMT_STRING, get_mldp_cgrp_adev_iface, NULL, NULL, NULL, BBFDM_BOTH},
+//{"Interface", &DMREAD, DMT_STRING, get_mldp_cgrp_adev_iface, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF MLDProxyClientGroupStatsParams[] = {
-//{"ReportsSent", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_rsent, NULL, NULL, NULL, BBFDM_BOTH},
-//{"ReportsReceived", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_rrcvd, NULL, NULL, NULL, BBFDM_BOTH},
-//{"QueriesSent", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_qsent, NULL, NULL, NULL, BBFDM_BOTH},
-//{"QueriesReceived", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_qrcvd, NULL, NULL, NULL, BBFDM_BOTH},
-//{"LeavesSent", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_lsent, NULL, NULL, NULL, BBFDM_BOTH},
-//{"LeavesReceived", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_lrcvd, NULL, NULL, NULL, BBFDM_BOTH},
+//{"ReportsSent", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_rsent, NULL, BBFDM_BOTH},
+//{"ReportsReceived", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_rrcvd, NULL, BBFDM_BOTH},
+//{"QueriesSent", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_qsent, NULL, BBFDM_BOTH},
+//{"QueriesReceived", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_qrcvd, NULL, BBFDM_BOTH},
+//{"LeavesSent", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_lsent, NULL, BBFDM_BOTH},
+//{"LeavesReceived", &DMREAD, DMT_UNINT, get_mldp_cgrp_stats_lrcvd, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF MLDProxyInterfaceParams[] = {
-{"Interface", &DMWRITE, DMT_STRING, get_mldp_interface_iface, set_mldp_interface_iface, NULL, NULL, BBFDM_BOTH},
-{"Upstream", &DMWRITE, DMT_BOOL, get_mcastp_interface_upstream, set_mldp_interface_upstream, NULL, NULL, BBFDM_BOTH},
-{"SnoopingMode", &DMWRITE, DMT_STRING, get_mcastp_iface_snoop_mode, set_mcastp_iface_snoop_mode, NULL, NULL, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_mldp_interface_iface, set_mldp_interface_iface, BBFDM_BOTH},
+{"Upstream", &DMWRITE, DMT_BOOL, get_mcastp_interface_upstream, set_mldp_interface_upstream, BBFDM_BOTH},
+{"SnoopingMode", &DMWRITE, DMT_STRING, get_mcastp_iface_snoop_mode, set_mcastp_iface_snoop_mode, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF X_IOPSYS_EU_MLDProxyParams[] = {
-{"Enable", &DMWRITE, DMT_BOOL, get_mcast_proxy_enable, set_mcast_proxy_enable, NULL, NULL, BBFDM_BOTH},
-{"Version", &DMWRITE, DMT_STRING, get_mld_proxy_version, set_mld_proxy_version, NULL, NULL, BBFDM_BOTH},
-{"QueryInterval",&DMWRITE, DMT_UNINT, get_mcastp_query_interval, set_mcastp_query_interval, NULL, NULL, BBFDM_BOTH},
-{"QueryResponseInterval",&DMWRITE, DMT_UNINT, get_mcastp_q_response_interval, set_mcastp_q_response_interval, NULL, NULL, BBFDM_BOTH},
-{"LastMemberQueryInterval",&DMWRITE, DMT_UNINT, get_mcastp_last_mq_interval, set_mcastp_last_mq_interval, NULL, NULL, BBFDM_BOTH},
-{"ImmediateLeave", &DMWRITE, DMT_BOOL, get_mcast_proxy_fast_leave, set_mcast_proxy_fast_leave, NULL, NULL, BBFDM_BOTH},
-{"Robustness", &DMWRITE, DMT_UNINT, get_mcast_proxy_robustness, set_mcast_proxy_robustness, NULL, NULL, BBFDM_BOTH},
-{"Aggregation", &DMWRITE, DMT_BOOL, get_mcast_proxy_aggregation, set_mcast_proxy_aggregation, NULL, NULL, BBFDM_BOTH},
-{"FilterNumberOfEntries", &DMREAD, DMT_UNINT, get_mcastp_filter_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
-{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_mcastp_interface_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_mcast_proxy_enable, set_mcast_proxy_enable, BBFDM_BOTH},
+{"Version", &DMWRITE, DMT_STRING, get_mld_proxy_version, set_mld_proxy_version, BBFDM_BOTH},
+{"QueryInterval",&DMWRITE, DMT_UNINT, get_mcastp_query_interval, set_mcastp_query_interval, BBFDM_BOTH},
+{"QueryResponseInterval",&DMWRITE, DMT_UNINT, get_mcastp_q_response_interval, set_mcastp_q_response_interval, BBFDM_BOTH},
+{"LastMemberQueryInterval",&DMWRITE, DMT_UNINT, get_mcastp_last_mq_interval, set_mcastp_last_mq_interval, BBFDM_BOTH},
+{"ImmediateLeave", &DMWRITE, DMT_BOOL, get_mcast_proxy_fast_leave, set_mcast_proxy_fast_leave, BBFDM_BOTH},
+{"Robustness", &DMWRITE, DMT_UNINT, get_mcast_proxy_robustness, set_mcast_proxy_robustness, BBFDM_BOTH},
+{"Aggregation", &DMWRITE, DMT_BOOL, get_mcast_proxy_aggregation, set_mcast_proxy_aggregation, BBFDM_BOTH},
+{"FilterNumberOfEntries", &DMREAD, DMT_UNINT, get_mcastp_filter_no_of_entries, NULL, BBFDM_BOTH},
+{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_mcastp_interface_no_of_entries, NULL, BBFDM_BOTH},
 {0}
 };

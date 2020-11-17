@@ -157,14 +157,14 @@ static int set_x_iopsys_eu_button_alias(char *refparam, struct dmctx *ctx, void 
 
 /*** DMROOT.X_IOPSYS_EU_Buttons.{i}. ****/
 DMLEAF X_IOPSYS_EU_ButtonParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_x_iopsys_eu_button_alias, set_x_iopsys_eu_button_alias, NULL, NULL, BBFDM_BOTH},
-{"Enable", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_button_enable, set_x_iopsys_eu_button_enable, NULL, NULL, BBFDM_BOTH},	
-{"Name", &DMREAD, DMT_STRING, get_x_iopsys_eu_button_name, NULL, NULL, NULL, BBFDM_BOTH},
-{"GPIOButton", &DMREAD, DMT_STRING, get_x_iopsys_eu_button_gpio, NULL, NULL, NULL, BBFDM_BOTH},
-{"HotplugInterface", &DMREAD, DMT_STRING, get_x_iopsys_eu_button_hotplug, NULL, NULL, NULL, BBFDM_BOTH},
-{"HotplugInterfaceForLongPress", &DMREAD, DMT_STRING, get_x_iopsys_eu_button_hotplug_long, NULL, NULL, NULL, BBFDM_BOTH},
-{"MinPressTime", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_button_minpress, set_x_iopsys_eu_button_minpress, NULL, NULL, BBFDM_BOTH},
-{"LongPressTime", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_button_longpress, set_x_iopsys_eu_button_longpress, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING, get_x_iopsys_eu_button_alias, set_x_iopsys_eu_button_alias, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_button_enable, set_x_iopsys_eu_button_enable, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_x_iopsys_eu_button_name, NULL, BBFDM_BOTH},
+{"GPIOButton", &DMREAD, DMT_STRING, get_x_iopsys_eu_button_gpio, NULL, BBFDM_BOTH},
+{"HotplugInterface", &DMREAD, DMT_STRING, get_x_iopsys_eu_button_hotplug, NULL, BBFDM_BOTH},
+{"HotplugInterfaceForLongPress", &DMREAD, DMT_STRING, get_x_iopsys_eu_button_hotplug_long, NULL, BBFDM_BOTH},
+{"MinPressTime", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_button_minpress, set_x_iopsys_eu_button_minpress, BBFDM_BOTH},
+{"LongPressTime", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_button_longpress, set_x_iopsys_eu_button_longpress, BBFDM_BOTH},
 {0}
 };

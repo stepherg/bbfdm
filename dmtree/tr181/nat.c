@@ -625,44 +625,44 @@ static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 
 /* *** Device.NAT. *** */
 DMOBJ tNATObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"InterfaceSetting", &DMWRITE, add_NAT_InterfaceSetting, delete_NAT_InterfaceSetting, NULL, browseInterfaceSettingInst, NULL, NULL, NULL, NULL, tNATInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
-{"PortMapping", &DMWRITE, add_NAT_PortMapping, delete_NAT_PortMapping, NULL, browsePortMappingInst, NULL, NULL, NULL, NULL, tNATPortMappingParams, NULL, BBFDM_BOTH, LIST_KEY{"RemoteHost", "ExternalPort", "Protocol", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"InterfaceSetting", &DMWRITE, add_NAT_InterfaceSetting, delete_NAT_InterfaceSetting, NULL, browseInterfaceSettingInst, NULL, NULL, tNATInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
+{"PortMapping", &DMWRITE, add_NAT_PortMapping, delete_NAT_PortMapping, NULL, browsePortMappingInst, NULL, NULL, tNATPortMappingParams, NULL, BBFDM_BOTH, LIST_KEY{"RemoteHost", "ExternalPort", "Protocol", "Alias", NULL}},
 {0}
 };
 
 DMLEAF tNATParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"InterfaceSettingNumberOfEntries", &DMREAD, DMT_UNINT, get_nat_interface_setting_number_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
-{"PortMappingNumberOfEntries", &DMREAD, DMT_UNINT, get_nat_port_mapping_number_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"InterfaceSettingNumberOfEntries", &DMREAD, DMT_UNINT, get_nat_interface_setting_number_of_entries, NULL, BBFDM_BOTH},
+{"PortMappingNumberOfEntries", &DMREAD, DMT_UNINT, get_nat_port_mapping_number_of_entries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.NAT.InterfaceSetting.{i}. *** */
 DMLEAF tNATInterfaceSettingParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_nat_interface_setting_enable, set_nat_interface_setting_enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMWRITE, DMT_STRING, get_nat_interface_setting_status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_nat_interface_setting_alias, set_nat_interface_setting_alias, NULL, NULL, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_nat_interface_setting_interface, set_nat_interface_setting_interface, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_nat_interface_setting_enable, set_nat_interface_setting_enable, BBFDM_BOTH},
+{"Status", &DMWRITE, DMT_STRING, get_nat_interface_setting_status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_nat_interface_setting_alias, set_nat_interface_setting_alias, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_nat_interface_setting_interface, set_nat_interface_setting_interface, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.NAT.PortMapping.{i}. *** */
 DMLEAF tNATPortMappingParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_nat_port_mapping_enable, set_nat_port_mapping_enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMWRITE, DMT_STRING, get_nat_port_mapping_status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_nat_port_mapping_alias, set_nat_port_mapping_alias, NULL, NULL, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_nat_port_mapping_interface, set_nat_port_mapping_interface, NULL, NULL, BBFDM_BOTH},
-//{"AllInterfaces", &DMWRITE, DMT_BOOL, get_nat_port_mapping_all_interface, set_nat_port_mapping_all_interface, NULL, NULL, BBFDM_BOTH},
-//{"LeaseDuration", &DMWRITE, DMT_UNINT, get_nat_port_mapping_lease_duration, set_nat_port_mapping_lease_duration, NULL, NULL, BBFDM_BOTH},
-{"RemoteHost", &DMWRITE, DMT_STRING, get_nat_port_mapping_remote_host, set_nat_port_mapping_remote_host, NULL, NULL, BBFDM_BOTH},
-{"ExternalPort", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port, set_nat_port_mapping_external_port, NULL, NULL, BBFDM_BOTH},
-{"ExternalPortEndRange", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port_end_range, set_nat_port_mapping_external_port_end_range, NULL, NULL, BBFDM_BOTH},
-{"InternalPort", &DMWRITE, DMT_UNINT, get_nat_port_mapping_internal_port, set_nat_port_mapping_internal_port, NULL, NULL, BBFDM_BOTH},
-{"Protocol", &DMWRITE, DMT_STRING, get_nat_port_mapping_protocol, set_nat_port_mapping_protocol, NULL, NULL, BBFDM_BOTH},
-{"InternalClient", &DMWRITE, DMT_STRING, get_nat_port_mapping_internal_client, set_nat_port_mapping_internal_client, NULL, NULL, BBFDM_BOTH},
-{"Description", &DMWRITE, DMT_STRING, get_nat_port_mapping_description, set_nat_port_mapping_description, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_nat_port_mapping_enable, set_nat_port_mapping_enable, BBFDM_BOTH},
+{"Status", &DMWRITE, DMT_STRING, get_nat_port_mapping_status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_nat_port_mapping_alias, set_nat_port_mapping_alias, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_nat_port_mapping_interface, set_nat_port_mapping_interface, BBFDM_BOTH},
+//{"AllInterfaces", &DMWRITE, DMT_BOOL, get_nat_port_mapping_all_interface, set_nat_port_mapping_all_interface, BBFDM_BOTH},
+//{"LeaseDuration", &DMWRITE, DMT_UNINT, get_nat_port_mapping_lease_duration, set_nat_port_mapping_lease_duration, BBFDM_BOTH},
+{"RemoteHost", &DMWRITE, DMT_STRING, get_nat_port_mapping_remote_host, set_nat_port_mapping_remote_host, BBFDM_BOTH},
+{"ExternalPort", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port, set_nat_port_mapping_external_port, BBFDM_BOTH},
+{"ExternalPortEndRange", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port_end_range, set_nat_port_mapping_external_port_end_range, BBFDM_BOTH},
+{"InternalPort", &DMWRITE, DMT_UNINT, get_nat_port_mapping_internal_port, set_nat_port_mapping_internal_port, BBFDM_BOTH},
+{"Protocol", &DMWRITE, DMT_STRING, get_nat_port_mapping_protocol, set_nat_port_mapping_protocol, BBFDM_BOTH},
+{"InternalClient", &DMWRITE, DMT_STRING, get_nat_port_mapping_internal_client, set_nat_port_mapping_internal_client, BBFDM_BOTH},
+{"Description", &DMWRITE, DMT_STRING, get_nat_port_mapping_description, set_nat_port_mapping_description, BBFDM_BOTH},
 {0}
 };

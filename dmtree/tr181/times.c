@@ -248,17 +248,17 @@ static int set_time_ntpserver5(char *refparam, struct dmctx *ctx, void *data, ch
 
 /* *** Device.Time. *** */
 DMLEAF tTimeParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_time_enable, set_time_enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_time_status, NULL, NULL, NULL, BBFDM_BOTH},
-{"NTPServer1", &DMWRITE, DMT_STRING, get_time_ntpserver1, set_time_ntpserver1, NULL, NULL, BBFDM_BOTH},
-{"NTPServer2", &DMWRITE, DMT_STRING, get_time_ntpserver2, set_time_ntpserver2, NULL, NULL, BBFDM_BOTH},
-{"NTPServer3", &DMWRITE, DMT_STRING, get_time_ntpserver3, set_time_ntpserver3, NULL, NULL, BBFDM_BOTH},
-{"NTPServer4", &DMWRITE, DMT_STRING, get_time_ntpserver4, set_time_ntpserver4, NULL, NULL, BBFDM_BOTH},
-{"NTPServer5", &DMWRITE, DMT_STRING, get_time_ntpserver5, set_time_ntpserver5, NULL, NULL, BBFDM_BOTH},
-{"CurrentLocalTime", &DMREAD, DMT_TIME, get_time_CurrentLocalTime, NULL, NULL, NULL, BBFDM_BOTH},
-{"LocalTimeZone", &DMWRITE, DMT_STRING, get_time_LocalTimeZone, set_time_LocalTimeZone, NULL, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"LocalTimeZoneName", &DMREAD, DMT_STRING, get_local_time_zone_name, NULL, NULL, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"SourceInterface", &DMWRITE, DMT_STRING, get_time_source_interface, set_time_source_interface, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_time_enable, set_time_enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_time_status, NULL, BBFDM_BOTH},
+{"NTPServer1", &DMWRITE, DMT_STRING, get_time_ntpserver1, set_time_ntpserver1, BBFDM_BOTH},
+{"NTPServer2", &DMWRITE, DMT_STRING, get_time_ntpserver2, set_time_ntpserver2, BBFDM_BOTH},
+{"NTPServer3", &DMWRITE, DMT_STRING, get_time_ntpserver3, set_time_ntpserver3, BBFDM_BOTH},
+{"NTPServer4", &DMWRITE, DMT_STRING, get_time_ntpserver4, set_time_ntpserver4, BBFDM_BOTH},
+{"NTPServer5", &DMWRITE, DMT_STRING, get_time_ntpserver5, set_time_ntpserver5, BBFDM_BOTH},
+{"CurrentLocalTime", &DMREAD, DMT_TIME, get_time_CurrentLocalTime, NULL, BBFDM_BOTH},
+{"LocalTimeZone", &DMWRITE, DMT_STRING, get_time_LocalTimeZone, set_time_LocalTimeZone, BBFDM_BOTH},
+{CUSTOM_PREFIX"LocalTimeZoneName", &DMREAD, DMT_STRING, get_local_time_zone_name, NULL, BBFDM_BOTH},
+{CUSTOM_PREFIX"SourceInterface", &DMWRITE, DMT_STRING, get_time_source_interface, set_time_source_interface, BBFDM_BOTH},
 {0}
 };

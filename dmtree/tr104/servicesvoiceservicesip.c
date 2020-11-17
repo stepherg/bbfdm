@@ -1044,76 +1044,75 @@ static int set_ServicesVoiceServiceSIPNetworkFQDNServer_Port(char *refparam, str
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.SIP. *** */
 DMOBJ tServicesVoiceServiceSIPObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Client", &DMWRITE, addObjServicesVoiceServiceSIPClient, delObjServicesVoiceServiceSIPClient, NULL, browseServicesVoiceServiceSIPClientInst, NULL, NULL, NULL, tServicesVoiceServiceSIPClientObj, tServicesVoiceServiceSIPClientParams, get_voice_service_sip_client_linker, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{"Network", &DMWRITE, addObjServicesVoiceServiceSIPNetwork, delObjServicesVoiceServiceSIPNetwork, NULL, browseServicesVoiceServiceSIPNetworkInst, NULL, NULL, NULL, tServicesVoiceServiceSIPNetworkObj, tServicesVoiceServiceSIPNetworkParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Client", &DMWRITE, addObjServicesVoiceServiceSIPClient, delObjServicesVoiceServiceSIPClient, NULL, browseServicesVoiceServiceSIPClientInst, NULL, tServicesVoiceServiceSIPClientObj, tServicesVoiceServiceSIPClientParams, get_voice_service_sip_client_linker, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"Network", &DMWRITE, addObjServicesVoiceServiceSIPNetwork, delObjServicesVoiceServiceSIPNetwork, NULL, browseServicesVoiceServiceSIPNetworkInst, NULL, tServicesVoiceServiceSIPNetworkObj, tServicesVoiceServiceSIPNetworkParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.SIP.Client.{i}. *** */
 DMOBJ tServicesVoiceServiceSIPClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Contact", &DMWRITE, addObjServicesVoiceServiceSIPClientContact, delObjServicesVoiceServiceSIPClientContact, NULL, browseServicesVoiceServiceSIPClientContactInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceSIPClientContactParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Contact", &DMWRITE, addObjServicesVoiceServiceSIPClientContact, delObjServicesVoiceServiceSIPClientContact, NULL, browseServicesVoiceServiceSIPClientContactInst, NULL, NULL, tServicesVoiceServiceSIPClientContactParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
 DMLEAF tServicesVoiceServiceSIPClientParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceSIPClient_Enable, set_ServicesVoiceServiceSIPClient_Enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClient_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClient_Origin, NULL, NULL, NULL, BBFDM_BOTH},
-{"AuthUserName", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_AuthUserName, set_ServicesVoiceServiceSIPClient_AuthUserName, NULL, NULL, BBFDM_BOTH},
-{"AuthPassword", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_AuthPassword, set_ServicesVoiceServiceSIPClient_AuthPassword, NULL, NULL, BBFDM_BOTH},
-{"RegisterURI", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_RegisterURI, set_ServicesVoiceServiceSIPClient_RegisterURI, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceSIPClient_Enable, set_ServicesVoiceServiceSIPClient_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClient_Status, NULL, BBFDM_BOTH},
+{"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClient_Origin, NULL, BBFDM_BOTH},
+{"AuthUserName", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_AuthUserName, set_ServicesVoiceServiceSIPClient_AuthUserName, BBFDM_BOTH},
+{"AuthPassword", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_AuthPassword, set_ServicesVoiceServiceSIPClient_AuthPassword, BBFDM_BOTH},
+{"RegisterURI", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_RegisterURI, set_ServicesVoiceServiceSIPClient_RegisterURI, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.{i}. *** */
 DMLEAF tServicesVoiceServiceSIPClientContactParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClientContact_Origin, NULL, NULL, NULL, BBFDM_BOTH},
-{"Port", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPClientContact_Port, set_ServicesVoiceServiceSIPClientContact_Port, NULL, NULL, BBFDM_BOTH},
-{"ExpireTime", &DMREAD, DMT_TIME, get_ServicesVoiceServiceSIPClientContact_ExpireTime, NULL, NULL, NULL, BBFDM_BOTH},
-{"UserAgent", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClientContact_UserAgent, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClientContact_Origin, NULL, BBFDM_BOTH},
+{"Port", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPClientContact_Port, set_ServicesVoiceServiceSIPClientContact_Port, BBFDM_BOTH},
+{"ExpireTime", &DMREAD, DMT_TIME, get_ServicesVoiceServiceSIPClientContact_ExpireTime, NULL, BBFDM_BOTH},
+{"UserAgent", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClientContact_UserAgent, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.SIP.Network.{i}. *** */
 DMOBJ tServicesVoiceServiceSIPNetworkObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"FQDNServer", &DMWRITE, addObjServicesVoiceServiceSIPNetworkFQDNServer, delObjServicesVoiceServiceSIPNetworkFQDNServer, NULL, browseServicesVoiceServiceSIPNetworkFQDNServerInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceSIPNetworkFQDNServerParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Domain", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"FQDNServer", &DMWRITE, addObjServicesVoiceServiceSIPNetworkFQDNServer, delObjServicesVoiceServiceSIPNetworkFQDNServer, NULL, browseServicesVoiceServiceSIPNetworkFQDNServerInst, NULL, NULL, tServicesVoiceServiceSIPNetworkFQDNServerParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Domain", NULL}},
 {0}
 };
 
 DMLEAF tServicesVoiceServiceSIPNetworkParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceSIPNetwork_Enable, set_ServicesVoiceServiceSIPNetwork_Enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"ProxyServer", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_ProxyServer, set_ServicesVoiceServiceSIPNetwork_ProxyServer, NULL, NULL, BBFDM_BOTH},
-{"ProxyServerPort", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_ProxyServerPort, set_ServicesVoiceServiceSIPNetwork_ProxyServerPort, NULL, NULL, BBFDM_BOTH},
-{"ProxyServerTransport", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_ProxyServerTransport, set_ServicesVoiceServiceSIPNetwork_ProxyServerTransport, NULL, NULL, BBFDM_BOTH},
-{"RegistrarServer", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_RegistrarServer, set_ServicesVoiceServiceSIPNetwork_RegistrarServer, NULL, NULL, BBFDM_BOTH},
-{"RegistrarServerPort", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_RegistrarServerPort, set_ServicesVoiceServiceSIPNetwork_RegistrarServerPort, NULL, NULL, BBFDM_BOTH},
-{"RegistrarServerTransport", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_RegistrarServerTransport, set_ServicesVoiceServiceSIPNetwork_RegistrarServerTransport, NULL, NULL, BBFDM_BOTH},
-{"UserAgentDomain", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_UserAgentDomain, set_ServicesVoiceServiceSIPNetwork_UserAgentDomain, NULL, NULL, BBFDM_BOTH},
-{"OutboundProxy", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_OutboundProxy, set_ServicesVoiceServiceSIPNetwork_OutboundProxy, NULL, NULL, BBFDM_BOTH},
-{"OutboundProxyPort", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_OutboundProxyPort, set_ServicesVoiceServiceSIPNetwork_OutboundProxyPort, NULL, NULL, BBFDM_BOTH},
-{"STUNServer", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_STUNServer, set_ServicesVoiceServiceSIPNetwork_STUNServer, NULL, NULL, BBFDM_BOTH},
-{"RegistrationPeriod", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_RegistrationPeriod, set_ServicesVoiceServiceSIPNetwork_RegistrationPeriod, NULL, NULL, BBFDM_BOTH},
-{"Realm", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_Realm, set_ServicesVoiceServiceSIPNetwork_Realm, NULL, NULL, BBFDM_BOTH},
-{"RegisterExpires", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_RegisterExpires, set_ServicesVoiceServiceSIPNetwork_RegisterExpires, NULL, NULL, BBFDM_BOTH},
-{"DSCPMark", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_DSCPMark, set_ServicesVoiceServiceSIPNetwork_DSCPMark, NULL, NULL, BBFDM_BOTH},
-{"CodecList", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_CodecList, set_ServicesVoiceServiceSIPNetwork_CodecList, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceSIPNetwork_Enable, set_ServicesVoiceServiceSIPNetwork_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_Status, NULL, BBFDM_BOTH},
+{"ProxyServer", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_ProxyServer, set_ServicesVoiceServiceSIPNetwork_ProxyServer, BBFDM_BOTH},
+{"ProxyServerPort", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_ProxyServerPort, set_ServicesVoiceServiceSIPNetwork_ProxyServerPort, BBFDM_BOTH},
+{"ProxyServerTransport", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_ProxyServerTransport, set_ServicesVoiceServiceSIPNetwork_ProxyServerTransport, BBFDM_BOTH},
+{"RegistrarServer", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_RegistrarServer, set_ServicesVoiceServiceSIPNetwork_RegistrarServer, BBFDM_BOTH},
+{"RegistrarServerPort", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_RegistrarServerPort, set_ServicesVoiceServiceSIPNetwork_RegistrarServerPort, BBFDM_BOTH},
+{"RegistrarServerTransport", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_RegistrarServerTransport, set_ServicesVoiceServiceSIPNetwork_RegistrarServerTransport, BBFDM_BOTH},
+{"UserAgentDomain", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_UserAgentDomain, set_ServicesVoiceServiceSIPNetwork_UserAgentDomain, BBFDM_BOTH},
+{"OutboundProxy", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_OutboundProxy, set_ServicesVoiceServiceSIPNetwork_OutboundProxy, BBFDM_BOTH},
+{"OutboundProxyPort", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_OutboundProxyPort, set_ServicesVoiceServiceSIPNetwork_OutboundProxyPort, BBFDM_BOTH},
+{"STUNServer", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_STUNServer, set_ServicesVoiceServiceSIPNetwork_STUNServer, BBFDM_BOTH},
+{"RegistrationPeriod", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_RegistrationPeriod, set_ServicesVoiceServiceSIPNetwork_RegistrationPeriod, BBFDM_BOTH},
+{"Realm", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_Realm, set_ServicesVoiceServiceSIPNetwork_Realm, BBFDM_BOTH},
+{"RegisterExpires", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_RegisterExpires, set_ServicesVoiceServiceSIPNetwork_RegisterExpires, BBFDM_BOTH},
+{"DSCPMark", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_DSCPMark, set_ServicesVoiceServiceSIPNetwork_DSCPMark, BBFDM_BOTH},
+{"CodecList", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_CodecList, set_ServicesVoiceServiceSIPNetwork_CodecList, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.SIP.Network.{i}.FQDNServer. *** */
 DMLEAF tServicesVoiceServiceSIPNetworkFQDNServerParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceSIPNetworkFQDNServer_Enable, set_ServicesVoiceServiceSIPNetworkFQDNServer_Enable, NULL, NULL, BBFDM_BOTH},
-{"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPNetworkFQDNServer_Origin, NULL, NULL, NULL, BBFDM_BOTH},
-{"Domain", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetworkFQDNServer_Domain, set_ServicesVoiceServiceSIPNetworkFQDNServer_Domain, NULL, NULL, BBFDM_BOTH},
-{"Port", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetworkFQDNServer_Port, set_ServicesVoiceServiceSIPNetworkFQDNServer_Port, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceSIPNetworkFQDNServer_Enable, set_ServicesVoiceServiceSIPNetworkFQDNServer_Enable, BBFDM_BOTH},
+{"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPNetworkFQDNServer_Origin, NULL, BBFDM_BOTH},
+{"Domain", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetworkFQDNServer_Domain, set_ServicesVoiceServiceSIPNetworkFQDNServer_Domain, BBFDM_BOTH},
+{"Port", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetworkFQDNServer_Port, set_ServicesVoiceServiceSIPNetworkFQDNServer_Port, BBFDM_BOTH},
 {0}
 };
-

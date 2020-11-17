@@ -858,11 +858,11 @@ static int get_InterfaceStack_LowerAlias(char *refparam, struct dmctx *ctx, void
 
 /* *** Device.InterfaceStack.{i}. *** */
 DMLEAF tInterfaceStackParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_InterfaceStack_Alias, set_InterfaceStack_Alias, NULL, NULL, BBFDM_BOTH},
-{"HigherLayer", &DMREAD, DMT_STRING, get_InterfaceStack_HigherLayer, NULL, NULL, NULL, BBFDM_BOTH},
-{"LowerLayer", &DMREAD, DMT_STRING, get_InterfaceStack_LowerLayer, NULL, NULL, NULL, BBFDM_BOTH},
-{"HigherAlias", &DMREAD, DMT_STRING, get_InterfaceStack_HigherAlias, NULL, NULL, NULL, BBFDM_BOTH},
-{"LowerAlias", &DMREAD, DMT_STRING, get_InterfaceStack_LowerAlias, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING, get_InterfaceStack_Alias, set_InterfaceStack_Alias, BBFDM_BOTH},
+{"HigherLayer", &DMREAD, DMT_STRING, get_InterfaceStack_HigherLayer, NULL, BBFDM_BOTH},
+{"LowerLayer", &DMREAD, DMT_STRING, get_InterfaceStack_LowerLayer, NULL, BBFDM_BOTH},
+{"HigherAlias", &DMREAD, DMT_STRING, get_InterfaceStack_HigherAlias, NULL, BBFDM_BOTH},
+{"LowerAlias", &DMREAD, DMT_STRING, get_InterfaceStack_LowerAlias, NULL, BBFDM_BOTH},
 {0}
 };

@@ -1329,249 +1329,250 @@ static int get_DSLChannelStatsQuarterHour_XTUCCRCErrors(char *refparam, struct d
 
 /* *** Device.DSL. *** */
 DMOBJ tDSLObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Line", &DMREAD, NULL, NULL, NULL, browseDSLLineInst, NULL, NULL, NULL, tDSLLineObj, tDSLLineParams, get_dsl_line_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"Channel", &DMREAD, NULL, NULL, NULL, browseDSLChannelInst, NULL, NULL, NULL, tDSLChannelObj, tDSLChannelParams, get_dsl_channel_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Line", &DMREAD, NULL, NULL, NULL, browseDSLLineInst, NULL, tDSLLineObj, tDSLLineParams, get_dsl_line_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Channel", &DMREAD, NULL, NULL, NULL, browseDSLChannelInst, NULL, tDSLChannelObj, tDSLChannelParams, get_dsl_channel_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
 DMLEAF tDSLParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"LineNumberOfEntries", &DMREAD, DMT_UNINT, get_DSL_LineNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-{"ChannelNumberOfEntries", &DMREAD, DMT_UNINT, get_DSL_ChannelNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"LineNumberOfEntries", &DMREAD, DMT_UNINT, get_DSL_LineNumberOfEntries, NULL, BBFDM_BOTH},
+{"ChannelNumberOfEntries", &DMREAD, DMT_UNINT, get_DSL_ChannelNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Line.{i}. *** */
 DMOBJ tDSLLineObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsObj, tDSLLineStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsObj, tDSLLineStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tDSLLineParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DSLLine_Enable, set_DSLLine_Enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_DSLLine_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DSLLine_Alias, set_DSLLine_Alias, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_DSLLine_Name, NULL, NULL, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_DSLLine_LowerLayers, set_DSLLine_LowerLayers, NULL, NULL, BBFDM_BOTH},
-{"Upstream", &DMREAD, DMT_BOOL, get_DSLLine_Upstream, NULL, NULL, NULL, BBFDM_BOTH},
-{"FirmwareVersion", &DMREAD, DMT_STRING, get_DSLLine_FirmwareVersion, NULL, NULL, NULL, BBFDM_BOTH},
-{"LinkStatus", &DMREAD, DMT_STRING, get_DSLLine_LinkStatus, NULL, NULL, NULL, BBFDM_BOTH},
-{"StandardsSupported", &DMREAD, DMT_STRING, get_DSLLine_StandardsSupported, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTSE", &DMREAD, DMT_HEXBIN, get_DSLLine_XTSE, NULL, NULL, NULL, BBFDM_BOTH},
-{"StandardUsed", &DMREAD, DMT_STRING, get_DSLLine_StandardUsed, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTSUsed", &DMREAD, DMT_HEXBIN, get_DSLLine_XTSUsed, NULL, NULL, NULL, BBFDM_BOTH},
-{"LineEncoding", &DMREAD, DMT_STRING, get_DSLLine_LineEncoding, NULL, NULL, NULL, BBFDM_BOTH},
-{"AllowedProfiles", &DMREAD, DMT_STRING, get_DSLLine_AllowedProfiles, NULL, NULL, NULL, BBFDM_BOTH},
-{"CurrentProfile", &DMREAD, DMT_STRING, get_DSLLine_CurrentProfile, NULL, NULL, NULL, BBFDM_BOTH},
-{"PowerManagementState", &DMREAD, DMT_STRING, get_DSLLine_PowerManagementState, NULL, NULL, NULL, BBFDM_BOTH},
-{"SuccessFailureCause", &DMREAD, DMT_UNINT, get_DSLLine_SuccessFailureCause, NULL, NULL, NULL, BBFDM_BOTH},
-{"UPBOKLERPb", &DMREAD, DMT_STRING, get_DSLLine_UPBOKLERPb, NULL, NULL, NULL, BBFDM_BOTH},
-{"RXTHRSHds", &DMREAD, DMT_INT, get_DSLLine_RXTHRSHds, NULL, NULL, NULL, BBFDM_BOTH},
-{"ACTRAMODEds", &DMREAD, DMT_UNINT, get_DSLLine_ACTRAMODEds, NULL, NULL, NULL, BBFDM_BOTH},
-{"ACTRAMODEus", &DMREAD, DMT_UNINT, get_DSLLine_ACTRAMODEus, NULL, NULL, NULL, BBFDM_BOTH},
-{"SNRMROCus", &DMREAD, DMT_UNINT, get_DSLLine_SNRMROCus, NULL, NULL, NULL, BBFDM_BOTH},
-{"LastStateTransmittedDownstream", &DMREAD, DMT_UNINT, get_DSLLine_LastStateTransmittedDownstream, NULL, NULL, NULL, BBFDM_BOTH},
-{"LastStateTransmittedUpstream", &DMREAD, DMT_UNINT, get_DSLLine_LastStateTransmittedUpstream, NULL, NULL, NULL, BBFDM_BOTH},
-{"US0MASK", &DMREAD, DMT_UNINT, get_DSLLine_US0MASK, NULL, NULL, NULL, BBFDM_BOTH},
-{"TRELLISds", &DMREAD, DMT_INT, get_DSLLine_TRELLISds, NULL, NULL, NULL, BBFDM_BOTH},
-{"TRELLISus", &DMREAD, DMT_INT, get_DSLLine_TRELLISus, NULL, NULL, NULL, BBFDM_BOTH},
-{"ACTSNRMODEds", &DMREAD, DMT_UNINT, get_DSLLine_ACTSNRMODEds, NULL, NULL, NULL, BBFDM_BOTH},
-{"ACTSNRMODEus", &DMREAD, DMT_UNINT, get_DSLLine_ACTSNRMODEus, NULL, NULL, NULL, BBFDM_BOTH},
-{"LineNumber", &DMREAD, DMT_INT, get_DSLLine_LineNumber, NULL, NULL, NULL, BBFDM_BOTH},
-{"UpstreamMaxBitRate", &DMREAD, DMT_UNINT, get_DSLLine_UpstreamMaxBitRate, NULL, NULL, NULL, BBFDM_BOTH},
-{"DownstreamMaxBitRate", &DMREAD, DMT_UNINT, get_DSLLine_DownstreamMaxBitRate, NULL, NULL, NULL, BBFDM_BOTH},
-{"UpstreamNoiseMargin", &DMREAD, DMT_INT, get_DSLLine_UpstreamNoiseMargin, NULL, NULL, NULL, BBFDM_BOTH},
-{"DownstreamNoiseMargin", &DMREAD, DMT_INT, get_DSLLine_DownstreamNoiseMargin, NULL, NULL, NULL, BBFDM_BOTH},
-{"SNRMpbus", &DMREAD, DMT_STRING, get_DSLLine_SNRMpbus, NULL, NULL, NULL, BBFDM_BOTH},
-{"SNRMpbds", &DMREAD, DMT_STRING, get_DSLLine_SNRMpbds, NULL, NULL, NULL, BBFDM_BOTH},
-{"UpstreamAttenuation", &DMREAD, DMT_INT, get_DSLLine_UpstreamAttenuation, NULL, NULL, NULL, BBFDM_BOTH},
-{"DownstreamAttenuation", &DMREAD, DMT_INT, get_DSLLine_DownstreamAttenuation, NULL, NULL, NULL, BBFDM_BOTH},
-{"UpstreamPower", &DMREAD, DMT_INT, get_DSLLine_UpstreamPower, NULL, NULL, NULL, BBFDM_BOTH},
-{"DownstreamPower", &DMREAD, DMT_INT, get_DSLLine_DownstreamPower, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURVendor", &DMREAD, DMT_HEXBIN, get_DSLLine_XTURVendor, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURCountry", &DMREAD, DMT_HEXBIN, get_DSLLine_XTURCountry, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURANSIStd", &DMREAD, DMT_UNINT, get_DSLLine_XTURANSIStd, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURANSIRev", &DMREAD, DMT_UNINT, get_DSLLine_XTURANSIRev, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCVendor", &DMREAD, DMT_HEXBIN, get_DSLLine_XTUCVendor, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCCountry", &DMREAD, DMT_HEXBIN, get_DSLLine_XTUCCountry, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCANSIStd", &DMREAD, DMT_UNINT, get_DSLLine_XTUCANSIStd, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCANSIRev", &DMREAD, DMT_UNINT, get_DSLLine_XTUCANSIRev, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DSLLine_Enable, set_DSLLine_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_DSLLine_Status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DSLLine_Alias, set_DSLLine_Alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_DSLLine_Name, NULL, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_DSLLine_LowerLayers, set_DSLLine_LowerLayers, BBFDM_BOTH},
+{"Upstream", &DMREAD, DMT_BOOL, get_DSLLine_Upstream, NULL, BBFDM_BOTH},
+{"FirmwareVersion", &DMREAD, DMT_STRING, get_DSLLine_FirmwareVersion, NULL, BBFDM_BOTH},
+{"LinkStatus", &DMREAD, DMT_STRING, get_DSLLine_LinkStatus, NULL, BBFDM_BOTH},
+{"StandardsSupported", &DMREAD, DMT_STRING, get_DSLLine_StandardsSupported, NULL, BBFDM_BOTH},
+{"XTSE", &DMREAD, DMT_HEXBIN, get_DSLLine_XTSE, NULL, BBFDM_BOTH},
+{"StandardUsed", &DMREAD, DMT_STRING, get_DSLLine_StandardUsed, NULL, BBFDM_BOTH},
+{"XTSUsed", &DMREAD, DMT_HEXBIN, get_DSLLine_XTSUsed, NULL, BBFDM_BOTH},
+{"LineEncoding", &DMREAD, DMT_STRING, get_DSLLine_LineEncoding, NULL, BBFDM_BOTH},
+{"AllowedProfiles", &DMREAD, DMT_STRING, get_DSLLine_AllowedProfiles, NULL, BBFDM_BOTH},
+{"CurrentProfile", &DMREAD, DMT_STRING, get_DSLLine_CurrentProfile, NULL, BBFDM_BOTH},
+{"PowerManagementState", &DMREAD, DMT_STRING, get_DSLLine_PowerManagementState, NULL, BBFDM_BOTH},
+{"SuccessFailureCause", &DMREAD, DMT_UNINT, get_DSLLine_SuccessFailureCause, NULL, BBFDM_BOTH},
+{"UPBOKLERPb", &DMREAD, DMT_STRING, get_DSLLine_UPBOKLERPb, NULL, BBFDM_BOTH},
+{"RXTHRSHds", &DMREAD, DMT_INT, get_DSLLine_RXTHRSHds, NULL, BBFDM_BOTH},
+{"ACTRAMODEds", &DMREAD, DMT_UNINT, get_DSLLine_ACTRAMODEds, NULL, BBFDM_BOTH},
+{"ACTRAMODEus", &DMREAD, DMT_UNINT, get_DSLLine_ACTRAMODEus, NULL, BBFDM_BOTH},
+{"SNRMROCus", &DMREAD, DMT_UNINT, get_DSLLine_SNRMROCus, NULL, BBFDM_BOTH},
+{"LastStateTransmittedDownstream", &DMREAD, DMT_UNINT, get_DSLLine_LastStateTransmittedDownstream, NULL, BBFDM_BOTH},
+{"LastStateTransmittedUpstream", &DMREAD, DMT_UNINT, get_DSLLine_LastStateTransmittedUpstream, NULL, BBFDM_BOTH},
+{"US0MASK", &DMREAD, DMT_UNINT, get_DSLLine_US0MASK, NULL, BBFDM_BOTH},
+{"TRELLISds", &DMREAD, DMT_INT, get_DSLLine_TRELLISds, NULL, BBFDM_BOTH},
+{"TRELLISus", &DMREAD, DMT_INT, get_DSLLine_TRELLISus, NULL, BBFDM_BOTH},
+{"ACTSNRMODEds", &DMREAD, DMT_UNINT, get_DSLLine_ACTSNRMODEds, NULL, BBFDM_BOTH},
+{"ACTSNRMODEus", &DMREAD, DMT_UNINT, get_DSLLine_ACTSNRMODEus, NULL, BBFDM_BOTH},
+{"LineNumber", &DMREAD, DMT_INT, get_DSLLine_LineNumber, NULL, BBFDM_BOTH},
+{"UpstreamMaxBitRate", &DMREAD, DMT_UNINT, get_DSLLine_UpstreamMaxBitRate, NULL, BBFDM_BOTH},
+{"DownstreamMaxBitRate", &DMREAD, DMT_UNINT, get_DSLLine_DownstreamMaxBitRate, NULL, BBFDM_BOTH},
+{"UpstreamNoiseMargin", &DMREAD, DMT_INT, get_DSLLine_UpstreamNoiseMargin, NULL, BBFDM_BOTH},
+{"DownstreamNoiseMargin", &DMREAD, DMT_INT, get_DSLLine_DownstreamNoiseMargin, NULL, BBFDM_BOTH},
+{"SNRMpbus", &DMREAD, DMT_STRING, get_DSLLine_SNRMpbus, NULL, BBFDM_BOTH},
+{"SNRMpbds", &DMREAD, DMT_STRING, get_DSLLine_SNRMpbds, NULL, BBFDM_BOTH},
+{"UpstreamAttenuation", &DMREAD, DMT_INT, get_DSLLine_UpstreamAttenuation, NULL, BBFDM_BOTH},
+{"DownstreamAttenuation", &DMREAD, DMT_INT, get_DSLLine_DownstreamAttenuation, NULL, BBFDM_BOTH},
+{"UpstreamPower", &DMREAD, DMT_INT, get_DSLLine_UpstreamPower, NULL, BBFDM_BOTH},
+{"DownstreamPower", &DMREAD, DMT_INT, get_DSLLine_DownstreamPower, NULL, BBFDM_BOTH},
+{"XTURVendor", &DMREAD, DMT_HEXBIN, get_DSLLine_XTURVendor, NULL, BBFDM_BOTH},
+{"XTURCountry", &DMREAD, DMT_HEXBIN, get_DSLLine_XTURCountry, NULL, BBFDM_BOTH},
+{"XTURANSIStd", &DMREAD, DMT_UNINT, get_DSLLine_XTURANSIStd, NULL, BBFDM_BOTH},
+{"XTURANSIRev", &DMREAD, DMT_UNINT, get_DSLLine_XTURANSIRev, NULL, BBFDM_BOTH},
+{"XTUCVendor", &DMREAD, DMT_HEXBIN, get_DSLLine_XTUCVendor, NULL, BBFDM_BOTH},
+{"XTUCCountry", &DMREAD, DMT_HEXBIN, get_DSLLine_XTUCCountry, NULL, BBFDM_BOTH},
+{"XTUCANSIStd", &DMREAD, DMT_UNINT, get_DSLLine_XTUCANSIStd, NULL, BBFDM_BOTH},
+{"XTUCANSIRev", &DMREAD, DMT_UNINT, get_DSLLine_XTUCANSIRev, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Line.{i}.Stats. *** */
 DMOBJ tDSLLineStatsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsTotalParams, NULL, BBFDM_BOTH},
-{"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsShowtimeParams, NULL, BBFDM_BOTH},
-{"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsLastShowtimeParams, NULL, BBFDM_BOTH},
-{"CurrentDay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsCurrentDayParams, NULL, BBFDM_BOTH},
-{"QuarterHour", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsQuarterHourParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsTotalParams, NULL, BBFDM_BOTH},
+{"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsShowtimeParams, NULL, BBFDM_BOTH},
+{"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsLastShowtimeParams, NULL, BBFDM_BOTH},
+{"CurrentDay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsCurrentDayParams, NULL, BBFDM_BOTH},
+{"QuarterHour", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDSLLineStatsQuarterHourParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tDSLLineStatsParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"TotalStart", &DMREAD, DMT_UNINT, get_DSLLineStats_TotalStart, NULL, NULL, NULL, BBFDM_BOTH},
-{"ShowtimeStart", &DMREAD, DMT_UNINT, get_DSLLineStats_ShowtimeStart, NULL, NULL, NULL, BBFDM_BOTH},
-{"LastShowtimeStart", &DMREAD, DMT_UNINT, get_DSLLineStats_LastShowtimeStart, NULL, NULL, NULL, BBFDM_BOTH},
-{"CurrentDayStart", &DMREAD, DMT_UNINT, get_DSLLineStats_CurrentDayStart, NULL, NULL, NULL, BBFDM_BOTH},
-{"QuarterHourStart", &DMREAD, DMT_UNINT, get_DSLLineStats_QuarterHourStart, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"TotalStart", &DMREAD, DMT_UNINT, get_DSLLineStats_TotalStart, NULL, BBFDM_BOTH},
+{"ShowtimeStart", &DMREAD, DMT_UNINT, get_DSLLineStats_ShowtimeStart, NULL, BBFDM_BOTH},
+{"LastShowtimeStart", &DMREAD, DMT_UNINT, get_DSLLineStats_LastShowtimeStart, NULL, BBFDM_BOTH},
+{"CurrentDayStart", &DMREAD, DMT_UNINT, get_DSLLineStats_CurrentDayStart, NULL, BBFDM_BOTH},
+{"QuarterHourStart", &DMREAD, DMT_UNINT, get_DSLLineStats_QuarterHourStart, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Line.{i}.Stats.Total. *** */
 DMLEAF tDSLLineStatsTotalParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"ErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsTotal_ErroredSecs, NULL, NULL, NULL, BBFDM_BOTH},
-{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsTotal_SeverelyErroredSecs, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"ErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsTotal_ErroredSecs, NULL, BBFDM_BOTH},
+{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsTotal_SeverelyErroredSecs, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Line.{i}.Stats.Showtime. *** */
 DMLEAF tDSLLineStatsShowtimeParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"ErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsShowtime_ErroredSecs, NULL, NULL, NULL, BBFDM_BOTH},
-{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsShowtime_SeverelyErroredSecs, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"ErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsShowtime_ErroredSecs, NULL, BBFDM_BOTH},
+{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsShowtime_SeverelyErroredSecs, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Line.{i}.Stats.LastShowtime. *** */
 DMLEAF tDSLLineStatsLastShowtimeParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"ErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsLastShowtime_ErroredSecs, NULL, NULL, NULL, BBFDM_BOTH},
-{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsLastShowtime_SeverelyErroredSecs, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"ErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsLastShowtime_ErroredSecs, NULL, BBFDM_BOTH},
+{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsLastShowtime_SeverelyErroredSecs, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Line.{i}.Stats.CurrentDay. *** */
 DMLEAF tDSLLineStatsCurrentDayParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"ErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsCurrentDay_ErroredSecs, NULL, NULL, NULL, BBFDM_BOTH},
-{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsCurrentDay_SeverelyErroredSecs, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"ErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsCurrentDay_ErroredSecs, NULL, BBFDM_BOTH},
+{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsCurrentDay_SeverelyErroredSecs, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Line.{i}.Stats.QuarterHour. *** */
 DMLEAF tDSLLineStatsQuarterHourParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"ErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsQuarterHour_ErroredSecs, NULL, NULL, NULL, BBFDM_BOTH},
-{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsQuarterHour_SeverelyErroredSecs, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"ErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsQuarterHour_ErroredSecs, NULL, BBFDM_BOTH},
+{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_DSLLineStatsQuarterHour_SeverelyErroredSecs, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Channel.{i}. *** */
 DMOBJ tDSLChannelObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsObj, tDSLChannelStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsObj, tDSLChannelStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
+
 DMLEAF tDSLChannelParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DSLChannel_Enable, set_DSLChannel_Enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_DSLChannel_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DSLChannel_Alias, set_DSLChannel_Alias, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_DSLChannel_Name, NULL, NULL, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMREAD, DMT_STRING, get_DSLChannel_LowerLayers, NULL, NULL, NULL, BBFDM_BOTH},
-{"LinkEncapsulationSupported", &DMREAD, DMT_STRING, get_DSLChannel_LinkEncapsulationSupported, NULL, NULL, NULL, BBFDM_BOTH},
-{"LinkEncapsulationUsed", &DMREAD, DMT_STRING, get_DSLChannel_LinkEncapsulationUsed, NULL, NULL, NULL, BBFDM_BOTH},
-{"LPATH", &DMREAD, DMT_UNINT, get_DSLChannel_LPATH, NULL, NULL, NULL, BBFDM_BOTH},
-{"INTLVDEPTH", &DMREAD, DMT_UNINT, get_DSLChannel_INTLVDEPTH, NULL, NULL, NULL, BBFDM_BOTH},
-{"INTLVBLOCK", &DMREAD, DMT_INT, get_DSLChannel_INTLVBLOCK, NULL, NULL, NULL, BBFDM_BOTH},
-{"ActualInterleavingDelay", &DMREAD, DMT_UNINT, get_DSLChannel_ActualInterleavingDelay, NULL, NULL, NULL, BBFDM_BOTH},
-{"ACTINP", &DMREAD, DMT_INT, get_DSLChannel_ACTINP, NULL, NULL, NULL, BBFDM_BOTH},
-{"INPREPORT", &DMREAD, DMT_BOOL, get_DSLChannel_INPREPORT, NULL, NULL, NULL, BBFDM_BOTH},
-{"NFEC", &DMREAD, DMT_INT, get_DSLChannel_NFEC, NULL, NULL, NULL, BBFDM_BOTH},
-{"RFEC", &DMREAD, DMT_INT, get_DSLChannel_RFEC, NULL, NULL, NULL, BBFDM_BOTH},
-{"LSYMB", &DMREAD, DMT_INT, get_DSLChannel_LSYMB, NULL, NULL, NULL, BBFDM_BOTH},
-{"UpstreamCurrRate", &DMREAD, DMT_UNINT, get_DSLChannel_UpstreamCurrRate, NULL, NULL, NULL, BBFDM_BOTH},
-{"DownstreamCurrRate", &DMREAD, DMT_UNINT, get_DSLChannel_DownstreamCurrRate, NULL, NULL, NULL, BBFDM_BOTH},
-{"ACTNDR", &DMREAD, DMT_UNINT, get_DSLChannel_ACTNDR, NULL, NULL, NULL, BBFDM_BOTH},
-{"ACTINPREIN", &DMREAD, DMT_UNINT, get_DSLChannel_ACTINPREIN, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DSLChannel_Enable, set_DSLChannel_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_DSLChannel_Status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DSLChannel_Alias, set_DSLChannel_Alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_DSLChannel_Name, NULL, BBFDM_BOTH},
+{"LowerLayers", &DMREAD, DMT_STRING, get_DSLChannel_LowerLayers, NULL, BBFDM_BOTH},
+{"LinkEncapsulationSupported", &DMREAD, DMT_STRING, get_DSLChannel_LinkEncapsulationSupported, NULL, BBFDM_BOTH},
+{"LinkEncapsulationUsed", &DMREAD, DMT_STRING, get_DSLChannel_LinkEncapsulationUsed, NULL, BBFDM_BOTH},
+{"LPATH", &DMREAD, DMT_UNINT, get_DSLChannel_LPATH, NULL, BBFDM_BOTH},
+{"INTLVDEPTH", &DMREAD, DMT_UNINT, get_DSLChannel_INTLVDEPTH, NULL, BBFDM_BOTH},
+{"INTLVBLOCK", &DMREAD, DMT_INT, get_DSLChannel_INTLVBLOCK, NULL, BBFDM_BOTH},
+{"ActualInterleavingDelay", &DMREAD, DMT_UNINT, get_DSLChannel_ActualInterleavingDelay, NULL, BBFDM_BOTH},
+{"ACTINP", &DMREAD, DMT_INT, get_DSLChannel_ACTINP, NULL, BBFDM_BOTH},
+{"INPREPORT", &DMREAD, DMT_BOOL, get_DSLChannel_INPREPORT, NULL, BBFDM_BOTH},
+{"NFEC", &DMREAD, DMT_INT, get_DSLChannel_NFEC, NULL, BBFDM_BOTH},
+{"RFEC", &DMREAD, DMT_INT, get_DSLChannel_RFEC, NULL, BBFDM_BOTH},
+{"LSYMB", &DMREAD, DMT_INT, get_DSLChannel_LSYMB, NULL, BBFDM_BOTH},
+{"UpstreamCurrRate", &DMREAD, DMT_UNINT, get_DSLChannel_UpstreamCurrRate, NULL, BBFDM_BOTH},
+{"DownstreamCurrRate", &DMREAD, DMT_UNINT, get_DSLChannel_DownstreamCurrRate, NULL, BBFDM_BOTH},
+{"ACTNDR", &DMREAD, DMT_UNINT, get_DSLChannel_ACTNDR, NULL, BBFDM_BOTH},
+{"ACTINPREIN", &DMREAD, DMT_UNINT, get_DSLChannel_ACTINPREIN, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Channel.{i}.Stats. *** */
 DMOBJ tDSLChannelStatsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsTotalParams, NULL, BBFDM_BOTH},
-{"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsShowtimeParams, NULL, BBFDM_BOTH},
-{"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsLastShowtimeParams, NULL, BBFDM_BOTH},
-{"CurrentDay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsCurrentDayParams, NULL, BBFDM_BOTH},
-{"QuarterHour", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsQuarterHourParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsTotalParams, NULL, BBFDM_BOTH},
+{"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsShowtimeParams, NULL, BBFDM_BOTH},
+{"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsLastShowtimeParams, NULL, BBFDM_BOTH},
+{"CurrentDay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsCurrentDayParams, NULL, BBFDM_BOTH},
+{"QuarterHour", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDSLChannelStatsQuarterHourParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tDSLChannelStatsParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"TotalStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_TotalStart, NULL, NULL, NULL, BBFDM_BOTH},
-{"ShowtimeStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_ShowtimeStart, NULL, NULL, NULL, BBFDM_BOTH},
-{"LastShowtimeStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_LastShowtimeStart, NULL, NULL, NULL, BBFDM_BOTH},
-{"CurrentDayStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_CurrentDayStart, NULL, NULL, NULL, BBFDM_BOTH},
-{"QuarterHourStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_QuarterHourStart, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"TotalStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_TotalStart, NULL, BBFDM_BOTH},
+{"ShowtimeStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_ShowtimeStart, NULL, BBFDM_BOTH},
+{"LastShowtimeStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_LastShowtimeStart, NULL, BBFDM_BOTH},
+{"CurrentDayStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_CurrentDayStart, NULL, BBFDM_BOTH},
+{"QuarterHourStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_QuarterHourStart, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Channel.{i}.Stats.Total. *** */
 DMLEAF tDSLChannelStatsTotalParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"XTURFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTURFECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTUCFECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTURHECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTUCHECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTURCRCErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTUCCRCErrors, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"XTURFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTURFECErrors, NULL, BBFDM_BOTH},
+{"XTUCFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTUCFECErrors, NULL, BBFDM_BOTH},
+{"XTURHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTURHECErrors, NULL, BBFDM_BOTH},
+{"XTUCHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTUCHECErrors, NULL, BBFDM_BOTH},
+{"XTURCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTURCRCErrors, NULL, BBFDM_BOTH},
+{"XTUCCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsTotal_XTUCCRCErrors, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Channel.{i}.Stats.Showtime. *** */
 DMLEAF tDSLChannelStatsShowtimeParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"XTURFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTURFECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTUCFECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTURHECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTUCHECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTURCRCErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTUCCRCErrors, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"XTURFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTURFECErrors, NULL, BBFDM_BOTH},
+{"XTUCFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTUCFECErrors, NULL, BBFDM_BOTH},
+{"XTURHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTURHECErrors, NULL, BBFDM_BOTH},
+{"XTUCHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTUCHECErrors, NULL, BBFDM_BOTH},
+{"XTURCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTURCRCErrors, NULL, BBFDM_BOTH},
+{"XTUCCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsShowtime_XTUCCRCErrors, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Channel.{i}.Stats.LastShowtime. *** */
 DMLEAF tDSLChannelStatsLastShowtimeParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"XTURFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTURFECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTUCFECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTURHECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTUCHECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTURCRCErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTUCCRCErrors, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"XTURFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTURFECErrors, NULL, BBFDM_BOTH},
+{"XTUCFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTUCFECErrors, NULL, BBFDM_BOTH},
+{"XTURHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTURHECErrors, NULL, BBFDM_BOTH},
+{"XTUCHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTUCHECErrors, NULL, BBFDM_BOTH},
+{"XTURCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTURCRCErrors, NULL, BBFDM_BOTH},
+{"XTUCCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsLastShowtime_XTUCCRCErrors, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Channel.{i}.Stats.CurrentDay. *** */
 DMLEAF tDSLChannelStatsCurrentDayParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"XTURFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTURFECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTUCFECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTURHECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTUCHECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTURCRCErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTUCCRCErrors, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"XTURFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTURFECErrors, NULL, BBFDM_BOTH},
+{"XTUCFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTUCFECErrors, NULL, BBFDM_BOTH},
+{"XTURHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTURHECErrors, NULL, BBFDM_BOTH},
+{"XTUCHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTUCHECErrors, NULL, BBFDM_BOTH},
+{"XTURCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTURCRCErrors, NULL, BBFDM_BOTH},
+{"XTUCCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsCurrentDay_XTUCCRCErrors, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DSL.Channel.{i}.Stats.QuarterHour. *** */
 DMLEAF tDSLChannelStatsQuarterHourParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"XTURFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTURFECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTUCFECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTURHECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTUCHECErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTURCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTURCRCErrors, NULL, NULL, NULL, BBFDM_BOTH},
-{"XTUCCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTUCCRCErrors, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"XTURFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTURFECErrors, NULL, BBFDM_BOTH},
+{"XTUCFECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTUCFECErrors, NULL, BBFDM_BOTH},
+{"XTURHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTURHECErrors, NULL, BBFDM_BOTH},
+{"XTUCHECErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTUCHECErrors, NULL, BBFDM_BOTH},
+{"XTURCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTURCRCErrors, NULL, BBFDM_BOTH},
+{"XTUCCRCErrors", &DMREAD, DMT_UNINT, get_DSLChannelStatsQuarterHour_XTUCCRCErrors, NULL, BBFDM_BOTH},
 {0}
 };

@@ -135,8 +135,7 @@ void dmbbf_update_enabled_notify_file(unsigned int dm_type, unsigned int amd_ver
 
 	dm_ctx_init(&dmctx, dm_type, amd_version, instance_mode);
 	dmctx.in_param = "";
-
-	dm_entry_enabled_notify(&dmctx, NULL);
+	dm_entry_enabled_notify(&dmctx);
 
 	dm_ctx_clean(&dmctx);
 }

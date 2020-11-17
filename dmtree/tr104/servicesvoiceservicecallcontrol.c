@@ -551,72 +551,72 @@ static int set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNum
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.CallControl. *** */
 DMOBJ tServicesVoiceServiceCallControlObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Line", &DMWRITE, addObjServicesVoiceServiceCallControlLine, delObjServicesVoiceServiceCallControlLine, NULL, browseServicesVoiceServiceCallControlLineInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineParams, get_voice_service_line_linker, BBFDM_BOTH, LIST_KEY{"DirectoryNumber", "Alias", NULL}},
-{"IncomingMap", &DMWRITE, addObjServicesVoiceServiceCallControlIncomingMap, delObjServicesVoiceServiceCallControlIncomingMap, NULL, browseServicesVoiceServiceCallControlIncomingMapInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlIncomingMapParams, NULL, BBFDM_BOTH, LIST_KEY{"Line", "Extension", "Alias", NULL}},
-{"OutgoingMap", &DMWRITE, addObjServicesVoiceServiceCallControlOutgoingMap, delObjServicesVoiceServiceCallControlOutgoingMap, NULL, browseServicesVoiceServiceCallControlOutgoingMapInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlOutgoingMapParams, NULL, BBFDM_BOTH, LIST_KEY{"Extension", "Line", "Alias", NULL}},
-{"NumberingPlan", &DMWRITE, addObjServicesVoiceServiceCallControlNumberingPlan, delObjServicesVoiceServiceCallControlNumberingPlan, NULL, browseServicesVoiceServiceCallControlNumberingPlanInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlNumberingPlanParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{"CallingFeatures", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesObj, NULL, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Line", &DMWRITE, addObjServicesVoiceServiceCallControlLine, delObjServicesVoiceServiceCallControlLine, NULL, browseServicesVoiceServiceCallControlLineInst, NULL, NULL, tServicesVoiceServiceCallControlLineParams, get_voice_service_line_linker, BBFDM_BOTH, LIST_KEY{"DirectoryNumber", "Alias", NULL}},
+{"IncomingMap", &DMWRITE, addObjServicesVoiceServiceCallControlIncomingMap, delObjServicesVoiceServiceCallControlIncomingMap, NULL, browseServicesVoiceServiceCallControlIncomingMapInst, NULL, NULL, tServicesVoiceServiceCallControlIncomingMapParams, NULL, BBFDM_BOTH, LIST_KEY{"Line", "Extension", "Alias", NULL}},
+{"OutgoingMap", &DMWRITE, addObjServicesVoiceServiceCallControlOutgoingMap, delObjServicesVoiceServiceCallControlOutgoingMap, NULL, browseServicesVoiceServiceCallControlOutgoingMapInst, NULL, NULL, tServicesVoiceServiceCallControlOutgoingMapParams, NULL, BBFDM_BOTH, LIST_KEY{"Extension", "Line", "Alias", NULL}},
+{"NumberingPlan", &DMWRITE, addObjServicesVoiceServiceCallControlNumberingPlan, delObjServicesVoiceServiceCallControlNumberingPlan, NULL, browseServicesVoiceServiceCallControlNumberingPlanInst, NULL, NULL, tServicesVoiceServiceCallControlNumberingPlanParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"CallingFeatures", &DMREAD, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesObj, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.CallControl.Line.{i}. *** */
 DMLEAF tServicesVoiceServiceCallControlLineParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Status", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"CallStatus", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlLine_CallStatus, NULL, NULL, NULL, BBFDM_BOTH},
-{"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Origin, NULL, NULL, NULL, BBFDM_BOTH},
-{"DirectoryNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_DirectoryNumber, set_ServicesVoiceServiceCallControlLine_DirectoryNumber, NULL, NULL, BBFDM_BOTH},
-{"Provider", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Provider, set_ServicesVoiceServiceCallControlLine_Provider, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Status", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Status, NULL, BBFDM_BOTH},
+{"CallStatus", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlLine_CallStatus, NULL, BBFDM_BOTH},
+{"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Origin, NULL, BBFDM_BOTH},
+{"DirectoryNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_DirectoryNumber, set_ServicesVoiceServiceCallControlLine_DirectoryNumber, BBFDM_BOTH},
+{"Provider", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Provider, set_ServicesVoiceServiceCallControlLine_Provider, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.CallControl.IncomingMap.{i}. *** */
 DMLEAF tServicesVoiceServiceCallControlIncomingMapParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Line", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlIncomingMap_Line, set_ServicesVoiceServiceCallControlIncomingMap_Line, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Line", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlIncomingMap_Line, set_ServicesVoiceServiceCallControlIncomingMap_Line, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.CallControl.OutgoingMap.{i}. *** */
 DMLEAF tServicesVoiceServiceCallControlOutgoingMapParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"CLIPNoScreeningNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlOutgoingMap_CLIPNoScreeningNumber, set_ServicesVoiceServiceCallControlOutgoingMap_CLIPNoScreeningNumber, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"CLIPNoScreeningNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlOutgoingMap_CLIPNoScreeningNumber, set_ServicesVoiceServiceCallControlOutgoingMap_CLIPNoScreeningNumber, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.CallControl.NumberingPlan. *** */
 DMLEAF tServicesVoiceServiceCallControlNumberingPlanParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"InterDigitTimerStd", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd, set_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"InterDigitTimerStd", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd, set_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.CallControl.CallingFeatures. *** */
 DMOBJ tServicesVoiceServiceCallControlCallingFeaturesObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Set", &DMWRITE, addObjServicesVoiceServiceCallControlCallingFeaturesSet, delObjServicesVoiceServiceCallControlCallingFeaturesSet, NULL, browseServicesVoiceServiceCallControlCallingFeaturesSetInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesSetObj, tServicesVoiceServiceCallControlCallingFeaturesSetParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Set", &DMWRITE, addObjServicesVoiceServiceCallControlCallingFeaturesSet, delObjServicesVoiceServiceCallControlCallingFeaturesSet, NULL, browseServicesVoiceServiceCallControlCallingFeaturesSetInst, NULL, tServicesVoiceServiceCallControlCallingFeaturesSetObj, tServicesVoiceServiceCallControlCallingFeaturesSetParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}. *** */
 DMOBJ tServicesVoiceServiceCallControlCallingFeaturesSetObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"SCREJ", &DMWRITE, addObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ, delObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ, NULL, browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesSetSCREJParams, NULL, BBFDM_BOTH, LIST_KEY{"CallingNumber", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"SCREJ", &DMWRITE, addObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ, delObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ, NULL, browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesSetSCREJParams, NULL, BBFDM_BOTH, LIST_KEY{"CallingNumber", "Alias", NULL}},
 {0}
 };
 
 DMLEAF tServicesVoiceServiceCallControlCallingFeaturesSetParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"CallWaitingEnable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CallWaitingEnable, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CallWaitingEnable, NULL, NULL, BBFDM_BOTH},
-{"CallForwardUnconditionalEnable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CallForwardUnconditionalEnable, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CallForwardUnconditionalEnable, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"CallWaitingEnable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CallWaitingEnable, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CallWaitingEnable, BBFDM_BOTH},
+{"CallForwardUnconditionalEnable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CallForwardUnconditionalEnable, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CallForwardUnconditionalEnable, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.SCREJ.{i}. *** */
 DMLEAF tServicesVoiceServiceCallControlCallingFeaturesSetSCREJParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"CallingNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNumber, set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNumber, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"CallingNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNumber, set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNumber, BBFDM_BOTH},
 {0}
 };
 

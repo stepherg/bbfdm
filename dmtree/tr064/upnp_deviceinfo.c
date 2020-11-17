@@ -24,60 +24,60 @@ int upnp_browseNetworkInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 
 /*** /UPnP/DM/DeviceInfo/ objects ***/
 DMOBJ upnpDeviceInfoObj[] ={
-{"PhysicalDevice", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE,upnpPhysicalDeviceObj, upnpPhysicalDeviceParams, NULL},
-{"OperatingSystem",&DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE,NULL, upnpOperatingSystemParams, NULL},
-{"ExecutionEnvironment",&DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE,NULL, upnpExecutionEnvironmentParams, NULL},
+{"PhysicalDevice", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,upnpPhysicalDeviceObj, upnpPhysicalDeviceParams, NULL},
+{"OperatingSystem",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,NULL, upnpOperatingSystemParams, NULL},
+{"ExecutionEnvironment",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,NULL, upnpExecutionEnvironmentParams, NULL},
 {0}
 };
 
 /*** /UPnP/DM/DeviceInfo/ parameters ***/
 DMLEAF upnpDeviceInfoParams[] = {
-{"ProvisioningCode", &DMWRITE, DMT_STRING, upnp_deviceinfo_get_provisionning_code, upnp_deviceinfo_set_provisionning_code, &DMFINFRM, NULL},
-{"SoftwareVersion", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_version, NULL, &DMFINFRM, NULL},
-{"SoftwareDescription", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_description, NULL, &DMFINFRM, NULL},
-{"UpTime", &DMREAD, DMT_UNINT, upnp_deviceinfo_get_up_time, NULL, &DMFINFRM, NULL},
+{"ProvisioningCode", &DMWRITE, DMT_STRING, upnp_deviceinfo_get_provisionning_code, upnp_deviceinfo_set_provisionning_code, NULL},
+{"SoftwareVersion", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_version, NULL, NULL},
+{"SoftwareDescription", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_description, NULL, NULL},
+{"UpTime", &DMREAD, DMT_UNINT, upnp_deviceinfo_get_up_time, NULL, NULL},
 {0}
 };
 
 /*** /UPnP/DM/DeviceInfo/PhysicalDevice/ objects ***/
 DMOBJ upnpPhysicalDeviceObj[] = {
-{"DeviceID", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE,NULL, upnpDeviceIdParams, NULL},
+{"DeviceID", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,NULL, upnpDeviceIdParams, NULL},
 {0}
 };
 
 /*** /UPnP/DM/DeviceInfo/PhysicalDevice/ parameters ***/
 DMLEAF upnpPhysicalDeviceParams[] = {
-{"HardwareVersion", &DMREAD, DMT_STRING, upnp_deviceinfo_get_hardware_version, NULL, &DMFINFRM, NULL},
-{"NetworkInterfaceNumberOfEntries", &DMREAD, DMT_UNINT, upnp_deviceinfo_get_network_interface_number_entries, NULL, &DMFINFRM, NULL},
+{"HardwareVersion", &DMREAD, DMT_STRING, upnp_deviceinfo_get_hardware_version, NULL, NULL},
+{"NetworkInterfaceNumberOfEntries", &DMREAD, DMT_UNINT, upnp_deviceinfo_get_network_interface_number_entries, NULL, NULL},
 {0}
 };
 
 /*** /UPnP/DM/DeviceInfo/OperatingSystem/ parameters ***/
 DMLEAF upnpOperatingSystemParams[] = {
-{"SoftwareVersion", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_version, NULL, &DMFINFRM, NULL},
-{"SoftwareDescription", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_description, NULL, &DMFINFRM, NULL},
-{"UpTime", &DMREAD, DMT_UNINT, upnp_deviceinfo_get_up_time, NULL, &DMFINFRM, NULL},
-{"WillReboot", &DMREAD, DMT_BOOL, upnp_deviceinfo_get_will_reboot, NULL, &DMFINFRM, NULL},
-{"WillBaselineReset", &DMREAD, DMT_BOOL, upnp_deviceinfo_get_will_base_line_reset, NULL, &DMFINFRM, NULL},
+{"SoftwareVersion", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_version, NULL, NULL},
+{"SoftwareDescription", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_description, NULL, NULL},
+{"UpTime", &DMREAD, DMT_UNINT, upnp_deviceinfo_get_up_time, NULL, NULL},
+{"WillReboot", &DMREAD, DMT_BOOL, upnp_deviceinfo_get_will_reboot, NULL, NULL},
+{"WillBaselineReset", &DMREAD, DMT_BOOL, upnp_deviceinfo_get_will_base_line_reset, NULL, NULL},
 {0}
 };
 
 /*** /UPnP/DM/DeviceInfo/ExecutionEnvironment/ parameters ***/
 DMLEAF upnpExecutionEnvironmentParams[] = {
-{"Status", &DMREAD, DMT_STRING, upnp_deviceinfo_get_status, NULL, &DMFINFRM, NULL},
-{"Uptime", &DMREAD, DMT_UNINT, upnp_deviceinfo_get_up_time, NULL, &DMFINFRM, NULL},
-{"SoftwareVersion", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_version, NULL, &DMFINFRM, NULL},
-{"SoftwareDescription", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_description, NULL, &DMFINFRM, NULL},
-{"WillReboot", &DMREAD, DMT_BOOL, upnp_deviceinfo_get_will_reboot, NULL, &DMFINFRM, NULL},
-{"WillBaselineReset", &DMREAD, DMT_BOOL, upnp_deviceinfo_get_will_base_line_reset, NULL, &DMFINFRM, NULL},
+{"Status", &DMREAD, DMT_STRING, upnp_deviceinfo_get_status, NULL, NULL},
+{"Uptime", &DMREAD, DMT_UNINT, upnp_deviceinfo_get_up_time, NULL, NULL},
+{"SoftwareVersion", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_version, NULL, NULL},
+{"SoftwareDescription", &DMREAD, DMT_STRING, upnp_deviceinfo_get_software_description, NULL, NULL},
+{"WillReboot", &DMREAD, DMT_BOOL, upnp_deviceinfo_get_will_reboot, NULL, NULL},
+{"WillBaselineReset", &DMREAD, DMT_BOOL, upnp_deviceinfo_get_will_base_line_reset, NULL, NULL},
 {0}
 };
 
 /*** /UPnP/DM/DeviceInfo/DeviceID/ parameters ***/
 DMLEAF upnpDeviceIdParams[] =  {
-{"ManufacturerOUI", &DMREAD, DMT_HEXBIN, upnp_deviceinfo_get_manufacturer_oui, NULL, &DMFINFRM, NULL},
-{"ProductClass", &DMREAD, DMT_STRING, upnp_deviceinfo_get_product_class, NULL, &DMFINFRM, NULL},
-{"SerialNumber", &DMREAD, DMT_STRING, upnp_deviceinfo_get_serial_number, NULL, &DMFINFRM, NULL},
+{"ManufacturerOUI", &DMREAD, DMT_HEXBIN, upnp_deviceinfo_get_manufacturer_oui, NULL, NULL},
+{"ProductClass", &DMREAD, DMT_STRING, upnp_deviceinfo_get_product_class, NULL, NULL},
+{"SerialNumber", &DMREAD, DMT_STRING, upnp_deviceinfo_get_serial_number, NULL, NULL},
 {0}
 };
 

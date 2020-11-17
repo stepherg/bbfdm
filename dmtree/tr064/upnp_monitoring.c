@@ -20,39 +20,39 @@
 
 /*** /UPnP/DM/Monitoring/ objects ***/
 DMOBJ upnpMonitoringObj[] = {
-{"OperatingSystem",&DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE, NULL, upnpMonitoringOperatingSystemParams, NULL},
-{"ExecutionEnvironment",&DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE, NULL, upnpMonitoringExecutionEnvironmentParams, NULL},
-{"IPUsage",&DMREAD, NULL, NULL, NULL, upnp_BrowseIPUsage, &DMFINFRM, &DMNONE, NULL, upnpMonitoringIPUsageParams, NULL},
+{"OperatingSystem",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, upnpMonitoringOperatingSystemParams, NULL},
+{"ExecutionEnvironment",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, upnpMonitoringExecutionEnvironmentParams, NULL},
+{"IPUsage",&DMREAD, NULL, NULL, NULL, upnp_BrowseIPUsage, NULL, NULL, NULL, upnpMonitoringIPUsageParams, NULL},
 {0}
 };
 
 /*** /UPnP/DM/Monitoring/ parameters ***/
 DMLEAF upnpMonitoringParams[] = {
-{"IPUsageNumberOfEntries", &DMREAD, DMT_UNINT, upnp_monitoring_get_IPUsageNumberOfEntries, NULL, &DMFINFRM, NULL},
+{"IPUsageNumberOfEntries", &DMREAD, DMT_UNINT, upnp_monitoring_get_IPUsageNumberOfEntries, NULL, NULL},
 {0}
 };
 
 /*** /UPnP/DM/Monitoring/OperatingSystem parameters ***/
 DMLEAF upnpMonitoringOperatingSystemParams[] = {
-{"CurrentTime", &DMREAD, DMT_TIME, upnp_monitoring_get_CurrentTime, NULL, &DMFINFRM, NULL},
-{"CPUUsage", &DMREAD, DMT_UNINT, upnp_monitoring_get_CPUUsage, NULL, &DMFINFRM, NULL},
-{"MemoryUsage", &DMREAD, DMT_UNINT, upnp_monitoring_get_MemoryUsage, NULL, &DMFINFRM, NULL},
+{"CurrentTime", &DMREAD, DMT_TIME, upnp_monitoring_get_CurrentTime, NULL, NULL},
+{"CPUUsage", &DMREAD, DMT_UNINT, upnp_monitoring_get_CPUUsage, NULL, NULL},
+{"MemoryUsage", &DMREAD, DMT_UNINT, upnp_monitoring_get_MemoryUsage, NULL, NULL},
 {0}
 };
 
 /*** /UPnP/DM/Monitoring/ExecutionEnvironement parameters ***/
  DMLEAF upnpMonitoringExecutionEnvironmentParams[] = {
-{"CPUUsage", &DMREAD, DMT_UNINT, upnp_monitoring_get_CPUUsage, NULL, &DMFINFRM, NULL},
-{"MemoryUsage", &DMREAD, DMT_UNINT, upnp_monitoring_get_MemoryUsage, NULL, &DMFINFRM, NULL},
+{"CPUUsage", &DMREAD, DMT_UNINT, upnp_monitoring_get_CPUUsage, NULL, NULL},
+{"MemoryUsage", &DMREAD, DMT_UNINT, upnp_monitoring_get_MemoryUsage, NULL, NULL},
 {0}
 };
 
 /*** /UPnP/DM/Monitoring/Usage parameters ***/
 DMLEAF upnpMonitoringIPUsageParams[] = {
-{"SystemName", &DMREAD, DMT_STRING, upnp_monitoring_get_SystemName, NULL, &DMFINFRM, NULL},
-{"Status", &DMREAD, DMT_STRING, upnp_monitoring_get_Status, NULL, &DMFINFRM, NULL},
-{"TotalPacketsSent", &DMREAD, DMT_UNINT, upnp_monitoring_get_TotalPacketsSent, NULL, &DMFINFRM, NULL},
-{"TotalPacketsReceived", &DMREAD, DMT_UNINT, upnp_monitoring_get_TotalPacketsReceived, NULL, &DMFINFRM, NULL},
+{"SystemName", &DMREAD, DMT_STRING, upnp_monitoring_get_SystemName, NULL, NULL},
+{"Status", &DMREAD, DMT_STRING, upnp_monitoring_get_Status, NULL, NULL},
+{"TotalPacketsSent", &DMREAD, DMT_UNINT, upnp_monitoring_get_TotalPacketsSent, NULL, NULL},
+{"TotalPacketsReceived", &DMREAD, DMT_UNINT, upnp_monitoring_get_TotalPacketsReceived, NULL, NULL},
 {0}
 };
 

@@ -386,19 +386,19 @@ int delete_dropbear_instance(char *refparam, struct dmctx *ctx, void *data, char
 
 /*** DMROOT.X_IOPSYS_EU_Dropbear.{i}. ****/
 DMLEAF X_IOPSYS_EU_DropbearParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_x_iopsys_eu_dropbear_alias, set_x_iopsys_eu_dropbear_alias, NULL, NULL, BBFDM_BOTH},
-{"PasswordAuth", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_dropbear_password_auth, set_x_iopsys_eu_dropbear_password_auth, NULL, NULL, BBFDM_BOTH},
-{"RootPasswordAuth", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_dropbear_root_password_auth, set_x_iopsys_eu_dropbear_root_password_auth, NULL, NULL, BBFDM_BOTH},
-{"Port", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_dropbear_port, set_x_iopsys_eu_dropbear_port, NULL, NULL, BBFDM_BOTH},
-{"RootLogin", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_dropbear_root_login, set_x_iopsys_eu_dropbear_root_login, NULL, NULL, BBFDM_BOTH},
-{"GatewayPorts", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_dropbear_gateway_ports, set_x_iopsys_eu_dropbear_gateway_ports, NULL, NULL, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_x_iopsys_eu_dropbear_interface, set_x_iopsys_eu_dropbear_interface, NULL, NULL, BBFDM_BOTH},
-{"RSAKeyFile", &DMWRITE, DMT_STRING, get_x_iopsys_eu_dropbear_rsakeyfile, set_x_iopsys_eu_dropbear_rsakeyfile, NULL, NULL, BBFDM_BOTH},
-{"DSSKeyFile", &DMWRITE, DMT_STRING, get_x_iopsys_eu_dropbear_dsskeyfile, set_x_iopsys_eu_dropbear_dsskeyfile, NULL, NULL, BBFDM_BOTH},
-{"SSHKeepAlive", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_dropbear_ssh_keepalive, set_x_iopsys_eu_dropbear_ssh_keepalive, NULL, NULL, BBFDM_BOTH},
-{"IdleTimeout", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_dropbear_idle_timeout, set_x_iopsys_eu_dropbear_idle_timeout, NULL, NULL, BBFDM_BOTH},
-{"Verbose", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_dropbear_verbose, set_x_iopsys_eu_dropbear_verbose, NULL, NULL, BBFDM_BOTH},
-{"BannerFile", &DMWRITE, DMT_STRING, get_x_iopsys_eu_dropbear_banner_file, set_x_iopsys_eu_dropbear_banner_file, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING, get_x_iopsys_eu_dropbear_alias, set_x_iopsys_eu_dropbear_alias, BBFDM_BOTH},
+{"PasswordAuth", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_dropbear_password_auth, set_x_iopsys_eu_dropbear_password_auth, BBFDM_BOTH},
+{"RootPasswordAuth", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_dropbear_root_password_auth, set_x_iopsys_eu_dropbear_root_password_auth, BBFDM_BOTH},
+{"Port", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_dropbear_port, set_x_iopsys_eu_dropbear_port, BBFDM_BOTH},
+{"RootLogin", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_dropbear_root_login, set_x_iopsys_eu_dropbear_root_login, BBFDM_BOTH},
+{"GatewayPorts", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_dropbear_gateway_ports, set_x_iopsys_eu_dropbear_gateway_ports, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_x_iopsys_eu_dropbear_interface, set_x_iopsys_eu_dropbear_interface, BBFDM_BOTH},
+{"RSAKeyFile", &DMWRITE, DMT_STRING, get_x_iopsys_eu_dropbear_rsakeyfile, set_x_iopsys_eu_dropbear_rsakeyfile, BBFDM_BOTH},
+{"DSSKeyFile", &DMWRITE, DMT_STRING, get_x_iopsys_eu_dropbear_dsskeyfile, set_x_iopsys_eu_dropbear_dsskeyfile, BBFDM_BOTH},
+{"SSHKeepAlive", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_dropbear_ssh_keepalive, set_x_iopsys_eu_dropbear_ssh_keepalive, BBFDM_BOTH},
+{"IdleTimeout", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_dropbear_idle_timeout, set_x_iopsys_eu_dropbear_idle_timeout, BBFDM_BOTH},
+{"Verbose", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_dropbear_verbose, set_x_iopsys_eu_dropbear_verbose, BBFDM_BOTH},
+{"BannerFile", &DMWRITE, DMT_STRING, get_x_iopsys_eu_dropbear_banner_file, set_x_iopsys_eu_dropbear_banner_file, BBFDM_BOTH},
 {0}
 };

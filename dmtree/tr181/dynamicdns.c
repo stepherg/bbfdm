@@ -1054,64 +1054,64 @@ static int set_DynamicDNSServer_MaxRetries(char *refparam, struct dmctx *ctx, vo
 
 /* *** Device.DynamicDNS. *** */
 DMOBJ tDynamicDNSObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Client", &DMWRITE, addObjDynamicDNSClient, delObjDynamicDNSClient, NULL, browseDynamicDNSClientInst, NULL, NULL, NULL, tDynamicDNSClientObj, tDynamicDNSClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Server", "Username", "Alias", NULL}},
-{"Server", &DMWRITE, addObjDynamicDNSServer, delObjDynamicDNSServer, NULL, browseDynamicDNSServerInst, NULL, NULL, NULL, NULL, tDynamicDNSServerParams, get_linker_dynamicdns_server, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Client", &DMWRITE, addObjDynamicDNSClient, delObjDynamicDNSClient, NULL, browseDynamicDNSClientInst, NULL, tDynamicDNSClientObj, tDynamicDNSClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Server", "Username", "Alias", NULL}},
+{"Server", &DMWRITE, addObjDynamicDNSServer, delObjDynamicDNSServer, NULL, browseDynamicDNSServerInst, NULL, NULL, tDynamicDNSServerParams, get_linker_dynamicdns_server, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
 DMLEAF tDynamicDNSParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"ClientNumberOfEntries", &DMREAD, DMT_UNINT, get_DynamicDNS_ClientNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-{"ServerNumberOfEntries", &DMREAD, DMT_UNINT, get_DynamicDNS_ServerNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-{"SupportedServices", &DMREAD, DMT_STRING, get_DynamicDNS_SupportedServices, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"ClientNumberOfEntries", &DMREAD, DMT_UNINT, get_DynamicDNS_ClientNumberOfEntries, NULL, BBFDM_BOTH},
+{"ServerNumberOfEntries", &DMREAD, DMT_UNINT, get_DynamicDNS_ServerNumberOfEntries, NULL, BBFDM_BOTH},
+{"SupportedServices", &DMREAD, DMT_STRING, get_DynamicDNS_SupportedServices, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DynamicDNS.Client.{i}. *** */
 DMOBJ tDynamicDNSClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Hostname", &DMWRITE, NULL, NULL, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Hostname", &DMWRITE, NULL, NULL, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", NULL}},
 {0}
 };
 
 DMLEAF tDynamicDNSClientParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DynamicDNSClient_Enable, set_DynamicDNSClient_Enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_DynamicDNSClient_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Alias, set_DynamicDNSClient_Alias, NULL, NULL, BBFDM_BOTH},
-{"LastError", &DMREAD, DMT_STRING, get_DynamicDNSClient_LastError, NULL, NULL, NULL, BBFDM_BOTH},
-{"Server", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Server, set_DynamicDNSClient_Server, NULL, NULL, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Interface, set_DynamicDNSClient_Interface, NULL, NULL, BBFDM_BOTH},
-{"Username", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Username, set_DynamicDNSClient_Username, NULL, NULL, BBFDM_BOTH},
-{"Password", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Password, set_DynamicDNSClient_Password, NULL, NULL, BBFDM_BOTH},
-{"HostnameNumberOfEntries", &DMREAD, DMT_UNINT, get_DynamicDNSClient_HostnameNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DynamicDNSClient_Enable, set_DynamicDNSClient_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_DynamicDNSClient_Status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Alias, set_DynamicDNSClient_Alias, BBFDM_BOTH},
+{"LastError", &DMREAD, DMT_STRING, get_DynamicDNSClient_LastError, NULL, BBFDM_BOTH},
+{"Server", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Server, set_DynamicDNSClient_Server, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Interface, set_DynamicDNSClient_Interface, BBFDM_BOTH},
+{"Username", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Username, set_DynamicDNSClient_Username, BBFDM_BOTH},
+{"Password", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Password, set_DynamicDNSClient_Password, BBFDM_BOTH},
+{"HostnameNumberOfEntries", &DMREAD, DMT_UNINT, get_DynamicDNSClient_HostnameNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DynamicDNS.Client.{i}.Hostname.{i}. *** */
 DMLEAF tDynamicDNSClientHostnameParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DynamicDNSClientHostname_Enable, set_DynamicDNSClientHostname_Enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_DynamicDNSClientHostname_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMWRITE, DMT_STRING, get_DynamicDNSClientHostname_Name, set_DynamicDNSClientHostname_Name, NULL, NULL, BBFDM_BOTH},
-{"LastUpdate", &DMREAD, DMT_TIME, get_DynamicDNSClientHostname_LastUpdate, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DynamicDNSClientHostname_Enable, set_DynamicDNSClientHostname_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_DynamicDNSClientHostname_Status, NULL, BBFDM_BOTH},
+{"Name", &DMWRITE, DMT_STRING, get_DynamicDNSClientHostname_Name, set_DynamicDNSClientHostname_Name, BBFDM_BOTH},
+{"LastUpdate", &DMREAD, DMT_TIME, get_DynamicDNSClientHostname_LastUpdate, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DynamicDNS.Server.{i}. *** */
 DMLEAF tDynamicDNSServerParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Enable, set_DynamicDNSServer_Enable, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Name, set_DynamicDNSServer_Name, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Alias, set_DynamicDNSServer_Alias, NULL, NULL, BBFDM_BOTH},
-{"ServiceName", &DMWRITE, DMT_STRING, get_DynamicDNSServer_ServiceName, set_DynamicDNSServer_ServiceName, NULL, NULL, BBFDM_BOTH},
-{"ServerAddress", &DMWRITE, DMT_STRING, get_DynamicDNSServer_ServerAddress, set_DynamicDNSServer_ServerAddress, NULL, NULL, BBFDM_BOTH},
-{"ServerPort", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_ServerPort, set_DynamicDNSServer_ServerPort, NULL, NULL, BBFDM_BOTH},
-{"SupportedProtocols", &DMREAD, DMT_STRING, get_DynamicDNSServer_SupportedProtocols, NULL, NULL, NULL, BBFDM_BOTH},
-{"Protocol", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Protocol, set_DynamicDNSServer_Protocol, NULL, NULL, BBFDM_BOTH},
-{"CheckInterval", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_CheckInterval, set_DynamicDNSServer_CheckInterval, NULL, NULL, BBFDM_BOTH},
-{"RetryInterval", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_RetryInterval, set_DynamicDNSServer_RetryInterval, NULL, NULL, BBFDM_BOTH},
-{"MaxRetries", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_MaxRetries, set_DynamicDNSServer_MaxRetries, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Enable, set_DynamicDNSServer_Enable, BBFDM_BOTH},
+{"Name", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Name, set_DynamicDNSServer_Name, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Alias, set_DynamicDNSServer_Alias, BBFDM_BOTH},
+{"ServiceName", &DMWRITE, DMT_STRING, get_DynamicDNSServer_ServiceName, set_DynamicDNSServer_ServiceName, BBFDM_BOTH},
+{"ServerAddress", &DMWRITE, DMT_STRING, get_DynamicDNSServer_ServerAddress, set_DynamicDNSServer_ServerAddress, BBFDM_BOTH},
+{"ServerPort", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_ServerPort, set_DynamicDNSServer_ServerPort, BBFDM_BOTH},
+{"SupportedProtocols", &DMREAD, DMT_STRING, get_DynamicDNSServer_SupportedProtocols, NULL, BBFDM_BOTH},
+{"Protocol", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Protocol, set_DynamicDNSServer_Protocol, BBFDM_BOTH},
+{"CheckInterval", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_CheckInterval, set_DynamicDNSServer_CheckInterval, BBFDM_BOTH},
+{"RetryInterval", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_RetryInterval, set_DynamicDNSServer_RetryInterval, BBFDM_BOTH},
+{"MaxRetries", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_MaxRetries, set_DynamicDNSServer_MaxRetries, BBFDM_BOTH},
 {0}
 };

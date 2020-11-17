@@ -192,41 +192,41 @@ static int set_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.POTS. *** */
 DMOBJ tServicesVoiceServicePOTSObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"FXS", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServicePOTSFXSInst, NULL, NULL, NULL, tServicesVoiceServicePOTSFXSObj, tServicesVoiceServicePOTSFXSParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"FXS", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServicePOTSFXSInst, NULL, tServicesVoiceServicePOTSFXSObj, tServicesVoiceServicePOTSFXSParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
 DMLEAF tServicesVoiceServicePOTSParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Region", &DMWRITE, DMT_STRING, get_ServicesVoiceServicePOTS_Region, set_ServicesVoiceServicePOTS_Region, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Region", &DMWRITE, DMT_STRING, get_ServicesVoiceServicePOTS_Region, set_ServicesVoiceServicePOTS_Region, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.POTS.FXS.{i}. *** */
 DMOBJ tServicesVoiceServicePOTSFXSObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"VoiceProcessing", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServicePOTSFXSVoiceProcessingParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"VoiceProcessing", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServicePOTSFXSVoiceProcessingParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tServicesVoiceServicePOTSFXSParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Status", &DMREAD, DMT_STRING, get_ServicesVoiceServicePOTSFXS_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_ServicesVoiceServicePOTSFXS_Name, NULL, NULL, NULL, BBFDM_BOTH},
-{"DialType", &DMREAD, DMT_STRING, get_ServicesVoiceServicePOTSFXS_DialType, NULL, NULL, NULL, BBFDM_BOTH},
-{"ClipGeneration", &DMWRITE, DMT_BOOL, get_ServicesVoiceServicePOTSFXS_ClipGeneration, set_ServicesVoiceServicePOTSFXS_ClipGeneration, NULL, NULL, BBFDM_BOTH},
-{"Active", &DMREAD, DMT_BOOL, get_ServicesVoiceServicePOTSFXS_Active, NULL, NULL, NULL, BBFDM_BOTH},
-{"TerminalType", &DMREAD, DMT_STRING, get_ServicesVoiceServicePOTSFXS_TerminalType, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Status", &DMREAD, DMT_STRING, get_ServicesVoiceServicePOTSFXS_Status, NULL, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_ServicesVoiceServicePOTSFXS_Name, NULL, BBFDM_BOTH},
+{"DialType", &DMREAD, DMT_STRING, get_ServicesVoiceServicePOTSFXS_DialType, NULL, BBFDM_BOTH},
+{"ClipGeneration", &DMWRITE, DMT_BOOL, get_ServicesVoiceServicePOTSFXS_ClipGeneration, set_ServicesVoiceServicePOTSFXS_ClipGeneration, BBFDM_BOTH},
+{"Active", &DMREAD, DMT_BOOL, get_ServicesVoiceServicePOTSFXS_Active, NULL, BBFDM_BOTH},
+{"TerminalType", &DMREAD, DMT_STRING, get_ServicesVoiceServicePOTSFXS_TerminalType, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.POTS.FXS.{i}.VoiceProcessing. *** */
 DMLEAF tServicesVoiceServicePOTSFXSVoiceProcessingParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"TransmitGain", &DMWRITE, DMT_INT, get_ServicesVoiceServicePOTSFXSVoiceProcessing_TransmitGain, set_ServicesVoiceServicePOTSFXSVoiceProcessing_TransmitGain, NULL, NULL, BBFDM_BOTH},
-{"ReceiveGain", &DMWRITE, DMT_INT, get_ServicesVoiceServicePOTSFXSVoiceProcessing_ReceiveGain, set_ServicesVoiceServicePOTSFXSVoiceProcessing_ReceiveGain, NULL, NULL, BBFDM_BOTH},
-{"EchoCancellationEnable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable, set_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"TransmitGain", &DMWRITE, DMT_INT, get_ServicesVoiceServicePOTSFXSVoiceProcessing_TransmitGain, set_ServicesVoiceServicePOTSFXSVoiceProcessing_TransmitGain, BBFDM_BOTH},
+{"ReceiveGain", &DMWRITE, DMT_INT, get_ServicesVoiceServicePOTSFXSVoiceProcessing_ReceiveGain, set_ServicesVoiceServicePOTSFXSVoiceProcessing_ReceiveGain, BBFDM_BOTH},
+{"EchoCancellationEnable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable, set_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable, BBFDM_BOTH},
 {0}
 };
 

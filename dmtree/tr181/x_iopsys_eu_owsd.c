@@ -451,39 +451,39 @@ static int delete_owsd_listen_instance(char *refparam, struct dmctx *ctx, void *
 
 /*** DMROOT.X_IOPSYS_EU_OWSD. ***/
 DMLEAF X_IOPSYS_EU_OWSDParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"UnixSocket", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_global_sock, set_x_iopsys_eu_owsd_global_sock, NULL, NULL, BBFDM_BOTH},
-{"URLRedirect", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_global_redirect, set_x_iopsys_eu_owsd_global_redirect, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"UnixSocket", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_global_sock, set_x_iopsys_eu_owsd_global_sock, BBFDM_BOTH},
+{"URLRedirect", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_global_redirect, set_x_iopsys_eu_owsd_global_redirect, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ X_IOPSYS_EU_OWSDObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"UbusProxy", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, UbusProxyParams, NULL, BBFDM_BOTH},
-{"VirtualHost", &DMWRITE, add_owsd_listen, delete_owsd_listen_instance, NULL, browseXIopsysEuOWSDVirtualHost, NULL, NULL, NULL, NULL, VirtualHostParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"UbusProxy", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, UbusProxyParams, NULL, BBFDM_BOTH},
+{"VirtualHost", &DMWRITE, add_owsd_listen, delete_owsd_listen_instance, NULL, browseXIopsysEuOWSDVirtualHost, NULL, NULL, VirtualHostParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF UbusProxyParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_owsd_ubus_proxy_enable, set_x_iopsys_eu_owsd_ubus_proxy_enable, NULL, NULL, BBFDM_BOTH},
-{"PeerCertificate", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_ubus_proxy_cert, set_x_iopsys_eu_owsd_ubus_proxy_cert, NULL, NULL, BBFDM_BOTH},
-{"PeerKey", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_ubus_proxy_key, set_x_iopsys_eu_owsd_ubus_proxy_key, NULL, NULL, BBFDM_BOTH},
-{"PeerCA", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_ubus_proxy_ca, set_x_iopsys_eu_owsd_ubus_proxy_ca, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_owsd_ubus_proxy_enable, set_x_iopsys_eu_owsd_ubus_proxy_enable, BBFDM_BOTH},
+{"PeerCertificate", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_ubus_proxy_cert, set_x_iopsys_eu_owsd_ubus_proxy_cert, BBFDM_BOTH},
+{"PeerKey", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_ubus_proxy_key, set_x_iopsys_eu_owsd_ubus_proxy_key, BBFDM_BOTH},
+{"PeerCA", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_ubus_proxy_ca, set_x_iopsys_eu_owsd_ubus_proxy_ca, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF VirtualHostParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_alias, set_x_iopsys_eu_owsd_virtualhost_alias, NULL, NULL, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_interface, set_x_iopsys_eu_owsd_virtualhost_interface, NULL, NULL, BBFDM_BOTH},
-{"Port", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_owsd_virtualhost_port, set_x_iopsys_eu_owsd_virtualhost_port, NULL, NULL, BBFDM_BOTH},
-{"IPv6Enable", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_owsd_virtualhost_ipv6_enable, set_x_iopsys_eu_owsd_virtualhost_ipv6_enable, NULL, NULL, BBFDM_BOTH},
-{"AllowInterfaceIPAddressAsOrigin", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_owsd_virtualhost_whitelist_interface, set_x_iopsys_eu_owsd_virtualhost_whitelist_interface, NULL, NULL, BBFDM_BOTH},
-{"AllowDHCPDomainsAsOrigin", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_owsd_virtualhost_whitelist_dhcp, set_x_iopsys_eu_owsd_virtualhost_whitelist_dhcp, NULL, NULL, BBFDM_BOTH},
-{"AllowedOrigins", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_origin, set_x_iopsys_eu_owsd_virtualhost_origin, NULL, NULL, BBFDM_BOTH},
-{"Certificate", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_certificate, set_x_iopsys_eu_owsd_virtualhost_certificate, NULL, NULL, BBFDM_BOTH},
-{"Key", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_key, set_x_iopsys_eu_owsd_virtualhost_key, NULL, NULL, BBFDM_BOTH},
-{"CA", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_ca, set_x_iopsys_eu_owsd_virtualhost_ca, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_alias, set_x_iopsys_eu_owsd_virtualhost_alias, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_interface, set_x_iopsys_eu_owsd_virtualhost_interface, BBFDM_BOTH},
+{"Port", &DMWRITE, DMT_UNINT, get_x_iopsys_eu_owsd_virtualhost_port, set_x_iopsys_eu_owsd_virtualhost_port, BBFDM_BOTH},
+{"IPv6Enable", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_owsd_virtualhost_ipv6_enable, set_x_iopsys_eu_owsd_virtualhost_ipv6_enable, BBFDM_BOTH},
+{"AllowInterfaceIPAddressAsOrigin", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_owsd_virtualhost_whitelist_interface, set_x_iopsys_eu_owsd_virtualhost_whitelist_interface, BBFDM_BOTH},
+{"AllowDHCPDomainsAsOrigin", &DMWRITE, DMT_BOOL, get_x_iopsys_eu_owsd_virtualhost_whitelist_dhcp, set_x_iopsys_eu_owsd_virtualhost_whitelist_dhcp, BBFDM_BOTH},
+{"AllowedOrigins", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_origin, set_x_iopsys_eu_owsd_virtualhost_origin, BBFDM_BOTH},
+{"Certificate", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_certificate, set_x_iopsys_eu_owsd_virtualhost_certificate, BBFDM_BOTH},
+{"Key", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_key, set_x_iopsys_eu_owsd_virtualhost_key, BBFDM_BOTH},
+{"CA", &DMWRITE, DMT_STRING, get_x_iopsys_eu_owsd_virtualhost_ca, set_x_iopsys_eu_owsd_virtualhost_ca, BBFDM_BOTH},
 {0}
 };

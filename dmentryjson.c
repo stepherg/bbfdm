@@ -657,7 +657,7 @@ static void parse_mapping_param(char *parameter, json_object *mapping, struct li
 
 static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pleaf, int i, struct list_head *list)
 {
-	/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type(8)*/
+	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(8)*/
 	struct json_object *type, *protocols, *proto, *write, *mapping_arr, *mapping;
 	char full_param[256] = "";
 	size_t n_proto;
@@ -697,12 +697,6 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 
 	//setvalue
 	pleaf[i].setvalue = json_object_get_boolean(write) ? setvalue_param : NULL;
-
-	//forced_inform
-	pleaf[i].forced_inform = NULL;
-
-	//notification
-	pleaf[i].notification = NULL;
 
 	//bbfdm_type
 	json_object_object_get_ex(jobj, "protocols", &protocols);
@@ -748,7 +742,7 @@ static void count_obj_param_under_jsonobj(json_object *jsonobj, int *obj_number,
 
 static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, struct list_head *list)
 {
-	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys(14)*/
+	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys(14)*/
 
 	char *full_obj = NULL, *prfix_obj = NULL, *obj_str = NULL;
 	int obj_number = 0, param_number = 0, i = 0, j = 0;
@@ -812,12 +806,6 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, s
 
 			//browseinstobj
 			pobj[index].browseinstobj = json_object_get_boolean(json_obj) ? browse_obj : NULL;
-
-			//forced_inform
-			pobj[index].forced_inform = NULL;
-
-			//notification
-			pobj[index].notification = NULL;
 
 			//nextdynamicobj
 			pobj[index].nextdynamicobj = NULL;

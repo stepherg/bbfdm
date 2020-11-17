@@ -17,7 +17,7 @@
 #include "x_iopsys_eu_igmp.h"
 #include "x_iopsys_eu_syslog.h"
 #include "softwaremodules.h"
-#include "xmpp.h"
+//#include "xmpp.h"
 #include "x_iopsys_eu_owsd.h"
 #include "x_iopsys_eu_dropbear.h"
 #include "x_iopsys_eu_buttons.h"
@@ -41,9 +41,11 @@
 #include "interfacestack.h"
 #include "qos.h"
 
+/*
 #if BBF_TR104
 #include "voice_services.h"
 #endif
+*/
 
 #ifdef BBF_TR064
 #include "upnp_deviceinfo.h"
@@ -55,60 +57,62 @@
 /*** UPNP ***/
 #ifdef BBF_TR064
 DMOBJ tEntry181ObjUPNP[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{(char *)&dmroot, &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE, tRoot181ObjUPNP, NULL, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{(char *)&dmroot, &DMREAD, NULL, NULL, NULL, NULL, NULL, tRoot181ObjUPNP, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ tRoot181ObjUPNP[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"BBF", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE, tRoot181ObjUPNPBBF, NULL, NULL, BBFDM_BOTH},
-{"UPnP", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE, tRoot181ObjUPNPDMROOT, NULL, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"BBF", &DMREAD, NULL, NULL, NULL, NULL, NULL, tRoot181ObjUPNPBBF, NULL, NULL, BBFDM_BOTH},
+{"UPnP", &DMREAD, NULL, NULL, NULL, NULL, NULL, tRoot181ObjUPNPDMROOT, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ tRoot181ObjUPNPDMROOT[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"DM", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE, tRoot181ObjUPNPDM, NULL, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"DM", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tRoot181ObjUPNPDM, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ tRoot181ObjUPNPDM[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE,upnpDeviceInfoObj, upnpDeviceInfoParams, NULL, BBFDM_BOTH},
-{"Configuration", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE,upnpConfigurationObj, NULL, NULL, BBFDM_BOTH},
-{"Monitoring", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE,upnpMonitoringObj, upnpMonitoringParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL,upnpDeviceInfoObj, upnpDeviceInfoParams, NULL, BBFDM_BOTH},
+{"Configuration", &DMREAD, NULL, NULL, NULL, NULL, NULL,upnpConfigurationObj, NULL, NULL, BBFDM_BOTH},
+{"Monitoring", &DMREAD, NULL, NULL, NULL, NULL, NULL,upnpMonitoringObj, upnpMonitoringParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ tRoot181ObjUPNPBBF[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE,tDeviceInfoObj, tDeviceInfoParams, NULL, BBFDM_BOTH},
-{"ManagementServer", &DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE,NULL, tManagementServerParams, NULL, BBFDM_BOTH},
-{"Time", &DMREAD, NULL, NULL, NULL, NULL, NULL, &DMNONE,NULL, tTimeParams, NULL, BBFDM_BOTH},
-{"UPnP", &DMREAD, NULL, NULL, NULL, NULL, NULL, &DMNONE,tUPnPObj, NULL, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL,tDeviceInfoObj, tDeviceInfoParams, NULL, BBFDM_BOTH},
+{"ManagementServer", &DMREAD, NULL, NULL, NULL, NULL, NULL,NULL, tManagementServerParams, NULL, BBFDM_BOTH},
+{"Time", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tTimeParams, NULL, BBFDM_BOTH},
+{"UPnP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPObj, NULL, NULL, BBFDM_BOTH},
+/*
 #if BBF_TR104
-{"VoiceService", &DMREAD, NULL, NULL, NULL, browseVoiceServiceInst, NULL, NULL, tServicesVoiceServiceObj, tServicesVoiceServiceParams, NULL, BBFDM_BOTH},
+{"VoiceService", &DMREAD, NULL, NULL, NULL, NULL, browseVoiceServiceInst, NULL, tServicesVoiceServiceObj, tServicesVoiceServiceParams, NULL, BBFDM_BOTH},
 #endif
-{CUSTOM_PREFIX"Syslog", &DMREAD, NULL, NULL, NULL, NULL, NULL, &DMNONE,NULL, tSe_SyslogParam, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"IGMP", &DMREAD, NULL, NULL, NULL, NULL, NULL, &DMNONE, NULL, X_IOPSYS_EU_IGMPObj, X_IOPSYS_EU_IGMPParams, NULL, BBFDM_BOTH},
-{"SoftwareModules", &DMREAD, NULL, NULL, NULL, NULL, NULL, &DMNONE,tSoftwareModulesObj, NULL, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"OWSD", &DMREAD, NULL, NULL, NULL, NULL, NULL, &DMNONE,X_IOPSYS_EU_OWSDObj, X_IOPSYS_EU_OWSDParams, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"Dropbear", &DMWRITE, add_dropbear_instance, delete_dropbear_instance, NULL, browseXIopsysEuDropbear, NULL, &DMNONE, NULL, X_IOPSYS_EU_DropbearParams, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"Buttons", &DMREAD, NULL, NULL, NULL, browseXIopsysEuButton, NULL, &DMNONE, NULL, X_IOPSYS_EU_ButtonParams, NULL, BBFDM_BOTH},
-{"Bridging",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tBridgingObj, NULL, NULL, BBFDM_BOTH},
-{"WiFi",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiObj, NULL, NULL, BBFDM_BOTH},
-{"IP",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPObj, NULL, NULL, BBFDM_BOTH},
-{"Ethernet", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tEthernetObj, NULL, NULL, BBFDM_BOTH},
-{"DSL",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDSLObj, NULL, NULL, BBFDM_BOTH},
-{"ATM",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tATMObj, NULL, NULL, BBFDM_BOTH},
-{"PTM", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tPTMObj, NULL, NULL, BBFDM_BOTH},
-{"DHCPv4", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDHCPv4Obj, NULL, NULL, BBFDM_BOTH},
-{"Hosts", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tHostsObj, tHostsParams, NULL, BBFDM_BOTH},
-{"NAT", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tNATObj, NULL, NULL, BBFDM_BOTH},
-{"PPP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tPPPObj, NULL, NULL, BBFDM_BOTH},
-{"Routing", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tRoutingObj, tRoutingParams, NULL, BBFDM_BOTH},
-{"XMPP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,tXMPPObj, tXMPPParams, NULL, BBFDM_BOTH},
+*/
+{CUSTOM_PREFIX"Syslog", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tSe_SyslogParam, NULL, BBFDM_BOTH},
+{CUSTOM_PREFIX"IGMP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, X_IOPSYS_EU_IGMPObj, X_IOPSYS_EU_IGMPParams, NULL, BBFDM_BOTH},
+{"SoftwareModules", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,tSoftwareModulesObj, NULL, NULL, BBFDM_BOTH},
+{CUSTOM_PREFIX"OWSD", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,X_IOPSYS_EU_OWSDObj, X_IOPSYS_EU_OWSDParams, NULL, BBFDM_BOTH},
+{CUSTOM_PREFIX"Dropbear", &DMWRITE, add_dropbear_instance, delete_dropbear_instance, NULL, browseXIopsysEuDropbear, NULL, NULL, X_IOPSYS_EU_DropbearParams, NULL, BBFDM_BOTH},
+{CUSTOM_PREFIX"Buttons", &DMREAD, NULL, NULL, NULL, browseXIopsysEuButton, NULL, NULL, X_IOPSYS_EU_ButtonParams, NULL, BBFDM_BOTH},
+{"Bridging",&DMREAD, NULL, NULL, NULL, NULL, NULL, tBridgingObj, NULL, NULL, BBFDM_BOTH},
+{"WiFi",&DMREAD, NULL, NULL, NULL, NULL, NULL, tWiFiObj, NULL, NULL, BBFDM_BOTH},
+{"IP",&DMREAD, NULL, NULL, NULL, NULL, NULL, tIPObj, NULL, NULL, BBFDM_BOTH},
+{"Ethernet", &DMREAD, NULL, NULL, NULL, NULL, NULL, tEthernetObj, NULL, NULL, BBFDM_BOTH},
+{"DSL",&DMREAD, NULL, NULL, NULL, NULL, NULL, tDSLObj, NULL, NULL, BBFDM_BOTH},
+{"ATM",&DMREAD, NULL, NULL, NULL, NULL, NULL, tATMObj, NULL, NULL, BBFDM_BOTH},
+{"PTM", &DMREAD, NULL, NULL, NULL, NULL, NULL, tPTMObj, NULL, NULL, BBFDM_BOTH},
+{"DHCPv4", &DMREAD, NULL, NULL, NULL, NULL, NULL, tDHCPv4Obj, NULL, NULL, BBFDM_BOTH},
+{"Hosts", &DMREAD, NULL, NULL, NULL, NULL, NULL, tHostsObj, tHostsParams, NULL, BBFDM_BOTH},
+{"NAT", &DMREAD, NULL, NULL, NULL, NULL, NULL, tNATObj, NULL, NULL, BBFDM_BOTH},
+{"PPP", &DMREAD, NULL, NULL, NULL, NULL, NULL, tPPPObj, NULL, NULL, BBFDM_BOTH},
+{"Routing", &DMREAD, NULL, NULL, NULL, NULL, NULL, tRoutingObj, tRoutingParams, NULL, BBFDM_BOTH},
+//{"XMPP", &DMREAD, NULL, NULL, NULL, NULL, NULL, tXMPPObj, tXMPPParams, NULL, BBFDM_BOTH},
 {0}
 };
 

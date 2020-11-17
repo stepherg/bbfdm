@@ -793,95 +793,96 @@ char *get_softwaremodules_url(char *uuid)
 
 /* *** Device.SoftwareModules. *** */
 DMOBJ tSoftwareModulesObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"ExecEnv", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecEnvInst, NULL, NULL, NULL, NULL, tSoftwareModulesExecEnvParams, get_exe_cenv_linker, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}},
-{"DeploymentUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesDeploymentUnitInst, NULL, NULL, NULL, NULL, tSoftwareModulesDeploymentUnitParams, get_du_linker, BBFDM_BOTH, LIST_KEY{"UUID", "Version", "ExecutionEnvRef", "Alias", NULL}},
-{"ExecutionUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecutionUnitInst, NULL, NULL, NULL, tSoftwareModulesExecutionUnitObj, tSoftwareModulesExecutionUnitParams, NULL, BBFDM_BOTH, LIST_KEY{"EUID", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"ExecEnv", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecEnvInst, NULL, NULL, tSoftwareModulesExecEnvParams, get_exe_cenv_linker, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}},
+{"DeploymentUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesDeploymentUnitInst, NULL, NULL, tSoftwareModulesDeploymentUnitParams, get_du_linker, BBFDM_BOTH, LIST_KEY{"UUID", "Version", "ExecutionEnvRef", "Alias", NULL}},
+{"ExecutionUnit", &DMREAD, NULL, NULL, NULL, browseSoftwareModulesExecutionUnitInst, NULL, tSoftwareModulesExecutionUnitObj, tSoftwareModulesExecutionUnitParams, NULL, BBFDM_BOTH, LIST_KEY{"EUID", "Alias", NULL}},
 {0}
 };
 
 DMLEAF tSoftwareModulesParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"ExecEnvNumberOfEntries", &DMREAD, DMT_UNINT, get_SoftwareModules_ExecEnvNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-{"DeploymentUnitNumberOfEntries", &DMREAD, DMT_UNINT, get_SoftwareModules_DeploymentUnitNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-{"ExecutionUnitNumberOfEntries", &DMREAD, DMT_UNINT, get_SoftwareModules_ExecutionUnitNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"ExecEnvNumberOfEntries", &DMREAD, DMT_UNINT, get_SoftwareModules_ExecEnvNumberOfEntries, NULL, BBFDM_BOTH},
+{"DeploymentUnitNumberOfEntries", &DMREAD, DMT_UNINT, get_SoftwareModules_DeploymentUnitNumberOfEntries, NULL, BBFDM_BOTH},
+{"ExecutionUnitNumberOfEntries", &DMREAD, DMT_UNINT, get_SoftwareModules_ExecutionUnitNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.SoftwareModules.ExecEnv.{i}. *** */
 DMLEAF tSoftwareModulesExecEnvParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_SoftwareModulesExecEnv_Enable, set_SoftwareModulesExecEnv_Enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Reset", &DMWRITE, DMT_BOOL, get_SoftwareModulesExecEnv_Reset, set_SoftwareModulesExecEnv_Reset, NULL, NULL, BBFDM_CWMP},
-{"Alias", &DMWRITE, DMT_STRING, get_SoftwareModulesExecEnv_Alias, set_SoftwareModulesExecEnv_Alias, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_Name, NULL, NULL, NULL, BBFDM_BOTH},
-{"Type", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_Type, NULL, NULL, NULL, BBFDM_BOTH},
-//{"InitialRunLevel", &DMWRITE, DMT_UNINT, get_SoftwareModulesExecEnv_InitialRunLevel, set_SoftwareModulesExecEnv_InitialRunLevel, NULL, NULL, BBFDM_BOTH},
-//{"RequestedRunLevel", &DMWRITE, DMT_INT, get_SoftwareModulesExecEnv_RequestedRunLevel, set_SoftwareModulesExecEnv_RequestedRunLevel, NULL, NULL, BBFDM_CWMP},
-//{"CurrentRunLevel", &DMREAD, DMT_INT, get_SoftwareModulesExecEnv_CurrentRunLevel, NULL, NULL, NULL, BBFDM_BOTH},
-//{"InitialExecutionUnitRunLevel", &DMWRITE, DMT_INT, get_SoftwareModulesExecEnv_InitialExecutionUnitRunLevel, set_SoftwareModulesExecEnv_InitialExecutionUnitRunLevel, NULL, NULL, BBFDM_BOTH},
-{"Vendor", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_Vendor, NULL, NULL, NULL, BBFDM_BOTH},
-{"Version", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_Version, NULL, NULL, NULL, BBFDM_BOTH},
-{"ParentExecEnv", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_ParentExecEnv, NULL, NULL, NULL, BBFDM_BOTH},
-{"AllocatedDiskSpace", &DMREAD, DMT_INT, get_SoftwareModulesExecEnv_AllocatedDiskSpace, NULL, NULL, NULL, BBFDM_BOTH},
-{"AvailableDiskSpace", &DMREAD, DMT_INT, get_SoftwareModulesExecEnv_AvailableDiskSpace, NULL, NULL, NULL, BBFDM_BOTH},
-{"AllocatedMemory", &DMREAD, DMT_INT, get_SoftwareModulesExecEnv_AllocatedMemory, NULL, NULL, NULL, BBFDM_BOTH},
-{"AvailableMemory", &DMREAD, DMT_INT, get_SoftwareModulesExecEnv_AvailableMemory, NULL, NULL, NULL, BBFDM_BOTH},
-{"ActiveExecutionUnits", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_ActiveExecutionUnits, NULL, NULL, NULL, BBFDM_BOTH},
-//{"ProcessorRefList", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_ProcessorRefList, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_SoftwareModulesExecEnv_Enable, set_SoftwareModulesExecEnv_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_Status, NULL, BBFDM_BOTH},
+{"Reset", &DMWRITE, DMT_BOOL, get_SoftwareModulesExecEnv_Reset, set_SoftwareModulesExecEnv_Reset, BBFDM_CWMP},
+{"Alias", &DMWRITE, DMT_STRING, get_SoftwareModulesExecEnv_Alias, set_SoftwareModulesExecEnv_Alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_Name, NULL, BBFDM_BOTH},
+{"Type", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_Type, NULL, BBFDM_BOTH},
+//{"InitialRunLevel", &DMWRITE, DMT_UNINT, get_SoftwareModulesExecEnv_InitialRunLevel, set_SoftwareModulesExecEnv_InitialRunLevel, BBFDM_BOTH},
+//{"RequestedRunLevel", &DMWRITE, DMT_INT, get_SoftwareModulesExecEnv_RequestedRunLevel, set_SoftwareModulesExecEnv_RequestedRunLevel, BBFDM_CWMP},
+//{"CurrentRunLevel", &DMREAD, DMT_INT, get_SoftwareModulesExecEnv_CurrentRunLevel, NULL, BBFDM_BOTH},
+//{"InitialExecutionUnitRunLevel", &DMWRITE, DMT_INT, get_SoftwareModulesExecEnv_InitialExecutionUnitRunLevel, set_SoftwareModulesExecEnv_InitialExecutionUnitRunLevel, BBFDM_BOTH},
+{"Vendor", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_Vendor, NULL, BBFDM_BOTH},
+{"Version", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_Version, NULL, BBFDM_BOTH},
+{"ParentExecEnv", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_ParentExecEnv, NULL, BBFDM_BOTH},
+{"AllocatedDiskSpace", &DMREAD, DMT_INT, get_SoftwareModulesExecEnv_AllocatedDiskSpace, NULL, BBFDM_BOTH},
+{"AvailableDiskSpace", &DMREAD, DMT_INT, get_SoftwareModulesExecEnv_AvailableDiskSpace, NULL, BBFDM_BOTH},
+{"AllocatedMemory", &DMREAD, DMT_INT, get_SoftwareModulesExecEnv_AllocatedMemory, NULL, BBFDM_BOTH},
+{"AvailableMemory", &DMREAD, DMT_INT, get_SoftwareModulesExecEnv_AvailableMemory, NULL, BBFDM_BOTH},
+{"ActiveExecutionUnits", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_ActiveExecutionUnits, NULL, BBFDM_BOTH},
+//{"ProcessorRefList", &DMREAD, DMT_STRING, get_SoftwareModulesExecEnv_ProcessorRefList, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.SoftwareModules.DeploymentUnit.{i}. *** */
 DMLEAF tSoftwareModulesDeploymentUnitParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"UUID", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_UUID, NULL, NULL, NULL, BBFDM_BOTH},
-{"DUID", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_DUID, NULL, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_SoftwareModulesDeploymentUnit_Alias, set_SoftwareModulesDeploymentUnit_Alias, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Name, NULL, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Resolved", &DMREAD, DMT_BOOL, get_SoftwareModulesDeploymentUnit_Resolved, NULL, NULL, NULL, BBFDM_BOTH},
-{"URL", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_URL, NULL, NULL, NULL, BBFDM_BOTH},
-{"Description", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Description, NULL, NULL, NULL, BBFDM_BOTH},
-{"Vendor", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Vendor, NULL, NULL, NULL, BBFDM_BOTH},
-{"Version", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Version, NULL, NULL, NULL, BBFDM_BOTH},
-{"VendorLogList", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_VendorLogList, NULL, NULL, NULL, BBFDM_BOTH},
-{"VendorConfigList", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_VendorConfigList, NULL, NULL, NULL, BBFDM_BOTH},
-{"ExecutionUnitList", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_ExecutionUnitList, NULL, NULL, NULL, BBFDM_BOTH},
-{"ExecutionEnvRef", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_ExecutionEnvRef, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"UUID", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_UUID, NULL, BBFDM_BOTH},
+{"DUID", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_DUID, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_SoftwareModulesDeploymentUnit_Alias, set_SoftwareModulesDeploymentUnit_Alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Name, NULL, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Status, NULL, BBFDM_BOTH},
+{"Resolved", &DMREAD, DMT_BOOL, get_SoftwareModulesDeploymentUnit_Resolved, NULL, BBFDM_BOTH},
+{"URL", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_URL, NULL, BBFDM_BOTH},
+{"Description", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Description, NULL, BBFDM_BOTH},
+{"Vendor", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Vendor, NULL, BBFDM_BOTH},
+{"Version", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Version, NULL, BBFDM_BOTH},
+{"VendorLogList", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_VendorLogList, NULL, BBFDM_BOTH},
+{"VendorConfigList", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_VendorConfigList, NULL, BBFDM_BOTH},
+{"ExecutionUnitList", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_ExecutionUnitList, NULL, BBFDM_BOTH},
+{"ExecutionEnvRef", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_ExecutionEnvRef, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.SoftwareModules.ExecutionUnit.{i}. *** */
 DMOBJ tSoftwareModulesExecutionUnitObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-//{"Extensions", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+//{"Extensions", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tSoftwareModulesExecutionUnitParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"EUID", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_EUID, NULL, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_SoftwareModulesExecutionUnit_Alias, set_SoftwareModulesExecutionUnit_Alias, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Name, NULL, NULL, NULL, BBFDM_BOTH},
-{"ExecEnvLabel", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecEnvLabel, NULL, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Status, NULL, NULL, &DMACTIVE, BBFDM_BOTH},
-//{"RequestedState", &DMWRITE, DMT_STRING, get_SoftwareModulesExecutionUnit_RequestedState, set_SoftwareModulesExecutionUnit_RequestedState, NULL, NULL, BBFDM_CWMP},
-//{"ExecutionFaultCode", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecutionFaultCode, NULL, NULL, NULL, BBFDM_BOTH},
-//{"ExecutionFaultMessage", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecutionFaultMessage, NULL, NULL, NULL, BBFDM_BOTH},
-//{"AutoStart", &DMWRITE, DMT_BOOL, get_SoftwareModulesExecutionUnit_AutoStart, set_SoftwareModulesExecutionUnit_AutoStart, NULL, NULL, BBFDM_BOTH},
-//{"RunLevel", &DMWRITE, DMT_UNINT, get_SoftwareModulesExecutionUnit_RunLevel, set_SoftwareModulesExecutionUnit_RunLevel, NULL, NULL, BBFDM_BOTH},
-{"Vendor", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Vendor, NULL, NULL, NULL, BBFDM_BOTH},
-{"Version", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Version, NULL, NULL, NULL, BBFDM_BOTH},
-{"Description", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Description, NULL, NULL, NULL, BBFDM_BOTH},
-{"DiskSpaceInUse", &DMREAD, DMT_INT, get_SoftwareModulesExecutionUnit_DiskSpaceInUse, NULL, NULL, NULL, BBFDM_BOTH},
-{"MemoryInUse", &DMREAD, DMT_INT, get_SoftwareModulesExecutionUnit_MemoryInUse, NULL, NULL, NULL, BBFDM_BOTH},
-{"References", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_References, NULL, NULL, NULL, BBFDM_BOTH},
-{"AssociatedProcessList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_AssociatedProcessList, NULL, NULL, NULL, BBFDM_BOTH},
-{"VendorLogList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_VendorLogList, NULL, NULL, NULL, BBFDM_BOTH},
-{"VendorConfigList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_VendorConfigList, NULL, NULL, NULL, BBFDM_BOTH},
-//{"SupportedDataModelList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_SupportedDataModelList, NULL, NULL, NULL, BBFDM_CWMP},
-{"ExecutionEnvRef", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecutionEnvRef, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"EUID", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_EUID, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_SoftwareModulesExecutionUnit_Alias, set_SoftwareModulesExecutionUnit_Alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Name, NULL, BBFDM_BOTH},
+{"ExecEnvLabel", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecEnvLabel, NULL, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Status, NULL, BBFDM_BOTH},
+//{"RequestedState", &DMWRITE, DMT_STRING, get_SoftwareModulesExecutionUnit_RequestedState, set_SoftwareModulesExecutionUnit_RequestedState, NULL, BBFDM_CWMP},
+//{"ExecutionFaultCode", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecutionFaultCode, NULL, BBFDM_BOTH},
+//{"ExecutionFaultMessage", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecutionFaultMessage, NULL, BBFDM_BOTH},
+//{"AutoStart", &DMWRITE, DMT_BOOL, get_SoftwareModulesExecutionUnit_AutoStart, set_SoftwareModulesExecutionUnit_AutoStart, BBFDM_BOTH},
+//{"RunLevel", &DMWRITE, DMT_UNINT, get_SoftwareModulesExecutionUnit_RunLevel, set_SoftwareModulesExecutionUnit_RunLevel, BBFDM_BOTH},
+{"Vendor", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Vendor, NULL, BBFDM_BOTH},
+{"Version", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Version, NULL, BBFDM_BOTH},
+{"Description", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Description, NULL, BBFDM_BOTH},
+{"DiskSpaceInUse", &DMREAD, DMT_INT, get_SoftwareModulesExecutionUnit_DiskSpaceInUse, NULL, BBFDM_BOTH},
+{"MemoryInUse", &DMREAD, DMT_INT, get_SoftwareModulesExecutionUnit_MemoryInUse, NULL, BBFDM_BOTH},
+{"References", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_References, NULL, BBFDM_BOTH},
+{"AssociatedProcessList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_AssociatedProcessList, NULL, BBFDM_BOTH},
+{"VendorLogList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_VendorLogList, NULL, BBFDM_BOTH},
+{"VendorConfigList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_VendorConfigList, NULL, BBFDM_BOTH},
+//{"SupportedDataModelList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_SupportedDataModelList, NULL, BBFDM_CWMP},
+{"ExecutionEnvRef", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecutionEnvRef, NULL, BBFDM_BOTH},
 {0}
 };
+

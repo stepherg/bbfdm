@@ -84,7 +84,6 @@ static void print_dm_help(void)
 	printf(" set_notification <param1> <notif1> <change1> [<param2> <notif2> <change2>] ....[<param N> <notif N> <change N>]\n");
 	printf(" add_obj <param> <parameter key>\n");
 	printf(" del_obj <param> <parameter key>\n");
-	printf(" inform\n");
 #ifdef BBF_TR064
 	printf(" upnp_get_values [param]\n");
 	printf(" upnp_get_selected_values [param]\n");
@@ -289,9 +288,6 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 				fault = FAULT_9003;
 			}
 			break;
-		case CMD_INFORM:
-			dm_entry_inform(ctx);
-			break;
 		case CMD_ADD_OBJECT:
 			fault = dm_entry_add_object(ctx);
 			if (!fault) {
@@ -463,17 +459,6 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2)
 	return usp_fault_map(fault);
 }
 
-void add_list_enabled_lwnotify(char *param, char *notification, char *value)
-{
-	struct dm_enabled_notify *dm_enabled_notify;
-
-	dm_enabled_notify = calloc(1, sizeof(struct dm_enabled_notify)); // Should be calloc and not dmcalloc
-	list_add_tail(&dm_enabled_notify->list, &list_enabled_lw_notify);
-	dm_enabled_notify->name = strdup(param); // Should be strdup and not dmstrdup
-	dm_enabled_notify->value = value ? strdup(value) : strdup(""); // Should be strdup and not dmstrdup
-	dm_enabled_notify->notification = strdup(notification); // Should be strdup and not dmstrdup
-}
-
 void del_list_enabled_notify(struct dm_enabled_notify *dm_enabled_notify)
 {
 	list_del(&dm_enabled_notify->list); // Should be free and not dmfree
@@ -481,29 +466,6 @@ void del_list_enabled_notify(struct dm_enabled_notify *dm_enabled_notify)
 	free(dm_enabled_notify->value);
 	free(dm_enabled_notify->notification);
 	free(dm_enabled_notify);
-}
-
-void free_all_list_enabled_lwnotify()
-{
-	struct dm_enabled_notify *dm_enabled_notify;
-	while (list_enabled_lw_notify.next != &list_enabled_lw_notify) {
-		dm_enabled_notify = list_entry(list_enabled_lw_notify.next, struct dm_enabled_notify, list);
-		del_list_enabled_notify(dm_enabled_notify);
-	}
-}
-
-int dm_entry_reload_enabled_notify(unsigned int dm_type, unsigned int amd_version, int instance_mode)
-{
-	struct dmctx dmctx = {0};
-
-	dm_ctx_init(&dmctx, dm_type, amd_version, instance_mode);
-	dmctx.in_param = "";
-
-	free_all_list_enabled_lwnotify();
-	dm_entry_enabled_notify(&dmctx, add_list_enabled_lwnotify);
-
-	dm_ctx_clean(&dmctx);
-	return 0;
 }
 
 int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value)
@@ -986,7 +948,6 @@ int cli_output_dm_result(struct dmctx *dmctx, int fault, int cmd, int out)
 		}
 		break;
 	case CMD_GET_VALUE:
-	case CMD_INFORM:
 		list_for_each_entry(n, &dmctx->list_parameter, list) {
 			fprintf (stdout, "{ \"parameter\": \"%s\", \"value\": \"%s\", \"type\": \"%s\" }\n", n->name, n->data, n->type);
 		}
@@ -1303,11 +1264,6 @@ void dm_execute_cli_shell(int argc, char** argv, unsigned int dmtype, unsigned i
 			apply_services = 1;
 		cli_output_dm_result(&cli_dmctx, fault, CMD_DEL_OBJECT, output);
 	}
-	/* INFORM */
-	else if (strcmp(cmd, "inform") == 0) {
-		fault = dm_entry_param_method(&cli_dmctx, CMD_INFORM, "", NULL, NULL);
-		cli_output_dm_result(&cli_dmctx, fault, CMD_INFORM, output);
-	}
 #ifdef BBF_TR064
 	/* UPNP GET VALUES */
 	else if (strcmp(cmd, "upnp_get_values") == 0) {
@@ -1601,10 +1557,6 @@ int dmentry_cli(int argc, char *argv[], unsigned int dmtype, unsigned int amd_ve
 			fault = dm_entry_apply(&cli_dmctx, CMD_SET_NOTIFICATION, NULL, NULL);
 		}
 		cli_output_dm_result(&cli_dmctx, fault, CMD_SET_NOTIFICATION, 1);
-	}
-	else if (strcmp(argv[2], "inform") == 0 || strcmp(argv[2], "inform_parameter") == 0) {
-		fault = dm_entry_param_method(&cli_dmctx, CMD_INFORM, "", NULL, NULL);
-		cli_output_dm_result(&cli_dmctx, fault, CMD_INFORM, 1);
 	}
 	else if (strcmp(argv[2], "add_obj") == 0) {
 		if (argc < 5)

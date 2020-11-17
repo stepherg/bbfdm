@@ -168,58 +168,58 @@ static int get_ServicesVoiceServiceCapabilitiesCodec_PacketizationPeriod(char *r
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.Capabilities. *** */
 DMOBJ tServicesVoiceServiceCapabilitiesObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesSIPObj, NULL, NULL, BBFDM_BOTH},
-{"POTS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesPOTSParams, NULL, BBFDM_BOTH},
-{"Codec", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCapabilitiesCodecInst, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesCodecParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Codec", "BitRate", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesSIPObj, NULL, NULL, BBFDM_BOTH},
+{"POTS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesPOTSParams, NULL, BBFDM_BOTH},
+{"Codec", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCapabilitiesCodecInst, NULL, NULL, tServicesVoiceServiceCapabilitiesCodecParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Codec", "BitRate", NULL}},
 {0}
 };
 
 DMLEAF tServicesVoiceServiceCapabilitiesParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"MaxLineCount", &DMREAD, DMT_INT, get_ServicesVoiceServiceCapabilities_MaxLineCount, NULL, NULL, NULL, BBFDM_BOTH},
-{"MaxSessionsPerLine", &DMREAD, DMT_INT, get_ServicesVoiceServiceCapabilities_MaxSessionsPerLine, NULL, NULL, NULL, BBFDM_BOTH},
-{"MaxSessionCount", &DMREAD, DMT_INT, get_ServicesVoiceServiceCapabilities_MaxSessionCount, NULL, NULL, NULL, BBFDM_BOTH},
-{"NetworkConnectionModes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilities_NetworkConnectionModes, NULL, NULL, NULL, BBFDM_BOTH},
-{"UserConnectionModes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilities_UserConnectionModes, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"MaxLineCount", &DMREAD, DMT_INT, get_ServicesVoiceServiceCapabilities_MaxLineCount, NULL, BBFDM_BOTH},
+{"MaxSessionsPerLine", &DMREAD, DMT_INT, get_ServicesVoiceServiceCapabilities_MaxSessionsPerLine, NULL, BBFDM_BOTH},
+{"MaxSessionCount", &DMREAD, DMT_INT, get_ServicesVoiceServiceCapabilities_MaxSessionCount, NULL, BBFDM_BOTH},
+{"NetworkConnectionModes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilities_NetworkConnectionModes, NULL, BBFDM_BOTH},
+{"UserConnectionModes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilities_UserConnectionModes, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.Capabilities.SIP. *** */
 DMOBJ tServicesVoiceServiceCapabilitiesSIPObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Client", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesSIPClientParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Client", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesSIPClientParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.Capabilities.SIP.Client. *** */
 DMLEAF tServicesVoiceServiceCapabilitiesSIPClientParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Extensions", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_Extensions, NULL, NULL, NULL, BBFDM_BOTH},
-{"URISchemes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_URISchemes, NULL, NULL, NULL, BBFDM_BOTH},
-{"TLSAuthenticationProtocols", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_TLSAuthenticationProtocols, NULL, NULL, NULL, BBFDM_BOTH},
-{"TLSAuthenticationKeySizes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_TLSAuthenticationKeySizes, NULL, NULL, NULL, BBFDM_BOTH},
-{"TLSEncryptionProtocols", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_TLSEncryptionProtocols, NULL, NULL, NULL, BBFDM_BOTH},
-{"TLSEncryptionKeySizes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_TLSEncryptionKeySizes, NULL, NULL, NULL, BBFDM_BOTH},
-{"TLSKeyExchangeProtocols", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_TLSKeyExchangeProtocols, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Extensions", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_Extensions, NULL, BBFDM_BOTH},
+{"URISchemes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_URISchemes, NULL, BBFDM_BOTH},
+{"TLSAuthenticationProtocols", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_TLSAuthenticationProtocols, NULL, BBFDM_BOTH},
+{"TLSAuthenticationKeySizes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_TLSAuthenticationKeySizes, NULL, BBFDM_BOTH},
+{"TLSEncryptionProtocols", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_TLSEncryptionProtocols, NULL, BBFDM_BOTH},
+{"TLSEncryptionKeySizes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_TLSEncryptionKeySizes, NULL, BBFDM_BOTH},
+{"TLSKeyExchangeProtocols", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesSIPClient_TLSKeyExchangeProtocols, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.Capabilities.POTS. *** */
 DMLEAF tServicesVoiceServiceCapabilitiesPOTSParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"DialType", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesPOTS_DialType, NULL, NULL, NULL, BBFDM_BOTH},
-{"ClipGeneration", &DMREAD, DMT_BOOL, get_ServicesVoiceServiceCapabilitiesPOTS_ClipGeneration, NULL, NULL, NULL, BBFDM_BOTH},
-{"ChargingPulse", &DMREAD, DMT_BOOL, get_ServicesVoiceServiceCapabilitiesPOTS_ChargingPulse, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"DialType", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesPOTS_DialType, NULL, BBFDM_BOTH},
+{"ClipGeneration", &DMREAD, DMT_BOOL, get_ServicesVoiceServiceCapabilitiesPOTS_ClipGeneration, NULL, BBFDM_BOTH},
+{"ChargingPulse", &DMREAD, DMT_BOOL, get_ServicesVoiceServiceCapabilitiesPOTS_ChargingPulse, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.Capabilities.Codec.{i}. *** */
 DMLEAF tServicesVoiceServiceCapabilitiesCodecParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Codec", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesCodec_Codec, NULL, NULL, NULL, BBFDM_BOTH},
-{"BitRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCapabilitiesCodec_BitRate, NULL, NULL, NULL, BBFDM_BOTH},
-{"PacketizationPeriod", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesCodec_PacketizationPeriod, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Codec", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesCodec_Codec, NULL, BBFDM_BOTH},
+{"BitRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCapabilitiesCodec_BitRate, NULL, BBFDM_BOTH},
+{"PacketizationPeriod", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesCodec_PacketizationPeriod, NULL, BBFDM_BOTH},
 {0}
 };
 

@@ -206,17 +206,17 @@ static int set_userint_remoteaccesss_protocol(char *refparam, struct dmctx *ctx,
 
 /* *** Device.UserInterface. *** */
 DMOBJ tUserInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"RemoteAccess", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUserInterfaceRemoteAccessParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"RemoteAccess", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUserInterfaceRemoteAccessParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.UserInterface.RemoteAccess. *** */
 DMLEAF tUserInterfaceRemoteAccessParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_userint_remoteaccesss_enable, set_userint_remoteaccesss_enable, NULL, NULL, BBFDM_BOTH},
-{"Port", &DMWRITE, DMT_UNINT, get_userint_remoteaccesss_port, set_userint_remoteaccesss_port, NULL, NULL, BBFDM_BOTH},
-{"SupportedProtocols", &DMREAD, DMT_STRING, get_userint_remoteaccesss_supportedprotocols, NULL, NULL, NULL, BBFDM_BOTH},
-{"Protocol", &DMWRITE, DMT_STRING, get_userint_remoteaccesss_protocol, set_userint_remoteaccesss_protocol, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_userint_remoteaccesss_enable, set_userint_remoteaccesss_enable, BBFDM_BOTH},
+{"Port", &DMWRITE, DMT_UNINT, get_userint_remoteaccesss_port, set_userint_remoteaccesss_port, BBFDM_BOTH},
+{"SupportedProtocols", &DMREAD, DMT_STRING, get_userint_remoteaccesss_supportedprotocols, NULL, BBFDM_BOTH},
+{"Protocol", &DMWRITE, DMT_STRING, get_userint_remoteaccesss_protocol, set_userint_remoteaccesss_protocol, BBFDM_BOTH},
 {0}
 };

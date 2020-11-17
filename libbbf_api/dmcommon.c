@@ -1034,6 +1034,7 @@ char **strsplit_by_str(const char str[], char *delim)
 			substr = strdup(strparse);
 			tokens[tokens_used] = dmcalloc(strlen(substr)+1, sizeof(char));
 			strcpy(tokens[tokens_used], strparse);
+			tokens[tokens_used+1] = NULL;
 			FREE(strparse);
 			break;
 		}
@@ -1833,3 +1834,30 @@ void append_dot_to_string(char *new_string, const char *string, size_t len)
 		strncpy(new_string, string, len - 1);
 }
 
+int check_instance_wildcard_parameter_by_regex(char *parameter, char* regex)
+{
+        char **array_str = strsplit_by_str(regex, ".*.");
+        int i = 0;
+        char *res= NULL, *tmp = NULL;
+        regex_t regex1 = {};
+        while (array_str[i]) {
+			if (res == NULL) {
+				dmasprintf(&res, "^%s", array_str[i]);
+				i++;
+				continue;
+			}
+			tmp = dmstrdup(res);
+			FREE(res);
+			dmasprintf(&res, "%s\\.[0-9][0-9]*\\.%s", tmp, array_str[i]);
+			FREE(tmp);
+			i++;
+        }
+        tmp = dmstrdup(res);
+        FREE(res);
+        asprintf(&res, "%s%c", tmp, '$');
+        regcomp(&regex1, res, 0);
+        int ret = regexec(&regex1, parameter, 0, NULL, 0);
+        regfree(&regex1);
+        FREE(res);
+        return ret;
+}

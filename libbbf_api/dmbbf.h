@@ -60,14 +60,7 @@
 
 extern struct dm_permession_s DMREAD;
 extern struct dm_permession_s DMWRITE;
-extern struct dm_forced_inform_s DMFINFRM;
 
-extern struct dm_notif_s DMNONE;
-extern struct dm_notif_s DMACTIVE;
-extern struct dm_notif_s DMPASSIVE;
-
-extern void (*api_send_active_value_change)(void);
-extern void (*api_add_list_enabled_lwnotify)(char *param, char *notification, char *value);
 #define DMPARAM_ARGS \
 	struct dmctx *dmctx, \
 	struct dmnode *node, \
@@ -76,8 +69,6 @@ extern void (*api_add_list_enabled_lwnotify)(char *param, char *notification, ch
 	int type, \
 	int (*get_cmd)(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value), \
 	int (*set_cmd)(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action), \
-	struct dm_forced_inform_s *forced_inform, \
-	struct dm_notif_s *notification, \
 	void *data, \
 	char *instance
 
@@ -87,15 +78,12 @@ extern void (*api_add_list_enabled_lwnotify)(char *param, char *notification, ch
 	struct dm_permession_s *permission, \
 	int (*addobj)(char *refparam, struct dmctx *ctx, void *data, char **instance), \
 	int (*delobj)(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action), \
-	struct dm_forced_inform_s *forced_inform, \
-	struct dm_notif_s *notification, \
 	int (*get_linker)(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker), \
 	void *data, \
 	char *instance
 
 #define TAILLE_MAX 1024
 
-struct dm_forced_inform_s;
 struct dm_permession_s;
 struct dm_parameter;
 struct dm_leaf_s;
@@ -114,38 +102,29 @@ struct dm_permession_s {
 	char *(*get_permission)(char *refparam, struct dmctx *dmctx, void *data, char *instance);
 };
 
-struct dm_forced_inform_s {
-	unsigned char val;
-	unsigned char (*get_forced_inform)(char *refparam, struct dmctx *dmctx, void *data, char *instance);
-};
-
 struct dm_notif_s {
 	char *val;
 	char *(*get_notif)(char *refparam, struct dmctx *dmctx, void *data, char *instance);
 };
 
 typedef struct dm_leaf_s {
-	/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type(8)*/
+	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(8)*/
 	char *parameter;
 	struct dm_permession_s *permission;
 	int type;
 	int (*getvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 	int (*setvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
-	struct dm_forced_inform_s *forced_inform;
-	struct dm_notif_s *notification;
 	int bbfdm_type;
 } DMLEAF;
 
 typedef struct dm_obj_s {
-	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys(14)*/
+	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys(14)*/
 	char *obj;
 	struct dm_permession_s *permission;
 	int (*addobj)(char *refparam, struct dmctx *ctx, void *data, char **instance);
 	int (*delobj)(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action);
 	char *checkdep;
 	int (*browseinstobj)(struct dmctx *dmctx, struct dmnode *node, void *data, char *instance);
-	struct dm_forced_inform_s *forced_inform;
-	struct dm_notif_s *notification;
 	struct dm_dynamic_obj *nextdynamicobj;
 	struct dm_obj_s *nextobj;
 	struct dm_leaf_s *leaf;
@@ -269,7 +248,6 @@ struct prefix_method {
 	const char *prefix_name;
 	bool enable;
 	bool (*set_enable)(void);
-	bool forced_inform;
 	int (*method)(struct dmctx *ctx);
 };
 
@@ -339,7 +317,6 @@ enum {
 	CMD_SET_NOTIFICATION,
 	CMD_ADD_OBJECT,
 	CMD_DEL_OBJECT,
-	CMD_INFORM,
 	CMD_USP_OPERATE,
 	CMD_USP_LIST_OPERATE,
 	CMD_GET_SCHEMA,
@@ -565,12 +542,11 @@ int dm_entry_get_name(struct dmctx *ctx);
 int dm_entry_get_schema(struct dmctx *ctx);
 int dm_entry_get_instances(struct dmctx *dmctx);
 int dm_entry_get_notification(struct dmctx *ctx);
-int dm_entry_inform(struct dmctx *ctx);
 int dm_entry_add_object(struct dmctx *ctx);
 int dm_entry_delete_object(struct dmctx *ctx);
 int dm_entry_set_value(struct dmctx *ctx);
 int dm_entry_set_notification(struct dmctx *ctx);
-int dm_entry_enabled_notify(struct dmctx *dmctx, void (*add_list_enabled_lwnotify_arg)(char *param, char *notification, char *value));
+int dm_entry_enabled_notify(struct dmctx *dmctx);
 int dm_entry_get_linker(struct dmctx *ctx);
 int dm_entry_get_linker_value(struct dmctx *ctx);
 #ifdef BBF_TR064
@@ -601,6 +577,7 @@ int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char 
 void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found);
 int free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj);
 int dm_entry_get_full_param_value(struct dmctx *dmctx);
+char* check_parameter_forced_notification(char *parameter);
 #ifdef BBF_TR064
 void dm_upnp_apply_config(void);
 void add_list_upnp_param_track(struct dmctx *dmctx, struct list_head *pchead, char *param, char *key, char *value, unsigned int isobj);
@@ -609,7 +586,6 @@ int dm_entry_upnp_get_supported_parameters(struct dmctx *dmctx);
 int dm_entry_upnp_set_attributes(struct dmctx *dmctx);
 int dm_entry_upnp_delete_instance(struct dmctx *dmctx);
 int dm_entry_upnp_get_acl_data(struct dmctx *dmctx);
-void free_all_list_enabled_lwnotify();
 int dm_entry_upnp_add_instance(struct dmctx *dmctx);
 #endif
 

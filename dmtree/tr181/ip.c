@@ -2168,126 +2168,126 @@ static int get_IPInterfaceStats_MulticastPacketsReceived(char *refparam, struct 
 ***********************************************************************************************************************************/
 /* *** Device.IP. *** */
 DMOBJ tIPObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Interface", &DMWRITE, addObjIPInterface, delObjIPInterface, NULL, browseIPInterfaceInst, NULL, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Interface", &DMWRITE, addObjIPInterface, delObjIPInterface, NULL, browseIPInterfaceInst, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}},
 #ifdef BBF_TR143
-{"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsObj, tIPDiagnosticsParams, NULL, BBFDM_BOTH},
+{"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsObj, tIPDiagnosticsParams, NULL, BBFDM_BOTH},
 #endif
 {0}
 };
 
 DMLEAF tIPParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"IPv4Capable", &DMREAD, DMT_BOOL, get_IP_IPv4Capable, NULL, NULL, NULL, BBFDM_BOTH},
-{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IP_IPv4Enable, set_IP_IPv4Enable, NULL, NULL, BBFDM_BOTH},
-{"IPv4Status", &DMREAD, DMT_STRING, get_IP_IPv4Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"IPv6Capable", &DMREAD, DMT_BOOL, get_IP_IPv6Capable, NULL, NULL, NULL, BBFDM_BOTH},
-{"IPv6Enable", &DMWRITE, DMT_BOOL, get_IP_IPv6Enable, set_IP_IPv6Enable, NULL, NULL, BBFDM_BOTH},
-{"IPv6Status", &DMREAD, DMT_STRING, get_IP_IPv6Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"ULAPrefix", &DMWRITE, DMT_STRING, get_IP_ULAPrefix, set_IP_ULAPrefix, NULL, NULL, BBFDM_BOTH},
-{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IP_InterfaceNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"IPv4Capable", &DMREAD, DMT_BOOL, get_IP_IPv4Capable, NULL, BBFDM_BOTH},
+{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IP_IPv4Enable, set_IP_IPv4Enable, BBFDM_BOTH},
+{"IPv4Status", &DMREAD, DMT_STRING, get_IP_IPv4Status, NULL, BBFDM_BOTH},
+{"IPv6Capable", &DMREAD, DMT_BOOL, get_IP_IPv6Capable, NULL, BBFDM_BOTH},
+{"IPv6Enable", &DMWRITE, DMT_BOOL, get_IP_IPv6Enable, set_IP_IPv6Enable, BBFDM_BOTH},
+{"IPv6Status", &DMREAD, DMT_STRING, get_IP_IPv6Status, NULL, BBFDM_BOTH},
+{"ULAPrefix", &DMWRITE, DMT_STRING, get_IP_ULAPrefix, set_IP_ULAPrefix, BBFDM_BOTH},
+{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IP_InterfaceNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IP.Interface.{i}. *** */
 DMOBJ tIPInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"IPv4Address", &DMWRITE, addObjIPInterfaceIPv4Address, delObjIPInterfaceIPv4Address, NULL, browseIPInterfaceIPv4AddressInst, NULL, NULL, NULL, NULL, tIPInterfaceIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", "SubnetMask", NULL}},
-{"IPv6Address", &DMWRITE, addObjIPInterfaceIPv6Address, delObjIPInterfaceIPv6Address, NULL, browseIPInterfaceIPv6AddressInst, NULL, NULL, NULL, NULL, tIPInterfaceIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", NULL}},
-{"IPv6Prefix", &DMWRITE, addObjIPInterfaceIPv6Prefix, delObjIPInterfaceIPv6Prefix, NULL, browseIPInterfaceIPv6PrefixInst, NULL, NULL, NULL, NULL, tIPInterfaceIPv6PrefixParams, get_linker_ipv6_prefix, BBFDM_BOTH, LIST_KEY{"Alias", "Prefix", NULL}},
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPInterfaceStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"IPv4Address", &DMWRITE, addObjIPInterfaceIPv4Address, delObjIPInterfaceIPv4Address, NULL, browseIPInterfaceIPv4AddressInst, NULL, NULL, tIPInterfaceIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", "SubnetMask", NULL}},
+{"IPv6Address", &DMWRITE, addObjIPInterfaceIPv6Address, delObjIPInterfaceIPv6Address, NULL, browseIPInterfaceIPv6AddressInst, NULL, NULL, tIPInterfaceIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", NULL}},
+{"IPv6Prefix", &DMWRITE, addObjIPInterfaceIPv6Prefix, delObjIPInterfaceIPv6Prefix, NULL, browseIPInterfaceIPv6PrefixInst, NULL, NULL, tIPInterfaceIPv6PrefixParams, get_linker_ipv6_prefix, BBFDM_BOTH, LIST_KEY{"Alias", "Prefix", NULL}},
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tIPInterfaceParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_IPInterface_Enable, set_IPInterface_Enable, NULL, NULL, BBFDM_BOTH},
-{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv4Enable, set_IPInterface_IPv4Enable, NULL, NULL, BBFDM_BOTH},
-{"IPv6Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv6Enable, set_IPInterface_IPv6Enable, NULL, NULL, BBFDM_BOTH},
-//{"ULAEnable", &DMWRITE, DMT_BOOL, get_IPInterface_ULAEnable, set_IPInterface_ULAEnable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_IPInterface_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterface_Alias, set_IPInterface_Alias, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_IPInterface_Name, NULL, NULL, NULL, BBFDM_BOTH},
-{"LastChange", &DMREAD, DMT_UNINT, get_IPInterface_LastChange, NULL, NULL, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_IPInterface_LowerLayers, set_IPInterface_LowerLayers, NULL, NULL, BBFDM_BOTH},
-{"Router", &DMWRITE, DMT_STRING, get_IPInterface_Router, set_IPInterface_Router, NULL, NULL, BBFDM_BOTH},
-{"Reset", &DMWRITE, DMT_BOOL, get_IPInterface_Reset, set_IPInterface_Reset, NULL, NULL, BBFDM_CWMP},
-{"MaxMTUSize", &DMWRITE, DMT_UNINT, get_IPInterface_MaxMTUSize, set_IPInterface_MaxMTUSize, NULL, NULL, BBFDM_BOTH},
-{"Type", &DMREAD, DMT_STRING, get_IPInterface_Type, NULL, NULL, NULL, BBFDM_BOTH},
-{"Loopback", &DMWRITE, DMT_BOOL, get_IPInterface_Loopback, set_IPInterface_Loopback, NULL, NULL, BBFDM_BOTH},
-{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv4AddressNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv6AddressNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-{"IPv6PrefixNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv6PrefixNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-//{"AutoIPEnable", &DMWRITE, DMT_BOOL, get_IPInterface_AutoIPEnable, set_IPInterface_AutoIPEnable, NULL, NULL, BBFDM_BOTH},
-{"TWAMPReflectorNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_TWAMPReflectorNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_IPInterface_Enable, set_IPInterface_Enable, BBFDM_BOTH},
+{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv4Enable, set_IPInterface_IPv4Enable, BBFDM_BOTH},
+{"IPv6Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv6Enable, set_IPInterface_IPv6Enable, BBFDM_BOTH},
+//{"ULAEnable", &DMWRITE, DMT_BOOL, get_IPInterface_ULAEnable, set_IPInterface_ULAEnable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_IPInterface_Status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterface_Alias, set_IPInterface_Alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_IPInterface_Name, NULL, BBFDM_BOTH},
+{"LastChange", &DMREAD, DMT_UNINT, get_IPInterface_LastChange, NULL, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_IPInterface_LowerLayers, set_IPInterface_LowerLayers, BBFDM_BOTH},
+{"Router", &DMWRITE, DMT_STRING, get_IPInterface_Router, set_IPInterface_Router, BBFDM_BOTH},
+{"Reset", &DMWRITE, DMT_BOOL, get_IPInterface_Reset, set_IPInterface_Reset, BBFDM_CWMP},
+{"MaxMTUSize", &DMWRITE, DMT_UNINT, get_IPInterface_MaxMTUSize, set_IPInterface_MaxMTUSize, BBFDM_BOTH},
+{"Type", &DMREAD, DMT_STRING, get_IPInterface_Type, NULL, BBFDM_BOTH},
+{"Loopback", &DMWRITE, DMT_BOOL, get_IPInterface_Loopback, set_IPInterface_Loopback, BBFDM_BOTH},
+{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH},
+{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv6AddressNumberOfEntries, NULL, BBFDM_BOTH},
+{"IPv6PrefixNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv6PrefixNumberOfEntries, NULL, BBFDM_BOTH},
+//{"AutoIPEnable", &DMWRITE, DMT_BOOL, get_IPInterface_AutoIPEnable, set_IPInterface_AutoIPEnable, BBFDM_BOTH},
+{"TWAMPReflectorNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_TWAMPReflectorNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IP.Interface.{i}.IPv4Address.{i}. *** */
 DMLEAF tIPInterfaceIPv4AddressParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv4Address_Enable, set_IPInterfaceIPv4Address_Enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv4Address_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_Alias, set_IPInterfaceIPv4Address_Alias, NULL, NULL, BBFDM_BOTH},
-{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_IPAddress, set_IPInterfaceIPv4Address_IPAddress, NULL, NULL, BBFDM_BOTH},
-{"SubnetMask", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_SubnetMask, set_IPInterfaceIPv4Address_SubnetMask, NULL, NULL, BBFDM_BOTH},
-{"AddressingType", &DMREAD, DMT_STRING, get_IPInterfaceIPv4Address_AddressingType, NULL, NULL, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"FirewallEnabled", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv4Address_X_IOPSYS_EU_FirewallEnabled, set_IPInterfaceIPv4Address_X_IOPSYS_EU_FirewallEnabled, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv4Address_Enable, set_IPInterfaceIPv4Address_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv4Address_Status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_Alias, set_IPInterfaceIPv4Address_Alias, BBFDM_BOTH},
+{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_IPAddress, set_IPInterfaceIPv4Address_IPAddress, BBFDM_BOTH},
+{"SubnetMask", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_SubnetMask, set_IPInterfaceIPv4Address_SubnetMask, BBFDM_BOTH},
+{"AddressingType", &DMREAD, DMT_STRING, get_IPInterfaceIPv4Address_AddressingType, NULL, BBFDM_BOTH},
+{CUSTOM_PREFIX"FirewallEnabled", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv4Address_X_IOPSYS_EU_FirewallEnabled, set_IPInterfaceIPv4Address_X_IOPSYS_EU_FirewallEnabled, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IP.Interface.{i}.IPv6Address.{i}. *** */
 DMLEAF tIPInterfaceIPv6AddressParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Address_Enable, set_IPInterfaceIPv6Address_Enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"IPAddressStatus", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_IPAddressStatus, NULL, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_Alias, set_IPInterfaceIPv6Address_Alias, NULL, NULL, BBFDM_BOTH},
-{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_IPAddress, set_IPInterfaceIPv6Address_IPAddress, NULL, NULL, BBFDM_BOTH},
-{"Origin", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_Origin, NULL, NULL, NULL, BBFDM_BOTH},
-{"Prefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_Prefix, set_IPInterfaceIPv6Address_Prefix, NULL, NULL, BBFDM_BOTH},
-{"PreferredLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Address_PreferredLifetime, set_IPInterfaceIPv6Address_PreferredLifetime, NULL, NULL, BBFDM_BOTH},
-{"ValidLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Address_ValidLifetime, set_IPInterfaceIPv6Address_ValidLifetime, NULL, NULL, BBFDM_BOTH},
-//{"Anycast", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Address_Anycast, set_IPInterfaceIPv6Address_Anycast, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Address_Enable, set_IPInterfaceIPv6Address_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_Status, NULL, BBFDM_BOTH},
+{"IPAddressStatus", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_IPAddressStatus, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_Alias, set_IPInterfaceIPv6Address_Alias, BBFDM_BOTH},
+{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_IPAddress, set_IPInterfaceIPv6Address_IPAddress, BBFDM_BOTH},
+{"Origin", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_Origin, NULL, BBFDM_BOTH},
+{"Prefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_Prefix, set_IPInterfaceIPv6Address_Prefix, BBFDM_BOTH},
+{"PreferredLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Address_PreferredLifetime, set_IPInterfaceIPv6Address_PreferredLifetime, BBFDM_BOTH},
+{"ValidLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Address_ValidLifetime, set_IPInterfaceIPv6Address_ValidLifetime, BBFDM_BOTH},
+//{"Anycast", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Address_Anycast, set_IPInterfaceIPv6Address_Anycast, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IP.Interface.{i}.IPv6Prefix.{i}. *** */
 DMLEAF tIPInterfaceIPv6PrefixParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_Enable, set_IPInterfaceIPv6Prefix_Enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_Status, NULL, NULL, NULL, BBFDM_BOTH},
-{"PrefixStatus", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_PrefixStatus, NULL, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Alias, set_IPInterfaceIPv6Prefix_Alias, NULL, NULL, BBFDM_BOTH},
-{"Prefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Prefix, set_IPInterfaceIPv6Prefix_Prefix, NULL, NULL, BBFDM_BOTH},
-{"Origin", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_Origin, NULL, NULL, NULL, BBFDM_BOTH},
-//{"StaticType", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_StaticType, set_IPInterfaceIPv6Prefix_StaticType, NULL, NULL, BBFDM_BOTH},
-{"ParentPrefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_ParentPrefix, set_IPInterfaceIPv6Prefix_ParentPrefix, NULL, NULL, BBFDM_BOTH},
-{"ChildPrefixBits", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_ChildPrefixBits, set_IPInterfaceIPv6Prefix_ChildPrefixBits, NULL, NULL, BBFDM_BOTH},
-//{"OnLink", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_OnLink, set_IPInterfaceIPv6Prefix_OnLink, NULL, NULL, BBFDM_BOTH},
-//{"Autonomous", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_Autonomous, set_IPInterfaceIPv6Prefix_Autonomous, NULL, NULL, BBFDM_BOTH},
-{"PreferredLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Prefix_PreferredLifetime, set_IPInterfaceIPv6Prefix_PreferredLifetime, NULL, NULL, BBFDM_BOTH},
-{"ValidLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Prefix_ValidLifetime, set_IPInterfaceIPv6Prefix_ValidLifetime, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_Enable, set_IPInterfaceIPv6Prefix_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_Status, NULL, BBFDM_BOTH},
+{"PrefixStatus", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_PrefixStatus, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Alias, set_IPInterfaceIPv6Prefix_Alias, BBFDM_BOTH},
+{"Prefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Prefix, set_IPInterfaceIPv6Prefix_Prefix, BBFDM_BOTH},
+{"Origin", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_Origin, NULL, BBFDM_BOTH},
+//{"StaticType", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_StaticType, set_IPInterfaceIPv6Prefix_StaticType, BBFDM_BOTH},
+{"ParentPrefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_ParentPrefix, set_IPInterfaceIPv6Prefix_ParentPrefix, BBFDM_BOTH},
+{"ChildPrefixBits", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_ChildPrefixBits, set_IPInterfaceIPv6Prefix_ChildPrefixBits, BBFDM_BOTH},
+//{"OnLink", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_OnLink, set_IPInterfaceIPv6Prefix_OnLink, BBFDM_BOTH},
+//{"Autonomous", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_Autonomous, set_IPInterfaceIPv6Prefix_Autonomous, BBFDM_BOTH},
+{"PreferredLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Prefix_PreferredLifetime, set_IPInterfaceIPv6Prefix_PreferredLifetime, BBFDM_BOTH},
+{"ValidLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Prefix_ValidLifetime, set_IPInterfaceIPv6Prefix_ValidLifetime, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IP.Interface.{i}.Stats. *** */
 DMLEAF tIPInterfaceStatsParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"BytesSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BytesSent, NULL, NULL, NULL, BBFDM_BOTH},
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BytesReceived, NULL, NULL, NULL, BBFDM_BOTH},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_PacketsSent, NULL, NULL, NULL, BBFDM_BOTH},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_PacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
-{"ErrorsSent", &DMREAD, DMT_UNINT, get_IPInterfaceStats_ErrorsSent, NULL, NULL, NULL, BBFDM_BOTH},
-{"ErrorsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_ErrorsReceived, NULL, NULL, NULL, BBFDM_BOTH},
-//{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_UnicastPacketsSent, NULL, NULL, NULL, BBFDM_BOTH},
-//{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_UnicastPacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
-{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_IPInterfaceStats_DiscardPacketsSent, NULL, NULL, NULL, BBFDM_BOTH},
-{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_DiscardPacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
-//{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_MulticastPacketsSent, NULL, NULL, NULL, BBFDM_BOTH},
-{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_MulticastPacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
-//{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BroadcastPacketsSent, NULL, NULL, NULL, BBFDM_BOTH},
-//{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BroadcastPacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
-//{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_UnknownProtoPacketsReceived, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"BytesSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BytesReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_PacketsReceived, NULL, BBFDM_BOTH},
+{"ErrorsSent", &DMREAD, DMT_UNINT, get_IPInterfaceStats_ErrorsSent, NULL, BBFDM_BOTH},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_ErrorsReceived, NULL, BBFDM_BOTH},
+//{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_UnicastPacketsSent, NULL, BBFDM_BOTH},
+//{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_UnicastPacketsReceived, NULL, BBFDM_BOTH},
+{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_IPInterfaceStats_DiscardPacketsSent, NULL, BBFDM_BOTH},
+{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_DiscardPacketsReceived, NULL, BBFDM_BOTH},
+//{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_MulticastPacketsSent, NULL, BBFDM_BOTH},
+{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_MulticastPacketsReceived, NULL, BBFDM_BOTH},
+//{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BroadcastPacketsSent, NULL, BBFDM_BOTH},
+//{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH},
+//{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH},
 {0}
 };

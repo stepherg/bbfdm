@@ -46,9 +46,9 @@ static int get_ServicesVoiceServiceReservedPorts_LANPortRange(char *refparam, st
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.ReservedPorts. *** */
 DMLEAF tServicesVoiceServiceReservedPortsParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"WANPortRange", &DMREAD, DMT_STRING, get_ServicesVoiceServiceReservedPorts_WANPortRange, NULL, NULL, NULL, BBFDM_BOTH},
-{"LANPortRange", &DMREAD, DMT_STRING, get_ServicesVoiceServiceReservedPorts_LANPortRange, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"WANPortRange", &DMREAD, DMT_STRING, get_ServicesVoiceServiceReservedPorts_WANPortRange, NULL, BBFDM_BOTH},
+{"LANPortRange", &DMREAD, DMT_STRING, get_ServicesVoiceServiceReservedPorts_LANPortRange, NULL, BBFDM_BOTH},
 {0}
 };
 

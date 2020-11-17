@@ -114,16 +114,16 @@ static int get_ServicesVoiceServiceCallLog_CallTerminationCause(char *refparam, 
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.CallLog.{i}. *** */
 DMLEAF tServicesVoiceServiceCallLogParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"CallingPartyNumber", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_CallingPartyNumber, NULL, NULL, NULL, BBFDM_BOTH},
-{"CalledPartyNumber", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_CalledPartyNumber, NULL, NULL, NULL, BBFDM_BOTH},
-{"Source", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Source, NULL, NULL, NULL, BBFDM_BOTH},
-{"Destination", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Destination, NULL, NULL, NULL, BBFDM_BOTH},
-{"UsedLine", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_UsedLine, NULL, NULL, NULL, BBFDM_BOTH},
-{"Direction", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Direction, NULL, NULL, NULL, BBFDM_BOTH},
-{"Start", &DMREAD, DMT_TIME, get_ServicesVoiceServiceCallLog_Start, NULL, NULL, NULL, BBFDM_BOTH},
-{"Duration", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Duration, NULL, NULL, NULL, BBFDM_BOTH},
-{"CallTerminationCause", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_CallTerminationCause, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"CallingPartyNumber", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_CallingPartyNumber, NULL, BBFDM_BOTH},
+{"CalledPartyNumber", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_CalledPartyNumber, NULL, BBFDM_BOTH},
+{"Source", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Source, NULL, BBFDM_BOTH},
+{"Destination", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Destination, NULL, BBFDM_BOTH},
+{"UsedLine", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_UsedLine, NULL, BBFDM_BOTH},
+{"Direction", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Direction, NULL, BBFDM_BOTH},
+{"Start", &DMREAD, DMT_TIME, get_ServicesVoiceServiceCallLog_Start, NULL, BBFDM_BOTH},
+{"Duration", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Duration, NULL, BBFDM_BOTH},
+{"CallTerminationCause", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_CallTerminationCause, NULL, BBFDM_BOTH},
 {0}
 };
 

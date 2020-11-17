@@ -585,121 +585,121 @@ static int get_FirmwareImage_bootfailurelog(char *refparam, struct dmctx *ctx, v
 
 /* *** Device.DeviceInfo. *** */
 DMOBJ tDeviceInfoObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"VendorConfigFile", &DMREAD, NULL, NULL, NULL, browseVcfInst, NULL, NULL, NULL, NULL, tDeviceInfoVendorConfigFileParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"MemoryStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoMemoryStatusParams, NULL, BBFDM_BOTH},
-{"ProcessStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoProcessStatusObj, tDeviceInfoProcessStatusParams, NULL, BBFDM_BOTH},
-{"Processor", &DMREAD, NULL, NULL, NULL, browseDeviceInfoProcessorInst, NULL, NULL, NULL, NULL, tDeviceInfoProcessorParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{"VendorLogFile", &DMREAD, NULL, NULL, NULL, browseVlfInst, NULL, NULL, NULL, NULL, tDeviceInfoVendorLogFileParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"SupportedDataModel", &DMREAD, NULL, NULL, NULL, browseDeviceInfoSupportedDataModelInst, NULL, NULL, NULL, NULL, tDeviceInfoSupportedDataModelParams, NULL, BBFDM_CWMP, LIST_KEY{"URL", "Alias", "UUID", NULL}},
-{"FirmwareImage", &DMREAD, NULL, NULL, NULL, browseDeviceInfoFirmwareImageInst, NULL, NULL, NULL, NULL, tDeviceInfoFirmwareImageParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"VendorConfigFile", &DMREAD, NULL, NULL, NULL, browseVcfInst, NULL, NULL, tDeviceInfoVendorConfigFileParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"MemoryStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoMemoryStatusParams, NULL, BBFDM_BOTH},
+{"ProcessStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, tDeviceInfoProcessStatusObj, tDeviceInfoProcessStatusParams, NULL, BBFDM_BOTH},
+{"Processor", &DMREAD, NULL, NULL, NULL, browseDeviceInfoProcessorInst, NULL, NULL, tDeviceInfoProcessorParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"VendorLogFile", &DMREAD, NULL, NULL, NULL, browseVlfInst, NULL, NULL, tDeviceInfoVendorLogFileParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"SupportedDataModel", &DMREAD, NULL, NULL, NULL, browseDeviceInfoSupportedDataModelInst, NULL, NULL, tDeviceInfoSupportedDataModelParams, NULL, BBFDM_CWMP, LIST_KEY{"URL", "Alias", "UUID", NULL}},
+{"FirmwareImage", &DMREAD, NULL, NULL, NULL, browseDeviceInfoFirmwareImageInst, NULL, NULL, tDeviceInfoFirmwareImageParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
 DMLEAF tDeviceInfoParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"DeviceCategory", &DMREAD, DMT_STRING, os__get_device_devicecategory, NULL, NULL, NULL, BBFDM_BOTH},
-{"Manufacturer", &DMREAD, DMT_STRING, get_device_manufacturer, NULL, &DMFINFRM, NULL, BBFDM_BOTH},
-{"ManufacturerOUI", &DMREAD, DMT_STRING, get_device_manufactureroui, NULL, &DMFINFRM, NULL, BBFDM_BOTH},
-{"ModelName", &DMREAD, DMT_STRING, os__get_device_modelname, NULL, &DMFINFRM, NULL, BBFDM_BOTH},
-{"Description", &DMREAD, DMT_STRING, os__get_device_description, NULL, &DMFINFRM, NULL, BBFDM_BOTH},
-{"ProductClass", &DMREAD, DMT_STRING, get_device_productclass, NULL, &DMFINFRM, NULL, BBFDM_BOTH},
-{"SerialNumber", &DMREAD, DMT_STRING, get_device_serialnumber, NULL,  &DMFINFRM, NULL, BBFDM_BOTH},
-{"HardwareVersion", &DMREAD, DMT_STRING, os__get_device_hardwareversion, NULL, &DMFINFRM, NULL, BBFDM_BOTH},
-{"SoftwareVersion", &DMREAD, DMT_STRING, get_device_softwareversion, NULL, &DMFINFRM, &DMACTIVE, BBFDM_BOTH},
-{"ActiveFirmwareImage", &DMREAD, DMT_STRING, get_device_active_fwimage, NULL, &DMFINFRM, &DMACTIVE, BBFDM_BOTH},
-{"AdditionalHardwareVersion", &DMREAD, DMT_STRING, os__get_device_additionalhardwareversion, NULL, NULL, NULL, BBFDM_BOTH},
-{"AdditionalSoftwareVersion", &DMREAD, DMT_STRING, os__get_device_additionalsoftwareversion, NULL, NULL, NULL, BBFDM_BOTH},
-{"ProvisioningCode", &DMWRITE, DMT_STRING, get_device_provisioningcode, set_device_provisioningcode, &DMFINFRM, &DMACTIVE, BBFDM_BOTH},
-{"UpTime", &DMREAD, DMT_UNINT, get_device_info_uptime, NULL, NULL, NULL, BBFDM_BOTH},
-{"ProcessorNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_ProcessorNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-{"SupportedDataModelNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_SupportedDataModelNumberOfEntries, NULL, NULL, NULL, BBFDM_CWMP},
-{"FirmwareImageNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_FirmwareImageNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"BaseMACAddress", &DMREAD, DMT_STRING, os__get_base_mac_addr, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"DeviceCategory", &DMREAD, DMT_STRING, os__get_device_devicecategory, NULL, BBFDM_BOTH},
+{"Manufacturer", &DMREAD, DMT_STRING, get_device_manufacturer, NULL, BBFDM_BOTH},
+{"ManufacturerOUI", &DMREAD, DMT_STRING, get_device_manufactureroui, NULL, BBFDM_BOTH},
+{"ModelName", &DMREAD, DMT_STRING, os__get_device_modelname, NULL, BBFDM_BOTH},
+{"Description", &DMREAD, DMT_STRING, os__get_device_description, NULL, BBFDM_BOTH},
+{"ProductClass", &DMREAD, DMT_STRING, get_device_productclass, NULL, BBFDM_BOTH},
+{"SerialNumber", &DMREAD, DMT_STRING, get_device_serialnumber, NULL, BBFDM_BOTH},
+{"HardwareVersion", &DMREAD, DMT_STRING, os__get_device_hardwareversion, NULL, BBFDM_BOTH},
+{"SoftwareVersion", &DMREAD, DMT_STRING, get_device_softwareversion, NULL, BBFDM_BOTH},
+{"ActiveFirmwareImage", &DMREAD, DMT_STRING, get_device_active_fwimage, NULL, BBFDM_BOTH},
+{"AdditionalHardwareVersion", &DMREAD, DMT_STRING, os__get_device_additionalhardwareversion, NULL, BBFDM_BOTH},
+{"AdditionalSoftwareVersion", &DMREAD, DMT_STRING, os__get_device_additionalsoftwareversion, NULL, BBFDM_BOTH},
+{"ProvisioningCode", &DMWRITE, DMT_STRING, get_device_provisioningcode, set_device_provisioningcode, BBFDM_BOTH},
+{"UpTime", &DMREAD, DMT_UNINT, get_device_info_uptime, NULL, BBFDM_BOTH},
+{"ProcessorNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_ProcessorNumberOfEntries, NULL, BBFDM_BOTH},
+{"SupportedDataModelNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_SupportedDataModelNumberOfEntries, NULL, BBFDM_CWMP},
+{"FirmwareImageNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_FirmwareImageNumberOfEntries, NULL, BBFDM_BOTH},
+{CUSTOM_PREFIX"BaseMACAddress", &DMREAD, DMT_STRING, os__get_base_mac_addr, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DeviceInfo.VendorConfigFile.{i}. *** */
 DMLEAF tDeviceInfoVendorConfigFileParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_vcf_alias, set_vcf_alias, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_vcf_name, NULL, NULL, NULL, BBFDM_BOTH},
-{"Version", &DMREAD, DMT_STRING, get_vcf_version, NULL, NULL, NULL, BBFDM_BOTH},
-{"Date", &DMREAD, DMT_TIME, get_vcf_date, NULL, NULL, NULL, BBFDM_BOTH},
-{"Description", &DMREAD, DMT_STRING, get_vcf_desc, NULL, NULL, NULL, BBFDM_BOTH},
-{"UseForBackupRestore", &DMREAD, DMT_BOOL, get_vcf_backup_restore, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING, get_vcf_alias, set_vcf_alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_vcf_name, NULL, BBFDM_BOTH},
+{"Version", &DMREAD, DMT_STRING, get_vcf_version, NULL, BBFDM_BOTH},
+{"Date", &DMREAD, DMT_TIME, get_vcf_date, NULL, BBFDM_BOTH},
+{"Description", &DMREAD, DMT_STRING, get_vcf_desc, NULL, BBFDM_BOTH},
+{"UseForBackupRestore", &DMREAD, DMT_BOOL, get_vcf_backup_restore, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DeviceInfo.MemoryStatus. *** */
 DMLEAF tDeviceInfoMemoryStatusParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Total", &DMREAD, DMT_UNINT, os__get_memory_status_total, NULL, NULL, NULL, BBFDM_BOTH},
-{"Free", &DMREAD, DMT_UNINT, os__get_memory_status_free, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Total", &DMREAD, DMT_UNINT, os__get_memory_status_total, NULL, BBFDM_BOTH},
+{"Free", &DMREAD, DMT_UNINT, os__get_memory_status_free, NULL, BBFDM_BOTH},
 {0}
 };
-
 /* *** Device.DeviceInfo.ProcessStatus. *** */
 DMOBJ tDeviceInfoProcessStatusObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Process", &DMREAD, NULL, NULL, NULL, os__browseProcessEntriesInst, NULL, NULL, NULL, NULL, tDeviceInfoProcessStatusProcessParams, NULL, BBFDM_BOTH, LIST_KEY{"PID", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Process", &DMREAD, NULL, NULL, NULL, os__browseProcessEntriesInst, NULL, NULL, tDeviceInfoProcessStatusProcessParams, NULL, BBFDM_BOTH, LIST_KEY{"PID", NULL}},
 {0}
 };
 
 DMLEAF tDeviceInfoProcessStatusParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"CPUUsage", &DMREAD, DMT_UNINT, os__get_process_cpu_usage, NULL, NULL, NULL, BBFDM_BOTH},
-{"ProcessNumberOfEntries", &DMREAD, DMT_UNINT, os__get_process_number_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"CPUUsage", &DMREAD, DMT_UNINT, os__get_process_cpu_usage, NULL, BBFDM_BOTH},
+{"ProcessNumberOfEntries", &DMREAD, DMT_UNINT, os__get_process_number_of_entries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DeviceInfo.ProcessStatus.Process.{i}. *** */
 DMLEAF tDeviceInfoProcessStatusProcessParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"PID", &DMREAD, DMT_UNINT, os__get_process_pid, NULL, NULL, NULL, BBFDM_BOTH},
-{"Command", &DMREAD, DMT_STRING, os__get_process_command, NULL, NULL, NULL, BBFDM_BOTH},
-{"Size", &DMREAD, DMT_UNINT, os__get_process_size, NULL, NULL, NULL, BBFDM_BOTH},
-{"Priority", &DMREAD, DMT_UNINT, os__get_process_priority, NULL, NULL, NULL, BBFDM_BOTH},
-{"CPUTime", &DMREAD, DMT_UNINT, os__get_process_cpu_time, NULL, NULL, NULL, BBFDM_BOTH},
-{"State", &DMREAD, DMT_STRING, os__get_process_state, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"PID", &DMREAD, DMT_UNINT, os__get_process_pid, NULL, BBFDM_BOTH},
+{"Command", &DMREAD, DMT_STRING, os__get_process_command, NULL, BBFDM_BOTH},
+{"Size", &DMREAD, DMT_UNINT, os__get_process_size, NULL, BBFDM_BOTH},
+{"Priority", &DMREAD, DMT_UNINT, os__get_process_priority, NULL, BBFDM_BOTH},
+{"CPUTime", &DMREAD, DMT_UNINT, os__get_process_cpu_time, NULL, BBFDM_BOTH},
+{"State", &DMREAD, DMT_STRING, os__get_process_state, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DeviceInfo.VendorLogFile.{i}. *** */
 DMLEAF tDeviceInfoVendorLogFileParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_vlf_alias, set_vlf_alias, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_vlf_name, NULL, NULL, NULL, BBFDM_BOTH},
-{"MaximumSize", &DMREAD, DMT_UNINT, get_vlf_max_size, NULL, NULL, NULL, BBFDM_BOTH},
-{"Persistent", &DMREAD, DMT_BOOL, get_vlf_persistent, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING, get_vlf_alias, set_vlf_alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_vlf_name, NULL, BBFDM_BOTH},
+{"MaximumSize", &DMREAD, DMT_UNINT, get_vlf_max_size, NULL, BBFDM_BOTH},
+{"Persistent", &DMREAD, DMT_BOOL, get_vlf_persistent, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DeviceInfo.Processor.{i}. *** */
 DMLEAF tDeviceInfoProcessorParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoProcessor_Alias, set_DeviceInfoProcessor_Alias, NULL, NULL, BBFDM_BOTH},
-{"Architecture", &DMREAD, DMT_STRING, get_DeviceInfoProcessor_Architecture, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoProcessor_Alias, set_DeviceInfoProcessor_Alias, BBFDM_BOTH},
+{"Architecture", &DMREAD, DMT_STRING, get_DeviceInfoProcessor_Architecture, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DeviceInfo.SupportedDataModel.{i}. *** */
 DMLEAF tDeviceInfoSupportedDataModelParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoSupportedDataModel_Alias, set_DeviceInfoSupportedDataModel_Alias, NULL, NULL, BBFDM_CWMP},
-{"URL", &DMREAD, DMT_STRING, get_DeviceInfoSupportedDataModel_URL, NULL, NULL, NULL, BBFDM_CWMP},
-{"URN", &DMREAD, DMT_STRING, get_DeviceInfoSupportedDataModel_URN, NULL, NULL, NULL, BBFDM_CWMP},
-{"Features", &DMREAD, DMT_STRING, get_DeviceInfoSupportedDataModel_Features, NULL, NULL, NULL, BBFDM_CWMP},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoSupportedDataModel_Alias, set_DeviceInfoSupportedDataModel_Alias, BBFDM_CWMP},
+{"URL", &DMREAD, DMT_STRING, get_DeviceInfoSupportedDataModel_URL, NULL, BBFDM_CWMP},
+{"URN", &DMREAD, DMT_STRING, get_DeviceInfoSupportedDataModel_URN, NULL, BBFDM_CWMP},
+{"Features", &DMREAD, DMT_STRING, get_DeviceInfoSupportedDataModel_Features, NULL, BBFDM_CWMP},
 {0}
 };
 
 /* *** Device.DeviceInfo.FirmwareImage.{i}. *** */
 DMLEAF tDeviceInfoFirmwareImageParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Name", &DMREAD, DMT_STRING, get_FirmwareImage_name, NULL, NULL, NULL, BBFDM_BOTH },
-{"Version", &DMREAD, DMT_STRING, get_FirmwareImage_version, NULL, NULL, NULL, BBFDM_BOTH },
-{"Available", &DMREAD, DMT_BOOL, get_FirmwareImage_available, NULL, NULL, NULL, BBFDM_BOTH },
-{"Status", &DMREAD, DMT_STRING, get_FirmwareImage_status, NULL, NULL, NULL, BBFDM_BOTH },
-{"BootFailureLog", &DMREAD, DMT_STRING, get_FirmwareImage_bootfailurelog, NULL, NULL, NULL, BBFDM_BOTH },
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Name", &DMREAD, DMT_STRING, get_FirmwareImage_name, NULL, BBFDM_BOTH },
+{"Version", &DMREAD, DMT_STRING, get_FirmwareImage_version, NULL, BBFDM_BOTH },
+{"Available", &DMREAD, DMT_BOOL, get_FirmwareImage_available, NULL, BBFDM_BOTH },
+{"Status", &DMREAD, DMT_STRING, get_FirmwareImage_status, NULL, BBFDM_BOTH },
+{"BootFailureLog", &DMREAD, DMT_STRING, get_FirmwareImage_bootfailurelog, NULL, BBFDM_BOTH },
 {0}
 };
+

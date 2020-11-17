@@ -282,49 +282,48 @@ static int set_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes(char *r
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.VoIPProfile.{i}. *** */
 DMOBJ tServicesVoiceServiceVoIPProfileObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileRTPObj, tServicesVoiceServiceVoIPProfileRTPParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileRTPObj, tServicesVoiceServiceVoIPProfileRTPParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tServicesVoiceServiceVoIPProfileParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"DTMFMethod", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfile_DTMFMethod, set_ServicesVoiceServiceVoIPProfile_DTMFMethod, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"DTMFMethod", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfile_DTMFMethod, set_ServicesVoiceServiceVoIPProfile_DTMFMethod, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP. *** */
 DMOBJ tServicesVoiceServiceVoIPProfileRTPObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"RTCP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileRTPRTCPParams, NULL, BBFDM_BOTH},
-{"SRTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileRTPSRTPParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"RTCP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileRTPRTCPParams, NULL, BBFDM_BOTH},
+{"SRTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceVoIPProfileRTPSRTPParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tServicesVoiceServiceVoIPProfileRTPParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"LocalPortMin", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTP_LocalPortMin, set_ServicesVoiceServiceVoIPProfileRTP_LocalPortMin, NULL, NULL, BBFDM_BOTH},
-{"LocalPortMax", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTP_LocalPortMax, set_ServicesVoiceServiceVoIPProfileRTP_LocalPortMax, NULL, NULL, BBFDM_BOTH},
-{"DSCPMark", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTP_DSCPMark, set_ServicesVoiceServiceVoIPProfileRTP_DSCPMark, NULL, NULL, BBFDM_BOTH},
-{"TelephoneEventPayloadType", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTP_TelephoneEventPayloadType, set_ServicesVoiceServiceVoIPProfileRTP_TelephoneEventPayloadType, NULL, NULL, BBFDM_BOTH},
-{"JitterBufferType", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType, set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType, NULL, NULL, BBFDM_BOTH},
-{"JitterBufferMaxSize", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTP_JitterBufferMaxSize, set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferMaxSize, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"LocalPortMin", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTP_LocalPortMin, set_ServicesVoiceServiceVoIPProfileRTP_LocalPortMin, BBFDM_BOTH},
+{"LocalPortMax", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTP_LocalPortMax, set_ServicesVoiceServiceVoIPProfileRTP_LocalPortMax, BBFDM_BOTH},
+{"DSCPMark", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTP_DSCPMark, set_ServicesVoiceServiceVoIPProfileRTP_DSCPMark, BBFDM_BOTH},
+{"TelephoneEventPayloadType", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTP_TelephoneEventPayloadType, set_ServicesVoiceServiceVoIPProfileRTP_TelephoneEventPayloadType, BBFDM_BOTH},
+{"JitterBufferType", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType, set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType, BBFDM_BOTH},
+{"JitterBufferMaxSize", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTP_JitterBufferMaxSize, set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferMaxSize, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.RTCP. *** */
 DMLEAF tServicesVoiceServiceVoIPProfileRTPRTCPParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"TxRepeatInterval", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTPRTCP_TxRepeatInterval, set_ServicesVoiceServiceVoIPProfileRTPRTCP_TxRepeatInterval, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"TxRepeatInterval", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceVoIPProfileRTPRTCP_TxRepeatInterval, set_ServicesVoiceServiceVoIPProfileRTPRTCP_TxRepeatInterval, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.SRTP. *** */
 DMLEAF tServicesVoiceServiceVoIPProfileRTPSRTPParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceVoIPProfileRTPSRTP_Enable, set_ServicesVoiceServiceVoIPProfileRTPSRTP_Enable, NULL, NULL, BBFDM_BOTH},
-{"KeyingMethods", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfileRTPSRTP_KeyingMethods, set_ServicesVoiceServiceVoIPProfileRTPSRTP_KeyingMethods, NULL, NULL, BBFDM_BOTH},
-{"EncryptionKeySizes", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes, set_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceVoIPProfileRTPSRTP_Enable, set_ServicesVoiceServiceVoIPProfileRTPSRTP_Enable, BBFDM_BOTH},
+{"KeyingMethods", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfileRTPSRTP_KeyingMethods, set_ServicesVoiceServiceVoIPProfileRTPSRTP_KeyingMethods, BBFDM_BOTH},
+{"EncryptionKeySizes", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes, set_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes, BBFDM_BOTH},
 {0}
 };
-

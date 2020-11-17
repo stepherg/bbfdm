@@ -1288,89 +1288,89 @@ static int set_time_span_stop_time(char *refparam, struct dmctx *ctx, void *data
 
 /* *** Device.Firewall. *** */
 DMOBJ tFirewallObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, NULL, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
 DMLEAF tFirewallParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_firewall_enable, set_firewall_enable, NULL, NULL, BBFDM_BOTH},
-{"Config", &DMWRITE, DMT_STRING, get_firewall_config, set_firewall_config, NULL, NULL, BBFDM_BOTH},
-{"AdvancedLevel", &DMWRITE, DMT_STRING, get_firewall_advanced_level, set_firewall_advanced_level, NULL, NULL, BBFDM_BOTH},
-{"LevelNumberOfEntries", &DMREAD, DMT_UNINT, get_firewall_level_number_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
-{"ChainNumberOfEntries", &DMREAD, DMT_UNINT, get_firewall_chain_number_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_firewall_enable, set_firewall_enable, BBFDM_BOTH},
+{"Config", &DMWRITE, DMT_STRING, get_firewall_config, set_firewall_config, BBFDM_BOTH},
+{"AdvancedLevel", &DMWRITE, DMT_STRING, get_firewall_advanced_level, set_firewall_advanced_level, BBFDM_BOTH},
+{"LevelNumberOfEntries", &DMREAD, DMT_UNINT, get_firewall_level_number_of_entries, NULL, BBFDM_BOTH},
+{"ChainNumberOfEntries", &DMREAD, DMT_UNINT, get_firewall_chain_number_of_entries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Firewall.Level.{i}. *** */
 DMLEAF tFirewallLevelParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_level_alias, set_level_alias, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMWRITE, DMT_STRING, get_level_name, set_level_name, NULL, NULL, BBFDM_BOTH},
-{"Description", &DMWRITE, DMT_STRING, get_level_description, set_level_description, NULL, NULL, BBFDM_BOTH},
-{"Chain", &DMREAD, DMT_STRING, get_level_chain, NULL, NULL, NULL, BBFDM_BOTH},
-{"PortMappingEnabled", &DMWRITE, DMT_BOOL, get_level_port_mapping_enabled, set_level_port_mapping_enabled, NULL, NULL, BBFDM_BOTH},
-{"DefaultLogPolicy", &DMWRITE, DMT_BOOL, get_level_default_log_policy, set_level_default_log_policy, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Alias", &DMWRITE, DMT_STRING, get_level_alias, set_level_alias, BBFDM_BOTH},
+{"Name", &DMWRITE, DMT_STRING, get_level_name, set_level_name, BBFDM_BOTH},
+{"Description", &DMWRITE, DMT_STRING, get_level_description, set_level_description, BBFDM_BOTH},
+{"Chain", &DMREAD, DMT_STRING, get_level_chain, NULL, BBFDM_BOTH},
+{"PortMappingEnabled", &DMWRITE, DMT_BOOL, get_level_port_mapping_enabled, set_level_port_mapping_enabled, BBFDM_BOTH},
+{"DefaultLogPolicy", &DMWRITE, DMT_BOOL, get_level_default_log_policy, set_level_default_log_policy, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Firewall.Chain.{i}. *** */
 DMOBJ tFirewallChainObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Rule", &DMWRITE, add_firewall_rule, delete_firewall_rule, NULL, browseRuleInst, NULL, NULL, NULL, tFirewallChainRuleObj, tFirewallChainRuleParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Rule", &DMWRITE, add_firewall_rule, delete_firewall_rule, NULL, browseRuleInst, NULL, tFirewallChainRuleObj, tFirewallChainRuleParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
 DMLEAF tFirewallChainParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_chain_enable, set_chain_enable, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_chain_alias, set_chain_alias, NULL, NULL, BBFDM_BOTH},
-{"Name", &DMWRITE, DMT_STRING, get_chain_name, set_chain_name, NULL, NULL, BBFDM_BOTH},
-{"Creator", &DMREAD, DMT_STRING, get_chain_creator, NULL, NULL, NULL, BBFDM_BOTH},
-{"RuleNumberOfEntries", &DMREAD, DMT_UNINT, get_chain_rule_number_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_chain_enable, set_chain_enable, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_chain_alias, set_chain_alias, BBFDM_BOTH},
+{"Name", &DMWRITE, DMT_STRING, get_chain_name, set_chain_name, BBFDM_BOTH},
+{"Creator", &DMREAD, DMT_STRING, get_chain_creator, NULL, BBFDM_BOTH},
+{"RuleNumberOfEntries", &DMREAD, DMT_UNINT, get_chain_rule_number_of_entries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Firewall.Chain.{i}.Rule.{i}. *** */
 DMOBJ tFirewallChainRuleObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{CUSTOM_PREFIX"TimeSpan", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tTimeSpanParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{CUSTOM_PREFIX"TimeSpan", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tTimeSpanParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tFirewallChainRuleParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_rule_enable, set_rule_enable, NULL, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_rule_status, NULL, NULL, NULL, BBFDM_BOTH},
-{"Order", &DMWRITE, DMT_UNINT, get_rule_order, set_rule_order, NULL, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_rule_alias, set_rule_alias, NULL, NULL, BBFDM_BOTH},
-{"Description", &DMWRITE, DMT_STRING, get_rule_description, set_rule_description, NULL, NULL, BBFDM_BOTH},
-{"Target", &DMWRITE, DMT_STRING, get_rule_target, set_rule_target, NULL, NULL, BBFDM_BOTH},
-//{"TargetChain", &DMWRITE, DMT_STRING, get_rule_target_chain, set_rule_target_chain, NULL, NULL, BBFDM_BOTH},
-{"SourceInterface", &DMWRITE, DMT_STRING, get_rule_source_interface, set_rule_source_interface, NULL, NULL, BBFDM_BOTH},
-{"DestInterface", &DMWRITE, DMT_STRING, get_rule_dest_interface, set_rule_dest_interface, NULL, NULL, BBFDM_BOTH},
-{"IPVersion", &DMWRITE, DMT_INT, get_rule_i_p_version, set_rule_i_p_version, NULL, NULL, BBFDM_BOTH},
-{"DestIP", &DMWRITE, DMT_STRING, get_rule_dest_ip, set_rule_dest_ip, NULL, NULL, BBFDM_BOTH},
-{"DestMask", &DMWRITE, DMT_STRING, get_rule_dest_mask, set_rule_dest_mask, NULL, NULL, BBFDM_BOTH},
-{"SourceIP", &DMWRITE, DMT_STRING, get_rule_source_ip, set_rule_source_ip, NULL, NULL, BBFDM_BOTH},
-{"SourceMask", &DMWRITE, DMT_STRING, get_rule_source_mask, set_rule_source_mask, NULL, NULL, BBFDM_BOTH},
-{"Protocol", &DMWRITE, DMT_INT, get_rule_protocol, set_rule_protocol, NULL, NULL, BBFDM_BOTH},
-{"DestPort", &DMWRITE, DMT_INT, get_rule_dest_port, set_rule_dest_port, NULL, NULL, BBFDM_BOTH},
-{"DestPortRangeMax", &DMWRITE, DMT_INT, get_rule_dest_port_range_max, set_rule_dest_port_range_max, NULL, NULL, BBFDM_BOTH},
-{"SourcePort", &DMWRITE, DMT_INT, get_rule_source_port, set_rule_source_port, NULL, NULL, BBFDM_BOTH},
-{"SourcePortRangeMax", &DMWRITE, DMT_INT, get_rule_source_port_range_max, set_rule_source_port_range_max, NULL, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"ICMPType", &DMWRITE, DMT_STRING, get_rule_icmp_type, set_rule_icmp_type, NULL, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"SourceMACAddress", &DMWRITE, DMT_STRING, get_rule_source_mac, set_rule_source_mac, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_rule_enable, set_rule_enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_rule_status, NULL, BBFDM_BOTH},
+{"Order", &DMWRITE, DMT_UNINT, get_rule_order, set_rule_order, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_rule_alias, set_rule_alias, BBFDM_BOTH},
+{"Description", &DMWRITE, DMT_STRING, get_rule_description, set_rule_description, BBFDM_BOTH},
+{"Target", &DMWRITE, DMT_STRING, get_rule_target, set_rule_target, BBFDM_BOTH},
+//{"TargetChain", &DMWRITE, DMT_STRING, get_rule_target_chain, set_rule_target_chain, BBFDM_BOTH},
+{"SourceInterface", &DMWRITE, DMT_STRING, get_rule_source_interface, set_rule_source_interface, BBFDM_BOTH},
+{"DestInterface", &DMWRITE, DMT_STRING, get_rule_dest_interface, set_rule_dest_interface, BBFDM_BOTH},
+{"IPVersion", &DMWRITE, DMT_INT, get_rule_i_p_version, set_rule_i_p_version, BBFDM_BOTH},
+{"DestIP", &DMWRITE, DMT_STRING, get_rule_dest_ip, set_rule_dest_ip, BBFDM_BOTH},
+{"DestMask", &DMWRITE, DMT_STRING, get_rule_dest_mask, set_rule_dest_mask, BBFDM_BOTH},
+{"SourceIP", &DMWRITE, DMT_STRING, get_rule_source_ip, set_rule_source_ip, BBFDM_BOTH},
+{"SourceMask", &DMWRITE, DMT_STRING, get_rule_source_mask, set_rule_source_mask, BBFDM_BOTH},
+{"Protocol", &DMWRITE, DMT_INT, get_rule_protocol, set_rule_protocol, BBFDM_BOTH},
+{"DestPort", &DMWRITE, DMT_INT, get_rule_dest_port, set_rule_dest_port, BBFDM_BOTH},
+{"DestPortRangeMax", &DMWRITE, DMT_INT, get_rule_dest_port_range_max, set_rule_dest_port_range_max, BBFDM_BOTH},
+{"SourcePort", &DMWRITE, DMT_INT, get_rule_source_port, set_rule_source_port, BBFDM_BOTH},
+{"SourcePortRangeMax", &DMWRITE, DMT_INT, get_rule_source_port_range_max, set_rule_source_port_range_max, BBFDM_BOTH},
+{CUSTOM_PREFIX"ICMPType", &DMWRITE, DMT_STRING, get_rule_icmp_type, set_rule_icmp_type, BBFDM_BOTH},
+{CUSTOM_PREFIX"SourceMACAddress", &DMWRITE, DMT_STRING, get_rule_source_mac, set_rule_source_mac, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tTimeSpanParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"SupportedDays", &DMWRITE, DMT_STRING, get_time_span_supported_days, set_time_span_supported_days, NULL, NULL, BBFDM_BOTH},
-{"Days", &DMWRITE, DMT_STRING, get_time_span_days, set_time_span_days, NULL, NULL, BBFDM_BOTH},
-{"StartTime", &DMWRITE, DMT_STRING, get_time_span_start_time, set_time_span_start_time, NULL, NULL, BBFDM_BOTH},
-{"StopTime", &DMWRITE, DMT_STRING, get_time_span_stop_time, set_time_span_stop_time, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"SupportedDays", &DMWRITE, DMT_STRING, get_time_span_supported_days, set_time_span_supported_days, BBFDM_BOTH},
+{"Days", &DMWRITE, DMT_STRING, get_time_span_days, set_time_span_days, BBFDM_BOTH},
+{"StartTime", &DMWRITE, DMT_STRING, get_time_span_start_time, set_time_span_start_time, BBFDM_BOTH},
+{"StopTime", &DMWRITE, DMT_STRING, get_time_span_stop_time, set_time_span_stop_time, BBFDM_BOTH},
 {0}
 };

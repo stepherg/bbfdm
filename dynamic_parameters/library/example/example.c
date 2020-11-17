@@ -136,18 +136,18 @@ opr_ret_t dynamicDeviceOperate(struct dmctx *dmctx, char *path, json_object *inp
 
 /* *** Device.IP.Diagnostics. *** */
 DMOBJ tdynamicIPDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"X_IOPSYS_EU_BBKSpeedTest", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tdynamicIPDiagnosticsX_IOPSYS_EU_BBKSpeedTestParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"X_IOPSYS_EU_BBKSpeedTest", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tdynamicIPDiagnosticsX_IOPSYS_EU_BBKSpeedTestParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.IP.Diagnostics.X_IOPSYS_EU_BBKSpeedTest. *** */
 DMLEAF tdynamicIPDiagnosticsX_IOPSYS_EU_BBKSpeedTestParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"DiagnosticsState", &DMWRITE, DMT_STRING, getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_DiagnosticsState, setdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_DiagnosticsState, NULL, NULL, BBFDM_BOTH},
-{"Latency", &DMREAD, DMT_STRING, getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_Latency, NULL, NULL, NULL, BBFDM_BOTH},
-{"Download", &DMREAD, DMT_STRING, getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_Download, NULL, NULL, NULL, BBFDM_BOTH},
-{"Upload", &DMREAD, DMT_STRING, getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_Upload, NULL, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"DiagnosticsState", &DMWRITE, DMT_STRING, getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_DiagnosticsState, setdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_DiagnosticsState, BBFDM_BOTH},
+{"Latency", &DMREAD, DMT_STRING, getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_Latency, NULL, BBFDM_BOTH},
+{"Download", &DMREAD, DMT_STRING, getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_Download, NULL, BBFDM_BOTH},
+{"Upload", &DMREAD, DMT_STRING, getdynamic_IPDiagnosticsX_IOPSYS_EU_BBKSpeedTest_Upload, NULL, BBFDM_BOTH},
 {0}
 };
 

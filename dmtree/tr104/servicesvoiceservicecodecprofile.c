@@ -72,9 +72,9 @@ static int set_ServicesVoiceServiceCodecProfile_PacketizationPeriod(char *refpar
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.CodecProfile.{i}. *** */
 DMLEAF tServicesVoiceServiceCodecProfileParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/
-{"Codec", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCodecProfile_Codec, set_ServicesVoiceServiceCodecProfile_Codec, NULL, NULL, BBFDM_BOTH},
-{"PacketizationPeriod", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCodecProfile_PacketizationPeriod, set_ServicesVoiceServiceCodecProfile_PacketizationPeriod, NULL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Codec", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCodecProfile_Codec, set_ServicesVoiceServiceCodecProfile_Codec, BBFDM_BOTH},
+{"PacketizationPeriod", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCodecProfile_PacketizationPeriod, set_ServicesVoiceServiceCodecProfile_PacketizationPeriod, BBFDM_BOTH},
 {0}
 };
 

@@ -19,42 +19,43 @@
 
 /*** /UPnP/DM/Configuration/ objects ***/
 DMOBJ upnpConfigurationObj[] = {
-{"Network",&DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE, upnpConfigurationNetworkObj, upnpConfigurationNetworkParams, NULL},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Network",&DMREAD, NULL, NULL, NULL, NULL, NULL, upnpConfigurationNetworkObj, upnpConfigurationNetworkParams, NULL},
 {0}
 };
 
 /*** /UPnP/DM/Configuration/Network objects ***/
 DMOBJ upnpConfigurationNetworkObj[] = {
-{"IPInterface",&DMWRITE, upnp_configuration_ipinterface_createinstance, upnp_configuration_ipinterface_deleteinstance, NULL, upnp_browseIPInterfaceInst, &DMFINFRM, &DMNONE, upnpConfigurationNetworkIPInterfaceObj, upnpConfigurationNetworkIPInterfaceParams, NULL},
+{"IPInterface",&DMWRITE, upnp_configuration_ipinterface_createinstance, upnp_configuration_ipinterface_deleteinstance, NULL, upnp_browseIPInterfaceInst, NULL, upnpConfigurationNetworkIPInterfaceObj, upnpConfigurationNetworkIPInterfaceParams, NULL},
 {0}
 };
 
 /*** /UPnP/DM/Configuration/Network parameters ***/
 DMLEAF upnpConfigurationNetworkParams[]= {
-{"HostName", &DMWRITE, DMT_STRING, upnp_configuration_get_hostname, upnp_configuration_set_hostname, &DMFINFRM, NULL},
-{"IPInterfaceNumberOfEntries", &DMREAD, DMT_UNINT, upnp_configuration_get_IPInterfaceNumberOfEntries, NULL, &DMFINFRM, NULL},
+{"HostName", &DMWRITE, DMT_STRING, upnp_configuration_get_hostname, upnp_configuration_set_hostname},
+{"IPInterfaceNumberOfEntries", &DMREAD, DMT_UNINT, upnp_configuration_get_IPInterfaceNumberOfEntries, NULL},
 {0}
 };
 
 /*** /UPnP/DM/Configuration/Network/IPInterface/#/ objects ***/
 DMOBJ upnpConfigurationNetworkIPInterfaceObj[]= {
-{"IPv4",&DMREAD, NULL, NULL, NULL, NULL, &DMFINFRM, &DMNONE, NULL, upnpConfigurationNetworkIPInterfaceIpv4Params, NULL},
+{"IPv4",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, upnpConfigurationNetworkIPInterfaceIpv4Params, NULL},
 {0}
 };
 
 /*** /UPnP/DM/Configuration/Network/IPInterface/#/ parameters ***/
 DMLEAF upnpConfigurationNetworkIPInterfaceParams[]= {
-{"SystemName", &DMREAD, DMT_STRING, upnp_configuration_get_SystemName, NULL, &DMFINFRM, NULL},
+{"SystemName", &DMREAD, DMT_STRING, upnp_configuration_get_SystemName, NULL},
 {0}
 };
 
 /*** /UPnP/DM/Configuration/Network/IPInterface/#/IPv4/ parameters ***/
 DMLEAF upnpConfigurationNetworkIPInterfaceIpv4Params[]= {
-{"IPAddress", &DMWRITE, DMT_STRING, upnp_configuration_get_ipv4_IPAddress, upnp_configuration_set_ipv4_IPAddress, &DMFINFRM, NULL},
-{"AddressingType", &DMWRITE, DMT_STRING, upnp_configuration_get_ipv4_addressingtype, upnp_configuration_set_ipv4_addressingtype, &DMFINFRM, NULL},
-{"DNSServers", &DMWRITE, DMT_STRING, upnp_configuration_get_ipv4_dnssevers, upnp_configuration_set_ipv4_dnssevers, &DMFINFRM, NULL},
-{"SubnetMask", &DMWRITE, DMT_STRING, upnp_configuration_get_ipv4_subnetmask, upnp_configuration_set_ipv4_subnetmask, &DMFINFRM, NULL},
-{"DefaultGateway", &DMWRITE, DMT_STRING, upnp_configuration_get_ipv4_defaultgateway, upnp_configuration_set_ipv4_defaultgateway, &DMFINFRM, NULL},
+{"IPAddress", &DMWRITE, DMT_STRING, upnp_configuration_get_ipv4_IPAddress, upnp_configuration_set_ipv4_IPAddress},
+{"AddressingType", &DMWRITE, DMT_STRING, upnp_configuration_get_ipv4_addressingtype, upnp_configuration_set_ipv4_addressingtype},
+{"DNSServers", &DMWRITE, DMT_STRING, upnp_configuration_get_ipv4_dnssevers, upnp_configuration_set_ipv4_dnssevers},
+{"SubnetMask", &DMWRITE, DMT_STRING, upnp_configuration_get_ipv4_subnetmask, upnp_configuration_set_ipv4_subnetmask},
+{"DefaultGateway", &DMWRITE, DMT_STRING, upnp_configuration_get_ipv4_defaultgateway, upnp_configuration_set_ipv4_defaultgateway},
 {0}
 };
 
