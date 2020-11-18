@@ -1721,20 +1721,29 @@ int os_set_QoSClassification_DestVendorClassIDMode(char *refparam, struct dmctx 
 
 int os_get_QoSClassification_SourceClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "src_client_id", value);
+	char *srcclid = NULL, hex[256] = {0};
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "src_client_id", &srcclid);
+
+	if (srcclid && *srcclid)
+		convert_string_to_hex(srcclid, hex);
+
+	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
 }
 
 int os_set_QoSClassification_SourceClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char res[256] = {0};
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			// Set received value of source Client ID in /etc/config/qos.
-			dmuci_set_value_by_section((struct uci_section *)data, "src_client_id", value);
+			convert_hex_to_string(value, res);
+			dmuci_set_value_by_section((struct uci_section *)data, "src_client_id", res);
 			break;
 	}
 	return 0;
@@ -1762,20 +1771,29 @@ int os_set_QoSClassification_SourceClientIDExclude(char *refparam, struct dmctx 
 
 int os_get_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "dst_client_id", value);
+	char *dstclid = NULL, hex[256] = {0};
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "dst_client_id", &dstclid);
+
+	if (dstclid && *dstclid)
+		convert_string_to_hex(dstclid, hex);
+
+	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
 }
 
 int os_set_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char res[256] = {0};
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			// Set received value of Destination Client ID in /etc/config/qos.
-			dmuci_set_value_by_section((struct uci_section *)data, "dst_client_id", value);
+			convert_hex_to_string(value, res);
+			dmuci_set_value_by_section((struct uci_section *)data, "dst_client_id", res);
 			break;
 	}
 	return 0;
@@ -1803,20 +1821,29 @@ int os_set_QoSClassification_DestClientIDExclude(char *refparam, struct dmctx *c
 
 int os_get_QoSClassification_SourceUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "src_user_class_id", value);
+	char *srcusrclid = NULL, hex[256] = {0};
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "src_user_class_id", &srcusrclid);
+
+	if (srcusrclid && *srcusrclid)
+		convert_string_to_hex(srcusrclid, hex);
+
+	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
 }
 
 int os_set_QoSClassification_SourceUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char res[256] = {0};
+
 	switch (action)	{
 	case VALUECHECK:
 		if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		// Set received value of source user ClassID in /etc/config/qos.
-		dmuci_set_value_by_section((struct uci_section *)data, "src_user_class_id", value);
+		convert_hex_to_string(value, res);
+		dmuci_set_value_by_section((struct uci_section *)data, "src_user_class_id", res);
 		break;
 	}
 	return 0;
@@ -1844,20 +1871,29 @@ int os_set_QoSClassification_SourceUserClassIDExclude(char *refparam, struct dmc
 
 int os_get_QoSClassification_DestUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "dst_user_class_id", value);
+	char *dstusrclid = NULL, hex[256] = {0};
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "dst_user_class_id", &dstusrclid);
+
+	if (dstusrclid && *dstusrclid)
+		convert_string_to_hex(dstusrclid, hex);
+
+	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
 }
 
 int os_set_QoSClassification_DestUserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char res[256] = {0};
+
 	switch (action)	{
 	case VALUECHECK:
 		if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		// Set received value of destination user ClassID in /etc/config/qos.
-		dmuci_set_value_by_section((struct uci_section *)data, "dst_user_class_id", value);
+		convert_hex_to_string(value, res);
+		dmuci_set_value_by_section((struct uci_section *)data, "dst_user_class_id", res);
 		break;
 	}
 	return 0;
