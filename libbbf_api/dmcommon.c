@@ -1444,6 +1444,9 @@ int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_
 {
 	int i;
 
+       if (value[0] == '-')
+               return -1;
+
 	/* check size for each range */
 	for (i = 0; i < r_args_size; i++) {
 		unsigned long val = 0, minval = 0, maxval = 0;
