@@ -1371,9 +1371,22 @@ void convert_string_to_hex(const char *str, char *hex)
 	int i, j, len = strlen(str);
 
 	for (i = 0, j = 0; i < len; i++, j += 2) {
-		sprintf((char *)hex+j, "%02X", str[i]);
+		sprintf((char *)hex + j, "%02X", str[i]);
 	}
 	hex[j] = '\0';
+}
+
+void convert_hex_to_string(const char *hex, char *str)
+{
+	int i, j, len = strlen(hex);
+	char buf[3] = {0};
+
+	for (i = 0, j = 0; i < len; i += 2, j++) {
+		strncpy(buf, &hex[i], 2);
+		buf[2] = '\0';
+		sprintf((char *)str + j, "%c", (char)strtol(buf, NULL, 16));
+	}
+	str[j] = '\0';
 }
 
 bool match(const char *string, const char *pattern)
@@ -1433,8 +1446,10 @@ int dm_validate_string(char *value, int min_length, int max_length, char *enumer
 int dm_validate_boolean(char *value)
 {
 	/* check format */
-	if ((value[0] == '1' && value[1] == '\0') || (value[0] == '0' && value[1] == '\0')
-		|| !strcasecmp(value, "true") || !strcasecmp(value, "false")) {
+	if ((value[0] == '1' && value[1] == '\0') ||
+		(value[0] == '0' && value[1] == '\0') ||
+		!strcasecmp(value, "true") ||
+		!strcasecmp(value, "false")) {
 		return 0;
 	}
 	return -1;
@@ -1443,9 +1458,6 @@ int dm_validate_boolean(char *value)
 int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size)
 {
 	int i;
-
-       if (value[0] == '-')
-               return -1;
 
 	/* check size for each range */
 	for (i = 0; i < r_args_size; i++) {
@@ -1460,7 +1472,7 @@ int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_
 
 		val = strtoul(value, &endval, 10);
 
-		if ((*endval != 0) || (errno != 0)) return -1;
+		if ((*value == '-') || (*endval != 0) || (errno != 0)) return -1;
 
 		if (r_args[i].min && r_args[i].max && minval == maxval) {
 
@@ -1525,7 +1537,7 @@ int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args
 
 		val = strtoul(value, &endval, 10);
 
-		if ((*endval != 0) || (errno != 0)) return -1;
+		if ((*value == '-') || (*endval != 0) || (errno != 0)) return -1;
 
 		/* check size */
 		if ((r_args[i].min && val < minval) || (r_args[i].max && val > maxval) || (val < 0) || (val > (unsigned long)ULONG_MAX))
@@ -1595,8 +1607,8 @@ int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_si
 			continue;
 		}
 
-		if ((r_args[i].min && !r_args[i].max && (strlen(value) < atoi(r_args[i].min))) ||
-			(!r_args[i].min && r_args[i].max && (strlen(value) > atoi(r_args[i].max)))) {
+		if ((r_args[i].min && (strlen(value) < atoi(r_args[i].min))) ||
+			(r_args[i].max && (strlen(value) > atoi(r_args[i].max)))) {
 			return -1;
 		}
 	}

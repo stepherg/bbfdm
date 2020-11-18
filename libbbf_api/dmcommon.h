@@ -312,6 +312,7 @@ int get_net_device_sysfs(const char *uci_iface, const char *name, char **value);
 char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_section);
 int dm_time_format(time_t ts, char **dst);
 void convert_string_to_hex(const char *str, char *hex);
+void convert_hex_to_string(const char *hex, char *str);
 bool match(const char *string, const char *pattern);
 int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], int enumeration_size, char *pattern[], int pattern_size);
 int dm_validate_boolean(char *value);
