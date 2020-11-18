@@ -110,8 +110,6 @@ Each object in the **DMOBJ** table contains the following arguments:
 | `delobj`            | The function to delete instance under this object. This function will be triggered when the ACS/Controller call DeleteObject of an instance of this object |
 | `checkdep`          | A string of the object dependency, it can be a file("file:/etc/config/network") or an ubus object,method("ubus:network.interface->status"). If it's `NULL` then the object has always appeared in the tree. |
 | `browseinstobj`     | This function allow to browse all instances under this object |
-| `forced_inform`     | If it's set to `&DMFINFRM` that mean the object contains a force inform parameter in its subtree. The forced inform parameters are the parameter included in the inform message |
-| `notification`      | The notification of the object. Could be **&DMACTIVE**, **&DMACTIVE** or **&DMNONE** |
 | `nextdynamicobj`       | Pointer to the next of **DMOBJ** which contains a list of the child objects using json files and plugins(libraries) |
 | `nextobj`           | Pointer to a **DMOBJ** array which contains a list of the child objects |
 | `leaf`              | Pointer to a **DMLEAF** array which contains a list of the child objects |
@@ -131,8 +129,6 @@ Each parameter in the **DMLEAF** table contains the following arguments:
 | `type`              | Type of the parameter: **DM_STRING**, **DM_BOOL**, **DM_UNINT**,... |
 | `getvalue`          | The function which return the value of this parameter |
 | `setvalue`          | The function which set the value of this parameter |
-| `forced_inform`     | If this argument is set to `&DMFINFRM` that mean the parameter will be included in the list of parameter of inform message |
-| `notification`      | The notification of the parameter. Could be **&DMACTIVE**, **&DMACTIVE** or **&DMNONE** |
 | `bbfdm_type`        | The bbfdm type of the parameter. Could be **BBFDM_CWMP**, **BBFDM_USP** or **BBFDM_NONE**.If it's `BBFDM_NONE` then we can see this parameter in all protocols (CWMP, USP,...) |
 
 ## BBFDM API ##
@@ -218,37 +214,45 @@ It is a generator of data model tree in XML format conform to BBF schema.
 $ ./generate_xml_bbf.sh 
 Start Generation of BBF Data Models...
 Please wait...
-Number of BBF Data Models objects is 196
-Number of BBF Data Models parameters is 1393
+Number of BBF Data Models objects is 275
+Number of BBF Data Models parameters is 1647
 End of BBF Data Models Generation
 ```
 
 #### JSON generator: ####
 It is a generator of json file from xml data model and C source code.
 ```plain
-$ python generator_json_with_backend.py
-Usage: generator_json_with_backend.py <tr-181 cwmp xml data model> <tr-181 usp xml data model> [Object path]
+$ python generate_json.py
+Usage: generate_json.py <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]
 Examples:
-  - generator_json_with_backend.py tr-181-2-12-0-cwmp-full.xml tr-181-2-12-0-usp-full.xml Device.
+  - generate_json.py tr-181-2-13-0-cwmp-full.xml tr-181-2-13-0-usp-full.xml Device.
     ==> Generate the json file of the sub tree Device. in tr181.json
-  - generator_json_with_backend.py tr-104-1-1-0-full.xml VoiceService.
-    ==> Generate the json file of the sub tree VoiceService. in tr104.json
-  - generator_json_with_backend.py tr-106-1-2-0-full.xml Device.
+  - generate_json.py tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.
+    ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json
+  - generate_json.py tr-106-1-2-0-full.xml Device.
     ==> Generate the json file of the sub tree Device. in tr106.json
 
-Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-12-0-cwmp-full.xml
+Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-13-0-cwmp-full.xml
 ```
 
 #### Excel generator: ####
 It is a generator of excel sheet with supported and unsupported data model parameters.
 ```plain
 $ python generate_excel.py
-Usage: generate_excel.py <json data model>
+Usage: generate_excel.py <json data model> [options...] <urls>
+Options: 
+ -r, --remote-dm     Check OBJ/PARAM under these repositories if it is not found under bbf repo
+ -h, --help          This help text
+
 Examples:
-  - generate_excel.py tr181.json
+  - python generate_excel.py tr181.json
     ==> Generate excel file in tr181.xls
-  - generate_excel.py tr104.json
+  - python generate_excel.py tr104.json
     ==> Generate excel file in tr104.xls
+  - python generate_excel.py tr181.json -r https://dev.iopsys.eu/feed/iopsys.git,https://dev.iopsys.eu/abc/def.git
+    ==> Generate excel file in tr181.xls
+  - python generate_excel.py tr181.json --remote-dm https://dev.iopsys.eu/feed/iopsys.git
+    ==> Generate excel file in tr181.xls
 ```
 
 #### Load additional parameters at run time ####

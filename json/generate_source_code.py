@@ -355,7 +355,7 @@ def printheaderObjCommon( objname ):
 def cprintheaderOBJS( objname ):
 	fp = open('./.objparamarray.c', 'a')
 	print("DMOBJ %s[] = {" % ("t" + getname(objname) + "Obj"), file=fp)
-	print("/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/", file=fp)
+	print("/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/", file=fp)
 	fp.close()
 
 def hprintheaderOBJS( objname ):
@@ -772,7 +772,7 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
 def cprintheaderPARAMS( objname ):
 	fp = open('./.objparamarray.c', 'a')
 	print("DMLEAF %s[] = {" % ("t" + getname(objname) + "Params"), file=fp)
-	print("/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/", file=fp)
+	print("/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/", file=fp)
 	fp.close()
 
 def hprintheaderPARAMS( objname ):
@@ -804,7 +804,7 @@ def printPARAMline( parentname, dmparam, value ):
 	cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, parentname, dmparam, value)
 
 	fp = open('./.objparamarray.c', 'a')
-	print("{\"%s\", %s, %s, %s, %s, NULL, NULL, %s}," % (dmparam, access, ptype, getvalue, setvalue, bbfdm), file=fp)
+	print("{\"%s\", %s, %s, %s, %s, %s}," % (dmparam, access, ptype, getvalue, setvalue, bbfdm), file=fp)
 	fp.close()
 
 def printtailArray( ):
@@ -851,9 +851,9 @@ def printOBJline( dmobject, value ):
 
 	fp = open('./.objparamarray.c', 'a')
 	if uniquekeys:
-		print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, NULL, %s, %s, NULL, %s, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm, uniquekeys), file=fp)
+		print("{\"%s\", %s, %s, %s, NULL, %s, NULL, %s, %s, NULL, %s, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm, uniquekeys), file=fp)
 	else:
-		print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, NULL, %s, %s, NULL, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm), file=fp)
+		print("{\"%s\", %s, %s, %s, NULL, %s, NULL, %s, %s, NULL, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm), file=fp)
 	fp.close()
 
 def printusage():

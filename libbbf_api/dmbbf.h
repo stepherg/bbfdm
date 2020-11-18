@@ -108,7 +108,7 @@ struct dm_notif_s {
 };
 
 typedef struct dm_leaf_s {
-	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(8)*/
+	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(6)*/
 	char *parameter;
 	struct dm_permession_s *permission;
 	int type;
@@ -118,7 +118,7 @@ typedef struct dm_leaf_s {
 } DMLEAF;
 
 typedef struct dm_obj_s {
-	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys(14)*/
+	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys(12)*/
 	char *obj;
 	struct dm_permession_s *permission;
 	int (*addobj)(char *refparam, struct dmctx *ctx, void *data, char **instance);

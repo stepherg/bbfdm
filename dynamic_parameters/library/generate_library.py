@@ -107,7 +107,7 @@ def printheaderObjCommon( objname ):
 def cprintheaderOBJS( objname ):
 	fp = open('./.objparamarray.c', 'a')
 	print >> fp,  "DMOBJ %s[] = {" % ("tdynamic" + getname(objname) + "Obj")
-	print >> fp,  "/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, forced_inform, notification, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/"
+	print >> fp,  "/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/"
 	fp.close()
 
 def cprintheaderRootDynamicObj( ):
@@ -276,7 +276,7 @@ def cprintOperate( get_operate ):
 def cprintheaderPARAMS( objname ):
 	fp = open('./.objparamarray.c', 'a')
 	print >> fp,  "DMLEAF %s[] = {" % ("tdynamic" + getname(objname) + "Params")
-	print >> fp,  "/* PARAM, permission, type, getvalue, setvalue, forced_inform, notification, bbfdm_type*/"
+	print >> fp,  "/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/"
 	fp.close()
 
 def hprintheaderPARAMS( objname ):
@@ -308,7 +308,7 @@ def printPARAMline( parentname, dmparam, value ):
 	cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, parentname, dmparam)
 
 	fp = open('./.objparamarray.c', 'a')
-	print >> fp,  "{\"%s\", %s, %s, %s, %s, NULL, NULL, %s}," % (dmparam, access, ptype, getvalue, setvalue, bbfdm)
+	print >> fp,  "{\"%s\", %s, %s, %s, %s, %s}," % (dmparam, access, ptype, getvalue, setvalue, bbfdm)
 	fp.close()
 
 def printtailArray( ):
@@ -355,7 +355,7 @@ def printOBJline( dmobject, value ):
 		paramarray = "NULL"
 
 	fp = open('./.objparamarray.c', 'a')
-	print >> fp,  "{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, NULL, %s, %s, NULL, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm)
+	print >> fp,  "{\"%s\", %s, %s, %s, NULL, %s, NULL, %s, %s, NULL, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm)
 	fp.close()
 
 def printusage():

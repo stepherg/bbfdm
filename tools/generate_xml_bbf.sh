@@ -179,7 +179,7 @@ gen_dm_tree(){
 		done
 
 		######## Create Childs list
-		while IFS=, read -r f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13; do
+		while IFS=, read -r f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11; do
 			name=`echo ${f1//{} | sed 's/^"\(.*\)"$/\1/'`
 			permission=${f2// &}
 			type=${f3// }
@@ -202,19 +202,15 @@ gen_dm_tree(){
 			fi
 
 			if [ "$p_found" == "1" ]; then
-				forced_inform=${f6// &}
-				active_notify=`echo ${f7//&} | tr --delete }`
-				[ "$forced_inform" == "DMFINFRM" ] && forced_inform="true" || forced_inform="false"
-				[ "$active_notify" == "DMACTIVE" ] && active_notify="Active" || active_notify=""
 				name=`set_obj_param_child "$father_name" "$name"`
 				otype=`get_param_type $type`
-				pname=`set_obj_param_line "$instance" "$otype" "$active_notify" "$forced_inform" "$name"`
+				pname=`set_obj_param_line "$instance" "$otype" "" "false" "$name"`
 				echo $pname >> $TREE_TXT
 			fi
 
 			if [ -n "$str" ]; then
-				child_objects=${f9// }
-				child_parameters=${f10// }
+				child_objects=${f7// }
+				child_parameters=${f8// }
 				obj_name=${name}
 				#Add the actual object to the list of objects looking for their children objects ########
 				if [ "$child_objects" != "NULL" ]; then

@@ -138,7 +138,7 @@ gen_dm_tree(){
 		done
 	
 		######## Create Childs list
-		while IFS=, read -r f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13; do
+		while IFS=, read -r f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11; do
 			name=`echo ${f1/CUSTOM_PREFIX/$CUSTOM_PREFIX} | sed 's/{//' | sed 's/"//g'`
 			type=${f3// }
 			multiinstance=${f5// }
@@ -159,8 +159,8 @@ gen_dm_tree(){
 				echo $pname >> $TREE_TXT
 			fi
 			if [ -n "$str" ]; then
-				child_objects=${f9// }
-				child_parameters=${f10// }
+				child_objects=${f7// }
+				child_parameters=${f8// }
 				obj_name=${name}
 				#Add the actual object to the list of objects looking for their children objects ########
 				if [ "$child_objects" != "NULL" ]; then
