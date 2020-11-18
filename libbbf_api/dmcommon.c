@@ -1034,7 +1034,7 @@ char **strsplit_by_str(const char str[], char *delim)
 			substr = strdup(strparse);
 			tokens[tokens_used] = dmcalloc(strlen(substr)+1, sizeof(char));
 			strcpy(tokens[tokens_used], strparse);
-			tokens[tokens_used+1] = NULL;
+			tokens_used++;
 			FREE(strparse);
 			break;
 		}
@@ -1054,6 +1054,7 @@ char **strsplit_by_str(const char str[], char *delim)
 		strparse = strdup(substr+strlen(delim));
 	} while (substr != NULL);
 	FREE(strparse);
+	tokens[tokens_used] = NULL;
 	return tokens;
 }
 
@@ -1854,7 +1855,7 @@ int check_instance_wildcard_parameter_by_regex(char *parameter, char* regex)
         }
         tmp = dmstrdup(res);
         FREE(res);
-        asprintf(&res, "%s%c", tmp, '$');
+        dmasprintf(&res, "%s%c", tmp, '$');
         regcomp(&regex1, res, 0);
         int ret = regexec(&regex1, parameter, 0, NULL, 0);
         regfree(&regex1);
