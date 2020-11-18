@@ -1463,28 +1463,28 @@ DMLEAF tDHCPv6ClientParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_DHCPv6Client_Enable, set_DHCPv6Client_Enable, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_DHCPv6Client_Alias, set_DHCPv6Client_Alias, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, get_DHCPv6Client_Interface, set_DHCPv6Client_Interface, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_DHCPv6Client_Status, BBFDM_BOTH},
-{"DUID", &DMREAD, DMT_HEXBIN, get_DHCPv6Client_DUID, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_DHCPv6Client_Status, NULL, BBFDM_BOTH},
+{"DUID", &DMREAD, DMT_HEXBIN, get_DHCPv6Client_DUID, NULL, BBFDM_BOTH},
 {"RequestAddresses", &DMWRITE, DMT_BOOL, get_DHCPv6Client_RequestAddresses, set_DHCPv6Client_RequestAddresses, BBFDM_BOTH},
 {"RequestPrefixes", &DMWRITE, DMT_BOOL, get_DHCPv6Client_RequestPrefixes, set_DHCPv6Client_RequestPrefixes, BBFDM_BOTH},
 //{"RapidCommit", &DMWRITE, DMT_BOOL, get_DHCPv6Client_RapidCommit, set_DHCPv6Client_RapidCommit, BBFDM_BOTH},
 {"Renew", &DMWRITE, DMT_BOOL, get_DHCPv6Client_Renew, set_DHCPv6Client_Renew, BBFDM_BOTH},
 //{"SuggestedT1", &DMWRITE, DMT_INT, get_DHCPv6Client_SuggestedT1, set_DHCPv6Client_SuggestedT1, BBFDM_BOTH},
 //{"SuggestedT2", &DMWRITE, DMT_INT, get_DHCPv6Client_SuggestedT2, set_DHCPv6Client_SuggestedT2, BBFDM_BOTH},
-//{"SupportedOptions", &DMREAD, DMT_STRING, get_DHCPv6Client_SupportedOptions, BBFDM_BOTH},
+//{"SupportedOptions", &DMREAD, DMT_STRING, get_DHCPv6Client_SupportedOptions, NULL, BBFDM_BOTH},
 {"RequestedOptions", &DMWRITE, DMT_STRING, get_DHCPv6Client_RequestedOptions, set_DHCPv6Client_RequestedOptions, BBFDM_BOTH},
-//{"ServerNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_ServerNumberOfEntries, BBFDM_BOTH},
-//{"SentOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_SentOptionNumberOfEntries, BBFDM_BOTH},
-//{"ReceivedOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_ReceivedOptionNumberOfEntries, BBFDM_BOTH},
+//{"ServerNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_ServerNumberOfEntries, NULL, BBFDM_BOTH},
+//{"SentOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_SentOptionNumberOfEntries, NULL, BBFDM_BOTH},
+//{"ReceivedOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_ReceivedOptionNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DHCPv6.Client.{i}.Server.{i}. *** */
 DMLEAF tDHCPv6ClientServerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"SourceAddress", &DMREAD, DMT_STRING, get_DHCPv6ClientServer_SourceAddress, BBFDM_BOTH},
-//{"DUID", &DMREAD, DMT_HEXBIN, get_DHCPv6ClientServer_DUID, BBFDM_BOTH},
-//{"InformationRefreshTime", &DMREAD, DMT_TIME, get_DHCPv6ClientServer_InformationRefreshTime, BBFDM_BOTH},
+//{"SourceAddress", &DMREAD, DMT_STRING, get_DHCPv6ClientServer_SourceAddress, NULL, BBFDM_BOTH},
+//{"DUID", &DMREAD, DMT_HEXBIN, get_DHCPv6ClientServer_DUID, NULL, BBFDM_BOTH},
+//{"InformationRefreshTime", &DMREAD, DMT_TIME, get_DHCPv6ClientServer_InformationRefreshTime, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -1501,9 +1501,9 @@ DMLEAF tDHCPv6ClientSentOptionParams[] = {
 /* *** Device.DHCPv6.Client.{i}.ReceivedOption.{i}. *** */
 DMLEAF tDHCPv6ClientReceivedOptionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"Tag", &DMREAD, DMT_UNINT, get_DHCPv6ClientReceivedOption_Tag, BBFDM_BOTH},
-//{"Value", &DMREAD, DMT_HEXBIN, get_DHCPv6ClientReceivedOption_Value, BBFDM_BOTH},
-//{"Server", &DMREAD, DMT_STRING, get_DHCPv6ClientReceivedOption_Server, BBFDM_BOTH},
+//{"Tag", &DMREAD, DMT_UNINT, get_DHCPv6ClientReceivedOption_Tag, NULL, BBFDM_BOTH},
+//{"Value", &DMREAD, DMT_HEXBIN, get_DHCPv6ClientReceivedOption_Value, NULL, BBFDM_BOTH},
+//{"Server", &DMREAD, DMT_STRING, get_DHCPv6ClientReceivedOption_Server, NULL, BBFDM_BOTH},
 {0}
 };
 
