@@ -64,7 +64,7 @@ int usp_fault_map(int fault)
 			out_fault = USP_FAULT_PARAM_READ_ONLY;
 			break;
 		default:
-			if (fault)
+			if (fault >= FAULT_9000)
 				out_fault = USP_FAULT_GENERAL_FAILURE;
 			else
 				out_fault = fault;
