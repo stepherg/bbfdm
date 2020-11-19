@@ -530,18 +530,31 @@ static int set_WiFiRadio_TransmitPower(char *refparam, struct dmctx *ctx, void *
 /*#Device.WiFi.Radio.{i}.RegulatoryDomain!UCI:wireless/wifi-device,@i-1/country*/
 static int get_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "country", value);
+	struct uci_section *dmmap_section = NULL;
+	char *conf_country, *dmmap_contry = NULL;
+
+	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "country", &conf_country);
+
+	get_dmmap_section_of_config_section("dmmap_wireless", "wifi-device", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec), &dmmap_section);
+	dmuci_get_value_by_section_string(dmmap_section, "country", &dmmap_contry);
+
+	dmasprintf(value, "%s%c", conf_country, (dmmap_contry && *dmmap_contry) ? dmmap_contry[2] : ' ');
 	return 0;
 }
 
 static int set_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *dmmap_section = NULL;
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, 3, 3, NULL, 0, RegulatoryDomain, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			get_dmmap_section_of_config_section("dmmap_wireless", "wifi-device", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "country", value);
+			value[2] = '\0';
 			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "country", value);
 			break;
 	}
