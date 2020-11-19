@@ -919,9 +919,9 @@ static int get_USBUSBHostsHostDevice_ProductID(char *refparam, struct dmctx *ctx
 	unsigned int ui_idproduct;
 
 	*value = "0";
-	int rc =  read_sysfs_usb_port(data, "idProduct", &idproduct);
+	int rc = read_sysfs_usb_port(data, "idProduct", &idproduct);
 
-	if(idproduct != NULL) {
+	if (rc != -1 && idproduct != NULL) {
 		sscanf(idproduct, "%x", &ui_idproduct);
 		dmasprintf(value, "%u", ui_idproduct);
 	}
@@ -930,7 +930,17 @@ static int get_USBUSBHostsHostDevice_ProductID(char *refparam, struct dmctx *ctx
 
 static int get_USBUSBHostsHostDevice_VendorID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return read_sysfs_usb_port(data, "idVendor", value);
+	char *idvendor = NULL;
+	unsigned int ui_idvendor;
+
+	*value = "0";
+	int rc = read_sysfs_usb_port(data, "idVendor", &idvendor);
+
+	if (rc != -1 && idvendor != NULL) {
+		sscanf(idvendor, "%x", &ui_idvendor);
+		dmasprintf(value, "%u", ui_idvendor);
+	}
+	return rc;
 }
 
 static int get_USBUSBHostsHostDevice_Manufacturer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
