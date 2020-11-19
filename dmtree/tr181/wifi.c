@@ -1337,75 +1337,6 @@ static int set_radio_frequency(char *refparam, struct dmctx *ctx, void *data, ch
 	return 0;
 }
 
-/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataDownlinkRate!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.rate_of_last_rx_pkt*/
-static int get_access_point_associative_device_lastdatadownlinkrate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 2, "stats", "rate_of_last_rx_pkt");
-	return 0;
-}
-
-/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataUplinkRate!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.rate_of_last_tx_pkt*/
-static int get_access_point_associative_device_lastdatauplinkrate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 2, "stats", "rate_of_last_tx_pkt");
-	return 0;
-}
-
-/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength!UBUS:wifi.ap.@Name/stations//stations[i-1].rssi*/
-static int get_access_point_associative_device_signalstrength(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "rssi");
-	return 0;
-}
-
-/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Retransmissions!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.tx_pkts_retries*/
-static int get_WiFiAccessPointAssociatedDevice_Retransmissions(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 2, "stats", "tx_pkts_retries");
-	return 0;
-}
-
-/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.AssociationTime!UBUS:wifi.ap.@Name/stations//stations[i-1].in_network*/
-static int get_WiFiAccessPointAssociatedDevice_AssociationTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = "0001-01-01T00:00:00Z";
-
-	char *in_network = dmjson_get_value((json_object *)data, 1, "in_network");
-	if (in_network && *in_network != '\0' && atoi(in_network) > 0) {
-		time_t t_time = time(NULL) - atoi(in_network);
-		if (localtime(&t_time) == NULL)
-			return -1;
-
-		char local_time[32] = {0};
-
-		if (strftime(local_time, sizeof(local_time), "%Y-%m-%dT%H:%M:%SZ", localtime(&t_time)) == 0)
-			return -1;
-
-		*value = dmstrdup(local_time);
-	}
-	return 0;
-}
-
-/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.MACAddress!UBUS:wifi.ap.@Name/stations//stations[i-1].macaddr*/
-static int get_access_point_associative_device_mac(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "macaddr");
-	return 0;
-}
-
-static int get_access_point_associative_device_active(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = "true";
-	return 0;
-}
-
-/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Noise!UBUS:wifi.ap.@Name/stations//stations[i-1].noise*/
-static int get_WiFiAccessPointAssociatedDevice_Noise(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "noise");
-	return 0;
-}
-
 /*#Device.WiFi.EndPoint.{i}.Enable!UCI:wireless/wifi-iface,@i-1/disabled*/
 static int get_WiFiEndPoint_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2398,14 +2329,14 @@ DMOBJ tWiFiAccessPointAssociatedDeviceObj[] = {
 
 DMLEAF tWiFiAccessPointAssociatedDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Active", &DMREAD, DMT_BOOL, get_access_point_associative_device_active, NULL, BBFDM_BOTH},
-{"Noise", &DMREAD, DMT_INT, get_WiFiAccessPointAssociatedDevice_Noise, NULL, BBFDM_BOTH},
-{"MACAddress", &DMREAD, DMT_STRING ,get_access_point_associative_device_mac, NULL, BBFDM_BOTH},
-{"LastDataDownlinkRate", &DMREAD, DMT_UNINT, get_access_point_associative_device_lastdatadownlinkrate, NULL, BBFDM_BOTH},
-{"LastDataUplinkRate", &DMREAD, DMT_UNINT, get_access_point_associative_device_lastdatauplinkrate, NULL, BBFDM_BOTH},
-{"SignalStrength", &DMREAD, DMT_INT, get_access_point_associative_device_signalstrength, NULL, BBFDM_BOTH},
-{"Retransmissions", &DMREAD, DMT_UNINT, get_WiFiAccessPointAssociatedDevice_Retransmissions, NULL, BBFDM_BOTH},
-{"AssociationTime", &DMREAD, DMT_TIME, get_WiFiAccessPointAssociatedDevice_AssociationTime, NULL, BBFDM_BOTH},
+{"Active", &DMREAD, DMT_BOOL, os__get_WiFiAccessPointAssociatedDevice_Active, NULL, BBFDM_BOTH},
+{"Noise", &DMREAD, DMT_INT, os__get_WiFiAccessPointAssociatedDevice_Noise, NULL, BBFDM_BOTH},
+{"MACAddress", &DMREAD, DMT_STRING , os__get_WiFiAccessPointAssociatedDevice_MACAddress, NULL, BBFDM_BOTH},
+{"LastDataDownlinkRate", &DMREAD, DMT_UNINT, os__get_WiFiAccessPointAssociatedDevice_LastDataDownlinkRate, NULL, BBFDM_BOTH},
+{"LastDataUplinkRate", &DMREAD, DMT_UNINT, os__get_WiFiAccessPointAssociatedDevice_LastDataUplinkRate, NULL, BBFDM_BOTH},
+{"SignalStrength", &DMREAD, DMT_INT, os__get_WiFiAccessPointAssociatedDevice_SignalStrength, NULL, BBFDM_BOTH},
+//{"Retransmissions", &DMREAD, DMT_UNINT, os__get_WiFiAccessPointAssociatedDevice_Retransmissions, NULL, BBFDM_BOTH},
+{"AssociationTime", &DMREAD, DMT_TIME, os__get_WiFiAccessPointAssociatedDevice_AssociationTime, NULL, BBFDM_BOTH},
 {0}
 };
 

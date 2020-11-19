@@ -161,6 +161,41 @@ int os__get_WiFiSSIDStats_UnknownProtoPacketsReceived(char *refparam, struct dmc
 	return not_implemented(value);
 }
 
+int os__get_WiFiAccessPointAssociatedDevice_Active(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
+int os__get_WiFiAccessPointAssociatedDevice_Noise(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
+int os__get_WiFiAccessPointAssociatedDevice_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
+int os__get_WiFiAccessPointAssociatedDevice_LastDataDownlinkRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
+int os__get_WiFiAccessPointAssociatedDevice_LastDataUplinkRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
+int os__get_WiFiAccessPointAssociatedDevice_SignalStrength(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
+int os__get_WiFiAccessPointAssociatedDevice_AssociationTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
 int os__get_access_point_associative_device_statistics_tx_bytes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return not_implemented(value);

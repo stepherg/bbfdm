@@ -229,6 +229,74 @@ int os__get_WiFiSSIDStats_UnknownProtoPacketsReceived(char *refparam, struct dmc
 	return ssid_read_ubus(data, "rx_unknown_packets", value);
 }
 
+int os__get_WiFiAccessPointAssociatedDevice_Active(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "true";
+	return 0;
+}
+
+/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Noise!UBUS:wifi.ap.@Name/stations//stations[i-1].noise*/
+int os__get_WiFiAccessPointAssociatedDevice_Noise(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "noise");
+	return 0;
+}
+
+/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.MACAddress!UBUS:wifi.ap.@Name/stations//stations[i-1].macaddr*/
+int os__get_WiFiAccessPointAssociatedDevice_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "macaddr");
+	return 0;
+}
+
+/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataDownlinkRate!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.rx_rate_latest.rate*/
+int os__get_WiFiAccessPointAssociatedDevice_LastDataDownlinkRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *rate_mbps = dmjson_get_value((json_object *)data, 3, "stats", "rx_rate_latest", "rate");
+	unsigned int rate_kbps = (rate_mbps && *rate_mbps != '\0') ? atoi(rate_mbps) * 1000 : 1000;
+
+	dmasprintf(value, "%u", rate_kbps);
+	return 0;
+}
+
+/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataUplinkRate!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.tx_rate_latest.rate*/
+int os__get_WiFiAccessPointAssociatedDevice_LastDataUplinkRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *rate_mbps = dmjson_get_value((json_object *)data, 3, "stats", "tx_rate_latest", "rate");
+	unsigned int rate_kbps = (rate_mbps && *rate_mbps != '\0') ? atoi(rate_mbps) * 1000 : 1000;
+
+	dmasprintf(value, "%u", rate_kbps);
+	return 0;
+}
+
+/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength!UBUS:wifi.ap.@Name/stations//stations[i-1].rssi*/
+int os__get_WiFiAccessPointAssociatedDevice_SignalStrength(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "rssi");
+	return 0;
+}
+
+/*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.AssociationTime!UBUS:wifi.ap.@Name/stations//stations[i-1].in_network*/
+int os__get_WiFiAccessPointAssociatedDevice_AssociationTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0001-01-01T00:00:00Z";
+
+	char *in_network = dmjson_get_value((json_object *)data, 1, "in_network");
+	if (in_network && *in_network != '\0' && atoi(in_network) > 0) {
+		time_t t_time = time(NULL) - atoi(in_network);
+		if (localtime(&t_time) == NULL)
+			return -1;
+
+		char local_time[32] = {0};
+
+		if (strftime(local_time, sizeof(local_time), "%Y-%m-%dT%H:%M:%SZ", localtime(&t_time)) == 0)
+			return -1;
+
+		*value = dmstrdup(local_time);
+	}
+	return 0;
+}
+
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.BytesSent!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.tx_total_bytes*/
 int os__get_access_point_associative_device_statistics_tx_bytes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
