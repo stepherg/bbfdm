@@ -261,49 +261,12 @@ static char *get_ip_interface_last_instance(char *package, char *section, char* 
 	return instance;
 }
 
-static int remove_interface_name_from_interface_list(struct uci_section *dmmap_sec, char *int_sec)
-{
-	char *sec_name, intf_list[256], *p, *pch = NULL, *spch = NULL;
-
-	intf_list[0] = '\0';
-	dmuci_get_value_by_section_string(dmmap_sec, "section_name", &sec_name);
-
-	p = intf_list;
-	for (pch = strtok_r(sec_name, ",", &spch); pch; pch = strtok_r(NULL, ",", &spch)) {
-		if (strcmp(pch, int_sec) != 0) {
-			if (intf_list[0] != '\0')
-				dmstrappendchr(p, ',');
-			dmstrappendstr(p, pch);
-		}
-	}
-	dmstrappendend(p);
-
-	if (*intf_list != '\0') {
-		/* set section_name list */
-		dmuci_set_value_by_section(dmmap_sec, "section_name", intf_list);
-	} else {
-		/* remove dmmap section */
-		dmuci_delete_by_section(dmmap_sec, NULL, NULL);
-	}
-	return 0;
-}
-
 static int delete_ip_intertace_instance(struct uci_section *s)
 {
 	struct uci_section *int_ss = NULL, *int_stmp = NULL;
 	char buf[32], *ifname, *int_sec_name = dmstrdup(section_name(s));
 
 	snprintf(buf, sizeof(buf), "@%s", int_sec_name);
-
-	/* remove section name from the list of dmmap ethernet link */
-	uci_path_foreach_sections_safe(bbfdm, DMMAP, "link", int_stmp, int_ss) {
-		char *sec_list;
-		dmuci_get_value_by_section_string(int_ss, "section_name", &sec_list);
-		if (strstr(sec_list, int_sec_name)) {
-			remove_interface_name_from_interface_list(int_ss, int_sec_name);
-			break;
-		}
-	}
 
 	uci_foreach_sections_safe("network", "interface", int_stmp, int_ss) {
 
