@@ -1247,10 +1247,12 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 					dmuci_set_value_by_section(dmmap_s, "device", new_name);
 					dmuci_set_value_by_section(dmmap_s, "section_name", sec_name);
 
-
 				} else {
 					/* type != macvlan */
-					char *vid;
+					struct uci_section *s = NULL;
+					char *vid, *old_name;
+
+					dmuci_get_value_by_section_string((struct uci_section *)data, "name", &old_name);
 					dmuci_get_value_by_section_string((struct uci_section *)data, "vid", &vid);
 					if (*vid != '\0')
 						snprintf(new_name, sizeof(new_name), "%s.%s", linker, vid);
@@ -1259,6 +1261,13 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 
 					if (is_name_exist_in_devices(new_name))
 						return -1;
+
+					// if device is lowerlayer to an ip interface, then
+					// the ifname of the ip interface also needs to be updated
+					uci_foreach_option_eq("network", "interface", "ifname", old_name, s) {
+						dmuci_set_value_by_section(s, "ifname", new_name);
+					}
+
 				}
 
 				// Set ifname and name options of device section
