@@ -110,6 +110,14 @@ struct notification notifications[] = {
 	[6] = {"6", "passive_active_lw"}
 };
 
+struct dm_parameter forced_notifications_parameters[] = {
+		{.name = "Device.DeviceInfo.SoftwareVersion", .notification = "2"},
+		{.name = "Device.DeviceInfo.ProvisioningCode", .notification = "2"},
+		{.name = "Device.ManagementServer.ConnectionRequestURL", .notification = "2"},
+		{.name = "Device.ManagementServer.ConnReqJabberID", .notification = "2"},
+		{.name = "Device.SoftwareModules.ExecutionUnit.*.Status", .notification = "2"}
+};
+
 struct dm_acl dm_acl[] = {
 	[0] = {DM_PUBLIC_LIST, "public_list"},
 	[1] = {DM_PUBLIC_READ, "public_read"},
@@ -1888,21 +1896,10 @@ int dm_entry_enabled_notify(struct dmctx *dmctx)
 char* check_parameter_forced_notification(char *parameter)
 {
 	int i;
-	struct uci_list *list_notif;
-	char *pch, *notification = "0";
-	struct uci_element *e;
 
-	for (i = (ARRAY_SIZE(notifications) - 1); i >= 0; i--) {
-		dmuci_get_option_value_list("cwmp", "@forced_notifications[0]", notifications[i].type, &list_notif);
-		if (list_notif) {
-			uci_foreach_element(list_notif, e) {
-				pch = e->name;
-				if (strcmp(pch, parameter) == 0 || check_instance_wildcard_parameter_by_regex(parameter, pch) == 0) {
-					notification = notifications[i].value;
-					return notification;
-				}
-			}
-		}
+	for (i=0; i<ARRAY_SIZE(forced_notifications_parameters); i++) {
+		if (strcmp(forced_notifications_parameters[i].name, parameter) == 0 || check_instance_wildcard_parameter_by_regex(parameter, forced_notifications_parameters[i].name) == 0)
+			return forced_notifications_parameters[i].notification;
 	}
 	return NULL;
 }

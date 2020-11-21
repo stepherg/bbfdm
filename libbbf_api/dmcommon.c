@@ -1852,28 +1852,15 @@ void append_dot_to_string(char *new_string, const char *string, size_t len)
 
 int check_instance_wildcard_parameter_by_regex(char *parameter, char* regex)
 {
-        char **array_str = strsplit_by_str(regex, ".*.");
-        int i = 0;
-        char *res= NULL, *tmp = NULL;
-        regex_t regex1 = {};
-        while (array_str[i]) {
-			if (res == NULL) {
-				dmasprintf(&res, "^%s", array_str[i]);
-				i++;
-				continue;
-			}
-			tmp = dmstrdup(res);
-			FREE(res);
-			dmasprintf(&res, "%s\\.[0-9][0-9]*\\.%s", tmp, array_str[i]);
-			FREE(tmp);
-			i++;
+        size_t l1, l2;
+        char **parameter_split = strsplit(parameter, ".", &l1);
+        char **regex_split = strsplit(regex, ".", &l2);
+        if (l1 != l2)
+                return -1;
+        int i;
+        for (i=0; i<l1; i++) {
+                if (strcmp(parameter_split[i], regex_split[i]) != 0 && (strcmp(regex_split[i], "*") != 0 || atoi(parameter_split[i])<=0))
+                        return -1;
         }
-        tmp = dmstrdup(res);
-        FREE(res);
-        dmasprintf(&res, "%s%c", tmp, '$');
-        regcomp(&regex1, res, 0);
-        int ret = regexec(&regex1, parameter, 0, NULL, 0);
-        regfree(&regex1);
-        FREE(res);
-        return ret;
+        return 0;
 }

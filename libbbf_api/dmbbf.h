@@ -180,6 +180,7 @@ struct dm_parameter {
 	char *type; 
 	char *version;
 	unsigned int flags;
+	char *notification;
 };
 
 struct dm_json_parameter {
