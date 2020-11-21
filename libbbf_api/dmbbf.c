@@ -1146,6 +1146,64 @@ int string_to_bool(char *v, bool *b)
 	return -1;
 }
 
+static int is64digit(char c)
+{
+	if ((c >= '0' && c <= '9') ||
+		(c >= 'a' && c <= 'z') ||
+		(c >= 'A' && c <= 'Z') ||
+		(c == '+' || c == '/' || c == '='))
+		return 1;
+	return 0;
+}
+
+static char *check_value_by_type(char *value, int type)
+{
+	int i = 0, len = strlen(value);
+	char buf[len + 1];
+
+	strncpy(buf, value, sizeof(buf) - 1);
+	buf[len] = 0;
+
+	switch (type) {
+		case DMT_UNINT:
+		case DMT_UNLONG:
+			while (buf[i] != 0) {
+				if (isdigit(buf[i]) == 0)
+					return "0";
+				i++;
+			}
+			break;
+		case DMT_INT:
+		case DMT_LONG:
+			if (buf[i] == '-')
+				i++;
+			while (buf[i] != 0) {
+				if (isdigit(buf[i]) == 0)
+					return "0";
+				i++;
+			}
+			break;
+		case DMT_BOOL:
+			if (dm_validate_boolean(buf))
+				return "0";
+			break;
+		case DMT_HEXBIN:
+			while (buf[i] != 0) {
+				if (isxdigit(buf[i]) == 0)
+					return "0";
+				i++;
+			}
+			break;
+		case DMT_TIME:
+			if (dm_validate_dateTime(buf))
+				return "0001-01-01T00:00:00Z";
+			break;
+		default:
+			break;
+	}
+	return value;
+}
+
 static char *get_default_value_by_type(int type)
 {
 	switch (type) {
@@ -1259,8 +1317,7 @@ static int get_value_param(DMPARAM_ARGS)
 	dmastrcat(&full_param, node->current_object, lastname);
 	(get_cmd)(full_param, dmctx, data, instance, &value);
 
-	if (value && *value == '\0')
-		value = get_default_value_by_type(type);
+	value = (value && *value) ? check_value_by_type(value, type) : get_default_value_by_type(type);
 
 	add_list_paramameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0);
 	return 0;
@@ -1283,8 +1340,7 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 
 	(get_cmd)(full_param, dmctx, data, instance, &value);
 
-	if (value && *value == '\0')
-		value = get_default_value_by_type(type);
+	value = (value && *value) ? check_value_by_type(value, type) : get_default_value_by_type(type);
 
 	add_list_paramameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0);
 	dmctx->stop = true;
