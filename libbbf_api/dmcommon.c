@@ -395,29 +395,8 @@ int network_get_ipaddr(char **value, char *iface)
 	return 0;
 }
 
-char *dmmap_file_path_get(const char *dmmap_package)
-{
-	char *path;
-	int rc;
-
-	rc = dmasprintf(&path, "/etc/bbfdm/%s", dmmap_package);
-	if (rc == -1)
-		return NULL;
-
-	if (access(path, F_OK)) {
-		/*
-		 *File does not exist
-		 **/
-		FILE *fp = fopen(path, "w"); // new empty file
-		if (fp)
-			fclose(fp);
-	}
-	return path;
-}
-
 void update_section_list(char *config, char *section, char *option, int number, char *filter, char *option1, char *val1, char *option2, char *val2)
 {
-	char *add_value;
 	struct uci_section *s = NULL;
 	int i = 0;
 
@@ -432,16 +411,10 @@ void update_section_list(char *config, char *section, char *option, int number, 
 			}
 		}
 		while (i < number) {
-			dmuci_add_section_bbfdm(config, section, &s, &add_value);
-			if (option)
-				dmuci_set_value_by_section_bbfdm(s, option, filter);
-
-			if (option1)
-				dmuci_set_value_by_section_bbfdm(s, option1, val1);
-
-			if (option2)
-				dmuci_set_value_by_section_bbfdm(s, option2, val2);
-
+			dmuci_add_section_bbfdm(config, section, &s);
+			dmuci_set_value_by_section_bbfdm(s, option, filter);
+			dmuci_set_value_by_section_bbfdm(s, option1, val1);
+			dmuci_set_value_by_section_bbfdm(s, option2, val2);
 			i++;
 		}
 	} else {
@@ -455,16 +428,10 @@ void update_section_list(char *config, char *section, char *option, int number, 
 			}
 		}
 		while (i < number) {
-			dmuci_add_section(config, section, &s, &add_value);
-			if (option)
-				dmuci_set_value_by_section(s, option, filter);
-
-			if (option1)
-				dmuci_set_value_by_section(s, option1, val1);
-
-			if (option2)
-				dmuci_set_value_by_section(s, option2, val2);
-
+			dmuci_add_section(config, section, &s);
+			dmuci_set_value_by_section(s, option, filter);
+			dmuci_set_value_by_section(s, option1, val1);
+			dmuci_set_value_by_section(s, option2, val2);
 			i++;
 		}
 	}
@@ -625,14 +592,12 @@ void synchronize_specific_config_sections_with_dmmap(char *package, char *sectio
 	struct uci_section *s, *stmp, *dmmap_sect;
 	char *v;
 
-	dmmap_file_path_get(dmmap_package);
-
 	uci_foreach_sections(package, section_type, s) {
 		/*
 		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
 		 */
 		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
-			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect, &v);
+			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect);
 			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
 		}
 
@@ -657,14 +622,12 @@ void synchronize_specific_config_sections_with_dmmap_eq(char *package, char *sec
 	struct uci_section *s, *stmp, *dmmap_sect;
 	char *v;
 
-	dmmap_file_path_get(dmmap_package);
-
 	uci_foreach_option_eq(package, section_type, option_name, option_value, s) {
 		/*
 		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
 		 */
 		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
-			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect, &v);
+			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect);
 			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
 		}
 
@@ -689,14 +652,12 @@ void synchronize_specific_config_sections_with_dmmap_eq_no_delete(char *package,
 	struct uci_section *s, *dmmap_sect;
 	char *v;
 
-	dmmap_file_path_get(dmmap_package);
-
 	uci_foreach_option_eq(package, section_type, option_name, option_value, s) {
 		/*
 		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
 		 */
 		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
-			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect, &v);
+			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect);
 			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
 		}
 	}
@@ -715,14 +676,12 @@ void synchronize_specific_config_sections_with_dmmap_cont(char *package, char *s
 	struct uci_section *s, *stmp, *dmmap_sect;
 	char *v;
 
-	dmmap_file_path_get(dmmap_package);
-
 	uci_foreach_option_cont(package, section_type, option_name, option_value, s) {
 		/*
 		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
 		 */
 		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
-			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect, &v);
+			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect);
 			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
 		}
 
@@ -762,11 +721,8 @@ int synchronize_system_folders_with_dmmap_opt(char *sysfsrep, char *dmmap_packag
 	struct sysfs_dmsection *p, *tmp;
 	LIST_HEAD(dup_list_no_inst);
 
-
-	dmmap_file_path_get(dmmap_package);
-
 	sysfs_foreach_file(sysfsrep, dir, ent) {
-		if(strcmp(ent->d_name, ".")==0 || strcmp(ent->d_name, "..")==0)
+		if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
 			continue;
 
 		/*
@@ -774,7 +730,7 @@ int synchronize_system_folders_with_dmmap_opt(char *sysfsrep, char *dmmap_packag
 		 */
 		dmasprintf(&sysfs_rep_path, "%s/%s", sysfsrep, ent->d_name);
 		if ((dmmap_sect = get_dup_section_in_dmmap_opt(dmmap_package, dmmap_section, opt_name, sysfs_rep_path)) == NULL) {
-			dmuci_add_section_bbfdm(dmmap_package, dmmap_section, &dmmap_sect, &v);
+			dmuci_add_section_bbfdm(dmmap_package, dmmap_section, &dmmap_sect);
 			dmuci_set_value_by_section_bbfdm(dmmap_sect, opt_name, sysfs_rep_path);
 		}
 
@@ -855,10 +811,24 @@ void get_config_section_of_dmmap_section(char* package, char* section_type, char
 	*config_section = NULL;
 }
 
-void check_create_dmmap_package(char *dmmap_package)
+char *check_create_dmmap_package(const char *dmmap_package)
 {
-	char *dmmap_file_path = dmmap_file_path_get(dmmap_package);
-	dmfree(dmmap_file_path);
+	char *path;
+	int rc;
+
+	rc = dmasprintf(&path, "/etc/bbfdm/%s", dmmap_package);
+	if (rc == -1)
+		return NULL;
+
+	if (access(path, F_OK)) {
+		/*
+		 *File does not exist
+		 **/
+		FILE *fp = fopen(path, "w"); // new empty file
+		if (fp)
+			fclose(fp);
+	}
+	return path;
 }
 
 int is_section_unnamed(char *section_name)
@@ -920,12 +890,11 @@ void delete_sections_save_next_sections(char* dmmap_package, char *section_type,
 
 void update_dmmap_sections(struct list_head *dup_list, char *instancename, char* dmmap_package, char *section_type)
 {
-	struct uci_section *dm_sect;
-	char *v;
+	struct uci_section *dm_sect = NULL;
 	struct dmmap_sect *p = NULL;
 
 	list_for_each_entry(p, dup_list, list) {
-		dmuci_add_section_bbfdm(dmmap_package, section_type, &dm_sect, &v);
+		dmuci_add_section_bbfdm(dmmap_package, section_type, &dm_sect);
 		dmuci_set_value_by_section(dm_sect, "section_name", p->section_name);
 		dmuci_set_value_by_section(dm_sect, instancename, p->instance);
 	}

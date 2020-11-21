@@ -209,14 +209,13 @@ static void get_certificate_paths(void)
 static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 #if defined(LOPENSSL) || defined(LMBEDTLS)
-	char *inst = NULL, *max_inst = NULL, *v = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	struct uci_section *dmmap_sect = NULL;
 	struct certificate_profile certificateprofile = {};
 
-	check_create_dmmap_package("dmmap_security");
 	get_certificate_paths();
 	int i;
-	for (i=0; i < MAX_CERT; i++) {
+	for (i = 0; i < MAX_CERT; i++) {
 		if(!strlen(certifcates_paths[i]))
 			break;
 #ifdef LOPENSSL
@@ -229,8 +228,9 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 			fclose(fp);
 			continue;
 		}
+
 		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_security", "security_certificate", "path", certifcates_paths[i])) == NULL) {
-			dmuci_add_section_bbfdm("dmmap_security", "security_certificate", &dmmap_sect, &v);
+			dmuci_add_section_bbfdm("dmmap_security", "security_certificate", &dmmap_sect);
 			dmuci_set_value_by_section_bbfdm(dmmap_sect, "path", certifcates_paths[i]);
 		}
 		init_certificate(certifcates_paths[i], cert, dmmap_sect, &certificateprofile);
@@ -251,8 +251,9 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 		int ret = mbedtls_x509_crt_parse_file( &cacert, certifcates_paths[i]);
 		if (ret < 0)
 			continue;
+
 		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_security", "security_certificate", "path", certifcates_paths[i])) == NULL) {
-			dmuci_add_section_bbfdm("dmmap_security", "security_certificate", &dmmap_sect, &v);
+			dmuci_add_section_bbfdm("dmmap_security", "security_certificate", &dmmap_sect);
 			dmuci_set_value_by_section_bbfdm(dmmap_sect, "path", certifcates_paths[i]);
 		}
 		init_certificate(certifcates_paths[i], cacert, dmmap_sect, &certificateprofile);

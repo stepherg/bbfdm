@@ -272,8 +272,7 @@ int upnp_configuration_set_ipv4_defaultgateway(char *refparam, struct dmctx *ctx
 
 int upnp_configuration_ipinterface_createinstance(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *value=NULL;
-	char *iface_instance=NULL, ib[8], ip_name[32];
+	char *iface_instance =NULL, ib[8], ip_name[32];
 	char *p = ip_name;
 	struct uci_section *iface_sec = NULL;
 
@@ -282,7 +281,8 @@ int upnp_configuration_ipinterface_createinstance(char *refparam, struct dmctx *
 	dmstrappendstr(p, "ip_interface_");
 	dmstrappendstr(p, ib);
 	dmstrappendend(p);
-	dmuci_add_section("network", "interface", &iface_sec, &value);
+
+	dmuci_add_section("network", "interface", &iface_sec);
 	dmuci_set_value("network", ip_name, "", "interface");
 	dmuci_set_value("network", ip_name, "proto", "dhcp");
 	*instance = update_instance(iface_instance, 4, iface_sec, "upnp_ip_iface_instance", "network", "interface");

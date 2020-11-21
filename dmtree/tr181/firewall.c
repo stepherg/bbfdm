@@ -15,12 +15,11 @@
 /***************************** Browse Functions ***********************************/
 static int browseLevelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct uci_section *s;
-	char *v, *max_inst = NULL;
+	struct uci_section *s = NULL;
+	char *max_inst = NULL;
 
-	check_create_dmmap_package("dmmap_firewall");
 	s = is_dmmap_section_exist("dmmap_firewall", "level");
-	if (!s) dmuci_add_section_bbfdm("dmmap_firewall", "level", &s, &v);
+	if (!s) dmuci_add_section_bbfdm("dmmap_firewall", "level", &s);
 	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
 			s, "firewall_level_instance", "firewall_level_alias", "dmmap_firewall", "level");
 	DM_LINK_INST_OBJ(dmctx, parent_node, s, "1");
@@ -29,12 +28,11 @@ static int browseLevelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 
 static int browseChainInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct uci_section *s;
-	char *v, *max_inst = NULL;
+	struct uci_section *s = NULL;
+	char *max_inst = NULL;
 
-	check_create_dmmap_package("dmmap_firewall");
 	s = is_dmmap_section_exist("dmmap_firewall", "chain");
-	if (!s) dmuci_add_section_bbfdm("dmmap_firewall", "chain", &s, &v);
+	if (!s) dmuci_add_section_bbfdm("dmmap_firewall", "chain", &s);
 	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
 			s, "firewall_chain_instance", "firewall_chain_alias", "dmmap_firewall", "chain");
 	DM_LINK_INST_OBJ(dmctx, parent_node, s, "1");
@@ -63,20 +61,19 @@ static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 
 static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	struct uci_section *s, *dmmap_firewall_rule;
-	char *last_inst = NULL, *sect_name = NULL, *v;
+	struct uci_section *s = NULL, *dmmap_firewall_rule = NULL;
 
-	last_inst = get_last_instance_bbfdm("dmmap_firewall", "rule", "firewall_chain_rule_instance");
+	char *last_inst = get_last_instance_bbfdm("dmmap_firewall", "rule", "firewall_chain_rule_instance");
 
-	dmuci_add_section("firewall", "rule", &s, &sect_name);
+	dmuci_add_section("firewall", "rule", &s);
 	dmuci_set_value_by_section(s, "name", "-");
 	dmuci_set_value_by_section(s, "enabled", "0");
 	dmuci_set_value_by_section(s, "dest", "");
 	dmuci_set_value_by_section(s, "src", "");
 	dmuci_set_value_by_section(s, "target", "DROP");
 
-	dmuci_add_section_bbfdm("dmmap_firewall", "rule", &dmmap_firewall_rule, &v);
-	dmuci_set_value_by_section(dmmap_firewall_rule, "section_name", sect_name);
+	dmuci_add_section_bbfdm("dmmap_firewall", "rule", &dmmap_firewall_rule);
+	dmuci_set_value_by_section(dmmap_firewall_rule, "section_name", section_name(s));
 	*instance = update_instance(last_inst, 4, dmmap_firewall_rule, "firewall_chain_rule_instance", "dmmap_firewall", "rule");
 	return 0;
 }

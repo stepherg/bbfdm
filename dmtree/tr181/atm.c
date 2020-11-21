@@ -234,12 +234,11 @@ static int get_atm_status(char *refparam, struct dmctx *ctx, void *data, char *i
 *************************************************************/
 static int add_atm_link(char *refparam, struct dmctx *ctx, void *data, char **instancepara)
 {
-	char *instance = NULL, *atm_device = NULL, *v = NULL;
 	struct uci_section *dmmap_atm = NULL;
+	char atm_device[16];
 
-	check_create_dmmap_package("dmmap_dsl");
-	instance = get_last_instance_bbfdm("dmmap_dsl", "atm-device", "atmlinkinstance");
-	dmasprintf(&atm_device, "atm%d", instance ? atoi(instance) : 0);
+	char *instance = get_last_instance_bbfdm("dmmap_dsl", "atm-device", "atmlinkinstance");
+	snprintf(atm_device, sizeof(atm_device), "atm%d", instance ? atoi(instance) : 0);
 
 	dmuci_set_value("dsl", atm_device, "", "atm-device");
 	dmuci_set_value("dsl", atm_device, "name", "ATM");
@@ -250,7 +249,7 @@ static int add_atm_link(char *refparam, struct dmctx *ctx, void *data, char **in
 	dmuci_set_value("dsl", atm_device, "encapsulation", "llc");
 	dmuci_set_value("dsl", atm_device, "qos_class", "ubr");
 
-	dmuci_add_section_bbfdm("dmmap_dsl", "atm-device", &dmmap_atm, &v);
+	dmuci_add_section_bbfdm("dmmap_dsl", "atm-device", &dmmap_atm);
 	dmuci_set_value_by_section(dmmap_atm, "section_name", atm_device);
 	*instancepara = update_instance(instance, 4, dmmap_atm, "atmlinkinstance", "dmmap_dsl", "atm-device");
 	return 0;

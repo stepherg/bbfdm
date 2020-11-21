@@ -326,13 +326,11 @@ static int set_x_iopsys_eu_dropbear_alias(char *refparam, struct dmctx *ctx, voi
 /***** ADD DEL OBJ *******/
 int add_dropbear_instance(char *refparam, struct dmctx *ctx, void *data, char **instancepara)
 {
-	char *value, *v, *instance;
 	struct uci_section *dropbear_sec = NULL, *dmmap_sec= NULL;
 
-	check_create_dmmap_package("dmmap_dropbear");
-	instance = get_last_instance_bbfdm("dmmap_dropbear", "dropbear", "dropbearinstance");
+	char *instance = get_last_instance_bbfdm("dmmap_dropbear", "dropbear", "dropbearinstance");
 
-	dmuci_add_section("dropbear", "dropbear", &dropbear_sec, &value);
+	dmuci_add_section("dropbear", "dropbear", &dropbear_sec);
 	dmuci_set_value_by_section(dropbear_sec, "verbose", "0");
 	dmuci_set_value_by_section(dropbear_sec, "Port", "22");
 	dmuci_set_value_by_section(dropbear_sec, "RootLogin", "1");
@@ -340,7 +338,7 @@ int add_dropbear_instance(char *refparam, struct dmctx *ctx, void *data, char **
 	dmuci_set_value_by_section(dropbear_sec, "SSHKeepAlive", "300");
 	dmuci_set_value_by_section(dropbear_sec, "IdleTimeout", "0");
 
-	dmuci_add_section_bbfdm("dmmap_dropbear", "dropbear", &dmmap_sec, &v);
+	dmuci_add_section_bbfdm("dmmap_dropbear", "dropbear", &dmmap_sec);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(dropbear_sec));
 	*instancepara = update_instance(instance, 4, dmmap_sec, "dropbearinstance", "dmmap_dropbear", "dropbear");
 	return 0;

@@ -69,22 +69,22 @@ static int get_ip_iface_sysfs(const struct uci_section *data, const char *name, 
 static void create_firewall_zone_config(char *iface)
 {
 	struct uci_section *s;
-	char *value, *name;
+	char name[16];
 
-	dmuci_add_section("firewall", "zone", &s, &value);
-	dmasprintf(&name, "fwl_%s", iface);
+	snprintf(name, sizeof(name), "fwl_%s", iface);
+
+	dmuci_add_section("firewall", "zone", &s);
 	dmuci_set_value_by_section(s, "name", name);
 	dmuci_set_value_by_section(s, "input", "DROP");
 	dmuci_set_value_by_section(s, "forward", "DROP");
 	dmuci_set_value_by_section(s, "output", "ACCEPT");
 	dmuci_set_value_by_section(s, "network", iface);
-	dmfree(name);
 }
 
 static struct uci_section *update_dmmap_network_interface(char *dmmap_file_name, char *dmmap_sec_name, char *parent_section, char *section_name, char *option, char *value, bool assign)
 {
 	struct uci_section *dmmap_section = NULL;
-	char *sec_name, *name, *opt_value;
+	char *sec_name, *opt_value;
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_file_name, dmmap_sec_name, "parent_section", parent_section, dmmap_section) {
 		dmuci_get_value_by_section_string(dmmap_section, "section_name", &sec_name);
@@ -94,7 +94,7 @@ static struct uci_section *update_dmmap_network_interface(char *dmmap_file_name,
 	}
 
 	if (!dmmap_section) {
-		dmuci_add_section_bbfdm(dmmap_file_name, dmmap_sec_name, &dmmap_section, &name);
+		dmuci_add_section_bbfdm(dmmap_file_name, dmmap_sec_name, &dmmap_section);
 		dmuci_set_value_by_section_bbfdm(dmmap_section, "parent_section", parent_section);
 		dmuci_set_value_by_section_bbfdm(dmmap_section, "section_name", section_name);
 		dmuci_set_value_by_section_bbfdm(dmmap_section, option, value);
@@ -233,7 +233,7 @@ static void synchronize_intf_ipv6_prefix_sections_with_dmmap(void)
 static char *get_ip_interface_last_instance(char *package, char *section, char* dmmap_package, char *opt_inst)
 {
 	struct uci_section *s = NULL, *dmmap_section = NULL;
-	char *instance = NULL, *last_inst = NULL, *v = NULL, *proto, *ifname;
+	char *instance = NULL, *last_inst = NULL, *proto, *ifname;
 
 	uci_foreach_sections(package, section, s) {
 
@@ -247,7 +247,7 @@ static char *get_ip_interface_last_instance(char *package, char *section, char* 
 
 		get_dmmap_section_of_config_section(dmmap_package, section, section_name(s), &dmmap_section);
 		if (dmmap_section == NULL) {
-			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section, &v);
+			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section);
 			dmuci_set_value_by_section(dmmap_section, "section_name", section_name(s));
 		}
 		instance = update_instance(last_inst, 4, dmmap_section, opt_inst, dmmap_package, section);
@@ -379,11 +379,11 @@ static void set_ip_interface_ifname_option(struct uci_section *section, char *li
 
 	// if device dosn't exist ==> create a new device section
 	if (!device_exists) {
-		char device_name[32], *val;
+		char device_name[32];
 
 		snprintf(device_name, sizeof(device_name), "dev_ip_int_%s", instance);
 
-		dmuci_add_section("network", "device", &s, &val);
+		dmuci_add_section("network", "device", &s);
 		dmuci_rename_section_by_section(s, device_name);
 		dmuci_set_value_by_section(s, "type", "untagged");
 		dmuci_set_value_by_section(s, "ifname", linker);
@@ -614,16 +614,16 @@ end:
 **************************************************************/
 static int addObjIPInterface(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *last_inst = NULL, *v, ip_name[32] = {0};
 	struct uci_section *dmmap_ip_interface;
+	char ip_name[32] = {0};
 
-	last_inst = get_ip_interface_last_instance("network", "interface", "dmmap_network", "ip_int_instance");
+	char *last_inst = get_ip_interface_last_instance("network", "interface", "dmmap_network", "ip_int_instance");
 	snprintf(ip_name, sizeof(ip_name), "ip_interface_%d", last_inst ? atoi(last_inst) + 1 : 1);
 
 	dmuci_set_value("network", ip_name, "", "interface");
 	dmuci_set_value("network", ip_name, "proto", "static");
 
-	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ip_interface, &v);
+	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ip_interface);
 	dmuci_set_value_by_section(dmmap_ip_interface, "section_name", ip_name);
 	*instance = update_instance(last_inst, 4, dmmap_ip_interface, "ip_int_instance", "dmmap_network", "interface");
 	return 0;
@@ -663,7 +663,7 @@ static int addObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 	if (strcmp(proto, "static") != 0)
 		return FAULT_9001;
 
-	char *last_inst = NULL, *ip_inst, *v, ipv4_name[64] = {0}, buf[32] = {0};
+	char *last_inst = NULL, *ip_inst, ipv4_name[64] = {0}, buf[32] = {0};
 	struct uci_section *dmmap_ip_interface = NULL, *dmmap_ip_interface_ipv4;
 	struct browse_args browse_args = {0};
 
@@ -683,7 +683,7 @@ static int addObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 	browse_args.option = "parent_section";
 	browse_args.value = section_name((struct uci_section *)data);
 
-	dmuci_add_section_bbfdm("dmmap_network_ipv4", "intf_ipv4", &dmmap_ip_interface_ipv4, &v);
+	dmuci_add_section_bbfdm("dmmap_network_ipv4", "intf_ipv4", &dmmap_ip_interface_ipv4);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "parent_section", section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "section_name", ipv4_name);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "address", "0.0.0.0");
@@ -752,7 +752,7 @@ static int addObjIPInterfaceIPv6Address(char *refparam, struct dmctx *ctx, void 
 	if (strcmp(proto, "static") != 0 || (strcmp(proto, "static") == 0 && interface_section_with_dhcpv6_exists(section_name((struct uci_section *)data))))
 		return FAULT_9001;
 
-	char *last_inst = NULL, *ip_inst, *v, ipv6_name[64] = {0}, buf[32] = {0};
+	char *last_inst = NULL, *ip_inst, ipv6_name[64] = {0}, buf[32] = {0};
 	struct uci_section *dmmap_ip_interface = NULL, *dmmap_ip_interface_ipv6;
 	struct browse_args browse_args = {0};
 
@@ -771,7 +771,7 @@ static int addObjIPInterfaceIPv6Address(char *refparam, struct dmctx *ctx, void 
 	browse_args.option = "parent_section";
 	browse_args.value = section_name((struct uci_section *)data);
 
-	dmuci_add_section_bbfdm("dmmap_network_ipv6", "intf_ipv6", &dmmap_ip_interface_ipv6, &v);
+	dmuci_add_section_bbfdm("dmmap_network_ipv6", "intf_ipv6", &dmmap_ip_interface_ipv6);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6, "parent_section", section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6, "section_name", ipv6_name);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6, "address", "::");
@@ -838,7 +838,7 @@ static int addObjIPInterfaceIPv6Prefix(char *refparam, struct dmctx *ctx, void *
 	if (strcmp(proto, "static") != 0 || (strcmp(proto, "static") == 0 && interface_section_with_dhcpv6_exists(section_name((struct uci_section *)data))))
 		return FAULT_9001;
 
-	char *last_inst = NULL, *ip_inst, *v, ipv6_prefix_name[64] = {0}, buf[32] = {0};
+	char *last_inst = NULL, *ip_inst, ipv6_prefix_name[64] = {0}, buf[32] = {0};
 	struct uci_section *dmmap_ip_interface = NULL, *dmmap_ip_interface_ipv6_prefix;
 	struct browse_args browse_args = {0};
 
@@ -857,7 +857,7 @@ static int addObjIPInterfaceIPv6Prefix(char *refparam, struct dmctx *ctx, void *
 	browse_args.option = "parent_section";
 	browse_args.value = section_name((struct uci_section *)data);
 
-	dmuci_add_section_bbfdm("dmmap_network_ipv6_prefix", "intf_ipv6_prefix", &dmmap_ip_interface_ipv6_prefix, &v);
+	dmuci_add_section_bbfdm("dmmap_network_ipv6_prefix", "intf_ipv6_prefix", &dmmap_ip_interface_ipv6_prefix);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6_prefix, "parent_section", section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6_prefix, "section_name", ipv6_prefix_name);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6_prefix, "address", "::/64");

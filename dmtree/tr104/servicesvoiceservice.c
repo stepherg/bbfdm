@@ -120,14 +120,12 @@ static int browseServicesVoiceServiceCodecProfileInst(struct dmctx *dmctx, DMNOD
 **************************************************************/
 static int addObjServicesVoiceServiceVoIPProfile(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *value, *v;
 	struct uci_section *dmmap = NULL, *s = NULL;
 
-	check_create_dmmap_package("dmmap_asterisk");
-	inst = get_last_instance_bbfdm("dmmap_asterisk", "sip_service_provider", "clientinstance");
-	dmuci_add_section("asterisk", "sip_service_provider", &s, &value);
+	char *inst = get_last_instance_bbfdm("dmmap_asterisk", "sip_service_provider", "clientinstance");
+	dmuci_add_section("asterisk", "sip_service_provider", &s);
 
-	dmuci_add_section_bbfdm("dmmap_asterisk", "sip_service_provider", &dmmap, &v);
+	dmuci_add_section_bbfdm("dmmap_asterisk", "sip_service_provider", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	*instance = update_instance(inst, 4, dmmap, "clientinstance", "dmmap_asterisk", "sip_service_provider");
 	return 0;
@@ -169,14 +167,12 @@ static int delObjServicesVoiceServiceVoIPProfile(char *refparam, struct dmctx *c
 
 static int addObjServicesVoiceServiceCodecProfile(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *value, *v;
 	struct uci_section *dmmap = NULL, *s = NULL;
 
-	check_create_dmmap_package("dmmap_asterisk");
-	inst = get_last_instance_bbfdm("dmmap_asterisk", "codec_profile", "codecprofileinstance");
-	dmuci_add_section("asterisk", "codec_profile", &s, &value);
+	char *inst = get_last_instance_bbfdm("dmmap_asterisk", "codec_profile", "codecprofileinstance");
+	dmuci_add_section("asterisk", "codec_profile", &s);
 
-	dmuci_add_section_bbfdm("dmmap_asterisk", "codec_profile", &dmmap, &v);
+	dmuci_add_section_bbfdm("dmmap_asterisk", "codec_profile", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	*instance = update_instance(inst, 4, dmmap, "codecprofileinstance", "dmmap_asterisk", "codec_profile");
 	return 0;

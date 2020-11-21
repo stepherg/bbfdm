@@ -280,7 +280,7 @@ void get_dmmap_section_of_config_section(char* dmmap_package, char* section_type
 void get_dmmap_section_of_config_section_eq(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section);
 void get_dmmap_section_of_config_section_cont(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section);
 void get_config_section_of_dmmap_section(char* package, char* section_type, char *section_name, struct uci_section **config_section);
-void check_create_dmmap_package(char *dmmap_package);
+char *check_create_dmmap_package(const char *dmmap_package);
 int is_section_unnamed(char *section_name);
 void delete_sections_save_next_sections(char* dmmap_package, char *section_type, char *instancename, char *section_name, int instance, struct list_head *dup_list);
 void update_dmmap_sections(struct list_head *dup_list, char *instancename, char* dmmap_package, char *section_type);
@@ -305,7 +305,6 @@ int command_exec_output_to_array(char *cmd, char **output, int *length);
 int bbf_api_copy_temporary_file_to_original_file(char *f1, char *f2);
 struct uci_section *is_dmmap_section_exist(char* package, char* section);
 struct uci_section *is_dmmap_section_exist_eq(char* package, char* section, char* opt, char* value);
-char * dmmap_file_path_get(const char *dmmap_package);
 int dm_read_sysfs_file(const char *file, char *dst, unsigned len);
 int get_net_iface_sysfs(const char *uci_iface, const char *name, char **value);
 int get_net_device_sysfs(const char *uci_iface, const char *name, char **value);

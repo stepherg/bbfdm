@@ -209,18 +209,17 @@ static int browseDHCPv6ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 	struct dhcpv6_args *curr_dhcp_args = (struct dhcpv6_args*)prev_data;
 	struct uci_section *dmmap_sect;
 	struct browse_args browse_args = {0};
-	char **tagvalue = NULL, *inst, *max_inst = NULL, *optionvalue= NULL, *tmp, *tag, *value, *v;
+	char **tagvalue = NULL, *inst, *max_inst = NULL, *optionvalue= NULL, *tmp, *tag, *value;
 	size_t length;
 	int j;
 	struct dhcpv6_client_option_args dhcp_client_opt_args = {0};
 
-	check_create_dmmap_package("dmmap_dhcpv6");
 	dmuci_get_value_by_section_list(curr_dhcp_args->dhcp_sec, "dhcp_option", &dhcp_options_list);
 	if (dhcp_options_list != NULL) {
 		uci_foreach_element(dhcp_options_list, e) {
 			tagvalue= strsplit(e->name, ",", &length);
 			if ((dmmap_sect = get_dup_section_in_dmmap_eq("dmmap_dhcpv6", "servpool_option", section_name(curr_dhcp_args->dhcp_sec), "option_tag", tagvalue[0])) == NULL) {
-				dmuci_add_section_bbfdm("dmmap_dhcpv6", "servpool_option", &dmmap_sect, &v);
+				dmuci_add_section_bbfdm("dmmap_dhcpv6", "servpool_option", &dmmap_sect);
 				dmuci_set_value_by_section_bbfdm(dmmap_sect, "option_tag", tagvalue[0]);
 				dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(curr_dhcp_args->dhcp_sec));
 			}
@@ -306,18 +305,18 @@ static int browseDHCPv6ServerPoolClientIPv6PrefixInst(struct dmctx *dmctx, DMNOD
 
 static int addObjDHCPv6Client(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	struct uci_section *s, *dmmap_sect;
-	char *value, *instancepara, *v;
+	struct uci_section *s = NULL, *dmmap_sect = NULL;
 
-	check_create_dmmap_package("dmmap_dhcpv6");
-	instancepara = get_last_instance_bbfdm("dmmap_dhcpv6", "interface", "bbf_dhcpv6client_instance");
-	dmuci_add_section("network", "interface", &s, &value);
+	char *inst_para = get_last_instance_bbfdm("dmmap_dhcpv6", "interface", "bbf_dhcpv6client_instance");
+
+	dmuci_add_section("network", "interface", &s);
 	dmuci_set_value_by_section(s, "proto", "dhcpv6");
 	dmuci_set_value_by_section(s, "ifname", "@wan");
 	dmuci_set_value_by_section(s, "type", "anywan");
-	dmuci_add_section_bbfdm("dmmap_dhcpv6", "interface", &dmmap_sect, &v);
+
+	dmuci_add_section_bbfdm("dmmap_dhcpv6", "interface", &dmmap_sect);
 	dmuci_set_value_by_section(dmmap_sect, "section_name", section_name(s));
-	*instance = update_instance(instancepara, 4, dmmap_sect, "bbf_dhcpv6client_instance", "dmmap_dhcpv6", "interface");
+	*instance = update_instance(inst_para, 4, dmmap_sect, "bbf_dhcpv6client_instance", "dmmap_dhcpv6", "interface");
 	return 0;
 }
 
@@ -369,20 +368,19 @@ static int delObjDHCPv6Client(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int addObjDHCPv6ServerPool(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *value, *v, *instancepara;
-	struct uci_section *s = NULL, *dmmap_dhcp= NULL;
+	struct uci_section *s = NULL, *dmmap_dhcp = NULL;
 
-	check_create_dmmap_package("dmmap_dhcpv6");
-	instancepara = get_last_instance_bbfdm("dmmap_dhcpv6", "dhcp", "dhcpv6_serv_pool_instance");
-	dmuci_add_section("dhcp", "dhcp", &s, &value);
+	char *inst_para = get_last_instance_bbfdm("dmmap_dhcpv6", "dhcp", "dhcpv6_serv_pool_instance");
+
+	dmuci_add_section("dhcp", "dhcp", &s);
 	dmuci_set_value_by_section(s, "dhcpv6", "server");
 	dmuci_set_value_by_section(s, "start", "100");
 	dmuci_set_value_by_section(s, "leasetime", "12h");
 	dmuci_set_value_by_section(s, "limit", "150");
 
-	dmuci_add_section_bbfdm("dmmap_dhcpv6", "dhcp", &dmmap_dhcp, &v);
+	dmuci_add_section_bbfdm("dmmap_dhcpv6", "dhcp", &dmmap_dhcp);
 	dmuci_set_value_by_section(dmmap_dhcp, "section_name", section_name(s));
-	*instance = update_instance(instancepara, 4, dmmap_dhcp, "dhcpv6_serv_pool_instance", "dmmap_dhcpv6", "dhcp");
+	*instance = update_instance(inst_para, 4, dmmap_dhcp, "dhcpv6_serv_pool_instance", "dmmap_dhcpv6", "dhcp");
 	return 0;
 }
 
@@ -436,19 +434,17 @@ static int addObjDHCPv6ServerPoolOption(char *refparam, struct dmctx *ctx, void 
 	struct dhcpv6_args *dhcp_arg = (struct dhcpv6_args*)data;
 	struct uci_section *dmmap_sect;
 	struct browse_args browse_args = {0};
-	char *value, *instancepara;
 
-	check_create_dmmap_package("dmmap_dhcpv6");
-	instancepara = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_dhcpv6", "servpool_option", "bbf_dhcpv6_servpool_option_instance", "section_name", section_name(dhcp_arg->dhcp_sec));
-	dmuci_add_section_bbfdm("dmmap_dhcpv6", "servpool_option", &dmmap_sect, &value);
-	if (dhcp_arg->dhcp_sec != NULL)
-		dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(dhcp_arg->dhcp_sec));
+	char *inst_para = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_dhcpv6", "servpool_option", "bbf_dhcpv6_servpool_option_instance", "section_name", section_name(dhcp_arg->dhcp_sec));
+
+	dmuci_add_section_bbfdm("dmmap_dhcpv6", "servpool_option", &dmmap_sect);
+	dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(dhcp_arg->dhcp_sec));
 	dmuci_set_value_by_section_bbfdm(dmmap_sect, "option_tag", "0");
 
 	browse_args.option = "section_name";
 	browse_args.value = section_name(dhcp_arg->dhcp_sec);
 
-	*instance = update_instance(instancepara, 6, dmmap_sect, "bbf_dhcpv6_servpool_option_instance", "dmmap_dhcpv6", "servpool_option", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(inst_para, 6, dmmap_sect, "bbf_dhcpv6_servpool_option_instance", "dmmap_dhcpv6", "servpool_option", check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -949,7 +945,7 @@ static int get_DHCPv6ServerPool_VendorClassID(char *refparam, struct dmctx *ctx,
 static int set_DHCPv6ServerPool_VendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *vendorclassidclassifier = NULL;
-	char *name, res[256] = {0};
+	char res[256] = {0};
 
 	switch (action)	{
 		case VALUECHECK:
@@ -961,7 +957,7 @@ static int set_DHCPv6ServerPool_VendorClassID(char *refparam, struct dmctx *ctx,
 
 			vendorclassidclassifier = get_dhcpv6_classifier("vendorclass", ((struct dhcpv6_args *)data)->interface);
 			if (!vendorclassidclassifier) {
-				dmuci_add_section("dhcp", "vendorclass", &vendorclassidclassifier, &name);
+				dmuci_add_section("dhcp", "vendorclass", &vendorclassidclassifier);
 				dmuci_set_value_by_section(vendorclassidclassifier, "networkid", ((struct dhcpv6_args *)data)->interface);
 			}
 			dmuci_set_value_by_section(vendorclassidclassifier, "vendorclass", res);
@@ -988,7 +984,7 @@ static int get_DHCPv6ServerPool_UserClassID(char *refparam, struct dmctx *ctx, v
 static int set_DHCPv6ServerPool_UserClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *userclassidclassifier = NULL;
-	char *name, res[256] = {0};
+	char res[256] = {0};
 
 	switch (action)	{
 		case VALUECHECK:
@@ -1000,7 +996,7 @@ static int set_DHCPv6ServerPool_UserClassID(char *refparam, struct dmctx *ctx, v
 
 			userclassidclassifier = get_dhcpv6_classifier("userclass", ((struct dhcpv6_args *)data)->interface);
 			if (!userclassidclassifier) {
-				dmuci_add_section("dhcp", "userclass", &userclassidclassifier, &name);
+				dmuci_add_section("dhcp", "userclass", &userclassidclassifier);
 				dmuci_set_value_by_section(userclassidclassifier, "networkid", ((struct dhcpv6_args *)data)->interface);
 			}
 			dmuci_set_value_by_section(userclassidclassifier, "userclass", res);
@@ -1162,7 +1158,7 @@ static int get_DHCPv6ServerPoolClient_Alias(char *refparam, struct dmctx *ctx, v
 static int set_DHCPv6ServerPoolClient_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s = NULL, *dmmap = NULL;
-	char *src_addr = "", *v;
+	char *src_addr = "";
 
 	switch (action)	{
 		case VALUECHECK:
@@ -1174,7 +1170,7 @@ static int set_DHCPv6ServerPoolClient_Alias(char *refparam, struct dmctx *ctx, v
 				dmuci_set_value_by_section_bbfdm(s, "alias", value);
 				return 0;
 			}
-			dmuci_add_section_bbfdm("dmmap", "dhcpv6clients", &dmmap, &v);
+			dmuci_add_section_bbfdm("dmmap", "dhcpv6clients", &dmmap);
 			dmuci_set_value_by_section(dmmap, "srcaddr", src_addr);
 			dmuci_set_value_by_section(dmmap, "alias", value);
 			break;

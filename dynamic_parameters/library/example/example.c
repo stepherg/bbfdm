@@ -127,9 +127,9 @@ opr_ret_t dynamicDeviceOperate(struct dmctx *dmctx, char *path, json_object *inp
 	char *param_download = (char *) dmjson_get_value(ubus_res, 1, "download");
 	char *param_upload = (char *) dmjson_get_value(ubus_res, 1, "upload");
 
-	add_list_paramameter(dmctx, dmstrdup("Latency"), param_latency, "string", NULL, 0);
-	add_list_paramameter(dmctx, dmstrdup("Download"), param_download, "string", NULL, 0);
-	add_list_paramameter(dmctx, dmstrdup("Upload"), param_upload, "string", NULL, 0);
+	add_list_parameter(dmctx, dmstrdup("Latency"), param_latency, "string", NULL, 0);
+	add_list_parameter(dmctx, dmstrdup("Download"), param_download, "string", NULL, 0);
+	add_list_parameter(dmctx, dmstrdup("Upload"), param_upload, "string", NULL, 0);
 
 	return SUCCESS;
 }

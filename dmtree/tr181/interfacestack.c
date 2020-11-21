@@ -74,16 +74,16 @@ static char *get_alias_by_section_option_condition(char *dmmap_config, char *sec
 static struct uci_section *create_dmmap_interface_stack_section(char *curr_inst)
 {
 	struct uci_section *s = NULL;
-	char *name;
 
-	check_create_dmmap_package("dmmap_interface_stack");
 	uci_path_foreach_option_eq(bbfdm, "dmmap_interface_stack", "interface_stack", "interface_stack_instance", curr_inst, s) {
 		return s;
 	}
+
 	if (!s) {
-		dmuci_add_section_bbfdm("dmmap_interface_stack", "interface_stack", &s, &name);
+		dmuci_add_section_bbfdm("dmmap_interface_stack", "interface_stack", &s);
 		dmuci_set_value_by_section_bbfdm(s, "interface_stack_instance", curr_inst);
 	}
+
 	return s;
 }
 

@@ -86,12 +86,10 @@ static int browseServicesVoiceServiceSIPNetworkFQDNServerInst(struct dmctx *dmct
 **************************************************************/
 static int addObjServicesVoiceServiceSIPClient(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *v;
 	char new_sec_name[16], value[32];
 	struct uci_section *dmmap = NULL;
 
-	check_create_dmmap_package("dmmap_asterisk");
-	inst = get_last_instance_bbfdm("dmmap_asterisk", "sip_service_provider", "clientinstance");
+	char *inst = get_last_instance_bbfdm("dmmap_asterisk", "sip_service_provider", "clientinstance");
 	snprintf(new_sec_name, sizeof(new_sec_name), "sip%d", (inst) ? atoi(inst) : 0);
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "", "sip_service_provider");
 	TR104_DEBUG("section name is [%s]. last inst = [%s]\n", new_sec_name, inst);
@@ -119,7 +117,7 @@ static int addObjServicesVoiceServiceSIPClient(char *refparam, struct dmctx *ctx
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "is_fax", "0");
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "transport", "udp");
 
-	dmuci_add_section_bbfdm("dmmap_asterisk", "sip_service_provider", &dmmap, &v);
+	dmuci_add_section_bbfdm("dmmap_asterisk", "sip_service_provider", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", new_sec_name);
 	*instance = update_instance(inst, 4, dmmap, "clientinstance", "dmmap_asterisk", "sip_service_provider");
 

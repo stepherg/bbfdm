@@ -55,11 +55,10 @@ static int browseDynamicDNSClientInst(struct dmctx *dmctx, DMNODE *parent_node, 
 static int dmmap_synchronizeDynamicDNSServer(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL, *sddns = NULL, *stmp = NULL, *ss = NULL;
-	char *service_name = NULL, *dmmap_service_name = NULL, *name = NULL, *retry_interval = NULL, *retry_unit = NULL;
+	char *service_name = NULL, *dmmap_service_name = NULL, *retry_interval = NULL, *retry_unit = NULL;
 	char *enabled = NULL, *dns_server = NULL, *use_https = NULL, *check_interval = NULL, *check_unit = NULL, *retry_count = NULL;
 	int found;
 
-	check_create_dmmap_package("dmmap_ddns");
 	uci_path_foreach_sections_safe(bbfdm, "dmmap_ddns", "ddns_server", stmp, s) {
 		dmuci_get_value_by_section_string(s, "service_name", &dmmap_service_name);
 		found = 0;
@@ -110,7 +109,7 @@ static int dmmap_synchronizeDynamicDNSServer(struct dmctx *dmctx, DMNODE *parent
 		if (found)
 			continue;
 
-		dmuci_add_section_bbfdm("dmmap_ddns", "ddns_server", &sddns, &name);
+		dmuci_add_section_bbfdm("dmmap_ddns", "ddns_server", &sddns);
 		dmuci_set_value_by_section(sddns, "section_name", section_name(s));
 		dmuci_set_value_by_section(sddns, "enabled", enabled);
 		dmuci_set_value_by_section(sddns, "service_name", service_name);
@@ -154,15 +153,13 @@ static int browseDynamicDNSClientHostnameInst(struct dmctx *dmctx, DMNODE *paren
 *************************************************************/
 static int addObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char inst[8], *last_inst, *value, *v, *s_name;
 	struct uci_section *dmmap = NULL, *s = NULL;
+	char s_name[32];
 
-	check_create_dmmap_package("dmmap_ddns");
-	last_inst = get_last_instance_bbfdm("dmmap_ddns", "service", "clientinstance");
-	snprintf(inst, sizeof(inst), "%s", last_inst ? last_inst : "1");
-	dmasprintf(&s_name, "Ddns_%d", atoi(inst)+1);
+	char *last_inst = get_last_instance_bbfdm("dmmap_ddns", "service", "clientinstance");
+	snprintf(s_name, sizeof(s_name), "Ddns_%s", last_inst ? last_inst : "1");
 
-	dmuci_add_section("ddns", "service", &s, &value);
+	dmuci_add_section("ddns", "service", &s);
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "enabled", "1");
 	dmuci_set_value_by_section(s, "use_syslog", "0");
@@ -175,7 +172,7 @@ static int addObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 	dmuci_set_value_by_section(s, "retry_unit", "value");
 	dmuci_set_value_by_section(s, "ip_source", "interface");
 
-	dmuci_add_section_bbfdm("dmmap_ddns", "service", &dmmap, &v);
+	dmuci_add_section_bbfdm("dmmap_ddns", "service", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	*instance = update_instance(last_inst, 4, dmmap, "clientinstance", "dmmap_ddns", "service");
 	return 0;
@@ -217,14 +214,13 @@ static int delObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 
 static int addObjDynamicDNSServer(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char inst[8], *last_inst, *value, *v, *s_name;
 	struct uci_section *dmmap = NULL, *s = NULL;
+	char s_name[16];
 
-	check_create_dmmap_package("dmmap_ddns");
-	last_inst = get_last_instance_bbfdm("dmmap_ddns", "ddns_server", "serverinstance");
-	snprintf(inst, sizeof(inst), "%s", last_inst ? last_inst : "1");
-	dmasprintf(&s_name, "server_%d", atoi(inst)+1);
-	dmuci_add_section("ddns", "service", &s, &value);
+	char *last_inst = get_last_instance_bbfdm("dmmap_ddns", "ddns_server", "serverinstance");
+	snprintf(s_name, sizeof(s_name), "server_%s", last_inst ? last_inst : "1");
+
+	dmuci_add_section("ddns", "service", &s);
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "service_name", s_name);
 	dmuci_set_value_by_section(s, "enabled", "1");
@@ -238,7 +234,7 @@ static int addObjDynamicDNSServer(char *refparam, struct dmctx *ctx, void *data,
 	dmuci_set_value_by_section(s, "retry_unit", "value");
 	dmuci_set_value_by_section(s, "ip_source", "interface");
 
-	dmuci_add_section_bbfdm("dmmap_ddns", "ddns_server", &dmmap, &v);
+	dmuci_add_section_bbfdm("dmmap_ddns", "ddns_server", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	*instance = update_instance(last_inst, 4, dmmap, "serverinstance", "dmmap_ddns", "ddns_server");
 	return 0;

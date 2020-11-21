@@ -107,8 +107,8 @@ static int is_name_exist_in_devices(char *name)
 static void add_new_dmmap_section(char *macaddr, char*interface, char *section_name)
 {
 	struct uci_section *dmmap = NULL;
-	char *v;
-	dmuci_add_section_bbfdm(DMMAP, "link", &dmmap, &v);
+
+	dmuci_add_section_bbfdm(DMMAP, "link", &dmmap);
 	dmuci_set_value_by_section(dmmap, "mac", macaddr);
 	dmuci_set_value_by_section(dmmap, "device", interface);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name);
@@ -336,18 +336,18 @@ static int get_linker_vlan_term(char *refparam, struct dmctx *dmctx, void *data,
 **************************************************************/
 static int addObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *v, *val, *interface_name;
 	struct uci_section *s = NULL, *dmmap_link = NULL;
+	char interface_name[32];
 
-	inst = get_last_instance_bbfdm(DMMAP, "link", "link_instance");
-	dmasprintf(&interface_name, "link_%d", inst ? atoi(inst)+1 : 1);
+	char *inst = get_last_instance_bbfdm(DMMAP, "link", "link_instance");
+	snprintf(interface_name, sizeof(interface_name), "link_%d", inst ? atoi(inst)+1 : 1);
 
 	/* Add device section */
-	dmuci_add_section("network", "interface", &s, &val);
+	dmuci_add_section("network", "interface", &s);
 	dmuci_rename_section_by_section(s, interface_name);
 
 	/* Add link section in dmmap file */
-	dmuci_add_section_bbfdm(DMMAP, "link", &dmmap_link, &v);
+	dmuci_add_section_bbfdm(DMMAP, "link", &dmmap_link);
 	dmuci_set_value_by_section(dmmap_link, "section_name", interface_name);
 	*instance = update_instance(inst, 4, dmmap_link, "link_instance", "dmmap", "link");
 	return 0;
@@ -398,20 +398,19 @@ static int delObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int addObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *device_name, *val, *v;
 	struct uci_section *s = NULL, *dmmap_network = NULL;
+	char device_name[32];
 
-	check_create_dmmap_package("dmmap_network");
-	inst = get_vlan_last_instance_bbfdm("dmmap_network", "device", "vlan_term_instance");
-	dmasprintf(&device_name, "vlan_ter_%d", inst ? atoi(inst)+1 : 1);
+	char *inst = get_vlan_last_instance_bbfdm("dmmap_network", "device", "vlan_term_instance");
+	snprintf(device_name, sizeof(device_name), "vlan_ter_%d", inst ? atoi(inst)+1 : 1);
 
 	// Add device section
-	dmuci_add_section("network", "device", &s, &val);
+	dmuci_add_section("network", "device", &s);
 	dmuci_rename_section_by_section(s, device_name);
 	dmuci_set_value_by_section(s, "type", "8021q");
 
 	// Add device section in dmmap_network file
-	dmuci_add_section_bbfdm("dmmap_network", "device", &dmmap_network, &v);
+	dmuci_add_section_bbfdm("dmmap_network", "device", &dmmap_network);
 	dmuci_set_value_by_section(dmmap_network, "section_name", device_name);
 	*instance = update_instance(inst, 4, dmmap_network, "vlan_term_instance", "dmmap_network", "device");
 	return 0;

@@ -182,17 +182,19 @@ static int browseUSBPortInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 	regcomp(&regex1, "^[0-9][0-9]*-[0-9]*[0-9]$", 0);
 	regcomp(&regex2, "^[0-9][0-9]*-[0-9]*[0-9]\\.[0-9]*[0-9]$", 0);
-	check_create_dmmap_package("dmmap_usb");
+
 	synchronize_system_folders_with_dmmap_opt(SYSFS_USB_DEVICES_PATH,
 		"dmmap_usb", "dmmap_port", "port_link", "usb_port_instance", &dup_list);
 
 	list_for_each_entry(p, &dup_list, list) {
-		if(regexec(&regex1, p->sysfs_folder_name, 0, NULL, 0) != 0 &&
-		regexec(&regex2, p->sysfs_folder_name, 0, NULL, 0) !=0 &&
-		strstr(p->sysfs_folder_name, "usb") != p->sysfs_folder_name) {
+
+		if (regexec(&regex1, p->sysfs_folder_name, 0, NULL, 0) != 0 &&
+			regexec(&regex2, p->sysfs_folder_name, 0, NULL, 0) !=0 &&
+			strstr(p->sysfs_folder_name, "usb") != p->sysfs_folder_name) {
 			dmuci_delete_by_section_unnamed_bbfdm(p->dm, NULL, NULL);
 			continue;
 		}
+
 		init_usb_port(p->dm, p->sysfs_folder_name, p->sysfs_folder_path, &port);
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
@@ -214,8 +216,9 @@ static int browseUSBUSBHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, v
 	struct usb_port port= {};
 	LIST_HEAD(dup_list);
 
-	check_create_dmmap_package("dmmap_usb");
-	synchronize_system_folders_with_dmmap_opt(SYSFS_USB_DEVICES_PATH, "dmmap_usb", "dmmap_host", "port_link", "usb_host_instance", &dup_list);
+	synchronize_system_folders_with_dmmap_opt(SYSFS_USB_DEVICES_PATH,
+		"dmmap_usb", "dmmap_host", "port_link", "usb_host_instance", &dup_list);
+
 	list_for_each_entry(p, &dup_list, list) {
 		if(!strstr(p->sysfs_folder_name, "usb"))
 			continue;
@@ -246,7 +249,6 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 	regcomp(&regex2, "^[0-9][0-9]*-[0-9]*[0-9]\\.[0-9]*[0-9]$", 0);
 
 	LIST_HEAD(dup_list_no_inst);
-	dmmap_file_path_get(dmmap_package);
 
 	sysfs_foreach_file(sysfsrep, dir, ent) {
 		if(strcmp(ent->d_name, ".")==0 || strcmp(ent->d_name, "..")==0)
@@ -270,7 +272,7 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 			 */
 			dmasprintf(&sysfs_rep_path, "%s/%s", sysfsrep, ent->d_name);
 			if ((dmmap_sect = get_dup_section_in_dmmap_opt(dmmap_package, dmmap_section, opt_name, sysfs_rep_path)) == NULL) {
-				dmuci_add_section_bbfdm(dmmap_package, dmmap_section, &dmmap_sect, &v);
+				dmuci_add_section_bbfdm(dmmap_package, dmmap_section, &dmmap_sect);
 				dmuci_set_value_by_section_bbfdm(dmmap_sect, opt_name, sysfs_rep_path);
 			}
 			dmuci_get_value_by_section_string(dmmap_sect, inst_opt, &instance);
@@ -312,20 +314,27 @@ static int browseUSBUSBHostsHostDeviceInst(struct dmctx *dmctx, DMNODE *parent_n
 	struct sysfs_dmsection *p;
 	char *instance = NULL, *instnbr = NULL, *parent_host_instance = NULL;
 	struct usb_port port= {};
-	struct usb_port *prev_port= (struct usb_port *)prev_data;
+	struct usb_port *prev_port = (struct usb_port *)prev_data;
 	LIST_HEAD(dup_list);
 
-	check_create_dmmap_package("dmmap_usb");
-	synchronize_usb_devices_with_dmmap_opt_recursively(prev_port->folder_path, "dmmap_usb", "dmmap_host_device", "port_link", "usb_host_device_instance", 1, &dup_list);
+
+	synchronize_usb_devices_with_dmmap_opt_recursively(prev_port->folder_path,
+		"dmmap_usb", "dmmap_host_device", "port_link", "usb_host_device_instance", 1, &dup_list);
+
 	list_for_each_entry(p, &dup_list, list) {
+
 		init_usb_port(p->dm, p->sysfs_folder_name, p->sysfs_folder_path, &port);
+
 		if (p->dm && prev_port->dmsect ) {
 			dmuci_get_value_by_section_string(prev_port->dmsect, "usb_host_instance", &parent_host_instance);
 			dmuci_set_value_by_section_bbfdm(p->dm, "usb_host_device_parent_host_instance", parent_host_instance);
 		}
-		port.dmsect= prev_port->dmsect;
+
+		port.dmsect = prev_port->dmsect;
+
 		instance = handle_update_instance(2, dmctx, &instnbr, update_instance_alias, 5,
 				   p->dm, "usb_host_device_instance", "usb_host_device_alias", "dmmap_usb", "dmmap_host_device");
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, instance) == DM_STOP)
 			break;
 	}
@@ -337,17 +346,16 @@ static int browseUSBUSBHostsHostDeviceConfigurationInst(struct dmctx *dmctx, DMN
 {
 	const struct usb_port *usb_dev = prev_data;
 	struct usb_port port = {};
-	struct uci_section *s;
-	char nbre[16], *v, *max_inst = NULL;
+	struct uci_section *s = NULL;
+	char nbre[16], *max_inst = NULL;
 
 	__read_sysfs_usb_port(usb_dev, "bNumConfigurations", nbre, sizeof(nbre));
 	if(nbre[0] == '0')
 		return 0;
 
-	check_create_dmmap_package("dmmap_usb");
 	s = is_dmmap_section_exist("dmmap_usb", "usb_device_conf");
 	if (!s)
-		dmuci_add_section_bbfdm("dmmap_usb", "usb_device_conf", &s, &v);
+		dmuci_add_section_bbfdm("dmmap_usb", "usb_device_conf", &s);
 	dmuci_set_value_by_section_bbfdm(s, "usb_parent_device", usb_dev->folder_path);
 
 	init_usb_port(s, usb_dev->folder_name, usb_dev->folder_path, &port);
@@ -365,21 +373,23 @@ static int browseUSBUSBHostsHostDeviceConfigurationInterfaceInst(struct dmctx *d
 	struct dirent *ent;
 	struct usb_port *usb_dev = (struct usb_port*)prev_data;
 	struct usb_port port = {0};
-	char *sysfs_rep_path, *v, *inst = NULL, *max_inst = NULL;
-	struct uci_section *dmmap_sect;
+	char *sysfs_rep_path, *inst = NULL, *max_inst = NULL;
+	struct uci_section *dmmap_sect = NULL;
 	regex_t regex1 = {};
 	regex_t regex2 = {};
 
 	regcomp(&regex1, "^[0-9][0-9]*-[0-9]*[0-9]:[0-9][0-9]*\\.[0-9]*[0-9]$", 0);
 	regcomp(&regex2, "^[0-9][0-9]*-[0-9]*[0-9]\\.[0-9]*[0-9]:[0-9][0-9]*\\.[0-9]*[0-9]$", 0);
-	check_create_dmmap_package("dmmap_usb");
+
 	sysfs_foreach_file(usb_dev->folder_path, dir, ent) {
-		if(strcmp(ent->d_name, ".")==0 || strcmp(ent->d_name, "..")==0)
+
+		if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
 			continue;
-		if(regexec(&regex1, ent->d_name, 0, NULL, 0) == 0 || regexec(&regex2, ent->d_name, 0, NULL, 0) ==0) {
+
+		if (regexec(&regex1, ent->d_name, 0, NULL, 0) == 0 || regexec(&regex2, ent->d_name, 0, NULL, 0) == 0) {
 			dmasprintf(&sysfs_rep_path, "%s/%s", usb_dev->folder_path, ent->d_name);
 			if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_usb", "usb_device_conf_interface", "port_link", sysfs_rep_path)) == NULL) {
-				dmuci_add_section_bbfdm("dmmap_usb", "usb_device_conf_interface", &dmmap_sect, &v);
+				dmuci_add_section_bbfdm("dmmap_usb", "usb_device_conf_interface", &dmmap_sect);
 				dmuci_set_value_by_section_bbfdm(dmmap_sect, "port_link", sysfs_rep_path);
 			}
 

@@ -768,14 +768,13 @@ char *get_last_instance_lev2_bbfdm_dmmap_opt(char *dmmap_package, char *section,
 
 char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check)
 {
-	struct uci_section *s, *dmmap_section;
-	char *instance = NULL, *last_inst = NULL, *v = NULL;
+	struct uci_section *s = NULL, *dmmap_section = NULL;
+	char *instance = NULL, *last_inst = NULL;
 
-	check_create_dmmap_package(dmmap_package);
 	uci_foreach_option_cont(package, section, opt_check, value_check, s) {
 		get_dmmap_section_of_config_section(dmmap_package, section, section_name(s), &dmmap_section);
 		if (dmmap_section == NULL) {
-			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section, &v);
+			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section);
 			dmuci_set_value_by_section(dmmap_section, "section_name", section_name(s));
 		}
 		instance = update_instance(last_inst, 4, dmmap_section, opt_inst, dmmap_package, section);
@@ -812,7 +811,7 @@ int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, cha
 	return 0;
 }
 
-void add_list_paramameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_version, unsigned int flags)
+void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_version, unsigned int flags)
 {
 	struct dm_parameter *dm_parameter;
 	struct list_head *ilist;
@@ -828,7 +827,7 @@ void add_list_paramameter(struct dmctx *ctx, char *param_name, char *param_data,
 	dm_parameter = dmcalloc(1, sizeof(struct dm_parameter));
 	_list_add(&dm_parameter->list, ilist->prev, ilist);
 	dm_parameter->name = param_name;
-	dm_parameter->data = param_data ? param_data : ""; //allocate memory in function
+	dm_parameter->data = param_data ? param_data : "";
 	dm_parameter->type = param_type;
 	dm_parameter->version = param_version;
 	dm_parameter->flags = flags;
@@ -1057,13 +1056,13 @@ static int remove_parameter_notification(char *param)
 
 static int set_parameter_notification(struct dmctx *ctx, char *param, char *value)
 {
-	char *tmp = NULL, *buf = NULL, *pch, *new_param;
+	char *tmp = NULL, *pch, *new_param;
 	char *notification = NULL;
 	struct uci_section *s;
 	dmuci_get_section_type("cwmp", "@notifications[0]", &tmp);
 	update_param_instance_alias(ctx, param, &new_param);
 	if (!tmp || tmp[0] == '\0') {
-		dmuci_add_section("cwmp", "notifications", &s, &buf);
+		dmuci_add_section("cwmp", "notifications", &s);
 	} else {
 		remove_parameter_notification(new_param);
 	}
@@ -1147,7 +1146,7 @@ static char *check_value_by_type(char *value, int type)
 	int i = 0, len = strlen(value);
 	char buf[len + 1];
 
-	strncpy(buf, value, sizeof(buf) - 1);
+	strcpy(buf, value);
 	buf[len] = 0;
 
 	switch (type) {
@@ -1174,14 +1173,14 @@ static char *check_value_by_type(char *value, int type)
 				return "0";
 			break;
 		case DMT_HEXBIN:
-			while (buf[i]) {
+			while (buf[i] != 0) {
 				if (isxdigit(buf[i]) == 0)
 					return "0";
 				i++;
 			}
 			break;
 		case DMT_BASE64:
-			while (buf[i]) {
+			while (buf[i] != 0) {
 				if (is64digit(buf[i]) == 0)
 					return "0";
 				i++;
@@ -1313,7 +1312,7 @@ static int get_value_param(DMPARAM_ARGS)
 
 	value = (value && *value) ? check_value_by_type(value, type) : get_default_value_by_type(type);
 
-	add_list_paramameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0);
+	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0);
 	return 0;
 }
 
@@ -1336,7 +1335,7 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 
 	value = (value && *value) ? check_value_by_type(value, type) : get_default_value_by_type(type);
 
-	add_list_paramameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0);
+	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0);
 	dmctx->stop = true;
 	return 0;
 }
@@ -1402,7 +1401,7 @@ static int mparam_get_name(DMPARAM_ARGS)
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_paramameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0);
 	return 0;
 }
 
@@ -1414,7 +1413,7 @@ static int mobj_get_name(DMOBJECT_ARGS)
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_paramameter(dmctx, refparam, perm, "xsd:object", NULL, 0);
+	add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL, 0);
 	return 0;
 }
 
@@ -1435,7 +1434,7 @@ static int mparam_get_name_in_param(DMPARAM_ARGS)
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_paramameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0);
 	return 0;
 }
 
@@ -1454,7 +1453,7 @@ static int mparam_get_name_in_obj(DMPARAM_ARGS)
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_paramameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0);
 	return 0;
 }
 
@@ -1475,7 +1474,7 @@ static int mobj_get_name_in_obj(DMOBJECT_ARGS)
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_paramameter(dmctx, refparam, perm, "xsd:object", NULL, 0);
+	add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL, 0);
 	return 0;
 }
 
@@ -1508,7 +1507,7 @@ static int mobj_get_schema_name(DMOBJECT_ARGS)
 	if (node->obj)
 		unique_keys = node->obj->unique_keys;
 
-	add_list_paramameter(dmctx, refparam, perm, "xsd:object", (char *) unique_keys, 0);
+	add_list_parameter(dmctx, refparam, perm, "xsd:object", (char *) unique_keys, 0);
 	return 0;
 }
 
@@ -1518,7 +1517,7 @@ static int mparam_get_schema_name(DMPARAM_ARGS)
 	char *perm = permission->val;
 	dmastrcat(&refparam, node->current_object, lastname);
 
-	add_list_paramameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0);
 	return 0;
 }
 
@@ -1562,7 +1561,7 @@ static int mobj_get_instances_in_obj(DMOBJECT_ARGS)
 
 		if (name) {
 			name[strlen(name) - 1] = 0;
-			add_list_paramameter(dmctx, name, NULL, "xsd:object", NULL, 0);
+			add_list_parameter(dmctx, name, NULL, "xsd:object", NULL, 0);
 		}
 	}
 
@@ -1631,7 +1630,7 @@ static int mparam_get_notification(DMPARAM_ARGS)
 	} else {
 		value = check_parameter_forced_notification(refparam);
 	}
-	add_list_paramameter(dmctx, refparam, value, DMT_TYPE[type], NULL, 0);
+	add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL, 0);
 	return 0;
 }
 
@@ -1655,7 +1654,7 @@ static int mparam_get_notification_in_param(DMPARAM_ARGS)
 	} else {
 		value = check_parameter_forced_notification(refparam);
 	}
-	add_list_paramameter(dmctx, refparam, value, DMT_TYPE[type], NULL, 0);
+	add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL, 0);
 	dmctx->stop = 1;
 	return 0;
 }
@@ -2210,7 +2209,7 @@ static int upnp_set_parameter_onchange(struct dmctx *ctx, char *param, char *onc
 
 	dmuci_get_section_type(UPNP_CFG, "@notifications[0]", &tmp);
 	if (!tmp || tmp[0] == '\0') {
-		dmuci_add_section(UPNP_CFG, "notifications", &s, &tmp);
+		dmuci_add_section(UPNP_CFG, "notifications", &s);
 	}
 
 	dmuci_del_list_value(UPNP_CFG, "@notifications[0]",onchange, param);
@@ -2362,7 +2361,7 @@ int dm_entry_upnp_update_attribute_values_update(struct dmctx *dmctx)
 
 	dmuci_get_section_type(UPNP_CFG, "@dm[0]", &tmp);
 	if (!tmp || tmp[0] == '\0') {
-		dmuci_add_section(UPNP_CFG, "dm", &s, &tmp);
+		dmuci_add_section(UPNP_CFG, "dm", &s);
 	}
 	snprintf(buf, sizeof(buf), "%d", version);
 	dmuci_set_value(UPNP_CFG, "@dm[0]", "attribute_values_version", buf);
@@ -2420,7 +2419,7 @@ static int mobj_upnp_get_instances(DMOBJECT_ARGS)
 		dmctx->stop = 1;
 		return FAULT_UPNP_703;
 	}
-	add_list_paramameter(dmctx, refparam, NULL, NULL, NULL, 0);
+	add_list_parameter(dmctx, refparam, NULL, NULL, NULL, 0);
 	return 0;
 }
 
@@ -2470,7 +2469,7 @@ static int mparam_upnp_get_supportedparams(DMPARAM_ARGS)
 				return FAULT_UPNP_703;
 			}
 			dmctx->findparam = 1;
-			add_list_paramameter(dmctx, refparam, NULL, NULL, NULL, 0);
+			add_list_parameter(dmctx, refparam, NULL, NULL, NULL, 0);
 			return 0;
 		}
 	}
@@ -2480,7 +2479,7 @@ static int mparam_upnp_get_supportedparams(DMPARAM_ARGS)
 			dmctx->stop = 1;
 			return FAULT_UPNP_703;
 		}
-		add_list_paramameter(dmctx, refparam, NULL, NULL, NULL, 0);
+		add_list_parameter(dmctx, refparam, NULL, NULL, NULL, 0);
 		return 0;
 	}
 	return FAULT_UPNP_703;
@@ -2501,7 +2500,7 @@ static int mobj_upnp_get_supportedparams(DMOBJECT_ARGS)
 			dmctx->stop = 1;
 			return FAULT_UPNP_703;
 		}
-		add_list_paramameter(dmctx, refparam, NULL, NULL, NULL, 0);
+		add_list_parameter(dmctx, refparam, NULL, NULL, NULL, 0);
 		return 0;
 	}
 	return FAULT_UPNP_703;
@@ -2566,7 +2565,7 @@ static int mparam_upnp_structured_get_value_in_param(DMPARAM_ARGS)
 	}
 	dmctx->findparam = 1;
 	(get_cmd)(full_param, dmctx, data, instance, &value);
-	add_list_paramameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0);
+	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0);
 	return 0;
 }
 
@@ -2631,7 +2630,7 @@ static int upnp_get_value_param(DMPARAM_ARGS)
 		return FAULT_UPNP_703;
 	}
 	(get_cmd)(full_param, dmctx, data, instance, &value);
-	add_list_paramameter(dmctx, full_param, value, NULL, NULL, 0);
+	add_list_parameter(dmctx, full_param, value, NULL, NULL, 0);
 	return 0;
 }
 
@@ -2656,7 +2655,7 @@ static int mparam_upnp_get_value_in_param(DMPARAM_ARGS)
 		return FAULT_UPNP_703;
 	}
 	(get_cmd)(full_param, dmctx, data, instance, &value);
-	add_list_paramameter(dmctx, full_param, value, NULL, NULL, 0);
+	add_list_parameter(dmctx, full_param, value, NULL, NULL, 0);
 	dmctx->stop = 1;
 	return 0;
 }
@@ -2922,7 +2921,7 @@ static int mparam_upnp_get_attributes(DMPARAM_ARGS)
 	get_parameter_version(dmctx, refparam, &version, &s);
 	flags |= UPNP_DMT_TYPE[type];
 
-	add_list_paramameter(dmctx, refparam, perm, NULL, version, flags);
+	add_list_parameter(dmctx, refparam, perm, NULL, version, flags);
 	return 0;
 }
 
@@ -2962,7 +2961,7 @@ static int mobj_upnp_get_attributes(DMOBJECT_ARGS)
 	else if (node->obj->browseinstobj)
 		flags |= (NODE_DATA_ATTRIBUTE_MULTIINSTANCE | NODE_DATA_ATTRIBUTE_TYPEPTR);
 
-	add_list_paramameter(dmctx, refparam, perm, NULL, version, flags);
+	add_list_parameter(dmctx, refparam, perm, NULL, version, flags);
 
 	return 0;
 }
@@ -3107,7 +3106,7 @@ static int mparam_upnp_get_acldata(DMPARAM_ARGS)
 
 	dmctx->stop = 1;
 
-	add_list_paramameter(dmctx, refparam, NULL, NULL, NULL, flags);
+	add_list_parameter(dmctx, refparam, NULL, NULL, NULL, flags);
 	return 0;
 }
 
@@ -3131,7 +3130,7 @@ static int mobj_upnp_get_acldata(DMOBJECT_ARGS)
 	dmctx->stop = 1;
 	flags |= DM_FACTORIZED;
 
-	add_list_paramameter(dmctx, refparam, NULL, NULL, NULL, flags);
+	add_list_parameter(dmctx, refparam, NULL, NULL, NULL, flags);
 	return 0;
 }
 

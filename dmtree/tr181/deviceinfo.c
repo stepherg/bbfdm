@@ -428,7 +428,6 @@ static int get_DeviceInfoProcessor_Alias(char *refparam, struct dmctx *ctx, void
 static int set_DeviceInfoProcessor_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s = NULL, *dmmap = NULL;
-	char *v;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -440,7 +439,7 @@ static int set_DeviceInfoProcessor_Alias(char *refparam, struct dmctx *ctx, void
 				dmuci_set_value_by_section_bbfdm(s, "alias", value);
 				return 0;
 			}
-			dmuci_add_section_bbfdm("dmmap", "processor", &dmmap, &v);
+			dmuci_add_section_bbfdm("dmmap", "processor", &dmmap);
 			dmuci_set_value_by_section(dmmap, "processor_inst", instance);
 			dmuci_set_value_by_section(dmmap, "alias", value);
 			break;
@@ -509,7 +508,6 @@ static int get_DeviceInfoSupportedDataModel_Alias(char *refparam, struct dmctx *
 static int set_DeviceInfoSupportedDataModel_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s = NULL, *dmmap = NULL;
-	char *v;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -521,7 +519,7 @@ static int set_DeviceInfoSupportedDataModel_Alias(char *refparam, struct dmctx *
 				dmuci_set_value_by_section_bbfdm(s, "alias", value);
 				return 0;
 			}
-			dmuci_add_section_bbfdm("dmmap", "data_model", &dmmap, &v);
+			dmuci_add_section_bbfdm("dmmap", "data_model", &dmmap);
 			dmuci_set_value_by_section(dmmap, "data_model_inst", instance);
 			dmuci_set_value_by_section(dmmap, "alias", value);
 			break;

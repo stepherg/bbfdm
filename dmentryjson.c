@@ -357,15 +357,13 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 		}
 
 		if(arg2 && arg3 && arg4) {
-			char *inst = NULL, *sect_name = NULL, *v;
 			struct uci_section *section = NULL, *dmmap = NULL;
 
-			check_create_dmmap_package(arg4);
-			inst = get_last_instance_bbfdm(arg4, arg3, buf_instance);
-			dmuci_add_section(arg2, arg3, &section, &sect_name);
+			char *inst = get_last_instance_bbfdm(arg4, arg3, buf_instance);
+			dmuci_add_section(arg2, arg3, &section);
 
-			dmuci_add_section_bbfdm(arg4, arg3, &dmmap, &v);
-			dmuci_set_value_by_section(dmmap, "section_name", sect_name);
+			dmuci_add_section_bbfdm(arg4, arg3, &dmmap);
+			dmuci_set_value_by_section(dmmap, "section_name", section_name(section));
 			*instance = update_instance(inst, 4, dmmap, buf_instance, arg4, arg3);
 		}
 	}

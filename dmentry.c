@@ -640,7 +640,7 @@ int dm_entry_upnp_update_version_configuration(struct dmctx *dmctx)
 
 	dmuci_get_section_type(UPNP_CFG, "@dm[0]", &tmp);
 	if (!tmp || tmp[0] == '\0') {
-		dmuci_add_section(UPNP_CFG, "dm", &s, &tmp);
+		dmuci_add_section(UPNP_CFG, "dm", &s);
 	}
 	snprintf(buf, sizeof(buf), "%d", version);
 	dmuci_set_value(UPNP_CFG, "@dm[0]", "current_configuration_version", buf);
@@ -693,7 +693,7 @@ int dm_entry_upnp_check_versiononchange_param(struct dmctx *pctx)
 				dmuci_set_value(UPNP_CFG, p->key, "version", buf);
 			}
 			else {
-				dmuci_add_section(UPNP_CFG, "parameter_version", &s, &tmp);
+				dmuci_add_section(UPNP_CFG, "parameter_version", &s);
 				if (s != NULL) {
 					dmuci_set_value_by_section(s, "version", buf);
 					dmuci_set_value_by_section(s, "parameter", p->name);
@@ -720,7 +720,7 @@ int upnp_state_variables_init(struct dmctx *dmctx)
 
 	dmuci_get_section_type(UPNP_CFG, "@dm[0]", &tmp);
 	if (!tmp || tmp[0] == '\0') {
-		dmuci_add_section(UPNP_CFG, "dm", &s, &tmp);
+		dmuci_add_section(UPNP_CFG, "dm", &s);
 	}
 	dmuci_get_option_value_string(UPNP_CFG, "@dm[0]", "supported_datamodel_version", &v);
 	n = atoi(v);

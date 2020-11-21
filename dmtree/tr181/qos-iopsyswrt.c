@@ -166,16 +166,14 @@ int os_browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 *************************************************************/
 int os_addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *value, *v;
 	struct uci_section *dmmap = NULL, *s = NULL;
 
-	check_create_dmmap_package("dmmap_qos");
-	inst = get_last_instance_bbfdm("dmmap_qos", "classify", "classify_instance");
-	dmuci_add_section("qos", "classify", &s, &value);
-	//adding Classification object's parameter entries with default values
+	char *inst = get_last_instance_bbfdm("dmmap_qos", "classify", "classify_instance");
+
+	dmuci_add_section("qos", "classify", &s);
 	dmuci_set_value_by_section(s, "enable", "0");
 
-	dmuci_add_section_bbfdm("dmmap_qos", "classify", &dmmap, &v);
+	dmuci_add_section_bbfdm("dmmap_qos", "classify", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	*instance = update_instance(inst, 4, dmmap, "classify_instance", "dmmap_qos", "classify");
 	return 0;
@@ -281,13 +279,11 @@ int delObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char *instan
 
 int os_addObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *value, *v;
-	struct uci_section  *dmmap = NULL, *s = NULL;
+	struct uci_section *dmmap = NULL, *s = NULL;
 
-	check_create_dmmap_package("dmmap_qos");
-	inst = get_last_instance_bbfdm("dmmap_qos", "policer", "policer_instance");
-	dmuci_add_section("qos", "policer", &s, &value);
+	char *inst = get_last_instance_bbfdm("dmmap_qos", "policer", "policer_instance");
 
+	dmuci_add_section("qos", "policer", &s);
 	dmuci_set_value_by_section(s, "enable", "0");
 	dmuci_set_value_by_section(s, "committed_rate", "0");
 	dmuci_set_value_by_section(s, "committed_burst_size", "0");
@@ -297,7 +293,7 @@ int os_addObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char **in
 	dmuci_set_value_by_section(s, "meter_type", "0");
 	dmuci_set_value_by_section(s, "name", section_name(s));
 
-	dmuci_add_section_bbfdm("dmmap_qos", "policer", &dmmap, &v);
+	dmuci_add_section_bbfdm("dmmap_qos", "policer", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	*instance = update_instance(inst, 4, dmmap, "policer_instance", "dmmap_qos", "policer");
 	return 0;
@@ -364,12 +360,11 @@ int os_delObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char *ins
 
 int os_addObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *value, *v;
 	struct uci_section  *dmmap = NULL, *s = NULL;
 
-	check_create_dmmap_package("dmmap_qos");
-	inst = get_last_instance_bbfdm("dmmap_qos", "queue", "queueinstance");
-	dmuci_add_section("qos", "queue", &s, &value);
+	char *inst = get_last_instance_bbfdm("dmmap_qos", "queue", "queueinstance");
+
+	dmuci_add_section("qos", "queue", &s);
 	dmuci_set_value_by_section(s, "enable", "false");
 	dmuci_set_value_by_section(s, "weight", "0");
 	dmuci_set_value_by_section(s, "precedence", "0");
@@ -378,7 +373,7 @@ int os_addObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char **inst
 	dmuci_set_value_by_section(s, "rate", "0");
 	dmuci_set_value_by_section(s, "traffic_class", "0");
 
-	dmuci_add_section_bbfdm("dmmap_qos", "queue", &dmmap, &v);
+	dmuci_add_section_bbfdm("dmmap_qos", "queue", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	*instance = update_instance(inst, 4, dmmap, "queueinstance", "dmmap_qos", "queue");
 	return 0;
@@ -446,18 +441,16 @@ int os_delObjQoSQueueStats(char *refparam, struct dmctx *ctx, void *data, char *
 
 int os_addObjQoSShaper(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *value, *v;
 	struct uci_section  *dmmap = NULL, *s = NULL;
 
-	check_create_dmmap_package("dmmap_qos");
-	inst = get_last_instance_bbfdm("dmmap_qos", "shaper", "shaperinstance");
-	dmuci_add_section("qos", "shaper", &s, &value);
+	char *inst = get_last_instance_bbfdm("dmmap_qos", "shaper", "shaperinstance");
 
+	dmuci_add_section("qos", "shaper", &s);
 	dmuci_set_value_by_section(s, "enable", "0");
 	dmuci_set_value_by_section(s, "burst_size", "0");
 	dmuci_set_value_by_section(s, "rate", "0");
 
-	dmuci_add_section_bbfdm("dmmap_qos", "shaper", &dmmap, &v);
+	dmuci_add_section_bbfdm("dmmap_qos", "shaper", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	*instance = update_instance(inst, 4, dmmap, "shaperinstance", "dmmap_qos", "shaper");
 	return 0;

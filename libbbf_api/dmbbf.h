@@ -568,7 +568,7 @@ char *update_instance(char *max_inst, int argc, ...);
 char *update_instance_alias(int action, char **last_inst, char **max_inst, void *argv[]);
 char *update_instance_without_section(int action, char **last_inst, char **max_inst, void *argv[]);
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-void add_list_paramameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_version, unsigned int flags);
+void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_version, unsigned int flags);
 void api_del_list_parameter(struct dm_parameter *dm_parameter);
 void free_all_list_parameter(struct dmctx *ctx);
 void add_set_list_tmp(struct dmctx *ctx, char *param, char *value, unsigned int flags);

@@ -34,19 +34,18 @@ static int browseUserInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 
 static int add_users_user(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	struct uci_section *s, *dmmap_user;
-	char ib[8], *last_inst = NULL, *sect_name = NULL, *username, *v;
+	struct uci_section *s = NULL, *dmmap_user = NULL;
+	char username[32];
 
-	check_create_dmmap_package("dmmap_users");
-	last_inst = get_last_instance_bbfdm("dmmap_users", "user", "user_instance");
-	snprintf(ib, sizeof(ib), "%s", last_inst ? last_inst : "1");
-	dmasprintf(&username, "user_%d", atoi(ib)+1);
-	dmuci_add_section("users", "user", &s, &sect_name);
+	char *last_inst = get_last_instance_bbfdm("dmmap_users", "user", "user_instance");
+	snprintf(username, sizeof(username), "user_%d", last_inst ? atoi(last_inst) + 1 : 1);
+
+	dmuci_add_section("users", "user", &s);
 	dmuci_rename_section_by_section(s, username);
 	dmuci_set_value_by_section(s, "enabled", "1");
 	dmuci_set_value_by_section(s, "password", username);
 
-	dmuci_add_section_bbfdm("dmmap_users", "user", &dmmap_user, &v);
+	dmuci_add_section_bbfdm("dmmap_users", "user", &dmmap_user);
 	dmuci_set_value_by_section(dmmap_user, "section_name", username);
 	*instance = update_instance(last_inst, 4, dmmap_user, "user_instance", "dmmap_users", "user");
 	return 0;

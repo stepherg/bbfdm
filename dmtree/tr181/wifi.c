@@ -1818,19 +1818,19 @@ static int get_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 **************************************************************/
 static int add_wifi_ssid(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *value, *v, *inst, ssid[32] = {0};
 	struct uci_section *s = NULL, *dmmap_wifi = NULL;
+	char ssid[32] = {0};
 
-	check_create_dmmap_package("dmmap_wireless");
-	inst = get_last_instance_bbfdm("dmmap_wireless", "wifi-iface", "ssidinstance");
+	char *inst = get_last_instance_bbfdm("dmmap_wireless", "wifi-iface", "ssidinstance");
 	snprintf(ssid, sizeof(ssid), "iopsys_%d", inst ? (atoi(inst)+1) : 1);
-	dmuci_add_section("wireless", "wifi-iface", &s, &value);
+
+	dmuci_add_section("wireless", "wifi-iface", &s);
 	dmuci_set_value_by_section(s, "ssid", ssid);
 	dmuci_set_value_by_section(s, "network", "lan");
 	dmuci_set_value_by_section(s, "mode", "ap");
 	dmuci_set_value_by_section(s, "disabled", "0");
 
-	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_wifi, &v);
+	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_wifi);
 	dmuci_set_value_by_section(dmmap_wifi, "section_name", section_name(s));
 	*instance = update_instance(inst, 4, dmmap_wifi, "ssidinstance", "dmmap_wireless", "wifi-iface");
 	return 0;
@@ -1869,19 +1869,19 @@ static int delete_wifi_ssid(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int add_wifi_accesspoint(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *value, *v, *inst, ssid[32] = {0};
 	struct uci_section *s = NULL, *dmmap_wifi = NULL;
+	char ssid[32] = {0};
 
-	check_create_dmmap_package("dmmap_wireless");
-	inst = get_last_instance_bbfdm("dmmap_wireless", "wifi-iface", "ap_instance");
+	char *inst = get_last_instance_bbfdm("dmmap_wireless", "wifi-iface", "ap_instance");
 	snprintf(ssid, sizeof(ssid), "iopsys_%d", inst ? (atoi(inst)+1) : 1);
-	dmuci_add_section("wireless", "wifi-iface", &s, &value);
+
+	dmuci_add_section("wireless", "wifi-iface", &s);
 	dmuci_set_value_by_section(s, "ssid", ssid);
 	dmuci_set_value_by_section(s, "network", "lan");
 	dmuci_set_value_by_section(s, "mode", "ap");
 	dmuci_set_value_by_section(s, "disabled", "0");
 
-	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_wifi, &v);
+	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_wifi);
 	dmuci_set_value_by_section(dmmap_wifi, "section_name", section_name(s));
 	*instance = update_instance(inst, 4, dmmap_wifi, "ap_instance", "dmmap_wireless", "wifi-iface");
 	return 0;
@@ -1920,19 +1920,19 @@ static int delete_wifi_accesspoint(char *refparam, struct dmctx *ctx, void *data
 
 static int addObjWiFiEndPoint(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *value, *v, *instancepara, *instancepara1, *instancepara2;
-	struct uci_section *endpoint_sec = NULL, *dmmap_sec= NULL;
+	char *instancepara, *instancepara1, *instancepara2;
+	struct uci_section *endpoint_sec = NULL, *dmmap_sec = NULL;
 
-	check_create_dmmap_package("dmmap_wireless");
 	instancepara1 = get_last_instance_lev2_bbfdm("wireless", "wifi-iface", "dmmap_wireless", "endpointinstance", "mode", "wet")?get_last_instance_lev2_bbfdm("wireless", "wifi-iface", "dmmap_wireless", "endpointinstance", "mode", "wet"):"0";
 	instancepara2 = get_last_instance_lev2_bbfdm("wireless", "wifi-iface", "dmmap_wireless", "endpointinstance", "mode", "sta")?get_last_instance_lev2_bbfdm("wireless", "wifi-iface", "dmmap_wireless", "endpointinstance", "mode", "sta"):"0";
 	instancepara = atoi(instancepara1)>atoi(instancepara2)?dmstrdup(instancepara1):dmstrdup(instancepara2);
-	dmuci_add_section("wireless", "wifi-iface", &endpoint_sec, &value);
+
+	dmuci_add_section("wireless", "wifi-iface", &endpoint_sec);
 	dmuci_set_value_by_section(endpoint_sec, "device", "wl1");
 	dmuci_set_value_by_section(endpoint_sec, "mode", "wet");
 	dmuci_set_value_by_section(endpoint_sec, "network", "lan");
 
-	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_sec, &v);
+	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_sec);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(endpoint_sec));
 	*instance = update_instance(instancepara, 4, dmmap_sec, "endpointinstance", "dmmap_wireless", "wifi-iface");
 	return 0;
@@ -2071,18 +2071,16 @@ static int browseWiFiEndPointInst(struct dmctx *dmctx, DMNODE *parent_node, void
 
 static int browseWiFiEndPointProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct uci_section *s= NULL;
-	char *v, *max_inst = NULL, *ep_instance;
+	struct uci_section *s = NULL;
+	char *max_inst = NULL, *ep_instance;
 	struct wifi_enp_args *ep_args = (struct wifi_enp_args *)prev_data;
 	struct uci_section *dmmap_section = NULL;
-
-	check_create_dmmap_package("dmmap_wireless");
 
 	get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name(ep_args->wifi_enp_sec), &dmmap_section);
 	dmuci_get_value_by_section_string(dmmap_section, "endpointinstance", &ep_instance);
 	s = is_dmmap_section_exist_eq("dmmap_wireless", "ep_profile", "ep_key", ep_instance);
-	if(!s)
-		dmuci_add_section_bbfdm("dmmap_wireless", "ep_profile", &s, &v);
+	if (!s)
+		dmuci_add_section_bbfdm("dmmap_wireless", "ep_profile", &s);
 	dmuci_set_value_by_section_bbfdm(s, "ep_key", ep_instance);
 
 	handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,

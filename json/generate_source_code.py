@@ -406,15 +406,13 @@ def cprintAddDelObj( faddobj, fdelobj, name, mappingobj, dmobject ):
 	if mappingobj != None:
 		type, file, sectiontype, dmmapfile, path, ref = get_mapping_obj(mappingobj)
 		if type == "uci":
-			print("	char *inst, *value, *v;", file=fp)
 			print("	struct uci_section *dmmap = NULL, *s = NULL;", file=fp)
 			print("", file=fp)
-			print("	check_create_dmmap_package(\"%s\");" % dmmapfile, file=fp)
-			print("	inst = get_last_instance_bbfdm(\"%s\", \"%s\", \"%s\");" % (dmmapfile, sectiontype, name+"instance"), file=fp)
-			print("	dmuci_add_section(\"%s\", \"%s\", &s, &value);" % (file, sectiontype), file=fp)
+			print("	char *inst = get_last_instance_bbfdm(\"%s\", \"%s\", \"%s\");" % (dmmapfile, sectiontype, name+"instance"), file=fp)
+			print("	dmuci_add_section(\"%s\", \"%s\", &s);" % (file, sectiontype), file=fp)
 			print("	//dmuci_set_value_by_section(s, \"option\", \"value\");", file=fp)
 			print("", file=fp)
-			print("	dmuci_add_section_bbfdm(\"%s\", \"%s\", &dmmap, &v);" % (dmmapfile, sectiontype), file=fp)
+			print("	dmuci_add_section_bbfdm(\"%s\", \"%s\", &dmmap);" % (dmmapfile, sectiontype), file=fp)
 			print("	dmuci_set_value_by_section(dmmap, \"section_name\", section_name(s));", file=fp)
 			print("	*instance = update_instance(inst, 4, dmmap, \"%s\");" % (name+"instance"), file=fp)
 	else:

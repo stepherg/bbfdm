@@ -66,17 +66,17 @@ static inline int init_dsl_channel(struct dsl_channel_args *args, struct uci_sec
 static struct uci_section *update_create_dmmap_dsl_line(char *curr_id)
 {
 	struct uci_section *s = NULL;
-	char *name, *instance;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap", "dsl_line", "id", curr_id, s) {
 		return s;
 	}
 	if (!s) {
-		dmasprintf(&instance, "%d", atoi(curr_id));
-		dmuci_add_section_bbfdm("dmmap", "dsl_line", &s, &name);
+		char instance[16];
+
+		snprintf(instance, sizeof(instance), "%d", atoi(curr_id));
+		dmuci_add_section_bbfdm("dmmap", "dsl_line", &s);
 		dmuci_set_value_by_section_bbfdm(s, "id", curr_id);
 		dmuci_set_value_by_section_bbfdm(s, "dsl_line_instance", instance);
-		dmfree(instance);
 	}
 	return s;
 }
@@ -84,17 +84,17 @@ static struct uci_section *update_create_dmmap_dsl_line(char *curr_id)
 static struct uci_section *update_create_dmmap_dsl_channel(char *curr_id)
 {
 	struct uci_section *s = NULL;
-	char *name, *instance;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap", "dsl_channel", "id", curr_id, s) {
 		return s;
 	}
 	if (!s) {
-		dmasprintf(&instance, "%d", atoi(curr_id));
-		dmuci_add_section_bbfdm("dmmap", "dsl_channel", &s, &name);
+		char instance[16];
+
+		snprintf(instance, sizeof(instance), "%d", atoi(curr_id));
+		dmuci_add_section_bbfdm("dmmap", "dsl_channel", &s);
 		dmuci_set_value_by_section_bbfdm(s, "id", curr_id);
 		dmuci_set_value_by_section_bbfdm(s, "dsl_channel_instance", instance);
-		dmfree(instance);
 	}
 	return s;
 }

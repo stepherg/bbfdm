@@ -390,18 +390,16 @@ static int set_x_iopsys_eu_owsd_virtualhost_ca(char *refparam, struct dmctx *ctx
 /***** ADD DEL OBJ *******/
 static int add_owsd_listen(char *refparam, struct dmctx *ctx, void *data, char **instancepara)
 {
-	char *value, *v, *instance;
 	struct uci_section *listen_sec = NULL, *dmmap_sec = NULL;
 
-	check_create_dmmap_package("dmmap_owsd");
-	instance = get_last_instance_bbfdm("dmmap_owsd", "owsd-listen", "olisteninstance");
+	char *instance = get_last_instance_bbfdm("dmmap_owsd", "owsd-listen", "olisteninstance");
 
-	dmuci_add_section("owsd", "owsd-listen", &listen_sec, &value);
+	dmuci_add_section("owsd", "owsd-listen", &listen_sec);
 	dmuci_set_value_by_section(listen_sec, "ipv6", "on");
 	dmuci_set_value_by_section(listen_sec, "whitelist_interface_as_origin", "1");
 	dmuci_add_list_value_by_section(listen_sec, "origin", "*");
 
-	dmuci_add_section_bbfdm("dmmap_owsd", "owsd-listen", &dmmap_sec, &v);
+	dmuci_add_section_bbfdm("dmmap_owsd", "owsd-listen", &dmmap_sec);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(listen_sec));
 	*instancepara = update_instance(instance, 4, dmmap_sec, "olisteninstance", "dmmap_owsd", "owsd-listen");
 

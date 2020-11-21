@@ -419,7 +419,7 @@ int dmuci_del_list_value(char *package, char *section, char *option, char *value
 }
 
 /****** UCI ADD *******/
-char *dmuci_add_section(char *package, char *stype, struct uci_section **s, char **value)
+char *dmuci_add_section(char *package, char *stype, struct uci_section **s)
 {
 	struct uci_ptr ptr = {0};
 	char *fname, *val = "";
@@ -442,7 +442,6 @@ char *dmuci_add_section(char *package, char *stype, struct uci_section **s, char
 		&& uci_add_section(uci_ctx, ptr.p, stype, s) == UCI_OK)
 		val = dmstrdup((*s)->e.name);
 
-	*value = val;
 	return val;
 }
 

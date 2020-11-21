@@ -117,16 +117,17 @@ struct uci_section *get_dup_qos_stats_section_in_dmmap(char *dmmap_package, char
 int os_browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *dmmap_sect;
-	char *questatsout[256], *inst = NULL, *max_inst = NULL, *v, *lastinstancestore = NULL, dev[50] = "", user[50] = "";
+	char *questatsout[256], *inst = NULL, *max_inst = NULL, *lastinstancestore = NULL, dev[50] = "", user[50] = "";
 	int length, i, ret;
 	struct queuestats queuests = {0}, emptyquestats = {0};
 	regex_t regex1 = {}, regex2 = {};
 
 	regcomp(&regex1, "^qdisc noqueue [0-9]*: dev [[:alnum:]]* [[:alnum:]]* refcnt [0-9]*", 0);
 	regcomp(&regex2, "^qdisc pfifo_fast [0-9]*: dev [[:alnum:]]* [[:alnum:]]* refcnt [0-9]*", 0);
-	check_create_dmmap_package("dmmap_qos");
+
 	command_exec_output_to_array("tc -s qdisc", questatsout, &length);
-	for (i = 0; i < length; i++){
+
+	for (i = 0; i < length; i++) {
 		switch (i%3) {
 			case 0: ret = regexec(&regex1, questatsout[i], 0, NULL, 0);
 				 	if (ret == 0)
@@ -142,12 +143,13 @@ int os_browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 					break;
 			case 2: sscanf(questatsout[i], " backlog %db %dp requeues %d\n", &queuests.backlog_b, &queuests.backlog_p, &queuests.backlog_requeues);
 					if ((dmmap_sect = get_dup_qos_stats_section_in_dmmap("dmmap_qos", "qos_queue_stats", queuests.dev)) == NULL) {
-						dmuci_add_section_bbfdm("dmmap_qos", "qos_queue_stats", &dmmap_sect, &v);
+						dmuci_add_section_bbfdm("dmmap_qos", "qos_queue_stats", &dmmap_sect);
 						dmuci_set_value_by_section_bbfdm(dmmap_sect, "dev_link", queuests.dev);
 					}
+
 					queuests.dmsect= dmmap_sect;
 
-					if(lastinstancestore != NULL && max_inst != NULL)
+					if (lastinstancestore != NULL && max_inst != NULL)
 						max_inst = dmstrdup(lastinstancestore);
 
 					inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
@@ -157,14 +159,16 @@ int os_browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 
 					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&queuests, inst) == DM_STOP)
 						goto end;
+
 					queuests = emptyquestats;
 					break;
 		}
 	}
+
 	regfree(&regex1);
 	regfree(&regex2);
-	end:
-		return 0;
+end:
+	return 0;
 }
 
 int os_browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
@@ -176,20 +180,16 @@ int os_browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 int os_addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s, *dmmap_qos_classify;
-	char *last_inst = NULL, *sect_name = NULL, *qos_comment, *v;
-	char ib[8];
-	last_inst = get_last_instance_bbfdm("dmmap_qos", "classify", "classifinstance");
-	if (last_inst)
-		snprintf(ib, sizeof(ib), "%s", last_inst);
-	else
-		snprintf(ib, sizeof(ib), "%s", "1");
-	dmasprintf(&qos_comment, "QoS classify %d", atoi(ib)+1);
+	char qos_comment[32];
 
-	dmuci_add_section("qos", "classify", &s, &sect_name);
+	char *last_inst = get_last_instance_bbfdm("dmmap_qos", "classify", "classifinstance");
+	snprintf(qos_comment, sizeof(qos_comment), "QoS classify %s", (last_inst) ? last_inst : "1");
+
+	dmuci_add_section("qos", "classify", &s);
 	dmuci_set_value_by_section(s, "comment", qos_comment);
 
-	dmuci_add_section_bbfdm("dmmap_qos", "classify", &dmmap_qos_classify, &v);
-	dmuci_set_value_by_section(dmmap_qos_classify, "section_name", sect_name);
+	dmuci_add_section_bbfdm("dmmap_qos", "classify", &dmmap_qos_classify);
+	dmuci_set_value_by_section(dmmap_qos_classify, "section_name", section_name(s));
 	*instance = update_instance(last_inst, 4, dmmap_qos_classify, "classifinstance", "dmmap_qos", "classify");
 	return 0;
 }
@@ -298,20 +298,14 @@ int os_delObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char *ins
 #if 0
 int os_addObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	struct uci_section *s, *dmmap_qos_class;
-	char *last_inst = NULL, *sect_name = NULL, *v;
-	char ib[8];
+	struct uci_section *s = NULL;, *dmmap_qos_class = NULL;
 
-	last_inst = get_last_instance_bbfdm("dmmap_qos", "class", "queueinstance");
-	if (last_inst)
-		snprintf(ib, sizeof(ib), "%s", last_inst);
-	else
-		snprintf(ib, sizeof(ib), "%s", "1");
+	char *last_inst = get_last_instance_bbfdm("dmmap_qos", "class", "queueinstance");
 
-	dmuci_add_section("qos", "class", &s, &sect_name);
+	dmuci_add_section("qos", "class", &s);
 	dmuci_set_value_by_section(s, "packetsize", "1000");
 
-	dmuci_add_section_bbfdm("dmmap_qos", "class", &dmmap_qos_class, &v);
+	dmuci_add_section_bbfdm("dmmap_qos", "class", &dmmap_qos_class);
 	dmuci_set_value_by_section(dmmap_qos_class, "section_name", sect_name);
 	*instance = update_instance(last_inst, 4, dmmap_qos_class, "queueinstance", "dmmap_qos", "class");
 	return 0;
@@ -396,20 +390,14 @@ int os_delObjQoSShaper(char *refparam, struct dmctx *ctx, void *data, char *inst
 int addObjQoSShaper(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s, *dmmap_qos_class;
-	char *last_inst = NULL, *sect_name = NULL, *v;
-	char ib[8];
 
-	last_inst= get_last_instance_bbfdm_without_update("dmmap_qos", "class", "shaperinstance");
-	if (last_inst)
-		snprintf(ib, sizeof(ib), "%s", last_inst);
-	else
-		snprintf(ib, sizeof(ib), "%s", "1");
+	char *last_inst = get_last_instance_bbfdm_without_update("dmmap_qos", "class", "shaperinstance");
 
-	dmuci_add_section("qos", "class", &s, &sect_name);
+	dmuci_add_section("qos", "class", &s);
 	dmuci_set_value_by_section(s, "limitrate", "1000");
 
-	dmuci_add_section_bbfdm("dmmap_qos", "class", &dmmap_qos_class, &v);
-	dmuci_set_value_by_section(dmmap_qos_class, "section_name", sect_name);
+	dmuci_add_section_bbfdm("dmmap_qos", "class", &dmmap_qos_class);
+	dmuci_set_value_by_section(dmmap_qos_class, "section_name", section_name(s));
 	*instance = update_instance(last_inst, 4, dmmap_qos_class, "shaperinstance", "dmmap_qos", "class");
 	return 0;
 }

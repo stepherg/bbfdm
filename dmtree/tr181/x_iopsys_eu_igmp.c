@@ -48,7 +48,6 @@ static void sync_mcast_dmmap_iface_sec(struct uci_list *proxy_iface, char *s_mod
 	int found = 0;
 	char key[1024] = "";
 	char *s_name;
-	char *v;
 
 	uci_foreach_element(proxy_iface, e) {
 		char *p_ifname = dmstrdup(e->name);
@@ -72,7 +71,7 @@ static void sync_mcast_dmmap_iface_sec(struct uci_list *proxy_iface, char *s_mod
 
 		if (found == 0) {
 			// add entry in dmmap for this
-			dmuci_add_section_bbfdm(dmmap_package, dmmap_sec, &d_sec, &v);
+			dmuci_add_section_bbfdm(dmmap_package, dmmap_sec, &d_sec);
 			dmuci_set_value_by_section_bbfdm(d_sec, "section_name", section_name(s));
 			dmuci_set_value_by_section_bbfdm(d_sec, "ifname", key);
 			dmuci_set_value_by_section_bbfdm(d_sec, "upstream", up_iface);
@@ -103,7 +102,6 @@ void synchronize_specific_config_sections_with_dmmap_mcast_iface(char *package, 
 	struct uci_section *s, *stmp;
 	char *v;
 
-	dmmap_file_path_get(dmmap_package);
 	uci_foreach_option_eq(package, section_type, "proto", proto, s) {
 		if (strcmp(section_name(s), section_name((struct uci_section *)data)) != 0)
 			continue;
@@ -147,7 +145,6 @@ void synchronize_specific_config_sections_with_dmmap_mcast_filter(char *package,
 	struct uci_section *s, *dmmap_sect, *d_sec, *stmp;
 	char *v, *s_name;
 
-	dmmap_file_path_get(dmmap_package);
 	uci_foreach_option_eq(package, section_type, "proto", proto, s) {
 		if (strcmp(section_name(s), section_name((struct uci_section *)data)) != 0)
 			continue;
@@ -173,7 +170,7 @@ void synchronize_specific_config_sections_with_dmmap_mcast_filter(char *package,
 
 				if (found == 0) {
 					// add entry in dmmap for this
-					dmuci_add_section_bbfdm(dmmap_package, dmmap_sec, &d_sec, &v);
+					dmuci_add_section_bbfdm(dmmap_package, dmmap_sec, &d_sec);
 					dmuci_set_value_by_section_bbfdm(d_sec, "section_name", section_name(s));
 					dmuci_set_value_by_section_bbfdm(d_sec, "ipaddr", ip_addr);
 					dmuci_set_value_by_section_bbfdm(d_sec, "enable", "1");
@@ -271,15 +268,14 @@ int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
 
 static int add_igmp_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *value, *v, *s_name;
 	struct uci_section  *dmmap = NULL, *s = NULL;
 	struct browse_args browse_args = {0};
+	char s_name[32];
 
-	check_create_dmmap_package("dmmap_mcast");
-	inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "proxy", "proxy_instance", "proto", "igmp");
-	dmasprintf(&s_name, "igmp_proxy_%d", inst ? atoi(inst)+1 : 1);
+	char *inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "proxy", "proxy_instance", "proto", "igmp");
+	snprintf(s_name, sizeof(s_name), "igmp_proxy_%d", inst ? atoi(inst)+1 : 1);
 
-	dmuci_add_section("mcast", "proxy", &s, &value);
+	dmuci_add_section("mcast", "proxy", &s);
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "enable", "0");
 	dmuci_set_value_by_section(s, "proto", "igmp");
@@ -290,8 +286,8 @@ static int add_igmp_proxy_obj(char *refparam, struct dmctx *ctx, void *data, cha
 	browse_args.option = "proto";
 	browse_args.value = "igmp";
 
-	dmuci_add_section_bbfdm("dmmap_mcast", "proxy", &dmmap, &v);
-	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
+	dmuci_add_section_bbfdm("dmmap_mcast", "proxy", &dmmap);
+	dmuci_set_value_by_section(dmmap, "section_name", s_name);
 	dmuci_set_value_by_section(dmmap, "proto", "igmp");
 	*instance = update_instance(inst, 6, dmmap, "proxy_instance", "dmmap_mcast", "proxy", check_browse_section, (void *)&browse_args);
 
@@ -370,15 +366,14 @@ static int browse_igmp_proxy_inst(struct dmctx *dmctx, DMNODE *parent_node, void
 
 static int add_igmp_snooping_obj(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *value, *v, *s_name;
 	struct uci_section  *dmmap = NULL, *s = NULL;
 	struct browse_args browse_args = {0};
+	char s_name[32];
 
-	check_create_dmmap_package("dmmap_mcast");
-	inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "snooping", "snooping_instance", "proto", "igmp");
-	dmasprintf(&s_name, "igmp_snoop_%d", inst ? atoi(inst)+1 : 1);
+	char *inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "snooping", "snooping_instance", "proto", "igmp");
+	snprintf(s_name, sizeof(s_name), "igmp_snoop_%d", inst ? atoi(inst)+1 : 1);
 
-	dmuci_add_section("mcast", "snooping", &s, &value);
+	dmuci_add_section("mcast", "snooping", &s);
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "enable", "0");
 	dmuci_set_value_by_section(s, "proto", "igmp");
@@ -389,8 +384,8 @@ static int add_igmp_snooping_obj(char *refparam, struct dmctx *ctx, void *data, 
 	browse_args.option = "proto";
 	browse_args.value = "igmp";
 
-	dmuci_add_section_bbfdm("dmmap_mcast", "snooping", &dmmap, &v);
-	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
+	dmuci_add_section_bbfdm("dmmap_mcast", "snooping", &dmmap);
+	dmuci_set_value_by_section(dmmap, "section_name", s_name);
 	dmuci_set_value_by_section(dmmap, "proto", "igmp");
 	*instance = update_instance(inst, 6, dmmap, "snooping_instance", "dmmap_mcast", "snooping", check_browse_section, (void *)&browse_args);
 
@@ -511,14 +506,13 @@ static int browse_igmp_cgrp_inst(struct dmctx *dmctx, DMNODE *parent_node, void 
 
 static int add_igmps_filter_obj(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *last_inst, *v;
 	struct uci_section *dmmap_igmps_filter = NULL;
 	struct browse_args browse_args = {0};
 
-	last_inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "snooping_filter", "filter_instance",
+	char *last_inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "snooping_filter", "filter_instance",
 					"section_name", section_name((struct uci_section *)data));
 
-	dmuci_add_section_bbfdm("dmmap_mcast", "snooping_filter", &dmmap_igmps_filter, &v);
+	dmuci_add_section_bbfdm("dmmap_mcast", "snooping_filter", &dmmap_igmps_filter);
 	dmuci_set_value_by_section(dmmap_igmps_filter, "section_name", section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_igmps_filter, "enable", "0");
 
@@ -946,14 +940,13 @@ int set_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, 
 static int add_igmpp_interface_obj(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	// This section works but commented for now as it is tested not much yet.
-	char *last_inst, *v;
 	struct uci_section *dmmap_igmpp_interface = NULL;
 	struct browse_args browse_args = {0};
 
-	last_inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "proxy_interface", "iface_instance",
+	char *last_inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "proxy_interface", "iface_instance",
 					"section_name", section_name((struct uci_section *)data));
 
-	dmuci_add_section_bbfdm("dmmap_mcast", "proxy_interface", &dmmap_igmpp_interface, &v);
+	dmuci_add_section_bbfdm("dmmap_mcast", "proxy_interface", &dmmap_igmpp_interface);
 	dmuci_set_value_by_section(dmmap_igmpp_interface, "section_name",
 				section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_igmpp_interface, "upstream", "0");
@@ -1087,14 +1080,13 @@ static int browse_igmpp_interface_inst(struct dmctx *dmctx, DMNODE *parent_node,
 
 static int add_igmpp_filter_obj(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *last_inst, *v;
 	struct uci_section *dmmap_igmpp_filter = NULL;
 	struct browse_args browse_args = {0};
 
-	last_inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "proxy_filter", "filter_instance",
+	char *last_inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_mcast", "proxy_filter", "filter_instance",
 			"section_name", section_name((struct uci_section *)data));
 
-	dmuci_add_section_bbfdm("dmmap_mcast", "proxy_filter", &dmmap_igmpp_filter, &v);
+	dmuci_add_section_bbfdm("dmmap_mcast", "proxy_filter", &dmmap_igmpp_filter);
 	dmuci_set_value_by_section(dmmap_igmpp_filter, "section_name",
 			section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_igmpp_filter, "enable", "0");

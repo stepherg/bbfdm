@@ -213,14 +213,12 @@ static int delObjServicesVoiceServiceCallControlCallingFeaturesSet(char *refpara
 
 static int addObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *inst, *value, *v;
 	struct uci_section *dmmap = NULL, *s = NULL;
 
-	check_create_dmmap_package("dmmap_asterisk");
-	inst = get_last_instance_bbfdm("dmmap_asterisk", "call_filter_rule_incoming", "screjinstance");
-	dmuci_add_section("asterisk", "call_filter_rule_incoming", &s, &value);
+	char *inst = get_last_instance_bbfdm("dmmap_asterisk", "call_filter_rule_incoming", "screjinstance");
+	dmuci_add_section("asterisk", "call_filter_rule_incoming", &s);
 
-	dmuci_add_section_bbfdm("dmmap_asterisk", "call_filter_rule_incoming", &dmmap, &v);
+	dmuci_add_section_bbfdm("dmmap_asterisk", "call_filter_rule_incoming", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
 	*instance = update_instance(inst, 4, dmmap, "screjinstance", "dmmap_asterisk", "call_filter_rule_incoming");
 	return 0;

@@ -223,7 +223,7 @@ static int get_SoftwareModulesExecEnv_Alias(char *refparam, struct dmctx *ctx, v
 static int set_SoftwareModulesExecEnv_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s = NULL, *dmmap = NULL;
-	char *name, *v;
+	char *name;
 	int found = 0;
 
 	switch (action)	{
@@ -238,7 +238,7 @@ static int set_SoftwareModulesExecEnv_Alias(char *refparam, struct dmctx *ctx, v
 				found = 1;
 			}
 			if (!found) {
-				dmuci_add_section_bbfdm("dmmap", "environment", &dmmap, &v);
+				dmuci_add_section_bbfdm("dmmap", "environment", &dmmap);
 				dmuci_set_value_by_section(dmmap, "name", name);
 				dmuci_set_value_by_section(dmmap, "alias", value);
 			}
@@ -383,7 +383,7 @@ static int get_SoftwareModulesDeploymentUnit_Alias(char *refparam, struct dmctx 
 static int set_SoftwareModulesDeploymentUnit_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s = NULL, *dmmap = NULL;
-	char *du_name, *du_env, *environment, *name, *v;
+	char *du_name, *du_env, *environment, *name;
 	int found = 0;
 
 	switch (action)	{
@@ -404,7 +404,7 @@ static int set_SoftwareModulesDeploymentUnit_Alias(char *refparam, struct dmctx 
 				}
 			}
 			if (!found) {
-				dmuci_add_section_bbfdm("dmmap", "deployment_unit", &dmmap, &v);
+				dmuci_add_section_bbfdm("dmmap", "deployment_unit", &dmmap);
 				dmuci_set_value_by_section(dmmap, "name", name);
 				dmuci_set_value_by_section(dmmap, "environment", environment);
 				dmuci_set_value_by_section(dmmap, "alias", value);
@@ -554,7 +554,7 @@ static int get_SoftwareModulesExecutionUnit_Alias(char *refparam, struct dmctx *
 static int set_SoftwareModulesExecutionUnit_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s = NULL, *dmmap = NULL;
-	char *eu_euid, *eu_env, *environment, *euid, *v;
+	char *eu_euid, *eu_env, *environment, *euid;
 	int found = 0;
 
 	switch (action)	{
@@ -575,7 +575,7 @@ static int set_SoftwareModulesExecutionUnit_Alias(char *refparam, struct dmctx *
 				}
 			}
 			if (!found) {
-				dmuci_add_section_bbfdm("dmmap", "execution_unit", &dmmap, &v);
+				dmuci_add_section_bbfdm("dmmap", "execution_unit", &dmmap);
 				dmuci_set_value_by_section(dmmap, "euid", euid);
 				dmuci_set_value_by_section(dmmap, "environment", environment);
 				dmuci_set_value_by_section(dmmap, "alias", value);

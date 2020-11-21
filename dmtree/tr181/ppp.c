@@ -401,18 +401,18 @@ static int get_linker_ppp_interface(char *refparam, struct dmctx *dmctx, void *d
 **************************************************************/
 static int add_ppp_interface(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char name[16] = {0};
-	char *inst, *v;
 	struct uci_section *dmmap_ppp = NULL;
+	char name[16] = {0};
 
-	check_create_dmmap_package("dmmap_network");
-	inst = get_last_instance_lev2_bbfdm("network", "interface", "dmmap_network", "ppp_int_instance", "proto", "ppp");
+	char *inst = get_last_instance_lev2_bbfdm("network", "interface", "dmmap_network", "ppp_int_instance", "proto", "ppp");
 	snprintf(name, sizeof(name), "ppp_%d", inst ? (atoi(inst)+1) : 1);
+
 	dmuci_set_value("network", name, "", "interface");
 	dmuci_set_value("network", name, "proto", "ppp");
 	dmuci_set_value("network", name, "username", name);
 	dmuci_set_value("network", name, "password", name);
-	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ppp, &v);
+
+	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ppp);
 	dmuci_set_value_by_section(dmmap_ppp, "section_name", name);
 	*instance = update_instance(inst, 4, dmmap_ppp, "ppp_int_instance", "dmmap_network", "interface");
 	return 0;
