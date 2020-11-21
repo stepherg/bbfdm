@@ -1146,6 +1146,22 @@ int string_to_bool(char *v, bool *b)
 	return -1;
 }
 
+static char *get_default_value_by_type(int type)
+{
+	switch (type) {
+		case DMT_UNINT:
+		case DMT_INT:
+		case DMT_UNLONG:
+		case DMT_LONG:
+		case DMT_BOOL:
+			return "0";
+		case DMT_TIME:
+			return "0001-01-01T00:00:00Z";
+		default:
+			return "";
+	}
+}
+
 void dmentry_instance_lookup_inparam(struct dmctx *ctx)
 {
 	char *pch, *spch, *in_param;
@@ -1242,6 +1258,10 @@ static int get_value_param(DMPARAM_ARGS)
 
 	dmastrcat(&full_param, node->current_object, lastname);
 	(get_cmd)(full_param, dmctx, data, instance, &value);
+
+	if (value && *value == '\0')
+		value = get_default_value_by_type(type);
+
 	add_list_paramameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0);
 	return 0;
 }
@@ -1262,6 +1282,10 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 	}
 
 	(get_cmd)(full_param, dmctx, data, instance, &value);
+
+	if (value && *value == '\0')
+		value = get_default_value_by_type(type);
+
 	add_list_paramameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0);
 	dmctx->stop = true;
 	return 0;
