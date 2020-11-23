@@ -382,6 +382,9 @@ static void dm_browse_schema_entry(struct dmctx *dmctx, DMNODE *parent_node, DMO
 	if (!bbfdatamodel_matches(entryobj->bbfdm_type))
 		return;
 
+	if (entryobj->checkdep && (check_dependency(entryobj->checkdep) == false))
+		return;
+
 	if (entryobj->browseinstobj) {
 		dmasprintf(&(node.current_object), "%s%s%c{i}%c", parent_obj, entryobj->obj, dm_delim, dm_delim);
 		if (dmctx->method_obj) {
