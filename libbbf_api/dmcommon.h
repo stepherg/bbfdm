@@ -41,6 +41,7 @@
 #include <getopt.h>
 #include <dlfcn.h>
 #include <fcntl.h>
+#include <math.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>

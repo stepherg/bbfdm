@@ -170,7 +170,17 @@ int os__get_process_size(char* refparam, struct dmctx *ctx, void *data, char *in
 /*#Device.DeviceInfo.ProcessStatus.Process.{i}.Priority!UBUS:router.system/processes//processes[@i-1].priority*/
 int os__get_process_priority(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+	int priority = 0;
+
 	*value = dmjson_get_value((json_object *)data, 1, "priority");
+
+	priority = (*value && **value) ? atoi(*value) : 0;
+
+	/* Convert Linux priority to a value between 0 and 99 */
+	priority = round((priority + 100) * 99 / 139);
+
+	dmasprintf(value, "%d", priority);
+
 	return 0;
 }
 
