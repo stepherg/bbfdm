@@ -937,7 +937,6 @@ static int get_dhcp_reserved_addresses(char *refparam, struct dmctx *ctx, void *
 	struct uci_section *s = NULL;
 	char *min, *max, *ip;
 	unsigned int n_min, n_max, n_ip;
-	*value = "";
 
 	get_dhcp_interval_address(ctx, data, instance, &min, LANIP_INTERVAL_START);
 	get_dhcp_interval_address(ctx, data, instance, &max, LANIP_INTERVAL_END);
@@ -964,9 +963,8 @@ static int get_dhcp_reserved_addresses(char *refparam, struct dmctx *ctx, void *
 
 static int set_dhcp_reserved_addresses(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s = NULL, *dhcp_section = NULL;
 	char *min, *max, *local_value, *pch, *spch = NULL;
-	unsigned int n_min, n_max, n_ip, ipexist= 0;
+	unsigned int n_min, n_max;
 
 	switch (action) {
 		case VALUECHECK:
@@ -980,22 +978,32 @@ static int set_dhcp_reserved_addresses(char *refparam, struct dmctx *ctx, void *
 			n_max = inet_network(max);
 			local_value = dmstrdup(value);
 
-			for (pch = strtok_r(local_value, ",", &spch);
-				pch != NULL;
-				pch = strtok_r(NULL, ",", &spch)) {
-				uci_foreach_option_eq("dhcp", "host", "ip", pch, s) {
-					ipexist = 1;
-				}
-				if(ipexist)
-					continue;
-				n_ip = inet_network(pch);
+			for (pch = strtok_r(local_value, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 
+				bool host_exist = false;
+
+				// Check if host exists
+				struct uci_section *s = NULL;
+				uci_foreach_option_eq("dhcp", "host", "ip", pch, s) {
+					host_exist = true;
+				}
+
+				// host exists -> skip it
+				if (host_exist)
+					continue;
+
+				unsigned int n_ip = inet_network(pch);
+
+				// Check ip address in dhcp range -> if not, skip it
 				if (n_ip < n_min || n_ip > n_max)
 					continue;
 
-				dmuci_add_section("dhcp", "host", &dhcp_section);
-				dmuci_set_value_by_section(dhcp_section, "dhcp", ((struct dhcp_args *)data)->interface);
-				dmuci_set_value_by_section(dhcp_section, "ip", pch);
+				// host doesn't exist -> create an new one
+				struct uci_section *dhcp_host_section = NULL;
+				dmuci_add_section("dhcp", "host", &dhcp_host_section);
+				dmuci_set_value_by_section(dhcp_host_section, "name", "reserved");
+				dmuci_set_value_by_section(dhcp_host_section, "dhcp", ((struct dhcp_args *)data)->interface);
+				dmuci_set_value_by_section(dhcp_host_section, "ip", pch);
 			}
 			dmfree(local_value);
 			return 0;
