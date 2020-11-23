@@ -34,7 +34,7 @@
 #define DELIMITOR ","
 #define DM_PROMPT "icwmp>"
 
-#define DM_ENABLED_NOTIFY "/etc/icwmpd/.dm_enabled_notify"
+#define DM_ENABLED_NOTIFY "/etc/bbfdm/.dm_enabled_notify"
 #define DM_ENABLED_NOTIFY_TEMPORARY "/tmp/.dm_enabled_notify_temporary"
 
 #ifdef BBF_TR064
