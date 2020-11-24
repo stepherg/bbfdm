@@ -58,6 +58,7 @@ char *ProfileEnable[] = {"Disabled", "Quiescent", "Enabled"};
 char *SupportedOperatingChannelBandwidth[] = {"20MHz", "40MHz", "80MHz", "160MHZ", "80+80MHz", "Auto"};
 char *SupportedStandards[] = {"a", "b", "g", "n", "ac", "ax"};
 char *SupportedFrequencyBands[] = {"2.4GHz", "5GHz"};
+char *Provider_Bridge_Type[] = {"S-VLAN", "PE"};
 
 char *PIN[] = {"^\\d{4}|\\d{8}$"};
 char *DestinationAddress[] = {"^\\d+/\\d+$"};
@@ -727,6 +728,42 @@ void synchronize_specific_config_sections_with_dmmap_cont(char *package, char *s
 		dmuci_get_value_by_section_string(s, "section_name", &v);
 		if (get_origin_section_from_config(package, section_type, v) == NULL)
 			dmuci_delete_by_section(s, NULL, NULL);
+	}
+}
+
+void synchronize_specific_config_sections_with_dmmap_network(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list)
+{
+	struct uci_section *s, *stmp, *dmmap_sect;
+	char *v;
+
+	dmmap_file_path_get(dmmap_package);
+
+	uci_foreach_sections(package, section_type, s) {
+		/*
+		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
+		 * If the section belong to provider bridge (section name: pr_br_{i}) then skip adding to dmmap_package
+		 */
+		if((strncmp(section_name(s), "pr_br_", 6)) == 0)
+			continue;
+
+		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
+			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect, &v);
+			DMUCI_SET_VALUE_BY_SECTION(bbfdm, dmmap_sect, "section_name", section_name(s));
+		}
+
+		/*
+		 * Add system and dmmap sections to the list
+		 */
+		add_sectons_list_paramameter(dup_list, s, dmmap_sect, NULL);
+	}
+
+	/*
+	 * Delete unused dmmap sections
+	 */
+	uci_path_foreach_sections_safe(bbfdm, dmmap_package, section_type, stmp, s) {
+		dmuci_get_value_by_section_string(s, "section_name", &v);
+		if (get_origin_section_from_config(package, section_type, v) == NULL)
+			dmuci_delete_by_section_unnamed_bbfdm(s, NULL, NULL);
 	}
 }
 

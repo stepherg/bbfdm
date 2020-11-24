@@ -112,6 +112,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			strchr(ifname, '@'))
 			continue;
 
+		// Skip if its a provider bridge configuration
+		if (strncmp(section_name(s), "pr_br_", 6) == 0)
+			continue;
+
 		// The higher layer is Device.IP.Interface.{i}.
 		layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_network", "interface", "section_name", section_name(s), "ip_int_instance", "ip_int_alias");
 		if (*layer_inst == '\0')
@@ -364,7 +368,9 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			char *int_name;
 			dmuci_get_value_by_section_string(s, "section_name", &int_name);
 			struct uci_section *dmmap_section, *port;
-			get_dmmap_section_of_config_section("dmmap_network", "interface", int_name, &dmmap_section);
+
+			get_dmmap_section_of_config_section("dmmap_bridge", "bridge", int_name, &dmmap_section);
+
 			if (dmmap_section != NULL) {
 				char *br_inst, *mg;
 				dmuci_get_value_by_section_string(dmmap_section, "bridge_instance", &br_inst);
@@ -433,13 +439,11 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	}
 
 	/* Higher layers are Device.Bridging.Bridge.{i}.Port.{i}.*/
-	uci_foreach_sections("network", "interface", s) {
-		char *type;
-		dmuci_get_value_by_section_string(s, "type", &type);
-		if (strcmp(type, "bridge") != 0)
-			continue;
+	uci_path_foreach_sections(bbfdm, "dmmap_bridge", "bridge", s) {
 
-		char *br_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_network", "interface", "section_name", section_name(s), "bridge_instance", "bridge_alias");
+		char *br_inst;
+		dmuci_get_value_by_section_string(s, "bridge_instance", &br_inst);
+
 		if (*br_inst == '\0')
 			continue;
 

@@ -243,7 +243,7 @@ int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
 	/* Find out bridge section name using bridge key. */
 	struct uci_section *s = NULL;
 	char *sec_name;
-	uci_path_foreach_option_eq(bbfdm, "dmmap_network", "interface", "bridge_instance", key, s) {
+	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge", "bridge", "bridge_instance", key, s) {
 		dmuci_get_value_by_section_string(s, "section_name", &sec_name);
 		break;
 	}
@@ -267,6 +267,7 @@ int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
 	}
 
 	return 0;
+
 }
 
 static int add_igmp_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char **instance)
@@ -905,11 +906,11 @@ int get_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, 
 	}
 
 	strncpy(sec_name, end, sizeof(sec_name) - 1);
-	// In the dmmap_network file, the details related to the instance id etc. associated with this bridge
+	// In the dmmap_bridge file, the details related to the instance id etc. associated with this bridge
 	// is stored, we now switch our focus to it to extract the necessary information.
 	struct uci_section *dmmap_section, *port;
 
-	get_dmmap_section_of_config_section("dmmap_network", "interface", sec_name, &dmmap_section);
+	get_dmmap_section_of_config_section("dmmap_bridge", "bridge", sec_name, &dmmap_section);
 	if (dmmap_section != NULL) {
 		char *br_inst, *mg;
 		dmuci_get_value_by_section_string(dmmap_section, "bridge_instance", &br_inst);
@@ -1872,7 +1873,7 @@ static int get_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 				struct uci_section *dmmap_section, *port;
 				char *br_inst, *mg, linker[64] = "";
 
-				get_dmmap_section_of_config_section("dmmap_network", "interface", sec_name,
+				get_dmmap_section_of_config_section("dmmap_bridge", "bridge", sec_name,
 						&dmmap_section);
 				if (dmmap_section != NULL) {
 					dmuci_get_value_by_section_string(dmmap_section, "bridge_instance", &br_inst);

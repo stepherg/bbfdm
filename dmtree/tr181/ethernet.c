@@ -186,6 +186,10 @@ static int dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_nod
 		if (*ifname == '\0' || strchr(ifname, '@'))
 			continue;
 
+		// If the section belong to provider bridge (section name: pr_br_{i}) then skip adding to dmmap_package
+		if((strncmp(section_name(s), "pr_br_", 6)) == 0)
+			continue;
+
 		dmuci_get_value_by_section_string(s, "macaddr", &macaddr);
 		create_link(section_name(s), macaddr);
 	}
@@ -948,7 +952,8 @@ static int get_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 		char *int_name;
 		dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &int_name);
 		struct uci_section *dmmap_section, *port;
-		get_dmmap_section_of_config_section("dmmap_network", "interface", int_name, &dmmap_section);
+		get_dmmap_section_of_config_section("dmmap_bridge", "bridge", int_name, &dmmap_section);
+
 		if (dmmap_section != NULL) {
 			char *br_inst, *mg;
 			dmuci_get_value_by_section_string(dmmap_section, "bridge_instance", &br_inst);

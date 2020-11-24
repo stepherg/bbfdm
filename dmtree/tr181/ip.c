@@ -407,7 +407,7 @@ static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
-	synchronize_specific_config_sections_with_dmmap("network", "interface", "dmmap_network", &dup_list);
+        synchronize_specific_config_sections_with_dmmap_network("network", "interface", "dmmap_network", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
 		dmuci_get_value_by_section_string(p->config_section, "proto", &proto);

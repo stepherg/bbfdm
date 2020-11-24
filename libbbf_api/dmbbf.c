@@ -1146,16 +1146,6 @@ int string_to_bool(char *v, bool *b)
 	return -1;
 }
 
-static int is64digit(char c)
-{
-	if ((c >= '0' && c <= '9') ||
-		(c >= 'a' && c <= 'z') ||
-		(c >= 'A' && c <= 'Z') ||
-		(c == '+' || c == '/' || c == '='))
-		return 1;
-	return 0;
-}
-
 static char *check_value_by_type(char *value, int type)
 {
 	int i = 0, len = strlen(value);

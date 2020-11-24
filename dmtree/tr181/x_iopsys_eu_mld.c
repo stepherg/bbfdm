@@ -762,7 +762,7 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 				struct uci_section *dmmap_section, *port;
 				char *br_inst, *mg, linker[64] = "";
 
-				get_dmmap_section_of_config_section("dmmap_network", "interface", sec_name,
+				get_dmmap_section_of_config_section("dmmap_bridge", "bridge", sec_name,
 						&dmmap_section);
 				if (dmmap_section != NULL) {
 					dmuci_get_value_by_section_string(dmmap_section, "bridge_instance", &br_inst);
