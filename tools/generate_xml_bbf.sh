@@ -1,15 +1,11 @@
 #!/bin/sh
 
-# Copyright (C) 2019 iopsys Software Solutions AB
+# Copyright (C) 2020 iopsys Software Solutions AB
 # Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
-
-# USAGE:
-# ./generate_xml.sh
-
 
 ############################################ VARIABLES #########################################################
 CURRENT_PATH=`pwd`
-OUT_STREAM="tmp.txt"
+OUT_STREAM=".tmp.txt"
 ROOT_FILE="device.c"
 TREE_TXT=$CURRENT_PATH"/"$OUT_STREAM
 obj_look_obj_child_list=""
@@ -136,6 +132,8 @@ file_filter(){
 ################# Tree.txt Generation ####################
 gen_dm_tree(){
 	file=$1
+	dyn_obj=$2
+
 	#Get line number of lines containing Object or Param
 	leaf_obj_line=`get_leaf_obj_line_number "$file"`
 
@@ -181,6 +179,7 @@ gen_dm_tree(){
 		######## Create Childs list
 		while IFS=, read -r f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11; do
 			name=`echo ${f1//{} | sed 's/^"\(.*\)"$/\1/'`
+
 			permission=${f2// &}
 			type=${f3// }
 			browse=${f5// }
@@ -189,6 +188,15 @@ gen_dm_tree(){
 				instance="readWrite"
 			else
 				instance="readOnly"
+			fi
+
+			if [ "$dyn_obj" -eq "1" ];then
+				oname="object, $instance, , , , root, Device.$name"
+				if [ "$browse" != "NULL" ]; then
+					echo "$oname.{i}." >> $TREE_TXT
+				else
+					echo "$oname." >> $TREE_TXT
+				fi
 			fi
 
 			if [ "$o_found" == "1" ]; then
@@ -212,18 +220,28 @@ gen_dm_tree(){
 				child_objects=${f7// }
 				child_parameters=${f8// }
 				obj_name=${name}
+
 				#Add the actual object to the list of objects looking for their children objects ########
 				if [ "$child_objects" != "NULL" ]; then
-					new_item=${obj_name}":"${browse}":"${child_objects}
+					if [ "$dyn_obj" -eq "1" ];then
+						new_item="Device."${obj_name}":"${browse}":"${child_objects}
+					else
+						new_item=${obj_name}":"${browse}":"${child_objects}
+					fi
 					obj_look_obj_child_list=`add_item_to_list "$new_item" "$obj_look_obj_child_list"`
 				fi
+
 				#Add the actual object to the list of objects looking for their children parameters #######
 				if [ "$child_parameters" != "NULL" ]; then
-					new_item=${obj_name}":"${browse}":"${child_parameters}
+					if [ "$dyn_obj" -eq "1" ];then
+						new_item="Device."${obj_name}":"${browse}":"${child_parameters}
+					else
+						new_item=${obj_name}":"${browse}":"${child_parameters}
+					fi
 					obj_look_param_child_list=`add_item_to_list "$new_item" "$obj_look_param_child_list"`
 				fi
 			fi
-
+			dyn_obj=0
 		done <<<"`sed -n $line_number',/{0}/p' $file | cut -d \" \" -f 1-4,6- | sed '/#ifdef GENERIC_OPENWRT/,/#else/d' | sed -e '/{0}/d' | sed -e '/^{/!d'`"
 		
 		######### Remove object from list of object looking there childs
@@ -321,7 +339,7 @@ add_dm_xml() {
 gen_data_model_xml_file() {
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 	echo "<dm:document xmlns:dm=\"urn:broadband-forum-org:cwmp:datamodel-1-6\" xmlns:dmr=\"urn:broadband-forum-org:cwmp:datamodel-report-0-1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"urn:broadband-forum-org:cwmp:datamodel-1-6 http://www.broadband-forum.org/cwmp/cwmp-datamodel-1-6.xsd urn:broadband-forum-org:cwmp:datamodel-report-0-1 http://www.broadband-forum.org/cwmp/cwmp-datamodel-report.xsd\" spec=\"urn:broadband-forum-org:$DM_VERSION\" file=\"$DM_FILE\">"
-	echo "	<model name=\"$model_name\">"
+	echo "	<model name=\"$MODEL_NAME\">"
 	echo "		<object name=\"$ROOT_PATH\" access=\"readOnly\" minEntries=\"1\" maxEntries=\"1\">"
 	echo "			<description>"
 	echo "				The top-level for $DM_TR181"
@@ -332,14 +350,29 @@ gen_data_model_xml_file() {
 	echo "</dm:document>"
 }
 
+display_usage() {
+	echo "Usage: $0 [-r|--remote-dm urls] [-h|--help]"
+	echo "Options: "
+	echo "  -r, --remote-dm     generate data model tree using dynamic OBJ/PARAM under these repositories"
+	echo "  -h, --help          This help text"
+	echo ""
+	echo "Examples: "
+	echo " - sh $0"
+	echo " - sh $0 --remote-dm https://dev.iopsys.eu/feed/iopsys.git^devel,https://dev.iopsys.eu/iopsys/mydatamodel.git^5c8e7cb740dc5e425adf53ea574fb529d2823f88"
+	echo " - sh $0 -r https://dev.iopsys.eu/feed/iopsys.git^6.0.0ALPHA1"
+	echo ""
+}
+
 ############################################### MAIN ######################################################
+
+# set initial values
 cnt_obj=1
 cnt_param=0
 DM_TR181="tr181"
 DM_TR104="tr104"
 DM_TR143="tr143"
 DM_TR157="tr157"
-DM_PATH=${2:-"$(pwd)/../dmtree"}
+DM_PATH="$(pwd)/../dmtree"
 SCRIPTS_PATH_TR181=${DM_PATH}/${DM_TR181}
 SCRIPTS_PATH_TR104=${DM_PATH}/${DM_TR104}
 SCRIPTS_PATH_TR143=${DM_PATH}/${DM_TR143}
@@ -349,27 +382,95 @@ ROOT_PATH="Device"
 DM_HEAD="$ROOT_PATH-2.13"
 DM_FILE="tr-181-2-13-0-cwmp-full.xml"
 DM_VERSION="tr-181-2-13-0-cwmp"
-model_name="$ROOT_PATH:2.13"
+MODEL_NAME="$ROOT_PATH:2.13"
 XML_OUT_STREAM_BBF="iopsys_bbf.xml"
+
+# read the options
+OPTS=$(getopt --options r:h --long remote-dm:,help --name "$0" -- "$@")
+
+if [ $? != 0 ]; then echo "Failed to parse options...exiting." >&2 ; exit 1 ; fi
+
+eval set -- "$OPTS"
+
+# extract options and their arguments into variables.
+while true ; do
+	case "$1" in
+		-r | --remote-dm )
+			REMOTEDM="$2"
+			shift 2
+			;;
+		-h | --help )
+			display_usage
+			exit 0
+			;;
+		-- )
+			shift
+			break
+			;;
+		*)
+			echo "Internal error!"
+			exit 1
+			;;
+	esac
+done
+
+# download remote data models if exists
+if [ -n "$REMOTEDM" ]; then
+	echo "Start downloading remote data models..."
+	echo "Download in progress........"
+	i=0
+	for dm_url in $(echo $REMOTEDM | tr "," "\n"); do
+		URL="${dm_url%^*}"
+		BRANCH="${dm_url#*^}"
+		git clone $URL ".repo$i" > /dev/null 2>&1
+		git -C ".repo$i" checkout $BRANCH > /dev/null 2>&1
+		let "i++"
+	done
+fi
+
 ############## GEN BBF Data Models TREE ##############
 echo "Start Generation of BBF Data Models..."
 echo "Please wait..."
+
 rm -rf $OUT_STREAM
 rm -rf $XML_OUT_STREAM_BBF
+
 cd "$SCRIPTS_PATH_TR181"
-gen_dm_tree $ROOT_FILE
+gen_dm_tree $ROOT_FILE "0"
+
 for dir in $DIR_LIST; do
 	cd $dir
 	files=`ls *.c |grep -v $ROOT_FILE`
 	for file in $files; do
-		gen_dm_tree "$file"
+		gen_dm_tree "$file" "0"
 	done
 done
+
 cd $CURRENT_PATH
+if [ -n "$REMOTEDM" ]; then
+	i=0
+	for dm_url in $(echo $REMOTEDM | tr "," "\n"); do
+		files=`find .repo$i -name datamodel.c`
+		for file in $files; do
+			gen_dm_tree "$file" "1"
+		done
+		let "i++"
+	done
+fi
+
 file_filter $OUT_STREAM
 gen_data_model_xml_file > $XML_OUT_STREAM_BBF
 
 echo "Number of BBF Data Models objects is $cnt_obj"
 echo "Number of BBF Data Models parameters is $cnt_param"
 echo "End of BBF Data Models Generation"
+
+if [ -n "$REMOTEDM" ]; then
+	i=0
+	for dm_url in $(echo $REMOTEDM | tr "," "\n"); do
+		rm -rf ".repo$i"
+		let "i++"
+	done
+fi
+
 rm -rf $OUT_STREAM

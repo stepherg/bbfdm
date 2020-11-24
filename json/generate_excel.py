@@ -139,18 +139,22 @@ def printOBJPARAM(obj, supported, protocols, types):
 
 def printusage():
 	print("Usage: " + sys.argv[0] + " <json data model> [options...] <urls>")
+	print("JSON data models: ")
+	print(" tr181.json or tr104.json     The JSON data model to be parsed")
 	print("Options: ")
-	print(" -r, --remote-dm     Check OBJ/PARAM under these repositories if it is not found under bbf repo")
-	print(" -h, --help          This help text")
+	print(" -r, --remote-dm              Check OBJ/PARAM under these repositories if it is not found under bbf repo")
+	print(" -h, --help                   This help text")
+	print("Urls: ")
+	print(" url^(branch,hash,tag)        The url with branch, hash or tag to be used")
 	print("")
-	print("Examples:")
+	print("Examples: ")
 	print("  - python " + sys.argv[0] + " tr181.json")
 	print("    ==> Generate excel file in tr181.xls")
 	print("  - python " + sys.argv[0] + " tr104.json")
 	print("    ==> Generate excel file in tr104.xls")
-	print("  - python " + sys.argv[0] + " tr181.json -r https://dev.iopsys.eu/feed/iopsys.git,https://dev.iopsys.eu/abc/def.git")
+	print("  - python " + sys.argv[0] + " tr181.json -r https://dev.iopsys.eu/feed/iopsys.git^release-5.3,https://dev.iopsys.eu/iopsys/mydatamodel.git^5c8e7cb740dc5e425adf53ea574fb529d2823f88")
 	print("    ==> Generate excel file in tr181.xls")
-	print("  - python " + sys.argv[0] + " tr181.json --remote-dm https://dev.iopsys.eu/feed/iopsys.git")
+	print("  - python " + sys.argv[0] + " tr181.json --remote-dm https://dev.iopsys.eu/feed/iopsys.git^6.0.0ALPHA1")
 	print("    ==> Generate excel file in tr181.xls")
 
 def object_parse_childs( dmobject , value ):
@@ -262,9 +266,12 @@ for opt, arg in opts:
 if remotedm != None:
 	print("Start downloading remote data models...")
 	print("Download in progress........")
-	url = remotedm.split(",")
+	dm_url = remotedm.split(",")
 	for i in range(remotedm.count(',') + 1):
-		subprocess.run(["git", "clone", url[i], ".repo" + str(i)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+		url = dm_url[i].split("^")
+		subprocess.run(["git", "clone", url[0], ".repo" + str(i)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+		if url.count("^") == 1:
+			subprocess.run(["git", "-C", ".repo" + str(i), "checkout", url[1]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 if "tr181" in sys.argv[1]:
 	excel_file = "tr181.xls"

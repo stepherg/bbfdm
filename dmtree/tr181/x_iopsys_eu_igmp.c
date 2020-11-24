@@ -2132,9 +2132,9 @@ DMLEAF IGMPProxyInterfaceParams[] = {
 DMLEAF X_IOPSYS_EU_IGMPProxyParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_mcast_proxy_enable, set_mcast_proxy_enable, BBFDM_BOTH},
 {"Version", &DMWRITE, DMT_STRING, get_igmp_proxy_version, set_igmp_proxy_version, BBFDM_BOTH},
-{"QueryInterval",&DMWRITE, DMT_UNINT, get_mcastp_query_interval, set_mcastp_query_interval, BBFDM_BOTH},
-{"QueryResponseInterval",&DMWRITE, DMT_UNINT, get_mcastp_q_response_interval, set_mcastp_q_response_interval, BBFDM_BOTH},
-{"LastMemberQueryInterval",&DMWRITE, DMT_UNINT, get_mcastp_last_mq_interval, set_mcastp_last_mq_interval, BBFDM_BOTH},
+{"QueryInterval", &DMWRITE, DMT_UNINT, get_mcastp_query_interval, set_mcastp_query_interval, BBFDM_BOTH},
+{"QueryResponseInterval", &DMWRITE, DMT_UNINT, get_mcastp_q_response_interval, set_mcastp_q_response_interval, BBFDM_BOTH},
+{"LastMemberQueryInterval", &DMWRITE, DMT_UNINT, get_mcastp_last_mq_interval, set_mcastp_last_mq_interval, BBFDM_BOTH},
 {"ImmediateLeave", &DMWRITE, DMT_BOOL, get_mcast_proxy_fast_leave, set_mcast_proxy_fast_leave, BBFDM_BOTH},
 {"Robustness", &DMWRITE, DMT_UNINT, get_mcast_proxy_robustness, set_mcast_proxy_robustness, BBFDM_BOTH},
 {"Aggregation", &DMWRITE, DMT_BOOL, get_mcast_proxy_aggregation, set_mcast_proxy_aggregation, BBFDM_BOTH},

@@ -24,9 +24,9 @@ int upnp_browseNetworkInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 
 /*** /UPnP/DM/DeviceInfo/ objects ***/
 DMOBJ upnpDeviceInfoObj[] ={
-{"PhysicalDevice", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,upnpPhysicalDeviceObj, upnpPhysicalDeviceParams, NULL},
-{"OperatingSystem",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,NULL, upnpOperatingSystemParams, NULL},
-{"ExecutionEnvironment",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,NULL, upnpExecutionEnvironmentParams, NULL},
+{"PhysicalDevice", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, upnpPhysicalDeviceObj, upnpPhysicalDeviceParams, NULL},
+{"OperatingSystem", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, upnpOperatingSystemParams, NULL},
+{"ExecutionEnvironment", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, upnpExecutionEnvironmentParams, NULL},
 {0}
 };
 
@@ -41,7 +41,7 @@ DMLEAF upnpDeviceInfoParams[] = {
 
 /*** /UPnP/DM/DeviceInfo/PhysicalDevice/ objects ***/
 DMOBJ upnpPhysicalDeviceObj[] = {
-{"DeviceID", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL,NULL, upnpDeviceIdParams, NULL},
+{"DeviceID", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, upnpDeviceIdParams, NULL},
 {0}
 };
 

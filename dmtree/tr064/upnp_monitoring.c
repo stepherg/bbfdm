@@ -20,9 +20,9 @@
 
 /*** /UPnP/DM/Monitoring/ objects ***/
 DMOBJ upnpMonitoringObj[] = {
-{"OperatingSystem",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, upnpMonitoringOperatingSystemParams, NULL},
-{"ExecutionEnvironment",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, upnpMonitoringExecutionEnvironmentParams, NULL},
-{"IPUsage",&DMREAD, NULL, NULL, NULL, upnp_BrowseIPUsage, NULL, NULL, NULL, upnpMonitoringIPUsageParams, NULL},
+{"OperatingSystem", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, upnpMonitoringOperatingSystemParams, NULL},
+{"ExecutionEnvironment", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, upnpMonitoringExecutionEnvironmentParams, NULL},
+{"IPUsage", &DMREAD, NULL, NULL, NULL, upnp_BrowseIPUsage, NULL, NULL, NULL, upnpMonitoringIPUsageParams, NULL},
 {0}
 };
 

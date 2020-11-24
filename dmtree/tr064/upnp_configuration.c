@@ -20,13 +20,13 @@
 /*** /UPnP/DM/Configuration/ objects ***/
 DMOBJ upnpConfigurationObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Network",&DMREAD, NULL, NULL, NULL, NULL, NULL, upnpConfigurationNetworkObj, upnpConfigurationNetworkParams, NULL},
+{"Network", &DMREAD, NULL, NULL, NULL, NULL, NULL, upnpConfigurationNetworkObj, upnpConfigurationNetworkParams, NULL},
 {0}
 };
 
 /*** /UPnP/DM/Configuration/Network objects ***/
 DMOBJ upnpConfigurationNetworkObj[] = {
-{"IPInterface",&DMWRITE, upnp_configuration_ipinterface_createinstance, upnp_configuration_ipinterface_deleteinstance, NULL, upnp_browseIPInterfaceInst, NULL, upnpConfigurationNetworkIPInterfaceObj, upnpConfigurationNetworkIPInterfaceParams, NULL},
+{"IPInterface", &DMWRITE, upnp_configuration_ipinterface_createinstance, upnp_configuration_ipinterface_deleteinstance, NULL, upnp_browseIPInterfaceInst, NULL, upnpConfigurationNetworkIPInterfaceObj, upnpConfigurationNetworkIPInterfaceParams, NULL},
 {0}
 };
 
@@ -39,7 +39,7 @@ DMLEAF upnpConfigurationNetworkParams[]= {
 
 /*** /UPnP/DM/Configuration/Network/IPInterface/#/ objects ***/
 DMOBJ upnpConfigurationNetworkIPInterfaceObj[]= {
-{"IPv4",&DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, upnpConfigurationNetworkIPInterfaceIpv4Params, NULL},
+{"IPv4", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, upnpConfigurationNetworkIPInterfaceIpv4Params, NULL},
 {0}
 };
 
