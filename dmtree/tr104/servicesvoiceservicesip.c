@@ -635,6 +635,8 @@ static int set_ServicesVoiceServiceSIPNetwork_ProxyServerTransport(char *refpara
 				return FAULT_9007;
 			break;
 		case VALUESET:
+                        for (char *ch = value; *ch != '\0'; ch++)
+                          *ch = tolower(*ch);
 			dmuci_set_value_by_section((struct uci_section *)data, "transport", value);
 			break;
 	}
@@ -702,6 +704,8 @@ static int set_ServicesVoiceServiceSIPNetwork_RegistrarServerTransport(char *ref
 				return FAULT_9007;
 			break;
 		case VALUESET:
+                        for (char *ch = value; *ch != '\0'; ch++)
+                          *ch = tolower(*ch);
 			dmuci_set_value_by_section((struct uci_section *)data, "transport", value);
 			break;
 	}
