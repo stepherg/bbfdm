@@ -623,6 +623,8 @@ static int get_ServicesVoiceServiceSIPNetwork_ProxyServerTransport(char *refpara
 		// Convert to uppercase
 		for (char *ch = *value; *ch != '\0'; ch++)
 			*ch = toupper(*ch);
+	} else {
+		*value = "UDP";
 	}
 	return 0;
 }
@@ -635,8 +637,8 @@ static int set_ServicesVoiceServiceSIPNetwork_ProxyServerTransport(char *refpara
 				return FAULT_9007;
 			break;
 		case VALUESET:
-                        for (char *ch = value; *ch != '\0'; ch++)
-                          *ch = tolower(*ch);
+			for (char *ch = value; *ch != '\0'; ch++)
+				*ch = tolower(*ch);
 			dmuci_set_value_by_section((struct uci_section *)data, "transport", value);
 			break;
 	}
@@ -692,6 +694,8 @@ static int get_ServicesVoiceServiceSIPNetwork_RegistrarServerTransport(char *ref
 	if (*value && **value) {
 		for (char *ch = *value; *ch != '\0'; ch++)
 			*ch = toupper(*ch);
+	} else {
+		*value = "UDP";
 	}
 	return 0;
 }
@@ -704,8 +708,8 @@ static int set_ServicesVoiceServiceSIPNetwork_RegistrarServerTransport(char *ref
 				return FAULT_9007;
 			break;
 		case VALUESET:
-                        for (char *ch = value; *ch != '\0'; ch++)
-                          *ch = tolower(*ch);
+			for (char *ch = value; *ch != '\0'; ch++)
+				*ch = tolower(*ch);
 			dmuci_set_value_by_section((struct uci_section *)data, "transport", value);
 			break;
 	}
