@@ -58724,7 +58724,7 @@
 											"index": "@i-1"
 										},
 										"option": {
-											"name": "ldhcpalias"
+											"name": "dhcp_host_alias"
 										}
 									}
 								}

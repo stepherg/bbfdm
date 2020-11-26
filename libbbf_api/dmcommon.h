@@ -118,7 +118,6 @@ extern char *SupportedFrequencyBands[];
 #define DHCP_LEASES_FILE "/tmp/dhcp.leases"
 #define DHCP_CLIENT_OPTIONS_FILE "/var/dhcp.client.options"
 #define DMMAP "dmmap"
-#define DHCPSTATICADDRESS_DISABLED_CHADDR "00:00:00:00:00:01"
 #define RANGE_ARGS (struct range_args[])
 #define LIST_KEY (const char *[])
 #define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
