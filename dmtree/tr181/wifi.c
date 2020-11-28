@@ -435,6 +435,14 @@ static int get_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx 
 		*value = "80MHz";
 	else if (strncmp(*value, "VHT160", 6) == 0)
 		*value = "160MHz";
+	else if (strncmp(*value, "HE20", 4) == 0)
+		*value = "20MHz";
+	else if (strncmp(*value, "HE40", 4) == 0)
+		*value = "40MHz";
+	else if (strncmp(*value, "HE80", 4) == 0)
+		*value = "80MHz";
+	else if (strncmp(*value, "HE160", 5) == 0)
+		*value = "160MHz";
 
 	return 0;
 }
