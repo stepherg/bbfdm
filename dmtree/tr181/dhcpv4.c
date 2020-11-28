@@ -1108,7 +1108,7 @@ static int get_dhcp_reserved_addresses(char *refparam, struct dmctx *ctx, void *
 {
 	char val[512] = {0}, *p;
 	struct uci_section *s = NULL;
-	char *min, *max, *ip;
+	char *min, *max;
 	unsigned int n_min, n_max, n_ip;
 
 	get_dhcp_interval_address(ctx, data, instance, &min, LANIP_INTERVAL_START);
@@ -1119,9 +1119,17 @@ static int get_dhcp_reserved_addresses(char *refparam, struct dmctx *ctx, void *
 	n_max = inet_network(max);
 	p = val;
 	uci_foreach_option_eq("dhcp", "host", "dhcp", ((struct dhcp_args *)data)->interface, s) {
-		dmuci_get_value_by_section_string(s, "ip", &ip);
-		if (ip[0] == '\0')
+
+		char *host_name = NULL;
+		dmuci_get_value_by_section_string(s, "name", &host_name);
+		if (host_name && strcmp(host_name, "_reserved") != 0)
 			continue;
+
+		char *ip = NULL;
+		dmuci_get_value_by_section_string(s, "ip", &ip);
+		if (ip && ip[0] == '\0')
+			continue;
+
 		n_ip = inet_network(ip);
 		if (n_ip >= n_min && n_ip <= n_max) {
 			if (val[0] != '\0')
@@ -1136,6 +1144,7 @@ static int get_dhcp_reserved_addresses(char *refparam, struct dmctx *ctx, void *
 
 static int set_dhcp_reserved_addresses(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *s = NULL, *stmp = NULL;
 	char *min, *max, *local_value, *pch, *spch = NULL;
 	unsigned int n_min, n_max;
 
@@ -1149,8 +1158,25 @@ static int set_dhcp_reserved_addresses(char *refparam, struct dmctx *ctx, void *
 			get_dhcp_interval_address(ctx, data, instance, &max, LANIP_INTERVAL_END);
 			n_min = inet_network(min);
 			n_max = inet_network(max);
-			local_value = dmstrdup(value);
 
+			uci_foreach_option_eq_safe("dhcp", "host", "dhcp", ((struct dhcp_args *)data)->interface, stmp, s) {
+
+				char *host_name = NULL;
+				dmuci_get_value_by_section_string(s, "name", &host_name);
+				if (host_name && strcmp(host_name, "_reserved") != 0)
+					continue;
+
+				char *ip = NULL;
+				dmuci_get_value_by_section_string(s, "ip", &ip);
+				if (ip && ip[0] == '\0')
+					continue;
+
+				// Check if ip exists in the list value : yes -> skip it else delete it
+				if (!strstr(value, ip))
+					dmuci_delete_by_section(s, NULL, NULL);
+			}
+
+			local_value = dmstrdup(value);
 			for (pch = strtok_r(local_value, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 
 				bool host_exist = false;
@@ -1171,7 +1197,7 @@ static int set_dhcp_reserved_addresses(char *refparam, struct dmctx *ctx, void *
 				// host doesn't exist -> create an new one
 				struct uci_section *dhcp_host_section = NULL;
 				dmuci_add_section("dhcp", "host", &dhcp_host_section);
-				dmuci_set_value_by_section(dhcp_host_section, "name", "reserved");
+				dmuci_set_value_by_section(dhcp_host_section, "name", "_reserved");
 				dmuci_set_value_by_section(dhcp_host_section, "dhcp", ((struct dhcp_args *)data)->interface);
 				dmuci_set_value_by_section(dhcp_host_section, "ip", pch);
 			}
