@@ -1160,6 +1160,7 @@ static char *check_value_by_type(char *value, int type)
 {
 	int i = 0, len = strlen(value);
 	char buf[len + 1];
+	struct tm tm;
 
 	strncpy(buf, value, sizeof(buf) - 1);
 	buf[len] = 0;
@@ -1190,13 +1191,13 @@ static char *check_value_by_type(char *value, int type)
 		case DMT_HEXBIN:
 			while (buf[i] != 0) {
 				if (isxdigit(buf[i]) == 0)
-					return "0";
+					return "";
 				i++;
 			}
 			break;
 		case DMT_TIME:
-			if (dm_validate_dateTime(buf))
-				return "0001-01-01T00:00:00Z";
+			if (!strptime(buf, (len == 27) ? "%Y-%m-%dT%H:%M:%S." : "%Y-%m-%dT%H:%M:%SZ", &tm))
+				return (len == 27) ? "0001-01-01T00:00:00.000000Z" : "0001-01-01T00:00:00Z";
 			break;
 		default:
 			break;
