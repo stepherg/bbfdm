@@ -456,7 +456,7 @@ static int set_ServicesVoiceServiceCallControlOutgoingMap_CLIPNoScreeningNumber(
 /*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.InterDigitTimerStd!UCI:asterisk/tel_advanced,tel_options/interdigit*/
 static int get_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "tel_options", "interdigit", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "tel_options", "interdigit", "15000");
 	return 0;
 }
 

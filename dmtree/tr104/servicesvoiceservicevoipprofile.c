@@ -195,7 +195,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferMaxSize(char *refp
 /*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.RTCP.TxRepeatInterval!UCI:asterisk/sip_advanced,sip_options/rtcpinterval*/
 static int get_ServicesVoiceServiceVoIPProfileRTPRTCP_TxRepeatInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("asterisk", "sip_options", "rtcpinterval", value);
+	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "rtcpinterval", "1");
 	return 0;
 }
 
