@@ -409,7 +409,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			break;
 #endif
 	}
-	dmuci_commit();
+	dmuci_save();
 	return usp_fault_map(fault);
 }
 
@@ -435,7 +435,7 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2)
 			} else {
 				dmuci_set_value("cwmp", "acs", "ParameterKey", arg1 ? arg1 : "");
 				dmuci_change_packages(&head_package_change);
-				dmuci_commit();
+				dmuci_save();
 			}
 			free_all_set_list_tmp(ctx);
 			break;
@@ -452,7 +452,7 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2)
 				//Should not happen
 				dmuci_revert();
 			} else {
-				dmuci_commit();
+				dmuci_save();
 			}
 			free_all_set_list_tmp(ctx);
 			break;
@@ -869,6 +869,20 @@ int dm_entry_restart_services(void)
 		if(strcmp(pc->package, "cwmp") == 0)
 			continue;
 		dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
+	}
+	free_all_list_package_change(&head_package_change);
+
+	return 0;
+}
+
+int dm_entry_revert_changes(void)
+{
+	struct package_change *pc;
+
+	list_for_each_entry(pc, &head_package_change, list) {
+		if(strcmp(pc->package, "cwmp") == 0)
+			continue;
+		dmubus_call_set("uci", "revert", UBUS_ARGS{{"config", pc->package, String}}, 1);
 	}
 	free_all_list_package_change(&head_package_change);
 

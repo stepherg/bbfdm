@@ -319,6 +319,50 @@ end:
 	return rc;
 }
 
+int dmuci_save_package(char *package)
+{
+	struct uci_ptr ptr = {0};
+
+	if (uci_lookup_ptr(uci_ctx, &ptr, package, true) != UCI_OK)
+		return -1;
+
+	if (uci_save(uci_ctx, ptr.p) != UCI_OK)
+		return -1;
+
+	return 0;
+}
+
+int dmuci_save(void)
+{
+	char **configs = NULL;
+	char **bbfdm_configs = NULL;
+	char **p;
+	int rc = 0;
+
+	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs) {
+		rc = -1;
+		goto end;
+	}
+	for (p = configs; *p; p++)
+		dmuci_save_package(*p);
+
+	if (uci_ctx_bbfdm) {
+		if ((uci_list_configs(uci_ctx_bbfdm, &bbfdm_configs) != UCI_OK) || !bbfdm_configs) {
+			rc = -1;
+			goto out;
+		}
+		for (p = bbfdm_configs; *p; p++)
+			dmuci_save_package_bbfdm(*p);
+
+		free(bbfdm_configs);
+	}
+
+out:
+	free(configs);
+end:
+	return rc;
+}
+
 /**** UCI REVERT *****/
 static int dmuci_revert_package(char *package)
 {
