@@ -107,8 +107,8 @@ static struct uci_section *update_dmmap_network_interface(char *dmmap_file_name,
 static void synchronize_intf_ipv4_sections_with_dmmap(void)
 {
 	json_object *res = NULL, *ipv4_obj = NULL, *arrobj = NULL;
-	struct uci_section *s = NULL, *stmp = NULL;
-	char *dmmap_intf_s, *dmmap_address;
+	struct uci_section *s = NULL, *ss = NULL, *stmp = NULL;
+	char *dmmap_intf_s, *dmmap_address, *ipaddr = NULL;
 	bool found = false;
 	int i = 0;
 
@@ -116,6 +116,12 @@ static void synchronize_intf_ipv4_sections_with_dmmap(void)
 		dmuci_get_value_by_section_string(s, "section_name", &dmmap_intf_s);
 		dmuci_get_value_by_section_string(s, "address", &dmmap_address);
 		found = false;
+
+		ss = get_origin_section_from_config("network", "interface", dmmap_intf_s);
+		dmuci_get_value_by_section_string(ss, "ipaddr", &ipaddr);
+
+		if (ipaddr && *ipaddr != '\0' && strcmp(ipaddr, dmmap_address) == 0)
+			continue;
 
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", dmmap_intf_s, String}}, 1, &res);
 
@@ -428,7 +434,7 @@ static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 static int browseIPInterfaceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *parent_sec = (struct uci_section *)prev_data, *intf_s = NULL, *dmmap_s = NULL;
-	char *inst = NULL, *max_inst = NULL, *ifname, buf[32] = {0};
+	char *inst = NULL, *max_inst = NULL, *ipaddr, *ifname, buf[32] = {0};
 	json_object *res = NULL, *ipv4_obj = NULL, *arrobj = NULL;
 	struct intf_ip_args curr_intf_ip_args = {0};
 	struct browse_args browse_args = {0};
@@ -443,17 +449,38 @@ static int browseIPInterfaceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_
 		if (strcmp(section_name(intf_s), section_name(parent_sec)) != 0 && strcmp(ifname, buf) != 0)
 			continue;
 
-		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(intf_s), String}}, 1, &res);
+		dmuci_get_value_by_section_string(intf_s, "ipaddr", &ipaddr);
 
-		dmjson_foreach_obj_in_array(res, arrobj, ipv4_obj, i, 1, "ipv4-address") {
+		if (*ipaddr == '\0') {
 
-			char *address = dmjson_get_value(ipv4_obj, 1, "address");
-			if (*address == '\0')
-				continue;
+			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(intf_s), String}}, 1, &res);
 
-			dmmap_s = update_dmmap_network_interface("dmmap_network_ipv4", "intf_ipv4", section_name(parent_sec), section_name(intf_s), "address", address, false);
+			dmjson_foreach_obj_in_array(res, arrobj, ipv4_obj, i, 1, "ipv4-address") {
 
-			init_interface_ip_args(&curr_intf_ip_args, intf_s, dmmap_s, ipv4_obj);
+				char *address = dmjson_get_value(ipv4_obj, 1, "address");
+				if (*address == '\0')
+					continue;
+
+				dmmap_s = update_dmmap_network_interface("dmmap_network_ipv4", "intf_ipv4", section_name(parent_sec), section_name(intf_s), "address", address, false);
+
+				init_interface_ip_args(&curr_intf_ip_args, intf_s, dmmap_s, ipv4_obj);
+
+				browse_args.option = "parent_section";
+				browse_args.value = section_name(parent_sec);
+
+				inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
+					   dmmap_s, "ipv4_instance", "ipv4_alias", "dmmap_network_ipv4", "intf_ipv4",
+					   check_browse_section, (void *)&browse_args);
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
+					goto end;
+			}
+
+		} else {
+
+			dmmap_s = update_dmmap_network_interface("dmmap_network_ipv4", "intf_ipv4", section_name(parent_sec), section_name(intf_s), "address", ipaddr, false);
+
+			init_interface_ip_args(&curr_intf_ip_args, intf_s, dmmap_s, NULL);
 
 			browse_args.option = "parent_section";
 			browse_args.value = section_name(parent_sec);
@@ -671,21 +698,27 @@ static int addObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 	dmuci_get_value_by_section_string(dmmap_ip_interface, "ip_int_instance", &ip_inst);
 
 	last_inst = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_network_ipv4", "intf_ipv4", "ipv4_instance", "parent_section", section_name((struct uci_section *)data));
-	snprintf(ipv4_name, sizeof(ipv4_name), "ip_interface_%s_ipv4_%d", ip_inst, last_inst ? atoi(last_inst) + 1 : 1);
-	snprintf(buf, sizeof(buf), "@%s", section_name((struct uci_section *)data));
 
-	dmuci_set_value("network", ipv4_name, "", "interface");
-	dmuci_set_value("network", ipv4_name, "ifname", buf);
-	dmuci_set_value("network", ipv4_name, "proto", "static");
-	dmuci_set_value("network", ipv4_name, "ipaddr", "0.0.0.0");
-	dmuci_set_value("network", ipv4_name, "netmask", "0.0.0.0");
+	if (last_inst) {
+		snprintf(ipv4_name, sizeof(ipv4_name), "ip_interface_%s_ipv4_%d", ip_inst, atoi(last_inst) + 1);
+		snprintf(buf, sizeof(buf), "@%s", section_name((struct uci_section *)data));
+
+		dmuci_set_value("network", ipv4_name, "", "interface");
+		dmuci_set_value("network", ipv4_name, "ifname", buf);
+		dmuci_set_value("network", ipv4_name, "proto", "static");
+		dmuci_set_value("network", ipv4_name, "ipaddr", "0.0.0.0");
+		dmuci_set_value("network", ipv4_name, "netmask", "0.0.0.0");
+	} else {
+		dmuci_set_value_by_section((struct uci_section *)data, "ipaddr", "0.0.0.0");
+		dmuci_set_value_by_section((struct uci_section *)data, "netmask", "0.0.0.0");
+	}
 
 	browse_args.option = "parent_section";
 	browse_args.value = section_name((struct uci_section *)data);
 
 	dmuci_add_section_bbfdm("dmmap_network_ipv4", "intf_ipv4", &dmmap_ip_interface_ipv4);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "parent_section", section_name((struct uci_section *)data));
-	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "section_name", ipv4_name);
+	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "section_name", last_inst ? ipv4_name : section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "address", "0.0.0.0");
 
 	*instance = update_instance(last_inst, 6, dmmap_ip_interface_ipv4, "ipv4_instance", "dmmap_network_ipv4", "intf_ipv4", check_browse_section, (void *)&browse_args);
@@ -1555,7 +1588,14 @@ static int set_IPInterfaceIPv4Address_Alias(char *refparam, struct dmctx *ctx, v
 /*#Device.IP.Interface.{i}.IPv4Address.{i}.IPAddress!UCI:network/interface,@i-1/ipaddr*/
 static int get_IPInterfaceIPv4Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "address");
+	char *ip_addr = "";
+
+	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "ipaddr", &ip_addr);
+
+	if (ip_addr[0] == '\0')
+		ip_addr = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "address");
+
+	*value = ip_addr;
 	return 0;
 }
 
@@ -1582,8 +1622,16 @@ static int set_IPInterfaceIPv4Address_IPAddress(char *refparam, struct dmctx *ct
 /*#Device.IP.Interface.{i}.IPv4Address.{i}.SubnetMask!UCI:network/interface,@i-1/netmask*/
 static int get_IPInterfaceIPv4Address_SubnetMask(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *mask = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "mask");
-	*value = (mask && *mask) ? cidr2netmask(atoi(mask)) : "";
+	char *mask = "";
+
+	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "netmask", &mask);
+
+	if (mask[0] == '\0') {
+		mask = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "mask");
+		mask = (mask && *mask) ? dmstrdup(cidr2netmask(atoi(mask))) : "";
+	}
+
+	*value = mask;
 	return 0;
 }
 
