@@ -1057,6 +1057,7 @@ static int addObjBridgingBridgeVLAN(char *refparam, struct dmctx *ctx, void *dat
 	dmuci_set_value_by_section(br_vlan_s, "bridge_vlan_instance", *instance);
 	dmuci_set_value_by_section(br_vlan_s, "interface", section_name(((struct bridge_args *)data)->bridge_sec));
 	dmuci_set_value_by_section(br_vlan_s, "added_by_user", "1");
+	dmuci_set_value_by_section(br_vlan_s, "vid", "1");
 	return 0;
 }
 
