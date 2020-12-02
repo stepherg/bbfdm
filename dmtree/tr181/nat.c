@@ -505,14 +505,9 @@ static int set_nat_port_mapping_internal_port(char *refparam, struct dmctx *ctx,
 /*#Device.NAT.PortMapping.{i}.Protocol!UCI:firewall/redirect,@i-1/proto*/
 static int get_nat_port_mapping_protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *proto;
+	char *proto = NULL;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
-	if (strcmp(proto, "tcp") == 0)
-		*value = "TCP";
-	else if (strcmp(proto, "udp") == 0)
-		*value = "UDP";
-	else
-		*value = "TCP,UDP";
+	*value = (proto && strcmp(proto, "udp") == 0) ? "UDP" : "TCP";
 	return 0;
 }
 
@@ -520,16 +515,11 @@ static int set_nat_port_mapping_protocol(char *refparam, struct dmctx *ctx, void
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NATProtocol, 3, NULL, 0))
+			if (dm_validate_string(value, -1, -1, NATProtocol, 2, NULL, 0))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (strcasecmp("TCP", value) == 0)
-				dmuci_set_value_by_section((struct uci_section *)data, "proto", "tcp");
-			else if (strcasecmp("UDP", value) == 0)
-				dmuci_set_value_by_section((struct uci_section *)data, "proto", "udp");
-			else
-				dmuci_set_value_by_section((struct uci_section *)data, "proto", "tcpudp");
+			dmuci_set_value_by_section((struct uci_section *)data, "proto", (strcmp("UDP", value) == 0) ? "udp" : "tcp");
 			return 0;
 	}
 	return 0;
