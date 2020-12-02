@@ -149,6 +149,32 @@ int set_section_order(char *package, char *dmpackage, char *sect_type, struct uc
 	return 0;
 }
 
+static char *get_last_host_instance(char *package, char *section, char *dmmap_package, char *opt_inst, char *opt_check, char *value_check)
+{
+	struct uci_section *s = NULL, *dmmap_section = NULL;
+	char *instance = NULL, *last_inst = NULL;
+
+	uci_foreach_option_cont(package, section, opt_check, value_check, s) {
+
+		// Skip all reserved hosts
+		char *host_name = NULL;
+		dmuci_get_value_by_section_string(s, "name", &host_name);
+		if (host_name && strcmp(host_name, "_reserved") == 0)
+			continue;
+
+		get_dmmap_section_of_config_section(dmmap_package, section, section_name(s), &dmmap_section);
+		if (dmmap_section == NULL) {
+			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "section_name", section_name(s));
+		}
+		instance = update_instance(last_inst, 4, dmmap_section, opt_inst, dmmap_package, section);
+		if(last_inst)
+			dmfree(last_inst);
+		last_inst = dmstrdup(instance);
+	}
+	return instance;
+}
+
 static void dhcp_leases_load(struct list_head *head)
 {
 	FILE *f = fopen(DHCP_LEASES_FILE, "r");
@@ -393,7 +419,7 @@ static int addObjDHCPv4ServerPoolStaticAddress(char *refparam, struct dmctx *ctx
 	struct browse_args browse_args = {0};
 	char host_name[32];
 
-	char *instance = get_last_instance_lev2_bbfdm("dhcp", "host", "dmmap_dhcp", "dhcp_host_instance", "dhcp", ((struct dhcp_args *)data)->interface);
+	char *instance = get_last_host_instance("dhcp", "host", "dmmap_dhcp", "dhcp_host_instance", "dhcp", ((struct dhcp_args *)data)->interface);
 	snprintf(host_name, sizeof(host_name), "host_%d", instance ? atoi(instance) + 1 : 1);
 
 	dmuci_add_section("dhcp", "host", &s);
@@ -2794,6 +2820,12 @@ static int browseDHCPv4ServerPoolStaticAddressInst(struct dmctx *dmctx, DMNODE *
 
 	synchronize_specific_config_sections_with_dmmap_cont("dhcp", "host", "dmmap_dhcp", "dhcp", ((struct dhcp_args *)prev_data)->interface, &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
+
+		// Skip all reserved hosts
+		char *host_name = NULL;
+		dmuci_get_value_by_section_string(p->config_section, "name", &host_name);
+		if (host_name && strcmp(host_name, "_reserved") == 0)
+			continue;
 
 		dmuci_set_value_by_section(p->dmmap_section, "dhcp", ((struct dhcp_args *)prev_data)->interface);
 		init_args_dhcp_host(&curr_dhcp_host_args, ((struct dhcp_args *)prev_data)->dhcp_sec, p->config_section, ((struct dhcp_args *)prev_data)->interface);
