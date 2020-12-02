@@ -274,7 +274,7 @@ end:
 	return o;
 }
 
-/**** UCI Commit *****/
+/**** UCI COMMIT *****/
 int dmuci_commit_package(char *package)
 {
 	struct uci_ptr ptr = {0};
@@ -291,7 +291,6 @@ int dmuci_commit_package(char *package)
 int dmuci_commit(void)
 {
 	char **configs = NULL;
-	char **bbfdm_configs = NULL;
 	char **p;
 	int rc = 0;
 
@@ -299,26 +298,17 @@ int dmuci_commit(void)
 		rc = -1;
 		goto end;
 	}
+
 	for (p = configs; *p; p++)
 		dmuci_commit_package(*p);
 
-	if (uci_ctx_bbfdm) {
-		if ((uci_list_configs(uci_ctx_bbfdm, &bbfdm_configs) != UCI_OK) || !bbfdm_configs) {
-			rc = -1;
-			goto out;
-		}
-		for (p = bbfdm_configs; *p; p++)
-			dmuci_commit_package_bbfdm(*p);
-
-		free(bbfdm_configs);
-	}
-
-out:
 	free(configs);
+
 end:
 	return rc;
 }
 
+/**** UCI SAVE *****/
 int dmuci_save_package(char *package)
 {
 	struct uci_ptr ptr = {0};

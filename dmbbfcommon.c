@@ -67,9 +67,9 @@ int bbfdmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *pack
 	return dmuci_lookup_ptr(ctx, ptr, package, section, option, value);
 }
 
-void bbf_apply_end_session(void)
+int bbf_uci_commit_bbfdm(void)
 {
-	apply_end_session();
+	return dmuci_commit_bbfdm();
 }
 
 int bbf_set_ip_version(int ipversion)

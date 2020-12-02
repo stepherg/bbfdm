@@ -621,7 +621,6 @@ int free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj
 int dm_entry_get_full_param_value(struct dmctx *dmctx);
 char* check_parameter_forced_notification(char *parameter);
 #ifdef BBF_TR064
-void dm_upnp_apply_config(void);
 void add_list_upnp_param_track(struct dmctx *dmctx, struct list_head *pchead, char *param, char *key, char *value, unsigned int isobj);
 int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
 int dm_entry_upnp_get_supported_parameters(struct dmctx *dmctx);

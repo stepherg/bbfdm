@@ -39,7 +39,6 @@ int dm_entry_revert_changes(void);
 int usp_fault_map(int fault);
 #ifdef BBF_TR064
 int dm_entry_upnp_restart_services(void);
-void dm_upnp_apply_config(void);
 int dm_entry_upnp_check_alarmonchange_param(struct dmctx *dmctx);
 int dm_entry_upnp_check_eventonchange_param(struct dmctx *dmctx);
 int dm_entry_upnp_check_versiononchange_param(struct dmctx *pctx);

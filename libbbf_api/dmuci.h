@@ -280,6 +280,15 @@ int dmuci_commit_package_##UCI_PATH(char *package) \
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
+int dmuci_commit_##UCI_PATH(void) \
+{\
+	struct uci_context *save_uci_ctx;	\
+	save_uci_ctx = uci_ctx;			\
+	uci_ctx = uci_ctx_##UCI_PATH;	\
+	int res = dmuci_commit(); \
+	uci_ctx = save_uci_ctx;			\
+	return res;						\
+}\
 int dmuci_save_package_##UCI_PATH(char *package) \
 {\
 	struct uci_context *save_uci_ctx;	\
@@ -331,6 +340,7 @@ int dmuci_delete_bbfdm(char *package, char *section, char *option, char *value);
 int dmuci_delete_by_section_unnamed_bbfdm(struct uci_section *s, char *option, char *value);
 int dmuci_delete_by_section_bbfdm(struct uci_section *s, char *option, char *value);
 int dmuci_commit_package_bbfdm(char *package);
+int dmuci_commit_bbfdm(void);
 struct uci_section *dmuci_walk_section_bbfdm(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
 
 void alloc_uci_ctx_bbfdm(void);

@@ -18,7 +18,7 @@
 extern unsigned int upnp_in_user_mask;
 extern struct list_head list_execute_end_session;
 
-void bbf_apply_end_session(void);
+int bbf_uci_commit_bbfdm(void);
 int set_bbfdatamodel_type(int bbf_type);
 int get_bbfdatamodel_type(void);
 int bbf_set_ip_version(int ipversion);
@@ -37,7 +37,6 @@ void apply_end_session(void);
 int dm_add_end_session(struct dmctx *ctx, void(*function)(struct execute_end_session *), int action, void *data);
 void bbf_set_end_session_flag (struct dmctx *ctx, unsigned int flag);
 int bbfdmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);
-void bbf_apply_end_session(void);
 void dmbbf_update_enabled_notify_file(unsigned int dm_type, unsigned int amd_version, int instance_mode);
 int get_dm_type(char *dm_str);
 

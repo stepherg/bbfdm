@@ -259,6 +259,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 {
 	int err = 0, fault = 0;
 	bool setnotif = true;
+	bool bbfdm_commit = true;
 #ifdef BBF_TR064
 	bool alarm = false, event = false;
 	int err2 = 0;
@@ -305,6 +306,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			fault = dm_entry_set_value(ctx);
 			if (fault)
 				add_list_fault_param(ctx, ctx->in_param, usp_fault_map(fault));
+			bbfdm_commit = false;
 			break;
 		case CMD_SET_NOTIFICATION:
 			if (arg2)
@@ -331,6 +333,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 				dmuci_set_value("cwmp", "acs", "ParameterKey", arg1 ? arg1 : "");
 				dmuci_change_packages(&head_package_change);
 			}
+			bbfdm_commit = false;
 			break;
 		case CMD_DEL_OBJECT:
 			fault = dm_entry_delete_object(ctx);
@@ -338,6 +341,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 				dmuci_set_value("cwmp", "acs", "ParameterKey", arg1 ? arg1 : "");
 				dmuci_change_packages(&head_package_change);
 			}
+			bbfdm_commit = false;
 			break;
 		case CMD_USP_OPERATE:
 			ctx->in_value = arg1 ? arg1 : "";
@@ -409,6 +413,10 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			break;
 #endif
 	}
+
+	if (bbfdm_commit)
+		dmuci_commit_bbfdm();
+
 	dmuci_save();
 	return usp_fault_map(fault);
 }
@@ -885,12 +893,6 @@ int dm_entry_revert_changes(void)
 	return 0;
 }
 
-void dm_apply_config(void)
-{
-	apply_end_session();
-	dm_entry_restart_services();
-}
-
 #ifdef BBF_TR064
 int dm_entry_upnp_restart_services(void)
 {
@@ -902,12 +904,6 @@ int dm_entry_upnp_restart_services(void)
 	free_all_list_package_change(&head_package_change);
 
 	return 0;
-}
-
-void dm_upnp_apply_config(void)
-{
-	apply_end_session();
-	dm_entry_upnp_restart_services();
 }
 
 int cli_output_dm_upnp_variable_state(struct dmctx *dmctx, int cmd, char *variable)
@@ -1499,8 +1495,10 @@ void dm_execute_cli_shell(int argc, char** argv, unsigned int dmtype, unsigned i
 	}
 
 	dm_ctx_clean(&cli_dmctx);
+
 	if (apply_services) {
-		dm_apply_config();
+		dmuci_commit_bbfdm();
+		dm_entry_restart_services();
 	}
 
 	if (!fault) {
@@ -1817,8 +1815,10 @@ int dmentry_cli(int argc, char *argv[], unsigned int dmtype, unsigned int amd_ve
 	}
 
 	dm_ctx_clean(&cli_dmctx);
+
 	if (apply_services) {
-		dm_apply_config();
+		dmuci_commit_bbfdm();
+		dm_entry_restart_services();
 	}
 
 	if (!fault) {
