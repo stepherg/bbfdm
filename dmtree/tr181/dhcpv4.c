@@ -1022,70 +1022,93 @@ static int get_dhcp_interval_address(struct dmctx *ctx, void *data, char *instan
 /*#Device.DHCPv4.Server.Pool.{i}.MinAddress!UCI:dhcp/interface,@i-1/start*/
 static int get_dhcp_interval_address_min(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	get_dhcp_interval_address(ctx, data, instance, value, LANIP_INTERVAL_START);
+	unsigned iface_addr, iface_cidr;
+	char *start = NULL, addr_min[32] = {0};
+
+	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "start", &start);
+	if (!start || *start == '\0')
+		return -1;
+
+	if (interface_get_ipv4(((struct dhcp_args *)data)->interface, &iface_addr, &iface_cidr))
+		return -1;
+
+	unsigned iface_bits = ~((1 << (32 - iface_cidr)) - 1);
+	unsigned iface_start_addr = htonl((ntohl(iface_addr) & iface_bits) + atoi(start));
+	inet_ntop(AF_INET, &iface_start_addr, addr_min, INET_ADDRSTRLEN);
+
+	*value = dmstrdup(addr_min);
+	return 0;
+}
+
+static int set_dhcp_address_min(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *start = NULL, *limit = NULL, buf[32] = {0};
+	unsigned iface_addr, iface_cidr, value_addr;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+
+			dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "start", &start);
+			dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "limit", &limit);
+			if (!start || *start == '\0' || !limit || *limit == '\0')
+				return -1;
+
+			if (interface_get_ipv4(((struct dhcp_args *)data)->interface, &iface_addr, &iface_cidr))
+				return -1;
+
+			unsigned iface_bits = ~((1 << (32 - iface_cidr)) - 1);
+			unsigned iface_net = ntohl(iface_addr) & iface_bits;
+
+			inet_pton(AF_INET, value, &value_addr);
+			unsigned value_net = ntohl(value_addr) & iface_bits;
+
+			if (value_net == iface_net) {
+
+				unsigned dhcp_start = ntohl(value_addr) - iface_net;
+				snprintf(buf, sizeof(buf), "%d", dhcp_start);
+				dmuci_set_value_by_section(((struct dhcp_args *)data)->dhcp_sec, "start", buf);
+
+				unsigned dhcp_limit = atoi(start) + atoi(limit) - dhcp_start;
+				snprintf(buf, sizeof(buf), "%d", dhcp_limit);
+				dmuci_set_value_by_section(((struct dhcp_args *)data)->dhcp_sec, "limit", buf);
+
+			}
+
+			break;
+	}
 	return 0;
 }
 
 /*#Device.DHCPv4.Server.Pool.{i}.MaxAddress!UCI:dhcp/interface,@i-1/limit*/
 static int get_dhcp_interval_address_max(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	get_dhcp_interval_address(ctx, data, instance, value, LANIP_INTERVAL_END);
-	return 0;
-}
+	unsigned iface_addr, iface_cidr;
+	char *start = NULL, *limit = NULL, addr_max[32] = {0};
 
-static int set_dhcp_address_min(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	json_object *res, *jobj;
-	char *ipaddr = "", *mask = "", buf[16];
-	struct uci_section *s = NULL;
+	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "start", &start);
+	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "limit", &limit);
+	if (!start || *start == '\0' || !limit || *limit == '\0')
+		return -1;
 
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_get_option_value_string("network", ((struct dhcp_args *)data)->interface, "ipaddr", &ipaddr);
-			if (ipaddr[0] == '\0') {
-				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", ((struct dhcp_args *)data)->interface, String}}, 1, &res);
-				if (res) {
-					jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
-					ipaddr = dmjson_get_value(jobj, 1, "address");					
-				}
-			}
-			if (ipaddr[0] == '\0')
-				return 0;
+	if (interface_get_ipv4(((struct dhcp_args *)data)->interface, &iface_addr, &iface_cidr))
+		return -1;
 
-			dmuci_get_option_value_string("network", ((struct dhcp_args *)data)->interface, "netmask", &mask);
-			if (mask[0] == '\0') {
-				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", ((struct dhcp_args *)data)->interface, String}}, 1, &res);
-				if (res) {
-					jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
-					mask = dmjson_get_value(jobj, 1, "mask");
-					if (mask[0] == '\0')
-						return 0;
-					mask = cidr2netmask(atoi(mask));
-				}
-			}
-			if (mask[0] == '\0')
-				mask = "255.255.255.0";
+	unsigned iface_bits = ~((1 << (32 - iface_cidr)) - 1);
+	unsigned iface_end_addr = htonl((ntohl(iface_addr) & iface_bits) + atoi(start) + atoi(limit) - 1);
+	inet_ntop(AF_INET, &iface_end_addr, addr_max, INET_ADDRSTRLEN);
 
-			ipcalc_rev_start(ipaddr, mask, value, buf);
-			uci_foreach_option_eq("dhcp", "dhcp", "interface", ((struct dhcp_args *)data)->interface, s) {
-				dmuci_set_value_by_section(s, "start", buf);
-				break;
-			}
-
-			return 0;
-	}
+	*value = dmstrdup(addr_max);
 	return 0;
 }
 
 static int set_dhcp_address_max(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	json_object *res, *jobj;
-	char *ipaddr = "", *mask = "", *start, buf[16];
-	struct uci_section *s = NULL;
+	char *start = NULL, buf[32] = {0};
+	unsigned iface_addr, iface_cidr, value_addr;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1093,39 +1116,29 @@ static int set_dhcp_address_max(char *refparam, struct dmctx *ctx, void *data, c
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			uci_foreach_option_eq("dhcp", "dhcp", "interface", ((struct dhcp_args *)data)->interface, s) {
-				dmuci_get_value_by_section_string(s, "start", &start);
-				break;
-			}
-			if (!s) return 0;
 
-			dmuci_get_option_value_string("network", ((struct dhcp_args *)data)->interface, "ipaddr", &ipaddr);
-			if (ipaddr[0] == '\0') {
-				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", ((struct dhcp_args *)data)->interface, String}}, 1, &res);
-				if (res) {
-					jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
-					ipaddr = dmjson_get_value(jobj, 1, "address");									}
-			}
-			if (ipaddr[0] == '\0')
-				return 0;
+			dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "start", &start);
+			if (!start || *start == '\0')
+				return -1;
 
-			dmuci_get_option_value_string("network", ((struct dhcp_args *)data)->interface, "netmask", &mask);
-			if (mask[0] == '\0') {
-				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", ((struct dhcp_args *)data)->interface, String}}, 1, &res);
-				if (res) {
-					jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
-					mask = dmjson_get_value(jobj, 1, "mask");
-					if (mask[0] == '\0')
-						return 0;
-					mask = cidr2netmask(atoi(mask));
-				}
-			}
-			if (mask[0] == '\0')
-				mask = "255.255.255.0";
+			if (interface_get_ipv4(((struct dhcp_args *)data)->interface, &iface_addr, &iface_cidr))
+				return -1;
 
-			ipcalc_rev_end(ipaddr, mask, start, value, buf);
-			dmuci_set_value_by_section(s, "limit", buf);
-			return 0;
+			unsigned iface_bits = ~((1 << (32 - iface_cidr)) - 1);
+			unsigned iface_net = ntohl(iface_addr) & iface_bits;
+
+			inet_pton(AF_INET, value, &value_addr);
+			unsigned value_net = ntohl(value_addr) & iface_bits;
+
+			if (value_net == iface_net) {
+
+				unsigned dhcp_limit = ntohl(value_addr) - iface_net - atoi(start) + 1;
+				snprintf(buf, sizeof(buf), "%d", dhcp_limit);
+				dmuci_set_value_by_section(((struct dhcp_args *)data)->dhcp_sec, "limit", buf);
+
+			}
+
+			break;
 	}
 	return 0;
 }
