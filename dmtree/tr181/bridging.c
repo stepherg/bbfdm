@@ -1842,7 +1842,21 @@ static int get_Bridging_MaxVLANEntries(char *refparam, struct dmctx *ctx, void *
 
 static int get_Bridging_MaxProviderBridgeEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "0";
+	*value = "20";
+	return 0;
+}
+
+/*#Device.Bridging.ProviderBridgeNumberOfEntries!UCI:network/interface/*/
+static int get_Bridging_ProviderBridgeNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *s = NULL;
+	int cnt = 0;
+
+	uci_foreach_option_eq("network", "interface", "type", "bridge", s) {
+		if (strncmp(section_name(s), "pr_br_", 6) == 0)
+			cnt++;
+	}
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -3319,6 +3333,7 @@ DMLEAF tBridgingParams[] = {
 {"MaxQBridgeEntries", &DMREAD, DMT_UNINT, get_Bridging_MaxQBridgeEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {"MaxVLANEntries", &DMREAD, DMT_UNINT, get_Bridging_MaxVLANEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {"MaxProviderBridgeEntries", &DMREAD, DMT_UNINT, get_Bridging_MaxProviderBridgeEntries, NULL, NULL, NULL, BBFDM_BOTH},
+{"ProviderBridgeNumberOfEntries", &DMREAD, DMT_UNINT, get_Bridging_ProviderBridgeNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {"MaxFilterEntries", &DMREAD, DMT_UNINT, get_Bridging_get_Bridging_MaxFilterEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {"BridgeNumberOfEntries", &DMREAD, DMT_UNINT, get_Bridging_BridgeNumberOfEntries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
