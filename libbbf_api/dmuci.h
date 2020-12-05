@@ -145,7 +145,7 @@ static inline void uci_list_init(struct uci_list *ptr)
 }
 
 #define NEW_UCI_PATH(UCI_PATH, CPATH, DPATH)		\
-struct uci_context *uci_ctx_##UCI_PATH;			\
+struct uci_context *uci_ctx_##UCI_PATH = NULL;			\
 const char *uci_savedir_##UCI_PATH = DPATH; \
 const char *uci_confdir_##UCI_PATH = CPATH; \
 int dmuci_get_section_type_##UCI_PATH(char *package, char *section,char **value)	\
@@ -159,20 +159,20 @@ int dmuci_get_section_type_##UCI_PATH(char *package, char *section,char **value)
 }\
 int dmuci_init_##UCI_PATH(void)		\
 {\
-	uci_ctx_##UCI_PATH = uci_alloc_context();	\
-	if (!uci_ctx_##UCI_PATH) {					\
-		return -1;								\
-	}											\
-	uci_add_delta_path(uci_ctx_##UCI_PATH, uci_ctx_##UCI_PATH->savedir);	\
-	uci_set_savedir(uci_ctx_##UCI_PATH, uci_savedir_##UCI_PATH);					\
-	uci_set_confdir(uci_ctx_##UCI_PATH, uci_confdir_##UCI_PATH);					\
+	if (uci_ctx_##UCI_PATH == NULL) {				\
+		uci_ctx_##UCI_PATH = uci_alloc_context();	\
+		if (!uci_ctx_##UCI_PATH)					\
+			return -1;								\
+		uci_add_delta_path(uci_ctx_##UCI_PATH, uci_ctx_##UCI_PATH->savedir);	\
+		uci_set_savedir(uci_ctx_##UCI_PATH, uci_savedir_##UCI_PATH);			\
+		uci_set_confdir(uci_ctx_##UCI_PATH, uci_confdir_##UCI_PATH);			\
+	}																			\
 	return 0;	\
 }\
-int dmuci_exit_##UCI_PATH(void)		\
+void dmuci_exit_##UCI_PATH(void)		\
 {\
 	if (uci_ctx_##UCI_PATH) uci_free_context(uci_ctx_##UCI_PATH);\
 	uci_ctx_##UCI_PATH = NULL; \
-	return 0;	\
 }\
 int dmuci_get_option_value_string_##UCI_PATH(char *package, char *section, char *option, char **value)	\
 {\
@@ -291,6 +291,15 @@ int dmuci_commit_##UCI_PATH(void) \
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
+int dmuci_revert_##UCI_PATH(void) \
+{\
+	struct uci_context *save_uci_ctx;	\
+	save_uci_ctx = uci_ctx;			\
+	uci_ctx = uci_ctx_##UCI_PATH;	\
+	int res = dmuci_revert(); \
+	uci_ctx = save_uci_ctx;			\
+	return res;						\
+}\
 int dmuci_save_package_##UCI_PATH(char *package) \
 {\
 	struct uci_context *save_uci_ctx;	\
@@ -302,7 +311,9 @@ int dmuci_save_package_##UCI_PATH(char *package) \
 }\
 
 int dmuci_init(void);
-int dmuci_end(void);
+void dmuci_exit(void);
+int bbf_uci_init(void);
+int bbf_uci_exit(void);
 char *dmuci_list_to_string(struct uci_list *list, char *delimitor);
 void uci_add_list_to_list(struct uci_list *addlist, struct uci_list *list);
 void free_all_list_package_change(struct list_head *clist);
@@ -343,9 +354,11 @@ int dmuci_delete_by_section_unnamed_bbfdm(struct uci_section *s, char *option, c
 int dmuci_delete_by_section_bbfdm(struct uci_section *s, char *option, char *value);
 int dmuci_commit_package_bbfdm(char *package);
 int dmuci_commit_bbfdm(void);
+int dmuci_revert_bbfdm(void);
 struct uci_section *dmuci_walk_section_bbfdm(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
 
-void alloc_uci_ctx_bbfdm(void);
+int dmuci_init_bbfdm(void);
+void dmuci_exit_bbfdm(void);
 void commit_and_free_uci_ctx_bbfdm(char *dmmap_config);
 
 int db_get_value_string(char *package, char *section, char *option, char **value);

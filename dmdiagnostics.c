@@ -606,7 +606,7 @@ int start_upload_download_diagnostic(int diagnostic_type, char *proto)
 		dmcmd("/bin/sh", 5, DOWNLOAD_DIAGNOSTIC_PATH, "run", proto, url, device);
 
 		// Allocate uci_ctx_bbfdm
-		alloc_uci_ctx_bbfdm();
+		dmuci_init_bbfdm();
 
 		url = get_diagnostics_option("download", "url");
 		status = get_diagnostics_option("download", "DiagnosticState");
@@ -625,7 +625,7 @@ int start_upload_download_diagnostic(int diagnostic_type, char *proto)
 		dmcmd("/bin/sh", 6, UPLOAD_DIAGNOSTIC_PATH, "run", proto, url, device, size);
 
 		// Allocate uci_ctx_bbfdm
-		alloc_uci_ctx_bbfdm();
+		dmuci_init_bbfdm();
 
 		url = get_diagnostics_option("upload", "url");
 		status = get_diagnostics_option("upload", "DiagnosticState");

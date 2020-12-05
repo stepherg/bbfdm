@@ -16,7 +16,7 @@
 #include "dmuci.h"
 #include "dmmem.h"
 
-static struct uci_context *uci_ctx;
+static struct uci_context *uci_ctx = NULL;
 static struct uci_context *uci_varstate_ctx;
 static char *db_config = NULL;
 
@@ -24,9 +24,25 @@ NEW_UCI_PATH(bbfdm, BBFDM_CONFIG, BBFDM_SAVEDIR)
 
 int dmuci_init(void)
 {
-	uci_ctx = uci_alloc_context();
-	if (!uci_ctx)
-		return -1;
+	if (uci_ctx == NULL) {
+		uci_ctx = uci_alloc_context();
+		if (!uci_ctx)
+			return -1;
+	}
+
+	return 0;
+}
+
+void dmuci_exit(void)
+{
+	if (uci_ctx)
+		uci_free_context(uci_ctx);
+	uci_ctx = NULL;
+}
+
+int bbf_uci_init(void)
+{
+	dmuci_init();
 
 	uci_varstate_ctx = uci_alloc_context();
 	if (!uci_varstate_ctx)
@@ -39,11 +55,9 @@ int dmuci_init(void)
 	return 0;
 }
 
-int dmuci_end(void)
+int bbf_uci_exit(void)
 {
-	if (uci_ctx)
-		uci_free_context(uci_ctx);
-	uci_ctx = NULL;
+	dmuci_exit();
 
 	if (uci_varstate_ctx)
 		uci_free_context(uci_varstate_ctx);
@@ -292,20 +306,15 @@ int dmuci_commit(void)
 {
 	char **configs = NULL;
 	char **p;
-	int rc = 0;
 
-	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs) {
-		rc = -1;
-		goto end;
-	}
+	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs)
+		return -1;
 
 	for (p = configs; *p; p++)
 		dmuci_commit_package(*p);
 
 	free(configs);
-
-end:
-	return rc;
+	return 0;
 }
 
 /**** UCI SAVE *****/
@@ -812,11 +821,6 @@ int varstate_get_value_string(char *package, char *section, char *option, char *
 		return -1;
 	}
 	return 0;
-}
-
-void alloc_uci_ctx_bbfdm(void)
-{
-	dmuci_init_bbfdm();
 }
 
 void commit_and_free_uci_ctx_bbfdm(char *dmmap_config)

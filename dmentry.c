@@ -156,7 +156,7 @@ static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int dm_type, unsigned 
 	UPNP_SUPPORTED_DM *tUPNPSupportedDM = NULL;
 #endif
 	if (custom == CTX_INIT_ALL)
-		dmuci_init();
+		bbf_uci_init();
 
 	INIT_LIST_HEAD(&ctx->list_parameter);
 	INIT_LIST_HEAD(&ctx->set_list_tmp);
@@ -210,7 +210,7 @@ static int dm_ctx_clean_custom(struct dmctx *ctx, int custom)
 	free_all_list_fault_param(ctx);
 	DMFREE(ctx->addobj_instance);
 	if (custom == CTX_INIT_ALL) {
-		dmuci_end();
+		bbf_uci_exit();
 		dmubus_free();
 		dmcleanmem();
 	}
@@ -259,7 +259,6 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 {
 	int err = 0, fault = 0;
 	bool setnotif = true;
-	bool bbfdm_commit = true;
 #ifdef BBF_TR064
 	bool alarm = false, event = false;
 	int err2 = 0;
@@ -306,7 +305,6 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			fault = dm_entry_set_value(ctx);
 			if (fault)
 				add_list_fault_param(ctx, ctx->in_param, usp_fault_map(fault));
-			bbfdm_commit = false;
 			break;
 		case CMD_SET_NOTIFICATION:
 			if (arg2)
@@ -337,7 +335,6 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 				dmuci_set_value("cwmp", "acs", "ParameterKey", arg1 ? arg1 : "");
 				dmuci_change_packages(&head_package_change);
 			}
-			bbfdm_commit = false;
 			break;
 		case CMD_DEL_OBJECT:
 			fault = dm_entry_delete_object(ctx);
@@ -345,7 +342,6 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 				dmuci_set_value("cwmp", "acs", "ParameterKey", arg1 ? arg1 : "");
 				dmuci_change_packages(&head_package_change);
 			}
-			bbfdm_commit = false;
 			break;
 		case CMD_USP_OPERATE:
 			ctx->in_value = arg1 ? arg1 : "";
@@ -417,9 +413,6 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			break;
 #endif
 	}
-
-	if (bbfdm_commit)
-		dmuci_commit_bbfdm();
 
 	dmuci_save();
 	return usp_fault_map(fault);
@@ -876,11 +869,13 @@ int dm_entry_restart_services(void)
 {
 	struct package_change *pc;
 
+	bbf_uci_commit_bbfdm();
+
 	list_for_each_entry(pc, &head_package_change, list) {
 		if (strcmp(pc->package, "cwmp") == 0) {
 			dmuci_init();
 			dmuci_commit_package("cwmp");
-			dmuci_end();
+			dmuci_exit();
 		} else {
 			dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
 		}
@@ -893,6 +888,8 @@ int dm_entry_restart_services(void)
 int dm_entry_revert_changes(void)
 {
 	struct package_change *pc;
+
+	bbf_uci_revert_bbfdm();
 
 	list_for_each_entry(pc, &head_package_change, list) {
 		dmubus_call_set("uci", "revert", UBUS_ARGS{{"config", pc->package, String}}, 1);

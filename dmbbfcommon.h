@@ -18,7 +18,8 @@
 extern unsigned int upnp_in_user_mask;
 extern struct list_head list_execute_end_session;
 
-int bbf_uci_commit_bbfdm(void);
+void bbf_uci_commit_bbfdm(void);
+void bbf_uci_revert_bbfdm(void);
 int set_bbfdatamodel_type(int bbf_type);
 int get_bbfdatamodel_type(void);
 int bbf_set_ip_version(int ipversion);

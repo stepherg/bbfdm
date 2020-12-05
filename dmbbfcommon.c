@@ -67,9 +67,18 @@ int bbfdmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *pack
 	return dmuci_lookup_ptr(ctx, ptr, package, section, option, value);
 }
 
-int bbf_uci_commit_bbfdm(void)
+void bbf_uci_commit_bbfdm(void)
 {
-	return dmuci_commit_bbfdm();
+	dmuci_init_bbfdm();
+	dmuci_commit_bbfdm();
+	dmuci_exit_bbfdm();
+}
+
+void bbf_uci_revert_bbfdm(void)
+{
+	dmuci_init_bbfdm();
+	dmuci_revert_bbfdm();
+	dmuci_exit_bbfdm();
 }
 
 int bbf_set_ip_version(int ipversion)

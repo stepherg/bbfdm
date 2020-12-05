@@ -351,7 +351,7 @@ static opr_ret_t ip_diagnostics_ipping(struct dmctx *dmctx, char *path, json_obj
 	dmcmd("/bin/sh", 3, IPPING_PATH, "run", "usp");
 
 	// Allocate uci_ctx_bbfdm
-	alloc_uci_ctx_bbfdm();
+	dmuci_init_bbfdm();
 
 	ipping.success_count = get_diagnostics_option("ipping", "SuccessCount");
 	ipping.failure_count = get_diagnostics_option("ipping", "FailureCount");
@@ -409,7 +409,7 @@ static opr_ret_t ip_diagnostics_traceroute(struct dmctx *dmctx, char *path, json
 	dmcmd("/bin/sh", 3, TRACEROUTE_PATH, "run", "usp");
 
 	// Allocate uci_ctx_bbfdm
-	alloc_uci_ctx_bbfdm();
+	dmuci_init_bbfdm();
 
 	traceroute.response_time = get_diagnostics_option("traceroute", "ResponseTime");
 	add_list_parameter(dmctx, dmstrdup("ResponseTime"), traceroute.response_time, DMT_TYPE[DMT_UNINT], NULL, 0, NULL);
@@ -588,7 +588,7 @@ static opr_ret_t ip_diagnostics_udpecho(struct dmctx *dmctx, char *path, json_ob
 	dmcmd("/bin/sh", 3, UDPECHO_PATH, "run", "usp");
 
 	// Allocate uci_ctx_bbfdm
-	alloc_uci_ctx_bbfdm();
+	dmuci_init_bbfdm();
 
 	udpecho.success_count = get_diagnostics_option("udpechodiag", "SuccessCount");
 	udpecho.failure_count = get_diagnostics_option("udpechodiag", "FailureCount");
@@ -639,7 +639,7 @@ static opr_ret_t ip_diagnostics_serverselection(struct dmctx *dmctx, char *path,
 	dmcmd("/bin/sh", 3, SERVERSELECTION_PATH, "run", "usp");
 
 	// Allocate uci_ctx_bbfdm
-	alloc_uci_ctx_bbfdm();
+	dmuci_init_bbfdm();
 
 	serverselection.fasthost = get_diagnostics_option("serverselection", "FastestHost");
 	serverselection.average_response_time = get_diagnostics_option("serverselection", "AverageResponseTime");
@@ -683,7 +683,7 @@ static opr_ret_t ip_diagnostics_nslookup(struct dmctx *dmctx, char *path, json_o
 	dmcmd("/bin/sh", 3, NSLOOKUP_PATH, "run", "usp");
 
 	// Allocate uci_ctx_bbfdm
-	alloc_uci_ctx_bbfdm();
+	dmuci_init_bbfdm();
 
 	nslookup.success_count = get_diagnostics_option("nslookup", "SuccessCount");
 	char *param_success_count = dmstrdup("SuccessCount");
