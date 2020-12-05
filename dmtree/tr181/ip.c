@@ -143,8 +143,8 @@ static void synchronize_intf_ipv4_sections_with_dmmap(void)
 static void synchronize_intf_ipv6_sections_with_dmmap(void)
 {
 	json_object *res = NULL, *ipv6_obj = NULL, *arrobj = NULL;
-	struct uci_section *s = NULL, *stmp = NULL;
-	char *dmmap_intf_s, *dmmap_address;
+	struct uci_section *s = NULL, *ss = NULL, *stmp = NULL;
+	char *dmmap_intf_s, *dmmap_address, *ip6addr = NULL;
 	bool found = false;
 	int i = 0;
 
@@ -152,6 +152,12 @@ static void synchronize_intf_ipv6_sections_with_dmmap(void)
 		dmuci_get_value_by_section_string(s, "section_name", &dmmap_intf_s);
 		dmuci_get_value_by_section_string(s, "address", &dmmap_address);
 		found = false;
+
+		ss = get_origin_section_from_config("network", "interface", dmmap_intf_s);
+		dmuci_get_value_by_section_string(ss, "ip6addr", &ip6addr);
+
+		if (ip6addr && *ip6addr != '\0' && strcmp(ip6addr, dmmap_address) == 0)
+			continue;
 
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", dmmap_intf_s, String}}, 1, &res);
 
@@ -186,8 +192,8 @@ static void synchronize_intf_ipv6_sections_with_dmmap(void)
 static void synchronize_intf_ipv6_prefix_sections_with_dmmap(void)
 {
 	json_object *res = NULL, *ipv6_prefix_obj = NULL, *arrobj = NULL;
-	struct uci_section *s = NULL, *stmp = NULL;
-	char *dmmap_intf_s, *dmmap_address, ipv6_prefix[256] = {0};
+	struct uci_section *s = NULL, *ss = NULL, *stmp = NULL;
+	char *dmmap_intf_s, *dmmap_address, *ip6prefix = NULL, ipv6_prefix[256] = {0};
 	bool found = false;
 	int i = 0;
 
@@ -195,6 +201,12 @@ static void synchronize_intf_ipv6_prefix_sections_with_dmmap(void)
 		dmuci_get_value_by_section_string(s, "section_name", &dmmap_intf_s);
 		dmuci_get_value_by_section_string(s, "address", &dmmap_address);
 		found = false;
+
+		ss = get_origin_section_from_config("network", "interface", dmmap_intf_s);
+		dmuci_get_value_by_section_string(ss, "ip6prefix", &ip6prefix);
+
+		if (ip6prefix && *ip6prefix != '\0' && strcmp(ip6prefix, dmmap_address) == 0)
+			continue;
 
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", dmmap_intf_s, String}}, 1, &res);
 
@@ -501,7 +513,7 @@ end:
 static int browseIPInterfaceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *parent_sec = (struct uci_section *)prev_data, *intf_s = NULL, *dmmap_s = NULL;
-	char *inst = NULL, *max_inst = NULL, *ifname, buf[32] = {0};
+	char *inst = NULL, *max_inst = NULL, *ifname, *ip6addr, buf[32] = {0};
 	json_object *res = NULL, *ipv6_obj = NULL, *arrobj = NULL;
 	struct intf_ip_args curr_intf_ip_args = {0};
 	struct browse_args browse_args = {0};
@@ -516,17 +528,38 @@ static int browseIPInterfaceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_
 		if (strcmp(section_name(intf_s), section_name(parent_sec)) != 0 && strcmp(ifname, buf) != 0)
 			continue;
 
+		dmuci_get_value_by_section_string(intf_s, "ip6addr", &ip6addr);
+
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(intf_s), String}}, 1, &res);
 
-		dmjson_foreach_obj_in_array(res, arrobj, ipv6_obj, i, 1, "ipv6-address") {
+		if (*ip6addr == '\0') {
 
-			char *address = dmjson_get_value(ipv6_obj, 1, "address");
-			if (*address == '\0')
-				continue;
+			dmjson_foreach_obj_in_array(res, arrobj, ipv6_obj, i, 1, "ipv6-address") {
 
-			dmmap_s = update_dmmap_network_interface("dmmap_network_ipv6", "intf_ipv6", section_name(parent_sec), section_name(intf_s), "address", address, false);
+				char *address = dmjson_get_value(ipv6_obj, 1, "address");
+				if (*address == '\0')
+					continue;
 
-			init_interface_ip_args(&curr_intf_ip_args, intf_s, dmmap_s, ipv6_obj);
+				dmmap_s = update_dmmap_network_interface("dmmap_network_ipv6", "intf_ipv6", section_name(parent_sec), section_name(intf_s), "address", address, false);
+
+				init_interface_ip_args(&curr_intf_ip_args, intf_s, dmmap_s, ipv6_obj);
+
+				browse_args.option = "parent_section";
+				browse_args.value = section_name(parent_sec);
+
+				inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
+					   dmmap_s, "ipv6_instance", "ipv6_alias", "dmmap_network_ipv6", "intf_ipv6",
+					   check_browse_section, (void *)&browse_args);
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
+					goto end;
+			}
+
+		} else {
+
+			dmmap_s = update_dmmap_network_interface("dmmap_network_ipv6", "intf_ipv6", section_name(parent_sec), section_name(intf_s), "address", ip6addr, false);
+
+			init_interface_ip_args(&curr_intf_ip_args, intf_s, dmmap_s, NULL);
 
 			browse_args.option = "parent_section";
 			browse_args.value = section_name(parent_sec);
@@ -537,6 +570,7 @@ static int browseIPInterfaceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
 				goto end;
+
 		}
 
 		dmjson_foreach_obj_in_array(res, arrobj, ipv6_obj, i, 1, "ipv6-prefix-assignment") {
@@ -568,7 +602,7 @@ end:
 static int browseIPInterfaceIPv6PrefixInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *parent_sec = (struct uci_section *)prev_data, *intf_s = NULL, *dmmap_s = NULL;
-	char *inst = NULL, *max_inst = NULL, *ifname, buf[32] = {0}, ipv6_prefix[256] = {0};
+	char *inst = NULL, *max_inst = NULL, *ifname, *ip6prefix, buf[32] = {0}, ipv6_prefix[256] = {0};
 	json_object *res = NULL, *ipv6_prefix_obj = NULL, *arrobj = NULL;
 	struct intf_ip_args curr_intf_ip_args = {0};
 	struct browse_args browse_args = {0};
@@ -583,19 +617,40 @@ static int browseIPInterfaceIPv6PrefixInst(struct dmctx *dmctx, DMNODE *parent_n
 		if (strcmp(section_name(intf_s), section_name(parent_sec)) != 0 && strcmp(ifname, buf) != 0)
 			continue;
 
+		dmuci_get_value_by_section_string(intf_s, "ip6prefix", &ip6prefix);
+
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(intf_s), String}}, 1, &res);
 
-		dmjson_foreach_obj_in_array(res, arrobj, ipv6_prefix_obj, i, 1, "ipv6-prefix") {
+		if (*ip6prefix == '\0') {
 
-			char *address = dmjson_get_value(ipv6_prefix_obj, 1, "address");
-			char *mask = dmjson_get_value(ipv6_prefix_obj, 1, "mask");
-			if (*address == '\0' || *mask == '\0')
-				continue;
+			dmjson_foreach_obj_in_array(res, arrobj, ipv6_prefix_obj, i, 1, "ipv6-prefix") {
 
-			snprintf(ipv6_prefix, sizeof(ipv6_prefix), "%s/%s", address, mask);
-			dmmap_s = update_dmmap_network_interface("dmmap_network_ipv6_prefix","intf_ipv6_prefix", section_name(parent_sec), section_name(intf_s), "address", ipv6_prefix, false);
+				char *address = dmjson_get_value(ipv6_prefix_obj, 1, "address");
+				char *mask = dmjson_get_value(ipv6_prefix_obj, 1, "mask");
+				if (*address == '\0' || *mask == '\0')
+					continue;
 
-			init_interface_ip_args(&curr_intf_ip_args, intf_s, dmmap_s, ipv6_prefix_obj);
+				snprintf(ipv6_prefix, sizeof(ipv6_prefix), "%s/%s", address, mask);
+				dmmap_s = update_dmmap_network_interface("dmmap_network_ipv6_prefix","intf_ipv6_prefix", section_name(parent_sec), section_name(intf_s), "address", ipv6_prefix, false);
+
+				init_interface_ip_args(&curr_intf_ip_args, intf_s, dmmap_s, ipv6_prefix_obj);
+
+				browse_args.option = "parent_section";
+				browse_args.value = section_name(parent_sec);
+
+				inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
+					   dmmap_s, "ipv6_prefix_instance", "ipv6_prefix_alias", "dmmap_network_ipv6_prefix", "intf_ipv6_prefix",
+					   check_browse_section, (void *)&browse_args);
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
+					goto end;
+			}
+
+		} else {
+
+			dmmap_s = update_dmmap_network_interface("dmmap_network_ipv6_prefix","intf_ipv6_prefix", section_name(parent_sec), section_name(intf_s), "address", ip6prefix, false);
+
+			init_interface_ip_args(&curr_intf_ip_args, intf_s, dmmap_s, NULL);
 
 			browse_args.option = "parent_section";
 			browse_args.value = section_name(parent_sec);
@@ -606,6 +661,7 @@ static int browseIPInterfaceIPv6PrefixInst(struct dmctx *dmctx, DMNODE *parent_n
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
 				goto end;
+
 		}
 
 		dmjson_foreach_obj_in_array(res, arrobj, ipv6_prefix_obj, i, 1, "ipv6-prefix-assignment") {
@@ -1778,6 +1834,8 @@ static int set_IPInterfaceIPv6Address_Alias(char *refparam, struct dmctx *ctx, v
 static int get_IPInterfaceIPv6Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "address", value);
+	char *mask = strchr(*value, '/');
+	if (mask) *mask = '\0';
 	return 0;
 }
 
