@@ -34,8 +34,8 @@ static int browseServicesVoiceServiceCallControlLineInst(struct dmctx *dmctx, DM
 	synchronize_specific_config_sections_with_dmmap("asterisk", "tel_line", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 5,
-				p->dmmap_section, "lineinstance", "linealias", "dmmap_asterisk", "tel_line");
+		inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
+			   p->dmmap_section, "lineinstance", "linealias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -54,8 +54,8 @@ static int browseServicesVoiceServiceCallControlIncomingMapInst(struct dmctx *dm
 	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 5,
-				p->dmmap_section, "clientinstance", "clientalias", "dmmap_asterisk", "sip_service_provider");
+		inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
+			   p->dmmap_section, "clientinstance", "clientalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -74,8 +74,8 @@ static int browseServicesVoiceServiceCallControlOutgoingMapInst(struct dmctx *dm
 	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 5,
-				p->dmmap_section, "clientinstance", "clientalias", "dmmap_asterisk", "sip_service_provider");
+		inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
+			   p->dmmap_section, "clientinstance", "clientalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -94,8 +94,8 @@ static int browseServicesVoiceServiceCallControlNumberingPlanInst(struct dmctx *
 	synchronize_specific_config_sections_with_dmmap("asterisk", "tel_advanced", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "numberingplaninstance", "numberingplanalias", "dmmap_asterisk", "tel_advanced");
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "numberingplaninstance", "numberingplanalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -114,8 +114,8 @@ static int browseServicesVoiceServiceCallControlCallingFeaturesSetInst(struct dm
 	synchronize_specific_config_sections_with_dmmap("asterisk", "advanced_features", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "setinstance", "setalias", "dmmap_asterisk", "advanced_features");
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "setinstance", "setalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -134,8 +134,8 @@ static int browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst(stru
 	synchronize_specific_config_sections_with_dmmap("asterisk", "call_filter_rule_incoming", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst =  handle_update_instance(3, dmctx, &inst_last, update_instance_alias, 5,
-				p->dmmap_section, "screjinstance", "screjalias", "dmmap_asterisk", "call_filter_rule_incoming");
+		inst = handle_update_instance(3, dmctx, &inst_last, update_instance_alias, 3,
+			   p->dmmap_section, "screjinstance", "screjalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -336,7 +336,6 @@ static int set_ServicesVoiceServiceCallControlLine_Provider(char *refparam, stru
 {
 	char sip_client[64] = "Device.Services.VoiceService.1.SIP.Client.";
 	size_t client_len = strlen(sip_client);
-	char lower_layer[64] = {0};
 
 	switch (action)	{
 		case VALUECHECK:
@@ -344,11 +343,10 @@ static int set_ServicesVoiceServiceCallControlLine_Provider(char *refparam, stru
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
-			if (strncmp(lower_layer, sip_client, client_len) == 0) {
+			if (strncmp(value, sip_client, client_len) == 0) {
 				/* check linker is available */
 				char *linker = NULL;
-				adm_entry_get_linker_value(ctx, lower_layer, &linker);
+				adm_entry_get_linker_value(ctx, value, &linker);
 				if (linker && *linker) {
 					dmuci_set_value_by_section((struct uci_section *)data, "sip_account", linker);
 					dmfree(linker);
@@ -389,7 +387,7 @@ static int get_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, s
 
 static int set_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *dup = NULL, *token = NULL, *saveptr = NULL, *p, buf[16] = { 0, 0 }, lower_layer[64] = {0};
+	char *dup = NULL, *token = NULL, *saveptr = NULL, *p, buf[16] = { 0, 0 };
 	char call_line[64] = "Device.Services.VoiceService.1.CallControl.Line.";
 	size_t line_len = strlen(call_line);
 
@@ -407,12 +405,10 @@ static int set_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, s
 			p = buf;
 			for (token = strtok_r(value, ",", &saveptr); token != NULL; token = strtok_r(NULL, ",", &saveptr)) {
 
-				append_dot_to_string(lower_layer, token, sizeof(lower_layer));
-
-				if (strncmp(lower_layer, call_line, line_len) == 0) {
+				if (strncmp(token, call_line, line_len) == 0) {
 					/* check linker is available */
 					char *linker = NULL;
-					adm_entry_get_linker_value(ctx, lower_layer, &linker);
+					adm_entry_get_linker_value(ctx, token, &linker);
 					if (!linker || linker[0] == '\0')
 						continue;
 

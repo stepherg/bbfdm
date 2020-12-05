@@ -650,13 +650,11 @@ char *update_instance_alias(int action, char **last_inst, char **max_inst, void 
 	struct uci_section *s = (struct uci_section *) argv[0];
 	char *inst_opt = (char *) argv[1];
 	char *alias_opt = (char *) argv[2];
-	char *dmmap_package = (char *) argv[3];
-	char *section_type = (char *) argv[4];
-	int (*check_browse)(struct uci_section *section, void *data) = argv[5];
-	void *data = (void *) argv[6];
+	int (*check_browse)(struct uci_section *section, void *data) = argv[3];
+	void *data = (void *) argv[4];
 
 	if (*max_inst == NULL)
-		max_instance = get_max_instance(dmmap_package, section_type, inst_opt, check_browse, data);
+		max_instance = get_max_instance(section_config(s), section_type(s), inst_opt, check_browse, data);
 	else
 		max_instance = atoi(*max_inst);
 
@@ -2028,16 +2026,17 @@ static int get_linker_check_obj(DMOBJECT_ARGS)
 {
 	char *link_val = "";
 
-	if (!get_linker) {
+	if (!get_linker)
 		return  FAULT_9005;
-	}
-	if (node->obj->browseinstobj && !node->is_instanceobj) {
+
+	if (node->obj->browseinstobj && !node->is_instanceobj)
 		return  FAULT_9005;
-	}
+
 	get_linker(node->current_object, dmctx, data, instance, &link_val);
-	if (dmctx->linker[0] == '\0') {
+
+	if (dmctx->linker[0] == '\0')
 		return  FAULT_9005;
-	}
+
 	if (link_val && link_val[0] != '\0' && strcmp(link_val, dmctx->linker) == 0) {
 		if (node->current_object[strlen(node->current_object) - 1] == '.')
 			node->current_object[strlen(node->current_object) - 1] = 0;
@@ -2045,6 +2044,7 @@ static int get_linker_check_obj(DMOBJECT_ARGS)
 		dmctx->stop = true;
 		return 0;
 	}
+
 	return FAULT_9005;
 }
 
@@ -2058,7 +2058,7 @@ static int get_linker_check_param(DMPARAM_ARGS)
  *****************/
 int dm_entry_get_linker_value(struct dmctx *dmctx)
 {
-	int err ;
+	int err;
 	DMOBJ *root = dmctx->dm_entryobj;
 	DMNODE node = { .current_object = "" };
 
@@ -2076,11 +2076,11 @@ int dm_entry_get_linker_value(struct dmctx *dmctx)
 
 static int get_linker_value_check_obj(DMOBJECT_ARGS)
 {
-	char *link_val;
 	if (!get_linker)
 		return FAULT_9005;
 
 	if (strcmp(node->current_object, dmctx->in_param) == 0) {
+		char *link_val;
 		get_linker(node->current_object, dmctx, data, instance, &link_val);
 		dmctx->linker = dmstrdup(link_val);
 		dmctx->stop = true;

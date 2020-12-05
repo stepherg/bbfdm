@@ -299,8 +299,8 @@ int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *
 			synchronize_specific_config_sections_with_dmmap(arg2, arg3, arg4, &dup_list);
 			list_for_each_entry(p, &dup_list, list) {
 
-				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-						   p->dmmap_section, buf_instance, buf_alias, arg4, arg3);
+				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+					   p->dmmap_section, buf_instance, buf_alias);
 
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 					break;

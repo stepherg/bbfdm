@@ -641,20 +641,18 @@ static int remove_vlanid_from_ifname_list(struct uci_section *bridge_sec, char *
 
 static void set_lowerlayers_management_port(struct dmctx *ctx, void *data, char *value)
 {
-	char lower_layer[256] = {0}, lower_layer_path[256] = {0};
+	char lower_layer_path[256] = {0};
 	char *pch = NULL, *spch = NULL, *p, new_device[512] = { 0, 0 };
 
 	p = new_device;
 	for (pch = strtok_r(value, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 
-		append_dot_to_string(lower_layer, pch, sizeof(lower_layer));
-
 		snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.Port.", ((struct bridge_port_args *)data)->br_inst);
 
-		if (strncmp(lower_layer, lower_layer_path, strlen(lower_layer_path)) == 0) {
+		if (strncmp(pch, lower_layer_path, strlen(lower_layer_path)) == 0) {
 			/* check linker is available */
 			char *linker = NULL;
-			adm_entry_get_linker_value(ctx, lower_layer, &linker);
+			adm_entry_get_linker_value(ctx, pch, &linker);
 			if (!linker || linker[0] == '\0')
 				continue;
 
@@ -1427,7 +1425,7 @@ static int get_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 
 static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char lower_layer[256] = {0}, *management;
+	char *management = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1436,16 +1434,14 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "management", &management);
-			if (strcmp(management, "1") == 0) {
+			if (management && strcmp(management, "1") == 0) {
 				/* Management Port ==> true */
 				set_lowerlayers_management_port(ctx, data, value);
 			} else {
 				/* Management Port ==> false */
 
-				append_dot_to_string(lower_layer, value, sizeof(lower_layer));
-
 				char *linker = NULL;
-				adm_entry_get_linker_value(ctx, lower_layer, &linker);
+				adm_entry_get_linker_value(ctx, value, &linker);
 				if (!linker || linker[0] == '\0')
 					return 0;
 
@@ -2028,7 +2024,7 @@ static int get_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 
 static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char lower_layer[256] = {0}, lower_layer_path[256] = {0};
+	char lower_layer_path[256] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -2036,15 +2032,14 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
 			snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.VLAN.", ((struct bridge_vlanport_args *)data)->br_inst);
 
 			/* Check the path object is correct or no */
-			if (strncmp(lower_layer, lower_layer_path, strlen(lower_layer_path)) == 0) {
+			if (strncmp(value, lower_layer_path, strlen(lower_layer_path)) == 0) {
 				/* Check linker exist */
 				char *linker = NULL;
-				adm_entry_get_linker_value(ctx, lower_layer, &linker);
-				if (!linker)
+				adm_entry_get_linker_value(ctx, value, &linker);
+				if (!linker || *linker == '\0')
 					return 0;
 
 				char *br = strstr(linker, ":vlan_");
@@ -2112,7 +2107,7 @@ static int get_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 
 static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char lower_layer[256] = {0}, lower_layer_path[256] = {0};
+	char lower_layer_path[256] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -2120,13 +2115,12 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
 			snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.Port.", ((struct bridge_vlanport_args *)data)->br_inst);
 
-			if (strncmp(lower_layer, lower_layer_path, strlen(lower_layer_path)) == 0) {
+			if (strncmp(value, lower_layer_path, strlen(lower_layer_path)) == 0) {
 				char *linker = NULL;
-				adm_entry_get_linker_value(ctx, lower_layer, &linker);
-				if (!linker)
+				adm_entry_get_linker_value(ctx, value, &linker);
+				if (!linker || *linker == '\0')
 					return 0;
 
 				char *br = strchr(linker, ':');
@@ -2239,8 +2233,8 @@ static int browseBridgingBridgeInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_network", "type", "bridge", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				  p->dmmap_section, "bridge_instance", "bridge_alias", "dmmap_network", "interface");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "bridge_instance", "bridge_alias");
 
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
 		init_bridging_args(&curr_bridging_args, p->config_section, ifname, inst);
@@ -2268,9 +2262,9 @@ static int browseBridgingBridgePortInst(struct dmctx *dmctx, DMNODE *parent_node
 		browse_args.option = "br_inst";
 		browse_args.value = br_args->br_inst;
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-					s, "bridge_port_instance", "bridge_port_alias", "dmmap_bridge_port", "bridge_port",
-					check_browse_section, (void *)&browse_args);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "bridge_port_instance", "bridge_port_alias",
+			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_port_args, inst) == DM_STOP)
 			break;
@@ -2293,9 +2287,9 @@ static int browseBridgingBridgeVLANInst(struct dmctx *dmctx, DMNODE *parent_node
 		browse_args.option = "br_inst";
 		browse_args.value = br_args->br_inst;
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-					s, "bridge_vlan_instance", "bridge_vlan_alias", "dmmap_bridge_vlanport", "bridge_vlan",
-					check_browse_section, (void *)&browse_args);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "bridge_vlan_instance", "bridge_vlan_alias",
+			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_vlan_args, inst) == DM_STOP)
 			break;
@@ -2319,9 +2313,9 @@ static int browseBridgingBridgeVLANPortInst(struct dmctx *dmctx, DMNODE *parent_
 		browse_args.option = "br_inst";
 		browse_args.value = br_args->br_inst;
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-						s, "bridge_vlanport_instance", "bridge_vlanport_alias", "dmmap_bridge_vlanport", "bridge_vlanport",
-						check_browse_section, (void *)&browse_args);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   s, "bridge_vlanport_instance", "bridge_vlanport_alias",
+			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridge_vlanport_args, inst) == DM_STOP)
 			break;

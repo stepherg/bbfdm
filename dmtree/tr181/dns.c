@@ -109,8 +109,8 @@ static int browseServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 	dmmap_synchronizeDNSClientRelayServer(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_dns", "dns_server", s) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   s, "dns_server_instance", "dns_server_alias", "dmmap_dns", "dns_server");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   s, "dns_server_instance", "dns_server_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -126,8 +126,8 @@ static int browseRelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, v
 	dmmap_synchronizeDNSClientRelayServer(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_dns", "dns_server", s) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   s, "dns_server_instance", "dns_server_alias", "dmmap_dns", "dns_server");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   s, "dns_server_instance", "dns_server_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -142,8 +142,8 @@ static int browseResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "NSLookupResult", s) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   s, "nslookup_res_instance", "nslookup_res_alias", DMMAP_DIAGNOSTIGS, "NSLookupResult");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   s, "nslookup_res_instance", "nslookup_res_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -627,8 +627,7 @@ static int set_server_dns_server(char *refparam, struct dmctx *ctx, void *data, 
 
 static int set_server_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *str, *ointerface, *ip, *interface;
-	char intf[256] = {0};
+	char *str, *ointerface, *ip, *interface = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -636,8 +635,10 @@ static int set_server_interface(char *refparam, struct dmctx *ctx, void *data, c
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(intf, value, sizeof(intf));
-			adm_entry_get_linker_value(ctx, intf, &interface);
+			adm_entry_get_linker_value(ctx, value, &interface);
+			if (interface == NULL && interface[0] == '\0')
+				return 0;
+
 			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &ointerface);
 			if (strcmp(ointerface, interface) == 0)
 				return 0;
@@ -764,8 +765,7 @@ static int set_forwarding_dns_server(char *refparam, struct dmctx *ctx, void *da
 
 static int set_forwarding_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *str, *ointerface, *ip, *interface;
-	char intf[256] = {0};
+	char *str, *ointerface, *ip, *interface = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -773,8 +773,10 @@ static int set_forwarding_interface(char *refparam, struct dmctx *ctx, void *dat
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(intf, value, sizeof(intf));
-			adm_entry_get_linker_value(ctx, intf, &interface);
+			adm_entry_get_linker_value(ctx, value, &interface);
+			if (interface == NULL || interface[0] == '\0')
+				return 0;
+
 			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &ointerface);
 			if (strcmp(ointerface, interface) == 0)
 				return 0;

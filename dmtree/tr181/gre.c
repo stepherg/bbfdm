@@ -23,8 +23,8 @@ static int browseGRETunnelInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_network", "proto", "gre", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "gretunnel_instance", "gretunnel_alias", "dmmap_network", "interface");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "gretunnel_instance", "gretunnel_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
@@ -62,8 +62,8 @@ static int browseGRETunnelInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node
 		browse_args.option = "section_name";
 		browse_args.value = section_name(dm->config_section);
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-			   p->dmmap_section, "greiface_instance", "greiface_alias", "dmmap_network", "interface",
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "greiface_instance", "greiface_alias",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)

@@ -225,16 +225,12 @@ static int get_br_key_from_lower_layer(char *lower_layer, char *key, size_t s_ke
 
 int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
 {
-	char lower_layer[256] = {0};
-
-	append_dot_to_string(lower_layer, value, sizeof(lower_layer));
-
 	/* Check if the value is valid or not. */
-	if (strncmp(lower_layer, "Device.Bridging.Bridge.", 23) != 0)
+	if (strncmp(value, "Device.Bridging.Bridge.", 23) != 0)
 		return -1;
 
 	char key[10] = {0};
-	if (get_br_key_from_lower_layer(lower_layer, key, sizeof(key)) != 0)
+	if (get_br_key_from_lower_layer(value, key, sizeof(key)) != 0)
 		return -1;
 
 	/* Find out bridge section name using bridge key. */
@@ -352,8 +348,8 @@ static int browse_igmp_proxy_inst(struct dmctx *dmctx, DMNODE *parent_node, void
 		browse_args.option = "proto";
 		browse_args.value = "igmp";
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
-			   p->dmmap_section, "proxy_instance", "proxy_alias", "dmmap_mcast", "proxy",
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "proxy_instance", "proxy_alias",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
@@ -448,8 +444,8 @@ static int browse_igmp_snooping_inst(struct dmctx *dmctx, DMNODE *parent_node, v
 		browse_args.option = "proto";
 		browse_args.value = "igmp";
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 7,
-			   p->dmmap_section, "snooping_instance", "snooping_alias", "dmmap_mcast", "snooping",
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "snooping_instance", "snooping_alias",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
@@ -583,8 +579,8 @@ static int browse_igmps_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		browse_args.option = "section_name";
 		browse_args.value = section_name((struct uci_section *)prev_data);
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-			   p->dmmap_section, "filter_instance", "filter_alias", "dmmap_mcast", "snooping_filter",
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "filter_instance", "filter_alias",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
@@ -1065,8 +1061,8 @@ static int browse_igmpp_interface_inst(struct dmctx *dmctx, DMNODE *parent_node,
 		browse_args.option = "section_name";
 		browse_args.value = section_name((struct uci_section *)prev_data);
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-			   p->dmmap_section, "iface_instance", "iface_alias", "dmmap_mcast", "proxy_interface",
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "iface_instance", "iface_alias",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
@@ -1159,8 +1155,8 @@ static int browse_igmpp_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		browse_args.option = "section_name";
 		browse_args.value = section_name((struct uci_section *)prev_data);
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-			   p->dmmap_section, "filter_instance", "filter_alias", "dmmap_mcast", "proxy_filter",
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "filter_instance", "filter_alias",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
@@ -1745,7 +1741,7 @@ static void set_igmpp_iface_val(void *data, char *instance, char *linker, char *
 
 static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker, *interface_linker = NULL;
+	char *linker = NULL, *interface_linker = NULL;
 	char ifname[16];
 	char *if_type;
 	struct uci_section *s;
@@ -1762,23 +1758,21 @@ static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 			interface_linker = dmstrdup(ifname);
 			is_br = true;
 		} else {
-			char interface[256] = {0};
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
+				uci_foreach_sections("network", "interface", s) {
+					if(strcmp(section_name(s), linker) != 0)
+						continue;
 
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
-			uci_foreach_sections("network", "interface", s) {
-				if(strcmp(section_name(s), linker) != 0) {
-					continue;
+					dmuci_get_value_by_section_string(s, "type", &if_type);
+					if (strcmp(if_type, "bridge") == 0) {
+						dmasprintf(&interface_linker, "br-%s", linker);
+						is_br = true;
+					} else {
+						dmuci_get_value_by_section_string(s, "ifname", &interface_linker);
+					}
+					break;
 				}
-
-				dmuci_get_value_by_section_string(s, "type", &if_type);
-				if (strcmp(if_type, "bridge") == 0) {
-					dmasprintf(&interface_linker, "br-%s", linker);
-					is_br = true;
-				} else {
-					dmuci_get_value_by_section_string(s, "ifname", &interface_linker);
-				}
-				break;
 			}
 		}
 

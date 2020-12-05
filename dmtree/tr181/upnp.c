@@ -137,8 +137,8 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 
 		upnp_dev.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   dmmap_sect, "upnp_root_device_instance", "upnp_root_device_alias", "dmmap_upnp", "upnp_root_device");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   dmmap_sect, "upnp_root_device_instance", "upnp_root_device_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, inst) == DM_STOP)
 			return 0;
@@ -183,8 +183,8 @@ static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_nod
 
 		upnp_dev.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				   dmmap_sect, "upnp_evice_instance", "upnp_device_alias", "dmmap_upnp", "upnp_device");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   dmmap_sect, "upnp_evice_instance", "upnp_device_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, inst) == DM_STOP)
 			return 0;
@@ -229,8 +229,8 @@ static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_no
 
 		upnp_dev.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   dmmap_sect, "upnp_service_instance", "upnp_service_alias", "dmmap_upnp", "upnp_service");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   dmmap_sect, "upnp_service_instance", "upnp_service_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, inst) == DM_STOP)
 			return 0;
@@ -263,8 +263,8 @@ static int browseUPnPDescriptionDeviceDescriptionInst(struct dmctx *dmctx, DMNOD
 		}
 		upnp_desc.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   dmmap_sect, "upnp_service_instance", "upnp_service_alias", "dmmap_upnp", "upnp_description");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   dmmap_sect, "upnp_service_instance", "upnp_service_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_desc, inst) == DM_STOP)
 			return 0;
@@ -308,8 +308,8 @@ static int browseUPnPDescriptionDeviceInstanceInst(struct dmctx *dmctx, DMNODE *
 
 		upnp_dev_inst.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   dmmap_sect, "upnp_device_inst_instance", "upnp_device_inst_alias", "dmmap_upnp", "upnp_device_inst");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   dmmap_sect, "upnp_device_inst_instance", "upnp_device_inst_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev_inst, inst) == DM_STOP)
 			return 0;
@@ -347,8 +347,8 @@ static int browseUPnPDescriptionServiceInstanceInst(struct dmctx *dmctx, DMNODE 
 
 		upnp_services_inst.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   dmmap_sect, "upnp_service_inst_instance", "upnp_service_inst_alias", "dmmap_upnp", "upnp_service_inst");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   dmmap_sect, "upnp_service_inst_instance", "upnp_service_inst_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_services_inst, inst) == DM_STOP)
 			return 0;

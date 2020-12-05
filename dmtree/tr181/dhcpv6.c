@@ -134,8 +134,8 @@ static int browseDHCPv6ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 		dhcpv6_client_arg.dhcp_client_dm = p->dmmap_section;
 		dhcpv6_client_arg.ip = dmstrdup(ipv6addr?ipv6addr:"");
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				   p->dmmap_section, "bbf_dhcpv6client_instance", "bbf_dhcpv6client_alias", "dmmap_dhcpv6", "interface");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "bbf_dhcpv6client_instance", "bbf_dhcpv6client_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&dhcpv6_client_arg, inst) == DM_STOP)
 			break;
@@ -157,8 +157,8 @@ static int browseDHCPv6ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, 
 		dmuci_get_value_by_section_string(p->config_section, "interface", &interface);
 		init_dhcpv6_args(&curr_dhcp6_args, p->config_section, interface);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				p->dmmap_section, "dhcpv6_serv_pool_instance", "dhcpv6_serv_pool_alias", "dmmap_dhcpv6", "dhcp");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "dhcpv6_serv_pool_instance", "dhcpv6_serv_pool_alias");
 
 		dmuci_get_value_by_section_string(p->dmmap_section, "order", &v);
 		if (v == NULL || strlen(v) == 0)
@@ -249,9 +249,9 @@ static int browseDHCPv6ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 		browse_args.option = "section_name";
 		browse_args.value = section_name(curr_dhcp_args->dhcp_sec);
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-				  dmmap_sect, "bbf_dhcpv6_servpool_option_instance", "bbf_dhcpv6_servpool_option_alias", "dmmap_dhcpv6", "servpool_option",
-				  check_browse_section, (void *)&browse_args);
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   dmmap_sect, "bbf_dhcpv6_servpool_option_instance", "bbf_dhcpv6_servpool_option_alias",
+			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&dhcp_client_opt_args, inst) == DM_STOP)
 			break;
@@ -558,25 +558,24 @@ static int get_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	char *linker = NULL, *v;
-	char interface[256] = {0};
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 
-			if (strlen(value) == 0 || strcmp(value, "") == 0)
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker == NULL || linker[0] == '\0')
 				return FAULT_9007;
 
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
 			uci_path_foreach_sections(bbfdm, "dmmap_dhcpv6", "interface", s) {
 				dmuci_get_value_by_section_string(s, "section_name", &v);
 				if (strcmp(v, linker) == 0)
 					return FAULT_9007;
 			}
+
 			uci_foreach_sections("network", "interface", s) {
 				if (strcmp(section_name(s), linker) == 0) {
 					dmuci_get_value_by_section_string(s, "proto", &v);
@@ -586,8 +585,7 @@ static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 			}
 			break;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
+			adm_entry_get_linker_value(ctx, value, &linker);
 			dmuci_set_value_by_section_bbfdm(((struct dhcpv6_client_args *)data)->dhcp_client_dm, "section_name", linker);
 			break;
 	}
@@ -908,7 +906,7 @@ static int get_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 
 static int set_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char interface[256] = {0}, *linker;
+	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -916,13 +914,12 @@ static int set_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
-			if (linker) {
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
 				dmuci_set_value_by_section(((struct dhcpv6_args *)data)->dhcp_sec, "interface", linker);
 				dmfree(linker);
 			}
-			return 0;
+			break;
 	}
 	return 0;
 }

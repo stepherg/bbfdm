@@ -235,8 +235,8 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 		}
 		init_certificate(certifcates_paths[i], cert, dmmap_sect, &certificateprofile);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   dmmap_sect, "security_certificate_instance", "security_certificate_alias", "dmmap_security", "security_certificate");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   dmmap_sect, "security_certificate_instance", "security_certificate_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst) == DM_STOP)
 			break;
@@ -258,8 +258,8 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 		}
 		init_certificate(certifcates_paths[i], cacert, dmmap_sect, &certificateprofile);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   dmmap_sect, "security_certificate_instance", "security_certificate_alias", "dmmap_security", "security_certificate");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   dmmap_sect, "security_certificate_instance", "security_certificate_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst) == DM_STOP)
 			break;

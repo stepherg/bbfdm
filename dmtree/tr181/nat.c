@@ -243,7 +243,6 @@ static int get_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 static int set_nat_interface_setting_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *iface, *pch, *pchr, buf[256] = "";
-	char interface[256] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -254,9 +253,8 @@ static int set_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 			strcpy(buf, value);
 			dmuci_set_value_by_section((struct uci_section *)data, "network", "");
 			for(pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
-				append_dot_to_string(interface, pch, sizeof(interface));
-				adm_entry_get_linker_value(ctx, interface, &iface);
-				if (iface) {
+				adm_entry_get_linker_value(ctx, pch, &iface);
+				if (iface && *iface) {
 					dmuci_add_list_value_by_section((struct uci_section *)data, "network", iface);
 					dmfree(iface);
 				}
@@ -361,9 +359,7 @@ static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 
 static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *iface, *network, *zone;
-	struct uci_section *s = NULL;
-	char interface[256] = {0};
+	char *iface = NULL, *network, *zone;
 
 	switch (action) {
 		case VALUECHECK:
@@ -371,9 +367,10 @@ static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &iface);
-			if (iface[0] != '\0') {
+			adm_entry_get_linker_value(ctx, value, &iface);
+			if (iface && *iface) {
+				struct uci_section *s = NULL;
+
 				uci_foreach_sections("firewall", "zone", s) {
 					dmuci_get_value_by_section_string(s, "network", &network);
 					if (is_strword_in_optionvalue(network, iface)) {
@@ -382,6 +379,7 @@ static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 						break;
 					}
 				}
+				dmfree(iface);
 			}
 			break;
 	}
@@ -580,8 +578,8 @@ static int browseInterfaceSettingInst(struct dmctx *dmctx, DMNODE *parent_node, 
 	synchronize_specific_config_sections_with_dmmap("firewall", "zone", "dmmap_firewall", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "interface_setting_instance", "interface_setting_alias", "dmmap_firewall", "zone");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "interface_setting_instance", "interface_setting_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -603,8 +601,8 @@ static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 		if (*target != '\0' && strcmp(target, "DNAT") != 0)
 			continue;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "port_mapping_instance", "port_mapping_alias", "dmmap_firewall", "redirect");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "port_mapping_instance", "port_mapping_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;

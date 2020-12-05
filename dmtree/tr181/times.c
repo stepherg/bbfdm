@@ -160,18 +160,16 @@ static int get_time_ntpserver5(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int set_time_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char interface[256] = {0}, *iface = NULL;
+	char *iface = NULL;
 
 	switch (action) {
 		case VALUECHECK:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &iface);
+			adm_entry_get_linker_value(ctx, value, &iface);
 			if (iface == NULL ||  iface[0] == '\0')
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &iface);
+			adm_entry_get_linker_value(ctx, value, &iface);
 			dmuci_set_value("system", "ntp", "interface", iface);
 			return 0;
 	}

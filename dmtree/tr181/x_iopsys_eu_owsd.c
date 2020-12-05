@@ -22,8 +22,8 @@ static int browseXIopsysEuOWSDVirtualHost(struct dmctx *dmctx, DMNODE *parent_no
 	synchronize_specific_config_sections_with_dmmap("owsd", "owsd-listen", "dmmap_owsd", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "olisteninstance", "olistenalias", "dmmap_owsd", "owsd-listen");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "olisteninstance", "olistenalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -107,15 +107,14 @@ static int get_x_iopsys_eu_owsd_virtualhost_interface(char *refparam, struct dmc
 
 static int set_x_iopsys_eu_owsd_virtualhost_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char interface[256] = {0}, *linker;
+	char *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
 			return 0;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
-			if (linker) {
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
 				dmuci_set_value_by_section((struct uci_section *)data, "interface", linker);
 				dmfree(linker);
 			}

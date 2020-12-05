@@ -1593,8 +1593,8 @@ static int browseIPDiagnosticsTraceRouteRouteHopsInst(struct dmctx *dmctx, DMNOD
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "RouteHops", s) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				   (void *)s, "routehop_instance", "routehop_alias", DMMAP_DIAGNOSTIGS, "RouteHops");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   s, "routehop_instance", "routehop_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -1609,8 +1609,8 @@ static int browseIPDiagnosticsDownloadDiagnosticsPerConnectionResultInst(struct 
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "DownloadPerConnection", s) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				   (void *)s, "perconnection_instance", "perconnection_alias", DMMAP_DIAGNOSTIGS, "DownloadPerConnection");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   s, "perconnection_instance", "perconnection_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -1625,8 +1625,8 @@ static int browseIPDiagnosticsUploadDiagnosticsPerConnectionResultInst(struct dm
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "UploadPerConnection", s) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				   (void *)s, "perconnection_instance", "perconnection_alias", DMMAP_DIAGNOSTIGS, "UploadPerConnection");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   s, "perconnection_instance", "perconnection_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;

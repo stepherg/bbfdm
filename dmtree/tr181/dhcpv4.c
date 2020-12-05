@@ -871,8 +871,7 @@ static int get_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 
 static int set_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char interface[256] = {0};
-	char *linker;
+	char *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -880,9 +879,8 @@ static int set_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
-			if (linker) {
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
 				dmuci_set_value_by_section(((struct dhcp_args *)data)->dhcp_sec, "interface", linker);
 				dmfree(linker);
 			}
@@ -1729,25 +1727,24 @@ static int get_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 static int set_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	char *linker = NULL, *v;
-	char interface[256] = {0};
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 
-			if(strlen(value) == 0 || strcmp(value, "") == 0)
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker == NULL || linker[0] == '\0')
 				return FAULT_9007;
 
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
 			uci_path_foreach_sections(bbfdm, "dmmap_dhcp_client", "interface", s) {
 				dmuci_get_value_by_section_string(s, "section_name", &v);
 				if(strcmp(v, linker) == 0)
 					return FAULT_9007;
 			}
+
 			uci_foreach_sections("network", "interface", s) {
 				if(strcmp(section_name(s), linker) == 0){
 					dmuci_get_value_by_section_string(s, "proto", &v);
@@ -1757,8 +1754,7 @@ static int set_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 			}
 			break;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
+			adm_entry_get_linker_value(ctx, value, &linker);
 			dmuci_set_value_by_section_bbfdm(((struct dhcp_client_args *)data)->dhcp_client_dm, "section_name", linker);
 			break;
 	}
@@ -2410,27 +2406,24 @@ static int get_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx
 
 static int set_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	char *linker = NULL, *v;
-	char interface[256] = {0};
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 
-			if (strlen(value) == 0 || strcmp(value, "") == 0)
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker == NULL || linker[0] == '\0')
 				return FAULT_9007;
 
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
-			if (linker == NULL)
-				return FAULT_9007;
 			uci_path_foreach_sections(bbfdm, "dmmap_dhcp_relay", "interface", s) {
 				dmuci_get_value_by_section_string(s, "section_name", &v);
 				if (strcmp(v, linker) == 0)
 					return FAULT_9007;
 			}
+
 			uci_foreach_sections("network", "interface", s) {
 				if (strcmp(section_name(s), linker) == 0) {
 					dmuci_get_value_by_section_string(s, "proto", &v);
@@ -2440,8 +2433,7 @@ static int set_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx
 			}
 			break;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
+			adm_entry_get_linker_value(ctx, value, &linker);
 			dmuci_set_value_by_section_bbfdm(((struct dhcp_client_args *)data)->dhcp_client_dm, "section_name", linker);
 			break;
 	}
@@ -2698,8 +2690,8 @@ static int browseDHCPv4ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, 
 
 		dhcp_leases_assign_to_interface(&curr_dhcp_args, &leases, interface);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				p->dmmap_section, "dhcp_instance", "dhcp_alias", "dmmap_dhcp", "dhcp");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "dhcp_instance", "dhcp_alias");
 
 		dmuci_get_value_by_section_string(p->dmmap_section, "order", &v);
 		if (v == NULL || strlen(v) == 0)
@@ -2736,8 +2728,8 @@ static int browseDHCPv4ServerPoolStaticAddressInst(struct dmctx *dmctx, DMNODE *
 		browse_args.option = "dhcp";
 		browse_args.value = ((struct dhcp_args *)prev_data)->interface;
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-			   p->dmmap_section, "dhcp_host_instance", "dhcp_host_alias", "dmmap_dhcp", "host",
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   p->dmmap_section, "dhcp_host_instance", "dhcp_host_alias",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcp_host_args, inst) == DM_STOP)
@@ -2892,8 +2884,8 @@ static int browseDHCPv4ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 		dhcp_client_arg.dhcp_client_conf = p->config_section;
 		dhcp_client_arg.dhcp_client_dm = p->dmmap_section;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "bbf_dhcpv4client_instance", "bbf_dhcpv4client_alias", "dmmap_dhcp_client", "interface");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "bbf_dhcpv4client_instance", "bbf_dhcpv4client_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&dhcp_client_arg, inst) == DM_STOP)
 			break;
@@ -2947,8 +2939,8 @@ static int browseDHCPv4ClientSentOptionInst(struct dmctx *dmctx, DMNODE *parent_
 		browse_args.option = "section_name";
 		browse_args.value = section_name(dhcp_client_args->dhcp_client_conf);
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-			   dmmap_sect, "bbf_dhcpv4_sentopt_instance", "bbf_dhcpv4_sentopt_alias", "dmmap_dhcp_client", "send_option",
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   dmmap_sect, "bbf_dhcpv4_sentopt_instance", "bbf_dhcpv4_sentopt_alias",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&dhcp_client_opt_args, inst) == DM_STOP)
@@ -2988,8 +2980,8 @@ static int browseDHCPv4ClientReqOptionInst(struct dmctx *dmctx, DMNODE *parent_n
 		browse_args.option = "section_name";
 		browse_args.value = section_name(dhcp_client_args->dhcp_client_conf);
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-			   dmmap_sect, "bbf_dhcpv4_reqtopt_instance", "bbf_dhcpv4_reqtopt_alias", "dmmap_dhcp_client", "req_option",
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   dmmap_sect, "bbf_dhcpv4_reqtopt_instance", "bbf_dhcpv4_reqtopt_alias",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&dhcp_client_opt_args, inst) == DM_STOP)
@@ -3045,8 +3037,8 @@ static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 		browse_args.option = "section_name";
 		browse_args.value = section_name(curr_dhcp_args->dhcp_sec);
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-			   dmmap_sect, "bbf_dhcpv4_servpool_option_instance", "bbf_dhcpv4_servpool_option_alias", "dmmap_dhcp", "servpool_option",
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+			   dmmap_sect, "bbf_dhcpv4_servpool_option_instance", "bbf_dhcpv4_servpool_option_alias",
 			   check_browse_section, (void *)&browse_args);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&dhcp_client_opt_args, inst) == DM_STOP)
@@ -3128,8 +3120,8 @@ static int browseDHCPv4RelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_n
 		dhcp_relay_arg.dhcp_client_dm= p->dmmap_section;
 
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				   p->dmmap_section, "bbf_dhcpv4relay_instance", "bbf_dhcpv4relay_alias", "dmmap_dhcp_relay", "interface");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "bbf_dhcpv4relay_instance", "bbf_dhcpv4relay_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&dhcp_relay_arg, inst) == DM_STOP)
 			break;

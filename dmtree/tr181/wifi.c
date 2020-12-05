@@ -1793,7 +1793,7 @@ static int get_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 
 static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char lower_layer[256] = {0}, *linker;
+	char *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1801,13 +1801,11 @@ static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
-			adm_entry_get_linker_value(ctx, lower_layer, &linker);
-			if (linker) {
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
 				dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->wifi_ssid_sec, "device", linker);
 				dmfree(linker);
-			} else
-				return FAULT_9005;
+			}
 			return 0;
 	}
 	return 0;
@@ -1987,8 +1985,8 @@ static int browseWifiRadioInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 	list_for_each_entry(p, &dup_list, list) {
 		init_wifi_radio(&curr_wifi_radio_args, p->config_section);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "radioinstance", "radioalias", "dmmap_wireless", "wifi-device");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "radioinstance", "radioalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_radio_args, inst) == DM_STOP)
 			break;
@@ -2015,8 +2013,8 @@ static int browseWifiSsidInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 #endif
 		init_wifi_ssid(&curr_wifi_ssid_args, p->config_section, ifname, linker);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "ssidinstance", "ssidalias", "dmmap_wireless", "wifi-iface");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "ssidinstance", "ssidalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_ssid_args, inst) == DM_STOP)
 			break;
@@ -2041,8 +2039,8 @@ static int browseWifiAccessPointInst(struct dmctx *dmctx, DMNODE *parent_node, v
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
 		init_wifi_acp(&curr_wifi_acp_args, p->config_section, ifname);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "ap_instance", "ap_alias", "dmmap_wireless", "wifi-iface");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "ap_instance", "ap_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_acp_args, inst) == DM_STOP)
 			break;
@@ -2067,8 +2065,8 @@ static int browseWiFiEndPointInst(struct dmctx *dmctx, DMNODE *parent_node, void
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
 		init_wifi_enp(&curr_wifi_enp_args, p->config_section, ifname);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "endpointinstance", "endpointalias", "dmmap_wireless", "wifi-iface");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "endpointinstance", "endpointalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_enp_args, inst) == DM_STOP)
 			break;
@@ -2091,8 +2089,8 @@ static int browseWiFiEndPointProfileInst(struct dmctx *dmctx, DMNODE *parent_nod
 		dmuci_add_section_bbfdm("dmmap_wireless", "ep_profile", &s);
 	dmuci_set_value_by_section_bbfdm(s, "ep_key", ep_instance);
 
-	handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
-			s, "ep_profile_instance", "ep_profile_alias", "dmmap_wireless", "wifi-iface");
+	handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 3,
+			s, "ep_profile_instance", "ep_profile_alias");
 
 	DM_LINK_INST_OBJ(dmctx, parent_node, ep_args->wifi_enp_sec, "1");
 	return 0;

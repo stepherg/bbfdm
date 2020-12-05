@@ -42,8 +42,8 @@ static int browseDynamicDNSClientInst(struct dmctx *dmctx, DMNODE *parent_node, 
 	synchronize_specific_config_sections_with_dmmap("ddns", "service", "dmmap_ddns", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "clientinstance", "clientalias", "dmmap_ddns", "service");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "clientinstance", "clientalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -133,8 +133,8 @@ static int browseDynamicDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, 
 	dmmap_synchronizeDynamicDNSServer(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_ddns", "ddns_server", s) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   s, "serverinstance", "serveralias", "dmmap_ddns", "ddns_server");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   s, "serverinstance", "serveralias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -469,7 +469,7 @@ static int get_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *
 
 static int set_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char lower_layer[256] = {0}, *linker = NULL;
+	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -477,12 +477,11 @@ static int set_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
-			adm_entry_get_linker_value(ctx, lower_layer, &linker);
-			if (linker)
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
 				dmuci_set_value_by_section((struct uci_section *)data, "service_name", linker);
-			else
-				return FAULT_9005;
+				dmfree(linker);
+			}
 			break;
 	}
 	return 0;
@@ -501,7 +500,7 @@ static int get_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, voi
 
 static int set_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char interface[256] = {0}, *linker = NULL;
+	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -509,12 +508,11 @@ static int set_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
-			if (linker)
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
 				dmuci_set_value_by_section((struct uci_section *)data, "interface", linker);
-			else
-				return FAULT_9005;
+				dmfree(linker);
+			}
 			break;
 	}
 	return 0;

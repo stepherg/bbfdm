@@ -651,7 +651,7 @@ static int get_router_ipv4forwarding_interface_linker_parameter(char *refparam, 
 
 static int set_router_ipv4forwarding_interface_linker_parameter(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char interface[256] = {0}, *linker = NULL;
+	char *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -659,9 +659,8 @@ static int set_router_ipv4forwarding_interface_linker_parameter(char *refparam, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
-			if (linker) {
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
 				dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "interface", linker);
 				dmfree(linker);
 			}
@@ -793,7 +792,7 @@ static int get_RoutingRouterIPv6Forwarding_Interface(char *refparam, struct dmct
 
 static int set_RoutingRouterIPv6Forwarding_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char interface[256] = {0}, *linker = NULL;
+	char *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -801,9 +800,8 @@ static int set_RoutingRouterIPv6Forwarding_Interface(char *refparam, struct dmct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &linker);
-			if (linker) {
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
 				dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "interface", linker);
 				dmfree(linker);
 			}
@@ -1180,8 +1178,8 @@ static int browseRouterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 	update_section_list(DMMAP,"router", NULL, 1, NULL, NULL, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap", "router", s) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   s, "router_instance", "router_alias", "dmmap", "router");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   s, "router_instance", "router_alias");
 
 		DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst);
 		break;

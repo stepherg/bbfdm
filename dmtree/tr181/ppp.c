@@ -285,7 +285,7 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char lower_layer[256] = {0}, *linker;
+	char *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -293,12 +293,11 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
-			adm_entry_get_linker_value(ctx, lower_layer, &linker);
-			if(linker)
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
 				dmuci_set_value_by_section(((struct uci_section *)data), "ifname", linker);
-			else
-				return FAULT_9005;
+				dmfree(linker);
+			}
 			return 0;
 	}
 	return 0;
@@ -465,8 +464,8 @@ static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 		if (!strstr(proto, "ppp"))
 			continue;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "ppp_int_instance", "ppp_int_alias", "dmmap_network", "interface");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "ppp_int_instance", "ppp_int_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;

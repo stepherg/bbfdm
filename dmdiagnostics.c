@@ -56,17 +56,15 @@ void init_diagnostics_operation(char *sec_name, char *operation_path)
 
 void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value)
 {
-	char interface[64] = {0}, *linker = NULL;
+	char *linker = NULL;
 
 	if (value[0] == 0)
 		return;
 
-	append_dot_to_string(interface, value, sizeof(interface));
-
-	if (strncmp(interface, "Device.IP.Interface.", 20) != 0)
+	if (strncmp(value, "Device.IP.Interface.", 20) != 0)
 		return;
 
-	adm_entry_get_linker_value(ctx, interface, &linker);
+	adm_entry_get_linker_value(ctx, value, &linker);
 
 	if (linker && *linker) {
 		set_diagnostics_option(sec_name, "interface", linker);

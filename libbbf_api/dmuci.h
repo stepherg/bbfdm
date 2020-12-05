@@ -122,6 +122,8 @@ struct package_change
 		section = dmuci_walk_section(package, stype, arg, NULL, CMP_FILTER_FUNC, func, section, GET_NEXT_SECTION))
 
 #define section_name(s) (s)->e.name
+#define section_type(s) (s)->type
+#define section_config(s) (s)->package->e.name
 
 static inline void uci_list_insert(struct uci_list *list, struct uci_list *ptr)
 {

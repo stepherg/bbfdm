@@ -22,8 +22,8 @@ static int browseUserInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 	synchronize_specific_config_sections_with_dmmap("users", "user", "dmmap_users", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "user_instance", "user_alias", "dmmap_users", "user");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "user_instance", "user_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;

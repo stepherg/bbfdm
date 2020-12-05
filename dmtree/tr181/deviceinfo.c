@@ -351,8 +351,8 @@ static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 			continue;
 		}
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			  s, "vcf_instance", "vcf_alias", "dmmap", "vcf");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   s, "vcf_instance", "vcf_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -389,8 +389,8 @@ static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 	uci_path_foreach_sections(bbfdm, "dmmap", "vlf", dm_sec) {
 		char *inst, *max_inst = NULL;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				   dm_sec, "vlf_instance", "vlf_alias", "dmmap", "vlf");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   dm_sec, "vlf_instance", "vlf_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)dm_sec, inst) == DM_STOP){
 			break;

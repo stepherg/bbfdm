@@ -84,8 +84,8 @@ static int browseIEEE1905ALForwardingTableForwardingRuleInst(struct dmctx *dmctx
 	synchronize_specific_config_sections_with_dmmap("ieee1905", "forwarding_rule", "dmmap_forwarding_rule", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst =  handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				p->dmmap_section, "forwardingruleinstance", "forwardingrulealias", "dmmap_forwarding_rule", "forwarding_rule");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "forwardingruleinstance", "forwardingrulealias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;

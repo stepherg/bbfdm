@@ -20,8 +20,8 @@ static int browseLevelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 
 	s = is_dmmap_section_exist("dmmap_firewall", "level");
 	if (!s) dmuci_add_section_bbfdm("dmmap_firewall", "level", &s);
-	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			s, "firewall_level_instance", "firewall_level_alias", "dmmap_firewall", "level");
+	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			s, "firewall_level_instance", "firewall_level_alias");
 	DM_LINK_INST_OBJ(dmctx, parent_node, s, "1");
 	return 0;
 }
@@ -33,8 +33,8 @@ static int browseChainInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 
 	s = is_dmmap_section_exist("dmmap_firewall", "chain");
 	if (!s) dmuci_add_section_bbfdm("dmmap_firewall", "chain", &s);
-	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			s, "firewall_chain_instance", "firewall_chain_alias", "dmmap_firewall", "chain");
+	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			s, "firewall_chain_instance", "firewall_chain_alias");
 	DM_LINK_INST_OBJ(dmctx, parent_node, s, "1");
 	return 0;
 }
@@ -49,8 +49,8 @@ static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 	synchronize_specific_config_sections_with_dmmap("firewall", "rule", "dmmap_firewall", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "firewall_chain_rule_instance", "firewall_chain_rule_alias", "dmmap_firewall", "rule");
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "firewall_chain_rule_instance", "firewall_chain_rule_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -900,24 +900,22 @@ static int set_rule_target(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int set_rule_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *iface, *zone, *net;
-	struct uci_section *s = NULL;
-	char interface[256] = {0};
+	char *iface = NULL, *zone, *net;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &iface);
+			adm_entry_get_linker_value(ctx, value, &iface);
 			if (iface == NULL ||  iface[0] == '\0')
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &iface);
+			adm_entry_get_linker_value(ctx, value, &iface);
 			if (iface && iface[0] != '\0') {
+				struct uci_section *s = NULL;
+
 				uci_foreach_sections("firewall", "zone", s) {
 					dmuci_get_value_by_section_string(s, "network", &net);
 					if (dm_strword(net, iface)) {
@@ -926,6 +924,7 @@ static int set_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 						break;
 					}
 				}
+				dmfree(iface);
 			}
 			break;
 	}
@@ -934,9 +933,7 @@ static int set_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 
 static int set_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *iface, *zone, *net;
-	struct uci_section *s = NULL;
-	char interface[256] = {0};
+	char *iface = NULL, *zone, *net;
 
 	switch (action) {
 		case VALUECHECK:
@@ -949,9 +946,10 @@ static int set_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 				break;
 			}
 
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &iface);
+			adm_entry_get_linker_value(ctx, value, &iface);
 			if (iface != NULL && iface[0] != '\0') {
+				struct uci_section *s = NULL;
+
 				uci_foreach_sections("firewall", "zone", s) {
 					dmuci_get_value_by_section_string(s, "name", &net);
 					if (dm_strword(net, iface)) {
@@ -960,10 +958,11 @@ static int set_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 						break;
 					}
 				}
+				dmfree(iface);
 			}
 			break;
 	}
-        return 0;
+	return 0;
 }
 
 static int set_rule_i_p_version(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)

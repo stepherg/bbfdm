@@ -118,8 +118,8 @@ static int browseDSLLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			s = update_create_dmmap_dsl_line(cur_dsl_line_args.id);
 			init_dsl_line(&cur_dsl_line_args, s);
 
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-				   s, "dsl_line_instance", "dsl_line_alias", "dmmap", "dsl_line");
+			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+				   s, "dsl_line_instance", "dsl_line_alias");
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&cur_dsl_line_args, inst) == DM_STOP)
 				break;
@@ -149,8 +149,8 @@ static int browseDSLChannelInst(struct dmctx *dmctx, DMNODE *parent_node, void *
 				s = update_create_dmmap_dsl_channel(cur_dsl_channel_args.id);
 				init_dsl_channel(&cur_dsl_channel_args, s);
 
-				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-						  s, "dsl_channel_instance", "dsl_channel_alias", "dmmap", "dsl_line");
+				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+					   s, "dsl_channel_instance", "dsl_channel_alias");
 
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&cur_dsl_channel_args, inst) == DM_STOP)
 					break;

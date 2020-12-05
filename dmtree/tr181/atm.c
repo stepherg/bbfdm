@@ -359,8 +359,8 @@ static int browseAtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmuci_get_value_by_section_string(p->config_section, "device", &ifname);
 		init_atm_link(&curr_atm_args, p->config_section, ifname);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "atmlinkinstance", "atmlinkalias", "dmmap_dsl", "atm-device");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "atmlinkinstance", "atmlinkalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_atm_args, inst) == DM_STOP)
 			break;

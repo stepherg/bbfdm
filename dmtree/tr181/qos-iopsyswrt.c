@@ -30,8 +30,8 @@ int os_browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, voi
 	synchronize_specific_config_sections_with_dmmap("qos", "classify", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "classify_instance", "classifyalias", "dmmap_qos", "classify");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "classify_instance", "classifyalias");
 
 		//synchronizing option src_ip of uci classify section to src_mask/src_ip of dmmap's classify section
 		dmuci_get_value_by_section_string(p->config_section, "src_ip", &value);
@@ -69,8 +69,8 @@ int browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, void *
 	synchronize_specific_config_sections_with_dmmap("qos", "classify", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "classificationinstance", "classificationalias", "dmmap_qos", "classify");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "classificationinstance", "classificationalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -107,8 +107,8 @@ int os_browseQoSPolicerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 	synchronize_specific_config_sections_with_dmmap("qos", "policer", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "policer_instance", "policeralias", "dmmap_qos", "policer");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "policer_instance", "policeralias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -127,8 +127,8 @@ int os_browseQoSQueueInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 	synchronize_specific_config_sections_with_dmmap("qos", "queue", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "queueinstance", "queuealias", "dmmap_qos", "queue");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "queueinstance", "queuealias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -151,8 +151,8 @@ int os_browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 	synchronize_specific_config_sections_with_dmmap("qos", "shaper", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "shaperinstance", "shaperalias", "dmmap_qos", "shaper");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "shaperinstance", "shaperalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -1028,8 +1028,7 @@ int os_get_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *
 
 int os_set_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *interface_linker = NULL;
-	char interface[256] = {0};
+	char *linker = NULL;
 
 	switch (action)	{
 	case VALUECHECK:
@@ -1037,10 +1036,11 @@ int os_set_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		append_dot_to_string(interface, value, sizeof(interface));
-		adm_entry_get_linker_value(ctx, interface, &interface_linker);
-		if (interface_linker)
-			dmuci_set_value_by_section((struct uci_section *)data, "ifname", interface_linker);
+		adm_entry_get_linker_value(ctx, value, &linker);
+		if (linker && *linker) {
+			dmuci_set_value_by_section((struct uci_section *)data, "ifname", linker);
+			dmfree(linker);
+		}
 		break;
 	}
 	return 0;
@@ -2468,29 +2468,21 @@ int os_get_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void *da
 
 int os_set_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker = NULL;
-	char policer[256] = {0};
+	struct uci_section *dmmap_s = NULL;
+	char *linker = NULL, link_inst[8] = {0};
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(policer, value, sizeof(policer));
-
-			if (strncmp(policer, "Device.QoS.Policer.", 19) != 0)
+			if (strncmp(value, "Device.QoS.Policer.", 19) != 0)
 				return 0;
 
-			struct uci_section *dmmap_s = NULL;
-			char link_inst[8] = {0};
-			snprintf(link_inst, sizeof(link_inst), "%c", policer[strlen(policer)-2]);
+			snprintf(link_inst, sizeof(link_inst), "%c", value[19]);
 			get_dmmap_section_of_config_section_eq("dmmap_qos", "policer", "policer_instance", link_inst, &dmmap_s);
-
-			if (dmmap_s == NULL)
-				break;
-
 			dmuci_get_value_by_section_string(dmmap_s, "section_name", &linker);
-
 			dmuci_set_value_by_section((struct uci_section *)data, "policer", linker);
 			break;
 	}
@@ -3316,8 +3308,7 @@ int os_get_QoSQueue_Interface(char *refparam, struct dmctx *ctx, void *data, cha
 
 int os_set_QoSQueue_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *interface_linker = NULL;
-	char interface[256] = {0};
+	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -3325,10 +3316,11 @@ int os_set_QoSQueue_Interface(char *refparam, struct dmctx *ctx, void *data, cha
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &interface_linker);
-			if (interface_linker)
-				dmuci_set_value_by_section((struct uci_section *)data, "ifname", interface_linker);
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
+				dmuci_set_value_by_section((struct uci_section *)data, "ifname", linker);
+				dmfree(linker);
+			}
 			break;
 	}
 	return 0;
@@ -3729,8 +3721,7 @@ int os_get_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, ch
 
 int os_set_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *interface_linker = NULL;
-	char interface[256] = {0};
+	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -3738,9 +3729,11 @@ int os_set_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, ch
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(interface, value, sizeof(interface));
-			adm_entry_get_linker_value(ctx, interface, &interface_linker);
-			dmuci_set_value_by_section((struct uci_section *)data, "ifname", interface_linker);
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
+				dmuci_set_value_by_section((struct uci_section *)data, "ifname", linker);
+				dmfree(linker);
+			}
 			break;
 	}
 	return 0;

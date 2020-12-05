@@ -1760,14 +1760,6 @@ int check_browse_section(struct uci_section *s, void *data)
 	return -1;
 }
 
-void append_dot_to_string(char *new_string, const char *string, size_t len)
-{
-	if (string[strlen(string) - 1] != '.')
-		snprintf(new_string, len, "%s.", string);
-	else
-		strncpy(new_string, string, len - 1);
-}
-
 int check_instance_wildcard_parameter_by_regex(char *parameter, char* regex)
 {
         size_t l1, l2;

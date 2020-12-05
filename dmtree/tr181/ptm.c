@@ -253,8 +253,8 @@ static int browsePtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmuci_get_value_by_section_string(p->config_section, "device", &ifname);
 		init_ptm_link(&curr_ptm_args, p->config_section, ifname);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "ptmlinkinstance", "ptmlinkalias", "dmmap_dsl", "ptm-device");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "ptmlinkinstance", "ptmlinkalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ptm_args, inst) == DM_STOP)
 			break;

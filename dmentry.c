@@ -519,6 +519,7 @@ int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, cha
 
 	dm_entry_get_linker(&dmctx);
 	*value = dmctx.linker_param;
+
 	dm_ctx_clean_sub(&dmctx);
 	return 0;
 }
@@ -526,14 +527,16 @@ int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, cha
 int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value)
 {
 	struct dmctx dmctx = {0};
+	char linker[256] = {0};
 	*value = NULL;
 
-	if (!param || param[0] == '\0') {
+	if (!param || param[0] == '\0')
 		return 0;
-	}
+
+	snprintf(linker, sizeof(linker), "%s%c", param, (param[strlen(param) - 1] != '.') ? '.' : '\0');
 
 	dm_ctx_init_sub(&dmctx, ctx->dm_type, ctx->amd_version, ctx->instance_mode);
-	dmctx.in_param = param;
+	dmctx.in_param = linker;
 
 	dm_entry_get_linker_value(&dmctx);
 	*value = dmctx.linker;

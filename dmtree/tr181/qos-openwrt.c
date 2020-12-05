@@ -71,8 +71,8 @@ int os_browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, voi
 	synchronize_specific_config_sections_with_dmmap("qos", "classify", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "classifinstance", "classifalias", "dmmap_qos", "classify");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "classifinstance", "classifalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
@@ -152,8 +152,8 @@ int os_browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 					if (lastinstancestore != NULL && max_inst != NULL)
 						max_inst = dmstrdup(lastinstancestore);
 
-					inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-						   dmmap_sect, "queuestatsinstance", "queuestatsalias", "dmmap_qos", "qos_queue_stats");
+					inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+						   dmmap_sect, "queuestatsinstance", "queuestatsalias");
 
 					lastinstancestore = dmstrdup(max_inst);
 
@@ -586,8 +586,7 @@ int get_QoS_DefaultQueue(char *refparam, struct dmctx *ctx, void *data, char *in
 
 int set_QoS_DefaultQueue(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker;
-	char lower_layer[256] = {0};
+	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -595,9 +594,11 @@ int set_QoS_DefaultQueue(char *refparam, struct dmctx *ctx, void *data, char *in
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
-			adm_entry_get_linker_value(ctx, lower_layer, &linker);
-			dmuci_set_value("qos", "Default", "default", linker);
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker) {
+				dmuci_set_value("qos", "Default", "default", linker);
+				dmfree(linker);
+			}
 			break;
 	}
 	return 0;
@@ -3392,8 +3393,8 @@ int browseQoSQueueInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data
 	synchronize_specific_config_sections_with_dmmap("qos", "class", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "queueinstance", "queuealias", "dmmap_qos", "class");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "queueinstance", "queuealias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
@@ -3705,8 +3706,8 @@ int browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_dat
 		if (limitrate == NULL || strlen(limitrate) == 0)
 			continue;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "shaperinstance", "shaperalias", "dmmap_qos", "class");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "shaperinstance", "shaperalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;

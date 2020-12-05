@@ -433,8 +433,8 @@ static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 			strchr(ifname, '@'))
 			continue;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 5,
-			   p->dmmap_section, "ip_int_instance", "ip_int_alias", "dmmap_network", "interface");
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "ip_int_instance", "ip_int_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -480,8 +480,8 @@ static int browseIPInterfaceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_
 				browse_args.option = "parent_section";
 				browse_args.value = section_name(parent_sec);
 
-				inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-					   dmmap_s, "ipv4_instance", "ipv4_alias", "dmmap_network_ipv4", "intf_ipv4",
+				inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+					   dmmap_s, "ipv4_instance", "ipv4_alias",
 					   check_browse_section, (void *)&browse_args);
 
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
@@ -497,8 +497,8 @@ static int browseIPInterfaceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_
 			browse_args.option = "parent_section";
 			browse_args.value = section_name(parent_sec);
 
-			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-				   dmmap_s, "ipv4_instance", "ipv4_alias", "dmmap_network_ipv4", "intf_ipv4",
+			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_s, "ipv4_instance", "ipv4_alias",
 				   check_browse_section, (void *)&browse_args);
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
@@ -547,8 +547,8 @@ static int browseIPInterfaceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_
 				browse_args.option = "parent_section";
 				browse_args.value = section_name(parent_sec);
 
-				inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-					   dmmap_s, "ipv6_instance", "ipv6_alias", "dmmap_network_ipv6", "intf_ipv6",
+				inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+					   dmmap_s, "ipv6_instance", "ipv6_alias",
 					   check_browse_section, (void *)&browse_args);
 
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
@@ -564,8 +564,8 @@ static int browseIPInterfaceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_
 			browse_args.option = "parent_section";
 			browse_args.value = section_name(parent_sec);
 
-			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-				   dmmap_s, "ipv6_instance", "ipv6_alias", "dmmap_network_ipv6", "intf_ipv6",
+			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_s, "ipv6_instance", "ipv6_alias",
 				   check_browse_section, (void *)&browse_args);
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
@@ -586,8 +586,8 @@ static int browseIPInterfaceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_
 			browse_args.option = "parent_section";
 			browse_args.value = section_name(parent_sec);
 
-			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-				   dmmap_s, "ipv6_instance", "ipv6_alias", "dmmap_network_ipv6", "intf_ipv6",
+			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_s, "ipv6_instance", "ipv6_alias",
 				   check_browse_section, (void *)&browse_args);
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
@@ -638,8 +638,8 @@ static int browseIPInterfaceIPv6PrefixInst(struct dmctx *dmctx, DMNODE *parent_n
 				browse_args.option = "parent_section";
 				browse_args.value = section_name(parent_sec);
 
-				inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-					   dmmap_s, "ipv6_prefix_instance", "ipv6_prefix_alias", "dmmap_network_ipv6_prefix", "intf_ipv6_prefix",
+				inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+					   dmmap_s, "ipv6_prefix_instance", "ipv6_prefix_alias",
 					   check_browse_section, (void *)&browse_args);
 
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
@@ -655,8 +655,8 @@ static int browseIPInterfaceIPv6PrefixInst(struct dmctx *dmctx, DMNODE *parent_n
 			browse_args.option = "parent_section";
 			browse_args.value = section_name(parent_sec);
 
-			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-				   dmmap_s, "ipv6_prefix_instance", "ipv6_prefix_alias", "dmmap_network_ipv6_prefix", "intf_ipv6_prefix",
+			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_s, "ipv6_prefix_instance", "ipv6_prefix_alias",
 				   check_browse_section, (void *)&browse_args);
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
@@ -679,8 +679,8 @@ static int browseIPInterfaceIPv6PrefixInst(struct dmctx *dmctx, DMNODE *parent_n
 			browse_args.option = "parent_section";
 			browse_args.value = section_name(parent_sec);
 
-			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 7,
-				   dmmap_s, "ipv6_prefix_instance", "ipv6_prefix_alias", "dmmap_network_ipv6_prefix", "intf_ipv6_prefix",
+			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+				   dmmap_s, "ipv6_prefix_instance", "ipv6_prefix_alias",
 				   check_browse_section, (void *)&browse_args);
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
@@ -1323,7 +1323,6 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *linker = NULL;
-	char lower_layer[256] = {0};
 
 	switch (action)	{
 		case VALUECHECK:
@@ -1331,14 +1330,11 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			append_dot_to_string(lower_layer, value, sizeof(lower_layer));
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker == NULL || *linker == '\0')
+				return -1;
 
-			if (strncmp(lower_layer, "Device.Ethernet.VLANTermination.", 32) == 0) {
-				adm_entry_get_linker_value(ctx, lower_layer, &linker);
-
-				if (linker == NULL || *linker == '\0')
-					return -1;
-
+			if (strncmp(value, "Device.Ethernet.VLANTermination.", 32) == 0) {
 				struct uci_section *s = NULL, *stmp = NULL;
 
 				// Remove the device section corresponding to this interface if exists
@@ -1377,11 +1373,7 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 				// Update ifname list
 				dmuci_set_value_by_section((struct uci_section *)data, "ifname", linker);
 
-			} else if (strncmp(lower_layer, "Device.Ethernet.Link.", 21) == 0) {
-				adm_entry_get_linker_value(ctx, lower_layer, &linker);
-
-				if (linker == NULL || *linker == '\0')
-					return -1;
+			} else if (strncmp(value, "Device.Ethernet.Link.", 21) == 0) {
 
 				// Get interface name from Ethernet.Link. object
 				struct uci_section *s = NULL;

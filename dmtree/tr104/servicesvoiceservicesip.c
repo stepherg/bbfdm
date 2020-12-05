@@ -34,8 +34,8 @@ static int browseServicesVoiceServiceSIPClientInst(struct dmctx *dmctx, DMNODE *
 	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 5,
-				p->dmmap_section, "clientinstance", "clientalias", "dmmap_asterisk", "sip_service_provider");
+		inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
+			   p->dmmap_section, "clientinstance", "clientalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -63,8 +63,8 @@ static int browseServicesVoiceServiceSIPNetworkInst(struct dmctx *dmctx, DMNODE 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst =  handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 5,
-				p->dmmap_section, "networkinstance", "networkalias", "dmmap_asterisk", "sip_service_provider");
+		inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
+			   p->dmmap_section, "networkinstance", "networkalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
