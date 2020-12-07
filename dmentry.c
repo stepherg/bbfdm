@@ -327,7 +327,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 				fault = FAULT_9003;
 			}
 			break;
-		case CMD_INIT_NOTIFY:
+		case CMD_LIST_NOTIFY:
 			ctx->in_param = "";
 			fault = dm_entry_enabled_notify(ctx);
 			break;
