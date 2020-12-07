@@ -164,7 +164,7 @@ static int add_client_server(char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_set_value_by_section(s, "interface", "lan");
 	dmuci_set_value_by_section(s, "enable", "1");
 
-	*instance = update_instance(inst, 4, s, "dns_server_instance", "dmmap_dns", "dns_server");
+	*instance = update_instance(inst, 2, s, "dns_server_instance");
 	return 0;
 }
 
@@ -180,7 +180,7 @@ static int add_relay_forwarding(char *refparam, struct dmctx *ctx, void *data, c
 	dmuci_set_value_by_section(s, "interface", "lan");
 	dmuci_set_value_by_section(s, "enable", "1");
 
-	*instance = update_instance(inst, 4, s, "dns_server_instance", "dmmap_dns", "dns_server");
+	*instance = update_instance(inst, 2, s, "dns_server_instance");
 	return 0;
 }
 

@@ -413,7 +413,7 @@ static int add_ppp_interface(char *refparam, struct dmctx *ctx, void *data, char
 
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ppp);
 	dmuci_set_value_by_section(dmmap_ppp, "section_name", name);
-	*instance = update_instance(inst, 4, dmmap_ppp, "ppp_int_instance", "dmmap_network", "interface");
+	*instance = update_instance(inst, 2, dmmap_ppp, "ppp_int_instance");
 	return 0;
 }
 

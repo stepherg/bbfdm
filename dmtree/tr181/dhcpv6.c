@@ -316,7 +316,7 @@ static int addObjDHCPv6Client(char *refparam, struct dmctx *ctx, void *data, cha
 
 	dmuci_add_section_bbfdm("dmmap_dhcpv6", "interface", &dmmap_sect);
 	dmuci_set_value_by_section(dmmap_sect, "section_name", section_name(s));
-	*instance = update_instance(inst_para, 4, dmmap_sect, "bbf_dhcpv6client_instance", "dmmap_dhcpv6", "interface");
+	*instance = update_instance(inst_para, 2, dmmap_sect, "bbf_dhcpv6client_instance");
 	return 0;
 }
 
@@ -380,7 +380,7 @@ static int addObjDHCPv6ServerPool(char *refparam, struct dmctx *ctx, void *data,
 
 	dmuci_add_section_bbfdm("dmmap_dhcpv6", "dhcp", &dmmap_dhcp);
 	dmuci_set_value_by_section(dmmap_dhcp, "section_name", section_name(s));
-	*instance = update_instance(inst_para, 4, dmmap_dhcp, "dhcpv6_serv_pool_instance", "dmmap_dhcpv6", "dhcp");
+	*instance = update_instance(inst_para, 2, dmmap_dhcp, "dhcpv6_serv_pool_instance");
 	return 0;
 }
 
@@ -444,7 +444,7 @@ static int addObjDHCPv6ServerPoolOption(char *refparam, struct dmctx *ctx, void 
 	browse_args.option = "section_name";
 	browse_args.value = section_name(dhcp_arg->dhcp_sec);
 
-	*instance = update_instance(inst_para, 6, dmmap_sect, "bbf_dhcpv6_servpool_option_instance", "dmmap_dhcpv6", "servpool_option", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(inst_para, 5, dmmap_sect, "bbf_dhcpv6_servpool_option_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 

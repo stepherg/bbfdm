@@ -87,7 +87,7 @@ static int addObjGRETunnel(char *refparam, struct dmctx *ctx, void *data, char *
 
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_sec);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(gre_sec));
-	*instancepara = update_instance(instance, 4, dmmap_sec, "gretunnel_instance", "dmmap_network", "interface");
+	*instancepara = update_instance(instance, 2, dmmap_sec, "gretunnel_instance");
 	return 0;
 }
 
@@ -152,7 +152,7 @@ static int addObjGRETunnelInterface(char *refparam, struct dmctx *ctx, void *dat
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_sec);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(greiface_sec));
 	dmuci_set_value_by_section(dmmap_sec, "gre_tunnel_sect", section_name(((struct dmmap_dup *)data)->config_section));
-	*instancepara = update_instance(instance, 6, dmmap_sec, "greiface_instance", "dmmap_network", "interface", check_browse_section, (void *)&browse_args);
+	*instancepara = update_instance(instance, 5, dmmap_sec, "greiface_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 

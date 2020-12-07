@@ -340,7 +340,7 @@ int add_dropbear_instance(char *refparam, struct dmctx *ctx, void *data, char **
 
 	dmuci_add_section_bbfdm("dmmap_dropbear", "dropbear", &dmmap_sec);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(dropbear_sec));
-	*instancepara = update_instance(instance, 4, dmmap_sec, "dropbearinstance", "dmmap_dropbear", "dropbear");
+	*instancepara = update_instance(instance, 2, dmmap_sec, "dropbearinstance");
 	return 0;
 }
 

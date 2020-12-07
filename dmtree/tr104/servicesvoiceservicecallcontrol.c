@@ -220,7 +220,7 @@ static int addObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ(char *re
 
 	dmuci_add_section_bbfdm("dmmap_asterisk", "call_filter_rule_incoming", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 4, dmmap, "screjinstance", "dmmap_asterisk", "call_filter_rule_incoming");
+	*instance = update_instance(inst, 2, dmmap, "screjinstance");
 	return 0;
 }
 

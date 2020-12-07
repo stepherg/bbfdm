@@ -33,7 +33,7 @@ static int add_NAT_InterfaceSetting(char *refparam, struct dmctx *ctx, void *dat
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "zone", &dmmap_firewall);
 	dmuci_set_value_by_section(dmmap_firewall, "section_name", section_name(s));
-	*instance = update_instance(inst, 4, dmmap_firewall, "interface_setting_instance", "dmmap_firewall", "zone");
+	*instance = update_instance(inst, 2, dmmap_firewall, "interface_setting_instance");
 	return 0;
 
 }
@@ -87,7 +87,7 @@ static int add_NAT_PortMapping(char *refparam, struct dmctx *ctx, void *data, ch
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "redirect", &dmmap_firewall);
 	dmuci_set_value_by_section(dmmap_firewall, "section_name", section_name(s));
-	*instance = update_instance(inst, 4, dmmap_firewall, "port_mapping_instance", "dmmap_firewall", "redirect");
+	*instance = update_instance(inst, 2, dmmap_firewall, "port_mapping_instance");
 	return 0;
 
 }

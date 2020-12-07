@@ -299,7 +299,7 @@ static int addObjIEEE1905ALForwardingTableForwardingRule(char *refparam, struct 
 
 	dmuci_add_section_bbfdm("dmmap_forwarding_rule", "forwarding_rule", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 4, dmmap, "forwardingruleinstance", "dmmap_forwarding_rule", "forwarding_rule");
+	*instance = update_instance(inst, 2, dmmap, "forwardingruleinstance");
 	return 0;
 }
 

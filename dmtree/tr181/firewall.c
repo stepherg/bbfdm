@@ -74,7 +74,7 @@ static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "rule", &dmmap_firewall_rule);
 	dmuci_set_value_by_section(dmmap_firewall_rule, "section_name", section_name(s));
-	*instance = update_instance(last_inst, 4, dmmap_firewall_rule, "firewall_chain_rule_instance", "dmmap_firewall", "rule");
+	*instance = update_instance(last_inst, 2, dmmap_firewall_rule, "firewall_chain_rule_instance");
 	return 0;
 }
 

@@ -268,7 +268,7 @@ static char *get_ip_interface_last_instance(char *package, char *section, char* 
 			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section);
 			dmuci_set_value_by_section(dmmap_section, "section_name", section_name(s));
 		}
-		instance = update_instance(last_inst, 4, dmmap_section, opt_inst, dmmap_package, section);
+		instance = update_instance(last_inst, 2, dmmap_section, opt_inst);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(instance);
@@ -708,7 +708,7 @@ static int addObjIPInterface(char *refparam, struct dmctx *ctx, void *data, char
 
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ip_interface);
 	dmuci_set_value_by_section(dmmap_ip_interface, "section_name", ip_name);
-	*instance = update_instance(last_inst, 4, dmmap_ip_interface, "ip_int_instance", "dmmap_network", "interface");
+	*instance = update_instance(last_inst, 2, dmmap_ip_interface, "ip_int_instance");
 	return 0;
 }
 
@@ -777,7 +777,7 @@ static int addObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "section_name", last_inst ? ipv4_name : section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "address", "0.0.0.0");
 
-	*instance = update_instance(last_inst, 6, dmmap_ip_interface_ipv4, "ipv4_instance", "dmmap_network_ipv4", "intf_ipv4", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(last_inst, 5, dmmap_ip_interface_ipv4, "ipv4_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -865,7 +865,7 @@ static int addObjIPInterfaceIPv6Address(char *refparam, struct dmctx *ctx, void 
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6, "section_name", ipv6_name);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6, "address", "::");
 
-	*instance = update_instance(last_inst, 6, dmmap_ip_interface_ipv6, "ipv6_instance", "dmmap_network_ipv6", "intf_ipv6", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(last_inst, 5, dmmap_ip_interface_ipv6, "ipv6_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -951,7 +951,7 @@ static int addObjIPInterfaceIPv6Prefix(char *refparam, struct dmctx *ctx, void *
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6_prefix, "section_name", ipv6_prefix_name);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6_prefix, "address", "::/64");
 
-	*instance = update_instance(last_inst, 6, dmmap_ip_interface_ipv6_prefix, "ipv6_prefix_instance", "dmmap_network_ipv6_prefix", "intf_ipv6_prefix", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(last_inst, 5, dmmap_ip_interface_ipv6_prefix, "ipv6_prefix_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 

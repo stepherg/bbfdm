@@ -36,7 +36,7 @@ static int add_mld_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_add_section_bbfdm("dmmap_mcast", "proxy", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", s_name);
 	dmuci_set_value_by_section(dmmap, "proto", "mld");
-	*instance = update_instance(inst, 6, dmmap, "proxy_instance", "dmmap_mcast", "proxy", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(inst, 5, dmmap, "proxy_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -133,7 +133,7 @@ static int add_mld_snooping_obj(char *refparam, struct dmctx *ctx, void *data, c
 	dmuci_add_section_bbfdm("dmmap_mcast", "snooping", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", s_name);
 	dmuci_set_value_by_section(dmmap, "proto", "mld");
-	*instance = update_instance(inst, 6, dmmap, "snooping_instance", "dmmap_mcast", "snooping", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(inst, 5, dmmap, "snooping_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -259,7 +259,7 @@ static int add_mlds_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 	browse_args.option = "section_name";
 	browse_args.value = section_name((struct uci_section *)data);
 
-	*instance = update_instance(last_inst, 6, dmmap_mlds_filter, "filter_instance", "dmmap_mcast", "snooping_filter", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(last_inst, 5, dmmap_mlds_filter, "filter_instance", NULL, check_browse_section, (void *)&browse_args);
 
 	return 0;
 }
@@ -332,7 +332,7 @@ static int add_mldp_interface_obj(char *refparam, struct dmctx *ctx, void *data,
 	browse_args.option = "section_name";
 	browse_args.value = section_name((struct uci_section *)data);
 
-	*instance = update_instance(last_inst, 6, dmmap_mldp_interface, "iface_instance", "dmmap_mcast", "proxy_interface", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(last_inst, 5, dmmap_mldp_interface, "iface_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -431,7 +431,7 @@ static int add_mldp_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 	browse_args.option = "section_name";
 	browse_args.value = section_name((struct uci_section *)data);
 
-	*instance = update_instance(last_inst, 6, dmmap_mldp_filter, "filter_instance", "dmmap_mcast", "proxy_filter", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(last_inst, 5, dmmap_mldp_filter, "filter_instance", NULL, check_browse_section, (void *)&browse_args);
 
 	return 0;
 }

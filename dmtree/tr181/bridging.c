@@ -822,7 +822,7 @@ static int addObjBridgingBridge(char *refparam, struct dmctx *ctx, void *data, c
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_bridge);
 	dmuci_set_value_by_section(dmmap_bridge, "section_name", bridge_name);
 	dmuci_set_value_by_section(dmmap_bridge, "added_by_user", "1");
-	*instance = update_instance(last_inst, 4, dmmap_bridge, "bridge_instance", "dmmap_network", "interface");
+	*instance = update_instance(last_inst, 2, dmmap_bridge, "bridge_instance");
 
 	return 0;
 }

@@ -607,13 +607,12 @@ char *update_instance(char *max_inst, int argc, ...)
 	va_list arg;
 	char *instance, *last_inst = NULL;
 	int i = 0;
-	void *argv[argc+1];
+	void *argv[8] = {0};
 
 	va_start(arg, argc);
 	for (i = 0; i < argc; i++) {
 		argv[i] = va_arg(arg, void*);
 	}
-	argv[argc] = NULL;
 	va_end(arg);
 
 	instance = update_instance_alias(0, &last_inst, &max_inst, argv);
@@ -703,7 +702,7 @@ char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst)
 	char *inst = NULL, *last_inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, package, section, s) {
-		inst = update_instance(last_inst, 4, s, opt_inst, package, section);
+		inst = update_instance(last_inst, 2, s, opt_inst);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(inst);
@@ -733,14 +732,14 @@ char *get_last_instance(char *package, char *section, char *opt_inst)
 
 	if (strcmp(package, DMMAP) == 0) {
 		uci_path_foreach_sections(bbfdm, "dmmap", section, s) {
-			inst = update_instance(last_inst, 4, s, opt_inst, package, section);
+			inst = update_instance(last_inst, 2, s, opt_inst);
 			if(last_inst)
 				dmfree(last_inst);
 			last_inst = dmstrdup(inst);
 		}
 	} else {
 		uci_foreach_sections(package, section, s) {
-			inst = update_instance(inst, 4, s, opt_inst, package, section);
+			inst = update_instance(inst, 2, s, opt_inst);
 		}
 	}
 	return inst;
@@ -756,7 +755,7 @@ char *get_last_instance_lev2_bbfdm_dmmap_opt(char *dmmap_package, char *section,
 	browse_args.value = value_check;
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section, opt_check, value_check, s) {
-		instance = update_instance(last_inst, 6, s, opt_inst, dmmap_package, section, check_browse_section, (void *)&browse_args);
+		instance = update_instance(last_inst, 5, s, opt_inst, NULL, check_browse_section, (void *)&browse_args);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(instance);
@@ -775,7 +774,7 @@ char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_pac
 			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section);
 			dmuci_set_value_by_section(dmmap_section, "section_name", section_name(s));
 		}
-		instance = update_instance(last_inst, 4, dmmap_section, opt_inst, dmmap_package, section);
+		instance = update_instance(last_inst, 2, dmmap_section, opt_inst);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(instance);
@@ -790,14 +789,14 @@ char *get_last_instance_lev2(char *package, char *section, char *opt_inst, char 
 
 	if (strcmp(package, DMMAP) == 0) {
 		uci_path_foreach_option_cont(bbfdm, package, section, opt_check, value_check, s) {
-			instance = update_instance(last_inst, 4, s, opt_inst, package, section);
+			instance = update_instance(last_inst, 2, s, opt_inst);
 			if(last_inst)
 				dmfree(last_inst);
 			last_inst = dmstrdup(instance);
 		}
 	} else {
 		uci_foreach_option_cont(package, section, opt_check, value_check, s) {
-			instance = update_instance(instance, 4, s, opt_inst, package, section);
+			instance = update_instance(instance, 2, s, opt_inst);
 		}
 	}
 	return instance;

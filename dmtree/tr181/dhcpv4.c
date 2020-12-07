@@ -167,7 +167,7 @@ static char *get_last_host_instance(char *package, char *section, char *dmmap_pa
 			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section);
 			dmuci_set_value_by_section(dmmap_section, "section_name", section_name(s));
 		}
-		instance = update_instance(last_inst, 4, dmmap_section, opt_inst, dmmap_package, section);
+		instance = update_instance(last_inst, 2, dmmap_section, opt_inst);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(instance);
@@ -370,7 +370,7 @@ static int addObjDHCPv4ServerPool(char *refparam, struct dmctx *ctx, void *data,
 
 	dmuci_add_section_bbfdm("dmmap_dhcp", "dhcp", &dmmap_dhcp);
 	dmuci_set_value_by_section(dmmap_dhcp, "section_name", dhcp_sname);
-	*instancepara = update_instance(instance, 4, dmmap_dhcp, "dhcp_instance", "dmmap_dhcp", "dhcp");
+	*instancepara = update_instance(instance, 2, dmmap_dhcp, "dhcp_instance");
 	return 0;
 }
 
@@ -435,7 +435,7 @@ static int addObjDHCPv4ServerPoolStaticAddress(char *refparam, struct dmctx *ctx
 	dmuci_add_section_bbfdm("dmmap_dhcp", "host", &dmmap_dhcp_host);
 	dmuci_set_value_by_section(dmmap_dhcp_host, "section_name", section_name(s));
 	dmuci_set_value_by_section(dmmap_dhcp_host, "dhcp", ((struct dhcp_args *)data)->interface);
-	*instancepara = update_instance(instance, 6, dmmap_dhcp_host, "dhcp_host_instance", "dmmap_dhcp", "host", check_browse_section, (void *)&browse_args);
+	*instancepara = update_instance(instance, 5, dmmap_dhcp_host, "dhcp_host_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -484,7 +484,7 @@ static int addObjDHCPv4Client(char *refparam, struct dmctx *ctx, void *data, cha
 
 	dmuci_add_section_bbfdm("dmmap_dhcp_client", "interface", &dmmap_sect);
 	dmuci_set_value_by_section(dmmap_sect, "section_name", section_name(s));
-	*instance = update_instance(inst_para, 4, dmmap_sect, "bbf_dhcpv4client_instance", "dmmap_dhcp_client", "interface");
+	*instance = update_instance(inst_para, 2, dmmap_sect, "bbf_dhcpv4client_instance");
 	return 0;
 }
 
@@ -580,7 +580,7 @@ static int addObjDHCPv4ClientSentOption(char *refparam, struct dmctx *ctx, void 
 	browse_args.option = "section_name";
 	browse_args.value = section_name(dhcp_client_args->dhcp_client_conf);
 
-	*instance = update_instance(inst_para, 6, dmmap_sect, "bbf_dhcpv4_sentopt_instance", "dmmap_dhcp_client", "send_option", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(inst_para, 5, dmmap_sect, "bbf_dhcpv4_sentopt_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -627,7 +627,7 @@ static int addObjDHCPv4ClientReqOption(char *refparam, struct dmctx *ctx, void *
 	browse_args.option = "section_name";
 	browse_args.value = section_name(dhcp_client_args->dhcp_client_conf);
 
-	*instance = update_instance(inst_para, 6, dmmap_sect, "bbf_dhcpv4_sentopt_instance", "dmmap_dhcp_client", "req_option", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(inst_para, 5, dmmap_sect, "bbf_dhcpv4_sentopt_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -672,7 +672,7 @@ static int addObjDHCPv4ServerPoolOption(char *refparam, struct dmctx *ctx, void 
 	browse_args.option = "section_name";
 	browse_args.value = section_name(dhcp_arg->dhcp_sec);
 
-	*instance = update_instance(inst_para, 6, dmmap_sect, "bbf_dhcpv4_servpool_option_instance", "dmmap_dhcp", "servpool_option", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(inst_para, 5, dmmap_sect, "bbf_dhcpv4_servpool_option_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -714,7 +714,7 @@ static int addObjDHCPv4RelayForwarding(char *refparam, struct dmctx *ctx, void *
 
 	dmuci_add_section_bbfdm("dmmap_dhcp_relay", "interface", &dmmap_sect);
 	dmuci_set_value_by_section(dmmap_sect, "section_name", section_name(s));
-	*instance = update_instance(inst_para, 4, dmmap_sect, "bbf_dhcpv4relay_instance", "dmmap_dhcp_relay", "interface");
+	*instance = update_instance(inst_para, 2, dmmap_sect, "bbf_dhcpv4relay_instance");
 	return 0;
 }
 

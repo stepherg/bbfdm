@@ -127,7 +127,7 @@ static int addObjServicesVoiceServiceVoIPProfile(char *refparam, struct dmctx *c
 
 	dmuci_add_section_bbfdm("dmmap_asterisk", "sip_service_provider", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 4, dmmap, "clientinstance", "dmmap_asterisk", "sip_service_provider");
+	*instance = update_instance(inst, 2, dmmap, "clientinstance");
 	return 0;
 }
 
@@ -174,7 +174,7 @@ static int addObjServicesVoiceServiceCodecProfile(char *refparam, struct dmctx *
 
 	dmuci_add_section_bbfdm("dmmap_asterisk", "codec_profile", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 4, dmmap, "codecprofileinstance", "dmmap_asterisk", "codec_profile");
+	*instance = update_instance(inst, 2, dmmap, "codecprofileinstance");
 	return 0;
 }
 

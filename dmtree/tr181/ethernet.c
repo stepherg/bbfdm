@@ -206,7 +206,7 @@ static char *get_vlan_last_instance_bbfdm(char *package, char *section, char *op
 			dmuci_set_value_by_section(s, "vlan_term_instance", "");
 			continue;
 		}
-		inst = update_instance(last_inst, 4, s, opt_inst, package, section);
+		inst = update_instance(last_inst, 2, s, opt_inst);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(inst);
@@ -349,7 +349,7 @@ static int addObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 	/* Add link section in dmmap file */
 	dmuci_add_section_bbfdm(DMMAP, "link", &dmmap_link);
 	dmuci_set_value_by_section(dmmap_link, "section_name", interface_name);
-	*instance = update_instance(inst, 4, dmmap_link, "link_instance", "dmmap", "link");
+	*instance = update_instance(inst, 2, dmmap_link, "link_instance");
 	return 0;
 }
 
@@ -412,7 +412,7 @@ static int addObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 	// Add device section in dmmap_network file
 	dmuci_add_section_bbfdm("dmmap_network", "device", &dmmap_network);
 	dmuci_set_value_by_section(dmmap_network, "section_name", device_name);
-	*instance = update_instance(inst, 4, dmmap_network, "vlan_term_instance", "dmmap_network", "device");
+	*instance = update_instance(inst, 2, dmmap_network, "vlan_term_instance");
 	return 0;
 }
 

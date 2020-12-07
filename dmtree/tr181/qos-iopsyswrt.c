@@ -175,7 +175,7 @@ int os_addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, ch
 
 	dmuci_add_section_bbfdm("dmmap_qos", "classify", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 4, dmmap, "classify_instance", "dmmap_qos", "classify");
+	*instance = update_instance(inst, 2, dmmap, "classify_instance");
 	return 0;
 }
 
@@ -295,7 +295,7 @@ int os_addObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char **in
 
 	dmuci_add_section_bbfdm("dmmap_qos", "policer", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 4, dmmap, "policer_instance", "dmmap_qos", "policer");
+	*instance = update_instance(inst, 2, dmmap, "policer_instance");
 	return 0;
 }
 
@@ -375,7 +375,7 @@ int os_addObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char **inst
 
 	dmuci_add_section_bbfdm("dmmap_qos", "queue", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 4, dmmap, "queueinstance", "dmmap_qos", "queue");
+	*instance = update_instance(inst, 2, dmmap, "queueinstance");
 	return 0;
 }
 
@@ -452,7 +452,7 @@ int os_addObjQoSShaper(char *refparam, struct dmctx *ctx, void *data, char **ins
 
 	dmuci_add_section_bbfdm("dmmap_qos", "shaper", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 4, dmmap, "shaperinstance", "dmmap_qos", "shaper");
+	*instance = update_instance(inst, 2, dmmap, "shaperinstance");
 	return 0;
 }
 

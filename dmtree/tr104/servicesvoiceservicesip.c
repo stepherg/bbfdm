@@ -119,7 +119,7 @@ static int addObjServicesVoiceServiceSIPClient(char *refparam, struct dmctx *ctx
 
 	dmuci_add_section_bbfdm("dmmap_asterisk", "sip_service_provider", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", new_sec_name);
-	*instance = update_instance(inst, 4, dmmap, "clientinstance", "dmmap_asterisk", "sip_service_provider");
+	*instance = update_instance(inst, 2, dmmap, "clientinstance");
 
 	return 0;
 }

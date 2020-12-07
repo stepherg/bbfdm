@@ -285,7 +285,7 @@ static int add_igmp_proxy_obj(char *refparam, struct dmctx *ctx, void *data, cha
 	dmuci_add_section_bbfdm("dmmap_mcast", "proxy", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", s_name);
 	dmuci_set_value_by_section(dmmap, "proto", "igmp");
-	*instance = update_instance(inst, 6, dmmap, "proxy_instance", "dmmap_mcast", "proxy", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(inst, 5, dmmap, "proxy_instance", NULL, check_browse_section, (void *)&browse_args);
 
 	return 0;
 }
@@ -383,7 +383,7 @@ static int add_igmp_snooping_obj(char *refparam, struct dmctx *ctx, void *data, 
 	dmuci_add_section_bbfdm("dmmap_mcast", "snooping", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", s_name);
 	dmuci_set_value_by_section(dmmap, "proto", "igmp");
-	*instance = update_instance(inst, 6, dmmap, "snooping_instance", "dmmap_mcast", "snooping", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(inst, 5, dmmap, "snooping_instance", NULL, check_browse_section, (void *)&browse_args);
 
 	return 0;
 }
@@ -515,7 +515,7 @@ static int add_igmps_filter_obj(char *refparam, struct dmctx *ctx, void *data, c
 	browse_args.option = "section_name";
 	browse_args.value = section_name((struct uci_section *)data);
 
-	*instance = update_instance(last_inst, 6, dmmap_igmps_filter, "filter_instance", "dmmap_mcast", "snooping_filter", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(last_inst, 5, dmmap_igmps_filter, "filter_instance", NULL, check_browse_section, (void *)&browse_args);
 
 	return 0;
 }
@@ -951,7 +951,7 @@ static int add_igmpp_interface_obj(char *refparam, struct dmctx *ctx, void *data
 	browse_args.option = "section_name";
 	browse_args.value = section_name((struct uci_section *)data);
 
-	*instance = update_instance(last_inst, 6, dmmap_igmpp_interface, "iface_instance", "dmmap_mcast", "proxy_interface", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(last_inst, 5, dmmap_igmpp_interface, "iface_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
 }
 
@@ -1090,7 +1090,7 @@ static int add_igmpp_filter_obj(char *refparam, struct dmctx *ctx, void *data, c
 	browse_args.option = "section_name";
 	browse_args.value = section_name((struct uci_section *)data);
 
-	*instance = update_instance(last_inst, 6, dmmap_igmpp_filter, "filter_instance", "dmmap_mcast", "proxy_filter", check_browse_section, (void *)&browse_args);
+	*instance = update_instance(last_inst, 5, dmmap_igmpp_filter, "filter_instance", NULL, check_browse_section, (void *)&browse_args);
 
 	return 0;
 }

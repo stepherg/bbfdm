@@ -47,7 +47,7 @@ static int add_users_user(char *refparam, struct dmctx *ctx, void *data, char **
 
 	dmuci_add_section_bbfdm("dmmap_users", "user", &dmmap_user);
 	dmuci_set_value_by_section(dmmap_user, "section_name", username);
-	*instance = update_instance(last_inst, 4, dmmap_user, "user_instance", "dmmap_users", "user");
+	*instance = update_instance(last_inst, 2, dmmap_user, "user_instance");
 	return 0;
 }
 

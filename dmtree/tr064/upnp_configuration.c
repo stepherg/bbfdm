@@ -285,7 +285,7 @@ int upnp_configuration_ipinterface_createinstance(char *refparam, struct dmctx *
 	dmuci_add_section("network", "interface", &iface_sec);
 	dmuci_set_value("network", ip_name, "", "interface");
 	dmuci_set_value("network", ip_name, "proto", "dhcp");
-	*instance = update_instance(iface_instance, 4, iface_sec, "upnp_ip_iface_instance", "network", "interface");
+	*instance = update_instance(iface_instance, 2, iface_sec, "upnp_ip_iface_instance");
 	return 0;
 }
 

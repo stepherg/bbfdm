@@ -251,7 +251,7 @@ static int add_atm_link(char *refparam, struct dmctx *ctx, void *data, char **in
 
 	dmuci_add_section_bbfdm("dmmap_dsl", "atm-device", &dmmap_atm);
 	dmuci_set_value_by_section(dmmap_atm, "section_name", atm_device);
-	*instancepara = update_instance(instance, 4, dmmap_atm, "atmlinkinstance", "dmmap_dsl", "atm-device");
+	*instancepara = update_instance(instance, 2, dmmap_atm, "atmlinkinstance");
 	return 0;
 }
 
