@@ -83,11 +83,6 @@ void del_list_parameter(struct dm_parameter *dm_parameter)
 	api_del_list_parameter(dm_parameter);
 }
 
-int dm_update_file_enabled_notify(char *param, char *new_value)
-{
-	return bbf_api_dm_update_file_enabled_notify(param, new_value);
-}
-
 void dmjson_parse_init(char *msg)
 {
 	bbf_api_dmjson_parse_init(msg);
