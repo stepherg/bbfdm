@@ -41,7 +41,6 @@ libbbfdm_la_SOURCES =	\
 	../dmoperate.c		\
 	../dmdiagnostics.c	\
 	../dmbbfcommon.c	\
-	../md5.c 			\
 	../wepkey.c
 
 if BBF_TR181

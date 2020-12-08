@@ -11,41 +11,6 @@
 
 #include "dmbbfcommon.h"
 
-int end_session_flag = 0;
-unsigned int upnp_in_user_mask = DM_SUPERADMIN_MASK;
-
-LIST_HEAD(list_execute_end_session);
-
-int dm_add_end_session(struct dmctx *ctx, void(*function)(struct execute_end_session *), int action, void *data)
-{
-	struct execute_end_session *execute_end_session;
-
-	execute_end_session = calloc (1,sizeof(struct execute_end_session));
-	if (execute_end_session == NULL)
-	{
-		return -1;
-	}
-	execute_end_session->action = action;
-	execute_end_session->data = data;
-	execute_end_session->function = function;
-	execute_end_session->amd_version = ctx->amd_version;
-	execute_end_session->instance_mode = ctx->instance_mode;
-	execute_end_session->dm_type = ctx->dm_type;
-	list_add_tail (&(execute_end_session->list), &(list_execute_end_session));
-
-	return 0;
-}
-
-void apply_end_session()
-{
-	struct execute_end_session *p, *q;
-	list_for_each_entry_safe(p, q, &(list_execute_end_session), list) {
-		p->function(p);
-		list_del(&(p->list));
-		FREE(p);
-	}
-}
-
 void bbf_set_end_session_flag(struct dmctx *ctx, unsigned int flag)
 {
 	ctx->end_session_flag |= flag;
@@ -120,12 +85,6 @@ int copy_temporary_file_to_original_file(char *f1, char *f2)
 void dmjson_get_var(char *jkey, char **jval)
 {
 	bbf_api_dmjson_get_var(jkey, jval);
-}
-
-void dm_update_enabled_notify(struct dm_enabled_notify *p, char *new_value)
-{
-	free(p->value); // Should be free and not dmfree
-	p->value = strdup(new_value);
 }
 
 void dmjson_get_string(char *jkey, char **jval)

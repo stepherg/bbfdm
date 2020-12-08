@@ -15,7 +15,6 @@
 #include <libbbf_api/dmcommon.h>
 #include "dmentry.h"
 
-extern unsigned int upnp_in_user_mask;
 extern struct list_head list_execute_end_session;
 
 void bbf_uci_commit_bbfdm(void);
@@ -31,7 +30,6 @@ void del_list_fault_param(struct param_fault *param_fault);
 int copy_temporary_file_to_original_file(char *f1, char *f2);
 void dmjson_get_var(char *jkey, char **jval);
 void dmjson_get_string(char *jkey, char **jval);
-void dm_update_enabled_notify(struct dm_enabled_notify *p, char *new_value);
 
 void apply_end_session(void);
 int dm_add_end_session(struct dmctx *ctx, void(*function)(struct execute_end_session *), int action, void *data);
