@@ -39962,7 +39962,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "network",
+								"section": {
+									"type": "interface",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ula"
+								}
+							}
+						}
+					]
 				},
 				"Status": {
 					"type": "string",

@@ -1228,6 +1228,30 @@ static int set_IPInterface_IPv6Enable(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
+/*#Device.IP.Interface.{i}.ULAEnable!UCI:network/interface,@i-1/ula*/
+static int get_IPInterface_ULAEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ula", "1");
+	return 0;
+}
+
+static int set_IPInterface_ULAEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section((struct uci_section *)data, "ula", b ? "1" : "0");
+			break;
+	}
+	return 0;
+}
+
 /*#Device.IP.Interface.{i}.Status!UCI:network/interface,@i-1/disabled*/
 static int get_IPInterface_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2265,7 +2289,7 @@ DMLEAF tIPInterfaceParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_IPInterface_Enable, set_IPInterface_Enable, BBFDM_BOTH},
 {"IPv4Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv4Enable, set_IPInterface_IPv4Enable, BBFDM_BOTH},
 {"IPv6Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv6Enable, set_IPInterface_IPv6Enable, BBFDM_BOTH},
-//{"ULAEnable", &DMWRITE, DMT_BOOL, get_IPInterface_ULAEnable, set_IPInterface_ULAEnable, BBFDM_BOTH},
+{"ULAEnable", &DMWRITE, DMT_BOOL, get_IPInterface_ULAEnable, set_IPInterface_ULAEnable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_IPInterface_Status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_IPInterface_Alias, set_IPInterface_Alias, BBFDM_BOTH},
 {"Name", &DMREAD, DMT_STRING, get_IPInterface_Name, NULL, BBFDM_BOTH},
