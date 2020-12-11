@@ -140,7 +140,7 @@ static int browseUSBInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void
 			//dmuci_delete_by_section_unnamed_bbfdm(p->dm, NULL, NULL);
 			continue;
 		}
-		if(p->dm){
+		if(p->dmmap_section){
 			foldersplit= strsplit(p->sysfs_folder_name, ":", &length);
 			snprintf(port_link, sizeof(port_link), "%s", foldersplit[0]);
 		}
@@ -155,14 +155,14 @@ static int browseUSBInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void
 			closedir(dir);
 
 		dmasprintf(&iface_path, "%s/%s", netfolderpath, iface_name);
-		if (p->dm)
-			dmuci_set_value_by_section_bbfdm(p->dm, "usb_iface_path", iface_path);
+		if (p->dmmap_section)
+			dmuci_set_value_by_section_bbfdm(p->dmmap_section, "usb_iface_path", iface_path);
 
 		dmasprintf(&statistics_path, "%s/statistics", iface_path);
-		init_usb_interface(p->dm, iface_name, iface_path, statistics_path, port_link, &iface);
+		init_usb_interface(p->dmmap_section, iface_name, iface_path, statistics_path, port_link, &iface);
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dm, "usb_iface_instance", "usb_iface_alias");
+			   p->dmmap_section, "usb_iface_instance", "usb_iface_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &iface, inst) == DM_STOP)
 			break;
@@ -183,22 +183,21 @@ static int browseUSBPortInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	regcomp(&regex1, "^[0-9][0-9]*-[0-9]*[0-9]$", 0);
 	regcomp(&regex2, "^[0-9][0-9]*-[0-9]*[0-9]\\.[0-9]*[0-9]$", 0);
 
-	synchronize_system_folders_with_dmmap_opt(SYSFS_USB_DEVICES_PATH,
-		"dmmap_usb", "dmmap_port", "port_link", "usb_port_instance", &dup_list);
+	synchronize_system_folders_with_dmmap_opt(SYSFS_USB_DEVICES_PATH, "dmmap_usb", "dmmap_port", "port_link", "usb_port_instance", &dup_list);
 
 	list_for_each_entry(p, &dup_list, list) {
 
 		if (regexec(&regex1, p->sysfs_folder_name, 0, NULL, 0) != 0 &&
 			regexec(&regex2, p->sysfs_folder_name, 0, NULL, 0) !=0 &&
 			strstr(p->sysfs_folder_name, "usb") != p->sysfs_folder_name) {
-			dmuci_delete_by_section_unnamed_bbfdm(p->dm, NULL, NULL);
+			dmuci_delete_by_section_unnamed_bbfdm(p->dmmap_section, NULL, NULL);
 			continue;
 		}
 
-		init_usb_port(p->dm, p->sysfs_folder_name, p->sysfs_folder_path, &port);
+		init_usb_port(p->dmmap_section, p->sysfs_folder_name, p->sysfs_folder_path, &port);
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dm, "usb_port_instance", "usb_port_alias");
+			   p->dmmap_section, "usb_port_instance", "usb_port_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, inst) == DM_STOP)
 			break;
@@ -213,21 +212,20 @@ static int browseUSBUSBHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, v
 {
 	struct sysfs_dmsection *p;
 	char *inst = NULL, *max_inst = NULL;
-	struct usb_port port= {};
+	struct usb_port port = {0};
 	LIST_HEAD(dup_list);
 
-	synchronize_system_folders_with_dmmap_opt(SYSFS_USB_DEVICES_PATH,
-		"dmmap_usb", "dmmap_host", "port_link", "usb_host_instance", &dup_list);
+	synchronize_system_folders_with_dmmap_opt(SYSFS_USB_DEVICES_PATH, "dmmap_usb", "dmmap_host", "port_link", "usb_host_instance", &dup_list);
 
 	list_for_each_entry(p, &dup_list, list) {
 		if(!strstr(p->sysfs_folder_name, "usb"))
 			continue;
 
-		init_usb_port(p->dm, p->sysfs_folder_name, p->sysfs_folder_path, &port);
-		port.dmsect= p->dm;
+		init_usb_port(p->dmmap_section, p->sysfs_folder_name, p->sysfs_folder_path, &port);
+		port.dmsect= p->dmmap_section;
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dm, "usb_host_instance", "usb_host_alias");
+			   p->dmmap_section, "usb_host_instance", "usb_host_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, inst) == DM_STOP)
 			break;
@@ -241,7 +239,7 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 	struct uci_section *s, *stmp, *dmmap_sect;
 	DIR *dir;
 	struct dirent *ent;
-	char *v, *sysfs_rep_path, *instance = NULL;
+	char *v, *sysfs_repo_path, *instance = NULL;
 	struct sysfs_dmsection *p;
 	regex_t regex1 = {}, regex2 = {};
 
@@ -251,7 +249,7 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 	LIST_HEAD(dup_list_no_inst);
 
 	sysfs_foreach_file(sysfsrep, dir, ent) {
-		if(strcmp(ent->d_name, ".")==0 || strcmp(ent->d_name, "..")==0)
+		if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
 			continue;
 
 		if (regexec(&regex1, ent->d_name, 0, NULL, 0) == 0 || regexec(&regex2, ent->d_name, 0, NULL, 0) ==0) {
@@ -261,7 +259,7 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 			snprintf(deviceClassFile, sizeof(deviceClassFile), "%s/%s/bDeviceClass", sysfsrep, ent->d_name);
 			dm_read_sysfs_file(deviceClassFile, deviceClass, sizeof(deviceClass));
 
-			if(strncmp(deviceClass, "09", 2) == 0){
+			if (strncmp(deviceClass, "09", 2) == 0) {
 				char hubpath[270];
 
 				snprintf(hubpath, sizeof(hubpath), "%s/%s", sysfsrep, ent->d_name);
@@ -270,19 +268,19 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 			/*
 			 * create/update corresponding dmmap section that have same config_section link and using param_value_array
 			 */
-			dmasprintf(&sysfs_rep_path, "%s/%s", sysfsrep, ent->d_name);
-			if ((dmmap_sect = get_dup_section_in_dmmap_opt(dmmap_package, dmmap_section, opt_name, sysfs_rep_path)) == NULL) {
+			dmasprintf(&sysfs_repo_path, "%s/%s", sysfsrep, ent->d_name);
+			if ((dmmap_sect = get_dup_section_in_dmmap_opt(dmmap_package, dmmap_section, opt_name, sysfs_repo_path)) == NULL) {
 				dmuci_add_section_bbfdm(dmmap_package, dmmap_section, &dmmap_sect);
-				dmuci_set_value_by_section_bbfdm(dmmap_sect, opt_name, sysfs_rep_path);
+				dmuci_set_value_by_section_bbfdm(dmmap_sect, opt_name, sysfs_repo_path);
 			}
 			dmuci_get_value_by_section_string(dmmap_sect, inst_opt, &instance);
 			/*
 			 * Add system and dmmap sections to the list
 			 */
 			if (instance == NULL || strlen(instance) <= 0)
-				add_sysfs_sectons_list_paramameter(&dup_list_no_inst, dmmap_sect, ent->d_name, sysfs_rep_path);
+				add_sysfs_section_list(&dup_list_no_inst, dmmap_sect, ent->d_name, sysfs_repo_path);
 			else
-				add_sysfs_sectons_list_paramameter(dup_list, dmmap_sect, ent->d_name, sysfs_rep_path);
+				add_sysfs_section_list(dup_list, dmmap_sect, ent->d_name, sysfs_repo_path);
 		}
 	}
 	if (dir)
@@ -293,12 +291,12 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 	 * fusion two lists
 	 */
 	list_for_each_entry(p, &dup_list_no_inst, list) {
-		add_sysfs_sectons_list_paramameter(dup_list, p->dm, p->sysfs_folder_name, p->sysfs_folder_path);
+		add_sysfs_section_list(dup_list, p->dmmap_section, p->sysfs_folder_name, p->sysfs_folder_path);
 	}
 	/*
 	 * Delete unused dmmap sections
 	 */
-	if(is_root){
+	if (is_root) {
 		uci_path_foreach_sections_safe(bbfdm, dmmap_package, dmmap_section, stmp, s) {
 			dmuci_get_value_by_section_string(s, opt_name, &v);
 			if (!folder_exists(v)) {
@@ -323,17 +321,17 @@ static int browseUSBUSBHostsHostDeviceInst(struct dmctx *dmctx, DMNODE *parent_n
 
 	list_for_each_entry(p, &dup_list, list) {
 
-		init_usb_port(p->dm, p->sysfs_folder_name, p->sysfs_folder_path, &port);
+		init_usb_port(p->dmmap_section, p->sysfs_folder_name, p->sysfs_folder_path, &port);
 
-		if (p->dm && prev_port->dmsect ) {
+		if (p->dmmap_section && prev_port->dmsect ) {
 			dmuci_get_value_by_section_string(prev_port->dmsect, "usb_host_instance", &parent_host_instance);
-			dmuci_set_value_by_section_bbfdm(p->dm, "usb_host_device_parent_host_instance", parent_host_instance);
+			dmuci_set_value_by_section_bbfdm(p->dmmap_section, "usb_host_device_parent_host_instance", parent_host_instance);
 		}
 
 		port.dmsect = prev_port->dmsect;
 
 		instance = handle_update_instance(2, dmctx, &instnbr, update_instance_alias, 3,
-				   p->dm, "usb_host_device_instance", "usb_host_device_alias");
+				   p->dmmap_section, "usb_host_device_instance", "usb_host_device_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &port, instance) == DM_STOP)
 			break;

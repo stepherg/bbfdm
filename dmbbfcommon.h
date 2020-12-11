@@ -15,8 +15,6 @@
 #include <libbbf_api/dmcommon.h>
 #include "dmentry.h"
 
-extern struct list_head list_execute_end_session;
-
 void bbf_uci_commit_bbfdm(void);
 void bbf_uci_revert_bbfdm(void);
 int set_bbfdatamodel_type(int bbf_type);
@@ -30,11 +28,8 @@ int copy_temporary_file_to_original_file(char *f1, char *f2);
 void dmjson_get_var(char *jkey, char **jval);
 void dmjson_get_string(char *jkey, char **jval);
 
-void apply_end_session(void);
-int dm_add_end_session(struct dmctx *ctx, void(*function)(struct execute_end_session *), int action, void *data);
 void bbf_set_end_session_flag (struct dmctx *ctx, unsigned int flag);
 int bbfdmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);
-void dmbbf_update_enabled_notify_file(unsigned int dm_type, unsigned int amd_version, int instance_mode);
 int get_dm_type(char *dm_str);
 
 #endif //__DMBBFCOMMON_H__

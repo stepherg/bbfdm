@@ -16,7 +16,6 @@
 
 #define LIBRARY_FOLDER_PATH "/usr/lib/bbfdm"
 
-int check_stats_library_folder(char *library_folder_path);
 int load_library_dynamic_arrays(struct dmctx *ctx);
 int free_library_dynamic_arrays(DMOBJ *dm_entryobj);
 

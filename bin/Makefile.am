@@ -40,8 +40,7 @@ libbbfdm_la_SOURCES =	\
 	../dmmemjson.c 		\
 	../dmoperate.c		\
 	../dmdiagnostics.c	\
-	../dmbbfcommon.c	\
-	../wepkey.c
+	../dmbbfcommon.c
 
 if BBF_TR181
 libbbfdm_la_SOURCES +=							\

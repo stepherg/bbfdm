@@ -699,13 +699,13 @@ static void update_device_management_port(char *old_name, char *new_name, char *
 
 static void update_vlanport_and_device_section(void *data, char *linker, char **new_linker)
 {
-	struct uci_section *ss = NULL;
-	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_vlanport", "bridge_vlanport", "br_inst", ((struct bridge_port_args *)data)->br_inst, ss) {
+	struct uci_section *br_vlan_port_s = NULL;
+	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_vlanport", "bridge_vlanport", "br_inst", ((struct bridge_port_args *)data)->br_inst, br_vlan_port_s) {
 		char *port_name;
-		dmuci_get_value_by_section_string(ss, "port_name", &port_name);
+		dmuci_get_value_by_section_string(br_vlan_port_s, "port_name", &port_name);
 		if (strcmp(section_name(((struct bridge_port_args *)data)->bridge_port_dmmap_sec), port_name) == 0) {
 			char *device_name;
-			dmuci_get_value_by_section_string(ss, "device_name", &device_name);
+			dmuci_get_value_by_section_string(br_vlan_port_s, "device_name", &device_name);
 
 			// Update device section
 			struct uci_section *s = NULL;
@@ -729,7 +729,7 @@ static void update_vlanport_and_device_section(void *data, char *linker, char **
 			}
 
 			// Update vlan port section in dmmap
-			dmuci_set_value_by_section(ss, "name", *new_linker);
+			dmuci_set_value_by_section(br_vlan_port_s, "name", *new_linker);
 			break;
 		}
 	}

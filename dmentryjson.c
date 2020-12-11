@@ -14,38 +14,6 @@
 #include "dmentry.h"
 
 LIST_HEAD(json_list);
-static char json_hash[64] = "";
-
-static int get_stats_json_folder(char *folder_path, int *file_count, unsigned long *size, unsigned long *date)
-{
-	struct stat stats;
-	struct dirent *entry;
-	DIR *dirp = NULL;
-	char buf[264] = {0};
-	int filecount = 0;
-	unsigned long filesize = 0, filedate = 0;
-
-	if (folder_exists(folder_path)) {
-		dirp = opendir(folder_path);
-		while ((entry = readdir(dirp)) != NULL) {
-			if ((entry->d_type == DT_REG) && (strstr(entry->d_name, ".json"))) {
-				filecount++;
-				snprintf(buf, sizeof(buf), "%s/%s", folder_path, entry->d_name);
-				if (!stat(buf, &stats)) {
-					filesize = (filesize + stats.st_size) / 2;
-					filedate = (filedate + stats.st_mtime) / 2;
-				}
-			}
-		}
-		if (dirp) closedir(dirp);
-
-		*file_count = filecount;
-		*size = filesize;
-		*date = filedate;
-		return 1;
-	}
-	return 0;
-}
 
 static void add_json_data_to_list(struct list_head *dup_list, char *name, char *arg1, const char *arg2, const char *arg3, const char *arg4,
 					const char *arg5, const char *arg6, const char *arg7, const char *arg8)
@@ -124,23 +92,6 @@ int free_json_dynamic_arrays(DMOBJ *dm_entryobj)
 	free_json_data_from_list(&json_list);
 	dmcleanmemjson();
 	free_node_object_tree_dynamic_array(dm_entryobj);
-	return 0;
-}
-
-int check_stats_json_folder(char *json_folder_path)
-{
-	int file_count = 0;
-	unsigned long size = 0, date = 0;
-	char str[128] = "";
-
-	if (!get_stats_json_folder(json_folder_path, &file_count, &size, &date))
-		return 0;
-	
-	snprintf(str, sizeof(str), "count:%d,sizes:%lu,date:%lu", file_count, size, date);
-	if (strcmp(str, json_hash)) {
-		strcpy(json_hash, str);
-		return 1;
-	}
 	return 0;
 }
 
@@ -828,41 +779,6 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, s
 	}
 }
 
-static void parse_next_obj(struct dmctx *ctx, json_object *jobj)
-{
-	json_object_object_foreach(jobj, key, json_obj) {
-		DMOBJ *dm_entryobj = NULL;
-		if (json_object_get_type(json_obj) == json_type_object && is_obj(key, json_obj)) {
-			int check_obj = check_json_root_obj(ctx, key, &dm_entryobj);
-			if (check_obj == 0) continue;
-			if (check_obj == 1) {
-				parse_next_obj(ctx, json_obj);
-			} else {
-				if (!dm_entryobj) continue;
-
-				if (dm_entryobj->nextdynamicobj == NULL) {
-					dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
-					dm_entryobj->nextdynamicobj[INDX_JSON_OBJ_MOUNT].isstatic = 0;
-				}
-
-				if (dm_entryobj->nextdynamicobj[INDX_JSON_OBJ_MOUNT].nextobj == NULL) {
-					dm_entryobj->nextdynamicobj[INDX_JSON_OBJ_MOUNT].nextobj = calloc(2, sizeof(struct dm_obj_s *));
-				}
-
-				if (dm_entryobj->nextdynamicobj[INDX_JSON_OBJ_MOUNT].nextobj[0] == NULL) {
-					dm_entryobj->nextdynamicobj[INDX_JSON_OBJ_MOUNT].nextobj[0] = dmcallocjson(2, sizeof(struct dm_obj_s));
-					parse_obj(key, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_OBJ_MOUNT].nextobj[0], 0, &json_list);
-				} else {
-					int idx = get_index_of_available_entry(dm_entryobj->nextdynamicobj[INDX_JSON_OBJ_MOUNT].nextobj[0]);
-					dm_entryobj->nextdynamicobj[INDX_JSON_OBJ_MOUNT].nextobj[0] = dmreallocjson(dm_entryobj->nextdynamicobj[INDX_JSON_OBJ_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
-					memset(dm_entryobj->nextdynamicobj[INDX_JSON_OBJ_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
-					parse_obj(key, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_OBJ_MOUNT].nextobj[0], idx, &json_list);
-				}
-			}
-		}
-	}
-}
-
 int load_json_dynamic_arrays(struct dmctx *ctx)
 {
 	struct dirent *ent;
@@ -881,12 +797,11 @@ int load_json_dynamic_arrays(struct dmctx *ctx)
 				json_object_object_foreach(json, key, jobj) {
 					if (!key) break;
 					int check_obj = check_json_root_obj(ctx, key, &dm_entryobj);
-					if (check_obj == 0) continue;
-					if (check_obj == 1) {
-						parse_next_obj(ctx, jobj);
+					if (check_obj == 0)
 						continue;
-					}
-					if (!dm_entryobj) continue;
+
+					if (!dm_entryobj)
+						continue;
 
 					if (dm_entryobj->nextdynamicobj == NULL) {
 						dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));

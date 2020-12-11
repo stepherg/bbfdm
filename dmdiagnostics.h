@@ -25,15 +25,14 @@
 #define FTP_STOR_REQUEST "STOR"
 #define DMMAP_DIAGNOSTIGS "dmmap_diagnostics"
 
-struct download_diag
+struct diagnostic_stats
 {
 	char romtime[default_date_size];
 	char bomtime[default_date_size];
 	char eomtime[default_date_size];
+	char tcpopenrequesttime[default_date_size];
+	char tcpopenresponsetime[default_date_size];
 	int test_bytes_received;
-	unsigned long total_bytes_received;
-	char tcpopenrequesttime[default_date_size];
-	char tcpopenresponsetime[default_date_size];
 	int tmp;
 	int first_data;
 	uint16_t ip_len;
@@ -42,28 +41,10 @@ struct download_diag
 	uint32_t get_ack;
 	uint32_t ftp_syn;
 };
-
-struct upload_diagnostic_stats
-{
-	char romtime[default_date_size];
-	char bomtime[default_date_size];
-	char eomtime[default_date_size];
-	unsigned long total_bytes_sent;
-	char tcpopenrequesttime[default_date_size];
-	char tcpopenresponsetime[default_date_size];
-	int tmp;
-	int first_data;
-	uint16_t ip_len;
-	uint32_t ack_seq;
-	uint32_t random_seq;
-	uint32_t get_ack;
-	uint32_t ftp_syn;
-};
-
 
 enum download_diagnostic_protocol {
-	DOWNLOAD_DIAGNOSTIC_HTTP = 1,
-	DOWNLOAD_DIAGNOSTIC_FTP
+	DIAGNOSTIC_HTTP = 1,
+	DIAGNOSTIC_FTP
 };
 
 enum diagnostic_type {

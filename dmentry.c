@@ -17,7 +17,6 @@
 #include "dmentrylibrary.h"
 #include "dmoperate.h"
 #include "device.h"
-#include "wepkey.h"
 #include "dmbbfcommon.h"
 
 #ifdef BBF_TR064
@@ -26,6 +25,9 @@
 
 LIST_HEAD(head_package_change);
 LIST_HEAD(list_enabled_lw_notify);
+
+static char json_hash[64] = {0};
+static char library_hash[64] = {0};
 
 int usp_fault_map(int fault)
 {
@@ -223,15 +225,8 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 	int err2 = 0;
 #endif
 
-	if (check_stats_json_folder(JSON_FOLDER_PATH)) {
-		free_json_dynamic_arrays(tEntry181Obj);
-		load_json_dynamic_arrays(ctx);
-	}
-
-	if (check_stats_library_folder(LIBRARY_FOLDER_PATH)) {
-		free_library_dynamic_arrays(tEntry181Obj);
-		load_library_dynamic_arrays(ctx);
-	}
+	// Load dynamic objects and parameters
+	load_dynamic_arrays(ctx);
 
 	if (!inparam) inparam = "";
 	ctx->in_param = inparam;
@@ -331,7 +326,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			break;
 		case CMD_UPNP_GET_INSTANCES:
 			ctx->depth = atoi(arg1);
-			fault = dm_entry_upnp_get_instances(ctx);
+			fault = dm_entry_upnp_get_instances(ctx, false);
 			break;
 		case CMD_UPNP_SET_VALUES:
 			ctx->in_value = arg1 ? arg1 : "";
@@ -347,13 +342,13 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 				ctx->dmparam_flags |= (event) ? DM_PARAM_EVENT_ON_CHANGE : 0;
 				ctx->dmparam_flags |= (alarm) ? DM_PARAM_ALARAM_ON_CHANGE : 0;
 				ctx->setaction = VALUECHECK;
-				fault = dm_entry_upnp_set_attributes(ctx);
+				fault = dm_entry_upnp_get_set_attributes(ctx, false);
 			} else {
 				fault = FAULT_9003;
 			}
 			break;
 		case CMD_UPNP_GET_ATTRIBUTES:
-			fault = dm_entry_upnp_get_attributes(ctx);
+			fault = dm_entry_upnp_get_set_attributes(ctx, true);
 			break;
 		case CMD_UPNP_DEL_INSTANCE:
 			fault = dm_entry_upnp_delete_instance(ctx);
@@ -440,7 +435,7 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2)
 				ctx->in_param = n->name;
 				ctx->dmparam_flags = n->flags;
 				ctx->stop = false;
-				fault = dm_entry_upnp_set_attributes(ctx);
+				fault = dm_entry_upnp_get_set_attributes(ctx, false);
 				if (fault) break;
 			}
 			if (fault) {
@@ -554,8 +549,7 @@ int dm_entry_upnp_check_onchange_param(struct dmctx *pctx, struct list_head *ena
 				add_list_upnp_param_track(&dmctx, changed_head, p->name, "1", all_instances, 1);
 				ischange = 1;
 			}
-		}
-		else {
+		} else {
 			fault = dm_entry_param_method(&dmctx, CMD_UPNP_GET_VALUES, p->name, NULL, NULL);
 			if (!fault && dmctx.list_parameter.next != &dmctx.list_parameter) {
 				dm_parameter = list_entry(dmctx.list_parameter.next, struct dm_parameter, list);
@@ -617,7 +611,7 @@ int dm_entry_upnp_check_versiononchange_param(struct dmctx *pctx)
 {
 	struct dmctx dmctx = {0};
 	struct dm_upnp_enabled_track *p;
-	struct dm_parameter *dm_parameter;
+	struct dm_parameter *parameter;
 	int version, fault, ischange = 0;
 	char *all_instances;
 
@@ -632,21 +626,19 @@ int dm_entry_upnp_check_versiononchange_param(struct dmctx *pctx)
 				add_list_upnp_param_track(&dmctx, &list_upnp_changed_version, p->name, "1", all_instances, 1);
 				ischange = 1;
 			}
-		}
-		else {
+		} else {
 			fault = dm_entry_param_method(&dmctx, CMD_UPNP_GET_VALUES, p->name, NULL, NULL);
 			if (!fault && dmctx.list_parameter.next != &dmctx.list_parameter) {
-				dm_parameter = list_entry(dmctx.list_parameter.next, struct dm_parameter, list);
-				if (strcmp(dm_parameter->data, p->value) != 0) {
-					dm_upnp_update_enabled_track_value(p, dm_parameter->data);
-					add_list_upnp_param_track(&dmctx, &list_upnp_changed_version, p->name, p->key, dm_parameter->data, 0);
+				parameter = list_entry(dmctx.list_parameter.next, struct dm_parameter, list);
+				if (strcmp(parameter->data, p->value) != 0) {
+					dm_upnp_update_enabled_track_value(p, parameter->data);
+					add_list_upnp_param_track(&dmctx, &list_upnp_changed_version, p->name, p->key, parameter->data, 0);
 					ischange = 1;
 				}
 			}
 			free_all_list_parameter(&dmctx);
 		}
-		if (ischange)
-		{
+		if (ischange) {
 			char buf[32];
 			char *tmp;
 			struct uci_section *s = NULL;
@@ -654,8 +646,7 @@ int dm_entry_upnp_check_versiononchange_param(struct dmctx *pctx)
 			snprintf(buf, sizeof(buf), "%d", version);
 			if (p->key) {
 				dmuci_set_value(UPNP_CFG, p->key, "version", buf);
-			}
-			else {
+			} else {
 				dmuci_add_section(UPNP_CFG, "parameter_version", &s);
 				if (s != NULL) {
 					dmuci_set_value_by_section(s, "version", buf);
@@ -894,12 +885,80 @@ int cli_output_dm_upnp_variable_state(struct dmctx *dmctx, int cmd, char *variab
 }
 #endif
 
+static int get_stats_folder(const char *path, bool is_json, int *file_count, unsigned long *size, unsigned long *date)
+{
+	struct stat stats;
+	struct dirent *entry;
+	DIR *dirp = NULL;
+	char buf[264] = {0};
+	int filecount = 0;
+	unsigned long filesize = 0, filedate = 0;
+
+	if (folder_exists(path)) {
+		dirp = opendir(path);
+		while ((entry = readdir(dirp)) != NULL) {
+			if ((entry->d_type == DT_REG) && (strstr(entry->d_name, is_json ? ".json" : ".so"))) {
+				filecount++;
+				snprintf(buf, sizeof(buf), "%s/%s", path, entry->d_name);
+				if (!stat(buf, &stats)) {
+					filesize = (filesize + stats.st_size) / 2;
+					filedate = (filedate + stats.st_mtime) / 2;
+				}
+			}
+		}
+		if (dirp) closedir(dirp);
+
+		*file_count = filecount;
+		*size = filesize;
+		*date = filedate;
+		return 1;
+	}
+	return 0;
+}
+
+static int check_stats_folder(const char *path, bool is_json)
+{
+	int file_count = 0;
+	unsigned long size = 0, date = 0;
+	char buf[128] = {0};
+
+	if (!get_stats_folder(path, is_json, &file_count, &size, &date))
+		return 0;
+
+	snprintf(buf, sizeof(buf), "count:%d,sizes:%lu,date:%lu", file_count, size, date);
+	if (strcmp(buf, is_json ? json_hash : library_hash)) {
+		strcpy(is_json ? json_hash : library_hash, buf);
+		return 1;
+	}
+
+	return 0;
+}
+
+int load_dynamic_arrays(struct dmctx *ctx)
+{
+	// Load dynamic objects and parameters exposed via a JSON file
+	if (check_stats_folder(JSON_FOLDER_PATH, true)) {
+		free_json_dynamic_arrays(tEntry181Obj);
+		load_json_dynamic_arrays(ctx);
+	}
+
+	// Load dynamic objects and parameters exposed via a library
+	if (check_stats_folder(LIBRARY_FOLDER_PATH, false)) {
+		free_library_dynamic_arrays(tEntry181Obj);
+		load_library_dynamic_arrays(ctx);
+	}
+
+	return 0;
+}
+
 int free_dynamic_arrays(void)
 {
 	DMOBJ *root = tEntry181Obj;
 	DMNODE node = {.current_object = ""};
+
 	free_dm_browse_node_dynamic_object_tree(&node, root);
 	free_json_dynamic_arrays(tEntry181Obj);
 	free_library_dynamic_arrays(tEntry181Obj);
+
 	return 0;
 }

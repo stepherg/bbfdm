@@ -49,6 +49,7 @@ int dm_entry_upnp_get_current_configuration_version(struct dmctx *dmctx, char **
 
 int dm_ctx_clean(struct dmctx *ctx);
 int dm_ctx_clean_sub(struct dmctx *ctx);
+int load_dynamic_arrays(struct dmctx *ctx);
 int free_dynamic_arrays(void);
 int dmentry_get_parameter_leaf_value(struct dmctx *ctx, char *inparam);
 void dm_ctx_init_list_parameter(struct dmctx *ctx);

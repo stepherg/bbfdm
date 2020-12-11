@@ -13,16 +13,6 @@
 
 #include "dmcommon.h"
 
-char *array_notifcation_char[__MAX_notification] = {
-	[notification_none] = "0",
-	[notification_passive] = "1",
-	[notification_active] = "2",
-	[notification_passive_lw] = "3",
-	[notification_ppassive_passive_lw] = "4",
-	[notification_aactive_lw] = "5",
-	[notification_passive_active_lw] = "6",
-};
-
 char *Encapsulation[] = {"LLC", "VCMUX"};
 char *LinkType[] = {"EoA", "IPoA", "PPPoA", "CIP", "Unconfigured"};
 char *BridgeStandard[] = {"802.1D-2004", "802.1Q-2005", "802.1Q-2011"};
@@ -70,18 +60,6 @@ char *MACAddress[] = {"^([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])$"};
 char *IPPrefix[] = {"^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])/(3[0-2]|[012]?[0-9])$", "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/(12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$"};
 char *IPv4Prefix[] = {"^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])/(3[0-2]|[012]?[0-9])$"};
 char *IPv6Prefix[] = {"^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/(12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$"};
-
-char *cut_fx(char *str, char *delimiter, int occurence)
-{
-	int i = 1;
-	char *pch, *spch;
-	pch = strtok_r(str, delimiter, &spch);
-	while (pch != NULL && i < occurence) {
-		i++;
-		pch = strtok_r(NULL, delimiter, &spch);
-	}
-	return pch;
-}
 
 unsigned char dmisnumeric(char *nbr)
 {
@@ -409,16 +387,6 @@ int wan_remove_dev_interface(struct uci_section *interface_setion, char *dev)
 	return 0;
 }
 
-int dmcommon_check_notification_value(char *value)
-{
-	int i;
-	for (i = 0; i< __MAX_notification; i++) {
-		if (strcmp(value, array_notifcation_char[i]) == 0)
-			return 0;
-	}
-	return -1;
-}
-
 void parse_proc_route_line(char *line, struct proc_routing *proute)
 {
 	char *pch, *spch;
@@ -462,7 +430,7 @@ void ip_to_hex(char *address, char *ret)
 /*
  * dmmap_config sections list manipulation
  */
-void add_sectons_list_paramameter(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section, void* additional_attribute)
+void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section, void *additional_attribute)
 {
 	struct dmmap_dup *dmmap_config;
 
@@ -554,7 +522,7 @@ void synchronize_specific_config_sections_with_dmmap(char *package, char *sectio
 		/*
 		 * Add system and dmmap sections to the list
 		 */
-		add_sectons_list_paramameter(dup_list, s, dmmap_sect, NULL);
+		add_dmmap_config_dup_list(dup_list, s, dmmap_sect, NULL);
 	}
 
 	/*
@@ -584,7 +552,7 @@ void synchronize_specific_config_sections_with_dmmap_eq(char *package, char *sec
 		/*
 		 * Add system and dmmap sections to the list
 		 */
-		add_sectons_list_paramameter(dup_list, s, dmmap_sect, NULL);
+		add_dmmap_config_dup_list(dup_list, s, dmmap_sect, NULL);
 	}
 
 	/*
@@ -617,49 +585,49 @@ void synchronize_specific_config_sections_with_dmmap_eq_no_delete(char *package,
 	uci_path_foreach_sections(bbfdm, dmmap_package, section_type, dmmap_sect) {
 		dmuci_get_value_by_section_string(dmmap_sect, "section_name", &v);
 		get_config_section_of_dmmap_section("network", "interface", v, &s);
-		add_sectons_list_paramameter(dup_list, s, dmmap_sect, NULL);
+		add_dmmap_config_dup_list(dup_list, s, dmmap_sect, NULL);
 	}
 }
 
 void synchronize_specific_config_sections_with_dmmap_cont(char *package, char *section_type, char *dmmap_package,char* option_name, char* option_value, struct list_head *dup_list)
 {
-	struct uci_section *s, *stmp, *dmmap_sect;
+	struct uci_section *uci_s, *stmp, *dmmap_sect;
 	char *v;
 
-	uci_foreach_option_cont(package, section_type, option_name, option_value, s) {
+	uci_foreach_option_cont(package, section_type, option_name, option_value, uci_s) {
 		/*
 		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
 		 */
-		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
+		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(uci_s))) == NULL) {
 			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect);
-			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(uci_s));
 		}
 
 		/*
 		 * Add system and dmmap sections to the list
 		 */
-		add_sectons_list_paramameter(dup_list, s, dmmap_sect, NULL);
+		add_dmmap_config_dup_list(dup_list, uci_s, dmmap_sect, NULL);
 	}
 
 	/*
 	 * Delete unused dmmap sections
 	 */
-	uci_path_foreach_sections_safe(bbfdm, dmmap_package, section_type, stmp, s) {
-		dmuci_get_value_by_section_string(s, "section_name", &v);
+	uci_path_foreach_sections_safe(bbfdm, dmmap_package, section_type, stmp, uci_s) {
+		dmuci_get_value_by_section_string(uci_s, "section_name", &v);
 		if (get_origin_section_from_config(package, section_type, v) == NULL)
-			dmuci_delete_by_section(s, NULL, NULL);
+			dmuci_delete_by_section(uci_s, NULL, NULL);
 	}
 }
 
-void add_sysfs_sectons_list_paramameter(struct list_head *dup_list, struct uci_section *dmmap_section, char *file_name, char* filepath)
+void add_sysfs_section_list(struct list_head *dup_list, struct uci_section *dmmap_section, char *file_name, char *file_path)
 {
 	struct sysfs_dmsection *dmmap_sysfs;
 
 	dmmap_sysfs = dmcalloc(1, sizeof(struct sysfs_dmsection));
 	list_add_tail(&dmmap_sysfs->list, dup_list);
-	dmmap_sysfs->dm = dmmap_section;
+	dmmap_sysfs->dmmap_section = dmmap_section;
 	dmmap_sysfs->sysfs_folder_name = dmstrdup(file_name);
-	dmmap_sysfs->sysfs_folder_path = dmstrdup(filepath);
+	dmmap_sysfs->sysfs_folder_path = dmstrdup(file_path);
 }
 
 int synchronize_system_folders_with_dmmap_opt(char *sysfsrep, char *dmmap_package, char *dmmap_section, char *opt_name, char* inst_opt, struct list_head *dup_list)
@@ -667,7 +635,7 @@ int synchronize_system_folders_with_dmmap_opt(char *sysfsrep, char *dmmap_packag
 	struct uci_section *s, *stmp, *dmmap_sect;
 	DIR *dir;
 	struct dirent *ent;
-	char *v, *sysfs_rep_path, *instance= NULL;
+	char *v, *sysfs_rep_path, *instance = NULL;
 	struct sysfs_dmsection *p, *tmp;
 	LIST_HEAD(dup_list_no_inst);
 
@@ -691,9 +659,9 @@ int synchronize_system_folders_with_dmmap_opt(char *sysfsrep, char *dmmap_packag
 		 */
 
 		if(instance == NULL || strlen(instance) <= 0)
-			add_sysfs_sectons_list_paramameter(&dup_list_no_inst, dmmap_sect, ent->d_name, sysfs_rep_path);
+			add_sysfs_section_list(&dup_list_no_inst, dmmap_sect, ent->d_name, sysfs_rep_path);
 		else
-			add_sysfs_sectons_list_paramameter(dup_list, dmmap_sect, ent->d_name, sysfs_rep_path);
+			add_sysfs_section_list(dup_list, dmmap_sect, ent->d_name, sysfs_rep_path);
 	}
 	if (dir)
 		closedir(dir);
@@ -816,15 +784,15 @@ void delete_sections_save_next_sections(char* dmmap_package, char *section_type,
 
 	uci_path_foreach_sections(bbfdm, dmmap_package, section_type, s) {
 		dmuci_get_value_by_section_string(s, instancename, &v);
-		inst= atoi(v);
-		if(inst>instance){
+		inst = atoi(v);
+		if (inst > instance){
 			dmuci_get_value_by_section_string(s, "section_name", &tmp);
 			add_dmmap_list_section(dup_list, lsectname, v);
 			dmfree(lsectname);
-			lsectname= NULL;
+			lsectname = NULL;
 			dmasprintf(&lsectname, "%s", tmp);
 			dmfree(tmp);
-			tmp= NULL;
+			tmp = NULL;
 		}
 	}
 
@@ -832,8 +800,8 @@ void delete_sections_save_next_sections(char* dmmap_package, char *section_type,
 
 	uci_path_foreach_sections_safe(bbfdm, dmmap_package, section_type, stmp, s) {
 		dmuci_get_value_by_section_string(s, instancename, &v);
-		inst= atoi(v);
-		if(inst>=instance)
+		inst = atoi(v);
+		if (inst >= instance)
 			dmuci_delete_by_section_unnamed_bbfdm(s, NULL, NULL);
 	}
 }
@@ -1380,7 +1348,7 @@ int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_
 
 	/* check size for each range */
 	for (i = 0; i < r_args_size; i++) {
-		unsigned long val = 0, minval = 0, maxval = 0;
+		unsigned long ui_val = 0, minval = 0, maxval = 0;
 		char *endval = NULL, *endmin = NULL, *endmax = NULL;
 
 		if (r_args[i].min) minval = strtoul(r_args[i].min, &endmin, 10);
@@ -1389,7 +1357,7 @@ int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_
 		/* reset errno to 0 before call */
 		errno = 0;
 
-		val = strtoul(value, &endval, 10);
+		ui_val = strtoul(value, &endval, 10);
 
 		if ((*value == '-') || (*endval != 0) || (errno != 0)) return -1;
 
@@ -1405,7 +1373,7 @@ int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_
 		}
 
 		/* check size */
-		if ((r_args[i].min && val < minval) || (r_args[i].max && val > maxval) || (val < 0) || (val > (unsigned int)UINT_MAX))
+		if ((r_args[i].min && ui_val < minval) || (r_args[i].max && ui_val > maxval) || (ui_val < 0) || (ui_val > (unsigned int)UINT_MAX))
 			return -1;
 	}
 
@@ -1418,7 +1386,7 @@ int dm_validate_int(char *value, struct range_args r_args[], int r_args_size)
 
 	/* check size for each range */
 	for (i = 0; i < r_args_size; i++) {
-		long val = 0, minval = 0, maxval = 0;
+		long i_val = 0, minval = 0, maxval = 0;
 		char *endval = NULL, *endmin = NULL, *endmax = NULL;
 
 		if (r_args[i].min) minval = strtol(r_args[i].min, &endmin, 10);
@@ -1427,12 +1395,12 @@ int dm_validate_int(char *value, struct range_args r_args[], int r_args_size)
 		/* reset errno to 0 before call */
 		errno = 0;
 
-		val = strtol(value, &endval, 10);
+		i_val = strtol(value, &endval, 10);
 
 		if ((*endval != 0) || (errno != 0)) return -1;
 
 		/* check size */
-		if ((r_args[i].min && val < minval) || (r_args[i].max && val > maxval) || (val < INT_MIN) || (val > INT_MAX))
+		if ((r_args[i].min && i_val < minval) || (r_args[i].max && i_val > maxval) || (i_val < INT_MIN) || (i_val > INT_MAX))
 			return -1;
 	}
 
@@ -1445,7 +1413,7 @@ int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args
 
 	/* check size for each range */
 	for (i = 0; i < r_args_size; i++) {
-		unsigned long val = 0, minval = 0, maxval = 0;
+		unsigned long ul_val = 0, minval = 0, maxval = 0;
 		char *endval = NULL, *endmin = NULL, *endmax = NULL;
 
 		if (r_args[i].min) minval = strtoul(r_args[i].min, &endmin, 10);
@@ -1454,12 +1422,12 @@ int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args
 		/* reset errno to 0 before call */
 		errno = 0;
 
-		val = strtoul(value, &endval, 10);
+		ul_val = strtoul(value, &endval, 10);
 
 		if ((*value == '-') || (*endval != 0) || (errno != 0)) return -1;
 
 		/* check size */
-		if ((r_args[i].min && val < minval) || (r_args[i].max && val > maxval) || (val < 0) || (val > (unsigned long)ULONG_MAX))
+		if ((r_args[i].min && ul_val < minval) || (r_args[i].max && ul_val > maxval) || (ul_val < 0) || (ul_val > (unsigned long)ULONG_MAX))
 			return -1;
 	}
 
@@ -1472,7 +1440,7 @@ int dm_validate_long(char *value, struct range_args r_args[], int r_args_size)
 
 	/* check size for each range */
 	for (i = 0; i < r_args_size; i++) {
-		long val = 0, minval = 0, maxval = 0;
+		long u_val = 0, minval = 0, maxval = 0;
 		char *endval = NULL, *endmin = NULL, *endmax = NULL;
 
 		if (r_args[i].min) minval = strtol(r_args[i].min, &endmin, 10);
@@ -1481,12 +1449,12 @@ int dm_validate_long(char *value, struct range_args r_args[], int r_args_size)
 		/* reset errno to 0 before call */
 		errno = 0;
 
-		val = strtol(value, &endval, 10);
+		u_val = strtol(value, &endval, 10);
 
 		if ((*endval != 0) || (errno != 0)) return -1;
 
 		/* check size */
-		if ((r_args[i].min && val < minval) || (r_args[i].max && val > maxval))
+		if ((r_args[i].min && u_val < minval) || (r_args[i].max && u_val > maxval))
 			return -1;
 	}
 
@@ -1574,7 +1542,7 @@ int dm_validate_string_list(char *value, int min_item, int max_item, int max_siz
 
 int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
-	char *pch, *pchr;
+	char *token, *saveptr;
 	int nbr_item = 0;
 
 	/* check length of list */
@@ -1587,8 +1555,8 @@ int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int ma
 	buf[strlen(value)] = '\0';
 
 	/* for each value, validate string */
-	for (pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
-		if (dm_validate_unsignedInt(pch, r_args, r_args_size))
+	for (token = strtok_r(buf, ",", &saveptr); token != NULL; token = strtok_r(NULL, ",", &saveptr)) {
+		if (dm_validate_unsignedInt(token, r_args, r_args_size))
 			return -1;
 		nbr_item ++;
 	}
@@ -1681,33 +1649,6 @@ char *replace_char(char *str, char find, char replace)
 	return str;
 }
 
-int is_vlan_termination_section(char *name)
-{
-	struct uci_section *s;
-
-	uci_foreach_sections("network", "interface", s) {
-
-		// check ifname is not empty
-		char *ifname;
-		dmuci_get_value_by_section_string(s, "ifname", &ifname);
-		if (*ifname == '\0')
-			continue;
-
-		// check if ifname list contains the device name
-		if (strstr(ifname, name)) {
-			char *type;
-			// check type is not bridge
-
-			dmuci_get_value_by_section_string(s, "type", &type);
-			if (strcmp(type, "bridge") == 0)
-				return 0;
-
-			break;
-		}
-	}
-	return 1;
-}
-
 void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, char *value)
 {
 	struct uci_section *d_sec = NULL;
@@ -1759,19 +1700,4 @@ int check_browse_section(struct uci_section *s, void *data)
 	if (strcmp(opt_val, browse_args->value) == 0)
 		return 0;
 	return -1;
-}
-
-int check_instance_wildcard_parameter_by_regex(char *parameter, char* regex)
-{
-        size_t l1, l2;
-        char **parameter_split = strsplit(parameter, ".", &l1);
-        char **regex_split = strsplit(regex, ".", &l2);
-        if (l1 != l2)
-                return -1;
-        int i;
-        for (i=0; i<l1; i++) {
-                if (strcmp(parameter_split[i], regex_split[i]) != 0 && (strcmp(regex_split[i], "*") != 0 || atoi(parameter_split[i])<=0))
-                        return -1;
-        }
-        return 0;
 }

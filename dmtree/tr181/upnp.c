@@ -150,7 +150,7 @@ static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_nod
 {
 	json_object *res = NULL,  *devices = NULL, *device = NULL;
 	struct upnpdiscovery upnp_dev = {};
-	char *descurl = NULL, *st = NULL, *usn = NULL, *inst = NULL, *max_inst = NULL;
+	char *dev_descurl = NULL, *dev_st = NULL, *dev_usn = NULL, *inst = NULL, *max_inst = NULL;
 	char **stparams = NULL, **uuid, **urn;
 	size_t lengthuuid, lengthurn;
 	struct uci_section* dmmap_sect = NULL;
@@ -163,18 +163,18 @@ static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_nod
 	size_t nbre_devices = (devices) ? json_object_array_length(devices) : 0;
 
 	for (i = 0; i < nbre_devices; i++) {
-		device= json_object_array_get_idx(devices, i);
-		descurl = dmjson_get_value(device, 1, "descurl");
-		st = dmjson_get_value(device, 1, "st");
-		usn = dmjson_get_value(device, 1, "usn");
-		stparams = strsplit_by_str(usn, "::");
+		device = json_object_array_get_idx(devices, i);
+		dev_descurl = dmjson_get_value(device, 1, "descurl");
+		dev_st = dmjson_get_value(device, 1, "st");
+		dev_usn = dmjson_get_value(device, 1, "usn");
+		stparams = strsplit_by_str(dev_usn, "::");
 		uuid = strsplit(stparams[0], ":", &lengthuuid);
 		urn = strsplit(stparams[1], ":", &lengthurn);
-		dmasprintf(&upnp_dev.descurl, "%s", descurl?descurl:"");
-		dmasprintf(&upnp_dev.st, "%s", st?st:"");
-		dmasprintf(&upnp_dev.usn, "%s", usn?usn:"");
-		dmasprintf(&upnp_dev.uuid, "%s", lengthuuid>0?uuid[1]:"");
-		dmasprintf(&upnp_dev.urn, "%s", lengthurn>0?urn[1]:"");
+		dmasprintf(&upnp_dev.descurl, "%s", dev_descurl ? dev_descurl : "");
+		dmasprintf(&upnp_dev.st, "%s", dev_st ? dev_st : "");
+		dmasprintf(&upnp_dev.usn, "%s", dev_usn ? dev_usn : "");
+		dmasprintf(&upnp_dev.uuid, "%s", (lengthuuid > 0) ? uuid[1] : "");
+		dmasprintf(&upnp_dev.urn, "%s", (lengthurn > 0) ? urn[1] : "");
 
 		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_device", "uuid", uuid[1])) == NULL) {
 			dmuci_add_section_bbfdm("dmmap_upnp", "upnp_device", &dmmap_sect);
@@ -196,7 +196,7 @@ static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_no
 {
 	json_object *res = NULL,  *services = NULL, *service = NULL;
 	struct upnpdiscovery upnp_dev = {};
-	char *descurl = NULL, *st = NULL, *usn = NULL, *inst = NULL, *max_inst = NULL;
+	char *srv_descurl = NULL, *srv_st = NULL, *srv_usn = NULL, *inst = NULL, *max_inst = NULL;
 	char **stparams = NULL, **uuid, **urn;
 	size_t lengthuuid, lengthurn;
 	struct uci_section* dmmap_sect = NULL;
@@ -210,21 +210,21 @@ static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_no
 
 	for (i = 0; i < nbre_services; i++){
 		service = json_object_array_get_idx(services, i);
-		descurl = dmjson_get_value(service, 1, "descurl");
-		st = dmjson_get_value(service, 1, "st");
-		usn = dmjson_get_value(service, 1, "usn");
-		stparams = strsplit_by_str(usn, "::");
+		srv_descurl = dmjson_get_value(service, 1, "descurl");
+		srv_st = dmjson_get_value(service, 1, "st");
+		srv_usn = dmjson_get_value(service, 1, "usn");
+		stparams = strsplit_by_str(srv_usn, "::");
 		uuid = strsplit(stparams[0], ":", &lengthuuid);
 		urn = strsplit(stparams[1], ":", &lengthurn);
-		dmasprintf(&upnp_dev.descurl, "%s", descurl?descurl:"");
-		dmasprintf(&upnp_dev.st, "%s", st?st:"");
-		dmasprintf(&upnp_dev.usn, "%s", usn?usn:"");
-		dmasprintf(&upnp_dev.uuid, "%s", lengthuuid>0?uuid[1]:"");
-		dmasprintf(&upnp_dev.urn, "%s", lengthurn>0?urn[1]:"");
+		dmasprintf(&upnp_dev.descurl, "%s", srv_descurl ? srv_descurl : "");
+		dmasprintf(&upnp_dev.st, "%s", srv_st ? srv_st : "");
+		dmasprintf(&upnp_dev.usn, "%s", srv_usn ? srv_usn : "");
+		dmasprintf(&upnp_dev.uuid, "%s", (lengthuuid > 0) ? uuid[1] : "");
+		dmasprintf(&upnp_dev.urn, "%s", (lengthurn > 0) ? urn[1] : "");
 
-		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_service", "usn", usn)) == NULL) {
+		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_service", "usn", srv_usn)) == NULL) {
 			dmuci_add_section_bbfdm("dmmap_upnp", "upnp_service", &dmmap_sect);
-			dmuci_set_value_by_section_bbfdm(dmmap_sect, "usn", usn);
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "usn", srv_usn);
 		}
 
 		upnp_dev.dmmap_sect = dmmap_sect;

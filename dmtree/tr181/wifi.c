@@ -13,7 +13,6 @@
  */
 
 #include "dmentry.h"
-#include "wepkey.h"
 #include "wifi.h"
 #include "os.h"
 
@@ -851,6 +850,28 @@ static void reset_wlan(struct uci_section *s)
 	dmuci_delete_by_section(s, "auth_secret", NULL);
 }
 
+static void generate_wep_key(char *passphrase, char strk64[4][11])
+{
+	unsigned char k64[4][5];
+	unsigned char pseed[4] = {0};
+	unsigned int randNumber, tmp;
+	int i, j;
+
+	for (i = 0; i < strlen(passphrase); i++)
+		pseed[i%4] ^= (unsigned char) passphrase[i];
+
+	randNumber = pseed[0] | (pseed[1] << 8) | (pseed[2] << 16) | (pseed[3] << 24);
+
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 5; j++) {
+			randNumber = (randNumber * 0x343fd + 0x269ec3) & 0xffffffff;
+			tmp = (randNumber >> 16) & 0xff;
+			k64[i][j] = (unsigned char) tmp;
+		}
+		snprintf(strk64[i], sizeof(strk64[i]), "%02X%02X%02X%02X%02X", k64[i][0], k64[i][1], k64[i][2], k64[i][3], k64[i][4]);
+	}
+}
+
 static void set_security_mode(struct uci_section *section, char *value)
 {
 	char *encryption, *mode;
@@ -867,7 +888,7 @@ static void set_security_mode(struct uci_section *section, char *value)
 			reset_wlan(section);
 			dmuci_set_value_by_section(section, "encryption", "wep-open");
 			char *option, strk64[4][11];
-			wepkey64("iopsys", strk64);
+			generate_wep_key("iopsys", strk64);
 			int i;
 			for (i = 0; i < 4; i++) {
 				dmasprintf(&option, "key%d", i + 1);
@@ -1793,7 +1814,7 @@ static int get_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 
 static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker = NULL;
+	char *ssid_linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1801,10 +1822,10 @@ static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->wifi_ssid_sec, "device", linker);
-				dmfree(linker);
+			adm_entry_get_linker_value(ctx, value, &ssid_linker);
+			if (ssid_linker && *ssid_linker) {
+				dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->wifi_ssid_sec, "device", ssid_linker);
+				dmfree(ssid_linker);
 			}
 			return 0;
 	}
@@ -1822,12 +1843,12 @@ static int get_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 /*************************************************************
 * ADD DEL OBJ
 **************************************************************/
-static int add_wifi_ssid(char *refparam, struct dmctx *ctx, void *data, char **instance)
+static int add_wifi_iface(char *inst_name, char **instance)
 {
 	struct uci_section *s = NULL, *dmmap_wifi = NULL;
 	char ssid[32] = {0};
 
-	char *inst = get_last_instance_bbfdm("dmmap_wireless", "wifi-iface", "ssidinstance");
+	char *inst = get_last_instance_bbfdm("dmmap_wireless", "wifi-iface", inst_name);
 	snprintf(ssid, sizeof(ssid), "iopsys_%d", inst ? (atoi(inst)+1) : 1);
 
 	dmuci_add_section("wireless", "wifi-iface", &s);
@@ -1838,62 +1859,21 @@ static int add_wifi_ssid(char *refparam, struct dmctx *ctx, void *data, char **i
 
 	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_wifi);
 	dmuci_set_value_by_section(dmmap_wifi, "section_name", section_name(s));
-	*instance = update_instance(inst, 2, dmmap_wifi, "ssidinstance");
+	*instance = update_instance(inst, 2, dmmap_wifi, inst_name);
 	return 0;
 }
 
-static int delete_wifi_ssid(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+static int add_wifi_ssid(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	int found = 0;
-	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;
-
-	switch (del_action) {
-		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name(((struct wifi_ssid_args *)data)->wifi_ssid_sec), &dmmap_section);
-			dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section(((struct wifi_ssid_args *)data)->wifi_ssid_sec, NULL, NULL);
-			break;
-		case DEL_ALL:
-			uci_foreach_sections("wireless", "wifi-iface", s) {
-				if (found != 0) {
-					get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name(ss), &dmmap_section);
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = s;
-				found++;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name(ss), &dmmap_section);
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
-			}
-			return 0;
-	}
-	return 0;
+	return add_wifi_iface("ssidinstance", instance);
 }
 
 static int add_wifi_accesspoint(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	struct uci_section *s = NULL, *dmmap_wifi = NULL;
-	char ssid[32] = {0};
-
-	char *inst = get_last_instance_bbfdm("dmmap_wireless", "wifi-iface", "ap_instance");
-	snprintf(ssid, sizeof(ssid), "iopsys_%d", inst ? (atoi(inst)+1) : 1);
-
-	dmuci_add_section("wireless", "wifi-iface", &s);
-	dmuci_set_value_by_section(s, "ssid", ssid);
-	dmuci_set_value_by_section(s, "network", "lan");
-	dmuci_set_value_by_section(s, "mode", "ap");
-	dmuci_set_value_by_section(s, "disabled", "0");
-
-	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_wifi);
-	dmuci_set_value_by_section(dmmap_wifi, "section_name", section_name(s));
-	*instance = update_instance(inst, 2, dmmap_wifi, "ap_instance");
-	return 0;
+	return add_wifi_iface("ap_instance", instance);
 }
 
-static int delete_wifi_accesspoint(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+static int delete_wifi_iface(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	int found = 0;
 	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;
@@ -2122,8 +2102,8 @@ DMOBJ tWiFiObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"DataElements", &DMREAD, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsObj, NULL, NULL, BBFDM_BOTH},
 {"Radio", &DMREAD, NULL, NULL, NULL, browseWifiRadioInst, NULL, tWiFiRadioObj, tWiFiRadioParams, get_linker_Wifi_Radio, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"SSID", &DMWRITE, add_wifi_ssid, delete_wifi_ssid, NULL, browseWifiSsidInst, NULL, tWiFiSSIDObj, tWiFiSSIDParams, get_linker_Wifi_Ssid, BBFDM_BOTH, LIST_KEY{"Name", "Alias", "BSSID", NULL}},
-{"AccessPoint", &DMWRITE, add_wifi_accesspoint, delete_wifi_accesspoint, NULL, browseWifiAccessPointInst, NULL, tWiFiAccessPointObj, tWiFiAccessPointParams, NULL, BBFDM_BOTH, LIST_KEY{"SSIDReference", "Alias", NULL}},
+{"SSID", &DMWRITE, add_wifi_ssid, delete_wifi_iface, NULL, browseWifiSsidInst, NULL, tWiFiSSIDObj, tWiFiSSIDParams, get_linker_Wifi_Ssid, BBFDM_BOTH, LIST_KEY{"Name", "Alias", "BSSID", NULL}},
+{"AccessPoint", &DMWRITE, add_wifi_accesspoint, delete_wifi_iface, NULL, browseWifiAccessPointInst, NULL, tWiFiAccessPointObj, tWiFiAccessPointParams, NULL, BBFDM_BOTH, LIST_KEY{"SSIDReference", "Alias", NULL}},
 {"NeighboringWiFiDiagnostic", &DMREAD, NULL, NULL, NULL, NULL, NULL, tWiFiNeighboringWiFiDiagnosticObj, tWiFiNeighboringWiFiDiagnosticParams, NULL, BBFDM_BOTH},
 {"EndPoint", &DMWRITE, addObjWiFiEndPoint, delObjWiFiEndPoint, NULL, browseWiFiEndPointInst, NULL, tWiFiEndPointObj, tWiFiEndPointParams, NULL, BBFDM_BOTH, LIST_KEY{"SSIDReference", "Alias", NULL}},
 {0}

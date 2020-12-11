@@ -20,6 +20,7 @@ int os_get_linker_qos_queue(char *refparam, struct dmctx *dmctx, void *data, cha
 	*linker = "";
 	return 0;
 }
+
 int os_browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL, *value = NULL;
@@ -181,8 +182,8 @@ int os_addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, ch
 
 int os_delObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *dmmap_section= NULL;
-	int found = 0;
+	struct uci_section *s = NULL, *stmp = NULL, *dmmap_section = NULL;
+
 	switch (del_action) {
 	case DEL_INST:
 		if (is_section_unnamed(section_name((struct uci_section *)data))){
@@ -192,90 +193,22 @@ int os_delObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, ch
 			dmuci_delete_by_section_unnamed((struct uci_section *)data, NULL, NULL);
 		} else {
 			get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name((struct uci_section *)data), &dmmap_section);
-			if (dmmap_section != NULL)
-				dmuci_delete_by_section_unnamed_bbfdm(dmmap_section, NULL, NULL);
+			dmuci_delete_by_section_unnamed_bbfdm(dmmap_section, NULL, NULL);
+
 			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
 		}
 		break;
 	case DEL_ALL:
-		uci_foreach_sections("qos", "classify", s) {
-			if (found != 0){
-				get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name(ss), &dmmap_section);
-				if (dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
-			}
-			ss = s;
-			found++;
-		}
-		if (ss != NULL) {
-			get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name(ss), &dmmap_section);
-			if (dmmap_section != NULL)
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section(ss, NULL, NULL);
+		uci_foreach_sections_safe("qos", "classify", stmp, s) {
+			get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name(s), &dmmap_section);
+			dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+			dmuci_delete_by_section(s, NULL, NULL);
 		}
 		break;
 	}
 	return 0;
 }
-#if 0
-int addObjQoSApp(char *refparam, struct dmctx *ctx, void *data, char **instance)
-{
-	//TODO
-	return 0;
-}
-
-int delObjQoSApp(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
-{
-	switch (del_action) {
-		case DEL_INST:
-			//TODO
-			break;
-		case DEL_ALL:
-			//TODO
-			break;
-	}
-	return 0;
-}
-
-int addObjQoSFlow(char *refparam, struct dmctx *ctx, void *data, char **instance)
-{
-	//TODO
-	return 0;
-}
-
-int delObjQoSFlow(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
-{
-	switch (del_action) {
-		case DEL_INST:
-			//TODO
-			break;
-		case DEL_ALL:
-			//TODO
-			break;
-	}
-	return 0;
-}
-
-int addObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char **instance)
-{
-	//TODO
-	return 0;
-}
-
-int delObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
-{
-	switch (del_action) {
-		case DEL_INST:
-			//TODO
-			break;
-		case DEL_ALL:
-			//TODO
-			break;
-	}
-	return 0;
-}
-#endif
 
 int os_addObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
@@ -493,6 +426,47 @@ int os_delObjQoSShaper(char *refparam, struct dmctx *ctx, void *data, char *inst
 				dmuci_delete_by_section(ss, NULL, NULL);
 			}
 			break;
+	}
+	return 0;
+}
+
+/*************************************************************
+* COMMON Functions
+**************************************************************/
+static int os_get_QoS_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *ifname = NULL;
+	dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
+
+	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
+	if (*value == NULL)
+		adm_entry_get_linker_param(ctx, dm_print_path("%s%cPPP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
+	if (*value == NULL)
+		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
+	if (*value == NULL)
+		adm_entry_get_linker_param(ctx, dm_print_path("%s%cWiFi%cRadio%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
+	if (*value == NULL)
+		*value = "";
+
+	return 0;
+}
+
+static int os_set_QoS_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *linker = NULL;
+
+	switch (action)	{
+	case VALUECHECK:
+		if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		adm_entry_get_linker_value(ctx, value, &linker);
+		if (linker && *linker) {
+			dmuci_set_value_by_section((struct uci_section *)data, "ifname", linker);
+			dmfree(linker);
+		}
+		break;
 	}
 	return 0;
 }
@@ -1010,40 +984,12 @@ int os_set_QoSClassification_Alias(char *refparam, struct dmctx *ctx, void *data
 
 int os_get_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ifname;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
-
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cPPP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cWiFi%cRadio%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		*value = "";
-
-	return 0;
+	return os_get_QoS_Interface(refparam, ctx, data, instance, value);
 }
 
 int os_set_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker = NULL;
-
-	switch (action)	{
-	case VALUECHECK:
-		if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
-			return FAULT_9007;
-		break;
-	case VALUESET:
-		adm_entry_get_linker_value(ctx, value, &linker);
-		if (linker && *linker) {
-			dmuci_set_value_by_section((struct uci_section *)data, "ifname", linker);
-			dmfree(linker);
-		}
-		break;
-	}
-	return 0;
+	return os_set_QoS_Interface(refparam, ctx, data, instance, value, action);
 }
 
 int os_get_QoSClassification_DestIP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -3290,40 +3236,12 @@ int os_set_QoSQueue_TrafficClasses(char *refparam, struct dmctx *ctx, void *data
 
 int os_get_QoSQueue_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ifname;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
-
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cPPP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cWiFi%cRadio%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		*value = "";
-
-	return 0;
+	return os_get_QoS_Interface(refparam, ctx, data, instance, value);
 }
 
 int os_set_QoSQueue_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker = NULL;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section((struct uci_section *)data, "ifname", linker);
-				dmfree(linker);
-			}
-			break;
-	}
-	return 0;
+	return os_set_QoS_Interface(refparam, ctx, data, instance, value, action);
 }
 
 #if 0
@@ -3704,39 +3622,12 @@ int os_set_QoSShaper_Alias(char *refparam, struct dmctx *ctx, void *data, char *
 
 int os_get_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ifname = NULL;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cPPP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cWiFi%cRadio%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
-	if (*value == NULL)
-		*value = "";
-	return 0;
+	return os_get_QoS_Interface(refparam, ctx, data, instance, value);
 }
 
 int os_set_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker = NULL;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section((struct uci_section *)data, "ifname", linker);
-				dmfree(linker);
-			}
-			break;
-	}
-	return 0;
+	return os_set_QoS_Interface(refparam, ctx, data, instance, value, action);
 }
 
 int os_get_QoSShaper_ShapingRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

@@ -28,5 +28,8 @@ extern DMOBJ tServicesVoiceServiceVoIPProfileObj[];
 extern DMLEAF tServicesVoiceServiceVoIPProfileParams[];
 extern DMLEAF tServicesVoiceServiceCodecProfileParams[];
 
+int browseVoiceServiceSIPProviderInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);
+int delObjVoiceServiceSIPProvider(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action);
+
 #endif //__SERVICESVOICESERVICE_H
 

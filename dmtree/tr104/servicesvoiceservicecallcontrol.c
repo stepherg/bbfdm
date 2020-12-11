@@ -8,6 +8,7 @@
  *	Author: Yalu Zhang, yalu.zhang@iopsys.eu
  */
 
+#include "servicesvoiceservice.h"
 #include "servicesvoiceservicecallcontrol.h"
 #include "common.h"
 #include "dmentry.h"
@@ -47,41 +48,13 @@ static int browseServicesVoiceServiceCallControlLineInst(struct dmctx *dmctx, DM
 /*#Device.Services.VoiceService.{i}.CallControl.IncomingMap.{i}.!UCI:asterisk/sip_service_provider/dmmap_asterisk*/
 static int browseServicesVoiceServiceCallControlIncomingMapInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
-	struct dmmap_dup *p;
-	LIST_HEAD(dup_list);
-
-	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-
-		inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
-			   p->dmmap_section, "clientinstance", "clientalias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
-			break;
-	}
-	free_dmmap_config_dup_list(&dup_list);
-	return 0;
+	return browseVoiceServiceSIPProviderInst(dmctx, parent_node, prev_data, prev_instance);
 }
 
 /*#Device.Services.VoiceService.{i}.CallControl.OutgoingMap.{i}.!UCI:asterisk/sip_service_provider/dmmap_asterisk*/
 static int browseServicesVoiceServiceCallControlOutgoingMapInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
-	struct dmmap_dup *p;
-	LIST_HEAD(dup_list);
-
-	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-
-		inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
-			   p->dmmap_section, "clientinstance", "clientalias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
-			break;
-	}
-	free_dmmap_config_dup_list(&dup_list);
-	return 0;
+	return browseVoiceServiceSIPProviderInst(dmctx, parent_node, prev_data, prev_instance);
 }
 
 /*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.!UCI:asterisk/tel_advanced/dmmap_asterisk*/

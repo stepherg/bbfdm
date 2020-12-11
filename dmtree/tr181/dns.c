@@ -101,24 +101,7 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 }
 
 /******************************** Browse Functions ****************************************/
-static int browseServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	struct uci_section *s = NULL;
-	char *inst, *max_inst = NULL;
-
-	dmmap_synchronizeDNSClientRelayServer(dmctx, NULL, NULL, NULL);
-	uci_path_foreach_sections(bbfdm, "dmmap_dns", "dns_server", s) {
-
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   s, "dns_server_instance", "dns_server_alias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
-			break;
-	}
-	return 0;
-}
-
-static int browseRelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+static int browseDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
 	char *inst, *max_inst = NULL;
@@ -152,7 +135,7 @@ static int browseResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 }
 
 /*********************************** Add/Delet Object functions *************************/
-static int add_client_server(char *refparam, struct dmctx *ctx, void *data, char **instance)
+static int add_dns_server(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s = NULL;
 
@@ -168,60 +151,7 @@ static int add_client_server(char *refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
-static int add_relay_forwarding(char *refparam, struct dmctx *ctx, void *data, char **instance)
-{
-	struct uci_section *s = NULL;
-
-	char *inst = get_last_instance_bbfdm("dmmap_dns", "dns_server", "dns_server_instance");
-	dmuci_add_list_value("network", "lan", "dns", "0.0.0.0");
-
-	dmuci_add_section_bbfdm("dmmap_dns", "dns_server", &s);
-	dmuci_set_value_by_section(s, "ip", "0.0.0.0");
-	dmuci_set_value_by_section(s, "interface", "lan");
-	dmuci_set_value_by_section(s, "enable", "1");
-
-	*instance = update_instance(inst, 2, s, "dns_server_instance");
-	return 0;
-}
-
-static int delete_client_server(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
-{
-	struct uci_section *s = NULL, *ss = NULL, *stmp = NULL;
-	char *interface, *ip, *str;
-	struct uci_list *v;
-	struct uci_element *e, *tmp;
-
-	switch (del_action) {
-		case DEL_INST:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &str);
-			if (str[0] == '1')
-				return 0;
-			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &ip);
-			dmuci_del_list_value("network", interface, "dns", ip);
-			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
-			break;
-		case DEL_ALL:
-			uci_foreach_sections("network", "interface", s) {
-				dmuci_get_value_by_section_string(s, "peerdns", &str);
-				if (str[0] == '1')
-					continue;
-				dmuci_get_value_by_section_list(s, "dns", &v);
-				if (v != NULL) {
-					uci_foreach_element_safe(v, e, tmp) {
-						uci_path_foreach_option_eq_safe(bbfdm, "dmmap_dns", "dns_server", "ip", tmp->name, stmp, ss) {
-							dmuci_delete_by_section(ss, NULL, NULL);
-						}
-						dmuci_del_list_value_by_section(s, "dns", tmp->name);
-					}
-				}
-			}
-			break;
-	}
-	return 0;
-}
-
-static int delete_relay_forwarding(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+static int delete_dns_server(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *s = NULL, *ss = NULL, *stmp = NULL;
 	char *interface, *ip, *str;
@@ -319,7 +249,7 @@ static int get_server_dns_server(char *refparam, struct dmctx *ctx, void *data, 
 	return 0;
 }
 
-static int get_server_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_dns_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker;
 
@@ -330,7 +260,7 @@ static int get_server_interface(char *refparam, struct dmctx *ctx, void *data, c
 	return 0;
 }
 
-static int get_server_type(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_dns_type(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *v;
 	*value = "Static";
@@ -400,32 +330,6 @@ static int get_forwarding_alias(char *refparam, struct dmctx *ctx, void *data, c
 static int get_forwarding_dns_server(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "ip", value);
-	return 0;
-}
-
-static int get_forwarding_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char *linker;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &linker);
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
-	if (*value == NULL)
-		*value = "";
-	return 0;
-}
-
-static int get_forwarding_type(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char *v;
-	*value = "Static";
-	dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &v);
-	if (*v == '1') {
-		dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &v);
-		if (strchr(v, ':') == NULL)
-			*value = "DHCPv4";
-		else
-			*value = "DHCPv6";
-	}
 	return 0;
 }
 
@@ -535,7 +439,7 @@ static int set_client_enable(char *refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
-static int set_server_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+static int set_dns_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *str, *ip, *interface;
 	bool b, ob;
@@ -580,7 +484,7 @@ static int set_server_alias(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
-static int set_server_dns_server(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+static int set_dns_server(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *str, *oip, *interface;
 	struct uci_list *v;
@@ -625,9 +529,9 @@ static int set_server_dns_server(char *refparam, struct dmctx *ctx, void *data, 
 	return 0;
 }
 
-static int set_server_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+static int set_dns_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *str, *ointerface, *ip, *interface = NULL;
+	char *str, *interface, *ip, *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -635,21 +539,21 @@ static int set_server_interface(char *refparam, struct dmctx *ctx, void *data, c
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &interface);
-			if (interface == NULL && interface[0] == '\0')
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker == NULL || linker[0] == '\0')
 				return 0;
 
-			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &ointerface);
-			if (strcmp(ointerface, interface) == 0)
+			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
+			if (strcmp(interface, linker) == 0)
 				return 0;
 			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &str);
 			if (str[0] == '1')
 				return 0;
 			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &ip);
-			dmuci_del_list_value("network", ointerface, "dns", ip);
+			dmuci_del_list_value("network", interface, "dns", ip);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &str);
 			if (str[0] == '1')
-				dmuci_add_list_value("network", interface, "dns", ip);
+				dmuci_add_list_value("network", linker, "dns", ip);
 			dmuci_set_value_by_section((struct uci_section *)data, "interface", interface);
 			break;
 	}
@@ -673,37 +577,6 @@ static int set_relay_enable(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
-static int set_forwarding_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *str, *ip, *interface;
-	bool b, ob;
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &str);
-			string_to_bool(value, &b);
-			string_to_bool(str, &ob);
-			if (ob == b)
-				return 0;
-			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &str);
-			if (str[0] == '1')
-				return 0;
-			dmuci_set_value_by_section((struct uci_section *)data, "enable", b ? "1" : "0");
-			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &ip);
-			if (b == 1)
-				dmuci_add_list_value("network", interface, "dns", ip);
-			else
-				dmuci_del_list_value("network", interface, "dns", ip);
-			break;
-	}
-	return 0;
-}
-
 static int set_forwarding_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action) {
@@ -713,82 +586,6 @@ static int set_forwarding_alias(char *refparam, struct dmctx *ctx, void *data, c
 			break;
 		case VALUESET:
 			dmuci_set_value_by_section((struct uci_section *)data, "dns_server_alias", value);
-			break;
-	}
-	return 0;
-}
-
-static int set_forwarding_dns_server(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *str, *oip, *interface;
-	struct uci_list *v;
-	struct uci_element *e;
-	int count = 0, i = 0;
-	char *dns[32] = {0};
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 2))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &oip);
-			if (strcmp(oip, value) == 0)
-				return 0;
-			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &str);
-			if (str[0] == '1')
-				return 0;
-			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
-			dmuci_get_option_value_list("network", interface, "dns", &v);
-			if (v) {
-				uci_foreach_element(v, e) {
-					if (strcmp(e->name, oip)==0)
-						dns[count] = dmstrdup(value);
-					else
-						dns[count] = dmstrdup(e->name);
-					count++;
-				}
-			}
-			dmuci_delete("network", interface, "dns", NULL);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &str);
-			if (str[0] == '1') {
-				for (i = 0; i < count; i++) {
-					dmuci_add_list_value("network", interface, "dns", dns[i] ? dns[i] : "");
-					dmfree(dns[i]);
-				}
-			}
-			dmuci_set_value_by_section((struct uci_section *)data, "ip", value);
-			break;
-	}
-	return 0;
-}
-
-static int set_forwarding_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *str, *ointerface, *ip, *interface = NULL;
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &interface);
-			if (interface == NULL || interface[0] == '\0')
-				return 0;
-
-			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &ointerface);
-			if (strcmp(ointerface, interface) == 0)
-				return 0;
-			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &str);
-			if (str[0] == '1')
-				return 0;
-			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &ip);
-			dmuci_del_list_value("network", ointerface, "dns", ip);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &str);
-			if (str[0] == '1')
-				dmuci_add_list_value("network", interface, "dns", ip);
-			dmuci_set_value_by_section((struct uci_section *)data, "interface", interface);
 			break;
 	}
 	return 0;
@@ -905,7 +702,7 @@ DMLEAF tDNSParams[] = {
 /* *** Device.DNS.Client. *** */
 DMOBJ tDNSClientObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Server", &DMWRITE, add_client_server, delete_client_server, NULL, browseServerInst, NULL, NULL, tDNSClientServerParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}},
+{"Server", &DMWRITE, add_dns_server, delete_dns_server, NULL, browseDNSServerInst, NULL, NULL, tDNSClientServerParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}},
 {0}
 };
 
@@ -920,19 +717,19 @@ DMLEAF tDNSClientParams[] = {
 /* *** Device.DNS.Client.Server.{i}. *** */
 DMLEAF tDNSClientServerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_server_enable, set_server_enable, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_server_enable, set_dns_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_server_status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_server_alias, set_server_alias, BBFDM_BOTH},
-{"DNSServer", &DMWRITE, DMT_STRING, get_server_dns_server, set_server_dns_server, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_server_interface, set_server_interface, BBFDM_BOTH},
-{"Type", &DMREAD, DMT_STRING, get_server_type, NULL, BBFDM_BOTH},
+{"DNSServer", &DMWRITE, DMT_STRING, get_server_dns_server, set_dns_server, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_dns_interface, set_dns_interface, BBFDM_BOTH},
+{"Type", &DMREAD, DMT_STRING, get_dns_type, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DNS.Relay. *** */
 DMOBJ tDNSRelayObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Forwarding", &DMWRITE, add_relay_forwarding, delete_relay_forwarding, NULL, browseRelayForwardingInst, NULL, NULL, tDNSRelayForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}},
+{"Forwarding", &DMWRITE, add_dns_server, delete_dns_server, NULL, browseDNSServerInst, NULL, NULL, tDNSRelayForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}},
 {0}
 };
 
@@ -947,12 +744,12 @@ DMLEAF tDNSRelayParams[] = {
 /* *** Device.DNS.Relay.Forwarding.{i}. *** */
 DMLEAF tDNSRelayForwardingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_forwarding_enable, set_forwarding_enable, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_forwarding_enable, set_dns_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_forwarding_status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_forwarding_alias, set_forwarding_alias, BBFDM_BOTH},
-{"DNSServer", &DMWRITE, DMT_STRING, get_forwarding_dns_server, set_forwarding_dns_server, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_forwarding_interface, set_forwarding_interface, BBFDM_BOTH},
-{"Type", &DMREAD, DMT_STRING, get_forwarding_type, NULL, BBFDM_BOTH},
+{"DNSServer", &DMWRITE, DMT_STRING, get_forwarding_dns_server, set_dns_server, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_dns_interface, set_dns_interface, BBFDM_BOTH},
+{"Type", &DMREAD, DMT_STRING, get_dns_type, NULL, BBFDM_BOTH},
 {0}
 };
 

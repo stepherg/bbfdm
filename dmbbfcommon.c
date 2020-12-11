@@ -86,17 +86,6 @@ void dmjson_get_string(char *jkey, char **jval)
 	bbf_api_dmjson_get_string(jkey, jval);
 }
 
-void dmbbf_update_enabled_notify_file(unsigned int dm_type, unsigned int amd_version, int instance_mode)
-{
-	struct dmctx dmctx = {0};
-
-	dm_ctx_init(&dmctx, dm_type, amd_version, instance_mode);
-	dmctx.in_param = "";
-	dm_entry_enabled_notify(&dmctx);
-
-	dm_ctx_clean(&dmctx);
-}
-
 int get_dm_type(char *dm_str)
 {
 	if (dm_str == NULL)

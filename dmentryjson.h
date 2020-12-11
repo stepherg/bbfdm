@@ -16,7 +16,6 @@
 
 #define JSON_FOLDER_PATH "/etc/bbfdm/json"
 
-int check_stats_json_folder(char *json_folder_path);
 int load_json_dynamic_arrays(struct dmctx *ctx);
 int free_json_dynamic_arrays(DMOBJ *dm_entryobj);
 

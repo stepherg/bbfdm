@@ -78,6 +78,11 @@ int del_mcasts_filter_obj(char *refparam, struct dmctx *ctx, void *data, char *i
 
 void update_snooping_mode(struct uci_section *s);
 int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname);
+int del_proxy_obj(void *data, char *proto, unsigned char del_action);
+int del_snooping_obj(void *data, char *proto, unsigned char del_action);
+int browse_proxy_interface_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *proto);
+int browse_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *section_type,
+		char *option_name, char *option_value);
 void synchronize_specific_config_sections_with_dmmap_mcast_iface(char *package, char *section_type,
 		void *data, char *dmmap_package, char *dmmap_sec, char *proto,
 		struct list_head *dup_list);

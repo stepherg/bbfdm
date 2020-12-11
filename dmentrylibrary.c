@@ -12,56 +12,6 @@
 #include "dmentrylibrary.h"
 #include "dmoperate.h"
 
-static char library_hash[64] = "";
-
-static int get_stats_library_folder(char *folder_path, int *file_count, unsigned long *size, unsigned long *date)
-{
-	struct stat stats;
-	struct dirent *entry;
-	DIR *dirp = NULL;
-	char buf[264] = {0};
-	int filecount = 0;
-	unsigned long filesize = 0, filedate = 0;
-
-	if (folder_exists(folder_path)) {
-		dirp = opendir(folder_path);
-		while ((entry = readdir(dirp)) != NULL) {
-			if ((entry->d_type == DT_REG) && (strstr(entry->d_name, ".so"))) {
-				filecount++;
-				snprintf(buf, sizeof(buf), "%s/%s", folder_path, entry->d_name);
-				if (!stat(buf, &stats)) {
-					filesize = (filesize + stats.st_size) / 2;
-					filedate = (filedate + stats.st_mtime) / 2;
-				}
-			}
-		}
-		if (dirp) closedir(dirp);
-
-		*file_count = filecount;
-		*size = filesize;
-		*date = filedate;
-		return 1;
-	}
-	return 0;
-}
-
-int check_stats_library_folder(char *library_folder_path)
-{
-	int file_count = 0;
-	unsigned long size = 0, date = 0;
-	char str[128] = "";
-
-	if (!get_stats_library_folder(library_folder_path, &file_count, &size, &date))
-		return 0;
-
-	snprintf(str, sizeof(str), "count:%d,sizes:%lu,date:%lu", file_count, size, date);
-	if (strcmp(str, library_hash)) {
-		strcpy(library_hash, str);
-		return 1;
-	}
-	return 0;
-}
-
 static int dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj)
 {
 	if (!entryobj)

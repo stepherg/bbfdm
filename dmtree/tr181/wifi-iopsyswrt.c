@@ -709,9 +709,7 @@ char * os__get_default_wpa_key()
 /**************************************************************************
  * *** Device.WiFi.DataElements. *** *
  ***************************************************************************/
-
-/*#Device.WiFi.DataElements.Network.ID!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.ID*/
-int os__get_WiFiDataElementsNetwork_ID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int os__get_WiFiDataElementsNetwork_option(const char *option, char **value)
 {
 	int i;
 	json_object *res, *data_arr = NULL, *data_obj = NULL, *net_obj = NULL;
@@ -720,9 +718,15 @@ int os__get_WiFiDataElementsNetwork_ID(char *refparam, struct dmctx *ctx, void *
 	DM_ASSERT(res, *value = "");
 	dmjson_foreach_obj_in_array(res, data_arr, data_obj, i, 1, "data") {
 		json_object_object_get_ex(data_obj, "wfa-dataelements:Network", &net_obj);
-		*value = dmjson_get_value(net_obj, 1, "ID");
+		*value = dmjson_get_value(net_obj, 1, option);
 	}
 	return 0;
+}
+
+/*#Device.WiFi.DataElements.Network.ID!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.ID*/
+int os__get_WiFiDataElementsNetwork_ID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return os__get_WiFiDataElementsNetwork_option("ID", value);
 }
 
 int os__set_WiFiDataElementsNetwork_ID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -739,34 +743,16 @@ int os__set_WiFiDataElementsNetwork_ID(char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
-/*#Device.WiFi.DataElements.Network.TimeStamp!UBUS:wifi.dataelements.collector/dump//description*/
+/*#Device.WiFi.DataElements.Network.TimeStamp!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.TimeStamp*/
 int os__get_WiFiDataElementsNetwork_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int i;
-	json_object *res, *data_arr = NULL, *data_obj = NULL, *net_obj = NULL;
-
-	dmubus_call("wifi.dataelements.collector", "dump", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
-	dmjson_foreach_obj_in_array(res, data_arr, data_obj, i, 1, "data") {
-		json_object_object_get_ex(data_obj, "wfa-dataelements:Network", &net_obj);
-		*value = dmjson_get_value(net_obj, 1, "TimeStamp");
-	}
-	return 0;
+	return os__get_WiFiDataElementsNetwork_option("TimeStamp", value);
 }
 
 /*#Device.WiFi.DataElements.Network.ControllerID!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.ControllerID*/
 int os__get_WiFiDataElementsNetwork_ControllerID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int i;
-	json_object *res, *data_arr = NULL, *data_obj = NULL, *net_obj = NULL;
-
-	dmubus_call("wifi.dataelements.collector", "dump", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "");
-	dmjson_foreach_obj_in_array(res, data_arr, data_obj, i, 1, "data") {
-		json_object_object_get_ex(data_obj, "wfa-dataelements:Network", &net_obj);
-		*value = dmjson_get_value(net_obj, 1, "ControllerID");
-	}
-	return 0;
+	return os__get_WiFiDataElementsNetwork_option("ControllerID", value);
 }
 
 int os__set_WiFiDataElementsNetwork_ControllerID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)

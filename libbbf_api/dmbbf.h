@@ -32,7 +32,6 @@
 
 #define DMDELIM_CWMP '.'
 #define DELIMITOR ","
-#define DM_PROMPT "icwmp>"
 
 #define DM_ENABLED_NOTIFY "/etc/bbfdm/.dm_enabled_notify"
 #define DM_ENABLED_NOTIFY_TEMPORARY "/tmp/.dm_enabled_notify_temporary"
@@ -45,10 +44,6 @@
 #undef UNDEF
 #endif
 #define UNDEF -1
-
-#ifndef UNUSED
-#define UNUSED(x) (void)(x)
-#endif
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
@@ -233,8 +228,8 @@ struct dmctx
 	char *inst_buf[16];
 	char *instance_wildchar;
 	unsigned int end_session_flag;
+	bool isgetschema;
 };
-
 
 typedef struct dmnode {
 	DMOBJ *obj;
@@ -245,13 +240,6 @@ typedef struct dmnode {
 	unsigned char is_instanceobj;
 } DMNODE;
 
-struct prefix_method {
-	const char *prefix_name;
-	bool enable;
-	bool (*set_enable)(void);
-	int (*method)(struct dmctx *ctx);
-};
-
 struct notification {
 	char *value;
 	char *type;
@@ -261,16 +249,6 @@ struct dm_acl {
 	unsigned int flag;
 	char *user_access;
 };
-
-typedef struct execute_end_session {
-	struct list_head list;
-	int action;
-	unsigned int dm_type;
-	unsigned int amd_version;
-	unsigned int instance_mode;
-	void *data;
-	void (*function)(struct execute_end_session *);
-} execute_end_session;
 
 typedef struct lib_map_obj {
 	char *path;
@@ -548,6 +526,17 @@ enum {
 	__INDX_DYNAMIC_MAX
 };
 
+enum notification_enum {
+	notification_none,
+	notification_passive,
+	notification_active,
+	notification_passive_lw,
+	notification_ppassive_passive_lw,
+	notification_aactive_lw,
+	notification_passive_active_lw,
+	__MAX_notification
+};
+
 extern struct list_head list_enabled_notify;
 
 #ifdef BBF_TR064
@@ -571,8 +560,6 @@ int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, cha
 void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_version, unsigned int flags, char *param_notification);
 void api_del_list_parameter(struct dm_parameter *dm_parameter);
 void free_all_list_parameter(struct dmctx *ctx);
-void add_set_list_tmp(struct dmctx *ctx, char *param, char *value, unsigned int flags);
-void del_set_list_tmp(struct set_tmp *set_tmp);
 void free_all_set_list_tmp(struct dmctx *ctx);
 void add_list_fault_param(struct dmctx *ctx, char *param, int fault);
 void bbf_api_del_list_fault_param(struct param_fault *param_fault);
@@ -591,21 +578,6 @@ int dm_entry_set_notification(struct dmctx *ctx);
 int dm_entry_enabled_notify(struct dmctx *dmctx);
 int dm_entry_get_linker(struct dmctx *ctx);
 int dm_entry_get_linker_value(struct dmctx *ctx);
-#ifdef BBF_TR064
-int dm_entry_upnp_get_instances(struct dmctx *ctx);
-int dm_entry_upnp_get_selected_values(struct dmctx *dmctx);
-int dm_entry_upnp_get_values(struct dmctx *dmctx);
-int dm_entry_upnp_set_values(struct dmctx *dmctx);
-int dm_entry_upnp_get_attributes(struct dmctx *dmctx);
-int upnp_state_variables_init(struct dmctx *dmctx);
-int dm_entry_upnp_tracked_parameters(struct dmctx *dmctx);
-int dm_entry_upnp_get_instance_numbers(struct dmctx *dmctx);
-char *dm_entry_get_all_instance_numbers(struct dmctx *pctx, char *param);
-void free_all_list_enabled_notify();
-void free_all_list_upnp_param_track(struct list_head *head);
-#endif
-int bbf_api_dm_update_file_enabled_notify(char *param, char *new_value);
-void dm_update_enabled_notify_byname(char *name, char *new_value);
 char *get_last_instance(char *package, char *section, char *opt_inst);
 char *get_last_instance_bbfdm_without_update(char *package, char *section, char *opt_inst);
 char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst);
@@ -613,21 +585,29 @@ char *get_last_instance_lev2(char *package, char *section, char *opt_inst, char 
 char *get_last_instance_lev2_bbfdm_dmmap_opt(char* dmmap_package, char *section,  char *opt_inst, char *opt_check, char *value_check);
 char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check);
 char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...);
-int dm_add_end_session(struct dmctx *ctx, void(*function)(struct execute_end_session *), int action, void *data);
 char *dm_print_path(char *fpath, ...);
 int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
 void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found);
 int free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj);
 int dm_entry_get_full_param_value(struct dmctx *dmctx);
-char* check_parameter_forced_notification(char *parameter);
+char *check_parameter_forced_notification(const char *parameter);
 #ifdef BBF_TR064
-void add_list_upnp_param_track(struct dmctx *dmctx, struct list_head *pchead, char *param, char *key, char *value, unsigned int isobj);
-int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
+int dm_entry_upnp_get_instances(struct dmctx *ctx, bool all_instances);
+int dm_entry_upnp_get_selected_values(struct dmctx *dmctx);
+int dm_entry_upnp_get_values(struct dmctx *dmctx);
+int dm_entry_upnp_set_values(struct dmctx *dmctx);
+int dm_entry_upnp_get_set_attributes(struct dmctx *dmctx);
 int dm_entry_upnp_get_supported_parameters(struct dmctx *dmctx);
-int dm_entry_upnp_set_attributes(struct dmctx *dmctx);
 int dm_entry_upnp_delete_instance(struct dmctx *dmctx);
 int dm_entry_upnp_get_acl_data(struct dmctx *dmctx);
 int dm_entry_upnp_add_instance(struct dmctx *dmctx);
+int upnp_state_variables_init(struct dmctx *dmctx);
+int dm_entry_upnp_tracked_parameters(struct dmctx *dmctx);
+char *dm_entry_get_all_instance_numbers(struct dmctx *pctx, char *param);
+void free_all_list_enabled_notify();
+void free_all_list_upnp_param_track(struct list_head *head);
+void add_list_upnp_param_track(struct dmctx *dmctx, struct list_head *pchead, char *param, char *key, char *value, unsigned int isobj);
+int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
 #endif
 
 static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)

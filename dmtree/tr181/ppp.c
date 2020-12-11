@@ -110,7 +110,6 @@ static int get_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *data,
 static int set_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
-	char *ubus_object;
 
 	switch (action) {
 		case VALUECHECK:
@@ -120,10 +119,10 @@ static int set_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *data,
 		case VALUESET:
 			string_to_bool(value, &b);
 			if (b) {
-				dmastrcat(&ubus_object, "network.interface.", section_name(((struct uci_section *)data)));
-				dmubus_call_set(ubus_object, "down", UBUS_ARGS{}, 0);
-				dmubus_call_set(ubus_object, "up", UBUS_ARGS{}, 0);
-				dmfree(ubus_object);
+				char intf_obj[64] = {0};
+				snprintf(intf_obj, sizeof(intf_obj), "network.interface.%s", section_name(((struct uci_section *)data)));
+				dmubus_call_set(intf_obj, "down", UBUS_ARGS{}, 0);
+				dmubus_call_set(intf_obj, "up", UBUS_ARGS{}, 0);
 			}
 			break;
 	}
@@ -285,7 +284,7 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker = NULL;
+	char *ppp_linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -293,10 +292,10 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section(((struct uci_section *)data), "ifname", linker);
-				dmfree(linker);
+			adm_entry_get_linker_value(ctx, value, &ppp_linker);
+			if (ppp_linker && *ppp_linker) {
+				dmuci_set_value_by_section(((struct uci_section *)data), "ifname", ppp_linker);
+				dmfree(ppp_linker);
 			}
 			return 0;
 	}
@@ -333,15 +332,15 @@ static int get_PPPInterfacePPPoE_ACName(char *refparam, struct dmctx *ctx, void 
 
 static int set_PPPInterfacePPPoE_ACName(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *proto;
+	char *proto_intf;
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 
-			dmuci_get_value_by_section_string(((struct uci_section *)data), "proto", &proto);
-			if (strcmp(proto, "pppoe") != 0)
+			dmuci_get_value_by_section_string(((struct uci_section *)data), "proto", &proto_intf);
+			if (strcmp(proto_intf, "pppoe") != 0)
 				return FAULT_9001;
 			break;
 		case VALUESET:

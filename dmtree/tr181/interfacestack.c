@@ -9,6 +9,7 @@
  */
 
 #include "dmentry.h"
+#include "ethernet.h"
 #include "interfacestack.h"
 
 struct interfacestack_data {
@@ -23,7 +24,7 @@ struct interfacestack_data {
 **************************************************************/
 static char *get_instance_by_section(int mode, char *dmmap_config, char *section, char *option, char *value, char *instance_option, char *alias_option)
 {
-	struct uci_section *dmmap_section;
+	struct uci_section *dmmap_section = NULL;
 	char *instance = "";
 
 	get_dmmap_section_of_config_section_eq(dmmap_config, section, option, value, &dmmap_section);
@@ -38,7 +39,7 @@ static char *get_instance_by_section(int mode, char *dmmap_config, char *section
 
 static char *get_instance_by_section_option_condition(int mode, char *dmmap_config, char *section, struct uci_section *s, char *option, char *value, char *instance_option, char *alias_option)
 {
-	struct uci_section *dmmap_section;
+	struct uci_section *dmmap_section = NULL;
 	char *instance = "";
 
 	get_dmmap_section_of_config_section_cont(dmmap_config, section, option, value, &dmmap_section);
@@ -53,7 +54,7 @@ static char *get_instance_by_section_option_condition(int mode, char *dmmap_conf
 
 static char *get_alias_by_section(char *dmmap_config, char *section, struct uci_section *s, char *alias_option)
 {
-	struct uci_section *dmmap_section;
+	struct uci_section *dmmap_section = NULL;
 	char *alias = "";
 
 	get_dmmap_section_of_config_section(dmmap_config, section, section_name(s), &dmmap_section);
@@ -63,7 +64,7 @@ static char *get_alias_by_section(char *dmmap_config, char *section, struct uci_
 
 static char *get_alias_by_section_option_condition(char *dmmap_config, char *section, char *option, char *value, char *alias_option)
 {
-	struct uci_section *dmmap_section;
+	struct uci_section *dmmap_section = NULL;
 	char *alias = "";
 
 	get_dmmap_section_of_config_section_cont(dmmap_config, section, option, value, &dmmap_section);
@@ -87,17 +88,41 @@ static struct uci_section *create_dmmap_interface_stack_section(char *curr_inst)
 	return s;
 }
 
-int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+static int create_and_link_interface_stack_instance(struct dmctx *dmctx, DMNODE *parent_node, char *higherlayer, char *lowerlayer, char *higheralias, char *loweralias, char *max_inst, int *instance)
 {
 	struct interfacestack_data intf_stack_data = {0};
-	struct uci_section *s = NULL, *dmmap_s = NULL;
+	struct uci_section *dmmap_s = NULL;
+	char *inst = NULL, buf_instance[16] = {0};
+
+	// fill interface stack data
+	intf_stack_data.higherlayer = higherlayer;
+	intf_stack_data.lowerlayer = lowerlayer;
+	intf_stack_data.higheralias = higheralias;
+	intf_stack_data.loweralias = loweralias;
+
+	// create dmmap section
+	snprintf(buf_instance, sizeof(buf_instance), "%d", ++(*instance));
+	dmmap_s = create_dmmap_interface_stack_section(buf_instance);
+
+	// link instance to interface stack data
+	inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+		   dmmap_s, "interface_stack_instance", "interface_stack_alias");
+
+	if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
+		return -1;
+
+	return 0;
+}
+
+int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct uci_section *s = NULL;
 	char *layer_inst = "", *loweralias = "", *higheralias = "";
-	char *inst = NULL, *max_inst = NULL;
+	char *max_inst = NULL;
 	char buf_lowerlayer[128] = {0};
 	char buf_higherlayer[128] = {0};
 	char buf_higheralias[64] = {0};
 	char buf_loweralias[64] = {0};
-	char buf_instance[16] = {0};
 	int instance = 0;
 
 	/* Higher layers are Device.IP.Interface.{i}. */
@@ -119,13 +144,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.IP.Interface.%s", layer_inst);
 
 		higheralias = get_alias_by_section("dmmap_network", "interface", s, "ip_int_alias");
-		if (*higheralias == '\0')
-			if (*layer_inst == '\0')
-				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
-			else
-				snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", layer_inst);
-		else
-			snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", higheralias);
+		snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *higheralias ? higheralias : *layer_inst ? "cpe-" : "", (*higheralias == '\0' && *layer_inst) ? layer_inst : "");
 
 		if (strstr(proto, "ppp")) {
 			// The lower layer is Device.PPP.Interface.{i}.
@@ -134,10 +153,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				continue;
 			snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "Device.PPP.Interface.%s", layer_inst);
 			loweralias = get_alias_by_section("dmmap_network", "interface", s, "ppp_int_alias");
-			if (*loweralias == '\0')
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", layer_inst);
-			else
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
+			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : "cpe-", (*loweralias == '\0') ? layer_inst : "");
 		} else {
 			// The lower layer is Device.Ethernet.VLANTermination.{i}.
 			char *value = NULL;
@@ -167,31 +183,11 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				if (value == NULL)
 					value = "";
 			}
-			snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "%s", value?value:"");
-			if (*loweralias == '\0')
-				if (*layer_inst == '\0')
-					snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
-				else
-					snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", layer_inst);
-			else
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
+			snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "%s", value ? value : "");
+			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *layer_inst ? "cpe-" : "", (*loweralias == '\0' && *layer_inst) ? layer_inst : "");
 		}
 
-		// fill interface stack data
-		intf_stack_data.higherlayer = buf_higherlayer;
-		intf_stack_data.lowerlayer = buf_lowerlayer;
-		intf_stack_data.higheralias = buf_higheralias;
-		intf_stack_data.loweralias = buf_loweralias;
-
-		// create dmmap section
-		snprintf(buf_instance, sizeof(buf_instance), "%d", ++instance);
-		dmmap_s = create_dmmap_interface_stack_section(buf_instance);
-
-		// link instance to interface stack data
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_s, "interface_stack_instance", "interface_stack_alias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
+		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, max_inst, &instance))
 			goto end;
 	}
 
@@ -209,22 +205,16 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.PPP.Interface.%s", layer_inst);
 
 		higheralias = get_alias_by_section("dmmap_network", "interface", s, "ppp_int_alias");
-		if (*higheralias == '\0')
-			if (*layer_inst == '\0')
-				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
-			else
-				snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", layer_inst);
-		else
-			snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", higheralias);
+		snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *higheralias ? higheralias : *layer_inst ? "cpe-" : "", (*higheralias == '\0' && *layer_inst) ? layer_inst : "");
 
 		char *value = NULL;
 		int found = 0;
 		// The lower layer is Device.Ethernet.VLANTermination.{i}.
-		char *device = get_device(section_name(s));
-		if (device[0] != '\0') {
+		char *ppp_device = get_device(section_name(s));
+		if (ppp_device[0] != '\0') {
 			struct uci_section *vlan_sect = NULL;
-			adm_entry_get_linker_param(dmctx, dm_print_path("%s%cEthernet%cVLANTermination%c", dmroot, dm_delim, dm_delim, dm_delim), device, &value);
-			uci_foreach_option_eq("network", "device", "name", device, vlan_sect) {
+			adm_entry_get_linker_param(dmctx, dm_print_path("%s%cEthernet%cVLANTermination%c", dmroot, dm_delim, dm_delim, dm_delim), ppp_device, &value);
+			uci_foreach_option_eq("network", "device", "name", ppp_device, vlan_sect) {
 				loweralias = get_alias_by_section("dmmap_network", "device", vlan_sect, "vlan_term_alias");
 				layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_network", "device", "section_name", section_name(vlan_sect), "vlan_term_instance", "vlan_term_alias");
 				break;
@@ -236,7 +226,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		if (found == 0) {
 			// The lower layer is Device.Ethernet.Link.{i}.
 			char linker[32] = {0};
-			strncpy(linker, device, sizeof(linker) - 1);
+			strncpy(linker, ppp_device, sizeof(linker) - 1);
 			char *vid = strchr(linker, '.');
 			if (vid) *vid = '\0';
 			adm_entry_get_linker_param(dmctx, dm_print_path("%s%cEthernet%cLink%c", dmroot, dm_delim, dm_delim, dm_delim), linker, &value);
@@ -247,29 +237,9 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		}
 
 		snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "%s", value);
-		if (*loweralias == '\0')
-			if (*layer_inst == '\0')
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
-			else
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", layer_inst);
-		else
-			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
+		snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *layer_inst ? "cpe-" : "", (*loweralias == '\0' && *layer_inst) ? layer_inst : "");
 
-		// fill interface stack data
-		intf_stack_data.higherlayer = buf_higherlayer;
-		intf_stack_data.lowerlayer = buf_lowerlayer;
-		intf_stack_data.higheralias = buf_higheralias;
-		intf_stack_data.loweralias = buf_loweralias;
-
-		// create dmmap section
-		snprintf(buf_instance, sizeof(buf_instance), "%d", ++instance);
-		dmmap_s = create_dmmap_interface_stack_section(buf_instance);
-
-		// link instance to interface stack data
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_s, "interface_stack_instance", "interface_stack_alias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
+		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, max_inst, &instance))
 			goto end;
 	}
 
@@ -289,13 +259,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.Ethernet.VLANTermination.%s", layer_inst);
 
 		higheralias = get_alias_by_section("dmmap_network", "device", s, "vlan_term_alias");
-		if (*higheralias == '\0')
-			if (*layer_inst == '\0')
-				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
-			else
-				snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", layer_inst);
-		else
-			snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", higheralias);
+		snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *higheralias ? higheralias : *layer_inst ? "cpe-" : "", (*higheralias == '\0' && *layer_inst) ? layer_inst : "");
 
 		// The lower layer is Device.Ethernet.Link.{i}.
 		char *vid = strchr(name, '.');
@@ -310,29 +274,9 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmuci_get_value_by_section_string(link_s, "link_alias", &loweralias);
 
 		snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "%s", value);
-		if (*loweralias == '\0')
-			if (*layer_inst == '\0')
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
-			else
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", layer_inst);
-		else
-			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
+		snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *layer_inst ? "cpe-" : "", (*loweralias == '\0' && *layer_inst) ? layer_inst : "");
 
-		// fill interface stack data
-		intf_stack_data.higherlayer = buf_higherlayer;
-		intf_stack_data.lowerlayer = buf_lowerlayer;
-		intf_stack_data.higheralias = buf_higheralias;
-		intf_stack_data.loweralias = buf_loweralias;
-
-		// create dmmap section
-		snprintf(buf_instance, sizeof(buf_instance), "%d", ++instance);
-		dmmap_s = create_dmmap_interface_stack_section(buf_instance);
-
-		// link instance to interface stack data
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_s, "interface_stack_instance", "interface_stack_alias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
+		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, max_inst, &instance))
 			goto end;
 	}
 
@@ -347,14 +291,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.Ethernet.Link.%s", layer_inst);
 
 		dmuci_get_value_by_section_string(s, "link_alias", &higheralias);
-		if (*higheralias == '\0')
-			if (*layer_inst == '\0')
-				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
-			else
-				snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", layer_inst);
-		else
-			snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", higheralias);
-
+		snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *higheralias ? higheralias : *layer_inst ? "cpe-" : "", (*higheralias == '\0' && *layer_inst) ? layer_inst : "");
 
 		char *linker, *value = NULL;
 		dmuci_get_value_by_section_string(s, "device", &linker);
@@ -406,29 +343,9 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			value = "";
 
 		snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "%s", value);
-		if (*loweralias == '\0')
-			if (*layer_inst == '\0')
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
-			else
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", layer_inst);
-		else
-			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
+		snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *layer_inst ? "cpe-" : "", (*loweralias == '\0' && *layer_inst) ? layer_inst : "");
 
-		// fill interface stack data
-		intf_stack_data.higherlayer = buf_higherlayer;
-		intf_stack_data.lowerlayer = buf_lowerlayer;
-		intf_stack_data.higheralias = buf_higheralias;
-		intf_stack_data.loweralias = buf_loweralias;
-
-		// create dmmap section
-		snprintf(buf_instance, sizeof(buf_instance), "%d", ++instance);
-		dmmap_s = create_dmmap_interface_stack_section(buf_instance);
-
-		// link instance to interface stack data
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_s, "interface_stack_instance", "interface_stack_alias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
+		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, max_inst, &instance))
 			goto end;
 	}
 
@@ -457,13 +374,8 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				adm_entry_get_linker_param(dmctx, dm_print_path("%s%cBridging%cBridge%c", dmroot, dm_delim, dm_delim, dm_delim), linker, &mg_value);
 				dmuci_get_value_by_section_string(port, "bridge_port_alias", &higheralias);
 				dmuci_get_value_by_section_string(port, "bridge_port_instance", &bridge_port_inst);
-				if (*higheralias == '\0')
-					if (*bridge_port_inst == '\0')
-						snprintf(buf_mngr, sizeof(buf_mngr), "%s", "");
-					else
-						snprintf(buf_mngr, sizeof(buf_mngr), "cpe-%s", bridge_port_inst);
-				else
-					snprintf(buf_mngr, sizeof(buf_mngr), "%s", higheralias);
+
+				snprintf(buf_mngr, sizeof(buf_mngr), "%s%s", *higheralias ? higheralias : *bridge_port_inst ? "cpe-" : "", (*higheralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
 				if (mg_value == NULL)
 					mg_value = "";
@@ -490,38 +402,13 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 			dmuci_get_value_by_section_string(sd, "bridge_port_alias", &loweralias);
 			dmuci_get_value_by_section_string(sd, "bridge_port_instance", &bridge_port_inst);
-			if (*loweralias == '\0')
-				if (*bridge_port_inst == '\0')
-					snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
-				else
-					snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", bridge_port_inst);
-			else
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
 
-			// fill interface stack data
-			intf_stack_data.higherlayer = mg_value;
-			intf_stack_data.lowerlayer = vb;
-			intf_stack_data.higheralias = buf_mngr;
-			intf_stack_data.loweralias = buf_loweralias;
+			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-			// create dmmap section
-			snprintf(buf_instance, sizeof(buf_instance), "%d", ++instance);
-			dmmap_s = create_dmmap_interface_stack_section(buf_instance);
-
-			// link instance to interface stack data
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-				   dmmap_s, "interface_stack_instance", "interface_stack_alias");
-
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
+			if (create_and_link_interface_stack_instance(dmctx, parent_node, mg_value, vb, buf_mngr, buf_loweralias, max_inst, &instance))
 				goto end;
 
-			if (*loweralias == '\0')
-				if (*bridge_port_inst == '\0')
-					snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
-				else
-					snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", bridge_port_inst);
-			else
-				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", loweralias);
+			snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
 			char package[32] = {0};
 			int found = 0;
@@ -606,41 +493,19 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				}
 			}
 
-			if (*loweralias == '\0')
-				if (*bridge_port_inst == '\0')
-					snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
-				else
-					snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", bridge_port_inst);
-			else
-				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
-
 			if (value == NULL)
 				value = "";
 
-			// fill interface stack data
-			intf_stack_data.higherlayer = vb;
-			intf_stack_data.lowerlayer = value;
-			intf_stack_data.higheralias = buf_higheralias;
-			intf_stack_data.loweralias = buf_loweralias;
+			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-			// create dmmap section
-			snprintf(buf_instance, sizeof(buf_instance), "%d", ++instance);
-			dmmap_s = create_dmmap_interface_stack_section(buf_instance);
-			// link instance to interface stack data
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-				   dmmap_s, "interface_stack_instance", "interface_stack_alias");
-
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
+			if (create_and_link_interface_stack_instance(dmctx, parent_node, vb, value, buf_higheralias, buf_loweralias, max_inst, &instance))
 				goto end;
+
 			// The lower layer is Device.WiFi.Radio.{i}.
 			if(strcmp(package, "wireless") == 0) {
-				if (*loweralias == '\0')
-					if (*bridge_port_inst == '\0')
-						snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
-					else
-						snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", bridge_port_inst);
-				else
-					snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", loweralias);
+
+				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
+
 				struct uci_section *wl_s = NULL;
 				char *wl_device;
 				uci_foreach_option_eq("wireless", "wifi-iface", "ifname", device, wl_s) {
@@ -663,41 +528,16 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				if (vb == NULL)
 					vb = "";
 
-				if (*loweralias == '\0')
-					if (*bridge_port_inst == '\0')
-						snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
-					else
-						snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", bridge_port_inst);
-				else
-					snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
+				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-				// fill interface stack data
-				intf_stack_data.higherlayer = value;
-				intf_stack_data.lowerlayer = vb;
-				intf_stack_data.higheralias = buf_higheralias;
-				intf_stack_data.loweralias = buf_loweralias;
-
-				// create dmmap section
-				snprintf(buf_instance, sizeof(buf_instance), "%d", ++instance);
-				dmmap_s = create_dmmap_interface_stack_section(buf_instance);
-
-				// link instance to interface stack data
-				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-					   dmmap_s, "interface_stack_instance", "interface_stack_alias");
-
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
+				if (create_and_link_interface_stack_instance(dmctx, parent_node, value, vb, buf_higheralias, buf_loweralias, max_inst, &instance))
 					goto end;
 			}
 
 			// The lower layer is Device.DSL.Channel.{i}.
 			if(strcmp(package, "dsl:atm") == 0) {
-				if (*loweralias == '\0')
-					if (*bridge_port_inst == '\0')
-						snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
-					else
-						snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", bridge_port_inst);
-				else
-					snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", loweralias);
+
+				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
 				char *link_channel = "channel_0";
 				adm_entry_get_linker_param(dmctx, dm_print_path("%s%cDSL%cChannel%c", dmroot, dm_delim, dm_delim, dm_delim), link_channel, &vb);
@@ -710,41 +550,16 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 					bridge_port_inst = get_instance_by_section(dmctx->instance_mode, "dmmap", "dsl_channel", "section_name", section_name(dsl_s), "dsl_channel_instance", "dsl_channel_alias");
 				}
 
-				if (*loweralias == '\0')
-					if (*bridge_port_inst == '\0')
-						snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
-					else
-						snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", bridge_port_inst);
-				else
-					snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
+				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-				// fill interface stack data
-				intf_stack_data.higherlayer = value;
-				intf_stack_data.lowerlayer = vb;
-				intf_stack_data.higheralias = buf_higheralias;
-				intf_stack_data.loweralias = buf_loweralias;
-
-				// create dmmap section
-				snprintf(buf_instance, sizeof(buf_instance), "%d", ++instance);
-				dmmap_s = create_dmmap_interface_stack_section(buf_instance);
-
-				// link instance to interface stack data
-				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-					   dmmap_s, "interface_stack_instance", "interface_stack_alias");
-
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
+				if (create_and_link_interface_stack_instance(dmctx, parent_node, value, vb, buf_higheralias, buf_loweralias, max_inst, &instance))
 					goto end;
 			}
 
 			// The lower layer is Device.DSL.Line.{i}.
 			if(strcmp(package, "dsl:ptm") == 0) {
-				if (*loweralias == '\0')
-					if (*bridge_port_inst == '\0')
-						snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", "");
-					else
-						snprintf(buf_higheralias, sizeof(buf_higheralias), "cpe-%s", bridge_port_inst);
-				else
-					snprintf(buf_higheralias, sizeof(buf_higheralias), "%s", loweralias);
+
+				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
 				char *link_line = "line_0";
 				adm_entry_get_linker_param(dmctx, dm_print_path("%s%cDSL%cLine%c", dmroot, dm_delim, dm_delim, dm_delim), link_line, &value);
@@ -757,29 +572,9 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 					bridge_port_inst = get_instance_by_section(dmctx->instance_mode, "dmmap", "dsl_line", "id", "0", "dsl_line_instance", "dsl_line_alias");
 				}
 
-				if (*loweralias == '\0')
-					if (*bridge_port_inst == '\0')
-						snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", "");
-					else
-						snprintf(buf_loweralias, sizeof(buf_loweralias), "cpe-%s", bridge_port_inst);
-				else
-					snprintf(buf_loweralias, sizeof(buf_loweralias), "%s", loweralias);
+				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-				// fill interface stack data
-				intf_stack_data.higherlayer = vb;
-				intf_stack_data.lowerlayer = value;
-				intf_stack_data.higheralias = buf_higheralias;
-				intf_stack_data.loweralias = buf_loweralias;
-
-				// create dmmap section
-				snprintf(buf_instance, sizeof(buf_instance), "%d", ++instance);
-				dmmap_s = create_dmmap_interface_stack_section(buf_instance);
-
-				// link instance to interface stack data
-				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-					   dmmap_s, "interface_stack_instance", "interface_stack_alias");
-
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
+				if (create_and_link_interface_stack_instance(dmctx, parent_node, vb, value, buf_higheralias, buf_loweralias, max_inst, &instance))
 					goto end;
 			}
 		}

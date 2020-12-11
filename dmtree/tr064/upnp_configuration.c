@@ -180,13 +180,13 @@ int upnp_configuration_set_ipv4_IPAddress(char *refparam, struct dmctx *ctx, voi
 {
 	struct upnp_configuration_args *upnp_configargs = (struct upnp_configuration_args *)data;
 	char *proto = NULL;
+
 	switch (action) {
 		case VALUECHECK:
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string(upnp_configargs->upnpConfiguration_sec, "proto", &proto);
-			if(proto == NULL || strlen(proto)<=0) return 0;
-			if(strcmp(proto, "static") == 0)
+			if (proto && strcmp(proto, "static") == 0)
 				dmuci_set_value_by_section(upnp_configargs->upnpConfiguration_sec, "ipaddr", value);
 			return 0;
 	}

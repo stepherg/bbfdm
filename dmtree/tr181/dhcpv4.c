@@ -7,6 +7,7 @@
  *
  *		Author: Anis Ellouze <anis.ellouze@pivasoftware.com>
  *		Author: Omar Kallel <omar.kallel@pivasoftware.com>
+ *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  *
  */
 
@@ -101,11 +102,11 @@ static inline void init_client_options_args(struct client_options_args *args, ch
 }
 
 /*************************************************************
-* COMMON Functions
+* COMMON FUNCTIONS
 **************************************************************/
-static struct uci_section *exist_other_section_same_order(struct uci_section *dmmap_sect, char * package, char* sect_type, char *order)
+static struct uci_section *exist_other_section_same_order(struct uci_section *dmmap_sect, char *package, char *sect_type, char *order)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	uci_path_foreach_option_eq(bbfdm, package, sect_type, "order", order, s) {
 		if (strcmp(section_name(s), section_name(dmmap_sect)) != 0) {
 			return s;
@@ -127,7 +128,7 @@ int set_section_order(char *package, char *dmpackage, char *sect_type, struct uc
 		dmuci_get_value_by_section_string(dmmap_sect, "section_name", &sect_name);
 		get_config_section_of_dmmap_section(package, sect_type, sect_name, &s);
 	} else
-		s= conf;
+		s = conf;
 
 	if (strcmp(order, "1") != 0 && s != NULL) {
 		dmuci_set_value_by_section(s, "force", "");
@@ -145,6 +146,65 @@ int set_section_order(char *package, char *dmpackage, char *sect_type, struct uc
 			dmuci_set_value_by_section(s, "force", "");
 		}
 		set_section_order(package, dmpackage, sect_type, dm, s, set_force, incrorder);
+	}
+	return 0;
+}
+
+int get_value_in_mac_format(struct uci_section *s, char *option_name, bool type, char **value)
+{
+	char *option_value = NULL, **macarray, buf[32];
+	unsigned pos = 0;
+	size_t length;
+
+	dmuci_get_value_by_section_string(s, option_name, &option_value);
+	if (option_value == NULL || *option_value == '\0')
+		return -1;
+
+	buf[0] = 0;
+	macarray = strsplit(option_value, ":", &length);
+
+	for (int i = 0; i < 6; i++)
+		pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s:", (macarray[i] && strcmp(macarray[i], "*") == 0) ? "00" : type ? "FF" : macarray[i]);
+
+	if (pos)
+		buf[pos - 1] = 0;
+
+	*value = dmstrdup(buf);
+	return 0;
+}
+
+int set_DHCP_Interface(struct dmctx *ctx, char *value, struct uci_section *s_data, char *dmmap_name, char *proto, int action)
+{
+	struct uci_section *s = NULL;
+	char *linker = NULL, *v;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+				return FAULT_9007;
+
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker == NULL || linker[0] == '\0')
+				return FAULT_9007;
+
+			uci_path_foreach_sections(bbfdm, dmmap_name, "interface", s) {
+				dmuci_get_value_by_section_string(s, "section_name", &v);
+				if(strcmp(v, linker) == 0)
+					return FAULT_9007;
+			}
+
+			uci_foreach_sections("network", "interface", s) {
+				if(strcmp(section_name(s), linker) == 0){
+					dmuci_get_value_by_section_string(s, "proto", &v);
+					if(strcmp(v, proto) != 0)
+						return FAULT_9007;
+				}
+			}
+			break;
+		case VALUESET:
+			adm_entry_get_linker_value(ctx, value, &linker);
+			dmuci_set_value_by_section_bbfdm(s_data, "section_name", linker);
+			break;
 	}
 	return 0;
 }
@@ -294,25 +354,39 @@ static bool check_dhcp_host_option_exists(char *dhcp_interface, char *option, ch
 	return false;
 }
 
+static int get_dhcp_iface_range(struct uci_section *dhcp_sec, char *interface, unsigned *iface_addr, unsigned *iface_bits, unsigned *iface_net_start, unsigned *iface_net_end, int *start, int *limit)
+{
+	char *dhcp_start = NULL, *dhcp_limit = NULL;
+	unsigned iface_cidr;
+
+	dmuci_get_value_by_section_string(dhcp_sec, "start", &dhcp_start);
+	dmuci_get_value_by_section_string(dhcp_sec, "limit", &dhcp_limit);
+	if (!dhcp_start || *dhcp_start == '\0' || !dhcp_limit || *dhcp_limit == '\0')
+		return -1;
+
+	if (interface_get_ipv4(interface, iface_addr, &iface_cidr))
+		return -1;
+
+	*iface_bits = ~((1 << (32 - iface_cidr)) - 1);
+	*iface_net_start = (ntohl(*iface_addr) & *iface_bits) + atoi(dhcp_start);
+	*iface_net_end = (ntohl(*iface_addr) & *iface_bits) + atoi(dhcp_start) + atoi(dhcp_limit) - 1;
+	*start = atoi(dhcp_start);
+	*limit = atoi(dhcp_limit);
+
+	return 0;
+}
+
 static int check_ipv4_in_dhcp_pool(struct uci_section *dhcp_sec, char *interface, char *ip)
 {
-	unsigned iface_addr, iface_cidr, addr;
-	char *start = NULL, *limit = NULL;
+	unsigned iface_addr, iface_bits, iface_net_start, iface_net_end;
+	int start = 0, limit = 0;
 
-	dmuci_get_value_by_section_string(dhcp_sec, "start", &start);
-	dmuci_get_value_by_section_string(dhcp_sec, "limit", &limit);
-	if (!start || *start == '\0' || !limit || *limit == '\0')
+	if (get_dhcp_iface_range(dhcp_sec, interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit))
 		return -1;
 
-	if (interface_get_ipv4(interface, &iface_addr, &iface_cidr))
-		return -1;
-
-	unsigned iface_bits = ~((1 << (32 - iface_cidr)) - 1);
-	unsigned iface_net_start = (ntohl(iface_addr) & iface_bits) + atoi(start);
-	unsigned iface_net_end = (ntohl(iface_addr) & iface_bits) + atoi(start) + atoi(limit) - 1;
-
+	unsigned addr, net;
 	inet_pton(AF_INET, ip, &addr);
-	unsigned net = ntohl(addr);
+	net = ntohl(addr);
 
 	if (net > iface_net_end || net < iface_net_start)
 		return -1;
@@ -892,18 +966,14 @@ static int set_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 /*#Device.DHCPv4.Server.Pool.{i}.MinAddress!UCI:dhcp/interface,@i-1/start*/
 static int get_DHCPv4ServerPool_MinAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	unsigned iface_addr, iface_cidr;
-	char *start = NULL, addr_min[32] = {0};
+	unsigned iface_addr, iface_bits, iface_net_start, iface_net_end;
+	int start = 0, limit = 0;
+	char addr_min[32] = {0};
 
-	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "start", &start);
-	if (!start || *start == '\0')
+	if (get_dhcp_iface_range(((struct dhcp_args *)data)->dhcp_sec, ((struct dhcp_args *)data)->interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit))
 		return -1;
 
-	if (interface_get_ipv4(((struct dhcp_args *)data)->interface, &iface_addr, &iface_cidr))
-		return -1;
-
-	unsigned iface_bits = ~((1 << (32 - iface_cidr)) - 1);
-	unsigned iface_start_addr = htonl((ntohl(iface_addr) & iface_bits) + atoi(start));
+	unsigned iface_start_addr = htonl((ntohl(iface_addr) & iface_bits) + start);
 	inet_ntop(AF_INET, &iface_start_addr, addr_min, INET_ADDRSTRLEN);
 
 	*value = dmstrdup(addr_min);
@@ -912,8 +982,9 @@ static int get_DHCPv4ServerPool_MinAddress(char *refparam, struct dmctx *ctx, vo
 
 static int set_DHCPv4ServerPool_MinAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *start = NULL, *limit = NULL, buf[32] = {0};
-	unsigned iface_addr, iface_cidr, value_addr;
+	unsigned iface_addr, iface_bits, iface_net_start, iface_net_end, value_addr;
+	int start = 0, limit = 0;
+	char buf[32] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -921,15 +992,9 @@ static int set_DHCPv4ServerPool_MinAddress(char *refparam, struct dmctx *ctx, vo
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "start", &start);
-			dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "limit", &limit);
-			if (!start || *start == '\0' || !limit || *limit == '\0')
+			if (get_dhcp_iface_range(((struct dhcp_args *)data)->dhcp_sec, ((struct dhcp_args *)data)->interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit))
 				return -1;
 
-			if (interface_get_ipv4(((struct dhcp_args *)data)->interface, &iface_addr, &iface_cidr))
-				return -1;
-
-			unsigned iface_bits = ~((1 << (32 - iface_cidr)) - 1);
 			unsigned iface_net = ntohl(iface_addr) & iface_bits;
 
 			inet_pton(AF_INET, value, &value_addr);
@@ -938,7 +1003,7 @@ static int set_DHCPv4ServerPool_MinAddress(char *refparam, struct dmctx *ctx, vo
 			if (value_net == iface_net) {
 
 				unsigned dhcp_start = ntohl(value_addr) - iface_net;
-				unsigned dhcp_limit = atoi(start) + atoi(limit) - dhcp_start;
+				unsigned dhcp_limit = start + limit - dhcp_start;
 
 				// check if MinAddress > MaxAddress
 				if ((int)dhcp_limit < 0)
@@ -960,19 +1025,14 @@ static int set_DHCPv4ServerPool_MinAddress(char *refparam, struct dmctx *ctx, vo
 /*#Device.DHCPv4.Server.Pool.{i}.MaxAddress!UCI:dhcp/interface,@i-1/limit*/
 static int get_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	unsigned iface_addr, iface_cidr;
-	char *start = NULL, *limit = NULL, addr_max[32] = {0};
+	unsigned iface_addr, iface_bits, iface_net_start, iface_net_end;
+	int start = 0, limit = 0;
+	char addr_max[32] = {0};
 
-	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "start", &start);
-	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "limit", &limit);
-	if (!start || *start == '\0' || !limit || *limit == '\0')
+	if (get_dhcp_iface_range(((struct dhcp_args *)data)->dhcp_sec, ((struct dhcp_args *)data)->interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit))
 		return -1;
 
-	if (interface_get_ipv4(((struct dhcp_args *)data)->interface, &iface_addr, &iface_cidr))
-		return -1;
-
-	unsigned iface_bits = ~((1 << (32 - iface_cidr)) - 1);
-	unsigned iface_end_addr = htonl((ntohl(iface_addr) & iface_bits) + atoi(start) + atoi(limit) - 1);
+	unsigned iface_end_addr = htonl((ntohl(iface_addr) & iface_bits) + start + limit - 1);
 	inet_ntop(AF_INET, &iface_end_addr, addr_max, INET_ADDRSTRLEN);
 
 	*value = dmstrdup(addr_max);
@@ -981,8 +1041,9 @@ static int get_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, vo
 
 static int set_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *start = NULL, buf[32] = {0};
-	unsigned iface_addr, iface_cidr, value_addr;
+	unsigned iface_addr, iface_bits, iface_net_start, iface_net_end, value_addr;
+	int start = 0, limit = 0;
+	char buf[32] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -990,14 +1051,9 @@ static int set_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, vo
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "start", &start);
-			if (!start || *start == '\0')
+			if (get_dhcp_iface_range(((struct dhcp_args *)data)->dhcp_sec, ((struct dhcp_args *)data)->interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit))
 				return -1;
 
-			if (interface_get_ipv4(((struct dhcp_args *)data)->interface, &iface_addr, &iface_cidr))
-				return -1;
-
-			unsigned iface_bits = ~((1 << (32 - iface_cidr)) - 1);
 			unsigned iface_net = ntohl(iface_addr) & iface_bits;
 
 			inet_pton(AF_INET, value, &value_addr);
@@ -1005,7 +1061,7 @@ static int set_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, vo
 
 			if (value_net == iface_net) {
 
-				unsigned dhcp_limit = ntohl(value_addr) - iface_net - atoi(start) + 1;
+				unsigned dhcp_limit = ntohl(value_addr) - iface_net - start + 1;
 
 				// check if MaxAddress < MinAddress
 				if ((int)dhcp_limit < 0)
@@ -1023,21 +1079,13 @@ static int set_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, vo
 
 static int get_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	unsigned iface_addr, iface_cidr, addr, pos = 0;
-	char *start = NULL, *limit = NULL, list_val[512];
+	unsigned iface_addr, iface_bits, iface_net_start, iface_net_end, addr, pos = 0;
+	int start = 0, limit = 0;
+	char list_val[512];
 	struct uci_section *s = NULL;
 
-	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "start", &start);
-	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "limit", &limit);
-	if (!start || *start == '\0' || !limit || *limit == '\0')
+	if (get_dhcp_iface_range(((struct dhcp_args *)data)->dhcp_sec, ((struct dhcp_args *)data)->interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit))
 		return -1;
-
-	if (interface_get_ipv4(((struct dhcp_args *)data)->interface, &iface_addr, &iface_cidr))
-		return -1;
-
-	unsigned iface_bits = ~((1 << (32 - iface_cidr)) - 1);
-	unsigned iface_net_start = (ntohl(iface_addr) & iface_bits) + atoi(start);
-	unsigned iface_net_end = (ntohl(iface_addr) & iface_bits) + atoi(start) + atoi(limit) - 1;
 
 	list_val[0] = 0;
 	uci_foreach_option_eq("dhcp", "host", "dhcp", ((struct dhcp_args *)data)->interface, s) {
@@ -1727,38 +1775,7 @@ static int get_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 static int set_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s = NULL;
-	char *linker = NULL, *v;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
-				return FAULT_9007;
-
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker == NULL || linker[0] == '\0')
-				return FAULT_9007;
-
-			uci_path_foreach_sections(bbfdm, "dmmap_dhcp_client", "interface", s) {
-				dmuci_get_value_by_section_string(s, "section_name", &v);
-				if(strcmp(v, linker) == 0)
-					return FAULT_9007;
-			}
-
-			uci_foreach_sections("network", "interface", s) {
-				if(strcmp(section_name(s), linker) == 0){
-					dmuci_get_value_by_section_string(s, "proto", &v);
-					if(strcmp(v, "dhcp") != 0)
-						return FAULT_9007;
-				}
-			}
-			break;
-		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section_bbfdm(((struct dhcp_client_args *)data)->dhcp_client_dm, "section_name", linker);
-			break;
-	}
-	return 0;
+	return set_DHCP_Interface(ctx, value, ((struct dhcp_client_args *)data)->dhcp_client_dm, "dmmap_dhcp_client", "dhcp", action);
 }
 
 /*#Device.DHCPv4.Client.{i}.Status!UCI:network/interface,@i-1/disabled*/
@@ -2406,38 +2423,7 @@ static int get_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx
 
 static int set_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s = NULL;
-	char *linker = NULL, *v;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
-				return FAULT_9007;
-
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker == NULL || linker[0] == '\0')
-				return FAULT_9007;
-
-			uci_path_foreach_sections(bbfdm, "dmmap_dhcp_relay", "interface", s) {
-				dmuci_get_value_by_section_string(s, "section_name", &v);
-				if (strcmp(v, linker) == 0)
-					return FAULT_9007;
-			}
-
-			uci_foreach_sections("network", "interface", s) {
-				if (strcmp(section_name(s), linker) == 0) {
-					dmuci_get_value_by_section_string(s, "proto", &v);
-					if(strcmp(v, "relay") != 0)
-						return FAULT_9007;
-				}
-			}
-			break;
-		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section_bbfdm(((struct dhcp_client_args *)data)->dhcp_client_dm, "section_name", linker);
-			break;
-	}
-	return 0;
+	return set_DHCP_Interface(ctx, value, ((struct dhcp_client_args *)data)->dhcp_client_dm, "dmmap_dhcp_relay", "relay", action);
 }
 
 /*#Device.DHCPv4.Relay.Forwarding.{i}.VendorClassID!UCI:network/interface,@i-1/vendorclass*/
@@ -2466,33 +2452,12 @@ static int set_DHCPv4RelayForwarding_VendorClassID(char *refparam, struct dmctx 
 /*#Device.DHCPv4.Relay.Forwarding.{i}.Chaddr!UCI:network/interface,@i-1/mac*/
 static int get_DHCPv4RelayForwarding_Chaddr(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *mac, **macarray, *res = NULL, *tmp = "";
-	size_t length;
-	int i;
-
 	if (((struct dhcp_client_args *)data)->macclassifier == NULL) {
 		*value = "";
 		return 0;
 	}
-	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->macclassifier, "mac", &mac);
-	macarray = strsplit(mac, ":", &length);
-	res = (char*)dmcalloc(18, sizeof(char));
-	tmp = res;
-	for (i = 0; i < 6; i++) {
-		if (strcmp(macarray[i], "*") == 0) {
-			sprintf(tmp, "%s", "00");
-		} else {
-			sprintf(tmp, "%s", macarray[i]);
-		}
-		tmp += 2;
 
-		if (i < 5) {
-			sprintf(tmp, "%s", ":");
-			tmp++;
-		}
-	}
-	dmasprintf(value, "%s", res);
-	return 0;
+	return get_value_in_mac_format(((struct dhcp_client_args *)data)->macclassifier, "mac", false, value);
 }
 
 static int set_DHCPv4RelayForwarding_Chaddr(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -2511,33 +2476,12 @@ static int set_DHCPv4RelayForwarding_Chaddr(char *refparam, struct dmctx *ctx, v
 /*#Device.DHCPv4.Relay.Forwarding.{i}.ChaddrMask!UCI:network/interface,@i-1/mac*/
 static int get_DHCPv4RelayForwarding_ChaddrMask(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *mac, **macarray, *res = NULL, *tmp = "";
-	size_t length;
-	int i;
-
 	if (((struct dhcp_client_args *)data)->macclassifier == NULL) {
 		*value= "";
 		return 0;
 	}
-	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->macclassifier, "mac", &mac);
-	macarray = strsplit(mac, ":", &length);
-	res = (char*)dmcalloc(18, sizeof(char));
-	tmp = res;
-	for (i = 0; i < 6; i++) {
-		if (strcmp(macarray[i], "*") == 0) {
-			sprintf(tmp, "%s", "00");
-		} else {
-			sprintf(tmp, "%s", "FF");
-		}
-		tmp += 2;
 
-		if (i < 5)  {
-			sprintf(tmp, "%s", ":");
-			tmp++;
-		}
-	}
-	dmasprintf(value, "%s", res);
-	return 0;
+	return get_value_in_mac_format(((struct dhcp_client_args *)data)->macclassifier, "mac", true, value);
 }
 
 static int set_DHCPv4RelayForwarding_ChaddrMask(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -2997,7 +2941,7 @@ static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 	struct dhcp_args *curr_dhcp_args = (struct dhcp_args*)prev_data;
 	struct uci_section *dmmap_sect;
 	struct browse_args browse_args = {0};
-	char **tagvalue = NULL, *inst, *max_inst = NULL, *optionvalue = NULL, *tmp, *tag, *value;
+	char **tagvalue = NULL, *inst, *max_inst = NULL, *optionvalue = NULL, *tmp, *dhcpv4_tag, *dhcpv4_value;
 	size_t length;
 	int j;
 	struct dhcp_client_option_args dhcp_client_opt_args = {0};
@@ -3027,12 +2971,13 @@ static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 	}
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_dhcp", "servpool_option", "section_name", section_name(curr_dhcp_args->dhcp_sec), dmmap_sect) {
-		dmuci_get_value_by_section_string(dmmap_sect, "option_tag", &tag);
-		dmuci_get_value_by_section_string(dmmap_sect, "option_value", &value);
+		dmuci_get_value_by_section_string(dmmap_sect, "option_tag", &dhcpv4_tag);
+		dmuci_get_value_by_section_string(dmmap_sect, "option_value", &dhcpv4_value);
+
 		dhcp_client_opt_args.client_sect = curr_dhcp_args->dhcp_sec;
-		dhcp_client_opt_args.option_tag = dmstrdup(tag);
-		dhcp_client_opt_args.value = dmstrdup(value);
 		dhcp_client_opt_args.opt_sect = dmmap_sect;
+		dhcp_client_opt_args.option_tag = dmstrdup(dhcpv4_tag);
+		dhcp_client_opt_args.value = dmstrdup(dhcpv4_value);
 
 		browse_args.option = "section_name";
 		browse_args.value = section_name(curr_dhcp_args->dhcp_sec);
@@ -3050,9 +2995,9 @@ static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 /*#Device.DHCPv4.Relay.Forwarding.{i}.!UCI:network/interface/dmmap_dhcp_relay*/
 static int browseDHCPv4RelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst, *max_inst = NULL, *v, *dhcp_network = NULL;
+	char *relay_type = NULL, *relay_ipv4addr = NULL, *relay_ipv6addr = NULL, *relay_mask4 = NULL;
+	char *inst, *max_inst = NULL, *relay_network = NULL, *dhcp_network = NULL;
 	struct dmmap_dup *p;
-	char *type, *ipv4addr = "", *ipv6addr = "", *proto, *ip_inst, *mask4 = NULL;
 	json_object *res, *jobj;
 	struct dhcp_client_args dhcp_relay_arg = {0};
 	LIST_HEAD(dup_list);
@@ -3060,65 +3005,48 @@ static int browseDHCPv4RelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_n
 	synchronize_specific_config_sections_with_dmmap_eq_no_delete("network", "interface", "dmmap_dhcp_relay", "proto", "relay", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		if (p->config_section != NULL) {
-			dmuci_get_value_by_section_string(p->config_section, "type", &type);
-			if (strcmp(type, "alias") == 0 || strcmp(section_name(p->config_section), "loopback") == 0)
+			dmuci_get_value_by_section_string(p->config_section, "type", &relay_type);
+			if (strcmp(relay_type, "alias") == 0 || strcmp(section_name(p->config_section), "loopback") == 0)
 				continue;
 
-			dmuci_get_value_by_section_string(p->config_section, "ipaddr", &ipv4addr);
-			dmuci_get_value_by_section_string(p->config_section, "netmask", &mask4);
-			if (ipv4addr[0] == '\0') {
+			dmuci_get_value_by_section_string(p->config_section, "ipaddr", &relay_ipv4addr);
+			dmuci_get_value_by_section_string(p->config_section, "netmask", &relay_mask4);
+			if (relay_ipv4addr && *relay_ipv4addr) {
 				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(p->config_section), String}}, 1, &res);
-				if (res) {
-					jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
-					ipv4addr = dmjson_get_value(jobj, 1, "address");
-					mask4= dmjson_get_value(jobj, 1, "mask");
-				}
+				jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
+				relay_ipv4addr = dmjson_get_value(jobj, 1, "address");
+				relay_mask4 = dmjson_get_value(jobj, 1, "mask");
 			}
 
-			dmuci_get_value_by_section_string(p->config_section, "ip6addr", &ipv6addr);
-			if (ipv6addr[0] == '\0') {
+			dmuci_get_value_by_section_string(p->config_section, "ip6addr", &relay_ipv6addr);
+			if (relay_ipv6addr[0] == '\0') {
 				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(p->config_section), String}}, 1, &res);
 				if (res) {
 					jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv6-address");
-					ipv6addr = dmjson_get_value(jobj, 1, "address");
+					relay_ipv6addr = dmjson_get_value(jobj, 1, "address");
 				}
 			}
 
-			dmuci_get_value_by_section_string(p->config_section, "proto", &proto);
-			dmuci_get_value_by_section_string(p->config_section, "ip_int_instance", &ip_inst);
-			if (ipv4addr[0] == '\0' && ipv6addr[0] == '\0' && strcmp(ip_inst, "") == 0 && strcmp(type, "bridge") != 0 && strcmp(proto, "relay") != 0) {
+			if (relay_ipv4addr[0] == '\0' &&
+				relay_ipv6addr[0] == '\0' &&
+				strcmp(relay_type, "bridge") != 0) {
 				p->config_section = NULL;
 				dmuci_set_value_by_section_bbfdm(p->dmmap_section, "section_name", "");
 			}
 		}
 
-		if (ipv4addr == NULL || strlen(ipv4addr) == 0)
-			dhcp_relay_arg.ip = dmstrdup("");
-		else
-			dhcp_relay_arg.ip = dmstrdup(ipv4addr);
-		if (mask4 == NULL || strlen(mask4) == 0)
-			dhcp_relay_arg.mask = dmstrdup("");
-		else
-			dhcp_relay_arg.mask = dmstrdup(mask4);
-		if (p->config_section != NULL)
-			dmuci_get_value_by_section_string(p->config_section, "network", &v);
-		else
-			v = dmstrdup("");
+		dhcp_relay_arg.ip = relay_ipv4addr ? dmstrdup(relay_ipv4addr) : dmstrdup("");
+		dhcp_relay_arg.mask = relay_mask4 ? dmstrdup(relay_mask4) : dmstrdup("");
 
-		dhcp_network = get_dhcp_network_from_relay_list(v);
-		if (dhcp_network && strlen(dhcp_network) > 0) {
-			dhcp_relay_arg.macclassifier = get_dhcp_classifier("mac", dhcp_network);
-			dhcp_relay_arg.vendorclassidclassifier = get_dhcp_classifier("vendorclass", dhcp_network);
-			dhcp_relay_arg.userclassclassifier = get_dhcp_classifier("userclass", dhcp_network);
-		} else {
-			dhcp_relay_arg.macclassifier = NULL;
-			dhcp_relay_arg.vendorclassidclassifier = NULL;
-			dhcp_relay_arg.userclassclassifier = NULL;
-		}
+		dmuci_get_value_by_section_string(p->config_section, "network", &relay_network);
+		dhcp_network = get_dhcp_network_from_relay_list(relay_network);
+
+
+		dhcp_relay_arg.macclassifier = (dhcp_network && *dhcp_network) ? get_dhcp_classifier("mac", dhcp_network) : NULL;
+		dhcp_relay_arg.vendorclassidclassifier = (dhcp_network && *dhcp_network) ? get_dhcp_classifier("vendorclass", dhcp_network) : NULL;
+		dhcp_relay_arg.userclassclassifier = (dhcp_network && *dhcp_network) ? get_dhcp_classifier("userclass", dhcp_network) : NULL;
 		dhcp_relay_arg.dhcp_client_conf = p->config_section;
-
-		dhcp_relay_arg.dhcp_client_dm= p->dmmap_section;
-
+		dhcp_relay_arg.dhcp_client_dm = p->dmmap_section;
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
 			   p->dmmap_section, "bbf_dhcpv4relay_instance", "bbf_dhcpv4relay_alias");

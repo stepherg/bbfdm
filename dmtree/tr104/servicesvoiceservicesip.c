@@ -8,6 +8,7 @@
  *	Author: Yalu Zhang, yalu.zhang@iopsys.eu
  */
 
+#include "servicesvoiceservice.h"
 #include "servicesvoiceservicesip.h"
 #include "common.h"
 #include "dmentry.h"
@@ -27,21 +28,7 @@ static int get_voice_service_sip_client_linker(char *refparam, struct dmctx *dmc
 /*#Device.Services.VoiceService.{i}.SIP.Client.{i}.!UCI:asterisk/sip_service_provider/dmmap_asterisk*/
 static int browseServicesVoiceServiceSIPClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
-	struct dmmap_dup *p;
-	LIST_HEAD(dup_list);
-
-	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-
-		inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
-			   p->dmmap_section, "clientinstance", "clientalias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
-			break;
-	}
-	free_dmmap_config_dup_list(&dup_list);
-	return 0;
+	return browseVoiceServiceSIPProviderInst(dmctx, parent_node, prev_data, prev_instance);
 }
 
 /*#Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.{i}.*/
@@ -126,36 +113,7 @@ static int addObjServicesVoiceServiceSIPClient(char *refparam, struct dmctx *ctx
 
 static int delObjServicesVoiceServiceSIPClient(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;
-	int found = 0;
-
-	switch (del_action) {
-		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_asterisk", "sip_service_provider", section_name((struct uci_section *)data), &dmmap_section);
-			if (dmmap_section != NULL)
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
-			break;
-		case DEL_ALL:
-			uci_foreach_sections("asterisk", "sip_service_provider", s) {
-				if (found != 0) {
-					get_dmmap_section_of_config_section("dmmap_asterisk", "sip_service_provider", section_name(ss), &dmmap_section);
-					if (dmmap_section != NULL)
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = s;
-				found++;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_asterisk", "sip_service_provider", section_name(ss), &dmmap_section);
-				if (dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
-			}
-			break;
-	}
-	return 0;
+	return delObjVoiceServiceSIPProvider(refparam, ctx, data, instance, del_action);
 }
 
 static int addObjServicesVoiceServiceSIPNetwork(char *refparam, struct dmctx *ctx, void *data, char **instance)

@@ -422,19 +422,21 @@ static int set_DynamicDNSClient_Alias(char *refparam, struct dmctx *ctx, void *d
 
 static int get_DynamicDNSClient_LastError(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	FILE* fp = NULL;
-	char buf[512] = "", path[64] = "", status[32] = "", *enable, *logdir = NULL;
+	char status[64] = {0}, *enable = NULL;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", &enable);
-	if (*enable == '\0' || strcmp(enable, "0") == 0) {
+	if (enable && (*enable == '\0' || strcmp(enable, "0") == 0)) {
 		strcpy(status, "NO_ERROR");
 	} else {
+		char path[128] = {0}, *logdir = NULL;
+
 		dmuci_get_option_value_string("ddns", "global", "ddns_logdir", &logdir);
-		if (*logdir == '\0')
-			logdir = "/var/log/ddns";
-		snprintf(path, sizeof(path), "%s/%s.log", logdir, section_name((struct uci_section *)data));
-		fp = fopen(path, "r");
+		snprintf(path, sizeof(path), "%s/%s.log", (logdir && *logdir) ? logdir : "/var/log/ddns", section_name((struct uci_section *)data));
+
+		FILE *fp = fopen(path, "r");
 		if (fp != NULL) {
+			char buf[512] = {0};
+
 			strcpy(status, "NO_ERROR");
 			while (fgets(buf, 512, fp) != NULL) {
 				if (strstr(buf, "ERROR") && strstr(buf, "Please check your configuration"))
@@ -593,19 +595,20 @@ static int set_DynamicDNSClientHostname_Enable(char *refparam, struct dmctx *ctx
 /*#Device.DynamicDNS.Client.{i}.Hostname.{i}.Status!UCI:ddns/service,@i-1/enabled*/
 static int get_DynamicDNSClientHostname_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	FILE* fp = NULL;
-	char buf[512] = "", path[64] = "", status[32] = "", *enable, *logdir = NULL;
+	char status[32] = {0}, *enable = NULL;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", &enable);
-	if (*enable == '\0' || strcmp(enable, "0") == 0) {
+	if (enable && (*enable == '\0' || strcmp(enable, "0") == 0)) {
 		strcpy(status, "Disabled");
 	} else {
+		char path[128] = {0}, *logdir = NULL;
+
 		dmuci_get_option_value_string("ddns", "global", "ddns_logdir", &logdir);
-		if (*logdir == '\0')
-			logdir = "/var/log/ddns";
-		snprintf(path, sizeof(path), "%s/%s.log", logdir, section_name((struct uci_section *)data));
-		fp = fopen(path, "r");
+		snprintf(path, sizeof(path), "%s/%s.log", (logdir && *logdir) ? logdir : "/var/log/ddns", section_name((struct uci_section *)data));
+		FILE *fp = fopen(path, "r");
 		if (fp != NULL) {
+			char buf[512] = {0};
+
 			strcpy(status, "Registered");
 			while (fgets(buf, 512, fp) != NULL) {
 				if (strstr(buf, "Registered IP") || strstr(buf, "Update successful"))

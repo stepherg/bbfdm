@@ -197,8 +197,7 @@ int os_addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, ch
 int os_delObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct dmmap_dup *p = (struct dmmap_dup*)data;
-	struct uci_section *s = NULL, *ss = NULL, *dmmap_section;
-	int found = 0;
+	struct uci_section *s = NULL, *stmp = NULL, *dmmap_section = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
@@ -209,72 +208,22 @@ int os_delObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, ch
 				dmuci_delete_by_section_unnamed(p->config_section, NULL, NULL);
 			} else {
 				get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name(p->config_section), &dmmap_section);
-				if(dmmap_section != NULL)
-					dmuci_delete_by_section_unnamed_bbfdm(dmmap_section, NULL, NULL);
+				dmuci_delete_by_section_unnamed_bbfdm(dmmap_section, NULL, NULL);
+
 				dmuci_delete_by_section(p->config_section, NULL, NULL);
 			}
 			break;
 		case DEL_ALL:
-			uci_foreach_sections("qos", "classify", s) {
-				if (found != 0){
-					get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name(ss), &dmmap_section);
-					if(dmmap_section != NULL)
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = s;
-				found++;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name(ss), &dmmap_section);
-				if(dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
+			uci_foreach_sections_safe("qos", "classify", stmp, s) {
+				get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
 			}
 			break;
 	}
 	return 0;
 }
-
-#if 0
-int addObjQoSApp(char *refparam, struct dmctx *ctx, void *data, char **instance)
-{
-	//TODO
-	return 0;
-}
-
-int delObjQoSApp(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
-{
-	switch (del_action) {
-		case DEL_INST:
-			//TODO
-			break;
-		case DEL_ALL:
-			//TODO
-			break;
-	}
-	return 0;
-}
-
-int addObjQoSFlow(char *refparam, struct dmctx *ctx, void *data, char **instance)
-{
-	//TODO
-	return 0;
-}
-
-int delObjQoSFlow(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
-{
-	switch (del_action) {
-		case DEL_INST:
-			//TODO
-			break;
-		case DEL_ALL:
-			//TODO
-			break;
-	}
-	return 0;
-}
-#endif
 
 int os_addObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {

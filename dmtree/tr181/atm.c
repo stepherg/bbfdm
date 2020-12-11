@@ -257,54 +257,40 @@ static int add_atm_link(char *refparam, struct dmctx *ctx, void *data, char **in
 
 static int delete_atm_link(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *ns = NULL, *nss = NULL, *dmmap_section= NULL;
-	char *ifname;
+	struct uci_section *s = NULL, *ss = NULL, *ns = NULL, *nss = NULL, *dmmap_section = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(((struct atm_args *)data)->atm_sec), &dmmap_section);
-			if(dmmap_section != NULL)
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section(((struct atm_args *)data)->atm_sec, NULL, NULL);
 			uci_foreach_option_cont("network", "interface", "ifname", ((struct atm_args *)data)->ifname, s) {
-				if (ss && ifname!=NULL)
+				if (ss != NULL && ((struct atm_args *)data)->ifname != NULL)
 					wan_remove_dev_interface(ss, ((struct atm_args *)data)->ifname);
 				ss = s;
 			}
-			if (ss != NULL && ifname!=NULL)
+			if (ss != NULL && ((struct atm_args *)data)->ifname != NULL)
 				wan_remove_dev_interface(ss, ((struct atm_args *)data)->ifname);
+
+			get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(((struct atm_args *)data)->atm_sec), &dmmap_section);
+			dmuci_delete_by_section(dmmap_section, NULL, NULL);
+			
+			dmuci_delete_by_section(((struct atm_args *)data)->atm_sec, NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_sections("dsl", "atm-device", s) {
-				if (ss){
-					get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(ss), &dmmap_section);
-					if(dmmap_section != NULL)
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_get_value_by_section_string(ss, "device", &ifname);
-					dmuci_delete_by_section(ss, NULL, NULL);
-					uci_foreach_option_cont("network", "interface", "ifname", ifname, ns) {
-						if (nss && ifname!=NULL)
-							wan_remove_dev_interface(nss, ifname);
-						nss = ns;
-					}
-					if (nss != NULL && ifname!=NULL)
-						wan_remove_dev_interface(nss, ifname);
-				}
-				ss = s;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(ss), &dmmap_section);
-				if(dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_get_value_by_section_string(ss, "device", &ifname);
-				dmuci_delete_by_section(ss, NULL, NULL);
+			uci_foreach_sections_safe("dsl", "atm-device", ss, s) {
+				char *ifname = NULL;
+
+				dmuci_get_value_by_section_string(s, "device", &ifname);
 				uci_foreach_option_cont("network", "interface", "ifname", ifname, ns) {
-					if (nss && ifname!=NULL)
+					if (nss != NULL && ifname != NULL)
 						wan_remove_dev_interface(nss, ifname);
 					nss = ns;
 				}
-				if (nss != NULL && ifname!=NULL)
+				if (nss != NULL && ifname != NULL)
 					wan_remove_dev_interface(nss, ifname);
+
+				get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
 			}
 			break;
 	}

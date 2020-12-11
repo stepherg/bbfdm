@@ -177,17 +177,6 @@ do { \
         if ((dir = opendir(path)) == NULL) return 0; \
         while ((ent = readdir (dir)) != NULL) \
 
-enum notification_enum {
-	notification_none,
-	notification_passive,
-	notification_active,
-	notification_passive_lw,
-	notification_ppassive_passive_lw,
-	notification_aactive_lw,
-	notification_passive_active_lw,
-	__MAX_notification
-};
-
 enum strstructered_enum {
 	STRUCTERED_SAME,
 	STRUCTERED_PART,
@@ -239,7 +228,7 @@ struct sysfs_dmsection {
 	struct list_head list;
 	char *sysfs_folder_path;
 	char *sysfs_folder_name;
-	struct uci_section *dm;
+	struct uci_section *dmmap_section;
 };
 
 struct browse_args {
@@ -247,7 +236,6 @@ struct browse_args {
 	char *value;
 };
 
-char *cut_fx(char *str, char *delimiter, int occurence);
 pid_t get_pid(char *pname);
 int check_file(char *path);
 char *cidr2netmask(int bits);
@@ -262,16 +250,15 @@ void update_section_list(char *config, char *section, char *option, int number, 
 int wan_remove_dev_interface(struct uci_section *interface_setion, char *dev);
 void parse_proc_route_line(char *line, struct proc_routing *proute);
 int strstructered(char *str1, char *str2);
-int dmcommon_check_notification_value(char *value);
 void hex_to_ip(char *address, char *ret);
 void ip_to_hex(char *address, char *ret);
-void add_sectons_list_paramameter(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section, void* additional_attribute);
+void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section, void* additional_attribute);
 void free_dmmap_config_dup_list(struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap_eq(char *package, char *section_type, char *dmmap_package,char* option_name, char* option_value, struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap_eq_no_delete(char *package, char *section_type, char *dmmap_package,char* option_name, char* option_value, struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap_cont(char *package, char *section_type, char *dmmap_package,char* option_name, char* option_value, struct list_head *dup_list);
-void add_sysfs_sectons_list_paramameter(struct list_head *dup_list, struct uci_section *dmmap_section, char *file_name, char* filepath);
+void add_sysfs_section_list(struct list_head *dup_list, struct uci_section *dmmap_section, char *file_name, char *file_path);
 int synchronize_system_folders_with_dmmap_opt(char *sysfsrep, char *dmmap_package, char *dmmap_section, char *opt_name, char* inst_opt, struct list_head *dup_list);
 void get_dmmap_section_of_config_section(char* dmmap_package, char* section_type, char *section_name, struct uci_section **dmmap_section);
 void get_dmmap_section_of_config_section_eq(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section);
@@ -326,9 +313,7 @@ bool file_exists(const char *path);
 bool is_regular_file(const char *path);
 char *stringToHex(char *text, int length);
 char *replace_char(char *str, char find, char replace);
-int is_vlan_termination_section(char *name);
 void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *value, bool b);
 void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, char *value);
 int check_browse_section(struct uci_section *s, void *data);
-int check_instance_wildcard_parameter_by_regex(char *parameter, char* regex);
 #endif

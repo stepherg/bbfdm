@@ -92,6 +92,32 @@ static int browseSoftwareModulesExecutionUnitInst(struct dmctx *dmctx, DMNODE *p
 }
 
 /*************************************************************
+* COMMON FUNCTIONS
+**************************************************************/
+static int get_SoftwareModules_VendorConfigList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *s = NULL;
+	*value = "";
+
+	char *config = dmjson_get_value((json_object *)data, 1, "config");
+	if (config == NULL || *config == '\0')
+		return 0;
+
+	uci_path_foreach_sections(bbfdm, DMMAP, "vcf", s) {
+		char *name = NULL;
+
+		dmuci_get_value_by_section_string(s, "name", &name);
+		if (name && strcmp(name, config) == 0) {
+			char *vcf_instance;
+			dmuci_get_value_by_section_string(s, "vcf_instance", &vcf_instance);
+			*value = strdup(dm_print_path("%s%cDeviceInfo%cVendorConfigFile%c%s%c", dmroot, dm_delim, dm_delim, dm_delim, vcf_instance, dm_delim));
+			break;
+		}
+	}
+	return 0;
+}
+
+/*************************************************************
 * GET & SET PARAM
 *************************************************************/
 static int get_SoftwareModules_ExecEnvNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -470,23 +496,7 @@ static int get_SoftwareModulesDeploymentUnit_VendorLogList(char *refparam, struc
 /*#Device.SoftwareModules.DeploymentUnit.{i}.VendorConfigList!UBUS:swmodules/du_list//deployment_unit[i-1].config*/
 static int get_SoftwareModulesDeploymentUnit_VendorConfigList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	char *name, *vcf_instance, *config;
-
-	*value = "";
-	config = dmjson_get_value((json_object *)data, 1, "config");
-	if (!strlen(config))
-		return 0;
-
-	uci_path_foreach_sections(bbfdm, DMMAP, "vcf", s) {
-		dmuci_get_value_by_section_string(s, "name", &name);
-		if (strcmp(name, config) == 0) {
-			dmuci_get_value_by_section_string(s, "vcf_instance", &vcf_instance);
-			*value = strdup(dm_print_path("%s%cDeviceInfo%cVendorConfigFile%c%s%c", dmroot, dm_delim, dm_delim, dm_delim, vcf_instance, dm_delim));
-			break;
-		}
-	}
-	return 0;
+	return get_SoftwareModules_VendorConfigList(refparam, ctx, data, instance, value);
 }
 
 static int get_SoftwareModulesDeploymentUnit_ExecutionUnitList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -694,23 +704,7 @@ static int get_SoftwareModulesExecutionUnit_VendorLogList(char *refparam, struct
 /*#Device.SoftwareModules.ExecutionUnit.{i}.VendorConfigList!UBUS:swmodules/eu_list//execution_unit[i-1].config*/
 static int get_SoftwareModulesExecutionUnit_VendorConfigList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	char *name, *vcf_instance, *config;
-
-	*value = "";
-	config = dmjson_get_value((json_object *)data, 1, "config");
-	if (!strlen(config))
-		return 0;
-
-	uci_path_foreach_sections(bbfdm, DMMAP, "vcf", s) {
-		dmuci_get_value_by_section_string(s, "name", &name);
-		if (strcmp(name, config) == 0) {
-			dmuci_get_value_by_section_string(s, "vcf_instance", &vcf_instance);
-			*value = strdup(dm_print_path("%s%cDeviceInfo%cVendorConfigFile%c%s%c", dmroot, dm_delim, dm_delim, dm_delim, vcf_instance, dm_delim));
-			break;
-		}
-	}
-	return 0;
+	return get_SoftwareModules_VendorConfigList(refparam, ctx, data, instance, value);
 }
 
 /*#Device.SoftwareModules.ExecutionUnit.{i}.ExecutionEnvRef!UBUS:swmodules/eu_list//execution_unit[i-1].environment*/
