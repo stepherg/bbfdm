@@ -13845,7 +13845,18 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "status"
+							}
+						}
+					]
 				},
 				"Status": {
 					"type": "string",
@@ -13864,6 +13875,17 @@
 						"NotPresent",
 						"LowerLayerDown",
 						"Error"
+					],
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "status"
+							}
+						}
 					]
 				},
 				"Alias": {
@@ -13928,7 +13950,18 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "upstream"
+							}
+						}
+					]
 				},
 				"FirmwareVersion": {
 					"type": "string",
@@ -13942,6 +13975,17 @@
 					"range": [
 						{
 							"max": 64
+						}
+					],
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "firmware_version"
+							}
 						}
 					]
 				},
@@ -13961,6 +14005,17 @@
 						"NoSignal",
 						"Disabled",
 						"Error"
+					],
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "link_status"
+							}
+						}
 					]
 				},
 				"AllowedProfiles": {
@@ -13977,7 +14032,18 @@
 							"106a",
 							"212a"
 						]
-					}
+					},
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "allowed_profiles"
+							}
+						}
+					]
 				},
 				"CurrentProfile": {
 					"type": "string",
@@ -13987,7 +14053,18 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "string"
+					"datatype": "string",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "current_profile"
+							}
+						}
+					]
 				},
 				"PowerManagementState": {
 					"type": "string",
@@ -14003,6 +14080,17 @@
 						"L2.1",
 						"L2.2",
 						"L3"
+					],
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "power_management_state"
+							}
+						}
 					]
 				},
 				"SuccessFailureCause": {
@@ -14018,6 +14106,17 @@
 						{
 							"min": 0,
 							"max": 5
+						}
+					],
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "success_failure_cause"
+							}
 						}
 					]
 				},
@@ -14036,7 +14135,18 @@
 							"max": 1280
 						}
 					],
-					"unit": "0.1 dB"
+					"unit": "0.1 dB",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "upbokler"
+							}
+						}
+					]
 				},
 				"LastTransmittedDownstreamSignal": {
 					"type": "unsignedInt",
@@ -14085,7 +14195,18 @@
 							"max": 1280
 						}
 					],
-					"unit": "0.1dB"
+					"unit": "0.1dB",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "upbokle"
+							}
+						}
+					]
 				},
 				"LineNumber": {
 					"type": "int",
@@ -14100,6 +14221,17 @@
 						{
 							"min": 1
 						}
+					],
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "line_number"
+							}
+						}
 					]
 				},
 				"UpstreamMaxBitRate": {
@@ -14111,7 +14243,18 @@
 						"usp"
 					],
 					"datatype": "unsignedInt",
-					"unit": "Kbps"
+					"unit": "Kbps",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "max_bit_rate.us"
+							}
+						}
+					]
 				},
 				"DownstreamMaxBitRate": {
 					"type": "unsignedInt",
@@ -14122,7 +14265,18 @@
 						"usp"
 					],
 					"datatype": "unsignedInt",
-					"unit": "Kbps"
+					"unit": "Kbps",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "max_bit_rate.ds"
+							}
+						}
+					]
 				},
 				"UpstreamNoiseMargin": {
 					"type": "int",
@@ -14133,7 +14287,18 @@
 						"usp"
 					],
 					"datatype": "int",
-					"unit": "0.1dB"
+					"unit": "0.1dB",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "noise_margin.us"
+							}
+						}
+					]
 				},
 				"DownstreamNoiseMargin": {
 					"type": "int",
@@ -14144,7 +14309,18 @@
 						"usp"
 					],
 					"datatype": "int",
-					"unit": "0.1dB"
+					"unit": "0.1dB",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "noise_margin.ds"
+							}
+						}
+					]
 				},
 				"UpstreamAttenuation": {
 					"type": "int",
@@ -14155,7 +14331,18 @@
 						"usp"
 					],
 					"datatype": "int",
-					"unit": "0.1dB"
+					"unit": "0.1dB",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "attenuation.us"
+							}
+						}
+					]
 				},
 				"DownstreamAttenuation": {
 					"type": "int",
@@ -14166,7 +14353,18 @@
 						"usp"
 					],
 					"datatype": "int",
-					"unit": "0.1dB"
+					"unit": "0.1dB",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "attenuation.ds"
+							}
+						}
+					]
 				},
 				"UpstreamPower": {
 					"type": "int",
@@ -14177,7 +14375,18 @@
 						"usp"
 					],
 					"datatype": "int",
-					"unit": "0.1dBmV"
+					"unit": "0.1dBmV",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "power.us"
+							}
+						}
+					]
 				},
 				"DownstreamPower": {
 					"type": "int",
@@ -14188,7 +14397,18 @@
 						"usp"
 					],
 					"datatype": "int",
-					"unit": "0.1dBmV"
+					"unit": "0.1dBmV",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "power.ds"
+							}
+						}
+					]
 				},
 				"SNRMRMCds": {
 					"type": "int",
@@ -14199,7 +14419,18 @@
 						"usp"
 					],
 					"datatype": "int",
-					"unit": "0.1dB"
+					"unit": "0.1dB",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "snrm_rmc.ds"
+							}
+						}
+					]
 				},
 				"SNRMRMCus": {
 					"type": "int",
@@ -14210,7 +14441,18 @@
 						"usp"
 					],
 					"datatype": "int",
-					"unit": "0.1dB"
+					"unit": "0.1dB",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "fast.line.1",
+								"method": "status",
+								"args": {},
+								"key": "snrm_rmc.us"
+							}
+						}
+					]
 				},
 				"BITSRMCpsds": {
 					"type": "string",
@@ -14410,7 +14652,18 @@
 							"usp"
 						],
 						"datatype": "unsignedInt",
-						"unit": "seconds"
+						"unit": "seconds",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "total_start"
+								}
+							}
+						]
 					},
 					"ShowtimeStart": {
 						"type": "unsignedInt",
@@ -14421,7 +14674,18 @@
 							"usp"
 						],
 						"datatype": "unsignedInt",
-						"unit": "seconds"
+						"unit": "seconds",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "showtime_start"
+								}
+							}
+						]
 					},
 					"LastShowtimeStart": {
 						"type": "unsignedInt",
@@ -14432,7 +14696,18 @@
 							"usp"
 						],
 						"datatype": "unsignedInt",
-						"unit": "seconds"
+						"unit": "seconds",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "last_showtime_start"
+								}
+							}
+						]
 					},
 					"CurrentDayStart": {
 						"type": "unsignedInt",
@@ -14443,7 +14718,18 @@
 							"usp"
 						],
 						"datatype": "unsignedInt",
-						"unit": "seconds"
+						"unit": "seconds",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "current_day_start"
+								}
+							}
+						]
 					},
 					"QuarterHourStart": {
 						"type": "unsignedInt",
@@ -14454,7 +14740,18 @@
 							"usp"
 						],
 						"datatype": "unsignedInt",
-						"unit": "seconds"
+						"unit": "seconds",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "quarter_hour_start"
+								}
+							}
+						]
 					},
 					"Device.FAST.Line.{i}.Stats.Total.": {
 						"type": "object",
@@ -14472,7 +14769,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.errored_secs"
+									}
+								}
+							]
 						},
 						"SeverelyErroredSecs": {
 							"type": "unsignedInt",
@@ -14482,7 +14790,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.severely_errored_secs"
+									}
+								}
+							]
 						},
 						"LOSS": {
 							"type": "unsignedInt",
@@ -14492,7 +14811,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.loss"
+									}
+								}
+							]
 						},
 						"LORS": {
 							"type": "unsignedInt",
@@ -14502,7 +14832,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.lors"
+									}
+								}
+							]
 						},
 						"UAS": {
 							"type": "unsignedInt",
@@ -14512,7 +14853,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.uas"
+									}
+								}
+							]
 						},
 						"RTXUC": {
 							"type": "unsignedInt",
@@ -14522,7 +14874,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.rtx_uc"
+									}
+								}
+							]
 						},
 						"RTXTX": {
 							"type": "unsignedInt",
@@ -14532,7 +14895,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.rtx_tx"
+									}
+								}
+							]
 						},
 						"SuccessBSW": {
 							"type": "unsignedInt",
@@ -14542,7 +14916,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.success_bsw"
+									}
+								}
+							]
 						},
 						"SuccessSRA": {
 							"type": "unsignedInt",
@@ -14552,7 +14937,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.success_sra"
+									}
+								}
+							]
 						},
 						"SuccessFRA": {
 							"type": "unsignedInt",
@@ -14562,7 +14958,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.success_fra"
+									}
+								}
+							]
 						},
 						"SuccessRPA": {
 							"type": "unsignedInt",
@@ -14572,7 +14979,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.success_rpa"
+									}
+								}
+							]
 						},
 						"SuccessTIGA": {
 							"type": "unsignedInt",
@@ -14582,7 +15000,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "total.success_tiga"
+									}
+								}
+							]
 						}
 					},
 					"Device.FAST.Line.{i}.Stats.Showtime.": {
@@ -14601,7 +15030,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.errored_secs"
+									}
+								}
+							]
 						},
 						"SeverelyErroredSecs": {
 							"type": "unsignedInt",
@@ -14611,7 +15051,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.severely_errored_secs"
+									}
+								}
+							]
 						},
 						"LOSS": {
 							"type": "unsignedInt",
@@ -14621,7 +15072,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.loss"
+									}
+								}
+							]
 						},
 						"LORS": {
 							"type": "unsignedInt",
@@ -14631,7 +15093,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.lors"
+									}
+								}
+							]
 						},
 						"UAS": {
 							"type": "unsignedInt",
@@ -14641,7 +15114,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.uas"
+									}
+								}
+							]
 						},
 						"RTXUC": {
 							"type": "unsignedInt",
@@ -14651,7 +15135,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.rtx_uc"
+									}
+								}
+							]
 						},
 						"RTXTX": {
 							"type": "unsignedInt",
@@ -14661,7 +15156,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.rtx_tx"
+									}
+								}
+							]
 						},
 						"SuccessBSW": {
 							"type": "unsignedInt",
@@ -14671,7 +15177,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.success_bsw"
+									}
+								}
+							]
 						},
 						"SuccessSRA": {
 							"type": "unsignedInt",
@@ -14681,7 +15198,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.success_sra"
+									}
+								}
+							]
 						},
 						"SuccessFRA": {
 							"type": "unsignedInt",
@@ -14691,7 +15219,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.success_fra"
+									}
+								}
+							]
 						},
 						"SuccessRPA": {
 							"type": "unsignedInt",
@@ -14701,7 +15240,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.success_rpa"
+									}
+								}
+							]
 						},
 						"SuccessTIGA": {
 							"type": "unsignedInt",
@@ -14711,7 +15261,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "showtime.success_tiga"
+									}
+								}
+							]
 						}
 					},
 					"Device.FAST.Line.{i}.Stats.LastShowtime.": {
@@ -14730,7 +15291,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.errored_secs"
+									}
+								}
+							]
 						},
 						"SeverelyErroredSecs": {
 							"type": "unsignedInt",
@@ -14740,7 +15312,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.severely_errored_secs"
+									}
+								}
+							]
 						},
 						"LOSS": {
 							"type": "unsignedInt",
@@ -14750,7 +15333,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.loss"
+									}
+								}
+							]
 						},
 						"LORS": {
 							"type": "unsignedInt",
@@ -14760,7 +15354,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.lors"
+									}
+								}
+							]
 						},
 						"UAS": {
 							"type": "unsignedInt",
@@ -14770,7 +15375,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.uas"
+									}
+								}
+							]
 						},
 						"RTXUC": {
 							"type": "unsignedInt",
@@ -14780,7 +15396,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.rtx_uc"
+									}
+								}
+							]
 						},
 						"RTXTX": {
 							"type": "unsignedInt",
@@ -14790,7 +15417,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.rtx_tx"
+									}
+								}
+							]
 						},
 						"SuccessBSW": {
 							"type": "unsignedInt",
@@ -14800,7 +15438,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.success_bsw"
+									}
+								}
+							]
 						},
 						"SuccessSRA": {
 							"type": "unsignedInt",
@@ -14810,7 +15459,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.success_sra"
+									}
+								}
+							]
 						},
 						"SuccessFRA": {
 							"type": "unsignedInt",
@@ -14820,7 +15480,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.success_fra"
+									}
+								}
+							]
 						},
 						"SuccessRPA": {
 							"type": "unsignedInt",
@@ -14830,7 +15501,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.success_rpa"
+									}
+								}
+							]
 						},
 						"SuccessTIGA": {
 							"type": "unsignedInt",
@@ -14840,7 +15522,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "lastshowtime.success_tiga"
+									}
+								}
+							]
 						}
 					},
 					"Device.FAST.Line.{i}.Stats.CurrentDay.": {
@@ -14859,7 +15552,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.errored_secs"
+									}
+								}
+							]
 						},
 						"SeverelyErroredSecs": {
 							"type": "unsignedInt",
@@ -14869,7 +15573,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.severely_errored_secs"
+									}
+								}
+							]
 						},
 						"LOSS": {
 							"type": "unsignedInt",
@@ -14879,7 +15594,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.loss"
+									}
+								}
+							]
 						},
 						"LORS": {
 							"type": "unsignedInt",
@@ -14889,7 +15615,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.lors"
+									}
+								}
+							]
 						},
 						"UAS": {
 							"type": "unsignedInt",
@@ -14899,7 +15636,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.uas"
+									}
+								}
+							]
 						},
 						"RTXUC": {
 							"type": "unsignedInt",
@@ -14909,7 +15657,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.rtx_uc"
+									}
+								}
+							]
 						},
 						"RTXTX": {
 							"type": "unsignedInt",
@@ -14919,7 +15678,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.rtx_tx"
+									}
+								}
+							]
 						},
 						"SuccessBSW": {
 							"type": "unsignedInt",
@@ -14929,7 +15699,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.success_bsw"
+									}
+								}
+							]
 						},
 						"SuccessSRA": {
 							"type": "unsignedInt",
@@ -14939,7 +15720,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.success_sra"
+									}
+								}
+							]
 						},
 						"SuccessFRA": {
 							"type": "unsignedInt",
@@ -14949,7 +15741,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.success_fra"
+									}
+								}
+							]
 						},
 						"SuccessRPA": {
 							"type": "unsignedInt",
@@ -14959,7 +15762,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.success_rpa"
+									}
+								}
+							]
 						},
 						"SuccessTIGA": {
 							"type": "unsignedInt",
@@ -14969,7 +15783,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "currentday.success_tiga"
+									}
+								}
+							]
 						}
 					},
 					"Device.FAST.Line.{i}.Stats.QuarterHour.": {
@@ -14988,7 +15813,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.errored_secs"
+									}
+								}
+							]
 						},
 						"SeverelyErroredSecs": {
 							"type": "unsignedInt",
@@ -14998,7 +15834,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.severely_errored_secs"
+									}
+								}
+							]
 						},
 						"LOSS": {
 							"type": "unsignedInt",
@@ -15008,7 +15855,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.loss"
+									}
+								}
+							]
 						},
 						"LORS": {
 							"type": "unsignedInt",
@@ -15018,7 +15876,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.lors"
+									}
+								}
+							]
 						},
 						"UAS": {
 							"type": "unsignedInt",
@@ -15028,7 +15897,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.uas"
+									}
+								}
+							]
 						},
 						"RTXUC": {
 							"type": "unsignedInt",
@@ -15038,7 +15918,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.rtx_uc"
+									}
+								}
+							]
 						},
 						"RTXTX": {
 							"type": "unsignedInt",
@@ -15048,7 +15939,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.rtx_tx"
+									}
+								}
+							]
 						},
 						"SuccessBSW": {
 							"type": "unsignedInt",
@@ -15058,7 +15960,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.success_bsw"
+									}
+								}
+							]
 						},
 						"SuccessSRA": {
 							"type": "unsignedInt",
@@ -15068,7 +15981,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.success_sra"
+									}
+								}
+							]
 						},
 						"SuccessFRA": {
 							"type": "unsignedInt",
@@ -15078,7 +16002,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.success_fra"
+									}
+								}
+							]
 						},
 						"SuccessRPA": {
 							"type": "unsignedInt",
@@ -15088,7 +16023,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.success_rpa"
+									}
+								}
+							]
 						},
 						"SuccessTIGA": {
 							"type": "unsignedInt",
@@ -15098,7 +16044,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "fast.line.1",
+										"method": "stats",
+										"args": {},
+										"key": "quarterhour.success_tiga"
+									}
+								}
+							]
 						}
 					}
 				},

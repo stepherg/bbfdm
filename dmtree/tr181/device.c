@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 iopsys Software Solutions AB
+ * Copyright (C) 2020 iopsys Software Solutions AB
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 2.1
@@ -37,6 +37,7 @@
 #include "dns.h"
 #include "users.h"
 #include "dsl.h"
+#include "fast.h"
 #include "dhcpv6.h"
 #include "interfacestack.h"
 #include "qos.h"
@@ -88,6 +89,7 @@ DMOBJ tDeviceObj[] = {
 {"IP", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, tIPObj, tIPParams, NULL, BBFDM_BOTH},
 {"Ethernet", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, tEthernetObj, tEthernetParams, NULL, BBFDM_BOTH},
 {"DSL", &DMREAD, NULL, NULL, "file:/etc/config/dsl", NULL, NULL, tDSLObj, tDSLParams, NULL, BBFDM_BOTH},
+{"FAST", &DMREAD, NULL, NULL, "ubus:fast", NULL, NULL, tFASTObj, NULL, NULL, BBFDM_BOTH},
 {"ATM", &DMREAD, NULL, NULL, "file:/etc/config/dsl", NULL, NULL, tATMObj, NULL, NULL, BBFDM_BOTH},
 {"PTM", &DMREAD, NULL, NULL, "file:/etc/config/dsl", NULL, NULL, tPTMObj, NULL, NULL, BBFDM_BOTH},
 {"DHCPv4", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/dhcp.sh", NULL, NULL, tDHCPv4Obj, tDHCPv4Params, NULL, BBFDM_BOTH},
