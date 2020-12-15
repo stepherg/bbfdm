@@ -95,7 +95,6 @@ LIST_HEAD(list_upnp_changed_version);
 
 LIST_HEAD(list_enabled_notify);
 
-int ip_version = 4;
 char dm_delim = DMDELIM_CWMP;
 char dmroot[64] = "Device";
 int bbfdatamodel_type = BBFDM_BOTH;

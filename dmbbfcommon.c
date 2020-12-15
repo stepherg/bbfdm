@@ -46,12 +46,6 @@ void bbf_uci_revert_bbfdm(void)
 	dmuci_exit_bbfdm();
 }
 
-int bbf_set_ip_version(int ipversion)
-{
-	ip_version = ipversion;
-	return 0;
-}
-
 void del_list_parameter(struct dm_parameter *dm_parameter)
 {
 	api_del_list_parameter(dm_parameter);

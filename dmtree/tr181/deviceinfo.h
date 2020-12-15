@@ -32,6 +32,5 @@ char *get_deviceid_manufactureroui();
 char *get_deviceid_productclass();
 char *get_deviceid_serialnumber();
 char *get_softwareversion();
-int lookup_vcf_name(char *instance, char **value);
 
 #endif

@@ -326,7 +326,7 @@ int network_get_ipaddr(char **value, char *iface)
 {
 	json_object *res, *jobj;
 	char *ipv6_value = "";
-
+	char *ip_version = NULL;
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", iface, String}}, 1, &res);
 	DM_ASSERT(res, *value = "");
 	jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
@@ -334,10 +334,11 @@ int network_get_ipaddr(char **value, char *iface)
 	jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv6-address");
 	ipv6_value = dmjson_get_value(jobj, 1, "address");
 
+	dmuci_get_option_value_string("cwmp", "acs", "ip_version", &ip_version);
 	if((*value)[0] == '\0' || ipv6_value[0] == '\0') {
 		if ((*value)[0] == '\0')
 			*value = ipv6_value;
-	} else if (ip_version == 6) {
+	} else if (ip_version && ip_version[0] == '6') {
 		*value = ipv6_value;
 		return 0;
 	}

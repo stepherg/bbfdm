@@ -559,7 +559,6 @@ extern struct list_head list_upnp_changed_onalarm;
 extern struct list_head list_upnp_changed_version;
 #endif
 
-extern int ip_version;
 extern char dm_delim;
 extern char dmroot[64];
 extern char *DMT_TYPE[];

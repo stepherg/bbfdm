@@ -20,8 +20,6 @@ extern DMLEAF tSoftwareModulesDeploymentUnitParams[];
 extern DMOBJ tSoftwareModulesExecutionUnitObj[];
 extern DMLEAF tSoftwareModulesExecutionUnitParams[];
 
-char *get_deployment_unit_reference(struct dmctx *ctx, char *package_name, char *package_env);
-void get_deployment_unit_name_version(char *uuid, char **name, char **version, char **env);
 char *get_softwaremodules_uuid(char *url);
 char *get_softwaremodules_url(char *uuid);
 

@@ -21,7 +21,6 @@ void bbf_uci_commit_bbfdm(void);
 void bbf_uci_revert_bbfdm(void);
 int set_bbfdatamodel_type(int bbf_type);
 int get_bbfdatamodel_type(void);
-int bbf_set_ip_version(int ipversion);
 void del_list_parameter(struct dm_parameter *dm_parameter);
 void dmjson_parse_init(char *msg);
 void dmjson_parse_fini(void);

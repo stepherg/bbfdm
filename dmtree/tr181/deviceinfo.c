@@ -86,15 +86,6 @@ char *get_softwareversion()
 	return os__get_softwareversion();
 }
 
-int lookup_vcf_name(char *instance, char **value)
-{
-	struct uci_section *s = NULL;
-	uci_path_foreach_option_eq(bbfdm, DMMAP, "vcf", "vcf_instance", instance, s) {
-		dmuci_get_value_by_section_string(s, "name", value);
-	}
-	return 0;
-}
-
 static int get_device_manufacturer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = get_deviceid_manufacturer();
