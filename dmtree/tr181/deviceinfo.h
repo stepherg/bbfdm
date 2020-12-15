@@ -27,10 +27,4 @@ extern DMLEAF tDeviceInfoProcessorParams[];
 extern DMLEAF tDeviceInfoSupportedDataModelParams[];
 extern DMLEAF tDeviceInfoFirmwareImageParams[];
 
-char *get_deviceid_manufacturer();
-char *get_deviceid_manufactureroui();
-char *get_deviceid_productclass();
-char *get_deviceid_serialnumber();
-char *get_softwareversion();
-
 #endif

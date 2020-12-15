@@ -1278,14 +1278,14 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 	if (strstr(proto, "ppp")) {
 		char linker[64] = {0};
 		snprintf(linker, sizeof(linker), "%s", section_name((struct uci_section *)data));
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cPPP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", linker, value);
 		if (*value != NULL)
 			return 0;
 	}
 
 	char *device = get_device(section_name((struct uci_section *)data));
 	if (device[0] != '\0') {
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cVLANTermination%c", dmroot, dm_delim, dm_delim, dm_delim), device, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", device, value);
 		if (*value != NULL)
 			return 0;
 	}
@@ -1295,7 +1295,7 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 		strncpy(linker, device, sizeof(linker) - 1);
 		char *vid = strchr(linker, '.');
 		if (vid) *vid = '\0';
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cLink%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", linker, value);
 		if (*value != NULL)
 			return 0;
 	}
@@ -2058,7 +2058,7 @@ static int get_IPInterfaceIPv6Prefix_ParentPrefix(char *refparam, struct dmctx *
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "address", &linker);
 	if (linker && *linker)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;

@@ -20,8 +20,5 @@ extern DMLEAF tSoftwareModulesDeploymentUnitParams[];
 extern DMOBJ tSoftwareModulesExecutionUnitObj[];
 extern DMLEAF tSoftwareModulesExecutionUnitParams[];
 
-char *get_softwaremodules_uuid(char *url);
-char *get_softwaremodules_url(char *uuid);
-
 #endif //__SOFTWAREMODULES_H
 

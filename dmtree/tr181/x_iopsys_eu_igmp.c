@@ -1297,7 +1297,7 @@ static int get_igmp_cgrp_adev_iface(char *refparam, struct dmctx *ctx, void *dat
 {
 	char *ifname = dmjson_get_value((json_object *)data, 1, "device");
 
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
+	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", ifname, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -1307,7 +1307,7 @@ static int get_igmp_cgrp_adev_host(char *refparam, struct dmctx *ctx, void *data
 {
 	char *ipaddr = dmjson_get_value((json_object *)data, 1, "ipaddr");
 
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cHosts%cHost%c", dmroot, dm_delim, dm_delim, dm_delim), ipaddr, value);
+	adm_entry_get_linker_param(ctx, "Device.Hosts.Host.", ipaddr, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -1768,7 +1768,7 @@ static int get_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 			dmuci_get_value_by_section_string(interface_s, "proto", &proto);
 			if (proto && proto[0] != '\0') {
 				// It is a L3 bridge, get the linker accordingly
-				adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), sec_name, value);
+				adm_entry_get_linker_param(ctx, "Device.IP.Interface.", sec_name, value);
 			} else {
 				// It is a L2 bridge, get the linker accordingly
 				get_bridge_port_linker(ctx, sec_name, value);
@@ -1781,7 +1781,7 @@ static int get_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 		if (igmpp_ifname == NULL)
 			goto end;
 
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), igmpp_ifname, value);
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", igmpp_ifname, value);
 	}
 
 end:

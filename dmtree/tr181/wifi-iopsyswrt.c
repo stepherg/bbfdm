@@ -394,7 +394,7 @@ int os__get_radio_supported_frequency_bands(char *refparam, struct dmctx *ctx, v
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "2.4GHz,5GHz");
-	*value = dmjson_get_value_array_all(res, DELIMITOR, 1, "supp_bands");
+	*value = dmjson_get_value_array_all(res, ",", 1, "supp_bands");
 	return 0;
 }
 
@@ -551,7 +551,7 @@ int os__get_radio_possible_channels(char *refparam, struct dmctx *ctx, void *dat
 		if (opclass && strcmp(opclass, cur_opclass) != 0)
 			continue;
 
-		*value = dmjson_get_value_array_all(supp_channels, DELIMITOR, 1, "channels");
+		*value = dmjson_get_value_array_all(supp_channels, ",", 1, "channels");
 		break;
 	}
 	return 0;

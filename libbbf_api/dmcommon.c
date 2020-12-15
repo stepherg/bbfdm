@@ -61,58 +61,7 @@ char *IPPrefix[] = {"^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9
 char *IPv4Prefix[] = {"^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])/(3[0-2]|[012]?[0-9])$"};
 char *IPv6Prefix[] = {"^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/(12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$"};
 
-unsigned char dmisnumeric(char *nbr)
-{
-	if (*nbr == '\0')
-		return 0;
-	while (*nbr <= '9' && *nbr >= '0') {
-		nbr++;
-	}
-	return ((*nbr) ? 0 : 1);
-}
-
-/* int strstructered(char *str1, char *str2)
- * Return:
- * STRUCTERED_SAME: if str1 is same of str2
- * STRUCTERED_PART: if str2 is part of str1
- * STRUCTERED_NULL: if str2 is not part of str1
- *
- */
-int strstructered(char *str1, char *str2)
-{
-	char buf[16];
-	int i = 0;
-	for (; *str1 && *str2; str1++, str2++) {
-		if (*str1 == *str2)
-			continue;
-		if (*str2 == '#') {
-			i = 0;
-			do {
-				buf[i++] = *str1;
-			} while (*(str1+1) && *(str1+1) != dm_delim && str1++);
-			buf[i] = '\0';
-			if (dmisnumeric(buf))
-				continue;
-		} else if (*str1 == '#') {
-			i = 0;
-			do {
-				buf[i++] = *str2;
-			} while (*(str2+1) && *(str2+1) != dm_delim && str2++);
-			buf[i] = '\0';
-			if (dmisnumeric(buf))
-				continue;
-		}
-		return STRUCTERED_NULL;
-	}
-	if (*str1 == '\0' && *str2 == '\0')
-		return STRUCTERED_SAME;
-	else if (*str2 == '\0')
-		return STRUCTERED_PART;
-	return STRUCTERED_NULL;
-}
-
-
-pid_t get_pid(char *pname)
+pid_t get_pid(const char *pname)
 {
 	DIR* dir;
 	struct dirent* ent;
@@ -300,29 +249,6 @@ int dmcmd_read(int pipe, char *buffer, int size)
 	return -1;
 }
 
-int network_get_ipaddr(char **value, char *iface)
-{
-	json_object *res, *jobj;
-	char *ipv6_value = "";
-	char *ip_version = NULL;
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", iface, String}}, 1, &res);
-	DM_ASSERT(res, *value = "");
-	jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
-	*value = dmjson_get_value(jobj, 1, "address");
-	jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv6-address");
-	ipv6_value = dmjson_get_value(jobj, 1, "address");
-
-	dmuci_get_option_value_string("cwmp", "acs", "ip_version", &ip_version);
-	if((*value)[0] == '\0' || ipv6_value[0] == '\0') {
-		if ((*value)[0] == '\0')
-			*value = ipv6_value;
-	} else if (ip_version && ip_version[0] == '6') {
-		*value = ipv6_value;
-		return 0;
-	}
-	return 0;
-}
-
 void update_section_list(char *config, char *section, char *option, int number, char *filter, char *option1, char *val1, char *option2, char *val2)
 {
 	struct uci_section *s = NULL;
@@ -385,26 +311,6 @@ int wan_remove_dev_interface(struct uci_section *interface_setion, char *dev)
 	else
 		dmuci_set_value_by_section(interface_setion, "ifname", new_ifname);
 	return 0;
-}
-
-void parse_proc_route_line(char *line, struct proc_routing *proute)
-{
-	char *pch, *spch;
-
-	proute->iface = strtok_r(line, " \t", &spch);
-	pch = strtok_r(NULL, " \t", &spch);
-	hex_to_ip(pch, proute->destination);
-	pch = strtok_r(NULL, " \t", &spch);
-	hex_to_ip(pch, proute->gateway);
-	proute->flags = strtok_r(NULL, " \t", &spch);
-	proute->refcnt = strtok_r(NULL, " \t", &spch);
-	proute->use = strtok_r(NULL, " \t", &spch);
-	proute->metric = strtok_r(NULL, " \t", &spch);
-	pch = strtok_r(NULL, " \t", &spch);
-	hex_to_ip(pch, proute->mask);
-	proute->mtu = strtok_r(NULL, " \t", &spch);
-	proute->window = strtok_r(NULL, " \t", &spch);
-	proute->irtt = strtok_r(NULL, " \t\n\r", &spch);
 }
 
 void hex_to_ip(char *address, char *ret)

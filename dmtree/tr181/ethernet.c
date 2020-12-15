@@ -87,7 +87,7 @@ void get_bridge_port_linker(struct dmctx *ctx, char *intf_name, char **value)
 				char *device, linker[512] = "";
 				dmuci_get_value_by_section_string(bridge_port, "device", &device);
 				snprintf(linker, sizeof(linker), "br_%s:%s+%s", br_inst, section_name(bridge_port), device);
-				adm_entry_get_linker_param(ctx, dm_print_path("%s%cBridging%cBridge%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+				adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", linker, value);
 				break;
 			}
 		}
@@ -1001,7 +1001,7 @@ static int get_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 		if (vid) *vid = '\0';
 		char *macvlan = strchr(linker, '_');
 		if (macvlan) *macvlan = '\0';
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
 	}
 
 	if (*value == NULL)
@@ -1228,9 +1228,9 @@ static int get_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 		// 8021ad device, will have a vlan termination object as its lowerlayer
 		dmuci_get_value_by_section_string((struct uci_section *)data, "inner_vid", &inner_vid);
 		dmasprintf(&dev_name, "%s.%s", name, inner_vid);
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cVLANTermination%c", dmroot, dm_delim, dm_delim, dm_delim), dev_name, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", dev_name, value);
 	} else {
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cLink%c", dmroot, dm_delim, dm_delim, dm_delim), name, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", name, value);
 	}
 
 	if (*value == NULL)
@@ -1671,7 +1671,7 @@ static int get_EthernetRMONStats_Interface(char *refparam, struct dmctx *ctx, vo
 	char *linker;
 
 	dmuci_get_value_by_section_string(((struct eth_rmon_args *)data)->eth_rmon_sec, "ifname", &linker);
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;

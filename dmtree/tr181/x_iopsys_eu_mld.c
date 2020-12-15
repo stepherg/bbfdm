@@ -576,7 +576,7 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 			dmuci_get_value_by_section_string(intf_s, "proto", &proto);
 			if (proto && proto[0] != '\0') {
 				// It is a L3 bridge, get the linker accordingly
-				adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), sec_name, value);
+				adm_entry_get_linker_param(ctx, "Device.IP.Interface.", sec_name, value);
 			} else {
 				// It is a L2 bridge, get the linker accordingly
 				get_bridge_port_linker(ctx, sec_name, value);
@@ -598,7 +598,7 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 		if (tmp_linker == NULL)
 			goto end;
 
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), tmp_linker, value);
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", tmp_linker, value);
 	}
 
 end:

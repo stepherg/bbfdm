@@ -112,9 +112,10 @@ extern char *SupportedFrequencyBands[];
 
 #define UPTIME "/proc/uptime"
 #define DEFAULT_CONFIG_DIR "/etc/config/"
+#define PROC_ROUTE "/proc/net/route"
+#define PROC_ROUTE6 "/proc/net/ipv6_route"
 #define MAX_DHCP_LEASES 256
 #define MAX_PROC_ROUTING 256
-#define ROUTING_FILE "/proc/net/route"
 #define DHCP_LEASES_FILE "/tmp/dhcp.leases"
 #define DHCP_CLIENT_OPTIONS_FILE "/var/dhcp.client.options"
 #define DMMAP "dmmap"
@@ -148,7 +149,6 @@ do { \
 	*dest = '\0'; \
 } while(0)
 
-
 #define DMCMD(CMD, N, ...) \
 do { \
 	int mpp = dmcmd(CMD, N, ## __VA_ARGS__); \
@@ -177,37 +177,9 @@ do { \
         if ((dir = opendir(path)) == NULL) return 0; \
         while ((ent = readdir (dir)) != NULL) \
 
-enum strstructered_enum {
-	STRUCTERED_SAME,
-	STRUCTERED_PART,
-	STRUCTERED_NULL
-};
-
 struct range_args {
 	const char *min;
 	const char *max;
-};
-
-struct proc_routing {
-	char *iface;
-	char *flags;
-	char *refcnt;
-	char *use;
-	char *metric;
-	char *mtu;
-	char *window;
-	char *irtt;
-	char destination[16];
-	char gateway[16];
-	char mask[16];
-};
-
-struct routingfwdargs
-{
-	char *permission;
-	struct uci_section *routefwdsection;
-	struct proc_routing *proute;
-	int type;
 };
 
 struct dmmap_dup
@@ -236,7 +208,7 @@ struct browse_args {
 	char *value;
 };
 
-pid_t get_pid(char *pname);
+pid_t get_pid(const char *pname);
 int check_file(char *path);
 char *cidr2netmask(int bits);
 bool is_strword_in_optionvalue(char *optionvalue, char *str);
@@ -245,11 +217,8 @@ int dmcmd(char *cmd, int n, ...);
 int dmcmd_read(int pipe, char *buffer, int size);
 void dmcmd_read_alloc(int pipe, char **value);
 int dmcmd_no_wait(char *cmd, int n, ...);
-int network_get_ipaddr(char **value, char *iface);
 void update_section_list(char *config, char *section, char *option, int number, char *filter, char *option1, char *val1,  char *option2, char *val2);
 int wan_remove_dev_interface(struct uci_section *interface_setion, char *dev);
-void parse_proc_route_line(char *line, struct proc_routing *proute);
-int strstructered(char *str1, char *str2);
 void hex_to_ip(char *address, char *ret);
 void ip_to_hex(char *address, char *ret);
 void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section, void* additional_attribute);

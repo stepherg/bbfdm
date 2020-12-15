@@ -212,7 +212,7 @@ static char *get_dsl_value_array_without_argument(char *command1, char *id, char
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
 	dmubus_call(command, command2, UBUS_ARGS{}, 0, &res);
 	if (!res) return "";
-	value = dmjson_get_value_array_all(res, DELIMITOR, 1, key);
+	value = dmjson_get_value_array_all(res, ",", 1, key);
 	return value;
 }
 
@@ -936,7 +936,7 @@ static int get_DSLChannel_LowerLayers(char *refparam, struct dmctx *ctx, void *d
 {
 	char linker[8];
 	snprintf(linker, sizeof(linker), "line_%s", ((struct dsl_line_args *)data)->id);
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cDSL%cLine%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
+	adm_entry_get_linker_param(ctx, "Device.DSL.Line.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
 	if (*value == NULL)
 		*value = "";
 	return 0;

@@ -229,7 +229,7 @@ static int get_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 	if (v == NULL)
 		return 0;
 	uci_foreach_element(v, e) {
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
 		if (ifaceobj == NULL)
 			continue;
 		if (*buf != '\0')
@@ -346,7 +346,7 @@ static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 	if (v == NULL)
 		return 0;
 	uci_foreach_element(v, e) {
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
 		if (ifaceobj == NULL)
 			continue;
 		if (*buf != '\0')

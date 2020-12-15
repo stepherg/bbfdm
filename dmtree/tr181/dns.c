@@ -254,7 +254,7 @@ static int get_dns_interface(char *refparam, struct dmctx *ctx, void *data, char
 	char *linker;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &linker);
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -342,7 +342,7 @@ static int get_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 static int get_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("nslookup", "interface");
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;

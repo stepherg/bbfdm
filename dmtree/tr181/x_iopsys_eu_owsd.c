@@ -98,7 +98,7 @@ static int get_x_iopsys_eu_owsd_virtualhost_interface(char *refparam, struct dmc
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &iface);
 	if (iface[0] != '\0') {
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), iface, value); // MEM WILL BE FREED IN DMMEMCLEAN
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface, value); // MEM WILL BE FREED IN DMMEMCLEAN
 		if (*value == NULL)
 			*value = "";
 	}

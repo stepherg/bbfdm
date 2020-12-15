@@ -175,6 +175,28 @@ static int set_management_server_periodic_inform_time(char *refparam, struct dmc
 	return 0;	
 }
 
+static int network_get_ipaddr(char **value, char *iface)
+{
+	json_object *res, *jobj;
+	char *ipv6_value = "";
+	char *ip_version = NULL;
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", iface, String}}, 1, &res);
+	DM_ASSERT(res, *value = "");
+	jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
+	*value = dmjson_get_value(jobj, 1, "address");
+	jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv6-address");
+	ipv6_value = dmjson_get_value(jobj, 1, "address");
+
+	dmuci_get_option_value_string("cwmp", "acs", "ip_version", &ip_version);
+	if((*value)[0] == '\0' || ipv6_value[0] == '\0') {
+		if ((*value)[0] == '\0')
+			*value = ipv6_value;
+	} else if (ip_version && ip_version[0] == '6') {
+		*value = ipv6_value;
+	}
+	return 0;
+}
+
 /*#Device.ManagementServer.ConnectionRequestURL!UCI:cwmp/cpe,cpe/port*/
 static int get_management_server_connection_request_url(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {

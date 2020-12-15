@@ -1394,7 +1394,7 @@ static int get_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 		p = lbuf;
 		dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "device", &device);
 		for (pch = strtok_r(device, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
-			adm_entry_get_linker_param(ctx, dm_print_path("%s%cBridging%cBridge%c", dmroot, dm_delim, dm_delim, dm_delim), pch, value);
+			adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", pch, value);
 			if (*value == NULL)
 				*value = "";
 			dmstrappendstr(p, *value);
@@ -1409,13 +1409,13 @@ static int get_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 		char *tag = strchr(linker, '.');
 		if (tag) tag[0] = '\0';
 
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
 		if (*value == NULL)
-			adm_entry_get_linker_param(ctx,dm_print_path("%s%cWiFi%cSSID%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+			adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", linker, value);
 		if (*value == NULL)
-			adm_entry_get_linker_param(ctx, dm_print_path("%s%cATM%cLink%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+			adm_entry_get_linker_param(ctx, "Device.ATM.Link.", linker, value);
 		if (*value == NULL)
-			adm_entry_get_linker_param(ctx, dm_print_path("%s%cPTM%cLink%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+			adm_entry_get_linker_param(ctx, "Device.PTM.Link.", linker, value);
 
 		if (*value == NULL)
 			*value = "";
@@ -2015,7 +2015,7 @@ static int get_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 	if (vid[0] != '\0') {
 		/* Get linker */
 		snprintf(linker, sizeof(linker),"br_%s:vlan_%s", ((struct bridge_vlanport_args *)data)->br_inst, (vid[0] != '\0') ? vid : "1");
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cBridging%cBridge%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+		adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", linker, value);
 		if (*value == NULL)
 			*value = "";
 	}
@@ -2099,7 +2099,7 @@ static int get_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 	dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "name", &name);
 	dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "port_name", &port_name);
 	snprintf(plinker, sizeof(plinker), "br_%s:%s+%s", ((struct bridge_vlanport_args *)data)->br_inst, port_name, name);
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cBridging%cBridge%c", dmroot, dm_delim, dm_delim, dm_delim), plinker, value);
+	adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", plinker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;

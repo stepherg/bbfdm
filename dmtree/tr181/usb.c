@@ -541,7 +541,7 @@ static int get_USBInterface_LowerLayers(char *refparam, struct dmctx *ctx, void 
 {
 	const struct usb_interface *iface = (struct usb_interface *)data;
 
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), iface->iface_name, value);
+	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", iface->iface_name, value);
 	return 0;
 }
 
@@ -992,7 +992,7 @@ out:
 static int get_USBUSBHostsHostDevice_USBPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct usb_port *port= (struct usb_port *)data;
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cUSB%cPort%c", dmroot, dm_delim, dm_delim, dm_delim), port->folder_name, value);
+	adm_entry_get_linker_param(ctx, "Device.USB.Port.", port->folder_name, value);
 	return 0;
 }
 
@@ -1004,7 +1004,7 @@ static int get_USBUSBHostsHostDevice_Rate(char *refparam, struct dmctx *ctx, voi
 static int get_USBUSBHostsHostDevice_Parent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct usb_port *port = (struct usb_port*)data;
-	char *v;
+	char *host_inst, usb_host_path[128] = {0};
 	regex_t regex1 = {};
 
 	regcomp(&regex1, "^[0-9][0-9]*-[0-9]*[0-9]\\.[0-9]*[0-9]$", 0);
@@ -1012,8 +1012,9 @@ static int get_USBUSBHostsHostDevice_Parent(char *refparam, struct dmctx *ctx, v
 		*value = "";
 		goto out;
 	}
-	dmuci_get_value_by_section_string(port->dmsect, "usb_host_instance", &v);
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cUSB%cUSBHosts%cHost%c%s%vDevice%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim, v, dm_delim, dm_delim), port->folder_name, value);
+	dmuci_get_value_by_section_string(port->dmsect, "usb_host_instance", &host_inst);
+	snprintf(usb_host_path, sizeof(usb_host_path), "Device.USB.USBHosts.Host.%s.Device.", host_inst);
+	adm_entry_get_linker_param(ctx, usb_host_path, port->folder_name, value);
 	if (*value == NULL)
 		*value = "";
 out:

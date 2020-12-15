@@ -1327,7 +1327,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_LocalI
 	const struct param_node *node_val = (struct param_node *)data;
 	char *linker = dmjson_get_value(node_val->node, 1, "non1905_nbr_localintf");
 
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIEEE1905%cAL%cNetworkTopology%cIEEE1905Device%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -1344,7 +1344,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_Neighb
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_LocalInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "local_intf_id");
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIEEE1905%cAL%cNetworkTopology%cIEEE1905Device%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -1367,7 +1367,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_LocalInte
 	const struct obj_node *node_val = (struct obj_node *)data;
 	char *linker = dmjson_get_value(node_val->node, 1, "1905_nbr_localintf");
 
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIEEE1905%cAL%cNetworkTopology%cIEEE1905Device%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -1465,7 +1465,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceLis
 	list_val[0] = 0;
 	dmjson_foreach_value_in_array((json_object *)data, tuple, tuple_mac, i, 1, "br_mac") {
 
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIEEE1905%cAL%cNetworkTopology%cIEEE1905Device%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim, dm_delim), tuple_mac, &interface);
+		adm_entry_get_linker_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", tuple_mac, &interface);
 		if (interface)
 			pos += snprintf(&list_val[pos], sizeof(list_val) - pos, "%s,", interface);
 	}

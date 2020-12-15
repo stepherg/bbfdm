@@ -110,7 +110,7 @@ static int get_SoftwareModules_VendorConfigList(char *refparam, struct dmctx *ct
 		if (name && strcmp(name, config) == 0) {
 			char *vcf_instance;
 			dmuci_get_value_by_section_string(s, "vcf_instance", &vcf_instance);
-			*value = strdup(dm_print_path("%s%cDeviceInfo%cVendorConfigFile%c%s%c", dmroot, dm_delim, dm_delim, dm_delim, vcf_instance, dm_delim));
+			dmasprintf(value, "Device.DeviceInfo.VendorConfigFile.%s.", vcf_instance);
 			break;
 		}
 	}
@@ -307,7 +307,7 @@ static int get_SoftwareModulesExecEnv_ParentExecEnv(char *refparam, struct dmctx
 	*value = "";
 	if (strcmp(env_name, "OpenWRT_Linux")) {
 		char *linker = dmstrdup(env_name);
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cSoftwareModules%cExecEnv%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+		adm_entry_get_linker_param(ctx, "Device.SoftwareModules.ExecEnv.", linker, value);
 		if (*value == NULL) {
 			*value = "";
 			return 0;
@@ -358,11 +358,11 @@ static int get_SoftwareModulesExecEnv_ActiveExecutionUnits(char *refparam, struc
 		environment = dmjson_get_value(du_obj, 1, "environment");
 		if (strcmp(environment, curr_env) == 0) {
 			if(!eu_list) {
-				dmasprintf(&eu_list, "%s", dm_print_path("%s%cSoftwareModules%cExecutionUnit%c%d%c", dmroot, dm_delim, dm_delim, dm_delim, env, dm_delim));
+				dmasprintf(&eu_list, "Device.SoftwareModules.ExecutionUnit.%d.", env);
 			} else {
 				eu_list_tmp = dmstrdup(eu_list);
 				dmfree(eu_list);
-				dmasprintf(&eu_list, "%s,%s", eu_list_tmp, dm_print_path("%s%cSoftwareModules%cExecutionUnit%c%d%c", dmroot, dm_delim, dm_delim, dm_delim, env, dm_delim));
+				dmasprintf(&eu_list, "%s,Device.SoftwareModules.ExecutionUnit.%d.", eu_list_tmp, env);
 				dmfree(eu_list_tmp);
 			}
 		}
@@ -515,7 +515,7 @@ static int get_SoftwareModulesDeploymentUnit_ExecutionUnitList(char *refparam, s
 		name = dmjson_get_value(du_obj, 1, "name");
 		environment = dmjson_get_value(du_obj, 1, "environment");
 		if ((strcmp(name, curr_name) == 0) && (strcmp(environment, curr_environment) == 0)) {
-			dmasprintf(value, "%s", dm_print_path("%s%cSoftwareModules%cExecutionUnit%c%d%c", dmroot, dm_delim, dm_delim, dm_delim, env, dm_delim));
+			dmasprintf(value, "Device.SoftwareModules.ExecutionUnit.%d.", env);
 			break;
 		}
 	}
@@ -526,11 +526,9 @@ static int get_SoftwareModulesDeploymentUnit_ExecutionUnitList(char *refparam, s
 static int get_SoftwareModulesDeploymentUnit_ExecutionEnvRef(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "environment");
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cSoftwareModules%cExecEnv%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
-	if (*value == NULL) {
+	adm_entry_get_linker_param(ctx, "Device.SoftwareModules.ExecEnv.", linker, value);
+	if (*value == NULL)
 		*value = "";
-		return 0;
-	}
 	return 0;
 }
 
@@ -667,7 +665,7 @@ static int get_SoftwareModulesExecutionUnit_References(char *refparam, struct dm
 			name = dmjson_get_value(du_obj, 1, "name");
 			environment = dmjson_get_value(du_obj, 1, "environment");
 			if ((strcmp(name, curr_name) == 0) && (strcmp(environment, curr_environment) == 0)) {
-				dmasprintf(value, "%s", dm_print_path("%s%cSoftwareModules%cDeploymentUnit%c%d%c", dmroot, dm_delim, dm_delim, dm_delim, env, dm_delim));
+				dmasprintf(value, "Device.SoftwareModules.DeploymentUnit.%d.", env);
 				break;
 			}
 		}
@@ -688,7 +686,7 @@ static int get_SoftwareModulesExecutionUnit_AssociatedProcessList(char *refparam
 		process++;
 		pid = dmjson_get_value(processes_obj, 1, "PID");
 		if (strcmp(euid, pid) == 0) {
-			dmasprintf(value, "%s", dm_print_path("%s%cDeviceInfo%cProcessStatus%cProcess%c%d%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim, process, dm_delim));
+			dmasprintf(value, "Device.DeviceInfo.ProcessStatus.Process.%d.", process);
 			break;
 		}
 	}
@@ -711,7 +709,7 @@ static int get_SoftwareModulesExecutionUnit_VendorConfigList(char *refparam, str
 static int get_SoftwareModulesExecutionUnit_ExecutionEnvRef(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "environment");
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cSoftwareModules%cExecEnv%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.SoftwareModules.ExecEnv.", linker, value);
 	if (*value == NULL) {
 		*value = "";
 		return 0;

@@ -105,7 +105,7 @@ int os__get_HostsHost_IPAddress(char *refparam, struct dmctx *ctx, void *data, c
 int os__get_HostsHost_DHCPClient(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "macaddr");
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cDHCPv4%cServer%cPool%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.DHCPv4.Server.Pool.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -114,7 +114,7 @@ int os__get_HostsHost_DHCPClient(char *refparam, struct dmctx *ctx, void *data, 
 int os__get_HostsHost_AssociatedDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "macaddr");
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cWiFi%cAccessPoint%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.WiFi.AccessPoint.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -125,9 +125,9 @@ int os__get_HostsHost_Layer1Interface(char *refparam, struct dmctx *ctx, void *d
 	char *linker = dmjson_get_value((json_object *)data, 1, "device");
 	char *type = dmjson_get_value((json_object *)data, 1, "type");
 	if (strcmp(type, "wifi") == 0)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cWiFi%cRadio%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
 	else
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -136,7 +136,7 @@ int os__get_HostsHost_Layer1Interface(char *refparam, struct dmctx *ctx, void *d
 int os__get_HostsHost_Layer3Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "network");
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;

@@ -25,20 +25,8 @@
 #include "dmuci.h"
 #include "dmmem.h"
 
-#ifdef BBF_TR064
-#define DMROOT_UPNP ""
-#define DMDELIM_UPNP '/'
-#endif
-
-#define DMDELIM_CWMP '.'
-#define DELIMITOR ","
-
 #define DM_ENABLED_NOTIFY "/etc/bbfdm/.dm_enabled_notify"
 #define DM_ENABLED_NOTIFY_TEMPORARY "/tmp/.dm_enabled_notify_temporary"
-
-#ifdef BBF_TR064
-#define UPNP_CFG "tr064"
-#endif
 
 #ifdef UNDEF
 #undef UNDEF
@@ -55,6 +43,8 @@
 
 extern struct dm_permession_s DMREAD;
 extern struct dm_permession_s DMWRITE;
+extern char *DMT_TYPE[];
+extern int bbfdatamodel_type;
 
 #define DMPARAM_ARGS \
 	struct dmctx *dmctx, \
@@ -77,15 +67,8 @@ extern struct dm_permession_s DMWRITE;
 	void *data, \
 	char *instance
 
-#define TAILLE_MAX 1024
-
-struct dm_permession_s;
-struct dm_parameter;
-struct dm_leaf_s;
-struct dm_obj_s;
 struct dmnode;
 struct dmctx;
-struct dm_notif_s;
 
 struct dm_dynamic_obj {
 	struct dm_obj_s **nextobj;
@@ -128,21 +111,10 @@ typedef struct dm_obj_s {
 	const char **unique_keys;
 } DMOBJ;
 
-#ifdef BBF_TR064
-typedef struct dm_upnp_supported_dm_s {
-	char *location;
-	char *uri;
-	char *url;
-	char *description;
-	char *source_location;
-} UPNP_SUPPORTED_DM;
-#endif
-
 struct set_tmp {
 	struct list_head list;
 	char *name;
 	char *value;
-	unsigned int flags;
 };
 
 struct param_fault {
@@ -158,23 +130,11 @@ struct dm_enabled_notify {
 	char *value;
 };
 
-#ifdef BBF_TR064
-struct dm_upnp_enabled_track {
-	struct list_head list;
-	char *name;
-	char *key;
-	char *value;
-	unsigned int isobj;
-};
-#endif
-
 struct dm_parameter {
 	struct list_head list;
 	char *name;
 	char *data;
-	char *type; 
-	char *version;
-	unsigned int flags;
+	char *type;
 	char *notification;
 };
 
@@ -205,7 +165,6 @@ struct dmctx
 	struct list_head list_json_parameter;
 	DMOBJ *dm_entryobj;
 	bool nextlevel;
-	int depth;
 	int faultcode;
 	int setaction;
 	char *in_param;
@@ -215,18 +174,12 @@ struct dmctx
 	char *addobj_instance;
 	char *linker;
 	char *linker_param;
-	unsigned int dmparam_flags;
 	unsigned int alias_register;
 	unsigned int nbrof_instance;
-	unsigned int amd_version;
 	unsigned int instance_mode;
-	unsigned int dm_type;
-	unsigned int user_mask;
 	unsigned char inparam_isparam;
 	unsigned char findparam;
-	char all_instances[512];
 	char *inst_buf[16];
-	char *instance_wildchar;
 	unsigned int end_session_flag;
 	bool isgetschema;
 };
@@ -243,11 +196,6 @@ typedef struct dmnode {
 struct notification {
 	char *value;
 	char *type;
-};
-
-struct dm_acl {
-	unsigned int flag;
-	char *user_access;
 };
 
 typedef struct lib_map_obj {
@@ -301,31 +249,6 @@ enum {
 	CMD_USP_LIST_OPERATE,
 	CMD_GET_SCHEMA,
 	CMD_GET_INSTANCES,
-#ifdef BBF_TR064
-	CMD_UPNP_GET_SUPPORTED_PARAMETERS,
-	CMD_UPNP_GET_INSTANCES,
-	CMD_UPNP_GET_SELECTED_VALUES,
-	CMD_UPNP_GET_VALUES,
-	CMD_UPNP_SET_VALUES,
-	CMD_UPNP_GET_ATTRIBUTES,
-	CMD_UPNP_SET_ATTRIBUTES,
-	CMD_UPNP_DEL_INSTANCE,
-	CMD_UPNP_ADD_INSTANCE,
-	CMD_UPNP_GET_ACLDATA,
-	CMD_UPNP_INIT_STATE_VARIABLES,
-	CMD_UPNP_LOAD_ENABLED_PARAMETRS_TRACK,
-	CMD_UPNP_GET_CONFIGURATION_UPDATE,
-	CMD_UPNP_GET_CURRENT_CONFIGURATION_VERSION,
-	CMD_UPNP_GET_SUPPORTED_DATA_MODEL_UPDATE,
-	CMD_UPNP_GET_SUPPORTED_PARAMETERS_UPDATE,
-	CMD_UPNP_GET_ATTRIBUTE_VALUES_UPDATE,
-	CMD_UPNP_GET_ENABLED_PARAMETRS_ALARM,
-	CMD_UPNP_GET_ENABLED_PARAMETRS_EVENT,
-	CMD_UPNP_GET_ENABLED_PARAMETRS_VERSION,
-	CMD_UPNP_CHECK_CHANGED_PARAMETRS_ALARM,
-	CMD_UPNP_CHECK_CHANGED_PARAMETRS_EVENT,
-	CMD_UPNP_CHECK_CHANGED_PARAMETRS_VERSION,
-#endif
 	CMD_EXTERNAL_COMMAND
 };
 
@@ -407,21 +330,6 @@ enum fault_code_enum {
 	__FAULT_MAX
 };
 
-#ifdef BBF_TR064
-enum upnp_fault_code_enum {
-	FAULT_UPNP_606 = 606,// Action not authorized
-	FAULT_UPNP_701 = 701,// Invalid Argument Syntax
-	FAULT_UPNP_702,//Invalid XML Argument
-	FAULT_UPNP_703,// No Such Name
-	FAULT_UPNP_704,// Invalid Value Type
-	FAULT_UPNP_705,// Invalid Value
-	FAULT_UPNP_706,// Read Only Violation
-	FAULT_UPNP_707,// Multiple Set
-	FAULT_UPNP_708,// Resource Temporarily Unavailable
-	__FAULT_UPNP_MAX
-};
-#endif
-
 enum {
 	INSTANCE_UPDATE_NUMBER,
 	INSTANCE_UPDATE_ALIAS
@@ -473,51 +381,10 @@ enum amd_version_enum {
 	AMD_5,
 };
 
-enum dm_type_enum {
-	DM_CWMP,
-	DM_UPNP,
-};
-
 enum bbfdm_type_enum {
 	BBFDM_BOTH,
 	BBFDM_CWMP,
 	BBFDM_USP,
-};
-
-enum dm_param_flags_enum{
-	/* UPNP OnChange flags flags */
-	DM_PARAM_ALARAM_ON_CHANGE = 1 << 0,
-	DM_PARAM_EVENT_ON_CHANGE = 1 << 1,
-	/* UPNP type flags */
-	NODE_DATA_ATTRIBUTE_INSTANCE = 0x0010,
-	NODE_DATA_ATTRIBUTE_MULTIINSTANCE = 0x0020,
-	NODE_DATA_ATTRIBUTE_TYPESTRING = 0x0100,
-	NODE_DATA_ATTRIBUTE_TYPEINT = 0x0200,
-	NODE_DATA_ATTRIBUTE_TYPELONG = 0x0400,
-	NODE_DATA_ATTRIBUTE_TYPEBOOL = 0x0800,
-	NODE_DATA_ATTRIBUTE_TYPEDATETIME = 0x1000,
-	NODE_DATA_ATTRIBUTE_TYPEBASE64 = 0x2000,
-	NODE_DATA_ATTRIBUTE_TYPEBIN = 0x4000,
-	NODE_DATA_ATTRIBUTE_TYPEPTR = 0x8000,
-	NODE_DATA_ATTRIBUTE_TYPEMASK = 0x0000FF00,
-	/*ACLRoles*/
-	DM_PUBLIC_LIST = 1 << 0,
-	DM_PUBLIC_READ = 1 << 1,
-	DM_PUBLIC_WRITE = 1 << 2,
-	DM_PUBLIC_MASK = DM_PUBLIC_LIST|DM_PUBLIC_READ|DM_PUBLIC_WRITE,
-	DM_BASIC_LIST = 1 << 3,
-	DM_BASIC_READ = 1 << 4,
-	DM_BASIC_WRITE = 1 << 5,
-	DM_BASIC_MASK = DM_PUBLIC_MASK|DM_BASIC_LIST|DM_BASIC_READ|DM_BASIC_WRITE,
-	DM_XXXADMIN_LIST = 1 << 6,
-	DM_XXXADMIN_READ = 1 << 7,
-	DM_XXXADMIN_WRITE = 1 << 8,
-	DM_XXXADMIN_MASK = DM_BASIC_MASK|DM_XXXADMIN_LIST|DM_XXXADMIN_READ|DM_XXXADMIN_WRITE,
-	DM_SUPERADMIN_MASK = DM_XXXADMIN_MASK | (1 << 9),
-	DM_LIST_MASK = DM_PUBLIC_LIST|DM_BASIC_LIST|DM_XXXADMIN_LIST,
-	DM_READ_MASK = DM_PUBLIC_READ|DM_BASIC_READ|DM_XXXADMIN_READ,
-	DM_WRITE_MASK = DM_PUBLIC_WRITE|DM_BASIC_WRITE|DM_XXXADMIN_WRITE,
-	DM_FACTORIZED = 1 << 31
 };
 
 enum {
@@ -537,27 +404,11 @@ enum notification_enum {
 	__MAX_notification
 };
 
-extern struct list_head list_enabled_notify;
-
-#ifdef BBF_TR064
-extern struct list_head list_upnp_enabled_onevent;
-extern struct list_head list_upnp_enabled_onalarm;
-extern struct list_head list_upnp_enabled_version;
-extern struct list_head list_upnp_changed_onevent;
-extern struct list_head list_upnp_changed_onalarm;
-extern struct list_head list_upnp_changed_version;
-#endif
-
-extern char dm_delim;
-extern char dmroot[64];
-extern char *DMT_TYPE[];
-extern int bbfdatamodel_type;
-
 char *update_instance(char *max_inst, int argc, ...);
 char *update_instance_alias(int action, char **last_inst, char **max_inst, void *argv[]);
 char *update_instance_without_section(int action, char **last_inst, char **max_inst, void *argv[]);
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_version, unsigned int flags, char *param_notification);
+void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_notification);
 void api_del_list_parameter(struct dm_parameter *dm_parameter);
 void free_all_list_parameter(struct dmctx *ctx);
 void free_all_set_list_tmp(struct dmctx *ctx);
@@ -585,30 +436,11 @@ char *get_last_instance_lev2(char *package, char *section, char *opt_inst, char 
 char *get_last_instance_lev2_bbfdm_dmmap_opt(char* dmmap_package, char *section,  char *opt_inst, char *opt_check, char *value_check);
 char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check);
 char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...);
-char *dm_print_path(char *fpath, ...);
 int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
 void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found);
 int free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj);
 int dm_entry_get_full_param_value(struct dmctx *dmctx);
 char *check_parameter_forced_notification(const char *parameter);
-#ifdef BBF_TR064
-int dm_entry_upnp_get_instances(struct dmctx *ctx, bool all_instances);
-int dm_entry_upnp_get_selected_values(struct dmctx *dmctx);
-int dm_entry_upnp_get_values(struct dmctx *dmctx);
-int dm_entry_upnp_set_values(struct dmctx *dmctx);
-int dm_entry_upnp_get_set_attributes(struct dmctx *dmctx);
-int dm_entry_upnp_get_supported_parameters(struct dmctx *dmctx);
-int dm_entry_upnp_delete_instance(struct dmctx *dmctx);
-int dm_entry_upnp_get_acl_data(struct dmctx *dmctx);
-int dm_entry_upnp_add_instance(struct dmctx *dmctx);
-int upnp_state_variables_init(struct dmctx *dmctx);
-int dm_entry_upnp_tracked_parameters(struct dmctx *dmctx);
-char *dm_entry_get_all_instance_numbers(struct dmctx *pctx, char *param);
-void free_all_list_enabled_notify();
-void free_all_list_upnp_param_track(struct list_head *head);
-void add_list_upnp_param_track(struct dmctx *dmctx, struct list_head *pchead, char *param, char *key, char *value, unsigned int isobj);
-int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
-#endif
 
 static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)
 {

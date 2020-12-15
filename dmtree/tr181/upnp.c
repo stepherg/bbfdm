@@ -560,19 +560,11 @@ static int get_UPnPDiscoveryService_Location(char *refparam, struct dmctx *ctx, 
 
 static int get_UPnPDiscoveryService_ParentDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *rootdevlink = NULL, *devlink = NULL;
-
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cUPnP%cDiscovery%cRootDevice%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), ((struct upnpdiscovery *)data)->uuid, &rootdevlink);
-	if (rootdevlink != NULL) {
-		*value = rootdevlink;
-		return 0;
-	}
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cUPnP%cDiscovery%cDevice%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), ((struct upnpdiscovery *)data)->uuid, &devlink);
-	if (devlink != NULL) {
-		*value = devlink;
-		return 0;
-	}
-	*value = "";
+	adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.RootDevice.", ((struct upnpdiscovery *)data)->uuid, value);
+	if (*value == NULL)
+		adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.Device.", ((struct upnpdiscovery *)data)->uuid, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
@@ -646,33 +638,26 @@ static int get_UPnPDescriptionDeviceInstance_UDN(char *refparam, struct dmctx *c
 
 static int get_UPnPDescriptionDeviceInstance_ParentDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *devinstlink = NULL;
-
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cUPnP%cDescription%cDeviceInstance%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), ((struct upnp_device_inst *)data)->parentudn, &devinstlink);
-	if (devinstlink != NULL)
-		*value = devinstlink;
+	adm_entry_get_linker_param(ctx, "Device.UPnP.Description.DeviceInstance.", ((struct upnp_device_inst *)data)->parentudn, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
 static int get_UPnPDescriptionDeviceInstance_DiscoveryDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct upnp_device_inst *upnpdevinst = (struct upnp_device_inst *)data;
-	char *rootdevlink = NULL, *devlink = NULL, **udnarray = NULL;
+	char **udnarray = NULL;
 	size_t length;
 
 	if (upnpdevinst->udn && upnpdevinst->udn[0]) {
 		udnarray = strsplit(upnpdevinst->udn, ":", &length);
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cUPnP%cDiscovery%cRootDevice%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), udnarray[1], &rootdevlink);
-		if (rootdevlink != NULL) {
-			*value = rootdevlink;
-			return 0;
-		}
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cUPnP%cDiscovery%cDevice%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), udnarray[1], &devlink);
-		if (devlink != NULL) {
-			*value =devlink;
-			return 0;
-		}
+		adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.RootDevice.", udnarray[1], value);
+		if (*value == NULL)
+			adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.Device.", udnarray[1], value);
 	}
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
@@ -755,11 +740,9 @@ static int get_UPnPDescriptionDeviceInstance_PresentationURL(char *refparam, str
 
 static int get_UPnPDescriptionServiceInstance_ParentDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *devinstlink = NULL;
-
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cUPnP%cDescription%cDeviceInstance%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), ((struct upnp_service_inst *)data)->parentudn, &devinstlink);
-	if (devinstlink != NULL)
-		*value = devinstlink;
+	adm_entry_get_linker_param(ctx, "Device.UPnP.Description.DeviceInstance.", ((struct upnp_service_inst *)data)->parentudn, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
@@ -772,13 +755,13 @@ static int get_UPnPDescriptionServiceInstance_ServiceId(char *refparam, struct d
 
 static int get_UPnPDescriptionServiceInstance_ServiceDiscovery(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *usn = NULL, *devlink = NULL;
+	char *usn = NULL;
 
 	dmasprintf(&usn, "%s::%s", ((struct upnp_service_inst *)data)->parentudn, ((struct upnp_service_inst *)data)->servicetype);
 	if (usn && usn[0]) {
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cUPnP%cDiscovery%cService%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), usn, &devlink);
-		if (devlink != NULL)
-			*value = devlink;
+		adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.Service.", usn, value);
+		if (*value == NULL)
+			*value = "";
 	}
 	return 0;
 }

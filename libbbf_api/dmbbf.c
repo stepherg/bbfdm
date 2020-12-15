@@ -49,33 +49,6 @@ static int mparam_set_notification_in_obj(DMPARAM_ARGS);
 static int mobj_set_notification_in_param(DMOBJECT_ARGS);
 static int mparam_set_notification_in_param(DMPARAM_ARGS);
 static int mobj_set_notification_in_obj(DMOBJECT_ARGS);
-#ifdef BBF_TR064
-static int mparam_upnp_get_instances(DMPARAM_ARGS);
-static int mobj_upnp_get_instances(DMOBJECT_ARGS);
-static int mparam_upnp_structured_get_value_in_param(DMPARAM_ARGS);
-static int mparam_upnp_get_supportedparams(DMPARAM_ARGS);
-static int mparam_upnp_set_attributes(DMPARAM_ARGS);
-static int mobj_upnp_set_attributes(DMOBJECT_ARGS);
-static int mobj_upnp_get_supportedparams(DMOBJECT_ARGS);
-static int mparam_upnp_get_attributes(DMPARAM_ARGS);
-static int mobj_upnp_get_attributes(DMOBJECT_ARGS);
-static int upnp_get_value_obj(DMOBJECT_ARGS);
-static int upnp_get_value_param(DMPARAM_ARGS);
-static int mobj_upnp_get_value_in_param(DMOBJECT_ARGS);
-static int mparam_upnp_get_value_in_param(DMPARAM_ARGS);
-static int mobj_upnp_set_value(DMOBJECT_ARGS);
-static int mparam_upnp_set_value(DMPARAM_ARGS);
-static int upnp_delete_instance_param(DMPARAM_ARGS);
-static int upnp_delete_instance_obj(DMOBJECT_ARGS);
-static int mparam_upnp_add_instance(DMPARAM_ARGS);
-static int mobj_upnp_add_instance(DMOBJECT_ARGS);
-static int mparam_upnp_get_acldata(DMPARAM_ARGS);
-static int mobj_upnp_get_acldata(DMOBJECT_ARGS);
-static int mparam_upnp_get_instance_numbers(DMPARAM_ARGS);
-static int mobj_upnp_get_instance_numbers(DMOBJECT_ARGS);
-static int enabled_tracked_param_check_obj(DMOBJECT_ARGS);
-static int enabled_tracked_param_check_param(DMPARAM_ARGS);
-#endif
 static int enabled_notify_check_obj(DMOBJECT_ARGS);
 static int enabled_notify_check_param(DMPARAM_ARGS);
 static int get_linker_check_obj(DMOBJECT_ARGS);
@@ -83,19 +56,8 @@ static int get_linker_check_param(DMPARAM_ARGS);
 static int get_linker_value_check_obj(DMOBJECT_ARGS);
 static int get_linker_value_check_param(DMPARAM_ARGS);
 
-#ifdef BBF_TR064
-LIST_HEAD(list_upnp_enabled_onevent);
-LIST_HEAD(list_upnp_enabled_onalarm);
-LIST_HEAD(list_upnp_enabled_version);
-LIST_HEAD(list_upnp_changed_onevent);
-LIST_HEAD(list_upnp_changed_onalarm);
-LIST_HEAD(list_upnp_changed_version);
-#endif
-
 LIST_HEAD(list_enabled_notify);
 
-char dm_delim = DMDELIM_CWMP;
-char dmroot[64] = "Device";
 int bbfdatamodel_type = BBFDM_BOTH;
 
 struct notification notifications[] = {
@@ -114,18 +76,6 @@ struct dm_parameter forced_notifications_parameters[] = {
 	{.name = "Device.ManagementServer.ConnectionRequestURL", .notification = "2"},
 	{.name = "Device.ManagementServer.ConnReqJabberID", .notification = "2"},
 	{.name = "Device.SoftwareModules.ExecutionUnit.*.Status", .notification = "2"}
-};
-
-struct dm_acl dm_acl[] = {
-	[0] = {DM_PUBLIC_LIST, "public_list"},
-	[1] = {DM_PUBLIC_READ, "public_read"},
-	[2] = {DM_PUBLIC_WRITE, "public_write"},
-	[3] = {DM_BASIC_LIST, "basic_list"},
-	[4] = {DM_BASIC_READ, "basic_read"},
-	[5] = {DM_BASIC_WRITE, "basic_write"},
-	[6] = {DM_XXXADMIN_LIST, "xxxadmin_list"},
-	[7] = {DM_XXXADMIN_READ, "xxxadmin_read"},
-	[8] = {DM_XXXADMIN_WRITE, "xxxadmin_write"},
 };
 
 char *DMT_TYPE[] = {
@@ -149,18 +99,6 @@ char *array_notifcation_char[__MAX_notification] = {
 	[notification_aactive_lw] = "5",
 	[notification_passive_active_lw] = "6",
 };
-
-#ifdef BBF_TR064
-unsigned int UPNP_DMT_TYPE[] = {
-[DMT_STRING] = NODE_DATA_ATTRIBUTE_TYPESTRING,
-[DMT_UNINT] = NODE_DATA_ATTRIBUTE_TYPEINT,
-[DMT_INT] = NODE_DATA_ATTRIBUTE_TYPEINT,
-[DMT_LONG] = NODE_DATA_ATTRIBUTE_TYPELONG,
-[DMT_BOOL] = NODE_DATA_ATTRIBUTE_TYPEBOOL,
-[DMT_TIME] = NODE_DATA_ATTRIBUTE_TYPEDATETIME,
-[DMT_HEXBIN] = NODE_DATA_ATTRIBUTE_TYPEBIN,
-};
-#endif
 
 struct dm_permession_s DMREAD = {"0", NULL};
 struct dm_permession_s DMWRITE = {"1", NULL};
@@ -188,7 +126,7 @@ static int plugin_leaf_match(DMOBJECT_ARGS)
 	if (!dmctx->inparam_isparam)
 		return FAULT_9005;
 	str = dmctx->in_param + strlen(node->current_object);
-	if (!strchr(str, dm_delim))
+	if (!strchr(str, '.'))
 		return 0;
 	return FAULT_9005;
 }
@@ -227,7 +165,7 @@ static int plugin_leaf_nextlevel_match(DMOBJECT_ARGS)
 	if (!dmctx->inparam_isparam)
 		return FAULT_9005;
 	str = dmctx->in_param + strlen(node->current_object);
-	if (!strchr(str, dm_delim))
+	if (!strchr(str, '.'))
 		return 0;
 	return FAULT_9005;
 }
@@ -316,9 +254,9 @@ static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *ent
 		return;
 
 	if (entryobj->browseinstobj && dmctx->isgetschema)
-		dmasprintf(&(node.current_object), "%s%s%c{i}%c", parent_obj, entryobj->obj, dm_delim, dm_delim);
+		dmasprintf(&(node.current_object), "%s%s.{i}.", parent_obj, entryobj->obj);
 	else
-		dmasprintf(&(node.current_object), "%s%s%c", parent_obj, entryobj->obj, dm_delim);
+		dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
 
 	if (dmctx->checkobj) {
 		*err = dmctx->checkobj(dmctx, &node, entryobj->permission, entryobj->addobj, entryobj->delobj, entryobj->get_linker, data, instance);
@@ -333,14 +271,9 @@ static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *ent
 	}
 
 	if (entryobj->browseinstobj && !dmctx->isgetschema) {
-		if (dmctx->instance_wildchar) {
-			dm_link_inst_obj(dmctx, &node, data, dmctx->instance_wildchar);
-			return;
-		} else {
-			entryobj->browseinstobj(dmctx, &node, data, instance);
-			*err = dmctx->faultcode;
-			return;
-		}
+		entryobj->browseinstobj(dmctx, &node, data, instance);
+		*err = dmctx->faultcode;
+		return;
 	}
 
 	if (entryobj->leaf) {
@@ -417,7 +350,7 @@ int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char 
 	parent_obj = parent_node->current_object;
 	if (instance == NULL)
 		return -1;
-	dmasprintf(&node.current_object, "%s%s%c", parent_obj, instance, dm_delim);
+	dmasprintf(&node.current_object, "%s%s.", parent_obj, instance);
 	if (dmctx->checkobj) {
 		err = dmctx->checkobj(dmctx, &node, prevobj->permission, prevobj->addobj, prevobj->delobj, prevobj->get_linker, data, instance);
 		if (err)
@@ -460,7 +393,7 @@ void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entry
 		node.parent = parent_node;
 		node.instance_level = parent_node->instance_level;
 		node.matched = parent_node->matched;
-		dmasprintf(&(node.current_object), "%s%s%c", parent_obj, entryobj->obj, dm_delim);
+		dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
 		if (strcmp(node.current_object, obj) == 0) {
 			*root_entry = entryobj;
 			*obj_found = 1;
@@ -505,7 +438,7 @@ int free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj
 static int rootcmp(char *inparam, char *rootobj)
 {
 	char buf[32];
-	snprintf(buf, sizeof(buf), "%s%c", rootobj, dm_delim);
+	snprintf(buf, sizeof(buf), "%s.", rootobj);
 	int cmp = strcmp(inparam, buf);
 	return cmp;
 }
@@ -527,15 +460,11 @@ char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_i
 	}
 	argv[argc] = NULL;
 	va_end(arg);
-	if (ctx->amd_version >= AMD_4) {
-		if(pos < ctx->nbrof_instance) {
-			action = (ctx->alias_register & (1 << pos)) ? INSTANCE_UPDATE_ALIAS : INSTANCE_UPDATE_NUMBER;
-		} else {
-			action = (ctx->instance_mode == INSTANCE_MODE_ALIAS) ? INSTANCE_UPDATE_ALIAS : INSTANCE_UPDATE_NUMBER;
-		}
-	} else {
-		action = INSTANCE_UPDATE_NUMBER;
-	}
+
+	if (pos < ctx->nbrof_instance)
+		action = (ctx->alias_register & (1 << pos)) ? INSTANCE_UPDATE_ALIAS : INSTANCE_UPDATE_NUMBER;
+	else
+		action = (ctx->instance_mode == INSTANCE_MODE_ALIAS) ? INSTANCE_UPDATE_ALIAS : INSTANCE_UPDATE_NUMBER;
 
 	instance = up_instance(action, &last_inst, max_inst, argv);
 	if (last_inst)
@@ -750,7 +679,7 @@ int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, cha
 	return 0;
 }
 
-void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_version, unsigned int flags, char *param_notification)
+void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_notification)
 {
 	struct dm_parameter *dm_parameter;
 	struct list_head *ilist;
@@ -768,8 +697,6 @@ void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, c
 	dm_parameter->name = param_name;
 	dm_parameter->data = param_data ? param_data : "";
 	dm_parameter->type = param_type;
-	dm_parameter->version = param_version;
-	dm_parameter->flags = flags;
 	dm_parameter->notification = param_notification;
 }
 
@@ -789,14 +716,13 @@ void free_all_list_parameter(struct dmctx *ctx)
 	}
 }
 
-static void add_set_list_tmp(struct dmctx *ctx, char *param, char *value, unsigned int flags)
+static void add_set_list_tmp(struct dmctx *ctx, char *param, char *value)
 {
 	struct set_tmp *set_tmp;
 	set_tmp = dmcalloc(1, sizeof(struct set_tmp));
 	list_add_tail(&set_tmp->list, &ctx->set_list_tmp);
 	set_tmp->name = dmstrdup(param);
 	set_tmp->value = value ? dmstrdup(value) : NULL;
-	set_tmp->flags = flags;
 }
 
 static void del_set_list_tmp(struct set_tmp *set_tmp)
@@ -932,20 +858,20 @@ int update_param_instance_alias(struct dmctx *ctx, char *param, char **new_param
 	char pat[2] = {0};
 
 	char *dup = dmstrdup(param);
-	*pat = dm_delim;
+	*pat = '.';
 	p = buf;
 	for (pch = strtok_r(dup, pat, &spch); pch != NULL; pch = strtok_r(NULL, pat, &spch)) {
 		if (isdigit(pch[0])) {
-			dmstrappendchr(p, dm_delim);
+			dmstrappendchr(p, '.');
 			dmstrappendstr(p, pch);
 			i++;
 		} else if (pch[0]== '[') {
-			dmstrappendchr(p, dm_delim);
+			dmstrappendchr(p, '.');
 			dmstrappendstr(p, (ctx->inst_buf[i]) ? ctx->inst_buf[i] : "1");
 			i++;
 		} else {
 			if (j > 0) {
-				dmstrappendchr(p, dm_delim);
+				dmstrappendchr(p, '.');
 				dmstrappendstr(p, pch);
 			}
 			if (j == 0) {
@@ -954,8 +880,8 @@ int update_param_instance_alias(struct dmctx *ctx, char *param, char **new_param
 			}
 		}
 	}
-	if (param[strlen(param) - 1] == dm_delim)
-		dmstrappendchr(p, dm_delim);
+	if (param[strlen(param) - 1] == '.')
+		dmstrappendchr(p, '.');
 	dmstrappendend(p);
 	*new_param = dmstrdup(buf);
 	dmfree(dup);
@@ -981,7 +907,7 @@ static char *get_parameter_notification(struct dmctx *ctx, char *param)
 					return notification;
 				}
 				len = strlen(pch);
-				if (pch[len-1] == dm_delim) {
+				if (pch[len-1] == '.') {
 					if (strstr(new_param, pch)) {
 						if (len > maxlen )
 						{
@@ -1004,7 +930,7 @@ static int remove_parameter_notification(char *param)
 	struct uci_element *e, *tmp;
 	char *pch;
 	for (i = (ARRAY_SIZE(notifications) - 1); i >= 0; i--) {
-		if (param[strlen(param)-1] == dm_delim) {
+		if (param[strlen(param)-1] == '.') {
 			dmuci_get_option_value_list("cwmp", "@notifications[0]", notifications[i].type, &list_notif);
 			if (list_notif) {
 				uci_foreach_element_safe(list_notif, e, tmp) {
@@ -1060,7 +986,7 @@ static int set_parameter_notification(struct dmctx *ctx, char *param, char *valu
 				uci_foreach_element(list_notif, e) {
 					pch = e->name;
 					len = strlen(pch);
-					if (pch[len-1] == dm_delim && strstr(new_param, pch)) {
+					if (pch[len-1] == '.' && strstr(new_param, pch)) {
 						dmuci_add_list_value("cwmp", "@notifications[0]", "disabled", new_param);
 						goto end;
 					}
@@ -1186,9 +1112,8 @@ void dmentry_instance_lookup_inparam(struct dmctx *ctx)
 	char *pch, *spch, *in_param;
 	in_param = dmstrdup(ctx->in_param);
 	int i = 0;
-	char pat[2] = {0};
-	*pat = dm_delim;
-	for (pch = strtok_r(in_param, pat, &spch); pch != NULL; pch = strtok_r(NULL, pat, &spch)) {
+
+	for (pch = strtok_r(in_param, ".", &spch); pch != NULL; pch = strtok_r(NULL, ".", &spch)) {
 		if (pch[0]== '[') {
 			ctx->alias_register |= (1 << i);
 			i++;
@@ -1240,7 +1165,7 @@ int dm_entry_get_value(struct dmctx *dmctx)
 		dmctx->findparam = 1;
 		dmctx->stop = 0;
 		findparam_check = 1;
-	} else if (dmctx->in_param[strlen(dmctx->in_param) - 1] == dm_delim) {
+	} else if (dmctx->in_param[strlen(dmctx->in_param) - 1] == '.') {
 		dmctx->inparam_isparam = 0;
 		dmctx->findparam = 0;
 		dmctx->stop = 0;
@@ -1280,7 +1205,7 @@ static int get_value_param(DMPARAM_ARGS)
 
 	value = (value && *value) ? check_value_by_type(value, type) : get_default_value_by_type(type);
 
-	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0, NULL);
+	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL);
 	return 0;
 }
 
@@ -1303,7 +1228,7 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 
 	value = (value && *value) ? check_value_by_type(value, type) : get_default_value_by_type(type);
 
-	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0, NULL);
+	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL);
 	dmctx->stop = true;
 	return 0;
 }
@@ -1336,7 +1261,7 @@ int dm_entry_get_name(struct dmctx *ctx)
 		ctx->in_param = root->obj;
 		node.matched = 1;
 		findparam_check = 1;
-	} else if (*(ctx->in_param + strlen(ctx->in_param) - 1) == dm_delim) {
+	} else if (*(ctx->in_param + strlen(ctx->in_param) - 1) == '.') {
 		ctx->inparam_isparam = 0;
 		ctx->findparam = 0;
 		ctx->stop = 0;
@@ -1369,7 +1294,7 @@ static int mparam_get_name(DMPARAM_ARGS)
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0, NULL);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL);
 	return 0;
 }
 
@@ -1381,7 +1306,7 @@ static int mobj_get_name(DMOBJECT_ARGS)
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL, 0, NULL);
+	add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL);
 	return 0;
 }
 
@@ -1402,7 +1327,7 @@ static int mparam_get_name_in_param(DMPARAM_ARGS)
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0, NULL);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL);
 	return 0;
 }
 
@@ -1421,7 +1346,7 @@ static int mparam_get_name_in_obj(DMPARAM_ARGS)
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0, NULL);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL);
 	return 0;
 }
 
@@ -1442,7 +1367,7 @@ static int mobj_get_name_in_obj(DMOBJECT_ARGS)
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL, 0, NULL);
+	add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL);
 	return 0;
 }
 
@@ -1476,7 +1401,7 @@ static int mobj_get_schema_name(DMOBJECT_ARGS)
 	if (node->obj)
 		unique_keys = node->obj->unique_keys;
 
-	add_list_parameter(dmctx, refparam, perm, "xsd:object", (char *) unique_keys, 0, NULL);
+	add_list_parameter(dmctx, refparam, perm, "xsd:object", (char *) unique_keys);
 	return 0;
 }
 
@@ -1486,7 +1411,7 @@ static int mparam_get_schema_name(DMPARAM_ARGS)
 	char *perm = permission->val;
 	dmastrcat(&refparam, node->current_object, lastname);
 
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL, 0, NULL);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL);
 	return 0;
 }
 
@@ -1497,7 +1422,7 @@ int dm_entry_get_instances(struct dmctx *ctx)
 {
 	DMOBJ *root = ctx->dm_entryobj;
 	DMNODE node = { .current_object = "" };
-	char buf[4] = { dm_delim, 0 };
+	char buf[4] = { '.', 0 };
 	size_t plen;
 	int err;
 
@@ -1505,7 +1430,7 @@ int dm_entry_get_instances(struct dmctx *ctx)
 		ctx->in_param = buf;
 
 	plen = strlen(ctx->in_param);
-	if (ctx->in_param[plen - 1] != dm_delim)
+	if (ctx->in_param[plen - 1] != '.')
 		return FAULT_9005;
 
 	ctx->inparam_isparam = 0;
@@ -1530,7 +1455,7 @@ static int mobj_get_instances_in_obj(DMOBJECT_ARGS)
 
 		if (name) {
 			name[strlen(name) - 1] = 0;
-			add_list_parameter(dmctx, name, NULL, "xsd:object", NULL, 0, NULL);
+			add_list_parameter(dmctx, name, NULL, "xsd:object", NULL);
 		}
 	}
 
@@ -1562,7 +1487,7 @@ int dm_entry_get_notification(struct dmctx *dmctx)
 		dmctx->method_obj = mobj_get_notification;
 		dmctx->method_param = mparam_get_notification;
 		findparam_check = 1;
-	} else if (*(dmctx->in_param + strlen(dmctx->in_param) - 1) == dm_delim) {
+	} else if (*(dmctx->in_param + strlen(dmctx->in_param) - 1) == '.') {
 		dmctx->inparam_isparam = 0;
 		dmctx->findparam = 0;
 		dmctx->stop = 0;
@@ -1599,7 +1524,7 @@ static int mparam_get_notification(DMPARAM_ARGS)
 	} else {
 		value = check_parameter_forced_notification(refparam);
 	}
-	add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL, 0, NULL);
+	add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL);
 	return 0;
 }
 
@@ -1623,7 +1548,7 @@ static int mparam_get_notification_in_param(DMPARAM_ARGS)
 	} else {
 		value = check_parameter_forced_notification(refparam);
 	}
-	add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL, 0, NULL);
+	add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL);
 	dmctx->stop = 1;
 	return 0;
 }
@@ -1643,7 +1568,7 @@ int dm_entry_add_object(struct dmctx *dmctx)
 	int err;
 
 	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0'
-			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != dm_delim))
+			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != '.'))
 		return FAULT_9005;
 
 	dmctx->inparam_isparam = 0;
@@ -1686,7 +1611,7 @@ static int mobj_add_object(DMOBJECT_ARGS)
 	if (fault)
 		return fault;
 	dmctx->addobj_instance = instance;
-	dmasprintf(&objinst, "%s%s%c", node->current_object, instance, dm_delim);
+	dmasprintf(&objinst, "%s%s.", node->current_object, instance);
 	set_parameter_notification(dmctx, objinst, "0");
 	dmfree(objinst);
 	return 0;
@@ -1702,7 +1627,7 @@ int dm_entry_delete_object(struct dmctx *dmctx)
 	int err;
 
 	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0'
-			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != dm_delim))
+			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != '.'))
 		return FAULT_9005;
 
 	dmctx->inparam_isparam = 0;
@@ -1755,7 +1680,7 @@ int dm_entry_set_value(struct dmctx *dmctx)
 	int err;
 
 	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0'
-			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) == dm_delim))
+			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) == '.'))
 		return FAULT_9005;
 
 	dmctx->inparam_isparam = 1;
@@ -1801,7 +1726,7 @@ static int mparam_set_value(DMPARAM_ARGS)
 			dmfree(refparam);
 			return fault;
 		}
-		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_value, 0);
+		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_value);
 	} else if (dmctx->setaction == VALUESET) {
 		(set_cmd)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
 		dm_update_enabled_notify_byname(refparam, dmctx->in_value);
@@ -1824,7 +1749,7 @@ int dm_entry_set_notification(struct dmctx *dmctx)
 
 	if (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, root->obj) == 0) {
 		return FAULT_9009;
-	} else if (*(dmctx->in_param + strlen(dmctx->in_param) - 1) == dm_delim) {
+	} else if (*(dmctx->in_param + strlen(dmctx->in_param) - 1) == '.') {
 		dmctx->inparam_isparam = 0;
 		dmctx->findparam = 0;
 		dmctx->stop = 0;
@@ -1867,7 +1792,7 @@ static int mobj_set_notification_in_obj(DMOBJECT_ARGS)
 		if (check_parameter_forced_notification(refparam))
 			return FAULT_9009;
 
-		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_notification, 0);
+		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_notification);
 	} else if (dmctx->setaction == VALUESET) {
 		set_parameter_notification(dmctx, dmctx->in_param, dmctx->in_notification);
 		dmctx->end_session_flag |= BBF_END_SESSION_RELOAD;
@@ -1894,7 +1819,7 @@ static int mparam_set_notification_in_param(DMPARAM_ARGS)
 			dmfree(refparam);
 			return FAULT_9009;
 		}
-		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_notification, 0);
+		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_notification);
 	} else if (dmctx->setaction == VALUESET) {
 		set_parameter_notification(dmctx, dmctx->in_param, dmctx->in_notification);
 		dmctx->end_session_flag |= BBF_END_SESSION_RELOAD;
@@ -1965,7 +1890,7 @@ static int enabled_notify_check_param(DMPARAM_ARGS)
 	}
 	if (notif[0] == '1' || notif[0] == '2' || notif[0] == '4' || notif[0] == '6') {
 		stype = DMT_TYPE[type];
-		add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL, 0, notif);
+		add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], notif);
 		dmjson_fprintf(fp, 4, DMJSON_ARGS{{"parameter", refparam}, {"notification", notif}, {"value", value}, {"type", stype}});
 	}
 	fclose(fp);
@@ -2063,1132 +1988,4 @@ static int get_linker_value_check_obj(DMOBJECT_ARGS)
 static int get_linker_value_check_param(DMPARAM_ARGS)
 {
 	return FAULT_9005;
-}
-
-#ifdef BBF_TR064
-/* ******************
- * UPNP entries
- * ******************/
-
-int upnp_map_bbf_fault(int bbf_fault)
-{
-	switch (bbf_fault) {
-	case FAULT_9005:
-		return FAULT_UPNP_703;
-	case FAULT_9003:
-		return FAULT_UPNP_701;
-	case FAULT_9007:
-		return FAULT_UPNP_705;
-	case FAULT_9008:
-		return FAULT_UPNP_706;
-	}
-	if (bbf_fault > __FAULT_UPNP_MAX)
-		return FAULT_UPNP_701;
-	return bbf_fault;
-}
-
-int plugin_upnp_structured_obj_match(DMOBJECT_ARGS)
-{
-	if (node->matched)
-		return 0;
-	if (!dmctx->inparam_isparam && strstructered(node->current_object, dmctx->in_param) == STRUCTERED_SAME) {
-		node->matched++;
-		dmctx->findparam = 1;
-		return 0;
-	}
-	if (strstructered(dmctx->in_param, node->current_object) == STRUCTERED_PART) {
-		return 0;
-	}
-	return FAULT_UPNP_703;
-}
-
-int plugin_upnp_leaf_match(DMOBJECT_ARGS)
-{
-	char *str;
-	if (node->matched)
-		return 0;
-	if (!dmctx->inparam_isparam)
-		return FAULT_UPNP_703;
-	str = dmctx->in_param + strlen(node->current_object);
-	if (!strchr(str, dm_delim))
-		return 0;
-	return FAULT_UPNP_703;
-}
-
-static int plugin_upnp_obj_depth_match(DMOBJECT_ARGS)
-{
-	if (node->matched) {
-		node->matched++;
-	}
-	else if (strcmp(node->current_object, dmctx->in_param) == 0) {
-		node->matched++;
-		dmctx->findparam = 1;
-	}
-	else if (strstr(dmctx->in_param, node->current_object) == dmctx->in_param) {
-		return 0;
-	}
-	if (dmctx->depth == 0 || dmctx->depth >= (node->matched - 1))
-		return 0;
-	return FAULT_UPNP_703;
-}
-
-int plugin_upnp_leaf_depth_match(DMOBJECT_ARGS)
-{
-	char *str;
-	if (!node->matched) {
-		if (!dmctx->inparam_isparam) {
-			return FAULT_UPNP_703;
-		}
-		else {
-			str = dmctx->in_param + strlen(node->current_object);
-			if (strchr(str, dm_delim))
-				return FAULT_UPNP_703;
-		}
-	}
-	if (dmctx->depth == 0)
-		return 0;
-	if (dmctx->depth >= node->matched)
-		return 0;
-	return FAULT_UPNP_703;
-}
-
-static int plugin_upnp_skip_leafs(DMOBJECT_ARGS)
-{
-	return FAULT_UPNP_703;
-}
-
-static int upnp_get_parameter_onchange(struct dmctx *ctx, char *param, char *onchange)
-{
-	struct uci_list *list_onchange;
-	char *pch;
-	struct uci_element *e;
-	dmuci_get_option_value_list(UPNP_CFG, "@notifications[0]", onchange, &list_onchange);
-	if (list_onchange) {
-		uci_foreach_element(list_onchange, e) {
-			pch = e->name;
-			if (strcmp(pch, param) == 0) {
-				return 1;
-			}
-		}
-	}
-	return 0;
-}
-
-static int upnp_set_parameter_onchange(struct dmctx *ctx, char *param, char *onchange, unsigned int value)
-{
-	char *tmp;
-	struct uci_section *s;
-
-	dmuci_get_section_type(UPNP_CFG, "@notifications[0]", &tmp);
-	if (!tmp || tmp[0] == '\0') {
-		dmuci_add_section(UPNP_CFG, "notifications", &s);
-	}
-
-	dmuci_del_list_value(UPNP_CFG, "@notifications[0]",onchange, param);
-	if (value) {
-		dmuci_add_list_value(UPNP_CFG, "@notifications[0]", onchange, param);
-	}
-	return 0;
-}
-
-void add_list_upnp_param_track(struct dmctx *dmctx, struct list_head *pchead, char *param, char *key, char *value, unsigned int isobj)
-{
-	struct dm_upnp_enabled_track *dm_upnp_enabled_track;
-
-	dm_upnp_enabled_track = calloc(1, sizeof(struct dm_upnp_enabled_track)); // Should be calloc and not dmcalloc
-	list_add_tail(&dm_upnp_enabled_track->list, pchead);
-	dm_upnp_enabled_track->name = strdup(param); // Should be strdup and not dmstrdup
-	dm_upnp_enabled_track->value = value ? strdup(value) : strdup(""); // Should be strdup and not dmstrdup
-	dm_upnp_enabled_track->key = key ? strdup(key) : NULL; // Should be strdup and not dmstrdup
-	dm_upnp_enabled_track->isobj = isobj;
-}
-
-void del_list_upnp_param_track(struct dm_upnp_enabled_track *dm_upnp_enabled_track)
-{
-	list_del(&dm_upnp_enabled_track->list); // Should be free and not dmfree
-	free(dm_upnp_enabled_track->name);
-	free(dm_upnp_enabled_track->value);
-	free(dm_upnp_enabled_track->key);
-	free(dm_upnp_enabled_track);
-}
-
-void free_all_list_upnp_param_track(struct list_head *pchead)
-{
-	struct dm_upnp_enabled_track *dm_upnp_enabled_track;
-	while (pchead->next != pchead) {
-		dm_upnp_enabled_track = list_entry(pchead->next, struct dm_upnp_enabled_track, list);
-		del_list_upnp_param_track(dm_upnp_enabled_track);
-	}
-}
-
-int get_parameter_version(struct dmctx *ctx, char *param, char **version, struct uci_section **rs)
-{
-	struct uci_list *list_struc;
-	struct uci_section *s = NULL;
-	char *pch;
-	struct uci_element *e;
-
-	*version = NULL;
-	*rs = NULL;
-
-	uci_foreach_option_eq(UPNP_CFG, "parameter_version", "parameter", param, s) {
-		break;
-	}
-	if (s != NULL) {
-		*rs = s;
-		dmuci_get_value_by_section_string(s, "version", version);
-		if (**version == '\0')
-			*version = "0";
-		return 1;
-	} else {
-		dmuci_get_option_value_list(UPNP_CFG, "@parameter_version_structured[0]", "paramater", &list_struc);
-		if (list_struc) {
-			uci_foreach_element(list_struc, e) {
-				pch = e->name;
-				if (strstructered(pch, param) == STRUCTERED_SAME) {
-					*version = "0";
-					return 1;
-				}
-			}
-		}
-	}
-	return 0;
-}
-
-unsigned int get_parameter_acl(struct dmctx *ctx, char *param)
-{
-	int i, maxlen = 0, len;
-	struct uci_list *list_acl;
-	char *pch;
-	unsigned int acl = 0, f;
-	struct uci_element *e;
-
-	for (i = (ARRAY_SIZE(dm_acl) - 1); i >= 0; i--) {
-		dmuci_get_option_value_list(UPNP_CFG, "@acl_factorized[0]", dm_acl[i].user_access, &list_acl);
-		if (list_acl) {
-			f = 0;
-			maxlen = 0;
-			uci_foreach_element(list_acl, e) {
-				pch = e->name;
-				if (strstructered(pch, param) == STRUCTERED_SAME) {
-					f = dm_acl[i].flag;
-					break;
-				}
-				len = strlen(pch);
-				if (pch[len-1] == dm_delim) {
-					if (strstructered(param, pch) == STRUCTERED_PART) {
-						if (len > maxlen )
-						{
-							f = dm_acl[i].flag;
-							maxlen = len;
-						}
-					}
-				}
-			}
-			acl |= f;
-		}
-	}
-	return acl;
-}
-
-unsigned int dm_upnp_check_acl_list(struct dmctx *dmctx, char *param)
-{
-	unsigned int flag;
-	unsigned int mask = DM_LIST_MASK | DM_READ_MASK | DM_WRITE_MASK;
-	flag = get_parameter_acl(dmctx, param);
-	if (flag & mask & dmctx->user_mask)
-		return flag;
-	return 0;
-}
-
-unsigned int dm_upnp_check_acl_read(struct dmctx *dmctx, char *param)
-{
-	unsigned int flag;
-	unsigned int mask = DM_READ_MASK | DM_WRITE_MASK;
-	flag = get_parameter_acl(dmctx, param);
-	if (flag & mask & dmctx->user_mask)
-		return flag;
-	return 0;
-}
-
-unsigned int dm_upnp_check_acl_write(struct dmctx *dmctx, char *param)
-{
-	unsigned int flag;
-	unsigned int mask = DM_WRITE_MASK;
-	flag = get_parameter_acl(dmctx, param);
-	if (flag & mask & dmctx->user_mask)
-		return flag;
-	return 0;
-}
-
-int dm_entry_upnp_update_attribute_values_update(struct dmctx *dmctx)
-{
-	char *v, *tmp, buf[32];
-	struct uci_section *s;
-	int version;
-
-	dmuci_get_option_value_string(UPNP_CFG, "@dm[0]", "attribute_values_version", &v);
-	version = atoi(v);
-	version++;
-
-	dmuci_get_section_type(UPNP_CFG, "@dm[0]", &tmp);
-	if (!tmp || tmp[0] == '\0') {
-		dmuci_add_section(UPNP_CFG, "dm", &s);
-	}
-	snprintf(buf, sizeof(buf), "%d", version);
-	dmuci_set_value(UPNP_CFG, "@dm[0]", "attribute_values_version", buf);
-	snprintf(buf, sizeof(buf), "%ld", time(NULL));
-	dmuci_set_value(UPNP_CFG, "@dm[0]", "attribute_values_epochtime", buf);
-
-	return 0;
-}
-
-/* ******************
- * UPNP get instances
- * ******************/
-int dm_entry_upnp_get_instances(struct dmctx *dmctx, bool all_instances)
-{
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = {.current_object = ""};
-	int err;
-	char buf[4] = {0};
-	buf[0] = dm_delim;
-
-	if (*(dmctx->in_param) == '\0')
-		dmctx->in_param = buf;
-
-	if (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != dm_delim)
-		return FAULT_UPNP_701;
-
-	dmctx->inparam_isparam = 0;
-	dmctx->findparam = 0;
-	dmctx->stop = 0;
-	dmctx->checkobj = plugin_upnp_obj_depth_match;
-	dmctx->checkleaf = plugin_upnp_skip_leafs;
-	dmctx->method_obj = all_instances ? mobj_upnp_get_instance_numbers : mobj_upnp_get_instances;
-	dmctx->method_param = all_instances ? mparam_upnp_get_instance_numbers : mparam_upnp_get_instances;
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (dmctx->findparam)
-		return 0;
-	else
-		return (upnp_map_bbf_fault(err));
-}
-
-static int mparam_upnp_get_instances(DMPARAM_ARGS)
-{
-	return 0;
-}
-
-static int mobj_upnp_get_instances(DMOBJECT_ARGS)
-{
-	char *refparam;
-	refparam = node->current_object;
-	if (!node->is_instanceobj || !node->matched)
-		return FAULT_UPNP_703;
-	if (!dm_upnp_check_acl_read(dmctx, refparam)) {
-		dmctx->findparam = 0;
-		dmctx->stop = 1;
-		return FAULT_UPNP_703;
-	}
-	add_list_parameter(dmctx, refparam, NULL, NULL, NULL, 0, NULL);
-	return 0;
-}
-
-static int mparam_upnp_get_instance_numbers(DMPARAM_ARGS)
-{
-	return 0;
-}
-
-static int mobj_upnp_get_instance_numbers(DMOBJECT_ARGS)
-{
-	char *refparam;
-	refparam = node->current_object;
-	if (!node->is_instanceobj || !node->matched)
-		return FAULT_UPNP_703;
-	if (*(dmctx->all_instances)) {
-		strcat(dmctx->all_instances, ",");
-	}
-	strcat(dmctx->all_instances, instance);
-	return 0;
-}
-
-/* *****************************
- * UPNP get supported parameters
- * *****************************/
-
-int dm_entry_upnp_get_supported_parameters(struct dmctx *dmctx)
-{
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = {.current_object = ""};
-	int err;
-
-	char buf[4] = {0};
-	buf[0] = dm_delim;
-
-	if (*(dmctx->in_param) == '\0')
-		dmctx->in_param = buf;
-
-	if (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != dm_delim)
-		dmctx->inparam_isparam = 1;
-	else
-		dmctx->inparam_isparam = 0;
-	dmctx->instance_wildchar = "#";
-	dmctx->findparam = 0;
-	dmctx->stop = 0;
-	dmctx->checkobj = plugin_upnp_obj_depth_match;
-	dmctx->checkleaf = plugin_upnp_leaf_depth_match;
-	dmctx->method_obj = mobj_upnp_get_supportedparams;
-	dmctx->method_param = mparam_upnp_get_supportedparams;
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (dmctx->findparam)
-		return 0;
-	else
-		return (upnp_map_bbf_fault(err));
-}
-
-static int mparam_upnp_get_supportedparams(DMPARAM_ARGS)
-{
-	char *refparam;
-	dmastrcat(&refparam, node->current_object, lastname);
-	if (dmctx->inparam_isparam) {
-		if (strcmp(refparam, dmctx->in_param) == 0) {
-			if (!dm_upnp_check_acl_list(dmctx, refparam)) {
-				dmctx->findparam = 0;
-				dmctx->stop = 1;
-				return FAULT_UPNP_703;
-			}
-			dmctx->findparam = 1;
-			add_list_parameter(dmctx, refparam, NULL, NULL, NULL, 0, NULL);
-			return 0;
-		}
-	}
-	else {
-		if (!dm_upnp_check_acl_list(dmctx, refparam)) {
-			dmctx->findparam = 0;
-			dmctx->stop = 1;
-			return FAULT_UPNP_703;
-		}
-		add_list_parameter(dmctx, refparam, NULL, NULL, NULL, 0, NULL);
-		return 0;
-	}
-	return FAULT_UPNP_703;
-}
-
-static int mobj_upnp_get_supportedparams(DMOBJECT_ARGS)
-{
-	char *refparam;
-	if (node->matched <= 1)
-		return FAULT_UPNP_703;
-	if (dmctx->depth == (node->matched - 1)) {
-		if (node->obj->browseinstobj && !node->is_instanceobj)
-			dmastrcat(&refparam, node->current_object, "#/");
-		else
-			refparam = node->current_object;
-		if (!dm_upnp_check_acl_list(dmctx, refparam)) {
-			dmctx->findparam = 0;
-			dmctx->stop = 1;
-			return FAULT_UPNP_703;
-		}
-		add_list_parameter(dmctx, refparam, NULL, NULL, NULL, 0, NULL);
-		return 0;
-	}
-	return FAULT_UPNP_703;
-}
-
-/* ************************
- * UPNP get selected values
- * ************************/
-
-int dm_entry_upnp_get_selected_values(struct dmctx *dmctx)
-{
-	int err = 0;
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = {.current_object = ""};
-
-	if (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, root->obj) == 0) {
-		dmctx->inparam_isparam = 0;
-		dmctx->method_obj = get_value_obj;
-		dmctx->method_param = get_value_param;
-		dmctx->checkobj = NULL;
-		dmctx->checkleaf = NULL;
-		dmctx->findparam = 1;
-		dmctx->stop = 0;
-	} else if (dmctx->in_param[strlen(dmctx->in_param) - 1] == dm_delim) {
-		dmctx->inparam_isparam = 0;
-		dmctx->findparam = 0;
-		dmctx->stop = 0;
-		dmctx->checkobj = plugin_upnp_structured_obj_match;
-		dmctx->checkleaf = plugin_upnp_leaf_match;
-		dmctx->method_obj = get_value_obj;
-		dmctx->method_param = get_value_param;
-	} else {
-		dmctx->inparam_isparam = 1;
-		dmctx->findparam = 0;
-		dmctx->stop = 0;
-		dmctx->checkobj = plugin_upnp_structured_obj_match;
-		dmctx->checkleaf = plugin_upnp_leaf_match;
-		dmctx->method_obj = mobj_get_value_in_param;
-		dmctx->method_param = mparam_upnp_structured_get_value_in_param;
-	}
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (dmctx->findparam)
-		return 0;
-	else
-		return (upnp_map_bbf_fault(err));
-}
-
-static int mparam_upnp_structured_get_value_in_param(DMPARAM_ARGS)
-{
-	char *full_param;
-	char *value = "";
-
-	dmastrcat(&full_param, node->current_object, lastname);
-	if (strstructered(dmctx->in_param, full_param) == STRUCTERED_NULL) {
-		dmfree(full_param);
-		return FAULT_UPNP_703;
-	}
-	if (!dm_upnp_check_acl_read(dmctx, full_param)) {
-		dmctx->findparam = 0;
-		dmctx->stop = 1;
-		return FAULT_UPNP_703;
-	}
-	dmctx->findparam = 1;
-	(get_cmd)(full_param, dmctx, data, instance, &value);
-	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL, 0, NULL);
-	return 0;
-}
-
-/* ***************
- * UPNP get values
- * ***************/
-int dm_entry_upnp_get_values(struct dmctx *dmctx)
-{
-	int err = 0;
-	unsigned char findparam_check = 0;
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = {.current_object = ""};
-
-	if (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, root->obj) == 0) {
-		dmctx->inparam_isparam = 0;
-		dmctx->method_obj = upnp_get_value_obj;
-		dmctx->method_param = upnp_get_value_param;
-		dmctx->checkobj = NULL;
-		dmctx->checkleaf = NULL;
-		dmctx->findparam = 1;
-		dmctx->stop = 0;
-		findparam_check = 1;
-	} else if (dmctx->in_param[strlen(dmctx->in_param) - 1] == dm_delim) {
-		dmctx->inparam_isparam = 0;
-		dmctx->findparam = 0;
-		dmctx->stop = 0;
-		dmctx->checkobj = plugin_obj_match;
-		dmctx->checkleaf = plugin_leaf_match;
-		dmctx->method_obj = upnp_get_value_obj;
-		dmctx->method_param = upnp_get_value_param;
-		findparam_check = 1;
-	} else {
-		dmctx->inparam_isparam = 1;
-		dmctx->findparam = 0;
-		dmctx->stop = 0;
-		dmctx->checkobj = plugin_obj_match;
-		dmctx->checkleaf = plugin_leaf_match;
-		dmctx->method_obj = mobj_upnp_get_value_in_param;
-		dmctx->method_param = mparam_upnp_get_value_in_param;
-	}
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (findparam_check && dmctx->findparam)
-		return 0;
-	else
-	return (upnp_map_bbf_fault(err));
-}
-
-static int upnp_get_value_obj(DMOBJECT_ARGS)
-{
-	return 0;
-}
-
-static int upnp_get_value_param(DMPARAM_ARGS)
-{
-	char *full_param;
-	char *value = "";
-
-	dmastrcat(&full_param, node->current_object, lastname);
-	if (!dm_upnp_check_acl_read(dmctx, full_param)) {
-		dmctx->findparam = 0;
-		dmctx->stop = 1;
-		return FAULT_UPNP_703;
-	}
-	(get_cmd)(full_param, dmctx, data, instance, &value);
-	add_list_parameter(dmctx, full_param, value, NULL, NULL, 0, NULL);
-	return 0;
-}
-
-static int mobj_upnp_get_value_in_param(DMOBJECT_ARGS)
-{
-	return 0;
-}
-static int mparam_upnp_get_value_in_param(DMPARAM_ARGS)
-{
-	char *full_param;
-	char *value = "";
-
-	dmastrcat(&full_param, node->current_object, lastname);
-	if (strcmp(dmctx->in_param, full_param) != 0) {
-		dmfree(full_param);
-		return FAULT_UPNP_703;
-	}
-
-	if (!dm_upnp_check_acl_read(dmctx, full_param)) {
-		dmctx->findparam = 0;
-		dmctx->stop = 1;
-		return FAULT_UPNP_703;
-	}
-	(get_cmd)(full_param, dmctx, data, instance, &value);
-	add_list_parameter(dmctx, full_param, value, NULL, NULL, 0, NULL);
-	dmctx->stop = 1;
-	return 0;
-}
-
-/* ***************
- * UPNP set values
- * ***************/
-
-int dm_entry_upnp_set_values(struct dmctx *dmctx)
-{
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-	int err;
-
-	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0'
-			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) == dm_delim))
-		return FAULT_UPNP_703;
-
-	dmctx->inparam_isparam = 1;
-	dmctx->stop = 0;
-	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_match;
-	dmctx->method_obj = mobj_upnp_set_value;
-	dmctx->method_param = mparam_upnp_set_value;
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (dmctx->stop)
-		return (upnp_map_bbf_fault(err));
-	else
-		return FAULT_UPNP_703;
-}
-
-static int mobj_upnp_set_value(DMOBJECT_ARGS)
-{
-	return FAULT_UPNP_703;
-}
-
-static int mparam_upnp_set_value(DMPARAM_ARGS)
-{
-	char *refparam, *perm, *v = "";
-
-	dmastrcat(&refparam, node->current_object, lastname);
-	if (strcmp(refparam, dmctx->in_param) != 0) {
-		dmfree(refparam);
-		return FAULT_UPNP_703;
-	}
-	dmctx->stop = 1;
-
-	if (dmctx->setaction == VALUECHECK) {
-		perm = permission->val;
-		if (permission->get_permission != NULL)
-			perm = permission->get_permission(refparam, dmctx, data, instance);
-
-		if (perm[0] == '0' || !set_cmd) {
-			dmfree(refparam);
-			return FAULT_UPNP_706;
-		}
-		if (!dm_upnp_check_acl_write(dmctx, refparam)) {
-			dmctx->findparam = 0;
-			return FAULT_UPNP_706;
-		}
-		int fault = (set_cmd)(refparam, dmctx, data, instance, dmctx->in_value, VALUECHECK);
-		if (fault) {
-			dmfree(refparam);
-			return fault;
-		}
-		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_value, 0);
-	}
-	else if (dmctx->setaction == VALUESET) {
-		(set_cmd)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
-		(get_cmd)(refparam, dmctx, data, instance, &v);
-		dm_update_enabled_notify_byname(refparam, v);
-	}
-	dmfree(refparam);
-	return 0;
-}
-
-/* ********************
- * UPNP delete instance
- * *******************/
-
-int dm_entry_upnp_delete_instance(struct dmctx *dmctx)
-{
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-	int err;
-
-	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0'
-			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != dm_delim))
-		return FAULT_UPNP_703;
-
-	dmctx->inparam_isparam = 0;
-	dmctx->stop = 0;
-	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_onlyobj_match;
-	dmctx->method_obj = upnp_delete_instance_obj;
-	dmctx->method_param = upnp_delete_instance_param;
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (dmctx->stop)
-	return (upnp_map_bbf_fault(err));
-	else
-		return FAULT_UPNP_703;
-}
-
-static int upnp_delete_instance_obj(DMOBJECT_ARGS)
-{
-	char *refparam = node->current_object;
-	char *perm = permission->val;
-	unsigned char del_action = DEL_INST;
-	if (strcmp(refparam, dmctx->in_param) != 0)
-		return FAULT_UPNP_703;
-
-	dmctx->stop = 1;
-
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
-
-	if (perm[0] == '0' || delobj == NULL)
-		return FAULT_UPNP_706;
-
-	if (!dm_upnp_check_acl_write(dmctx, refparam)) {
-		dmctx->findparam = 0;
-		return FAULT_UPNP_706;
-	}
-
-	if (!node->is_instanceobj)
-		del_action = DEL_ALL;
-	int fault = (delobj)(refparam, dmctx, data, instance, del_action);
-	return fault;
-}
-
-static int upnp_delete_instance_param(DMPARAM_ARGS)
-{
-	return FAULT_UPNP_703;
-}
-
-/* ********************
- * UPNP add instance
- * *******************/
-
-int dm_entry_upnp_add_instance(struct dmctx *dmctx)
-{
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-	int err;
-
-	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0'
-			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != dm_delim))
-		return FAULT_UPNP_703;
-
-	dmctx->inparam_isparam = 0;
-	dmctx->stop = 0;
-	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_onlyobj_match;
-	dmctx->method_obj = mobj_upnp_add_instance;
-	dmctx->method_param = mparam_upnp_add_instance;
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (dmctx->stop)
-	return (upnp_map_bbf_fault(err));
-	else
-		return FAULT_UPNP_703;
-}
-
-static int mparam_upnp_add_instance(DMPARAM_ARGS)
-{
-	return FAULT_UPNP_703;
-}
-
-static int mobj_upnp_add_instance(DMOBJECT_ARGS)
-{
-	char *refparam = node->current_object;
-	char *perm = permission->val;
-	char *objinst;
-
-	if (strcmp(refparam, dmctx->in_param) != 0)
-		return FAULT_UPNP_703;
-
-	dmctx->stop = 1;
-	if (node->is_instanceobj)
-		return FAULT_UPNP_703;
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
-
-	if (perm[0] == '0' || addobj == NULL)
-		return FAULT_UPNP_706;
-
-	if (!dm_upnp_check_acl_write(dmctx, refparam)) {
-		dmctx->findparam = 0;
-		return FAULT_UPNP_706;
-	}
-
-	int fault = (addobj)(refparam, dmctx, data, &instance);
-	if (fault)
-		return fault;
-	dmctx->addobj_instance = instance;
-	dmasprintf(&objinst, "%s%s%c", node->current_object, instance, dm_delim);
-	set_parameter_notification(dmctx, objinst, "0");
-	dmfree(objinst);
-	return 0;
-}
-
-/* ********************
- * UPNP get/set attributes
- * ********************/
-int dm_entry_upnp_get_set_attributes(struct dmctx *dmctx, bool is_get)
-{
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-	int err;
-	char buf[4] = {0};
-	buf[0] = dm_delim;
-
-	if (*(dmctx->in_param) == '\0')
-		dmctx->in_param = buf;
-
-	if (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != dm_delim)
-		dmctx->inparam_isparam = 1;
-	else
-		dmctx->inparam_isparam = 0;
-
-	dmctx->findparam = 0;
-	dmctx->stop = 0;
-	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_match;
-	dmctx->method_obj = is_get ? mobj_upnp_get_attributes : mobj_upnp_set_attributes;
-	dmctx->method_param = is_get ? mparam_upnp_get_attributes : mparam_upnp_set_attributes;
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (dmctx->findparam)
-		return 0;
-	else
-		return (upnp_map_bbf_fault(err));
-}
-
-static int mparam_upnp_get_attributes(DMPARAM_ARGS)
-{
-	char *refparam;
-	unsigned int flags = 0;
-	char *perm = permission->val;
-	char *version = NULL;
-	struct uci_section *s = NULL;
-
-	dmastrcat(&refparam, node->current_object, lastname);
-
-	if (strcmp(refparam, dmctx->in_param) != 0)
-			return FAULT_UPNP_703;
-
-	if (!dm_upnp_check_acl_read(dmctx, refparam)) {
-		dmctx->findparam = 0;
-		dmctx->stop = 1;
-		return FAULT_UPNP_703;
-	}
-
-	dmctx->stop = 1;
-
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
-
-	perm = (*perm == '1') ? "readWrite" : "readOnly";
-
-	if (upnp_get_parameter_onchange(dmctx, refparam, "alarmchange"))
-		flags |= DM_PARAM_ALARAM_ON_CHANGE;
-	if (upnp_get_parameter_onchange(dmctx, refparam, "eventchange"))
-		flags |= DM_PARAM_EVENT_ON_CHANGE;
-	get_parameter_version(dmctx, refparam, &version, &s);
-	flags |= UPNP_DMT_TYPE[type];
-
-	add_list_parameter(dmctx, refparam, perm, NULL, version, flags, NULL);
-	return 0;
-}
-
-static int mobj_upnp_get_attributes(DMOBJECT_ARGS)
-{
-	char *refparam;
-	unsigned int flags = 0;
-	char *perm = permission->val;
-	char *version = NULL;
-	struct uci_section *s = NULL;
-
-	refparam = node->current_object;
-
-	if (strcmp(refparam, dmctx->in_param) != 0)
-			return FAULT_UPNP_703;
-
-	if (!dm_upnp_check_acl_read(dmctx, refparam)) {
-		dmctx->findparam = 0;
-		dmctx->stop = 1;
-		return FAULT_UPNP_703;
-	}
-
-	dmctx->stop = 1;
-
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
-
-	perm = (*perm == '1') ? "readWrite" : "readOnly";
-
-	if (!node->is_instanceobj && upnp_get_parameter_onchange(dmctx, refparam, "eventchange"))
-		flags |= DM_PARAM_EVENT_ON_CHANGE;
-
-	get_parameter_version(dmctx, refparam, &version, &s);
-
-	if (node->is_instanceobj)
-		flags |= (NODE_DATA_ATTRIBUTE_INSTANCE | NODE_DATA_ATTRIBUTE_TYPEPTR);
-	else if (node->obj->browseinstobj)
-		flags |= (NODE_DATA_ATTRIBUTE_MULTIINSTANCE | NODE_DATA_ATTRIBUTE_TYPEPTR);
-
-	add_list_parameter(dmctx, refparam, perm, NULL, version, flags, NULL);
-
-	return 0;
-}
-
-static int mparam_upnp_set_attributes(DMPARAM_ARGS)
-{
-	char *refparam;
-
-	dmastrcat(&refparam, node->current_object, lastname);
-
-	if (strcmp(refparam, dmctx->in_param) != 0)
-			return FAULT_UPNP_703;
-
-	dmctx->stop = 1;
-	if (dmctx->setaction == VALUECHECK) {
-		if (!dm_upnp_check_acl_write(dmctx, refparam)) {
-			dmctx->findparam = 0;
-			return FAULT_UPNP_706;
-		}
-		add_set_list_tmp(dmctx, dmctx->in_param, NULL, dmctx->dmparam_flags);
-	}
-	else {
-		upnp_set_parameter_onchange(dmctx, refparam, "alarmchange", dmctx->dmparam_flags & DM_PARAM_ALARAM_ON_CHANGE);
-		upnp_set_parameter_onchange(dmctx, refparam, "eventchange", dmctx->dmparam_flags & DM_PARAM_EVENT_ON_CHANGE);
-		dm_entry_upnp_update_attribute_values_update(dmctx);
-	}
-	return 0;
-}
-
-static int mobj_upnp_set_attributes(DMOBJECT_ARGS)
-{
-	char *refparam;
-
-	refparam = node->current_object;
-
-	if (strcmp(refparam, dmctx->in_param) != 0)
-			return FAULT_UPNP_703;
-
-	dmctx->stop = 1;
-
-	if (dmctx->setaction == VALUECHECK) {
-		if (!dm_upnp_check_acl_write(dmctx, refparam)) {
-			dmctx->findparam = 0;
-			return FAULT_UPNP_706;
-		}
-		add_set_list_tmp(dmctx, dmctx->in_param, NULL, dmctx->dmparam_flags);
-	}
-	else {
-		if (!node->is_instanceobj) {
-			upnp_set_parameter_onchange(dmctx, refparam,  "eventchange", dmctx->dmparam_flags & DM_PARAM_EVENT_ON_CHANGE);
-			dm_entry_upnp_update_attribute_values_update(dmctx);
-		}
-	}
-	return 0;
-}
-
-/* *******************
- * UPNP get ACL data
- * ******************/
-
-int dm_entry_upnp_get_acl_data(struct dmctx *dmctx)
-{
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-	int err;
-	char buf[4] = {0};
-	buf[0] = dm_delim;
-
-	if (*(dmctx->in_param) == '\0')
-		dmctx->in_param = buf;
-
-	if (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != dm_delim)
-		dmctx->inparam_isparam = 1;
-	else
-		dmctx->inparam_isparam = 0;
-
-	if (strchr(dmctx->in_param, '#'))
-		dmctx->instance_wildchar = "#";
-	else
-		dmctx->instance_wildchar = NULL;
-	dmctx->findparam = 0;
-	dmctx->stop = 0;
-	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_match;
-	dmctx->method_obj = mobj_upnp_get_acldata;
-	dmctx->method_param = mparam_upnp_get_acldata;
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (dmctx->findparam)
-		return 0;
-	else
-		return (upnp_map_bbf_fault(err));
-}
-
-static int mparam_upnp_get_acldata(DMPARAM_ARGS)
-{
-	char *refparam;
-	unsigned int flags = 0;
-
-	dmastrcat(&refparam, node->current_object, lastname);
-
-	if (strcmp(refparam, dmctx->in_param) != 0)
-			return FAULT_UPNP_703;
-
-	flags = dm_upnp_check_acl_list(dmctx, refparam);
-	if (!flags) {
-		dmctx->findparam = 0;
-		dmctx->stop = 1;
-		return FAULT_UPNP_703;
-	}
-
-	dmctx->stop = 1;
-
-	add_list_parameter(dmctx, refparam, NULL, NULL, NULL, flags, NULL);
-	return 0;
-}
-
-static int mobj_upnp_get_acldata(DMOBJECT_ARGS)
-{
-	char *refparam;
-	unsigned int flags = 0;
-
-	refparam = node->current_object;
-
-	if (strcmp(refparam, dmctx->in_param) != 0)
-			return FAULT_UPNP_703;
-
-	flags = dm_upnp_check_acl_list(dmctx, refparam);
-	if (!flags) {
-		dmctx->findparam = 0;
-		dmctx->stop = 1;
-		return FAULT_UPNP_703;
-	}
-
-	dmctx->stop = 1;
-	flags |= DM_FACTORIZED;
-
-	add_list_parameter(dmctx, refparam, NULL, NULL, NULL, flags, NULL);
-	return 0;
-}
-
-/* **************************
- * UPNP get instance numbers
- * *************************/
-char *dm_entry_get_all_instance_numbers(struct dmctx *pctx, char *param)
-{
-	static char instbuf[256];
-	struct dmctx dmctx = {0};
-
-	dm_ctx_init_sub(&dmctx, pctx->dm_type,  pctx->amd_version, pctx->instance_mode);
-	dmctx.in_param = param;
-	dmctx.depth = 1;
-	dm_entry_upnp_get_instances(&dmctx, true);
-	strcpy(instbuf, dmctx.all_instances);
-	dm_ctx_clean_sub(&dmctx);
-	return instbuf;
-}
-
-/************************************
- * upnp load tracked parameter values
- ***********************************/
-int dm_entry_upnp_tracked_parameters(struct dmctx *dmctx)
-{
-	int err;
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-
-	dmctx->method_obj = enabled_tracked_param_check_obj;
-	dmctx->method_param = enabled_tracked_param_check_param;
-	dmctx->checkobj = NULL ;
-	dmctx->checkleaf = NULL;
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	return err;
-}
-
-static int enabled_tracked_param_check_obj(DMOBJECT_ARGS)
-{
-	char *refparam;
-	char *all_instances;
-	char *version = "0";
-	struct uci_section *s;
-	int isevnt, isversion;
-
-	refparam = node->current_object;
-	if (!node->obj->browseinstobj || node->is_instanceobj)
-		return FAULT_UPNP_703;
-
-	isevnt = upnp_get_parameter_onchange(dmctx, refparam, "eventchange");
-	isversion = get_parameter_version(dmctx, refparam, &version, &s);
-	if (isevnt || isversion)
-		all_instances = dm_entry_get_all_instance_numbers(dmctx, refparam);
-
-	if (isevnt) {
-		add_list_upnp_param_track(dmctx, &list_upnp_enabled_onevent, refparam, "1", all_instances, 1);
-	}
-	if (isversion) {
-		add_list_upnp_param_track(dmctx, &list_upnp_enabled_version, refparam, (s ? section_name(s) : NULL), all_instances, 1);
-	}
-	return 0;
-}
-
-static int enabled_tracked_param_check_param(DMPARAM_ARGS)
-{
-	char *refparam;
-	char *value = "";
-	char *version = "0";
-	struct uci_section *s;
-	int isalrm, isevnt, isversion;
-
-	dmastrcat(&refparam, node->current_object, lastname);
-	isalrm = upnp_get_parameter_onchange(dmctx, refparam, "alarmchange");
-	isevnt = upnp_get_parameter_onchange(dmctx, refparam, "eventchange");
-	isversion = get_parameter_version(dmctx, refparam, &version, &s);
-
-	if (isalrm || isevnt || isversion)
-		(get_cmd)(refparam, dmctx, data, instance, &value);
-	if (isalrm) {
-		add_list_upnp_param_track(dmctx, &list_upnp_enabled_onalarm, refparam, "1", value, 0);
-	}
-	if (isevnt) {
-		add_list_upnp_param_track(dmctx, &list_upnp_enabled_onevent, refparam, "1", value, 0);
-	}
-	if (isversion) {
-		add_list_upnp_param_track(dmctx, &list_upnp_enabled_version, refparam, (s ? section_name(s) : NULL), value, 0);
-	}
-
-	dmfree(refparam);
-	return 0;
-}
-#endif
-
-/********************/
-char *dm_print_path(char *fpath, ...)
-{
-	static char pathbuf[512] = "";
-	va_list vl;
-
-	va_start(vl, fpath);
-	vsprintf(pathbuf, fpath, vl);
-	va_end(vl);
-	return pathbuf;
 }

@@ -121,15 +121,14 @@ static int get_time_ntpserver(char *refparam, struct dmctx *ctx, char **value, i
 
 static int get_time_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *iface = NULL, *interface = NULL;
-	*value = "";
+	char *iface = NULL;
+
 	dmuci_get_option_value_string("system", "ntp", "interface", &iface);
 	if (*iface == '\0' || strlen(iface) == 0)
 		return 0;
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), iface, &interface);
-	if (*interface == '\0')
-		return 0;
-	*value = dmstrdup(interface);
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 

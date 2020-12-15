@@ -437,7 +437,7 @@ static char *get_default_gateway_device(void)
 {
 	char *device = "";
 
-    FILE *f = fopen(ROUTING_FILE, "r");
+    FILE *f = fopen(PROC_ROUTE, "r");
 	if (f != NULL) {
 		char line[100], *p, *c, *saveptr;
 		while(fgets(line , 100 , f)) {

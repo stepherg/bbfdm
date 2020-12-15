@@ -521,7 +521,7 @@ static int get_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 	}
 
 	char *linker = dmstrdup(section_name(((struct dhcpv6_client_args *)data)->dhcp_client_conf));
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	return 0;
 }
 
@@ -835,7 +835,7 @@ static int get_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 {
 	char *linker;
 	linker = dmstrdup(((struct dhcpv6_args *)data)->interface);
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	dmfree(linker);

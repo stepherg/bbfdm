@@ -344,7 +344,7 @@ static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 
 	if (v != NULL) {
 		uci_foreach_element(v, e) {
-			adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), e->name, &vallink);
+			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &vallink);
 			if (vallink == NULL)
 				continue;
 			if (*buf != '\0')
@@ -352,7 +352,7 @@ static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 			strcat(buf, vallink);
 		}
 	} else {
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), zone, &vallink);
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", zone, &vallink);
 		if (vallink)
 			strcpy(buf, vallink);
 	}
@@ -378,7 +378,7 @@ static int get_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 	}
 	if (v != NULL) {
 		uci_foreach_element(v, e) {
-			adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), e->name, &ifaceobj);
+			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj);
 			if (ifaceobj == NULL)
 				continue;
 			if (*buf != '\0')

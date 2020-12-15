@@ -13,7 +13,27 @@
 #include "dmentry.h"
 #include "routing.h"
 
-#define PROC_ROUTE6 "/proc/net/ipv6_route"
+struct proc_routing {
+	char *iface;
+	char *flags;
+	char *refcnt;
+	char *use;
+	char *metric;
+	char *mtu;
+	char *window;
+	char *irtt;
+	char destination[16];
+	char gateway[16];
+	char mask[16];
+};
+
+struct routingfwdargs
+{
+	char *permission;
+	struct uci_section *routefwdsection;
+	struct proc_routing *proute;
+	int type;
+};
 
 enum enum_route_type {
 	ROUTE_STATIC,
@@ -99,6 +119,58 @@ static unsigned char is_proc_route6_in_config(char *ciface, char *cip, char *cgw
 	return 0;
 }
 
+static void parse_proc_route_line(char *line, struct proc_routing *proute)
+{
+	char *pch, *spch;
+
+	proute->iface = strtok_r(line, " \t", &spch);
+	pch = strtok_r(NULL, " \t", &spch);
+	hex_to_ip(pch, proute->destination);
+	pch = strtok_r(NULL, " \t", &spch);
+	hex_to_ip(pch, proute->gateway);
+	proute->flags = strtok_r(NULL, " \t", &spch);
+	proute->refcnt = strtok_r(NULL, " \t", &spch);
+	proute->use = strtok_r(NULL, " \t", &spch);
+	proute->metric = strtok_r(NULL, " \t", &spch);
+	pch = strtok_r(NULL, " \t", &spch);
+	hex_to_ip(pch, proute->mask);
+	proute->mtu = strtok_r(NULL, " \t", &spch);
+	proute->window = strtok_r(NULL, " \t", &spch);
+	proute->irtt = strtok_r(NULL, " \t\n\r", &spch);
+}
+
+static int parse_proc_route6_line(const char *line, char *ipstr, char *gwstr, char *dev, unsigned int *metric)
+{
+	unsigned int ip[4], gw[4], flags, refcnt, use, prefix;
+	char ipbuf[INET6_ADDRSTRLEN];
+
+	if (*line == '\n' || *line == '\0')
+		return -1;
+
+	sscanf(line, "%8x%8x%8x%8x %x %*s %*s %8x%8x%8x%8x %x %x %x %x %31s",
+				&ip[0], &ip[1], &ip[2], &ip[3], &prefix,
+				&gw[0], &gw[1], &gw[2], &gw[3], metric,
+				&refcnt, &use, &flags, dev);
+
+	if (strcmp(dev, "lo") == 0)
+		return -1;
+
+	ip[0] = htonl(ip[0]);
+	ip[1] = htonl(ip[1]);
+	ip[2] = htonl(ip[2]);
+	ip[3] = htonl(ip[3]);
+	gw[0] = htonl(gw[0]);
+	gw[1] = htonl(gw[1]);
+	gw[2] = htonl(gw[2]);
+	gw[3] = htonl(gw[3]);
+
+	inet_ntop(AF_INET6, ip, ipbuf, INET6_ADDRSTRLEN);
+	sprintf(ipstr, "%s/%u", ipbuf, prefix);
+	inet_ntop(AF_INET6, gw, gwstr, INET6_ADDRSTRLEN);
+
+	return 0;
+}
+
 static bool is_cfg_route_active(struct uci_section *s)
 {
 	FILE *fp;
@@ -110,7 +182,7 @@ static bool is_cfg_route_active(struct uci_section *s)
 	dmuci_get_value_by_section_string(s, "target", &dest);
 	dmuci_get_value_by_section_string(s, "netmask", &mask);
 
-	fp = fopen(ROUTING_FILE, "r");
+	fp = fopen(PROC_ROUTE, "r");
 	if (fp != NULL) {
 		while (fgets(line, MAX_PROC_ROUTING, fp) != NULL) {
 			if (line[0] == '\n' || lines == 0) { /* skip the first line or skip the line if it's empty */
@@ -240,7 +312,7 @@ static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMN
 		dmuci_get_value_by_section_string(s, "target", &target);
 		dmuci_get_value_by_section_string(s, "device", &iface);
 		found = 0;
-		fp = fopen(ROUTING_FILE, "r");
+		fp = fopen(PROC_ROUTE, "r");
 		if ( fp != NULL) {
 			lines = 0;
 			while (fgets(line, MAX_PROC_ROUTING, fp) != NULL) {
@@ -260,7 +332,7 @@ static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMN
 		}
 	}
 
-	fp = fopen(ROUTING_FILE, "r");
+	fp = fopen(PROC_ROUTE, "r");
 	if ( fp != NULL) {
 		lines = 0;
 		while (fgets(line, MAX_PROC_ROUTING, fp) != NULL) {
@@ -298,38 +370,6 @@ static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMN
 		}
 		fclose(fp);
 	}
-	return 0;
-}
-
-static int parse_proc_route6_line(const char *line, char *ipstr, char *gwstr, char *dev, unsigned int *metric)
-{
-	unsigned int ip[4], gw[4], flags, refcnt, use, prefix;
-	char ipbuf[INET6_ADDRSTRLEN];
-
-	if (*line == '\n' || *line == '\0')
-		return -1;
-
-	sscanf(line, "%8x%8x%8x%8x %x %*s %*s %8x%8x%8x%8x %x %x %x %x %31s",
-				&ip[0], &ip[1], &ip[2], &ip[3], &prefix,
-				&gw[0], &gw[1], &gw[2], &gw[3], metric,
-				&refcnt, &use, &flags, dev);
-
-	if (strcmp(dev, "lo") == 0)
-		return -1;
-
-	ip[0] = htonl(ip[0]);
-	ip[1] = htonl(ip[1]);
-	ip[2] = htonl(ip[2]);
-	ip[3] = htonl(ip[3]);
-	gw[0] = htonl(gw[0]);
-	gw[1] = htonl(gw[1]);
-	gw[2] = htonl(gw[2]);
-	gw[3] = htonl(gw[3]);
-
-	inet_ntop(AF_INET6, ip, ipbuf, INET6_ADDRSTRLEN);
-	sprintf(ipstr, "%s/%u", ipbuf, prefix);
-	inet_ntop(AF_INET6, gw, gwstr, INET6_ADDRSTRLEN);
-
 	return 0;
 }
 
@@ -623,7 +663,7 @@ static int get_RoutingRouterForwarding_Interface(char *refparam, struct dmctx *c
 	if (((struct routingfwdargs *)data)->routefwdsection != NULL)
 		dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "interface", &linker);
 	if (linker[0] != '\0') {
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
 		if (*value == NULL)
 			*value = "";
 	}
@@ -891,7 +931,7 @@ static int get_RoutingRouteInformationInterfaceSetting_Interface(char *refparam,
 	}
 
 	if (iface[0] != '\0') {
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), iface, value);
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface, value);
 		if (*value == NULL)
 			*value = "";
 	}

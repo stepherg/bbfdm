@@ -936,7 +936,7 @@ static int set_DHCPv4ServerPool_Order(char *refparam, struct dmctx *ctx, void *d
 static int get_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = dmstrdup(((struct dhcp_args *)data)->interface);
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	dmfree(linker);
@@ -1216,7 +1216,7 @@ static int get_DHCPv4ServerPool_DNSServers(char *refparam, struct dmctx *ctx, vo
 
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", ((struct dhcp_args *)data)->interface, String}}, 1, &res);
 	if (res) {
-		*value = dmjson_get_value_array_all(res, DELIMITOR, 1, "dns-server");
+		*value = dmjson_get_value_array_all(res, ",", 1, "dns-server");
 	} else
 		*value = "";
 
@@ -1766,7 +1766,7 @@ static int get_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 {
 	if (((struct dhcp_client_args *)data)->dhcp_client_conf) {
 		char *linker = dmstrdup(section_name(((struct dhcp_client_args *)data)->dhcp_client_conf));
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 		if (*value == NULL)
 			*value = "";
 	}
@@ -1886,7 +1886,7 @@ static int get_DHCPv4Client_DNSServers(char *refparam, struct dmctx *ctx, void *
 
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dhcp_client_args *)data)->dhcp_client_conf), String}}, 1, &res);
 	DM_ASSERT(res, *value = "");
-	*value = dmjson_get_value_array_all(res, DELIMITOR, 1, "dns-server");
+	*value = dmjson_get_value_array_all(res, ",", 1, "dns-server");
 	return 0;
 }
 
@@ -2417,7 +2417,7 @@ static int get_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx
 		return 0;
 	}
 	char *linker = dmstrdup(section_name(((struct dhcp_client_args *)data)->dhcp_client_conf));
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	return 0;
 }
 

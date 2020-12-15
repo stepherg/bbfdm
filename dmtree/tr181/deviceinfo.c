@@ -58,61 +58,33 @@ struct Supported_Data_Models Data_Models[] = {
 {"http://www.broadband-forum.org/cwmp/tr-157-1-3-0.xml","urn:broadband-forum-org:tr-157-1-3-0", "Bulkdata,SoftwareModules"},
 };
 
-/*
- *DeviceInfo. functions
- */
-char *get_deviceid_manufacturer()
-{
-	return os__get_deviceid_manufacturer();
-}
-
-char *get_deviceid_manufactureroui()
-{
-	return os__get_deviceid_manufactureroui();
-}
-
-char *get_deviceid_productclass()
-{
-	return os__get_deviceid_productclass();
-}
-
-char *get_deviceid_serialnumber()
-{
-	return os__get_deviceid_serialnumber();
-}
-
-char *get_softwareversion()
-{
-	return os__get_softwareversion();
-}
-
 static int get_device_manufacturer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_deviceid_manufacturer();
+	*value = os__get_deviceid_manufacturer();
 	return 0;
 }
 
 static int get_device_manufactureroui(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_deviceid_manufactureroui();
+	*value = os__get_deviceid_manufactureroui();
 	return 0;
 }
 
 static int get_device_productclass(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_deviceid_productclass();
+	*value = os__get_deviceid_productclass();
 	return 0;
 }
 
 static int get_device_serialnumber(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_deviceid_serialnumber();
+	*value = os__get_deviceid_serialnumber();
 	return 0;
 }
 
 static int get_device_softwareversion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_softwareversion();
+	*value = os__get_softwareversion();
 	return 0;
 }
 

@@ -526,7 +526,7 @@ int get_QoS_DefaultQueue(char *refparam, struct dmctx *ctx, void *data, char *in
 	char *linker;
 
 	dmuci_get_option_value_string("qos", "Default", "default", &linker);
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cQoS%cQueue%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.QoS.Queue.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -745,11 +745,11 @@ int os_get_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *
 	uci_foreach_sections("qos", "interface", s) {
 		dmuci_get_value_by_section_string(s, "classgroup", &ifaceclassgrp);
 		if (ifaceclassgrp != NULL && strcmp(ifaceclassgrp, classgroup) == 0) {
-			adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), section_name(s), value);
+			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", section_name(s), value);
 			if (*value == NULL)
-				adm_entry_get_linker_param(ctx, dm_print_path("%s%cPPP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), section_name(s), value);
+				adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", section_name(s), value);
 			if (*value == NULL)
-				adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), section_name(s), value);
+				adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", section_name(s), value);
 			if (*value == NULL)
 				*value = "";
 		}
@@ -3576,13 +3576,13 @@ int os_get_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *data
 {
 	struct queuestats *qts= (struct queuestats*)data;
 
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), qts->dev, value);
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", qts->dev, value);
 	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cPPP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), qts->dev, value);
+		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", qts->dev, value);
 	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), qts->dev, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", qts->dev, value);
 	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cWiFi%cRadio%c", dmroot, dm_delim, dm_delim, dm_delim), qts->dev, value);
+		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", qts->dev, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -3734,11 +3734,11 @@ int get_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, char 
 	uci_foreach_sections("qos", "interface", s) {
 		dmuci_get_value_by_section_string(s, "classgroup", &ifaceclassgrp);
 		if (ifaceclassgrp != NULL && strcmp(ifaceclassgrp, classgroup) == 0) {
-			adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), section_name(s), value);
+			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", section_name(s), value);
 			if (*value == NULL)
-				adm_entry_get_linker_param(ctx, dm_print_path("%s%cPPP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), section_name(s), value);
+				adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", section_name(s), value);
 			if (*value == NULL)
-				adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), section_name(s), value);
+				adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", section_name(s), value);
 			if (*value == NULL)
 				*value = "";
 		}

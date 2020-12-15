@@ -15,9 +15,6 @@ AM_CONDITIONAL([BBF_TR143],[test "x$enable_tr143" = "xyes"])
 AC_ARG_ENABLE(tr157, [AS_HELP_STRING([--enable-tr157], [enable tr157 bulkdata collector feature])], AC_DEFINE(BBF_TR157),)
 AM_CONDITIONAL([BBF_TR157],[test "x$enable_tr157" = "xyes"])
 
-AC_ARG_ENABLE(tr064, [AS_HELP_STRING([--enable-tr064], [enable tr064 upnp feature])], AC_DEFINE(BBF_TR064),)
-AM_CONDITIONAL([BBF_TR064],[test "x$enable_tr064" = "xyes"])
-
 AC_ARG_ENABLE(libopenssl, [AS_HELP_STRING([--enable-libopenssl], [enable libopenssl feature])], AC_DEFINE(LOPENSSL),)
 AM_CONDITIONAL([LOPENSSL],[test "x$enable_libopenssl" = "xyes"])
 

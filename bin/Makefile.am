@@ -1,5 +1,3 @@
-LIB_BBFDM_VERSION = 3:0:0
-
 lib_LTLIBRARIES = libbbf_api.la
 
 libbbf_api_la_SOURCES =				\
@@ -122,15 +120,6 @@ libbbfdm_la_SOURCES +=							\
 	../dmtree/tr157/softwaremodules.c
 endif
 
-if BBF_TR064
-libbbfdm_la_SOURCES +=							\
-	../dmtree/tr064/upnp_device.c 				\
-	../dmtree/tr064/upnp_deviceinfo.c	        \
-	../dmtree/tr064/upnp_configuration.c		\
-	../dmtree/tr064/upnp_monitoring.c			\
-	../dmtree/tr064/upnp_common.c
-endif
-
 libbbfdm_la_CFLAGS =		\
 	$(AM_CFLAGS)			\
 	$(LIBUCI_CFLAGS)		\
@@ -144,9 +133,7 @@ libbbfdm_la_LDFLAGS = 		\
 	$(LIBUBOX_LDFLAGS)		\
 	$(LIBUBUS_LDFLAGS)		\
 	$(LIBOPENSSL_LIBS)		\
-	$(LIBMBETLS_LIBS)		\
-	-share					\
-	-version-info $(LIB_BBFDM_VERSION)			
+	$(LIBMBETLS_LIBS)			
 
 libbbfdm_la_LIBADD =		\
 	$(AM_LIBS)				\
@@ -164,4 +151,3 @@ libbbfdm_la_CFLAGS+=-I../dmtree/tr181
 libbbfdm_la_CFLAGS+=-I../dmtree/tr104
 libbbfdm_la_CFLAGS+=-I../dmtree/tr143
 libbbfdm_la_CFLAGS+=-I../dmtree/tr157
-libbbfdm_la_CFLAGS+=-I../dmtree/tr064

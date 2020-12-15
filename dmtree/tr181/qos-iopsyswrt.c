@@ -438,13 +438,13 @@ static int os_get_QoS_Interface(char *refparam, struct dmctx *ctx, void *data, c
 	char *ifname = NULL;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
 
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cIP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", ifname, value);
 	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cPPP%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
+		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", ifname, value);
 	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cEthernet%cInterface%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", ifname, value);
 	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, dm_print_path("%s%cWiFi%cRadio%c", dmroot, dm_delim, dm_delim, dm_delim), ifname, value);
+		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", ifname, value);
 	if (*value == NULL)
 		*value = "";
 
@@ -2404,7 +2404,7 @@ int os_get_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void *da
 	get_dmmap_section_of_config_section_eq("dmmap_qos", "policer", "section_name", linker, &dmmap_s);
 	if (dmmap_s != NULL) {
 		dmuci_get_value_by_section_string(dmmap_s, "policer_instance", &p_inst);
-		dmasprintf(value, "%s%cQoS%cPolicer%c%s", dmroot, dm_delim, dm_delim, dm_delim, p_inst);
+		dmasprintf(value, "Device.QoS.Policer.%s", p_inst);
 	}
 
 	if (*value == NULL)

@@ -42,7 +42,7 @@ struct diagnostic_stats
 	uint32_t ftp_syn;
 };
 
-enum download_diagnostic_protocol {
+enum diagnostic_protocol {
 	DIAGNOSTIC_HTTP = 1,
 	DIAGNOSTIC_FTP
 };

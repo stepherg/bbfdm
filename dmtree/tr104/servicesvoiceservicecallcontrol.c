@@ -299,7 +299,7 @@ static int get_ServicesVoiceServiceCallControlLine_Provider(char *refparam, stru
 	char *linker = NULL;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "sip_account", &linker);
-	adm_entry_get_linker_param(ctx, dm_print_path("%s%cServices%cVoiceService%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
@@ -342,7 +342,7 @@ static int get_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, s
 		p = buf;
 		for (token = strtok_r(tmp, " ", &saveptr); token != NULL; token = strtok_r(NULL, " ", &saveptr)) {
 			snprintf(linker, sizeof(linker), "telline%s", token);
-			adm_entry_get_linker_param(ctx, dm_print_path("%s%cServices%cVoiceService%c", dmroot, dm_delim, dm_delim, dm_delim), linker, value);
+			adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
 			if (*value == NULL)
 				continue;
 			dmstrappendstr(p, *value);
