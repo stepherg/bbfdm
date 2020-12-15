@@ -34,7 +34,7 @@ struct dm_ubus_req {
 
 static struct blob_buf b;
 static struct ubus_context *ubus_ctx;
-static int timeout = 1000;
+static int timeout = 5000;
 static json_object *json_res = NULL;
 static char ubus_method[32] = {0};
 static bool ubus_method_exists = false;
