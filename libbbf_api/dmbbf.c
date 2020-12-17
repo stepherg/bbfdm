@@ -1814,7 +1814,7 @@ static int enabled_notify_check_obj(DMOBJECT_ARGS)
 
 static int enabled_notify_check_param(DMPARAM_ARGS)
 {
-	char *refparam, *stype, *notif = NULL, *value = "";
+	char *refparam, *notif = NULL, *value = "";
 
 	dmastrcat(&refparam, node->current_object, lastname);
 	if ((notif = check_parameter_forced_notification(refparam)) == NULL)
@@ -1825,10 +1825,8 @@ static int enabled_notify_check_param(DMPARAM_ARGS)
 		return 0;
 	}
 	(get_cmd)(refparam, dmctx, data, instance, &value);
-	if (notif[0] == '1' || notif[0] == '2' || notif[0] == '4' || notif[0] == '6') {
-		stype = DMT_TYPE[type];
+	if (notif[0] == '1' || notif[0] == '2' || notif[0] == '4' || notif[0] == '6')
 		add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], notif);
-	}
 	return 0;
 }
 
