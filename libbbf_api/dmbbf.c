@@ -796,60 +796,6 @@ static int check_notification_value(const char *value)
 	return -1;
 }
 
-static int bbf_api_dm_update_file_enabled_notify(char *param, char *new_value)
-{
-	FILE *fp, *ftmp;
-	char buf[512];
-	char *parameter, *notification, *value, *type, *jval;
-
-	fp = fopen(DM_ENABLED_NOTIFY, "r");
-	if (fp == NULL)
-		return 0;
-
-	ftmp = fopen(DM_ENABLED_NOTIFY_TEMPORARY, "a");
-	if (ftmp == NULL) {
-		fclose(fp);
-		return 0;
-	}
-
-	while (fgets(buf, 512, fp) != NULL) {
-		int len = strlen(buf);
-		if (len)
-			buf[len-1] = '\0';
-		bbf_api_dmjson_parse_init(buf);
-		bbf_api_dmjson_get_string("parameter", &jval);
-		if (jval == NULL || strlen(jval) == 0)
-			continue;
-		parameter = dmstrdup(jval?jval:"");
-		bbf_api_dmjson_get_string("value", &jval);
-		value = dmstrdup(jval?jval:"");
-		bbf_api_dmjson_get_string("notification", &jval);
-		notification = dmstrdup(jval?jval:"");
-		bbf_api_dmjson_get_string("type", &jval);
-		type = dmstrdup(jval?jval:"");
-		bbf_api_dmjson_parse_fini();
-		if (strcmp(parameter, param) == 0)
-			dmjson_fprintf(ftmp, 4, DMJSON_ARGS{{"parameter", parameter}, {"notification", notification}, {"value", new_value}, {"type", type}});
-		else
-			dmjson_fprintf(ftmp, 4, DMJSON_ARGS{{"parameter", parameter}, {"notification", notification}, {"value", value}, {"type", type}});
-	}
-	fclose(fp);
-	fclose(ftmp);
-
-	return 0;
-}
-
-static void dm_update_enabled_notify_byname(char *name, char *new_value)
-{
-	int iscopy;
-	bbf_api_dm_update_file_enabled_notify(name, new_value);
-	remove(DM_ENABLED_NOTIFY);
-	iscopy = bbf_api_copy_temporary_file_to_original_file(DM_ENABLED_NOTIFY, DM_ENABLED_NOTIFY_TEMPORARY);
-	if(iscopy)
-		remove(DM_ENABLED_NOTIFY_TEMPORARY);
-
-}
-
 int update_param_instance_alias(struct dmctx *ctx, char *param, char **new_param)
 {
 	char *pch, *spch, *p;
@@ -1727,10 +1673,8 @@ static int mparam_set_value(DMPARAM_ARGS)
 			return fault;
 		}
 		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_value);
-	} else if (dmctx->setaction == VALUESET) {
+	} else if (dmctx->setaction == VALUESET)
 		(set_cmd)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
-		dm_update_enabled_notify_byname(refparam, dmctx->in_value);
-	}
 	dmfree(refparam);
 	return 0;
 }
@@ -1846,7 +1790,6 @@ int dm_entry_enabled_notify(struct dmctx *dmctx)
 	dmctx->method_param = enabled_notify_check_param;
 	dmctx->checkobj = NULL ;
 	dmctx->checkleaf = NULL;
-	remove(DM_ENABLED_NOTIFY);
 	err = dm_browse(dmctx, &node, root, NULL, NULL);
 	return err;
 }
@@ -1872,7 +1815,6 @@ static int enabled_notify_check_obj(DMOBJECT_ARGS)
 static int enabled_notify_check_param(DMPARAM_ARGS)
 {
 	char *refparam, *stype, *notif = NULL, *value = "";
-	FILE *fp;
 
 	dmastrcat(&refparam, node->current_object, lastname);
 	if ((notif = check_parameter_forced_notification(refparam)) == NULL)
@@ -1883,18 +1825,10 @@ static int enabled_notify_check_param(DMPARAM_ARGS)
 		return 0;
 	}
 	(get_cmd)(refparam, dmctx, data, instance, &value);
-	fp = fopen(DM_ENABLED_NOTIFY, "a");
-	if (fp == NULL) {
-		dmfree(refparam);
-		return 0;
-	}
 	if (notif[0] == '1' || notif[0] == '2' || notif[0] == '4' || notif[0] == '6') {
 		stype = DMT_TYPE[type];
 		add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], notif);
-		dmjson_fprintf(fp, 4, DMJSON_ARGS{{"parameter", refparam}, {"notification", notif}, {"value", value}, {"type", stype}});
 	}
-	fclose(fp);
-
 	return 0;
 }
 

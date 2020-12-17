@@ -8,6 +8,7 @@
  *	Author: Imen Bhiri <imen.bhiri@pivasoftware.com>
  *	Author: Feten Besbes <feten.besbes@pivasoftware.com>
  *	Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+ *	Author: Omar Kallel <omar.kallel@pivasoftware.com>
  */
 
 #ifndef __DM_COMMON_H
@@ -255,7 +256,6 @@ struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* secti
 bool elt_exists_in_array(char **str_array, char *str, int length);
 int get_shift_time_time(int shift_time, char *local_time, int size);
 int command_exec_output_to_array(char *cmd, char **output, int *length);
-int bbf_api_copy_temporary_file_to_original_file(char *f1, char *f2);
 struct uci_section *is_dmmap_section_exist(char* package, char* section);
 struct uci_section *is_dmmap_section_exist_eq(char* package, char* section, char* opt, char* value);
 int dm_read_sysfs_file(const char *file, char *dst, unsigned len);

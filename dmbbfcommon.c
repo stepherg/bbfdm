@@ -51,39 +51,9 @@ void del_list_parameter(struct dm_parameter *dm_parameter)
 	api_del_list_parameter(dm_parameter);
 }
 
-void dmjson_parse_init(char *msg)
-{
-	bbf_api_dmjson_parse_init(msg);
-}
-
-void dmjson_parse_fini(void)
-{
-	bbf_api_dmjson_parse_fini();
-}
-
-json_object *dmjson_select_obj(json_object * jobj, char *argv[])
-{
-	return (bbf_api_dmjson_select_obj(jobj, argv));
-}
-
 void del_list_fault_param(struct param_fault *param_fault)
 {
 	bbf_api_del_list_fault_param(param_fault);
-}
-
-int copy_temporary_file_to_original_file(char *f1, char *f2)
-{
-	return bbf_api_copy_temporary_file_to_original_file(f1, f2);
-}
-
-void dmjson_get_var(char *jkey, char **jval)
-{
-	bbf_api_dmjson_get_var(jkey, jval);
-}
-
-void dmjson_get_string(char *jkey, char **jval)
-{
-	bbf_api_dmjson_get_string(jkey, jval);
 }
 
 int get_dm_type(char *dm_str)

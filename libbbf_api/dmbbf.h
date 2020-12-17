@@ -25,9 +25,6 @@
 #include "dmuci.h"
 #include "dmmem.h"
 
-#define DM_ENABLED_NOTIFY "/etc/bbfdm/.dm_enabled_notify"
-#define DM_ENABLED_NOTIFY_TEMPORARY "/tmp/.dm_enabled_notify_temporary"
-
 #ifdef UNDEF
 #undef UNDEF
 #endif
@@ -121,13 +118,6 @@ struct param_fault {
 	struct list_head list;
 	char *name;
 	int fault;
-};
-
-struct dm_enabled_notify {
-	struct list_head list;
-	char *name;
-	char *notification;
-	char *value;
 };
 
 struct dm_parameter {

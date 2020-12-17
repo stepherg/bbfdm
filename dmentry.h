@@ -9,7 +9,7 @@
  *	  Author Imen Bhiri <imen.bhiri@pivasoftware.com>
  *	  Author Feten Besbes <feten.besbes@pivasoftware.com>
  *	  Author Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
- *
+ *	  Author: Omar Kallel <omar.kallel@pivasoftware.com>
  */
 
 #ifndef __DMENTRY_H__

@@ -321,15 +321,6 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2)
 	return usp_fault_map(fault);
 }
 
-void del_list_enabled_notify(struct dm_enabled_notify *dm_enabled_notify)
-{
-	list_del(&dm_enabled_notify->list); // Should be free and not dmfree
-	free(dm_enabled_notify->name);
-	free(dm_enabled_notify->value);
-	free(dm_enabled_notify->notification);
-	free(dm_enabled_notify);
-}
-
 int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value)
 {
 	struct dmctx dmctx = {0};

@@ -1053,29 +1053,6 @@ int command_exec_output_to_array(char *cmd, char **output, int *length)
 	return 0;
 }
 
-int bbf_api_copy_temporary_file_to_original_file(char *f1, char *f2)
-{
-	FILE *fp, *ftmp;
-	char buf[512];
-
-	ftmp = fopen(f2, "r");
-	if (ftmp == NULL)
-		return 0;
-
-	fp = fopen(f1, "w");
-	if (fp == NULL) {
-	  fclose(ftmp);
-	  return 0;
-	}
-
-	while (fgets(buf, 512, ftmp) != NULL) {
-		fprintf(fp, "%s", buf);
-	}
-	fclose(ftmp);
-	fclose(fp);
-	return 1;
-}
-
 static inline int char_is_valid(char c)
 {
 	return c >= 0x20 && c < 0x7f;
