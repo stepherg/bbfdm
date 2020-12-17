@@ -34,4 +34,7 @@ extern DMLEAF tDSLChannelStatsLastShowtimeParams[];
 extern DMLEAF tDSLChannelStatsCurrentDayParams[];
 extern DMLEAF tDSLChannelStatsQuarterHourParams[];
 
+char *get_value_with_argument(char *command1, char *id, char *command2, char *argument, char *key);
+int get_line_linkstatus(char *method, char *id, char **value);
+
 #endif //__DSL_H

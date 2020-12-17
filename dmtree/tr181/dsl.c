@@ -11,7 +11,6 @@
 #include "dmentry.h"
 #include "dsl.h"
 
-
 struct dsl_line_args
 {
 	struct uci_section *line_sec;
@@ -192,7 +191,7 @@ static char *get_dsl_value_without_argument_and_with_two_key(char *command1, cha
 	return value;
 }
 
-static char *get_dsl_value_with_argument(char *command1, char *id, char *command2, char *argument, char *key)
+char *get_value_with_argument(char *command1, char *id, char *command2, char *argument, char *key)
 {
 	json_object *res;
 	char command[16], *value = "0";
@@ -214,6 +213,27 @@ static char *get_dsl_value_array_without_argument(char *command1, char *id, char
 	if (!res) return "";
 	value = dmjson_get_value_array_all(res, ",", 1, key);
 	return value;
+}
+
+int get_line_linkstatus(char *method, char *id, char **value)
+{
+	char *link_status = get_dsl_value_without_argument(method, id, "status", "link_status");
+
+	if (strcmp(link_status, "up") == 0)
+		*value = "Up";
+	else if (strcmp(link_status, "initializing") == 0)
+		*value = "Initializing";
+	else if (strcmp(link_status, "no_signal") == 0)
+		*value = "NoSignal";
+	else if (strcmp(link_status, "disabled") == 0)
+		*value = "Disabled";
+	else if (strcmp(link_status, "establishing") == 0)
+		*value = "EstablishingLink";
+	else if (strcmp(link_status, "error") == 0)
+		*value = "Error";
+	else
+		*value = link_status;
+	return 0;
 }
 
 /**************************************************************************
@@ -336,22 +356,7 @@ static int get_DSLLine_FirmwareVersion(char *refparam, struct dmctx *ctx, void *
 /*#Device.DSL.Line.{i}.LinkStatus!UBUS:dsl.line.0/status//link_status*/
 static int get_DSLLine_LinkStatus(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *link_status = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "link_status");
-	if(strcmp(link_status, "up") == 0)
-		*value = "Up";
-	else if(strcmp(link_status, "initializing") == 0)
-		*value = "Initializing";
-	else if(strcmp(link_status, "no_signal") == 0)
-		*value = "NoSignal";
-	else if(strcmp(link_status, "disabled") == 0)
-		*value = "Disabled";
-	else if(strcmp(link_status, "establishing") == 0)
-		*value = "EstablishingLink";
-	else if(strcmp(link_status, "error") == 0)
-		*value = "Error";
-	else
-		*value = link_status;
-	return 0;
+	return get_line_linkstatus("dsl.line", ((struct dsl_line_args*)data)->id, value);
 }
 
 static char *get_dsl_standard(char *str)
@@ -808,70 +813,70 @@ static int get_DSLLineStats_QuarterHourStart(char *refparam, struct dmctx *ctx, 
 /*#Device.DSL.Line.{i}.Stats.Total.ErroredSecs!UBUS:dsl.line.0/stats//total.errored_secs*/
 static int get_DSLLineStatsTotal_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "total", "errored_secs");
+	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "total", "errored_secs");
 	return 0;
 }
 
 /*#Device.DSL.Line.{i}.Stats.Total.SeverelyErroredSecs!UBUS:dsl.line.0/stats//total.severely_errored_secs*/
 static int get_DSLLineStatsTotal_SeverelyErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "total", "severely_errored_secs");
+	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "total", "severely_errored_secs");
 	return 0;
 }
 
 /*#Device.DSL.Line.{i}.Stats.Showtime.ErroredSecs!UBUS:dsl.line.0/stats//showtime.severely_errored_secs*/
 static int get_DSLLineStatsShowtime_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "showtime", "errored_secs");
+	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "showtime", "errored_secs");
 	return 0;
 }
 
 /*#Device.DSL.Line.{i}.Stats.Showtime.SeverelyErroredSecs!UBUS:dsl.line.0/stats//showtime.severely_errored_secs*/
 static int get_DSLLineStatsShowtime_SeverelyErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "showtime", "severely_errored_secs");
+	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "showtime", "severely_errored_secs");
 	return 0;
 }
 
 /*#Device.DSL.Line.{i}.Stats.LastShowtime.ErroredSecs!UBUS:dsl.line.0/stats//lastshowtime.errored_secs*/
 static int get_DSLLineStatsLastShowtime_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "lastshowtime", "errored_secs");
+	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "lastshowtime", "errored_secs");
 	return 0;
 }
 
 /*#Device.DSL.Line.{i}.Stats.LastShowtime.SeverelyErroredSecs!UBUS:dsl.line.0/stats//lastshowtime.severely_errored_secs*/
 static int get_DSLLineStatsLastShowtime_SeverelyErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "lastshowtime", "severely_errored_secs");
+	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "lastshowtime", "severely_errored_secs");
 	return 0;
 }
 
 /*#Device.DSL.Line.{i}.Stats.CurrentDay.ErroredSecs!UBUS:dsl.line.0/stats//currentday.errored_secs*/
 static int get_DSLLineStatsCurrentDay_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "currentday", "errored_secs");
+	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "currentday", "errored_secs");
 	return 0;
 }
 
 /*#Device.DSL.Line.{i}.Stats.CurrentDay.SeverelyErroredSecs!UBUS:dsl.line.0/stats//currentday.severely_errored_secs*/
 static int get_DSLLineStatsCurrentDay_SeverelyErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "currentday", "severely_errored_secs");
+	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "currentday", "severely_errored_secs");
 	return 0;
 }
 
 /*#Device.DSL.Line.{i}.Stats.QuarterHour.ErroredSecs!UBUS:dsl.line.0/stats//quarterhour.severely_errored_secs*/
 static int get_DSLLineStatsQuarterHour_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "quarterhour", "errored_secs");
+	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "quarterhour", "errored_secs");
 	return 0;
 }
 
 /*#Device.DSL.Line.{i}.Stats.QuarterHour.SeverelyErroredSecs!UBUS:dsl.line.0/stats//quarterhour.severely_errored_secs*/
 static int get_DSLLineStatsQuarterHour_SeverelyErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "quarterhour", "severely_errored_secs");
+	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "quarterhour", "severely_errored_secs");
 	return 0;
 }
 
@@ -1121,209 +1126,209 @@ static int get_DSLChannelStats_QuarterHourStart(char *refparam, struct dmctx *ct
 /*#Device.DSL.Channel.{i}.Stats.Total.XTURFECErrors!UBUS:dsl.channel.0/stats//total.xtur_fec_errors*/
 static int get_DSLChannelStatsTotal_XTURFECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtur_fec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtur_fec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.Total.XTUCFECErrors!UBUS:dsl.channel.0/stats//total.xtur_fec_errors*/
 static int get_DSLChannelStatsTotal_XTUCFECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtuc_fec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtuc_fec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.Total.XTURHECErrors!UBUS:dsl.channel.0/stats//total.xtur_fec_errors*/
 static int get_DSLChannelStatsTotal_XTURHECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtur_hec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtur_hec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.Total.XTUCHECErrors!UBUS:dsl.channel.0/stats//total.xtur_fec_errors*/
 static int get_DSLChannelStatsTotal_XTUCHECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtuc_hec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtuc_hec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.Total.XTURCRCErrors!UBUS:dsl.channel.0/stats//total.xtur_fec_errors*/
 static int get_DSLChannelStatsTotal_XTURCRCErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtur_crc_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtur_crc_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.Total.XTUCCRCErrors!UBUS:dsl.channel.0/stats//total.xtur_fec_errors*/
 static int get_DSLChannelStatsTotal_XTUCCRCErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtuc_crc_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "total", "xtuc_crc_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.Showtime.XTURFECErrors!UBUS:dsl.channel.0/stats//showtime.xtur_fec_errors*/
 static int get_DSLChannelStatsShowtime_XTURFECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtur_fec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtur_fec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.Showtime.XTUCFECErrors!UBUS:dsl.channel.0/stats//showtime.xtuc_fec_errors*/
 static int get_DSLChannelStatsShowtime_XTUCFECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtuc_fec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtuc_fec_errors");
 	return 0;}
 
 /*#Device.DSL.Channel.{i}.Stats.Showtime.XTURHECErrors!UBUS:dsl.channel.0/stats//showtime.xtur_hec_errors*/
 static int get_DSLChannelStatsShowtime_XTURHECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtur_hec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtur_hec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.Showtime.XTUCHECErrors!UBUS:dsl.channel.0/stats//showtime.xtuc_hec_errors*/
 static int get_DSLChannelStatsShowtime_XTUCHECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtuc_hec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtuc_hec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.Showtime.XTURCRCErrors!UBUS:dsl.channel.0/stats//showtime.xtur_crc_errors*/
 static int get_DSLChannelStatsShowtime_XTURCRCErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtur_crc_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtur_crc_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.Showtime.XTUCCRCErrors!UBUS:dsl.channel.0/stats//showtime.xtuc_crc_errors*/
 static int get_DSLChannelStatsShowtime_XTUCCRCErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtuc_crc_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "showtime", "xtuc_crc_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.LastShowtime.XTURFECErrors!UBUS:dsl.channel.0/stats//lastshowtime.xtur_fec_errors*/
 static int get_DSLChannelStatsLastShowtime_XTURFECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtur_fec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtur_fec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.LastShowtime.XTUCFECErrors!UBUS:dsl.channel.0/stats//lastshowtime.xtuc_fec_errors*/
 static int get_DSLChannelStatsLastShowtime_XTUCFECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtuc_fec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtuc_fec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.LastShowtime.XTURHECErrors!UBUS:dsl.channel.0/stats//lastshowtime.xtur_hec_errors*/
 static int get_DSLChannelStatsLastShowtime_XTURHECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtur_hec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtur_hec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.LastShowtime.XTUCHECErrors!UBUS:dsl.channel.0/stats//lastshowtime.xtuc_hec_errors*/
 static int get_DSLChannelStatsLastShowtime_XTUCHECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtuc_hec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtuc_hec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.LastShowtime.XTURCRCErrors!UBUS:dsl.channel.0/stats//lastshowtime.xtur_crc_errors*/
 static int get_DSLChannelStatsLastShowtime_XTURCRCErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtur_crc_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtur_crc_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.LastShowtime.XTUCCRCErrors!UBUS:dsl.channel.0/stats//lastshowtime.xtuc_crc_errors*/
 static int get_DSLChannelStatsLastShowtime_XTUCCRCErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtuc_crc_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "lastshowtime", "xtuc_crc_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.CurrentDay.XTURFECErrors!UBUS:dsl.channel.0/stats//currentday.xtur_fec_errors*/
 static int get_DSLChannelStatsCurrentDay_XTURFECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtur_fec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtur_fec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.CurrentDay.XTUCFECErrors!UBUS:dsl.channel.0/stats//currentday.xtuc_fec_errors*/
 static int get_DSLChannelStatsCurrentDay_XTUCFECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtuc_fec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtuc_fec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.CurrentDay.XTURHECErrors!UBUS:dsl.channel.0/stats//currentday.xtur_hec_errors*/
 static int get_DSLChannelStatsCurrentDay_XTURHECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtur_hec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtur_hec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.CurrentDay.XTUCHECErrors!UBUS:dsl.channel.0/stats//currentday.xtuc_hec_errors*/
 static int get_DSLChannelStatsCurrentDay_XTUCHECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtuc_hec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtuc_hec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.CurrentDay.XTURCRCErrors!UBUS:dsl.channel.0/stats//currentday.xtur_crc_errors*/
 static int get_DSLChannelStatsCurrentDay_XTURCRCErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtur_crc_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtur_crc_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.CurrentDay.XTUCCRCErrors!UBUS:dsl.channel.0/stats//currentday.xtuc_crc_errors*/
 static int get_DSLChannelStatsCurrentDay_XTUCCRCErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtuc_crc_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "currentday", "xtuc_crc_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.QuarterHour.XTURFECErrors!UBUS:dsl.channel.0/stats//quarterhour.xtur_fec_errors*/
 static int get_DSLChannelStatsQuarterHour_XTURFECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtur_fec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtur_fec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.QuarterHour.XTUCFECErrors!UBUS:dsl.channel.0/stats//quarterhour.xtuc_fec_errors*/
 static int get_DSLChannelStatsQuarterHour_XTUCFECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtuc_fec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtuc_fec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.QuarterHour.XTURHECErrors!UBUS:dsl.channel.0/stats//quarterhour.xtur_hec_errors*/
 static int get_DSLChannelStatsQuarterHour_XTURHECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtur_hec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtur_hec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.QuarterHour.XTUCHECErrors!UBUS:dsl.channel.0/stats//quarterhour.xtuc_hec_errors*/
 static int get_DSLChannelStatsQuarterHour_XTUCHECErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtuc_hec_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtuc_hec_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.QuarterHour.XTURCRCErrors!UBUS:dsl.channel.0/stats//quarterhour.xtur_crc_errors*/
 static int get_DSLChannelStatsQuarterHour_XTURCRCErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtur_crc_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtur_crc_errors");
 	return 0;
 }
 
 /*#Device.DSL.Channel.{i}.Stats.QuarterHour.XTUCCRCErrors!UBUS:dsl.channel.0/stats//quarterhour.xtuc_crc_errors*/
 static int get_DSLChannelStatsQuarterHour_XTUCCRCErrors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_dsl_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtuc_crc_errors");
+	*value = get_value_with_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "quarterhour", "xtuc_crc_errors");
 	return 0;
 }
 

@@ -9,8 +9,8 @@
  */
 
 #include "dmentry.h"
+#include "dsl.h"
 #include "fast.h"
-
 
 struct fast_line_args
 {
@@ -115,18 +115,6 @@ static char *get_fast_value_without_argument_and_with_two_key(char *command1, ch
 	dmubus_call(command, command2, UBUS_ARGS{}, 0, &res);
 	if (!res) return "";
 	value = dmjson_get_value(res, 2, key1, key2);
-	return value;
-}
-
-static char *get_fast_value_with_argument(char *command1, char *id, char *command2, char *argument, char *key)
-{
-	json_object *res;
-	char command[16], *value = "0";
-
-	snprintf(command, sizeof(command), "%s.%s", command1, id);
-	dmubus_call(command, command2, UBUS_ARGS{{"interval", argument, String}}, 1, &res);
-	if (!res) return "";
-	value = dmjson_get_value(res, 1, key);
 	return value;
 }
 
@@ -250,22 +238,7 @@ static int get_FASTLine_FirmwareVersion(char *refparam, struct dmctx *ctx, void 
 /*#Device.FAST.Line.{i}.LinkStatus!UBUS:fast.line.1/status//link_status*/
 static int get_FASTLine_LinkStatus(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *link_status = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "status", "link_status");
-	if(strcmp(link_status, "up") == 0)
-		*value = "Up";
-	else if(strcmp(link_status, "initializing") == 0)
-		*value = "Initializing";
-	else if(strcmp(link_status, "no_signal") == 0)
-		*value = "NoSignal";
-	else if(strcmp(link_status, "disabled") == 0)
-		*value = "Disabled";
-	else if(strcmp(link_status, "establishing") == 0)
-		*value = "EstablishingLink";
-	else if(strcmp(link_status, "error") == 0)
-		*value = "Error";
-	else
-		*value = link_status;
-	return 0;
+	return get_line_linkstatus("fast.line", ((struct fast_line_args*)data)->id, value);
 }
 
 /*#Device.FAST.Line.{i}.AllowedProfiles!UBUS:fast.line.1/status//allowed_profiles*/
@@ -435,420 +408,420 @@ static int get_FASTLineStats_QuarterHourStart(char *refparam, struct dmctx *ctx,
 /*#Device.FAST.Line.{i}.Stats.Total.ErroredSecs!UBUS:fast.line.1/stats//total.errored_secs*/
 static int get_FASTLineStatsTotal_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "errored_secs");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "errored_secs");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Total.SeverelyErroredSecs!UBUS:fast.line.1/stats//total.severely_errored_secs*/
 static int get_FASTLineStatsTotal_SeverelyErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "severely_errored_secs");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "severely_errored_secs");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Total.LOSS!UBUS:fast.line.1/stats//total.loss*/
 static int get_FASTLineStatsTotal_LOSS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "loss");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "loss");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Total.LORS!UBUS:fast.line.1/stats//total.lors*/
 static int get_FASTLineStatsTotal_LORS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "lors");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "lors");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Total.UAS!UBUS:fast.line.1/stats//total.uas*/
 static int get_FASTLineStatsTotal_UAS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "uas");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "uas");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Total.RTXUC!UBUS:fast.line.1/stats//total.rtx_uc*/
 static int get_FASTLineStatsTotal_RTXUC(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "rtx_uc");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "rtx_uc");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Total.RTXTX!UBUS:fast.line.1/stats//total.rtx_tx*/
 static int get_FASTLineStatsTotal_RTXTX(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "rtx_tx");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "rtx_tx");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Total.SuccessBSW!UBUS:fast.line.1/stats//total.success_bsw*/
 static int get_FASTLineStatsTotal_SuccessBSW(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "success_bsw");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "success_bsw");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Total.SuccessSRA!UBUS:fast.line.1/stats//total.success_sra*/
 static int get_FASTLineStatsTotal_SuccessSRA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "success_sra");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "success_sra");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Total.SuccessFRA!UBUS:fast.line.1/stats//total.success_fra*/
 static int get_FASTLineStatsTotal_SuccessFRA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "success_fra");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "success_fra");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Total.SuccessRPA!UBUS:fast.line.1/stats//total.success_rpa*/
 static int get_FASTLineStatsTotal_SuccessRPA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "success_rpa");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "success_rpa");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Total.SuccessTIGA!UBUS:fast.line.1/stats//total.success_tiga*/
 static int get_FASTLineStatsTotal_SuccessTIGA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "success_tiga");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "total", "success_tiga");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.ErroredSecs!UBUS:fast.line.1/stats//showtime.errored_secs*/
 static int get_FASTLineStatsShowtime_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "errored_secs");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "errored_secs");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.SeverelyErroredSecs!UBUS:fast.line.1/stats//showtime.severely_errored_secs*/
 static int get_FASTLineStatsShowtime_SeverelyErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "severely_errored_secs");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "severely_errored_secs");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.LOSS!UBUS:fast.line.1/stats//showtime.loss*/
 static int get_FASTLineStatsShowtime_LOSS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "loss");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "loss");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.LORS!UBUS:fast.line.1/stats//showtime.lors*/
 static int get_FASTLineStatsShowtime_LORS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "lors");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "lors");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.UAS!UBUS:fast.line.1/stats//showtime.uas*/
 static int get_FASTLineStatsShowtime_UAS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "uas");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "uas");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.RTXUC!UBUS:fast.line.1/stats//showtime.rtx_uc*/
 static int get_FASTLineStatsShowtime_RTXUC(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "rtx_uc");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "rtx_uc");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.RTXTX!UBUS:fast.line.1/stats//showtime.rtx_tx*/
 static int get_FASTLineStatsShowtime_RTXTX(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "rtx_tx");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "rtx_tx");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.SuccessBSW!UBUS:fast.line.1/stats//showtime.success_bsw*/
 static int get_FASTLineStatsShowtime_SuccessBSW(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "success_bsw");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "success_bsw");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.SuccessSRA!UBUS:fast.line.1/stats//showtime.success_sra*/
 static int get_FASTLineStatsShowtime_SuccessSRA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "success_sra");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "success_sra");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.SuccessFRA!UBUS:fast.line.1/stats//showtime.success_fra*/
 static int get_FASTLineStatsShowtime_SuccessFRA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "success_fra");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "success_fra");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.SuccessRPA!UBUS:fast.line.1/stats//showtime.success_rpa*/
 static int get_FASTLineStatsShowtime_SuccessRPA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "success_rpa");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "success_rpa");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.Showtime.SuccessTIGA!UBUS:fast.line.1/stats//showtime.success_tiga*/
 static int get_FASTLineStatsShowtime_SuccessTIGA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "success_tiga");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "showtime", "success_tiga");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.ErroredSecs!UBUS:fast.line.1/stats//lastshowtime.errored_secs*/
 static int get_FASTLineStatsLastShowtime_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "errored_secs");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "errored_secs");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.SeverelyErroredSecs!UBUS:fast.line.1/stats//lastshowtime.severely_errored_secs*/
 static int get_FASTLineStatsLastShowtime_SeverelyErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "severely_errored_secs");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "severely_errored_secs");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.LOSS!UBUS:fast.line.1/stats//lastshowtime.loss*/
 static int get_FASTLineStatsLastShowtime_LOSS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "loss");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "loss");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.LORS!UBUS:fast.line.1/stats//lastshowtime.lors*/
 static int get_FASTLineStatsLastShowtime_LORS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "lors");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "lors");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.UAS!UBUS:fast.line.1/stats//lastshowtime.uas*/
 static int get_FASTLineStatsLastShowtime_UAS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "uas");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "uas");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.RTXUC!UBUS:fast.line.1/stats//lastshowtime.rtx_uc*/
 static int get_FASTLineStatsLastShowtime_RTXUC(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "rtx_uc");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "rtx_uc");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.RTXTX!UBUS:fast.line.1/stats//lastshowtime.rtx_tx*/
 static int get_FASTLineStatsLastShowtime_RTXTX(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "rtx_tx");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "rtx_tx");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.SuccessBSW!UBUS:fast.line.1/stats//lastshowtime.success_bsw*/
 static int get_FASTLineStatsLastShowtime_SuccessBSW(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "success_bsw");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "success_bsw");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.SuccessSRA!UBUS:fast.line.1/stats//lastshowtime.success_sra*/
 static int get_FASTLineStatsLastShowtime_SuccessSRA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "success_sra");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "success_sra");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.SuccessFRA!UBUS:fast.line.1/stats//lastshowtime.success_fra*/
 static int get_FASTLineStatsLastShowtime_SuccessFRA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "success_fra");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "success_fra");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.SuccessRPA!UBUS:fast.line.1/stats//lastshowtime.success_rpa*/
 static int get_FASTLineStatsLastShowtime_SuccessRPA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "success_rpa");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "success_rpa");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.LastShowtime.SuccessTIGA!UBUS:fast.line.1/stats//lastshowtime.success_tiga*/
 static int get_FASTLineStatsLastShowtime_SuccessTIGA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "success_tiga");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "lastshowtime", "success_tiga");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.ErroredSecs!UBUS:fast.line.1/stats//currentday.errored_secs*/
 static int get_FASTLineStatsCurrentDay_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "errored_secs");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "errored_secs");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.SeverelyErroredSecs!UBUS:fast.line.1/stats//currentday.severely_errored_secs*/
 static int get_FASTLineStatsCurrentDay_SeverelyErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "severely_errored_secs");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "severely_errored_secs");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.LOSS!UBUS:fast.line.1/stats//currentday.loss*/
 static int get_FASTLineStatsCurrentDay_LOSS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "loss");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "loss");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.LORS!UBUS:fast.line.1/stats//currentday.lors*/
 static int get_FASTLineStatsCurrentDay_LORS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "lors");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "lors");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.UAS!UBUS:fast.line.1/stats//currentday.uas*/
 static int get_FASTLineStatsCurrentDay_UAS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "uas");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "uas");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.RTXUC!UBUS:fast.line.1/stats//currentday.rtx_uc*/
 static int get_FASTLineStatsCurrentDay_RTXUC(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "rtx_uc");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "rtx_uc");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.RTXTX!UBUS:fast.line.1/stats//currentday.rtx_tx*/
 static int get_FASTLineStatsCurrentDay_RTXTX(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "rtx_tx");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "rtx_tx");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.SuccessBSW!UBUS:fast.line.1/stats//currentday.success_bsw*/
 static int get_FASTLineStatsCurrentDay_SuccessBSW(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "success_bsw");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "success_bsw");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.SuccessSRA!UBUS:fast.line.1/stats//currentday.success_sra*/
 static int get_FASTLineStatsCurrentDay_SuccessSRA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "success_sra");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "success_sra");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.SuccessFRA!UBUS:fast.line.1/stats//currentday.success_fra*/
 static int get_FASTLineStatsCurrentDay_SuccessFRA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "success_fra");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "success_fra");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.SuccessRPA!UBUS:fast.line.1/stats//currentday.success_rpa*/
 static int get_FASTLineStatsCurrentDay_SuccessRPA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "success_rpa");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "success_rpa");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.CurrentDay.SuccessTIGA!UBUS:fast.line.1/stats//currentday.success_tiga*/
 static int get_FASTLineStatsCurrentDay_SuccessTIGA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "success_tiga");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "currentday", "success_tiga");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.ErroredSecs!UBUS:fast.line.1/stats//quarterhour.errored_secs*/
 static int get_FASTLineStatsQuarterHour_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "errored_secs");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "errored_secs");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.SeverelyErroredSecs!UBUS:fast.line.1/stats//quarterhour.severely_errored_secs*/
 static int get_FASTLineStatsQuarterHour_SeverelyErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "severely_errored_secs");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "severely_errored_secs");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.LOSS!UBUS:fast.line.1/stats//quarterhour.loss*/
 static int get_FASTLineStatsQuarterHour_LOSS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "loss");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "loss");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.LORS!UBUS:fast.line.1/stats//quarterhour.lors*/
 static int get_FASTLineStatsQuarterHour_LORS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "lors");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "lors");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.UAS!UBUS:fast.line.1/stats//quarterhour.uas*/
 static int get_FASTLineStatsQuarterHour_UAS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "uas");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "uas");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.RTXUC!UBUS:fast.line.1/stats//quarterhour.rtx_uc*/
 static int get_FASTLineStatsQuarterHour_RTXUC(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "rtx_uc");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "rtx_uc");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.RTXTX!UBUS:fast.line.1/stats//quarterhour.rtx_tx*/
 static int get_FASTLineStatsQuarterHour_RTXTX(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "rtx_tx");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "rtx_tx");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.SuccessBSW!UBUS:fast.line.1/stats//quarterhour.success_bsw*/
 static int get_FASTLineStatsQuarterHour_SuccessBSW(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "success_bsw");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "success_bsw");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.SuccessSRA!UBUS:fast.line.1/stats//quarterhour.success_sra*/
 static int get_FASTLineStatsQuarterHour_SuccessSRA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "success_sra");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "success_sra");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.SuccessFRA!UBUS:fast.line.1/stats//quarterhour.success_fra*/
 static int get_FASTLineStatsQuarterHour_SuccessFRA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "success_fra");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "success_fra");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.SuccessRPA!UBUS:fast.line.1/stats//quarterhour.success_rpa*/
 static int get_FASTLineStatsQuarterHour_SuccessRPA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "success_rpa");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "success_rpa");
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.Stats.QuarterHour.SuccessTIGA!UBUS:fast.line.1/stats//quarterhour.success_tiga*/
 static int get_FASTLineStatsQuarterHour_SuccessTIGA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "success_tiga");
+	*value = get_value_with_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "quarterhour", "success_tiga");
 	return 0;
 }
 
