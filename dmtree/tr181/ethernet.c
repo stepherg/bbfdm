@@ -695,7 +695,7 @@ static int get_EthernetInterface_MACAddress(char *refparam, struct dmctx *ctx, v
 static int get_EthernetInterface_MaxBitRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *link_supported = NULL;
-	int rate = 0;
+	int rate = 0, arrlen = 0;
 	char *max_link, *autoneg;
 
 	dmubus_call("network.device", "status", UBUS_ARGS{{"name", ((struct eth_port_args *)data)->ifname, String}}, 1, &res);
@@ -705,8 +705,11 @@ static int get_EthernetInterface_MaxBitRate(char *refparam, struct dmctx *ctx, v
 		*value = "-1";
 	} else {
 		json_object_object_get_ex(res, "link-supported", &link_supported);
-		if (link_supported) {
-			max_link = dmjson_get_value_in_array_idx(link_supported, json_object_array_length(link_supported) - 1, 0);
+		if (link_supported)
+			arrlen = json_object_array_length(link_supported);
+
+		if (arrlen) {
+			max_link = dmjson_get_value_in_array_idx(link_supported, arrlen - 1, 0);
 			sscanf(max_link, "%d%*s", &rate);
 			dmasprintf(value, "%d", rate);
 		}
