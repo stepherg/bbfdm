@@ -48,11 +48,9 @@
 #include "lanconfigsecurity.h"
 #include "security.h"
 #include "ieee1905.h"
+#include "softwaremodules.h"
 #ifdef BBF_TR104
 #include "servicesvoiceservice.h"
-#endif
-#ifdef BBF_TR157
-#include "softwaremodules.h"
 #endif
 
 /* *** BBFDM *** */
@@ -113,9 +111,7 @@ DMOBJ tDeviceObj[] = {
 {"DynamicDNS", &DMREAD, NULL, NULL, "file:/etc/config/ddns", NULL, NULL, tDynamicDNSObj, tDynamicDNSParams, NULL, BBFDM_BOTH},
 {"QoS", &DMREAD, NULL, NULL, "file:/etc/config/qos", NULL, NULL, tQoSObj, tQoSParams, NULL, BBFDM_BOTH},
 {"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH},
-#ifdef BBF_TR157
 {"SoftwareModules", &DMREAD, NULL, NULL, "ubus:swmodules", NULL, NULL, tSoftwareModulesObj, tSoftwareModulesParams, NULL, BBFDM_BOTH},
-#endif
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_BOTH},
 {0}
 };

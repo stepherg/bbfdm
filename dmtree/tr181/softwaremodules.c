@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 iopsys Software Solutions AB
+ * Copyright (C) 2020 iopsys Software Solutions AB
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 2.1
@@ -16,24 +16,16 @@
 ***************************************************************************/
 static int get_exe_cenv_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	if (data) {
-		char *name = dmjson_get_value((json_object *)data, 1, "name");
-		*linker = dmstrdup(name);
-		return 0;
-	}
-	*linker = "";
+	char *name = dmjson_get_value((json_object *)data, 1, "name");
+	*linker = (name && *name) ? dmstrdup(name) : "";
 	return 0;
 }
 
 static int get_du_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	if (data) {
-		char *name = dmjson_get_value((json_object *)data, 1, "name");
-		char *environment = dmjson_get_value((json_object *)data, 1, "environment");
-		dmasprintf(linker, "%s-%s", name, environment);
-		return 0;
-	}
-	*linker = "";
+	char *name = dmjson_get_value((json_object *)data, 1, "name");
+	char *environment = dmjson_get_value((json_object *)data, 1, "environment");
+	dmasprintf(linker, "%s-%s", name, environment);
 	return 0;
 }
 
@@ -44,15 +36,13 @@ static int browseSoftwareModulesExecEnvInst(struct dmctx *dmctx, DMNODE *parent_
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
 	char *inst, *max_inst = NULL;
-	int id = 0, j = 0;
+	int id = 0, env = 0;
 
 	dmubus_call("swmodules", "environment", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		dmjson_foreach_obj_in_array(res, arrobj, du_obj, j, 1, "environment") {
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, inst) == DM_STOP)
-				break;
-		}
+	dmjson_foreach_obj_in_array(res, arrobj, du_obj, env, 1, "environment") {
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
@@ -61,15 +51,13 @@ static int browseSoftwareModulesDeploymentUnitInst(struct dmctx *dmctx, DMNODE *
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
 	char *inst, *max_inst = NULL;
-	int id = 0, j = 0;
+	int id = 0, du = 0;
 
 	dmubus_call("swmodules", "du_list", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		dmjson_foreach_obj_in_array(res, arrobj, du_obj, j, 1, "deployment_unit") {
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, inst) == DM_STOP)
-				break;
-		}
+	dmjson_foreach_obj_in_array(res, arrobj, du_obj, du, 1, "deployment_unit") {
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
@@ -78,15 +66,13 @@ static int browseSoftwareModulesExecutionUnitInst(struct dmctx *dmctx, DMNODE *p
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
 	char *inst, *max_inst = NULL;
-	int id = 0, j = 0;
+	int id = 0, eu = 0;
 
 	dmubus_call("swmodules", "eu_list", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		dmjson_foreach_obj_in_array(res, arrobj, du_obj, j, 1, "execution_unit") {
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, inst) == DM_STOP)
-				break;
-		}
+	dmjson_foreach_obj_in_array(res, arrobj, du_obj, eu, 1, "execution_unit") {
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)du_obj, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
@@ -110,7 +96,7 @@ static int get_SoftwareModules_VendorConfigList(char *refparam, struct dmctx *ct
 		if (name && strcmp(name, config) == 0) {
 			char *vcf_instance;
 			dmuci_get_value_by_section_string(s, "vcf_instance", &vcf_instance);
-			dmasprintf(value, "Device.DeviceInfo.VendorConfigFile.%s.", vcf_instance);
+			dmasprintf(value, "Device.DeviceInfo.VendorConfigFile.%s", vcf_instance);
 			break;
 		}
 	}
@@ -128,7 +114,7 @@ static int get_SoftwareModules_ExecEnvNumberOfEntries(char *refparam, struct dmc
 	dmubus_call("swmodules", "environment", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	json_object_object_get_ex(res, "environment", &environment);
-	nbre_env = json_object_array_length(environment);
+	nbre_env = (environment) ? json_object_array_length(environment) : 0;
 	dmasprintf(value, "%d", nbre_env);
 	return 0;
 }
@@ -141,7 +127,7 @@ static int get_SoftwareModules_DeploymentUnitNumberOfEntries(char *refparam, str
 	dmubus_call("swmodules", "du_list", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	json_object_object_get_ex(res, "deployment_unit", &deployment_unit);
-	nbre_du = json_object_array_length(deployment_unit);
+	nbre_du = (deployment_unit) ? json_object_array_length(deployment_unit) : 0;
 	dmasprintf(value, "%d", nbre_du);
 	return 0;
 }
@@ -154,7 +140,7 @@ static int get_SoftwareModules_ExecutionUnitNumberOfEntries(char *refparam, stru
 	dmubus_call("swmodules", "eu_list", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	json_object_object_get_ex(res, "execution_unit", &execution_unit);
-	nbre_env = json_object_array_length(execution_unit);
+	nbre_env = (execution_unit) ? json_object_array_length(execution_unit) : 0;
 	dmasprintf(value, "%d", nbre_env);
 	return 0;
 }
@@ -162,18 +148,15 @@ static int get_SoftwareModules_ExecutionUnitNumberOfEntries(char *refparam, stru
 /*#Device.SoftwareModules.ExecEnv.{i}.Enable!UBUS:swmodules/environment//environment[i-1].status*/
 static int get_SoftwareModulesExecEnv_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "status");
-	if (strcmp(*value, "Up") == 0)
-		*value = "1";
-	else
-		*value = "0";
+	char *status = dmjson_get_value((json_object *)data, 1, "status");
+	*value = (status && strcmp(status, "Up") == 0) ? "1" : "0";
 	return 0;
 }
 
 static int set_SoftwareModulesExecEnv_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *env_name = NULL;
 	bool b;
-	char *env_name;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -183,12 +166,8 @@ static int set_SoftwareModulesExecEnv_Enable(char *refparam, struct dmctx *ctx, 
 		case VALUESET:
 			string_to_bool(value, &b);
 			env_name = dmjson_get_value((json_object *)data, 1, "name");
-			if (strcmp(env_name, "OpenWRT_Linux")) {
-				if (b)
-					dmcmd_no_wait("/usr/bin/lxc-start", 2, "-n", env_name);
-				else
-					dmcmd_no_wait("/usr/bin/lxc-stop", 2, "-n", env_name);
-			}
+			if (env_name && strcmp(env_name, "OpenWRT_Linux") != 0)
+				dmcmd_no_wait(b ? "/usr/bin/lxc-start" : "/usr/bin/lxc-stop", 2, "-n", env_name);
 			break;
 	}
 	return 0;
@@ -209,8 +188,8 @@ static int get_SoftwareModulesExecEnv_Reset(char *refparam, struct dmctx *ctx, v
 
 static int set_SoftwareModulesExecEnv_Reset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *env_name = NULL;
 	bool b;
-	char *env_name;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -220,7 +199,7 @@ static int set_SoftwareModulesExecEnv_Reset(char *refparam, struct dmctx *ctx, v
 		case VALUESET:
 			string_to_bool(value, &b);
 			env_name = dmjson_get_value((json_object *)data, 1, "name");
-			if (strcmp(env_name, "OpenWRT_Linux") == 0) {
+			if (env_name && strcmp(env_name, "OpenWRT_Linux") == 0) {
 				if (b) dmcmd_no_wait("/sbin/defaultreset", 0);
 			}
 			break;
@@ -231,18 +210,18 @@ static int set_SoftwareModulesExecEnv_Reset(char *refparam, struct dmctx *ctx, v
 static int get_SoftwareModulesExecEnv_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
-	char *env_name, *name;
+	char *env_name, *name = NULL;
 
 	name = dmjson_get_value((json_object *)data, 1, "name");
-	uci_path_foreach_sections(bbfdm, "dmmap", "environment", s) {
+	uci_path_foreach_sections(bbfdm, "dmmap_sw_modules", "environment", s) {
 		dmuci_get_value_by_section_string(s, "name", &env_name);
-		if (strcmp(env_name, name) == 0) {
+		if (name && strcmp(env_name, name) == 0) {
 			dmuci_get_value_by_section_string(s, "alias", value);
-			if ((*value)[0] == '\0')
-				dmasprintf(value, "cpe-%s", instance);
-			return 0;
+			break;
 		}
 	}
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
 	return 0;
 }
 
@@ -250,7 +229,7 @@ static int set_SoftwareModulesExecEnv_Alias(char *refparam, struct dmctx *ctx, v
 {
 	struct uci_section *s = NULL, *dmmap = NULL;
 	char *name;
-	int found = 0;
+	bool found = false;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -259,12 +238,12 @@ static int set_SoftwareModulesExecEnv_Alias(char *refparam, struct dmctx *ctx, v
 			break;
 		case VALUESET:
 			name = dmjson_get_value((json_object *)data, 1, "name");
-			uci_path_foreach_option_eq(bbfdm, "dmmap", "environment", "name", name, s) {
+			uci_path_foreach_option_eq(bbfdm, "dmmap_sw_modules", "environment", "name", name, s) {
 				dmuci_set_value_by_section_bbfdm(s, "alias", value);
-				found = 1;
+				found = true;
 			}
 			if (!found) {
-				dmuci_add_section_bbfdm("dmmap", "environment", &dmmap);
+				dmuci_add_section_bbfdm("dmmap_sw_modules", "environment", &dmmap);
 				dmuci_set_value_by_section(dmmap, "name", name);
 				dmuci_set_value_by_section(dmmap, "alias", value);
 			}
@@ -304,15 +283,10 @@ static int get_SoftwareModulesExecEnv_Version(char *refparam, struct dmctx *ctx,
 static int get_SoftwareModulesExecEnv_ParentExecEnv(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *env_name = dmjson_get_value((json_object *)data, 1, "name");
-	*value = "";
-	if (strcmp(env_name, "OpenWRT_Linux")) {
-		char *linker = dmstrdup(env_name);
-		adm_entry_get_linker_param(ctx, "Device.SoftwareModules.ExecEnv.", linker, value);
-		if (*value == NULL) {
-			*value = "";
-			return 0;
-		}
-	}
+	if (env_name && strcmp(env_name, "OpenWRT_Linux"))
+		adm_entry_get_linker_param(ctx, "Device.SoftwareModules.ExecEnv.", env_name, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
@@ -347,28 +321,24 @@ static int get_SoftwareModulesExecEnv_AvailableMemory(char *refparam, struct dmc
 static int get_SoftwareModulesExecEnv_ActiveExecutionUnits(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
-	int j = 0, env = 0;
-	char *environment, *eu_list = NULL, *eu_list_tmp = NULL;
+	unsigned pos = 0, eu = 0;
+	char eu_list[1024];
 
+	eu_list[0] = 0;
 	char *curr_env = dmjson_get_value((json_object *)data, 1, "name");
 	dmubus_call("swmodules", "eu_list", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
-	dmjson_foreach_obj_in_array(res, arrobj, du_obj, j, 1, "execution_unit") {
-		env++;
-		environment = dmjson_get_value(du_obj, 1, "environment");
-		if (strcmp(environment, curr_env) == 0) {
-			if(!eu_list) {
-				dmasprintf(&eu_list, "Device.SoftwareModules.ExecutionUnit.%d.", env);
-			} else {
-				eu_list_tmp = dmstrdup(eu_list);
-				dmfree(eu_list);
-				dmasprintf(&eu_list, "%s,Device.SoftwareModules.ExecutionUnit.%d.", eu_list_tmp, env);
-				dmfree(eu_list_tmp);
-			}
-		}
+	dmjson_foreach_obj_in_array(res, arrobj, du_obj, eu, 1, "execution_unit") {
+		char *environment = dmjson_get_value(du_obj, 1, "environment");
+
+		if (strcmp(environment, curr_env) == 0)
+			pos += snprintf(&eu_list[pos], sizeof(eu_list) - pos, "Device.SoftwareModules.ExecutionUnit.%d,", eu+1);
 	}
-	if(eu_list)
-		*value = eu_list;
+
+	if (pos)
+		eu_list[pos - 1] = 0;
+
+	*value = dmstrdup(eu_list);
 	return 0;
 }
 
@@ -389,28 +359,28 @@ static int get_SoftwareModulesDeploymentUnit_DUID(char *refparam, struct dmctx *
 static int get_SoftwareModulesDeploymentUnit_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
-	char *du_name, *du_env, *environment, *name;
+	char *du_name, *du_env, *environment = NULL, *name = NULL;
 
 	name = dmjson_get_value((json_object *)data, 1, "name");
 	environment = dmjson_get_value((json_object *)data, 1, "environment");
-	uci_path_foreach_sections(bbfdm, "dmmap", "deployment_unit", s) {
+	uci_path_foreach_sections(bbfdm, "dmmap_sw_modules", "deployment_unit", s) {
 		dmuci_get_value_by_section_string(s, "name", &du_name);
 		dmuci_get_value_by_section_string(s, "environment", &du_env);
-		if ((strcmp(du_name, name) == 0) && (strcmp(du_env, environment) == 0)) {
+		if (name && (strcmp(du_name, name) == 0) && (environment && strcmp(du_env, environment) == 0)) {
 			dmuci_get_value_by_section_string(s, "alias", value);
-			if ((*value)[0] == '\0')
-				dmasprintf(value, "cpe-%s", instance);
-			return 0;
+			break;
 		}
 	}
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
 	return 0;
 }
 
 static int set_SoftwareModulesDeploymentUnit_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s = NULL, *dmmap = NULL;
-	char *du_name, *du_env, *environment, *name;
-	int found = 0;
+	char *du_name, *du_env, *environment = NULL, *name = NULL;
+	bool found = false;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -420,17 +390,17 @@ static int set_SoftwareModulesDeploymentUnit_Alias(char *refparam, struct dmctx 
 		case VALUESET:
 			name = dmjson_get_value((json_object *)data, 1, "name");
 			environment = dmjson_get_value((json_object *)data, 1, "environment");
-			uci_path_foreach_sections(bbfdm, "dmmap", "deployment_unit", s) {
+			uci_path_foreach_sections(bbfdm, "dmmap_sw_modules", "deployment_unit", s) {
 				dmuci_get_value_by_section_string(s, "name", &du_name);
 				dmuci_get_value_by_section_string(s, "environment", &du_env);
-				if ((strcmp(du_name, name) == 0) && (strcmp(du_env, environment) == 0)) {
+				if (name && (strcmp(du_name, name) == 0) && (environment && strcmp(du_env, environment) == 0)) {
 					dmuci_set_value_by_section_bbfdm(s, "alias", value);
-					found = 1;
+					found = true;
 					break;
 				}
 			}
 			if (!found) {
-				dmuci_add_section_bbfdm("dmmap", "deployment_unit", &dmmap);
+				dmuci_add_section_bbfdm("dmmap_sw_modules", "deployment_unit", &dmmap);
 				dmuci_set_value_by_section(dmmap, "name", name);
 				dmuci_set_value_by_section(dmmap, "environment", environment);
 				dmuci_set_value_by_section(dmmap, "alias", value);
@@ -487,12 +457,6 @@ static int get_SoftwareModulesDeploymentUnit_Version(char *refparam, struct dmct
 	return 0;
 }
 
-static int get_SoftwareModulesDeploymentUnit_VendorLogList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = "";
-	return 0;
-}
-
 /*#Device.SoftwareModules.DeploymentUnit.{i}.VendorConfigList!UBUS:swmodules/du_list//deployment_unit[i-1].config*/
 static int get_SoftwareModulesDeploymentUnit_VendorConfigList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -503,19 +467,18 @@ static int get_SoftwareModulesDeploymentUnit_ExecutionUnitList(char *refparam, s
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
 	char *environment, *name, *curr_environment, *curr_name;
-	int j = 0, env = 0;
+	int eu = 0;
 
 	curr_name = dmjson_get_value((json_object *)data, 1, "name");
 	curr_environment = dmjson_get_value((json_object *)data, 1, "environment");
 
 	dmubus_call("swmodules", "eu_list", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
-	dmjson_foreach_obj_in_array(res, arrobj, du_obj, j, 1, "execution_unit") {
-		env++;
+	dmjson_foreach_obj_in_array(res, arrobj, du_obj, eu, 1, "execution_unit") {
 		name = dmjson_get_value(du_obj, 1, "name");
 		environment = dmjson_get_value(du_obj, 1, "environment");
 		if ((strcmp(name, curr_name) == 0) && (strcmp(environment, curr_environment) == 0)) {
-			dmasprintf(value, "Device.SoftwareModules.ExecutionUnit.%d.", env);
+			dmasprintf(value, "Device.SoftwareModules.ExecutionUnit.%d", eu+1);
 			break;
 		}
 	}
@@ -542,20 +505,20 @@ static int get_SoftwareModulesExecutionUnit_EUID(char *refparam, struct dmctx *c
 static int get_SoftwareModulesExecutionUnit_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
-	char *eu_euid, *eu_env, *environment, *euid;
+	char *eu_euid, *eu_env, *environment = NULL, *euid = NULL;
 
 	euid = dmjson_get_value((json_object *)data, 1, "euid");
 	environment = dmjson_get_value((json_object *)data, 1, "environment");
-	uci_path_foreach_sections(bbfdm, "dmmap", "execution_unit", s) {
+	uci_path_foreach_sections(bbfdm, "dmmap_sw_modules", "execution_unit", s) {
 		dmuci_get_value_by_section_string(s, "euid", &eu_euid);
 		dmuci_get_value_by_section_string(s, "environment", &eu_env);
-		if ((strcmp(eu_euid, euid) == 0) && (strcmp(eu_env, environment) == 0)) {
+		if ((euid && strcmp(eu_euid, euid) == 0) && (environment && strcmp(eu_env, environment) == 0)) {
 			dmuci_get_value_by_section_string(s, "alias", value);
-			if ((*value)[0] == '\0')
-				dmasprintf(value, "cpe-%s", instance);
-			return 0;
+			break;
 		}
 	}
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
 	return 0;
 }
 
@@ -563,7 +526,7 @@ static int set_SoftwareModulesExecutionUnit_Alias(char *refparam, struct dmctx *
 {
 	struct uci_section *s = NULL, *dmmap = NULL;
 	char *eu_euid, *eu_env, *environment, *euid;
-	int found = 0;
+	bool found = false;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -573,17 +536,17 @@ static int set_SoftwareModulesExecutionUnit_Alias(char *refparam, struct dmctx *
 		case VALUESET:
 			euid = dmjson_get_value((json_object *)data, 1, "euid");
 			environment = dmjson_get_value((json_object *)data, 1, "environment");
-			uci_path_foreach_sections(bbfdm, "dmmap", "execution_unit", s) {
+			uci_path_foreach_sections(bbfdm, "dmmap_sw_modules", "execution_unit", s) {
 				dmuci_get_value_by_section_string(s, "euid", &eu_euid);
 				dmuci_get_value_by_section_string(s, "environment", &eu_env);
 				if ((strcmp(eu_euid, euid) == 0) && (strcmp(eu_env, environment) == 0)) {
 					dmuci_set_value_by_section_bbfdm(s, "alias", value);
-					found = 1;
+					found = true;
 					break;
 				}
 			}
 			if (!found) {
-				dmuci_add_section_bbfdm("dmmap", "execution_unit", &dmmap);
+				dmuci_add_section_bbfdm("dmmap_sw_modules", "execution_unit", &dmmap);
 				dmuci_set_value_by_section(dmmap, "euid", euid);
 				dmuci_set_value_by_section(dmmap, "environment", environment);
 				dmuci_set_value_by_section(dmmap, "alias", value);
@@ -652,22 +615,19 @@ static int get_SoftwareModulesExecutionUnit_References(char *refparam, struct dm
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
 	char *environment, *name, *curr_environment, *curr_name;
-	int j = 0, env = 0;
+	int  du = 0;
 
 	curr_name = dmjson_get_value((json_object *)data, 1, "name");
 	curr_environment = dmjson_get_value((json_object *)data, 1, "environment");
 
 	dmubus_call("swmodules", "du_list", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
-	if (res) {
-		dmjson_foreach_obj_in_array(res, arrobj, du_obj, j, 1, "deployment_unit") {
-			env++;
-			name = dmjson_get_value(du_obj, 1, "name");
-			environment = dmjson_get_value(du_obj, 1, "environment");
-			if ((strcmp(name, curr_name) == 0) && (strcmp(environment, curr_environment) == 0)) {
-				dmasprintf(value, "Device.SoftwareModules.DeploymentUnit.%d.", env);
-				break;
-			}
+	dmjson_foreach_obj_in_array(res, arrobj, du_obj, du, 1, "deployment_unit") {
+		name = dmjson_get_value(du_obj, 1, "name");
+		environment = dmjson_get_value(du_obj, 1, "environment");
+		if ((strcmp(name, curr_name) == 0) && (strcmp(environment, curr_environment) == 0)) {
+			dmasprintf(value, "Device.SoftwareModules.DeploymentUnit.%d", du+1);
+			break;
 		}
 	}
 	return 0;
@@ -677,25 +637,18 @@ static int get_SoftwareModulesExecutionUnit_AssociatedProcessList(char *refparam
 {
 	json_object *res = NULL, *processes_obj = NULL, *arrobj = NULL;
 	char *euid, *pid;
-	int j = 0, process = 0;
+	int process = 0;
 
 	euid = dmjson_get_value((json_object *)data, 1, "euid");
 	dmubus_call("router.system", "processes", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
-	dmjson_foreach_obj_in_array(res, arrobj, processes_obj, j, 1, "processes") {
-		process++;
-		pid = dmjson_get_value(processes_obj, 1, "PID");
+	dmjson_foreach_obj_in_array(res, arrobj, processes_obj, process, 1, "processes") {
+		pid = dmjson_get_value(processes_obj, 1, "pid");
 		if (strcmp(euid, pid) == 0) {
-			dmasprintf(value, "Device.DeviceInfo.ProcessStatus.Process.%d.", process);
+			dmasprintf(value, "Device.DeviceInfo.ProcessStatus.Process.%d", process+1);
 			break;
 		}
 	}
-	return 0;
-}
-
-static int get_SoftwareModulesExecutionUnit_VendorLogList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = "";
 	return 0;
 }
 
@@ -710,10 +663,8 @@ static int get_SoftwareModulesExecutionUnit_ExecutionEnvRef(char *refparam, stru
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "environment");
 	adm_entry_get_linker_param(ctx, "Device.SoftwareModules.ExecEnv.", linker, value);
-	if (*value == NULL) {
+	if (*value == NULL)
 		*value = "";
-		return 0;
-	}
 	return 0;
 }
 
@@ -772,7 +723,7 @@ DMLEAF tSoftwareModulesDeploymentUnitParams[] = {
 {"Description", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Description, NULL, BBFDM_BOTH},
 {"Vendor", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Vendor, NULL, BBFDM_BOTH},
 {"Version", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_Version, NULL, BBFDM_BOTH},
-{"VendorLogList", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_VendorLogList, NULL, BBFDM_BOTH},
+//{"VendorLogList", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_VendorLogList, NULL, BBFDM_BOTH},
 {"VendorConfigList", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_VendorConfigList, NULL, BBFDM_BOTH},
 {"ExecutionUnitList", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_ExecutionUnitList, NULL, BBFDM_BOTH},
 {"ExecutionEnvRef", &DMREAD, DMT_STRING, get_SoftwareModulesDeploymentUnit_ExecutionEnvRef, NULL, BBFDM_BOTH},
@@ -793,7 +744,7 @@ DMLEAF tSoftwareModulesExecutionUnitParams[] = {
 {"Name", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Name, NULL, BBFDM_BOTH},
 {"ExecEnvLabel", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecEnvLabel, NULL, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_Status, NULL, BBFDM_BOTH},
-//{"RequestedState", &DMWRITE, DMT_STRING, get_SoftwareModulesExecutionUnit_RequestedState, set_SoftwareModulesExecutionUnit_RequestedState, NULL, BBFDM_CWMP},
+//{"RequestedState", &DMWRITE, DMT_STRING, get_SoftwareModulesExecutionUnit_RequestedState, set_SoftwareModulesExecutionUnit_RequestedState, BBFDM_CWMP},
 //{"ExecutionFaultCode", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecutionFaultCode, NULL, BBFDM_BOTH},
 //{"ExecutionFaultMessage", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecutionFaultMessage, NULL, BBFDM_BOTH},
 //{"AutoStart", &DMWRITE, DMT_BOOL, get_SoftwareModulesExecutionUnit_AutoStart, set_SoftwareModulesExecutionUnit_AutoStart, BBFDM_BOTH},
@@ -805,7 +756,7 @@ DMLEAF tSoftwareModulesExecutionUnitParams[] = {
 {"MemoryInUse", &DMREAD, DMT_INT, get_SoftwareModulesExecutionUnit_MemoryInUse, NULL, BBFDM_BOTH},
 {"References", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_References, NULL, BBFDM_BOTH},
 {"AssociatedProcessList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_AssociatedProcessList, NULL, BBFDM_BOTH},
-{"VendorLogList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_VendorLogList, NULL, BBFDM_BOTH},
+//{"VendorLogList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_VendorLogList, NULL, BBFDM_BOTH},
 {"VendorConfigList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_VendorConfigList, NULL, BBFDM_BOTH},
 //{"SupportedDataModelList", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_SupportedDataModelList, NULL, BBFDM_CWMP},
 {"ExecutionEnvRef", &DMREAD, DMT_STRING, get_SoftwareModulesExecutionUnit_ExecutionEnvRef, NULL, BBFDM_BOTH},

@@ -78,8 +78,9 @@ libbbfdm_la_SOURCES +=							\
 	../dmtree/tr181/dynamicdns.c				\
 	../dmtree/tr181/security.c					\
 	../dmtree/tr181/lanconfigsecurity.c			\
-	../dmtree/tr181/ieee1905.c				\
-	../dmtree/tr181/qos.c
+	../dmtree/tr181/ieee1905.c					\
+	../dmtree/tr181/qos.c 						\
+	../dmtree/tr181/softwaremodules.c
 	
 endif
 
@@ -116,11 +117,6 @@ libbbfdm_la_SOURCES +=							\
 	../dmtree/tr143/diagnostics.c
 endif
 
-if BBF_TR157
-libbbfdm_la_SOURCES +=							\
-	../dmtree/tr157/softwaremodules.c
-endif
-
 libbbfdm_la_CFLAGS =		\
 	$(AM_CFLAGS)			\
 	$(LIBUCI_CFLAGS)		\
@@ -151,4 +147,3 @@ libbbfdm_la_CFLAGS+=-I../
 libbbfdm_la_CFLAGS+=-I../dmtree/tr181
 libbbfdm_la_CFLAGS+=-I../dmtree/tr104
 libbbfdm_la_CFLAGS+=-I../dmtree/tr143
-libbbfdm_la_CFLAGS+=-I../dmtree/tr157

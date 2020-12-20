@@ -60,16 +60,6 @@ CONFIGURE_ARGS += \
 	--enable-tr143
 endif
 
-ifeq ($(CONFIG_BBF_TR157),y)
-CONFIGURE_ARGS += \
-	--enable-tr157
-endif
-
-ifeq ($(CONFIG_BBF_TR064),y)
-CONFIGURE_ARGS += \
-	--enable-tr064
-endif
-
 define Package/libbbfdm/install
 	$(INSTALL_DIR) $(1)/lib
 	$(CP) $(PKG_BUILD_DIR)/bin/.libs/libbbfdm.so* $(1)/lib/
@@ -84,7 +74,6 @@ define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/libbbfdm $(1)/usr/include/libbbf_api
 	$(CP) $(PKG_BUILD_DIR)/*.h $(1)/usr/include/libbbfdm/
 	$(CP) $(PKG_BUILD_DIR)/libbbf_api/*.h $(1)/usr/include/libbbf_api/
-	$(CP) $(PKG_BUILD_DIR)/dmtree/tr181/*.h $(1)/usr/include/libbbfdm/
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_BUILD_DIR)/bin/.libs/libbbfdm.{a,so*} $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/bin/.libs/libbbf_api.{a,so*} $(1)/usr/lib/

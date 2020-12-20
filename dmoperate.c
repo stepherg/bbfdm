@@ -744,19 +744,17 @@ static opr_ret_t swmodules_install_du(struct dmctx *dmctx, char *path, json_obje
 	du_install.username = dmjson_get_value(input, 1, "Username");
 	du_install.password = dmjson_get_value(input, 1, "Password");
 	du_install.environment = dmjson_get_value(input, 1, "ExecutionEnvRef");
-	if (du_install.environment[0] == '\0')
-		return UBUS_INVALID_ARGUMENTS;
 
-	char *exec_env = get_param_val_from_op_cmd(du_install.environment, "Name");
+	char *exec_env = get_param_val_from_op_cmd(du_install.environment ? du_install.environment : "Device.SoftwareModules.ExecEnv.1.", "Name");
 	if (!exec_env)
 		return FAIL;
 
-	dmubus_call("swmodules", "du_install",
-			UBUS_ARGS{{"url", du_install.url},
-					  {"uuid", du_install.uuid},
-					  {"username", du_install.username},
-					  {"password", du_install.password},
-					  {"environment", exec_env}},
+	dmubus_call("swmodules", "du_install", UBUS_ARGS{
+			{"url", du_install.url},
+			{"uuid", du_install.uuid},
+			{"username", du_install.username},
+			{"password", du_install.password},
+			{"environment", exec_env}},
 			5,
 			&res);
 
@@ -783,11 +781,11 @@ static opr_ret_t swmodules_update_du(struct dmctx *dmctx, char *path, json_objec
 	if (!du_uuid)
 		return FAIL;
 
-	dmubus_call("swmodules", "du_update",
-			UBUS_ARGS{{"uuid", du_uuid},
-					  {"url", du_update.url},
-					  {"username", du_update.username},
-					  {"password", du_update.password}},
+	dmubus_call("swmodules", "du_update", UBUS_ARGS{
+			{"uuid", du_uuid},
+			{"url", du_update.url},
+			{"username", du_update.username},
+			{"password", du_update.password}},
 			4,
 			&res);
 
@@ -802,6 +800,7 @@ static opr_ret_t swmodules_update_du(struct dmctx *dmctx, char *path, json_objec
 static opr_ret_t swmodules_uninstall_du(struct dmctx *dmctx, char *path, json_object *input)
 {
 	json_object *res = NULL;
+	char exec_env_path[64] = {0};
 
 	char *du_name = get_param_val_from_op_cmd(path, "Name");
 	if (!du_name)
@@ -811,13 +810,14 @@ static opr_ret_t swmodules_uninstall_du(struct dmctx *dmctx, char *path, json_ob
 	if (!exec_env)
 		return FAIL;
 
-	char *env = get_param_val_from_op_cmd(exec_env, "Name");
+	snprintf(exec_env_path, sizeof(exec_env_path), "%s.", exec_env);
+	char *env = get_param_val_from_op_cmd(exec_env_path, "Name");
 	if (!env)
 		return FAIL;
 
-	dmubus_call("swmodules", "du_uninstall",
-			UBUS_ARGS{{"name", du_name},
-					  {"environment", env}},
+	dmubus_call("swmodules", "du_uninstall", UBUS_ARGS{
+			{"name", du_name},
+			{"environment", env}},
 			2,
 			&res);
 

@@ -218,9 +218,6 @@ def generatelistfromfile(dmobject):
 	if "tr-104" in sys.argv[1]:
 		pathfilename = "../dmtree/tr104/" + obj[1].lower() + ".c"
 		pathiopsyswrtfilename = "../dmtree/tr104/" + obj[1].lower() + "-iopsyswrt.c"
-	elif obj[1] == "SoftwareModules" or obj[1] == "BulkData" :
-		pathfilename = "../dmtree/tr157/" + obj[1].lower() + ".c"
-		pathiopsyswrtfilename = "../dmtree/tr157/" + obj[1].lower() + "-iopsyswrt.c"
 	else:
 		pathfilename = "../dmtree/tr181/" + obj[1].lower() + ".c"
 		pathiopsyswrtfilename = "../dmtree/tr181/" + obj[1].lower() + "-iopsyswrt.c"
