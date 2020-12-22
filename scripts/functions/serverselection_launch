@@ -14,7 +14,6 @@ serverselection_get() {
 serverselection_launch() {
 	local i proto device res ba stc times sc1 success_count min_time avg_time max_time avg_time_sum min max micros
 	local fasthost avg_time_host min_time_host max_time_host
-	[ "$1" == "cwmp" ] && [ "`$UCI_GET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState`" != "Requested" ] && return
 	local hostlist=`serverselection_get dmmap_diagnostics.serverselection.HostList`
 	local cnt=`serverselection_get dmmap_diagnostics.serverselection.NumberOfRepetitions 3`
 	local timeout=`serverselection_get dmmap_diagnostics.serverselection.Timeout 1000`

@@ -28,7 +28,6 @@ ipping_error()
 
 ipping_launch() {
 	local i proto device res ba stc times sc1 success_count failure_count min_time avg_time max_time avg_time_sum min max micros avg_time_det min_time_det max_time_det avg_time_sum_det min_det max_det
-	[ "$1" == "cwmp" ] && [ "`$UCI_GET_BBFDM dmmap_diagnostics.ipping.DiagnosticState`" != "Requested" ] && return
 	local host=`ipping_get dmmap_diagnostics.ipping.Host`
 	local cnt=`ipping_get dmmap_diagnostics.ipping.NumberOfRepetitions 3`
 	local dsize=`ipping_get dmmap_diagnostics.ipping.DataBlockSize 64`

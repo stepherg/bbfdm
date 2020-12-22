@@ -18,7 +18,6 @@ nslookup_get() {
 nslookup_launch() {
 	local i j time1 time2 timeresponse status AnswerType HostNameReturned address dns_server_ip ResponseTime success_count
 	local address=""
-	[ "$1" == "cwmp" ] && [ "`$UCI_GET_BBFDM dmmap_diagnostics.nslookup.DiagnosticState`" != "Requested" ] && return
 	local hostname=`nslookup_get dmmap_diagnostics.nslookup.HostName`
 	local dnsserver=`nslookup_get dmmap_diagnostics.nslookup.DNSServer`
 	local cnt=`nslookup_get dmmap_diagnostics.nslookup.NumberOfRepetitions 1`

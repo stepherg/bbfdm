@@ -16,7 +16,6 @@ traceroute_get() {
 
 traceroute_launch() {
 	local i proto device res host ip time=0
-	[ "$1" == "cwmp" ] && [ "`$UCI_GET_BBFDM dmmap_diagnostics.traceroute.DiagnosticState`" != "Requested" ] && return
 	local host=`traceroute_get dmmap_diagnostics.traceroute.Host`
 	local cnt=`traceroute_get dmmap_diagnostics.traceroute.NumberOfTries 3`
 	local dsize=`traceroute_get dmmap_diagnostics.traceroute.DataBlockSize 38`

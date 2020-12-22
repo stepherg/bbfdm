@@ -13,7 +13,6 @@ udpecho_get() {
 
 udpecho_launch() {
 	local i proto device res ba stc times sc1 success_count failure_count min_time avg_time max_time avg_time_sum min max micros
-	[ "$1" == "cwmp" ] && [ "`$UCI_GET_BBFDM dmmap_diagnostics.udpechodiag.DiagnosticState`" != "Requested" ] && return
 	local host=`udpecho_get dmmap_diagnostics.udpechodiag.Host`
 	local port=`udpecho_get dmmap_diagnostics.udpechodiag.port`
 	local cnt=`udpecho_get dmmap_diagnostics.udpechodiag.NumberOfRepetitions 1`

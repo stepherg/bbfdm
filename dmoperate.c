@@ -458,7 +458,7 @@ static opr_ret_t ip_diagnostics_download(struct dmctx *dmctx, char *path, json_o
 	set_diagnostics_option("download", "NumberOfConnections", download.num_of_connections);
 	set_diagnostics_option("download", "EnablePerConnection", download.enable_per_connection_results);
 
-	if (start_upload_download_diagnostic(DOWNLOAD_DIAGNOSTIC, "usp") == -1)
+	if (start_upload_download_diagnostic(DOWNLOAD_DIAGNOSTIC, bbfdatamodel_type == BBFDM_CWMP ? "cwmp":"usp") == -1)
 		return FAIL;
 
 	download.romtime = get_diagnostics_option("download", "ROMtime");
