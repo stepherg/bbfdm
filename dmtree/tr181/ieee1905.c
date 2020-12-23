@@ -353,7 +353,7 @@ static int ubus_ieee1905_info(const char *option, char **value)
 {
 	json_object *res = NULL;
 	dmubus_call("ieee1905", "info", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "0");
+	DM_ASSERT(res, *value = "");
 	*value = dmjson_get_value(res, 1, option);
 	return 0;
 }
@@ -361,9 +361,8 @@ static int ubus_ieee1905_info(const char *option, char **value)
 /*#Device.IEEE1905.Version!UBUS:ieee1905/info//version*/
 static int get_IEEE1905_Version(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *version = NULL;
-	ubus_ieee1905_info("version", &version);
-	if (version && *version == '0')
+	ubus_ieee1905_info("version", value);
+	if (*value && **value == '\0')
 		*value = "1905.1";
 	return 0;
 }
@@ -377,9 +376,8 @@ static int get_IEEE1905AL_IEEE1905Id(char *refparam, struct dmctx *ctx, void *da
 /*#Device.IEEE1905.AL.Status!UBUS:ieee1905/info//status*/
 static int get_IEEE1905AL_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *version = NULL;
-	ubus_ieee1905_info("status", &version);
-	if (version && *version == '0')
+	ubus_ieee1905_info("status", value);
+	if (*value && **value == '\0')
 		*value = "Disabled";
 	return 0;
 }
@@ -401,13 +399,19 @@ static int get_IEEE1905AL_LowerLayers(char *refparam, struct dmctx *ctx, void *d
 /*#Device.IEEE1905.AL.RegistrarFreqBand!UBUS:ieee1905/info//registrar_freq_band*/
 static int get_IEEE1905AL_RegistrarFreqBand(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_ieee1905_info("registrar_freq_band", value);
+	ubus_ieee1905_info("registrar_freq_band", value);
+	if (*value && **value == '\0')
+		*value = "802.11 5 GHz";
+	return 0;
 }
 
 /*#Device.IEEE1905.AL.InterfaceNumberOfEntries!UBUS:ieee1905/info//interface_num*/
 static int get_IEEE1905AL_InterfaceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_ieee1905_info("interface_num", value);
+	ubus_ieee1905_info("interface_num", value);
+	if (*value && **value == '\0')
+		*value = "0";
+	return 0;
 }
 
 /*#Device.IEEE1905.AL.Interface.{i}.InterfaceId!UBUS:ieee1905.al.Name/info//mac*/
@@ -975,6 +979,8 @@ static int get_IEEE1905ALNetworkTopology_Status(char *refparam, struct dmctx *ct
 	dmubus_call("topology", "status", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "Error_Misconfigured");
 	*value = dmjson_get_value(res, 1, "status");
+	if (*value && strcmp(*value, "available") == 0)
+		*value = "Available";
 	return 0;
 }
 
@@ -1060,7 +1066,8 @@ static int get_IEEE1905ALNetworkTopologyChangeLog_TimeStamp(char *refparam, stru
 
 static int get_IEEE1905ALNetworkTopologyChangeLog_EventType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "event_type");
+	char *event_type = dmjson_get_value((json_object *)data, 1, "event_type");
+	*value = (event_type && strcmp(event_type, "add") == 0) ? "NewNeighbor" : "LostNeighbor";
 	return 0;
 }
 
