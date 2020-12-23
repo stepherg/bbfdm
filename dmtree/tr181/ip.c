@@ -2047,7 +2047,7 @@ static int get_IPInterfaceIPv6Prefix_Origin(char *refparam, struct dmctx *ctx, v
 	} else {
 		char *proto = NULL;
 		dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-		*value = (proto && strcmp(proto, "dhcpv6") == 0) ? "DHCPv6" : "Static";
+		*value = (proto && strcmp(proto, "dhcpv6") == 0) ? "PrefixDelegation" : "Static";
 	}
 	return 0;
 }
