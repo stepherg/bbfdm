@@ -33331,15 +33331,8 @@
 					],
 					"mapping": [
 						{
-							"type": "ubus",
-							"ubus": {
-								"object": "network.device",
-								"method": "status",
-								"args": {
-									"name": "@Name"
-								},
-								"key": "macaddr"
-							}
+							"type": "sysfs",
+							"file": "/sys/class/net/@Name/address"
 						}
 					]
 				},

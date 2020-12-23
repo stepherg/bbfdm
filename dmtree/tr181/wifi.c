@@ -194,14 +194,10 @@ static int set_wlan_ssid(char *refparam, struct dmctx *ctx, void *data, char *in
 	return 0;
 }
 
-/*#Device.WiFi.SSID.{i}.MACAddress!UBUS:network.device/status/name,@Name/macaddr*/
+/*#Device.WiFi.SSID.{i}.MACAddress!SYSFS:/sys/class/net/@Name/address*/
 static int get_WiFiSSID_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL;
-	dmubus_call("network.device", "status", UBUS_ARGS{{"name", ((struct wifi_ssid_args *)data)->ifname, String}}, 1, &res);
-	DM_ASSERT(res, *value = "");
-	*value = dmjson_get_value(res, 1, "macaddr");
-	return 0;
+	return get_net_device_sysfs(((struct wifi_ssid_args *)data)->ifname, "address", value);
 }
 
 /*#Device.WiFi.Radio.{i}.Enable!UCI:wireless/wifi-device,@i-1/disabled*/
