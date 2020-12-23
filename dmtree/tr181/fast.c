@@ -879,7 +879,7 @@ DMLEAF tFASTLineParams[] = {
 {"PowerManagementState", &DMREAD, DMT_STRING, get_FASTLine_PowerManagementState, NULL, BBFDM_BOTH},
 {"SuccessFailureCause", &DMREAD, DMT_UNINT, get_FASTLine_SuccessFailureCause, NULL, BBFDM_BOTH},
 {"UPBOKLER", &DMREAD, DMT_UNINT, get_FASTLine_UPBOKLER, NULL, BBFDM_BOTH},
-{"UPBOKLE", &DMREAD, DMT_STRING, get_FASTLine_UPBOKLE, NULL, BBFDM_BOTH},
+{"UPBOKLE", &DMREAD, DMT_UNINT, get_FASTLine_UPBOKLE, NULL, BBFDM_BOTH},
 {"LineNumber", &DMREAD, DMT_INT, get_FASTLine_LineNumber, NULL, BBFDM_BOTH},
 {"UpstreamMaxBitRate", &DMREAD, DMT_UNINT, get_FASTLine_UpstreamMaxBitRate, NULL, BBFDM_BOTH},
 {"DownstreamMaxBitRate", &DMREAD, DMT_UNINT, get_FASTLine_DownstreamMaxBitRate, NULL, BBFDM_BOTH},
