@@ -801,6 +801,8 @@ static int get_RoutingRouterIPv6Forwarding_Origin(char *refparam, struct dmctx *
 {
 	if (((struct routingfwdargs *)data)->type != ROUTE_DYNAMIC)
 		*value = "Static";
+	else
+		*value = "DHCPv6";
 	return 0;
 }
 
