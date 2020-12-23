@@ -194,7 +194,8 @@ int os__get_process_cpu_time(char* refparam, struct dmctx *ctx, void *data, char
 /*#Device.DeviceInfo.ProcessStatus.Process.{i}.State!UBUS:router.system/processes//processes[@i-1].state*/
 int os__get_process_state(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "state");
+	char *state = dmjson_get_value((json_object *)data, 1, "state");
+	*value = (state && strcmp(state, "Unknown") == 0) ? "Idle" : state;
 	return 0;
 }
 
