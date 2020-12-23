@@ -244,14 +244,33 @@ static int get_FASTLine_LinkStatus(char *refparam, struct dmctx *ctx, void *data
 /*#Device.FAST.Line.{i}.AllowedProfiles!UBUS:fast.line.1/status//allowed_profiles*/
 static int get_FASTLine_AllowedProfiles(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_array_without_argument("fast.line", ((struct fast_line_args*)data)->id, "status", "allowed_profiles");
+	json_object *res = NULL, *allowed_profiles;
+	char list_profile[16], ubus_name[16], *profile = NULL;
+	unsigned pos = 0, idx = 0;
+
+	snprintf(ubus_name, sizeof(ubus_name), "fast.line.%s", ((struct fast_line_args*)data)->id);
+	dmubus_call(ubus_name, "status", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "");
+
+	list_profile[0] = 0;
+	dmjson_foreach_value_in_array(res, allowed_profiles, profile, idx, 1, "allowed_profiles") {
+		if (profile && (strcmp(profile, "106a") == 0 || strcmp(profile, "212a") == 0))
+			pos += snprintf(&list_profile[pos], sizeof(list_profile) - pos, "%s,", profile);
+	}
+
+	/* cut tailing ',' */
+	if (pos)
+		list_profile[pos - 1] = 0;
+
+	*value = dmstrdup(list_profile);
 	return 0;
 }
 
 /*#Device.FAST.Line.{i}.CurrentProfile!UBUS:fast.line.1/status//current_profile*/
 static int get_FASTLine_CurrentProfile(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "status", "current_profile");
+	char *current_profile = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "status", "current_profile");
+	*value = (current_profile && strcmp(current_profile, "unknown") == 0) ? "" : current_profile;
 	return 0;
 }
 
