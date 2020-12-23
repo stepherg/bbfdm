@@ -417,7 +417,7 @@ static int get_DeviceInfoProcessor_Architecture(char *refparam, struct dmctx *ct
 	if (uname(&utsname) < 0)
 		return 0;
 
-	if (strstr(utsname.machine, "arm")) {
+	if (strstr(utsname.machine, "arm") || strstr(utsname.machine, "aarch64")) {
 		*value = "arm";
 	} else if(strstr(utsname.machine, "mips")) {
 		const bool is_big_endian = IS_BIG_ENDIAN;
