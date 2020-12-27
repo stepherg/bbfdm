@@ -219,7 +219,7 @@ static char *get_last_host_instance(char *package, char *section, char *dmmap_pa
 		// Skip all reserved hosts
 		char *host_name = NULL;
 		dmuci_get_value_by_section_string(s, "name", &host_name);
-		if (host_name && strcmp(host_name, "_reserved") == 0)
+		if (host_name && strcmp(host_name, "reserved") == 0)
 			continue;
 
 		get_dmmap_section_of_config_section(dmmap_package, section, section_name(s), &dmmap_section);
@@ -1092,7 +1092,7 @@ static int get_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 
 		char *host_name = NULL;
 		dmuci_get_value_by_section_string(s, "name", &host_name);
-		if (host_name && strcmp(host_name, "_reserved") != 0)
+		if (host_name && strcmp(host_name, "reserved") != 0)
 			continue;
 
 		char *ip = NULL;
@@ -1142,7 +1142,7 @@ static int set_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 
 				char *host_name = NULL;
 				dmuci_get_value_by_section_string(s, "name", &host_name);
-				if (host_name && strcmp(host_name, "_reserved") != 0)
+				if (host_name && strcmp(host_name, "reserved") != 0)
 					continue;
 
 				char *ip = NULL;
@@ -1170,7 +1170,7 @@ static int set_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 				// host doesn't exist -> create an new one
 				struct uci_section *dhcp_host_section = NULL;
 				dmuci_add_section("dhcp", "host", &dhcp_host_section);
-				dmuci_set_value_by_section(dhcp_host_section, "name", "_reserved");
+				dmuci_set_value_by_section(dhcp_host_section, "name", "reserved");
 				dmuci_set_value_by_section(dhcp_host_section, "dhcp", ((struct dhcp_args *)data)->interface);
 				dmuci_set_value_by_section(dhcp_host_section, "ip", pch);
 			}
@@ -1395,7 +1395,7 @@ static int get_DHCPv4ServerPool_StaticAddressNumberOfEntries(char *refparam, str
 		// Skip all reserved hosts
 		char *host_name = NULL;
 		dmuci_get_value_by_section_string(s, "name", &host_name);
-		if (host_name && strcmp(host_name, "_reserved") == 0)
+		if (host_name && strcmp(host_name, "reserved") == 0)
 			continue;
 
 		i++;
@@ -2663,7 +2663,7 @@ static int browseDHCPv4ServerPoolStaticAddressInst(struct dmctx *dmctx, DMNODE *
 		// Skip all reserved hosts
 		char *host_name = NULL;
 		dmuci_get_value_by_section_string(p->config_section, "name", &host_name);
-		if (host_name && strcmp(host_name, "_reserved") == 0)
+		if (host_name && strcmp(host_name, "reserved") == 0)
 			continue;
 
 		dmuci_set_value_by_section(p->dmmap_section, "dhcp", ((struct dhcp_args *)prev_data)->interface);
