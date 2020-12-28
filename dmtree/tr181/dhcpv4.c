@@ -1842,37 +1842,30 @@ static int get_DHCPv4Client_SubnetMask(char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
-/*#Device.DHCPv4.Client.{i}.IPRouters!UBUS:network.interface/status/interface,@Name/route[@i-1].target*/
+/*#Device.DHCPv4.Client.{i}.IPRouters!UBUS:network.interface/status/interface,@Name/route[@i-1].nexthop*/
 static int get_DHCPv4Client_IPRouters(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *v, buf[256] = "";
-	json_object *jobj = NULL, *res;
-	int i = 0;
+	json_object *res = NULL, *route = NULL, *arrobj = NULL;
+	unsigned pos = 0, idx = 0;
+	char list_ip[256] = {0};
 
 	if (((struct dhcp_client_args *)data)->dhcp_client_conf == NULL)
 		return 0;
 
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dhcp_client_args *)data)->dhcp_client_conf), String}}, 1, &res);
 	DM_ASSERT(res, *value = "");
-	while (1) {
-		jobj = dmjson_select_obj_in_array_idx(res, i, 1, "route");
-		i++;
 
-		if (jobj == NULL)
-			break;
-
-		v = dmjson_get_value(jobj, 1, "target");
-		if (*v == '\0')
-			continue;
-		if (strcmp(v, "0.0.0.0") == 0)
-			continue;
-		if (buf[0] != '\0') {
-			strcat(buf, ",");
-		} else
-			strcat(buf, v);
+	list_ip[0] = 0;
+	dmjson_foreach_obj_in_array(res, arrobj, route, idx, 1, "route") {
+		char *nexthop = dmjson_get_value(route, 1, "nexthop");
+		pos += snprintf(&list_ip[pos], sizeof(list_ip) - pos, "%s,", nexthop);
 	}
-	*value = dmstrdup(buf);
 
+	/* cut tailing ',' */
+	if (pos)
+		list_ip[pos - 1] = 0;
+
+	*value = dmstrdup(list_ip);
 	return 0;
 }
 
@@ -2772,7 +2765,7 @@ static int browseDHCPv4ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 {
 	char *inst, *max_inst = NULL;
 	struct dmmap_dup *p;
-	char *type, *ipv4addr = "", *ipv6addr = "", *proto, *mask4 = NULL;
+	char *type, *ipv4addr = "", *ipv6addr = "", *mask4 = NULL;
 	json_object *res, *jobj;
 	struct dhcp_client_args dhcp_client_arg = {0};
 	LIST_HEAD(dup_list);
@@ -2792,6 +2785,7 @@ static int browseDHCPv4ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 					jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
 					ipv4addr = dmjson_get_value(jobj, 1, "address");
 					mask4 = dmjson_get_value(jobj, 1, "mask");
+					mask4 = (mask4 && *mask4) ? cidr2netmask(atoi(mask4)) : "";
 				}
 			}
 
@@ -2804,27 +2798,16 @@ static int browseDHCPv4ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 				}
 			}
 
-			dmuci_get_value_by_section_string(p->config_section, "proto", &proto);
-
 			if (ipv4addr[0] == '\0' &&
 				ipv6addr[0] == '\0' &&
-				strcmp(proto, "dhcp") != 0 &&
-				strcmp(proto, "dhcpv6") != 0 &&
 				strcmp(type, "bridge") != 0) {
 				p->config_section = NULL;
 				dmuci_set_value_by_section_bbfdm(p->dmmap_section, "section_name", "");
 			}
 		}
 
-		if (ipv4addr == NULL || strlen(ipv4addr) == 0)
-			dhcp_client_arg.ip = dmstrdup("");
-		else
-			dhcp_client_arg.ip = dmstrdup(ipv4addr);
-		if (mask4 == NULL || strlen(mask4) == 0)
-			dhcp_client_arg.mask = dmstrdup("");
-		else
-			dhcp_client_arg.mask = dmstrdup(mask4);
-
+		dhcp_client_arg.ip = dmstrdup(ipv4addr ? ipv4addr : "");
+		dhcp_client_arg.mask = dmstrdup(mask4 ? mask4 : "");
 		dhcp_client_arg.dhcp_client_conf = p->config_section;
 		dhcp_client_arg.dhcp_client_dm = p->dmmap_section;
 

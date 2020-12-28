@@ -58710,7 +58710,7 @@
 								"args": {
 									"interface": "@Name"
 								},
-								"key": "route[@i-1].target"
+								"key": "route[@i-1].nexthop"
 							}
 						}
 					]
