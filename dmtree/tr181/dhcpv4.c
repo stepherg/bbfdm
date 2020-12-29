@@ -2776,46 +2776,23 @@ static int browseDHCPv4ServerPoolClientOptionInst(struct dmctx *dmctx, DMNODE *p
 /*#Device.DHCPv4.Client.{i}.!UCI:network/interface/dmmap_dhcp_client*/
 static int browseDHCPv4ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst, *max_inst = NULL;
+	char *inst, *max_inst = NULL, *ipv4addr = "", *mask4 = NULL;
 	struct dmmap_dup *p;
-	char *type, *ipv4addr = "", *ipv6addr = "", *mask4 = NULL;
 	json_object *res, *jobj;
 	struct dhcp_client_args dhcp_client_arg = {0};
 	LIST_HEAD(dup_list);
 
-	synchronize_specific_config_sections_with_dmmap_eq_no_delete("network", "interface", "dmmap_dhcp_client", "proto", "dhcp", &dup_list);
+	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_dhcp_client", "proto", "dhcp", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		if (p->config_section != NULL) {
-			dmuci_get_value_by_section_string(p->config_section, "type", &type);
-			if (strcmp(type, "alias") == 0 || strcmp(section_name(p->config_section), "loopback") == 0)
-				continue;
-
-			dmuci_get_value_by_section_string(p->config_section, "ipaddr", &ipv4addr);
-			dmuci_get_value_by_section_string(p->config_section, "netmask", &mask4);
-			if (ipv4addr[0] == '\0') {
-				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(p->config_section), String}}, 1, &res);
-				if (res) {
-					jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
-					ipv4addr = dmjson_get_value(jobj, 1, "address");
-					mask4 = dmjson_get_value(jobj, 1, "mask");
-					mask4 = (mask4 && *mask4) ? cidr2netmask(atoi(mask4)) : "";
-				}
-			}
-
-			dmuci_get_value_by_section_string(p->config_section, "ip6addr", &ipv6addr);
-			if (ipv6addr[0] == '\0') {
-				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(p->config_section), String}}, 1, &res);
-				if (res) {
-					jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv6-address");
-					ipv6addr = dmjson_get_value(jobj, 1, "address");
-				}
-			}
-
-			if (ipv4addr[0] == '\0' &&
-				ipv6addr[0] == '\0' &&
-				strcmp(type, "bridge") != 0) {
-				p->config_section = NULL;
-				dmuci_set_value_by_section_bbfdm(p->dmmap_section, "section_name", "");
+		dmuci_get_value_by_section_string(p->config_section, "ipaddr", &ipv4addr);
+		dmuci_get_value_by_section_string(p->config_section, "netmask", &mask4);
+		if (ipv4addr[0] == '\0') {
+			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(p->config_section), String}}, 1, &res);
+			if (res) {
+				jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
+				ipv4addr = dmjson_get_value(jobj, 1, "address");
+				mask4 = dmjson_get_value(jobj, 1, "mask");
+				mask4 = (mask4 && *mask4) ? cidr2netmask(atoi(mask4)) : "";
 			}
 		}
 
