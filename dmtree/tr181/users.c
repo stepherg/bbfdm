@@ -193,11 +193,16 @@ static int set_user_username(char *refparam, struct dmctx *ctx, void *data, char
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
 				return FAULT_9007;
+
+			// Check if the value is empty
+			if (*value == '\0')
+				return FAULT_9007;
 			break;
 		case VALUESET:
 			// Update dmmap_users file
 			get_dmmap_section_of_config_section("dmmap_users", "user", section_name((struct uci_section *)data), &dmmap_section);
 			dmuci_set_value_by_section(dmmap_section, "section_name", value);
+
 			// Update users config
 			dmuci_rename_section_by_section((struct uci_section *)data, value);
 			break;
