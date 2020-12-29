@@ -59101,7 +59101,7 @@
 										"index": "@i-1"
 									},
 									"option": {
-										"name": "ignore"
+										"name": "dhcpv4"
 									}
 								}
 							}
@@ -59132,7 +59132,7 @@
 										"index": "@i-1"
 									},
 									"option": {
-										"name": "ignore"
+										"name": "dhcpv4"
 									}
 								}
 							}
@@ -60957,7 +60957,7 @@
 										"index": "@i-1"
 									},
 									"option": {
-										"name": "ignore"
+										"name": "dhcpv6"
 									}
 								}
 							}
@@ -60988,7 +60988,7 @@
 										"index": "@i-1"
 									},
 									"option": {
-										"name": "ignore"
+										"name": "dhcpv6"
 									}
 								}
 							}
