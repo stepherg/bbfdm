@@ -844,11 +844,11 @@ static int delObjDHCPv4RelayForwarding(char *refparam, struct dmctx *ctx, void *
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
-/*#Device.DHCPv4.Server.Pool.{i}.Enable!UCI:dhcp/interface,@i-1/ignore*/
+/*#Device.DHCPv4.Server.Pool.{i}.Enable!UCI:dhcp/interface,@i-1/dhcpv4*/
 static int get_DHCPv4ServerPool_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "ignore", value);
-	*value = ((*value)[0] == '1') ? "0" : "1";
+	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "dhcpv4", value);
+	*value = (*value && strcmp(*value, "disabled") == 0) ? "0" : "1";
 	return 0;
 }
 
@@ -863,17 +863,17 @@ static int set_DHCPv4ServerPool_Enable(char *refparam, struct dmctx *ctx, void *
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dhcp_args *)data)->dhcp_sec, "ignore", b ? "0" : "1");
+			dmuci_set_value_by_section(((struct dhcp_args *)data)->dhcp_sec, "dhcpv4", b ? "server" : "disabled");
 			return 0;
 	}
 	return 0;
 }
 
-/*#Device.DHCPv4.Server.Pool.{i}.Status!UCI:dhcp/interface,@i-1/ignore*/
+/*#Device.DHCPv4.Server.Pool.{i}.Status!UCI:dhcp/interface,@i-1/dhcpv4*/
 static int get_DHCPv4ServerPool_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "ignore", value);
-	*value = ((*value)[0] == '1') ? "Disabled" : "Enabled";
+	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "dhcpv4", value);
+	*value = (*value && strcmp(*value, "disabled") == 0) ? "Disabled" : "Enabled";
 	return 0;
 }
 
@@ -2238,10 +2238,17 @@ static int set_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 
 static int get_DHCPv4Server_PoolNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
+	char *ignore = NULL;
 	int i = 0;
 
 	uci_foreach_sections("dhcp", "dhcp", s) {
+
+		// skip the section if option ignore = '1'
+		dmuci_get_value_by_section_string(s, "ignore", &ignore);
+		if (ignore && strcmp(ignore, "1") == 0)
+			continue;
+
 		i++;
 	}
 	dmasprintf(value, "%d", i);
@@ -2610,7 +2617,7 @@ static int get_DHCPv4Relay_ForwardingNumberOfEntries(char *refparam, struct dmct
 /*#Device.DHCPv4.Server.Pool.{i}.!UCI:dhcp/dhcp/dmmap_dhcp*/
 static int browseDHCPv4ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *interface, *inst = NULL, *max_inst = NULL, *v;
+	char *ignore = NULL, *interface, *inst = NULL, *max_inst = NULL, *v;
 	struct dhcp_args curr_dhcp_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(leases);
@@ -2622,6 +2629,12 @@ static int browseDHCPv4ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, 
 		dhcp_leases_load(&leases);
 
 	list_for_each_entry(p, &dup_list, list) {
+
+		// skip the section if option ignore = '1'
+		dmuci_get_value_by_section_string(p->config_section, "ignore", &ignore);
+		if (ignore && strcmp(ignore, "1") == 0)
+			continue;
+
 		dmuci_get_value_by_section_string(p->config_section, "interface", &interface);
 		init_dhcp_args(&curr_dhcp_args, p->config_section, interface);
 
