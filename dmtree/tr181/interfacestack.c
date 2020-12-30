@@ -539,7 +539,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-				char *link_channel = "channel_0";
+				char *link_channel = "channel_1";
 				adm_entry_get_linker_param(dmctx, "Device.DSL.Channel.", link_channel, &vb);
 				if (vb == NULL)
 					vb = "";
@@ -561,7 +561,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-				char *link_line = "line_0";
+				char *link_line = "line_1";
 				adm_entry_get_linker_param(dmctx, "Device.DSL.Line.", link_line, &value);
 				if (value == NULL)
 					value = "";
@@ -569,7 +569,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				struct uci_section *dsl_s = NULL;
 				uci_path_foreach_sections(bbfdm, "dmmap", "dsl_line", dsl_s) {
 					dmuci_get_value_by_section_string(dsl_s, "dsl_line_alias", &loweralias);
-					bridge_port_inst = get_instance_by_section(dmctx->instance_mode, "dmmap", "dsl_line", "id", "0", "dsl_line_instance", "dsl_line_alias");
+					bridge_port_inst = get_instance_by_section(dmctx->instance_mode, "dmmap", "dsl_line", "id", "1", "dsl_line_instance", "dsl_line_alias");
 				}
 
 				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
