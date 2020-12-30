@@ -8,6 +8,7 @@
  *	Author: Yalu Zhang, yalu.zhang@iopsys.eu
  */
 
+#include "dmentry.h"
 #include "servicesvoiceservicecodecprofile.h"
 #include "common.h"
 
@@ -17,32 +18,12 @@
 /*#Device.Services.VoiceService.{i}.CodecProfile.{i}.Codec!UCI:asterisk/codec_profile,@i-1/name*/
 static int get_ServicesVoiceServiceCodecProfile_Codec(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "name", value);
-	return 0;
-}
+	char *linker;
 
-static int set_ServicesVoiceServiceCodecProfile_Codec(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	int i;
-	const char *uci_name;
-
-	switch (action)	{
-		case VALUECHECK:
-			for (i = 0; i < codecs_num; i++) {
-				if (strcmp(supported_codecs[i].codec, value) == 0)
-					return 0;
-			}
-			TR104_DEBUG("Wrong codec: [%s]\n", value);
-			return FAULT_9007;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "name", value);
-			// The UCI section name must be changed accordingly. Otherwise it can not be referenced correctly
-			uci_name = get_codec_uci_name(value);
-			if (uci_name) {
-				dmuci_rename_section_by_section((struct uci_section *)data, (char *)uci_name);
-			}
-			break;
-	}
+	dmuci_get_value_by_section_string((struct uci_section *)data, "name", &linker);
+	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
@@ -73,7 +54,7 @@ static int set_ServicesVoiceServiceCodecProfile_PacketizationPeriod(char *refpar
 /* *** Device.Services.VoiceService.{i}.CodecProfile.{i}. *** */
 DMLEAF tServicesVoiceServiceCodecProfileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Codec", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCodecProfile_Codec, set_ServicesVoiceServiceCodecProfile_Codec, BBFDM_BOTH},
+{"Codec", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCodecProfile_Codec, NULL, BBFDM_BOTH},
 {"PacketizationPeriod", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCodecProfile_PacketizationPeriod, set_ServicesVoiceServiceCodecProfile_PacketizationPeriod, BBFDM_BOTH},
 {0}
 };

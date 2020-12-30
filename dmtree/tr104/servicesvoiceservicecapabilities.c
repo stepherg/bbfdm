@@ -11,6 +11,15 @@
 #include "servicesvoiceservicecapabilities.h"
 #include "common.h"
 
+/**************************************************************************
+* LINKER
+***************************************************************************/
+static int get_voice_service_capabilities_codec_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	*linker = data ? dmstrdup(((struct codec_info *)data)->codec) : "";
+	return 0;
+}
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -171,7 +180,7 @@ DMOBJ tServicesVoiceServiceCapabilitiesObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesSIPObj, NULL, NULL, BBFDM_BOTH},
 {"POTS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesPOTSParams, NULL, BBFDM_BOTH},
-{"Codec", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCapabilitiesCodecInst, NULL, NULL, tServicesVoiceServiceCapabilitiesCodecParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Codec", "BitRate", NULL}},
+{"Codec", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCapabilitiesCodecInst, NULL, NULL, tServicesVoiceServiceCapabilitiesCodecParams, get_voice_service_capabilities_codec_linker, BBFDM_BOTH, LIST_KEY{"Alias", "Codec", "BitRate", NULL}},
 {0}
 };
 
