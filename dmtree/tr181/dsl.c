@@ -906,7 +906,20 @@ static int set_DSLChannel_Enable(char *refparam, struct dmctx *ctx, void *data, 
 static int get_DSLChannel_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *status = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "status", "status");
-	*value = (strcmp(status, "up") == 0) ? "Up" : "Down";
+	if (strcmp(status, "up") == 0)
+		*value = "Up";
+	else if (strcmp(status, "down") == 0)
+		*value = "Down";
+	else if (strcmp(status, "dormant") == 0)
+		*value = "Dormant";
+	else if (strcmp(status, "not_present") == 0)
+		*value = "NotPresent";
+	else if (strcmp(status, "lower_layer_down") == 0)
+		*value = "LowerLayerDown";
+	else if (strcmp(status, "error") == 0)
+		*value = "Error";
+	else
+		*value = "Unknown";
 	return 0;
 }
 
