@@ -10,7 +10,6 @@ UCI_DELETE_BBFDM="/sbin/uci -q -c /etc/bbfdm delete"
 UCI_COMMIT_BBFDM="/sbin/uci -q -c /etc/bbfdm commit"
 CAPTURE_FILE="/tmp/download_dump"
 DOWNLOAD_DIAGNOSTIC_FILE="/tmp/bbfdm_download_diagnostic"
-DOWNLOAD_DIAGNOSTIC_LOG_FILE="/tmp/bbfdm_download_diagnostic_log"
 CONNECTION_TIMEOUT=10
 
 download_get() {
@@ -19,7 +18,7 @@ download_get() {
 }
 
 download_launch() {
-	local proto tx_bytes_before rx_bytes_before time1 tx_bytes_after rx_bytes_after time2 res rh ba stc periodtime
+	local proto tx_bytes_before rx_bytes_before time1 tx_bytes_after rx_bytes_after time2 periodtime error_code
 	local url=$2
 	local device=$3
 	[ "$url" = "" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBFDM; return; }
@@ -34,18 +33,17 @@ download_launch() {
 		tx_bytes_before=`ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes`
 		rx_bytes_before=`ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes`
 		time1=`date +%s`
-		res=$(wget $proto -t 1 --timeout=${CONNECTION_TIMEOUT} -O ${DOWNLOAD_DIAGNOSTIC_FILE} -o ${DOWNLOAD_DIAGNOSTIC_LOG_FILE} $url 2>&1)
+		curl $proto --fail --silent --retry 1 --connect-timeout ${CONNECTION_TIMEOUT} -o ${DOWNLOAD_DIAGNOSTIC_FILE} $url
+		error_code="$?"
 		time2=`date +%s`
 		tx_bytes_after=`ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes`
 		rx_bytes_after=`ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes`
-		rh=`cat ${DOWNLOAD_DIAGNOSTIC_LOG_FILE} | grep "resolve host"`
-		[ -n "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
-		ba=`echo "$res" | grep "bad address"`
-		[ -n "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
-		stc=`cat ${DOWNLOAD_DIAGNOSTIC_LOG_FILE} | grep "404 Not Found"`
-		[ -n "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_NoResponse; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
-		stc=`cat ${DOWNLOAD_DIAGNOSTIC_LOG_FILE} | grep "100%"`
-		[ -z "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_TransferFailed; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
+		[ "$error_code" == "6" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
+		[ "$error_code" == "7" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
+		[ "$error_code" == "22" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_NoResponse; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
+		[ "$error_code" == "27" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_IncorrectSize; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
+		[ "$error_code" == "28" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_Timeout; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
+		[ "$error_code" != "0" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_Other; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
 	fi
 	tx_bytes=$((tx_bytes_after-tx_bytes_before))
 	rx_bytes=$((rx_bytes_after-rx_bytes_before))
@@ -64,7 +62,6 @@ download_launch() {
 	fi
 	$UCI_COMMIT_BBFDM
 	rm ${DOWNLOAD_DIAGNOSTIC_FILE} 2>/dev/null
-	rm ${DOWNLOAD_DIAGNOSTIC_LOG_FILE} 2>/dev/null
 	sleep 1
 	local pids=`ps | grep $PID`
 	kill $PID &>/dev/null
