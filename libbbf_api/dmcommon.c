@@ -1455,30 +1455,39 @@ bool folder_exists(const char *path)
 {
 	struct stat buffer;
 
-	if (stat(path, &buffer) == 0 && S_ISDIR(buffer.st_mode))
-		return true;
-	else
-		return false;
+	return (stat(path, &buffer) == 0 && S_ISDIR(buffer.st_mode));
 }
 
 bool file_exists(const char *path)
 {
 	struct stat buffer;
 
-	if(stat(path, &buffer) == 0)
-		return true;
-	else
-		return false;
+	return stat(path, &buffer) == 0;
 }
 
 bool is_regular_file(const char *path)
 {
 	struct stat buffer;
 
-	if (stat(path, &buffer) == 0 && S_ISREG(buffer.st_mode))
-		return true;
-	else
-		return false;
+	return (stat(path, &buffer) == 0 && S_ISREG(buffer.st_mode));
+}
+
+unsigned long file_system_size(const char *path, const enum fs_size_type_enum type)
+{
+	struct statvfs vfs;
+
+	statvfs(path, &vfs);
+
+	switch (type) {
+		case FS_SIZE_TOTAL:
+			return vfs.f_blocks * vfs.f_frsize;
+		case FS_SIZE_AVAILABLE:
+			return vfs.f_bavail * vfs.f_frsize;
+		case FS_SIZE_USED:
+			return (vfs.f_blocks - vfs.f_bfree) * vfs.f_frsize;
+		default:
+			return -1;
+	}
 }
 
 int get_base64char_value(char b64)

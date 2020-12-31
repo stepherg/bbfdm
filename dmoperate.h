@@ -21,8 +21,6 @@
 
 #define SYSTEM_UBUS_PATH "system"
 #define NETWORK_INTERFACE_UBUS_PATH "network.interface"
-#define ICWMP_SCRIPT "/usr/sbin/icwmp"
-#define VCF_FILE_TYPE "3 Vendor Configuration File"
 
 extern struct op_cmd *dynamic_operate;
 

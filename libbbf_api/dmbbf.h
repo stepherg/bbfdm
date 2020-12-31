@@ -447,9 +447,11 @@ static inline void trace_empty_func()
 }
 #if TRACE_TYPE == 2
 #define TRACE(MESSAGE, ...) do { \
-	fprintf(stderr, "TRACE: %s@%s:%d " MESSAGE, __FUNCTION__,__FILE__,__LINE__, ##__VA_ARGS__); \
-	fprintf(stderr, "\n"); \
-	fflush(stderr); \
+	FILE *fp = fopen("/tmp/bbfdm.log", "a"); \
+	if (fp) { \
+		fprintf(fp, "%s@%s:%d: " MESSAGE, __func__, __FILE__, __LINE__, ##__VA_ARGS__); \
+		fclose(fp); \
+	} \
 } while(0)
 #elif TRACE_TYPE == 1
 #define TRACE(MESSAGE, ...) printf(MESSAGE, ## __VA_ARGS__)

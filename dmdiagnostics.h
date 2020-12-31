@@ -14,8 +14,8 @@
 
 #include <libbbf_api/dmcommon.h>
 
-#define DOWNLOAD_UPLOAD_PROTOCOL_HTTP "http://"
-#define DOWNLOAD_UPLOAD_PROTOCOL_FTP "ftp://"
+#define HTTP_PROTO "http://"
+#define FTP_PROTO "ftp://"
 #define default_date_format "AAAA-MM-JJTHH:MM:SS.000000Z"
 #define default_date_size sizeof(default_date_format) + 1
 #define FTP_SIZE_RESPONSE "213"
@@ -23,7 +23,10 @@
 #define FTP_TRANSFERT_COMPLETE "226 Transfer"
 #define FTP_RETR_REQUEST "RETR"
 #define FTP_STOR_REQUEST "STOR"
+#define CURL_TIMEOUT 10
 #define DMMAP_DIAGNOSTIGS "dmmap_diagnostics"
+#define CONFIG_RESTORE "/tmp/bbf_config_restore"
+#define CONFIG_BACKUP "/tmp/bbf_config_backup"
 
 struct diagnostic_stats
 {
@@ -58,5 +61,7 @@ void set_diagnostics_option(char *sec_name, char *option, char *value);
 void init_diagnostics_operation(char *sec_name, char *operation_path);
 void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value);
 int start_upload_download_diagnostic(int diagnostic_type, char *proto);
+int bbf_config_backup(const char *url, const char *username, const char *password, char *config_name);
+int bbf_config_restore(const char *url, const char *username, const char *password, const char *size);
 
 #endif

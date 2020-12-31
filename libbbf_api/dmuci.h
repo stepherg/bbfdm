@@ -318,8 +318,14 @@ char *dmuci_list_to_string(struct uci_list *list, char *delimitor);
 void uci_add_list_to_list(struct uci_list *addlist, struct uci_list *list);
 void free_all_list_package_change(struct list_head *clist);
 int dmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);
+int dmuci_import(char *package_name, const char *input_path);
+int dmuci_export_package(char *package, const char *output_path);
+int dmuci_export(const char *output_path);
+int dmuci_commit_package(char *package);
 int dmuci_commit(void);
+int dmuci_save_package(char *package);
 int dmuci_save(void);
+int dmuci_revert_package(char *package);
 int dmuci_revert(void);
 int dmuci_change_packages(struct list_head *clist);
 
@@ -342,8 +348,6 @@ int dmuci_add_list_value_by_section(struct uci_section *s, char *option, char *v
 int dmuci_del_list_value_by_section(struct uci_section *s, char *option, char *value);
 int dmuci_rename_section_by_section(struct uci_section *s, char *value);
 struct uci_section *dmuci_walk_section(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
-int dmuci_commit_package(char *package);
-int dmuci_save_package(char *package);
 
 int dmuci_get_option_value_string_bbfdm(char *package, char *section, char *option, char **value);
 char *dmuci_set_value_bbfdm(char *package, char *section, char *option, char *value);

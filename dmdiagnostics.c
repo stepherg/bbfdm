@@ -9,6 +9,7 @@
  *
  */
 
+#include <curl/curl.h>
 #include <libtrace.h>
 #include "dmentry.h"
 #include "dmdiagnostics.h"
@@ -69,6 +70,118 @@ void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *v
 		set_diagnostics_option(sec_name, "interface", linker);
 		dmfree(linker);
 	}
+}
+
+static int download_file(const char *file_path, const char *url, const char *username, const char *password)
+{
+	int res_code = 0;
+
+	CURL *curl = curl_easy_init();
+	if (curl) {
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		curl_easy_setopt(curl, CURLOPT_USERNAME, username);
+		curl_easy_setopt(curl, CURLOPT_PASSWORD, password);
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT, CURL_TIMEOUT);
+
+		FILE *fp = fopen(file_path, "wb");
+		if (fp) {
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+			curl_easy_perform(curl);
+			fclose(fp);
+		}
+
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &res_code);
+		curl_easy_cleanup(curl);
+	}
+
+	return res_code;
+}
+
+static int upload_file(const char *file_path, const char *url, const char *username, const char *password)
+{
+	int res_code = 0;
+
+	CURL *curl = curl_easy_init();
+	if (curl) {
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		curl_easy_setopt(curl, CURLOPT_USERNAME, username);
+		curl_easy_setopt(curl, CURLOPT_PASSWORD, password);
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT, CURL_TIMEOUT);
+		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+		FILE *fp = fopen(file_path, "rb");
+		if (fp) {
+			curl_easy_setopt(curl, CURLOPT_READDATA, fp);
+			curl_easy_perform(curl);
+			fclose(fp);
+		}
+
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &res_code);
+		curl_easy_cleanup(curl);
+	}
+
+	return res_code;
+}
+
+int bbf_config_backup(const char *url, const char *username, const char *password, char *config_name)
+{
+	int res = 0;
+
+	// Export config file to backup file
+	if (dmuci_export_package(config_name, CONFIG_BACKUP)) {
+		res = -1;
+		goto end;
+	}
+
+	// Upload config file
+	int res_code = upload_file(CONFIG_BACKUP, url, username, password);
+	if ((strncmp(url, HTTP_PROTO, strlen(HTTP_PROTO)) == 0 && res_code != 200) ||
+		(strncmp(url, FTP_PROTO, strlen(FTP_PROTO)) == 0 && res_code != 226) ||
+		(strncmp(url, HTTP_PROTO, strlen(HTTP_PROTO)) && strncmp(url, FTP_PROTO, strlen(FTP_PROTO))))
+		res = -1;
+
+end:
+	// Remove temporary file
+	if (remove(CONFIG_BACKUP))
+		res = -1;
+
+	return res;
+}
+
+int bbf_config_restore(const char *url, const char *username, const char *password, const char *size)
+{
+	int res = 0;
+
+	// Check file size
+	if (size && *size) {
+		unsigned long file_size = strtoul(size, NULL, 10);
+		unsigned long fs_available_size = file_system_size("/tmp", FS_SIZE_AVAILABLE);
+
+		if (fs_available_size < file_size) {
+			res = -1;
+			goto end;
+		}
+	}
+
+	// Download config file
+	int res_code = download_file(CONFIG_RESTORE, url, username, password);
+	if ((strncmp(url, HTTP_PROTO, strlen(HTTP_PROTO)) == 0 && res_code != 200) ||
+		(strncmp(url, FTP_PROTO, strlen(FTP_PROTO)) == 0 && res_code != 226) ||
+		(strncmp(url, HTTP_PROTO, strlen(HTTP_PROTO)) && strncmp(url, FTP_PROTO, strlen(FTP_PROTO)))) {
+		res = -1;
+		goto end;
+	}
+
+	// Apply config file
+	if (dmuci_import(NULL, CONFIG_RESTORE))
+		res = -1;
+
+end:
+	// Remove temporary file
+	if (remove(CONFIG_RESTORE))
+		res = -1;
+
+	return res;
 }
 
 static void libtrace_cleanup(libtrace_t *trace, libtrace_packet_t *packet)
@@ -468,8 +581,8 @@ int start_upload_download_diagnostic(int diagnostic_type, char *proto)
 	}
 
 	if ((url[0] == '\0') ||
-		(strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_HTTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_HTTP)) != 0 &&
-		strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_FTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_FTP)) != 0 &&
+		(strncmp(url, HTTP_PROTO, strlen(HTTP_PROTO)) != 0 &&
+		strncmp(url, FTP_PROTO, strlen(FTP_PROTO)) != 0 &&
 		strstr(url,"@") != NULL))
 		return -1;
 
@@ -490,9 +603,9 @@ int start_upload_download_diagnostic(int diagnostic_type, char *proto)
 		status = get_diagnostics_option("download", "DiagnosticState");
 		if (status && strcmp(status, "Complete") == 0) {
 			memset(&diag_stats, 0, sizeof(diag_stats));
-			if (strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_HTTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_HTTP)) == 0)
+			if (strncmp(url, HTTP_PROTO, strlen(HTTP_PROTO)) == 0)
 				extract_stats(DOWNLOAD_DUMP_FILE, DIAGNOSTIC_HTTP, DOWNLOAD_DIAGNOSTIC);
-			if (strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_FTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_FTP)) == 0)
+			if (strncmp(url, FTP_PROTO, strlen(FTP_PROTO)) == 0)
 				extract_stats(DOWNLOAD_DUMP_FILE, DIAGNOSTIC_FTP, DOWNLOAD_DIAGNOSTIC);
 		} else if (status && strncmp(status, "Error_", strlen("Error_")) == 0)
 			return -1;
@@ -509,9 +622,9 @@ int start_upload_download_diagnostic(int diagnostic_type, char *proto)
 		status = get_diagnostics_option("upload", "DiagnosticState");
 		if (status && strcmp(status, "Complete") == 0) {
 			memset(&diag_stats, 0, sizeof(diag_stats));
-			if (strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_HTTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_HTTP)) == 0)
+			if (strncmp(url, HTTP_PROTO, strlen(HTTP_PROTO)) == 0)
 				extract_stats(UPLOAD_DUMP_FILE, DIAGNOSTIC_HTTP, UPLOAD_DIAGNOSTIC);
-			if (strncmp(url, DOWNLOAD_UPLOAD_PROTOCOL_FTP, strlen(DOWNLOAD_UPLOAD_PROTOCOL_FTP)) == 0)
+			if (strncmp(url, FTP_PROTO, strlen(FTP_PROTO)) == 0)
 				extract_stats(UPLOAD_DUMP_FILE, DIAGNOSTIC_FTP, UPLOAD_DIAGNOSTIC);
 		} else if (status && strncmp(status, "Error_", strlen("Error_")) == 0)
 			return -1;

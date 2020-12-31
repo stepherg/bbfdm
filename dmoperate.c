@@ -235,10 +235,10 @@ static opr_ret_t vendor_conf_backup(struct dmctx *dmctx, char *path, json_object
 	fserver.user = dmjson_get_value(input, 1, "Username");
 	fserver.pass = dmjson_get_value(input, 1, "Password");
 
-	dmcmd("/bin/sh", 7, ICWMP_SCRIPT, "upload", fserver.url, VCF_FILE_TYPE, fserver.user, fserver.pass, vcf_name);
+	int res = bbf_config_backup(fserver.url, fserver.user, fserver.pass, vcf_name);
 	dmfree(vcf_name);
 
-	return SUCCESS;
+	return res ? FAIL : SUCCESS;
 }
 
 static opr_ret_t vendor_conf_restore(struct dmctx *dmctx, char *path, json_object *input)
@@ -254,12 +254,9 @@ static opr_ret_t vendor_conf_restore(struct dmctx *dmctx, char *path, json_objec
 	fserver.pass = dmjson_get_value(input, 1, "Password");
 	file_size = dmjson_get_value(input, 1, "FileSize");
 
-	dmcmd("/bin/sh", 7, ICWMP_SCRIPT, "download", fserver.url, file_size, VCF_FILE_TYPE, fserver.user, fserver.pass);
+	int res = bbf_config_restore(fserver.url, fserver.user, fserver.pass, file_size);
 
-	if (0 == dmcmd_no_wait("/bin/sh", 4, ICWMP_SCRIPT, "apply", "download", VCF_FILE_TYPE))
-		return SUCCESS;
-	else
-		return FAIL;
+	return res ? FAIL : SUCCESS;
 }
 
 static void fill_wireless_scan_results(struct dmctx *dmctx, char *radio)
@@ -348,7 +345,7 @@ static opr_ret_t ip_diagnostics_ipping(struct dmctx *dmctx, char *path, json_obj
 	// Commit and Free uci_ctx_bbfdm
 	commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
 
-	dmcmd("/bin/sh", 3, IPPING_PATH, "run", bbfdatamodel_type == BBFDM_CWMP ? "cwmp":"usp");
+	dmcmd("/bin/sh", 3, IPPING_PATH, "run", bbfdatamodel_type == BBFDM_CWMP ? "cwmp" : "usp");
 
 	// Allocate uci_ctx_bbfdm
 	dmuci_init_bbfdm();
@@ -406,7 +403,7 @@ static opr_ret_t ip_diagnostics_traceroute(struct dmctx *dmctx, char *path, json
 	// Commit and Free uci_ctx_bbfdm
 	commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
 
-	dmcmd("/bin/sh", 3, TRACEROUTE_PATH, "run", bbfdatamodel_type == BBFDM_CWMP ? "cwmp":"usp");
+	dmcmd("/bin/sh", 3, TRACEROUTE_PATH, "run", bbfdatamodel_type == BBFDM_CWMP ? "cwmp" : "usp");
 
 	// Allocate uci_ctx_bbfdm
 	dmuci_init_bbfdm();
@@ -458,7 +455,7 @@ static opr_ret_t ip_diagnostics_download(struct dmctx *dmctx, char *path, json_o
 	set_diagnostics_option("download", "NumberOfConnections", download.num_of_connections);
 	set_diagnostics_option("download", "EnablePerConnection", download.enable_per_connection_results);
 
-	if (start_upload_download_diagnostic(DOWNLOAD_DIAGNOSTIC, bbfdatamodel_type == BBFDM_CWMP ? "cwmp":"usp") == -1)
+	if (start_upload_download_diagnostic(DOWNLOAD_DIAGNOSTIC, bbfdatamodel_type == BBFDM_CWMP ? "cwmp" : "usp") == -1)
 		return FAIL;
 
 	download.romtime = get_diagnostics_option("download", "ROMtime");
@@ -518,7 +515,7 @@ static opr_ret_t ip_diagnostics_upload(struct dmctx *dmctx, char *path, json_obj
 	set_diagnostics_option("upload", "NumberOfConnections", upload.num_of_connections);
 	set_diagnostics_option("upload", "EnablePerConnection", upload.enable_per_connection_results);
 
-	if (start_upload_download_diagnostic(UPLOAD_DIAGNOSTIC, bbfdatamodel_type == BBFDM_CWMP ? "cwmp":"usp") == -1)
+	if (start_upload_download_diagnostic(UPLOAD_DIAGNOSTIC, bbfdatamodel_type == BBFDM_CWMP ? "cwmp" : "usp") == -1)
 		return FAIL;
 
 	upload.romtime = get_diagnostics_option("upload", "ROMtime");
@@ -585,7 +582,7 @@ static opr_ret_t ip_diagnostics_udpecho(struct dmctx *dmctx, char *path, json_ob
 	// Commit and Free uci_ctx_bbfdm
 	commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
 
-	dmcmd("/bin/sh", 3, UDPECHO_PATH, "run", bbfdatamodel_type == BBFDM_CWMP ? "cwmp":"usp");
+	dmcmd("/bin/sh", 3, UDPECHO_PATH, "run", bbfdatamodel_type == BBFDM_CWMP ? "cwmp" : "usp");
 
 	// Allocate uci_ctx_bbfdm
 	dmuci_init_bbfdm();
@@ -636,7 +633,7 @@ static opr_ret_t ip_diagnostics_serverselection(struct dmctx *dmctx, char *path,
 	// Commit and Free uci_ctx_bbfdm
 	commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
 
-	dmcmd("/bin/sh", 3, SERVERSELECTION_PATH, "run", bbfdatamodel_type == BBFDM_CWMP ? "cwmp":"usp");
+	dmcmd("/bin/sh", 3, SERVERSELECTION_PATH, "run", bbfdatamodel_type == BBFDM_CWMP ? "cwmp" : "usp");
 
 	// Allocate uci_ctx_bbfdm
 	dmuci_init_bbfdm();
@@ -680,7 +677,7 @@ static opr_ret_t ip_diagnostics_nslookup(struct dmctx *dmctx, char *path, json_o
 	// Commit and Free uci_ctx_bbfdm
 	commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
 
-	dmcmd("/bin/sh", 3, NSLOOKUP_PATH, "run", bbfdatamodel_type == BBFDM_CWMP ? "cwmp":"usp");
+	dmcmd("/bin/sh", 3, NSLOOKUP_PATH, "run", bbfdatamodel_type == BBFDM_CWMP ? "cwmp" : "usp");
 
 	// Allocate uci_ctx_bbfdm
 	dmuci_init_bbfdm();

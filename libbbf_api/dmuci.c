@@ -288,6 +288,73 @@ end:
 	return o;
 }
 
+/**** UCI IMPORT *****/
+int dmuci_import(char *package_name, const char *input_path)
+{
+	struct uci_package *package = NULL;
+	struct uci_element *e;
+	int ret = 0;
+
+	FILE *input = fopen(input_path, "r");
+	if (!input)
+		return -1;
+
+	if (uci_import(uci_ctx, input, package_name, &package, (package_name != NULL)) != UCI_OK) {
+		ret = -1;
+		goto end;
+	}
+
+	uci_foreach_element(&uci_ctx->root, e) {
+		struct uci_package *p = uci_to_package(e);
+		if (uci_commit(uci_ctx, &p, true) != UCI_OK)
+			ret = -1;
+	}
+
+end:
+	fclose(input);
+
+	return ret;
+}
+
+/**** UCI EXPORT *****/
+int dmuci_export_package(char *package, const char *output_path)
+{
+	struct uci_ptr ptr = {0};
+	int ret = 0;
+
+	FILE *out = fopen(output_path, "a");
+	if (!out)
+		return -1;
+
+	if (uci_lookup_ptr(uci_ctx, &ptr, package, true) != UCI_OK) {
+		ret = -1;
+		goto end;
+	}
+
+	if (uci_export(uci_ctx, out, ptr.p, true) != UCI_OK)
+		ret = -1;
+
+end:
+	fclose(out);
+
+	return ret;
+}
+
+int dmuci_export(const char *output_path)
+{
+	char **configs = NULL;
+	char **p;
+
+	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs)
+		return -1;
+
+	for (p = configs; *p; p++)
+		dmuci_export_package(*p, output_path);
+
+	free(configs);
+	return 0;
+}
+
 /**** UCI COMMIT *****/
 int dmuci_commit_package(char *package)
 {
@@ -363,7 +430,7 @@ end:
 }
 
 /**** UCI REVERT *****/
-static int dmuci_revert_package(char *package)
+int dmuci_revert_package(char *package)
 {
 	struct uci_ptr ptr = {0};
 

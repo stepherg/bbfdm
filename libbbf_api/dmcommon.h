@@ -46,6 +46,7 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -155,6 +156,12 @@ do { \
 	int mpp = dmcmd(CMD, N, ## __VA_ARGS__); \
 	if (mpp) close (mpp); \
 } while (0)
+
+enum fs_size_type_enum {
+	FS_SIZE_TOTAL,
+	FS_SIZE_AVAILABLE,
+	FS_SIZE_USED,
+};
 
 #define IPPING_PATH "/usr/share/bbfdm/functions/ipping_launch"
 #define IPPING_STOP DMCMD("/bin/sh", 2, IPPING_PATH, "stop");
@@ -280,6 +287,7 @@ char *decode64(char *enc);
 bool folder_exists(const char *path);
 bool file_exists(const char *path);
 bool is_regular_file(const char *path);
+unsigned long file_system_size(const char *path, const enum fs_size_type_enum type);
 char *stringToHex(char *text, int length);
 char *replace_char(char *str, char find, char replace);
 void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *value, bool b);
