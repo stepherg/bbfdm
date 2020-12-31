@@ -50,7 +50,6 @@ traceroute_launch() {
 	$UCI_SET_BBFDM dmmap_diagnostics.traceroute.NumberOfHops=$i
 	$UCI_SET_BBFDM dmmap_diagnostics.traceroute.ResponseTime=$($UCI_GET_BBFDM dmmap_diagnostics.@RouteHops[-1].time)
 	$UCI_COMMIT_BBFDM
-	[ "$1" == "cwmp" ] && event_diagnostic
 }
 
 delete_all_route_hops() {
@@ -58,17 +57,6 @@ delete_all_route_hops() {
 	for j in $($UCI_SHOW_BBFDM dmmap_diagnostics | grep "dmmap_diagnostics.@RouteHops.*=RouteHops"); do
 		$UCI_DELETE_BBFDM dmmap_diagnostics.@RouteHops[-1]
 		$UCI_COMMIT_BBFDM
-	done
-}
-
-event_diagnostic() {
-	local e=1
-	local i=0
-	while [ "$e" != 0 -a $i -lt 200 ]; do
-		ubus -t 1 call tr069 inform '{"event":"8 DIAGNOSTICS COMPLETE"}'
-		e=$?
-		[ "$e" != "0" ] && sleep 1;
-		let i++
 	done
 }
 

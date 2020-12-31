@@ -82,7 +82,6 @@ nslookup_launch() {
 	$UCI_SET_BBFDM dmmap_diagnostics.nslookup.SuccessCount=$success_count
 	[ "$1" == "cwmp" ] && $UCI_SET_BBFDM dmmap_diagnostics.nslookup.DiagnosticState=Complete
 	$UCI_COMMIT_BBFDM
-	[ "$1" == "cwmp" ] && event_dignostic
 }
 
 delete_all_results() {
@@ -91,17 +90,6 @@ delete_all_results() {
 		$UCI_DELETE_BBFDM dmmap_diagnostics.@NSLookupResult[-1]
 	done
 	$UCI_COMMIT_BBFDM
-}
-
-event_dignostic() {
-	local e=1
-	local i=0
-	while [ "$e" != 0 -a $i -lt 200 ]; do
-		ubus -t 1 call tr069 inform '{"event":"8 DIAGNOSTICS COMPLETE"}' &>/dev/null
-		e=$?
-		[ "$e" != "0" ] && sleep 1;
-		let i++
-	done
 }
 
 nslookup_stop_diagnostic() {

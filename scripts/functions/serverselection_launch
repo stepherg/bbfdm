@@ -107,18 +107,6 @@ serverselection_launch() {
 	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.MinimumResponseTime=$min_time_host
 	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.MaximumResponseTime=$max_time_host
 	$UCI_COMMIT_BBFDM
-	[ "$1" == "cwmp" ] && event_dignostic
-}
-
-event_dignostic() {
-	local e=1
-	local i=0
-	while [ "$e" != 0 -a $i -lt 200 ]; do
-		ubus -t 1 call tr069 inform '{"event":"8 DIAGNOSTICS COMPLETE"}' &>/dev/null
-		e=$?
-		[ "$e" != "0" ] && sleep 1;
-		let i++
-	done
 }
 
 serverselection_stop_diagnostic() {
