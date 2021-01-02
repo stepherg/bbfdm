@@ -119,7 +119,7 @@ serverselection_stop_diagnostic() {
 }
 
 if [ "$1" == "run" ]; then
-	serverselection_launch $2
+	serverselection_launch
 elif [ "$1" == "stop" ]; then
 	serverselection_stop_diagnostic
 else

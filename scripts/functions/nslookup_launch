@@ -80,7 +80,7 @@ nslookup_launch() {
 	done <${LOG_FILE}
 	rm -f ${LOG_FILE}
 	$UCI_SET_BBFDM dmmap_diagnostics.nslookup.SuccessCount=$success_count
-	[ "$1" == "cwmp" ] && $UCI_SET_BBFDM dmmap_diagnostics.nslookup.DiagnosticState=Complete
+	$UCI_SET_BBFDM dmmap_diagnostics.nslookup.DiagnosticState=Complete
 	$UCI_COMMIT_BBFDM
 }
 
@@ -103,7 +103,7 @@ nslookup_stop_diagnostic() {
 }
 
 if [ "$1" == "run" ]; then
-	nslookup_launch $2
+	nslookup_launch
 elif [ "$1" == "stop" ]; then
 	nslookup_stop_diagnostic
 else

@@ -113,7 +113,7 @@ ipping_stop_diagnostic() {
 }
 
 if [ "$1" == "run" ]; then
-	ipping_launch $2
+	ipping_launch
 elif [ "$1" == "stop" ]; then
 	ipping_stop_diagnostic
 else

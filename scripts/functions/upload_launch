@@ -19,9 +19,9 @@ upload_get() {
 
 upload_launch() {
 	local proto tx_bytes_before rx_bytes_before time1 tx_bytes_after rx_bytes_after time2 res ba stc periodtime
-	local url=$2
-	local device=$3
-	local size=$4
+	local url=$1
+	local device=$2
+	local size=$3
 	[ "$url" = "" ] && { $UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBFDM; return; }
 	local protocol=`upload_get dmmap_diagnostics.upload.ProtocolVersion Any`
 	if [ "$protocol" == "IPv4" ]; then proto="-4"; elif [ "$protocol" == "IPv6" ]; then proto="-6"; else proto=""; fi
@@ -113,7 +113,7 @@ upload_stop_diagnostic() {
 }
 
 if [ "$1" == "run" ] ; then
-	upload_launch $2 $3 $4 $5
+	upload_launch $2 $3 $4
 elif [ "$1" == "stop" ]; then
 	upload_stop_diagnostic
 else

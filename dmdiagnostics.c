@@ -567,7 +567,7 @@ static char *get_default_gateway_device(void)
     return device;
 }
 
-int start_upload_download_diagnostic(int diagnostic_type, char *proto)
+int start_upload_download_diagnostic(int diagnostic_type)
 {
 	char *url, *interface, *device, *size, *status;
 
@@ -594,7 +594,7 @@ int start_upload_download_diagnostic(int diagnostic_type, char *proto)
 		// Commit and Free uci_ctx_bbfdm
 		commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
 
-		dmcmd("/bin/sh", 5, DOWNLOAD_DIAGNOSTIC_PATH, "run", proto, url, device);
+		dmcmd("/bin/sh", 4, DOWNLOAD_DIAGNOSTIC_PATH, "run", url, device);
 
 		// Allocate uci_ctx_bbfdm
 		dmuci_init_bbfdm();
@@ -613,7 +613,7 @@ int start_upload_download_diagnostic(int diagnostic_type, char *proto)
 		// Commit and Free uci_ctx_bbfdm
 		commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
 
-		dmcmd("/bin/sh", 6, UPLOAD_DIAGNOSTIC_PATH, "run", proto, url, device, size);
+		dmcmd("/bin/sh", 5, UPLOAD_DIAGNOSTIC_PATH, "run", url, device, size);
 
 		// Allocate uci_ctx_bbfdm
 		dmuci_init_bbfdm();

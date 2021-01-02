@@ -46,7 +46,7 @@ traceroute_launch() {
 	rm -f /tmp/traceres
 	let i++
 
-	[ "$1" == "cwmp" ] && $UCI_SET_BBFDM dmmap_diagnostics.traceroute.DiagnosticState=Complete
+	$UCI_SET_BBFDM dmmap_diagnostics.traceroute.DiagnosticState=Complete
 	$UCI_SET_BBFDM dmmap_diagnostics.traceroute.NumberOfHops=$i
 	$UCI_SET_BBFDM dmmap_diagnostics.traceroute.ResponseTime=$($UCI_GET_BBFDM dmmap_diagnostics.@RouteHops[-1].time)
 	$UCI_COMMIT_BBFDM
@@ -72,7 +72,7 @@ traceroute_stop() {
 }
 
 if [ "$1" == "run" ]; then
-	traceroute_launch $2 2>/dev/null  
+	traceroute_launch 2>/dev/null  
 elif [ "$1" == "stop" ]; then
 	traceroute_stop 2>/dev/null
 else

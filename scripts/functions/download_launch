@@ -19,8 +19,8 @@ download_get() {
 
 download_launch() {
 	local proto tx_bytes_before rx_bytes_before time1 tx_bytes_after rx_bytes_after time2 periodtime error_code
-	local url=$2
-	local device=$3
+	local url=$1
+	local device=$2
 	[ "$url" = "" ] && { $UCI_SET_BBFDM dmmap_diagnostics.download.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBFDM; return; }
 	local protocol=`download_get dmmap_diagnostics.download.ProtocolVersion Any`
 	if [ "$protocol" == "IPv4" ]; then proto="-4"; elif [ "$protocol" == "IPv6" ]; then proto="-6"; else proto=""; fi
@@ -89,7 +89,7 @@ download_stop_diagnostic() {
 }
 
 if [ "$1" == "run" ] ; then
-	download_launch $2 $3 $4
+	download_launch $2 $3
 elif [ "$1" == "stop" ]; then
 	download_stop_diagnostic
 else

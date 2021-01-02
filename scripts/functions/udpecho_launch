@@ -84,7 +84,7 @@ udpecho_stop_diagnostic() {
 }
 
 if [ "$1" == "run" ]; then
-	udpecho_launch $1
+	udpecho_launch
 elif [ "$1" == "stop" ]; then
 	udpecho_stop_diagnostic
 else
