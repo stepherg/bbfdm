@@ -228,16 +228,16 @@ DMLEAF tQoSQueueParams[] = {
 /* *** Device.QoS.QueueStats.{i}. *** */
 DMLEAF tQoSQueueStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"Enable", &DMWRITE, DMT_BOOL, get_QoSQueueStats_Enable, set_QoSQueueStats_Enable, BBFDM_BOTH},
-//{"Status", &DMREAD, DMT_STRING, get_QoSQueueStats_Status, NULL, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, os_get_QoSQueueStats_Enable, os_set_QoSQueueStats_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, os_get_QoSQueueStats_Status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, os_get_QoSQueueStats_Alias, os_set_QoSQueueStats_Alias, BBFDM_BOTH},
-//{"Queue", &DMWRITE, DMT_STRING, get_QoSQueueStats_Queue, set_QoSQueueStats_Queue, BBFDM_BOTH},
+{"Queue", &DMWRITE, DMT_STRING, os_get_QoSQueueStats_Queue, os_set_QoSQueueStats_Queue, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, os_get_QoSQueueStats_Interface, os_set_QoSQueueStats_Interface, BBFDM_BOTH},
 {"OutputPackets", &DMREAD, DMT_UNINT, os_get_QoSQueueStats_OutputPackets, NULL, BBFDM_BOTH},
 {"OutputBytes", &DMREAD, DMT_UNINT, os_get_QoSQueueStats_OutputBytes, NULL, BBFDM_BOTH},
 {"DroppedPackets", &DMREAD, DMT_UNINT, os_get_QoSQueueStats_DroppedPackets, NULL, BBFDM_BOTH},
 {"DroppedBytes", &DMREAD, DMT_UNINT, os_get_QoSQueueStats_DroppedBytes, NULL, BBFDM_BOTH},
-{"QueueOccupancyPackets", &DMREAD, DMT_UNINT, os_get_QoSQueueStats_QueueOccupancyPackets, NULL, BBFDM_BOTH},
+//{"QueueOccupancyPackets", &DMREAD, DMT_UNINT, os_get_QoSQueueStats_QueueOccupancyPackets, NULL, BBFDM_BOTH},
 //{"QueueOccupancyPercentage", &DMREAD, DMT_UNINT, get_QoSQueueStats_QueueOccupancyPercentage, NULL, BBFDM_BOTH},
 {0}
 };
