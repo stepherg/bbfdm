@@ -2177,9 +2177,9 @@ static int set_DHCPv4ClientReqOption_Tag(char *refparam, struct dmctx *ctx, void
 
 static int get_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_list *dhcp_option_list;
+	struct uci_list *dhcp_option_list = NULL;
 	struct uci_element *e;
-	char **buf;
+	char **buf = NULL;
 	size_t length;
 
 	if (strcmp(((struct dhcp_client_option_args *)data)->option_tag, "0") == 0) {
@@ -2190,7 +2190,7 @@ static int get_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 	if (dhcp_option_list != NULL) {
 		uci_foreach_element(dhcp_option_list, e) {
 			buf = strsplit(e->name, ",", &length);
-			if (strcmp(buf[0], ((struct dhcp_client_option_args *)data)->option_tag) == 0) {
+			if (buf && *buf && strcmp(buf[0], ((struct dhcp_client_option_args *)data)->option_tag) == 0) {
 				*value = "1";
 				return 0;
 			}
@@ -2202,9 +2202,9 @@ static int get_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 
 static int set_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_list *dhcp_option_list;
+	struct uci_list *dhcp_option_list = NULL;
 	struct uci_element *e;
-	char **buf, *opt_value;
+	char **buf = NULL, *opt_value;
 	size_t length;
 	bool test = false, b;
 
@@ -2222,7 +2222,7 @@ static int set_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 			if (dhcp_option_list != NULL) {
 				uci_foreach_element(dhcp_option_list, e) {
 					buf = strsplit(e->name, ",", &length);
-					if (strcmp(buf[0], ((struct dhcp_client_option_args *)data)->option_tag) == 0) {
+					if (buf && *buf && strcmp(buf[0], ((struct dhcp_client_option_args *)data)->option_tag) == 0) {
 						test = true;
 						if (!b)
 							dmuci_del_list_value_by_section(((struct dhcp_client_option_args *)data)->client_sect, "dhcp_option", opt_value);
@@ -2285,7 +2285,7 @@ static int get_DHCPv4ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, voi
 
 static int set_DHCPv4ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *opttagvalue, **option, *oldopttagvalue;
+	char *opttagvalue, **option = NULL, *oldopttagvalue;
 	size_t length;
 	struct uci_list *dhcp_option_list = NULL;
 	struct uci_element *e;
@@ -2300,7 +2300,7 @@ static int set_DHCPv4ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, voi
 				return 0;
 			uci_foreach_element(dhcp_option_list, e) {
 				option = strsplit(e->name, ",", &length);
-				if (strcmp(option[0], value)==0)
+				if (option && *option && strcmp(option[0], value) == 0)
 					return FAULT_9007;
 			}
 			break;
@@ -2329,7 +2329,7 @@ static int get_DHCPv4ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 
 static int set_DHCPv4ServerPoolOption_Value(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *opttagvalue, **option, *oldopttagvalue;
+	char *opttagvalue, **option = NULL, *oldopttagvalue;
 	size_t length;
 	struct uci_list *dhcp_option_list = NULL;
 	struct uci_element *e;
@@ -2349,7 +2349,7 @@ static int set_DHCPv4ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 
 			uci_foreach_element(dhcp_option_list, e) {
 				option = strsplit(e->name, ",", &length);
-				if (strcmp(option[0], res) == 0)
+				if (option && *option && strcmp(option[0], res) == 0)
 					return FAULT_9007;
 			}
 			dmasprintf(&oldopttagvalue, "%s,%s", ((struct dhcp_client_option_args *)data)->option_tag, ((struct dhcp_client_option_args *)data)->value);
@@ -2923,12 +2923,15 @@ static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 	if (dhcp_options_list != NULL) {
 		uci_foreach_element(dhcp_options_list, e) {
 			tagvalue = strsplit(e->name, ",", &length);
+			if (!tagvalue)
+				continue;
+
 			if ((dmmap_sect = get_dup_section_in_dmmap_eq("dmmap_dhcp", "servpool_option", section_name(curr_dhcp_args->dhcp_sec), "option_tag", tagvalue[0])) == NULL) {
 				dmuci_add_section_bbfdm("dmmap_dhcp", "servpool_option", &dmmap_sect);
 				dmuci_set_value_by_section_bbfdm(dmmap_sect, "option_tag", tagvalue[0]);
 				dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(curr_dhcp_args->dhcp_sec));
 			}
-			optionvalue = dmstrdup(tagvalue[1]);
+			optionvalue = dmstrdup(length > 1 ? tagvalue[1] : "");
 			if (length > 2) {
 				for (j = 2; j < length; j++) {
 					tmp = dmstrdup(optionvalue);
@@ -2949,8 +2952,8 @@ static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 
 		dhcp_client_opt_args.client_sect = curr_dhcp_args->dhcp_sec;
 		dhcp_client_opt_args.opt_sect = dmmap_sect;
-		dhcp_client_opt_args.option_tag = dmstrdup(dhcpv4_tag);
-		dhcp_client_opt_args.value = dmstrdup(dhcpv4_value);
+		dhcp_client_opt_args.option_tag = dhcpv4_tag;
+		dhcp_client_opt_args.value = dhcpv4_value;
 
 		browse_args.option = "section_name";
 		browse_args.value = section_name(curr_dhcp_args->dhcp_sec);
