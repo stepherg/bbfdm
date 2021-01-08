@@ -40,5 +40,6 @@ extern DMLEAF tDHCPv4RelayForwardingParams[];
 int set_section_order(char *package, char *dmpackage, char* sect_type, struct uci_section *dmmap_sect, struct uci_section *conf, int set_force, char* order);
 int get_value_in_mac_format(struct uci_section *s, char *option_name, bool type, char **value);
 int set_DHCP_Interface(struct dmctx *ctx, char *value, struct uci_section *s_data, char *dmmap_name, char *proto, int action);
+char *get_dhcp_server_pool_last_instance(char *package, char *section, char *dmmap_package, char *opt_inst);
 
 #endif

@@ -347,17 +347,21 @@ static int delObjDHCPv6Client(char *refparam, struct dmctx *ctx, void *data, cha
 static int addObjDHCPv6ServerPool(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s = NULL, *dmmap_dhcp = NULL;
+	char dhcpv6_sname[32] = {0};
 
-	char *inst_para = get_last_instance_bbfdm("dmmap_dhcpv6", "dhcp", "dhcpv6_serv_pool_instance");
+	char *inst_para = get_dhcp_server_pool_last_instance("dhcp", "dhcp", "dmmap_dhcpv6", "dhcpv6_serv_pool_instance");
+	snprintf(dhcpv6_sname, sizeof(dhcpv6_sname), "dhcpv6_%d", inst_para ? atoi(inst_para) + 1 : 1);
 
 	dmuci_add_section("dhcp", "dhcp", &s);
+	dmuci_rename_section_by_section(s, dhcpv6_sname);
 	dmuci_set_value_by_section(s, "dhcpv6", "server");
 	dmuci_set_value_by_section(s, "start", "100");
 	dmuci_set_value_by_section(s, "leasetime", "12h");
 	dmuci_set_value_by_section(s, "limit", "150");
+	dmuci_set_value_by_section(s, "ignore", "0");
 
 	dmuci_add_section_bbfdm("dmmap_dhcpv6", "dhcp", &dmmap_dhcp);
-	dmuci_set_value_by_section(dmmap_dhcp, "section_name", section_name(s));
+	dmuci_set_value_by_section(dmmap_dhcp, "section_name", dhcpv6_sname);
 	*instance = update_instance(inst_para, 2, dmmap_dhcp, "dhcpv6_serv_pool_instance");
 	return 0;
 }

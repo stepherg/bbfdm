@@ -425,6 +425,31 @@ static struct uci_section *get_dhcp_classifier(char *classifier_name, char *netw
 	return NULL;
 }
 
+char *get_dhcp_server_pool_last_instance(char *package, char *section, char *dmmap_package, char *opt_inst)
+{
+	struct uci_section *s = NULL, *dmmap_section = NULL;
+	char *instance = NULL, *last_inst = NULL, *ignore = NULL;
+
+	uci_foreach_sections(package, section, s) {
+
+		// skip the section if option ignore = '1'
+		dmuci_get_value_by_section_string(s, "ignore", &ignore);
+		if (ignore && strcmp(ignore, "1") == 0)
+			continue;
+
+		get_dmmap_section_of_config_section(dmmap_package, section, section_name(s), &dmmap_section);
+		if (dmmap_section == NULL) {
+			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "section_name", section_name(s));
+		}
+		instance = update_instance(last_inst, 2, dmmap_section, opt_inst);
+		if(last_inst)
+			dmfree(last_inst);
+		last_inst = dmstrdup(instance);
+	}
+	return instance;
+}
+
 /*************************************************************
 * ADD & DEL OBJ
 **************************************************************/
@@ -433,7 +458,7 @@ static int addObjDHCPv4ServerPool(char *refparam, struct dmctx *ctx, void *data,
 	struct uci_section *s = NULL, *dmmap_dhcp = NULL;
 	char dhcp_sname[32] = {0};
 
-	char *instance = get_last_instance_bbfdm("dmmap_dhcp", "dhcp", "dhcp_instance");
+	char *instance = get_dhcp_server_pool_last_instance("dhcp", "dhcp", "dmmap_dhcp", "dhcp_instance");
 	snprintf(dhcp_sname, sizeof(dhcp_sname), "dhcp_%d", instance ? atoi(instance) + 1 : 1);
 
 	dmuci_add_section("dhcp", "dhcp", &s);
@@ -441,6 +466,7 @@ static int addObjDHCPv4ServerPool(char *refparam, struct dmctx *ctx, void *data,
 	dmuci_set_value_by_section(s, "start", "100");
 	dmuci_set_value_by_section(s, "leasetime", "12h");
 	dmuci_set_value_by_section(s, "limit", "150");
+	dmuci_set_value_by_section(s, "ignore", "0");
 
 	dmuci_add_section_bbfdm("dmmap_dhcp", "dhcp", &dmmap_dhcp);
 	dmuci_set_value_by_section(dmmap_dhcp, "section_name", dhcp_sname);
