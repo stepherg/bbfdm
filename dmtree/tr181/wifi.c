@@ -131,7 +131,7 @@ static int get_WiFi_EndPointNumberOfEntries(char *refparam, struct dmctx *ctx, v
 
 	uci_foreach_sections("wireless", "wifi-iface", s) {
 		dmuci_get_value_by_section_string(s, "mode", &mode);
-		if (strcmp(mode, "wet") == 0 || strcmp(mode, "sta") == 0)
+		if (strcmp(mode, "sta") == 0)
 			nbre++;
 	}
 	dmasprintf(value, "%d", nbre);
@@ -1902,16 +1902,15 @@ static int delete_wifi_iface(char *refparam, struct dmctx *ctx, void *data, char
 
 static int addObjWiFiEndPoint(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *instancepara, *instancepara1, *instancepara2;
 	struct uci_section *endpoint_sec = NULL, *dmmap_sec = NULL;
 
-	instancepara1 = get_last_instance_lev2_bbfdm("wireless", "wifi-iface", "dmmap_wireless", "endpointinstance", "mode", "wet")?get_last_instance_lev2_bbfdm("wireless", "wifi-iface", "dmmap_wireless", "endpointinstance", "mode", "wet"):"0";
-	instancepara2 = get_last_instance_lev2_bbfdm("wireless", "wifi-iface", "dmmap_wireless", "endpointinstance", "mode", "sta")?get_last_instance_lev2_bbfdm("wireless", "wifi-iface", "dmmap_wireless", "endpointinstance", "mode", "sta"):"0";
-	instancepara = atoi(instancepara1)>atoi(instancepara2)?dmstrdup(instancepara1):dmstrdup(instancepara2);
+	char *instancepara = get_last_instance_lev2_bbfdm("wireless", "wifi-iface", "dmmap_wireless", "endpointinstance", "mode", "sta");
+	if (!instancepara)
+		instancepara = "0";
 
 	dmuci_add_section("wireless", "wifi-iface", &endpoint_sec);
-	dmuci_set_value_by_section(endpoint_sec, "device", "wl1");
-	dmuci_set_value_by_section(endpoint_sec, "mode", "wet");
+	dmuci_set_value_by_section(endpoint_sec, "device", "wl2");
+	dmuci_set_value_by_section(endpoint_sec, "mode", "sta");
 	dmuci_set_value_by_section(endpoint_sec, "network", "lan");
 
 	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_sec);
@@ -1935,7 +1934,7 @@ static int delObjWiFiEndPoint(char *refparam, struct dmctx *ctx, void *data, cha
 
 			char *mode;
 			dmuci_get_value_by_section_string(s, "mode", &mode);
-			if (strcmp(mode, "sta") != 0 && strcmp(mode, "wet") != 0)
+			if (strcmp(mode, "sta") != 0)
 				continue;
 
 			dmuci_set_value_by_section(s, "mode", "");
@@ -2028,16 +2027,18 @@ static int browseWifiAccessPointInst(struct dmctx *dmctx, DMNODE *parent_node, v
 /*#Device.WiFi.EndPoint.{i}.!UCI:wireless/wifi-iface/dmmap_wireless*/
 static int browseWiFiEndPointInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *ifname, *max_inst = NULL, *mode= NULL;
+	char *inst = NULL, *ifname, *max_inst = NULL, *mode = NULL;
 	struct wifi_enp_args curr_wifi_enp_args = {0};
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("wireless", "wifi-iface", "dmmap_wireless", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
+
 		dmuci_get_value_by_section_string(p->config_section, "mode", &mode);
-		if(strcmp(mode, "wet")!=0 && strcmp(mode, "sta")!=0)
+		if (strcmp(mode, "sta") != 0)
 			continue;
+
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
 		init_wifi_enp(&curr_wifi_enp_args, p->config_section, ifname);
 
