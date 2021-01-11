@@ -471,30 +471,6 @@ void synchronize_specific_config_sections_with_dmmap_eq(char *package, char *sec
 	}
 }
 
-void synchronize_specific_config_sections_with_dmmap_eq_no_delete(char *package, char *section_type, char *dmmap_package, char* option_name, char* option_value, struct list_head *dup_list)
-{
-	struct uci_section *s, *dmmap_sect;
-	char *v;
-
-	uci_foreach_option_eq(package, section_type, option_name, option_value, s) {
-		/*
-		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
-		 */
-		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
-			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect);
-			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
-		}
-	}
-
-	dmmap_sect = NULL;
-	s = NULL;
-	uci_path_foreach_sections(bbfdm, dmmap_package, section_type, dmmap_sect) {
-		dmuci_get_value_by_section_string(dmmap_sect, "section_name", &v);
-		get_config_section_of_dmmap_section("network", "interface", v, &s);
-		add_dmmap_config_dup_list(dup_list, s, dmmap_sect, NULL);
-	}
-}
-
 void synchronize_specific_config_sections_with_dmmap_cont(char *package, char *section_type, char *dmmap_package,char* option_name, char* option_value, struct list_head *dup_list)
 {
 	struct uci_section *uci_s, *stmp, *dmmap_sect;

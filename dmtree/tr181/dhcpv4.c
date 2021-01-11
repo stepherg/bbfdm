@@ -2997,58 +2997,38 @@ static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 /*#Device.DHCPv4.Relay.Forwarding.{i}.!UCI:network/interface/dmmap_dhcp_relay*/
 static int browseDHCPv4RelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *relay_type = NULL, *relay_ipv4addr = NULL, *relay_ipv6addr = NULL, *relay_mask4 = NULL;
+	char *relay_ipv4addr = NULL, *relay_mask4 = NULL;
 	char *inst, *max_inst = NULL, *relay_network = NULL, *dhcp_network = NULL;
 	struct dmmap_dup *p;
 	json_object *res, *jobj;
 	struct dhcp_client_args dhcp_relay_arg = {0};
 	LIST_HEAD(dup_list);
 
-	synchronize_specific_config_sections_with_dmmap_eq_no_delete("network", "interface", "dmmap_dhcp_relay", "proto", "relay", &dup_list);
+	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_dhcp_relay", "proto", "relay", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		if (p->config_section != NULL) {
-			dmuci_get_value_by_section_string(p->config_section, "type", &relay_type);
-			if (strcmp(relay_type, "alias") == 0 || strcmp(section_name(p->config_section), "loopback") == 0)
-				continue;
-
-			dmuci_get_value_by_section_string(p->config_section, "ipaddr", &relay_ipv4addr);
-			dmuci_get_value_by_section_string(p->config_section, "netmask", &relay_mask4);
-			if (relay_ipv4addr && *relay_ipv4addr) {
-				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(p->config_section), String}}, 1, &res);
+		dmuci_get_value_by_section_string(p->config_section, "ipaddr", &relay_ipv4addr);
+		dmuci_get_value_by_section_string(p->config_section, "netmask", &relay_mask4);
+		if (relay_ipv4addr && *relay_ipv4addr) {
+			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(p->config_section), String}}, 1, &res);
+			if (res) {
 				jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
 				relay_ipv4addr = dmjson_get_value(jobj, 1, "address");
 				relay_mask4 = dmjson_get_value(jobj, 1, "mask");
-			}
-
-			dmuci_get_value_by_section_string(p->config_section, "ip6addr", &relay_ipv6addr);
-			if (relay_ipv6addr[0] == '\0') {
-				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(p->config_section), String}}, 1, &res);
-				if (res) {
-					jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv6-address");
-					relay_ipv6addr = dmjson_get_value(jobj, 1, "address");
-				}
-			}
-
-			if (relay_ipv4addr[0] == '\0' &&
-				relay_ipv6addr[0] == '\0' &&
-				strcmp(relay_type, "bridge") != 0) {
-				p->config_section = NULL;
-				dmuci_set_value_by_section_bbfdm(p->dmmap_section, "section_name", "");
+				relay_mask4 = (relay_mask4 && *relay_mask4) ? cidr2netmask(atoi(relay_mask4)) : "";
 			}
 		}
 
-		dhcp_relay_arg.ip = relay_ipv4addr ? dmstrdup(relay_ipv4addr) : dmstrdup("");
-		dhcp_relay_arg.mask = relay_mask4 ? dmstrdup(relay_mask4) : dmstrdup("");
+		dhcp_relay_arg.ip = dmstrdup(relay_ipv4addr ? relay_ipv4addr : "");
+		dhcp_relay_arg.mask = dmstrdup(relay_mask4 ? relay_mask4 : "");
+		dhcp_relay_arg.dhcp_client_conf = p->config_section;
+		dhcp_relay_arg.dhcp_client_dm = p->dmmap_section;
 
 		dmuci_get_value_by_section_string(p->config_section, "network", &relay_network);
 		dhcp_network = get_dhcp_network_from_relay_list(relay_network);
 
-
 		dhcp_relay_arg.macclassifier = (dhcp_network && *dhcp_network) ? get_dhcp_classifier("mac", dhcp_network) : NULL;
 		dhcp_relay_arg.vendorclassidclassifier = (dhcp_network && *dhcp_network) ? get_dhcp_classifier("vendorclass", dhcp_network) : NULL;
 		dhcp_relay_arg.userclassclassifier = (dhcp_network && *dhcp_network) ? get_dhcp_classifier("userclass", dhcp_network) : NULL;
-		dhcp_relay_arg.dhcp_client_conf = p->config_section;
-		dhcp_relay_arg.dhcp_client_dm = p->dmmap_section;
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
 			   p->dmmap_section, "bbf_dhcpv4relay_instance", "bbf_dhcpv4relay_alias");
