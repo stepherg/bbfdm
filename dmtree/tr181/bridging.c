@@ -1016,6 +1016,11 @@ static void remove_vlanid_from_device_and_vlanport(char *vid)
 		dmuci_set_value_by_section(s, "name", name);
 		dmuci_set_value_by_section(s, "vid", "");
 	}
+
+	// Check if this vid is set as inner_vid for any interface, then delete it.
+	uci_foreach_option_eq("network", "device", "inner_vid", vid, s) {
+		dmuci_delete_by_section(s, "inner_vid", NULL);
+	}
 }
 
 static void remove_vlanport_section(struct uci_section *vlanport_dmmap_sec, struct uci_section *bridge_sec, char *br_inst)
@@ -1612,6 +1617,10 @@ static int delObjBridgingBridgeVLANPort(char *refparam, struct dmctx *ctx, void 
 {
 	struct uci_section *s = NULL, *prev_s = NULL;
 
+	// Get the vlanid associated with the vlanport
+	char *vid = NULL;
+	dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "vid", &vid);
+
 	switch (del_action) {
 		case DEL_INST:
 			remove_vlanport_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, ((struct bridge_vlanport_args *)data)->bridge_sec,
@@ -1634,6 +1643,13 @@ static int delObjBridgingBridgeVLANPort(char *refparam, struct dmctx *ctx, void 
 				dmuci_delete_by_section_bbfdm(prev_s, NULL, NULL);
 			break;
 		}
+
+	if (vid != NULL && vid[0] != '\0') {
+		// Check if this vid is set as inner_vid for any interface, then delete it.
+		uci_foreach_option_eq("network", "device", "inner_vid", vid, s) {
+			dmuci_delete_by_section(s, "inner_vid", NULL);
+		}
+	}
 
 	return 0;
 }
@@ -2380,6 +2396,64 @@ static int get_BridgingBridgePort_PVID(char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
+static int fetch_and_configure_inner_vid(char *br_inst, char *type_val, char **vid) {
+
+	struct uci_section *dev_s = NULL, *sec = NULL;
+	char *name, *instance;
+
+	// Get the vid under device section with type 8021q of port under same br_inst.
+	uci_foreach_option_eq("network", "device", "type", type_val, dev_s) {
+		dmuci_get_value_by_section_string(dev_s, "name", &name);
+		//find out the bridge instance of device section
+		uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "device", name, sec) {
+			dmuci_get_value_by_section_string(sec, "br_inst", &instance);
+			break;
+		}
+
+		//Check if the bridge instances are same or not, if yes, then get the vid.
+		char bridge_inst[20] = {0};
+		strncpy(bridge_inst, br_inst, sizeof(bridge_inst));
+		if (strncmp(bridge_inst, instance, sizeof(bridge_inst)) == 0) {
+			if (strcmp(type_val, "8021ad") == 0) {
+				dmuci_set_value_by_section(dev_s, "inner_vid", *vid);
+			} else {
+				dmuci_get_value_by_section_string(dev_s, "vid", vid);
+			}
+			break;
+		}
+	}
+
+	return 0;
+}
+
+static int handle_inner_vid() {
+
+	struct uci_section *s = NULL, *sec = NULL;
+	char *br_inst, *vid = NULL;
+
+	uci_foreach_sections("network", "interface", s) {
+		// Get the bridge instance.
+		uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "interface", section_name(s), sec) {
+			dmuci_get_value_by_section_string(sec, "br_inst", &br_inst);
+			break;
+		}
+
+		fetch_and_configure_inner_vid(br_inst, "8021q", &vid);
+
+		if (vid == NULL) {
+			fetch_and_configure_inner_vid(br_inst, "untagged", &vid);
+		}
+
+		//loop device section with type 8021ad and fetch the br_inst of it,
+		//if same br_inst then add vid as inner_vid
+		if (vid != NULL && vid[0] != '\0') {
+			fetch_and_configure_inner_vid(br_inst, "8021ad", &vid);
+		}
+	}
+
+	return 0;
+}
+
 static int set_BridgingBridgePort_PVID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *type;
@@ -2415,6 +2489,7 @@ static int set_BridgingBridgePort_PVID(char *refparam, struct dmctx *ctx, void *
 				update_bridge_ifname(((struct bridge_port_args *)data)->bridge_sec, ((struct bridge_port_args *)data)->bridge_port_sec, 0);
 				dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, "name", new_name);
 				dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, "vid", value);
+				handle_inner_vid();
 				update_bridge_ifname(((struct bridge_port_args *)data)->bridge_sec, ((struct bridge_port_args *)data)->bridge_port_sec, 1);
 				dmfree(new_name);
 			}
@@ -2437,6 +2512,52 @@ static int get_BridgingBridgePort_TPID(char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
+static int configure_interface_type(struct uci_section *bridge_sec, struct uci_section *sec, char *interface, char *br_inst, char *value)
+{
+	struct uci_section *s, *ss = NULL;
+	char *vid = NULL, *inner_vid = NULL;
+
+	dmuci_set_value_by_section(sec, "type", value);
+
+	if (strncmp(value, "8021q", 5) == 0) {
+		//Check if the interface has inner-vid if so then delete
+		uci_foreach_sections("network", "device", s) {
+			if (strcmp(section_name(sec), section_name(s)) == 0) {
+				dmuci_get_value_by_section_string(s, "inner_vid", &inner_vid);
+				if (inner_vid[0] != '\0') {
+					dmuci_delete_by_section(s, "inner_vid", NULL);
+					break;
+				}
+			}
+		}
+
+		//fetch the vid of the 8021q interface.
+		uci_foreach_option_eq("network", "device", "name", interface, ss) {
+			dmuci_get_value_by_section_string(ss, "vid", &vid);
+			break;
+		}
+
+		if (vid != NULL && vid[0] != '\0') {
+			fetch_and_configure_inner_vid(br_inst, "8021ad", &vid);
+		}
+
+	} else if (strncmp(value, "8021ad", 6) == 0) {
+		fetch_and_configure_inner_vid(br_inst, "8021q", &vid);
+
+		if (vid == NULL) {
+			fetch_and_configure_inner_vid(br_inst, "untagged", &vid);
+		}
+
+		//apply the vid of the interface as the inner_vid of 8021ad port
+		if (vid != NULL && vid[0] != '\0') {
+			dmuci_set_value_by_section(sec, "inner_vid", vid);
+		}
+
+	}
+
+	return 0;
+}
+
 static int set_BridgingBridgePort_TPID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action) {
@@ -2446,9 +2567,9 @@ static int set_BridgingBridgePort_TPID(char *refparam, struct dmctx *ctx, void *
 			return 0;
 		case VALUESET:
 			if (strcmp(value, "33024") == 0)
-				dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, "type", "8021q");
+				configure_interface_type(((struct bridge_port_args *)data)->bridge_sec, ((struct bridge_port_args *)data)->bridge_port_sec, ((struct bridge_port_args *)data)->ifname, ((struct bridge_port_args *)data)->br_inst, "8021q");
 			else if (strcmp(value, "34984") == 0)
-				dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, "type", "8021ad");
+				configure_interface_type(((struct bridge_port_args *)data)->bridge_sec, ((struct bridge_port_args *)data)->bridge_port_sec, ((struct bridge_port_args *)data)->ifname, ((struct bridge_port_args *)data)->br_inst, "8021ad");
 			return 0;
 	}
 	return 0;
@@ -2788,6 +2909,7 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 					dmfree(new_vid);
 				}
 			}
+			handle_inner_vid();
 			return 0;
 	}
 	return 0;
@@ -2889,6 +3011,7 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 					}
 				}
 			}
+			handle_inner_vid();
 			return 0;
 	}
 	return 0;
