@@ -826,6 +826,54 @@ int set_mcast_snooping_mode(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
+int get_mcasts_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "last_member_query_interval", value);
+	return 0;
+}
+
+int set_mcasts_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+	case VALUECHECK:
+		if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		dmuci_set_value_by_section((struct uci_section *)data, "last_member_query_interval", value);
+		break;
+	}
+
+	return 0;
+}
+
+int get_mcasts_fast_leave(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *val = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "fast_leave", &val);
+	*value = (val && strcmp(val, "1") == 0) ? "true" : "false";
+	return 0;
+}
+
+int set_mcasts_fast_leave(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action) {
+	case VALUECHECK:
+		if (dm_validate_boolean(value))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		string_to_bool(value, &b);
+		dmuci_set_value_by_section((struct uci_section *)data, "fast_leave", (b) ? "1" : "0");
+		break;
+	}
+
+	return 0;
+}
+
 int get_mcast_snooping_robustness(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "robustness", "0");
@@ -1990,6 +2038,8 @@ DMLEAF X_IOPSYS_EU_IGMPSnoopingParams[] = {
 {"Aggregation", &DMWRITE, DMT_BOOL, get_mcast_snooping_aggregation, set_mcast_snooping_aggregation, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, get_mcast_snooping_interface, set_mcast_snooping_interface, BBFDM_BOTH},
 {"Mode", &DMWRITE, DMT_STRING, get_mcast_snooping_mode, set_mcast_snooping_mode, BBFDM_BOTH},
+{"LastMemberQueryInterval", &DMWRITE, DMT_UNINT, get_mcasts_last_mq_interval, set_mcasts_last_mq_interval, BBFDM_BOTH},
+{"ImmediateLeave", &DMWRITE, DMT_BOOL, get_mcasts_fast_leave, set_mcasts_fast_leave, BBFDM_BOTH},
 {"FilterNumberOfEntries", &DMREAD, DMT_UNINT, get_mcasts_filter_no_of_entries, NULL, BBFDM_BOTH},
 {"ClientGroupNumberOfEntries", &DMREAD, DMT_UNINT, get_igmp_cgrps_no_of_entries, NULL, BBFDM_BOTH},
 {0}

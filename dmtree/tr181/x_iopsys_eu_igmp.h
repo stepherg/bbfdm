@@ -52,6 +52,10 @@ int get_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, 
 int set_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
 int get_mcast_snooping_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int set_mcast_snooping_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
+int get_mcasts_fast_leave(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
+int set_mcasts_fast_leave(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
+int get_mcasts_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
+int set_mcasts_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
 
 int get_mcastp_query_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int set_mcastp_query_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
