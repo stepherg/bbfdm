@@ -701,6 +701,8 @@ DMLEAF X_IOPSYS_EU_MLDSnoopingParams[] = {
 {"Aggregation", &DMWRITE, DMT_BOOL, get_mcast_snooping_aggregation, set_mcast_snooping_aggregation, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, get_mcast_snooping_interface, set_mcast_snooping_interface, BBFDM_BOTH},
 {"Mode", &DMWRITE, DMT_STRING, get_mcast_snooping_mode, set_mcast_snooping_mode, BBFDM_BOTH},
+{"LastMemberQueryInterval", &DMWRITE, DMT_UNINT, get_mcasts_last_mq_interval, set_mcasts_last_mq_interval, BBFDM_BOTH},
+{"ImmediateLeave", &DMWRITE, DMT_BOOL, get_mcasts_fast_leave, set_mcasts_fast_leave, BBFDM_BOTH},
 {"FilterNumberOfEntries", &DMREAD, DMT_UNINT, get_mcasts_filter_no_of_entries, NULL, BBFDM_BOTH},
 //{"ClientGroupNumberOfEntries", &DMREAD, DMT_UNINT, get_mldp_cgrps_no_of_entries, NULL, BBFDM_BOTH},
 {0}
@@ -718,7 +720,6 @@ DMOBJ MLDProxyCLientGroupObj[] = {
 //{"ClientGroupStats", &DMREAD, NULL, NULL, NULL, browse_mldp_cgrp_stats_inst, NULL, NULL, MLDProxyClientGroupStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
-
 
 DMLEAF MLDProxyClientGroupParams[] = {
 //{"GroupAddress", &DMREAD, DMT_STRING, get_mldp_cgrp_gaddr, NULL, BBFDM_BOTH},
