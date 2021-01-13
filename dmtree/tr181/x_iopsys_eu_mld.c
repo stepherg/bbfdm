@@ -900,6 +900,8 @@ DMLEAF X_IOPSYS_EU_MLDSnoopingParams[] = {
 {"Aggregation", &DMWRITE, DMT_BOOL, get_mcast_snooping_aggregation, set_mcast_snooping_aggregation, NULL, NULL, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, get_mcast_snooping_interface, set_mcast_snooping_interface, NULL, NULL, BBFDM_BOTH},
 {"Mode", &DMWRITE, DMT_STRING, get_mcast_snooping_mode, set_mcast_snooping_mode, NULL, NULL, BBFDM_BOTH},
+{"LastMemberQueryInterval",&DMWRITE, DMT_UNINT, get_mcasts_last_mq_interval, set_mcasts_last_mq_interval, NULL, NULL, BBFDM_BOTH},
+{"ImmediateLeave", &DMWRITE, DMT_BOOL, get_mcasts_fast_leave, set_mcasts_fast_leave, NULL, NULL, BBFDM_BOTH},
 {"FilterNumberOfEntries", &DMREAD, DMT_UNINT, get_mcasts_filter_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
 //{"ClientGroupNumberOfEntries", &DMREAD, DMT_UNINT, get_mldp_cgrps_no_of_entries, NULL, NULL, NULL, BBFDM_BOTH},
 {0}
