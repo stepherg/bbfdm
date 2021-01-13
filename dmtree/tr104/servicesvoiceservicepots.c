@@ -34,7 +34,8 @@ static int browseServicesVoiceServicePOTSFXSInst(struct dmctx *dmctx, DMNODE *pa
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 				break;
 		}
-		dmfree(line_name);
+		if (line_name && *line_name)
+			dmfree(line_name);
 	}
 	free_dmmap_config_dup_list(&dup_list);
 	return 0;
