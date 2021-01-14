@@ -1711,7 +1711,7 @@ static int delObjBridgingBridgeVLANPort(char *refparam, struct dmctx *ctx, void 
 			break;
 		}
 
-	if (vid != NULL & vid[0] != '\0') {
+	if (vid != NULL && vid[0] != '\0') {
 		// Check if this vid is set as inner_vid for any interface, then delete it.
 		uci_foreach_option_eq("network", "device", "inner_vid", vid, s) {
 			dmuci_delete_by_section(s, "inner_vid", NULL);
