@@ -959,12 +959,16 @@ static int set_rule_source_all_interfaces(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
 			string_to_bool(value, &b);
-			if (b) {
-				// Get the current 'src' option
-				dmuci_get_value_by_section_string((struct uci_section *)data, "src", &src);
 
+			// Get the current 'src' option
+			dmuci_get_value_by_section_string((struct uci_section *)data, "src", &src);
+
+			if ((b && strcmp(src, "*") == 0) || (!b && strcmp(src, "*") != 0))
+				break;
+
+			get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
+			if (b) {
 				// Save 'src' option in the associated dmmap rule section
 				dmuci_set_value_by_section(dmmap_section, "src", src);
 
@@ -1028,12 +1032,16 @@ static int set_rule_dest_all_interfaces(char *refparam, struct dmctx *ctx, void 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
 			string_to_bool(value, &b);
-			if (b) {
-				// Get the current 'dest' option
-				dmuci_get_value_by_section_string((struct uci_section *)data, "dest", &dest);
 
+			// Get the current 'dest' option
+			dmuci_get_value_by_section_string((struct uci_section *)data, "dest", &dest);
+
+			if ((b && strcmp(dest, "*") == 0) || (!b && strcmp(dest, "*") != 0))
+				break;
+
+			get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
+			if (b) {
 				// Save 'dest' option in the associated dmmap rule section
 				dmuci_set_value_by_section(dmmap_section, "dest", dest);
 
