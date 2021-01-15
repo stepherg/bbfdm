@@ -3547,6 +3547,31 @@ int set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char 
 }
 #endif
 
+int os_get_QoSQueueStats_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
+int os_set_QoSQueueStats_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			//TODO
+			break;
+	}
+	return 0;
+}
+
+int os_get_QoSQueueStats_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+
+}
+
 int os_get_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct queuestats *qts= (struct queuestats*)data;
@@ -3567,6 +3592,25 @@ int os_set_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data, ch
 			break;
 		case VALUESET:
 			dmuci_set_value_by_section(qts->dmsect, "queuestatsalias", value);
+			break;
+	}
+	return 0;
+}
+
+int os_get_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}
+
+int os_set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			//TODO
 			break;
 	}
 	return 0;

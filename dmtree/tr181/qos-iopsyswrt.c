@@ -17,9 +17,7 @@
 *************************************************************/
 int os_get_linker_qos_queue(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	char sec_name[100] = {0};
-	strncpy(sec_name, section_name((struct uci_section *)data), sizeof(sec_name));
-	*linker = sec_name;
+	*linker = data ? dmstrdup(section_name((struct uci_section *)data)) : "";
 	return 0;
 }
 
@@ -146,13 +144,13 @@ int os_browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 	char *inst = NULL, *max_inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, "dmmap_qstats", "queue_stats", s) {
+
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
 				s, "q_instance", "q_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
-
 	return 0;
 }
 
@@ -3501,19 +3499,13 @@ int os_set_QoSQueue_ShapingBurstSize(char *refparam, struct dmctx *ctx, void *da
 
 int os_get_QoSQueueStats_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "0";
-	struct uci_section *qstats_sec = NULL;
-	uci_path_foreach_option_eq(bbfdm, "dmmap_qstats", "queue_stats", "q_instance", instance, qstats_sec) {
-		*value = dmuci_get_value_by_section_fallback_def(qstats_sec, "enabled", "0");
-		break;
-	}
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "0");
 	return 0;
 }
 
 int os_set_QoSQueueStats_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
-	struct uci_section *qstats_sec = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -3522,9 +3514,7 @@ int os_set_QoSQueueStats_Enable(char *refparam, struct dmctx *ctx, void *data, c
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			uci_path_foreach_option_eq(bbfdm, "dmmap_qstats", "queue_stats", "q_instance", instance, qstats_sec) {
-				dmuci_set_value_by_section(qstats_sec, "enabled", b ? "1" : "0");
-			}
+			dmuci_set_value_by_section((struct uci_section *)data, "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -3540,27 +3530,21 @@ int os_get_QoSQueueStats_Status(char *refparam, struct dmctx *ctx, void *data, c
 
 int os_get_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
-	struct uci_section *qstats_sec = NULL;
-	uci_path_foreach_option_eq(bbfdm, "dmmap_qstats", "queue_stats", "q_instance", instance, qstats_sec) {
-		dmuci_get_value_by_section_string(qstats_sec, "alias", value);
-		break;
-	}
+	dmuci_get_value_by_section_string((struct uci_section *)data, "alias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
 	return 0;
 }
 
 int os_set_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *qstats_sec = NULL;
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			uci_path_foreach_option_eq(bbfdm, "dmmap_qstats", "queue_stats", "q_instance", instance, qstats_sec) {
-				dmuci_set_value_by_section(qstats_sec, "alias", value);
-			}
+			dmuci_set_value_by_section((struct uci_section *)data, "alias", value);
 			break;
 	}
 	return 0;
@@ -3568,27 +3552,34 @@ int os_set_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data, ch
 
 int os_get_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
-	struct uci_section *qstats_sec = NULL;
-	uci_path_foreach_option_eq(bbfdm, "dmmap_qstats", "queue_stats", "q_instance", instance, qstats_sec) {
-		dmuci_get_value_by_section_string(qstats_sec, "queue", value);
-		break;
-	}
+	char *queue_link;
+	dmuci_get_value_by_section_string((struct uci_section *)data, "queue", &queue_link);
+	adm_entry_get_linker_param(ctx, "Device.QoS.Queue.", queue_link, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
 int os_set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *qstats_sec = NULL;
+	char *queue_link = NULL;
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
+
+			if (strncmp(value, "Device.QoS.Queue.", 17) != 0)
+				return FAULT_9007;
+
+			adm_entry_get_linker_value(ctx, value, &queue_link);
+			if (queue_link == NULL || *queue_link == '\0')
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
-			uci_path_foreach_option_eq(bbfdm, "dmmap_qstats", "queue_stats", "q_instance", instance, qstats_sec) {
-				dmuci_set_value_by_section(qstats_sec, "queue", value);
-			}
+			adm_entry_get_linker_value(ctx, value, &queue_link);
+			dmuci_set_value_by_section((struct uci_section *)data, "queue", queue_link);
 			break;
 	}
 	return 0;
@@ -3596,121 +3587,79 @@ int os_set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, ch
 
 int os_get_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
-	struct uci_section *qstats_sec = NULL;
-	uci_path_foreach_option_eq(bbfdm, "dmmap_qstats", "queue_stats", "q_instance", instance, qstats_sec) {
-		dmuci_get_value_by_section_string(qstats_sec, "interface", value);
-		break;
-	}
+	char *intf_link;
+	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &intf_link);
+	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", intf_link, value);
+	if (*value == NULL)
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", intf_link, value);
+	if (*value == NULL)
+		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", intf_link, value);
+	if (*value == NULL)
+		*value = "";
 	return 0;
 }
 
 int os_set_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *qstats_sec = NULL;
+	char *intf_link = NULL;
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
+
+			adm_entry_get_linker_value(ctx, value, &intf_link);
+			if (intf_link == NULL || *intf_link == '\0')
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
-			uci_path_foreach_option_eq(bbfdm, "dmmap_qstats", "queue_stats", "q_instance", instance, qstats_sec) {
-				dmuci_set_value_by_section(qstats_sec, "interface", value);
-			}
+			adm_entry_get_linker_value(ctx, value, &intf_link);
+			dmuci_set_value_by_section((struct uci_section *)data, "interface", intf_link);
 			break;
 	}
 	return 0;
 }
 
-static int get_json_object (char *refparam, struct dmctx *ctx, void *data, char *instance, char **value, json_object **res)
+static int get_QoSQueueStats_value(void *data, char *option, char **value)
 {
-	char *qid_linker = NULL, *linker = NULL, *find = NULL;
+	char *queue_link = NULL, *intf_link = NULL;
 
-	// get the ifname corresponding to the instance
-	os_get_QoSQueueStats_Interface(refparam, ctx, data, instance, value);
-	adm_entry_get_linker_value(ctx, *value, &linker);
-	if (linker == NULL)
-		return 0;
+	*value = "0";
+	dmuci_get_value_by_section_string((struct uci_section *)data, "queue", &queue_link);
+	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &intf_link);
 
-	// get the qid corresponding to the instance
-	os_get_QoSQueueStats_Queue(refparam, ctx, data, instance, value);
-	adm_entry_get_linker_value(ctx, *value, &qid_linker);
+	if (queue_link && *queue_link && intf_link && *intf_link) {
+		json_object *res = NULL;
+		char queue_id[8] = {0};
 
-	if (qid_linker != NULL && qid_linker[0] != '\0') {
-		char queue_id[50] = {0};
-		snprintf(queue_id, sizeof(queue_id), "%c", qid_linker[2]);
-		dmubus_call("qos", "queue_stats", UBUS_ARGS{{"ifname", linker, String}, {"qid", queue_id, String}}, 2, res);
+		snprintf(queue_id, sizeof(queue_id), "%c", queue_link[2]);
+		dmubus_call("qos", "queue_stats", UBUS_ARGS{{"ifname", intf_link, String}, {"qid", queue_id, Integer}}, 2, &res);
+		DM_ASSERT(res, *value = "0");
+		json_object *queue_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "queues");
+		*value = dmjson_get_value(queue_obj, 1, option);
 	}
-
 	return 0;
 }
 
 int os_get_QoSQueueStats_OutputPackets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *queue_obj = NULL, *arrobj = NULL;;
-	int i = 0;
-
-	get_json_object(refparam, ctx, data, instance, value, &res);
-	dmjson_foreach_obj_in_array(res, arrobj, queue_obj, i, 1, "queues") {
-		*value = dmjson_get_value(queue_obj, 1, "tx_packets");
-	}
-
-	if (value == NULL) {
-		*value = "0";
-	}
-
-	return 0;
+	return get_QoSQueueStats_value(data, "tx_packets", value);
 }
 
 int os_get_QoSQueueStats_OutputBytes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *queue_obj = NULL, *arrobj = NULL;;
-	int i = 0;
-
-	get_json_object(refparam, ctx, data, instance, value, &res);
-	dmjson_foreach_obj_in_array(res, arrobj, queue_obj, i, 1, "queues") {
-		*value = dmjson_get_value(queue_obj, 1, "tx_bytes");
-	}
-
-	if (value == NULL) {
-		*value = "0";
-	}
-
-	return 0;
+	return get_QoSQueueStats_value(data, "tx_bytes", value);
 }
 
 int os_get_QoSQueueStats_DroppedPackets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *queue_obj = NULL, *arrobj = NULL;;
-	int i = 0;
-
-	get_json_object(refparam, ctx, data, instance, value, &res);
-	dmjson_foreach_obj_in_array(res, arrobj, queue_obj, i, 1, "queues") {
-		*value = dmjson_get_value(queue_obj, 1, "tx_dropped_packets");
-	}
-
-	if (value == NULL) {
-		*value = "0";
-	}
-
-	return 0;
+	return get_QoSQueueStats_value(data, "tx_dropped_packets", value);
 }
 
 int os_get_QoSQueueStats_DroppedBytes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *queue_obj = NULL, *arrobj = NULL;;
-	int i = 0;
-
-	get_json_object(refparam, ctx, data, instance, value, &res);
-	dmjson_foreach_obj_in_array(res, arrobj, queue_obj, i, 1, "queues") {
-		*value = dmjson_get_value(queue_obj, 1, "tx_dropped_bytes");
-	}
-
-	if (value == NULL) {
-		*value = "0";
-	}
-
-	return 0;
+	return get_QoSQueueStats_value(data, "tx_dropped_bytes", value);
 }
 
 int os_get_QoSQueueStats_QueueOccupancyPackets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
