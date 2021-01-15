@@ -316,45 +316,46 @@ static int get_rule_target(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_list *v = NULL, *v1 = NULL;
-	struct uci_element *e;
-	char *vallink = NULL, *zone, buf[256] = "", *val;
-	struct uci_section *s = NULL;
+	char *ifaceobj = NULL, *src = NULL, buf[256] = "";
+	struct uci_list *net_list = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "src", &zone);
-	if (zone == NULL || strlen(zone) == 0)
+	dmuci_get_value_by_section_string((struct uci_section *)data, "src", &src);
+	if (src == NULL || *src == '\0')
 		return 0;
 
-	if (strcmp(zone, "*") == 0) {
-		v = dmcalloc(1, sizeof(struct uci_list));
-		uci_list_init(v);
-		uci_foreach_sections("firewall", "zone", s) {
-			dmuci_get_value_by_section_list(s, "network", &v1);
-			uci_add_list_to_list(v1, v);
-		}
+	if (strcmp(src, "*") == 0) {
+		struct uci_section *dmmap_section = NULL;
+
+		get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
+		dmuci_get_value_by_section_string(dmmap_section, "src", &src);
 	} else {
+		struct uci_section *s = NULL;
+		char *zone_name = NULL;
+
 		uci_foreach_sections("firewall", "zone", s) {
-			dmuci_get_value_by_section_string(s, "name", &val);
-			if (strcmp(val, zone) == 0) {
-				dmuci_get_value_by_section_list(s, "network", &v);
+			dmuci_get_value_by_section_string(s, "name", &zone_name);
+			if (zone_name && strcmp(zone_name, src) == 0) {
+				dmuci_get_value_by_section_list(s, "network", &net_list);
 				break;
 			}
 		}
 	}
 
-	if (v != NULL) {
-		uci_foreach_element(v, e) {
-			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &vallink);
-			if (vallink == NULL)
+	if (net_list != NULL) {
+		struct uci_element *e;
+
+		uci_foreach_element(net_list, e) {
+			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj);
+			if (ifaceobj == NULL)
 				continue;
 			if (*buf != '\0')
 				strcat(buf, ",");
-			strcat(buf, vallink);
+			strcat(buf, ifaceobj);
 		}
 	} else {
-		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", zone, &vallink);
-		if (vallink)
-			strcpy(buf, vallink);
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", src, &ifaceobj);
+		if (ifaceobj)
+			strcpy(buf, ifaceobj);
 	}
 
 	*value = dmstrdup(buf);
@@ -371,21 +372,35 @@ static int get_rule_source_all_interfaces(char *refparam, struct dmctx *ctx, voi
 
 static int get_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_list *v = NULL;
-	struct uci_element *e;
-	char *zone, *ifaceobj = NULL, buf[256] = "", *val;
-	struct uci_section *s = NULL;
+	char *ifaceobj = NULL, *dest = NULL, buf[256] = "";
+	struct uci_list *net_list = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "dest", &zone);
-	uci_foreach_sections("firewall", "zone", s) {
-		dmuci_get_value_by_section_string(s, "name", &val);
-		if (strcmp(val, zone) == 0) {
-			dmuci_get_value_by_section_list(s, "network", &v);
-			break;
+	dmuci_get_value_by_section_string((struct uci_section *)data, "dest", &dest);
+	if (dest == NULL || *dest == '\0')
+		return 0;
+
+	if (strcmp(dest, "*") == 0) {
+		struct uci_section *dmmap_section = NULL;
+
+		get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
+		dmuci_get_value_by_section_string(dmmap_section, "dest", &dest);
+	} else {
+		struct uci_section *s = NULL;
+		char *zone_name = NULL;
+
+		uci_foreach_sections("firewall", "zone", s) {
+			dmuci_get_value_by_section_string(s, "name", &zone_name);
+			if (zone_name && strcmp(zone_name, dest) == 0) {
+				dmuci_get_value_by_section_list(s, "network", &net_list);
+				break;
+			}
 		}
 	}
-	if (v != NULL) {
-		uci_foreach_element(v, e) {
+
+	if (net_list != NULL) {
+		struct uci_element *e;
+
+		uci_foreach_element(net_list, e) {
 			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj);
 			if (ifaceobj == NULL)
 				continue;
@@ -393,6 +408,10 @@ static int get_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 				strcat(buf, ",");
 			strcat(buf, ifaceobj);
 		}
+	} else {
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", dest, &ifaceobj);
+		if (ifaceobj)
+			strcpy(buf, ifaceobj);
 	}
 
 	*value = dmstrdup(buf);
@@ -916,7 +935,7 @@ static int set_rule_target(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int set_rule_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *iface = NULL, *zone, *net;
+	char *iface = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -926,17 +945,29 @@ static int set_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 			adm_entry_get_linker_value(ctx, value, &iface);
 			if (iface == NULL ||  iface[0] == '\0')
 				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &iface);
 			if (iface && iface[0] != '\0') {
 				struct uci_section *s = NULL;
+				char *net;
 
 				uci_foreach_sections("firewall", "zone", s) {
 					dmuci_get_value_by_section_string(s, "network", &net);
 					if (dm_strword(net, iface)) {
-						dmuci_get_value_by_section_string(s, "name", &zone);
-						dmuci_set_value_by_section((struct uci_section *)data, "src", zone);
+						char *zone_name, *src = NULL;
+
+						dmuci_get_value_by_section_string(s, "name", &zone_name);
+						dmuci_get_value_by_section_string((struct uci_section *)data, "src", &src);
+						if (src && strcmp(src, "*") == 0) {
+							struct uci_section *dmmap_section = NULL;
+
+							get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
+							dmuci_set_value_by_section(dmmap_section, "src", zone_name);
+						} else {
+							dmuci_set_value_by_section((struct uci_section *)data, "src", zone_name);
+						}
 						break;
 					}
 				}
@@ -944,7 +975,7 @@ static int set_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 			}
 			break;
 	}
-        return 0;
+	return 0;
 }
 
 static int set_rule_source_all_interfaces(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -984,28 +1015,39 @@ static int set_rule_source_all_interfaces(char *refparam, struct dmctx *ctx, voi
 
 static int set_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *iface = NULL, *zone, *net;
+	char *iface = NULL;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
-			break;
-		case VALUESET:
-			if (value[0] == '\0') {
-				dmuci_set_value_by_section((struct uci_section *)data, "dest", "");
-				break;
-			}
 
 			adm_entry_get_linker_value(ctx, value, &iface);
-			if (iface != NULL && iface[0] != '\0') {
+			if (iface == NULL ||  iface[0] == '\0')
+				return FAULT_9007;
+
+			break;
+		case VALUESET:
+			adm_entry_get_linker_value(ctx, value, &iface);
+			if (iface && iface[0] != '\0') {
 				struct uci_section *s = NULL;
+				char *net;
 
 				uci_foreach_sections("firewall", "zone", s) {
-					dmuci_get_value_by_section_string(s, "name", &net);
+					dmuci_get_value_by_section_string(s, "network", &net);
 					if (dm_strword(net, iface)) {
-						dmuci_get_value_by_section_string(s, "name", &zone);
-						dmuci_set_value_by_section((struct uci_section *)data, "dest", zone);
+						char *zone_name, *dest = NULL;
+
+						dmuci_get_value_by_section_string(s, "name", &zone_name);
+						dmuci_get_value_by_section_string((struct uci_section *)data, "dest", &dest);
+						if (dest && strcmp(dest, "*") == 0) {
+							struct uci_section *dmmap_section = NULL;
+
+							get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
+							dmuci_set_value_by_section(dmmap_section, "dest", zone_name);
+						} else {
+							dmuci_set_value_by_section((struct uci_section *)data, "dest", zone_name);
+						}
 						break;
 					}
 				}
@@ -1013,7 +1055,7 @@ static int set_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 			}
 			break;
 	}
-        return 0;
+	return 0;
 }
 
 static int set_rule_dest_all_interfaces(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
