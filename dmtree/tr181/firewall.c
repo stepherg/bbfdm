@@ -62,10 +62,17 @@ static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s = NULL, *dmmap_firewall_rule = NULL;
+	char creation_date[32] = {0};
+	char s_name[16] = {0};
+	time_t now = time(NULL);
+
+	strftime(creation_date, sizeof(creation_date), "%Y-%m-%dT%H:%M:%SZ", localtime(&now));
 
 	char *last_inst = get_last_instance_bbfdm("dmmap_firewall", "rule", "firewall_chain_rule_instance");
+	snprintf(s_name, sizeof(s_name), "rule_%s", last_inst ? last_inst : "1");
 
 	dmuci_add_section("firewall", "rule", &s);
+	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "name", "-");
 	dmuci_set_value_by_section(s, "enabled", "0");
 	dmuci_set_value_by_section(s, "dest", "");
@@ -73,7 +80,8 @@ static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_set_value_by_section(s, "target", "DROP");
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "rule", &dmmap_firewall_rule);
-	dmuci_set_value_by_section(dmmap_firewall_rule, "section_name", section_name(s));
+	dmuci_set_value_by_section(dmmap_firewall_rule, "section_name", s_name);
+	dmuci_set_value_by_section(dmmap_firewall_rule, "creation_date", creation_date);
 	*instance = update_instance(last_inst, 2, dmmap_firewall_rule, "firewall_chain_rule_instance");
 	return 0;
 }
@@ -312,6 +320,15 @@ static int get_rule_target(char *refparam, struct dmctx *ctx, void *data, char *
 	else
 		*value = v;
     return 0;
+}
+
+static int get_FirewallChainRule_CreationDate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *dmmap_section = NULL;
+
+	get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
+	*value = dmuci_get_value_by_section_fallback_def(dmmap_section, "creation_date", "0001-01-01T00:00:00Z");
+	return 0;
 }
 
 static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1438,6 +1455,7 @@ DMLEAF tFirewallChainRuleParams[] = {
 {"Description", &DMWRITE, DMT_STRING, get_rule_description, set_rule_description, BBFDM_BOTH},
 {"Target", &DMWRITE, DMT_STRING, get_rule_target, set_rule_target, BBFDM_BOTH},
 //{"TargetChain", &DMWRITE, DMT_STRING, get_rule_target_chain, set_rule_target_chain, BBFDM_BOTH},
+{"CreationDate", &DMREAD, DMT_TIME, get_FirewallChainRule_CreationDate, NULL, BBFDM_BOTH},
 {"SourceInterface", &DMWRITE, DMT_STRING, get_rule_source_interface, set_rule_source_interface, BBFDM_BOTH},
 {"SourceAllInterfaces", &DMWRITE, DMT_BOOL, get_rule_source_all_interfaces, set_rule_source_all_interfaces, BBFDM_BOTH},
 {"DestInterface", &DMWRITE, DMT_STRING, get_rule_dest_interface, set_rule_dest_interface, BBFDM_BOTH},
