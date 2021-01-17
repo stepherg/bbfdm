@@ -48,6 +48,7 @@ char *ProfileEnable[] = {"Disabled", "Quiescent", "Enabled"};
 char *SupportedOperatingChannelBandwidth[] = {"20MHz", "40MHz", "80MHz", "160MHZ", "80+80MHz", "Auto"};
 char *SupportedStandards[] = {"a", "b", "g", "n", "ac", "ax"};
 char *SupportedFrequencyBands[] = {"2.4GHz", "5GHz"};
+char *Provider_Bridge_Type[] = {"S-VLAN", "PE"};
 
 char *PIN[] = {"^\\d{4}|\\d{8}$"};
 char *DestinationAddress[] = {"^\\d+/\\d+$"};
@@ -366,7 +367,7 @@ void free_dmmap_config_dup_list(struct list_head *dup_list)
  */
 struct uci_section *get_origin_section_from_config(char *package, char *section_type, char *orig_section_name)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_foreach_sections(package, section_type, s) {
 		if (strcmp(section_name(s), orig_section_name) == 0) {
@@ -417,6 +418,14 @@ void synchronize_specific_config_sections_with_dmmap(char *package, char *sectio
 	char *v;
 
 	uci_foreach_sections(package, section_type, s) {
+		/*
+		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
+		 * If the section belong to provider bridge (section name: pr_br_{i}) then skip adding to dmmap_package
+		 */
+		if ((strcmp(package, "network") == 0) &&
+			(strncmp(section_name(s), "pr_br_", 6) == 0))
+			continue;
+
 		/*
 		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
 		 */

@@ -77,7 +77,7 @@ void get_bridge_port_linker(struct dmctx *ctx, char *intf_name, char **value)
 	struct uci_section *dmmap_section = NULL, *bridge_port = NULL;
 
 	*value = NULL;
-	get_dmmap_section_of_config_section("dmmap_network", "interface", intf_name, &dmmap_section);
+	get_dmmap_section_of_config_section("dmmap_bridge", "bridge", intf_name, &dmmap_section);
 	if (dmmap_section != NULL) {
 		char *br_inst, *mg;
 		dmuci_get_value_by_section_string(dmmap_section, "bridge_instance", &br_inst);
@@ -233,6 +233,10 @@ static int dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_nod
 		// Skip this interface section if ifname is empty
 		dmuci_get_value_by_section_string(s, "ifname", &ifname);
 		if (*ifname == '\0' || strchr(ifname, '@'))
+			continue;
+
+		// If the section belong to provider bridge (section name: pr_br_{i}) then skip adding to dmmap_package
+		if (strncmp(section_name(s), "pr_br_", 6) == 0)
 			continue;
 
 		dmuci_get_value_by_section_string(s, "macaddr", &macaddr);
