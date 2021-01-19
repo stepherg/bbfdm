@@ -812,11 +812,19 @@ static int get_access_point_security_supported_modes(char *refparam, struct dmct
 	return 0;
 }
 
-static void get_security_mode(char **value, char *encryption)
+static void get_security_mode(struct uci_section *section, char *encryption, char **value)
 {
-	if (strcmp(encryption, "wep-open") == 0 || strcmp(encryption, "wep-shared") == 0)
-		*value = "WEP-64";
-	else if (strcmp(encryption, "psk") == 0)
+	if (strstr(encryption, "wep")) {
+		char *key_index = NULL, *key = NULL;
+		char buf[16];
+
+		dmuci_get_value_by_section_string(section, "key", &key_index);
+		if (key_index && (*key_index) > '0' && (*key_index) < '5' && *(key_index+1) == '\0') {
+			snprintf(buf, sizeof(buf), "key%s", key_index);
+			dmuci_get_value_by_section_string(section, buf, &key);
+		}
+		*value = (key && strlen(key) == 10) ? "WEP-64" : "WEP-128";
+	} else if (strcmp(encryption, "psk") == 0)
 		*value = "WPA-Personal";
 	else if (strcmp(encryption, "wpa") == 0)
 		*value = "WPA-Enterprise";
@@ -824,7 +832,7 @@ static void get_security_mode(char **value, char *encryption)
 		*value = "WPA2-Personal";
 	else if (strcmp(encryption, "wpa2") == 0)
 		*value = "WPA2-Enterprise";
-	else if (strcmp(encryption, "mixed-psk") == 0)
+	else if (strcmp(encryption, "psk-mixed") == 0 || strcmp(encryption, "mixed-psk") == 0)
 		*value = "WPA-WPA2-Personal";
 	else if (strcmp(encryption, "wpa-mixed") == 0 || strcmp(encryption, "mixed-wpa") == 0)
 		*value = "WPA-WPA2-Enterprise";
@@ -846,25 +854,12 @@ static void reset_wlan(struct uci_section *s)
 	dmuci_delete_by_section(s, "auth_secret", NULL);
 }
 
-static void generate_wep_key(char *passphrase, char strk64[4][11])
+static void generate_wep_key(const char *passphrase, char *buf, size_t len)
 {
-	unsigned char k64[4][5];
-	unsigned char pseed[4] = {0};
-	unsigned int randNumber, tmp;
-	int i, j;
+	unsigned pos = 0, i;
 
-	for (i = 0; i < strlen(passphrase); i++)
-		pseed[i%4] ^= (unsigned char) passphrase[i];
-
-	randNumber = pseed[0] | (pseed[1] << 8) | (pseed[2] << 16) | (pseed[3] << 24);
-
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 5; j++) {
-			randNumber = (randNumber * 0x343fd + 0x269ec3) & 0xffffffff;
-			tmp = (randNumber >> 16) & 0xff;
-			k64[i][j] = (unsigned char) tmp;
-		}
-		snprintf(strk64[i], sizeof(strk64[i]), "%02X%02X%02X%02X%02X", k64[i][0], k64[i][1], k64[i][2], k64[i][3], k64[i][4]);
+	for (i = 0; i < len/2; i++) {
+		pos += snprintf(buf + pos, len - pos, "%02X", passphrase[i]);
 	}
 }
 
@@ -873,69 +868,61 @@ static void set_security_mode(struct uci_section *section, char *value)
 	char *encryption, *mode;
 
 	dmuci_get_value_by_section_string(section, "encryption", &encryption);
-	get_security_mode(&mode, encryption);
+	get_security_mode(section, encryption, &mode);
 
 	if (strcmp(value, mode) != 0) {
+		reset_wlan(section);
+
 		if (strcmp(value, "None") == 0) {
-			reset_wlan(section);
 			dmuci_set_value_by_section(section, "encryption", "none");
-		}
-		else if (strcmp(value, "WEP-64") == 0 || strcmp(value, "WEP-128") == 0) {
-			reset_wlan(section);
-			dmuci_set_value_by_section(section, "encryption", "wep-open");
-			char *option, strk64[4][11];
-			generate_wep_key("iopsys", strk64);
+		} else if (strcmp(value, "WEP-64") == 0) {
+			char key[16], buf[11];
 			int i;
+
+			generate_wep_key("iopsys", buf, sizeof(buf));
 			for (i = 0; i < 4; i++) {
-				dmasprintf(&option, "key%d", i + 1);
-				dmuci_set_value_by_section(section, option, strk64[i]);
-				dmfree(option);
+				snprintf(key, sizeof(key), "key%d", i + 1);
+				dmuci_set_value_by_section(section, key, buf);
 			}
+			dmuci_set_value_by_section(section, "encryption", "wep-open");
 			dmuci_set_value_by_section(section, "key", "1");
-		}
-		else if (strcmp(value, "WPA-Personal") == 0) {
-			reset_wlan(section);
+		} else if (strcmp(value, "WEP-128") == 0) {
+			char key[16], buf[27];
+			int i;
+
+			generate_wep_key("iopsys_wep128", buf, sizeof(buf));
+			for (i = 0; i < 4; i++) {
+				snprintf(key, sizeof(key), "key%d", i + 1);
+				dmuci_set_value_by_section(section, key, buf);
+			}
+			dmuci_set_value_by_section(section, "encryption", "wep-open");
+			dmuci_set_value_by_section(section, "key", "1");
+		} else if (strcmp(value, "WPA-Personal") == 0) {
 			char *wpa_key = os__get_default_wpa_key();
 			dmuci_set_value_by_section(section, "encryption", "psk");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
-		}
-		else if (strcmp(value, "WPA-Enterprise") == 0) {
-			reset_wlan(section);
+		} else if (strcmp(value, "WPA-Enterprise") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "wpa");
-			dmuci_set_value_by_section(section, "auth_server", "");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
-			dmuci_set_value_by_section(section, "auth_secret", "");
-		}
-		else if (strcmp(value, "WPA2-Personal") == 0) {
-			reset_wlan(section);
+		} else if (strcmp(value, "WPA2-Personal") == 0) {
 			char *wpa_key = os__get_default_wpa_key();
 			dmuci_set_value_by_section(section, "encryption", "psk2");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
 			dmuci_set_value_by_section(section, "wps", "1");
-		}
-		else if (strcmp(value, "WPA2-Enterprise") == 0) {
-			reset_wlan(section);
+		} else if (strcmp(value, "WPA2-Enterprise") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "wpa2");
-			dmuci_set_value_by_section(section, "auth_server", "");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
-			dmuci_set_value_by_section(section, "auth_secret", "");
-		}
-		else if (strcmp(value, "WPA-WPA2-Personal") == 0) {
-			reset_wlan(section);
+		} else if (strcmp(value, "WPA-WPA2-Personal") == 0) {
 			char *wpa_key = os__get_default_wpa_key();
 			dmuci_set_value_by_section(section, "encryption", "mixed-psk");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
 			dmuci_set_value_by_section(section, "wps", "1");
-		}
-		else if (strcmp(value, "WPA-WPA2-Enterprise") == 0) {
-			reset_wlan(section);
+		} else if (strcmp(value, "WPA-WPA2-Enterprise") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "wpa-mixed");
-			dmuci_set_value_by_section(section, "auth_server", "");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
-			dmuci_set_value_by_section(section, "auth_secret", "");
 		}
 	}
 }
@@ -949,7 +936,7 @@ static int get_access_point_security_modes(char *refparam, struct dmctx *ctx, vo
 	if (*encryption == '\0')
 		*value = "None";
 	else
-		get_security_mode(value, encryption);
+		get_security_mode(((struct wifi_acp_args *)data)->wifi_acp_sec, encryption, value);
 	return 0;
 }
 
@@ -978,8 +965,12 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "encryption", &encryption);
-			if (strcmp(encryption, "wep-open") == 0 || strcmp(encryption, "wep-shared") == 0 ) {
-				dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, "key", value);
+			if (strstr(encryption, "wep")) {
+				char *key_index = NULL, buf[16];
+
+				dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "key", &key_index);
+				snprintf(buf, sizeof(buf),"key%s", key_index ? key_index : "1");
+				dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, buf, value);
 			}
 			return 0;
 	}
@@ -1520,7 +1511,7 @@ static int get_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 	if (*encryption == '\0')
 		*value = "None";
 	else
-		get_security_mode(value, encryption);
+		get_security_mode((struct uci_section *)data, encryption, value);
 	return 0;
 }
 
@@ -1549,8 +1540,12 @@ static int set_WiFiEndPointProfileSecurity_WEPKey(char *refparam, struct dmctx *
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string((struct uci_section*)data, "encryption", &encryption);
-			if (strcmp(encryption, "wep-open") == 0 || strcmp(encryption, "wep-shared") == 0 ) {
-				dmuci_set_value_by_section((struct uci_section*)data, "key", value);
+			if (strstr(encryption, "wep")) {
+				char *key_index = NULL, buf[16];
+
+				dmuci_get_value_by_section_string((struct uci_section*)data, "key", &key_index);
+				snprintf(buf, sizeof(buf),"key%s", key_index ? key_index : "1");
+				dmuci_set_value_by_section((struct uci_section*)data, buf, value);
 			}
 			return 0;
 	}
