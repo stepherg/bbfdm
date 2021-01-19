@@ -81,6 +81,111 @@ static void create_firewall_zone_config(char *iface)
 	dmuci_set_value_by_section(s, "network", iface);
 }
 
+static int parse_proc_intf6_line(const char *line, const char *device, char *ipstr)
+{
+	char ip6buf[INET6_ADDRSTRLEN] = {0}, dev[32] = {0};
+	unsigned int ip[4], prefix;
+
+	sscanf(line, "%8x%8x%8x%8x %*s %x %*s %*s %31s",
+				&ip[0], &ip[1], &ip[2], &ip[3],
+				&prefix, dev);
+
+	if (strcmp(dev, device) != 0)
+		return -1;
+
+	ip[0] = htonl(ip[0]);
+	ip[1] = htonl(ip[1]);
+	ip[2] = htonl(ip[2]);
+	ip[3] = htonl(ip[3]);
+
+	inet_ntop(AF_INET6, ip, ip6buf, INET6_ADDRSTRLEN);
+	snprintf(ipstr, INET6_ADDRSTRLEN, "%s/%u", ip6buf, prefix);
+
+	if (strncmp(ipstr, "fe80:", 5) != 0)
+		return -1;
+
+	return 0;
+}
+
+static bool proc_intf6_line_exists(char *parent_section, char *address)
+{
+	struct uci_section *s = NULL;
+
+	uci_path_foreach_sections(bbfdm, "dmmap_network_ipv6", "intf_ipv6", s) {
+		char *parent_s = NULL, *addr = NULL;
+
+		dmuci_get_value_by_section_string(s, "parent_section", &parent_s);
+		dmuci_get_value_by_section_string(s, "address", &addr);
+
+		if (parent_s && strcmp(parent_s, parent_section) == 0 &&
+			addr && strcmp(addr, address) == 0)
+			return true;
+	}
+	return false;
+}
+
+static void dmmap_synchronize_ipv6_address_link_local(char *parent_section)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+	char buf[512] = {0}, ipstr[INET6_ADDRSTRLEN] = {0};
+	FILE *fp = NULL;
+
+	char *device = get_device(parent_section);
+
+	uci_path_foreach_sections_safe(bbfdm, "dmmap_network_ipv6", "intf_ipv6", stmp, s) {
+		char *link_local = NULL, *parent_s = NULL, *address = NULL;
+
+		dmuci_get_value_by_section_string(s, "parent_section", &parent_s);
+		dmuci_get_value_by_section_string(s, "link_local", &link_local);
+
+		if ((parent_s && strcmp(parent_s, parent_section) != 0) ||
+			(link_local && strcmp(link_local, "1") != 0))
+			continue;
+
+		dmuci_get_value_by_section_string(s, "address", &address);
+
+		fp = fopen(PROC_INTF6, "r");
+		if (fp == NULL)
+			return;
+
+		bool found = false;
+		while (fgets(buf, 512, fp) != NULL) {
+
+			if (parse_proc_intf6_line(buf, device, ipstr))
+				continue;
+
+			if (address && strcmp(address, ipstr) == 0) {
+				found = true;
+				break;
+			}
+		}
+		fclose(fp);
+
+		if (!found)
+			dmuci_delete_by_section(s, NULL, NULL);
+	}
+
+	fp = fopen(PROC_INTF6, "r");
+	if (fp == NULL)
+		return;
+
+	while (fgets(buf , 512 , fp) != NULL) {
+
+		if (parse_proc_intf6_line(buf, device, ipstr))
+			continue;
+
+		if (proc_intf6_line_exists(parent_section, ipstr))
+			continue;
+
+		dmuci_add_section_bbfdm("dmmap_network_ipv6", "intf_ipv6", &s);
+		dmuci_set_value_by_section(s, "parent_section", parent_section);
+		dmuci_set_value_by_section(s, "section_name", parent_section);
+		dmuci_set_value_by_section(s, "link_local", "1");
+		dmuci_set_value_by_section(s, "address", ipstr);
+	}
+	fclose(fp);
+}
+
 static struct uci_section *check_dmmap_network_interface_ipv4(char *dmmap_file_name, char *dmmap_sec_name, char *parent_section, char *section_name)
 {
 	struct uci_section *dmmap_section = NULL;
@@ -133,11 +238,15 @@ static void synchronize_intf_ipv6_sections_with_dmmap(void)
 {
 	json_object *res = NULL, *ipv6_obj = NULL, *arrobj = NULL;
 	struct uci_section *s = NULL, *ss = NULL, *stmp = NULL;
-	char *dmmap_intf_s, *dmmap_address, *ip6addr = NULL;
+	char *dmmap_intf_s, *dmmap_address, *link_local = NULL, *ip6addr = NULL;
 	bool found = false;
 	int i = 0;
 
 	uci_path_foreach_sections_safe(bbfdm, "dmmap_network_ipv6", "intf_ipv6", stmp, s) {
+		dmuci_get_value_by_section_string(s, "link_local", &link_local);
+		if (link_local && *link_local != '\0' && strcmp(link_local, "1") == 0)
+			continue;
+
 		dmuci_get_value_by_section_string(s, "section_name", &dmmap_intf_s);
 		dmuci_get_value_by_section_string(s, "address", &dmmap_address);
 		found = false;
@@ -617,6 +726,32 @@ static int browseIPInterfaceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
 				goto end;
+		}
+
+		// Get ipv6 LinkLocal address
+		if (!strchr(ifname, '@')) {
+
+			dmmap_synchronize_ipv6_address_link_local(section_name(parent_sec));
+
+			uci_path_foreach_option_eq(bbfdm, "dmmap_network_ipv6", "intf_ipv6", "parent_section", section_name(parent_sec), dmmap_s) {
+				char *link_local = NULL;
+
+				dmuci_get_value_by_section_string(dmmap_s, "link_local", &link_local);
+				if (link_local && strcmp(link_local, "1") != 0)
+					continue;
+
+				init_interface_ip_args(&curr_intf_ip_args, NULL, dmmap_s, NULL);
+
+				browse_args.option = "parent_section";
+				browse_args.value = section_name(parent_sec);
+
+				inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
+					   dmmap_s, "ipv6_instance", "ipv6_alias",
+					   check_browse_section, (void *)&browse_args);
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_intf_ip_args, inst) == DM_STOP)
+					goto end;
+			}
 		}
 	}
 
@@ -1754,12 +1889,21 @@ static int set_IPInterfaceIPv4Address_X_IOPSYS_EU_FirewallEnabled(char *refparam
 /*#Device.IP.Interface.{i}.IPv6Address.{i}.Enable!UCI:network/interface,@i-1/ipv6*/
 static int get_IPInterfaceIPv6Address_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct intf_ip_args *)data)->interface_sec, "ipv6", "1");
+	char *link_local = NULL;
+
+	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "link_local", &link_local);
+	if (link_local && strcmp(link_local, "1") == 0) {
+		*value = "1";
+	} else {
+		*value = dmuci_get_value_by_section_fallback_def(((struct intf_ip_args *)data)->interface_sec, "ipv6", "1");
+	}
+
 	return 0;
 }
 
 static int set_IPInterfaceIPv6Address_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *link_local = NULL;
 	bool b;
 
 	switch (action)	{
@@ -1769,7 +1913,9 @@ static int set_IPInterfaceIPv6Address_Enable(char *refparam, struct dmctx *ctx, 
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "ipv6", b ? "1" : "0");
+			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "link_local", &link_local);
+			if (link_local && strcmp(link_local, "1") != 0)
+				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "ipv6", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -1831,7 +1977,7 @@ static int get_IPInterfaceIPv6Address_IPAddress(char *refparam, struct dmctx *ct
 
 static int set_IPInterfaceIPv6Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *proto = NULL;
+	char *proto = NULL, *link_local = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -1840,7 +1986,8 @@ static int set_IPInterfaceIPv6Address_IPAddress(char *refparam, struct dmctx *ct
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-			if (proto && strcmp(proto, "static") == 0) {
+			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "link_local", &link_local);
+			if (proto && strcmp(proto, "static") == 0 && link_local && strcmp(link_local, "1") != 0) {
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "ip6addr", value);
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->dmmap_sec, "address", value);
 			}
@@ -1851,10 +1998,12 @@ static int set_IPInterfaceIPv6Address_IPAddress(char *refparam, struct dmctx *ct
 
 static int get_IPInterfaceIPv6Address_Origin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *assign = NULL;
+	char *assign = NULL, *link_local = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
-	if (assign && strcmp(assign, "1") == 0) {
+	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "link_local", &link_local);
+
+	if ((assign && strcmp(assign, "1") == 0) || (link_local && strcmp(link_local, "1") == 0)) {
 		*value = "AutoConfigured";
 	} else {
 		char *proto;
@@ -1872,14 +2021,23 @@ static int get_IPInterfaceIPv6Address_Prefix(char *refparam, struct dmctx *ctx, 
 	if (assign && strcmp(assign, "1") == 0) {
 		struct uci_section *dmmap_section = NULL;
 		char *ip_inst = NULL, *ipv6_prefix_inst = NULL, *parent_section, *section_name;
+		char curr_address[64] = {0}, *address = NULL;
 
 		dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "parent_section", &parent_section);
 		get_dmmap_section_of_config_section("dmmap_network", "interface", parent_section, &dmmap_section);
 		dmuci_get_value_by_section_string(dmmap_section, "ip_int_instance", &ip_inst);
 
+		char *addr = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "address");
+		char *mask = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "mask");
+		snprintf(curr_address, sizeof(curr_address), "%s/%s", addr, mask);
 		dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "section_name", &section_name);
-		get_dmmap_section_of_config_section("dmmap_network_ipv6_prefix", "intf_ipv6_prefix", section_name, &dmmap_section);
-		dmuci_get_value_by_section_string(dmmap_section, "ipv6_prefix_instance", &ipv6_prefix_inst);
+		uci_path_foreach_option_eq(bbfdm, "dmmap_network_ipv6_prefix", "intf_ipv6_prefix", "section_name", section_name, dmmap_section) {
+			dmuci_get_value_by_section_string(dmmap_section, "address", &address);
+			if (address && strcmp(address, curr_address) == 0) {
+				dmuci_get_value_by_section_string(dmmap_section, "ipv6_prefix_instance", &ipv6_prefix_inst);
+				break;
+			}
+		}
 
 		if (ip_inst && *ip_inst && ipv6_prefix_inst && *ipv6_prefix_inst)
 			dmasprintf(value, "Device.IP.Interface.%s.IPv6Prefix.%s", ip_inst, ipv6_prefix_inst);

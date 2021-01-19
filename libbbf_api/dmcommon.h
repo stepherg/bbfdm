@@ -117,6 +117,7 @@ extern char *Provider_Bridge_Type[];
 #define DEFAULT_CONFIG_DIR "/etc/config/"
 #define PROC_ROUTE "/proc/net/route"
 #define PROC_ROUTE6 "/proc/net/ipv6_route"
+#define PROC_INTF6 "/proc/net/if_inet6"
 #define MAX_DHCP_LEASES 256
 #define MAX_PROC_ROUTING 256
 #define DHCP_LEASES_FILE "/tmp/dhcp.leases"
