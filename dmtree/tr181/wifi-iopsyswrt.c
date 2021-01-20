@@ -1415,127 +1415,271 @@ int os__get_WiFiDataElementsNetworkDeviceRadioUnassociatedSTA_SignalStrength(cha
 	return 0;
 }
 
-#if 0
 int os__get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *res = NULL, *notify_arr = NULL, *notify_obj = NULL, *assoc_ev = NULL;
+	int num_assoc_ev = 0, i = 0;
+
+	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		dmjson_foreach_obj_in_array(res, notify_arr, notify_obj, i, 1, "notification") {
+			if (json_object_object_get_ex(notify_obj, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
+				num_assoc_ev++;
+			}
+		}
+	}
+	dmasprintf(value, "%d", num_assoc_ev);
 	return 0;
 }
 
 int os__get_WiFiDataElementsAssociationEventAssociationEventData_BSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *assoc_ev = NULL, *assoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
+			if (json_object_object_get_ex(assoc_ev, "AssocData", &assoc_data))
+				*value = dmjson_get_value(assoc_data, 1, "BSSID");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsAssociationEventAssociationEventData_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *assoc_ev = NULL, *assoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
+			if (json_object_object_get_ex(assoc_ev, "AssocData", &assoc_data))
+				*value = dmjson_get_value(assoc_data, 1, "MACAddress");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsAssociationEventAssociationEventData_StatusCode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *assoc_ev = NULL, *assoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
+			if (json_object_object_get_ex(assoc_ev, "AssocData", &assoc_data))
+				*value = dmjson_get_value(assoc_data, 1, "StatusCode");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsAssociationEventAssociationEventData_HTCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *assoc_ev = NULL, *assoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
+			if (json_object_object_get_ex(assoc_ev, "AssocData", &assoc_data))
+				*value = dmjson_get_value(assoc_data, 1, "HTCapabilities");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsAssociationEventAssociationEventData_VHTCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *assoc_ev = NULL, *assoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
+			if (json_object_object_get_ex(assoc_ev, "AssocData", &assoc_data))
+				*value = dmjson_get_value(assoc_data, 1, "VHTCapabilities");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsAssociationEventAssociationEventData_HECapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *assoc_ev = NULL, *assoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
+			if (json_object_object_get_ex(assoc_ev, "AssocData", &assoc_data))
+				*value = dmjson_get_value(assoc_data, 1, "HECapabilities");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *assoc_ev = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
+			*value = dmjson_get_value((json_object *)data, 1, "eventTime");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *res = NULL, *notify_arr = NULL, *notify_obj = NULL, *disassoc_ev = NULL;
+	int num_disassoc_ev = 0, i = 0;
+
+	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		dmjson_foreach_obj_in_array(res, notify_arr, notify_obj, i, 1, "notification") {
+			if (json_object_object_get_ex(notify_obj, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+				num_disassoc_ev++;
+			}
+		}
+	}
+	dmasprintf(value, "%d", num_disassoc_ev);
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *disassoc_ev = NULL, *disassoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_data))
+				*value = dmjson_get_value(disassoc_data, 1, "BSSID");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *disassoc_ev = NULL, *disassoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_data))
+				*value = dmjson_get_value(disassoc_data, 1, "MACAddress");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ReasonCode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *disassoc_ev = NULL, *disassoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_data))
+				*value = dmjson_get_value(disassoc_data, 1, "ReasonCode");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *disassoc_ev = NULL, *disassoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_data))
+				*value = dmjson_get_value(disassoc_data, 1, "BytesSent");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *disassoc_ev = NULL, *disassoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_data))
+				*value = dmjson_get_value(disassoc_data, 1, "BytesReceived");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *disassoc_ev = NULL, *disassoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_data))
+				*value = dmjson_get_value(disassoc_data, 1, "PacketsSent");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *disassoc_ev = NULL, *disassoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_data))
+				*value = dmjson_get_value(disassoc_data, 1, "PacketsReceived");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *disassoc_ev = NULL, *disassoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_data))
+				*value = dmjson_get_value(disassoc_data, 1, "ErrorsSent");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *disassoc_ev = NULL, *disassoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_data))
+				*value = dmjson_get_value(disassoc_data, 1, "ErrorsReceived");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_RetransCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *disassoc_ev = NULL, *disassoc_data = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_data))
+				*value = dmjson_get_value(disassoc_data, 1, "RetransCount");
+		}
+	}
 	return 0;
 }
 
 int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	json_object *disassoc_ev = NULL;
+
+	if (data) {
+		if (json_object_object_get_ex((json_object *)data, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+			*value = dmjson_get_value((json_object *)data, 1, "eventTime");
+		}
+	}
 	return 0;
 }
-#endif
 
 /*************************************************************
  * ENTRY METHOD
@@ -1704,16 +1848,40 @@ int os__browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan
 	return 0;
 }
 
-#if 0
 int os__browseWiFiDataElementsAssociationEventAssociationEventDataInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *res = NULL, *notify_arr = NULL, *notify_obj = NULL, *assoc_ev = NULL;
+	char *inst = NULL, *max_inst = NULL;
+	int id = 0, i = 0;
+
+	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		dmjson_foreach_obj_in_array(res, notify_arr, notify_obj, i, 1, "notification") {
+			if (json_object_object_get_ex(notify_obj, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
+				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)notify_obj, inst) == DM_STOP)
+					break;
+			}
+		}
+	}
 	return 0;
 }
 
 int os__browseWiFiDataElementsDisassociationEventDisassociationEventDataInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	//TODO
+	json_object *res = NULL, *notify_arr = NULL, *notify_obj = NULL, *disassoc_ev = NULL;
+	char *inst = NULL, *max_inst = NULL;
+	int id = 0, i = 0;
+
+	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{}, 0, &res);
+	if (res) {
+		dmjson_foreach_obj_in_array(res, notify_arr, notify_obj, i, 1, "notification") {
+			if (json_object_object_get_ex(notify_obj, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
+				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)notify_obj, inst) == DM_STOP)
+					break;
+			}
+		}
+	}
 	return 0;
 }
-#endif

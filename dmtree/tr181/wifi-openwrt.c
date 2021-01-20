@@ -831,7 +831,6 @@ int os__get_WiFiDataElementsNetworkDeviceRadioUnassociatedSTA_SignalStrength(cha
 	return not_implemented(value);
 }
 
-#if 0
 int os__get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return not_implemented(value);
@@ -931,7 +930,6 @@ int os__get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeStamp
 {
 	return not_implemented(value);
 }
-#endif
 
 int os__browseWiFiDataElementsNetworkDeviceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -988,7 +986,6 @@ int os__browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan
 	return 0;
 }
 
-#if 0
 int os__browseWiFiDataElementsAssociationEventAssociationEventDataInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	return 0;
@@ -998,4 +995,3 @@ int os__browseWiFiDataElementsDisassociationEventDisassociationEventDataInst(str
 {
 	return 0;
 }
-#endif

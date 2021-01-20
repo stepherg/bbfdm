@@ -2663,55 +2663,55 @@ DMLEAF tWiFiDataElementsNetworkDeviceRadioUnassociatedSTAParams[] = {
 /* *** Device.WiFi.DataElements.AssociationEvent. *** */
 DMOBJ tWiFiDataElementsAssociationEventObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-//{"AssociationEventData", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsAssociationEventAssociationEventDataInst, NULL, NULL, tWiFiDataElementsAssociationEventAssociationEventDataParams, NULL, BBFDM_BOTH},
+{"AssociationEventData", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsAssociationEventAssociationEventDataInst, NULL, NULL, tWiFiDataElementsAssociationEventAssociationEventDataParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tWiFiDataElementsAssociationEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"AssociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
+{"AssociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.AssociationEvent.AssociationEventData.{i}. *** */
 DMLEAF tWiFiDataElementsAssociationEventAssociationEventDataParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"BSSID", &DMREAD, DMT_STRING, os__get_WiFiDataElementsAssociationEventAssociationEventData_BSSID, NULL, BBFDM_BOTH},
-//{"MACAddress", &DMREAD, DMT_STRING, os__get_WiFiDataElementsAssociationEventAssociationEventData_MACAddress, NULL, BBFDM_BOTH},
-//{"StatusCode", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsAssociationEventAssociationEventData_StatusCode, NULL, BBFDM_BOTH},
-//{"HTCapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsAssociationEventAssociationEventData_HTCapabilities, NULL, BBFDM_BOTH},
-//{"VHTCapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsAssociationEventAssociationEventData_VHTCapabilities, NULL, BBFDM_BOTH},
-//{"HECapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsAssociationEventAssociationEventData_HECapabilities, NULL, BBFDM_BOTH},
-//{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp, NULL, BBFDM_BOTH},
+{"BSSID", &DMREAD, DMT_STRING, os__get_WiFiDataElementsAssociationEventAssociationEventData_BSSID, NULL, BBFDM_BOTH},
+{"MACAddress", &DMREAD, DMT_STRING, os__get_WiFiDataElementsAssociationEventAssociationEventData_MACAddress, NULL, BBFDM_BOTH},
+{"StatusCode", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsAssociationEventAssociationEventData_StatusCode, NULL, BBFDM_BOTH},
+{"HTCapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsAssociationEventAssociationEventData_HTCapabilities, NULL, BBFDM_BOTH},
+{"VHTCapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsAssociationEventAssociationEventData_VHTCapabilities, NULL, BBFDM_BOTH},
+{"HECapabilities", &DMREAD, DMT_BASE64, os__get_WiFiDataElementsAssociationEventAssociationEventData_HECapabilities, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.DisassociationEvent. *** */
 DMOBJ tWiFiDataElementsDisassociationEventObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-//{"DisassociationEventData", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsDisassociationEventDisassociationEventDataInst, NULL, NULL, tWiFiDataElementsDisassociationEventDisassociationEventDataParams, NULL, BBFDM_BOTH},
+{"DisassociationEventData", &DMREAD, NULL, NULL, NULL, os__browseWiFiDataElementsDisassociationEventDisassociationEventDataInst, NULL, NULL, tWiFiDataElementsDisassociationEventDisassociationEventDataParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tWiFiDataElementsDisassociationEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"DisassociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
+{"DisassociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.DisassociationEvent.DisassociationEventData.{i}. *** */
 DMLEAF tWiFiDataElementsDisassociationEventDisassociationEventDataParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"BSSID", &DMREAD, DMT_STRING, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BSSID, NULL, BBFDM_BOTH},
-//{"MACAddress", &DMREAD, DMT_STRING, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_MACAddress, NULL, BBFDM_BOTH},
-//{"ReasonCode", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ReasonCode, NULL, BBFDM_BOTH},
-//{"BytesSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesSent, NULL, BBFDM_BOTH},
-//{"BytesReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesReceived, NULL, BBFDM_BOTH},
-//{"PacketsSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsSent, NULL, BBFDM_BOTH},
-//{"PacketsReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsReceived, NULL, BBFDM_BOTH},
-//{"ErrorsSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsSent, NULL, BBFDM_BOTH},
-//{"ErrorsReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsReceived, NULL, BBFDM_BOTH},
-//{"RetransCount", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_RetransCount, NULL, BBFDM_BOTH},
-//{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeStamp, NULL, BBFDM_BOTH},
+{"BSSID", &DMREAD, DMT_STRING, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BSSID, NULL, BBFDM_BOTH},
+{"MACAddress", &DMREAD, DMT_STRING, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_MACAddress, NULL, BBFDM_BOTH},
+{"ReasonCode", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ReasonCode, NULL, BBFDM_BOTH},
+{"BytesSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsReceived, NULL, BBFDM_BOTH},
+{"ErrorsSent", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsSent, NULL, BBFDM_BOTH},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsReceived, NULL, BBFDM_BOTH},
+{"RetransCount", &DMREAD, DMT_UNINT, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_RetransCount, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, os__get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeStamp, NULL, BBFDM_BOTH},
 {0}
 };
