@@ -1177,7 +1177,7 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		init_args_ipv4forward(&curr_routefwdargs, p->config_section, "1", ROUTE_STATIC);
 
 		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
-			   p->dmmap_section, "routeinstance", "routealias", ipv4_forwarding, &find_max);
+			   p->dmmap_section, "routeinstance", "routealias", &ipv4_forwarding, &find_max);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, inst) == DM_STOP)
 			goto end;
@@ -1188,7 +1188,7 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		init_args_ipv4forward(&curr_routefwdargs, p->config_section, "1", ROUTE_DISABLED);
 
 		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
-			   p->dmmap_section, "routeinstance", "routealias", ipv4_forwarding, &find_max);
+			   p->dmmap_section, "routeinstance", "routealias", &ipv4_forwarding, &find_max);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, inst) == DM_STOP)
 			goto end;
@@ -1200,7 +1200,7 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		init_args_ipv4forward(&curr_routefwdargs, ss, "0", ROUTE_DYNAMIC);
 
 		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
-			   ss, "routeinstance", "routealias", ipv4_forwarding, &find_max);
+			   ss, "routeinstance", "routealias", &ipv4_forwarding, &find_max);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, inst) == DM_STOP)
 			goto end;
@@ -1224,7 +1224,7 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		init_args_ipv6forward(&curr_route6fwdargs, p->config_section, "1", ROUTE_STATIC);
 
 		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
-			   p->dmmap_section, "route6instance", "route6alias", ipv4_forwarding, &find_max);
+			   p->dmmap_section, "route6instance", "route6alias", &ipv4_forwarding, &find_max);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, inst) == DM_STOP)
 			goto end;
@@ -1235,7 +1235,7 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		init_args_ipv6forward(&curr_route6fwdargs, ss, "0", ROUTE_DYNAMIC);
 
 		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
-			   ss, "route6instance", "route6alias", ipv4_forwarding, &find_max);
+			   ss, "route6instance", "route6alias", &ipv4_forwarding, &find_max);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, inst) == DM_STOP)
 			goto end;
