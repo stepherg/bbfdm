@@ -19,6 +19,8 @@ extern DMLEAF tPPPParams[];
 extern DMOBJ tPPPInterfaceObj[];
 extern DMLEAF tPPPInterfaceParams[];
 extern DMLEAF tPPPInterfacePPPoEParams[];
+extern DMLEAF tPPPInterfaceIPCPParams[];
+extern DMLEAF tPPPInterfaceIPv6CPParams[];
 extern DMLEAF tPPPInterfaceStatsParams[];
 
 #endif

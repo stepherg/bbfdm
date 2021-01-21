@@ -199,6 +199,53 @@ static int set_ppp_password(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
+static int get_PPPInterfaceIPCP_LocalIPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL;
+
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	DM_ASSERT(res, *value = "");
+	json_object *ipv4_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
+	*value = dmjson_get_value(ipv4_obj, 1, "address");
+	return 0;
+}
+
+static int get_PPPInterfaceIPCP_RemoteIPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL;
+
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	DM_ASSERT(res, *value = "");
+	json_object *ipv4_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
+	*value = dmjson_get_value(ipv4_obj, 1, "ptpaddress");
+	if (**value == '\0') {
+		json_object *route_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "route");
+		*value = dmjson_get_value(route_obj, 1, "nexthop");
+	}
+	return 0;
+}
+
+static int get_PPPInterfaceIPCP_DNSServers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL;
+
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	DM_ASSERT(res, *value = "");
+	*value = dmjson_get_value_array_all(res, ",", 1, "dns-server");
+	return 0;
+}
+
+static int get_PPPInterfaceIPv6CP_LocalInterfaceIdentifier(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL;
+
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	DM_ASSERT(res, *value = "");
+	json_object *ipv4_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv6-address");
+	*value = dmjson_get_value(ipv4_obj, 1, "address");
+	return 0;
+}
+
 static int ppp_read_sysfs(struct uci_section *sect, const char *name, char **value)
 {
 	char *proto;
@@ -490,6 +537,8 @@ DMLEAF tPPPParams[] = {
 DMOBJ tPPPInterfaceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"PPPoE", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfacePPPoEParams, NULL, BBFDM_BOTH},
+{"IPCP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceIPCPParams, NULL, BBFDM_BOTH},
+{"IPv6CP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceIPv6CPParams, NULL, BBFDM_BOTH},
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -515,6 +564,25 @@ DMLEAF tPPPInterfacePPPoEParams[] = {
 //{"SessionID", &DMREAD, DMT_UNINT, get_PPPInterfacePPPoE_SessionID, NULL, BBFDM_BOTH},
 {"ACName", &DMWRITE, DMT_STRING, get_PPPInterfacePPPoE_ACName, set_PPPInterfacePPPoE_ACName, BBFDM_BOTH},
 {"ServiceName", &DMWRITE, DMT_STRING, get_PPPInterfacePPPoE_ServiceName, set_PPPInterfacePPPoE_ServiceName, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.PPP.Interface.{i}.IPCP. *** */
+DMLEAF tPPPInterfaceIPCPParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"LocalIPAddress", &DMREAD, DMT_STRING, get_PPPInterfaceIPCP_LocalIPAddress, NULL, BBFDM_BOTH},
+{"RemoteIPAddress", &DMREAD, DMT_STRING, get_PPPInterfaceIPCP_RemoteIPAddress, NULL, BBFDM_BOTH},
+{"DNSServers", &DMREAD, DMT_STRING, get_PPPInterfaceIPCP_DNSServers, NULL, BBFDM_BOTH},
+//{"PassthroughEnable", &DMWRITE, DMT_BOOL, get_PPPInterfaceIPCP_PassthroughEnable, set_PPPInterfaceIPCP_PassthroughEnable, BBFDM_BOTH},
+//{"PassthroughDHCPPool", &DMWRITE, DMT_STRING, get_PPPInterfaceIPCP_PassthroughDHCPPool, set_PPPInterfaceIPCP_PassthroughDHCPPool, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.PPP.Interface.{i}.IPv6CP. *** */
+DMLEAF tPPPInterfaceIPv6CPParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"LocalInterfaceIdentifier", &DMREAD, DMT_STRING, get_PPPInterfaceIPv6CP_LocalInterfaceIdentifier, NULL, BBFDM_BOTH},
+//{"RemoteInterfaceIdentifier", &DMREAD, DMT_STRING, get_PPPInterfaceIPv6CP_RemoteInterfaceIdentifier, NULL, BBFDM_BOTH},
 {0}
 };
 
