@@ -34329,7 +34329,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string"
+						"datatype": "string",
+						"mapping": [
+							{
+								"type": "uci",
+								"uci": {
+									"file": "wireless",
+									"section": {
+										"type": "wifi-iface",
+										"index": "@i-1"
+									},
+									"option": {
+										"name": "key"
+									}
+								}
+							}
+						]
 					},
 					"RadiusServerIPAddr": {
 						"type": "string",
@@ -35933,7 +35948,22 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "string"
+							"datatype": "string",
+							"mapping": [
+								{
+									"type": "uci",
+									"uci": {
+										"file": "wireless",
+										"section": {
+											"type": "wifi-iface",
+											"index": "@i-1"
+										},
+										"option": {
+											"name": "key"
+										}
+									}
+								}
+							]
 						},
 						"MFPConfig": {
 							"type": "string",

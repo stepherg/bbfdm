@@ -808,12 +808,18 @@ static int set_WiFiAccessPoint_UAPSDEnable(char *refparam, struct dmctx *ctx, vo
 
 static int get_access_point_security_supported_modes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "None,WEP-64,WEP-128,WPA-Personal,WPA2-Personal,WPA-WPA2-Personal,WPA-Enterprise,WPA2-Enterprise,WPA-WPA2-Enterprise";
+	*value = "None,WEP-64,WEP-128,WPA-Personal,WPA2-Personal,WPA3-Personal,WPA-WPA2-Personal,WPA3-Personal-Transition,WPA-Enterprise,WPA2-Enterprise,WPA3-Enterprise,WPA-WPA2-Enterprise";
 	return 0;
 }
 
-static void get_security_mode(struct uci_section *section, char *encryption, char **value)
+static char *get_security_mode(struct uci_section *section)
 {
+	char *encryption = NULL;
+
+	dmuci_get_value_by_section_string(section, "encryption", &encryption);
+	if (!encryption || *encryption == '\0')
+		return "None";
+
 	if (strstr(encryption, "wep")) {
 		char *key_index = NULL, *key = NULL;
 		char buf[16];
@@ -823,21 +829,27 @@ static void get_security_mode(struct uci_section *section, char *encryption, cha
 			snprintf(buf, sizeof(buf), "key%s", key_index);
 			dmuci_get_value_by_section_string(section, buf, &key);
 		}
-		*value = (key && strlen(key) == 10) ? "WEP-64" : "WEP-128";
+		return (key && strlen(key) == 10) ? "WEP-64" : "WEP-128";
 	} else if (strcmp(encryption, "psk") == 0)
-		*value = "WPA-Personal";
-	else if (strcmp(encryption, "wpa") == 0)
-		*value = "WPA-Enterprise";
+		return "WPA-Personal";
 	else if (strcmp(encryption, "psk2") == 0)
-		*value = "WPA2-Personal";
+		return "WPA2-Personal";
+	else if (strcmp(encryption, "sae") == 0)
+		return "WPA3-Personal";
+	else if (strcmp(encryption, "psk-mixed") == 0)
+		return "WPA-WPA2-Personal";
+	else if (strcmp(encryption, "sae-mixed") == 0)
+		return "WPA3-Personal-Transition";
+	else if (strcmp(encryption, "wpa") == 0)
+		return "WPA-Enterprise";
 	else if (strcmp(encryption, "wpa2") == 0)
-		*value = "WPA2-Enterprise";
-	else if (strcmp(encryption, "psk-mixed") == 0 || strcmp(encryption, "mixed-psk") == 0)
-		*value = "WPA-WPA2-Personal";
-	else if (strcmp(encryption, "wpa-mixed") == 0 || strcmp(encryption, "mixed-wpa") == 0)
-		*value = "WPA-WPA2-Enterprise";
+		return "WPA2-Enterprise";
+	else if (strcmp(encryption, "wpa3") == 0)
+		return "WPA3-Enterprise";
+	else if (strcmp(encryption, "wpa-mixed") == 0)
+		return "WPA-WPA2-Enterprise";
 	else
-		*value = "None";
+		return "None";
 }
 
 static void reset_wlan(struct uci_section *s)
@@ -865,12 +877,9 @@ static void generate_wep_key(const char *passphrase, char *buf, size_t len)
 
 static void set_security_mode(struct uci_section *section, char *value)
 {
-	char *encryption, *mode;
+	char *mode = get_security_mode(section);
 
-	dmuci_get_value_by_section_string(section, "encryption", &encryption);
-	get_security_mode(section, encryption, &mode);
-
-	if (strcmp(value, mode) != 0) {
+	if (mode && strcmp(value, mode) != 0) {
 		reset_wlan(section);
 
 		if (strcmp(value, "None") == 0) {
@@ -916,13 +925,24 @@ static void set_security_mode(struct uci_section *section, char *value)
 			dmuci_set_value_by_section(section, "auth_port", "1812");
 		} else if (strcmp(value, "WPA-WPA2-Personal") == 0) {
 			char *wpa_key = os__get_default_wpa_key();
-			dmuci_set_value_by_section(section, "encryption", "mixed-psk");
+			dmuci_set_value_by_section(section, "encryption", "psk-mixed");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
 			dmuci_set_value_by_section(section, "wps", "1");
 		} else if (strcmp(value, "WPA-WPA2-Enterprise") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "wpa-mixed");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
+		} else if (strcmp(value, "WPA3-Personal") == 0) {
+			char *wpa_key = os__get_default_wpa_key();
+			dmuci_set_value_by_section(section, "encryption", "sae");
+			dmuci_set_value_by_section(section, "key", wpa_key);
+		} else if (strcmp(value, "WPA3-Enterprise") == 0) {
+			dmuci_set_value_by_section(section, "encryption", "wpa3");
+			dmuci_set_value_by_section(section, "auth_port", "1812");
+		} else if (strcmp(value, "WPA3-Personal-Transition") == 0) {
+			char *wpa_key = os__get_default_wpa_key();
+			dmuci_set_value_by_section(section, "encryption", "sae-mixed");
+			dmuci_set_value_by_section(section, "key", wpa_key);
 		}
 	}
 }
@@ -930,22 +950,26 @@ static void set_security_mode(struct uci_section *section, char *value)
 /*#Device.WiFi.AccessPoint.{i}.Security.ModeEnabled!UCI:wireless/wifi-iface,@i-1/encryption&UCI:wireless/wifi-iface,@i-1/encryption*/
 static int get_access_point_security_modes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *encryption;
-
-	dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "encryption", &encryption);
-	if (*encryption == '\0')
-		*value = "None";
-	else
-		get_security_mode(((struct wifi_acp_args *)data)->wifi_acp_sec, encryption, value);
+	*value = get_security_mode(((struct wifi_acp_args *)data)->wifi_acp_sec);
 	return 0;
 }
 
 static int set_access_point_security_modes(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *supported_modes = NULL;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
 				return FAULT_9007;
+
+			// Get the list of all supported security modes
+			get_access_point_security_supported_modes(refparam, ctx, data, instance, &supported_modes);
+
+			// Check if the input value is a valid security mode
+			if (supported_modes && strstr(supported_modes, value) == NULL)
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			set_security_mode(((struct wifi_acp_args *)data)->wifi_acp_sec, value);
@@ -988,7 +1012,7 @@ static int set_access_point_security_shared_key(char *refparam, struct dmctx *ct
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "encryption", &encryption);
-			if (strcmp(encryption, "psk") == 0 || strcmp(encryption, "psk2") == 0 || strcmp(encryption, "mixed-psk") == 0 )
+			if (strstr(encryption, "psk"))
 				dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, "key", value);
 			return 0;
 	}
@@ -1006,7 +1030,7 @@ static int set_access_point_security_passphrase(char *refparam, struct dmctx *ct
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "encryption", &encryption);
-			if (strcmp(encryption, "psk") == 0 || strcmp(encryption, "psk2") == 0 || strcmp(encryption, "mixed-psk") == 0 )
+			if (strstr(encryption, "psk"))
 				set_access_point_security_shared_key(refparam, ctx, data, instance, value, action);
 			return 0;
 	}
@@ -1031,9 +1055,28 @@ static int set_access_point_security_rekey_interval(char *refparam, struct dmctx
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "encryption", &encryption);
-			if (strcmp(encryption, "wep-open") != 0 && strcmp(encryption, "wep-shared") != 0 && strcmp(encryption, "none") != 0)
+			if (!strstr(encryption, "wep") && strcmp(encryption, "none") != 0)
 				dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, "wpa_group_rekey", value);
 			return 0;
+	}
+	return 0;
+}
+
+/*#Device.WiFi.AccessPoint.{i}.Security.SAEPassphrase!UCI:wireless/wifi-iface,@i-1/key*/
+static int set_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *encryption;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "encryption", &encryption);
+			if (strstr(encryption, "sae"))
+				dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, "key", value);
+			break;
 	}
 	return 0;
 }
@@ -1056,7 +1099,7 @@ static int set_access_point_security_radius_ip_address(char *refparam, struct dm
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "encryption", &encryption);
-			if (strcmp(encryption, "wpa") == 0 || strcmp(encryption, "wpa2") == 0 || strcmp(encryption, "mixed-wpa") == 0 || strcmp(encryption, "wpa-mixed") == 0)
+			if (strstr(encryption, "wpa"))
 				dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, "auth_server", value);
 			return 0;
 	}
@@ -1081,7 +1124,7 @@ static int set_access_point_security_radius_server_port(char *refparam, struct d
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "encryption", &encryption);
-			if (strcmp(encryption, "wpa") == 0 || strcmp(encryption, "wpa2") == 0 || strcmp(encryption, "mixed-wpa") == 0 || strcmp(encryption, "wpa-mixed") == 0)
+			if (strstr(encryption, "wpa"))
 				dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, "auth_port", value);
 			return 0;
 	}
@@ -1099,7 +1142,7 @@ static int set_access_point_security_radius_secret(char *refparam, struct dmctx 
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct wifi_acp_args *)data)->wifi_acp_sec, "encryption", &encryption);
-			if (strcmp(encryption, "wpa") == 0 || strcmp(encryption, "wpa2") == 0 || strcmp(encryption, "mixed-wpa") == 0 || strcmp(encryption, "wpa-mixed") == 0)
+			if (strstr(encryption, "wpa"))
 				dmuci_set_value_by_section(((struct wifi_acp_args *)data)->wifi_acp_sec, "auth_secret", value);
 			return 0;
 	}
@@ -1505,22 +1548,26 @@ static int set_WiFiEndPointProfile_SSID(char *refparam, struct dmctx *ctx, void 
 /*#Device.WiFi.EndPoint.{i}.Profile.{i}.Security.ModeEnabled!UCI:wireless/wifi-iface,@i-1/encryption*/
 static int get_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *encryption;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", &encryption);
-	if (*encryption == '\0')
-		*value = "None";
-	else
-		get_security_mode((struct uci_section *)data, encryption, value);
+	*value = get_security_mode((struct uci_section *)data);
 	return 0;
 }
 
 static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *supported_modes = NULL;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
 				return FAULT_9007;
+
+			// Get the list of all supported security modes
+			get_access_point_security_supported_modes(refparam, ctx, data, instance, &supported_modes);
+
+			// Check if the input value is a valid security mode
+			if (supported_modes && strstr(supported_modes, value) == NULL)
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			set_security_mode((struct uci_section *)data, value);
@@ -1563,9 +1610,8 @@ static int set_WiFiEndPointProfileSecurity_PreSharedKey(char *refparam, struct d
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string((struct uci_section*)data, "encryption", &encryption);
-			if (strcmp(encryption, "psk") == 0 || strcmp(encryption, "psk2") == 0 || strcmp(encryption, "mixed-psk") == 0 ) {
+			if (strstr(encryption, "psk"))
 				dmuci_set_value_by_section((struct uci_section*)data, "key", value);
-			}
 			return 0;
 	}
 	return 0;
@@ -1582,10 +1628,28 @@ static int set_WiFiEndPointProfileSecurity_KeyPassphrase(char *refparam, struct 
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string((struct uci_section*)data, "encryption", &encryption);
-			if (strcmp(encryption, "psk") == 0 || strcmp(encryption, "psk2") == 0 || strcmp(encryption, "mixed-psk") == 0 ) {
+			if (strstr(encryption, "psk"))
 				set_WiFiEndPointProfileSecurity_PreSharedKey(refparam, ctx, data, instance, value, action);
-			}
 			return 0;
+	}
+	return 0;
+}
+
+/*#Device.WiFi.EndPoint.{i}.Profile.{i}.Security.SAEPassphrase!UCI:wireless/wifi-iface,@i-1/key*/
+static int set_WiFiEndPointProfileSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *encryption;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_get_value_by_section_string((struct uci_section*)data, "encryption", &encryption);
+			if (strstr(encryption, "sae"))
+				dmuci_set_value_by_section((struct uci_section*)data, "key", value);
+			break;
 	}
 	return 0;
 }
@@ -2277,6 +2341,7 @@ DMLEAF tWiFiAccessPointSecurityParams[] = {
 {"PreSharedKey", &DMWRITE, DMT_HEXBIN, get_empty, set_access_point_security_shared_key, BBFDM_BOTH},
 {"KeyPassphrase", &DMWRITE, DMT_STRING, get_empty, set_access_point_security_passphrase, BBFDM_BOTH},
 {"RekeyingInterval", &DMWRITE, DMT_UNINT, get_access_point_security_rekey_interval, set_access_point_security_rekey_interval, BBFDM_BOTH},
+{"SAEPassphrase", &DMWRITE, DMT_STRING, get_empty, set_WiFiAccessPointSecurity_SAEPassphrase, BBFDM_BOTH},
 {"RadiusServerIPAddr", &DMWRITE, DMT_STRING, get_access_point_security_radius_ip_address, set_access_point_security_radius_ip_address, BBFDM_BOTH},
 {"RadiusServerPort", &DMWRITE, DMT_UNINT, get_access_point_security_radius_server_port, set_access_point_security_radius_server_port, BBFDM_BOTH},
 {"RadiusSecret", &DMWRITE, DMT_STRING,get_empty, set_access_point_security_radius_secret, BBFDM_BOTH},
@@ -2408,6 +2473,7 @@ DMLEAF tWiFiEndPointProfileSecurityParams[] = {
 {"WEPKey", &DMWRITE, DMT_HEXBIN, get_empty, set_WiFiEndPointProfileSecurity_WEPKey, BBFDM_BOTH},
 {"PreSharedKey", &DMWRITE, DMT_HEXBIN, get_empty, set_WiFiEndPointProfileSecurity_PreSharedKey, BBFDM_BOTH},
 {"KeyPassphrase", &DMWRITE, DMT_STRING, get_empty, set_WiFiEndPointProfileSecurity_KeyPassphrase, BBFDM_BOTH},
+{"SAEPassphrase", &DMWRITE, DMT_STRING, get_empty, set_WiFiEndPointProfileSecurity_SAEPassphrase, BBFDM_BOTH},
 {"MFPConfig", &DMWRITE, DMT_STRING, get_WiFiEndPointProfileSecurity_MFPConfig, set_WiFiEndPointProfileSecurity_MFPConfig, BBFDM_BOTH},
 {0}
 };
