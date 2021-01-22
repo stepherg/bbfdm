@@ -322,6 +322,15 @@ static int get_rule_target(char *refparam, struct dmctx *ctx, void *data, char *
     return 0;
 }
 
+/*#Device.Firewall.Chain.{i}.Rule.{i}.Log!UCI:firewall/rule,@i-1/log*/
+static int get_rule_log(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *v;
+	dmuci_get_value_by_section_string((struct uci_section *)data, "log", &v);
+	*value = (*v == '1' ) ? "1" : "0";
+	return 0;
+}
+
 static int get_FirewallChainRule_CreationDate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *dmmap_section = NULL;
@@ -950,6 +959,23 @@ static int set_rule_target(char *refparam, struct dmctx *ctx, void *data, char *
         return 0;
 }
 
+static int set_rule_log(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section((struct uci_section *)data, "log", b ? "1" : "");
+			break;
+	}
+        return 0;
+}
+
 static int set_rule_interface(struct dmctx *ctx, void *data, char *type, char *value, int action)
 {
 	char *iface = NULL;
@@ -1455,6 +1481,7 @@ DMLEAF tFirewallChainRuleParams[] = {
 {"Description", &DMWRITE, DMT_STRING, get_rule_description, set_rule_description, BBFDM_BOTH},
 {"Target", &DMWRITE, DMT_STRING, get_rule_target, set_rule_target, BBFDM_BOTH},
 //{"TargetChain", &DMWRITE, DMT_STRING, get_rule_target_chain, set_rule_target_chain, BBFDM_BOTH},
+{"Log", &DMWRITE, DMT_BOOL, get_rule_log, set_rule_log, BBFDM_BOTH},
 {"CreationDate", &DMREAD, DMT_TIME, get_FirewallChainRule_CreationDate, NULL, BBFDM_BOTH},
 {"SourceInterface", &DMWRITE, DMT_STRING, get_rule_source_interface, set_rule_source_interface, BBFDM_BOTH},
 {"SourceAllInterfaces", &DMWRITE, DMT_BOOL, get_rule_source_all_interfaces, set_rule_source_all_interfaces, BBFDM_BOTH},

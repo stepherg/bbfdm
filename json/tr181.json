@@ -64620,7 +64620,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+						"mapping": [
+							{
+								"type": "uci",
+								"uci": {
+									"file": "firewall",
+									"section": {
+										"type": "rule",
+										"index": "@i-1"
+									},
+									"option": {
+										"name": "log"
+									}
+								}
+							}
+						]
 					},
 					"CreationDate": {
 						"type": "dateTime",
