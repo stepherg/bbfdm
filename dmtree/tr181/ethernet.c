@@ -230,9 +230,9 @@ static int dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_nod
 		if ((strcmp(type, "bridge") == 0) && *proto == '\0')
 			continue;
 
-		// Skip this interface section if ifname is empty
+		// Skip this interface section if its ifname option contains '@'
 		dmuci_get_value_by_section_string(s, "ifname", &ifname);
-		if (*ifname == '\0' || strchr(ifname, '@'))
+		if (strchr(ifname, '@'))
 			continue;
 
 		// If the section belong to provider bridge (section name: pr_br_{i}) then skip adding to dmmap_package
