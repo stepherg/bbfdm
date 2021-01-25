@@ -81,7 +81,7 @@ static void create_firewall_zone_config(char *iface)
 	dmuci_set_value_by_section(s, "network", iface);
 }
 
-static int parse_proc_intf6_line(const char *line, const char *device, char *ipstr)
+static int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, size_t str_len)
 {
 	char ip6buf[INET6_ADDRSTRLEN] = {0}, dev[32] = {0};
 	unsigned int ip[4], prefix;
@@ -99,7 +99,7 @@ static int parse_proc_intf6_line(const char *line, const char *device, char *ips
 	ip[3] = htonl(ip[3]);
 
 	inet_ntop(AF_INET6, ip, ip6buf, INET6_ADDRSTRLEN);
-	snprintf(ipstr, INET6_ADDRSTRLEN, "%s/%u", ip6buf, prefix);
+	snprintf(ipstr, str_len, "%s/%u", ip6buf, prefix);
 
 	if (strncmp(ipstr, "fe80:", 5) != 0)
 		return -1;
@@ -127,7 +127,7 @@ static bool proc_intf6_line_exists(char *parent_section, char *address)
 static void dmmap_synchronize_ipv6_address_link_local(char *parent_section)
 {
 	struct uci_section *s = NULL, *stmp = NULL;
-	char buf[512] = {0}, ipstr[INET6_ADDRSTRLEN] = {0};
+	char buf[512] = {0}, ipstr[64] = {0};
 	FILE *fp = NULL;
 
 	char *device = get_device(parent_section);
@@ -151,7 +151,7 @@ static void dmmap_synchronize_ipv6_address_link_local(char *parent_section)
 		bool found = false;
 		while (fgets(buf, 512, fp) != NULL) {
 
-			if (parse_proc_intf6_line(buf, device, ipstr))
+			if (parse_proc_intf6_line(buf, device, ipstr, sizeof(ipstr)))
 				continue;
 
 			if (address && strcmp(address, ipstr) == 0) {
@@ -171,7 +171,7 @@ static void dmmap_synchronize_ipv6_address_link_local(char *parent_section)
 
 	while (fgets(buf , 512 , fp) != NULL) {
 
-		if (parse_proc_intf6_line(buf, device, ipstr))
+		if (parse_proc_intf6_line(buf, device, ipstr, sizeof(ipstr)))
 			continue;
 
 		if (proc_intf6_line_exists(parent_section, ipstr))

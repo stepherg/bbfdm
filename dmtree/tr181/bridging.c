@@ -2405,7 +2405,7 @@ static int get_BridgingBridgePort_PVID(char *refparam, struct dmctx *ctx, void *
 static int fetch_and_configure_inner_vid(char *br_inst, char *type_val, char **vid) {
 
 	struct uci_section *dev_s = NULL, *sec = NULL;
-	char *name, *instance;
+	char *name, *instance = NULL;
 
 	// Get the vid under device section with type 8021q of port under same br_inst.
 	uci_foreach_option_eq("network", "device", "type", type_val, dev_s) {
@@ -2417,10 +2417,8 @@ static int fetch_and_configure_inner_vid(char *br_inst, char *type_val, char **v
 		}
 
 		//Check if the bridge instances are same or not, if yes, then get the vid.
-		char bridge_inst[20] = {0};
-		strncpy(bridge_inst, br_inst, sizeof(bridge_inst));
-		if (strncmp(bridge_inst, instance, sizeof(bridge_inst)) == 0) {
-			if (strcmp(type_val, "8021ad") == 0) {
+		if (instance && br_inst && strcmp(br_inst, instance) == 0) {
+			if (type_val && strcmp(type_val, "8021ad") == 0) {
 				dmuci_set_value_by_section(dev_s, "inner_vid", *vid);
 			} else {
 				dmuci_get_value_by_section_string(dev_s, "vid", vid);

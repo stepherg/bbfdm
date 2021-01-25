@@ -1554,18 +1554,9 @@ static int get_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 
 static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *supported_modes = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
-				return FAULT_9007;
-
-			// Get the list of all supported security modes
-			get_access_point_security_supported_modes(refparam, ctx, data, instance, &supported_modes);
-
-			// Check if the input value is a valid security mode
-			if (supported_modes && strstr(supported_modes, value) == NULL)
 				return FAULT_9007;
 
 			return 0;
