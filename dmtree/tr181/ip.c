@@ -1838,8 +1838,15 @@ static int set_IPInterfaceIPv4Address_SubnetMask(char *refparam, struct dmctx *c
 /*#Device.IP.Interface.{i}.IPv4Address.{i}.AddressingType!UCI:network/interface,@i-1/proto*/
 static int get_IPInterfaceIPv4Address_AddressingType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", value);
-	*value = (strcmp(*value, "static") == 0) ? "Static" : "DHCP";
+	char *proto = NULL;
+
+	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
+	if (proto && strcmp(proto, "static") == 0)
+		*value = "Static";
+	else if (proto && strncmp(proto, "ppp", 3) == 0)
+		*value = "IPCP";
+	else
+		*value = "DHCP";
 	return 0;
 }
 

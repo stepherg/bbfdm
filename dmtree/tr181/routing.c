@@ -31,7 +31,6 @@ struct routingfwdargs
 {
 	char *permission;
 	struct uci_section *routefwdsection;
-	struct proc_routing *proute;
 	int type;
 };
 
@@ -630,8 +629,16 @@ static int get_router_ipv4forwarding_origin(char *refparam, struct dmctx *ctx, v
 {
 	if (((struct routingfwdargs *)data)->type != ROUTE_DYNAMIC)
 		*value = "Static";
-	else
-		*value = "DHCPv4";
+	else {
+		json_object *res = NULL;
+		char *interface;
+
+		dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "interface", &interface);
+		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", interface, String}}, 1, &res);
+		DM_ASSERT(res, *value = "DHCPv4");
+		char *proto = dmjson_get_value(res, 1, "proto");
+		*value = (proto && strncmp(proto, "ppp", 3) == 0) ? "IPCP" : "DHCPv4";
+	}
 	return 0;
 }
 
