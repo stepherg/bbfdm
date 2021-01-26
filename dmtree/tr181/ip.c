@@ -1558,10 +1558,11 @@ static int set_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *data, 
 	return 0;
 }
 
-/*#Device.IP.Interface.{i}.MaxMTUSize!SYSFS:/sys/class/net/@Name/mtu*/
+/*#Device.IP.Interface.{i}.MaxMTUSize!UCI:network/interface,@i-1/mtu*/
 static int get_IPInterface_MaxMTUSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_ip_iface_sysfs(data, "mtu", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "mtu", "1500");
+	return 0;
 }
 
 static int set_IPInterface_MaxMTUSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)

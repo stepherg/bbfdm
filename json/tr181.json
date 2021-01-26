@@ -41116,8 +41116,17 @@
 					],
 					"mapping": [
 						{
-							"type": "sysfs",
-							"file": "/sys/class/net/@Name/mtu"
+							"type": "uci",
+							"uci": {
+								"file": "network",
+								"section": {
+									"type": "interface",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "mtu"
+								}
+							}
 						}
 					]
 				},
