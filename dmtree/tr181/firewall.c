@@ -491,7 +491,14 @@ static int get_rule_dest_mask(char *refparam, struct dmctx *ctx, void *data, cha
 		return 0;
 
 	pch = strchr(destip, '/');
-	*value = pch ? pch : "";
+	if (pch) {
+		*value = destip;
+	} else {
+		char *family;
+
+		dmuci_get_value_by_section_string((struct uci_section *)data, "family", &family);
+		dmasprintf(value, "%s/%s", destip, strcmp(family, "ipv6") == 0 ? "128" : "32");
+	}
 	return 0;
 }
 
@@ -519,7 +526,14 @@ static int get_rule_source_mask(char *refparam, struct dmctx *ctx, void *data, c
 		return 0;
 
 	pch = strchr(srcip, '/');
-	*value = pch ? pch : "";
+	if (pch) {
+		*value = srcip;
+	} else {
+		char *family;
+
+		dmuci_get_value_by_section_string((struct uci_section *)data, "family", &family);
+		dmasprintf(value, "%s/%s", srcip, strcmp(family, "ipv6") == 0 ? "128" : "32");
+	}
 	return 0;
 }
 
@@ -1136,7 +1150,7 @@ static int set_rule_dest_ip(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int set_rule_dest_mask(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char buf[64], new[70], *pch, *destip;
+	char new[64], *pch, *destip;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1145,11 +1159,13 @@ static int set_rule_dest_mask(char *refparam, struct dmctx *ctx, void *data, cha
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "dest_ip", &destip);
-			strcpy(buf, destip);
-			pch = strchr(buf, '/');
+			pch = strchr(destip, '/');
 			if (pch)
 				*pch = '\0';
-			snprintf(new, sizeof(new), "%s%s", buf, value);
+
+			pch = strchr(value, '/');
+
+			snprintf(new, sizeof(new), "%s%s", destip, pch);
 			dmuci_set_value_by_section((struct uci_section *)data, "dest_ip", new);
 			break;
 	}
@@ -1181,7 +1197,7 @@ static int set_rule_source_ip(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int set_rule_source_mask(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char buf[64], new[70], *pch, *srcip;
+	char new[64], *pch, *srcip;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1190,11 +1206,13 @@ static int set_rule_source_mask(char *refparam, struct dmctx *ctx, void *data, c
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "src_ip", &srcip);
-			strcpy(buf, srcip);
-			pch = strchr(buf, '/');
+			pch = strchr(srcip, '/');
 			if (pch)
 				*pch = '\0';
-			snprintf(new, sizeof(new), "%s%s", buf, value);
+
+			pch = strchr(value, '/');
+
+			snprintf(new, sizeof(new), "%s%s", srcip, pch);
 			dmuci_set_value_by_section((struct uci_section *)data, "src_ip", new);
 			break;
 	}
