@@ -491,11 +491,7 @@ static int get_rule_dest_mask(char *refparam, struct dmctx *ctx, void *data, cha
 		return 0;
 
 	pch = strchr(destip, '/');
-	if (pch) {
-		*value = pch+1;
-	} else {
-		*value = "";
-	}
+	*value = pch ? pch : "";
 	return 0;
 }
 
@@ -517,18 +513,13 @@ static int get_rule_source_ip(char *refparam, struct dmctx *ctx, void *data, cha
 static int get_rule_source_mask(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *pch, *srcip;
-	*value = "";
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "src_ip", &srcip);
 	if (*srcip == '\0')
 		return 0;
 
 	pch = strchr(srcip, '/');
-	if (pch) {
-		*value = pch+1;
-	} else {
-		*value = "";
-	}
+	*value = pch ? pch : "";
 	return 0;
 }
 
@@ -1158,7 +1149,7 @@ static int set_rule_dest_mask(char *refparam, struct dmctx *ctx, void *data, cha
 			pch = strchr(buf, '/');
 			if (pch)
 				*pch = '\0';
-			snprintf(new, sizeof(new), "%s/%s", buf, value);
+			snprintf(new, sizeof(new), "%s%s", buf, value);
 			dmuci_set_value_by_section((struct uci_section *)data, "dest_ip", new);
 			break;
 	}
@@ -1203,7 +1194,7 @@ static int set_rule_source_mask(char *refparam, struct dmctx *ctx, void *data, c
 			pch = strchr(buf, '/');
 			if (pch)
 				*pch = '\0';
-			snprintf(new, sizeof(new), "%s/%s", buf, value);
+			snprintf(new, sizeof(new), "%s%s", buf, value);
 			dmuci_set_value_by_section((struct uci_section *)data, "src_ip", new);
 			break;
 	}
