@@ -971,8 +971,8 @@ static char *get_dsl_link_encapsulation_standard(char *str)
 		dsl_link_encapsulation_standard = "G.992.3_Annex_K_PTM";
 	else if(strcmp(str, "vdsl2_atm") == 0)
 		dsl_link_encapsulation_standard = "G.993.2_Annex_K_ATM";
-	else if(strcmp(str, "vdsl2_ptm") == 0)
-		dsl_link_encapsulation_standard = "G.993.2_Annex_K_PTM";
+	else if(strcmp(str, "auto") == 0)
+		dsl_link_encapsulation_standard = "G.994.1";
 	else
 		dsl_link_encapsulation_standard = "G.993.2_Annex_K_PTM";
 
