@@ -124,8 +124,9 @@ int os__browse_wifi_associated_device(struct dmctx *dmctx, DMNODE *parent_node, 
 char * os__get_radio_frequency_nocache(const struct wifi_radio_args *args);
 char * os__get_radio_channel_nocache(const struct wifi_radio_args *args);
 void os__wifi_start_scan(const char *radio);
-int os_get_wifi_access_point_status (char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
+int os_get_wifi_access_point_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os_get_radio_operating_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
+int os_get_supported_modes(const char *ubus_method, const char *ifname, char **value);
 char * os__get_default_wpa_key();
 int os__get_WiFiDataElementsNetwork_ID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os__set_WiFiDataElementsNetwork_ID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);

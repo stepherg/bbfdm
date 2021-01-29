@@ -341,7 +341,7 @@ int os__get_access_point_associative_device_statistics_retrans_count(char *refpa
 
 
 /*#Device.WiFi.AccessPoint.{i}.Status!UBUS:wifi.ap.@Name/status//status*/
-int os_get_wifi_access_point_status (char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+int os_get_wifi_access_point_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res;
 	char object[32], *status = NULL, *iface;
@@ -662,6 +662,63 @@ int os__get_radio_supported_standard(char *refparam, struct dmctx *ctx, void *da
 int os_get_radio_operating_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return get_radio_standards(((struct wifi_radio_args *)data)->wifi_radio_sec, value);
+}
+
+static char *get_data_model_mode(const char *ubus_mode)
+{
+	if (strcmp(ubus_mode, "WEP64") == 0)
+		return "WEP-64";
+	else if (strcmp(ubus_mode, "WEP128") == 0)
+		return "WEP-128";
+	else if (strcmp(ubus_mode, "WPAPSK") == 0)
+		return "WPA-Personal";
+	else if (strcmp(ubus_mode, "WPA2PSK") == 0)
+		return "WPA2-Personal";
+	else if (strcmp(ubus_mode, "WPA3PSK") == 0)
+		return "WPA3-Personal";
+	else if (strcmp(ubus_mode, "WPAPSK+WPA2PSK") == 0)
+		return "WPA-WPA2-Personal";
+	else if (strcmp(ubus_mode, "WPA2PSK+WPA3PSK") == 0)
+		return "WPA3-Personal-Transition";
+	else if (strcmp(ubus_mode, "WPA") == 0)
+		return "WPA-Enterprise";
+	else if (strcmp(ubus_mode, "WPA2") == 0)
+		return "WPA2-Enterprise";
+	else if (strcmp(ubus_mode, "WPA3") == 0)
+		return "WPA3-Enterprise";
+	else if (strcmp(ubus_mode, "WPA+WPA2") == 0)
+		return "WPA-WPA2-Enterprise";
+	else
+		return "None";
+}
+
+int os_get_supported_modes(const char *ubus_method, const char *ifname, char **value)
+{
+	char *dm_default_modes_supported = "None,WEP-64,WEP-128,WPA-Personal,WPA2-Personal,WPA3-Personal,WPA-WPA2-Personal,WPA3-Personal-Transition,WPA-Enterprise,WPA2-Enterprise,WPA3-Enterprise,WPA-WPA2-Enterprise";
+	char *dm_wifi_driver_modes_supported = "NONE,WEP64,WEP128,WPAPSK,WPA2PSK,WPA3PSK,WPAPSK+WPA2PSK,WPA2PSK+WPA3PSK,WPA,WPA2,WPA3,WPA+WPA2";
+	json_object *res = NULL, *supported_modes = NULL;
+	char list_modes[256], object[32], *mode = NULL;
+	unsigned pos = 0, idx = 0;
+
+	snprintf(object, sizeof(object), "%s.%s", ubus_method, ifname);
+	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = dm_default_modes_supported);
+
+	list_modes[0] = 0;
+	dmjson_foreach_value_in_array(res, supported_modes, mode, idx, 1, "supp_security") {
+		if (!strstr(dm_wifi_driver_modes_supported, mode))
+			continue;
+
+		pos += snprintf(&list_modes[pos], sizeof(list_modes) - pos, "%s,", get_data_model_mode(mode));
+	}
+
+	/* cut tailing ',' */
+	if (pos)
+		list_modes[pos - 1] = 0;
+
+	*value = (*list_modes != '\0') ? dmstrdup(list_modes) : dm_default_modes_supported;
+
+	return 0;
 }
 
 int os__get_access_point_total_associations(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

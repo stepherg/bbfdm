@@ -808,8 +808,7 @@ static int set_WiFiAccessPoint_UAPSDEnable(char *refparam, struct dmctx *ctx, vo
 
 static int get_access_point_security_supported_modes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "None,WEP-64,WEP-128,WPA-Personal,WPA2-Personal,WPA3-Personal,WPA-WPA2-Personal,WPA3-Personal-Transition,WPA-Enterprise,WPA2-Enterprise,WPA3-Enterprise,WPA-WPA2-Enterprise";
-	return 0;
+	return os_get_supported_modes("wifi.ap", ((struct wifi_acp_args *)data)->ifname, value);
 }
 
 static char *get_security_mode(struct uci_section *section)
@@ -1466,6 +1465,11 @@ static int get_WiFiEndPoint_SSIDReference(char *refparam, struct dmctx *ctx, voi
 	return 0;
 }
 
+static int get_WiFiEndPointSecurity_ModesSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return os_get_supported_modes("wifi.backhaul", ((struct wifi_enp_args *)data)->ifname, value);
+}
+
 static int get_WiFiEndPointProfile_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "1";
@@ -1555,9 +1559,18 @@ static int get_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 
 static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *supported_modes = NULL;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, NULL, NULL))
+				return FAULT_9007;
+
+			// Get the list of all supported security modes
+			get_WiFiEndPointSecurity_ModesSupported(refparam, ctx, data, instance, &supported_modes);
+
+			// Check if the input value is a valid security mode
+			if (supported_modes && strstr(supported_modes, value) == NULL)
 				return FAULT_9007;
 
 			return 0;
@@ -2435,7 +2448,7 @@ DMLEAF tWiFiEndPointStatsParams[] = {
 /* *** Device.WiFi.EndPoint.{i}.Security. *** */
 DMLEAF tWiFiEndPointSecurityParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"ModesSupported", &DMREAD, DMT_STRING, get_WiFiEndPointSecurity_ModesSupported, NULL, BBFDM_BOTH},
+{"ModesSupported", &DMREAD, DMT_STRING, get_WiFiEndPointSecurity_ModesSupported, NULL, BBFDM_BOTH},
 {0}
 };
 
