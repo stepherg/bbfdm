@@ -735,7 +735,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress(cha
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+		if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 2))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -780,7 +780,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress(char *re
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+		if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 2))
 			return FAULT_9007;
 		break;
 	case VALUESET:

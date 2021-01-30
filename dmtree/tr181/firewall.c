@@ -1131,7 +1131,7 @@ static int set_rule_dest_ip(char *refparam, struct dmctx *ctx, void *data, char 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 2))
+			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 3))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1154,7 +1154,7 @@ static int set_rule_dest_mask(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, 0, IPPrefix, 3))
+			if (dm_validate_string(value, -1, 49, NULL, 0, IPPrefix, 4))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1178,7 +1178,7 @@ static int set_rule_source_ip(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 2))
+			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 3))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1201,7 +1201,7 @@ static int set_rule_source_mask(char *refparam, struct dmctx *ctx, void *data, c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, 0, IPPrefix, 3))
+			if (dm_validate_string(value, -1, 49, NULL, 0, IPPrefix, 4))
 				return FAULT_9007;
 			break;
 		case VALUESET:

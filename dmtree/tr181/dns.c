@@ -494,7 +494,7 @@ static int set_dns_server(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 2))
+			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 3))
 				return FAULT_9007;
 			break;
 		case VALUESET:

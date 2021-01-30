@@ -243,16 +243,16 @@ def generate_validate_value(dmparam, value):
 			printGlobalstrCommon(str_pattern)
 		elif datatypeparam == "IPAddress":
 			patternparam = "IPAddress"
-			pattern_length = "2"
+			pattern_length = "3"
 		elif datatypeparam == "IPv6Address":
 			patternparam = "IPv6Address"
-			pattern_length = "1"
+			pattern_length = "2"
 		elif datatypeparam == "IPPrefix":
 			patternparam = "IPPrefix"
-			pattern_length = "3"
+			pattern_length = "4"
 		elif datatypeparam == "IPv6Prefix":
 			patternparam = "IPv6Prefix"
-			pattern_length = "1"
+			pattern_length = "2"
 		else:
 			patternparam = "NULL"
 			pattern_length = "0"
@@ -309,16 +309,16 @@ def generate_validate_value(dmparam, value):
 			printGlobalstrCommon(str_pattern)
 		elif datatypeparam == "IPAddress":
 			patternparam = "IPAddress"
-			pattern_length = "2"
+			pattern_length = "3"
 		elif datatypeparam == "IPv6Address":
 			patternparam = "IPv6Address"
-			pattern_length = "1"
+			pattern_length = "2"
 		elif datatypeparam == "IPPrefix":
 			patternparam = "IPPrefix"
-			pattern_length = "3"
+			pattern_length = "4"
 		elif datatypeparam == "IPv6Prefix":
 			patternparam = "IPv6Prefix"
-			pattern_length = "1"
+			pattern_length = "2"
 		else:
 			patternparam = "NULL"
 			pattern_length = "0"

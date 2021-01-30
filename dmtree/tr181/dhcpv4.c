@@ -1014,7 +1014,7 @@ static int set_DHCPv4ServerPool_MinAddress(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
+			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1073,7 +1073,7 @@ static int set_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
+			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 2))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1148,7 +1148,7 @@ static int set_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, 32, -1, -1, 15, NULL, 0, IPv4Address, 1))
+			if (dm_validate_string_list(value, -1, 32, -1, -1, 15, NULL, 0, IPv4Address, 2))
 				return FAULT_9007;
 
 			local_value = dmstrdup(value);
@@ -1225,7 +1225,7 @@ static int set_DHCPv4ServerPool_SubnetMask(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
+			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 2))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1269,7 +1269,7 @@ static int set_DHCPv4ServerPool_DNSServers(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, 4, -1, -1, 15, NULL, 0, IPv4Address, 1))
+			if (dm_validate_string_list(value, -1, 4, -1, -1, 15, NULL, 0, IPv4Address, 2))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1348,7 +1348,7 @@ static int set_DHCPv4ServerPool_IPRouters(char *refparam, struct dmctx *ctx, voi
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, 4, -1, -1, 15, NULL, 0, IPv4Address, 1))
+			if (dm_validate_string_list(value, -1, 4, -1, -1, 15, NULL, 0, IPv4Address, 2))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1536,7 +1536,7 @@ static int set_DHCPv4ServerPoolStaticAddress_Chaddr(char *refparam, struct dmctx
 	switch (action) {
 		case VALUECHECK:
 			// Validate value string -> MAC Address
-			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 2))
 				return FAULT_9007;
 
 			// Check if mac exists
@@ -1567,7 +1567,7 @@ static int set_DHCPv4ServerPoolStaticAddress_Yiaddr(char *refparam, struct dmctx
 	switch (action) {
 		case VALUECHECK:
 			// Validate value string -> IPv4 Address
-			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
+			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 2))
 				return FAULT_9007;
 
 			// Check if ip address is out dhcp pool
@@ -2490,7 +2490,7 @@ static int set_DHCPv4RelayForwarding_Chaddr(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2514,7 +2514,7 @@ static int set_DHCPv4RelayForwarding_ChaddrMask(char *refparam, struct dmctx *ct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:

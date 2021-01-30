@@ -324,7 +324,7 @@ static int set_mldp_filter_address(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 45, NULL, 0, IPv6Address, 1))
+		if (dm_validate_string(value, -1, 45, NULL, 0, IPv6Address, 2))
 			return FAULT_9007;
 		break;
 	case VALUESET:

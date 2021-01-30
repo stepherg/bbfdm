@@ -746,7 +746,7 @@ static int set_WiFiAccessPoint_AllowedMACAddress(char *refparam, struct dmctx *c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string_list(value, -1, -1, -1, -1, 17, NULL, 0, MACAddress, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1094,7 +1094,7 @@ static int set_access_point_security_radius_ip_address(char *refparam, struct dm
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 2))
+			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 3))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1330,7 +1330,7 @@ static int set_WiFiAccessPointAccounting_ServerIPAddr(char *refparam, struct dmc
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 2))
+			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 3))
 				return FAULT_9007;
 			break;
 		case VALUESET:

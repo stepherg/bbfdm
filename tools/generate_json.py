@@ -110,7 +110,7 @@ def getMinMaxEnumerationUnitPatternparam(paramtype, c):
 				else:
 					paramenum = "%s, \"%s\"" % (paramenum, cc.get('value'))
 			if cc.tag == "pattern":
-				if parampattern == None and cc.get('value') != "":
+				if parampattern == None:
 					parampattern = "\"%s\"" % cc.get('value')
 				elif cc.get('value') != "":
 					parampattern = "%s,\"%s\"" % (parampattern, cc.get('value'))
@@ -152,7 +152,7 @@ def getparamdatatyperef( datatyperef ):
 							paramenum = "\"%s\"" % dd.get('value')
 						else:
 							paramenum = "%s, \"%s\"" % (paramenum, dd.get('value'))
-					if dd.tag == "pattern" and dd.get('value') != "":
+					if dd.tag == "pattern":
 						if parampattern == None:
 							parampattern = "\"%s\"" % dd.get('value')
 						elif dd.get('value') != "":

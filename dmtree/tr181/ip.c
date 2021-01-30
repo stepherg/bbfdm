@@ -1174,7 +1174,7 @@ static int set_IP_ULAPrefix(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, 0, IPv6Prefix, 1))
+			if (dm_validate_string(value, -1, 49, NULL, 0, IPv6Prefix, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1792,7 +1792,7 @@ static int set_IPInterfaceIPv4Address_IPAddress(char *refparam, struct dmctx *ct
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
+			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1827,7 +1827,7 @@ static int set_IPInterfaceIPv4Address_SubnetMask(char *refparam, struct dmctx *c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
+			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1993,7 +1993,7 @@ static int set_IPInterfaceIPv6Address_IPAddress(char *refparam, struct dmctx *ct
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPv6Address, 1))
+			if (dm_validate_string(value, -1, 45, NULL, 0, IPv6Address, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2207,7 +2207,7 @@ static int set_IPInterfaceIPv6Prefix_Prefix(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, 0, IPv6Prefix, 1))
+			if (dm_validate_string(value, -1, 49, NULL, 0, IPv6Prefix, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2279,7 +2279,7 @@ static int set_IPInterfaceIPv6Prefix_ChildPrefixBits(char *refparam, struct dmct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, 0, IPv6Prefix, 1))
+			if (dm_validate_string(value, -1, 49, NULL, 0, IPv6Prefix, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:

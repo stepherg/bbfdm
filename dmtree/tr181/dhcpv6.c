@@ -951,7 +951,7 @@ static int set_DHCPv6ServerPool_SourceAddress(char *refparam, struct dmctx *ctx,
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPv6Address, 1))
+			if (dm_validate_string(value, -1, 45, NULL, 0, IPv6Address, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -975,7 +975,7 @@ static int set_DHCPv6ServerPool_SourceAddressMask(char *refparam, struct dmctx *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPv6Address, 1))
+			if (dm_validate_string(value, -1, 45, NULL, 0, IPv6Address, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:

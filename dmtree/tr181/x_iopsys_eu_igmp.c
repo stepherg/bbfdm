@@ -714,7 +714,7 @@ int set_mcasts_filter_address(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
+		if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 2))
 			return FAULT_9007;
 
 		break;
@@ -1273,7 +1273,7 @@ static int set_igmpp_filter_address(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
+		if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 2))
 			return FAULT_9007;
 		break;
 	case VALUESET:

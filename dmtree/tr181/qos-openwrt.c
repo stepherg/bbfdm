@@ -803,7 +803,7 @@ int os_set_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, 0, IPPrefix, 3))
+			if (dm_validate_string(value, -1, 49, NULL, 0, IPPrefix, 4))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -844,7 +844,7 @@ int os_set_QoSClassification_SourceMask(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, 0, IPPrefix, 3))
+			if (dm_validate_string(value, -1, 49, NULL, 0, IPPrefix, 4))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -929,7 +929,7 @@ int os_set_QoSClassification_DestIP(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 2))
+			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 3))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -955,7 +955,7 @@ int os_set_QoSClassification_SourceIP(char *refparam, struct dmctx *ctx, void *d
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 2))
+			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 3))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1112,7 +1112,7 @@ int os_set_QoSClassification_SourceMACAddress(char *refparam, struct dmctx *ctx,
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1132,7 +1132,7 @@ int set_QoSClassification_SourceMACMask(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1173,7 +1173,7 @@ int os_set_QoSClassification_DestMACAddress(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1193,7 +1193,7 @@ int set_QoSClassification_DestMACMask(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 2))
 				return FAULT_9007;
 			break;
 		case VALUESET:

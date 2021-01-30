@@ -1,8 +1,9 @@
 #include "lanconfigsecurity.h"
 
+/*#Device.LANConfigSecurity.ConfigPassword!UCI:users/user,user/password*/
 static int get_LANConfigSecurity_ConfigPassword(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value="";
+	*value = "";
 	return 0;
 }
 
