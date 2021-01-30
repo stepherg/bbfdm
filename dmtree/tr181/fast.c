@@ -375,17 +375,17 @@ static int get_FASTLine_DownstreamPower(char *refparam, struct dmctx *ctx, void 
 	return 0;
 }
 
-/*#Device.FAST.Line.{i}.SNRMRMCds!UBUS:fast.line.1/status//snrm_rmc_ds*/
+/*#Device.FAST.Line.{i}.SNRMRMCds!UBUS:fast.line.1/status//snrm_rmc.ds*/
 static int get_FASTLine_SNRMRMCds(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_array_without_argument("fast.line", ((struct fast_line_args*)data)->id, "status", "snrm_rmc_ds");
+	*value = get_fast_value_without_argument_and_with_two_key("fast.line", ((struct fast_line_args*)data)->id, "status", "snrm_rmc", "ds");
 	return 0;
 }
 
-/*#Device.FAST.Line.{i}.SNRMRMCus!UBUS:fast.line.1/status//snrm_rmc_us*/
+/*#Device.FAST.Line.{i}.SNRMRMCus!UBUS:fast.line.1/status//snrm_rmc.us*/
 static int get_FASTLine_SNRMRMCus(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_fast_value_array_without_argument("fast.line", ((struct fast_line_args*)data)->id, "status", "snrm_rmc_us");
+	*value = get_fast_value_without_argument_and_with_two_key("fast.line", ((struct fast_line_args*)data)->id, "status", "snrm_rmc", "us");
 	return 0;
 }
 
