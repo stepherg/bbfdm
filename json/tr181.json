@@ -165,7 +165,7 @@
 					"protocols": [
 						"usp"
 					],
-					"datatype": "string",
+					"datatype": "URL",
 					"range": [
 						{
 							"max": 2048
@@ -231,6 +231,29 @@
 						"Error_Internal",
 						"Error_Other"
 					]
+				}
+			}
+		},
+		"ScheduleTimer()": {
+			"type": "command",
+			"protocols": [
+				"usp"
+			],
+			"input": {
+				"DelaySeconds": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"usp"
+					],
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"min": 1
+						}
+					],
+					"unit": "seconds"
 				}
 			}
 		},
@@ -839,10 +862,10 @@
 							"protocols": [
 								"usp"
 							],
-							"datatype": "string",
+							"datatype": "URL",
 							"range": [
 								{
-									"max": 256
+									"max": 2048
 								}
 							]
 						},
@@ -889,10 +912,10 @@
 							"protocols": [
 								"usp"
 							],
-							"datatype": "string",
+							"datatype": "URL",
 							"range": [
 								{
-									"max": 256
+									"max": 2048
 								}
 							]
 						},
@@ -1668,10 +1691,10 @@
 							"protocols": [
 								"usp"
 							],
-							"datatype": "string",
+							"datatype": "URL",
 							"range": [
 								{
-									"max": 256
+									"max": 2048
 								}
 							]
 						},
@@ -1927,6 +1950,7 @@
 					"datatype": "string",
 					"enumerations": [
 						"NoImage",
+						"Active",
 						"Downloading",
 						"Validating",
 						"Available",
@@ -1959,10 +1983,10 @@
 							"protocols": [
 								"usp"
 							],
-							"datatype": "string",
+							"datatype": "URL",
 							"range": [
 								{
-									"max": 256
+									"max": 2048
 								}
 							]
 						},
@@ -2080,10 +2104,10 @@
 					"protocols": [
 						"cwmp"
 					],
-					"datatype": "string",
+					"datatype": "URL",
 					"range": [
 						{
-							"max": 256
+							"max": 2048
 						}
 					]
 				},
@@ -2224,10 +2248,10 @@
 				"protocols": [
 					"cwmp"
 				],
-				"datatype": "string",
+				"datatype": "URL",
 				"range": [
 					{
-						"max": 256
+						"max": 2048
 					}
 				],
 				"mapping": [
@@ -2442,10 +2466,10 @@
 				"protocols": [
 					"cwmp"
 				],
-				"datatype": "string",
+				"datatype": "URL",
 				"range": [
 					{
-						"max": 256
+						"max": 2048
 					}
 				],
 				"mapping": [
@@ -2553,10 +2577,10 @@
 				"protocols": [
 					"cwmp"
 				],
-				"datatype": "string",
+				"datatype": "URL",
 				"range": [
 					{
-						"max": 256
+						"max": 2048
 					}
 				]
 			},
@@ -2567,10 +2591,10 @@
 				"protocols": [
 					"cwmp"
 				],
-				"datatype": "string",
+				"datatype": "URL",
 				"range": [
 					{
-						"max": 256
+						"max": 2048
 					}
 				]
 			},
@@ -3494,10 +3518,10 @@
 							"protocols": [
 								"cwmp"
 							],
-							"datatype": "string",
+							"datatype": "URL",
 							"range": [
 								{
-									"max": 256
+									"max": 2048
 								}
 							]
 						}
@@ -3540,10 +3564,10 @@
 						"protocols": [
 							"cwmp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						]
 					}
@@ -4161,10 +4185,10 @@
 						"protocols": [
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						]
 					},
@@ -4793,10 +4817,10 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "string",
+					"datatype": "URL",
 					"range": [
 						{
-							"max": 1024
+							"max": 2048
 						}
 					],
 					"mapping": [
@@ -4970,10 +4994,10 @@
 							"protocols": [
 								"usp"
 							],
-							"datatype": "string",
+							"datatype": "URL",
 							"range": [
 								{
-									"max": 256
+									"max": 2048
 								}
 							],
 							"mapping": [
@@ -6676,10 +6700,10 @@
 					"cwmp",
 					"usp"
 				],
-				"datatype": "string",
+				"datatype": "URL",
 				"range": [
 					{
-						"max": 256
+						"max": 2048
 					}
 				]
 			},
@@ -6691,10 +6715,10 @@
 					"cwmp",
 					"usp"
 				],
-				"datatype": "string",
+				"datatype": "URL",
 				"range": [
 					{
-						"max": 256
+						"max": 2048
 					}
 				]
 			},
@@ -6738,10 +6762,10 @@
 					"cwmp",
 					"usp"
 				],
-				"datatype": "string",
+				"datatype": "URL",
 				"range": [
 					{
-						"max": 256
+						"max": 2048
 					}
 				]
 			},
@@ -6753,10 +6777,10 @@
 					"cwmp",
 					"usp"
 				],
-				"datatype": "string",
+				"datatype": "URL",
 				"range": [
 					{
-						"max": 256
+						"max": 2048
 					}
 				]
 			},
@@ -9002,6 +9026,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -9023,6 +9048,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -9053,6 +9079,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -9074,6 +9101,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -9104,6 +9132,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -9125,6 +9154,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -9155,6 +9185,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -9176,6 +9207,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -9206,6 +9238,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -9227,6 +9260,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -12772,10 +12806,12 @@
 								"usp"
 							],
 							"datatype": "string",
-							"range": [
-								{
-									"max": 21
-								}
+							"enumerations": [
+								"Open",
+								"Short",
+								"Powered on DSLAM/DPU",
+								"Powered on CPE",
+								"Unknown"
 							]
 						},
 						"LoopLength": {
@@ -12814,9 +12850,32 @@
 								"usp"
 							],
 							"list": {
-								"datatype": "string",
-								"maxsize": 61430
+								"datatype": "SELTPAttenuationCharacteristicsIndexAndTFlog",
+								"item": {
+									"min": 0,
+									"max": 8191
+								}
 							}
+						},
+						"TFlogGroupSize": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 1,
+									"max": 2
+								},
+								{
+									"min": 12,
+									"max": 12
+								}
+							],
+							"unit": "subcarriers"
 						},
 						"MissingFilter": {
 							"type": "boolean",
@@ -12828,14 +12887,20 @@
 							"datatype": "boolean"
 						},
 						"CapacityEstimate": {
-							"type": "unsignedInt",
+							"type": "string",
 							"read": true,
 							"write": true,
 							"protocols": [
 								"usp"
 							],
-							"datatype": "unsignedInt",
-							"unit": "kbit/s"
+							"list": {
+								"datatype": "unsignedInt",
+								"item": {
+									"min": 1,
+									"max": 2
+								},
+								"unit": "kbit/s"
+							}
 						}
 					}
 				},
@@ -13542,10 +13607,12 @@
 							"cwmp"
 						],
 						"datatype": "string",
-						"range": [
-							{
-								"max": 21
-							}
+						"enumerations": [
+							"Open",
+							"Short",
+							"Powered on DSLAM/DPU",
+							"Powered on CPE",
+							"Unknown"
 						]
 					},
 					"LoopLength": {
@@ -13584,9 +13651,32 @@
 							"cwmp"
 						],
 						"list": {
-							"datatype": "string",
-							"maxsize": 61430
+							"datatype": "SELTPAttenuationCharacteristicsIndexAndTFlog",
+							"item": {
+								"min": 0,
+								"max": 8191
+							}
 						}
+					},
+					"TFlogGroupSize": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1,
+								"max": 2
+							},
+							{
+								"min": 12,
+								"max": 12
+							}
+						],
+						"unit": "subcarriers"
 					},
 					"MissingFilter": {
 						"type": "boolean",
@@ -13598,14 +13688,20 @@
 						"datatype": "boolean"
 					},
 					"CapacityEstimate": {
-						"type": "unsignedInt",
+						"type": "string",
 						"read": true,
 						"write": false,
 						"protocols": [
 							"cwmp"
 						],
-						"datatype": "unsignedInt",
-						"unit": "kbit/s"
+						"list": {
+							"datatype": "unsignedInt",
+							"item": {
+								"min": 1,
+								"max": 2
+							},
+							"unit": "kbit/s"
+						}
 					}
 				}
 			}
@@ -13709,7 +13805,7 @@
 				"protocols": [
 					"cwmp"
 				],
-				"datatype": "string",
+				"datatype": "URL",
 				"range": [
 					{
 						"max": 2048
@@ -13772,7 +13868,7 @@
 					"protocols": [
 						"cwmp"
 					],
-					"datatype": "string",
+					"datatype": "URL",
 					"range": [
 						{
 							"max": 2048
@@ -14771,6 +14867,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -14792,6 +14889,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -14813,6 +14911,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -14834,6 +14933,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -14855,6 +14955,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15032,6 +15133,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15053,6 +15155,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15074,6 +15177,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15095,6 +15199,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15116,6 +15221,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15293,6 +15399,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15314,6 +15421,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15335,6 +15443,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15356,6 +15465,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15377,6 +15487,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15554,6 +15665,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15575,6 +15687,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15596,6 +15709,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15617,6 +15731,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15638,6 +15753,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15815,6 +15931,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15836,6 +15953,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15857,6 +15975,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15878,6 +15997,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -15899,6 +16019,7 @@
 								"usp"
 							],
 							"datatype": "unsignedInt",
+							"unit": "seconds",
 							"mapping": [
 								{
 									"type": "ubus",
@@ -16666,7 +16787,8 @@
 							"UMTSHSPA",
 							"CDMA2000OneX",
 							"CDMA2000HRPD",
-							"LTE"
+							"LTE",
+							"NR"
 						]
 					}
 				},
@@ -16738,6 +16860,28 @@
 					]
 				},
 				"RSSI": {
+					"type": "int",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "int",
+					"unit": "dBm"
+				},
+				"RSRP": {
+					"type": "int",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "int",
+					"unit": "dBm"
+				},
+				"RSRQ": {
 					"type": "int",
 					"read": true,
 					"write": false,
@@ -18440,6 +18584,16 @@
 				],
 				"datatype": "boolean"
 			},
+			"FlowControlSupported": {
+				"type": "boolean",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "boolean"
+			},
 			"InterfaceNumberOfEntries": {
 				"type": "unsignedInt",
 				"read": true,
@@ -19255,6 +19409,16 @@
 					]
 				},
 				"PriorityTagging": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "boolean"
+				},
+				"FlowControl": {
 					"type": "boolean",
 					"read": true,
 					"write": true,
@@ -27751,6 +27915,21 @@
 				],
 				"datatype": "StatsCounter32"
 			},
+			"ResetCause": {
+				"type": "string",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "string",
+				"enumerations": [
+					"HostReinit",
+					"SpontaneousInterrupt",
+					"LossOfPower"
+				]
+			},
 			"Reset": {
 				"type": "boolean",
 				"read": true,
@@ -28120,6 +28299,29 @@
 						],
 						"datatype": "unsignedInt"
 					},
+					"RadarDetections": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"list": {
+							"datatype": "unsignedInt",
+							"maxsize": 1024
+						}
+					},
+					"DFSEnable": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "boolean"
+					},
 					"Device.WiFi.MultiAP.APDevice.{i}.Radio.{i}.": {
 						"type": "object",
 						"protocols": [
@@ -28187,7 +28389,7 @@
 						"Channel": {
 							"type": "unsignedInt",
 							"read": true,
-							"write": false,
+							"write": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -28214,6 +28416,19 @@
 								"AboveControlChannel",
 								"BelowControlChannel"
 							]
+						},
+						"PossibleChannels": {
+							"type": "string",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"list": {
+								"datatype": "string",
+								"maxsize": 1024
+							}
 						},
 						"CurrentOperatingChannelBandwidth": {
 							"type": "string",
@@ -28267,6 +28482,23 @@
 								}
 							],
 							"unit": "percentage"
+						},
+						"TransmitPowerLimit": {
+							"type": "int",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "int",
+							"range": [
+								{
+									"min": -90,
+									"max": 36
+								}
+							],
+							"unit": "dBm"
 						},
 						"APNumberOfEntries": {
 							"type": "unsignedInt",
@@ -32079,8 +32311,12 @@
 					"enumerations": [
 						"400nsec",
 						"800nsec",
-						"1600nsec",
-						"3200nsec",
+						"1xLTF_0.8us",
+						"1xLTF_1.6us",
+						"2xLTF_0.8us",
+						"2xLTF_1.6us",
+						"4xLTF_0.8us",
+						"4xLTF_3.2us",
 						"Auto"
 					]
 				},
@@ -32095,6 +32331,26 @@
 					"datatype": "unsignedInt"
 				},
 				"CenterFrequencySegement1": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt"
+				},
+				"CenterFrequencySegment0": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt"
+				},
+				"CenterFrequencySegment1": {
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
@@ -32514,6 +32770,16 @@
 						"datatype": "string"
 					}
 				},
+				"EnableRRM": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "boolean"
+				},
 				"Device.WiFi.Radio.{i}.Stats.": {
 					"type": "object",
 					"protocols": [
@@ -32522,6 +32788,96 @@
 					],
 					"access": false,
 					"array": false,
+					"CtsReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"NoCtsReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"FrameHeaderError": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"GoodPLCPReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"DPacketOtherMACReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"MPacketOtherMACReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"CPacketOtherMACReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"CtsOtherMACReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"RtsOtherMACReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
 					"BytesSent": {
 						"type": "unsignedLong",
 						"read": true,
@@ -33430,6 +33786,43 @@
 					],
 					"datatype": "boolean"
 				},
+				"ATFEnable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "boolean"
+				},
+				"FlushATFTable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "boolean"
+				},
+				"SetATF": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"min": 0,
+							"max": 100
+						}
+					],
+					"unit": "percent"
+				},
 				"Device.WiFi.SSID.{i}.Stats.": {
 					"type": "object",
 					"protocols": [
@@ -33878,6 +34271,86 @@
 								}
 							}
 						]
+					},
+					"DiscardPacketsSentBufOverflow": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"DiscardPacketsSentNoAssoc": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"FragSent": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"SentNoAck": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"DupReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"TooLongReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"TooShortReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
+					},
+					"AckUcastReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "StatsCounter64"
 					}
 				}
 			},
@@ -34227,6 +34700,20 @@
 						}
 					]
 				},
+				"CpeOperationMode": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"enumerations": [
+						"Router",
+						"Bridge/Extender"
+					]
+				},
 				"Device.WiFi.AccessPoint.{i}.Security.": {
 					"type": "object",
 					"protocols": [
@@ -34298,6 +34785,22 @@
 								}
 							}
 						]
+					},
+					"EncryptionMode": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"list": {
+							"datatype": "string",
+							"enumerations": [
+								"TKIP",
+								"AES"
+							]
+						}
 					},
 					"WEPKey": {
 						"type": "hexBinary",
@@ -34706,6 +35209,33 @@
 					],
 					"access": false,
 					"array": true,
+					"Type": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "string"
+					},
+					"SetStaATF": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 0,
+								"max": 100
+							}
+						],
+						"unit": "percent"
+					},
 					"MACAddress": {
 						"type": "string",
 						"read": true,
@@ -35034,6 +35564,16 @@
 									}
 								}
 							]
+						},
+						"ErrorsReceived": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "StatsCounter32"
 						},
 						"RetransCount": {
 							"type": "unsignedInt",
@@ -37292,7 +37832,12 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string"
+						"datatype": "URL",
+						"range": [
+							{
+								"max": 2048
+							}
+						]
 					},
 					"Icon": {
 						"type": "hexBinary",
@@ -37317,7 +37862,12 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string"
+						"datatype": "URL",
+						"range": [
+							{
+								"max": 2048
+							}
+						]
 					}
 				},
 				"Device.ZigBee.ZDO.{i}.Security.": {
@@ -42439,6 +42989,16 @@
 					],
 					"datatype": "boolean"
 				},
+				"IPLayerCapacitySupported": {
+					"type": "boolean",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "boolean"
+				},
 				"IPv4ServerSelectionDiagnosticsSupported": {
 					"type": "boolean",
 					"read": true,
@@ -42920,10 +43480,10 @@
 							"protocols": [
 								"usp"
 							],
-							"datatype": "string",
+							"datatype": "URL",
 							"range": [
 								{
-									"max": 256
+									"max": 2048
 								}
 							]
 						},
@@ -43270,10 +43830,10 @@
 							"protocols": [
 								"usp"
 							],
-							"datatype": "string",
+							"datatype": "URL",
 							"range": [
 								{
-									"max": 256
+									"max": 2048
 								}
 							]
 						},
@@ -43792,6 +44352,677 @@
 							"unit": "microseconds"
 						},
 						"MaximumResponseTime": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"unit": "microseconds"
+						}
+					}
+				},
+				"IPLayerMaxConnections": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"usp"
+					],
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"min": 1
+						}
+					]
+				},
+				"IPLayerMaxIncrementalResult": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"usp"
+					],
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"min": 1
+						}
+					]
+				},
+				"IPLayerCapSupportedMetrics": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"usp"
+					],
+					"list": {
+						"datatype": "string",
+						"enumerations": [
+							"IPLR",
+							"Sampled_RTT",
+							"IPDV",
+							"IPRR"
+						]
+					}
+				},
+				"IPLayerCapacity()": {
+					"type": "command",
+					"protocols": [
+						"usp"
+					],
+					"input": {
+						"Interface": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "string",
+							"range": [
+								{
+									"max": 256
+								}
+							]
+						},
+						"Role": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "string",
+							"enumerations": [
+								"Receiver",
+								"Sender"
+							]
+						},
+						"Host": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "string",
+							"range": [
+								{
+									"max": 256
+								}
+							]
+						},
+						"Port": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 1,
+									"max": 65535
+								}
+							]
+						},
+						"JumboFramesPermitted": {
+							"type": "boolean",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "boolean"
+						},
+						"NumberOfConnections": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 1
+								}
+							]
+						},
+						"EthernetPriority": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 0,
+									"max": 7
+								}
+							]
+						},
+						"DSCP": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 0,
+									"max": 63
+								}
+							]
+						},
+						"ProtocolVersion": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "string",
+							"enumerations": [
+								"Any",
+								"IPv4",
+								"IPv6"
+							]
+						},
+						"UDPPayloadMin": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 35,
+									"max": 9000
+								}
+							],
+							"unit": "octets"
+						},
+						"UDPPayloadMax": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 35,
+									"max": 9000
+								}
+							],
+							"unit": "octets"
+						},
+						"PortMin": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 49152,
+									"max": 65535
+								}
+							]
+						},
+						"PortMax": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 49152,
+									"max": 65535
+								}
+							]
+						},
+						"PortOptionalMin": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 0,
+									"max": 0
+								},
+								{
+									"min": 1024,
+									"max": 49151
+								}
+							]
+						},
+						"PortOptionalMax": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 0,
+									"max": 0
+								},
+								{
+									"min": 1024,
+									"max": 49151
+								}
+							]
+						},
+						"TestType": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "string",
+							"enumerations": [
+								"Search",
+								"Fixed"
+							]
+						},
+						"IPDVEnable": {
+							"type": "boolean",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "boolean"
+						},
+						"IPRREnable": {
+							"type": "boolean",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "boolean"
+						},
+						"PreambleDuration": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 0,
+									"max": 5
+								}
+							],
+							"unit": "seconds"
+						},
+						"StartSendingRate": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 500,
+									"max": 10000000
+								}
+							],
+							"unit": "kbps"
+						},
+						"NumberTestSubIntervals": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 1,
+									"max": 100
+								}
+							]
+						},
+						"TestSubInterval": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 100,
+									"max": 6000
+								}
+							],
+							"unit": "milliseconds"
+						},
+						"StatusFeedbackInterval": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 5,
+									"max": 250
+								}
+							],
+							"unit": "milliseconds"
+						},
+						"TimeoutNoTraffic": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 5,
+									"max": 30
+								}
+							],
+							"unit": "seconds"
+						},
+						"Tmax": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 50,
+									"max": 3000
+								}
+							],
+							"unit": "milliseconds"
+						},
+						"TmaxRTT": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 50,
+									"max": 3000
+								}
+							],
+							"unit": "milliseconds"
+						},
+						"TimestampResolution": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 1,
+									"max": 1000
+								}
+							],
+							"unit": "microseconds"
+						},
+						"LowerThresh": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 5,
+									"max": 250
+								}
+							],
+							"unit": "milliseconds"
+						},
+						"UpperThresh": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 5,
+									"max": 250
+								}
+							],
+							"unit": "milliseconds"
+						},
+						"HighSpeedDelta": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 2
+								}
+							]
+						},
+						"SlowAdjThresh": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 2
+								}
+							]
+						},
+						"HSpeedThresh": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 1
+								}
+							],
+							"unit": "Gbps"
+						}
+					},
+					"output": {
+						"Status": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "string",
+							"enumerations": [
+								"Complete",
+								"Error_CannotResolveHostName",
+								"Error_NoRouteToHost",
+								"Error_InitConnectionFailed",
+								"Error_NoResponse",
+								"Error_PasswordRequestFailed",
+								"Error_LoginFailed",
+								"Error_RejectedByRemote",
+								"Error_IncorrectSize",
+								"Error_Timeout",
+								"Error_Internal",
+								"Error_Other"
+							]
+						},
+						"BOMTime": {
+							"type": "dateTime",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "dateTime"
+						},
+						"EOMTime": {
+							"type": "dateTime",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "dateTime"
+						},
+						"TmaxUsed": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"unit": "milliseconds"
+						},
+						"TestInterval": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"unit": "seconds"
+						},
+						"MaxIPLayerCapacity": {
+							"type": "decimal",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "decimal"
+						},
+						"TimeOfMax": {
+							"type": "dateTime",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "dateTime"
+						},
+						"LossRatioAtMax": {
+							"type": "decimal",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "decimal"
+						},
+						"RTTRangeAtMax": {
+							"type": "decimal",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "decimal"
+						},
+						"PDVRangeAtMax": {
+							"type": "decimal",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "decimal"
+						},
+						"MinOnewayDelayAtMax": {
+							"type": "decimal",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "decimal"
+						},
+						"ReorderedRatioAtMax": {
+							"type": "decimal",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "decimal"
+						},
+						"TmaxRTTUsed": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"unit": "milliseconds"
+						},
+						"TimestampResolutionUsed": {
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
@@ -44462,10 +45693,10 @@
 						"protocols": [
 							"cwmp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						]
 					},
@@ -44958,10 +46189,10 @@
 						"protocols": [
 							"cwmp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						]
 					},
@@ -45888,6 +47119,748 @@
 								"cwmp"
 							],
 							"datatype": "unsignedInt"
+						}
+					}
+				},
+				"Device.IP.Diagnostics.IPLayerCapacityMetrics.": {
+					"type": "object",
+					"protocols": [
+						"cwmp"
+					],
+					"access": false,
+					"array": false,
+					"DiagnosticsState": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "DiagnosticsState",
+						"enumerations": [
+							"None",
+							"Requested",
+							"Canceled",
+							"Complete",
+							"Error"
+						]
+					},
+					"IPLayerMaxConnections": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1
+							}
+						]
+					},
+					"IPLayerMaxIncrementalResult": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1
+							}
+						]
+					},
+					"IPLayerCapSupportedMetrics": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"list": {
+							"datatype": "string",
+							"enumerations": [
+								"IPLR",
+								"Sampled_RTT",
+								"IPDV",
+								"IPRR"
+							]
+						}
+					},
+					"Interface": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 256
+							}
+						]
+					},
+					"Role": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "string",
+						"enumerations": [
+							"Receiver",
+							"Sender"
+						]
+					},
+					"Host": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 256
+							}
+						]
+					},
+					"Port": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1,
+								"max": 65535
+							}
+						]
+					},
+					"JumboFramesPermitted": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "boolean"
+					},
+					"NumberOfConnections": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1
+							}
+						]
+					},
+					"EthernetPriority": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 0,
+								"max": 7
+							}
+						]
+					},
+					"DSCP": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 0,
+								"max": 63
+							}
+						]
+					},
+					"ProtocolVersion": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "string",
+						"enumerations": [
+							"Any",
+							"IPv4",
+							"IPv6"
+						]
+					},
+					"UDPPayloadMin": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 35,
+								"max": 9000
+							}
+						],
+						"unit": "octets"
+					},
+					"UDPPayloadMax": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 35,
+								"max": 9000
+							}
+						],
+						"unit": "octets"
+					},
+					"PortMin": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 49152,
+								"max": 65535
+							}
+						]
+					},
+					"PortMax": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 49152,
+								"max": 65535
+							}
+						]
+					},
+					"PortOptionalMin": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 0,
+								"max": 0
+							},
+							{
+								"min": 1024,
+								"max": 49151
+							}
+						]
+					},
+					"PortOptionalMax": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 0,
+								"max": 0
+							},
+							{
+								"min": 1024,
+								"max": 49151
+							}
+						]
+					},
+					"TestType": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "string",
+						"enumerations": [
+							"Search",
+							"Fixed"
+						]
+					},
+					"IPDVEnable": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "boolean"
+					},
+					"IPRREnable": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "boolean"
+					},
+					"PreambleDuration": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 0,
+								"max": 5
+							}
+						],
+						"unit": "seconds"
+					},
+					"StartSendingRate": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 500,
+								"max": 10000000
+							}
+						],
+						"unit": "kbps"
+					},
+					"NumberTestSubIntervals": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1,
+								"max": 100
+							}
+						]
+					},
+					"TestSubInterval": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 100,
+								"max": 6000
+							}
+						],
+						"unit": "milliseconds"
+					},
+					"StatusFeedbackInterval": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 5,
+								"max": 250
+							}
+						],
+						"unit": "milliseconds"
+					},
+					"TimeoutNoTraffic": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 5,
+								"max": 30
+							}
+						],
+						"unit": "seconds"
+					},
+					"Tmax": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 50,
+								"max": 3000
+							}
+						],
+						"unit": "milliseconds"
+					},
+					"TmaxRTT": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 50,
+								"max": 3000
+							}
+						],
+						"unit": "milliseconds"
+					},
+					"TimestampResolution": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1,
+								"max": 1000
+							}
+						],
+						"unit": "microseconds"
+					},
+					"LowerThresh": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 5,
+								"max": 250
+							}
+						],
+						"unit": "milliseconds"
+					},
+					"UpperThresh": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 5,
+								"max": 250
+							}
+						],
+						"unit": "milliseconds"
+					},
+					"HighSpeedDelta": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 2
+							}
+						]
+					},
+					"SlowAdjThresh": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 2
+							}
+						]
+					},
+					"HSpeedThresh": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1
+							}
+						],
+						"unit": "Gbps"
+					},
+					"BOMTime": {
+						"type": "dateTime",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "dateTime"
+					},
+					"EOMTime": {
+						"type": "dateTime",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "dateTime"
+					},
+					"TmaxUsed": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"unit": "milliseconds"
+					},
+					"TestInterval": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"unit": "seconds"
+					},
+					"MaxIPLayerCapacity": {
+						"type": "decimal",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "decimal"
+					},
+					"TimeOfMax": {
+						"type": "dateTime",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "dateTime"
+					},
+					"LossRatioAtMax": {
+						"type": "decimal",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "decimal"
+					},
+					"RTTRangeAtMax": {
+						"type": "decimal",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "decimal"
+					},
+					"PDVRangeAtMax": {
+						"type": "decimal",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "decimal"
+					},
+					"MinOnewayDelayAtMax": {
+						"type": "decimal",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "decimal"
+					},
+					"ReorderedRatioAtMax": {
+						"type": "decimal",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "decimal"
+					},
+					"IncrementalResultNumberOfEntries": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt"
+					},
+					"TmaxRTTUsed": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"unit": "milliseconds"
+					},
+					"TimestampResolutionUsed": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"unit": "microseconds"
+					},
+					"Device.IP.Diagnostics.IPLayerCapacityMetrics.IncrementalResult.{i}.": {
+						"type": "object",
+						"protocols": [
+							"cwmp"
+						],
+						"access": false,
+						"array": true,
+						"IPLayerCapacity": {
+							"type": "decimal",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp"
+							],
+							"datatype": "decimal"
+						},
+						"TimeOfSubInterval": {
+							"type": "dateTime",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp"
+							],
+							"datatype": "dateTime"
+						},
+						"LossRatio": {
+							"type": "decimal",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp"
+							],
+							"datatype": "decimal"
+						},
+						"RTTRange": {
+							"type": "decimal",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp"
+							],
+							"datatype": "decimal"
+						},
+						"PDVRange": {
+							"type": "decimal",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp"
+							],
+							"datatype": "decimal"
+						},
+						"MinOnewayDelay": {
+							"type": "decimal",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp"
+							],
+							"datatype": "decimal"
+						},
+						"ReorderedRatio": {
+							"type": "decimal",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp"
+							],
+							"datatype": "decimal"
 						}
 					}
 				},
@@ -50905,10 +52878,10 @@
 					"cwmp",
 					"usp"
 				],
-				"datatype": "string",
+				"datatype": "URL",
 				"range": [
 					{
-						"max": 2000
+						"max": 2048
 					}
 				]
 			}
@@ -55386,6 +57359,16 @@
 					}
 				]
 			},
+			"AccessControlNumberOfEntries": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "unsignedInt"
+			},
 			"Device.Hosts.Host.{i}.": {
 				"type": "object",
 				"protocols": [
@@ -55971,6 +57954,191 @@
 							"usp"
 						],
 						"datatype": "StatsCounter32"
+					}
+				}
+			},
+			"Device.Hosts.AccessControl.{i}.": {
+				"type": "object",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"uniqueKeys": [
+					"Alias",
+					"PhysAddress"
+				],
+				"access": true,
+				"array": true,
+				"Alias": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "Alias",
+					"range": [
+						{
+							"max": 64
+						}
+					]
+				},
+				"PhysAddress": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"range": [
+						{
+							"max": 64
+						}
+					]
+				},
+				"HostName": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"range": [
+						{
+							"max": 256
+						}
+					]
+				},
+				"Enable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "boolean"
+				},
+				"AccessPolicy": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"enumerations": [
+						"Allow",
+						"Deny"
+					]
+				},
+				"ScheduleNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt"
+				},
+				"Device.Hosts.AccessControl.{i}.Schedule.{i}.": {
+					"type": "object",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"uniqueKeys": [
+						"Alias"
+					],
+					"access": true,
+					"array": true,
+					"Alias": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "Alias",
+						"range": [
+							{
+								"max": 64
+							}
+						]
+					},
+					"Enable": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "boolean"
+					},
+					"Day": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"list": {
+							"datatype": "string",
+							"enumerations": [
+								"Monday",
+								"Tuesday",
+								"Wednesday",
+								"Thursday",
+								"Friday",
+								"Saturday",
+								"Sunday"
+							]
+						}
+					},
+					"StartTime": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 5
+							}
+						],
+						"pattern": [
+							"",
+							"([01][0-9]|2[0-3]):[0-5][0-9]"
+						]
+					},
+					"Duration": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1
+							}
+						],
+						"unit": "seconds"
 					}
 				}
 			}
@@ -63030,10 +65198,10 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						],
 						"mapping": [
@@ -63192,10 +65360,10 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						],
 						"mapping": [
@@ -63325,10 +65493,10 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						],
 						"mapping": [
@@ -63460,10 +65628,10 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						],
 						"mapping": [
@@ -63704,10 +65872,10 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						],
 						"mapping": [
@@ -63808,10 +65976,10 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						],
 						"mapping": [
@@ -63886,10 +66054,10 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						],
 						"mapping": [
@@ -64007,7 +66175,12 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
+						"range": [
+							{
+								"max": 2048
+							}
+						],
 						"mapping": [
 							{
 								"type": "ubus",
@@ -64028,7 +66201,12 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
+						"range": [
+							{
+								"max": 2048
+							}
+						],
 						"mapping": [
 							{
 								"type": "ubus",
@@ -64049,7 +66227,12 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
+						"range": [
+							{
+								"max": 2048
+							}
+						],
 						"mapping": [
 							{
 								"type": "ubus",
@@ -67238,10 +69421,10 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						]
 					},
@@ -68853,10 +71036,10 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "string",
+					"datatype": "URL",
 					"range": [
 						{
-							"max": 256
+							"max": 2048
 						}
 					]
 				},
@@ -69245,10 +71428,10 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 1024
+								"max": 2048
 							}
 						],
 						"mapping": [
@@ -70766,10 +72949,10 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 1024
+								"max": 2048
 							}
 						]
 					},
@@ -71045,10 +73228,10 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "string",
+							"datatype": "URL",
 							"range": [
 								{
-									"max": 1024
+									"max": 2048
 								}
 							]
 						},
@@ -71956,10 +74139,10 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "string",
+							"datatype": "URL",
 							"range": [
 								{
-									"max": 1024
+									"max": 2048
 								}
 							]
 						},
@@ -72389,10 +74572,10 @@
 									"cwmp",
 									"usp"
 								],
-								"datatype": "string",
+								"datatype": "URL",
 								"range": [
 									{
-										"max": 1024
+										"max": 2048
 									}
 								]
 							},
@@ -73143,6 +75326,16 @@
 						"usp"
 					],
 					"datatype": "string"
+				},
+				"EnableEncryption": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "boolean"
 				},
 				"BrokerAddress": {
 					"type": "string",
@@ -77078,10 +79271,10 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "string",
+						"datatype": "URL",
 						"range": [
 							{
-								"max": 256
+								"max": 2048
 							}
 						]
 					},
@@ -78009,6 +80202,1424 @@
 				}
 			}
 		},
+		"Device.WWC.": {
+			"type": "object",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"access": false,
+			"array": false,
+			"HwCapabilities": {
+				"type": "string",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"list": {
+					"datatype": "string",
+					"enumerations": [
+						"NG-RAN",
+						"E-UTRAN",
+						"W-5GAN"
+					]
+				}
+			},
+			"SwCapabilities": {
+				"type": "string",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"list": {
+					"datatype": "string",
+					"enumerations": [
+						"FN-RG",
+						"5G-RG",
+						"ATSSS"
+					]
+				}
+			},
+			"Mode": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "string",
+				"enumerations": [
+					"FN-RG",
+					"5G-RG",
+					"Auto"
+				]
+			},
+			"Status": {
+				"type": "string",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "string",
+				"enumerations": [
+					"FN-RG",
+					"5G-RG",
+					"Negotiating"
+				]
+			},
+			"AccessNetworkNumberOfEntries": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "unsignedInt"
+			},
+			"URSPNumberOfEntries": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "unsignedInt"
+			},
+			"Device.WWC.AccessNetwork.{i}.": {
+				"type": "object",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"uniqueKeys": [
+					"Alias",
+					"Name"
+				],
+				"access": false,
+				"array": true,
+				"Alias": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "Alias",
+					"range": [
+						{
+							"max": 64
+						}
+					]
+				},
+				"Name": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"range": [
+						{
+							"max": 64
+						}
+					]
+				},
+				"Interface": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"range": [
+						{
+							"max": 256
+						}
+					]
+				},
+				"RegistrationStatus": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"enumerations": [
+						"RM_REGISTERED",
+						"RM_DEREGISTERED",
+						"RM_UNDEFINED",
+						"Error"
+					]
+				},
+				"ConnectionStatus": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"enumerations": [
+						"CM_IDLE",
+						"CM_CONNECTED",
+						"CM_UNDEFINED",
+						"Error"
+					]
+				},
+				"AccessNetworkType": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"enumerations": [
+						"NG-RAN",
+						"E-UTRAN",
+						"W-5GAN"
+					]
+				},
+				"LastError": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt"
+				},
+				"Device.WWC.AccessNetwork.{i}.GUTI.": {
+					"type": "object",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"access": false,
+					"array": false,
+					"PLMN": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					},
+					"AMFId": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					},
+					"TMSI": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					}
+				}
+			},
+			"Device.WWC.URSP.{i}.": {
+				"type": "object",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"uniqueKeys": [
+					"Alias",
+					"Precedence"
+				],
+				"access": false,
+				"array": true,
+				"Alias": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "Alias",
+					"range": [
+						{
+							"max": 64
+						}
+					]
+				},
+				"Precedence": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"min": 0,
+							"max": 255
+						}
+					]
+				},
+				"TrafficDescriptorNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt"
+				},
+				"Device.WWC.URSP.{i}.TrafficDescriptor.{i}.": {
+					"type": "object",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"uniqueKeys": [
+						"Alias"
+					],
+					"access": false,
+					"array": true,
+					"Alias": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "Alias",
+						"range": [
+							{
+								"max": 64
+							}
+						]
+					},
+					"Type": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					},
+					"Value": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 1024
+							}
+						]
+					},
+					"RouteSelectionDescriptorNumberOfEntries": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					},
+					"Device.WWC.URSP.{i}.TrafficDescriptor.{i}.RouteSelectionDescriptor.{i}.": {
+						"type": "object",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"uniqueKeys": [
+							"Alias",
+							"Precedence"
+						],
+						"access": false,
+						"array": true,
+						"Alias": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "Alias",
+							"range": [
+								{
+									"max": 64
+								}
+							]
+						},
+						"Precedence": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 0,
+									"max": 255
+								}
+							]
+						},
+						"SSC": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "unsignedInt",
+							"range": [
+								{
+									"min": 1,
+									"max": 3
+								}
+							]
+						},
+						"DNN": {
+							"type": "string",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "string",
+							"range": [
+								{
+									"max": 100
+								}
+							]
+						},
+						"PDUSessionType": {
+							"type": "string",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "string",
+							"enumerations": [
+								"IPv4",
+								"IPv6",
+								"IPv4v6",
+								"Unstructured"
+							]
+						},
+						"AccessType": {
+							"type": "string",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "string",
+							"enumerations": [
+								"3GPP access",
+								"Non-3GPP access"
+							]
+						},
+						"Device.WWC.URSP.{i}.TrafficDescriptor.{i}.RouteSelectionDescriptor.{i}.NetworkSlice.": {
+							"type": "object",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"access": false,
+							"array": false,
+							"SliceServiceType": {
+								"type": "string",
+								"read": true,
+								"write": false,
+								"protocols": [
+									"cwmp",
+									"usp"
+								],
+								"datatype": "SST",
+								"enumerations": [
+									"eMBB",
+									"URLLC",
+									"MIoT",
+									"V2X"
+								]
+							},
+							"SliceDifferentiator": {
+								"type": "unsignedInt",
+								"read": true,
+								"write": false,
+								"protocols": [
+									"cwmp",
+									"usp"
+								],
+								"datatype": "unsignedInt"
+							}
+						}
+					}
+				}
+			}
+		},
+		"Device.PDU.": {
+			"type": "object",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"access": false,
+			"array": false,
+			"SessionNumberOfEntries": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "unsignedInt"
+			},
+			"Device.PDU.Session.{i}.": {
+				"type": "object",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"uniqueKeys": [
+					"Alias",
+					"SessionID"
+				],
+				"access": false,
+				"array": true,
+				"Alias": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "Alias",
+					"range": [
+						{
+							"max": 64
+						}
+					]
+				},
+				"Interface": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"range": [
+						{
+							"max": 256
+						}
+					]
+				},
+				"SessionID": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"min": 1,
+							"max": 15
+						}
+					]
+				},
+				"PTI": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"min": 1,
+							"max": 254
+						}
+					]
+				},
+				"SessionType": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"enumerations": [
+						"IPv4",
+						"IPv6",
+						"IPv4v6",
+						"Unstructured"
+					]
+				},
+				"SSC": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"min": 1,
+							"max": 3
+						}
+					]
+				},
+				"SessionAMBRDownlink": {
+					"type": "unsignedLong",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedLong",
+					"unit": "bits per second"
+				},
+				"SessionAMBRUplink": {
+					"type": "unsignedLong",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedLong",
+					"unit": "bits per second"
+				},
+				"LastError": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt"
+				},
+				"PDUIPv4Address": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "IPv4Address",
+					"range": [
+						{
+							"max": 15
+						}
+					],
+					"pattern": [
+						"",
+						"((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])"
+					]
+				},
+				"PDUIPv6InterfaceIdentifier": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string"
+				},
+				"RQTimerValue": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt",
+					"unit": "seconds"
+				},
+				"AlwaysOn": {
+					"type": "boolean",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "boolean"
+				},
+				"DNN": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"range": [
+						{
+							"max": 100
+						}
+					]
+				},
+				"QoSRuleNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt"
+				},
+				"QoSFlowNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt"
+				},
+				"Device.PDU.Session.{i}.PCO.": {
+					"type": "object",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"access": false,
+					"array": false,
+					"IPv6PCSCF": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "IPv6Address",
+						"range": [
+							{
+								"max": 45
+							}
+						]
+					},
+					"IPv6DNS": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 256
+							}
+						]
+					},
+					"IPv4PCSCF": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "IPv4Address",
+						"range": [
+							{
+								"max": 15
+							}
+						],
+						"pattern": [
+							"",
+							"((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])"
+						]
+					},
+					"IPv4DNS": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 256
+							}
+						]
+					}
+				},
+				"Device.PDU.Session.{i}.NetworkSlice.": {
+					"type": "object",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"access": false,
+					"array": false,
+					"SliceServiceType": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "SST",
+						"enumerations": [
+							"eMBB",
+							"URLLC",
+							"MIoT",
+							"V2X"
+						]
+					},
+					"SliceDifferentiator": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					}
+				},
+				"Device.PDU.Session.{i}.QoSRule.{i}.": {
+					"type": "object",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"uniqueKeys": [
+						"Alias",
+						"Identifier"
+					],
+					"access": false,
+					"array": true,
+					"Alias": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "Alias",
+						"range": [
+							{
+								"max": 64
+							}
+						]
+					},
+					"Identifier": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1,
+								"max": 255
+							}
+						]
+					},
+					"Precedence": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 0,
+								"max": 255
+							}
+						]
+					},
+					"Segregation": {
+						"type": "boolean",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "boolean"
+					},
+					"QFI": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1,
+								"max": 63
+							}
+						]
+					},
+					"DQR": {
+						"type": "boolean",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "boolean"
+					},
+					"FilterNumberOfEntries": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					},
+					"Device.PDU.Session.{i}.QoSRule.{i}.Filter.{i}.": {
+						"type": "object",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"uniqueKeys": [
+							"Alias"
+						],
+						"access": false,
+						"array": true,
+						"Alias": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "Alias",
+							"range": [
+								{
+									"max": 64
+								}
+							]
+						},
+						"Direction": {
+							"type": "string",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "string",
+							"enumerations": [
+								"downlink",
+								"uplink",
+								"bidirectional"
+							]
+						},
+						"Type": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "unsignedInt"
+						},
+						"Value": {
+							"type": "string",
+							"read": true,
+							"write": false,
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"datatype": "string",
+							"range": [
+								{
+									"max": 1024
+								}
+							]
+						}
+					}
+				},
+				"Device.PDU.Session.{i}.QoSFlow.{i}.": {
+					"type": "object",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"uniqueKeys": [
+						"Alias",
+						"QFI"
+					],
+					"access": false,
+					"array": true,
+					"Alias": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "Alias",
+						"range": [
+							{
+								"max": 64
+							}
+						]
+					},
+					"QFI": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1,
+								"max": 63
+							}
+						]
+					},
+					"FiveQI": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1,
+								"max": 255
+							}
+						]
+					},
+					"GFBRUplink": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong",
+						"unit": "bits per second"
+					},
+					"GFBRDownlink": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong",
+						"unit": "bits per second"
+					},
+					"MFBRUplink": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong",
+						"unit": "bits per second"
+					},
+					"MFBRDownlink": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong",
+						"unit": "bits per second"
+					},
+					"AveragingWindow": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt",
+						"unit": "milliseconds"
+					},
+					"EPSBearer": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					}
+				}
+			}
+		},
+		"Device.FWE.": {
+			"type": "object",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"access": false,
+			"array": false,
+			"LinkNumberOfEntries": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "unsignedInt"
+			},
+			"Device.FWE.Link.{i}.": {
+				"type": "object",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"uniqueKeys": [
+					"Alias",
+					"Name"
+				],
+				"access": false,
+				"array": true,
+				"Status": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"enumerations": [
+						"Up",
+						"Down",
+						"Unknown",
+						"Dormant",
+						"NotPresent",
+						"LowerLayerDown",
+						"Error"
+					]
+				},
+				"Alias": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "Alias",
+					"range": [
+						{
+							"max": 64
+						}
+					]
+				},
+				"Name": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"range": [
+						{
+							"max": 64
+						}
+					]
+				},
+				"LastChange": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt",
+					"unit": "seconds"
+				},
+				"LowerLayers": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"list": {
+						"datatype": "string",
+						"maxsize": 1024
+					}
+				},
+				"Device.FWE.Link.{i}.Stats.": {
+					"type": "object",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"access": false,
+					"array": false,
+					"BytesSent": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong",
+						"unit": "bytes"
+					},
+					"BytesReceived": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong",
+						"unit": "bytes"
+					},
+					"PacketsSent": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong"
+					},
+					"PacketsReceived": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong"
+					},
+					"ErrorsSent": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					},
+					"ErrorsReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					},
+					"UnicastPacketsSent": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong"
+					},
+					"UnicastPacketsReceived": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong"
+					},
+					"DiscardPacketsSent": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					},
+					"DiscardPacketsReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					},
+					"MulticastPacketsSent": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong"
+					},
+					"MulticastPacketsReceived": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong"
+					},
+					"BroadcastPacketsSent": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong"
+					},
+					"BroadcastPacketsReceived": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedLong"
+					},
+					"UnknownProtoPacketsReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					}
+				}
+			}
+		},
 		"Device.LocalAgent.": {
 			"type": "object",
 			"protocols": [
@@ -78423,6 +82034,15 @@
 							"usp"
 						],
 						"datatype": "string"
+					},
+					"EnableEncryption": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"usp"
+						],
+						"datatype": "boolean"
 					}
 				},
 				"Device.LocalAgent.MTP.{i}.MQTT.": {
@@ -78987,6 +82607,15 @@
 							],
 							"datatype": "boolean"
 						},
+						"EnableEncryption": {
+							"type": "boolean",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "boolean"
+						},
 						"KeepAliveInterval": {
 							"type": "unsignedInt",
 							"read": true,
@@ -79078,6 +82707,24 @@
 									"max": 65535
 								}
 							]
+						},
+						"PublishRetainResponse": {
+							"type": "boolean",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "boolean"
+						},
+						"PublishRetainNotify": {
+							"type": "boolean",
+							"read": true,
+							"write": true,
+							"protocols": [
+								"usp"
+							],
+							"datatype": "boolean"
 						}
 					}
 				},
@@ -79346,6 +82993,7 @@
 					"datatype": "string",
 					"range": [
 						{
+							"min": 1,
 							"max": 64
 						}
 					]
@@ -80394,6 +84042,15 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
+					"protocols": [
+						"usp"
+					],
+					"datatype": "boolean"
+				},
+				"EnableEncryption": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
 					"protocols": [
 						"usp"
 					],

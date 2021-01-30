@@ -52,8 +52,8 @@ static const struct fw_image fw_images[] = {
 };
 
 struct Supported_Data_Models Data_Models[] = {
-{"http://www.broadband-forum.org/cwmp/tr-181-2-13-0.xml","urn:broadband-forum-org:tr-181-2-13-0","IP,Wireless,Firewall,NAT,DHCP,QoS,DNS,GRE,UPnP"},
-{"http://www.broadband-forum.org/cwmp/tr-104-1-1-0.xml","urn:broadband-forum-org:tr-104-1-1-0", "VoiceService"},
+{"http://www.broadband-forum.org/cwmp/tr-181-2-14-1.xml","urn:broadband-forum-org:tr-181-2-14-1","IP,Wireless,Firewall,NAT,DHCP,QoS,DNS,GRE,UPnP"},
+{"http://www.broadband-forum.org/cwmp/tr-104-2-0-2.xml","urn:broadband-forum-org:tr-104-2-0-2", "VoiceService"},
 {"http://www.broadband-forum.org/cwmp/tr-143-1-1-0.xml","urn:broadband-forum-org:tr-143-1-1-0", "Ping,TraceRoute,Download,Upload,UDPecho,ServerSelectionDiag"},
 {"http://www.broadband-forum.org/cwmp/tr-157-1-3-0.xml","urn:broadband-forum-org:tr-157-1-3-0", "Bulkdata,SoftwareModules"},
 };

@@ -225,14 +225,14 @@ It is a generator of json file from xml data model and C source code.
 $ python generate_json.py
 Usage: generate_json.py <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]
 Examples:
-  - generate_json.py tr-181-2-13-0-cwmp-full.xml tr-181-2-13-0-usp-full.xml Device.
+  - generate_json.py tr-181-2-14-1-cwmp-full.xml tr-181-2-14-1-usp-full.xml Device.
     ==> Generate the json file of the sub tree Device. in tr181.json
   - generate_json.py tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.
     ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json
   - generate_json.py tr-106-1-2-0-full.xml Device.
     ==> Generate the json file of the sub tree Device. in tr106.json
 
-Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-13-0-cwmp-full.xml
+Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-14-1-cwmp-full.xml
 ```
 
 #### Excel generator: ####
