@@ -825,7 +825,7 @@ static int get_DSLLineStatsTotal_SeverelyErroredSecs(char *refparam, struct dmct
 	return 0;
 }
 
-/*#Device.DSL.Line.{i}.Stats.Showtime.ErroredSecs!UBUS:dsl.line.1/stats//showtime.severely_errored_secs*/
+/*#Device.DSL.Line.{i}.Stats.Showtime.ErroredSecs!UBUS:dsl.line.1/stats//showtime.errored_secs*/
 static int get_DSLLineStatsShowtime_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "showtime", "errored_secs");
@@ -867,7 +867,7 @@ static int get_DSLLineStatsCurrentDay_SeverelyErroredSecs(char *refparam, struct
 	return 0;
 }
 
-/*#Device.DSL.Line.{i}.Stats.QuarterHour.ErroredSecs!UBUS:dsl.line.1/stats//quarterhour.severely_errored_secs*/
+/*#Device.DSL.Line.{i}.Stats.QuarterHour.ErroredSecs!UBUS:dsl.line.1/stats//quarterhour.errored_secs*/
 static int get_DSLLineStatsQuarterHour_ErroredSecs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = get_value_with_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "quarterhour", "errored_secs");
