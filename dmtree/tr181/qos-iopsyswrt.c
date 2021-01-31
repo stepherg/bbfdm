@@ -311,11 +311,10 @@ int os_addObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char **inst
 	dmuci_add_section("qos", "queue", &s);
 	dmuci_set_value_by_section(s, "enable", "false");
 	dmuci_set_value_by_section(s, "weight", "0");
-	dmuci_set_value_by_section(s, "precedence", "0");
+	dmuci_set_value_by_section(s, "precedence", "1");
 	dmuci_set_value_by_section(s, "burst_size", "0");
-	dmuci_set_value_by_section(s, "scheduling", "ST");
-	dmuci_set_value_by_section(s, "rate", "0");
-	dmuci_set_value_by_section(s, "traffic_class", "0");
+	dmuci_set_value_by_section(s, "scheduling", "SP");
+	dmuci_set_value_by_section(s, "rate", "-1");
 
 	dmuci_add_section_bbfdm("dmmap_qos", "queue", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
@@ -3450,7 +3449,7 @@ int os_set_QoSQueue_SchedulerAlgorithm(char *refparam, struct dmctx *ctx, void *
 /*#Device.QoS.Queue.{i}.ShapingRate!UCI:qos/class,@i-1/rate*/
 int os_get_QoSQueue_ShapingRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "rate", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "rate", "-1");
 	return 0;
 }
 
