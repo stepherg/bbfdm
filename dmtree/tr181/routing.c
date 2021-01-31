@@ -64,58 +64,78 @@ static inline int init_args_ipv6forward(struct routingfwdargs *args, struct uci_
 **************************************************************************************/
 static bool is_proc_route_in_config(struct proc_routing *proute)
 {
-	struct uci_section *s;
-	char *mask, *target, *gateway, *device;
+	struct uci_section *s = NULL;
 
 	uci_foreach_option_eq("network", "route", "target", proute->destination, s) {
+		char *mask;
+
 		dmuci_get_value_by_section_string(s, "netmask", &mask);
 		if (mask[0] == '\0' || strcmp(proute->mask, mask) == 0)
 			return true;
 	}
+
 	uci_foreach_option_eq("network", "route_disabled", "target", proute->destination, s) {
+		char *mask;
+
 		dmuci_get_value_by_section_string(s, "netmask", &mask);
 		if (mask[0] == '\0' || strcmp(proute->mask, mask) == 0)
 			return true;
 	}
+
 	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route_dynamic", s) {
+		char *target, *gateway, *device;
+
 		dmuci_get_value_by_section_string(s, "target", &target);
 		dmuci_get_value_by_section_string(s, "gateway", &gateway);
 		dmuci_get_value_by_section_string(s, "device", &device);
-		if (strcmp(target, proute->destination) == 0 && strcmp(gateway, proute->gateway) == 0 && strcmp(device, proute->iface) == 0) {
+		if (strcmp(target, proute->destination) == 0 && strcmp(gateway, proute->gateway) == 0 && strcmp(device, proute->iface) == 0)
 			return true;
-		}
 	}
+
 	return false;
 }
 
-static unsigned char is_proc_route6_in_config(char *ciface, char *cip, char *cgw)
+static bool is_proc_route6_in_config(char *cdev, char *cip, char *cgw)
 {
 	struct uci_section *s = NULL;
-	char *ip, *gw, *v;
-	json_object *jobj;
 
 	uci_foreach_sections("network", "route6", s) {
-		dmuci_get_value_by_section_string(s, "target", &ip);
-		ip = (*ip) ? ip : "::/0";
-		dmuci_get_value_by_section_string(s, "gateway", &gw);
-		gw = (*gw) ? gw : "::";
-		dmuci_get_value_by_section_string(s, "interface", &v);
-		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", v, String}}, 1, &jobj);
-		if (!jobj) return 0;
-		v = dmjson_get_value(jobj, 1, "device");
-		if (((*v != '\0' && strcmp(ciface, v) == 0) || ((*gw != ':' || *(gw+1) != ':') && strcmp(cgw, gw) == 0)) && strcmp(cip, ip) == 0) {
-			return 1;
-		}
+		char *ip_r, *gw_r, *intf_r;
+		json_object *jobj = NULL;
+
+		dmuci_get_value_by_section_string(s, "target", &ip_r);
+		dmuci_get_value_by_section_string(s, "gateway", &gw_r);
+		dmuci_get_value_by_section_string(s, "interface", &intf_r);
+		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", intf_r, String}}, 1, &jobj);
+		char *dev_r = (jobj) ? dmjson_get_value(jobj, 1, "device") : "";
+		if (strcmp(cdev, dev_r) == 0 && strcmp(cgw, gw_r) == 0 && strcmp(cip, ip_r) == 0)
+			return true;
 	}
+
+	uci_foreach_sections("network", "route6_disabled", s) {
+		char *ip_r6, *gw_r6, *intf_r6;
+		json_object *jobj = NULL;
+
+		dmuci_get_value_by_section_string(s, "target", &ip_r6);
+		dmuci_get_value_by_section_string(s, "gateway", &gw_r6);
+		dmuci_get_value_by_section_string(s, "interface", &intf_r6);
+		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", intf_r6, String}}, 1, &jobj);
+		char *dev_r6 = (jobj) ? dmjson_get_value(jobj, 1, "device") : "";
+		if (strcmp(cdev, dev_r6) == 0 && strcmp(cgw, gw_r6) == 0 && strcmp(cip, ip_r6) == 0)
+			return true;
+	}
+
 	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route6_dynamic", s) {
-		dmuci_get_value_by_section_string(s, "target", &ip);
-		dmuci_get_value_by_section_string(s, "gateway", &gw);
-		dmuci_get_value_by_section_string(s, "device", &v);
-		if (((*v != '\0' && strcmp(ciface, v) == 0) || ((*gw != ':' || *(gw+1) != ':') && strcmp(cgw, gw) == 0)) && strcmp(cip, ip) == 0) {
-			return 1;
-		}
+		char *ip_r6d, *gw_r6d, *dev_r6d;
+
+		dmuci_get_value_by_section_string(s, "target", &ip_r6d);
+		dmuci_get_value_by_section_string(s, "gateway", &gw_r6d);
+		dmuci_get_value_by_section_string(s, "device", &dev_r6d);
+		if (strcmp(cdev, dev_r6d) == 0 && strcmp(cgw, gw_r6d) == 0 && strcmp(cip, ip_r6d) == 0)
+			return true;
 	}
-	return 0;
+
+	return false;
 }
 
 static void parse_proc_route_line(char *line, struct proc_routing *proute)
@@ -170,58 +190,28 @@ static int parse_proc_route6_line(const char *line, char *ipstr, char *gwstr, ch
 	return 0;
 }
 
-static bool is_cfg_route_active(struct uci_section *s)
-{
-	FILE *fp;
-	char line[MAX_PROC_ROUTING];
-	struct proc_routing proute;
-	char *dest, *mask;
-	int lines = 0;
-
-	dmuci_get_value_by_section_string(s, "target", &dest);
-	dmuci_get_value_by_section_string(s, "netmask", &mask);
-
-	fp = fopen(PROC_ROUTE, "r");
-	if (fp != NULL) {
-		while (fgets(line, MAX_PROC_ROUTING, fp) != NULL) {
-			if (line[0] == '\n' || lines == 0) { /* skip the first line or skip the line if it's empty */
-				lines++;
-				continue;
-			}
-			parse_proc_route_line(line, &proute);
-			if (strcmp(dest, proute.destination) == 0 &&
-				(mask[0] == '\0' || strcmp(mask, proute.mask) == 0)) {
-				fclose(fp) ;
-				return true;
-			}
-		}
-		fclose(fp) ;
-	}
-	return false;
-}
-
-static int get_forwarding_last_inst(void)
+static int get_forwarding_last_inst(bool ipv6)
 {
 	char *rinst = NULL, *drinst = NULL, *dsinst = NULL, *tmp = NULL;
-	int r = 0, dr = 0, ds = 0, max = 0;
+	int r = 0, dr = 0, ds = 0;
 	struct uci_section *s = NULL;
 
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route", s) {
-		dmuci_get_value_by_section_string(s, "routeinstance", &tmp);
+	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", ipv6 ? "route6" : "route", s) {
+		dmuci_get_value_by_section_string(s, ipv6 ? "route6instance" : "routeinstance", &tmp);
 		if (tmp && tmp[0] == '\0')
 			break;
 		rinst = tmp;
 	}
 
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route_disabled", s) {
-		dmuci_get_value_by_section_string(s, "routeinstance", &tmp);
+	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", ipv6 ? "route6_disabled" : "route_disabled", s) {
+		dmuci_get_value_by_section_string(s, ipv6 ? "route6instance" : "routeinstance", &tmp);
 		if (tmp && tmp[0] == '\0')
 			break;
 		dsinst = tmp;
 	}
 
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route_dynamic", s) {
-		dmuci_get_value_by_section_string(s, "routeinstance", &tmp);
+	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", ipv6 ? "route6_dynamic" : "route_dynamic", s) {
+		dmuci_get_value_by_section_string(s, ipv6 ? "route6instance" : "routeinstance", &tmp);
 		if (tmp && tmp[0] == '\0')
 			break;
 		drinst = tmp;
@@ -230,34 +220,8 @@ static int get_forwarding_last_inst(void)
 	if (rinst) r = atoi(rinst);
 	if (dsinst) ds = atoi(dsinst);
 	if (drinst) dr = atoi(drinst);
-	max = (r>ds&&r>dr?r:ds>dr?ds:dr);
-	return max;
-}
 
-static int get_forwarding6_last_inst(void)
-{
-	char *rinst = NULL, *drinst = NULL, *tmp = NULL;
-	int r = 0, dr = 0, max = 0;
-	struct uci_section *s = NULL;
-
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route6", s) {
-		dmuci_get_value_by_section_string(s, "route6instance", &tmp);
-		if (tmp && tmp[0] == '\0')
-			break;
-		rinst = tmp;
-	}
-
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route6_dynamic", s) {
-		dmuci_get_value_by_section_string(s, "route6instance", &tmp);
-		if (tmp && tmp[0] == '\0')
-			break;
-		drinst = tmp;
-	}
-
-	if (rinst) r = atoi(rinst);
-	if (drinst) dr = atoi(drinst);
-	max = r>dr?r:dr;
-	return max;
+	return (r > ds && r > dr ? r : ds > dr ? ds : dr);
 }
 
 static char *forwarding_update_instance_alias_bbfdm(int action, char **last_inst, char **max_inst, void *argv[])
@@ -274,7 +238,7 @@ static char *forwarding_update_instance_alias_bbfdm(int action, char **last_inst
 	dmuci_get_value_by_section_string(s, inst_opt, &instance);
 	if (instance[0] == '\0') {
 		if (*find_max) {
-			int m = (*ipv4_forwarding) ? get_forwarding_last_inst() : get_forwarding6_last_inst();
+			int m = get_forwarding_last_inst((*ipv4_forwarding) ? false : true);
 			snprintf(buf, sizeof(buf), "%d", m+1);
 			*find_max = false;
 		} else if (max_inst == NULL) {
@@ -357,7 +321,7 @@ static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMN
 			}
 			char instance[16];
 
-			snprintf(instance, sizeof(instance), "%d", get_forwarding_last_inst() + 1);
+			snprintf(instance, sizeof(instance), "%d", get_forwarding_last_inst(false) + 1);
 			dmuci_add_section_bbfdm("dmmap_route_forwarding", "route_dynamic", &s);
 			dmuci_set_value_by_section_bbfdm(s, "target", proute.destination);
 			dmuci_set_value_by_section_bbfdm(s, "netmask", proute.mask);
@@ -379,7 +343,6 @@ static int dmmap_synchronizeRoutingRouterIPv6Forwarding(struct dmctx *dmctx, DMN
 	char *iface, *target;
 	unsigned int metric;
 	FILE *fp = NULL;
-	int found = 0;
 
 	uci_path_foreach_sections_safe(bbfdm, "dmmap_route_forwarding", "route6_dynamic", stmp, s) {
 		dmuci_get_value_by_section_string(s, "target", &target);
@@ -389,7 +352,7 @@ static int dmmap_synchronizeRoutingRouterIPv6Forwarding(struct dmctx *dmctx, DMN
 		if (fp == NULL)
 			return 0;
 
-		found = 0;
+		int found = 0;
 		while (fgets(buf, 512, fp) != NULL) {
 
 			if (parse_proc_route6_line(buf, ipstr, gwstr, dev, &metric))
@@ -417,9 +380,10 @@ static int dmmap_synchronizeRoutingRouterIPv6Forwarding(struct dmctx *dmctx, DMN
 
 		if (is_proc_route6_in_config(dev, ipstr, gwstr))
 			continue;
+
 		iface = "";
 		uci_foreach_sections("network", "interface", s) {
-				json_object *jobj = NULL;
+			json_object *jobj = NULL;
 
 			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &jobj);
 			if (!jobj) {
@@ -434,7 +398,7 @@ static int dmmap_synchronizeRoutingRouterIPv6Forwarding(struct dmctx *dmctx, DMN
 		}
 		char instance[16];
 
-		snprintf(instance, sizeof(instance), "%d", get_forwarding6_last_inst() + 1);
+		snprintf(instance, sizeof(instance), "%d", get_forwarding_last_inst(true) + 1);
 		dmuci_add_section_bbfdm("dmmap_route_forwarding", "route6_dynamic", &s);
 		dmuci_set_value_by_section_bbfdm(s, "target", ipstr);
 		dmuci_set_value_by_section_bbfdm(s, "gateway", gwstr);
@@ -511,6 +475,9 @@ static int get_RoutingRouter_IPv6ForwardingNumberOfEntries(char *refparam, struc
 	uci_foreach_sections("network", "route6", s) {
 		cnt++;
 	}
+	uci_foreach_sections("network", "route6_disabled", s) {
+		cnt++;
+	}
 	dmmap_synchronizeRoutingRouterIPv6Forwarding(ctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route6_dynamic", s) {
 		cnt++;
@@ -521,15 +488,14 @@ static int get_RoutingRouter_IPv6ForwardingNumberOfEntries(char *refparam, struc
 
 static int get_router_ipv4forwarding_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	if(((struct routingfwdargs *)data)->type == ROUTE_DISABLED)
-		*value = "0";
-	else
-		*value = "1";
+	*value = (((struct routingfwdargs *)data)->type == ROUTE_DISABLED) ? "0" : "1";
 	return 0;
 }
 
 static int set_router_ipv4forwarding_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	int route_type = ((struct routingfwdargs *)data)->type;
+	struct uci_section *dmmap_section = NULL;
 	bool b;
 
 	switch (action) {
@@ -539,16 +505,17 @@ static int set_router_ipv4forwarding_enable(char *refparam, struct dmctx *ctx, v
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			if (b) {
-				if (((struct routingfwdargs *)data)->type == ROUTE_STATIC)
-					return 0;
-				dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, NULL, "route");
-			}
-			else {
-				if (((struct routingfwdargs *)data)->type == ROUTE_DISABLED)
-					return 0;
-				dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, NULL, "route_disabled");
-			}
+
+			if ((b && route_type == ROUTE_STATIC) || (!b && route_type == ROUTE_DISABLED))
+				return 0;
+
+			// Update config section
+			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, NULL, b ? "route" : "route_disabled");
+
+			// Update dmmap section
+			get_dmmap_section_of_config_section("dmmap_route_forwarding", b ? "route_disabled" : "route", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, NULL, b ? "route" : "route_disabled");
+
 			return 0;
 	}
 	return 0;
@@ -556,21 +523,14 @@ static int set_router_ipv4forwarding_enable(char *refparam, struct dmctx *ctx, v
 
 static int get_router_ipv4forwarding_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	if(((struct routingfwdargs *)data)->type == ROUTE_DISABLED) {
-		*value = "Disabled";
-	} else {
-		if (is_cfg_route_active(((struct routingfwdargs *)data)->routefwdsection))
-			*value = "Enabled";
-		else
-			*value = "Error";
-	}
+	*value = (((struct routingfwdargs *)data)->type == ROUTE_DISABLED) ? "Disabled" : "Enabled";
 	return 0;
 }
 
 /*#Device.Routing.Router.{i}.IPv4Forwarding.{i}.DestIPAddress!UCI:network/route,@i-1/target*/
 static int get_router_ipv4forwarding_destip(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct routingfwdargs *)data)->routefwdsection, "target", "0.0.0.0");
+	dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "target", value);
 	return 0;
 }
 
@@ -591,7 +551,7 @@ static int set_router_ipv4forwarding_destip(char *refparam, struct dmctx *ctx, v
 /*#Device.Routing.Router.{i}.IPv4Forwarding.{i}.DestSubnetMask!UCI:network/route,@i-1/netmask*/
 static int get_router_ipv4forwarding_destmask(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct routingfwdargs *)data)->routefwdsection, "netmask", "255.255.255.255");
+	dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "netmask", value);
 	return 0;
 }
 
@@ -611,11 +571,7 @@ static int set_router_ipv4forwarding_destmask(char *refparam, struct dmctx *ctx,
 
 static int get_router_ipv4forwarding_static_route(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	if (((struct routingfwdargs *)data)->type != ROUTE_DYNAMIC)
-		*value = "1";
-	else
-		*value = "0";
-
+	*value = (((struct routingfwdargs *)data)->type != ROUTE_DYNAMIC) ? "1" : "0";
 	return 0;
 }
 
@@ -645,7 +601,7 @@ static int get_router_ipv4forwarding_origin(char *refparam, struct dmctx *ctx, v
 /*#Device.Routing.Router.{i}.IPv4Forwarding.{i}.GatewayIPAddress!UCI:network/route,@i-1/gateway*/
 static int get_router_ipv4forwarding_gatewayip(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct routingfwdargs *)data)->routefwdsection, "gateway", "0.0.0.0");
+	dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "gateway", value);
 	return 0;
 }
 
@@ -665,11 +621,10 @@ static int set_router_ipv4forwarding_gatewayip(char *refparam, struct dmctx *ctx
 
 static int get_RoutingRouterForwarding_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker;
+	char *linker = NULL;
 
-	if (((struct routingfwdargs *)data)->routefwdsection != NULL)
-		dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "interface", &linker);
-	if (linker[0] != '\0') {
+	dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "interface", &linker);
+	if (linker && linker[0] != '\0') {
 		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
 		if (*value == NULL)
 			*value = "";
@@ -720,18 +675,34 @@ static int set_router_ipv4forwarding_metric(char *refparam, struct dmctx *ctx, v
 
 static int get_RoutingRouterIPv6Forwarding_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "1";
+	*value = (((struct routingfwdargs *)data)->type == ROUTE_DISABLED) ? "0" : "1";
 	return 0;
 }
 
 static int set_RoutingRouterIPv6Forwarding_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	int route6_type = ((struct routingfwdargs *)data)->type;
+	struct uci_section *dmmap_section = NULL;
+	bool b;
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			string_to_bool(value, &b);
+
+			if ((b && route6_type == ROUTE_STATIC) || (!b && route6_type == ROUTE_DISABLED))
+				break;
+
+			// Update config section
+			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, NULL, b ? "route6" : "route6_disabled");
+
+			// Update dmmap section
+			get_dmmap_section_of_config_section("dmmap_route_forwarding", b ? "route6_disabled" : "route6", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, NULL, b ? "route6" : "route6_disabled");
+
 			break;
 	}
 	return 0;
@@ -739,14 +710,14 @@ static int set_RoutingRouterIPv6Forwarding_Enable(char *refparam, struct dmctx *
 
 static int get_RoutingRouterIPv6Forwarding_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "Enabled";
+	*value = (((struct routingfwdargs *)data)->type == ROUTE_DISABLED) ? "Disabled" : "Enabled";
 	return 0;
 }
 
 /*#Device.Routing.Router.{i}.IPv6Forwarding.{i}.DestIPPrefix!UCI:network/route,@i-1/target*/
 static int get_RoutingRouterIPv6Forwarding_DestIPPrefix(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct routingfwdargs *)data)->routefwdsection, "target", "::");
+	dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "target", value);
 	return 0;
 }
 
@@ -786,7 +757,7 @@ static int set_RoutingRouterIPv6Forwarding_ForwardingPolicy(char *refparam, stru
 /*#Device.Routing.Router.{i}.IPv6Forwarding.{i}.NextHop!UCI:network/route,@i-1/gateway*/
 static int get_RoutingRouterIPv6Forwarding_NextHop(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct routingfwdargs *)data)->routefwdsection, "gateway", "::");
+	dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "gateway", value);
 	return 0;
 }
 
@@ -806,10 +777,7 @@ static int set_RoutingRouterIPv6Forwarding_NextHop(char *refparam, struct dmctx 
 
 static int get_RoutingRouterIPv6Forwarding_Origin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	if (((struct routingfwdargs *)data)->type != ROUTE_DYNAMIC)
-		*value = "Static";
-	else
-		*value = "DHCPv6";
+	*value = (((struct routingfwdargs *)data)->type != ROUTE_DYNAMIC) ? "Static" : "DHCPv6";
 	return 0;
 }
 
@@ -1081,16 +1049,17 @@ struct dm_permession_s DMRouting = {"0", &get_routing_perm};
 static int add_ipv4forwarding(char *refparam, struct dmctx *ctx, void *data, char **instancepara)
 {
 	struct uci_section *s = NULL, *dmmap_route = NULL;
-	char instance[16];
+	char instance[16], route_name[32];
 
-	snprintf(instance, sizeof(instance), "%d", get_forwarding_last_inst());
+	int last_inst = get_forwarding_last_inst(false);
+	snprintf(instance, sizeof(instance), "%d", last_inst);
+	snprintf(route_name, sizeof(route_name), "route_%d", (last_inst == 0) ? 1 : last_inst + 1);
 
-	dmuci_add_section("network", "route", &s);
-	dmuci_set_value_by_section(s, "metric", "0");
-	dmuci_set_value_by_section(s, "interface", "lan");
+	dmuci_add_section("network", "route_disabled", &s);
+	dmuci_rename_section_by_section(s, route_name);
 
-	dmuci_add_section_bbfdm("dmmap_route_forwarding", "route", &dmmap_route);
-	dmuci_set_value_by_section(dmmap_route, "section_name", section_name(s));
+	dmuci_add_section_bbfdm("dmmap_route_forwarding", "route_disabled", &dmmap_route);
+	dmuci_set_value_by_section(dmmap_route, "section_name", route_name);
 	*instancepara = update_instance(instance, 2, dmmap_route, "routeinstance");
 	return 0;
 }
@@ -1117,18 +1086,19 @@ static int delete_ipv4forwarding(char *refparam, struct dmctx *ctx, void *data, 
 
 static int add_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, char **instancepara)
 {
-	struct uci_section *s = NULL, *dmmap_route = NULL;
-	char instance[16];
+	struct uci_section *s = NULL, *dmmap_route6 = NULL;
+	char instance[16], route6_name[32];
 
-	snprintf(instance, sizeof(instance), "%d", get_forwarding6_last_inst());
+	int last_inst = get_forwarding_last_inst(true);
+	snprintf(instance, sizeof(instance), "%d", last_inst);
+	snprintf(route6_name, sizeof(route6_name), "route6_%d", (last_inst == 0) ? 1 : last_inst + 1);
 
-	dmuci_add_section("network", "route6", &s);
-	dmuci_set_value_by_section(s, "metric", "0");
-	dmuci_set_value_by_section(s, "interface", "lan");
+	dmuci_add_section("network", "route6_disabled", &s);
+	dmuci_rename_section_by_section(s, route6_name);
 
-	dmuci_add_section_bbfdm("dmmap_route_forwarding", "route6", &dmmap_route);
-	dmuci_set_value_by_section(dmmap_route, "section_name", section_name(s));
-	*instancepara = update_instance(instance, 2, dmmap_route, "route6instance");
+	dmuci_add_section_bbfdm("dmmap_route_forwarding", "route6_disabled", &dmmap_route6);
+	dmuci_set_value_by_section(dmmap_route6, "section_name", route6_name);
+	*instancepara = update_instance(instance, 2, dmmap_route6, "route6instance");
 	return 0;
 }
 
@@ -1179,8 +1149,10 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
+	// Enable Routes
 	synchronize_specific_config_sections_with_dmmap("network", "route", "dmmap_route_forwarding", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
+
 		init_args_ipv4forward(&curr_routefwdargs, p->config_section, "1", ROUTE_STATIC);
 
 		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
@@ -1190,8 +1162,11 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 			goto end;
 	}
 	free_dmmap_config_dup_list(&dup_list);
+
+	// Disable Routes
 	synchronize_specific_config_sections_with_dmmap("network", "route_disabled", "dmmap_route_forwarding", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
+
 		init_args_ipv4forward(&curr_routefwdargs, p->config_section, "1", ROUTE_DISABLED);
 
 		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
@@ -1202,8 +1177,10 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	}
 	free_dmmap_config_dup_list(&dup_list);
 
+	// Dynamic Routes
 	dmmap_synchronizeRoutingRouterIPv4Forwarding(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route_dynamic", ss) {
+
 		init_args_ipv4forward(&curr_routefwdargs, ss, "0", ROUTE_DYNAMIC);
 
 		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
@@ -1212,6 +1189,7 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, inst) == DM_STOP)
 			goto end;
 	}
+
 end:
 	return 0;
 }
@@ -1226,8 +1204,10 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	struct dmmap_dup *p;
 	LIST_HEAD(dup_list);
 
+	// Enable Routes
 	synchronize_specific_config_sections_with_dmmap("network", "route6", "dmmap_route_forwarding", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
+
 		init_args_ipv6forward(&curr_route6fwdargs, p->config_section, "1", ROUTE_STATIC);
 
 		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
@@ -1237,8 +1217,25 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 			goto end;
 	}
 	free_dmmap_config_dup_list(&dup_list);
+
+	// Disable Routes
+	synchronize_specific_config_sections_with_dmmap("network", "route6_disabled", "dmmap_route_forwarding", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		init_args_ipv6forward(&curr_route6fwdargs, p->config_section, "1", ROUTE_DISABLED);
+
+		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
+			   p->dmmap_section, "route6instance", "route6alias", &ipv4_forwarding, &find_max);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, inst) == DM_STOP)
+			goto end;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+
+	// Dynamic Routes
 	dmmap_synchronizeRoutingRouterIPv6Forwarding(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route6_dynamic", ss) {
+
 		init_args_ipv6forward(&curr_route6fwdargs, ss, "0", ROUTE_DYNAMIC);
 
 		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
@@ -1247,6 +1244,7 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, inst) == DM_STOP)
 			goto end;
 	}
+
 end:
 	return 0;
 }
@@ -1325,7 +1323,7 @@ DMLEAF tRoutingRouterIPv4ForwardingParams[] = {
 {0}
 };
 
-/* *** Device.Routing.Router.{i}.IPv4Forwarding.{i}. *** */
+/* *** Device.Routing.Router.{i}.IPv6Forwarding.{i}. *** */
 DMLEAF tRoutingRouterIPv6ForwardingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Enable", &DMRouting, DMT_BOOL, get_RoutingRouterIPv6Forwarding_Enable, set_RoutingRouterIPv6Forwarding_Enable, BBFDM_BOTH},
