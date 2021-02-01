@@ -2496,9 +2496,9 @@ static int fetch_and_configure_inner_vid(char *br_inst, char *type_val, char **v
 static int handle_inner_vid() {
 
 	struct uci_section *s = NULL, *sec = NULL;
-	char *br_inst = NULL, *vid = NULL;
 
 	uci_foreach_sections("network", "interface", s) {
+		char *br_inst = NULL, *vid = NULL;
 		// Get the bridge instance.
 		uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "interface", section_name(s), sec) {
 			dmuci_get_value_by_section_string(sec, "br_inst", &br_inst);
