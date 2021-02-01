@@ -2433,25 +2433,25 @@ static int fetch_and_configure_inner_vid(char *br_inst, char *type_val, char **v
 static int handle_inner_vid() {
 
 	struct uci_section *s = NULL, *sec = NULL;
-	char *br_inst, *vid = NULL;
 
 	uci_foreach_sections("network", "interface", s) {
+		char *br_inst = NULL, *vid = NULL;
 		// Get the bridge instance.
 		uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "interface", section_name(s), sec) {
 			dmuci_get_value_by_section_string(sec, "br_inst", &br_inst);
 			break;
 		}
 
-		fetch_and_configure_inner_vid(br_inst, "8021q", &vid);
-
-		if (vid == NULL) {
-			fetch_and_configure_inner_vid(br_inst, "untagged", &vid);
-		}
-
-		//loop device section with type 8021ad and fetch the br_inst of it,
-		//if same br_inst then add vid as inner_vid
-		if (vid != NULL && vid[0] != '\0') {
-			fetch_and_configure_inner_vid(br_inst, "8021ad", &vid);
+		if (br_inst != NULL && br_inst[0] != '\0') {
+			fetch_and_configure_inner_vid(br_inst, "8021q", &vid);
+			if (vid == NULL) {
+				fetch_and_configure_inner_vid(br_inst, "untagged", &vid);
+			}
+			//loop device section with type 8021ad and fetch the br_inst of it,
+			//if same br_inst then add vid as inner_vid
+			if (vid != NULL && vid[0] != '\0') {
+				fetch_and_configure_inner_vid(br_inst, "8021ad", &vid);
+			}
 		}
 	}
 
