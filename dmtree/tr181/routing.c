@@ -581,6 +581,19 @@ static int get_router_ipv4forwarding_forwarding_policy(char *refparam, struct dm
 	return 0;
 }
 
+static int set_router_ipv4forwarding_forwarding_policy(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			break;
+	}
+	return 0;
+}
+
 static int get_router_ipv4forwarding_origin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	if (((struct routingfwdargs *)data)->type != ROUTE_DYNAMIC)
@@ -963,14 +976,14 @@ static int set_RoutingRouter_Alias(char *refparam, struct dmctx *ctx, void *data
 
 static int get_router_ipv4forwarding_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+	int route_type = ((struct routingfwdargs *)data)->type;
 	struct uci_section *dmmap_section = NULL;
 
-	if(((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
-		dmmap_section= ((struct routingfwdargs *)data)->routefwdsection;
-	else if (((struct routingfwdargs *)data)->type == ROUTE_STATIC)
-		get_dmmap_section_of_config_section("dmmap_route_forwarding", "route", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+	if (route_type == ROUTE_DYNAMIC)
+		dmmap_section = ((struct routingfwdargs *)data)->routefwdsection;
 	else
-		get_dmmap_section_of_config_section("dmmap_route_forwarding", "route_disabled", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+		get_dmmap_section_of_config_section("dmmap_route_forwarding", (route_type == ROUTE_STATIC) ? "route" : "route_disabled", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+
 	dmuci_get_value_by_section_string(dmmap_section, "routealias", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "cpe-%s", instance);
@@ -979,6 +992,7 @@ static int get_router_ipv4forwarding_alias(char *refparam, struct dmctx *ctx, vo
 
 static int set_router_ipv4forwarding_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	int route_type = ((struct routingfwdargs *)data)->type;
 	struct uci_section *dmmap_section = NULL;
 
 	switch (action) {
@@ -987,12 +1001,11 @@ static int set_router_ipv4forwarding_alias(char *refparam, struct dmctx *ctx, vo
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if(((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+			if (route_type == ROUTE_DYNAMIC)
 				dmmap_section = ((struct routingfwdargs *)data)->routefwdsection;
-			else if (((struct routingfwdargs *)data)->type == ROUTE_STATIC)
-				get_dmmap_section_of_config_section("dmmap_route_forwarding", "route", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
 			else
-				get_dmmap_section_of_config_section("dmmap_route_forwarding", "route_disabled", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+				get_dmmap_section_of_config_section("dmmap_route_forwarding", (route_type == ROUTE_STATIC) ? "route" : "route_disabled", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+
 			dmuci_set_value_by_section(dmmap_section, "routealias", value);
 			return 0;
 	}
@@ -1001,12 +1014,14 @@ static int set_router_ipv4forwarding_alias(char *refparam, struct dmctx *ctx, vo
 
 static int get_RoutingRouterIPv6Forwarding_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+	int route6_type = ((struct routingfwdargs *)data)->type;
 	struct uci_section *dmmap_section = NULL;
 
-	if(((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+	if (route6_type == ROUTE_DYNAMIC)
 		dmmap_section = ((struct routingfwdargs *)data)->routefwdsection;
 	else
-		get_dmmap_section_of_config_section("dmmap_route_forwarding", "route6", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+		get_dmmap_section_of_config_section("dmmap_route_forwarding", (route6_type == ROUTE_STATIC) ? "route6" : "route6_disabled", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+
 	dmuci_get_value_by_section_string(dmmap_section, "route6alias", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "cpe-%s", instance);
@@ -1015,6 +1030,7 @@ static int get_RoutingRouterIPv6Forwarding_Alias(char *refparam, struct dmctx *c
 
 static int set_RoutingRouterIPv6Forwarding_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	int route6_type = ((struct routingfwdargs *)data)->type;
 	struct uci_section *dmmap_section = NULL;
 
 	switch (action) {
@@ -1023,10 +1039,11 @@ static int set_RoutingRouterIPv6Forwarding_Alias(char *refparam, struct dmctx *c
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if(((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+			if (route6_type == ROUTE_DYNAMIC)
 				dmmap_section = ((struct routingfwdargs *)data)->routefwdsection;
 			else
-				get_dmmap_section_of_config_section("dmmap_route_forwarding", "route6", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+				get_dmmap_section_of_config_section("dmmap_route_forwarding", (route6_type == ROUTE_STATIC) ? "route6" : "route6_disabled", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+
 			dmuci_set_value_by_section(dmmap_section, "route6alias", value);
 			return 0;
 	}
@@ -1041,7 +1058,7 @@ static char *get_routing_perm(char *refparam, struct dmctx *dmctx, void *data, c
 	return NULL;
 }
 
-struct dm_permession_s DMRouting = {"0", &get_routing_perm};
+struct dm_permession_s DMRouting = {"1", &get_routing_perm};
 
 /*************************************************************
 * ADD DEL OBJ
@@ -1066,20 +1083,45 @@ static int add_ipv4forwarding(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int delete_ipv4forwarding(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *dmmap_section = NULL;
+	struct uci_section *route_s = NULL, *stmp = NULL, *dmmap_section = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_route_forwarding", "route", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
-			if (dmmap_section) dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section(((struct routingfwdargs *)data)->routefwdsection, NULL, NULL);
+			// Return 9008 error if the removed route is dynamic
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return FAULT_9008;
 
-			get_dmmap_section_of_config_section("dmmap_route_forwarding", "route_disabled", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
-			if (dmmap_section) dmuci_delete_by_section(dmmap_section, NULL, NULL);
+			// Remove dmmap section
+			get_dmmap_section_of_config_section("dmmap_route_forwarding", (((struct routingfwdargs *)data)->type == ROUTE_STATIC) ? "route" : "route_disabled", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+			dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+			// Remove config section
 			dmuci_delete_by_section(((struct routingfwdargs *)data)->routefwdsection, NULL, NULL);
 			break;
 		case DEL_ALL:
-			return FAULT_9005;
+			// Remove all static enable routes
+			uci_foreach_sections_safe("network", "route", stmp, route_s) {
+
+				// Remove dmmap section
+				get_dmmap_section_of_config_section("dmmap_route_forwarding", "route", section_name(route_s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				// Remove config section
+				dmuci_delete_by_section(route_s, NULL, NULL);
+			}
+
+			// Remove all static disable routes
+			uci_foreach_sections_safe("network", "route_disabled", stmp, route_s) {
+
+				// Remove dmmap section
+				get_dmmap_section_of_config_section("dmmap_route_forwarding", "route_disabled", section_name(route_s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				// Remove config section
+				dmuci_delete_by_section(route_s, NULL, NULL);
+			}
+
+			break;
 		}
 	return 0;
 }
@@ -1104,18 +1146,46 @@ static int add_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int delete_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *dmmap_section = NULL;
+	struct uci_section *route6_s = NULL, *stmp = NULL, *dmmap_section = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_route_forwarding", "route6", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
-			if (dmmap_section)
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+			// Return 9008 error if the removed route6 is dynamic
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return FAULT_9008;
+
+			// Remove dmmap section
+			get_dmmap_section_of_config_section("dmmap_route_forwarding", (((struct routingfwdargs *)data)->type == ROUTE_STATIC) ? "route6" : "route6_disabled", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
+			dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+			// Remove config section
 			dmuci_delete_by_section(((struct routingfwdargs *)data)->routefwdsection, NULL, NULL);
 			break;
 		case DEL_ALL:
-			return FAULT_9005;
-		}
+			// Remove all static enable routes
+			uci_foreach_sections_safe("network", "route6", stmp, route6_s) {
+
+				// Remove dmmap section
+				get_dmmap_section_of_config_section("dmmap_route_forwarding", "route6", section_name(route6_s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				// Remove config section
+				dmuci_delete_by_section(route6_s, NULL, NULL);
+			}
+
+			// Remove all static disable routes
+			uci_foreach_sections_safe("network", "route6_disabled", stmp, route6_s) {
+
+				// Remove dmmap section
+				get_dmmap_section_of_config_section("dmmap_route_forwarding", "route6_disabled", section_name(route6_s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				// Remove config section
+				dmuci_delete_by_section(route6_s, NULL, NULL);
+			}
+
+			break;
+	}
 	return 0;
 }
 
@@ -1315,7 +1385,7 @@ DMLEAF tRoutingRouterIPv4ForwardingParams[] = {
 {"StaticRoute", &DMREAD, DMT_BOOL, get_router_ipv4forwarding_static_route, NULL, BBFDM_BOTH},
 {"DestIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destip, set_router_ipv4forwarding_destip, BBFDM_BOTH},
 {"DestSubnetMask", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destmask, set_router_ipv4forwarding_destmask, BBFDM_BOTH},
-{"ForwardingPolicy", &DMREAD, DMT_INT, get_router_ipv4forwarding_forwarding_policy, NULL, BBFDM_BOTH},
+{"ForwardingPolicy", &DMRouting, DMT_INT, get_router_ipv4forwarding_forwarding_policy, set_router_ipv4forwarding_forwarding_policy, BBFDM_BOTH},
 {"GatewayIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_gatewayip, set_router_ipv4forwarding_gatewayip, BBFDM_BOTH},
 {"Interface", &DMRouting, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH},
 {"Origin", &DMREAD, DMT_STRING, get_router_ipv4forwarding_origin, NULL, BBFDM_BOTH},
