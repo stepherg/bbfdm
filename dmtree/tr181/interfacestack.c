@@ -511,17 +511,17 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
 				struct uci_section *wl_s = NULL;
-				char *wl_device;
+				char *wl_device = NULL;
 				uci_foreach_option_eq("wireless", "wifi-iface", "ifname", device, wl_s) {
 					dmuci_get_value_by_section_string(wl_s, "device", &wl_device);
 					break;
 				}
 
-				if (wl_device[0] != '\0') {
+				if (wl_device && wl_device[0] != '\0') {
 					adm_entry_get_linker_param(dmctx, "Device.WiFi.Radio.", wl_device, &vb);
 					struct uci_section *ss = NULL;
 					uci_foreach_sections("wireless", "wifi-device", ss) {
-						if(strcmp(section_name(ss), device) == 0) {
+						if(strcmp(section_name(ss), wl_device) == 0) {
 							loweralias = get_alias_by_section("dmmap_wireless", "wifi-device", ss, "radioalias");
 							bridge_port_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_wireless", "wifi-device", "section_name", section_name(ss), "radioinstance", "radioalias");
 							break;
