@@ -275,19 +275,25 @@ static int get_ServicesVoiceServiceCallControlLine_Origin(char *refparam, struct
 /*#Device.Services.VoiceService.{i}.CallControl.Line.{i}.DirectoryNumber!UCI:asterisk/tel_line,@i-1/extension*/
 static int get_ServicesVoiceServiceCallControlLine_DirectoryNumber(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "extension", value);
+	char *sip_account = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "sip_account", &sip_account);
+	dmuci_get_option_value_string("asterisk", sip_account, "user", value);
 	return 0;
 }
 
 static int set_ServicesVoiceServiceCallControlLine_DirectoryNumber(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
+	char *sip_account = NULL;
+
+	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 32, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "extension", value);
+			dmuci_get_value_by_section_string((struct uci_section *)data, "sip_account", &sip_account);
+			dmuci_set_value("asterisk", sip_account, "user", value);
 			break;
 	}
 	return 0;
