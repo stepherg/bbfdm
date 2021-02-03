@@ -366,7 +366,7 @@ static int get_SecurityCertificate_NotBefore(char *refparam, struct dmctx *ctx, 
 	struct tm not_before_time;
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	char not_before_str[DATE_LEN];
-	ASN1_TIME *not_before = X509_get_notBefore(cert_profile->openssl_cert);
+	const ASN1_TIME *not_before = X509_get0_notBefore(cert_profile->openssl_cert);
 	ASN1_TIME_to_tm(not_before, &not_before_time);
 	strftime(not_before_str, sizeof(not_before_str), "%Y-%m-%dT%H:%M:%SZ", &not_before_time);
 	*value = dmstrdup(not_before_str);
@@ -384,7 +384,7 @@ static int get_SecurityCertificate_NotAfter(char *refparam, struct dmctx *ctx, v
 	struct tm not_after_time;
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	char not_after_str[DATE_LEN];
-	ASN1_TIME *not_after = X509_get_notAfter(cert_profile->openssl_cert);
+	const ASN1_TIME *not_after = X509_get0_notAfter(cert_profile->openssl_cert);
 	ASN1_TIME_to_tm(not_after, &not_after_time);
 	strftime(not_after_str, sizeof(not_after_str), "%Y-%m-%dT%H:%M:%SZ", &not_after_time);
 	*value = dmstrdup(not_after_str);
