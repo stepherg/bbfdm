@@ -91,8 +91,7 @@ static struct uci_section *create_dmmap_interface_stack_section(char *curr_inst)
 static int create_and_link_interface_stack_instance(struct dmctx *dmctx, DMNODE *parent_node, char *higherlayer, char *lowerlayer, char *higheralias, char *loweralias, char *max_inst, int *instance)
 {
 	struct interfacestack_data intf_stack_data = {0};
-	struct uci_section *dmmap_s = NULL;
-	char *inst = NULL, buf_instance[16] = {0};
+	char buf_instance[16] = {0};
 
 	// fill interface stack data
 	intf_stack_data.higherlayer = higherlayer;
@@ -102,10 +101,10 @@ static int create_and_link_interface_stack_instance(struct dmctx *dmctx, DMNODE 
 
 	// create dmmap section
 	snprintf(buf_instance, sizeof(buf_instance), "%d", ++(*instance));
-	dmmap_s = create_dmmap_interface_stack_section(buf_instance);
+	struct uci_section *dmmap_s = create_dmmap_interface_stack_section(buf_instance);
 
 	// link instance to interface stack data
-	inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+	char *inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
 		   dmmap_s, "interface_stack_instance", "interface_stack_alias");
 
 	if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
@@ -178,7 +177,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			if (device[0] != '\0' && found == 0) {
 				// The lower layer is Device.Ethernet.Link.{i}.
 				char linker[32] = {0};
-				strncpy(linker, device, sizeof(linker) - 1);
+				DM_STRNCPY(linker, device, sizeof(linker));
 				char *vid = strchr(linker, '.');
 				if (vid) *vid = '\0';
 				adm_entry_get_linker_param(dmctx, "Device.Ethernet.Link.", linker, &value);
@@ -230,7 +229,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		if (found == 0) {
 			// The lower layer is Device.Ethernet.Link.{i}.
 			char linker[32] = {0};
-			strncpy(linker, ppp_device, sizeof(linker) - 1);
+			DM_STRNCPY(linker, ppp_device, sizeof(linker));
 			char *vid = strchr(linker, '.');
 			if (vid) *vid = '\0';
 			adm_entry_get_linker_param(dmctx, "Device.Ethernet.Link.", linker, &value);
@@ -304,7 +303,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			// The lower layer is Device.Bridging.Bridge.{i}.Port.{i}.
 			char *int_name;
 			dmuci_get_value_by_section_string(s, "section_name", &int_name);
-			struct uci_section *dmmap_section, *port;
+			struct uci_section *dmmap_section, *port = NULL;
 
 			get_dmmap_section_of_config_section("dmmap_bridge", "bridge", int_name, &dmmap_section);
 
@@ -419,7 +418,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			// The lower layer is Device.Ethernet.Interface.{i}.
 			adm_entry_get_linker_param(dmctx, "Device.Ethernet.Interface.", device, &value);
 			if (value != NULL) {
-				strncpy(package, "ports", sizeof(package) - 1);
+				DM_STRNCPY(package, "ports", sizeof(package));
 				struct uci_section *port_s = NULL;
 				uci_foreach_option_eq("ports", "ethport", "ifname", device, port_s) {
 					loweralias = get_alias_by_section("dmmap_ports", "ethport", port_s, "eth_port_alias");
@@ -434,7 +433,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				adm_entry_get_linker_param(dmctx, "Device.WiFi.SSID.", device, &value);
 
 			if (!found && value != NULL) {
-				strncpy(package, "wireless", sizeof(package) - 1);
+				DM_STRNCPY(package, "wireless", sizeof(package));
 				struct uci_section *wl_s = NULL;
 				uci_foreach_option_eq("wireless", "wifi-iface", "ifname", device, wl_s) {
 					loweralias = get_alias_by_section("dmmap_wireless", "wifi-iface", wl_s, "ssidalias");
@@ -452,7 +451,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			}
 
 			if (!found && value != NULL) {
-				strncpy(package, "dsl:atm", sizeof(package) - 1);
+				DM_STRNCPY(package, "dsl:atm", sizeof(package));
 				struct uci_section *dsl_s = NULL;
 				uci_foreach_option_eq("dsl", "atm-device", "device", device, dsl_s) {
 					loweralias = get_alias_by_section("dmmap_dsl", "atm-device", dsl_s, "atmlinkalias");
@@ -470,7 +469,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			}
 
 			if (!found && value != NULL) {
-				strncpy(package, "dsl:ptm", sizeof(package) - 1);
+				DM_STRNCPY(package, "dsl:ptm", sizeof(package));
 				struct uci_section *dsl_s = NULL;
 				uci_foreach_option_eq("dsl", "ptm-device", "device", device, dsl_s) {
 					loweralias = get_alias_by_section("dmmap_dsl", "ptm-device", dsl_s, "ptmlinkalias");
@@ -488,7 +487,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			}
 
 			if (!found && value != NULL) {
-				strncpy(package, "ports", sizeof(package) - 1);
+				DM_STRNCPY(package, "ports", sizeof(package));
 				struct uci_section *port_s = NULL;
 				uci_foreach_option_eq("ports", "ethport", "ifname", device, port_s) {
 					loweralias = get_alias_by_section("dmmap_ports", "ethport", port_s, "eth_port_alias");

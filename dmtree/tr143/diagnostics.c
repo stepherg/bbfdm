@@ -1589,7 +1589,7 @@ static int get_IPDiagnosticsServerSelectionDiagnostics_MaximumResponseTime(char 
 static int browseIPDiagnosticsTraceRouteRouteHopsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "RouteHops", s) {
 
@@ -1605,7 +1605,7 @@ static int browseIPDiagnosticsTraceRouteRouteHopsInst(struct dmctx *dmctx, DMNOD
 static int browseIPDiagnosticsDownloadDiagnosticsPerConnectionResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "DownloadPerConnection", s) {
 
@@ -1621,7 +1621,7 @@ static int browseIPDiagnosticsDownloadDiagnosticsPerConnectionResultInst(struct 
 static int browseIPDiagnosticsUploadDiagnosticsPerConnectionResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "UploadPerConnection", s) {
 

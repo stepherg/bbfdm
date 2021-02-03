@@ -12,57 +12,6 @@
 
 #include "dmjson.h"
 
-static json_object *dmjson_jobj = NULL;
-
-void dm_add_json_obj(json_object *json_obj_out, char *object, char *string)
-{
-	if (object != NULL && string != NULL) {
-		json_object *json_obj_tmp = json_object_new_string(string);
-		json_object_object_add(json_obj_out, object, json_obj_tmp);
-	}
-}
-
-static void inline __dmjson_fprintf(FILE *fp, int argc, struct dmjson_arg dmarg[])
-{
-	int i;
-	char *arg;
-	json_object *json_obj_out = json_object_new_object();
-	if (json_obj_out == NULL)
-		return;
-
-	if (argc) {
-		for (i = 0; i < argc; i++) {
-			dm_add_json_obj(json_obj_out, dmarg[i].key, dmarg[i].val);
-		}
-		arg = (char *)json_object_to_json_string(json_obj_out);
-		fprintf(fp, "%s\n", arg);
-	}
-
-	json_object_put(json_obj_out);
-}
-
-void dmjson_fprintf(FILE *fp, int argc, struct dmjson_arg dmarg[])
-{
-	__dmjson_fprintf(fp, argc, dmarg);
-}
-
-void bbf_api_dmjson_parse_init(char *msg)
-{
-	if (dmjson_jobj) {
-		json_object_put(dmjson_jobj);
-		dmjson_jobj = NULL;
-	}
-	dmjson_jobj = json_tokener_parse(msg);
-}
-
-void bbf_api_dmjson_parse_fini(void)
-{
-	if (dmjson_jobj) {
-		json_object_put(dmjson_jobj);
-		dmjson_jobj = NULL;
-	}
-}
-
 static char *dmjson_print_value(json_object *jobj)
 {
 	enum json_type type;
@@ -87,13 +36,8 @@ static char *dmjson_print_value(json_object *jobj)
 
 char *____dmjson_get_value_in_obj(json_object *mainjobj, char *argv[])
 {
-	json_object *jobj = NULL;
-	char *value = "";
-
-	jobj = bbf_api_dmjson_select_obj(mainjobj, argv);
-	value = dmjson_print_value(jobj);
-
-	return value;
+	json_object *jobj = bbf_api_dmjson_select_obj(mainjobj, argv);
+	return dmjson_print_value(jobj);
 }
 
 char *__dmjson_get_value_in_obj(json_object *mainjobj, int argc, ...)
@@ -125,10 +69,9 @@ json_object *__dmjson_get_obj(json_object *mainjobj, int argc, ...)
 	argv[argc] = NULL;
 	va_end(arg);
 	return bbf_api_dmjson_select_obj(mainjobj, argv);
-	//return v;
 }
 
-json_object *bbf_api_dmjson_select_obj(json_object * jobj, char *argv[])
+json_object *bbf_api_dmjson_select_obj(json_object *jobj, char *argv[])
 {
 	int i;
 	for (i = 0; argv[i]; i++) {
@@ -243,7 +186,7 @@ char *____dmjson_get_value_array_all(json_object *mainjobj, char *delim, char *a
 {
 	json_object *arrobj;
 	char *v, *ret = "";
-	int i, dlen;
+	int i, dlen, rlen;
 
 	delim = (delim) ? delim : ",";
 	dlen = strlen(delim);
@@ -255,9 +198,9 @@ char *____dmjson_get_value_array_all(json_object *mainjobj, char *delim, char *a
 		if (*ret == '\0') {
 			ret = dmstrdup(v);
 		} else if (*v) {
-			ret = dmrealloc(ret, strlen(ret) + dlen + strlen(v) + 1);
-			strcat(ret, delim);
-			strcat(ret, v);
+			rlen = strlen(ret);
+			ret = dmrealloc(ret, rlen + dlen + strlen(v) + 1);
+			snprintf(&ret[rlen], dlen + strlen(v) + 1, "%s%s", delim, v);
 		}
 	}
 	return ret;
@@ -277,30 +220,4 @@ char *__dmjson_get_value_array_all(json_object *mainjobj, char *delim, int argc,
 	va_end(arg);
 	ret = ____dmjson_get_value_array_all(mainjobj, delim, argv);
 	return ret;
-}
-
-void bbf_api_dmjson_get_var(char *jkey, char **jval)
-{
-	*jval = "";
-
-	if (dmjson_jobj == NULL)
-		return;
-
-	json_object_object_foreach(dmjson_jobj, key, val) {
-		if (strcmp(jkey, key) == 0) {
-			*jval = dmjson_print_value(val);
-			return;
-		}
-	}
-}
-
-void bbf_api_dmjson_get_string(char *jkey, char **jval)
-{
-	*jval = "";
-	if (dmjson_jobj == NULL)
-		return;
-
-	struct json_object *get_obj;
-	if (json_object_object_get_ex(dmjson_jobj, jkey, &get_obj))
-		*jval = (char *)json_object_get_string(get_obj);
 }

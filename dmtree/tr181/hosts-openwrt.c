@@ -129,18 +129,3 @@ int os__get_HostsHostWANStats_PacketsReceived(char *refparam, struct dmctx *ctx,
 {
 	return not_implemented(value);
 }
-
-int os__get_HostsHostWANStats_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	return not_implemented(value);
-}
-
-int os__get_HostsHostWANStats_RetransCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	return not_implemented(value);
-}
-
-int os__get_HostsHostWANStats_DiscardPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	return not_implemented(value);
-}

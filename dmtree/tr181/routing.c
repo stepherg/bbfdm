@@ -184,7 +184,7 @@ static int parse_proc_route6_line(const char *line, char *ipstr, char *gwstr, ch
 	gw[3] = htonl(gw[3]);
 
 	inet_ntop(AF_INET6, ip, ipbuf, INET6_ADDRSTRLEN);
-	sprintf(ipstr, "%s/%u", ipbuf, prefix);
+	snprintf(ipstr, INET6_ADDRSTRLEN + 8, "%s/%u", ipbuf, prefix);
 	inet_ntop(AF_INET6, gw, gwstr, INET6_ADDRSTRLEN);
 
 	return 0;
@@ -264,19 +264,19 @@ static char *forwarding_update_instance_alias_bbfdm(int action, char **last_inst
 
 static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct uci_section *s = NULL, *stmp;
+	struct uci_section *s = NULL, *stmp = NULL;
 	struct proc_routing proute = {0};
 	json_object *jobj;
 	FILE* fp = NULL;
-	char *target, *iface, *str, line[MAX_PROC_ROUTING];
-	int found, lines;
+	char *target = NULL, *iface = NULL, *str = NULL, line[MAX_PROC_ROUTING] = {0};
+	int lines;
 
 	uci_path_foreach_sections_safe(bbfdm, "dmmap_route_forwarding", "route_dynamic", stmp, s) {
 		dmuci_get_value_by_section_string(s, "target", &target);
 		dmuci_get_value_by_section_string(s, "device", &iface);
-		found = 0;
 		fp = fopen(PROC_ROUTE, "r");
 		if ( fp != NULL) {
+			bool found = false;
 			lines = 0;
 			while (fgets(line, MAX_PROC_ROUTING, fp) != NULL) {
 				if (line[0] == '\n' || lines == 0) { /* skip the first line or skip the line if it's empty */
@@ -285,7 +285,7 @@ static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMN
 				}
 				parse_proc_route_line(line, &proute);
 				if ((strcmp(iface, proute.iface) == 0) && strcmp(target, proute.destination) == 0) {
-					found = 1;
+					found = true;
 					break;
 				}
 			}
@@ -449,7 +449,7 @@ static int get_RoutingRouter_Status(char *refparam, struct dmctx *ctx, void *dat
 /*#Device.Routing.Router.{i}.IPv4ForwardingNumberOfEntries!UCI:network/route/*/
 static int get_RoutingRouter_IPv4ForwardingNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	int cnt = 0;
 
 	uci_foreach_sections("network", "route", s) {
@@ -469,7 +469,7 @@ static int get_RoutingRouter_IPv4ForwardingNumberOfEntries(char *refparam, struc
 /*#Device.Routing.Router.{i}.IPv6ForwardingNumberOfEntries!UCI:network/route6/*/
 static int get_RoutingRouter_IPv6ForwardingNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	int cnt = 0;
 
 	uci_foreach_sections("network", "route6", s) {
@@ -1216,7 +1216,7 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	struct uci_section *ss = NULL;
 	bool find_max = true, ipv4_forwarding = true;
 	struct routingfwdargs curr_routefwdargs = {0};
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	// Enable Routes
@@ -1271,7 +1271,7 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	struct uci_section *ss = NULL;
 	bool find_max = true, ipv4_forwarding = false;
 	struct routingfwdargs curr_route6fwdargs = {0};
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	// Enable Routes
@@ -1322,7 +1322,7 @@ end:
 static int browseRoutingRouteInformationInterfaceSettingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
 
 	uci_foreach_sections("network", "interface", s) {

@@ -15,7 +15,7 @@
 int browseXIopsysEuButton(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("buttons", "button", "dmmap_buttons", &dup_list);
@@ -43,13 +43,10 @@ static int get_x_iopsys_eu_button_name(char *refparam, struct dmctx *ctx, void *
 
 static int get_x_iopsys_eu_button_gpio(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_list *val;
+	struct uci_list *val = NULL;
 
 	dmuci_get_value_by_section_list((struct uci_section *)data, "button", &val);
-	if (val)
-		*value = dmuci_list_to_string(val, " ");
-	else
-		*value = "";
+	*value = dmuci_list_to_string(val, " ");
 	return 0;
 }
 

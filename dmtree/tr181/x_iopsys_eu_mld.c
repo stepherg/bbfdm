@@ -50,7 +50,7 @@ static int browse_mld_proxy_inst(struct dmctx *dmctx, DMNODE *parent_node, void 
 {
 	char *inst = NULL, *max_inst = NULL;
 	struct browse_args browse_args = {0};
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_cont("mcast", "proxy", "dmmap_mcast", "proto", "mld", &dup_list);
@@ -107,7 +107,7 @@ static int browse_mld_snooping_inst(struct dmctx *dmctx, DMNODE *parent_node, vo
 {
 	char *inst = NULL, *max_inst = NULL;
 	struct browse_args browse_args = {0};
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_cont("mcast", "snooping", "dmmap_mcast", "proto", "mld", &dup_list);
@@ -483,7 +483,7 @@ static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 	char *linker = NULL, *interface_linker = NULL;
 	char ifname[16];
 	char *up, *f_inst, *if_type;
-	struct uci_section *d_sec, *s;
+	struct uci_section *d_sec = NULL, *s = NULL;
 	bool b;
 
 	switch (action) {
@@ -558,11 +558,11 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 	if (strstr(mldp_ifname, "br-")) {
 		// Interface is bridge type, convert to network uci file section name
 		char val[16] = {0};
-		strncpy(val, mldp_ifname, sizeof(val) - 1);
+		DM_STRNCPY(val, mldp_ifname, sizeof(val));
 		char *tok, *end;
 		tok = strtok_r(val, "-", &end);
 		if (strcmp(tok, "br") == 0) {
-			strncpy(sec_name, end, sizeof(sec_name) - 1);
+			DM_STRNCPY(sec_name, end, sizeof(sec_name));
 		} else {
 			goto end;
 		}

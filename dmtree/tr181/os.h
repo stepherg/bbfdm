@@ -102,9 +102,6 @@ int os__get_access_point_associative_device_statistics_tx_packets(char *refparam
 int os__get_access_point_associative_device_statistics_rx_packets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os__get_access_point_associative_device_statistics_tx_errors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os__get_access_point_associative_device_statistics_retrans_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-int os__get_access_point_associative_device_statistics_failed_retrans_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-int os__get_access_point_associative_device_statistics_retry_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-int os__get_access_point_associative_device_statistics_multiple_retry_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os__get_radio_max_bit_rate (char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os__get_radio_frequency(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os__get_radio_supported_frequency_bands(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
@@ -333,7 +330,6 @@ int os_get_QoSQueueStats_OutputPackets(char *refparam, struct dmctx *ctx, void *
 int os_get_QoSQueueStats_OutputBytes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os_get_QoSQueueStats_DroppedPackets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os_get_QoSQueueStats_DroppedBytes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-//int os_get_QoSQueueStats_QueueOccupancyPackets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int os_browseQoSQueueInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);
 int os_browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);
 int os_addObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char **instance);

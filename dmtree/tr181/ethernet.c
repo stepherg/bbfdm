@@ -47,7 +47,7 @@ static inline int init_eth_rmon(struct eth_rmon_args *args, struct uci_section *
 **************************************************************/
 int is_vlan_termination_section(const char *name)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_foreach_sections("network", "interface", s) {
 
@@ -124,7 +124,7 @@ static int check_section_in_curr_section(char *curr_section, char *section)
 {
 	char *pch = NULL, *pchr = NULL, section_list[256] = {0};
 
-	strncpy(section_list, curr_section, sizeof(section_list) - 1);
+	DM_STRNCPY(section_list, curr_section, sizeof(section_list));
 	for (pch = strtok_r(section_list, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
 		if (strcmp(pch, section) == 0)
 			return 1;
@@ -175,7 +175,7 @@ static void create_link(char *sec_name, char *mac_addr)
 
 	/* For all the Ethernet link objects pointing to same Ethernet Interface, only one ethernet link */
 	char intf[32] = {0};
-	strncpy(intf, device, sizeof(intf) - 1);
+	DM_STRNCPY(intf, device, sizeof(intf));
 	char *vid = strchr(intf, '.');
 	char *macvlan = strchr(intf, '_');
 	if (vid != NULL || !macvlan) {
@@ -247,7 +247,7 @@ static int dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_nod
 
 static char *get_vlan_last_instance_bbfdm(char *package, char *section, char *opt_inst)
 {
-	struct uci_section *s, *confsect;
+	struct uci_section *s = NULL, *confsect;
 	char *inst = NULL, *last_inst = NULL, *type, *sect_name, *name;
 
 	uci_path_foreach_sections(bbfdm, package, section, s) {
@@ -699,21 +699,18 @@ static int get_EthernetInterface_MACAddress(char *refparam, struct dmctx *ctx, v
 static int get_EthernetInterface_MaxBitRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *link_supported = NULL;
-	int rate = 0, arrlen = 0;
-	char *max_link, *autoneg;
+	int rate = 0;
 
 	dmubus_call("network.device", "status", UBUS_ARGS{{"name", ((struct eth_port_args *)data)->ifname, String}}, 1, &res);
 	DM_ASSERT(res, *value = "-1");
-	autoneg = dmjson_get_value(res, 1, "autoneg");
-	if (strcmp(autoneg, "true") == 0) {
+	char *autoneg = dmjson_get_value(res, 1, "autoneg");
+	if (autoneg && strcmp(autoneg, "true") == 0) {
 		*value = "-1";
 	} else {
 		json_object_object_get_ex(res, "link-supported", &link_supported);
-		if (link_supported)
-			arrlen = json_object_array_length(link_supported);
-
+		int arrlen = link_supported ? json_object_array_length(link_supported) : 0;
 		if (arrlen) {
-			max_link = dmjson_get_value_in_array_idx(link_supported, arrlen - 1, 0);
+			char *max_link = dmjson_get_value_in_array_idx(link_supported, arrlen - 1, 0);
 			sscanf(max_link, "%d%*s", &rate);
 			dmasprintf(value, "%d", rate);
 		}
@@ -758,12 +755,12 @@ static int get_EthernetInterface_CurrentBitRate(char *refparam, struct dmctx *ct
 static int get_EthernetInterface_DuplexMode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL;
-	char mode, *speed, *autoneg;
+	char mode, *speed = NULL;
 
 	dmubus_call("network.device", "status", UBUS_ARGS{{"name", ((struct eth_port_args *)data)->ifname, String}}, 1, &res);
 	DM_ASSERT(res, *value = "Auto");
-	autoneg = dmjson_get_value(res, 1, "autoneg");
-	if (strcmp(autoneg, "true") == 0) {
+	char *autoneg = dmjson_get_value(res, 1, "autoneg");
+	if (autoneg && strcmp(autoneg, "true") == 0) {
 		*value = "Auto";
 	} else {
 		speed = dmjson_get_value(res, 1, "speed");
@@ -1046,20 +1043,20 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 			} else if (strncmp(value, "Device.Bridging.Bridge.", 23) == 0) {
 				char br_linker[250] = {0};
 
-				strncpy(br_linker, link_linker, sizeof(br_linker) - 1);
+				DM_STRNCPY(br_linker, link_linker, sizeof(br_linker));
 
 				char *bridge = strchr(br_linker, ':');
 				if (bridge) {
 					*bridge = '\0';
 					char br_inst[8] = {0};
-					strncpy(br_inst, br_linker+3, sizeof(br_inst) - 1);
+					DM_STRNCPY(br_inst, br_linker+3, sizeof(br_inst));
 
-					struct uci_section *port;
+					struct uci_section *port = NULL;
 					char *interface, *curr_interface;
 
 					// Remove the network section corresponding to this dmmap interface if exists
 					dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &curr_interface);
-					struct uci_section *s, *tmp;
+					struct uci_section *s = NULL, *tmp = NULL;
 					uci_foreach_sections_safe("network", "interface", tmp, s) {
 						if (strcmp(section_name(s), curr_interface) == 0) {
 							char *proto;
@@ -1279,7 +1276,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 
 					uci_foreach_option_eq("network", "interface", "ifname", vlan_linker, s) {
 						dmuci_set_value_by_section(s, "ifname", new_name);
-						strncpy(sec_name, section_name(s), sizeof(sec_name) - 1);
+						DM_STRNCPY(sec_name, section_name(s), sizeof(sec_name));
 						break;
 					}
 
@@ -1472,8 +1469,8 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 			dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "name", &name);
 			struct uci_section *s = NULL, *dmmap_s = NULL;
-			char *link_instance, new_name[16] = {0};
 			if (b && *name != '\0') {
+				char *link_instance = NULL, new_name[16] = {0};
 				int name_found = 0;
 
 				uci_foreach_option_eq("network", "interface", "ifname", name, s) {

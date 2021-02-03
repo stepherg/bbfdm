@@ -149,7 +149,7 @@ static unsigned dm_ubus_req_hash(const struct dm_ubus_req *req)
 
 static const struct dm_ubus_cache_entry * dm_ubus_cache_lookup(unsigned hash)
 {
-	const struct dm_ubus_cache_entry *entry;
+	const struct dm_ubus_cache_entry *entry = NULL;
 	const struct dm_ubus_cache_entry *entry_match = NULL;
 
 	list_for_each_entry(entry, &dmubus_cache, list) {
@@ -204,8 +204,8 @@ int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_si
 
 static void receive_list_result(struct ubus_context *ctx, struct ubus_object_data *obj, void *priv)
 {
-	struct blob_attr *cur;
-	size_t rem;
+	struct blob_attr *cur = NULL;
+	size_t rem = 0;
 
 	if (!obj->signature  || *ubus_method == '\0')
 		return;
@@ -236,7 +236,7 @@ bool dmubus_object_method_exists(const char *obj)
 		*delimiter = '\0';
 	}
 
-	strncpy(ubus_method, method, sizeof(ubus_method) - 1);
+	DM_STRNCPY(ubus_method, method, sizeof(ubus_method));
 	ubus_method_exists = false;
 
 	if (ubus_lookup(ubus_ctx, obj, receive_list_result, NULL))

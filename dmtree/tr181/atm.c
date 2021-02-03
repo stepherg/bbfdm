@@ -337,11 +337,12 @@ static int browseAtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 {
 	char *inst = NULL, *max_inst = NULL, *ifname;
 	struct atm_args curr_atm_args = {0};
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("dsl", "atm-device", "dmmap_dsl", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
+
 		dmuci_get_value_by_section_string(p->config_section, "device", &ifname);
 		init_atm_link(&curr_atm_args, p->config_section, ifname);
 

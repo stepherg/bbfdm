@@ -34,8 +34,8 @@ LIB_MAP_OPERATE tRootDynamicOperate[] = {
 /*************************************************************/
 static int execute_bbk_speedtest()
 {
-	json_object *res;
-	char *latency, *download, *upload = NULL;
+	json_object *res = NULL;
+	char *latency = NULL, *download = NULL, *upload = NULL;
 
 	dmubus_call("bbk", "start", UBUS_ARGS{}, 0, &res);
 	if (res) {
@@ -62,10 +62,8 @@ static char *bbk_speedtest_get(char *option, char *default_value)
 
 void bbk_speedtest_set(char *option, char *value)
 {
-	struct uci_section *section = NULL;
-
 	check_create_dmmap_package("dmmap_diagnostics");
-	section = dmuci_walk_section_bbfdm("dmmap_diagnostics", "bbkspeedtest", NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
+	struct uci_section *section = dmuci_walk_section_bbfdm("dmmap_diagnostics", "bbkspeedtest", NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
 	if (!section)
 		dmuci_set_value_bbfdm("dmmap_diagnostics", "bbkspeedtest", "", "bbkspeedtest");
 

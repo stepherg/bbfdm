@@ -297,7 +297,7 @@ static void dhcp_leases_assign_to_interface(struct dhcp_args *dhcp,
 					struct list_head *src,
 					const char *iface)
 {
-	struct dhcp_lease *lease, *tmp;
+	struct dhcp_lease *lease = NULL, *tmp = NULL;
 	unsigned iface_addr;
 	unsigned iface_cidr;
 	unsigned iface_net;
@@ -396,7 +396,7 @@ static int check_ipv4_in_dhcp_pool(struct uci_section *dhcp_sec, char *interface
 
 static char *get_dhcp_network_from_relay_list(char *net_list)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	char **net_list_arr, *v;
 	int i;
 	size_t length;
@@ -591,7 +591,7 @@ static int addObjDHCPv4Client(char *refparam, struct dmctx *ctx, void *data, cha
 static int delObjDHCPv4Client(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct dhcp_client_args *dhcp_client_args = (struct dhcp_client_args*)data;
-	struct uci_section *s, *dmmap_section, *stmp;
+	struct uci_section *s = NULL, *dmmap_section = NULL, *stmp = NULL;
 	json_object *res, *jobj;
 
 	char *v;
@@ -686,7 +686,7 @@ static int addObjDHCPv4ClientSentOption(char *refparam, struct dmctx *ctx, void 
 
 static int delObjDHCPv4ClientSentOption(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s, *stmp;
+	struct uci_section *s = NULL, *stmp = NULL;
 	char *list= NULL, *opt_value= NULL;
 
 	switch (del_action) {
@@ -733,7 +733,7 @@ static int addObjDHCPv4ClientReqOption(char *refparam, struct dmctx *ctx, void *
 
 static int delObjDHCPv4ClientReqOption(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s, *stmp;
+	struct uci_section *s = NULL, *stmp = NULL;
 	char *list = NULL;
 
 	switch (del_action) {
@@ -778,7 +778,7 @@ static int addObjDHCPv4ServerPoolOption(char *refparam, struct dmctx *ctx, void 
 
 static int delObjDHCPv4ServerPoolOption(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s, *stmp;
+	struct uci_section *s = NULL, *stmp = NULL;
 	char *opt_value = NULL;
 	struct uci_list *dhcp_options_list = NULL;
 
@@ -1010,7 +1010,6 @@ static int set_DHCPv4ServerPool_MinAddress(char *refparam, struct dmctx *ctx, vo
 {
 	unsigned iface_addr, iface_bits, iface_net_start, iface_net_end, value_addr;
 	int start = 0, limit = 0;
-	char buf[32] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -1027,6 +1026,7 @@ static int set_DHCPv4ServerPool_MinAddress(char *refparam, struct dmctx *ctx, vo
 			unsigned value_net = ntohl(value_addr) & iface_bits;
 
 			if (value_net == iface_net) {
+				char buf[32] = {0};
 
 				unsigned dhcp_start = ntohl(value_addr) - iface_net;
 				unsigned dhcp_limit = start + limit - dhcp_start;
@@ -1069,7 +1069,6 @@ static int set_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, vo
 {
 	unsigned iface_addr, iface_bits, iface_net_start, iface_net_end, value_addr;
 	int start = 0, limit = 0;
-	char buf[32] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -1086,6 +1085,7 @@ static int set_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, vo
 			unsigned value_net = ntohl(value_addr) & iface_bits;
 
 			if (value_net == iface_net) {
+				char buf_limit[32] = {0};
 
 				unsigned dhcp_limit = ntohl(value_addr) - iface_net - start + 1;
 
@@ -1093,8 +1093,8 @@ static int set_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, vo
 				if ((int)dhcp_limit < 0)
 					return -1;
 
-				snprintf(buf, sizeof(buf), "%u", dhcp_limit);
-				dmuci_set_value_by_section(((struct dhcp_args *)data)->dhcp_sec, "limit", buf);
+				snprintf(buf_limit, sizeof(buf_limit), "%u", dhcp_limit);
+				dmuci_set_value_by_section(((struct dhcp_args *)data)->dhcp_sec, "limit", buf_limit);
 
 			}
 
@@ -1173,7 +1173,7 @@ static int set_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 
 				char *ip = NULL;
 				dmuci_get_value_by_section_string(s, "ip", &ip);
-				if (ip && ip[0] == '\0')
+				if (ip == NULL || *ip == '\0')
 					continue;
 
 				// Check if ip exists in the list value : yes -> skip it else delete it
@@ -1184,10 +1184,8 @@ static int set_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 			local_value = dmstrdup(value);
 			for (pch = strtok_r(local_value, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 
-				bool host_exist = false;
-
 				// Check if host exists
-				host_exist = check_dhcp_host_option_exists(((struct dhcp_args *)data)->interface, "ip", pch);
+				bool host_exist = check_dhcp_host_option_exists(((struct dhcp_args *)data)->interface, "ip", pch);
 
 				// host exists -> skip it
 				if (host_exist)
@@ -1366,7 +1364,7 @@ static int get_DHCPv4ServerPool_LeaseTime(char *refparam, struct dmctx *ctx, voi
 
 	*value = "-1";
 	dmuci_get_value_by_section_string(((struct dhcp_args *)data)->dhcp_sec, "leasetime", &ltime);
-	if (ltime && ltime[0] == '\0')
+	if (ltime == NULL || *ltime == '\0')
 		return 0;
 
 	if (strchr(ltime, 'd')) {
@@ -1413,7 +1411,7 @@ static int set_DHCPv4ServerPool_LeaseTime(char *refparam, struct dmctx *ctx, voi
 /*#Device.DHCPv4.Server.Pool.{i}.StaticAddressNumberOfEntries!UCI:dhcp/host/*/
 static int get_DHCPv4ServerPool_StaticAddressNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	int i = 0;
 
 	uci_foreach_option_eq("dhcp", "host", "dhcp", ((struct dhcp_args *)data)->interface, s) {
@@ -1433,7 +1431,7 @@ static int get_DHCPv4ServerPool_StaticAddressNumberOfEntries(char *refparam, str
 static int get_DHCPv4ServerPool_OptionNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_list *dhcp_options_list = NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	int i = 0;
 
 	dmuci_get_value_by_section_list(((struct dhcp_args *)data)->dhcp_sec, "dhcp_option", &dhcp_options_list);
@@ -1666,7 +1664,7 @@ static int get_DHCPv4ServerPoolClient_OptionNumberOfEntries(char *refparam, stru
 	while (fgets(line, sizeof(line), f) != NULL) {
 		remove_new_line(line);
 
-		sscanf(line, "%24s vcid=%128s clid=%128s ucid=%128s",
+		sscanf(line, "%23s vcid=%127s clid=%127s ucid=%127s",
 				macaddr, vcid, clid, ucid);
 
 		if (strncmp(macaddr, (char *)args->lease->hwaddr, 24) == 0) {
@@ -1724,7 +1722,7 @@ static int get_DHCPv4ServerPoolClientOption_Value(char *refparam, struct dmctx *
 
 static int get_DHCPv4_ClientNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s, *dmmap_sect;
+	struct uci_section *s = NULL, *dmmap_sect = NULL;
 	int nbre_confs = 0, nbre_dmmaps = 0;
 
 	uci_foreach_option_eq("network", "interface", "proto", "dhcp", s) {
@@ -2029,7 +2027,7 @@ static int get_DHCPv4ClientSentOption_Tag(char *refparam, struct dmctx *ctx, voi
 
 static int set_DHCPv4ClientSentOption_Tag(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *pch, *spch = NULL, *list, *v, *opttagvalue, **sendopts, *oldopttagvalue;
+	char *pch, *spch = NULL, *list, *v = NULL, *opttagvalue, **sendopts = NULL, *oldopttagvalue;
 	size_t length;
 
 	switch (action)	{
@@ -2204,7 +2202,7 @@ static int set_DHCPv4ClientReqOption_Tag(char *refparam, struct dmctx *ctx, void
 static int get_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_list *dhcp_option_list = NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	char **buf = NULL;
 	size_t length;
 
@@ -2229,7 +2227,7 @@ static int get_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 static int set_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_list *dhcp_option_list = NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	char **buf = NULL, *opt_value;
 	size_t length;
 	bool test = false, b;
@@ -2314,7 +2312,7 @@ static int set_DHCPv4ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, voi
 	char *opttagvalue, **option = NULL, *oldopttagvalue;
 	size_t length;
 	struct uci_list *dhcp_option_list = NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -2358,7 +2356,7 @@ static int set_DHCPv4ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 	char *opttagvalue, **option = NULL, *oldopttagvalue;
 	size_t length;
 	struct uci_list *dhcp_option_list = NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	char res[256] = {0};
 
 	switch (action)	{
@@ -2621,7 +2619,7 @@ static int get_DHCPv4Relay_Status(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_DHCPv4Relay_ForwardingNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s, *dmmap_sect;
+	struct uci_section *s = NULL, *dmmap_sect = NULL;
 	int nbre_confs = 0, nbre_dmmaps = 0;
 
 	uci_foreach_option_eq("network", "interface", "proto", "relay", s) {
@@ -2645,7 +2643,7 @@ static int browseDHCPv4ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, 
 {
 	char *ignore = NULL, *interface, *inst = NULL, *max_inst = NULL, *v;
 	struct dhcp_args curr_dhcp_args = {0};
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(leases);
 	LIST_HEAD(dup_list);
 
@@ -2686,7 +2684,7 @@ static int browseDHCPv4ServerPoolStaticAddressInst(struct dmctx *dmctx, DMNODE *
 	char *inst = NULL, *max_inst = NULL;
 	struct dhcp_host_args curr_dhcp_host_args = {0};
 	struct browse_args browse_args = {0};
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_cont("dhcp", "host", "dmmap_dhcp", "dhcp", ((struct dhcp_args *)prev_data)->interface, &dup_list);
@@ -2718,12 +2716,12 @@ static int browseDHCPv4ServerPoolStaticAddressInst(struct dmctx *dmctx, DMNODE *
 static int browseDhcpClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	const struct dhcp_args *dhcp = prev_data;
-	const struct dhcp_lease *lease;
+	const struct dhcp_lease *lease = NULL;
+	struct client_args client_args = {0};
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0;
 
 	list_for_each_entry(lease, &dhcp->leases, list) {
-		struct client_args client_args;
-		char *inst, *max_inst = NULL;
 
 		init_dhcp_client_args(&client_args, lease);
 
@@ -2737,9 +2735,9 @@ static int browseDhcpClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *
 
 static int browseDhcpClientIPv4Inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst, *max_inst = NULL;
+	char *max_inst = NULL;
 
-	inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, 1);
+	char *inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, 1);
 	DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, inst);
 	return 0;
 }
@@ -2759,7 +2757,7 @@ static int browseDHCPv4ServerPoolClientOptionInst(struct dmctx *dmctx, DMNODE *p
 	while (fgets(line, sizeof(line), f) != NULL) {
 		remove_new_line(line);
 
-		sscanf(line, "%24s vcid=%128s clid=%128s ucid=%128s",
+		sscanf(line, "%23s vcid=%127s clid=%127s ucid=%127s",
 				macaddr, vcid, clid, ucid);
 
 		if (strncmp(macaddr, (char *)args->lease->hwaddr, 24) == 0) {
@@ -2802,8 +2800,8 @@ static int browseDHCPv4ServerPoolClientOptionInst(struct dmctx *dmctx, DMNODE *p
 /*#Device.DHCPv4.Client.{i}.!UCI:network/interface/dmmap_dhcp_client*/
 static int browseDHCPv4ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst, *max_inst = NULL, *ipv4addr = "", *mask4 = NULL;
-	struct dmmap_dup *p;
+	char *inst = NULL, *max_inst = NULL, *ipv4addr = "", *mask4 = NULL;
+	struct dmmap_dup *p = NULL;
 	json_object *res, *jobj;
 	struct dhcp_client_args dhcp_client_arg = {0};
 	LIST_HEAD(dup_list);
@@ -2842,7 +2840,7 @@ static int browseDHCPv4ClientSentOptionInst(struct dmctx *dmctx, DMNODE *parent_
 	struct uci_section *dmmap_sect;
 	struct dhcp_client_option_args dhcp_client_opt_args = {0};
 	struct browse_args browse_args = {0};
-	char *inst, *max_inst = NULL, *tag, *value, **sentopts = NULL, **buf = NULL, *tmp, *optionvalue, *v = NULL;
+	char *inst = NULL, *max_inst = NULL, *tag, *value, **sentopts = NULL, **buf = NULL, *tmp, *optionvalue, *v = NULL;
 	size_t length = 0, lgh2;
 	int i, j;
 
@@ -2898,7 +2896,7 @@ static int browseDHCPv4ClientReqOptionInst(struct dmctx *dmctx, DMNODE *parent_n
 	struct uci_section *dmmap_sect;
 	struct dhcp_client_option_args dhcp_client_opt_args = {0};
 	struct browse_args browse_args = {0};
-	char *inst, *max_inst = NULL, *tag, **reqtopts = NULL, *v = NULL;
+	char *inst = NULL, *max_inst = NULL, *tag, **reqtopts = NULL, *v = NULL;
 	size_t length = 0;
 	int i;
 
@@ -2936,13 +2934,12 @@ static int browseDHCPv4ClientReqOptionInst(struct dmctx *dmctx, DMNODE *parent_n
 static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_list *dhcp_options_list = NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	struct dhcp_args *curr_dhcp_args = (struct dhcp_args*)prev_data;
-	struct uci_section *dmmap_sect;
+	struct uci_section *dmmap_sect = NULL;
 	struct browse_args browse_args = {0};
-	char **tagvalue = NULL, *inst, *max_inst = NULL, *optionvalue = NULL, *tmp, *dhcpv4_tag, *dhcpv4_value;
-	size_t length;
-	int j;
+	char **tagvalue = NULL, *inst = NULL, *max_inst = NULL, *optionvalue = NULL, *tmp = NULL, *dhcpv4_tag, *dhcpv4_value;
+	size_t length = 0;
 	struct dhcp_client_option_args dhcp_client_opt_args = {0};
 
 	dmuci_get_value_by_section_list(curr_dhcp_args->dhcp_sec, "dhcp_option", &dhcp_options_list);
@@ -2959,6 +2956,8 @@ static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 			}
 			optionvalue = dmstrdup(length > 1 ? tagvalue[1] : "");
 			if (length > 2) {
+				int j;
+
 				for (j = 2; j < length; j++) {
 					tmp = dmstrdup(optionvalue);
 					dmfree(optionvalue);
@@ -2998,8 +2997,8 @@ static int browseDHCPv4ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 static int browseDHCPv4RelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *relay_ipv4addr = NULL, *relay_mask4 = NULL;
-	char *inst, *max_inst = NULL, *relay_network = NULL, *dhcp_network = NULL;
-	struct dmmap_dup *p;
+	char *inst = NULL, *max_inst = NULL, *relay_network = NULL, *dhcp_network = NULL;
+	struct dmmap_dup *p = NULL;
 	json_object *res, *jobj;
 	struct dhcp_client_args dhcp_relay_arg = {0};
 	LIST_HEAD(dup_list);

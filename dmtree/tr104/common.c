@@ -38,14 +38,14 @@ int init_supported_codecs()
 
 	json_object_object_foreach(res, key, value) {
 		if (value) {
-			const char *codec;
-			int min = 0, max = 0, increment = 0, ptime_default = 0, duration, total_len, len;
+			const char *codec = NULL;
+			int min = 0, max = 0, increment = 0, ptime_default = 0;
 			int size = sizeof(supported_codecs[codecs_num].packetization_period);
 
-			strncpy(supported_codecs[codecs_num].uci_name, key, sizeof(supported_codecs[codecs_num].uci_name) - 1);
+			DM_STRNCPY(supported_codecs[codecs_num].uci_name, key, sizeof(supported_codecs[codecs_num].uci_name) - 1);
 			json_object_object_foreach(value, sub_key, sub_value) {
 				if (sub_value && !strcasecmp(sub_key, "name") && (codec = json_object_get_string(sub_value)) != NULL) {
-					strncpy(supported_codecs[codecs_num].codec, codec, sizeof(supported_codecs[codecs_num].codec));
+					DM_STRNCPY(supported_codecs[codecs_num].codec, codec, sizeof(supported_codecs[codecs_num].codec));
 				} else if (sub_value && !strcasecmp(sub_key, "bitrate")) {
 					supported_codecs[codecs_num].bit_rate = json_object_get_int(sub_value);
 				} else if (sub_value && !strcasecmp(sub_key, "ptime_min")) {
@@ -61,17 +61,19 @@ int init_supported_codecs()
 
 			// Construct packetization period
 			if (min > 0 && max > min) {
+				int duration = 0, total_len = 0;
+
 				if (increment <= 0)
 					increment = 10;
 				for (total_len = 0, duration = min; duration <= max; duration += increment) {
 					supported_codecs[codecs_num].ptime_default = (unsigned int)ptime_default;
-					len = snprintf(supported_codecs[codecs_num].packetization_period + total_len, size,
+					int len = snprintf(supported_codecs[codecs_num].packetization_period + total_len, size,
 							"%s%d", (duration == min) ? "" : ",", duration);
 					if (len > 0 && len < size) {
 						total_len += len;
 						size -= len;
 					} else {
-						TR104_DEBUG("supported_codecs[codecs_num].packetization_period = %s, "
+						BBF_DEBUG("supported_codecs[codecs_num].packetization_period = %s, "
 								"the size is too small\n", supported_codecs[codecs_num].packetization_period);
 						break;
 					}
@@ -111,7 +113,7 @@ static void convert_src_dst(char *src_or_dst, size_t buf_size)
 int init_call_log()
 {
 #define CHECK_RESULT(cond) if (!(cond)) { \
-	TR104_DEBUG("Invalid cdr [%s]\ncalling_number = [%s], called_number = [%s], " \
+		BBF_DEBUG("Invalid cdr [%s]\ncalling_number = [%s], called_number = [%s], " \
 		"start_time = [%s], end_time = %s\n", line, \
 		cdr.calling_num, cdr.called_num, cdr.start_time, end_time); \
 		continue; \
@@ -135,7 +137,7 @@ int init_call_log()
 
 	fp = fopen(CALL_LOG_FILE, "r");
 	if (!fp) {
-		TR104_DEBUG("Call log file %s doesn't exist\n", CALL_LOG_FILE);
+		BBF_DEBUG("Call log file %s doesn't exist\n", CALL_LOG_FILE);
 		res = -1;
 		goto __ret;
 	}
@@ -230,12 +232,12 @@ int init_call_log()
 		// Skip invalid call logs
 		if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||
 			cdr.start_time[0] == '\0' || end_time[0] == '\0') {
-			TR104_DEBUG("Invalid CDR: [%s]\ncalling_number = [%s], called_number = [%s], "
+			BBF_DEBUG("Invalid CDR: [%s]\ncalling_number = [%s], called_number = [%s], "
 				"start_time = [%s], end_time = [%s]\n", line,
 				cdr.calling_num, cdr.called_num, cdr.start_time, end_time);
 			continue;
 		} else if (cdr.destination[0] == '\0' && strcasecmp(cdr.called_num, "h") == 0) {
-			TR104_DEBUG("Invalid CDR: [%s]\ncalled_number = [%s], destination = [%s]\n", line,
+			BBF_DEBUG("Invalid CDR: [%s]\ncalled_number = [%s], destination = [%s]\n", line,
 				cdr.called_num, cdr.destination);
 			continue;
 		}
@@ -252,7 +254,7 @@ int init_call_log()
 			// Convert start time to ISO 8601 date-time format as per TR-181 data model
 			strftime(cdr.start_time, sizeof(cdr.start_time), "%Y-%m-%dT%H:%M:%SZ", &tm_start);
 		} else {
-			TR104_DEBUG("Invalid CDR: [%s]\nWrong start time and/or end time, [%s], [%s]\n",
+			BBF_DEBUG("Invalid CDR: [%s]\nWrong start time and/or end time, [%s], [%s]\n",
 				line, cdr.start_time, end_time);
 			continue;
 		}
@@ -260,14 +262,14 @@ int init_call_log()
 		// Determine the call direction and used line
 		char *tel_line = NULL;
 		if ((tel_line = strcasestr(cdr.source, "TELCHAN")) != NULL) {
-			strncpy(cdr.direction, "Outgoing", sizeof(cdr.direction));
+			DM_STRNCPY(cdr.direction, "Outgoing", sizeof(cdr.direction));
 		} else if ((tel_line = strcasestr(cdr.destination, "TELCHAN")) != NULL) {
-			strncpy(cdr.direction, "Incoming", sizeof(cdr.direction));
+			DM_STRNCPY(cdr.direction, "Incoming", sizeof(cdr.direction));
 		} else {
-			TR104_DEBUG("Invalid CDR: [%s]\ndirection = [%s]\n", line, cdr.direction);
+			BBF_DEBUG("Invalid CDR: [%s]\ndirection = [%s]\n", line, cdr.direction);
 			continue;
 		}
-		strncpy(cdr.used_line, tel_line, sizeof(cdr.used_line) - 1);
+		DM_STRNCPY(cdr.used_line, tel_line, sizeof(cdr.used_line));
 
 		/*
 		 * Convert the termination cause to a value specified in TR-104.
@@ -278,17 +280,17 @@ int init_call_log()
 		 * TODO: Asterisk needs to be changed in order to provide more TR-104 compliant call termination causes.
 		 */
 		if (strcasecmp(cdr.termination_cause, "NO ANSWER") == 0)
-			strncpy(cdr.termination_cause, "LocalTimeout", sizeof(cdr.termination_cause));
+			DM_STRNCPY(cdr.termination_cause, "LocalTimeout", sizeof(cdr.termination_cause));
 		else if (strcasecmp(cdr.termination_cause, "FAILED") == 0)
-			strncpy(cdr.termination_cause, "LocalInternalError", sizeof(cdr.termination_cause));
+			DM_STRNCPY(cdr.termination_cause, "LocalInternalError", sizeof(cdr.termination_cause));
 		else if (strcasecmp(cdr.termination_cause, "BUSY") == 0)
-			strncpy(cdr.termination_cause, "RemoteBusy", sizeof(cdr.termination_cause));
+			DM_STRNCPY(cdr.termination_cause, "RemoteBusy", sizeof(cdr.termination_cause));
 		else if (strcasecmp(cdr.termination_cause, "ANSWERED") == 0)
-			strncpy(cdr.termination_cause, "RemoteDisconnect", sizeof(cdr.termination_cause));
+			DM_STRNCPY(cdr.termination_cause, "RemoteDisconnect", sizeof(cdr.termination_cause));
 		else if (strcasecmp(cdr.termination_cause, "CONGESTION") == 0)
-			strncpy(cdr.termination_cause, "RemoteNetworkFailure", sizeof(cdr.termination_cause));
+			DM_STRNCPY(cdr.termination_cause, "RemoteNetworkFailure", sizeof(cdr.termination_cause));
 		else
-			strncpy(cdr.termination_cause, "LocalInternalError", sizeof(cdr.termination_cause));
+			DM_STRNCPY(cdr.termination_cause, "LocalInternalError", sizeof(cdr.termination_cause));
 		// Convert source and destination
 		convert_src_dst(cdr.source, sizeof(cdr.source));
 		convert_src_dst(cdr.destination, sizeof(cdr.destination));

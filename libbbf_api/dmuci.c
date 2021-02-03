@@ -68,36 +68,25 @@ int bbf_uci_exit(void)
 	return 0;
 }
 
-char *dmuci_list_to_string(struct uci_list *list, char *delimitor)
+char *dmuci_list_to_string(struct uci_list *list, const char *delimitor)
 {
-	struct uci_element *e = NULL;
-	char val[512] = {0};
-	int del_len = strlen(delimitor);
-
 	if (list) {
+		struct uci_element *e = NULL;
+		char list_val[512] = {0};
+		unsigned pos = 0;
+
+		list_val[0] = 0;
 		uci_foreach_element(list, e) {
-			int len = strlen(val);
-			if (len != 0) {
-				memcpy(val + len, delimitor, del_len);
-				strcpy(val + len + del_len, e->name);
-			} else
-				strcpy(val, e->name);
+			if (e->name)
+				pos += snprintf(&list_val[pos], sizeof(list_val) - pos, "%s%s", e->name, delimitor);
 		}
-		return (dmstrdup(val)); // MEM WILL BE FREED IN DMMEMCLEAN
+
+		if (pos)
+			list_val[pos - 1] = 0;
+
+		return dmstrdup(list_val); // MEM WILL BE FREED IN DMMEMCLEAN
 	} else {
 		return "";
-	}
-}
-
-void uci_add_list_to_list(struct uci_list *addlist, struct uci_list *list)
-{
-	struct uci_element *e, *elt;
-
-	uci_foreach_element(addlist, e) {
-		elt = dmcalloc(1, sizeof(struct uci_element));
-		elt->list= e->list;
-		elt->name= e->name;
-		uci_list_add(list, &elt->list);
 	}
 }
 
@@ -117,7 +106,8 @@ static inline bool check_section_name(const char *str, bool name)
 
 static void add_list_package_change(struct list_head *clist, char *package)
 {
-	struct package_change *pc;
+	struct package_change *pc = NULL;
+
 	list_for_each_entry(pc, clist, list) {
 		if (strcmp(pc->package, package) == 0)
 			return;
@@ -223,10 +213,10 @@ char *dmuci_get_option_value_fallback_def(char *package, char *section, char *op
 
 int dmuci_get_option_value_list(char *package, char *section, char *option, struct uci_list **value)
 {
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	struct uci_ptr ptr = {0};
 	struct uci_list *list;
-	char *pch = NULL, *spch = NULL, *dup;
+	char *pch = NULL, *spch = NULL, *dup = NULL;
 
 	*value = NULL;
 
@@ -265,7 +255,7 @@ int dmuci_get_option_value_list(char *package, char *section, char *option, stru
 static struct uci_option *dmuci_get_option_ptr(char *cfg_path, char *package, char *section, char *option)
 {
 	struct uci_option *o = NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	struct uci_ptr ptr = {0};
 	char *oconfdir;
 
@@ -292,7 +282,7 @@ end:
 int dmuci_import(char *package_name, const char *input_path)
 {
 	struct uci_package *package = NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	int ret = 0;
 
 	FILE *input = fopen(input_path, "r");
@@ -532,20 +522,17 @@ int dmuci_del_list_value(char *package, char *section, char *option, char *value
 char *dmuci_add_section(char *package, char *stype, struct uci_section **s)
 {
 	struct uci_ptr ptr = {0};
-	char *fname, *val = "";
+	char fname[128], *val = "";
 
 	*s = NULL;
 
-	dmasprintf(&fname, "%s/%s", uci_ctx->confdir, package);
-	if (access(fname, F_OK ) == -1 ) {
+	snprintf(fname, sizeof(fname), "%s/%s", uci_ctx->confdir, package);
+	if (!file_exists(fname)) {
 		FILE *fptr = fopen(fname, "w");
-		dmfree(fname);
 		if (fptr)
 			fclose(fptr);
 		else
 			return val;
-	} else {
-		dmfree(fname);
 	}
 
 	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, NULL, NULL, NULL) == 0
@@ -618,7 +605,7 @@ lookup:
 /**** UCI GET by section pointer*****/
 int dmuci_get_value_by_section_string(struct uci_section *s, char *option, char **value)
 {
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	struct uci_option *o;
 
 	if (s == NULL || option == NULL)
@@ -654,7 +641,7 @@ char *dmuci_get_value_by_section_fallback_def(struct uci_section *s, char *optio
 
 int dmuci_get_value_by_section_list(struct uci_section *s, char *option, struct uci_list **value)
 {
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	struct uci_option *o;
 	struct uci_list *list;
 	char *pch = NULL, *spch = NULL, *dup;
@@ -785,7 +772,7 @@ int dmuci_rename_section_by_section(struct uci_section *s, char *value)
 struct uci_section *dmuci_walk_section (char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk)
 {
 	struct uci_section *s = NULL;
-	struct uci_element *e, *m;
+	struct uci_element *e, *m = NULL;
 	char *value, *dup, *pch, *spch;
 	struct uci_list *list_value, *list_section;
 	struct uci_ptr ptr = {0};

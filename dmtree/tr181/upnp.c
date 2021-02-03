@@ -151,7 +151,7 @@ static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_nod
 	json_object *res = NULL,  *devices = NULL, *device = NULL;
 	struct upnpdiscovery upnp_dev = {};
 	char *dev_descurl = NULL, *dev_st = NULL, *dev_usn = NULL, *inst = NULL, *max_inst = NULL;
-	char **stparams = NULL, **uuid, **urn;
+	char **stparams = NULL, **uuid = NULL, **urn = NULL;
 	size_t lengthuuid, lengthurn;
 	struct uci_section* dmmap_sect = NULL;
 	int i;
@@ -197,7 +197,7 @@ static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_no
 	json_object *res = NULL,  *services = NULL, *service = NULL;
 	struct upnpdiscovery upnp_dev = {};
 	char *srv_descurl = NULL, *srv_st = NULL, *srv_usn = NULL, *inst = NULL, *max_inst = NULL;
-	char **stparams = NULL, **uuid, **urn;
+	char **stparams = NULL, **uuid = NULL, **urn = NULL;
 	size_t lengthuuid, lengthurn;
 	struct uci_section* dmmap_sect = NULL;
 	int i;
@@ -439,7 +439,7 @@ static int set_UPnPDevice_UPnPIGD(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_UPnPDiscovery_RootDeviceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int nbre = 0, i;
+	int nbre = 0;
 	char *is_root_device = NULL;
 	json_object *res = NULL, *devices = NULL, *device = NULL;
 
@@ -453,7 +453,9 @@ static int get_UPnPDiscovery_RootDeviceNumberOfEntries(char *refparam, struct dm
 		return 0;
 
 	size_t nbre_devices = json_object_array_length(devices);
-	if (nbre_devices > 0){
+	if (nbre_devices > 0) {
+		int i;
+
 		for (i = 0; i < nbre_devices; i++){
 			device = json_object_array_get_idx(devices, i);
 			is_root_device = dmjson_get_value(device, 1, "is_root_device");

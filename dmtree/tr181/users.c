@@ -15,8 +15,8 @@
 /*#Device.Users.User.{i}.!UCI:users/user/dmmap_users*/
 static int browseUserInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst, *max_inst = NULL;
-	struct dmmap_dup *p;
+	char *inst = NULL, *max_inst = NULL;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("users", "user", "dmmap_users", &dup_list);

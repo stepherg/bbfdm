@@ -97,12 +97,10 @@ static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *da
 /*#Device.DeviceInfo.UpTime!PROCFS:/proc/uptime*/
 static int get_device_info_uptime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	FILE *fp = NULL;
-	char *pch, *spch, buf[64];
-	*value = "0";
-
-	fp = fopen(UPTIME, "r");
+	FILE *fp = fopen(UPTIME, "r");
 	if (fp != NULL) {
+		char *pch = NULL, *spch = NULL, buf[64] = {0};
+
 		if (fgets(buf, 64, fp) != NULL) {
 			pch = strtok_r(buf, ".", &spch);
 			*value = (pch) ? dmstrdup(pch) : "0";
@@ -174,19 +172,19 @@ static int get_vcf_version(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int get_vcf_date(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	DIR *dir;
-	struct dirent *d_file;
-	char *config_name;
+	DIR *dir = NULL;
+	struct dirent *d_file = NULL;
+	char *config_name = NULL;
 
 	*value = "0001-01-01T00:00:00Z";
 	dmuci_get_value_by_section_string((struct uci_section *)data, "name", &config_name);
 	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
 		while ((d_file = readdir (dir)) != NULL) {
-			if (strcmp(config_name, d_file->d_name) == 0) {
+			if (config_name && strcmp(config_name, d_file->d_name) == 0) {
 				char date[sizeof("AAAA-MM-JJTHH:MM:SSZ")], path[280] = {0};
 				struct stat attr;
 
-				snprintf(path, sizeof(path), DEFAULT_CONFIG_DIR"%s", d_file->d_name);
+				snprintf(path, sizeof(path), "%s%s", DEFAULT_CONFIG_DIR, d_file->d_name);
 				stat(path, &attr);
 				strftime(date, sizeof(date), "%Y-%m-%dT%H:%M:%SZ", localtime(&attr.st_mtime));
 				*value = dmstrdup(date);
@@ -233,8 +231,9 @@ static int set_vcf_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 
 static int check_file_dir(char *name)
 {
-	DIR *dir;
-	struct dirent *d_file;
+	DIR *dir = NULL;
+	struct dirent *d_file = NULL;
+
 	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
 		while ((d_file = readdir (dir)) != NULL) {
 			if (strcmp(name, d_file->d_name) == 0) {
@@ -292,8 +291,8 @@ static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 {
 	char *inst = NULL, *max_inst = NULL, *name;
 	struct uci_section *s = NULL, *del_sec = NULL;
-	DIR *dir;
-	struct dirent *d_file;
+	DIR *dir = NULL;
+	struct dirent *d_file = NULL;
 
 	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
 		while ((d_file = readdir (dir)) != NULL) {
@@ -329,8 +328,9 @@ static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 
 static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct uci_section *sys_log_sec, *dm_sec;
-	char *log_file,*log_size;
+	struct uci_section *sys_log_sec = NULL, *dm_sec = NULL;
+	char *log_file = NULL,*log_size = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int i = 1;
 
 	uci_foreach_sections("system", "system", sys_log_sec) {
@@ -350,7 +350,6 @@ static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 		}
 	}
 	uci_path_foreach_sections(bbfdm, "dmmap", "vlf", dm_sec) {
-		char *inst, *max_inst = NULL;
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
 			   dm_sec, "vlf_instance", "vlf_alias");

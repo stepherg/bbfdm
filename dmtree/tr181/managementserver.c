@@ -662,7 +662,7 @@ static int set_management_server_conn_rep_allowed_jabber_id(char *refparam, stru
 
 static int get_management_server_conn_req_jabber_id(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	char *username, *domain, *resource, *tmpPtr = NULL, *strResponse = NULL;
 
 	uci_foreach_sections("xmpp", "xmpp_connection", s) {

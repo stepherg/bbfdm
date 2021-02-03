@@ -57,12 +57,12 @@ inline void *__dmrealloc
 #ifdef WITH_MEMTRACK
 const char *file, const char *func, int line,
 #endif /*WITH_MEMTRACK*/
-void *old, size_t size
+void *n, size_t size
 )
 {
 	struct dmmem *m = NULL;
-	if (old != NULL) {
-		m = container_of(old, struct dmmem, mem);
+	if (n != NULL) {
+		m = container_of(n, struct dmmem, mem);
 		list_del(&m->list);
 	}
 	struct dmmem *new_m = realloc(m, sizeof(struct dmmem) + size);
@@ -131,26 +131,22 @@ char **s, const char *format, ...
 {
 	int size;
 	char *str = NULL;
-	va_list arg, argcopy;
+	va_list arg;
 
-	va_start(arg,format);
-	va_copy(argcopy, arg);
-	size = vsnprintf(NULL, 0, format, argcopy);
-	if (size < 0)
-		return -1;
-	va_end(argcopy);
-#ifdef WITH_MEMTRACK
-	str = (char *)__dmcalloc(file, func, line, sizeof(char), size+1);
-#else
-	str = (char *)__dmcalloc(sizeof(char), size+1);
-#endif
-	vsnprintf(str, size+1, format, arg);
+	va_start(arg, format);
+	size = vasprintf(&str, format, arg);
 	va_end(arg);
+
+	if (size < 0 || str == NULL)
+		return -1;
+
 #ifdef WITH_MEMTRACK
 	*s = __dmstrdup(file, func, line, str);
 #else
 	*s = __dmstrdup(str);
 #endif /*WITH_MEMTRACK*/
+
+	free(str);
 	if (*s == NULL)
 		return -1;
 	return 0;	

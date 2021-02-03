@@ -94,12 +94,13 @@ static int get_local_time_zone_name(char *refparam, struct dmctx *ctx, void *dat
 static int get_time_ntpserver(char *refparam, struct dmctx *ctx, char **value, int index)
 {
 	bool found = 0;
-	int element = 0;
 	struct uci_list *v;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	
 	dmuci_get_option_value_list("system","ntp","server", &v);
 	if (v) {
+		int element = 0;
+
 		uci_foreach_element(v, e) {
 			element++;
 			if (element == index) {
@@ -178,7 +179,7 @@ static int set_time_source_interface(char *refparam, struct dmctx *ctx, void *da
 static int set_time_ntpserver(char *refparam, struct dmctx *ctx, int action, char *value, int index)
 {
 	struct uci_list *v;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	int count = 0, i = 0;
 	char *ntp[5] = {0};
 	

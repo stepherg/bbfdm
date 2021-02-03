@@ -32,10 +32,8 @@ char *get_diagnostics_option_fallback_def(char *sec_name, char *option, char *de
 
 void set_diagnostics_option(char *sec_name, char *option, char *value)
 {
-	struct uci_section *section = NULL;
-
 	check_create_dmmap_package(DMMAP_DIAGNOSTIGS);
-	section = dmuci_walk_section_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
+	struct uci_section *section = dmuci_walk_section_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
 	if (!section)
 		dmuci_set_value_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, "", sec_name);
 
@@ -44,10 +42,8 @@ void set_diagnostics_option(char *sec_name, char *option, char *value)
 
 void init_diagnostics_operation(char *sec_name, char *operation_path)
 {
-	struct uci_section *section = NULL;
-
 	check_create_dmmap_package(DMMAP_DIAGNOSTIGS);
-	section = dmuci_walk_section_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
+	struct uci_section *section = dmuci_walk_section_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
 	if (section)
 		dmuci_delete_by_section_bbfdm(section, NULL, NULL);
 
@@ -491,9 +487,9 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 static int extract_stats(char *dump_file, int proto, int diagnostic_type)
 {
 	libtrace_t *trace = NULL;
-	libtrace_packet_t *packet = NULL;
+	libtrace_packet_t *packet = trace_create_packet();
+
 	read_next = 1;
-	packet = trace_create_packet();
 	if (packet == NULL) {
 		libtrace_cleanup(trace, packet);
 		return -1;
@@ -552,8 +548,9 @@ static char *get_default_gateway_device(void)
 
     FILE *f = fopen(PROC_ROUTE, "r");
 	if (f != NULL) {
-		char line[100], *p, *c, *saveptr;
-		while(fgets(line , 100 , f)) {
+		char line[100] = {0}, *p = NULL, *c = NULL, *saveptr = NULL;
+
+		while(fgets(line, sizeof(line), f)) {
 			p = strtok_r(line, " \t", &saveptr);
 			c = strtok_r(NULL, " \t", &saveptr);
 			if (p && c && strcmp(c, "00000000") == 0) {

@@ -17,9 +17,9 @@
 static int browseGRETunnelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL;
-	struct dmmap_dup *p= NULL;
-
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
+
 	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_network", "proto", "gre", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
@@ -35,7 +35,7 @@ static int browseGRETunnelInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 
 struct uci_section *has_tunnel_interface_route(char *interface)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_foreach_option_eq("network", "route", "interface", interface, s) {
 		return s;
@@ -46,8 +46,8 @@ struct uci_section *has_tunnel_interface_route(char *interface)
 static int browseGRETunnelInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL, *ifname= NULL;
-	struct dmmap_dup *p, *dm = (struct dmmap_dup *)prev_data;
-	struct uci_section *s;
+	struct dmmap_dup *p = NULL, *dm = (struct dmmap_dup *)prev_data;
+	struct uci_section *s = NULL;
 	struct browse_args browse_args = {0};
 
 	LIST_HEAD(dup_list);
@@ -295,7 +295,7 @@ static int get_GRETunnel_ConnectedRemoteEndpoint(char *refparam, struct dmctx *c
 
 static int get_GRETunnel_InterfaceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	char *ifname;
 	int i = 0;
 

@@ -203,16 +203,14 @@ int os__get_process_state(char* refparam, struct dmctx *ctx, void *data, char *i
 int os__browseProcessEntriesInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *processes = NULL, *arrobj = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
 
 	dmubus_call("router.system", "processes", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		dmjson_foreach_obj_in_array(res, arrobj, processes, i, 1, "processes") {
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)processes, inst) == DM_STOP)
-				break;
-		}
+	dmjson_foreach_obj_in_array(res, arrobj, processes, i, 1, "processes") {
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)processes, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }

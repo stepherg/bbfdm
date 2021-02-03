@@ -31,7 +31,7 @@ static void add_default_rule(char *port, char *enable, char *owsd)
 
 static int get_userint_remoteaccesss_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *ss;
+	struct uci_section *ss = NULL;
 	char *rule_name, *rule_enabled;
 
 	uci_foreach_sections("firewall", "rule", ss) {
@@ -74,7 +74,7 @@ static int set_userint_remoteaccesss_enable(char *refparam, struct dmctx *ctx, v
 
 static int get_userint_remoteaccesss_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *ss;
+	struct uci_section *ss = NULL;
 	char *rule_name, *dest_port;
 
 	uci_foreach_sections("firewall", "rule", ss) {
@@ -117,33 +117,31 @@ static int set_userint_remoteaccesss_port(char *refparam, struct dmctx *ctx, voi
 	return 0;
 }
 
-static int get_supportedprotocols(void)
+static bool get_supportedprotocols(void)
 {
-	char *cert, *key, *ca;
-	int found_https = 0;
+	char *cert = NULL, *key = NULL, *ca = NULL;
 
-	if ((dmuci_get_option_value_string("owsd", "wan_https", "cert", &cert) == 0 && *cert != '\0' && access(cert, F_OK) != -1) ||
-		(dmuci_get_option_value_string("owsd", "wan_https", "key", &key) == 0 && *key != '\0' && access(key, F_OK) != -1) ||
-		(dmuci_get_option_value_string("owsd", "wan_https", "ca", &ca) == 0 && *ca != '\0' && access(ca, F_OK) != -1))
-		found_https = 1;
+	dmuci_get_option_value_string("owsd", "wan_https", "cert", &cert);
+	dmuci_get_option_value_string("owsd", "wan_https", "key", &key);
+	dmuci_get_option_value_string("owsd", "wan_https", "ca", &ca);
 
-	return found_https;
+	if ((cert && *cert && file_exists(cert)) ||
+		(key && *key && file_exists(key)) ||
+		(ca && *ca && file_exists(ca)))
+		return true;
+
+	return false;
 }
 
 static int get_userint_remoteaccesss_supportedprotocols(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int found = get_supportedprotocols();
-	if (found) {
-		*value = "HTTP,HTTPS";
-		return 0;
-	}
-	*value = "HTTP";
+	*value = (get_supportedprotocols()) ? "HTTP,HTTPS" : "HTTP";
 	return 0;
 }
 
 static int get_userint_remoteaccesss_protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *ss;
+	struct uci_section *ss = NULL;
 	char *rule_name, *rule_owsd;
 
 	uci_foreach_sections("firewall", "rule", ss) {
@@ -164,16 +162,13 @@ static int get_userint_remoteaccesss_protocol(char *refparam, struct dmctx *ctx,
 static int set_userint_remoteaccesss_protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *ss;
-	char *rule_name, *name_http;
-	int found;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, SupportedProtocols, 2, NULL, 0))
 				return FAULT_9007;
 
-			found = get_supportedprotocols();
-			if (found) {
+			if (get_supportedprotocols()) {
 				if ((strcmp(value, "HTTP") != 0) && (strcmp(value, "HTTPS") != 0))
 					return FAULT_9007;
 			} else {
@@ -183,21 +178,16 @@ static int set_userint_remoteaccesss_protocol(char *refparam, struct dmctx *ctx,
 			return 0;
 		case VALUESET:
 			uci_foreach_sections("firewall", "rule", ss) {
+				char *rule_name;
+
 				dmuci_get_value_by_section_string(ss, "name", &rule_name);
 				if (strcmp(rule_name, "juci-remote-access") == 0) {
-					if (strcmp(value, "HTTPS") == 0)
-						dmuci_set_value_by_section(ss, "owsd", "wan_https");
-					else
-						dmuci_set_value_by_section(ss, "owsd", "wan");
+					dmuci_set_value_by_section(ss, "owsd", (strcmp(value, "HTTPS") == 0) ? "wan_https" : "wan");
 					return 0;
 				}
 			}
 
-			if (strcmp(value, "HTTPS") == 0)
-				name_http = "wan_https";
-			else
-				name_http = "wan";
-			add_default_rule("80", "0", name_http);
+			add_default_rule("80", "0", (strcmp(value, "HTTPS") == 0) ? "wan_https" : "wan");
 			return 0;
 	}
 	return 0;

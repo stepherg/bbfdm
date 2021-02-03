@@ -297,11 +297,8 @@ static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *ent
 
 static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance)
 {
-	DMOBJ *jentryobj;
-	struct dm_dynamic_obj *next_dyn_array;
-	int i, j, err = 0;
-
 	char *parent_obj = parent_node->current_object;
+	int err = 0;
 
 	if (entryobj) {
 		for (; entryobj->obj; entryobj++) {
@@ -313,11 +310,11 @@ static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, 
 
 	if (parent_node->obj) {
 		if (parent_node->obj->nextdynamicobj) {
-			for (i = 0; i < __INDX_DYNAMIC_MAX; i++) {
-				next_dyn_array = parent_node->obj->nextdynamicobj + i;
+			for (int i = 0; i < __INDX_DYNAMIC_MAX; i++) {
+				struct dm_dynamic_obj *next_dyn_array = parent_node->obj->nextdynamicobj + i;
 				if (next_dyn_array->nextobj) {
-					for (j = 0; next_dyn_array->nextobj[j]; j++) {
-						jentryobj = next_dyn_array->nextobj[j];
+					for (int j = 0; next_dyn_array->nextobj[j]; j++) {
+						DMOBJ *jentryobj = next_dyn_array->nextobj[j];
 						for (; (jentryobj && jentryobj->obj); jentryobj++) {
 							dm_browse_entry(dmctx, parent_node, jentryobj, data, instance, parent_obj, &err);
 							if (dmctx->stop)
@@ -383,10 +380,11 @@ int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char 
 
 void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found)
 {
-	int err = 0;
 	if (!entryobj)
 		return;
+
 	char *parent_obj = parent_node->current_object;
+
 	for (; entryobj->obj; entryobj++) {
 		DMNODE node = {0};
 		node.obj = entryobj;
@@ -400,7 +398,7 @@ void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entry
 			return;
 		}
 
-		err = plugin_dynamic_obj_match(dmctx, &node, entryobj->obj, full_obj);
+		int err = plugin_dynamic_obj_match(dmctx, &node, entryobj->obj, full_obj);
 		if (err)
 			continue;
 
@@ -582,20 +580,6 @@ char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst)
 	return inst;
 }
 
-char *get_last_instance_bbfdm_without_update(char *package, char *section, char *opt_inst)
-{
-	struct uci_section *s;
-	char *inst = NULL, *last_inst = NULL;
-
-	uci_path_foreach_sections(bbfdm, package, section, s) {
-		dmuci_get_value_by_section_string(s, opt_inst, &inst);
-		if(last_inst)
-			dmfree(last_inst);
-		last_inst = dmstrdup(inst);
-	}
-	return inst;
-}
-
 char *get_last_instance(char *package, char *section, char *opt_inst)
 {
 	struct uci_section *s;
@@ -626,7 +610,7 @@ char *get_last_instance_lev2_bbfdm_dmmap_opt(char *dmmap_package, char *section,
 	browse_args.value = value_check;
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section, opt_check, value_check, s) {
-		instance = update_instance(last_inst, 5, s, opt_inst, NULL, check_browse_section, (void *)&browse_args);
+		instance = update_instance(last_inst, 5, s, opt_inst, 0, check_browse_section, (void *)&browse_args);
 		if(last_inst)
 			dmfree(last_inst);
 		last_inst = dmstrdup(instance);
@@ -653,26 +637,6 @@ char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_pac
 	return instance;
 }
 
-char *get_last_instance_lev2(char *package, char *section, char *opt_inst, char *opt_check, char *value_check)
-{
-	struct uci_section *s;
-	char *instance = NULL, *last_inst = NULL;
-
-	if (strcmp(package, DMMAP) == 0) {
-		uci_path_foreach_option_cont(bbfdm, package, section, opt_check, value_check, s) {
-			instance = update_instance(last_inst, 2, s, opt_inst);
-			if(last_inst)
-				dmfree(last_inst);
-			last_inst = dmstrdup(instance);
-		}
-	} else {
-		uci_foreach_option_cont(package, section, opt_check, value_check, s) {
-			instance = update_instance(instance, 2, s, opt_inst);
-		}
-	}
-	return instance;
-}
-
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "";
@@ -682,7 +646,8 @@ int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, cha
 void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_notification)
 {
 	struct dm_parameter *dm_parameter;
-	struct list_head *ilist;
+	struct list_head *ilist = NULL;
+
 	list_for_each(ilist, &ctx->list_parameter) {
 		dm_parameter = list_entry(ilist, struct dm_parameter, list);
 		int cmp = strcmp(dm_parameter->name, param_name);
@@ -709,7 +674,7 @@ void api_del_list_parameter(struct dm_parameter *dm_parameter)
 
 void free_all_list_parameter(struct dmctx *ctx)
 {
-	struct dm_parameter *dm_parameter;
+	struct dm_parameter *dm_parameter = NULL;
 	while (ctx->list_parameter.next != &ctx->list_parameter) {
 		dm_parameter = list_entry(ctx->list_parameter.next, struct dm_parameter, list);
 		api_del_list_parameter(dm_parameter);
@@ -735,7 +700,7 @@ static void del_set_list_tmp(struct set_tmp *set_tmp)
 
 void free_all_set_list_tmp(struct dmctx *ctx)
 {
-	struct set_tmp *set_tmp;
+	struct set_tmp *set_tmp = NULL;
 	while (ctx->set_list_tmp.next != &ctx->set_list_tmp) {
 		set_tmp = list_entry(ctx->set_list_tmp.next, struct set_tmp, list);
 		del_set_list_tmp(set_tmp);
@@ -762,7 +727,7 @@ void bbf_api_del_list_fault_param(struct param_fault *param_fault)
 
 void free_all_list_fault_param(struct dmctx *ctx)
 {
-	struct param_fault *param_fault;
+	struct param_fault *param_fault = NULL;
 	while (ctx->list_fault_param.next != &ctx->list_fault_param) {
 		param_fault = list_entry(ctx->list_fault_param.next, struct param_fault, list);
 		bbf_api_del_list_fault_param(param_fault);
@@ -840,7 +805,7 @@ static char *get_parameter_notification(struct dmctx *ctx, char *param)
 	struct uci_list *list_notif;
 	char *pch, *new_param;
 	char *notification = "0";
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 
 	update_param_instance_alias(ctx, param, &new_param);
 	for (i = (ARRAY_SIZE(notifications) - 1); i >= 0; i--) {
@@ -873,8 +838,9 @@ static int remove_parameter_notification(char *param)
 {
 	int i;
 	struct uci_list *list_notif;
-	struct uci_element *e, *tmp;
+	struct uci_element *e = NULL, *tmp = NULL;
 	char *pch;
+
 	for (i = (ARRAY_SIZE(notifications) - 1); i >= 0; i--) {
 		if (param[strlen(param)-1] == '.') {
 			dmuci_get_option_value_list("cwmp", "@notifications[0]", notifications[i].type, &list_notif);
@@ -924,7 +890,7 @@ static int set_parameter_notification(struct dmctx *ctx, char *param, char *valu
 		dmuci_add_list_value("cwmp", "@notifications[0]", "passive_active_lw", new_param);
 	} else if (strcmp(value, "0") == 0) {
 		struct uci_list *list_notif;
-		struct uci_element *e;
+		struct uci_element *e = NULL;
 		int i, len;
 		for (i = (ARRAY_SIZE(notifications) - 1); i >= 1; i--) {
 			dmuci_get_option_value_list("cwmp", "@notifications[0]", notifications[i].type, &list_notif);
@@ -986,8 +952,7 @@ static char *check_value_by_type(char *value, int type)
 	char buf[len + 1];
 	struct tm tm;
 
-	strcpy(buf, value);
-	buf[len] = 0;
+	snprintf(buf, sizeof(buf), "%s", value);
 
 	switch (type) {
 		case DMT_UNINT:
@@ -1074,27 +1039,6 @@ void dmentry_instance_lookup_inparam(struct dmctx *ctx)
 /* **********
  * get value 
  * **********/
-
-int dm_entry_get_full_param_value(struct dmctx *dmctx)
-{
-	int err = 0;
-	unsigned char findparam_check = 0;
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = {.current_object = ""};
-	dmctx->inparam_isparam = 1;
-	dmctx->findparam = 0;
-	dmctx->stop = 0;
-	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_match;
-	dmctx->method_obj = mobj_get_value_in_param;
-	dmctx->method_param = mparam_get_value_in_param;
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (findparam_check && dmctx->findparam)
-		return 0;
-	else
-		return err;
-}
-
 int dm_entry_get_value(struct dmctx *dmctx)
 {
 	int err = 0;
@@ -1368,12 +1312,11 @@ int dm_entry_get_instances(struct dmctx *ctx)
 {
 	DMOBJ *root = ctx->dm_entryobj;
 	DMNODE node = { .current_object = "" };
-	char buf[4] = { '.', 0 };
 	size_t plen;
 	int err;
 
 	if (ctx->in_param[0] == 0)
-		ctx->in_param = buf;
+		ctx->in_param = dmstrdup(".");
 
 	plen = strlen(ctx->in_param);
 	if (ctx->in_param[plen - 1] != '.')
@@ -1649,17 +1592,17 @@ static int mobj_set_value(DMOBJECT_ARGS)
 
 static int mparam_set_value(DMPARAM_ARGS)
 {
-	char *refparam, *perm;
+	char *refparam = NULL;
 
 	dmastrcat(&refparam, node->current_object, lastname);
-	if (strcmp(refparam, dmctx->in_param) != 0) {
+	if (refparam && strcmp(refparam, dmctx->in_param) != 0) {
 		dmfree(refparam);
 		return FAULT_9005;
 	}
 	dmctx->stop = 1;
 
 	if (dmctx->setaction == VALUECHECK) {
-		perm = permission->val;
+		char *perm = permission->val;
 		if (permission->get_permission != NULL)
 			perm = permission->get_permission(refparam, dmctx, data, instance);
 

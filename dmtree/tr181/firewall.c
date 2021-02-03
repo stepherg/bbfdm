@@ -15,10 +15,9 @@
 /***************************** Browse Functions ***********************************/
 static int browseLevelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct uci_section *s = NULL;
 	char *max_inst = NULL;
 
-	s = is_dmmap_section_exist("dmmap_firewall", "level");
+	struct uci_section *s = is_dmmap_section_exist("dmmap_firewall", "level");
 	if (!s) dmuci_add_section_bbfdm("dmmap_firewall", "level", &s);
 	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
 			s, "firewall_level_instance", "firewall_level_alias");
@@ -28,10 +27,9 @@ static int browseLevelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 
 static int browseChainInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct uci_section *s = NULL;
 	char *max_inst = NULL;
 
-	s = is_dmmap_section_exist("dmmap_firewall", "chain");
+	struct uci_section *s = is_dmmap_section_exist("dmmap_firewall", "chain");
 	if (!s) dmuci_add_section_bbfdm("dmmap_firewall", "chain", &s);
 	handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
 			s, "firewall_chain_instance", "firewall_chain_alias");
@@ -42,8 +40,8 @@ static int browseChainInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 /*#Device.Firewall.Chain.{i}.Rule.{i}.!UCI:firewall/rule/dmmap_firewall*/
 static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst, *max_inst = NULL;
-	struct dmmap_dup *p;
+	char *inst = NULL, *max_inst = NULL;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("firewall", "rule", "dmmap_firewall", &dup_list);
@@ -342,7 +340,7 @@ static int get_FirewallChainRule_CreationDate(char *refparam, struct dmctx *ctx,
 
 static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ifaceobj = NULL, *src = NULL, buf[256] = "";
+	char *ifaceobj = NULL, *src = NULL, src_iface[256] = {0};
 	struct uci_list *net_list = NULL;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "src", &src);
@@ -368,23 +366,25 @@ static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 	}
 
 	if (net_list != NULL) {
-		struct uci_element *e;
+		struct uci_element *e = NULL;
+		unsigned pos = 0;
 
+		src_iface[0] = 0;
 		uci_foreach_element(net_list, e) {
 			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj);
-			if (ifaceobj == NULL)
-				continue;
-			if (*buf != '\0')
-				strcat(buf, ",");
-			strcat(buf, ifaceobj);
+			if (ifaceobj)
+				pos += snprintf(&src_iface[pos], sizeof(src_iface) - pos, "%s,", ifaceobj);
 		}
+
+		if (pos)
+			src_iface[pos - 1] = 0;
 	} else {
 		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", src, &ifaceobj);
 		if (ifaceobj)
-			strcpy(buf, ifaceobj);
+			DM_STRNCPY(src_iface, ifaceobj, sizeof(src_iface));
 	}
 
-	*value = dmstrdup(buf);
+	*value = dmstrdup(src_iface);
 	return 0;
 }
 
@@ -398,7 +398,7 @@ static int get_rule_source_all_interfaces(char *refparam, struct dmctx *ctx, voi
 
 static int get_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ifaceobj = NULL, *dest = NULL, buf[256] = "";
+	char *ifaceobj = NULL, *dest = NULL, dst_iface[256] = {0};
 	struct uci_list *net_list = NULL;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "dest", &dest);
@@ -424,23 +424,25 @@ static int get_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 	}
 
 	if (net_list != NULL) {
-		struct uci_element *e;
+		struct uci_element *e = NULL;
+		unsigned pos = 0;
 
+		dst_iface[0] = 0;
 		uci_foreach_element(net_list, e) {
 			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj);
-			if (ifaceobj == NULL)
-				continue;
-			if (*buf != '\0')
-				strcat(buf, ",");
-			strcat(buf, ifaceobj);
+			if (ifaceobj)
+				pos += snprintf(&dst_iface[pos], sizeof(dst_iface) - pos, "%s,", ifaceobj);
 		}
+
+		if (pos)
+			dst_iface[pos - 1] = 0;
 	} else {
 		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", dest, &ifaceobj);
 		if (ifaceobj)
-			strcpy(buf, ifaceobj);
+			DM_STRNCPY(dst_iface, ifaceobj, sizeof(dst_iface));
 	}
 
-	*value = dmstrdup(buf);
+	*value = dmstrdup(dst_iface);
 	return 0;
 }
 
@@ -474,7 +476,7 @@ static int get_rule_dest_ip(char *refparam, struct dmctx *ctx, void *data, char 
 	char buf[64], *pch, *destip;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "dest_ip", &destip);
-	strcpy(buf, destip);
+	DM_STRNCPY(buf, destip, sizeof(buf));
 	pch = strchr(buf, '/');
 	if (pch) *pch = '\0';
 	*value = dmstrdup(buf);
@@ -508,7 +510,7 @@ static int get_rule_source_ip(char *refparam, struct dmctx *ctx, void *data, cha
 	char buf[64], *pch, *srcip;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "src_ip", &srcip);
-	strcpy(buf, srcip);
+	DM_STRNCPY(buf, srcip, sizeof(buf));
 	pch = strchr(buf, '/');
 	if (pch)
 		*pch = '\0';
@@ -636,8 +638,8 @@ static int get_rule_source_port_range_max(char *refparam, struct dmctx *ctx, voi
 static int get_rule_icmp_type(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_list *v= NULL;
-	struct uci_element *e;
-	char *ptr;
+	struct uci_element *e = NULL;
+	char *ptr = NULL;
 
 	dmasprintf(value, "%s", "");
 	dmuci_get_value_by_section_list((struct uci_section *)data, "icmp_type", &v);
@@ -1136,12 +1138,12 @@ static int set_rule_dest_ip(char *refparam, struct dmctx *ctx, void *data, char 
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "dest_ip", &destip);
-			strcpy(buf, destip);
+			DM_STRNCPY(buf, destip, sizeof(buf));
 			pch = strchr(buf, '/');
 			if (pch)
 				snprintf(new, sizeof(new), "%s%s", value, pch);
 			else
-				strcpy(new, value);
+				DM_STRNCPY(new, value, sizeof(new));
 			dmuci_set_value_by_section((struct uci_section *)data, "dest_ip", new);
 			break;
 	}
@@ -1183,12 +1185,12 @@ static int set_rule_source_ip(char *refparam, struct dmctx *ctx, void *data, cha
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "src_ip", &srcip);
-			strcpy(buf, srcip);
+			DM_STRNCPY(buf, srcip, sizeof(buf));
 			pch = strchr(buf, '/');
 			if (pch)
 				snprintf(new, sizeof(new), "%s%s", value, pch);
 			else
-				strcpy(new, value);
+				DM_STRNCPY(new, value, sizeof(new));
 			dmuci_set_value_by_section((struct uci_section *)data, "src_ip", new);
 			break;
 	}

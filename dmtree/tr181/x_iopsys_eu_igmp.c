@@ -15,12 +15,11 @@
 
 static void get_mcast_iface_key(char *p_ifname, char *key, size_t key_size)
 {
-	int itf_found = 0;
-	struct uci_section *n_sec;
+	struct uci_section *n_sec = NULL;
 	char *intf_name;
 
 	uci_foreach_sections("network", "interface", n_sec) {
-		itf_found = 0;
+		bool itf_found = 0;
 		dmuci_get_value_by_section_string(n_sec, "ifname", &intf_name);
 
 		intf_name = dmstrdup(intf_name);
@@ -28,7 +27,7 @@ static void get_mcast_iface_key(char *p_ifname, char *key, size_t key_size)
 		pch = strtok_r(intf_name, " ", &spch);
 		while (pch != NULL) {
 			if (strcmp(pch, p_ifname) == 0) {
-				strncpy(key, section_name(n_sec), key_size - 1);
+				DM_STRNCPY(key, section_name(n_sec), key_size);
 				itf_found = 1;
 				break;
 			}
@@ -44,7 +43,7 @@ static void sync_mcast_dmmap_iface_sec(struct uci_list *proxy_iface, char *s_mod
                 struct uci_section *s, char *dmmap_package, char *dmmap_sec,
                 struct list_head *dup_list, char *up_iface)
 {
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	struct uci_section *d_sec;
 	int found = 0;
 	char key[1024] = "";
@@ -53,7 +52,7 @@ static void sync_mcast_dmmap_iface_sec(struct uci_list *proxy_iface, char *s_mod
 	uci_foreach_element(proxy_iface, e) {
 		char *p_ifname = dmstrdup(e->name);
 		if (strstr(p_ifname, "br-") != NULL)
-			strncpy(key, p_ifname, sizeof(key) - 1);
+			DM_STRNCPY(key, p_ifname, sizeof(key));
 		else
 			get_mcast_iface_key(p_ifname, key, sizeof(key));
 
@@ -85,7 +84,7 @@ static void sync_mcast_dmmap_iface_sec(struct uci_list *proxy_iface, char *s_mod
 static void add_empty_mcast_iface_to_list(char *dmmap_package, char *dmmap_sec,
                 struct uci_section *s, struct list_head *dup_list)
 {
-	struct uci_section *dmmap_sect;
+	struct uci_section *dmmap_sect = NULL;
 	char *f_ifname;
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, dmmap_sec, "section_name", section_name(s), dmmap_sect) {
@@ -100,7 +99,7 @@ void synchronize_specific_config_sections_with_dmmap_mcast_iface(char *package, 
 		void *data, char *dmmap_package, char *dmmap_sec, char *proto,
 		struct list_head *dup_list)
 {
-	struct uci_section *s, *stmp;
+	struct uci_section *s = NULL, *stmp = NULL;
 	char *v;
 
 	uci_foreach_option_eq(package, section_type, "proto", proto, s) {
@@ -143,7 +142,7 @@ void synchronize_specific_config_sections_with_dmmap_mcast_filter(char *package,
 		void *data, char *dmmap_package, char *dmmap_sec, char *proto,
 		struct list_head *dup_list)
 {
-	struct uci_section *s, *dmmap_sect, *d_sec, *stmp;
+	struct uci_section *s = NULL, *dmmap_sect = NULL, *d_sec = NULL, *stmp = NULL;
 	char *v, *s_name;
 
 	uci_foreach_option_eq(package, section_type, "proto", proto, s) {
@@ -156,7 +155,7 @@ void synchronize_specific_config_sections_with_dmmap_mcast_filter(char *package,
 
 		dmuci_get_value_by_section_list(s, "filter", &l);
 		if (l != NULL) {
-			struct uci_element *e;
+			struct uci_element *e = NULL;
 			uci_foreach_element(l, e) {
 				char *ip_addr = dmstrdup(e->name);
 				int found = 0;
@@ -247,7 +246,7 @@ int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
 	struct uci_section *intf_s = NULL;
 	uci_foreach_sections("network", "interface", intf_s) {
 		char  sec[20] = {0};
-		strncpy(sec, section_name(intf_s), sizeof(sec) - 1);
+		DM_STRNCPY(sec, section_name(intf_s), sizeof(sec));
 		if (strncmp(sec, sec_name, sizeof(sec)) != 0)
 			continue;
 
@@ -342,7 +341,7 @@ static int browse_igmp_proxy_inst(struct dmctx *dmctx, DMNODE *parent_node, void
 {
 	char *inst = NULL, *max_inst = NULL;
 	struct browse_args browse_args = {0};
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_cont("mcast", "proxy", "dmmap_mcast", "proto", "igmp", &dup_list);
@@ -441,7 +440,7 @@ static int browse_igmp_snooping_inst(struct dmctx *dmctx, DMNODE *parent_node, v
 {
 	char *inst = NULL, *max_inst = NULL;
 	struct browse_args browse_args = {0};
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_cont("mcast", "snooping", "dmmap_mcast", "proto", "igmp", &dup_list);
@@ -490,12 +489,13 @@ static int get_igmpp_no_of_entries(char *refparam, struct dmctx *ctx, void *data
 static int browse_igmp_cgrp_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	//perform ubus call to mcast stats and browse through each igmp group json object
-	int i = 0, id = 0;
 	json_object *res = NULL, *jobj = NULL, *arrobj = NULL, *group_obj = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	dmubus_call("mcast", "stats", UBUS_ARGS{}, 0, &res);
 	if (res) {
+		int i = 0, id = 0;
+
 		jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "snooping");
 		dmjson_foreach_obj_in_array(jobj, arrobj, group_obj, i, 1, "groups") {
 			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
@@ -615,11 +615,13 @@ int get_mcasts_filter_no_of_entries(char *refparam, struct dmctx *ctx, void *dat
 
 static int get_igmp_cgrps_no_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int i = 0, cnt = 0;
+	int cnt = 0;
 	json_object *res = NULL, *jobj = NULL, *arrobj = NULL, *group_obj = NULL;
 
 	dmubus_call("mcast", "stats", UBUS_ARGS{}, 0, &res);
 	if (res) {
+		int i = 0;
+
 		jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "snooping");
 		dmjson_foreach_obj_in_array(jobj, arrobj, group_obj, i, 1, "groups") {
 			cnt++;
@@ -631,7 +633,7 @@ static int get_igmp_cgrps_no_of_entries(char *refparam, struct dmctx *ctx, void 
 
 int get_mcasts_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *f_sec;
+	struct uci_section *f_sec = NULL;
 	char *f_inst, *f_enable;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "snooping_filter",
@@ -685,7 +687,7 @@ int set_mcasts_filter_enable(char *refparam, struct dmctx *ctx, void *data, char
 
 int get_mcasts_filter_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *d_sec;
+	struct uci_section *d_sec = NULL;
 	char *f_inst, *ip_addr;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "snooping_filter",
@@ -931,7 +933,7 @@ int get_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, 
 	// section would be wan, so extract wan from br-wan
 	char *tok, *end;
 
-	strncpy(val, val1, sizeof(val) - 1);
+	DM_STRNCPY(val, val1, sizeof(val));
 	tok = strtok_r(val, "-", &end);
 	if ((tok == NULL) || (end == NULL))
 		return 0;
@@ -939,7 +941,7 @@ int get_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, 
 	if (strcmp(tok, "br") != 0)
 		return 0;
 
-	strncpy(sec_name, end, sizeof(sec_name) - 1);
+	DM_STRNCPY(sec_name, end, sizeof(sec_name));
 	// In the dmmap_bridge file, the details related to the instance id etc. associated with this bridge
 	// is stored, we now switch our focus to it to extract the necessary information.
 	get_bridge_port_linker(ctx, sec_name, value);
@@ -993,15 +995,15 @@ static int add_igmpp_interface_obj(char *refparam, struct dmctx *ctx, void *data
 
 static void get_igmpp_iface_del_key_val(char *key, size_t key_size, char *if_name)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	char *ifval;
 	if (strstr(if_name, "br-") != NULL) {
-		strncpy(key, if_name, key_size - 1);
+		DM_STRNCPY(key, if_name, key_size);
 	} else {
 		uci_foreach_sections("network", "interface", s) {
 			if(strcmp(section_name(s), if_name) == 0) {
 				dmuci_get_value_by_section_string(s, "ifname", &ifval);
-				strncpy(key, ifval, key_size - 1);
+				DM_STRNCPY(key, ifval, key_size);
 				break;
 			}
 		}
@@ -1043,8 +1045,8 @@ static int del_igmpp_interface_obj(char *refparam, struct dmctx *ctx, void *data
 				char key[1024];
 				get_igmpp_iface_del_key_val(key, sizeof(key), if_name);
 
-				char *pch = NULL, *spch = NULL;
-				pch = strtok_r(key, " ", &spch);
+				char *spch = NULL;
+				char *pch = strtok_r(key, " ", &spch);
 				while (pch != NULL) {
 					del_igmpp_iface_val(upstream, data, pch);
 					pch = strtok_r(NULL, " ", &spch);
@@ -1199,8 +1201,9 @@ int get_mcastp_interface_no_of_entries(char *refparam, struct dmctx *ctx, void *
 
 int get_mcastp_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *f_sec;
+	struct uci_section *f_sec = NULL;
 	char *f_inst, *f_enable = NULL;
+
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_filter",
 			"section_name", section_name((struct uci_section *)data), f_sec) {
 		dmuci_get_value_by_section_string(f_sec, "filter_instance", &f_inst);
@@ -1250,7 +1253,7 @@ int set_mcastp_filter_enable(char *refparam, struct dmctx *ctx, void *data, char
 
 int get_mcastp_filter_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *d_sec;
+	struct uci_section *d_sec = NULL;
 	char *f_inst;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_filter",
@@ -1299,7 +1302,7 @@ static int browse_igmp_cgrp_assoc_dev_inst(struct dmctx *dmctx, DMNODE *parent_n
 
 	int i = 0, id = 0;
 	json_object *arrobj = NULL, *client_jobj = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	dmjson_foreach_obj_in_array((struct json_object *)prev_data, arrobj, client_jobj, i, 1, "clients") {
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
@@ -1617,17 +1620,16 @@ void update_snooping_mode(struct uci_section *s)
 {
 	// Update snooping mode as per downstream interface
 	struct uci_list *v = NULL;
-	struct uci_element *e;
-	struct uci_section *itf_sec;
-	char *val, *s_mode, *up;
+	struct uci_element *e = NULL;
+	struct uci_section *itf_sec = NULL;
+	char *val = NULL, *s_mode = NULL, *up = NULL;
 	bool b;
 
 	dmuci_get_value_by_section_list(s, "downstream_interface", &v);
 	if (v != NULL) {
 		uci_foreach_element(v, e) {
 			val = dmstrdup(e->name);
-			uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface",
-					"ifname", val, itf_sec) {
+			uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface", "ifname", val, itf_sec) {
 				dmuci_get_value_by_section_string(itf_sec, "upstream", &up);
 				string_to_bool(up, &b);
 				if (b)
@@ -1651,7 +1653,7 @@ static void sync_proxy_interface_sections(struct uci_section *s, char *section,
                                 char *value, bool up_iface)
 {
         struct uci_list *v = NULL;
-        struct uci_element *e;
+        struct uci_element *e = NULL;
         char *val;
 
 	dmuci_get_value_by_section_list(s, section, &v);
@@ -1660,14 +1662,16 @@ static void sync_proxy_interface_sections(struct uci_section *s, char *section,
 	// update the downstream or upstream interface list.
 	value = dmstrdup(value);
 
-	char *pch = NULL, *spch = NULL;
-	pch = strtok_r(value, " ", &spch);
+	char *spch = NULL;
+	char *pch = strtok_r(value, " ", &spch);
 	while (pch != NULL) {
-		int found = 0; // use to avoid duplicate entries
 
 		if (v != NULL) {
 			// For each pch value check if entry already exists
 			// in the qos uci file in the downstream or upstream list
+
+			bool found = 0; // use to avoid duplicate entries
+
 			uci_foreach_element(v, e) {
 				val = dmstrdup(e->name);
 				if (strcmp(val, pch) == 0) {
@@ -1702,7 +1706,7 @@ static void sync_proxy_interface_sections(struct uci_section *s, char *section,
 
 static void set_igmpp_iface_val(void *data, char *instance, char *linker, char *interface_linker, bool is_br)
 {
-	struct uci_section *d_sec;
+	struct uci_section *d_sec = NULL;
 	char *up, *f_inst;
 	bool b;
 
@@ -1732,9 +1736,9 @@ static void set_igmpp_iface_val(void *data, char *instance, char *linker, char *
 static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *linker = NULL, *interface_linker = NULL;
-	char ifname[16];
-	char *if_type;
-	struct uci_section *s;
+	char ifname[16] = {0};
+	char *if_type = NULL;
+	struct uci_section *s = NULL;
 	bool is_br = false;
 
 	switch (action) {
@@ -1755,7 +1759,7 @@ static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 						continue;
 
 					dmuci_get_value_by_section_string(s, "type", &if_type);
-					if (strcmp(if_type, "bridge") == 0) {
+					if (if_type && strcmp(if_type, "bridge") == 0) {
 						dmasprintf(&interface_linker, "br-%s", linker);
 						is_br = true;
 					} else {
@@ -1798,11 +1802,11 @@ static int get_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 	if (strstr(igmpp_ifname, "br-")) {
 		// Interface is bridge type, convert to network uci file section name
 		char val[16] = {0};
-		strncpy(val, igmpp_ifname, sizeof(val) - 1);
+		DM_STRNCPY(val, igmpp_ifname, sizeof(val));
 		char *token, *end;
 		token = strtok_r(val, "-", &end);
 		if (strcmp(token, "br") == 0) {
-			strncpy(sec_name, end, sizeof(sec_name) - 1);
+			DM_STRNCPY(sec_name, end, sizeof(sec_name));
 		} else {
 			goto end;
 		}
@@ -1866,12 +1870,12 @@ static int set_igmpp_interface_upstream(char *refparam, struct dmctx *ctx, void 
 				char *ifval;
 				dmuci_get_value_by_section_string(d_sec, "ifname", &ifname);
 				if (strstr(ifname, "br-") != NULL) {
-					strncpy(key, ifname, sizeof(key) - 1);
+					DM_STRNCPY(key, ifname, sizeof(key));
 				} else {
 					uci_foreach_sections("network", "interface", s) {
 						if(strcmp(section_name(s), ifname) == 0) {
 							dmuci_get_value_by_section_string(s, "ifname", &ifval);
-							strncpy(key, ifval, sizeof(key) - 1);
+							DM_STRNCPY(key, ifval, sizeof(key));
 							break;
 						}
 					}
@@ -1894,7 +1898,7 @@ static int set_igmpp_interface_upstream(char *refparam, struct dmctx *ctx, void 
 
 int get_mcastp_interface_upstream(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *d_sec;
+	struct uci_section *d_sec = NULL;
 	char *f_inst, *up = NULL;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface",
@@ -1912,7 +1916,7 @@ int get_mcastp_interface_upstream(char *refparam, struct dmctx *ctx, void *data,
 
 int get_mcastp_iface_snoop_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *d_sec;
+	struct uci_section *d_sec = NULL;
 	char *f_inst, *val = NULL;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface",

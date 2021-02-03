@@ -27,13 +27,6 @@ struct dmjson_arg {
 
 #define DMJSON_ARGS (struct dmjson_arg[])
 
-void dm_add_json_obj(json_object *json_obj_out, char *object, char *string);
-void dmjson_printf(int argc, struct dmjson_arg dmarg[]);
-void dmjson_fprintf(FILE *fp, int argc, struct dmjson_arg dmarg[]);
-void bbf_api_dmjson_parse_init(char *msg);
-void bbf_api_dmjson_parse_fini(void);
-void bbf_api_dmjson_get_var(char *jkey, char **jval);
-void bbf_api_dmjson_get_string(char *jkey, char **jval);
 json_object *bbf_api_dmjson_select_obj(json_object * jobj, char *argv[]);
 json_object *__dmjson_get_obj(json_object *mainjobj, int argc, ...);
 char *____dmjson_get_value_in_obj(json_object *mainjobj, char *argv[]);
@@ -58,7 +51,7 @@ char *__dmjson_get_value_array_all(json_object *mainjobj, char *delim, int argc,
 	__dmjson_select_obj_in_array_idx(MAINJOBJ, NULL, INDEX, ARGC, ##args)
 
 #define dmjson_get_value_array_all(MAINJOBJ,DELIM,ARGC,args...) \
-	__dmjson_get_value_array_all(MAINJOBJ, DELIM, ARGC, ##args);
+	__dmjson_get_value_array_all(MAINJOBJ, DELIM, ARGC, ##args)
 
 #define dmjson_foreach_obj_in_array(MAINJOBJ,ARROBJ,OBJ,INDEX,ARGC,args...) \
 	for (INDEX = 0, ARROBJ = NULL, OBJ = __dmjson_select_obj_in_array_idx(MAINJOBJ, &(ARROBJ), INDEX, ARGC, ##args);\

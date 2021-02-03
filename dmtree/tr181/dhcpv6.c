@@ -88,7 +88,7 @@ static int browseDHCPv6ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 	struct dmmap_dup *p = NULL;
 	struct dhcpv6_client_args dhcpv6_client_arg = {0};
 	json_object *res, *jobj;
-	char *inst, *max_inst = NULL, *ipv6addr = NULL;
+	char *inst = NULL, *max_inst = NULL, *ipv6addr = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_dhcpv6", "proto", "dhcpv6", &dup_list);
@@ -117,7 +117,7 @@ static int browseDHCPv6ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, 
 {
 	char *ignore = NULL, *interface, *inst = NULL, *max_inst = NULL, *v;
 	struct dhcpv6_args curr_dhcp6_args = {0};
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("dhcp", "dhcp", "dmmap_dhcpv6", &dup_list);
@@ -149,7 +149,7 @@ static int browseDHCPv6ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, 
 static int browseDHCPv6ServerPoolClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct dhcpv6_args *dhcp_arg= (struct dhcpv6_args*)prev_data;
-	json_object *res, *res1, *jobj, *dev_obj= NULL, *net_obj= NULL;
+	json_object *res = NULL, *res1 = NULL, *jobj = NULL, *dev_obj = NULL, *net_obj = NULL;
 	struct clientv6_args curr_dhcp_client_args = {0};
 	int i = 0;
 	char *inst = NULL, *max_inst = NULL, *device;
@@ -179,13 +179,12 @@ static int browseDHCPv6ServerPoolClientInst(struct dmctx *dmctx, DMNODE *parent_
 static int browseDHCPv6ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_list *dhcp_options_list = NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	struct dhcpv6_args *curr_dhcp_args = (struct dhcpv6_args*)prev_data;
-	struct uci_section *dmmap_sect;
+	struct uci_section *dmmap_sect = NULL;
 	struct browse_args browse_args = {0};
-	char **dhcpv6_option = NULL, *inst, *max_inst = NULL, *optionvalue= NULL, *tmp, *dhcpv6_tag, *dhcpv6_value;
+	char **dhcpv6_option = NULL, *inst = NULL, *max_inst = NULL, *optionvalue = NULL, *tmp = NULL, *dhcpv6_tag, *dhcpv6_value;
 	size_t length;
-	int j;
 	struct dhcpv6_client_option_args dhcpv6_client_opt_args = {0};
 
 	dmuci_get_value_by_section_list(curr_dhcp_args->dhcp_sec, "dhcp_option", &dhcp_options_list);
@@ -202,6 +201,8 @@ static int browseDHCPv6ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_
 			}
 			optionvalue = dmstrdup(length > 1 ? dhcpv6_option[1] : "");
 			if (length > 2) {
+				int j;
+
 				for (j = 2; j < length; j++){
 					tmp = dmstrdup(optionvalue);
 					dmfree(optionvalue);
@@ -301,7 +302,7 @@ static int addObjDHCPv6Client(char *refparam, struct dmctx *ctx, void *data, cha
 static int delObjDHCPv6Client(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct dhcpv6_client_args *dhcpv6_client_args = (struct dhcpv6_client_args*)data;
-	struct uci_section *s, *dmmap_section, *ss = NULL;
+	struct uci_section *s = NULL, *dmmap_section, *ss = NULL;
 	int found = 0;
 	char *proto;
 
@@ -432,7 +433,7 @@ static int addObjDHCPv6ServerPoolOption(char *refparam, struct dmctx *ctx, void 
 
 static int delObjDHCPv6ServerPoolOption(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s, *stmp;
+	struct uci_section *s = NULL, *stmp = NULL;
 	char *opt_value = NULL;
 	struct uci_list *dhcp_options_list = NULL;
 
@@ -986,7 +987,7 @@ static int set_DHCPv6ServerPool_SourceAddressMask(char *refparam, struct dmctx *
 
 static int get_DHCPv6ServerPool_ClientNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res, *res1, *jobj, *dev_obj = NULL, *next_obj = NULL;
+	json_object *res = NULL, *res1 = NULL, *jobj = NULL, *dev_obj = NULL, *next_obj = NULL;
 	char *device;
 	int i = 0;
 
@@ -1012,7 +1013,7 @@ static int get_DHCPv6ServerPool_ClientNumberOfEntries(char *refparam, struct dmc
 static int get_DHCPv6ServerPool_OptionNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_list *dhcp_options_list = NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	int i = 0;
 
 	dmuci_get_value_by_section_list(((struct dhcpv6_args *)data)->dhcp_sec, "dhcp_option", &dhcp_options_list);
@@ -1153,7 +1154,7 @@ static int get_DHCPv6ServerPoolClientIPv6Prefix_ValidLifetime(char *refparam, st
 static int get_DHCPv6ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_list *dhcp_option_list;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	char **buf = NULL;
 	size_t length;
 
@@ -1180,8 +1181,8 @@ static int get_DHCPv6ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 static int set_DHCPv6ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_list *dhcp_option_list;
-	struct uci_element *e;
-	char **buf, *opt_value;
+	struct uci_element *e = NULL;
+	char **buf = NULL, *opt_value;
 	size_t length;
 	bool test = false, b;
 
@@ -1250,7 +1251,7 @@ static int set_DHCPv6ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, voi
 	char *opttagvalue, **option = NULL, *oldopttagvalue;
 	size_t length;
 	struct uci_list *dhcp_option_list= NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -1297,7 +1298,7 @@ static int set_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 	char *opttagvalue, **option = NULL, *oldopttagvalue;
 	size_t length;
 	struct uci_list *dhcp_option_list = NULL;
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 	char res[256] = {0};
 
 	switch (action)	{

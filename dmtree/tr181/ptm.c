@@ -245,7 +245,7 @@ static int browsePtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 {
 	char *inst = NULL, *max_inst = NULL, *ifname;
 	struct ptm_args curr_ptm_args = {0};
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("dsl", "ptm-device", "dmmap_dsl", &dup_list);

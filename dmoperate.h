@@ -25,7 +25,7 @@
 extern struct op_cmd *dynamic_operate;
 
 struct wifi_security_params {
-	char node[255];
+	char node[256];
 	char *param;
 	char value[256];
 };
@@ -215,7 +215,7 @@ struct op_cmd {
 	const operation_args args;
 };
 
-int add_dynamic_operate(char *path, operation operate, char *optype);
+int add_dynamic_operate(char *path, operation operate, char *type);
 void operate_list_cmds(struct dmctx *dmctx);
 opr_ret_t operate_on_node(struct dmctx *dmctx, char *path, char *input);
 

@@ -422,7 +422,7 @@ static char *get_dsl_standard(char *str)
 /*#Device.DSL.Line.{i}.StandardsSupported!UBUS:dsl.line.1/status//standards_supported*/
 static int get_DSLLine_StandardsSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *standards_supported, *pch, *spch, *tmp, *tmpPtr = NULL, *str = NULL;
+	char *standards_supported, *pch, *spch, *tmp = NULL, *tmpPtr = NULL, *str = NULL;
 
 	*value = "G.992.1_Annex_A";
 	standards_supported = get_dsl_value_array_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "standards_supported");
@@ -982,7 +982,7 @@ static char *get_dsl_link_encapsulation_standard(char *str)
 /*#Device.DSL.Channel.{i}.LinkEncapsulationSupported!UBUS:dsl.channel.1/status//link_encapsulation_supported*/
 static int get_DSLChannel_LinkEncapsulationSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *link_encap,*pch, *spch, *tmp, *tmpPtr = NULL, *str = NULL;
+	char *link_encap,*pch, *spch, *tmp = NULL, *tmpPtr = NULL, *str = NULL;
 
 	*value = "G.994.1";
 	link_encap = get_dsl_value_array_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "status", "link_encapsulation_supported");

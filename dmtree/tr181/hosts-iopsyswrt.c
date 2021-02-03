@@ -22,12 +22,10 @@ int os__browseHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 	int id = 0, i = 0;
 
 	dmubus_call("router.network", "hosts", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		dmjson_foreach_obj_in_array(res, arrobj, host_obj, i, 1, "hosts") {
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)host_obj, inst) == DM_STOP)
-				break;
-		}
+	dmjson_foreach_obj_in_array(res, arrobj, host_obj, i, 1, "hosts") {
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)host_obj, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
@@ -35,7 +33,7 @@ int os__browseHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 /*#Device.Hosts.Host.{i}.IPv4Address.{i}.!UBUS:router.network/hosts//hosts[@i-1].ipv4addr*/
 int os__browseHostsHostIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *ip_arr, *host_obj = (json_object *)prev_data;
+	json_object *ip_arr = NULL, *host_obj = (json_object *)prev_data;
 	char *inst = NULL, *max_inst = NULL, *ipv4addr = NULL;
 	int id = 0, i = 0;
 
@@ -50,7 +48,7 @@ int os__browseHostsHostIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node,
 /*#Device.Hosts.Host.{i}.IPv6Address.{i}.!UBUS:router.network/hosts//hosts[@i-1].ipv6addr*/
 int os__browseHostsHostIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *ip_arr, *host_obj = (json_object *)prev_data;
+	json_object *ip_arr = NULL, *host_obj = (json_object *)prev_data;
 	char *inst = NULL, *max_inst = NULL, *ipv6addr = NULL;
 	int id = 0, i = 0;
 

@@ -90,7 +90,7 @@ static bool bbf_set_value(char *path, char *value)
 static char *bbf_get_value_by_id(char *id)
 {
 	struct dmctx dm_ctx = {0};
-	struct dm_parameter *n;
+	struct dm_parameter *n = NULL;
 	char *value = NULL;
 
 	bbf_init(&dm_ctx, id);
@@ -106,7 +106,6 @@ static char *bbf_get_value_by_id(char *id)
 
 static char *get_param_val_from_op_cmd(char *op_cmd, const char *param)
 {
-	char *val = NULL;
 	char node[256] = {'\0'};
 
 	// Trim action from operation command
@@ -115,11 +114,10 @@ static char *get_param_val_from_op_cmd(char *op_cmd, const char *param)
 	strncpy(node, op_cmd, ret - op_cmd +1);
 
 	// Append param name to the trimmed path
-	strcat(node, param);
+	strncat(node, param, sizeof(node) - strlen(node));
 
 	// Get parameter value
-	val = bbf_get_value_by_id(node);
-	return val;
+	return bbf_get_value_by_id(node);
 }
 
 static opr_ret_t reboot_device(struct dmctx *dmctx, char *path, json_object *input)
@@ -144,10 +142,9 @@ static opr_ret_t network_interface_reset(struct dmctx *dmctx, char *path, json_o
 	bool status = false;
 
 	snprintf(cmd + strlen(cmd), NAME_MAX - strlen(cmd), "%s", ".");
-	char *zone = NULL;
-	zone = get_param_val_from_op_cmd(path, "Name");
+	char *zone = get_param_val_from_op_cmd(path, "Name");
 	if (zone) {
-		strcat(cmd, zone);
+		strncat(cmd, zone, NAME_MAX - strlen(cmd));
 		dmfree(zone);
 	} else {
 		return FAIL;
@@ -190,20 +187,20 @@ static opr_ret_t ap_security_reset(struct dmctx *dmctx, char *path, json_object 
 	len = ARRAY_SIZE(reset_params);
 
 	for (i = 0; i < len; i++) {
-		strncpy(reset_params[i].node, node, 255);
-		strcat(reset_params[i].node, reset_params[i].param);
+		DM_STRNCPY(reset_params[i].node, node, sizeof(reset_params[i].node));
+		strncat(reset_params[i].node, reset_params[i].param, 255 - strlen(reset_params[i].node));
 	}
 	const char *mode_enabled = "WPA2-Personal";
 
 	// Default mode - WPA2-Personal
-	strncpy(reset_params[0].value, mode_enabled, 255);
+	DM_STRNCPY(reset_params[0].value, mode_enabled, sizeof(reset_params[0].value));
 
 	// Get Default wpakey
 	db_get_value_string("hw", "board", "wpa_key", &wpakey);
 
 	// PreSharedKey and KeyPassphrase are kept same
-	strncpy(reset_params[1].value, wpakey, 255);
-	strncpy(reset_params[2].value, wpakey, 255);
+	DM_STRNCPY(reset_params[1].value, wpakey, sizeof(reset_params[1].value));
+	DM_STRNCPY(reset_params[2].value, wpakey, sizeof(reset_params[2].value));
 
 	for (i = 0; i < len; i++) {
 		bbf_set_value(reset_params[i].node, reset_params[i].value);
@@ -222,9 +219,8 @@ static opr_ret_t dhcp_client_renew(struct dmctx *dmctx, char *path, json_object 
 static opr_ret_t vendor_conf_backup(struct dmctx *dmctx, char *path, json_object *input)
 {
 	struct file_server fserver = {0};
-	char *vcf_name = NULL;
 
-	vcf_name = get_param_val_from_op_cmd(path, "Name");
+	char *vcf_name = get_param_val_from_op_cmd(path, "Name");
 	if (!vcf_name)
 		return FAIL;
 
@@ -306,10 +302,11 @@ static void fill_wireless_scan_results(struct dmctx *dmctx, char *radio)
 static opr_ret_t fetch_neighboring_wifi_diagnostic(struct dmctx *dmctx, char *path, json_object *input)
 {
 	json_object *res = NULL, *radios = NULL, *arrobj = NULL;
-	int j = 0;
 
 	dmubus_call("wifi", "status", UBUS_ARGS{}, 0, &res);
 	if (res) {
+		int j = 0;
+
 		dmjson_foreach_obj_in_array(res, arrobj, radios, j, 1, "radios") {
 			fill_wireless_scan_results(dmctx, dmjson_get_value(radios, 1, "name"));
 		}
@@ -1217,7 +1214,7 @@ static opr_ret_t do_operate(struct dmctx *dmctx, char *path, operation func, con
 opr_ret_t operate_on_node(struct dmctx *dmctx, char *path, char *input)
 {
 	struct op_cmd *save_pointer = NULL;
-	const struct op_cmd *op;
+	const struct op_cmd *op = NULL;
 	const size_t n = ARRAY_SIZE(operate_helper);
 	size_t i;
 

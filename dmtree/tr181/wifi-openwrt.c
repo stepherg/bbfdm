@@ -226,21 +226,6 @@ int os__get_access_point_associative_device_statistics_retrans_count(char *refpa
 	return not_implemented(value);
 }
 
-int os__get_access_point_associative_device_statistics_failed_retrans_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	return not_implemented(value);
-}
-
-int os__get_access_point_associative_device_statistics_retry_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	return not_implemented(value);
-}
-
-int os__get_access_point_associative_device_statistics_multiple_retry_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	return not_implemented(value);
-}
-
 int os_get_wifi_access_point_status (char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return not_implemented(value);

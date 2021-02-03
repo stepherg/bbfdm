@@ -35,7 +35,7 @@ static int get_du_linker(char *refparam, struct dmctx *dmctx, void *data, char *
 static int browseSoftwareModulesExecEnvInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, env = 0;
 
 	dmubus_call("swmodules", "environment", UBUS_ARGS{}, 0, &res);
@@ -50,7 +50,7 @@ static int browseSoftwareModulesExecEnvInst(struct dmctx *dmctx, DMNODE *parent_
 static int browseSoftwareModulesDeploymentUnitInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, du = 0;
 
 	dmubus_call("swmodules", "du_list", UBUS_ARGS{}, 0, &res);
@@ -65,7 +65,7 @@ static int browseSoftwareModulesDeploymentUnitInst(struct dmctx *dmctx, DMNODE *
 static int browseSoftwareModulesExecutionUnitInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 	int id = 0, eu = 0;
 
 	dmubus_call("swmodules", "eu_list", UBUS_ARGS{}, 0, &res);
@@ -210,12 +210,12 @@ static int set_SoftwareModulesExecEnv_Reset(char *refparam, struct dmctx *ctx, v
 static int get_SoftwareModulesExecEnv_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
-	char *env_name, *name = NULL;
+	char *env_name = NULL;
 
-	name = dmjson_get_value((json_object *)data, 1, "name");
+	char *name = dmjson_get_value((json_object *)data, 1, "name");
 	uci_path_foreach_sections(bbfdm, "dmmap_sw_modules", "environment", s) {
 		dmuci_get_value_by_section_string(s, "name", &env_name);
-		if (name && strcmp(env_name, name) == 0) {
+		if (name && env_name && strcmp(env_name, name) == 0) {
 			dmuci_get_value_by_section_string(s, "alias", value);
 			break;
 		}
@@ -332,7 +332,7 @@ static int get_SoftwareModulesExecEnv_ActiveExecutionUnits(char *refparam, struc
 		char *environment = dmjson_get_value(du_obj, 1, "environment");
 
 		if (strcmp(environment, curr_env) == 0)
-			pos += snprintf(&eu_list[pos], sizeof(eu_list) - pos, "Device.SoftwareModules.ExecutionUnit.%d,", eu+1);
+			pos += snprintf(&eu_list[pos], sizeof(eu_list) - pos, "Device.SoftwareModules.ExecutionUnit.%u,", eu+1);
 	}
 
 	if (pos)
@@ -359,14 +359,14 @@ static int get_SoftwareModulesDeploymentUnit_DUID(char *refparam, struct dmctx *
 static int get_SoftwareModulesDeploymentUnit_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
-	char *du_name, *du_env, *environment = NULL, *name = NULL;
+	char *du_name = NULL, *du_env = NULL;
 
-	name = dmjson_get_value((json_object *)data, 1, "name");
-	environment = dmjson_get_value((json_object *)data, 1, "environment");
+	char *name = dmjson_get_value((json_object *)data, 1, "name");
+	char *environment = dmjson_get_value((json_object *)data, 1, "environment");
 	uci_path_foreach_sections(bbfdm, "dmmap_sw_modules", "deployment_unit", s) {
 		dmuci_get_value_by_section_string(s, "name", &du_name);
 		dmuci_get_value_by_section_string(s, "environment", &du_env);
-		if (name && (strcmp(du_name, name) == 0) && (environment && strcmp(du_env, environment) == 0)) {
+		if (name && du_name && (strcmp(du_name, name) == 0) && (environment && du_env && strcmp(du_env, environment) == 0)) {
 			dmuci_get_value_by_section_string(s, "alias", value);
 			break;
 		}
@@ -466,18 +466,18 @@ static int get_SoftwareModulesDeploymentUnit_VendorConfigList(char *refparam, st
 static int get_SoftwareModulesDeploymentUnit_ExecutionUnitList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
-	char *environment, *name, *curr_environment, *curr_name;
+	char *environment = NULL, *name = NULL;
 	int eu = 0;
 
-	curr_name = dmjson_get_value((json_object *)data, 1, "name");
-	curr_environment = dmjson_get_value((json_object *)data, 1, "environment");
+	char *curr_name = dmjson_get_value((json_object *)data, 1, "name");
+	char *curr_environment = dmjson_get_value((json_object *)data, 1, "environment");
 
 	dmubus_call("swmodules", "eu_list", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	dmjson_foreach_obj_in_array(res, arrobj, du_obj, eu, 1, "execution_unit") {
 		name = dmjson_get_value(du_obj, 1, "name");
 		environment = dmjson_get_value(du_obj, 1, "environment");
-		if ((strcmp(name, curr_name) == 0) && (strcmp(environment, curr_environment) == 0)) {
+		if ((name && curr_name && strcmp(name, curr_name) == 0) && (environment && curr_environment && strcmp(environment, curr_environment) == 0)) {
 			dmasprintf(value, "Device.SoftwareModules.ExecutionUnit.%d", eu+1);
 			break;
 		}
@@ -505,14 +505,14 @@ static int get_SoftwareModulesExecutionUnit_EUID(char *refparam, struct dmctx *c
 static int get_SoftwareModulesExecutionUnit_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
-	char *eu_euid, *eu_env, *environment = NULL, *euid = NULL;
+	char *eu_euid = NULL, *eu_env = NULL;
 
-	euid = dmjson_get_value((json_object *)data, 1, "euid");
-	environment = dmjson_get_value((json_object *)data, 1, "environment");
+	char *euid = dmjson_get_value((json_object *)data, 1, "euid");
+	char *environment = dmjson_get_value((json_object *)data, 1, "environment");
 	uci_path_foreach_sections(bbfdm, "dmmap_sw_modules", "execution_unit", s) {
 		dmuci_get_value_by_section_string(s, "euid", &eu_euid);
 		dmuci_get_value_by_section_string(s, "environment", &eu_env);
-		if ((euid && strcmp(eu_euid, euid) == 0) && (environment && strcmp(eu_env, environment) == 0)) {
+		if ((euid && eu_euid && strcmp(eu_euid, euid) == 0) && (environment && eu_env && strcmp(eu_env, environment) == 0)) {
 			dmuci_get_value_by_section_string(s, "alias", value);
 			break;
 		}
@@ -614,18 +614,18 @@ static int get_SoftwareModulesExecutionUnit_MemoryInUse(char *refparam, struct d
 static int get_SoftwareModulesExecutionUnit_References(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *du_obj = NULL, *arrobj = NULL;
-	char *environment, *name, *curr_environment, *curr_name;
-	int  du = 0;
+	char *environment = NULL, *name = NULL;
+	int du = 0;
 
-	curr_name = dmjson_get_value((json_object *)data, 1, "name");
-	curr_environment = dmjson_get_value((json_object *)data, 1, "environment");
+	char *curr_name = dmjson_get_value((json_object *)data, 1, "name");
+	char *curr_environment = dmjson_get_value((json_object *)data, 1, "environment");
 
 	dmubus_call("swmodules", "du_list", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	dmjson_foreach_obj_in_array(res, arrobj, du_obj, du, 1, "deployment_unit") {
 		name = dmjson_get_value(du_obj, 1, "name");
 		environment = dmjson_get_value(du_obj, 1, "environment");
-		if ((strcmp(name, curr_name) == 0) && (strcmp(environment, curr_environment) == 0)) {
+		if ((name && curr_name && strcmp(name, curr_name) == 0) && (environment && curr_environment && strcmp(environment, curr_environment) == 0)) {
 			dmasprintf(value, "Device.SoftwareModules.DeploymentUnit.%d", du+1);
 			break;
 		}
@@ -636,15 +636,15 @@ static int get_SoftwareModulesExecutionUnit_References(char *refparam, struct dm
 static int get_SoftwareModulesExecutionUnit_AssociatedProcessList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *processes_obj = NULL, *arrobj = NULL;
-	char *euid, *pid;
+	char *pid = NULL;
 	int process = 0;
 
-	euid = dmjson_get_value((json_object *)data, 1, "euid");
+	char *euid = dmjson_get_value((json_object *)data, 1, "euid");
 	dmubus_call("router.system", "processes", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	dmjson_foreach_obj_in_array(res, arrobj, processes_obj, process, 1, "processes") {
 		pid = dmjson_get_value(processes_obj, 1, "pid");
-		if (strcmp(euid, pid) == 0) {
+		if (pid && euid && strcmp(euid, pid) == 0) {
 			dmasprintf(value, "Device.DeviceInfo.ProcessStatus.Process.%d", process+1);
 			break;
 		}

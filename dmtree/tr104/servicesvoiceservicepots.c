@@ -18,7 +18,7 @@
 static int browseServicesVoiceServicePOTSFXSInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *inst_last = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "tel_line", "dmmap_asterisk", &dup_list);
@@ -26,7 +26,7 @@ static int browseServicesVoiceServicePOTSFXSInst(struct dmctx *dmctx, DMNODE *pa
 		char *line_name = NULL;
 
 		dmuci_get_value_by_section_string(p->config_section, "name", &line_name);
-		if (*line_name == '\0' || strcasestr(line_name, "DECT") == NULL) {
+		if (line_name && (*line_name == '\0' || strcasestr(line_name, "DECT") == NULL)) {
 
 			inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
 				   p->dmmap_section, "fxsinstance", "fxsalias");

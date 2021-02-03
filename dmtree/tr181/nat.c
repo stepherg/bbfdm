@@ -221,21 +221,26 @@ static int set_nat_interface_setting_alias(char *refparam, struct dmctx *ctx, vo
 static int get_nat_interface_setting_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_list *v = NULL;
-	struct uci_element *e;
-	char *ifaceobj, buf[256] = "";
+	char buf[256];
+	unsigned pos = 0;
 
-	*value = "";
+	buf[0] = 0;
 	dmuci_get_value_by_section_list((struct uci_section *)data, "network", &v);
-	if (v == NULL)
-		return 0;
-	uci_foreach_element(v, e) {
-		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
-		if (ifaceobj == NULL)
-			continue;
-		if (*buf != '\0')
-			strcat(buf, ",");
-		strcat(buf, ifaceobj);
+	if (v) {
+		struct uci_element *e = NULL;
+		char *ifaceobj = NULL;
+
+		uci_foreach_element(v, e) {
+			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
+			if (ifaceobj)
+				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", ifaceobj);
+		}
 	}
+
+	/* cut tailing ',' */
+	if (pos)
+		buf[pos - 1] = 0;
+
 	*value = dmstrdup(buf);
 	return 0;
 }
@@ -250,7 +255,7 @@ static int set_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			strcpy(buf, value);
+			DM_STRNCPY(buf, value, sizeof(buf));
 			dmuci_set_value_by_section((struct uci_section *)data, "network", "");
 			for(pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
 				adm_entry_get_linker_value(ctx, pch, &iface);
@@ -332,14 +337,14 @@ static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 {
 	struct uci_section *s = NULL;
 	struct uci_list *v = NULL;
-	struct uci_element *e;
-	char *zone_name = NULL, *name = NULL, *ifaceobj = NULL, *src_dip = NULL;
-	char buf[256] = "";
+	char *zone_name = NULL, *name = NULL, *src_dip = NULL, buf[256];
+	unsigned pos = 0;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "src_dip", &src_dip);
 	if (src_dip && strcmp(src_dip, "*") == 0)
 		return 0;
 
+	buf[0] = 0;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "src", &zone_name);
 	uci_foreach_sections("firewall", "zone", s) {
 		dmuci_get_value_by_section_string(s, "name", &name);
@@ -348,16 +353,22 @@ static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 			break;
 		}
 	}
-	if (v == NULL)
-		return 0;
-	uci_foreach_element(v, e) {
-		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
-		if (ifaceobj == NULL)
-			continue;
-		if (*buf != '\0')
-			strcat(buf, ",");
-		strcat(buf, ifaceobj);
+
+	if (v) {
+		struct uci_element *e = NULL;
+		char *ifaceobj = NULL;
+
+		uci_foreach_element(v, e) {
+			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
+			if (ifaceobj)
+				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", ifaceobj);
+		}
 	}
+
+	/* cut tailing ',' */
+	if (pos)
+		buf[pos - 1] = 0;
+
 	*value = dmstrdup(buf);
 	return 0;
 }
@@ -628,8 +639,8 @@ static int set_nat_port_mapping_description(char *refparam, struct dmctx *ctx, v
 /*#Device.NAT.InterfaceSetting.{i}.!UCI:firewall/zone/dmmap_firewall*/
 static int browseInterfaceSettingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst, *max_inst = NULL;
-	struct dmmap_dup *p;
+	char *inst = NULL, *max_inst = NULL;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("firewall", "zone", "dmmap_firewall", &dup_list);
@@ -648,8 +659,8 @@ static int browseInterfaceSettingInst(struct dmctx *dmctx, DMNODE *parent_node, 
 /*#Device.NAT.PortMapping.{i}.!UCI:firewall/redirect/dmmap_firewall*/
 static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst, *max_inst = NULL, *target;
-	struct dmmap_dup *p;
+	char *inst = NULL, *max_inst = NULL, *target;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("firewall", "redirect", "dmmap_firewall", &dup_list);

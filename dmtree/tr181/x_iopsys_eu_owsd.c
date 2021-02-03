@@ -16,7 +16,7 @@
 static int browseXIopsysEuOWSDVirtualHost(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("owsd", "owsd-listen", "dmmap_owsd", &dup_list);
@@ -195,13 +195,10 @@ static int set_x_iopsys_eu_owsd_virtualhost_whitelist_dhcp(char *refparam, struc
 
 static int get_x_iopsys_eu_owsd_virtualhost_origin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_list *val;
+	struct uci_list *val = NULL;
 
 	dmuci_get_value_by_section_list((struct uci_section *)data, "origin", &val);
-	if (val)
-		*value = dmuci_list_to_string(val, " ");
-	else
-		*value = "";
+	*value = dmuci_list_to_string(val, " ");
 	return 0;
 }
 

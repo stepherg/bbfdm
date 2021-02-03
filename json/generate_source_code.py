@@ -488,7 +488,7 @@ def cprintBrowseObj( fbrowse, name, mappingobj, dmobject ):
 		############################## UCI ########################################
 		if type == "uci" :
 			print("	char *inst = NULL, *max_inst = NULL;", file=fp)
-			print("	struct dmmap_dup *p;", file=fp)
+			print("	struct dmmap_dup *p = NULL;", file=fp)
 			print("	LIST_HEAD(dup_list);", file=fp)
 			print("", file=fp)
 			print("	synchronize_specific_config_sections_with_dmmap(\"%s\", \"%s\", \"%s\", &dup_list);" % (res1, res2, res3), file=fp)

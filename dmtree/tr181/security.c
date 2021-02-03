@@ -158,7 +158,7 @@ static char *get_certificate_pk(mbedtls_pk_type_t sig_pk)
 
 static void get_certificate_paths(void)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	int cidx;
 
 	for (cidx=0; cidx<MAX_CERT; cidx++)
@@ -175,7 +175,7 @@ static void get_certificate_paths(void)
 			break;
 		if(!file_exists(cert) || !is_regular_file(cert))
 			continue;
-		strncpy(certifcates_paths[cidx], cert, 256);
+		DM_STRNCPY(certifcates_paths[cidx], cert, 256);
 		cidx++;
 	}
 
@@ -188,7 +188,7 @@ static void get_certificate_paths(void)
 			break;
 		if(!file_exists(cert) || !is_regular_file(cert))
 			continue;
-		strncpy(certifcates_paths[cidx], cert, 256);
+		DM_STRNCPY(certifcates_paths[cidx], cert, 256);
 		cidx++;
 	}
 
@@ -201,7 +201,7 @@ static void get_certificate_paths(void)
 			break;
 		if(!file_exists(cert) || !is_regular_file(cert))
 			continue;
-		strncpy(certifcates_paths[cidx], cert, 256);
+		DM_STRNCPY(certifcates_paths[cidx], cert, 256);
 		cidx++;
 	}
 }
@@ -219,8 +219,7 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 		if(!strlen(certifcates_paths[i]))
 			break;
 #ifdef LOPENSSL
-		FILE *fp = NULL;
-		fp = fopen(certifcates_paths[i], "r");
+		FILE *fp = fopen(certifcates_paths[i], "r");
 		if (fp == NULL)
 			continue;
 		X509 *cert = PEM_read_X509(fp, NULL, NULL, NULL);
@@ -284,8 +283,7 @@ static int get_Security_CertificateNumberOfEntries(char *refparam, struct dmctx 
 		if(!strlen(certifcates_paths[i]))
 			break;
 #ifdef LOPENSSL
-		FILE *fp = NULL;
-		fp = fopen(certifcates_paths[i], "r");
+		FILE *fp = fopen(certifcates_paths[i], "r");
 		if (fp == NULL)
 			continue;
 		X509 *cert = PEM_read_X509(fp, NULL, NULL, NULL);

@@ -119,10 +119,9 @@ char *cidr2netmask(int bits)
 
 bool is_strword_in_optionvalue(char *optionvalue, char *str)
 {
-	int len;
 	char *s = optionvalue;
 	while ((s = strstr(s, str))) {
-		len = strlen(str); //should be inside while, optimization reason
+		int len = strlen(str); //should be inside while, optimization reason
 		if(s[len] == '\0' || s[len] == ' ')
 			return true;
 		s++;
@@ -196,10 +195,9 @@ int dmcmd_no_wait(char *cmd, int n, ...)
 	static char sargv[4][128];
 
 	argv[0] = cmd;
-	va_start(arg,n);
-	for (i=0; i<n; i++)
-	{
-		strcpy(sargv[i], va_arg(arg, char*));
+	va_start(arg, n);
+	for (i = 0; i < n; i++) {
+		DM_STRNCPY(sargv[i], va_arg(arg, char*), sizeof(sargv[i]));
 		argv[i+1] = sargv[i];
 	}
 	va_end(arg);
@@ -215,39 +213,6 @@ int dmcmd_no_wait(char *cmd, int n, ...)
 	} else if (pid < 0)
 		return -1;
 	return 0;
-}
-
-void dmcmd_read_alloc(int pipe, char **value)
-{
-	char buffer[64];
-	ssize_t rxed;
-	int t, len = 1;
-
-	*value = NULL;
-	while ((rxed = read(pipe, buffer, sizeof(buffer) - 1)) > 0) {
-		t = len;
-		len += rxed;
-		*value = dmrealloc(*value, len);
-		memcpy(*value + t - 1, buffer, rxed);
-		*(*value + len -1) = '\0';
-	}
-	if (*value == NULL)
-		*value = dmstrdup("");
-}
-
-int dmcmd_read(int pipe, char *buffer, int size)
-{
-	int rd;
-	if (size < 2) return -1;
-	if ((rd = read(pipe, buffer, (size-1))) > 0) {
-		remove_new_line(buffer);
-		buffer[rd] = '\0';
-		return (rd + 1);
-	} else {
-		buffer[0] = '\0';
-		return -1;
-	}
-	return -1;
 }
 
 void update_section_list(char *config, char *section, char *option, int number, char *filter, char *option1, char *val1, char *option2, char *val2)
@@ -316,22 +281,14 @@ int wan_remove_dev_interface(struct uci_section *interface_setion, char *dev)
 
 void hex_to_ip(char *address, char *ret)
 {
-	int ip[4] = {0};
+	unsigned int ip[4] = {0};
 
 	sscanf(address, "%2x%2x%2x%2x", &(ip[0]), &(ip[1]), &(ip[2]), &(ip[3]));
 	if (htonl(13) == 13) {
-		sprintf(ret, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+		sprintf(ret, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
 	} else {
-		sprintf(ret, "%d.%d.%d.%d", ip[3], ip[2], ip[1], ip[0]);
+		sprintf(ret, "%u.%u.%u.%u", ip[3], ip[2], ip[1], ip[0]);
 	}
-}
-
-void ip_to_hex(char *address, char *ret)
-{
-	int ip[4] = {0};
-
-	sscanf(address, "%d.%d.%d.%d", &(ip[0]), &(ip[1]), &(ip[2]), &(ip[3]));
-	sprintf(ret, "%02X%02X%02X%02X", ip[0], ip[1], ip[2], ip[3]);
 }
 
 /*
@@ -355,7 +312,7 @@ static void dmmap_config_dup_delete(struct dmmap_dup *dmmap_config)
 
 void free_dmmap_config_dup_list(struct list_head *dup_list)
 {
-	struct dmmap_dup *dmmap_config;
+	struct dmmap_dup *dmmap_config = NULL;
 	while (dup_list->next != dup_list) {
 		dmmap_config = list_entry(dup_list->next, struct dmmap_dup, list);
 		dmmap_config_dup_delete(dmmap_config);
@@ -549,7 +506,7 @@ int synchronize_system_folders_with_dmmap_opt(char *sysfsrep, char *dmmap_packag
 		 * Add system and dmmap sections to the list
 		 */
 
-		if(instance == NULL || strlen(instance) <= 0)
+		if (instance == NULL || *instance == '\0')
 			add_sysfs_section_list(&dup_list_no_inst, dmmap_sect, ent->d_name, sysfs_rep_path);
 		else
 			add_sysfs_section_list(dup_list, dmmap_sect, ent->d_name, sysfs_rep_path);
@@ -629,7 +586,7 @@ char *check_create_dmmap_package(const char *dmmap_package)
 	if (rc == -1)
 		return NULL;
 
-	if (access(path, F_OK)) {
+	if (!file_exists(path)) {
 		/*
 		 *File does not exist
 		 **/
@@ -804,14 +761,15 @@ char **strsplit_by_str(const char str[], char *delim)
 	char **tokens = dmcalloc(tokens_alloc, sizeof(char*));
 	char *strparse = strdup(str);
 	do {
-		substr = strstr(strparse, delim);
-		if (substr == NULL && (strparse == NULL || strparse[0] == '\0'))
+		if (strparse == NULL || strparse[0] == '\0')
 			break;
+
+		substr = strstr(strparse, delim);
 
 		if (substr == NULL) {
 			substr = strdup(strparse);
 			tokens[tokens_used] = dmcalloc(strlen(substr)+1, sizeof(char));
-			strcpy(tokens[tokens_used], strparse);
+			DM_STRNCPY(tokens[tokens_used], strparse, strlen(substr)+1);
 			tokens_used++;
 			FREE(strparse);
 			break;
@@ -834,23 +792,6 @@ char **strsplit_by_str(const char str[], char *delim)
 	FREE(strparse);
 	tokens[tokens_used] = NULL;
 	return tokens;
-}
-
-char *get_macaddr_from_device(char *device_name)
-{
-	char *mac;
-
-	if (device_name[0]) {
-		char file[128];
-		char val[32];
-
-		snprintf(file, sizeof(file), "/sys/class/net/%s/address", device_name);
-		dm_read_sysfs_file(file, val, sizeof(val));
-		mac = dmstrdup(val);
-	} else {
-		mac = "";
-	}
-	return mac;
 }
 
 char *get_macaddr(char *interface_name)
@@ -1015,16 +956,15 @@ int get_shift_time_time(int shift_time, char *local_time, int size)
 	return 0;
 }
 
-int command_exec_output_to_array(char *cmd, char **output, int *length)
+int command_exec_output_to_array(const char *cmd, char **output, int *length)
 {
-	FILE *fp;
-	char out[1035];
+	char out[2048];
 	int i = 0;
 
 	/* Open the command for reading. */
-	fp = popen(cmd, "r");
+	FILE *fp = popen(cmd, "r");
 	if (fp == NULL)
-		return 0;
+		return -1;
 
 	/* Read the output line by line and store it in output array. */
 	while (fgets(out, sizeof(out)-1, fp) != NULL)
@@ -1137,8 +1077,7 @@ void convert_hex_to_string(const char *hex, char *str)
 	char buf[3] = {0};
 
 	for (i = 0, j = 0; i < len; i += 2, j++) {
-		strncpy(buf, &hex[i], 2);
-		buf[2] = '\0';
+		DM_STRNCPY(buf, &hex[i], 3);
 		sprintf((char *)str + j, "%c", (char)strtol(buf, NULL, 16));
 	}
 	str[j] = '\0';
@@ -1241,7 +1180,7 @@ int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_
 		}
 
 		/* check size */
-		if ((r_args[i].min && ui_val < minval) || (r_args[i].max && ui_val > maxval) || (ui_val < 0) || (ui_val > (unsigned int)UINT_MAX))
+		if ((r_args[i].min && ui_val < minval) || (r_args[i].max && ui_val > maxval) || (ui_val > (unsigned int)UINT_MAX))
 			return -1;
 	}
 
@@ -1295,7 +1234,7 @@ int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args
 		if ((*value == '-') || (*endval != 0) || (errno != 0)) return -1;
 
 		/* check size */
-		if ((r_args[i].min && ul_val < minval) || (r_args[i].max && ul_val > maxval) || (ul_val < 0) || (ul_val > (unsigned long)ULONG_MAX))
+		if ((r_args[i].min && ul_val < minval) || (r_args[i].max && ul_val > maxval) || (ul_val > (unsigned long)ULONG_MAX))
 			return -1;
 	}
 
@@ -1391,8 +1330,7 @@ int dm_validate_string_list(char *value, int min_item, int max_item, int max_siz
 
 	/* copy data in buffer */
 	char buf[strlen(value)+1];
-	strncpy(buf, value, sizeof(buf) - 1);
-	buf[strlen(value)] = '\0';
+	DM_STRNCPY(buf, value, sizeof(buf));
 
 	/* for each value, validate string */
 	for (pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
@@ -1419,8 +1357,7 @@ int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int ma
 
 	/* copy data in buffer */
 	char buf[strlen(value)+1];
-	strncpy(buf, value, sizeof(buf) - 1);
-	buf[strlen(value)] = '\0';
+	DM_STRNCPY(buf, value, sizeof(buf));
 
 	/* for each value, validate string */
 	for (token = strtok_r(buf, ",", &saveptr); token != NULL; token = strtok_r(NULL, ",", &saveptr)) {
@@ -1440,7 +1377,7 @@ bool folder_exists(const char *path)
 {
 	struct stat buffer;
 
-	return (stat(path, &buffer) == 0 && S_ISDIR(buffer.st_mode));
+	return stat(path, &buffer) == 0 && S_ISDIR(buffer.st_mode);
 }
 
 bool file_exists(const char *path)
@@ -1454,7 +1391,7 @@ bool is_regular_file(const char *path)
 {
 	struct stat buffer;
 
-	return (stat(path, &buffer) == 0 && S_ISREG(buffer.st_mode));
+	return stat(path, &buffer) == 0 && S_ISREG(buffer.st_mode);
 }
 
 unsigned long file_system_size(const char *path, const enum fs_size_type_enum type)
@@ -1503,10 +1440,8 @@ char *decode64(char *enc)
 
 char *stringToHex(char *text, int length)
 {
-	char *hex = NULL;
 	int i, j;
-
-	hex = (char *)dmcalloc(100, sizeof(char));
+	char *hex = (char *)dmcalloc(100, sizeof(char));
 
 	for (i = 0, j = 0; i < length; ++i, j += 3) {
 		sprintf(hex + j, "%02x", text[i] & 0xff);
@@ -1526,6 +1461,36 @@ char *replace_char(char *str, char find, char replace)
 	return str;
 }
 
+char *replace_str(const char *str, const char *substr, const char *replacement)
+{
+	int replacement_len = strlen(replacement);
+	int substr_len = strlen(substr);
+	int i, cnt = 0;
+
+	for (i = 0; str[i] != '\0'; i++) {
+		if (strstr(&str[i], substr) == &str[i]) {
+			cnt++;
+			i += substr_len - 1;
+		}
+	}
+
+	size_t new_str_len = i + cnt * (replacement_len - substr_len) + 1;
+	char *value = (char *)dmmalloc(new_str_len * sizeof(char));
+
+	i = 0;
+	while (*str) {
+		if (strstr(str, substr) == str) {
+			i += snprintf(&value[i], new_str_len - i, "%s", replacement);
+			str += substr_len;
+		}
+		else
+			value[i++] = *str++;
+	}
+	value[i] = '\0';
+
+	return value;
+}
+
 void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, char *value)
 {
 	struct uci_section *d_sec = NULL;
@@ -1542,14 +1507,14 @@ void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, ch
 void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *value, bool b)
 {
 	struct uci_list *v = NULL;
-	struct uci_element *e;
-	char *val;
+	struct uci_element *e = NULL;
+	char *val = NULL;
 
 	dmuci_get_value_by_section_list(s, section, &v);
 	if (v != NULL) {
 		uci_foreach_element(v, e) {
 			val = dmstrdup(e->name);
-			if (strcmp(val, value) == 0) {
+			if (val && strcmp(val, value) == 0) {
 				if (!b) {
 					// remove this entry
 					dmuci_del_list_value_by_section(s, section, value);

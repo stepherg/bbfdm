@@ -17,7 +17,7 @@
 int browseVoiceServiceSIPProviderInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *inst_last = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
@@ -72,7 +72,7 @@ int delObjVoiceServiceSIPProvider(char *refparam, struct dmctx *ctx, void *data,
 **************************************************************/
 static int browseServicesVoiceServiceCallLogInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct call_log_entry *entry;
+	struct call_log_entry *entry = NULL;
 	char inst[16];
 	int i = 0;
 
@@ -103,7 +103,7 @@ static int browseServicesVoiceServiceVoIPProfileInst(struct dmctx *dmctx, DMNODE
 static int browseServicesVoiceServiceCodecProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *inst_last = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 	int i, j;
 	int has_codec_profile = 0;
@@ -124,7 +124,6 @@ static int browseServicesVoiceServiceCodecProfileInst(struct dmctx *dmctx, DMNOD
 					char str[16];
 					// Not found. Add this codec in the UCI
 					dmuci_set_value(TR104_UCI_PACKAGE, codec->uci_name, "", "codec_profile");
-					TR104_DEBUG("Created a UCI section: %s\n", str);
 					dmuci_set_value(TR104_UCI_PACKAGE, codec->uci_name, "name", codec->codec);
 					snprintf(str, sizeof(str), "%u", codec->ptime_default);
 					dmuci_set_value(TR104_UCI_PACKAGE, codec->uci_name, "ptime", str);

@@ -36,7 +36,7 @@ static int get_linker_dynamicdns_server(char *refparam, struct dmctx *dmctx, voi
 static int browseDynamicDNSClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("ddns", "service", "dmmap_ddns", &dup_list);
@@ -306,23 +306,26 @@ static int get_DynamicDNS_ServerNumberOfEntries(char *refparam, struct dmctx *ct
 
 static int get_DynamicDNS_SupportedServices(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	FILE *fp = NULL;
-	char line[256] = "", buf[1028] = "", buf_tmp[1024] = "", *pch = NULL, *spch = NULL;
+	char *pch = NULL, *spch = NULL;
 
 	*value = "";
-	fp = fopen(DDNS_PROVIDERS_FILE, "r");
+	FILE *fp = fopen(DDNS_PROVIDERS_FILE, "r");
 	if ( fp != NULL) {
+		char line[256] = {0};
+		char buf[1028] = {0};
+		char buf_tmp[1024] = {0};
+
 		while (fgets(line, 256, fp) != NULL) {
 			if (line[0] == '#')
 				continue;
 
 			pch = strtok_r(line, "\t", &spch);
-			pch= strstr(pch, "\"")+1;
-			pch[strchr(pch, '\"')-pch]=0;
+			pch = strstr(pch, "\"") + 1;
+			pch[strchr(pch, '\"')-pch] = 0;
 			if (strcmp(buf, "") == 0) {
 				snprintf(buf, sizeof(buf), "%s", pch);
 			} else {
-				strcpy(buf_tmp, buf);
+				DM_STRNCPY(buf_tmp, buf, sizeof(buf_tmp));
 				snprintf(buf, sizeof(buf), "%s,%s", buf_tmp, pch);
 			}
 		}
@@ -359,19 +362,22 @@ static int set_DynamicDNSClient_Enable(char *refparam, struct dmctx *ctx, void *
 /*#Device.DynamicDNS.Client.{i}.Status!UCI:ddns/service,@i-1/enabled*/
 static int get_DynamicDNSClient_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	FILE* fp = NULL;
-	char buf[512] = "", path[64] = "", status[32] = "", *enable, *logdir = NULL;
+	char status[32] = {0}, *enable, *logdir = NULL;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", &enable);
 	if (*enable == '\0' || strcmp(enable, "0") == 0) {
 		strcpy(status, "Disabled");
 	} else {
+		char path[64] = {0};
+
 		dmuci_get_option_value_string("ddns", "global", "ddns_logdir", &logdir);
 		if (*logdir == '\0')
 			logdir = "/var/log/ddns";
 		snprintf(path, sizeof(path), "%s/%s.log", logdir, section_name((struct uci_section *)data));
-		fp = fopen(path, "r");
+		FILE *fp = fopen(path, "r");
 		if (fp != NULL) {
+			char buf[512] = {0};
+
 			strcpy(status, "Connecting");
 			while (fgets(buf, 512, fp) != NULL) {
 				if (strstr(buf, "Update successful"))
@@ -818,24 +824,26 @@ static int get_DynamicDNSServer_ServerAddress(char *refparam, struct dmctx *ctx,
 
 static void set_server_address(struct uci_section *section, char *value)
 {
-	char new[64], *dns_server;
+	char *dns_server = NULL;
 
 	dmuci_get_value_by_section_string(section, "dns_server", &dns_server);
-	if (*dns_server == '\0') {
+	if (dns_server && *dns_server == '\0') {
 		dmuci_set_value_by_section(section, "dns_server", value);
 	} else {
-		char *addr = strchr(dns_server, ':');
+		char new[64] = {0};
+
+		char *addr = dns_server ? strchr(dns_server, ':') : NULL;
 		if (addr)
 			snprintf(new, sizeof(new), "%s%s", value, addr);
 		else
-			strcpy(new, value);
+			DM_STRNCPY(new, value, sizeof(new));
 		dmuci_set_value_by_section(section, "dns_server", new);
 	}
 }
 
 static int set_DynamicDNSServer_ServerAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	char *service_name;
 
 	switch (action)	{
@@ -888,7 +896,7 @@ static void set_server_port(struct uci_section *section, char *value)
 
 static int set_DynamicDNSServer_ServerPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	char *service_name;
 
 	switch (action)	{

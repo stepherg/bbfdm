@@ -30,17 +30,17 @@ static unsigned char is_dns_server_in_dmmap(char *chk_ip, char *chk_interface)
 
 static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *jobj, *arrobj;
+	json_object *jobj, *arrobj = NULL;
 	struct uci_list *v;
-	struct uci_element *e;
-	struct uci_section *s = NULL, *sdns = NULL, *stmp, *ss;
-	char *ipdns, *str, *vip = NULL, *viface;
-	int j, found;
+	struct uci_element *e = NULL;
+	struct uci_section *s = NULL, *sdns = NULL, *stmp = NULL, *ss;
+	char *ipdns = NULL, *str, *vip = NULL, *viface;
+	int j = 0;
 
 	uci_path_foreach_sections_safe(bbfdm, "dmmap_dns", "dns_server", stmp, s) {
 		dmuci_get_value_by_section_string(s, "ip", &vip);
 		dmuci_get_value_by_section_string(s, "interface", &viface);
-		found = 0;
+		int found = 0;
 		uci_foreach_sections("network", "interface", ss) {
 			if (strcmp(section_name(ss), viface) != 0)
 				continue;
@@ -104,7 +104,7 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 static int browseDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	dmmap_synchronizeDNSClientRelayServer(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_dns", "dns_server", s) {
@@ -121,7 +121,7 @@ static int browseDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 static int browseResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst, *max_inst = NULL;
+	char *inst = NULL, *max_inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "NSLookupResult", s) {
 
@@ -156,7 +156,7 @@ static int delete_dns_server(char *refparam, struct dmctx *ctx, void *data, char
 	struct uci_section *s = NULL, *ss = NULL, *stmp = NULL;
 	char *interface, *ip, *str;
 	struct uci_list *v;
-	struct uci_element *e, *tmp;
+	struct uci_element *e = NULL, *tmp = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
@@ -488,8 +488,8 @@ static int set_dns_server(char *refparam, struct dmctx *ctx, void *data, char *i
 {
 	char *str, *oip, *interface;
 	struct uci_list *v;
-	struct uci_element *e;
-	int count = 0, i = 0;
+	struct uci_element *e = NULL;
+	int count = 0;
 	char *dns[32] = {0};
 
 	switch (action) {
@@ -518,6 +518,8 @@ static int set_dns_server(char *refparam, struct dmctx *ctx, void *data, char *i
 			dmuci_delete("network", interface, "dns", NULL);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &str);
 			if (str[0] == '1') {
+				int i = 0;
+
 				for (i = 0; i < count; i++) {
 					dmuci_add_list_value("network", interface, "dns", dns[i] ? dns[i] : "");
 					dmfree(dns[i]);

@@ -29,7 +29,7 @@ static int get_voice_service_line_linker(char *refparam, struct dmctx *dmctx, vo
 static int browseServicesVoiceServiceCallControlLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *inst_last = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "tel_line", "dmmap_asterisk", &dup_list);
@@ -61,7 +61,7 @@ static int browseServicesVoiceServiceCallControlOutgoingMapInst(struct dmctx *dm
 static int browseServicesVoiceServiceCallControlNumberingPlanInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "tel_advanced", "dmmap_asterisk", &dup_list);
@@ -81,7 +81,7 @@ static int browseServicesVoiceServiceCallControlNumberingPlanInst(struct dmctx *
 static int browseServicesVoiceServiceCallControlCallingFeaturesSetInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "advanced_features", "dmmap_asterisk", &dup_list);
@@ -101,7 +101,7 @@ static int browseServicesVoiceServiceCallControlCallingFeaturesSetInst(struct dm
 static int browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *inst_last = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "call_filter_rule_incoming", "dmmap_asterisk", &dup_list);
@@ -122,65 +122,65 @@ static int browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst(stru
 **************************************************************/
 static int addObjServicesVoiceServiceCallControlLine(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	TR104_DEBUG("VoiceService.1.CallControl.Line. can't be added or deleted\n");
+	BBF_DEBUG("VoiceService.1.CallControl.Line. can't be added or deleted\n");
 	return 0;
 }
 
 static int delObjServicesVoiceServiceCallControlLine(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	TR104_DEBUG("VoiceService.1.CallControl.Line. can't be added or deleted\n");
+	BBF_DEBUG("VoiceService.1.CallControl.Line. can't be added or deleted\n");
 	return 0;
 }
 
 static int addObjServicesVoiceServiceCallControlIncomingMap(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	TR104_DEBUG("VoiceService.1.CallControl.IncomingMap. has a 1:1 mapping to Services.VoiceService."
+	BBF_DEBUG("VoiceService.1.CallControl.IncomingMap. has a 1:1 mapping to Services.VoiceService."
 			"1.SIP.Client. so it can't be added or deleted\n");
 	return 0;
 }
 
 static int delObjServicesVoiceServiceCallControlIncomingMap(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	TR104_DEBUG("VoiceService.1.CallControl.IncomingMap. has a 1:1 mapping to Services.VoiceService."
+	BBF_DEBUG("VoiceService.1.CallControl.IncomingMap. has a 1:1 mapping to Services.VoiceService."
 				"1.SIP.Client. so it can't be added or deleted\n");
 	return 0;
 }
 
 static int addObjServicesVoiceServiceCallControlOutgoingMap(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	TR104_DEBUG("VoiceService.1.CallControl.OutgoingMap. has a 1:1 mapping to Services.VoiceService."
+	BBF_DEBUG("VoiceService.1.CallControl.OutgoingMap. has a 1:1 mapping to Services.VoiceService."
 				"1.SIP.Client. so it can't be added or deleted\n");
 	return 0;
 }
 
 static int delObjServicesVoiceServiceCallControlOutgoingMap(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	TR104_DEBUG("VoiceService.1.CallControl.OutgoingMap. has a 1:1 mapping to Services.VoiceService."
+	BBF_DEBUG("VoiceService.1.CallControl.OutgoingMap. has a 1:1 mapping to Services.VoiceService."
 					"1.SIP.Client. so it can't be added or deleted\n");
 	return 0;
 }
 
 static int addObjServicesVoiceServiceCallControlNumberingPlan(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	TR104_DEBUG("VoiceService.1.CallControl.NumberingPlan. has only one instance so it can't be added or deleted\n");
+	BBF_DEBUG("VoiceService.1.CallControl.NumberingPlan. has only one instance so it can't be added or deleted\n");
 	return 0;
 }
 
 static int delObjServicesVoiceServiceCallControlNumberingPlan(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	TR104_DEBUG("VoiceService.1.CallControl.NumberingPlan. has only one instance so it can't be added or deleted\n");
+	BBF_DEBUG("VoiceService.1.CallControl.NumberingPlan. has only one instance so it can't be added or deleted\n");
 	return 0;
 }
 
 static int addObjServicesVoiceServiceCallControlCallingFeaturesSet(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	TR104_DEBUG("VoiceService.1.CallControl.CallingFeatures.Set. has only one instance so it can't be added or deleted\n");
+	BBF_DEBUG("VoiceService.1.CallControl.CallingFeatures.Set. has only one instance so it can't be added or deleted\n");
 	return 0;
 }
 
 static int delObjServicesVoiceServiceCallControlCallingFeaturesSet(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	TR104_DEBUG("VoiceService.1.CallControl.CallingFeatures.Set. has only one instance so it can't be added or deleted\n");
+	BBF_DEBUG("VoiceService.1.CallControl.CallingFeatures.Set. has only one instance so it can't be added or deleted\n");
 	return 0;
 }
 
@@ -260,7 +260,7 @@ static int get_ServicesVoiceServiceCallControlLine_CallStatus(char *refparam, st
 		char *offhook = dmjson_get_value(res, 1, "offhook");
 		*value = *offhook == '1' ? "Connected" : "Idle";
 	} else {
-		TR104_DEBUG("dmubus_call() failed\n");
+		BBF_DEBUG("dmubus_call() failed\n");
 	}
 
 	return 0;

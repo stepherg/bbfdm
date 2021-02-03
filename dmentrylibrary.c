@@ -65,7 +65,7 @@ static int get_index_of_available_dynamic_array(struct dm_obj_s **jentryobj)
 
 int load_library_dynamic_arrays(struct dmctx *ctx)
 {
-	struct dirent *ent;
+	struct dirent *ent = NULL;
 	DIR *dir = NULL;
 
 	if (folder_exists(LIBRARY_FOLDER_PATH)) {

@@ -304,7 +304,7 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_PPP_InterfaceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 	char *proto;
 	int nbre = 0;
 
@@ -454,7 +454,7 @@ static int delete_ppp_interface(char *refparam, struct dmctx *ctx, void *data, c
 static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL, *proto;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("network", "interface", "dmmap_network", &dup_list);

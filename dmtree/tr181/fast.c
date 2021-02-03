@@ -244,7 +244,7 @@ static int get_FASTLine_LinkStatus(char *refparam, struct dmctx *ctx, void *data
 /*#Device.FAST.Line.{i}.AllowedProfiles!UBUS:fast.line.1/status//allowed_profiles*/
 static int get_FASTLine_AllowedProfiles(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *allowed_profiles;
+	json_object *res = NULL, *allowed_profiles = NULL;
 	char list_profile[16], ubus_name[16], *profile = NULL;
 	unsigned pos = 0, idx = 0;
 

@@ -38,6 +38,12 @@
 #define FREE(x) do { if(x) {free(x); x = NULL;} } while (0)
 #endif
 
+#define DM_STRNCPY(DST, SRC, SIZE) \
+do { \
+	strncpy(DST, SRC, SIZE - 1); \
+	DST[SIZE-1] = '\0'; \
+} while(0)
+
 extern struct dm_permession_s DMREAD;
 extern struct dm_permession_s DMWRITE;
 extern char *DMT_TYPE[];
@@ -407,29 +413,26 @@ void bbf_api_del_list_fault_param(struct param_fault *param_fault);
 void free_all_list_fault_param(struct dmctx *ctx);
 int string_to_bool(char *v, bool *b);
 void dmentry_instance_lookup_inparam(struct dmctx *ctx);
-int dm_entry_get_value(struct dmctx *ctx);
+int dm_entry_get_value(struct dmctx *dmctx);
 int dm_entry_get_name(struct dmctx *ctx);
 int dm_entry_get_schema(struct dmctx *ctx);
-int dm_entry_get_instances(struct dmctx *dmctx);
-int dm_entry_get_notification(struct dmctx *ctx);
-int dm_entry_add_object(struct dmctx *ctx);
-int dm_entry_delete_object(struct dmctx *ctx);
-int dm_entry_set_value(struct dmctx *ctx);
-int dm_entry_set_notification(struct dmctx *ctx);
+int dm_entry_get_instances(struct dmctx *ctx);
+int dm_entry_get_notification(struct dmctx *dmctx);
+int dm_entry_add_object(struct dmctx *dmctx);
+int dm_entry_delete_object(struct dmctx *dmctx);
+int dm_entry_set_value(struct dmctx *dmctx);
+int dm_entry_set_notification(struct dmctx *dmctx);
 int dm_entry_enabled_notify(struct dmctx *dmctx);
-int dm_entry_get_linker(struct dmctx *ctx);
-int dm_entry_get_linker_value(struct dmctx *ctx);
+int dm_entry_get_linker(struct dmctx *dmctx);
+int dm_entry_get_linker_value(struct dmctx *dmctx);
 char *get_last_instance(char *package, char *section, char *opt_inst);
-char *get_last_instance_bbfdm_without_update(char *package, char *section, char *opt_inst);
 char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst);
-char *get_last_instance_lev2(char *package, char *section, char *opt_inst, char *opt_check, char *value_check);
 char *get_last_instance_lev2_bbfdm_dmmap_opt(char* dmmap_package, char *section,  char *opt_inst, char *opt_check, char *value_check);
 char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check);
 char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...);
 int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
 void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found);
 int free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj);
-int dm_entry_get_full_param_value(struct dmctx *dmctx);
 char *check_parameter_forced_notification(const char *parameter);
 
 static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)
@@ -441,33 +444,25 @@ static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, voi
 }
 
 #ifndef TRACE
-#define TRACE_TYPE 2
-static inline void trace_empty_func()
-{
-}
-#if TRACE_TYPE == 2
 #define TRACE(MESSAGE, ...) do { \
+	fprintf(stderr, "TRACE: %s@%s:%d " MESSAGE, __FUNCTION__,__FILE__,__LINE__, ##__VA_ARGS__); \
+	fprintf(stderr, "\n"); \
+	fflush(stderr); \
+} while(0)
+#endif
+
+#define ENABLE_BBF_DEBUG 0
+
+#if ENABLE_BBF_DEBUG
+#define BBF_DEBUG(fmt, ...) do { \
 	FILE *fp = fopen("/tmp/bbfdm.log", "a"); \
 	if (fp) { \
-		fprintf(fp, "%s@%s:%d: " MESSAGE, __func__, __FILE__, __LINE__, ##__VA_ARGS__); \
+		fprintf(fp, "%s@%s:%d: " fmt, __func__, __FILE__, __LINE__, ##__VA_ARGS__); \
 		fclose(fp); \
 	} \
 } while(0)
-#elif TRACE_TYPE == 1
-#define TRACE(MESSAGE, ...) printf(MESSAGE, ## __VA_ARGS__)
 #else
-#define TRACE(MESSAGE, ...) trace_empty_func()
-#endif
-#endif
-
-#ifndef DETECT_CRASH
-#define DETECT_CRASH(MESSAGE,args...) { \
-	const char *A[] = {MESSAGE}; \
-	printf("DETECT_CRASH: %s %s %d\n",__FUNCTION__,__FILE__,__LINE__); fflush(stdout);\
-	if(sizeof(A) > 0) \
-		printf(*A,##args); \
-	sleep(1); \
-}
+#define BBF_DEBUG(fmt, ...)
 #endif
 
-#endif
+#endif //__DMBBF_H__

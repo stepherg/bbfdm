@@ -165,20 +165,6 @@ int dm_ctx_clean_sub(struct dmctx *ctx)
 	return dm_ctx_clean_custom(ctx, CTX_INIT_SUB);
 }
 
-int dmentry_get_parameter_leaf_value(struct dmctx *ctx, char *inparam)
-{
-	int fault = 0;
-
-	if (!inparam) inparam = "";
-	ctx->in_param = inparam;
-
-	if (ctx->in_param[0] == '.' && strlen(ctx->in_param) == 1)
-		fault = FAULT_9005;
-	else
-		fault = dm_entry_get_full_param_value(ctx);
-	return fault;
-}
-
 int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2)
 {
 	int err = 0, fault = 0;
@@ -280,8 +266,8 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 
 int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2)
 {
+	struct set_tmp *n = NULL, *p = NULL;
 	int fault = 0;
-	struct set_tmp *n, *p;
 	
 	switch(cmd) {
 		case CMD_SET_VALUE:
@@ -359,7 +345,7 @@ int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value)
 
 int dm_entry_restart_services(void)
 {
-	struct package_change *pc;
+	struct package_change *pc = NULL;
 
 	bbf_uci_commit_bbfdm();
 
@@ -379,7 +365,7 @@ int dm_entry_restart_services(void)
 
 int dm_entry_revert_changes(void)
 {
-	struct package_change *pc;
+	struct package_change *pc = NULL;
 
 	bbf_uci_revert_bbfdm();
 
@@ -391,49 +377,50 @@ int dm_entry_revert_changes(void)
 	return 0;
 }
 
-static int get_stats_folder(const char *path, bool is_json, int *file_count, unsigned long *size, unsigned long *date)
+static int get_stats_folder(bool json_path, int *count, unsigned long *size)
 {
-	struct stat stats;
-	struct dirent *entry;
-	DIR *dirp = NULL;
-	char buf[264] = {0};
-	int filecount = 0;
-	unsigned long filesize = 0, filedate = 0;
+	const char *path = json_path ? JSON_FOLDER_PATH : LIBRARY_FOLDER_PATH;
 
 	if (folder_exists(path)) {
-		dirp = opendir(path);
+		struct dirent *entry = NULL;
+		struct stat stats;
+		int file_count = 0;
+		unsigned long file_size = 0;
+		char buf[512] = {0};
+
+		DIR *dirp = opendir(path);
 		while ((entry = readdir(dirp)) != NULL) {
-			if ((entry->d_type == DT_REG) && (strstr(entry->d_name, is_json ? ".json" : ".so"))) {
-				filecount++;
+			if ((entry->d_type == DT_REG) && (strstr(entry->d_name, json_path ? ".json" : ".so"))) {
+				file_count++;
 				snprintf(buf, sizeof(buf), "%s/%s", path, entry->d_name);
-				if (!stat(buf, &stats)) {
-					filesize = (filesize + stats.st_size) / 2;
-					filedate = (filedate + stats.st_mtime) / 2;
-				}
+				if (!stat(buf, &stats))
+					file_size += stats.st_size;
 			}
 		}
-		if (dirp) closedir(dirp);
 
-		*file_count = filecount;
-		*size = filesize;
-		*date = filedate;
+		if (dirp)
+			closedir(dirp);
+
+		*count = file_count;
+		*size = file_size;
 		return 1;
 	}
 	return 0;
 }
 
-static int check_stats_folder(const char *path, bool is_json)
+static int check_stats_folder(bool json_path)
 {
-	int file_count = 0;
-	unsigned long size = 0, date = 0;
-	char buf[128] = {0};
+	int count = 0;
+	unsigned long size = 0;
+	char buf[64] = {0};
 
-	if (!get_stats_folder(path, is_json, &file_count, &size, &date))
+	if (!get_stats_folder(json_path, &count, &size))
 		return 0;
 
-	snprintf(buf, sizeof(buf), "count:%d,sizes:%lu,date:%lu", file_count, size, date);
-	if (strcmp(buf, is_json ? json_hash : library_hash)) {
-		strcpy(is_json ? json_hash : library_hash, buf);
+	snprintf(buf, sizeof(buf), "count:%d,size:%lu", count, size);
+
+	if (strcmp(buf, json_path ? json_hash : library_hash) != 0) {
+		strncpy(json_path ? json_hash : library_hash, buf, 64);
 		return 1;
 	}
 
@@ -443,13 +430,13 @@ static int check_stats_folder(const char *path, bool is_json)
 int load_dynamic_arrays(struct dmctx *ctx)
 {
 	// Load dynamic objects and parameters exposed via a JSON file
-	if (check_stats_folder(JSON_FOLDER_PATH, true)) {
+	if (check_stats_folder(true)) {
 		free_json_dynamic_arrays(tEntry181Obj);
 		load_json_dynamic_arrays(ctx);
 	}
 
 	// Load dynamic objects and parameters exposed via a library
-	if (check_stats_folder(LIBRARY_FOLDER_PATH, false)) {
+	if (check_stats_folder(false)) {
 		free_library_dynamic_arrays(tEntry181Obj);
 		load_library_dynamic_arrays(ctx);
 	}

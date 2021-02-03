@@ -64,12 +64,10 @@ static int browseIEEE1905ALInterfaceLinkInst(struct dmctx *dmctx, DMNODE *parent
 	int id = 0, i = 0;
 
 	dmubus_call((char *)prev_data, "link_info", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		dmjson_foreach_obj_in_array(res, arrobj, link_obj, i, 1, "links") {
-			inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)link_obj, inst) == DM_STOP)
-				break;
-		}
+	dmjson_foreach_obj_in_array(res, arrobj, link_obj, i, 1, "links") {
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)link_obj, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
@@ -78,7 +76,7 @@ static int browseIEEE1905ALInterfaceLinkInst(struct dmctx *dmctx, DMNODE *parent
 static int browseIEEE1905ALForwardingTableForwardingRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *max_inst = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("ieee1905", "forwarding_rule", "dmmap_forwarding_rule", &dup_list);
@@ -102,13 +100,11 @@ static int browseIEEE1905ALNetworkTopologyChangeLogInst(struct dmctx *dmctx, DMN
 	int id = 0, i = 0;
 
 	dmubus_call("topology", "changelog", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "changelog") {
+	dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "changelog") {
 
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
-				break;
-		}
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
@@ -122,13 +118,11 @@ static int browseIEEE1905ALNetworkTopologyNonIEEE1905NeighborInst(struct dmctx *
 	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res_self);
 	if (res_self)
 		json_object_object_get_ex(res_self, "self", &res);
-	if (res) {
-		dmjson_foreach_value_in_array(res, arrobj, obj, i, 1, "non1905_neighbors") {
+	dmjson_foreach_value_in_array(res, arrobj, obj, i, 1, "non1905_neighbors") {
 
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
-				break;
-		}
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
@@ -140,13 +134,11 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst(struct dmctx *dmctx
 	int id = 0, i = 0;
 
 	dmubus_call("topology", "dump", UBUS_ARGS{}, 0, &res);
-	if (res) {
-		dmjson_foreach_obj_in_array(res, arrobj, node, i, 1, "nodes") {
+	dmjson_foreach_obj_in_array(res, arrobj, node, i, 1, "nodes") {
 
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)node, inst) == DM_STOP)
-				break;
-		}
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)node, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
@@ -206,7 +198,7 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst(struct dmc
 
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *arrobj, *node = (json_object *)prev_data;
+	json_object *arrobj = NULL, *node = (json_object *)prev_data;
 	struct param_node param_st = {.node = node};
 	char *inst = NULL, *max_inst = NULL, *non1905_neighbor = NULL;
 	int id = 0, i = 0;
@@ -1463,7 +1455,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_RSS
 
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *tuple;
+	json_object *tuple = NULL;
 	char *tuple_mac = NULL, *interface = NULL;
 	char list_val[512];
 	int i = 0;

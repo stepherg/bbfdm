@@ -44,7 +44,7 @@ static int browseServicesVoiceServiceSIPClientContactInst(struct dmctx *dmctx, D
 static int browseServicesVoiceServiceSIPNetworkInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, *inst_last = NULL;
-	struct dmmap_dup *p;
+	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
@@ -79,7 +79,6 @@ static int addObjServicesVoiceServiceSIPClient(char *refparam, struct dmctx *ctx
 	char *inst = get_last_instance_bbfdm("dmmap_asterisk", "sip_service_provider", "clientinstance");
 	snprintf(new_sec_name, sizeof(new_sec_name), "sip%d", (inst) ? atoi(inst) : 0);
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "", "sip_service_provider");
-	TR104_DEBUG("section name is [%s]. last inst = [%s]\n", new_sec_name, inst);
 
 	// Set default options
 	snprintf(value, sizeof(value), "account %d", (inst) ? atoi(inst) + 1 : 1);
@@ -118,14 +117,14 @@ static int delObjServicesVoiceServiceSIPClient(char *refparam, struct dmctx *ctx
 
 static int addObjServicesVoiceServiceSIPNetwork(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	TR104_DEBUG("Each Services.VoiceService.1.SIP.Network object is bound to one Services.VoiceService"
+	BBF_DEBUG("Each Services.VoiceService.1.SIP.Network object is bound to one Services.VoiceService"
 			".1.SIP.Client object\n");
 	return 0;
 }
 
 static int delObjServicesVoiceServiceSIPNetwork(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	TR104_DEBUG("Each Services.VoiceService.1.SIP.Network object is bound to one Services.VoiceService"
+	BBF_DEBUG("Each Services.VoiceService.1.SIP.Network object is bound to one Services.VoiceService"
 				".1.SIP.Client object\n");
 	return 0;
 }
@@ -207,7 +206,7 @@ static int get_ServicesVoiceServiceSIPClient_Status(char *refparam, struct dmctx
 		dmfree(enabled);
 	} else {
 		// Get registration status from ubus
-		json_object *res = NULL, *sip, *client;
+		json_object *res = NULL, *sip = NULL, *client = NULL;
 
 		dmubus_call("voice.asterisk", "status", UBUS_ARGS{}, 0, &res);
 		if (res) {
@@ -228,7 +227,7 @@ static int get_ServicesVoiceServiceSIPClient_Status(char *refparam, struct dmctx
 				}
 			}
 		} else {
-			TR104_DEBUG("dmubus_call() failed\n");
+			BBF_DEBUG("dmubus_call() failed\n");
 		}
 	}
 
@@ -339,11 +338,11 @@ static int set_ServicesVoiceServiceSIPClientContact_Port(char *refparam, struct 
 static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *section = (struct uci_section *)data;
-	json_object *res = NULL, *sip, *client;
+	json_object *res = NULL, *sip = NULL, *client = NULL;
 
 	*value = "0001-01-01T00:00:00Z";
 	if (!section) {
-		TR104_DEBUG("section shall NOT be null\n");
+		BBF_DEBUG("section shall NOT be null\n");
 		return 0;
 	}
 
@@ -371,7 +370,7 @@ static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, s
 							dmfree(period_str);
 						}
 						if (period <= 0) {
-							TR104_DEBUG("Use default registration expires\n");
+							BBF_DEBUG("Use default registration expires\n");
 							period = atoi(DEFAULT_SIP_REGISTER_EXPIRY_STR);
 						}
 						time_expires = time_last + period;
@@ -381,7 +380,7 @@ static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, s
 
 						*value = dmstrdup(buf);
 					} else {
-						TR104_DEBUG("Unexpected time format: %s\n", last_reg_time);
+						BBF_DEBUG("Unexpected time format: %s\n", last_reg_time);
 					}
 				}
 			}
@@ -394,10 +393,10 @@ static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, s
 static int get_ServicesVoiceServiceSIPClientContact_UserAgent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *section = (struct uci_section *)data;
-	json_object *res = NULL, *sip, *client;
+	json_object *res = NULL, *sip = NULL, *client = NULL;
 
 	if (!section) {
-		TR104_DEBUG("section shall NOT be null\n");
+		BBF_DEBUG("section shall NOT be null\n");
 		return 0;
 	}
 
@@ -410,7 +409,7 @@ static int get_ServicesVoiceServiceSIPClientContact_UserAgent(char *refparam, st
 				*value = dmjson_get_value(client, 1, "useragent");
 		}
 	} else {
-		TR104_DEBUG("dmubus_call() failed\n");
+		BBF_DEBUG("dmubus_call() failed\n");
 	}
 
 	return 0;
@@ -466,18 +465,16 @@ static int get_server_address(struct uci_section *section, char *option, char **
 
 static int set_server_address(struct uci_section *section, char *option, char *value)
 {
-	char *old_value, *port, *new_value;
+	char *old_value = NULL;
 
 	dmuci_get_value_by_section_string(section, option, &old_value);
-	port = strchr(old_value, ':');
+	char *port = (old_value && *old_value) ? strchr(old_value, ':') : NULL;
 	if (port) {
+		char new_value[32] = {0};
+
 		port++;
-		new_value = (char *)dmmalloc(strlen(value) + strlen(port) + 2);
-		if (new_value) {
-			sprintf(new_value, "%s:%s", value, port);
-			dmuci_set_value_by_section(section, option, new_value);
-			dmfree(new_value);
-		}
+		snprintf(new_value, sizeof(new_value), "%s:%s", value, port);
+		dmuci_set_value_by_section(section, option, new_value);
 	} else {
 		dmuci_set_value_by_section(section, option, value);
 	}
@@ -490,7 +487,7 @@ static int set_server_address(struct uci_section *section, char *option, char *v
 
 static int get_server_port(struct uci_section *section, char *option, char **value)
 {
-	char *domain, *port = NULL;
+	char *domain = NULL, *port = NULL;
 
 	dmuci_get_value_by_section_string(section, option, &domain);
 	if (domain && *domain) {
@@ -499,10 +496,7 @@ static int get_server_port(struct uci_section *section, char *option, char **val
 			port++;
 	}
 
-	if (port && *port)
-		*value = dmstrdup(port);
-	else
-		*value = dmstrdup(DEFAULT_SIP_PORT_STR);
+	*value = dmstrdup((port && *port) ? port : DEFAULT_SIP_PORT_STR);
 
 	if (domain && *domain)
 		dmfree(domain);
@@ -512,18 +506,15 @@ static int get_server_port(struct uci_section *section, char *option, char **val
 
 static int set_server_port(struct uci_section *section, char *option, char *value)
 {
-	char *old_value, *new_value, *tmp;
+	char *old_value = NULL, new_value[32] = {0};
 
 	dmuci_get_value_by_section_string(section, option, &old_value);
-	tmp = strchr(old_value, ':');
+	char *tmp = old_value ? strchr(old_value, ':') : NULL;
 	if (tmp)
 		*tmp = '\0';
-	new_value = (char *)dmmalloc(strlen(old_value) + strlen(value) + 2);
-	if (new_value) {
-		sprintf(new_value, "%s:%s", old_value, value);
-		dmuci_set_value_by_section(section, option, new_value);
-		dmfree(new_value);
-	}
+
+	snprintf(new_value, sizeof(new_value), "%s:%s", old_value ? old_value : "", value);
+	dmuci_set_value_by_section(section, option, new_value);
 
 	if (old_value && *old_value)
 		dmfree(old_value);
@@ -857,7 +848,7 @@ static int get_ServicesVoiceServiceSIPNetwork_CodecList(char *refparam, struct d
 			if (codec && len < sizeof(buf)) {
 				int res = snprintf(buf + len, sizeof(buf) - len, "%s%s", len == 0 ? "" : ",", codec);
 				if (res <= 0) {
-					TR104_DEBUG("buf might be too small\n");
+					BBF_DEBUG("buf might be too small\n");
 					dmfree(tmp);
 					return FAULT_9002;
 				}
@@ -875,8 +866,8 @@ static int get_ServicesVoiceServiceSIPNetwork_CodecList(char *refparam, struct d
 
 static int set_ServicesVoiceServiceSIPNetwork_CodecList(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *codec_list = NULL, *token = NULL, *saveptr = NULL, *uci_name = NULL;
 	int res = 0;
-	char *codec_list = NULL, *token, *saveptr, *uci_name;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -950,19 +941,11 @@ static int get_ServicesVoiceServiceSIPNetworkFQDNServer_Origin(char *refparam, s
 /*#Device.Services.VoiceService.{i}.SIP.Network.{i}.FQDNServer.Domain!UCI:asterisk/sip_service_provider,@i-1/domain*/
 static int get_ServicesVoiceServiceSIPNetworkFQDNServer_Domain(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	if (!data) {
-		TR104_DEBUG("data shall NOT be null\n");
-		return 0;
-	}
 	return get_server_address(data, "domain", value);
 }
 
 static int set_ServicesVoiceServiceSIPNetworkFQDNServer_Domain(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	if (!data) {
-		TR104_DEBUG("data shall NOT be null\n");
-		return 0;
-	}
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
@@ -978,19 +961,11 @@ static int set_ServicesVoiceServiceSIPNetworkFQDNServer_Domain(char *refparam, s
 /*#Device.Services.VoiceService.{i}.SIP.Network.{i}.FQDNServer.Port!UCI:asterisk/sip_service_provider,@i-1/domain*/
 static int get_ServicesVoiceServiceSIPNetworkFQDNServer_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	if (!data) {
-		TR104_DEBUG("data shall NOT be null\n");
-		return 0;
-	}
 	return get_server_port(data, "domain", value);
 }
 
 static int set_ServicesVoiceServiceSIPNetworkFQDNServer_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	if (!data) {
-		TR104_DEBUG("data shall NOT be null\n");
-		return 0;
-	}
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","65535"}}, 1))

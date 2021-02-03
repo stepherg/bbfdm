@@ -10,23 +10,9 @@
 
 #include <libbbf_api/dmcommon.h>
 
-#define ENABLE_TR104_DEBUG 0
-
 #define TR104_UCI_PACKAGE "asterisk"
 #define DEFAULT_SIP_PORT_STR "5060"
 #define DEFAULT_SIP_REGISTER_EXPIRY_STR "300"
-
-#if ENABLE_TR104_DEBUG
-#define TR104_DEBUG(fmt, ...) do { \
-	FILE *fp = fopen("/tmp/bbf_tr104.log", "a"); \
-	if (fp) { \
-		fprintf(fp, "%s@%s:%d: " fmt, __func__, __FILE__, __LINE__, ##__VA_ARGS__); \
-		fclose(fp); \
-	} \
-} while(0)
-#else
-#define TR104_DEBUG(fmt, ...)
-#endif
 
 struct codec_info {
 	char uci_name[16]; // Codec name used in UCI, i.e. alaw
