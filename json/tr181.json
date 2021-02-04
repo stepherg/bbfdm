@@ -41814,22 +41814,7 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean",
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "network",
-								"section": {
-									"type": "interface",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "proto"
-								}
-							}
-						}
-					]
+					"datatype": "boolean"
 				},
 				"TWAMPReflectorNumberOfEntries": {
 					"type": "unsignedInt",
