@@ -38,5 +38,6 @@ extern DMLEAF tDHCPv4RelayParams[];
 extern DMLEAF tDHCPv4RelayForwardingParams[];
 
 int set_section_order(char *package, char *dmpackage, char* sect_type, struct uci_section *dmmap_sect, struct uci_section *conf, int set_force, char* order);
+int set_DHCP_Interface(struct dmctx *ctx, char *value, struct uci_section *config_s, struct uci_section *dmmap_s, char *dmmap_name, char *proto, int action);
 
 #endif

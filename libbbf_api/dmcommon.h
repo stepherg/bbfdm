@@ -270,7 +270,6 @@ void add_sectons_list_paramameter(struct list_head *dup_list, struct uci_section
 void free_dmmap_config_dup_list(struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap_eq(char *package, char *section_type, char *dmmap_package,char* option_name, char* option_value, struct list_head *dup_list);
-void synchronize_specific_config_sections_with_dmmap_eq_no_delete(char *package, char *section_type, char *dmmap_package,char* option_name, char* option_value, struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap_cont(char *package, char *section_type, char *dmmap_package,char* option_name, char* option_value, struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap_network(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list);
 void add_sysfs_sectons_list_paramameter(struct list_head *dup_list, struct uci_section *dmmap_section, char *file_name, char* filepath);
