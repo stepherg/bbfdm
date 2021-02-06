@@ -313,7 +313,7 @@ static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMN
 					fclose(fp);
 					return 0;
 				}
-				str = dmjson_get_value(jobj, 1, "device");
+				str = dmjson_get_value(jobj, 1, "l3_device");
 				if (strcmp(str, proute.iface) == 0) {
 					iface = section_name(s);
 					break;
