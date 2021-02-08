@@ -386,22 +386,112 @@ static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 	return 0;
 }
 
+static int get_nat_port_mapping_all_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *src_dip = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "src_dip", &src_dip);
+	*value = (src_dip && *src_dip == '*') ? "1" : "0";
+	return 0;
+}
+
+static int set_nat_port_mapping_all_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *dmmap_section = NULL;
+	char *src_dip = NULL;
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+
+			// Get the current 'src_dip' option
+			dmuci_get_value_by_section_string((struct uci_section *)data, "src_dip", &src_dip);
+
+			if ((b && strcmp(src_dip, "*") == 0) || (!b && strcmp(src_dip, "*") != 0))
+				break;
+
+			get_dmmap_section_of_config_section("dmmap_firewall", "redirect", section_name((struct uci_section *)data), &dmmap_section);
+			if (b) {
+				// Save 'src_dip' option in the associated dmmap rule section
+				dmuci_set_value_by_section(dmmap_section, "src_dip", src_dip);
+
+				// Set the current 'src_dip' option
+				dmuci_set_value_by_section((struct uci_section *)data, "src_dip", "*");
+			} else {
+				// Get 'src_dip' option from the associated dmmap rule section
+				dmuci_get_value_by_section_string(dmmap_section, "src_dip", &src_dip);
+
+				// Set the current 'src_dip' option
+				dmuci_set_value_by_section((struct uci_section *)data, "src_dip", src_dip);
+			}
+			break;
+	}
+	return 0;
+}
+
+static int get_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	// Currently, CPE only supports static port mappings
+	*value = "0";
+	return 0;
+}
+
+static int set_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			// Nothing to set for static port mappings
+			break;
+	}
+	return 0;
+}
+
 /*#Device.NAT.PortMapping.{i}.RemoteHost!UCI:firewall/redirect,@i-1/src_dip*/
 static int get_nat_port_mapping_remote_host(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "src_dip", value);
+	char *src_dip = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "src_dip", &src_dip);
+
+	if (src_dip && strcmp(src_dip, "*") == 0) {
+		struct uci_section *dmmap_section = NULL;
+
+		get_dmmap_section_of_config_section("dmmap_firewall", "redirect", section_name((struct uci_section *)data), &dmmap_section);
+		dmuci_get_value_by_section_string(dmmap_section, "src_dip", &src_dip);
+	}
+
+	*value = src_dip;
 	return 0;
 }
 
 static int set_nat_port_mapping_remote_host(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *src_dip = NULL;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "src_dip", value);
+			dmuci_get_value_by_section_string((struct uci_section *)data,  "src_dip", &src_dip);
+			if (src_dip && strcmp(src_dip, "*") == 0) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_firewall", "redirect", section_name((struct uci_section *)data), &dmmap_section);
+				dmuci_set_value_by_section(dmmap_section, "src_dip", value);
+			} else {
+				dmuci_set_value_by_section((struct uci_section *)data, "src_dip", value);
+			}
 			return 0;
 	}
 	return 0;
@@ -643,8 +733,8 @@ DMLEAF tNATPortMappingParams[] = {
 {"Status", &DMWRITE, DMT_STRING, get_nat_port_mapping_status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_nat_port_mapping_alias, set_nat_port_mapping_alias, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, get_nat_port_mapping_interface, set_nat_port_mapping_interface, BBFDM_BOTH},
-//{"AllInterfaces", &DMWRITE, DMT_BOOL, get_nat_port_mapping_all_interface, set_nat_port_mapping_all_interface, BBFDM_BOTH},
-//{"LeaseDuration", &DMWRITE, DMT_UNINT, get_nat_port_mapping_lease_duration, set_nat_port_mapping_lease_duration, BBFDM_BOTH},
+{"AllInterfaces", &DMWRITE, DMT_BOOL, get_nat_port_mapping_all_interface, set_nat_port_mapping_all_interface, BBFDM_BOTH},
+{"LeaseDuration", &DMWRITE, DMT_UNINT, get_nat_port_mapping_lease_duration, set_nat_port_mapping_lease_duration, BBFDM_BOTH},
 {"RemoteHost", &DMWRITE, DMT_STRING, get_nat_port_mapping_remote_host, set_nat_port_mapping_remote_host, BBFDM_BOTH},
 {"ExternalPort", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port, set_nat_port_mapping_external_port, BBFDM_BOTH},
 {"ExternalPortEndRange", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port_end_range, set_nat_port_mapping_external_port_end_range, BBFDM_BOTH},
