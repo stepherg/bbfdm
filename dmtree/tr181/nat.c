@@ -465,26 +465,26 @@ static int set_nat_port_mapping_remote_host(char *refparam, struct dmctx *ctx, v
 	return 0;
 }
 
-/*#Device.NAT.PortMapping.{i}.ExternalPort!UCI:firewall/redirect,@i-1/src_port*/
+/*#Device.NAT.PortMapping.{i}.ExternalPort!UCI:firewall/redirect,@i-1/src_dport*/
 static int get_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *src_port = NULL;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "src_port", &src_port);
-	if (src_port && *src_port == '\0') {
+	char *src_dport = NULL;
+	dmuci_get_value_by_section_string((struct uci_section *)data, "src_dport", &src_dport);
+	if (src_dport && *src_dport == '\0') {
 		*value = "0";
 		return 0;
 	}
 
-	char *tmp = src_port ? strchr(src_port, ':') : NULL;
+	char *tmp = src_dport ? strchr(src_dport, ':') : NULL;
 	if (tmp)
 		*tmp = '\0';
-	*value = src_port;
+	*value = src_dport;
 	return 0;
 }
 
 static int set_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *src_port = NULL, buffer[64];
+	char *src_dport = NULL, buffer[64];
 
 	switch (action) {
 		case VALUECHECK:
@@ -492,31 +492,31 @@ static int set_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "src_port", &src_port);
-			src_port = src_port ? strchr(src_port, ':') : NULL;
-			if (src_port == NULL)
+			dmuci_get_value_by_section_string((struct uci_section *)data, "src_dport", &src_dport);
+			src_dport = src_dport ? strchr(src_dport, ':') : NULL;
+			if (src_dport == NULL)
 				snprintf(buffer, sizeof(buffer), "%s", value);
 			else
-				snprintf(buffer, sizeof(buffer), "%s%s", value, src_port);
-			dmuci_set_value_by_section((struct uci_section *)data, "src_port", buffer);
+				snprintf(buffer, sizeof(buffer), "%s%s", value, src_dport);
+			dmuci_set_value_by_section((struct uci_section *)data, "src_dport", buffer);
 			return 0;
 	}
 	return 0;
 }
 
-/*#Device.NAT.PortMapping.{i}.ExternalPortEndRange!UCI:firewall/redirect,@i-1/src_port*/
+/*#Device.NAT.PortMapping.{i}.ExternalPortEndRange!UCI:firewall/redirect,@i-1/src_dport*/
 static int get_nat_port_mapping_external_port_end_range(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *src_port = NULL;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "src_port", &src_port);
-	char *tmp = src_port ? strchr(src_port, ':') : NULL;
+	char *src_dport = NULL;
+	dmuci_get_value_by_section_string((struct uci_section *)data, "src_dport", &src_dport);
+	char *tmp = src_dport ? strchr(src_dport, ':') : NULL;
 	*value = tmp ? tmp + 1 : "0";
 	return 0;
 }
 
 static int set_nat_port_mapping_external_port_end_range(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *src_port = NULL, *tmp = NULL, buffer[64];
+	char *src_dport = NULL, *tmp = NULL, buffer[64];
 
 	switch (action) {
 		case VALUECHECK:
@@ -524,22 +524,22 @@ static int set_nat_port_mapping_external_port_end_range(char *refparam, struct d
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "src_port", &src_port);
-			tmp = src_port ? strchr(src_port, ':') : NULL;
+			dmuci_get_value_by_section_string((struct uci_section *)data, "src_dport", &src_dport);
+			tmp = src_dport ? strchr(src_dport, ':') : NULL;
 			if (tmp)
 				*tmp = '\0';
 
-			snprintf(buffer, sizeof(buffer), "%s:%s", src_port, value);
-			dmuci_set_value_by_section((struct uci_section *)data, "src_port", buffer);
+			snprintf(buffer, sizeof(buffer), "%s:%s", src_dport, value);
+			dmuci_set_value_by_section((struct uci_section *)data, "src_dport", buffer);
 			return 0;
 	}
 	return 0;
 }
 
-/*#Device.NAT.PortMapping.{i}.InternalPort!UCI:firewall/redirect,@i-1/src_dport*/
+/*#Device.NAT.PortMapping.{i}.InternalPort!UCI:firewall/redirect,@i-1/dest_port*/
 static int get_nat_port_mapping_internal_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "src_dport", "0");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "dest_port", "0");
 	return 0;
 }
 
@@ -551,7 +551,7 @@ static int set_nat_port_mapping_internal_port(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "src_dport", value);
+			dmuci_set_value_by_section((struct uci_section *)data, "dest_port", value);
 			return 0;
 	}
 	return 0;
