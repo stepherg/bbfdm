@@ -333,7 +333,12 @@ static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 	struct uci_section *s = NULL;
 	struct uci_list *v = NULL;
 	struct uci_element *e;
-	char *zone_name = NULL, *name = NULL, *ifaceobj = NULL, buf[256] = "";
+	char *zone_name = NULL, *name = NULL, *ifaceobj = NULL, *src_dip = NULL;
+	char buf[256] = "";
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "src_dip", &src_dip);
+	if (src_dip && strcmp(src_dip, "*") == 0)
+		return 0;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "src", &zone_name);
 	uci_foreach_sections("firewall", "zone", s) {
@@ -397,6 +402,7 @@ static int get_nat_port_mapping_all_interface(char *refparam, struct dmctx *ctx,
 
 static int set_nat_port_mapping_all_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *src = NULL;
 	bool b;
 
 	switch (action)	{
@@ -407,6 +413,11 @@ static int set_nat_port_mapping_all_interface(char *refparam, struct dmctx *ctx,
 		case VALUESET:
 			string_to_bool(value, &b);
 			dmuci_set_value_by_section((struct uci_section *)data, "src_dip", b ? "*" : "");
+			if (b) {
+				dmuci_get_value_by_section_string((struct uci_section *)data, "src", &src);
+				if (src == NULL || *src == '\0')
+					dmuci_set_value_by_section((struct uci_section *)data, "src", "wan");
+			}
 			break;
 	}
 	return 0;
