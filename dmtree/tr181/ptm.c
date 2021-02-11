@@ -10,6 +10,7 @@
  */
 
 #include "dmentry.h"
+#include "ethernet.h"
 #include "ptm.h"
 
 struct ptm_args
@@ -127,9 +128,7 @@ static int set_ptm_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 /*#Device.PTM.Link.{i}.Status!SYSFS:/sys/class/net/@Name/operstate*/
 static int get_ptm_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	get_net_device_sysfs(((struct ptm_args *)data)->ifname, "operstate", value);
-	*value = (strcmp(*value, "up") == 0) ? "Up" : "Down";
-	return 0;
+	return get_device_status(((struct ptm_args *)data)->ifname, value);
 }
 
 /*************************************************************

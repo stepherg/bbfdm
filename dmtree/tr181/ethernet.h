@@ -30,5 +30,6 @@ extern DMLEAF tEthernetRMONStatsParams[];
 
 void get_bridge_port_linker(struct dmctx *ctx, char *intf_name, char **value);
 int is_vlan_termination_section(const char *name);
+int get_device_status(const char *device, char **value);
 
 #endif //__ETHERNET_H
