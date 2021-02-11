@@ -94,32 +94,6 @@ void get_bridge_port_linker(struct dmctx *ctx, char *intf_name, char **value)
 	}
 }
 
-int get_device_status(const char *device, char **value)
-{
-	char *operstate = NULL;
-
-	get_net_device_sysfs(device, "operstate", &operstate);
-	if (operstate == NULL || *operstate == '\0') {
-		*value = "Down";
-		return 0;
-	}
-
-	if (strcmp(operstate, "up") == 0)
-		*value = "Up";
-	else if (strcmp(operstate, "unknown") == 0)
-		*value = "Unknown";
-	else if (strcmp(operstate, "notpresent") == 0)
-		*value = "NotPresent";
-	else if (strcmp(operstate, "lowerlayerdown") == 0)
-		*value = "LowerLayerDown";
-	else if (strcmp(operstate, "dormant") == 0)
-		*value = "Dormant";
-	else
-		*value = "Down";
-
-	return 0;
-}
-
 static int eth_iface_sysfs(const struct uci_section *data, const char *name, char **value)
 {
 	char *device;
@@ -619,7 +593,7 @@ static int set_EthernetInterface_Enable(char *refparam, struct dmctx *ctx, void 
 /*#Device.Ethernet.Interface.{i}.Status!SYSFS:/sys/class/net/@Name/operstate*/
 static int get_EthernetInterface_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_device_status(((struct eth_port_args *)data)->ifname, value);
+	return get_net_device_status(((struct eth_port_args *)data)->ifname, value);
 }
 
 /*#Device.Ethernet.Interface.{i}.Alias!UCI:dmmap_ports/ethport,@i-1/eth_port_alias*/

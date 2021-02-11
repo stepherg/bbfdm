@@ -1036,6 +1036,32 @@ int get_net_device_sysfs(const char *device, const char *name, char **value)
 	return 0;
 }
 
+int get_net_device_status(const char *device, char **value)
+{
+	char *operstate = NULL;
+
+	get_net_device_sysfs(device, "operstate", &operstate);
+	if (operstate == NULL || *operstate == '\0') {
+		*value = "Down";
+		return 0;
+	}
+
+	if (strcmp(operstate, "up") == 0)
+		*value = "Up";
+	else if (strcmp(operstate, "unknown") == 0)
+		*value = "Unknown";
+	else if (strcmp(operstate, "notpresent") == 0)
+		*value = "NotPresent";
+	else if (strcmp(operstate, "lowerlayerdown") == 0)
+		*value = "LowerLayerDown";
+	else if (strcmp(operstate, "dormant") == 0)
+		*value = "Dormant";
+	else
+		*value = "Down";
+
+	return 0;
+}
+
 int get_net_iface_sysfs(const char *uci_iface, const char *name, char **value)
 {
 	const char *device = get_device((char *)uci_iface);

@@ -10,7 +10,6 @@
  */
 
 #include "dmentry.h"
-#include "ethernet.h"
 #include "atm.h"
 
 struct atm_args
@@ -231,7 +230,7 @@ static int set_atm_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 /*#Device.ATM.Link.{i}.Status!SYSFS:/sys/class/net/@Name/operstate*/
 static int get_atm_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_device_status(((struct atm_args *)data)->ifname, value);
+	return get_net_device_status(((struct atm_args *)data)->ifname, value);
 }
 
 /*************************************************************
