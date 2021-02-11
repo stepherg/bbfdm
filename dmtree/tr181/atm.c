@@ -203,21 +203,25 @@ static int get_atm_stats_pack_sent(char *refparam, struct dmctx *ctx, void *data
 	return 0;
 }
 
+/*#Device.ATM.Link.{i}.Enable!UCI:dsl/atm-device,@i-1/enabled*/
 static int get_atm_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "true";
+	*value = dmuci_get_value_by_section_fallback_def(((struct atm_args *)data)->atm_sec, "enabled", "1");
 	return 0;
 }
 
 static int set_atm_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	bool b;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			//TODO
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "enabled", b ? "1" : "0");
 			return 0;
 	}
 	return 0;

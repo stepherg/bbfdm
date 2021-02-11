@@ -17361,7 +17361,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dsl",
+								"section": {
+									"type": "atm-device",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "enabled"
+								}
+							}
+						}
+					]
 				},
 				"Status": {
 					"type": "string",
@@ -18235,7 +18250,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dsl",
+								"section": {
+									"type": "ptm-device",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "enabled"
+								}
+							}
+						}
+					]
 				},
 				"Status": {
 					"type": "string",

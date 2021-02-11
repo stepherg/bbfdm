@@ -100,21 +100,25 @@ static int get_ptm_stats_pack_sent(char *refparam, struct dmctx *ctx, void *data
 	return 0;
 }
 
+/*#Device.PTM.Link.{i}.Enable!UCI:dsl/ptm-device,@i-1/enabled*/
 static int get_ptm_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "true";
+	*value = dmuci_get_value_by_section_fallback_def(((struct ptm_args *)data)->ptm_sec, "enabled", "1");
 	return 0;
 }
 
 static int set_ptm_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	bool b;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			//TODO
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section(((struct ptm_args *)data)->ptm_sec, "enabled", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
