@@ -120,9 +120,16 @@ static int set_ptm_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 	return 0;
 }
 
+/*#Device.PTM.Link.{i}.Status!SYSFS:/sys/class/net/@Name/operstate*/
 static int get_ptm_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "Up";
+	get_net_device_sysfs(((struct ptm_args *)data)->ifname, "operstate", value);
+	if (strcmp(*value, "up") == 0)
+		*value = "Up";
+	else if (strcmp(*value, "down") == 0)
+		*value = "Down";
+	else
+		*value = "Unknown";
 	return 0;
 }
 

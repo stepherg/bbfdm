@@ -17380,6 +17380,12 @@
 						"NotPresent",
 						"LowerLayerDown",
 						"Error"
+					],
+					"mapping": [
+						{
+							"type": "sysfs",
+							"file": "/sys/class/net/@Name/operstate"
+						}
 					]
 				},
 				"Alias": {
@@ -18248,6 +18254,12 @@
 						"NotPresent",
 						"LowerLayerDown",
 						"Error"
+					],
+					"mapping": [
+						{
+							"type": "sysfs",
+							"file": "/sys/class/net/@Name/operstate"
+						}
 					]
 				},
 				"Alias": {

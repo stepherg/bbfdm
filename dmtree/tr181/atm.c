@@ -223,9 +223,16 @@ static int set_atm_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 	return 0;
 }
 
+/*#Device.ATM.Link.{i}.Status!SYSFS:/sys/class/net/@Name/operstate*/
 static int get_atm_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "Up";
+	get_net_device_sysfs(((struct atm_args *)data)->ifname, "operstate", value);
+	if (strcmp(*value, "up") == 0)
+		*value = "Up";
+	else if (strcmp(*value, "down") == 0)
+		*value = "Down";
+	else
+		*value = "Unknown";
 	return 0;
 }
 
