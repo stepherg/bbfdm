@@ -716,7 +716,7 @@ int set_mcasts_filter_address(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 2))
+		if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
 			return FAULT_9007;
 
 		break;
@@ -957,7 +957,7 @@ int set_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, 
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, 0, NULL, 0))
+		if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1276,7 +1276,7 @@ static int set_igmpp_filter_address(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 2))
+		if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1743,7 +1743,7 @@ static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+		if (dm_validate_string(value, -1, 256, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:

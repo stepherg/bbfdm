@@ -729,7 +729,7 @@ int os__set_WiFiDataElementsNetwork_ID(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
+		if (dm_validate_string(value, -1, -1, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -755,7 +755,7 @@ int os__set_WiFiDataElementsNetwork_ControllerID(char *refparam, struct dmctx *c
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
+		if (dm_validate_string(value, -1, -1, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:

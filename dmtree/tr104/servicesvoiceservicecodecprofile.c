@@ -38,7 +38,7 @@ static int set_ServicesVoiceServiceCodecProfile_PacketizationPeriod(char *refpar
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string_list(value, -1, -1, -1, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

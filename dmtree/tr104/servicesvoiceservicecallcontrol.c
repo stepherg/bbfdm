@@ -288,7 +288,7 @@ static int set_ServicesVoiceServiceCallControlLine_DirectoryNumber(char *refpara
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 32, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -318,7 +318,7 @@ static int set_ServicesVoiceServiceCallControlLine_Provider(char *refparam, stru
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -372,7 +372,7 @@ static int set_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, s
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if ((dup = dmstrdup(value)) == NULL)
@@ -416,7 +416,7 @@ static int set_ServicesVoiceServiceCallControlOutgoingMap_CLIPNoScreeningNumber(
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 32, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -506,7 +506,7 @@ static int set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNum
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 32, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

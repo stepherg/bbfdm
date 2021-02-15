@@ -1905,7 +1905,7 @@ static int set_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1928,7 +1928,7 @@ static int set_BridgingBridge_Standard(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, BridgeStandard, 3, NULL, 0))
+			if (dm_validate_string(value, -1, -1, BridgeStandard, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2050,7 +2050,7 @@ static int set_BridgingBridgePort_Alias(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2144,7 +2144,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, 0, NULL, 0))
+			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2677,7 +2677,7 @@ static int set_BridgingBridgeVLAN_Alias(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2698,7 +2698,7 @@ static int set_BridgingBridgeVLAN_Name(char *refparam, struct dmctx *ctx, void *
 	struct uci_section *s = NULL;
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2826,7 +2826,7 @@ static int set_BridgingBridgeVLANPort_Alias(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2860,7 +2860,7 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2944,7 +2944,7 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -3064,7 +3064,7 @@ int set_BridgingBridgeProviderBridge_Type(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, -1, Provider_Bridge_Type, 2, NULL, 0))
+		if (dm_validate_string(value, -1, -1, Provider_Bridge_Type, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -3116,7 +3116,7 @@ static int set_BridgingBridgeProviderBridge_Alias(char *refparam, struct dmctx *
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+		if (dm_validate_string(value, -1, 64, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -3141,7 +3141,7 @@ static int set_BridgingBridgeProviderBridge_SVLANcomponent(char *refparam, struc
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+		if (dm_validate_string(value, -1, 256, NULL, NULL))
 			return FAULT_9007;
 
 		// Validate input value and Check if bridge is present
@@ -3195,7 +3195,7 @@ static int set_BridgingBridgeProviderBridge_CVLANcomponents(char *refparam, stru
 	switch (action)	{
 		case VALUECHECK:
 			/* Validate received list */
-			if (dm_validate_string_list(value, -1, -1, -1, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string_list(value, -1, -1, -1, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			// Validate each item in list and Check if bridge is present
