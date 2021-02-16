@@ -156,11 +156,20 @@ static int set_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 
 static int get_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char linker[32];
-	snprintf(linker, sizeof(linker), "channel_%d", atoi(instance));
-	adm_entry_get_linker_param(ctx, "Device.DSL.Channel.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
-	if (*value == NULL)
-		*value = "";
+	*value = "Device.DSL.Channel.1";
+	return 0;
+}
+
+static int set_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			break;
+	}
 	return 0;
 }
 
@@ -380,7 +389,7 @@ DMLEAF tATMLinkParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_atm_enable, set_atm_enable, BBFDM_BOTH},
 {"Name", &DMREAD, DMT_STRING, get_atm_link_name, NULL, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_atm_status, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMREAD, DMT_STRING, get_atm_lower_layer, NULL, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_atm_lower_layer, set_atm_lower_layer, BBFDM_BOTH},
 {"LinkType", &DMWRITE, DMT_STRING, get_atm_link_type, set_atm_link_type, BBFDM_BOTH},
 {"DestinationAddress", &DMWRITE, DMT_STRING, get_atm_destination_address, set_atm_destination_address, BBFDM_BOTH},
 {"Encapsulation", &DMWRITE, DMT_STRING, get_atm_encapsulation, set_atm_encapsulation, BBFDM_BOTH},

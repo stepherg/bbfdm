@@ -53,11 +53,34 @@ static int get_ptm_link_name(char *refparam, struct dmctx *ctx, void *data, char
 
 static int get_ptm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char linker[32];
-	snprintf(linker, sizeof(linker), "channel_%d", atoi(instance));
-	adm_entry_get_linker_param(ctx, "Device.DSL.Channel.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
-	if (*value == NULL)
-		*value = "";
+	json_object *res = NULL, *line_obj = NULL;
+	dmubus_call("fast", "status", UBUS_ARGS{}, 0, &res);
+	if (!res) {
+		*value = "Device.DSL.Channel.1";
+		return 0;
+	}
+	line_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "line");
+	if (!line_obj) {
+		*value = "Device.DSL.Channel.1";
+		return 0;
+	}
+	if ( strcmp(dmjson_get_value(line_obj, 1, "status"), "up") == 0)
+		*value = "Device.FAST.Line.1";
+	else
+		*value = "Device.DSL.Channel.1";
+	return 0;
+}
+
+static int set_ptm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			break;
+	}
 	return 0;
 }
 
@@ -287,7 +310,7 @@ DMLEAF tPTMLinkParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_ptm_enable, set_ptm_enable, BBFDM_BOTH},
 {"Name", &DMREAD, DMT_STRING, get_ptm_link_name, NULL, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_ptm_status, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMREAD, DMT_STRING, get_ptm_lower_layer, NULL, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_ptm_lower_layer, set_ptm_lower_layer, BBFDM_BOTH},
 {0}
 };
 
