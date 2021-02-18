@@ -66999,7 +66999,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "dateTime"
+						"datatype": "dateTime",
+						"mapping": [
+							{
+								"type": "uci",
+								"uci": {
+									"file": "firewall",
+									"section": {
+										"type": "rule",
+										"index": "@i-1"
+									},
+									"option": {
+										"name": "expiry"
+									}
+								}
+							}
+						]
 					},
 					"SourceInterface": {
 						"type": "string",

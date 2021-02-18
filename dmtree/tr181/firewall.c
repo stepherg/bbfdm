@@ -338,6 +338,45 @@ static int get_FirewallChainRule_CreationDate(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
+#ifndef GENERIC_OPENWRT
+/*#Device.Firewall.Chain.{i}.Rule.{i}.ExpiryDate!UCI:firewall/rule,@i-1/expiry*/
+static int get_FirewallChainRule_ExpiryDate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *expiry_date = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "expiry", &expiry_date);
+	if (expiry_date && *expiry_date != '\0' && atoi(expiry_date) > 0) {
+		char expiry[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
+		time_t time_value = atoi(expiry_date);
+
+		strftime(expiry, sizeof expiry, "%Y-%m-%dT%H:%M:%SZ", localtime(&time_value));
+		*value = dmstrdup(expiry);
+	} else {
+		*value = "9999-12-31T23:59:59Z";
+	}
+	return 0;
+}
+
+static int set_FirewallChainRule_ExpiryDate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char expiry_date[16];
+	struct tm tm;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_dateTime(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			strptime(value, "%Y-%m-%dT%H:%M:%SZ", &tm);
+			snprintf(expiry_date, sizeof(expiry_date), "%ld", mktime(&tm));
+			dmuci_set_value_by_section((struct uci_section *)data, "expiry", expiry_date);
+			break;
+	}
+	return 0;
+}
+#endif
+
 static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *ifaceobj = NULL, *src = NULL, src_iface[256] = {0};
@@ -1497,6 +1536,9 @@ DMLEAF tFirewallChainRuleParams[] = {
 //{"TargetChain", &DMWRITE, DMT_STRING, get_rule_target_chain, set_rule_target_chain, BBFDM_BOTH},
 {"Log", &DMWRITE, DMT_BOOL, get_rule_log, set_rule_log, BBFDM_BOTH},
 {"CreationDate", &DMREAD, DMT_TIME, get_FirewallChainRule_CreationDate, NULL, BBFDM_BOTH},
+#ifndef GENERIC_OPENWRT
+{"ExpiryDate", &DMWRITE, DMT_TIME, get_FirewallChainRule_ExpiryDate, set_FirewallChainRule_ExpiryDate, BBFDM_BOTH},
+#endif
 {"SourceInterface", &DMWRITE, DMT_STRING, get_rule_source_interface, set_rule_source_interface, BBFDM_BOTH},
 {"SourceAllInterfaces", &DMWRITE, DMT_BOOL, get_rule_source_all_interfaces, set_rule_source_all_interfaces, BBFDM_BOTH},
 {"DestInterface", &DMWRITE, DMT_STRING, get_rule_dest_interface, set_rule_dest_interface, BBFDM_BOTH},
