@@ -61346,7 +61346,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dnsmasq",
+									"name": "@dnsmasq[0]"
+								},
+								"option": {
+									"name": "dhcpv4server"
+								}
+							}
+						}
+					]
 				},
 				"PoolNumberOfEntries": {
 					"type": "unsignedInt",

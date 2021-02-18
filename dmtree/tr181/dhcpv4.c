@@ -2236,6 +2236,30 @@ static int set_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 	return 0;
 }
 
+/*#Device.DHCPv4.Server.Enable!UCI:dhcp/dnsmasq,@dnsmasq[0]/dhcpv4server*/
+static int get_DHCPv4Server_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("dhcp", "@dnsmasq[0]", "dhcpv4server", "1");
+	return 0;
+}
+
+static int set_DHCPv4Server_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value("dhcp", "@dnsmasq[0]", "dhcpv4server", b ? "1" : "0");
+			return 0;
+	}
+	return 0;
+}
+
 static int get_DHCPv4Server_PoolNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
@@ -3096,7 +3120,7 @@ DMOBJ tDHCPv4ServerObj[] = {
 
 DMLEAF tDHCPv4ServerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4Server_Enable, set_DHCPv4Server_Enable, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4Server_Enable, set_DHCPv4Server_Enable, BBFDM_BOTH},
 {"PoolNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Server_PoolNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
