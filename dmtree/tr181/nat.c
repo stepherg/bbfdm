@@ -434,38 +434,26 @@ static int set_nat_port_mapping_all_interface(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
-#ifndef GENERIC_OPENWRT
-/*#Device.NAT.PortMapping.{i}.LeaseDuration!UCI:firewall/redirect,@i-1/expiry*/
 static int get_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *expiry_date = NULL;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "expiry", &expiry_date);
-	if (expiry_date && *expiry_date != '\0' && atoi(expiry_date) > 0) {
-		dmasprintf(value, "%ld", atoi(expiry_date) - time(NULL));
-	} else {
-		*value = "0";
-	}
+	// Currently, CPE only supports static port mappings
+	*value = "0";
 	return 0;
 }
 
 static int set_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char expiry_date[16];
-
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			snprintf(expiry_date, sizeof(expiry_date), "%ld", atoi(value) + time(NULL));
-			dmuci_set_value_by_section((struct uci_section *)data, "expiry", expiry_date);
+			// Nothing to set for static port mappings
 			break;
 	}
 	return 0;
 }
-#endif
 
 /*#Device.NAT.PortMapping.{i}.RemoteHost!UCI:firewall/redirect,@i-1/src_dip*/
 static int get_nat_port_mapping_remote_host(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -724,9 +712,7 @@ DMLEAF tNATPortMappingParams[] = {
 {"Alias", &DMWRITE, DMT_STRING, get_nat_port_mapping_alias, set_nat_port_mapping_alias, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, get_nat_port_mapping_interface, set_nat_port_mapping_interface, BBFDM_BOTH},
 {"AllInterfaces", &DMWRITE, DMT_BOOL, get_nat_port_mapping_all_interface, set_nat_port_mapping_all_interface, BBFDM_BOTH},
-#ifndef GENERIC_OPENWRT
 {"LeaseDuration", &DMWRITE, DMT_UNINT, get_nat_port_mapping_lease_duration, set_nat_port_mapping_lease_duration, BBFDM_BOTH},
-#endif
 {"RemoteHost", &DMWRITE, DMT_STRING, get_nat_port_mapping_remote_host, set_nat_port_mapping_remote_host, BBFDM_BOTH},
 {"ExternalPort", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port, set_nat_port_mapping_external_port, BBFDM_BOTH},
 {"ExternalPortEndRange", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port_end_range, set_nat_port_mapping_external_port_end_range, BBFDM_BOTH},

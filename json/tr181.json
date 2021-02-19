@@ -59423,22 +59423,7 @@
 						"usp"
 					],
 					"datatype": "unsignedInt",
-					"unit": "seconds",
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "firewall",
-								"section": {
-									"type": "redirect",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "expiry"
-								}
-							}
-						}
-					]
+					"unit": "seconds"
 				},
 				"RemoteHost": {
 					"type": "string",
