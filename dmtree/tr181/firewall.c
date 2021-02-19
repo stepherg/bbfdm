@@ -985,12 +985,16 @@ static int set_rule_log(char *refparam, struct dmctx *ctx, void *data, char *ins
 
 static int set_rule_interface(struct dmctx *ctx, void *data, char *type, char *value, int action)
 {
-	char *iface = NULL;
+	struct uci_section *dmmap_section = NULL;
+	char *iface = NULL, *option = NULL;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (*value == '\0')
+				break;
 
 			adm_entry_get_linker_value(ctx, value, &iface);
 			if (iface == NULL ||  iface[0] == '\0')
@@ -998,30 +1002,29 @@ static int set_rule_interface(struct dmctx *ctx, void *data, char *type, char *v
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &iface);
-			if (iface && iface[0] != '\0') {
-				struct uci_section *s = NULL;
-				char *net;
+			get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
+			dmuci_get_value_by_section_string((struct uci_section *)data, type, &option);
 
-				uci_foreach_sections("firewall", "zone", s) {
-					dmuci_get_value_by_section_string(s, "network", &net);
-					if (dm_strword(net, iface)) {
-						char *zone_name, *option = NULL;
+			if (*value == '\0') {
+				dmuci_set_value_by_section((option && strcmp(option, "*") == 0) ? dmmap_section : (struct uci_section *)data, type, "");
+			} else {
+				adm_entry_get_linker_value(ctx, value, &iface);
+				if (iface && iface[0] != '\0') {
+					struct uci_section *s = NULL;
+					char *net;
 
-						dmuci_get_value_by_section_string(s, "name", &zone_name);
-						dmuci_get_value_by_section_string((struct uci_section *)data, type, &option);
-						if (option && strcmp(option, "*") == 0) {
-							struct uci_section *dmmap_section = NULL;
+					uci_foreach_sections("firewall", "zone", s) {
+						dmuci_get_value_by_section_string(s, "network", &net);
+						if (dm_strword(net, iface)) {
+							char *zone_name;
 
-							get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name((struct uci_section *)data), &dmmap_section);
-							dmuci_set_value_by_section(dmmap_section, type, zone_name);
-						} else {
-							dmuci_set_value_by_section((struct uci_section *)data, type, zone_name);
+							dmuci_get_value_by_section_string(s, "name", &zone_name);
+							dmuci_set_value_by_section((option && strcmp(option, "*") == 0) ? dmmap_section : (struct uci_section *)data, type, zone_name);
+							break;
 						}
-						break;
 					}
+					dmfree(iface);
 				}
-				dmfree(iface);
 			}
 			break;
 	}
