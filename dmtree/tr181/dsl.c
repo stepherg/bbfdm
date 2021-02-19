@@ -38,8 +38,8 @@ static int get_dsl_line_linker(char *refparam, struct dmctx *dmctx, void *data, 
 
 static int get_dsl_channel_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	if (data && ((struct dsl_line_args *)data)->id){
-		dmasprintf(linker, "channel_%s", ((struct dsl_line_args *)data)->id);
+	if (instance) {
+		dmasprintf(linker, "dsl_channel_%s", instance);
 		return 0;
 	}
 	*linker = "" ;

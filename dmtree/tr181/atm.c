@@ -156,18 +156,35 @@ static int set_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 
 static int get_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "Device.DSL.Channel.1";
+	char *linker = NULL;
+	struct uci_section *dmmap_section = NULL;
+
+	get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(((struct atm_args *)data)->atm_sec), &dmmap_section);
+	dmuci_get_value_by_section_string(dmmap_section, "atm_ll_link", &linker);
+	if (linker != NULL)
+		adm_entry_get_linker_param(ctx, "Device.DSL.Channel.", linker, value);
+	if (*value != NULL && (*value)[0] != '\0')
+		return 0;
+	char *atm_file = NULL;
+	dmasprintf(&atm_file, "/sys/class/net/atm%d", atoi(instance) - 1);
+	if (folder_exists(atm_file)) {
+		*value = "Device.DSL.Channel.1";
+		dmuci_set_value_by_section(dmmap_section, "atm_ll_link", "dsl_channel_1");
+	}
 	return 0;
 }
 
 static int set_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *dmmap_section = NULL;
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (strncmp(value, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0)
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(((struct atm_args *)data)->atm_sec), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "atm_ll_link", "dsl_channel_1");
 			break;
 	}
 	return 0;

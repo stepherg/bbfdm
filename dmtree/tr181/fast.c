@@ -21,10 +21,11 @@ struct fast_line_args
 /**************************************************************************
 * LINKER
 ***************************************************************************/
+
 static int get_fast_line_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	if (data && ((struct fast_line_args *)data)->id) {
-		dmasprintf(linker, "line_%s", ((struct fast_line_args *)data)->id);
+	if (instance) {
+		dmasprintf(linker, "fast_line_%s", instance);
 		return 0;
 	}
 	*linker = "" ;

@@ -51,34 +51,81 @@ static int get_ptm_link_name(char *refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
+static int find_lower_layer_by_dmmap_link(struct dmctx *ctx, void *data, char* dm_object, char **value)
+{
+	char *linker = NULL;
+	struct uci_section *dmmap_section = NULL;
+
+	get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(((struct ptm_args *)data)->ptm_sec), &dmmap_section);
+	dmuci_get_value_by_section_string(dmmap_section, "ptm_ll_link", &linker);
+	if (linker != NULL)
+		adm_entry_get_linker_param(ctx, dm_object, linker, value);
+	if (*value == NULL)
+		*value = "";
+	return 0;
+}
+
+static int get_ptm_dsl_channel(struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *ptm_file = NULL;
+	struct uci_section *dmmap_section = NULL;
+
+	dmasprintf(&ptm_file, "/sys/class/net/ptm%d", atoi(instance) - 1);
+	if (folder_exists(ptm_file)) {
+		*value = "Device.DSL.Channel.1";
+		get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(((struct ptm_args *)data)->ptm_sec), &dmmap_section);
+		dmuci_set_value_by_section(dmmap_section, "ptm_ll_link", "fast_line_1");
+	}
+
+	return 0;
+}
+
+static int get_ptm_fast_line(struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *dmmap_section = NULL;
+	json_object *res = NULL, *line_obj = NULL;
+
+	dmubus_call("fast", "status", UBUS_ARGS{}, 0, &res);
+	if (!res)
+		return 0;
+	line_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "line");
+	if (!line_obj)
+		return 0;
+	if ( strcmp(dmjson_get_value(line_obj, 1, "status"), "up") == 0) {
+		*value = "Device.FAST.Line.1";
+		get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(((struct ptm_args *)data)->ptm_sec), &dmmap_section);
+		dmuci_set_value_by_section(dmmap_section, "ptm_ll_link", "fast_line_1");
+	}
+	return 0;
+}
+
 static int get_ptm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *line_obj = NULL;
-	dmubus_call("fast", "status", UBUS_ARGS{}, 0, &res);
-	if (!res) {
-		*value = "Device.DSL.Channel.1";
-		return 0;
-	}
-	line_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "line");
-	if (!line_obj) {
-		*value = "Device.DSL.Channel.1";
-		return 0;
-	}
-	if ( strcmp(dmjson_get_value(line_obj, 1, "status"), "up") == 0)
-		*value = "Device.FAST.Line.1";
-	else
-		*value = "Device.DSL.Channel.1";
+	get_ptm_fast_line(ctx, data, instance, value);
+	if (*value == NULL || (*value)[0] == '\0')
+		get_ptm_dsl_channel(ctx, data, instance, value);
+	if (*value == NULL || (*value)[0] == '\0')
+		find_lower_layer_by_dmmap_link(ctx, data, "Device.FAST.Line.", value);
+	if (*value == NULL || (*value)[0] == '\0')
+		find_lower_layer_by_dmmap_link(ctx, data, "Device.DSL.Channel.", value);
 	return 0;
 }
 
 static int set_ptm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *dmmap_section = NULL;
+
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (strncmp(value, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0 && strncmp(value, "Device.FAST.Line.1", strlen("Device.FAST.Line.1")) != 0)
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(((struct ptm_args *)data)->ptm_sec), &dmmap_section);
+			if (strcmp(value, "Device.DSL.Channel.1") == 0)
+				dmuci_set_value_by_section(dmmap_section, "ptm_ll_link", "dsl_channel_1");
+			else
+				dmuci_set_value_by_section(dmmap_section, "ptm_ll_link", "fast_line_1");
 			break;
 	}
 	return 0;
