@@ -971,10 +971,10 @@ static char *get_dsl_link_encapsulation_standard(char *str)
 		dsl_link_encapsulation_standard = "G.992.3_Annex_K_PTM";
 	else if(strcmp(str, "vdsl2_atm") == 0)
 		dsl_link_encapsulation_standard = "G.993.2_Annex_K_ATM";
-	else if(strcmp(str, "auto") == 0)
-		dsl_link_encapsulation_standard = "G.994.1";
-	else
+	else if(strcmp(str, "vdsl2_ptm") == 0)
 		dsl_link_encapsulation_standard = "G.993.2_Annex_K_PTM";
+	else
+		dsl_link_encapsulation_standard = "G.994.1";
 
 	return dsl_link_encapsulation_standard;
 }
@@ -1007,7 +1007,7 @@ static int get_DSLChannel_LinkEncapsulationSupported(char *refparam, struct dmct
 static int get_DSLChannel_LinkEncapsulationUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *link_encapsulation_used = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "status", "link_encapsulation_used");
-	*value = get_dsl_link_encapsulation_standard(link_encapsulation_used);
+	*value = (strcmp(link_encapsulation_used, "auto") != 0) ? get_dsl_link_encapsulation_standard(link_encapsulation_used) : "G.993.2_Annex_K_PTM";
 	return 0;
 }
 
