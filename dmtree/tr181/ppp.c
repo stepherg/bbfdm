@@ -246,6 +246,16 @@ static int get_PPPInterfaceIPv6CP_LocalInterfaceIdentifier(char *refparam, struc
 	return 0;
 }
 
+static int get_PPPInterfaceIPv6CP_RemoteInterfaceIdentifier(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL;
+
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	DM_ASSERT(res, *value = "");
+	*value = dmjson_get_value(res, 2, "data", "llremote");
+	return 0;
+}
+
 static int ppp_read_sysfs(struct uci_section *sect, const char *name, char **value)
 {
 	char *proto;
@@ -582,7 +592,7 @@ DMLEAF tPPPInterfaceIPCPParams[] = {
 DMLEAF tPPPInterfaceIPv6CPParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"LocalInterfaceIdentifier", &DMREAD, DMT_STRING, get_PPPInterfaceIPv6CP_LocalInterfaceIdentifier, NULL, BBFDM_BOTH},
-//{"RemoteInterfaceIdentifier", &DMREAD, DMT_STRING, get_PPPInterfaceIPv6CP_RemoteInterfaceIdentifier, NULL, BBFDM_BOTH},
+{"RemoteInterfaceIdentifier", &DMREAD, DMT_STRING, get_PPPInterfaceIPv6CP_RemoteInterfaceIdentifier, NULL, BBFDM_BOTH},
 {0}
 };
 
