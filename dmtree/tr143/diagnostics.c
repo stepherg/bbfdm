@@ -46,7 +46,7 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, 5, NULL, 0))
+			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -76,7 +76,7 @@ static int set_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -103,7 +103,7 @@ static int set_ip_ping_protocolversion(char *refparam, struct dmctx *ctx, void *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, 3, NULL, 0))
+			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -130,7 +130,7 @@ static int set_ip_ping_host(char *refparam, struct dmctx *ctx, void *data, char 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -327,7 +327,7 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, 5, NULL, 0))
+			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -357,7 +357,7 @@ static int set_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -384,7 +384,7 @@ static int set_IPDiagnosticsTraceRoute_ProtocolVersion(char *refparam, struct dm
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, 3, NULL, 0))
+			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -411,7 +411,7 @@ static int set_IPDiagnosticsTraceRoute_Host(char *refparam, struct dmctx *ctx, v
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -623,7 +623,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, 5, NULL, 0))
+			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -659,7 +659,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -696,7 +696,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DownloadURL(char *refparam, stru
 	struct uci_section *curr_section = NULL;
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -789,7 +789,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_ProtocolVersion(char *refparam, 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, 3, NULL, 0))
+			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1014,7 +1014,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, 5, NULL, 0))
+			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1050,7 +1050,7 @@ static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct d
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1088,7 +1088,7 @@ static int set_IPDiagnosticsUploadDiagnostics_UploadURL(char *refparam, struct d
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1201,7 +1201,7 @@ static int set_IPDiagnosticsUploadDiagnostics_ProtocolVersion(char *refparam, st
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, 3, NULL, 0))
+			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1426,7 +1426,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, 5, NULL, 0))
+			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1456,7 +1456,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1483,7 +1483,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Host(char *refparam, struct dmctx
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1672,7 +1672,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_ProtocolVersion(char *refparam, s
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, 3, NULL, 0))
+			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1743,7 +1743,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, 5, NULL, 0))
+			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1773,7 +1773,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1800,7 +1800,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_ProtocolVersion(char *ref
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, 3, NULL, 0))
+			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1827,7 +1827,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Protocol(char *refparam, 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ServerSelectionProtocol, 2, NULL, 0))
+			if (dm_validate_string(value, -1, -1, ServerSelectionProtocol, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1881,7 +1881,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_HostList(char *refparam, 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, 10, -1, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string_list(value, -1, 10, -1, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:

@@ -159,7 +159,7 @@ static int set_user_alias(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -190,7 +190,7 @@ static int set_user_username(char *refparam, struct dmctx *ctx, void *data, char
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -208,7 +208,7 @@ static int set_user_password(char *refparam, struct dmctx *ctx, void *data, char
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -236,7 +236,7 @@ static int set_user_language(char *refparam, struct dmctx *ctx, void *data, char
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 16, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 16, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

@@ -54,7 +54,7 @@ static int set_ServicesVoiceServicePOTS_Region(char *refparam, struct dmctx *ctx
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 2, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 2, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

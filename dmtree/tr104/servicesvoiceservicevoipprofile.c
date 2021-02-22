@@ -38,7 +38,7 @@ static int set_ServicesVoiceServiceVoIPProfile_DTMFMethod(char *refparam, struct
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, DTMFMethod, 3, NULL, 0))
+			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, DTMFMethod, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -161,7 +161,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType(char *refpara
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, JitterBufferType, 2, NULL, 0))
+			if (dm_validate_string(value, -1, -1, JitterBufferType, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -247,7 +247,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTPSRTP_KeyingMethods(char *refpar
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, KeyingMethods, 4, NULL, 0))
+			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, KeyingMethods, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

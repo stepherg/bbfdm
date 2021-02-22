@@ -574,7 +574,7 @@ int set_QoS_DefaultPolicer(char *refparam, struct dmctx *ctx, void *data, char *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -603,7 +603,7 @@ int set_QoS_DefaultQueue(char *refparam, struct dmctx *ctx, void *data, char *in
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -754,7 +754,7 @@ int os_set_QoSClassification_Alias(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -775,7 +775,7 @@ int set_QoSClassification_DHCPType(char *refparam, struct dmctx *ctx, void *data
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DHCPType, 2, NULL, 0))
+			if (dm_validate_string(value, -1, -1, DHCPType, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -823,7 +823,7 @@ int os_set_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -865,7 +865,7 @@ int os_set_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, 0, IPPrefix, 3))
+			if (dm_validate_string(value, -1, 49, NULL, IPPrefix))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -906,7 +906,7 @@ int os_set_QoSClassification_SourceMask(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, 0, IPPrefix, 3))
+			if (dm_validate_string(value, -1, 49, NULL, IPPrefix))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -991,7 +991,7 @@ int os_set_QoSClassification_DestIP(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 2))
+			if (dm_validate_string(value, -1, 45, NULL, IPAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1017,7 +1017,7 @@ int os_set_QoSClassification_SourceIP(char *refparam, struct dmctx *ctx, void *d
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, 0, IPAddress, 2))
+			if (dm_validate_string(value, -1, 45, NULL, IPAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1174,7 +1174,7 @@ int os_set_QoSClassification_SourceMACAddress(char *refparam, struct dmctx *ctx,
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string(value, -1, 17, NULL, MACAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1194,7 +1194,7 @@ int set_QoSClassification_SourceMACMask(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string(value, -1, 17, NULL, MACAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1235,7 +1235,7 @@ int os_set_QoSClassification_DestMACAddress(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string(value, -1, 17, NULL, MACAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1255,7 +1255,7 @@ int set_QoSClassification_DestMACMask(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+			if (dm_validate_string(value, -1, 17, NULL, MACAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1496,7 +1496,7 @@ int os_set_QoSClassification_SourceVendorClassID(char *refparam, struct dmctx *c
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 255, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 255, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1556,7 +1556,7 @@ int set_QoSClassification_SourceVendorClassIDMode(char *refparam, struct dmctx *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, VendorClassIDMode, 4, NULL, 0))
+			if (dm_validate_string(value, -1, -1, VendorClassIDMode, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1576,7 +1576,7 @@ int os_set_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 255, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 255, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1636,7 +1636,7 @@ int set_QoSClassification_DestVendorClassIDMode(char *refparam, struct dmctx *ct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, VendorClassIDMode, 4, NULL, 0))
+			if (dm_validate_string(value, -1, -1, VendorClassIDMode, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2406,7 +2406,7 @@ int os_set_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void *da
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2426,7 +2426,7 @@ int set_QoSClassification_App(char *refparam, struct dmctx *ctx, void *data, cha
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2472,7 +2472,7 @@ int set_QoSApp_Alias(char *refparam, struct dmctx *ctx, void *data, char *instan
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2492,7 +2492,7 @@ int set_QoSApp_ProtocolIdentifier(char *refparam, struct dmctx *ctx, void *data,
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2512,7 +2512,7 @@ int set_QoSApp_Name(char *refparam, struct dmctx *ctx, void *data, char *instanc
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2572,7 +2572,7 @@ int set_QoSApp_DefaultPolicer(char *refparam, struct dmctx *ctx, void *data, cha
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2678,7 +2678,7 @@ int set_QoSFlow_Alias(char *refparam, struct dmctx *ctx, void *data, char *insta
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2698,7 +2698,7 @@ int set_QoSFlow_Type(char *refparam, struct dmctx *ctx, void *data, char *instan
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2718,7 +2718,7 @@ int set_QoSFlow_TypeParameters(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2738,7 +2738,7 @@ int set_QoSFlow_Name(char *refparam, struct dmctx *ctx, void *data, char *instan
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2758,7 +2758,7 @@ int set_QoSFlow_App(char *refparam, struct dmctx *ctx, void *data, char *instanc
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2818,7 +2818,7 @@ int set_QoSFlow_Policer(char *refparam, struct dmctx *ctx, void *data, char *ins
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2921,7 +2921,7 @@ int os_set_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3035,7 +3035,7 @@ int os_set_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *data, c
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3060,7 +3060,7 @@ int set_QoSPolicer_ConformingAction(char *refparam, struct dmctx *ctx, void *dat
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, 0, ConformingAction, 5))
+			if (dm_validate_string(value, -1, -1, NULL, ConformingAction))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3080,7 +3080,7 @@ int set_QoSPolicer_PartialConformingAction(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, 0, ConformingAction, 5))
+			if (dm_validate_string(value, -1, -1, NULL, ConformingAction))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3100,7 +3100,7 @@ int set_QoSPolicer_NonConformingAction(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, 0, ConformingAction, 5))
+			if (dm_validate_string(value, -1, -1, NULL, ConformingAction))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3498,7 +3498,7 @@ int set_QoSQueue_DropAlgorithm(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DropAlgorithm, 4, NULL, 0))
+			if (dm_validate_string(value, -1, -1, DropAlgorithm, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3598,7 +3598,7 @@ int set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3624,7 +3624,7 @@ int os_set_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data, ch
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3654,7 +3654,7 @@ int os_set_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *data
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3766,7 +3766,7 @@ int set_QoSShaper_Alias(char *refparam, struct dmctx *ctx, void *data, char *ins
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3812,7 +3812,7 @@ int set_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

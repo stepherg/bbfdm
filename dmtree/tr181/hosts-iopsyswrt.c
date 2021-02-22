@@ -113,7 +113,7 @@ int os__set_HostsHost_Alias(char *refparam, struct dmctx *ctx, void *data, char 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

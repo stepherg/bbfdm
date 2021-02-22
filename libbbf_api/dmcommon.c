@@ -23,54 +23,54 @@ char *array_notifcation_char[__MAX_notification] = {
 	[notification_passive_active_lw] = "6",
 };
 
-char *Encapsulation[] = {"LLC", "VCMUX"};
-char *LinkType[] = {"EoA", "IPoA", "PPPoA", "CIP", "Unconfigured"};
-char *BridgeStandard[] = {"802.1D-2004", "802.1Q-2005", "802.1Q-2011"};
-char *BridgeType[] = {"ProviderNetworkPort", "CustomerNetworkPort", "CustomerEdgePort", "CustomerVLANPort", "VLANUnawarePort"};
-char *VendorClassIDMode[] = {"Exact", "Prefix", "Suffix", "Substring"};
-char *DiagnosticsState[] = {"None", "Requested", "Canceled", "Complete", "Error"};
-char *SupportedProtocols[] = {"HTTP", "HTTPS"};
-char *InstanceMode[] = {"InstanceNumber", "InstanceAlias"};
-char *NATProtocol[] = {"TCP", "UDP", "TCP/UDP"};
-char *Config[] = {"High", "Low", "Off", "Advanced"};
-char *Target[] = {"Drop", "Accept", "Reject", "Return", "TargetChain"};
-char *ServerConnectAlgorithm[] = {"DNS-SRV", "DNS", "ServerTable", "WebSocket"};
-char *KeepAlivePolicy[] = {"ICMP", "None"};
-char *DeliveryHeaderProtocol[] = {"IPv4", "IPv6"};
-char *KeyIdentifierGenerationPolicy[] = {"Disabled", "Provisioned", "CPE_Generated"};
-char *PreambleType[] = {"short", "long", "auto"};
-char *MFPConfig[] = {"Disabled", "Optional", "Required"};
-char *DuplexMode[] = {"Half", "Full", "Auto"};
-char *RequestedState[] = {"Idle", "Active"};
-char *BulkDataProtocols[] = {"Streaming", "File", "HTTP"};
-char *EncodingTypes[] = {"XML", "XDR", "CSV", "JSON"};
-char *CSVReportFormat[] = {"ParameterPerRow", "ParameterPerColumn"};
-char *RowTimestamp[] = {"Unix-Epoch", "ISO-8601", "None"};
-char *JSONReportFormat[] = {"ObjectHierarchy", "NameValuePair"};
-char *StaticType[] = {"Static", "Inapplicable", "PrefixDelegation", "Child"};
-char *ProtocolVersion[] = {"Any", "IPv4", "IPv6"};
-char *ServerSelectionProtocol[] = {"ICMP", "UDP Echo"};
-char *DHCPType[] = {"DHCPv4", "DHCPv6"};
-char *DropAlgorithm[] = {"RED", "DT", "WRED", "BLUE"};
-char *SchedulerAlgorithm[] = {"WFQ", "WRR", "SP"};
-char *DTMFMethod[] = {"InBand", "RFC2833", "SIPInfo"};
-char *ProfileEnable[] = {"Disabled", "Quiescent", "Enabled"};
-char *SupportedOperatingChannelBandwidth[] = {"20MHz", "40MHz", "80MHz", "160MHZ", "80+80MHz", "Auto"};
-char *SupportedStandards[] = {"a", "b", "g", "n", "ac", "ax"};
-char *SupportedFrequencyBands[] = {"2.4GHz", "5GHz"};
-char *Provider_Bridge_Type[] = {"S-VLAN", "PE"};
+char *Encapsulation[] = {"LLC", "VCMUX", NULL};
+char *LinkType[] = {"EoA", "IPoA", "PPPoA", "CIP", "Unconfigured", NULL};
+char *BridgeStandard[] = {"802.1D-2004", "802.1Q-2005", "802.1Q-2011", NULL};
+char *BridgeType[] = {"ProviderNetworkPort", "CustomerNetworkPort", "CustomerEdgePort", "CustomerVLANPort", "VLANUnawarePort", NULL};
+char *VendorClassIDMode[] = {"Exact", "Prefix", "Suffix", "Substring", NULL};
+char *DiagnosticsState[] = {"None", "Requested", "Canceled", "Complete", "Error", NULL};
+char *SupportedProtocols[] = {"HTTP", "HTTPS", NULL};
+char *InstanceMode[] = {"InstanceNumber", "InstanceAlias", NULL};
+char *NATProtocol[] = {"TCP", "UDP", NULL};
+char *Config[] = {"High", "Low", "Off", "Advanced", NULL};
+char *Target[] = {"Drop", "Accept", "Reject", "Return", "TargetChain", NULL};
+char *ServerConnectAlgorithm[] = {"DNS-SRV", "DNS", "ServerTable", "WebSocket", NULL};
+char *KeepAlivePolicy[] = {"ICMP", "None", NULL};
+char *DeliveryHeaderProtocol[] = {"IPv4", "IPv6", NULL};
+char *KeyIdentifierGenerationPolicy[] = {"Disabled", "Provisioned", "CPE_Generated", NULL};
+char *PreambleType[] = {"short", "long", "auto", NULL};
+char *MFPConfig[] = {"Disabled", "Optional", "Required", NULL};
+char *DuplexMode[] = {"Half", "Full", "Auto", NULL};
+char *RequestedState[] = {"Idle", "Active", NULL};
+char *BulkDataProtocols[] = {"Streaming", "File", "HTTP", NULL};
+char *EncodingTypes[] = {"XML", "XDR", "CSV", "JSON", NULL};
+char *CSVReportFormat[] = {"ParameterPerRow", "ParameterPerColumn", NULL};
+char *RowTimestamp[] = {"Unix-Epoch", "ISO-8601", "None", NULL};
+char *JSONReportFormat[] = {"ObjectHierarchy", "NameValuePair", NULL};
+char *StaticType[] = {"Static", "Inapplicable", "PrefixDelegation", "Child", NULL};
+char *ProtocolVersion[] = {"Any", "IPv4", "IPv6", NULL};
+char *ServerSelectionProtocol[] = {"ICMP", "UDP Echo", NULL};
+char *DHCPType[] = {"DHCPv4", "DHCPv6", NULL};
+char *DropAlgorithm[] = {"RED", "DT", "WRED", "BLUE", NULL};
+char *SchedulerAlgorithm[] = {"WFQ", "WRR", "SP", NULL};
+char *DTMFMethod[] = {"InBand", "RFC2833", "SIPInfo", NULL};
+char *ProfileEnable[] = {"Disabled", "Quiescent", "Enabled", NULL};
+char *SupportedOperatingChannelBandwidth[] = {"20MHz", "40MHz", "80MHz", "160MHZ", "80+80MHz", "Auto", NULL};
+char *SupportedStandards[] = {"a", "b", "g", "n", "ac", "ax", NULL};
+char *SupportedFrequencyBands[] = {"2.4GHz", "5GHz", NULL};
+char *Provider_Bridge_Type[] = {"S-VLAN", "PE", NULL};
 
-char *PIN[] = {"^\\d{4}|\\d{8}$"};
-char *DestinationAddress[] = {"^\\d+/\\d+$"};
-char *RegulatoryDomain[] = {"^[A-Z][A-Z][ OI]$"};
-char *ConformingAction[] = {"^Null$", "^Drop$", "^[0-9]|[1-5][0-9]|6[0-3]$", "^:[0-7]$", "^([0-9]|[1-5][0-9]|6[0-3]):[0-7]$"};
-char *IPv4Address[] = {"^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])$"};
-char *IPv6Address[] = {"^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$"};
-char *IPAddress[] = {"^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])$", "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$"};
-char *MACAddress[] = {"^([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])$"};
-char *IPPrefix[] = {"^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])/(3[0-2]|[012]?[0-9])$", "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/(12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$"};
-char *IPv4Prefix[] = {"^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])/(3[0-2]|[012]?[0-9])$"};
-char *IPv6Prefix[] = {"^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/(12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$"};
+char *PIN[] = {"^\\d{4}|\\d{8}$", NULL};
+char *DestinationAddress[] = {"^\\d+/\\d+$", NULL};
+char *RegulatoryDomain[] = {"^[A-Z][A-Z][ OI]$", NULL};
+char *ConformingAction[] = {"^Null$", "^Drop$", "^[0-9]|[1-5][0-9]|6[0-3]$", "^:[0-7]$", "^([0-9]|[1-5][0-9]|6[0-3]):[0-7]$", NULL};
+char *IPv4Address[] = {"^$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])$", NULL};
+char *IPv6Address[] = {"^$", "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$", NULL};
+char *IPAddress[] = {"^$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])$", "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$", NULL};
+char *MACAddress[] = {"^$", "^([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])$", NULL};
+char *IPPrefix[] = {"^$", "^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])/(3[0-2]|[012]?[0-9])$", "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/(12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$", NULL};
+char *IPv4Prefix[] = {"^$", "^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])/(3[0-2]|[012]?[0-9])$", NULL};
+char *IPv6Prefix[] = {"^$", "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/(12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$", NULL};
 
 char *cut_fx(char *str, char *delimiter, int occurence)
 {
@@ -1380,38 +1380,36 @@ static int dm_validate_string_length(char *value, int min_length, int max_length
 	return 0;
 }
 
-static int dm_validate_string_enumeration(char *value, char *enumeration[], int enumeration_size)
+static int dm_validate_string_enumeration(char *value, char *enumeration[])
 {
-	int i;
-	for (i = 0; i < enumeration_size; i++) {
-		if (strcmp(enumeration[i], value) == 0)
+	for (; *enumeration; enumeration++) {
+		if (strcmp(*enumeration, value) == 0)
 			return 0;
 	}
 	return -1;
 }
 
-static int dm_validate_string_pattern(char *value, char *pattern[], int pattern_size)
+static int dm_validate_string_pattern(char *value, char *pattern[])
 {
-	int i;
-	for (i = 0; i < pattern_size; i++) {
-		if (match(value, pattern[i]))
+	for (; *pattern; pattern++) {
+		if (match(value, *pattern))
 			return 0;
 	}
 	return -1;
 }
 
-int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], int enumeration_size, char *pattern[], int pattern_size)
+int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[])
 {
 	/* check size */
 	if (dm_validate_string_length(value, min_length, max_length))
 		return -1;
 
 	/* check enumeration */
-	if (enumeration && dm_validate_string_enumeration(value, enumeration, enumeration_size))
+	if (enumeration && dm_validate_string_enumeration(value, enumeration))
 		return -1;
 
 	/* check pattern */
-	if (pattern && dm_validate_string_pattern(value, pattern, pattern_size))
+	if (pattern && dm_validate_string_pattern(value, pattern))
 		return -1;
 
 	return 0;
@@ -1444,7 +1442,7 @@ int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_
 
 		val = strtoul(value, &endval, 10);
 
-		if ((*endval != 0) || (errno != 0)) return -1;
+		if ((*value == '-') || (*endval != 0) || (errno != 0)) return -1;
 
 		if (r_args[i].min && r_args[i].max && minval == maxval) {
 
@@ -1458,7 +1456,7 @@ int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_
 		}
 
 		/* check size */
-		if ((r_args[i].min && val < minval) || (r_args[i].max && val > maxval) || (val < 0) || (val > (unsigned int)UINT_MAX))
+		if ((r_args[i].min && val < minval) || (r_args[i].max && val > maxval) || (val > (unsigned int)UINT_MAX))
 			return -1;
 	}
 
@@ -1509,10 +1507,10 @@ int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args
 
 		val = strtoul(value, &endval, 10);
 
-		if ((*endval != 0) || (errno != 0)) return -1;
+		if ((*value == '-') || (*endval != 0) || (errno != 0)) return -1;
 
 		/* check size */
-		if ((r_args[i].min && val < minval) || (r_args[i].max && val > maxval) || (val < 0) || (val > (unsigned long)ULONG_MAX))
+		if ((r_args[i].min && val < minval) || (r_args[i].max && val > maxval) || (val > (unsigned long)ULONG_MAX))
 			return -1;
 	}
 
@@ -1579,8 +1577,8 @@ int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_si
 			continue;
 		}
 
-		if ((r_args[i].min && !r_args[i].max && (strlen(value) < atoi(r_args[i].min))) ||
-			(!r_args[i].min && r_args[i].max && (strlen(value) > atoi(r_args[i].max)))) {
+		if ((r_args[i].min && (strlen(value) < atoi(r_args[i].min))) ||
+			(r_args[i].max && (strlen(value) > atoi(r_args[i].max)))) {
 			return -1;
 		}
 	}
@@ -1597,7 +1595,7 @@ static int dm_validate_size_list(int min_item, int max_item, int nbr_item)
 	return 0;
 }
 
-int dm_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], int enumeration_size, char *pattern[], int pattern_size)
+int dm_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[])
 {
 	char *pch, *pchr;
 	int nbr_item = 0;
@@ -1613,7 +1611,7 @@ int dm_validate_string_list(char *value, int min_item, int max_item, int max_siz
 
 	/* for each value, validate string */
 	for (pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
-		if (dm_validate_string(pch, min, max, enumeration, enumeration_size, pattern, pattern_size))
+		if (dm_validate_string(pch, min, max, enumeration, pattern))
 			return -1;
 		nbr_item ++;
 	}

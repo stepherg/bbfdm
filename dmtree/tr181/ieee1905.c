@@ -504,7 +504,7 @@ static int set_IEEE1905ALInterface_PowerState(char *refparam, struct dmctx *ctx,
 {
 	switch (action) {
 	case VALUECHECK:
-		//if (dm_validate_string(value, -1, -1, PowerState, 4, NULL, 0))
+		//if (dm_validate_string(value, -1, -1, PowerState, NULL))
 		//      return FAULT_9007;
 		break;
 	case VALUESET:
@@ -705,7 +705,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_InterfaceList(char *refpa
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string_list(value, -1, -1, -1, -1, 256, NULL, 0, NULL, 0))
+		if (dm_validate_string_list(value, -1, -1, -1, -1, 256, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -726,7 +726,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress(cha
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+		if (dm_validate_string(value, -1, 17, NULL, MACAddress))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -771,7 +771,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress(char *re
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 17, NULL, 0, MACAddress, 1))
+		if (dm_validate_string(value, -1, 17, NULL, MACAddress))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1491,7 +1491,7 @@ static int set_IEEE1905ALSecurity_SetupMethod(char *refparam, struct dmctx *ctx,
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, 3, NULL, 0))
+		if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1512,7 +1512,7 @@ static int set_IEEE1905ALSecurity_Password(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
+		if (dm_validate_string(value, -1, -1, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:

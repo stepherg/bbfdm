@@ -35,7 +35,7 @@ static int set_management_server_url(char *refparam, struct dmctx *ctx, void *da
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -58,7 +58,7 @@ static int set_management_server_username(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -74,7 +74,7 @@ static int set_management_server_passwd(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -205,7 +205,7 @@ static int set_management_server_connection_request_username(char *refparam, str
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -221,7 +221,7 @@ static int set_management_server_connection_request_passwd(char *refparam, struc
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -276,7 +276,7 @@ static int set_lwn_protocol_used(char *refparam, struct dmctx *ctx, void *data, 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, NULL, 0, NULL, 0))
+			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -301,7 +301,7 @@ static int set_lwn_host(char *refparam, struct dmctx *ctx, void *data, char *ins
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -351,7 +351,7 @@ static int set_management_server_http_compression(char *refparam, struct dmctx *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -427,7 +427,7 @@ static int set_instance_mode(char *refparam, struct dmctx *ctx, void *data, char
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, InstanceMode, 2, NULL, 0))
+			if (dm_validate_string(value, -1, -1, InstanceMode, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -483,7 +483,7 @@ static int set_stun_server_address(char *refparam, struct dmctx *ctx, void *data
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -525,7 +525,7 @@ static int set_stun_username(char *refparam, struct dmctx *ctx, void *data, char
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -546,7 +546,7 @@ static int set_stun_password(char *refparam, struct dmctx *ctx, void *data, char
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -627,7 +627,7 @@ static int set_management_server_conn_rep_allowed_jabber_id(char *refparam, stru
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, 32, -1, -1, 256, NULL, 0, NULL, 0))
+			if (dm_validate_string_list(value, -1, 32, -1, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -677,7 +677,7 @@ static int set_management_server_conn_req_xmpp_connection(char *refparam, struct
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
+			if (dm_validate_string(value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
