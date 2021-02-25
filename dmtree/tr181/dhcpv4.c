@@ -490,10 +490,8 @@ static int addObjDHCPv4ServerPool(char *refparam, struct dmctx *ctx, void *data,
 
 	dmuci_add_section("dhcp", "dhcp", &s);
 	dmuci_rename_section_by_section(s, dhcp_sname);
-	dmuci_set_value_by_section(s, "start", "100");
-	dmuci_set_value_by_section(s, "leasetime", "12h");
-	dmuci_set_value_by_section(s, "limit", "150");
 	dmuci_set_value_by_section(s, "ignore", "0");
+	dmuci_set_value_by_section(s, "dhcpv4", "disabled");
 
 	dmuci_add_section_bbfdm("dmmap_dhcp", "dhcp", &dmmap_dhcp);
 	dmuci_set_value_by_section(dmmap_dhcp, "section_name", dhcp_sname);
@@ -553,14 +551,16 @@ static int addObjDHCPv4ServerPoolStaticAddress(char *refparam, struct dmctx *ctx
 	snprintf(host_name, sizeof(host_name), "host_%d", instance ? atoi(instance) + 1 : 1);
 
 	dmuci_add_section("dhcp", "host", &s);
+	dmuci_rename_section_by_section(s, host_name);
 	dmuci_set_value_by_section(s, "name", host_name);
 	dmuci_set_value_by_section(s, "dhcp", ((struct dhcp_args *)data)->interface);
+	dmuci_set_value_by_section(s, "enable", "0");
 
 	browse_args.option = "dhcp";
 	browse_args.value = ((struct dhcp_args *)data)->interface;
 
 	dmuci_add_section_bbfdm("dmmap_dhcp", "host", &dmmap_dhcp_host);
-	dmuci_set_value_by_section(dmmap_dhcp_host, "section_name", section_name(s));
+	dmuci_set_value_by_section(dmmap_dhcp_host, "section_name", host_name);
 	dmuci_set_value_by_section(dmmap_dhcp_host, "dhcp", ((struct dhcp_args *)data)->interface);
 	*instancepara = update_instance(instance, 5, dmmap_dhcp_host, "dhcp_host_instance", NULL, check_browse_section, (void *)&browse_args);
 	return 0;
@@ -797,6 +797,7 @@ static int addObjDHCPv4RelayForwarding(char *refparam, struct dmctx *ctx, void *
 
 	dmuci_add_section("network", "interface", &s);
 	dmuci_set_value_by_section(s, "proto", "relay");
+	dmuci_set_value_by_section(s, "disabled", "1");
 
 	dmuci_add_section_bbfdm("dmmap_dhcp_relay", "interface", &dmmap_sect);
 	dmuci_set_value_by_section(dmmap_sect, "section_name", section_name(s));

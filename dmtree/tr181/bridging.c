@@ -1403,6 +1403,7 @@ static int addObjBridgingBridge(char *refparam, struct dmctx *ctx, void *data, c
 	// Add interface bridge section
 	dmuci_set_value("network", bridge_name, "", "interface");
 	dmuci_set_value("network", bridge_name, "type", "bridge");
+	dmuci_set_value("network", bridge_name, "disabled", "1");
 
 	// Add dmmap bridge section
 	dmuci_add_section_bbfdm("dmmap_bridge", "bridge", &dmmap_bridge);

@@ -23,11 +23,7 @@ struct atm_args
 ***************************************************************************/
 static int get_atm_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	if (data && ((struct atm_args *)data)->ifname) {
-		*linker = ((struct atm_args *)data)->ifname;
-		return 0;
-	}
-	*linker = "";
+	*linker = (data && ((struct atm_args *)data)->ifname) ? ((struct atm_args *)data)->ifname : "";
 	return 0;
 }
 
@@ -103,10 +99,7 @@ static int set_atm_encapsulation(char *refparam, struct dmctx *ctx, void *data, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (strcmp(value, "VCMUX") == 0)
-				dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "encapsulation", "vcmux");
-			else if (strcmp(value, "LLC") == 0)
-				dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "encapsulation", "llc");
+			dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "encapsulation", (strcmp(value, "LLC") == 0) ? "llc" : "vcmux");
 			return 0;
 	}
 	return 0;
@@ -272,12 +265,10 @@ static int add_atm_link(char *refparam, struct dmctx *ctx, void *data, char **in
 
 	dmuci_set_value("dsl", atm_device, "", "atm-device");
 	dmuci_set_value("dsl", atm_device, "name", "ATM");
+	dmuci_set_value("dsl", atm_device, "enabled", "0");
 	dmuci_set_value("dsl", atm_device, "vpi", "8");
 	dmuci_set_value("dsl", atm_device, "vci", "35");
 	dmuci_set_value("dsl", atm_device, "device", atm_device);
-	dmuci_set_value("dsl", atm_device, "link_type", "eoa");
-	dmuci_set_value("dsl", atm_device, "encapsulation", "llc");
-	dmuci_set_value("dsl", atm_device, "qos_class", "ubr");
 
 	dmuci_add_section_bbfdm("dmmap_dsl", "atm-device", &dmmap_atm);
 	dmuci_set_value_by_section(dmmap_atm, "section_name", atm_device);

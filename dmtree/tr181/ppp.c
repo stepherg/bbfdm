@@ -442,12 +442,9 @@ static int set_PPPInterfacePPPoE_ServiceName(char *refparam, struct dmctx *ctx, 
 /**************************************************************************
 * LINKER
 ***************************************************************************/
-static int get_linker_ppp_interface(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker) {
-
-	if(((struct uci_section *)data))
-		dmasprintf(linker, "%s", section_name(((struct uci_section *)data)));
-	else
-		*linker = "";
+static int get_linker_ppp_interface(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	*linker = data ? dmstrdup(section_name(((struct uci_section *)data))) : "";
 	return 0;
 }
 
@@ -464,8 +461,7 @@ static int add_ppp_interface(char *refparam, struct dmctx *ctx, void *data, char
 
 	dmuci_set_value("network", name, "", "interface");
 	dmuci_set_value("network", name, "proto", "ppp");
-	dmuci_set_value("network", name, "username", name);
-	dmuci_set_value("network", name, "password", name);
+	dmuci_set_value("network", name, "disabled", "1");
 
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ppp);
 	dmuci_set_value_by_section(dmmap_ppp, "section_name", name);
@@ -485,7 +481,7 @@ static int delete_ppp_interface(char *refparam, struct dmctx *ctx, void *data, c
 			dmuci_delete_by_section(((struct uci_section *)data), NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_option_eq("network", "interface", "proto", "ppp", ppp_s) {
+			uci_foreach_option_cont("network", "interface", "proto", "ppp", ppp_s) {
 				if (found != 0) {
 					get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(ss), &dmmap_section);
 					if (dmmap_section) dmuci_delete_by_section(dmmap_section, NULL, NULL);

@@ -194,6 +194,12 @@ static int set_wlan_ssid(char *refparam, struct dmctx *ctx, void *data, char *in
 	return 0;
 }
 
+static int get_wlan_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmstrdup(section_name(((struct wifi_ssid_args *)data)->wifi_ssid_sec));
+	return 0;
+}
+
 /*#Device.WiFi.SSID.{i}.MACAddress!SYSFS:/sys/class/net/@Name/address*/
 static int get_WiFiSSID_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1906,19 +1912,21 @@ static int get_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 static int add_wifi_iface(char *inst_name, char **instance)
 {
 	struct uci_section *s = NULL, *dmmap_wifi = NULL;
-	char ssid[32] = {0};
+	char ssid[32] = {0}, s_name[32] = {0};
 
 	char *inst = get_last_instance_bbfdm("dmmap_wireless", "wifi-iface", inst_name);
 	snprintf(ssid, sizeof(ssid), "iopsys_%d", inst ? (atoi(inst)+1) : 1);
+	snprintf(s_name, sizeof(s_name), "wlan_%d", inst ? (atoi(inst)+1) : 1);
 
 	dmuci_add_section("wireless", "wifi-iface", &s);
+	dmuci_rename_section_by_section(s, s_name);
+	dmuci_set_value_by_section(s, "disabled", "1");
 	dmuci_set_value_by_section(s, "ssid", ssid);
 	dmuci_set_value_by_section(s, "network", "lan");
 	dmuci_set_value_by_section(s, "mode", "ap");
-	dmuci_set_value_by_section(s, "disabled", "0");
 
 	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_wifi);
-	dmuci_set_value_by_section(dmmap_wifi, "section_name", section_name(s));
+	dmuci_set_value_by_section(dmmap_wifi, "section_name", s_name);
 	*instance = update_instance(inst, 2, dmmap_wifi, inst_name);
 	return 0;
 }
@@ -1973,7 +1981,8 @@ static int addObjWiFiEndPoint(char *refparam, struct dmctx *ctx, void *data, cha
 		instancepara = "0";
 
 	dmuci_add_section("wireless", "wifi-iface", &endpoint_sec);
-	dmuci_set_value_by_section(endpoint_sec, "device", "wl2");
+	dmuci_set_value_by_section(endpoint_sec, "disabled", "1");
+	dmuci_set_value_by_section(endpoint_sec, "device", "wl2"); // Sould be removed after fixing Device.WiFi.EndPoint.{i}. object
 	dmuci_set_value_by_section(endpoint_sec, "mode", "sta");
 	dmuci_set_value_by_section(endpoint_sec, "network", "lan");
 
@@ -2273,7 +2282,7 @@ DMLEAF tWiFiSSIDParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_wifi_enable, set_wifi_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_wifi_status, NULL, BBFDM_BOTH},
 {"SSID", &DMWRITE, DMT_STRING, get_wlan_ssid, set_wlan_ssid, BBFDM_BOTH},
-{"Name", &DMWRITE, DMT_STRING,  get_wlan_ssid, set_wlan_ssid, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING,  get_wlan_name, NULL, BBFDM_BOTH},
 {"LowerLayers", &DMWRITE, DMT_STRING, get_ssid_lower_layer, set_ssid_lower_layer, BBFDM_BOTH},
 {"BSSID", &DMREAD, DMT_STRING, os__get_wlan_bssid, NULL, BBFDM_BOTH},
 {"MACAddress", &DMREAD, DMT_STRING, get_WiFiSSID_MACAddress, NULL, BBFDM_BOTH},

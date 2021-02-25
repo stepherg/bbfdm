@@ -42,8 +42,8 @@ static int add_users_user(char *refparam, struct dmctx *ctx, void *data, char **
 
 	dmuci_add_section("users", "user", &s);
 	dmuci_rename_section_by_section(s, username);
-	dmuci_set_value_by_section(s, "enabled", "1");
-	dmuci_set_value_by_section(s, "password", username);
+	dmuci_set_value_by_section(s, "enabled", "0");
+	dmuci_set_value_by_section(s, "remote_access", "0");
 
 	dmuci_add_section_bbfdm("dmmap_users", "user", &dmmap_user);
 	dmuci_set_value_by_section(dmmap_user, "section_name", username);

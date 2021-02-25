@@ -24,10 +24,7 @@ struct ptm_args
 ***************************************************************************/
 static int get_ptm_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	if (data && ((struct ptm_args *)data)->ifname)
-		*linker = ((struct ptm_args *)data)->ifname;
-	else
-		*linker = "" ;
+	*linker = (data && ((struct ptm_args *)data)->ifname) ? ((struct ptm_args *)data)->ifname : "";
 	return 0;
 }
 
@@ -44,6 +41,65 @@ static inline int init_ptm_link(struct ptm_args *args, struct uci_section *s, ch
 /**************************************************************************
 * SET & GET DSL LINK PARAMETERS
 ***************************************************************************/
+/*#Device.PTM.Link.{i}.Enable!UCI:dsl/ptm-device,@i-1/enabled*/
+static int get_ptm_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct ptm_args *)data)->ptm_sec, "enabled", "1");
+	return 0;
+}
+
+static int set_ptm_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section(((struct ptm_args *)data)->ptm_sec, "enabled", b ? "1" : "0");
+			return 0;
+	}
+	return 0;
+}
+
+/*#Device.PTM.Link.{i}.Status!SYSFS:/sys/class/net/@Name/operstate*/
+static int get_ptm_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_net_device_status(((struct ptm_args *)data)->ifname, value);
+}
+
+/*#Device.PTM.Link.{i}.Alias!UCI:dmmap_dsl/ptm-device,@i-1/ptmlinkalias*/
+static int get_ptm_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *dmmap_section = NULL;
+
+	get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(((struct ptm_args *)data)->ptm_sec), &dmmap_section);
+	dmuci_get_value_by_section_string(dmmap_section, "ptmlinkalias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+	return 0;
+}
+
+static int set_ptm_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *dmmap_section = NULL;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(((struct ptm_args *)data)->ptm_sec), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "ptmlinkalias", value);
+			return 0;
+	}
+	return 0;
+}
+
 /*#Device.PTM.Link.{i}.Name!UCI:dsl/ptm-device,@i-1/name*/
 static int get_ptm_link_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -131,7 +187,7 @@ static int set_ptm_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 	return 0;
 }
 
-static inline int ubus_ptm_stats(char **value, char *stat_mod, void *data)
+static inline int ubus_ptm_stats(char **value, const char *stat_mod, void *data)
 {
 	json_object *res = NULL;
 	dmubus_call("network.device", "status", UBUS_ARGS{{"name", ((struct ptm_args *)data)->ifname, String}}, 1, &res);
@@ -145,59 +201,25 @@ static inline int ubus_ptm_stats(char **value, char *stat_mod, void *data)
 /*#Device.PTM.Link.{i}.Stats.BytesReceived!UBUS:network.device/status/name,@Name/statistics.rx_bytes*/
 static int get_ptm_stats_bytes_received(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	ubus_ptm_stats(value, "rx_bytes", data);
-	return 0;
+	return ubus_ptm_stats(value, "rx_bytes", data);
 }
 
 /*#Device.PTM.Link.{i}.Stats.BytesSent!UBUS:network.device/status/name,@Name/statistics.tx_bytes*/
 static int get_ptm_stats_bytes_sent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	ubus_ptm_stats(value, "tx_bytes", data);
-	return 0;
+	return ubus_ptm_stats(value, "tx_bytes", data);
 }
 
 /*#Device.PTM.Link.{i}.Stats.PacketsReceived!UBUS:network.device/status/name,@Name/statistics.rx_packets*/
 static int get_ptm_stats_pack_received(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	ubus_ptm_stats(value, "rx_packets", data);
-	return 0;
+	return ubus_ptm_stats(value, "rx_packets", data);
 }
 
 /*#Device.PTM.Link.{i}.Stats.PacketsSent!UBUS:network.device/status/name,@Name/statistics.tx_packets*/
 static int get_ptm_stats_pack_sent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	ubus_ptm_stats(value, "tx_packets", data);
-	return 0;
-}
-
-/*#Device.PTM.Link.{i}.Enable!UCI:dsl/ptm-device,@i-1/enabled*/
-static int get_ptm_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmuci_get_value_by_section_fallback_def(((struct ptm_args *)data)->ptm_sec, "enabled", "1");
-	return 0;
-}
-
-static int set_ptm_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	bool b;
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct ptm_args *)data)->ptm_sec, "enabled", b ? "1" : "0");
-			return 0;
-	}
-	return 0;
-}
-
-/*#Device.PTM.Link.{i}.Status!SYSFS:/sys/class/net/@Name/operstate*/
-static int get_ptm_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	return get_net_device_status(((struct ptm_args *)data)->ifname, value);
+	return ubus_ptm_stats(value, "tx_packets", data);
 }
 
 /*************************************************************
@@ -214,8 +236,7 @@ static int add_ptm_link(char *refparam, struct dmctx *ctx, void *data, char **in
 	dmuci_set_value("dsl", ptm_device, "", "ptm-device");
 	dmuci_set_value("dsl", ptm_device, "name", "PTM");
 	dmuci_set_value("dsl", ptm_device, "device", ptm_device);
-	dmuci_set_value("dsl", ptm_device, "priority", "1");
-	dmuci_set_value("dsl", ptm_device, "portid", "1");
+	dmuci_set_value("dsl", ptm_device, "enabled", "0");
 
 	dmuci_add_section_bbfdm("dmmap_dsl", "ptm-device", &dmmap_ptm);
 	dmuci_set_value_by_section(dmmap_ptm, "section_name", ptm_device);
@@ -280,38 +301,6 @@ static int delete_ptm_link(char *refparam, struct dmctx *ctx, void *data, char *
 }
 
 /*************************************************************
-* SET AND GET ALIAS
-*************************************************************/
-/*#Device.PTM.Link.{i}.Alias!UCI:dmmap_dsl/ptm-device,@i-1/ptmlinkalias*/
-static int get_ptm_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct uci_section *dmmap_section = NULL;
-
-	get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(((struct ptm_args *)data)->ptm_sec), &dmmap_section);
-	dmuci_get_value_by_section_string(dmmap_section, "ptmlinkalias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
-}
-
-static int set_ptm_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	struct uci_section *dmmap_section = NULL;
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(((struct ptm_args *)data)->ptm_sec), &dmmap_section);
-			dmuci_set_value_by_section(dmmap_section, "ptmlinkalias", value);
-			return 0;
-	}
-	return 0;
-}
-
-/*************************************************************
 * ENTRY METHOD
 *************************************************************/
 /*#Device.PTM.Link.{i}.!UCI:dsl/ptm-device/dmmap_dsl*/
@@ -353,10 +342,10 @@ DMOBJ tPTMLinkObj[] = {
 
 DMLEAF tPTMLinkParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_ptm_alias, set_ptm_alias, BBFDM_BOTH},
 {"Enable", &DMWRITE, DMT_BOOL, get_ptm_enable, set_ptm_enable, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_ptm_link_name, NULL, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_ptm_status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ptm_alias, set_ptm_alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_ptm_link_name, NULL, BBFDM_BOTH},
 {"LowerLayers", &DMWRITE, DMT_STRING, get_ptm_lower_layer, set_ptm_lower_layer, BBFDM_BOTH},
 {0}
 };

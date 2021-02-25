@@ -357,11 +357,8 @@ static int addObjDHCPv6ServerPool(char *refparam, struct dmctx *ctx, void *data,
 
 	dmuci_add_section("dhcp", "dhcp", &s);
 	dmuci_rename_section_by_section(s, dhcpv6_sname);
-	dmuci_set_value_by_section(s, "dhcpv6", "server");
-	dmuci_set_value_by_section(s, "start", "100");
-	dmuci_set_value_by_section(s, "leasetime", "12h");
-	dmuci_set_value_by_section(s, "limit", "150");
 	dmuci_set_value_by_section(s, "ignore", "0");
+	dmuci_set_value_by_section(s, "dhcpv6", "disabled");
 
 	dmuci_add_section_bbfdm("dmmap_dhcpv6", "dhcp", &dmmap_dhcp);
 	dmuci_set_value_by_section(dmmap_dhcp, "section_name", dhcpv6_sname);

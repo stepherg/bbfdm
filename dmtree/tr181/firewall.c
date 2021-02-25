@@ -71,10 +71,7 @@ static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char
 
 	dmuci_add_section("firewall", "rule", &s);
 	dmuci_rename_section_by_section(s, s_name);
-	dmuci_set_value_by_section(s, "name", "-");
 	dmuci_set_value_by_section(s, "enabled", "0");
-	dmuci_set_value_by_section(s, "dest", "");
-	dmuci_set_value_by_section(s, "src", "");
 	dmuci_set_value_by_section(s, "target", "DROP");
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "rule", &dmmap_firewall_rule);
@@ -708,7 +705,7 @@ static int get_rule_source_mac(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_time_span_supported_days(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "mon tue wed thu fri sat sun";
+	*value = "mon,tue,wed,thu,fri,sat,sun";
 	return 0;
 }
 
@@ -1420,18 +1417,6 @@ static int set_rule_source_mac(char *refparam, struct dmctx *ctx, void *data, ch
 	return 0;
 }
 
-static int set_time_span_supported_days(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			//TODO
-			break;
-		case VALUESET:
-			break;
-	}
-	return 0;
-}
-
 static int set_time_span_days(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action) {
@@ -1560,7 +1545,7 @@ DMLEAF tFirewallChainRuleParams[] = {
 
 DMLEAF tTimeSpanParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"SupportedDays", &DMWRITE, DMT_STRING, get_time_span_supported_days, set_time_span_supported_days, BBFDM_BOTH},
+{"SupportedDays", &DMREAD, DMT_STRING, get_time_span_supported_days, NULL, BBFDM_BOTH},
 {"Days", &DMWRITE, DMT_STRING, get_time_span_days, set_time_span_days, BBFDM_BOTH},
 {"StartTime", &DMWRITE, DMT_STRING, get_time_span_start_time, set_time_span_start_time, BBFDM_BOTH},
 {"StopTime", &DMWRITE, DMT_STRING, get_time_span_stop_time, set_time_span_stop_time, BBFDM_BOTH},
