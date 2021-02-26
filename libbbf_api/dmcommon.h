@@ -310,7 +310,7 @@ int get_net_device_sysfs(const char *uci_iface, const char *name, char **value);
 char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_section);
 int dm_time_format(time_t ts, char **dst);
 bool match(const char *string, const char *pattern);
-int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
+int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], int enumeration_size, char *pattern[], int pattern_size);
 int dm_validate_boolean(char *value);
 int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size);
 int dm_validate_int(char *value, struct range_args r_args[], int r_args_size);
@@ -318,7 +318,7 @@ int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args
 int dm_validate_long(char *value, struct range_args r_args[], int r_args_size);
 int dm_validate_dateTime(char *value);
 int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size);
-int dm_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
+int dm_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], int enumeration_size, char *pattern[], int pattern_size);
 int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 char *decode64(char *enc);
 bool folder_exists(const char *path);

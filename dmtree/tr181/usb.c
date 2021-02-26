@@ -512,7 +512,7 @@ static int set_USBInterface_Alias(char *refparam, struct dmctx *ctx, void *data,
 	struct usb_interface *usbiface= (struct usb_interface *)data;
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -541,7 +541,7 @@ static int set_USBInterface_LowerLayers(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -619,7 +619,7 @@ static int set_USBPort_Alias(char *refparam, struct dmctx *ctx, void *data, char
 	struct usb_port* port = (struct usb_port *)data;
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -723,7 +723,7 @@ static int set_USBUSBHostsHost_Alias(char *refparam, struct dmctx *ctx, void *da
 	struct usb_port* port=(struct usb_port *)data;
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:

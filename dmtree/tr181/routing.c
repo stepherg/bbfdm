@@ -560,7 +560,7 @@ static int set_router_ipv4forwarding_destip(char *refparam, struct dmctx *ctx, v
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -581,7 +581,7 @@ static int set_router_ipv4forwarding_destmask(char *refparam, struct dmctx *ctx,
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -625,7 +625,7 @@ static int set_router_ipv4forwarding_gatewayip(char *refparam, struct dmctx *ctx
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (dm_validate_string(value, -1, 15, NULL, 0, IPv4Address, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -655,7 +655,7 @@ static int set_router_ipv4forwarding_interface_linker_parameter(char *refparam, 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -727,7 +727,7 @@ static int set_RoutingRouterIPv6Forwarding_DestIPPrefix(char *refparam, struct d
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, IPv6Prefix))
+			if (dm_validate_string(value, -1, 49, NULL, 0, IPv6Prefix, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -767,7 +767,7 @@ static int set_RoutingRouterIPv6Forwarding_NextHop(char *refparam, struct dmctx 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, IPv6Address))
+			if (dm_validate_string(value, -1, 45, NULL, 0, IPv6Address, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -797,7 +797,7 @@ static int set_RoutingRouterIPv6Forwarding_Interface(char *refparam, struct dmct
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -999,7 +999,7 @@ static int set_RoutingRouter_Alias(char *refparam, struct dmctx *ctx, void *data
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1031,7 +1031,7 @@ static int set_router_ipv4forwarding_alias(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1067,7 +1067,7 @@ static int set_RoutingRouterIPv6Forwarding_Alias(char *refparam, struct dmctx *c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (dm_validate_string(value, -1, 64, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:

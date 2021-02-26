@@ -170,7 +170,7 @@ static int set_userint_remoteaccesss_protocol(char *refparam, struct dmctx *ctx,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, SupportedProtocols, NULL))
+			if (dm_validate_string(value, -1, -1, SupportedProtocols, 2, NULL, 0))
 				return FAULT_9007;
 
 			found = get_supportedprotocols();

@@ -217,12 +217,13 @@ def generate_validate_value(dmparam, value):
 			enum_length = len(list_enumarationsparam)
 			enumarationsparam = dmparam if datatypeparam == "string" else datatypeparam
 			str_enum = "char *%s[] = {" % enumarationsparam
-			for i in range(enum_length):
+			for i in range(enum_length - 1):
 				str_enum += "\"%s\", " % list_enumarationsparam[i]
-			str_enum += "NULL};"
+			str_enum += "\"%s\"};" % list_enumarationsparam[enum_length - 1]
 			printGlobalstrCommon(str_enum)
 		else:
 			enumarationsparam = "NULL"
+			enum_length = "0"
 
 		patternparam = getarrayoptionparam(listparam, "pattern")
 		if patternparam != None:
@@ -230,27 +231,32 @@ def generate_validate_value(dmparam, value):
 			pattern_length = len(list_patternparam)
 			patternparam = dmparam if datatypeparam == "string" else datatypeparam
 			str_pattern = "char *%s[] = {" % patternparam
-			for i in range(pattern_length):
+			for i in range(pattern_length - 1):
 				str_pattern += "\"^%s$\", " % list_patternparam[i]
-			str_pattern += "NULL};"
+			str_pattern += "\"^%s$\"};" % list_patternparam[pattern_length - 1]
 			printGlobalstrCommon(str_pattern)
 		elif datatypeparam == "IPAddress":
 			patternparam = "IPAddress"
+			pattern_length = "2"
 		elif datatypeparam == "IPv6Address":
 			patternparam = "IPv6Address"
+			pattern_length = "1"
 		elif datatypeparam == "IPPrefix":
 			patternparam = "IPPrefix"
+			pattern_length = "3"
 		elif datatypeparam == "IPv6Prefix":
 			patternparam = "IPv6Prefix"
+			pattern_length = "1"
 		else:
 			patternparam = "NULL"
+			pattern_length = "0"
 
 		if datatypeparam == "unsignedInt":
 			validate_value += "			if (dm_validate_unsignedInt_list(value, %s, %s, %s, %s))\n" % (itemminparam, itemmaxparam, maxsizeparam, rangeargs)
 		else:
 			if rangeminparam == "NULL": rangeminparam = "-1"
 			if rangemaxparam == "NULL": rangemaxparam = "-1"
-			validate_value += "			if (dm_validate_string_list(value, %s, %s, %s, %s, %s, %s, %s))\n" % (itemminparam, itemmaxparam, maxsizeparam, rangeminparam, rangemaxparam, enumarationsparam, patternparam)
+			validate_value += "			if (dm_validate_string_list(value, %s, %s, %s, %s, %s, %s, %s, %s, %s))\n" % (itemminparam, itemmaxparam, maxsizeparam, rangeminparam, rangemaxparam, enumarationsparam, enum_length, patternparam, pattern_length)
 	else:
 		datatypeparam = getoptionparam(value, "datatype")
 		rangeparam = getarrayoptionparam(value, "range")
@@ -277,12 +283,13 @@ def generate_validate_value(dmparam, value):
 			enum_length = len(list_enumarationsparam)
 			enumarationsparam = dmparam if datatypeparam == "string" else datatypeparam
 			str_enum = "char *%s[] = {" % enumarationsparam
-			for i in range(enum_length):
+			for i in range(enum_length - 1):
 				str_enum += "\"%s\", " % list_enumarationsparam[i]
-			str_enum += "NULL};"
+			str_enum += "\"%s\"};" % list_enumarationsparam[enum_length - 1]
 			printGlobalstrCommon(str_enum)
 		else:
 			enumarationsparam = "NULL"
+			enum_length = "0"
 
 		patternparam = getarrayoptionparam(value, "pattern")
 		if patternparam != None:
@@ -290,20 +297,25 @@ def generate_validate_value(dmparam, value):
 			pattern_length = len(list_patternparam)
 			patternparam = dmparam if datatypeparam == "string" else datatypeparam
 			str_pattern = "char *%s[] = {" % patternparam
-			for i in range(pattern_length):
+			for i in range(pattern_length - 1):
 				str_pattern += "\"^%s$\", " % list_patternparam[i]
-			str_pattern += "NULL};"
+			str_pattern += "\"^%s$\"};" % list_patternparam[pattern_length - 1]
 			printGlobalstrCommon(str_pattern)
 		elif datatypeparam == "IPAddress":
 			patternparam = "IPAddress"
+			pattern_length = "2"
 		elif datatypeparam == "IPv6Address":
 			patternparam = "IPv6Address"
+			pattern_length = "1"
 		elif datatypeparam == "IPPrefix":
 			patternparam = "IPPrefix"
+			pattern_length = "3"
 		elif datatypeparam == "IPv6Prefix":
 			patternparam = "IPv6Prefix"
+			pattern_length = "1"
 		else:
 			patternparam = "NULL"
+			pattern_length = "0"
 
 		if datatypeparam == "boolean":
 			validate_value += "			if (dm_validate_boolean(value))\n"
@@ -324,7 +336,7 @@ def generate_validate_value(dmparam, value):
 		else:
 			if rangeminparam == "NULL": rangeminparam = "-1"
 			if rangemaxparam == "NULL": rangemaxparam = "-1"
-			validate_value += "			if (dm_validate_string(value, %s, %s, %s, %s))\n" % (rangeminparam, rangemaxparam, enumarationsparam, patternparam)
+			validate_value += "			if (dm_validate_string(value, %s, %s, %s, %s, %s, %s))\n" % (rangeminparam, rangemaxparam, enumarationsparam, enum_length, patternparam, pattern_length)
 	validate_value += "				return FAULT_9007;"
 	validate_value = validate_value.replace("\"NULL\"", "NULL")
 	return validate_value

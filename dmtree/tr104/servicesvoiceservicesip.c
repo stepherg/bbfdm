@@ -300,7 +300,7 @@ static int set_ServicesVoiceServiceSIPClient_AuthUserName(char *refparam, struct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 128, NULL, NULL))
+			if (dm_validate_string(value, -1, 128, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -321,7 +321,7 @@ static int set_ServicesVoiceServiceSIPClient_AuthPassword(char *refparam, struct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 128, NULL, NULL))
+			if (dm_validate_string(value, -1, 128, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -342,7 +342,7 @@ static int set_ServicesVoiceServiceSIPClient_RegisterURI(char *refparam, struct 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 389, NULL, NULL))
+			if (dm_validate_string(value, -1, 389, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -587,7 +587,7 @@ static int set_ServicesVoiceServiceSIPNetwork_ProxyServer(char *refparam, struct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -634,7 +634,7 @@ static int set_ServicesVoiceServiceSIPNetwork_ProxyServerTransport(char *refpara
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProxyServerTransport, NULL))
+			if (dm_validate_string(value, -1, -1, ProxyServerTransport, 4, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -655,7 +655,7 @@ static int set_ServicesVoiceServiceSIPNetwork_RegistrarServer(char *refparam, st
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -701,7 +701,7 @@ static int set_ServicesVoiceServiceSIPNetwork_RegistrarServerTransport(char *ref
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, RegistrarServerTransport, NULL))
+			if (dm_validate_string(value, -1, -1, RegistrarServerTransport, 4, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -722,7 +722,7 @@ static int set_ServicesVoiceServiceSIPNetwork_UserAgentDomain(char *refparam, st
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -742,7 +742,7 @@ static int set_ServicesVoiceServiceSIPNetwork_OutboundProxy(char *refparam, stru
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -783,7 +783,7 @@ static int set_ServicesVoiceServiceSIPNetwork_STUNServer(char *refparam, struct 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -825,7 +825,7 @@ static int set_ServicesVoiceServiceSIPNetwork_Realm(char *refparam, struct dmctx
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (dm_validate_string(value, -1, -1, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1002,7 +1002,7 @@ static int set_ServicesVoiceServiceSIPNetworkFQDNServer_Domain(char *refparam, s
 	}
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:

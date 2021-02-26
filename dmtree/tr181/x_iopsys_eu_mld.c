@@ -479,7 +479,7 @@ static int set_mldp_filter_address(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 45, NULL, IPv6Address))
+		if (dm_validate_string(value, -1, 45, NULL, 0, IPv6Address, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -666,7 +666,7 @@ static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 256, NULL, NULL))
+		if (dm_validate_string(value, -1, 256, NULL, 0, NULL, 0))
 			return FAULT_9007;
 		break;
 	case VALUESET:
