@@ -94,10 +94,10 @@ static int create_and_link_interface_stack_instance(struct dmctx *dmctx, DMNODE 
 	char buf_instance[16] = {0};
 
 	// fill interface stack data
-	intf_stack_data.higherlayer = higherlayer;
-	intf_stack_data.lowerlayer = lowerlayer;
-	intf_stack_data.higheralias = higheralias;
-	intf_stack_data.loweralias = loweralias;
+	intf_stack_data.higherlayer = higherlayer ? higherlayer : "";
+	intf_stack_data.lowerlayer = lowerlayer ? lowerlayer : "";
+	intf_stack_data.higheralias = higheralias ? higheralias : "";
+	intf_stack_data.loweralias = loweralias ? loweralias : "";
 
 	// create dmmap section
 	snprintf(buf_instance, sizeof(buf_instance), "%d", ++(*instance));
