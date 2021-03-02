@@ -675,7 +675,8 @@ static int dmmap_synchronizeBridgingBridgePort(struct dmctx *dmctx, DMNODE *pare
 {
 	struct bridge_args *br_args = (struct bridge_args *)prev_data;
 	struct uci_section *s = NULL, *stmp = NULL, *dmmap_br_port = NULL;
-	char *br_ifname = NULL, *pch = NULL, *spch = NULL, *p, plinker[32], linker_buf[512] = {0};
+	char *br_ifname = NULL, *pch = NULL, *spch = NULL, *p, plinker[32];
+	char *linker_buf;
 	char *sec_name;
 
 	if (br_args->bridge_sec == NULL)
@@ -737,7 +738,11 @@ static int dmmap_synchronizeBridgingBridgePort(struct dmctx *dmctx, DMNODE *pare
 		}
 	}
 
-	p = linker_buf;
+	p = linker_buf = malloc(2048);
+	if (p == NULL)
+		return 0;
+
+	*p = 0;
 	br_ifname = dmstrdup(br_args->ifname);
 	for (pch = strtok_r(br_ifname, " ", &spch); pch != NULL; pch = strtok_r(NULL, " ", &spch)) {
 
@@ -800,11 +805,14 @@ static int dmmap_synchronizeBridgingBridgePort(struct dmctx *dmctx, DMNODE *pare
 		dmstrappendchr(p, ',');
 	}
 
-	p = p -1;
+	if (p > linker_buf)
+		p--;
+
 	dmstrappendend(p);
 
 	// Update the device linker for management port
 	set_linker_bridge_port_management(br_args->br_inst, linker_buf);
+	free(linker_buf);
 	return 0;
 }
 
