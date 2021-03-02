@@ -1328,13 +1328,13 @@ int os_get_QoSQueueStats_Enable(char *refparam, struct dmctx *ctx, void *data, c
 int os_set_QoSQueueStats_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			//TODO
-			break;
+	case VALUECHECK:
+		if (dm_validate_boolean(value))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		//TODO
+		break;
 	}
 	return 0;
 }
@@ -1359,13 +1359,13 @@ int os_set_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data, ch
 	struct queuestats *qts= (struct queuestats*)data;
 
 	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(qts->dmsect, "queuestatsalias", value);
-			break;
+	case VALUECHECK:
+		if (dm_validate_string(value, -1, 64, NULL, NULL))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		dmuci_set_value_by_section(qts->dmsect, "queuestatsalias", value);
+		break;
 	}
 	return 0;
 }
@@ -1378,13 +1378,13 @@ int os_get_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, ch
 int os_set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			//TODO
-			break;
+	case VALUECHECK:
+		if (dm_validate_string(value, -1, 256, NULL, NULL))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		//TODO
+		break;
 	}
 	return 0;
 }
@@ -1408,13 +1408,13 @@ int os_get_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *data
 int os_set_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			//TODO
-			break;
+	case VALUECHECK:
+		if (dm_validate_string(value, -1, 256, NULL, NULL))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		//TODO
+		break;
 	}
 	return 0;
 }
