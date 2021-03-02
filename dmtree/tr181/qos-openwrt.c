@@ -1444,3 +1444,22 @@ int os_get_QoSQueueStats_DroppedBytes(char *refparam, struct dmctx *ctx, void *d
 {
 	return not_implemented(value);
 }
+
+int os_set_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+	case VALUECHECK:
+		if (dm_validate_string(value, -1, 255, NULL, NULL))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		//TODO
+		break;
+	}
+	return 0;
+}
+
+int os_get_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return not_implemented(value);
+}

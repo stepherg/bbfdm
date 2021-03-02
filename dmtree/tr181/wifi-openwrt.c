@@ -980,3 +980,8 @@ int os__browseWiFiDataElementsDisassociationEventDisassociationEventDataInst(str
 {
 	return 0;
 }
+
+int os_get_supported_modes(const char *ubus_method, const char *ifname, char **value)
+{
+	return not_implemented(value);
+}
