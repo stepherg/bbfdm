@@ -8827,7 +8827,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "bytes_sent"
+								}
+							}
+						]
 					},
 					"BytesReceived": {
 						"type": "unsignedLong",
@@ -8837,7 +8848,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "bytes_received"
+								}
+							}
+						]
 					},
 					"PacketsSent": {
 						"type": "unsignedLong",
@@ -8847,7 +8869,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "packets_sent"
+								}
+							}
+						]
 					},
 					"PacketsReceived": {
 						"type": "unsignedLong",
@@ -8857,7 +8890,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "packets_received"
+								}
+							}
+						]
 					},
 					"ErrorsSent": {
 						"type": "unsignedInt",
@@ -8867,7 +8911,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "errors_sent"
+								}
+							}
+						]
 					},
 					"ErrorsReceived": {
 						"type": "unsignedInt",
@@ -8877,7 +8932,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "errors_received"
+								}
+							}
+						]
 					},
 					"DiscardPacketsSent": {
 						"type": "unsignedInt",
@@ -8887,7 +8953,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "discard_packets_sent"
+								}
+							}
+						]
 					},
 					"DiscardPacketsReceived": {
 						"type": "unsignedInt",
@@ -8897,7 +8974,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "discard_packets_received"
+								}
+							}
+						]
 					},
 					"TotalStart": {
 						"type": "unsignedInt",
@@ -10061,7 +10149,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.channel.1",
+									"method": "stats",
+									"args": {},
+									"key": "bytes_sent"
+								}
+							}
+						]
 					},
 					"BytesReceived": {
 						"type": "unsignedLong",
@@ -10071,7 +10170,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.channel.1",
+									"method": "stats",
+									"args": {},
+									"key": "bytes_received"
+								}
+							}
+						]
 					},
 					"PacketsSent": {
 						"type": "unsignedLong",
@@ -10081,7 +10191,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.channel.1",
+									"method": "stats",
+									"args": {},
+									"key": "packets_sent"
+								}
+							}
+						]
 					},
 					"PacketsReceived": {
 						"type": "unsignedLong",
@@ -10091,7 +10212,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.channel.1",
+									"method": "stats",
+									"args": {},
+									"key": "packets_received"
+								}
+							}
+						]
 					},
 					"ErrorsSent": {
 						"type": "unsignedInt",
@@ -10101,7 +10233,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.channel.1",
+									"method": "stats",
+									"args": {},
+									"key": "errors_sent"
+								}
+							}
+						]
 					},
 					"ErrorsReceived": {
 						"type": "unsignedInt",
@@ -10111,7 +10254,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.channel.1",
+									"method": "stats",
+									"args": {},
+									"key": "errors_received"
+								}
+							}
+						]
 					},
 					"DiscardPacketsSent": {
 						"type": "unsignedInt",
@@ -10121,7 +10275,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.channel.1",
+									"method": "stats",
+									"args": {},
+									"key": "discard_packets_sent"
+								}
+							}
+						]
 					},
 					"DiscardPacketsReceived": {
 						"type": "unsignedInt",
@@ -10131,7 +10296,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "dsl.channel.1",
+									"method": "stats",
+									"args": {},
+									"key": "discard_packets_received"
+								}
+							}
+						]
 					},
 					"TotalStart": {
 						"type": "unsignedInt",
@@ -14668,7 +14844,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "bytes_sent"
+								}
+							}
+						]
 					},
 					"BytesReceived": {
 						"type": "unsignedLong",
@@ -14678,7 +14865,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "bytes_received"
+								}
+							}
+						]
 					},
 					"PacketsSent": {
 						"type": "unsignedLong",
@@ -14688,7 +14886,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "packets_sent"
+								}
+							}
+						]
 					},
 					"PacketsReceived": {
 						"type": "unsignedLong",
@@ -14698,7 +14907,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedLong"
+						"datatype": "unsignedLong",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "packets_received"
+								}
+							}
+						]
 					},
 					"ErrorsSent": {
 						"type": "unsignedInt",
@@ -14708,7 +14928,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "errors_sent"
+								}
+							}
+						]
 					},
 					"ErrorsReceived": {
 						"type": "unsignedInt",
@@ -14718,7 +14949,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "errors_received"
+								}
+							}
+						]
 					},
 					"DiscardPacketsSent": {
 						"type": "unsignedInt",
@@ -14728,7 +14970,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "discard_packets_sent"
+								}
+							}
+						]
 					},
 					"DiscardPacketsReceived": {
 						"type": "unsignedInt",
@@ -14738,7 +14991,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "fast.line.1",
+									"method": "stats",
+									"args": {},
+									"key": "discard_packets_received"
+								}
+							}
+						]
 					},
 					"TotalStart": {
 						"type": "unsignedInt",

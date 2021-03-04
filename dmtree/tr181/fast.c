@@ -390,6 +390,62 @@ static int get_FASTLine_SNRMRMCus(char *refparam, struct dmctx *ctx, void *data,
 	return 0;
 }
 
+/*#Device.FAST.Line.{i}.Stats.BytesSent!UBUS:fast.line.1/stats//bytes_sent*/
+static int get_FASTLineStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "bytes_sent");
+	return 0;
+}
+
+/*#Device.FAST.Line.{i}.Stats.BytesReceived!UBUS:fast.line.1/stats//bytes_received*/
+static int get_FASTLineStats_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "bytes_received");
+	return 0;
+}
+
+/*#Device.FAST.Line.{i}.Stats.PacketsSent!UBUS:fast.line.1/stats//packets_sent*/
+static int get_FASTLineStats_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "packets_sent");
+	return 0;
+}
+
+/*#Device.FAST.Line.{i}.Stats.PacketsReceived!UBUS:fast.line.1/stats//packets_received*/
+static int get_FASTLineStats_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "packets_received");
+	return 0;
+}
+
+/*#Device.FAST.Line.{i}.Stats.ErrorsSent!UBUS:fast.line.1/stats//errors_sent*/
+static int get_FASTLineStats_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "errors_sent");
+	return 0;
+}
+
+/*#Device.FAST.Line.{i}.Stats.ErrorsReceived!UBUS:fast.line.1/stats//errors_received*/
+static int get_FASTLineStats_ErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "errors_received");
+	return 0;
+}
+
+/*#Device.FAST.Line.{i}.Stats.DiscardPacketsSent!UBUS:fast.line.1/stats//discard_packets_sent*/
+static int get_FASTLineStats_DiscardPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "discard_packets_sent");
+	return 0;
+}
+
+/*#Device.FAST.Line.{i}.Stats.DiscardPacketsReceived!UBUS:fast.line.1/stats//discard_packets_received*/
+static int get_FASTLineStats_DiscardPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "stats", "discard_packets_received");
+	return 0;
+}
+
 /*#Device.FAST.Line.{i}.Stats.TotalStart!UBUS:fast.line.1/stats//total_start*/
 static int get_FASTLineStats_TotalStart(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -908,6 +964,14 @@ DMOBJ tFASTLineStatsObj[] = {
 
 DMLEAF tFASTLineStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"BytesSent", &DMREAD, DMT_UNLONG, get_FASTLineStats_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_FASTLineStats_BytesReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_FASTLineStats_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_FASTLineStats_PacketsReceived, NULL, BBFDM_BOTH},
+{"ErrorsSent", &DMREAD, DMT_UNINT, get_FASTLineStats_ErrorsSent, NULL, BBFDM_BOTH},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, get_FASTLineStats_ErrorsReceived, NULL, BBFDM_BOTH},
+{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_FASTLineStats_DiscardPacketsSent, NULL, BBFDM_BOTH},
+{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_FASTLineStats_DiscardPacketsReceived, NULL, BBFDM_BOTH},
 {"TotalStart", &DMREAD, DMT_UNINT, get_FASTLineStats_TotalStart, NULL, BBFDM_BOTH},
 {"ShowtimeStart", &DMREAD, DMT_UNINT, get_FASTLineStats_ShowtimeStart, NULL, BBFDM_BOTH},
 {"LastShowtimeStart", &DMREAD, DMT_UNINT, get_FASTLineStats_LastShowtimeStart, NULL, BBFDM_BOTH},

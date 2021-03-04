@@ -776,6 +776,62 @@ static int get_DSLLine_XTUCANSIRev(char *refparam, struct dmctx *ctx, void *data
 	return 0;
 }
 
+/*#Device.DSL.Line.{i}.Stats.BytesSent!UBUS:dsl.line.1/stats//bytes_sent*/
+static int get_DSLLineStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "bytes_sent");
+	return 0;
+}
+
+/*#Device.DSL.Line.{i}.Stats.BytesReceived!UBUS:dsl.line.1/stats//bytes_received*/
+static int get_DSLLineStats_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "bytes_received");
+	return 0;
+}
+
+/*#Device.DSL.Line.{i}.Stats.PacketsSent!UBUS:dsl.line.1/stats//packets_sent*/
+static int get_DSLLineStats_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "packets_sent");
+	return 0;
+}
+
+/*#Device.DSL.Line.{i}.Stats.PacketsReceived!UBUS:dsl.line.1/stats//packets_received*/
+static int get_DSLLineStats_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "packets_received");
+	return 0;
+}
+
+/*#Device.DSL.Line.{i}.Stats.ErrorsSent!UBUS:dsl.line.1/stats//errors_sent*/
+static int get_DSLLineStats_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "errors_sent");
+	return 0;
+}
+
+/*#Device.DSL.Line.{i}.Stats.ErrorsReceived!UBUS:dsl.line.1/stats//errors_received*/
+static int get_DSLLineStats_ErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "errors_received");
+	return 0;
+}
+
+/*#Device.DSL.Line.{i}.Stats.DiscardPacketsSent!UBUS:dsl.line.1/stats//discard_packets_sent*/
+static int get_DSLLineStats_DiscardPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "discard_packets_sent");
+	return 0;
+}
+
+/*#Device.DSL.Line.{i}.Stats.DiscardPacketsReceived!UBUS:dsl.line.1/stats//discard_packets_received*/
+static int get_DSLLineStats_DiscardPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "stats", "discard_packets_received");
+	return 0;
+}
+
 /*#Device.DSL.Line.{i}.Stats.TotalStart!UBUS:dsl.line.1/stats//total_start*/
 static int get_DSLLineStats_TotalStart(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1099,6 +1155,62 @@ static int get_DSLChannel_ACTNDR(char *refparam, struct dmctx *ctx, void *data, 
 static int get_DSLChannel_ACTINPREIN(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = get_dsl_value_without_argument_and_with_two_key("dsl.channel", ((struct dsl_channel_args*)data)->id, "status", "actinprein", "ds");
+	return 0;
+}
+
+/*#Device.DSL.Channel.{i}.Stats.BytesSent!UBUS:dsl.channel.1/stats//bytes_sent*/
+static int get_DSLChannelStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "bytes_sent");
+	return 0;
+}
+
+/*#Device.DSL.Channel.{i}.Stats.BytesReceived!UBUS:dsl.channel.1/stats//bytes_received*/
+static int get_DSLChannelStats_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "bytes_received");
+	return 0;
+}
+
+/*#Device.DSL.Channel.{i}.Stats.PacketsSent!UBUS:dsl.channel.1/stats//packets_sent*/
+static int get_DSLChannelStats_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "packets_sent");
+	return 0;
+}
+
+/*#Device.DSL.Channel.{i}.Stats.PacketsReceived!UBUS:dsl.channel.1/stats//packets_received*/
+static int get_DSLChannelStats_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "packets_received");
+	return 0;
+}
+
+/*#Device.DSL.Channel.{i}.Stats.ErrorsSent!UBUS:dsl.channel.1/stats//errors_sent*/
+static int get_DSLChannelStats_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "errors_sent");
+	return 0;
+}
+
+/*#Device.DSL.Channel.{i}.Stats.ErrorsReceived!UBUS:dsl.channel.1/stats//errors_received*/
+static int get_DSLChannelStats_ErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "errors_received");
+	return 0;
+}
+
+/*#Device.DSL.Channel.{i}.Stats.DiscardPacketsSent!UBUS:dsl.channel.1/stats//discard_packets_sent*/
+static int get_DSLChannelStats_DiscardPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "discard_packets_sent");
+	return 0;
+}
+
+/*#Device.DSL.Channel.{i}.Stats.DiscardPacketsReceived!UBUS:dsl.channel.1/stats//discard_packets_received*/
+static int get_DSLChannelStats_DiscardPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "stats", "discard_packets_received");
 	return 0;
 }
 
@@ -1434,6 +1546,14 @@ DMOBJ tDSLLineStatsObj[] = {
 
 DMLEAF tDSLLineStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"BytesSent", &DMREAD, DMT_UNLONG, get_DSLLineStats_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_DSLLineStats_BytesReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_DSLLineStats_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_DSLLineStats_PacketsReceived, NULL, BBFDM_BOTH},
+{"ErrorsSent", &DMREAD, DMT_UNINT, get_DSLLineStats_ErrorsSent, NULL, BBFDM_BOTH},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, get_DSLLineStats_ErrorsReceived, NULL, BBFDM_BOTH},
+{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_DSLLineStats_DiscardPacketsSent, NULL, BBFDM_BOTH},
+{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_DSLLineStats_DiscardPacketsReceived, NULL, BBFDM_BOTH},
 {"TotalStart", &DMREAD, DMT_UNINT, get_DSLLineStats_TotalStart, NULL, BBFDM_BOTH},
 {"ShowtimeStart", &DMREAD, DMT_UNINT, get_DSLLineStats_ShowtimeStart, NULL, BBFDM_BOTH},
 {"LastShowtimeStart", &DMREAD, DMT_UNINT, get_DSLLineStats_LastShowtimeStart, NULL, BBFDM_BOTH},
@@ -1528,6 +1648,14 @@ DMOBJ tDSLChannelStatsObj[] = {
 
 DMLEAF tDSLChannelStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"BytesSent", &DMREAD, DMT_UNLONG, get_DSLChannelStats_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_DSLChannelStats_BytesReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_DSLChannelStats_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_DSLChannelStats_PacketsReceived, NULL, BBFDM_BOTH},
+{"ErrorsSent", &DMREAD, DMT_UNINT, get_DSLChannelStats_ErrorsSent, NULL, BBFDM_BOTH},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, get_DSLChannelStats_ErrorsReceived, NULL, BBFDM_BOTH},
+{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_DSLChannelStats_DiscardPacketsSent, NULL, BBFDM_BOTH},
+{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_DSLChannelStats_DiscardPacketsReceived, NULL, BBFDM_BOTH},
 {"TotalStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_TotalStart, NULL, BBFDM_BOTH},
 {"ShowtimeStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_ShowtimeStart, NULL, BBFDM_BOTH},
 {"LastShowtimeStart", &DMREAD, DMT_UNINT, get_DSLChannelStats_LastShowtimeStart, NULL, BBFDM_BOTH},
