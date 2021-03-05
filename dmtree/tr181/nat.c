@@ -26,14 +26,13 @@ static int add_NAT_InterfaceSetting(char *refparam, struct dmctx *ctx, void *dat
 	snprintf(name, sizeof(name), "iface_set_%d", inst ? (atoi(inst)+1) : 1);
 
 	dmuci_add_section("firewall", "zone", &s);
-	dmuci_rename_section_by_section(s, name);
 	dmuci_set_value_by_section(s, "input", "REJECT");
 	dmuci_set_value_by_section(s, "output", "ACCEPT");
 	dmuci_set_value_by_section(s, "forward", "REJECT");
 	dmuci_set_value_by_section(s, "name", name);
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "zone", &dmmap_firewall);
-	dmuci_set_value_by_section(dmmap_firewall, "section_name", name);
+	dmuci_set_value_by_section(dmmap_firewall, "section_name", section_name(s));
 	*instance = update_instance(inst, 2, dmmap_firewall, "interface_setting_instance");
 	return 0;
 
