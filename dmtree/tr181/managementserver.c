@@ -143,23 +143,14 @@ static int set_management_server_periodic_inform_interval(char *refparam, struct
 /*#Device.ManagementServer.PeriodicInformTime!UCI:cwmp/acs,acs/periodic_inform_time*/
 static int get_management_server_periodic_inform_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "0001-01-01T00:00:00Z";
-	
-	char *periodic_inform_time;
-	dmuci_get_option_value_string("cwmp", "acs", "periodic_inform_time", &periodic_inform_time);
-	if (periodic_inform_time && *periodic_inform_time != '\0' && atoi(periodic_inform_time) > 0) {
-		time_t time_value = atoi(periodic_inform_time);
-		char s_now[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
-		strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", localtime(&time_value));
-		*value = dmstrdup(s_now); // MEM WILL BE FREED IN DMMEMCLEAN
-	}		
+	dmuci_get_option_value_string("cwmp", "acs", "periodic_inform_time", value);
 	return 0;	
 }
 
 static int set_management_server_periodic_inform_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct tm tm;
-	char buf[16];
+	char buf[32];
 
 	switch (action) {
 		case VALUECHECK:
@@ -167,9 +158,7 @@ static int set_management_server_periodic_inform_time(char *refparam, struct dmc
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			strptime(value, "%Y-%m-%dT%H:%M:%SZ", &tm);
-			snprintf(buf, sizeof(buf), "%ld", mktime(&tm));
-			dmuci_set_value("cwmp", "acs", "periodic_inform_time", buf);
+			dmuci_set_value("cwmp", "acs", "periodic_inform_time", value);
 			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
 			return 0;
 	}
