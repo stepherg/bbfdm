@@ -64,7 +64,6 @@ libbbfdm_la_SOURCES +=							\
 	../dmtree/tr181/ppp.c						\
 	../dmtree/tr181/nat.c						\
 	../dmtree/tr181/routing.c					\
-	../dmtree/tr181/userinterface.c				\
 	../dmtree/tr181/firewall.c					\
 	../dmtree/tr181/dns.c						\
 	../dmtree/tr181/users.c						\

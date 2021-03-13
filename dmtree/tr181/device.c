@@ -32,7 +32,6 @@
 #include "nat.h"
 #include "ppp.h"
 #include "routing.h"
-#include "userinterface.h"
 #include "firewall.h"
 #include "dns.h"
 #include "users.h"
@@ -100,7 +99,6 @@ DMOBJ tDeviceObj[] = {
 {"NAT", &DMREAD, NULL, NULL, "file:/etc/config/firewall", NULL, NULL, tNATObj, tNATParams, NULL, BBFDM_BOTH},
 {"PPP", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/ppp.sh", NULL, NULL, tPPPObj, tPPPParams, NULL, BBFDM_BOTH},
 {"Routing", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, tRoutingObj, tRoutingParams, NULL, BBFDM_BOTH},
-{"UserInterface", &DMREAD, NULL, NULL, NULL, NULL, NULL, tUserInterfaceObj, NULL, NULL, BBFDM_BOTH},
 {"Firewall", &DMREAD, NULL, NULL, "file:/etc/config/firewall", NULL, NULL, tFirewallObj, tFirewallParams, NULL, BBFDM_BOTH},
 {"DNS", &DMREAD, NULL, NULL, "file:/etc/config/dhcp", NULL, NULL, tDNSObj, tDNSParams, NULL, BBFDM_BOTH},
 {"Users", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, tUsersObj, tUsersParams, NULL, BBFDM_BOTH},
