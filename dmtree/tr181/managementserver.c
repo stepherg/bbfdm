@@ -149,9 +149,6 @@ static int get_management_server_periodic_inform_time(char *refparam, struct dmc
 
 static int set_management_server_periodic_inform_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct tm tm;
-	char buf[32];
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_dateTime(value))

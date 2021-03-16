@@ -1076,7 +1076,7 @@ DMLEAF tDynamicDNSParams[] = {
 /* *** Device.DynamicDNS.Client.{i}. *** */
 DMOBJ tDynamicDNSClientObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Hostname", &DMWRITE, NULL, NULL, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", NULL}},
+{"Hostname", &DMREAD, NULL, NULL, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", NULL}},
 {0}
 };
 

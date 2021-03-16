@@ -41,5 +41,7 @@ int set_section_order(char *package, char *dmpackage, char* sect_type, struct uc
 int get_value_in_mac_format(struct uci_section *s, char *option_name, bool type, char **value);
 int set_DHCP_Interface(struct dmctx *ctx, char *value, struct uci_section *config_s, struct uci_section *dmmap_s, char *dmmap_name, char *proto, int action);
 char *get_dhcp_server_pool_last_instance(char *package, char *section, char *dmmap_package, char *opt_inst);
+bool tag_option_exists(char *dmmap_package, char *section, char *opt_check, char *value_check, char *tag_name, char *tag_value);
+char *generate_tag_option(char *dmmap_package, char *section, char *opt_check, char *value_check, char *tag_name);
 
 #endif
