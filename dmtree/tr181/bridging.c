@@ -2754,11 +2754,17 @@ static int set_BridgingBridgeVLAN_VLANID(char *refparam, struct dmctx *ctx, void
 				if (vid && strcmp(vid+1, curr_vid) == 0) {
 					remove_ifname_from_bridge_section(((struct bridge_vlan_args *)data)->bridge_sec, pch);
 					struct uci_section *device_s = NULL, *vlanport_s = NULL;
-					char *ifname, *new_name;
+					char *ifname, *new_name = NULL;
 
 					/* Update vid and name of device section */
 					uci_foreach_option_eq("network", "device", "name", pch, device_s) {
 						dmuci_get_value_by_section_string(device_s, "ifname", &ifname);
+						if (*ifname == '\0') {
+							dmuci_get_value_by_section_string(device_s, "name", &ifname);
+							char *name = strchr(ifname, '.');
+							if (name)
+								*name = '\0';
+						}
 						dmasprintf(&new_name, "%s.%s", ifname, value);
 						dmuci_set_value_by_section(device_s, "name", new_name);
 						dmuci_set_value_by_section(device_s, "vid", value);
@@ -2769,25 +2775,27 @@ static int set_BridgingBridgeVLAN_VLANID(char *refparam, struct dmctx *ctx, void
 						char *vlan_name;
 						dmuci_get_value_by_section_string(vlanport_s, "name", &vlan_name);
 						if (strcmp(vlan_name, pch) == 0) {
-							dmuci_set_value_by_section(vlanport_s, "name", new_name);
+							dmuci_set_value_by_section(vlanport_s, "name", new_name ? new_name : "");
 							break;
 						}
 					}
 
 					/* Update port section in dmmap */
 					struct uci_section *s = NULL;
-					uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", ((struct bridge_vlanport_args *)data)->br_inst, s) {
+					uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", ((struct bridge_vlan_args *)data)->br_inst, s) {
 						char *device;
 						dmuci_get_value_by_section_string(s, "device", &device);
 						if (strcmp(device, pch) == 0) {
-							dmuci_set_value_by_section(s, "device", new_name);
-							update_device_management_port(device, new_name, ((struct bridge_vlanport_args *)data)->br_inst);
+							dmuci_set_value_by_section(s, "device", new_name ? new_name : "");
+							update_device_management_port(device, new_name ? new_name : "", ((struct bridge_vlan_args *)data)->br_inst);
 							break;
 						}
 					}
 
 					add_new_ifname_to_bridge_section(((struct bridge_vlan_args *)data)->bridge_sec, new_name);
-					dmfree(new_name);
+
+					if (new_name && *new_name)
+						dmfree(new_name);
 				}
 			}
 			dmfree(br_ifname);
