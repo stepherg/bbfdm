@@ -1708,6 +1708,9 @@ int os_set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, ch
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
+			if (value == NULL || *value == '\0')
+				break;
+
 			if (strncmp(value, "Device.QoS.Queue.", 17) != 0)
 				return FAULT_9007;
 
@@ -1717,6 +1720,9 @@ int os_set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, ch
 
 			break;
 		case VALUESET:
+			if (value == NULL || *value == '\0')
+				break;
+
 			adm_entry_get_linker_value(ctx, value, &queue_link);
 			dmuci_set_value_by_section((struct uci_section *)data, "queue", queue_link);
 			break;
@@ -1747,12 +1753,18 @@ int os_set_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *data
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
+			if (value == NULL || *value == '\0')
+				break;
+
 			adm_entry_get_linker_value(ctx, value, &intf_link);
 			if (intf_link == NULL || *intf_link == '\0')
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
+			if (value == NULL || *value == '\0')
+				break;
+
 			adm_entry_get_linker_value(ctx, value, &intf_link);
 			dmuci_set_value_by_section((struct uci_section *)data, "interface", intf_link);
 			break;
