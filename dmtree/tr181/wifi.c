@@ -681,10 +681,10 @@ static int get_WiFiRadio_AutoChannelSupported(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.AutoChannelRefreshPeriod!UCI:wireless/wifi-device,@i-1/acs_refresh_time*/
+/*#Device.WiFi.Radio.{i}.AutoChannelRefreshPeriod!UCI:wireless/wifi-device,@i-1/acs_refresh_period*/
 static int get_WiFiRadio_AutoChannelRefreshPeriod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "acs_refresh_time", "3600");
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_radio_args *)data)->wifi_radio_sec, "acs_refresh_period", "0");
 	return 0;
 }
 
@@ -696,7 +696,7 @@ static int set_WiFiRadio_AutoChannelRefreshPeriod(char *refparam, struct dmctx *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "acs_refresh_time", value);
+			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "acs_refresh_period", value);
 			break;
 	}
 	return 0;
