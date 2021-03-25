@@ -23,7 +23,7 @@ static int get_ServicesVoiceServiceVoIPProfile_DTMFMethod(char *refparam, struct
 	if (method && *method) {
 		if (strcasecmp(method, "inband") == 0)
 			*value = "InBand";
-		else if (strcasecmp(method, "rfc2833") == 0)
+		else if (strcasecmp(method, "rfc4733") == 0)
 			*value = "RFC4733";
 		else if (strcasestr(method, "info") != NULL)
 			*value = "SIPInfo";
@@ -45,7 +45,7 @@ static int set_ServicesVoiceServiceVoIPProfile_DTMFMethod(char *refparam, struct
 			if (strcasecmp(value, "InBand") == 0)
 				new_value = "inband";
 			else if (strcasecmp(value, "RFC4733") == 0)
-				new_value = "rfc2833";
+				new_value = "rfc4733";
 			else if (strcasecmp(value, "SIPInfo") == 0)
 				new_value = "info";
 			dmuci_set_value(TR104_UCI_PACKAGE, "sip_options", "dtmfmode", new_value);
