@@ -85,12 +85,6 @@ static int set_time_LocalTimeZone(char *refparam, struct dmctx *ctx, void *data,
 	return 0;
 }
 
-static int get_local_time_zone_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_option_value_string("system", "@system[0]", "zonename", value);
-	return 0;
-}
-
 static int get_time_ntpserver(char *refparam, struct dmctx *ctx, char **value, int index)
 {
 	bool found = 0;
@@ -120,19 +114,6 @@ static int get_time_ntpserver(char *refparam, struct dmctx *ctx, char **value, i
 	return 0;
 }
 
-static int get_time_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char *iface = NULL;
-
-	dmuci_get_option_value_string("system", "ntp", "interface", &iface);
-	if (*iface == '\0' || strlen(iface) == 0)
-		return 0;
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface, value);
-	if (*value == NULL)
-		*value = "";
-	return 0;
-}
-
 static int get_time_ntpserver1(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return get_time_ntpserver(refparam, ctx, value, 1);
@@ -156,24 +137,6 @@ static int get_time_ntpserver4(char *refparam, struct dmctx *ctx, void *data, ch
 static int get_time_ntpserver5(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return get_time_ntpserver(refparam, ctx, value, 5);
-}
-
-static int set_time_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *iface = NULL;
-
-	switch (action) {
-		case VALUECHECK:
-			adm_entry_get_linker_value(ctx, value, &iface);
-			if (iface == NULL ||  iface[0] == '\0')
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &iface);
-			dmuci_set_value("system", "ntp", "interface", iface);
-			return 0;
-	}
-	return 0;
 }
 
 static int set_time_ntpserver(char *refparam, struct dmctx *ctx, int action, char *value, int index)
@@ -256,7 +219,5 @@ DMLEAF tTimeParams[] = {
 {"NTPServer5", &DMWRITE, DMT_STRING, get_time_ntpserver5, set_time_ntpserver5, BBFDM_BOTH},
 {"CurrentLocalTime", &DMREAD, DMT_TIME, get_time_CurrentLocalTime, NULL, BBFDM_BOTH},
 {"LocalTimeZone", &DMWRITE, DMT_STRING, get_time_LocalTimeZone, set_time_LocalTimeZone, BBFDM_BOTH},
-{CUSTOM_PREFIX"LocalTimeZoneName", &DMREAD, DMT_STRING, get_local_time_zone_name, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"SourceInterface", &DMWRITE, DMT_STRING, get_time_source_interface, set_time_source_interface, BBFDM_BOTH},
 {0}
 };

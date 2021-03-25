@@ -66,21 +66,6 @@ static int get_ip_iface_sysfs(const struct uci_section *data, const char *name, 
 	return get_net_iface_sysfs(section_name((struct uci_section *)data), name, value);
 }
 
-static void create_firewall_zone_config(char *iface)
-{
-	struct uci_section *s;
-	char name[16];
-
-	snprintf(name, sizeof(name), "fwl_%s", iface);
-
-	dmuci_add_section("firewall", "zone", &s);
-	dmuci_set_value_by_section(s, "name", name);
-	dmuci_set_value_by_section(s, "input", "DROP");
-	dmuci_set_value_by_section(s, "forward", "DROP");
-	dmuci_set_value_by_section(s, "output", "ACCEPT");
-	dmuci_set_value_by_section(s, "network", iface);
-}
-
 static int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, size_t str_len)
 {
 	char ip6buf[INET6_ADDRSTRLEN] = {0}, dev[32] = {0};
@@ -1866,50 +1851,6 @@ static int get_IPInterfaceIPv4Address_AddressingType(char *refparam, struct dmct
 	return 0;
 }
 
-static int get_IPInterfaceIPv4Address_X_IOPSYS_EU_FirewallEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct uci_section *s = NULL;
-	char *input = NULL, *forward = NULL;
-
-	*value = "0";
-	uci_foreach_option_cont("firewall", "zone", "network", section_name(((struct intf_ip_args *)data)->interface_sec), s) {
-		dmuci_get_value_by_section_string(s, "input", &input);
-		dmuci_get_value_by_section_string(s, "forward", &forward);
-		if (input && strcmp(input, "ACCEPT") != 0 && forward && strcmp(forward, "ACCEPT") != 0) {
-			*value = "1";
-			break;
-		}
-	}
-
-	return 0;
-}
-
-static int set_IPInterfaceIPv4Address_X_IOPSYS_EU_FirewallEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	struct uci_section *s = NULL;
-	int cnt = 0;
-	bool b;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			string_to_bool(value, &b);
-			value = b ? "DROP" : "ACCEPT";
-			uci_foreach_option_cont("firewall", "zone", "network", section_name(((struct intf_ip_args *)data)->interface_sec), s) {
-				dmuci_set_value_by_section(s, "input", value);
-				dmuci_set_value_by_section(s, "forward", value);
-				cnt++;
-			}
-			if (cnt == 0 && b)
-				create_firewall_zone_config(section_name(((struct intf_ip_args *)data)->interface_sec));
-			break;
-	}
-	return 0;
-}
-
 /*#Device.IP.Interface.{i}.IPv6Address.{i}.Enable!UCI:network/interface,@i-1/ipv6*/
 static int get_IPInterfaceIPv6Address_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2409,10 +2350,10 @@ static int get_IPInterfaceStats_MulticastPacketsReceived(char *refparam, struct 
 ***********************************************************************************************************************************/
 /* *** Device.IP. *** */
 DMOBJ tIPObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Interface", &DMWRITE, addObjIPInterface, delObjIPInterface, NULL, browseIPInterfaceInst, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Interface", &DMWRITE, addObjIPInterface, delObjIPInterface, NULL, browseIPInterfaceInst, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}},
 #ifdef BBF_TR143
-{"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsObj, tIPDiagnosticsParams, NULL, BBFDM_BOTH},
+{"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsObj, tIPDiagnosticsParams, NULL, BBFDM_BOTH},
 #endif
 {0}
 };
@@ -2432,11 +2373,11 @@ DMLEAF tIPParams[] = {
 
 /* *** Device.IP.Interface.{i}. *** */
 DMOBJ tIPInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"IPv4Address", &DMWRITE, addObjIPInterfaceIPv4Address, delObjIPInterfaceIPv4Address, NULL, browseIPInterfaceIPv4AddressInst, NULL, NULL, tIPInterfaceIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", "SubnetMask", NULL}},
-{"IPv6Address", &DMWRITE, addObjIPInterfaceIPv6Address, delObjIPInterfaceIPv6Address, NULL, browseIPInterfaceIPv6AddressInst, NULL, NULL, tIPInterfaceIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", NULL}},
-{"IPv6Prefix", &DMWRITE, addObjIPInterfaceIPv6Prefix, delObjIPInterfaceIPv6Prefix, NULL, browseIPInterfaceIPv6PrefixInst, NULL, NULL, tIPInterfaceIPv6PrefixParams, get_linker_ipv6_prefix, BBFDM_BOTH, LIST_KEY{"Alias", "Prefix", NULL}},
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPInterfaceStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"IPv4Address", &DMWRITE, addObjIPInterfaceIPv4Address, delObjIPInterfaceIPv4Address, NULL, browseIPInterfaceIPv4AddressInst, NULL, NULL, NULL, tIPInterfaceIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", "SubnetMask", NULL}},
+{"IPv6Address", &DMWRITE, addObjIPInterfaceIPv6Address, delObjIPInterfaceIPv6Address, NULL, browseIPInterfaceIPv6AddressInst, NULL, NULL, NULL, tIPInterfaceIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", NULL}},
+{"IPv6Prefix", &DMWRITE, addObjIPInterfaceIPv6Prefix, delObjIPInterfaceIPv6Prefix, NULL, browseIPInterfaceIPv6PrefixInst, NULL, NULL, NULL, tIPInterfaceIPv6PrefixParams, get_linker_ipv6_prefix, BBFDM_BOTH, LIST_KEY{"Alias", "Prefix", NULL}},
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -2473,7 +2414,6 @@ DMLEAF tIPInterfaceIPv4AddressParams[] = {
 {"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_IPAddress, set_IPInterfaceIPv4Address_IPAddress, BBFDM_BOTH},
 {"SubnetMask", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_SubnetMask, set_IPInterfaceIPv4Address_SubnetMask, BBFDM_BOTH},
 {"AddressingType", &DMREAD, DMT_STRING, get_IPInterfaceIPv4Address_AddressingType, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"FirewallEnabled", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv4Address_X_IOPSYS_EU_FirewallEnabled, set_IPInterfaceIPv4Address_X_IOPSYS_EU_FirewallEnabled, BBFDM_BOTH},
 {0}
 };
 

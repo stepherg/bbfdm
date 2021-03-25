@@ -188,7 +188,7 @@ gen_dm_tree(){
 				fi
 			fi
 			dyn_obj=0
-		done <<<"`sed -n $line_number',/{0}/p' $file | cut -d \" \" -f 1-4,6- | sed '/#ifdef GENERIC_OPENWRT/,/#else/d' | sed -e '/{0}/d' | sed -e '/^{/!d'`"
+		done <<<"`sed -n $line_number',/{0}/p' $file | cut -d \" \" -f 1-4,6- | sed -e '/{0}/d' | sed -e '/^{/!d'`"
 		
 		######### Remove object from list of object looking there childs
 		for obj in $obj_look_obj_child_list; do

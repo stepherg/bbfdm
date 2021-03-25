@@ -72,7 +72,7 @@ int is_vlan_termination_section(const char *name)
 	return 1;
 }
 
-void get_bridge_port_linker(struct dmctx *ctx, char *intf_name, char **value)
+static void get_bridge_port_linker(struct dmctx *ctx, char *intf_name, char **value)
 {
 	struct uci_section *dmmap_section = NULL, *bridge_port = NULL;
 
@@ -120,7 +120,7 @@ static struct uci_section *is_device_section_exist(char *device)
 	return s;
 }
 
-static int check_section_in_curr_section(char *curr_section, char *section)
+int ethernet_check_section_in_curr_section(char *curr_section, char *section)
 {
 	char *pch = NULL, *pchr = NULL, section_list[256] = {0};
 
@@ -143,7 +143,7 @@ static void add_section_in_curr_section(struct uci_section *dmmap_section, char 
 	dmuci_set_value_by_section(dmmap_section, "section_name", section_list);
 }
 
-static int is_name_exist_in_devices(char *name)
+int ethernet_name_exists_in_devices(char *name)
 {
 	struct uci_section *s = NULL;
 
@@ -186,7 +186,7 @@ static void create_link(char *sec_name, char *mac_addr)
 			dmuci_get_value_by_section_string(dmmap_section, "section_name", &section_name);
 
 			/* Check section name exist => if yes, return*/
-			if (check_section_in_curr_section(section_name, sec_name))
+			if (ethernet_check_section_in_curr_section(section_name, sec_name))
 				return;
 
 			/* Update only section name */
@@ -869,7 +869,6 @@ static int get_EthernetInterfaceStats_MulticastPacketsReceived(char *refparam, s
 	return eth_port_sysfs(data, "statistics/multicast", value);
 }
 
-#ifndef GENERIC_OPENWRT
 static int eth_port_ubus(const struct eth_port_args *args, const char *name, char **value)
 {
 	json_object *res = NULL;
@@ -915,7 +914,6 @@ static int get_EthernetInterfaceStats_UnknownProtoPacketsReceived(char *refparam
 {
 	return eth_port_ubus(data, "rx_unknown_packets", value);
 }
-#endif
 
 static int get_EthernetLink_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1132,7 +1130,6 @@ static int get_EthernetLinkStats_MulticastPacketsReceived(char *refparam, struct
 	return eth_iface_sysfs(data, "statistics/multicast", value);
 }
 
-#ifndef GENERIC_OPENWRT
 static int eth_iface_ubus(struct uci_section *iface_s, const char *name, char **value)
 {
 	json_object *res = NULL;
@@ -1176,7 +1173,6 @@ static int get_EthernetLinkStats_UnknownProtoPacketsReceived(char *refparam, str
 {
 	return eth_iface_ubus(data, "rx_unknown_packets", value);
 }
-#endif
 
 static int get_EthernetVLANTermination_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1310,7 +1306,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 					snprintf(link_inst, sizeof(link_inst), "%c", value[21]);
 					snprintf(new_name, sizeof(new_name), "%s_%s", vlan_linker, link_inst);
 
-					if (is_name_exist_in_devices(new_name))
+					if (ethernet_name_exists_in_devices(new_name))
 						return -1;
 
 					uci_foreach_option_eq("network", "interface", "ifname", vlan_linker, s) {
@@ -1335,7 +1331,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 					else
 						snprintf(new_name, sizeof(new_name), "%s", vlan_linker);
 
-					if (is_name_exist_in_devices(new_name))
+					if (ethernet_name_exists_in_devices(new_name))
 						return -1;
 
 					// if device is lowerlayer to an ip interface, then
@@ -1362,7 +1358,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 					break;
 				}
 				snprintf(new_name, sizeof(new_name), "%s.%s.%s", dev_name, inner_vid, vid);
-				if (is_name_exist_in_devices(new_name))
+				if (ethernet_name_exists_in_devices(new_name))
 					return -1;
 
 				dmuci_set_value_by_section((struct uci_section *)data, "ifname", dev_name);
@@ -1410,7 +1406,7 @@ static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 						dmasprintf(&name, "%s.%s", ifname, value);
 					}
 
-					if (is_name_exist_in_devices(name))
+					if (ethernet_name_exists_in_devices(name))
 						return -1;
 
 					// set ifname option of the corresponding interface section
@@ -1482,108 +1478,6 @@ static int set_EthernetVLANTermination_TPID(char *refparam, struct dmctx *ctx, v
 			else if (strcmp(value, "34984") == 0)
 				dmuci_set_value_by_section((struct uci_section *)data, "type", "8021ad");
 			return 0;
-	}
-	return 0;
-}
-
-static int get_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_value_by_section_string((struct uci_section *)data, "type", value);
-	*value = (strcmp(*value, "macvlan") == 0) ? "1" : "0";
-	return 0;
-}
-
-static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *name, *ifname;
-	bool b;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			string_to_bool(value, &b);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "name", &name);
-			struct uci_section *s = NULL, *dmmap_s = NULL;
-			if (b && *name != '\0') {
-				char *link_instance = NULL, new_name[16] = {0};
-				int name_found = 0;
-
-				uci_foreach_option_eq("network", "interface", "ifname", name, s) {
-
-					get_dmmap_section_of_config_section_eq("dmmap", "link", "device", ifname, &dmmap_s);
-					if (dmmap_s) {
-						dmuci_get_value_by_section_string(dmmap_s, "link_instance", &link_instance);
-						snprintf(new_name, sizeof(new_name), "%s_%s", ifname, link_instance);
-
-						if (is_name_exist_in_devices(new_name))
-							return -1;
-
-						dmuci_set_value_by_section(dmmap_s, "device", new_name);
-						dmuci_set_value_by_section(dmmap_s, "section_name", section_name(s));
-
-					}
-
-					dmuci_set_value_by_section(s, "ifname", new_name);
-
-					name_found = 1;
-					break;
-				}
-
-				if (name_found == 0) {
-					int ifname_found = 0;
-					struct uci_section *ss = NULL;
-
-					uci_foreach_option_eq("network", "interface", "ifname", ifname, ss) {
-
-						uci_path_foreach_option_eq(bbfdm, "dmmap", "link", "device", ifname, dmmap_s) {
-							char *sec_name;
-							dmuci_get_value_by_section_string(dmmap_s, "section_name", &sec_name);
-							/* Check section name exist => if yes, continue*/
-							if (!check_section_in_curr_section(sec_name, section_name(ss)))
-								continue;
-
-							dmuci_get_value_by_section_string(dmmap_s, "link_instance", &link_instance);
-							snprintf(new_name, sizeof(new_name), "%s_%s", ifname, link_instance);
-
-							if (is_name_exist_in_devices(new_name))
-								return -1;
-
-							dmuci_set_value_by_section(dmmap_s, "device", new_name);
-							dmuci_set_value_by_section(dmmap_s, "section_name", section_name(ss));
-						}
-
-						dmuci_set_value_by_section(ss, "ifname", new_name);
-
-						ifname_found = 1;
-						break;
-					}
-
-					if (ifname_found == 0) {
-						get_dmmap_section_of_config_section_eq("dmmap", "link", "device", ifname, &dmmap_s);
-						if (dmmap_s) {
-							dmuci_get_value_by_section_string(dmmap_s, "link_instance", &link_instance);
-							snprintf(new_name, sizeof(new_name), "%s_%s", ifname, link_instance);
-
-							if (is_name_exist_in_devices(new_name))
-								return -1;
-
-							dmuci_set_value_by_section(dmmap_s, "device", new_name);
-							dmuci_set_value_by_section(dmmap_s, "section_name", "");
-
-						}
-					}
-				}
-
-				dmuci_set_value_by_section((struct uci_section *)data, "name", new_name);
-				dmuci_set_value_by_section((struct uci_section *)data, "type", "macvlan");
-			} else {
-				dmuci_set_value_by_section((struct uci_section *)data, "type", b ? "macvlan" : "8021q");
-			}
-			break;
 	}
 	return 0;
 }
@@ -1867,11 +1761,11 @@ static int get_EthernetRMONStats_Packets1024to1518Bytes(char *refparam, struct d
 ***********************************************************************************************************************************/
 /* *** Device.Ethernet. *** */
 DMOBJ tEthernetObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Interface", &DMREAD, NULL, NULL, NULL, browseEthernetInterfaceInst, NULL, tEthernetInterfaceObj, tEthernetInterfaceParams, get_linker_interface, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"Link", &DMWRITE, addObjEthernetLink, delObjEthernetLink, NULL, browseEthernetLinkInst, NULL, tEthernetLinkObj, tEthernetLinkParams, get_linker_link, BBFDM_BOTH, LIST_KEY{"Name", "Alias", "MACAddress", NULL}},
-{"VLANTermination", &DMWRITE, addObjEthernetVLANTermination, delObjEthernetVLANTermination, NULL, browseEthernetVLANTerminationInst, NULL, tEthernetVLANTerminationObj, tEthernetVLANTerminationParams, get_linker_vlan_term, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"RMONStats", &DMREAD, NULL, NULL, "file:/etc/config/ports;ubus:ethernet->rmonstats", browseEthernetRMONStatsInst, NULL, NULL, tEthernetRMONStatsParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Interface", "VLANID", "Queue", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Interface", &DMREAD, NULL, NULL, NULL, browseEthernetInterfaceInst, NULL, NULL, tEthernetInterfaceObj, tEthernetInterfaceParams, get_linker_interface, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Link", &DMWRITE, addObjEthernetLink, delObjEthernetLink, NULL, browseEthernetLinkInst, NULL, NULL, tEthernetLinkObj, tEthernetLinkParams, get_linker_link, BBFDM_BOTH, LIST_KEY{"Name", "Alias", "MACAddress", NULL}},
+{"VLANTermination", &DMWRITE, addObjEthernetVLANTermination, delObjEthernetVLANTermination, NULL, browseEthernetVLANTerminationInst, NULL, NULL, tEthernetVLANTerminationObj, tEthernetVLANTerminationParams, get_linker_vlan_term, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"RMONStats", &DMREAD, NULL, NULL, "file:/etc/config/ports;ubus:ethernet->rmonstats", browseEthernetRMONStatsInst, NULL, NULL, NULL, tEthernetRMONStatsParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Interface", "VLANID", "Queue", NULL}},
 {0}
 };
 
@@ -1886,8 +1780,8 @@ DMLEAF tEthernetParams[] = {
 
 /* *** Device.Ethernet.Interface.{i}. *** */
 DMOBJ tEthernetInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tEthernetInterfaceStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tEthernetInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -1921,21 +1815,19 @@ DMLEAF tEthernetInterfaceStatsParams[] = {
 {"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_EthernetInterfaceStats_DiscardPacketsSent, NULL, BBFDM_BOTH},
 {"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_EthernetInterfaceStats_DiscardPacketsReceived, NULL, BBFDM_BOTH},
 {"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetInterfaceStats_MulticastPacketsReceived, NULL, BBFDM_BOTH},
-#ifndef GENERIC_OPENWRT
 {"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_EthernetInterfaceStats_MulticastPacketsSent, NULL, BBFDM_BOTH},
 {"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_EthernetInterfaceStats_UnicastPacketsSent, NULL, BBFDM_BOTH},
 {"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetInterfaceStats_UnicastPacketsReceived, NULL, BBFDM_BOTH},
 {"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_EthernetInterfaceStats_BroadcastPacketsSent, NULL, BBFDM_BOTH},
 {"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetInterfaceStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH},
 {"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_EthernetInterfaceStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH},
-#endif
 {0}
 };
 
 /* *** Device.Ethernet.Link.{i}. *** */
 DMOBJ tEthernetLinkObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tEthernetLinkStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tEthernetLinkStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -1963,21 +1855,19 @@ DMLEAF tEthernetLinkStatsParams[] = {
 {"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_EthernetLinkStats_DiscardPacketsSent, NULL, BBFDM_BOTH},
 {"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_EthernetLinkStats_DiscardPacketsReceived, NULL, BBFDM_BOTH},
 {"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetLinkStats_MulticastPacketsReceived, NULL, BBFDM_BOTH},
-#ifndef GENERIC_OPENWRT
 {"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_EthernetLinkStats_MulticastPacketsSent, NULL, BBFDM_BOTH},
 {"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_EthernetLinkStats_UnicastPacketsSent, NULL, BBFDM_BOTH},
 {"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetLinkStats_UnicastPacketsReceived, NULL, BBFDM_BOTH},
 {"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_EthernetLinkStats_BroadcastPacketsSent, NULL, BBFDM_BOTH},
 {"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetLinkStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH},
 {"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_EthernetLinkStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH},
-#endif
 {0}
 };
 
 /* *** Device.Ethernet.VLANTermination.{i}. *** */
 DMOBJ tEthernetVLANTerminationObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tEthernetVLANTerminationStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tEthernetVLANTerminationStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -1991,7 +1881,6 @@ DMLEAF tEthernetVLANTerminationParams[] = {
 {"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetVLANTermination_LowerLayers, set_EthernetVLANTermination_LowerLayers, BBFDM_BOTH},
 {"VLANID", &DMWRITE, DMT_UNINT, get_EthernetVLANTermination_VLANID, set_EthernetVLANTermination_VLANID, BBFDM_BOTH},
 {"TPID", &DMWRITE, DMT_UNINT, get_EthernetVLANTermination_TPID, set_EthernetVLANTermination_TPID, BBFDM_BOTH},
-{CUSTOM_PREFIX"MACVLAN", &DMWRITE, DMT_BOOL, get_EthernetVLANTermination_MACVLAN, set_EthernetVLANTermination_MACVLAN, BBFDM_BOTH},
 {0}
 };
 

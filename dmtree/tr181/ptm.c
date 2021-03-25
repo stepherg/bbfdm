@@ -328,15 +328,15 @@ static int browsePtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 /* *** Device.PTM. *** */
 DMOBJ tPTMObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Link", &DMWRITE, add_ptm_link, delete_ptm_link, NULL, browsePtmLinkInst, NULL, tPTMLinkObj, tPTMLinkParams, get_ptm_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Link", &DMWRITE, add_ptm_link, delete_ptm_link, NULL, browsePtmLinkInst, NULL, NULL, tPTMLinkObj, tPTMLinkParams, get_ptm_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
 /* *** Device.PTM.Link.{i}. *** */
 DMOBJ tPTMLinkObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tPTMLinkStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPTMLinkStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 

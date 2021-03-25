@@ -134,7 +134,7 @@ def check_commands(param):
 
 def printOBJPARAM(obj, supported, protocols, types):
 	fp = open('./.tmp', 'a')
-	print("%s::%s::%s::%s::" % (obj, protocols, "Yes" if CUSTOM_PREFIX in obj else supported, types), file=fp)
+	print("%s::%s::%s::%s::" % (obj, protocols, supported, types), file=fp)
 	fp.close()
 
 def printusage():
@@ -253,7 +253,6 @@ except getopt.GetoptError:
 	printusage()
 	exit(1)
 
-CUSTOM_PREFIX = "X_IOPSYS_EU"
 remotedm = None
 
 for opt, arg in opts:

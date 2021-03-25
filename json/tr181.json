@@ -42294,16 +42294,6 @@
 								}
 							}
 						]
-					},
-					"X_IOPSYS_EU_FirewallEnabled": {
-						"type": "boolean",
-						"read": true,
-						"write": true,
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"datatype": "boolean"
 					}
 				},
 				"Device.IP.Interface.{i}.Stats.": {
@@ -65241,16 +65231,6 @@
 					],
 					"datatype": "boolean"
 				},
-				"X_IOPSYS_EU_Status": {
-					"type": "string",
-					"read": true,
-					"write": false,
-					"protocols": [
-						"cwmp",
-						"usp"
-					],
-					"datatype": "string"
-				},
 				"Device.UPnP.Device.Capabilities.": {
 					"type": "object",
 					"protocols": [
@@ -67716,152 +67696,7 @@
 							"usp"
 						],
 						"datatype": "boolean"
-					},
-					"X_IOPSYS_EU_ICMPType": {
-						"type": "string",
-						"read": true,
-						"write": true,
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"datatype": "string",
-						"mapping": [
-							{
-								"type": "uci",
-								"uci": {
-									"file": "firewall",
-									"section": {
-										"type": "rule",
-										"index": "@i-1"
-									},
-									"option": {
-										"name": "icmp_type"
 					}
-								}
-							}
-						]
-					},
-					"X_IOPSYS_EU_SourceMACAddress": {
-						"type": "string",
-						"read": true,
-						"write": true,
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"datatype": "string",
-						"mapping": [
-							{
-								"type": "uci",
-								"uci": {
-									"file": "firewall",
-									"section": {
-										"type": "rule",
-										"index": "@i-1"
-									},
-									"option": {
-										"name": "src_mac"
-									}
-								}
-							}
-						]
-					},
-					"Device.Firewall.Chain.{i}.Rule.{i}.X_IOPSYS_EU_TimeSpan.": {
-						"type": "object",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"access": false,
-						"array": false,
-						"SupportedDays": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"protocols": [
-								"cwmp",
-								"usp"
-							],
-							"datatype": "string"
-						},
-						"Days": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"protocols": [
-								"cwmp",
-								"usp"
-							],
-							"datatype": "string",
-							"mapping": [
-								{
-									"type": "uci",
-									"uci": {
-										"file": "firewall",
-										"section": {
-											"type": "rule",
-											"index": "@i-1"
-										},
-										"option": {
-											"name": "weekdays"
-										}
-									}
-								}
-							]
-						},
-						"StartTime": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"protocols": [
-								"cwmp",
-								"usp"
-							],
-							"datatype": "string",
-							"mapping": [
-								{
-									"type": "uci",
-									"uci": {
-										"file": "firewall",
-										"section": {
-											"type": "rule",
-											"index": "@i-1"
-										},
-										"option": {
-											"name": "start_time"
-										}
-									}
-								}
-							]
-						},
-						"StopTime": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"protocols": [
-								"cwmp",
-								"usp"
-							],
-							"datatype": "string",
-							"mapping": [
-								{
-									"type": "uci",
-									"uci": {
-										"file": "firewall",
-										"section": {
-											"type": "rule",
-											"index": "@i-1"
-										},
-										"option": {
-											"name": "stop_time"
-										}
-									}
-								}
-							]
-						}
-					}
-
 				}
 			}
 		},

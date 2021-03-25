@@ -379,15 +379,15 @@ static int browseAtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 /*** ATM. ***/
 DMOBJ tATMObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Link", &DMWRITE, add_atm_link, delete_atm_link, NULL, browseAtmLinkInst, NULL, tATMLinkObj, tATMLinkParams, get_atm_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Link", &DMWRITE, add_atm_link, delete_atm_link, NULL, browseAtmLinkInst, NULL, NULL, tATMLinkObj, tATMLinkParams, get_atm_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
 /*** ATM.Link. ***/
 DMOBJ tATMLinkObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tATMLinkStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tATMLinkStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 

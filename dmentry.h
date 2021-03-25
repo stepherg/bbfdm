@@ -28,16 +28,12 @@ int dm_ctx_init(struct dmctx *ctx, unsigned int instance_mode);
 int dm_ctx_init_sub(struct dmctx *ctx, unsigned int instance_mode);
 int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2);
 int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2);
-int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value);
-int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
 int dm_entry_restart_services(void);
 int dm_entry_revert_changes(void);
 int usp_fault_map(int fault);
 int dm_ctx_clean(struct dmctx *ctx);
 int dm_ctx_clean_sub(struct dmctx *ctx);
-int load_dynamic_arrays(struct dmctx *ctx);
-int free_dynamic_arrays(void);
-void dm_ctx_init_list_parameter(struct dmctx *ctx);
-void dm_ctx_clean_list_parameter(struct dmctx *ctx);
+void load_dynamic_arrays(struct dmctx *ctx);
+void free_dynamic_arrays(void);
 
 #endif

@@ -9,67 +9,305 @@
  */
 
 #include "hosts.h"
-#include "os.h"
+#include "dmentry.h"
+
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
+/*#Device.Hosts.Host.{i}.!UBUS:router.network/hosts//hosts*/
+static int browseHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	json_object *res = NULL, *host_obj = NULL, *arrobj = NULL;
+	char *inst = NULL, *max_inst = NULL;
+	int id = 0, i = 0;
+
+	dmubus_call("router.network", "hosts", UBUS_ARGS{}, 0, &res);
+	dmjson_foreach_obj_in_array(res, arrobj, host_obj, i, 1, "hosts") {
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)host_obj, inst) == DM_STOP)
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.IPv4Address.{i}.!UBUS:router.network/hosts//hosts[@i-1].ipv4addr*/
+static int browseHostsHostIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	json_object *ip_arr = NULL, *host_obj = (json_object *)prev_data;
+	char *inst = NULL, *max_inst = NULL, *ipv4addr = NULL;
+	int id = 0, i = 0;
+
+	dmjson_foreach_value_in_array(host_obj, ip_arr, ipv4addr, i, 1, "ipv4addr") {
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv4addr, inst) == DM_STOP)
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.IPv6Address.{i}.!UBUS:router.network/hosts//hosts[@i-1].ipv6addr*/
+static int browseHostsHostIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	json_object *ip_arr = NULL, *host_obj = (json_object *)prev_data;
+	char *inst = NULL, *max_inst = NULL, *ipv6addr = NULL;
+	int id = 0, i = 0;
+
+	dmjson_foreach_value_in_array(host_obj, ip_arr, ipv6addr, i, 1, "ipv6addr") {
+		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv6addr, inst) == DM_STOP)
+			break;
+	}
+	return 0;
+}
+
+/*************************************************************
+* LINKER
+**************************************************************/
+static int get_linker_host(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	*linker = dmjson_get_value((json_object *)data, 1, "ipaddr");
+	return 0;
+}
+
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
+/*#Device.Hosts.HostNumberOfEntries!UBUS:router.network/hosts//hosts*/
+static int get_Hosts_HostNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL, *hosts = NULL;
+	size_t nbre_hosts = 0;
+
+	dmubus_call("router.network", "hosts", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "0");
+	json_object_object_get_ex(res, "hosts", &hosts);
+	nbre_hosts = (hosts) ? json_object_array_length(hosts) : 0;
+	dmasprintf(value, "%d", nbre_hosts);
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.PhysAddress!UBUS:router.network/hosts//hosts[@i-1].macaddr*/
+static int get_HostsHost_PhysAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "macaddr");
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.IPAddress!UBUS:router.network/hosts//hosts[@i-1].ipaddr*/
+static int get_HostsHost_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "ipaddr");
+	return 0;
+}
+
+static int get_HostsHost_DHCPClient(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *linker = dmjson_get_value((json_object *)data, 1, "macaddr");
+	adm_entry_get_linker_param(ctx, "Device.DHCPv4.Server.Pool.", linker, value);
+	if (*value == NULL)
+		*value = "";
+	return 0;
+}
+
+static int get_HostsHost_AssociatedDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *linker = dmjson_get_value((json_object *)data, 1, "macaddr");
+	adm_entry_get_linker_param(ctx, "Device.WiFi.AccessPoint.", linker, value);
+	if (*value == NULL)
+		*value = "";
+	return 0;
+}
+
+static int get_HostsHost_Layer1Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *linker = dmjson_get_value((json_object *)data, 1, "device");
+	char *type = dmjson_get_value((json_object *)data, 1, "type");
+	if (strcmp(type, "wifi") == 0)
+		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
+	else
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
+	if (*value == NULL)
+		*value = "";
+	return 0;
+}
+
+static int get_HostsHost_Layer3Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *linker = dmjson_get_value((json_object *)data, 1, "network");
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	if (*value == NULL)
+		*value = "";
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.InterfaceType!UBUS:router.network/hosts//hosts[@i-1].type*/
+static int get_HostsHost_InterfaceType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "type");
+	*value = (strcmp(*value, "ethernet") == 0) ? "Ethernet" : "Wi-Fi";
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.HostName!UBUS:router.network/hosts//hosts[@i-1].hostname*/
+static int get_HostsHost_HostName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "hostname");
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.Active!UBUS:router.network/hosts//hosts[@i-1].active*/
+static int get_HostsHost_Active(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "active");
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.ActiveLastChange!UBUS:router.network/hosts//hosts[@i-1].activelstch*/
+static int get_HostsHost_ActiveLastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0001-01-01T00:00:00Z";
+
+	char *lastchange = dmjson_get_value((json_object *)data, 1, "activelstch");
+	if (lastchange && *lastchange != '\0' && atoi(lastchange) > 0) {
+		time_t t_time = atoi(lastchange);
+		if (localtime(&t_time) == NULL)
+			return -1;
+
+		char local_time[32] = {0};
+
+		if (strftime(local_time, sizeof(local_time), "%Y-%m-%dT%H:%M:%SZ", localtime(&t_time)) == 0)
+			return -1;
+
+		*value = dmstrdup(local_time);
+	}
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.IPv4AddressNumberOfEntries!UBUS:router.network/hosts//hosts[@i-1].ipv4addr*/
+static int get_HostsHost_IPv4AddressNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *ipv4addr = NULL;
+	size_t nbre_addr = 0;
+
+	json_object_object_get_ex((json_object *)data, "ipv4addr", &ipv4addr);
+	nbre_addr = (ipv4addr) ? json_object_array_length(ipv4addr) : 0;
+	dmasprintf(value, "%d", nbre_addr);
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.IPv6AddressNumberOfEntries!UBUS:router.network/hosts//hosts[@i-1].ipv6addr*/
+static int get_HostsHost_IPv6AddressNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *ipv6addr = NULL;
+	size_t nbre_addr = 0;
+
+	json_object_object_get_ex((json_object *)data, "ipv6addr", &ipv6addr);
+	nbre_addr = (ipv6addr) ? json_object_array_length(ipv6addr) : 0;
+	dmasprintf(value, "%d", nbre_addr);
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.IPv4Address.{i}.IPAddress!UBUS:router.network/hosts//hosts[@i-1].ipv4addr[@i-1]*/
+static int get_HostsHostIPv4Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)data;
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.IPv6Address.{i}.IPAddress!UBUS:router.network/hosts//hosts[@i-1].ipv6addr[@i-1]*/
+static int get_HostsHostIPv6Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)data;
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.WANStats.BytesSent!UBUS:router.network/hosts//hosts[@i-1].stats.tx_bytes*/
+static int get_HostsHostWANStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 2, "stats", "tx_bytes");
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.WANStats.BytesReceived!UBUS:router.network/hosts//hosts[@i-1].stats.rx_bytes*/
+static int get_HostsHostWANStats_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 2, "stats", "rx_bytes");
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.WANStats.PacketsSent!UBUS:router.network/hosts//hosts[@i-1].stats.tx_packets*/
+static int get_HostsHostWANStats_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 2, "stats", "tx_packets");
+	return 0;
+}
+
+/*#Device.Hosts.Host.{i}.WANStats.PacketsReceived!UBUS:router.network/hosts//hosts[@i-1].stats.rx_packets*/
+static int get_HostsHostWANStats_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 2, "stats", "rx_packets");
+	return 0;
+}
 
 /* *** Device.Hosts. *** */
 DMOBJ tHostsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Host", &DMREAD, NULL, NULL, NULL, os__browseHostsHostInst, NULL, tHostsHostObj, tHostsHostParams, get_linker_host, BBFDM_BOTH, LIST_KEY{"PhysAddress", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Host", &DMREAD, NULL, NULL, NULL, browseHostsHostInst, NULL, NULL, tHostsHostObj, tHostsHostParams, get_linker_host, BBFDM_BOTH, LIST_KEY{"PhysAddress", NULL}},
 {0}
 };
 
 DMLEAF tHostsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"HostNumberOfEntries", &DMREAD, DMT_UNINT, os__get_Hosts_HostNumberOfEntries, NULL, BBFDM_BOTH},
+{"HostNumberOfEntries", &DMREAD, DMT_UNINT, get_Hosts_HostNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}. *** */
 DMOBJ tHostsHostObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"IPv4Address", &DMREAD, NULL, NULL, NULL, os__browseHostsHostIPv4AddressInst, NULL, NULL, tHostsHostIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
-{"IPv6Address", &DMREAD, NULL, NULL, NULL, os__browseHostsHostIPv6AddressInst, NULL, NULL, tHostsHostIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
-{"WANStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tHostsHostWANStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseHostsHostIPv4AddressInst, NULL, NULL, NULL, tHostsHostIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
+{"IPv6Address", &DMREAD, NULL, NULL, NULL, browseHostsHostIPv6AddressInst, NULL, NULL, NULL, tHostsHostIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
+{"WANStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHostsHostWANStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tHostsHostParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"PhysAddress", &DMREAD, DMT_STRING, os__get_HostsHost_PhysAddress, NULL, BBFDM_BOTH},
-{"IPAddress", &DMREAD, DMT_STRING, os__get_HostsHost_IPAddress, NULL, BBFDM_BOTH},
-{"DHCPClient", &DMREAD, DMT_STRING, os__get_HostsHost_DHCPClient, NULL, BBFDM_BOTH},
-{"AssociatedDevice", &DMREAD, DMT_STRING, os__get_HostsHost_AssociatedDevice, NULL, BBFDM_BOTH},
-{"Layer1Interface", &DMREAD, DMT_STRING, os__get_HostsHost_Layer1Interface, NULL, BBFDM_BOTH},
-{"Layer3Interface", &DMREAD, DMT_STRING, os__get_HostsHost_Layer3Interface, NULL, BBFDM_BOTH},
-{"InterfaceType", &DMREAD, DMT_STRING, os__get_HostsHost_InterfaceType, NULL, BBFDM_BOTH},
-{"HostName", &DMREAD, DMT_STRING, os__get_HostsHost_HostName, NULL, BBFDM_BOTH},
-{"Active", &DMREAD, DMT_BOOL, os__get_HostsHost_Active, NULL, BBFDM_BOTH},
-{"ActiveLastChange", &DMREAD, DMT_TIME, os__get_HostsHost_ActiveLastChange, NULL, BBFDM_BOTH},
-{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, os__get_HostsHost_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH},
-{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, os__get_HostsHost_IPv6AddressNumberOfEntries, NULL, BBFDM_BOTH},
+{"PhysAddress", &DMREAD, DMT_STRING, get_HostsHost_PhysAddress, NULL, BBFDM_BOTH},
+{"IPAddress", &DMREAD, DMT_STRING, get_HostsHost_IPAddress, NULL, BBFDM_BOTH},
+{"DHCPClient", &DMREAD, DMT_STRING, get_HostsHost_DHCPClient, NULL, BBFDM_BOTH},
+{"AssociatedDevice", &DMREAD, DMT_STRING, get_HostsHost_AssociatedDevice, NULL, BBFDM_BOTH},
+{"Layer1Interface", &DMREAD, DMT_STRING, get_HostsHost_Layer1Interface, NULL, BBFDM_BOTH},
+{"Layer3Interface", &DMREAD, DMT_STRING, get_HostsHost_Layer3Interface, NULL, BBFDM_BOTH},
+{"InterfaceType", &DMREAD, DMT_STRING, get_HostsHost_InterfaceType, NULL, BBFDM_BOTH},
+{"HostName", &DMREAD, DMT_STRING, get_HostsHost_HostName, NULL, BBFDM_BOTH},
+{"Active", &DMREAD, DMT_BOOL, get_HostsHost_Active, NULL, BBFDM_BOTH},
+{"ActiveLastChange", &DMREAD, DMT_TIME, get_HostsHost_ActiveLastChange, NULL, BBFDM_BOTH},
+{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsHost_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH},
+{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsHost_IPv6AddressNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}.IPv4Address.{i}. *** */
 DMLEAF tHostsHostIPv4AddressParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"IPAddress", &DMREAD, DMT_STRING, os__get_HostsHostIPv4Address_IPAddress, NULL, BBFDM_BOTH},
+{"IPAddress", &DMREAD, DMT_STRING, get_HostsHostIPv4Address_IPAddress, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}.IPv6Address.{i}. *** */
 DMLEAF tHostsHostIPv6AddressParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"IPAddress", &DMREAD, DMT_STRING, os__get_HostsHostIPv6Address_IPAddress, NULL, BBFDM_BOTH},
+{"IPAddress", &DMREAD, DMT_STRING, get_HostsHostIPv6Address_IPAddress, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}.WANStats. *** */
 DMLEAF tHostsHostWANStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"BytesSent", &DMREAD, DMT_UNINT, os__get_HostsHostWANStats_BytesSent, NULL, BBFDM_BOTH},
-{"BytesReceived", &DMREAD, DMT_UNINT, os__get_HostsHostWANStats_BytesReceived, NULL, BBFDM_BOTH},
-{"PacketsSent", &DMREAD, DMT_UNINT, os__get_HostsHostWANStats_PacketsSent, NULL, BBFDM_BOTH},
-{"PacketsReceived", &DMREAD, DMT_UNINT, os__get_HostsHostWANStats_PacketsReceived, NULL, BBFDM_BOTH},
+{"BytesSent", &DMREAD, DMT_UNINT, get_HostsHostWANStats_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_BytesReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsReceived, NULL, BBFDM_BOTH},
 {0}
 };

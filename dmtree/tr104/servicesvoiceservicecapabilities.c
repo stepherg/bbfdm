@@ -178,9 +178,9 @@ static int get_ServicesVoiceServiceCapabilitiesCodec_PacketizationPeriod(char *r
 /* *** Device.Services.VoiceService.{i}.Capabilities. *** */
 DMOBJ tServicesVoiceServiceCapabilitiesObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesSIPObj, NULL, NULL, BBFDM_BOTH},
-{"POTS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesPOTSParams, NULL, BBFDM_BOTH},
-{"Codec", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCapabilitiesCodecInst, NULL, NULL, tServicesVoiceServiceCapabilitiesCodecParams, get_voice_service_capabilities_codec_linker, BBFDM_BOTH, LIST_KEY{"Alias", "Codec", "BitRate", NULL}},
+{"SIP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesSIPObj, NULL, NULL, BBFDM_BOTH},
+{"POTS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesPOTSParams, NULL, BBFDM_BOTH},
+{"Codec", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCapabilitiesCodecInst, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesCodecParams, get_voice_service_capabilities_codec_linker, BBFDM_BOTH, LIST_KEY{"Alias", "Codec", "BitRate", NULL}},
 {0}
 };
 
@@ -196,8 +196,8 @@ DMLEAF tServicesVoiceServiceCapabilitiesParams[] = {
 
 /* *** Device.Services.VoiceService.{i}.Capabilities.SIP. *** */
 DMOBJ tServicesVoiceServiceCapabilitiesSIPObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Client", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesSIPClientParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Client", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCapabilitiesSIPClientParams, NULL, BBFDM_BOTH},
 {0}
 };
 

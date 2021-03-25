@@ -2,11 +2,11 @@ BBF Compilation
 ===================
 
 autoreconf -i
-./configure CC="gcc-9" --enable-tr181 --enable-tr104 --enable-tr143 --enable-libopenssl CPPFLAGS=-DCUSTOM_PREFIX=\\\"X_IOPSYS_EU_\\\"
-make 
-cp bin/.libs/libbbfdm.so* /usr/lib/
-cp bin/.libs/libbbf_api.so* /usr/lib/
-mkdir /usr/include/libbbfdm
-mkdir /usr/include/libbbf_api
-cp *.h /usr/include/libbbfdm/
-cp libbbf_api/*.h /usr/include/libbbf_api/
+./configure CC="gcc-9" --enable-tr181 --enable-tr104 --enable-tr143 --enable-libopenssl --enable-vendor-extension BBF_VENDOR_LIST="iopsys"
+make CPPFLAGS=-DBBF_VENDOR_LIST=\\\"iopsys\\\" CPPFLAGS+=-DBBF_VENDOR_PREFIX=\\\"X_IOPSYS_EU_\\\"
+make install
+ldconfig
+
+mkdir -p /etc/bbfdm/
+mkdir -p /etc/bbfdm/json
+mkdir -p /usr/lib/bbfdm

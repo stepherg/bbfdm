@@ -1177,7 +1177,8 @@ void operate_list_cmds(struct dmctx *dmctx)
 	size_t i;
 	struct op_cmd *save_pointer = NULL;
 
-	if (dynamic_operate) save_pointer = dynamic_operate;
+	if (dynamic_operate)
+		save_pointer = dynamic_operate;
 
 	for(i = 0; i < n; i++) {
 		param = dmstrdup(operate_helper[i].name);
@@ -1193,7 +1194,8 @@ void operate_list_cmds(struct dmctx *dmctx)
 		add_list_parameter(dmctx, param, (char *)args, type, NULL);
 	}
 
-	if (save_pointer)dynamic_operate = save_pointer;
+	if (save_pointer)
+		dynamic_operate = save_pointer;
 }
 
 static opr_ret_t do_operate(struct dmctx *dmctx, char *path, operation func, const char *input)

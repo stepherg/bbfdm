@@ -10,7 +10,6 @@
  */
 
 #include "deviceinfo.h"
-#include "os.h"
 
 struct Supported_Data_Models
 {
@@ -58,39 +57,93 @@ struct Supported_Data_Models Data_Models[] = {
 {"http://www.broadband-forum.org/cwmp/tr-157-1-3-0.xml","urn:broadband-forum-org:tr-157-1-3-0", "Bulkdata,SoftwareModules"},
 };
 
+/*#Device.DeviceInfo.Manufacturer!UCI:cwmp/cpe,cpe/manufacturer*/
 static int get_device_manufacturer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = os__get_deviceid_manufacturer();
+	dmuci_get_option_value_string("cwmp","cpe","manufacturer", value);
+	if (*value[0] == '\0')
+		db_get_value_string("device", "deviceinfo", "Manufacturer", value);
+
 	return 0;
 }
 
+/*#Device.DeviceInfo.ManufacturerOUI!UCI:cwmp/cpe,cpe/manufacturer_oui*/
 static int get_device_manufactureroui(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = os__get_deviceid_manufactureroui();
+	dmuci_get_option_value_string("cwmp", "cpe", "manufacturer_oui", value);
+	if (*value[0] == '\0')
+		db_get_value_string("device", "deviceinfo", "ManufacturerOUI", value);
+
 	return 0;
 }
 
+/*#Device.DeviceInfo.ProductClass!UCI:cwmp/cpe,cpe/product_class*/
 static int get_device_productclass(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = os__get_deviceid_productclass();
+	dmuci_get_option_value_string("cwmp", "cpe", "product_class", value);
+	if (*value[0] == '\0')
+		db_get_value_string("device", "deviceinfo", "ProductClass", value);
+
 	return 0;
 }
 
 static int get_device_serialnumber(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = os__get_deviceid_serialnumber();
+	db_get_value_string("device", "deviceinfo", "SerialNumber", value);
 	return 0;
 }
 
 static int get_device_softwareversion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = os__get_softwareversion();
+	db_get_value_string("device", "deviceinfo", "SoftwareVersion", value);
 	return 0;
 }
 
 static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmstrdup("Device.DeviceInfo.FirmwareImage.1");
+	return 0;
+}
+
+static int get_device_hardwareversion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	db_get_value_string("device", "deviceinfo", "HardwareVersion", value);
+	return 0;
+}
+
+static int get_device_devicecategory(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	db_get_value_string("device", "deviceinfo", "DeviceCategory", value);
+	return 0;
+}
+
+static int get_device_additionalhardwareversion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	db_get_value_string("device", "deviceinfo", "AdditionalHardwareVersion", value);
+	return 0;
+}
+
+static int get_device_additionalsoftwareversion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	db_get_value_string("device", "deviceinfo", "AdditionalSoftwareVersion", value);
+	return 0;
+}
+
+/*#Device.DeviceInfo.ModelName!UCI:cwmp/cpe,cpe/model_name*/
+static int get_device_modelname(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("cwmp", "cpe", "model_name", value);
+	if (*value[0] == '\0')
+		db_get_value_string("device", "deviceinfo", "ModelName", value);
+	return 0;
+}
+
+/*#Device.DeviceInfo.Description!UCI:cwmp/cpe,cpe/description*/
+static int get_device_description(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("cwmp", "cpe", "description", value);
+	if (*value[0] == '\0')
+		db_get_value_string("device", "deviceinfo", "Description", value);
 	return 0;
 }
 
@@ -542,40 +595,151 @@ static int get_FirmwareImage_bootfailurelog(char *refparam, struct dmctx *ctx, v
 	return 0;
 }
 
+/*#Device.DeviceInfo.MemoryStatus.Total!UBUS:router.system/memory//total*/
+static int get_memory_status_total(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res;
+	dmubus_call("router.system", "memory", UBUS_ARGS{{}}, 0, &res);
+	DM_ASSERT(res, *value = "0");
+	*value = dmjson_get_value(res, 1, "total");
+	return 0;
+}
+
+/*#Device.DeviceInfo.MemoryStatus.Free!UBUS:router.system/memory//free*/
+static int get_memory_status_free(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res;
+	dmubus_call("router.system", "memory", UBUS_ARGS{{}}, 0, &res);
+	DM_ASSERT(res, *value = "0");
+	*value = dmjson_get_value(res, 1, "free");
+	return 0;
+}
+
+/*#Device.DeviceInfo.ProcessStatus.CPUUsage!UBUS:router.system/process//cpu_usage*/
+static int get_process_cpu_usage(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res;
+	dmubus_call("router.system", "process", UBUS_ARGS{{}}, 0, &res);
+	DM_ASSERT(res, *value = "0");
+	*value = dmjson_get_value(res, 1, "cpu_usage");
+	return 0;
+}
+
+/*#Device.DeviceInfo.ProcessStatus.ProcessNumberOfEntries!UBUS:router.system/processes//processes*/
+static int get_process_number_of_entries(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL, *processes = NULL;
+	int nbre_process = 0;
+
+	dmubus_call("router.system", "processes", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "0");
+	json_object_object_get_ex(res, "processes", &processes);
+	nbre_process = (processes) ? json_object_array_length(processes) : 0;
+	dmasprintf(value, "%d", nbre_process);
+	return 0;
+}
+
+/*#Device.DeviceInfo.ProcessStatus.Process.{i}.!UBUS:router.system/processes//processes*/
+static int browseProcessEntriesInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	json_object *res = NULL, *processes = NULL, *arrobj = NULL;
+	char *inst = NULL, *max_inst = NULL;
+	int id = 0, i = 0;
+
+	dmubus_call("router.system", "processes", UBUS_ARGS{}, 0, &res);
+	dmjson_foreach_obj_in_array(res, arrobj, processes, i, 1, "processes") {
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)processes, inst) == DM_STOP)
+			break;
+	}
+	return 0;
+}
+
+/*#Device.DeviceInfo.ProcessStatus.Process.{i}.PID!UBUS:router.system/processes//processes[@i-1].pid*/
+static int get_process_pid(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "pid");
+	return 0;
+}
+
+/*#Device.DeviceInfo.ProcessStatus.Process.{i}.Command!UBUS:router.system/processes//processes[@i-1].command*/
+static int get_process_command(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "command");
+	return 0;
+}
+
+/*#Device.DeviceInfo.ProcessStatus.Process.{i}.Size!UBUS:router.system/processes//processes[@i-1].vsz*/
+static int get_process_size(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "vsz");
+	return 0;
+}
+
+/*#Device.DeviceInfo.ProcessStatus.Process.{i}.Priority!UBUS:router.system/processes//processes[@i-1].priority*/
+static int get_process_priority(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int priority = 0;
+
+	*value = dmjson_get_value((json_object *)data, 1, "priority");
+
+	priority = (*value && **value) ? atoi(*value) : 0;
+
+	/* Convert Linux priority to a value between 0 and 99 */
+	priority = round((priority + 100) * 99 / 139);
+
+	dmasprintf(value, "%d", priority);
+
+	return 0;
+}
+
+/*#Device.DeviceInfo.ProcessStatus.Process.{i}.CPUTime!UBUS:router.system/processes//processes[@i-1].cputime*/
+static int get_process_cpu_time(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "cputime");
+	return 0;
+}
+
+/*#Device.DeviceInfo.ProcessStatus.Process.{i}.State!UBUS:router.system/processes//processes[@i-1].state*/
+static int get_process_state(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *state = dmjson_get_value((json_object *)data, 1, "state");
+	*value = (state && strcmp(state, "Unknown") == 0) ? "Idle" : state;
+	return 0;
+}
 
 /* *** Device.DeviceInfo. *** */
 DMOBJ tDeviceInfoObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"VendorConfigFile", &DMREAD, NULL, NULL, NULL, browseVcfInst, NULL, NULL, tDeviceInfoVendorConfigFileParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"MemoryStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoMemoryStatusParams, NULL, BBFDM_BOTH},
-{"ProcessStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, tDeviceInfoProcessStatusObj, tDeviceInfoProcessStatusParams, NULL, BBFDM_BOTH},
-{"Processor", &DMREAD, NULL, NULL, NULL, browseDeviceInfoProcessorInst, NULL, NULL, tDeviceInfoProcessorParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{"VendorLogFile", &DMREAD, NULL, NULL, NULL, browseVlfInst, NULL, NULL, tDeviceInfoVendorLogFileParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"SupportedDataModel", &DMREAD, NULL, NULL, NULL, browseDeviceInfoSupportedDataModelInst, NULL, NULL, tDeviceInfoSupportedDataModelParams, NULL, BBFDM_CWMP, LIST_KEY{"URL", "Alias", "UUID", NULL}},
-{"FirmwareImage", &DMREAD, NULL, NULL, NULL, browseDeviceInfoFirmwareImageInst, NULL, NULL, tDeviceInfoFirmwareImageParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"VendorConfigFile", &DMREAD, NULL, NULL, NULL, browseVcfInst, NULL, NULL, NULL, tDeviceInfoVendorConfigFileParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"MemoryStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoMemoryStatusParams, NULL, BBFDM_BOTH},
+{"ProcessStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoProcessStatusObj, tDeviceInfoProcessStatusParams, NULL, BBFDM_BOTH},
+{"Processor", &DMREAD, NULL, NULL, NULL, browseDeviceInfoProcessorInst, NULL, NULL, NULL, tDeviceInfoProcessorParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"VendorLogFile", &DMREAD, NULL, NULL, NULL, browseVlfInst, NULL, NULL, NULL, tDeviceInfoVendorLogFileParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"SupportedDataModel", &DMREAD, NULL, NULL, NULL, browseDeviceInfoSupportedDataModelInst, NULL, NULL, NULL, tDeviceInfoSupportedDataModelParams, NULL, BBFDM_CWMP, LIST_KEY{"URL", "Alias", "UUID", NULL}},
+{"FirmwareImage", &DMREAD, NULL, NULL, NULL, browseDeviceInfoFirmwareImageInst, NULL, NULL, NULL, tDeviceInfoFirmwareImageParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
 DMLEAF tDeviceInfoParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"DeviceCategory", &DMREAD, DMT_STRING, os__get_device_devicecategory, NULL, BBFDM_BOTH},
+{"DeviceCategory", &DMREAD, DMT_STRING, get_device_devicecategory, NULL, BBFDM_BOTH},
 {"Manufacturer", &DMREAD, DMT_STRING, get_device_manufacturer, NULL, BBFDM_BOTH},
 {"ManufacturerOUI", &DMREAD, DMT_STRING, get_device_manufactureroui, NULL, BBFDM_BOTH},
-{"ModelName", &DMREAD, DMT_STRING, os__get_device_modelname, NULL, BBFDM_BOTH},
-{"Description", &DMREAD, DMT_STRING, os__get_device_description, NULL, BBFDM_BOTH},
+{"ModelName", &DMREAD, DMT_STRING, get_device_modelname, NULL, BBFDM_BOTH},
+{"Description", &DMREAD, DMT_STRING, get_device_description, NULL, BBFDM_BOTH},
 {"ProductClass", &DMREAD, DMT_STRING, get_device_productclass, NULL, BBFDM_BOTH},
 {"SerialNumber", &DMREAD, DMT_STRING, get_device_serialnumber, NULL, BBFDM_BOTH},
-{"HardwareVersion", &DMREAD, DMT_STRING, os__get_device_hardwareversion, NULL, BBFDM_BOTH},
+{"HardwareVersion", &DMREAD, DMT_STRING, get_device_hardwareversion, NULL, BBFDM_BOTH},
 {"SoftwareVersion", &DMREAD, DMT_STRING, get_device_softwareversion, NULL, BBFDM_BOTH},
 {"ActiveFirmwareImage", &DMREAD, DMT_STRING, get_device_active_fwimage, NULL, BBFDM_BOTH},
-{"AdditionalHardwareVersion", &DMREAD, DMT_STRING, os__get_device_additionalhardwareversion, NULL, BBFDM_BOTH},
-{"AdditionalSoftwareVersion", &DMREAD, DMT_STRING, os__get_device_additionalsoftwareversion, NULL, BBFDM_BOTH},
+{"AdditionalHardwareVersion", &DMREAD, DMT_STRING, get_device_additionalhardwareversion, NULL, BBFDM_BOTH},
+{"AdditionalSoftwareVersion", &DMREAD, DMT_STRING, get_device_additionalsoftwareversion, NULL, BBFDM_BOTH},
 {"ProvisioningCode", &DMWRITE, DMT_STRING, get_device_provisioningcode, set_device_provisioningcode, BBFDM_BOTH},
 {"UpTime", &DMREAD, DMT_UNINT, get_device_info_uptime, NULL, BBFDM_BOTH},
 {"ProcessorNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_ProcessorNumberOfEntries, NULL, BBFDM_BOTH},
 {"SupportedDataModelNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_SupportedDataModelNumberOfEntries, NULL, BBFDM_CWMP},
 {"FirmwareImageNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_FirmwareImageNumberOfEntries, NULL, BBFDM_BOTH},
-{CUSTOM_PREFIX"BaseMACAddress", &DMREAD, DMT_STRING, os__get_base_mac_addr, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -594,33 +758,33 @@ DMLEAF tDeviceInfoVendorConfigFileParams[] = {
 /* *** Device.DeviceInfo.MemoryStatus. *** */
 DMLEAF tDeviceInfoMemoryStatusParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Total", &DMREAD, DMT_UNINT, os__get_memory_status_total, NULL, BBFDM_BOTH},
-{"Free", &DMREAD, DMT_UNINT, os__get_memory_status_free, NULL, BBFDM_BOTH},
+{"Total", &DMREAD, DMT_UNINT, get_memory_status_total, NULL, BBFDM_BOTH},
+{"Free", &DMREAD, DMT_UNINT, get_memory_status_free, NULL, BBFDM_BOTH},
 {0}
 };
 /* *** Device.DeviceInfo.ProcessStatus. *** */
 DMOBJ tDeviceInfoProcessStatusObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Process", &DMREAD, NULL, NULL, NULL, os__browseProcessEntriesInst, NULL, NULL, tDeviceInfoProcessStatusProcessParams, NULL, BBFDM_BOTH, LIST_KEY{"PID", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Process", &DMREAD, NULL, NULL, NULL, browseProcessEntriesInst, NULL, NULL, NULL, tDeviceInfoProcessStatusProcessParams, NULL, BBFDM_BOTH, LIST_KEY{"PID", NULL}},
 {0}
 };
 
 DMLEAF tDeviceInfoProcessStatusParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"CPUUsage", &DMREAD, DMT_UNINT, os__get_process_cpu_usage, NULL, BBFDM_BOTH},
-{"ProcessNumberOfEntries", &DMREAD, DMT_UNINT, os__get_process_number_of_entries, NULL, BBFDM_BOTH},
+{"CPUUsage", &DMREAD, DMT_UNINT, get_process_cpu_usage, NULL, BBFDM_BOTH},
+{"ProcessNumberOfEntries", &DMREAD, DMT_UNINT, get_process_number_of_entries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.DeviceInfo.ProcessStatus.Process.{i}. *** */
 DMLEAF tDeviceInfoProcessStatusProcessParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"PID", &DMREAD, DMT_UNINT, os__get_process_pid, NULL, BBFDM_BOTH},
-{"Command", &DMREAD, DMT_STRING, os__get_process_command, NULL, BBFDM_BOTH},
-{"Size", &DMREAD, DMT_UNINT, os__get_process_size, NULL, BBFDM_BOTH},
-{"Priority", &DMREAD, DMT_UNINT, os__get_process_priority, NULL, BBFDM_BOTH},
-{"CPUTime", &DMREAD, DMT_UNINT, os__get_process_cpu_time, NULL, BBFDM_BOTH},
-{"State", &DMREAD, DMT_STRING, os__get_process_state, NULL, BBFDM_BOTH},
+{"PID", &DMREAD, DMT_UNINT, get_process_pid, NULL, BBFDM_BOTH},
+{"Command", &DMREAD, DMT_STRING, get_process_command, NULL, BBFDM_BOTH},
+{"Size", &DMREAD, DMT_UNINT, get_process_size, NULL, BBFDM_BOTH},
+{"Priority", &DMREAD, DMT_UNINT, get_process_priority, NULL, BBFDM_BOTH},
+{"CPUTime", &DMREAD, DMT_UNINT, get_process_cpu_time, NULL, BBFDM_BOTH},
+{"State", &DMREAD, DMT_STRING, get_process_state, NULL, BBFDM_BOTH},
 {0}
 };
 

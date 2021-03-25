@@ -18,8 +18,24 @@ AM_CONDITIONAL([LOPENSSL],[test "x$enable_libopenssl" = "xyes"])
 AC_ARG_ENABLE(libmbedtls, [AS_HELP_STRING([--enable-libmbedtls], [enable libmbedtls upnp feature])], AC_DEFINE(LMBEDTLS),)
 AM_CONDITIONAL([LMBEDTLS],[test "x$enable_libmbedtls" = "xyes"])
 
-AC_ARG_ENABLE(generic_openwrt, [AS_HELP_STRING([--enable-generic-openwrt], [enable generic openwrt support])], AC_DEFINE(GENERIC_OPENWRT),)
-AM_CONDITIONAL([GENERIC_OPENWRT],[test "x$enable_generic_openwrt" = "xyes"])
+AC_ARG_ENABLE(vendor_extension, [AS_HELP_STRING([--enable-vendor-extension], [enable vendor extension])], AC_DEFINE(BBF_VENDOR_EXTENSION),)
+AM_CONDITIONAL([BBF_VENDOR_EXTENSION],[test "x$enable_vendor_extension" = "xyes"])
+
+case $BBF_VENDOR_LIST in
+  *openwrt*) vendor_openwrt=yes ;;&
+  *iopsys*) vendor_iopsys=yes ;;&
+  *test*) vendor_test=yes ;;&
+  *) ;;
+esac
+
+AM_CONDITIONAL([BBF_VENDOR_IOPSYS],[test "x$vendor_iopsys" = "xyes"])
+AM_COND_IF([BBF_VENDOR_IOPSYS], [AC_DEFINE(BBF_VENDOR_IOPSYS)],)
+
+AM_CONDITIONAL([BBF_VENDOR_OPENWRT],[test "x$vendor_openwrt" = "xyes"])
+AM_COND_IF([BBF_VENDOR_OPENWRT], [AC_DEFINE(BBF_VENDOR_OPENWRT)],)
+
+AM_CONDITIONAL([BBF_VENDOR_TEST],[test "x$vendor_test" = "xyes"])
+AM_COND_IF([BBF_VENDOR_TEST], [AC_DEFINE(BBF_VENDOR_TEST)],)
 
 # checks for programs
 AC_PROG_CC

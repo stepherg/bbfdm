@@ -1479,27 +1479,6 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Protocol(char *refparam, 
 	return 0;
 }
 
-static int get_IPDiagnosticsServerSelectionDiagnostics_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = get_diagnostics_option_fallback_def("serverselection", "port", "1");
-	return 0;
-}
-
-static int set_IPDiagnosticsServerSelectionDiagnostics_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","65535"}}, 1))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			SERVERSELECTION_STOP;
-			set_diagnostics_option("serverselection", "port", value);
-			return 0;
-	}
-	return 0;
-}
-
 static int get_IPDiagnosticsServerSelectionDiagnostics_HostList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = get_diagnostics_option("serverselection", "HostList");
@@ -1636,13 +1615,13 @@ static int browseIPDiagnosticsUploadDiagnosticsPerConnectionResultInst(struct dm
 
 /* *** Device.IP.Diagnostics. *** */
 DMOBJ tIPDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"IPPing", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsIPPingParams, NULL, BBFDM_CWMP},
-{"TraceRoute", &DMREAD, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsTraceRouteObj, tIPDiagnosticsTraceRouteParams, NULL, BBFDM_CWMP},
-{"DownloadDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsDownloadDiagnosticsObj, tIPDiagnosticsDownloadDiagnosticsParams, NULL, BBFDM_CWMP},
-{"UploadDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsUploadDiagnosticsObj, tIPDiagnosticsUploadDiagnosticsParams, NULL, BBFDM_CWMP},
-{"UDPEchoDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsUDPEchoDiagnosticsParams, NULL, BBFDM_CWMP},
-{"ServerSelectionDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsServerSelectionDiagnosticsParams, NULL, BBFDM_CWMP},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"IPPing", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsIPPingParams, NULL, BBFDM_CWMP},
+{"TraceRoute", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsTraceRouteObj, tIPDiagnosticsTraceRouteParams, NULL, BBFDM_CWMP},
+{"DownloadDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsDownloadDiagnosticsObj, tIPDiagnosticsDownloadDiagnosticsParams, NULL, BBFDM_CWMP},
+{"UploadDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsUploadDiagnosticsObj, tIPDiagnosticsUploadDiagnosticsParams, NULL, BBFDM_CWMP},
+{"UDPEchoDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsUDPEchoDiagnosticsParams, NULL, BBFDM_CWMP},
+{"ServerSelectionDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsServerSelectionDiagnosticsParams, NULL, BBFDM_CWMP},
 {0}
 };
 
@@ -1687,8 +1666,8 @@ DMLEAF tIPDiagnosticsIPPingParams[] = {
 
 /* *** Device.IP.Diagnostics.TraceRoute. *** */
 DMOBJ tIPDiagnosticsTraceRouteObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"RouteHops", &DMREAD, NULL, NULL, NULL, browseIPDiagnosticsTraceRouteRouteHopsInst, NULL, NULL, tIPDiagnosticsTraceRouteRouteHopsParams, NULL, BBFDM_CWMP},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"RouteHops", &DMREAD, NULL, NULL, NULL, browseIPDiagnosticsTraceRouteRouteHopsInst, NULL, NULL, NULL, tIPDiagnosticsTraceRouteRouteHopsParams, NULL, BBFDM_CWMP},
 {0}
 };
 
@@ -1720,8 +1699,8 @@ DMLEAF tIPDiagnosticsTraceRouteRouteHopsParams[] = {
 
 /* *** Device.IP.Diagnostics.DownloadDiagnostics. *** */
 DMOBJ tIPDiagnosticsDownloadDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"PerConnectionResult", &DMREAD, NULL, NULL, NULL, browseIPDiagnosticsDownloadDiagnosticsPerConnectionResultInst, NULL, NULL, tIPDiagnosticsDownloadDiagnosticsPerConnectionResultParams, NULL, BBFDM_CWMP},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"PerConnectionResult", &DMREAD, NULL, NULL, NULL, browseIPDiagnosticsDownloadDiagnosticsPerConnectionResultInst, NULL, NULL, NULL, tIPDiagnosticsDownloadDiagnosticsPerConnectionResultParams, NULL, BBFDM_CWMP},
 {0}
 };
 
@@ -1769,8 +1748,8 @@ DMLEAF tIPDiagnosticsDownloadDiagnosticsPerConnectionResultParams[] = {
 
 /* *** Device.IP.Diagnostics.UploadDiagnostics. *** */
 DMOBJ tIPDiagnosticsUploadDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"PerConnectionResult", &DMREAD, NULL, NULL, NULL, browseIPDiagnosticsUploadDiagnosticsPerConnectionResultInst, NULL, NULL, tIPDiagnosticsUploadDiagnosticsPerConnectionResultParams, NULL, BBFDM_CWMP},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"PerConnectionResult", &DMREAD, NULL, NULL, NULL, browseIPDiagnosticsUploadDiagnosticsPerConnectionResultInst, NULL, NULL, NULL, tIPDiagnosticsUploadDiagnosticsPerConnectionResultParams, NULL, BBFDM_CWMP},
 {0}
 };
 
@@ -1844,7 +1823,6 @@ DMLEAF tIPDiagnosticsServerSelectionDiagnosticsParams[] = {
 {"Interface", &DMWRITE, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_Interface, set_IPDiagnosticsServerSelectionDiagnostics_Interface, BBFDM_CWMP},
 {"ProtocolVersion", &DMWRITE, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_ProtocolVersion, set_IPDiagnosticsServerSelectionDiagnostics_ProtocolVersion, BBFDM_CWMP},
 {"Protocol", &DMWRITE, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_Protocol, set_IPDiagnosticsServerSelectionDiagnostics_Protocol, BBFDM_CWMP},
-{CUSTOM_PREFIX"Port", &DMWRITE, DMT_UNINT, get_IPDiagnosticsServerSelectionDiagnostics_Port, set_IPDiagnosticsServerSelectionDiagnostics_Port, BBFDM_CWMP},
 {"HostList", &DMWRITE, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_HostList, set_IPDiagnosticsServerSelectionDiagnostics_HostList, BBFDM_CWMP},
 {"NumberOfRepetitions", &DMWRITE, DMT_UNINT, get_IPDiagnosticsServerSelectionDiagnostics_NumberOfRepetitions, set_IPDiagnosticsServerSelectionDiagnostics_NumberOfRepetitions, BBFDM_CWMP},
 {"Timeout", &DMWRITE, DMT_UNINT, get_IPDiagnosticsServerSelectionDiagnostics_Timeout, set_IPDiagnosticsServerSelectionDiagnostics_Timeout, BBFDM_CWMP},

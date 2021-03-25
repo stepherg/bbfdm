@@ -343,7 +343,7 @@ def printheaderObjCommon( objname ):
 def cprintheaderOBJS( objname ):
 	fp = open('./.objparamarray.c', 'a')
 	print("DMOBJ %s[] = {" % ("t" + getname(objname) + "Obj"), file=fp)
-	print("/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/", file=fp)
+	print("/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/", file=fp)
 	fp.close()
 
 def hprintheaderOBJS( objname ):
@@ -837,9 +837,9 @@ def printOBJline( dmobject, value ):
 
 	fp = open('./.objparamarray.c', 'a')
 	if uniquekeys:
-		print("{\"%s\", %s, %s, %s, NULL, %s, NULL, %s, %s, NULL, %s, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm, uniquekeys), file=fp)
+		print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, %s, %s, NULL, %s, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm, uniquekeys), file=fp)
 	else:
-		print("{\"%s\", %s, %s, %s, NULL, %s, NULL, %s, %s, NULL, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm), file=fp)
+		print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, %s, %s, NULL, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm), file=fp)
 	fp.close()
 
 def printusage():

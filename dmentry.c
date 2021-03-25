@@ -13,8 +13,9 @@
  */
 
 #include "dmentry.h"
-#include "dmentryjson.h"
-#include "dmentrylibrary.h"
+#include "dmdynamicjson.h"
+#include "dmdynamiclibrary.h"
+#include "dmdynamicvendor.h"
 #include "dmoperate.h"
 #include "device.h"
 #include "dmbbfcommon.h"
@@ -23,6 +24,10 @@ LIST_HEAD(head_package_change);
 
 static char json_hash[64] = {0};
 static char library_hash[64] = {0};
+
+#ifdef BBF_VENDOR_EXTENSION
+static bool first_boot = false;
+#endif
 
 int usp_fault_map(int fault)
 {
@@ -119,18 +124,7 @@ static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, int
 	ctx->end_session_flag = 0;
 	return 0;
 }
-void dm_ctx_init_list_parameter(struct dmctx *ctx)
-{
-	INIT_LIST_HEAD(&ctx->list_parameter);
-	INIT_LIST_HEAD(&ctx->set_list_tmp);
-	INIT_LIST_HEAD(&ctx->list_fault_param);
-}
-void dm_ctx_clean_list_parameter(struct dmctx *ctx)
-{
-	free_all_list_parameter(ctx);
-	free_all_set_list_tmp(ctx);
-	free_all_list_fault_param(ctx);
-}
+
 static int dm_ctx_clean_custom(struct dmctx *ctx, int custom)
 {
 	free_all_list_parameter(ctx);
@@ -427,7 +421,7 @@ static int check_stats_folder(bool json_path)
 	return 0;
 }
 
-int load_dynamic_arrays(struct dmctx *ctx)
+void load_dynamic_arrays(struct dmctx *ctx)
 {
 	// Load dynamic objects and parameters exposed via a JSON file
 	if (check_stats_folder(true)) {
@@ -441,17 +435,25 @@ int load_dynamic_arrays(struct dmctx *ctx)
 		load_library_dynamic_arrays(ctx);
 	}
 
-	return 0;
+#ifdef BBF_VENDOR_EXTENSION
+	// Load objects and parameters exposed via vendor extension
+	if (first_boot == false) {
+		free_vendor_dynamic_arrays(tEntry181Obj);
+		load_vendor_dynamic_arrays(ctx);
+		first_boot = true;
+	}
+#endif
 }
 
-int free_dynamic_arrays(void)
+void free_dynamic_arrays(void)
 {
 	DMOBJ *root = tEntry181Obj;
 	DMNODE node = {.current_object = ""};
 
-	free_dm_browse_node_dynamic_object_tree(&node, root);
 	free_json_dynamic_arrays(tEntry181Obj);
 	free_library_dynamic_arrays(tEntry181Obj);
-
-	return 0;
+#ifdef BBF_VENDOR_EXTENSION
+	free_vendor_dynamic_arrays(tEntry181Obj);
+#endif
+	free_dm_browse_node_dynamic_object_tree(&node, root);
 }

@@ -903,8 +903,8 @@ static int get_FASTLineStatsQuarterHour_SuccessTIGA(char *refparam, struct dmctx
 
 /* *** Device.FAST. *** */
 DMOBJ tFASTObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Line", &DMREAD, NULL, NULL, NULL, browseFASTLineInst, NULL, tFASTLineObj, tFASTLineParams, get_fast_line_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Line", &DMREAD, NULL, NULL, NULL, browseFASTLineInst, NULL, NULL, tFASTLineObj, tFASTLineParams, get_fast_line_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
@@ -916,8 +916,8 @@ DMLEAF tFASTParams[] = {
 
 /* *** Device.FAST.Line.{i}. *** */
 DMOBJ tFASTLineObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsObj, tFASTLineStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsObj, tFASTLineStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -953,12 +953,12 @@ DMLEAF tFASTLineParams[] = {
 
 /* *** Device.FAST.Line.{i}.Stats. *** */
 DMOBJ tFASTLineStatsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsTotalParams, NULL, BBFDM_BOTH},
-{"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsShowtimeParams, NULL, BBFDM_BOTH},
-{"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsLastShowtimeParams, NULL, BBFDM_BOTH},
-{"CurrentDay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsCurrentDayParams, NULL, BBFDM_BOTH},
-{"QuarterHour", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsQuarterHourParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsTotalParams, NULL, BBFDM_BOTH},
+{"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsShowtimeParams, NULL, BBFDM_BOTH},
+{"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsLastShowtimeParams, NULL, BBFDM_BOTH},
+{"CurrentDay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsCurrentDayParams, NULL, BBFDM_BOTH},
+{"QuarterHour", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsQuarterHourParams, NULL, BBFDM_BOTH},
 {0}
 };
 

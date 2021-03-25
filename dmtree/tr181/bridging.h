@@ -26,4 +26,7 @@ extern DMOBJ tBridgingBridgePortObj[];
 extern DMLEAF tBridgingBridgePortStatsParams[];
 extern DMLEAF tBridgingProviderBridgeParams[];
 
+void bridging_get_priority_list(char *uci_opt_name, void *data, char **value);
+void bridging_set_priority_list(char *uci_opt_name, void *data, char *value);
+
 #endif

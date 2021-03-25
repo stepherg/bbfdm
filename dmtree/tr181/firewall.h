@@ -19,7 +19,5 @@ extern DMLEAF tFirewallLevelParams[];
 extern DMLEAF tFirewallChainParams[];
 extern DMOBJ tFirewallChainObj[];
 extern DMLEAF tFirewallChainRuleParams[];
-extern DMOBJ tFirewallChainRuleObj[];
-extern DMLEAF tTimeSpanParams[];
 
 #endif

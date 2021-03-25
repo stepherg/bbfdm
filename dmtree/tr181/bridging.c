@@ -2299,7 +2299,7 @@ static int set_BridgingBridgePort_DefaultUserPriority(char *refparam, struct dmc
 	return 0;
 }
 
-static void get_priority_list(char *uci_opt_name, void *data, char **value)
+void bridging_get_priority_list(char *uci_opt_name, void *data, char **value)
 {
 	struct uci_list *v= NULL;
 	struct uci_element *e = NULL;
@@ -2326,7 +2326,7 @@ static void get_priority_list(char *uci_opt_name, void *data, char **value)
 	dmasprintf(value, "%s", uci_value);
 }
 
-static void set_priority_list(char *uci_opt_name, void *data, char *value)
+void bridging_set_priority_list(char *uci_opt_name, void *data, char *value)
 {
 	char buf[16];
 	char *pch, *pchr;
@@ -2349,7 +2349,7 @@ static void set_priority_list(char *uci_opt_name, void *data, char *value)
 
 static int get_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	get_priority_list("ingress_qos_mapping", data, value);
+	bridging_get_priority_list("ingress_qos_mapping", data, value);
 	return 0;
 }
 
@@ -2362,50 +2362,8 @@ static int set_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dm
 			break;
 
 		case VALUESET:
-			set_priority_list("ingress_qos_mapping", data, value);
+			bridging_set_priority_list("ingress_qos_mapping", data, value);
 			break;
-	}
-	return 0;
-}
-
-static int get_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	get_priority_list("egress_qos_mapping", data, value);
-	return 0;
-}
-
-static int set_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_unsignedInt_list(value, 8, 8, -1, RANGE_ARGS{{"0","7"}}, 1))
-				return FAULT_9007;
-			return 0;
-
-		case VALUESET:
-			set_priority_list("egress_qos_mapping", data, value);
-			return 0;
-	}
-	return 0;
-}
-
-static int get_BridgingBridgePort_DSCP_Eth_Priority_Map(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	get_priority_list("dscp2pbit", data, value);
-	return 0;
-}
-
-static int set_BridgingBridgePort_DSCP_Eth_Priority_Map(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_unsignedInt_list(value, 1, 64, -1, RANGE_ARGS{{"0","7"}}, 1))
-				return FAULT_9007;
-			return 0;
-
-		case VALUESET:
-			set_priority_list("dscp2pbit", data, value);
-			return 0;
 	}
 	return 0;
 }
@@ -3385,9 +3343,9 @@ static int browseBridgingBridgeVLANPortInst(struct dmctx *dmctx, DMNODE *parent_
 ***********************************************************************************************************************************/
 /* *** Device.Bridging. *** */
 DMOBJ tBridgingObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Bridge", &DMWRITE, addObjBridgingBridge, delObjBridgingBridge, NULL, browseBridgingBridgeInst, NULL, tBridgingBridgeObj, tBridgingBridgeParams, get_linker_bridge, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{"ProviderBridge", &DMWRITE, addObjBridgingProviderBridge , delObjBridgingProviderBridge, NULL, browseBridgingProviderBridgeInst, NULL, NULL, tBridgingProviderBridgeParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Bridge", &DMWRITE, addObjBridgingBridge, delObjBridgingBridge, NULL, browseBridgingBridgeInst, NULL, NULL, tBridgingBridgeObj, tBridgingBridgeParams, get_linker_bridge, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"ProviderBridge", &DMWRITE, addObjBridgingProviderBridge, delObjBridgingProviderBridge, NULL, browseBridgingProviderBridgeInst, NULL, NULL, NULL, tBridgingProviderBridgeParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -3406,10 +3364,10 @@ DMLEAF tBridgingParams[] = {
 
 /*** Bridging.Bridge.{i}. ***/
 DMOBJ tBridgingBridgeObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Port", &DMWRITE, addObjBridgingBridgePort, delObjBridgingBridgePort, NULL, browseBridgingBridgePortInst, NULL, tBridgingBridgePortObj, tBridgingBridgePortParams, get_linker_br_port, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"VLAN", &DMWRITE, addObjBridgingBridgeVLAN, delObjBridgingBridgeVLAN, NULL, browseBridgingBridgeVLANInst, NULL, NULL, tBridgingBridgeVLANParams, get_linker_br_vlan, BBFDM_BOTH, LIST_KEY{"VLANID", "Alias", NULL}},
-{"VLANPort", &DMWRITE, addObjBridgingBridgeVLANPort, delObjBridgingBridgeVLANPort, NULL, browseBridgingBridgeVLANPortInst, NULL, NULL, tBridgingBridgeVLANPortParams, NULL, BBFDM_BOTH, LIST_KEY{"VLAN", "Port", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Port", &DMWRITE, addObjBridgingBridgePort, delObjBridgingBridgePort, NULL, browseBridgingBridgePortInst, NULL, NULL, tBridgingBridgePortObj, tBridgingBridgePortParams, get_linker_br_port, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"VLAN", &DMWRITE, addObjBridgingBridgeVLAN, delObjBridgingBridgeVLAN, NULL, browseBridgingBridgeVLANInst, NULL, NULL, NULL, tBridgingBridgeVLANParams, get_linker_br_vlan, BBFDM_BOTH, LIST_KEY{"VLANID", "Alias", NULL}},
+{"VLANPort", &DMWRITE, addObjBridgingBridgeVLANPort, delObjBridgingBridgeVLANPort, NULL, browseBridgingBridgeVLANPortInst, NULL, NULL, NULL, tBridgingBridgeVLANPortParams, NULL, BBFDM_BOTH, LIST_KEY{"VLAN", "Port", "Alias", NULL}},
 {0}
 };
 
@@ -3427,8 +3385,8 @@ DMLEAF tBridgingBridgeParams[] = {
 
 /*** Bridging.Bridge.{i}.Port.{i}. ***/
 DMOBJ tBridgingBridgePortObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tBridgingBridgePortStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tBridgingBridgePortStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -3444,8 +3402,6 @@ DMLEAF tBridgingBridgePortParams[] = {
 //{"Type", &DMWRITE, DMT_STRING, get_BridgingBridgePort_Type, set_BridgingBridgePort_Type, BBFDM_BOTH},
 {"DefaultUserPriority", &DMWRITE, DMT_UNINT, get_BridgingBridgePort_DefaultUserPriority, set_BridgingBridgePort_DefaultUserPriority, BBFDM_BOTH},
 {"PriorityRegeneration", &DMWRITE, DMT_STRING, get_BridgingBridgePort_PriorityRegeneration, set_BridgingBridgePort_PriorityRegeneration, BBFDM_BOTH},
-{"X_IOPSYS_EU_EgressPriorityRegeneration", &DMWRITE, DMT_STRING, get_BridgingBridgePort_Egress_PriorityRegeneration, set_BridgingBridgePort_Egress_PriorityRegeneration, BBFDM_BOTH},
-{"X_IOPSYS_EU_DSCPEthernetPriorityMapping", &DMWRITE, DMT_STRING, get_BridgingBridgePort_DSCP_Eth_Priority_Map, set_BridgingBridgePort_DSCP_Eth_Priority_Map, BBFDM_BOTH},
 //{"PortState", &DMREAD, DMT_STRING, get_BridgingBridgePort_PortState, NULL, BBFDM_BOTH},
 {"PVID", &DMWRITE, DMT_INT, get_BridgingBridgePort_PVID, set_BridgingBridgePort_PVID, BBFDM_BOTH},
 {"TPID", &DMWRITE, DMT_UNINT, get_BridgingBridgePort_TPID, set_BridgingBridgePort_TPID, BBFDM_BOTH},

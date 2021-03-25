@@ -434,7 +434,6 @@ static int set_nat_port_mapping_all_interface(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
-#ifndef GENERIC_OPENWRT
 /*#Device.NAT.PortMapping.{i}.LeaseDuration!UCI:firewall/redirect,@i-1/expiry*/
 static int get_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -468,7 +467,6 @@ static int set_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx
 	}
 	return 0;
 }
-#endif
 
 /*#Device.NAT.PortMapping.{i}.RemoteHost!UCI:firewall/redirect,@i-1/src_dip*/
 static int get_nat_port_mapping_remote_host(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -696,9 +694,9 @@ static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 
 /* *** Device.NAT. *** */
 DMOBJ tNATObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"InterfaceSetting", &DMWRITE, add_NAT_InterfaceSetting, delete_NAT_InterfaceSetting, NULL, browseInterfaceSettingInst, NULL, NULL, tNATInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
-{"PortMapping", &DMWRITE, add_NAT_PortMapping, delete_NAT_PortMapping, NULL, browsePortMappingInst, NULL, NULL, tNATPortMappingParams, NULL, BBFDM_BOTH, LIST_KEY{"RemoteHost", "ExternalPort", "Protocol", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"InterfaceSetting", &DMWRITE, add_NAT_InterfaceSetting, delete_NAT_InterfaceSetting, NULL, browseInterfaceSettingInst, NULL, NULL, NULL, tNATInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
+{"PortMapping", &DMWRITE, add_NAT_PortMapping, delete_NAT_PortMapping, NULL, browsePortMappingInst, NULL, NULL, NULL, tNATPortMappingParams, NULL, BBFDM_BOTH, LIST_KEY{"RemoteHost", "ExternalPort", "Protocol", "Alias", NULL}},
 {0}
 };
 
@@ -727,9 +725,7 @@ DMLEAF tNATPortMappingParams[] = {
 {"Alias", &DMWRITE, DMT_STRING, get_nat_port_mapping_alias, set_nat_port_mapping_alias, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, get_nat_port_mapping_interface, set_nat_port_mapping_interface, BBFDM_BOTH},
 {"AllInterfaces", &DMWRITE, DMT_BOOL, get_nat_port_mapping_all_interface, set_nat_port_mapping_all_interface, BBFDM_BOTH},
-#ifndef GENERIC_OPENWRT
 {"LeaseDuration", &DMWRITE, DMT_UNINT, get_nat_port_mapping_lease_duration, set_nat_port_mapping_lease_duration, BBFDM_BOTH},
-#endif
 {"RemoteHost", &DMWRITE, DMT_STRING, get_nat_port_mapping_remote_host, set_nat_port_mapping_remote_host, BBFDM_BOTH},
 {"ExternalPort", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port, set_nat_port_mapping_external_port, BBFDM_BOTH},
 {"ExternalPortEndRange", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port_end_range, set_nat_port_mapping_external_port_end_range, BBFDM_BOTH},

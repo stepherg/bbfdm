@@ -33,8 +33,8 @@ lib_LTLIBRARIES += libbbfdm.la
 
 libbbfdm_la_SOURCES =	\
 	../dmentry.c 		\
-	../dmentrylibrary.c \
-	../dmentryjson.c 	\
+	../dmdynamiclibrary.c \
+	../dmdynamicjson.c 	\
 	../dmmemjson.c 		\
 	../dmoperate.c		\
 	../dmdiagnostics.c	\
@@ -47,12 +47,6 @@ libbbfdm_la_SOURCES +=							\
 	../dmtree/tr181/managementserver.c			\
 	../dmtree/tr181/times.c						\
 	../dmtree/tr181/upnp.c						\
-	../dmtree/tr181/x_iopsys_eu_igmp.c 			\
-	../dmtree/tr181/x_iopsys_eu_mld.c 			\
-	../dmtree/tr181/x_iopsys_eu_syslog.c		\
-	../dmtree/tr181/x_iopsys_eu_dropbear.c		\
-	../dmtree/tr181/x_iopsys_eu_owsd.c			\
-	../dmtree/tr181/x_iopsys_eu_buttons.c		\
 	../dmtree/tr181/wifi.c						\
 	../dmtree/tr181/ethernet.c					\
 	../dmtree/tr181/atm.c						\
@@ -83,20 +77,6 @@ libbbfdm_la_SOURCES +=							\
 	
 endif
 
-if GENERIC_OPENWRT
-libbbfdm_la_SOURCES += \
-	../dmtree/tr181/deviceinfo-openwrt.c \
-	../dmtree/tr181/wifi-openwrt.c \
-	../dmtree/tr181/hosts-openwrt.c \
-	../dmtree/tr181/qos-openwrt.c						
-else
-libbbfdm_la_SOURCES += \
-	../dmtree/tr181/deviceinfo-iopsyswrt.c \
-	../dmtree/tr181/wifi-iopsyswrt.c \
-	../dmtree/tr181/hosts-iopsyswrt.c \
-	../dmtree/tr181/qos-iopsyswrt.c				
-endif
-
 if BBF_TR104
 libbbfdm_la_SOURCES +=	\
 	../dmtree/tr104/common.c				\
@@ -114,6 +94,43 @@ endif
 if BBF_TR143
 libbbfdm_la_SOURCES +=							\
 	../dmtree/tr143/diagnostics.c
+endif
+
+if BBF_VENDOR_EXTENSION
+
+libbbfdm_la_SOURCES +=	\
+	../dmdynamicvendor.c 	\
+	../dmtree/vendor/vendor.c
+
+if BBF_VENDOR_IOPSYS
+libbbfdm_la_SOURCES +=	\
+	../dmtree/vendor/iopsys/tr181/vendor.c					\
+	../dmtree/vendor/iopsys/tr181/device.c					\
+	../dmtree/vendor/iopsys/tr181/deviceinfo.c				\
+	../dmtree/vendor/iopsys/tr181/bridging.c					\
+	../dmtree/vendor/iopsys/tr181/ethernet.c					\
+	../dmtree/vendor/iopsys/tr181/ieee1905.c					\
+	../dmtree/vendor/iopsys/tr181/times.c						\
+	../dmtree/vendor/iopsys/tr181/x_iopsys_eu_igmp.c 			\
+	../dmtree/vendor/iopsys/tr181/x_iopsys_eu_mld.c
+endif
+
+if BBF_VENDOR_OPENWRT
+libbbfdm_la_SOURCES +=	\
+	../dmtree/vendor/openwrt/tr181/vendor.c					\
+	../dmtree/vendor/openwrt/tr181/deviceinfo.c				\
+	../dmtree/vendor/openwrt/tr181/qos.c
+endif
+
+if BBF_VENDOR_TEST
+libbbfdm_la_SOURCES +=	\
+	../dmtree/vendor/test/tr181/vendor.c					\
+	../dmtree/vendor/test/tr181/deviceinfo.c 				\
+	../dmtree/vendor/test/tr181/firewall.c					\
+	../dmtree/vendor/test/tr181/device.c 					\
+	../dmtree/vendor/test/tr181/x_test_com_dropbear.c
+endif
+
 endif
 
 libbbfdm_la_CFLAGS =		\
@@ -144,6 +161,7 @@ libbbfdm_la_LIBADD =		\
 	-lbbf_api
 
 libbbfdm_la_CFLAGS+=-I../
+libbbfdm_la_CFLAGS+=-I../dmtree
 libbbfdm_la_CFLAGS+=-I../dmtree/tr181
 libbbfdm_la_CFLAGS+=-I../dmtree/tr104
 libbbfdm_la_CFLAGS+=-I../dmtree/tr143

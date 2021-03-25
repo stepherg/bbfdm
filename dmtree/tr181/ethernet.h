@@ -28,7 +28,8 @@ extern DMLEAF tEthernetVLANTerminationParams[];
 extern DMLEAF tEthernetVLANTerminationStatsParams[];
 extern DMLEAF tEthernetRMONStatsParams[];
 
-void get_bridge_port_linker(struct dmctx *ctx, char *intf_name, char **value);
 int is_vlan_termination_section(const char *name);
+int ethernet_check_section_in_curr_section(char *curr_section, char *section);
+int ethernet_name_exists_in_devices(char *name);
 
 #endif //__ETHERNET_H

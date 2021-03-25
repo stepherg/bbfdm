@@ -524,12 +524,12 @@ static int set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNum
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.CallControl. *** */
 DMOBJ tServicesVoiceServiceCallControlObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Line", &DMWRITE, addObjServicesVoiceServiceCallControlLine, delObjServicesVoiceServiceCallControlLine, NULL, browseServicesVoiceServiceCallControlLineInst, NULL, NULL, tServicesVoiceServiceCallControlLineParams, get_voice_service_line_linker, BBFDM_BOTH, LIST_KEY{"DirectoryNumber", "Alias", NULL}},
-{"IncomingMap", &DMWRITE, addObjServicesVoiceServiceCallControlIncomingMap, delObjServicesVoiceServiceCallControlIncomingMap, NULL, browseServicesVoiceServiceCallControlIncomingMapInst, NULL, NULL, tServicesVoiceServiceCallControlIncomingMapParams, NULL, BBFDM_BOTH, LIST_KEY{"Line", "Extension", "Alias", NULL}},
-{"OutgoingMap", &DMWRITE, addObjServicesVoiceServiceCallControlOutgoingMap, delObjServicesVoiceServiceCallControlOutgoingMap, NULL, browseServicesVoiceServiceCallControlOutgoingMapInst, NULL, NULL, tServicesVoiceServiceCallControlOutgoingMapParams, NULL, BBFDM_BOTH, LIST_KEY{"Extension", "Line", "Alias", NULL}},
-{"NumberingPlan", &DMWRITE, addObjServicesVoiceServiceCallControlNumberingPlan, delObjServicesVoiceServiceCallControlNumberingPlan, NULL, browseServicesVoiceServiceCallControlNumberingPlanInst, NULL, NULL, tServicesVoiceServiceCallControlNumberingPlanParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{"CallingFeatures", &DMREAD, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesObj, NULL, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Line", &DMWRITE, addObjServicesVoiceServiceCallControlLine, delObjServicesVoiceServiceCallControlLine, NULL, browseServicesVoiceServiceCallControlLineInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineParams, get_voice_service_line_linker, BBFDM_BOTH, LIST_KEY{"DirectoryNumber", "Alias", NULL}},
+{"IncomingMap", &DMWRITE, addObjServicesVoiceServiceCallControlIncomingMap, delObjServicesVoiceServiceCallControlIncomingMap, NULL, browseServicesVoiceServiceCallControlIncomingMapInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlIncomingMapParams, NULL, BBFDM_BOTH, LIST_KEY{"Line", "Extension", "Alias", NULL}},
+{"OutgoingMap", &DMWRITE, addObjServicesVoiceServiceCallControlOutgoingMap, delObjServicesVoiceServiceCallControlOutgoingMap, NULL, browseServicesVoiceServiceCallControlOutgoingMapInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlOutgoingMapParams, NULL, BBFDM_BOTH, LIST_KEY{"Extension", "Line", "Alias", NULL}},
+{"NumberingPlan", &DMWRITE, addObjServicesVoiceServiceCallControlNumberingPlan, delObjServicesVoiceServiceCallControlNumberingPlan, NULL, browseServicesVoiceServiceCallControlNumberingPlanInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlNumberingPlanParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"CallingFeatures", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesObj, NULL, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -567,15 +567,15 @@ DMLEAF tServicesVoiceServiceCallControlNumberingPlanParams[] = {
 
 /* *** Device.Services.VoiceService.{i}.CallControl.CallingFeatures. *** */
 DMOBJ tServicesVoiceServiceCallControlCallingFeaturesObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Set", &DMWRITE, addObjServicesVoiceServiceCallControlCallingFeaturesSet, delObjServicesVoiceServiceCallControlCallingFeaturesSet, NULL, browseServicesVoiceServiceCallControlCallingFeaturesSetInst, NULL, tServicesVoiceServiceCallControlCallingFeaturesSetObj, tServicesVoiceServiceCallControlCallingFeaturesSetParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Set", &DMWRITE, addObjServicesVoiceServiceCallControlCallingFeaturesSet, delObjServicesVoiceServiceCallControlCallingFeaturesSet, NULL, browseServicesVoiceServiceCallControlCallingFeaturesSetInst, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesSetObj, tServicesVoiceServiceCallControlCallingFeaturesSetParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
 /* *** Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}. *** */
 DMOBJ tServicesVoiceServiceCallControlCallingFeaturesSetObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"SCREJ", &DMWRITE, addObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ, delObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ, NULL, browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesSetSCREJParams, NULL, BBFDM_BOTH, LIST_KEY{"CallingNumber", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"SCREJ", &DMWRITE, addObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ, delObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ, NULL, browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesSetSCREJParams, NULL, BBFDM_BOTH, LIST_KEY{"CallingNumber", "Alias", NULL}},
 {0}
 };
 

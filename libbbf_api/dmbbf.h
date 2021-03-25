@@ -75,7 +75,12 @@ struct dmctx;
 
 struct dm_dynamic_obj {
 	struct dm_obj_s **nextobj;
-	int isstatic;
+	int idx_type;
+};
+
+struct dm_dynamic_leaf {
+	struct dm_leaf_s **nextleaf;
+	int idx_type;
 };
 
 struct dm_permession_s {
@@ -99,7 +104,7 @@ typedef struct dm_leaf_s {
 } DMLEAF;
 
 typedef struct dm_obj_s {
-	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys(12)*/
+	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys(13)*/
 	char *obj;
 	struct dm_permession_s *permission;
 	int (*addobj)(char *refparam, struct dmctx *ctx, void *data, char **instance);
@@ -107,6 +112,7 @@ typedef struct dm_obj_s {
 	char *checkdep;
 	int (*browseinstobj)(struct dmctx *dmctx, struct dmnode *node, void *data, char *instance);
 	struct dm_dynamic_obj *nextdynamicobj;
+	struct dm_dynamic_leaf *dynamicleaf;
 	struct dm_obj_s *nextobj;
 	struct dm_leaf_s *leaf;
 	int (*get_linker)(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker);
@@ -194,10 +200,21 @@ struct notification {
 	char *type;
 };
 
-typedef struct lib_map_obj {
+typedef struct dm_map_obj {
 	char *path;
 	struct dm_obj_s *root_obj;
-} LIB_MAP_OBJ;
+	struct dm_leaf_s *root_leaf;
+} DM_MAP_OBJ;
+
+typedef struct dm_map_vendor {
+	char *vendor;
+	struct dm_map_obj *vendor_obj;
+} DM_MAP_VENDOR;
+
+typedef struct dm_map_vendor_exclude {
+	char *vendor;
+	char **vendor_obj;
+} DM_MAP_VENDOR_EXCLUDE;
 
 enum operate_ret_status{
 	UBUS_INVALID_ARGUMENTS,
@@ -216,11 +233,11 @@ typedef enum operate_ret_status opr_ret_t;
 
 typedef opr_ret_t (*operation) (struct dmctx *dmctx, char *p, json_object *input);
 
-typedef struct lib_map_operate {
+typedef struct dm_map_operate {
 	char *path;
 	operation operate;
 	char *type; // sync or async
-} LIB_MAP_OPERATE;
+} DM_MAP_OPERATE;
 
 enum set_value_action {
 	VALUECHECK,
@@ -381,11 +398,13 @@ enum bbfdm_type_enum {
 	BBFDM_BOTH,
 	BBFDM_CWMP,
 	BBFDM_USP,
+	BBFDM_NONE
 };
 
 enum {
-	INDX_JSON_OBJ_MOUNT,
-	INDX_LIBRARY_OBJ_MOUNT,
+	INDX_JSON_MOUNT,
+	INDX_LIBRARY_MOUNT,
+	INDX_VENDOR_MOUNT,
 	__INDX_DYNAMIC_MAX
 };
 
@@ -431,8 +450,12 @@ char *get_last_instance_lev2_bbfdm_dmmap_opt(char* dmmap_package, char *section,
 char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check);
 char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...);
 int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
+void dm_exclude_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *data);
 void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found);
-int free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj);
+bool find_root_entry(struct dmctx *ctx, char *in_param, DMOBJ **root_entry);
+int get_obj_idx_dynamic_array(DMOBJ **entryobj);
+int get_leaf_idx_dynamic_array(DMLEAF **entryleaf);
+void free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj);
 char *check_parameter_forced_notification(const char *parameter);
 
 static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)

@@ -29,7 +29,6 @@ extern DMLEAF tIEEE1905ALForwardingTableForwardingRuleParams[];
 extern DMOBJ tIEEE1905ALNetworkTopologyObj[];
 extern DMLEAF tIEEE1905ALNetworkTopologyParams[];
 extern DMLEAF tIEEE1905ALNetworkTopologyChangeLogParams[];
-extern DMLEAF tIEEE1905ALNetworkTopologyNonIEEE1905NeighborParams[];
 extern DMOBJ tIEEE1905ALNetworkTopologyIEEE1905DeviceObj[];
 extern DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceParams[];
 extern DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressParams[];

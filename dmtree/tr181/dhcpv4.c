@@ -2934,7 +2934,7 @@ static int browseDHCPv4ClientSentOptionInst(struct dmctx *dmctx, DMNODE *parent_
 		sentopts = strsplit(options, " ", &length);
 
 	for (i = 0; i < length; i++) {
-		if (sentopts[i])
+		if (sentopts && sentopts[i])
 			buf = strsplit(sentopts[i], ":", &length2);
 
 		if ((dhcp_client_dmmap_s = get_dup_section_in_dmmap_eq("dmmap_dhcp_client", "send_option", section_name(dhcp_client_s), "option_tag", buf[0])) == NULL) {
@@ -2983,6 +2983,9 @@ static int browseDHCPv4ClientReqOptionInst(struct dmctx *dmctx, DMNODE *parent_n
 		reqtopts = strsplit(options, " ", &length);
 
 	for (i = 0; i < length; i++) {
+		if (reqtopts == NULL)
+			continue;
+
 		if ((dhcp_client_dmmap_s = get_dup_section_in_dmmap_eq("dmmap_dhcp_client", "req_option", section_name(dhcp_client_s), "option_tag", reqtopts[i])) == NULL) {
 			dmuci_add_section_bbfdm("dmmap_dhcp_client", "req_option", &dhcp_client_dmmap_s);
 			dmuci_set_value_by_section_bbfdm(dhcp_client_dmmap_s, "option_tag", reqtopts[i]);
@@ -3114,10 +3117,10 @@ static int browseDHCPv4RelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_n
 ***********************************************************************************************************************************/
 /* *** Device.DHCPv4. *** */
 DMOBJ tDHCPv4Obj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Client", &DMWRITE, addObjDHCPv4Client, delObjDHCPv4Client, NULL, browseDHCPv4ClientInst, NULL, tDHCPv4ClientObj, tDHCPv4ClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
-{"Server", &DMREAD, NULL, NULL, NULL, NULL, NULL, tDHCPv4ServerObj, tDHCPv4ServerParams, NULL, BBFDM_BOTH},
-{"Relay", &DMREAD, NULL, NULL, NULL, NULL, NULL, tDHCPv4RelayObj, tDHCPv4RelayParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Client", &DMWRITE, addObjDHCPv4Client, delObjDHCPv4Client, NULL, browseDHCPv4ClientInst, NULL, NULL, tDHCPv4ClientObj, tDHCPv4ClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
+{"Server", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDHCPv4ServerObj, tDHCPv4ServerParams, NULL, BBFDM_BOTH},
+{"Relay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDHCPv4RelayObj, tDHCPv4RelayParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -3129,9 +3132,9 @@ DMLEAF tDHCPv4Params[] = {
 
 /* *** Device.DHCPv4.Client.{i}. *** */
 DMOBJ tDHCPv4ClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"SentOption", &DMWRITE, addObjDHCPv4ClientSentOption, delObjDHCPv4ClientSentOption, NULL, browseDHCPv4ClientSentOptionInst, NULL, NULL, tDHCPv4ClientSentOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
-{"ReqOption", &DMWRITE, addObjDHCPv4ClientReqOption, delObjDHCPv4ClientReqOption, NULL, browseDHCPv4ClientReqOptionInst, NULL, NULL, tDHCPv4ClientReqOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"SentOption", &DMWRITE, addObjDHCPv4ClientSentOption, delObjDHCPv4ClientSentOption, NULL, browseDHCPv4ClientSentOptionInst, NULL, NULL, NULL, tDHCPv4ClientSentOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
+{"ReqOption", &DMWRITE, addObjDHCPv4ClientReqOption, delObjDHCPv4ClientReqOption, NULL, browseDHCPv4ClientReqOptionInst, NULL, NULL, NULL, tDHCPv4ClientReqOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
 {0}
 };
 
@@ -3179,8 +3182,8 @@ DMLEAF tDHCPv4ClientReqOptionParams[] = {
 
 /* *** Device.DHCPv4.Server. *** */
 DMOBJ tDHCPv4ServerObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Pool", &DMWRITE, addObjDHCPv4ServerPool, delObjDHCPv4ServerPool, NULL, browseDHCPv4ServerPoolInst, NULL, tDHCPv4ServerPoolObj, tDHCPv4ServerPoolParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Pool", &DMWRITE, addObjDHCPv4ServerPool, delObjDHCPv4ServerPool, NULL, browseDHCPv4ServerPoolInst, NULL, NULL, tDHCPv4ServerPoolObj, tDHCPv4ServerPoolParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
@@ -3193,10 +3196,10 @@ DMLEAF tDHCPv4ServerParams[] = {
 
 /* *** Device.DHCPv4.Server.Pool.{i}. *** */
 DMOBJ tDHCPv4ServerPoolObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"StaticAddress", &DMWRITE, addObjDHCPv4ServerPoolStaticAddress, delObjDHCPv4ServerPoolStaticAddress, NULL, browseDHCPv4ServerPoolStaticAddressInst, NULL, NULL, tDHCPv4ServerPoolStaticAddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Chaddr", NULL}},
-{"Option", &DMWRITE, addObjDHCPv4ServerPoolOption, delObjDHCPv4ServerPoolOption, NULL, browseDHCPv4ServerPoolOptionInst, NULL, NULL, tDHCPv4ServerPoolOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
-{"Client", &DMREAD, NULL, NULL, NULL, browseDhcpClientInst, NULL, tDHCPv4ServerPoolClientObj, tDHCPv4ServerPoolClientParams, get_dhcp_client_linker, BBFDM_BOTH, LIST_KEY{"Chaddr", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"StaticAddress", &DMWRITE, addObjDHCPv4ServerPoolStaticAddress, delObjDHCPv4ServerPoolStaticAddress, NULL, browseDHCPv4ServerPoolStaticAddressInst, NULL, NULL, NULL, tDHCPv4ServerPoolStaticAddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Chaddr", NULL}},
+{"Option", &DMWRITE, addObjDHCPv4ServerPoolOption, delObjDHCPv4ServerPoolOption, NULL, browseDHCPv4ServerPoolOptionInst, NULL, NULL, NULL, tDHCPv4ServerPoolOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
+{"Client", &DMREAD, NULL, NULL, NULL, browseDhcpClientInst, NULL, NULL, tDHCPv4ServerPoolClientObj, tDHCPv4ServerPoolClientParams, get_dhcp_client_linker, BBFDM_BOTH, LIST_KEY{"Chaddr", "Alias", NULL}},
 {0}
 };
 
@@ -3254,9 +3257,9 @@ DMLEAF tDHCPv4ServerPoolOptionParams[] = {
 
 /* *** Device.DHCPv4.Server.Pool.{i}.Client.{i}. *** */
 DMOBJ tDHCPv4ServerPoolClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseDhcpClientIPv4Inst, NULL, NULL, tDHCPv4ServerPoolClientIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
-{"Option", &DMREAD, NULL, NULL, NULL, browseDHCPv4ServerPoolClientOptionInst, NULL, NULL, tDHCPv4ServerPoolClientOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseDhcpClientIPv4Inst, NULL, NULL, NULL, tDHCPv4ServerPoolClientIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
+{"Option", &DMREAD, NULL, NULL, NULL, browseDHCPv4ServerPoolClientOptionInst, NULL, NULL, NULL, tDHCPv4ServerPoolClientOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", NULL}},
 {0}
 };
 
@@ -3288,8 +3291,8 @@ DMLEAF tDHCPv4ServerPoolClientOptionParams[] = {
 
 /* *** Device.DHCPv4.Relay. *** */
 DMOBJ tDHCPv4RelayObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Forwarding", &DMWRITE, addObjDHCPv4RelayForwarding, delObjDHCPv4RelayForwarding, NULL, browseDHCPv4RelayForwardingInst,  NULL, NULL, tDHCPv4RelayForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Forwarding", &DMWRITE, addObjDHCPv4RelayForwarding, delObjDHCPv4RelayForwarding, NULL, browseDHCPv4RelayForwardingInst, NULL, NULL, NULL, tDHCPv4RelayForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 

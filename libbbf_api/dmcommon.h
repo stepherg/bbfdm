@@ -240,6 +240,8 @@ void get_dmmap_section_of_config_section(char* dmmap_package, char* section_type
 void get_dmmap_section_of_config_section_eq(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section);
 void get_dmmap_section_of_config_section_cont(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section);
 void get_config_section_of_dmmap_section(char* package, char* section_type, char *section_name, struct uci_section **config_section);
+int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value);
+int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
 char *check_create_dmmap_package(const char *dmmap_package);
 int is_section_unnamed(char *section_name);
 void delete_sections_save_next_sections(char* dmmap_package, char *section_type, char *instancename, char *section_name, int instance, struct list_head *dup_list);

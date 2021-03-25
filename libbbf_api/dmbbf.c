@@ -189,7 +189,7 @@ static int plugin_dynamic_obj_match(struct dmctx *dmctx, struct dmnode *node, ch
 
 static int bbfdatamodel_matches(const enum bbfdm_type_enum type)
 {
-	return bbfdatamodel_type == BBFDM_BOTH || type == BBFDM_BOTH || bbfdatamodel_type == type;
+	return (bbfdatamodel_type == BBFDM_BOTH || type == BBFDM_BOTH || bbfdatamodel_type == type) && type != BBFDM_NONE;
 }
 
 static bool check_dependency(const char *conf_obj)
@@ -225,16 +225,34 @@ static bool check_dependency(const char *conf_obj)
 static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf, void *data, char *instance)
 {
 	int err = 0;
-	if (!leaf)
-		return 0;
-
-	for (; leaf->parameter; leaf++) {
+	for (; (leaf && leaf->parameter); leaf++) {
 		if (!bbfdatamodel_matches(leaf->bbfdm_type))
 			continue;
 		err = dmctx->method_param(dmctx, parent_node, leaf->parameter, leaf->permission, leaf->type, leaf->getvalue, leaf->setvalue, data, instance);
 		if (dmctx->stop)
 			return err;
 	}
+
+	if (parent_node->obj) {
+		if (parent_node->obj->dynamicleaf) {
+			for (int i = 0; i < __INDX_DYNAMIC_MAX; i++) {
+				struct dm_dynamic_leaf *next_dyn_array = parent_node->obj->dynamicleaf + i;
+				if (next_dyn_array->nextleaf) {
+					for (int j = 0; next_dyn_array->nextleaf[j]; j++) {
+						DMLEAF *jleaf = next_dyn_array->nextleaf[j];
+						for (; (jleaf && jleaf->parameter); jleaf++) {
+							if (!bbfdatamodel_matches(jleaf->bbfdm_type))
+								continue;
+							err = dmctx->method_param(dmctx, parent_node, jleaf->parameter, jleaf->permission, jleaf->type, jleaf->getvalue, jleaf->setvalue, data, instance);
+							if (dmctx->stop)
+								return err;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return err;
 }
 
@@ -276,7 +294,7 @@ static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *ent
 		return;
 	}
 
-	if (entryobj->leaf) {
+	if (entryobj->leaf || entryobj->dynamicleaf) {
 		if (dmctx->checkleaf) {
 			*err = dmctx->checkleaf(dmctx, &node, entryobj->permission, entryobj->addobj, entryobj->delobj, entryobj->get_linker, data, instance);
 			if (!*err) {
@@ -300,12 +318,10 @@ static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, 
 	char *parent_obj = parent_node->current_object;
 	int err = 0;
 
-	if (entryobj) {
-		for (; entryobj->obj; entryobj++) {
-			dm_browse_entry(dmctx, parent_node, entryobj, data, instance, parent_obj, &err);
-			if (dmctx->stop)
-				return err;
-		}
+	for (; (entryobj && entryobj->obj); entryobj++) {
+		dm_browse_entry(dmctx, parent_node, entryobj, data, instance, parent_obj, &err);
+		if (dmctx->stop)
+			return err;
 	}
 
 	if (parent_node->obj) {
@@ -370,7 +386,7 @@ int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char 
 				return err;
 		}
 	}
-	if (nextobj) {
+	if (nextobj || prevobj->nextdynamicobj) {
 		err = dm_browse(dmctx, &node, nextobj, data, instance);
 		if (dmctx->stop)
 			return err;
@@ -378,19 +394,43 @@ int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char 
 	return err;
 }
 
-void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found)
+void dm_exclude_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *data)
 {
-	if (!entryobj)
-		return;
-
 	char *parent_obj = parent_node->current_object;
 
-	for (; entryobj->obj; entryobj++) {
+	for (; (entryobj && entryobj->obj); entryobj++) {
 		DMNODE node = {0};
 		node.obj = entryobj;
 		node.parent = parent_node;
 		node.instance_level = parent_node->instance_level;
 		node.matched = parent_node->matched;
+
+		dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
+		if (strcmp(node.current_object, data) == 0) {
+			entryobj->bbfdm_type = BBFDM_NONE;
+			return;
+		}
+
+		int err = plugin_dynamic_obj_match(dmctx, &node, entryobj->obj, data);
+		if (err)
+			continue;
+
+		if (entryobj->nextobj)
+			dm_exclude_obj(dmctx, &node, entryobj->nextobj, data);
+	}
+}
+
+void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found)
+{
+	char *parent_obj = parent_node->current_object;
+
+	for (; (entryobj && entryobj->obj); entryobj++) {
+		DMNODE node = {0};
+		node.obj = entryobj;
+		node.parent = parent_node;
+		node.instance_level = parent_node->instance_level;
+		node.matched = parent_node->matched;
+
 		dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
 		if (strcmp(node.current_object, obj) == 0) {
 			*root_entry = entryobj;
@@ -407,18 +447,55 @@ void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entry
 	}
 }
 
-int free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj)
+bool find_root_entry(struct dmctx *ctx, char *in_param, DMOBJ **root_entry)
 {
-	if (!entryobj)
-		return 0;
+	int obj_found = 0;
+	DMOBJ *root = ctx->dm_entryobj;
+	DMNODE node = {.current_object = ""};
 
-	for (; entryobj->obj; entryobj++) {
+	char *obj_path = replace_str(in_param, ".{i}.", ".");
+	dm_check_dynamic_obj(ctx, &node, root, obj_path, obj_path, root_entry, &obj_found);
+	dmfree(obj_path);
+
+	return (obj_found && *root_entry) ? true : false;
+}
+
+int get_obj_idx_dynamic_array(DMOBJ **entryobj)
+{
+	int i, idx = 0;
+	for (i = 0; entryobj[i]; i++) {
+		idx++;
+	}
+	return idx;
+}
+
+int get_leaf_idx_dynamic_array(DMLEAF **entryleaf)
+{
+	int i, idx = 0;
+	for (i = 0; entryleaf[i]; i++) {
+		idx++;
+	}
+	return idx;
+}
+
+void free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj)
+{
+	for (; (entryobj && entryobj->obj); entryobj++) {
+
 		if (entryobj->nextdynamicobj) {
 			for (int i = 0; i < __INDX_DYNAMIC_MAX; i++) {
 				struct dm_dynamic_obj *next_dyn_array = entryobj->nextdynamicobj + i;
-				if (next_dyn_array->nextobj) FREE(next_dyn_array->nextobj);
+				FREE(next_dyn_array->nextobj);
 			}
 			FREE(entryobj->nextdynamicobj);
+		}
+
+		if (entryobj->dynamicleaf) {
+			for (int i = 0; i < __INDX_DYNAMIC_MAX; i++) {
+				struct dm_dynamic_leaf *next_dyn_array = entryobj->dynamicleaf + i;
+				FREE(next_dyn_array->nextleaf);
+			}
+			FREE(entryobj->dynamicleaf);
 		}
 
 		DMNODE node = {0};
@@ -430,7 +507,6 @@ int free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj
 		if (entryobj->nextobj)
 			free_dm_browse_node_dynamic_object_tree(&node, entryobj->nextobj);
 	}
-	return 0;
 }
 
 static int rootcmp(char *inparam, char *rootobj)

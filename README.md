@@ -491,22 +491,22 @@ The application should bring its plugin(library) file under **'/usr/lib/bbfdm/'*
 
 To build a new library, you can use **example source code** under **dynamic_parameters/library** folder to help you build it.
 
-Each library should contains two Root table named **“tRootDynamicObj”** and **“tRootDynamicOperate”** to define the parant path for each new object and operate.
+Each library should contains two Root table named **“tDynamicObj”** and **“tDynamicOperate”** to define the parant path for each new object and operate.
 
-#### RootDynamicObject definition ####
+#### DynamicObject definition ####
 ![object](/pictures/rootdynamicobj.png)
 
-Each object in the **LIB_MAP_OBJ** table contains two arguments:
+Each object in the **DM_MAP_OBJ** table contains two arguments:
 
 |     Argument        |                                                   Description                                                               |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `parentobj`         | A string of the parent object name. Example “Device.IP.Diagnostics.”, “Device.DeviceInfo”, “Device.WiFi.Radio.” |
 | `nextobject`        | Pointer to a **DMOBJ** array which contains a list of the child objects. |
 
-#### RootDynamicOperate definition ####
+#### DynamicOperate definition ####
 ![object](/pictures/rootdynamincoperate.png)
 
-Each operate in the **LIB_MAP_OPERATE** table contains two arguments:
+Each operate in the **DM_MAP_OPERATE** table contains two arguments:
 
 |     Argument        |                                                   Description                                                               |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------- |

@@ -382,13 +382,6 @@ static int set_UPnPDevice_Enable(char *refparam, struct dmctx *ctx, void *data, 
 	return 0;
 }
 
-static int get_upnp_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	pid_t pid = get_pid("miniupnpd");
-	*value = (pid < 0) ? "Down" : "Up";
-	return 0;
-}
-
 static int get_UPnPDevice_UPnPMediaServer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *path = "/etc/rc.d/*minidlna";
@@ -798,24 +791,23 @@ static int get_UPnPDescriptionServiceInstance_EventSubURL(char *refparam, struct
 
 /* *** Device.UPnP. *** */
 DMOBJ tUPnPObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceObj, tUPnPDeviceParams, NULL, BBFDM_BOTH},
-{"Discovery", &DMREAD, NULL, NULL, NULL, NULL, NULL, tUPnPDiscoveryObj, tUPnPDiscoveryParams, NULL, BBFDM_BOTH},
-{"Description", &DMREAD, NULL, NULL, NULL, NULL, NULL, tUPnPDescriptionObj, tUPnPDescriptionParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceObj, tUPnPDeviceParams, NULL, BBFDM_BOTH},
+{"Discovery", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDiscoveryObj, tUPnPDiscoveryParams, NULL, BBFDM_BOTH},
+{"Description", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDescriptionObj, tUPnPDescriptionParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.UPnP.Device. *** */
 DMOBJ tUPnPDeviceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceCapabilitiesParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceCapabilitiesParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tUPnPDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Enable", &DMWRITE, DMT_BOOL, get_UPnPDevice_Enable, set_UPnPDevice_Enable, BBFDM_BOTH},
-{CUSTOM_PREFIX"Status", &DMREAD, DMT_STRING, get_upnp_status, NULL, BBFDM_BOTH},
 {"UPnPMediaServer", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPMediaServer, set_UPnPDevice_UPnPMediaServer, BBFDM_BOTH},
 //{"UPnPMediaRenderer", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPMediaRenderer, set_UPnPDevice_UPnPMediaRenderer, BBFDM_BOTH},
 //{"UPnPWLANAccessPoint", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPWLANAccessPoint, set_UPnPDevice_UPnPWLANAccessPoint, BBFDM_BOTH},
@@ -848,10 +840,10 @@ DMLEAF tUPnPDeviceCapabilitiesParams[] = {
 
 /* *** Device.UPnP.Discovery. *** */
 DMOBJ tUPnPDiscoveryObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"RootDevice", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryRootDeviceInst, NULL, NULL, tUPnPDiscoveryRootDeviceParams, get_root_device_linker, BBFDM_BOTH, LIST_KEY{"UUID", NULL}},
-{"Device", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryDeviceInst, NULL, NULL, tUPnPDiscoveryDeviceParams, get_device_linker, BBFDM_BOTH, LIST_KEY{"UUID", NULL}},
-{"Service", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryServiceInst, NULL, NULL, tUPnPDiscoveryServiceParams, get_service_linker, BBFDM_BOTH, LIST_KEY{"USN", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"RootDevice", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryRootDeviceInst, NULL, NULL, NULL, tUPnPDiscoveryRootDeviceParams, get_root_device_linker, BBFDM_BOTH, LIST_KEY{"UUID", NULL}},
+{"Device", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryDeviceInst, NULL, NULL, NULL, tUPnPDiscoveryDeviceParams, get_device_linker, BBFDM_BOTH, LIST_KEY{"UUID", NULL}},
+{"Service", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryServiceInst, NULL, NULL, NULL, tUPnPDiscoveryServiceParams, get_service_linker, BBFDM_BOTH, LIST_KEY{"USN", NULL}},
 {0}
 };
 
@@ -907,10 +899,10 @@ DMLEAF tUPnPDiscoveryServiceParams[] = {
 
 /* *** Device.UPnP.Description. *** */
 DMOBJ tUPnPDescriptionObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"DeviceDescription", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceDescriptionInst, NULL, NULL, tUPnPDescriptionDeviceDescriptionParams, NULL, BBFDM_BOTH, LIST_KEY{"URLBase", NULL}},
-{"DeviceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceInstanceInst, NULL, NULL, tUPnPDescriptionDeviceInstanceParams, get_device_instance_linker, BBFDM_BOTH, LIST_KEY{"UDN", NULL}},
-{"ServiceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionServiceInstanceInst, NULL, NULL, tUPnPDescriptionServiceInstanceParams, NULL, BBFDM_BOTH, LIST_KEY{"ParentDevice", "ServiceId", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"DeviceDescription", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceDescriptionInst, NULL, NULL, NULL, tUPnPDescriptionDeviceDescriptionParams, NULL, BBFDM_BOTH, LIST_KEY{"URLBase", NULL}},
+{"DeviceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceInstanceInst, NULL, NULL, NULL, tUPnPDescriptionDeviceInstanceParams, get_device_instance_linker, BBFDM_BOTH, LIST_KEY{"UDN", NULL}},
+{"ServiceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionServiceInstanceInst, NULL, NULL, NULL, tUPnPDescriptionServiceInstanceParams, NULL, BBFDM_BOTH, LIST_KEY{"ParentDevice", "ServiceId", NULL}},
 {0}
 };
 

@@ -40,10 +40,9 @@ define Package/libbbfdm/description
 endef
 
 TARGET_CFLAGS += \
-	-DCUSTOM_PREFIX=\\\"$(CONFIG_LIBBBFDM_VENDOR_PREFIX)\\\" \
+	-DBBF_VENDOR_LIST=\\\"$(CONFIG_BBF_VENDOR_LIST)\\\" \
+	-DBBF_VENDOR_PREFIX=\\\"$(CONFIG_BBF_VENDOR_PREFIX)\\\" \
 	-D_GNU_SOURCE -D_AADJ
-
-CONFIGURE_ARGS += --enable-generic-openwrt
 
 ifeq ($(CONFIG_BBF_TR181),y)
 CONFIGURE_ARGS += \
@@ -60,13 +59,22 @@ CONFIGURE_ARGS += \
 	--enable-tr143
 endif
 
+ifeq ($(CONFIG_BBF_VENDOR_EXTENSION),y)
+CONFIGURE_ARGS += \
+	--enable-vendor-extension
+
+CONFIGURE_ARGS += \
+	BBF_VENDOR_LIST="$(CONFIG_BBF_VENDOR_LIST)"
+
+endif ##CONFIG_BBF_VENDOR_EXTENSION
+
 define Package/libbbfdm/install
 	$(INSTALL_DIR) $(1)/lib
 	$(CP) $(PKG_BUILD_DIR)/bin/.libs/libbbfdm.so* $(1)/lib/
 	$(CP) $(PKG_BUILD_DIR)/bin/.libs/libbbf_api.so* $(1)/lib/
 	$(INSTALL_DIR) $(1)/etc/bbfdm
 	$(INSTALL_DIR) $(1)/usr/share/bbfdm
-	$(CP) $(PKG_BUILD_DIR)/scripts/functions $(1)/usr/share/bbfdm
+	$(CP) $(PKG_BUILD_DIR)/scripts $(1)/usr/share/bbfdm
 endef
 
 define Build/InstallDev

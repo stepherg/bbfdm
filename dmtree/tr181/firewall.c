@@ -335,7 +335,6 @@ static int get_FirewallChainRule_CreationDate(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
-#ifndef GENERIC_OPENWRT
 /*#Device.Firewall.Chain.{i}.Rule.{i}.ExpiryDate!UCI:firewall/rule,@i-1/expiry*/
 static int get_FirewallChainRule_ExpiryDate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -372,7 +371,6 @@ static int set_FirewallChainRule_ExpiryDate(char *refparam, struct dmctx *ctx, v
 	}
 	return 0;
 }
-#endif
 
 static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -668,68 +666,6 @@ static int get_rule_source_port_range_max(char *refparam, struct dmctx *ctx, voi
 	if (tmp == NULL)
 		tmp = strchr(v, '-');
 	*value = (tmp) ? tmp+1 : "-1";
-	return 0;
-}
-
-static int get_rule_icmp_type(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct uci_list *v= NULL;
-	struct uci_element *e = NULL;
-	char *ptr = NULL;
-
-	dmasprintf(value, "%s", "");
-	dmuci_get_value_by_section_list((struct uci_section *)data, "icmp_type", &v);
-	if (v != NULL) {
-		uci_foreach_element(v, e) {
-			ptr = dmstrdup(*value);
-			dmfree(*value);
-
-			if (strlen(ptr) == 0)
-				dmasprintf(value, "%s", e->name);
-			else {
-				dmasprintf(value, "%s %s", ptr, e->name);
-				dmfree(ptr);
-			}
-		}
-	}
-	return 0;
-}
-
-static int get_rule_source_mac(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char *v = NULL;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "src_mac", &v);
-	*value = (v) ? v : "";
-	return 0;
-}
-
-static int get_time_span_supported_days(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = "mon,tue,wed,thu,fri,sat,sun";
-	return 0;
-}
-
-static int get_time_span_days(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char *v;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "weekdays", &v);
-	*value = (v) ? v : "";
-	return 0;
-}
-
-static int get_time_span_start_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char *v;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "start_time", &v);
-	*value = (v) ? v : "";
-	return 0;
-}
-
-static int get_time_span_stop_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char *v;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "stop_time", &v);
-	*value = (v) ? v : "";
 	return 0;
 }
 
@@ -1384,83 +1320,11 @@ static int set_rule_source_port_range_max(char *refparam, struct dmctx *ctx, voi
         return 0;
 }
 
-static int set_rule_icmp_type(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	int i;
-	size_t length;
-	char **devices = NULL;
-
-	switch (action) {
-		case VALUECHECK:
-			//TODO
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "icmp_type", "");
-			devices = strsplit(value, " ", &length);
-			for (i = 0; i < length; i++)
-				dmuci_add_list_value_by_section((struct uci_section *)data, "icmp_type", devices[i]);
-			break;
-	}
-	return 0;
-}
-
-static int set_rule_source_mac(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			//TODO
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "src_mac", value);
-			break;
-	}
-	return 0;
-}
-
-static int set_time_span_days(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			//TODO
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "weekdays", value);
-			break;
-	}
-	return 0;
-}
-
-static int set_time_span_start_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			//TODO
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "start_time", value);
-			break;
-	}
-	return 0;
-}
-
-static int set_time_span_stop_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			//TODO
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "stop_time", value);
-			break;
-	}
-	return 0;
-}
-
 /* *** Device.Firewall. *** */
 DMOBJ tFirewallObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
@@ -1488,8 +1352,8 @@ DMLEAF tFirewallLevelParams[] = {
 
 /* *** Device.Firewall.Chain.{i}. *** */
 DMOBJ tFirewallChainObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Rule", &DMWRITE, add_firewall_rule, delete_firewall_rule, NULL, browseRuleInst, NULL, tFirewallChainRuleObj, tFirewallChainRuleParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Rule", &DMWRITE, add_firewall_rule, delete_firewall_rule, NULL, browseRuleInst, NULL, NULL, NULL, tFirewallChainRuleParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
@@ -1504,12 +1368,6 @@ DMLEAF tFirewallChainParams[] = {
 };
 
 /* *** Device.Firewall.Chain.{i}.Rule.{i}. *** */
-DMOBJ tFirewallChainRuleObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{CUSTOM_PREFIX"TimeSpan", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tTimeSpanParams, NULL, BBFDM_BOTH},
-{0}
-};
-
 DMLEAF tFirewallChainRuleParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Enable", &DMWRITE, DMT_BOOL, get_rule_enable, set_rule_enable, BBFDM_BOTH},
@@ -1521,9 +1379,7 @@ DMLEAF tFirewallChainRuleParams[] = {
 //{"TargetChain", &DMWRITE, DMT_STRING, get_rule_target_chain, set_rule_target_chain, BBFDM_BOTH},
 {"Log", &DMWRITE, DMT_BOOL, get_rule_log, set_rule_log, BBFDM_BOTH},
 {"CreationDate", &DMREAD, DMT_TIME, get_FirewallChainRule_CreationDate, NULL, BBFDM_BOTH},
-#ifndef GENERIC_OPENWRT
 {"ExpiryDate", &DMWRITE, DMT_TIME, get_FirewallChainRule_ExpiryDate, set_FirewallChainRule_ExpiryDate, BBFDM_BOTH},
-#endif
 {"SourceInterface", &DMWRITE, DMT_STRING, get_rule_source_interface, set_rule_source_interface, BBFDM_BOTH},
 {"SourceAllInterfaces", &DMWRITE, DMT_BOOL, get_rule_source_all_interfaces, set_rule_source_all_interfaces, BBFDM_BOTH},
 {"DestInterface", &DMWRITE, DMT_STRING, get_rule_dest_interface, set_rule_dest_interface, BBFDM_BOTH},
@@ -1538,16 +1394,5 @@ DMLEAF tFirewallChainRuleParams[] = {
 {"DestPortRangeMax", &DMWRITE, DMT_INT, get_rule_dest_port_range_max, set_rule_dest_port_range_max, BBFDM_BOTH},
 {"SourcePort", &DMWRITE, DMT_INT, get_rule_source_port, set_rule_source_port, BBFDM_BOTH},
 {"SourcePortRangeMax", &DMWRITE, DMT_INT, get_rule_source_port_range_max, set_rule_source_port_range_max, BBFDM_BOTH},
-{CUSTOM_PREFIX"ICMPType", &DMWRITE, DMT_STRING, get_rule_icmp_type, set_rule_icmp_type, BBFDM_BOTH},
-{CUSTOM_PREFIX"SourceMACAddress", &DMWRITE, DMT_STRING, get_rule_source_mac, set_rule_source_mac, BBFDM_BOTH},
-{0}
-};
-
-DMLEAF tTimeSpanParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"SupportedDays", &DMREAD, DMT_STRING, get_time_span_supported_days, NULL, BBFDM_BOTH},
-{"Days", &DMWRITE, DMT_STRING, get_time_span_days, set_time_span_days, BBFDM_BOTH},
-{"StartTime", &DMWRITE, DMT_STRING, get_time_span_start_time, set_time_span_start_time, BBFDM_BOTH},
-{"StopTime", &DMWRITE, DMT_STRING, get_time_span_stop_time, set_time_span_stop_time, BBFDM_BOTH},
 {0}
 };

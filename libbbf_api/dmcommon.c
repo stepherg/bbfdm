@@ -853,9 +853,9 @@ char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_sectio
 		json_object *j_e = jarr->array[i];
 		const char *sect;
 
-		sect = __dmjson_get_string(j_e, "section");
+		sect = dmjson_get_value(j_e, 1, "section");
 		if (!strcmp(sect, wifi_section)) {
-			ifname = __dmjson_get_string(j_e, "ifname");
+			ifname = dmjson_get_value(j_e, 2, "config", "ifname");
 			break;
 		}
 	}
