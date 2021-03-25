@@ -2,25 +2,16 @@
 # Copyright (C) 2019 iopsys Software Solutions AB
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-UCI_GET_BBFDM="/sbin/uci -q -c /etc/bbfdm get"
-UCI_SET_BBFDM="/sbin/uci -q -c /etc/bbfdm set"
-UCI_ADD_BBFDM="/sbin/uci -q -c /etc/bbfdm add"
-UCI_DELETE_BBFDM="/sbin/uci -q -c /etc/bbfdm delete"
-UCI_COMMIT_BBFDM="/sbin/uci -q -c /etc/bbfdm commit"
-UCI_SHOW_BBFDM="/sbin/uci -q -c /etc/bbfdm show"
-LOG_FILE="/tmp/nslookup.log"
+source /usr/share/bbfdm/bbf_uci_api
 
-nslookup_get() {
-	local val=`$UCI_GET_BBFDM $1`
-	echo ${val:-$2}
-}
+LOG_FILE="/tmp/nslookup.log"
 
 nslookup_launch() {
 	local i j time1 time2 timeresponse status AnswerType HostNameReturned address dns_server_ip ResponseTime success_count
 	local address=""
-	local hostname=`nslookup_get dmmap_diagnostics.nslookup.HostName`
-	local dnsserver=`nslookup_get dmmap_diagnostics.nslookup.DNSServer`
-	local cnt=`nslookup_get dmmap_diagnostics.nslookup.NumberOfRepetitions 1`
+	local hostname=`uci_get_bbf_dmmap dmmap_diagnostics.nslookup.HostName`
+	local dnsserver=`uci_get_bbf_dmmap dmmap_diagnostics.nslookup.DNSServer`
+	local cnt=`uci_get_bbf_dmmap dmmap_diagnostics.nslookup.NumberOfRepetitions 1`
 	[ "$hostname" = "" ] && return
 	i=0
 	j=0
@@ -67,29 +58,29 @@ nslookup_launch() {
 	echo $line | grep 'Non-authoritative' >/dev/null 2>&1 && { AnswerType="NonAuthoritative"; continue; }
 
 	if echo $line | grep '++++++++++++++++++++++' >/dev/null 2>&1; then
-		$UCI_ADD_BBFDM dmmap_diagnostics NSLookupResult
-		$UCI_SET_BBFDM dmmap_diagnostics.@NSLookupResult[$j].Status=$status
-		$UCI_SET_BBFDM dmmap_diagnostics.@NSLookupResult[$j].AnswerType=$AnswerType
-		$UCI_SET_BBFDM dmmap_diagnostics.@NSLookupResult[$j].HostNameReturned=$HostNameReturned
-		$UCI_SET_BBFDM dmmap_diagnostics.@NSLookupResult[$j].IPAddresses=$address
-		$UCI_SET_BBFDM dmmap_diagnostics.@NSLookupResult[$j].DNSServerIP=$dns_server_ip
-		$UCI_SET_BBFDM dmmap_diagnostics.@NSLookupResult[$j].ResponseTime=$ResponseTime
+		$UCI_ADD_BBF_DMMAP dmmap_diagnostics NSLookupResult
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].Status=$status
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].AnswerType=$AnswerType
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].HostNameReturned=$HostNameReturned
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].IPAddresses=$address
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].DNSServerIP=$dns_server_ip
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].ResponseTime=$ResponseTime
 		let j++
 		address=""
 	fi
 	done <${LOG_FILE}
 	rm -f ${LOG_FILE}
-	$UCI_SET_BBFDM dmmap_diagnostics.nslookup.SuccessCount=$success_count
-	$UCI_SET_BBFDM dmmap_diagnostics.nslookup.DiagnosticState=Complete
-	$UCI_COMMIT_BBFDM
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.SuccessCount=$success_count
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.DiagnosticState=Complete
+	$UCI_COMMIT_BBF_DMMAP
 }
 
 delete_all_results() {
 	local j
-	for j in $($UCI_SHOW_BBFDM dmmap_diagnostics | grep "dmmap_diagnostics.@NSLookupResult.*=NSLookupResult"); do
-		$UCI_DELETE_BBFDM dmmap_diagnostics.@NSLookupResult[-1]
+	for j in $($UCI_SHOW_BBF_DMMAP dmmap_diagnostics | grep "dmmap_diagnostics.@NSLookupResult.*=NSLookupResult"); do
+		$UCI_DELETE_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[-1]
 	done
-	$UCI_COMMIT_BBFDM
+	$UCI_COMMIT_BBF_DMMAP
 }
 
 nslookup_stop_diagnostic() {
@@ -97,8 +88,8 @@ nslookup_stop_diagnostic() {
 	local pids=`ps | grep nslookup_launch | grep -v grep | awk '{print $1}'`
 	if [ -n "$pids" ]; then
 		kill -9 $pids &>/dev/null
-		$UCI_SET_BBFDM dmmap_diagnostics.nslookup.DiagnosticState=None
-		$UCI_COMMIT_BBFDM
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.DiagnosticState=None
+		$UCI_COMMIT_BBF_DMMAP
 	fi
 }
 

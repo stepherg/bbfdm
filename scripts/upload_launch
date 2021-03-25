@@ -3,27 +3,19 @@
 # Author: IMEN Bhiri <imen.bhiri@pivasoftware.com>
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-UCI_GET_BBFDM="/sbin/uci -q -c /etc/bbfdm get"
-UCI_SET_BBFDM="/sbin/uci -q -c /etc/bbfdm set"
-UCI_ADD_BBFDM="/sbin/uci -q -c /etc/bbfdm add"
-UCI_DELETE_BBFDM="/sbin/uci -q -c /etc/bbfdm delete"
-UCI_COMMIT_BBFDM="/sbin/uci -q -c /etc/bbfdm commit"
+source /usr/share/bbfdm/bbf_uci_api
+
 CAPTURE_FILE="/tmp/upload_dump"
 UPLOAD_DIAGNOSTIC_FILE="/tmp/bbfdm_upload_diagnostic"
 CONNECTION_TIMEOUT=20
-
-upload_get() {
-	local val=`$UCI_GET_BBFDM $1`
-	echo ${val:-$2}
-}
 
 upload_launch() {
 	local proto tx_bytes_before rx_bytes_before time1 tx_bytes_after rx_bytes_after time2 res ba stc periodtime
 	local url=$1
 	local device=$2
 	local size=$3
-	[ "$url" = "" ] && { $UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBFDM; return; }
-	local protocol=`upload_get dmmap_diagnostics.upload.ProtocolVersion Any`
+	[ "$url" = "" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBF_DMMAP; return; }
+	local protocol=`uci_get_bbf_dmmap dmmap_diagnostics.upload.ProtocolVersion Any`
 	if [ "$protocol" == "IPv4" ]; then proto="-4"; elif [ "$protocol" == "IPv6" ]; then proto="-6"; else proto=""; fi
 	# Disable acceleration on Broadcom devices to capture all packets with tcpdump
 	[ -e /usr/sbin/fcctl ] && { fcctl disable >/dev/null 2>&1; fcctl flush >/dev/null 2>&1; }
@@ -40,11 +32,11 @@ upload_launch() {
 		tx_bytes_after=`ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes`
 		rx_bytes_after=`ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes`
 		ba=`echo "$res" | grep "bad address"`
-		[ -n "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBFDM; kill $PID &> /dev/null; return; }
+		[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBF_DMMAP; kill $PID &> /dev/null; return; }
 		stc=`echo "$res" | grep "404 Not Found"`
-		[ -n "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=Error_NoResponse; $UCI_COMMIT_BBFDM; kill $PID &> /dev/null; return; }
+		[ -n "$stc" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState=Error_NoResponse; $UCI_COMMIT_BBF_DMMAP; kill $PID &> /dev/null; return; }
 		stc=`echo "$res" |sed -n 3p|awk '{print $13}'`
-		[ "$stc" != "100" ] && { $UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=Error_TransferFailed; $UCI_COMMIT_BBFDM; kill $PID &> /dev/null; return; }
+		[ "$stc" != "100" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState=Error_TransferFailed; $UCI_COMMIT_BBF_DMMAP; kill $PID &> /dev/null; return; }
 	elif [ ${url:0:6} = ftp:// ]; then 
 		#add user and pass if they exist
 		substr="@"
@@ -59,32 +51,32 @@ upload_launch() {
 		tx_bytes_after=`ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes`
 		rx_bytes_after=`ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes`
 		ba=`echo "$res" | grep "Couldn't resolve host"`
-		[ -n "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
+		[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBF_DMMAP; kill $PID 2> /dev/null; return; }
 		stc=`echo "$res" | grep "Access denied"`
-		[ -n "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=Error_LoginFailed; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
+		[ -n "$stc" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState=Error_LoginFailed; $UCI_COMMIT_BBF_DMMAP; kill $PID 2> /dev/null; return; }
 		stc=`echo "$res" | grep "Failed FTP upload"`
-		[ -n "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=Error_NoResponse; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
+		[ -n "$stc" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState=Error_NoResponse; $UCI_COMMIT_BBF_DMMAP; kill $PID 2> /dev/null; return; }
 		stc=`echo "$res" |tail -n 1 |awk '{print $(NF-11)}'`
-		[ "$stc" != "100" ] && { $UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=Error_TransferFailed; $UCI_COMMIT_BBFDM; kill $PID 2> /dev/null; return; }
+		[ "$stc" != "100" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState=Error_TransferFailed; $UCI_COMMIT_BBF_DMMAP; kill $PID 2> /dev/null; return; }
 	fi
 	tx_bytes=$((tx_bytes_after-tx_bytes_before))
 	rx_bytes=$((rx_bytes_after-rx_bytes_before))
 	periodtime=$(($((time2-time1))*1000000))
-	$UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=Complete
-	$UCI_SET_BBFDM dmmap_diagnostics.upload.TestBytesSent=$size
-	$UCI_SET_BBFDM dmmap_diagnostics.upload.TotalBytesReceived=$rx_bytes
-	$UCI_SET_BBFDM dmmap_diagnostics.upload.TotalBytesSent=$tx_bytes
-	$UCI_SET_BBFDM dmmap_diagnostics.upload.PeriodOfFullLoading=$periodtime
-	local perconnection=`$UCI_GET_BBFDM dmmap_diagnostics.upload.EnablePerConnection`
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState=Complete
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.TestBytesSent=$size
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.TotalBytesReceived=$rx_bytes
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.TotalBytesSent=$tx_bytes
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.PeriodOfFullLoading=$periodtime
+	local perconnection=`$UCI_GET_BBF_DMMAP dmmap_diagnostics.upload.EnablePerConnection`
 	if ([ "$perconnection" == "true" ] || [ "$perconnection" == "1" ]); then
-		$UCI_ADD_BBFDM dmmap_diagnostics UploadPerConnection
-		$UCI_SET_BBFDM dmmap_diagnostics.@UploadPerConnection[0].TestBytesSent=$size
-		$UCI_SET_BBFDM dmmap_diagnostics.@UploadPerConnection[0].TotalBytesReceived=$rx_bytes
-		$UCI_SET_BBFDM dmmap_diagnostics.@UploadPerConnection[0].TotalBytesSent=$tx_bytes
+		$UCI_ADD_BBF_DMMAP dmmap_diagnostics UploadPerConnection
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.@UploadPerConnection[0].TestBytesSent=$size
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.@UploadPerConnection[0].TotalBytesReceived=$rx_bytes
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.@UploadPerConnection[0].TotalBytesSent=$tx_bytes
 	else
-		$UCI_DELETE_BBFDM dmmap_diagnostics.@UploadPerConnection[0]
+		$UCI_DELETE_BBF_DMMAP dmmap_diagnostics.@UploadPerConnection[0]
 	fi
-	$UCI_COMMIT_BBFDM
+	$UCI_COMMIT_BBF_DMMAP
 	rm ${UPLOAD_DIAGNOSTIC_FILE} &>/dev/null
 	sleep 3
 	local pids=`ps | grep $PID`
@@ -94,11 +86,11 @@ upload_launch() {
 }
 
 upload_stop_diagnostic() {
-	$UCI_DELETE_BBFDM dmmap_diagnostics.@UploadPerConnection[0]
+	$UCI_DELETE_BBF_DMMAP dmmap_diagnostics.@UploadPerConnection[0]
 	local pids=`ps | grep upload_launch.*run | grep -v grep | awk '{print $1}'`
 	if [ -n "$pids" ]; then
 		kill -9 $pids &>/dev/null
-		$UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=None
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState=None
 	fi
 	local pids=`ps | grep upload_launch.*run | grep -v grep | awk '{print $1}'`                            
     if [ -n "$pids" ]; then
@@ -107,9 +99,9 @@ upload_stop_diagnostic() {
 	    	kill -9 $kid &>/dev/null                                                 
 	    done
 	    kill -9 $pids &>/dev/null                                                          
-	    $UCI_SET_BBFDM dmmap_diagnostics.upload.DiagnosticState=None    
+	    $UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState=None    
     fi
-    $UCI_COMMIT_BBFDM
+    $UCI_COMMIT_BBF_DMMAP
 }
 
 if [ "$1" == "run" ] ; then

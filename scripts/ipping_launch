@@ -3,37 +3,30 @@
 # Author: MOHAMED Kallel <mohamed.kallel@pivasoftware.com>
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-UCI_GET_BBFDM="/sbin/uci -q -c /etc/bbfdm get"
-UCI_SET_BBFDM="/sbin/uci -q -c /etc/bbfdm set"
-UCI_COMMIT_BBFDM="/sbin/uci -q -c /etc/bbfdm commit"
-
-ipping_get() {
-	local val=`$UCI_GET_BBFDM $1`
-	echo ${val:-$2}
-}
+source /usr/share/bbfdm/bbf_uci_api
 
 ipping_error()
 {
-	local cnt=`ipping_get dmmap_diagnostics.ipping.NumberOfRepetitions 3`
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.SuccessCount=0
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.FailureCount=$cnt
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.AverageResponseTime=0
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.MinimumResponseTime=9999
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.MaximumResponseTime=0
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.AverageResponseTimeDetailed=0
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.MinimumResponseTimeDetailed=999999999
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.MaximumResponseTimeDetailed=0
-	$UCI_COMMIT_BBFDM
+	local cnt=`uci_get_bbf_dmmap dmmap_diagnostics.ipping.NumberOfRepetitions 3`
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.SuccessCount=0
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.FailureCount=$cnt
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.AverageResponseTime=0
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MinimumResponseTime=9999
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MaximumResponseTime=0
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.AverageResponseTimeDetailed=0
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MinimumResponseTimeDetailed=999999999
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MaximumResponseTimeDetailed=0
+	$UCI_COMMIT_BBF_DMMAP
 }
 
 ipping_launch() {
 	local i proto device res ba stc times sc1 success_count failure_count min_time avg_time max_time avg_time_sum min max micros avg_time_det min_time_det max_time_det avg_time_sum_det min_det max_det
-	local host=`ipping_get dmmap_diagnostics.ipping.Host`
-	local cnt=`ipping_get dmmap_diagnostics.ipping.NumberOfRepetitions 3`
-	local dsize=`ipping_get dmmap_diagnostics.ipping.DataBlockSize 64`
-	local timeout=`ipping_get dmmap_diagnostics.ipping.Timeout 1000`
-	local interface=`ipping_get dmmap_diagnostics.ipping.interface`
-	local protocol=`ipping_get dmmap_diagnostics.ipping.ProtocolVersion Any`
+	local host=`uci_get_bbf_dmmap dmmap_diagnostics.ipping.Host`
+	local cnt=`uci_get_bbf_dmmap dmmap_diagnostics.ipping.NumberOfRepetitions 3`
+	local dsize=`uci_get_bbf_dmmap dmmap_diagnostics.ipping.DataBlockSize 64`
+	local timeout=`uci_get_bbf_dmmap dmmap_diagnostics.ipping.Timeout 1000`
+	local interface=`uci_get_bbf_dmmap dmmap_diagnostics.ipping.interface`
+	local protocol=`uci_get_bbf_dmmap dmmap_diagnostics.ipping.ProtocolVersion Any`
 	[ ! -z "$interface" ] && device=`ifstatus $interface | jsonfilter -e @.device` && device="-I $device" || device=""
 	if [ "$protocol" == "IPv4" ]; then proto="-4"; elif [ "$protocol" == "IPv6" ]; then proto="-6"; else proto=""; fi
 	[ "$host" = "" ] && return
@@ -53,11 +46,11 @@ ipping_launch() {
 		let i++
 		res=$(ping -q $proto -c 1 -s $dsize -W $timeout $device $host 2>&1)
 		ba=`echo "$res" | grep "bad address"`
-		[ -n "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.ipping.DiagnosticState=Error_CannotResolveHostName; ipping_error; return; }
+		[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState=Error_CannotResolveHostName; ipping_error; return; }
 		ba=`echo "$res" | grep "unknown host"`
-		[ -n "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.ipping.DiagnosticState=Error_CannotResolveHostName; ipping_error; return; }
+		[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState=Error_CannotResolveHostName; ipping_error; return; }
 		stc=`echo "$res" | grep "received"`
-		[ -z "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.ipping.DiagnosticState=Error_Other; ipping_error; return; }
+		[ -z "$stc" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState=Error_Other; ipping_error; return; }
 		times=`echo "$res" | grep "min/avg/max"`
 		[ -z "$times" ] && continue
 		sc1=`echo $stc | awk '{print $4}'`
@@ -91,24 +84,24 @@ ipping_launch() {
 	max_time=$(awk "BEGIN{print int($max / 1000)}")
 	min_time_det=$min_det
 	max_time_det=$max_det
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.DiagnosticState=Complete
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.SuccessCount=$success_count
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.FailureCount=$failure_count
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.AverageResponseTime=$avg_time
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.MinimumResponseTime=$min_time
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.MaximumResponseTime=$max_time
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.AverageResponseTimeDetailed=$avg_time_det
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.MinimumResponseTimeDetailed=$min_time_det
-	$UCI_SET_BBFDM dmmap_diagnostics.ipping.MaximumResponseTimeDetailed=$max_time_det
-	$UCI_COMMIT_BBFDM
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState=Complete
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.SuccessCount=$success_count
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.FailureCount=$failure_count
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.AverageResponseTime=$avg_time
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MinimumResponseTime=$min_time
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MaximumResponseTime=$max_time
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.AverageResponseTimeDetailed=$avg_time_det
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MinimumResponseTimeDetailed=$min_time_det
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MaximumResponseTimeDetailed=$max_time_det
+	$UCI_COMMIT_BBF_DMMAP
 }
 
 ipping_stop_diagnostic() {
 	local pids=`ps | grep ipping_launch | grep -v grep | awk '{print $1}'`
 	if [ -n "$pids" ]; then
 		kill -9 $pids &>/dev/null
-		$UCI_SET_BBFDM dmmap_diagnostics.ipping.DiagnosticState=None
-		$UCI_COMMIT_BBFDM
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState=None
+		$UCI_COMMIT_BBF_DMMAP
 	fi
 }
 

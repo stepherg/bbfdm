@@ -578,7 +578,7 @@ static int set_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, voi
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		/* Set received value of dest. mask in /etc/bbfdm/dmmap_qos.
+		/* Set received value of dest. mask in /etc/bbfdm/dmmap/dmmap_qos.
 		 * If received value is an empty string then get the value of dest. ip. from dmmap_qos and set it as dest_ip in qos uci file.
 		 * If both received value of dest. mask and the dest. ip from dmmap_qos is empty then delete the dest_ip option from qos uci file.
 		 * Note: setting an empty string as option value in uci or dmmap will delete that option.
@@ -587,7 +587,7 @@ static int set_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, voi
 		get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name((struct uci_section *)data), &dmmap_section);
 		dmuci_set_value_by_section_bbfdm(dmmap_section, "dest_mask", value);
 		if (value[0] == '\0') {
-			//get source ip value from /etc/bbfdm/dmmap_qos and set as dest_ip
+			//get source ip value from /etc/bbfdm/dmmap/dmmap_qos and set as dest_ip
 			dmuci_get_value_by_section_string(dmmap_section, "dest_ip", &dest_ip);
 			dmuci_set_value_by_section((struct uci_section *)data, "dest_ip", dest_ip);
 		} else {
@@ -617,7 +617,7 @@ static int set_QoSClassification_SourceMask(char *refparam, struct dmctx *ctx, v
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		/* Set received value of src. mask in /etc/bbfdm/dmmap_qos.
+		/* Set received value of src. mask in /etc/bbfdm/dmmap/dmmap_qos.
 		 * If received value is an empty string then get the value of src. ip. from dmmap_qos and set it as src_ip in qos uci file.
 		 * If both received value of src. mask and the src. ip from dmmap_qos is empty then  delete the src_ip option from qos uci file.
 		 * Note: setting an empty string as option value in uci or dmmap will delete that option.
@@ -626,7 +626,7 @@ static int set_QoSClassification_SourceMask(char *refparam, struct dmctx *ctx, v
 		get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name((struct uci_section *)data), &dmmap_section);
 		dmuci_set_value_by_section_bbfdm(dmmap_section, "src_mask", value);
 		if (value[0] == '\0') {
-			//get source ip value from /etc/bbfdm/dmmap_qos and set as src_ip
+			//get source ip value from /etc/bbfdm/dmmap/dmmap_qos and set as src_ip
 			dmuci_get_value_by_section_string(dmmap_section, "src_ip", &src_ip);
 			dmuci_set_value_by_section((struct uci_section *)data, "src_ip", src_ip);
 		} else {
@@ -694,9 +694,9 @@ static int set_QoSClassification_DestIP(char *refparam, struct dmctx *ctx, void 
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		/* If dest. mask parameter from etc/bbfdm/dmmap_qos is present, set this (dest. mask) value as dest_ip in qos uci file
-		 * Else write received dest. ip to /etc/bbfdm/dmmap_qos and qos uci file.
-		 * Also write the received dest. ip value to /etc/bbfdm/dmmap_qos.
+		/* If dest. mask parameter from /etc/bbfdm/dmmap/dmmap_qos is present, set this (dest. mask) value as dest_ip in qos uci file
+		 * Else write received dest. ip to /etc/bbfdm/dmmap/dmmap_qos and qos uci file.
+		 * Also write the received dest. ip value to /etc/bbfdm/dmmap/dmmap_qos.
 		 * */
 		get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name((struct uci_section *)data), &dmmap_section);
 		dmuci_get_value_by_section_string(dmmap_section, "dest_mask", &dest_mask);
@@ -732,9 +732,9 @@ static int set_QoSClassification_SourceIP(char *refparam, struct dmctx *ctx, voi
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		/*if source mask parameter from etc/bbfdm/dmmap_qos is present, set this (source mask) value as src_ip in qos uci file
-		Else write received source ip to /etc/bbfdm/dmmap_qos and qos uci file.
-		also write the received source ip value to /etc/bbfdm/dmmap_qos.
+		/*if source mask parameter from /etc/bbfdm/dmmap/dmmap_qos is present, set this (source mask) value as src_ip in qos uci file
+		Else write received source ip to /etc/bbfdm/dmmap/dmmap_qos and qos uci file.
+		also write the received source ip value to /etc/bbfdm/dmmap/dmmap_qos.
 		*/
 		get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name((struct uci_section *)data), &dmmap_section);
 		dmuci_get_value_by_section_string(dmmap_section, "src_mask", &src_mask);

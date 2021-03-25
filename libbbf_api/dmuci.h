@@ -27,7 +27,7 @@
 #define LIB_DB_CONFIG "/lib/db/config"
 #define ETC_DB_CONFIG "/etc/board-db/config"
 #define VARSTATE_CONFIG "/var/state"
-#define BBFDM_CONFIG "/etc/bbfdm"
+#define BBFDM_CONFIG "/etc/bbfdm/dmmap"
 #define BBFDM_SAVEDIR "/tmp/.bbfdm"
 #define UCI_CONFIG_DIR "/etc/config/"
 

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+UCI_GET="/sbin/uci -q get"
+UCI_SET="/sbin/uci -q set"
+UCI_ADD="/sbin/uci -q add"
+UCI_DELETE="/sbin/uci -q delete"
+UCI_COMMIT="/sbin/uci -q commit"
+UCI_SHOW="/sbin/uci -q show"
+
+UCI_GET_BBF_DMMAP="/sbin/uci -q -c /etc/bbfdm/dmmap get"
+UCI_SET_BBF_DMMAP="/sbin/uci -q -c /etc/bbfdm/dmmap set"
+UCI_ADD_BBF_DMMAP="/sbin/uci -q -c /etc/bbfdm/dmmap add"
+UCI_DELETE_BBF_DMMAP="/sbin/uci -q -c /etc/bbfdm/dmmap delete"
+UCI_COMMIT_BBF_DMMAP="/sbin/uci -q -c /etc/bbfdm/dmmap commit"
+UCI_SHOW_BBF_DMMAP="/sbin/uci -q -c /etc/bbfdm/dmmap show"
+
+uci_get() {
+	local val=`$UCI_GET $1`
+	echo ${val:-$2}
+}
+
+uci_get_bbf_dmmap() {
+	local val=`$UCI_GET_BBF_DMMAP $1`
+	echo ${val:-$2}
+}

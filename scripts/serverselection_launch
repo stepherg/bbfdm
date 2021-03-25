@@ -2,25 +2,18 @@
 # Copyright (C) 2019 iopsys Software Solutions AB
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-UCI_GET_BBFDM="/sbin/uci -q -c /etc/bbfdm get"
-UCI_SET_BBFDM="/sbin/uci -q -c /etc/bbfdm set"
-UCI_COMMIT_BBFDM="/sbin/uci -q -c /etc/bbfdm commit"
-
-serverselection_get() {
-	local val=`$UCI_GET_BBFDM $1`
-	echo ${val:-$2}
-}
+source /usr/share/bbfdm/bbf_uci_api
 
 serverselection_launch() {
 	local i proto device res ba stc times sc1 success_count min_time avg_time max_time avg_time_sum min max micros
 	local fasthost avg_time_host min_time_host max_time_host
-	local hostlist=`serverselection_get dmmap_diagnostics.serverselection.HostList`
-	local cnt=`serverselection_get dmmap_diagnostics.serverselection.NumberOfRepetitions 3`
-	local timeout=`serverselection_get dmmap_diagnostics.serverselection.Timeout 1000`
-	local port=`serverselection_get dmmap_diagnostics.serverselection.port`
-	local interface=`serverselection_get dmmap_diagnostics.serverselection.interface`
-	local protoversion=`serverselection_get dmmap_diagnostics.serverselection.ProtocolVersion Any`
-	local protocol=`serverselection_get dmmap_diagnostics.serverselection.Protocol ICMP`
+	local hostlist=`uci_get_bbf_dmmap dmmap_diagnostics.serverselection.HostList`
+	local cnt=`uci_get_bbf_dmmap dmmap_diagnostics.serverselection.NumberOfRepetitions 3`
+	local timeout=`uci_get_bbf_dmmap dmmap_diagnostics.serverselection.Timeout 1000`
+	local port=`uci_get_bbf_dmmap dmmap_diagnostics.serverselection.port`
+	local interface=`uci_get_bbf_dmmap dmmap_diagnostics.serverselection.interface`
+	local protoversion=`uci_get_bbf_dmmap dmmap_diagnostics.serverselection.ProtocolVersion Any`
+	local protocol=`uci_get_bbf_dmmap dmmap_diagnostics.serverselection.Protocol ICMP`
 	if [ "$protoversion" == "IPv4" ]; then proto="-4"; elif [ "$protoversion" == "IPv6" ]; then proto="-6"; else proto=""; fi
 	[ "$hostlist" = "" ] && return
 	timeout=$((timeout/1000))
@@ -40,11 +33,11 @@ serverselection_launch() {
 				let i++
 				res=$(ping -q $proto -c 1 -W $timeout $device $host 2>&1)
 				ba=`echo "$res" | grep "bad address"`
-				[ -n "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBFDM; break; }
+				[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; break; }
 				ba=`echo "$res" | grep "unknown host"`
-				[ -n "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBFDM; break; }
+				[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; break; }
 				stc=`echo "$res" | grep "received"`
-				[ -z "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Error_Other; $UCI_COMMIT_BBFDM; break; }
+				[ -z "$stc" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_Other; $UCI_COMMIT_BBF_DMMAP; break; }
 				times=`echo "$res" | grep "min/avg/max"`
 				[ -z "$times" ] && break
 				sc1=`echo $stc | awk '{print $4}'`
@@ -71,9 +64,9 @@ serverselection_launch() {
 				let i++
 				res=$(nping $proto -c 1 --udp --dest-port $port --data-length 24 $device $host 2>&1)
 				ba=`echo "$res" | grep "RCVD"`
-				[ -z "$ba" ] && { $UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBFDM; return; }
+				[ -z "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; return; }
 				stc=`echo "$res" | grep "RCVD" | grep "unreachable"`
-				[ -n "$stc" ] && { $UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Error_Other; $UCI_COMMIT_BBFDM; return; }
+				[ -n "$stc" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_Other; $UCI_COMMIT_BBF_DMMAP; return; }
 				times=`echo "$res" | grep "rtt"`
 				[ -z "$times" ] && continue
 				sc1=`echo "$res" | grep "Rcvd" | awk -F': ' '{print $3}' | awk -F'(' '{ print $1 }'`
@@ -101,20 +94,20 @@ serverselection_launch() {
 		max=0
 		i=0
 	done
-	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=Complete
-	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.FastestHost=$fasthost
-	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.AverageResponseTime=$avg_time_host
-	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.MinimumResponseTime=$min_time_host
-	$UCI_SET_BBFDM dmmap_diagnostics.serverselection.MaximumResponseTime=$max_time_host
-	$UCI_COMMIT_BBFDM
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Complete
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.FastestHost=$fasthost
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.AverageResponseTime=$avg_time_host
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.MinimumResponseTime=$min_time_host
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.MaximumResponseTime=$max_time_host
+	$UCI_COMMIT_BBF_DMMAP
 }
 
 serverselection_stop_diagnostic() {
 	local pids=`ps | grep serverselection_launch | grep -v grep | awk '{print $1}'`
 	if [ -n "$pids" ]; then
 		kill -9 $pids &>/dev/null
-		$UCI_SET_BBFDM dmmap_diagnostics.serverselection.DiagnosticState=None
-		$UCI_COMMIT_BBFDM
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=None
+		$UCI_COMMIT_BBF_DMMAP
 	fi
 }
 

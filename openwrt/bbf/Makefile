@@ -73,8 +73,9 @@ define Package/libbbfdm/install
 	$(CP) $(PKG_BUILD_DIR)/bin/.libs/libbbfdm.so* $(1)/lib/
 	$(CP) $(PKG_BUILD_DIR)/bin/.libs/libbbf_api.so* $(1)/lib/
 	$(INSTALL_DIR) $(1)/etc/bbfdm
+	$(INSTALL_DIR) $(1)/etc/bbfdm/dmmap
 	$(INSTALL_DIR) $(1)/usr/share/bbfdm
-	$(CP) $(PKG_BUILD_DIR)/scripts $(1)/usr/share/bbfdm
+	$(CP) $(PKG_BUILD_DIR)/scripts/* $(1)/usr/share/bbfdm
 endef
 
 define Build/InstallDev

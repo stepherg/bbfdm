@@ -582,7 +582,7 @@ char *check_create_dmmap_package(const char *dmmap_package)
 	char *path;
 	int rc;
 
-	rc = dmasprintf(&path, "/etc/bbfdm/%s", dmmap_package);
+	rc = dmasprintf(&path, "/etc/bbfdm/dmmap/%s", dmmap_package);
 	if (rc == -1)
 		return NULL;
 

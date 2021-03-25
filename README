@@ -8,5 +8,6 @@ make install
 ldconfig
 
 mkdir -p /etc/bbfdm/
+mkdir -p /etc/bbfdm/dmmap
 mkdir -p /etc/bbfdm/json
 mkdir -p /usr/lib/bbfdm
