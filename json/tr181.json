@@ -19208,14 +19208,16 @@
 					"unit": "Mbps",
 					"mapping": [
 						{
-							"type": "ubus",
-							"ubus": {
-								"object": "network.device",
-								"method": "status",
-								"args": {
-									"name": "@Name"
+							"type": "uci",
+							"uci": {
+								"file": "ports",
+								"section": {
+									"type": "ethport",
+									"index": "@i-1"
 								},
-								"key": "link-supported"
+								"option": {
+									"name": "speed"
+								}
 							}
 						}
 					]
@@ -19260,14 +19262,16 @@
 					],
 					"mapping": [
 						{
-							"type": "ubus",
-							"ubus": {
-								"object": "network.device",
-								"method": "status",
-								"args": {
-									"name": "@Name"
+							"type": "uci",
+							"uci": {
+								"file": "ports",
+								"section": {
+									"type": "ethport",
+									"index": "@i-1"
 								},
-								"key": "speed"
+								"option": {
+									"name": "duplex"
+								}
 							}
 						}
 					]

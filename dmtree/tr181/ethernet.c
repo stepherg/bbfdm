@@ -668,6 +668,10 @@ static int set_EthernetInterface_LowerLayers(char *refparam, struct dmctx *ctx, 
 		case VALUECHECK:
 			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
+
+			if (*value != '\0')
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			break;
@@ -688,26 +692,18 @@ static int get_EthernetInterface_MACAddress(char *refparam, struct dmctx *ctx, v
 	return eth_port_sysfs(data, "address", value);
 }
 
-/*#Device.Ethernet.Interface.{i}.MaxBitRate!UBUS:network.device/status/name,@Name/link-supported*/
+/*#Device.Ethernet.Interface.{i}.MaxBitRate!UCI:ports/ethport,@i-1/speed*/
 static int get_EthernetInterface_MaxBitRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *link_supported = NULL;
-	int rate = 0;
+	char *autoneg = NULL;
 
-	dmubus_call("network.device", "status", UBUS_ARGS{{"name", ((struct eth_port_args *)data)->ifname, String}}, 1, &res);
-	DM_ASSERT(res, *value = "-1");
-	char *autoneg = dmjson_get_value(res, 1, "autoneg");
-	if (autoneg && strcmp(autoneg, "true") == 0) {
+	dmuci_get_value_by_section_string(((struct eth_port_args *)data)->eth_port_sec, "autoneg", &autoneg);
+
+	if (autoneg && strcmp(autoneg, "0") == 0)
+		dmuci_get_value_by_section_string(((struct eth_port_args *)data)->eth_port_sec, "speed", value);
+	else
 		*value = "-1";
-	} else {
-		json_object_object_get_ex(res, "link-supported", &link_supported);
-		int arrlen = link_supported ? json_object_array_length(link_supported) : 0;
-		if (arrlen) {
-			char *max_link = dmjson_get_value_in_array_idx(link_supported, arrlen - 1, 0);
-			sscanf(max_link, "%d%*s", &rate);
-			dmasprintf(value, "%d", rate);
-		}
-	}
+
 	return 0;
 }
 
@@ -744,21 +740,20 @@ static int get_EthernetInterface_CurrentBitRate(char *refparam, struct dmctx *ct
 	return 0;
 }
 
-/*#Device.Ethernet.Interface.{i}.DuplexMode!UBUS:network.device/status/name,@Name/speed*/
+/*#Device.Ethernet.Interface.{i}.DuplexMode!UCI:ports/ethport,@i-1/duplex*/
 static int get_EthernetInterface_DuplexMode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL;
-	char mode, *speed = NULL;
+	char *autoneg = NULL;
 
-	dmubus_call("network.device", "status", UBUS_ARGS{{"name", ((struct eth_port_args *)data)->ifname, String}}, 1, &res);
-	DM_ASSERT(res, *value = "Auto");
-	char *autoneg = dmjson_get_value(res, 1, "autoneg");
-	if (autoneg && strcmp(autoneg, "true") == 0) {
-		*value = "Auto";
+	dmuci_get_value_by_section_string(((struct eth_port_args *)data)->eth_port_sec, "autoneg", &autoneg);
+
+	if (autoneg && strcmp(autoneg, "0") == 0) {
+		char *duplex = NULL;
+
+		dmuci_get_value_by_section_string(((struct eth_port_args *)data)->eth_port_sec, "duplex", &duplex);
+		*value = (duplex && strcmp(duplex, "full") == 0) ? "Full" : "Half";
 	} else {
-		speed = dmjson_get_value(res, 1, "speed");
-		sscanf(speed, "%*d%c", &mode);
-		*value = (mode == 'F') ? "Full" : "Half";
+		*value = "Auto";
 	}
 	return 0;
 }
@@ -775,10 +770,7 @@ static int set_EthernetInterface_DuplexMode(char *refparam, struct dmctx *ctx, v
 				dmuci_set_value_by_section(((struct eth_port_args *)data)->eth_port_sec, "autoneg", "1");
 			else {
 				dmuci_set_value_by_section(((struct eth_port_args *)data)->eth_port_sec, "autoneg", "0");
-				if (strcmp(value, "Full") == 0)
-					dmuci_set_value_by_section(((struct eth_port_args *)data)->eth_port_sec, "duplex", "full");
-				else
-					dmuci_set_value_by_section(((struct eth_port_args *)data)->eth_port_sec, "duplex", "half");
+				dmuci_set_value_by_section(((struct eth_port_args *)data)->eth_port_sec, "duplex", (*value == 'F') ? "full" : "half");
 			}
 			return 0;
 	}
