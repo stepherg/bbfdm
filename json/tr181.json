@@ -57636,7 +57636,7 @@
 					{
 						"type": "ubus",
 						"ubus": {
-							"object": "router.network",
+							"object": "topology",
 							"method": "hosts",
 							"args": {},
 							"key": "hosts"
@@ -57669,7 +57669,7 @@
 				"mapping": {
 					"type": "ubus",
 					"ubus": {
-						"object": "router.network",
+						"object": "topology",
 						"method": "hosts",
 						"args": {},
 						"key": "hosts"
@@ -57708,7 +57708,7 @@
 						{
 							"type": "ubus",
 							"ubus": {
-								"object": "router.network",
+								"object": "topology",
 								"method": "hosts",
 								"args": {},
 								"key": "hosts[@i-1].macaddr"
@@ -57734,7 +57734,7 @@
 						{
 							"type": "ubus",
 							"ubus": {
-								"object": "router.network",
+								"object": "topology",
 								"method": "hosts",
 								"args": {},
 								"key": "hosts[@i-1].ipaddr"
@@ -57857,10 +57857,10 @@
 						{
 							"type": "ubus",
 							"ubus": {
-								"object": "router.network",
+								"object": "topology",
 								"method": "hosts",
 								"args": {},
-								"key": "hosts[@i-1].type"
+								"key": "hosts[@i-1].interface_type"
 							}
 						}
 					]
@@ -57928,7 +57928,7 @@
 						{
 							"type": "ubus",
 							"ubus": {
-								"object": "router.network",
+								"object": "topology",
 								"method": "hosts",
 								"args": {},
 								"key": "hosts[@i-1].hostname"
@@ -57949,7 +57949,7 @@
 						{
 							"type": "ubus",
 							"ubus": {
-								"object": "router.network",
+								"object": "topology",
 								"method": "hosts",
 								"args": {},
 								"key": "hosts[@i-1].active"
@@ -57970,10 +57970,10 @@
 						{
 							"type": "ubus",
 							"ubus": {
-								"object": "router.network",
+								"object": "topology",
 								"method": "hosts",
 								"args": {},
-								"key": "hosts[@i-1].activelstch"
+								"key": "hosts[@i-1].active_last_change"
 							}
 						}
 					]
@@ -57991,7 +57991,7 @@
 						{
 							"type": "ubus",
 							"ubus": {
-								"object": "router.network",
+								"object": "topology",
 								"method": "hosts",
 								"args": {},
 								"key": "hosts[@i-1].ipv4addr"
@@ -58012,7 +58012,7 @@
 						{
 							"type": "ubus",
 							"ubus": {
-								"object": "router.network",
+								"object": "topology",
 								"method": "hosts",
 								"args": {},
 								"key": "hosts[@i-1].ipv6addr"
@@ -58034,7 +58034,7 @@
 					"mapping": {
 						"type": "ubus",
 						"ubus": {
-							"object": "router.network",
+							"object": "topology",
 							"method": "hosts",
 							"args": {},
 							"key": "hosts[@i-1].ipv4addr"
@@ -58062,7 +58062,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "router.network",
+									"object": "topology",
 									"method": "hosts",
 									"args": {},
 									"key": "hosts[@i-1].ipv4addr[@i-1]"
@@ -58085,7 +58085,7 @@
 					"mapping": {
 						"type": "ubus",
 						"ubus": {
-							"object": "router.network",
+							"object": "topology",
 							"method": "hosts",
 							"args": {},
 							"key": "hosts[@i-1].ipv6addr"
@@ -58109,7 +58109,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "router.network",
+									"object": "topology",
 									"method": "hosts",
 									"args": {},
 									"key": "hosts[@i-1].ipv6addr[@i-1]"
@@ -58139,7 +58139,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "router.network",
+									"object": "topology",
 									"method": "hosts",
 									"args": {},
 									"key": "hosts[@i-1].stats.tx_bytes"
@@ -58160,7 +58160,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "router.network",
+									"object": "topology",
 									"method": "hosts",
 									"args": {},
 									"key": "hosts[@i-1].stats.rx_bytes"
@@ -58181,7 +58181,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "router.network",
+									"object": "topology",
 									"method": "hosts",
 									"args": {},
 									"key": "hosts[@i-1].stats.tx_packets"
@@ -58202,7 +58202,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "router.network",
+									"object": "topology",
 									"method": "hosts",
 									"args": {},
 									"key": "hosts[@i-1].stats.rx_packets"

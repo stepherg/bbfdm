@@ -79,7 +79,7 @@ DMOBJ tDeviceObj[] = {
 {"PTM", &DMREAD, NULL, NULL, "file:/etc/config/dsl", NULL, NULL, NULL, tPTMObj, NULL, NULL, BBFDM_BOTH},
 {"DHCPv4", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/dhcp.sh", NULL, NULL, NULL, tDHCPv4Obj, tDHCPv4Params, NULL, BBFDM_BOTH},
 {"DHCPv6", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/dhcpv6.sh", NULL, NULL, NULL, tDHCPv6Obj, tDHCPv6Params, NULL, BBFDM_BOTH},
-{"Hosts", &DMREAD, NULL, NULL, "ubus:router.network->hosts", NULL, NULL, NULL, tHostsObj, tHostsParams, NULL, BBFDM_BOTH},
+{"Hosts", &DMREAD, NULL, NULL, "ubus:topology->hosts", NULL, NULL, NULL, tHostsObj, tHostsParams, NULL, BBFDM_BOTH},
 {"NAT", &DMREAD, NULL, NULL, "file:/etc/config/firewall", NULL, NULL, NULL, tNATObj, tNATParams, NULL, BBFDM_BOTH},
 {"PPP", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/ppp.sh", NULL, NULL, NULL, tPPPObj, tPPPParams, NULL, BBFDM_BOTH},
 {"Routing", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tRoutingObj, tRoutingParams, NULL, BBFDM_BOTH},

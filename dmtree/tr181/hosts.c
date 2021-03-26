@@ -14,14 +14,14 @@
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
-/*#Device.Hosts.Host.{i}.!UBUS:router.network/hosts//hosts*/
+/*#Device.Hosts.Host.{i}.!UBUS:topology/hosts//hosts*/
 static int browseHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *host_obj = NULL, *arrobj = NULL;
 	char *inst = NULL, *max_inst = NULL;
 	int id = 0, i = 0;
 
-	dmubus_call("router.network", "hosts", UBUS_ARGS{}, 0, &res);
+	dmubus_call("topology", "hosts", UBUS_ARGS{}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, host_obj, i, 1, "hosts") {
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)host_obj, inst) == DM_STOP)
@@ -30,7 +30,7 @@ static int browseHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.IPv4Address.{i}.!UBUS:router.network/hosts//hosts[@i-1].ipv4addr*/
+/*#Device.Hosts.Host.{i}.IPv4Address.{i}.!UBUS:topology/hosts//hosts[@i-1].ipv4addr*/
 static int browseHostsHostIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *ip_arr = NULL, *host_obj = (json_object *)prev_data;
@@ -45,7 +45,7 @@ static int browseHostsHostIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_no
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.IPv6Address.{i}.!UBUS:router.network/hosts//hosts[@i-1].ipv6addr*/
+/*#Device.Hosts.Host.{i}.IPv6Address.{i}.!UBUS:topology/hosts//hosts[@i-1].ipv6addr*/
 static int browseHostsHostIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *ip_arr = NULL, *host_obj = (json_object *)prev_data;
@@ -72,13 +72,13 @@ static int get_linker_host(char *refparam, struct dmctx *dmctx, void *data, char
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
-/*#Device.Hosts.HostNumberOfEntries!UBUS:router.network/hosts//hosts*/
+/*#Device.Hosts.HostNumberOfEntries!UBUS:topology/hosts//hosts*/
 static int get_Hosts_HostNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *hosts = NULL;
 	size_t nbre_hosts = 0;
 
-	dmubus_call("router.network", "hosts", UBUS_ARGS{}, 0, &res);
+	dmubus_call("topology", "hosts", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	json_object_object_get_ex(res, "hosts", &hosts);
 	nbre_hosts = (hosts) ? json_object_array_length(hosts) : 0;
@@ -86,14 +86,14 @@ static int get_Hosts_HostNumberOfEntries(char *refparam, struct dmctx *ctx, void
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.PhysAddress!UBUS:router.network/hosts//hosts[@i-1].macaddr*/
+/*#Device.Hosts.Host.{i}.PhysAddress!UBUS:topology/hosts//hosts[@i-1].macaddr*/
 static int get_HostsHost_PhysAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "macaddr");
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.IPAddress!UBUS:router.network/hosts//hosts[@i-1].ipaddr*/
+/*#Device.Hosts.Host.{i}.IPAddress!UBUS:topology/hosts//hosts[@i-1].ipaddr*/
 static int get_HostsHost_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "ipaddr");
@@ -121,8 +121,8 @@ static int get_HostsHost_AssociatedDevice(char *refparam, struct dmctx *ctx, voi
 static int get_HostsHost_Layer1Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "device");
-	char *type = dmjson_get_value((json_object *)data, 1, "type");
-	if (strcmp(type, "wifi") == 0)
+	char *type = dmjson_get_value((json_object *)data, 1, "interface_type");
+	if (strcmp(type, "Wi-Fi") == 0)
 		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
 	else
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
@@ -140,50 +140,35 @@ static int get_HostsHost_Layer3Interface(char *refparam, struct dmctx *ctx, void
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.InterfaceType!UBUS:router.network/hosts//hosts[@i-1].type*/
+/*#Device.Hosts.Host.{i}.InterfaceType!UBUS:topology/hosts//hosts[@i-1].interface_type*/
 static int get_HostsHost_InterfaceType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "type");
-	*value = (strcmp(*value, "ethernet") == 0) ? "Ethernet" : "Wi-Fi";
+	*value = dmjson_get_value((json_object *)data, 1, "interface_type");
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.HostName!UBUS:router.network/hosts//hosts[@i-1].hostname*/
+/*#Device.Hosts.Host.{i}.HostName!UBUS:topology/hosts//hosts[@i-1].hostname*/
 static int get_HostsHost_HostName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "hostname");
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.Active!UBUS:router.network/hosts//hosts[@i-1].active*/
+/*#Device.Hosts.Host.{i}.Active!UBUS:topology/hosts//hosts[@i-1].active*/
 static int get_HostsHost_Active(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "active");
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.ActiveLastChange!UBUS:router.network/hosts//hosts[@i-1].activelstch*/
+/*#Device.Hosts.Host.{i}.ActiveLastChange!UBUS:topology/hosts//hosts[@i-1].active_last_change*/
 static int get_HostsHost_ActiveLastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "0001-01-01T00:00:00Z";
-
-	char *lastchange = dmjson_get_value((json_object *)data, 1, "activelstch");
-	if (lastchange && *lastchange != '\0' && atoi(lastchange) > 0) {
-		time_t t_time = atoi(lastchange);
-		if (localtime(&t_time) == NULL)
-			return -1;
-
-		char local_time[32] = {0};
-
-		if (strftime(local_time, sizeof(local_time), "%Y-%m-%dT%H:%M:%SZ", localtime(&t_time)) == 0)
-			return -1;
-
-		*value = dmstrdup(local_time);
-	}
+	*value = dmjson_get_value((json_object *)data, 1, "active_last_change");
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.IPv4AddressNumberOfEntries!UBUS:router.network/hosts//hosts[@i-1].ipv4addr*/
+/*#Device.Hosts.Host.{i}.IPv4AddressNumberOfEntries!UBUS:topology/hosts//hosts[@i-1].ipv4addr*/
 static int get_HostsHost_IPv4AddressNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *ipv4addr = NULL;
@@ -195,7 +180,7 @@ static int get_HostsHost_IPv4AddressNumberOfEntries(char *refparam, struct dmctx
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.IPv6AddressNumberOfEntries!UBUS:router.network/hosts//hosts[@i-1].ipv6addr*/
+/*#Device.Hosts.Host.{i}.IPv6AddressNumberOfEntries!UBUS:topology/hosts//hosts[@i-1].ipv6addr*/
 static int get_HostsHost_IPv6AddressNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *ipv6addr = NULL;
@@ -207,42 +192,42 @@ static int get_HostsHost_IPv6AddressNumberOfEntries(char *refparam, struct dmctx
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.IPv4Address.{i}.IPAddress!UBUS:router.network/hosts//hosts[@i-1].ipv4addr[@i-1]*/
+/*#Device.Hosts.Host.{i}.IPv4Address.{i}.IPAddress!UBUS:topology/hosts//hosts[@i-1].ipv4addr[@i-1]*/
 static int get_HostsHostIPv4Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = (char *)data;
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.IPv6Address.{i}.IPAddress!UBUS:router.network/hosts//hosts[@i-1].ipv6addr[@i-1]*/
+/*#Device.Hosts.Host.{i}.IPv6Address.{i}.IPAddress!UBUS:topology/hosts//hosts[@i-1].ipv6addr[@i-1]*/
 static int get_HostsHostIPv6Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = (char *)data;
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.WANStats.BytesSent!UBUS:router.network/hosts//hosts[@i-1].stats.tx_bytes*/
+/*#Device.Hosts.Host.{i}.WANStats.BytesSent!UBUS:topology/hosts//hosts[@i-1].stats.tx_bytes*/
 static int get_HostsHostWANStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 2, "stats", "tx_bytes");
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.WANStats.BytesReceived!UBUS:router.network/hosts//hosts[@i-1].stats.rx_bytes*/
+/*#Device.Hosts.Host.{i}.WANStats.BytesReceived!UBUS:topology/hosts//hosts[@i-1].stats.rx_bytes*/
 static int get_HostsHostWANStats_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 2, "stats", "rx_bytes");
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.WANStats.PacketsSent!UBUS:router.network/hosts//hosts[@i-1].stats.tx_packets*/
+/*#Device.Hosts.Host.{i}.WANStats.PacketsSent!UBUS:topology/hosts//hosts[@i-1].stats.tx_packets*/
 static int get_HostsHostWANStats_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 2, "stats", "tx_packets");
 	return 0;
 }
 
-/*#Device.Hosts.Host.{i}.WANStats.PacketsReceived!UBUS:router.network/hosts//hosts[@i-1].stats.rx_packets*/
+/*#Device.Hosts.Host.{i}.WANStats.PacketsReceived!UBUS:topology/hosts//hosts[@i-1].stats.rx_packets*/
 static int get_HostsHostWANStats_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 2, "stats", "rx_packets");
