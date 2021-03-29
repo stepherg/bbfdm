@@ -2225,6 +2225,9 @@ static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
+			if (*value == '\0')
+				break;
+
 			adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", ((struct wifi_acp_args *)data)->ifname, &linker);
 			if (strncmp(value, "Device.WiFi.SSID.", 17) != 0 || (linker && strcmp(value, linker) != 0))
 				return FAULT_9007;
