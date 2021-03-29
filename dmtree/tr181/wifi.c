@@ -367,7 +367,7 @@ static int browseWifiSsidInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 	list_for_each_entry(p, &dup_list, list) {
 
 		dmuci_get_value_by_section_string(p->config_section, "device", &linker);
-		ifname = get_device_from_wifi_iface(linker, section_name(p->config_section));
+		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
 
 		init_wifi_ssid(&curr_wifi_ssid_args, p->config_section, ifname, linker);
 
@@ -2213,6 +2213,26 @@ static int get_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 	adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", ((struct wifi_acp_args *)data)->ifname, value); // MEM WILL BE FREED IN DMMEMCLEAN
 	if (*value == NULL)
 		*value = "";
+	return 0;
+}
+
+static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *linker = NULL;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
+				return FAULT_9007;
+
+			adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", ((struct wifi_acp_args *)data)->ifname, &linker);
+			if (strncmp(value, "Device.WiFi.SSID.", 17) != 0 || (linker && strcmp(value, linker) != 0))
+				return FAULT_9007;
+
+			break;
+		case VALUESET:
+			break;
+	}
 	return 0;
 }
 
@@ -4215,7 +4235,7 @@ DMLEAF tWiFiAccessPointParams[] = {
 {"Alias", &DMWRITE, DMT_STRING, get_access_point_alias, set_access_point_alias, BBFDM_BOTH},
 {"Enable", &DMWRITE, DMT_BOOL,  get_wifi_enable, set_wifi_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_wifi_access_point_status, NULL, BBFDM_BOTH},
-{"SSIDReference", &DMREAD, DMT_STRING, get_ap_ssid_ref, NULL, BBFDM_BOTH},
+{"SSIDReference", &DMWRITE, DMT_STRING, get_ap_ssid_ref, set_ap_ssid_ref, BBFDM_BOTH},
 {"SSIDAdvertisementEnabled", &DMWRITE, DMT_BOOL, get_wlan_ssid_advertisement_enable, set_wlan_ssid_advertisement_enable, BBFDM_BOTH},
 {"WMMEnable", &DMWRITE, DMT_BOOL, get_wmm_enabled, set_wmm_enabled, BBFDM_BOTH},
 {"UAPSDEnable", &DMWRITE, DMT_BOOL, get_WiFiAccessPoint_UAPSDEnable, set_WiFiAccessPoint_UAPSDEnable, BBFDM_BOTH},
