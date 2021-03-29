@@ -238,6 +238,7 @@ static int add_wifi_iface(char *inst_name, char **instance)
 
 	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_wifi);
 	dmuci_set_value_by_section(dmmap_wifi, "section_name", s_name);
+	dmuci_set_value_by_section(dmmap_wifi, "ifname", ssid);
 	*instance = update_instance(inst, 2, dmmap_wifi, inst_name);
 	return 0;
 }
@@ -358,7 +359,7 @@ static int browseWifiRadioInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 /*#Device.WiFi.SSID.{i}.!UCI:wireless/wifi-iface/dmmap_wireless*/
 static int browseWifiSsidInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL, *ifname = NULL, *linker;
+	char *inst = NULL, *max_inst = NULL, *ifname = NULL, *linker = NULL;
 	struct wifi_ssid_args curr_wifi_ssid_args = {0};
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
@@ -368,6 +369,9 @@ static int browseWifiSsidInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 
 		dmuci_get_value_by_section_string(p->config_section, "device", &linker);
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
+
+		if (ifname && *ifname == '\0')
+			dmuci_get_value_by_section_string(p->dmmap_section, "ifname", &ifname);
 
 		init_wifi_ssid(&curr_wifi_ssid_args, p->config_section, ifname, linker);
 
@@ -391,10 +395,16 @@ static int browseWifiAccessPointInst(struct dmctx *dmctx, DMNODE *parent_node, v
 
 	synchronize_specific_config_sections_with_dmmap("wireless", "wifi-iface", "dmmap_wireless", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
+
 		dmuci_get_value_by_section_string(p->config_section, "mode", &mode);
 		if ((strlen(mode)>0 || mode[0] != '\0') && strcmp(mode, "ap") != 0)
 			continue;
+
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
+
+		if (ifname && *ifname == '\0')
+			dmuci_get_value_by_section_string(p->dmmap_section, "ifname", &ifname);
+
 		init_wifi_acp(&curr_wifi_acp_args, p->config_section, ifname);
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
