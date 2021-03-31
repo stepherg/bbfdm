@@ -163,8 +163,8 @@ gen_dm_tree(){
 			fi
 
 			if [ -n "$str" ]; then
-				child_objects=${f7// }
-				child_parameters=${f8// }
+				child_objects=${f8// }
+				child_parameters=${f9// }
 				obj_name=${name}
 
 				#Add the actual object to the list of objects looking for their children objects ########

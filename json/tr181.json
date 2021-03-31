@@ -736,27 +736,6 @@
 					}
 				]
 			},
-			"X_IOPSYS_EU_BaseMACAddress": {
-				"type": "string",
-				"read": true,
-				"write": false,
-				"protocols": [
-					"cwmp",
-					"usp"
-				],
-				"datatype": "string",
-				"mapping": [
-					{
-						"type": "ubus",
-						"ubus": {
-							"object": "router.system",
-							"method": "info",
-							"args": {},
-							"key": "basemac"
-						}
-					}
-				]
-			},
 			"Device.DeviceInfo.VendorConfigFile.{i}.": {
 				"type": "object",
 				"protocols": [
@@ -6558,41 +6537,6 @@
 						}
 					}
 				]
-			},
-			"X_IOPSYS_EU_LocalTimeZoneName": {
-				"type": "string",
-				"read": true,
-				"write": false,
-				"protocols": [
-					"cwmp",
-					"usp"
-				],
-				"datatype": "string",
-				"mapping": [
-					{
-						"type": "uci",
-						"uci": {
-							"file": "system",
-							"section": {
-								"type": "system",
-								"name": "@system[0]"
-							},
-							"option": {
-								"name": "zonename"
-							}
-						}
-					}
-				]
-			},
-			"X_IOPSYS_EU_SourceInterface": {
-				"type": "string",
-				"read": true,
-				"write": true,
-				"protocols": [
-					"cwmp",
-					"usp"
-				],
-				"datatype": "string"
 			}
 		},
 		"Device.UserInterface.": {
