@@ -8,6 +8,7 @@ import sys
 import getopt
 import bbf_common as bbf
 import xml.etree.ElementTree as ET
+import xml.dom.minidom as MD
 
 BBF_REMOTE_DM = None
 BBF_VENDOR_LIST = None
@@ -44,6 +45,11 @@ def print_dmxml_usage():
 	print("    ==> Generate xml file in %s" % XML_FILE)
 	print("  - python " + sys.argv[0] + " -v iopsys,openwrt,test -r https://dev.iopsys.eu/feed/iopsys.git^6.0.0ALPHA1 -p X_TEST_COM_")
 	print("    ==> Generate xml file in %s" % XML_FILE)
+
+def pretty_format( elem ):
+	elem_string = ET.tostring(elem, 'UTF-8')
+	reparsed = MD.parseString(elem_string)
+	return reparsed.toprettyxml(indent="  ")
 
 def generate_xml_file():
 	global DM_OBJ_COUNT
@@ -84,10 +90,10 @@ def generate_xml_file():
 			syntax = ET.SubElement(parameter, "syntax")
 			ET.SubElement(syntax, ARRAY_TYPES.get(obj[2], None))
 			DM_PARAM_COUNT += 1
-
-	tree = ET.ElementTree(root)
-
-	tree.write(XML_FILE, encoding ='UTF-8', xml_declaration = True)
+	
+	xml_file = open(XML_FILE, "w")
+	xml_file.write(pretty_format(root))
+	xml_file.close()
 
 try:
 	opts, args = getopt.getopt(sys.argv[1:], "hr:v:p:", ["remote-dm=", "vendor-list=", "vendor-prefix="])
