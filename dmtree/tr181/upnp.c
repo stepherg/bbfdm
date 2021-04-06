@@ -792,19 +792,13 @@ static int get_UPnPDescriptionServiceInstance_EventSubURL(char *refparam, struct
 /* *** Device.UPnP. *** */
 DMOBJ tUPnPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceObj, tUPnPDeviceParams, NULL, BBFDM_BOTH},
+{"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceParams, NULL, BBFDM_BOTH},
 {"Discovery", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDiscoveryObj, tUPnPDiscoveryParams, NULL, BBFDM_BOTH},
 {"Description", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDescriptionObj, tUPnPDescriptionParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.UPnP.Device. *** */
-DMOBJ tUPnPDeviceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceCapabilitiesParams, NULL, BBFDM_BOTH},
-{0}
-};
-
 DMLEAF tUPnPDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Enable", &DMWRITE, DMT_BOOL, get_UPnPDevice_Enable, set_UPnPDevice_Enable, BBFDM_BOTH},
@@ -817,24 +811,6 @@ DMLEAF tUPnPDeviceParams[] = {
 //{"UPnPDMBasicMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMBasicMgmt, set_UPnPDevice_UPnPDMBasicMgmt, BBFDM_BOTH},
 //{"UPnPDMConfigurationMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMConfigurationMgmt, set_UPnPDevice_UPnPDMConfigurationMgmt, BBFDM_BOTH},
 //{"UPnPDMSoftwareMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMSoftwareMgmt, set_UPnPDevice_UPnPDMSoftwareMgmt, BBFDM_BOTH},
-{0}
-};
-
-/* *** Device.UPnP.Device.Capabilities. *** */
-DMLEAF tUPnPDeviceCapabilitiesParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"UPnPArchitecture", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPArchitecture, NULL, BBFDM_BOTH},
-//{"UPnPArchitectureMinorVer", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPArchitectureMinorVer, NULL, BBFDM_BOTH},
-//{"UPnPMediaServer", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPMediaServer, NULL, BBFDM_BOTH},
-//{"UPnPMediaRenderer", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPMediaRenderer, NULL, BBFDM_BOTH},
-//{"UPnPWLANAccessPoint", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPWLANAccessPoint, NULL, BBFDM_BOTH},
-//{"UPnPBasicDevice", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPBasicDevice, NULL, BBFDM_BOTH},
-//{"UPnPQoSDevice", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPQoSDevice, NULL, BBFDM_BOTH},
-//{"UPnPQoSPolicyHolder", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPQoSPolicyHolder, NULL, BBFDM_BOTH},
-//{"UPnPIGD", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPIGD, NULL, BBFDM_BOTH},
-//{"UPnPDMBasicMgmt", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPDMBasicMgmt, NULL, BBFDM_BOTH},
-//{"UPnPDMConfigurationMgmt", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPDMConfigurationMgmt, NULL, BBFDM_BOTH},
-//{"UPnPDMSoftwareMgmt", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPDMSoftwareMgmt, NULL, BBFDM_BOTH},
 {0}
 };
 

@@ -24,7 +24,7 @@ DM_MAP_OBJ tVendorExtensionOverwriteTEST[] = {
 DM_MAP_OBJ tVendorExtensionTEST[] = {
 /* parentobj, nextobject, parameter */
 {"Device.", tTEST_DeviceObj, NULL},
-{"Device.Firewall.Chain.{i}.Rule.{i}.", tTEST_FirewallChainRuleObj, NULL},
+{"Device.Firewall.Chain.{i}.Rule.{i}.", tTEST_FirewallChainRuleObj, tTEST_FirewallChainRuleParams},
 {0}
 };
 

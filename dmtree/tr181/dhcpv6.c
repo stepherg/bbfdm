@@ -1303,7 +1303,7 @@ static int set_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 /* *** Device.DHCPv6. *** */
 DMOBJ tDHCPv6Obj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Client", &DMWRITE, addObjDHCPv6Client, delObjDHCPv6Client, NULL, browseDHCPv6ClientInst, NULL, NULL, tDHCPv6ClientObj, tDHCPv6ClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
+{"Client", &DMWRITE, addObjDHCPv6Client, delObjDHCPv6Client, NULL, browseDHCPv6ClientInst, NULL, NULL, NULL, tDHCPv6ClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
 {"Server", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDHCPv6ServerObj, tDHCPv6ServerParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1311,15 +1311,6 @@ DMOBJ tDHCPv6Obj[] = {
 DMLEAF tDHCPv6Params[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"ClientNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6_ClientNumberOfEntries, NULL, BBFDM_BOTH},
-{0}
-};
-
-/* *** Device.DHCPv6.Client.{i}. *** */
-DMOBJ tDHCPv6ClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-//{"Server", &DMREAD, NULL, NULL, NULL, browseDHCPv6ClientServerInst, NULL, NULL, NULL, tDHCPv6ClientServerParams, NULL, BBFDM_BOTH, LIST_KEY{"SourceAddress", NULL}},
-//{"SentOption", &DMWRITE, addObjDHCPv6ClientSentOption, delObjDHCPv6ClientSentOption, NULL, browseDHCPv6ClientSentOptionInst, NULL, NULL, NULL, tDHCPv6ClientSentOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
-//{"ReceivedOption", &DMREAD, NULL, NULL, NULL, browseDHCPv6ClientReceivedOptionInst, NULL, NULL, NULL, tDHCPv6ClientReceivedOptionParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -1341,34 +1332,6 @@ DMLEAF tDHCPv6ClientParams[] = {
 //{"ServerNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_ServerNumberOfEntries, NULL, BBFDM_BOTH},
 //{"SentOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_SentOptionNumberOfEntries, NULL, BBFDM_BOTH},
 //{"ReceivedOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_ReceivedOptionNumberOfEntries, NULL, BBFDM_BOTH},
-{0}
-};
-
-/* *** Device.DHCPv6.Client.{i}.Server.{i}. *** */
-DMLEAF tDHCPv6ClientServerParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"SourceAddress", &DMREAD, DMT_STRING, get_DHCPv6ClientServer_SourceAddress, NULL, BBFDM_BOTH},
-//{"DUID", &DMREAD, DMT_HEXBIN, get_DHCPv6ClientServer_DUID, NULL, BBFDM_BOTH},
-//{"InformationRefreshTime", &DMREAD, DMT_TIME, get_DHCPv6ClientServer_InformationRefreshTime, NULL, BBFDM_BOTH},
-{0}
-};
-
-/* *** Device.DHCPv6.Client.{i}.SentOption.{i}. *** */
-DMLEAF tDHCPv6ClientSentOptionParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv6ClientSentOption_Enable, set_DHCPv6ClientSentOption_Enable, BBFDM_BOTH},
-//{"Alias", &DMWRITE, DMT_STRING, get_DHCPv6ClientSentOption_Alias, set_DHCPv6ClientSentOption_Alias, BBFDM_BOTH},
-//{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv6ClientSentOption_Tag, set_DHCPv6ClientSentOption_Tag, BBFDM_BOTH},
-//{"Value", &DMWRITE, DMT_HEXBIN, get_DHCPv6ClientSentOption_Value, set_DHCPv6ClientSentOption_Value, BBFDM_BOTH},
-{0}
-};
-
-/* *** Device.DHCPv6.Client.{i}.ReceivedOption.{i}. *** */
-DMLEAF tDHCPv6ClientReceivedOptionParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"Tag", &DMREAD, DMT_UNINT, get_DHCPv6ClientReceivedOption_Tag, NULL, BBFDM_BOTH},
-//{"Value", &DMREAD, DMT_HEXBIN, get_DHCPv6ClientReceivedOption_Value, NULL, BBFDM_BOTH},
-//{"Server", &DMREAD, DMT_STRING, get_DHCPv6ClientReceivedOption_Server, NULL, BBFDM_BOTH},
 {0}
 };
 

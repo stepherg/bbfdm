@@ -32,9 +32,10 @@ missing
 libtool
 ltmain.sh
 COPYING
-json/tr*/
-json/tr*.xls
-tools/tr*/
+tools/*.xls
+tools/*.xml
+tools/*.pyc
+tools/__pycache__
 *.gcov
 *.gcno
 *.log

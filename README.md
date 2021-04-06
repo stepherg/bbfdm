@@ -1,144 +1,186 @@
-# README #
-The libray **bbfdm** is an implementation of BBF(Broad Band Forum) data models. BBF data models includes a list of objects and parameters used for CPE management through remote control protocols such as : CWMP, USP, etc.
+# BroadBand Forum Data Models (BBFDM)
 
-## Design of bbfdm ##
-The root directory of bbfdm library is **“src”** which is structred as follow :
-![structure](/pictures/structure.jpg)
+`bbfdm` is a data model library implementation which includes a list of objects, parameters and operates used for CPE management through remote control protocols such as [TR-069/CWMP](https://cwmp-data-models.broadband-forum.org/) or [TR-369/USP](https://usp.technology/).
 
-## How to start with bbfdm ##
-The bbfdm library offers a tool to generate templates of the source code from json files.
+## Design of bbfdm
 
-```plain
-$ python generate_source_code.py
-Usage: generate_source_code.py <json data model> [Object path]
-Examples:
-  - generate_source_code.py tr181.json
-    ==> Generate the C code of all data model in tr181/ folder
-  - generate_source_code.py tr104.json
-    ==> Generate the C code of all data model in tr104/ folder
-  - generate_source_code.py tr181.json Device.DeviceInfo.
-    ==> Generate the C code of DeviceInfo object in tr181/ folder
-  - generate_source_code.py tr181.json Device.WiFi.
-    ==> Generate the C code of WiFi object in tr181/ folder
-  - generate_source_code.py tr104.json Device.Services.VoiceService.{i}.Capabilities.
-    ==> Generate the C code of Services.VoiceService.{i}.Capabilities. object in tr104/ folder
+`bbfdm` library is structred as follow :
+
+
+```bash
+├── dm...(.c and .h)
+├── dmtree
+│   ├── json
+│   ├── tr104
+│   ├── tr143
+│   ├── tr181
+│   └── vendor
+│       ├── iopsys
+│       ├── openwrt
+│       └── vendor.h
+├── libbbf_api
+├── scripts
+└── tools
 ```
-**Note:** Any developer can full the json file (**tr181.json** or **tr104.json**) with mapping field according to UCI, UBUS or CLI commands before generating the source code in C.
 
-Find below the examples of **UCI**, **UBUS** or **CLI** commands:
+- `dmtree` folder which includes all supported Data Models. It contains 5 folders:
 
-**1. UCI command:**
+	- `tr181` folder : TR-181 Data Model files
+
+	- `tr104` folder : Voice Services Data Model files
+
+	- `tr143` folder : Diagnostics Data Model files
+
+	- `vendor` folder : Vendor Data Model files
+
+	- `json` folder : TR-181 and TR-104 JSON files
+
+- `libbbf_api` folder which contains the source code of all API functions (UCI, Ubus, JSON, CLI and memory management)
+
+- `scripts` folder which contains the Diagnostics scripts
+
+- `tools` folder which contains some tools to generate Data Model in C, JSON, XML and Excel format
+
+- `dm...(.c and .h)` files which contains the `bbfdm` engine (operate, diagnostics) functions
+
+## How to add support for a new Object/Parameter
+
+As mentioned above, all Data Models are stored in the **'dmtree'** folder. In order to implement a new object/parameter, you need to expand its get/set/add/delete functions and then save them in the rigth folder.
+
+`bbfdm` library offers a tool to generate templates of the source code from json files placed under **'dmtree/json'**. So, any developer can fill these json files ([tr181](/dmtree/json/tr181.json) or [tr104](/dmtree/json/tr104.json)) with mapping field according to UCI, UBUS or CLI commands then generate the source code in C.
+
+```bash
+$ python generate_dm_c.py
+Usage: generate_dm_c.py <data model name> [Object path]
+data model name:   The data model(s) to be used, for ex: tr181 or tr181,tr104
+Examples:
+  - generate_dm_c.py tr181
+    ==> Generate the C code of tr181 data model in datamodel/ folder
+  - generate_dm_c.py tr104
+    ==> Generate the C code of tr104 data model in datamodel/ folder
+  - generate_dm_c.py tr181,tr104
+    ==> Generate the C code of tr181 and tr104 data model in datamodel/ folder
+  - generate_dm_c.py tr181 Device.DeviceInfo.
+    ==> Generate the C code of Device.DeviceInfo object in datamodel/ folder
+  - generate_dm_c.py tr104 Device.Services.VoiceService.{i}.Capabilities.
+    ==> Generate the C code of Device.Services.VoiceService.{i}.Capabilities. object in datamodel/ folder
+```
+
+Below some examples of **UCI**, **UBUS** or **CLI** mappings:
+
+#### UCI command
 
 - **@Name:** the section name of paraent object
 
 - **@i:** is the number of instance object
 
-```plain
-    "mapping": [
-        {
-            "type": "uci", 
-            "uci": {
-                "file": "wireless", 
-                "section": {
-                    "type": "wifi-device", 
-		    "name": "@Name",
-                    "index": "@i-1"
-                }, 
-                "option": {
-                    "name": "disabled"
-                }
-            }
-        }
-    ]
+```bash
+	"mapping": [
+		{
+			"type": "uci",
+			"uci": {
+				"file": "wireless",
+				"section": {
+					"type": "wifi-device",
+					"name": "@Name",
+					"index": "@i-1"
+				},
+				"option": {
+					"name": "disabled"
+				}
+			}
+		}
+	]
 ```
 
-**2. UBUS command:**
+#### UBUS command
 
 - **@Name:** the section name of paraent object
 
-```plain
-    "mapping": [
-        {
-            "type": "ubus", 
-            "ubus": {
-                "object": "network.device", 
-                "method": "status", 
-                "args": {
-	            "name": "@Name"
-                }, 
-                "key": "statistics.rx_bytes"
-            }
-        }
-    ]
+```bash
+	"mapping": [
+		{
+			"type": "ubus",
+			"ubus": {
+				"object": "network.device",
+				"method": "status",
+				"args": {
+					"name": "@Name"
+				},
+				"key": "statistics.rx_bytes"
+			}
+		}
+	]
 ```
 
-**3. CLI command:**
+#### CLI command:
 
 - **@Name:** the section name of paraent object
 
 - **-i:** is the number of arguments command
 
-```plain
-    "mapping": [
-        {
-            "type" : "cli",
-            "cli" : {
-                "command" : "wlctl",
-                "args" : [
-                    "-i",
-                    "@Name",
-                    "bands"
-                ]
-            }
-        }
-    ]
+```bash
+	"mapping": [
+		{
+			"type" : "cli",
+			"cli" : {
+				"command" : "wlctl",
+				"args" : [
+					"-i",
+					"@Name",
+					"bands"
+				]
+			}
+		}
+	]
 ```
 
-After building the templates of C source code, a **tr181** or **tr104** folder will be generated under **json** folder that contains all files related a each object under root Device.
+After building the templates of C source code, a **datamodel** folder will be generated under **'tools'** folder that contains all files related to each object under root "**Device.**"
 
-#### Object definition ###
+> Note: You can generate the source code without filling out the mapping field in the JSON file
 
-![object](/pictures/obj.png)
+### Object definition
 
 Each object in the **DMOBJ** table contains the following arguments:
 
-|     Argument        |                                                   Description                                                               |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+|     Argument        |                            Description                                                               |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
 | `OBJ`               | A string of the object name. Example “Bridging”, “IP”, “DeviceInfo”, “WiFi” |
 | `permission`        | The permission of the object. Could be **&DMREAD** or **&DMWRITE**. If it's `&DMWRITE` then we can add/delete instances of this object |
 | `addobj`            | The function to add new instance under this object. This function will be triggered when the ACS/Controller call AddObject of this object |
 | `delobj`            | The function to delete instance under this object. This function will be triggered when the ACS/Controller call DeleteObject of an instance of this object |
-| `checkdep`          | A string of the object dependency, it can be a file("file:/etc/config/network") or an ubus object,method("ubus:network.interface->status"). If it's `NULL` then the object has always appeared in the tree. |
+| `checkdep`          | A string of the object dependency, it can be a file("file:/etc/config/network") or an ubus object,method("ubus:network.interface->status"). If it's `NULL` then the object has always appeared in the tree |
 | `browseinstobj`     | This function allow to browse all instances under this object |
-| `nextdynamicobj`       | Pointer to the next of **DMOBJ** which contains a list of the child objects using json files and plugins(libraries) |
+| `nextdynamicobj`    | Pointer to the next of **DMOBJ** which contains a list of the child objects using json files, shared libraries and vendor extension |
+| `dynamicleaf`       | Pointer to the next of **DMLEAF** which contains a list of the child parameters using json files, shared libraries and vendor extension |
 | `nextobj`           | Pointer to a **DMOBJ** array which contains a list of the child objects |
-| `leaf`              | Pointer to a **DMLEAF** array which contains a list of the child objects |
+| `leaf`              | Pointer to a **DMLEAF** array which contains a list of the child parameters |
 | `linker`            | This argument is used for LowerLayer parameters or to make reference to other instance object in the tree |
-| `bbfdm_type`        | The bbfdm type of the object. Could be **BBFDM_CWMP**, **BBFDM_USP** or **BBFDM_NONE**.If it's `BBFDM_NONE` then we can see this object in all protocols (CWMP, USP,...) |
+| `bbfdm_type`        | The bbfdm type of the object. Could be **BBFDM_CWMP**, **BBFDM_USP**, **BBFDM_BOTH** or **BBFDM_NONE**.If it's **BBFDM_BOTH** then we can see this object in all protocols (CWMP, USP,...) |
 
-#### Parameter definition ###
 
-![parameter](/pictures/param.png)
+### Parameter definition
 
 Each parameter in the **DMLEAF** table contains the following arguments:
 
-|     Argument        |                                                   Description                                                               |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+|     Argument        |                             Description                                                               |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
 | `PARAM`             | A string of the parameter name. Example “Enable”, “Status”, “Name” |
 | `permission`        | The permission of the parameter. Could be **&DMREAD** or **&DMWRITE**.If it's `&DMWRITE` then we can set a value for this parameter |
 | `type`              | Type of the parameter: **DM_STRING**, **DM_BOOL**, **DM_UNINT**,... |
 | `getvalue`          | The function which return the value of this parameter |
 | `setvalue`          | The function which set the value of this parameter |
-| `bbfdm_type`        | The bbfdm type of the parameter. Could be **BBFDM_CWMP**, **BBFDM_USP** or **BBFDM_NONE**.If it's `BBFDM_NONE` then we can see this parameter in all protocols (CWMP, USP,...) |
+| `bbfdm_type`        | The bbfdm type of the parameter. Could be **BBFDM_CWMP**, **BBFDM_USP**, **BBFDM_BOTH** or **BBFDM_NONE**.If it's **BBFDM_BOTH** then we can see this parameter in all protocols (CWMP, USP,...) |
 
-## BBFDM API ##
+## BBF API
 
-The bbfdm API is used for GET/SET/ADD/Delete/Operate calls.
+`libbbf_api` is a library which contains the source code of all API functions (UCI, Ubus, JSON, CLI and memory management). these API are used for GET/SET/ADD/Delete/Operate calls which can be called in internal or external packages.
 
-It includes list of `UCI` functions. The most used one are as follow:
+The most used one are as follow:
 
-**1. dmuci_get_option_value_string:** execute the uci get value
-```plain
+#### 1. dmuci_get_option_value_string: execute the uci get value
+
+```bash
 int dmuci_get_option_value_string(char *package, char *section, char *option, char **value)
 ```
 **Argument:**
@@ -147,8 +189,9 @@ int dmuci_get_option_value_string(char *package, char *section, char *option, ch
 - **option:** option name
 - **value:** the value of the returned option
 
-**2. dmuci_get_value_by_section_string:** execute the uci get value
-```plain
+#### 2. dmuci_get_value_by_section_string: execute the uci get value
+
+```bash
 int dmuci_get_value_by_section_string(struct uci_section *s, char *option, char **value)
 ```
 **Argument:**
@@ -156,23 +199,23 @@ int dmuci_get_value_by_section_string(struct uci_section *s, char *option, char 
 - **option:** option name
 - **value:** the value of the returned option
 
-**3. uci_foreach_sections:** browse all sections by package and section type
-```plain
+#### 3. uci_foreach_sections: browse all sections by package and section type
+
+```bash
 #define uci_foreach_sections(package, stype, section)
 ```
+
 **Argument:**
 - **package:** package name
 - **stype:** section type to browse
 - **section:** return section pointer for each loop iteration
 
-**NOTE: For others please refer to dmuci (.c and .h)**
+#### 4. dmubus_call: execute the ubus call
 
-It also includes list of `UBUS` functions as follow:
-
-**1. dmubus_call:** execute the ubus call
-```plain
+```bash
 int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
 ```
+
 **Argument:**
 - **obj:** ubus obj
 - **method:** ubus method
@@ -180,24 +223,26 @@ int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_si
 - **u_args_size:** number of ubus arguments
 - **req_res:** the json message of the ubus call
 
-**2. dmubus_call_set:** set the ubus call
-```plain
+#### 5. dmubus_call_set: set the ubus call
+
+```bash
 int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size);
 ```
+
 **Argument:**
 - **obj:** ubus obj
 - **method:** ubus method
 - **u_args: ubus** arguments
 - **u_args_size:** number of ubus arguments
 
-**NOTE: There are others API related to JSON and CLI command defined in dmjson, dmcommon (.c and .h).**
 
-## TIPS ##
-When developing a new parameters/features in the data model C source code, it's highly recommended to use the memory management functions of bbfdm allocate and free because it's freed at the end of each RPCs.
+> Note1: For other funtions, please refer to dmuci, dmubus, dmjson, dmcommon and dmmem (.c and .h) files in the [link](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbf_api)
 
-The list of memory management functions of bbfdm are:
+> Note2: When developing a new parameters/features in the Data Model, it's highly recommended to use the memory management functions of `libbbf_api` allocate and free because it's freed at the end of each RPCs.
 
-```plain
+The list of memory management functions of `libbbf_api` are:
+
+```bash
 dmmalloc(x)
 dmcalloc(n, x)
 dmrealloc(x, n)
@@ -207,66 +252,144 @@ dmastrcat(s, b, m)
 dmfree(x)
 ```
 
-## Good To know ##
-#### XML generator: ####
-It is a generator of data model tree in XML format conform to BBF schema.
-```plain
-$ ./generate_xml_bbf.sh 
-Start Generation of BBF Data Models...
-Please wait...
-Number of BBF Data Models objects is 275
-Number of BBF Data Models parameters is 1647
-End of BBF Data Models Generation
+## BBFDM Vendor
+
+`bbfdm` library can be used to **Extend** the Data Model with new objects/parameters, to **Overwrite** existing objects/parameters with new ones and **Exclude** some objects/parameters from Data Model tree.
+
+### How to add new vendor
+
+#### 1. Create a vendor folder
+
+Create a new folder under **'dmtree/vendor/'** which contains all files related to the vendor
+
+#### 2. Fill Extend, Overwrite and Exclude tables with objects/parameters
+
+Create the first vendor C file which contains new **Extend**, **Overwrite** and **Exclude** tables of objects/parameters.
+
+##### Extend and Overwrite table
+
+The Extend and Overwrite tables contain entries of **DM_MAP_OBJ** structure.
+
+The **DM_MAP_OBJ** structure contains three arguments:
+
+|     Argument     |                                     Description                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| `parentobj`      | A string of the parent object name. Example “Device.IP.Diagnostics.”, “Device.DeviceInfo”, “Device.WiFi.Radio.” |
+| `nextobject`     | Pointer to a **DMOBJ** array which contains a list of the child objects |
+| `parameter`      | Pointer to a **DMLEAF** array which contains a list of the child parameters |
+
+##### Exclude table
+
+Each entry in the exclude table is a string which could be a path of object or parameter that need to be excluded from the tree
+
+The following [link](https://dev.iopsys.eu/iopsys/bbf/-/blob/devel/dmtree/vendor/test/tr181/vendor.c) contains example of Extend, Overwrite and Exclude table.
+
+#### 3. Adding vendor and standard objects/Parameters
+
+Implement the new vendor/standard objects and parameters as defined above in the first section.
+
+Example: [Custom Vendor Object Dropbear](https://dev.iopsys.eu/iopsys/bbf/-/blob/devel/dmtree/vendor/test/tr181/x_test_com_dropbear.c)
+
+#### 4. link vendor tables to the main tree
+
+To register the new vendor tables, you need to link them in the main three tables: 
+
+- **tVendorExtension**
+
+- **tVendorExtensionOverwrite**
+
+- **tVendorExtensionExclude**
+
+These tables are defined in the file **'dmtree/vendor/vendor.c'**.
+
+Example: [Link vendor tables to the main tree](https://dev.iopsys.eu/iopsys/bbf/-/blob/devel/dmtree/vendor/vendor.c)
+
+#### 5. Enable vendor
+
+To enable the new vendor
+
+- Define **BBF_VENDOR_EXTENSION** macro
+
+- Add the new vendor in the list **BBF_VENDOR_LIST** macro
+
+- Define the vendor prefix using **BBF_VENDOR_PREFIX** macro
+
+Example of Config Options:
+
+```bash
+BBF_VENDOR_EXTENSION=y
+BBF_VENDOR_LIST="iopsys,test"
+BBF_VENDOR_PREFIX="X_TEST_COM_"
 ```
 
-#### JSON generator: ####
-It is a generator of json file from xml data model and C source code.
-```plain
-$ python generate_json.py
-Usage: generate_json.py <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]
-Examples:
-  - generate_json.py tr-181-2-14-1-cwmp-full.xml tr-181-2-14-1-usp-full.xml Device.
-    ==> Generate the json file of the sub tree Device. in tr181.json
-  - generate_json.py tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.
-    ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json
-  - generate_json.py tr-106-1-2-0-full.xml Device.
-    ==> Generate the json file of the sub tree Device. in tr106.json
+> Note1: The `libbbfdm` vendor list can support multi-vendor with comma seperated.
 
-Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-14-1-cwmp-full.xml
-```
+> Note2: If multi vendors are supported and there is a object/parameter that is implmented by multi customers in different way, the implemented object/parameter of the first vendor name in the **BBF_VENDOR_LIST** will be considered. 
 
-#### Excel generator: ####
-It is a generator of excel sheet with supported and unsupported data model parameters.
-```plain
-$ python generate_excel.py
-Usage: generate_excel.py <json data model> [options...] <urls>
-Options: 
- -r, --remote-dm     Check OBJ/PARAM under these repositories if it is not found under bbf repo
- -h, --help          This help text
+> Note3: Overwrite and Exclude are only considered in `dmtree/vendor/<vendor>/`
 
-Examples:
-  - python generate_excel.py tr181.json
-    ==> Generate excel file in tr181.xls
-  - python generate_excel.py tr104.json
-    ==> Generate excel file in tr104.xls
-  - python generate_excel.py tr181.json -r https://dev.iopsys.eu/feed/iopsys.git,https://dev.iopsys.eu/abc/def.git
-    ==> Generate excel file in tr181.xls
-  - python generate_excel.py tr181.json --remote-dm https://dev.iopsys.eu/feed/iopsys.git
-    ==> Generate excel file in tr181.xls
-```
+- The directory **'dmtree/vendor/test/'** contains an example of **test** vendor implementation
 
-#### Load additional parameters at run time ####
 
-The bbfdm library allows all applications installed on the box to import its own tr-181 data model parameters at run time in two formats: **JSON files** and **Plugin(library) files**.
+## BBFDM Dynamic Object/Parameter/Operate
 
-#### `JSON Files:` ####
+`bbfdm` library allows all applications installed on the box to import its own Data Model parameters at run time in two formats:
 
-The application should bring its JSON file under **'/etc/bbfdm/json/'** path with **UCI** and **UBUS** mappings. The new added parameters will be automatically shown by icwmp and uspd/obuspa.
+- **Shared library**
 
-To build a new JSON file, you can use **example.json file** under **dynamic_parameters/json** folder to help you build it.
+- **JSON files**
+
+### 1. Shared library via external package
+
+The application should bring its shared library under **'/usr/lib/bbfdm/'** path that contains the sub tree of **Objects/Parameters** and the related functions **Get/Set/Add/Delete/Operate**. The new added objects, parameters and operates will be automatically shown by icwmpd and uspd/obuspa.
+
+Each library should contains two Root tables:
+
+- **“tDynamicObj”**
+
+- **“tDynamicOperate”** 
+
+#### DynamicObject definition
+
+The “tDynamicObj” table contains entries of **DM_MAP_OBJ** structure.
+
+The **DM_MAP_OBJ** structure contains three arguments:
+
+|     Argument     |                                     Description                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| `parentobj`      | A string of the parent object name. Example “Device.IP.Diagnostics.”, “Device.DeviceInfo”, “Device.WiFi.Radio.” |
+| `nextobject`     | Pointer to a **DMOBJ** array which contains a list of the child objects |
+| `parameter`      | Pointer to a **DMLEAF** array which contains a list of the child parameters |
+
+#### DynamicOperate definition
+
+The “tDynamicOperate” table contains entries of **DM_MAP_OPERATE** structure.
+
+The **DM_MAP_OPERATE** structure contains two arguments:
+
+|     Argument       |                           Description                                                                           |
+| ------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `pathname`         | A string of the path name operate. Example “Device.BBKSpeedTest”, “Device.WiFi.AccessPoint.*.X_IOPSYS_EU_Reset” |
+| `operation`        | The function which return the status of this operate. |
+
+
+For the other tables, they are defined in the same way as the Object and Parameter definition described above.
+
+> Note1: Shared library can only add vendor or standard objects that are not implemented by `libbbfdm`
+
+> Note2: Shared library is not allowed to overwrite objects/parameters
+
+- For more examples on the external packages, you can see these links: [BulkData](https://dev.iopsys.eu/feed/iopsys/-/blob/devel/bulkdata/src/datamodel.c), [XMPP](https://dev.iopsys.eu/feed/iopsys/-/blob/devel/xmpp/src/datamodel.c)
+
+### 2. JSON File via external package
+
+The application should bring its JSON file under **'/etc/bbfdm/json/'** path with **UCI** and **UBUS** mappings. The new added parameters will be automatically shown by icwmpd and uspd/obuspa.
+
+#### Some examples on JSON Definition
 
 **1. Object without instance:**
-```plain
+
+```bash
 "Device.CWMP.": {
     "type": "object", 
     "protocols": [
@@ -278,8 +401,10 @@ To build a new JSON file, you can use **example.json file** under **dynamic_para
 ```
 
 **2. Object with instace:**
+
 - **UCI command:** uci show wireless | grep wifi-device
-```plain
+
+```bash
 "Device.X_IOPSYS_EU_Radio.{i}.": {
     "type": "object", 
     "protocols": [
@@ -301,7 +426,8 @@ To build a new JSON file, you can use **example.json file** under **dynamic_para
 ```
 
 - **UBUS command:** ubus call dsl status | jsonfilter -e @.line
-```plain
+
+```bash
 "Device.DSL.Line.{i}.": {
 	"type": "object", 
 	"protocols": [
@@ -327,7 +453,7 @@ To build a new JSON file, you can use **example.json file** under **dynamic_para
 
 - **@i:** is the number of instance object
 
-```plain
+```bash
 "Country": {
 	"type": "string", 
 	"protocols": [
@@ -353,10 +479,11 @@ To build a new JSON file, you can use **example.json file** under **dynamic_para
 	]
 }
 ```
-- **UBUS command (format 1):** ubus call network.interface status '{"interface":"lan"}' | jsonfilter -e @.device
+
+- **UBUS command:** ubus call network.interface status '{"interface":"lan"}' | jsonfilter -e @.device
 
 - **@Name:** the section name of paraent object, in this example, the section name is "lan"
-```plain
+```bash
 "SSID": {
 	"type": "string", 
 	"protocols": [
@@ -381,9 +508,9 @@ To build a new JSON file, you can use **example.json file** under **dynamic_para
 }
 ```
 
-- **UBUS command (format 2):** ubus call wifi status | jsonfilter -e @.radios[0].noise
+- **UBUS command:** ubus call wifi status | jsonfilter -e @.radios[0].noise
 
-```plain
+```bash
 "Noise": {
 	"type": "int", 
 	"protocols": [
@@ -405,11 +532,12 @@ To build a new JSON file, you can use **example.json file** under **dynamic_para
 	]
 }
 ```
-**4. Parameter under object without instance:**
+
+**4. Parameter without instance:**
 
 - **UCI command:** uci get cwmp.cpe.userid
 
-```plain
+```bash
 "Username": {
 	"type": "string", 
 	"protocols": [
@@ -435,9 +563,10 @@ To build a new JSON file, you can use **example.json file** under **dynamic_para
 	]
 }
 ```
-- **UBUS command (format 1):** ubus call system info | jsonfilter -e @.uptime
 
-```plain
+- **UBUS command:** ubus call system info | jsonfilter -e @.uptime
+
+```bash
 "Uptime": {
 	"type": "unsignedInt", 
 	"protocols": [
@@ -459,9 +588,10 @@ To build a new JSON file, you can use **example.json file** under **dynamic_para
 	]
 }
 ```
-- **UBUS command (format 2):** ubus call system info | jsonfilter -e @.memory.total
 
-```plain
+- **UBUS command:** ubus call system info | jsonfilter -e @.memory.total
+
+```bash
 "Total": {
 	"type": "unsignedInt", 
 	"protocols": [
@@ -483,61 +613,87 @@ To build a new JSON file, you can use **example.json file** under **dynamic_para
 	]
 }
 ```
-#### 
 
-#### `Plugin(library) Files:` ####
+> Note1: JSON File can only add vendor or standard objects that are not implemented by `libbbfdm`
 
-The application should bring its plugin(library) file under **'/usr/lib/bbfdm/'** path that contains the sub tree of **Objects/Parameters** and the related functions **Get/Set/Add/Delete/Operate**. The new added objects, parameters and operates will be automatically shown by icwmp and uspd/obuspa.
+> Note2: JSON File is not allowed to overwrite objects/parameters
 
-To build a new library, you can use **example source code** under **dynamic_parameters/library** folder to help you build it.
+- For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [UserInterface](https://dev.iopsys.eu/feed/3rdparty/-/blob/userinterface/sulu/files/etc/bbfdm/json/UserInterface.json)
 
-Each library should contains two Root table named **“tDynamicObj”** and **“tDynamicOperate”** to define the parant path for each new object and operate.
+## BBFDM Tools
 
-#### DynamicObject definition ####
-![object](/pictures/rootdynamicobj.png)
+### XML generator
 
-Each object in the **DM_MAP_OBJ** table contains two arguments:
+It is a generator of Data Model tree in XML format which conforms to Broadband Forum schema.
 
-|     Argument        |                                                   Description                                                               |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `parentobj`         | A string of the parent object name. Example “Device.IP.Diagnostics.”, “Device.DeviceInfo”, “Device.WiFi.Radio.” |
-| `nextobject`        | Pointer to a **DMOBJ** array which contains a list of the child objects. |
+```bash
+$ python generate_dm_xml.py -h
+Usage: generate_dm_xml.py [options...] <urls>
+Options: 
+ -r, --remote-dm              Check OBJ/PARAM under these repositories if it is not found under bbf repo
+ -v, --vendor-list            Generate data model tree with vendor extension OBJ/PARAM
+ -p, --vendor-prefix          Generate data model tree using this vendor prefix. Default vendor prefix: X_IOPSYS_EU_
+ -h, --help                   This help text
+Urls: 
+ url^(branch,hash,tag)        The url with branch, hash or tag to be used
 
-#### DynamicOperate definition ####
-![object](/pictures/rootdynamincoperate.png)
-
-Each operate in the **DM_MAP_OPERATE** table contains two arguments:
-
-|     Argument        |                                                   Description                                                               |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `pathname`         | A string of the path name operate. Example “Device.BBKSpeedTest”, “Device.WiFi.AccessPoint.*.X_IOPSYS_EU_Reset” |
-| `operation`        | The function which return the status of this operate. |
-
-For the other tables, they are defined in the same way as the [Object and Parameter](#object-definition) definition described above.
-
-**Below are the steps for building of a new library using JSON file**
-
-**1. Create the json file:**
-
-Any developer should create a json file containing object requested as defined in the above section of **JSON Files**. You can find an example of json file **example.json** under **library** folder.
-
-**2. Generate the source code:**
-
-The bbfdm library offers a tool to generate templates of the library source code from json file. You can find the tool **generate_library.py** under **library** folder.
-
-```plain
-$ python generate_library.py 
-Usage: generate_library.py <json file>
-Examples:
-  - generate_library.py example.json
-    ==> Generate the C code in example/ folder
+Examples: 
+  - python generate_dm_xml.py
+    ==> Generate xml file in datamodel.xml
+  - python generate_dm_xml.py -v iopsys
+    ==> Generate xml file in datamodel.xml
+  - python generate_dm_xml.py -r https://dev.iopsys.eu/feed/iopsys.git^devel,https://dev.iopsys.eu/iopsys/mydatamodel.git^5c8e7cb740dc5e425adf53ea574fb529d2823f88
+    ==> Generate xml file in datamodel.xml
+  - python generate_dm_xml.py -v iopsys,openwrt,test -r https://dev.iopsys.eu/feed/iopsys.git^6.0.0ALPHA1 -p X_TEST_COM_
+    ==> Generate xml file in datamodel.xml
 ```
 
-**3. Fill the functions of object/parameter:**
+### JSON generator
 
-After building the templates of source code, a **test.c, test.h and Makefile** files will be generated under **test** folder that contains the functions related to each object, parameter and operate. Then, you have to fill each function with the necessary [bbfdm API](#bbfdm-api) defined above. You can find an example of source code **(example folder)** under **library** folder.
+It is a generator of Data Model JSON format
 
-## Dependencies ##
+```bash
+$ python generate_dm_json.py 
+Usage: generate_dm_json.py <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]
+Examples:
+  - generate_dm_json.py tr-181-2-14-1-cwmp-full.xml tr-181-2-14-1-usp-full.xml Device.
+    ==> Generate the json file of the sub tree Device. in tr181.json
+  - generate_dm_json.py tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.
+    ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json
+  - generate_dm_json.py tr-106-1-2-0-full.xml Device.
+    ==> Generate the json file of the sub tree Device. in tr106.json
+
+Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-14-1-cwmp-full.xml
+```
+
+### Excel generator
+
+It is a generator of excel sheet with supported and unsupported Data Model tree.
+
+```bash
+$ python generate_dm_excel.py
+Usage: generate_dm_excel.py <data model name> [options...] <urls>
+data model name:              The data model(s) to be used, for ex: tr181 or tr181,tr104
+Options: 
+ -r, --remote-dm              Check OBJ/PARAM under these repositories if it is not found under bbf repo
+ -v, --vendor-list            Generate data model tree with vendor extension OBJ/PARAM
+ -p, --vendor-prefix          Generate data model tree using this vendor prefix. Default vendor prefix: X_IOPSYS_EU_
+ -h, --help                   This help text
+Urls: 
+ url^(branch,hash,tag)        The url with branch, hash or tag to be used
+
+Examples: 
+  - python generate_dm_excel.py tr181
+    ==> Generate excel file in datamodel.xls
+  - python generate_dm_excel.py tr104
+    ==> Generate excel file in datamodel.xls
+  - python generate_dm_excel.py tr181,tr104 -r https://dev.iopsys.eu/feed/iopsys.git^release-5.3,https://dev.iopsys.eu/iopsys/mydatamodel.git^5c8e7cb740dc5e425adf53ea574fb529d2823f88
+    ==> Generate excel file in datamodel.xls
+  - python generate_dm_excel.py tr181,tr104 -v iopsys,openwrt,test -r https://dev.iopsys.eu/feed/iopsys.git^6.0.0ALPHA1 -p X_TEST_COM_
+    ==> Generate excel file in datamodel.xls
+```
+
+## Dependencies
 
 To successfully build libbbfdm, the following libraries are needed:
 
@@ -547,6 +703,6 @@ To successfully build libbbfdm, the following libraries are needed:
 | libubox     | https://git.openwrt.org/project/libubox.git | BSD            |
 | libubus     | https://git.openwrt.org/project/ubus.git    | LGPL 2.1       |
 | libjson-c   | https://s3.amazonaws.com/json-c_releases    | MIT            |
+| libcurl     | https://dl.uxnr.de/mirror/curl              | MIT            |
 | libtrace    | https://github.com/apietila/libtrace.git    | GPLv2          |
 | libbbf_api  | https://dev.iopsys.eu/iopsys/bbf.git        | LGPL 2.1       |
-

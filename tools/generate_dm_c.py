@@ -1,32 +1,26 @@
 #!/usr/bin/python
 
-# Copyright (C) 2020 iopsys Software Solutions AB
+# Copyright (C) 2021 iopsys Software Solutions AB
 # Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-import os, sys, time, json
+from __future__ import print_function
+
+import os
+import sys
+import json
 from collections import OrderedDict
+import bbf_common as bbf
 
+DMC_DIR = "datamodel"
 arrTypes = { "string": "DMT_STRING",
-			"unsignedInt": "DMT_UNINT",
-			"unsignedLong": "DMT_UNLONG",
-			"int": "DMT_INT",
-			"long": "DMT_LONG",
-			"boolean": "DMT_BOOL",
-			"dateTime": "DMT_TIME",
-			"hexBinary": "DMT_HEXBIN",
-			"base64": "DMT_BASE64"}
-
-def removefile( filename ):
-	try:
-		os.remove(filename)
-	except OSError:
-		pass
-
-def securemkdir( folder ):
-	try:
-		os.mkdir(folder)
-	except:
-		pass
+			 "unsignedInt": "DMT_UNINT",
+			 "unsignedLong": "DMT_UNLONG",
+			 "int": "DMT_INT",
+			 "long": "DMT_LONG",
+			 "boolean": "DMT_BOOL",
+			 "dateTime": "DMT_TIME",
+			 "hexBinary": "DMT_HEXBIN",
+			 "base64": "DMT_BASE64"}
 
 def getlastname( name ):
 	return name.replace(".{i}", "").split('.')[-2];
@@ -90,24 +84,6 @@ def getparamtype( value ):
 	paramtype = getoptionparam(value, "type")
 	return arrTypes.get(paramtype, None)
 
-def objhaschild( value ):
-	if isinstance(value, dict):
-		for obj, val in value.items():
-			if isinstance(val, dict):
-				for obj1, val1 in val.items():
-					if obj1 == "type" and val1 == "object":
-						return 1
-	return 0
-
-def objhasparam( value ):
-	if isinstance(value, dict):
-		for obj, val in value.items():
-			if isinstance(val, dict):
-				for obj1,val1 in val.items():
-					if obj1 == "type" and val1 != "object":
-						return 1
-	return 0
-
 def get_mapping_param( mappingobj ):
 	type = getoptionparam(mappingobj, "type")
 	if type == "uci":
@@ -151,11 +127,7 @@ def get_mapping_param( mappingobj ):
 		return type, command, list_length, value, None, None, None, None
 
 def printGlobalstrCommon( str_exp ):
-	if "tr104" in sys.argv[1]:
-		common = "tr104/common.c"
-	else:
-		common = "tr181/common.c"
-	fp = open(common, 'a')
+	fp = open(DMC_DIR + "/common.c", 'a')
 	print("%s" % str_exp, file=fp)
 	fp.close()
 
@@ -802,8 +774,8 @@ def printtailArray( ):
 
 def printOBJline( dmobject, value ):
 	commonname = getname(dmobject)
-	hasobj = objhaschild(value)
-	hasparam = objhasparam(value)
+	hasobj = bbf.obj_has_child(value)
+	hasparam = bbf.obj_has_param(value)
 	accessobj = getoptionparam(value, "access")
 	mappingobj = getoptionparam(value, "mapping")
 	bbfdm = getprotocolsparam(value, "protocols")
@@ -842,23 +814,24 @@ def printOBJline( dmobject, value ):
 		print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, %s, %s, NULL, %s}," % (getlastname(dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm), file=fp)
 	fp.close()
 
-def printusage():
-	print("Usage: " + sys.argv[0] + " <json data model>" + " [Object path]")
+def print_dmc_usage():
+	print("Usage: " + sys.argv[0] + " <data model name>" + " [Object path]")
+	print("data model name:   The data model(s) to be used, for ex: tr181 or tr181,tr104")
 	print("Examples:")
-	print("  - " + sys.argv[0] + " tr181.json")
-	print("    ==> Generate the C code of all data model in tr181/ folder")
-	print("  - " + sys.argv[0] + " tr104.json")
-	print("    ==> Generate the C code of all data model in tr104/ folder")
-	print("  - " + sys.argv[0] + " tr181.json" + " Device.DeviceInfo.")
-	print("    ==> Generate the C code of DeviceInfo object in tr181/ folder")
-	print("  - " + sys.argv[0] + " tr181.json" + " Device.WiFi.")
-	print("    ==> Generate the C code of WiFi object in tr181/ folder")
-	print("  - " + sys.argv[0] + " tr104.json" + " Device.Services.VoiceService.{i}.Capabilities.")
-	print("    ==> Generate the C code of Services.VoiceService.{i}.Capabilities. object in tr104/ folder")
+	print("  - " + sys.argv[0] + " tr181")
+	print("    ==> Generate the C code of tr181 data model in datamodel/ folder")
+	print("  - " + sys.argv[0] + " tr104")
+	print("    ==> Generate the C code of tr104 data model in datamodel/ folder")
+	print("  - " + sys.argv[0] + " tr181,tr104")
+	print("    ==> Generate the C code of tr181 and tr104 data model in datamodel/ folder")
+	print("  - " + sys.argv[0] + " tr181" + " Device.DeviceInfo.")
+	print("    ==> Generate the C code of Device.DeviceInfo object in datamodel/ folder")
+	print("  - " + sys.argv[0] + " tr104" + " Device.Services.VoiceService.{i}.Capabilities.")
+	print("    ==> Generate the C code of Device.Services.VoiceService.{i}.Capabilities. object in datamodel/ folder")
 
 def object_parse_childs( dmobject , value, nextlevel ):
-	hasobj = objhaschild(value)
-	hasparam = objhasparam(value)
+	hasobj = bbf.obj_has_child(value)
+	hasparam = bbf.obj_has_param(value)
 
 	if hasobj or hasparam:
 		printheaderObjCommon(dmobject)
@@ -885,7 +858,7 @@ def object_parse_childs( dmobject , value, nextlevel ):
 					continue
 				if isinstance(v,dict):
 					for k1,v1 in v.items():
-						if k1 == "type" and v1 != "object":
+						if k1 == "type" and v1 != "object" and "()" not in k:
 							printPARAMline(dmobject, k, v)
 							break
 		printtailArray()
@@ -899,7 +872,7 @@ def object_parse_childs( dmobject , value, nextlevel ):
 							object_parse_childs(k , v, 0)
 
 def generatecfromobj( pobj, pvalue, pdir, nextlevel ):
-	securemkdir(pdir)
+	bbf.create_folder(pdir)
 	removetmpfiles()
 	object_parse_childs(pobj, pvalue, nextlevel)
 	
@@ -968,67 +941,64 @@ def generatecfromobj( pobj, pvalue, pdir, nextlevel ):
 	
 
 def removetmpfiles():
-	removefile("./.objparamarray.c")
-	removefile("./.objparamarray.h")
-	removefile("./.objadddel.c")
-	removefile("./.objbrowse.c")
-	removefile("./.getstevalue.c")
+	bbf.remove_file("./.objparamarray.c")
+	bbf.remove_file("./.objparamarray.h")
+	bbf.remove_file("./.objadddel.c")
+	bbf.remove_file("./.objbrowse.c")
+	bbf.remove_file("./.getstevalue.c")
 
 ### main ###
 if len(sys.argv) < 2:
-	printusage()
+	print_dmc_usage()
 	exit(1)
 	
 if (sys.argv[1]).lower() == "-h" or (sys.argv[1]).lower() == "--help":
-	printusage()
+	print_dmc_usage()
 	exit(1)
 
-json_file = sys.argv[1] # tr181.json
+bbf.remove_folder(DMC_DIR)
+dm_name = sys.argv[1].split(",")
+for i in range(sys.argv[1].count(',') + 1):
 
-# load json file
-with open(json_file) as file:
-	data = json.loads(file.read(), object_pairs_hook=OrderedDict)
+	JSON_FILE = bbf.ARRAY_JSON_FILES.get(dm_name[i], None)
 
-if "tr181" in sys.argv[1]: # TR181 JSON File
-	gendir = "tr181"
-elif "tr104" in sys.argv[1]: # TR104 JSON File 
-	gendir = "tr104"
-elif "tr106" in sys.argv[1]: # TR106 JSON File 
-	gendir = "tr106"
-else:
-	gendir = "source_" + time.strftime("%Y-%m-%d_%H-%M-%S")
+	if JSON_FILE != None:
+		file = open(JSON_FILE, "r")
+		data = json.loads(file.read(), object_pairs_hook=OrderedDict)
 
-for obj, value in data.items():
-	if obj == None:
-		print("Wrong JSON Data model format!")
-		exit(1)
+		for obj, value in data.items():
+			if obj == None:
+				print("Wrong JSON Data model format!")
+				continue
 
-	# Generate the object file if it is defined by "sys.argv[2]" argument
-	if (len(sys.argv) > 2):
-		if sys.argv[2] != obj:
+			# Generate the object file if it is defined by "sys.argv[2]" argument
+			if (len(sys.argv) > 2):
+				if sys.argv[2] != obj:
+					if isinstance(value, dict):
+						for obj1, value1 in value.items():
+							if obj1 == sys.argv[2]:
+								if isinstance(value1, dict):
+									for obj2, value2 in value1.items():
+										if obj2 == "type" and value2 == "object":
+											generatecfromobj(obj1, value1, DMC_DIR, 0)
+											break
+								break
+					break
+
+			# Generate the root object tree file if amin does not exist
+			generatecfromobj(obj, value, DMC_DIR, 1)
+
+			# Generate the sub object tree file if amin does not exist
 			if isinstance(value, dict):
 				for obj1, value1 in value.items():
-					if obj1 == sys.argv[2]:
-						if isinstance(value1, dict):
-							for obj2, value2 in value1.items():
-								if obj2 == "type" and value2 == "object":
-									generatecfromobj(obj1, value1, gendir, 0)
-									break
-						break
-			break
+					if isinstance(value1, dict):
+						for obj2, value2 in value1.items():
+							if obj2 == "type" and value2 == "object":
+								generatecfromobj(obj1, value1, DMC_DIR, 0)
+	else:
+		print("!!!! %s : Data Model doesn't exist" % dm_name[i])
 
-	# Generate the root object tree file if amin does not exist
-	generatecfromobj(obj, value, gendir, 1)
-
-	# Generate the sub object tree file if amin does not exist
-	if isinstance(value, dict):
-		for obj1, value1 in value.items():
-			if isinstance(value1, dict):
-				for obj2, value2 in value1.items():
-					if obj2 == "type" and value2 == "object":
-						generatecfromobj(obj1, value1, gendir, 0)
-
-if (os.path.isdir(gendir)):
-	print("Source code generated under \"./%s\" folder" % gendir)
+if (os.path.isdir(DMC_DIR)):
+	print("Source code generated under \"%s\" folder" % DMC_DIR)
 else:
 	print("No source code generated!")

@@ -7,6 +7,7 @@ import os, sys, time, re, json
 import xml.etree.ElementTree as xml
 from collections import OrderedDict
 from shutil import copyfile
+import bbf_common as bbf
 
 listTypes = ["string",
 			 "unsignedInt",
@@ -40,18 +41,6 @@ listdataTypes = ["string",
 				 "IoTUnitType",
 				 "IoTEnumSensorType",
 				 "IoTEnumControlType"]
-
-def removefile( filename ):
-	try:
-		os.remove(filename)
-	except OSError:
-		pass
-
-def securemkdir( folder ):
-	try:
-		os.mkdir(folder)
-	except:
-		pass
 
 def getname( objname ):
 	global model_root_name
@@ -428,7 +417,7 @@ def replace_data_in_file( data_in, data_out ):
 	file_r.close()
 	file_w.close()
 	copyfile("./.json_tmp_1", "./.json_tmp")
-	removefile("./.json_tmp_1")
+	bbf.remove_file("./.json_tmp_1")
 
 def updatejsontmpfile ():
 	replace_data_in_file ("}\n", "},\n")
@@ -442,8 +431,8 @@ def updatejsontmpfile ():
 	replace_data_in_file ("},\n]", "}\n]")
 
 def removetmpfiles():
-	removefile("./.json_tmp")
-	removefile("./.json_tmp_1")
+	bbf.remove_file("./.json_tmp")
+	bbf.remove_file("./.json_tmp_1")
 
 def printOBJ( dmobject, hasobj, hasparam, bbfdm_type ):
 	uniquekeys = getuniquekeys(dmobject)
@@ -717,7 +706,7 @@ def object_parse_childs(dmobject, level, generatelist, check_obj):
 
 def generatejsonfromobj(pobj, pdir):
 	generatelist = 0
-	securemkdir(pdir)
+	bbf.create_folder(pdir)
 	removetmpfiles()
 	dmlevel = (pobj.get('name')).count(".") - (pobj.get('name')).count("{i}.") + 1
 	if (pobj.get('name')).count(".") == 1:

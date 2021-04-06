@@ -74,7 +74,7 @@ DMOBJ tDeviceObj[] = {
 {"IP", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tIPObj, tIPParams, NULL, BBFDM_BOTH},
 {"Ethernet", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tEthernetObj, tEthernetParams, NULL, BBFDM_BOTH},
 {"DSL", &DMREAD, NULL, NULL, "file:/etc/config/dsl", NULL, NULL, NULL, tDSLObj, tDSLParams, NULL, BBFDM_BOTH},
-{"FAST", &DMREAD, NULL, NULL, "ubus:fast", NULL, NULL, NULL, tFASTObj, NULL, NULL, BBFDM_BOTH},
+{"FAST", &DMREAD, NULL, NULL, "ubus:fast", NULL, NULL, NULL, tFASTObj, tFASTParams, NULL, BBFDM_BOTH},
 {"ATM", &DMREAD, NULL, NULL, "file:/etc/config/dsl", NULL, NULL, NULL, tATMObj, NULL, NULL, BBFDM_BOTH},
 {"PTM", &DMREAD, NULL, NULL, "file:/etc/config/dsl", NULL, NULL, NULL, tPTMObj, NULL, NULL, BBFDM_BOTH},
 {"DHCPv4", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/dhcp.sh", NULL, NULL, NULL, tDHCPv4Obj, tDHCPv4Params, NULL, BBFDM_BOTH},

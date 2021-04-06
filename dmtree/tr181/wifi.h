@@ -36,7 +36,6 @@ extern DMLEAF tWiFiAccessPointWPSParams[];
 extern DMLEAF tWiFiAccessPointAccountingParams[];
 extern DMOBJ tWiFiEndPointObj[];
 extern DMLEAF tWiFiEndPointParams[];
-extern DMLEAF tWiFiEndPointStatsParams[];
 extern DMLEAF tWiFiEndPointSecurityParams[];
 extern DMLEAF tWiFiEndPointWPSParams[];
 extern DMOBJ tWiFiEndPointProfileObj[];

@@ -15,11 +15,7 @@
 
 extern DMOBJ tDHCPv6Obj[];
 extern DMLEAF tDHCPv6Params[];
-extern DMOBJ tDHCPv6ClientObj[];
 extern DMLEAF tDHCPv6ClientParams[];
-extern DMLEAF tDHCPv6ClientServerParams[];
-extern DMLEAF tDHCPv6ClientSentOptionParams[];
-extern DMLEAF tDHCPv6ClientReceivedOptionParams[];
 extern DMOBJ tDHCPv6ServerObj[];
 extern DMLEAF tDHCPv6ServerParams[];
 extern DMOBJ tDHCPv6ServerPoolObj[];

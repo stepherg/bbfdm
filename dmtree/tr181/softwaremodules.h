@@ -17,7 +17,6 @@ extern DMOBJ tSoftwareModulesObj[];
 extern DMLEAF tSoftwareModulesParams[];
 extern DMLEAF tSoftwareModulesExecEnvParams[];
 extern DMLEAF tSoftwareModulesDeploymentUnitParams[];
-extern DMOBJ tSoftwareModulesExecutionUnitObj[];
 extern DMLEAF tSoftwareModulesExecutionUnitParams[];
 
 #endif //__SOFTWAREMODULES_H

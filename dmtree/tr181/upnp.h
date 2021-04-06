@@ -15,9 +15,7 @@
 #include <libbbf_api/dmcommon.h>
 
 extern DMOBJ tUPnPObj[];
-extern DMOBJ tUPnPDeviceObj[];
 extern DMLEAF tUPnPDeviceParams[];
-extern DMLEAF tUPnPDeviceCapabilitiesParams[];
 extern DMOBJ tUPnPDiscoveryObj[];
 extern DMLEAF tUPnPDiscoveryParams[];
 extern DMLEAF tUPnPDiscoveryRootDeviceParams[];
