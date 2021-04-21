@@ -218,10 +218,12 @@ static int get_ServicesVoiceServiceSIPClient_Status(char *refparam, struct dmctx
 					if (state && *state) {
 						if (strcasecmp(state, "Registered") == 0) {
 							*value = "Up";
-						} else if (strcasecmp(state, "Request") == 0) {
+						} else if (strcasecmp(state, "Rejected") == 0) {
+							*value = "Error_Registration";
+						} else if (strcasecmp(state, "Stopped") == 0) {
+							*value = "Quiescent";
+						} else if (strcasecmp(state, "Unregistered") == 0) {
 							*value = "Registering";
-						} else {
-							*value = state;
 						}
 					}
 				}
