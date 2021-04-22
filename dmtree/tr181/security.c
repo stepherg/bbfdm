@@ -25,9 +25,9 @@ struct certificate_profile {
 	struct uci_section *dmmap_sect;
 };
 
-/************************************************************
- * Init function
- *************************************************************/
+/*************************************************************
+* INIT
+**************************************************************/
 void init_certificate(char *path,
 #ifdef LOPENSSL
 X509 *cert,
@@ -45,6 +45,9 @@ struct uci_section *dmsect, struct certificate_profile *certprofile)
 	certprofile->dmmap_sect = dmsect;
 }
 
+/*************************************************************
+* COMMON FUNCTIONS
+**************************************************************/
 #ifdef LOPENSSL
 static char *get_certificate_sig_alg(int sig_nid)
 {
@@ -151,10 +154,18 @@ static char *get_certificate_pk(mbedtls_pk_type_t sig_pk)
 }
 #endif
 
+static char *generate_serial_number(char *text, int length)
+{
+	int i, j;
+	char *hex = (char *)dmcalloc(100, sizeof(char));
 
-/*************************************************************
-* ENTRY METHOD
-**************************************************************/
+	for (i = 0, j = 0; i < length; ++i, j += 3) {
+		sprintf(hex + j, "%02x", text[i] & 0xff);
+		if (i < length-1)
+			sprintf(hex + j + 2, "%c", ':');
+	}
+	return hex;
+}
 
 static void get_certificate_paths(void)
 {
@@ -206,6 +217,9 @@ static void get_certificate_paths(void)
 	}
 }
 
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
 static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 #if defined(LOPENSSL) || defined(LMBEDTLS)
@@ -328,10 +342,10 @@ static int get_SecurityCertificate_SerialNumber(char *refparam, struct dmctx *ct
 #ifdef LOPENSSL
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	ASN1_INTEGER *serial = X509_get_serialNumber(cert_profile->openssl_cert);
-	*value = stringToHex((char *)serial->data, serial->length);
+	*value = generate_serial_number((char *)serial->data, serial->length);
 #elif LMBEDTLS
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
-	*value = stringToHex(cert_profile->mbdtls_cert.serial.p, cert_profile->mbdtls_cert.serial.len);
+	*value = generate_serial_number(cert_profile->mbdtls_cert.serial.p, cert_profile->mbdtls_cert.serial.len);
 #endif
 	return 0;
 }

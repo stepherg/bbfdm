@@ -1,0 +1,11 @@
+config userinterface global
+	option enable '1'
+	option password_required '1'
+	option password_user_selectable '1'
+	option text_color '52525B'
+	option background_color 'FFFFFF'
+	option button_color 'FA4141'
+	option button_text_color 'FFFFFF'
+	option available_languages 'en,sv'
+	option current_language 'en'
+	option theme 'light'

@@ -1,0 +1,14 @@
+config system
+	option timezone 'CET-1CEST,M3.5.0,M10.5.0/3'
+	option zonename 'Europe/Stockholm'
+	option conloglevel '7'
+	option cronloglevel '9'
+	option hostname 'iopsys'
+	option log_size '200'
+	option ttylogin	1
+
+config timeserver 'ntp'
+	option enabled 1
+	option enable_server '1'
+	list server 'ntp1.sth.netnod.se'
+	list server 'ntp1.gbg.netnod.se'

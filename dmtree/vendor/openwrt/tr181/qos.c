@@ -31,9 +31,34 @@ struct queuestats
 	int backlog_requeues;
 };
 
-/**************************************************************************
-* Browse functions
-***************************************************************************/
+/*************************************************************
+* COMMON FUNCTIONS
+**************************************************************/
+int command_exec_output_to_array(const char *cmd, char **output, int *length)
+{
+	char out[2048];
+	int i = 0;
+
+	/* Open the command for reading. */
+	FILE *fp = popen(cmd, "r");
+	if (fp == NULL)
+		return -1;
+
+	/* Read the output line by line and store it in output array. */
+	while (fgets(out, sizeof(out)-1, fp) != NULL)
+		dmasprintf(&output[i++], "%s", out);
+
+	*length = i;
+
+	/* close */
+	pclose(fp);
+
+	return 0;
+}
+
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
 /*#Device.QoS.Classification.{i}.!UCI:qos/classify/dmmap_qos*/
 static int openwrt__browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -122,6 +147,9 @@ end:
 	return 0;
 }
 
+/*************************************************************
+* ADD & DEL OBJ
+**************************************************************/
 static int openwrt__addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s, *dmmap_qclassify;
@@ -180,6 +208,9 @@ static int openwrt__delObjQoSQueueStats(char *refparam, struct dmctx *ctx, void 
 	return 0;
 }
 
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
 /*#Device.QoS.ClassificationNumberOfEntries!UCI:qos/classify/*/
 static int openwrt__get_QClassificationNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {

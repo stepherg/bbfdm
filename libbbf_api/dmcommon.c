@@ -957,28 +957,6 @@ int get_shift_time_time(int shift_time, char *local_time, int size)
 	return 0;
 }
 
-int command_exec_output_to_array(const char *cmd, char **output, int *length)
-{
-	char out[2048];
-	int i = 0;
-
-	/* Open the command for reading. */
-	FILE *fp = popen(cmd, "r");
-	if (fp == NULL)
-		return -1;
-
-	/* Read the output line by line and store it in output array. */
-	while (fgets(out, sizeof(out)-1, fp) != NULL)
-		dmasprintf(&output[i++], "%s", out);
-
-	*length = i;
-
-	/* close */
-	pclose(fp);
-
-	return 0;
-}
-
 static inline int char_is_valid(char c)
 {
 	return c >= 0x20 && c < 0x7f;
@@ -1463,19 +1441,6 @@ char *decode64(char *enc)
 	return dec;
 }
 
-char *stringToHex(char *text, int length)
-{
-	int i, j;
-	char *hex = (char *)dmcalloc(100, sizeof(char));
-
-	for (i = 0, j = 0; i < length; ++i, j += 3) {
-		sprintf(hex + j, "%02x", text[i] & 0xff);
-		if (i < length-1)
-			sprintf(hex + j + 2, "%c", ':');
-	}
-	return hex;
-}
-
 char *replace_char(char *str, char find, char replace)
 {
 	char *current_pos = strchr(str, find);
@@ -1514,48 +1479,6 @@ char *replace_str(const char *str, const char *substr, const char *replacement)
 	value[i] = '\0';
 
 	return value;
-}
-
-void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, char *value)
-{
-	struct uci_section *d_sec = NULL;
-	struct uci_section *stmp = NULL;
-	char *opt_val;
-
-	uci_path_foreach_sections_safe(bbfdm, dmmap_file, section, stmp, d_sec) {
-		dmuci_get_value_by_section_string(d_sec, option, &opt_val);
-		if (strcmp(opt_val, value) == 0)
-			dmuci_delete_by_section_unnamed_bbfdm(d_sec, NULL, NULL);
-	}
-}
-
-void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *value, bool b)
-{
-	struct uci_list *v = NULL;
-	struct uci_element *e = NULL;
-	char *val = NULL;
-
-	dmuci_get_value_by_section_list(s, section, &v);
-	if (v != NULL) {
-		uci_foreach_element(v, e) {
-			val = dmstrdup(e->name);
-			if (val && strcmp(val, value) == 0) {
-				if (!b) {
-					// remove this entry
-					dmuci_del_list_value_by_section(s, section, value);
-				}
-
-				// Further action is not required
-				return;
-			}
-		}
-	}
-
-	// If control has reached this point, that means, either the entry was not found
-	// in the list, hence, if b is true, add this entry to the list
-	if (b) {
-		dmuci_add_list_value_by_section(s, section, value);
-	}
 }
 
 int check_browse_section(struct uci_section *s, void *data)

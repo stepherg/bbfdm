@@ -202,14 +202,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 		case CMD_SET_NOTIFICATION:
 			if (arg2)
 				err = string_to_bool(arg2, &setnotif);
-			if (!err && arg1 &&
-				(strcmp(arg1, "0") == 0 ||
-				strcmp(arg1, "1") == 0  ||
-				strcmp(arg1, "2") == 0 ||
-				strcmp(arg1, "3") == 0 ||
-				strcmp(arg1, "4") == 0 ||
-				strcmp(arg1, "5") == 0 ||
-				strcmp(arg1, "6") == 0)) {
+			if (!err && arg1) {
 				ctx->in_notification = arg1;
 				ctx->setaction = VALUECHECK;
 				ctx->notification_change = setnotif;
@@ -219,7 +212,6 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			}
 			break;
 		case CMD_LIST_NOTIFY:
-			ctx->in_param = "";
 			fault = dm_entry_enabled_notify(ctx);
 			break;
 		case CMD_ADD_OBJECT:
@@ -247,10 +239,10 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			fault = dm_entry_get_schema(ctx);
 			break;
 		case CMD_GET_INSTANCES:
-			if (arg1)
-				string_to_bool(arg1, &ctx->nextlevel);
-
-			fault = dm_entry_get_instances(ctx);
+			if (!arg1 || (arg1 && string_to_bool(arg1, &ctx->nextlevel) == 0))
+				fault = dm_entry_get_instances(ctx);
+			else
+				fault = FAULT_9003;
 			break;
 	}
 
@@ -273,15 +265,11 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2)
 				fault = dm_entry_set_value(ctx);
 				if (fault) break;
 			}
-			if (fault) {
-				//Should not happen
-				add_list_fault_param(ctx, ctx->in_param, usp_fault_map(fault));
-			} else {
+			if (!fault) {
 				dmuci_set_value("cwmp", "acs", "ParameterKey", arg1 ? arg1 : "");
 				dmuci_change_packages(&head_package_change);
 				dmuci_save();
 			}
-			free_all_set_list_tmp(ctx);
 			break;
 		case CMD_SET_NOTIFICATION:
 			ctx->setaction = VALUESET;
@@ -296,9 +284,10 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2)
 				dmuci_change_packages(&head_package_change);
 				dmuci_save();
 			}
-			free_all_set_list_tmp(ctx);
 			break;
 	}
+	free_all_set_list_tmp(ctx);
+
 	return usp_fault_map(fault);
 }
 

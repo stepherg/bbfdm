@@ -92,6 +92,8 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 			void *handle = dlopen(buf, RTLD_LAZY);
 			if (!handle) continue;
 
+			dlerror();    /* Clear any existing error */
+
 			//Dynamic Object
 			DM_MAP_OBJ *dynamic_obj = NULL;
 			*(void **) (&dynamic_obj) = dlsym(handle, "tDynamicObj");

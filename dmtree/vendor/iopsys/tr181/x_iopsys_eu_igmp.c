@@ -283,6 +283,48 @@ int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
 	return 0;
 }
 
+void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, char *value)
+{
+	struct uci_section *d_sec = NULL;
+	struct uci_section *stmp = NULL;
+	char *opt_val;
+
+	uci_path_foreach_sections_safe(bbfdm, dmmap_file, section, stmp, d_sec) {
+		dmuci_get_value_by_section_string(d_sec, option, &opt_val);
+		if (strcmp(opt_val, value) == 0)
+			dmuci_delete_by_section_unnamed_bbfdm(d_sec, NULL, NULL);
+	}
+}
+
+void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *value, bool b)
+{
+	struct uci_list *v = NULL;
+	struct uci_element *e = NULL;
+	char *val = NULL;
+
+	dmuci_get_value_by_section_list(s, section, &v);
+	if (v != NULL) {
+		uci_foreach_element(v, e) {
+			val = dmstrdup(e->name);
+			if (val && strcmp(val, value) == 0) {
+				if (!b) {
+					// remove this entry
+					dmuci_del_list_value_by_section(s, section, value);
+				}
+
+				// Further action is not required
+				return;
+			}
+		}
+	}
+
+	// If control has reached this point, that means, either the entry was not found
+	// in the list, hence, if b is true, add this entry to the list
+	if (b) {
+		dmuci_add_list_value_by_section(s, section, value);
+	}
+}
+
 int del_proxy_obj(void *data, char *proto, unsigned char del_action)
 {
 	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;

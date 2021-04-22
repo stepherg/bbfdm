@@ -1,0 +1,283 @@
+{
+	"Device.UserInterface.": {
+		"type": "object",
+		"protocols": [
+			"cwmp",
+			"usp"
+		],
+		"access": false,
+		"array": false,		
+		"Enable": {
+			"type": "boolean",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"datatype": "boolean",
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "userinterface", 
+						"section": {
+							"name": "global"
+						}, 
+						"option": {
+							"name": "enable"
+						}
+					}
+				}
+			]
+		},
+		"PasswordRequired": {
+			"type": "boolean",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"datatype": "boolean",
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "userinterface", 
+						"section": {
+							"name": "global"
+						}, 
+						"option": {
+							"name": "password_required"
+						}
+					}
+				}
+			]		
+		},
+		"PasswordUserSelectable": {
+			"type": "boolean",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"datatype": "boolean",
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "userinterface", 
+						"section": {
+							"name": "global"
+						}, 
+						"option": {
+							"name": "password_user_selectable"
+						}
+					}
+				}
+			]			
+		},
+		"TextColor": {
+			"type": "hexBinary",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"datatype": "hexBinary",
+			"range": [
+				{
+					"min": 3,
+					"max": 3
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "userinterface", 
+						"section": {
+							"name": "global"
+						}, 
+						"option": {
+							"name": "text_color"
+						}
+					}
+				}
+			]			
+		},
+		"BackgroundColor": {
+			"type": "hexBinary",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"datatype": "hexBinary",
+			"range": [
+				{
+					"min": 3,
+					"max": 3
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "userinterface", 
+						"section": {
+							"name": "global"
+						}, 
+						"option": {
+							"name": "background_color"
+						}
+					}
+				}
+			]			
+		},
+		"ButtonColor": {
+			"type": "hexBinary",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"datatype": "hexBinary",
+			"range": [
+				{
+					"min": 3,
+					"max": 3
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "userinterface", 
+						"section": {
+							"name": "global"
+						}, 
+						"option": {
+							"name": "button_color"
+						}
+					}
+				}
+			]			
+		},
+		"ButtonTextColor": {
+			"type": "hexBinary",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"datatype": "hexBinary",
+			"range": [
+				{
+					"min": 3,
+					"max": 3
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "userinterface", 
+						"section": {
+							"name": "global"
+						}, 
+						"option": {
+							"name": "button_text_color"
+						}
+					}
+				}
+			]			
+		},
+		"AvailableLanguages": {
+			"type": "string",
+			"read": true,
+			"write": false,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"list": {
+				"datatype": "string",
+				"maxsize": 256
+			},
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "userinterface", 
+						"section": {
+							"name": "global"
+						}, 
+						"option": {
+							"name": "available_languages"
+						}
+					}
+				}
+			]			
+		},
+		"CurrentLanguage": {
+			"type": "string",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"datatype": "string",
+			"range": [
+				{
+					"max": 16
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "userinterface", 
+						"section": {
+							"name": "global"
+						}, 
+						"option": {
+							"name": "current_language"
+						}
+					}
+				}
+			]			
+		},
+		"X_IOPSYS_EU_Theme": {
+			"type": "string",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"datatype": "string",
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "userinterface", 
+						"section": {
+							"name": "global"
+						}, 
+						"option": {
+							"name": "theme"
+						}
+					}
+				}
+			]			
+		}		
+	}
+}

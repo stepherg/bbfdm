@@ -1,0 +1,104 @@
+{
+	"ifname": "test2",
+	"status": "running",
+	"ssid": "iopsysWrt-002207AB9F80",
+	"bssid": "00:22:07:aa:91:88",
+	"security": "WPA2PSK",
+	"encryption": "CCMP",
+	"channel": 36,
+	"bandwidth": 80,
+	"standard": "802.11",
+	"num_stations": 0,
+	"max_stations": 0,
+	"utilization": 0,
+	"adm_capacity": 0,
+	"hidden": true,
+	"supp_security": [
+		"NONE",
+		"WPA3PSK",
+		"WPA2PSK+WPA3PSK",
+		"WPA",
+		"WPA2",
+		"WPA2+WPA3"
+	],
+	"capabilities": {
+		"wmm": false,
+		"apsd": false,
+		"shortslot": false,
+		"dot11h": false,
+		"2040coex": false,
+		"psmp": false,
+		"proxy_arp": false,
+		"dot11v_btm": true,
+		"dot11n": {
+			"dot11n_ldpc": true,
+			"dot11n_40": true,
+			"dot11n_ps": true,
+			"dot11n_sgi20": true,
+			"dot11n_sgi40": true,
+			"dot11n_tx_stbc": false,
+			"dot11n_rx_stbc": false,
+			"dot11n_supp_max_mcs": 31
+		},
+		"dot11ac": {
+			"dot11ac_160": true,
+			"dot11ac_8080": true,
+			"dot11ac_mpdu_max": 11454,
+			"dot11ac_sgi80": true,
+			"dot11ac_sgi160": false,
+			"dot11ac_rx_ldpc": true,
+			"dot11ac_tx_stbc": false,
+			"dot11ac_rx_stbc_1ss": false,
+			"dot11ac_rx_stbc_2ss": false,
+			"dot11ac_rx_stbc_3ss": false,
+			"dot11ac_rx_stbc_4ss": false,
+			"dot11ac_su_beamformer": true,
+			"dot11ac_su_beamformee": true,
+			"dot11ac_mu_beamformer": false,
+			"dot11ac_mu_beamformee": false,
+			"dot11ac_supp_max_rx_mcs": 9,
+			"dot11ac_supp_max_rx_nss": 4,
+			"dot11ac_supp_max_tx_mcs": 9,
+			"dot11ac_supp_max_tx_nss": 4
+		},
+		"dot11k": {
+			"dot11k_link_meas": true,
+			"dot11k_nbr_report": true,
+			"dot11k_bcn_passive": true,
+			"dot11k_bcn_active": true,
+			"dot11k_bcn_table": true,
+			"dot11k_rcpi": false,
+			"dot11k_rsni": false
+		}
+	},
+	"wmm_params": [
+		{
+			"ac": "BE",
+			"aifsn": 0,
+			"cwmin": 21,
+			"cwmax": 741,
+			"txop": 0
+		},
+		{
+			"ac": "BE",
+			"aifsn": 0,
+			"cwmin": 3,
+			"cwmax": 12,
+			"txop": 0
+		},
+		{
+			"ac": "BE",
+			"aifsn": 0,
+			"cwmin": 78,
+			"cwmax": 999,
+			"txop": 0
+		},
+		{
+			"ac": "BE",
+			"aifsn": 0,
+			"cwmin": 66,
+			"cwmax": 149,
+			"txop": 0
+		}
+	]
+}

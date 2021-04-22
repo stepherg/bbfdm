@@ -263,7 +263,6 @@ struct uci_section *get_dup_section_in_dmmap_opt(char *dmmap_package, char *sect
 struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* section_type, char*sect_name, char *opt_name, char* opt_value);
 bool elt_exists_in_array(char **str_array, char *str, int length);
 int get_shift_time_time(int shift_time, char *local_time, int size);
-int command_exec_output_to_array(const char *cmd, char **output, int *length);
 struct uci_section *is_dmmap_section_exist(char* package, char* section);
 struct uci_section *is_dmmap_section_exist_eq(char* package, char* section, char* opt, char* value);
 int dm_read_sysfs_file(const char *file, char *dst, unsigned len);
@@ -290,10 +289,7 @@ bool folder_exists(const char *path);
 bool file_exists(const char *path);
 bool is_regular_file(const char *path);
 unsigned long file_system_size(const char *path, const enum fs_size_type_enum type);
-char *stringToHex(char *text, int length);
 char *replace_char(char *str, char find, char replace);
 char *replace_str(const char *str, const char *substr, const char *replacement);
-void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *value, bool b);
-void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, char *value);
 int check_browse_section(struct uci_section *s, void *data);
 #endif

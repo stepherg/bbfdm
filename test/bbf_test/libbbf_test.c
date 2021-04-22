@@ -1,0 +1,365 @@
+/*
+ * Copyright (C) 2021 iopsys Software Solutions AB
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License version 2.1
+ * as published by the Free Software Foundation
+ *
+ *	Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+ */
+
+#include <libbbf_api/dmbbf.h>
+#include <libbbf_api/dmcommon.h>
+#include <libbbf_api/dmuci.h>
+#include <libbbf_api/dmubus.h>
+#include <libbbf_api/dmjson.h>
+
+#include "libbbf_test.h"
+
+/* ********** DynamicObj ********** */
+DM_MAP_OBJ tDynamicObj[] = {
+/* parentobj, nextobject, parameter */
+{"Device.ManagementServer.", tDynamicManagementServerObj, tDynamicManagementServerParams},
+{"Device.", tDynamicDeviceObj, NULL},
+{0}
+};
+
+/* ********** DynamicOperate ********** */
+DM_MAP_OPERATE tDynamicOperate[] = {
+/* pathname, operation, type, args */
+{
+	"Device.X_IOPSYS_EU_PingTEST.Run", DynamicDevicePingOperate, "async",
+	{
+		.in = (const char *[]) {
+			"Host",
+			NULL
+		},
+		.out = (const char *[]) {
+			"AverageResponseTime",
+			"MinimumResponseTime",
+			"MaximumResponseTime",
+			NULL
+		}
+	}
+},
+{
+	"Device.X_IOPSYS_EU_Reboot", DynamicDeviceRebootOperate, "sync"
+},
+{0}
+};
+
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
+static int browseManagementServerInformParameterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL, *max_inst = NULL;
+	struct dmmap_dup *p = NULL;
+	LIST_HEAD(dup_list);
+
+	synchronize_specific_config_sections_with_dmmap("cwmp", "inform_extra", "dmmap_cwmp", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
+			   p->dmmap_section, "inform_instance", "inform_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
+/*************************************************************
+* ADD & DEL OBJ
+**************************************************************/
+static int addObjManagementServerInformParameter(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	struct uci_section *s = NULL, *dmmap_s = NULL;
+
+	char *last_inst = get_last_instance_bbfdm("dmmap_cwmp", "inform_extra", "inform_instance");
+
+	dmuci_add_section("cwmp", "inform_extra", &s);
+
+	dmuci_add_section_bbfdm("dmmap_cwmp", "inform_extra", &dmmap_s);
+	dmuci_set_value_by_section(dmmap_s, "section_name", section_name(s));
+	*instance = update_instance(last_inst, 2, dmmap_s, "inform_instance");
+	return 0;
+}
+
+static int delObjManagementServerInformParameter(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL, *stmp = NULL, *dmmap_s = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name((struct uci_section *)data), &dmmap_s);
+			dmuci_delete_by_section_unnamed_bbfdm(dmmap_s, NULL, NULL);
+
+			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+			break;
+		case DEL_ALL:
+			uci_foreach_sections_safe("cwmp", "inform_extra", stmp, s) {
+				get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name(s), &dmmap_s);
+				dmuci_delete_by_section(dmmap_s, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
+
+			}
+			break;
+	}
+	return 0;
+}
+
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
+static int get_ManagementServer_EnableCWMP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "enabled", "1");
+	return 0;
+}
+
+static int set_ManagementServer_EnableCWMP(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value("cwmp", "acs", "enabled", b ? "1" : "0");
+			break;
+	}
+	return 0;
+}
+
+static int get_ManagementServerInformParameter_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "1");
+	return 0;
+}
+
+static int set_ManagementServerInformParameter_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section((struct uci_section *)data, "enabled", b ? "1" : "0");
+			break;
+	}
+	return 0;
+}
+
+static int get_ManagementServerInformParameter_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *dmmap_section = NULL;
+
+	get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name((struct uci_section *)data), &dmmap_section);
+	dmuci_get_value_by_section_string(dmmap_section, "inform_alias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+	return 0;
+}
+
+static int set_ManagementServerInformParameter_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *dmmap_section = NULL;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name((struct uci_section *)data), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "inform_alias", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_ManagementServerInformParameter_ParameterName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "parameter", value);
+	return 0;
+}
+
+static int set_ManagementServerInformParameter_ParameterName(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section((struct uci_section *)data, "parameter", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_ManagementServerInformParameter_EventList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "events", value);
+	return 0;
+}
+
+static int set_ManagementServerInformParameter_EventList(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section((struct uci_section *)data, "events", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_X_IOPSYS_EU_Syslog_ServerIPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("system", "@system[0]", "log_ip", value);
+	return 0;
+}
+
+static int set_X_IOPSYS_EU_Syslog_ServerIPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:			
+			return 0;
+		case VALUESET:
+			dmuci_set_value("system", "@system[0]", "log_ip", value);
+			return 0;
+	}
+	return 0;
+}
+	
+static int get_X_IOPSYS_EU_Syslog_ServerPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("system", "@system[0]", "log_port", "514");
+	return 0;
+}
+
+static int set_X_IOPSYS_EU_Syslog_ServerPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:			
+			return 0;
+		case VALUESET:
+			dmuci_set_value("system", "@system[0]", "log_port", value);
+			return 0;
+	}
+	return 0;
+}
+
+static int get_X_IOPSYS_EU_Syslog_ConsoleLogLevel(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("system", "@system[0]", "conloglevel", "7");
+	return 0;
+}
+
+static int set_X_IOPSYS_EU_Syslog_ConsoleLogLevel(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:			
+			return 0;
+		case VALUESET:
+			dmuci_set_value("system", "@system[0]", "conloglevel", value);
+			return 0;
+	}
+	return 0;
+}
+
+/*************************************************************
+ * OPERATE
+ *************************************************************/
+opr_ret_t DynamicDevicePingOperate(struct dmctx *dmctx, char *path, json_object *input)
+{
+	char *p, *min = NULL, *avg = NULL, *max = NULL, line[512], command[512];
+	FILE *log = NULL;
+
+	char *host = dmjson_get_value(input, 1, "Host");
+	if(host[0] == '\0')
+		return UBUS_INVALID_ARGUMENTS;
+
+	snprintf(command, sizeof(command), "ping -c 1 -W 1 %s", host);
+
+	if ((log = popen(command, "r"))) {
+		while (fgets(line, sizeof(line), log) != NULL) {
+			if (strstr(line, "rtt")) {
+				strtok_r(line, "=", &min);
+				strtok_r(min+1, "/", &avg);
+				add_list_parameter(dmctx, dmstrdup("MinimumResponseTime"), dmstrdup(min ? min+1 : ""), "xsd:unsignedInt", NULL);
+				strtok_r(avg, "/", &max);
+				add_list_parameter(dmctx, dmstrdup("AverageResponseTime"), dmstrdup(avg ? avg : ""), "xsd:unsignedInt", NULL);
+				strtok_r(max, "/", &p);
+				add_list_parameter(dmctx, dmstrdup("MaximumResponseTime"), dmstrdup(max ? max : ""), "xsd:unsignedInt", NULL);
+				break;
+			}
+		}
+		pclose(log);
+	}
+	return SUCCESS;
+}
+
+opr_ret_t DynamicDeviceRebootOperate(struct dmctx *dmctx, char *path, json_object *input)
+{
+	if (0 == dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0))
+		return SUCCESS;
+	else
+		return FAIL;
+}
+
+/**********************************************************************************************************************************
+*                                            OBJ & PARAM DEFINITION
+***********************************************************************************************************************************/
+/* *** Device.ManagementServer. *** */
+DMOBJ tDynamicManagementServerObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"InformParameter", &DMWRITE, addObjManagementServerInformParameter, delObjManagementServerInformParameter, NULL, browseManagementServerInformParameterInst, NULL, NULL, NULL, tManagementServerInformParameterParams, NULL, BBFDM_CWMP, LIST_KEY{"Alias", "ParameterName", NULL}},
+{0}
+};
+
+DMLEAF tDynamicManagementServerParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"EnableCWMP", &DMWRITE, DMT_BOOL, get_ManagementServer_EnableCWMP, set_ManagementServer_EnableCWMP, BBFDM_CWMP},
+{0}
+};
+
+/* *** Device.ManagementServer.InformParameter.{i}. *** */
+DMLEAF tManagementServerInformParameterParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_ManagementServerInformParameter_Enable, set_ManagementServerInformParameter_Enable, BBFDM_CWMP},
+{"Alias", &DMWRITE, DMT_STRING, get_ManagementServerInformParameter_Alias, set_ManagementServerInformParameter_Alias, BBFDM_CWMP},
+{"ParameterName", &DMWRITE, DMT_STRING, get_ManagementServerInformParameter_ParameterName, set_ManagementServerInformParameter_ParameterName, BBFDM_CWMP},
+{"EventList", &DMWRITE, DMT_STRING, get_ManagementServerInformParameter_EventList, set_ManagementServerInformParameter_EventList, BBFDM_CWMP},
+{0}
+};
+
+/* *** Device. *** */
+DMOBJ tDynamicDeviceObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"X_IOPSYS_EU_Syslog", &DMREAD, NULL, NULL, "file:/etc/config/system", NULL, NULL, NULL, NULL, tX_IOPSYS_EU_SyslogParam, NULL, BBFDM_BOTH},
+{0}
+};
+
+/*** Device.X_IOPSYS_EU_Syslog. ***/
+DMLEAF tX_IOPSYS_EU_SyslogParam[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"ServerIPAddress", &DMWRITE, DMT_STRING, get_X_IOPSYS_EU_Syslog_ServerIPAddress, set_X_IOPSYS_EU_Syslog_ServerIPAddress, BBFDM_BOTH},
+{"ServerPort", &DMWRITE, DMT_UNINT, get_X_IOPSYS_EU_Syslog_ServerPort, set_X_IOPSYS_EU_Syslog_ServerPort, BBFDM_BOTH},
+{"ConsoleLogLevel", &DMWRITE, DMT_UNINT, get_X_IOPSYS_EU_Syslog_ConsoleLogLevel, set_X_IOPSYS_EU_Syslog_ConsoleLogLevel, BBFDM_BOTH},
+{0}
+};

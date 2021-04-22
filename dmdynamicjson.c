@@ -469,10 +469,13 @@ static bool is_obj(char *object, json_object *jobj)
 
 static void parse_mapping_obj(char *object, json_object *mapping, struct list_head *list)
 {
-	struct json_object *type, *obj;
+	if (!mapping)
+		return;
+
+	struct json_object *type = NULL, *obj = NULL;
 	json_object_object_get_ex(mapping, "type", &type);
 
-	if (strcmp(json_object_get_string(type), "uci") == 0) {
+	if (type && strcmp(json_object_get_string(type), "uci") == 0) {
 		//UCI: arg1=type :: arg2=uci_file :: arg3=uci_section_type :: arg4=uci_dmmap_file :: arg5="" :: arg6=""
 
 		struct json_object *file, *section, *section_type, *dmmap_file;
@@ -485,7 +488,7 @@ static void parse_mapping_obj(char *object, json_object *mapping, struct list_he
 		//Add to list
 		add_json_data_to_list(list, object, "uci", json_object_get_string(file), json_object_get_string(section_type), json_object_get_string(dmmap_file), "", "", "", "");
 	}
-	else if (strcmp(json_object_get_string(type), "ubus") == 0) {
+	else if (type && strcmp(json_object_get_string(type), "ubus") == 0) {
 		//UBUS: arg1=type :: arg2=ubus_object :: arg3=ubus_method :: arg4=ubus_args1 :: arg5=ubus_args2 :: arg6=ubus_key
 
 		struct json_object *obj1, *method, *key, *args;
@@ -506,10 +509,13 @@ static void parse_mapping_obj(char *object, json_object *mapping, struct list_he
 
 static void parse_mapping_param(char *parameter, json_object *mapping, struct list_head *list)
 {
-	struct json_object *type, *obj;
+	if (!mapping)
+		return;
+
+	struct json_object *type = NULL, *obj = NULL;
 	json_object_object_get_ex(mapping, "type", &type);
 
-	if (strcmp(json_object_get_string(type), "uci") == 0) {
+	if (type && strcmp(json_object_get_string(type), "uci") == 0) {
 		//UCI: arg1=type :: arg2=uci_file :: arg3=uci_section_type :: arg4=uci_section_name :: arg5=uci_section_index :: arg6=uci_option_name  :: arg7=path :: arg8=ref
 
 		struct json_object *file, *section, *type, *section_name, *index, *option, *option_name, *path, *ref;
@@ -528,7 +534,7 @@ static void parse_mapping_param(char *parameter, json_object *mapping, struct li
 		add_json_data_to_list(list, parameter, "uci", json_object_get_string(file), json_object_get_string(type), json_object_get_string(section_name), json_object_get_string(index),
 							json_object_get_string(option_name), json_object_get_string(path), json_object_get_string(ref));
 	}
-	else if (strcmp(json_object_get_string(type), "ubus") == 0) {
+	else if (type && strcmp(json_object_get_string(type), "ubus") == 0) {
 		//UBUS: arg1=type :: arg2=ubus_object :: arg3=ubus_method :: arg4=ubus_args1 :: arg5=ubus_args2 :: arg6=ubus_key
 
 		struct json_object *object, *method, *key, *args;
@@ -550,36 +556,37 @@ static void parse_mapping_param(char *parameter, json_object *mapping, struct li
 static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pleaf, int i, struct list_head *list)
 {
 	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(6)*/
-	struct json_object *type, *protocols, *proto, *write, *mapping_arr, *mapping;
+	struct json_object *type = NULL, *protocols = NULL, *write = NULL, *mapping_arr = NULL, *mapping = NULL;
 	char full_param[256] = {0};
 	size_t n_proto;
 
-	if (!pleaf) return;
+	if (!jobj || !pleaf)
+		return;
 
 	//PARAM
 	pleaf[i].parameter = dmstrdupjson(param);
 
 	//permission
 	json_object_object_get_ex(jobj, "write", &write);
-	pleaf[i].permission = json_object_get_boolean(write) ? &DMWRITE : &DMREAD;
+	pleaf[i].permission = (write && json_object_get_boolean(write)) ? &DMWRITE : &DMREAD;
 
 	//type
 	json_object_object_get_ex(jobj, "type", &type);
-	if (strcmp(json_object_get_string(type), "boolean") == 0)
+	if (type && strcmp(json_object_get_string(type), "boolean") == 0)
 		pleaf[i].type = DMT_BOOL;
-	else if (strcmp(json_object_get_string(type), "unsignedInt") == 0)
+	else if (type && strcmp(json_object_get_string(type), "unsignedInt") == 0)
 		pleaf[i].type = DMT_UNINT;
-	else if (strcmp(json_object_get_string(type), "unsignedLong") == 0)
+	else if (type && strcmp(json_object_get_string(type), "unsignedLong") == 0)
 		pleaf[i].type = DMT_UNLONG;
-	else if (strcmp(json_object_get_string(type), "hexBinary") == 0)
+	else if (type && strcmp(json_object_get_string(type), "hexBinary") == 0)
 		pleaf[i].type = DMT_HEXBIN;
-	else if (strcmp(json_object_get_string(type), "int") == 0)
+	else if (type && strcmp(json_object_get_string(type), "int") == 0)
 		pleaf[i].type = DMT_INT;
-	else if (strcmp(json_object_get_string(type), "long") == 0)
+	else if (type && strcmp(json_object_get_string(type), "long") == 0)
 		pleaf[i].type = DMT_LONG;
-	else if (strcmp(json_object_get_string(type), "dateTime") == 0)
+	else if (type && strcmp(json_object_get_string(type), "dateTime") == 0)
 		pleaf[i].type = DMT_TIME;
-	else if (strcmp(json_object_get_string(type), "base64") == 0)
+	else if (type && strcmp(json_object_get_string(type), "base64") == 0)
 		pleaf[i].type = DMT_BASE64;
 	else
 		pleaf[i].type = DMT_STRING;
@@ -588,18 +595,18 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	pleaf[i].getvalue = getvalue_param;
 
 	//setvalue
-	pleaf[i].setvalue = json_object_get_boolean(write) ? setvalue_param : NULL;
+	pleaf[i].setvalue = (write && json_object_get_boolean(write)) ? setvalue_param : NULL;
 
 	//bbfdm_type
 	json_object_object_get_ex(jobj, "protocols", &protocols);
-	n_proto = json_object_array_length(protocols);
+	n_proto = protocols ? json_object_array_length(protocols) : 0;
 	if (n_proto == 2)
 		pleaf[i].bbfdm_type = BBFDM_BOTH;
 	else if (n_proto == 1) {
-		proto = json_object_array_get_idx(protocols, 0);
-		if (strcmp(json_object_get_string(proto), "cwmp") == 0)
+		struct json_object *proto = protocols ? json_object_array_get_idx(protocols, 0) : NULL;
+		if (proto && strcmp(json_object_get_string(proto), "cwmp") == 0)
 			pleaf[i].bbfdm_type = BBFDM_CWMP;
-		else if (strcmp(json_object_get_string(proto), "usp") == 0)
+		else if (proto && strcmp(json_object_get_string(proto), "usp") == 0)
 			pleaf[i].bbfdm_type = BBFDM_USP;
 		else
 			pleaf[i].bbfdm_type = BBFDM_BOTH;
@@ -608,8 +615,10 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 
 	snprintf(full_param, sizeof(full_param), "%s%s", object, param);
 	json_object_object_get_ex(jobj, "mapping", &mapping_arr);
-	// for now, we have only one case
-	mapping = json_object_array_get_idx(mapping_arr, 0);
+	if (mapping_arr && json_object_get_type(mapping_arr) == json_type_array)
+		mapping = json_object_array_get_idx(mapping_arr, 0);
+	else
+		mapping = NULL;
 	parse_mapping_param(full_param, mapping, list);
 }
 
@@ -668,14 +677,14 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, s
 	json_object_object_foreach(jobj, key, json_obj) {
 		//bbfdm_type
 		if (strcmp(key, "protocols") == 0) {
-			size_t n_proto = json_object_array_length(json_obj);
+			size_t n_proto = json_obj ? json_object_array_length(json_obj) : 0;
 			if (n_proto == 2)
 				pobj[index].bbfdm_type = BBFDM_BOTH;
 			else if (n_proto == 1) {
-				struct json_object *proto = json_object_array_get_idx(json_obj, 0);
-				if (strcmp(json_object_get_string(proto), "cwmp") == 0)
+				struct json_object *proto = json_obj ? json_object_array_get_idx(json_obj, 0) : NULL;
+				if (proto && strcmp(json_object_get_string(proto), "cwmp") == 0)
 					pobj[index].bbfdm_type = BBFDM_CWMP;
-				else if (strcmp(json_object_get_string(proto), "usp") == 0)
+				else if (proto && strcmp(json_object_get_string(proto), "usp") == 0)
 					pobj[index].bbfdm_type = BBFDM_USP;
 				else
 					pobj[index].bbfdm_type = BBFDM_BOTH;

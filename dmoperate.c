@@ -272,7 +272,7 @@ static void fill_wireless_scan_results(struct dmctx *dmctx, char *radio)
 	if (!json_object_object_get_ex(res,"accesspoints", &obj))
 		return;
 
-	uint8_t len = json_object_array_length(obj);
+	uint8_t len = obj ? json_object_array_length(obj) : 0;
 	for (uint8_t j = 0; j < len; j++ ) {
 		wifi_neighbor_count++;
 		json_object *array_obj = json_object_array_get_idx(obj, j);

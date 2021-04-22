@@ -12,6 +12,17 @@
 
 #include "dmjson.h"
 
+static json_object *dmjson_select_obj(json_object *jobj, char *argv[])
+{
+	int i;
+	for (i = 0; argv[i]; i++) {
+		if (jobj == NULL)
+			return NULL;
+		json_object_object_get_ex(jobj, argv[i], &jobj);
+	}
+	return jobj;
+}
+
 static char *dmjson_print_value(json_object *jobj)
 {
 	enum json_type type;
@@ -34,9 +45,9 @@ static char *dmjson_print_value(json_object *jobj)
 	return ret;
 }
 
-char *____dmjson_get_value_in_obj(json_object *mainjobj, char *argv[])
+static char *____dmjson_get_value_in_obj(json_object *mainjobj, char *argv[])
 {
-	json_object *jobj = bbf_api_dmjson_select_obj(mainjobj, argv);
+	json_object *jobj = dmjson_select_obj(mainjobj, argv);
 	return dmjson_print_value(jobj);
 }
 
@@ -68,26 +79,15 @@ json_object *__dmjson_get_obj(json_object *mainjobj, int argc, ...)
 	}
 	argv[argc] = NULL;
 	va_end(arg);
-	return bbf_api_dmjson_select_obj(mainjobj, argv);
+	return dmjson_select_obj(mainjobj, argv);
 }
 
-json_object *bbf_api_dmjson_select_obj(json_object *jobj, char *argv[])
-{
-	int i;
-	for (i = 0; argv[i]; i++) {
-		if (jobj == NULL)
-			return NULL;
-		json_object_object_get_ex(jobj, argv[i], &jobj);
-	}
-	return jobj;
-}
-
-json_object *____dmjson_select_obj_in_array_idx(json_object *mainjobj, json_object **arrobj, int index, char *argv[])
+static json_object *____dmjson_select_obj_in_array_idx(json_object *mainjobj, json_object **arrobj, int index, char *argv[])
 {
 	json_object *jobj = NULL;
 
 	if (arrobj == NULL || *arrobj == NULL) {
-		jobj = bbf_api_dmjson_select_obj(mainjobj, argv);
+		jobj = dmjson_select_obj(mainjobj, argv);
 		if (arrobj)
 			*arrobj = jobj;
 		if (jobj && json_object_get_type(jobj) == json_type_array) {
@@ -124,13 +124,13 @@ json_object *__dmjson_select_obj_in_array_idx(json_object *mainjobj, json_object
 	return jobj;
 }
 
-char *____dmjson_get_value_in_array_idx(json_object *mainjobj, json_object **arrobj, int index, char *argv[])
+static char *____dmjson_get_value_in_array_idx(json_object *mainjobj, json_object **arrobj, int index, char *argv[])
 {
 	json_object *jobj = NULL;
 	char *value = NULL;
 
 	if (arrobj == NULL || *arrobj == NULL) {
-		jobj = bbf_api_dmjson_select_obj(mainjobj, argv);
+		jobj = dmjson_select_obj(mainjobj, argv);
 		if (arrobj)
 			*arrobj = jobj;
 		if (jobj && json_object_get_type(jobj) == json_type_array) {
@@ -169,7 +169,7 @@ char *__dmjson_get_value_in_array_idx(json_object *mainjobj, json_object **arrob
 	return (v ? v : defret) ;
 }
 
-char *____dmjson_get_value_array_all(json_object *mainjobj, char *delim, char *argv[])
+static char *____dmjson_get_value_array_all(json_object *mainjobj, char *delim, char *argv[])
 {
 	json_object *arrobj;
 	char *v, *ret = "";
