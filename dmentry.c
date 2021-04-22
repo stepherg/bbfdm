@@ -293,6 +293,7 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2)
 				if (fault) break;
 			}
 			if (!fault) {
+				dmuci_change_packages(&head_package_change);
 				dmuci_save();
 			}
 			free_all_set_list_tmp(ctx);
