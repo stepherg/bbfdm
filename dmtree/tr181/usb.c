@@ -788,7 +788,7 @@ static int get_USBUSBHostsHost_Type(char *refparam, struct dmctx *ctx, void *dat
 
 static int get_USBUSBHostsHost_PowerManagementEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char power[64];
+	char power[64] = {0};
 
 	__read_sysfs_usb_port(data, "power/level", power, sizeof(power));
 
@@ -1018,7 +1018,7 @@ static int get_USBUSBHostsHostDevice_MaxChildren(char *refparam, struct dmctx *c
 
 static int get_USBUSBHostsHostDevice_IsSuspended(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char status[16];
+	char status[16] = {0};
 
 	__read_sysfs_usb_port(data, "power/runtime_status", status, sizeof(status));
 	if(strncmp(status, "suspended", 9) == 0)

@@ -97,7 +97,7 @@ static int browseFASTLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 ***************************************************************************/
 static char *get_fast_value_without_argument(char *command1, char *id, char *command2, char *key)
 {
-	json_object *res;
+	json_object *res = NULL;
 	char command[16], *value = "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
@@ -109,7 +109,7 @@ static char *get_fast_value_without_argument(char *command1, char *id, char *com
 
 static char *get_fast_value_without_argument_and_with_two_key(char *command1, char *id, char *command2, char *key1, char *key2)
 {
-	json_object *res;
+	json_object *res = NULL;
 	char command[16], *value = "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
@@ -121,7 +121,7 @@ static char *get_fast_value_without_argument_and_with_two_key(char *command1, ch
 
 static char *get_fast_value_array_without_argument(char *command1, char *id, char *command2, char *key)
 {
-	json_object *res;
+	json_object *res = NULL;
 	char command[16], *value= "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);

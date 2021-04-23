@@ -463,7 +463,7 @@ static int get_UPnPDiscovery_RootDeviceNumberOfEntries(char *refparam, struct dm
 
 static int get_UPnPDiscovery_DeviceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res,  *devices;
+	json_object *res = NULL,  *devices;
 
 	*value = "0";
 	dmubus_call("upnpc", "discovery", UBUS_ARGS{{}}, 0, &res);
@@ -481,7 +481,7 @@ static int get_UPnPDiscovery_DeviceNumberOfEntries(char *refparam, struct dmctx 
 
 static int get_UPnPDiscovery_ServiceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res, *services;
+	json_object *res = NULL, *services;
 
 	*value = "0";
 	dmubus_call("upnpc", "discovery", UBUS_ARGS{{}}, 0, &res);
@@ -565,7 +565,7 @@ static int get_UPnPDiscoveryService_ParentDevice(char *refparam, struct dmctx *c
 
 static int get_UPnPDescription_DeviceDescriptionNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res,  *descriptions;
+	json_object *res = NULL,  *descriptions;
 
 	*value = "0";
 	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);
@@ -583,7 +583,7 @@ static int get_UPnPDescription_DeviceDescriptionNumberOfEntries(char *refparam, 
 
 static int get_UPnPDescription_DeviceInstanceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res, *devicesinstances;
+	json_object *res = NULL, *devicesinstances;
 
 	*value = "0";
 	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);
@@ -601,7 +601,7 @@ static int get_UPnPDescription_DeviceInstanceNumberOfEntries(char *refparam, str
 
 static int get_UPnPDescription_ServiceInstanceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res, *servicesinstances;
+	json_object *res = NULL, *servicesinstances;
 
 	*value = "0";
 	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);

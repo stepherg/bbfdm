@@ -290,7 +290,7 @@ static void dhcp_leases_load(struct list_head *head)
 
 static int interface_get_ipv4(const char *iface, uint32_t *addr, unsigned *bits)
 {
-	json_object *res;
+	json_object *res = NULL;
 	const char *addr_str = NULL;
 	int addr_cidr = -1;
 
@@ -2114,7 +2114,7 @@ static int set_DHCPv4ClientSentOption_Value(char *refparam, struct dmctx *ctx, v
 			dmuci_set_value_by_section_bbfdm(dhcp_client_s->dmmap_sect, "option_value", res);
 
 			if (tag_enabled) {
-				char new_tag_value[128] = {0};
+				char new_tag_value[512] = {0};
 
 				snprintf(new_tag_value, sizeof(new_tag_value), "%s:%s", dhcp_client_s->option_tag, res);
 				add_elt_to_str_list(&sendopts, new_tag_value);
@@ -2452,7 +2452,7 @@ static int set_DHCPv4ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 			convert_hex_to_string(value, res);
 
 			if (option_enabled) {
-				char new_tag_value[128] = {0}, old_tag_value[128] = {0};
+				char new_tag_value[512] = {0}, old_tag_value[128] = {0};
 
 				snprintf(old_tag_value, sizeof(old_tag_value), "%s,%s", dhcp_client_s->option_tag, dhcp_client_s->value);
 				snprintf(new_tag_value, sizeof(new_tag_value), "%s,%s", dhcp_client_s->option_tag, res);

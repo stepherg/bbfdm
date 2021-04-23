@@ -169,7 +169,7 @@ static int browseDSLChannelInst(struct dmctx *dmctx, DMNODE *parent_node, void *
 ***************************************************************************/
 static char *get_dsl_value_without_argument(char *command1, char *id, char *command2, char *key)
 {
-	json_object *res;
+	json_object *res = NULL;
 	char command[16], *value = "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
@@ -181,7 +181,7 @@ static char *get_dsl_value_without_argument(char *command1, char *id, char *comm
 
 static char *get_dsl_value_without_argument_and_with_two_key(char *command1, char *id, char *command2, char *key1, char *key2)
 {
-	json_object *res;
+	json_object *res = NULL;
 	char command[16], *value = "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
@@ -193,7 +193,7 @@ static char *get_dsl_value_without_argument_and_with_two_key(char *command1, cha
 
 char *get_value_with_argument(char *command1, char *id, char *command2, char *argument, char *key)
 {
-	json_object *res;
+	json_object *res = NULL;
 	char command[16], *value = "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
@@ -205,7 +205,7 @@ char *get_value_with_argument(char *command1, char *id, char *command2, char *ar
 
 static char *get_dsl_value_array_without_argument(char *command1, char *id, char *command2, char *key)
 {
-	json_object *res;
+	json_object *res = NULL;
 	char command[16], *value= "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);

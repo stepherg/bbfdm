@@ -1286,7 +1286,7 @@ static int set_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 			convert_hex_to_string(value, res);
 
 			if (option_enabled) {
-				char new_tag_value[128] = {0}, old_tag_value[128] = {0};
+				char new_tag_value[512] = {0}, old_tag_value[128] = {0};
 
 				snprintf(old_tag_value, sizeof(old_tag_value), "%s,%s", dhcpv6_client_s->option_tag, dhcpv6_client_s->value);
 				snprintf(new_tag_value, sizeof(new_tag_value), "%s,%s", dhcpv6_client_s->option_tag, res);

@@ -30,7 +30,7 @@ static unsigned char is_dns_server_in_dmmap(char *chk_ip, char *chk_interface)
 
 static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *jobj, *arrobj = NULL;
+	json_object *jobj = NULL, *arrobj = NULL;
 	struct uci_list *v;
 	struct uci_element *e = NULL;
 	struct uci_section *s = NULL, *sdns = NULL, *stmp = NULL, *ss;
