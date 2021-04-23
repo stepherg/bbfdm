@@ -379,7 +379,7 @@ For the other tables, they are defined in the same way as the Object and Paramet
 
 > Note2: Shared library is not allowed to overwrite objects/parameters
 
-- For more examples on the external packages, you can see these links: [BulkData](https://dev.iopsys.eu/feed/iopsys/-/blob/devel/bulkdata/src/datamodel.c), [XMPP](https://dev.iopsys.eu/feed/iopsys/-/blob/devel/xmpp/src/datamodel.c)
+- For more examples on the external packages, you can see these links: [BulkData](https://dev.iopsys.eu/iopsys/bulkdata/-/blob/master/datamodel.c), [XMPP](https://dev.iopsys.eu/iopsys/xmppc/-/blob/master/datamodel.c)
 
 ### 2. JSON File via external package
 
