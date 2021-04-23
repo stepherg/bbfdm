@@ -370,7 +370,9 @@ The **DM_MAP_OPERATE** structure contains two arguments:
 |     Argument       |                           Description                                                                           |
 | ------------------ | --------------------------------------------------------------------------------------------------------------- |
 | `pathname`         | A string of the path name operate. Example “Device.BBKSpeedTest”, “Device.WiFi.AccessPoint.*.X_IOPSYS_EU_Reset” |
-| `operation`        | The function which return the status of this operate. |
+| `operation`        | The function to be executed in the operation |
+| `type`             | The type of the operation. Could be **sync** or **async** |
+| `args`             | The input and output arguments of the operation |
 
 
 For the other tables, they are defined in the same way as the Object and Parameter definition described above.

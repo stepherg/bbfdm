@@ -157,7 +157,8 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 					if (dynamic_operate[i].operate && dynamic_operate[i].type)
 						add_dynamic_operate(dynamic_operate[i].path,
 								dynamic_operate[i].operate,
-								dynamic_operate[i].type);
+								dynamic_operate[i].type,
+								dynamic_operate[i].args);
 				}
 			}
 

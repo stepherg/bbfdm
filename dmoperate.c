@@ -843,13 +843,14 @@ static int get_index_of_available_dynamic_operate(struct op_cmd *operate)
 	return idx;
 }
 
-int add_dynamic_operate(char *path, operation operate, char *type)
+int add_dynamic_operate(char *path, operation operate, char *type, operation_args args)
 {
 	if (dynamic_operate == NULL) {
 		dynamic_operate = calloc(2, sizeof(struct op_cmd));
 		dynamic_operate[0].name = path;
 		dynamic_operate[0].opt = operate;
 		dynamic_operate[0].type = type;
+		dynamic_operate[0].args = args;
 	} else {
 		int idx = get_index_of_available_dynamic_operate(dynamic_operate);
 		struct op_cmd *new_dynamic_operate = realloc(dynamic_operate, (idx + 2) * sizeof(struct op_cmd));
@@ -861,6 +862,7 @@ int add_dynamic_operate(char *path, operation operate, char *type)
 		dynamic_operate[idx].name = path;
 		dynamic_operate[idx].opt = operate;
 		dynamic_operate[idx].type = type;
+		dynamic_operate[idx].args = args;
 	}
 	return 0;
 }

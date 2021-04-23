@@ -212,10 +212,10 @@ struct op_cmd {
 	const char *name;
 	operation opt;
 	const char *type;
-	const operation_args args;
+	operation_args args;
 };
 
-int add_dynamic_operate(char *path, operation operate, char *type);
+int add_dynamic_operate(char *path, operation operate, char *type, operation_args args);
 void operate_list_cmds(struct dmctx *dmctx);
 opr_ret_t operate_on_node(struct dmctx *dmctx, char *path, char *input);
 

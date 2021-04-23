@@ -237,6 +237,7 @@ typedef struct dm_map_operate {
 	char *path;
 	operation operate;
 	char *type; // sync or async
+	operation_args args;
 } DM_MAP_OPERATE;
 
 enum set_value_action {
