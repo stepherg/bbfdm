@@ -267,13 +267,6 @@ static int set_ServicesVoiceServiceSIPClient_AuthUserName(char *refparam, struct
 	return 0;
 }
 
-/*#Device.Services.VoiceService.{i}.SIP.Client.{i}.AuthPassword!UCI:asterisk/sip_service_provider,@i-1/secret*/
-static int get_ServicesVoiceServiceSIPClient_AuthPassword(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_value_by_section_string((struct uci_section *)data, "secret", value);
-	return 0;
-}
-
 static int set_ServicesVoiceServiceSIPClient_AuthPassword(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
@@ -1004,7 +997,7 @@ DMLEAF tServicesVoiceServiceSIPClientParams[] = {
 {"Status", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClient_Status, NULL, BBFDM_BOTH},
 {"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClient_Origin, NULL, BBFDM_BOTH},
 {"AuthUserName", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_AuthUserName, set_ServicesVoiceServiceSIPClient_AuthUserName, BBFDM_BOTH},
-{"AuthPassword", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_AuthPassword, set_ServicesVoiceServiceSIPClient_AuthPassword, BBFDM_BOTH},
+{"AuthPassword", &DMWRITE, DMT_STRING, get_empty, set_ServicesVoiceServiceSIPClient_AuthPassword, BBFDM_BOTH},
 {"RegisterURI", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_RegisterURI, set_ServicesVoiceServiceSIPClient_RegisterURI, BBFDM_BOTH},
 {0}
 };
