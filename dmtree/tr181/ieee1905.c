@@ -1458,13 +1458,6 @@ static int set_IEEE1905ALSecurity_SetupMethod(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
-/*#Device.IEEE1905.AL.Security.Password!UCI:ieee1905/security,security/key*/
-static int get_IEEE1905ALSecurity_Password(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_option_value_string("ieee1905", "security", "key", value);
-	return 0;
-}
-
 static int set_IEEE1905ALSecurity_Password(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action) {
@@ -1801,7 +1794,7 @@ DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleParams[] = {
 DMLEAF tIEEE1905ALSecurityParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"SetupMethod", &DMWRITE, DMT_STRING, get_IEEE1905ALSecurity_SetupMethod, set_IEEE1905ALSecurity_SetupMethod, BBFDM_BOTH},
-{"Password", &DMWRITE, DMT_STRING, get_IEEE1905ALSecurity_Password, set_IEEE1905ALSecurity_Password, BBFDM_BOTH},
+{"Password", &DMWRITE, DMT_STRING, get_empty, set_IEEE1905ALSecurity_Password, BBFDM_BOTH},
 {0}
 };
 
