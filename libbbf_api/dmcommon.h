@@ -112,6 +112,7 @@ extern char *SupportedOperatingChannelBandwidth[];
 extern char *SupportedStandards[];
 extern char *SupportedFrequencyBands[];
 extern char *Provider_Bridge_Type[];
+extern char *AdvPreferredRouterFlag[];
 
 #define UPTIME "/proc/uptime"
 #define DEFAULT_CONFIG_DIR "/etc/config/"

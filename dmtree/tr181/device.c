@@ -42,6 +42,7 @@
 #include "security.h"
 #include "ieee1905.h"
 #include "softwaremodules.h"
+#include "routeradvertisement.h"
 #ifdef BBF_TR104
 #include "servicesvoiceservice.h"
 #endif
@@ -95,5 +96,6 @@ DMOBJ tDeviceObj[] = {
 {"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH},
 {"SoftwareModules", &DMREAD, NULL, NULL, "ubus:swmodules", NULL, NULL, NULL, tSoftwareModulesObj, tSoftwareModulesParams, NULL, BBFDM_BOTH},
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_BOTH},
+{"RouterAdvertisement", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tRouterAdvertisementObj, tRouterAdvertisementParams, NULL, BBFDM_BOTH},
 {0}
 };

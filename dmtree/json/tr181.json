@@ -54141,7 +54141,22 @@
 					"cwmp",
 					"usp"
 				],
-				"datatype": "boolean"
+				"datatype": "boolean",
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "dhcp",
+							"section": {
+								"type": "dnsmasq",
+								"name": "@dnsmasq[0]"
+							},
+							"option": {
+								"name": "raserver"
+							}
+						}
+					}
+				]
 			},
 			"InterfaceSettingNumberOfEntries": {
 				"type": "unsignedInt",
@@ -54165,6 +54180,16 @@
 				],
 				"access": true,
 				"array": true,
+				"mapping": {
+					"type": "uci",
+					"uci": {
+						"file": "dhcp",
+						"section": {
+							"type": "dhcp"
+						},
+						"dmmapfile": "dmmap_radv"
+					}
+				},
 				"Enable": {
 					"type": "boolean",
 					"read": true,
@@ -54173,7 +54198,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra"
+								}
+							}
+						}
+					]
 				},
 				"Status": {
 					"type": "string",
@@ -54189,6 +54229,21 @@
 						"Enabled",
 						"Error_Misconfigured",
 						"Error"
+					],
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra"
+								}
+							}
+						}
 					]
 				},
 				"Alias": {
@@ -54214,7 +54269,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "string"
+					"datatype": "string",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "interface"
+								}
+							}
+						}
+					]
 				},
 				"ManualPrefixes": {
 					"type": "string",
@@ -54261,7 +54331,22 @@
 							"max": 1800
 						}
 					],
-					"unit": "seconds"
+					"unit": "seconds",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra_maxinterval"
+								}
+							}
+						}
+					]
 				},
 				"MinRtrAdvInterval": {
 					"type": "unsignedInt",
@@ -54278,7 +54363,22 @@
 							"max": 1350
 						}
 					],
-					"unit": "seconds"
+					"unit": "seconds",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra_mininterval"
+								}
+							}
+						}
+					]
 				},
 				"AdvDefaultLifetime": {
 					"type": "unsignedInt",
@@ -54294,7 +54394,22 @@
 							"max": 65535
 						}
 					],
-					"unit": "seconds"
+					"unit": "seconds",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra_lifetime"
+								}
+							}
+						}
+					]
 				},
 				"AdvManagedFlag": {
 					"type": "boolean",
@@ -54304,7 +54419,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra_management"
+								}
+							}
+						}
+					]
 				},
 				"AdvOtherConfigFlag": {
 					"type": "boolean",
@@ -54314,7 +54444,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra_management"
+								}
+							}
+						}
+					]
 				},
 				"AdvMobileAgentFlag": {
 					"type": "boolean",
@@ -54339,6 +54484,21 @@
 						"High",
 						"Medium",
 						"Low"
+					],
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra_preference"
+								}
+							}
+						}
 					]
 				},
 				"AdvNDProxyFlag": {
@@ -54359,7 +54519,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "unsignedInt"
+					"datatype": "unsignedInt",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra_mtu"
+								}
+							}
+						}
+					]
 				},
 				"AdvReachableTime": {
 					"type": "unsignedInt",
@@ -54375,7 +54550,22 @@
 							"max": 3600000
 						}
 					],
-					"unit": "milliseconds"
+					"unit": "milliseconds",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra_reachabletime"
+								}
+							}
+						}
+					]
 				},
 				"AdvRetransTimer": {
 					"type": "unsignedInt",
@@ -54386,7 +54576,22 @@
 						"usp"
 					],
 					"datatype": "unsignedInt",
-					"unit": "milliseconds"
+					"unit": "milliseconds",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra_retranstime"
+								}
+							}
+						}
+					]
 				},
 				"AdvCurHopLimit": {
 					"type": "unsignedInt",
@@ -54400,6 +54605,21 @@
 					"range": [
 						{
 							"max": 255
+						}
+					],
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra_hoplimit"
+								}
+							}
 						}
 					]
 				},
