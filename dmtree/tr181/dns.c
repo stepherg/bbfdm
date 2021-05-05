@@ -758,38 +758,38 @@ DMLEAF tDNSRelayForwardingParams[] = {
 /* *** Device.DNS.Diagnostics. *** */
 DMOBJ tDNSDiagnosticsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"NSLookupDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsObj, tDNSDiagnosticsNSLookupDiagnosticsParams, NULL, BBFDM_BOTH},
+{"NSLookupDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsObj, tDNSDiagnosticsNSLookupDiagnosticsParams, NULL, BBFDM_CWMP},
 {0}
 };
 
 /* *** Device.DNS.Diagnostics.NSLookupDiagnostics. *** */
 DMOBJ tDNSDiagnosticsNSLookupDiagnosticsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Result", &DMREAD, NULL, NULL, NULL, browseResultInst, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsResultParams, NULL, BBFDM_BOTH},
+{"Result", &DMREAD, NULL, NULL, NULL, browseResultInst, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsResultParams, NULL, BBFDM_CWMP},
 {0}
 };
 
 DMLEAF tDNSDiagnosticsNSLookupDiagnosticsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"DiagnosticsState", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_diagnostics_state, set_nslookupdiagnostics_diagnostics_state, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_interface, set_nslookupdiagnostics_interface, BBFDM_BOTH},
-{"HostName", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_host_name, set_nslookupdiagnostics_host_name, BBFDM_BOTH},
-{"DNSServer", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_d_n_s_server, set_nslookupdiagnostics_d_n_s_server, BBFDM_BOTH},
-{"Timeout", &DMWRITE, DMT_UNINT, get_nslookupdiagnostics_timeout, set_nslookupdiagnostics_timeout, BBFDM_BOTH},
-{"NumberOfRepetitions", &DMWRITE, DMT_UNINT, get_nslookupdiagnostics_number_of_repetitions, set_nslookupdiagnostics_number_of_repetitions, BBFDM_BOTH},
-{"SuccessCount", &DMREAD, DMT_UNINT, get_nslookupdiagnostics_success_count, NULL, BBFDM_BOTH},
-{"ResultNumberOfEntries", &DMREAD, DMT_UNINT, get_nslookupdiagnostics_result_number_of_entries, NULL, BBFDM_BOTH},
+{"DiagnosticsState", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_diagnostics_state, set_nslookupdiagnostics_diagnostics_state, BBFDM_CWMP},
+{"Interface", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_interface, set_nslookupdiagnostics_interface, BBFDM_CWMP},
+{"HostName", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_host_name, set_nslookupdiagnostics_host_name, BBFDM_CWMP},
+{"DNSServer", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_d_n_s_server, set_nslookupdiagnostics_d_n_s_server, BBFDM_CWMP},
+{"Timeout", &DMWRITE, DMT_UNINT, get_nslookupdiagnostics_timeout, set_nslookupdiagnostics_timeout, BBFDM_CWMP},
+{"NumberOfRepetitions", &DMWRITE, DMT_UNINT, get_nslookupdiagnostics_number_of_repetitions, set_nslookupdiagnostics_number_of_repetitions, BBFDM_CWMP},
+{"SuccessCount", &DMREAD, DMT_UNINT, get_nslookupdiagnostics_success_count, NULL, BBFDM_CWMP},
+{"ResultNumberOfEntries", &DMREAD, DMT_UNINT, get_nslookupdiagnostics_result_number_of_entries, NULL, BBFDM_CWMP},
 {0}
 };
 
 /* *** Device.DNS.Diagnostics.NSLookupDiagnostics.Result.{i}. *** */
 DMLEAF tDNSDiagnosticsNSLookupDiagnosticsResultParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Status", &DMREAD, DMT_STRING, get_result_status, NULL, BBFDM_BOTH},
-{"AnswerType", &DMREAD, DMT_STRING, get_result_answer_type, NULL, BBFDM_BOTH},
-{"HostNameReturned", &DMREAD, DMT_STRING, get_result_host_name_returned, NULL, BBFDM_BOTH},
-{"IPAddresses", &DMREAD, DMT_STRING, get_result_i_p_addresses, NULL, BBFDM_BOTH},
-{"DNSServerIP", &DMREAD, DMT_STRING, get_result_d_n_s_server_i_p, NULL, BBFDM_BOTH},
-{"ResponseTime", &DMREAD, DMT_UNINT, get_result_response_time, NULL, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_result_status, NULL, BBFDM_CWMP},
+{"AnswerType", &DMREAD, DMT_STRING, get_result_answer_type, NULL, BBFDM_CWMP},
+{"HostNameReturned", &DMREAD, DMT_STRING, get_result_host_name_returned, NULL, BBFDM_CWMP},
+{"IPAddresses", &DMREAD, DMT_STRING, get_result_i_p_addresses, NULL, BBFDM_CWMP},
+{"DNSServerIP", &DMREAD, DMT_STRING, get_result_d_n_s_server_i_p, NULL, BBFDM_CWMP},
+{"ResponseTime", &DMREAD, DMT_UNINT, get_result_response_time, NULL, BBFDM_CWMP},
 {0}
 };
