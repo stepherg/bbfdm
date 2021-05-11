@@ -15,7 +15,9 @@
 
 extern DMOBJ tRouterAdvertisementObj[];
 extern DMLEAF tRouterAdvertisementParams[];
+extern DMOBJ tRouterAdvertisementInterfaceSettingObj[];
 extern DMLEAF tRouterAdvertisementInterfaceSettingParams[];
+extern DMLEAF tRouterAdvertisementInterfaceSettingOptionParams[];
 
 #endif //__ROUTERADVERTISEMENT_H
 
