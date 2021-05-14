@@ -143,7 +143,7 @@ static int addObjRouterAdvertisementInterfaceSettingOption(char *refparam, struc
 
 	dmuci_add_section_bbfdm("dmmap_radv", "radv_option", &dmmap_sect);
 	dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name((struct uci_section *)data));
-	dmuci_set_value_by_section_bbfdm(dmmap_sect, "option_tag", "25");
+	dmuci_set_value_by_section_bbfdm(dmmap_sect, "option_tag", "23");
 
 	browse_args.option = "section_name";
 	browse_args.value = section_name((struct uci_section *)data);
@@ -672,7 +672,7 @@ static int set_RouterAdvertisementInterfaceSettingOption_Alias(char *refparam, s
 
 static int get_RouterAdvertisementInterfaceSettingOption_Tag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "25";
+	*value = "23";
 	return 0;
 }
 
