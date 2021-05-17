@@ -15,5 +15,6 @@
 #include <libbbf_api/dmcommon.h>
 
 extern DMLEAF tIOPSYS_BridgingBridgePortParams[];
+extern DMLEAF tIOPSYS_BridgingBridgeVLANParams[];
 
 #endif //__IOPSYS_BRIDGING_H

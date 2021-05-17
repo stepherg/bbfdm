@@ -9,7 +9,6 @@
  *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  *
  */
-
 #include "dmentry.h"
 #include "bridging.h"
 
@@ -2326,6 +2325,38 @@ void bridging_get_priority_list(char *uci_opt_name, void *data, char **value)
 	dmasprintf(value, "%s", uci_value);
 }
 
+void bridging_get_vlan_tvid(char *uci_opt_name, void *data, char **value)
+{
+	dmuci_get_value_by_section_string(((struct bridge_vlan_args *)data)->bridge_vlan_sec, uci_opt_name, value);
+}
+
+void bridging_set_vlan_tvid(char *uci_opt_name, void *data, char *value)
+{
+	char *ifname, *pch, *spch;
+
+	dmuci_get_value_by_section_string(((struct bridge_vlan_args *)data)->bridge_sec, "ifname", &ifname);
+	char *br_ifname = dmstrdup(ifname);
+	for (pch = strtok_r(br_ifname, " ", &spch); pch != NULL; pch = strtok_r(NULL, " ", &spch)) {
+		struct uci_section *device_s = NULL;
+
+		/* Update tvid in the device section */
+		uci_foreach_option_eq("network", "device", "name", pch, device_s) {
+			// tvid value 0 means vlan translation disable
+			if (strcmp(value, "0") == 0) {
+				dmuci_delete_by_section(device_s, uci_opt_name, NULL);
+			} else {
+				dmuci_set_value_by_section(device_s, uci_opt_name, value);
+			}
+		}
+	}
+	dmfree(br_ifname);
+	if (strcmp(value, "0") == 0) {
+		dmuci_delete_by_section(((struct bridge_vlan_args *)data)->bridge_vlan_sec, uci_opt_name, NULL);
+	} else {
+		dmuci_set_value_by_section(((struct bridge_vlan_args *)data)->bridge_vlan_sec, uci_opt_name, value);
+	}
+}
+
 void bridging_set_priority_list(char *uci_opt_name, void *data, char *value)
 {
 	char buf[16];
@@ -2892,6 +2923,19 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 						dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "vid", new_vid);
 					}
 					dmfree(new_vid);
+
+					/* Update tvid, read from dmmap_bridge_vlan, set in vlanport_sec */
+					struct uci_section *vlan_s = NULL;
+					uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_vlan", "bridge_vlan", "br_inst", ((struct bridge_vlanport_args *)data)->br_inst, vlan_s) {
+						char *vlan_inst;
+						dmuci_get_value_by_section_string(vlan_s, "bridge_vlan_instance", &vlan_inst);
+						if (strcmp(vlan_inst, instance) == 0) {
+							char *tvid;
+							dmuci_get_value_by_section_string(vlan_s, "tvid", &tvid);
+							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "tvid", tvid);
+							break;
+						}
+					}
 				}
 			}
 			handle_inner_vid();

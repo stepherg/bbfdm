@@ -26,5 +26,6 @@ DM_MAP_OBJ tVendorExtensionIOPSYS[] = {
 {"Device.Time.", NULL, tIOPSYS_TimeParams},
 {"Device.IEEE1905.AL.NetworkTopology.", tIOPSYS_IEEE1905ALNetworkTopologyObj, tIOPSYS_IEEE1905ALNetworkTopologyParams},
 {"Device.Bridging.Bridge.{i}.Port.{i}.", NULL, tIOPSYS_BridgingBridgePortParams},
+{"Device.Bridging.Bridge.{i}.VLAN.{i}.", NULL, tIOPSYS_BridgingBridgeVLANParams},
 {0}
 };
