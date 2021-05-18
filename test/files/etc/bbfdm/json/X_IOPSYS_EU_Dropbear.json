@@ -1,5 +1,5 @@
 {
-	"Device.X_IOPSYS_EU_Dropbear.": {
+	"Device.X_IOPSYS_EU_Dropbear.{i}.": {
 		"type": "object", 
 		"protocols": [
 			"cwmp", 
@@ -36,7 +36,7 @@
 						"option": {
 							"name": "dropbearalias"
 						},
-						"path":"/etc/bbfdm",
+						"path":"/etc/bbfdm"
 					}
 				}
 			]

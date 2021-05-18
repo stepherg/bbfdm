@@ -97,7 +97,8 @@ static void generate_prefixobj_and_obj_full_obj(char *full_obj, char **prefix_ob
 {
 	char *pch = NULL, *pchr = NULL, *tmp_obj = NULL;
 
-	char *str = dmstrdupjson(full_obj);
+	char *full_object = replace_str(full_obj, ".{i}.", ".");
+	char *str = dmstrdupjson(full_object);
 	for (pch = strtok_r(str, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
 		if (pchr != NULL && *pchr != '\0') {
 			if (*prefix_obj == NULL) {
@@ -112,7 +113,8 @@ static void generate_prefixobj_and_obj_full_obj(char *full_obj, char **prefix_ob
 			*obj = dmstrdupjson(pch);
 		}
 	}
-	if(str) dmfreejson(str);
+	dmfreejson(str);
+	dmfree(full_object);
 }
 
 static char *generate_obj_without_instance(char *full_obj, bool is_obj)
