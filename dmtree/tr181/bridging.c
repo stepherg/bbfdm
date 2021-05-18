@@ -1983,33 +1983,44 @@ static int get_BridgingBridge_VLANPortNumberOfEntries(char *refparam, struct dmc
 
 static int get_BridgingBridgePort_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *device, *eth_ports, *management;
+	char *management;
 
-	*value = "0";
 	dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "management", &management);
-	if (strcmp(management, "1") == 0)
-		return 0;
-
-	dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "ifname", &device);
-	db_get_value_string("hw", "board", "ethernetLanPorts", &eth_ports);
-	if (dm_strword(eth_ports, device)) {
-		// ethport ports section
-		dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "enabled", value);
+	if (strcmp(management, "1") == 0) {
+		*value = "1";
 	} else {
-		// device section
-		json_object *res = NULL;
-		char *up;
-		dmubus_call("network.device", "status", UBUS_ARGS{{"name", device, String}}, 1, &res);
-		DM_ASSERT(res, *value = "0");
-		up = dmjson_get_value(res, 1, "up");
-		*value = up ? "1" :"0";
+		char *device, *eth_ports, *config;
+
+		dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "ifname", &device);
+		dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "config", &config);
+		db_get_value_string("hw", "board", "ethernetLanPorts", &eth_ports);
+
+		if (dm_strword(eth_ports, device)) {
+			// ports config => ethport sections
+
+			*value = dmuci_get_value_by_section_fallback_def(((struct bridge_port_args *)data)->bridge_port_sec, "enabled", "1");
+		} else if (!strcmp(config, "wireless")) {
+			// wireless config => wifi-iface sections
+
+			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "disabled", value);
+			*value = ((*value)[0] == '1') ? "0" : "1";
+		} else {
+			// network config => device sections
+
+			json_object *res = NULL;
+			char *up;
+			dmubus_call("network.device", "status", UBUS_ARGS{{"name", device, String}}, 1, &res);
+			DM_ASSERT(res, *value = "0");
+			up = dmjson_get_value(res, 1, "up");
+			*value = up ? "1" :"0";
+		}
 	}
 	return 0;
 }
 
 static int set_BridgingBridgePort_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *device, *eth_ports, *management;
+	char *management;
 	bool b;
 
 	switch (action) {
@@ -2020,14 +2031,24 @@ static int set_BridgingBridgePort_Enable(char *refparam, struct dmctx *ctx, void
 		case VALUESET:
 			string_to_bool(value, &b);
 			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "management", &management);
-			if (strcmp(management, "1") == 0)
-				return 0;
+			if (strcmp(management, "1") == 0) {
+				break;
+			} else {
+				char *device, *eth_ports, *config;
 
-			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "ifname", &device);
-			db_get_value_string("hw", "board", "ethernetLanPorts", &eth_ports);
-			if (strstr(eth_ports, device)) {
-				// ethport ports section
-				dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, "enabled", b ? "1" : "0");
+				dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "ifname", &device);
+				dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "config", &config);
+				db_get_value_string("hw", "board", "ethernetLanPorts", &eth_ports);
+
+				if (dm_strword(eth_ports, device)) {
+					// ports config => ethport sections
+
+					dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, "enabled", b ? "1" : "0");
+				} else if (!strcmp(config, "wireless")) {
+					// wireless config => wifi-iface sections
+
+					dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, "disabled", b ? "0" : "1");
+				}
 			}
 			return 0;
 	}
