@@ -174,18 +174,29 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 					found = 1;
 			}
 
-			if (device[0] != '\0' && found == 0) {
+			if (found == 0) {
 				// The lower layer is Device.Ethernet.Link.{i}.
 				char linker[32] = {0};
-				DM_STRNCPY(linker, device, sizeof(linker));
-				char *vid = strchr(linker, '.');
-				if (vid) *vid = '\0';
+
+				if (device[0] != '\0') {
+					DM_STRNCPY(linker, device, sizeof(linker));
+					char *vid = strchr(linker, '.');
+					if (vid) *vid = '\0';
+				} else {
+					struct uci_section *ss = NULL;
+
+					get_dmmap_section_of_config_section_eq("dmmap", "link", "section_name", section_name(s), &ss);
+					dmuci_get_value_by_section_string(ss, "linker", &device);
+					DM_STRNCPY(linker, device, sizeof(linker));
+				}
+
 				adm_entry_get_linker_param(dmctx, "Device.Ethernet.Link.", linker, &value);
 				loweralias = get_alias_by_section_option_condition("dmmap", "link", "section_name", section_name(s), "link_alias");
 				layer_inst = get_instance_by_section_option_condition(dmctx->instance_mode, "dmmap", "link", s, "section_name", section_name(s), "link_instance", "link_alias");
 				if (value == NULL)
 					value = "";
 			}
+
 			snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "%s", value ? value : "");
 			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *layer_inst ? "cpe-" : "", (*loweralias == '\0' && *layer_inst) ? layer_inst : "");
 		}

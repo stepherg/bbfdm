@@ -375,6 +375,8 @@ static int get_linker_interface(char *refparam, struct dmctx *dmctx, void *data,
 static int get_linker_link(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "device", linker);
+	if ((*linker)[0] == '\0')
+		dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", linker);
 	return 0;
 }
 

@@ -1395,6 +1395,7 @@ static int get_IPInterface_LastChange(char *refparam, struct dmctx *ctx, void *d
 
 static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+	char linker[32] = {0};
 	char *proto;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
@@ -1414,17 +1415,21 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 	}
 
 	if (device[0] != '\0') {
-		char linker[32] = {0};
 		DM_STRNCPY(linker, device, sizeof(linker));
 		char *vid = strchr(linker, '.');
 		if (vid) *vid = '\0';
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", linker, value);
-		if (*value != NULL)
-			return 0;
+	} else {
+		struct uci_section *s = NULL;
+
+		get_dmmap_section_of_config_section_eq("dmmap", "link", "section_name", section_name((struct uci_section *)data), &s);
+		dmuci_get_value_by_section_string(s, "linker", &device);
+		DM_STRNCPY(linker, device, sizeof(linker));
 	}
 
+	adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", linker, value);
 	if (*value == NULL)
 		*value = "";
+
 	return 0;
 }
 
@@ -1436,11 +1441,18 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 		case VALUECHECK:
 			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
+
+			if (strncmp(value, "Device.Ethernet.VLANTermination.", 32) != 0 &&
+				strncmp(value, "Device.Ethernet.Link.", 21) != 0)
+				return FAULT_9007;
+
+			adm_entry_get_linker_value(ctx, value, &ip_linker);
+			if (ip_linker == NULL || *ip_linker == '\0')
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &ip_linker);
-			if (ip_linker == NULL || *ip_linker == '\0')
-				return -1;
 
 			if (strncmp(value, "Device.Ethernet.VLANTermination.", 32) == 0) {
 				struct uci_section *s = NULL, *stmp = NULL;
@@ -1486,7 +1498,17 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 				// Get interface name from Ethernet.Link. object
 				struct uci_section *s = NULL;
 				char *interface_list;
+				bool new_eth_link_s = false;
+
 				get_dmmap_section_of_config_section_eq("dmmap", "link", "device", ip_linker, &s);
+				if (s == NULL) {
+
+					// There is no dmmap section that maps to this device, so we get the requested section using section_name option
+					get_dmmap_section_of_config_section_eq("dmmap", "link", "section_name", ip_linker, &s);
+					dmuci_set_value_by_section(s, "linker", ip_linker);
+					new_eth_link_s = true;
+				}
+
 				dmuci_get_value_by_section_string(s, "section_name", &interface_list);
 				char *interface = strchr(interface_list, ',');
 
@@ -1501,7 +1523,7 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 							dmuci_get_value_by_section_string(s, "type", &type);
 							if (*proto == '\0') {
 								dmuci_set_value_by_section(s, "proto", "none");
-								if (strcmp(type, "bridge") != 0)
+								if (!new_eth_link_s && strcmp(type, "bridge") != 0)
 									set_ip_interface_ifname_option(s, ip_linker, instance, false);
 							} else {
 								ip_interface_s = true;
@@ -1512,6 +1534,7 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 					}
 
 					if (!ip_interface_s) {
+
 						// Get dmmap section related to this interface section and remove it
 						struct uci_section *dmmap_section = NULL;
 						get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
