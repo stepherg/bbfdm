@@ -676,7 +676,7 @@ static int dmmap_synchronizeBridgingBridgePort(struct dmctx *dmctx, DMNODE *pare
 	struct uci_section *s = NULL, *stmp = NULL, *dmmap_br_port = NULL;
 	char *br_ifname = NULL, *pch = NULL, *spch = NULL, *p, plinker[32];
 	char *linker_buf;
-	char *sec_name;
+	char *sec_name = "";
 
 	if (br_args->bridge_sec == NULL)
 		return 0;
@@ -712,32 +712,29 @@ static int dmmap_synchronizeBridgingBridgePort(struct dmctx *dmctx, DMNODE *pare
 
 	// section added by user ==> skip it
 	char *s_user = NULL;
-	stmp = NULL; s = NULL;
-	char *pr_br_inst;
-	uci_path_foreach_option_eq_safe(bbfdm, "dmmap_bridge", "bridge", "bridge_instance", br_args->br_inst, stmp, s) {
-		dmuci_get_value_by_section_string(s, "added_by_user", &s_user);
-		if (strcmp(s_user, "1") != 0) {
-			if (!is_bridge_port_management_in_dmmap(br_args->br_inst)) {
-				struct uci_section *sbr_port = NULL;
-				dmuci_add_section_bbfdm("dmmap_bridge_port", "bridge_port", &sbr_port);
-				dmuci_set_value_by_section(sbr_port, "br_inst", br_args->br_inst);
-				dmuci_set_value_by_section(sbr_port, "config", "network");
-				dmuci_set_value_by_section(sbr_port, "interface", br_args->is_dmmap_sec ? sec_name : section_name(br_args->bridge_sec));
 
-				/*
-				 * Add provider bridge instance number here if this bridge inst. is
-				 * a svlan/cvlan bridge of a provider bridge
-				 */
-				if (is_bridge_pr_br_member(br_args->br_inst, &pr_br_inst)) {
-					dmuci_set_value_by_section(sbr_port, "provider_br_inst", pr_br_inst);
-				}
+	get_dmmap_section_of_config_section("dmmap_bridge", "bridge", section_name(br_args->bridge_sec), &s);
+	dmuci_get_value_by_section_string(s, "added_by_user", &s_user);
+	if (strcmp(s_user, "1") != 0) {
+		if (!is_bridge_port_management_in_dmmap(br_args->br_inst)) {
+			struct uci_section *sbr_port = NULL;
+			dmuci_add_section_bbfdm("dmmap_bridge_port", "bridge_port", &sbr_port);
+			dmuci_set_value_by_section(sbr_port, "br_inst", br_args->br_inst);
+			dmuci_set_value_by_section(sbr_port, "config", "network");
+			dmuci_set_value_by_section(sbr_port, "interface", br_args->is_dmmap_sec ? sec_name : section_name(br_args->bridge_sec));
+			dmuci_set_value_by_section(sbr_port, "management", "1");
 
-				dmuci_set_value_by_section(sbr_port, "management", "1");
-			}
+			/*
+			 * Add provider bridge instance number here if this bridge inst. is
+			 * a svlan/cvlan bridge of a provider bridge
+			 */
+			char *pr_br_inst = NULL;
+			if (is_bridge_pr_br_member(br_args->br_inst, &pr_br_inst))
+				dmuci_set_value_by_section(sbr_port, "provider_br_inst", pr_br_inst ? pr_br_inst : "");
 		}
 	}
 
-	p = linker_buf = malloc(2048);
+	p = linker_buf = (char *)dmmalloc(2048 * sizeof(char));
 	if (p == NULL)
 		return 0;
 
@@ -759,29 +756,28 @@ static int dmmap_synchronizeBridgingBridgePort(struct dmctx *dmctx, DMNODE *pare
 		dmuci_set_value_by_section(sbr_port, "config", "network");
 		dmuci_set_value_by_section(sbr_port, "device", pch);
 		dmuci_set_value_by_section(sbr_port, "br_inst", br_args->br_inst);
+		dmuci_set_value_by_section(sbr_port, "interface", br_args->is_dmmap_sec ? sec_name : section_name(br_args->bridge_sec));
+		dmuci_set_value_by_section(sbr_port, "management", "0");
 
 		/*
 		 * Add provider bridge instance number here if this bridge inst. is
 		 * a svlan/cvlan bridge of a provider bridge
 		 */
-		if (is_bridge_pr_br_member(br_args->br_inst, &pr_br_inst)) {
-			dmuci_set_value_by_section(sbr_port, "provider_br_inst", pr_br_inst);
-		}
+		char *pr_br_inst = NULL;
+		if (is_bridge_pr_br_member(br_args->br_inst, &pr_br_inst))
+			dmuci_set_value_by_section(sbr_port, "provider_br_inst", pr_br_inst ? pr_br_inst : "");
 
-		dmuci_set_value_by_section(sbr_port, "interface", br_args->is_dmmap_sec ? sec_name : section_name(br_args->bridge_sec));
-		dmuci_set_value_by_section(sbr_port, "management", "0");
 		snprintf(plinker, sizeof(plinker), "br_%s:%s+%s", br_args->br_inst, section_name(sbr_port), pch);
 		dmstrappendstr(p, plinker);
 		dmstrappendchr(p, ',');
 	}
 	dmfree(br_ifname);
 
-	struct uci_section *ss = NULL;
-	uci_foreach_option_eq("wireless", "wifi-iface", "network", br_args->is_dmmap_sec ? sec_name : section_name(br_args->bridge_sec), ss) {
+	uci_foreach_option_eq("wireless", "wifi-iface", "network", br_args->is_dmmap_sec ? sec_name : section_name(br_args->bridge_sec), s) {
 
 		// get ifname from wireless/wifi-iface section
 		char *ifname;
-		dmuci_get_value_by_section_string(ss, "ifname", &ifname);
+		dmuci_get_value_by_section_string(s, "ifname", &ifname);
 
 		if (is_bridge_port_device_exist(br_args->br_inst, ifname, &dmmap_br_port)) {
 			if (dmmap_br_port) {
@@ -806,12 +802,13 @@ static int dmmap_synchronizeBridgingBridgePort(struct dmctx *dmctx, DMNODE *pare
 
 	if (p > linker_buf)
 		p--;
-
 	dmstrappendend(p);
 
-	// Update the device linker for management port
-	set_linker_bridge_port_management(br_args->br_inst, linker_buf);
-	free(linker_buf);
+	// Update the device linker for management port if it is not added by user
+	if (strcmp(s_user, "1") != 0)
+		set_linker_bridge_port_management(br_args->br_inst, linker_buf);
+
+	dmfree(linker_buf);
 	return 0;
 }
 
@@ -847,13 +844,9 @@ static void get_bridge_vlanport_device_section(struct uci_section *dmmap_section
 	*device_section = NULL;
 }
 
-static void get_bridge_port_device_section(struct uci_section *dmmap_section, struct uci_section **device_section)
+static void get_bridge_port_device_section(char *device, struct uci_section **device_section)
 {
 	struct uci_section *s = NULL;
-	char *device;
-
-	/* Get device from dmmap section */
-	dmuci_get_value_by_section_string(dmmap_section, "device", &device);
 
 	if (device[0] != '\0') {
 		/* Find the ethport ports section corresponding to this device */
@@ -935,6 +928,7 @@ static void set_lowerlayers_management_port(struct dmctx *ctx, void *data, char 
 	}
 	p = p -1;
 	dmstrappendend(p);
+
 	dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "device", new_device);
 }
 
@@ -966,6 +960,37 @@ static void update_device_management_port(char *old_name, char *new_name, char *
 		}
 		p = p -1;
 		dmstrappendend(p);
+		dmuci_set_value_by_section(s, "device", new_device);
+	}
+}
+
+static void remove_device_from_management_port(char *curr_device, char *br_inst)
+{
+	struct uci_section *s = NULL;
+
+	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_inst, s) {
+		char *management;
+		dmuci_get_value_by_section_string(s, "management", &management);
+		if (strcmp(management, "0") == 0)
+			continue;
+
+		char *device;
+		dmuci_get_value_by_section_string(s, "device", &device);
+
+		char new_device[512], *p, *pch = NULL, *spch = NULL;
+		new_device[0] = '\0';
+		p = new_device;
+		for (pch = strtok_r(device, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+
+			if (strcmp(pch, curr_device) == 0)
+				continue;
+
+			dmstrappendstr(p, pch);
+			dmstrappendchr(p, ',');
+		}
+		p = p -1;
+		dmstrappendend(p);
+
 		dmuci_set_value_by_section(s, "device", new_device);
 	}
 }
@@ -1548,15 +1573,27 @@ static int delObjBridgingBridgePort(char *refparam, struct dmctx *ctx, void *dat
 			// Remove only dmmap section
 			dmuci_delete_by_section_unnamed_bbfdm(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, NULL, NULL);
 		} else {
-			// Remove ifname from ifname list of bridge section
+			char new_ifname[128] = {0};
 			char *ifname = NULL;
+
+			// Remove ifname from ifname list of bridge section
 			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_sec, "ifname", &ifname);
 			if (ifname && ifname[0] != '\0') {
-				char new_ifname[128] = {0};
-
 				remove_interface_from_ifname(device, ifname, new_ifname);
 				dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_sec, "ifname", new_ifname);
 			}
+
+			// Remove ifname from ifname list of dmmap bridge section
+			get_dmmap_section_of_config_section("dmmap_bridge", "bridge", section_name(((struct bridge_port_args *)data)->bridge_sec), &s);
+			dmuci_get_value_by_section_string(s, "ifname", &ifname);
+			if (ifname && ifname[0] != '\0') {
+				remove_interface_from_ifname(device, ifname, new_ifname);
+				dmuci_set_value_by_section(s, "ifname", new_ifname);
+			}
+
+			// Remove device from management port section
+			snprintf(new_ifname, sizeof(new_ifname), "br_%s:%s+%s", ((struct bridge_port_args *)data)->br_inst, section_name(((struct bridge_port_args *)data)->bridge_port_dmmap_sec), device);
+			remove_device_from_management_port(new_ifname, ((struct bridge_port_args *)data)->br_inst);
 
 			// Remove ifname from device section
 			uci_foreach_option_eq("network", "device", "name", device, s) {
@@ -1895,13 +1932,10 @@ static int get_BridgingBridge_Status(char *refparam, struct dmctx *ctx, void *da
 /*#Device.Bridging.Bridge.{i}.Alias!UCI:dmmap_network/interface,@i-1/bridge_alias*/
 static int get_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *dmmap_section = NULL;
+	struct uci_section *dmmap_sect = NULL;
 
-	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge", "bridge", "bridge_instance", ((struct bridge_args *)data)->br_inst, dmmap_section) {
-		dmuci_get_value_by_section_string(dmmap_section, "bridge_alias", value);
-		break;
-	}
-
+	get_dmmap_section_of_config_section("dmmap_bridge", "bridge", section_name(((struct bridge_args *)data)->bridge_sec), &dmmap_sect);
+	dmuci_get_value_by_section_string(dmmap_sect, "bridge_alias", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "cpe-%s", instance);
 	return 0;
@@ -1909,7 +1943,7 @@ static int get_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *dat
 
 static int set_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *dmmap_section = NULL;
+	struct uci_section *dmmap_sect = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1917,10 +1951,8 @@ static int set_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *dat
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			uci_path_foreach_option_eq(bbfdm, "dmmap_bridge", "bridge", "bridge_instance", ((struct bridge_args *)data)->br_inst, dmmap_section) {
-				dmuci_set_value_by_section(dmmap_section, "bridge_alias", value);
-				break;
-			}
+			get_dmmap_section_of_config_section("dmmap_bridge", "bridge", section_name(((struct bridge_args *)data)->bridge_sec), &dmmap_sect);
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "bridge_alias", value);
 			return 0;
 	}
 	return 0;
@@ -2169,25 +2201,38 @@ static int get_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 
 static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *management = NULL;
+	char *management = NULL, *linker = NULL;
+	struct uci_section *dmmap_bridge_s = NULL;
+
+	dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "management", &management);
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
+
+			if (management && strcmp(management, "1") == 0)
+				break;
+
+			if (strncmp(value, "Device.Ethernet.Interface.", 26) != 0 &&
+				strncmp(value, "Device.WiFi.SSID.", 17) != 0 &&
+				strncmp(value, "Device.ATM.Link.", 16) != 0 &&
+				strncmp(value, "Device.PTM.Link.", 16) != 0)
+				return FAULT_9007;
+
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker == NULL || *linker == '\0')
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "management", &management);
 			if (management && strcmp(management, "1") == 0) {
 				/* Management Port ==> true */
 				set_lowerlayers_management_port(ctx, data, value);
 			} else {
 				/* Management Port ==> false */
 
-				char *linker = NULL;
 				adm_entry_get_linker_value(ctx, value, &linker);
-				if (!linker || linker[0] == '\0')
-					return 0;
 
 				if (check_ifname_exist_in_br_ifname_list(linker, section_name(((struct bridge_port_args *)data)->bridge_sec)))
 					return 0;
@@ -2200,11 +2245,16 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 					update_vlanport_and_device_section(data, linker, &new_linker);
 					if (new_linker) linker = new_linker;
 
-					// Add name to ifname list interface
+					// network config: add name to ifname option
 					add_new_ifname_to_bridge_section(((struct bridge_port_args *)data)->bridge_sec, linker);
+
+					// dmmap_bridge: add name to ifname option
+					get_dmmap_section_of_config_section("dmmap_bridge", "bridge", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
+					add_new_ifname_to_bridge_section(dmmap_bridge_s, linker);
 
 					// Update device option in dmmap
 					dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "device", linker);
+
 					update_device_management_port(section_name(((struct bridge_port_args *)data)->bridge_port_dmmap_sec), linker, ((struct bridge_port_args *)data)->br_inst);
 				} else {
 					char *tag = strchr(device, '.');
@@ -2240,8 +2290,12 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 							}
 						}
 
-						// Add name to ifname list interface
+						// network config: add name to ifname option
 						add_new_ifname_to_bridge_section(((struct bridge_port_args *)data)->bridge_sec, new_name);
+
+						// dmmap_bridge: add name to ifname option
+						get_dmmap_section_of_config_section("dmmap_bridge", "bridge", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
+						add_new_ifname_to_bridge_section(dmmap_bridge_s, new_name);
 
 						// Update device option in dmmap
 						dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "device", new_name);
@@ -2256,8 +2310,12 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 						update_vlanport_and_device_section(data, linker, &new_linker);
 						if (new_linker) linker = new_linker;
 
-						// Add name to ifname list interface
+						// network config: add name to ifname option
 						add_new_ifname_to_bridge_section(((struct bridge_port_args *)data)->bridge_sec, linker);
+
+						// dmmap_bridge: add name to ifname option
+						get_dmmap_section_of_config_section("dmmap_bridge", "bridge", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
+						add_new_ifname_to_bridge_section(dmmap_bridge_s, linker);
 
 						// Update device option in dmmap
 						dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "device", linker);
@@ -3272,15 +3330,6 @@ static int browseBridgingBridgeInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	struct uci_section *ss = NULL;
 	LIST_HEAD(dup_list);
 
-	/*
-	 * Sync network with dmmap_bridge
-	 * We need three things to pass to next objects:
-	 * 1) Bridge instance
-	 * 2) network uci bridge config section of the bridge (if exists else dmmap_bridge section)
-	 * 3) ifname, containing names of all the ports in bridge
-	 *
-	 */
-
 	/* Sync dmmap_bridge with network config */
 	sync_bridge_config_sections_with_dmmap_bridge_eq("network", "interface", "dmmap_bridge", "type", "bridge", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
@@ -3294,6 +3343,12 @@ static int browseBridgingBridgeInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		// get network interface section ==> ss = NULL so it is dmmap_bridge section, otherwise network bridge section
 		ss = get_origin_section_from_config("network", "interface", section_name);
 
+		/*
+		 * We need three things to pass to next objects:
+		 * 1) Bridge instance
+		 * 2) network uci bridge config section of the bridge (if exists else dmmap_bridge section)
+		 * 3) ifname, containing names of all the ports in bridge
+		 */
 		init_bridging_args(&curr_bridging_args, p->config_section, ifname, inst, (ss == NULL) ? true : false);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridging_args, inst) == DM_STOP)
@@ -3334,8 +3389,11 @@ static int browseBridgingBridgePortInst(struct dmctx *dmctx, DMNODE *parent_node
 	dmmap_synchronizeBridgingBridgePort(dmctx, parent_node, prev_data, prev_instance);
 	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_args->br_inst, s) {
 
-		get_bridge_port_device_section(s, &deviceport_s);
+		/* Getting device from dmmap section */
 		dmuci_get_value_by_section_string(s, "device", &device);
+
+		/* Getting the corresponding device section */
+		get_bridge_port_device_section(device, &deviceport_s);
 
 		init_bridge_port_args(&curr_bridge_port_args, deviceport_s, s, br_args->bridge_sec, device, br_args->br_inst, br_args->is_dmmap_sec);
 
