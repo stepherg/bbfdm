@@ -863,9 +863,20 @@ char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_sectio
 	return (char *)ifname;
 }
 
-/*
- * Manage string lists
- */
+bool value_exists_in_uci_list(struct uci_list *list, const char *value)
+{
+	struct uci_element *e;
+
+	if (list == NULL)
+		return false;
+
+	uci_foreach_element(list, e) {
+		if (!strcmp(e->name, value))
+			return true;
+	}
+
+	return false;
+}
 
 bool elt_exits_in_str_list(char *str_list, char *elt)
 {

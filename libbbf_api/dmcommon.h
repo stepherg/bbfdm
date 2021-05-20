@@ -254,6 +254,7 @@ char **strsplit_by_str(const char str[], char *delim);
 char *get_macaddr(char *interface_name);
 char *get_device(char *interface_name);
 char *get_l3_device(char *interface_name);
+bool value_exists_in_uci_list(struct uci_list *list, const char *value);
 bool elt_exits_in_str_list(char *str_list, char *elt);
 void add_elt_to_str_list(char **str_list, char *elt);
 void remove_elt_from_str_list(char **str_list, char *ifname);

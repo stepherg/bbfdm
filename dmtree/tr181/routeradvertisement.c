@@ -18,6 +18,33 @@ struct radv_option_args {
 };
 
 /*************************************************************
+* COMMON FUNCTIONS
+**************************************************************/
+static int radv_get_option_value(struct uci_section *s, char *option_list, const char *option_value, char **value)
+{
+	struct uci_list *uci_list = NULL;
+
+	dmuci_get_value_by_section_list(s, option_list, &uci_list);
+	*value = (value_exists_in_uci_list(uci_list, option_value)) ? "1" : "0";
+	return 0;
+}
+
+static int radv_set_option_value(struct uci_section *s, char *option_list, const char *option_value, bool b)
+{
+	struct uci_list *uci_list = NULL;
+
+	dmuci_get_value_by_section_list(s, option_list, &uci_list);
+	if (b) {
+		if (!value_exists_in_uci_list(uci_list, option_value))
+			dmuci_add_list_value_by_section(s, option_list, (char *)option_value);
+	} else {
+		if (value_exists_in_uci_list(uci_list, option_value))
+			dmuci_del_list_value_by_section(s, option_list, (char *)option_value);
+	}
+	return 0;
+}
+
+/*************************************************************
 * ENTRY METHOD
 **************************************************************/
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.!UCI:dhcp/dhcp/dmmap_radv*/
@@ -103,7 +130,7 @@ static int addObjRouterAdvertisementInterfaceSetting(char *refparam, struct dmct
 	dmuci_rename_section_by_section(s, ra_sname);
 	dmuci_set_value_by_section(s, "ignore", "0");
 	dmuci_set_value_by_section(s, "ra", "disabled");
-	dmuci_set_value_by_section(s, "ra_management", "3");
+	dmuci_set_value_by_section(s, "ra_flags", "none");
 
 	dmuci_add_section_bbfdm("dmmap_radv", "dhcp", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", ra_sname);
@@ -155,12 +182,12 @@ static int addObjRouterAdvertisementInterfaceSettingOption(char *refparam, struc
 static int delObjRouterAdvertisementInterfaceSettingOption(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *s = NULL, *stmp = NULL;
-	char *dns_list = NULL;
+	struct uci_list *dns_list = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_get_value_by_section_string(((struct radv_option_args *)data)->config_sect, "dns", &dns_list);
-			if (elt_exits_in_str_list(dns_list, ((struct radv_option_args *)data)->option_value))
+			dmuci_get_value_by_section_list(((struct radv_option_args *)data)->config_sect, "dns", &dns_list);
+			if (value_exists_in_uci_list(dns_list, ((struct radv_option_args *)data)->option_value))
 				dmuci_del_list_value_by_section(((struct radv_option_args *)data)->config_sect, "dns", ((struct radv_option_args *)data)->option_value);
 
 			dmuci_delete_by_section_unnamed_bbfdm(((struct radv_option_args *)data)->dmmap_sect, NULL, NULL);
@@ -417,14 +444,10 @@ static int set_RouterAdvertisementInterfaceSetting_AdvDefaultLifetime(char *refp
 	return 0;
 }
 
-/*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvManagedFlag!UCI:dhcp/dhcp,@i-1/ra_management*/
+/*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvManagedFlag!UCI:dhcp/dhcp,@i-1/ra_flags*/
 static int get_RouterAdvertisementInterfaceSetting_AdvManagedFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ra_flag = NULL;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ra_management", &ra_flag);
-	*value = (ra_flag && (*ra_flag == '0' || *ra_flag == '3')) ? "0" : "1";
-	return 0;
+	return radv_get_option_value((struct uci_section *)data, "ra_flags", "managed-config", value);
 }
 
 static int set_RouterAdvertisementInterfaceSetting_AdvManagedFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -438,27 +461,15 @@ static int set_RouterAdvertisementInterfaceSetting_AdvManagedFlag(char *refparam
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			if (b) {
-				dmuci_set_value_by_section((struct uci_section *)data, "ra_management", "1");
-			} else {
-				char *ra_flag = NULL;
-
-				dmuci_get_value_by_section_string((struct uci_section *)data, "ra_management", &ra_flag);
-				dmuci_set_value_by_section((struct uci_section *)data, "ra_management", (ra_flag && *ra_flag != '3') ? "0" : "3");
-			}
-			break;
+			return radv_set_option_value((struct uci_section *)data, "ra_flags", "managed-config", b);
 	}
 	return 0;
 }
 
-/*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvOtherConfigFlag!UCI:dhcp/dhcp,@i-1/ra_management*/
+/*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvOtherConfigFlag!UCI:dhcp/dhcp,@i-1/ra_flags*/
 static int get_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ra_flag = NULL;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ra_management", &ra_flag);
-	*value = (ra_flag && *ra_flag == '3') ? "0" : "1";
-	return 0;
+	return radv_get_option_value((struct uci_section *)data, "ra_flags", "other-config", value);
 }
 
 static int set_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -472,16 +483,29 @@ static int set_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag(char *refp
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			if (!b) {
-				dmuci_set_value_by_section((struct uci_section *)data, "ra_management", "3");
-			} else {
-				char *ra_flag = NULL;
+			return radv_set_option_value((struct uci_section *)data, "ra_flags", "other-config", b);
+	}
+	return 0;
+}
 
-				dmuci_get_value_by_section_string((struct uci_section *)data, "ra_management", &ra_flag);
-				if (ra_flag && *ra_flag == '3')
-					dmuci_set_value_by_section((struct uci_section *)data, "ra_management", "0");
-			}
+/*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvMobileAgentFlag!UCI:dhcp/dhcp,@i-1/ra_flags*/
+static int get_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return radv_get_option_value((struct uci_section *)data, "ra_flags", "home-agent", value);
+}
+
+static int set_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
 			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			return radv_set_option_value((struct uci_section *)data, "ra_flags", "home-agent", b);
 	}
 	return 0;
 }
@@ -615,17 +639,12 @@ static int get_RouterAdvertisementInterfaceSetting_OptionNumberOfEntries(char *r
 static int get_RouterAdvertisementInterfaceSettingOption_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct radv_option_args *radv_option_s = (struct radv_option_args *)data;
-	char *dns_list = NULL;
-
-	dmuci_get_value_by_section_string(radv_option_s->config_sect, "dns", &dns_list);
-	*value = (elt_exits_in_str_list(dns_list, radv_option_s->option_value)) ? "1" : "0";
-	return 0;
+	return radv_get_option_value(radv_option_s->config_sect, "dns", radv_option_s->option_value, value);
 }
 
 static int set_RouterAdvertisementInterfaceSettingOption_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct radv_option_args *radv_option_s = (struct radv_option_args *)data;
-	char *dns_list = NULL;
 	bool b;
 
 	switch (action)	{
@@ -635,15 +654,7 @@ static int set_RouterAdvertisementInterfaceSettingOption_Enable(char *refparam, 
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_get_value_by_section_string(radv_option_s->config_sect, "dns", &dns_list);
-			if (b) {
-				if (!elt_exits_in_str_list(dns_list, radv_option_s->option_value))
-					dmuci_add_list_value_by_section(radv_option_s->config_sect, "dns", radv_option_s->option_value);
-			} else {
-				if (elt_exits_in_str_list(dns_list, radv_option_s->option_value))
-					dmuci_del_list_value_by_section(radv_option_s->config_sect, "dns", radv_option_s->option_value);
-			}
-			break;
+			return radv_set_option_value(radv_option_s->config_sect, "dns", radv_option_s->option_value, b);
 	}
 	return 0;
 }
@@ -706,7 +717,6 @@ static int set_RouterAdvertisementInterfaceSettingOption_Value(char *refparam, s
 	struct radv_option_args *radv_option_s = (struct radv_option_args *)data;
 	struct uci_list *dns_list = NULL;
 	char res[256] = {0};
-	bool option_enabled = false;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -714,22 +724,10 @@ static int set_RouterAdvertisementInterfaceSettingOption_Value(char *refparam, s
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_list(radv_option_s->config_sect, "dns", &dns_list);
-
-			if (dns_list != NULL) {
-				struct uci_element *e = NULL;
-
-				uci_foreach_element(dns_list, e) {
-					if (strcmp(e->name, radv_option_s->option_value) == 0) {
-						option_enabled = true;
-						break;
-					}
-				}
-			}
-
 			convert_hex_to_string(value, res);
 
-			if (option_enabled) {
+			dmuci_get_value_by_section_list(radv_option_s->config_sect, "dns", &dns_list);
+			if (value_exists_in_uci_list(dns_list, radv_option_s->option_value)) {
 				dmuci_del_list_value_by_section(radv_option_s->config_sect, "dns", radv_option_s->option_value);
 				dmuci_add_list_value_by_section(radv_option_s->config_sect, "dns", res);
 			}
@@ -777,7 +775,7 @@ DMLEAF tRouterAdvertisementInterfaceSettingParams[] = {
 {"AdvDefaultLifetime", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvDefaultLifetime, set_RouterAdvertisementInterfaceSetting_AdvDefaultLifetime, BBFDM_BOTH},
 {"AdvManagedFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvManagedFlag, set_RouterAdvertisementInterfaceSetting_AdvManagedFlag, BBFDM_BOTH},
 {"AdvOtherConfigFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag, set_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag, BBFDM_BOTH},
-//{"AdvMobileAgentFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag, set_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag, BBFDM_BOTH},
+{"AdvMobileAgentFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag, set_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag, BBFDM_BOTH},
 {"AdvPreferredRouterFlag", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag, set_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag, BBFDM_BOTH},
 //{"AdvNDProxyFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvNDProxyFlag, set_RouterAdvertisementInterfaceSetting_AdvNDProxyFlag, BBFDM_BOTH},
 {"AdvLinkMTU", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvLinkMTU, set_RouterAdvertisementInterfaceSetting_AdvLinkMTU, BBFDM_BOTH},

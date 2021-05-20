@@ -54430,7 +54430,7 @@
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "ra_management"
+									"name": "ra_flags"
 								}
 							}
 						}
@@ -54455,7 +54455,7 @@
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "ra_management"
+									"name": "ra_flags"
 								}
 							}
 						}
@@ -54469,7 +54469,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "dhcp",
+								"section": {
+									"type": "dhcp",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "ra_flags"
+								}
+							}
+						}
+					]
 				},
 				"AdvPreferredRouterFlag": {
 					"type": "string",
