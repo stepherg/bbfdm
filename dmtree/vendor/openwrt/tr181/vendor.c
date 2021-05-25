@@ -15,7 +15,7 @@
 
 DM_MAP_OBJ tVendorExtensionOverwriteOPENWRT[] = {
 /* parentobj, nextobject, parameter */
-{"Device.DeviceInfo.", NULL, tOPENWRT_DeviceInfoParams},
+{"Device.DeviceInfo.", tOPENWRT_DeviceInfoObj, tOPENWRT_DeviceInfoParams},
 {"Device.QoS.", tOPENWRT_QoSObj, tOPENWRT_QoSParams},
 {0}
 };
