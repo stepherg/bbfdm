@@ -3981,6 +3981,21 @@
 						"TCP",
 						"TLS",
 						"SCTP"
+					],
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "asterisk",
+								"section": {
+									"type": "sip_service_provider",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "transport"
+								}
+							}
+						}
 					]
 				},
 				"OutboundProxy": {
@@ -4007,7 +4022,7 @@
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "outboundproxy"
+									"name": "outbound_proxy"
 								}
 							}
 						}
@@ -4067,7 +4082,7 @@
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "outboundproxy"
+									"name": "outbound_proxy_port"
 								}
 							}
 						}
@@ -7002,7 +7017,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "asterisk",
+								"section": {
+									"type": "tel_line",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "enabled"
+								}
+							}
+						}
+					]
 				},
 				"QuiescentMode": {
 					"type": "boolean",
@@ -7105,6 +7135,21 @@
 					"range": [
 						{
 							"max": 256
+						}
+					],
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "asterisk",
+								"section": {
+									"type": "tel_line",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "sip_account"
+								}
+							}
 						}
 					]
 				},

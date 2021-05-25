@@ -336,6 +336,7 @@ static int set_ServicesVoiceServiceCallControlLine_Provider(char *refparam, stru
 	return 0;
 }
 
+/*#Device.Services.VoiceService.{i}.CallControl.Line.{i}.Enable!UCI:asterisk/tel_line,@i-1/enabled*/
 static int get_ServicesVoiceServiceCallControlLine_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "1");
@@ -559,13 +560,12 @@ DMOBJ tServicesVoiceServiceCallControlObj[] = {
 /* *** Device.Services.VoiceService.{i}.CallControl.Line.{i}. *** */
 DMLEAF tServicesVoiceServiceCallControlLineParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceCallControlLine_Enable, set_ServicesVoiceServiceCallControlLine_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Status, NULL, BBFDM_BOTH},
 {"CallStatus", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlLine_CallStatus, NULL, BBFDM_BOTH},
 {"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Origin, NULL, BBFDM_BOTH},
 {"DirectoryNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_DirectoryNumber, set_ServicesVoiceServiceCallControlLine_DirectoryNumber, BBFDM_BOTH},
 {"Provider", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Provider, set_ServicesVoiceServiceCallControlLine_Provider, BBFDM_BOTH},
-{"Enable", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Enable, set_ServicesVoiceServiceCallControlLine_Enable, BBFDM_BOTH},
-
 {0}
 };
 
