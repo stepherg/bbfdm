@@ -2314,7 +2314,22 @@
 				"protocols": [
 					"cwmp"
 				],
-				"datatype": "dateTime"
+				"datatype": "dateTime",
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "cwmp",
+							"section": {
+								"type": "cpe",
+								"name": "cpe"
+							},
+							"option": {
+								"name": "schedule_reboot"
+							}
+						}
+					}
+				]
 			},
 			"DelayReboot": {
 				"type": "int",
@@ -2329,7 +2344,22 @@
 						"min": -1
 					}
 				],
-				"unit": "seconds"
+				"unit": "seconds",
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "cwmp",
+							"section": {
+								"type": "cpe",
+								"name": "cpe"
+							},
+							"option": {
+								"name": "delay_reboot"
+							}
+						}
+					}
+				]
 			},
 			"PeriodicInformEnable": {
 				"type": "boolean",

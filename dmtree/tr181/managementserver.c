@@ -86,6 +86,50 @@ static int set_management_server_passwd(char *refparam, struct dmctx *ctx, void 
 	return 0;	
 }
 
+/*#Device.ManagementServer.ScheduleReboot!UCI:cwmp/cpe,cpe/schedule_reboot*/
+static int get_management_server_schedule_reboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("cwmp", "cpe", "schedule_reboot", value);
+	return 0;
+}
+
+static int set_management_server_schedule_reboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_dateTime(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value("cwmp", "cpe", "schedule_reboot", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.ManagementServer.DelayReboot!UCI:cwmp/cpe,cpe/delay_reboot*/
+static int get_management_server_delay_reboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("cwmp", "cpe", "delay_reboot", "-1");
+	return 0;
+}
+
+static int set_management_server_delay_reboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value("cwmp", "cpe", "delay_reboot", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			break;
+	}
+	return 0;
+}
+
 /*#Device.ManagementServer.ParameterKey!UCI:cwmp/acs,acs/ParameterKey*/
 static int get_management_server_key(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -542,6 +586,8 @@ DMLEAF tManagementServerParams[] = {
 {"URL", &DMWRITE, DMT_STRING, get_management_server_url, set_management_server_url, BBFDM_CWMP},
 {"Username", &DMWRITE, DMT_STRING, get_management_server_username, set_management_server_username, BBFDM_CWMP},
 {"Password", &DMWRITE, DMT_STRING, get_empty, set_management_server_passwd, BBFDM_CWMP},
+{"ScheduleReboot", &DMWRITE, DMT_TIME, get_management_server_schedule_reboot, set_management_server_schedule_reboot, BBFDM_CWMP},
+{"DelayReboot", &DMWRITE, DMT_INT, get_management_server_delay_reboot, set_management_server_delay_reboot, BBFDM_CWMP},
 {"PeriodicInformEnable", &DMWRITE, DMT_BOOL, get_management_server_periodic_inform_enable, set_management_server_periodic_inform_enable,  BBFDM_CWMP},
 {"PeriodicInformInterval", &DMWRITE, DMT_UNINT, get_management_server_periodic_inform_interval, set_management_server_periodic_inform_interval, BBFDM_CWMP},
 {"PeriodicInformTime", &DMWRITE, DMT_TIME, get_management_server_periodic_inform_time, set_management_server_periodic_inform_time, BBFDM_CWMP},
