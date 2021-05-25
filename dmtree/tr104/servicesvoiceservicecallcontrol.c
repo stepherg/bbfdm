@@ -336,6 +336,29 @@ static int set_ServicesVoiceServiceCallControlLine_Provider(char *refparam, stru
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCallControlLine_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "1");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlLine_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section((struct uci_section *)data, "enabled", b ? "1" : "0");
+			break;
+	}
+	return 0;
+}
+
 /*#Device.Services.VoiceService.{i}.CallControl.IncomingMap.{i}.Line!UCI:asterisk/sip_service_provider,@i-1/call_lines*/
 static int get_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -541,6 +564,8 @@ DMLEAF tServicesVoiceServiceCallControlLineParams[] = {
 {"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Origin, NULL, BBFDM_BOTH},
 {"DirectoryNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_DirectoryNumber, set_ServicesVoiceServiceCallControlLine_DirectoryNumber, BBFDM_BOTH},
 {"Provider", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Provider, set_ServicesVoiceServiceCallControlLine_Provider, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Enable, set_ServicesVoiceServiceCallControlLine_Enable, BBFDM_BOTH},
+
 {0}
 };
 

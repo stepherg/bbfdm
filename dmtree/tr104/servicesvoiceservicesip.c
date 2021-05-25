@@ -284,19 +284,46 @@ static int set_ServicesVoiceServiceSIPClient_AuthPassword(char *refparam, struct
 /*#Device.Services.VoiceService.{i}.SIP.Client.{i}.RegisterURI!UCI:asterisk/sip_service_provider,@i-1/user*/
 static int get_ServicesVoiceServiceSIPClient_RegisterURI(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "user", value);
+	char *value_user = NULL;
+	char *value_address = NULL;
+	char buf[256] = {0};
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "user", &value_user);
+	dmuci_get_value_by_section_string((struct uci_section *)data, "domain", &value_address);
+
+	if (!(value_address && *value_address)) {
+		dmuci_get_value_by_section_string((struct uci_section *)data, "outbound_proxy", &value_address);
+	}
+
+	snprintf(buf, sizeof(buf), "%s@%s", value_user, value_address);
+
+	if (buf[0] != '\0')
+		*value = dmstrdup(buf);
+
 	return 0;
 }
 
 static int set_ServicesVoiceServiceSIPClient_RegisterURI(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *value_user = NULL;
+	char *value_domain = NULL;
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 389, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "user", value);
+			value_domain = strchr(value, '@');
+			if (value_domain) {
+				value_domain++;
+				value_user = dmstrdup(value);
+				if (value_user) {
+					value_user[value_domain - value - 1] = '\0';
+					dmuci_set_value_by_section((struct uci_section *)data, "user", value_user);
+					dmuci_set_value_by_section((struct uci_section *)data, "domain", value_domain);
+				}
+			}
 			break;
 	}
 	return 0;
@@ -684,7 +711,8 @@ static int set_ServicesVoiceServiceSIPNetwork_UserAgentDomain(char *refparam, st
 /*#Device.Services.VoiceService.{i}.SIP.Network.{i}.OutboundProxy!UCI:asterisk/sip_service_provider,@i-1/outboundproxy*/
 static int get_ServicesVoiceServiceSIPNetwork_OutboundProxy(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_server_address(data, "outboundproxy", value);
+	dmuci_get_value_by_section_string((struct uci_section *)data, "outbound_proxy", value);
+	return 0;
 }
 
 static int set_ServicesVoiceServiceSIPNetwork_OutboundProxy(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -695,7 +723,7 @@ static int set_ServicesVoiceServiceSIPNetwork_OutboundProxy(char *refparam, stru
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			set_server_address(data, "outboundproxy", value);
+			dmuci_set_value_by_section((struct uci_section *)data, "outbound_proxy", value);
 			break;
 	}
 	return 0;
@@ -704,7 +732,8 @@ static int set_ServicesVoiceServiceSIPNetwork_OutboundProxy(char *refparam, stru
 /*#Device.Services.VoiceService.{i}.SIP.Network.{i}.OutboundProxyPort!UCI:asterisk/sip_service_provider,@i-1/outboundproxy*/
 static int get_ServicesVoiceServiceSIPNetwork_OutboundProxyPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_server_port(data, "outboundproxy", value);
+	dmuci_get_value_by_section_string((struct uci_section *)data, "outbound_proxy_port", value);
+	return 0;
 }
 
 static int set_ServicesVoiceServiceSIPNetwork_OutboundProxyPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -715,7 +744,37 @@ static int set_ServicesVoiceServiceSIPNetwork_OutboundProxyPort(char *refparam, 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			set_server_port(data, "outboundproxy", value);
+			dmuci_set_value_by_section((struct uci_section *)data, "outbound_proxy_port", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.SIP.Network.{i}.UserAgentTransport!UCI:asterisk/sip_service_provider,@i-1/transport*/
+static int get_ServicesVoiceServiceSIPNetwork_UserAgentTransport(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "transport", value);
+	if (*value && **value) {
+		// Convert to uppercase
+		for (char *ch = *value; *ch != '\0'; ch++)
+			*ch = toupper(*ch);
+	} else {
+		*value = "UDP";
+	}
+	return 0;
+}
+
+static int set_ServicesVoiceServiceSIPNetwork_UserAgentTransport(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, -1, ProxyServerTransport, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			for (char *ch = value; *ch != '\0'; ch++)
+				*ch = tolower(*ch);
+			dmuci_set_value_by_section((struct uci_section *)data, "transport", value);
 			break;
 	}
 	return 0;
@@ -1032,6 +1091,7 @@ DMLEAF tServicesVoiceServiceSIPNetworkParams[] = {
 {"UserAgentDomain", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_UserAgentDomain, set_ServicesVoiceServiceSIPNetwork_UserAgentDomain, BBFDM_BOTH},
 {"OutboundProxy", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_OutboundProxy, set_ServicesVoiceServiceSIPNetwork_OutboundProxy, BBFDM_BOTH},
 {"OutboundProxyPort", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_OutboundProxyPort, set_ServicesVoiceServiceSIPNetwork_OutboundProxyPort, BBFDM_BOTH},
+{"UserAgentTransport", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_UserAgentTransport, set_ServicesVoiceServiceSIPNetwork_UserAgentTransport, BBFDM_BOTH},
 {"STUNServer", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_STUNServer, set_ServicesVoiceServiceSIPNetwork_STUNServer, BBFDM_BOTH},
 {"RegistrationPeriod", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_RegistrationPeriod, set_ServicesVoiceServiceSIPNetwork_RegistrationPeriod, BBFDM_BOTH},
 {"Realm", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_Realm, set_ServicesVoiceServiceSIPNetwork_Realm, BBFDM_BOTH},
