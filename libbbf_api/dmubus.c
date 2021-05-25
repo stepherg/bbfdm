@@ -88,10 +88,19 @@ static int __dm_ubus_call(const char *obj, const char *method, const struct ubus
 
 	blob_buf_init(&b, 0);
 	for (i = 0; i < u_args_size; i++) {
-		if (u_args[i].type != Integer)
-			blobmsg_add_string(&b, u_args[i].key, u_args[i].val);
-		else
+		if (u_args[i].type == Integer) {
 			blobmsg_add_u32(&b, u_args[i].key, atoi(u_args[i].val));
+		} else if (u_args[i].type == Boolean) {
+			bool val = false;
+			string_to_bool((char *)u_args[i].val, &val);
+			blobmsg_add_u8(&b, u_args[i].key, val);
+		} else if (u_args[i].type == Table) {
+			json_object *obj = json_tokener_parse(u_args[i].val);
+			blobmsg_add_json_element(&b, u_args[i].key, obj);
+			json_object_put(obj);
+		} else {
+			blobmsg_add_string(&b, u_args[i].key, u_args[i].val);
+		}
 	}
 
 	if (!ubus_lookup_id(ubus_ctx, obj, &id))

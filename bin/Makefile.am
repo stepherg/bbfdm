@@ -159,6 +159,8 @@ libbbfdm_la_LIBADD =		\
 	$(LBLOBMSG_LIBS) 		\
 	$(LIBDLOPEN_LIBS) 		\
 	$(LIBCURL_LIBS)			\
+	$(LIBOPENSSL_LIBS)		\
+	$(LIBCRYPTO_LIBS)		\
 	-lbbf_api
 
 libbbfdm_la_CFLAGS+=-I../

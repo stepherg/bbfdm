@@ -34,6 +34,9 @@ struct file_server {
 	char *url;
 	char *user;
 	char *pass;
+	char *file_size;
+	char *checksum_algorithm;
+	char *checksum;
 };
 
 struct neighboring_wiFi_diagnostic {

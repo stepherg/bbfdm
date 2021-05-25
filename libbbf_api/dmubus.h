@@ -19,6 +19,8 @@
 enum ubus_arg_type {
 	String,
 	Integer,
+	Boolean,
+	Table
 };
 
 struct ubus_arg {

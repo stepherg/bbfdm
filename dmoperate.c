@@ -20,6 +20,14 @@
 static uint8_t wifi_neighbor_count = 0;
 struct op_cmd *dynamic_operate = NULL;
 
+static const char *fw_image_activate_in[] = {
+	"TimeWindow.1.Start",
+	"TimeWindow.2.Start",
+	"TimeWindow.3.Start",
+	"TimeWindow.4.Start",
+	"TimeWindow.5.Start",
+};
+
 static void bbf_init(struct dmctx *dm_ctx, char *path)
 {
 	unsigned int instance = INSTANCE_MODE_NUMBER;
@@ -219,6 +227,12 @@ static opr_ret_t dhcp_client_renew(struct dmctx *dmctx, char *path, json_object 
 static opr_ret_t vendor_conf_backup(struct dmctx *dmctx, char *path, json_object *input)
 {
 	struct file_server fserver = {0};
+	char obj_path[256] = {'\0'};
+	char command[32] = {'\0'};
+
+	char *ret = strrchr(path, '.');
+	strncpy(obj_path, path, ret - path +1);
+	DM_STRNCPY(command, ret+1, sizeof(command));
 
 	char *vcf_name = get_param_val_from_op_cmd(path, "Name");
 	if (!vcf_name)
@@ -231,7 +245,7 @@ static opr_ret_t vendor_conf_backup(struct dmctx *dmctx, char *path, json_object
 	fserver.user = dmjson_get_value(input, 1, "Username");
 	fserver.pass = dmjson_get_value(input, 1, "Password");
 
-	int res = bbf_config_backup(fserver.url, fserver.user, fserver.pass, vcf_name);
+	int res = bbf_config_backup(fserver.url, fserver.user, fserver.pass, vcf_name, command, obj_path);
 	dmfree(vcf_name);
 
 	return res ? FAIL : SUCCESS;
@@ -240,7 +254,12 @@ static opr_ret_t vendor_conf_backup(struct dmctx *dmctx, char *path, json_object
 static opr_ret_t vendor_conf_restore(struct dmctx *dmctx, char *path, json_object *input)
 {
 	struct file_server fserver = {0};
-	char *file_size = NULL;
+	char obj_path[256] = {'\0'};
+	char command[32] = {'\0'};
+
+	char *ret = strrchr(path, '.');
+	strncpy(obj_path, path, ret - path +1);
+	DM_STRNCPY(command, ret+1, sizeof(command));
 
 	fserver.url = dmjson_get_value(input, 1, "URL");
 	if (fserver.url[0] == '\0')
@@ -248,9 +267,11 @@ static opr_ret_t vendor_conf_restore(struct dmctx *dmctx, char *path, json_objec
 
 	fserver.user = dmjson_get_value(input, 1, "Username");
 	fserver.pass = dmjson_get_value(input, 1, "Password");
-	file_size = dmjson_get_value(input, 1, "FileSize");
+	fserver.file_size = dmjson_get_value(input, 1, "FileSize");
+	fserver.checksum_algorithm = dmjson_get_value(input, 1, "CheckSumAlgorithm");
+	fserver.checksum = dmjson_get_value(input, 1, "CheckSum");
 
-	int res = bbf_config_restore(fserver.url, fserver.user, fserver.pass, file_size);
+	int res = bbf_config_restore(fserver.url, fserver.user, fserver.pass, fserver.file_size, fserver.checksum_algorithm, fserver.checksum, command, obj_path);
 
 	return res ? FAIL : SUCCESS;
 }
@@ -744,11 +765,11 @@ static opr_ret_t swmodules_install_du(struct dmctx *dmctx, char *path, json_obje
 		return FAIL;
 
 	dmubus_call("swmodules", "du_install", UBUS_ARGS{
-			{"url", du_install.url},
-			{"uuid", du_install.uuid},
-			{"username", du_install.username},
-			{"password", du_install.password},
-			{"environment", exec_env}},
+			{"url", du_install.url, String},
+			{"uuid", du_install.uuid, String},
+			{"username", du_install.username, String},
+			{"password", du_install.password, String},
+			{"environment", exec_env, String}},
 			5,
 			&res);
 
@@ -776,10 +797,10 @@ static opr_ret_t swmodules_update_du(struct dmctx *dmctx, char *path, json_objec
 		return FAIL;
 
 	dmubus_call("swmodules", "du_update", UBUS_ARGS{
-			{"uuid", du_uuid},
-			{"url", du_update.url},
-			{"username", du_update.username},
-			{"password", du_update.password}},
+			{"uuid", du_uuid, String},
+			{"url", du_update.url, String},
+			{"username", du_update.username, String},
+			{"password", du_update.password, String}},
 			4,
 			&res);
 
@@ -810,8 +831,8 @@ static opr_ret_t swmodules_uninstall_du(struct dmctx *dmctx, char *path, json_ob
 		return FAIL;
 
 	dmubus_call("swmodules", "du_uninstall", UBUS_ARGS{
-			{"name", du_name},
-			{"environment", env}},
+			{"name", du_name, String},
+			{"environment", env, String}},
 			2,
 			&res);
 
@@ -826,12 +847,65 @@ static opr_ret_t swmodules_uninstall_du(struct dmctx *dmctx, char *path, json_ob
 
 static opr_ret_t firmware_image_download(struct dmctx *dmctx, char *path, json_object *input)
 {
-	return SUCCESS;
+	char obj_path[256] = {'\0'};
+	char command[32] = {'\0'};
+	char *bank_id = NULL;
+	char *linker = NULL;
+
+	char *ret = strrchr(path, '.');
+	strncpy(obj_path, path, ret - path +1);
+	DM_STRNCPY(command, ret+1, sizeof(command));
+
+	adm_entry_get_linker_value(dmctx, obj_path, &linker);
+	if (linker && *linker) {
+		bank_id = strchr(linker, ':');
+		if (!bank_id)
+			return FAIL;
+	} else {
+		return FAIL;
+	}
+
+	char *url = dmjson_get_value(input, 1, "URL");
+	char *auto_activate = dmjson_get_value(input, 1, "AutoActivate");
+	if (url[0] == '\0' || auto_activate[0] == '\0')
+		return UBUS_INVALID_ARGUMENTS;
+
+	char *username = dmjson_get_value(input, 1, "Username");
+	char *password = dmjson_get_value(input, 1, "Password");
+	char *file_size = dmjson_get_value(input, 1, "FileSize");
+	char *checksum_algorithm = dmjson_get_value(input, 1, "CheckSumAlgorithm");
+	char *checksum = dmjson_get_value(input, 1, "CheckSum");
+
+	int res = bbf_fw_image_download(url, auto_activate, username, password, file_size, checksum_algorithm, checksum, bank_id+1, command, obj_path);
+
+	return res ? FAIL : SUCCESS;
 }
 
 static opr_ret_t firmware_image_activate(struct dmctx *dmctx, char *path, json_object *input)
 {
-	return SUCCESS;
+	struct activate_image active_images[MAX_TIME_WINDOW] = {0};
+	char fwimage_path[256] = {'\0'};
+	char *bank_id = NULL;
+	char *linker = NULL;
+
+	char *ret = strrchr(path, '.');
+	strncpy(fwimage_path, path, ret - path +1);
+
+	adm_entry_get_linker_value(dmctx, fwimage_path, &linker);
+	if (linker && *linker) {
+		bank_id = strchr(linker, ':');
+		if (!bank_id)
+			return FAIL;
+	} else {
+		return FAIL;
+	}
+
+	for (int i = 0; i < ARRAY_SIZE(fw_image_activate_in); i++)
+		active_images[i].start_time = dmjson_get_value(input, 1, fw_image_activate_in[i]);
+
+	int res = bbf_fw_image_activate(bank_id+1, active_images);
+
+	return res ? FAIL : SUCCESS;
 }
 
 static int get_index_of_available_dynamic_operate(struct op_cmd *operate)
@@ -934,7 +1008,17 @@ static const struct op_cmd operate_helper[] = {
 		}
 	},
 	{
-		"Device.DeviceInfo.FirmwareImage.*.Activate", firmware_image_activate, "async"
+		"Device.DeviceInfo.FirmwareImage.*.Activate", firmware_image_activate, "async",
+		{
+			.in = (const char *[]) {
+				"TimeWindow.{i}.Start",
+				"TimeWindow.{i}.End",
+				"TimeWindow.{i}.Mode",
+				"TimeWindow.{i}.UserMessage",
+				"TimeWindow.{i}.MaxRetries",
+				NULL
+			}
+		}
 	},
 	{
 		"Device.WiFi.NeighboringWiFiDiagnostic", fetch_neighboring_wifi_diagnostic, "async",
