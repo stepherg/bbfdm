@@ -653,38 +653,6 @@ static int get_WiFiRadio_Name(char *refparam, struct dmctx *ctx, void *data, cha
 	return 0;
 }
 
-static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *freq;
-
-	switch (action) {
-			case VALUECHECK:
-				if (dm_validate_string_list(value, -1, -1, -1, -1, -1, SupportedStandards, NULL))
-					return FAULT_9007;
-				return 0;
-			case VALUESET:
-				freq = get_radio_option_nocache(data, "band");
-				if (strcmp(freq, "5GHz") == 0) {
-					 if (strcmp(value, "n") == 0)
-						value = "11n"; 
-					 else if (strcmp(value, "ac") == 0)
-						value = "11ac";
-				} else {
-					if (strcmp(value, "b") == 0)
-						value = "11b";
-					else if (strcmp(value, "b,g") == 0 || strcmp(value, "g,b") == 0)
-						value = "11bg";
-					else if (strcmp(value, "g") == 0)
-						value = "11g";
-					 else if (strcmp(value, "n") == 0)
-						value = "11n";
-				}
-				dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "hwmode", value);
-				return 0;
-		}
-		return 0;
-}
-
 static int get_WiFiRadio_AutoChannelSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "true";
@@ -806,49 +774,82 @@ static int set_WiFiRadio_DTIMPeriod(char *refparam, struct dmctx *ctx, void *dat
 /*#Device.WiFi.Radio.{i}.OperatingChannelBandwidth!UCI:wireless/wifi-device,@i-1/htmode*/
 static int get_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "htmode", value);
-	if(*value[0] == '\0') {
-		*value = "";
-		return 0;
-	}
-	if (strncmp(*value, "NOHT", 4) == 0)
-		*value = "20MHz";
-	else if (strncmp(*value, "HT20", 4) == 0)
-		*value = "20MHz";
-	else if (strncmp(*value, "HT40", 4) == 0)
-		*value = "40MHz";
-	else if (strncmp(*value, "VHT20", 5) == 0)
-		*value = "20MHz";
-	else if (strncmp(*value, "VHT40", 5) == 0)
-		*value = "40MHz";
-	else if (strncmp(*value, "VHT80", 5) == 0)
-		*value = "80MHz";
-	else if (strncmp(*value, "VHT160", 6) == 0)
-		*value = "160MHz";
-	else if (strncmp(*value, "HE20", 4) == 0)
-		*value = "20MHz";
-	else if (strncmp(*value, "HE40", 4) == 0)
-		*value = "40MHz";
-	else if (strncmp(*value, "HE80", 4) == 0)
-		*value = "80MHz";
-	else if (strncmp(*value, "HE160", 5) == 0)
-		*value = "160MHz";
+	char *htmode = NULL;
 
+	dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "htmode", &htmode);
+
+	if (htmode && *htmode) {
+		int freq;
+
+		sscanf(htmode, "%*[A-Z]%d", &freq);
+		dmasprintf(value, "%dMHz", !strcmp(htmode, "NOHT") ? 20 : freq);
+	} else {
+		*value = "Auto";
+	}
+
+	return 0;
+}
+
+/*#Device.WiFi.Radio.{i}.SupportedOperatingChannelBandwidths!UBUS:wifi.radio.@Name/status//supp_channels[0].bandwidth*/
+static int get_WiFiRadio_SupportedOperatingChannelBandwidths(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL, *supp_channels = NULL, *arrobj = NULL;
+	char object[32], *bandwidth = NULL, *bandwidth_list = "";
+	int i = 0;
+
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
+	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "Auto");
+	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
+		bandwidth = dmjson_get_value(supp_channels, 1, "bandwidth");
+		if (bandwidth && !strstr(bandwidth_list, !strcmp(bandwidth, "8080") ? "80+80" : !strcmp(bandwidth, "80") ? ",80MHz" : bandwidth)) {
+			if (*bandwidth_list == '\0')
+				dmasprintf(&bandwidth_list, "%sMHz", !strcmp(bandwidth, "8080") ? "80+80" : bandwidth);
+			else {
+				char *tmp = dmstrdup(bandwidth_list);
+				dmfree(bandwidth_list);
+				dmasprintf(&bandwidth_list, "%s,%sMHz", tmp, !strcmp(bandwidth, "8080") ? "80+80" : bandwidth);
+				dmfree(tmp);
+			}
+		}
+	}
+	*value = bandwidth_list;
 	return 0;
 }
 
 static int set_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char buf[8];
+	char *supported_bandwidths = NULL;
+	char *curr_htmode = NULL;
+	char htmode[32];
+	int freq;
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, SupportedOperatingChannelBandwidth, NULL))
 				return FAULT_9007;
+
+			// Get the list of all supported operating channel bandwidths
+			get_WiFiRadio_SupportedOperatingChannelBandwidths(refparam, ctx, data, instance, &supported_bandwidths);
+
+			// Check if the input value is a valid channel bandwidth value
+			if (!value_exits_in_str_list(supported_bandwidths, ",", value))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
-			sscanf(value,"%3[^M]", buf);
-			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "bandwidth", buf);
+			sscanf(value, "%d", &freq);
+
+			dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "htmode", &curr_htmode);
+
+			if (strncmp(curr_htmode, "VHT", 3) == 0)
+				snprintf(htmode, sizeof(htmode), "VHT%d", freq);
+			else if (strncmp(curr_htmode, "HT", 2) == 0 && (freq == 20 || freq == 40))
+				snprintf(htmode, sizeof(htmode), "HT%d", freq);
+			else
+				snprintf(htmode, sizeof(htmode), "HE%d", freq);
+
+			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "htmode", htmode);
 			break;
 	}
 	return 0;
@@ -1295,7 +1296,7 @@ static int set_access_point_security_modes(char *refparam, struct dmctx *ctx, vo
 			get_access_point_security_supported_modes(refparam, ctx, data, instance, &supported_modes);
 
 			// Check if the input value is a valid security mode
-			if (supported_modes && strstr(supported_modes, value) == NULL)
+			if (!value_exits_in_str_list(supported_modes, ",", value))
 				return FAULT_9007;
 
 			return 0;
@@ -1696,20 +1697,6 @@ static int set_WiFiAccessPointAccounting_Secret(char *refparam, struct dmctx *ct
 	return 0;
 }
 
-static int set_radio_frequency(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, SupportedFrequencyBands, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "hwmode", (!strcmp(value, "5GHz") ? "11a" :"11g"));
-			break;
-	}
-	return 0;
-}
-
 /*#Device.WiFi.EndPoint.{i}.Enable!UCI:wireless/wifi-iface,@i-1/disabled*/
 static int get_WiFiEndPoint_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1884,7 +1871,7 @@ static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 			get_WiFiEndPointSecurity_ModesSupported(refparam, ctx, data, instance, &supported_modes);
 
 			// Check if the input value is a valid security mode
-			if (supported_modes && strstr(supported_modes, value) == NULL)
+			if (!value_exits_in_str_list(supported_modes, ",", value))
 				return FAULT_9007;
 
 			return 0;
@@ -2616,6 +2603,19 @@ static int get_radio_max_bit_rate (char *refparam, struct dmctx *ctx, void *data
 	return 0;
 }
 
+/*#Device.WiFi.Radio.{i}.SupportedFrequencyBands!UBUS:wifi.radio.@Name/status//supp_bands*/
+static int get_radio_supported_frequency_bands(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL;
+	char object[32];
+
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
+	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "2.4GHz,5GHz");
+	*value = dmjson_get_value_array_all(res, ",", 1, "supp_bands");
+	return 0;
+}
+
 /*#Device.WiFi.Radio.{i}.OperatingFrequencyBand!UBUS:wifi.radio.@Name/status//band*/
 static int get_radio_frequency(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2629,16 +2629,27 @@ static int get_radio_frequency(char *refparam, struct dmctx *ctx, void *data, ch
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.SupportedFrequencyBands!UBUS:wifi.radio.@Name/status//supp_bands*/
-static int get_radio_supported_frequency_bands(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int set_radio_frequency(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	json_object *res = NULL;
-	char object[32];
+	char *supported_frequency_bands = NULL;
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "2.4GHz,5GHz");
-	*value = dmjson_get_value_array_all(res, ",", 1, "supp_bands");
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, -1, SupportedFrequencyBands, NULL))
+				return FAULT_9007;
+
+			// Get the list of all supported frequency bands
+			get_radio_supported_frequency_bands(refparam, ctx, data, instance, &supported_frequency_bands);
+
+			// Check if the input value is a supported band value
+			if (!value_exits_in_str_list(supported_frequency_bands, ",", value))
+				return FAULT_9007;
+
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "hwmode", (!strcmp(value, "5GHz") ? "11a" :"11g"));
+			break;
+	}
 	return 0;
 }
 
@@ -2765,45 +2776,16 @@ static int get_radio_possible_channels(char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.SupportedOperatingChannelBandwidths!UBUS:wifi.radio.@Name/status//supp_channels[0].bandwidth*/
-static int get_WiFiRadio_SupportedOperatingChannelBandwidths(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	json_object *res = NULL, *supp_channels = NULL, *arrobj = NULL;
-	char object[32], *bandwidth = NULL, *bandwidth_list = "";
-	int i = 0;
-
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "Auto");
-	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
-		bandwidth = dmjson_get_value(supp_channels, 1, "bandwidth");
-		if (bandwidth && !strstr(bandwidth_list, !strcmp(bandwidth, "8080") ? "80+80" : !strcmp(bandwidth, "80") ? ",80MHz" : bandwidth)) {
-			if (*bandwidth_list == '\0')
-				dmasprintf(&bandwidth_list, "%sMHz", !strcmp(bandwidth, "8080") ? "80+80" : bandwidth);
-			else {
-				char *tmp = dmstrdup(bandwidth_list);
-				dmfree(bandwidth_list);
-				dmasprintf(&bandwidth_list, "%s,%sMHz", tmp, !strcmp(bandwidth, "8080") ? "80+80" : bandwidth);
-				dmfree(tmp);
-			}
-		}
-	}
-	*value = bandwidth_list;
-	return 0;
-}
-
 /*#Device.WiFi.Radio.{i}.CurrentOperatingChannelBandwidth!UBUS:wifi.radio.@Name/status//bandwidth*/
 static int get_WiFiRadio_CurrentOperatingChannelBandwidth(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res;
-	char object[32], *bandwidth = NULL;
+	json_object *res = NULL;
+	char object[32];
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "20MHz");
-	bandwidth = dmjson_get_value(res, 1, "bandwidth");
-	if (bandwidth)
-		dmasprintf(value, "%sMHz", bandwidth);
+	dmasprintf(value, "%sMHz", dmjson_get_value(res, 1, "bandwidth"));
 	return 0;
 }
 
@@ -2863,13 +2845,83 @@ static int get_radio_standards(struct uci_section *section, char **value)
 /*#Device.WiFi.Radio.{i}.SupportedStandards!UBUS:wifi.radio.@Name/status//standard*/
 static int get_radio_supported_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_radio_standards(((struct wifi_radio_args *)data)->wifi_radio_sec, value);
+	char *freq = get_radio_option_nocache(data, "band");
+	*value = (freq && *freq == '5') ? "a,n,ac,ax" : "b,g,n,ax";
+	return 0;
 }
 
 /*#Device.WiFi.Radio.{i}.OperatingStandards!UBUS:wifi.radio.@Name/status//standard*/
 static int get_radio_operating_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return get_radio_standards(((struct wifi_radio_args *)data)->wifi_radio_sec, value);
+}
+
+static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *supported_standards = NULL;
+	char *curr_htmode = NULL;
+	char *pch, *spch, *band;
+	char htmode[8];
+	char hwmode[8];
+	int freq = 20;
+
+	switch (action) {
+			case VALUECHECK:
+				if (dm_validate_string_list(value, -1, -1, -1, -1, -1, SupportedStandards, NULL))
+					return FAULT_9007;
+
+				// Get the list of all supported standards
+				get_radio_supported_standard(refparam, ctx, data, instance, &supported_standards);
+
+				// Check if the input value is a valid standard value
+				for (pch = strtok_r(value, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+					if (!value_exits_in_str_list(supported_standards, ",", pch))
+						return FAULT_9007;
+				}
+
+				break;
+			case VALUESET:
+				dmuci_get_value_by_section_string(((struct wifi_radio_args *)data)->wifi_radio_sec, "htmode", &curr_htmode);
+
+				if (curr_htmode && *curr_htmode) {
+					sscanf(curr_htmode, "%*[A-Z]%d", &freq);
+					freq = !strcmp(htmode, "NOHT") ? 20 : freq;
+				}
+
+				band = get_radio_option_nocache(data, "band");
+
+				if (strcmp(band, "5GHz") == 0) {
+					if (strstr(value, "ax"))
+						snprintf(htmode, sizeof(htmode), "HE%d", freq);
+					else if (strstr(value, "ac"))
+						snprintf(htmode, sizeof(htmode), "VHT%d", freq);
+					else if (strstr(value, "n"))
+						snprintf(htmode, sizeof(htmode), "HT%d", (freq != 20 && freq != 40) ? 20 : freq);
+					else
+						snprintf(htmode, sizeof(htmode), "NOHT");
+
+					snprintf(hwmode, sizeof(hwmode), "11a");
+				} else {
+					if (strstr(value, "ax")) {
+						snprintf(htmode, sizeof(htmode), "HE%d", freq);
+						snprintf(hwmode, sizeof(hwmode), "11g");
+					} else if (strstr(value, "n")) {
+						snprintf(htmode, sizeof(htmode), "HT%d", (freq != 20 && freq != 40) ? 20 : freq);
+						snprintf(hwmode, sizeof(hwmode), "11g");
+					} else if (strstr(value, "g")) {
+						snprintf(htmode, sizeof(htmode), "NOHT");
+						snprintf(hwmode, sizeof(hwmode), "11g");
+					} else {
+						snprintf(htmode, sizeof(htmode), "NOHT");
+						snprintf(hwmode, sizeof(hwmode), "11b");
+					}
+				}
+
+				dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "hwmode", hwmode);
+				dmuci_set_value_by_section(((struct wifi_radio_args *)data)->wifi_radio_sec, "htmode", htmode);
+				break;
+		}
+		return 0;
 }
 
 static int get_access_point_total_associations(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -4105,8 +4157,8 @@ DMLEAF tWiFiRadioParams[] = {
 {"LowerLayers", &DMWRITE, DMT_STRING, get_WiFiRadio_LowerLayers, set_WiFiRadio_LowerLayers, BBFDM_BOTH},
 {"Name", &DMREAD, DMT_STRING, get_WiFiRadio_Name, NULL, BBFDM_BOTH},
 {"MaxBitRate", &DMREAD, DMT_UNINT, get_radio_max_bit_rate, NULL, BBFDM_BOTH},
-{"OperatingFrequencyBand", &DMWRITE, DMT_STRING, get_radio_frequency, set_radio_frequency, BBFDM_BOTH},
 {"SupportedFrequencyBands", &DMREAD, DMT_STRING, get_radio_supported_frequency_bands, NULL, BBFDM_BOTH},
+{"OperatingFrequencyBand", &DMWRITE, DMT_STRING, get_radio_frequency, set_radio_frequency, BBFDM_BOTH},
 {"SupportedStandards", &DMREAD, DMT_STRING, get_radio_supported_standard, NULL, BBFDM_BOTH},
 {"OperatingStandards", &DMWRITE, DMT_STRING, get_radio_operating_standard, set_radio_operating_standard, BBFDM_BOTH},
 {"ChannelsInUse", &DMREAD, DMT_STRING, get_radio_channel, NULL, BBFDM_BOTH},

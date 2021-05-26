@@ -1970,7 +1970,7 @@ static int get_DHCPv4ClientSentOption_Enable(char *refparam, struct dmctx *ctx, 
 
 	snprintf(tag_value, sizeof(tag_value), "%s:%s", dhcp_client_s->option_tag, dhcp_client_s->value);
 	dmuci_get_value_by_section_string(dhcp_client_s->client_sect, "sendopts", &sendopts);
-	*value = (elt_exits_in_str_list(sendopts, tag_value)) ? "1" : "0";
+	*value = (value_exits_in_str_list(sendopts, " ", tag_value)) ? "1" : "0";
 	return 0;
 }
 
@@ -1992,7 +1992,7 @@ static int set_DHCPv4ClientSentOption_Enable(char *refparam, struct dmctx *ctx, 
 
 			snprintf(tag_value, sizeof(tag_value), "%s:%s", dhcp_client_s->option_tag, dhcp_client_s->value);
 			if (b) {
-				if (!elt_exits_in_str_list(sendopts, tag_value)) {
+				if (!value_exits_in_str_list(sendopts, " ", tag_value)) {
 					add_elt_to_str_list(&sendopts, tag_value);
 					dmuci_set_value_by_section(dhcp_client_s->client_sect, "sendopts", sendopts);
 				}
@@ -2056,7 +2056,7 @@ static int set_DHCPv4ClientSentOption_Tag(char *refparam, struct dmctx *ctx, voi
 			dmuci_get_value_by_section_string(dhcp_client_s->client_sect, "sendopts", &sendopts);
 			snprintf(old_tag_value, sizeof(old_tag_value), "%s:%s", dhcp_client_s->option_tag, dhcp_client_s->value);
 
-			if (elt_exits_in_str_list(sendopts, old_tag_value)) {
+			if (value_exits_in_str_list(sendopts, " ", old_tag_value)) {
 				remove_elt_from_str_list(&sendopts, old_tag_value);
 				tag_enabled = true;
 			}
@@ -2105,7 +2105,7 @@ static int set_DHCPv4ClientSentOption_Value(char *refparam, struct dmctx *ctx, v
 			dmuci_get_value_by_section_string(dhcp_client_s->client_sect, "sendopts", &sendopts);
 			snprintf(old_tag_value, sizeof(old_tag_value), "%s:%s", dhcp_client_s->option_tag, dhcp_client_s->value);
 
-			if (elt_exits_in_str_list(sendopts, old_tag_value)) {
+			if (value_exits_in_str_list(sendopts, " ", old_tag_value)) {
 				remove_elt_from_str_list(&sendopts, old_tag_value);
 				tag_enabled = true;
 			}
@@ -2131,7 +2131,7 @@ static int get_DHCPv4ClientReqOption_Enable(char *refparam, struct dmctx *ctx, v
 	char *reqopts = NULL;
 
 	dmuci_get_value_by_section_string(dhcp_client_s->client_sect, "reqopts", &reqopts);
-	*value = (elt_exits_in_str_list(reqopts, dhcp_client_s->option_tag)) ? "1" : "0";
+	*value = (value_exits_in_str_list(reqopts, " ", dhcp_client_s->option_tag)) ? "1" : "0";
 	return 0;
 }
 
@@ -2150,7 +2150,7 @@ static int set_DHCPv4ClientReqOption_Enable(char *refparam, struct dmctx *ctx, v
 			string_to_bool(value, &b);
 			dmuci_get_value_by_section_string(dhcp_client_s->client_sect, "reqopts", &reqopts);
 			if (b) {
-				if (!elt_exits_in_str_list(reqopts, dhcp_client_s->option_tag)) {
+				if (!value_exits_in_str_list(reqopts, " ", dhcp_client_s->option_tag)) {
 					add_elt_to_str_list(&reqopts, dhcp_client_s->option_tag);
 					dmuci_set_value_by_section(dhcp_client_s->client_sect, "reqopts", reqopts);
 				}
@@ -2212,7 +2212,7 @@ static int set_DHCPv4ClientReqOption_Tag(char *refparam, struct dmctx *ctx, void
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct dhcp_client_option_args *)data)->client_sect, "reqopts", &reqopts);
 
-			if (elt_exits_in_str_list(reqopts, dhcp_client_s->option_tag)) {
+			if (value_exits_in_str_list(reqopts, " ", dhcp_client_s->option_tag)) {
 				remove_elt_from_str_list(&reqopts, dhcp_client_s->option_tag);
 				tag_enabled = true;
 			}

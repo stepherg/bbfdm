@@ -255,7 +255,7 @@ char *get_macaddr(char *interface_name);
 char *get_device(char *interface_name);
 char *get_l3_device(char *interface_name);
 bool value_exists_in_uci_list(struct uci_list *list, const char *value);
-bool elt_exits_in_str_list(char *str_list, char *elt);
+bool value_exits_in_str_list(char *str_list, const char *delimitor, const char *value);
 void add_elt_to_str_list(char **str_list, char *elt);
 void remove_elt_from_str_list(char **str_list, char *ifname);
 struct uci_section *get_origin_section_from_config(char *package, char *section_type, char *orig_section_name);

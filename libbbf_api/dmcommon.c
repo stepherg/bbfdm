@@ -45,7 +45,7 @@ char *DropAlgorithm[] = {"RED", "DT", "WRED", "BLUE", NULL};
 char *SchedulerAlgorithm[] = {"WFQ", "WRR", "SP", NULL};
 char *DTMFMethod[] = {"InBand", "RFC2833", "SIPInfo", NULL};
 char *ProfileEnable[] = {"Disabled", "Quiescent", "Enabled", NULL};
-char *SupportedOperatingChannelBandwidth[] = {"20MHz", "40MHz", "80MHz", "160MHZ", "80+80MHz", "Auto", NULL};
+char *SupportedOperatingChannelBandwidth[] = {"20MHz", "40MHz", "80MHz", "160MHz", "80+80MHz", "Auto", NULL};
 char *SupportedStandards[] = {"a", "b", "g", "n", "ac", "ax", NULL};
 char *SupportedFrequencyBands[] = {"2.4GHz", "5GHz", NULL};
 char *Provider_Bridge_Type[] = {"S-VLAN", "PE", NULL};
@@ -878,16 +878,16 @@ bool value_exists_in_uci_list(struct uci_list *list, const char *value)
 	return false;
 }
 
-bool elt_exits_in_str_list(char *str_list, char *elt)
+bool value_exits_in_str_list(char *str_list, const char *delimitor, const char *value)
 {
+	char *pch, *spch;
+
 	if (str_list == NULL || *str_list == '\0')
 		return false;
 
-	char *pch, *spch;
-
 	char *list = dmstrdup(str_list);
-	for (pch = strtok_r(list, " ", &spch); pch != NULL; pch = strtok_r(NULL, " ", &spch)) {
-		if(strcmp(pch, elt) == 0)
+	for (pch = strtok_r(list, delimitor, &spch); pch != NULL; pch = strtok_r(NULL, delimitor, &spch)) {
+		if (strcmp(pch, value) == 0)
 			return true;
 	}
 	return false;
