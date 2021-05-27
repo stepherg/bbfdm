@@ -1085,8 +1085,9 @@ static char *get_default_value_by_type(int type)
 		case DMT_UNLONG:
 		case DMT_LONG:
 		case DMT_BOOL:
-		case DMT_BASE64:
 			return "0";
+		case DMT_BASE64:
+			return "AA=="; // base64 encoded hex value 00
 		case DMT_TIME:
 			return "0001-01-01T00:00:00Z";
 		default:
