@@ -54,8 +54,11 @@ static char *____dmjson_get_value_in_obj(json_object *mainjobj, char *argv[])
 char *__dmjson_get_value_in_obj(json_object *mainjobj, int argc, ...)
 {
 	va_list arg;
-	char *argv[64], *v;
+	char *argv[64];
 	int i;
+
+	if (!mainjobj)
+		return "";
 
 	va_start(arg, argc);
 	for (i = 0; i < argc; i++) {
@@ -63,8 +66,7 @@ char *__dmjson_get_value_in_obj(json_object *mainjobj, int argc, ...)
 	}
 	argv[argc] = NULL;
 	va_end(arg);
-	v = ____dmjson_get_value_in_obj(mainjobj, argv);
-	return v;
+	return ____dmjson_get_value_in_obj(mainjobj, argv);
 }
 
 json_object *__dmjson_get_obj(json_object *mainjobj, int argc, ...)

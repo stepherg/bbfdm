@@ -794,26 +794,25 @@ static int get_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx 
 static int get_WiFiRadio_SupportedOperatingChannelBandwidths(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *supp_channels = NULL, *arrobj = NULL;
-	char object[32], *bandwidth = NULL, *bandwidth_list = "";
-	int i = 0;
+	char bandwidth_list[128], object[32];
+	int i = 0, pos = 0;
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
 	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
 	DM_ASSERT(res, *value = "Auto");
+
+	bandwidth_list[0] = 0;
 	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
-		bandwidth = dmjson_get_value(supp_channels, 1, "bandwidth");
+		char *bandwidth = dmjson_get_value(supp_channels, 1, "bandwidth");
 		if (bandwidth && !strstr(bandwidth_list, !strcmp(bandwidth, "8080") ? "80+80" : !strcmp(bandwidth, "80") ? ",80MHz" : bandwidth)) {
-			if (*bandwidth_list == '\0')
-				dmasprintf(&bandwidth_list, "%sMHz", !strcmp(bandwidth, "8080") ? "80+80" : bandwidth);
-			else {
-				char *tmp = dmstrdup(bandwidth_list);
-				dmfree(bandwidth_list);
-				dmasprintf(&bandwidth_list, "%s,%sMHz", tmp, !strcmp(bandwidth, "8080") ? "80+80" : bandwidth);
-				dmfree(tmp);
-			}
+			pos += snprintf(&bandwidth_list[pos], sizeof(bandwidth_list) - pos, "%sMHz,", !strcmp(bandwidth, "8080") ? "80+80" : bandwidth);
 		}
 	}
-	*value = bandwidth_list;
+
+	if (pos)
+		bandwidth_list[pos - 1] = 0;
+
+	*value = dmstrdup(bandwidth_list);
 	return 0;
 }
 
@@ -2811,37 +2810,6 @@ static int browseWifiNeighboringWiFiDiagnosticResultInst(struct dmctx *dmctx, DM
 	return 0;
 }
 
-static int get_radio_standards(struct uci_section *section, char **value)
-{
-	json_object *res;
-	char object[32], *standard = NULL;
-	char **standards = NULL, *str_append = NULL;
-	int i;
-	size_t length;
-
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(section));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "n,ax");
-
-	standard = dmjson_get_value(res, 1, "standard");
-	standards = strsplit(standard, "/", &length);
-
-	for (i = 0; i < length; i++) {
-		if (strstr(standards[i], "802.11") == standards[i])
-			str_append = dmstrdup(strstr(standards[i], "802.11") + strlen("802.11"));
-		else
-			str_append = dmstrdup(standards[i]);
-		if (strlen(*value) == 0){
-			dmasprintf(value, "%s", str_append);
-			continue;
-		}
-		dmasprintf(value, "%s,%s", *value, str_append);
-		FREE(str_append);
-	}
-
-	return 0;
-}
-
 /*#Device.WiFi.Radio.{i}.SupportedStandards!UBUS:wifi.radio.@Name/status//standard*/
 static int get_radio_supported_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2853,7 +2821,21 @@ static int get_radio_supported_standard(char *refparam, struct dmctx *ctx, void 
 /*#Device.WiFi.Radio.{i}.OperatingStandards!UBUS:wifi.radio.@Name/status//standard*/
 static int get_radio_operating_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_radio_standards(((struct wifi_radio_args *)data)->wifi_radio_sec, value);
+	json_object *res = NULL;
+	char standard_list[16] = { 0, 0 };
+	char object[16];
+
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct wifi_radio_args *)data)->wifi_radio_sec));
+	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "n,ax");
+	char *standard = dmjson_get_value(res, 1, "standard");
+	if (strstr(standard, "802.11")) {
+		DM_STRNCPY(standard_list, standard + strlen("802.11"), sizeof(standard_list));
+		replace_char(standard_list, '/', ',');
+	}
+
+	*value = dmstrdup(standard_list);
+	return 0;
 }
 
 static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -2885,7 +2867,7 @@ static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void 
 
 				if (curr_htmode && *curr_htmode) {
 					sscanf(curr_htmode, "%*[A-Z]%d", &freq);
-					freq = !strcmp(htmode, "NOHT") ? 20 : freq;
+					freq = !strcmp(curr_htmode, "NOHT") ? 20 : freq;
 				}
 
 				band = get_radio_option_nocache(data, "band");
@@ -4124,7 +4106,7 @@ static int browseWiFiDataElementsDisassociationEventDisassociationEventDataInst(
 /* *** Device.WiFi. *** */
 DMOBJ tWiFiObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"DataElements", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsObj, NULL, NULL, BBFDM_BOTH},
+{"DataElements", &DMREAD, NULL, NULL, "ubus:wifi.dataelements.collector", NULL, NULL, NULL, tWiFiDataElementsObj, NULL, NULL, BBFDM_BOTH},
 {"Radio", &DMREAD, NULL, NULL, NULL, browseWifiRadioInst, NULL, NULL, tWiFiRadioObj, tWiFiRadioParams, get_linker_Wifi_Radio, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {"SSID", &DMWRITE, add_wifi_ssid, delete_wifi_iface, NULL, browseWifiSsidInst, NULL, NULL, tWiFiSSIDObj, tWiFiSSIDParams, get_linker_Wifi_Ssid, BBFDM_BOTH, LIST_KEY{"Name", "Alias", "BSSID", NULL}},
 {"AccessPoint", &DMWRITE, add_wifi_accesspoint, delete_wifi_iface, NULL, browseWifiAccessPointInst, NULL, NULL, tWiFiAccessPointObj, tWiFiAccessPointParams, NULL, BBFDM_BOTH, LIST_KEY{"SSIDReference", "Alias", NULL}},

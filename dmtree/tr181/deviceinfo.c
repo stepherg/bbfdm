@@ -93,7 +93,7 @@ static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *da
 		}
 	}
 
-	snprintf(linker, sizeof(linker), "fw_image:%s", id);
+	snprintf(linker, sizeof(linker), "fw_image:%s", id ? id : "");
 	adm_entry_get_linker_param(ctx, "Device.DeviceInfo.FirmwareImage.", linker, value);
 	if (*value == NULL)
 		*value = "";
@@ -116,7 +116,7 @@ static int get_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 		}
 	}
 
-	snprintf(linker, sizeof(linker), "fw_image:%s", id);
+	snprintf(linker, sizeof(linker), "fw_image:%s", id ? id : "");
 	adm_entry_get_linker_param(ctx, "Device.DeviceInfo.FirmwareImage.", linker, value);
 	if (*value == NULL)
 		*value = "";
