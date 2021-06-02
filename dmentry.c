@@ -327,11 +327,34 @@ int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value)
 	return 0;
 }
 
+int dm_entry_list_updated_services(struct blob_buf *bb)
+{
+	struct package_change *pc = NULL;
+	void *arr;
+
+	if (!bb)
+		return 0;
+
+	arr = blobmsg_open_array(bb, "updated_services");
+	list_for_each_entry(pc, &head_package_change, list) {
+		blobmsg_add_string(bb, NULL, pc->package);
+	}
+	blobmsg_close_array(bb, arr);
+	return 0;
+}
+
 int dm_entry_restart_services(void)
 {
 	struct package_change *pc = NULL;
 
 	bbf_uci_commit_bbfdm();
+
+	// In case of cwmp proto, skip restarting services,
+	// cwmp shall restart services on end session
+	if (get_bbfdatamodel_type() == BBFDM_CWMP) {
+		free_all_list_package_change(&head_package_change);
+		return 0;
+	}
 
 	list_for_each_entry(pc, &head_package_change, list) {
 		if (strcmp(pc->package, "cwmp") == 0) {
