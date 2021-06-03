@@ -349,18 +349,11 @@ int dm_entry_restart_services(void)
 
 	bbf_uci_commit_bbfdm();
 
-	// In case of cwmp proto, skip restarting services,
-	// cwmp shall restart services on end session
-	if (get_bbfdatamodel_type() == BBFDM_CWMP) {
-		free_all_list_package_change(&head_package_change);
-		return 0;
-	}
-
 	list_for_each_entry(pc, &head_package_change, list) {
-		if (strcmp(pc->package, "cwmp") == 0) {
-			dmuci_init();
-			dmuci_commit_package("cwmp");
-			dmuci_exit();
+		// In case of cwmp proto, skip restarting services,
+		// cwmp shall restart services on end session
+		if (get_bbfdatamodel_type() == BBFDM_CWMP) {
+			dmuci_commit_package(pc->package);
 		} else {
 			dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
 		}
