@@ -113,6 +113,7 @@ extern char *SupportedStandards[];
 extern char *SupportedFrequencyBands[];
 extern char *Provider_Bridge_Type[];
 extern char *AdvPreferredRouterFlag[];
+extern char *PowerState[];
 
 #define UPTIME "/proc/uptime"
 #define DEFAULT_CONFIG_DIR "/etc/config/"

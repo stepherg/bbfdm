@@ -50,6 +50,7 @@ char *SupportedStandards[] = {"a", "b", "g", "n", "ac", "ax", NULL};
 char *SupportedFrequencyBands[] = {"2.4GHz", "5GHz", NULL};
 char *Provider_Bridge_Type[] = {"S-VLAN", "PE", NULL};
 char *AdvPreferredRouterFlag[] = {"High", "Medium", "Low", NULL};
+char *PowerState[] = {"On", "Power_Save", "Off", "Unsupported", NULL};
 
 char *PIN[] = {"^\\d{4}|\\d{8}$", NULL};
 char *DestinationAddress[] = {"^\\d+/\\d+$", NULL};

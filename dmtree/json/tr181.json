@@ -73069,18 +73069,7 @@
 						"usp"
 					],
 					"datatype": "unsignedInt",
-					"unit": "seconds",
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "ieee1905",
-								"method": "info",
-								"args": {},
-								"key": "last_change"
-							}
-						}
-					]
+					"unit": "seconds"
 				},
 				"LowerLayers": {
 					"type": "string",
@@ -73119,7 +73108,7 @@
 								"object": "ieee1905",
 								"method": "info",
 								"args": {},
-								"key": "registrar_freq_band"
+								"key": "registrar_band"
 							}
 						}
 					]
@@ -73140,7 +73129,7 @@
 								"object": "ieee1905",
 								"method": "info",
 								"args": {},
-								"key": "interface_num"
+								"key": "num_interfaces"
 							}
 						}
 					]
@@ -73160,9 +73149,9 @@
 						"type": "ubus",
 						"ubus": {
 							"object": "ieee1905",
-							"method": "interfaces",
+							"method": "info",
 							"args": {},
-							"key": "names"
+							"key": "interface"
 						}
 					},
 					"InterfaceId": {
@@ -73187,10 +73176,10 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "ieee1905.al.Name",
+									"object": "ieee1905",
 									"method": "info",
 									"args": {},
-									"key": "mac"
+									"key": "interface[@i-1].macaddress"
 								}
 							}
 						]
@@ -73212,6 +73201,17 @@
 							"NotPresent",
 							"LowerLayerDown",
 							"Error"
+						],
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "interface[@i-1].status"
+								}
+							}
 						]
 					},
 					"LastChange": {
@@ -73282,10 +73282,10 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "ieee1905.al.Name",
+									"object": "ieee1905",
 									"method": "info",
 									"args": {},
-									"key": "interface_type"
+									"key": "interface[@i-1].media"
 								}
 							}
 						]
@@ -73307,6 +73307,17 @@
 						],
 						"pattern": [
 							"[0-9A-F]{6}"
+						],
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "interface[@i-1].genphy_oui"
+								}
+							}
 						]
 					},
 					"GenericPhyVariant": {
@@ -73323,6 +73334,17 @@
 								"min": 1,
 								"max": 1
 							}
+						],
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "interface[@i-1].genphy_variant"
+								}
+							}
 						]
 					},
 					"GenericPhyURL": {
@@ -73337,6 +73359,17 @@
 						"range": [
 							{
 								"max": 2048
+							}
+						],
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "interface[@i-1].genphy_url"
+								}
 							}
 						]
 					},
@@ -73369,10 +73402,10 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "ieee1905.al.Name",
+									"object": "ieee1905",
 									"method": "info",
 									"args": {},
-									"key": "power_state"
+									"key": "interface[@i-1].power"
 								}
 							}
 						]
@@ -73390,10 +73423,10 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "ieee1905.al.Name",
+									"object": "ieee1905",
 									"method": "info",
 									"args": {},
-									"key": "vendor_nr"
+									"key": "interface[@i-1].num_vendor_properties"
 								}
 							}
 						]
@@ -73406,7 +73439,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "interface[@i-1].num_links"
+								}
+							}
+						]
 					},
 					"Device.IEEE1905.AL.Interface.{i}.VendorProperties.{i}.": {
 						"type": "object",
@@ -73416,6 +73460,15 @@
 						],
 						"access": false,
 						"array": true,
+						"mapping": {
+							"type": "ubus",
+							"ubus": {
+								"object": "ieee1905",
+								"method": "info",
+								"args": {},
+								"key": "interface[@i-1].properties"
+							}
+						},
 						"OUI": {
 							"type": "string",
 							"read": true,
@@ -73433,6 +73486,17 @@
 							],
 							"pattern": [
 								"[0-9A-F]{6}"
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "interface[@i-1].properties[@i-1].oui"
+									}
+								}
 							]
 						},
 						"Information": {
@@ -73447,6 +73511,17 @@
 							"range": [
 								{
 									"max": 65535
+								}
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "interface[@i-1].properties[@i-1].data"
+									}
 								}
 							]
 						}
@@ -73466,10 +73541,10 @@
 						"mapping": {
 							"type": "ubus",
 							"ubus": {
-								"object": "ieee1905.al.Name",
-								"method": "link_info",
+								"object": "ieee1905",
+								"method": "info",
 								"args": {},
-								"key": "Links"
+								"key": "interface[@i-1].links"
 							}
 						},
 						"InterfaceId": {
@@ -73494,10 +73569,10 @@
 								{
 									"type": "ubus",
 									"ubus": {
-										"object": "ieee1905.al.Name",
-										"method": "link_info",
+										"object": "ieee1905",
+										"method": "info",
 										"args": {},
-										"key": "Links[@i-1].interfaceid"
+										"key": "interface[@i-1].links[@i-1].macaddress"
 									}
 								}
 							]
@@ -73524,10 +73599,10 @@
 								{
 									"type": "ubus",
 									"ubus": {
-										"object": "ieee1905.al.Name",
-										"method": "link_info",
+										"object": "ieee1905",
+										"method": "info",
 										"args": {},
-										"key": "Links[@i-1].ieee1905id"
+										"key": "interface[@i-1].links[@i-1].ieee1905id"
 									}
 								}
 							]
@@ -73561,10 +73636,10 @@
 								{
 									"type": "ubus",
 									"ubus": {
-										"object": "ieee1905.al.Name",
-										"method": "link_info",
+										"object": "ieee1905",
+										"method": "info",
 										"args": {},
-										"key": "Links[@i-1].media_type"
+										"key": "interface[@i-1].links[@i-1].media"
 									}
 								}
 							]
@@ -73586,6 +73661,17 @@
 							],
 							"pattern": [
 								"[0-9A-F]{6}"
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "interface[@i-1].links[@i-1].genphy_oui"
+									}
+								}
 							]
 						},
 						"GenericPhyVariant": {
@@ -73602,6 +73688,17 @@
 									"min": 1,
 									"max": 1
 								}
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "interface[@i-1].links[@i-1].genphy_variant"
+									}
+								}
 							]
 						},
 						"GenericPhyURL": {
@@ -73616,6 +73713,17 @@
 							"range": [
 								{
 									"max": 2048
+								}
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "interface[@i-1].links[@i-1].genphy_url"
+									}
 								}
 							]
 						},
@@ -73640,10 +73748,10 @@
 									{
 										"type": "ubus",
 										"ubus": {
-											"object": "ieee1905.al.Name",
-											"method": "link_info",
+											"object": "ieee1905",
+											"method": "info",
 											"args": {},
-											"key": "Links[@i-1].ieee802dot1bridge"
+											"key": "interface[@i-1].links[@i-1].metric.has_bridge"
 										}
 									}
 								]
@@ -73661,10 +73769,10 @@
 									{
 										"type": "ubus",
 										"ubus": {
-											"object": "ieee1905.al.Name",
-											"method": "link_info",
+											"object": "ieee1905",
+											"method": "info",
 											"args": {},
-											"key": "Links[@i-1].packet_errors_tx"
+											"key": "interface[@i-1].links[@i-1].metric.tx_errors"
 										}
 									}
 								]
@@ -73682,10 +73790,10 @@
 									{
 										"type": "ubus",
 										"ubus": {
-											"object": "ieee1905.al.Name",
-											"method": "link_info",
+											"object": "ieee1905",
+											"method": "info",
 											"args": {},
-											"key": "Links[@i-1].packet_errors_rx"
+											"key": "interface[@i-1].links[@i-1].metric.rx_errors"
 										}
 									}
 								]
@@ -73703,10 +73811,10 @@
 									{
 										"type": "ubus",
 										"ubus": {
-											"object": "ieee1905.al.Name",
-											"method": "link_info",
+											"object": "ieee1905",
+											"method": "info",
 											"args": {},
-											"key": "Links[@i-1].transmitted_packets"
+											"key": "interface[@i-1].links[@i-1].metric.tx_packets"
 										}
 									}
 								]
@@ -73724,10 +73832,10 @@
 									{
 										"type": "ubus",
 										"ubus": {
-											"object": "ieee1905.al.Name",
-											"method": "link_info",
+											"object": "ieee1905",
+											"method": "info",
 											"args": {},
-											"key": "Links[@i-1].packets_received"
+											"key": "interface[@i-1].links[@i-1].metric.rx_packets"
 										}
 									}
 								]
@@ -73746,10 +73854,10 @@
 									{
 										"type": "ubus",
 										"ubus": {
-											"object": "ieee1905.al.Name",
-											"method": "link_info",
+											"object": "ieee1905",
+											"method": "info",
 											"args": {},
-											"key": "Links[@i-1].mac_throughput_capacity"
+											"key": "interface[@i-1].links[@i-1].metric.max_macrate"
 										}
 									}
 								]
@@ -73769,18 +73877,7 @@
 										"max": 100
 									}
 								],
-								"unit": "percent",
-								"mapping": [
-									{
-										"type": "ubus",
-										"ubus": {
-											"object": "ieee1905.al.Name",
-											"method": "link_info",
-											"args": {},
-											"key": "Links[@i-1].link_availability"
-										}
-									}
-								]
+								"unit": "percent"
 							},
 							"PHYRate": {
 								"type": "unsignedInt",
@@ -73796,10 +73893,10 @@
 									{
 										"type": "ubus",
 										"ubus": {
-											"object": "ieee1905.al.Name",
-											"method": "link_info",
+											"object": "ieee1905",
+											"method": "info",
 											"args": {},
-											"key": "Links[@i-1].phy_rate"
+											"key": "interface[@i-1].links[@i-1].metric.max_phyrate"
 										}
 									}
 								]
@@ -73824,10 +73921,10 @@
 									{
 										"type": "ubus",
 										"ubus": {
-											"object": "ieee1905.al.Name",
-											"method": "link_info",
+											"object": "ieee1905",
+											"method": "info",
 											"args": {},
-											"key": "Links[@i-1].rssi"
+											"key": "interface[@i-1].links[@i-1].metric.rssi"
 										}
 									}
 								]
@@ -74237,7 +74334,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.enabled"
+								}
+							}
+						]
 					},
 					"Status": {
 						"type": "string",
@@ -74252,6 +74360,17 @@
 							"Incomplete",
 							"Available",
 							"Error_Misconfigured"
+						],
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.status"
+								}
+							}
 						]
 					},
 					"MaxChangeLogEntries": {
@@ -74266,6 +74385,17 @@
 						"range": [
 							{
 								"min": 1
+							}
+						],
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.max_changelog"
+								}
 							}
 						]
 					},
@@ -74282,6 +74412,17 @@
 							{
 								"max": 256
 							}
+						],
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.last_change"
+								}
+							}
 						]
 					},
 					"IEEE1905DeviceNumberOfEntries": {
@@ -74292,7 +74433,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.num_device"
+								}
+							}
+						]
 					},
 					"ChangeLogNumberOfEntries": {
 						"type": "unsignedInt",
@@ -74302,7 +74454,18 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt"
+						"datatype": "unsignedInt",
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.num_changelog"
+								}
+							}
+						]
 					},
 					"Device.IEEE1905.AL.NetworkTopology.ChangeLog.{i}.": {
 						"type": "object",
@@ -74419,6 +74582,15 @@
 						],
 						"access": false,
 						"array": true,
+						"mapping": {
+							"type": "ubus",
+							"ubus": {
+								"object": "ieee1905",
+								"method": "info",
+								"args": {},
+								"key": "topology.device"
+							}
+						},
 						"IEEE1905Id": {
 							"type": "string",
 							"read": true,
@@ -74436,6 +74608,17 @@
 							"pattern": [
 								"",
 								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].ieee1905id"
+									}
+								}
 							]
 						},
 						"Version": {
@@ -74450,6 +74633,17 @@
 							"enumerations": [
 								"1905.1",
 								"1905.1a"
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].version"
+									}
+								}
 							]
 						},
 						"RegistrarFreqBand": {
@@ -74483,6 +74677,17 @@
 								{
 									"max": 128
 								}
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].name"
+									}
+								}
 							]
 						},
 						"ManufacturerName": {
@@ -74497,6 +74702,17 @@
 							"range": [
 								{
 									"max": 128
+								}
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].manufacturer"
+									}
 								}
 							]
 						},
@@ -74513,6 +74729,17 @@
 								{
 									"max": 128
 								}
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].model"
+									}
+								}
 							]
 						},
 						"ControlURL": {
@@ -74527,6 +74754,17 @@
 							"range": [
 								{
 									"max": 2048
+								}
+							],
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].url"
+									}
 								}
 							]
 						},
@@ -74548,7 +74786,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].num_vendor_properties"
+									}
+								}
+							]
 						},
 						"IPv4AddressNumberOfEntries": {
 							"type": "unsignedInt",
@@ -74558,7 +74807,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].num_ipv4"
+									}
+								}
+							]
 						},
 						"IPv6AddressNumberOfEntries": {
 							"type": "unsignedInt",
@@ -74568,7 +74828,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].num_ipv6"
+									}
+								}
+							]
 						},
 						"InterfaceNumberOfEntries": {
 							"type": "unsignedInt",
@@ -74578,7 +74849,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].num_interface"
+									}
+								}
+							]
 						},
 						"NonIEEE1905NeighborNumberOfEntries": {
 							"type": "unsignedInt",
@@ -74588,7 +74870,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].num_neighbor_non1905"
+									}
+								}
+							]
 						},
 						"IEEE1905NeighborNumberOfEntries": {
 							"type": "unsignedInt",
@@ -74598,7 +74891,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].num_neighbor_1905"
+									}
+								}
+							]
 						},
 						"L2NeighborNumberOfEntries": {
 							"type": "unsignedInt",
@@ -74608,7 +74912,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].num_neighbor_l2"
+									}
+								}
+							]
 						},
 						"BridgingTupleNumberOfEntries": {
 							"type": "unsignedInt",
@@ -74618,7 +74933,18 @@
 								"cwmp",
 								"usp"
 							],
-							"datatype": "unsignedInt"
+							"datatype": "unsignedInt",
+							"mapping": [
+								{
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].num_bridge_tuple"
+									}
+								}
+							]
 						},
 						"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IPv4Address.{i}.": {
 							"type": "object",
@@ -74632,6 +74958,15 @@
 							],
 							"access": false,
 							"array": true,
+							"mapping": {
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.device[@i-1].ipv4_address"
+								}
+							},
 							"MACAddress": {
 								"type": "string",
 								"read": true,
@@ -74649,6 +74984,17 @@
 								"pattern": [
 									"",
 									"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].ipv4_address[@i-1].macaddress"
+										}
+									}
 								]
 							},
 							"IPv4Address": {
@@ -74668,6 +75014,17 @@
 								"pattern": [
 									"",
 									"((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].ipv4_address[@i-1].ip"
+										}
+									}
 								]
 							},
 							"IPv4AddressType": {
@@ -74684,6 +75041,17 @@
 									"DHCP",
 									"Static",
 									"Auto-IP"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].ipv4_address[@i-1].type"
+										}
+									}
 								]
 							},
 							"DHCPServer": {
@@ -74698,6 +75066,17 @@
 								"range": [
 									{
 										"max": 45
+									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].ipv4_address[@i-1].dhcpserver"
+										}
 									}
 								]
 							}
@@ -74714,6 +75093,15 @@
 							],
 							"access": false,
 							"array": true,
+							"mapping": {
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.device[@i-1].ipv6_address"
+								}
+							},
 							"MACAddress": {
 								"type": "string",
 								"read": true,
@@ -74731,6 +75119,17 @@
 								"pattern": [
 									"",
 									"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].ipv6_address[@i-1].macaddress"
+										}
+									}
 								]
 							},
 							"IPv6Address": {
@@ -74745,6 +75144,17 @@
 								"range": [
 									{
 										"max": 45
+									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].ipv6_address[@i-1].ip"
+										}
 									}
 								]
 							},
@@ -74763,6 +75173,17 @@
 									"DHCP",
 									"Static",
 									"SLAAC"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].ipv6_address[@i-1].type"
+										}
+									}
 								]
 							},
 							"IPv6AddressOrigin": {
@@ -74778,6 +75199,17 @@
 									{
 										"max": 45
 									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].ipv6_address[@i-1].dhcpserver"
+										}
+									}
 								]
 							}
 						},
@@ -74789,6 +75221,15 @@
 							],
 							"access": false,
 							"array": true,
+							"mapping": {
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.device[@i-1].vendor_properties"
+								}
+							},
 							"MessageType": {
 								"type": "hexBinary",
 								"read": true,
@@ -74822,6 +75263,17 @@
 								],
 								"pattern": [
 									"[0-9A-F]{6}"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].vendor_properties[@i-1].oui"
+										}
+									}
 								]
 							},
 							"Information": {
@@ -74838,6 +75290,17 @@
 										"min": 0,
 										"max": 65535
 									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].vendor_properties[@i-1].data"
+										}
+									}
 								]
 							}
 						},
@@ -74852,6 +75315,15 @@
 							],
 							"access": false,
 							"array": true,
+							"mapping": {
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.device[@i-1].interface"
+								}
+							},
 							"InterfaceId": {
 								"type": "string",
 								"read": true,
@@ -74869,6 +75341,17 @@
 								"pattern": [
 									"",
 									"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].interface[@i-1].macaddress"
+										}
+									}
 								]
 							},
 							"MediaType": {
@@ -74895,6 +75378,17 @@
 									"IEEE 1901 FFT",
 									"MoCAv1.1",
 									"Generic PHY"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].interface[@i-1].media"
+										}
+									}
 								]
 							},
 							"PowerState": {
@@ -74911,6 +75405,17 @@
 									"Power_Save",
 									"Off",
 									"Unsupported"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].interface[@i-1].power"
+										}
+									}
 								]
 							},
 							"GenericPhyOUI": {
@@ -74930,6 +75435,17 @@
 								],
 								"pattern": [
 									"[0-9A-F]{6}"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].interface[@i-1].genphy_oui"
+										}
+									}
 								]
 							},
 							"GenericPhyVariant": {
@@ -74946,6 +75462,17 @@
 										"min": 1,
 										"max": 1
 									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].interface[@i-1].genphy_variant"
+										}
+									}
 								]
 							},
 							"GenericPhyURL": {
@@ -74960,6 +75487,17 @@
 								"range": [
 									{
 										"max": 2048
+									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].interface[@i-1].genphy_url"
+										}
 									}
 								]
 							},
@@ -74980,6 +75518,17 @@
 								"pattern": [
 									"",
 									"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].interface[@i-1].bssid"
+										}
+									}
 								]
 							},
 							"Role": {
@@ -74997,6 +75546,17 @@
 									"Wi-Fi P2P Client",
 									"Wi-Fi P2P Group Owner",
 									"802.11adPCP"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].interface[@i-1].role"
+										}
+									}
 								]
 							},
 							"APChannelBand": {
@@ -75012,6 +75572,17 @@
 									{
 										"min": 1,
 										"max": 1
+									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].interface[@i-1].bandwidth"
+										}
 									}
 								]
 							},
@@ -75029,6 +75600,17 @@
 										"min": 1,
 										"max": 1
 									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].interface[@i-1].freq_seg0_idx"
+										}
+									}
 								]
 							},
 							"FrequencyIndex2": {
@@ -75045,6 +75627,17 @@
 										"min": 1,
 										"max": 1
 									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].interface[@i-1].freq_seg1_idx"
+										}
+									}
 								]
 							}
 						},
@@ -75060,6 +75653,15 @@
 							],
 							"access": false,
 							"array": true,
+							"mapping": {
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.device[@i-1].non1905_neighbors"
+								}
+							},
 							"LocalInterface": {
 								"type": "string",
 								"read": true,
@@ -75072,6 +75674,17 @@
 								"range": [
 									{
 										"max": 256
+									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].non1905_neighbors[@i-1].interface_macaddress"
+										}
 									}
 								]
 							},
@@ -75092,6 +75705,17 @@
 								"pattern": [
 									"",
 									"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].non1905_neighbors[@i-1].neighbors"
+										}
+									}
 								]
 							}
 						},
@@ -75176,6 +75800,15 @@
 							],
 							"access": false,
 							"array": true,
+							"mapping": {
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.device[@i-1].ieee1905_neighbors"
+								}
+							},
 							"LocalInterface": {
 								"type": "string",
 								"read": true,
@@ -75188,6 +75821,17 @@
 								"range": [
 									{
 										"max": 256
+									}
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].macaddress"
+										}
 									}
 								]
 							},
@@ -75208,6 +75852,17 @@
 								"pattern": [
 									"",
 									"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+								],
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].neighbor_device_id"
+										}
+									}
 								]
 							},
 							"MetricNumberOfEntries": {
@@ -75218,7 +75873,18 @@
 									"cwmp",
 									"usp"
 								],
-								"datatype": "unsignedInt"
+								"datatype": "unsignedInt",
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].num_metrics"
+										}
+									}
+								]
 							},
 							"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IEEE1905Neighbor.{i}.Metric.{i}.": {
 								"type": "object",
@@ -75231,6 +75897,15 @@
 								],
 								"access": false,
 								"array": true,
+								"mapping": {
+									"type": "ubus",
+									"ubus": {
+										"object": "ieee1905",
+										"method": "info",
+										"args": {},
+										"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].metric"
+									}
+								},
 								"NeighborMACAddress": {
 									"type": "string",
 									"read": true,
@@ -75248,6 +75923,17 @@
 									"pattern": [
 										"",
 										"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+									],
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "ieee1905",
+												"method": "info",
+												"args": {},
+												"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].metric[@i-1].neighbor_macaddress"
+											}
+										}
 									]
 								},
 								"IEEE802dot1Bridge": {
@@ -75258,7 +75944,18 @@
 										"cwmp",
 										"usp"
 									],
-									"datatype": "boolean"
+									"datatype": "boolean",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "ieee1905",
+												"method": "info",
+												"args": {},
+												"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].metric[@i-1].has_bridge"
+											}
+										}
+									]
 								},
 								"PacketErrors": {
 									"type": "unsignedInt",
@@ -75268,7 +75965,18 @@
 										"cwmp",
 										"usp"
 									],
-									"datatype": "StatsCounter32"
+									"datatype": "StatsCounter32",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "ieee1905",
+												"method": "info",
+												"args": {},
+												"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].metric[@i-1].tx_errors"
+											}
+										}
+									]
 								},
 								"PacketErrorsReceived": {
 									"type": "unsignedInt",
@@ -75278,7 +75986,18 @@
 										"cwmp",
 										"usp"
 									],
-									"datatype": "StatsCounter32"
+									"datatype": "StatsCounter32",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "ieee1905",
+												"method": "info",
+												"args": {},
+												"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].metric[@i-1].rx_errors"
+											}
+										}
+									]
 								},
 								"TransmittedPackets": {
 									"type": "unsignedInt",
@@ -75288,7 +76007,18 @@
 										"cwmp",
 										"usp"
 									],
-									"datatype": "StatsCounter32"
+									"datatype": "StatsCounter32",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "ieee1905",
+												"method": "info",
+												"args": {},
+												"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].metric[@i-1].tx_packets"
+											}
+										}
+									]
 								},
 								"PacketsReceived": {
 									"type": "unsignedInt",
@@ -75298,7 +76028,18 @@
 										"cwmp",
 										"usp"
 									],
-									"datatype": "StatsCounter32"
+									"datatype": "StatsCounter32",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "ieee1905",
+												"method": "info",
+												"args": {},
+												"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].metric[@i-1].rx_packets"
+											}
+										}
+									]
 								},
 								"MACThroughputCapacity": {
 									"type": "unsignedInt",
@@ -75309,7 +76050,18 @@
 										"usp"
 									],
 									"datatype": "unsignedInt",
-									"unit": "Mb/s"
+									"unit": "Mb/s",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "ieee1905",
+												"method": "info",
+												"args": {},
+												"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].metric[@i-1].max_macrate"
+											}
+										}
+									]
 								},
 								"LinkAvailability": {
 									"type": "unsignedInt",
@@ -75326,7 +76078,18 @@
 											"max": 100
 										}
 									],
-									"unit": "percent"
+									"unit": "percent",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "ieee1905",
+												"method": "info",
+												"args": {},
+												"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].metric[@i-1].link_available"
+											}
+										}
+									]
 								},
 								"PHYRate": {
 									"type": "unsignedInt",
@@ -75337,7 +76100,18 @@
 										"usp"
 									],
 									"datatype": "unsignedInt",
-									"unit": "Mb/s"
+									"unit": "Mb/s",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "ieee1905",
+												"method": "info",
+												"args": {},
+												"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].metric[@i-1].max_phyrate"
+											}
+										}
+									]
 								},
 								"RSSI": {
 									"type": "unsignedInt",
@@ -75354,7 +76128,18 @@
 											"max": 255
 										}
 									],
-									"unit": "dB"
+									"unit": "dB",
+									"mapping": [
+										{
+											"type": "ubus",
+											"ubus": {
+												"object": "ieee1905",
+												"method": "info",
+												"args": {},
+												"key": "topology.device[@i-1].ieee1905_neighbors[@i-1].metric[@i-1].rssi"
+											}
+										}
+									]
 								}
 							}
 						},
@@ -75366,6 +76151,15 @@
 							],
 							"access": false,
 							"array": true,
+							"mapping": {
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "topology.device[@i-1].bridge_tuples"
+								}
+							},
 							"InterfaceList": {
 								"type": "string",
 								"read": true,
@@ -75381,7 +76175,18 @@
 											"max": 256
 										}
 									]
-								}
+								},
+								"mapping": [
+									{
+										"type": "ubus",
+										"ubus": {
+											"object": "ieee1905",
+											"method": "info",
+											"args": {},
+											"key": "topology.device[@i-1].bridge_tuples[@i-1].macaddress"
+										}
+									}
+								]
 							}
 						}
 					}
@@ -75481,7 +76286,18 @@
 								"",
 								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
 							]
-						}
+						},
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "network_registrars.registrar_2"
+								}
+							}
+						]
 					},
 					"Registrar5": {
 						"type": "string",
@@ -75503,7 +76319,18 @@
 								"",
 								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
 							]
-						}
+						},
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "network_registrars.registrar_5"
+								}
+							}
+						]
 					},
 					"Registrar60": {
 						"type": "string",
@@ -75525,7 +76352,18 @@
 								"",
 								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
 							]
-						}
+						},
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "network_registrars.registrar_60"
+								}
+							}
+						]
 					}
 				}
 			}

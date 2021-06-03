@@ -13,7 +13,6 @@
 #include "deviceinfo.h"
 #include "bridging.h"
 #include "ethernet.h"
-#include "ieee1905.h"
 #include "ip.h"
 #include "times.h"
 #include "vendor.h"
@@ -24,7 +23,6 @@ DM_MAP_OBJ tVendorExtensionIOPSYS[] = {
 {"Device.DeviceInfo.", NULL, tIOPSYS_DeviceInfoParams},
 {"Device.Ethernet.VLANTermination.{i}.", NULL, tIOPSYS_EthernetVLANTerminationParams},
 {"Device.Time.", NULL, tIOPSYS_TimeParams},
-{"Device.IEEE1905.AL.NetworkTopology.", tIOPSYS_IEEE1905ALNetworkTopologyObj, tIOPSYS_IEEE1905ALNetworkTopologyParams},
 {"Device.Bridging.Bridge.{i}.Port.{i}.", NULL, tIOPSYS_BridgingBridgePortParams},
 {"Device.Bridging.Bridge.{i}.VLAN.{i}.", NULL, tIOPSYS_BridgingBridgeVLANParams},
 {0}

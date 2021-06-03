@@ -110,7 +110,6 @@ libbbfdm_la_SOURCES +=	\
 	../dmtree/vendor/iopsys/tr181/deviceinfo.c				\
 	../dmtree/vendor/iopsys/tr181/bridging.c					\
 	../dmtree/vendor/iopsys/tr181/ethernet.c					\
-	../dmtree/vendor/iopsys/tr181/ieee1905.c					\
 	../dmtree/vendor/iopsys/tr181/times.c						\
 	../dmtree/vendor/iopsys/tr181/x_iopsys_eu_igmp.c 			\
 	../dmtree/vendor/iopsys/tr181/x_iopsys_eu_mld.c
