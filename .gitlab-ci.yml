@@ -15,7 +15,7 @@ variables:
 
 run_unit_test:
   stage: unit_test
-  image: iopsys/code-analysis-dev:latest
+  image: iopsys/code-analysis:latest
   allow_failure: false
   script:
   - "./gitlab-ci/setup.sh"
@@ -28,7 +28,7 @@ run_unit_test:
 
 run_functional_test:
   stage: functional_test
-  image: iopsys/code-analysis-dev:latest
+  image: iopsys/code-analysis:latest
   allow_failure: false
   script:
   - "./gitlab-ci/setup.sh"
@@ -42,7 +42,7 @@ run_functional_test:
 
 run_functional_api_test:
   stage: functional_api_test
-  image: iopsys/code-analysis-dev:latest
+  image: iopsys/code-analysis:latest
   allow_failure: false
   script:
   - "./gitlab-ci/setup.sh"

@@ -167,11 +167,3 @@ libbbfdm_la_CFLAGS+=-I../dmtree
 libbbfdm_la_CFLAGS+=-I../dmtree/tr181
 libbbfdm_la_CFLAGS+=-I../dmtree/tr104
 libbbfdm_la_CFLAGS+=-I../dmtree/tr143
-
-if BBF_TEST
-libbbf_api_la_CFLAGS += -fprofile-arcs -ftest-coverage
-libbbf_api_la_LDFLAGS += --coverage
-
-libbbfdm_la_CFLAGS += -fprofile-arcs -ftest-coverage
-libbbfdm_la_LDFLAGS += --coverage
-endif

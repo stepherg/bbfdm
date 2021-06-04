@@ -6,7 +6,7 @@ UNIT_TESTS = unit_test_bbfd
 FUNCTIONAL_TESTS = functional_test_bbfd
 FUNCTIONAL_API_TESTS = functional_api_test_bbfd
 
-VALGRIND = valgrind --show-reachable=yes \
+VALGRIND = valgrind --leak-check=full --show-reachable=no \
            --show-leak-kinds=all --errors-for-leak-kinds=all \
            --error-exitcode=1 --track-origins=yes
 
