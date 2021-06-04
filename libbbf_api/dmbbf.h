@@ -445,6 +445,7 @@ int dm_entry_set_notification(struct dmctx *dmctx);
 int dm_entry_enabled_notify(struct dmctx *dmctx);
 int dm_entry_get_linker(struct dmctx *dmctx);
 int dm_entry_get_linker_value(struct dmctx *dmctx);
+int dm_browse_last_access_path(char *path, size_t len);
 char *get_last_instance(char *package, char *section, char *opt_inst);
 char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst);
 char *get_last_instance_lev2_bbfdm_dmmap_opt(char* dmmap_package, char *section,  char *opt_inst, char *opt_check, char *value_check);

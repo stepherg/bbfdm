@@ -17,6 +17,10 @@
 #include "dmcommon.h"
 #include "dmbbf.h"
 
+#define MAX_DM_PATH (1024)
+
+static char dm_browse_path[MAX_DM_PATH];
+
 static char *get_parameter_notification(struct dmctx *ctx, char *param);
 static int remove_parameter_notification(char *param);
 static int set_parameter_notification(struct dmctx *ctx, char *param,char *value);
@@ -55,8 +59,6 @@ static int get_linker_check_obj(DMOBJECT_ARGS);
 static int get_linker_check_param(DMPARAM_ARGS);
 static int get_linker_value_check_obj(DMOBJECT_ARGS);
 static int get_linker_value_check_param(DMPARAM_ARGS);
-
-LIST_HEAD(list_enabled_notify);
 
 int bbfdatamodel_type = BBFDM_BOTH;
 
@@ -228,6 +230,7 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 	for (; (leaf && leaf->parameter); leaf++) {
 		if (!bbfdatamodel_matches(leaf->bbfdm_type))
 			continue;
+		snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, leaf->parameter);
 		err = dmctx->method_param(dmctx, parent_node, leaf->parameter, leaf->permission, leaf->type, leaf->getvalue, leaf->setvalue, data, instance);
 		if (dmctx->stop)
 			return err;
@@ -243,6 +246,7 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 						for (; (jleaf && jleaf->parameter); jleaf++) {
 							if (!bbfdatamodel_matches(jleaf->bbfdm_type))
 								continue;
+							snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, jleaf->parameter);
 							err = dmctx->method_param(dmctx, parent_node, jleaf->parameter, jleaf->permission, jleaf->type, jleaf->getvalue, jleaf->setvalue, data, instance);
 							if (dmctx->stop)
 								return err;
@@ -276,6 +280,7 @@ static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *ent
 	else
 		dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
 
+	snprintf(dm_browse_path, MAX_DM_PATH, "%s", node.current_object);
 	if (dmctx->checkobj) {
 		*err = dmctx->checkobj(dmctx, &node, entryobj->permission, entryobj->addobj, entryobj->delobj, entryobj->get_linker, data, instance);
 		if (*err)
@@ -319,6 +324,7 @@ static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, 
 	int err = 0;
 
 	for (; (entryobj && entryobj->obj); entryobj++) {
+		snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_obj, entryobj->obj);
 		dm_browse_entry(dmctx, parent_node, entryobj, data, instance, parent_obj, &err);
 		if (dmctx->stop)
 			return err;
@@ -332,6 +338,7 @@ static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, 
 					for (int j = 0; next_dyn_array->nextobj[j]; j++) {
 						DMOBJ *jentryobj = next_dyn_array->nextobj[j];
 						for (; (jentryobj && jentryobj->obj); jentryobj++) {
+							snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_obj, jentryobj->obj);
 							dm_browse_entry(dmctx, parent_node, jentryobj, data, instance, parent_obj, &err);
 							if (dmctx->stop)
 								return err;
@@ -1940,4 +1947,10 @@ static int get_linker_value_check_obj(DMOBJECT_ARGS)
 static int get_linker_value_check_param(DMPARAM_ARGS)
 {
 	return FAULT_9005;
+}
+
+int dm_browse_last_access_path(char *path, size_t len)
+{
+	snprintf(path, len, "%s", dm_browse_path);
+	return 0;
 }

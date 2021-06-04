@@ -37,4 +37,21 @@ int dm_ctx_clean_sub(struct dmctx *ctx);
 void load_dynamic_arrays(struct dmctx *ctx);
 void free_dynamic_arrays(void);
 
+/**
+ * @brief dm_debug_browse_path
+ *
+ * Debug API to get the last datamodel access object by datamodel browse
+ * function.
+ *
+ * @param buff Memory address to store the last access object, ownership
+ *  of the address belongs to caller.
+ * @param len maximum size of buffer.
+ *
+ * @return 0, on success and -1, in case of error.
+ *
+ * @note This is debug API, mostly be useful in debugging in last datamodel
+ * object illegal access.
+ */
+int dm_debug_browse_path(char *buff, size_t len);
+
 #endif

@@ -29,6 +29,17 @@ static char library_hash[64] = {0};
 static bool first_boot = false;
 #endif
 
+int dm_debug_browse_path(char *buff, size_t len)
+{
+	if (!buff)
+		return -1;
+
+	// initialise with default value
+	buff[0] = '\0';
+
+	return dm_browse_last_access_path(buff, len);
+}
+
 int usp_fault_map(int fault)
 {
 	int out_fault;
