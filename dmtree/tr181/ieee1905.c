@@ -464,6 +464,7 @@ static int get_IEEE1905ALInterface_MediaType(char *refparam, struct dmctx *ctx, 
 	return 0;
 }
 
+#if 0 // Below parameters not supported by ieee1905
 /*#Device.IEEE1905.AL.Interface.{i}.GenericPhyOUI!UBUS:ieee1905/info//interface[@i-1].genphy_oui*/
 static int get_IEEE1905ALInterface_GenericPhyOUI(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -484,6 +485,7 @@ static int get_IEEE1905ALInterface_GenericPhyURL(char *refparam, struct dmctx *c
 	*value = dmjson_get_value((json_object *)data, 1, "genphy_url");
 	return 0;
 }
+#endif
 
 #if 0
 static int get_IEEE1905ALInterface_SetIntfPowerStateEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -579,12 +581,14 @@ static int get_IEEE1905ALInterfaceLink_MediaType(char *refparam, struct dmctx *c
 	return 0;
 }
 
+#if 0 // Generic interfaces not supported by ieee1905
 /*#Device.IEEE1905.AL.Interface.{i}.Link.{i}.GenericPhyOUI!UBUS:ieee1905/info//interface[@i-1].links[@i-1].genphy_oui*/
 static int get_IEEE1905ALInterfaceLink_GenericPhyOUI(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "genphy_oui");
 	return 0;
 }
+
 
 /*#Device.IEEE1905.AL.Interface.{i}.Link.{i}.GenericPhyVariant!UBUS:ieee1905/info//interface[@i-1].links[@i-1].genphy_variant*/
 static int get_IEEE1905ALInterfaceLink_GenericPhyVariant(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -599,6 +603,7 @@ static int get_IEEE1905ALInterfaceLink_GenericPhyURL(char *refparam, struct dmct
 	*value = dmjson_get_value((json_object *)data, 1, "genphy_url");
 	return 0;
 }
+#endif
 
 /*#Device.IEEE1905.AL.Interface.{i}.Link.{i}.Metric.IEEE802dot1Bridge!UBUS:ieee1905/info//interface[@i-1].links[@i-1].metric.has_bridge*/
 static int get_IEEE1905ALInterfaceLinkMetric_IEEE802dot1Bridge(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1265,6 +1270,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_PowerState(char 
 	return 0;
 }
 
+#if 0 // Genric interfaces not supported by ieee1905
 /*#Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.Interface.{i}.GenericPhyOUI!UBUS:ieee1905/info//topology.device[@i-1].interface[@i-1].genphy_oui*/
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyOUI(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1285,6 +1291,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyURL(ch
 	*value = dmjson_get_value((json_object *)data, 1, "genphy_url");
 	return 0;
 }
+#endif
 
 /*#Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.Interface.{i}.NetworkMembership!UBUS:ieee1905/info//topology.device[@i-1].interface[@i-1].bssid*/
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_NetworkMembership(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
