@@ -1317,7 +1317,29 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_Role(char *refpa
 /*#Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.Interface.{i}.APChannelBand!UBUS:ieee1905/info//topology.device[@i-1].interface[@i-1].bandwidth*/
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_APChannelBand(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "bandwidth");
+	char *val = dmjson_get_value((json_object *)data, 1, "bandwidth");
+	int bw = atoi(val);
+
+	switch (bw) {
+		case 20:
+			*value = "00";
+			break;
+		case 40:
+			*value = "01";
+			break;
+		case 80:
+			*value = "02";
+			break;
+		case 160:
+			*value = "03";
+			break;
+		case 8080:
+			*value = "04";
+			break;
+		default:
+			*value = "";
+	}
+
 	return 0;
 }
 
