@@ -355,7 +355,7 @@ static char *get_datamodel_media_type(const char *media)
 	else if (!strcmp(media, "IEEE MOCA_V1_1"))
 		return "MoCAv1.1";
 	else
-		return "Generic PHY";
+		return media;
 }
 
 /*************************************************************
@@ -432,7 +432,7 @@ static int get_IEEE1905ALInterface_InterfaceId(char *refparam, struct dmctx *ctx
 static int get_IEEE1905ALInterface_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *status = dmjson_get_value((json_object *)data, 1, "status");
-	*value = !strcmp(status, "up") ? "Up" : "Down";
+	*value = !strcasecmp(status, "up") ? "Up" : "Down";
 	return 0;
 }
 
@@ -513,7 +513,7 @@ static int set_IEEE1905ALInterface_SetIntfPowerStateEnabled(char *refparam, stru
 static int get_IEEE1905ALInterface_PowerState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *power = dmjson_get_value((json_object *)data, 1, "power");
-	*value = !strcmp(power, "on") ? "On" : "Off";
+	*value = !strcasecmp(power, "on") ? "On" : "Off";
 	return 0;
 }
 
@@ -977,7 +977,7 @@ static int get_IEEE1905ALNetworkTopology_Status(char *refparam, struct dmctx *ct
 {
 	char *status = NULL;
 	ubus_ieee1905_info_options("topology", "status", &status);
-	*value = !strcmp(status, "available") ? "Available" : "Incomplete";
+	*value = !strcasecmp(status, "available") ? "Available" : "Incomplete";
 	return 0;
 }
 
@@ -1266,7 +1266,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_MediaType(char *
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_PowerState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *power = dmjson_get_value((json_object *)data, 1, "power");
-	*value = !strcmp(power, "on") ? "On" : "Off";
+	*value = !strcasecmp(power, "on") ? "On" : "Off";
 	return 0;
 }
 
