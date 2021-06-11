@@ -71036,7 +71036,8 @@
 					"enumerations": [
 						"Streaming",
 						"File",
-						"HTTP"
+						"HTTP",
+						"USPEventNotif"
 					]
 				}
 			},
@@ -75541,6 +75542,7 @@
 								],
 								"datatype": "string",
 								"enumerations": [
+									"",
 									"AP",
 									"non-AP/non-PCP STA",
 									"Wi-Fi P2P Client",

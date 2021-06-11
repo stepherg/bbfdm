@@ -376,22 +376,21 @@ static int get_IEEE1905AL_IEEE1905Id(char *refparam, struct dmctx *ctx, void *da
 /*#Device.IEEE1905.AL.Status!UBUS:ieee1905/info//status*/
 static int get_IEEE1905AL_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_ieee1905_info("status", value);
-}
+	char *val = NULL;
 
-#if 0
-static int get_IEEE1905AL_LastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
+	ubus_ieee1905_info("status", &val);
+	if (!strcasecmp(val, "enabled"))
+		*value = "Enabled";
+	else if (!strcasecmp(val, "disabled"))
+		*value = "Disabled";
+	else if (!strcasecmp(val, "error_misconfigured"))
+		*value = "Error_Misconfigured";
+	else if (!strcasecmp(val, "error"))
+		*value = "Error";
+	else
+		*value = val;
 
-static int get_IEEE1905AL_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
 }
-#endif
 
 /*#Device.IEEE1905.AL.RegistrarFreqBand!UBUS:ieee1905/info//registrar_band*/
 static int get_IEEE1905AL_RegistrarFreqBand(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -437,18 +436,6 @@ static int get_IEEE1905ALInterface_Status(char *refparam, struct dmctx *ctx, voi
 }
 
 #if 0
-static int get_IEEE1905ALInterface_LastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_IEEE1905ALInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
 static int get_IEEE1905ALInterface_InterfaceStackReference(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -1589,8 +1576,6 @@ DMLEAF tIEEE1905ALParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"IEEE1905Id", &DMREAD, DMT_STRING, get_IEEE1905AL_IEEE1905Id, NULL, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_IEEE1905AL_Status, NULL, BBFDM_BOTH},
-//{"LastChange", &DMREAD, DMT_UNINT, get_IEEE1905AL_LastChange, NULL, BBFDM_BOTH},
-//{"LowerLayers", &DMREAD, DMT_STRING, get_IEEE1905AL_LowerLayers, NULL, BBFDM_BOTH},
 {"RegistrarFreqBand", &DMREAD, DMT_STRING, get_IEEE1905AL_RegistrarFreqBand, NULL, BBFDM_BOTH},
 {"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905AL_InterfaceNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
@@ -1608,8 +1593,6 @@ DMLEAF tIEEE1905ALInterfaceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"InterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_InterfaceId, NULL, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_Status, NULL, BBFDM_BOTH},
-//{"LastChange", &DMREAD, DMT_UNINT, get_IEEE1905ALInterface_LastChange, NULL, BBFDM_BOTH},
-//{"LowerLayers", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_LowerLayers, NULL, BBFDM_BOTH},
 //{"InterfaceStackReference", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_InterfaceStackReference, NULL, BBFDM_BOTH},
 {"MediaType", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_MediaType, NULL, BBFDM_BOTH},
 //{"GenericPhyOUI", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_GenericPhyOUI, NULL, BBFDM_BOTH},
