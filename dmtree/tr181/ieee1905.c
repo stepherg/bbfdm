@@ -1340,14 +1340,27 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_APChannelBand(ch
 /*#Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.Interface.{i}.FrequencyIndex1!UBUS:ieee1905/info//topology.device[@i-1].interface[@i-1].freq_seg0_idx*/
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex1(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "freq_seg0_idx");
+	char *val = dmjson_get_value((json_object *)data, 1, "freq_seg0_idx");
+	char freq_str[3] = {0};
+	int freq = atoi(val);
+
+	snprintf(freq_str, 3, "%02x", freq);
+
+	*value = dmstrdup(freq_str);
+
 	return 0;
 }
 
 /*#Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.Interface.{i}.FrequencyIndex2!UBUS:ieee1905/info//topology.device[@i-1].interface[@i-1].freq_seg1_idx*/
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex2(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "freq_seg1_idx");
+	char *val = dmjson_get_value((json_object *)data, 1, "freq_seg1_idx");
+	char freq_str[3] = {0};
+	int freq = atoi(val);
+
+	snprintf(freq_str, 3, "%02x", freq);
+	*value = dmstrdup(freq_str);
+
 	return 0;
 }
 
