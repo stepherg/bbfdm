@@ -12,7 +12,6 @@
 #include "dmentry.h"
 #include "ppp.h"
 
-
 /*************************************************************
 * GET SET ALIAS
 **************************************************************/
@@ -325,15 +324,48 @@ static int get_PPPInterfaceStats_MulticastPacketsReceived(char *refparam, struct
 
 static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker;
+	char *linker, *ifname;
+	int ret = 0;
+	struct uci_section *ss = NULL;
+	char *dev = "0";
+
 	dmuci_get_value_by_section_string(((struct uci_section *)data), "ifname", &linker);
-	adm_entry_get_linker_param(ctx, "Device.ATM.Link.", linker, value);
+
+	// Get wan interface
+	dev = get_device(section_name(((struct uci_section *)data)));
+
+	// Check if interface name is same as dev value.
+	char *token, *end = linker;
+	while ((token = strtok_r(end, " ", &end))) {
+		if (0 == strcmp(dev, token)) {
+			ret = 1;
+			break;
+		}
+	}
+
+	if (0 == ret) {
+		*value = "";
+		return 0;
+	}
+
+	// Check if the interface is untagged or tagged.
+	if (NULL != strchr(token, '.')) {
+		// Get the device section and the ifname corresponding to it
+		uci_foreach_option_eq("network", "device", "name", token, ss) {
+			dmuci_get_value_by_section_string(ss, "ifname", &ifname);
+			break;
+		}
+	} else {
+		ifname = token;
+	}
+
+	adm_entry_get_linker_param(ctx, "Device.ATM.Link.", ifname, value);
 	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, "Device.PTM.Link.", linker, value);
+		adm_entry_get_linker_param(ctx, "Device.PTM.Link.", ifname, value);
 	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", ifname, value);
 	if (*value == NULL)
-		adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", linker, value);
+		adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", ifname, value);
 	if (*value == NULL)
 		*value = "";
 	return 0;
