@@ -355,7 +355,7 @@ static char *get_datamodel_media_type(const char *media)
 	else if (!strcmp(media, "IEEE MOCA_V1_1"))
 		return "MoCAv1.1";
 	else
-		return media;
+		return (char *)media;
 }
 
 /*************************************************************
@@ -390,6 +390,7 @@ static int get_IEEE1905AL_Status(char *refparam, struct dmctx *ctx, void *data, 
 	else
 		*value = val;
 
+	return 0;
 }
 
 /*#Device.IEEE1905.AL.RegistrarFreqBand!UBUS:ieee1905/info//registrar_band*/
