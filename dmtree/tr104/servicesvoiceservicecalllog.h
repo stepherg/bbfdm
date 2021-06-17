@@ -13,8 +13,17 @@
 
 #include <libbbf_api/dmcommon.h>
 
+extern DMOBJ tServicesVoiceServiceCallLogObj[];
 extern DMLEAF tServicesVoiceServiceCallLogParams[];
-
+extern DMOBJ tServicesVoiceServiceCallLogSessionObj[];
+extern DMLEAF tServicesVoiceServiceCallLogSessionParams[];
+extern DMOBJ tServicesVoiceServiceCallLogSessionDestinationObj[];
+extern DMOBJ tServicesVoiceServiceCallLogSessionSourceObj[];
+extern DMOBJ tServicesVoiceServiceCallLogSessionDestinationDSPObj[];
+extern DMOBJ tServicesVoiceServiceCallLogSessionSourceDSPObj[];
+extern DMLEAF tServicesVoiceServiceCallLogSessionDestinationDSPCodecParams[];
+extern DMLEAF tServicesVoiceServiceCallLogSessionSourceDSPCodecParams[];
+extern DMLEAF tServicesVoiceServiceCallLogSessionSourceRTPParams[];
 
 #endif //__SERVICESVOICESERVICECALLLOG_H
 

@@ -6,10 +6,21 @@
  * as published by the Free Software Foundation
  *
  *	Author: Yalu Zhang, yalu.zhang@iopsys.eu
+ *	Author: Grzegorz Sluja, grzegorz.sluja@iopsys.eu
  */
 
 #include "servicesvoiceservicecalllog.h"
 #include "common.h"
+
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
+static int browseServicesVoiceServiceCallLogSessionInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	// prev_data is from its parent node SIP.Client.{i}. i.e. the UCI section of asterisk.sip_service_provider
+	DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, "1");
+	return 0;
+}
 
 /*************************************************************
 * GET & SET PARAM
@@ -98,14 +109,87 @@ static int get_ServicesVoiceServiceCallLog_Duration(char *refparam, struct dmctx
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCallLog_SessionId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->sessionId) : "0";
+	return 0;
+}
+
 static int get_ServicesVoiceServiceCallLog_CallTerminationCause(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->termination_cause) : "";
+	return 0;
+}
 
-	if (entry) {
-		*value = dmstrdup(entry->termination_cause);
-	}
+static int get_ServicesVoiceServiceCallLog_FarEndIpAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->farEndIPAddress) : "";
+	return 0;
+}
 
+static int get_ServicesVoiceServiceCallLog_SessionDSPCodec(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->codec) : "";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLog_Src_PacketsDiscarded(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->discarded) : "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLog_Src_PacketsLost(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->lost) : "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLog_Src_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->rxpkts) : "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLog_Src_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->txpkts) : "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLog_Src_AverageReceiveInterarrivalJitter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->jbAvg) : "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLog_Src_FarEndInterarrivalJitter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->jitter) : "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLog_Src_FarEndPacketLossRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->uLossRate) : "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLog_Src_MaxJitter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->maxJitter) : "0";
 	return 0;
 }
 
@@ -113,6 +197,12 @@ static int get_ServicesVoiceServiceCallLog_CallTerminationCause(char *refparam, 
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
 /* *** Device.Services.VoiceService.{i}.CallLog.{i}. *** */
+DMOBJ tServicesVoiceServiceCallLogObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Session", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceCallLogSessionInst, NULL, NULL, tServicesVoiceServiceCallLogSessionObj, tServicesVoiceServiceCallLogSessionParams, NULL, BBFDM_BOTH},
+{0}
+};
+
 DMLEAF tServicesVoiceServiceCallLogParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"CallingPartyNumber", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_CallingPartyNumber, NULL, BBFDM_BOTH},
@@ -127,3 +217,79 @@ DMLEAF tServicesVoiceServiceCallLogParams[] = {
 {0}
 };
 
+/* *** Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}. *** */
+DMOBJ tServicesVoiceServiceCallLogSessionObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Destination", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionDestinationObj, NULL, NULL, BBFDM_BOTH},
+{"Source", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionSourceObj, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+DMLEAF tServicesVoiceServiceCallLogSessionParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Duration", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Duration, NULL, BBFDM_BOTH},
+{"Start", &DMREAD, DMT_TIME, get_ServicesVoiceServiceCallLog_Start, NULL, BBFDM_BOTH},
+{"SessionID", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_SessionId, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination. *** */
+DMOBJ tServicesVoiceServiceCallLogSessionDestinationObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"DSP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionDestinationDSPObj, NULL, NULL, BBFDM_BOTH},
+{"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source. *** */
+DMOBJ tServicesVoiceServiceCallLogSessionSourceObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"DSP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionSourceDSPObj, NULL, NULL, BBFDM_BOTH},
+{"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionSourceRTPParams, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.DSP. *** */
+DMOBJ tServicesVoiceServiceCallLogSessionDestinationDSPObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"ReceiveCodec", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionDestinationDSPCodecParams, NULL, BBFDM_BOTH},
+{"TransmitCodec", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionDestinationDSPCodecParams, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.DSP. *** */
+DMOBJ tServicesVoiceServiceCallLogSessionSourceDSPObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"ReceiveCodec", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionSourceDSPCodecParams, NULL, BBFDM_BOTH},
+{"TransmitCodec", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionSourceDSPCodecParams, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.DSP.ReceiveCodec. *** */
+DMLEAF tServicesVoiceServiceCallLogSessionDestinationDSPCodecParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Codec", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_SessionDSPCodec, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.DSP.ReceiveCodec. *** */
+DMLEAF tServicesVoiceServiceCallLogSessionSourceDSPCodecParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Codec", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_SessionDSPCodec, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.RTP. *** */
+DMLEAF tServicesVoiceServiceCallLogSessionSourceRTPParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"FarEndIPAddress", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_FarEndIpAddress, NULL, BBFDM_BOTH},
+{"PacketsDiscarded", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Src_PacketsDiscarded, NULL, BBFDM_BOTH},
+{"PacketsLost", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Src_PacketsLost, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_ServicesVoiceServiceCallLog_Src_PacketsReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_ServicesVoiceServiceCallLog_Src_PacketsSent, NULL, BBFDM_BOTH},
+{"AverageReceiveInterarrivalJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_AverageReceiveInterarrivalJitter, NULL, BBFDM_BOTH},
+{"FarEndInterarrivalJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_FarEndInterarrivalJitter, NULL, BBFDM_BOTH},
+{"FarEndPacketLossRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Src_FarEndPacketLossRate, NULL, BBFDM_BOTH},
+{"MaxJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_MaxJitter, NULL, BBFDM_BOTH},
+{0}
+};

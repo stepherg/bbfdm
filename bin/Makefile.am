@@ -75,8 +75,7 @@ libbbfdm_la_SOURCES +=							\
 	../dmtree/tr181/qos.c 						\
 	../dmtree/tr181/softwaremodules.c			\
 	../dmtree/tr181/routeradvertisement.c
-	
-endif
+endif #BBF_TR181
 
 if BBF_TR104
 libbbfdm_la_SOURCES +=	\
@@ -90,12 +89,12 @@ libbbfdm_la_SOURCES +=	\
 	../dmtree/tr104/servicesvoiceservicecallcontrol.c	\
 	../dmtree/tr104/servicesvoiceservicecodecprofile.c	\
 	../dmtree/tr104/servicesvoiceservicereservedports.c
-endif
+endif #BBF_TR104
 
 if BBF_TR143
 libbbfdm_la_SOURCES +=							\
 	../dmtree/tr143/diagnostics.c
-endif
+endif #BBF_TR143
 
 if BBF_VENDOR_EXTENSION
 
@@ -104,6 +103,8 @@ libbbfdm_la_SOURCES +=	\
 	../dmtree/vendor/vendor.c
 
 if BBF_VENDOR_IOPSYS
+
+if BBF_TR181
 libbbfdm_la_SOURCES +=	\
 	../dmtree/vendor/iopsys/tr181/vendor.c					\
 	../dmtree/vendor/iopsys/tr181/device.c					\
@@ -113,25 +114,40 @@ libbbfdm_la_SOURCES +=	\
 	../dmtree/vendor/iopsys/tr181/times.c						\
 	../dmtree/vendor/iopsys/tr181/x_iopsys_eu_igmp.c 			\
 	../dmtree/vendor/iopsys/tr181/x_iopsys_eu_mld.c
-endif
+endif #BBF_TR181
+
+if BBF_TR104
+libbbfdm_la_SOURCES +=	\
+	../dmtree/vendor/iopsys/tr104/servicesvoiceservicecalllog.c
+endif #BBF_TR104
+
+endif #BBF_VENDOR_IOPSYS
 
 if BBF_VENDOR_OPENWRT
+
+if BBF_TR181
 libbbfdm_la_SOURCES +=	\
 	../dmtree/vendor/openwrt/tr181/vendor.c					\
 	../dmtree/vendor/openwrt/tr181/deviceinfo.c				\
 	../dmtree/vendor/openwrt/tr181/qos.c
-endif
+endif #BBF_TR181
+
+endif #BBF_VENDOR_OPENWRT
 
 if BBF_VENDOR_TEST
+
+if BBF_TR181
 libbbfdm_la_SOURCES +=	\
 	../dmtree/vendor/test/tr181/vendor.c					\
 	../dmtree/vendor/test/tr181/deviceinfo.c 				\
 	../dmtree/vendor/test/tr181/firewall.c					\
 	../dmtree/vendor/test/tr181/device.c 					\
 	../dmtree/vendor/test/tr181/x_test_com_dropbear.c
-endif
+endif #BBF_TR181
 
-endif
+endif #BBF_VENDOR_TEST
+
+endif #BBF_VENDOR_EXTENSION
 
 libbbfdm_la_CFLAGS =		\
 	$(AM_CFLAGS)			\

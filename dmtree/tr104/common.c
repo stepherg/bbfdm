@@ -229,6 +229,215 @@ int init_call_log()
 		CHECK_RESULT(end);
 		strncpy(cdr.termination_cause, token, end - token);
 
+		// session id
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.sessionId, token, end - token);
+
+		// SIP IP Address
+		token = strstr(token, ",\"");
+		CHECK_RESULT(token);
+		token += 2;
+		end = strstr(token, "\",");
+		CHECK_RESULT(end);
+		strncpy(cdr.sipIpAddress, token, end - token);
+
+		// Far End IP Address
+		token = strstr(token, ",\"");
+		CHECK_RESULT(token);
+		token += 2;
+		end = strstr(token, "\",");
+		CHECK_RESULT(end);
+		strncpy(cdr.farEndIPAddress, token, end - token);
+
+		// Sip Response Code
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.sipResponseCode, token, end - token);
+
+		// Codec
+		token = strstr(token, ",\"");
+		CHECK_RESULT(token);
+		token += 2;
+		end = strstr(token, "\",");
+		CHECK_RESULT(end);
+		strncpy(cdr.codec, token, end - token);
+
+		// RTP statistic values
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.localBurstDensity, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.remoteBurstDensity, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.localBurstDuration, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.remoteBurstDuration, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.localGapDensity, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.remoteGapDensity, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.localGapDuration, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.remoteGapDuration, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.localJbRate, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.remoteJbRate, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.localJbMax, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.remoteJbMax, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.localJbNominal, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.remoteJbNominal, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.localJbAbsMax, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.remoteJbAbsMax, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.jbAvg, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.uLossRate, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.discarded, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.lost, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.rxpkts, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.txpkts, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.jitter, token, end - token);
+
+		token = strstr(token, ",");
+		CHECK_RESULT(token);
+		token += 1;
+		end = strstr(token, ",");
+		CHECK_RESULT(end);
+		strncpy(cdr.maxJitter, token, end - token);
+
 		// Skip invalid call logs
 		if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||
 			cdr.start_time[0] == '\0' || end_time[0] == '\0') {
@@ -246,10 +455,11 @@ int init_call_log()
 		struct tm tm_start, tm_end;
 		char *r1 = strptime(cdr.start_time, "%Y-%m-%d %H:%M:%S", &tm_start);
 		char *r2 = strptime(end_time, "%Y-%m-%d %H:%M:%S", &tm_end);
+
 		if (r1 && *r1 == '\0' && r2 && *r2 == '\0') {
 			time_t time_start, time_end;
-			time_start = mktime(&tm_start);
-			time_end = mktime(&tm_end);
+			time_start = timegm(&tm_start);
+			time_end = timegm(&tm_end);
 			snprintf(cdr.duration, sizeof(cdr.duration), "%u", (unsigned int)(time_end - time_start));
 			// Convert start time to ISO 8601 date-time format as per TR-181 data model
 			strftime(cdr.start_time, sizeof(cdr.start_time), "%Y-%m-%dT%H:%M:%SZ", &tm_start);

@@ -15,6 +15,7 @@
 #include "ethernet.h"
 #include "ip.h"
 #include "times.h"
+#include "../tr104/servicesvoiceservicecalllog.h"
 #include "vendor.h"
 
 DM_MAP_OBJ tVendorExtensionIOPSYS[] = {
@@ -25,5 +26,8 @@ DM_MAP_OBJ tVendorExtensionIOPSYS[] = {
 {"Device.Time.", NULL, tIOPSYS_TimeParams},
 {"Device.Bridging.Bridge.{i}.Port.{i}.", NULL, tIOPSYS_BridgingBridgePortParams},
 {"Device.Bridging.Bridge.{i}.VLAN.{i}.", NULL, tIOPSYS_BridgingBridgeVLANParams},
+{"Device.Services.VoiceService.{i}.CallLog.{i}.", NULL, tIOPSYS_VoiceServiceCallLogParams},
+{"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.RTP.", NULL, tIOPSYS_VoiceServiceCallLogSessionSourceRTPParams},
+{"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.RTP.", NULL, tIOPSYS_VoiceServiceCallLogSessionDestinationRTPParams},
 {0}
 };

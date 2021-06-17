@@ -23,6 +23,7 @@ extern DMOBJ tServicesVoiceServicePOTSObj[];
 extern DMLEAF tServicesVoiceServicePOTSParams[];
 extern DMOBJ tServicesVoiceServiceSIPObj[];
 extern DMOBJ tServicesVoiceServiceCallControlObj[];
+extern DMOBJ tServicesVoiceServiceCallLogObj[];
 extern DMLEAF tServicesVoiceServiceCallLogParams[];
 extern DMOBJ tServicesVoiceServiceVoIPProfileObj[];
 extern DMLEAF tServicesVoiceServiceVoIPProfileParams[];

@@ -31,6 +31,35 @@ struct call_log_entry {
 	char start_time[32];
 	char duration[8];
 	char termination_cause[32];
+	char sessionId[20];
+	char sipIpAddress[40];
+	char farEndIPAddress[40];
+	char sipResponseCode[20];
+	char codec[40];
+	char localBurstDensity[20];
+	char remoteBurstDensity[20];
+	char localBurstDuration[20];
+	char remoteBurstDuration[20];
+	char localGapDensity[20];
+	char remoteGapDensity[20];
+	char localGapDuration[20];
+	char remoteGapDuration[20];
+	char localJbRate[20];
+	char remoteJbRate[20];
+	char localJbMax[20];
+	char remoteJbMax[20];
+	char localJbNominal[20];
+	char remoteJbNominal[20];
+	char localJbAbsMax[20];
+	char remoteJbAbsMax[20];
+	char jbAvg[20];
+	char uLossRate[20];
+	char discarded[20];
+	char lost[20];
+	char rxpkts[20];
+	char txpkts[20];
+	char jitter[20];
+	char maxJitter[20];
 };
 
 #define MAX_SUPPORTED_CODECS 8
