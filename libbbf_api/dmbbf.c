@@ -1700,8 +1700,13 @@ static int mparam_set_value(DMPARAM_ARGS)
 			return fault;
 		}
 		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_value);
-	} else if (dmctx->setaction == VALUESET)
-		(set_cmd)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
+	} else if (dmctx->setaction == VALUESET) {
+		int fault = (set_cmd)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
+		if (fault) {
+			dmfree(refparam);
+			return fault;
+		}
+	}
 	dmfree(refparam);
 	return 0;
 }

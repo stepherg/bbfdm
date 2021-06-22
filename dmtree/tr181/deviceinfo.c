@@ -144,9 +144,14 @@ static int set_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 			adm_entry_get_linker_value(ctx, value, &linker);
 			if (linker && *linker) {
 				char *bank_id = strchr(linker, ':');
-				if (bank_id)
-					dmubus_call_set("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id+1, Integer}}, 1);
-				dmfree(linker);
+				if (bank_id) {
+					json_object *res = NULL;
+
+					dmubus_call("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id+1, Integer}}, 1, &res);
+					char *success = dmjson_get_value(res, 1, "success");
+					if (strcmp(success, "true") != 0)
+						return FAULT_9001;
+				}
 			}
 			break;
 	}

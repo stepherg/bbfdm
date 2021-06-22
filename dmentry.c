@@ -274,7 +274,10 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2)
 				ctx->in_value = n->value ? n->value : "";
 				ctx->stop = false;
 				fault = dm_entry_set_value(ctx);
-				if (fault) break;
+				if (fault) {
+					add_list_fault_param(ctx, ctx->in_param, usp_fault_map(fault));
+					break;
+				}
 			}
 			if (!fault) {
 				dmuci_set_value("cwmp", "acs", "ParameterKey", arg1 ? arg1 : "");
