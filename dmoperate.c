@@ -112,7 +112,7 @@ static char *bbf_get_value_by_id(char *id)
 	return value;
 }
 
-static char *get_param_val_from_op_cmd(char *op_cmd, const char *param)
+char *get_param_val_from_op_cmd(char *op_cmd, const char *param)
 {
 	char node[256] = {'\0'};
 
@@ -731,120 +731,6 @@ static opr_ret_t ip_diagnostics_nslookup(struct dmctx *dmctx, char *path, json_o
 	return SUCCESS;
 }
 
-static opr_ret_t swmodules_exec_env_reset(struct dmctx *dmctx, char *path, json_object *input)
-{
-	char *exec_env = get_param_val_from_op_cmd(path, "Name");
-	if (exec_env) {
-		if (strcmp(exec_env, "OpenWRT_Linux") == 0) {
-			if (0 == dmcmd_no_wait("/sbin/defaultreset", 0))
-				return SUCCESS;
-			else
-				return FAIL;
-		}
-	} else
-		return FAIL;
-
-	return SUCCESS;
-}
-
-static opr_ret_t swmodules_install_du(struct dmctx *dmctx, char *path, json_object *input)
-{
-	json_object *res = NULL;
-	struct deployment_unit_install du_install = {0};
-
-	du_install.url = dmjson_get_value(input, 1, "URL");
-	if (du_install.url[0] == '\0')
-		return UBUS_INVALID_ARGUMENTS;
-	du_install.uuid = dmjson_get_value(input, 1, "UUID");
-	du_install.username = dmjson_get_value(input, 1, "Username");
-	du_install.password = dmjson_get_value(input, 1, "Password");
-	du_install.environment = dmjson_get_value(input, 1, "ExecutionEnvRef");
-
-	char *exec_env = get_param_val_from_op_cmd(du_install.environment ? du_install.environment : "Device.SoftwareModules.ExecEnv.1.", "Name");
-	if (!exec_env)
-		return FAIL;
-
-	dmubus_call("swmodules", "du_install", UBUS_ARGS{
-			{"url", du_install.url, String},
-			{"uuid", du_install.uuid, String},
-			{"username", du_install.username, String},
-			{"password", du_install.password, String},
-			{"environment", exec_env, String}},
-			5,
-			&res);
-
-	if (!res)
-		return FAIL;
-
-	char *status = dmjson_get_value(res, 1, "status");
-
-	return (strcmp(status, "true") == 0) ? SUCCESS : FAIL;
-}
-
-static opr_ret_t swmodules_update_du(struct dmctx *dmctx, char *path, json_object *input)
-{
-	json_object *res = NULL;
-	struct deployment_unit_update du_update = {0};
-
-	du_update.url = dmjson_get_value(input, 1, "URL");
-	if (du_update.url[0] == '\0')
-		return UBUS_INVALID_ARGUMENTS;
-	du_update.username = dmjson_get_value(input, 1, "Username");
-	du_update.password = dmjson_get_value(input, 1, "Password");
-
-	char *du_uuid = get_param_val_from_op_cmd(path, "UUID");
-	if (!du_uuid)
-		return FAIL;
-
-	dmubus_call("swmodules", "du_update", UBUS_ARGS{
-			{"uuid", du_uuid, String},
-			{"url", du_update.url, String},
-			{"username", du_update.username, String},
-			{"password", du_update.password, String}},
-			4,
-			&res);
-
-	if (!res)
-		return FAIL;
-
-	char *status = dmjson_get_value(res, 1, "status");
-
-	return (strcmp(status, "true") == 0) ? SUCCESS : FAIL;
-}
-
-static opr_ret_t swmodules_uninstall_du(struct dmctx *dmctx, char *path, json_object *input)
-{
-	json_object *res = NULL;
-	char exec_env_path[64] = {0};
-
-	char *du_name = get_param_val_from_op_cmd(path, "Name");
-	if (!du_name)
-		return FAIL;
-
-	char *exec_env = get_param_val_from_op_cmd(path, "ExecutionEnvRef");
-	if (!exec_env)
-		return FAIL;
-
-	snprintf(exec_env_path, sizeof(exec_env_path), "%s.", exec_env);
-	char *env = get_param_val_from_op_cmd(exec_env_path, "Name");
-	if (!env)
-		return FAIL;
-
-	dmubus_call("swmodules", "du_uninstall", UBUS_ARGS{
-			{"name", du_name, String},
-			{"environment", env, String}},
-			2,
-			&res);
-
-	if (!res)
-		return FAIL;
-
-	char *status = dmjson_get_value(res, 1, "status");
-
-	return (strcmp(status, "true") == 0) ? SUCCESS : FAIL;
-
-}
-
 static opr_ret_t firmware_image_download(struct dmctx *dmctx, char *path, json_object *input)
 {
 	char obj_path[256] = {'\0'};
@@ -1223,36 +1109,6 @@ static const struct op_cmd operate_helper[] = {
 			}
 		}
 	},
-	{
-		"Device.SoftwareModules.ExecEnv.*.Reset", swmodules_exec_env_reset, "sync"
-	},
-	{
-		"Device.SoftwareModules.InstallDU", swmodules_install_du, "async",
-		{
-			.in = (const char *[]) {
-				"URL",
-				"UUID",
-				"Username",
-				"Password",
-				"ExecutionEnvRef",
-				NULL
-			}
-		}
-	},
-	{
-		"Device.SoftwareModules.DeploymentUnit.*.Update", swmodules_update_du, "async",
-		{
-			.in = (const char *[]) {
-				"URL",
-				"Username",
-				"Password",
-				NULL
-			}
-		}
-	},
-	{
-		"Device.SoftwareModules.DeploymentUnit.*.Uninstall", swmodules_uninstall_du, "async"
-	}
 };
 
 void operate_list_cmds(struct dmctx *dmctx)

@@ -73,7 +73,6 @@ libbbfdm_la_SOURCES +=							\
 	../dmtree/tr181/lanconfigsecurity.c			\
 	../dmtree/tr181/ieee1905.c					\
 	../dmtree/tr181/qos.c 						\
-	../dmtree/tr181/softwaremodules.c			\
 	../dmtree/tr181/routeradvertisement.c
 endif #BBF_TR181
 
