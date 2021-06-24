@@ -626,7 +626,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 ### XML generator
 
-It is a generator of Data Model tree in XML format which conforms to Broadband Forum schema.
+It is a generator of Data Model tree in XML with two format: **Broadband Forum schema** and **HDM**.
 
 ```bash
 $ python generate_dm_xml.py -h
@@ -635,6 +635,13 @@ Options:
  -r, --remote-dm              Check OBJ/PARAM under these repositories if it is not found under bbf repo
  -v, --vendor-list            Generate data model tree with vendor extension OBJ/PARAM
  -p, --vendor-prefix          Generate data model tree using this vendor prefix. Default vendor prefix: X_IOPSYS_EU_
+ -f, --format                 Generate data model tree with HDM format. Default format: BBF
+ -d, --device-protocol        Generate data model tree using this device protocol. Default device protocol: DEVICE_PROTOCOL_DSLFTR069v1
+ -m, --manufacturer           Generate data model tree using this manufacturer. Default manufacturer: iopsys
+ -o, --manufacturer-oui       Generate data model tree using this manufacturer oui. Default manufacturer oui: 002207
+ -c, --product-class          Generate data model tree using this product class. Default product class: DG400PRIME
+ -n, --model-name             Generate data model tree using this model name. Default model name: DG400PRIME-A
+ -s, --software-version       Generate data model tree using this software version. Default software version: 1.2.3.4
  -h, --help                   This help text
 Urls: 
  url^(branch,hash,tag)        The url with branch, hash or tag to be used
@@ -642,8 +649,10 @@ Urls:
 Examples: 
   - python generate_dm_xml.py
     ==> Generate xml file in datamodel.xml
+  - python generate_dm_xml.py -f HDM
+    ==> Generate xml file with HDM format in datamodel.xml
   - python generate_dm_xml.py -v iopsys
-    ==> Generate xml file in datamodel.xml
+    ==> Generate xml file using iopsys extension in datamodel.xml
   - python generate_dm_xml.py -r https://dev.iopsys.eu/feed/iopsys.git^devel,https://dev.iopsys.eu/iopsys/mydatamodel.git^5c8e7cb740dc5e425adf53ea574fb529d2823f88
     ==> Generate xml file in datamodel.xml
   - python generate_dm_xml.py -v iopsys,openwrt,test -r https://dev.iopsys.eu/feed/iopsys.git^6.0.0ALPHA1 -p X_TEST_COM_
