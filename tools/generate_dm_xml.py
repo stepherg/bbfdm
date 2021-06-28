@@ -53,6 +53,9 @@ def generate_bbf_xml_file(output_file):
 
     for value in bbf.LIST_SUPPORTED_DM:
 
+        if "()" in value:
+            continue
+
         obj = value.strip().split(",")
         access = "readOnly" if obj[1] == "DMREAD" else "readWrite"
 
@@ -145,6 +148,9 @@ def generate_hdm_xml_file(output_file):
     param_array[0] = parameters
 
     for value in bbf.LIST_SUPPORTED_DM:
+
+        if "()" in value:
+            continue
 
         obj = value.strip().split(",")
 

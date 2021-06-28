@@ -9,6 +9,7 @@
  *		Author: Feten Besbes <feten.besbes@pivasoftware.com>
  */
 
+#include "dmdiagnostics.h"
 #include "deviceinfo.h"
 
 struct Supported_Data_Models
@@ -792,6 +793,180 @@ static int get_process_state(char* refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
+/*************************************************************
+ * OPERATE COMMANDS
+ *************************************************************/
+static operation_args vendor_config_file_backup_args = {
+	.in = (const char *[]) {
+		"URL",
+		"Username",
+		"Password",
+		NULL
+	}
+};
+
+static int get_operate_args_DeviceInfoVendorConfigFile_Backup(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&vendor_config_file_backup_args;
+	return 0;
+}
+
+static int operate_DeviceInfoVendorConfigFile_Backup(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char backup_path[256] = {'\0'};
+	char backup_command[32] = {'\0'};
+	char *vcf_name = NULL;
+
+	char *ret = strrchr(refparam, '.');
+	strncpy(backup_path, refparam, ret - refparam +1);
+	DM_STRNCPY(backup_command, ret+1, sizeof(backup_command));
+
+	char *url = dmjson_get_value((json_object *)value, 1, "URL");
+	if (url[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+
+	char *user = dmjson_get_value((json_object *)value, 1, "Username");
+	char *pass = dmjson_get_value((json_object *)value, 1, "Password");
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "name", &vcf_name);
+
+	int res = bbf_config_backup(url, user, pass, vcf_name, backup_command, backup_path);
+
+	return res ? CMD_FAIL : CMD_SUCCESS;
+}
+
+static operation_args vendor_config_file_restore_args = {
+	.in = (const char *[]) {
+		"URL",
+		"Username",
+		"Password",
+		"FileSize",
+		"TargetFileName",
+		"CheckSumAlgorithm",
+		"CheckSum",
+		NULL
+	}
+};
+
+static int get_operate_args_DeviceInfoVendorConfigFile_Restore(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&vendor_config_file_restore_args;
+	return 0;
+}
+
+static int operate_DeviceInfoVendorConfigFile_Restore(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char restore_path[256] = {'\0'};
+	char restore_command[32] = {'\0'};
+
+	char *ret = strrchr(refparam, '.');
+	strncpy(restore_path, refparam, ret - refparam +1);
+	DM_STRNCPY(restore_command, ret+1, sizeof(restore_command));
+
+	char *url = dmjson_get_value((json_object *)value, 1, "URL");
+	if (url[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+
+	char *user = dmjson_get_value((json_object *)value, 1, "Username");
+	char *pass = dmjson_get_value((json_object *)value, 1, "Password");
+	char *file_size = dmjson_get_value((json_object *)value, 1, "FileSize");
+	char *checksum_algorithm = dmjson_get_value((json_object *)value, 1, "CheckSumAlgorithm");
+	char *checksum = dmjson_get_value((json_object *)value, 1, "CheckSum");
+
+	int res = bbf_config_restore(url, user, pass, file_size, checksum_algorithm, checksum, restore_command, restore_path);
+
+	return res ? CMD_FAIL : CMD_SUCCESS;
+}
+
+static operation_args firmware_image_download_args = {
+	.in = (const char *[]) {
+		"URL",
+		"AutoActivate",
+		"Username",
+		"Password",
+		"FileSize",
+		"CheckSumAlgorithm",
+		"CheckSum",
+		NULL
+	}
+};
+
+static int get_operate_args_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&firmware_image_download_args;
+	return 0;
+}
+
+static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char obj_path[256] = {'\0'};
+	char command[32] = {'\0'};
+
+	char *ret = strrchr(refparam, '.');
+	strncpy(obj_path, refparam, ret - refparam +1);
+	DM_STRNCPY(command, ret+1, sizeof(command));
+
+	char *url = dmjson_get_value((json_object *)value, 1, "URL");
+	char *auto_activate = dmjson_get_value((json_object *)value, 1, "AutoActivate");
+	if (url[0] == '\0' || auto_activate[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+
+	char *username = dmjson_get_value((json_object *)value, 1, "Username");
+	char *password = dmjson_get_value((json_object *)value, 1, "Password");
+	char *file_size = dmjson_get_value((json_object *)value, 1, "FileSize");
+	char *checksum_algorithm = dmjson_get_value((json_object *)value, 1, "CheckSumAlgorithm");
+	char *checksum = dmjson_get_value((json_object *)value, 1, "CheckSum");
+
+	char *bank_id = dmjson_get_value((json_object *)data, 1, "id");
+
+	int res = bbf_fw_image_download(url, auto_activate, username, password, file_size, checksum_algorithm, checksum, bank_id, command, obj_path);
+
+	return res ? CMD_FAIL : CMD_SUCCESS;
+}
+
+static operation_args firmware_image_activate_args = {
+	.in = (const char *[]) {
+		"TimeWindow.{i}.Start",
+		"TimeWindow.{i}.End",
+		"TimeWindow.{i}.Mode",
+		"TimeWindow.{i}.UserMessage",
+		"TimeWindow.{i}.MaxRetries",
+		NULL
+	}
+};
+
+
+static const char *firmware_image_activate_in[] = {
+	"TimeWindow.1.Start",
+	"TimeWindow.2.Start",
+	"TimeWindow.3.Start",
+	"TimeWindow.4.Start",
+	"TimeWindow.5.Start",
+};
+
+static int get_operate_args_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&firmware_image_activate_args;
+	return 0;
+}
+
+static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct activate_image active_images[MAX_TIME_WINDOW] = {0};
+
+	for (int i = 0; i < ARRAY_SIZE(firmware_image_activate_in); i++)
+		active_images[i].start_time = dmjson_get_value((json_object *)value, 1, firmware_image_activate_in[i]);
+
+	char *bank_id = dmjson_get_value((json_object *)data, 1, "id");
+
+	int res = bbf_fw_image_activate(bank_id, active_images);
+
+	return res ? CMD_FAIL : CMD_SUCCESS;
+}
+
+/**********************************************************************************************************************************
+*                                            OBJ & LEAF DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.DeviceInfo. *** */
 DMOBJ tDeviceInfoObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
@@ -837,6 +1012,8 @@ DMLEAF tDeviceInfoVendorConfigFileParams[] = {
 {"Date", &DMREAD, DMT_TIME, get_vcf_date, NULL, BBFDM_BOTH},
 {"Description", &DMREAD, DMT_STRING, get_vcf_desc, NULL, BBFDM_BOTH},
 {"UseForBackupRestore", &DMREAD, DMT_BOOL, get_vcf_backup_restore, NULL, BBFDM_BOTH},
+{"Backup()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoVendorConfigFile_Backup, operate_DeviceInfoVendorConfigFile_Backup, BBFDM_USP},
+{"Restore()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoVendorConfigFile_Restore, operate_DeviceInfoVendorConfigFile_Restore, BBFDM_USP},
 {0}
 };
 
@@ -910,6 +1087,8 @@ DMLEAF tDeviceInfoFirmwareImageParams[] = {
 {"Available", &DMREAD, DMT_BOOL, get_DeviceInfoFirmwareImage_Available, NULL, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_DeviceInfoFirmwareImage_Status, NULL, BBFDM_BOTH},
 {"BootFailureLog", &DMREAD, DMT_STRING, get_empty, NULL, BBFDM_BOTH},
+{"Download()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoFirmwareImage_Download, operate_DeviceInfoFirmwareImage_Download, BBFDM_USP},
+{"Activate()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoFirmwareImage_Activate, operate_DeviceInfoFirmwareImage_Activate, BBFDM_USP},
 {0}
 };
 

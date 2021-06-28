@@ -284,7 +284,7 @@ static void test_api_bbfdm_set_value_parameter(void **state)
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list == &ctx->list_fault_param);
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key", NULL);
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
 	assert_int_equal(fault, 0);
 }
 
@@ -538,8 +538,8 @@ static void test_api_bbfdm_valid_operate(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.DHCPv4.Client.1.Renew", NULL, NULL);
-	assert_int_equal(fault, SUCCESS);
+	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.WiFi.AccessPoint.1.Security.Reset()", NULL, NULL);
+	assert_int_equal(fault, CMD_SUCCESS);
 }
 
 static void test_api_bbfdm_wrong_operate(void **state)
@@ -547,7 +547,7 @@ static void test_api_bbfdm_wrong_operate(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.IP.Diagnostics.IPing", NULL, NULL);
+	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.IP.Diagnostics.IPing()", NULL, NULL);
 	assert_int_equal(fault, CMD_NOT_FOUND);
 }
 
@@ -682,7 +682,7 @@ static void test_api_bbfdm_json_set_value(void **state)
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list == &ctx->list_fault_param);
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key", NULL);
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
 	assert_int_equal(fault, 0);
 
 	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_Dropbear.1.Port", "9856", NULL);
@@ -691,7 +691,7 @@ static void test_api_bbfdm_json_set_value(void **state)
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list == &ctx->list_fault_param);
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key", NULL);
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
 	assert_int_equal(fault, 0);
 }
 
@@ -766,7 +766,7 @@ static void test_api_bbfdm_library_set_value(void **state)
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list == &ctx->list_fault_param);
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key", NULL);
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
 	assert_int_equal(fault, 0);
 
 	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_Syslog.ServerPort", "9856", NULL);
@@ -775,7 +775,7 @@ static void test_api_bbfdm_library_set_value(void **state)
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list == &ctx->list_fault_param);
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key", NULL);
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
 	assert_int_equal(fault, 0);
 }
 

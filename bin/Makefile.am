@@ -35,8 +35,7 @@ libbbfdm_la_SOURCES =	\
 	../dmentry.c 		\
 	../dmdynamiclibrary.c \
 	../dmdynamicjson.c 	\
-	../dmmemjson.c 		\
-	../dmoperate.c		\
+	../dmdynamicmem.c 		\
 	../dmdiagnostics.c	\
 	../dmbbfcommon.c
 
@@ -66,7 +65,6 @@ libbbfdm_la_SOURCES +=							\
 	../dmtree/tr181/fast.c						\
 	../dmtree/tr181/interfacestack.c			\
 	../dmtree/tr181/usb.c 						\
-	../dmtree/tr181/datamodelversion.c			\
 	../dmtree/tr181/gre.c 						\
 	../dmtree/tr181/dynamicdns.c				\
 	../dmtree/tr181/security.c					\

@@ -2368,6 +2368,20 @@ static int get_IPInterfaceStats_MulticastPacketsReceived(char *refparam, struct 
 	return get_ip_iface_sysfs(data, "statistics/multicast", value);
 }
 
+/*************************************************************
+ * OPERATE COMMANDS
+ *************************************************************/
+static int operate_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char interface_obj[64] = {0};
+
+	snprintf(interface_obj, sizeof(interface_obj), "network.interface.%s", section_name(((struct uci_section *)data)));
+	dmubus_call_set(interface_obj, "down", UBUS_ARGS{}, 0);
+	dmubus_call_set(interface_obj, "up", UBUS_ARGS{}, 0);
+
+	return CMD_SUCCESS;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -2425,6 +2439,7 @@ DMLEAF tIPInterfaceParams[] = {
 {"IPv6PrefixNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv6PrefixNumberOfEntries, NULL, BBFDM_BOTH},
 //{"AutoIPEnable", &DMWRITE, DMT_BOOL, get_IPInterface_AutoIPEnable, set_IPInterface_AutoIPEnable, BBFDM_BOTH},
 {"TWAMPReflectorNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_TWAMPReflectorNumberOfEntries, NULL, BBFDM_BOTH},
+{"Reset()", &DMSYNC, DMT_COMMAND, NULL, operate_IPInterface_Reset, BBFDM_USP},
 {0}
 };
 

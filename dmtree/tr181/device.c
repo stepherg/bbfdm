@@ -35,7 +35,6 @@
 #include "interfacestack.h"
 #include "qos.h"
 #include "usb.h"
-#include "datamodelversion.h"
 #include "gre.h"
 #include "dynamicdns.h"
 #include "lanconfigsecurity.h"
@@ -46,6 +45,43 @@
 #include "servicesvoiceservice.h"
 #endif
 
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
+static int get_Device_InterfaceStackNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *s = NULL;
+	int cnt = 0;
+
+	uci_path_foreach_sections(bbfdm, "dmmap_interface_stack", "interface_stack", s) {
+		cnt++;
+	}
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
+static int get_Device_RootDataModelVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "2.14";
+	return 0;
+}
+
+/*************************************************************
+ * OPERATE COMMANDS
+ *************************************************************/
+static int operate_Device_Reboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return !dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0) ? CMD_SUCCESS : CMD_FAIL;
+}
+
+static int operate_Device_FactoryReset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return !dmcmd_no_wait("/sbin/defaultreset", 0) ? CMD_SUCCESS : CMD_FAIL;
+}
+
+/**********************************************************************************************************************************
+*                                            OBJ & LEAF DEFINITION
+***********************************************************************************************************************************/
 /* *** BBFDM *** */
 DMOBJ tEntry181Obj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
@@ -53,13 +89,7 @@ DMOBJ tEntry181Obj[] = {
 {0}
 };
 
-DMLEAF tDeviceParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"InterfaceStackNumberOfEntries", &DMREAD, DMT_UNINT, get_Device_InterfaceStackNumberOfEntries, NULL, BBFDM_BOTH},
-{"RootDataModelVersion", &DMREAD, DMT_STRING, get_Device_RootDataModelVersion, NULL, BBFDM_BOTH},
-{0}
-};
-
+/* *** Device. *** */
 DMOBJ tDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoObj, tDeviceInfoParams, NULL, BBFDM_BOTH},
@@ -95,5 +125,14 @@ DMOBJ tDeviceObj[] = {
 {"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH},
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_BOTH},
 {"RouterAdvertisement", &DMREAD, NULL, NULL, "file:/etc/config/dhcp", NULL, NULL, NULL, tRouterAdvertisementObj, tRouterAdvertisementParams, NULL, BBFDM_BOTH},
+{0}
+};
+
+DMLEAF tDeviceParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"InterfaceStackNumberOfEntries", &DMREAD, DMT_UNINT, get_Device_InterfaceStackNumberOfEntries, NULL, BBFDM_BOTH},
+{"RootDataModelVersion", &DMREAD, DMT_STRING, get_Device_RootDataModelVersion, NULL, BBFDM_BOTH},
+{"Reboot()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_Reboot, BBFDM_USP},
+{"FactoryReset()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_FactoryReset, BBFDM_USP},
 {0}
 };

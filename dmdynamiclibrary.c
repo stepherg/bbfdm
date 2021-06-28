@@ -9,15 +9,25 @@
  *
  */
 
+#include "dmdynamicmem.h"
 #include "dmdynamiclibrary.h"
-#include "dmoperate.h"
 
 LIST_HEAD(loaded_library_list);
+LIST_HEAD(dynamic_operate_list);
+LIST_HEAD(library_memhead);
 
 struct loaded_library
 {
 	struct list_head list;
 	void *library;
+};
+
+struct dynamic_operate
+{
+	struct list_head list;
+	char *operate_path;
+	void *operate;
+	void *operate_args;
 };
 
 static void add_list_loaded_libraries(struct list_head *library_list, void *library)
@@ -37,6 +47,28 @@ static void free_all_list_open_library(struct list_head *library_list)
 			dlclose(lib->library);
 		}
 		FREE(lib);
+	}
+}
+
+static void add_list_dynamic_operates(struct list_head *operate_list, char *operate_path, void *operate, void *operate_args)
+{
+	struct dynamic_operate *dyn_operate = calloc(1, sizeof(struct dynamic_operate));
+	list_add_tail(&dyn_operate->list, operate_list);
+	dyn_operate->operate_path = strdup(operate_path);
+	dyn_operate->operate = operate;
+	dyn_operate->operate_args = operate_args;
+}
+
+static void free_list_dynamic_operates(struct list_head *operate_list)
+{
+	struct dynamic_operate *dyn_operate;
+	while (operate_list->next != operate_list) {
+		dyn_operate = list_entry(operate_list->next, struct dynamic_operate, list);
+		list_del(&dyn_operate->list);
+		if (dyn_operate->operate_path) {
+			free(dyn_operate->operate_path);
+		}
+		FREE(dyn_operate);
 	}
 }
 
@@ -71,8 +103,74 @@ void free_library_dynamic_arrays(DMOBJ *dm_entryobj)
 	DMNODE node = {.current_object = ""};
 
 	free_all_list_open_library(&loaded_library_list);
+	free_list_dynamic_operates(&dynamic_operate_list);
+	dm_dynamic_cleanmem(&library_memhead);
 	dm_browse_node_dynamic_object_tree(&node, root);
-	FREE(dynamic_operate);
+}
+
+static bool operate_find_root_entry(struct dmctx *ctx, char *in_param, DMOBJ **root_entry)
+{
+	int obj_found = 0;
+	DMOBJ *root = ctx->dm_entryobj;
+	DMNODE node = {.current_object = ""};
+
+	dm_check_dynamic_obj(ctx, &node, root, in_param, in_param, root_entry, &obj_found);
+
+	return (obj_found && *root_entry) ? true : false;
+}
+
+
+static char *get_path_without_instance(char *path)
+{
+	char *pch = NULL, *pchr = NULL;
+	char res_path[512] = {0};
+	unsigned pos = 0;
+
+	char *str = dm_dynamic_strdup(&library_memhead, path);
+
+	res_path[0] = 0;
+	for (pch = strtok_r(str, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
+		if (atoi(pch) == 0)
+			pos += snprintf(&res_path[pos], sizeof(res_path) - pos, "%s%s", pch, (pchr != NULL && *pchr != '\0') ? "." : "");
+	}
+
+	if (str)
+		dm_dynamic_free(str);
+
+	return dm_dynamic_strdup(&library_memhead, res_path);
+}
+
+static int get_dynamic_operate_args(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct dynamic_operate *dyn_operate = NULL;
+	operation_args *operate_args = NULL;
+
+	char *operate_path = get_path_without_instance(refparam);
+	list_for_each_entry(dyn_operate, &dynamic_operate_list, list) {
+		if (strcmp(dyn_operate->operate_path, operate_path) == 0) {
+			operate_args = (operation_args *)dyn_operate->operate_args;
+			break;
+		}
+	}
+
+	*value = (char *)operate_args;
+	return 0;
+}
+
+static int dynamic_operate_leaf(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct dynamic_operate *dyn_operate = NULL;
+	operation operate_func = NULL;
+
+	char *operate_path = get_path_without_instance(refparam);
+	list_for_each_entry(dyn_operate, &dynamic_operate_list, list) {
+		if (strcmp(dyn_operate->operate_path, operate_path) == 0) {
+			operate_func = (operation)dyn_operate->operate;
+			break;
+		}
+	}
+
+	return operate_func ? operate_func(ctx, refparam, (json_object *)value) : CMD_FAIL;
 }
 
 int load_library_dynamic_arrays(struct dmctx *ctx)
@@ -150,17 +248,58 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 				}
 			}
 
-			//Dynamic Operate
+			//Dynamic Operate is deprecated now.  It will be removed later.
 			DM_MAP_OPERATE *dynamic_operate = NULL;
 			*(void **) (&dynamic_operate) = dlsym(handle, "tDynamicOperate");
 			if (dynamic_operate) {
 
 				for (int i = 0; dynamic_operate[i].path; i++) {
-					if (dynamic_operate[i].operate && dynamic_operate[i].type)
-						add_dynamic_operate(dynamic_operate[i].path,
-								dynamic_operate[i].operate,
-								dynamic_operate[i].type,
-								dynamic_operate[i].args);
+					if (dynamic_operate[i].operate && dynamic_operate[i].type) {
+						char parent_path[256] = {'\0'};
+						char operate_path[256] = {'\0'};
+						DMOBJ *dm_entryobj = NULL;
+
+						char *object_path = replace_str(dynamic_operate[i].path, ".*.", ".");
+						snprintf(operate_path, sizeof(operate_path), "%s%s", object_path, !strstr(object_path, "()") ? "()" : "");
+						dmfree(object_path);
+
+						char *ret = strrchr(operate_path, '.');
+						strncpy(parent_path, operate_path, ret - operate_path +1);
+
+						bool obj_exists = operate_find_root_entry(ctx, parent_path, &dm_entryobj);
+						if (obj_exists == false || !dm_entryobj)
+							continue;
+
+						add_list_dynamic_operates(&dynamic_operate_list, operate_path, dynamic_operate[i].operate, &dynamic_operate[i].args);
+
+						if (dm_entryobj->dynamicleaf == NULL) {
+							dm_entryobj->dynamicleaf = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_leaf));
+							dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
+							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
+							dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
+						}
+
+						operation_args *args = &dynamic_operate[i].args;
+						DMLEAF *new_leaf = dm_dynamic_calloc(&library_memhead, 2, sizeof(struct dm_leaf_s));
+						new_leaf[0].parameter = dm_dynamic_strdup(&library_memhead, ret+1);
+						new_leaf[0].permission = !strcmp(dynamic_operate[i].type, "sync") ? &DMSYNC : &DMASYNC;
+						new_leaf[0].type = DMT_COMMAND;
+						new_leaf[0].getvalue = (args->in || args->out) ? get_dynamic_operate_args : NULL;
+						new_leaf[0].setvalue = dynamic_operate_leaf;
+						new_leaf[0].bbfdm_type = BBFDM_USP;
+
+						if (dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf == NULL) {
+							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = calloc(2, sizeof(DMLEAF *));
+							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[0] = new_leaf;
+						} else {
+							int idx = get_leaf_idx_dynamic_array(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf);
+							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = realloc(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf, (idx + 2) * sizeof(DMLEAF *));
+							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[idx] = new_leaf;
+							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[idx+1] = NULL;
+						}
+
+					}
+
 				}
 			}
 

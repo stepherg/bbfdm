@@ -3112,6 +3112,18 @@ static int browseDHCPv4RelayForwardingInst(struct dmctx *dmctx, DMNODE *parent_n
 	return 0;
 }
 
+/*************************************************************
+ * OPERATE COMMANDS
+ *************************************************************/
+static int operate_DHCPv4Client_Renew(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *dhcp_s = ((struct dhcp_client_args *)data)->dhcp_client_conf;
+
+	dmubus_call_set("network.interface", "renew", UBUS_ARGS{{"interface", section_name(dhcp_s), String}}, 1);
+
+	return CMD_SUCCESS;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -3156,6 +3168,7 @@ DMLEAF tDHCPv4ClientParams[] = {
 //{"PassthroughDHCPPool", &DMWRITE, DMT_STRING, get_DHCPv4Client_PassthroughDHCPPool, set_DHCPv4Client_PassthroughDHCPPool, BBFDM_BOTH},
 {"SentOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Client_SentOptionNumberOfEntries, NULL, BBFDM_BOTH},
 {"ReqOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Client_ReqOptionNumberOfEntries, NULL, BBFDM_BOTH},
+{"Renew()", &DMSYNC, DMT_COMMAND, NULL, operate_DHCPv4Client_Renew, BBFDM_USP},
 {0}
 };
 

@@ -343,11 +343,8 @@ BBF_VENDOR_PREFIX="X_TEST_COM_"
 
 The application should bring its shared library under **'/usr/lib/bbfdm/'** path that contains the sub tree of **Objects/Parameters** and the related functions **Get/Set/Add/Delete/Operate**. The new added objects, parameters and operates will be automatically shown by icwmpd and uspd/obuspa.
 
-Each library should contains two Root tables:
+Each library should contains the Root table: **“tDynamicObj”**
 
-- **“tDynamicObj”**
-
-- **“tDynamicOperate”**
 
 #### DynamicObject definition
 
@@ -360,19 +357,6 @@ The **DM_MAP_OBJ** structure contains three arguments:
 | `parentobj`      | A string of the parent object name. Example “Device.IP.Diagnostics.”, “Device.DeviceInfo”, “Device.WiFi.Radio.” |
 | `nextobject`     | Pointer to a **DMOBJ** array which contains a list of the child objects |
 | `parameter`      | Pointer to a **DMLEAF** array which contains a list of the child parameters |
-
-#### DynamicOperate definition
-
-The “tDynamicOperate” table contains entries of **DM_MAP_OPERATE** structure.
-
-The **DM_MAP_OPERATE** structure contains two arguments:
-
-|     Argument       |                           Description                                                                           |
-| ------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `pathname`         | A string of the path name operate. Example “Device.BBKSpeedTest”, “Device.WiFi.AccessPoint.*.X_IOPSYS_EU_Reset” |
-| `operation`        | The function to be executed in the operation |
-| `type`             | The type of the operation. Could be **sync** or **async** |
-| `args`             | The input and output arguments of the operation |
 
 
 For the other tables, they are defined in the same way as the Object and Parameter definition described above.

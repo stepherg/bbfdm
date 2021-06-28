@@ -15,10 +15,9 @@ extern DMOBJ tDynamicManagementServerObj[];
 extern DMLEAF tDynamicManagementServerParams[];
 extern DMLEAF tManagementServerInformParameterParams[];
 extern DMOBJ tDynamicDeviceObj[];
+extern DMLEAF tDynamicDeviceParams[];
 extern DMLEAF tX_IOPSYS_EU_SyslogParam[];
-
-opr_ret_t DynamicDevicePingOperate(struct dmctx *dmctx, char *path, json_object *input);
-opr_ret_t DynamicDeviceRebootOperate(struct dmctx *dmctx, char *path, json_object *input);
+extern DMLEAF tX_IOPSYS_EU_PingTESTParam[];
 
 #endif //__LIBBBFD_TEST_H
 

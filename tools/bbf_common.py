@@ -38,7 +38,8 @@ Array_Types = {"string": "DMT_STRING",
                "boolean": "DMT_BOOL",
                "dateTime": "DMT_TIME",
                "hexBinary": "DMT_HEXBIN",
-               "base64": "DMT_BASE64"}
+               "base64": "DMT_BASE64",
+               "command": "DMT_COMMAND"}
 
 
 def rename_file(old_file_name, new_file_name):

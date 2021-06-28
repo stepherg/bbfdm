@@ -46,6 +46,8 @@ do { \
 
 extern struct dm_permession_s DMREAD;
 extern struct dm_permession_s DMWRITE;
+extern struct dm_permession_s DMSYNC;
+extern struct dm_permession_s DMASYNC;
 extern char *DMT_TYPE[];
 extern int bbfdatamodel_type;
 
@@ -184,6 +186,7 @@ struct dmctx
 	char *inst_buf[16];
 	unsigned int end_session_flag;
 	bool isgetschema;
+	bool iscommand;
 };
 
 typedef struct dmnode {
@@ -216,12 +219,18 @@ typedef struct dm_map_vendor_exclude {
 	char **vendor_obj;
 } DM_MAP_VENDOR_EXCLUDE;
 
-enum operate_ret_status{
+enum operate_ret_status {
+	CMD_INVALID_ARGUMENTS,
+	CMD_SUCCESS,
+	CMD_FAIL,
+	CMD_NOT_FOUND,
+	__STATUS_MAX,
+};
+
+enum deprecated_operate_ret_status {
 	UBUS_INVALID_ARGUMENTS,
 	SUCCESS,
 	FAIL,
-	CMD_NOT_FOUND,
-	__STATUS_MAX,
 };
 
 typedef struct {
@@ -385,6 +394,7 @@ enum dmt_type_enum {
 	DMT_TIME,
 	DMT_HEXBIN,
 	DMT_BASE64,
+	DMT_COMMAND,
 };
 
 enum amd_version_enum {
@@ -445,6 +455,8 @@ int dm_entry_set_notification(struct dmctx *dmctx);
 int dm_entry_enabled_notify(struct dmctx *dmctx);
 int dm_entry_get_linker(struct dmctx *dmctx);
 int dm_entry_get_linker_value(struct dmctx *dmctx);
+int dm_entry_list_operates(struct dmctx *ctx);
+int dm_entry_operate(struct dmctx *dmctx);
 int dm_browse_last_access_path(char *path, size_t len);
 char *get_last_instance(char *package, char *section, char *opt_inst);
 char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst);

@@ -558,6 +558,23 @@ static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 	return 0;
 }
 
+/*************************************************************
+ * OPERATE COMMANDS
+ *************************************************************/
+static int operate_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char interface_obj[64] = {0};
+
+	snprintf(interface_obj, sizeof(interface_obj), "network.interface.%s", section_name(((struct uci_section *)data)));
+	dmubus_call_set(interface_obj, "down", UBUS_ARGS{}, 0);
+	dmubus_call_set(interface_obj, "up", UBUS_ARGS{}, 0);
+
+	return CMD_SUCCESS;
+}
+
+/**********************************************************************************************************************************
+*                                            OBJ & PARAM DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.PPP. *** */
 DMOBJ tPPPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
@@ -593,6 +610,7 @@ DMLEAF tPPPInterfaceParams[] = {
 {"ConnectionStatus", &DMREAD, DMT_STRING, get_ppp_status, NULL, BBFDM_BOTH},
 {"Username", &DMWRITE, DMT_STRING, get_ppp_username, set_ppp_username, BBFDM_BOTH},
 {"Password", &DMWRITE, DMT_STRING, get_empty, set_ppp_password, BBFDM_BOTH},
+{"Reset()", &DMSYNC, DMT_COMMAND, NULL, operate_PPPInterface_Reset, BBFDM_USP},
 {0}
 };
 

@@ -14,12 +14,18 @@
 #include "dmbbfcommon.h"
 #include "diagnostics.h"
 
+/*************************************************************
+* COMMON FUNCTIONS
+**************************************************************/
 static int get_diag_enable_true(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "1";
 	return 0;
 }
 
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
 /*
  * *** Device.IP.Diagnostics.IPPing. ***
  */
@@ -1565,6 +1571,9 @@ static int get_IPDiagnosticsServerSelectionDiagnostics_MaximumResponseTime(char 
 	return 0;
 }
 
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
 static int browseIPDiagnosticsTraceRouteRouteHopsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
@@ -1613,6 +1622,544 @@ static int browseIPDiagnosticsUploadDiagnosticsPerConnectionResultInst(struct dm
 	return 0;
 }
 
+/*************************************************************
+ * OPERATE COMMANDS
+ *************************************************************/
+static operation_args ip_diagnostics_ipping_args = {
+	.in = (const char *[]) {
+		"Interface",
+		"ProtocolVersion",
+		"Host",
+		"NumberOfRepetitions",
+		"Timeout",
+		"DataBlockSize",
+		"DSCP",
+		NULL
+	},
+	.out = (const char *[]) {
+		"Status",
+		"IPAddressUsed",
+		"SuccessCount",
+		"FailureCount",
+		"AverageResponseTime",
+		"MinimumResponseTime",
+		"MaximumResponseTime",
+		"AverageResponseTimeDetailed",
+		"MinimumResponseTimeDetailed",
+		"MaximumResponseTimeDetailed",
+		NULL
+	}
+};
+
+static int get_operate_args_IPDiagnostics_IPPing(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&ip_diagnostics_ipping_args;
+	return 0;
+}
+
+static int operate_IPDiagnostics_IPPing(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	init_diagnostics_operation("ipping", IPPING_PATH);
+
+	char *ipping_host = dmjson_get_value((json_object *)value, 1, "Host");
+	if (ipping_host[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+	char *ipping_interface = dmjson_get_value((json_object *)value, 1, "Interface");
+	char *ipping_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
+	char *ipping_nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
+	char *ipping_timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
+	char *ipping_datablocksize = dmjson_get_value((json_object *)value, 1, "DataBlockSize");
+	char *ipping_dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
+
+	set_diagnostics_option("ipping", "Host", ipping_host);
+	set_diagnostics_interface_option(ctx, "ipping", ipping_interface);
+	set_diagnostics_option("ipping", "ProtocolVersion", ipping_proto);
+	set_diagnostics_option("ipping", "NumberOfRepetitions", ipping_nbofrepetition);
+	set_diagnostics_option("ipping", "Timeout", ipping_timeout);
+	set_diagnostics_option("ipping", "DataBlockSize", ipping_datablocksize);
+	set_diagnostics_option("ipping", "DSCP", ipping_dscp);
+
+	// Commit and Free uci_ctx_bbfdm
+	commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
+
+	dmcmd("/bin/sh", 2, IPPING_PATH, "run");
+
+	// Allocate uci_ctx_bbfdm
+	dmuci_init_bbfdm();
+
+	char *ipping_success_count = get_diagnostics_option("ipping", "SuccessCount");
+	char *ipping_failure_count = get_diagnostics_option("ipping", "FailureCount");
+	char *ipping_average_response_time = get_diagnostics_option("ipping", "AverageResponseTime");
+	char *ipping_minimum_response_time = get_diagnostics_option("ipping", "MinimumResponseTime");
+	char *ipping_maximum_response_time = get_diagnostics_option("ipping", "MaximumResponseTime");
+	char *ipping_average_response_time_detailed = get_diagnostics_option("ipping", "AverageResponseTimeDetailed");
+	char *ipping_minimum_response_time_detailed = get_diagnostics_option("ipping", "MinimumResponseTimeDetailed");
+	char *ipping_maximum_response_time_detailed = get_diagnostics_option("ipping", "MaximumResponseTimeDetailed");
+
+	add_list_parameter(ctx, dmstrdup("SuccessCount"), ipping_success_count, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("FailureCount"), ipping_failure_count, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("AverageResponseTime"), ipping_average_response_time, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("MinimumResponseTime"), ipping_minimum_response_time, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("MaximumResponseTime"), ipping_maximum_response_time, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("AverageResponseTimeDetailed"), ipping_average_response_time_detailed, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("MinimumResponseTimeDetailed"), ipping_minimum_response_time_detailed, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("MaximumResponseTimeDetailed"), ipping_maximum_response_time_detailed, DMT_TYPE[DMT_UNINT], NULL);
+
+	return CMD_SUCCESS;
+}
+
+static operation_args ip_diagnostics_trace_route_args = {
+	.in = (const char *[]) {
+		"Interface",
+		"ProtocolVersion",
+		"Host",
+		"NumberOfTries",
+		"Timeout",
+		"DataBlockSize",
+		"DSCP",
+		"MaxHopCount",
+		NULL
+	},
+	.out = (const char *[]) {
+		"Status",
+		"IPAddressUsed",
+		"ResponseTime",
+		NULL
+	}
+};
+
+static int get_operate_args_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&ip_diagnostics_trace_route_args;
+	return 0;
+}
+
+static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *s = NULL;
+	char *route_hops_host[2] = {0};
+	char *route_hops_host_address[2] = {0};
+	char *route_hops_rttimes[2] = {0};
+	char *route_hops_errorcode = NULL;
+	int i = 1;
+
+	init_diagnostics_operation("traceroute", TRACEROUTE_PATH);
+
+	char *host = dmjson_get_value((json_object *)value, 1, "Host");
+	if (host[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+
+	char *interface = dmjson_get_value((json_object *)value, 1, "Interface");
+	char *proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
+	char *nboftries = dmjson_get_value((json_object *)value, 1, "NumberOfTries");
+	char *timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
+	char *datablocksize = dmjson_get_value((json_object *)value, 1, "DataBlockSize");
+	char *dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
+	char *maxhops = dmjson_get_value((json_object *)value, 1, "MaxHopCount");
+
+	set_diagnostics_option("traceroute", "Host", host);
+	set_diagnostics_interface_option(ctx, "traceroute", interface);
+	set_diagnostics_option("traceroute", "ProtocolVersion", proto);
+	set_diagnostics_option("traceroute", "NumberOfTries", nboftries);
+	set_diagnostics_option("traceroute", "Timeout", timeout);
+	set_diagnostics_option("traceroute", "DataBlockSize", datablocksize);
+	set_diagnostics_option("traceroute", "DSCP", dscp);
+	set_diagnostics_option("traceroute", "MaxHops", maxhops);
+
+	// Commit and Free uci_ctx_bbfdm
+	commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
+
+	dmcmd("/bin/sh", 2, TRACEROUTE_PATH, "run");
+
+	// Allocate uci_ctx_bbfdm
+	dmuci_init_bbfdm();
+
+	char *response_time = get_diagnostics_option("traceroute", "ResponseTime");
+	add_list_parameter(ctx, dmstrdup("ResponseTime"), response_time, DMT_TYPE[DMT_UNINT], NULL);
+
+	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "RouteHops", s) {
+		dmasprintf(&route_hops_host[0], "RouteHops.%d.Host", i);
+		dmasprintf(&route_hops_host_address[0], "RouteHops.%d.HostAddress", i);
+		dmasprintf(&route_hops_rttimes[0], "RouteHops.%d.RTTimes", i);
+		dmasprintf(&route_hops_errorcode, "RouteHops.%d.ErrorCode", i);
+
+		dmuci_get_value_by_section_string(s, "host", &route_hops_host[1]);
+		dmuci_get_value_by_section_string(s, "ip", &route_hops_host_address[1]);
+		dmuci_get_value_by_section_string(s, "time", &route_hops_rttimes[1]);
+
+		add_list_parameter(ctx, route_hops_host[0], route_hops_host[1], DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, route_hops_host_address[0], route_hops_host_address[1], DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, route_hops_rttimes[0], route_hops_rttimes[1], DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, route_hops_errorcode, "0", DMT_TYPE[DMT_UNINT], NULL);
+		i++;
+	}
+
+	return CMD_SUCCESS;
+}
+
+static operation_args ip_diagnostics_download_args = {
+	.in = (const char *[]) {
+		"Interface",
+		"DownloadURL",
+		"DSCP",
+		"EthernetPriority",
+		"TimeBasedTestDuration",
+		"TimeBasedTestMeasurementInterval",
+		"TimeBasedTestMeasurementOffset",
+		"ProtocolVersion",
+		"NumberOfConnections",
+		"EnablePerConnectionResults",
+		NULL
+	},
+	.out = (const char *[]) {
+		"Status",
+		"IPAddressUsed",
+		"ROMTime",
+		"BOMTime",
+		"EOMTime",
+		"TestBytesReceived",
+		"TotalBytesReceived",
+		"TotalBytesSent",
+		"TestBytesReceivedUnderFullLoading",
+		"TotalBytesReceivedUnderFullLoading",
+		"TotalBytesSentUnderFullLoading",
+		"PeriodOfFullLoading",
+		"TCPOpenRequestTime",
+		"TCPOpenResponseTime",
+		NULL
+	}
+};
+
+static int get_operate_args_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&ip_diagnostics_download_args;
+	return 0;
+}
+
+static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	init_diagnostics_operation("download", DOWNLOAD_DIAGNOSTIC_PATH);
+
+	char *download_url = dmjson_get_value((json_object *)value, 1, "DownloadURL");
+	if (download_url[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+	char *download_interface = dmjson_get_value((json_object *)value, 1, "Interface");
+	char *download_dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
+	char *download_ethernet_priority = dmjson_get_value((json_object *)value, 1, "EthernetPriority");
+	char *download_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
+	char *download_num_of_connections = dmjson_get_value((json_object *)value, 1, "NumberOfConnections");
+	char *download_enable_per_connection_results = dmjson_get_value((json_object *)value, 1, "EnablePerConnectionResults");
+
+	set_diagnostics_option("download", "url", download_url);
+	set_diagnostics_interface_option(ctx, "download", download_interface);
+	set_diagnostics_option("download", "DSCP", download_dscp);
+	set_diagnostics_option("download", "ethernetpriority", download_ethernet_priority);
+	set_diagnostics_option("download", "ProtocolVersion", download_proto);
+	set_diagnostics_option("download", "NumberOfConnections", download_num_of_connections);
+	set_diagnostics_option("download", "EnablePerConnection", download_enable_per_connection_results);
+
+	if (start_upload_download_diagnostic(DOWNLOAD_DIAGNOSTIC) == -1)
+		return CMD_FAIL;
+
+	char *romtime = get_diagnostics_option("download", "ROMtime");
+	char *bomtime = get_diagnostics_option("download", "BOMtime");
+	char *eomtime = get_diagnostics_option("download", "EOMtime");
+	char *test_bytes_received = get_diagnostics_option("download", "TestBytesReceived");
+	char *total_bytes_received = get_diagnostics_option("download", "TotalBytesReceived");
+	char *total_bytes_sent = get_diagnostics_option("download", "TotalBytesSent");
+	char *test_bytes_received_under_full_loading = get_diagnostics_option("download", "TestBytesReceived");
+	char *total_bytes_received_under_full_loading = get_diagnostics_option("download", "TotalBytesReceived");
+	char *total_bytes_sent_under_full_loading = get_diagnostics_option("download", "TotalBytesSent");
+	char *period_of_full_loading = get_diagnostics_option("download", "PeriodOfFullLoading");
+	char *tcp_open_request_time = get_diagnostics_option("download", "TCPOpenRequestTime");
+	char *tcp_open_response_time = get_diagnostics_option("download", "TCPOpenResponseTime");
+
+	add_list_parameter(ctx, dmstrdup("ROMTime"), romtime, DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("BOMTime"), bomtime, DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("EOMTime"), eomtime, DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("TestBytesReceived"), test_bytes_received, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TotalBytesReceived"), total_bytes_received, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TotalBytesSent"), total_bytes_sent, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TestBytesReceivedUnderFullLoading"), test_bytes_received_under_full_loading, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TotalBytesReceivedUnderFullLoading"), total_bytes_received_under_full_loading, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TotalBytesSentUnderFullLoading"), total_bytes_sent_under_full_loading, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("PeriodOfFullLoading"), period_of_full_loading, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TCPOpenRequestTime"), tcp_open_request_time, DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("TCPOpenResponseTime"), tcp_open_response_time, DMT_TYPE[DMT_TIME], NULL);
+
+	return CMD_SUCCESS;
+}
+
+static operation_args ip_diagnostics_upload_args = {
+	.in = (const char *[]) {
+		"Interface",
+		"UploadURL",
+		"DSCP",
+		"EthernetPriority",
+		"TestFileLength",
+		"TimeBasedTestDuration",
+		"TimeBasedTestMeasurementInterval",
+		"TimeBasedTestMeasurementOffset",
+		"ProtocolVersion",
+		"NumberOfConnections",
+		"EnablePerConnectionResults",
+		NULL
+	},
+	.out = (const char *[]) {
+		"Status",
+		"IPAddressUsed",
+		"ROMTime",
+		"BOMTime",
+		"EOMTime",
+		"TestBytesSent",
+		"TotalBytesReceived",
+		"TotalBytesSent",
+		"TestBytesSentUnderFullLoading",
+		"TotalBytesReceivedUnderFullLoading",
+		"TotalBytesSentUnderFullLoading",
+		"PeriodOfFullLoading",
+		"TCPOpenRequestTime",
+		"TCPOpenResponseTime",
+		NULL
+	}
+};
+
+static int get_operate_args_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&ip_diagnostics_upload_args;
+	return 0;
+}
+
+static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	init_diagnostics_operation("upload", UPLOAD_DIAGNOSTIC_PATH);
+
+	char *upload_url = dmjson_get_value((json_object *)value, 1, "UploadURL");
+	if (upload_url[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+
+	char *upload_test_file_length = dmjson_get_value((json_object *)value, 1, "TestFileLength");
+	if (upload_test_file_length[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+
+	char *upload_interface = dmjson_get_value((json_object *)value, 1, "Interface");
+	char *upload_dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
+	char *upload_ethernet_priority = dmjson_get_value((json_object *)value, 1, "EthernetPriority");
+	char *upload_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
+	char *upload_num_of_connections = dmjson_get_value((json_object *)value, 1, "NumberOfConnections");
+	char *upload_enable_per_connection_results = dmjson_get_value((json_object *)value, 1, "EnablePerConnectionResults");
+
+	set_diagnostics_option("upload", "url", upload_url);
+	set_diagnostics_option("upload", "TestFileLength", upload_test_file_length);
+	set_diagnostics_interface_option(ctx, "upload", upload_interface);
+	set_diagnostics_option("upload", "DSCP", upload_dscp);
+	set_diagnostics_option("upload", "ethernetpriority", upload_ethernet_priority);
+	set_diagnostics_option("upload", "ProtocolVersion", upload_proto);
+	set_diagnostics_option("upload", "NumberOfConnections", upload_num_of_connections);
+	set_diagnostics_option("upload", "EnablePerConnection", upload_enable_per_connection_results);
+
+	if (start_upload_download_diagnostic(UPLOAD_DIAGNOSTIC) == -1)
+		return CMD_FAIL;
+
+	char *upload_romtime = get_diagnostics_option("upload", "ROMtime");
+	char *upload_bomtime = get_diagnostics_option("upload", "BOMtime");
+	char *upload_eomtime = get_diagnostics_option("upload", "EOMtime");
+	char *upload_test_bytes_sent = get_diagnostics_option("upload", "TestBytesSent");
+	char *upload_total_bytes_received = get_diagnostics_option("upload", "TotalBytesReceived");
+	char *upload_total_bytes_sent = get_diagnostics_option("upload", "TotalBytesSent");
+	char *upload_test_bytes_sent_under_full_loading = get_diagnostics_option("upload", "TestBytesSent");
+	char *upload_total_bytes_received_under_full_loading = get_diagnostics_option("upload", "TotalBytesReceived");
+	char *upload_total_bytes_sent_under_full_loading = get_diagnostics_option("upload", "TotalBytesSent");
+	char *upload_period_of_full_loading = get_diagnostics_option("upload", "PeriodOfFullLoading");
+	char *upload_tcp_open_request_time = get_diagnostics_option("upload", "TCPOpenRequestTime");
+	char *upload_tcp_open_response_time = get_diagnostics_option("upload", "TCPOpenResponseTime");
+
+	add_list_parameter(ctx, dmstrdup("ROMTime"), upload_romtime, DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("BOMTime"), upload_bomtime, DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("EOMTime"), upload_eomtime, DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("TestBytesSent"), upload_test_bytes_sent, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TotalBytesReceived"), upload_total_bytes_received, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TotalBytesSent"), upload_total_bytes_sent, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TestBytesSentUnderFullLoading"), upload_test_bytes_sent_under_full_loading, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TotalBytesReceivedUnderFullLoading"), upload_total_bytes_received_under_full_loading, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TotalBytesSentUnderFullLoading"), upload_total_bytes_sent_under_full_loading, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("PeriodOfFullLoading"), upload_period_of_full_loading, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TCPOpenRequestTime"), upload_tcp_open_request_time, DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("TCPOpenResponseTime"), upload_tcp_open_response_time, DMT_TYPE[DMT_TIME], NULL);
+
+	return CMD_SUCCESS;
+}
+
+static operation_args ip_diagnostics_udpecho_args = {
+	.in = (const char *[]) {
+		"Interface",
+		"UploadURL",
+		"DSCP",
+		"EthernetPriority",
+		"TestFileLength",
+		"TimeBasedTestDuration",
+		"TimeBasedTestMeasurementInterval",
+		"TimeBasedTestMeasurementOffset",
+		"ProtocolVersion",
+		"NumberOfConnections",
+		"EnablePerConnectionResults",
+		NULL
+	},
+	.out = (const char *[]) {
+		"Status",
+		"IPAddressUsed",
+		"ROMTime",
+		"BOMTime",
+		"EOMTime",
+		"TestBytesSent",
+		"TotalBytesReceived",
+		"TotalBytesSent",
+		"TestBytesSentUnderFullLoading",
+		"TotalBytesReceivedUnderFullLoading",
+		"TotalBytesSentUnderFullLoading",
+		"PeriodOfFullLoading",
+		"TCPOpenRequestTime",
+		"TCPOpenResponseTime",
+		NULL
+	}
+};
+
+static int get_operate_args_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&ip_diagnostics_udpecho_args;
+	return 0;
+}
+
+static int operate_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	init_diagnostics_operation("udpechodiag", UDPECHO_PATH);
+
+	char *udpecho_host = dmjson_get_value((json_object *)value, 1, "Host");
+	if (udpecho_host[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+
+	char *udpecho_port = dmjson_get_value((json_object *)value, 1, "Port");
+	if (udpecho_port[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+
+	char *udpecho_interface = dmjson_get_value((json_object *)value, 1, "Interface");
+	char *udpecho_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
+	char *udpecho_nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
+	char *udpecho_timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
+	char *udpecho_datablocksize = dmjson_get_value((json_object *)value, 1, "DataBlockSize");
+	char *udpecho_dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
+	char *udpecho_inter_transmission_time = dmjson_get_value((json_object *)value, 1, "InterTransmissionTime");
+
+	set_diagnostics_option("udpechodiag", "Host", udpecho_host);
+	set_diagnostics_option("udpechodiag", "port", udpecho_port);
+	set_diagnostics_interface_option(ctx, "udpechodiag", udpecho_interface);
+	set_diagnostics_option("udpechodiag", "ProtocolVersion", udpecho_proto);
+	set_diagnostics_option("udpechodiag", "NumberOfRepetitions", udpecho_nbofrepetition);
+	set_diagnostics_option("udpechodiag", "Timeout", udpecho_timeout);
+	set_diagnostics_option("udpechodiag", "DataBlockSize", udpecho_datablocksize);
+	set_diagnostics_option("udpechodiag", "DSCP", udpecho_dscp);
+	set_diagnostics_option("udpechodiag", "InterTransmissionTime", udpecho_inter_transmission_time);
+
+	// Commit and Free uci_ctx_bbfdm
+	commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
+
+	dmcmd("/bin/sh", 2, UDPECHO_PATH, "run");
+
+	// Allocate uci_ctx_bbfdm
+	dmuci_init_bbfdm();
+
+	char *udpecho_success_count = get_diagnostics_option("udpechodiag", "SuccessCount");
+	char *udpecho_failure_count = get_diagnostics_option("udpechodiag", "FailureCount");
+	char *udpecho_average_response_time = get_diagnostics_option("udpechodiag", "AverageResponseTime");
+	char *udpecho_minimum_response_time = get_diagnostics_option("udpechodiag", "MinimumResponseTime");
+	char *udpecho_maximum_response_time = get_diagnostics_option("udpechodiag", "MaximumResponseTime");
+
+	add_list_parameter(ctx, dmstrdup("SuccessCount"), udpecho_success_count, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("FailureCount"), udpecho_failure_count, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("AverageResponseTime"), udpecho_average_response_time, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("MinimumResponseTime"), udpecho_minimum_response_time, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("MaximumResponseTime"), udpecho_maximum_response_time, DMT_TYPE[DMT_UNINT], NULL);
+
+	return CMD_SUCCESS;
+}
+
+static operation_args ip_diagnostics_server_selection_args = {
+	.in = (const char *[]) {
+		"Interface",
+		"ProtocolVersion",
+		"Protocol",
+		"HostList",
+		"NumberOfRepetitions",
+		"Timeout",
+		NULL
+	},
+	.out = (const char *[]) {
+		"Status",
+		"FastestHost",
+		"MinimumResponseTime",
+		"AverageResponseTime",
+		"MaximumResponseTime",
+		"IPAddressUsed",
+		NULL
+	}	
+};
+
+static int get_operate_args_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&ip_diagnostics_server_selection_args;
+	return 0;
+}
+
+static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	init_diagnostics_operation("serverselection", SERVERSELECTION_PATH);
+
+	char *hostlist = dmjson_get_value((json_object *)value, 1, "HostList");
+	if (hostlist[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+
+	char *port = dmjson_get_value((json_object *)value, 1, "Port");
+	char *proto = dmjson_get_value((json_object *)value, 1, "Protocol");
+	if (strcmp(proto, "ICMP") && port[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+
+	char *protocol_version = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
+	char *interface = dmjson_get_value((json_object *)value, 1, "Interface");
+	char *nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
+	char *timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
+
+	set_diagnostics_option("serverselection", "HostList", hostlist);
+	set_diagnostics_interface_option(ctx, "serverselection", interface);
+	set_diagnostics_option("serverselection", "ProtocolVersion", protocol_version);
+	set_diagnostics_option("serverselection", "NumberOfRepetitions", nbofrepetition);
+	set_diagnostics_option("serverselection", "port", port);
+	set_diagnostics_option("serverselection", "Protocol", proto);
+	set_diagnostics_option("serverselection", "Timeout", timeout);
+
+	// Commit and Free uci_ctx_bbfdm
+	commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
+
+	dmcmd("/bin/sh", 2, SERVERSELECTION_PATH, "run");
+
+	// Allocate uci_ctx_bbfdm
+	dmuci_init_bbfdm();
+
+	char *fasthost = get_diagnostics_option("serverselection", "FastestHost");
+	char *average_response_time = get_diagnostics_option("serverselection", "AverageResponseTime");
+	char *minimum_response_time = get_diagnostics_option("serverselection", "MinimumResponseTime");
+	char *maximum_response_time = get_diagnostics_option("serverselection", "MaximumResponseTime");
+
+	add_list_parameter(ctx, dmstrdup("FastestHost"), fasthost, DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("AverageResponseTime"), average_response_time, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("MinimumResponseTime"), minimum_response_time, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("MaximumResponseTime"), maximum_response_time, DMT_TYPE[DMT_UNINT], NULL);
+
+	return CMD_SUCCESS;
+}
+
+/**********************************************************************************************************************************
+*                                            OBJ & LEAF DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.IP.Diagnostics. *** */
 DMOBJ tIPDiagnosticsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
@@ -1639,6 +2186,12 @@ DMLEAF tIPDiagnosticsParams[] = {
 {"IPv6UDPEchoDiagnosticsSupported", &DMREAD, DMT_BOOL, get_diag_enable_true, NULL, BBFDM_BOTH},
 {"IPv4ServerSelectionDiagnosticsSupported", &DMREAD, DMT_BOOL, get_diag_enable_true, NULL, BBFDM_BOTH},
 {"IPv6ServerSelectionDiagnosticsSupported", &DMREAD, DMT_BOOL, get_diag_enable_true, NULL, BBFDM_BOTH},
+{"IPPing()", &DMASYNC, DMT_COMMAND, get_operate_args_IPDiagnostics_IPPing, operate_IPDiagnostics_IPPing, BBFDM_USP},
+{"TraceRoute()", &DMASYNC, DMT_COMMAND, get_operate_args_IPDiagnostics_TraceRoute, operate_IPDiagnostics_TraceRoute, BBFDM_USP},
+{"DownloadDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_IPDiagnostics_DownloadDiagnostics, operate_IPDiagnostics_DownloadDiagnostics, BBFDM_USP},
+{"UploadDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_IPDiagnostics_UploadDiagnostics, operate_IPDiagnostics_UploadDiagnostics, BBFDM_USP},
+{"UDPEchoDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_IPDiagnostics_UDPEchoDiagnostics, operate_IPDiagnostics_UDPEchoDiagnostics, BBFDM_USP},
+{"ServerSelectionDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_IPDiagnostics_ServerSelectionDiagnostics, operate_IPDiagnostics_ServerSelectionDiagnostics, BBFDM_USP},
 {0}
 };
 

@@ -20,31 +20,7 @@
 DM_MAP_OBJ tDynamicObj[] = {
 /* parentobj, nextobject, parameter */
 {"Device.ManagementServer.", tDynamicManagementServerObj, tDynamicManagementServerParams},
-{"Device.", tDynamicDeviceObj, NULL},
-{0}
-};
-
-/* ********** DynamicOperate ********** */
-DM_MAP_OPERATE tDynamicOperate[] = {
-/* pathname, operation, type, args */
-{
-	"Device.X_IOPSYS_EU_PingTEST.Run", DynamicDevicePingOperate, "async",
-	{
-		.in = (const char *[]) {
-			"Host",
-			NULL
-		},
-		.out = (const char *[]) {
-			"AverageResponseTime",
-			"MinimumResponseTime",
-			"MaximumResponseTime",
-			NULL
-		}
-	}
-},
-{
-	"Device.X_IOPSYS_EU_Reboot", DynamicDeviceRebootOperate, "sync"
-},
+{"Device.", tDynamicDeviceObj, tDynamicDeviceParams},
 {0}
 };
 
@@ -283,16 +259,40 @@ static int set_X_IOPSYS_EU_Syslog_ConsoleLogLevel(char *refparam, struct dmctx *
 }
 
 /*************************************************************
- * OPERATE
+ * OPERATE COMMANDS
  *************************************************************/
-opr_ret_t DynamicDevicePingOperate(struct dmctx *dmctx, char *path, json_object *input)
+static int operate_Device_X_IOPSYS_EU_Reboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return !dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0) ? CMD_SUCCESS : CMD_FAIL;
+}
+
+static operation_args x_iopsys_eu_ping_test_run_args = {
+	.in = (const char *[]) {
+		"Host",
+		NULL
+	},
+	.out = (const char *[]) {
+		"AverageResponseTime",
+		"MinimumResponseTime",
+		"MaximumResponseTime",
+		NULL
+	}
+};
+
+static int get_operate_args_XIOPSYSEUPingTEST_Run(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&x_iopsys_eu_ping_test_run_args;
+	return 0;
+}
+
+static int operate_DeviceXIOPSYSEUPingTEST_Run(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *p, *min = NULL, *avg = NULL, *max = NULL, line[512], command[512];
 	FILE *log = NULL;
 
-	char *host = dmjson_get_value(input, 1, "Host");
+	char *host = dmjson_get_value((json_object *)value, 1, "Host");
 	if(host[0] == '\0')
-		return UBUS_INVALID_ARGUMENTS;
+		return CMD_INVALID_ARGUMENTS;
 
 	snprintf(command, sizeof(command), "ping -c 1 -W 1 %s", host);
 
@@ -301,25 +301,17 @@ opr_ret_t DynamicDevicePingOperate(struct dmctx *dmctx, char *path, json_object 
 			if (strstr(line, "rtt")) {
 				strtok_r(line, "=", &min);
 				strtok_r(min+1, "/", &avg);
-				add_list_parameter(dmctx, dmstrdup("MinimumResponseTime"), dmstrdup(min ? min+1 : ""), "xsd:unsignedInt", NULL);
+				add_list_parameter(ctx, dmstrdup("MinimumResponseTime"), dmstrdup(min ? min+1 : ""), "xsd:unsignedInt", NULL);
 				strtok_r(avg, "/", &max);
-				add_list_parameter(dmctx, dmstrdup("AverageResponseTime"), dmstrdup(avg ? avg : ""), "xsd:unsignedInt", NULL);
+				add_list_parameter(ctx, dmstrdup("AverageResponseTime"), dmstrdup(avg ? avg : ""), "xsd:unsignedInt", NULL);
 				strtok_r(max, "/", &p);
-				add_list_parameter(dmctx, dmstrdup("MaximumResponseTime"), dmstrdup(max ? max : ""), "xsd:unsignedInt", NULL);
+				add_list_parameter(ctx, dmstrdup("MaximumResponseTime"), dmstrdup(max ? max : ""), "xsd:unsignedInt", NULL);
 				break;
 			}
 		}
 		pclose(log);
 	}
-	return SUCCESS;
-}
-
-opr_ret_t DynamicDeviceRebootOperate(struct dmctx *dmctx, char *path, json_object *input)
-{
-	if (0 == dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0))
-		return SUCCESS;
-	else
-		return FAIL;
+	return CMD_SUCCESS;
 }
 
 /**********************************************************************************************************************************
@@ -352,6 +344,13 @@ DMLEAF tManagementServerInformParameterParams[] = {
 DMOBJ tDynamicDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"X_IOPSYS_EU_Syslog", &DMREAD, NULL, NULL, "file:/etc/config/system", NULL, NULL, NULL, NULL, tX_IOPSYS_EU_SyslogParam, NULL, BBFDM_BOTH},
+{"X_IOPSYS_EU_PingTEST", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tX_IOPSYS_EU_PingTESTParam, NULL, BBFDM_BOTH},
+{0}
+};
+
+DMLEAF tDynamicDeviceParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"X_IOPSYS_EU_Reboot()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_X_IOPSYS_EU_Reboot, BBFDM_USP},
 {0}
 };
 
@@ -361,5 +360,12 @@ DMLEAF tX_IOPSYS_EU_SyslogParam[] = {
 {"ServerIPAddress", &DMWRITE, DMT_STRING, get_X_IOPSYS_EU_Syslog_ServerIPAddress, set_X_IOPSYS_EU_Syslog_ServerIPAddress, BBFDM_BOTH},
 {"ServerPort", &DMWRITE, DMT_UNINT, get_X_IOPSYS_EU_Syslog_ServerPort, set_X_IOPSYS_EU_Syslog_ServerPort, BBFDM_BOTH},
 {"ConsoleLogLevel", &DMWRITE, DMT_UNINT, get_X_IOPSYS_EU_Syslog_ConsoleLogLevel, set_X_IOPSYS_EU_Syslog_ConsoleLogLevel, BBFDM_BOTH},
+{0}
+};
+
+/*** Device.X_IOPSYS_EU_PingTEST. ***/
+DMLEAF tX_IOPSYS_EU_PingTESTParam[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Run()", &DMASYNC, DMT_COMMAND, get_operate_args_XIOPSYSEUPingTEST_Run, operate_DeviceXIOPSYSEUPingTEST_Run, BBFDM_USP},
 {0}
 };

@@ -1080,7 +1080,7 @@ static int get_EthernetLink_MACAddress(char *refparam, struct dmctx *ctx, void *
 	int i;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "mac", &mac_addr);
-	strncpy(address, mac_addr, sizeof(address));
+	DM_STRNCPY(address, mac_addr, sizeof(address));
 	for (i = 0; address[i] != '\0'; i++) {
 		if(address[i] >= 'a' && address[i] <= 'z') {
 			address[i] = address[i] - 32;

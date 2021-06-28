@@ -601,18 +601,6 @@ end:
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
-int get_Device_InterfaceStackNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_path_foreach_sections(bbfdm, "dmmap_interface_stack", "interface_stack", s) {
-		cnt++;
-	}
-	dmasprintf(value, "%d", cnt);
-	return 0;
-}
-
 static int get_InterfaceStack_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;

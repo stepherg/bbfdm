@@ -15,7 +15,6 @@
 
 extern DMLEAF tInterfaceStackParams[];
 
-int get_Device_InterfaceStackNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);
 
 #endif //__INTERFACESTACK_H

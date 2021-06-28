@@ -13,6 +13,9 @@
 #include "dmbbfcommon.h"
 #include "dns.h"
 
+/*************************************************************
+* COMMON FUNCTIONS
+**************************************************************/
 static unsigned char is_dns_server_in_dmmap(char *chk_ip, char *chk_interface)
 {
 	struct uci_section *s = NULL;
@@ -100,7 +103,9 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 	return 0;
 }
 
-/******************************** Browse Functions ****************************************/
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
 static int browseDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
@@ -134,7 +139,9 @@ static int browseResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 	return 0;
 }
 
-/*********************************** Add/Delet Object functions *************************/
+/*************************************************************
+* ADD & DEL OBJ
+**************************************************************/
 static int add_dns_server(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s = NULL;
@@ -188,7 +195,9 @@ static int delete_dns_server(char *refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
-/***************************************** Get/Set Parameter functions ***********************/
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
 static int get_dns_supported_record_types(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "A,AAAA,PTR";
@@ -686,12 +695,109 @@ static int set_nslookupdiagnostics_number_of_repetitions(char *refparam, struct 
 	return 0;
 }
 
+/*************************************************************
+ * OPERATE COMMANDS
+ *************************************************************/
+static operation_args dns_diagnostics_nslookup_args = {
+	.in = (const char *[]) {
+		"HostName",
+		"Interface",
+		"DNSServer",
+		"Timeout",
+		"NumberOfRepetitions",
+		NULL
+	},
+	.out = (const char *[]) {
+		"Status",
+		"AnswerType",
+		"HostNameReturned",
+		"IPAddresses",
+		"DNSServerIP",
+		"ResponseTime",
+		NULL
+	}
+};
+
+static int get_operate_args_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&dns_diagnostics_nslookup_args;
+	return 0;
+}
+
+static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *s = NULL;
+	char *nslookup_status[2] = {0};
+	char *nslookup_answer_type[2] = {0};
+	char *nslookup_hostname_returned[2] = {0};
+	char *nslookup_ip_addresses[2] = {0};
+	char *nslookup_dns_server_ip[2] = {0};
+	char *nslookup_response_time[2] = {0};
+	int i = 1;
+
+	init_diagnostics_operation("nslookup", NSLOOKUP_PATH);
+
+	char *hostname = dmjson_get_value((json_object *)value, 1, "HostName");
+	if (hostname[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+	char *interface = dmjson_get_value((json_object *)value, 1, "Interface");
+	char *dnsserver = dmjson_get_value((json_object *)value, 1, "DNSServer");
+	char *timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
+	char *nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
+
+	set_diagnostics_option("nslookup", "HostName", hostname);
+	set_diagnostics_interface_option(ctx, "nslookup", interface);
+	set_diagnostics_option("nslookup", "DNSServer", dnsserver);
+	set_diagnostics_option("nslookup", "Timeout", timeout);
+	set_diagnostics_option("nslookup", "NumberOfRepetitions", nbofrepetition);
+
+	// Commit and Free uci_ctx_bbfdm
+	commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
+
+	dmcmd("/bin/sh", 2, NSLOOKUP_PATH, "run");
+
+	// Allocate uci_ctx_bbfdm
+	dmuci_init_bbfdm();
+
+	char *success_count = get_diagnostics_option("nslookup", "SuccessCount");
+	add_list_parameter(ctx, dmstrdup("SuccessCount"), success_count, DMT_TYPE[DMT_UNINT], NULL);
+
+	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "NSLookupResult", s) {
+		dmasprintf(&nslookup_status[0], "Result.%d.Status", i);
+		dmasprintf(&nslookup_answer_type[0], "Result.%d.AnswerType", i);
+		dmasprintf(&nslookup_hostname_returned[0], "Result.%d.HostNameReturned", i);
+		dmasprintf(&nslookup_ip_addresses[0], "Result.%d.IPAddresses", i);
+		dmasprintf(&nslookup_dns_server_ip[0], "Result.%d.DNSServerIP", i);
+		dmasprintf(&nslookup_response_time[0], "Result.%d.ResponseTime", i);
+
+		dmuci_get_value_by_section_string(s, "Status", &nslookup_status[1]);
+		dmuci_get_value_by_section_string(s, "AnswerType", &nslookup_answer_type[1]);
+		dmuci_get_value_by_section_string(s, "HostNameReturned", &nslookup_hostname_returned[1]);
+		dmuci_get_value_by_section_string(s, "IPAddresses", &nslookup_ip_addresses[1]);
+		dmuci_get_value_by_section_string(s, "DNSServerIP", &nslookup_dns_server_ip[1]);
+		dmuci_get_value_by_section_string(s, "ResponseTime", &nslookup_response_time[1]);
+
+		add_list_parameter(ctx, nslookup_status[0], nslookup_status[1], DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, nslookup_answer_type[0], nslookup_answer_type[1], DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, nslookup_hostname_returned[0], nslookup_hostname_returned[1], DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, nslookup_ip_addresses[0], nslookup_ip_addresses[1], DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, nslookup_dns_server_ip[0], nslookup_dns_server_ip[1], DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, nslookup_response_time[0], nslookup_response_time[1], DMT_TYPE[DMT_UNINT], NULL);
+		i++;
+	}
+
+	return CMD_SUCCESS;
+}
+
+/**********************************************************************************************************************************
+*                                            OBJ & LEAF DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.DNS. *** */
 DMOBJ tDNSObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Client", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSClientObj, tDNSClientParams, NULL, BBFDM_BOTH},
 {"Relay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSRelayObj, tDNSRelayParams, NULL, BBFDM_BOTH},
-{"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsObj, NULL, NULL, BBFDM_BOTH},
+{"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsObj, tDNSDiagnosticsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -759,6 +865,12 @@ DMLEAF tDNSRelayForwardingParams[] = {
 DMOBJ tDNSDiagnosticsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"NSLookupDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsObj, tDNSDiagnosticsNSLookupDiagnosticsParams, NULL, BBFDM_CWMP},
+{0}
+};
+
+DMLEAF tDNSDiagnosticsParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"NSLookupDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_DNSDiagnostics_NSLookupDiagnostics, operate_DNSDiagnostics_NSLookupDiagnostics, BBFDM_USP},
 {0}
 };
 

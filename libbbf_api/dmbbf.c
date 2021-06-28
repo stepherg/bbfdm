@@ -104,6 +104,8 @@ char *array_notifcation_char[__MAX_notification] = {
 
 struct dm_permession_s DMREAD = {"0", NULL};
 struct dm_permession_s DMWRITE = {"1", NULL};
+struct dm_permession_s DMSYNC = {"sync", NULL};
+struct dm_permession_s DMASYNC = {"async", NULL};
 
 static int plugin_obj_match(DMOBJECT_ARGS)
 {
@@ -227,9 +229,15 @@ static bool check_dependency(const char *conf_obj)
 static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf, void *data, char *instance)
 {
 	int err = 0;
+
 	for (; (leaf && leaf->parameter); leaf++) {
+
 		if (!bbfdatamodel_matches(leaf->bbfdm_type))
 			continue;
+
+		if (dmctx->iscommand != (leaf->type == DMT_COMMAND))
+			continue;
+
 		snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, leaf->parameter);
 		err = dmctx->method_param(dmctx, parent_node, leaf->parameter, leaf->permission, leaf->type, leaf->getvalue, leaf->setvalue, data, instance);
 		if (dmctx->stop)
@@ -244,8 +252,13 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 					for (int j = 0; next_dyn_array->nextleaf[j]; j++) {
 						DMLEAF *jleaf = next_dyn_array->nextleaf[j];
 						for (; (jleaf && jleaf->parameter); jleaf++) {
+
 							if (!bbfdatamodel_matches(jleaf->bbfdm_type))
 								continue;
+
+							if (dmctx->iscommand != (jleaf->type == DMT_COMMAND))
+								continue;
+
 							snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, jleaf->parameter);
 							err = dmctx->method_param(dmctx, parent_node, jleaf->parameter, jleaf->permission, jleaf->type, jleaf->getvalue, jleaf->setvalue, data, instance);
 							if (dmctx->stop)
@@ -427,30 +440,55 @@ void dm_exclude_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, c
 	}
 }
 
+static void dm_check_dynamic_obj_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *parent_obj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found)
+{
+	DMNODE node = {0};
+	node.obj = entryobj;
+	node.parent = parent_node;
+	node.instance_level = parent_node->instance_level;
+	node.matched = parent_node->matched;
+
+	dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
+	if (strcmp(node.current_object, obj) == 0) {
+		*root_entry = entryobj;
+		*obj_found = 1;
+		return;
+	}
+
+	int err = plugin_dynamic_obj_match(dmctx, &node, entryobj->obj, full_obj);
+	if (err)
+		return;
+
+	if (entryobj->nextobj || entryobj->nextdynamicobj)
+		dm_check_dynamic_obj(dmctx, &node, entryobj->nextobj, full_obj, obj, root_entry, obj_found);
+}
+
 void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found)
 {
 	char *parent_obj = parent_node->current_object;
 
 	for (; (entryobj && entryobj->obj); entryobj++) {
-		DMNODE node = {0};
-		node.obj = entryobj;
-		node.parent = parent_node;
-		node.instance_level = parent_node->instance_level;
-		node.matched = parent_node->matched;
-
-		dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
-		if (strcmp(node.current_object, obj) == 0) {
-			*root_entry = entryobj;
-			*obj_found = 1;
+		dm_check_dynamic_obj_entry(dmctx, parent_node, entryobj, parent_obj, full_obj, obj, root_entry, obj_found);
+		if (*obj_found == 1)
 			return;
+	}
+
+	if (parent_node->obj) {
+		if (parent_node->obj->nextdynamicobj) {
+			for (int i = 0; i < __INDX_DYNAMIC_MAX; i++) {
+				struct dm_dynamic_obj *next_dyn_array = parent_node->obj->nextdynamicobj + i;
+				if (next_dyn_array->nextobj) {
+					for (int j = 0; next_dyn_array->nextobj[j]; j++) {
+						DMOBJ *jentryobj = next_dyn_array->nextobj[j];
+						for (; (jentryobj && jentryobj->obj); jentryobj++) {
+							dm_check_dynamic_obj_entry(dmctx, parent_node, jentryobj, parent_obj, full_obj, obj, root_entry, obj_found);
+							if (*obj_found == 1)
+								return;
+						}
+					}
+				}
+			}
 		}
-
-		int err = plugin_dynamic_obj_match(dmctx, &node, entryobj->obj, full_obj);
-		if (err)
-			continue;
-
-		if (entryobj->nextobj)
-			dm_check_dynamic_obj(dmctx, &node, entryobj->nextobj, full_obj, obj, root_entry, obj_found);
 	}
 }
 
@@ -743,7 +781,7 @@ void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, c
 	dm_parameter = dmcalloc(1, sizeof(struct dm_parameter));
 	_list_add(&dm_parameter->list, ilist->prev, ilist);
 	dm_parameter->name = param_name;
-	dm_parameter->data = param_data ? param_data : "";
+	dm_parameter->data = param_data;
 	dm_parameter->type = param_type;
 	dm_parameter->notification = param_notification;
 }
@@ -1952,6 +1990,100 @@ static int get_linker_value_check_obj(DMOBJECT_ARGS)
 static int get_linker_value_check_param(DMPARAM_ARGS)
 {
 	return FAULT_9005;
+}
+
+/* ************
+ * list operate
+ * ************/
+static int mobj_list_operates_name(DMOBJECT_ARGS)
+{
+	return 0;
+}
+
+static int mparam_list_operates_name(DMPARAM_ARGS)
+{
+	char *full_param;
+	char *value = NULL;
+
+	dmastrcat(&full_param, node->current_object, lastname);
+	if (get_cmd)
+		(get_cmd)(full_param, dmctx, data, instance, &value);
+
+	add_list_parameter(dmctx, full_param, value, permission->val, NULL);
+	return 0;
+}
+
+int dm_entry_list_operates(struct dmctx *dmctx)
+{
+	DMOBJ *root = dmctx->dm_entryobj;
+	DMNODE node = {.current_object = ""};
+	int err;
+
+	dmctx->inparam_isparam = 0;
+	dmctx->isgetschema = 1;
+	dmctx->iscommand = 1;
+	dmctx->findparam = 0;
+	dmctx->stop = 0;
+	dmctx->checkobj = NULL;
+	dmctx->checkleaf = NULL;
+	dmctx->method_obj = mobj_list_operates_name;
+	dmctx->method_param = mparam_list_operates_name;
+	err = dm_browse(dmctx, &node, root, NULL, NULL);
+	return err;
+}
+
+/* **************
+ * Operate  
+ * **************/
+static int mobj_operate(DMOBJECT_ARGS)
+{
+	return CMD_NOT_FOUND;
+}
+
+static int mparam_operate(DMPARAM_ARGS)
+{
+	char *full_param = NULL;
+
+	dmastrcat(&full_param, node->current_object, lastname);
+	if (full_param && strcmp(full_param, dmctx->in_param) != 0) {
+		dmfree(full_param);
+		return CMD_NOT_FOUND;
+	}
+	dmctx->stop = 1;
+
+	if (!set_cmd) {
+		dmfree(full_param);
+		return CMD_FAIL;
+	}
+
+	json_object *j_input = (dmctx->in_value) ? json_tokener_parse(dmctx->in_value) : NULL;
+	int fault = (set_cmd)(full_param, dmctx, data, instance, (char *)j_input, VALUESET);
+	json_object_put(j_input);
+	dmfree(full_param);
+	return fault;
+}
+
+int dm_entry_operate(struct dmctx *dmctx)
+{
+	DMOBJ *root = dmctx->dm_entryobj;
+	DMNODE node = { .current_object = "" };
+	int err;
+
+	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0' || (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != ')'))
+		return CMD_NOT_FOUND;
+
+	dmctx->iscommand = 1;
+	dmctx->inparam_isparam = 1;
+	dmctx->stop = 0;
+	dmctx->checkobj = plugin_obj_match;
+	dmctx->checkleaf = plugin_leaf_match;
+	dmctx->method_obj = mobj_operate;
+	dmctx->method_param = mparam_operate;
+	err = dm_browse(dmctx, &node, root, NULL, NULL);
+	if (dmctx->stop)
+		return err;
+	else
+		return CMD_NOT_FOUND;
 }
 
 int dm_browse_last_access_path(char *path, size_t len)

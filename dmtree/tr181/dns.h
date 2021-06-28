@@ -22,6 +22,7 @@ extern DMLEAF tDNSRelayParams[];
 extern DMOBJ tDNSRelayObj[];
 extern DMLEAF tDNSRelayForwardingParams[];
 extern DMOBJ tDNSDiagnosticsObj[];
+extern DMLEAF tDNSDiagnosticsParams[];
 extern DMLEAF tDNSDiagnosticsNSLookupDiagnosticsParams[];
 extern DMOBJ tDNSDiagnosticsNSLookupDiagnosticsObj[];
 extern DMLEAF tDNSDiagnosticsNSLookupDiagnosticsResultParams[];

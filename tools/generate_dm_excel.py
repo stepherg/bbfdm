@@ -27,23 +27,13 @@ def getprotocols(value):
     return "CWMP+USP"
 
 
-def check_param_obj(dmobject):
+def check_param_obj_command(dmobject):
     for value in bbf.LIST_SUPPORTED_DM:
         obj = value.split(",")
         if obj[0] == dmobject:
             bbf.LIST_SUPPORTED_DM.remove(value)
             return "Yes"
     return "No"
-
-
-def check_commands(param):
-    cmd = 'awk \'/static const struct op_cmd operate_helper/,/^};$/\' ../dmoperate.c'
-    param = param.replace(".{i}.", ".*.").replace("()", "")
-
-    res = os.popen(cmd).read()
-    string = "\n\t{\n\t\t\"%s\"," % param
-
-    return "Yes" if string in res else "No"
 
 
 def add_data_to_list_dm(obj, supported, protocols, types):
@@ -54,7 +44,7 @@ def parse_standard_object(dmobject, value):
     hasobj = bbf.obj_has_child(value)
     hasparam = bbf.obj_has_param(value)
 
-    supported = check_param_obj(dmobject)
+    supported = check_param_obj_command(dmobject)
     add_data_to_list_dm(dmobject, supported, getprotocols(value), "object")
 
     if hasparam:
@@ -65,14 +55,8 @@ def parse_standard_object(dmobject, value):
                 if isinstance(v, dict):
                     for k1, v1 in v.items():
                         if k1 == "type" and v1 != "object":
-                            if "()" in k:
-                                supported = check_commands(dmobject + k)
-                                add_data_to_list_dm(
-                                    dmobject + k, supported, getprotocols(v), "operate")
-                            else:
-                                supported = check_param_obj(dmobject + k)
-                                add_data_to_list_dm(
-                                    dmobject + k, supported, getprotocols(v), "parameter")
+                            supported = check_param_obj_command(dmobject + k)
+                            add_data_to_list_dm(dmobject + k, supported, getprotocols(v), "operate" if "()" in k else "parameter")
                             break
 
     if hasobj:

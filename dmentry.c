@@ -16,7 +16,6 @@
 #include "dmdynamicjson.h"
 #include "dmdynamiclibrary.h"
 #include "dmdynamicvendor.h"
-#include "dmoperate.h"
 #include "device.h"
 #include "dmbbfcommon.h"
 
@@ -241,10 +240,10 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			break;
 		case CMD_USP_OPERATE:
 			ctx->in_value = arg1 ? arg1 : "";
-			fault = operate_on_node(ctx, ctx->in_param, ctx->in_value);
+			fault = dm_entry_operate(ctx);
 			break;
 		case CMD_USP_LIST_OPERATE:
-			operate_list_cmds(ctx);
+			fault = dm_entry_list_operates(ctx);
 			break;
 		case CMD_GET_SCHEMA:
 			fault = dm_entry_get_schema(ctx);
@@ -261,11 +260,11 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 	return usp_fault_map(fault);
 }
 
-int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2)
+int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1)
 {
 	struct set_tmp *n = NULL, *p = NULL;
 	int fault = 0;
-	
+
 	switch(cmd) {
 		case CMD_SET_VALUE:
 			ctx->setaction = VALUESET;

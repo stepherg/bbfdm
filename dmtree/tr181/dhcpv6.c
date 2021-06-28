@@ -1300,6 +1300,21 @@ static int set_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 	return 0;
 }
 
+/*************************************************************
+ * OPERATE COMMANDS
+ *************************************************************/
+static int operate_DHCPv6Client_Renew(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *dhcpv6_s = ((struct dhcpv6_client_args *)data)->dhcp_client_conf;
+
+	dmubus_call_set("network.interface", "renew", UBUS_ARGS{{"interface", section_name(dhcpv6_s), String}}, 1);
+
+	return CMD_SUCCESS;
+}
+
+/**********************************************************************************************************************************
+*                                            OBJ & PARAM DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.DHCPv6. *** */
 DMOBJ tDHCPv6Obj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
@@ -1332,6 +1347,7 @@ DMLEAF tDHCPv6ClientParams[] = {
 //{"ServerNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_ServerNumberOfEntries, NULL, BBFDM_BOTH},
 //{"SentOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_SentOptionNumberOfEntries, NULL, BBFDM_BOTH},
 //{"ReceivedOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv6Client_ReceivedOptionNumberOfEntries, NULL, BBFDM_BOTH},
+{"Renew()", &DMSYNC, DMT_COMMAND, NULL, operate_DHCPv6Client_Renew, BBFDM_USP},
 {0}
 };
 

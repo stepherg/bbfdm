@@ -27,7 +27,7 @@ enum ctx_init_enum {
 int dm_ctx_init(struct dmctx *ctx, unsigned int instance_mode);
 int dm_ctx_init_sub(struct dmctx *ctx, unsigned int instance_mode);
 int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2);
-int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1, char *arg2);
+int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1);
 int dm_entry_restart_services(void);
 int dm_entry_manage_services(struct blob_buf *bb, bool restart);
 int dm_entry_revert_changes(void);

@@ -77,7 +77,7 @@ static void test_api_bbfdm_get_set_standard_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key", NULL);
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -105,7 +105,7 @@ static void test_api_bbfdm_get_set_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key", NULL);
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -137,7 +137,7 @@ static void test_api_bbfdm_get_set_library_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key", NULL);
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -362,8 +362,8 @@ static void test_api_bbfdm_valid_standard_operate(void **state)
 	struct dm_parameter *n;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.IP.Diagnostics.IPPing", input, NULL);
-	assert_int_equal(fault, SUCCESS);
+	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.IP.Diagnostics.IPPing()", input, NULL);
+	assert_int_equal(fault, CMD_SUCCESS);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 		if (strcmp(n->name, "SuccessCount") == 0) {
@@ -384,8 +384,8 @@ static void test_api_bbfdm_valid_library_operate(void **state)
 	struct dm_parameter *n;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.X_IOPSYS_EU_PingTEST.Run", input, NULL);
-	assert_int_equal(fault, SUCCESS);
+	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.X_IOPSYS_EU_PingTEST.Run()", input, NULL);
+	assert_int_equal(fault, CMD_SUCCESS);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 		assert_string_not_equal(n->data, "0");

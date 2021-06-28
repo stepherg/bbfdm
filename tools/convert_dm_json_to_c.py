@@ -798,6 +798,52 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
     fp.close()
 
 
+def cprinOperateCommands(getoperateargs, operate, in_args, out_args, struct_name):
+    # Open file
+    fp = open('./.operatecommands.c', 'a')
+    
+    if in_args != None or out_args != None:
+        ############################## OPERATE ARGUMENTS ########################################
+        print("static operation_args %s = {" % struct_name, file=fp)
+        
+        if in_args != None:
+            if isinstance(in_args, dict):
+                print(" .in = (const char *[]) {", file=fp)
+                for obj, _val in in_args.items():
+                    print("     \"%s\"," % obj, file=fp)
+                print("     NULL", file=fp)
+                print(" %s" % ("}," if out_args != None else "}"), file=fp)
+
+        if out_args != None:
+            if isinstance(out_args, dict):
+                print(" .out = (const char *[]) {", file=fp)
+                for obj, _val in out_args.items():
+                    print("     \"%s\"," % obj, file=fp)
+                print("     NULL", file=fp)
+                print(" }", file=fp)
+        
+        print("};", file=fp)
+        print("", file=fp)
+    
+        print("static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)" % getoperateargs, file=fp)
+        print("{", file=fp)
+        print(" *value = (char *)&%s;" % struct_name, file=fp)
+        print(" return 0;", file=fp)
+        print("}", file=fp)
+        print("", file=fp)
+
+    ############################## OPERATE ########################################
+    print("static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)" % operate, file=fp)
+    print("{", file=fp)
+    print(" //TODO", file=fp)
+    print(" return CMD_SUCCESS;", file=fp)
+    print("}", file=fp)
+    print("", file=fp)
+
+    # Close file
+    fp.close()  
+
+
 def cprintheaderPARAMS(objname):
     fp = open('./.objparamarray.c', 'a')
     print("DMLEAF %s[] = {" % ("t" + getname(objname) + "Params"), file=fp)
@@ -838,6 +884,32 @@ def printPARAMline(parentname, dmparam, value):
     fp = open('./.objparamarray.c', 'a')
     print("{\"%s\", %s, %s, %s, %s, %s}," %
           (dmparam, access, ptype, getvalue, setvalue, bbfdm), file=fp)
+    fp.close()
+
+
+def printCOMMANDline( parentname, dmparam, value ):
+    commonname = getname(parentname) + "_" + dmparam
+    ptype = bbf.get_param_type(value)
+    operate = "operate_" + commonname.replace("()", "")
+    bbfdm = getprotocolsparam(value, "protocols")
+    asyncparam = bbf.get_option_value(value, "async")
+    in_args = bbf.get_option_value(value, "input")
+    out_args = bbf.get_option_value(value, "output")
+
+    if asyncparam:
+        c_type = "&DMASYNC"
+    else:
+        c_type = "&DMSYNC"
+        
+    if in_args != None or out_args != None:
+        getoperateargs = "get_operate_args_" + commonname.replace("()", "")
+    else:
+        getoperateargs = "NULL"
+
+    cprinOperateCommands(getoperateargs, operate, in_args, out_args, commonname.replace("()", "").lower()+"_args")
+
+    fp = open('./.objparamarray.c', 'a')
+    print("{\"%s\", %s, %s, %s, %s, %s}," % (dmparam, c_type, ptype, getoperateargs, operate, bbfdm), file=fp)
     fp.close()
 
 
@@ -943,9 +1015,15 @@ def object_parse_childs(dmobject, value, nextlevel):
                     continue
                 if isinstance(v, dict):
                     for k1, v1 in v.items():
-                        if k1 == "type" and v1 != "object" and "()" not in k:
+
+                        if k1 == "type" and v1 == "command":
+                            printCOMMANDline(dmobject, k, v)
+                            break                       
+
+                        if k1 == "type" and v1 != "object":
                             printPARAMline(dmobject, k, v)
                             break
+
         printtailArray()
 
     if hasobj and nextlevel == 0:
@@ -1013,6 +1091,19 @@ def generatecfromobj(pobj, pvalue, pdir, nextlevel):
         pass
 
     try:
+        exists = os.path.isfile("./.operatecommands.c")
+        if exists:
+            print("/*************************************************************", file=dmfpc)
+            print("* OPERATE COMMANDS", file=dmfpc)
+            print("**************************************************************/", file=dmfpc)
+        tmpf = open("./.operatecommands.c", "r")
+        tmpd = tmpf.read()
+        tmpf.close()
+        dmfpc.write(tmpd)
+    except IOError:
+        pass
+
+    try:
         print("/**********************************************************************************************************************************", file=dmfpc)
         print("*                                            OBJ & PARAM DEFINITION", file=dmfpc)
         print("***********************************************************************************************************************************/", file=dmfpc)
@@ -1042,6 +1133,7 @@ def removetmpfiles():
     bbf.remove_file("./.objadddel.c")
     bbf.remove_file("./.objbrowse.c")
     bbf.remove_file("./.getstevalue.c")
+    bbf.remove_file("./.operatecommands.c")
 
 
 ### main ###
