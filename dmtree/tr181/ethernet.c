@@ -1075,7 +1075,19 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 
 static int get_EthernetLink_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "mac", value);
+	char *mac_addr;
+	char address[64] = {0};
+	int i;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "mac", &mac_addr);
+	strncpy(address, mac_addr, sizeof(address));
+	for (i = 0; address[i] != '\0'; i++) {
+		if(address[i] >= 'a' && address[i] <= 'z') {
+			address[i] = address[i] - 32;
+		}
+	}
+
+	*value = dmstrdup(address);
 	return 0;
 }
 

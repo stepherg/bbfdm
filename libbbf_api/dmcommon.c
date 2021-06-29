@@ -1016,10 +1016,19 @@ int get_net_device_sysfs(const char *device, const char *name, char **value)
 {
 	if (device && device[0]) {
 		char file[256];
-		char val[64];
+		char val[64] = {0};
 
 		snprintf(file, sizeof(file), "/sys/class/net/%s/%s", device, name);
 		dm_read_sysfs_file(file, val, sizeof(val));
+		if (0 == strcmp(name, "address")) {
+			// Convert the mac address to upper case.
+			int i;
+			for (i = 0; val[i] != '\0'; i++) {
+				if (val[i] >= 'a' && val[i] <= 'z') {
+					val[i] = val[i] - 32;
+				}
+			}
+		}
 		*value = dmstrdup(val);
 	} else {
 		*value = "0";
