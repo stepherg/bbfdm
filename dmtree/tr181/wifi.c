@@ -157,24 +157,25 @@ static char *get_security_mode(struct uci_section *section)
 			dmuci_get_value_by_section_string(section, buf, &key);
 		}
 		return (key && strlen(key) == 10) ? "WEP-64" : "WEP-128";
-	} else if (strcmp(encryption, "psk") == 0)
-		return "WPA-Personal";
-	else if (strcmp(encryption, "psk2") == 0)
+	}
+	else if (strncmp(encryption, "psk-mixed", 9) == 0)
+		return "WPA-WPA2-Personal";
+	else if (strncmp(encryption, "psk2", 4) == 0)
 		return "WPA2-Personal";
+	else if (strncmp(encryption, "psk", 3) == 0)
+		return "WPA-Personal";
 	else if (strcmp(encryption, "sae") == 0)
 		return "WPA3-Personal";
-	else if (strcmp(encryption, "psk-mixed") == 0)
-		return "WPA-WPA2-Personal";
 	else if (strcmp(encryption, "sae-mixed") == 0)
 		return "WPA3-Personal-Transition";
-	else if (strcmp(encryption, "wpa") == 0)
-		return "WPA-Enterprise";
-	else if (strcmp(encryption, "wpa2") == 0)
-		return "WPA2-Enterprise";
-	else if (strcmp(encryption, "wpa3") == 0)
-		return "WPA3-Enterprise";
-	else if (strcmp(encryption, "wpa-mixed") == 0)
+	else if (strncmp(encryption, "wpa-mixed", 9) == 0)
 		return "WPA-WPA2-Enterprise";
+	else if (strncmp(encryption, "wpa2", 4) == 0)
+		return "WPA2-Enterprise";
+	else if (strncmp(encryption, "wpa3", 4) == 0)
+		return "WPA3-Enterprise";
+	else if (strncmp(encryption, "wpa", 3) == 0)
+		return "WPA-Enterprise";
 	else
 		return "None";
 }
