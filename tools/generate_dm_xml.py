@@ -136,6 +136,8 @@ def generate_hdm_xml_file():
 	modelName.text = str(MODEL_NAME)
 	softwareVersion = ET.SubElement(root, "softwareVersion")
 	softwareVersion.text = str(SOFTWARE_VERSION)
+	type = ET.SubElement(root, "type")
+	type.text = str("Device:2")
 
 	dataModel = ET.SubElement(root, "dataModel")
 	attributes = ET.SubElement(dataModel, "attributes")
