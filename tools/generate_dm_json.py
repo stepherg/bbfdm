@@ -292,7 +292,7 @@ def getuniquekeys (dmobject):
 
 def printopenobject (obj):
 	fp = open('./.json_tmp', 'a')
-	if "tr-104" in sys.argv[1]:
+	if "tr-104" in sys.argv[1] or "tr-135" in sys.argv[1]:
 		print("\"Device.Services.%s\" : {" % obj.get('name').replace(" ", ""), file=fp)
 	else:
 		print("\"%s\" : {" % obj.get('name').replace(" ", ""), file=fp)
@@ -724,6 +724,8 @@ def generatejsonfromobj(pobj, pdir):
 		dmfp = open(pdir + "/tr181.json", "a")
 	elif "tr-104" in sys.argv[1] and pobj.get("name").count(".") == 2:
 		dmfp = open(pdir + "/tr104.json", "a")
+	elif "tr-135" in sys.argv[1] and pobj.get("name").count(".") == 2:
+		dmfp = open(pdir + "/tr135.json", "a")
 	elif "tr-106" in sys.argv[1] and pobj.get("name").count(".") == 1:
 		dmfp = open(pdir + "/tr106.json", "a")
 	else:
@@ -825,6 +827,9 @@ if "tr-181" in sys.argv[1]:
 	gendir = "tr181_" + time.strftime("%Y-%m-%d_%H-%M-%S")
 elif "tr-104" in sys.argv[1]:
 	gendir = "tr104_" + time.strftime("%Y-%m-%d_%H-%M-%S")
+	Root = (sys.argv[3])[len("Device.Services."):]
+elif "tr-135" in sys.argv[1]:
+	gendir = "tr135_" + time.strftime("%Y-%m-%d_%H-%M-%S")
 	Root = (sys.argv[3])[len("Device.Services."):]
 elif "tr-106" in sys.argv[1]:
 	gendir = "tr106_" + time.strftime("%Y-%m-%d_%H-%M-%S")
