@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # Copyright (C) 2021 iopsys Software Solutions AB
 # Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
