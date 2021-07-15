@@ -276,168 +276,171 @@ int init_call_log()
 		end = strstr(token, ",");
 		CHECK_RESULT(end);
 		strncpy(cdr.localBurstDensity, token, end - token);
+		// for incoming unanswered call cdr does not contain RTP stats
+		if (strcasecmp(cdr.localBurstDensity, "\"DOCUMENTATION\"") == 0) {
+			cdr.localBurstDensity[0] = '\0';
+		} else {
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.remoteBurstDensity, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.remoteBurstDensity, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.localBurstDuration, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.localBurstDuration, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.remoteBurstDuration, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.remoteBurstDuration, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.localGapDensity, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.localGapDensity, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.remoteGapDensity, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.remoteGapDensity, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.localGapDuration, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.localGapDuration, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.remoteGapDuration, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.remoteGapDuration, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.localJbRate, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.localJbRate, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.remoteJbRate, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.remoteJbRate, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.localJbMax, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.localJbMax, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.remoteJbMax, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.remoteJbMax, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.localJbNominal, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.localJbNominal, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.remoteJbNominal, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.remoteJbNominal, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.localJbAbsMax, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.localJbAbsMax, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.remoteJbAbsMax, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.remoteJbAbsMax, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.jbAvg, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.jbAvg, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.uLossRate, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.uLossRate, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.discarded, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.discarded, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.lost, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.lost, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.rxpkts, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.rxpkts, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.txpkts, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.txpkts, token, end - token);
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.jitter, token, end - token);
 
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.jitter, token, end - token);
-
-		token = strstr(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = strstr(token, ",");
-		CHECK_RESULT(end);
-		strncpy(cdr.maxJitter, token, end - token);
-
+			token = strstr(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = strstr(token, ",");
+			CHECK_RESULT(end);
+			strncpy(cdr.maxJitter, token, end - token);
+		}
 		// Skip invalid call logs
 		if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||
 			cdr.start_time[0] == '\0' || end_time[0] == '\0') {
