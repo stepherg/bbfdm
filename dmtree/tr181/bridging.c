@@ -3091,7 +3091,7 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "name", new_name);
 							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "ifname", new_linker);
 
-							/* Update ifname list */
+							/* network->interface : Update ifname option */
 							char *ifname = NULL;
 							dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_sec, "ifname", &ifname);
 							if (ifname && ifname[0] != '\0') {
@@ -3102,12 +3102,23 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 							}
 							update_bridge_ifname(((struct bridge_vlanport_args *)data)->bridge_sec, ((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, 1);
 
+							/* dmmap_bridge->bridge : Update ifname option */
+							struct uci_section *ss = NULL;
+							get_dmmap_section_of_config_section("dmmap_bridge", "bridge", section_name(((struct bridge_vlanport_args *)data)->bridge_sec), &ss);
+							dmuci_get_value_by_section_string(ss, "ifname", &ifname);
+							if (ifname && ifname[0] != '\0') {
+								char new_ifname[128] = {0};
+
+								remove_interface_from_ifname(new_linker, ifname, new_ifname);
+								dmuci_set_value_by_section(ss, "ifname", new_ifname);
+							}
+							update_bridge_ifname(ss, ((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, 1);
+
 							/* Update dmmap section */
 							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "name", new_name);
 							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "port_name", section_name);
 
 							/* Update dmmap bridge_port section */
-							struct uci_section *ss = NULL;
 							uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", ((struct bridge_vlanport_args *)data)->br_inst, ss) {
 								if (strcmp(section_name(ss), section_name) == 0) {
 									dmuci_set_value_by_section(ss, "device", new_name);
