@@ -64,7 +64,7 @@ static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char
 	char s_name[16] = {0};
 	time_t now = time(NULL);
 
-	strftime(creation_date, sizeof(creation_date), "%Y-%m-%dT%H:%M:%SZ", localtime(&now));
+	strftime(creation_date, sizeof(creation_date), "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
 
 	char *last_inst = get_last_instance_bbfdm("dmmap_firewall", "rule", "firewall_chain_rule_instance");
 	snprintf(s_name, sizeof(s_name), "rule_%s", last_inst ? last_inst : "1");
@@ -345,7 +345,7 @@ static int get_FirewallChainRule_ExpiryDate(char *refparam, struct dmctx *ctx, v
 		char expiry[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
 		time_t time_value = atoi(expiry_date);
 
-		strftime(expiry, sizeof expiry, "%Y-%m-%dT%H:%M:%SZ", localtime(&time_value));
+		strftime(expiry, sizeof expiry, "%Y-%m-%dT%H:%M:%SZ", gmtime(&time_value));
 		*value = dmstrdup(expiry);
 	} else {
 		*value = "9999-12-31T23:59:59Z";
@@ -365,7 +365,7 @@ static int set_FirewallChainRule_ExpiryDate(char *refparam, struct dmctx *ctx, v
 			break;
 		case VALUESET:
 			strptime(value, "%Y-%m-%dT%H:%M:%SZ", &tm);
-			snprintf(expiry_date, sizeof(expiry_date), "%ld", mktime(&tm));
+			snprintf(expiry_date, sizeof(expiry_date), "%ld", timegm(&tm));
 			dmuci_set_value_by_section((struct uci_section *)data, "expiry", expiry_date);
 			break;
 	}
