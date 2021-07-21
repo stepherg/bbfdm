@@ -7,6 +7,7 @@ stages:
     - unit_test
     - functional_test
     - functional_api_test
+    - tools_test
     - uspd
 
 variables:
@@ -53,6 +54,21 @@ run_functional_api_test:
       paths:
           - timestamp.log
           - functional-api-test-coverage.xml
+
+run_tools_test:
+  stage: tools_test
+  image: iopsys/code-analysis:latest
+  allow_failure: false
+  script:
+  - "./gitlab-ci/tools-test.sh"
+
+  artifacts:
+      when: always
+      paths:
+          - timestamp.log
+          - tools/out/datamodel_default.xml
+          - tools/out/datamodel_hdm.xml
+          - tools/out/datamodel.xls
 
 run_uspd:
   stage: uspd

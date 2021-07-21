@@ -1,0 +1,64 @@
+{
+  "manufacturer": "iopsys",
+  "protocol": "DEVICE_PROTOCOL_DSLFTR069v1",
+  "manufacturer_oui": "002207",
+  "product_class": "DG400PRIME",
+  "model_name": "DG400PRIME-A",
+  "software_version": "1.2.3.4",
+  "vendor_list": [
+    "iopsys",
+    "openwrt"
+  ],
+  "vendor_prefix": "X_IOPSYS_EU_",
+  "plugins": [
+    {
+      "repo": "https://dev.iopsys.eu/iopsys/bulkdata.git",
+      "dm_files": [
+        "datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/iopsys/xmppc.git"
+    },
+    {
+      "repo": "https://dev.iopsys.eu/iopsys/stunc.git",
+      "version": "devel",
+      "dm_files": [
+        "datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/iopsys/udpechoserver.git",
+      "version": "master",
+      "dm_files": [
+        "datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/iopsys/twamp.git",
+      "version": "master",
+      "dm_files": [
+        "datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/iopsys/periodicstats.git",
+      "version": "devel",
+      "dm_files": [
+        "bbf_plugin/bbf_plugin.c"
+      ]
+    }
+  ],
+  "output": {
+    "acs": [
+      "default",
+      "hdm"
+    ],
+    "file_format": [
+      "xls",
+      "xml"
+    ],
+    "output_dir": "./out",
+    "output_file_prefix": "datamodel"
+  }
+}

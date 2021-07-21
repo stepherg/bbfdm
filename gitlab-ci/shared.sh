@@ -21,6 +21,17 @@ function exec_cmd()
 	fi
 }
 
+function exec_cmd_verbose()
+{
+	echo "executing $@"
+	$@
+
+	if [ $? -ne 0 ]; then
+		echo "Failed to execute $@"
+		exit 1
+	fi
+}
+
 function install_libbbf()
 {
 	COV_CFLAGS='-fprofile-arcs -ftest-coverage'

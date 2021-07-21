@@ -50,19 +50,19 @@ As mentioned above, all Data Models are stored in the **'dmtree'** folder. In or
 `bbfdm` library offers a tool to generate templates of the source code from json files placed under **'dmtree/json'**. So, any developer can fill these json files ([tr181](/dmtree/json/tr181.json) or [tr104](/dmtree/json/tr104.json)) with mapping field according to UCI, UBUS or CLI commands then generate the source code in C.
 
 ```bash
-$ python generate_dm_c.py
-Usage: generate_dm_c.py <data model name> [Object path]
+$ ./convert_dm_json_to_c.py
+Usage: convert_dm_json_to_c.py <data model name> [Object path]
 data model name:   The data model(s) to be used, for ex: tr181 or tr181,tr104
 Examples:
-  - generate_dm_c.py tr181
+  - convert_dm_json_to_c.py tr181
     ==> Generate the C code of tr181 data model in datamodel/ folder
-  - generate_dm_c.py tr104
+  - convert_dm_json_to_c.py tr104
     ==> Generate the C code of tr104 data model in datamodel/ folder
-  - generate_dm_c.py tr181,tr104
+  - convert_dm_json_to_c.py tr181,tr104
     ==> Generate the C code of tr181 and tr104 data model in datamodel/ folder
-  - generate_dm_c.py tr181 Device.DeviceInfo.
+  - convert_dm_json_to_c.py tr181 Device.DeviceInfo.
     ==> Generate the C code of Device.DeviceInfo object in datamodel/ folder
-  - generate_dm_c.py tr104 Device.Services.VoiceService.{i}.Capabilities.
+  - convert_dm_json_to_c.py tr104 Device.Services.VoiceService.{i}.Capabilities.
     ==> Generate the C code of Device.Services.VoiceService.{i}.Capabilities. object in datamodel/ folder
 ```
 
@@ -292,7 +292,7 @@ Example: [Custom Vendor Object Dropbear](https://dev.iopsys.eu/iopsys/bbf/-/blob
 
 #### 4. link vendor tables to the main tree
 
-To register the new vendor tables, you need to link them in the main three tables: 
+To register the new vendor tables, you need to link them in the main three tables:
 
 - **tVendorExtension**
 
@@ -324,7 +324,7 @@ BBF_VENDOR_PREFIX="X_TEST_COM_"
 
 > Note1: The `libbbfdm` vendor list can support multi-vendor with comma seperated.
 
-> Note2: If multi vendors are supported and there is a object/parameter that is implmented by multi customers in different way, the implemented object/parameter of the first vendor name in the **BBF_VENDOR_LIST** will be considered. 
+> Note2: If multi vendors are supported and there is a object/parameter that is implmented by multi customers in different way, the implemented object/parameter of the first vendor name in the **BBF_VENDOR_LIST** will be considered.
 
 > Note3: Overwrite and Exclude are only considered in `dmtree/vendor/<vendor>/`
 
@@ -347,7 +347,7 @@ Each library should contains two Root tables:
 
 - **“tDynamicObj”**
 
-- **“tDynamicOperate”** 
+- **“tDynamicOperate”**
 
 #### DynamicObject definition
 
@@ -393,34 +393,34 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 ```bash
 "Device.CWMP.": {
-    "type": "object", 
+    "type": "object",
     "protocols": [
-        "cwmp", 
+        "cwmp",
         "usp"
-    ], 
+    ],
     "array": false
 }
 ```
 
-**2. Object with instace:**
+**2. Object with instance:**
 
 - **UCI command:** uci show wireless | grep wifi-device
 
 ```bash
 "Device.X_IOPSYS_EU_Radio.{i}.": {
-    "type": "object", 
+    "type": "object",
     "protocols": [
-        "cwmp", 
+        "cwmp",
         "usp"
-    ], 
+    ],
     "array": true,
     "mapping": {
-        "type": "uci", 
+        "type": "uci",
         "uci": {
-            "file": "wireless", 
+            "file": "wireless",
             "section": {
                 "type": "wifi-device"
-            }, 
+            },
             "dmmapfile": "dmmap_wireless"
         }
     }
@@ -431,18 +431,18 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 ```bash
 "Device.DSL.Line.{i}.": {
-	"type": "object", 
+	"type": "object",
 	"protocols": [
-		"cwmp", 
+		"cwmp",
 		"usp"
-	], 
+	],
 	"array": true,
 	"mapping": {
-		"type": "ubus", 
+		"type": "ubus",
 		"ubus": {
-			"object": "dsl", 
-			"method": "status", 
-			"args": {}, 
+			"object": "dsl",
+			"method": "status",
+			"args": {},
 			"key": "line"
 		}
 	}
@@ -457,13 +457,13 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 ```bash
 "Country": {
-	"type": "string", 
+	"type": "string",
 	"protocols": [
-		"cwmp", 
+		"cwmp",
 		"usp"
 	],
-	"read": true, 
-	"write": true, 
+	"read": true,
+	"write": true,
 	"mapping": [
 		{
 			"type" : "uci",
@@ -487,12 +487,12 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 - **@Name:** the section name of paraent object, in this example, the section name is "lan"
 ```bash
 "SSID": {
-	"type": "string", 
+	"type": "string",
 	"protocols": [
-		"cwmp", 
+		"cwmp",
 		"usp"
 	],
-	"read": true, 
+	"read": true,
 	"write": false,
 	"mapping": [
 		{
@@ -514,12 +514,12 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 ```bash
 "Noise": {
-	"type": "int", 
+	"type": "int",
 	"protocols": [
-		"cwmp", 
+		"cwmp",
 		"usp"
 	],
-	"read": true, 
+	"read": true,
 	"write": false,
 	"mapping": [
 		{
@@ -541,13 +541,13 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 ```bash
 "Username": {
-	"type": "string", 
+	"type": "string",
 	"protocols": [
-		"cwmp", 
+		"cwmp",
 		"usp"
 	],
-	"read": true, 
-	"write": true, 
+	"read": true,
+	"write": true,
 	"mapping": [
 		{
 			"type" : "uci",
@@ -570,12 +570,12 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 ```bash
 "Uptime": {
-	"type": "unsignedInt", 
+	"type": "unsignedInt",
 	"protocols": [
-		"cwmp", 
+		"cwmp",
 		"usp"
 	],
-	"read": true, 
+	"read": true,
 	"write": false,
 	"mapping": [
 		{
@@ -595,12 +595,12 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 ```bash
 "Total": {
-	"type": "unsignedInt", 
+	"type": "unsignedInt",
 	"protocols": [
-		"cwmp", 
+		"cwmp",
 		"usp"
 	],
-	"read": true, 
+	"read": true,
 	"write": false,
 	"mapping": [
 		{
@@ -623,86 +623,185 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 - For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [UserInterface](/test/files/etc/bbfdm/json/UserInterface.json), [X_IOPSYS_EU_Dropbear](/test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json)
 
 ## BBFDM Tools
+BBF tools are written in python3 and has below dependencies.
 
-### XML generator
-
-It is a generator of Data Model tree in XML with two format: **Broadband Forum schema** and **HDM**.
-
+System utilities: python3-pip, libxml2-utils
 ```bash
-$ python generate_dm_xml.py -h
-Usage: generate_dm_xml.py [options...] <urls>
-Options: 
- -r, --remote-dm              Check OBJ/PARAM under these repositories if it is not found under bbf repo
- -v, --vendor-list            Generate data model tree with vendor extension OBJ/PARAM
- -p, --vendor-prefix          Generate data model tree using this vendor prefix. Default vendor prefix: X_IOPSYS_EU_
- -f, --format                 Generate data model tree with HDM format. Default format: BBF
- -d, --device-protocol        Generate data model tree using this device protocol. Default device protocol: DEVICE_PROTOCOL_DSLFTR069v1
- -m, --manufacturer           Generate data model tree using this manufacturer. Default manufacturer: iopsys
- -o, --manufacturer-oui       Generate data model tree using this manufacturer oui. Default manufacturer oui: 002207
- -c, --product-class          Generate data model tree using this product class. Default product class: DG400PRIME
- -n, --model-name             Generate data model tree using this model name. Default model name: DG400PRIME-A
- -s, --software-version       Generate data model tree using this software version. Default software version: 1.2.3.4
- -h, --help                   This help text
-Urls: 
- url^(branch,hash,tag)        The url with branch, hash or tag to be used
-
-Examples: 
-  - python generate_dm_xml.py
-    ==> Generate xml file in datamodel.xml
-  - python generate_dm_xml.py -f HDM
-    ==> Generate xml file with HDM format in datamodel.xml
-  - python generate_dm_xml.py -v iopsys
-    ==> Generate xml file using iopsys extension in datamodel.xml
-  - python generate_dm_xml.py -r https://dev.iopsys.eu/feed/iopsys.git^devel,https://dev.iopsys.eu/iopsys/mydatamodel.git^5c8e7cb740dc5e425adf53ea574fb529d2823f88
-    ==> Generate xml file in datamodel.xml
-  - python generate_dm_xml.py -v iopsys,openwrt,test -r https://dev.iopsys.eu/feed/iopsys.git^6.0.0ALPHA1 -p X_TEST_COM_
-    ==> Generate xml file in datamodel.xml
+$ sudo apt install -y python3-pip
+$ sudo apt install -y libxml2-utils
+```
+Python utilities: jsonschema, xlwt
+```bash
+$ pip3 install jsonschema xlwt
 ```
 
-### JSON generator
+| Tools                   | Description                                                  |
+| ----------------------- |:------------------------------------------------------------:|
+|convert_dm_json_to_c.py  | Convert json mapping to C code for dynamic plugins library.  |
+|convert_dm_xml_to_json.py| Convert standart xml to Json format.                         |
+|generate_dm.py           | Generate list of supported/un-supported parameters based of json input|
+|generate_dm_xml.py       | Generate list of supported/un-supported parameters in xml format |
+|generate_dm_excel.py     | Generate list of supported/un-supported parameters in xls format |
 
-It is a generator of Data Model JSON format
+> Note: Currently all the tools needs to be executed in tools directory.
+
+### XML->JSON convertor
+It is a [python script](./tools/convert_dm_xml_to_json.py) to convert Data Model from Broadband Forum XML format to JSON format.
 
 ```bash
-$ python generate_dm_json.py 
-Usage: generate_dm_json.py <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]
+$ ./convert_dm_xml_to_json.py
+Usage: ./convert_dm_xml_to_json.py <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]
 Examples:
-  - generate_dm_json.py tr-181-2-14-1-cwmp-full.xml tr-181-2-14-1-usp-full.xml Device.
+  - ./convert_dm_xml_to_json.py tr-181-2-14-1-cwmp-full.xml tr-181-2-14-1-usp-full.xml Device.
     ==> Generate the json file of the sub tree Device. in tr181.json
-  - generate_dm_json.py tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.
+  - ./convert_dm_xml_to_json.py tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.
     ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json
-  - generate_dm_json.py tr-106-1-2-0-full.xml Device.
+  - ./convert_dm_xml_to_json.py tr-106-1-2-0-full.xml Device.
     ==> Generate the json file of the sub tree Device. in tr106.json
 
 Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-14-1-cwmp-full.xml
 ```
 
-### Excel generator
+### XML generator
 
-It is a generator of excel sheet with supported and unsupported Data Model tree.
+[Python script](./tools/generate_dm_xml.py) to generator list of supported and un-supported Data Model tree in XML for acs supported format: **Broadband Forum schema** and **HDM**.
 
 ```bash
-$ python generate_dm_excel.py
-Usage: generate_dm_excel.py <data model name> [options...] <urls>
-data model name:              The data model(s) to be used, for ex: tr181 or tr181,tr104
-Options: 
- -r, --remote-dm              Check OBJ/PARAM under these repositories if it is not found under bbf repo
- -v, --vendor-list            Generate data model tree with vendor extension OBJ/PARAM
- -p, --vendor-prefix          Generate data model tree using this vendor prefix. Default vendor prefix: X_IOPSYS_EU_
- -h, --help                   This help text
-Urls: 
- url^(branch,hash,tag)        The url with branch, hash or tag to be used
+$ ./generate_dm_xml.py -h
+usage: generate_dm_xml.py [-h] [-r https://dev.iopsys.eu/iopsys/stunc.git^devel] [-v iopsys] [-p X_IOPSYS_EU_] [-d DEVICE_PROTOCOL_DSLFTR069v1] [-m iopsys] [-u 002207] [-c DG400PRIME] [-n DG400PRIME-A]
+                          [-s 1.2.3.4] [-f BBF] [-o datamodel.xml]
 
-Examples: 
-  - python generate_dm_excel.py tr181
-    ==> Generate excel file in datamodel.xls
-  - python generate_dm_excel.py tr104
-    ==> Generate excel file in datamodel.xls
-  - python generate_dm_excel.py tr181,tr104 -r https://dev.iopsys.eu/feed/iopsys.git^release-5.3,https://dev.iopsys.eu/iopsys/mydatamodel.git^5c8e7cb740dc5e425adf53ea574fb529d2823f88
-    ==> Generate excel file in datamodel.xls
-  - python generate_dm_excel.py tr181,tr104 -v iopsys,openwrt,test -r https://dev.iopsys.eu/feed/iopsys.git^6.0.0ALPHA1 -p X_TEST_COM_
-    ==> Generate excel file in datamodel.xls
+Script to generate list of supported and non-supported parameter in xml format
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -r https://dev.iopsys.eu/iopsys/stunc.git^devel, --remote-dm https://dev.iopsys.eu/iopsys/stunc.git^devel
+                        Includes OBJ/PARAM defined under remote repositories defined as bbf plugin
+  -v iopsys, --vendor-list iopsys
+                        Generate data model tree with vendor extension OBJ/PARAM.
+  -p X_IOPSYS_EU_, --vendor-prefix X_IOPSYS_EU_
+                        Generate data model tree using provided vendor prefix for vendor defined objects.
+  -d DEVICE_PROTOCOL_DSLFTR069v1, --device-protocol DEVICE_PROTOCOL_DSLFTR069v1
+                        Generate data model tree using this device protocol.
+  -m iopsys, --manufacturer iopsys
+                        Generate data model tree using this manufacturer.
+  -u 002207, --manufacturer-oui 002207
+                        Generate data model tree using this manufacturer oui.
+  -c DG400PRIME, --product-class DG400PRIME
+                        Generate data model tree using this product class.
+  -n DG400PRIME-A, --model-name DG400PRIME-A
+                        Generate data model tree using this model name.
+  -s 1.2.3.4, --software-version 1.2.3.4
+                        Generate data model tree using this software version.
+  -f BBF, --format BBF  Generate data model tree with HDM format.
+  -o datamodel.xml, --output datamodel.xml
+                        Generate the output file with given name
+
+Part of BBF-tools, refer Readme for more examples
 ```
+
+More examples:
+```bash
+$ ./generate_dm_xml.py -v iopsys -v openwrt
+```
+
+### Excel generator
+[Python script](./tools/generate_dm_excel.py) to generat list of supported and un-supported parameters in excel sheet.
+
+```bash
+$ ./generate_dm_excel.py -h
+usage: generate_dm_excel.py [-h] -d tr181 [-r https://dev.iopsys.eu/iopsys/stunc.git^devel] [-v iopsys] [-p X_IOPSYS_EU_] [-o supported_datamodel.xls]
+
+Script to generate list of supported and non-supported parameter in xls format
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d tr181, --datamodel tr181
+  -r https://dev.iopsys.eu/iopsys/stunc.git^devel, --remote-dm https://dev.iopsys.eu/iopsys/stunc.git^devel
+                        Includes OBJ/PARAM defined under remote repositories defined as bbf plugin
+  -v iopsys, --vendor-list iopsys
+                        Generate data model tree with vendor extension OBJ/PARAM
+  -p X_IOPSYS_EU_, --vendor-prefix X_IOPSYS_EU_
+                        Generate data model tree using provided vendor prefix for vendor defined objects
+  -o supported_datamodel.xls, --output supported_datamodel.xls
+                        Generate the output file with given name
+
+Part of BBF-tools, refer Readme for more examples
+```
+
+More examples:
+```bash
+$ ./generate_dm_excel.py -d tr181 -v iopsys -v openwrt -o datamodel.xls
+$ ./generate_dm_excel.py -d tr181 -d tr104 -v iopsys -v openwrt -o datamodel.xls
+```
+### Data Model generator
+
+This is a pipeline friendly master script to generate the list of supported and un-supported datamodels in xml and xls formats based on provided input in a json file.
+Example json file available [here](./tools/tools_input.json).
+
+```bash
+$ Usage: generate_dm.py <input json file>
+Examples:
+  - generate_dm.py tools_input.json
+    ==> Generate all required files defined in tools_input.json file
+```
+
+The input json file should be defined as follow:
+
+```bash
+{
+	"manufacturer": "iopsys",
+	"protocol": "DEVICE_PROTOCOL_DSLFTR069v1",
+	"manufacturer_oui": "002207",
+	"product_class": "DG400PRIME",
+	"model_name": "DG400PRIME-A",
+	"software_version": "1.2.3.4",
+	"vendor_list": [
+		"iopsys",
+		"openwrt",
+		"test"
+	],
+	"vendor_prefix": "X_IOPSYS_EU_",
+	"plugins": [
+		{
+			"repo": "https://dev.iopsys.eu/iopsys/mydatamodel.git",
+			"version": "tag/hash/branch",
+			"dm_files": [
+				"src/datamodel.c",
+				"src/additional_datamodel.c"
+			]
+		},
+		{
+			"repo": "https://dev.iopsys.eu/iopsys/mybbfplugin.git",
+			"version": "tag/hash/branch",
+			"dm_files": [
+				"dm.c"
+			]
+		},
+		{
+			"repo": "https://dev.iopsys.eu/iopsys/mydatamodeljson.git",
+			"version": "tag/hash/branch",
+			"dm_files": [
+				"src/plugin/datamodel.json"
+			]
+		}
+	],
+	"output": {
+		"acs": [
+			"hdm",
+			"default"
+		],
+		"file_format": [
+			"xml",
+			"xls"
+		],
+		"output_dir": "./out",
+		"output_file_prefix": "datamodel"
+	}
+}
+```
+
+- For more examples of tools input json file, you can see this link: [tools_input.json](./devel/tools/tools_input.json)
 
 ## Dependencies
 
