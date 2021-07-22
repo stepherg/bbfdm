@@ -151,7 +151,7 @@ static int get_ServicesVoiceServiceCallLog_Dst_PeakJitter(char *refparam, struct
 /* *** Device.Services.VoiceService.{i}.CallLog.{i}. *** */
 DMLEAF tIOPSYS_VoiceServiceCallLogParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{BBF_VENDOR_PREFIX"SIPSession-ID", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_SessionId, NULL, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"SIPSession-ID", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_SessionId, NULL, BBFDM_BOTH},
 {BBF_VENDOR_PREFIX"SIPIPAddress", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_SipIpAddress, NULL, BBFDM_BOTH},
 {BBF_VENDOR_PREFIX"SIPResponseCode", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_SipResponseCode, NULL, BBFDM_BOTH},
 {0}

@@ -229,7 +229,7 @@ DMLEAF tServicesVoiceServiceCallLogSessionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Duration", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Duration, NULL, BBFDM_BOTH},
 {"Start", &DMREAD, DMT_TIME, get_ServicesVoiceServiceCallLog_Start, NULL, BBFDM_BOTH},
-{"SessionID", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_SessionId, NULL, BBFDM_BOTH},
+{"SessionID", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_SessionId, NULL, BBFDM_BOTH},
 {0}
 };
 
