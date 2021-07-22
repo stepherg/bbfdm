@@ -177,6 +177,12 @@ def generate_hdm_xml_file(output_file):
     xml_file.close()
 
 def generate_xml(acs = 'default', output_file="datamodel.xml"):
+    global DM_OBJ_COUNT
+    global DM_PARAM_COUNT
+
+    DM_OBJ_COUNT = 0
+    DM_PARAM_COUNT = 0
+
     print("Generating BBF Data Models in xml format for %s acs..." % acs)
     bbf.fill_list_supported_dm()
 
