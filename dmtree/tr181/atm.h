@@ -19,4 +19,6 @@ extern DMOBJ tATMLinkObj[];
 extern DMLEAF tATMLinkParams[];
 extern DMLEAF tATMLinkStatsParams[];
 
+void remove_device_from_interface(struct uci_section *interface_s, char *device);
+
 #endif

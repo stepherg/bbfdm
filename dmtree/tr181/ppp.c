@@ -329,7 +329,7 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 	struct uci_section *ss = NULL;
 	char *dev = "0";
 
-	dmuci_get_value_by_section_string(((struct uci_section *)data), "ifname", &linker);
+	dmuci_get_value_by_section_string(((struct uci_section *)data), "device", &linker);
 
 	// Get wan interface
 	dev = get_device(section_name(((struct uci_section *)data)));
@@ -383,7 +383,7 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &ppp_linker);
 			if (ppp_linker && *ppp_linker) {
-				dmuci_set_value_by_section(((struct uci_section *)data), "ifname", ppp_linker);
+				dmuci_set_value_by_section(((struct uci_section *)data), "device", ppp_linker);
 				dmfree(ppp_linker);
 			}
 			return 0;
@@ -544,6 +544,7 @@ static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 
 	synchronize_specific_config_sections_with_dmmap("network", "interface", "dmmap_network", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
+
 		dmuci_get_value_by_section_string(p->config_section, "proto", &proto);
 		if (!strstr(proto, "ppp"))
 			continue;

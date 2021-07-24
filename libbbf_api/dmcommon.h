@@ -228,7 +228,6 @@ void remove_new_line(char *buf);
 int dmcmd(char *cmd, int n, ...);
 int dmcmd_no_wait(char *cmd, int n, ...);
 void update_section_list(char *config, char *section, char *option, int number, char *filter, char *option1, char *val1,  char *option2, char *val2);
-int wan_remove_dev_interface(struct uci_section *interface_setion, char *dev);
 void hex_to_ip(char *address, char *ret);
 void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section, void* additional_attribute);
 void free_dmmap_config_dup_list(struct list_head *dup_list);

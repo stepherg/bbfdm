@@ -505,7 +505,7 @@ static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 					if (strcmp(if_type, "bridge") == 0)
 						dmasprintf(&interface_linker, "br-%s", linker);
 					else
-						dmuci_get_value_by_section_string(s, "ifname", &interface_linker);
+						dmuci_get_value_by_section_string(s, "device", &interface_linker);
 					break;
 				}
 			}
@@ -587,7 +587,7 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 		// it is a L3 interface, get the section name from device name to construct the linker
 		struct uci_section *intf_s = NULL;
 		uci_foreach_sections("network", "interface", intf_s) {
-			dmuci_get_value_by_section_string(intf_s, "ifname", &device_name);
+			dmuci_get_value_by_section_string(intf_s, "device", &device_name);
 			if (strcmp(device_name, mldp_ifname) == 0) {
 				tmp_linker = dmstrdup(section_name(intf_s));
 				break;

@@ -292,7 +292,7 @@ static void test_bbf_api_uci(void **state)
 	assert_string_equal(value, "");
 
 	// dmuci_get_value_by_section_string: test with correct option name
-	uci_res = dmuci_get_value_by_section_string(uci_s, "ifname", &value);
+	uci_res = dmuci_get_value_by_section_string(uci_s, "device", &value);
 	assert_int_equal(uci_res, 0);
 	assert_string_equal(value, "lo");
 

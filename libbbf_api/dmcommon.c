@@ -259,28 +259,6 @@ void update_section_list(char *config, char *section, char *option, int number, 
 	}
 }
 
-int wan_remove_dev_interface(struct uci_section *interface_setion, char *dev)
-{
-	char *ifname, new_ifname[64], *p, *pch = NULL, *spch = NULL;
-	new_ifname[0] = '\0';
-	p = new_ifname;
-	dmuci_get_value_by_section_string(interface_setion, "ifname", &ifname);
-	for (pch = strtok_r(ifname, " ", &spch); pch; pch = strtok_r(NULL, " ", &spch)) {
-		if (!strstr(pch, dev)) {
-			if (new_ifname[0] != '\0') {
-				dmstrappendchr(p, ' ');
-			}
-			dmstrappendstr(p, pch);
-		}
-	}
-	dmstrappendend(p);
-	if (new_ifname[0] == '\0')
-		dmuci_delete_by_section(interface_setion, NULL, NULL);
-	else
-		dmuci_set_value_by_section(interface_setion, "ifname", new_ifname);
-	return 0;
-}
-
 void hex_to_ip(char *address, char *ret)
 {
 	unsigned int ip[4] = {0};

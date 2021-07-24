@@ -38,7 +38,7 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 				char *link_instance = NULL, new_name[16] = {0};
 				int name_found = 0;
 
-				uci_foreach_option_eq("network", "interface", "ifname", name, s) {
+				uci_foreach_option_eq("network", "interface", "device", name, s) {
 
 					get_dmmap_section_of_config_section_eq("dmmap", "link", "device", ifname, &dmmap_s);
 					if (dmmap_s) {
@@ -53,7 +53,7 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 
 					}
 
-					dmuci_set_value_by_section(s, "ifname", new_name);
+					dmuci_set_value_by_section(s, "device", new_name);
 
 					name_found = 1;
 					break;
@@ -63,7 +63,7 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 					int ifname_found = 0;
 					struct uci_section *ss = NULL;
 
-					uci_foreach_option_eq("network", "interface", "ifname", ifname, ss) {
+					uci_foreach_option_eq("network", "interface", "device", ifname, ss) {
 
 						uci_path_foreach_option_eq(bbfdm, "dmmap", "link", "device", ifname, dmmap_s) {
 							char *sec_name;
@@ -82,7 +82,7 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 							dmuci_set_value_by_section(dmmap_s, "section_name", section_name(ss));
 						}
 
-						dmuci_set_value_by_section(ss, "ifname", new_name);
+						dmuci_set_value_by_section(ss, "device", new_name);
 
 						ifname_found = 1;
 						break;

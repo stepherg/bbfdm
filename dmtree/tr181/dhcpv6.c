@@ -510,10 +510,10 @@ static int set_DHCPv6Client_Alias(char *refparam, struct dmctx *ctx, void *data,
 static int get_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *dhcpv6_s = ((struct dhcpv6_client_args *)data)->dhcp_client_conf;
-	char *ifname = NULL;
+	char *device = NULL;
 
-	dmuci_get_value_by_section_string(dhcpv6_s, "ifname", &ifname);
-	char *parent_s = (ifname && *ifname) ? strchr(ifname, '@') : NULL;
+	dmuci_get_value_by_section_string(dhcpv6_s, "device", &device);
+	char *parent_s = (device && *device) ? strchr(device, '@') : NULL;
 
 	char *linker = dmstrdup(parent_s ? parent_s + 1 : dhcpv6_s ? section_name(dhcpv6_s) : "");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);

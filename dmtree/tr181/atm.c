@@ -15,7 +15,7 @@
 struct atm_args
 {
 	struct uci_section *atm_sec;
-	char *ifname;
+	char *device;
 };
 
 /**************************************************************************
@@ -23,18 +23,44 @@ struct atm_args
 ***************************************************************************/
 static int get_atm_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	*linker = (data && ((struct atm_args *)data)->ifname) ? ((struct atm_args *)data)->ifname : "";
+	*linker = (data && ((struct atm_args *)data)->device) ? ((struct atm_args *)data)->device : "";
 	return 0;
 }
 
 /**************************************************************************
 * INIT
 ***************************************************************************/
-static inline int init_atm_link(struct atm_args *args, struct uci_section *s, char *ifname)
+static inline int init_atm_link(struct atm_args *args, struct uci_section *s, char *device)
 {
 	args->atm_sec = s;
-	args->ifname = ifname;
+	args->device = device;
 	return 0;
+}
+
+/*************************************************************
+* COMMON FUNCTIONS
+**************************************************************/
+void remove_device_from_interface(struct uci_section *interface_s, char *device)
+{
+	char *curr_device  = NULL, *pch = NULL, *spch = NULL;
+	char new_device[64] = {0};
+	unsigned pos = 0;
+
+	dmuci_get_value_by_section_string(interface_s, "device", &curr_device);
+
+	new_device[0] = '\0';
+	for (pch = strtok_r(curr_device, " ", &spch); pch; pch = strtok_r(NULL, " ", &spch)) {
+
+		if (strcmp(pch, device) == 0)
+			continue;
+
+		pos += snprintf(&new_device[pos], sizeof(new_device) - pos, "%s ", pch);
+	}
+
+	if (pos)
+		new_device[pos - 1] = 0;
+
+	dmuci_set_value_by_section(interface_s, "device", new_device);
 }
 
 /**************************************************************************
@@ -186,7 +212,7 @@ static int set_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 static inline int ubus_atm_stats(char **value, char *stat_mod, void *data)
 {
 	json_object *res = NULL;
-	dmubus_call("network.device", "status", UBUS_ARGS{{"name", ((struct atm_args *)data)->ifname, String}}, 1, &res);
+	dmubus_call("network.device", "status", UBUS_ARGS{{"name", ((struct atm_args *)data)->device, String}}, 1, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 2, "statistics", stat_mod);
 	if ((*value)[0] == '\0')
@@ -249,7 +275,7 @@ static int set_atm_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 /*#Device.ATM.Link.{i}.Status!SYSFS:/sys/class/net/@Name/operstate*/
 static int get_atm_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_net_device_status(((struct atm_args *)data)->ifname, value);
+	return get_net_device_status(((struct atm_args *)data)->device, value);
 }
 
 /*************************************************************
@@ -278,17 +304,17 @@ static int add_atm_link(char *refparam, struct dmctx *ctx, void *data, char **in
 
 static int delete_atm_link(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *ns = NULL, *nss = NULL, *dmmap_section = NULL;
+	struct uci_section *s = NULL, *stmp = NULL, *dmmap_section = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			uci_foreach_option_cont("network", "interface", "ifname", ((struct atm_args *)data)->ifname, s) {
-				if (ss != NULL && ((struct atm_args *)data)->ifname != NULL)
-					wan_remove_dev_interface(ss, ((struct atm_args *)data)->ifname);
-				ss = s;
+			uci_foreach_option_cont("network", "interface", "device", ((struct atm_args *)data)->device, s) {
+				if (stmp != NULL && ((struct atm_args *)data)->device != NULL)
+					remove_device_from_interface(stmp, ((struct atm_args *)data)->device);
+				stmp = s;
 			}
-			if (ss != NULL && ((struct atm_args *)data)->ifname != NULL)
-				wan_remove_dev_interface(ss, ((struct atm_args *)data)->ifname);
+			if (stmp != NULL && ((struct atm_args *)data)->device != NULL)
+				remove_device_from_interface(stmp, ((struct atm_args *)data)->device);
 
 			get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(((struct atm_args *)data)->atm_sec), &dmmap_section);
 			dmuci_delete_by_section(dmmap_section, NULL, NULL);
@@ -296,17 +322,18 @@ static int delete_atm_link(char *refparam, struct dmctx *ctx, void *data, char *
 			dmuci_delete_by_section(((struct atm_args *)data)->atm_sec, NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_sections_safe("dsl", "atm-device", ss, s) {
-				char *ifname = NULL;
+			uci_foreach_sections_safe("dsl", "atm-device", stmp, s) {
+				struct uci_section *ns = NULL, *nss = NULL;
+				char *device = NULL;
 
-				dmuci_get_value_by_section_string(s, "device", &ifname);
-				uci_foreach_option_cont("network", "interface", "ifname", ifname, ns) {
-					if (nss != NULL && ifname != NULL)
-						wan_remove_dev_interface(nss, ifname);
+				dmuci_get_value_by_section_string(s, "device", &device);
+				uci_foreach_option_cont("network", "interface", "device", device, ns) {
+					if (nss != NULL && device != NULL)
+						remove_device_from_interface(nss, device);
 					nss = ns;
 				}
-				if (nss != NULL && ifname != NULL)
-					wan_remove_dev_interface(nss, ifname);
+				if (nss != NULL && device != NULL)
+					remove_device_from_interface(nss, device);
 
 				get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(s), &dmmap_section);
 				dmuci_delete_by_section(dmmap_section, NULL, NULL);
@@ -356,7 +383,7 @@ static int set_atm_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 /*#Device.ATM.Link.{i}.!UCI:dsl/atm-device/dmmap_dsl*/
 static int browseAtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL, *ifname;
+	char *inst = NULL, *max_inst = NULL, *device;
 	struct atm_args curr_atm_args = {0};
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
@@ -364,8 +391,8 @@ static int browseAtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	synchronize_specific_config_sections_with_dmmap("dsl", "atm-device", "dmmap_dsl", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		dmuci_get_value_by_section_string(p->config_section, "device", &ifname);
-		init_atm_link(&curr_atm_args, p->config_section, ifname);
+		dmuci_get_value_by_section_string(p->config_section, "device", &device);
+		init_atm_link(&curr_atm_args, p->config_section, device);
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
 			   p->dmmap_section, "atmlinkinstance", "atmlinkalias");

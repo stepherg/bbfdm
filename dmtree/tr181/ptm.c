@@ -10,12 +10,13 @@
  */
 
 #include "dmentry.h"
+#include "atm.h"
 #include "ptm.h"
 
 struct ptm_args
 {
 	struct uci_section *ptm_sec;
-	char *ifname;
+	char *device;
 };
 
 
@@ -24,17 +25,17 @@ struct ptm_args
 ***************************************************************************/
 static int get_ptm_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	*linker = (data && ((struct ptm_args *)data)->ifname) ? ((struct ptm_args *)data)->ifname : "";
+	*linker = (data && ((struct ptm_args *)data)->device) ? ((struct ptm_args *)data)->device : "";
 	return 0;
 }
 
 /**************************************************************************
 * INIT
 ***************************************************************************/
-static inline int init_ptm_link(struct ptm_args *args, struct uci_section *s, char *ifname)
+static inline int init_ptm_link(struct ptm_args *args, struct uci_section *s, char *device)
 {
 	args->ptm_sec = s;
-	args->ifname = ifname;
+	args->device = device;
 	return 0;
 }
 
@@ -68,7 +69,7 @@ static int set_ptm_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 /*#Device.PTM.Link.{i}.Status!SYSFS:/sys/class/net/@Name/operstate*/
 static int get_ptm_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_net_device_status(((struct ptm_args *)data)->ifname, value);
+	return get_net_device_status(((struct ptm_args *)data)->device, value);
 }
 
 /*#Device.PTM.Link.{i}.Alias!UCI:dmmap_dsl/ptm-device,@i-1/ptmlinkalias*/
@@ -190,7 +191,7 @@ static int set_ptm_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 static inline int ubus_ptm_stats(char **value, const char *stat_mod, void *data)
 {
 	json_object *res = NULL;
-	dmubus_call("network.device", "status", UBUS_ARGS{{"name", ((struct ptm_args *)data)->ifname, String}}, 1, &res);
+	dmubus_call("network.device", "status", UBUS_ARGS{{"name", ((struct ptm_args *)data)->device, String}}, 1, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 2, "statistics", stat_mod);
 	if ((*value)[0] == '\0')
@@ -246,54 +247,41 @@ static int add_ptm_link(char *refparam, struct dmctx *ctx, void *data, char **in
 
 static int delete_ptm_link(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	char *ifname;
-	struct uci_section *s = NULL, *ss = NULL, *ns = NULL, *nss = NULL, *dmmap_section= NULL;
+	struct uci_section *s = NULL, *stmp = NULL, *dmmap_section = NULL;
 
 	switch (del_action) {
 	case DEL_INST:
 		get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(((struct ptm_args *)data)->ptm_sec), &dmmap_section);
-		if (dmmap_section != NULL)
-			dmuci_delete_by_section(dmmap_section, NULL, NULL);
+		dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
 		dmuci_delete_by_section(((struct ptm_args *)data)->ptm_sec, NULL, NULL);
-		uci_foreach_option_cont("network", "interface", "ifname", ((struct ptm_args *)data)->ifname, s) {
-			if (ss && ifname!=NULL)
-				wan_remove_dev_interface(ss, ((struct ptm_args *)data)->ifname);
-			ss = s;
+
+		uci_foreach_option_cont("network", "interface", "device", ((struct ptm_args *)data)->device, s) {
+			if (stmp && ((struct ptm_args *)data)->device != NULL)
+				remove_device_from_interface(stmp, ((struct ptm_args *)data)->device);
+			stmp = s;
 		}
-		if (ss != NULL && ifname!=NULL)
-			wan_remove_dev_interface(ss, ((struct ptm_args *)data)->ifname);
+		if (stmp != NULL && ((struct ptm_args *)data)->device != NULL)
+			remove_device_from_interface(stmp, ((struct ptm_args *)data)->device);
 		break;
 	case DEL_ALL:
-		uci_foreach_sections("dsl", "ptm-device", s) {
-			if (ss){
-				get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(ss), &dmmap_section);
-				if (dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_get_value_by_section_string(ss, "device", &ifname);
-				dmuci_delete_by_section(ss, NULL, NULL);
-				uci_foreach_option_cont("network", "interface", "ifname", ifname, ns) {
-					if (nss)
-						wan_remove_dev_interface(nss, ifname);
-					nss = ns;
-				}
-				if (nss != NULL && ifname!=NULL)
-					wan_remove_dev_interface(nss, ifname);
-			}
-			ss = s;
-		}
-		if (ss != NULL) {
-			get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(ss), &dmmap_section);
-			if (dmmap_section != NULL)
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_get_value_by_section_string(ss, "device", &ifname);
-			dmuci_delete_by_section(ss, NULL, NULL);
-			uci_foreach_option_cont("network", "interface", "ifname", ifname, ns) {
-				if (nss && ifname!=NULL)
-					wan_remove_dev_interface(nss, ifname);
+		uci_foreach_sections_safe("dsl", "ptm-device", stmp, s) {
+			struct uci_section *ns = NULL, *nss = NULL;
+			char *device = NULL;
+
+			dmuci_get_value_by_section_string(s, "device", &device);
+			uci_foreach_option_cont("network", "interface", "device", device, ns) {
+				if (nss != NULL && device != NULL)
+					remove_device_from_interface(nss, device);
 				nss = ns;
 			}
-			if (nss != NULL && ifname!=NULL)
-				wan_remove_dev_interface(nss, ifname);
+			if (nss != NULL && device != NULL)
+				remove_device_from_interface(nss, device);
+
+			get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(s), &dmmap_section);
+			dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+			dmuci_delete_by_section(s, NULL, NULL);
 		}
 		break;
 	}
@@ -306,15 +294,15 @@ static int delete_ptm_link(char *refparam, struct dmctx *ctx, void *data, char *
 /*#Device.PTM.Link.{i}.!UCI:dsl/ptm-device/dmmap_dsl*/
 static int browsePtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL, *ifname;
+	char *inst = NULL, *max_inst = NULL, *device;
 	struct ptm_args curr_ptm_args = {0};
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("dsl", "ptm-device", "dmmap_dsl", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		dmuci_get_value_by_section_string(p->config_section, "device", &ifname);
-		init_ptm_link(&curr_ptm_args, p->config_section, ifname);
+		dmuci_get_value_by_section_string(p->config_section, "device", &device);
+		init_ptm_link(&curr_ptm_args, p->config_section, device);
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
 			   p->dmmap_section, "ptmlinkinstance", "ptmlinkalias");

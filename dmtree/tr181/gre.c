@@ -45,14 +45,14 @@ struct uci_section *has_tunnel_interface_route(char *interface)
 
 static int browseGRETunnelInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL, *ifname= NULL;
+	char *inst = NULL, *max_inst = NULL, *device = NULL;
 	struct dmmap_dup *p = NULL, *dm = (struct dmmap_dup *)prev_data;
 	struct uci_section *s = NULL;
 	struct browse_args browse_args = {0};
-
 	LIST_HEAD(dup_list);
-	dmasprintf(&ifname, "@%s", section_name(dm->config_section));
-	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_network", "ifname", ifname, &dup_list);
+
+	dmasprintf(&device, "@%s", section_name(dm->config_section));
+	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_network", "device", device, &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		if ((s = has_tunnel_interface_route(section_name(p->config_section))) == NULL)
 			continue;
@@ -135,13 +135,13 @@ static int addObjGRETunnelInterface(char *refparam, struct dmctx *ctx, void *dat
 {
 	struct uci_section *greiface_sec = NULL, *dmmap_sec = NULL, *route_sec = NULL;
 	struct browse_args browse_args = {0};
-	char ifname[32];
+	char device_buf[32];
 
 	char *instance = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_network", "interface", "greiface_instance", "gre_tunnel_sect", section_name(((struct dmmap_dup *)data)->config_section));
 
 	dmuci_add_section("network", "interface", &greiface_sec);
-	snprintf(ifname, sizeof(ifname), "@%s", section_name(((struct dmmap_dup *)data)->config_section));
-	dmuci_set_value_by_section(greiface_sec, "ifname", ifname);
+	snprintf(device_buf, sizeof(device_buf), "@%s", section_name(((struct dmmap_dup *)data)->config_section));
+	dmuci_set_value_by_section(greiface_sec, "device", device_buf);
 
 	dmuci_add_section("network", "route", &route_sec);
 	dmuci_set_value_by_section(route_sec, "interface", section_name(greiface_sec));
@@ -158,9 +158,7 @@ static int addObjGRETunnelInterface(char *refparam, struct dmctx *ctx, void *dat
 
 static int delObjGRETunnelInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *s1 = NULL, *dmmap_section = NULL;
-	int found = 0;
-	char *iface = NULL, *atiface = NULL;
+	struct uci_section *s = NULL, *stmp = NULL, *dmmap_section = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
@@ -169,39 +167,33 @@ static int delObjGRETunnelInterface(char *refparam, struct dmctx *ctx, void *dat
 				dmuci_set_value_by_section(dmmap_section, "greiface_instance", "");
 				dmuci_set_value_by_section(dmmap_section, "greiface_alias", "");
 			}
+
 			if ((s = has_tunnel_interface_route(section_name(((struct dmmap_dup *)data)->config_section))) != NULL)
 				dmuci_delete_by_section(s, NULL, NULL);
 			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_sections("network", "interface", s) {
-				dmuci_get_value_by_section_string(s, "ifname", &iface);
-				dmasprintf(&atiface, "@%s", section_name(((struct dmmap_dup *)data)->config_section));
+			uci_foreach_sections_safe("network", "interface", stmp, s) {
+				struct uci_section *ss = NULL;
+				char device_buf[32] = {0};
+				char *device = NULL;
 
-				if(!iface || strcmp(iface, atiface) != 0)
+				dmuci_get_value_by_section_string(s, "device", &device);
+				snprintf(device_buf, sizeof(device_buf), "@%s", section_name(((struct dmmap_dup *)data)->config_section));
+
+				if (!device || strcmp(device, device_buf) != 0)
 					continue;
-				if (found != 0){
-					get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(ss), &dmmap_section);
-					if (dmmap_section != NULL) {
-						dmuci_set_value_by_section(dmmap_section, "greiface_instance", "");
-						dmuci_set_value_by_section(dmmap_section, "greiface_alias", "");
-					}
-					if ((s1 = has_tunnel_interface_route(section_name(ss))) != NULL)
-						dmuci_delete_by_section(s1, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = s;
-				found++;
-			}
-			if (ss != NULL){
-				get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(ss), &dmmap_section);
+
+				get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(s), &dmmap_section);
 				if (dmmap_section != NULL) {
 					dmuci_set_value_by_section(dmmap_section, "greiface_instance", "");
 					dmuci_set_value_by_section(dmmap_section, "greiface_alias", "");
 				}
-				if ((s1 = has_tunnel_interface_route(section_name(ss))) != NULL)
-					dmuci_delete_by_section(s1, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
+
+				if ((ss = has_tunnel_interface_route(section_name(s))) != NULL)
+					dmuci_delete_by_section(ss, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
 			}
 			break;
 	}
@@ -296,11 +288,11 @@ static int get_GRETunnel_ConnectedRemoteEndpoint(char *refparam, struct dmctx *c
 static int get_GRETunnel_InterfaceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
-	char *ifname;
+	char device_buf[32] = {0};
 	int i = 0;
 
-	dmasprintf(&ifname, "@%s", section_name(((struct dmmap_dup *)data)->config_section));
-	uci_foreach_option_eq("network", "interface", "ifname", ifname, s) {
+	snprintf(device_buf, sizeof(device_buf), "@%s", section_name(((struct dmmap_dup *)data)->config_section));
+	uci_foreach_option_eq("network", "interface", "device", device_buf, s) {
 		i++;
 	}
 	dmasprintf(value, "%d", i);

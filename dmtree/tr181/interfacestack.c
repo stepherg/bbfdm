@@ -126,14 +126,14 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 	/* Higher layers are Device.IP.Interface.{i}. */
 	uci_foreach_sections("network", "interface", s) {
-		char *proto, *ifname;
+		char *proto, *device;
 
 		dmuci_get_value_by_section_string(s, "proto", &proto);
-		dmuci_get_value_by_section_string(s, "ifname", &ifname);
+		dmuci_get_value_by_section_string(s, "device", &device);
 
 		if (strcmp(section_name(s), "loopback") == 0 ||
 			*proto == '\0' ||
-			strchr(ifname, '@'))
+			strchr(device, '@'))
 			continue;
 
 		// Skip if its a provider bridge configuration
@@ -262,7 +262,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		char *type, *name, *value = NULL;
 		dmuci_get_value_by_section_string(s, "type", &type);
 		dmuci_get_value_by_section_string(s, "name", &name);
-		if (strcmp(type, "untagged") == 0 || (*name != '\0' && !is_vlan_termination_section(name)))
+		if (strcmp(type, "bridge") == 0 || strcmp(type, "untagged") == 0)
 			continue;
 
 		// The higher layer is Device.Ethernet.VLANTermination.{i}.
@@ -307,25 +307,28 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmuci_get_value_by_section_string(s, "link_alias", &higheralias);
 		snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *higheralias ? higheralias : *layer_inst ? "cpe-" : "", (*higheralias == '\0' && *layer_inst) ? layer_inst : "");
 
-		char *linker, *value = NULL;
+		char *linker, *value = NULL, *device_s_type = NULL;
+
 		dmuci_get_value_by_section_string(s, "device", &linker);
-		char *bridge = strstr(linker, "br-");
-		if (bridge) {
+		struct uci_section *br_device_s = get_device_section(linker);
+		if (br_device_s) dmuci_get_value_by_section_string(br_device_s, "type", &device_s_type);
+
+		if (br_device_s && strcmp(device_s_type, "bridge") == 0) {
 			// The lower layer is Device.Bridging.Bridge.{i}.Port.{i}.
-			char *int_name;
-			dmuci_get_value_by_section_string(s, "section_name", &int_name);
 			struct uci_section *dmmap_section, *port = NULL;
 
-			get_dmmap_section_of_config_section("dmmap_bridge", "bridge", int_name, &dmmap_section);
+			get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(br_device_s), &dmmap_section);
 
 			if (dmmap_section != NULL) {
-				char *br_inst, *mg;
+				char *br_inst, *mg = NULL;
+
 				dmuci_get_value_by_section_string(dmmap_section, "bridge_instance", &br_inst);
 				uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_inst, port) {
 					dmuci_get_value_by_section_string(port, "management", &mg);
-					if (strcmp(mg, "1") == 0) {
-						char *device, linker[512] = "";
-						dmuci_get_value_by_section_string(port, "device", &device);
+					if (mg && strcmp(mg, "1") == 0) {
+						char *device, linker[512] = {0};
+
+						dmuci_get_value_by_section_string(port, "port", &device);
 						snprintf(linker, sizeof(linker), "br_%s:%s+%s", br_inst, section_name(port), device);
 						adm_entry_get_linker_param(dmctx, "Device.Bridging.Bridge.", linker, &value);
 						dmuci_get_value_by_section_string(port, "bridge_port_alias", &loweralias);
@@ -366,12 +369,12 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	}
 
 	/* Higher layers are Device.Bridging.Bridge.{i}.Port.{i}.*/
-	uci_path_foreach_sections(bbfdm, "dmmap_bridge", "bridge", s) {
+	uci_path_foreach_sections(bbfdm, "dmmap_bridge", "device", s) {
+		char *br_inst = NULL;
 
-		char *br_inst;
 		dmuci_get_value_by_section_string(s, "bridge_instance", &br_inst);
 
-		if (*br_inst == '\0')
+		if (br_inst && *br_inst == '\0')
 			continue;
 
 		// The higher layer is Device.Bridging.Bridge.{i}.Port.{i}.
@@ -379,11 +382,13 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		char buf_mngr[64] = {0};
 		struct uci_section *port = NULL;
 		uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_inst, port) {
-			char *mg;
+			char *mg = NULL;
+
 			dmuci_get_value_by_section_string(port, "management", &mg);
-			if (strcmp(mg, "1") == 0) {
+			if (mg && strcmp(mg, "1") == 0) {
 				char *device, linker[512] = {0};
-				dmuci_get_value_by_section_string(port, "device", &device);
+
+				dmuci_get_value_by_section_string(port, "port", &device);
 				snprintf(linker, sizeof(linker), "br_%s:%s+%s", br_inst, section_name(port), device);
 				adm_entry_get_linker_param(dmctx, "Device.Bridging.Bridge.", linker, &mg_value);
 				dmuci_get_value_by_section_string(port, "bridge_port_alias", &higheralias);
@@ -399,13 +404,13 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 		struct uci_section *sd = NULL;
 		uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_inst, sd) {
-			char *mg;
+			char *mg = NULL;
 			dmuci_get_value_by_section_string(sd, "management", &mg);
-			if (strcmp(mg, "1") == 0)
+			if (mg && strcmp(mg, "1") == 0)
 				continue;
 
 			char *vb = NULL, *device, linker[512] = {0};
-			dmuci_get_value_by_section_string(sd, "device", &device);
+			dmuci_get_value_by_section_string(sd, "port", &device);
 
 			// The lower layer is Device.Bridging.Bridge.{i}.Port.{i}.
 			snprintf(linker, sizeof(linker), "br_%s:%s+%s", br_inst, section_name(sd), device);
