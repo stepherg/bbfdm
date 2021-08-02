@@ -253,6 +253,19 @@ static int get_DeviceInfo_ProcessorNumberOfEntries(char *refparam, struct dmctx 
 	return 0;
 }
 
+static int get_DeviceInfo_VendorLogFileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *dm_sec = NULL;
+	unsigned int num = 0;
+
+	uci_path_foreach_sections(bbfdm, "dmmap", "vlf", dm_sec) {
+		num++;
+	}
+
+	dmasprintf(value, "%d", num);
+	return 0;
+}
+
 static int get_DeviceInfo_SupportedDataModelNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmasprintf(value, "%d", ARRAY_SIZE(Data_Models));
@@ -390,8 +403,14 @@ static int get_vlf_name(char *refparam, struct dmctx *ctx, void *data, char *ins
 
 static int get_vlf_max_size (char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+	int size = 0;
+
 	dmuci_get_value_by_section_string((struct uci_section *)data, "log_size", value);
-	*value = (**value) ? *value : "0";
+
+	// Value defined in system is in KiB in datamodel this is in bytes, convert the value in bytes
+	size = (*value && **value) ? atoi(*value) * 1000 : 0;
+
+	dmasprintf(value, "%d", size);
 	return 0;
 }
 
@@ -998,6 +1017,7 @@ DMLEAF tDeviceInfoParams[] = {
 {"ProvisioningCode", &DMWRITE, DMT_STRING, get_device_provisioningcode, set_device_provisioningcode, BBFDM_BOTH},
 {"UpTime", &DMREAD, DMT_UNINT, get_device_info_uptime, NULL, BBFDM_BOTH},
 {"ProcessorNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_ProcessorNumberOfEntries, NULL, BBFDM_BOTH},
+{"VendorLogFileNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_VendorLogFileNumberOfEntries, NULL, BBFDM_BOTH},
 {"SupportedDataModelNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_SupportedDataModelNumberOfEntries, NULL, BBFDM_CWMP},
 {"FirmwareImageNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_FirmwareImageNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
