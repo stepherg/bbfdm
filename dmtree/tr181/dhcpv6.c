@@ -60,7 +60,7 @@ static int get_value_in_date_time_format(json_object *json_obj, char *option_nam
 	if (option_value && *option_value != '\0' && atoi(option_value) > 0) {
 		time_t time_value = atoi(option_value);
 		char s_now[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
-		if (strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", localtime(&time_value)) == 0)
+		if (strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", gmtime(&time_value)) == 0)
 			return -1;
 		*value = dmstrdup(s_now); // MEM WILL BE FREED IN DMMEMCLEAN
 	}
@@ -1081,7 +1081,7 @@ static int get_DHCPv6ServerPoolClientIPv6Prefix_PreferredLifetime(char *refparam
 	if (preferred && *preferred != '\0' && atoi(preferred) > 0) {
 		time_t time_value = atoi(preferred);
 		char s_now[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
-		if (strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", localtime(&time_value)) == 0)
+		if (strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", gmtime(&time_value)) == 0)
 			return -1;
 		*value = dmstrdup(s_now); // MEM WILL BE FREED IN DMMEMCLEAN
 	}
@@ -1097,7 +1097,7 @@ static int get_DHCPv6ServerPoolClientIPv6Prefix_ValidLifetime(char *refparam, st
 	if (valid && *valid != '\0' && atoi(valid) > 0) {
 		time_t time_value = atoi(valid);
 		char s_now[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
-		if (strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", localtime(&time_value)) == 0)
+		if (strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%SZ", gmtime(&time_value)) == 0)
 			return -1;
 		*value = dmstrdup(s_now);
 	}

@@ -1714,7 +1714,7 @@ static int get_DHCPv4ServerPoolClientIPv4Address_LeaseTimeRemaining(char *refpar
 {
 	const struct client_args *args = data;
 
-	return dm_time_format(args->lease->ts, value);
+	return dm_time_utc_format(args->lease->ts, value);
 }
 
 static int get_DHCPv4ServerPoolClientIPv4Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

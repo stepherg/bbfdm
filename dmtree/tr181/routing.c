@@ -942,7 +942,7 @@ static int get_RoutingRouteInformationInterfaceSetting_RouteLifetime(char *refpa
 	if (valid && *valid != '\0' && atoi(valid) > 0) {
 		char local_time[32] = {0};
 
-		if (get_shift_time_time(atoi(valid), local_time, sizeof(local_time)) == -1)
+		if (get_shift_utc_time(atoi(valid), local_time, sizeof(local_time)) == -1)
 			return 0;
 		*value = dmstrdup(local_time);
 	}

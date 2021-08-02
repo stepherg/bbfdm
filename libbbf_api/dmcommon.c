@@ -931,6 +931,22 @@ bool elt_exists_in_array(char **str_array, char *str, int length)
 	return false;
 }
 
+int get_shift_utc_time(int shift_time, char *utc_time, int size)
+{
+	struct tm *t_tm;
+	time_t now = time(NULL);
+
+	now = now + shift_time;
+	t_tm = gmtime(&now);
+	if (t_tm == NULL)
+		return -1;
+
+	if (strftime(utc_time, size, "%Y-%m-%dT%H:%M:%SZ", t_tm) == 0)
+		return -1;
+
+	return 0;
+}
+
 int get_shift_time_time(int shift_time, char *local_time, int size)
 {
 	time_t t_time;
@@ -1045,6 +1061,24 @@ int get_net_iface_sysfs(const char *uci_iface, const char *name, char **value)
 	const char *device = get_device((char *)uci_iface);
 
 	return get_net_device_sysfs(device, name, value);
+}
+
+int dm_time_utc_format(time_t ts, char **dst)
+{
+	char time_buf[32] = { 0, 0 };
+	struct tm *t_tm;
+
+	*dst = "0001-01-01T00:00:00Z";
+
+	t_tm = gmtime(&ts);
+	if (t_tm == NULL)
+		return -1;
+
+	if(strftime(time_buf, sizeof(time_buf), "%Y-%m-%dT%H:%M:%SZ", t_tm) == 0)
+		return -1;
+
+	*dst = dmstrdup(time_buf);
+	return 0;
 }
 
 int dm_time_format(time_t ts, char **dst)

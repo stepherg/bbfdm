@@ -90,8 +90,8 @@ static void send_transfer_complete_event(const char *command, const char *obj_pa
 	char fault_string[128] = {0};
 	unsigned fault_code = 0;
 
-	strftime(start_time, sizeof(start_time), "%Y-%m-%dT%H:%M:%SZ", localtime(&start_t));
-	strftime(complete_time, sizeof(complete_time), "%Y-%m-%dT%H:%M:%SZ", localtime(&complete_t));
+	strftime(start_time, sizeof(start_time), "%Y-%m-%dT%H:%M:%SZ", gmtime(&start_t));
+	strftime(complete_time, sizeof(complete_time), "%Y-%m-%dT%H:%M:%SZ", gmtime(&complete_t));
 
 	if (!get_response_code_status(transfer_url, res_code)) {
 		fault_code = USP_FAULT_GENERAL_FAILURE;

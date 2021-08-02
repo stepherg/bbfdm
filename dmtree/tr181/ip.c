@@ -2052,7 +2052,7 @@ static int get_IPInterfaceIPv6Address_PreferredLifetime(char *refparam, struct d
 	else
 		preferred = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "preferred");
 
-	if (preferred && *preferred && get_shift_time_time(atoi(preferred), local_time, sizeof(local_time)) == -1)
+	if (preferred && *preferred && get_shift_utc_time(atoi(preferred), local_time, sizeof(local_time)) == -1)
 		return 0;
 
 	*value = (*local_time) ? dmstrdup(local_time) : "9999-12-31T23:59:59Z";
@@ -2082,7 +2082,7 @@ static int get_IPInterfaceIPv6Address_ValidLifetime(char *refparam, struct dmctx
 	else
 		preferred = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "valid");
 
-	if (preferred && *preferred && get_shift_time_time(atoi(preferred), local_time, sizeof(local_time)) == -1)
+	if (preferred && *preferred && get_shift_utc_time(atoi(preferred), local_time, sizeof(local_time)) == -1)
 		return 0;
 
 	*value = (*local_time) ? dmstrdup(local_time) : "9999-12-31T23:59:59Z";
@@ -2265,7 +2265,7 @@ static int get_IPInterfaceIPv6Prefix_PreferredLifetime(char *refparam, struct dm
 	char local_time[32] = {0};
 
 	char *preferred = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "preferred");
-	if (preferred && *preferred && get_shift_time_time(atoi(preferred), local_time, sizeof(local_time)) == -1)
+	if (preferred && *preferred && get_shift_utc_time(atoi(preferred), local_time, sizeof(local_time)) == -1)
 		return 0;
 
 	*value = (*local_time) ? dmstrdup(local_time) : "9999-12-31T23:59:59Z";

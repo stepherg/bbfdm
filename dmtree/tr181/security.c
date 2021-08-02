@@ -331,7 +331,7 @@ static int get_SecurityCertificate_LastModif(char *refparam, struct dmctx *ctx, 
 	struct stat b;
 	char t[sizeof("AAAA-MM-JJTHH:MM:SSZ")] = "0001-01-01T00:00:00Z";
 	if (!stat(cert_profile->path, &b))
-		strftime(t, sizeof(t), "%Y-%m-%dT%H:%M:%SZ", localtime(&b.st_mtime));
+		strftime(t, sizeof(t), "%Y-%m-%dT%H:%M:%SZ", gmtime(&b.st_mtime));
 	*value = dmstrdup(t);
 	return 0;
 }

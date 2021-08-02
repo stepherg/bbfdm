@@ -689,7 +689,7 @@ static int get_DynamicDNSClientHostname_LastUpdate(char *refparam, struct dmctx 
 		uptime = "0";
 
 	epoch_time = now - atoi(uptime) + atoi(last_time);
-	if ((ts = localtime(&epoch_time)) == NULL)
+	if ((ts = gmtime(&epoch_time)) == NULL)
 		return -1;
 
 	if (strftime(current_time, sizeof(current_time), "%Y-%m-%dT%H:%M:%SZ", ts) == 0)

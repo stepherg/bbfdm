@@ -313,7 +313,7 @@ static int get_vcf_date(char *refparam, struct dmctx *ctx, void *data, char *ins
 
 				snprintf(path, sizeof(path), "%s%s", DEFAULT_CONFIG_DIR, d_file->d_name);
 				stat(path, &attr);
-				strftime(date, sizeof(date), "%Y-%m-%dT%H:%M:%SZ", localtime(&attr.st_mtime));
+				strftime(date, sizeof(date), "%Y-%m-%dT%H:%M:%SZ", gmtime(&attr.st_mtime));
 				*value = dmstrdup(date);
 			}
 		}

@@ -392,7 +392,7 @@ static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, s
 						}
 						time_expires = time_last + period;
 
-						if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", localtime(&time_expires)) == 0)
+						if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", gmtime(&time_expires)) == 0)
 							return -1;
 
 						*value = dmstrdup(buf);

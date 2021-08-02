@@ -2709,15 +2709,15 @@ static int get_WiFiAccessPointAssociatedDevice_AssociationTime(char *refparam, s
 	char *in_network = dmjson_get_value((json_object *)data, 1, "in_network");
 	if (in_network && *in_network != '\0' && atoi(in_network) > 0) {
 		time_t t_time = time(NULL) - atoi(in_network);
-		if (localtime(&t_time) == NULL)
+		if (gmtime(&t_time) == NULL)
 			return -1;
 
-		char local_time[32] = {0};
+		char utc_time[32] = {0};
 
-		if (strftime(local_time, sizeof(local_time), "%Y-%m-%dT%H:%M:%SZ", localtime(&t_time)) == 0)
+		if (strftime(utc_time, sizeof(utc_time), "%Y-%m-%dT%H:%M:%SZ", gmtime(&t_time)) == 0)
 			return -1;
 
-		*value = dmstrdup(local_time);
+		*value = dmstrdup(utc_time);
 	}
 	return 0;
 }
