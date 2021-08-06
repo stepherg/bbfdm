@@ -56,7 +56,7 @@ static void sync_mcast_dmmap_iface_sec(struct uci_list *proxy_iface, char *s_mod
 		uci_path_foreach_option_eq(bbfdm, dmmap_package, dmmap_sec, "ifname", key, d_sec) {
 			dmuci_get_value_by_section_string(d_sec, "section_name", &s_name);
 			if (strcmp(s_name, section_name(s)) == 0) {
-				add_dmmap_config_dup_list(dup_list, s, d_sec, NULL);
+				add_dmmap_config_dup_list(dup_list, s, d_sec);
 				found = 1;
 				break;
 			}
@@ -69,7 +69,7 @@ static void sync_mcast_dmmap_iface_sec(struct uci_list *proxy_iface, char *s_mod
 			dmuci_set_value_by_section_bbfdm(d_sec, "ifname", key);
 			dmuci_set_value_by_section_bbfdm(d_sec, "upstream", up_iface);
 			dmuci_set_value_by_section_bbfdm(d_sec, "snooping_mode", s_mode);
-			add_dmmap_config_dup_list(dup_list, s, d_sec, NULL);
+			add_dmmap_config_dup_list(dup_list, s, d_sec);
 		}
 	}
 }
@@ -85,7 +85,7 @@ static void add_empty_mcast_iface_to_list(char *dmmap_package, char *dmmap_sec,
 		dmuci_get_value_by_section_string(dmmap_sect, "ifname", &f_ifname);
 
 		if (f_ifname && *f_ifname == '\0')
-			add_dmmap_config_dup_list(dup_list, s, dmmap_sect, NULL);
+			add_dmmap_config_dup_list(dup_list, s, dmmap_sect);
 	}
 }
 
@@ -182,7 +182,7 @@ void synchronize_specific_config_sections_with_dmmap_mcast_filter(char *package,
 				uci_path_foreach_option_eq(bbfdm, dmmap_package, dmmap_sec, "ipaddr", ip_addr, d_sec) {
 					dmuci_get_value_by_section_string(d_sec, "section_name", &s_name);
 					if (strcmp(s_name, section_name(s)) == 0) {
-						add_dmmap_config_dup_list(dup_list, s, d_sec, NULL);
+						add_dmmap_config_dup_list(dup_list, s, d_sec);
 						found = 1;
 						break;
 					}
@@ -194,7 +194,7 @@ void synchronize_specific_config_sections_with_dmmap_mcast_filter(char *package,
 					dmuci_set_value_by_section_bbfdm(d_sec, "section_name", section_name(s));
 					dmuci_set_value_by_section_bbfdm(d_sec, "ipaddr", ip_addr);
 					dmuci_set_value_by_section_bbfdm(d_sec, "enable", "1");
-					add_dmmap_config_dup_list(dup_list, s, d_sec, NULL);
+					add_dmmap_config_dup_list(dup_list, s, d_sec);
 				}
 			}
 		}
@@ -207,7 +207,7 @@ void synchronize_specific_config_sections_with_dmmap_mcast_filter(char *package,
 			dmuci_get_value_by_section_string(dmmap_sect, "enable", &f_enable);
 
 			if ((f_ip[0] == '\0') || (strcmp(f_enable, "0") == 0))
-				add_dmmap_config_dup_list(dup_list, s, dmmap_sect, NULL);
+				add_dmmap_config_dup_list(dup_list, s, dmmap_sect);
 		}
 	}
 

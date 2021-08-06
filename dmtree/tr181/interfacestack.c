@@ -136,10 +136,6 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			strchr(device, '@'))
 			continue;
 
-		// Skip if its a provider bridge configuration
-		if (strncmp(section_name(s), "pr_br_", 6) == 0)
-			continue;
-
 		// The higher layer is Device.IP.Interface.{i}.
 		layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_network", "interface", "section_name", section_name(s), "ip_int_instance", "ip_int_alias");
 		if (*layer_inst == '\0')

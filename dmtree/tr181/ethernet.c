@@ -217,10 +217,6 @@ static int dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_nod
 		if (strchr(device, '@'))
 			continue;
 
-		// If the section belong to provider bridge (section name: pr_br_{i}) then skip adding to dmmap_package
-		if (strncmp(section_name(s), "pr_br_", 6) == 0)
-			continue;
-
 		dmuci_get_value_by_section_string(s, "macaddr", &macaddr);
 		create_link(section_name(s), macaddr);
 	}

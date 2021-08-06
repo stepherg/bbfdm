@@ -57,8 +57,6 @@ static int browseGRETunnelInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node
 		if ((s = has_tunnel_interface_route(section_name(p->config_section))) == NULL)
 			continue;
 
-		p->additional_attribute = dm->config_section;
-
 		browse_args.option = "section_name";
 		browse_args.value = section_name(dm->config_section);
 

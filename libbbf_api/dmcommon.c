@@ -274,7 +274,7 @@ void hex_to_ip(char *address, char *ret)
 /*
  * dmmap_config sections list manipulation
  */
-void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section, void *additional_attribute)
+void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section)
 {
 	struct dmmap_dup *dmmap_config;
 
@@ -282,7 +282,6 @@ void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *c
 	list_add_tail(&dmmap_config->list, dup_list);
 	dmmap_config->config_section = config_section;
 	dmmap_config->dmmap_section = dmmap_section;
-	dmmap_config->additional_attribute = additional_attribute;
 }
 
 static void dmmap_config_dup_delete(struct dmmap_dup *dmmap_config)
@@ -357,14 +356,6 @@ void synchronize_specific_config_sections_with_dmmap(char *package, char *sectio
 	uci_foreach_sections(package, section_type, s) {
 		/*
 		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
-		 * If the section belong to provider bridge (section name: pr_br_{i}) then skip adding to dmmap_package
-		 */
-		if ((strcmp(package, "network") == 0) &&
-			(strncmp(section_name(s), "pr_br_", 6) == 0))
-			continue;
-
-		/*
-		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
 		 */
 		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
 			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect);
@@ -374,7 +365,7 @@ void synchronize_specific_config_sections_with_dmmap(char *package, char *sectio
 		/*
 		 * Add system and dmmap sections to the list
 		 */
-		add_dmmap_config_dup_list(dup_list, s, dmmap_sect, NULL);
+		add_dmmap_config_dup_list(dup_list, s, dmmap_sect);
 	}
 
 	/*
@@ -404,7 +395,7 @@ void synchronize_specific_config_sections_with_dmmap_eq(char *package, char *sec
 		/*
 		 * Add system and dmmap sections to the list
 		 */
-		add_dmmap_config_dup_list(dup_list, s, dmmap_sect, NULL);
+		add_dmmap_config_dup_list(dup_list, s, dmmap_sect);
 	}
 
 	/*
@@ -434,7 +425,7 @@ void synchronize_specific_config_sections_with_dmmap_cont(char *package, char *s
 		/*
 		 * Add system and dmmap sections to the list
 		 */
-		add_dmmap_config_dup_list(dup_list, uci_s, dmmap_sect, NULL);
+		add_dmmap_config_dup_list(dup_list, uci_s, dmmap_sect);
 	}
 
 	/*
