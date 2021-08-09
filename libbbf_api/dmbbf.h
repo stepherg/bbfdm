@@ -139,7 +139,7 @@ struct dm_parameter {
 	char *name;
 	char *data;
 	char *type;
-	char *notification;
+	char *additional_data;
 };
 
 struct dm_json_parameter {
@@ -172,8 +172,6 @@ struct dmctx
 	int faultcode;
 	int setaction;
 	char *in_param;
-	char *in_notification;
-	bool notification_change;
 	char *in_value;
 	char *addobj_instance;
 	char *linker;
@@ -197,11 +195,6 @@ typedef struct dmnode {
 	unsigned char matched;
 	unsigned char is_instanceobj;
 } DMNODE;
-
-struct notification {
-	char *value;
-	char *type;
-};
 
 typedef struct dm_map_obj {
 	char *path;
@@ -262,10 +255,7 @@ enum del_action_enum {
 enum {
 	CMD_GET_VALUE,
 	CMD_GET_NAME,
-	CMD_GET_NOTIFICATION,
 	CMD_SET_VALUE,
-	CMD_SET_NOTIFICATION,
-	CMD_LIST_NOTIFY,
 	CMD_ADD_OBJECT,
 	CMD_DEL_OBJECT,
 	CMD_USP_OPERATE,
@@ -419,22 +409,11 @@ enum {
 	__INDX_DYNAMIC_MAX
 };
 
-enum notification_enum {
-	notification_none,
-	notification_passive,
-	notification_active,
-	notification_passive_lw,
-	notification_ppassive_passive_lw,
-	notification_aactive_lw,
-	notification_passive_active_lw,
-	__MAX_notification
-};
-
 char *update_instance(char *max_inst, int argc, ...);
 char *update_instance_alias(int action, char **last_inst, char **max_inst, void *argv[]);
 char *update_instance_without_section(int action, char **last_inst, char **max_inst, void *argv[]);
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
-void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_notification);
+void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *additional_data);
 void api_del_list_parameter(struct dm_parameter *dm_parameter);
 void free_all_list_parameter(struct dmctx *ctx);
 void free_all_set_list_tmp(struct dmctx *ctx);
@@ -447,12 +426,9 @@ int dm_entry_get_value(struct dmctx *dmctx);
 int dm_entry_get_name(struct dmctx *ctx);
 int dm_entry_get_schema(struct dmctx *ctx);
 int dm_entry_get_instances(struct dmctx *ctx);
-int dm_entry_get_notification(struct dmctx *dmctx);
 int dm_entry_add_object(struct dmctx *dmctx);
 int dm_entry_delete_object(struct dmctx *dmctx);
 int dm_entry_set_value(struct dmctx *dmctx);
-int dm_entry_set_notification(struct dmctx *dmctx);
-int dm_entry_enabled_notify(struct dmctx *dmctx);
 int dm_entry_get_linker(struct dmctx *dmctx);
 int dm_entry_get_linker_value(struct dmctx *dmctx);
 int dm_entry_list_operates(struct dmctx *ctx);
@@ -470,7 +446,6 @@ bool find_root_entry(struct dmctx *ctx, char *in_param, DMOBJ **root_entry);
 int get_obj_idx_dynamic_array(DMOBJ **entryobj);
 int get_leaf_idx_dynamic_array(DMLEAF **entryleaf);
 void free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj);
-char *check_parameter_forced_notification(const char *parameter);
 
 static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)
 {

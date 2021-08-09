@@ -194,71 +194,6 @@ static void test_api_bbfdm_get_name_wrong_next_level(void **state)
 	assert_true(&first_entry->list == &ctx->list_parameter);
 }
 
-static void test_api_bbfdm_get_notification_object(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *first_entry;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.", NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
-	assert_true(&first_entry->list != &ctx->list_parameter);
-}
-
-static void test_api_bbfdm_get_notification_parameter(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *first_entry;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.ManagementServer.ConnReqJabberID", NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
-	assert_true(&first_entry->list != &ctx->list_parameter);
-}
-
-static void test_api_bbfdm_get_notification_dot(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *first_entry;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, ".", NULL, NULL);
-	assert_int_equal(fault, FAULT_9005);
-
-	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
-	assert_true(&first_entry->list == &ctx->list_parameter);
-}
-
-static void test_api_bbfdm_get_notification_wrong_object_path(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *first_entry;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.User.", NULL, NULL);
-	assert_int_equal(fault, FAULT_9005);
-
-	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
-	assert_true(&first_entry->list == &ctx->list_parameter);
-}
-
-static void test_api_bbfdm_get_notification_wrong_parameter_path(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *first_entry;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.Users.User.1.Usename", NULL, NULL);
-	assert_int_equal(fault, FAULT_9005);
-
-	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
-	assert_true(&first_entry->list == &ctx->list_parameter);
-}
-
 static void test_api_bbfdm_set_value_object(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -338,96 +273,6 @@ static void test_api_bbfdm_set_value_parameter_wrong_value(void **state)
 
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list != &ctx->list_fault_param);
-}
-
-static void test_api_bbfdm_set_notification_object(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.Users.", "1", NULL);
-	assert_int_equal(fault, 0);
-}
-
-static void test_api_bbfdm_set_notification_parameter(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.DeviceInfo.UpTime", "2", NULL);
-	assert_int_equal(fault, 0);
-}
-
-static void test_api_bbfdm_set_notification_empty(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.", "1", NULL);
-	assert_int_equal(fault, FAULT_9009);
-}
-
-static void test_api_bbfdm_set_notification_root(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "", "2", NULL);
-	assert_int_equal(fault, FAULT_9009);
-}
-
-static void test_api_bbfdm_set_notification_wrong_notif(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.DeviceInfo.", "12", NULL);
-	assert_int_equal(fault, FAULT_9003);
-}
-
-static void test_api_bbfdm_set_notification_forced_parameter_notif(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.DeviceInfo.SoftwareVersion", "1", NULL);
-	assert_int_equal(fault, FAULT_9009);
-}
-
-static void test_api_bbfdm_set_notification_wrong_object_path(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.Device.", "1", NULL);
-	assert_int_equal(fault, FAULT_9005);
-}
-
-static void test_api_bbfdm_set_notification_wrong_parameter_path(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.Users.1.Username", "1", NULL);
-	assert_int_equal(fault, FAULT_9005);
-}
-
-static void test_api_bbfdm_set_notification_parameter_in_notification(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.Users.User.1.Username", "1", "false");
-	assert_int_equal(fault, 0);
-}
-
-static void test_api_bbfdm_set_notification_parameter_wrong_in_notification(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.WiFi.Radio.1.Enable", "1", "test");
-	assert_int_equal(fault, FAULT_9003);
 }
 
 static void test_api_bbfdm_add_object(void **state)
@@ -518,19 +363,6 @@ static void test_api_bbfdm_delete_object_empty(void **state)
 
 	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "", "test_key", NULL);
 	assert_int_equal(fault, FAULT_9005);
-}
-
-static void test_api_bbfdm_get_list_notify(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *first_entry;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_LIST_NOTIFY, NULL, NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
-	assert_true(&first_entry->list != &ctx->list_parameter);
 }
 
 static void test_api_bbfdm_valid_operate(void **state)
@@ -821,13 +653,6 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_without_next_level, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_wrong_next_level, setup, teardown_revert),
 
-		// Get Notification method test cases
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_notification_object, setup, teardown_commit),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_notification_parameter, setup, teardown_commit),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_notification_dot, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_notification_wrong_object_path, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_notification_wrong_parameter_path, setup, teardown_revert),
-
 		// Set Value method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_object, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_parameter, setup, teardown_commit),
@@ -835,18 +660,6 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_wrong_parameter_path, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_parameter_non_writable, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_parameter_wrong_value, setup, teardown_revert),
-
-		// Set Notification method test cases
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_notification_object, setup, teardown_commit),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_notification_parameter, setup, teardown_commit),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_notification_empty, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_notification_root, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_notification_wrong_notif, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_notification_forced_parameter_notif, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_notification_wrong_object_path, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_notification_wrong_parameter_path, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_notification_parameter_in_notification, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_notification_parameter_wrong_in_notification, setup, teardown_revert),
 
 		// Add Object method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_object, setup, teardown_commit),
@@ -866,9 +679,6 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_instances_wrong_object, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_instances_without_next_level, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_instances_wrong_next_level, setup, teardown_revert),
-
-		// Get List Notify method test cases
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_list_notify, setup, teardown_commit),
 
 		// Operate method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_operate, setup, teardown_commit),

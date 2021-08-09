@@ -21,9 +21,6 @@
 
 static char dm_browse_path[MAX_DM_PATH];
 
-static char *get_parameter_notification(struct dmctx *ctx, char *param);
-static int remove_parameter_notification(char *param);
-static int set_parameter_notification(struct dmctx *ctx, char *param,char *value);
 static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance);
 static int get_value_obj(DMOBJECT_ARGS);
 static int get_value_param(DMPARAM_ARGS);
@@ -45,40 +42,12 @@ static int delete_object_obj(DMOBJECT_ARGS);
 static int delete_object_param(DMPARAM_ARGS);
 static int mobj_set_value(DMOBJECT_ARGS);
 static int mparam_set_value(DMPARAM_ARGS);
-static int mobj_get_notification_in_param(DMOBJECT_ARGS);
-static int mobj_get_notification(DMOBJECT_ARGS);
-static int mparam_get_notification(DMPARAM_ARGS);
-static int mparam_get_notification_in_param(DMPARAM_ARGS);
-static int mparam_set_notification_in_obj(DMPARAM_ARGS);
-static int mobj_set_notification_in_param(DMOBJECT_ARGS);
-static int mparam_set_notification_in_param(DMPARAM_ARGS);
-static int mobj_set_notification_in_obj(DMOBJECT_ARGS);
-static int enabled_notify_check_obj(DMOBJECT_ARGS);
-static int enabled_notify_check_param(DMPARAM_ARGS);
 static int get_linker_check_obj(DMOBJECT_ARGS);
 static int get_linker_check_param(DMPARAM_ARGS);
 static int get_linker_value_check_obj(DMOBJECT_ARGS);
 static int get_linker_value_check_param(DMPARAM_ARGS);
 
 int bbfdatamodel_type = BBFDM_BOTH;
-
-struct notification notifications[] = {
-	[0] = {"0", "disabled"},
-	[1] = {"1", "passive"},
-	[2] = {"2", "active"},
-	[3] = {"3", "passive_lw"},
-	[4] = {"4", "passive_passive_lw"},
-	[5] = {"5", "active_lw"},
-	[6] = {"6", "passive_active_lw"}
-};
-
-struct dm_parameter forced_notifications_parameters[] = {
-	{.name = "Device.DeviceInfo.SoftwareVersion", .notification = "2"},
-	{.name = "Device.DeviceInfo.ProvisioningCode", .notification = "2"},
-	{.name = "Device.ManagementServer.ConnectionRequestURL", .notification = "2"},
-	{.name = "Device.ManagementServer.ConnReqJabberID", .notification = "2"},
-	{.name = "Device.SoftwareModules.ExecutionUnit.*.Status", .notification = "2"}
-};
 
 char *DMT_TYPE[] = {
 	[DMT_STRING] = "xsd:string",
@@ -90,16 +59,6 @@ char *DMT_TYPE[] = {
 	[DMT_TIME] = "xsd:dateTime",
 	[DMT_HEXBIN] = "xsd:hexBinary",
 	[DMT_BASE64] = "xsd:base64",
-};
-
-char *array_notifcation_char[__MAX_notification] = {
-	[notification_none] = "0",
-	[notification_passive] = "1",
-	[notification_active] = "2",
-	[notification_passive_lw] = "3",
-	[notification_ppassive_passive_lw] = "4",
-	[notification_aactive_lw] = "5",
-	[notification_passive_active_lw] = "6",
 };
 
 struct dm_permession_s DMREAD = {"0", NULL};
@@ -764,7 +723,7 @@ int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, cha
 	return 0;
 }
 
-void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *param_notification)
+void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *additional_data)
 {
 	struct dm_parameter *dm_parameter;
 	struct list_head *ilist = NULL;
@@ -783,7 +742,7 @@ void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, c
 	dm_parameter->name = param_name;
 	dm_parameter->data = param_data;
 	dm_parameter->type = param_type;
-	dm_parameter->notification = param_notification;
+	dm_parameter->additional_data = additional_data;
 }
 
 void api_del_list_parameter(struct dm_parameter *dm_parameter)
@@ -855,33 +814,6 @@ void free_all_list_fault_param(struct dmctx *ctx)
 	}
 }
 
-static int check_instance_wildcard_parameter_by_regex(const char *parameter, const char *regex)
-{
-	size_t l1, l2;
-
-	char **parameter_split = strsplit(parameter, ".", &l1);
-	char **regex_split = strsplit(regex, ".", &l2);
-	if (l1 != l2)
-		return -1;
-
-	for (int i = 0; i < l1; i++) {
-		if (strcmp(parameter_split[i], regex_split[i]) != 0 && (strcmp(regex_split[i], "*") != 0 || atoi(parameter_split[i]) <= 0))
-			return -1;
-	}
-
-	return 0;
-}
-
-static int check_notification_value(const char *value)
-{
-	int i;
-	for (i = 0; i< __MAX_notification; i++) {
-		if (strcmp(value, array_notifcation_char[i]) == 0)
-			return 0;
-	}
-	return -1;
-}
-
 int update_param_instance_alias(struct dmctx *ctx, char *param, char **new_param)
 {
 	char *pch, *spch, *p;
@@ -917,121 +849,6 @@ int update_param_instance_alias(struct dmctx *ctx, char *param, char **new_param
 	dmstrappendend(p);
 	*new_param = dmstrdup(buf);
 	dmfree(dup);
-	return 0;
-}
-
-static char *get_parameter_notification(struct dmctx *ctx, char *param)
-{
-	int i, maxlen = 0, len;
-	struct uci_list *list_notif;
-	char *pch, *new_param;
-	char *notification = "0";
-	struct uci_element *e = NULL;
-
-	update_param_instance_alias(ctx, param, &new_param);
-	for (i = (ARRAY_SIZE(notifications) - 1); i >= 0; i--) {
-		dmuci_get_option_value_list("cwmp", "@notifications[0]", notifications[i].type, &list_notif);
-		if (list_notif) {
-			uci_foreach_element(list_notif, e) {
-				pch = e->name;
-				if (strcmp(pch, new_param) == 0) {
-					notification = notifications[i].value;
-					return notification;
-				}
-				len = strlen(pch);
-				if (pch[len-1] == '.') {
-					if (strstr(new_param, pch)) {
-						if (len > maxlen )
-						{
-							notification = notifications[i].value;
-							maxlen = len;
-						}
-					}
-				}
-			}
-		}
-	}
-	dmfree(new_param);
-	return notification;
-}
-
-static int remove_parameter_notification(char *param)
-{
-	int i;
-	struct uci_list *list_notif;
-	struct uci_element *e = NULL, *tmp = NULL;
-	char *pch;
-
-	for (i = (ARRAY_SIZE(notifications) - 1); i >= 0; i--) {
-		if (param[strlen(param)-1] == '.') {
-			dmuci_get_option_value_list("cwmp", "@notifications[0]", notifications[i].type, &list_notif);
-			if (list_notif) {
-				uci_foreach_element_safe(list_notif, e, tmp) {
-					pch = tmp->name;
-					if (strstr(pch, param)) {
-						dmuci_del_list_value("cwmp", "@notifications[0]", notifications[i].type, pch);
-					}
-				}
-			}
-		} else {
-			dmuci_del_list_value("cwmp", "@notifications[0]", notifications[i].type, param);
-		}
-	}
-	return 0;
-}
-
-static int set_parameter_notification(struct dmctx *ctx, char *param, char *value)
-{
-	char *tmp = NULL, *pch, *new_param;
-	char *notification = NULL;
-	struct uci_section *s;
-	dmuci_get_section_type("cwmp", "@notifications[0]", &tmp);
-	update_param_instance_alias(ctx, param, &new_param);
-	if (!tmp || tmp[0] == '\0') {
-		dmuci_add_section("cwmp", "notifications", &s);
-	} else {
-		remove_parameter_notification(new_param);
-	}
-
-	notification = get_parameter_notification(ctx, new_param);
-	if (strcmp(notification, value) == 0) {
-		goto end;
-	}
-	if (strcmp(value, "1") == 0) {
-		dmuci_add_list_value("cwmp", "@notifications[0]", "passive", new_param);
-	} else if (strcmp(value, "2") == 0) {
-		dmuci_add_list_value("cwmp", "@notifications[0]", "active", new_param);
-	} else if (strcmp(value, "3") == 0) {
-		dmuci_add_list_value("cwmp", "@notifications[0]", "passive_lw", new_param);
-	} else if (strcmp(value, "4") == 0) {
-		dmuci_add_list_value("cwmp", "@notifications[0]", "passive_passive_lw", new_param);
-	} else if (strcmp(value, "5") == 0) {
-		dmuci_add_list_value("cwmp", "@notifications[0]", "active_lw", new_param);
-	} else if (strcmp(value, "6") == 0) {
-		dmuci_add_list_value("cwmp", "@notifications[0]", "passive_active_lw", new_param);
-	} else if (strcmp(value, "0") == 0) {
-		struct uci_list *list_notif;
-		struct uci_element *e = NULL;
-		int i, len;
-		for (i = (ARRAY_SIZE(notifications) - 1); i >= 1; i--) {
-			dmuci_get_option_value_list("cwmp", "@notifications[0]", notifications[i].type, &list_notif);
-			if (list_notif) {
-				uci_foreach_element(list_notif, e) {
-					pch = e->name;
-					len = strlen(pch);
-					if (pch[len-1] == '.' && strstr(new_param, pch)) {
-						dmuci_add_list_value("cwmp", "@notifications[0]", "disabled", new_param);
-						goto end;
-					}
-				}
-			}
-		}
-
-	} else {
-		return -1;
-	}
-end:
-	dmfree(new_param);
 	return 0;
 }
 
@@ -1478,97 +1295,6 @@ static int mparam_get_instances_in_obj(DMPARAM_ARGS)
 	return 0;
 }
 
-/* ********************
- * get notification
- * ********************/
-int dm_entry_get_notification(struct dmctx *dmctx)
-{
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-	unsigned char findparam_check = 0;
-	int err;
-
-	if (dmctx->in_param[0] == '\0'
-		|| rootcmp(dmctx->in_param, root->obj) == 0) {
-		dmctx->inparam_isparam = 0;
-		dmctx->findparam = 1;
-		dmctx->stop = 0;
-		dmctx->checkobj = NULL;
-		dmctx->checkleaf = NULL;
-		dmctx->method_obj = mobj_get_notification;
-		dmctx->method_param = mparam_get_notification;
-		findparam_check = 1;
-	} else if (*(dmctx->in_param + strlen(dmctx->in_param) - 1) == '.') {
-		dmctx->inparam_isparam = 0;
-		dmctx->findparam = 0;
-		dmctx->stop = 0;
-		dmctx->checkobj = plugin_obj_match;
-		dmctx->checkleaf = plugin_leaf_match;
-		dmctx->method_obj = mobj_get_notification;
-		dmctx->method_param = mparam_get_notification;
-		findparam_check = 1;
-	} else {
-		dmctx->inparam_isparam = 1;
-		dmctx->findparam = 0;
-		dmctx->stop = 0;
-		dmctx->checkobj = plugin_obj_match;
-		dmctx->checkleaf = plugin_leaf_match;
-		dmctx->method_obj = mobj_get_notification_in_param;
-		dmctx->method_param = mparam_get_notification_in_param;
-	}
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (findparam_check && dmctx->findparam)
-		return 0;
-	else
-		return err;
-}
-
-static int mparam_get_notification(DMPARAM_ARGS)
-{
-	char *value;
-	char *refparam;
-
-	dmastrcat(&refparam, node->current_object, lastname);
-
-	if (check_parameter_forced_notification(refparam) == NULL) {
-		value = get_parameter_notification(dmctx, refparam);
-	} else {
-		value = check_parameter_forced_notification(refparam);
-	}
-	add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL);
-	return 0;
-}
-
-static int mobj_get_notification(DMOBJECT_ARGS)
-{
-	return 0;
-}
-
-static int mparam_get_notification_in_param(DMPARAM_ARGS)
-{
-	char *value = NULL;
-	char *refparam;
-
-	dmastrcat(&refparam, node->current_object, lastname);
-	if (strcmp(refparam, dmctx->in_param) != 0) {
-		dmfree(refparam);
-		return FAULT_9005;
-	}
-	if (check_parameter_forced_notification(refparam) == NULL) {
-		value = get_parameter_notification(dmctx, refparam);
-	} else {
-		value = check_parameter_forced_notification(refparam);
-	}
-	add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL);
-	dmctx->stop = 1;
-	return 0;
-}
-
-static int mobj_get_notification_in_param(DMOBJECT_ARGS)
-{
-	return 0;
-}
-
 /* **************
  * add object 
  * **************/
@@ -1623,7 +1349,6 @@ static int mobj_add_object(DMOBJECT_ARGS)
 		return fault;
 	dmctx->addobj_instance = instance;
 	dmasprintf(&objinst, "%s%s.", node->current_object, instance);
-	set_parameter_notification(dmctx, objinst, "0");
 	dmfree(objinst);
 	return 0;
 }
@@ -1746,157 +1471,6 @@ static int mparam_set_value(DMPARAM_ARGS)
 		}
 	}
 	dmfree(refparam);
-	return 0;
-}
-
-/* ****************
- * set notification  
- * ****************/
-int dm_entry_set_notification(struct dmctx *dmctx)
-{
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-	int err;
-
-	if (check_notification_value(dmctx->in_notification) < 0)
-		return FAULT_9003;
-
-	if (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, root->obj) == 0) {
-		return FAULT_9009;
-	} else if (*(dmctx->in_param + strlen(dmctx->in_param) - 1) == '.') {
-		dmctx->inparam_isparam = 0;
-		dmctx->findparam = 0;
-		dmctx->stop = 0;
-		dmctx->checkobj = plugin_obj_match;
-		dmctx->checkleaf = plugin_leaf_match;
-		dmctx->method_obj = mobj_set_notification_in_obj;
-		dmctx->method_param = mparam_set_notification_in_obj;
-	} else {
-		dmctx->inparam_isparam = 1;
-		dmctx->findparam = 0;
-		dmctx->stop = 0;
-		dmctx->checkobj = plugin_obj_match;
-		dmctx->checkleaf = plugin_leaf_match;
-		dmctx->method_obj = mobj_set_notification_in_param;
-		dmctx->method_param = mparam_set_notification_in_param;
-	}
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	if (dmctx->stop)
-		return err;
-	else
-		return FAULT_9005;
-}
-
-static int mparam_set_notification_in_obj(DMPARAM_ARGS)
-{
-	return FAULT_9005;
-}
-
-static int mobj_set_notification_in_obj(DMOBJECT_ARGS)
-{
-	char *refparam = node->current_object;
-	if (strcmp(refparam, dmctx->in_param) != 0) {
-		return FAULT_9005;
-	}
-	dmctx->stop = 1;
-	if (!dmctx->notification_change) {
-		return 0;
-	}
-	if (dmctx->setaction == VALUECHECK) {
-		if (check_parameter_forced_notification(refparam))
-			return FAULT_9009;
-
-		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_notification);
-	} else if (dmctx->setaction == VALUESET) {
-		set_parameter_notification(dmctx, dmctx->in_param, dmctx->in_notification);
-		dmctx->end_session_flag |= BBF_END_SESSION_RELOAD;
-	}
-	return 0;
-}
-
-static int mparam_set_notification_in_param(DMPARAM_ARGS)
-{
-	char *refparam;
-
-	dmastrcat(&refparam, node->current_object, lastname);
-	if (strcmp(refparam, dmctx->in_param) != 0) {
-		dmfree(refparam);
-		return FAULT_9005;
-	}
-
-	dmctx->stop = 1;
-	if (!dmctx->notification_change) {
-		return 0;
-	}
-	if (dmctx->setaction == VALUECHECK) {
-		if (check_parameter_forced_notification(refparam)) {
-			dmfree(refparam);
-			return FAULT_9009;
-		}
-		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_notification);
-	} else if (dmctx->setaction == VALUESET) {
-		set_parameter_notification(dmctx, dmctx->in_param, dmctx->in_notification);
-		dmctx->end_session_flag |= BBF_END_SESSION_RELOAD;
-	}
-	dmfree(refparam);
-	return 0;
-}
-
-static int mobj_set_notification_in_param(DMOBJECT_ARGS)
-{
-	return FAULT_9005;
-}
-
-/*********************
- * load enabled notify
- ********************/
-int dm_entry_enabled_notify(struct dmctx *dmctx)
-{
-	int err;
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-
-	dmctx->method_obj = enabled_notify_check_obj;
-	dmctx->method_param = enabled_notify_check_param;
-	dmctx->checkobj = NULL ;
-	dmctx->checkleaf = NULL;
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-	return err;
-}
-
-char *check_parameter_forced_notification(const char *parameter)
-{
-	int i;
-
-	for (i = 0; i < ARRAY_SIZE(forced_notifications_parameters); i++) {
-		if (strcmp(forced_notifications_parameters[i].name, parameter) == 0 ||
-			check_instance_wildcard_parameter_by_regex(parameter, forced_notifications_parameters[i].name) == 0)
-			return forced_notifications_parameters[i].notification;
-	}
-
-	return NULL;
-}
-
-static int enabled_notify_check_obj(DMOBJECT_ARGS)
-{
-	return FAULT_9005;
-}
-
-static int enabled_notify_check_param(DMPARAM_ARGS)
-{
-	char *refparam, *notif = NULL, *value = "";
-
-	dmastrcat(&refparam, node->current_object, lastname);
-	if ((notif = check_parameter_forced_notification(refparam)) == NULL)
-		notif = get_parameter_notification(dmctx, refparam);
-
-	if (notif == NULL || notif[0] == '0') {
-		dmfree(refparam);
-		return 0;
-	}
-	(get_cmd)(refparam, dmctx, data, instance, &value);
-	if (notif[0] == '1' || notif[0] == '2' || notif[0] == '4' || notif[0] == '6')
-		add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], notif);
 	return 0;
 }
 

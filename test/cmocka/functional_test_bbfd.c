@@ -148,111 +148,6 @@ static void test_api_bbfdm_get_set_library_parameter(void **state)
 	validate_parameter(ctx, "Device.ManagementServer.EnableCWMP", "0", "xsd:boolean");
 }
 
-static void test_api_bbfdm_get_set_notification_standard_parameter(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	// get notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.WiFi.SSID.1.SSID", NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.SSID.1.SSID", "0", "xsd:string");
-
-	// set notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.WiFi.SSID.1.SSID", "1", NULL);
-	assert_int_equal(fault, 0);
-
-	// get notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.WiFi.SSID.1.SSID", NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.SSID.1.SSID", "1", "xsd:string");
-
-	// set notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.WiFi.SSID.1.SSID", "2", NULL);
-	assert_int_equal(fault, 0);
-
-	// get notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.WiFi.SSID.1.SSID", NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.SSID.1.SSID", "2", "xsd:string");
-}
-
-static void test_api_bbfdm_get_set_notification_json_parameter(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	// get notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.UserInterface.CurrentLanguage", NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.UserInterface.CurrentLanguage", "0", "xsd:string");
-
-	// set notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.UserInterface.CurrentLanguage", "1", NULL);
-	assert_int_equal(fault, 0);
-
-	// get notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.UserInterface.CurrentLanguage", NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.UserInterface.CurrentLanguage", "1", "xsd:string");
-
-	// set notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.UserInterface.CurrentLanguage", "2", NULL);
-	assert_int_equal(fault, 0);
-
-	// get notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.UserInterface.CurrentLanguage", NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.UserInterface.CurrentLanguage", "2", "xsd:string");
-}
-
-static void test_api_bbfdm_get_set_notification_library_parameter(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	// get notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.ManagementServer.EnableCWMP", NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.ManagementServer.EnableCWMP", "0", "xsd:boolean");
-
-	// set notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.ManagementServer.EnableCWMP", "1", NULL);
-	assert_int_equal(fault, 0);
-
-	// get notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.ManagementServer.EnableCWMP", NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.ManagementServer.EnableCWMP", "1", "xsd:boolean");
-
-	// set notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_SET_NOTIFICATION, "Device.ManagementServer.EnableCWMP", "2", NULL);
-	assert_int_equal(fault, 0);
-
-	// get notification ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_NOTIFICATION, "Device.ManagementServer.EnableCWMP", NULL, NULL);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.ManagementServer.EnableCWMP", "2", "xsd:boolean");
-}
-
 static void test_api_bbfdm_add_del_standard_object(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -400,11 +295,6 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_standard_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_json_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_library_parameter, setup, teardown_commit),
-
-		// Get/Set Notification method test cases
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_notification_standard_parameter, setup, teardown_commit),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_notification_json_parameter, setup, teardown_commit),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_notification_library_parameter, setup, teardown_commit),
 
 		// Add/Delete Object method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_standard_object, setup, teardown_commit),

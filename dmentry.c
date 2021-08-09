@@ -196,33 +196,12 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			else
 				fault = FAULT_9003;
 			break;
-		case CMD_GET_NOTIFICATION:
-			if (ctx->in_param[0] == '.' && strlen(ctx->in_param) == 1)
-				fault = FAULT_9005;
-			else
-				fault = dm_entry_get_notification(ctx);
-			break;
 		case CMD_SET_VALUE:
 			ctx->in_value = arg1 ? arg1 : "";
 			ctx->setaction = VALUECHECK;
 			fault = dm_entry_set_value(ctx);
 			if (fault)
 				add_list_fault_param(ctx, ctx->in_param, usp_fault_map(fault));
-			break;
-		case CMD_SET_NOTIFICATION:
-			if (arg2)
-				err = string_to_bool(arg2, &setnotif);
-			if (!err && arg1) {
-				ctx->in_notification = arg1;
-				ctx->setaction = VALUECHECK;
-				ctx->notification_change = setnotif;
-				fault = dm_entry_set_notification(ctx);
-			} else {
-				fault = FAULT_9003;
-			}
-			break;
-		case CMD_LIST_NOTIFY:
-			fault = dm_entry_enabled_notify(ctx);
 			break;
 		case CMD_ADD_OBJECT:
 			fault = dm_entry_add_object(ctx);
@@ -280,20 +259,6 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1)
 			}
 			if (!fault) {
 				dmuci_set_value("cwmp", "acs", "ParameterKey", arg1 ? arg1 : "");
-				dmuci_change_packages(&head_package_change);
-				dmuci_save();
-			}
-			break;
-		case CMD_SET_NOTIFICATION:
-			ctx->setaction = VALUESET;
-			list_for_each_entry_safe(n, p, &ctx->set_list_tmp, list) {
-				ctx->in_param = n->name;
-				ctx->in_notification = n->value ? n->value : "0";
-				ctx->stop = false;
-				fault = dm_entry_set_notification(ctx);
-				if (fault) break;
-			}
-			if (!fault) {
 				dmuci_change_packages(&head_package_change);
 				dmuci_save();
 			}
