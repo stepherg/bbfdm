@@ -171,8 +171,7 @@ int dm_ctx_clean_sub(struct dmctx *ctx)
 
 int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2)
 {
-	int err = 0, fault = 0;
-	bool setnotif = true;
+	int fault = 0;
 
 	// Load dynamic objects and parameters
 	load_dynamic_arrays(ctx);

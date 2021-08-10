@@ -263,6 +263,7 @@ struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_
 struct uci_section *get_dup_section_in_dmmap_opt(char *dmmap_package, char *section_type, char *opt_name, char *opt_value);
 struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* section_type, char*sect_name, char *opt_name, char* opt_value);
 bool elt_exists_in_array(char **str_array, char *str, int length);
+int get_shift_utc_time(int shift_time, char *utc_time, int size);
 int get_shift_time_time(int shift_time, char *local_time, int size);
 struct uci_section *is_dmmap_section_exist(char* package, char* section);
 struct uci_section *is_dmmap_section_exist_eq(char* package, char* section, char* opt, char* value);
@@ -271,6 +272,7 @@ int get_net_iface_sysfs(const char *uci_iface, const char *name, char **value);
 int get_net_device_sysfs(const char *device, const char *name, char **value);
 int get_net_device_status(const char *device, char **value);
 char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_section);
+int dm_time_utc_format(time_t ts, char **dst);
 int dm_time_format(time_t ts, char **dst);
 void convert_string_to_hex(const char *str, char *hex);
 void convert_hex_to_string(const char *hex, char *str);
