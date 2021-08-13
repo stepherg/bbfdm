@@ -162,11 +162,15 @@ static bool check_dependency(const char *conf_obj)
 	/* multiple files => "file:/etc/config/network,/lib/netifd/proto/dhcp.sh" */
 	/* one ubus => "ubus:router.network" (with method : "ubus:router.network->hosts") */
 	/* multiple ubus => "ubus:router.system->info,dsl->status,wifi" */
-	/* common (files and ubus) => "file:/etc/config/network,/etc/config/dhcp;ubus:router.system,dsl->status" */
+	/* one package => "opkg:icwmp" */
+	/* multiple packages => "opkg:icwmp,obuspa" */
+	/* common (files, ubus and opkg) => "file:/etc/config/network,/etc/config/dhcp;ubus:router.system,dsl->status;opkg:icwmp" */
 
-	char *pch, *spch;
+	char *pch = NULL, *spch = NULL;
+	char conf_list[512] = {0};
 
-	char *conf_list = dmstrdup(conf_obj);
+	DM_STRNCPY(conf_list, conf_obj, sizeof(conf_list));
+
 	for (pch = strtok_r(conf_list, ";", &spch); pch != NULL; pch = strtok_r(NULL, ";", &spch)) {
 		char *conf_type = strchr(pch, ':');
 		if (!conf_type)
@@ -177,8 +181,20 @@ static bool check_dependency(const char *conf_obj)
 
 		char *token, *saveptr;
 		for (token = strtok_r(conf_name, ",", &saveptr); token != NULL; token = strtok_r(NULL, ",", &saveptr)) {
-			if ((!strcmp(pch, "file") && !file_exists(token)) || (!strcmp(pch, "ubus") && !dmubus_object_method_exists(token)))
+
+			if (!strcmp(pch, "file") && !file_exists(token))
 				return false;
+
+			if (!strcmp(pch, "ubus") && !dmubus_object_method_exists(token))
+				return false;
+
+			if (!strcmp(pch, "opkg")) {
+				char opkg_path[256] = {0};
+
+				snprintf(opkg_path, sizeof(opkg_path), "/usr/lib/opkg/info/%s.control", token);
+				if (!file_exists(opkg_path))
+					return false;
+			}
 		}
 	}
 
