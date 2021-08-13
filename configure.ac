@@ -1,6 +1,4 @@
 AC_INIT([libbbfdm], [0.1], [mohamed.kallel@pivasoftware.com])
-AM_INIT_AUTOMAKE
-
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_ARG_ENABLE(tr181, [AS_HELP_STRING([--enable-tr181], [enable tr181 device feature])], AC_DEFINE(BBF_TR181),)
@@ -20,6 +18,9 @@ AM_CONDITIONAL([LMBEDTLS],[test "x$enable_libmbedtls" = "xyes"])
 
 AC_ARG_ENABLE(vendor_extension, [AS_HELP_STRING([--enable-vendor-extension], [enable vendor extension])], AC_DEFINE(BBF_VENDOR_EXTENSION),)
 AM_CONDITIONAL([BBF_VENDOR_EXTENSION],[test "x$enable_vendor_extension" = "xyes"])
+
+AC_DEFINE_UNQUOTED(BBF_VENDOR_LIST, "$BBF_VENDOR_LIST")
+AC_DEFINE_UNQUOTED(BBF_VENDOR_PREFIX, "$BBF_VENDOR_PREFIX")
 
 case $BBF_VENDOR_LIST in
   *openwrt*) vendor_openwrt=yes ;;&

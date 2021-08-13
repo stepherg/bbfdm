@@ -10,6 +10,9 @@ ln -sf bash /bin/sh
 # compile and install libbbf
 install_libbbf
 
+#compile and install libbbf_test dynamic extension library
+install_libbbf_test
+
 supervisorctl status all
 supervisorctl update
 sleep 3

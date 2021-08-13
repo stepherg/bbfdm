@@ -36,7 +36,8 @@ function install_libbbf()
 {
 	COV_CFLAGS='-fprofile-arcs -ftest-coverage'
 	COV_LDFLAGS='--coverage'
-	VENDOR_LIST='iopsys,test'
+	VENDOR_LIST='iopsys'
+	VENDOR_PREFIX='X_IOPSYS_EU_'
 
 	echo "Compiling libbbf"
 	if [ -f Makefile ]; then
@@ -47,9 +48,9 @@ function install_libbbf()
 		rm -f *.log *.xml
 	fi
 
-	autoreconf -i  >/dev/null 2>&1
-	./configure CFLAGS="$COV_CFLAGS" LDFLAGS="$COV_LDFLAGS" BBF_VENDOR_LIST="$VENDOR_LIST" --enable-tr181 --enable-tr104 --enable-tr143 --enable-libopenssl --enable-vendor-extension >/dev/null 2>&1
-	exec_cmd make CPPFLAGS=-DBBF_VENDOR_LIST=\\\"iopsys\\\" CPPFLAGS+=-DBBF_VENDOR_PREFIX=\\\"X_IOPSYS_EU_\\\"
+	exec_cmd autoreconf -i
+	exec_cmd ./configure --enable-tr181 --enable-tr104 --enable-tr143 --enable-libopenssl --enable-vendor-extension BBF_VENDOR_LIST="$VENDOR_LIST" BBF_VENDOR_PREFIX="$VENDOR_PREFIX"
+	make CFLAGS="-D_GNU_SOURCE -Wall -Werror" CFLAGS+="$COV_CFLAGS" LDFLAGS="$COV_LDFLAGS" >/dev/null 2>&1
 
 	echo "installing libbbf"
 	exec_cmd make install
@@ -62,7 +63,10 @@ function install_libbbf()
 	mkdir -p /usr/share/bbfdm
 	mkdir -p /usr/lib/bbfdm
 	cp -f scripts/* /usr/share/bbfdm
+}
 
+function install_libbbf_test()
+{
 	# compile and install libbbf_test
 	echo "Compiling libbbf_test"
 	make clean -C test/bbf_test/
