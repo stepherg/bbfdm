@@ -396,6 +396,19 @@ static void test_api_bbfdm_get_list_operate(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 }
 
+static void test_api_bbfdm_get_list_event(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *first_entry;
+	int fault = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_USP_LIST_EVENT, NULL, NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
+	assert_true(&first_entry->list != &ctx->list_parameter);
+}
+
 static void test_api_bbfdm_get_schema(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -686,6 +699,9 @@ int main(void)
 
 		// Get List Operate method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_list_operate, setup, teardown_commit),
+
+		// Get List Operate method test cases
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_list_event, setup, teardown_commit),
 
 		// Get Schema method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_schema, setup, teardown_commit),

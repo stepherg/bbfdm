@@ -210,7 +210,7 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 		if (!bbfdatamodel_matches(leaf->bbfdm_type))
 			continue;
 
-		if (dmctx->iscommand != (leaf->type == DMT_COMMAND))
+		if (dmctx->iscommand != (leaf->type == DMT_COMMAND) || dmctx->isevent != (leaf->type == DMT_EVENT))
 			continue;
 
 		snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, leaf->parameter);
@@ -231,7 +231,7 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 							if (!bbfdatamodel_matches(jleaf->bbfdm_type))
 								continue;
 
-							if (dmctx->iscommand != (jleaf->type == DMT_COMMAND))
+							if (dmctx->iscommand != (jleaf->type == DMT_COMMAND) || dmctx->isevent != (jleaf->type == DMT_EVENT))
 								continue;
 
 							snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, jleaf->parameter);
@@ -1667,6 +1667,46 @@ int dm_entry_operate(struct dmctx *dmctx)
 		return err;
 	else
 		return CMD_NOT_FOUND;
+}
+
+/* ************
+ * list event
+ * ************/
+static int mobj_list_events_name(DMOBJECT_ARGS)
+{
+	return 0;
+}
+
+static int mparam_list_events_name(DMPARAM_ARGS)
+{
+	char *value = NULL;
+	char *full_param;
+
+	dmastrcat(&full_param, node->current_object, lastname);
+	if (get_cmd)
+		(get_cmd)(full_param, dmctx, data, instance, &value);
+
+	add_list_parameter(dmctx, full_param, value, permission->val, NULL);
+	return 0;
+}
+
+int dm_entry_list_events(struct dmctx *dmctx)
+{
+	DMOBJ *root = dmctx->dm_entryobj;
+	DMNODE node = {.current_object = ""};
+	int err;
+
+	dmctx->inparam_isparam = 0;
+	dmctx->isgetschema = 1;
+	dmctx->isevent = 1;
+	dmctx->findparam = 0;
+	dmctx->stop = 0;
+	dmctx->checkobj = NULL;
+	dmctx->checkleaf = NULL;
+	dmctx->method_obj = mobj_list_events_name;
+	dmctx->method_param = mparam_list_events_name;
+	err = dm_browse(dmctx, &node, root, NULL, NULL);
+	return err;
 }
 
 int dm_browse_last_access_path(char *path, size_t len)

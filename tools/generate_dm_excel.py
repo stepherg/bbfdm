@@ -27,7 +27,7 @@ def getprotocols(value):
     return "CWMP+USP"
 
 
-def check_param_obj_command(dmobject):
+def is_param_obj_command_event_supported(dmobject):
     for value in bbf.LIST_SUPPORTED_DM:
         obj = value.split(",")
         if obj[0] == dmobject:
@@ -44,7 +44,7 @@ def parse_standard_object(dmobject, value):
     hasobj = bbf.obj_has_child(value)
     hasparam = bbf.obj_has_param(value)
 
-    supported = check_param_obj_command(dmobject)
+    supported = is_param_obj_command_event_supported(dmobject)
     add_data_to_list_dm(dmobject, supported, getprotocols(value), "object")
 
     if hasparam:
@@ -55,8 +55,8 @@ def parse_standard_object(dmobject, value):
                 if isinstance(v, dict):
                     for k1, v1 in v.items():
                         if k1 == "type" and v1 != "object":
-                            supported = check_param_obj_command(dmobject + k)
-                            add_data_to_list_dm(dmobject + k, supported, getprotocols(v), "operate" if "()" in k else "parameter")
+                            supported = is_param_obj_command_event_supported(dmobject + k)
+                            add_data_to_list_dm(dmobject + k, supported, getprotocols(v), "operate" if "()" in k else "event" if "!" in k else "parameter")
                             break
 
     if hasobj:
@@ -151,7 +151,7 @@ def generate_excel_file(output_file):
                 'pattern: pattern solid, fore_colour custom_colour_yellow')
             style = xlwt.easyxf(
                 'pattern: pattern solid, fore_colour custom_colour_yellow;''alignment: horizontal center;')
-        elif param[3] == "operate":
+        elif param[3] == "operate" or param[3] == "event":
             style_name = xlwt.easyxf(
                 'pattern: pattern solid, fore_colour custom_colour_green')
             style = xlwt.easyxf(

@@ -37,7 +37,7 @@ echo "Validate UserInterface JSON Plugin"
 ./test/tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
 check_ret $?
 
-echo "Validate TR-181 JSON Plugin afetr generating from XML"
+echo "Validate TR-181 JSON Plugin after generating from XML"
 json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-181-2-14-1-cwmp-full.xml test/tools/tr-181-2-14-1-usp-full.xml Device.)
 ./test/tools/validate_json_plugin.py $json_path
 check_ret $?

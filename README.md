@@ -157,11 +157,15 @@ Each object in the **DMOBJ** table contains the following arguments:
 | `leaf`              | Pointer to a **DMLEAF** array which contains a list of the child parameters |
 | `linker`            | This argument is used for LowerLayer parameters or to make reference to other instance object in the tree |
 | `bbfdm_type`        | The bbfdm type of the object. Could be **BBFDM_CWMP**, **BBFDM_USP**, **BBFDM_BOTH** or **BBFDM_NONE**.If it's **BBFDM_BOTH** then we can see this object in all protocols (CWMP, USP,...) |
+| `uniqueKeys`        | The unique key parameters defined for the object. |
 
 
-### Parameter definition
+### Leaf definition
 
-Each parameter in the **DMLEAF** table contains the following arguments:
+Each leaf in the **DMLEAF** table can be a **Parameter**, **Command** or **Event**.
+
+
+#### 1.Parameter definition
 
 |     Argument        |                             Description                                                               |
 | ------------------- | -------------------------------------------------------------------------------------------------- |
@@ -171,6 +175,31 @@ Each parameter in the **DMLEAF** table contains the following arguments:
 | `getvalue`          | The function which return the value of this parameter |
 | `setvalue`          | The function which set the value of this parameter |
 | `bbfdm_type`        | The bbfdm type of the parameter. Could be **BBFDM_CWMP**, **BBFDM_USP**, **BBFDM_BOTH** or **BBFDM_NONE**.If it's **BBFDM_BOTH** then we can see this parameter in all protocols (CWMP, USP,...) |
+
+
+#### 2.Command definition
+
+|     Argument        |                             Description                                                               |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| `PARAM`             | A string of the command name. Example “IPPing()”, “DownloadDiagnostics()”, “Renew()” |
+| `permission`        | The permission of the command. Could be **&DMASYNC** or **&DMSYNC**. |
+| `type`              | Type of the command, It should be **DMT_COMMAND** |
+| `getvalue`          | The function which return the input, output arguments of the command |
+| `setvalue`          | The function which call the operation of the command |
+| `bbfdm_type`        | The bbfdm type of the command. It should be **BBFDM_USP** as long as operate commands are only defined in USP protocol. |
+
+
+#### 3.Event definition
+
+|     Argument        |                             Description                                                               |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| `PARAM`             | A string of the event name. Example “Boot!”, “Push!”, “Periodic!” |
+| `permission`        | The permission of the event. It should be **DMREAD** |
+| `type`              | Type of the event, It should be **DMT_EVENT** |
+| `getvalue`          | The function which return the parameter arguments of the event |
+| `setvalue`          | The function which call the operation of the event, It should be **NULL** |
+| `bbfdm_type`        | The bbfdm type of the event. It should be **BBFDM_USP** as long as events are only defined in USP protocol. |
+
 
 ## BBF API
 

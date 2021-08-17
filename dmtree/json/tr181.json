@@ -56,6 +56,59 @@
 				"usp"
 			]
 		},
+		"Boot!": {
+			"type": "event",
+			"version": "2.12",
+			"protocols": [
+				"usp"
+			],
+			"CommandKey": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.12",
+				"protocols": [
+					"usp"
+				],
+				"datatype": "string"
+			},
+			"Cause": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.12",
+				"protocols": [
+					"usp"
+				],
+				"datatype": "string",
+				"enumerations": [
+					"LocalReboot",
+					"RemoteReboot",
+					"LocalFactoryReset",
+					"RemoteFactoryReset"
+				]
+			},
+			"FirmwareUpdated": {
+				"type": "boolean",
+				"read": true,
+				"write": true,
+				"version": "2.12",
+				"protocols": [
+					"usp"
+				],
+				"datatype": "boolean"
+			},
+			"ParameterMap": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.12",
+				"protocols": [
+					"usp"
+				],
+				"datatype": "JSONObject"
+			}
+		},
 		"FactoryReset()": {
 			"type": "command",
 			"async": false,
@@ -4562,6 +4615,129 @@
 							}
 						]
 					}
+				}
+			},
+			"DUStateChange!": {
+				"type": "event",
+				"version": "2.12",
+				"protocols": [
+					"usp"
+				],
+				"UUID": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "UUID",
+					"range": [
+						{
+							"min": 36,
+							"max": 36
+						}
+					],
+					"pattern": [
+						"[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}"
+					]
+				},
+				"DeploymentUnitRef": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string"
+				},
+				"Version": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string",
+					"range": [
+						{
+							"max": 32
+						}
+					]
+				},
+				"CurrentState": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string",
+					"enumerations": [
+						"Installed",
+						"UnInstalled",
+						"Failed"
+					]
+				},
+				"Resolved": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "boolean"
+				},
+				"ExecutionUnitRefList": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"list": {
+						"datatype": "string"
+					}
+				},
+				"StartTime": {
+					"type": "dateTime",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "dateTime"
+				},
+				"CompleteTime": {
+					"type": "dateTime",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "dateTime"
+				},
+				"OperationPerformed": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string",
+					"enumerations": [
+						"Install",
+						"Update",
+						"Uninstall"
+					]
 				}
 			},
 			"Device.SoftwareModules.ExecEnv.{i}.": {
@@ -41744,9 +41920,9 @@
 					"uci": {
 						"file": "network",
 						"section": {
-							"type": "interface"
+							"type": "device"
 						},
-						"dmmapfile": "dmmap_network"
+						"dmmapfile": "dmmap_bridge"
 					}
 				},
 				"Enable": {
@@ -76499,6 +76675,23 @@
 					],
 					"datatype": "string"
 				},
+				"Push!": {
+					"type": "event",
+					"version": "2.13",
+					"protocols": [
+						"usp"
+					],
+					"Data": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.13",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string"
+					}
+				},
 				"Device.BulkData.Profile.{i}.Parameter.{i}.": {
 					"type": "object",
 					"version": "2.5",
@@ -88594,6 +88787,141 @@
 				"datatype": "unsignedInt",
 				"unit": "seconds"
 			},
+			"Periodic!": {
+				"type": "event",
+				"version": "2.12",
+				"protocols": [
+					"usp"
+				]
+			},
+			"WakeUp!": {
+				"type": "event",
+				"version": "2.12",
+				"protocols": [
+					"usp"
+				]
+			},
+			"TransferComplete!": {
+				"type": "event",
+				"version": "2.12",
+				"protocols": [
+					"usp"
+				],
+				"Command": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string"
+				},
+				"CommandKey": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string"
+				},
+				"Requestor": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string"
+				},
+				"TransferType": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string",
+					"enumerations": [
+						"Download",
+						"Upload"
+					]
+				},
+				"Affected": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string"
+				},
+				"TransferURL": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "URL",
+					"range": [
+						{
+							"max": 2048
+						}
+					]
+				},
+				"StartTime": {
+					"type": "dateTime",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "dateTime"
+				},
+				"CompleteTime": {
+					"type": "dateTime",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "dateTime"
+				},
+				"FaultCode": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "unsignedInt"
+				},
+				"FaultString": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string",
+					"range": [
+						{
+							"max": 256
+						}
+					]
+				}
+			},
 			"AddCertificate()": {
 				"type": "command",
 				"async": false,
@@ -89170,6 +89498,33 @@
 						"usp"
 					],
 					"datatype": "string"
+				},
+				"Triggered!": {
+					"type": "event",
+					"version": "2.13",
+					"protocols": [
+						"usp"
+					],
+					"ParamPath": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.13",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string"
+					},
+					"ParamValue": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.13",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string"
+					}
 				}
 			},
 			"Device.LocalAgent.Controller.{i}.": {
@@ -89366,6 +89721,23 @@
 							],
 							"unit": "seconds"
 						}
+					}
+				},
+				"Timer!": {
+					"type": "event",
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"CommandKey": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string"
 					}
 				},
 				"AddMyCertificate()": {

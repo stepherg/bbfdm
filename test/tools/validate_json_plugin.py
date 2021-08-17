@@ -165,7 +165,7 @@ def parse_value( key , value ):
 	validate(instance = value, schema = obj_schema if key.endswith('.') else param_schema)
 
 	for k, v in value.items():
-		if not k.endswith('()') and k != "list" and k != "mapping" and isinstance(v, dict):
+		if not k.endswith('()') and not k.endswith('!') and k != "list" and k != "mapping" and isinstance(v, dict):
 			parse_value(k, v)
 
 ### main ###

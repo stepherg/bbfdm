@@ -314,6 +314,25 @@ static int operate_DeviceXIOPSYSEUPingTEST_Run(char *refparam, struct dmctx *ctx
 	return CMD_SUCCESS;
 }
 
+/*************************************************************
+ * EVENTS
+ *************************************************************/
+static event_args boot_event_args = {
+	.param = (const char *[]) {
+		"CommandKey",
+		"Cause",
+		"FirmwareUpdated",
+		"ParameterMap",
+		NULL
+	}
+};
+
+static int get_event_args_XIOPSYSEU_Boot(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&boot_event_args;
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -351,6 +370,8 @@ DMOBJ tDynamicDeviceObj[] = {
 DMLEAF tDynamicDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"X_IOPSYS_EU_Reboot()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_X_IOPSYS_EU_Reboot, BBFDM_USP},
+{"X_IOPSYS_EU_Boot!", &DMREAD, DMT_EVENT, get_event_args_XIOPSYSEU_Boot, NULL, BBFDM_USP},
+{"X_IOPSYS_EU_WakeUp!", &DMREAD, DMT_EVENT, NULL, NULL, BBFDM_USP},
 {0}
 };
 

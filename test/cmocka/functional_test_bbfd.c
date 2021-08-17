@@ -288,6 +288,52 @@ static void test_api_bbfdm_valid_library_operate(void **state)
 	}
 }
 
+static void test_api_bbfdm_valid_library_event(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *n;
+	int fault = 0, idx = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_USP_LIST_EVENT, NULL, NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	list_for_each_entry(n, &ctx->list_parameter, list) {
+
+		if (strcmp(n->name, "Device.X_IOPSYS_EU_WakeUp!") == 0) {
+			assert_string_equal(n->type, "0");
+			assert_null(n->data);
+		}
+
+		if (strcmp(n->name, "Device.X_IOPSYS_EU_Boot!") == 0) {
+			assert_string_equal(n->type, "0");
+			event_args *args = (event_args *)n->data;
+			assert_non_null(args);
+			const char **event_param = args->param;
+			assert_non_null(event_param);
+			for (int i = 0; event_param[i] != NULL; i++) {
+				switch (i) {
+				case 0:
+					assert_string_equal(event_param[i], "CommandKey");
+					break;
+				case 1:
+					assert_string_equal(event_param[i], "Cause");
+					break;
+				case 2:
+					assert_string_equal(event_param[i], "FirmwareUpdated");
+					break;
+				case 3:
+					assert_string_equal(event_param[i], "ParameterMap");
+					break;
+				}
+			}
+		}
+
+		idx++;
+	}
+
+	assert_int_equal(idx, 2);
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
@@ -304,6 +350,9 @@ int main(void)
 		// Operate method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_standard_operate, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_library_operate, setup, teardown_commit),
+
+		// Event method test cases
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_library_event, setup, teardown_commit),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, group_teardown);

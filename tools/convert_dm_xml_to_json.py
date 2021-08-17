@@ -646,6 +646,33 @@ def printCOMMAND(dmparam, dmobject, _bbfdm_type):
     fp.close()
 
 
+def printEVENT(dmparam, dmobject, _bbfdm_type):
+    fp = open('./.json_tmp', 'a')
+    print("\"%s\" : {" % dmparam.get('name'), file=fp)
+    print("\"type\" : \"event\",", file=fp)
+    print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
+    has_param = 0
+    for c in dmparam:
+        if c.tag == "parameter":
+            has_param = 1
+
+    print(("\"protocols\" : [\"usp\"],") if (has_param) else (
+        "\"protocols\" : [\"usp\"]"), file=fp)
+
+    if has_param:
+        fp.close()
+
+    for param in dmparam:
+        if param.tag == "parameter":
+            printPARAM(param, dmobject, "\"usp\"")
+
+    if has_param:
+        fp = open('./.json_tmp', 'a')
+
+    print("}", file=fp)
+    fp.close()
+
+
 def printusage():
     print("Usage: " +
           sys.argv[0] + " <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]")
@@ -728,6 +755,8 @@ def chech_obj_with_other_obj(obj, dmobject):
                 printPARAM(c, obj, "\"cwmp\"")
         if c.tag == "command":
             printCOMMAND(c, obj, "\"usp\"")
+        if c.tag == "event":
+            printEVENT(c, obj, "\"usp\"")
 
 
 def object_parse_childs(dmobject, level, generatelist, check_obj):
@@ -760,6 +789,8 @@ def object_parse_childs(dmobject, level, generatelist, check_obj):
                 printPARAM(c, dmobject, bbfdm_type)
             if c.tag == "command":
                 printCOMMAND(c, dmobject, "\"usp\"")
+            if c.tag == "event":
+                printEVENT(c, dmobject, "\"usp\"")
 
     if check_obj == 1 and "tr-181" in sys.argv[1] and exist == 1:
         chech_obj_with_other_obj(obj, dmobject)

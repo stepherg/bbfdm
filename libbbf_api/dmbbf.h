@@ -185,6 +185,7 @@ struct dmctx
 	unsigned int end_session_flag;
 	bool isgetschema;
 	bool iscommand;
+	bool isevent;
 };
 
 typedef struct dmnode {
@@ -231,6 +232,10 @@ typedef struct {
 	const char **out;
 } operation_args;
 
+typedef struct {
+	const char **param;
+} event_args;
+
 typedef enum operate_ret_status opr_ret_t;
 
 typedef opr_ret_t (*operation) (struct dmctx *dmctx, char *p, json_object *input);
@@ -260,6 +265,7 @@ enum {
 	CMD_DEL_OBJECT,
 	CMD_USP_OPERATE,
 	CMD_USP_LIST_OPERATE,
+	CMD_USP_LIST_EVENT,
 	CMD_GET_SCHEMA,
 	CMD_GET_INSTANCES,
 	CMD_EXTERNAL_COMMAND
@@ -385,6 +391,7 @@ enum dmt_type_enum {
 	DMT_HEXBIN,
 	DMT_BASE64,
 	DMT_COMMAND,
+	DMT_EVENT,
 };
 
 enum amd_version_enum {
@@ -433,6 +440,7 @@ int dm_entry_get_linker(struct dmctx *dmctx);
 int dm_entry_get_linker_value(struct dmctx *dmctx);
 int dm_entry_list_operates(struct dmctx *ctx);
 int dm_entry_operate(struct dmctx *dmctx);
+int dm_entry_list_events(struct dmctx *dmctx);
 int dm_browse_last_access_path(char *path, size_t len);
 char *get_last_instance(char *package, char *section, char *opt_inst);
 char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst);

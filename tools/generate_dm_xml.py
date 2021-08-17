@@ -53,7 +53,7 @@ def generate_bbf_xml_file(output_file):
 
     for value in bbf.LIST_SUPPORTED_DM:
 
-        if "()" in value:
+        if "()" in value or "!" in value:
             continue
 
         obj = value.strip().split(",")
@@ -149,7 +149,7 @@ def generate_hdm_xml_file(output_file):
 
     for value in bbf.LIST_SUPPORTED_DM:
 
-        if "()" in value:
+        if "()" in value or "!" in value:
             continue
 
         obj = value.strip().split(",")

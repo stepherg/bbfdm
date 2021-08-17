@@ -223,6 +223,9 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 		case CMD_USP_LIST_OPERATE:
 			fault = dm_entry_list_operates(ctx);
 			break;
+		case CMD_USP_LIST_EVENT:
+			fault = dm_entry_list_events(ctx);
+			break;
 		case CMD_GET_SCHEMA:
 			fault = dm_entry_get_schema(ctx);
 			break;
