@@ -1135,6 +1135,7 @@ static int mparam_get_name(DMPARAM_ARGS)
 {
 	char *refparam;
 	char *perm = permission->val;
+
 	dmastrcat(&refparam, node->current_object, lastname);
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
@@ -1145,9 +1146,9 @@ static int mparam_get_name(DMPARAM_ARGS)
 
 static int mobj_get_name(DMOBJECT_ARGS)
 {
-	char *refparam;
+	char *refparam = node->current_object;
 	char *perm = permission->val;
-	refparam = node->current_object;
+
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
@@ -1159,16 +1160,20 @@ static int mparam_get_name_in_param(DMPARAM_ARGS)
 {
 	char *refparam;
 	char *perm = permission->val;
+
 	dmastrcat(&refparam, node->current_object, lastname);
 	if (strcmp(refparam, dmctx->in_param) != 0) {
 		dmfree(refparam);
 		return FAULT_9005;
 	}
+
 	dmctx->stop = 1;
+
 	if (dmctx->nextlevel == 1) {
 		dmfree(refparam);
 		return FAULT_9003;
 	}
+
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
@@ -1197,17 +1202,14 @@ static int mparam_get_name_in_obj(DMPARAM_ARGS)
 
 static int mobj_get_name_in_obj(DMOBJECT_ARGS)
 {
-	char *refparam;
+	char *refparam = node->current_object;
 	char *perm = permission->val;
 
-	if (!node->matched) {
+	if (!node->matched)
 		return FAULT_9005;
-	}
 
 	if (dmctx->nextlevel && strcmp(node->current_object, dmctx->in_param) == 0)
 		return 0;
-
-	refparam = node->current_object;
 
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
@@ -1246,7 +1248,7 @@ static int mobj_get_schema_name(DMOBJECT_ARGS)
 	if (node->obj)
 		unique_keys = node->obj->unique_keys;
 
-	add_list_parameter(dmctx, refparam, perm, "xsd:object", (char *) unique_keys);
+	add_list_parameter(dmctx, refparam, perm, "xsd:object", (char *)unique_keys);
 	return 0;
 }
 
@@ -1346,14 +1348,15 @@ static int mobj_add_object(DMOBJECT_ARGS)
 {
 	char *refparam = node->current_object;
 	char *perm = permission->val;
-	char *objinst;
 
 	if (strcmp(refparam, dmctx->in_param) != 0)
 		return FAULT_9005;
 
 	dmctx->stop = 1;
+
 	if (node->is_instanceobj)
 		return FAULT_9005;
+
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
@@ -1363,9 +1366,8 @@ static int mobj_add_object(DMOBJECT_ARGS)
 	int fault = (addobj)(refparam, dmctx, data, &instance);
 	if (fault)
 		return fault;
+
 	dmctx->addobj_instance = instance;
-	dmasprintf(&objinst, "%s%s.", node->current_object, instance);
-	dmfree(objinst);
 	return 0;
 }
 
@@ -1400,6 +1402,7 @@ static int delete_object_obj(DMOBJECT_ARGS)
 	char *refparam = node->current_object;
 	char *perm = permission->val;
 	unsigned char del_action = DEL_INST;
+
 	if (strcmp(refparam, dmctx->in_param) != 0)
 		return FAULT_9005;
 
@@ -1413,8 +1416,8 @@ static int delete_object_obj(DMOBJECT_ARGS)
 
 	if (!node->is_instanceobj)
 		del_action = DEL_ALL;
-	int fault = (delobj)(refparam, dmctx, data, instance, del_action);
-	return fault;
+
+	return (delobj)(refparam, dmctx, data, instance, del_action);
 }
 
 static int delete_object_param(DMPARAM_ARGS)
@@ -1455,13 +1458,12 @@ static int mobj_set_value(DMOBJECT_ARGS)
 
 static int mparam_set_value(DMPARAM_ARGS)
 {
-	char *refparam = NULL;
+	char refparam[MAX_DM_PATH];
 
-	dmastrcat(&refparam, node->current_object, lastname);
-	if (refparam && strcmp(refparam, dmctx->in_param) != 0) {
-		dmfree(refparam);
+	snprintf(refparam, MAX_DM_PATH, "%s%s", node->current_object, lastname);
+	if (strcmp(refparam, dmctx->in_param) != 0)
 		return FAULT_9005;
-	}
+
 	dmctx->stop = 1;
 
 	if (dmctx->setaction == VALUECHECK) {
@@ -1469,24 +1471,19 @@ static int mparam_set_value(DMPARAM_ARGS)
 		if (permission->get_permission != NULL)
 			perm = permission->get_permission(refparam, dmctx, data, instance);
 
-		if (perm[0] == '0' || !set_cmd) {
-			dmfree(refparam);
+		if (perm[0] == '0' || !set_cmd)
 			return FAULT_9008;
-		}
+
 		int fault = (set_cmd)(refparam, dmctx, data, instance, dmctx->in_value, VALUECHECK);
-		if (fault) {
-			dmfree(refparam);
+		if (fault)
 			return fault;
-		}
+
 		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_value);
 	} else if (dmctx->setaction == VALUESET) {
 		int fault = (set_cmd)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
-		if (fault) {
-			dmfree(refparam);
+		if (fault)
 			return fault;
-		}
 	}
-	dmfree(refparam);
 	return 0;
 }
 
@@ -1632,24 +1629,20 @@ static int mobj_operate(DMOBJECT_ARGS)
 
 static int mparam_operate(DMPARAM_ARGS)
 {
-	char *full_param = NULL;
+	char full_param[MAX_DM_PATH];
 
-	dmastrcat(&full_param, node->current_object, lastname);
-	if (full_param && strcmp(full_param, dmctx->in_param) != 0) {
-		dmfree(full_param);
+	snprintf(full_param, MAX_DM_PATH, "%s%s", node->current_object, lastname);
+	if (strcmp(full_param, dmctx->in_param) != 0)
 		return CMD_NOT_FOUND;
-	}
+
 	dmctx->stop = 1;
 
-	if (!set_cmd) {
-		dmfree(full_param);
+	if (!set_cmd)
 		return CMD_FAIL;
-	}
 
 	json_object *j_input = (dmctx->in_value) ? json_tokener_parse(dmctx->in_value) : NULL;
 	int fault = (set_cmd)(full_param, dmctx, data, instance, (char *)j_input, VALUESET);
 	json_object_put(j_input);
-	dmfree(full_param);
 	return fault;
 }
 
