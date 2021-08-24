@@ -162,6 +162,48 @@ static int get_ppp_status(char *refparam, struct dmctx *ctx, void *data, char *i
 	return 0;
 }
 
+static int get_PPPInterface_LastConnectionError(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL;
+	char *status;
+
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	DM_ASSERT(res, *value = "ERROR_NONE");
+	status = dmjson_get_value(res, 2, "data", "lastconnectionerror");
+
+	switch (atoi(status)) {
+		case 0:
+			*value = "ERROR_NONE";
+			break;
+		case 1: case 10: case 13: case 14: case 17: case 18: case 20: case 22:
+			*value = "ERROR_UNKNOWN";
+			break;
+		case 2: case 3: case 4: case 6: case 7: case 9:
+			*value = "ERROR_COMMAND_ABORTED";
+			break;
+		case 5: case 15:
+			*value = "ERROR_USER_DISCONNECT";
+			break;
+		case 8:
+			*value = "ERROR_IP_CONFIGURATION";
+			break;
+		case 11: case 19: case 21:
+			*value = "ERROR_AUTHENTICATION_FAILURE";
+			break;
+		case 12:
+			*value = "ERROR_IDLE_DISCONNECT";
+			break;
+		case 16:
+			*value = "ERROR_ISP_DISCONNECT";
+			break;
+		default:
+			*value = "ERROR_NONE";
+			break;
+		}
+
+	return 0;
+}
+
 /*#Device.PPP.Interface.{i}.Username!UCI:network/interface,@i-1/username*/
 static int get_ppp_username(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -194,6 +236,319 @@ static int set_ppp_password(char *refparam, struct dmctx *ctx, void *data, char 
 		case VALUESET:
 			dmuci_set_value_by_section(((struct uci_section *)data), "password", value);
 			return 0;
+	}
+	return 0;
+}
+
+static int get_PPPInterface_MaxMRUSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *pppd_opt = NULL;
+	dmuci_get_value_by_section_string(((struct uci_section *)data), "pppd_options", &pppd_opt);
+	if (pppd_opt && *pppd_opt == '\0') {
+		*value = "1500";
+		return 0;
+	}
+
+	char *token = NULL , *end = NULL;
+	token = strtok_r(pppd_opt, " ", &end);
+	while (NULL != token) {
+		if (0 == strcmp(token, "mru")) {
+			char mru_val[1024] = {0}, mru_str[1024] = {0};
+			DM_STRNCPY(mru_val, end, sizeof(mru_val));
+			sscanf(mru_val, "%s", mru_str);
+			if ('\0' != mru_str[0]) {
+				*value = dmstrdup(mru_str);
+			}
+			break;
+		}
+		token = strtok_r(NULL, " ", &end);
+	}
+
+	if (*value && (*value)[0] == '\0') {
+		*value = "1500";
+	}
+
+	return 0;
+}
+
+static int configure_pppd_mru(char *pppd_opt, char *mru_str, void *data, char *value)
+{
+	int found = 0;
+	char *token = NULL, *end = NULL;
+	char mru_val[1024] = {0}, mru_opt[1024] = {0};
+
+	token = strtok_r(pppd_opt, " ", &end);
+	while (NULL != token) {
+		if (0 == strcmp(token, "mru")) {
+			found = 1;
+			strcat(mru_val, token);
+			strcat(mru_val, " ");
+			strcat(mru_val, value);
+			DM_STRNCPY(mru_opt, end, sizeof(mru_opt));
+			char *p, *q;
+			p = strtok_r(mru_opt, " ", &q);
+			if (p != NULL && q != NULL) {
+				strcat(mru_val, " ");
+				strcat(mru_val, q);
+			}
+			break;
+		}
+		strcat(mru_val, token);
+		strcat(mru_val, " ");
+		token = strtok_r(NULL, " ", &end);
+	}
+
+	if (found == 0) {
+		strcat(mru_val, mru_str);
+	}
+
+	dmuci_set_value_by_section(((struct uci_section *)data), "pppd_options", mru_val);
+	return 0;
+}
+
+static int set_PPPInterface_MaxMRUSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char mru_str[1024] = {0};
+	char *pppd_opt = NULL;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"64","65535"}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			snprintf(mru_str, sizeof(mru_str), "%s %s", "mru", value);
+			dmuci_get_value_by_section_string(((struct uci_section *)data), "pppd_options", &pppd_opt);
+
+			if (pppd_opt && *pppd_opt == '\0') {
+				dmuci_set_value_by_section(((struct uci_section *)data), "pppd_options", mru_str);
+			} else {
+				// If mru is specified then we need to replace and keep the rest of the options intact.
+				configure_pppd_mru(pppd_opt, mru_str, data, value);
+			}
+			break;
+	}
+	return 0;
+}
+
+static int get_PPPInterface_CurrentMRUSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL;
+	char *status;
+
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct uci_section *)data)), String}}, 1, &res);
+	DM_ASSERT(res, *value = "");
+	status = dmjson_get_value(res, 1, "up");
+	if (0 != strcmp(status, "true")) {
+		*value = "";
+		return 0;
+	}
+
+	char intf[1024] = {0};
+	snprintf(intf, sizeof(intf), "%s-%s", "pppoe", section_name((struct uci_section *)data));
+	get_net_device_sysfs(intf, "mtu", value);
+
+	return 0;
+}
+
+static int get_PPPInterface_LCPEcho(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *lcp_echo = NULL, *token = NULL;
+	char echo_val[50] = {0};
+
+	dmuci_get_value_by_section_string(((struct uci_section *)data), "keepalive", &lcp_echo);
+	if (lcp_echo && *lcp_echo == '\0') {
+		*value = "1";
+		return 0;
+	}
+
+	token = strtok(lcp_echo , " ");
+	if (NULL != token) {
+		DM_STRNCPY(echo_val, token, sizeof(echo_val));
+		*value = dmstrdup(echo_val);
+	}
+
+	return 0;
+}
+
+static int get_PPPInterface_LCPEchoRetry(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *lcp_retry = NULL, *token = NULL;
+	char lcp_interval[50] = {0};
+	dmuci_get_value_by_section_string(((struct uci_section *)data), "keepalive", &lcp_retry);
+	if (lcp_retry && *lcp_retry == '\0') {
+		*value = "5";
+	} else {
+		token = strchr(lcp_retry , ' ');
+		if (NULL != token) {
+			DM_STRNCPY(lcp_interval, token + 1, sizeof(lcp_interval));
+			*value = dmstrdup(lcp_interval);
+		}
+	}
+
+	return 0;
+}
+
+static int configure_supported_ncp_options(struct uci_section *ss, char *value, char *option)
+{
+	char *proto, *pppd_opt = NULL;
+	char ipcp_opt[1024] = {0};
+
+	dmuci_get_value_by_section_string(ss, "proto", &proto);
+	if (0 == strcmp(proto, "pppoe")) {
+		dmuci_get_value_by_section_string(ss, "pppd_options", &pppd_opt);
+	}
+
+	if (pppd_opt && *pppd_opt != '\0') {
+		char *token = NULL, *end = NULL;
+		int found = 0;
+		token = strtok_r(pppd_opt, " ", &end);
+		while (NULL != token) {
+			char ncp_opt[1024] = {0};
+			DM_STRNCPY(ncp_opt, token, sizeof(ncp_opt));
+			if (0 == strncmp(ncp_opt, option, sizeof(ncp_opt))) {
+				found = 1;
+				if (0 == strcmp(value, "1") && NULL != end) {
+					if ('\0' != ipcp_opt[0]) {
+						strcat(ipcp_opt, " ");
+					}
+					strcat(ipcp_opt, end);
+					break;
+				}
+			} else {
+				if ('\0' != ipcp_opt[0]) {
+					strcat(ipcp_opt, " ");
+				}
+				strcat(ipcp_opt, token);
+			}
+			token = strtok_r(NULL, " ", &end);
+		}
+
+		if ((0 == strcmp(value, "0")) && found == 0) {
+			if ('\0' != ipcp_opt[0]) {
+				strcat(ipcp_opt, " ");
+			}
+			strcat(ipcp_opt, option);
+		}
+
+		dmuci_set_value_by_section(ss, "pppd_options", ipcp_opt);
+	} else {
+		if (0 == strcmp(value, "0")) {
+			dmuci_set_value_by_section(ss, "pppd_options", option);
+		}
+	}
+
+	return 0;
+}
+
+static int parse_pppd_options(char *pppd_opt, int option)
+{
+	int noip = 0, noipv6 = 0;
+	char *token = NULL, *end = NULL;
+
+	token = strtok_r(pppd_opt, " ", &end);
+	while (NULL != token) {
+		char value[50] = {0};
+		DM_STRNCPY(value, token, sizeof(value));
+
+		if ((4 == strlen(value)) && 0 == strcmp(value, "noip")) {
+			noip = 1;
+		}
+
+		if (0 == strncmp(value, "noipv6", 6)) {
+			noipv6 = 1;
+		}
+
+		token = strtok_r(NULL, " ", &end);
+	}
+
+	if (option == IPCP) {
+		return noip;
+	} else {
+		return noipv6;
+	}
+}
+
+static int handle_supported_ncp_options(struct uci_section *s, char *instance, int option)
+{
+	char *pppd_opt = NULL, *proto = NULL;
+
+	dmuci_get_value_by_section_string(s, "proto", &proto);
+	if (proto && strcmp(proto, "pppoe") == 0)
+		dmuci_get_value_by_section_string(s, "pppd_options", &pppd_opt);
+
+	return pppd_opt ? parse_pppd_options(pppd_opt, option) : 0;
+}
+
+static int get_PPPInterface_IPCPEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int ret = handle_supported_ncp_options((struct uci_section *)data, instance, IPCP);
+	*value = ret ? "0" : "1";
+	return 0;
+}
+
+static int set_PPPInterface_IPCPEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			configure_supported_ncp_options((struct uci_section *)data, value, "noip");
+			break;
+	}
+	return 0;
+}
+
+static int get_PPPInterface_IPv6CPEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int ret = handle_supported_ncp_options((struct uci_section *)data, instance, IPCPv6);
+	*value = ret ? "0" : "1";
+	return 0;
+}
+
+static int set_PPPInterface_IPv6CPEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			configure_supported_ncp_options((struct uci_section *)data, value, "noipv6");
+			break;
+	}
+	return 0;
+}
+
+static int get_PPPInterfacePPPoE_SessionID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char path[1024] = {0};
+	char session_id[20] = {0};
+	FILE *fp;
+	int i = 0;
+
+	fp = fopen("/proc/net/pppoe" ,"r");
+	if (NULL == fp) {
+		*value  = "1";
+	} else {
+		while (fgets(path, sizeof(path), fp) != NULL) {
+			i++;
+			if (2 == i) {
+				sscanf(path, "%s", session_id);
+				int number = (int)strtol(session_id, NULL, 16);
+				memset(session_id, '\0', sizeof(session_id));
+				snprintf(session_id, sizeof(session_id), "%d", number);
+				if ('\0' == session_id[0]) {
+					*value = "1";
+				} else {
+					*value = dmstrdup(session_id);
+				}
+				break;
+			}
+		}
+		fclose(fp);
 	}
 	return 0;
 }
@@ -407,6 +762,12 @@ static int get_PPP_InterfaceNumberOfEntries(char *refparam, struct dmctx *ctx, v
 	return 0;
 }
 
+static int get_PPP_SupportedNCPs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "IPCP,IPv6CP";
+	return 0;
+}
+
 /*#Device.PPP.Interface.{i}.PPPoE.ACName!UCI:network/interface,@i-1/ac*/
 static int get_PPPInterfacePPPoE_ACName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -532,6 +893,7 @@ static int delete_ppp_interface(char *refparam, struct dmctx *ctx, void *data, c
 	return 0;
 }
 
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -544,13 +906,12 @@ static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 
 	synchronize_specific_config_sections_with_dmmap("network", "interface", "dmmap_network", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-
 		dmuci_get_value_by_section_string(p->config_section, "proto", &proto);
 		if (!strstr(proto, "ppp"))
 			continue;
 
 		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dmmap_section, "ppp_int_instance", "ppp_int_alias");
+			p->dmmap_section, "ppp_int_instance", "ppp_int_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
@@ -586,6 +947,7 @@ DMOBJ tPPPObj[] = {
 DMLEAF tPPPParams[] = {
 /* PARAM, permission, type, getvlue, setvalue, bbfdm_type*/
 {"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_PPP_InterfaceNumberOfEntries, NULL, BBFDM_BOTH},
+{"SupportedNCPs", &DMREAD, DMT_STRING, get_PPP_SupportedNCPs, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -609,16 +971,23 @@ DMLEAF tPPPInterfaceParams[] = {
 {"Name", &DMREAD, DMT_STRING, get_ppp_name, NULL, BBFDM_BOTH},
 {"LowerLayers", &DMWRITE, DMT_STRING, get_ppp_lower_layer, set_ppp_lower_layer, BBFDM_BOTH},
 {"ConnectionStatus", &DMREAD, DMT_STRING, get_ppp_status, NULL, BBFDM_BOTH},
+{"LastConnectionError", &DMREAD, DMT_STRING, get_PPPInterface_LastConnectionError, NULL, BBFDM_BOTH},
 {"Username", &DMWRITE, DMT_STRING, get_ppp_username, set_ppp_username, BBFDM_BOTH},
 {"Password", &DMWRITE, DMT_STRING, get_empty, set_ppp_password, BBFDM_BOTH},
 {"Reset()", &DMSYNC, DMT_COMMAND, NULL, operate_PPPInterface_Reset, BBFDM_USP},
+{"MaxMRUSize", &DMWRITE, DMT_UNINT, get_PPPInterface_MaxMRUSize, set_PPPInterface_MaxMRUSize, BBFDM_BOTH},
+{"CurrentMRUSize", &DMREAD, DMT_UNINT, get_PPPInterface_CurrentMRUSize, NULL, BBFDM_BOTH},
+{"LCPEcho", &DMREAD, DMT_UNINT, get_PPPInterface_LCPEcho, NULL, BBFDM_BOTH},
+{"LCPEchoRetry", &DMREAD, DMT_UNINT, get_PPPInterface_LCPEchoRetry, NULL, BBFDM_BOTH},
+{"IPCPEnable", &DMWRITE, DMT_BOOL, get_PPPInterface_IPCPEnable, set_PPPInterface_IPCPEnable, BBFDM_BOTH},
+{"IPv6CPEnable", &DMWRITE, DMT_BOOL, get_PPPInterface_IPv6CPEnable, set_PPPInterface_IPv6CPEnable, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.PPP.Interface.{i}.PPPoE. *** */
 DMLEAF tPPPInterfacePPPoEParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"SessionID", &DMREAD, DMT_UNINT, get_PPPInterfacePPPoE_SessionID, NULL, BBFDM_BOTH},
+{"SessionID", &DMREAD, DMT_UNINT, get_PPPInterfacePPPoE_SessionID, NULL, BBFDM_BOTH},
 {"ACName", &DMWRITE, DMT_STRING, get_PPPInterfacePPPoE_ACName, set_PPPInterfacePPPoE_ACName, BBFDM_BOTH},
 {"ServiceName", &DMWRITE, DMT_STRING, get_PPPInterfacePPPoE_ServiceName, set_PPPInterfacePPPoE_ServiceName, BBFDM_BOTH},
 {0}

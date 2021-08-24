@@ -14,6 +14,9 @@
 
 #include <libbbf_api/dmcommon.h>
 
+#define IPCP 0
+#define IPCPv6 1
+
 extern DMOBJ tPPPObj[];
 extern DMLEAF tPPPParams[];
 extern DMOBJ tPPPInterfaceObj[];
