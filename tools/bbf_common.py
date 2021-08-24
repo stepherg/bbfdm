@@ -114,7 +114,7 @@ def clean_supported_dm_list():
     LIST_SUPPORTED_DM.clear()
 
 def fill_list_supported_dm():
-    fp = open(DATA_MODEL_FILE, 'r')
+    fp = open(DATA_MODEL_FILE, 'r', encoding='utf-8')
     Lines = fp.readlines()
 
     for line in Lines:
@@ -122,7 +122,7 @@ def fill_list_supported_dm():
 
 
 def fill_data_model_file():
-    fp = open(DATA_MODEL_FILE, 'a')
+    fp = open(DATA_MODEL_FILE, 'a', encoding='utf-8')
     for value in LIST_SUPPORTED_DM:
         print("%s" % value, file=fp)
     fp.close()
@@ -138,7 +138,7 @@ def generate_datamodel_tree(filename):
     table_name = ""
     parent_obj = ""
 
-    fp = open(filename, 'r')
+    fp = open(filename, 'r', encoding='utf-8')
     for line in fp:
 
         if "DMOBJ" in line:
@@ -225,7 +225,7 @@ def generate_dynamic_datamodel_tree(filename):
 
     obj_found = 0
 
-    fp = open(filename, 'r')
+    fp = open(filename, 'r', encoding='utf-8')
     for line in fp:
 
         if "DM_MAP_OBJ" in line:
@@ -289,7 +289,7 @@ def generate_dynamic_json_datamodel_tree(filename):
     if filename.endswith('.json') is False:
         return
 
-    json_file = open(filename, "r")
+    json_file = open(filename, "r", encoding='utf-8')
     data = json.loads(json_file.read(), object_pairs_hook=OrderedDict)
 
     for obj, value in data.items():

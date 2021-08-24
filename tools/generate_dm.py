@@ -37,7 +37,7 @@ VENDOR_LIST = None
 PLUGINS = None
 OUTPUT = None
 
-json_file = open(sys.argv[1], "r")
+json_file = open(sys.argv[1], "r", encoding='utf-8')
 json_data = json.loads(json_file.read())
 
 for option, value in json_data.items():

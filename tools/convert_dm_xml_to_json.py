@@ -244,7 +244,7 @@ def generatelistfromfile(dmobject):
         pathfile = pathfilename if x == 0 else pathiopsyswrtfilename
         exists = os.path.isfile(pathfile)
         if exists:
-            filec = open(pathfile, "r")
+            filec = open(pathfile, "r", encoding='utf-8')
             for linec in filec:
                 if "/*#" in linec:
                     listmapping.append(linec)
@@ -326,7 +326,7 @@ def getuniquekeys(dmobject):
 
 
 def printopenobject(obj):
-    fp = open('./.json_tmp', 'a')
+    fp = open('./.json_tmp', 'a', encoding='utf-8')
     if "tr-104" in sys.argv[1] or "tr-135" in sys.argv[1]:
         print("\"Device.Services.%s\" : {" % obj.get(
             'name').replace(" ", ""), file=fp)
@@ -336,19 +336,19 @@ def printopenobject(obj):
 
 
 def printopenfile():
-    fp = open('./.json_tmp', 'a')
+    fp = open('./.json_tmp', 'a', encoding='utf-8')
     print("{", file=fp)
     fp.close()
 
 
 def printclosefile():
-    fp = open('./.json_tmp', 'a')
+    fp = open('./.json_tmp', 'a', encoding='utf-8')
     print("}", file=fp)
     fp.close()
 
 
 def printOBJMaPPING(mapping):
-    fp = open('./.json_tmp', 'a')
+    fp = open('./.json_tmp', 'a', encoding='utf-8')
     config_type = mapping.split(":")
     config = config_type[1].split("/")
     print("\"mapping\": {", file=fp)
@@ -379,7 +379,7 @@ def printOBJMaPPING(mapping):
 
 
 def printPARAMMaPPING(mapping):
-    fp = open('./.json_tmp', 'a')
+    fp = open('./.json_tmp', 'a', encoding='utf-8')
     lst = mapping.split("&")
     print("\"mapping\": [", file=fp)
     for i in range(len(lst)):
@@ -441,19 +441,19 @@ def printPARAMMaPPING(mapping):
 
 
 def removelastline():
-    file = open("./.json_tmp")
+    file = open("./.json_tmp", encoding='utf-8')
     lines = file.readlines()
     lines = lines[:-1]
     file.close()
-    w = open("./.json_tmp", 'w')
+    w = open("./.json_tmp", 'w', encoding='utf-8')
     w.writelines(lines)
     w.close()
     printclosefile()
 
 
 def replace_data_in_file(data_in, data_out):
-    file_r = open("./.json_tmp", "rt")
-    file_w = open("./.json_tmp_1", "wt")
+    file_r = open("./.json_tmp", "rt", encoding='utf-8')
+    file_w = open("./.json_tmp_1", "wt", encoding='utf-8')
     text = ''.join(file_r).replace(data_in, data_out)
     file_w.write(text)
     file_r.close()
@@ -487,7 +487,7 @@ def printOBJ(dmobject, hasobj, hasparam, bbfdm_type):
     else:
         fbrowse = "false"
 
-    fp = open('./.json_tmp', 'a')
+    fp = open('./.json_tmp', 'a', encoding='utf-8')
     print("\"type\" : \"object\",", file=fp)
     print("\"version\" : \"%s\"," % dmobject.get('version'), file=fp)
     print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
@@ -511,7 +511,7 @@ def printPARAM(dmparam, dmobject, bbfdm_type):
     islist, datatype, paramvalrange, paramenum, paramunit, parampattern, listminItem, listmaxItem, listmaxsize = getparamoption(
         dmparam)
 
-    fp = open('./.json_tmp', 'a')
+    fp = open('./.json_tmp', 'a', encoding='utf-8')
     print("\"%s\" : {" % dmparam.get('name').replace(" ", ""), file=fp)
     print("\"type\" : \"%s\"," % getparamtype(dmparam), file=fp)
     print("\"read\" : true,", file=fp)
@@ -606,7 +606,7 @@ def printPARAM(dmparam, dmobject, bbfdm_type):
 
 
 def printCOMMAND(dmparam, dmobject, _bbfdm_type):
-    fp = open('./.json_tmp', 'a')
+    fp = open('./.json_tmp', 'a', encoding='utf-8')
     print("\"%s\" : {" % dmparam.get('name'), file=fp)
     print("\"type\" : \"command\",", file=fp)
     print("\"async\" : %s," %
@@ -630,7 +630,7 @@ def printCOMMAND(dmparam, dmobject, _bbfdm_type):
                 if param.tag == "parameter":
                     fp.close()
                     printPARAM(param, dmobject, "\"usp\"")
-            fp = open('./.json_tmp', 'a')
+            fp = open('./.json_tmp', 'a', encoding='utf-8')
             print("}" if outputfound else "},", file=fp)
 
         if c.tag == "output":
@@ -639,7 +639,7 @@ def printCOMMAND(dmparam, dmobject, _bbfdm_type):
                 if param.tag == "parameter":
                     fp.close()
                     printPARAM(param, dmobject, "\"usp\"")
-            fp = open('./.json_tmp', 'a')
+            fp = open('./.json_tmp', 'a', encoding='utf-8')
             print("}", file=fp)
 
     print("}", file=fp)
@@ -647,7 +647,7 @@ def printCOMMAND(dmparam, dmobject, _bbfdm_type):
 
 
 def printEVENT(dmparam, dmobject, _bbfdm_type):
-    fp = open('./.json_tmp', 'a')
+    fp = open('./.json_tmp', 'a', encoding='utf-8')
     print("\"%s\" : {" % dmparam.get('name'), file=fp)
     print("\"type\" : \"event\",", file=fp)
     print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
@@ -667,7 +667,7 @@ def printEVENT(dmparam, dmobject, _bbfdm_type):
             printPARAM(param, dmobject, "\"usp\"")
 
     if has_param:
-        fp = open('./.json_tmp', 'a')
+        fp = open('./.json_tmp', 'a', encoding='utf-8')
 
     print("}", file=fp)
     fp.close()
@@ -832,23 +832,23 @@ def generatejsonfromobj(pobj, pdir):
         chech_each_obj_with_other_obj(model1, model2)
 
     if "tr-181" in sys.argv[1] and pobj.get("name").count(".") == 1:
-        dmfp = open(pdir + "/tr181.json", "a")
+        dmfp = open(pdir + "/tr181.json", "a", encoding='utf-8')
     elif "tr-104" in sys.argv[1] and pobj.get("name").count(".") == 2:
-        dmfp = open(pdir + "/tr104.json", "a")
+        dmfp = open(pdir + "/tr104.json", "a", encoding='utf-8')
     elif "tr-135" in sys.argv[1] and pobj.get("name").count(".") == 2:
-        dmfp = open(pdir + "/tr135.json", "a")
+        dmfp = open(pdir + "/tr135.json", "a", encoding='utf-8')
     elif "tr-106" in sys.argv[1] and pobj.get("name").count(".") == 1:
-        dmfp = open(pdir + "/tr106.json", "a")
+        dmfp = open(pdir + "/tr106.json", "a", encoding='utf-8')
     else:
         dmfp = open(pdir + "/" + (getname(pobj.get('name'))
-                                  ).lower() + ".json", "a")
+                                  ).lower() + ".json", "a", encoding='utf-8')
 
     printclosefile()
     printclosefile()
     updatejsontmpfile()
     removelastline()
 
-    f = open("./.json_tmp", "r")
+    f = open("./.json_tmp", "r", encoding='utf-8')
     obj = json.load(f, object_pairs_hook=OrderedDict)
     dump = json.dumps(obj, indent=4)
     tabs = re.sub('\n +', lambda match: '\n' + '\t' *

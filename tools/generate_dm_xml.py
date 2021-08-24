@@ -79,7 +79,7 @@ def generate_bbf_xml_file(output_file):
             ET.SubElement(syntax, ARRAY_TYPES.get(obj[2], None))
             DM_PARAM_COUNT += 1
 
-    xml_file = open(output_file, "w")
+    xml_file = open(output_file, "w", encoding='utf-8')
     xml_file.write(pretty_format(root))
     xml_file.close()
 
@@ -178,7 +178,7 @@ def generate_hdm_xml_file(output_file):
             param_type.text = str(ARRAY_TYPES.get(obj[2], None))
             DM_PARAM_COUNT += 1
 
-    xml_file = open(output_file, "w")
+    xml_file = open(output_file, "w", encoding='utf-8')
     xml_file.write(pretty_format(root))
     xml_file.close()
 

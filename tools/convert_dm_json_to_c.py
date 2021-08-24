@@ -115,7 +115,7 @@ def get_mapping_param(mappingobj):
 
 
 def printGlobalstrCommon(str_exp):
-    fp = open(DMC_DIR + "/common.c", 'a')
+    fp = open(DMC_DIR + "/common.c", 'a', encoding='utf-8')
     print("%s" % str_exp, file=fp)
     fp.close()
 
@@ -327,20 +327,20 @@ def generate_validate_value(dmparam, value):
 
 
 def printheaderObjCommon(objname):
-    fp = open('./.objparamarray.c', 'a')
+    fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     print("/* *** %s *** */" % objname, file=fp)
     fp.close()
 
 
 def cprintheaderOBJS(objname):
-    fp = open('./.objparamarray.c', 'a')
+    fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     print("DMOBJ %s[] = {" % ("t" + getname(objname) + "Obj"), file=fp)
     print("/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/", file=fp)
     fp.close()
 
 
 def hprintheaderOBJS(objname):
-    fp = open('./.objparamarray.h', 'a')
+    fp = open('./.objparamarray.h', 'a', encoding='utf-8')
     print("extern DMOBJ %s[];" % ("t" + getname(objname) + "Obj"), file=fp)
     fp.close()
 
@@ -385,7 +385,7 @@ def hprintfootfile(fp, filename):
 
 
 def cprintAddDelObj(faddobj, fdelobj, name, mappingobj, _dmobject):
-    fp = open('./.objadddel.c', 'a')
+    fp = open('./.objadddel.c', 'a', encoding='utf-8')
     print("static int %s(char *refparam, struct dmctx *ctx, void *data, char **instance)" %
           faddobj, file=fp)
     print("{", file=fp)
@@ -468,7 +468,7 @@ def cprintAddDelObj(faddobj, fdelobj, name, mappingobj, _dmobject):
 
 def cprintBrowseObj(fbrowse, name, mappingobj, dmobject):
     # Open file
-    fp = open('./.objbrowse.c', 'a')
+    fp = open('./.objbrowse.c', 'a', encoding='utf-8')
 
     # Mapping Parameter
     if mappingobj is not None:
@@ -543,7 +543,7 @@ def cprintBrowseObj(fbrowse, name, mappingobj, dmobject):
 
 def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, parentname, dmparam, value):
     # Open file
-    fp = open('./.getstevalue.c', 'a')
+    fp = open('./.getstevalue.c', 'a', encoding='utf-8')
 
     # Generate Validate value
     validate_value = ""
@@ -800,7 +800,7 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
 
 def cprintOperateCommands(getoperateargs, operate, in_args, out_args, struct_name):
     # Open file
-    fp = open('./.operatecommands.c', 'a')
+    fp = open('./.operatecommands.c', 'a', encoding='utf-8')
     
     if in_args != None or out_args != None:
         ############################## OPERATE ARGUMENTS ########################################
@@ -846,7 +846,7 @@ def cprintOperateCommands(getoperateargs, operate, in_args, out_args, struct_nam
 
 def cprintEvent(geteventargs, param_args, struct_name):
     # Open file
-    fp = open('./.events.c', 'a')
+    fp = open('./.events.c', 'a', encoding='utf-8')
     
     if param_args != None:
         ############################## OPERATE ARGUMENTS ########################################
@@ -873,14 +873,14 @@ def cprintEvent(geteventargs, param_args, struct_name):
 
 
 def cprintheaderPARAMS(objname):
-    fp = open('./.objparamarray.c', 'a')
+    fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     print("DMLEAF %s[] = {" % ("t" + getname(objname) + "Params"), file=fp)
     print("/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/", file=fp)
     fp.close()
 
 
 def hprintheaderPARAMS(objname):
-    fp = open('./.objparamarray.h', 'a')
+    fp = open('./.objparamarray.h', 'a', encoding='utf-8')
     print("extern DMLEAF %s[];" % ("t" + getname(objname) + "Params"), file=fp)
     fp.close()
 
@@ -909,7 +909,7 @@ def printPARAMline(parentname, dmparam, value):
     cprintGetSetValue(getvalue, setvalue, mappingparam,
                       instance, typeparam, parentname, dmparam, value)
 
-    fp = open('./.objparamarray.c', 'a')
+    fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     print("{\"%s\", %s, %s, %s, %s, %s}," %
           (dmparam, access, ptype, getvalue, setvalue, bbfdm), file=fp)
     fp.close()
@@ -936,7 +936,7 @@ def printCOMMANDline( parentname, dmparam, value ):
 
     cprintOperateCommands(getoperateargs, operate, in_args, out_args, commonname.replace("()", "").lower()+"_args")
 
-    fp = open('./.objparamarray.c', 'a')
+    fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     print("{\"%s\", %s, %s, %s, %s, %s}," % (dmparam, c_type, ptype, getoperateargs, operate, bbfdm), file=fp)
     fp.close()
 
@@ -953,13 +953,13 @@ def printEVENTline( parentname, dmparam, value ):
     else:
         geteventargs = "NULL"
 
-    fp = open('./.objparamarray.c', 'a')
+    fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     print("{\"%s\", &DMREAD, %s, %s, NULL, %s}," % (dmparam, ptype, geteventargs, bbfdm), file=fp)
     fp.close()
 
 
 def printtailArray():
-    fp = open('./.objparamarray.c', 'a')
+    fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     print("{0}", file=fp)
     print("};", file=fp)
     print("", file=fp)
@@ -1003,7 +1003,7 @@ def printOBJline(dmobject, value):
     else:
         paramarray = "NULL"
 
-    fp = open('./.objparamarray.c', 'a')
+    fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     if uniquekeys:
         print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, %s, %s, NULL, %s, %s}," % (getlastname(
             dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm, uniquekeys), file=fp)
@@ -1089,8 +1089,8 @@ def generatecfromobj(pobj, pvalue, pdir, nextlevel):
     removetmpfiles()
     object_parse_childs(pobj, pvalue, nextlevel)
 
-    dmfpc = open(pdir + "/" + getname(pobj).lower() + ".c", "w")
-    dmfph = open(pdir + "/" + getname(pobj).lower() + ".h", "w")
+    dmfpc = open(pdir + "/" + getname(pobj).lower() + ".c", "w", encoding='utf-8')
+    dmfph = open(pdir + "/" + getname(pobj).lower() + ".h", "w", encoding='utf-8')
     cprinttopfile(dmfpc, getname(pobj).lower())
     hprinttopfile(dmfph, getname(pobj).lower())
 
@@ -1102,7 +1102,7 @@ def generatecfromobj(pobj, pvalue, pdir, nextlevel):
             print("* ENTRY METHOD", file=dmfpc)
             print(
                 "**************************************************************/", file=dmfpc)
-        tmpf = open("./.objbrowse.c", "r")
+        tmpf = open("./.objbrowse.c", "r", encoding='utf-8')
         tmpd = tmpf.read()
         tmpf.close()
         dmfpc.write(tmpd)
@@ -1117,7 +1117,7 @@ def generatecfromobj(pobj, pvalue, pdir, nextlevel):
             print("* ADD & DEL OBJ", file=dmfpc)
             print(
                 "**************************************************************/", file=dmfpc)
-        tmpf = open("./.objadddel.c", "r")
+        tmpf = open("./.objadddel.c", "r", encoding='utf-8')
         tmpd = tmpf.read()
         tmpf.close()
         dmfpc.write(tmpd)
@@ -1132,7 +1132,7 @@ def generatecfromobj(pobj, pvalue, pdir, nextlevel):
             print("* GET & SET PARAM", file=dmfpc)
             print(
                 "**************************************************************/", file=dmfpc)
-        tmpf = open("./.getstevalue.c", "r")
+        tmpf = open("./.getstevalue.c", "r", encoding='utf-8')
         tmpd = tmpf.read()
         tmpf.close()
         dmfpc.write(tmpd)
@@ -1145,7 +1145,7 @@ def generatecfromobj(pobj, pvalue, pdir, nextlevel):
             print("/*************************************************************", file=dmfpc)
             print("* OPERATE COMMANDS", file=dmfpc)
             print("**************************************************************/", file=dmfpc)
-        tmpf = open("./.operatecommands.c", "r")
+        tmpf = open("./.operatecommands.c", "r", encoding='utf-8')
         tmpd = tmpf.read()
         tmpf.close()
         dmfpc.write(tmpd)
@@ -1158,7 +1158,7 @@ def generatecfromobj(pobj, pvalue, pdir, nextlevel):
             print("/*************************************************************", file=dmfpc)
             print("* EVENTS", file=dmfpc)
             print("**************************************************************/", file=dmfpc)
-        tmpf = open("./.events.c", "r")
+        tmpf = open("./.events.c", "r", encoding='utf-8')
         tmpd = tmpf.read()
         tmpf.close()
         dmfpc.write(tmpd)
@@ -1169,7 +1169,7 @@ def generatecfromobj(pobj, pvalue, pdir, nextlevel):
         print("/**********************************************************************************************************************************", file=dmfpc)
         print("*                                            OBJ & PARAM DEFINITION", file=dmfpc)
         print("***********************************************************************************************************************************/", file=dmfpc)
-        tmpf = open("./.objparamarray.c", "r")
+        tmpf = open("./.objparamarray.c", "r", encoding='utf-8')
         tmpd = tmpf.read()
         tmpf.close()
         dmfpc.write(tmpd)
@@ -1177,7 +1177,7 @@ def generatecfromobj(pobj, pvalue, pdir, nextlevel):
         pass
 
     try:
-        tmpf = open("./.objparamarray.h", "r")
+        tmpf = open("./.objparamarray.h", "r", encoding='utf-8')
         tmpd = tmpf.read()
         tmpf.close()
         dmfph.write(tmpd)
@@ -1215,7 +1215,7 @@ for index in range(sys.argv[1].count(',') + 1):
     JSON_FILE = bbf.ARRAY_JSON_FILES.get(dm_name[index], None)
 
     if JSON_FILE is not None:
-        j_file = open(JSON_FILE, "r")
+        j_file = open(JSON_FILE, "r", encoding='utf-8')
         data = json.loads(j_file.read(), object_pairs_hook=OrderedDict)
 
         for dm_obj, dm_value in data.items():

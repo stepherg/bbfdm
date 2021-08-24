@@ -104,7 +104,7 @@ def parse_object_tree(dm_name_list):
         JSON_FILE = bbf.ARRAY_JSON_FILES.get(dm, None)
 
         if JSON_FILE is not None:
-            file = open(JSON_FILE, "r")
+            file = open(JSON_FILE, "r", encoding='utf-8')
             data = json.loads(file.read(), object_pairs_hook=OrderedDict)
 
             for obj, value in data.items():
