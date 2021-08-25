@@ -1398,12 +1398,42 @@ static int get_access_point_security_supported_modes(char *refparam, struct dmct
 	return get_supported_modes("wifi.ap", ((struct wifi_acp_args *)data)->ifname, value);
 }
 
+static bool is_different_group(const char *mode1, const char *mode2)
+{
+	int i, g1 = 0, g2 =0;
+	char *security_modes[3] = {
+		"WEP-64, WEP-128",
+		"WPA-Personal, WPA2-Personal, WPA3-Personal, WPA-WPA2-Personal, WPA3-Personal-Transition",
+		"WPA-Enterprise, WPA2-Enterprise, WPA3-Enterprise, WPA-WPA2-Enterprise"};
+
+	for (i = 0; i < 3; i++) {
+		if (strstr(security_modes[i], mode1)) {
+			g1 = i;
+		}
+
+		if (strstr(security_modes[i], mode2)) {
+			g2 = i;
+		}
+	}
+
+	return (g1 != g2);
+
+}
+
 static void set_security_mode(struct uci_section *section, char *value)
 {
+	char *wpa_key = NULL;
 	char *mode = get_security_mode(section);
 
+	// Use default key only in case the key is not set
+	dmuci_get_value_by_section_string(section, "key", &wpa_key);
+	if (strlen(wpa_key) == 0)
+		wpa_key = get_default_wpa_key();
+
 	if (mode && strcmp(value, mode) != 0) {
-		reset_wlan(section);
+		// Only reset the wlan key section if its belongs to different group
+		if (is_different_group(value, mode))
+			reset_wlan(section);
 
 		if (strcmp(value, "None") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "none");
@@ -1430,7 +1460,6 @@ static void set_security_mode(struct uci_section *section, char *value)
 			dmuci_set_value_by_section(section, "encryption", "wep-open");
 			dmuci_set_value_by_section(section, "key", "1");
 		} else if (strcmp(value, "WPA-Personal") == 0) {
-			char *wpa_key = get_default_wpa_key();
 			dmuci_set_value_by_section(section, "encryption", "psk");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
@@ -1438,7 +1467,6 @@ static void set_security_mode(struct uci_section *section, char *value)
 			dmuci_set_value_by_section(section, "encryption", "wpa");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
 		} else if (strcmp(value, "WPA2-Personal") == 0) {
-			char *wpa_key = get_default_wpa_key();
 			dmuci_set_value_by_section(section, "encryption", "psk2");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
@@ -1447,7 +1475,6 @@ static void set_security_mode(struct uci_section *section, char *value)
 			dmuci_set_value_by_section(section, "encryption", "wpa2");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
 		} else if (strcmp(value, "WPA-WPA2-Personal") == 0) {
-			char *wpa_key = get_default_wpa_key();
 			dmuci_set_value_by_section(section, "encryption", "psk-mixed");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
@@ -1456,14 +1483,12 @@ static void set_security_mode(struct uci_section *section, char *value)
 			dmuci_set_value_by_section(section, "encryption", "wpa-mixed");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
 		} else if (strcmp(value, "WPA3-Personal") == 0) {
-			char *wpa_key = get_default_wpa_key();
 			dmuci_set_value_by_section(section, "encryption", "sae");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 		} else if (strcmp(value, "WPA3-Enterprise") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "wpa3");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
 		} else if (strcmp(value, "WPA3-Personal-Transition") == 0) {
-			char *wpa_key = get_default_wpa_key();
 			dmuci_set_value_by_section(section, "encryption", "sae-mixed");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 		}
