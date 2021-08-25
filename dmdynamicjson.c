@@ -321,6 +321,21 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 	return 0;
 }
 
+static char *get_param_ubus_value(json_object *json_obj, char *arguments)
+{
+	char *value = "";
+
+	char *opt = strchr(arguments, '.');
+	if (opt) {
+		*opt = '\0';
+		value = dmjson_get_value(json_obj, 2, arguments, opt + 1);
+	} else {
+		value = dmjson_get_value(json_obj, 1, arguments);
+	}
+
+	return value;
+}
+
 static int getvalue_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct dm_json_parameter *pleaf = NULL;
@@ -392,18 +407,15 @@ static int getvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 		DM_ASSERT(res, *value = "");
 
 		if (arg6) {
-			char arg6_1[128] = "";
-			DM_STRNCPY(arg6_1, arg6, sizeof(arg6_1));
-			char *opt = strchr(arg6_1, '.');
-			if (opt) {
-				*opt = '\0';
-				char *arg6_2 = opt + 1;
-				if (data && (strcmp(arg6_1, "@Name") == 0))
-					*value = dmjson_get_value(res, 2, section_name((struct uci_section *)data), arg6_2);
-				else
-					*value = dmjson_get_value(res, 2, arg6_1, arg6_2);
+			char arg6_buf[128] = "";
+
+			DM_STRNCPY(arg6_buf, arg6, sizeof(arg6_buf));
+			char *is_array = strstr(arg6_buf, "[@i-1]");
+			if (is_array) {
+				char *arguments = is_array + sizeof("[@i-1]");
+				*value = get_param_ubus_value((json_object *)data, arguments);
 			} else {
-				*value = dmjson_get_value(res, 1, arg6);
+				*value = get_param_ubus_value(res, arg6_buf);
 			}
 		}
 	} else {

@@ -1,0 +1,117 @@
+{
+	"radios": [
+		{
+			"name": "test1",
+			"isup": true,
+			"standard": "802.11a/n/ac/ax",
+			"country": "DE",
+			"band": "5GHz",
+			"channel": 36,
+			"frequency": 5180,
+			"bandwidth": 80,
+			"noise": -87,
+			"maxrate": 2401,
+			"supp_bands": [
+				"5GHz"
+			],
+			"supp_std": [
+				"11a",
+				"11n",
+				"11ac",
+				"11ax"
+			],
+			"channels": [
+				36,
+				40,
+				44,
+				48,
+				52,
+				56,
+				60,
+				64,
+				100,
+				104,
+				108,
+				112,
+				116,
+				120,
+				124,
+				128,
+				132,
+				136,
+				140
+			],
+			"accesspoints": [
+				{
+					"ifname": "test1",
+					"status": "running",
+					"ssid": "iopsysWrt-44D43771AD50",
+					"bssid": "44:d4:37:71:ad:5f"
+				}
+			],
+			"backhauls": [
+				
+			],
+			"stats": {
+				"tx_bytes": 14418177,
+				"tx_packets": 521,
+				"rx_bytes": 25518977,
+				"rx_packets": 789,
+			}
+		},
+		{
+			"name": "test2",
+			"isup": true,
+			"standard": "802.11b/g/n/ax",
+			"country": "DE",
+			"band": "2.4GHz",
+			"channel": 11,
+			"frequency": 2462,
+			"bandwidth": 20,
+			"noise": -85,
+			"maxrate": 286,
+			"supp_bands": [
+				"2.4GHz"
+			],
+			"supp_std": [
+				"11b",
+				"11g",
+				"11n",
+				"11ac",
+				"11ax"
+			],
+			"channels": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13
+			],
+			"accesspoints": [
+				{
+					"ifname": "test2",
+					"status": "running",
+					"ssid": "iopsysWrt-44D43771AD50",
+					"bssid": "44:d4:37:71:ad:5e"
+				}
+			],
+			"backhauls": [
+				
+			],
+			"stats": {
+				"tx_bytes": 14417451,
+				"tx_packets": 861,
+				"rx_bytes": 274118977,
+				"rx_packets": 809,
+			}
+		}
+	]
+}

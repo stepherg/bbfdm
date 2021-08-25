@@ -114,6 +114,42 @@ static void test_api_bbfdm_get_set_json_parameter(void **state)
 
 	// validate parameter after setting to fr: name, type, value
 	validate_parameter(ctx, "Device.UserInterface.CurrentLanguage", "fr", "xsd:string");
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.X_IOPSYS_EU_Radio.1.Noise", NULL, NULL);
+	printf("fault=%d \n", fault);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.2.Noise", "-87", "xsd:int");
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.X_IOPSYS_EU_Radio.2.Noise", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.2.Noise", "-85", "xsd:int");
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.X_IOPSYS_EU_Radio.2.Band", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.2.Band", "2.4GHz", "xsd:string");
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.X_IOPSYS_EU_Radio.1.Stats.BytesSent", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.1.Stats.BytesSent", "14418177,", "xsd:unsignedInt");
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.X_IOPSYS_EU_Radio.2.Stats.BytesSent", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.2.Stats.BytesSent", "14417451", "xsd:unsignedInt");
 }
 
 static void test_api_bbfdm_get_set_library_parameter(void **state)

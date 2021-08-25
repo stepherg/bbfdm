@@ -1,3 +1,16 @@
+config wifi-device 'test1'
+    option channel 'auto'
+    option hwmode 'auto'
+    option country 'DE'
+    option band 'a'
+    option bandwidth '80'
+
+config wifi-iface 'test1_1'
+    option device 'test1'
+    option ifname 'test1'
+    option mode 'ap'
+    option encryption 'psk2'
+
 config wifi-device 'test2'
     option channel 'auto'
     option hwmode 'auto'

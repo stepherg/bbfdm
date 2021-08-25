@@ -495,35 +495,9 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 }
 ```
 
-- **UBUS command:** ubus call network.interface status '{"interface":"lan"}' | jsonfilter -e @.device
-
-- **@Name:** the section name of paraent object, in this example, the section name is "lan"
-```bash
-"SSID": {
-	"type": "string",
-	"protocols": [
-		"cwmp",
-		"usp"
-	],
-	"read": true,
-	"write": false,
-	"mapping": [
-		{
-			"type" : "ubus",
-			"ubus" : {
-				"object" : "network.interface",
-				"method" : "status",
-				"args" : {
-					"interface" : "@Name"
-				},
-				"key" : "device"
-			}
-		}
-	]
-}
-```
-
 - **UBUS command:** ubus call wifi status | jsonfilter -e @.radios[0].noise
+
+- **@i:** is the number of instance object
 
 ```bash
 "Noise": {
@@ -541,7 +515,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 				"object" : "wifi",
 				"method" : "status",
 				"args" : {},
-				"key" : "radios[i-1].noise"
+				"key" : "radios[@i-1].noise"
 			}
 		}
 	]
