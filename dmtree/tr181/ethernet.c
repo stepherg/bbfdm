@@ -393,7 +393,7 @@ static int addObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int delObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *stmp = NULL, *ss = NULL, *sstmp = NULL;
+	struct uci_section *s = NULL, *stmp = NULL;
 	char *sect_name = NULL, *section_list = NULL, *pch = NULL, *pchr = NULL;
 
 	switch (del_action) {
@@ -411,17 +411,16 @@ static int delObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 				// Remove network and device section
 				uci_foreach_sections_safe("network", "interface", stmp, s) {
 					if (strcmp(section_name(s), pch) == 0) {
-						// Remove the device section corresponding to this interface if exists
-						char *device = get_device(pch);
-						uci_foreach_option_eq_safe("network", "device", "name", device, sstmp, ss) {
-							char *type;
-							dmuci_get_value_by_section_string(s, "type", &type);
-							if (strcmp(type, "untagged") == 0) dmuci_delete_by_section(ss, NULL, NULL);
-							break;
-						}
+						char *device = NULL;
 
-						// Remove network section
-						dmuci_delete_by_section(s, NULL, NULL);
+						dmuci_get_value_by_section_string(s, "device", &device);
+						if (device && *device) {
+							// Remove only device option
+							dmuci_delete_by_section(s, "device", NULL);
+						} else {
+							// Remove network section
+							dmuci_delete_by_section(s, NULL, NULL);
+						}
 						break;
 					}
 				}
