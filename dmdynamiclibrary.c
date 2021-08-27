@@ -187,10 +187,12 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 			char buf[512] = {0};
 			snprintf(buf, sizeof(buf), "%s/%s", LIBRARY_FOLDER_PATH, ent->d_name);
 
-			void *handle = dlopen(buf, RTLD_LAZY);
-			if (!handle) continue;
+			void *handle = dlopen(buf, RTLD_NOW|RTLD_LOCAL);
+			if (!handle) {
+				fprintf(stderr, "Plugin failed [%s]", dlerror());
+				continue;
+			}
 
-			dlerror();    /* Clear any existing error */
 
 			//Dynamic Object
 			DM_MAP_OBJ *dynamic_obj = NULL;
