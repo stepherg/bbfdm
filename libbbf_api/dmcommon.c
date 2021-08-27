@@ -1297,10 +1297,29 @@ int dm_validate_long(char *value, struct range_args r_args[], int r_args_size)
 
 int dm_validate_dateTime(char *value)
 {
-	/* check format */
+	/*
+	 * Allowed format:
+	 * XXXX-XX-XXTXX:XX:XXZ
+	 * XXXX-XX-XXTXX:XX:XX.XXXZ
+	 * XXXX-XX-XXTXX:XX:XX.XXXXXXZ
+	 */
+
+	char *p = NULL;
 	struct tm tm;
-	if (!(strptime(value, "%Y-%m-%dT%H:%M:%SZ", &tm)))
+	int m;
+
+	p = strptime(value, "%Y-%m-%dT%H:%M:%SZ", &tm);
+	if (p && *p == '\0')
+		return 0;
+
+	p = strptime(value, "%Y-%m-%dT%H:%M:%S.", &tm);
+	if (!p || *p == '\0' || value[strlen(value) - 1] != 'Z')
 		return -1;
+
+	int num_parsed = sscanf(p, "%dZ", &m);
+	if (num_parsed != 1 || (strlen(p) != 7 && strlen(p) != 4))
+		return -1;
+
 	return 0;
 }
 

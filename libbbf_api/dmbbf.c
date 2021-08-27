@@ -946,8 +946,8 @@ static char *check_value_by_type(char *value, int type)
 			}
 			break;
 		case DMT_TIME:
-			if (!strptime(buf, (len == 27) ? "%Y-%m-%dT%H:%M:%S." : "%Y-%m-%dT%H:%M:%SZ", &tm))
-				return (len == 27) ? "0001-01-01T00:00:00.000000Z" : "0001-01-01T00:00:00Z";
+			if (!strptime(buf, "%Y-%m-%dT%H:%M:%S", &tm))
+				return "0001-01-01T00:00:00Z";
 			break;
 		default:
 			break;

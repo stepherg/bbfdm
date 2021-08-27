@@ -764,7 +764,27 @@ static void test_bbf_api_validate(void **state)
 	assert_int_equal(validate, -1);
 
 	// dm_validate_dateTime: test with wrong value
+	validate = dm_validate_dateTime("2021-12-31T20:53:99.12Z");
+	assert_int_equal(validate, -1);
+
+	// dm_validate_dateTime: test with wrong value
+	validate = dm_validate_dateTime("2021-12-31T20:53:99+01:00Z");
+	assert_int_equal(validate, -1);
+
+	// dm_validate_dateTime: test with wrong value
+	validate = dm_validate_dateTime("2021-12-31T20:53:99.12");
+	assert_int_equal(validate, -1);
+
+	// dm_validate_dateTime: test with correct value
 	validate = dm_validate_dateTime("2021-12-31T20:53:01Z");
+	assert_int_equal(validate, 0);
+
+	// dm_validate_dateTime: test with correct value
+	validate = dm_validate_dateTime("2021-12-31T20:53:01.125Z");
+	assert_int_equal(validate, 0);
+
+	// dm_validate_dateTime: test with correct value
+	validate = dm_validate_dateTime("2021-12-31T20:53:01.125345Z");
 	assert_int_equal(validate, 0);
 
 
