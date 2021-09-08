@@ -84,7 +84,8 @@ libbbfdm_la_SOURCES +=	\
 	../dmtree/tr104/servicesvoiceservicevoipprofile.c	\
 	../dmtree/tr104/servicesvoiceservicecallcontrol.c	\
 	../dmtree/tr104/servicesvoiceservicecodecprofile.c	\
-	../dmtree/tr104/servicesvoiceservicereservedports.c
+	../dmtree/tr104/servicesvoiceservicereservedports.c     \
+	../dmtree/tr104/servicesvoiceservicedect.c
 endif #BBF_TR104
 
 if BBF_TR143
