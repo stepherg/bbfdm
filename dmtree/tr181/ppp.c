@@ -13,45 +13,81 @@
 #include "ppp.h"
 
 /*************************************************************
-* GET SET ALIAS
+* ENTRY METHOD
 **************************************************************/
-/*#Device.PPP.Interface.{i}.Alias!UCI:dmmap_network/interface,@i-1/ppp_int_alias*/
-static int get_ppp_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+/*#Device.PPP.Interface.{i}.!UCI:network/interface/dmmap_network*/
+static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct uci_section *dmmap_section = NULL;
+	char *inst = NULL, *proto;
+	struct dmmap_dup *p = NULL;
+	LIST_HEAD(dup_list);
 
-	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
-	dmuci_get_value_by_section_string(dmmap_section, "ppp_int_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
+	synchronize_specific_config_sections_with_dmmap("network", "interface", "dmmap_network", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+		dmuci_get_value_by_section_string(p->config_section, "proto", &proto);
+		if (!strstr(proto, "ppp"))
+			continue;
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "ppp_int_instance", "ppp_int_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
 	return 0;
 }
 
-static int set_ppp_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+/*************************************************************
+* ADD DEL OBJ
+**************************************************************/
+static int add_ppp_interface(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	struct uci_section *dmmap_section = NULL;
+	struct uci_section *dmmap_ppp = NULL;
+	char name[16] = {0};
 
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
-			dmuci_set_value_by_section(dmmap_section, "ppp_int_alias", value);
-			return 0;
+	snprintf(name, sizeof(name), "ppp_%s", *instance);
+
+	dmuci_set_value("network", name, "", "interface");
+	dmuci_set_value("network", name, "proto", "ppp");
+	dmuci_set_value("network", name, "disabled", "1");
+
+	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ppp);
+	dmuci_set_value_by_section(dmmap_ppp, "section_name", name);
+	dmuci_set_value_by_section(dmmap_ppp, "ppp_int_instance", *instance);
+	return 0;
+}
+
+static int delete_ppp_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			break;
+		case DEL_ALL:
+			uci_foreach_option_cont_safe("network", "interface", "proto", "ppp", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+			break;
 	}
 	return 0;
 }
 
-/**************************************************************************
-* GET & SET PARAMETERS
-***************************************************************************/
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
 /*#Device.PPP.Interface.{i}.Enable!UBUS:network.interface/status/interface,@Name/up*/
 static int get_ppp_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res;
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct uci_section *)data)), String}}, 1, &res);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);
 	DM_ASSERT(res, *value = "false");
 	*value = dmjson_get_value(res, 1, "up");
 	return 0;
@@ -69,7 +105,7 @@ static int set_ppp_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmastrcat(&ubus_object, "network.interface.", section_name(((struct uci_section *)data)));
+			dmastrcat(&ubus_object, "network.interface.", section_name(((struct dmmap_dup *)data)->config_section));
 			dmubus_call_set(ubus_object, b ? "up" : "down", UBUS_ARGS{}, 0);
 			dmfree(ubus_object);
 			break;
@@ -83,10 +119,33 @@ static int get_PPPInterface_Status(char *refparam, struct dmctx *ctx, void *data
 	json_object *res = NULL;
 	char *status;
 
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct uci_section *)data)), String}}, 1, &res);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);
 	DM_ASSERT(res, *value = "Down");
 	status = dmjson_get_value(res, 1, "up");
 	*value = (strcmp(status, "true") == 0) ? "Up" : "Down";
+	return 0;
+}
+
+/*#Device.PPP.Interface.{i}.Alias!UCI:dmmap_network/interface,@i-1/ppp_int_alias*/
+static int get_ppp_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "ppp_int_alias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+	return 0;
+}
+
+static int set_ppp_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "ppp_int_alias", value);
+			return 0;
+	}
 	return 0;
 }
 
@@ -94,7 +153,7 @@ static int get_PPPInterface_Status(char *refparam, struct dmctx *ctx, void *data
 static int get_PPPInterface_LastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res;
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "uptime");
 	return 0;
@@ -119,7 +178,7 @@ static int set_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *data,
 			string_to_bool(value, &b);
 			if (b) {
 				char intf_obj[64] = {0};
-				snprintf(intf_obj, sizeof(intf_obj), "network.interface.%s", section_name(((struct uci_section *)data)));
+				snprintf(intf_obj, sizeof(intf_obj), "network.interface.%s", section_name(((struct dmmap_dup *)data)->config_section));
 				dmubus_call_set(intf_obj, "down", UBUS_ARGS{}, 0);
 				dmubus_call_set(intf_obj, "up", UBUS_ARGS{}, 0);
 			}
@@ -130,7 +189,7 @@ static int set_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_ppp_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmstrdup(section_name(((struct uci_section *)data)));
+	*value = dmstrdup(section_name(((struct dmmap_dup *)data)->config_section));
 	return 0;
 }
 
@@ -141,7 +200,7 @@ static int get_ppp_status(char *refparam, struct dmctx *ctx, void *data, char *i
 	json_object *res = NULL, *jobj = NULL;
 	bool bstatus = false, bpend = false;
 
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct uci_section *)data)), String}}, 1, &res);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);
 	DM_ASSERT(res, *value = "Unconfigured");
 	jobj = dmjson_get_obj(res, 1, "up");
 	if (jobj) {
@@ -167,7 +226,7 @@ static int get_PPPInterface_LastConnectionError(char *refparam, struct dmctx *ct
 	json_object *res = NULL;
 	char *status;
 
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);
 	DM_ASSERT(res, *value = "ERROR_NONE");
 	status = dmjson_get_value(res, 2, "data", "lastconnectionerror");
 
@@ -207,7 +266,7 @@ static int get_PPPInterface_LastConnectionError(char *refparam, struct dmctx *ct
 /*#Device.PPP.Interface.{i}.Username!UCI:network/interface,@i-1/username*/
 static int get_ppp_username(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct uci_section *)data), "username", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "username", value);
 	return 0;
 }
 
@@ -219,7 +278,7 @@ static int set_ppp_username(char *refparam, struct dmctx *ctx, void *data, char 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct uci_section *)data), "username", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "username", value);
 			return 0;
 	}
 	return 0;
@@ -234,7 +293,7 @@ static int set_ppp_password(char *refparam, struct dmctx *ctx, void *data, char 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct uci_section *)data), "password", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "password", value);
 			return 0;
 	}
 	return 0;
@@ -243,7 +302,7 @@ static int set_ppp_password(char *refparam, struct dmctx *ctx, void *data, char 
 static int get_PPPInterface_MaxMRUSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *pppd_opt = NULL;
-	dmuci_get_value_by_section_string(((struct uci_section *)data), "pppd_options", &pppd_opt);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "pppd_options", &pppd_opt);
 	if (pppd_opt && *pppd_opt == '\0') {
 		*value = "1500";
 		return 0;
@@ -255,7 +314,7 @@ static int get_PPPInterface_MaxMRUSize(char *refparam, struct dmctx *ctx, void *
 		if (0 == strcmp(token, "mru")) {
 			char mru_val[1024] = {0}, mru_str[1024] = {0};
 			DM_STRNCPY(mru_val, end, sizeof(mru_val));
-			sscanf(mru_val, "%s", mru_str);
+			sscanf(mru_val, "%1023s", mru_str);
 			if ('\0' != mru_str[0]) {
 				*value = dmstrdup(mru_str);
 			}
@@ -273,36 +332,33 @@ static int get_PPPInterface_MaxMRUSize(char *refparam, struct dmctx *ctx, void *
 
 static int configure_pppd_mru(char *pppd_opt, char *mru_str, void *data, char *value)
 {
-	int found = 0;
 	char *token = NULL, *end = NULL;
-	char mru_val[1024] = {0}, mru_opt[1024] = {0};
+	char list_options[1024] = {0}, mru_opt[1024] = {0};
+	unsigned pos = 0;
+	bool found = false;
 
+	list_options[0] = 0;
 	token = strtok_r(pppd_opt, " ", &end);
 	while (NULL != token) {
 		if (0 == strcmp(token, "mru")) {
-			found = 1;
-			strcat(mru_val, token);
-			strcat(mru_val, " ");
-			strcat(mru_val, value);
+			found = true;
+			pos += snprintf(&list_options[pos], sizeof(list_options) - pos, "%s %s", token, value);
 			DM_STRNCPY(mru_opt, end, sizeof(mru_opt));
 			char *p, *q;
 			p = strtok_r(mru_opt, " ", &q);
 			if (p != NULL && q != NULL) {
-				strcat(mru_val, " ");
-				strcat(mru_val, q);
+				pos += snprintf(&list_options[pos], sizeof(list_options) - pos, " %s", q);
 			}
 			break;
 		}
-		strcat(mru_val, token);
-		strcat(mru_val, " ");
+		pos += snprintf(&list_options[pos], sizeof(list_options) - pos, "%s ", token);
 		token = strtok_r(NULL, " ", &end);
 	}
 
-	if (found == 0) {
-		strcat(mru_val, mru_str);
-	}
+	if (found == false)
+		snprintf(&list_options[pos], sizeof(list_options) - pos, "%s", mru_str);
 
-	dmuci_set_value_by_section(((struct uci_section *)data), "pppd_options", mru_val);
+	dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "pppd_options", list_options);
 	return 0;
 }
 
@@ -318,10 +374,10 @@ static int set_PPPInterface_MaxMRUSize(char *refparam, struct dmctx *ctx, void *
 			break;
 		case VALUESET:
 			snprintf(mru_str, sizeof(mru_str), "%s %s", "mru", value);
-			dmuci_get_value_by_section_string(((struct uci_section *)data), "pppd_options", &pppd_opt);
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "pppd_options", &pppd_opt);
 
 			if (pppd_opt && *pppd_opt == '\0') {
-				dmuci_set_value_by_section(((struct uci_section *)data), "pppd_options", mru_str);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "pppd_options", mru_str);
 			} else {
 				// If mru is specified then we need to replace and keep the rest of the options intact.
 				configure_pppd_mru(pppd_opt, mru_str, data, value);
@@ -336,7 +392,7 @@ static int get_PPPInterface_CurrentMRUSize(char *refparam, struct dmctx *ctx, vo
 	json_object *res = NULL;
 	char *status;
 
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct uci_section *)data)), String}}, 1, &res);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);
 	DM_ASSERT(res, *value = "");
 	status = dmjson_get_value(res, 1, "up");
 	if (0 != strcmp(status, "true")) {
@@ -345,7 +401,7 @@ static int get_PPPInterface_CurrentMRUSize(char *refparam, struct dmctx *ctx, vo
 	}
 
 	char intf[1024] = {0};
-	snprintf(intf, sizeof(intf), "%s-%s", "pppoe", section_name((struct uci_section *)data));
+	snprintf(intf, sizeof(intf), "%s-%s", "pppoe", section_name(((struct dmmap_dup *)data)->config_section));
 	get_net_device_sysfs(intf, "mtu", value);
 
 	return 0;
@@ -356,7 +412,7 @@ static int get_PPPInterface_LCPEcho(char *refparam, struct dmctx *ctx, void *dat
 	char *lcp_echo = NULL, *token = NULL;
 	char echo_val[50] = {0};
 
-	dmuci_get_value_by_section_string(((struct uci_section *)data), "keepalive", &lcp_echo);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "keepalive", &lcp_echo);
 	if (lcp_echo && *lcp_echo == '\0') {
 		*value = "1";
 		return 0;
@@ -375,7 +431,7 @@ static int get_PPPInterface_LCPEchoRetry(char *refparam, struct dmctx *ctx, void
 {
 	char *lcp_retry = NULL, *token = NULL;
 	char lcp_interval[50] = {0};
-	dmuci_get_value_by_section_string(((struct uci_section *)data), "keepalive", &lcp_retry);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "keepalive", &lcp_retry);
 	if (lcp_retry && *lcp_retry == '\0') {
 		*value = "5";
 	} else {
@@ -392,7 +448,8 @@ static int get_PPPInterface_LCPEchoRetry(char *refparam, struct dmctx *ctx, void
 static int configure_supported_ncp_options(struct uci_section *ss, char *value, char *option)
 {
 	char *proto, *pppd_opt = NULL;
-	char ipcp_opt[1024] = {0};
+	char list_options[1024] = {0};
+	unsigned pos = 0;
 
 	dmuci_get_value_by_section_string(ss, "proto", &proto);
 	if (0 == strcmp(proto, "pppoe")) {
@@ -401,37 +458,39 @@ static int configure_supported_ncp_options(struct uci_section *ss, char *value, 
 
 	if (pppd_opt && *pppd_opt != '\0') {
 		char *token = NULL, *end = NULL;
-		int found = 0;
+		bool found = false;
+
+		list_options[0] = 0;
 		token = strtok_r(pppd_opt, " ", &end);
 		while (NULL != token) {
 			char ncp_opt[1024] = {0};
 			DM_STRNCPY(ncp_opt, token, sizeof(ncp_opt));
 			if (0 == strncmp(ncp_opt, option, sizeof(ncp_opt))) {
-				found = 1;
+				found = true;
 				if (0 == strcmp(value, "1") && NULL != end) {
-					if ('\0' != ipcp_opt[0]) {
-						strcat(ipcp_opt, " ");
-					}
-					strcat(ipcp_opt, end);
+					if (pos != 0)
+						pos += snprintf(&list_options[pos], sizeof(list_options) - pos, "%c", ' ');
+
+					pos += snprintf(&list_options[pos], sizeof(list_options) - pos, "%s", end);
 					break;
 				}
 			} else {
-				if ('\0' != ipcp_opt[0]) {
-					strcat(ipcp_opt, " ");
-				}
-				strcat(ipcp_opt, token);
+				if (pos != 0)
+					pos += snprintf(&list_options[pos], sizeof(list_options) - pos, "%c", ' ');
+
+				pos += snprintf(&list_options[pos], sizeof(list_options) - pos, "%s", token);
 			}
 			token = strtok_r(NULL, " ", &end);
 		}
 
-		if ((0 == strcmp(value, "0")) && found == 0) {
-			if ('\0' != ipcp_opt[0]) {
-				strcat(ipcp_opt, " ");
-			}
-			strcat(ipcp_opt, option);
+		if ((0 == strcmp(value, "0")) && found == false) {
+			if (pos != 0)
+				pos += snprintf(&list_options[pos], sizeof(list_options) - pos, "%c", ' ');
+
+			pos += snprintf(&list_options[pos], sizeof(list_options) - pos, "%s", option);
 		}
 
-		dmuci_set_value_by_section(ss, "pppd_options", ipcp_opt);
+		dmuci_set_value_by_section(ss, "pppd_options", list_options);
 	} else {
 		if (0 == strcmp(value, "0")) {
 			dmuci_set_value_by_section(ss, "pppd_options", option);
@@ -482,7 +541,7 @@ static int handle_supported_ncp_options(struct uci_section *s, char *instance, i
 
 static int get_PPPInterface_IPCPEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int ret = handle_supported_ncp_options((struct uci_section *)data, instance, IPCP);
+	int ret = handle_supported_ncp_options(((struct dmmap_dup *)data)->config_section, instance, IPCP);
 	*value = ret ? "0" : "1";
 	return 0;
 }
@@ -495,7 +554,7 @@ static int set_PPPInterface_IPCPEnable(char *refparam, struct dmctx *ctx, void *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			configure_supported_ncp_options((struct uci_section *)data, value, "noip");
+			configure_supported_ncp_options(((struct dmmap_dup *)data)->config_section, value, "noip");
 			break;
 	}
 	return 0;
@@ -503,7 +562,7 @@ static int set_PPPInterface_IPCPEnable(char *refparam, struct dmctx *ctx, void *
 
 static int get_PPPInterface_IPv6CPEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int ret = handle_supported_ncp_options((struct uci_section *)data, instance, IPCPv6);
+	int ret = handle_supported_ncp_options(((struct dmmap_dup *)data)->config_section, instance, IPCPv6);
 	*value = ret ? "0" : "1";
 	return 0;
 }
@@ -516,7 +575,7 @@ static int set_PPPInterface_IPv6CPEnable(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			configure_supported_ncp_options((struct uci_section *)data, value, "noipv6");
+			configure_supported_ncp_options(((struct dmmap_dup *)data)->config_section, value, "noipv6");
 			break;
 	}
 	return 0;
@@ -536,7 +595,7 @@ static int get_PPPInterfacePPPoE_SessionID(char *refparam, struct dmctx *ctx, vo
 		while (fgets(path, sizeof(path), fp) != NULL) {
 			i++;
 			if (2 == i) {
-				sscanf(path, "%s", session_id);
+				sscanf(path, "%19s", session_id);
 				int number = (int)strtol(session_id, NULL, 16);
 				memset(session_id, '\0', sizeof(session_id));
 				snprintf(session_id, sizeof(session_id), "%d", number);
@@ -557,7 +616,7 @@ static int get_PPPInterfaceIPCP_LocalIPAddress(char *refparam, struct dmctx *ctx
 {
 	json_object *res = NULL;
 
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);
 	DM_ASSERT(res, *value = "");
 	json_object *ipv4_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
 	*value = dmjson_get_value(ipv4_obj, 1, "address");
@@ -568,7 +627,7 @@ static int get_PPPInterfaceIPCP_RemoteIPAddress(char *refparam, struct dmctx *ct
 {
 	json_object *res = NULL;
 
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);
 	DM_ASSERT(res, *value = "");
 	json_object *ipv4_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
 	*value = dmjson_get_value(ipv4_obj, 1, "ptpaddress");
@@ -583,7 +642,7 @@ static int get_PPPInterfaceIPCP_DNSServers(char *refparam, struct dmctx *ctx, vo
 {
 	json_object *res = NULL;
 
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);
 	DM_ASSERT(res, *value = "");
 	*value = dmjson_get_value_array_all(res, ",", 1, "dns-server");
 	return 0;
@@ -593,7 +652,7 @@ static int get_PPPInterfaceIPv6CP_LocalInterfaceIdentifier(char *refparam, struc
 {
 	json_object *res = NULL;
 
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);
 	DM_ASSERT(res, *value = "");
 	json_object *ipv4_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv6-address");
 	*value = dmjson_get_value(ipv4_obj, 1, "address");
@@ -604,7 +663,7 @@ static int get_PPPInterfaceIPv6CP_RemoteInterfaceIdentifier(char *refparam, stru
 {
 	json_object *res = NULL;
 
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);
 	DM_ASSERT(res, *value = "");
 	*value = dmjson_get_value(res, 2, "data", "llremote");
 	return 0;
@@ -626,55 +685,55 @@ static int ppp_read_sysfs(struct uci_section *sect, const char *name, char **val
 /*#Device.PPP.Interface.{i}.Stats.BytesReceived!SYSFS:/sys/class/net/@Name/statistics/rx_bytes*/
 static int get_ppp_eth_bytes_received(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ppp_read_sysfs(data, "statistics/rx_bytes", value);
+	return ppp_read_sysfs(((struct dmmap_dup *)data)->config_section, "statistics/rx_bytes", value);
 }
 
 /*#Device.PPP.Interface.{i}.Stats.BytesSent!SYSFS:/sys/class/net/@Name/statistics/tx_bytes*/
 static int get_ppp_eth_bytes_sent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ppp_read_sysfs(data, "statistics/tx_bytes", value);
+	return ppp_read_sysfs(((struct dmmap_dup *)data)->config_section, "statistics/tx_bytes", value);
 }
 
 /*#Device.PPP.Interface.{i}.Stats.PacketsReceived!SYSFS:/sys/class/net/@Name/statistics/rx_packets*/
 static int get_ppp_eth_pack_received(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ppp_read_sysfs(data, "statistics/rx_packets", value);
+	return ppp_read_sysfs(((struct dmmap_dup *)data)->config_section, "statistics/rx_packets", value);
 }
 
 /*#Device.PPP.Interface.{i}.Stats.PacketsSent!SYSFS:/sys/class/net/@Name/statistics/tx_packets*/
 static int get_ppp_eth_pack_sent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ppp_read_sysfs(data, "statistics/tx_packets", value);
+	return ppp_read_sysfs(((struct dmmap_dup *)data)->config_section, "statistics/tx_packets", value);
 }
 
 /*#Device.PPP.Interface.{i}.Stats.ErrorsSent!SYSFS:/sys/class/net/@Name/statistics/tx_errors*/
 static int get_PPPInterfaceStats_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ppp_read_sysfs(data, "statistics/tx_errors", value);
+	return ppp_read_sysfs(((struct dmmap_dup *)data)->config_section, "statistics/tx_errors", value);
 }
 
 /*#Device.PPP.Interface.{i}.Stats.ErrorsReceived!SYSFS:/sys/class/net/@Name/statistics/rx_errors*/
 static int get_PPPInterfaceStats_ErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ppp_read_sysfs(data, "statistics/rx_errors", value);
+	return ppp_read_sysfs(((struct dmmap_dup *)data)->config_section, "statistics/rx_errors", value);
 }
 
 /*#Device.PPP.Interface.{i}.Stats.DiscardPacketsSent!SYSFS:/sys/class/net/@Name/statistics/tx_dropped*/
 static int get_PPPInterfaceStats_DiscardPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ppp_read_sysfs(data, "statistics/tx_dropped", value);
+	return ppp_read_sysfs(((struct dmmap_dup *)data)->config_section, "statistics/tx_dropped", value);
 }
 
 /*#Device.PPP.Interface.{i}.Stats.DiscardPacketsReceived!SYSFS:/sys/class/net/@Name/statistics/rx_dropped*/
 static int get_PPPInterfaceStats_DiscardPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ppp_read_sysfs(data, "statistics/rx_dropped", value);
+	return ppp_read_sysfs(((struct dmmap_dup *)data)->config_section, "statistics/rx_dropped", value);
 }
 
 /*#Device.PPP.Interface.{i}.Stats.MulticastPacketsReceived!SYSFS:/sys/class/net/@Name/statistics/multicast*/
 static int get_PPPInterfaceStats_MulticastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ppp_read_sysfs(data, "statistics/multicast", value);
+	return ppp_read_sysfs(((struct dmmap_dup *)data)->config_section, "statistics/multicast", value);
 }
 
 static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -684,10 +743,10 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 	struct uci_section *ss = NULL;
 	char *dev = "0";
 
-	dmuci_get_value_by_section_string(((struct uci_section *)data), "device", &linker);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "device", &linker);
 
 	// Get wan interface
-	dev = get_device(section_name(((struct uci_section *)data)));
+	dev = get_device(section_name(((struct dmmap_dup *)data)->config_section));
 
 	// Check if interface name is same as dev value.
 	char *token, *end = linker;
@@ -738,7 +797,7 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &ppp_linker);
 			if (ppp_linker && *ppp_linker) {
-				dmuci_set_value_by_section(((struct uci_section *)data), "device", ppp_linker);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "device", ppp_linker);
 				dmfree(ppp_linker);
 			}
 			return 0;
@@ -748,17 +807,8 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_PPP_InterfaceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	char *proto;
-	int nbre = 0;
-
-	uci_foreach_sections("network", "interface", s) {
-		dmuci_get_value_by_section_string(s, "proto", &proto);
-		if (!strstr(proto, "ppp"))
-			continue;
-		nbre++;
-	}
-	dmasprintf(value, "%d", nbre);
+	int cnt = get_number_of_entries(ctx, data, instance, browseInterfaceInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -772,9 +822,9 @@ static int get_PPP_SupportedNCPs(char *refparam, struct dmctx *ctx, void *data, 
 static int get_PPPInterfacePPPoE_ACName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *proto;
-	dmuci_get_value_by_section_string(((struct uci_section *)data), "proto", &proto);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "proto", &proto);
 	if (strcmp(proto, "pppoe") == 0) {
-		dmuci_get_value_by_section_string(((struct uci_section *)data), "ac", value);
+		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ac", value);
 		return 0;
 	}
 	return 0;
@@ -789,12 +839,12 @@ static int set_PPPInterfacePPPoE_ACName(char *refparam, struct dmctx *ctx, void 
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			dmuci_get_value_by_section_string(((struct uci_section *)data), "proto", &proto_intf);
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "proto", &proto_intf);
 			if (strcmp(proto_intf, "pppoe") != 0)
 				return FAULT_9001;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct uci_section *)data), "ac", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ac", value);
 			break;
 	}
 	return 0;
@@ -804,9 +854,9 @@ static int set_PPPInterfacePPPoE_ACName(char *refparam, struct dmctx *ctx, void 
 static int get_PPPInterfacePPPoE_ServiceName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *proto;
-	dmuci_get_value_by_section_string(((struct uci_section *)data), "proto", &proto);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "proto", &proto);
 	if (strcmp(proto, "pppoe") == 0) {
-		dmuci_get_value_by_section_string(((struct uci_section *)data), "service", value);
+		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "service", value);
 		return 0;
 	}
 	return 0;
@@ -821,12 +871,12 @@ static int set_PPPInterfacePPPoE_ServiceName(char *refparam, struct dmctx *ctx, 
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			dmuci_get_value_by_section_string(((struct uci_section *)data), "proto", &proto);
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "proto", &proto);
 			if (strcmp(proto, "pppoe") != 0)
 				return FAULT_9001;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct uci_section *)data), "service", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "service", value);
 			break;
 	}
 	return 0;
@@ -837,86 +887,7 @@ static int set_PPPInterfacePPPoE_ServiceName(char *refparam, struct dmctx *ctx, 
 ***************************************************************************/
 static int get_linker_ppp_interface(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	*linker = data ? dmstrdup(section_name(((struct uci_section *)data))) : "";
-	return 0;
-}
-
-/*************************************************************
-* ADD DEL OBJ
-**************************************************************/
-static int add_ppp_interface(char *refparam, struct dmctx *ctx, void *data, char **instance)
-{
-	struct uci_section *dmmap_ppp = NULL;
-	char name[16] = {0};
-
-	char *inst = get_last_instance_lev2_bbfdm("network", "interface", "dmmap_network", "ppp_int_instance", "proto", "ppp");
-	snprintf(name, sizeof(name), "ppp_%d", inst ? (atoi(inst)+1) : 1);
-
-	dmuci_set_value("network", name, "", "interface");
-	dmuci_set_value("network", name, "proto", "ppp");
-	dmuci_set_value("network", name, "disabled", "1");
-
-	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ppp);
-	dmuci_set_value_by_section(dmmap_ppp, "section_name", name);
-	*instance = update_instance(inst, 2, dmmap_ppp, "ppp_int_instance");
-	return 0;
-}
-
-static int delete_ppp_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
-{
-	int found = 0;
-	struct uci_section *ppp_s = NULL, *ss = NULL, *dmmap_section = NULL;
-
-	switch (del_action) {
-		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(((struct uci_section *)data)), &dmmap_section);
-			if (dmmap_section) dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section(((struct uci_section *)data), NULL, NULL);
-			break;
-		case DEL_ALL:
-			uci_foreach_option_cont("network", "interface", "proto", "ppp", ppp_s) {
-				if (found != 0) {
-					get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(ss), &dmmap_section);
-					if (dmmap_section) dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = ppp_s;
-				found++;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(ss), &dmmap_section);
-				if (dmmap_section) dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
-			}
-			break;
-	}
-	return 0;
-}
-
-
-/*************************************************************
-* ENTRY METHOD
-**************************************************************/
-/*#Device.PPP.Interface.{i}.!UCI:network/interface/dmmap_network*/
-static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	char *inst = NULL, *max_inst = NULL, *proto;
-	struct dmmap_dup *p = NULL;
-	LIST_HEAD(dup_list);
-
-	synchronize_specific_config_sections_with_dmmap("network", "interface", "dmmap_network", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-		dmuci_get_value_by_section_string(p->config_section, "proto", &proto);
-		if (!strstr(proto, "ppp"))
-			continue;
-
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			p->dmmap_section, "ppp_int_instance", "ppp_int_alias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
-			break;
-	}
-	free_dmmap_config_dup_list(&dup_list);
+	*linker = data ? dmstrdup(section_name(((struct dmmap_dup *)data)->config_section)) : "";
 	return 0;
 }
 
@@ -927,7 +898,7 @@ static int operate_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *d
 {
 	char interface_obj[64] = {0};
 
-	snprintf(interface_obj, sizeof(interface_obj), "network.interface.%s", section_name(((struct uci_section *)data)));
+	snprintf(interface_obj, sizeof(interface_obj), "network.interface.%s", section_name(((struct dmmap_dup *)data)->config_section));
 	dmubus_call_set(interface_obj, "down", UBUS_ARGS{}, 0);
 	dmubus_call_set(interface_obj, "up", UBUS_ARGS{}, 0);
 

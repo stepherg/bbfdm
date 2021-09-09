@@ -256,6 +256,8 @@ static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *ent
 	node.parent = parent_node;
 	node.instance_level = parent_node->instance_level;
 	node.matched = parent_node->matched;
+	node.prev_data = data;
+	node.prev_instance = instance;
 
 	if (!bbfdatamodel_matches(entryobj->bbfdm_type))
 		return;
@@ -344,11 +346,24 @@ int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char 
 {
 	int err = 0;
 	char *parent_obj;
+	DMNODE node = {0};
+
+	if (parent_node->browse_type == BROWSE_FIND_MAX_INST) {
+		int curr_inst = (instance && *instance != '\0') ? atoi(instance) : 0;
+		if (curr_inst > parent_node->max_instance)
+			parent_node->max_instance = curr_inst;
+		return 0;
+	}
+
+	if (parent_node->browse_type == BROWSE_NUM_OF_ENTRIES) {
+		parent_node->num_of_entries++;
+		return 0;
+	}
+
 	DMOBJ *prevobj = parent_node->obj;
 	DMOBJ *nextobj = prevobj->nextobj;
 	DMLEAF *nextleaf = prevobj->leaf;
 
-	DMNODE node = {0};
 	node.obj = prevobj;
 	node.parent = parent_node;
 	node.instance_level = parent_node->instance_level + 1;
@@ -533,14 +548,103 @@ static int rootcmp(char *inparam, char *rootobj)
 {
 	char buf[32];
 	snprintf(buf, sizeof(buf), "%s.", rootobj);
-	int cmp = strcmp(inparam, buf);
-	return cmp;
+	return strcmp(inparam, buf);
 }
 
 /***************************
  * update instance & alias
  ***************************/
-char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...)
+int get_number_of_entries(struct dmctx *ctx, void *data, char *instance, int (*browseinstobj)(struct dmctx *ctx, struct dmnode *node, void *data, char *instance))
+{
+	DMNODE node = {0};
+
+	node.browse_type = BROWSE_NUM_OF_ENTRIES;
+	(browseinstobj)(ctx, &node, data, instance);
+	return node.num_of_entries;
+}
+
+static int get_instance_mode(struct dmctx *dmctx, DMNODE *node)
+{
+	unsigned char instancelevel = node->instance_level;
+	int inst_mode = INSTANCE_MODE_NUMBER;
+
+	if (dmctx->nbrof_instance <= instancelevel) {
+		if (dmctx->instance_mode == INSTANCE_MODE_ALIAS)
+			inst_mode = INSTANCE_MODE_ALIAS;
+	} else if (dmctx->alias_register & (1 << instancelevel)) {
+		inst_mode = INSTANCE_MODE_ALIAS;
+	}
+
+	return inst_mode;
+}
+
+static int find_max_instance(struct dmctx *ctx, DMNODE *node)
+{
+	if (node->max_instance == 0) {
+		node->browse_type = BROWSE_FIND_MAX_INST;
+		node->obj->browseinstobj(ctx, node, node->prev_data, node->prev_instance);
+		node->browse_type = BROWSE_NORMAL;
+	}
+
+	return ++(node->max_instance);
+}
+
+char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, char *inst_opt, char *alias_opt)
+{
+	char buf[64] = {0};
+	char *instance = "";
+
+	dmuci_get_value_by_section_string(s, inst_opt, &instance);
+
+	switch(parent_node->browse_type) {
+	case BROWSE_NORMAL:
+		if (instance && *instance == '\0') {
+			int max_inst = find_max_instance(dmctx, parent_node);
+			snprintf(buf, sizeof(buf), "%d", max_inst);
+			instance = dmuci_set_value_by_section(s, inst_opt, buf);
+		}
+
+		int inst_mode = get_instance_mode(dmctx, parent_node);
+
+		if (inst_mode == INSTANCE_MODE_ALIAS) {
+			char *alias = "";
+
+			dmuci_get_value_by_section_string(s, alias_opt, &alias);
+			if (alias && alias[0] == '\0') {
+				snprintf(buf, sizeof(buf), "cpe-%s", instance);
+				alias = dmuci_set_value_by_section(s, alias_opt, buf);
+			}
+			snprintf(buf, sizeof(buf), "[%s]", alias);
+			instance = dmstrdup(buf);
+		}
+		break;
+	case BROWSE_FIND_MAX_INST:
+	case BROWSE_NUM_OF_ENTRIES:
+		break;
+	}
+
+	return instance;
+}
+
+char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, int inst_nbr)
+{
+	char *instance = "";
+
+	switch(parent_node->browse_type) {
+	case BROWSE_NORMAL:
+		dmasprintf(&instance, "%d", inst_nbr);
+		int inst_mode = get_instance_mode(dmctx, parent_node);
+		if (inst_mode == INSTANCE_MODE_ALIAS)
+			dmasprintf(&instance, "[cpe-%d]", inst_nbr);
+		break;
+	case BROWSE_FIND_MAX_INST:
+	case BROWSE_NUM_OF_ENTRIES:
+		break;
+	}
+	return instance;
+}
+
+__attribute__ ((deprecated)) char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...)
 {
 	va_list arg;
 	char *instance, *last_inst = NULL;
@@ -644,7 +748,7 @@ char *update_instance_alias(int action, char **last_inst, char **max_inst, void 
 	return instance;
 }
 
-char *update_instance_without_section(int action, char **last_inst, char **max_inst, void *argv[])
+__attribute__ ((deprecated)) char *update_instance_without_section(int action, char **last_inst, char **max_inst, void *argv[])
 {
 	char *instance, buf[64] = {0};
 	int instnbr = (int)(long)argv[0];
@@ -661,7 +765,7 @@ char *update_instance_without_section(int action, char **last_inst, char **max_i
 	return instance;
 }
 
-char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst)
+__attribute__ ((deprecated)) char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst)
 {
 	struct uci_section *s;
 	char *inst = NULL, *last_inst = NULL;
@@ -676,7 +780,7 @@ char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst)
 	return inst;
 }
 
-char *get_last_instance(char *package, char *section, char *opt_inst)
+__attribute__ ((deprecated)) char *get_last_instance(char *package, char *section, char *opt_inst)
 {
 	struct uci_section *s;
 	char *inst = NULL, *last_inst = NULL;
@@ -696,7 +800,7 @@ char *get_last_instance(char *package, char *section, char *opt_inst)
 	return inst;
 }
 
-char *get_last_instance_lev2_bbfdm_dmmap_opt(char *dmmap_package, char *section, char *opt_inst, char *opt_check, char *value_check)
+__attribute__ ((deprecated)) char *get_last_instance_lev2_bbfdm_dmmap_opt(char *dmmap_package, char *section, char *opt_inst, char *opt_check, char *value_check)
 {
 	struct uci_section *s;
 	char *instance = NULL, *last_inst = NULL;
@@ -714,7 +818,7 @@ char *get_last_instance_lev2_bbfdm_dmmap_opt(char *dmmap_package, char *section,
 	return instance;
 }
 
-char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check)
+__attribute__ ((deprecated)) char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check)
 {
 	struct uci_section *s = NULL, *dmmap_section = NULL;
 	char *instance = NULL, *last_inst = NULL;
@@ -761,7 +865,7 @@ void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, c
 	dm_parameter->additional_data = additional_data;
 }
 
-void api_del_list_parameter(struct dm_parameter *dm_parameter)
+static void api_del_list_parameter(struct dm_parameter *dm_parameter)
 {
 	list_del(&dm_parameter->list);
 	dmfree(dm_parameter->name);
@@ -828,44 +932,6 @@ void free_all_list_fault_param(struct dmctx *ctx)
 		param_fault = list_entry(ctx->list_fault_param.next, struct param_fault, list);
 		bbf_api_del_list_fault_param(param_fault);
 	}
-}
-
-int update_param_instance_alias(struct dmctx *ctx, char *param, char **new_param)
-{
-	char *pch, *spch, *p;
-	char buf[512];
-	int i = 0, j = 0;
-	char pat[2] = {0};
-
-	char *dup = dmstrdup(param);
-	*pat = '.';
-	p = buf;
-	for (pch = strtok_r(dup, pat, &spch); pch != NULL; pch = strtok_r(NULL, pat, &spch)) {
-		if (isdigit(pch[0])) {
-			dmstrappendchr(p, '.');
-			dmstrappendstr(p, pch);
-			i++;
-		} else if (pch[0]== '[') {
-			dmstrappendchr(p, '.');
-			dmstrappendstr(p, (ctx->inst_buf[i]) ? ctx->inst_buf[i] : "1");
-			i++;
-		} else {
-			if (j > 0) {
-				dmstrappendchr(p, '.');
-				dmstrappendstr(p, pch);
-			}
-			if (j == 0) {
-				dmstrappendstr(p, pch);
-				j++;
-			}
-		}
-	}
-	if (param[strlen(param) - 1] == '.')
-		dmstrappendchr(p, '.');
-	dmstrappendend(p);
-	*new_param = dmstrdup(buf);
-	dmfree(dup);
-	return 0;
 }
 
 int string_to_bool(char *v, bool *b)
@@ -1348,11 +1414,11 @@ static int mobj_add_object(DMOBJECT_ARGS)
 {
 	char *refparam = node->current_object;
 	char *perm = permission->val;
+	char *new_instance = NULL;
+	int fault = 0;
 
 	if (strcmp(refparam, dmctx->in_param) != 0)
 		return FAULT_9005;
-
-	dmctx->stop = 1;
 
 	if (node->is_instanceobj)
 		return FAULT_9005;
@@ -1363,11 +1429,18 @@ static int mobj_add_object(DMOBJECT_ARGS)
 	if (perm[0] == '0' || addobj == NULL)
 		return FAULT_9005;
 
-	int fault = (addobj)(refparam, dmctx, data, &instance);
+	int max_inst = find_max_instance(dmctx, node);
+	fault = dmasprintf(&new_instance, "%d", max_inst);
 	if (fault)
 		return fault;
 
-	dmctx->addobj_instance = instance;
+	dmctx->stop = 1;
+
+	fault = (addobj)(refparam, dmctx, data, &new_instance);
+	if (fault)
+		return fault;
+
+	dmctx->addobj_instance = new_instance;
 	return 0;
 }
 

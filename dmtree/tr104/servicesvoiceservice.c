@@ -16,51 +16,40 @@
 **************************************************************/
 int browseVoiceServiceSIPProviderInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "sip_service_provider", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
-			   p->dmmap_section, "clientinstance", "clientalias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "clientinstance", "clientalias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
 	return 0;
+
 }
 
 int delObjVoiceServiceSIPProvider(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;
-	int found = 0;
+	struct uci_section *s = NULL, *stmp = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_asterisk", "sip_service_provider", section_name((struct uci_section *)data), &dmmap_section);
-			if (dmmap_section != NULL)
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_sections("asterisk", "sip_service_provider", s) {
-				if (found != 0) {
-					get_dmmap_section_of_config_section("dmmap_asterisk", "sip_service_provider", section_name(ss), &dmmap_section);
-					if (dmmap_section != NULL)
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = s;
-				found++;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_asterisk", "sip_service_provider", section_name(ss), &dmmap_section);
-				if (dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
+			uci_foreach_sections_safe("asterisk", "sip_service_provider", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_asterisk", "sip_service_provider", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
 			}
 			break;
 	}
@@ -73,7 +62,7 @@ int delObjVoiceServiceSIPProvider(char *refparam, struct dmctx *ctx, void *data,
 static int browseServicesVoiceServiceCallLogInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct call_log_entry *entry = NULL;
-	char inst[16];
+	char *inst = NULL;
 	int i = 0;
 
 	init_call_log();
@@ -82,7 +71,9 @@ static int browseServicesVoiceServiceCallLogInst(struct dmctx *dmctx, DMNODE *pa
 
 	list_for_each_entry(entry, &call_log_list, list) {
 		i++;
-		snprintf(inst, sizeof(inst), "%d", i);
+
+		inst = handle_instance_without_section(dmctx, parent_node, i);
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, entry, inst) == DM_STOP)
 			break;
 
@@ -102,7 +93,7 @@ static int browseServicesVoiceServiceVoIPProfileInst(struct dmctx *dmctx, DMNODE
 /*#Device.Services.VoiceService.{i}.CodecProfile.{i}.!UCI:asterisk/codec_profile/dmmap_asterisk*/
 static int browseServicesVoiceServiceCodecProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 	int i, j;
@@ -146,13 +137,21 @@ static int browseServicesVoiceServiceCodecProfileInst(struct dmctx *dmctx, DMNOD
 	synchronize_specific_config_sections_with_dmmap("asterisk", "codec_profile", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
-			   p->dmmap_section, "codecprofileinstance", "codecprofilealias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "codecprofileinstance", "codecprofilealias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
+static int browseVoiceServiceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct uci_section *s = is_dmmap_section_exist("dmmap_asterisk", "voice_service");
+	if (!s) dmuci_add_section_bbfdm("dmmap_asterisk", "voice_service", &s);
+	handle_instance(dmctx, parent_node, s, "vsinstance", "vsalias");
+	DM_LINK_INST_OBJ(dmctx, parent_node, s, "1");
 	return 0;
 }
 
@@ -163,12 +162,11 @@ static int addObjServicesVoiceServiceVoIPProfile(char *refparam, struct dmctx *c
 {
 	struct uci_section *dmmap = NULL, *s = NULL;
 
-	char *inst = get_last_instance_bbfdm("dmmap_asterisk", "sip_service_provider", "clientinstance");
 	dmuci_add_section("asterisk", "sip_service_provider", &s);
 
 	dmuci_add_section_bbfdm("dmmap_asterisk", "sip_service_provider", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 2, dmmap, "clientinstance");
+	dmuci_set_value_by_section(dmmap, "clientinstance", *instance);
 	return 0;
 }
 
@@ -181,67 +179,41 @@ static int addObjServicesVoiceServiceCodecProfile(char *refparam, struct dmctx *
 {
 	struct uci_section *dmmap = NULL, *s = NULL;
 
-	char *inst = get_last_instance_bbfdm("dmmap_asterisk", "codec_profile", "codecprofileinstance");
 	dmuci_add_section("asterisk", "codec_profile", &s);
 
 	dmuci_add_section_bbfdm("dmmap_asterisk", "codec_profile", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 2, dmmap, "codecprofileinstance");
+	dmuci_set_value_by_section(dmmap, "codecprofileinstance", *instance);
 	return 0;
 }
 
 static int delObjServicesVoiceServiceCodecProfile(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;
-	int found = 0;
+	struct uci_section *s = NULL, *stmp = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_asterisk", "codec_profile", section_name((struct uci_section *)data), &dmmap_section);
-			if (dmmap_section != NULL)
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_sections("asterisk", "codec_profile", s) {
-				if (found != 0) {
-					get_dmmap_section_of_config_section("dmmap_asterisk", "codec_profile", section_name(ss), &dmmap_section);
-					if (dmmap_section != NULL)
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = s;
-				found++;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_asterisk", "codec_profile", section_name(ss), &dmmap_section);
-				if (dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
+			uci_foreach_sections_safe("asterisk", "codec_profile", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_asterisk", "codec_profile", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
 			}
 			break;
 	}
 	return 0;
 }
 
-static int browseVoiceServiceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	struct uci_section *s = NULL;
-	char *vs = NULL, *vs_last = NULL;
-
-	update_section_list(DMMAP,"voice_service", NULL, 1, NULL, NULL, NULL, NULL, NULL);
-	uci_path_foreach_sections(bbfdm, "dmmap", "voice_service", s) {
-
-		vs = handle_update_instance(1, dmctx, &vs_last, update_instance_alias, 3,
-			 s, "vsinstance", "vsalias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, vs) == DM_STOP)
-			break;
-	}
-	return 0;
-}
-
-int get_service_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
+static int get_service_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "vsalias", value);
 	if ((*value)[0] == '\0')

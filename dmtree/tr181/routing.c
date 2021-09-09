@@ -190,78 +190,6 @@ static int parse_proc_route6_line(const char *line, char *ipstr, char *gwstr, ch
 	return 0;
 }
 
-static int get_forwarding_last_inst(bool ipv6)
-{
-	char *rinst = NULL, *drinst = NULL, *dsinst = NULL, *tmp = NULL;
-	int r = 0, dr = 0, ds = 0;
-	struct uci_section *s = NULL;
-
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", ipv6 ? "route6" : "route", s) {
-		dmuci_get_value_by_section_string(s, ipv6 ? "route6instance" : "routeinstance", &tmp);
-		if (tmp && tmp[0] == '\0')
-			break;
-		rinst = tmp;
-	}
-
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", ipv6 ? "route6_disabled" : "route_disabled", s) {
-		dmuci_get_value_by_section_string(s, ipv6 ? "route6instance" : "routeinstance", &tmp);
-		if (tmp && tmp[0] == '\0')
-			break;
-		dsinst = tmp;
-	}
-
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", ipv6 ? "route6_dynamic" : "route_dynamic", s) {
-		dmuci_get_value_by_section_string(s, ipv6 ? "route6instance" : "routeinstance", &tmp);
-		if (tmp && tmp[0] == '\0')
-			break;
-		drinst = tmp;
-	}
-
-	if (rinst) r = atoi(rinst);
-	if (dsinst) ds = atoi(dsinst);
-	if (drinst) dr = atoi(drinst);
-
-	return (r > ds && r > dr ? r : ds > dr ? ds : dr);
-}
-
-static char *forwarding_update_instance_alias_bbfdm(int action, char **last_inst, char **max_inst, void *argv[])
-{
-	char *instance, *alias;
-	char buf[64] = {0};
-
-	struct uci_section *s = (struct uci_section *) argv[0];
-	char *inst_opt = (char *) argv[1];
-	char *alias_opt = (char *) argv[2];
-	bool *ipv4_forwarding = (bool *) argv[3];
-	bool *find_max = (bool *) argv[4];
-
-	dmuci_get_value_by_section_string(s, inst_opt, &instance);
-	if (instance[0] == '\0') {
-		if (*find_max) {
-			int m = get_forwarding_last_inst((*ipv4_forwarding) ? false : true);
-			snprintf(buf, sizeof(buf), "%d", m+1);
-			*find_max = false;
-		} else if (max_inst == NULL) {
-			snprintf(buf, sizeof(buf), "%d", 1);
-		} else {
-			snprintf(buf, sizeof(buf), "%d", atoi(*max_inst)+1);
-		}
-		instance = dmuci_set_value_by_section_bbfdm(s, inst_opt, buf);
-	}
-	*max_inst = instance;
-	*last_inst = instance;
-	if (action == INSTANCE_MODE_ALIAS) {
-		dmuci_get_value_by_section_string(s, alias_opt, &alias);
-		if (alias[0] == '\0') {
-			snprintf(buf, sizeof(buf), "cpe-%s", instance);
-			alias = dmuci_set_value_by_section_bbfdm(s, alias_opt, buf);
-		}
-		snprintf(buf, sizeof(buf), "[%s]", alias);
-		instance = dmstrdup(buf);
-	}
-	return instance;
-}
-
 static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL, *stmp = NULL;
@@ -319,9 +247,7 @@ static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMN
 					break;
 				}
 			}
-			char instance[16];
 
-			snprintf(instance, sizeof(instance), "%d", get_forwarding_last_inst(false) + 1);
 			dmuci_add_section_bbfdm("dmmap_route_forwarding", "route_dynamic", &s);
 			dmuci_set_value_by_section_bbfdm(s, "target", proute.destination);
 			dmuci_set_value_by_section_bbfdm(s, "netmask", proute.mask);
@@ -329,7 +255,6 @@ static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMN
 			dmuci_set_value_by_section_bbfdm(s, "gateway", proute.gateway);
 			dmuci_set_value_by_section_bbfdm(s, "device", proute.iface);
 			dmuci_set_value_by_section_bbfdm(s, "interface", iface);
-			dmuci_set_value_by_section_bbfdm(s, "routeinstance", instance);
 		}
 		fclose(fp);
 	}
@@ -396,9 +321,7 @@ static int dmmap_synchronizeRoutingRouterIPv6Forwarding(struct dmctx *dmctx, DMN
 				break;
 			}
 		}
-		char instance[16];
 
-		snprintf(instance, sizeof(instance), "%d", get_forwarding_last_inst(true) + 1);
 		dmuci_add_section_bbfdm("dmmap_route_forwarding", "route6_dynamic", &s);
 		dmuci_set_value_by_section_bbfdm(s, "target", ipstr);
 		dmuci_set_value_by_section_bbfdm(s, "gateway", gwstr);
@@ -406,9 +329,147 @@ static int dmmap_synchronizeRoutingRouterIPv6Forwarding(struct dmctx *dmctx, DMN
 		dmuci_set_value_by_section_bbfdm(s, "device", dev);
 		snprintf(buf, sizeof(buf), "%u", metric);
 		dmuci_set_value_by_section_bbfdm(s, "metric", buf);
-		dmuci_set_value_by_section_bbfdm(s, "route6instance", instance);
 	}
 	fclose(fp);
+	return 0;
+}
+
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
+static int browseRouterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct uci_section *s = is_dmmap_section_exist("dmmap_route_forwarding", "router");
+	if (!s) dmuci_add_section_bbfdm("dmmap_route_forwarding", "router", &s);
+	handle_instance(dmctx, parent_node, s, "router_instance", "router_alias");
+	DM_LINK_INST_OBJ(dmctx, parent_node, s, "1");
+	return 0;
+}
+
+/*#Device.Routing.Router.{i}.IPv4Forwarding.{i}.!UCI:network/route/dmmap_route_forwarding*/
+static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL;
+	struct uci_section *s = NULL;
+	struct routingfwdargs curr_routefwdargs = {0};
+	struct dmmap_dup *p = NULL;
+	LIST_HEAD(dup_list);
+
+	// Enable Routes
+	synchronize_specific_config_sections_with_dmmap("network", "route", "dmmap_route_forwarding", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		init_args_ipv4forward(&curr_routefwdargs, p->config_section, "1", ROUTE_STATIC);
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "routeinstance", "routealias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, inst) == DM_STOP)
+			goto end;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+
+	// Disable Routes
+	synchronize_specific_config_sections_with_dmmap("network", "route_disabled", "dmmap_route_forwarding", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		init_args_ipv4forward(&curr_routefwdargs, p->config_section, "1", ROUTE_DISABLED);
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "routeinstance", "routealias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, inst) == DM_STOP)
+			goto end;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+
+	// Dynamic Routes
+	dmmap_synchronizeRoutingRouterIPv4Forwarding(dmctx, parent_node, prev_data, prev_instance);
+	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route_dynamic", s) {
+
+		init_args_ipv4forward(&curr_routefwdargs, s, "0", ROUTE_DYNAMIC);
+
+		inst = handle_instance(dmctx, parent_node, s, "routeinstance", "routealias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, inst) == DM_STOP)
+			goto end;
+	}
+
+end:
+	return 0;
+}
+
+/*#Device.Routing.Router.{i}.IPv6Forwarding.{i}.!UCI:network/route6/dmmap_route_forwarding*/
+static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL;
+	struct uci_section *s = NULL;
+	struct routingfwdargs curr_route6fwdargs = {0};
+	struct dmmap_dup *p = NULL;
+	LIST_HEAD(dup_list);
+
+	// Enable Routes
+	synchronize_specific_config_sections_with_dmmap("network", "route6", "dmmap_route_forwarding", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		init_args_ipv6forward(&curr_route6fwdargs, p->config_section, "1", ROUTE_STATIC);
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "route6instance", "route6alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, inst) == DM_STOP)
+			goto end;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+
+	// Disable Routes
+	synchronize_specific_config_sections_with_dmmap("network", "route6_disabled", "dmmap_route_forwarding", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		init_args_ipv6forward(&curr_route6fwdargs, p->config_section, "1", ROUTE_DISABLED);
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "route6instance", "route6alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, inst) == DM_STOP)
+			goto end;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+
+	// Dynamic Routes
+	dmmap_synchronizeRoutingRouterIPv6Forwarding(dmctx, parent_node, prev_data, prev_instance);
+	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route6_dynamic", s) {
+
+		init_args_ipv6forward(&curr_route6fwdargs, s, "0", ROUTE_DYNAMIC);
+
+		inst = handle_instance(dmctx, parent_node, s, "route6instance", "route6alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, inst) == DM_STOP)
+			goto end;
+	}
+
+end:
+	return 0;
+}
+
+static int browseRoutingRouteInformationInterfaceSettingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct uci_section *s = NULL;
+	char *inst = NULL;
+	int id = 0, i = 0;
+
+	uci_foreach_sections("network", "interface", s) {
+		char *proto = NULL, *ip6addr = NULL;
+
+		dmuci_get_value_by_section_string(s, "proto", &proto);
+		dmuci_get_value_by_section_string(s, "ip6addr", &ip6addr);
+		if ((proto && strcmp(proto, "dhcpv6") == 0) || (ip6addr && ip6addr[0] != '\0')) {
+			json_object *res = NULL, *route_obj = NULL, *arrobj = NULL;
+
+			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &res);
+			dmjson_foreach_obj_in_array(res, arrobj, route_obj, i, 1, "route") {
+				inst = handle_instance_without_section(dmctx, parent_node, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)route_obj, inst) == DM_STOP)
+					break;
+			}
+		}
+	}
 	return 0;
 }
 
@@ -449,40 +510,16 @@ static int get_RoutingRouter_Status(char *refparam, struct dmctx *ctx, void *dat
 /*#Device.Routing.Router.{i}.IPv4ForwardingNumberOfEntries!UCI:network/route/*/
 static int get_RoutingRouter_IPv4ForwardingNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_foreach_sections("network", "route", s) {
-		cnt++;
-	}
-	uci_foreach_sections("network", "route_disabled", s) {
-		cnt++;
-	}
-	dmmap_synchronizeRoutingRouterIPv4Forwarding(ctx, NULL, NULL, NULL);
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route_dynamic", s) {
-		cnt++;
-	}
-	dmasprintf(value, "%d", cnt); // MEM WILL BE FREED IN DMMEMCLEAN
+	int cnt = get_number_of_entries(ctx, data, instance, browseIPv4ForwardingInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 /*#Device.Routing.Router.{i}.IPv6ForwardingNumberOfEntries!UCI:network/route6/*/
 static int get_RoutingRouter_IPv6ForwardingNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_foreach_sections("network", "route6", s) {
-		cnt++;
-	}
-	uci_foreach_sections("network", "route6_disabled", s) {
-		cnt++;
-	}
-	dmmap_synchronizeRoutingRouterIPv6Forwarding(ctx, NULL, NULL, NULL);
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route6_dynamic", s) {
-		cnt++;
-	}
-	dmasprintf(value, "%d", cnt); // MEM WILL BE FREED IN DMMEMCLEAN
+	int cnt = get_number_of_entries(ctx, data, instance, browseIPv6ForwardingInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -1063,21 +1100,19 @@ struct dm_permession_s DMRouting = {"1", &get_routing_perm};
 /*************************************************************
 * ADD DEL OBJ
 **************************************************************/
-static int add_ipv4forwarding(char *refparam, struct dmctx *ctx, void *data, char **instancepara)
+static int add_ipv4forwarding(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s = NULL, *dmmap_route = NULL;
-	char instance[16], route_name[32];
+	char route_name[32];
 
-	int last_inst = get_forwarding_last_inst(false);
-	snprintf(instance, sizeof(instance), "%d", last_inst);
-	snprintf(route_name, sizeof(route_name), "route_%d", (last_inst == 0) ? 1 : last_inst + 1);
+	snprintf(route_name, sizeof(route_name), "route_%s", *instance);
 
 	dmuci_add_section("network", "route_disabled", &s);
 	dmuci_rename_section_by_section(s, route_name);
 
 	dmuci_add_section_bbfdm("dmmap_route_forwarding", "route_disabled", &dmmap_route);
 	dmuci_set_value_by_section(dmmap_route, "section_name", route_name);
-	*instancepara = update_instance(instance, 2, dmmap_route, "routeinstance");
+	dmuci_set_value_by_section(dmmap_route, "routeinstance", *instance);
 	return 0;
 }
 
@@ -1120,27 +1155,24 @@ static int delete_ipv4forwarding(char *refparam, struct dmctx *ctx, void *data, 
 				// Remove config section
 				dmuci_delete_by_section(route_s, NULL, NULL);
 			}
-
 			break;
 		}
 	return 0;
 }
 
-static int add_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, char **instancepara)
+static int add_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s = NULL, *dmmap_route6 = NULL;
-	char instance[16], route6_name[32];
+	char route6_name[32];
 
-	int last_inst = get_forwarding_last_inst(true);
-	snprintf(instance, sizeof(instance), "%d", last_inst);
-	snprintf(route6_name, sizeof(route6_name), "route6_%d", (last_inst == 0) ? 1 : last_inst + 1);
+	snprintf(route6_name, sizeof(route6_name), "route6_%s", *instance);
 
 	dmuci_add_section("network", "route6_disabled", &s);
 	dmuci_rename_section_by_section(s, route6_name);
 
 	dmuci_add_section_bbfdm("dmmap_route_forwarding", "route6_disabled", &dmmap_route6);
 	dmuci_set_value_by_section(dmmap_route6, "section_name", route6_name);
-	*instancepara = update_instance(instance, 2, dmmap_route6, "route6instance");
+	dmuci_set_value_by_section(dmmap_route6, "route6instance", *instance);
 	return 0;
 }
 
@@ -1183,167 +1215,14 @@ static int delete_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, 
 				// Remove config section
 				dmuci_delete_by_section(route6_s, NULL, NULL);
 			}
-
 			break;
 	}
 	return 0;
 }
 
-/*************************************************************
-* SUB ENTRIES
-**************************************************************/
-static int browseRouterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	struct uci_section *s = NULL;
-	char *inst = NULL, *max_inst = NULL;
-
-	update_section_list(DMMAP,"router", NULL, 1, NULL, NULL, NULL, NULL, NULL);
-	uci_path_foreach_sections(bbfdm, "dmmap", "router", s) {
-
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   s, "router_instance", "router_alias");
-
-		DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst);
-		break;
-	}
-	return 0;
-}
-
-/*#Device.Routing.Router.{i}.IPv4Forwarding.{i}.!UCI:network/route/dmmap_route_forwarding*/
-static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	char *inst = NULL, *max_inst = NULL;
-	struct uci_section *ss = NULL;
-	bool find_max = true, ipv4_forwarding = true;
-	struct routingfwdargs curr_routefwdargs = {0};
-	struct dmmap_dup *p = NULL;
-	LIST_HEAD(dup_list);
-
-	// Enable Routes
-	synchronize_specific_config_sections_with_dmmap("network", "route", "dmmap_route_forwarding", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-
-		init_args_ipv4forward(&curr_routefwdargs, p->config_section, "1", ROUTE_STATIC);
-
-		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
-			   p->dmmap_section, "routeinstance", "routealias", &ipv4_forwarding, &find_max);
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, inst) == DM_STOP)
-			goto end;
-	}
-	free_dmmap_config_dup_list(&dup_list);
-
-	// Disable Routes
-	synchronize_specific_config_sections_with_dmmap("network", "route_disabled", "dmmap_route_forwarding", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-
-		init_args_ipv4forward(&curr_routefwdargs, p->config_section, "1", ROUTE_DISABLED);
-
-		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
-			   p->dmmap_section, "routeinstance", "routealias", &ipv4_forwarding, &find_max);
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, inst) == DM_STOP)
-			goto end;
-	}
-	free_dmmap_config_dup_list(&dup_list);
-
-	// Dynamic Routes
-	dmmap_synchronizeRoutingRouterIPv4Forwarding(dmctx, NULL, NULL, NULL);
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route_dynamic", ss) {
-
-		init_args_ipv4forward(&curr_routefwdargs, ss, "0", ROUTE_DYNAMIC);
-
-		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
-			   ss, "routeinstance", "routealias", &ipv4_forwarding, &find_max);
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, inst) == DM_STOP)
-			goto end;
-	}
-
-end:
-	return 0;
-}
-
-/*#Device.Routing.Router.{i}.IPv6Forwarding.{i}.!UCI:network/route6/dmmap_route_forwarding*/
-static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	char *inst = NULL, *max_inst = NULL;
-	struct uci_section *ss = NULL;
-	bool find_max = true, ipv4_forwarding = false;
-	struct routingfwdargs curr_route6fwdargs = {0};
-	struct dmmap_dup *p = NULL;
-	LIST_HEAD(dup_list);
-
-	// Enable Routes
-	synchronize_specific_config_sections_with_dmmap("network", "route6", "dmmap_route_forwarding", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-
-		init_args_ipv6forward(&curr_route6fwdargs, p->config_section, "1", ROUTE_STATIC);
-
-		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
-			   p->dmmap_section, "route6instance", "route6alias", &ipv4_forwarding, &find_max);
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, inst) == DM_STOP)
-			goto end;
-	}
-	free_dmmap_config_dup_list(&dup_list);
-
-	// Disable Routes
-	synchronize_specific_config_sections_with_dmmap("network", "route6_disabled", "dmmap_route_forwarding", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-
-		init_args_ipv6forward(&curr_route6fwdargs, p->config_section, "1", ROUTE_DISABLED);
-
-		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
-			   p->dmmap_section, "route6instance", "route6alias", &ipv4_forwarding, &find_max);
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, inst) == DM_STOP)
-			goto end;
-	}
-	free_dmmap_config_dup_list(&dup_list);
-
-	// Dynamic Routes
-	dmmap_synchronizeRoutingRouterIPv6Forwarding(dmctx, NULL, NULL, NULL);
-	uci_path_foreach_sections(bbfdm, "dmmap_route_forwarding", "route6_dynamic", ss) {
-
-		init_args_ipv6forward(&curr_route6fwdargs, ss, "0", ROUTE_DYNAMIC);
-
-		inst = handle_update_instance(2, dmctx, &max_inst, forwarding_update_instance_alias_bbfdm, 5,
-			   ss, "route6instance", "route6alias", &ipv4_forwarding, &find_max);
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, inst) == DM_STOP)
-			goto end;
-	}
-
-end:
-	return 0;
-}
-
-static int browseRoutingRouteInformationInterfaceSettingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	struct uci_section *s = NULL;
-	char *inst = NULL, *max_inst = NULL;
-	int id = 0, i = 0;
-
-	uci_foreach_sections("network", "interface", s) {
-		char *proto = NULL, *ip6addr = NULL;
-
-		dmuci_get_value_by_section_string(s, "proto", &proto);
-		dmuci_get_value_by_section_string(s, "ip6addr", &ip6addr);
-		if ((proto && strcmp(proto, "dhcpv6") == 0) || (ip6addr && ip6addr[0] != '\0')) {
-			json_object *res = NULL, *route_obj = NULL, *arrobj = NULL;
-
-			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &res);
-			dmjson_foreach_obj_in_array(res, arrobj, route_obj, i, 1, "route") {
-				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)route_obj, inst) == DM_STOP)
-					break;
-			}
-		}
-	}
-	return 0;
-}
-
+/**********************************************************************************************************************************
+*                                            OBJ & PARAM DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.Routing. *** */
 DMOBJ tRoutingObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/

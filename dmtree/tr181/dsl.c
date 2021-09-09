@@ -105,7 +105,7 @@ static int browseDSLLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	json_object *res = NULL, *line_obj = NULL;
 	struct dsl_line_args cur_dsl_line_args = {0};
 	struct uci_section *s = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int entries = 0;
 
 	dmubus_call("dsl", "status", UBUS_ARGS{}, 0, &res);
@@ -117,8 +117,7 @@ static int browseDSLLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			s = update_create_dmmap_dsl_line(cur_dsl_line_args.id);
 			init_dsl_line(&cur_dsl_line_args, s);
 
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-				   s, "dsl_line_instance", "dsl_line_alias");
+			inst = handle_instance(dmctx, parent_node, s, "dsl_line_instance", "dsl_line_alias");
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&cur_dsl_line_args, inst) == DM_STOP)
 				break;
@@ -134,7 +133,7 @@ static int browseDSLChannelInst(struct dmctx *dmctx, DMNODE *parent_node, void *
 	json_object *res = NULL, *line_obj = NULL, *channel_obj = NULL;
 	struct dsl_channel_args cur_dsl_channel_args = {0};
 	struct uci_section *s = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int entries_line = 0, entries_channel = 0;
 
 	dmubus_call("dsl", "status", UBUS_ARGS{}, 0, &res);
@@ -148,8 +147,7 @@ static int browseDSLChannelInst(struct dmctx *dmctx, DMNODE *parent_node, void *
 				s = update_create_dmmap_dsl_channel(cur_dsl_channel_args.id);
 				init_dsl_channel(&cur_dsl_channel_args, s);
 
-				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-					   s, "dsl_channel_instance", "dsl_channel_alias");
+				inst = handle_instance(dmctx, parent_node, s, "dsl_channel_instance", "dsl_channel_alias");
 
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&cur_dsl_channel_args, inst) == DM_STOP)
 					break;
@@ -241,24 +239,14 @@ int get_line_linkstatus(char *method, char *id, char **value)
 ***************************************************************************/
 static int get_DSL_LineNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_path_foreach_sections(bbfdm, "dmmap", "dsl_line", s) {
-		cnt++;
-	}
+	int cnt = get_number_of_entries(ctx, data, instance, browseDSLLineInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 static int get_DSL_ChannelNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_path_foreach_sections(bbfdm, "dmmap", "dsl_channel", s) {
-		cnt++;
-	}
+	int cnt = get_number_of_entries(ctx, data, instance, browseDSLChannelInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
@@ -1458,6 +1446,9 @@ static int get_DSLChannelStatsQuarterHour_XTUCCRCErrors(char *refparam, struct d
 	return 0;
 }
 
+/**********************************************************************************************************************************
+*                                            OBJ & LEAF DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.DSL. *** */
 DMOBJ tDSLObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/

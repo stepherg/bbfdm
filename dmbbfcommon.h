@@ -19,7 +19,6 @@ void bbf_uci_commit_bbfdm(void);
 void bbf_uci_revert_bbfdm(void);
 int set_bbfdatamodel_type(int bbf_type);
 int get_bbfdatamodel_type(void);
-void del_list_parameter(struct dm_parameter *dm_parameter);
 void del_list_fault_param(struct param_fault *param_fault);
 
 void bbf_set_end_session_flag (struct dmctx *ctx, unsigned int flag);

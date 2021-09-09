@@ -5,103 +5,85 @@
  * it under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation
  *
- *
  *      Author: Omar Kallel <omar.kallel@pivasoftware.com>
+ *      Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
 #include "users.h"
 
-/***************************** Browse Functions ***********************************/
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
 /*#Device.Users.User.{i}.!UCI:users/user/dmmap_users*/
 static int browseUserInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("users", "user", "dmmap_users", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dmmap_section, "user_instance", "user_alias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "user_instance", "user_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
 	return 0;
 }
 
+/*************************************************************
+* ADD & DEL OBJ
+**************************************************************/
 static int add_users_user(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s = NULL, *dmmap_user = NULL;
-	char username[32];
+	char sec_name[32];
 
-	char *last_inst = get_last_instance_bbfdm("dmmap_users", "user", "user_instance");
-	snprintf(username, sizeof(username), "user_%d", last_inst ? atoi(last_inst) + 1 : 1);
+	snprintf(sec_name, sizeof(sec_name), "user_%s", *instance);
 
 	dmuci_add_section("users", "user", &s);
-	dmuci_rename_section_by_section(s, username);
+	dmuci_rename_section_by_section(s, sec_name);
 	dmuci_set_value_by_section(s, "enabled", "0");
 	dmuci_set_value_by_section(s, "remote_access", "0");
 
 	dmuci_add_section_bbfdm("dmmap_users", "user", &dmmap_user);
-	dmuci_set_value_by_section(dmmap_user, "section_name", username);
-	*instance = update_instance(last_inst, 2, dmmap_user, "user_instance");
+	dmuci_set_value_by_section(dmmap_user, "section_name", sec_name);
+	dmuci_set_value_by_section(dmmap_user, "user_instance", *instance);
 	return 0;
 }
 
 static int delete_users_user(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;
-	int found = 0;
+	struct uci_section *s = NULL, *stmp = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			if (is_section_unnamed(section_name((struct uci_section *)data))) {
-				LIST_HEAD(dup_list);
-				delete_sections_save_next_sections("dmmap_users", "user", "user_instance", section_name((struct uci_section *)data), atoi(instance), &dup_list);
-				update_dmmap_sections(&dup_list, "user_instance", "dmmap_users", "user");
-				dmuci_delete_by_section_unnamed((struct uci_section *)data, NULL, NULL);
-			} else {
-				get_dmmap_section_of_config_section("dmmap_users", "user", section_name((struct uci_section *)data), &dmmap_section);
-				if (dmmap_section)
-					dmuci_delete_by_section_unnamed_bbfdm(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
-			}
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_sections("users", "user", s) {
-				if (found != 0) {
-					get_dmmap_section_of_config_section("dmmap_users", "user", section_name(ss), &dmmap_section);
-					if (dmmap_section)
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = s;
-				found++;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_users", "user", section_name(ss), &dmmap_section);
-				if (dmmap_section)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
+			uci_foreach_sections_safe("users", "user", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_users", "user", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
 			}
 			break;
 	}
 	return 0;
 }
 
-/***************************************** Set/Get Parameter functions ***********************/
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
 /*#Device.Users.UserNumberOfEntries!UCI:users/user/*/
 static int get_users_user_number_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_foreach_sections("users", "user", s) {
-		cnt++;
-	}
+	int cnt = get_number_of_entries(ctx, data, instance, browseUserInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
@@ -109,10 +91,7 @@ static int get_users_user_number_of_entries(char *refparam, struct dmctx *ctx, v
 /*#Device.Users.User.{i}.Alias!UCI:dmmap_users/user,@i-1/user_alias*/
 static int get_user_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *dmmap_section = NULL;
-
-	get_dmmap_section_of_config_section("dmmap_users", "user", section_name((struct uci_section *)data), &dmmap_section);
-	dmuci_get_value_by_section_string(dmmap_section, "user_alias", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "user_alias", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "cpe-%s", instance);
     return 0;
@@ -121,13 +100,13 @@ static int get_user_alias(char *refparam, struct dmctx *ctx, void *data, char *i
 /*#Device.Users.User.{i}.Enable!UCI:users/user,@i-1/enabled*/
 static int get_user_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "1");
     return 0;
 }
 
 static int get_user_username(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmstrdup(section_name((struct uci_section *)data));
+	*value = dmstrdup(section_name(((struct dmmap_dup *)data)->config_section));
     return 0;
 }
 
@@ -141,29 +120,26 @@ static int get_user_password(char *refparam, struct dmctx *ctx, void *data, char
 /*#Device.Users.User.{i}.RemoteAccessCapable!UCI:users/user,@i-1/remote_access*/
 static int get_user_remote_accessable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "remote_access", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "remote_access", "1");
     return 0;
 }
 
 /*#Device.Users.User.{i}.Language!UCI:users/user,@i-1/language*/
 static int get_user_language(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "language", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "language", value);
     return 0;
 }
 
 static int set_user_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *dmmap_section = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_users", "user", section_name((struct uci_section *)data), &dmmap_section);
-			dmuci_set_value_by_section(dmmap_section, "user_alias", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "user_alias", value);
 			return 0;
 	}
 	return 0;
@@ -179,7 +155,7 @@ static int set_user_enable(char *refparam, struct dmctx *ctx, void *data, char *
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -187,8 +163,6 @@ static int set_user_enable(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int set_user_username(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *dmmap_section = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 64, NULL, NULL))
@@ -200,11 +174,10 @@ static int set_user_username(char *refparam, struct dmctx *ctx, void *data, char
 			break;
 		case VALUESET:
 			// Update dmmap_users file
-			get_dmmap_section_of_config_section("dmmap_users", "user", section_name((struct uci_section *)data), &dmmap_section);
-			dmuci_set_value_by_section(dmmap_section, "section_name", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "section_name", value);
 
 			// Update users config
-			dmuci_rename_section_by_section((struct uci_section *)data, value);
+			dmuci_rename_section_by_section(((struct dmmap_dup *)data)->config_section, value);
 			break;
 	}
 	return 0;
@@ -218,7 +191,7 @@ static int set_user_password(char *refparam, struct dmctx *ctx, void *data, char
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "password", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "password", value);
 			break;
 	}
 	return 0;
@@ -234,7 +207,7 @@ static int set_user_remote_accessable(char *refparam, struct dmctx *ctx, void *d
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "remote_access", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "remote_access", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -248,12 +221,15 @@ static int set_user_language(char *refparam, struct dmctx *ctx, void *data, char
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "language", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "language", value);
 			break;
 	}
 	return 0;
 }
 
+/**********************************************************************************************************************************
+*                                            OBJ & LEAF DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.Users. *** */
 DMOBJ tUsersObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/

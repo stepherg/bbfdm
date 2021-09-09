@@ -88,7 +88,7 @@ static struct uci_section *create_dmmap_interface_stack_section(char *curr_inst)
 	return s;
 }
 
-static int create_and_link_interface_stack_instance(struct dmctx *dmctx, DMNODE *parent_node, char *higherlayer, char *lowerlayer, char *higheralias, char *loweralias, char *max_inst, int *instance)
+static int create_and_link_interface_stack_instance(struct dmctx *dmctx, DMNODE *parent_node, char *higherlayer, char *lowerlayer, char *higheralias, char *loweralias, int *instance)
 {
 	struct interfacestack_data intf_stack_data = {0};
 	char buf_instance[16] = {0};
@@ -104,8 +104,7 @@ static int create_and_link_interface_stack_instance(struct dmctx *dmctx, DMNODE 
 	struct uci_section *dmmap_s = create_dmmap_interface_stack_section(buf_instance);
 
 	// link instance to interface stack data
-	char *inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-		   dmmap_s, "interface_stack_instance", "interface_stack_alias");
+	char *inst = handle_instance(dmctx, parent_node, dmmap_s, "interface_stack_instance", "interface_stack_alias");
 
 	if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&intf_stack_data, inst) == DM_STOP)
 		return -1;
@@ -117,7 +116,6 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 {
 	struct uci_section *s = NULL;
 	char *layer_inst = "", *loweralias = "", *higheralias = "";
-	char *max_inst = NULL;
 	char buf_lowerlayer[128] = {0};
 	char buf_higherlayer[128] = {0};
 	char buf_higheralias[64] = {0};
@@ -197,7 +195,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *layer_inst ? "cpe-" : "", (*loweralias == '\0' && *layer_inst) ? layer_inst : "");
 		}
 
-		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, max_inst, &instance))
+		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, &instance))
 			goto end;
 	}
 
@@ -249,7 +247,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "%s", value);
 		snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *layer_inst ? "cpe-" : "", (*loweralias == '\0' && *layer_inst) ? layer_inst : "");
 
-		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, max_inst, &instance))
+		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, &instance))
 			goto end;
 	}
 
@@ -286,7 +284,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "%s", value);
 		snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *layer_inst ? "cpe-" : "", (*loweralias == '\0' && *layer_inst) ? layer_inst : "");
 
-		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, max_inst, &instance))
+		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, &instance))
 			goto end;
 	}
 
@@ -360,7 +358,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "%s", value);
 		snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *layer_inst ? "cpe-" : "", (*loweralias == '\0' && *layer_inst) ? layer_inst : "");
 
-		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, max_inst, &instance))
+		if (create_and_link_interface_stack_instance(dmctx, parent_node, buf_higherlayer, buf_lowerlayer, buf_higheralias, buf_loweralias, &instance))
 			goto end;
 	}
 
@@ -420,7 +418,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-			if (create_and_link_interface_stack_instance(dmctx, parent_node, mg_value, vb, buf_mngr, buf_loweralias, max_inst, &instance))
+			if (create_and_link_interface_stack_instance(dmctx, parent_node, mg_value, vb, buf_mngr, buf_loweralias, &instance))
 				goto end;
 
 			snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
@@ -513,7 +511,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 			snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-			if (create_and_link_interface_stack_instance(dmctx, parent_node, vb, value, buf_higheralias, buf_loweralias, max_inst, &instance))
+			if (create_and_link_interface_stack_instance(dmctx, parent_node, vb, value, buf_higheralias, buf_loweralias, &instance))
 				goto end;
 
 			// The lower layer is Device.WiFi.Radio.{i}.
@@ -545,7 +543,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-				if (create_and_link_interface_stack_instance(dmctx, parent_node, value, vb, buf_higheralias, buf_loweralias, max_inst, &instance))
+				if (create_and_link_interface_stack_instance(dmctx, parent_node, value, vb, buf_higheralias, buf_loweralias, &instance))
 					goto end;
 			}
 
@@ -567,7 +565,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-				if (create_and_link_interface_stack_instance(dmctx, parent_node, value, vb, buf_higheralias, buf_loweralias, max_inst, &instance))
+				if (create_and_link_interface_stack_instance(dmctx, parent_node, value, vb, buf_higheralias, buf_loweralias, &instance))
 					goto end;
 			}
 
@@ -589,7 +587,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 				snprintf(buf_loweralias, sizeof(buf_loweralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
-				if (create_and_link_interface_stack_instance(dmctx, parent_node, vb, value, buf_higheralias, buf_loweralias, max_inst, &instance))
+				if (create_and_link_interface_stack_instance(dmctx, parent_node, vb, value, buf_higheralias, buf_loweralias, &instance))
 					goto end;
 			}
 		}
@@ -654,6 +652,9 @@ static int get_InterfaceStack_LowerAlias(char *refparam, struct dmctx *ctx, void
 	return 0;
 }
 
+/**********************************************************************************************************************************
+*                                            OBJ & PARAM DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.InterfaceStack.{i}. *** */
 DMLEAF tInterfaceStackParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/

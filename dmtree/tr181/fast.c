@@ -68,7 +68,7 @@ static int browseFASTLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 	json_object *res = NULL, *line_obj = NULL;
 	struct fast_line_args cur_fast_line_args = {0};
 	struct uci_section *s = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int entries = 0;
 
 	dmubus_call("fast", "status", UBUS_ARGS{}, 0, &res);
@@ -80,8 +80,7 @@ static int browseFASTLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 			s = update_create_dmmap_fast_line(cur_fast_line_args.id);
 			init_fast_line(&cur_fast_line_args, s);
 
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-				   s, "fast_line_instance", "fast_line_alias");
+			inst = handle_instance(dmctx, parent_node, s, "fast_line_instance", "fast_line_alias");
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&cur_fast_line_args, inst) == DM_STOP)
 				break;
@@ -136,12 +135,7 @@ static char *get_fast_value_array_without_argument(char *command1, char *id, cha
 ***************************************************************************/
 static int get_FAST_LineNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_path_foreach_sections(bbfdm, "dmmap", "fast_line", s) {
-		cnt++;
-	}
+	int cnt = get_number_of_entries(ctx, data, instance, browseFASTLineInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
@@ -901,6 +895,9 @@ static int get_FASTLineStatsQuarterHour_SuccessTIGA(char *refparam, struct dmctx
 	return 0;
 }
 
+/**********************************************************************************************************************************
+*                                            OBJ & LEAF DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.FAST. *** */
 DMOBJ tFASTObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/

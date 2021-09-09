@@ -50,12 +50,7 @@
 **************************************************************/
 static int get_Device_InterfaceStackNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_path_foreach_sections(bbfdm, "dmmap_interface_stack", "interface_stack", s) {
-		cnt++;
-	}
+	int cnt = get_number_of_entries(ctx, data, instance, browseInterfaceStackInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
@@ -96,11 +91,8 @@ DMOBJ tDeviceObj[] = {
 {"ManagementServer", &DMREAD, NULL, NULL, "file:/etc/config/cwmp", NULL, NULL, NULL, NULL, tManagementServerParams, NULL, BBFDM_BOTH},
 {"Time", &DMREAD, NULL, NULL, "file:/etc/config/system", NULL, NULL, NULL, NULL, tTimeParams, NULL, BBFDM_BOTH},
 {"UPnP", &DMREAD, NULL, NULL, "file:/etc/config/upnpd", NULL, NULL, NULL, tUPnPObj, NULL, NULL, BBFDM_BOTH},
-#ifdef BBF_TR104
-{"Services", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesObj, NULL, NULL, BBFDM_BOTH},
-#endif
-{"Bridging", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tBridgingObj, tBridgingParams, NULL, BBFDM_BOTH},
 {"WiFi", &DMREAD, NULL, NULL, "file:/etc/config/wireless", NULL, NULL, NULL, tWiFiObj, tWiFiParams, NULL, BBFDM_BOTH},
+{"Bridging", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tBridgingObj, tBridgingParams, NULL, BBFDM_BOTH},
 {"IP", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tIPObj, tIPParams, NULL, BBFDM_BOTH},
 {"Ethernet", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tEthernetObj, tEthernetParams, NULL, BBFDM_BOTH},
 {"DSL", &DMREAD, NULL, NULL, "file:/etc/config/dsl", NULL, NULL, NULL, tDSLObj, tDSLParams, NULL, BBFDM_BOTH},
@@ -125,6 +117,9 @@ DMOBJ tDeviceObj[] = {
 {"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH},
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_BOTH},
 {"RouterAdvertisement", &DMREAD, NULL, NULL, "file:/etc/config/dhcp", NULL, NULL, NULL, tRouterAdvertisementObj, tRouterAdvertisementParams, NULL, BBFDM_BOTH},
+#ifdef BBF_TR104
+{"Services", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesObj, NULL, NULL, BBFDM_BOTH},
+#endif
 {0}
 };
 

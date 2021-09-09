@@ -18,6 +18,18 @@ static int setup(void **state)
 	return 0;
 }
 
+static int setup_alias(void **state)
+{
+	struct dmctx *ctx = calloc(1, sizeof(struct dmctx));
+	if (!ctx)
+		return -1;
+
+	dm_ctx_init(ctx, INSTANCE_MODE_ALIAS);
+	*state = ctx;
+
+	return 0;
+}
+
 static int teardown_commit(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -117,7 +129,6 @@ static void test_api_bbfdm_get_set_json_parameter(void **state)
 
 	// get value ==> expected "0" error
 	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.X_IOPSYS_EU_Radio.1.Noise", NULL, NULL);
-	printf("fault=%d \n", fault);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
@@ -182,6 +193,68 @@ static void test_api_bbfdm_get_set_library_parameter(void **state)
 
 	// validate parameter after setting to 0: name, type, value
 	validate_parameter(ctx, "Device.ManagementServer.EnableCWMP", "0", "xsd:boolean");
+}
+
+static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	int fault = 0;
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.Radio.[cpe-1].Channel", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.WiFi.Radio.[cpe-1].Channel", "64", "xsd:unsignedInt");
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.WiFi.Radio.[cpe-1].Channel", "64t", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.WiFi.Radio.[cpe-1].Channel", "84", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.Radio.[cpe-1].Channel", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to 64: name, type, value
+	validate_parameter(ctx, "Device.WiFi.Radio.[cpe-1].Channel", "84", "xsd:unsignedInt");
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.WiFi.Radio.[cpe-1].Alias", "iopsys_test", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.Radio.[iopsys_test].Alias", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to 64: name, type, value
+	validate_parameter(ctx, "Device.WiFi.Radio.[iopsys_test].Alias", "iopsys_test", "xsd:string");
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.WiFi.Radio.[iopsys_test].Channel", "74", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.Radio.[iopsys_test].Channel", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to 64: name, type, value
+	validate_parameter(ctx, "Device.WiFi.Radio.[iopsys_test].Channel", "74", "xsd:unsignedInt");
 }
 
 static void test_api_bbfdm_add_del_standard_object(void **state)
@@ -377,6 +450,7 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_standard_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_json_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_library_parameter, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_standard_parameter_alias, setup_alias, teardown_commit),
 
 		// Add/Delete Object method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_standard_object, setup, teardown_commit),

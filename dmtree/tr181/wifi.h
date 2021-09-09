@@ -73,25 +73,25 @@ extern DMLEAF tWiFiDataElementsDisassociationEventDisassociationEventDataParams[
 
 struct wifi_radio_args
 {
-	struct uci_section *wifi_radio_sec;
+	struct dmmap_dup *sections;
 };
 
 struct wifi_ssid_args
 {
-	struct uci_section *wifi_ssid_sec;
+	struct dmmap_dup *sections;
 	char *ifname;
 	char *linker;
 };
 
 struct wifi_enp_args
 {
-	struct uci_section *wifi_enp_sec;
+	struct dmmap_dup *sections;
 	char *ifname;
 };
 
 struct wifi_acp_args
 {
-	struct uci_section *wifi_acp_sec;
+	struct dmmap_dup *sections;
 	char *ifname;
 };
 

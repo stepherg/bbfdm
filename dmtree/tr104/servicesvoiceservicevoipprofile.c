@@ -216,7 +216,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTPRTCP_TxRepeatInterval(char *ref
 /*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.SRTP.Enable!UCI:asterisk/sip_service_provider,@i-1/encryption*/
 static int get_ServicesVoiceServiceVoIPProfileRTPSRTP_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "encryption", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "encryption", "1");
 	return 0;
 }
 
@@ -231,7 +231,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTPSRTP_Enable(char *refparam, str
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "encryption", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "encryption", b ? "1" : "0");
 			break;
 	}
 	return 0;

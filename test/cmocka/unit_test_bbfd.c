@@ -23,6 +23,18 @@ static int setup(void **state)
 	return 0;
 }
 
+static int setup_alias(void **state)
+{
+	struct dmctx *ctx = calloc(1, sizeof(struct dmctx));
+	if (!ctx)
+		return -1;
+
+	dm_ctx_init(ctx, INSTANCE_MODE_ALIAS);
+	*state = ctx;
+
+	return 0;
+}
+
 static int teardown_commit(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -116,6 +128,32 @@ static void test_api_bbfdm_get_value_wrong_parameter_path(void **state)
 	assert_true(&first_entry->list == &ctx->list_parameter);
 }
 
+static void test_api_bbfdm_get_value_object_alias(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *first_entry;
+	int fault = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
+	assert_true(&first_entry->list != &ctx->list_parameter);
+}
+
+static void test_api_bbfdm_get_value_parameter_alias(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *first_entry;
+	int fault = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.Radio.[cpe-1].Alias", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
+	assert_true(&first_entry->list != &ctx->list_parameter);
+}
+
 static void test_api_bbfdm_get_name_object(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -192,6 +230,19 @@ static void test_api_bbfdm_get_name_wrong_next_level(void **state)
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
 	assert_true(&first_entry->list == &ctx->list_parameter);
+}
+
+static void test_api_bbfdm_get_name_parameter_alias(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *first_entry;
+	int fault = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.WiFi.Radio.[cpe-1].Enable", "false", NULL);
+	assert_int_equal(fault, 0);
+
+	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
+	assert_true(&first_entry->list != &ctx->list_parameter);
 }
 
 static void test_api_bbfdm_set_value_object(void **state)
@@ -273,6 +324,22 @@ static void test_api_bbfdm_set_value_parameter_wrong_value(void **state)
 
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list != &ctx->list_fault_param);
+}
+
+static void test_api_bbfdm_set_value_parameter_alias(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct param_fault *first_fault;
+	int fault = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.Users.User.[cpe-1].Username", "test", NULL);
+	assert_int_equal(fault, 0);
+
+	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
+	assert_true(&first_fault->list == &ctx->list_fault_param);
+
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
 }
 
 static void test_api_bbfdm_add_object(void **state)
@@ -657,6 +724,8 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_empty, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_wrong_object_path, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_wrong_parameter_path, setup, teardown_revert),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_object_alias, setup_alias, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_parameter_alias, setup_alias, teardown_commit),
 
 		// Get Name method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_object, setup, teardown_commit),
@@ -665,6 +734,7 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_wrong_object_path, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_without_next_level, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_wrong_next_level, setup, teardown_revert),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_parameter_alias, setup_alias, teardown_commit),
 
 		// Set Value method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_object, setup, teardown_revert),
@@ -673,6 +743,7 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_wrong_parameter_path, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_parameter_non_writable, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_parameter_wrong_value, setup, teardown_revert),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_parameter_alias, setup_alias, teardown_commit),
 
 		// Add Object method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_object, setup, teardown_commit),

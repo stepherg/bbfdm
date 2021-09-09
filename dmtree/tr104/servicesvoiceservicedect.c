@@ -17,14 +17,14 @@
 static int browseServicesVoiceServiceDECTBaseInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *obj = NULL, *arrobj = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmubus_call("dect", "status", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "base") {
 
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
 				break;
@@ -37,14 +37,14 @@ static int browseServicesVoiceServiceDECTBaseInst(struct dmctx *dmctx, DMNODE *p
 static int browseServicesVoiceServiceDECTPortableInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *obj = NULL, *arrobj = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmubus_call("dect", "status", UBUS_ARGS{}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "handsets") {
 
-			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+			inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
 				break;

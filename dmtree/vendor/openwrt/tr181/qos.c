@@ -62,15 +62,14 @@ int command_exec_output_to_array(const char *cmd, char **output, int *length)
 /*#Device.QoS.Classification.{i}.!UCI:qos/classify/dmmap_qos*/
 static int openwrt__browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("qos", "classify", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dmmap_section, "classifinstance", "classifalias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "classifinstance", "classifalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
@@ -128,8 +127,7 @@ static int openwrt__browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_
 					if (lastinstancestore != NULL && max_inst != NULL)
 						max_inst = dmstrdup(lastinstancestore);
 
-					inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-						   dmmap_sect, "queuestatsinstance", "queuestatsalias");
+					inst = handle_instance(dmctx, parent_node, dmmap_sect, "queuestatsinstance", "queuestatsalias");
 
 					lastinstancestore = dmstrdup(max_inst);
 
@@ -155,39 +153,30 @@ static int openwrt__addObjQoSClassification(char *refparam, struct dmctx *ctx, v
 	struct uci_section *s, *dmmap_qclassify;
 	char qcomment[32];
 
-	char *last_inst = get_last_instance_bbfdm("dmmap_qos", "classify", "classifinstance");
-	snprintf(qcomment, sizeof(qcomment), "QoS classify %s", (last_inst) ? last_inst : "1");
+	snprintf(qcomment, sizeof(qcomment), "QoS classify %s", *instance);
 
 	dmuci_add_section("qos", "classify", &s);
 	dmuci_set_value_by_section(s, "comment", qcomment);
 
 	dmuci_add_section_bbfdm("dmmap_qos", "classify", &dmmap_qclassify);
 	dmuci_set_value_by_section(dmmap_qclassify, "section_name", section_name(s));
-	*instance = update_instance(last_inst, 2, dmmap_qclassify, "classifinstance");
+	dmuci_set_value_by_section(dmmap_qclassify, "classifinstance", *instance);
 	return 0;
 }
 
 static int openwrt__delObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct dmmap_dup *p = (struct dmmap_dup*)data;
-	struct uci_section *s = NULL, *stmp = NULL, *dmmap_section = NULL;
+	struct uci_section *s = NULL, *stmp = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			if(is_section_unnamed(section_name(p->config_section))){
-				LIST_HEAD(dup_list);
-				delete_sections_save_next_sections("dmmap_qos", "classify", "classifinstance", section_name(p->config_section), atoi(instance), &dup_list);
-				update_dmmap_sections(&dup_list, "classifinstance", "dmmap_qos", "classify");
-				dmuci_delete_by_section_unnamed(p->config_section, NULL, NULL);
-			} else {
-				get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name(p->config_section), &dmmap_section);
-				dmuci_delete_by_section_unnamed_bbfdm(dmmap_section, NULL, NULL);
-
-				dmuci_delete_by_section(p->config_section, NULL, NULL);
-			}
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("qos", "classify", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
 				get_dmmap_section_of_config_section("dmmap_qos", "classify", section_name(s), &dmmap_section);
 				dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
@@ -214,24 +203,15 @@ static int openwrt__delObjQoSQueueStats(char *refparam, struct dmctx *ctx, void 
 /*#Device.QoS.ClassificationNumberOfEntries!UCI:qos/classify/*/
 static int openwrt__get_QClassificationNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	static int nbre= 0;
-
-	uci_foreach_sections("qos", "classify", s) {
-		nbre++;
-	}
-
-	dmasprintf(value, "%d", nbre);
+	int cnt = get_number_of_entries(ctx, data, instance, openwrt__browseQoSClassificationInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 static int openwrt__get_QQueueStatsNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *questatsout[256];
-	static int length = 0;
-
-	command_exec_output_to_array("tc -s qdisc", questatsout, &length);
-	dmasprintf(value, "%d", length/3);
+	int cnt = get_number_of_entries(ctx, data, instance, openwrt__browseQoSQueueStatsInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 

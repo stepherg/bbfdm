@@ -18,7 +18,7 @@
 ***************************************************************************/
 static int get_voice_service_line_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	*linker = data ? section_name((struct uci_section *)data) : "";
+	*linker = data ? section_name(((struct dmmap_dup *)data)->config_section) : "";
 	return 0;
 }
 
@@ -28,17 +28,16 @@ static int get_voice_service_line_linker(char *refparam, struct dmctx *dmctx, vo
 /*#Device.Services.VoiceService.{i}.CallControl.Line.{i}.!UCI:asterisk/tel_line/dmmap_asterisk*/
 static int browseServicesVoiceServiceCallControlLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "tel_line", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
-			   p->dmmap_section, "lineinstance", "linealias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "lineinstance", "linealias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -60,17 +59,16 @@ static int browseServicesVoiceServiceCallControlOutgoingMapInst(struct dmctx *dm
 /*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.!UCI:asterisk/tel_advanced/dmmap_asterisk*/
 static int browseServicesVoiceServiceCallControlNumberingPlanInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "tel_advanced", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dmmap_section, "numberingplaninstance", "numberingplanalias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "numberingplaninstance", "numberingplanalias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -80,17 +78,16 @@ static int browseServicesVoiceServiceCallControlNumberingPlanInst(struct dmctx *
 /*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.!UCI:asterisk/advanced_features/dmmap_asterisk*/
 static int browseServicesVoiceServiceCallControlCallingFeaturesSetInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "advanced_features", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dmmap_section, "setinstance", "setalias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "setinstance", "setalias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -100,17 +97,16 @@ static int browseServicesVoiceServiceCallControlCallingFeaturesSetInst(struct dm
 /*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.SCREJ.{i}.!UCI:asterisk/call_filter_rule_incoming/dmmap_asterisk*/
 static int browseServicesVoiceServiceCallControlCallingFeaturesSetSCREJInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "call_filter_rule_incoming", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(3, dmctx, &inst_last, update_instance_alias, 3,
-			   p->dmmap_section, "screjinstance", "screjalias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "screjinstance", "screjalias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -188,43 +184,31 @@ static int addObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ(char *re
 {
 	struct uci_section *dmmap = NULL, *s = NULL;
 
-	char *inst = get_last_instance_bbfdm("dmmap_asterisk", "call_filter_rule_incoming", "screjinstance");
 	dmuci_add_section("asterisk", "call_filter_rule_incoming", &s);
 
 	dmuci_add_section_bbfdm("dmmap_asterisk", "call_filter_rule_incoming", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 2, dmmap, "screjinstance");
+	dmuci_set_value_by_section(dmmap, "screjinstance", *instance);
 	return 0;
 }
 
 static int delObjServicesVoiceServiceCallControlCallingFeaturesSetSCREJ(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;
-	int found = 0;
+	struct uci_section *s = NULL, *stmp = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_asterisk", "call_filter_rule_incoming", section_name((struct uci_section *)data), &dmmap_section);
-			if (dmmap_section != NULL)
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_sections("asterisk", "call_filter_rule_incoming", s) {
-				if (found != 0) {
-					get_dmmap_section_of_config_section("dmmap_asterisk", "call_filter_rule_incoming", section_name(ss), &dmmap_section);
-					if (dmmap_section != NULL)
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = s;
-				found++;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_asterisk", "call_filter_rule_incoming", section_name(ss), &dmmap_section);
-				if (dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
+			uci_foreach_sections_safe("asterisk", "call_filter_rule_incoming", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_asterisk", "call_filter_rule_incoming", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
 			}
 			break;
 	}
@@ -268,7 +252,7 @@ static int get_ServicesVoiceServiceCallControlLine_DirectoryNumber(char *refpara
 {
 	char *sip_account = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "sip_account", &sip_account);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "sip_account", &sip_account);
 	dmuci_get_option_value_string("asterisk", sip_account, "directory_number", value);
 	return 0;
 }
@@ -283,7 +267,7 @@ static int set_ServicesVoiceServiceCallControlLine_DirectoryNumber(char *refpara
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "sip_account", &sip_account);
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "sip_account", &sip_account);
 			dmuci_set_value("asterisk", sip_account, "directory_number", value);
 			break;
 	}
@@ -295,7 +279,7 @@ static int get_ServicesVoiceServiceCallControlLine_Provider(char *refparam, stru
 {
 	char *linker = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "sip_account", &linker);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "sip_account", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
 	if (*value == NULL)
 		*value = "";
@@ -318,7 +302,7 @@ static int set_ServicesVoiceServiceCallControlLine_Provider(char *refparam, stru
 				char *linker = NULL;
 				adm_entry_get_linker_value(ctx, value, &linker);
 				if (linker && *linker) {
-					dmuci_set_value_by_section((struct uci_section *)data, "sip_account", linker);
+					dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "sip_account", linker);
 					dmfree(linker);
 				}
 			}
@@ -330,7 +314,7 @@ static int set_ServicesVoiceServiceCallControlLine_Provider(char *refparam, stru
 /*#Device.Services.VoiceService.{i}.CallControl.Line.{i}.Enable!UCI:asterisk/tel_line,@i-1/enabled*/
 static int get_ServicesVoiceServiceCallControlLine_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "1");
 	return 0;
 }
 
@@ -345,7 +329,7 @@ static int set_ServicesVoiceServiceCallControlLine_Enable(char *refparam, struct
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -356,7 +340,7 @@ static int get_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, s
 {
 	char *tmp = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "call_lines", &tmp);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "call_lines", &tmp);
 	if (tmp && *tmp) {
 		char *token = NULL, *saveptr = NULL, *p, buf[512] = { 0, 0 }, linker[16] = {0};
 
@@ -414,7 +398,7 @@ static int set_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, s
 			dmstrappendend(p);
 
 			if (buf[0] != '\0')
-				dmuci_set_value_by_section((struct uci_section *)data, "call_lines", buf);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "call_lines", buf);
 			break;
 	}
 	return 0;
@@ -423,7 +407,7 @@ static int set_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, s
 /*#Device.Services.VoiceService.{i}.CallControl.OutgoingMap.{i}.CLIPNoScreeningNumber!UCI:asterisk/sip_service_provider,@i-1/displayname*/
 static int get_ServicesVoiceServiceCallControlOutgoingMap_CLIPNoScreeningNumber(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "displayname", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "displayname", value);
 	return 0;
 }
 
@@ -435,7 +419,7 @@ static int set_ServicesVoiceServiceCallControlOutgoingMap_CLIPNoScreeningNumber(
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "displayname", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "displayname", value);
 			break;
 	}
 	return 0;
@@ -513,7 +497,7 @@ static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CallForwardUnco
 /*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.SCREJ.{i}.CallingNumber!UCI:asterisk/call_filter_rule_incoming,@i-1/extension*/
 static int get_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNumber(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "extension", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "extension", value);
 	return 0;
 }
 
@@ -526,9 +510,9 @@ static int set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNum
 			break;
 		case VALUESET:
 			dmuci_set_value(TR104_UCI_PACKAGE, "call_filter0", "block_incoming", "1");
-			dmuci_set_value_by_section((struct uci_section *)data, "owner", "call_filter0");
-			dmuci_set_value_by_section((struct uci_section *)data, "enabled", "1");
-			dmuci_set_value_by_section((struct uci_section *)data, "extension", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "owner", "call_filter0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", "1");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "extension", value);
 			break;
 	}
 	return 0;
@@ -608,4 +592,3 @@ DMLEAF tServicesVoiceServiceCallControlCallingFeaturesSetSCREJParams[] = {
 {"CallingNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNumber, set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNumber, BBFDM_BOTH},
 {0}
 };
-

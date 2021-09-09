@@ -347,7 +347,7 @@ def hprintheaderOBJS(objname):
 
 def cprinttopfile(fp, filename):
     print("/*", file=fp)
-    print(" * Copyright (C) 2020 iopsys Software Solutions AB", file=fp)
+    print(" * Copyright (C) 2021 iopsys Software Solutions AB", file=fp)
     print(" *", file=fp)
     print(" * This program is free software; you can redistribute it and/or modify", file=fp)
     print(" * it under the terms of the GNU Lesser General Public License version 2.1", file=fp)
@@ -362,7 +362,7 @@ def cprinttopfile(fp, filename):
 
 def hprinttopfile(fp, filename):
     print("/*", file=fp)
-    print(" * Copyright (C) 2020 iopsys Software Solutions AB", file=fp)
+    print(" * Copyright (C) 2021 iopsys Software Solutions AB", file=fp)
     print(" *", file=fp)
     print(" * This program is free software; you can redistribute it and/or modify", file=fp)
     print(" * it under the terms of the GNU Lesser General Public License version 2.1", file=fp)
@@ -393,10 +393,8 @@ def cprintAddDelObj(faddobj, fdelobj, name, mappingobj, _dmobject):
         dm_type, file, sectiontype, dmmapfile, _path, _ref = get_mapping_obj(
             mappingobj)
         if dm_type == "uci":
-            print("	struct uci_section *dmmap = NULL, *s = NULL;", file=fp)
+            print("	struct uci_section *s = NULL, *dmmap = NULL;", file=fp)
             print("", file=fp)
-            print("	char *inst = get_last_instance_bbfdm(\"%s\", \"%s\", \"%s\");" %
-                  (dmmapfile, sectiontype, name+"instance"), file=fp)
             print("	dmuci_add_section(\"%s\", \"%s\", &s);" %
                   (file, sectiontype), file=fp)
             print("	//dmuci_set_value_by_section(s, \"option\", \"value\");", file=fp)
@@ -405,8 +403,8 @@ def cprintAddDelObj(faddobj, fdelobj, name, mappingobj, _dmobject):
                   (dmmapfile, sectiontype), file=fp)
             print(
                 "	dmuci_set_value_by_section(dmmap, \"section_name\", section_name(s));", file=fp)
-            print("	*instance = update_instance(inst, 2, dmmap, \"%s\");" %
-                  (name+"instance"), file=fp)
+            print(
+                "    dmuci_set_value_by_section(dmmap, \"%s\", *instance);" % (name+"instance"), file=fp)
     else:
         print("	//TODO", file=fp)
     print("	return 0;", file=fp)
@@ -417,39 +415,27 @@ def cprintAddDelObj(faddobj, fdelobj, name, mappingobj, _dmobject):
     if mappingobj is not None:
         if dm_type == "uci":
             print(
-                "	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;", file=fp)
-            print("	int found = 0;", file=fp)
+                "	struct uci_section *s = NULL, *stmp = NULL", file=fp)
             print("", file=fp)
     print("	switch (del_action) {", file=fp)
     if mappingobj is not None:
         if dm_type == "uci":
             print("		case DEL_INST:", file=fp)
-            print("			get_dmmap_section_of_config_section(\"%s\", \"%s\", section_name((struct uci_section *)data), &dmmap_section);" %
-                  (dmmapfile, sectiontype), file=fp)
-            print("			if (dmmap_section != NULL)", file=fp)
-            print("				dmuci_delete_by_section(dmmap_section, NULL, NULL);", file=fp)
             print(
-                "			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);", file=fp)
+                "            dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);", file=fp)
+            print(
+                "			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);", file=fp)
             print("			break;", file=fp)
             print("		case DEL_ALL:", file=fp)
-            print("			uci_foreach_sections(\"%s\", \"%s\", s) {" % (
+            print("			uci_foreach_sections_safe(\"%s\", \"%s\", stmp, s) {" % (
                 file, sectiontype), file=fp)
-            print("				if (found != 0) {", file=fp)
-            print("					get_dmmap_section_of_config_section(\"%s\", \"%s\", section_name(ss), &dmmap_section);" % (
+            print("                    struct uci_section *dmmap_section = NULL;", file=fp)
+            print("", file=fp)
+            print("					get_dmmap_section_of_config_section(\"%s\", \"%s\", section_name(s), &dmmap_section);" % (
                 dmmapfile, sectiontype), file=fp)
-            print("					if (dmmap_section != NULL)", file=fp)
-            print("						dmuci_delete_by_section(dmmap_section, NULL, NULL);", file=fp)
-            print("					dmuci_delete_by_section(ss, NULL, NULL);", file=fp)
-            print("				}", file=fp)
-            print("				ss = s;", file=fp)
-            print("				found++;", file=fp)
-            print("			}", file=fp)
-            print("			if (ss != NULL) {", file=fp)
-            print("				get_dmmap_section_of_config_section(\"%s\", \"%s\", section_name(ss), &dmmap_section);" % (
-                dmmapfile, sectiontype), file=fp)
-            print("				if (dmmap_section != NULL)", file=fp)
             print("					dmuci_delete_by_section(dmmap_section, NULL, NULL);", file=fp)
-            print("				dmuci_delete_by_section(ss, NULL, NULL);", file=fp)
+            print("", file=fp)
+            print("					dmuci_delete_by_section(s, NULL, NULL);", file=fp)
             print("			}", file=fp)
             print("			break;", file=fp)
     else:
@@ -488,8 +474,8 @@ def cprintBrowseObj(fbrowse, name, mappingobj, dmobject):
 
         ############################## UCI ########################################
         if dm_type == "uci":
-            print("	char *inst = NULL, *max_inst = NULL;", file=fp)
             print("	struct dmmap_dup *p = NULL;", file=fp)
+            print("    char *inst = NULL;", file=fp)
             print("	LIST_HEAD(dup_list);", file=fp)
             print("", file=fp)
             print("	synchronize_specific_config_sections_with_dmmap(\"%s\", \"%s\", \"%s\", &dup_list);" % (
@@ -497,11 +483,10 @@ def cprintBrowseObj(fbrowse, name, mappingobj, dmobject):
             print("	list_for_each_entry(p, &dup_list, list) {", file=fp)
             print("", file=fp)
             print(
-                "		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,", file=fp)
-            print("			   p->dmmap_section, \"%s\", \"%s\");" %
+                "		inst = handle_instance(dmctx, parent_node, p->dmmap_section, \"%s\", \"%s\");" %
                   (name+"instance", name+"alias"), file=fp)
             print("", file=fp)
-            print("		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)", file=fp)
+            print("		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)", file=fp)
             print("			break;", file=fp)
             print("	}", file=fp)
             print("	free_dmmap_config_dup_list(&dup_list);", file=fp)
@@ -509,7 +494,7 @@ def cprintBrowseObj(fbrowse, name, mappingobj, dmobject):
         ############################## UBUS ########################################
         elif dm_type == "ubus":
             print("	json_object *res = NULL, *obj = NULL, *arrobj = NULL;", file=fp)
-            print("	char *inst = NULL, *max_inst = NULL;", file=fp)
+            print("	char *inst = NULL;", file=fp)
             print("	int id = 0, i = 0;", file=fp)
             print("", file=fp)
             if res3 is None and res4 is None:
@@ -522,7 +507,7 @@ def cprintBrowseObj(fbrowse, name, mappingobj, dmobject):
             print(
                 "		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, \"%s\") {" % res5, file=fp)
             print("", file=fp)
-            print("			inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);", file=fp)
+            print("			inst = handle_instance_without_section(dmctx, parent_node, ++id);", file=fp)
             print("", file=fp)
             print(
                 "			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)", file=fp)
@@ -585,11 +570,7 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
                     get_value += "	}\n"
                     get_value += "	dmasprintf(value, \"%d\", cnt);"
                 elif "Alias" in dmparam:
-                    get_value += "	struct uci_section *dmmap_section = NULL;\n"
-                    get_value += "\n"
-                    get_value += "	get_dmmap_section_of_config_section(\"%s\", \"%s\", section_name((struct uci_section *)data), &dmmap_section);\n" % (
-                        res1, res2)
-                    get_value += "	dmuci_get_value_by_section_string(dmmap_section, \"%s\", value);\n" % res5
+                    get_value += "	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, \"%s\", value);\n" % res5
                     get_value += "	if ((*value)[0] == '\\0')\n"
                     get_value += "		dmasprintf(value, \"cpe-%s\", instance);"
                 elif instance == "TRUE" and res6 is not None:
@@ -609,7 +590,7 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
                     get_value += "	*value = bbf_uci_get_value(\"%s\", \"%s\", \"%s\", \"%s\");" % (
                         res6, res1, res3, res5)
                 elif instance == "TRUE":
-                    get_value += "	dmuci_get_value_by_section_string((struct uci_section *)data, \"%s\", value);" % res5
+                    get_value += "	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, \"%s\", value);" % res5
                 else:
                     get_value += "	dmuci_get_option_value_string(\"%s\", \"%s\", \"%s\", value);" % (
                         res1, res3, res5)
@@ -623,12 +604,12 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
                 if typeparam == "boolean":
                     set_value += "			string_to_bool(value, &b);\n"
                     if instance == "TRUE":
-                        set_value += "			dmuci_set_value_by_section((struct uci_section *)data, \"%s\", b ? \"1\" : \"0\");" % res5
+                        set_value += "			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, \"%s\", b ? \"1\" : \"0\");" % res5
                     else:
                         set_value += "			dmuci_set_value(\"%s\", \"%s\", \"%s\", b ? \"1\" : \"0\");" % (
                             res1, res3, res5)
                 elif instance == "TRUE":
-                    set_value += "			dmuci_set_value_by_section((struct uci_section *)data, \"%s\", value);" % res5
+                    set_value += "			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, \"%s\", value);" % res5
                 else:
                     set_value += "			dmuci_set_value(\"%s\", \"%s\", \"%s\", value);" % (
                         res1, res3, res5)
@@ -664,10 +645,10 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
                         elif i == 2 and res4 == "@Name":
                             get_value += "	if (*value[0] == '\\0')\n"
                             get_value += "	{\n"
-                            get_value += "	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{{\"%s\", section_name((struct uci_section *)data), String}}, 1, &res);\n" % (
+                            get_value += "	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{{\"%s\", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);\n" % (
                                 res1, res2, res3)
                         elif res4 == "@Name":
-                            get_value += "	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{{\"%s\", section_name((struct uci_section *)data), String}}, 1, &res);\n" % (
+                            get_value += "	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{{\"%s\", section_name(((struct dmmap_dup *)data)->config_section), String}}, 1, &res);\n" % (
                                 res1, res2, res3)
                         else:
                             get_value += "	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{{\"%s\", \"%s\", String}}, 1, &res);\n" % (
@@ -677,7 +658,7 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
                     option = res5.split(".")
                     if "." in res5:
                         if option[0] == "@Name":
-                            get_value += "	*value = dmjson_get_value(res, 2, section_name((struct uci_section *)data), \"%s\");" % (
+                            get_value += "	*value = dmjson_get_value(res, 2, section_name(((struct dmmap_dup *)data)->config_section), \"%s\");" % (
                                 option[1])
                         else:
                             get_value += "	*value = dmjson_get_value(res, 2, \"%s\", \"%s\");" % (
@@ -702,7 +683,7 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
 
                 # GET VALUE Parameter
                 if res1[:15] == "/sys/class/net/" and res1[15:20] == "@Name":
-                    get_value += "	get_net_device_sysfs(section_name((struct uci_section *)data), \"%s\", value);" % res1[
+                    get_value += "	get_net_device_sysfs(section_name(((struct dmmap_dup *)data)->config_section), \"%s\", value);" % res1[
                         21:]
                 else:
                     get_value += "	char val[64];\n"

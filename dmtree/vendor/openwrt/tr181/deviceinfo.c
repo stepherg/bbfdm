@@ -34,13 +34,13 @@ static const struct fw_image fw_images[] = {
 
 static int openwrt__browseDeviceInfoFirmwareImageInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(fw_images); i++) {
 		const struct fw_image *fw_img = &fw_images[i];
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, i+1);
+		inst = handle_instance_without_section(dmctx, parent_node, i+1);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)fw_img, inst) == DM_STOP)
 			break;
 	}

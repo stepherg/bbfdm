@@ -38,6 +38,10 @@
 #define FREE(x) do { if(x) {free(x); x = NULL;} } while (0)
 #endif
 
+#ifndef BBF_ATTR_UNUSED
+#define BBF_ATTR_UNUSED(x) (void)(x)
+#endif
+
 #define DM_STRNCPY(DST, SRC, SIZE) \
 do { \
 	strncpy(DST, SRC, SIZE - 1); \
@@ -192,9 +196,14 @@ typedef struct dmnode {
 	DMOBJ *obj;
 	struct dmnode *parent;
 	char *current_object;
+	void *prev_data;
+	char *prev_instance;
 	unsigned char instance_level;
 	unsigned char matched;
 	unsigned char is_instanceobj;
+	unsigned char browse_type;
+	int max_instance;
+	int num_of_entries;
 } DMNODE;
 
 typedef struct dm_map_obj {
@@ -255,6 +264,12 @@ enum set_value_action {
 enum del_action_enum {
 	DEL_INST,
 	DEL_ALL
+};
+
+enum browse_type_enum {
+	BROWSE_NORMAL,
+	BROWSE_FIND_MAX_INST,
+	BROWSE_NUM_OF_ENTRIES
 };
 
 enum {
@@ -416,12 +431,11 @@ enum {
 	__INDX_DYNAMIC_MAX
 };
 
-char *update_instance(char *max_inst, int argc, ...);
-char *update_instance_alias(int action, char **last_inst, char **max_inst, void *argv[]);
-char *update_instance_without_section(int action, char **last_inst, char **max_inst, void *argv[]);
+int get_number_of_entries(struct dmctx *ctx, void *data, char *instance, int (*browseinstobj)(struct dmctx *ctx, struct dmnode *node, void *data, char *instance));
+char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, char *inst_opt, char *alias_opt);
+char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, int inst_nbr);
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *additional_data);
-void api_del_list_parameter(struct dm_parameter *dm_parameter);
 void free_all_list_parameter(struct dmctx *ctx);
 void free_all_set_list_tmp(struct dmctx *ctx);
 void add_list_fault_param(struct dmctx *ctx, char *param, int fault);
@@ -442,11 +456,6 @@ int dm_entry_list_operates(struct dmctx *ctx);
 int dm_entry_operate(struct dmctx *dmctx);
 int dm_entry_list_events(struct dmctx *dmctx);
 int dm_browse_last_access_path(char *path, size_t len);
-char *get_last_instance(char *package, char *section, char *opt_inst);
-char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst);
-char *get_last_instance_lev2_bbfdm_dmmap_opt(char* dmmap_package, char *section,  char *opt_inst, char *opt_check, char *value_check);
-char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check);
-char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...);
 int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
 void dm_exclude_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *data);
 void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found);
@@ -454,6 +463,15 @@ bool find_root_entry(struct dmctx *ctx, char *in_param, DMOBJ **root_entry);
 int get_obj_idx_dynamic_array(DMOBJ **entryobj);
 int get_leaf_idx_dynamic_array(DMLEAF **entryleaf);
 void free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj);
+
+char *update_instance_alias(int action, char **last_inst, char **max_inst, void *argv[]);
+char *update_instance(char *max_inst, int argc, ...);
+__attribute__ ((deprecated)) char *update_instance_without_section(int action, char **last_inst, char **max_inst, void *argv[]);
+__attribute__ ((deprecated)) char *get_last_instance(char *package, char *section, char *opt_inst);
+__attribute__ ((deprecated)) char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst);
+__attribute__ ((deprecated)) char *get_last_instance_lev2_bbfdm_dmmap_opt(char* dmmap_package, char *section,  char *opt_inst, char *opt_check, char *value_check);
+__attribute__ ((deprecated)) char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check);
+__attribute__ ((deprecated)) char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...);
 
 static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)
 {

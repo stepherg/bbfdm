@@ -14,7 +14,7 @@
 
 struct atm_args
 {
-	struct uci_section *atm_sec;
+	struct dmmap_dup *sections;
 	char *device;
 };
 
@@ -30,9 +30,9 @@ static int get_atm_linker(char *refparam, struct dmctx *dmctx, void *data, char 
 /**************************************************************************
 * INIT
 ***************************************************************************/
-static inline int init_atm_link(struct atm_args *args, struct uci_section *s, char *device)
+static inline int init_atm_link(struct atm_args *args, struct dmmap_dup *s, char *device)
 {
-	args->atm_sec = s;
+	args->sections = s;
 	args->device = device;
 	return 0;
 }
@@ -63,16 +63,106 @@ void remove_device_from_interface(struct uci_section *interface_s, char *device)
 	dmuci_set_value_by_section(interface_s, "device", new_device);
 }
 
-/**************************************************************************
-* SET & GET DSL LINK PARAMETERS
-***************************************************************************/
+/*************************************************************
+* ENTRY METHOD
+*************************************************************/
+/*#Device.ATM.Link.{i}.!UCI:dsl/atm-device/dmmap_dsl*/
+static int browseAtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL, *device;
+	struct atm_args curr_atm_args = {0};
+	struct dmmap_dup *p = NULL;
+	LIST_HEAD(dup_list);
+
+	synchronize_specific_config_sections_with_dmmap("dsl", "atm-device", "dmmap_dsl", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		dmuci_get_value_by_section_string(p->config_section, "device", &device);
+		init_atm_link(&curr_atm_args, p, device);
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "atmlinkinstance", "atmlinkalias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_atm_args, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
+/*************************************************************
+* ADD & DEL OBJ
+**************************************************************/
+static int add_atm_link(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	struct uci_section *dmmap_atm = NULL;
+	char atm_device[16];
+
+	snprintf(atm_device, sizeof(atm_device), "atm%s", *instance);
+
+	dmuci_set_value("dsl", atm_device, "", "atm-device");
+	dmuci_set_value("dsl", atm_device, "name", "ATM");
+	dmuci_set_value("dsl", atm_device, "enabled", "0");
+	dmuci_set_value("dsl", atm_device, "vpi", "8");
+	dmuci_set_value("dsl", atm_device, "vci", "35");
+	dmuci_set_value("dsl", atm_device, "device", atm_device);
+
+	dmuci_add_section_bbfdm("dmmap_dsl", "atm-device", &dmmap_atm);
+	dmuci_set_value_by_section(dmmap_atm, "section_name", atm_device);
+	dmuci_set_value_by_section(dmmap_atm, "atmlinkinstance", *instance);
+	return 0;
+}
+
+static int delete_atm_link(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			uci_foreach_option_cont("network", "interface", "device", ((struct atm_args *)data)->device, s) {
+				if (stmp != NULL && ((struct atm_args *)data)->device != NULL)
+					remove_device_from_interface(stmp, ((struct atm_args *)data)->device);
+				stmp = s;
+			}
+			if (stmp != NULL && ((struct atm_args *)data)->device != NULL)
+				remove_device_from_interface(stmp, ((struct atm_args *)data)->device);
+
+			dmuci_delete_by_section((((struct atm_args *)data)->sections)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section((((struct atm_args *)data)->sections)->config_section, NULL, NULL);
+			break;
+		case DEL_ALL:
+			uci_foreach_sections_safe("dsl", "atm-device", stmp, s) {
+				struct uci_section *ns = NULL, *nss = NULL, *dmmap_section = NULL;
+				char *device = NULL;
+
+				dmuci_get_value_by_section_string(s, "device", &device);
+				uci_foreach_option_cont("network", "interface", "device", device, ns) {
+					if (nss != NULL && device != NULL)
+						remove_device_from_interface(nss, device);
+					nss = ns;
+				}
+				if (nss != NULL && device != NULL)
+					remove_device_from_interface(nss, device);
+
+				get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+			break;
+	}
+	return 0;
+}
+
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
 /*#Device.ATM.Link.{i}.DestinationAddress!UCI:dsl/atm-device,@i-1/vpi&UCI:dsl/atm-device,@i-1/vci*/
 static int get_atm_destination_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *vpi, *vci;
 
-	dmuci_get_value_by_section_string(((struct atm_args *)data)->atm_sec, "vpi", &vpi);
-	dmuci_get_value_by_section_string(((struct atm_args *)data)->atm_sec, "vci", &vci);
+	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->config_section, "vpi", &vpi);
+	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->config_section, "vci", &vci);
 	dmasprintf(value, "%s/%s", vpi, vci); // MEM WILL BE FREED IN DMMEMCLEAN
 	return 0;
 }
@@ -91,8 +181,8 @@ static int set_atm_destination_address(char *refparam, struct dmctx *ctx, void *
 			if (vpi)
 				vci = strtok_r(NULL, "/", &spch);
 			if (vpi && vci) {
-				dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "vpi", vpi);
-				dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "vci", vci);
+				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "vpi", vpi);
+				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "vci", vci);
 			}
 			return 0;
 	}
@@ -102,7 +192,7 @@ static int set_atm_destination_address(char *refparam, struct dmctx *ctx, void *
 /*#Device.ATM.Link.{i}.Name!UCI:dsl/atm-device,@i-1/name*/
 static int get_atm_link_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct atm_args *)data)->atm_sec, "name", value);
+	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->config_section, "name", value);
 	return 0;
 }
 
@@ -111,7 +201,7 @@ static int get_atm_encapsulation(char *refparam, struct dmctx *ctx, void *data, 
 {
 	char *encapsulation;
 
-	dmuci_get_value_by_section_string(((struct atm_args *)data)->atm_sec, "encapsulation", &encapsulation);
+	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->config_section, "encapsulation", &encapsulation);
 
 	*value = (strcmp(encapsulation, "vcmux") == 0) ? "VCMUX" : "LLC";
 	return 0;
@@ -125,7 +215,7 @@ static int set_atm_encapsulation(char *refparam, struct dmctx *ctx, void *data, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "encapsulation", (strcmp(value, "LLC") == 0) ? "llc" : "vcmux");
+			dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "encapsulation", (strcmp(value, "LLC") == 0) ? "llc" : "vcmux");
 			return 0;
 	}
 	return 0;
@@ -136,7 +226,7 @@ static int get_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 {
 	char *link_type;
 
-	dmuci_get_value_by_section_string(((struct atm_args *)data)->atm_sec, "link_type", &link_type);
+	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->config_section, "link_type", &link_type);
 	if (strcmp(link_type, "eoa") == 0)
 		*value = "EoA";
 	else if (strcmp(link_type, "ipoa") == 0)
@@ -159,15 +249,15 @@ static int set_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 			return 0;
 		case VALUESET:
 			if (strcmp(value, "EoA") == 0)
-				dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "link_type", "eoa");
+				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "eoa");
 			else if (strcmp(value, "IPoA") == 0)
-				dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "link_type", "ipoa");
+				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "ipoa");
 			else if (strcmp(value, "PPPoA") == 0)
-				dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "link_type", "pppoa");
+				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "pppoa");
 			else if (strcmp(value, "CIP") == 0)
-				dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "link_type", "cip");
+				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "cip");
 			else
-				dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "link_type", "");
+				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "");
 			return 0;
 	}
 	return 0;
@@ -176,34 +266,31 @@ static int set_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 static int get_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = NULL;
-	struct uci_section *dmmap_section = NULL;
+	char atm_file[128];
 
-	get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(((struct atm_args *)data)->atm_sec), &dmmap_section);
-	dmuci_get_value_by_section_string(dmmap_section, "atm_ll_link", &linker);
+	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->dmmap_section, "atm_ll_link", &linker);
 	if (linker != NULL)
 		adm_entry_get_linker_param(ctx, "Device.DSL.Channel.", linker, value);
 	if (*value != NULL && (*value)[0] != '\0')
 		return 0;
-	char *atm_file = NULL;
-	dmasprintf(&atm_file, "/sys/class/net/atm%d", atoi(instance) - 1);
+
+	snprintf(atm_file, sizeof(atm_file), "/sys/class/net/atm%d", atoi(instance) - 1);
 	if (folder_exists(atm_file)) {
 		*value = "Device.DSL.Channel.1";
-		dmuci_set_value_by_section(dmmap_section, "atm_ll_link", "dsl_channel_1");
+		dmuci_set_value_by_section((((struct atm_args *)data)->sections)->dmmap_section, "atm_ll_link", "dsl_channel_1");
 	}
 	return 0;
 }
 
 static int set_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *dmmap_section = NULL;
 	switch (action) {
 		case VALUECHECK:
 			if (strncmp(value, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0)
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(((struct atm_args *)data)->atm_sec), &dmmap_section);
-			dmuci_set_value_by_section(dmmap_section, "atm_ll_link", "dsl_channel_1");
+			dmuci_set_value_by_section((((struct atm_args *)data)->sections)->dmmap_section, "atm_ll_link", "dsl_channel_1");
 			break;
 	}
 	return 0;
@@ -251,7 +338,7 @@ static int get_atm_stats_pack_sent(char *refparam, struct dmctx *ctx, void *data
 /*#Device.ATM.Link.{i}.Enable!UCI:dsl/atm-device,@i-1/enabled*/
 static int get_atm_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct atm_args *)data)->atm_sec, "enabled", "1");
+	*value = dmuci_get_value_by_section_fallback_def((((struct atm_args *)data)->sections)->config_section, "enabled", "1");
 	return 0;
 }
 
@@ -266,7 +353,7 @@ static int set_atm_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct atm_args *)data)->atm_sec, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "enabled", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -278,83 +365,10 @@ static int get_atm_status(char *refparam, struct dmctx *ctx, void *data, char *i
 	return get_net_device_status(((struct atm_args *)data)->device, value);
 }
 
-/*************************************************************
-* ADD OBJ
-*************************************************************/
-static int add_atm_link(char *refparam, struct dmctx *ctx, void *data, char **instancepara)
-{
-	struct uci_section *dmmap_atm = NULL;
-	char atm_device[16];
-
-	char *instance = get_last_instance_bbfdm("dmmap_dsl", "atm-device", "atmlinkinstance");
-	snprintf(atm_device, sizeof(atm_device), "atm%d", instance ? atoi(instance) : 0);
-
-	dmuci_set_value("dsl", atm_device, "", "atm-device");
-	dmuci_set_value("dsl", atm_device, "name", "ATM");
-	dmuci_set_value("dsl", atm_device, "enabled", "0");
-	dmuci_set_value("dsl", atm_device, "vpi", "8");
-	dmuci_set_value("dsl", atm_device, "vci", "35");
-	dmuci_set_value("dsl", atm_device, "device", atm_device);
-
-	dmuci_add_section_bbfdm("dmmap_dsl", "atm-device", &dmmap_atm);
-	dmuci_set_value_by_section(dmmap_atm, "section_name", atm_device);
-	*instancepara = update_instance(instance, 2, dmmap_atm, "atmlinkinstance");
-	return 0;
-}
-
-static int delete_atm_link(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
-{
-	struct uci_section *s = NULL, *stmp = NULL, *dmmap_section = NULL;
-
-	switch (del_action) {
-		case DEL_INST:
-			uci_foreach_option_cont("network", "interface", "device", ((struct atm_args *)data)->device, s) {
-				if (stmp != NULL && ((struct atm_args *)data)->device != NULL)
-					remove_device_from_interface(stmp, ((struct atm_args *)data)->device);
-				stmp = s;
-			}
-			if (stmp != NULL && ((struct atm_args *)data)->device != NULL)
-				remove_device_from_interface(stmp, ((struct atm_args *)data)->device);
-
-			get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(((struct atm_args *)data)->atm_sec), &dmmap_section);
-			dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			
-			dmuci_delete_by_section(((struct atm_args *)data)->atm_sec, NULL, NULL);
-			break;
-		case DEL_ALL:
-			uci_foreach_sections_safe("dsl", "atm-device", stmp, s) {
-				struct uci_section *ns = NULL, *nss = NULL;
-				char *device = NULL;
-
-				dmuci_get_value_by_section_string(s, "device", &device);
-				uci_foreach_option_cont("network", "interface", "device", device, ns) {
-					if (nss != NULL && device != NULL)
-						remove_device_from_interface(nss, device);
-					nss = ns;
-				}
-				if (nss != NULL && device != NULL)
-					remove_device_from_interface(nss, device);
-
-				get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(s), &dmmap_section);
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-
-				dmuci_delete_by_section(s, NULL, NULL);
-			}
-			break;
-	}
-	return 0;
-}
-
-/*************************************************************
-* SET AND GET ALIAS
-*************************************************************/
 /*#Device.ATM.Link.{i}.Alias!UCI:dmmap_dsl/atm-device,@i-1/atmlinkalias*/
 static int get_atm_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *dmmap_section = NULL;
-
-	get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(((struct atm_args *)data)->atm_sec), &dmmap_section);
-	dmuci_get_value_by_section_string(dmmap_section, "atmlinkalias", value);
+	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->dmmap_section, "atmlinkalias", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "cpe-%s", instance);
 	return 0;
@@ -362,48 +376,21 @@ static int get_atm_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 
 static int set_atm_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *dmmap_section = NULL;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(((struct atm_args *)data)->atm_sec), &dmmap_section);
-			dmuci_set_value_by_section(dmmap_section, "atmlinkalias", value);
+			dmuci_set_value_by_section((((struct atm_args *)data)->sections)->dmmap_section, "atmlinkalias", value);
 			return 0;
 	}
 	return 0;
 }
 
-/*************************************************************
-* ENTRY METHOD
-*************************************************************/
-/*#Device.ATM.Link.{i}.!UCI:dsl/atm-device/dmmap_dsl*/
-static int browseAtmLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	char *inst = NULL, *max_inst = NULL, *device;
-	struct atm_args curr_atm_args = {0};
-	struct dmmap_dup *p = NULL;
-	LIST_HEAD(dup_list);
-
-	synchronize_specific_config_sections_with_dmmap("dsl", "atm-device", "dmmap_dsl", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-
-		dmuci_get_value_by_section_string(p->config_section, "device", &device);
-		init_atm_link(&curr_atm_args, p->config_section, device);
-
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dmmap_section, "atmlinkinstance", "atmlinkalias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_atm_args, inst) == DM_STOP)
-			break;
-	}
-	free_dmmap_config_dup_list(&dup_list);
-	return 0;
-}
-
+/**********************************************************************************************************************************
+*                                            OBJ & LEAF DEFINITION
+***********************************************************************************************************************************/
 /*** ATM. ***/
 DMOBJ tATMObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/

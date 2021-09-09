@@ -21,6 +21,5 @@ extern DMOBJ tServicesVoiceServiceSIPNetworkObj[];
 extern DMLEAF tServicesVoiceServiceSIPNetworkParams[];
 extern DMLEAF tServicesVoiceServiceSIPNetworkFQDNServerParams[];
 
-
 #endif //__SERVICESVOICESERVICESIP_H
 

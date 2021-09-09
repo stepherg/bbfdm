@@ -201,6 +201,27 @@ Each leaf in the **DMLEAF** table can be a **Parameter**, **Command** or **Event
 | `bbfdm_type`        | The bbfdm type of the event. It should be **BBFDM_USP** as long as events are only defined in USP protocol. |
 
 
+### Browse definition
+
+The browse function allow to go over all instances of the current object and link them to the data model tree.
+
+In this function, there are two functions that need to be defined:
+
+- function to retrieve the instances: it can be
+
+	* `handle_instance` function: allow to retrieve/attribute the instances number/alias from uci config sections depending of the request and the instance mode.
+
+	* `handle_instance_without_section` function: allow to attribute the instances number/alias with constant values.
+
+- function to link the instances: we need to call `DM_LINK_INST_OBJ()` function for each instance in order to link the instance to the data model tree. we also need to specify the `data`of this instance level. This `data` could be use later in the sub object and parameters functions (Get/Set/Add/Delete/Operate/Event).
+
+> Note1: the browse function is only developed for multi-instances objects.
+
+> Note2: you can read the next section `BBF API` below to find the definition of the functions used in the browse.
+
+> Note3: you can use [bbf_test plugin](./test/bbf_test/bbf_test.c) as a reference in order to develop any new object/leaf/browse.
+
+
 ## BBF API
 
 `libbbf_api` is a library which contains the source code of all API functions (UCI, Ubus, JSON, CLI and memory management). these API are used for GET/SET/ADD/Delete/Operate calls which can be called in internal or external packages.
@@ -264,6 +285,42 @@ int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_arg
 - **u_args: ubus** arguments
 - **u_args_size:** number of ubus arguments
 
+#### 6. handle_instance: allow to retrieve/attribute the instances from uci config sections
+
+```bash
+char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, char *inst_opt, char *alias_opt);
+```
+
+**Argument:**
+- **dmctx:** the current dmctx struct passed when calling this object
+- **parent_node:** the current node struct passed when calling this object
+- **s:** the uci section used to get the instance 
+- **inst_opt:** the option name of the instance number used for this object
+- **alias_opt:** the option name of the instance alias used for this object
+
+#### 7. handle_instance_without_section: allow to attribute instances with constant values
+
+```bash
+char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, int inst_nbr);
+```
+
+**Argument:** the current dmctx struct passed when calling this object
+- **dmctx:** the current dmctx struct passed when calling this object
+- **parent_node:** the current node struct passed when calling this object
+- **inst_nbr:** the instance to attribute for this object
+
+#### 8. DM_LINK_INST_OBJ: link the instance to the data model tree
+
+```bash
+int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)
+```
+
+**Argument:**
+- **dmctx:** the current dmctx struct passed when calling this object
+- **parent_node:** the current node struct passed when calling this object
+- **data:** the data transmitted for the next sub object and parameters that can be uci section, json object, or any type of data
+- **instance:** the current instance used for this object
+
 
 > Note1: For other funtions, please refer to dmuci, dmubus, dmjson, dmcommon and dmmem (.c and .h) files in the [link](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbf_api)
 
@@ -280,6 +337,25 @@ dmasprintf(s, format, ...)
 dmastrcat(s, b, m)
 dmfree(x)
 ```
+
+> Note3: There are several APIs that have been deprecated and replaced with new ones. the table below summarizes them
+
+|             Deprecated API             |                       New API                      |
+| -------------------------------------- | -------------------------------------------------- |
+| handle_update_instance                 | handle_instance or handle_instance_without_section |
+| update_instance_alias                  | handle_instance                                    |
+| update_instance_without_section        | handle_instance_without_section                    |
+| update_instance                        |                      Not Used                      |
+| get_last_instance_bbfdm                |                      Not Used                      |
+| get_last_instance                      | find_max_instance                                  |
+| get_last_instance_lev2_bbfdm_dmmap_opt |                      Not Used                      |
+| get_last_instance_lev2_bbfdm           |                      Not Used                      |
+| is_section_unnamed                     |                      Not Used                      |
+| delete_sections_save_next_sections     |                      Not Used                      |
+| update_dmmap_sections                  |                      Not Used                      |
+| check_browse_section                   |                      Not Used                      |
+| dmuci_delete_by_section_unnamed        | dmuci_delete_by_section                            |
+| dmuci_delete_by_section_unnamed_bbfdm  | dmuci_delete_by_section                            |
 
 ## BBFDM Vendor
 
@@ -606,6 +682,10 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 > Note1: JSON File can only add vendor or standard objects that are not implemented by `libbbfdm`
 
 > Note2: JSON File is not allowed to overwrite objects/parameters
+
+> Note3: Set, Add, Delete methods are only allowed for uci mapping. therefore for ubus mapping, only Get method is authorized
+
+> Note4: Each object definition in JSON file must begin with "Device." and should have the full parent path if it is under another object
 
 - For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [UserInterface](/test/files/etc/bbfdm/json/UserInterface.json), [X_IOPSYS_EU_Dropbear](/test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json)
 

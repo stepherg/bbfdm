@@ -7,6 +7,7 @@
  *
  *		Author: Imen Bhiri <imen.bhiri@pivasoftware.com>
  *		Author: Feten Besbes <feten.besbes@pivasoftware.com>
+ *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
 #include "dmdiagnostics.h"
@@ -36,6 +37,162 @@ static int get_device_fwimage_linker(char *refparam, struct dmctx *dmctx, void *
 	return 0;
 }
 
+/*************************************************************
+* COMMON FUNCTIONS
+**************************************************************/
+static bool check_file_dir(char *name)
+{
+	DIR *dir = NULL;
+	struct dirent *d_file = NULL;
+
+	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
+		while ((d_file = readdir (dir)) != NULL) {
+			if (strcmp(name, d_file->d_name) == 0) {
+				closedir(dir);
+				return true;
+			}
+		}
+		closedir(dir);
+	}
+	return false;
+}
+
+static int get_number_of_cpus(void)
+{
+	char val[16];
+
+	dm_read_sysfs_file("/sys/devices/system/cpu/present", val, sizeof(val));
+	char *max = strchr(val, '-');
+	return max ? atoi(max+1)+1 : 0;
+}
+
+static int dmmap_synchronizeVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+	DIR *dir;
+	struct dirent *d_file;
+
+	sysfs_foreach_file(DEFAULT_CONFIG_DIR, dir, d_file) {
+
+		if(d_file->d_name[0] == '.')
+			continue;
+
+		if (!is_dmmap_section_exist_eq("dmmap", "vcf", "name", d_file->d_name)) {
+			dmuci_add_section_bbfdm("dmmap", "vcf", &s);
+			dmuci_set_value_by_section(s, "name", d_file->d_name);
+			dmuci_set_value_by_section(s, "backup_restore", "1");
+		}
+	}
+
+	if (dir)
+		closedir (dir);
+
+	uci_path_foreach_sections_safe(bbfdm, "dmmap", "vcf", stmp, s) {
+		char *name;
+
+		dmuci_get_value_by_section_string(s, "name", &name);
+		if (check_file_dir(name) == 0)
+			dmuci_delete_by_section_bbfdm(s, NULL, NULL);
+	}
+
+	return 0;
+}
+
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
+static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct uci_section *s = NULL;
+	char *inst = NULL;
+
+	dmmap_synchronizeVcfInst(dmctx, parent_node, prev_data, prev_instance);
+	uci_path_foreach_sections(bbfdm, "dmmap", "vcf", s) {
+		inst = handle_instance(dmctx, parent_node, s, "vcf_instance", "vcf_alias");
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
+			break;
+	}
+	return 0;
+}
+
+static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct dmmap_dup *p = NULL;
+	char *inst = NULL;
+	LIST_HEAD(dup_list);
+
+	synchronize_specific_config_sections_with_dmmap("system", "system", "dmmap", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "vlf_instance", "vlf_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
+static int browseDeviceInfoProcessorInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL;
+	int i;
+
+	for (i = 0; i < get_number_of_cpus(); i++) {
+		inst = handle_instance_without_section(dmctx, parent_node, i+1);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, NULL, inst) == DM_STOP)
+			break;
+	}
+	return 0;
+}
+
+static int browseDeviceInfoSupportedDataModelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL;
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(Data_Models); i++) {
+		inst = handle_instance_without_section(dmctx, parent_node, i+1);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&Data_Models[i], inst) == DM_STOP)
+			break;
+	}
+	return 0;
+}
+
+static int browseDeviceInfoFirmwareImageInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	json_object *res = NULL, *bank_obj = NULL, *arrobj = NULL;
+	char *inst = NULL;
+	int id = 0, i = 0;
+
+	dmubus_call("fwbank", "dump", UBUS_ARGS{}, 0, &res);
+	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)bank_obj, inst) == DM_STOP)
+			break;
+	}
+	return 0;
+}
+
+/*#Device.DeviceInfo.ProcessStatus.Process.{i}.!UBUS:router.system/processes//processes*/
+static int browseProcessEntriesInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	json_object *res = NULL, *processes = NULL, *arrobj = NULL;
+	char *inst = NULL;
+	int id = 0, i = 0;
+
+	dmubus_call("router.system", "processes", UBUS_ARGS{}, 0, &res);
+	dmjson_foreach_obj_in_array(res, arrobj, processes, i, 1, "processes") {
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)processes, inst) == DM_STOP)
+			break;
+	}
+	return 0;
+}
+
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
 /*#Device.DeviceInfo.Manufacturer!UCI:cwmp/cpe,cpe/manufacturer*/
 static int get_device_manufacturer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -238,31 +395,24 @@ static int set_device_provisioningcode(char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
-static int get_number_of_cpus(void)
-{
-	char val[16];
-
-	dm_read_sysfs_file("/sys/devices/system/cpu/present", val, sizeof(val));
-	char *max = strchr(val, '-');
-	return max ? atoi(max+1)+1 : 0;
-}
-
 static int get_DeviceInfo_ProcessorNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmasprintf(value, "%d", get_number_of_cpus());
+	int cnt = get_number_of_entries(ctx, data, instance, browseDeviceInfoProcessorInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 static int get_DeviceInfo_VendorLogFileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *dm_sec = NULL;
-	unsigned int num = 0;
+	int cnt = get_number_of_entries(ctx, data, instance, browseVlfInst);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
 
-	uci_path_foreach_sections(bbfdm, "dmmap", "vlf", dm_sec) {
-		num++;
-	}
-
-	dmasprintf(value, "%d", num);
+static int get_DeviceInfo_VendorConfigFileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseVcfInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -274,14 +424,8 @@ static int get_DeviceInfo_SupportedDataModelNumberOfEntries(char *refparam, stru
 
 static int get_DeviceInfo_FirmwareImageNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *banks = NULL;
-	size_t nbre_banks = 0;
-
-	dmubus_call("fwbank", "dump", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "0");
-	json_object_object_get_ex(res, "bank", &banks);
-	nbre_banks = (banks) ? json_object_array_length(banks) : 0;
-	dmasprintf(value, "%d", nbre_banks);
+	int cnt = get_number_of_entries(ctx, data, instance, browseDeviceInfoFirmwareImageInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -356,26 +500,9 @@ static int set_vcf_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 	return 0;
 }
 
-static int check_file_dir(char *name)
-{
-	DIR *dir = NULL;
-	struct dirent *d_file = NULL;
-
-	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
-		while ((d_file = readdir (dir)) != NULL) {
-			if (strcmp(name, d_file->d_name) == 0) {
-				closedir(dir);
-				return 1;
-			}
-		}
-		closedir(dir);
-	}
-	return 0;
-}
-
 static int get_vlf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "vlf_alias", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "vlf_alias", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "cpe-%s", instance);
 	return 0;
@@ -389,7 +516,7 @@ static int set_vlf_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "vlf_alias", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "vlf_alias", value);
 			return 0;
 	}
 	return 0;
@@ -397,7 +524,7 @@ static int set_vlf_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 
 static int get_vlf_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "log_file", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "log_file", value);
 	return 0;
 }
 
@@ -405,7 +532,7 @@ static int get_vlf_max_size (char *refparam, struct dmctx *ctx, void *data, char
 {
 	int size = 0;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "log_size", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "log_size", value);
 
 	// Value defined in system is in KiB in datamodel this is in bytes, convert the value in bytes
 	size = (*value && **value) ? atoi(*value) * 1000 : 0;
@@ -417,93 +544,6 @@ static int get_vlf_max_size (char *refparam, struct dmctx *ctx, void *data, char
 static int get_vlf_persistent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "0";
-	return 0;
-}
-
-static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	char *inst = NULL, *max_inst = NULL, *name;
-	struct uci_section *s = NULL, *del_sec = NULL;
-	DIR *dir = NULL;
-	struct dirent *d_file = NULL;
-
-	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
-		while ((d_file = readdir (dir)) != NULL) {
-			if(d_file->d_name[0] == '.')
-				continue;
-			update_section_list(DMMAP,"vcf", "name", 1, d_file->d_name, NULL, NULL, "backup_restore", "1");
-		}
-		closedir (dir);
-	}
-	uci_path_foreach_sections(bbfdm, DMMAP, "vcf", s) {
-		dmuci_get_value_by_section_string(s, "name", &name);
-		if(del_sec) {
-			dmuci_delete_by_section_bbfdm(del_sec, NULL, NULL);
-			del_sec = NULL;
-		}
-		if (check_file_dir(name) == 0) {
-			del_sec = s;
-			continue;
-		}
-
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   s, "vcf_instance", "vcf_alias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
-			break;
-	}
-
-	if(del_sec)
-		dmuci_delete_by_section_bbfdm(del_sec, NULL, NULL);
-
-	return 0;
-}
-
-static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	struct uci_section *sys_log_sec = NULL, *dm_sec = NULL;
-	char *log_file = NULL,*log_size = NULL;
-	char *inst = NULL, *max_inst = NULL;
-	int i = 1;
-
-	uci_foreach_sections("system", "system", sys_log_sec) {
-		if (!sys_log_sec)
-			break;
-		dmuci_get_value_by_section_string(sys_log_sec, "log_file", &log_file);
-		dmuci_get_value_by_section_string(sys_log_sec, "log_size", &log_size);
-		uci_path_foreach_sections(bbfdm, "dmmap", "vlf", dm_sec) {
-			if (dm_sec)
-				break;
-		}
-		if (!dm_sec) {
-			update_section_list(DMMAP,"vlf", NULL, i++, NULL, "log_file", log_file, "log_size", log_size);
-		} else {
-			dmuci_set_value_by_section_bbfdm(dm_sec, "log_file", log_file);
-			dmuci_set_value_by_section_bbfdm(dm_sec, "log_size", log_size);
-		}
-	}
-	uci_path_foreach_sections(bbfdm, "dmmap", "vlf", dm_sec) {
-
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dm_sec, "vlf_instance", "vlf_alias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)dm_sec, inst) == DM_STOP){
-			break;
-		}
-	}
-	return 0;
-}
-
-static int browseDeviceInfoProcessorInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	char *inst = NULL, *max_inst = NULL;
-	int i;
-
-	for (i = 0; i < get_number_of_cpus(); i++) {
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, i+1);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, NULL, inst) == DM_STOP)
-			break;
-	}
 	return 0;
 }
 
@@ -556,34 +596,6 @@ static int get_DeviceInfoProcessor_Architecture(char *refparam, struct dmctx *ct
 		*value = (is_big_endian) ? "mipseb" : "mipsel";
 	} else
 		*value = dmstrdup(utsname.machine);
-	return 0;
-}
-
-static int browseDeviceInfoSupportedDataModelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	char *inst = NULL, *max_inst = NULL;
-	int i;
-
-	for (i = 0; i < ARRAY_SIZE(Data_Models); i++) {
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, i+1);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&Data_Models[i], inst) == DM_STOP)
-			break;
-	}
-	return 0;
-}
-
-static int browseDeviceInfoFirmwareImageInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	json_object *res = NULL, *bank_obj = NULL, *arrobj = NULL;
-	char *inst = NULL, *max_inst = NULL;
-	int id = 0, i = 0;
-
-	dmubus_call("fwbank", "dump", UBUS_ARGS{}, 0, &res);
-	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)bank_obj, inst) == DM_STOP)
-			break;
-	}
 	return 0;
 }
 
@@ -740,22 +752,6 @@ static int get_process_number_of_entries(char* refparam, struct dmctx *ctx, void
 	json_object_object_get_ex(res, "processes", &processes);
 	nbre_process = (processes) ? json_object_array_length(processes) : 0;
 	dmasprintf(value, "%d", nbre_process);
-	return 0;
-}
-
-/*#Device.DeviceInfo.ProcessStatus.Process.{i}.!UBUS:router.system/processes//processes*/
-static int browseProcessEntriesInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	json_object *res = NULL, *processes = NULL, *arrobj = NULL;
-	char *inst = NULL, *max_inst = NULL;
-	int id = 0, i = 0;
-
-	dmubus_call("router.system", "processes", UBUS_ARGS{}, 0, &res);
-	dmjson_foreach_obj_in_array(res, arrobj, processes, i, 1, "processes") {
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)processes, inst) == DM_STOP)
-			break;
-	}
 	return 0;
 }
 
@@ -1018,6 +1014,7 @@ DMLEAF tDeviceInfoParams[] = {
 {"UpTime", &DMREAD, DMT_UNINT, get_device_info_uptime, NULL, BBFDM_BOTH},
 {"ProcessorNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_ProcessorNumberOfEntries, NULL, BBFDM_BOTH},
 {"VendorLogFileNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_VendorLogFileNumberOfEntries, NULL, BBFDM_BOTH},
+{"VendorConfigFileNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_VendorConfigFileNumberOfEntries, NULL, BBFDM_BOTH},
 {"SupportedDataModelNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_SupportedDataModelNumberOfEntries, NULL, BBFDM_CWMP},
 {"FirmwareImageNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_FirmwareImageNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
@@ -1111,4 +1108,3 @@ DMLEAF tDeviceInfoFirmwareImageParams[] = {
 {"Activate()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoFirmwareImage_Activate, operate_DeviceInfoFirmwareImage_Activate, BBFDM_USP},
 {0}
 };
-

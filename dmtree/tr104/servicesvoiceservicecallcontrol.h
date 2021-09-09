@@ -23,6 +23,5 @@ extern DMOBJ tServicesVoiceServiceCallControlCallingFeaturesSetObj[];
 extern DMLEAF tServicesVoiceServiceCallControlCallingFeaturesSetParams[];
 extern DMLEAF tServicesVoiceServiceCallControlCallingFeaturesSetSCREJParams[];
 
-
 #endif //__SERVICESVOICESERVICECALLCONTROL_H
 

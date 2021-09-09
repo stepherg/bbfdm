@@ -26,13 +26,13 @@ static int get_voice_service_capabilities_codec_linker(char *refparam, struct dm
 static int browseServicesVoiceServiceCapabilitiesCodecInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	int i;
-	char inst[16];
+	char *inst = NULL;
 
 	if (codecs_num <= 0)
 		init_supported_codecs();
 
 	for (i = 0; i < codecs_num; i++) {
-		snprintf(inst, sizeof(inst), "%d", i + 1);
+		inst = handle_instance_without_section(dmctx, parent_node, i+1);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&supported_codecs[i], inst) == DM_STOP)
 			break;
 	}

@@ -9,9 +9,11 @@
  *
  */
 
-#include "dmentry.h"
 #include "times.h"
 
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
 static int get_time_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *path = "/etc/rc.d/*ntpd";
@@ -207,6 +209,9 @@ static int set_time_ntpserver5(char *refparam, struct dmctx *ctx, void *data, ch
 	return set_time_ntpserver(refparam, ctx, action, value, 5);
 }
 
+/**********************************************************************************************************************************
+*                                            OBJ & LEAF DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.Time. *** */
 DMLEAF tTimeParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/

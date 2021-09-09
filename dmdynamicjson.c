@@ -177,7 +177,7 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 		//UCI: arg1=type :: arg2=uci_file :: arg3=uci_section_type :: arg4=uci_dmmap_file :: arg5="" :: arg6=""
 
 		char buf_instance[64], buf_alias[64], *prefix_obj = NULL, *object = NULL;
-		char *inst = NULL, *max_inst = NULL;
+		char *inst = NULL;
 		struct dmmap_dup *p = NULL;
 		LIST_HEAD(dup_list);
 
@@ -194,8 +194,7 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 			synchronize_specific_config_sections_with_dmmap(arg2, arg3, arg4, &dup_list);
 			list_for_each_entry(p, &dup_list, list) {
 
-				inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-					   p->dmmap_section, buf_instance, buf_alias);
+				inst = handle_instance(dmctx, parent_node, p->dmmap_section, buf_instance, buf_alias);
 
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 					break;
@@ -207,7 +206,6 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 		//UBUS: arg1=type :: arg2=ubus_object :: arg3=ubus_method :: arg4=ubus_args1 :: arg5=ubus_args2 :: arg6=ubus_key
 
 		json_object *res = NULL, *dyn_obj = NULL, *arrobj = NULL;
-		char *max_inst = NULL;
 
 		if (arg2 && arg3 && arg4 && arg5)
 			dmubus_call(arg2, arg3, UBUS_ARGS{{arg4, arg5, String}}, 1, &res);
@@ -217,7 +215,7 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 			int id = 0, j = 0;
 
 			dmjson_foreach_obj_in_array(res, arrobj, dyn_obj, j, 1, arg6) {
-				char *inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+				char *inst = handle_instance_without_section(dmctx, parent_node, ++id);
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)dyn_obj, inst) == DM_STOP)
 					break;
 			}
@@ -256,12 +254,11 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 		if(arg2 && arg3 && arg4) {
 			struct uci_section *section = NULL, *dmmap = NULL;
 
-			char *inst = get_last_instance_bbfdm(arg4, arg3, buf_instance);
 			dmuci_add_section(arg2, arg3, &section);
 
 			dmuci_add_section_bbfdm(arg4, arg3, &dmmap);
 			dmuci_set_value_by_section(dmmap, "section_name", section_name(section));
-			*instance = update_instance(inst, 2, dmmap, buf_instance);
+			dmuci_set_value_by_section(dmmap, buf_instance, *instance);
 		}
 	}
 	return 0;
@@ -287,32 +284,21 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 
 	if (arg1 && strcmp(arg1, "uci") == 0) {
 		if(arg2 && arg3 && arg4) {
-			struct uci_section *s = NULL, *ss = NULL, *dmmap_section= NULL;
-			int found = 0;
+			struct uci_section *s = NULL, *stmp = NULL, *dmmap_section= NULL;
 
 			switch (del_action) {
 				case DEL_INST:
 					get_dmmap_section_of_config_section(arg4, arg3, section_name((struct uci_section *)data), &dmmap_section);
-					if (dmmap_section != NULL)
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
+					dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
 					dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
 					break;
 				case DEL_ALL:
-					uci_foreach_sections(arg2, arg3, s) {
-						if (found != 0) {
-							get_dmmap_section_of_config_section(arg4, arg3, section_name(ss), &dmmap_section);
-							if (dmmap_section != NULL)
-								dmuci_delete_by_section(dmmap_section, NULL, NULL);
-							dmuci_delete_by_section(ss, NULL, NULL);
-						}
-						ss = s;
-						found++;
-					}
-					if (ss != NULL) {
-						get_dmmap_section_of_config_section(arg4, arg3, section_name(ss), &dmmap_section);
-						if(dmmap_section != NULL)
-							dmuci_delete_by_section(dmmap_section, NULL, NULL);
-						dmuci_delete_by_section(ss, NULL, NULL);
+					uci_foreach_sections_safe(arg2, arg3, stmp, s) {
+						get_dmmap_section_of_config_section(arg4, arg3, section_name(s), &dmmap_section);
+						dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+						dmuci_delete_by_section(s, NULL, NULL);
 					}
 					break;
 			}

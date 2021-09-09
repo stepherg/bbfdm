@@ -20,7 +20,7 @@ static int get_ServicesVoiceServiceCodecProfile_Codec(char *refparam, struct dmc
 {
 	char *linker;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "name", &linker);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
 	if (*value == NULL)
 		*value = "";
@@ -30,7 +30,7 @@ static int get_ServicesVoiceServiceCodecProfile_Codec(char *refparam, struct dmc
 /*#Device.Services.VoiceService.{i}.CodecProfile.{i}.PacketizationPeriod!UCI:asterisk/codec_profile,@i-1/ptime*/
 static int get_ServicesVoiceServiceCodecProfile_PacketizationPeriod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ptime", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ptime", value);
 	return 0;
 }
 
@@ -42,7 +42,7 @@ static int set_ServicesVoiceServiceCodecProfile_PacketizationPeriod(char *refpar
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "ptime", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ptime", value);
 			break;
 	}
 	return 0;

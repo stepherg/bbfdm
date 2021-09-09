@@ -20,6 +20,5 @@ extern DMLEAF tServicesVoiceServiceCapabilitiesSIPClientParams[];
 extern DMLEAF tServicesVoiceServiceCapabilitiesPOTSParams[];
 extern DMLEAF tServicesVoiceServiceCapabilitiesCodecParams[];
 
-
 #endif //__SERVICESVOICESERVICECAPABILITIES_H
 

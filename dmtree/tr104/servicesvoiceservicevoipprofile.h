@@ -20,6 +20,5 @@ extern DMLEAF tServicesVoiceServiceVoIPProfileRTPParams[];
 extern DMLEAF tServicesVoiceServiceVoIPProfileRTPRTCPParams[];
 extern DMLEAF tServicesVoiceServiceVoIPProfileRTPSRTPParams[];
 
-
 #endif //__SERVICESVOICESERVICEVOIPPROFILE_H
 

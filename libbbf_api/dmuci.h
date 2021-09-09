@@ -106,6 +106,12 @@ struct package_change
 		section != NULL; \
 		section = dmuci_walk_section(package, stype, option, val, CMP_OPTION_CONTAINING, NULL, section, GET_NEXT_SECTION))
 
+#define uci_foreach_option_cont_safe(package, stype, option, val, _tmp, section) \
+	for (section = dmuci_walk_section(package, stype, option, val, CMP_OPTION_CONTAINING, NULL, NULL, GET_FIRST_SECTION), \
+		_tmp = (section) ? dmuci_walk_section(package, stype, option, val, CMP_OPTION_CONTAINING, NULL, section, GET_NEXT_SECTION) : NULL;	\
+		section != NULL; \
+		section = _tmp, _tmp = (section) ? dmuci_walk_section(package, stype, option, val, CMP_OPTION_CONTAINING, NULL, section, GET_NEXT_SECTION) : NULL)
+
 #define uci_foreach_option_cont_word(package, stype, option, val, section) \
 	for (section = dmuci_walk_section(package, stype, option, val, CMP_OPTION_CONT_WORD, NULL, NULL, GET_FIRST_SECTION); \
 		section != NULL; \
@@ -255,15 +261,6 @@ int dmuci_delete_by_section_##UCI_PATH(struct uci_section *s, char *option, char
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-int dmuci_delete_by_section_unnamed_##UCI_PATH(struct uci_section *s, char *option, char *value)\
-{\
-	struct uci_context *save_uci_ctx;	\
-	save_uci_ctx = uci_ctx;			\
-	uci_ctx = uci_ctx_##UCI_PATH;	\
-	int res = dmuci_delete_by_section_unnamed(s, option, value); \
-	uci_ctx = save_uci_ctx;			\
-	return res;						\
-}\
 struct uci_section *dmuci_walk_section_##UCI_PATH(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk)\
 {\
 	struct uci_context *save_uci_ctx;	\
@@ -306,6 +303,15 @@ int dmuci_save_package_##UCI_PATH(char *package) \
 	save_uci_ctx = uci_ctx;			\
 	uci_ctx = uci_ctx_##UCI_PATH;	\
 	int res = dmuci_save_package(package); \
+	uci_ctx = save_uci_ctx;			\
+	return res;						\
+}\
+int dmuci_delete_by_section_unnamed_##UCI_PATH(struct uci_section *s, char *option, char *value)\
+{\
+	struct uci_context *save_uci_ctx;	\
+	save_uci_ctx = uci_ctx;			\
+	uci_ctx = uci_ctx_##UCI_PATH;	\
+	int res = dmuci_delete_by_section_unnamed(s, option, value); \
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\

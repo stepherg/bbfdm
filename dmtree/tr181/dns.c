@@ -109,13 +109,12 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 static int browseDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 
-	dmmap_synchronizeDNSClientRelayServer(dmctx, NULL, NULL, NULL);
+	dmmap_synchronizeDNSClientRelayServer(dmctx, parent_node, prev_data, prev_instance);
 	uci_path_foreach_sections(bbfdm, "dmmap_dns", "dns_server", s) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   s, "dns_server_instance", "dns_server_alias");
+		inst = handle_instance(dmctx, parent_node, s, "dns_server_instance", "dns_server_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -126,12 +125,11 @@ static int browseDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 static int browseResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "NSLookupResult", s) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   s, "nslookup_res_instance", "nslookup_res_alias");
+		inst = handle_instance(dmctx, parent_node, s, "nslookup_res_instance", "nslookup_res_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -146,15 +144,13 @@ static int add_dns_server(char *refparam, struct dmctx *ctx, void *data, char **
 {
 	struct uci_section *s = NULL;
 
-	char *inst = get_last_instance_bbfdm("dmmap_dns", "dns_server", "dns_server_instance");
 	dmuci_add_list_value("network", "lan", "dns", "0.0.0.0");
 
 	dmuci_add_section_bbfdm("dmmap_dns", "dns_server", &s);
 	dmuci_set_value_by_section(s, "ip", "0.0.0.0");
 	dmuci_set_value_by_section(s, "interface", "lan");
 	dmuci_set_value_by_section(s, "enable", "1");
-
-	*instance = update_instance(inst, 2, s, "dns_server_instance");
+	dmuci_set_value_by_section(s, "dns_server_instance", *instance);
 	return 0;
 }
 
@@ -218,13 +214,7 @@ static int get_client_status(char *refparam, struct dmctx *ctx, void *data, char
 
 static int get_client_server_number_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	dmmap_synchronizeDNSClientRelayServer(ctx, NULL, NULL, NULL);
-	uci_path_foreach_sections(bbfdm, "dmmap_dns", "dns_server", s) {
-		cnt++;
-	}
+	int cnt = get_number_of_entries(ctx, data, instance, browseDNSServerInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
@@ -302,13 +292,7 @@ static int get_relay_status(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int get_relay_forward_number_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	dmmap_synchronizeDNSClientRelayServer(ctx, NULL, NULL, NULL);
-	uci_path_foreach_sections(bbfdm, "dmmap_dns", "dns_server", s) {
-		cnt++;
-	}
+	int cnt = get_number_of_entries(ctx, data, instance, browseDNSServerInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
@@ -389,13 +373,8 @@ static int get_nslookupdiagnostics_success_count(char *refparam, struct dmctx *c
 
 static int get_nslookupdiagnostics_result_number_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "NSLookupResult", s) {
-		cnt++;
-	}
-	dmasprintf(value, "%d", cnt); // MEM WILL BE FREED IN DMMEMCLEAN
+	int cnt = get_number_of_entries(ctx, data, instance, browseResultInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 

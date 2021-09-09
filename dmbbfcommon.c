@@ -46,11 +46,6 @@ void bbf_uci_revert_bbfdm(void)
 	dmuci_exit_bbfdm();
 }
 
-void del_list_parameter(struct dm_parameter *dm_parameter)
-{
-	api_del_list_parameter(dm_parameter);
-}
-
 void del_list_fault_param(struct param_fault *param_fault)
 {
 	bbf_api_del_list_fault_param(param_fault);

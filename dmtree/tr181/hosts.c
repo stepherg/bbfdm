@@ -18,12 +18,12 @@
 static int browseHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *host_obj = NULL, *arrobj = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmubus_call("topology", "hosts", UBUS_ARGS{}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, host_obj, i, 1, "hosts") {
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)host_obj, inst) == DM_STOP)
 			break;
 	}
@@ -34,11 +34,11 @@ static int browseHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 static int browseHostsHostIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *ip_arr = NULL, *host_obj = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL, *ipv4addr = NULL;
+	char *inst = NULL, *ipv4addr = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_value_in_array(host_obj, ip_arr, ipv4addr, i, 1, "ipv4addr") {
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv4addr, inst) == DM_STOP)
 			break;
 	}
@@ -49,11 +49,11 @@ static int browseHostsHostIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_no
 static int browseHostsHostIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *ip_arr = NULL, *host_obj = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL, *ipv6addr = NULL;
+	char *inst = NULL, *ipv6addr = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_value_in_array(host_obj, ip_arr, ipv6addr, i, 1, "ipv6addr") {
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv6addr, inst) == DM_STOP)
 			break;
 	}
@@ -75,14 +75,8 @@ static int get_linker_host(char *refparam, struct dmctx *dmctx, void *data, char
 /*#Device.Hosts.HostNumberOfEntries!UBUS:topology/hosts//hosts*/
 static int get_Hosts_HostNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *hosts = NULL;
-	size_t nbre_hosts = 0;
-
-	dmubus_call("topology", "hosts", UBUS_ARGS{}, 0, &res);
-	DM_ASSERT(res, *value = "0");
-	json_object_object_get_ex(res, "hosts", &hosts);
-	nbre_hosts = (hosts) ? json_object_array_length(hosts) : 0;
-	dmasprintf(value, "%d", nbre_hosts);
+	int cnt = get_number_of_entries(ctx, data, instance, browseHostsHostInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -171,24 +165,16 @@ static int get_HostsHost_ActiveLastChange(char *refparam, struct dmctx *ctx, voi
 /*#Device.Hosts.Host.{i}.IPv4AddressNumberOfEntries!UBUS:topology/hosts//hosts[@i-1].ipv4addr*/
 static int get_HostsHost_IPv4AddressNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *ipv4addr = NULL;
-	size_t nbre_addr = 0;
-
-	json_object_object_get_ex((json_object *)data, "ipv4addr", &ipv4addr);
-	nbre_addr = (ipv4addr) ? json_object_array_length(ipv4addr) : 0;
-	dmasprintf(value, "%d", nbre_addr);
+	int cnt = get_number_of_entries(ctx, data, instance, browseHostsHostIPv4AddressInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 /*#Device.Hosts.Host.{i}.IPv6AddressNumberOfEntries!UBUS:topology/hosts//hosts[@i-1].ipv6addr*/
 static int get_HostsHost_IPv6AddressNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *ipv6addr = NULL;
-	size_t nbre_addr = 0;
-
-	json_object_object_get_ex((json_object *)data, "ipv6addr", &ipv6addr);
-	nbre_addr = (ipv6addr) ? json_object_array_length(ipv6addr) : 0;
-	dmasprintf(value, "%d", nbre_addr);
+	int cnt = get_number_of_entries(ctx, data, instance, browseHostsHostIPv6AddressInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -234,6 +220,9 @@ static int get_HostsHostWANStats_PacketsReceived(char *refparam, struct dmctx *c
 	return 0;
 }
 
+/**********************************************************************************************************************************
+*                                            OBJ & LEAF DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.Hosts. *** */
 DMOBJ tHostsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/

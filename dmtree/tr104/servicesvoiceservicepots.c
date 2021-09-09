@@ -17,7 +17,7 @@
 /*#Device.Services.VoiceService.{i}.POTS.FXS.{i}.!UCI:asterisk/tel_line/dmmap_asterisk*/
 static int browseServicesVoiceServicePOTSFXSInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *inst_last = NULL;
+	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
@@ -28,10 +28,9 @@ static int browseServicesVoiceServicePOTSFXSInst(struct dmctx *dmctx, DMNODE *pa
 		dmuci_get_value_by_section_string(p->config_section, "name", &line_name);
 		if (line_name && (*line_name == '\0' || strcasestr(line_name, "DECT") == NULL)) {
 
-			inst = handle_update_instance(2, dmctx, &inst_last, update_instance_alias, 3,
-				   p->dmmap_section, "fxsinstance", "fxsalias");
+			inst = handle_instance(dmctx, parent_node, p->dmmap_section, "fxsinstance", "fxsalias");
 
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 				break;
 		}
 		if (line_name && *line_name)
@@ -74,7 +73,7 @@ static int get_ServicesVoiceServicePOTSFXS_Status(char *refparam, struct dmctx *
 /*#Device.Services.VoiceService.{i}.POTS.FXS.{i}.Name!UCI:asterisk/tel_line,@i-1/name*/
 static int get_ServicesVoiceServicePOTSFXS_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "name", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", value);
 	return 0;
 }
 
@@ -88,7 +87,7 @@ static int get_ServicesVoiceServicePOTSFXS_DialType(char *refparam, struct dmctx
 static int get_ServicesVoiceServicePOTSFXS_ClipGeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *clir;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "clir", &clir);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "clir", &clir);
 	*value = *clir == '1' ? "0" : "1";
 	return 0;
 }
@@ -104,7 +103,7 @@ static int set_ServicesVoiceServicePOTSFXS_ClipGeneration(char *refparam, struct
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "clir", !b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "clir", !b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -125,7 +124,7 @@ static int get_ServicesVoiceServicePOTSFXS_TerminalType(char *refparam, struct d
 /*#Device.Services.VoiceService.{i}.POTS.FXS.{i}.VoiceProcessing.TransmitGain!UCI:asterisk/tel_line,@i-1/txgain*/
 static int get_ServicesVoiceServicePOTSFXSVoiceProcessing_TransmitGain(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "txgain", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "txgain", "0");
 	return 0;
 }
 
@@ -137,7 +136,7 @@ static int set_ServicesVoiceServicePOTSFXSVoiceProcessing_TransmitGain(char *ref
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "txgain", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "txgain", value);
 			break;
 	}
 	return 0;
@@ -146,7 +145,7 @@ static int set_ServicesVoiceServicePOTSFXSVoiceProcessing_TransmitGain(char *ref
 /*#Device.Services.VoiceService.{i}.POTS.FXS.{i}.VoiceProcessing.ReceiveGain!UCI:asterisk/tel_line,@i-1/rxgain*/
 static int get_ServicesVoiceServicePOTSFXSVoiceProcessing_ReceiveGain(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "rxgain", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "rxgain", "0");
 	return 0;
 }
 
@@ -158,7 +157,7 @@ static int set_ServicesVoiceServicePOTSFXSVoiceProcessing_ReceiveGain(char *refp
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "rxgain", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "rxgain", value);
 			break;
 	}
 	return 0;
@@ -167,7 +166,7 @@ static int set_ServicesVoiceServicePOTSFXSVoiceProcessing_ReceiveGain(char *refp
 /*#Device.Services.VoiceService.{i}.POTS.FXS.{i}.VoiceProcessing.EchoCancellationEnable!UCI:asterisk/tel_line,@i-1/echo_cancel*/
 static int get_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "echo_cancel", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "echo_cancel", "1");
 	return 0;
 }
 
@@ -182,7 +181,7 @@ static int set_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "echo_cancel", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "echo_cancel", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -230,4 +229,3 @@ DMLEAF tServicesVoiceServicePOTSFXSVoiceProcessingParams[] = {
 {"EchoCancellationEnable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable, set_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable, BBFDM_BOTH},
 {0}
 };
-

@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2021 iopsys Software Solutions AB
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License version 2.1
+ * as published by the Free Software Foundation
+ *
+ *	Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+ */
+
 #include "lanconfigsecurity.h"
 
 /*#Device.LANConfigSecurity.ConfigPassword!UCI:users/user,user/password*/
@@ -21,6 +31,9 @@ static int set_LANConfigSecurity_ConfigPassword(char *refparam, struct dmctx *ct
 	return 0;
 }
 
+/**********************************************************************************************************************************
+*                                            OBJ & PARAM DEFINITION
+***********************************************************************************************************************************/
 DMLEAF tLANConfigSecurityParams[] = {
 {"ConfigPassword", &DMWRITE, DMT_STRING, get_LANConfigSecurity_ConfigPassword, set_LANConfigSecurity_ConfigPassword, BBFDM_BOTH},
 {0}

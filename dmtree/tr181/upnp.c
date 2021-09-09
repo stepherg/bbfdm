@@ -100,7 +100,7 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 {
 	json_object *res = NULL,  *devices = NULL, *device = NULL;
 	struct upnpdiscovery upnp_dev = {};
-	char *descurl = NULL, *st = NULL, *usn = NULL, *is_root_device = NULL, *inst = NULL, *max_inst = NULL;
+	char *descurl = NULL, *st = NULL, *usn = NULL, *is_root_device = NULL, *inst = NULL;
 	char **stparams = NULL, **uuid, **urn;
 	size_t length;
 	struct uci_section* dmmap_sect = NULL;
@@ -137,11 +137,10 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 
 		upnp_dev.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_sect, "upnp_root_device_instance", "upnp_root_device_alias");
+		inst = handle_instance_without_section(dmctx, parent_node, i+1);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, inst) == DM_STOP)
-			return 0;
+			break;
 	}
 	return 0;
 }
@@ -150,7 +149,7 @@ static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_nod
 {
 	json_object *res = NULL,  *devices = NULL, *device = NULL;
 	struct upnpdiscovery upnp_dev = {};
-	char *dev_descurl = NULL, *dev_st = NULL, *dev_usn = NULL, *inst = NULL, *max_inst = NULL;
+	char *dev_descurl = NULL, *dev_st = NULL, *dev_usn = NULL, *inst = NULL;
 	char **stparams = NULL, **uuid = NULL, **urn = NULL;
 	size_t lengthuuid, lengthurn;
 	struct uci_section* dmmap_sect = NULL;
@@ -183,11 +182,10 @@ static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_nod
 
 		upnp_dev.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_sect, "upnp_evice_instance", "upnp_device_alias");
+		inst = handle_instance_without_section(dmctx, parent_node, i+1);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, inst) == DM_STOP)
-			return 0;
+			break;
 	}
 	return 0;
 }
@@ -196,7 +194,7 @@ static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_no
 {
 	json_object *res = NULL,  *services = NULL, *service = NULL;
 	struct upnpdiscovery upnp_dev = {};
-	char *srv_descurl = NULL, *srv_st = NULL, *srv_usn = NULL, *inst = NULL, *max_inst = NULL;
+	char *srv_descurl = NULL, *srv_st = NULL, *srv_usn = NULL, *inst = NULL;
 	char **stparams = NULL, **uuid = NULL, **urn = NULL;
 	size_t lengthuuid, lengthurn;
 	struct uci_section* dmmap_sect = NULL;
@@ -229,11 +227,10 @@ static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_no
 
 		upnp_dev.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_sect, "upnp_service_instance", "upnp_service_alias");
+		inst = handle_instance_without_section(dmctx, parent_node, i+1);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, inst) == DM_STOP)
-			return 0;
+			break;
 	}
 	return 0;
 }
@@ -242,7 +239,7 @@ static int browseUPnPDescriptionDeviceDescriptionInst(struct dmctx *dmctx, DMNOD
 {
 	json_object *res = NULL, *descriptions = NULL, *description = NULL;
 	struct upnp_description_file_info upnp_desc = {};
-	char *descurl = NULL, *inst = NULL, *max_inst = NULL;
+	char *descurl = NULL, *inst = NULL;
 	struct uci_section* dmmap_sect = NULL;
 	int i;
 
@@ -263,11 +260,10 @@ static int browseUPnPDescriptionDeviceDescriptionInst(struct dmctx *dmctx, DMNOD
 		}
 		upnp_desc.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_sect, "upnp_service_instance", "upnp_service_alias");
+		inst = handle_instance_without_section(dmctx, parent_node, i+1);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_desc, inst) == DM_STOP)
-			return 0;
+			break;
 	}
 	return 0;
 }
@@ -276,7 +272,7 @@ static int browseUPnPDescriptionDeviceInstanceInst(struct dmctx *dmctx, DMNODE *
 {
 	json_object *res = NULL,  *devices_instances = NULL, *device_inst = NULL;
 	struct upnp_device_inst upnp_dev_inst = {};
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	struct uci_section* dmmap_sect = NULL;
 	int i;
 
@@ -308,11 +304,10 @@ static int browseUPnPDescriptionDeviceInstanceInst(struct dmctx *dmctx, DMNODE *
 
 		upnp_dev_inst.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_sect, "upnp_device_inst_instance", "upnp_device_inst_alias");
+		inst = handle_instance_without_section(dmctx, parent_node, i+1);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev_inst, inst) == DM_STOP)
-			return 0;
+			break;
 	}
 	return 0;
 }
@@ -321,7 +316,7 @@ static int browseUPnPDescriptionServiceInstanceInst(struct dmctx *dmctx, DMNODE 
 {
 	json_object *res = NULL, *services_instances = NULL, *service_inst = NULL;
 	struct upnp_service_inst upnp_services_inst = {};
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	struct uci_section* dmmap_sect = NULL;
 	int i;
 
@@ -347,11 +342,10 @@ static int browseUPnPDescriptionServiceInstanceInst(struct dmctx *dmctx, DMNODE 
 
 		upnp_services_inst.dmmap_sect = dmmap_sect;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_sect, "upnp_service_inst_instance", "upnp_service_inst_alias");
+		inst = handle_instance_without_section(dmctx, parent_node, i+1);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_services_inst, inst) == DM_STOP)
-			return 0;
+			break;
 	}
 	return 0;
 }
@@ -432,68 +426,22 @@ static int set_UPnPDevice_UPnPIGD(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_UPnPDiscovery_RootDeviceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int nbre = 0;
-	char *is_root_device = NULL;
-	json_object *res = NULL, *devices = NULL, *device = NULL;
-
-	*value = "0";
-	dmubus_call("upnpc", "discovery", UBUS_ARGS{{}}, 0, &res);
-	if (res == NULL)
-		return 0;
-
-	json_object_object_get_ex(res, "devices", &devices);
-	if (devices == NULL)
-		return 0;
-
-	size_t nbre_devices = json_object_array_length(devices);
-	if (nbre_devices > 0) {
-		int i;
-
-		for (i = 0; i < nbre_devices; i++){
-			device = json_object_array_get_idx(devices, i);
-			is_root_device = dmjson_get_value(device, 1, "is_root_device");
-			if(strcmp(is_root_device, "0") == 0)
-				continue;
-			nbre ++;
-		}
-	}
-	dmasprintf(value, "%d", nbre);
+	int cnt = get_number_of_entries(ctx, data, instance, browseUPnPDiscoveryRootDeviceInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 static int get_UPnPDiscovery_DeviceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL,  *devices;
-
-	*value = "0";
-	dmubus_call("upnpc", "discovery", UBUS_ARGS{{}}, 0, &res);
-	if (res == NULL)
-		return 0;
-
-	json_object_object_get_ex(res, "devices", &devices);
-	if (devices == NULL)
-		return 0;
-
-	size_t nbre_devices = json_object_array_length(devices);
-	dmasprintf(value, "%d", nbre_devices);
+	int cnt = get_number_of_entries(ctx, data, instance, browseUPnPDiscoveryDeviceInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 static int get_UPnPDiscovery_ServiceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *services;
-
-	*value = "0";
-	dmubus_call("upnpc", "discovery", UBUS_ARGS{{}}, 0, &res);
-	if (res == NULL)
-		return 0;
-
-	json_object_object_get_ex(res, "services", &services);
-	if (services == NULL)
-		return 0;
-
-	size_t nbre_services = json_object_array_length(services);
-	dmasprintf(value, "%d", nbre_services);
+	int cnt = get_number_of_entries(ctx, data, instance, browseUPnPDiscoveryServiceInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -565,55 +513,22 @@ static int get_UPnPDiscoveryService_ParentDevice(char *refparam, struct dmctx *c
 
 static int get_UPnPDescription_DeviceDescriptionNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL,  *descriptions;
-
-	*value = "0";
-	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);
-	if (res == NULL)
-		return 0;
-
-	json_object_object_get_ex(res, "descriptions", &descriptions);
-	if (descriptions == NULL)
-		return 0;
-
-	size_t nbre_descriptions = json_object_array_length(descriptions);
-	dmasprintf(value, "%d", nbre_descriptions);
+	int cnt = get_number_of_entries(ctx, data, instance, browseUPnPDescriptionDeviceDescriptionInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 static int get_UPnPDescription_DeviceInstanceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *devicesinstances;
-
-	*value = "0";
-	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);
-	if (res == NULL)
-		return 0;
-
-	json_object_object_get_ex(res, "devicesinstances", &devicesinstances);
-	if (devicesinstances == NULL)
-		return 0;
-
-	size_t nbre_devinstances = json_object_array_length(devicesinstances);
-	dmasprintf(value, "%d", nbre_devinstances);
+	int cnt = get_number_of_entries(ctx, data, instance, browseUPnPDescriptionDeviceInstanceInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 static int get_UPnPDescription_ServiceInstanceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *servicesinstances;
-
-	*value = "0";
-	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);
-	if (res == NULL)
-		return 0;
-
-	json_object_object_get_ex(res, "servicesinstances", &servicesinstances);
-	if (servicesinstances == NULL)
-		return 0;
-
-	size_t nbre_servinstances = json_object_array_length(servicesinstances);
-	dmasprintf(value, "%d", nbre_servinstances);
+	int cnt = get_number_of_entries(ctx, data, instance, browseUPnPDescriptionServiceInstanceInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -789,6 +704,9 @@ static int get_UPnPDescriptionServiceInstance_EventSubURL(char *refparam, struct
 	return 0;
 }
 
+/**********************************************************************************************************************************
+*                                            OBJ & LEAF DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.UPnP. *** */
 DMOBJ tUPnPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/

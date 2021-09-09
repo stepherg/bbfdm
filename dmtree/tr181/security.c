@@ -223,7 +223,7 @@ static void get_certificate_paths(void)
 static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 #if defined(LOPENSSL) || defined(LMBEDTLS)
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	struct uci_section *dmmap_sect = NULL;
 	struct certificate_profile certificateprofile = {};
 
@@ -248,8 +248,7 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 		}
 		init_certificate(certifcates_paths[i], cert, dmmap_sect, &certificateprofile);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_sect, "security_certificate_instance", "security_certificate_alias");
+		inst = handle_instance(dmctx, parent_node, dmmap_sect, "security_certificate_instance", "security_certificate_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst) == DM_STOP)
 			break;
@@ -271,8 +270,7 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 		}
 		init_certificate(certifcates_paths[i], cacert, dmmap_sect, &certificateprofile);
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   dmmap_sect, "security_certificate_instance", "security_certificate_alias");
+		inst = handle_instance(dmctx, parent_node, dmmap_sect, "security_certificate_instance", "security_certificate_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst) == DM_STOP)
 			break;
@@ -287,41 +285,8 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 **************************************************************/
 static int get_Security_CertificateNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int number = 0;
-
-#if defined(LOPENSSL) || defined(LMBEDTLS)
-
-	get_certificate_paths();
-	int i;
-	for (i=0; i < MAX_CERT; i++) {
-		if(!strlen(certifcates_paths[i]))
-			break;
-#ifdef LOPENSSL
-		FILE *fp = fopen(certifcates_paths[i], "r");
-		if (fp == NULL)
-			continue;
-		X509 *cert = PEM_read_X509(fp, NULL, NULL, NULL);
-		if (!cert) {
-			fclose(fp);
-			continue;
-		}
-		number++;
-		X509_free(cert);
-		cert = NULL;
-		fclose(fp);
-		fp = NULL;
-#elif LMBEDTLS
-		mbedtls_x509_crt cacert;
-		mbedtls_x509_crt_init( &cacert );
-
-		int ret = mbedtls_x509_crt_parse_file( &cacert, certifcates_paths[i]);
-		if (ret < 0)
-			continue;
-		number++;
-#endif
-	}
-#endif
-	dmasprintf(value, "%d", number);
+	int cnt = get_number_of_entries(ctx, data, instance, browseSecurityCertificateInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -441,6 +406,9 @@ static int get_SecurityCertificate_SignatureAlgorithm(char *refparam, struct dmc
 	return 0;
 }
 
+/**********************************************************************************************************************************
+*                                            OBJ & PARAM DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.Security. *** */
 DMOBJ tSecurityObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/

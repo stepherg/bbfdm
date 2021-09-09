@@ -1577,13 +1577,10 @@ static int get_IPDiagnosticsServerSelectionDiagnostics_MaximumResponseTime(char 
 static int browseIPDiagnosticsTraceRouteRouteHopsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "RouteHops", s) {
-
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   s, "routehop_instance", "routehop_alias");
-
+		inst = handle_instance(dmctx, parent_node, s, "routehop_instance", "routehop_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
@@ -1593,13 +1590,10 @@ static int browseIPDiagnosticsTraceRouteRouteHopsInst(struct dmctx *dmctx, DMNOD
 static int browseIPDiagnosticsDownloadDiagnosticsPerConnectionResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "DownloadPerConnection", s) {
-
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   s, "perconnection_instance", "perconnection_alias");
-
+		inst = handle_instance(dmctx, parent_node, s, "perconnection_instance", "perconnection_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}
@@ -1609,13 +1603,10 @@ static int browseIPDiagnosticsDownloadDiagnosticsPerConnectionResultInst(struct 
 static int browseIPDiagnosticsUploadDiagnosticsPerConnectionResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "UploadPerConnection", s) {
-
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   s, "perconnection_instance", "perconnection_alias");
-
+		inst = handle_instance(dmctx, parent_node, s, "perconnection_instance", "perconnection_alias");
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
 	}

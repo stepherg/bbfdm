@@ -22,11 +22,10 @@ static int get_linker_dynamicdns_server(char *refparam, struct dmctx *dmctx, voi
 	if (data) {
 		dmuci_get_value_by_section_string((struct uci_section *)data, "service_name", &service_name);
 		dmasprintf(linker, "%s", service_name);
-		return 0;
 	} else {
 		*linker = "";
-		return 0;
 	}
+	return 0;
 }
 
 /*************************************************************
@@ -35,17 +34,16 @@ static int get_linker_dynamicdns_server(char *refparam, struct dmctx *dmctx, voi
 /*#Device.DynamicDNS.Client.{i}.!UCI:ddns/service/dmmap_ddns*/
 static int browseDynamicDNSClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("ddns", "service", "dmmap_ddns", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dmmap_section, "clientinstance", "clientalias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "clientinstance", "clientalias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -127,14 +125,13 @@ static int dmmap_synchronizeDynamicDNSServer(struct dmctx *dmctx, DMNODE *parent
 /*#Device.DynamicDNS.Server.{i}.!UCI:ddns/service/dmmap_ddns*/
 static int browseDynamicDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	struct uci_section *s = NULL;
 
 	dmmap_synchronizeDynamicDNSServer(dmctx, NULL, NULL, NULL);
 	uci_path_foreach_sections(bbfdm, "dmmap_ddns", "ddns_server", s) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   s, "serverinstance", "serveralias");
+		inst = handle_instance(dmctx, parent_node, s, "serverinstance", "serveralias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
 			break;
@@ -156,8 +153,7 @@ static int addObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 	struct uci_section *dmmap = NULL, *s = NULL;
 	char s_name[32];
 
-	char *last_inst = get_last_instance_bbfdm("dmmap_ddns", "service", "clientinstance");
-	snprintf(s_name, sizeof(s_name), "Ddns_%s", last_inst ? last_inst : "1");
+	snprintf(s_name, sizeof(s_name), "Ddns_%s", *instance);
 
 	dmuci_add_section("ddns", "service", &s);
 	dmuci_rename_section_by_section(s, s_name);
@@ -174,38 +170,27 @@ static int addObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 
 	dmuci_add_section_bbfdm("dmmap_ddns", "service", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(last_inst, 2, dmmap, "clientinstance");
+	dmuci_set_value_by_section(dmmap, "clientinstance", *instance);
 	return 0;
 }
 
 static int delObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;
-	int found = 0;
+	struct uci_section *s = NULL, *stmp = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_ddns", "service", section_name((struct uci_section *)data), &dmmap_section);
-			if(dmmap_section != NULL)
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_sections("ddns", "service", s) {
-				if (found != 0){
-					get_dmmap_section_of_config_section("dmmap_ddns", "service", section_name(ss), &dmmap_section);
-					if(dmmap_section != NULL)
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = s;
-				found++;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_ddns", "service", section_name(ss), &dmmap_section);
-				if(dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
+			uci_foreach_sections_safe("ddns", "service", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_ddns", "service", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
 			}
 			break;
 	}
@@ -217,8 +202,7 @@ static int addObjDynamicDNSServer(char *refparam, struct dmctx *ctx, void *data,
 	struct uci_section *dmmap = NULL, *s = NULL;
 	char s_name[16];
 
-	char *last_inst = get_last_instance_bbfdm("dmmap_ddns", "ddns_server", "serverinstance");
-	snprintf(s_name, sizeof(s_name), "server_%s", last_inst ? last_inst : "1");
+	snprintf(s_name, sizeof(s_name), "server_%s", *instance);
 
 	dmuci_add_section("ddns", "service", &s);
 	dmuci_rename_section_by_section(s, s_name);
@@ -236,14 +220,13 @@ static int addObjDynamicDNSServer(char *refparam, struct dmctx *ctx, void *data,
 
 	dmuci_add_section_bbfdm("dmmap_ddns", "ddns_server", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(last_inst, 2, dmmap, "serverinstance");
+	dmuci_set_value_by_section(dmmap, "serverinstance", *instance);
 	return 0;
 }
 
 static int delObjDynamicDNSServer(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *stmp = NULL, *dmmap_section= NULL;
-	int found = 0;
+	struct uci_section *s = NULL, *stmp = NULL;
 	char *service_name;
 
 	switch (del_action) {
@@ -255,21 +238,13 @@ static int delObjDynamicDNSServer(char *refparam, struct dmctx *ctx, void *data,
 			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_sections("ddns", "service", s) {
-				if (found != 0){
-					get_dmmap_section_of_config_section("dmmap_ddns", "ddns_server", section_name(ss), &dmmap_section);
-					if(dmmap_section != NULL)
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
-					dmuci_delete_by_section(ss, NULL, NULL);
-				}
-				ss = s;
-				found++;
-			}
-			if (ss != NULL) {
-				get_dmmap_section_of_config_section("dmmap_ddns", "ddns_server", section_name(ss), &dmmap_section);
-				if(dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-				dmuci_delete_by_section(ss, NULL, NULL);
+			uci_foreach_sections_safe("ddns", "service", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_ddns", "ddns_server", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
 			}
 			break;
 	}
@@ -281,25 +256,14 @@ static int delObjDynamicDNSServer(char *refparam, struct dmctx *ctx, void *data,
 *************************************************************/
 static int get_DynamicDNS_ClientNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_foreach_sections("ddns", "service", s) {
-		cnt++;
-	}
+	int cnt = get_number_of_entries(ctx, data, instance, browseDynamicDNSClientInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 static int get_DynamicDNS_ServerNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	dmmap_synchronizeDynamicDNSServer(ctx, NULL, NULL, NULL);
-	uci_path_foreach_sections(bbfdm, "dmmap_ddns", "ddns_server", s) {
-		cnt++;
-	}
+	int cnt = get_number_of_entries(ctx, data, instance, browseDynamicDNSServerInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
@@ -338,7 +302,7 @@ static int get_DynamicDNS_SupportedServices(char *refparam, struct dmctx *ctx, v
 /*#Device.DynamicDNS.Client.{i}.Enable!UCI:ddns/service,@i-1/enabled*/
 static int get_DynamicDNSClient_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "0");
 	return 0;
 }
 
@@ -353,7 +317,7 @@ static int set_DynamicDNSClient_Enable(char *refparam, struct dmctx *ctx, void *
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -364,7 +328,7 @@ static int get_DynamicDNSClient_Status(char *refparam, struct dmctx *ctx, void *
 {
 	char status[32] = {0}, *enable, *logdir = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", &enable);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enabled", &enable);
 	if (*enable == '\0' || strcmp(enable, "0") == 0) {
 		strcpy(status, "Disabled");
 	} else {
@@ -373,7 +337,7 @@ static int get_DynamicDNSClient_Status(char *refparam, struct dmctx *ctx, void *
 		dmuci_get_option_value_string("ddns", "global", "ddns_logdir", &logdir);
 		if (*logdir == '\0')
 			logdir = "/var/log/ddns";
-		snprintf(path, sizeof(path), "%s/%s.log", logdir, section_name((struct uci_section *)data));
+		snprintf(path, sizeof(path), "%s/%s.log", logdir, section_name(((struct dmmap_dup *)data)->config_section));
 		FILE *fp = fopen(path, "r");
 		if (fp != NULL) {
 			char buf[512] = {0};
@@ -400,10 +364,7 @@ static int get_DynamicDNSClient_Status(char *refparam, struct dmctx *ctx, void *
 /*#Device.DynamicDNS.Client.{i}.Alias!UCI:dmmap_ddns/service,@i-1/clientalias*/
 static int get_DynamicDNSClient_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *dmmap_section = NULL;
-
-	get_dmmap_section_of_config_section("dmmap_ddns", "service", section_name((struct uci_section *)data), &dmmap_section);
-	dmuci_get_value_by_section_string(dmmap_section, "clientalias", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "clientalias", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "cpe-%s", instance);
 	return 0;
@@ -411,16 +372,13 @@ static int get_DynamicDNSClient_Alias(char *refparam, struct dmctx *ctx, void *d
 
 static int set_DynamicDNSClient_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *dmmap_section = NULL;
-
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_ddns", "service", section_name((struct uci_section *)data), &dmmap_section);
-			dmuci_set_value_by_section(dmmap_section, "clientalias", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "clientalias", value);
 			break;
 	}
 	return 0;
@@ -428,39 +386,39 @@ static int set_DynamicDNSClient_Alias(char *refparam, struct dmctx *ctx, void *d
 
 static int get_DynamicDNSClient_LastError(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char status[64] = {0}, *enable = NULL;
+	char last_err[64] = {0}, *enable = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", &enable);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enabled", &enable);
 	if (enable && (*enable == '\0' || strcmp(enable, "0") == 0)) {
-		strcpy(status, "NO_ERROR");
+		strcpy(last_err, "NO_ERROR");
 	} else {
 		char path[128] = {0}, *logdir = NULL;
 
 		dmuci_get_option_value_string("ddns", "global", "ddns_logdir", &logdir);
-		snprintf(path, sizeof(path), "%s/%s.log", (logdir && *logdir) ? logdir : "/var/log/ddns", section_name((struct uci_section *)data));
+		snprintf(path, sizeof(path), "%s/%s.log", (logdir && *logdir) ? logdir : "/var/log/ddns", section_name(((struct dmmap_dup *)data)->config_section));
 
 		FILE *fp = fopen(path, "r");
 		if (fp != NULL) {
 			char buf[512] = {0};
 
-			strcpy(status, "NO_ERROR");
+			strcpy(last_err, "NO_ERROR");
 			while (fgets(buf, 512, fp) != NULL) {
 				if (strstr(buf, "ERROR") && strstr(buf, "Please check your configuration"))
-					strcpy(status, "MISCONFIGURATION_ERROR");
+					strcpy(last_err, "MISCONFIGURATION_ERROR");
 				else if (strstr(buf, "NO valid IP found"))
-					strcpy(status, "DNS_ERROR");
+					strcpy(last_err, "DNS_ERROR");
 				else if (strstr(buf, "Authentication Failed"))
-					strcpy(status, "AUTHENTICATION_ERROR");
+					strcpy(last_err, "AUTHENTICATION_ERROR");
 				else if (strstr(buf, "Transfer failed") || (strstr(buf, "WARN") && strstr(buf, "failed")))
-					strcpy(status, "CONNECTION_ERROR");
+					strcpy(last_err, "CONNECTION_ERROR");
 				else if (strstr(buf, "Registered IP") || strstr(buf, "Update successful"))
-					strcpy(status, "NO_ERROR");
+					strcpy(last_err, "NO_ERROR");
 			}
 			fclose(fp);
 		} else
-			strcpy(status, "MISCONFIGURATION_ERROR");
+			strcpy(last_err, "MISCONFIGURATION_ERROR");
 	}
-	*value = dmstrdup(status);
+	*value = dmstrdup(last_err);
 	return 0;
 }
 
@@ -468,7 +426,7 @@ static int get_DynamicDNSClient_LastError(char *refparam, struct dmctx *ctx, voi
 static int get_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *service_name;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "service_name", &service_name);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "service_name", &service_name);
 	adm_entry_get_linker_param(ctx, "Device.DynamicDNS.Server.", service_name, value);
 	if (*value == NULL)
 		*value = "";
@@ -487,7 +445,7 @@ static int set_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
 			if (linker && *linker) {
-				dmuci_set_value_by_section((struct uci_section *)data, "service_name", linker);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "service_name", linker);
 				dmfree(linker);
 			}
 			break;
@@ -499,7 +457,7 @@ static int set_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *
 static int get_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *interface;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &interface);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", interface, value);
 	if (*value == NULL)
 		*value = "";
@@ -518,7 +476,7 @@ static int set_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, voi
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
 			if (linker && *linker) {
-				dmuci_set_value_by_section((struct uci_section *)data, "interface", linker);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", linker);
 				dmfree(linker);
 			}
 			break;
@@ -529,7 +487,7 @@ static int set_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, voi
 /*#Device.DynamicDNS.Client.{i}.Username!UCI:ddns/service,@i-1/username*/
 static int get_DynamicDNSClient_Username(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "username", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "username", value);
 	return 0;
 }
 
@@ -541,7 +499,7 @@ static int set_DynamicDNSClient_Username(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "username", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "username", value);
 			break;
 	}
 	return 0;
@@ -562,7 +520,7 @@ static int set_DynamicDNSClient_Password(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "password", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "password", value);
 			break;
 	}
 	return 0;
@@ -577,7 +535,7 @@ static int get_DynamicDNSClient_HostnameNumberOfEntries(char *refparam, struct d
 /*#Device.DynamicDNS.Client.{i}.Hostname.{i}.Enable!UCI:ddns/service,@i-1/enabled*/
 static int get_DynamicDNSClientHostname_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "0");
 	return 0;
 }
 
@@ -592,7 +550,7 @@ static int set_DynamicDNSClientHostname_Enable(char *refparam, struct dmctx *ctx
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -603,14 +561,14 @@ static int get_DynamicDNSClientHostname_Status(char *refparam, struct dmctx *ctx
 {
 	char status[32] = {0}, *enable = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", &enable);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enabled", &enable);
 	if (enable && (*enable == '\0' || strcmp(enable, "0") == 0)) {
 		strcpy(status, "Disabled");
 	} else {
 		char path[128] = {0}, *logdir = NULL;
 
 		dmuci_get_option_value_string("ddns", "global", "ddns_logdir", &logdir);
-		snprintf(path, sizeof(path), "%s/%s.log", (logdir && *logdir) ? logdir : "/var/log/ddns", section_name((struct uci_section *)data));
+		snprintf(path, sizeof(path), "%s/%s.log", (logdir && *logdir) ? logdir : "/var/log/ddns", section_name(((struct dmmap_dup *)data)->config_section));
 		FILE *fp = fopen(path, "r");
 		if (fp != NULL) {
 			char buf[512] = {0};
@@ -635,7 +593,7 @@ static int get_DynamicDNSClientHostname_Status(char *refparam, struct dmctx *ctx
 /*#Device.DynamicDNS.Client.{i}.Hostname.{i}.Name!UCI:ddns/service,@i-1/domain*/
 static int get_DynamicDNSClientHostname_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "domain", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "domain", value);
 	return 0;
 }
 
@@ -647,8 +605,8 @@ static int set_DynamicDNSClientHostname_Name(char *refparam, struct dmctx *ctx, 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "domain", value);
-			dmuci_set_value_by_section((struct uci_section *)data, "lookup_host", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "domain", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "lookup_host", value);
 			break;
 	}
 	return 0;
@@ -666,7 +624,7 @@ static int get_DynamicDNSClientHostname_LastUpdate(char *refparam, struct dmctx 
 	dmuci_get_option_value_string("ddns", "global", "ddns_rundir", &rundir);
 	if (*rundir == '\0')
 		rundir = "/var/run/ddns";
-	snprintf(path, sizeof(path), "%s/%s.update", rundir, section_name((struct uci_section *)data));
+	snprintf(path, sizeof(path), "%s/%s.update", rundir, section_name(((struct dmmap_dup *)data)->config_section));
 
 	fp = fopen(path, "r");
 	if (fp != NULL) {
@@ -1057,6 +1015,9 @@ static int set_DynamicDNSServer_MaxRetries(char *refparam, struct dmctx *ctx, vo
 	return 0;
 }
 
+/**********************************************************************************************************************************
+*                                            OBJ & PARAM DEFINITION
+***********************************************************************************************************************************/
 /* *** Device.DynamicDNS. *** */
 DMOBJ tDynamicDNSObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/

@@ -50,7 +50,7 @@ static int radv_set_option_value(struct uci_section *s, char *option_list, const
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.!UCI:dhcp/dhcp/dmmap_radv*/
 static int browseRouterAdvertisementInterfaceSettingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL, *ignore = NULL;
+	char *inst = NULL, *ignore = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
@@ -62,10 +62,9 @@ static int browseRouterAdvertisementInterfaceSettingInst(struct dmctx *dmctx, DM
 		if (ignore && strcmp(ignore, "1") == 0)
 			continue;
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dmmap_section, "radv_intf_instance", "radv_intf_alias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "radv_intf_instance", "radv_intf_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -74,12 +73,11 @@ static int browseRouterAdvertisementInterfaceSettingInst(struct dmctx *dmctx, DM
 
 static int browseRouterAdvertisementInterfaceSettingOptionInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct uci_section *dhcp_s = (struct uci_section *)prev_data;
+	struct uci_section *dhcp_s = ((struct dmmap_dup *)prev_data)->config_section;
 	struct uci_section *dhcp_dmmap_s = NULL;
 	struct radv_option_args radv_option_args = {0};
-	struct browse_args browse_args = {0};
 	struct uci_list *dns_list = NULL;
-	char *inst = NULL, *max_inst = NULL, *option_value = NULL;
+	char *inst = NULL, *option_value = NULL;
 
 	dmuci_get_value_by_section_list(dhcp_s, "dns", &dns_list);
 
@@ -102,12 +100,7 @@ static int browseRouterAdvertisementInterfaceSettingOptionInst(struct dmctx *dmc
 		radv_option_args.dmmap_sect = dhcp_dmmap_s;
 		radv_option_args.option_value = option_value;
 
-		browse_args.option = "section_name";
-		browse_args.value = section_name(dhcp_s);
-
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_alias, 5,
-				dhcp_dmmap_s, "radv_option_instance", "radv_option_alias",
-			   check_browse_section, (void *)&browse_args);
+		inst = handle_instance(dmctx, parent_node, dhcp_dmmap_s, "radv_option_instance", "radv_option_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&radv_option_args, inst) == DM_STOP)
 			break;
@@ -123,8 +116,7 @@ static int addObjRouterAdvertisementInterfaceSetting(char *refparam, struct dmct
 	struct uci_section *dmmap = NULL, *s = NULL;
 	char ra_sname[32] = {0};
 
-	char *inst = get_dhcp_server_pool_last_instance("dhcp", "dhcp", "dmmap_radv", "radv_intf_instance");
-	snprintf(ra_sname, sizeof(ra_sname), "ra_%d", inst ? atoi(inst) + 1 : 1);
+	snprintf(ra_sname, sizeof(ra_sname), "ra_%s", *instance);
 
 	dmuci_add_section("dhcp", "dhcp", &s);
 	dmuci_rename_section_by_section(s, ra_sname);
@@ -134,23 +126,23 @@ static int addObjRouterAdvertisementInterfaceSetting(char *refparam, struct dmct
 
 	dmuci_add_section_bbfdm("dmmap_radv", "dhcp", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", ra_sname);
-	*instance = update_instance(inst, 2, dmmap, "radv_intf_instance");
+	dmuci_set_value_by_section(dmmap, "radv_intf_instance", *instance);
 	return 0;
 }
 
 static int delObjRouterAdvertisementInterfaceSetting(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *stmp = NULL, *dmmap_section = NULL;
+	struct uci_section *s = NULL, *stmp = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_radv", "dhcp", section_name((struct uci_section *)data), &dmmap_section);
-			dmuci_delete_by_section(dmmap_section, NULL, NULL);
-
-			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("dhcp", "dhcp", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
 				get_dmmap_section_of_config_section("dmmap_radv", "dhcp", section_name(s), &dmmap_section);
 				dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
@@ -164,18 +156,11 @@ static int delObjRouterAdvertisementInterfaceSetting(char *refparam, struct dmct
 static int addObjRouterAdvertisementInterfaceSettingOption(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *dmmap_sect = NULL;
-	struct browse_args browse_args = {0};
-
-	char *inst_para = get_last_instance_lev2_bbfdm_dmmap_opt("dmmap_radv", "radv_option", "radv_option_instance", "section_name", section_name((struct uci_section *)data));
 
 	dmuci_add_section_bbfdm("dmmap_radv", "radv_option", &dmmap_sect);
-	dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name((struct uci_section *)data));
+	dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(((struct dmmap_dup *)data)->config_section));
 	dmuci_set_value_by_section_bbfdm(dmmap_sect, "option_tag", "23");
-
-	browse_args.option = "section_name";
-	browse_args.value = section_name((struct uci_section *)data);
-
-	*instance = update_instance(inst_para, 5, dmmap_sect, "radv_option_instance", NULL, check_browse_section, (void *)&browse_args);
+	dmuci_set_value_by_section_bbfdm(dmmap_sect, "radv_option_instance", *instance);
 	return 0;
 }
 
@@ -190,12 +175,12 @@ static int delObjRouterAdvertisementInterfaceSettingOption(char *refparam, struc
 			if (value_exists_in_uci_list(dns_list, ((struct radv_option_args *)data)->option_value))
 				dmuci_del_list_value_by_section(((struct radv_option_args *)data)->config_sect, "dns", ((struct radv_option_args *)data)->option_value);
 
-			dmuci_delete_by_section_unnamed_bbfdm(((struct radv_option_args *)data)->dmmap_sect, NULL, NULL);
+			dmuci_delete_by_section(((struct radv_option_args *)data)->dmmap_sect, NULL, NULL);
 			break;
 		case DEL_ALL:
-			dmuci_set_value_by_section((struct uci_section *)data, "dns", "");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dns", "");
 			uci_path_foreach_sections_safe(bbfdm, "dmmap_radv", "radv_option", stmp, s) {
-				dmuci_delete_by_section_unnamed_bbfdm(s, NULL, NULL);
+				dmuci_delete_by_section(s, NULL, NULL);
 			}
 			break;
 	}
@@ -231,27 +216,15 @@ static int set_RouterAdvertisement_Enable(char *refparam, struct dmctx *ctx, voi
 
 static int get_RouterAdvertisement_InterfaceSettingNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	char *ignore = NULL;
-	int i = 0;
-
-	uci_foreach_sections("dhcp", "dhcp", s) {
-
-		// skip the section if option ignore = '1'
-		dmuci_get_value_by_section_string(s, "ignore", &ignore);
-		if (ignore && strcmp(ignore, "1") == 0)
-			continue;
-
-		i++;
-	}
-	dmasprintf(value, "%d", i);
+	int cnt = get_number_of_entries(ctx, data, instance, browseRouterAdvertisementInterfaceSettingInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.Enable!UCI:dhcp/dhcp,@i-1/ra*/
 static int get_RouterAdvertisementInterfaceSetting_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ra", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ra", value);
 	*value = (*value && strcmp(*value, "disabled") == 0) ? "0" : "1";
 	return 0;
 }
@@ -267,7 +240,7 @@ static int set_RouterAdvertisementInterfaceSetting_Enable(char *refparam, struct
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "ra", b ? "server" : "disabled");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ra", b ? "server" : "disabled");
 			break;
 	}
 	return 0;
@@ -276,17 +249,14 @@ static int set_RouterAdvertisementInterfaceSetting_Enable(char *refparam, struct
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.Status!UCI:dhcp/dhcp,@i-1/ra*/
 static int get_RouterAdvertisementInterfaceSetting_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ra", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ra", value);
 	*value = (*value && strcmp(*value, "disabled") == 0) ? "Disabled" : "Enabled";
 	return 0;
 }
 
 static int get_RouterAdvertisementInterfaceSetting_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *dmmap_sect = NULL;
-
-	get_dmmap_section_of_config_section("dmmap_radv", "dhcp", section_name((struct uci_section *)data), &dmmap_sect);
-	dmuci_get_value_by_section_string(dmmap_sect, "radv_intf_alias", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "radv_intf_alias", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "cpe-%s", instance);
 	return 0;
@@ -294,16 +264,13 @@ static int get_RouterAdvertisementInterfaceSetting_Alias(char *refparam, struct 
 
 static int set_RouterAdvertisementInterfaceSetting_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *dmmap_sect = NULL;
-
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_radv", "dhcp", section_name((struct uci_section *)data), &dmmap_sect);
-			dmuci_set_value_by_section_bbfdm(dmmap_sect, "radv_intf_alias", value);
+			dmuci_set_value_by_section_bbfdm(((struct dmmap_dup *)data)->dmmap_section, "radv_intf_alias", value);
 			break;
 	}
 	return 0;
@@ -314,7 +281,7 @@ static int get_RouterAdvertisementInterfaceSetting_Interface(char *refparam, str
 {
 	char *linker = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &linker);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &linker);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	if (*value == NULL)
 		*value = "";
@@ -333,7 +300,7 @@ static int set_RouterAdvertisementInterfaceSetting_Interface(char *refparam, str
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
 			if (linker && *linker) {
-				dmuci_set_value_by_section((struct uci_section *)data, "interface", linker);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", linker);
 				dmfree(linker);
 			}
 			break;
@@ -345,12 +312,11 @@ static int get_RouterAdvertisementInterfaceSetting_Prefixes(char *refparam, stru
 {
 	json_object *res = NULL, *ipv6_prefix_obj = NULL, *arrobj = NULL;
 	char *interface = NULL, *ip_inst = NULL, list_val[512];
-	struct uci_section *dmmap_section = NULL;
+	struct uci_section *dmmap_s = NULL;
 	int i = 0, pos = 0;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
-	get_dmmap_section_of_config_section("dmmap_network", "interface", interface, &dmmap_section);
-	dmuci_get_value_by_section_string(dmmap_section, "ip_int_instance", &ip_inst);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &interface);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "ip_int_instance", &ip_inst);
 
 	list_val[0] = 0;
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", interface, String}}, 1, &res);
@@ -361,10 +327,10 @@ static int get_RouterAdvertisementInterfaceSetting_Prefixes(char *refparam, stru
 		char *mask = dmjson_get_value(ipv6_prefix_obj, 1, "mask");
 		snprintf(ipv6_prefix, sizeof(ipv6_prefix), "%s/%s", address, mask);
 
-		uci_path_foreach_option_eq(bbfdm, "dmmap_network_ipv6_prefix", "intf_ipv6_prefix", "section_name", interface, dmmap_section) {
-			dmuci_get_value_by_section_string(dmmap_section, "address", &address);
+		uci_path_foreach_option_eq(bbfdm, "dmmap_network_ipv6_prefix", "intf_ipv6_prefix", "section_name", interface, dmmap_s) {
+			dmuci_get_value_by_section_string(dmmap_s, "address", &address);
 			if (address && strcmp(address, ipv6_prefix) == 0) {
-				dmuci_get_value_by_section_string(dmmap_section, "ipv6_prefix_instance", &ipv6_prefix_inst);
+				dmuci_get_value_by_section_string(dmmap_s, "ipv6_prefix_instance", &ipv6_prefix_inst);
 				break;
 			}
 		}
@@ -384,7 +350,7 @@ static int get_RouterAdvertisementInterfaceSetting_Prefixes(char *refparam, stru
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.MaxRtrAdvInterval!UCI:dhcp/dhcp,@i-1/ra_maxinterval*/
 static int get_RouterAdvertisementInterfaceSetting_MaxRtrAdvInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ra_maxinterval", "600");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ra_maxinterval", "600");
 	return 0;
 }
 
@@ -396,7 +362,7 @@ static int set_RouterAdvertisementInterfaceSetting_MaxRtrAdvInterval(char *refpa
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "ra_maxinterval", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ra_maxinterval", value);
 			break;
 	}
 	return 0;
@@ -405,7 +371,7 @@ static int set_RouterAdvertisementInterfaceSetting_MaxRtrAdvInterval(char *refpa
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.MinRtrAdvInterval!UCI:dhcp/dhcp,@i-1/ra_mininterval*/
 static int get_RouterAdvertisementInterfaceSetting_MinRtrAdvInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ra_mininterval", "200");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ra_mininterval", "200");
 	return 0;
 }
 
@@ -417,7 +383,7 @@ static int set_RouterAdvertisementInterfaceSetting_MinRtrAdvInterval(char *refpa
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "ra_mininterval", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ra_mininterval", value);
 			break;
 	}
 	return 0;
@@ -426,7 +392,7 @@ static int set_RouterAdvertisementInterfaceSetting_MinRtrAdvInterval(char *refpa
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvDefaultLifetime!UCI:dhcp/dhcp,@i-1/ra_lifetime*/
 static int get_RouterAdvertisementInterfaceSetting_AdvDefaultLifetime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ra_lifetime", "1800");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ra_lifetime", "1800");
 	return 0;
 }
 
@@ -438,7 +404,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvDefaultLifetime(char *refp
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "ra_lifetime", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ra_lifetime", value);
 			break;
 	}
 	return 0;
@@ -447,7 +413,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvDefaultLifetime(char *refp
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvManagedFlag!UCI:dhcp/dhcp,@i-1/ra_flags*/
 static int get_RouterAdvertisementInterfaceSetting_AdvManagedFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return radv_get_option_value((struct uci_section *)data, "ra_flags", "managed-config", value);
+	return radv_get_option_value(((struct dmmap_dup *)data)->config_section, "ra_flags", "managed-config", value);
 }
 
 static int set_RouterAdvertisementInterfaceSetting_AdvManagedFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -461,7 +427,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvManagedFlag(char *refparam
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			return radv_set_option_value((struct uci_section *)data, "ra_flags", "managed-config", b);
+			return radv_set_option_value(((struct dmmap_dup *)data)->config_section, "ra_flags", "managed-config", b);
 	}
 	return 0;
 }
@@ -469,7 +435,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvManagedFlag(char *refparam
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvOtherConfigFlag!UCI:dhcp/dhcp,@i-1/ra_flags*/
 static int get_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return radv_get_option_value((struct uci_section *)data, "ra_flags", "other-config", value);
+	return radv_get_option_value(((struct dmmap_dup *)data)->config_section, "ra_flags", "other-config", value);
 }
 
 static int set_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -483,7 +449,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag(char *refp
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			return radv_set_option_value((struct uci_section *)data, "ra_flags", "other-config", b);
+			return radv_set_option_value(((struct dmmap_dup *)data)->config_section, "ra_flags", "other-config", b);
 	}
 	return 0;
 }
@@ -491,7 +457,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag(char *refp
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvMobileAgentFlag!UCI:dhcp/dhcp,@i-1/ra_flags*/
 static int get_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return radv_get_option_value((struct uci_section *)data, "ra_flags", "home-agent", value);
+	return radv_get_option_value(((struct dmmap_dup *)data)->config_section, "ra_flags", "home-agent", value);
 }
 
 static int set_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -505,7 +471,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag(char *refp
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			return radv_set_option_value((struct uci_section *)data, "ra_flags", "home-agent", b);
+			return radv_set_option_value(((struct dmmap_dup *)data)->config_section, "ra_flags", "home-agent", b);
 	}
 	return 0;
 }
@@ -515,7 +481,7 @@ static int get_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag(char *
 {
 	char *preferenece = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ra_preference", &preferenece);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ra_preference", &preferenece);
 	*value = (preferenece && *preferenece == 'h') ? "High" : (preferenece && *preferenece == 'l') ? "Low" : "Medium";
 	return 0;
 }
@@ -528,7 +494,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag(char *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "ra_preference", (*value == 'H') ? "high" : (*value == 'L') ? "low" : "medium");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ra_preference", (*value == 'H') ? "high" : (*value == 'L') ? "low" : "medium");
 			break;
 	}
 	return 0;
@@ -537,7 +503,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag(char *
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvLinkMTU!UCI:dhcp/dhcp,@i-1/ra_mtu*/
 static int get_RouterAdvertisementInterfaceSetting_AdvLinkMTU(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ra_mtu", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ra_mtu", "0");
 	return 0;
 }
 
@@ -549,7 +515,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvLinkMTU(char *refparam, st
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "ra_mtu", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ra_mtu", value);
 			break;
 	}
 	return 0;
@@ -558,7 +524,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvLinkMTU(char *refparam, st
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvReachableTime!UCI:dhcp/dhcp,@i-1/ra_reachabletime*/
 static int get_RouterAdvertisementInterfaceSetting_AdvReachableTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ra_reachabletime", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ra_reachabletime", "0");
 	return 0;
 }
 
@@ -570,7 +536,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvReachableTime(char *refpar
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "ra_reachabletime", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ra_reachabletime", value);
 			break;
 	}
 	return 0;
@@ -579,7 +545,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvReachableTime(char *refpar
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvRetransTimer!UCI:dhcp/dhcp,@i-1/ra_retranstime*/
 static int get_RouterAdvertisementInterfaceSetting_AdvRetransTimer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ra_retranstime", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ra_retranstime", "0");
 	return 0;
 }
 
@@ -591,7 +557,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvRetransTimer(char *refpara
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "ra_retranstime", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ra_retranstime", value);
 			break;
 	}
 	return 0;
@@ -600,7 +566,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvRetransTimer(char *refpara
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.AdvCurHopLimit!UCI:dhcp/dhcp,@i-1/ra_hoplimit*/
 static int get_RouterAdvertisementInterfaceSetting_AdvCurHopLimit(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ra_hoplimit", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ra_hoplimit", "0");
 	return 0;
 }
 
@@ -612,7 +578,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvCurHopLimit(char *refparam
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "ra_hoplimit", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ra_hoplimit", value);
 			break;
 	}
 	return 0;
@@ -620,19 +586,8 @@ static int set_RouterAdvertisementInterfaceSetting_AdvCurHopLimit(char *refparam
 
 static int get_RouterAdvertisementInterfaceSetting_OptionNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_list *dns_list = NULL;
-	int length = 0;
-
-	dmuci_get_value_by_section_list((struct uci_section *)data, "dns", &dns_list);
-	if (dns_list != NULL) {
-		struct uci_element *e = NULL;
-
-		uci_foreach_element(dns_list, e) {
-			length++;
-		}
-	}
-
-	dmasprintf(value, "%d", length);
+	int cnt = get_number_of_entries(ctx, data, instance, browseRouterAdvertisementInterfaceSettingOptionInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -795,4 +750,3 @@ DMLEAF tRouterAdvertisementInterfaceSettingOptionParams[] = {
 {"Value", &DMWRITE, DMT_HEXBIN, get_RouterAdvertisementInterfaceSettingOption_Value, set_RouterAdvertisementInterfaceSettingOption_Value, BBFDM_BOTH},
 {0}
 };
-

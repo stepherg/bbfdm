@@ -580,6 +580,9 @@ static int get_management_server_supported_conn_req_methods(char *refparam, stru
 	return 0;
 }
 
+/**********************************************************************************************************************************
+*                                            OBJ & PARAM DEFINITION
+***********************************************************************************************************************************/
 /*** ManagementServer. ***/
 DMLEAF tManagementServerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/

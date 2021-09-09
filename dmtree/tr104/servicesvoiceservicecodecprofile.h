@@ -15,6 +15,5 @@
 
 extern DMLEAF tServicesVoiceServiceCodecProfileParams[];
 
-
 #endif //__SERVICESVOICESERVICECODECPROFILE_H
 

@@ -19,13 +19,12 @@
 static int browseIEEE1905ALInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *interface_obj = NULL, *arrobj = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmubus_call("ieee1905", "info", UBUS_ARGS{}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, interface_obj, i, 1, "interface") {
-
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)interface_obj, inst) == DM_STOP)
 			break;
 	}
@@ -36,12 +35,11 @@ static int browseIEEE1905ALInterfaceInst(struct dmctx *dmctx, DMNODE *parent_nod
 static int browseIEEE1905ALInterfaceVendorPropertiesInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *arrobj = NULL, *propertie_obj = NULL, *interface = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(interface, arrobj, propertie_obj, i, 1, "properties") {
-
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)propertie_obj, inst) == DM_STOP)
 			break;
 	}
@@ -52,12 +50,11 @@ static int browseIEEE1905ALInterfaceVendorPropertiesInst(struct dmctx *dmctx, DM
 static int browseIEEE1905ALInterfaceLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *arrobj = NULL, *link_obj = NULL, *interface = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(interface, arrobj, link_obj, i, 1, "links") {
-
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)link_obj, inst) == DM_STOP)
 			break;
 	}
@@ -67,17 +64,16 @@ static int browseIEEE1905ALInterfaceLinkInst(struct dmctx *dmctx, DMNODE *parent
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.!UCI:ieee1905/forwarding_rule/dmmap_forwarding_rule*/
 static int browseIEEE1905ALForwardingTableForwardingRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("ieee1905", "forwarding_rule", "dmmap_forwarding_rule", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dmmap_section, "forwardingruleinstance", "forwardingrulealias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "forwardingruleinstance", "forwardingrulealias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -96,13 +92,12 @@ static int browseIEEE1905ALNetworkTopologyChangeLogInst(struct dmctx *dmctx, DMN
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *device_obj = NULL, *arrobj = NULL;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmubus_call("ieee1905", "info", UBUS_ARGS{}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, device_obj, i, 2, "topology", "device") {
-
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)device_obj, inst) == DM_STOP)
 			break;
 	}
@@ -113,12 +108,11 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst(struct dmctx *dmctx
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *arrobj = NULL, *ipv4_address = NULL, *device = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(device, arrobj, ipv4_address, i, 1, "ipv4_address") {
-
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv4_address, inst) == DM_STOP)
 			break;
 	}
@@ -129,12 +123,11 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst(struct d
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *arrobj = NULL, *ipv6_address = NULL, *device = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(device, arrobj, ipv6_address, i, 1, "ipv6_address") {
-
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ipv6_address, inst) == DM_STOP)
 			break;
 	}
@@ -145,12 +138,11 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst(struct d
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *arrobj = NULL, *vendor_properties = NULL, *device = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(device, arrobj, vendor_properties, i, 1, "vendor_properties") {
-
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)vendor_properties, inst) == DM_STOP)
 			break;
 	}
@@ -161,12 +153,11 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesInst(str
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *arrobj = NULL, *interface = NULL, *device = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(device, arrobj, interface, i, 1, "interface") {
-
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)interface, inst) == DM_STOP)
 			break;
 	}
@@ -177,12 +168,11 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst(struct dmc
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *arrobj = NULL, *non1905_neighbor = NULL, *device = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(device, arrobj, non1905_neighbor, i, 1, "non1905_neighbors") {
-
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)non1905_neighbor, inst) == DM_STOP)
 			break;
 	}
@@ -201,12 +191,11 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborInst(struct dm
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *arrobj = NULL, *ieee1905_neighbors = NULL, *device = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(device, arrobj, ieee1905_neighbors, i, 1, "ieee1905_neighbors") {
-
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ieee1905_neighbors, inst) == DM_STOP)
 			break;
 	}
@@ -217,12 +206,11 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst(str
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *arrobj = NULL, *bridge_tuple = NULL, *device = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(device, arrobj, bridge_tuple, i, 1, "bridge_tuples") {
-
-		inst = handle_update_instance(2, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)bridge_tuple, inst) == DM_STOP)
 			break;
 	}
@@ -233,12 +221,11 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleInst(struct
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *arrobj = NULL, *metric = NULL, *ieee1905_neighbors = (json_object *)prev_data;
-	char *inst = NULL, *max_inst = NULL;
+	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(ieee1905_neighbors, arrobj, metric, i, 1, "metric") {
-
-		inst = handle_update_instance(3, dmctx, &max_inst, update_instance_without_section, 1, ++id);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)metric, inst) == DM_STOP)
 			break;
 	}
@@ -253,43 +240,31 @@ static int addObjIEEE1905ALForwardingTableForwardingRule(char *refparam, struct 
 {
 	struct uci_section *dmmap = NULL, *s = NULL;
 
-	char *inst = get_last_instance_bbfdm("dmmap_forwarding_rule", "forwarding_rule", "forwardingruleinstance");
 	dmuci_add_section("ieee1905", "forwarding_rule", &s);
 
 	dmuci_add_section_bbfdm("dmmap_forwarding_rule", "forwarding_rule", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
-	*instance = update_instance(inst, 2, dmmap, "forwardingruleinstance");
+	dmuci_set_value_by_section(dmmap, "forwardingruleinstance", *instance);
 	return 0;
 }
 
 static int delObjIEEE1905ALForwardingTableForwardingRule(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *ss = NULL, *dmmap_section = NULL;
-	int found = 0;
+	struct uci_section *s = NULL, *stmp = NULL;
 
 	switch (del_action) {
 	case DEL_INST:
-		get_dmmap_section_of_config_section("dmmap_forwarding_rule", "forwarding_rule", section_name((struct uci_section *)data), &dmmap_section);
-		if (dmmap_section != NULL)
-			dmuci_delete_by_section(dmmap_section, NULL, NULL);
-		dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+		dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+		dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 		break;
 	case DEL_ALL:
-		uci_foreach_sections("ieee1905", "forwarding_rule", s) {
-			if (found != 0) {
-				get_dmmap_section_of_config_section("dmmap_forwarding_rule", "forwarding_rule", section_name(ss), &dmmap_section);
-				if (dmmap_section != NULL)
-					dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section(ss, NULL, NULL);
-			}
-			ss = s;
-			found++;
-		}
-		if (ss != NULL) {
-			get_dmmap_section_of_config_section("dmmap_forwarding_rule", "forwarding_rule", section_name(ss), &dmmap_section);
-			if (dmmap_section != NULL)
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-			dmuci_delete_by_section(ss, NULL, NULL);
+		uci_foreach_sections_safe("ieee1905", "forwarding_rule", stmp, s) {
+			struct uci_section *dmmap_section = NULL;
+
+			get_dmmap_section_of_config_section("dmmap_forwarding_rule", "forwarding_rule", section_name(s), &dmmap_section);
+			dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+			dmuci_delete_by_section(s, NULL, NULL);
 		}
 		break;
 	}
@@ -697,7 +672,7 @@ static int get_IEEE1905ALForwardingTable_ForwardingRuleNumberOfEntries(char *ref
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.InterfaceList!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/interface_list*/
 static int get_IEEE1905ALForwardingTableForwardingRule_InterfaceList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "interface_list", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface_list", value);
 	return 0;
 }
 
@@ -709,7 +684,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_InterfaceList(char *refpa
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section((struct uci_section *)data, "interface_list", value);
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface_list", value);
 		break;
 	}
 	return 0;
@@ -718,7 +693,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_InterfaceList(char *refpa
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.MACDestinationAddress!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/mac_destination_addr*/
 static int get_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "mac_destination_addr", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "mac_destination_addr", value);
 	return 0;
 }
 
@@ -730,7 +705,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress(cha
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section((struct uci_section *)data, "mac_destination_addr", value);
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "mac_destination_addr", value);
 		break;
 	}
 	return 0;
@@ -739,7 +714,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress(cha
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.MACDestinationAddressFlag!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/mac_destination_addr_flag*/
 static int get_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddressFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "mac_destination_addr_flag", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "mac_destination_addr_flag", value);
 	return 0;
 }
 
@@ -754,7 +729,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddressFlag
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section((struct uci_section *)data, "mac_destination_addr_flag", b ? "1" : "0");
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "mac_destination_addr_flag", b ? "1" : "0");
 		break;
 	}
 	return 0;
@@ -763,7 +738,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddressFlag
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.MACSourceAddress!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/mac_source_addr*/
 static int get_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-        dmuci_get_value_by_section_string((struct uci_section *)data, "mac_source_addr", value);
+        dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "mac_source_addr", value);
         return 0;
 }
 
@@ -775,7 +750,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress(char *re
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section((struct uci_section *)data, "mac_source_addr", value);
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "mac_source_addr", value);
 		break;
 	}
 	return 0;
@@ -784,7 +759,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress(char *re
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.MACSourceAddressFlag!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/mac_source_addr_flag*/
 static int get_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-        dmuci_get_value_by_section_string((struct uci_section *)data, "mac_source_addr_flag", value);
+        dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "mac_source_addr_flag", value);
         return 0;
 }
 
@@ -799,7 +774,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag(char
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section((struct uci_section *)data, "mac_source_addr_flag", b ? "1" : "0");
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "mac_source_addr_flag", b ? "1" : "0");
 		break;
 	}
 	return 0;
@@ -808,7 +783,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag(char
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.EtherType!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/ether_type*/
 static int get_IEEE1905ALForwardingTableForwardingRule_EtherType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ether_type", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ether_type", "0");
 	return 0;
 }
 
@@ -820,7 +795,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_EtherType(char *refparam,
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section((struct uci_section *)data, "ether_type", value);
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ether_type", value);
 		break;
 	}
 	return 0;
@@ -829,7 +804,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_EtherType(char *refparam,
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.EtherTypeFlag!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/ether_type_flag*/
 static int get_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ether_type_flag", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ether_type_flag", value);
 	return 0;
 }
 
@@ -844,7 +819,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag(char *refpa
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section((struct uci_section *)data, "ether_type_flag", b ? "1" : "0");
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ether_type_flag", b ? "1" : "0");
 		break;
 	}
 	return 0;
@@ -853,7 +828,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag(char *refpa
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.Vid!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/vid*/
 static int get_IEEE1905ALForwardingTableForwardingRule_Vid(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "vid", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "vid", "0");
 	return 0;
 }
 
@@ -865,7 +840,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_Vid(char *refparam, struc
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section((struct uci_section *)data, "vid", value);
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "vid", value);
 		break;
 	}
 	return 0;
@@ -874,7 +849,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_Vid(char *refparam, struc
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.VidFlag!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/vid_flag*/
 static int get_IEEE1905ALForwardingTableForwardingRule_VidFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "vid_flag", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid_flag", value);
 	return 0;
 }
 
@@ -889,7 +864,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_VidFlag(char *refparam, s
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section((struct uci_section *)data, "vid_flag", b ? "1" : "0");
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "vid_flag", b ? "1" : "0");
 		break;
 	}
 	return 0;
@@ -898,7 +873,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_VidFlag(char *refparam, s
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.PCP!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/pcp*/
 static int get_IEEE1905ALForwardingTableForwardingRule_PCP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "pcp", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "pcp", "0");
 	return 0;
 }
 
@@ -910,7 +885,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_PCP(char *refparam, struc
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section((struct uci_section *)data, "pcp", value);
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "pcp", value);
 		break;
 	}
 	return 0;
@@ -919,7 +894,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_PCP(char *refparam, struc
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.PCPFlag!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/pcp_flag*/
 static int get_IEEE1905ALForwardingTableForwardingRule_PCPFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "pcp_flag", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "pcp_flag", value);
 	return 0;
 }
 
@@ -934,7 +909,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_PCPFlag(char *refparam, s
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section((struct uci_section *)data, "pcp_flag", b ? "1" : "0");
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "pcp_flag", b ? "1" : "0");
 		break;
 	}
 	return 0;

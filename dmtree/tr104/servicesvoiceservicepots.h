@@ -19,6 +19,5 @@ extern DMOBJ tServicesVoiceServicePOTSFXSObj[];
 extern DMLEAF tServicesVoiceServicePOTSFXSParams[];
 extern DMLEAF tServicesVoiceServicePOTSFXSVoiceProcessingParams[];
 
-
 #endif //__SERVICESVOICESERVICEPOTS_H
 

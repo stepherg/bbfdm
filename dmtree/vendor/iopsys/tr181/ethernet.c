@@ -14,7 +14,7 @@
 
 static int get_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "type", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", value);
 	*value = (strcmp(*value, "macvlan") == 0) ? "1" : "0";
 	return 0;
 }
@@ -31,8 +31,8 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "name", &name);
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &name);
 			struct uci_section *s = NULL, *dmmap_s = NULL;
 			if (b && *name != '\0') {
 				char *link_instance = NULL, new_name[16] = {0};
@@ -104,10 +104,10 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 					}
 				}
 
-				dmuci_set_value_by_section((struct uci_section *)data, "name", new_name);
-				dmuci_set_value_by_section((struct uci_section *)data, "type", "macvlan");
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "type", "macvlan");
 			} else {
-				dmuci_set_value_by_section((struct uci_section *)data, "type", b ? "macvlan" : "8021q");
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "type", b ? "macvlan" : "8021q");
 			}
 			break;
 	}

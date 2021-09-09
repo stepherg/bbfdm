@@ -29,17 +29,16 @@ DM_MAP_OBJ tDynamicObj[] = {
 **************************************************************/
 static int browseManagementServerInformParameterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *max_inst = NULL;
 	struct dmmap_dup *p = NULL;
+	char *inst = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("cwmp", "inform_extra", "dmmap_cwmp", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
-		inst = handle_update_instance(1, dmctx, &max_inst, update_instance_alias, 3,
-			   p->dmmap_section, "inform_instance", "inform_alias");
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "inform_instance", "inform_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -53,34 +52,31 @@ static int addObjManagementServerInformParameter(char *refparam, struct dmctx *c
 {
 	struct uci_section *s = NULL, *dmmap_s = NULL;
 
-	char *last_inst = get_last_instance_bbfdm("dmmap_cwmp", "inform_extra", "inform_instance");
-
 	dmuci_add_section("cwmp", "inform_extra", &s);
 
 	dmuci_add_section_bbfdm("dmmap_cwmp", "inform_extra", &dmmap_s);
 	dmuci_set_value_by_section(dmmap_s, "section_name", section_name(s));
-	*instance = update_instance(last_inst, 2, dmmap_s, "inform_instance");
+	dmuci_set_value_by_section(dmmap_s, "inform_instance", *instance);
 	return 0;
 }
 
 static int delObjManagementServerInformParameter(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *stmp = NULL, *dmmap_s = NULL;
+	struct uci_section *s = NULL, *stmp = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
-			get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name((struct uci_section *)data), &dmmap_s);
-			dmuci_delete_by_section_unnamed_bbfdm(dmmap_s, NULL, NULL);
-
-			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("cwmp", "inform_extra", stmp, s) {
+				struct uci_section *dmmap_s = NULL;
+
 				get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name(s), &dmmap_s);
 				dmuci_delete_by_section(dmmap_s, NULL, NULL);
 
 				dmuci_delete_by_section(s, NULL, NULL);
-
 			}
 			break;
 	}
@@ -115,7 +111,7 @@ static int set_ManagementServer_EnableCWMP(char *refparam, struct dmctx *ctx, vo
 
 static int get_ManagementServerInformParameter_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enabled", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "1");
 	return 0;
 }
 
@@ -130,7 +126,7 @@ static int set_ManagementServerInformParameter_Enable(char *refparam, struct dmc
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -140,7 +136,7 @@ static int get_ManagementServerInformParameter_Alias(char *refparam, struct dmct
 {
 	struct uci_section *dmmap_section = NULL;
 
-	get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name((struct uci_section *)data), &dmmap_section);
+	get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name(((struct dmmap_dup *)data)->config_section), &dmmap_section);
 	dmuci_get_value_by_section_string(dmmap_section, "inform_alias", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "cpe-%s", instance);
@@ -157,7 +153,7 @@ static int set_ManagementServerInformParameter_Alias(char *refparam, struct dmct
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name((struct uci_section *)data), &dmmap_section);
+			get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name(((struct dmmap_dup *)data)->config_section), &dmmap_section);
 			dmuci_set_value_by_section(dmmap_section, "inform_alias", value);
 			break;
 	}
@@ -166,7 +162,7 @@ static int set_ManagementServerInformParameter_Alias(char *refparam, struct dmct
 
 static int get_ManagementServerInformParameter_ParameterName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "parameter", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "parameter", value);
 	return 0;
 }
 
@@ -178,7 +174,7 @@ static int set_ManagementServerInformParameter_ParameterName(char *refparam, str
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "parameter", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "parameter", value);
 			break;
 	}
 	return 0;
@@ -186,7 +182,7 @@ static int set_ManagementServerInformParameter_ParameterName(char *refparam, str
 
 static int get_ManagementServerInformParameter_EventList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "events", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "events", value);
 	return 0;
 }
 
@@ -198,7 +194,7 @@ static int set_ManagementServerInformParameter_EventList(char *refparam, struct 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "events", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "events", value);
 			break;
 	}
 	return 0;
