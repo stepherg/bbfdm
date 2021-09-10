@@ -125,7 +125,7 @@ int init_call_log()
 	struct call_log_entry *entry;
 	struct list_head *pos = NULL;
 	FILE *fp = NULL;
-	char line[320];
+	char line[1024];
 
 	// Check if there are any new call logs since the last time
 	if (stat(CALL_LOG_FILE, &cur_stat) == 0) {
