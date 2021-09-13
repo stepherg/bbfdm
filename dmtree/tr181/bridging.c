@@ -1839,7 +1839,7 @@ static int get_Bridging_get_Bridging_MaxFilterEntries(char *refparam, struct dmc
 	return 0;
 }
 
-/*#Device.Bridging.ProviderBridgeNumberOfEntries!UCI:network/interface/*/
+/*#Device.Bridging.ProviderBridgeNumberOfEntries!UCI:network/device/*/
 static int get_Bridging_ProviderBridgeNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
@@ -1853,7 +1853,7 @@ static int get_Bridging_ProviderBridgeNumberOfEntries(char *refparam, struct dmc
 	return 0;
 }
 
-/*#Device.Bridging.BridgeNumberOfEntries!UCI:network/interface/*/
+/*#Device.Bridging.BridgeNumberOfEntries!UCI:network/device/*/
 static int get_Bridging_BridgeNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
@@ -1866,14 +1866,10 @@ static int get_Bridging_BridgeNumberOfEntries(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
-/*#Device.Bridging.Bridge.{i}.Enable!UBUS:network.interface/status/interface,@Name/up*/
+/*#Device.Bridging.Bridge.{i}.Enable!UCI:network/device,@i-1/enabled*/
 static int get_BridgingBridge_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL;
-
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", ((struct bridge_args *)data)->bridge_sec_name, String}}, 1, &res);
-	DM_ASSERT(res, *value = "false");
-	*value = dmjson_get_value(res, 1, "up");
+	*value = dmuci_get_value_by_section_fallback_def(((struct bridge_args *)data)->bridge_sec, "enabled", "1");
 	return 0;
 }
 
@@ -1888,21 +1884,21 @@ static int set_BridgingBridge_Enable(char *refparam, struct dmctx *ctx, void *da
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmubus_call_set("network.interface", b ? "up" : "down", UBUS_ARGS{{"interface", ((struct bridge_args *)data)->bridge_sec_name, String}}, 1);
+			dmuci_set_value_by_section(((struct bridge_args *)data)->bridge_sec, "enabled", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
 }
 
-/*#Device.Bridging.Bridge.{i}.Status!UBUS:network.interface/status/interface,@Name/up*/
+/*#Device.Bridging.Bridge.{i}.Status!UCI:network/device,@i-1/enabled*/
 static int get_BridgingBridge_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	get_BridgingBridge_Enable(refparam, ctx, data, instance, value);
-	*value = (strcmp(*value, "true") == 0) ? "Enabled" : "Disabled";
+	*value = (strcmp(*value, "1") == 0) ? "Enabled" : "Disabled";
 	return 0;
 }
 
-/*#Device.Bridging.Bridge.{i}.Alias!UCI:dmmap_network/interface,@i-1/bridge_alias*/
+/*#Device.Bridging.Bridge.{i}.Alias!UCI:dmmap_bridge/device,@i-1/bridge_alias*/
 static int get_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *dmmap_sect = NULL;

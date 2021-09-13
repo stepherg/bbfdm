@@ -41853,7 +41853,7 @@
 						"uci": {
 							"file": "network",
 							"section": {
-								"type": "interface"
+								"type": "device"
 							}
 						}
 					}
@@ -41886,7 +41886,7 @@
 						"uci": {
 							"file": "network",
 							"section": {
-								"type": "interface"
+								"type": "device"
 							}
 						}
 					}
@@ -41937,14 +41937,16 @@
 					"datatype": "boolean",
 					"mapping": [
 						{
-							"type": "ubus",
-							"ubus": {
-								"object": "network.interface",
-								"method": "status",
-								"args": {
-									"interface": "@Name"
+							"type": "uci",
+							"uci": {
+								"file": "network",
+								"section": {
+									"type": "device",
+									"index": "@i-1"
 								},
-								"key": "up"
+								"option": {
+									"name": "enabled"
+								}
 							}
 						}
 					]
@@ -41966,14 +41968,16 @@
 					],
 					"mapping": [
 						{
-							"type": "ubus",
-							"ubus": {
-								"object": "network.interface",
-								"method": "status",
-								"args": {
-									"interface": "@Name"
+							"type": "uci",
+							"uci": {
+								"file": "network",
+								"section": {
+									"type": "device",
+									"index": "@i-1"
 								},
-								"key": "up"
+								"option": {
+									"name": "enabled"
+								}
 							}
 						}
 					]
@@ -41997,9 +42001,9 @@
 						{
 							"type": "uci",
 							"uci": {
-								"file": "dmmap_network",
+								"file": "dmmap_bridge",
 								"section": {
-									"type": "interface",
+									"type": "device",
 									"index": "@i-1"
 								},
 								"option": {
