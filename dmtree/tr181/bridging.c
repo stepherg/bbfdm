@@ -2661,24 +2661,22 @@ static int set_BridgingBridgeVLAN_VLANID(char *refparam, struct dmctx *ctx, void
 
 static int get_BridgingBridgeVLANPort_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL;
-	char *device;
-
-	dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "name", &device);
-	dmubus_call("network.device", "status", UBUS_ARGS{{"name", device, String}}, 1, &res);
-	DM_ASSERT(res, *value = "false");
-	*value = dmjson_get_value(res, 1, "up");
+	*value = dmuci_get_value_by_section_fallback_def(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "enabled", "1");
 	return 0;
 }
 
 static int set_BridgingBridgeVLANPort_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	bool b;
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
