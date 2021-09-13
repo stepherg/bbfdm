@@ -106,6 +106,31 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "type", "macvlan");
+			} else if (!b && *name != '\0') {
+				char *vid = NULL, new_name[16] = {0};
+
+				uci_foreach_option_eq("network", "interface", "device", name, s) {
+
+					get_dmmap_section_of_config_section_eq("dmmap", "link", "device", name, &dmmap_s);
+					if (dmmap_s) {
+						dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid", &vid);
+						if (vid && *vid)
+							snprintf(new_name, sizeof(new_name), "%s.%s", ifname, vid);
+						else
+							snprintf(new_name, sizeof(new_name), "%s", ifname);
+
+						if (ethernet_name_exists_in_devices(new_name))
+							return -1;
+
+						dmuci_set_value_by_section(dmmap_s, "device", ifname);
+					}
+
+					dmuci_set_value_by_section(s, "device", new_name);
+					break;
+				}
+
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "type", "8021q");
 			} else {
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "type", b ? "macvlan" : "8021q");
 			}
