@@ -9178,6 +9178,21 @@
 							"min": 1,
 							"max": 32
 						}
+					],
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "asterisk",
+								"section": {
+									"type": "numberingplan",
+									"name": "numberingplan"
+								},
+								"option": {
+									"name": "minimumnumberidigits"
+								}
+							}
+						}
 					]
 				},
 				"MaximumNumberOfDigits": {
@@ -9194,6 +9209,21 @@
 						{
 							"min": 1,
 							"max": 32
+						}
+					],
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "asterisk",
+								"section": {
+									"type": "numberingplan",
+									"name": "numberingplan"
+								},
+								"option": {
+									"name": "maxnumdigits"
+								}
+							}
 						}
 					]
 				},
@@ -9246,7 +9276,22 @@
 							"max": 50000
 						}
 					],
-					"unit": "milliseconds"
+					"unit": "milliseconds",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "asterisk",
+								"section": {
+									"type": "numberingplan",
+									"name": "numberingplan"
+								},
+								"option": {
+									"name": "interdigitopenmsec"
+								}
+							}
+						}
+					]
 				},
 				"TerminationDigit": {
 					"type": "string",

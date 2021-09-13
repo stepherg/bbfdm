@@ -446,6 +446,69 @@ static int set_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd(c
 	return 0;
 }
 
+/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.InterDigitTimerOpen!UCI:asterisk/numberingplan/interdigitopenmsec*/
+static int get_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerOpen(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("asterisk", "numberingplan", "interdigitopenmsec", "3000");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerOpen(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","50000"}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value("asterisk", "numberingplan", "interdigitopenmsec", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.MinimumNumberOfDigits!UCI:asterisk/numberingplan/minimumnumberidigits*/
+static int get_ServicesVoiceServiceCallControlNumberingPlan_MinimumNumberOfDigits(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("asterisk", "numberingplan", "minimumnumberdigits", "1");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlNumberingPlan_MinimumNumberOfDigits(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","32"}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value("asterisk", "numberingplan", "minimumnumberdigits", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.MaximumNumberOfDigits!UCI:asterisk/numberingplan/maxnumdigits*/
+static int get_ServicesVoiceServiceCallControlNumberingPlan_MaximumNumberOfDigits(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("asterisk", "numberingplan", "maxnumdigits", "15");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlNumberingPlan_MaximumNumberOfDigits(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","32"}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value("asterisk", "numberingplan", "maxnumdigits", value);
+			break;
+	}
+	return 0;
+}
+
 /*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.CallWaitingEnable!UCI:asterisk/advanced_features,call_features/callwaiting_enabled*/
 static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_CallWaitingEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -562,6 +625,9 @@ DMLEAF tServicesVoiceServiceCallControlOutgoingMapParams[] = {
 DMLEAF tServicesVoiceServiceCallControlNumberingPlanParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"InterDigitTimerStd", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd, set_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd, BBFDM_BOTH},
+{"InterDigitTimerOpen", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerOpen, set_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerOpen, BBFDM_BOTH},
+{"MinimumNumberOfDigits", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_MinimumNumberOfDigits, set_ServicesVoiceServiceCallControlNumberingPlan_MinimumNumberOfDigits, BBFDM_BOTH},
+{"MaximumNumberOfDigits", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_MaximumNumberOfDigits, set_ServicesVoiceServiceCallControlNumberingPlan_MaximumNumberOfDigits, BBFDM_BOTH},
 {0}
 };
 
