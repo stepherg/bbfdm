@@ -458,6 +458,62 @@ char *generate_tag_option(char *dmmap_package, char *section, char *opt_check, c
 	return option_tag;
 }
 
+static int get_DHCPv4ServerPool_Option_Value(struct uci_section *s, const char *option, char **value)
+{
+	struct uci_list *dhcp_option = NULL;
+	struct uci_element *e = NULL;
+
+	dmuci_get_value_by_section_list(s, "dhcp_option", &dhcp_option);
+	if (dhcp_option == NULL)
+		return -1;
+
+	uci_foreach_element(dhcp_option, e) {
+		char *pch = strchr(e->name, ',');
+		if (pch) {
+			char opt_tag[8] = {0};
+			unsigned int len = pch - e->name + 1;
+			unsigned int opt_size = (len > sizeof(opt_tag)) ? sizeof(opt_tag) : len;
+
+			DM_STRNCPY(opt_tag, e->name, opt_size);
+			if (strcmp(opt_tag, option) == 0) {
+				*value = dmstrdup(pch + 1);
+				return 0;
+			}
+		}
+	}
+	return -1;
+}
+
+static int set_DHCPv4ServerPool_Option_Value(struct uci_section *s, const char *option, char *value)
+{
+	struct uci_list *dhcp_option = NULL;
+	char new_dhcp_option[256] = {0};
+
+	dmuci_get_value_by_section_list(s, "dhcp_option", &dhcp_option);
+	if (dhcp_option) {
+		struct uci_element *e = NULL, *tmp = NULL;
+
+		uci_foreach_element_safe(dhcp_option, tmp, e) {
+			char *pch = strchr(e->name, ',');
+			if (pch) {
+				char opt_tag[8] = {0};
+				unsigned int len = pch - e->name + 1;
+				unsigned int opt_size = (len > sizeof(opt_tag)) ? sizeof(opt_tag) : len;
+
+				DM_STRNCPY(opt_tag, e->name, opt_size);
+				if (strcmp(opt_tag, option) == 0) {
+					dmuci_del_list_value_by_section(s, "dhcp_option", e->name);
+					break;
+				}
+			}
+		}
+	}
+
+	snprintf(new_dhcp_option, sizeof(new_dhcp_option), "%s,%s", option, value);
+	dmuci_add_list_value_by_section(s, "dhcp_option", new_dhcp_option);
+	return 0;
+}
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -1482,20 +1538,8 @@ static int set_DHCPv4ServerPool_SubnetMask(char *refparam, struct dmctx *ctx, vo
 /*#Device.DHCPv4.Server.Pool.{i}.DNSServers!UBUS:network.interface/status/interface,@Name/dns-server*/
 static int get_DHCPv4ServerPool_DNSServers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_list *dhcpv4_option = NULL;
-
-	dmuci_get_value_by_section_list((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", &dhcpv4_option);
-	if (dhcpv4_option) {
-		struct uci_element *e = NULL;
-		char *str = NULL;
-
-		uci_foreach_element(dhcpv4_option, e) {
-			if ((str = strstr(e->name, "6,"))) {
-				*value = dmstrdup(str + sizeof("6,") - 1);
-				return 0;
-			}
-		}
-	}
+	if (!get_DHCPv4ServerPool_Option_Value((((struct dhcp_args *)data)->sections)->config_section, "6", value))
+		return 0;
 
 	dmuci_get_option_value_string("network", ((struct dhcp_args *)data)->interface, "ipaddr", value);
 	return 0;
@@ -1503,97 +1547,42 @@ static int get_DHCPv4ServerPool_DNSServers(char *refparam, struct dmctx *ctx, vo
 
 static int set_DHCPv4ServerPool_DNSServers(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_list *dhcpv4_option = NULL;
-	char buf[64];
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string_list(value, -1, 4, -1, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_list((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", &dhcpv4_option);
-			if (dhcpv4_option) {
-				struct uci_element *e = NULL, *tmp = NULL;
-
-				uci_foreach_element_safe(dhcpv4_option, e, tmp) {
-					if (strstr(tmp->name, "6,"))
-						dmuci_del_list_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", tmp->name);
-				}
-			}
-
-			if (NULL != value && value[0] != '\0') {
-				snprintf(buf, sizeof(buf), "6,%s", value);
-				dmuci_add_list_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", buf);
-			}
+			set_DHCPv4ServerPool_Option_Value((((struct dhcp_args *)data)->sections)->config_section, "6", value);
+			return 0;
 	}
-
 	return 0;
 }
 
 static int get_DHCPv4ServerPool_DomainName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_list *dhcp_option = NULL;
-	struct uci_element *e = NULL;
-	char *str = NULL;
-
-	dmuci_get_value_by_section_list((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", &dhcp_option);
-	if (!dhcp_option)
-		return 0;
-
-	uci_foreach_element(dhcp_option, e) {
-		if ((str = strstr(e->name, "15,"))) {
-			*value = dmstrdup(str + sizeof("15,") - 1);
-			return 0;
-		}
-	}
-
+	get_DHCPv4ServerPool_Option_Value((((struct dhcp_args *)data)->sections)->config_section, "15", value);
 	return 0;
 }
 
 static int set_DHCPv4ServerPool_DomainName(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_list *dhcp_option = NULL;
-	char buf[64];
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_list((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", &dhcp_option);
-			if (dhcp_option) {
-				struct uci_element *e = NULL, *tmp = NULL;
-
-				uci_foreach_element_safe(dhcp_option, e, tmp) {
-					if (strstr(tmp->name, "15,"))
-						dmuci_del_list_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", tmp->name);
-				}
-			}
-
-			snprintf(buf, sizeof(buf), "15,%s", value);
-			dmuci_add_list_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", buf);
+			set_DHCPv4ServerPool_Option_Value((((struct dhcp_args *)data)->sections)->config_section, "15", value);
+			return 0;
 	}
 	return 0;
 }
 
 static int get_DHCPv4ServerPool_IPRouters(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_list *dhcp_option = NULL;
-
-	dmuci_get_value_by_section_list((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", &dhcp_option);
-	if (dhcp_option) {
-		struct uci_element *e = NULL;
-		char *str = NULL;
-
-		uci_foreach_element(dhcp_option, e) {
-			if ((str = strstr(e->name, "3,"))) {
-				*value = dmstrdup(str + sizeof("3,") - 1);
-				return 0;
-			}
-		}
-	}
+	if (!get_DHCPv4ServerPool_Option_Value((((struct dhcp_args *)data)->sections)->config_section, "3", value))
+		return 0;
 
 	dmuci_get_option_value_string("network", ((struct dhcp_args *)data)->interface, "ipaddr", value);
 	return 0;
@@ -1601,31 +1590,15 @@ static int get_DHCPv4ServerPool_IPRouters(char *refparam, struct dmctx *ctx, voi
 
 static int set_DHCPv4ServerPool_IPRouters(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_list *dhcp_option = NULL;
-	char buf[64];
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string_list(value, -1, 4, -1, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_list((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", &dhcp_option);
-			if (dhcp_option) {
-				struct uci_element *e = NULL, *tmp = NULL;
-
-				uci_foreach_element_safe(dhcp_option, e, tmp) {
-					if (strstr(tmp->name, "3,"))
-						dmuci_del_list_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", tmp->name);
-				}
-			}
-
-			if (NULL != value && value[0] != '\0') {
-				snprintf(buf, sizeof(buf), "3,%s", value);
-				dmuci_add_list_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "dhcp_option", buf);
-			}
+			set_DHCPv4ServerPool_Option_Value((((struct dhcp_args *)data)->sections)->config_section, "3", value);
+			return 0;
 	}
-
 	return 0;
 }
 
