@@ -558,21 +558,40 @@ static int get_EthernetInterface_Name(char *refparam, struct dmctx *ctx, void *d
 static int get_EthernetInterface_LastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL;
-	struct uci_section *s = NULL;
+	struct uci_section *s = NULL, *dev_s = NULL;
+	struct uci_list *uci_list = NULL;
 	char *device;
+	int intf_found = 0;
 
 	*value ="0";
 	uci_foreach_sections("network", "interface", s) {
 		dmuci_get_value_by_section_string(s, "device", &device);
-		if (strstr(device, ((struct eth_port_args *)data)->ifname)) {
+		if (0 == strncmp(device, "br-", 3)) {
+			uci_foreach_option_eq("network", "device", "name", device, dev_s) {
+				dmuci_get_value_by_section_list(dev_s, "ports", &uci_list);
+				if (value_exists_in_uci_list(uci_list, ((struct eth_port_args *)data)->ifname)) {
+					intf_found = 1;
+				}
+			}
+		} else {
+			if (strstr(device, ((struct eth_port_args *)data)->ifname)) {
+				intf_found = 1;
+			}
+		}
+
+		if (1 == intf_found) {
 			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &res);
 			DM_ASSERT(res, *value = "0");
 			*value = dmjson_get_value(res, 1, "uptime");
 			if((*value)[0] == '\0')
 				*value = "0";
-			break;
+			return 0;
 		}
 	}
+
+	if((*value)[0] == '\0')
+		*value = "0";
+
 	return 0;
 }
 
