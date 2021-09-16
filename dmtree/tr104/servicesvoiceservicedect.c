@@ -175,6 +175,14 @@ static int get_ServicesVoiceServiceDECTBase_RFPI(char *refparam, struct dmctx *c
 	return 0;
 }
 
+/*#Device.Services.VoiceService.{i}.DECT.Base.{i}.RepeaterSupportEnabled!UBUS:dect/status//base[@i-1].repeater_support_enabled*/
+static int get_ServicesVoiceServiceDECTBase_RepeaterSupportEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "repeater_support_enabled");
+
+	return 0;
+}
+
 /*#Device.Services.VoiceService.{i}.DECT.Base.{i}.SubscriptionEnable!UBUS:dect/status//base[@i-1].subscription_enabled*/
 static int get_ServicesVoiceServiceDECTBase_SubscriptionEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -407,6 +415,7 @@ DMLEAF tServicesVoiceServiceDECTBaseParams[] = {
 {"Name", &DMREAD, DMT_STRING, get_ServicesVoiceServiceDECTBase_Name, NULL, BBFDM_BOTH},
 {"Standard", &DMREAD, DMT_STRING, get_ServicesVoiceServiceDECTBase_Standard, NULL, BBFDM_BOTH},
 {"RFPI", &DMREAD, DMT_HEXBIN, get_ServicesVoiceServiceDECTBase_RFPI, NULL, BBFDM_BOTH},
+{"RepeaterSupportEnabled", &DMREAD, DMT_BOOL, get_ServicesVoiceServiceDECTBase_RepeaterSupportEnabled, NULL, BBFDM_BOTH},
 {"SubscriptionEnable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceDECTBase_SubscriptionEnable, set_ServicesVoiceServiceDECTBase_SubscriptionEnable, BBFDM_BOTH},
 {"FirmwareVersion", &DMREAD, DMT_STRING, get_ServicesVoiceServiceDECTBase_FirmwareVersion, NULL, BBFDM_BOTH},
 {"EepromVersion", &DMREAD, DMT_STRING, get_ServicesVoiceServiceDECTBase_EepromVersion, NULL, BBFDM_BOTH},

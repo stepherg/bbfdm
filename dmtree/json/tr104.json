@@ -2818,7 +2818,18 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "dect",
+								"method": "status",
+								"args": {},
+								"key": "base[@i-1].repeater_support_enabled"
+							}
+						}
+					]
 				},
 				"NEMOEnable": {
 					"type": "boolean",
