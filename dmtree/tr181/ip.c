@@ -1276,6 +1276,11 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 	}
 
 	char *device = get_device(section_name((struct uci_section *)data));
+
+	/* If the device value is empty, then get its value directly from device option */
+	if (device && *device == '\0')
+		dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+
 	if (device[0] != '\0') {
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", device, value);
 		if (*value != NULL)
