@@ -72,6 +72,7 @@ static int set_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, 
 			return 0;
 		case VALUESET:
 			IPPING_STOP
+			reset_diagnostic_state("ipping");
 			set_diagnostics_interface_option(ctx, "ipping", value);
 			return 0;
 	}
@@ -93,6 +94,7 @@ static int set_ip_ping_protocolversion(char *refparam, struct dmctx *ctx, void *
 			return 0;
 		case VALUESET:
 			IPPING_STOP
+			reset_diagnostic_state("ipping");
 			set_diagnostics_option("ipping", "ProtocolVersion", value);
 			return 0;
 	}
@@ -114,6 +116,7 @@ static int set_ip_ping_host(char *refparam, struct dmctx *ctx, void *data, char 
 			return 0;
 		case VALUESET:
 			IPPING_STOP
+			reset_diagnostic_state("ipping");
 			set_diagnostics_option("ipping", "Host", value);
 			return 0;
 	}
@@ -135,6 +138,7 @@ static int set_ip_ping_repetition_number(char *refparam, struct dmctx *ctx, void
 			return 0;
 		case VALUESET:
 			IPPING_STOP
+			reset_diagnostic_state("ipping");
 			set_diagnostics_option("ipping", "NumberOfRepetitions", value);
 			return 0;
 	}
@@ -156,6 +160,7 @@ static int set_ip_ping_timeout(char *refparam, struct dmctx *ctx, void *data, ch
 			return 0;
 		case VALUESET:
 			IPPING_STOP
+			reset_diagnostic_state("ipping");
 			set_diagnostics_option("ipping", "Timeout", value);
 			return 0;
 	}
@@ -177,6 +182,7 @@ static int set_ip_ping_block_size(char *refparam, struct dmctx *ctx, void *data,
 			return 0;
 		case VALUESET:
 			IPPING_STOP
+			reset_diagnostic_state("ipping");
 			set_diagnostics_option("ipping", "DataBlockSize", value);
 			return 0;
 	}
@@ -198,6 +204,7 @@ static int set_ip_ping_DSCP(char *refparam, struct dmctx *ctx, void *data, char 
 			return 0;
 		case VALUESET:
 			IPPING_STOP
+			reset_diagnostic_state("ipping");
 			set_diagnostics_option("ipping", "DSCP", value);
 			return 0;
 	}
@@ -298,6 +305,7 @@ static int set_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *c
 			return 0;
 		case VALUESET:
 			TRACEROUTE_STOP
+			reset_diagnostic_state("traceroute");
 			set_diagnostics_interface_option(ctx, "traceroute", value);
 			return 0;
 	}
@@ -319,6 +327,7 @@ static int set_IPDiagnosticsTraceRoute_ProtocolVersion(char *refparam, struct dm
 			return 0;
 		case VALUESET:
 			TRACEROUTE_STOP
+			reset_diagnostic_state("traceroute");
 			set_diagnostics_option("traceroute", "ProtocolVersion", value);
 			return 0;
 	}
@@ -340,6 +349,7 @@ static int set_IPDiagnosticsTraceRoute_Host(char *refparam, struct dmctx *ctx, v
 			return 0;
 		case VALUESET:
 			TRACEROUTE_STOP
+			reset_diagnostic_state("traceroute");
 			set_diagnostics_option("traceroute", "Host", value);
 			return 0;
 	}
@@ -361,6 +371,7 @@ static int set_IPDiagnosticsTraceRoute_NumberOfTries(char *refparam, struct dmct
 			return 0;
 		case VALUESET:
 			TRACEROUTE_STOP
+			reset_diagnostic_state("traceroute");
 			set_diagnostics_option("traceroute", "NumberOfTries", value);
 			return 0;
 	}
@@ -382,6 +393,7 @@ static int set_IPDiagnosticsTraceRoute_Timeout(char *refparam, struct dmctx *ctx
 			return 0;
 		case VALUESET:
 			TRACEROUTE_STOP
+			reset_diagnostic_state("traceroute");
 			set_diagnostics_option("traceroute", "Timeout", value);
 			return 0;
 	}
@@ -403,6 +415,7 @@ static int set_IPDiagnosticsTraceRoute_DataBlockSize(char *refparam, struct dmct
 			return 0;
 		case VALUESET:
 			TRACEROUTE_STOP
+			reset_diagnostic_state("traceroute");
 			set_diagnostics_option("traceroute", "DataBlockSize", value);
 			return 0;
 	}
@@ -424,6 +437,7 @@ static int set_IPDiagnosticsTraceRoute_DSCP(char *refparam, struct dmctx *ctx, v
 			return 0;
 		case VALUESET:
 			TRACEROUTE_STOP
+			reset_diagnostic_state("traceroute");
 			set_diagnostics_option("traceroute", "DSCP", value);
 			return 0;
 	}
@@ -445,6 +459,7 @@ static int set_IPDiagnosticsTraceRoute_MaxHopCount(char *refparam, struct dmctx 
 			return 0;
 		case VALUESET:
 			TRACEROUTE_STOP
+			reset_diagnostic_state("traceroute");
 			set_diagnostics_option("traceroute", "MaxHops", value);
 			return 0;
 	}
@@ -533,6 +548,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct
 			return 0;
 		case VALUESET:
 			DOWNLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("download");
 			set_diagnostics_interface_option(ctx, "download", value);
 			return 0;
 	}
@@ -554,6 +570,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DownloadURL(char *refparam, stru
 			return 0;
 		case VALUESET:
 			DOWNLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("download");
 			set_diagnostics_option("download", "url", value);
 			return 0;
 	}
@@ -587,6 +604,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DSCP(char *refparam, struct dmct
 			return 0;
 		case VALUESET:
 			DOWNLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("download");
 			set_diagnostics_option("download", "DSCP", value);
 			return 0;
 	}
@@ -608,6 +626,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_EthernetPriority(char *refparam,
 			return 0;
 		case VALUESET:
 			DOWNLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("download");
 			set_diagnostics_option("download", "ethernetpriority", value);
 			return 0;
 	}
@@ -629,6 +648,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_ProtocolVersion(char *refparam, 
 			return 0;
 		case VALUESET:
 			DOWNLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("download");
 			set_diagnostics_option("download", "ProtocolVersion", value);
 			return 0;
 	}
@@ -650,6 +670,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_NumberOfConnections(char *refpar
 			return 0;
 		case VALUESET:
 			DOWNLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("download");
 			set_diagnostics_option("download", "NumberOfConnections", value);
 			return 0;
 	}
@@ -752,6 +773,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_EnablePerConnectionResults(char 
 			return 0;
 		case VALUESET:
 			DOWNLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("download");
 			set_diagnostics_option("download", "EnablePerConnection", value);
 			return 0;
 	}
@@ -852,6 +874,7 @@ static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct d
 			return 0;
 		case VALUESET:
 			UPLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("upload");
 			set_diagnostics_interface_option(ctx, "upload", value);
 			return 0;
 	}
@@ -873,6 +896,7 @@ static int set_IPDiagnosticsUploadDiagnostics_UploadURL(char *refparam, struct d
 			return 0;
 		case VALUESET:
 			UPLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("upload");
 			set_diagnostics_option("upload", "url", value);
 			return 0;
 	}
@@ -900,6 +924,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DSCP(char *refparam, struct dmctx 
 			return 0;
 		case VALUESET:
 			UPLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("upload");
 			set_diagnostics_option("upload", "DSCP", value);
 			return 0;
 	}
@@ -921,6 +946,7 @@ static int set_IPDiagnosticsUploadDiagnostics_EthernetPriority(char *refparam, s
 			return 0;
 		case VALUESET:
 			UPLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("upload");
 			set_diagnostics_option("upload", "ethernetpriority", value);
 			return 0;
 	}
@@ -942,6 +968,7 @@ static int set_IPDiagnosticsUploadDiagnostics_TestFileLength(char *refparam, str
 			return 0;
 		case VALUESET:
 			UPLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("upload");
 			set_diagnostics_option("upload", "TestFileLength", value);
 			return 0;
 	}
@@ -963,6 +990,7 @@ static int set_IPDiagnosticsUploadDiagnostics_ProtocolVersion(char *refparam, st
 			return 0;
 		case VALUESET:
 			UPLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("upload");
 			set_diagnostics_option("upload", "ProtocolVersion", value);
 			return 0;
 	}
@@ -984,6 +1012,7 @@ static int set_IPDiagnosticsUploadDiagnostics_NumberOfConnections(char *refparam
 			return 0;
 		case VALUESET:
 			UPLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("upload");
 			set_diagnostics_option("upload", "NumberOfConnections", value);
 			return 0;
 	}
@@ -1086,6 +1115,7 @@ static int set_IPDiagnosticsUploadDiagnostics_EnablePerConnectionResults(char *r
 			return 0;
 		case VALUESET:
 			UPLOAD_DIAGNOSTIC_STOP
+			reset_diagnostic_state("upload");
 			set_diagnostics_option("upload", "EnablePerConnection", value);
 			return 0;
 	}
@@ -1187,6 +1217,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct 
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
+			reset_diagnostic_state("udpechodiag");
 			set_diagnostics_interface_option(ctx, "udpechodiag", value);
 			return 0;
 	}
@@ -1208,6 +1239,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Host(char *refparam, struct dmctx
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
+			reset_diagnostic_state("udpechodiag");
 			set_diagnostics_option("udpechodiag", "Host", value);
 			return 0;
 	}
@@ -1229,6 +1261,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Port(char *refparam, struct dmctx
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
+			reset_diagnostic_state("udpechodiag");
 			set_diagnostics_option("udpechodiag", "port", value);
 			return 0;
 	}
@@ -1250,6 +1283,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_NumberOfRepetitions(char *refpara
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
+			reset_diagnostic_state("udpechodiag");
 			set_diagnostics_option("udpechodiag", "NumberOfRepetitions", value);
 			return 0;
 	}
@@ -1271,6 +1305,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Timeout(char *refparam, struct dm
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
+			reset_diagnostic_state("udpechodiag");
 			set_diagnostics_option("udpechodiag", "Timeout", value);
 			return 0;
 	}
@@ -1292,6 +1327,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DataBlockSize(char *refparam, str
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
+			reset_diagnostic_state("udpechodiag");
 			set_diagnostics_option("udpechodiag", "DataBlockSize", value);
 			return 0;
 	}
@@ -1313,6 +1349,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DSCP(char *refparam, struct dmctx
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
+			reset_diagnostic_state("udpechodiag");
 			set_diagnostics_option("udpechodiag", "DSCP", value);
 			return 0;
 	}
@@ -1334,6 +1371,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_InterTransmissionTime(char *refpa
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
+			reset_diagnostic_state("udpechodiag");
 			set_diagnostics_option("udpechodiag", "InterTransmissionTime", value);
 			return 0;
 	}
@@ -1355,6 +1393,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_ProtocolVersion(char *refparam, s
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
+			reset_diagnostic_state("udpechodiag");
 			set_diagnostics_option("udpechodiag", "ProtocolVersion", value);
 			return 0;
 	}
@@ -1437,6 +1476,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam,
 			return 0;
 		case VALUESET:
 			SERVERSELECTION_STOP
+			reset_diagnostic_state("serverselection");
 			set_diagnostics_interface_option(ctx, "serverselection", value);
 			return 0;
 	}
@@ -1458,6 +1498,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_ProtocolVersion(char *ref
 			return 0;
 		case VALUESET:
 			SERVERSELECTION_STOP
+			reset_diagnostic_state("serverselection");
 			set_diagnostics_option("serverselection", "ProtocolVersion", value);
 			return 0;
 	}
@@ -1479,6 +1520,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Protocol(char *refparam, 
 			return 0;
 		case VALUESET:
 			SERVERSELECTION_STOP
+			reset_diagnostic_state("serverselection");
 			set_diagnostics_option("serverselection", "Protocol", value);
 			return 0;
 	}
@@ -1499,6 +1541,8 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_HostList(char *refparam, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			SERVERSELECTION_STOP
+			reset_diagnostic_state("serverselection");
 			set_diagnostics_option("serverselection", "HostList", value);
 			return 0;
 	}
@@ -1520,6 +1564,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_NumberOfRepetitions(char 
 			return 0;
 		case VALUESET:
 			SERVERSELECTION_STOP
+			reset_diagnostic_state("serverselection");
 			set_diagnostics_option("serverselection", "NumberOfRepetitions", value);
 			return 0;
 	}
@@ -1541,6 +1586,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Timeout(char *refparam, s
 			return 0;
 		case VALUESET:
 			SERVERSELECTION_STOP
+			reset_diagnostic_state("serverselection");
 			set_diagnostics_option("serverselection", "Timeout", value);
 			return 0;
 	}

@@ -608,6 +608,7 @@ static int set_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, 
 			return 0;
 		case VALUESET:
 			NSLOOKUP_STOP
+			reset_diagnostic_state("nslookup");
 			set_diagnostics_interface_option(ctx, "nslookup", value);
 			return 0;
 	}
@@ -623,6 +624,7 @@ static int set_nslookupdiagnostics_host_name(char *refparam, struct dmctx *ctx, 
 			return 0;
 		case VALUESET:
 			NSLOOKUP_STOP
+			reset_diagnostic_state("nslookup");
 			set_diagnostics_option("nslookup", "HostName", value);
 			return 0;
 	}
@@ -638,6 +640,7 @@ static int set_nslookupdiagnostics_d_n_s_server(char *refparam, struct dmctx *ct
 			return 0;
 		case VALUESET:
 			NSLOOKUP_STOP
+			reset_diagnostic_state("nslookup");
 			set_diagnostics_option("nslookup", "DNSServer", value);
 			return 0;
 	}
@@ -653,6 +656,7 @@ static int set_nslookupdiagnostics_timeout(char *refparam, struct dmctx *ctx, vo
 			return 0;
 		case VALUESET:
 			NSLOOKUP_STOP
+			reset_diagnostic_state("nslookup");
 			set_diagnostics_option("nslookup", "Timeout", value);
 			return 0;
 	}
@@ -668,6 +672,7 @@ static int set_nslookupdiagnostics_number_of_repetitions(char *refparam, struct 
 			return 0;
 		case VALUESET:
 			NSLOOKUP_STOP
+			reset_diagnostic_state("nslookup");
 			set_diagnostics_option("nslookup", "NumberOfRepetitions", value);
 			return 0;
 	}

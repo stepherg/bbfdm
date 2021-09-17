@@ -42,6 +42,14 @@ void set_diagnostics_option(char *sec_name, char *option, char *value)
 	dmuci_set_value_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, option, value);
 }
 
+void reset_diagnostic_state(char *sec_name)
+{
+	char *diag_state = get_diagnostics_option(sec_name, "DiagnosticState");
+	if (strcmp(diag_state, "Requested") != 0) {
+		set_diagnostics_option(sec_name, "DiagnosticState", "None");
+	}
+}
+
 void init_diagnostics_operation(char *sec_name, char *operation_path)
 {
 	check_create_dmmap_package(DMMAP_DIAGNOSTIGS);

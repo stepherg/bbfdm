@@ -67,6 +67,7 @@ enum diagnostic_type {
 char *get_diagnostics_option(char *sec_name, char *option);
 char *get_diagnostics_option_fallback_def(char *sec_name, char *option, char *default_value);
 void set_diagnostics_option(char *sec_name, char *option, char *value);
+void reset_diagnostic_state(char *sec_name);
 void init_diagnostics_operation(char *sec_name, char *operation_path);
 void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value);
 int start_upload_download_diagnostic(int diagnostic_type);
