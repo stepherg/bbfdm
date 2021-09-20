@@ -627,7 +627,7 @@ static void http_download_per_packet(libtrace_packet_t *packet)
 		return;
 
 	struct timeval http_download_ts = trace_get_timeval(packet);
-	localtime_r(&(http_download_ts.tv_sec), &http_download_lt);
+	gmtime_r(&(http_download_ts.tv_sec), &http_download_lt);
 	strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%S", &http_download_lt);
 
 	if (strcmp(tcp_flag, "SYN ") == 0 && diag_stats.random_seq == 0) {
@@ -655,24 +655,32 @@ static void http_download_per_packet(libtrace_packet_t *packet)
 
 	if (strcmp(tcp_flag, "ACK ") == 0 && ntohl(tcp->ack_seq) == diag_stats.ack_seq && diag_stats.first_data == 0) {
 		snprintf(diag_stats.bomtime, sizeof(diag_stats.bomtime), "%s.%06ldZ", s_now, (long) http_download_ts.tv_usec);
-		char *val = strstr(nexthdr,"Content-Length");
-		char *pch, *pchr;
-		val += strlen("Content-Length: ");
-		pch = strtok_r(val, " \r\n\t", &pchr);
-		diag_stats.test_bytes_received = atoi(pch);
-		diag_stats.first_data = 1;
-		return;
+		char *val = strstr(nexthdr, "Content-Length");
+		if (val) {
+			char *pch, *pchr;
+
+			diag_stats.test_bytes_received = strlen(nexthdr);
+			val += strlen("Content-Length: ");
+			pch = strtok_r(val, " \r\n\t", &pchr);
+			diag_stats.test_bytes_received += atoi(pch);
+			diag_stats.first_data = 1;
+			return;
+		}
 	}
 
 	if ((strcmp(tcp_flag, "PSH ACK ") == 0 || strcmp(tcp_flag, "FIN PSH ACK ") == 0) &&  ntohl(tcp->ack_seq) == diag_stats.ack_seq) {
 		if (diag_stats.first_data == 0) {
 			snprintf(diag_stats.bomtime, sizeof(diag_stats.bomtime), "%s.%06ldZ", s_now, (long) http_download_ts.tv_usec);
-			char *val = strstr(nexthdr,"Content-Length");
-			char *pch, *pchr;
-			val += strlen("Content-Length: ");
-			pch = strtok_r(val, " \r\n\t", &pchr);
-			diag_stats.test_bytes_received = atoi(pch);
-			diag_stats.first_data = 1;
+			char *val = strstr(nexthdr, "Content-Length");
+			if (val) {
+				char *pch, *pchr;
+
+				diag_stats.test_bytes_received = strlen(nexthdr);
+				val += strlen("Content-Length: ");
+				pch = strtok_r(val, " \r\n\t", &pchr);
+				diag_stats.test_bytes_received = atoi(pch);
+				diag_stats.first_data = 1;
+			}
 		}
 		snprintf(diag_stats.eomtime, sizeof(diag_stats.eomtime), "%s.%06ldZ", s_now, (long) http_download_ts.tv_usec);
 		read_next = 0;
@@ -690,7 +698,7 @@ static void ftp_download_per_packet(libtrace_packet_t *packet)
 		return;
 
 	struct timeval ftp_download_ts = trace_get_timeval(packet);
-	localtime_r(&(ftp_download_ts.tv_sec), &ftp_download_lt);
+	gmtime_r(&(ftp_download_ts.tv_sec), &ftp_download_lt);
 	strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%S", &ftp_download_lt);
 
 	if (strcmp(tcp_flag, "PSH ACK ") == 0 && strlen(nexthdr) > strlen(FTP_SIZE_RESPONSE) && strncmp(nexthdr, FTP_SIZE_RESPONSE, strlen(FTP_SIZE_RESPONSE)) == 0) {
@@ -756,7 +764,7 @@ static void http_upload_per_packet(libtrace_packet_t *packet)
 		return;
 
 	struct timeval http_upload_ts = trace_get_timeval(packet);
-	localtime_r(&(http_upload_ts.tv_sec), &http_upload_lt);
+	gmtime_r(&(http_upload_ts.tv_sec), &http_upload_lt);
 	strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%S", &http_upload_lt);
 
 	if (strcmp(tcp_flag, "SYN ") == 0 && diag_stats.random_seq == 0) {
@@ -829,7 +837,7 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 	}
 
 	struct timeval ftp_upload_ts = trace_get_timeval(packet);
-	localtime_r(&(ftp_upload_ts.tv_sec), &ftp_upload_lt);
+	gmtime_r(&(ftp_upload_ts.tv_sec), &ftp_upload_lt);
 	strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%S", &ftp_upload_lt);
 
 	if (strcmp(tcp_flag, "SYN ") == 0 && diag_stats.ftp_syn == 1) {
