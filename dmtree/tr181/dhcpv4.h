@@ -14,6 +14,10 @@
 
 #include <libbbf_api/dmcommon.h>
 
+#define DHCP_OPTION_VENDORID 60
+#define DHCP_OPTION_CLIENTID 61
+#define DHCP_OPTION_HOSTNAME 12
+
 extern DMOBJ tDHCPv4Obj[];
 extern DMOBJ tDHCPv4ServerObj[];
 extern DMOBJ tDHCPv4ServerPoolObj[];

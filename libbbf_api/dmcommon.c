@@ -1363,6 +1363,34 @@ int dm_time_format(time_t ts, char **dst)
 	return 0;
 }
 
+void convert_string_to_hex(char *str, char *hex, int size)
+{
+	int i, j, len = strlen(str);
+	for (i = 0, j = 0; j < size-2, i < len ; i++, j += 2) {
+		sprintf((char *)hex + j, "%02X", str[i]);
+	}
+	hex[j] = '\0';
+}
+
+void convert_hex_to_string(char *hex, char *str, int size)
+{
+	int i=0, j, len = strlen(hex);
+	char buf[3] = {0};
+
+	for (i = 0, j = 0; j < size-1, hex[i] != '\0'; i += 2, j++) {
+		if(!isxdigit(hex[i]))
+		{
+			i--;
+			j--;
+			continue;
+		}
+		strncpy(buf, &hex[i], 2);
+		buf[2] = '\0';
+		sprintf((char*)str + j, "%c", (char)strtol(buf, NULL, 16));
+	}
+	str[j] = '\0';
+}
+
 bool match(const char *string, const char *pattern)
 {
 	regex_t re;
