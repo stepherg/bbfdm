@@ -1,0 +1,32 @@
+{
+	"status": "lower_layer_down",
+	"link_encapsulation_used": "auto",
+	"curr_rate": {
+		"us": 4294967295,
+		"ds": 4294967295
+	},
+	"actndr": {
+		"us": 0,
+		"ds": 0
+	},
+	"link_encapsulation_supported": [
+		"adsl2_atm",
+		"adsl2_ptm",
+		"vdsl2_atm",
+		"vdsl2_ptm",
+		"auto"
+	],
+	"lpath": 0,
+	"intlvdepth": 0,
+	"intlvblock": 0,
+	"actual_interleaving_delay": 0,
+	"actinp": 0,
+	"inpreport": false,
+	"nfec": 0,
+	"rfec": -1,
+	"lsymb": 0,
+	"actinprein": {
+		"us": 0,
+		"ds": 0
+	}
+}

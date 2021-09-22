@@ -1,0 +1,111 @@
+{
+	"status": "down",
+	"upstream": true,
+	"firmware_version": "A2pvfbH045q.d27l_rc4",
+	"link_status": "no_signal",
+	"xtse_used": [
+		"00",
+		"00",
+		"00",
+		"00",
+		"00",
+		"00",
+		"00",
+		"00"
+	],
+	"current_profile": "unknown",
+	"power_management_state": "l3",
+	"max_bit_rate": {
+		"us": 0,
+		"ds": 0
+	},
+	"line_encoding": "dmt",
+	"xtse": [
+		"0d",
+		"03",
+		"0c",
+		"00",
+		"c0",
+		"03",
+		"0c",
+		"01"
+	],
+	"standards_supported": [
+		"t1413",
+		"gdmt_annexa",
+		"glite",
+		"adsl2_annexa",
+		"adsl2_annexm",
+		"adsl2p_annexa",
+		"adsl2p_annexm",
+		"vdsl2_annexa"
+	],
+	"allowed_profiles": [
+		"8a",
+		"8b",
+		"8c",
+		"8d",
+		"12a",
+		"12b",
+		"17a",
+		"30a"
+	],
+	"success_failure_cause": 0,
+	"upbokler_pb": [
+		
+	],
+	"rxthrsh_ds": [
+		0
+	],
+	"act_ra_mode": {
+		"us": 1,
+		"ds": 1
+	},
+	"snr_mroc_us": 0,
+	"last_state_transmitted": {
+		"us": 0,
+		"ds": 0
+	},
+	"us0_mask": 8323072,
+	"trellis": {
+		"us": 0,
+		"ds": 0
+	},
+	"act_snr_mode": {
+		"us": 0,
+		"ds": 0
+	},
+	"line_number": 1,
+	"noise_margin": {
+		"us": 0,
+		"ds": 0
+	},
+	"snr_mpb_us": [
+		0,
+		0,
+		0,
+		0
+	],
+	"snr_mpb_ds": [
+		0,
+		0,
+		0,
+		0
+	],
+	"attenuation": {
+		"us": 0,
+		"ds": 0
+	},
+	"power": {
+		"us": -512,
+		"ds": 0
+	},
+	"xtur_vendor": "00000000",
+	"xtur_country": "0000",
+	"xtur_ansi_std": 0,
+	"xtur_ansi_rev": 0,
+	"xtuc_vendor": "00000000",
+	"xtuc_country": "0000",
+	"xtuc_ansi_std": 0,
+	"xtuc_ansi_rev": 0
+}

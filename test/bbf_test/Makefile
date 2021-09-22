@@ -1,16 +1,22 @@
 LIB = libbbf_test.so
+BIN = bbf_dm
 
+BIN_OBJ = bbf_dm.o
 LIB_OBJS = libbbf_test.o
-LIB_CFLAGS = $(CFLAGS) -Wall -Werror -fPIC
+LIB_CFLAGS = $(CFLAGS) -fPIC -I /usr/local/include/
 LIB_LDFLAGS = $(LDFLAGS) -lbbf_api
+BIN_LDFLAGS = $(LDFLAGS) -lbbfdm
 
 %.o: %.c
-	$(CC) $(PROG_CFLAGS) $(FPIC) -c -o $@ $<
+	$(CC) $(LIB_CFLAGS) $(FPIC) -c -o $@ $<
 
-all: $(LIB)
+all: $(LIB) $(BIN)
 
 $(LIB): $(LIB_OBJS)
 	$(CC) $(LIB_CFLAGS) $(LIB_LDFLAGS) -shared -o $@ $^
 
+$(BIN): $(BIN_OBJ)
+	$(CC) -o $@ $^ $(BIN_LDFLAGS)
+
 clean:
-	rm -fv *.o $(LIB)
+	rm -fv *.o $(LIB) $(BIN)

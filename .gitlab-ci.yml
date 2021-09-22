@@ -8,6 +8,7 @@ stages:
     - functional_test
     - functional_api_test
     - tools_test
+    - memory_test
     - uspd
 
 variables:
@@ -69,6 +70,24 @@ run_tools_test:
           - tools/out/datamodel_default.xml
           - tools/out/datamodel_hdm.xml
           - tools/out/datamodel.xls
+
+run_memory_test:
+  stage: memory_test
+  image: iopsys/code-analysis:latest
+  allow_failure: false
+  script:
+  - "./gitlab-ci/setup.sh"
+  - "./gitlab-ci/memory-test.sh"
+
+  artifacts:
+      when: always
+      paths:
+          - timestamp.log
+          - memory-report-get.xml
+          - memory-report-operate.xml
+          - memory-report-schema.xml
+          - memory-report-instances.xml
+          - memory-test-coverage.xml
 
 run_uspd:
   stage: uspd

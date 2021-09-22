@@ -38,4 +38,5 @@ tools/*.pyc
 tools/__pycache__
 *.gcov
 *.gcno
-*.log
+*\.log
+.libs

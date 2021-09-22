@@ -1,0 +1,44 @@
+{
+        "base": [
+                {
+                        "id": 1,
+                        "status": "up",
+                        "standard": "CAT-iq 3.0",
+                        "rfpi": "036CD3AAC8",
+                        "subscription_enabled": true,
+                        "firmware_version": "410",
+                        "eeprom_version": "6DEE",
+                        "hardware_version": "DCX81 Version C"
+                }
+        ],
+        "handsets": [
+                {
+                        "id": 1,
+                        "status": "up",
+                        "registration_status": "In reach",
+                        "ipui": "02FED686D3",
+                        "ipui_length": 40,
+                        "base_id": 1,
+                        "portable_type": "CAT-iq 2",
+                        "subscription_time": "2021-09-02T08:57:57Z",
+                        "hardware_version": "X65_BT_HW0.3",
+                        "software_version": "X65_BT_H31029",
+                        "software_upgrade": "true",
+                        "last_update_datetime": "0001-01-01T00:00:00Z"
+                },
+                {
+                        "id": 2,
+                        "status": "up",
+                        "registration_status": "in reach",
+                        "ipui": "02FED6860E",
+                        "ipui_length": 40,
+                        "base_id": 1,
+                        "portable_type": "CAT-iq 2",
+                        "subscription_time": "2021-09-02T09:50:11Z",
+                        "hardware_version": "X65_BT_HW0.3",
+                        "software_version": "X65_BT_H31029",
+                        "software_upgrade": "true",
+                        "last_update_datetime": "0001-01-01T00:00:00Z"
+                }
+        ]
+}
