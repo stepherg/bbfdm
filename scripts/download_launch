@@ -7,7 +7,7 @@ source /usr/share/bbfdm/bbf_uci_api
 
 CAPTURE_FILE="/tmp/download_dump"
 DOWNLOAD_DIAGNOSTIC_FILE="/tmp/bbfdm_download_diagnostic"
-CONNECTION_TIMEOUT=10
+CONNECTION_TIMEOUT=60
 
 download_launch() {
 	local proto tx_bytes_before rx_bytes_before time1 tx_bytes_after rx_bytes_after time2 periodtime error_code

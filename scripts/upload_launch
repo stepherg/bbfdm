@@ -7,7 +7,7 @@ source /usr/share/bbfdm/bbf_uci_api
 
 CAPTURE_FILE="/tmp/upload_dump"
 UPLOAD_DIAGNOSTIC_FILE="/tmp/bbfdm_upload_diagnostic.bin"
-CONNECTION_TIMEOUT=10
+CONNECTION_TIMEOUT=60
 
 upload_launch() {
 	local proto tx_bytes_before rx_bytes_before time1 tx_bytes_after rx_bytes_after time2 res ba stc periodtime

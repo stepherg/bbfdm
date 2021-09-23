@@ -668,20 +668,7 @@ static void http_download_per_packet(libtrace_packet_t *packet)
 		}
 	}
 
-	if ((strcmp(tcp_flag, "PSH ACK ") == 0 || strcmp(tcp_flag, "FIN PSH ACK ") == 0) &&  ntohl(tcp->ack_seq) == diag_stats.ack_seq) {
-		if (diag_stats.first_data == 0) {
-			snprintf(diag_stats.bomtime, sizeof(diag_stats.bomtime), "%s.%06ldZ", s_now, (long) http_download_ts.tv_usec);
-			char *val = strstr(nexthdr, "Content-Length");
-			if (val) {
-				char *pch, *pchr;
-
-				diag_stats.test_bytes_received = strlen(nexthdr);
-				val += strlen("Content-Length: ");
-				pch = strtok_r(val, " \r\n\t", &pchr);
-				diag_stats.test_bytes_received = atoi(pch);
-				diag_stats.first_data = 1;
-			}
-		}
+	if (strcmp(tcp_flag, "FIN ACK ") == 0) {
 		snprintf(diag_stats.eomtime, sizeof(diag_stats.eomtime), "%s.%06ldZ", s_now, (long) http_download_ts.tv_usec);
 		read_next = 0;
 		return;
@@ -1003,6 +990,10 @@ int start_upload_download_diagnostic(int diagnostic_type)
 				extract_stats(DOWNLOAD_DUMP_FILE, DIAGNOSTIC_HTTP, DOWNLOAD_DIAGNOSTIC);
 			if (strncmp(url, FTP_URI, strlen(FTP_URI)) == 0)
 				extract_stats(DOWNLOAD_DUMP_FILE, DIAGNOSTIC_FTP, DOWNLOAD_DIAGNOSTIC);
+
+			if (file_exists(DOWNLOAD_DUMP_FILE))
+				remove(DOWNLOAD_DUMP_FILE);
+
 		} else if (status && strncmp(status, "Error_", strlen("Error_")) == 0)
 			return -1;
 	} else {
@@ -1022,6 +1013,10 @@ int start_upload_download_diagnostic(int diagnostic_type)
 				extract_stats(UPLOAD_DUMP_FILE, DIAGNOSTIC_HTTP, UPLOAD_DIAGNOSTIC);
 			if (strncmp(url, FTP_URI, strlen(FTP_URI)) == 0)
 				extract_stats(UPLOAD_DUMP_FILE, DIAGNOSTIC_FTP, UPLOAD_DIAGNOSTIC);
+
+			if (file_exists(UPLOAD_DUMP_FILE))
+				remove(UPLOAD_DUMP_FILE);
+
 		} else if (status && strncmp(status, "Error_", strlen("Error_")) == 0)
 			return -1;
 	}
