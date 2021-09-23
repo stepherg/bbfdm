@@ -1,0 +1,91 @@
+{
+	"line": [
+		{
+			"id": 1,
+			"bytes_sent": 0,
+			"bytes_received": 0,
+			"packets_sent": 0,
+			"packets_received": 0,
+			"errors_sent": 0,
+			"errors_received": 0,
+			"discard_packets_sent": 0,
+			"discard_packets_received": 0,
+			"total_start": 0,
+			"showtime_start": 0,
+			"last_showtime_start": 8438,
+			"current_day_start": 0,
+			"quarter_hour_start": 0,
+			"total": {
+				"errored_secs": 0,
+				"severely_errored_secs": 0,
+				"loss": 0,
+				"lors": 0,
+				"uas": 0,
+				"rtx_uc": 0,
+				"rtx_tx": 0,
+				"success_bsw": 0,
+				"success_sra": 0,
+				"success_fra": 0,
+				"success_rpa": 4,
+				"success_tiga": 0
+			},
+			"showtime": {
+				"errored_secs": 0,
+				"severely_errored_secs": 0,
+				"loss": 0,
+				"lors": 0,
+				"uas": 0,
+				"rtx_uc": 0,
+				"rtx_tx": 0,
+				"success_bsw": 0,
+				"success_sra": 0,
+				"success_fra": 0,
+				"success_rpa": 338,
+				"success_tiga": 0
+			},
+			"lastshowtime": {
+				"errored_secs": 4294967295,
+				"severely_errored_secs": 4294967295,
+				"loss": 4294967295,
+				"lors": 4294967295,
+				"uas": 4294967295,
+				"rtx_uc": 4294967295,
+				"rtx_tx": 4294967295,
+				"success_bsw": 4294967295,
+				"success_sra": 4294967295,
+				"success_fra": 4294967295,
+				"success_rpa": 4294967295,
+				"success_tiga": 4294967295
+			},
+			"currentday": {
+				"errored_secs": 0,
+				"severely_errored_secs": 0,
+				"loss": 0,
+				"lors": 0,
+				"uas": 0,
+				"rtx_uc": 0,
+				"rtx_tx": 0,
+				"success_bsw": 0,
+				"success_sra": 0,
+				"success_fra": 0,
+				"success_rpa": 0,
+				"success_tiga": 0
+			},
+			"quarterhour": {
+				"errored_secs": 0,
+				"severely_errored_secs": 0,
+				"loss": 0,
+				"lors": 0,
+				"uas": 0,
+				"rtx_uc": 0,
+				"rtx_tx": 0,
+				"success_bsw": 0,
+				"success_sra": 0,
+				"success_fra": 0,
+				"success_rpa": 0,
+				"success_tiga": 0
+			}
+		}
+	]
+}
+

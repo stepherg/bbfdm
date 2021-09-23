@@ -1,0 +1,67 @@
+{
+	"line": [
+		{
+			"id": 1,
+			"status": "down",
+			"upstream": true,
+			"firmware_version": "A2pvfbH046w.d27l2",
+			"link_status": "no_signal",
+			"current_profile": "unknown",
+			"power_management_state": "l3",
+			"max_bit_rate": {
+				"us": 0,
+				"ds": 0
+			},
+			"allowed_profiles": [
+				
+			],
+			"success_failure_cause": 0,
+			"upbokler": 0,
+			"last_transmitted_signal": {
+				"us": 0,
+				"ds": 0
+			},
+			"upbokle": 0,
+			"line_number": 1,
+			"noise_margin": {
+				"us": 0,
+				"ds": 0
+			},
+			"attenuation": {
+				"us": 0,
+				"ds": 0
+			},
+			"power": {
+				"us": -512,
+				"ds": 0
+			},
+			"snrm_rmc": {
+				"us": 0,
+				"ds": 0
+			},
+			"bits_rmc_ps_ds": [
+				
+			],
+			"bits_rmc_ps_us": [
+				
+			],
+			"fext_to_cancel_enable": {
+				"us": false,
+				"ds": false
+			},
+			"etr": {
+				"us": 0,
+				"ds": 0
+			},
+			"att_etr": {
+				"us": 0,
+				"ds": 0
+			},
+			"min_eftr": {
+				"us": 0,
+				"ds": 0
+			}
+		}
+	]
+}
+

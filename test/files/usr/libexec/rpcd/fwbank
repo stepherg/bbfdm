@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. /usr/share/libubox/jshn.sh
+
+case "$1" in
+        list)
+                echo '{ "dump" : {} }'
+        ;;
+        call)
+                case "$2" in
+                        dump)
+                                cat /tmp/fwbank.data 2>/dev/null
+                        ;;
+                esac
+        ;;
+esac
+

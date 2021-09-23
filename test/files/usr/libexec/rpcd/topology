@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. /usr/share/libubox/jshn.sh
+
+case "$1" in
+        list)
+                echo '{ "hosts" : {} }'
+        ;;
+        call)
+                case "$2" in
+                        hosts)
+                                cat /tmp/topology_hosts.data 2>/dev/null
+                        ;;
+                esac
+        ;;
+esac
+

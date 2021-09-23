@@ -1,0 +1,24 @@
+{
+	"bank": [
+		{
+			"name": "A",
+			"id": 1,
+			"active": true,
+			"boot": true,
+			"upgrade": false,
+			"fwver": "DG400PRIME-A-IOPSYS-6.3.0BETA1-210908_1319",
+			"swver": "6.3.0BETA1",
+			"status": "Active"
+		},
+		{
+			"name": "B",
+			"id": 2,
+			"active": false,
+			"boot": false,
+			"upgrade": true,
+			"fwver": "DG400PRIME-A-IOPSYS-6.2.0RC1-210624_0041",
+			"swver": "6.2.0RC1",
+			"status": "Available"
+		}
+	]
+}

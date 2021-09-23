@@ -1,0 +1,29 @@
+
+config owsd 'global'
+	option enable '0'
+	option www '/www'
+
+config ubusproxy 'ubusproxy'
+	option enable '0'
+	list object 'netmode'
+
+config owsd-listen 'loopback'
+	option port '80'
+	option interface 'loopback'
+	option ipv6 'on'
+	option whitelist_interface_as_origin '1'
+
+config owsd-listen 'lan'
+	option port '80'
+	option interface 'lan'
+	option ipv6 'on'
+	option ipv6only 'off'
+	option whitelist_interface_as_origin '1'
+	option whitelist_dhcp_domains '1'
+
+config owsd-listen 'wan'
+	option port '80'
+	option interface 'wan'
+	option ipv6 'on'
+	option whitelist_interface_as_origin '1'
+

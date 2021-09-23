@@ -1,0 +1,20 @@
+#!/bin/sh
+
+. /usr/share/libubox/jshn.sh
+
+case "$1" in
+        list)
+                echo '{ "status" : {}, "stats" : {} }'
+        ;;
+        call)
+                case "$2" in
+                        status)
+                                cat /tmp/fast_status.data 2>/dev/null
+                        ;;
+                        stats)
+                                cat /tmp/fast_stats.data 2>/dev/null
+                        ;;
+                esac
+        ;;
+esac
+
