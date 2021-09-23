@@ -433,6 +433,26 @@ end:
 	return res;
 }
 
+int bbf_upload_log(const char *url, const char *username, const char *password,
+                char *config_name, const char *command, const char *obj_path)
+{
+	int res = 0;
+
+        // Upload the config file
+	time_t start_time = time(NULL);
+	long res_code = upload_file(config_name, url, username, password);
+	time_t complete_time = time(NULL);
+
+	// Send Transfer Complete Event
+	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, "Upload");
+
+	// Check if the upload operation was successful
+	if (!get_response_code_status(url, res_code)) {
+		res = -1;
+	}
+
+	return res;
+}
 int bbf_config_restore(const char *url, const char *username, const char *password,
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
 		const char *command, const char *obj_path)

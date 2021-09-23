@@ -71,6 +71,8 @@ void reset_diagnostic_state(char *sec_name);
 void init_diagnostics_operation(char *sec_name, char *operation_path);
 void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value);
 int start_upload_download_diagnostic(int diagnostic_type);
+int bbf_upload_log(const char *url, const char *username, const char *password,
+		char *config_name, const char *command, const char *obj_path);
 int bbf_config_backup(const char *url, const char *username, const char *password,
 		char *config_name, const char *command, const char *obj_path);
 int bbf_config_restore(const char *url, const char *username, const char *password,

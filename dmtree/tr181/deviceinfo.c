@@ -811,6 +811,44 @@ static int get_process_state(char* refparam, struct dmctx *ctx, void *data, char
 /*************************************************************
  * OPERATE COMMANDS
  *************************************************************/
+static operation_args vendor_log_file_upload_args = {
+    .in = (const char *[]) {
+        "URL",
+        "Username",
+        "Password",
+        NULL
+    }
+};
+
+static int get_operate_args_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&vendor_log_file_upload_args;
+	return 0;
+}
+static int operate_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char upload_path[256] = {'\0'};
+	char upload_command[32] = {'\0'};
+	char *vlf_file_path = NULL;
+
+	char *ret = strrchr(refparam, '.');
+	strncpy(upload_path, refparam, ret - refparam +1);
+	DM_STRNCPY(upload_command, ret+1, sizeof(upload_command));
+
+	char *user = dmjson_get_value((json_object *)value, 1, "Username");
+	char *pass = dmjson_get_value((json_object *)value, 1, "Password");
+	char *url = dmjson_get_value((json_object *)value, 1, "URL");
+
+	if (url[0] == '\0')
+		return CMD_INVALID_ARGUMENTS;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "log_file", &vlf_file_path);
+
+	int res = bbf_upload_log(url, user, pass, vlf_file_path, upload_command, upload_path);
+
+	return res ? CMD_FAIL : CMD_SUCCESS;
+}
+
 static operation_args vendor_config_file_backup_args = {
 	.in = (const char *[]) {
 		"URL",
@@ -1074,6 +1112,7 @@ DMLEAF tDeviceInfoVendorLogFileParams[] = {
 {"Name", &DMREAD, DMT_STRING, get_vlf_name, NULL, BBFDM_BOTH},
 {"MaximumSize", &DMREAD, DMT_UNINT, get_vlf_max_size, NULL, BBFDM_BOTH},
 {"Persistent", &DMREAD, DMT_BOOL, get_vlf_persistent, NULL, BBFDM_BOTH},
+{"Upload()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoVendorLogFile_Upload, operate_DeviceInfoVendorLogFile_Upload, BBFDM_USP},
 {0}
 };
 
