@@ -390,6 +390,39 @@ static int get_ServicesVoiceServiceDECTPortable_LastUpdateDateTime(char *refpara
 	return 0;
 }
 
+static int get_ServicesVoiceServiceDECTPortable_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *ipui = dmjson_get_value((json_object *)data, 1, "ipui");
+	dmuci_get_option_value_string("dectmngr", ipui, "name", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "DECT%s", instance);
+
+	return 0;
+}
+
+static int set_ServicesVoiceServiceDECTPortable_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *s = NULL;
+	char *ipui = NULL;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			ipui = dmjson_get_value((json_object *)data, 1, "ipui");
+			if ((s = get_origin_section_from_config("dectmngr", "handset", ipui)) == NULL) {
+				dmuci_add_section("dectmngr", "handset", &s);
+				dmuci_rename_section_by_section(s, ipui);
+			}
+
+			dmuci_set_value_by_section(s, "name", value);
+			break;
+	}
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -439,6 +472,7 @@ DMLEAF tServicesVoiceServiceDECTPortableParams[] = {
 {"SoftwareVersion", &DMREAD, DMT_STRING, get_ServicesVoiceServiceDECTPortable_SoftwareVersion, NULL, BBFDM_BOTH},
 {"SoftwareUpgrade", &DMREAD, DMT_BOOL, get_ServicesVoiceServiceDECTPortable_SoftwareUpgrade, NULL, BBFDM_BOTH},
 {"LastUpdateDateTime", &DMREAD, DMT_TIME, get_ServicesVoiceServiceDECTPortable_LastUpdateDateTime, NULL, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"Name", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceDECTPortable_Name, set_ServicesVoiceServiceDECTPortable_Name, BBFDM_BOTH},
 {0}
 };
 
