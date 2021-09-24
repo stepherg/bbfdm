@@ -6,8 +6,6 @@ stages:
     - static_code_analysis
     - unit_test
     - functional_test
-    - functional_api_test
-    - tools_test
     - memory_test
     - uspd
 
@@ -43,7 +41,7 @@ run_functional_test:
           - functional-test-coverage.xml
 
 run_functional_api_test:
-  stage: functional_api_test
+  stage: functional_test
   image: iopsys/code-analysis:latest
   allow_failure: false
   script:
@@ -57,7 +55,7 @@ run_functional_api_test:
           - functional-api-test-coverage.xml
 
 run_tools_test:
-  stage: tools_test
+  stage: unit_test
   image: iopsys/code-analysis:latest
   allow_failure: false
   script:
