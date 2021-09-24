@@ -1,0 +1,102 @@
+{
+	"accesspoints": [
+		{
+			"ssid": "ooredoo_5CAE00",
+			"bssid": "86:aa:9c:5c:ae:00",
+			"channel": 1,
+			"bandwidth": 20,
+			"encryption": "WPAPSK/WPA2PSK",
+			"ciphers": "TKIP/CCMP",
+			"band": "2.4GHz",
+			"rssi": -70,
+			"standard": "802.11b/g/n",
+			"load_stas": 0,
+			"load_utilization": 8,
+			"load_available": 31250
+		},
+		{
+			"ssid": "IOPSYS_WLAN",
+			"bssid": "74:da:da:7a:29:59",
+			"channel": 6,
+			"bandwidth": 20,
+			"encryption": "WPA2PSK",
+			"ciphers": "CCMP",
+			"band": "2.4GHz",
+			"rssi": -54,
+			"standard": "802.11b/g/n",
+			"load_stas": 0,
+			"load_utilization": 0,
+			"load_available": 0
+		},
+		{
+			"ssid": "amin_piva",
+			"bssid": "e8:2c:6d:00:02:d4",
+			"channel": 6,
+			"bandwidth": 20,
+			"encryption": "WPA2PSK",
+			"ciphers": "CCMP",
+			"band": "2.4GHz",
+			"rssi": -50,
+			"standard": "802.11b/g/n",
+			"load_stas": 0,
+			"load_utilization": 12,
+			"load_available": 0
+		},
+		{
+			"ssid": "piva-amin",
+			"bssid": "e8:2c:6d:a5:17:94",
+			"channel": 6,
+			"bandwidth": 20,
+			"encryption": "WPA2PSK+FT",
+			"ciphers": "CCMP",
+			"band": "2.4GHz",
+			"rssi": -73,
+			"standard": "802.11b/g",
+			"load_stas": 0,
+			"load_utilization": 20,
+			"load_available": 0
+		},
+		{
+			"ssid": "IOPSYS_WLAN_2.4",
+			"bssid": "50:4e:dc:4a:c7:54",
+			"channel": 11,
+			"bandwidth": 20,
+			"encryption": "WPAPSK/WPA2PSK",
+			"ciphers": "TKIP/CCMP",
+			"band": "2.4GHz",
+			"rssi": -68,
+			"standard": "802.11b/g/n",
+			"load_stas": 0,
+			"load_utilization": 0,
+			"load_available": 0
+		},
+		{
+			"ssid": "iopsysWrt-0022076D53B6",
+			"bssid": "00:22:07:6d:53:bc",
+			"channel": 11,
+			"bandwidth": 20,
+			"encryption": "WPA2PSK",
+			"ciphers": "CCMP",
+			"band": "2.4GHz",
+			"rssi": -15,
+			"standard": "802.11b/g/n",
+			"load_stas": 0,
+			"load_utilization": 13,
+			"load_available": 0
+		},
+		{
+			"ssid": "iopsys-5399",
+			"bssid": "00:22:07:2c:53:98",
+			"channel": 11,
+			"bandwidth": 20,
+			"encryption": "WPA2PSK",
+			"ciphers": "CCMP",
+			"band": "2.4GHz",
+			"rssi": -24,
+			"standard": "802.11b/g/n",
+			"load_stas": 0,
+			"load_utilization": 22,
+			"load_available": 0
+		}
+	]
+}

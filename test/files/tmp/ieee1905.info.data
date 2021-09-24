@@ -1,0 +1,101 @@
+{
+	"version": "1905.1a",
+	"ieee1905id": "46:d4:37:71:b8:10",
+	"status": "enabled",
+	"registrar": true,
+	"registrar_band": [
+		"5GHz",
+		"2.4GHz"
+	],
+	"num_interfaces": 4,
+	"interface": [
+		{
+			"ifname": "eth1",
+			"macaddress": "44:d4:37:71:b8:10",
+			"status": "up",
+			"media": "IEEE 802_3AB_GIGABIT_ETHERNET",
+			"genphy_oui": "000000",
+			"genphy_variant": "",
+			"genphy_url": "",
+			"power": "on",
+			"num_vendor_properties": 0,
+			"properties": [
+				
+			],
+			"num_links": 0,
+			"links": [
+				
+			]
+		},
+		{
+			"ifname": "eth3",
+			"macaddress": "44:d4:37:71:b8:10",
+			"status": "up",
+			"media": "IEEE 802_3AB_GIGABIT_ETHERNET",
+			"genphy_oui": "000000",
+			"genphy_variant": "",
+			"genphy_url": "",
+			"power": "on",
+			"num_vendor_properties": 0,
+			"properties": [
+				
+			],
+			"num_links": 0,
+			"links": [
+				
+			]
+		},
+		{
+			"ifname": "wl0",
+			"macaddress": "44:d4:37:71:b8:1f",
+			"status": "up",
+			"media": "IEEE 802_11AX_5_GHZ",
+			"genphy_oui": "000000",
+			"genphy_variant": "",
+			"genphy_url": "",
+			"power": "on",
+			"num_vendor_properties": 0,
+			"properties": [
+				
+			],
+			"num_links": 0,
+			"links": [
+				
+			]
+		},
+		{
+			"ifname": "wl1",
+			"macaddress": "44:d4:37:71:b8:1e",
+			"status": "up",
+			"media": "IEEE 802_11AX_2_4_GHZ",
+			"genphy_oui": "000000",
+			"genphy_variant": "",
+			"genphy_url": "",
+			"power": "on",
+			"num_vendor_properties": 0,
+			"properties": [
+				
+			],
+			"num_links": 0,
+			"links": [
+				
+			]
+		}
+	],
+	"topology": {
+		"enabled": false,
+		"status": "available",
+		"max_changelog": 100,
+		"num_changelog": 0,
+		"last_change": "",
+		"num_device": 0,
+		"device": [
+			
+		]
+	},
+	"network_registrars": {
+		"registrar_2": "00:00:00:00:00:00",
+		"registrar_5": "00:00:00:00:00:00",
+		"registrar_60": "00:00:00:00:00:00"
+	}
+}

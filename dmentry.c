@@ -16,10 +16,12 @@
 #include "dmdynamicjson.h"
 #include "dmdynamiclibrary.h"
 #include "dmdynamicvendor.h"
+#include "dmdynamicmem.h"
 #include "device.h"
 #include "dmbbfcommon.h"
 
 LIST_HEAD(head_package_change);
+LIST_HEAD(main_memhead);
 
 static char json_hash[64] = {0};
 static char library_hash[64] = {0};
@@ -447,4 +449,5 @@ void free_dynamic_arrays(void)
 	free_vendor_dynamic_arrays(tEntry181Obj);
 #endif
 	free_dm_browse_node_dynamic_object_tree(&node, root);
+	dm_dynamic_cleanmem(&main_memhead);
 }

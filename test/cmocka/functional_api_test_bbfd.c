@@ -490,7 +490,7 @@ static void test_bbf_api_json(void **state)
 
 	// dmjson_get_value: test correct option
 	json_value = dmjson_get_value(wifi_status, 1, "ssid");
-	assert_string_equal(json_value, "iopsysWrt-002207AB9F80");
+	assert_string_equal(json_value, "iopsysWrt-44D43771B810");
 
 	// dmjson_get_value: test correct option under object
 	json_value = dmjson_get_value(wifi_status, 2, "capabilities", "dot11h");

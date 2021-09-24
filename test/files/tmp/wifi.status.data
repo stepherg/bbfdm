@@ -45,7 +45,7 @@
 				{
 					"ifname": "test1",
 					"status": "running",
-					"ssid": "iopsysWrt-44D43771AD50",
+					"ssid": "iopsysWrt-44D43771B810",
 					"bssid": "44:d4:37:71:ad:5f"
 				}
 			],
@@ -99,7 +99,7 @@
 				{
 					"ifname": "test2",
 					"status": "running",
-					"ssid": "iopsysWrt-44D43771AD50",
+					"ssid": "iopsysWrt-44D43771B810",
 					"bssid": "44:d4:37:71:ad:5e"
 				}
 			],

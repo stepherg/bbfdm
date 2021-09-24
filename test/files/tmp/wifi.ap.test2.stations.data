@@ -1,0 +1,101 @@
+{
+	"stations": [
+		{
+			"macaddr": "25:19:1e:e2:f9:dd",
+			"wdev": "test2",
+			"channel": 36,
+			"frequency": 5180,
+			"rssi": -24,
+			"noise": -88,
+			"snr": 61,
+			"idle": 3,
+			"in_network": 50,
+			"tx_airtime": 0,
+			"rx_airtime": 0,
+			"airtime": 0,
+			"maxrate": 866,
+			"nss": 2,
+			"bandwidth": 40,
+			"status": {
+				"wmm": true,
+				"ps": true
+			},
+			"capabilities": {
+				"wmm": true,
+				"apsd": false,
+				"shortslot": false,
+				"dot11h": true,
+				"dot11n": {
+					"dot11n_ldpc": true,
+					"dot11n_40": true,
+					"dot11n_ps": true,
+					"dot11n_sgi20": true,
+					"dot11n_sgi40": true,
+					"dot11n_tx_stbc": true,
+					"dot11n_rx_stbc": true,
+					"dot11n_supp_max_mcs": -1
+				},
+				"dot11ac": {
+					"dot11ac_160": false,
+					"dot11ac_8080": false,
+					"dot11ac_sgi80": true,
+					"dot11ac_sgi160": false,
+					"dot11ac_rx_ldpc": true,
+					"dot11ac_tx_stbc": true,
+					"dot11ac_rx_stbc_1ss": false,
+					"dot11ac_rx_stbc_2ss": false,
+					"dot11ac_rx_stbc_3ss": false,
+					"dot11ac_rx_stbc_4ss": false,
+					"dot11ac_su_beamformer": true,
+					"dot11ac_su_beamformee": true,
+					"dot11ac_mu_beamformer": false,
+					"dot11ac_mu_beamformee": true,
+					"dot11ac_supp_max_rx_mcs": 7,
+					"dot11ac_supp_max_rx_nss": 8,
+					"dot11ac_supp_max_tx_mcs": 7,
+					"dot11ac_supp_max_tx_nss": 8
+				},
+				"dot11k": {
+					"dot11k_link_meas": true,
+					"dot11k_nbr_report": false,
+					"dot11k_bcn_passive": true,
+					"dot11k_bcn_active": true,
+					"dot11k_bcn_table": true,
+					"dot11k_rcpi": false,
+					"dot11k_rsni": false
+				}
+			},
+			"stats": {
+				"tx_total_pkts": 1072,
+				"tx_total_bytes": 123075,
+				"tx_failures": 0,
+				"tx_pkts_retries": 3,
+				"rx_data_pkts": 219,
+				"rx_data_bytes": 24676,
+				"rx_failures": 0,
+				"tx_rate_latest": {
+					"rate": 877,
+					"mcs": 10,
+					"bandwidth": 80,
+					"sgi": 1,
+					"nss": 2,
+					"phy": 9
+				},
+				"rx_rate_latest": {
+					"rate": 1083,
+					"mcs": 11,
+					"bandwidth": 80,
+					"sgi": 0,
+					"nss": 2,
+					"phy": 9
+				}
+			},
+			"rssi_per_antenna": [
+				-24,
+				-31,
+				-24,
+				-31
+			]
+		}
+	]
+}

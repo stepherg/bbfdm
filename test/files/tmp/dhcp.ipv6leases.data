@@ -1,0 +1,44 @@
+{
+	"device": {
+		"br-lan": {
+			"leases": [
+				{
+					"duid": "0004c7e7a6156c6255081be203f6ecdf2703",
+					"iaid": 1995102333,
+					"hostname": "",
+					"accept-reconf": false,
+					"assigned": 2161,
+					"flags": [
+						"bound"
+					],
+					"ipv6-addr": [
+						{
+							"address": "fd69:6d12:c33d::871",
+							"preferred-lifetime": -1,
+							"valid-lifetime": -1
+						}
+					],
+					"valid": 1284
+				},
+			{
+					"duid": "0004bc823a7bb321a63f328ef37740021102",
+					"iaid": 1420466609,
+					"hostname": "",
+					"accept-reconf": false,
+					"assigned": 3059,
+					"flags": [
+						"bound"
+					],
+					"ipv6-addr": [
+						{
+							"2001:1ba8:1458:ce00::bf3",
+							"preferred-lifetime": 17099,
+							"valid-lifetime": 27899
+						}
+					],
+					"valid": 2775
+				}
+			]
+		}
+	}
+}

@@ -4,6 +4,9 @@ echo "preparation script"
 
 pwd
 
+# link '/bin/sh' to bash instead of dash
+ln -sf bash /bin/sh
+
 cp -r ./test/files/etc/* /etc/
 cp -r ./test/files/usr/* /usr/
 cp -r ./test/files/var/* /var/

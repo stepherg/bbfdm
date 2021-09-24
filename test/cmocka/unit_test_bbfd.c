@@ -718,6 +718,7 @@ static void test_api_bbfdm_library_delete_object(void **state)
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
+
 		// Get Value method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_object, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_parameter, setup, teardown_commit),

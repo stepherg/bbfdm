@@ -31,7 +31,7 @@
 			"ipaddr": "192.168.1.187",
 			"address_source": "DHCP",
 			"lease_time_remaining": 3599,
-			"device": "wl0",
+			"device": "test2",
 			"network": "lan",
 			"interface_type": "Wi-Fi",
 			"hostname": "Galaxy-S8",

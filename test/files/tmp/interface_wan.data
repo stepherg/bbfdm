@@ -1,0 +1,77 @@
+{
+	"up": true,
+	"pending": false,
+	"available": true,
+	"autostart": true,
+	"dynamic": false,
+	"uptime": 92,
+	"l3_device": "eth0.1",
+	"proto": "dhcp",
+	"device": "eth0.1",
+	"updated": [
+		"addresses",
+		"routes",
+		"data"
+	],
+	"metric": 0,
+	"dns_metric": 0,
+	"delegation": true,
+	"ipv4-address": [
+		{
+			"address": "192.168.117.3",
+			"mask": 24
+		}
+	],
+	"ipv6-address": [
+		
+	],
+	"ipv6-prefix": [
+		
+	],
+	"ipv6-prefix-assignment": [
+		
+	],
+	"route": [
+		{
+			"target": "0.0.0.0",
+			"mask": 0,
+			"nexthop": "192.168.117.1",
+			"source": "192.168.117.3/32"
+		}
+	],
+	"dns-server": [
+		"192.168.117.1",
+		"8.8.4.4"
+	],
+	"dns-search": [
+		"bwrouter"
+	],
+	"neighbors": [
+		
+	],
+	"inactive": {
+		"ipv4-address": [
+			
+		],
+		"ipv6-address": [
+			
+		],
+		"route": [
+			
+		],
+		"dns-server": [
+			
+		],
+		"dns-search": [
+			
+		],
+		"neighbors": [
+			
+		]
+	},
+	"data": {
+		"hostname": "iopsysWrt-44D43771AFF0",
+		"leasetime": 86400,
+		"ntpserver": "200.23.51.102"
+	}
+}

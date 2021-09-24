@@ -43,14 +43,15 @@ static struct uci_section *has_tunnel_interface_route(char *interface)
 
 static int browseGRETunnelInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *device = NULL;
+	char *inst = NULL, device[128] = {0};
 	struct dmmap_dup *p = NULL, *dm = (struct dmmap_dup *)prev_data;
 	struct uci_section *s = NULL;
 	LIST_HEAD(dup_list);
 
-	dmasprintf(&device, "@%s", section_name(dm->config_section));
+	snprintf(device, sizeof(device), "@%s", section_name(dm->config_section));
 	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_network", "device", device, &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
+
 		if ((s = has_tunnel_interface_route(section_name(p->config_section))) == NULL)
 			continue;
 

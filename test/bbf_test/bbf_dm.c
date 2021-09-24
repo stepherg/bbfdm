@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 	if (argc > 4 && strlen(argv[4]))
 		value = argv[3];
 
-	usp_dm_exec(cmd, param, NULL, NULL);
+	usp_dm_exec(cmd, param, value, NULL);
 
 	free_dynamic_arrays();
 }

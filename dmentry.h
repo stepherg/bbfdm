@@ -18,7 +18,7 @@
 #include <libbbf_api/dmcommon.h>
 
 extern struct list_head head_package_change;
-
+extern struct list_head main_memhead;
 enum ctx_init_enum {
 	CTX_INIT_ALL,
 	CTX_INIT_SUB

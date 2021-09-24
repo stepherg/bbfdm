@@ -4,7 +4,7 @@
 
 case "$1" in
         list)
-                echo '{ "rmonstats" : {"ifname":"String"} }'
+                echo '{ "rmonstats" : {"ifname":"str"} }'
         ;;
         call)
                 case "$2" in

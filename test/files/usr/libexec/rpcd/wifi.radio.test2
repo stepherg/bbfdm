@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. /usr/share/libubox/jshn.sh
+
+case "$1" in
+        list)
+                echo '{ "status" : {}, "stats": {}, "scanresults": {} }'
+        ;;
+        call)
+                case "$2" in
+                        status)
+                                cat /tmp/wifi.radio.test2.status.data 2>/dev/null
+                        ;;
+                        stats)
+                                cat /tmp/wifi.radio.test2.stats.data 2>/dev/null
+                        ;;
+                        scanresults)
+                                cat /tmp/wifi.radio.test2.scanresults.data 2>/dev/null
+                        ;;
+                esac
+        ;;
+esac

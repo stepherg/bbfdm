@@ -4,9 +4,6 @@ echo "Unit Tests"
 pwd
 source ./gitlab-ci/shared.sh
 
-# link '/bin/sh' to bash instead of dash
-ln -sf bash /bin/sh
-
 # compile and install libbbf
 install_libbbf
 

@@ -223,16 +223,16 @@ typedef struct dm_map_vendor_exclude {
 } DM_MAP_VENDOR_EXCLUDE;
 
 enum operate_ret_status {
-	CMD_INVALID_ARGUMENTS,
 	CMD_SUCCESS,
+	CMD_INVALID_ARGUMENTS,
 	CMD_FAIL,
 	CMD_NOT_FOUND,
 	__STATUS_MAX,
 };
 
 enum deprecated_operate_ret_status {
-	UBUS_INVALID_ARGUMENTS,
 	SUCCESS,
+	UBUS_INVALID_ARGUMENTS,
 	FAIL,
 };
 

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+. /usr/share/libubox/jshn.sh
+
+case "$1" in
+        list)
+                echo '{ "dump" : {}, "event": {} }'
+        ;;
+        call)
+                case "$2" in
+                        dump)
+                                cat /tmp/wifi.dataelements.collector.dump.data 2>/dev/null
+                        ;;
+                        event)
+                                cat /tmp/wifi.dataelements.collector.event.data 2>/dev/null
+                        ;;
+                esac
+        ;;
+esac
+

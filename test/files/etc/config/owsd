@@ -20,6 +20,7 @@ config owsd-listen 'lan'
 	option ipv6only 'off'
 	option whitelist_interface_as_origin '1'
 	option whitelist_dhcp_domains '1'
+	option cert '/etc/ssl/certs/ca-certificates.crt'
 
 config owsd-listen 'wan'
 	option port '80'

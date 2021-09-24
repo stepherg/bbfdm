@@ -1,0 +1,28 @@
+#!/bin/sh
+
+. /usr/share/libubox/jshn.sh
+
+case "$1" in
+        list)
+                echo '{ "status" : {"interface":"str"} }'
+        ;;
+        call)
+                case "$2" in
+                	status)
+						read input;
+						json_load "$input"
+						json_get_var interface interface
+						if [ "$interface" == "lan" ]; then
+							cat /tmp/interface_lan.data 2>/dev/null
+						elif [ "$interface" == "wan" ]; then
+							cat /tmp/interface_wan.data 2>/dev/null
+						elif [ "$interface" == "wan6" ]; then
+							cat /tmp/interface_wan6.data 2>/dev/null
+						else
+							cat /tmp/interface_lan.data 2>/dev/null
+						fi
+					;;
+                esac
+        ;;
+esac
+

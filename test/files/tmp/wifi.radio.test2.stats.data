@@ -1,0 +1,14 @@
+{
+	"tx_bytes": 118352,
+	"tx_packets": 1111,
+	"tx_error_packets": 5,
+	"tx_dropped_packets": 0,
+	"rx_bytes": 0,
+	"rx_packets": 0,
+	"rx_error_packets": 0,
+	"rx_dropped_packets": 0,
+	"rx_plcp_error_packets": 0,
+	"rx_fcs_error_packets": 75050,
+	"rx_mac_error_packets": 0,
+	"rx_unknown_packets": 0
+}

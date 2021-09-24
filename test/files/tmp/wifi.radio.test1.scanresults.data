@@ -1,0 +1,60 @@
+{
+	"accesspoints": [
+		{
+			"ssid": "iopsysWrt-0022076D53B6",
+			"bssid": "00:22:07:6d:53:bd",
+			"channel": 36,
+			"bandwidth": 80,
+			"encryption": "WPA2PSK",
+			"ciphers": "CCMP",
+			"band": "5GHz",
+			"rssi": -21,
+			"standard": "802.11n/ac",
+			"load_stas": 0,
+			"load_utilization": 5,
+			"load_available": 0
+		},
+		{
+			"ssid": "piva-amin",
+			"bssid": "e8:2c:6d:a5:17:9a",
+			"channel": 36,
+			"bandwidth": 80,
+			"encryption": "WPA2PSK+FT",
+			"ciphers": "CCMP",
+			"band": "5GHz",
+			"rssi": -84,
+			"standard": "802.11n/ac",
+			"load_stas": 0,
+			"load_utilization": 3,
+			"load_available": 0
+		},
+		{
+			"ssid": "iopsysWrt-002207AB9F80",
+			"bssid": "00:22:07:aa:91:88",
+			"channel": 36,
+			"bandwidth": 80,
+			"encryption": "WPA2PSK",
+			"ciphers": "CCMP",
+			"band": "5GHz",
+			"rssi": -77,
+			"standard": "802.11n/ac",
+			"load_stas": 0,
+			"load_utilization": 3,
+			"load_available": 0
+		},
+		{
+			"ssid": "IOPSYS_WLAN_5",
+			"bssid": "50:4e:dc:4a:c7:50",
+			"channel": 52,
+			"bandwidth": 80,
+			"encryption": "WPAPSK/WPA2PSK",
+			"ciphers": "TKIP/CCMP",
+			"band": "5GHz",
+			"rssi": -71,
+			"standard": "802.11n/ac",
+			"load_stas": 0,
+			"load_utilization": 0,
+			"load_available": 0
+		}
+	]
+}

@@ -70,9 +70,8 @@ static int browseServicesVoiceServiceCallLogInst(struct dmctx *dmctx, DMNODE *pa
 		return 0;
 
 	list_for_each_entry(entry, &call_log_list, list) {
-		i++;
 
-		inst = handle_instance_without_section(dmctx, parent_node, i);
+		inst = handle_instance_without_section(dmctx, parent_node, ++i);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, entry, inst) == DM_STOP)
 			break;

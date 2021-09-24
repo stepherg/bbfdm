@@ -317,10 +317,12 @@ static int get_SecurityCertificate_SerialNumber(char *refparam, struct dmctx *ct
 
 static int get_SecurityCertificate_Issuer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
 #ifdef LOPENSSL
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
-	*value = X509_NAME_oneline(X509_get_issuer_name(cert_profile->openssl_cert), NULL, 0);
+	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+	char buf[256] = {0};
+
+	X509_NAME_oneline(X509_get_issuer_name(cert_profile->openssl_cert), buf, sizeof(buf));
+	*value = dmstrdup(buf);
 	if (*value[0] == '/')
 		(*value)++;
 	*value = replace_char(*value, '/', ' ');
@@ -374,10 +376,12 @@ static int get_SecurityCertificate_NotAfter(char *refparam, struct dmctx *ctx, v
 
 static int get_SecurityCertificate_Subject(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
 #ifdef LOPENSSL
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
-	*value = X509_NAME_oneline(X509_get_subject_name(cert_profile->openssl_cert), NULL, 0);
+	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+	char buf[256] = {0};
+
+	X509_NAME_oneline(X509_get_subject_name(cert_profile->openssl_cert), buf, sizeof(buf));
+	*value = dmstrdup(buf);
 	if (*value[0] == '/')
 		(*value)++;
 	*value = replace_char(*value, '/', ' ');

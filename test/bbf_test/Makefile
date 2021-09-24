@@ -3,7 +3,7 @@ BIN = bbf_dm
 
 BIN_OBJ = bbf_dm.o
 LIB_OBJS = libbbf_test.o
-LIB_CFLAGS = $(CFLAGS) -fPIC -I /usr/local/include/
+LIB_CFLAGS = $(CFLAGS) -Wall -Werror -fPIC -I /usr/local/include/
 LIB_LDFLAGS = $(LDFLAGS) -lbbf_api
 BIN_LDFLAGS = $(LDFLAGS) -lbbfdm
 

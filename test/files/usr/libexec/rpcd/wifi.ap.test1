@@ -9,13 +9,13 @@ case "$1" in
         call)
                 case "$2" in
                         status)
-                                cat /tmp/wifi.ap.test2.status.data 2>/dev/null
+                                cat /tmp/wifi.ap.test1.status.data 2>/dev/null
                         ;;
                         stats)
-                                cat /tmp/wifi.ap.test2.stats.data 2>/dev/null
+                                cat /tmp/wifi.ap.test1.stats.data 2>/dev/null
                         ;;
                         stations)
-                                cat /tmp/wifi.ap.test2.stations.data 2>/dev/null
+                                cat /tmp/wifi.ap.test1.stations.data 2>/dev/null
                         ;;
                 esac
         ;;

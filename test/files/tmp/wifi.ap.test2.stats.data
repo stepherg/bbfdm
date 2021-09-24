@@ -1,0 +1,65 @@
+{
+	"tx_bytes": 114331,
+	"tx_packets": 1069,
+	"tx_unicast_packets": 0,
+	"tx_multicast_packets": 1095,
+	"tx_broadcast_packets": 0,
+	"tx_error_packets": 1,
+	"tx_retrans_packets": 0,
+	"tx_retrans_fail_packets": 0,
+	"tx_retry_packets": 0,
+	"tx_multi_retry_packets": 0,
+	"tx_dropped_packets": 0,
+	"ack_fail_packets": 0,
+	"aggregate_packets": 0,
+	"rx_bytes": 0,
+	"rx_packets": 0,
+	"rx_unicast_packets": 0,
+	"rx_multicast_packets": 0,
+	"rx_broadcast_packets": 0,
+	"rx_error_packets": 0,
+	"rx_dropped_packets": 0,
+	"rx_unknown_packets": 0,
+	"wmm_stats": [
+		{
+			"ac": "BE",
+			"tx_bytes": 0,
+			"tx_packets": 0,
+			"tx_error_packets": 0,
+			"tx_retrans_packets": 0,
+			"rx_bytes": 0,
+			"rx_packets": 0,
+			"rx_error_packets": 0
+		},
+		{
+			"ac": "BK",
+			"tx_bytes": 0,
+			"tx_packets": 0,
+			"tx_error_packets": 0,
+			"tx_retrans_packets": 0,
+			"rx_bytes": 0,
+			"rx_packets": 0,
+			"rx_error_packets": 0
+		},
+		{
+			"ac": "VI",
+			"tx_bytes": 0,
+			"tx_packets": 0,
+			"tx_error_packets": 0,
+			"tx_retrans_packets": 0,
+			"rx_bytes": 0,
+			"rx_packets": 0,
+			"rx_error_packets": 0
+		},
+		{
+			"ac": "VO",
+			"tx_bytes": 0,
+			"tx_packets": 0,
+			"tx_error_packets": 0,
+			"tx_retrans_packets": 0,
+			"rx_bytes": 0,
+			"rx_packets": 0,
+			"rx_error_packets": 0
+		}
+	]
+}

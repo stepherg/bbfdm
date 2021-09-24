@@ -8,6 +8,8 @@
  *	Author: Yalu Zhang, yalu.zhang@iopsys.eu
  */
 
+#include "dmdynamicmem.h"
+#include "dmentry.h"
 #include "common.h"
 
 char *RFPowerControl[] = {"Normal", "Reduced"};
@@ -24,7 +26,7 @@ LIST_HEAD(call_log_list);
 static int call_log_list_size = 0;
 int call_log_count = 0;
 
-int init_supported_codecs()
+int init_supported_codecs(void)
 {
 	json_object *res = NULL;
 
@@ -111,7 +113,7 @@ static void convert_src_dst(char *src_or_dst, size_t buf_size)
 #define CALL_LOG_FILE_OLD "/var/log/asterisk/cdr-csv/Master_old.csv"
 #define SEPARATOR "\",\""
 #define SEPARATOR_SIZE strlen(SEPARATOR)
-int init_call_log()
+int init_call_log(void)
 {
 #define CHECK_RESULT(cond) if (!(cond)) { \
 		BBF_DEBUG("Invalid cdr [%s]\ncalling_number = [%s], called_number = [%s], " \
@@ -536,8 +538,7 @@ int init_call_log()
 					pos = &entry->list;
 				}
 			} else {
-				// NOTE: dmmalloc() caused uspd crash when reusing the existing list entries!!!
-				entry = malloc(sizeof(struct call_log_entry));
+				entry = dm_dynamic_malloc(&main_memhead, sizeof(struct call_log_entry));
 				if (!entry)
 					return -1;
 

@@ -76,7 +76,7 @@ extern char *DTMFMethod[];
 extern char *JitterBufferType[];
 extern char *KeyingMethods[];
 
-int init_supported_codecs();
-int init_call_log();
+int init_supported_codecs(void);
+int init_call_log(void);
 const char *get_codec_uci_name(const char *codec);
 const char *get_codec_name(const char *codec_profile);

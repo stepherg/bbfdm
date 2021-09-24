@@ -1,0 +1,135 @@
+{
+	"radio": "test2",
+	"macaddr": "44:d4:37:71:b8:1e",
+	"firmware": "test2: Aug 31 2021 22:20:08 version 17.10.157.2805 (r796514 WLTEST)",
+	"vendor_id": "0x14e4",
+	"device_id": "0xf6ca",
+	"isup": true,
+	"band": "2.4GHz",
+	"standard": "802.11g/n/ax",
+	"num_iface": 1,
+	"iface": [
+		{
+			"name": "test2",
+			"mode": "ap"
+		}
+	],
+	"opclass": 81,
+	"channel": 11,
+	"bandwidth": 20,
+	"channel_ext": "none",
+	"tx_streams": 2,
+	"rx_streams": 2,
+	"noise": -83,
+	"guard_int": "Auto",
+	"maxrate": 286,
+	"supp_bands": [
+		"2.4GHz"
+	],
+	"supp_std": [
+		"11b",
+		"11g",
+		"11n",
+		"11ac",
+		"11ax"
+	],
+	"supp_bw": [
+		"20MHz",
+		"40MHz"
+	],
+	"supp_rates": [
+		
+	],
+	"basic_rates": [
+		
+	],
+	"supp_channels": [
+		{
+			"opclass": 81,
+			"bandwidth": 20,
+			"txpower": 20,
+			"channels": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13
+			]
+		},
+		{
+			"opclass": 83,
+			"bandwidth": 40,
+			"txpower": 20,
+			"channels": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9
+			]
+		},
+		{
+			"opclass": 84,
+			"bandwidth": 40,
+			"txpower": 20,
+			"channels": [
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13
+			]
+		}
+	],
+	"txpower_dbm": 31,
+	"txpower": 100,
+	"dot11h_capable": false,
+	"dot11h_enabled": false,
+	"regdomain": "DE",
+	"beacon_int": 100,
+	"dtim_period": 2,
+	"preamble": "short",
+	"short_retry_limit": 7,
+	"long_retry_limit": 4,
+	"frag_threshold": -1,
+	"rts_threshold": -1,
+	"aggr_enabled": false,
+	"stats": {
+		"tx_bytes": 117108,
+		"tx_packets": 1100,
+		"tx_error_packets": 5,
+		"tx_dropped_packets": 0,
+		"rx_bytes": 0,
+		"rx_packets": 0,
+		"rx_error_packets": 0,
+		"rx_dropped_packets": 0,
+		"rx_plcp_error_packets": 0,
+		"rx_fcs_error_packets": 75038,
+		"rx_mac_error_packets": 0,
+		"rx_unknown_packets": 0
+	},
+	"diagnostics": {
+		"channel_busy": 0,
+		"tx_airtime": 10000,
+		"rx_airtime": 0,
+		"obss_airtime": 0,
+		"cca_time": 1000000,
+		"false_cca_count": 16
+	}
+}

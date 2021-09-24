@@ -75,3 +75,29 @@ function install_libbbf_test()
 	echo "installing libbbf_test"
 	cp -f test/bbf_test/libbbf_test.so /usr/lib/bbfdm
 }
+
+function install_libbulkdata()
+{
+	# clone and compile libbulkdata
+	rm -rf /opt/dev/bulkdata
+	exec_cmd git clone -b devel https://dev.iopsys.eu/iopsys/bulkdata.git /opt/dev/bulkdata
+	echo "Compiling libbulkdata"
+	make clean -C /opt/dev/bulkdata/
+	make CFLAGS="-D_GNU_SOURCE" -C /opt/dev/bulkdata/
+
+	echo "installing libbulkdata"
+	cp -f /opt/dev/bulkdata/libbulkdata.so /usr/lib/bbfdm
+}
+
+function install_libperiodicstats()
+{
+	# clone and compile libperiodicstats
+	rm -rf /opt/dev/periodicstats
+	exec_cmd git clone -b devel https://dev.iopsys.eu/iopsys/periodicstats.git /opt/dev/periodicstats
+	echo "Compiling libperiodicstats"
+	make clean -C /opt/dev/periodicstats/
+	make -C /opt/dev/periodicstats/
+
+	echo "installing libperiodicstats"
+	cp -f /opt/dev/periodicstats/libperiodicstats.so /usr/lib/bbfdm
+}
