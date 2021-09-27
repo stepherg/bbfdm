@@ -688,9 +688,8 @@ static void http_download_per_packet(libtrace_packet_t *packet)
 		}
 	}
 
-	if (strcmp(tcp_flag, "FIN ACK ") == 0) {
+	if ((strcmp(tcp_flag, "PSH ACK ") == 0 || strcmp(tcp_flag, "FIN PSH ACK ") == 0) &&  ntohl(tcp->ack_seq) == diag_stats.ack_seq) {
 		snprintf(diag_stats.eomtime, sizeof(diag_stats.eomtime), "%s.%06ldZ", s_now, (long) http_download_ts.tv_usec);
-		read_next = 0;
 		return;
 	}
 }
