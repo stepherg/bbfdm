@@ -16,6 +16,7 @@
 #include "ip.h"
 #include "times.h"
 #include "../tr104/servicesvoiceservicecalllog.h"
+#include "../tr104/servicesvoiceservicedect.h"
 #include "vendor.h"
 
 DM_MAP_OBJ tVendorExtensionIOPSYS[] = {
@@ -29,5 +30,6 @@ DM_MAP_OBJ tVendorExtensionIOPSYS[] = {
 {"Device.Services.VoiceService.{i}.CallLog.{i}.", NULL, tIOPSYS_VoiceServiceCallLogParams},
 {"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.RTP.", NULL, tIOPSYS_VoiceServiceCallLogSessionSourceRTPParams},
 {"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.RTP.", NULL, tIOPSYS_VoiceServiceCallLogSessionDestinationRTPParams},
+{"Device.Services.VoiceService.{i}.DECT.Portable.{i}.", NULL, tIOPSYS_VoiceServiceDECTPortableParams},
 {0}
 };
