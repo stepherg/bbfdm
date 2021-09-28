@@ -16,7 +16,7 @@
 static int get_ServicesVoiceServiceDECTPortable_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *ipui = dmjson_get_value((json_object *)data, 1, "ipui");
-	dmuci_get_option_value_string("dectmngr", ipui, "name", value);
+	dmuci_get_option_value_string("dect", ipui, "name", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "DECT%s", instance);
 
@@ -35,8 +35,8 @@ static int set_ServicesVoiceServiceDECTPortable_Name(char *refparam, struct dmct
 			break;
 		case VALUESET:
 			ipui = dmjson_get_value((json_object *)data, 1, "ipui");
-			if ((s = get_origin_section_from_config("dectmngr", "handset", ipui)) == NULL) {
-				dmuci_add_section("dectmngr", "handset", &s);
+			if ((s = get_origin_section_from_config("dect", "handset", ipui)) == NULL) {
+				dmuci_add_section("dect", "handset", &s);
 				dmuci_rename_section_by_section(s, ipui);
 			}
 
