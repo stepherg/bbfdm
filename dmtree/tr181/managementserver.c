@@ -28,7 +28,7 @@ static int get_management_server_url(char *refparam, struct dmctx *ctx, void *da
 	else if ((url != NULL) && (url[0] != '\0'))
 		*value = url;
 	else
-		*value = dmstrdup("http://192.168.1.1:8080/openacs/acs");
+		*value = "";
 	return 0;
 }
 

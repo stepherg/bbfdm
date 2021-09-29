@@ -862,7 +862,7 @@ int varstate_get_value_string(char *package, char *section, char *option, char *
 	struct uci_ptr ptr = {0};
 
 	uci_add_delta_path(uci_varstate_ctx, uci_varstate_ctx->savedir);
-	uci_set_savedir(uci_varstate_ctx, VARSTATE_CONFIG);
+	uci_set_confdir(uci_varstate_ctx, VARSTATE_CONFIG);
 
 	if (dmuci_lookup_ptr(uci_varstate_ctx, &ptr, package, section, option, NULL)) {
 		*value = "";
