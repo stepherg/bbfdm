@@ -935,7 +935,7 @@ static void test_bbf_api_common(void **state)
 	 */
 
 	// convert_string_to_hex: test
-	convert_string_to_hex("bbf_unit_test", buf);
+	convert_string_to_hex("bbf_unit_test", buf, sizeof(buf));
 	assert_string_equal(buf, "6262665F756E69745F74657374");
 
 
@@ -944,7 +944,7 @@ static void test_bbf_api_common(void **state)
 	 */
 
 	// convert_hex_to_string: test
-	convert_hex_to_string("6262665f756e69745f74657374", buf);
+	convert_hex_to_string("6262665f756e69745f74657374", buf, sizeof(buf));
 	assert_string_equal(buf, "bbf_unit_test");
 
 

@@ -315,7 +315,7 @@ static int get_ServicesVoiceServiceDECTPortable_IPEI(char *refparam, struct dmct
 	*value = "";
 	// Check for N type PUT
 	if (ipui[0] == '0') {
-		strcpy(buff, &ipui[1]);
+		DM_STRNCPY(buff, &ipui[1], sizeof(buff));
 		dmasprintf(value, "%s0", buff);
 	}
 

@@ -661,7 +661,7 @@ static int get_RouterAdvertisementInterfaceSettingOption_Value(char *refparam, s
 	char hex[65535] = {0};
 
 	if (option_value && *option_value)
-		convert_string_to_hex(option_value, hex);
+		convert_string_to_hex(option_value, hex, sizeof(hex));
 
 	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
@@ -679,7 +679,7 @@ static int set_RouterAdvertisementInterfaceSettingOption_Value(char *refparam, s
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			convert_hex_to_string(value, res);
+			convert_hex_to_string(value, res, sizeof(res));
 
 			dmuci_get_value_by_section_list(radv_option_s->config_sect, "dns", &dns_list);
 			if (value_exists_in_uci_list(dns_list, radv_option_s->option_value)) {

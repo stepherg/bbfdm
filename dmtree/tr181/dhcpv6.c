@@ -768,7 +768,7 @@ static int get_DHCPv6ServerPool_VendorClassID(char *refparam, struct dmctx *ctx,
 	dmuci_get_value_by_section_string(vendorclassidclassifier, "vendorclass", &vcid);
 
 	if (vcid && *vcid)
-		convert_string_to_hex(vcid, hex);
+		convert_string_to_hex(vcid, hex, sizeof(hex));
 
 	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
@@ -785,7 +785,7 @@ static int set_DHCPv6ServerPool_VendorClassID(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			convert_hex_to_string(value, res);
+			convert_hex_to_string(value, res, sizeof(res));
 
 			vendorclassidclassifier = get_dhcpv6_classifier("vendorclass", ((struct dhcpv6_args *)data)->interface);
 			if (!vendorclassidclassifier) {
@@ -807,7 +807,7 @@ static int get_DHCPv6ServerPool_UserClassID(char *refparam, struct dmctx *ctx, v
 	dmuci_get_value_by_section_string(userclassidclassifier, "userclass", &ucid);
 
 	if (ucid && *ucid)
-		convert_string_to_hex(ucid, hex);
+		convert_string_to_hex(ucid, hex, sizeof(hex));
 
 	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
@@ -824,7 +824,7 @@ static int set_DHCPv6ServerPool_UserClassID(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			convert_hex_to_string(value, res);
+			convert_hex_to_string(value, res, sizeof(res));
 
 			userclassidclassifier = get_dhcpv6_classifier("userclass", ((struct dhcpv6_args *)data)->interface);
 			if (!userclassidclassifier) {
@@ -1152,7 +1152,7 @@ static int get_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 	char hex[256] = {0};
 
 	if (tag_value && *tag_value)
-		convert_string_to_hex(tag_value, hex);
+		convert_string_to_hex(tag_value, hex, sizeof(hex));
 
 	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
@@ -1186,7 +1186,7 @@ static int set_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 				}
 			}
 
-			convert_hex_to_string(value, res);
+			convert_hex_to_string(value, res, sizeof(res));
 
 			if (option_enabled) {
 				char new_tag_value[512] = {0}, old_tag_value[128] = {0};

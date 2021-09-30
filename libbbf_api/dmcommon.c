@@ -1036,22 +1036,22 @@ int dm_time_format(time_t ts, char **dst)
 	return 0;
 }
 
-void convert_string_to_hex(const char *str, char *hex)
+void convert_string_to_hex(const char *str, char *hex, size_t size)
 {
 	int i, j, len = strlen(str);
 
-	for (i = 0, j = 0; i < len; i++, j += 2) {
+	for (i = 0, j = 0; i < len && j < size - 2; i++, j += 2) {
 		sprintf((char *)hex + j, "%02X", str[i]);
 	}
 	hex[j] = '\0';
 }
 
-void convert_hex_to_string(const char *hex, char *str)
+void convert_hex_to_string(const char *hex, char *str, size_t size)
 {
 	int i, j, len = strlen(hex);
 	char buf[3] = {0};
 
-	for (i = 0, j = 0; i < len; i += 2, j++) {
+	for (i = 0, j = 0; i < len && j < size - 1; i += 2, j++) {
 		DM_STRNCPY(buf, &hex[i], 3);
 		sprintf((char *)str + j, "%c", (char)strtol(buf, NULL, 16));
 	}

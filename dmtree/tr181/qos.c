@@ -813,7 +813,7 @@ static int get_QoSClassification_SourceClientID(char *refparam, struct dmctx *ct
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_client_id", &srcclid);
 
 	if (srcclid && *srcclid)
-		convert_string_to_hex(srcclid, hex);
+		convert_string_to_hex(srcclid, hex, sizeof(hex));
 
 	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
@@ -829,7 +829,7 @@ static int set_QoSClassification_SourceClientID(char *refparam, struct dmctx *ct
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			convert_hex_to_string(value, res);
+			convert_hex_to_string(value, res, sizeof(res));
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_client_id", res);
 			break;
 	}
@@ -843,7 +843,7 @@ static int get_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx,
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dst_client_id", &dstclid);
 
 	if (dstclid && *dstclid)
-		convert_string_to_hex(dstclid, hex);
+		convert_string_to_hex(dstclid, hex, sizeof(hex));
 
 	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
@@ -859,7 +859,7 @@ static int set_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			convert_hex_to_string(value, res);
+			convert_hex_to_string(value, res, sizeof(res));
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dst_client_id", res);
 			break;
 	}
@@ -873,7 +873,7 @@ static int get_QoSClassification_SourceUserClassID(char *refparam, struct dmctx 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_user_class_id", &srcusrclid);
 
 	if (srcusrclid && *srcusrclid)
-		convert_string_to_hex(srcusrclid, hex);
+		convert_string_to_hex(srcusrclid, hex, sizeof(hex));
 
 	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
@@ -889,7 +889,7 @@ static int set_QoSClassification_SourceUserClassID(char *refparam, struct dmctx 
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		convert_hex_to_string(value, res);
+		convert_hex_to_string(value, res, sizeof(res));
 		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_user_class_id", res);
 		break;
 	}
@@ -903,7 +903,7 @@ static int get_QoSClassification_DestUserClassID(char *refparam, struct dmctx *c
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dst_user_class_id", &dstusrclid);
 
 	if (dstusrclid && *dstusrclid)
-		convert_string_to_hex(dstusrclid, hex);
+		convert_string_to_hex(dstusrclid, hex, sizeof(hex));
 
 	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
@@ -919,7 +919,7 @@ static int set_QoSClassification_DestUserClassID(char *refparam, struct dmctx *c
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		convert_hex_to_string(value, res);
+		convert_hex_to_string(value, res, sizeof(res));
 		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dst_user_class_id", res);
 		break;
 	}
