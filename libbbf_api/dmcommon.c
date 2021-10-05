@@ -1029,7 +1029,7 @@ int dm_time_format(time_t ts, char **dst)
 	if (t_tm == NULL)
 		return -1;
 
-	if(strftime(time_buf, sizeof(time_buf), "%Y-%m-%dT%H:%M:%SZ", t_tm) == 0)
+	if(strftime(time_buf, sizeof(time_buf), "%Y-%m-%dT%H:%M:%S%z", t_tm) == 0)
 		return -1;
 
 	*dst = dmstrdup(time_buf);
