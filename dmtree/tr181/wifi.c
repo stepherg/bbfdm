@@ -3123,7 +3123,7 @@ static int set_WiFiDataElementsNetwork_ControllerID(char *refparam, struct dmctx
 	return 0;
 }
 
-/*#Device.WiFi.DataElements.Network.DeviceNumberOfEntries!UBUS:wifi.dataelements.collector/dump//data[@i-1].wfa-dataelements:Network.NumberOfDevices*/
+/*#Device.WiFi.DataElements.Network.DeviceNumberOfEntries!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.NumberOfDevices*/
 static int get_WiFiDataElementsNetwork_DeviceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	int i = 0;

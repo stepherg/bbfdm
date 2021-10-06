@@ -78,8 +78,12 @@ def getparamtype(dmparam):
                     if "StatsCounter" in reftype:
                         ptype = "unsignedInt"
                         break
-                    ptype = "string"
-                    break
+                    elif "Dbm1000" in reftype:
+                        ptype = "int"
+                        break
+                    else:
+                        ptype = "string"
+                        break
                 ptype = c.tag
                 break
             break
@@ -383,7 +387,7 @@ def printPARAMMaPPING(mapping):
     lst = mapping.split("&")
     print("\"mapping\": [", file=fp)
     for i in range(len(lst)):
-        config_type = lst[i].split(":")
+        config_type = lst[i].split(":", 1)
         config = config_type[1].split("/")
 
         print("{", file=fp)

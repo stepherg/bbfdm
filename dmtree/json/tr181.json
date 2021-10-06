@@ -15635,7 +15635,7 @@
 								"object": "fast.line.1",
 								"method": "status",
 								"args": {},
-								"key": "upbokle"
+								"key": "upbokler"
 							}
 						}
 					]
@@ -17989,7 +17989,7 @@
 					"datatype": "boolean"
 				},
 				"OpticalSignalLevel": {
-					"type": "string",
+					"type": "int",
 					"read": true,
 					"write": false,
 					"version": "2.4",
@@ -18000,7 +18000,7 @@
 					"datatype": "Dbm1000"
 				},
 				"LowerOpticalThreshold": {
-					"type": "string",
+					"type": "int",
 					"read": true,
 					"write": false,
 					"version": "2.4",
@@ -18011,7 +18011,7 @@
 					"datatype": "Dbm1000"
 				},
 				"UpperOpticalThreshold": {
-					"type": "string",
+					"type": "int",
 					"read": true,
 					"write": false,
 					"version": "2.4",
@@ -18022,7 +18022,7 @@
 					"datatype": "Dbm1000"
 				},
 				"TransmitOpticalLevel": {
-					"type": "string",
+					"type": "int",
 					"read": true,
 					"write": false,
 					"version": "2.4",
@@ -18033,7 +18033,7 @@
 					"datatype": "Dbm1000"
 				},
 				"LowerTransmitPowerThreshold": {
-					"type": "string",
+					"type": "int",
 					"read": true,
 					"write": false,
 					"version": "2.4",
@@ -18044,7 +18044,7 @@
 					"datatype": "Dbm1000"
 				},
 				"UpperTransmitPowerThreshold": {
-					"type": "string",
+					"type": "int",
 					"read": true,
 					"write": false,
 					"version": "2.4",
@@ -76185,8 +76185,7 @@
 					"enumerations": [
 						"Streaming",
 						"File",
-						"HTTP",
-						"USPEventNotif"
+						"HTTP"
 					]
 				}
 			},
@@ -80906,7 +80905,6 @@
 								],
 								"datatype": "string",
 								"enumerations": [
-									"",
 									"AP",
 									"non-AP/non-PCP STA",
 									"Wi-Fi P2P Client",
