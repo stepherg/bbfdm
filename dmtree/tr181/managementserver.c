@@ -580,6 +580,12 @@ static int get_management_server_supported_conn_req_methods(char *refparam, stru
 	return 0;
 }
 
+static int get_management_server_instance_wildcard_supported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "true";
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -613,5 +619,6 @@ DMLEAF tManagementServerParams[] = {
 {"ConnReqJabberID", &DMREAD, DMT_STRING, get_management_server_conn_req_jabber_id, NULL, BBFDM_CWMP},
 {"ConnReqXMPPConnection", &DMWRITE, DMT_STRING, get_management_server_conn_req_xmpp_connection, set_management_server_conn_req_xmpp_connection, BBFDM_CWMP},
 {"SupportedConnReqMethods", &DMREAD, DMT_STRING, get_management_server_supported_conn_req_methods, NULL, BBFDM_CWMP},
+{"InstanceWildcardsSupported", &DMREAD, DMT_BOOL, get_management_server_instance_wildcard_supported, NULL, BBFDM_CWMP},
 {0}
 };
