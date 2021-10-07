@@ -440,8 +440,6 @@ static int browseWiFiEndPointProfileInst(struct dmctx *dmctx, DMNODE *parent_nod
 		dmuci_add_section_bbfdm("dmmap_wireless", "ep_profile", &s);
 	dmuci_set_value_by_section_bbfdm(s, "ep_key", ep_instance);
 
-	handle_instance(dmctx, parent_node, s, "ep_profile_instance", "ep_profile_alias");
-
 	DM_LINK_INST_OBJ(dmctx, parent_node, ep_args->sections->config_section, "1");
 	return 0;
 }
@@ -2008,7 +2006,7 @@ static int get_WiFiEndPointProfile_Status(char *refparam, struct dmctx *ctx, voi
 	return 0;
 }
 
-static int get_WiFiEndPointProfile_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_dmmap_wireless_section(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value, char *section_name)
 {
 	struct uci_section *dmmap_section = NULL, *dm = NULL;
 	char *epinst = NULL;
@@ -2016,13 +2014,11 @@ static int get_WiFiEndPointProfile_Alias(char *refparam, struct dmctx *ctx, void
 	get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name((struct uci_section*)data), &dmmap_section);
 	dmuci_get_value_by_section_string(dmmap_section, "endpointinstance", &epinst);
 	get_dmmap_section_of_config_section_eq("dmmap_wireless", "ep_profile", "ep_key", epinst, &dm);
-	dmuci_get_value_by_section_string(dm, "ep_profile_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
+	dmuci_get_value_by_section_string(dm, section_name, value);
 	return 0;
 }
 
-static int set_WiFiEndPointProfile_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+static int set_dmmap_wireless_section(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action, char *section_name)
 {
 	struct uci_section *dmmap_section = NULL, *dm = NULL;
 	char *epinst = NULL;
@@ -2036,10 +2032,33 @@ static int set_WiFiEndPointProfile_Alias(char *refparam, struct dmctx *ctx, void
 			get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name((struct uci_section*)data), &dmmap_section);
 			dmuci_get_value_by_section_string(dmmap_section, "endpointinstance", &epinst);
 			get_dmmap_section_of_config_section_eq("dmmap_wireless", "ep_profile", "ep_key", epinst, &dm);
-			dmuci_set_value_by_section_bbfdm(dm, "ep_profile_alias", value);
+			dmuci_set_value_by_section_bbfdm(dm, section_name, value);
 			break;
 	}
 	return 0;
+}
+
+static int get_WiFiEndPointProfile_Location(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_dmmap_wireless_section(refparam, ctx, data, instance, value, "ep_location");
+}
+
+static int set_WiFiEndPointProfile_Location(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_dmmap_wireless_section(refparam, ctx, data, instance, value, action, "ep_location");
+}
+
+static int get_WiFiEndPointProfile_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	get_dmmap_wireless_section(refparam, ctx, data, instance, value, "ep_profile_alias");
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+	return 0;
+}
+
+static int set_WiFiEndPointProfile_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_dmmap_wireless_section(refparam, ctx, data, instance, value, action, "ep_profile_alias");
 }
 
 /*#Device.WiFi.EndPoint.{i}.Profile.{i}.SSID!UCI:wireless/wifi-iface,@i-1/ssid*/
@@ -4449,7 +4468,7 @@ DMLEAF tWiFiEndPointProfileParams[] = {
 {"Status", &DMREAD, DMT_STRING, get_WiFiEndPointProfile_Status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_WiFiEndPointProfile_Alias, set_WiFiEndPointProfile_Alias, BBFDM_BOTH},
 {"SSID", &DMWRITE, DMT_STRING, get_WiFiEndPointProfile_SSID, set_WiFiEndPointProfile_SSID, BBFDM_BOTH},
-//{"Location", &DMWRITE, DMT_STRING, get_WiFiEndPointProfile_Location, set_WiFiEndPointProfile_Location, BBFDM_BOTH},
+{"Location", &DMWRITE, DMT_STRING, get_WiFiEndPointProfile_Location, set_WiFiEndPointProfile_Location, BBFDM_BOTH},
 //{"Priority", &DMWRITE, DMT_UNINT, get_WiFiEndPointProfile_Priority, set_WiFiEndPointProfile_Priority, BBFDM_BOTH},
 {0}
 };
