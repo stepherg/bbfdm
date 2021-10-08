@@ -13,9 +13,6 @@ AM_CONDITIONAL([BBF_TR143],[test "x$enable_tr143" = "xyes"])
 AC_ARG_ENABLE(libopenssl, [AS_HELP_STRING([--enable-libopenssl], [enable libopenssl feature])], AC_DEFINE(LOPENSSL),)
 AM_CONDITIONAL([LOPENSSL],[test "x$enable_libopenssl" = "xyes"])
 
-AC_ARG_ENABLE(libmbedtls, [AS_HELP_STRING([--enable-libmbedtls], [enable libmbedtls upnp feature])], AC_DEFINE(LMBEDTLS),)
-AM_CONDITIONAL([LMBEDTLS],[test "x$enable_libmbedtls" = "xyes"])
-
 AC_ARG_ENABLE(vendor_extension, [AS_HELP_STRING([--enable-vendor-extension], [enable vendor extension])], AC_DEFINE(BBF_VENDOR_EXTENSION),)
 AM_CONDITIONAL([BBF_VENDOR_EXTENSION],[test "x$enable_vendor_extension" = "xyes"])
 
@@ -104,11 +101,6 @@ AC_SUBST([LIBCRYPTO_LIBS])
 AM_COND_IF([LOPENSSL], [
 	LIBOPENSSL_LIBS='-lssl'
 	AC_SUBST([LIBOPENSSL_LIBS])
-])
-
-AM_COND_IF([LMBEDTLS], [
-	LIBMBETLS_LIBS='-lmbedtls'
-	AC_SUBST([LIBMBETLS_LIBS])
 ])
 
 # checks for header files
