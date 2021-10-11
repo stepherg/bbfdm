@@ -3288,9 +3288,15 @@ static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_VHTCapabilities(ch
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_HECapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *caps_obj = NULL;
+	char *cap = NULL;
 
 	json_object_object_get_ex((json_object *)data, "Capabilites", &caps_obj);
-	*value = (caps_obj) ? dmjson_get_value(caps_obj, 1, "HECapabilities") : "";
+	cap = (caps_obj) ? dmjson_get_value(caps_obj, 1, "HECapabilities") : "";
+	if (strlen(cap)) {
+		*value = cap;
+	} else {
+		*value = "AAAAAA==";
+	}
 
 	return 0;
 }
