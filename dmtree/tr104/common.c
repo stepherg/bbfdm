@@ -602,3 +602,66 @@ const char *get_codec_name(const char *codec_profile)
 
 	return NULL;
 }
+
+/*Get the Alias parameter value by section*/
+int get_Alias_value_by_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value, char *service_name, char* service_inst)
+{
+    struct uci_section *s = NULL;
+
+    uci_path_foreach_option_eq(bbfdm, "dmmap", service_name, service_inst, instance, s) {
+        dmuci_get_value_by_section_string(s, "alias", value);
+        break;
+    }
+    if ((*value)[0] == '\0')
+        dmasprintf(value, "cpe-%s", instance);
+    return 0;
+}
+
+/*Set the Alias paramter value by section*/
+int set_Alias_value_by_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action, char *service_name, char* service_inst)
+{
+
+    struct uci_section *s = NULL, *dmmap = NULL;
+
+    switch (action) {
+        case VALUECHECK:
+            if (dm_validate_string(value, -1, 64, NULL, NULL))
+                return FAULT_9007;
+            break;
+        case VALUESET:
+            uci_path_foreach_option_eq(bbfdm, "dmmap", service_name, service_inst, instance, s) {
+                dmuci_set_value_by_section_bbfdm(s, "alias", value);
+                return 0;
+            }
+            dmuci_add_section_bbfdm("dmmap", service_name, &dmmap);
+            dmuci_set_value_by_section(dmmap, service_inst, instance);
+            dmuci_set_value_by_section(dmmap, "alias", value);
+            break;
+    }
+    return 0;
+}
+
+
+/*Get Alias parameter value by section string*/
+int get_Alias_value_by_inst(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value, char *alias_inst)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, alias_inst, value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+	return 0;
+}
+
+/*Set Alias parameter value by section string*/
+int set_Alias_value_by_inst(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action, char *alias_inst)
+{
+	switch (action) {
+	case VALUECHECK:
+		if (dm_validate_string(value, -1, 64, NULL, NULL))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, alias_inst, value);
+		break;
+	}
+	return 0;
+}

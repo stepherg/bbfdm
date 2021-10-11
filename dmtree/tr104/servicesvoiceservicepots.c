@@ -187,6 +187,17 @@ static int set_ServicesVoiceServicePOTSFXSVoiceProcessing_EchoCancellationEnable
 	return 0;
 }
 
+/*Get Device.Services.VoiceService.{i}.POTS.FXS.{i}. Alias*/
+static int get_ServicesVoiceServicePOTSFXS_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_inst(refparam, ctx, data, instance, value, "clientalias");
+}
+
+/*Set Device.Services.VoiceService.{i}.POTS.FXS.{i}. Alias*/
+static int set_ServicesVoiceServicePOTSFXS_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_inst(refparam, ctx, data, instance, value, action, "clientalias");
+}
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -218,6 +229,7 @@ DMLEAF tServicesVoiceServicePOTSFXSParams[] = {
 {"ClipGeneration", &DMWRITE, DMT_BOOL, get_ServicesVoiceServicePOTSFXS_ClipGeneration, set_ServicesVoiceServicePOTSFXS_ClipGeneration, BBFDM_BOTH},
 {"Active", &DMREAD, DMT_BOOL, get_ServicesVoiceServicePOTSFXS_Active, NULL, BBFDM_BOTH},
 {"TerminalType", &DMREAD, DMT_STRING, get_ServicesVoiceServicePOTSFXS_TerminalType, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServicePOTSFXS_Alias, set_ServicesVoiceServicePOTSFXS_Alias, BBFDM_BOTH},
 {0}
 };
 

@@ -193,6 +193,17 @@ static int get_ServicesVoiceServiceCallLog_Src_MaxJitter(char *refparam, struct 
 	return 0;
 }
 
+/* Get Alias - Device.Services.VoiceService.{i}.CallLog.{i}. */
+static int get_ServicesVoiceServiceCallLog_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_name(refparam, ctx, data, instance, value, "callLog", "callLog_inst");
+}
+
+/* Set Alias - Device.Services.VoiceService.{i}.CallLog.{i}. */
+static int set_ServicesVoiceServiceCallLog_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_name(refparam, ctx, data, instance, value, action, "callLog", "callLog_inst");
+}
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -214,6 +225,7 @@ DMLEAF tServicesVoiceServiceCallLogParams[] = {
 {"Start", &DMREAD, DMT_TIME, get_ServicesVoiceServiceCallLog_Start, NULL, BBFDM_BOTH},
 {"Duration", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Duration, NULL, BBFDM_BOTH},
 {"CallTerminationCause", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_CallTerminationCause, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallLog_Alias, set_ServicesVoiceServiceCallLog_Alias, BBFDM_BOTH},
 {0}
 };
 

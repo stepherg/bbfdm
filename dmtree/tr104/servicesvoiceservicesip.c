@@ -993,6 +993,55 @@ static int set_ServicesVoiceServiceSIPNetworkFQDNServer_Port(char *refparam, str
 	return 0;
 }
 
+/*Get Device.Services.VoiceService.{i}.SIP.Network.{i}. Alias*/
+static int get_ServicesVoiceServiceSIPNetwork_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_inst(refparam, ctx, data, instance, value, "networkalias");
+}
+
+/*Set Device.Services.VoiceService.{i}.SIP.Network.{i}. Alias*/
+static int set_ServicesVoiceServiceSIPNetwork_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_inst(refparam, ctx, data, instance, value, action, "networkalias");
+}
+
+
+/*Get Device.Services.VoiceService.{i}.SIP.Network.{i}.FQDNServer. Alias*/
+static int get_ServicesVoiceServiceSIPNetworkFQDNServer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+    return get_Alias_value_by_name(refparam, ctx, data, instance, value, "FQDNServer", "FQDNServer_inst");
+}
+
+/*Set Device.Services.VoiceService.{i}.SIP.Network.{i}.FQDNServer. Alias*/
+static int set_ServicesVoiceServiceSIPNetworkFQDNServer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+    return set_Alias_value_by_name(refparam, ctx, data, instance, value, action, "FQDNServer", "FQDNServer_inst");
+}
+
+/*Get Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.{i}. Alias*/
+static int get_ServicesVoiceServiceSIPClientContact_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+    return get_Alias_value_by_name(refparam, ctx, data, instance, value, "SIPClientContact", "SIPClientContact_inst");
+}
+
+/*Set Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.{i}. Alias*/
+static int set_ServicesVoiceServiceSIPClientContact_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+    return set_Alias_value_by_name(refparam, ctx, data, instance, value, action, "SIPClientContact", "SIPClientContact_inst");
+}
+
+/*Get Device.Services.VoiceService.{i}.SIP.Client.{i}. Alias*/
+static int get_ServicesVoiceServiceSIPClient_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+    return get_Alias_value_by_name(refparam, ctx, data, instance, value, "SIPClient", "SIPClient_inst");
+}
+
+/*Set Device.Services.VoiceService.{i}.SIP.Client.{i}. Alias*/
+static int set_ServicesVoiceServiceSIPClient_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+    return set_Alias_value_by_name(refparam, ctx, data, instance, value, action, "SIPClient", "SIPClient_inst");
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -1019,6 +1068,7 @@ DMLEAF tServicesVoiceServiceSIPClientParams[] = {
 {"AuthUserName", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_AuthUserName, set_ServicesVoiceServiceSIPClient_AuthUserName, BBFDM_BOTH},
 {"AuthPassword", &DMWRITE, DMT_STRING, get_empty, set_ServicesVoiceServiceSIPClient_AuthPassword, BBFDM_BOTH},
 {"RegisterURI", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_RegisterURI, set_ServicesVoiceServiceSIPClient_RegisterURI, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_Alias, set_ServicesVoiceServiceSIPClient_Alias, BBFDM_BOTH},
 {0}
 };
 
@@ -1029,6 +1079,7 @@ DMLEAF tServicesVoiceServiceSIPClientContactParams[] = {
 {"Port", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPClientContact_Port, set_ServicesVoiceServiceSIPClientContact_Port, BBFDM_BOTH},
 {"ExpireTime", &DMREAD, DMT_TIME, get_ServicesVoiceServiceSIPClientContact_ExpireTime, NULL, BBFDM_BOTH},
 {"UserAgent", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClientContact_UserAgent, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClientContact_Alias, set_ServicesVoiceServiceSIPClientContact_Alias, BBFDM_BOTH},
 {0}
 };
 
@@ -1059,6 +1110,7 @@ DMLEAF tServicesVoiceServiceSIPNetworkParams[] = {
 {"RegisterExpires", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_RegisterExpires, set_ServicesVoiceServiceSIPNetwork_RegisterExpires, BBFDM_BOTH},
 {"DSCPMark", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetwork_DSCPMark, set_ServicesVoiceServiceSIPNetwork_DSCPMark, BBFDM_BOTH},
 {"CodecList", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_CodecList, set_ServicesVoiceServiceSIPNetwork_CodecList, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetwork_Alias, set_ServicesVoiceServiceSIPNetwork_Alias, BBFDM_BOTH},
 {0}
 };
 
@@ -1069,5 +1121,6 @@ DMLEAF tServicesVoiceServiceSIPNetworkFQDNServerParams[] = {
 {"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPNetworkFQDNServer_Origin, NULL, BBFDM_BOTH},
 {"Domain", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetworkFQDNServer_Domain, set_ServicesVoiceServiceSIPNetworkFQDNServer_Domain, BBFDM_BOTH},
 {"Port", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPNetworkFQDNServer_Port, set_ServicesVoiceServiceSIPNetworkFQDNServer_Port, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPNetworkFQDNServer_Alias, set_ServicesVoiceServiceSIPNetworkFQDNServer_Alias, BBFDM_BOTH},
 {0}
 };

@@ -172,6 +172,16 @@ static int get_ServicesVoiceServiceCapabilitiesCodec_PacketizationPeriod(char *r
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCapabilities_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_name(refparam, ctx, data, instance, value, "Capabilities", "Capabilities_inst");
+}
+
+static int set_ServicesVoiceServiceCapabilities_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_name(refparam, ctx, data, instance, value, action, "Capabilities", "Capabilities_inst");
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -229,6 +239,7 @@ DMLEAF tServicesVoiceServiceCapabilitiesCodecParams[] = {
 {"Codec", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesCodec_Codec, NULL, BBFDM_BOTH},
 {"BitRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCapabilitiesCodec_BitRate, NULL, BBFDM_BOTH},
 {"PacketizationPeriod", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesCodec_PacketizationPeriod, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCapabilities_Alias, set_ServicesVoiceServiceCapabilities_Alias, BBFDM_BOTH},
 {0}
 };
 

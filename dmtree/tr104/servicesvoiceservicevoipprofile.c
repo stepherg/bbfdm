@@ -277,6 +277,18 @@ static int set_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes(char *r
 	return 0;
 }
 
+/*Get Device.Services.VoiceService.{i}.VoIPProfile.{i}. Alias*/
+static int get_ServicesVoiceServiceVoIPProfile_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_inst(refparam, ctx, data, instance, value, "clientalias");
+}
+
+/*Set Device.Services.VoiceService.{i}.VoIPProfile.{i}. Alias*/
+static int set_ServicesVoiceServiceVoIPProfile_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_inst(refparam, ctx, data, instance, value, action, "clientalias");
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -290,6 +302,7 @@ DMOBJ tServicesVoiceServiceVoIPProfileObj[] = {
 DMLEAF tServicesVoiceServiceVoIPProfileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"DTMFMethod", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfile_DTMFMethod, set_ServicesVoiceServiceVoIPProfile_DTMFMethod, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfile_Alias, set_ServicesVoiceServiceVoIPProfile_Alias, BBFDM_BOTH},
 {0}
 };
 

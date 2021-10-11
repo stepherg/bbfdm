@@ -581,6 +581,56 @@ static int set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNum
 	return 0;
 }
 
+
+/*Get Alias -  #Device.Services.VoiceService.{i}.CallControl.Line.{i}.*/
+static int get_ServicesVoiceServiceCallControlLine_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_inst(refparam, ctx, data, instance, value, "linealias");
+}
+
+/*Set Alias - #Device.Services.VoiceService.{i}.CallControl.Line.{i}.*/
+static int set_ServicesVoiceServiceCallControlLine_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_inst(refparam, ctx, data, instance, value, action, "linealias");
+}
+
+/*Get Alias - #Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.Alias*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_inst(refparam, ctx, data, instance, value, "setalias");
+}
+
+/*Set Alias - #Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.Alias*/
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_inst(refparam, ctx, data, instance, value, action, "setalias");
+}
+
+/*Get Alias -  #Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.SCREJ.{i}.*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_inst(refparam, ctx, data, instance, value, "screjalias");
+}
+
+/*Set Alias - #Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.SCREJ.{i}.*/
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_inst(refparam, ctx, data, instance, value, action, "screjalias");
+}
+
+/*Get Alias -  #Device.Services.VoiceService.{i}.CallControl.NumberingPlan.*/
+static int get_ServicesVoiceServiceCallControlNumberingPlan_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_inst(refparam, ctx, data, instance, value, "numberingplanalias");
+}
+
+/*Set Alias - #Device.Services.VoiceService.{i}.CallControl.NumberingPlan.*/
+static int set_ServicesVoiceServiceCallControlNumberingPlan_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_inst(refparam, ctx, data, instance, value, action, "numberingplanalias");
+}
+
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -604,6 +654,7 @@ DMLEAF tServicesVoiceServiceCallControlLineParams[] = {
 {"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Origin, NULL, BBFDM_BOTH},
 {"DirectoryNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_DirectoryNumber, set_ServicesVoiceServiceCallControlLine_DirectoryNumber, BBFDM_BOTH},
 {"Provider", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Provider, set_ServicesVoiceServiceCallControlLine_Provider, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Alias, set_ServicesVoiceServiceCallControlLine_Alias, BBFDM_BOTH},
 {0}
 };
 
@@ -628,6 +679,7 @@ DMLEAF tServicesVoiceServiceCallControlNumberingPlanParams[] = {
 {"InterDigitTimerOpen", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerOpen, set_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerOpen, BBFDM_BOTH},
 {"MinimumNumberOfDigits", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_MinimumNumberOfDigits, set_ServicesVoiceServiceCallControlNumberingPlan_MinimumNumberOfDigits, BBFDM_BOTH},
 {"MaximumNumberOfDigits", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_MaximumNumberOfDigits, set_ServicesVoiceServiceCallControlNumberingPlan_MaximumNumberOfDigits, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlNumberingPlan_Alias, set_ServicesVoiceServiceCallControlNumberingPlan_Alias, BBFDM_BOTH},
 {0}
 };
 
@@ -649,6 +701,7 @@ DMLEAF tServicesVoiceServiceCallControlCallingFeaturesSetParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"CallWaitingEnable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CallWaitingEnable, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CallWaitingEnable, BBFDM_BOTH},
 {"CallForwardUnconditionalEnable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CallForwardUnconditionalEnable, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CallForwardUnconditionalEnable, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_Alias, set_ServicesVoiceServiceCallControlCallingFeaturesSet_Alias, BBFDM_BOTH},
 {0}
 };
 
@@ -656,5 +709,6 @@ DMLEAF tServicesVoiceServiceCallControlCallingFeaturesSetParams[] = {
 DMLEAF tServicesVoiceServiceCallControlCallingFeaturesSetSCREJParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"CallingNumber", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNumber, set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNumber, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_Alias, set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_Alias, BBFDM_BOTH},
 {0}
 };
