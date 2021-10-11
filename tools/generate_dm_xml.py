@@ -4,6 +4,7 @@
 # Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
 import os
+import sys
 import argparse
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as MD
@@ -189,7 +190,7 @@ def generate_xml(acs = 'default', output_file="datamodel.xml"):
     DM_OBJ_COUNT = 0
     DM_PARAM_COUNT = 0
 
-    print("Generating BBF Data Models in xml format for %s acs..." % acs)
+    print(f'Generating BBF Data Models in xml format for {acs} acs...')
     bbf.fill_list_supported_dm()
 
     if acs == "HDM":
@@ -198,12 +199,12 @@ def generate_xml(acs = 'default', output_file="datamodel.xml"):
         generate_bbf_xml_file(output_file)
 
     if os.path.isfile(output_file):
-        print(" - XML file generated: %s" % output_file)
+        print(f' - XML file generated: {output_file}')
     else:
-        print(" - Error in generating xml file")
+        print(' - Error in generating xml file')
 
-    print(" - Number of BBF Data Models objects is %d" % DM_OBJ_COUNT)
-    print(" - Number of BBF Data Models parameters is %d" % DM_PARAM_COUNT)
+    print(f' - Number of BBF Data Models objects is {DM_OBJ_COUNT}')
+    print(f' - Number of BBF Data Models parameters is {DM_PARAM_COUNT}')
 
 ### main ###
 if __name__ == '__main__':
@@ -215,7 +216,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-r', '--remote-dm',
         action='append',
-		metavar = 'https://dev.iopsys.eu/iopsys/stunc.git^devel',
+		metavar = 'git^https://dev.iopsys.eu/iopsys/stunc.git^devel',
         help= 'Includes OBJ/PARAM defined under remote repositories defined as bbf plugin'
     )
 
@@ -228,7 +229,7 @@ if __name__ == '__main__':
 
     parser.add_argument(
         '-p', '--vendor-prefix',
-		default = 'iopsys',
+		default = 'X_IOPSYS_EU_',
 		metavar = 'X_IOPSYS_EU_',
 		help = 'Generate data model tree using provided vendor prefix for vendor defined objects.'
     )
@@ -242,8 +243,8 @@ if __name__ == '__main__':
 
     parser.add_argument(
         "-m", "--manufacturer",
-		default = 'iopsys',
-		metavar = 'iopsys',
+		default = 'IOPSYS',
+		metavar = 'IOPSYS',
 		help = 'Generate data model tree using this manufacturer.'
     )
 
@@ -304,13 +305,16 @@ if __name__ == '__main__':
         for f in args.remote_dm:
             x = f.split('^')
             r = {}
-            r["repo"] = x[0]
-            if len(x) == 2:
-                r["version"] = x[1]
+            r["proto"] = x[0]
+            if len(x) > 1:
+                r["repo"] = x[1]
+            if len(x) == 3:
+                r["version"] = x[2]
 
             plugins.append(r)
 
     bbf.generate_supported_dm(args.vendor_prefix, args.vendor_list, plugins)
     bbf.clean_supported_dm_list()
     generate_xml(args.format, args.output)
-    print("Datamodel generation completed, aritifacts available in %s" %args.output)
+    print(f'Datamodel generation completed, aritifacts available in {args.output}')
+    sys.exit(bbf.BBF_ERROR_CODE)

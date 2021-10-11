@@ -117,3 +117,4 @@ if isinstance(file_format, list):
 
 bbf.remove_file(bbf.DATA_MODEL_FILE)
 print("Datamodel generation completed, aritifacts shall be available in out directory or as per input json configuration")
+sys.exit(bbf.BBF_ERROR_CODE)

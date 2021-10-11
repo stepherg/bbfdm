@@ -735,14 +735,14 @@ Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-14
 
 ```bash
 $ ./generate_dm_xml.py -h
-usage: generate_dm_xml.py [-h] [-r https://dev.iopsys.eu/iopsys/stunc.git^devel] [-v iopsys] [-p X_IOPSYS_EU_] [-d DEVICE_PROTOCOL_DSLFTR069v1] [-m iopsys] [-u 002207] [-c DG400PRIME] [-n DG400PRIME-A]
+usage: generate_dm_xml.py [-h] [-r git^https://dev.iopsys.eu/iopsys/stunc.git^devel] [-v iopsys] [-p X_IOPSYS_EU_] [-d DEVICE_PROTOCOL_DSLFTR069v1] [-m iopsys] [-u 002207] [-c DG400PRIME] [-n DG400PRIME-A]
                           [-s 1.2.3.4] [-f BBF] [-o datamodel.xml]
 
 Script to generate list of supported and non-supported parameter in xml format
 
 optional arguments:
   -h, --help            show this help message and exit
-  -r https://dev.iopsys.eu/iopsys/stunc.git^devel, --remote-dm https://dev.iopsys.eu/iopsys/stunc.git^devel
+  -r git^https://dev.iopsys.eu/iopsys/stunc.git^devel, --remote-dm git^https://dev.iopsys.eu/iopsys/stunc.git^devel
                         Includes OBJ/PARAM defined under remote repositories defined as bbf plugin
   -v iopsys, --vendor-list iopsys
                         Generate data model tree with vendor extension OBJ/PARAM.
@@ -770,21 +770,25 @@ Part of BBF-tools, refer Readme for more examples
 More examples:
 ```bash
 $ ./generate_dm_xml.py -v iopsys -v openwrt
+$ ./generate_dm_xml.py -v iopsys -p X_IOPSYS_EU_ -r git^https://dev.iopsys.eu/iopsys/stunc.git^devel
+$ ./generate_dm_xml.py -f HDM -v iopsys -p X_IOPSYS_EU_ -o iopsys.xml
 ```
+
+> Note: For the remote data model, *git* is the only proto allowed to use in the *generate_dm_xml.py* script. Therefore, if you want to use vendor extensions from a local repository, you must use the *generate_dm.py* script.
 
 ### Excel generator
 [Python script](./tools/generate_dm_excel.py) to generat list of supported and un-supported parameters in excel sheet.
 
 ```bash
 $ ./generate_dm_excel.py -h
-usage: generate_dm_excel.py [-h] -d tr181 [-r https://dev.iopsys.eu/iopsys/stunc.git^devel] [-v iopsys] [-p X_IOPSYS_EU_] [-o supported_datamodel.xls]
+usage: generate_dm_excel.py [-h] -d tr181 [-r git^https://dev.iopsys.eu/iopsys/stunc.git^devel] [-v iopsys] [-p X_IOPSYS_EU_] [-o supported_datamodel.xls]
 
 Script to generate list of supported and non-supported parameter in xls format
 
 optional arguments:
   -h, --help            show this help message and exit
   -d tr181, --datamodel tr181
-  -r https://dev.iopsys.eu/iopsys/stunc.git^devel, --remote-dm https://dev.iopsys.eu/iopsys/stunc.git^devel
+  -r git^https://dev.iopsys.eu/iopsys/stunc.git^devel, --remote-dm git^https://dev.iopsys.eu/iopsys/stunc.git^devel
                         Includes OBJ/PARAM defined under remote repositories defined as bbf plugin
   -v iopsys, --vendor-list iopsys
                         Generate data model tree with vendor extension OBJ/PARAM
@@ -799,7 +803,8 @@ Part of BBF-tools, refer Readme for more examples
 More examples:
 ```bash
 $ ./generate_dm_excel.py -d tr181 -v iopsys -v openwrt -o datamodel.xls
-$ ./generate_dm_excel.py -d tr181 -d tr104 -v iopsys -v openwrt -o datamodel.xls
+$ ./generate_dm_excel.py -d tr181 -d tr104 -v iopsys -o datamodel.xls
+$ ./generate_dm_excel.py -d tr181 -v iopsys -p X_IOPSYS_EU_ -r git^https://dev.iopsys.eu/iopsys/xmppc.git^devel -o datamodel_iopsys.xls
 ```
 ### Data Model generator
 
@@ -832,6 +837,7 @@ The input json file should be defined as follow:
 	"plugins": [
 		{
 			"repo": "https://dev.iopsys.eu/iopsys/mydatamodel.git",
+			"proto": "git",
 			"version": "tag/hash/branch",
 			"dm_files": [
 				"src/datamodel.c",
@@ -840,6 +846,7 @@ The input json file should be defined as follow:
 		},
 		{
 			"repo": "https://dev.iopsys.eu/iopsys/mybbfplugin.git",
+			"proto": "git",
 			"version": "tag/hash/branch",
 			"dm_files": [
 				"dm.c"
@@ -847,9 +854,26 @@ The input json file should be defined as follow:
 		},
 		{
 			"repo": "https://dev.iopsys.eu/iopsys/mydatamodeljson.git",
+			"proto": "git",
 			"version": "tag/hash/branch",
 			"dm_files": [
 				"src/plugin/datamodel.json"
+			]
+		},
+		{
+			"repo": "/home/iopsys/sdk/mypackage/",
+			"proto": "local",
+			"dm_files": [
+				"src/datamodel.c",
+				"additional_datamodel.c"
+			]
+		},
+		{
+			"repo": "/src/feeds/mypackage/",
+			"proto": "local",
+			"dm_files": [
+				"datamodel.c",
+				"src/datamodel.json"
 			]
 		}
 	],
@@ -867,6 +891,10 @@ The input json file should be defined as follow:
 	}
 }
 ```
+
+> Note1: For the local repository, you must use an absolute path as repo option.
+
+> Note2: If proto is not defined in the json config file, then git is used by default as proto option.  
 
 - For more examples of tools input json file, you can see this link: [tools_input.json](./devel/tools/tools_input.json)
 
