@@ -943,12 +943,28 @@ static int get_WiFiRadio_DTIMPeriod(char *refparam, struct dmctx *ctx, void *dat
 
 static int set_WiFiRadio_DTIMPeriod(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *s = NULL;
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			//Here need to loop the iface and match the section name then add the dtim_period on each section
+			//as this param is read by mac80211.sh script and is overwriten as 2 if not written in all section
+			//of radio
+			uci_foreach_option_eq("wireless", "wifi-iface", "device", section_name((((struct wifi_radio_args *)data)->sections)->config_section), s) {
+				char *mode;
+
+				dmuci_get_value_by_section_string(s, "mode", &mode);
+
+				if (strcmp(mode, "ap") != 0)
+					continue;
+
+				dmuci_set_value_by_section(s, "dtim_period", value);
+			}
+
 			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "dtim_period", value);
 			break;
 	}
