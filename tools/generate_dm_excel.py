@@ -183,9 +183,9 @@ def generate_excel(dm_name_list, output_file="datamodel.xml"):
     generate_excel_file(output_file)
 
     if os.path.isfile(output_file):
-        print("└── Excel file generated: %s" % output_file)
+        print(" - Excel file generated: %s" % output_file)
     else:
-        print("└── Error in excel file generation %s" % output_file)
+        print(" - Error in excel file generation %s" % output_file)
 
 
 ### main ###

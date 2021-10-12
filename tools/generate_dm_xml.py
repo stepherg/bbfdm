@@ -198,12 +198,12 @@ def generate_xml(acs = 'default', output_file="datamodel.xml"):
         generate_bbf_xml_file(output_file)
 
     if os.path.isfile(output_file):
-        print("├── XML file generated: %s" % output_file)
+        print(" - XML file generated: %s" % output_file)
     else:
-        print("├── Error in generating xml file")
+        print(" - Error in generating xml file")
 
-    print("├── Number of BBF Data Models objects is %d" % DM_OBJ_COUNT)
-    print("└── Number of BBF Data Models parameters is %d" % DM_PARAM_COUNT)
+    print(" - Number of BBF Data Models objects is %d" % DM_OBJ_COUNT)
+    print(" - Number of BBF Data Models parameters is %d" % DM_PARAM_COUNT)
 
 ### main ###
 if __name__ == '__main__':

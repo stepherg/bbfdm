@@ -391,9 +391,9 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
 
                 if os.path.isdir(".repo"):
                     if version is None:
-                        print('├── Processing ' + repo)
+                        print(' - Processing ' + repo)
                     else:
-                        print('├── Processing ' + repo + '^' + version)
+                        print(' - Processing ' + repo + '^' + version)
 
                     dm_files = get_option_value(plugin, "dm_files")
                     if dm_files is not None and isinstance(dm_files, list):
@@ -414,7 +414,6 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
                                 generate_dynamic_json_datamodel_tree(file)
 
                     remove_folder(".repo")
-            print('└── Processing of plugins done')
 
     ############## Remove Duplicated Element from List ##############
     global LIST_SUPPORTED_DM
