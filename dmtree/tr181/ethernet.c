@@ -1708,7 +1708,7 @@ DMOBJ tEthernetObj[] = {
 {"Interface", &DMREAD, NULL, NULL, NULL, browseEthernetInterfaceInst, NULL, NULL, tEthernetInterfaceObj, tEthernetInterfaceParams, get_linker_interface, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {"Link", &DMWRITE, addObjEthernetLink, delObjEthernetLink, NULL, browseEthernetLinkInst, NULL, NULL, tEthernetLinkObj, tEthernetLinkParams, get_linker_link, BBFDM_BOTH, LIST_KEY{"Name", "Alias", "MACAddress", NULL}},
 {"VLANTermination", &DMWRITE, addObjEthernetVLANTermination, delObjEthernetVLANTermination, NULL, browseEthernetVLANTerminationInst, NULL, NULL, tEthernetVLANTerminationObj, tEthernetVLANTerminationParams, get_linker_vlan_term, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"RMONStats", &DMREAD, NULL, NULL, "file:/etc/config/ports;ubus:ethernet->rmonstats", browseEthernetRMONStatsInst, NULL, NULL, NULL, tEthernetRMONStatsParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Interface", "VLANID", "Queue", NULL}},
+{"RMONStats", &DMREAD, NULL, NULL, "file:/etc/config/ports;ubus:ethernet->rmonstats", browseEthernetRMONStatsInst, NULL, NULL, NULL, tEthernetRMONStatsParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Interface", "VLANID", NULL}},
 {0}
 };
 
