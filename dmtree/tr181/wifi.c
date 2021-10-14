@@ -2869,16 +2869,14 @@ static int set_radio_frequency(char *refparam, struct dmctx *ctx, void *data, ch
 /*#Device.WiFi.Radio.{i}.ChannelsInUse!UCI:wireless/wifi-device,@i-1/channel*/
 static int get_radio_channel(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+	char object[32];
 	json_object *res = NULL;
 
-	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "channel", value);
-	if (strcmp(*value, "auto") == 0 || (*value)[0] == '\0') {
-		char object[32];
-		snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
-		dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
-		DM_ASSERT(res, *value = "1");
-		*value = dmjson_get_value(res, 1, "channel");
-	}
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	DM_ASSERT(res, *value = "0");
+	*value = dmjson_get_value(res, 1, "channel");
+
 	return 0;
 }
 
