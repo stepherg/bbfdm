@@ -663,7 +663,7 @@ DMLEAF tNATParams[] = {
 DMLEAF tNATInterfaceSettingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Enable", &DMWRITE, DMT_BOOL, get_nat_interface_setting_enable, set_nat_interface_setting_enable, BBFDM_BOTH},
-{"Status", &DMWRITE, DMT_STRING, get_nat_interface_setting_status, NULL, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_nat_interface_setting_status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_nat_interface_setting_alias, set_nat_interface_setting_alias, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, get_nat_interface_setting_interface, set_nat_interface_setting_interface, BBFDM_BOTH},
 {0}
@@ -673,7 +673,7 @@ DMLEAF tNATInterfaceSettingParams[] = {
 DMLEAF tNATPortMappingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Enable", &DMWRITE, DMT_BOOL, get_nat_port_mapping_enable, set_nat_port_mapping_enable, BBFDM_BOTH},
-{"Status", &DMWRITE, DMT_STRING, get_nat_port_mapping_status, NULL, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_nat_port_mapping_status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_nat_port_mapping_alias, set_nat_port_mapping_alias, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, get_nat_port_mapping_interface, set_nat_port_mapping_interface, BBFDM_BOTH},
 {"AllInterfaces", &DMWRITE, DMT_BOOL, get_nat_port_mapping_all_interface, set_nat_port_mapping_all_interface, BBFDM_BOTH},
