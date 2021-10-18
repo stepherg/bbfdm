@@ -3086,9 +3086,9 @@ DMLEAF tDHCPv4ServerPoolParams[] = {
 {"DomainName", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_DomainName, set_DHCPv4ServerPool_DomainName, BBFDM_BOTH},
 {"IPRouters", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_IPRouters, set_DHCPv4ServerPool_IPRouters, BBFDM_BOTH},
 {"LeaseTime", &DMWRITE, DMT_INT, get_DHCPv4ServerPool_LeaseTime, set_DHCPv4ServerPool_LeaseTime, BBFDM_BOTH},
-{"StaticAddressNumberOfEntries", &DMWRITE, DMT_UNINT, get_DHCPv4ServerPool_StaticAddressNumberOfEntries, NULL, BBFDM_BOTH},
-{"OptionNumberOfEntries", &DMWRITE, DMT_UNINT, get_DHCPv4ServerPool_OptionNumberOfEntries, NULL, BBFDM_BOTH},
-{"ClientNumberOfEntries", &DMWRITE, DMT_UNINT, get_DHCPv4ServerPool_ClientNumberOfEntries, NULL, BBFDM_BOTH},
+{"StaticAddressNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPool_StaticAddressNumberOfEntries, NULL, BBFDM_BOTH},
+{"OptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPool_OptionNumberOfEntries, NULL, BBFDM_BOTH},
+{"ClientNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPool_ClientNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
