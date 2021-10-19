@@ -679,6 +679,22 @@ static void test_bbf_api_validate(void **state)
 	validate = dm_validate_unsignedInt("112", RANGE_ARGS{{"10","1000"}}, 1);
 	assert_int_equal(validate, 0);
 
+	// dm_validate_unsignedInt: test with multi range and wrong value
+	validate = dm_validate_unsignedInt("5420", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_unsignedInt: test with multi range and correct value
+	validate = dm_validate_unsignedInt("50", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
+	assert_int_equal(validate, 0);
+
+	// dm_validate_unsignedInt: test with wrong value
+	validate = dm_validate_unsignedInt("112", RANGE_ARGS{{"4","4"}}, 1);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_unsignedInt: test with correct value
+	validate = dm_validate_unsignedInt("1124", RANGE_ARGS{{"4","4"}}, 1);
+	assert_int_equal(validate, 0);
+
 
 	/*
 	 * Test of dm_validate_int function
@@ -704,6 +720,13 @@ static void test_bbf_api_validate(void **state)
 	validate = dm_validate_int("-2", RANGE_ARGS{{"-10","1000"}}, 1);
 	assert_int_equal(validate, 0);
 
+	// dm_validate_int: test with multi range and wrong value
+	validate = dm_validate_int("-2", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_int: test with multi range and correct value
+	validate = dm_validate_int("-7", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
+	assert_int_equal(validate, 0);
 
 	/*
 	 * Test of dm_validate_unsignedLong function
@@ -729,6 +752,14 @@ static void test_bbf_api_validate(void **state)
 	validate = dm_validate_unsignedLong("20", RANGE_ARGS{{"10","1000"}}, 1);
 	assert_int_equal(validate, 0);
 
+	// dm_validate_unsignedLong: test with multi range and wrong value
+	validate = dm_validate_unsignedLong("5420", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_unsignedLong: test with multi range and correct value
+	validate = dm_validate_unsignedLong("15000", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
+	assert_int_equal(validate, 0);
+
 
 	/*
 	 * Test of dm_validate_long function
@@ -752,6 +783,14 @@ static void test_bbf_api_validate(void **state)
 
 	// dm_validate_long: test with correct min/max value
 	validate = dm_validate_long("-2", RANGE_ARGS{{"-10","1000"}}, 1);
+	assert_int_equal(validate, 0);
+
+	// dm_validate_long: test with multi range and wrong value
+	validate = dm_validate_long("-2", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_long: test with multi range and correct value
+	validate = dm_validate_long("-7", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
 	assert_int_equal(validate, 0);
 
 
@@ -816,8 +855,20 @@ static void test_bbf_api_validate(void **state)
 	validate = dm_validate_hexBinary("123bcd", RANGE_ARGS{{"1","8"}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_hexBinary: test with wrong value
+	// dm_validate_hexBinary: test with correct value
 	validate = dm_validate_hexBinary("123bcd", RANGE_ARGS{{"3","3"}}, 1);
+	assert_int_equal(validate, 0);
+
+	// dm_validate_hexBinary: test with multi range and wrong value
+	validate = dm_validate_hexBinary("123bc", RANGE_ARGS{{"3","3"},{"5","5"}}, 2);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_hexBinary: test with multi range and correct value
+	validate = dm_validate_hexBinary("123bcd", RANGE_ARGS{{"3","3"},{"5","5"}}, 2);
+	assert_int_equal(validate, 0);
+
+	// dm_validate_hexBinary: test with multi range and correct value
+	validate = dm_validate_hexBinary("12345abcde", RANGE_ARGS{{"3","3"},{"5","5"}}, 2);
 	assert_int_equal(validate, 0);
 
 

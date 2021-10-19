@@ -15,7 +15,6 @@
 				"cwmp",
 				"usp"
 			],
-			"datatype": "boolean",
 			"mapping": [
 				{
 					"type": "uci", 
@@ -39,7 +38,6 @@
 				"cwmp",
 				"usp"
 			],
-			"datatype": "boolean",
 			"mapping": [
 				{
 					"type": "uci", 
@@ -63,7 +61,6 @@
 				"cwmp",
 				"usp"
 			],
-			"datatype": "boolean",
 			"mapping": [
 				{
 					"type": "uci", 
@@ -87,7 +84,6 @@
 				"cwmp",
 				"usp"
 			],
-			"datatype": "hexBinary",
 			"range": [
 				{
 					"min": 3,
@@ -117,7 +113,6 @@
 				"cwmp",
 				"usp"
 			],
-			"datatype": "hexBinary",
 			"range": [
 				{
 					"min": 3,
@@ -147,7 +142,6 @@
 				"cwmp",
 				"usp"
 			],
-			"datatype": "hexBinary",
 			"range": [
 				{
 					"min": 3,
@@ -177,7 +171,6 @@
 				"cwmp",
 				"usp"
 			],
-			"datatype": "hexBinary",
 			"range": [
 				{
 					"min": 3,
@@ -213,12 +206,12 @@
 			},
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "userinterface", 
+						"file": "userinterface",
 						"section": {
 							"name": "global"
-						}, 
+						},
 						"option": {
 							"name": "available_languages"
 						}
@@ -234,7 +227,6 @@
 				"cwmp",
 				"usp"
 			],
-			"datatype": "string",
 			"range": [
 				{
 					"max": 16
@@ -242,18 +234,18 @@
 			],
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "userinterface", 
+						"file": "userinterface",
 						"section": {
 							"name": "global"
-						}, 
+						},
 						"option": {
 							"name": "current_language"
 						}
 					}
 				}
-			]			
+			]
 		},
 		"X_IOPSYS_EU_Theme": {
 			"type": "string",
@@ -263,12 +255,11 @@
 				"cwmp",
 				"usp"
 			],
-			"datatype": "string",
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "userinterface", 
+						"file": "userinterface",
 						"section": {
 							"name": "global"
 						}, 

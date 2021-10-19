@@ -487,7 +487,8 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
         "cwmp",
         "usp"
     ],
-    "array": false
+    "array": false,
+    "access": false
 }
 ```
 
@@ -503,6 +504,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
         "usp"
     ],
     "array": true,
+    "access": true,
     "mapping": {
         "type": "uci",
         "uci": {
@@ -526,6 +528,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 		"usp"
 	],
 	"array": true,
+	"access": false,
 	"mapping": {
 		"type": "ubus",
 		"ubus": {
@@ -687,7 +690,14 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 > Note4: Each object definition in JSON file must begin with "Device." and should have the full parent path if it is under another object
 
-- For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [UserInterface](/test/files/etc/bbfdm/json/UserInterface.json), [X_IOPSYS_EU_Dropbear](/test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json)
+> Note5: You can validate any JSON file using [Validate_JSON_Plugin](/test/tools/validate_json_plugin.py) python script.
+
+```bash
+$ ./test/tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
+$ ./test/tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
+```
+
+- For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [UserInterface](/test/files/etc/bbfdm/json/UserInterface.json), [X_IOPSYS_EU_Dropbear](/test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json), [X_IOPSYS_EU_TEST](/test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json)
 
 ## BBFDM Tools
 BBF tools are written in python3 and has below dependencies.

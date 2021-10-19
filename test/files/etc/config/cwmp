@@ -54,3 +54,7 @@ config inform_extra
 	option enabled '0'
 	option parameter 'Device.DeviceInfo.SerialNumber'
 	option events '0 BOOTSTRAP'
+	
+config test 'test'
+	option enable '0'
+	option port '0'

@@ -1141,10 +1141,15 @@ int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_
 
 		if ((*value == '-') || (*endval != 0) || (errno != 0)) return -1;
 
-		if (r_args[i].min && r_args[i].max && minval == maxval) {
+		if (r_args[i].min && r_args[i].max) {
 
-			if (strlen(value) == minval)
-				break;
+			if (minval == maxval) {
+				if (strlen(value) == minval)
+					break;
+			} else {
+				if (ui_val >= minval && ui_val <= maxval)
+					break;
+			}
 
 			if (i == r_args_size - 1)
 				return -1;
@@ -1179,6 +1184,17 @@ int dm_validate_int(char *value, struct range_args r_args[], int r_args_size)
 
 		if ((*endval != 0) || (errno != 0)) return -1;
 
+		if (r_args[i].min && r_args[i].max) {
+
+			if (i_val >= minval && i_val <= maxval)
+				break;
+
+			if (i == r_args_size - 1)
+				return -1;
+
+			continue;
+		}
+
 		/* check size */
 		if ((r_args[i].min && i_val < minval) || (r_args[i].max && i_val > maxval) || (i_val < INT_MIN) || (i_val > INT_MAX))
 			return -1;
@@ -1206,6 +1222,17 @@ int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args
 
 		if ((*value == '-') || (*endval != 0) || (errno != 0)) return -1;
 
+		if (r_args[i].min && r_args[i].max) {
+
+			if (ul_val >= minval && ul_val <= maxval)
+				break;
+
+			if (i == r_args_size - 1)
+				return -1;
+
+			continue;
+		}
+
 		/* check size */
 		if ((r_args[i].min && ul_val < minval) || (r_args[i].max && ul_val > maxval) || (ul_val > (unsigned long)ULONG_MAX))
 			return -1;
@@ -1232,6 +1259,17 @@ int dm_validate_long(char *value, struct range_args r_args[], int r_args_size)
 		u_val = strtol(value, &endval, 10);
 
 		if ((*endval != 0) || (errno != 0)) return -1;
+
+		if (r_args[i].min && r_args[i].max) {
+
+			if (u_val >= minval && u_val <= maxval)
+				break;
+
+			if (i == r_args_size - 1)
+				return -1;
+
+			continue;
+		}
 
 		/* check size */
 		if ((r_args[i].min && u_val < minval) || (r_args[i].max && u_val > maxval))
@@ -1304,6 +1342,9 @@ int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_si
 
 static int dm_validate_size_list(int min_item, int max_item, int nbr_item)
 {
+	if (((min_item > 0) && (max_item > 0) && (min_item == max_item) && (nbr_item == 2 * min_item)))
+		return 0;
+
 	if (((min_item > 0) && (nbr_item < min_item)) ||
 		((max_item > 0) && (nbr_item > max_item))) {
 		return -1;
@@ -1340,7 +1381,7 @@ int dm_validate_string_list(char *value, int min_item, int max_item, int max_siz
 
 int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
-	char *token, *saveptr;
+	char *tmp, *saveptr;
 	int nbr_item = 0;
 
 	/* check length of list */
@@ -1352,8 +1393,116 @@ int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int ma
 	DM_STRNCPY(buf, value, sizeof(buf));
 
 	/* for each value, validate string */
-	for (token = strtok_r(buf, ",", &saveptr); token != NULL; token = strtok_r(NULL, ",", &saveptr)) {
-		if (dm_validate_unsignedInt(token, r_args, r_args_size))
+	for (tmp = strtok_r(buf, ",", &saveptr); tmp != NULL; tmp = strtok_r(NULL, ",", &saveptr)) {
+		if (dm_validate_unsignedInt(tmp, r_args, r_args_size))
+			return -1;
+		nbr_item ++;
+	}
+
+	/* check size of list */
+	if (dm_validate_size_list(min_item, max_item, nbr_item))
+		return -1;
+
+	return 0;
+}
+
+int dm_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+{
+	char *token, *pchr;
+	int nbr_item = 0;
+
+	/* check length of list */
+	if ((max_size > 0) && (strlen(value) > max_size))
+			return -1;
+
+	/* copy data in buffer */
+	char buf[strlen(value)+1];
+	DM_STRNCPY(buf, value, sizeof(buf));
+
+	/* for each value, validate string */
+	for (token = strtok_r(buf, ",", &pchr); token != NULL; token = strtok_r(NULL, ",", &pchr)) {
+		if (dm_validate_int(token, r_args, r_args_size))
+			return -1;
+		nbr_item ++;
+	}
+
+	/* check size of list */
+	if (dm_validate_size_list(min_item, max_item, nbr_item))
+		return -1;
+
+	return 0;
+}
+
+int dm_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+{
+	char *token, *tmp;
+	int nbr_item = 0;
+
+	/* check length of list */
+	if ((max_size > 0) && (strlen(value) > max_size))
+			return -1;
+
+	/* copy data in buffer */
+	char buf[strlen(value)+1];
+	DM_STRNCPY(buf, value, sizeof(buf));
+
+	/* for each value, validate string */
+	for (token = strtok_r(buf, ",", &tmp); token != NULL; token = strtok_r(NULL, ",", &tmp)) {
+		if (dm_validate_unsignedLong(token, r_args, r_args_size))
+			return -1;
+		nbr_item ++;
+	}
+
+	/* check size of list */
+	if (dm_validate_size_list(min_item, max_item, nbr_item))
+		return -1;
+
+	return 0;
+}
+
+int dm_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+{
+	char *pch, *saveptr;
+	int nbr_item = 0;
+
+	/* check length of list */
+	if ((max_size > 0) && (strlen(value) > max_size))
+			return -1;
+
+	/* copy data in buffer */
+	char buf[strlen(value)+1];
+	DM_STRNCPY(buf, value, sizeof(buf));
+
+	/* for each value, validate string */
+	for (pch = strtok_r(buf, ",", &saveptr); pch != NULL; pch = strtok_r(NULL, ",", &saveptr)) {
+		if (dm_validate_long(pch, r_args, r_args_size))
+			return -1;
+		nbr_item ++;
+	}
+
+	/* check size of list */
+	if (dm_validate_size_list(min_item, max_item, nbr_item))
+		return -1;
+
+	return 0;
+}
+
+int dm_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+{
+	char *pch, *spch;
+	int nbr_item = 0;
+
+	/* check length of list */
+	if ((max_size > 0) && (strlen(value) > max_size))
+			return -1;
+
+	/* copy data in buffer */
+	char buf[strlen(value)+1];
+	DM_STRNCPY(buf, value, sizeof(buf));
+
+	/* for each value, validate string */
+	for (pch = strtok_r(buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+		if (dm_validate_hexBinary(pch, r_args, r_args_size))
 			return -1;
 		nbr_item ++;
 	}

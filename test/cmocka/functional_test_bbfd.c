@@ -257,6 +257,573 @@ static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
 	validate_parameter(ctx, "Device.WiFi.Radio.[iopsys_test].Channel", "74", "xsd:unsignedInt");
 }
 
+static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	int fault = 0;
+
+	/*
+	 * Validate Boolean parameters
+	 */
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Enable", "64t", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Enable", "truee", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Enable", "true", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Enable", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Enable", "1", "xsd:boolean");
+
+	/*
+	 * Validate unsignedInt parameters
+	 */
+
+	// Mapping without range: Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_Retries", "64t", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_Retries", "15600", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_Retries", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Nbr_Retries", "15600", "xsd:unsignedInt");
+
+	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Port", "1050", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Mapping with range: set value in the first range [0-1000] ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Port", "1000", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Port", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Port", "1000", "xsd:unsignedInt");
+
+	// Mapping with range: set value in the second range [15000-65535] ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Port", "20546", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Port", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Port", "20546", "xsd:unsignedInt");
+
+	/*
+	 * Validate int parameters
+	 */
+
+	// Mapping with range (only min): Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Min_value", "-300", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Min_value", "-273", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Min_value", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Min_value", "-273", "xsd:int");
+
+	// Mapping with range (only max): Set Wrong Value out of range ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Max_value", "280", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Mapping with range: set value in the first range [0-1000] ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Max_value", "274", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Max_value", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Max_value", "274", "xsd:int");
+
+	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Value", "-3", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Mapping with range: set value in the first range [-10:-5] ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Value", "-7", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Value", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.value", "-7", "xsd:int");
+
+	// Mapping with range: set value in the second range [-1:10] ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Value", "1", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Value", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Value", "1", "xsd:int");
+
+	/*
+	 * Validate unsignedLong parameters
+	 */
+
+	// Mapping without range: Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_bytes", "64t", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_bytes", "15600", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_bytes", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Nbr_bytes", "15600", "xsd:unsignedLong");
+
+	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", "499", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Mapping with range: set value in the first range [0-100] ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", "99", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", "99", "xsd:unsignedLong");
+
+	// Mapping with range: set value in the second range [500-3010] ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", "1024", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", "1024", "xsd:unsignedLong");
+
+	/*
+	 * Validate long parameters
+	 */
+
+	// Mapping without range: Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.MaxTxPower", "-300t", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.MaxTxPower", "-273", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.MaxTxPower", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.MaxTxPower", "-273", "xsd:long");
+
+	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", "-91", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Mapping with range: set value in the first range [-90:36] ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", "274", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", "274", "xsd:long");
+
+	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", "37", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Mapping with range: set value in the first range [70:360] ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", "70", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", "70", "xsd:long");
+
+	/*
+	 * Validate dateTime parameters
+	 */
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.AssociationTime", "2030-01-01T11:22:33.2Z", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.AssociationTime", "2022-01-01T12:20:22.2222Z", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.AssociationTime", "2022-01-01T12:20:22Z", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.AssociationTime", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.AssociationTime", "2022-01-01T12:20:22Z", "xsd:dateTime");
+
+	/*
+	 * Validate hexBinary parameters
+	 */
+
+	// Mapping without range: Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.ButtonColor", "64t", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.ButtonColor", "64ab78cef12", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.ButtonColor", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.ButtonColor", "64ab78cef12", "xsd:hexBinary");
+
+	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TextColor", "am123", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Mapping with range: set value in the first range [3-3] ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TextColor", "123abc", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TextColor", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.TextColor", "123abc", "xsd:hexBinary");
+
+	// Mapping with range: set value in the second range [5-5] ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TextColor", "12345abcde", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TextColor", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.TextColor", "12345abcde", "xsd:hexBinary");
+
+	// Mapping without range: Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.BackgroundColor", "12345abce", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.BackgroundColor", "45a1bd", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.BackgroundColor", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.BackgroundColor", "45a1bd", "xsd:hexBinary");
+
+	/*
+	 * Validate string parameters
+	 */
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Interface", "64", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Interface", "wan", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Interface", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Interface", "wan", "xsd:string");
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.IPAddr", "192.168.1.789", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.IPAddr", "192.168.117.45", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.IPAddr", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.IPAddr", "192.168.117.45", "xsd:string");
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Protocol", "OMA-D", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Protocol", "OMA-DM", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Protocol", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Protocol", "OMA-DM", "xsd:string");
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Description", "bbf validate test", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Description", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Description", "bbf validate test", "xsd:string");
+
+	/*
+	 * Validate list string parameters
+	 */
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.FailureReasons", "te,be,re,yu", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.FailureReasons", "ExcessiveDelay,InsufficientBuffers", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.FailureReasons", "LowRate,Other", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.FailureReasons", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.FailureReasons", "LowRate,Other", "xsd:string");
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths", "200MHz,10MHz", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths", "ExcessiveDelay,InsufficientBuffers", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths", "40MHz,80+80MHz", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths", "40MHz,80+80MHz", "xsd:string");
+
+	/*
+	 * Validate list int parameters
+	 */
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported", "-5,-3,99,120", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported", "-1,9,990", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported", "-1,9,100", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported", "-1,9,100", "xsd:string");
+
+	/*
+	 * Validate list unsignedInt parameters
+	 */
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration", "8,1,2,3", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// Set Wrong Value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration", "1,2,3,4,5,6,7,8", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration", "0,1,2,3,4,5,6,7", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter after setting to true: name, type, value
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration", "0,1,2,3,4,5,6,7", "xsd:string");
+}
+
 static void test_api_bbfdm_add_del_standard_object(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -451,6 +1018,7 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_json_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_library_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_standard_parameter_alias, setup_alias, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_input_value_validation_json_parameter, setup, teardown_commit),
 
 		// Add/Delete Object method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_standard_object, setup, teardown_commit),

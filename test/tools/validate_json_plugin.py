@@ -63,7 +63,8 @@ obj_schema = {
 	"required": [
 		"type",
 		"protocols",
-		"array"
+		"array",
+		"access"
 	]
 }
 

@@ -4,10 +4,11 @@
 		"protocols": [
 			"cwmp", 
 			"usp"
-		], 
+		],
+		"access": true,
 		"array": true,
 		"mapping": {
-			"type": "uci", 
+			"type": "uci",
 			"uci": {
 				"file": "dropbear", 
 				"section": {
@@ -42,22 +43,22 @@
 			]
 		},
 		"PasswordAuth": {
-			"type": "boolean", 
+			"type": "boolean",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
-			], 
-			"read": true, 
-			"write": true, 
+			],
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
-						}, 
+						},
 						"option": {
 							"name": "PasswordAuth"
 						}
@@ -66,22 +67,22 @@
 			]
 		},
 		"RootPasswordAuth": {
-			"type": "boolean", 
+			"type": "boolean",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
-			], 
-			"read": true, 
-			"write": true, 
+			],
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
-						}, 
+						},
 						"option": {
 							"name": "RootPasswordAuth"
 						}
@@ -90,20 +91,20 @@
 			]
 		},
 		"Port": {
-			"type": "unsignedInt", 
+			"type": "unsignedInt",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
-			], 
-			"read": true, 
-			"write": true, 
+			],
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
 						}, 
 						"option": {
@@ -114,22 +115,22 @@
 			]
 		},
 		"RootLogin": {
-			"type": "boolean", 
+			"type": "boolean",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
-			], 
-			"read": true, 
-			"write": true, 
+			],
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
-						}, 
+						},
 						"option": {
 							"name": "RootLogin"
 						}
@@ -138,22 +139,22 @@
 			]
 		},
 		"GatewayPorts": {
-			"type": "boolean", 
+			"type": "boolean",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
 			], 
-			"read": true, 
-			"write": true, 
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
-						}, 
+						},
 						"option": {
 							"name": "GatewayPorts"
 						}
@@ -162,22 +163,22 @@
 			]
 		},
 		"Interface": {
-			"type": "string", 
+			"type": "string",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
 			], 
-			"read": true, 
-			"write": true, 
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
-						}, 
+						},
 						"option": {
 							"name": "Interface"
 						}
@@ -186,22 +187,22 @@
 			]
 		},
 		"RSAKeyFile": {
-			"type": "string", 
+			"type": "string",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
 			], 
-			"read": true, 
-			"write": true, 
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
-						}, 
+						},
 						"option": {
 							"name": "rsakeyfile"
 						}
@@ -210,22 +211,22 @@
 			]
 		},
 		"DSSKeyFile": {
-			"type": "string", 
+			"type": "string",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
-			], 
-			"read": true, 
-			"write": true, 
+			],
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
-						}, 
+						},
 						"option": {
 							"name": "dsskeyfile"
 						}
@@ -234,20 +235,20 @@
 			]
 		},
 		"SSHKeepAlive": {
-			"type": "unsignedInt", 
+			"type": "unsignedInt",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
 			], 
-			"read": true, 
-			"write": true, 
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
 						}, 
 						"option": {
@@ -258,22 +259,22 @@
 			]
 		},
 		"IdleTimeout": {
-			"type": "unsignedInt", 
+			"type": "unsignedInt",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
-			], 
-			"read": true, 
-			"write": true, 
+			],
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
-						}, 
+						},
 						"option": {
 							"name": "IdleTimeout"
 						}
@@ -282,22 +283,22 @@
 			]
 		},
 		"Verbose": {
-			"type": "boolean", 
+			"type": "boolean",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
 			], 
-			"read": true, 
-			"write": true, 
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
-						}, 
+						},
 						"option": {
 							"name": "verbose"
 						}
@@ -306,22 +307,22 @@
 			]
 		},
 		"BannerFile": {
-			"type": "string", 
+			"type": "string",
 			"protocols": [
-				"cwmp", 
+				"cwmp",
 				"usp"
 			], 
-			"read": true, 
-			"write": true, 
+			"read": true,
+			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "dropbear", 
+						"file": "dropbear",
 						"section": {
-							"type": "dropbear", 
+							"type": "dropbear",
 							"index": "@i-1"
-						}, 
+						},
 						"option": {
 							"name": "BannerFile"
 						}

@@ -146,19 +146,6 @@ struct dm_parameter {
 	char *additional_data;
 };
 
-struct dm_json_parameter {
-	struct list_head list;
-	char *name;
-	char *arg1;
-	char *arg2;
-	char *arg3;
-	char *arg4;
-	char *arg5;
-	char *arg6;
-	char *arg7;
-	char *arg8;
-};
-
 struct dmctx
 {
 	bool stop;
