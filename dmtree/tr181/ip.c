@@ -1477,8 +1477,8 @@ static int set_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *data, 
 			if (b) {
 				char interface_obj[64] = {0};
 				snprintf(interface_obj, sizeof(interface_obj), "network.interface.%s", section_name(((struct uci_section *)data)));
-				dmubus_call_set(interface_obj, "down", UBUS_ARGS{}, 0);
-				dmubus_call_set(interface_obj, "up", UBUS_ARGS{}, 0);
+				dmubus_call_set(interface_obj, "down", UBUS_ARGS{0}, 0);
+				dmubus_call_set(interface_obj, "up", UBUS_ARGS{0}, 0);
 			}
 			break;
 	}
@@ -2220,8 +2220,8 @@ static int operate_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *da
 	char interface_obj[64] = {0};
 
 	snprintf(interface_obj, sizeof(interface_obj), "network.interface.%s", section_name(((struct uci_section *)data)));
-	dmubus_call_set(interface_obj, "down", UBUS_ARGS{}, 0);
-	dmubus_call_set(interface_obj, "up", UBUS_ARGS{}, 0);
+	dmubus_call_set(interface_obj, "down", UBUS_ARGS{0}, 0);
+	dmubus_call_set(interface_obj, "up", UBUS_ARGS{0}, 0);
 
 	return CMD_SUCCESS;
 }

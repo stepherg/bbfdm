@@ -106,7 +106,7 @@ static int set_ppp_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 		case VALUESET:
 			string_to_bool(value, &b);
 			dmastrcat(&ubus_object, "network.interface.", section_name(((struct dmmap_dup *)data)->config_section));
-			dmubus_call_set(ubus_object, b ? "up" : "down", UBUS_ARGS{}, 0);
+			dmubus_call_set(ubus_object, b ? "up" : "down", UBUS_ARGS{0}, 0);
 			dmfree(ubus_object);
 			break;
 	}
@@ -179,8 +179,8 @@ static int set_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *data,
 			if (b) {
 				char intf_obj[64] = {0};
 				snprintf(intf_obj, sizeof(intf_obj), "network.interface.%s", section_name(((struct dmmap_dup *)data)->config_section));
-				dmubus_call_set(intf_obj, "down", UBUS_ARGS{}, 0);
-				dmubus_call_set(intf_obj, "up", UBUS_ARGS{}, 0);
+				dmubus_call_set(intf_obj, "down", UBUS_ARGS{0}, 0);
+				dmubus_call_set(intf_obj, "up", UBUS_ARGS{0}, 0);
 			}
 			break;
 	}
@@ -899,8 +899,8 @@ static int operate_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *d
 	char interface_obj[64] = {0};
 
 	snprintf(interface_obj, sizeof(interface_obj), "network.interface.%s", section_name(((struct dmmap_dup *)data)->config_section));
-	dmubus_call_set(interface_obj, "down", UBUS_ARGS{}, 0);
-	dmubus_call_set(interface_obj, "up", UBUS_ARGS{}, 0);
+	dmubus_call_set(interface_obj, "down", UBUS_ARGS{0}, 0);
+	dmubus_call_set(interface_obj, "up", UBUS_ARGS{0}, 0);
 
 	return CMD_SUCCESS;
 }

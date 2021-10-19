@@ -166,7 +166,7 @@ static int browseDHCPv6ServerPoolClientInst(struct dmctx *dmctx, DMNODE *parent_
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(dhcp_arg->dhcp_sections->config_section), String}}, 1, &res1);
 	if (!res1) return 0;
 	device = dmjson_get_value(res1, 1, "device");
-	dmubus_call("dhcp", "ipv6leases", UBUS_ARGS{}, 0, &res);
+	dmubus_call("dhcp", "ipv6leases", UBUS_ARGS{0}, 0, &res);
 	if (!res) return 0;
 	dev_obj = dmjson_get_obj(res, 1, "device");
 	if (!dev_obj) return 0;

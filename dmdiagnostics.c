@@ -545,7 +545,7 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	string_to_bool((char *)auto_activate, &activate);
 	if (activate) {
 		sleep(30); // Wait for the image to become available
-		if (dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0) != 0)
+		if (dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) != 0)
 			res = -1;
 	}
 
@@ -559,7 +559,7 @@ end:
 
 static void launch_activate_iamge_cb(struct uloop_timeout *t)
 {
-	dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0);
+	dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0);
 }
 
 static void activate_fw_images(struct activate_image *active_img)
@@ -584,7 +584,7 @@ int bbf_fw_image_activate(const char *bank_id, struct activate_image *active_img
 	if (*active_img->start_time) {
 		activate_fw_images(active_img);
 	} else {
-		if (dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0) != 0)
+		if (dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) != 0)
 			return -1;
 	}
 

@@ -108,7 +108,7 @@ static int browseDSLLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	char *inst = NULL;
 	int entries = 0;
 
-	dmubus_call("dsl", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("dsl", "status", UBUS_ARGS{0}, 0, &res);
 	while (res) {
 		line_obj = dmjson_select_obj_in_array_idx(res, entries, 1, "line");
 		if(line_obj) {
@@ -136,7 +136,7 @@ static int browseDSLChannelInst(struct dmctx *dmctx, DMNODE *parent_node, void *
 	char *inst = NULL;
 	int entries_line = 0, entries_channel = 0;
 
-	dmubus_call("dsl", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("dsl", "status", UBUS_ARGS{0}, 0, &res);
 	while (res) {
 		line_obj = dmjson_select_obj_in_array_idx(res, entries_line, 1, "line");
 		while (line_obj) {
@@ -171,7 +171,7 @@ static char *get_dsl_value_without_argument(char *command1, char *id, char *comm
 	char command[16], *value = "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
-	dmubus_call(command, command2, UBUS_ARGS{}, 0, &res);
+	dmubus_call(command, command2, UBUS_ARGS{0}, 0, &res);
 	if (!res) return "";
 	value = dmjson_get_value(res, 1, key);
 	return value;
@@ -183,7 +183,7 @@ static char *get_dsl_value_without_argument_and_with_two_key(char *command1, cha
 	char command[16], *value = "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
-	dmubus_call(command, command2, UBUS_ARGS{}, 0, &res);
+	dmubus_call(command, command2, UBUS_ARGS{0}, 0, &res);
 	if (!res) return "";
 	value = dmjson_get_value(res, 2, key1, key2);
 	return value;
@@ -207,7 +207,7 @@ static char *get_dsl_value_array_without_argument(char *command1, char *id, char
 	char command[16], *value= "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
-	dmubus_call(command, command2, UBUS_ARGS{}, 0, &res);
+	dmubus_call(command, command2, UBUS_ARGS{0}, 0, &res);
 	if (!res) return "";
 	value = dmjson_get_value_array_all(res, ",", 1, key);
 	return value;

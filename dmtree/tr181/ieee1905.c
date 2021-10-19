@@ -22,7 +22,7 @@ static int browseIEEE1905ALInterfaceInst(struct dmctx *dmctx, DMNODE *parent_nod
 	char *inst = NULL;
 	int id = 0, i = 0;
 
-	dmubus_call("ieee1905", "info", UBUS_ARGS{}, 0, &res);
+	dmubus_call("ieee1905", "info", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, interface_obj, i, 1, "interface") {
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)interface_obj, inst) == DM_STOP)
@@ -95,7 +95,7 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst(struct dmctx *dmctx
 	char *inst = NULL;
 	int id = 0, i = 0;
 
-	dmubus_call("ieee1905", "info", UBUS_ARGS{}, 0, &res);
+	dmubus_call("ieee1905", "info", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, device_obj, i, 2, "topology", "device") {
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)device_obj, inst) == DM_STOP)
@@ -286,7 +286,7 @@ static int get_linker_topology_interface(char *refparam, struct dmctx *dmctx, vo
 static int ubus_ieee1905_info(const char *option, char **value)
 {
 	json_object *res = NULL;
-	dmubus_call("ieee1905", "info", UBUS_ARGS{}, 0, &res);
+	dmubus_call("ieee1905", "info", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	*value = dmjson_get_value(res, 1, option);
 	return 0;
@@ -295,7 +295,7 @@ static int ubus_ieee1905_info(const char *option, char **value)
 static int ubus_ieee1905_info_options(const char *option1, const char *option2, char **value)
 {
 	json_object *res = NULL;
-	dmubus_call("ieee1905", "info", UBUS_ARGS{}, 0, &res);
+	dmubus_call("ieee1905", "info", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	*value = dmjson_get_value(res, 2, option1, option2);
 	return 0;
@@ -379,7 +379,7 @@ static int get_IEEE1905AL_RegistrarFreqBand(char *refparam, struct dmctx *ctx, v
 	char list_bands[64], *band = NULL;
 	unsigned pos = 0, idx = 0;
 
-	dmubus_call("ieee1905", "info", UBUS_ARGS{}, 0, &res);
+	dmubus_call("ieee1905", "info", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 
 	list_bands[0] = 0;

@@ -535,7 +535,7 @@ static int browse_igmp_cgrp_inst(struct dmctx *dmctx, DMNODE *parent_node, void 
 	json_object *res = NULL, *jobj = NULL, *arrobj = NULL, *group_obj = NULL;
 	char *inst = NULL;
 
-	dmubus_call("mcast", "stats", UBUS_ARGS{}, 0, &res);
+	dmubus_call("mcast", "stats", UBUS_ARGS{0}, 0, &res);
 	if (res) {
 		int i = 0, id = 0;
 
@@ -646,7 +646,7 @@ static int get_igmp_cgrps_no_of_entries(char *refparam, struct dmctx *ctx, void 
 	int cnt = 0;
 	json_object *res = NULL, *jobj = NULL, *arrobj = NULL, *group_obj = NULL;
 
-	dmubus_call("mcast", "stats", UBUS_ARGS{}, 0, &res);
+	dmubus_call("mcast", "stats", UBUS_ARGS{0}, 0, &res);
 	if (res) {
 		int i = 0;
 

@@ -203,7 +203,7 @@ static int get_ServicesVoiceServiceSIPClient_Status(char *refparam, struct dmctx
 		// Get registration status from ubus
 		json_object *res = NULL, *sip = NULL, *client = NULL;
 
-		dmubus_call("voice.asterisk", "status", UBUS_ARGS{}, 0, &res);
+		dmubus_call("voice.asterisk", "status", UBUS_ARGS{0}, 0, &res);
 		if (res) {
 			sip = dmjson_get_obj(res, 1, "sip");
 			if (sip) {
@@ -358,7 +358,7 @@ static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, s
 		return 0;
 	}
 
-	dmubus_call("voice.asterisk", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("voice.asterisk", "status", UBUS_ARGS{0}, 0, &res);
 	if (res) {
 		sip = dmjson_get_obj(res, 1, "sip");
 		if (sip) {
@@ -412,7 +412,7 @@ static int get_ServicesVoiceServiceSIPClientContact_UserAgent(char *refparam, st
 		return 0;
 	}
 
-	dmubus_call("voice.asterisk", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("voice.asterisk", "status", UBUS_ARGS{0}, 0, &res);
 	if (res) {
 		sip = dmjson_get_obj(res, 1, "sip");
 		if (sip) {

@@ -66,7 +66,7 @@ static int get_Device_RootDataModelVersion(char *refparam, struct dmctx *ctx, vo
  *************************************************************/
 static int operate_Device_Reboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return !dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0) ? CMD_SUCCESS : CMD_FAIL;
+	return !dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) ? CMD_SUCCESS : CMD_FAIL;
 }
 
 static int operate_Device_FactoryReset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)

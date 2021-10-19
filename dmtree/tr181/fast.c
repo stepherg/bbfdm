@@ -71,7 +71,7 @@ static int browseFASTLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 	char *inst = NULL;
 	int entries = 0;
 
-	dmubus_call("fast", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("fast", "status", UBUS_ARGS{0}, 0, &res);
 	while (res) {
 		line_obj = dmjson_select_obj_in_array_idx(res, entries, 1, "line");
 		if(line_obj) {
@@ -100,7 +100,7 @@ static char *get_fast_value_without_argument(char *command1, char *id, char *com
 	char command[16], *value = "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
-	dmubus_call(command, command2, UBUS_ARGS{}, 0, &res);
+	dmubus_call(command, command2, UBUS_ARGS{0}, 0, &res);
 	if (!res) return "";
 	value = dmjson_get_value(res, 1, key);
 	return value;
@@ -112,7 +112,7 @@ static char *get_fast_value_without_argument_and_with_two_key(char *command1, ch
 	char command[16], *value = "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
-	dmubus_call(command, command2, UBUS_ARGS{}, 0, &res);
+	dmubus_call(command, command2, UBUS_ARGS{0}, 0, &res);
 	if (!res) return "";
 	value = dmjson_get_value(res, 2, key1, key2);
 	return value;
@@ -124,7 +124,7 @@ static char *get_fast_value_array_without_argument(char *command1, char *id, cha
 	char command[16], *value= "0";
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
-	dmubus_call(command, command2, UBUS_ARGS{}, 0, &res);
+	dmubus_call(command, command2, UBUS_ARGS{0}, 0, &res);
 	if (!res) return "";
 	value = dmjson_get_value_array_all(res, ",", 1, key);
 	return value;
@@ -244,7 +244,7 @@ static int get_FASTLine_AllowedProfiles(char *refparam, struct dmctx *ctx, void 
 	unsigned pos = 0, idx = 0;
 
 	snprintf(ubus_name, sizeof(ubus_name), "fast.line.%s", ((struct fast_line_args*)data)->id);
-	dmubus_call(ubus_name, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(ubus_name, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 
 	list_profile[0] = 0;

@@ -498,7 +498,7 @@ def cprintBrowseObj(fbrowse, name, mappingobj, dmobject):
             print("	int id = 0, i = 0;", file=fp)
             print("", file=fp)
             if res3 is None and res4 is None:
-                print("	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{}, 0, &res);" %
+                print("	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{0}, 0, &res);" %
                       (res1, res2), file=fp)
             else:
                 print("	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{{\"%s\", \"%s\", String}}, 1, &res);" % (
@@ -635,7 +635,7 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
                 else:
                     get_value += "	json_object *res;\n"
                     if res3 is None and res4 is None:
-                        get_value += "	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{}, 0, &res);\n" % (
+                        get_value += "	dmubus_call(\"%s\", \"%s\", UBUS_ARGS{0}, 0, &res);\n" % (
                             res1, res2)
                     else:
                         if i == 2 and res4 == "prev_value":

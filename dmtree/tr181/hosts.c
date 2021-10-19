@@ -21,7 +21,7 @@ static int browseHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 	char *inst = NULL;
 	int id = 0, i = 0;
 
-	dmubus_call("topology", "hosts", UBUS_ARGS{}, 0, &res);
+	dmubus_call("topology", "hosts", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, host_obj, i, 1, "hosts") {
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)host_obj, inst) == DM_STOP)

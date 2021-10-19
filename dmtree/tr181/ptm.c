@@ -217,7 +217,7 @@ static int get_ptm_fast_line(struct dmctx *ctx, void *data, char *instance, char
 {
 	json_object *res = NULL, *line_obj = NULL;
 
-	dmubus_call("fast", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("fast", "status", UBUS_ARGS{0}, 0, &res);
 	if (!res)
 		return 0;
 	line_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "line");

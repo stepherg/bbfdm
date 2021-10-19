@@ -30,7 +30,7 @@ int init_supported_codecs(void)
 {
 	json_object *res = NULL;
 
-	dmubus_call("voice.asterisk", "codecs", UBUS_ARGS{}, 0, &res);
+	dmubus_call("voice.asterisk", "codecs", UBUS_ARGS{0}, 0, &res);
 	if (!res)
 		return -1;
 

@@ -398,11 +398,11 @@ static void test_bbf_api_ubus(void **state)
 	 */
 
 	// dmubus_call: test Wrong obj
-	dmubus_call("ucii", "configs", UBUS_ARGS{}, 0, &res);
+	dmubus_call("ucii", "configs", UBUS_ARGS{0}, 0, &res);
 	assert_null(res);
 
 	// dmubus_call: test Wrong method
-	dmubus_call("uci", "configss", UBUS_ARGS{}, 0, &res);
+	dmubus_call("uci", "configss", UBUS_ARGS{0}, 0, &res);
 	assert_null(res);
 
 	// dmubus_call: test Wrong argument
@@ -410,7 +410,7 @@ static void test_bbf_api_ubus(void **state)
 	assert_null(res);
 
 	// dmubus_call: test correct obj/method
-	dmubus_call("uci", "configs", UBUS_ARGS{}, 0, &res);
+	dmubus_call("uci", "configs", UBUS_ARGS{0}, 0, &res);
 	assert_non_null(res);
 
 	// dmubus_call: test correct obj/method
@@ -422,11 +422,11 @@ static void test_bbf_api_ubus(void **state)
 	 */
 
 	// dmubus_call_set: test Wrong obj
-	ubus_res = dmubus_call_set("ucii", "configs", UBUS_ARGS{}, 0);
+	ubus_res = dmubus_call_set("ucii", "configs", UBUS_ARGS{0}, 0);
 	assert_int_not_equal(ubus_res, 0);
 
 	// dmubus_call_set: test Wrong method
-	ubus_res = dmubus_call_set("uci", "configss", UBUS_ARGS{}, 0);
+	ubus_res = dmubus_call_set("uci", "configss", UBUS_ARGS{0}, 0);
 	assert_int_not_equal(ubus_res, 0);
 
 	// dmubus_call_set: test Wrong argument
@@ -434,7 +434,7 @@ static void test_bbf_api_ubus(void **state)
 	assert_int_not_equal(ubus_res, 0);
 
 	// dmubus_call_set: test correct obj/method
-	ubus_res = dmubus_call_set("uci", "configs", UBUS_ARGS{}, 0);
+	ubus_res = dmubus_call_set("uci", "configs", UBUS_ARGS{0}, 0);
 	assert_int_equal(ubus_res, 0);
 
 	// dmubus_call_set: test correct obj/method
@@ -477,7 +477,7 @@ static void test_bbf_api_json(void **state)
 	char *json_value = NULL;
 	int idx = 0;
 
-	dmubus_call("wifi.ap.test2", "status", UBUS_ARGS{}, 0, &wifi_status);
+	dmubus_call("wifi.ap.test2", "status", UBUS_ARGS{0}, 0, &wifi_status);
 	assert_non_null(wifi_status);
 
 	/*

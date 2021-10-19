@@ -20,7 +20,7 @@ static int browseServicesVoiceServiceDECTBaseInst(struct dmctx *dmctx, DMNODE *p
 	char *inst = NULL;
 	int id = 0, i = 0;
 
-	dmubus_call("dect", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "base") {
 
@@ -40,7 +40,7 @@ static int browseServicesVoiceServiceDECTPortableInst(struct dmctx *dmctx, DMNOD
 	char *inst = NULL;
 	int id = 0, i = 0;
 
-	dmubus_call("dect", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	if (res) {
 		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "handsets") {
 
@@ -62,7 +62,7 @@ static int get_ServicesVoiceServiceDECT_BaseNumberOfEntries(char *refparam, stru
 	size_t num = 0;
 	json_object *res, *base;
 
-	dmubus_call("dect", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	json_object_object_get_ex(res, "base", &base);
 	
@@ -79,7 +79,7 @@ static int get_ServicesVoiceServiceDECT_PortableNumberOfEntries(char *refparam, 
 	size_t num = 0;
 	json_object *res, *handsets;
 
-	dmubus_call("dect", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 
 	json_object_object_get_ex(res, "handsets", &handsets);

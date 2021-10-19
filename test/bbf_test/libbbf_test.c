@@ -259,7 +259,7 @@ static int set_X_IOPSYS_EU_Syslog_ConsoleLogLevel(char *refparam, struct dmctx *
  *************************************************************/
 static int operate_Device_X_IOPSYS_EU_Reboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return !dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0) ? CMD_SUCCESS : CMD_FAIL;
+	return !dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) ? CMD_SUCCESS : CMD_FAIL;
 }
 
 static operation_args x_iopsys_eu_ping_test_run_args = {

@@ -165,7 +165,7 @@ static int browseDeviceInfoFirmwareImageInst(struct dmctx *dmctx, DMNODE *parent
 	char *inst = NULL;
 	int id = 0, i = 0;
 
-	dmubus_call("fwbank", "dump", UBUS_ARGS{}, 0, &res);
+	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)bank_obj, inst) == DM_STOP)
@@ -181,7 +181,7 @@ static int browseProcessEntriesInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	char *inst = NULL;
 	int id = 0, i = 0;
 
-	dmubus_call("router.system", "processes", UBUS_ARGS{}, 0, &res);
+	dmubus_call("router.system", "processes", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, processes, i, 1, "processes") {
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)processes, inst) == DM_STOP)
@@ -242,7 +242,7 @@ static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *da
 	char linker[32];
 	int i = 0;
 
-	dmubus_call("fwbank", "dump", UBUS_ARGS{}, 0, &res);
+	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
 		active = dmjson_get_value(bank_obj, 1, "active");
 		if (active && strcmp(active, "true") == 0) {
@@ -265,7 +265,7 @@ static int get_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 	char linker[32];
 	int i = 0;
 
-	dmubus_call("fwbank", "dump", UBUS_ARGS{}, 0, &res);
+	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
 		boot = dmjson_get_value(bank_obj, 1, "boot");
 		if (boot && strcmp(boot, "true") == 0) {
@@ -747,7 +747,7 @@ static int get_process_number_of_entries(char* refparam, struct dmctx *ctx, void
 	json_object *res = NULL, *processes = NULL;
 	int nbre_process = 0;
 
-	dmubus_call("router.system", "processes", UBUS_ARGS{}, 0, &res);
+	dmubus_call("router.system", "processes", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	json_object_object_get_ex(res, "processes", &processes);
 	nbre_process = (processes) ? json_object_array_length(processes) : 0;

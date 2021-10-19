@@ -76,7 +76,7 @@ static char *get_radio_option_nocache(const struct wifi_radio_args *args, char *
 	char object[32];
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(args->sections->config_section));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 
 	return (res) ? dmjson_get_value(res, 1, option) : "";
 }
@@ -118,7 +118,7 @@ static int get_supported_modes(const char *ubus_method, const char *ifname, char
 	unsigned pos = 0, idx = 0;
 
 	snprintf(object, sizeof(object), "%s.%s", ubus_method, ifname);
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = dm_default_modes_supported);
 
 	list_modes[0] = 0;
@@ -215,7 +215,7 @@ static void wifi_start_scan(const char *radio)
 	char object[32];
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", radio);
-	dmubus_call_set(object, "scan", UBUS_ARGS{}, 0);
+	dmubus_call_set(object, "scan", UBUS_ARGS{0}, 0);
 }
 
 /*************************************************************
@@ -454,7 +454,7 @@ static int browseWifiNeighboringWiFiDiagnosticResultInst(struct dmctx *dmctx, DM
 
 	uci_foreach_sections("wireless", "wifi-device", s) {
 		snprintf(object, sizeof(object), "wifi.radio.%s", section_name(s));
-		dmubus_call(object, "scanresults", UBUS_ARGS{}, 0, &res);
+		dmubus_call(object, "scanresults", UBUS_ARGS{0}, 0, &res);
 		dmjson_foreach_obj_in_array(res, arrobj, accesspoints, i, 1, "accesspoints") {
 			inst = handle_instance_without_section(dmctx, parent_node, ++id);
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)accesspoints, inst) == DM_STOP)
@@ -471,7 +471,7 @@ static int browse_wifi_associated_device(struct dmctx *dmctx, DMNODE *parent_nod
 	int id = 0, i = 0;
 
 	snprintf(object, sizeof(object), "wifi.ap.%s", ((struct wifi_acp_args *)prev_data)->ifname);
-	dmubus_call(object, "stations", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "stations", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, stations, i, 1, "stations") {
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)stations, inst) == DM_STOP)
@@ -487,7 +487,7 @@ static int browseWiFiDataElementsNetworkDeviceInst(struct dmctx *dmctx, DMNODE *
 	json_object *res = NULL, *data_arr = NULL, *data_obj = NULL, *net_obj = NULL;
 	json_object *dev_arr = NULL, *dev_obj = NULL;
 
-	dmubus_call("wifi.dataelements.collector", "dump", UBUS_ARGS{}, 0, &res);
+	dmubus_call("wifi.dataelements.collector", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, data_arr, data_obj, i, 1, "data") {
 		json_object_object_get_ex(data_obj, "wfa-dataelements:Network", &net_obj);
 		dmjson_foreach_obj_in_array(net_obj, dev_arr, dev_obj, j, 1, "DeviceList") {
@@ -646,7 +646,7 @@ static int browseWiFiDataElementsAssociationEventAssociationEventDataInst(struct
 	char *inst = NULL;
 	int id = 0, i = 0;
 
-	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{}, 0, &res);
+	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, notify_arr, notify_obj, i, 1, "notification") {
 		if (json_object_object_get_ex(notify_obj, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
 			inst = handle_instance_without_section(dmctx, parent_node, ++id);
@@ -663,7 +663,7 @@ static int browseWiFiDataElementsDisassociationEventDisassociationEventDataInst(
 	char *inst = NULL;
 	int id = 0, i = 0;
 
-	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{}, 0, &res);
+	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, notify_arr, notify_obj, i, 1, "notification") {
 		if (json_object_object_get_ex(notify_obj, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
 			inst = handle_instance_without_section(dmctx, parent_node, ++id);
@@ -996,7 +996,7 @@ static int get_WiFiRadio_SupportedOperatingChannelBandwidths(char *refparam, str
 	int i = 0, pos = 0;
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "Auto");
 
 	bandwidth_list[0] = 0;
@@ -2463,7 +2463,7 @@ static int get_wlan_bssid(char *refparam, struct dmctx *ctx, void *data, char *i
 	char object[32];
 
 	snprintf(object, sizeof(object), "wifi.ap.%s", ((struct wifi_ssid_args *)data)->ifname);
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	*value = dmjson_get_value(res, 1, "bssid");
 	return 0;
@@ -2475,7 +2475,7 @@ static int ssid_read_ubus(const struct wifi_ssid_args *args, const char *name, c
 	char object[32];
 
 	snprintf(object, sizeof(object), "wifi.ap.%s", args->ifname);
-	dmubus_call(object, "stats", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "stats", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, name);
 	return 0;
@@ -2487,7 +2487,7 @@ static int radio_read_ubus(const struct wifi_radio_args *args, const char *name,
 	char object[32];
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(args->sections->config_section));
-	dmubus_call(object, "stats", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "stats", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, name);
 	return 0;
@@ -2792,7 +2792,7 @@ static int get_wifi_access_point_status(char *refparam, struct dmctx *ctx, void 
 
 	dmuci_get_value_by_section_string((((struct wifi_ssid_args *)data)->sections)->config_section, "device", &iface);
 	snprintf(object, sizeof(object), "wifi.ap.%s", iface);
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, status = "Error_Misconfigured");
 	status = dmjson_get_value(res, 1, "status");
 
@@ -2810,7 +2810,7 @@ static int get_radio_max_bit_rate (char *refparam, struct dmctx *ctx, void *data
 	char object[32];
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "maxrate");
 	return 0;
@@ -2823,7 +2823,7 @@ static int get_radio_supported_frequency_bands(char *refparam, struct dmctx *ctx
 	char object[32];
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "2.4GHz,5GHz");
 	*value = dmjson_get_value_array_all(res, ",", 1, "supp_bands");
 	return 0;
@@ -2836,7 +2836,7 @@ static int get_radio_frequency(char *refparam, struct dmctx *ctx, void *data, ch
 	char object[32];
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	*value = dmjson_get_value(res, 1, "band");
 	return 0;
@@ -2873,7 +2873,7 @@ static int get_radio_channel(char *refparam, struct dmctx *ctx, void *data, char
 	json_object *res = NULL;
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "channel");
 
@@ -2889,7 +2889,7 @@ static int get_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, st
 	*value = "None";
 	uci_foreach_sections("wireless", "wifi-device", ss) {
 		snprintf(object, sizeof(object), "wifi.radio.%s", section_name(ss));
-		dmubus_call(object, "scanresults", UBUS_ARGS{}, 0, &res);
+		dmubus_call(object, "scanresults", UBUS_ARGS{0}, 0, &res);
 		DM_ASSERT(res, *value = "None");
 		neighboring_wifi_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "accesspoints");
 		if (neighboring_wifi_obj) {
@@ -2958,7 +2958,7 @@ static int get_radio_possible_channels(char *refparam, struct dmctx *ctx, void *
 	int i = 0;
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	cur_opclass = dmjson_get_value(res, 1, "opclass");
 	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
@@ -2979,7 +2979,7 @@ static int get_WiFiRadio_CurrentOperatingChannelBandwidth(char *refparam, struct
 	char object[32];
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "20MHz");
 	dmasprintf(value, "%sMHz", dmjson_get_value(res, 1, "bandwidth"));
 	return 0;
@@ -3001,7 +3001,7 @@ static int get_radio_operating_standard(char *refparam, struct dmctx *ctx, void 
 	char object[16];
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
-	dmubus_call(object, "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "n,ax");
 	char *standard = dmjson_get_value(res, 1, "standard");
 	if (strstr(standard, "802.11")) {
@@ -3088,7 +3088,7 @@ static int get_access_point_total_associations(char *refparam, struct dmctx *ctx
 	int i = 0, entries = 0;
 
 	snprintf(object, sizeof(object), "wifi.ap.%s", ((struct wifi_acp_args *)data)->ifname);
-	dmubus_call(object, "assoclist", UBUS_ARGS{}, 0, &res);
+	dmubus_call(object, "assoclist", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, assoclist, i, 1, "assoclist") {
 		entries++;
 	}
@@ -3101,7 +3101,7 @@ static int get_WiFiDataElementsNetwork_option(const char *option, char **value)
 	int i = 0;
 	json_object *res, *data_arr = NULL, *data_obj = NULL, *net_obj = NULL;
 
-	dmubus_call("wifi.dataelements.collector", "dump", UBUS_ARGS{}, 0, &res);
+	dmubus_call("wifi.dataelements.collector", "dump", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	dmjson_foreach_obj_in_array(res, data_arr, data_obj, i, 1, "data") {
 		json_object_object_get_ex(data_obj, "wfa-dataelements:Network", &net_obj);
@@ -3162,7 +3162,7 @@ static int get_WiFiDataElementsNetwork_DeviceNumberOfEntries(char *refparam, str
 	int i = 0;
 	json_object *res, *data_arr = NULL, *data_obj = NULL, *net_obj = NULL;
 
-	dmubus_call("wifi.dataelements.collector", "dump", UBUS_ARGS{}, 0, &res);
+	dmubus_call("wifi.dataelements.collector", "dump", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	dmjson_foreach_obj_in_array(res, data_arr, data_obj, i, 1, "data") {
 		json_object_object_get_ex(data_obj, "wfa-dataelements:Network", &net_obj);
@@ -4102,7 +4102,7 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 {
 	json_object *res = NULL;
 
-	dmubus_call("wifi", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("wifi", "status", UBUS_ARGS{0}, 0, &res);
 	if (res) {
 		json_object *radios = NULL, *arrobj = NULL;
 		int i = 0;
@@ -4119,9 +4119,9 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 
 			char *radio_name = dmjson_get_value(radios, 1, "name");
 			snprintf(object, sizeof(object), "wifi.radio.%s", radio_name);
-			dmubus_call_set(object, "scan", UBUS_ARGS{}, 0);
+			dmubus_call_set(object, "scan", UBUS_ARGS{0}, 0);
 			sleep(2); // Wait for results to get populated in scanresults
-			dmubus_call(object, "scanresults", UBUS_ARGS{}, 0, &scan_res);
+			dmubus_call(object, "scanresults", UBUS_ARGS{0}, 0, &scan_res);
 
 			if (!scan_res)
 				continue;
