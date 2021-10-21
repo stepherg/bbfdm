@@ -334,7 +334,7 @@ static int set_FirewallChainRule_ExpiryDate(char *refparam, struct dmctx *ctx, v
 			break;
 		case VALUESET:
 			strptime(value, "%Y-%m-%dT%H:%M:%SZ", &tm);
-			snprintf(expiry_date, sizeof(expiry_date), "%ld", timegm(&tm));
+			snprintf(expiry_date, sizeof(expiry_date), "%lld", (long long)timegm(&tm));
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "expiry", expiry_date);
 			break;
 	}

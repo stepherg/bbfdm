@@ -436,7 +436,7 @@ static int get_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "expiry", &expiry_date);
 	if (expiry_date && *expiry_date != '\0' && atoi(expiry_date) > 0) {
-		dmasprintf(value, "%ld", atoi(expiry_date) - time(NULL));
+		dmasprintf(value, "%lld", (long long)(atoi(expiry_date) - time(NULL)));
 	} else {
 		*value = "0";
 	}
@@ -456,7 +456,7 @@ static int set_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx
 			if (value && atoi(value) == 0)
 				break;
 
-			snprintf(expiry_date, sizeof(expiry_date), "%ld", atoi(value) + time(NULL));
+			snprintf(expiry_date, sizeof(expiry_date), "%lld", (long long)(atoi(value) + time(NULL)));
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "expiry", expiry_date);
 			break;
 	}
