@@ -34,7 +34,6 @@ libbbfdm_la_SOURCES =	\
 	../dmentry.c 		\
 	../dmdynamiclibrary.c \
 	../dmdynamicjson.c 	\
-	../dmdynamicmem.c 		\
 	../dmdiagnostics.c	\
 	../dmbbfcommon.c
 

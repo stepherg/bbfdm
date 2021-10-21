@@ -16,7 +16,6 @@
 #include "dmdynamicjson.h"
 #include "dmdynamiclibrary.h"
 #include "dmdynamicvendor.h"
-#include "dmdynamicmem.h"
 #include "device.h"
 #include "dmbbfcommon.h"
 

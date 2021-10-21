@@ -8,7 +8,6 @@
  *	Author: Yalu Zhang, yalu.zhang@iopsys.eu
  */
 
-#include "dmdynamicmem.h"
 #include "dmentry.h"
 #include "common.h"
 

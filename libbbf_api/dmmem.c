@@ -19,12 +19,12 @@ inline void *__dmmalloc
 #ifdef WITH_MEMTRACK
 const char *file, const char *func, int line,
 #endif /*WITH_MEMTRACK*/
-size_t size
+struct list_head *mem_list, size_t size
 )
 {
 	struct dmmem *m = malloc(sizeof(struct dmmem) + size);
 	if (m == NULL) return NULL;
-	list_add(&m->list, &memhead);
+	list_add(&m->list, mem_list);
 #ifdef WITH_MEMTRACK
 	m->file = (char *)file;
 	m->func = (char *)func;
@@ -38,12 +38,12 @@ inline void *__dmcalloc
 #ifdef WITH_MEMTRACK
 const char *file, const char *func, int line,
 #endif /*WITH_MEMTRACK*/
-int n, size_t size
+struct list_head *mem_list, int n, size_t size
 )
 {
 	struct dmmem *m = calloc(n, sizeof(struct dmmem) + size);
 	if (m == NULL) return NULL;
-	list_add(&m->list, &memhead);
+	list_add(&m->list, mem_list);
 #ifdef WITH_MEMTRACK
 	m->file = (char *)file;
 	m->func = (char *)func;
@@ -57,7 +57,7 @@ inline void *__dmrealloc
 #ifdef WITH_MEMTRACK
 const char *file, const char *func, int line,
 #endif /*WITH_MEMTRACK*/
-void *n, size_t size
+struct list_head *mem_list, void *n, size_t size
 )
 {
 	struct dmmem *m = NULL;
@@ -71,7 +71,7 @@ void *n, size_t size
 		return NULL;
 	} else
 		m = new_m;
-	list_add(&m->list, &memhead);
+	list_add(&m->list, mem_list);
 #ifdef WITH_MEMTRACK
 	m->file = (char *)file;
 	m->func = (char *)func;
@@ -89,11 +89,11 @@ inline void dmfree(void *m)
 	free(rm);
 }
 
-void dmcleanmem()
+inline void __dmcleanmem(struct list_head *mem_list)
 {
 	struct dmmem *dmm;
-	while (memhead.next != &memhead) {
-		dmm = list_entry(memhead.next, struct dmmem, list);
+	while (mem_list->next != mem_list) {
+		dmm = list_entry(mem_list->next, struct dmmem, list);
 #ifdef WITH_MEMTRACK
 		fprintf(stderr, "Allocated memory in {%s, %s(), line %d} is not freed\n", dmm->file, dmm->func, dmm->line);
 #endif /*WITH_MEMTRACK*/
@@ -107,14 +107,14 @@ char *__dmstrdup
 #ifdef WITH_MEMTRACK
 const char *file, const char *func, int line,
 #endif /*WITH_MEMTRACK*/
-const char *s
+struct list_head *mem_list, const char *s
 )
 {
 	size_t len = strlen(s) + 1;
 #ifdef WITH_MEMTRACK
-	void *new = __dmmalloc(file, func, line, len);
+	void *new = __dmmalloc(file, func, line, mem_list, len);
 #else
-	void *new = __dmmalloc(len);
+	void *new = __dmmalloc(mem_list, len);
 #endif /*WITH_MEMTRACK*/
 	if (new == NULL) return NULL;
 	return (char *) memcpy(new, s, len);
@@ -126,7 +126,7 @@ int __dmasprintf
 #ifdef WITH_MEMTRACK
 const char *file, const char *func, int line,
 #endif /*WITH_MEMTRACK*/
-char **s, const char *format, ...
+struct list_head *mem_list, char **s, const char *format, ...
 )
 {
 	int size;
@@ -141,9 +141,9 @@ char **s, const char *format, ...
 		return -1;
 
 #ifdef WITH_MEMTRACK
-	*s = __dmstrdup(file, func, line, str);
+	*s = __dmstrdup(file, func, line, mem_list, str);
 #else
-	*s = __dmstrdup(str);
+	*s = __dmstrdup(mem_list, str);
 #endif /*WITH_MEMTRACK*/
 
 	free(str);
@@ -157,7 +157,7 @@ int __dmastrcat
 #ifdef WITH_MEMTRACK
 const char *file, const char *func, int line,
 #endif /*WITH_MEMTRACK*/
-char **s, char *obj, char *lastname
+struct list_head *mem_list, char **s, char *obj, char *lastname
 )
 {
 	char buf[2048];
@@ -166,9 +166,9 @@ char **s, char *obj, char *lastname
 	int llen = strlen(lastname) + 1;
 	memcpy(buf + olen, lastname, llen);
 #ifdef WITH_MEMTRACK
-	*s = __dmstrdup(file, func, line, buf);
+	*s = __dmstrdup(file, func, line, mem_list, buf);
 #else
-	*s = __dmstrdup(buf);
+	*s = __dmstrdup(mem_list, buf);
 #endif /*WITH_MEMTRACK*/
 	if (*s == NULL) return -1;
 	return 0;	

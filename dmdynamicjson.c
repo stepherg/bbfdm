@@ -10,7 +10,6 @@
  */
 
 #include "dmdynamicjson.h"
-#include "dmdynamicmem.h"
 #include "dmentry.h"
 
 #define json_object_get_string(x) (char *)json_object_get_string(x)
@@ -47,9 +46,8 @@ static void free_json_data(struct list_head *json_list)
 	while (json_list->next != json_list) {
 		dm_json_obj = list_entry(json_list->next, struct dm_json_obj, list);
 		list_del(&dm_json_obj->list);
-		if (dm_json_obj->name)
-			dm_dynamic_free(dm_json_obj->name);
-		dm_dynamic_free(dm_json_obj);
+		dmfree(dm_json_obj->name);
+		dmfree(dm_json_obj);
 	}
 }
 
@@ -168,7 +166,7 @@ static char *generate_path_without_instance(char *full_obj, bool is_obj)
 	if (pos && !is_obj)
 		buf[pos - 1] = 0;
 
-	if (str) dm_dynamic_free(str);
+	dmfree(str);
 
 	return dm_dynamic_strdup(&json_memhead, buf);
 }

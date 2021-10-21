@@ -9,7 +9,6 @@
  *
  */
 
-#include "dmdynamicmem.h"
 #include "dmdynamiclibrary.h"
 
 LIST_HEAD(loaded_library_list);
@@ -134,8 +133,7 @@ static char *get_path_without_instance(char *path)
 			pos += snprintf(&res_path[pos], sizeof(res_path) - pos, "%s%s", pch, (pchr != NULL && *pchr != '\0') ? "." : "");
 	}
 
-	if (str)
-		dm_dynamic_free(str);
+	dmfree(str);
 
 	return dm_dynamic_strdup(&library_memhead, res_path);
 }
