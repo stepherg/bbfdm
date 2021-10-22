@@ -74,6 +74,10 @@ int get_dm_type(char *dm_str)
 		return DMT_HEXBIN;
 	else if (strcmp(dm_str, DMT_TYPE[DMT_BASE64]) == 0)
 		return DMT_BASE64;
+	else if (strcmp(dm_str, DMT_TYPE[DMT_COMMAND]) == 0)
+		return DMT_COMMAND;
+	else if (strcmp(dm_str, DMT_TYPE[DMT_EVENT]) == 0)
+		return DMT_EVENT;
 	else
 		return DMT_STRING;
 

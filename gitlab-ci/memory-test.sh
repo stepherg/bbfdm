@@ -17,31 +17,38 @@ supervisorctl update
 sleep 5
 supervisorctl status all
 
-echo "Running memory check on datamodel"
 ret=0
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-usp-get.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -u get Device.
-ret=$?
 
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-usp-operate.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -u list_operate
-ret=$(( ret + $? ))
+function run_valgrind()
+{
+    echo "Running $@ in valgrind"
+    valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-usp-get.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm $@
+    ret=$(( ret + $? ))
+}
 
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-usp-schema.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -u get_schema
-ret=$(( ret + $? ))
+echo "Running memory check on datamodel"
+run_valgrind -u get Device.
 
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-usp-instances.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -u instances Device.
-ret=$(( ret + $? ))
+# Test memory leak for get_supported_dm
+run_valgrind  -u get_info Device. 0
+run_valgrind  -u get_info Device. 1
+run_valgrind  -u get_info Device. 2
+run_valgrind  -u get_info Device. 3
+run_valgrind  -u get_info Device. 4
 
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-cwmp-get.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -c get Device.
-ret=$?
+run_valgrind -u list_operate
 
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-cwmp-operate.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -c list_operate
-ret=$(( ret + $? ))
+run_valgrind -u get_schema
 
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-cwmp-schema.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -c get_schema
-ret=$(( ret + $? ))
+run_valgrind -u instances Device.
 
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-cwmp-instances.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -c instances Device.
-ret=$(( ret + $? ))
+run_valgrind -c get Device.
+
+run_valgrind -c list_operate
+
+run_valgrind -c get_schema
+
+run_valgrind  -c instances Device.
 
 if [ "$ret" -ne 0 ]; then
 	echo "Memory check failed"

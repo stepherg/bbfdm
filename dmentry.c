@@ -175,6 +175,44 @@ int dm_ctx_clean_sub(struct dmctx *ctx)
 	return dm_ctx_clean_custom(ctx, CTX_INIT_SUB);
 }
 
+int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_type_t schema_type)
+{
+	int fault =0;
+
+	// Load dynamic objects and parameters
+	if (strlen(path) == 0)
+		path = "Device.";
+
+	if (path[strlen(path) - 1] != '.')
+		return usp_fault_map(USP_FAULT_INVALID_PATH);
+
+	ctx->in_param = path;
+
+	dmentry_instance_lookup_inparam(ctx);
+	ctx->stop = false;
+        switch(schema_type) {
+		case ALL_SCHEMA:
+			ctx->isinfo = 1;
+			ctx->isevent = 1;
+			ctx->iscommand =1;
+			break;
+		case PARAM_ONLY:
+			ctx->isinfo = 1;
+			break;
+		case EVENT_ONLY:
+			ctx->isevent = 1;
+			break;
+		case COMMAND_ONLY:
+			ctx->iscommand =1;
+			break;
+	}
+	ctx->nextlevel = first_level;
+
+	fault = dm_entry_get_supported_dm(ctx);
+
+	return usp_fault_map(fault);
+}
+
 int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2)
 {
 	int fault = 0;
@@ -227,13 +265,13 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			fault = dm_entry_operate(ctx);
 			break;
 		case CMD_USP_LIST_OPERATE:
-			fault = dm_entry_list_operates(ctx);
+			fault = dm_get_supported_dm(ctx, ctx->in_param, 0, COMMAND_ONLY);
 			break;
 		case CMD_USP_LIST_EVENT:
-			fault = dm_entry_list_events(ctx);
+			fault = dm_get_supported_dm(ctx, ctx->in_param, 0, EVENT_ONLY);
 			break;
 		case CMD_GET_SCHEMA:
-			fault = dm_entry_get_schema(ctx);
+			fault = dm_get_supported_dm(ctx, ctx->in_param, 0, PARAM_ONLY);
 			break;
 		case CMD_GET_INSTANCES:
 			if (!arg1 || (arg1 && string_to_bool(arg1, &ctx->nextlevel) == 0))

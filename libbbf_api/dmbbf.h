@@ -177,6 +177,7 @@ struct dmctx
 	bool isgetschema;
 	bool iscommand;
 	bool isevent;
+	bool isinfo;
 };
 
 typedef struct dmnode {
@@ -433,6 +434,7 @@ void dmentry_instance_lookup_inparam(struct dmctx *ctx);
 int dm_entry_get_value(struct dmctx *dmctx);
 int dm_entry_get_name(struct dmctx *ctx);
 int dm_entry_get_schema(struct dmctx *ctx);
+int dm_entry_get_supported_dm(struct dmctx *ctx);
 int dm_entry_get_instances(struct dmctx *ctx);
 int dm_entry_add_object(struct dmctx *dmctx);
 int dm_entry_delete_object(struct dmctx *dmctx);

@@ -976,12 +976,12 @@ static void test_api_bbfdm_valid_library_event(void **state)
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
 		if (strcmp(n->name, "Device.X_IOPSYS_EU_WakeUp!") == 0) {
-			assert_string_equal(n->type, "0");
+			assert_string_equal(n->type, "xsd:event");
 			assert_null(n->data);
 		}
 
 		if (strcmp(n->name, "Device.X_IOPSYS_EU_Boot!") == 0) {
-			assert_string_equal(n->type, "0");
+			assert_string_equal(n->type, "xsd:event");
 			event_args *args = (event_args *)n->data;
 			assert_non_null(args);
 			const char **event_param = args->param;

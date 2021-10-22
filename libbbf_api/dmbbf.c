@@ -46,6 +46,8 @@ static int get_linker_check_obj(DMOBJECT_ARGS);
 static int get_linker_check_param(DMPARAM_ARGS);
 static int get_linker_value_check_obj(DMOBJECT_ARGS);
 static int get_linker_value_check_param(DMPARAM_ARGS);
+static int mobj_get_supported_dm(DMOBJECT_ARGS);
+static int mparam_get_supported_dm(DMPARAM_ARGS);
 
 int bbfdatamodel_type = BBFDM_BOTH;
 
@@ -59,6 +61,8 @@ char *DMT_TYPE[] = {
 	[DMT_TIME] = "xsd:dateTime",
 	[DMT_HEXBIN] = "xsd:hexBinary",
 	[DMT_BASE64] = "xsd:base64",
+	[DMT_COMMAND] = "xsd:command",
+	[DMT_EVENT] = "xsd:event"
 };
 
 struct dm_permession_s DMREAD = {"0", NULL};
@@ -79,6 +83,18 @@ static int plugin_obj_match(DMOBJECT_ARGS)
 		return 0;
 	}
 	return FAULT_9005;
+}
+
+static int obj_match_supported_dm(DMOBJECT_ARGS)
+{
+	if(node->matched)
+		return 0;
+	if(!dmctx->inparam_isparam && strstr(node->current_object,dmctx->in_param) == node->current_object) {
+		node->matched ++;
+		dmctx->findparam = 1;
+		return 0;
+	}
+	return 0;
 }
 
 static int plugin_leaf_match(DMOBJECT_ARGS)
@@ -209,10 +225,10 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 
 		if (!bbfdatamodel_matches(leaf->bbfdm_type))
 			continue;
-
-		if (dmctx->iscommand != (leaf->type == DMT_COMMAND) || dmctx->isevent != (leaf->type == DMT_EVENT))
-			continue;
-
+		if(!dmctx->isinfo){
+			if (dmctx->iscommand != (leaf->type == DMT_COMMAND) || dmctx->isevent != (leaf->type == DMT_EVENT))
+				continue;
+		}
 		snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, leaf->parameter);
 		err = dmctx->method_param(dmctx, parent_node, leaf->parameter, leaf->permission, leaf->type, leaf->getvalue, leaf->setvalue, data, instance);
 		if (dmctx->stop)
@@ -230,10 +246,10 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 
 							if (!bbfdatamodel_matches(jleaf->bbfdm_type))
 								continue;
-
-							if (dmctx->iscommand != (jleaf->type == DMT_COMMAND) || dmctx->isevent != (jleaf->type == DMT_EVENT))
-								continue;
-
+							if(!dmctx->isinfo){
+								if (dmctx->iscommand != (jleaf->type == DMT_COMMAND) || dmctx->isevent != (jleaf->type == DMT_EVENT))
+									continue;
+							}
 							snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, jleaf->parameter);
 							err = dmctx->method_param(dmctx, parent_node, jleaf->parameter, jleaf->permission, jleaf->type, jleaf->getvalue, jleaf->setvalue, data, instance);
 							if (dmctx->stop)
@@ -1328,6 +1344,79 @@ static int mparam_get_schema_name(DMPARAM_ARGS)
 	return 0;
 }
 
+
+/* ***********************
+ * get supported data model
+ * ***********************/
+static int mobj_get_supported_dm(DMOBJECT_ARGS)
+{
+
+	char *perm = permission->val;
+	char *refparam = node->current_object;
+	const char **unique_keys = NULL;
+
+	if(node->matched && dmctx->isinfo){
+		if (node->obj)
+			unique_keys = node->obj->unique_keys;
+
+		add_list_parameter(dmctx, refparam, perm, "xsd:object", (char *)unique_keys);
+	}
+
+	return 0;
+}
+
+static int mparam_get_supported_dm(DMPARAM_ARGS)
+{
+	char *value = NULL;
+	char *refparam;
+
+	dmastrcat(&refparam, node->current_object, lastname);
+
+	if(node->matched) {
+		if(type == DMT_EVENT) {
+			if(dmctx->isevent) {
+				if (get_cmd)
+					(get_cmd)(refparam, dmctx, data, instance, &value);
+
+				add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL);
+			}
+
+		} else if(type == DMT_COMMAND) {
+			if(dmctx->iscommand) {
+
+				if (get_cmd)
+					(get_cmd)(refparam, dmctx, data, instance, &value);
+
+				//add_list_parameter(dmctx, refparam, value, permission->val, NULL);
+				add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], permission->val);
+			}
+		}
+		else {
+			add_list_parameter(dmctx, refparam, permission->val, DMT_TYPE[type], NULL);
+		}
+	}
+	return 0;
+}
+
+int dm_entry_get_supported_dm(struct dmctx *ctx)
+{
+	DMOBJ *root = ctx->dm_entryobj;
+	DMNODE node = {.current_object = ""};
+	int err;
+
+	ctx->inparam_isparam = 0;
+	ctx->isgetschema = 1;
+	ctx->findparam = 1;
+	ctx->stop =0;
+	ctx->checkobj = obj_match_supported_dm;
+	ctx->checkleaf = NULL;
+	ctx->method_obj = mobj_get_supported_dm;
+	ctx->method_param = mparam_get_supported_dm;
+	err = dm_browse(ctx, &node, root, NULL, NULL);
+
+	return err;
+}
+
 /* **************
  * get_instances
  * **************/
@@ -1759,7 +1848,7 @@ static int mparam_list_events_name(DMPARAM_ARGS)
 	if (get_cmd)
 		(get_cmd)(full_param, dmctx, data, instance, &value);
 
-	add_list_parameter(dmctx, full_param, value, permission->val, NULL);
+	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL);
 	return 0;
 }
 
