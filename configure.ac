@@ -16,6 +16,12 @@ AM_CONDITIONAL([LOPENSSL],[test "x$enable_libopenssl" = "xyes"])
 AC_ARG_ENABLE(vendor_extension, [AS_HELP_STRING([--enable-vendor-extension], [enable vendor extension])], AC_DEFINE(BBF_VENDOR_EXTENSION),)
 AM_CONDITIONAL([BBF_VENDOR_EXTENSION],[test "x$enable_vendor_extension" = "xyes"])
 
+AC_ARG_ENABLE(json_plugin, [AS_HELP_STRING([--enable-json-plugin], [enable json plugin to extend datamodel])], AC_DEFINE(BBFDM_ENABLE_JSON_PLUGIN),)
+AM_CONDITIONAL([BBFDM_ENABLE_JSON_PLUGIN],[test "x$enable_json_plugin" = "xyes"])
+
+AC_ARG_ENABLE(shared_library, [AS_HELP_STRING([--enable-shared-library], [enable shared library support to extend datamodel])], AC_DEFINE(BBFDM_ENABLE_DOTSO_PLUGIN),)
+AM_CONDITIONAL([BBFDM_ENABLE_DOTSO_PLUGIN],[test "x$enable_shared_library" = "xyes"])
+
 AC_DEFINE_UNQUOTED(BBF_VENDOR_LIST, "$BBF_VENDOR_LIST")
 AC_DEFINE_UNQUOTED(BBF_VENDOR_PREFIX, "$BBF_VENDOR_PREFIX")
 

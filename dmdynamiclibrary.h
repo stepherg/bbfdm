@@ -12,6 +12,8 @@
 #ifndef __DMENTRYLIBRARY_H__
 #define __DMENTRYLIBRARY_H__
 
+#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
+
 #include <libbbf_api/dmcommon.h>
 
 #define LIBRARY_FOLDER_PATH "/usr/lib/bbfdm"
@@ -19,4 +21,5 @@
 int load_library_dynamic_arrays(struct dmctx *ctx);
 void free_library_dynamic_arrays(DMOBJ *dm_entryobj);
 
+#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
 #endif //__DMENTRYLIBRARY_H__

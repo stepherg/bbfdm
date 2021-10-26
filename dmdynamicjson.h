@@ -12,6 +12,8 @@
 #ifndef __DMENTRYJSON_H__
 #define __DMENTRYJSON_H__
 
+#ifdef BBFDM_ENABLE_JSON_PLUGIN
+
 #include <libbbf_api/dmcommon.h>
 
 #define JSON_FOLDER_PATH "/etc/bbfdm/json"
@@ -19,4 +21,5 @@
 int load_json_dynamic_arrays(struct dmctx *ctx);
 int free_json_dynamic_arrays(DMOBJ *dm_entryobj);
 
+#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
 #endif //__DMENTRYJSON_H__

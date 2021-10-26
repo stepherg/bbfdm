@@ -22,8 +22,13 @@
 LIST_HEAD(head_package_change);
 LIST_HEAD(main_memhead);
 
+#ifdef BBFDM_ENABLE_JSON_PLUGIN
 static char json_hash[64] = {0};
+#endif /* BBFDM_ENABLE_JSON_PLUGIN */
+
+#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
 static char library_hash[64] = {0};
+#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
 
 #ifdef BBF_VENDOR_EXTENSION
 static bool first_boot = false;
@@ -363,9 +368,28 @@ int dm_entry_revert_changes(void)
 	return 0;
 }
 
+#if defined(BBFDM_ENABLE_JSON_PLUGIN) || defined(BBFDM_ENABLE_DOTSO_PLUGIN)
+static char* get_folder_path(bool json_path)
+{
+	if (json_path) {
+#ifdef BBFDM_ENABLE_JSON_PLUGIN
+		return JSON_FOLDER_PATH;
+#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
+	} else {
+#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
+		return LIBRARY_FOLDER_PATH;
+#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
+	}
+
+	return NULL;
+}
+
 static int get_stats_folder(bool json_path, int *count, unsigned long *size)
 {
-	const char *path = json_path ? JSON_FOLDER_PATH : LIBRARY_FOLDER_PATH;
+	const char *path = get_folder_path(json_path);
+	if (path == NULL) {
+		return 0;
+	}
 
 	if (folder_exists(path)) {
 		struct dirent *entry = NULL;
@@ -405,27 +429,43 @@ static int check_stats_folder(bool json_path)
 
 	snprintf(buf, sizeof(buf), "count:%d,size:%lu", count, size);
 
-	if (strcmp(buf, json_path ? json_hash : library_hash) != 0) {
-		strncpy(json_path ? json_hash : library_hash, buf, 64);
-		return 1;
+	if (json_path) {
+#ifdef BBFDM_ENABLE_JSON_PLUGIN
+		if (strcmp(buf, json_hash) != 0) {
+			strncpy(json_hash, buf, 64);
+			return 1;
+		}
+#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
+	} else {
+#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
+		if (strcmp(buf, library_hash) != 0) {
+			strncpy(library_hash, buf, 64);
+			return 1;
+		}
+#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
 	}
 
 	return 0;
 }
+#endif  /* (BBFDM_ENABLE_JSON_PLUGIN || BBFDM_ENABLE_DOTSO_PLUGIN) */
 
 void load_dynamic_arrays(struct dmctx *ctx)
 {
+#ifdef BBFDM_ENABLE_JSON_PLUGIN
 	// Load dynamic objects and parameters exposed via a JSON file
 	if (check_stats_folder(true)) {
 		free_json_dynamic_arrays(tEntry181Obj);
 		load_json_dynamic_arrays(ctx);
 	}
+#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
 
+#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
 	// Load dynamic objects and parameters exposed via a library
 	if (check_stats_folder(false)) {
 		free_library_dynamic_arrays(tEntry181Obj);
 		load_library_dynamic_arrays(ctx);
 	}
+#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
 
 #ifdef BBF_VENDOR_EXTENSION
 	// Load objects and parameters exposed via vendor extension
@@ -442,8 +482,14 @@ void free_dynamic_arrays(void)
 	DMOBJ *root = tEntry181Obj;
 	DMNODE node = {.current_object = ""};
 
+#ifdef BBFDM_ENABLE_JSON_PLUGIN
 	free_json_dynamic_arrays(tEntry181Obj);
+#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
+
+#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
 	free_library_dynamic_arrays(tEntry181Obj);
+#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
+
 #ifdef BBF_VENDOR_EXTENSION
 	free_vendor_dynamic_arrays(tEntry181Obj);
 #endif

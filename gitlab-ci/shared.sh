@@ -49,7 +49,7 @@ function install_libbbf()
 	fi
 
 	exec_cmd autoreconf -i
-	exec_cmd ./configure --enable-tr181 --enable-tr104 --enable-tr143 --enable-libopenssl --enable-vendor-extension BBF_VENDOR_LIST="$VENDOR_LIST" BBF_VENDOR_PREFIX="$VENDOR_PREFIX"
+	exec_cmd ./configure --enable-tr181 --enable-tr104 --enable-tr143 --enable-libopenssl --enable-json-plugin --enable-shared-library --enable-vendor-extension BBF_VENDOR_LIST="$VENDOR_LIST" BBF_VENDOR_PREFIX="$VENDOR_PREFIX"
 	make CFLAGS="-D_GNU_SOURCE -Wall -Werror" CFLAGS+="$COV_CFLAGS" LDFLAGS="$COV_LDFLAGS" >/dev/null 2>&1
 
 	echo "installing libbbf"
