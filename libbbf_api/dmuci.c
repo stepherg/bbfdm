@@ -17,10 +17,10 @@
 #include "dmmem.h"
 
 static struct uci_context *uci_ctx = NULL;
-static struct uci_context *uci_varstate_ctx;
 static char *db_config = NULL;
 
 NEW_UCI_PATH(bbfdm, BBFDM_CONFIG, BBFDM_SAVEDIR)
+NEW_UCI_PATH(varstate, VARSTATE_CONFDIR, NULL)
 
 int dmuci_init(void)
 {
@@ -44,9 +44,7 @@ int bbf_uci_init(void)
 {
 	dmuci_init();
 
-	uci_varstate_ctx = uci_alloc_context();
-	if (!uci_varstate_ctx)
-		return -1;
+	dmuci_init_varstate();
 
 	dmuci_init_bbfdm();
 
@@ -59,9 +57,7 @@ int bbf_uci_exit(void)
 {
 	dmuci_exit();
 
-	if (uci_varstate_ctx)
-		uci_free_context(uci_varstate_ctx);
-	uci_varstate_ctx = NULL;
+	dmuci_exit_varstate();
 
 	dmuci_exit_bbfdm();
 
@@ -845,27 +841,6 @@ int db_get_value_string(char *package, char *section, char *option, char **value
 	o = dmuci_get_option_ptr((db_config) ? db_config : LIB_DB_CONFIG, package, section, option);
 	if (o) {
 		*value = o->v.string ? dmstrdup(o->v.string) : ""; // MEM WILL BE FREED IN DMMEMCLEAN
-	} else {
-		*value = "";
-		return -1;
-	}
-	return 0;
-}
-
-/**** UCI GET /var/state *****/
-int varstate_get_value_string(char *package, char *section, char *option, char **value)
-{
-	struct uci_ptr ptr = {0};
-
-	uci_add_delta_path(uci_varstate_ctx, uci_varstate_ctx->savedir);
-	uci_set_confdir(uci_varstate_ctx, VARSTATE_CONFIG);
-
-	if (dmuci_lookup_ptr(uci_varstate_ctx, &ptr, package, section, option, NULL)) {
-		*value = "";
-		return -1;
-	}
-	if (ptr.o && ptr.o->v.string) {
-		*value = ptr.o->v.string;
 	} else {
 		*value = "";
 		return -1;

@@ -6,7 +6,6 @@ config acs 'acs'
 	option periodic_inform_enable 'true'
 	option periodic_inform_interval '1800'
 	option periodic_inform_time '0'
-	option ParameterKey ''
 	option dhcp_discovery 'enable'
 	# compression possible configs: GZIP, Deflate, Disabled
 	option compression 'Disabled'
