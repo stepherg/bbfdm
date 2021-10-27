@@ -2691,8 +2691,8 @@
 						"uci": {
 							"file": "cwmp",
 							"section": {
-								"type": "acs",
-								"name": "acs"
+								"type": "cpe",
+								"name": "cpe"
 							},
 							"option": {
 								"name": "ParameterKey"

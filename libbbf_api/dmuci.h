@@ -30,6 +30,7 @@
 #define BBFDM_CONFIG "/etc/bbfdm/dmmap"
 #define BBFDM_SAVEDIR "/tmp/.bbfdm"
 #define UCI_CONFIG_DIR "/etc/config/"
+#define VARSTATE_CONFDIR "/var/state/"
 
 enum dm_uci_cmp {
 	CMP_SECTION,
@@ -364,14 +365,18 @@ int dmuci_delete_by_section_bbfdm(struct uci_section *s, char *option, char *val
 int dmuci_commit_package_bbfdm(char *package);
 int dmuci_commit_bbfdm(void);
 int dmuci_revert_bbfdm(void);
+int dmuci_commit_package_varstate(char *package);
 struct uci_section *dmuci_walk_section_bbfdm(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
 
 int dmuci_init_bbfdm(void);
 void dmuci_exit_bbfdm(void);
 void commit_and_free_uci_ctx_bbfdm(char *dmmap_config);
 
+int dmuci_init_varstate(void);
+void dmuci_exit_varstate(void);
 int db_get_value_string(char *package, char *section, char *option, char **value);
-int varstate_get_value_string(char *package, char *section, char *option, char **value);
+int dmuci_get_option_value_string_varstate(char *package, char *section, char *option, char **value);
+int dmuci_set_value_varstate(char *package, char *section, char *option, char *value);
 
 char *bbf_uci_get_value(char *path, char *package, char *section, char *option);
 char *bbf_uci_set_value(char *path, char *package, char *section, char *option, char *value);
