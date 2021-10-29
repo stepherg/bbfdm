@@ -19,6 +19,14 @@
 static LIST_HEAD(loaded_json_files);
 static LIST_HEAD(json_list);
 static LIST_HEAD(json_memhead);
+static operation_args empty_cmd = {
+	.in = (const char**)NULL,
+	.out = (const char**)NULL
+};
+
+static event_args empty_event = {
+	.param = (const char**)NULL,
+};
 
 struct loaded_json_file
 {
@@ -30,15 +38,34 @@ struct dm_json_obj {
 	struct list_head list;
 	json_object *data;
 	char *name;
+	operation_args command_arg;
+	event_args event_arg;
 };
 
-static void save_json_data(struct list_head *json_list, char *name, json_object *data)
+static void save_json_data(struct list_head *json_list, char *name, json_object *data,
+			   const char **in_p, const char **out_p, const char **ev_arg)
 {
 	struct dm_json_obj *dm_json_obj = dm_dynamic_calloc(&json_memhead, 1, sizeof(struct dm_json_obj));
 
 	if (name) dm_json_obj->name = dm_dynamic_strdup(&json_memhead, name);
 	if (data) dm_json_obj->data = data;
+	dm_json_obj->command_arg.in = in_p;
+	dm_json_obj->command_arg.out = out_p;
+	dm_json_obj->event_arg.param = ev_arg;
 	list_add_tail(&dm_json_obj->list, json_list);
+}
+
+static void free_event_command_args(const char **arg_p)
+{
+	if (arg_p) {
+		int i = 0;
+		while (arg_p[i]) {
+			dmfree((char *)arg_p[i]);
+			i++;
+		}
+
+		free((char **)arg_p);
+	}
 }
 
 static void free_json_data(struct list_head *json_list)
@@ -49,6 +76,9 @@ static void free_json_data(struct list_head *json_list)
 		dm_json_obj = list_entry(json_list->next, struct dm_json_obj, list);
 		list_del(&dm_json_obj->list);
 		dmfree(dm_json_obj->name);
+		free_event_command_args(dm_json_obj->command_arg.in);
+		free_event_command_args(dm_json_obj->command_arg.out);
+		free_event_command_args(dm_json_obj->event_arg.param);
 		dmfree(dm_json_obj);
 	}
 }
@@ -539,6 +569,118 @@ static int getvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 	return 0;
 }
 
+static int ubus_set_operate(json_object *mapping_obj, struct dmctx *ctx, void *data, void *value, char *instance)
+{
+	struct json_object *ubus_obj = NULL;
+	struct json_object *object = NULL;
+	struct json_object *method = NULL;
+	struct json_object *res = NULL;
+	char obj_name[128] = {0}, *opt = NULL;
+
+	json_object_object_get_ex(mapping_obj, "ubus", &ubus_obj);
+	json_object_object_get_ex(ubus_obj, "object", &object);
+	json_object_object_get_ex(ubus_obj, "method", &method);
+
+	if ((opt = strstr(json_object_get_string(object), "@Name"))) {
+		*opt = '\0';
+		snprintf(obj_name, sizeof(obj_name), "%s%s", json_object_get_string(object), section_name((struct uci_section *)data));
+	} else if ((opt = strstr(json_object_get_string(object), "@i-1"))) {
+		*opt = '\0';
+		snprintf(obj_name, sizeof(obj_name), "%s%d", json_object_get_string(object), atoi(instance) - 1);
+	} else {
+		DM_STRNCPY(obj_name, json_object_get_string(object), sizeof(obj_name));
+	}
+
+	dmubus_operate_blob_set(obj_name, json_object_get_string(method), value, &res);
+
+	if (res) {
+		json_object_object_foreach(res, key, val) {
+			add_list_parameter(ctx, dmstrdup(key), dmstrdup(json_object_to_json_string(val)), DMT_TYPE[DMT_STRING], NULL);
+		}
+		json_object_put(res);
+	}
+
+	return CMD_SUCCESS;
+}
+
+static int setcommand_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct dm_json_obj *leaf_node = NULL;
+	struct json_object *p_obj = NULL, *map_arr = NULL, *map_obj = NULL, *type = NULL;
+
+	char *obj = generate_path_without_instance(refparam, false);
+	list_for_each_entry(leaf_node, &json_list, list) {
+		if (strcmp(leaf_node->name, obj) == 0) {
+			p_obj = leaf_node->data;
+			break;
+		}
+	}
+
+	if (p_obj == NULL) {
+		return CMD_FAIL;
+	}
+
+	json_object_object_get_ex(p_obj, "mapping", &map_arr);
+	if (map_arr && json_object_get_type(map_arr) == json_type_array)
+		map_obj = json_object_array_get_idx(map_arr, 0);
+
+	if (!map_obj) {
+		return CMD_FAIL;
+	}
+
+	json_object_object_get_ex(map_obj, "type", &type);
+
+	if (type && strcmp(json_object_get_string(type), "ubus") == 0) {
+		return ubus_set_operate(map_obj, ctx, data, value, instance);
+	}
+
+	return CMD_FAIL;
+}
+
+static int getcommand_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct dm_json_obj *leaf = NULL;
+	bool found = false;
+
+	char *obj = generate_path_without_instance(refparam, false);
+	list_for_each_entry(leaf, &json_list, list) {
+		if (strcmp(leaf->name, obj) == 0) {
+			found = true;
+			break;
+		}
+	}
+
+	if (found) {
+		*value = (char *)&leaf->command_arg;
+	} else {
+		*value = (char *)&empty_cmd;
+	}
+
+	return 0;
+}
+
+static int getevent_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct dm_json_obj *leaf = NULL;
+	bool found = false;
+
+	char *obj = generate_path_without_instance(refparam, false);
+	list_for_each_entry(leaf, &json_list, list) {
+		if (strcmp(leaf->name, obj) == 0) {
+			found = true;
+			break;
+		}
+	}
+
+	if (found) {
+		*value = (char *)&leaf->event_arg;
+	} else {
+		*value = (char *)&empty_event;
+	}
+
+	return 0;
+}
+
 static int fill_all_arguments(struct json_object *range, struct range_args range_arg[], int range_len)
 {
 	for (int i = 0; i < range_len; i++) {
@@ -841,25 +983,59 @@ static void parse_mapping_obj(char *object, json_object *mapping_obj, struct lis
 	if (!mapping_obj)
 		return;
 
-	save_json_data(list, object, mapping_obj);
+	save_json_data(list, object, mapping_obj, NULL, NULL, NULL);
+}
+
+static bool valid_event_param(char *param)
+{
+	bool ret;
+
+	if (strcmp(param, "type") == 0) {
+		ret = false;
+	} else if (strcmp(param, "version") == 0) {
+		ret = false;
+	} else if (strcmp(param, "protocols") == 0) {
+		ret = false;
+	} else {
+		ret = true;
+	}
+
+	return ret;
+}
+
+static char** fill_command_param(int count, struct json_object *obj)
+{
+	char **res_p = NULL;
+	if (!obj)
+		return res_p;
+
+	res_p = malloc(sizeof(char *) * (count + 1));
+	if (res_p) {
+		res_p[count] = NULL;
+		int id = 0;
+
+		json_object_object_foreach(obj, key, res_obj) {
+			res_p[id] = dm_dynamic_strdup(&json_memhead, key);
+			id++;
+		}
+	}
+
+	return res_p;
 }
 
 static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pleaf, int i, struct list_head *list)
 {
 	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(6)*/
-	struct json_object *type = NULL, *protocols = NULL, *write = NULL;
+	struct json_object *type = NULL, *protocols = NULL, *write = NULL, *async = NULL;
 	char full_param[512] = {0};
 	size_t n_proto;
+	char **in_p = NULL, **out_p = NULL, **ev_arg = NULL;
 
 	if (!jobj || !pleaf)
 		return;
 
 	//PARAM
 	pleaf[i].parameter = dm_dynamic_strdup(&json_memhead, param);
-
-	//permission
-	json_object_object_get_ex(jobj, "write", &write);
-	pleaf[i].permission = (write && json_object_get_boolean(write)) ? &DMWRITE : &DMREAD;
 
 	//type
 	json_object_object_get_ex(jobj, "type", &type);
@@ -879,14 +1055,84 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 		pleaf[i].type = DMT_TIME;
 	else if (type && strcmp(json_object_get_string(type), "base64") == 0)
 		pleaf[i].type = DMT_BASE64;
+	else if (type && strcmp(json_object_get_string(type), "command") == 0)
+		pleaf[i].type = DMT_COMMAND;
+	else if (type && strcmp(json_object_get_string(type), "event") == 0)
+		pleaf[i].type = DMT_EVENT;
 	else
 		pleaf[i].type = DMT_STRING;
 
+	//permission
+	if (pleaf[i].type == DMT_EVENT) {
+		pleaf[i].permission = &DMREAD;
+	} else if (pleaf[i].type == DMT_COMMAND) {
+		json_object_object_get_ex(jobj, "async", &async);
+		pleaf[i].permission = (async && json_object_get_boolean(async)) ? &DMASYNC : &DMSYNC;
+	} else {
+		json_object_object_get_ex(jobj, "write", &write);
+		pleaf[i].permission = (write && json_object_get_boolean(write)) ? &DMWRITE : &DMREAD;
+	}
+
 	//getvalue
-	pleaf[i].getvalue = getvalue_param;
+	if (pleaf[i].type == DMT_EVENT) {
+		int param_count = 0;
+		json_object_object_foreach(jobj, param, val) {
+			if (valid_event_param(param)) {
+				param_count++;
+				if (!ev_arg) {
+					ev_arg = malloc(sizeof(char*) * param_count);
+					if (!ev_arg)
+						break;
+				} else {
+					ev_arg = realloc(ev_arg, sizeof(char*) * param_count);
+					if (!ev_arg)
+						break;
+				}
+
+				ev_arg[param_count - 1] = dm_dynamic_strdup(&json_memhead, param);
+			}
+		}
+
+		if (ev_arg) {
+			param_count++;
+			ev_arg = realloc(ev_arg, sizeof(char*) * param_count);
+			ev_arg[param_count - 1] = NULL;
+		}
+
+		pleaf[i].getvalue = getevent_param;
+	} else if (pleaf[i].type == DMT_COMMAND) {
+		struct json_object *input_obj = NULL, *output_obj = NULL;
+
+		json_object_object_get_ex(jobj, "input", &input_obj);
+		json_object_object_get_ex(jobj, "output", &output_obj);
+
+		if (input_obj && json_object_get_type(input_obj) == json_type_object) {
+			int count = json_object_object_length(input_obj);
+			if (count) {
+				in_p = fill_command_param(count, input_obj);
+			}
+		}
+
+		if (output_obj && json_object_get_type(output_obj) == json_type_object) {
+			int count = json_object_object_length(output_obj);
+			if (count) {
+				out_p = fill_command_param(count, output_obj);
+			}
+		}
+
+		pleaf[i].getvalue = getcommand_param;
+	} else {
+		pleaf[i].getvalue = getvalue_param;
+	}
 
 	//setvalue
-	pleaf[i].setvalue = (write && json_object_get_boolean(write)) ? setvalue_param : NULL;
+	if (pleaf[i].type == DMT_EVENT) {
+		pleaf[i].setvalue = NULL;
+	} else if (pleaf[i].type == DMT_COMMAND) {
+		pleaf[i].setvalue = setcommand_param;
+	} else {
+		pleaf[i].setvalue = (write && json_object_get_boolean(write)) ? setvalue_param : NULL;
+	}
 
 	//bbfdm_type
 	json_object_object_get_ex(jobj, "protocols", &protocols);
@@ -905,7 +1151,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 		pleaf[i].bbfdm_type = BBFDM_BOTH;
 
 	snprintf(full_param, sizeof(full_param), "%s%s", object, param);
-	save_json_data(list, full_param, jobj);
+	save_json_data(list, full_param, jobj, (const char**)in_p, (const char**)out_p, (const char**)ev_arg);
 }
 
 static void count_obj_param_under_jsonobj(json_object *jsonobj, int *obj_number, int *param_number)

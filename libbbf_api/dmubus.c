@@ -123,6 +123,42 @@ int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_arg
 	return rc;
 }
 
+int dmubus_operate_blob_set(char *obj, char *method, void *value, json_object **resp)
+{
+	uint32_t id;
+	struct blob_buf blob;
+	int rc = -1;
+
+	json_res = NULL;
+	*resp = NULL;
+
+	if (ubus_ctx == NULL) {
+		ubus_ctx = dm_libubus_init();
+		if (ubus_ctx == NULL)
+			return rc;
+	}
+
+	memset(&blob, 0, sizeof(struct blob_buf));
+	blob_buf_init(&blob, 0);
+
+	if (value != NULL) {
+		if (!blobmsg_add_object(&blob, (json_object *)value)) {
+			blob_buf_free(&blob);
+			return rc;
+		}
+	}
+
+	if (!ubus_lookup_id(ubus_ctx, obj, &id)) {
+		rc = ubus_invoke(ubus_ctx, id, method, blob.head,
+				 receive_call_result_data, NULL, timeout);
+	}
+
+	*resp = json_res;
+	blob_buf_free(&blob);
+	return rc;
+
+}
+
 static inline json_object *ubus_call_req(char *obj, char *method, struct ubus_arg u_args[], int u_args_size)
 {
 	__dm_ubus_call(obj, method, u_args, u_args_size);

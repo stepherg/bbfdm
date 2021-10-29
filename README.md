@@ -436,7 +436,7 @@ BBF_VENDOR_PREFIX="X_TEST_COM_"
 - The directory **'dmtree/vendor/test/'** contains an example of **test** vendor implementation
 
 
-## BBFDM Dynamic Object/Parameter/Operate
+## BBFDM Dynamic Object/Parameter/Operate/Event
 
 `bbfdm` library allows all applications installed on the box to import its own Data Model parameters at run time in two formats:
 
@@ -678,6 +678,131 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 				"key" : "memory.total"
 			}
 		}
+	]
+}
+```
+
+**5. Object with Event and Operate command:**
+
+```bash
+{
+	"Device.X_IOPSYS_Test.": {
+		"type": "object",
+		"protocols": [
+			"cwmp",
+			"usp"
+		],
+		"array": false,
+		"Push!": {
+			"type": "event",
+			"version": "2.13",
+			"protocols": [
+				"usp"
+			],
+			"data": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.13",
+				"protocols": [
+					"usp"
+				],
+				"datatype": "string"
+			}
+		},
+		"Status()": {
+			"type": "command",
+			"async": true,
+			"version" : "2.12",
+			"protocols": [
+				"usp"
+			],
+			"input": {
+				"Option" : {
+					"type" : "string",
+					"read" : "true",
+					"write" : "true",
+					"protocol" : [
+						"usp"
+					],
+					"datatype" : "string"
+				}
+			},
+			"output": {
+				"Result" : {
+					"type" : "string",
+					"read" : "true",
+					"write" : "false",
+					"protocol" : [
+						"usp"
+					],
+					"datatype" : "string"
+				}
+			},
+			"mapping": [
+				{
+					"type" : "ubus",
+					"ubus" : {
+						"object" : "test",
+						"method" : "status"
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+- **UBUS command:** ubus call usp operate '{"path":"Device.X_IOPSYS_Test.", "action":"Status()", "input":{"Option":"Last"}}'
+
+```bash
+{
+ 	"Results": [
+		{
+			"path": "Device.X_IOPSYS_Test.Status()",
+			"result": [
+				{
+					"Result": "Success"
+				}
+			]
+		}
+	]
+}
+```
+
+- **UBUS command:** ubus call usp get_supported_dm
+
+```bash
+{
+	"parameters": [
+		{
+			"parameter": "Device.X_IOPSYS_Test.Push!",
+			"type": "xsd:event",
+			"in": [
+				"data"
+			]
+		},
+		...
+	]
+}
+```
+
+- **UBUS command:** ubus call usp list_operate
+
+```bash
+{
+	"parameters": [
+		{
+			"parameter": "Device.X_IOPSYS_Test.Status()",
+			"type": "async",
+			"in": [
+				"Option"
+			],
+			"out": [
+				"Result"
+			]
+		},
+		...
 	]
 }
 ```
