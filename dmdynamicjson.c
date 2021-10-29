@@ -12,13 +12,12 @@
 #include "dmdynamicjson.h"
 #include "dmentry.h"
 
-#ifdef BBFDM_ENABLE_JSON_PLUGIN
-
 #define json_object_get_string(x) (char *)json_object_get_string(x)
 
 static LIST_HEAD(loaded_json_files);
 static LIST_HEAD(json_list);
 static LIST_HEAD(json_memhead);
+
 static operation_args empty_cmd = {
 	.in = (const char**)NULL,
 	.out = (const char**)NULL
@@ -1319,5 +1318,3 @@ int load_json_dynamic_arrays(struct dmctx *ctx)
 	}
 	return 0;
 }
-
-#endif  /* BBFDM_ENABLE_JSON_PLUGIN */

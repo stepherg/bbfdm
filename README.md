@@ -693,6 +693,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 			"usp"
 		],
 		"array": false,
+		"access": false,
 		"Push!": {
 			"type": "event",
 			"version": "2.13",

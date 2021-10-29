@@ -149,6 +149,64 @@ param_schema = {
 	]
 }
 
+event_schema = {
+	"definitions": {
+		"type_t": {
+			"type": "string",
+			"enum": [
+				"event"
+			]
+		},
+		"protocols_t": {
+			"type": "string",
+			"enum": [
+				"usp"
+			]
+		}
+	},
+	"type" : "object",
+	"properties" : {
+		"type" : {"$ref": "#/definitions/type_t"},
+		"version" : {"type": "string"},
+		"protocols" : {"type" : "array", "items" : {"$ref": "#/definitions/protocols_t"}}
+	},
+	"required": [
+		"type",
+		"version",
+		"protocols"
+	]
+}
+
+command_schema = {
+	"definitions": {
+		"type_t": {
+			"type": "string",
+			"enum": [
+				"command"
+			]
+		},
+		"protocols_t": {
+			"type": "string",
+			"enum": [
+				"usp"
+			]
+		}
+	},
+	"type" : "object",
+	"properties" : {
+		"type" : {"$ref": "#/definitions/type_t"},
+		"async" : {"type" : "boolean"},
+		"protocols" : {"type" : "array", "items" : {"$ref": "#/definitions/protocols_t"}},
+		"input" : {"type" : "object"},
+		"output" : {"type" : "object"}
+	},
+	"required": [
+		"type",
+		"async",
+		"protocols"
+	]
+}
+
 def print_validate_json_usage():
     print("Usage: " + sys.argv[0] + " <dm json file>")
     print("Examples:")
@@ -163,10 +221,19 @@ def parse_value( key , value ):
 		print(key + " is not a valid path")
 		exit(1)
 	
-	validate(instance = value, schema = obj_schema if key.endswith('.') else param_schema)
+	if key.endswith('.'):
+		__schema = obj_schema
+	elif key.endswith('!'):
+		__schema = event_schema
+	elif key.endswith('()'):
+		__schema = command_schema
+	else:
+		__schema = param_schema
+
+	validate(instance = value, schema = __schema)
 
 	for k, v in value.items():
-		if not k.endswith('()') and not k.endswith('!') and k != "list" and k != "mapping" and isinstance(v, dict):
+		if k != "list" and k != "mapping" and k != "input" and k != "output" and isinstance(v, dict):
 			parse_value(k, v)
 
 ### main ###

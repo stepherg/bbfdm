@@ -663,6 +663,75 @@
 					}
 				}
 			]
+		},
+		"Push!": {
+			"type": "event",
+			"version": "2.13",
+			"protocols": [
+				"usp"
+			],
+			"Data": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.10",
+				"protocols": [
+					"usp"
+				]
+			},
+			"Status": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.12",
+				"protocols": [
+					"usp"
+				]
+			}
+		},
+		"Periodic!": {
+			"type": "event",
+			"version": "2.13",
+			"protocols": [
+				"usp"
+			]
+		},
+		"Status()": {
+			"type": "command",
+			"async": true,
+			"version" : "2.12",
+			"protocols": [
+				"usp"
+			],
+			"input": {
+				"Option" : {
+					"type" : "string",
+					"read" : "true",
+					"write" : "true",
+					"protocol" : [
+						"usp"
+					]
+				}
+			},
+			"output": {
+				"Result" : {
+					"type" : "string",
+					"read" : "true",
+					"write" : "false",
+					"protocol" : [
+						"usp"
+					]
+				}
+			},
+			"mapping": [
+				{
+					"type" : "ubus",
+					"ubus" : {
+						"object" : "test",
+						"method" : "status"
+					}
+				}
+			]
 		}
 	}
 }

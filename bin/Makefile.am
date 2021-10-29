@@ -32,8 +32,6 @@ lib_LTLIBRARIES += libbbfdm.la
 
 libbbfdm_la_SOURCES =	\
 	../dmentry.c 		\
-	../dmdynamiclibrary.c \
-	../dmdynamicjson.c 	\
 	../dmdiagnostics.c	\
 	../dmbbfcommon.c
 
@@ -91,6 +89,16 @@ if BBF_TR143
 libbbfdm_la_SOURCES +=							\
 	../dmtree/tr143/diagnostics.c
 endif #BBF_TR143
+
+if BBFDM_ENABLE_DOTSO_PLUGIN
+libbbfdm_la_SOURCES +=	\
+	../dmdynamiclibrary.c
+endif #BBFDM_ENABLE_DOTSO_PLUGIN
+
+if BBFDM_ENABLE_JSON_PLUGIN
+libbbfdm_la_SOURCES +=	\
+	../dmdynamicjson.c
+endif #BBFDM_ENABLE_JSON_PLUGIN
 
 if BBF_VENDOR_EXTENSION
 

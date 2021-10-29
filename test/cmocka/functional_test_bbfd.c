@@ -964,6 +964,21 @@ static void test_api_bbfdm_valid_library_operate(void **state)
 	}
 }
 
+static void test_api_bbfdm_valid_json_operate(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *n;
+	int fault = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.X_IOPSYS_EU_TEST.1.Status()", NULL, NULL);
+	assert_int_equal(fault, CMD_SUCCESS);
+
+	list_for_each_entry(n, &ctx->list_parameter, list) {
+		assert_string_not_equal(n->data, "Success");
+		assert_string_equal(n->type, "xsd:string");
+	}
+}
+
 static void test_api_bbfdm_valid_library_event(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -1007,7 +1022,47 @@ static void test_api_bbfdm_valid_library_event(void **state)
 		idx++;
 	}
 
-	assert_int_equal(idx, 2);
+	assert_int_equal(idx, 4);
+}
+
+static void test_api_bbfdm_valid_json_event(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *n;
+	int fault = 0, idx = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_USP_LIST_EVENT, NULL, NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	list_for_each_entry(n, &ctx->list_parameter, list) {
+
+		if (strcmp(n->name, "Device.X_IOPSYS_EU_TEST.1.Periodic!") == 0) {
+			assert_string_equal(n->type, "xsd:event");
+			assert_null(n->data);
+		}
+
+		if (strcmp(n->name, "Device.X_IOPSYS_EU_TEST.1.Push!") == 0) {
+			assert_string_equal(n->type, "xsd:event");
+			event_args *args = (event_args *)n->data;
+			assert_non_null(args);
+			const char **event_param = args->param;
+			assert_non_null(event_param);
+			for (int i = 0; event_param[i] != NULL; i++) {
+				switch (i) {
+				case 0:
+					assert_string_equal(event_param[i], "Data");
+					break;
+				case 1:
+					assert_string_equal(event_param[i], "Status");
+					break;
+				}
+			}
+		}
+
+		idx++;
+	}
+
+	assert_int_equal(idx, 4);
 }
 
 int main(void)
@@ -1028,9 +1083,11 @@ int main(void)
 		// Operate method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_standard_operate, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_library_operate, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_json_operate, setup, teardown_commit),
 
 		// Event method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_library_event, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_json_event, setup, teardown_commit),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, group_teardown);

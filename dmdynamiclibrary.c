@@ -11,8 +11,6 @@
 
 #include "dmdynamiclibrary.h"
 
-#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
-
 LIST_HEAD(loaded_library_list);
 LIST_HEAD(dynamic_operate_list);
 LIST_HEAD(library_memhead);
@@ -312,5 +310,3 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 	}
 	return 0;
 }
-
-#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
