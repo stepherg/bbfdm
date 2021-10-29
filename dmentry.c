@@ -180,6 +180,8 @@ int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_
 	int fault =0;
 
 	// Load dynamic objects and parameters
+	load_dynamic_arrays(ctx);
+
 	if (strlen(path) == 0)
 		path = "Device.";
 
@@ -265,13 +267,13 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			fault = dm_entry_operate(ctx);
 			break;
 		case CMD_USP_LIST_OPERATE:
-			fault = dm_get_supported_dm(ctx, ctx->in_param, 0, COMMAND_ONLY);
+			fault = dm_entry_list_operates(ctx);
 			break;
 		case CMD_USP_LIST_EVENT:
-			fault = dm_get_supported_dm(ctx, ctx->in_param, 0, EVENT_ONLY);
+			fault = dm_entry_list_events(ctx);
 			break;
 		case CMD_GET_SCHEMA:
-			fault = dm_get_supported_dm(ctx, ctx->in_param, 0, PARAM_ONLY);
+			fault = dm_entry_get_schema(ctx);
 			break;
 		case CMD_GET_INSTANCES:
 			if (!arg1 || (arg1 && string_to_bool(arg1, &ctx->nextlevel) == 0))

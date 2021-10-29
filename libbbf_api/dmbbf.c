@@ -1758,7 +1758,7 @@ static int mparam_list_operates_name(DMPARAM_ARGS)
 	if (get_cmd)
 		(get_cmd)(full_param, dmctx, data, instance, &value);
 
-	add_list_parameter(dmctx, full_param, value, permission->val, NULL);
+	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], permission->val);
 	return 0;
 }
 
