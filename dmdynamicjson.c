@@ -1047,7 +1047,7 @@ static char** fill_command_param(int count, struct json_object *obj)
 static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pleaf, int i, struct list_head *list)
 {
 	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(6)*/
-	struct json_object *type = NULL, *protocols = NULL, *write = NULL, *async = NULL;
+	struct json_object *type = NULL, *protocols = NULL, *write = NULL, *async = NULL, *version =  NULL;;
 	char full_param[512] = {0};
 	size_t n_proto;
 	char **in_p = NULL, **out_p = NULL, **ev_arg = NULL;
@@ -1170,6 +1170,12 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 			pleaf[i].bbfdm_type = BBFDM_BOTH;
 	} else
 		pleaf[i].bbfdm_type = BBFDM_BOTH;
+	
+	//Version
+	json_object_object_get_ex(jobj, "version", &version);
+	if(version)
+		DM_STRNCPY(pleaf[i].version, json_object_get_string(version), 10);
+
 
 	snprintf(full_param, sizeof(full_param), "%s%s", object, param);
 	save_json_data(list, full_param, jobj, (const char**)in_p, (const char**)out_p, (const char**)ev_arg);
@@ -1268,6 +1274,9 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, s
 			//linker
 			pobj[index].get_linker = NULL;
 		}
+		//Version
+		if(strcmp(key,"version")==0)
+			DM_STRNCPY(pobj[index].version, json_object_get_string(json_obj), 10);
 
 		if (strcmp(key, "mapping") == 0 && json_object_get_type(json_obj) == json_type_object) {
 			parse_mapping_obj(full_obj, json_obj, list);

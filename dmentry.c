@@ -137,6 +137,7 @@ static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, int
 	INIT_LIST_HEAD(&ctx->list_fault_param);
 	ctx->instance_mode = instance_mode;
 	ctx->dm_entryobj = tEntry181Obj;
+	ctx->dm_version = DEFAULT_DMVERSION;
 	ctx->end_session_flag = 0;
 	return 0;
 }
@@ -177,7 +178,7 @@ int dm_ctx_clean_sub(struct dmctx *ctx)
 
 int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_type_t schema_type)
 {
-	int fault =0;
+	int fault = 0;
 
 	// Load dynamic objects and parameters
 	load_dynamic_arrays(ctx);
@@ -192,11 +193,11 @@ int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_
 
 	dmentry_instance_lookup_inparam(ctx);
 	ctx->stop = false;
-        switch(schema_type) {
+	switch(schema_type) {
 		case ALL_SCHEMA:
 			ctx->isinfo = 1;
 			ctx->isevent = 1;
-			ctx->iscommand =1;
+			ctx->iscommand = 1;
 			break;
 		case PARAM_ONLY:
 			ctx->isinfo = 1;
@@ -205,7 +206,7 @@ int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_
 			ctx->isevent = 1;
 			break;
 		case COMMAND_ONLY:
-			ctx->iscommand =1;
+			ctx->iscommand = 1;
 			break;
 	}
 	ctx->nextlevel = first_level;

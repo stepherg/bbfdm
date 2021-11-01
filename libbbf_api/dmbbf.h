@@ -42,6 +42,8 @@
 #define BBF_ATTR_UNUSED(x) (void)(x)
 #endif
 
+#define DEFAULT_DMVERSION "2.14"
+
 #define DM_STRNCPY(DST, SRC, SIZE) \
 do { \
 	strncpy(DST, SRC, SIZE - 1); \
@@ -100,17 +102,18 @@ struct dm_notif_s {
 };
 
 typedef struct dm_leaf_s {
-	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(6)*/
+	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version(7)*/
 	char *parameter;
 	struct dm_permession_s *permission;
 	int type;
 	int (*getvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 	int (*setvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
 	int bbfdm_type;
+	char version[10];
 } DMLEAF;
 
 typedef struct dm_obj_s {
-	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys(13)*/
+	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version(14)*/
 	char *obj;
 	struct dm_permession_s *permission;
 	int (*addobj)(char *refparam, struct dmctx *ctx, void *data, char **instance);
@@ -124,6 +127,7 @@ typedef struct dm_obj_s {
 	int (*get_linker)(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker);
 	int bbfdm_type;
 	const char **unique_keys;
+	char version[10];
 } DMOBJ;
 
 struct set_tmp {
@@ -167,6 +171,7 @@ struct dmctx
 	char *addobj_instance;
 	char *linker;
 	char *linker_param;
+	char *dm_version;
 	unsigned int alias_register;
 	unsigned int nbrof_instance;
 	unsigned int instance_mode;

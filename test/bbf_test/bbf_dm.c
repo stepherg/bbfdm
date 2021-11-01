@@ -63,7 +63,12 @@ int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
 
 	dm_ctx_init(&bbf_ctx, 0);
 
-	if(cmd == CMD_GET_INFO){
+	if (arg2)
+		bbf_ctx.dm_version = arg2;
+
+	printf("config version %s\n", bbf_ctx.dm_version);
+
+	if (cmd == CMD_GET_INFO){
 		fault = dm_get_supported_dm(&bbf_ctx, path, false, atoi(arg1));
 	} else {
 		fault = dm_entry_param_method(&bbf_ctx, cmd, path, arg1, arg2);
@@ -83,7 +88,7 @@ int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
 
 int main(int argc, char *argv[])
 {
-	char *param = NULL, *value = NULL;
+	char *param = NULL, *value = NULL, *version = NULL;
 	int cmd;
 
 	if (argc < 3) {
@@ -98,10 +103,12 @@ int main(int argc, char *argv[])
 	if (argc > 3 && strlen(argv[3]))
 		param = argv[3];
 
-	if (argc > 4 && strlen(argv[4])){
+	if (argc > 4 && strlen(argv[4]))
 		value = argv[4];
-	}
 
-	usp_dm_exec(cmd, param, value, NULL);
+	if (argc > 5 && strlen(argv[5]))
+		version = argv[5];
+	
+	usp_dm_exec(cmd, param, value, version);
 	free_dynamic_arrays();
 }

@@ -2973,213 +2973,213 @@ static int operate_DHCPv4Client_Renew(char *refparam, struct dmctx *ctx, void *d
 ***********************************************************************************************************************************/
 /* *** Device.DHCPv4. *** */
 DMOBJ tDHCPv4Obj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Client", &DMWRITE, addObjDHCPv4Client, delObjDHCPv4Client, NULL, browseDHCPv4ClientInst, NULL, NULL, tDHCPv4ClientObj, tDHCPv4ClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
-{"Server", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDHCPv4ServerObj, tDHCPv4ServerParams, NULL, BBFDM_BOTH},
-{"Relay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDHCPv4RelayObj, tDHCPv4RelayParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Client", &DMWRITE, addObjDHCPv4Client, delObjDHCPv4Client, NULL, browseDHCPv4ClientInst, NULL, NULL, tDHCPv4ClientObj, tDHCPv4ClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}, "2.0"},
+{"Server", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDHCPv4ServerObj, tDHCPv4ServerParams, NULL, BBFDM_BOTH, NULL, "2.0"},
+{"Relay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDHCPv4RelayObj, tDHCPv4RelayParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {0}
 };
 
 DMLEAF tDHCPv4Params[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"ClientNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4_ClientNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"ClientNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4_ClientNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.DHCPv4.Client.{i}. *** */
 DMOBJ tDHCPv4ClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"SentOption", &DMWRITE, addObjDHCPv4ClientSentOption, delObjDHCPv4ClientSentOption, NULL, browseDHCPv4ClientSentOptionInst, NULL, NULL, NULL, tDHCPv4ClientSentOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
-{"ReqOption", &DMWRITE, addObjDHCPv4ClientReqOption, delObjDHCPv4ClientReqOption, NULL, browseDHCPv4ClientReqOptionInst, NULL, NULL, NULL, tDHCPv4ClientReqOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"SentOption", &DMWRITE, addObjDHCPv4ClientSentOption, delObjDHCPv4ClientSentOption, NULL, browseDHCPv4ClientSentOptionInst, NULL, NULL, NULL, tDHCPv4ClientSentOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}, "2.0"},
+{"ReqOption", &DMWRITE, addObjDHCPv4ClientReqOption, delObjDHCPv4ClientReqOption, NULL, browseDHCPv4ClientReqOptionInst, NULL, NULL, NULL, tDHCPv4ClientReqOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}, "2.0"},
 {0}
 };
 
 DMLEAF tDHCPv4ClientParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4Client_Enable, set_DHCPv4Client_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4Client_Alias, set_DHCPv4Client_Alias, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4Client_Interface, set_DHCPv4Client_Interface, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_DHCPv4Client_Status, NULL, BBFDM_BOTH},
-{"DHCPStatus", &DMREAD, DMT_STRING, get_DHCPv4Client_DHCPStatus, NULL, BBFDM_BOTH},
-{"Renew", &DMWRITE, DMT_BOOL, get_DHCPv4Client_Renew, set_DHCPv4Client_Renew, BBFDM_CWMP},
-{"IPAddress", &DMREAD, DMT_STRING, get_DHCPv4Client_IPAddress, NULL, BBFDM_BOTH},
-{"SubnetMask", &DMREAD, DMT_STRING, get_DHCPv4Client_SubnetMask, NULL, BBFDM_BOTH},
-{"IPRouters", &DMREAD, DMT_STRING, get_DHCPv4Client_IPRouters, NULL, BBFDM_BOTH},
-{"DNSServers", &DMREAD, DMT_STRING, get_DHCPv4Client_DNSServers, NULL, BBFDM_BOTH},
-{"LeaseTimeRemaining", &DMREAD, DMT_INT, get_DHCPv4Client_LeaseTimeRemaining, NULL, BBFDM_BOTH},
-//{"DHCPServer", &DMREAD, DMT_STRING, get_DHCPv4Client_DHCPServer, NULL, BBFDM_BOTH},
-//{"PassthroughEnable", &DMWRITE, DMT_BOOL, get_DHCPv4Client_PassthroughEnable, set_DHCPv4Client_PassthroughEnable, BBFDM_BOTH},
-//{"PassthroughDHCPPool", &DMWRITE, DMT_STRING, get_DHCPv4Client_PassthroughDHCPPool, set_DHCPv4Client_PassthroughDHCPPool, BBFDM_BOTH},
-{"SentOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Client_SentOptionNumberOfEntries, NULL, BBFDM_BOTH},
-{"ReqOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Client_ReqOptionNumberOfEntries, NULL, BBFDM_BOTH},
-{"Renew()", &DMSYNC, DMT_COMMAND, NULL, operate_DHCPv4Client_Renew, BBFDM_USP},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4Client_Enable, set_DHCPv4Client_Enable, BBFDM_BOTH, "2.0"},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4Client_Alias, set_DHCPv4Client_Alias, BBFDM_BOTH, "2.0"},
+{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4Client_Interface, set_DHCPv4Client_Interface, BBFDM_BOTH, "2.0"},
+{"Status", &DMREAD, DMT_STRING, get_DHCPv4Client_Status, NULL, BBFDM_BOTH, "2.0"},
+{"DHCPStatus", &DMREAD, DMT_STRING, get_DHCPv4Client_DHCPStatus, NULL, BBFDM_BOTH, "2.0"},
+{"Renew", &DMWRITE, DMT_BOOL, get_DHCPv4Client_Renew, set_DHCPv4Client_Renew, BBFDM_CWMP, "2.0"},
+{"IPAddress", &DMREAD, DMT_STRING, get_DHCPv4Client_IPAddress, NULL, BBFDM_BOTH, "2.0"},
+{"SubnetMask", &DMREAD, DMT_STRING, get_DHCPv4Client_SubnetMask, NULL, BBFDM_BOTH, "2.0"},
+{"IPRouters", &DMREAD, DMT_STRING, get_DHCPv4Client_IPRouters, NULL, BBFDM_BOTH, "2.0"},
+{"DNSServers", &DMREAD, DMT_STRING, get_DHCPv4Client_DNSServers, NULL, BBFDM_BOTH, "2.0"},
+{"LeaseTimeRemaining", &DMREAD, DMT_INT, get_DHCPv4Client_LeaseTimeRemaining, NULL, BBFDM_BOTH, "2.0"},
+//{"DHCPServer", &DMREAD, DMT_STRING, get_DHCPv4Client_DHCPServer, NULL, BBFDM_BOTH, "2.0"},
+//{"PassthroughEnable", &DMWRITE, DMT_BOOL, get_DHCPv4Client_PassthroughEnable, set_DHCPv4Client_PassthroughEnable, BBFDM_BOTH, "2.0"},
+//{"PassthroughDHCPPool", &DMWRITE, DMT_STRING, get_DHCPv4Client_PassthroughDHCPPool, set_DHCPv4Client_PassthroughDHCPPool, BBFDM_BOTH, "2.0"},
+{"SentOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Client_SentOptionNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
+{"ReqOptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Client_ReqOptionNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
+{"Renew()", &DMSYNC, DMT_COMMAND, NULL, operate_DHCPv4Client_Renew, BBFDM_USP, "2.12"},
 {0}
 };
 
 /* *** Device.DHCPv4.Client.{i}.SentOption.{i}. *** */
 DMLEAF tDHCPv4ClientSentOptionParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ClientSentOption_Enable, set_DHCPv4ClientSentOption_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ClientSentOption_Alias, set_DHCPv4ClientSentOption_Alias, BBFDM_BOTH},
-{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ClientSentOption_Tag, set_DHCPv4ClientSentOption_Tag, BBFDM_BOTH},
-{"Value", &DMWRITE, DMT_HEXBIN, get_DHCPv4ClientSentOption_Value, set_DHCPv4ClientSentOption_Value, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ClientSentOption_Enable, set_DHCPv4ClientSentOption_Enable, BBFDM_BOTH, "2.0"},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ClientSentOption_Alias, set_DHCPv4ClientSentOption_Alias, BBFDM_BOTH, "2.0"},
+{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ClientSentOption_Tag, set_DHCPv4ClientSentOption_Tag, BBFDM_BOTH, "2.0"},
+{"Value", &DMWRITE, DMT_HEXBIN, get_DHCPv4ClientSentOption_Value, set_DHCPv4ClientSentOption_Value, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.DHCPv4.Client.{i}.ReqOption.{i}. *** */
 DMLEAF tDHCPv4ClientReqOptionParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ClientReqOption_Enable, set_DHCPv4ClientReqOption_Enable, BBFDM_BOTH},
-//{"Order", &DMWRITE, DMT_UNINT, get_DHCPv4ClientReqOption_Order, set_DHCPv4ClientReqOption_Order, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ClientReqOption_Alias, set_DHCPv4ClientReqOption_Alias, BBFDM_BOTH},
-{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ClientReqOption_Tag, set_DHCPv4ClientReqOption_Tag, BBFDM_BOTH},
-//{"Value", &DMREAD, DMT_HEXBIN, get_DHCPv4ClientReqOption_Value, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ClientReqOption_Enable, set_DHCPv4ClientReqOption_Enable, BBFDM_BOTH, "2.0"},
+//{"Order", &DMWRITE, DMT_UNINT, get_DHCPv4ClientReqOption_Order, set_DHCPv4ClientReqOption_Order, BBFDM_BOTH, "2.0"},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ClientReqOption_Alias, set_DHCPv4ClientReqOption_Alias, BBFDM_BOTH, "2.0"},
+{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ClientReqOption_Tag, set_DHCPv4ClientReqOption_Tag, BBFDM_BOTH, "2.0"},
+//{"Value", &DMREAD, DMT_HEXBIN, get_DHCPv4ClientReqOption_Value, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.DHCPv4.Server. *** */
 DMOBJ tDHCPv4ServerObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Pool", &DMWRITE, addObjDHCPv4ServerPool, delObjDHCPv4ServerPool, NULL, browseDHCPv4ServerPoolInst, NULL, NULL, tDHCPv4ServerPoolObj, tDHCPv4ServerPoolParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Pool", &DMWRITE, addObjDHCPv4ServerPool, delObjDHCPv4ServerPool, NULL, browseDHCPv4ServerPoolInst, NULL, NULL, tDHCPv4ServerPoolObj, tDHCPv4ServerPoolParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}, "2.0"},
 {0}
 };
 
 DMLEAF tDHCPv4ServerParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4Server_Enable, set_DHCPv4Server_Enable, BBFDM_BOTH},
-{"PoolNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Server_PoolNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4Server_Enable, set_DHCPv4Server_Enable, BBFDM_BOTH, "2.0"},
+{"PoolNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Server_PoolNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.DHCPv4.Server.Pool.{i}. *** */
 DMOBJ tDHCPv4ServerPoolObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"StaticAddress", &DMWRITE, addObjDHCPv4ServerPoolStaticAddress, delObjDHCPv4ServerPoolStaticAddress, NULL, browseDHCPv4ServerPoolStaticAddressInst, NULL, NULL, NULL, tDHCPv4ServerPoolStaticAddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Chaddr", NULL}},
-{"Option", &DMWRITE, addObjDHCPv4ServerPoolOption, delObjDHCPv4ServerPoolOption, NULL, browseDHCPv4ServerPoolOptionInst, NULL, NULL, NULL, tDHCPv4ServerPoolOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
-{"Client", &DMREAD, NULL, NULL, NULL, browseDhcpClientInst, NULL, NULL, tDHCPv4ServerPoolClientObj, tDHCPv4ServerPoolClientParams, get_dhcp_client_linker, BBFDM_BOTH, LIST_KEY{"Chaddr", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"StaticAddress", &DMWRITE, addObjDHCPv4ServerPoolStaticAddress, delObjDHCPv4ServerPoolStaticAddress, NULL, browseDHCPv4ServerPoolStaticAddressInst, NULL, NULL, NULL, tDHCPv4ServerPoolStaticAddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Chaddr", NULL}, "2.0"},
+{"Option", &DMWRITE, addObjDHCPv4ServerPoolOption, delObjDHCPv4ServerPoolOption, NULL, browseDHCPv4ServerPoolOptionInst, NULL, NULL, NULL, tDHCPv4ServerPoolOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}, "2.0"},
+{"Client", &DMREAD, NULL, NULL, NULL, browseDhcpClientInst, NULL, NULL, tDHCPv4ServerPoolClientObj, tDHCPv4ServerPoolClientParams, get_dhcp_client_linker, BBFDM_BOTH, LIST_KEY{"Chaddr", "Alias", NULL}, "2.2"},
 {0}
 };
 
 DMLEAF tDHCPv4ServerPoolParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_Enable, set_DHCPv4ServerPool_Enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_DHCPv4ServerPool_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_Alias, set_DHCPv4ServerPool_Alias, BBFDM_BOTH},
-{"Order", &DMWRITE, DMT_UNINT, get_DHCPv4ServerPool_Order, set_DHCPv4ServerPool_Order, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_Interface, set_DHCPv4ServerPool_Interface, BBFDM_BOTH},
-//{"VendorClassID", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_VendorClassID, set_DHCPv4ServerPool_VendorClassID, BBFDM_BOTH},
-//{"VendorClassIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_VendorClassIDExclude, set_DHCPv4ServerPool_VendorClassIDExclude, BBFDM_BOTH},
-//{"VendorClassIDMode", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_VendorClassIDMode, set_DHCPv4ServerPool_VendorClassIDMode, BBFDM_BOTH},
-//{"ClientID", &DMWRITE, DMT_HEXBIN, get_DHCPv4ServerPool_ClientID, set_DHCPv4ServerPool_ClientID, BBFDM_BOTH},
-//{"ClientIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_ClientIDExclude, set_DHCPv4ServerPool_ClientIDExclude, BBFDM_BOTH},
-//{"UserClassID", &DMWRITE, DMT_HEXBIN, get_DHCPv4ServerPool_UserClassID, set_DHCPv4ServerPool_UserClassID, BBFDM_BOTH},
-//{"UserClassIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_UserClassIDExclude, set_DHCPv4ServerPool_UserClassIDExclude, BBFDM_BOTH},
-//{"Chaddr", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_Chaddr, set_DHCPv4ServerPool_Chaddr, BBFDM_BOTH},
-//{"ChaddrMask", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_ChaddrMask, set_DHCPv4ServerPool_ChaddrMask, BBFDM_BOTH},
-//{"ChaddrExclude", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_ChaddrExclude, set_DHCPv4ServerPool_ChaddrExclude, BBFDM_BOTH},
-//{"AllowedDevices", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_AllowedDevices, set_DHCPv4ServerPool_AllowedDevices, BBFDM_BOTH},
-{"MinAddress", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_MinAddress, set_DHCPv4ServerPool_MinAddress, BBFDM_BOTH},
-{"MaxAddress", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_MaxAddress, set_DHCPv4ServerPool_MaxAddress, BBFDM_BOTH},
-{"ReservedAddresses", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_ReservedAddresses, set_DHCPv4ServerPool_ReservedAddresses, BBFDM_BOTH},
-{"SubnetMask", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_SubnetMask, set_DHCPv4ServerPool_SubnetMask, BBFDM_BOTH},
-{"DNSServers", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_DNSServers, set_DHCPv4ServerPool_DNSServers, BBFDM_BOTH},
-{"DomainName", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_DomainName, set_DHCPv4ServerPool_DomainName, BBFDM_BOTH},
-{"IPRouters", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_IPRouters, set_DHCPv4ServerPool_IPRouters, BBFDM_BOTH},
-{"LeaseTime", &DMWRITE, DMT_INT, get_DHCPv4ServerPool_LeaseTime, set_DHCPv4ServerPool_LeaseTime, BBFDM_BOTH},
-{"StaticAddressNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPool_StaticAddressNumberOfEntries, NULL, BBFDM_BOTH},
-{"OptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPool_OptionNumberOfEntries, NULL, BBFDM_BOTH},
-{"ClientNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPool_ClientNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_Enable, set_DHCPv4ServerPool_Enable, BBFDM_BOTH, "2.0"},
+{"Status", &DMREAD, DMT_STRING, get_DHCPv4ServerPool_Status, NULL, BBFDM_BOTH, "2.0"},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_Alias, set_DHCPv4ServerPool_Alias, BBFDM_BOTH, "2.0"},
+{"Order", &DMWRITE, DMT_UNINT, get_DHCPv4ServerPool_Order, set_DHCPv4ServerPool_Order, BBFDM_BOTH, "2.0"},
+{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_Interface, set_DHCPv4ServerPool_Interface, BBFDM_BOTH, "2.0"},
+//{"VendorClassID", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_VendorClassID, set_DHCPv4ServerPool_VendorClassID, BBFDM_BOTH, "2.0"},
+//{"VendorClassIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_VendorClassIDExclude, set_DHCPv4ServerPool_VendorClassIDExclude, BBFDM_BOTH, "2.0"},
+//{"VendorClassIDMode", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_VendorClassIDMode, set_DHCPv4ServerPool_VendorClassIDMode, BBFDM_BOTH, "2.0"},
+//{"ClientID", &DMWRITE, DMT_HEXBIN, get_DHCPv4ServerPool_ClientID, set_DHCPv4ServerPool_ClientID, BBFDM_BOTH, "2.0"},
+//{"ClientIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_ClientIDExclude, set_DHCPv4ServerPool_ClientIDExclude, BBFDM_BOTH, "2.0"},
+//{"UserClassID", &DMWRITE, DMT_HEXBIN, get_DHCPv4ServerPool_UserClassID, set_DHCPv4ServerPool_UserClassID, BBFDM_BOTH, "2.0"},
+//{"UserClassIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_UserClassIDExclude, set_DHCPv4ServerPool_UserClassIDExclude, BBFDM_BOTH, "2.0"},
+//{"Chaddr", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_Chaddr, set_DHCPv4ServerPool_Chaddr, BBFDM_BOTH, "2.0"},
+//{"ChaddrMask", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_ChaddrMask, set_DHCPv4ServerPool_ChaddrMask, BBFDM_BOTH, "2.0"},
+//{"ChaddrExclude", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_ChaddrExclude, set_DHCPv4ServerPool_ChaddrExclude, BBFDM_BOTH, "2.0"},
+//{"AllowedDevices", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_AllowedDevices, set_DHCPv4ServerPool_AllowedDevices, BBFDM_BOTH, "2.13"},
+{"MinAddress", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_MinAddress, set_DHCPv4ServerPool_MinAddress, BBFDM_BOTH, "2.0"},
+{"MaxAddress", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_MaxAddress, set_DHCPv4ServerPool_MaxAddress, BBFDM_BOTH, "2.0"},
+{"ReservedAddresses", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_ReservedAddresses, set_DHCPv4ServerPool_ReservedAddresses, BBFDM_BOTH, "2.0"},
+{"SubnetMask", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_SubnetMask, set_DHCPv4ServerPool_SubnetMask, BBFDM_BOTH, "2.0"},
+{"DNSServers", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_DNSServers, set_DHCPv4ServerPool_DNSServers, BBFDM_BOTH, "2.0"},
+{"DomainName", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_DomainName, set_DHCPv4ServerPool_DomainName, BBFDM_BOTH, "2.0"},
+{"IPRouters", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_IPRouters, set_DHCPv4ServerPool_IPRouters, BBFDM_BOTH, "2.0"},
+{"LeaseTime", &DMWRITE, DMT_INT, get_DHCPv4ServerPool_LeaseTime, set_DHCPv4ServerPool_LeaseTime, BBFDM_BOTH, "2.0"},
+{"StaticAddressNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPool_StaticAddressNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
+{"OptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPool_OptionNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
+{"ClientNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPool_ClientNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.DHCPv4.Server.Pool.{i}.StaticAddress.{i}. *** */
 DMLEAF tDHCPv4ServerPoolStaticAddressParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPoolStaticAddress_Enable, set_DHCPv4ServerPoolStaticAddress_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolStaticAddress_Alias, set_DHCPv4ServerPoolStaticAddress_Alias, BBFDM_BOTH},
-{"Chaddr", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolStaticAddress_Chaddr, set_DHCPv4ServerPoolStaticAddress_Chaddr, BBFDM_BOTH},
-{"Yiaddr", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolStaticAddress_Yiaddr, set_DHCPv4ServerPoolStaticAddress_Yiaddr, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPoolStaticAddress_Enable, set_DHCPv4ServerPoolStaticAddress_Enable, BBFDM_BOTH, "2.0"},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolStaticAddress_Alias, set_DHCPv4ServerPoolStaticAddress_Alias, BBFDM_BOTH, "2.0"},
+{"Chaddr", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolStaticAddress_Chaddr, set_DHCPv4ServerPoolStaticAddress_Chaddr, BBFDM_BOTH, "2.0"},
+{"Yiaddr", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolStaticAddress_Yiaddr, set_DHCPv4ServerPoolStaticAddress_Yiaddr, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.DHCPv4.Server.Pool.{i}.Option.{i}. *** */
 DMLEAF tDHCPv4ServerPoolOptionParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPoolOption_Enable, set_DHCPv4ServerPoolOption_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolOption_Alias, set_DHCPv4ServerPoolOption_Alias, BBFDM_BOTH},
-{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ServerPoolOption_Tag, set_DHCPv4ServerPoolOption_Tag, BBFDM_BOTH},
-{"Value", &DMWRITE, DMT_HEXBIN, get_DHCPv4ServerPoolOption_Value, set_DHCPv4ServerPoolOption_Value, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPoolOption_Enable, set_DHCPv4ServerPoolOption_Enable, BBFDM_BOTH, "2.0"},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolOption_Alias, set_DHCPv4ServerPoolOption_Alias, BBFDM_BOTH, "2.0"},
+{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ServerPoolOption_Tag, set_DHCPv4ServerPoolOption_Tag, BBFDM_BOTH, "2.0"},
+{"Value", &DMWRITE, DMT_HEXBIN, get_DHCPv4ServerPoolOption_Value, set_DHCPv4ServerPoolOption_Value, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.DHCPv4.Server.Pool.{i}.Client.{i}. *** */
 DMOBJ tDHCPv4ServerPoolClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseDhcpClientIPv4Inst, NULL, NULL, NULL, tDHCPv4ServerPoolClientIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
-{"Option", &DMREAD, NULL, NULL, NULL, browseDHCPv4ServerPoolClientOptionInst, NULL, NULL, NULL, tDHCPv4ServerPoolClientOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseDhcpClientIPv4Inst, NULL, NULL, NULL, tDHCPv4ServerPoolClientIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}, "2.2"},
+{"Option", &DMREAD, NULL, NULL, NULL, browseDHCPv4ServerPoolClientOptionInst, NULL, NULL, NULL, tDHCPv4ServerPoolClientOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", NULL}, "2.2"},
 {0}
 };
 
 DMLEAF tDHCPv4ServerPoolClientParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING,  get_DHCPv4ServerPoolClient_Alias, set_DHCPv4ServerPoolClient_Alias, BBFDM_BOTH},
-{"Chaddr", &DMREAD, DMT_STRING,  get_DHCPv4ServerPoolClient_Chaddr, NULL, BBFDM_BOTH},
-{"Active", &DMREAD, DMT_BOOL,  get_DHCPv4ServerPoolClient_Active, NULL, BBFDM_BOTH},
-{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClient_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH},
-{"OptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClient_OptionNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Alias", &DMWRITE, DMT_STRING,  get_DHCPv4ServerPoolClient_Alias, set_DHCPv4ServerPoolClient_Alias, BBFDM_BOTH, "2.2"},
+{"Chaddr", &DMREAD, DMT_STRING,  get_DHCPv4ServerPoolClient_Chaddr, NULL, BBFDM_BOTH, "2.2"},
+{"Active", &DMREAD, DMT_BOOL,  get_DHCPv4ServerPoolClient_Active, NULL, BBFDM_BOTH, "2.2"},
+{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClient_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
+{"OptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClient_OptionNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.DHCPv4.Server.Pool.{i}.Client.{i}.IPv4Address.{i}. *** */
 DMLEAF tDHCPv4ServerPoolClientIPv4AddressParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"IPAddress", &DMREAD, DMT_STRING, get_DHCPv4ServerPoolClientIPv4Address_IPAddress, NULL, BBFDM_BOTH},
-{"LeaseTimeRemaining", &DMREAD, DMT_TIME, get_DHCPv4ServerPoolClientIPv4Address_LeaseTimeRemaining, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"IPAddress", &DMREAD, DMT_STRING, get_DHCPv4ServerPoolClientIPv4Address_IPAddress, NULL, BBFDM_BOTH, "2.2"},
+{"LeaseTimeRemaining", &DMREAD, DMT_TIME, get_DHCPv4ServerPoolClientIPv4Address_LeaseTimeRemaining, NULL, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.DHCPv4.Server.Pool.{i}.Client.{i}.Option.{i}. *** */
 DMLEAF tDHCPv4ServerPoolClientOptionParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Tag", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClientOption_Tag, NULL, BBFDM_BOTH},
-{"Value", &DMREAD, DMT_HEXBIN, get_DHCPv4ServerPoolClientOption_Value, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Tag", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClientOption_Tag, NULL, BBFDM_BOTH, "2.2"},
+{"Value", &DMREAD, DMT_HEXBIN, get_DHCPv4ServerPoolClientOption_Value, NULL, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.DHCPv4.Relay. *** */
 DMOBJ tDHCPv4RelayObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Forwarding", &DMWRITE, addObjDHCPv4RelayForwarding, delObjDHCPv4RelayForwarding, NULL, browseDHCPv4RelayForwardingInst, NULL, NULL, NULL, tDHCPv4RelayForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Forwarding", &DMWRITE, addObjDHCPv4RelayForwarding, delObjDHCPv4RelayForwarding, NULL, browseDHCPv4RelayForwardingInst, NULL, NULL, NULL, tDHCPv4RelayForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}, "2.0"},
 {0}
 };
 
 DMLEAF tDHCPv4RelayParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4Relay_Enable, set_DHCPv4Relay_Enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_DHCPv4Relay_Status, NULL, BBFDM_BOTH},
-{"ForwardingNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Relay_ForwardingNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4Relay_Enable, set_DHCPv4Relay_Enable, BBFDM_BOTH, "2.0"},
+{"Status", &DMREAD, DMT_STRING, get_DHCPv4Relay_Status, NULL, BBFDM_BOTH, "2.0"},
+{"ForwardingNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4Relay_ForwardingNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.DHCPv4.Relay.Forwarding.{i}. *** */
 DMLEAF tDHCPv4RelayForwardingParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_Enable, set_DHCPv4RelayForwarding_Enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_DHCPv4RelayForwarding_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_Alias, set_DHCPv4RelayForwarding_Alias, BBFDM_BOTH},
-//{"Order", &DMWRITE, DMT_UNINT, get_DHCPv4RelayForwarding_Order, set_DHCPv4RelayForwarding_Order, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_Interface, set_DHCPv4RelayForwarding_Interface, BBFDM_BOTH},
-{"VendorClassID", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_VendorClassID, set_DHCPv4RelayForwarding_VendorClassID, BBFDM_BOTH},
-//{"VendorClassIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_VendorClassIDExclude, set_DHCPv4RelayForwarding_VendorClassIDExclude, BBFDM_BOTH},
-//{"VendorClassIDMode", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_VendorClassIDMode, set_DHCPv4RelayForwarding_VendorClassIDMode, BBFDM_BOTH},
-//{"ClientID", &DMWRITE, DMT_HEXBIN, get_DHCPv4RelayForwarding_ClientID, set_DHCPv4RelayForwarding_ClientID, BBFDM_BOTH},
-//{"ClientIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_ClientIDExclude, set_DHCPv4RelayForwarding_ClientIDExclude, BBFDM_BOTH},
-{"UserClassID", &DMWRITE, DMT_HEXBIN, get_DHCPv4RelayForwarding_UserClassID, set_DHCPv4RelayForwarding_UserClassID, BBFDM_BOTH},
-//{"UserClassIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_UserClassIDExclude, set_DHCPv4RelayForwarding_UserClassIDExclude, BBFDM_BOTH},
-{"Chaddr", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_Chaddr, set_DHCPv4RelayForwarding_Chaddr, BBFDM_BOTH},
-{"ChaddrMask", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_ChaddrMask, set_DHCPv4RelayForwarding_ChaddrMask, BBFDM_BOTH},
-{"ChaddrExclude", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_ChaddrExclude, set_DHCPv4RelayForwarding_ChaddrExclude, BBFDM_BOTH},
-//{"LocallyServed", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_LocallyServed, set_DHCPv4RelayForwarding_LocallyServed, BBFDM_BOTH},
-//{"DHCPServerIPAddress", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_DHCPServerIPAddress, set_DHCPv4RelayForwarding_DHCPServerIPAddress, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_Enable, set_DHCPv4RelayForwarding_Enable, BBFDM_BOTH, "2.0"},
+{"Status", &DMREAD, DMT_STRING, get_DHCPv4RelayForwarding_Status, NULL, BBFDM_BOTH, "2.0"},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_Alias, set_DHCPv4RelayForwarding_Alias, BBFDM_BOTH, "2.0"},
+//{"Order", &DMWRITE, DMT_UNINT, get_DHCPv4RelayForwarding_Order, set_DHCPv4RelayForwarding_Order, BBFDM_BOTH, "2.0"},
+{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_Interface, set_DHCPv4RelayForwarding_Interface, BBFDM_BOTH, "2.0"},
+{"VendorClassID", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_VendorClassID, set_DHCPv4RelayForwarding_VendorClassID, BBFDM_BOTH, "2.0"},
+//{"VendorClassIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_VendorClassIDExclude, set_DHCPv4RelayForwarding_VendorClassIDExclude, BBFDM_BOTH, "2.0"},
+//{"VendorClassIDMode", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_VendorClassIDMode, set_DHCPv4RelayForwarding_VendorClassIDMode, BBFDM_BOTH, "2.0"},
+//{"ClientID", &DMWRITE, DMT_HEXBIN, get_DHCPv4RelayForwarding_ClientID, set_DHCPv4RelayForwarding_ClientID, BBFDM_BOTH, "2.0"},
+//{"ClientIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_ClientIDExclude, set_DHCPv4RelayForwarding_ClientIDExclude, BBFDM_BOTH, "2.0"},
+{"UserClassID", &DMWRITE, DMT_HEXBIN, get_DHCPv4RelayForwarding_UserClassID, set_DHCPv4RelayForwarding_UserClassID, BBFDM_BOTH, "2.0"},
+//{"UserClassIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_UserClassIDExclude, set_DHCPv4RelayForwarding_UserClassIDExclude, BBFDM_BOTH, "2.0"},
+{"Chaddr", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_Chaddr, set_DHCPv4RelayForwarding_Chaddr, BBFDM_BOTH, "2.0"},
+{"ChaddrMask", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_ChaddrMask, set_DHCPv4RelayForwarding_ChaddrMask, BBFDM_BOTH, "2.0"},
+{"ChaddrExclude", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_ChaddrExclude, set_DHCPv4RelayForwarding_ChaddrExclude, BBFDM_BOTH, "2.0"},
+//{"LocallyServed", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_LocallyServed, set_DHCPv4RelayForwarding_LocallyServed, BBFDM_BOTH, "2.0"},
+//{"DHCPServerIPAddress", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_DHCPServerIPAddress, set_DHCPv4RelayForwarding_DHCPServerIPAddress, BBFDM_BOTH, "2.0"},
 {0}
 };

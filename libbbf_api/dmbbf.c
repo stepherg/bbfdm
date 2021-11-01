@@ -171,6 +171,35 @@ static int bbfdatamodel_matches(const enum bbfdm_type_enum type)
 	return (bbfdatamodel_type == BBFDM_BOTH || type == BBFDM_BOTH || bbfdatamodel_type == type) && type != BBFDM_NONE;
 }
 
+static bool check_version(const char *obj_version, struct dmctx *ctx)
+{
+	char *config_version = ctx->dm_version;
+	int config_major = 0, config_minor = 0;
+	int obj_major = 0, obj_minor = 0;
+
+	if (!config_version || !obj_version)
+		return true;
+
+	if (config_version) {
+		config_major = atoi(config_version);
+		char *temp = strchr(config_version, '.');
+		if (temp)
+			config_minor = atoi(temp + 1);
+	}
+
+	if (obj_version) {
+		obj_major = atoi(obj_version);
+		char *temp = strchr(obj_version, '.');
+		if (temp)
+			obj_minor = atoi(temp + 1);
+	}
+
+	if (obj_major > config_major || obj_minor > config_minor)
+		return false;
+
+	return true;
+}
+
 static bool check_dependency(const char *conf_obj)
 {
 	/* Available cases */
@@ -184,7 +213,7 @@ static bool check_dependency(const char *conf_obj)
 
 	char *pch = NULL, *spch = NULL;
 	char conf_list[512] = {0};
-
+	
 	DM_STRNCPY(conf_list, conf_obj, sizeof(conf_list));
 
 	for (pch = strtok_r(conf_list, ";", &spch); pch != NULL; pch = strtok_r(NULL, ";", &spch)) {
@@ -225,10 +254,15 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 
 		if (!bbfdatamodel_matches(leaf->bbfdm_type))
 			continue;
-		if(!dmctx->isinfo){
+
+		if (!check_version(leaf->version, dmctx))
+			continue;
+
+		if (!dmctx->isinfo) {
 			if (dmctx->iscommand != (leaf->type == DMT_COMMAND) || dmctx->isevent != (leaf->type == DMT_EVENT))
 				continue;
 		}
+
 		snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, leaf->parameter);
 		err = dmctx->method_param(dmctx, parent_node, leaf->parameter, leaf->permission, leaf->type, leaf->getvalue, leaf->setvalue, data, instance);
 		if (dmctx->stop)
@@ -246,10 +280,15 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 
 							if (!bbfdatamodel_matches(jleaf->bbfdm_type))
 								continue;
-							if(!dmctx->isinfo){
+
+							if (!check_version(jleaf->version, dmctx))
+								continue;
+
+							if (!dmctx->isinfo) {
 								if (dmctx->iscommand != (jleaf->type == DMT_COMMAND) || dmctx->isevent != (jleaf->type == DMT_EVENT))
 									continue;
 							}
+
 							snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, jleaf->parameter);
 							err = dmctx->method_param(dmctx, parent_node, jleaf->parameter, jleaf->permission, jleaf->type, jleaf->getvalue, jleaf->setvalue, data, instance);
 							if (dmctx->stop)
@@ -279,6 +318,9 @@ static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *ent
 		return;
 
 	if (entryobj->checkdep && (check_dependency(entryobj->checkdep) == false))
+		return;
+
+	if (!check_version(entryobj->version, dmctx))
 		return;
 
 	if (entryobj->browseinstobj && dmctx->isgetschema)

@@ -1543,313 +1543,313 @@ static int get_IEEE1905ALNetworkingRegistrar_Registrar60(char *refparam, struct 
 ***********************************************************************************************************************************/
 /* *** Device.IEEE1905. *** */
 DMOBJ tIEEE1905Obj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"AL", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALObj, tIEEE1905ALParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"AL", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALObj, tIEEE1905ALParams, NULL, BBFDM_BOTH, NULL, "2.9"},
 {0}
 };
 
 DMLEAF tIEEE1905Params[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Version", &DMREAD, DMT_STRING, get_IEEE1905_Version, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Version", &DMREAD, DMT_STRING, get_IEEE1905_Version, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL. *** */
 DMOBJ tIEEE1905ALObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALInterfaceInst, NULL, NULL, tIEEE1905ALInterfaceObj, tIEEE1905ALInterfaceParams, NULL, BBFDM_BOTH, LIST_KEY{"InterfaceId", NULL}},
-{"ForwardingTable", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALForwardingTableObj, tIEEE1905ALForwardingTableParams, NULL, BBFDM_BOTH},
-{"NetworkTopology", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyObj, tIEEE1905ALNetworkTopologyParams, NULL, BBFDM_BOTH},
-{"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALSecurityParams, NULL, BBFDM_BOTH},
-{"NetworkingRegistrar", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkingRegistrarParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALInterfaceInst, NULL, NULL, tIEEE1905ALInterfaceObj, tIEEE1905ALInterfaceParams, NULL, BBFDM_BOTH, LIST_KEY{"InterfaceId", NULL}, "2.9"},
+{"ForwardingTable", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALForwardingTableObj, tIEEE1905ALForwardingTableParams, NULL, BBFDM_BOTH, NULL, "2.9"},
+{"NetworkTopology", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyObj, tIEEE1905ALNetworkTopologyParams, NULL, BBFDM_BOTH, NULL, "2.9"},
+{"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALSecurityParams, NULL, BBFDM_BOTH, NULL, "2.9"},
+{"NetworkingRegistrar", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALNetworkingRegistrarParams, NULL, BBFDM_BOTH, NULL, "2.9"},
 {0}
 };
 
 DMLEAF tIEEE1905ALParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"IEEE1905Id", &DMREAD, DMT_STRING, get_IEEE1905AL_IEEE1905Id, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_IEEE1905AL_Status, NULL, BBFDM_BOTH},
-{"RegistrarFreqBand", &DMREAD, DMT_STRING, get_IEEE1905AL_RegistrarFreqBand, NULL, BBFDM_BOTH},
-{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905AL_InterfaceNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"IEEE1905Id", &DMREAD, DMT_STRING, get_IEEE1905AL_IEEE1905Id, NULL, BBFDM_BOTH, "2.9"},
+{"Status", &DMREAD, DMT_STRING, get_IEEE1905AL_Status, NULL, BBFDM_BOTH, "2.9"},
+{"RegistrarFreqBand", &DMREAD, DMT_STRING, get_IEEE1905AL_RegistrarFreqBand, NULL, BBFDM_BOTH, "2.9"},
+{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905AL_InterfaceNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.Interface.{i}. *** */
 DMOBJ tIEEE1905ALInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"VendorProperties", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALInterfaceVendorPropertiesInst, NULL, NULL, NULL, tIEEE1905ALInterfaceVendorPropertiesParams, NULL, BBFDM_BOTH},
 {"Link", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALInterfaceLinkInst, NULL, NULL, tIEEE1905ALInterfaceLinkObj, tIEEE1905ALInterfaceLinkParams, NULL, BBFDM_BOTH, LIST_KEY{"InterfaceId", "IEEE1905Id", NULL}},
 {0}
 };
 
 DMLEAF tIEEE1905ALInterfaceParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"InterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_InterfaceId, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_Status, NULL, BBFDM_BOTH},
-//{"InterfaceStackReference", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_InterfaceStackReference, NULL, BBFDM_BOTH},
-{"MediaType", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_MediaType, NULL, BBFDM_BOTH},
-//{"GenericPhyOUI", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_GenericPhyOUI, NULL, BBFDM_BOTH},
-//{"GenericPhyVariant", &DMREAD, DMT_HEXBIN, get_IEEE1905ALInterface_GenericPhyVariant, NULL, BBFDM_BOTH},
-//{"GenericPhyURL", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_GenericPhyURL, NULL, BBFDM_BOTH},
-//{"SetIntfPowerStateEnabled", &DMWRITE, DMT_BOOL, get_IEEE1905ALInterface_SetIntfPowerStateEnabled, set_IEEE1905ALInterface_SetIntfPowerStateEnabled, BBFDM_BOTH},
-{"PowerState", &DMWRITE, DMT_STRING, get_IEEE1905ALInterface_PowerState, set_IEEE1905ALInterface_PowerState, BBFDM_BOTH},
-{"VendorPropertiesNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALInterface_VendorPropertiesNumberOfEntries, NULL, BBFDM_BOTH},
-{"LinkNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALInterface_LinkNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"InterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_InterfaceId, NULL, BBFDM_BOTH, "2.9"},
+{"Status", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_Status, NULL, BBFDM_BOTH, "2.9"},
+//{"InterfaceStackReference", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_InterfaceStackReference, NULL, BBFDM_BOTH, "2.9"},
+{"MediaType", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_MediaType, NULL, BBFDM_BOTH, "2.9"},
+//{"GenericPhyOUI", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_GenericPhyOUI, NULL, BBFDM_BOTH, "2.9"},
+//{"GenericPhyVariant", &DMREAD, DMT_HEXBIN, get_IEEE1905ALInterface_GenericPhyVariant, NULL, BBFDM_BOTH, "2.9"},
+//{"GenericPhyURL", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_GenericPhyURL, NULL, BBFDM_BOTH, "2.9"},
+//{"SetIntfPowerStateEnabled", &DMWRITE, DMT_BOOL, get_IEEE1905ALInterface_SetIntfPowerStateEnabled, set_IEEE1905ALInterface_SetIntfPowerStateEnabled, BBFDM_BOTH, "2.9"},
+{"PowerState", &DMWRITE, DMT_STRING, get_IEEE1905ALInterface_PowerState, set_IEEE1905ALInterface_PowerState, BBFDM_BOTH, "2.9"},
+{"VendorPropertiesNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALInterface_VendorPropertiesNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
+{"LinkNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALInterface_LinkNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.Interface.{i}.VendorProperties.{i}. *** */
 DMLEAF tIEEE1905ALInterfaceVendorPropertiesParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"OUI", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceVendorProperties_OUI, NULL, BBFDM_BOTH},
-{"Information", &DMREAD, DMT_HEXBIN, get_IEEE1905ALInterfaceVendorProperties_Information, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"OUI", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceVendorProperties_OUI, NULL, BBFDM_BOTH, "2.9"},
+{"Information", &DMREAD, DMT_HEXBIN, get_IEEE1905ALInterfaceVendorProperties_Information, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.Interface.{i}.Link.{i}. *** */
 DMOBJ tIEEE1905ALInterfaceLinkObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Metric", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALInterfaceLinkMetricParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Metric", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIEEE1905ALInterfaceLinkMetricParams, NULL, BBFDM_BOTH, NULL, "2.9"},
 {0}
 };
 
 DMLEAF tIEEE1905ALInterfaceLinkParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"InterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceLink_InterfaceId, NULL, BBFDM_BOTH},
-{"IEEE1905Id", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceLink_IEEE1905Id, NULL, BBFDM_BOTH},
-{"MediaType", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceLink_MediaType, NULL, BBFDM_BOTH},
-//{"GenericPhyOUI", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceLink_GenericPhyOUI, NULL, BBFDM_BOTH},
-//{"GenericPhyVariant", &DMREAD, DMT_HEXBIN, get_IEEE1905ALInterfaceLink_GenericPhyVariant, NULL, BBFDM_BOTH},
-//{"GenericPhyURL", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceLink_GenericPhyURL, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"InterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceLink_InterfaceId, NULL, BBFDM_BOTH, "2.9"},
+{"IEEE1905Id", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceLink_IEEE1905Id, NULL, BBFDM_BOTH, "2.9"},
+{"MediaType", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceLink_MediaType, NULL, BBFDM_BOTH, "2.9"},
+//{"GenericPhyOUI", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceLink_GenericPhyOUI, NULL, BBFDM_BOTH, "2.9"},
+//{"GenericPhyVariant", &DMREAD, DMT_HEXBIN, get_IEEE1905ALInterfaceLink_GenericPhyVariant, NULL, BBFDM_BOTH, "2.9"},
+//{"GenericPhyURL", &DMREAD, DMT_STRING, get_IEEE1905ALInterfaceLink_GenericPhyURL, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.Interface.{i}.Link.{i}.Metric. *** */
 DMLEAF tIEEE1905ALInterfaceLinkMetricParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"IEEE802dot1Bridge", &DMREAD, DMT_BOOL, get_IEEE1905ALInterfaceLinkMetric_IEEE802dot1Bridge, NULL, BBFDM_BOTH},
-{"PacketErrors", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_PacketErrors, NULL, BBFDM_BOTH},
-{"PacketErrorsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_PacketErrorsReceived, NULL, BBFDM_BOTH},
-{"TransmittedPackets", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_TransmittedPackets, NULL, BBFDM_BOTH},
-{"PacketsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_PacketsReceived, NULL, BBFDM_BOTH},
-{"MACThroughputCapacity", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_MACThroughputCapacity, NULL, BBFDM_BOTH},
-//{"LinkAvailability", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_LinkAvailability, NULL, BBFDM_BOTH},
-{"PHYRate", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_PHYRate, NULL, BBFDM_BOTH},
-{"RSSI", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_RSSI, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"IEEE802dot1Bridge", &DMREAD, DMT_BOOL, get_IEEE1905ALInterfaceLinkMetric_IEEE802dot1Bridge, NULL, BBFDM_BOTH, "2.9"},
+{"PacketErrors", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_PacketErrors, NULL, BBFDM_BOTH, "2.9"},
+{"PacketErrorsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_PacketErrorsReceived, NULL, BBFDM_BOTH, "2.9"},
+{"TransmittedPackets", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_TransmittedPackets, NULL, BBFDM_BOTH, "2.9"},
+{"PacketsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_PacketsReceived, NULL, BBFDM_BOTH, "2.9"},
+{"MACThroughputCapacity", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_MACThroughputCapacity, NULL, BBFDM_BOTH, "2.9"},
+//{"LinkAvailability", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_LinkAvailability, NULL, BBFDM_BOTH, "2.9"},
+{"PHYRate", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_PHYRate, NULL, BBFDM_BOTH, "2.9"},
+{"RSSI", &DMREAD, DMT_UNINT, get_IEEE1905ALInterfaceLinkMetric_RSSI, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.ForwardingTable. *** */
 DMOBJ tIEEE1905ALForwardingTableObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"ForwardingRule", &DMWRITE, addObjIEEE1905ALForwardingTableForwardingRule, delObjIEEE1905ALForwardingTableForwardingRule, NULL, browseIEEE1905ALForwardingTableForwardingRuleInst, NULL, NULL, NULL, tIEEE1905ALForwardingTableForwardingRuleParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"ForwardingRule", &DMWRITE, addObjIEEE1905ALForwardingTableForwardingRule, delObjIEEE1905ALForwardingTableForwardingRule, NULL, browseIEEE1905ALForwardingTableForwardingRuleInst, NULL, NULL, NULL, tIEEE1905ALForwardingTableForwardingRuleParams, NULL, BBFDM_BOTH, NULL, "2.9"},
 {0}
 };
 
 DMLEAF tIEEE1905ALForwardingTableParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"SetForwardingEnabled", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTable_SetForwardingEnabled, set_IEEE1905ALForwardingTable_SetForwardingEnabled, BBFDM_BOTH},
-{"ForwardingRuleNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALForwardingTable_ForwardingRuleNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"SetForwardingEnabled", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTable_SetForwardingEnabled, set_IEEE1905ALForwardingTable_SetForwardingEnabled, BBFDM_BOTH, "2.9"},
+{"ForwardingRuleNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALForwardingTable_ForwardingRuleNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}. *** */
 DMLEAF tIEEE1905ALForwardingTableForwardingRuleParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"InterfaceList", &DMWRITE, DMT_STRING, get_IEEE1905ALForwardingTableForwardingRule_InterfaceList, set_IEEE1905ALForwardingTableForwardingRule_InterfaceList, BBFDM_BOTH},
-{"MACDestinationAddress", &DMWRITE, DMT_STRING, get_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress, set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress, BBFDM_BOTH},
-{"MACDestinationAddressFlag", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddressFlag, set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddressFlag, BBFDM_BOTH},
-{"MACSourceAddress", &DMWRITE, DMT_STRING, get_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress, set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress, BBFDM_BOTH},
-{"MACSourceAddressFlag", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag, set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag, BBFDM_BOTH},
-{"EtherType", &DMWRITE, DMT_UNINT, get_IEEE1905ALForwardingTableForwardingRule_EtherType, set_IEEE1905ALForwardingTableForwardingRule_EtherType, BBFDM_BOTH},
-{"EtherTypeFlag", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag, set_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag, BBFDM_BOTH},
-{"Vid", &DMWRITE, DMT_UNINT, get_IEEE1905ALForwardingTableForwardingRule_Vid, set_IEEE1905ALForwardingTableForwardingRule_Vid, BBFDM_BOTH},
-{"VidFlag", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTableForwardingRule_VidFlag, set_IEEE1905ALForwardingTableForwardingRule_VidFlag, BBFDM_BOTH},
-{"PCP", &DMWRITE, DMT_UNINT, get_IEEE1905ALForwardingTableForwardingRule_PCP, set_IEEE1905ALForwardingTableForwardingRule_PCP, BBFDM_BOTH},
-{"PCPFlag", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTableForwardingRule_PCPFlag, set_IEEE1905ALForwardingTableForwardingRule_PCPFlag, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"InterfaceList", &DMWRITE, DMT_STRING, get_IEEE1905ALForwardingTableForwardingRule_InterfaceList, set_IEEE1905ALForwardingTableForwardingRule_InterfaceList, BBFDM_BOTH, "2.9"},
+{"MACDestinationAddress", &DMWRITE, DMT_STRING, get_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress, set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress, BBFDM_BOTH, "2.9"},
+{"MACDestinationAddressFlag", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddressFlag, set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddressFlag, BBFDM_BOTH, "2.9"},
+{"MACSourceAddress", &DMWRITE, DMT_STRING, get_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress, set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress, BBFDM_BOTH, "2.9"},
+{"MACSourceAddressFlag", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag, set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag, BBFDM_BOTH, "2.9"},
+{"EtherType", &DMWRITE, DMT_UNINT, get_IEEE1905ALForwardingTableForwardingRule_EtherType, set_IEEE1905ALForwardingTableForwardingRule_EtherType, BBFDM_BOTH, "2.9"},
+{"EtherTypeFlag", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag, set_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag, BBFDM_BOTH, "2.9"},
+{"Vid", &DMWRITE, DMT_UNINT, get_IEEE1905ALForwardingTableForwardingRule_Vid, set_IEEE1905ALForwardingTableForwardingRule_Vid, BBFDM_BOTH, "2.9"},
+{"VidFlag", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTableForwardingRule_VidFlag, set_IEEE1905ALForwardingTableForwardingRule_VidFlag, BBFDM_BOTH, "2.9"},
+{"PCP", &DMWRITE, DMT_UNINT, get_IEEE1905ALForwardingTableForwardingRule_PCP, set_IEEE1905ALForwardingTableForwardingRule_PCP, BBFDM_BOTH, "2.9"},
+{"PCPFlag", &DMWRITE, DMT_BOOL, get_IEEE1905ALForwardingTableForwardingRule_PCPFlag, set_IEEE1905ALForwardingTableForwardingRule_PCPFlag, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology. *** */
 DMOBJ tIEEE1905ALNetworkTopologyObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-//{"ChangeLog", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyChangeLogInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyChangeLogParams, NULL, BBFDM_BOTH},
-{"IEEE1905Device", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceParams, NULL, BBFDM_BOTH, LIST_KEY{"IEEE1905Id", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+//{"ChangeLog", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyChangeLogInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyChangeLogParams, NULL, BBFDM_BOTH, NULL, "2.9"},
+{"IEEE1905Device", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceParams, NULL, BBFDM_BOTH, LIST_KEY{"IEEE1905Id", NULL}, "2.9"},
 {0}
 };
 
 DMLEAF tIEEE1905ALNetworkTopologyParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_IEEE1905ALNetworkTopology_Enable, set_IEEE1905ALNetworkTopology_Enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopology_Status, NULL, BBFDM_BOTH},
-{"MaxChangeLogEntries", &DMWRITE, DMT_UNINT, get_IEEE1905ALNetworkTopology_MaxChangeLogEntries, set_IEEE1905ALNetworkTopology_MaxChangeLogEntries, BBFDM_BOTH},
-{"LastChange", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopology_LastChange, NULL, BBFDM_BOTH},
-{"IEEE1905DeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopology_IEEE1905DeviceNumberOfEntries, NULL, BBFDM_BOTH},
-{"ChangeLogNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopology_ChangeLogNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_IEEE1905ALNetworkTopology_Enable, set_IEEE1905ALNetworkTopology_Enable, BBFDM_BOTH, "2.9"},
+{"Status", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopology_Status, NULL, BBFDM_BOTH, "2.9"},
+{"MaxChangeLogEntries", &DMWRITE, DMT_UNINT, get_IEEE1905ALNetworkTopology_MaxChangeLogEntries, set_IEEE1905ALNetworkTopology_MaxChangeLogEntries, BBFDM_BOTH, "2.9"},
+{"LastChange", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopology_LastChange, NULL, BBFDM_BOTH, "2.9"},
+{"IEEE1905DeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopology_IEEE1905DeviceNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
+{"ChangeLogNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopology_ChangeLogNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.ChangeLog.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyChangeLogParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"TimeStamp", &DMREAD, DMT_TIME, get_IEEE1905ALNetworkTopologyChangeLog_TimeStamp, NULL, BBFDM_BOTH},
-//{"EventType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_EventType, NULL, BBFDM_BOTH},
-//{"ReporterDeviceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_ReporterDeviceId, NULL, BBFDM_BOTH},
-//{"ReporterInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_ReporterInterfaceId, NULL, BBFDM_BOTH},
-//{"NeighborType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_NeighborType, NULL, BBFDM_BOTH},
-//{"NeighborId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_NeighborId, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+//{"TimeStamp", &DMREAD, DMT_TIME, get_IEEE1905ALNetworkTopologyChangeLog_TimeStamp, NULL, BBFDM_BOTH, "2.9"},
+//{"EventType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_EventType, NULL, BBFDM_BOTH, "2.9"},
+//{"ReporterDeviceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_ReporterDeviceId, NULL, BBFDM_BOTH, "2.9"},
+//{"ReporterInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_ReporterInterfaceId, NULL, BBFDM_BOTH, "2.9"},
+//{"NeighborType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_NeighborType, NULL, BBFDM_BOTH, "2.9"},
+//{"NeighborId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyChangeLog_NeighborId, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}. *** */
 DMOBJ tIEEE1905ALNetworkTopologyIEEE1905DeviceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"MACAddress", "IPv4Address", NULL}},
-{"IPv6Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"MACAddress", "IPv6Address", NULL}},
-{"VendorProperties", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesParams, NULL, BBFDM_BOTH},
-{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceParams, get_linker_topology_interface, BBFDM_BOTH, LIST_KEY{"InterfaceId", NULL}},
-{"NonIEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborParams, NULL, BBFDM_BOTH, LIST_KEY{"LocalInterface", "NeighborInterfaceId", NULL}},
-//{"L2Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborParams, NULL, BBFDM_BOTH, (const char*[]){"LocalInterface", "NeighborInterfaceId", NULL}},
-{"IEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborParams, NULL, BBFDM_BOTH, LIST_KEY{"LocalInterface", "NeighborDeviceId", NULL}},
-{"BridgingTuple", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"MACAddress", "IPv4Address", NULL}, "2.9"},
+{"IPv6Address", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"MACAddress", "IPv6Address", NULL}, "2.9"},
+{"VendorProperties", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesParams, NULL, BBFDM_BOTH, NULL, "2.9"},
+{"Interface", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceParams, get_linker_topology_interface, BBFDM_BOTH, LIST_KEY{"InterfaceId", NULL}, "2.9"},
+{"NonIEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborParams, NULL, BBFDM_BOTH, LIST_KEY{"LocalInterface", "NeighborInterfaceId", NULL}, "2.9"},
+//{"L2Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborParams, NULL, BBFDM_BOTH, (const char*[]){"LocalInterface", "NeighborInterfaceId", NULL}, "2.9"},
+{"IEEE1905Neighbor", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborInst, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborParams, NULL, BBFDM_BOTH, LIST_KEY{"LocalInterface", "NeighborDeviceId", NULL}, "2.9"},
+{"BridgingTuple", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleParams, NULL, BBFDM_BOTH, NULL, "2.9"},
 {0}
 };
 
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"IEEE1905Id", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_IEEE1905Id, NULL, BBFDM_BOTH},
-{"Version", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_Version, NULL, BBFDM_BOTH},
-//{"RegistrarFreqBand", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_RegistrarFreqBand, NULL, BBFDM_BOTH},
-{"FriendlyName", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_FriendlyName, NULL, BBFDM_BOTH},
-{"ManufacturerName", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ManufacturerName, NULL, BBFDM_BOTH},
-{"ManufacturerModel", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ManufacturerModel, NULL, BBFDM_BOTH},
-{"ControlURL", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ControlURL, NULL, BBFDM_BOTH},
-//{"AssocWiFiNetworkDeviceRef", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_AssocWiFiNetworkDeviceRef, NULL, BBFDM_BOTH},
-{"VendorPropertiesNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_VendorPropertiesNumberOfEntries, NULL, BBFDM_BOTH},
-{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH},
-{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IPv6AddressNumberOfEntries, NULL, BBFDM_BOTH},
-{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_InterfaceNumberOfEntries, NULL, BBFDM_BOTH},
-{"NonIEEE1905NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_NonIEEE1905NeighborNumberOfEntries, NULL, BBFDM_BOTH},
-{"IEEE1905NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IEEE1905NeighborNumberOfEntries, NULL, BBFDM_BOTH},
-{"L2NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_L2NeighborNumberOfEntries, NULL, BBFDM_BOTH},
-{"BridgingTupleNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_BridgingTupleNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"IEEE1905Id", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_IEEE1905Id, NULL, BBFDM_BOTH, "2.9"},
+{"Version", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_Version, NULL, BBFDM_BOTH, "2.9"},
+//{"RegistrarFreqBand", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_RegistrarFreqBand, NULL, BBFDM_BOTH, "2.9"},
+{"FriendlyName", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_FriendlyName, NULL, BBFDM_BOTH, "2.9"},
+{"ManufacturerName", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ManufacturerName, NULL, BBFDM_BOTH, "2.9"},
+{"ManufacturerModel", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ManufacturerModel, NULL, BBFDM_BOTH, "2.9"},
+{"ControlURL", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_ControlURL, NULL, BBFDM_BOTH, "2.9"},
+//{"AssocWiFiNetworkDeviceRef", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905Device_AssocWiFiNetworkDeviceRef, NULL, BBFDM_BOTH, "2.13"},
+{"VendorPropertiesNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_VendorPropertiesNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
+{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
+{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IPv6AddressNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
+{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_InterfaceNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
+{"NonIEEE1905NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_NonIEEE1905NeighborNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
+{"IEEE1905NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_IEEE1905NeighborNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
+{"L2NeighborNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_L2NeighborNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
+{"BridgingTupleNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905Device_BridgingTupleNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IPv4Address.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv4AddressParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"MACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_MACAddress, NULL, BBFDM_BOTH},
-{"IPv4Address", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_IPv4Address, NULL, BBFDM_BOTH},
-{"IPv4AddressType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_IPv4AddressType, NULL, BBFDM_BOTH},
-{"DHCPServer", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_DHCPServer, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"MACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_MACAddress, NULL, BBFDM_BOTH, "2.9"},
+{"IPv4Address", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_IPv4Address, NULL, BBFDM_BOTH, "2.9"},
+{"IPv4AddressType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_IPv4AddressType, NULL, BBFDM_BOTH, "2.9"},
+{"DHCPServer", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv4Address_DHCPServer, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IPv6Address.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceIPv6AddressParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"MACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_MACAddress, NULL, BBFDM_BOTH},
-{"IPv6Address", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6Address, NULL, BBFDM_BOTH},
-{"IPv6AddressType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6AddressType, NULL, BBFDM_BOTH},
-{"IPv6AddressOrigin", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6AddressOrigin, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"MACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_MACAddress, NULL, BBFDM_BOTH, "2.9"},
+{"IPv6Address", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6Address, NULL, BBFDM_BOTH, "2.9"},
+{"IPv6AddressType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6AddressType, NULL, BBFDM_BOTH, "2.9"},
+{"IPv6AddressOrigin", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIPv6Address_IPv6AddressOrigin, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.VendorProperties.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceVendorPropertiesParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"MessageType", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceVendorProperties_MessageType, NULL, BBFDM_BOTH},
-{"OUI", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceVendorProperties_OUI, NULL, BBFDM_BOTH},
-{"Information", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceVendorProperties_Information, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+//{"MessageType", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceVendorProperties_MessageType, NULL, BBFDM_BOTH, "2.9"},
+{"OUI", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceVendorProperties_OUI, NULL, BBFDM_BOTH, "2.9"},
+{"Information", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceVendorProperties_Information, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.Interface.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"InterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_InterfaceId, NULL, BBFDM_BOTH},
-{"MediaType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_MediaType, NULL, BBFDM_BOTH},
-{"PowerState", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_PowerState, NULL, BBFDM_BOTH},
-//{"GenericPhyOUI", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyOUI, NULL, BBFDM_BOTH},
-//{"GenericPhyVariant", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyVariant, NULL, BBFDM_BOTH},
-//{"GenericPhyURL", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyURL, NULL, BBFDM_BOTH},
-{"NetworkMembership", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_NetworkMembership, NULL, BBFDM_BOTH},
-{"Role", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_Role, NULL, BBFDM_BOTH},
-{"APChannelBand", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_APChannelBand, NULL, BBFDM_BOTH},
-{"FrequencyIndex1", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex1, NULL, BBFDM_BOTH},
-{"FrequencyIndex2", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex2, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"InterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_InterfaceId, NULL, BBFDM_BOTH, "2.9"},
+{"MediaType", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_MediaType, NULL, BBFDM_BOTH, "2.9"},
+{"PowerState", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_PowerState, NULL, BBFDM_BOTH, "2.9"},
+//{"GenericPhyOUI", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyOUI, NULL, BBFDM_BOTH, "2.9"},
+//{"GenericPhyVariant", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyVariant, NULL, BBFDM_BOTH, "2.9"},
+//{"GenericPhyURL", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_GenericPhyURL, NULL, BBFDM_BOTH, "2.9"},
+{"NetworkMembership", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_NetworkMembership, NULL, BBFDM_BOTH, "2.9"},
+{"Role", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_Role, NULL, BBFDM_BOTH, "2.9"},
+{"APChannelBand", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_APChannelBand, NULL, BBFDM_BOTH, "2.9"},
+{"FrequencyIndex1", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex1, NULL, BBFDM_BOTH, "2.9"},
+{"FrequencyIndex2", &DMREAD, DMT_HEXBIN, get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex2, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.NonIEEE1905Neighbor.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_LocalInterface, NULL, BBFDM_BOTH},
-{"NeighborInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_NeighborInterfaceId, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_LocalInterface, NULL, BBFDM_BOTH, "2.9"},
+{"NeighborInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_NeighborInterfaceId, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.L2Neighbor.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceL2NeighborParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_LocalInterface, NULL, BBFDM_BOTH},
-//{"NeighborInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_NeighborInterfaceId, NULL, BBFDM_BOTH},
-//{"BehindInterfaceIds", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_BehindInterfaceIds, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+//{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_LocalInterface, NULL, BBFDM_BOTH, "2.9"},
+//{"NeighborInterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_NeighborInterfaceId, NULL, BBFDM_BOTH, "2.9"},
+//{"BehindInterfaceIds", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_BehindInterfaceIds, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IEEE1905Neighbor.{i}. *** */
 DMOBJ tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Metric", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricParams, NULL, BBFDM_BOTH, LIST_KEY{"NeighborMACAddress", NULL}},
+{"Metric", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricParams, NULL, BBFDM_BOTH, LIST_KEY{"NeighborMACAddress", NULL}, "2.9"},
 {0}
 };
 
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_LocalInterface, NULL, BBFDM_BOTH},
-{"NeighborDeviceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_NeighborDeviceId, NULL, BBFDM_BOTH},
-{"MetricNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_MetricNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"LocalInterface", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_LocalInterface, NULL, BBFDM_BOTH, "2.9"},
+{"NeighborDeviceId", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_NeighborDeviceId, NULL, BBFDM_BOTH, "2.9"},
+{"MetricNumberOfEntries", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_MetricNumberOfEntries, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IEEE1905Neighbor.{i}.Metric.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetricParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"NeighborMACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_NeighborMACAddress, NULL, BBFDM_BOTH},
-{"IEEE802dot1Bridge", &DMREAD, DMT_BOOL, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_IEEE802dot1Bridge, NULL, BBFDM_BOTH},
-{"PacketErrors", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketErrors, NULL, BBFDM_BOTH},
-{"PacketErrorsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketErrorsReceived, NULL, BBFDM_BOTH},
-{"TransmittedPackets", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_TransmittedPackets, NULL, BBFDM_BOTH},
-{"PacketsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketsReceived, NULL, BBFDM_BOTH},
-{"MACThroughputCapacity", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_MACThroughputCapacity, NULL, BBFDM_BOTH},
-{"LinkAvailability", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_LinkAvailability, NULL, BBFDM_BOTH},
-{"PHYRate", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PHYRate, NULL, BBFDM_BOTH},
-{"RSSI", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_RSSI, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"NeighborMACAddress", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_NeighborMACAddress, NULL, BBFDM_BOTH, "2.9"},
+{"IEEE802dot1Bridge", &DMREAD, DMT_BOOL, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_IEEE802dot1Bridge, NULL, BBFDM_BOTH, "2.9"},
+{"PacketErrors", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketErrors, NULL, BBFDM_BOTH, "2.9"},
+{"PacketErrorsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketErrorsReceived, NULL, BBFDM_BOTH, "2.9"},
+{"TransmittedPackets", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_TransmittedPackets, NULL, BBFDM_BOTH, "2.9"},
+{"PacketsReceived", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PacketsReceived, NULL, BBFDM_BOTH, "2.9"},
+{"MACThroughputCapacity", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_MACThroughputCapacity, NULL, BBFDM_BOTH, "2.9"},
+{"LinkAvailability", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_LinkAvailability, NULL, BBFDM_BOTH, "2.9"},
+{"PHYRate", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_PHYRate, NULL, BBFDM_BOTH, "2.9"},
+{"RSSI", &DMREAD, DMT_UNINT, get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_RSSI, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.BridgingTuple.{i}. *** */
 DMLEAF tIEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTupleParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"InterfaceList", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceList, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"InterfaceList", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceList, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.Security. *** */
 DMLEAF tIEEE1905ALSecurityParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"SetupMethod", &DMWRITE, DMT_STRING, get_IEEE1905ALSecurity_SetupMethod, set_IEEE1905ALSecurity_SetupMethod, BBFDM_BOTH},
-{"Password", &DMWRITE, DMT_STRING, get_empty, set_IEEE1905ALSecurity_Password, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"SetupMethod", &DMWRITE, DMT_STRING, get_IEEE1905ALSecurity_SetupMethod, set_IEEE1905ALSecurity_SetupMethod, BBFDM_BOTH, "2.9"},
+{"Password", &DMWRITE, DMT_STRING, get_empty, set_IEEE1905ALSecurity_Password, BBFDM_BOTH, "2.9"},
 {0}
 };
 
 /* *** Device.IEEE1905.AL.NetworkingRegistrar. *** */
 DMLEAF tIEEE1905ALNetworkingRegistrarParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Registrar2dot4", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkingRegistrar_Registrar2dot4, NULL, BBFDM_BOTH},
-{"Registrar5", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkingRegistrar_Registrar5, NULL, BBFDM_BOTH},
-{"Registrar60", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkingRegistrar_Registrar60, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Registrar2dot4", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkingRegistrar_Registrar2dot4, NULL, BBFDM_BOTH, "2.9"},
+{"Registrar5", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkingRegistrar_Registrar5, NULL, BBFDM_BOTH, "2.9"},
+{"Registrar60", &DMREAD, DMT_STRING, get_IEEE1905ALNetworkingRegistrar_Registrar60, NULL, BBFDM_BOTH, "2.9"},
 {0}
 };

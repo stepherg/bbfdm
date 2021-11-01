@@ -232,25 +232,25 @@ static int set_user_language(char *refparam, struct dmctx *ctx, void *data, char
 ***********************************************************************************************************************************/
 /* *** Device.Users. *** */
 DMOBJ tUsersObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"User", &DMWRITE, add_users_user, delete_users_user, NULL, browseUserInst, NULL, NULL, NULL, tUsersUserParams, NULL, BBFDM_BOTH, LIST_KEY{"Username", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"User", &DMWRITE, add_users_user, delete_users_user, NULL, browseUserInst, NULL, NULL, NULL, tUsersUserParams, NULL, BBFDM_BOTH, LIST_KEY{"Username", "Alias", NULL}, "2.0"},
 {0}
 };
 
 DMLEAF tUsersParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"UserNumberOfEntries", &DMREAD, DMT_UNINT, get_users_user_number_of_entries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"UserNumberOfEntries", &DMREAD, DMT_UNINT, get_users_user_number_of_entries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.Users.User.{i}. *** */
 DMLEAF tUsersUserParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_user_alias, set_user_alias, BBFDM_BOTH},
-{"Enable", &DMWRITE, DMT_BOOL, get_user_enable, set_user_enable, BBFDM_BOTH},
-{"Username", &DMWRITE, DMT_STRING, get_user_username, set_user_username, BBFDM_BOTH},
-{"Password", &DMWRITE, DMT_STRING, get_user_password, set_user_password, BBFDM_BOTH},
-{"RemoteAccessCapable", &DMWRITE, DMT_BOOL, get_user_remote_accessable, set_user_remote_accessable, BBFDM_BOTH},
-{"Language", &DMWRITE, DMT_STRING, get_user_language, set_user_language, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Alias", &DMWRITE, DMT_STRING, get_user_alias, set_user_alias, BBFDM_BOTH, "2.3"},
+{"Enable", &DMWRITE, DMT_BOOL, get_user_enable, set_user_enable, BBFDM_BOTH, "2.0"},
+{"Username", &DMWRITE, DMT_STRING, get_user_username, set_user_username, BBFDM_BOTH, "2.0"},
+{"Password", &DMWRITE, DMT_STRING, get_user_password, set_user_password, BBFDM_BOTH, "2.0"},
+{"RemoteAccessCapable", &DMWRITE, DMT_BOOL, get_user_remote_accessable, set_user_remote_accessable, BBFDM_BOTH, "2.0"},
+{"Language", &DMWRITE, DMT_STRING, get_user_language, set_user_language, BBFDM_BOTH, "2.0"},
 {0}
 };

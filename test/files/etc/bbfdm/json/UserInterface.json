@@ -1,6 +1,7 @@
 {
 	"Device.UserInterface.": {
 		"type": "object",
+		"version": "2.14",
 		"protocols": [
 			"cwmp",
 			"usp"
@@ -9,6 +10,7 @@
 		"array": false,		
 		"Enable": {
 			"type": "boolean",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -32,6 +34,7 @@
 		},
 		"PasswordRequired": {
 			"type": "boolean",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -55,6 +58,7 @@
 		},
 		"PasswordUserSelectable": {
 			"type": "boolean",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -78,6 +82,7 @@
 		},
 		"TextColor": {
 			"type": "hexBinary",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -107,6 +112,7 @@
 		},
 		"BackgroundColor": {
 			"type": "hexBinary",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -136,6 +142,7 @@
 		},
 		"ButtonColor": {
 			"type": "hexBinary",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -165,6 +172,7 @@
 		},
 		"ButtonTextColor": {
 			"type": "hexBinary",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -194,6 +202,7 @@
 		},
 		"AvailableLanguages": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": false,
 			"protocols": [
@@ -221,6 +230,7 @@
 		},
 		"CurrentLanguage": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -249,6 +259,7 @@
 		},
 		"X_IOPSYS_EU_Theme": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [

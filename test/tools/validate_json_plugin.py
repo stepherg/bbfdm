@@ -64,7 +64,8 @@ obj_schema = {
 		"type",
 		"protocols",
 		"array",
-		"access"
+		"access",
+		"version"
 	]
 }
 
@@ -145,7 +146,8 @@ param_schema = {
 		"type",
 		"protocols",
 		"read",
-		"write"
+		"write",
+		"version"
 	]
 }
 
@@ -173,7 +175,8 @@ event_schema = {
 	"required": [
 		"type",
 		"version",
-		"protocols"
+		"protocols",
+		"version"
 	]
 }
 
@@ -203,7 +206,8 @@ command_schema = {
 	"required": [
 		"type",
 		"async",
-		"protocols"
+		"protocols",
+		"version"
 	]
 }
 

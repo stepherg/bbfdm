@@ -1,6 +1,7 @@
 {
 	"Device.X_IOPSYS_EU_Dropbear.{i}.": {
-		"type": "object", 
+		"type": "object",
+		"version": "2.14",
 		"protocols": [
 			"cwmp", 
 			"usp"
@@ -18,7 +19,8 @@
 			}
 		},
 		"Alias": {
-			"type": "string", 
+			"type": "string",
+			"version": "2.14",
 			"protocols": [
 				"cwmp", 
 				"usp"
@@ -44,6 +46,7 @@
 		},
 		"PasswordAuth": {
 			"type": "boolean",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -68,6 +71,7 @@
 		},
 		"RootPasswordAuth": {
 			"type": "boolean",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -92,6 +96,7 @@
 		},
 		"Port": {
 			"type": "unsignedInt",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -116,6 +121,7 @@
 		},
 		"RootLogin": {
 			"type": "boolean",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -140,6 +146,7 @@
 		},
 		"GatewayPorts": {
 			"type": "boolean",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -164,6 +171,7 @@
 		},
 		"Interface": {
 			"type": "string",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -188,6 +196,7 @@
 		},
 		"RSAKeyFile": {
 			"type": "string",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -212,6 +221,7 @@
 		},
 		"DSSKeyFile": {
 			"type": "string",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -236,6 +246,7 @@
 		},
 		"SSHKeepAlive": {
 			"type": "unsignedInt",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -260,6 +271,7 @@
 		},
 		"IdleTimeout": {
 			"type": "unsignedInt",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -284,6 +296,7 @@
 		},
 		"Verbose": {
 			"type": "boolean",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -308,6 +321,7 @@
 		},
 		"BannerFile": {
 			"type": "string",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"

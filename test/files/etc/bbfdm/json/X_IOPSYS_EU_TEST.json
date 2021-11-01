@@ -1,6 +1,7 @@
 {
 	"Device.X_IOPSYS_EU_TEST.": {
 		"type": "object",
+		"version": "2.14",
 		"protocols": [
 			"cwmp",
 			"usp"
@@ -19,6 +20,7 @@
 		},
 		"Enable": {
 			"type": "boolean",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -42,6 +44,7 @@
 		},
 		"Port": {
 			"type": "unsignedInt",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -75,6 +78,7 @@
 		},
 		"Nbr_Retries": {
 			"type": "unsignedInt",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -98,6 +102,7 @@
 		},
 		"Min_value": {
 			"type": "int",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -126,6 +131,7 @@
 		},
 		"Max_value": {
 			"type": "int",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -154,6 +160,7 @@
 		},
 		"Value": {
 			"type": "int",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -187,6 +194,7 @@
 		},
 		"Nbr_packets": {
 			"type": "unsignedLong",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -220,6 +228,7 @@
 		},
 		"Nbr_bytes": {
 			"type": "unsignedLong",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -243,6 +252,7 @@
 		},
 		"TransmitPowerLimit": {
 			"type": "long",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -276,6 +286,7 @@
 		},
 		"MaxTxPower": {
 			"type": "long",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -299,6 +310,7 @@
 		},
 		"ButtonColor": {
 			"type": "hexBinary",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -322,6 +334,7 @@
 		},
 		"BackgroundColor": {
 			"type": "hexBinary",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -350,6 +363,7 @@
 		},
 		"TextColor": {
 			"type": "hexBinary",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -383,6 +397,7 @@
 		},
 		"AssociationTime": {
 			"type": "dateTime",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -406,6 +421,7 @@
 		},
 		"Description": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -429,6 +445,7 @@
 		},
 		"Interface": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -458,6 +475,7 @@
 		},
 		"IPAddr": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -490,6 +508,7 @@
 		},
 		"Protocol": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -526,6 +545,7 @@
 		},
 		"FailureReasons": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -563,6 +583,7 @@
 		},
 		"SupportedOperatingChannelBandwidths": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -597,6 +618,7 @@
 		},
 		"TransmitPowerSupported": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -630,6 +652,7 @@
 		},
 		"PriorityRegeneration": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [

@@ -778,114 +778,114 @@ static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmc
 ***********************************************************************************************************************************/
 /* *** Device.DNS. *** */
 DMOBJ tDNSObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Client", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSClientObj, tDNSClientParams, NULL, BBFDM_BOTH},
-{"Relay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSRelayObj, tDNSRelayParams, NULL, BBFDM_BOTH},
-{"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsObj, tDNSDiagnosticsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Client", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSClientObj, tDNSClientParams, NULL, BBFDM_BOTH, NULL, "2.0"},
+{"Relay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSRelayObj, tDNSRelayParams, NULL, BBFDM_BOTH, NULL, "2.0"},
+{"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsObj, tDNSDiagnosticsParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {0}
 };
 
 DMLEAF tDNSParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"SupportedRecordTypes", &DMREAD, DMT_STRING, get_dns_supported_record_types, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"SupportedRecordTypes", &DMREAD, DMT_STRING, get_dns_supported_record_types, NULL, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.DNS.Client. *** */
 DMOBJ tDNSClientObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Server", &DMWRITE, add_dns_server, delete_dns_server, NULL, browseDNSServerInst, NULL, NULL, NULL, tDNSClientServerParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Server", &DMWRITE, add_dns_server, delete_dns_server, NULL, browseDNSServerInst, NULL, NULL, NULL, tDNSClientServerParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}, "2.0"},
 {0}
 };
 
 DMLEAF tDNSClientParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_client_enable, set_client_enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_client_status, NULL, BBFDM_BOTH},
-{"ServerNumberOfEntries", &DMREAD, DMT_UNINT, get_client_server_number_of_entries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_client_enable, set_client_enable, BBFDM_BOTH, "2.0"},
+{"Status", &DMREAD, DMT_STRING, get_client_status, NULL, BBFDM_BOTH, "2.0"},
+{"ServerNumberOfEntries", &DMREAD, DMT_UNINT, get_client_server_number_of_entries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.DNS.Client.Server.{i}. *** */
 DMLEAF tDNSClientServerParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_server_enable, set_dns_enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_server_status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_server_alias, set_server_alias, BBFDM_BOTH},
-{"DNSServer", &DMWRITE, DMT_STRING, get_server_dns_server, set_dns_server, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_dns_interface, set_dns_interface, BBFDM_BOTH},
-{"Type", &DMREAD, DMT_STRING, get_dns_type, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_server_enable, set_dns_enable, BBFDM_BOTH, "2.0"},
+{"Status", &DMREAD, DMT_STRING, get_server_status, NULL, BBFDM_BOTH, "2.0"},
+{"Alias", &DMWRITE, DMT_STRING, get_server_alias, set_server_alias, BBFDM_BOTH, "2.0"},
+{"DNSServer", &DMWRITE, DMT_STRING, get_server_dns_server, set_dns_server, BBFDM_BOTH, "2.0"},
+{"Interface", &DMWRITE, DMT_STRING, get_dns_interface, set_dns_interface, BBFDM_BOTH, "2.0"},
+{"Type", &DMREAD, DMT_STRING, get_dns_type, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.DNS.Relay. *** */
 DMOBJ tDNSRelayObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Forwarding", &DMWRITE, add_dns_server, delete_dns_server, NULL, browseDNSServerInst, NULL, NULL, NULL, tDNSRelayForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Forwarding", &DMWRITE, add_dns_server, delete_dns_server, NULL, browseDNSServerInst, NULL, NULL, NULL, tDNSRelayForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}, "2.0"},
 {0}
 };
 
 DMLEAF tDNSRelayParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_relay_enable, set_relay_enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_relay_status, NULL, BBFDM_BOTH},
-{"ForwardNumberOfEntries", &DMREAD, DMT_UNINT, get_relay_forward_number_of_entries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_relay_enable, set_relay_enable, BBFDM_BOTH, "2.0"},
+{"Status", &DMREAD, DMT_STRING, get_relay_status, NULL, BBFDM_BOTH, "2.0"},
+{"ForwardNumberOfEntries", &DMREAD, DMT_UNINT, get_relay_forward_number_of_entries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.DNS.Relay.Forwarding.{i}. *** */
 DMLEAF tDNSRelayForwardingParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_forwarding_enable, set_dns_enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_forwarding_status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_forwarding_alias, set_forwarding_alias, BBFDM_BOTH},
-{"DNSServer", &DMWRITE, DMT_STRING, get_forwarding_dns_server, set_dns_server, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_dns_interface, set_dns_interface, BBFDM_BOTH},
-{"Type", &DMREAD, DMT_STRING, get_dns_type, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_forwarding_enable, set_dns_enable, BBFDM_BOTH, "2.0"},
+{"Status", &DMREAD, DMT_STRING, get_forwarding_status, NULL, BBFDM_BOTH, "2.0"},
+{"Alias", &DMWRITE, DMT_STRING, get_forwarding_alias, set_forwarding_alias, BBFDM_BOTH, "2.0"},
+{"DNSServer", &DMWRITE, DMT_STRING, get_forwarding_dns_server, set_dns_server, BBFDM_BOTH, "2.0"},
+{"Interface", &DMWRITE, DMT_STRING, get_dns_interface, set_dns_interface, BBFDM_BOTH, "2.0"},
+{"Type", &DMREAD, DMT_STRING, get_dns_type, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.DNS.Diagnostics. *** */
 DMOBJ tDNSDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"NSLookupDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsObj, tDNSDiagnosticsNSLookupDiagnosticsParams, NULL, BBFDM_CWMP},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"NSLookupDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsObj, tDNSDiagnosticsNSLookupDiagnosticsParams, NULL, BBFDM_CWMP, NULL, "2.0"},
 {0}
 };
 
 DMLEAF tDNSDiagnosticsParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"NSLookupDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_DNSDiagnostics_NSLookupDiagnostics, operate_DNSDiagnostics_NSLookupDiagnostics, BBFDM_USP},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version, version*/
+{"NSLookupDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_DNSDiagnostics_NSLookupDiagnostics, operate_DNSDiagnostics_NSLookupDiagnostics, BBFDM_USP, "2.12"},
 {0}
 };
 
 /* *** Device.DNS.Diagnostics.NSLookupDiagnostics. *** */
 DMOBJ tDNSDiagnosticsNSLookupDiagnosticsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Result", &DMREAD, NULL, NULL, NULL, browseResultInst, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsResultParams, NULL, BBFDM_CWMP},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Result", &DMREAD, NULL, NULL, NULL, browseResultInst, NULL, NULL, NULL, tDNSDiagnosticsNSLookupDiagnosticsResultParams, NULL, BBFDM_CWMP, NULL, "2.0"},
 {0}
 };
 
 DMLEAF tDNSDiagnosticsNSLookupDiagnosticsParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"DiagnosticsState", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_diagnostics_state, set_nslookupdiagnostics_diagnostics_state, BBFDM_CWMP},
-{"Interface", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_interface, set_nslookupdiagnostics_interface, BBFDM_CWMP},
-{"HostName", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_host_name, set_nslookupdiagnostics_host_name, BBFDM_CWMP},
-{"DNSServer", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_d_n_s_server, set_nslookupdiagnostics_d_n_s_server, BBFDM_CWMP},
-{"Timeout", &DMWRITE, DMT_UNINT, get_nslookupdiagnostics_timeout, set_nslookupdiagnostics_timeout, BBFDM_CWMP},
-{"NumberOfRepetitions", &DMWRITE, DMT_UNINT, get_nslookupdiagnostics_number_of_repetitions, set_nslookupdiagnostics_number_of_repetitions, BBFDM_CWMP},
-{"SuccessCount", &DMREAD, DMT_UNINT, get_nslookupdiagnostics_success_count, NULL, BBFDM_CWMP},
-{"ResultNumberOfEntries", &DMREAD, DMT_UNINT, get_nslookupdiagnostics_result_number_of_entries, NULL, BBFDM_CWMP},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"DiagnosticsState", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_diagnostics_state, set_nslookupdiagnostics_diagnostics_state, BBFDM_CWMP, "2.0"},
+{"Interface", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_interface, set_nslookupdiagnostics_interface, BBFDM_CWMP, "2.0"},
+{"HostName", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_host_name, set_nslookupdiagnostics_host_name, BBFDM_CWMP, "2.0"},
+{"DNSServer", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_d_n_s_server, set_nslookupdiagnostics_d_n_s_server, BBFDM_CWMP, "2.0"},
+{"Timeout", &DMWRITE, DMT_UNINT, get_nslookupdiagnostics_timeout, set_nslookupdiagnostics_timeout, BBFDM_CWMP, "2.0"},
+{"NumberOfRepetitions", &DMWRITE, DMT_UNINT, get_nslookupdiagnostics_number_of_repetitions, set_nslookupdiagnostics_number_of_repetitions, BBFDM_CWMP, "2.0"},
+{"SuccessCount", &DMREAD, DMT_UNINT, get_nslookupdiagnostics_success_count, NULL, BBFDM_CWMP, "2.0"},
+{"ResultNumberOfEntries", &DMREAD, DMT_UNINT, get_nslookupdiagnostics_result_number_of_entries, NULL, BBFDM_CWMP, "2.0"},
 {0}
 };
 
 /* *** Device.DNS.Diagnostics.NSLookupDiagnostics.Result.{i}. *** */
 DMLEAF tDNSDiagnosticsNSLookupDiagnosticsResultParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Status", &DMREAD, DMT_STRING, get_result_status, NULL, BBFDM_CWMP},
-{"AnswerType", &DMREAD, DMT_STRING, get_result_answer_type, NULL, BBFDM_CWMP},
-{"HostNameReturned", &DMREAD, DMT_STRING, get_result_host_name_returned, NULL, BBFDM_CWMP},
-{"IPAddresses", &DMREAD, DMT_STRING, get_result_i_p_addresses, NULL, BBFDM_CWMP},
-{"DNSServerIP", &DMREAD, DMT_STRING, get_result_d_n_s_server_i_p, NULL, BBFDM_CWMP},
-{"ResponseTime", &DMREAD, DMT_UNINT, get_result_response_time, NULL, BBFDM_CWMP},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Status", &DMREAD, DMT_STRING, get_result_status, NULL, BBFDM_CWMP, "2.0"},
+{"AnswerType", &DMREAD, DMT_STRING, get_result_answer_type, NULL, BBFDM_CWMP, "2.0"},
+{"HostNameReturned", &DMREAD, DMT_STRING, get_result_host_name_returned, NULL, BBFDM_CWMP, "2.0"},
+{"IPAddresses", &DMREAD, DMT_STRING, get_result_i_p_addresses, NULL, BBFDM_CWMP, "2.0"},
+{"DNSServerIP", &DMREAD, DMT_STRING, get_result_d_n_s_server_i_p, NULL, BBFDM_CWMP, "2.0"},
+{"ResponseTime", &DMREAD, DMT_UNINT, get_result_response_time, NULL, BBFDM_CWMP, "2.0"},
 {0}
 };

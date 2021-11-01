@@ -35,6 +35,7 @@ static int set_LANConfigSecurity_ConfigPassword(char *refparam, struct dmctx *ct
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
 DMLEAF tLANConfigSecurityParams[] = {
-{"ConfigPassword", &DMWRITE, DMT_STRING, get_LANConfigSecurity_ConfigPassword, set_LANConfigSecurity_ConfigPassword, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"ConfigPassword", &DMWRITE, DMT_STRING, get_LANConfigSecurity_ConfigPassword, set_LANConfigSecurity_ConfigPassword, BBFDM_BOTH, "2.0"},
 {0}
 };
