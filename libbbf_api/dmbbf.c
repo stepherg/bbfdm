@@ -639,6 +639,7 @@ char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_secti
 		break;
 	}
 
+	dmctx->inst_buf[parent_node->instance_level] = instance;
 	return instance;
 }
 
@@ -657,6 +658,8 @@ char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, 
 	case BROWSE_NUM_OF_ENTRIES:
 		break;
 	}
+
+	dmctx->inst_buf[parent_node->instance_level] = instance;
 	return instance;
 }
 

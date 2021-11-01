@@ -420,6 +420,22 @@ static char *get_param_ubus_value(json_object *json_obj, char *arguments)
 	return value;
 }
 
+static void replace_indexes(struct dmctx *ctx, char *refparam, char *obj, size_t obj_size)
+{
+	unsigned pos = 0;
+	unsigned char idx = 0;
+
+	for (int i = 0; refparam[i] != '\0'; i++) {
+		if (strstr(&refparam[i], "{i}") == &refparam[i]) {
+			pos += snprintf(&obj[pos], obj_size - pos, "%s", ctx->inst_buf[idx] ? ctx->inst_buf[idx] : "");
+			idx++;
+			i += 3; // increase i with length of "{i}"
+		}
+
+		pos += snprintf(&obj[pos], obj_size - pos, "%c", refparam[i]);
+	}
+}
+
 static char *uci_get_value(json_object *mapping_obj, char *refparam, struct dmctx *ctx, void *data, char *instance)
 {
 	struct json_object *obj = NULL;
@@ -500,10 +516,16 @@ static char *ubus_get_value(json_object *mapping_obj, char *refparam, struct dmc
 	}
 
 	if (args1 && args2) {
-		if (data && (strcmp(json_object_get_string(args2), "@Name") == 0))
+		if (data && (strcmp(json_object_get_string(args2), "@Name") == 0)) {
 			dmubus_call(arg2_1, json_object_get_string(method), UBUS_ARGS{{args1, section_name((struct uci_section *)data), String}}, 1, &res);
-		else
+		} else if (strstr(json_object_get_string(args2), "{i}")) {
+			char arg2_buf[512] = {0};
+
+			replace_indexes(ctx, json_object_get_string(args2), arg2_buf, sizeof(arg2_buf));
+			dmubus_call(arg2_1, json_object_get_string(method), UBUS_ARGS{{args1, arg2_buf, String}}, 1, &res);
+		} else {
 			dmubus_call(arg2_1, json_object_get_string(method), UBUS_ARGS{{args1, json_object_get_string(args2), String}}, 1, &res);
+		}
 	} else {
 		dmubus_call(arg2_1, json_object_get_string(method), UBUS_ARGS{0}, 0, &res);
 	}
