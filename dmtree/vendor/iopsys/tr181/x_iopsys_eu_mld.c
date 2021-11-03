@@ -24,6 +24,9 @@ static int add_mld_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "enable", "0");
 	dmuci_set_value_by_section(s, "proto", "mld");
+	dmuci_set_value_by_section(s, "last_member_query_interval", "10");
+        dmuci_set_value_by_section(s, "query_interval", "125");
+        dmuci_set_value_by_section(s, "query_response_interval", "100");
 	dmuci_set_value_by_section(s, "version", "2");
 	dmuci_set_value_by_section(s, "robustness", "2");
 	dmuci_set_value_by_section(s, "aggregation", "0");
@@ -70,6 +73,8 @@ static int add_mld_snooping_obj(char *refparam, struct dmctx *ctx, void *data, c
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "enable", "0");
 	dmuci_set_value_by_section(s, "proto", "mld");
+	dmuci_set_value_by_section(s, "last_member_query_interval", "10");
+	dmuci_set_value_by_section(s, "fast_leave", "1");
 	dmuci_set_value_by_section(s, "version", "2");
 	dmuci_set_value_by_section(s, "robustness", "2");
 	dmuci_set_value_by_section(s, "aggregation", "0");

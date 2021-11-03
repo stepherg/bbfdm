@@ -381,10 +381,12 @@ static int add_igmp_proxy_obj(char *refparam, struct dmctx *ctx, void *data, cha
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "enable", "0");
 	dmuci_set_value_by_section(s, "proto", "igmp");
+	dmuci_set_value_by_section(s, "last_member_query_interval", "10");
+	dmuci_set_value_by_section(s, "query_interval", "125");
+	dmuci_set_value_by_section(s, "query_response_interval", "100");
 	dmuci_set_value_by_section(s, "version", "2");
 	dmuci_set_value_by_section(s, "robustness", "2");
 	dmuci_set_value_by_section(s, "aggregation", "0");
-
 
 	dmuci_add_section_bbfdm("dmmap_mcast", "proxy", &dmmap);
 	dmuci_set_value_by_section(dmmap, "section_name", s_name);
@@ -428,7 +430,9 @@ static int add_igmp_snooping_obj(char *refparam, struct dmctx *ctx, void *data, 
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "enable", "0");
 	dmuci_set_value_by_section(s, "proto", "igmp");
+	dmuci_set_value_by_section(s, "last_member_query_interval", "10");
 	dmuci_set_value_by_section(s, "version", "2");
+	dmuci_set_value_by_section(s, "fast_leave", "1");
 	dmuci_set_value_by_section(s, "robustness", "2");
 	dmuci_set_value_by_section(s, "aggregation", "0");
 
