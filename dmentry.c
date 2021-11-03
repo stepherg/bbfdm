@@ -34,6 +34,8 @@ static char library_hash[64] = {0};
 static bool first_boot = false;
 #endif
 
+static void load_dynamic_arrays(struct dmctx *ctx);
+
 int dm_debug_browse_path(char *buff, size_t len)
 {
 	if (!buff)
@@ -150,20 +152,32 @@ static int dm_ctx_clean_custom(struct dmctx *ctx, int custom)
 	DMFREE(ctx->addobj_instance);
 	if (custom == CTX_INIT_ALL) {
 		bbf_uci_exit();
-		dmubus_free();
 		dmcleanmem();
 	}
 	return 0;
 }
 
+void dm_config_ubus(struct ubus_context *ctx)
+{
+	dmubus_configure(ctx);
+}
+
 int dm_ctx_init(struct dmctx *ctx, unsigned int instance_mode)
 {
+	dmubus_clean_endlife_entries();
 	return dm_ctx_init_custom(ctx, instance_mode, CTX_INIT_ALL);
 }
 
 int dm_ctx_clean(struct dmctx *ctx)
 {
+	dmubus_update_cached_entries();
 	return dm_ctx_clean_custom(ctx, CTX_INIT_ALL);
+}
+
+int dm_ctx_init_cache(int time)
+{
+	dmubus_set_caching_time(time);
+	return 0;
 }
 
 int dm_ctx_init_sub(struct dmctx *ctx, unsigned int instance_mode)
@@ -490,7 +504,7 @@ static int check_stats_folder(bool json_path)
 }
 #endif  /* (BBFDM_ENABLE_JSON_PLUGIN || BBFDM_ENABLE_DOTSO_PLUGIN) */
 
-void load_dynamic_arrays(struct dmctx *ctx)
+static void load_dynamic_arrays(struct dmctx *ctx)
 {
 #ifdef BBFDM_ENABLE_JSON_PLUGIN
 	// Load dynamic objects and parameters exposed via a JSON file
@@ -518,7 +532,7 @@ void load_dynamic_arrays(struct dmctx *ctx)
 #endif
 }
 
-void free_dynamic_arrays(void)
+static void free_dynamic_arrays(void)
 {
 	DMOBJ *root = tEntry181Obj;
 	DMNODE node = {.current_object = ""};
@@ -535,5 +549,11 @@ void free_dynamic_arrays(void)
 	free_vendor_dynamic_arrays(tEntry181Obj);
 #endif
 	free_dm_browse_node_dynamic_object_tree(&node, root);
+}
+
+void bbf_dm_cleanup(void)
+{
+	dmubus_free();
 	dm_dynamic_cleanmem(&main_memhead);
+	free_dynamic_arrays();
 }

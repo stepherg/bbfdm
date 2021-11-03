@@ -41,9 +41,10 @@ int dm_entry_revert_changes(void);
 int usp_fault_map(int fault);
 int dm_ctx_clean(struct dmctx *ctx);
 int dm_ctx_clean_sub(struct dmctx *ctx);
-void load_dynamic_arrays(struct dmctx *ctx);
-void free_dynamic_arrays(void);
 int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_type_t schema_type);
+void dm_config_ubus(struct ubus_context *ctx);
+int dm_ctx_init_cache(int time);
+void bbf_dm_cleanup(void);
 
 /**
  * @brief dm_debug_browse_path

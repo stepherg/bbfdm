@@ -11,11 +11,11 @@
  *	Author: Anis Ellouze <anis.ellouze@pivasoftware.com>
  */
 
-#include <json-c/json.h>
-#include <libubus.h>
 #include "dmubus.h"
 #include "dmmem.h"
 #include "dmcommon.h"
+
+#define UBUS_TIMEOUT 5000
 
 static LIST_HEAD(dmubus_cache);
 
@@ -23,6 +23,13 @@ struct dm_ubus_cache_entry {
 	struct list_head list;
 	json_object *data;
 	unsigned hash;
+	time_t last_request;
+	time_t resp_time;
+	bool failed;
+	bool async_call_running;
+	char obj[100];
+	char method[100];
+	struct blob_attr *breq;
 };
 
 struct dm_ubus_req {
@@ -32,27 +39,58 @@ struct dm_ubus_req {
 	unsigned n_args;
 };
 
-static struct blob_buf b;
+struct dm_ubus_hash_req {
+	const char *obj;
+	const char *method;
+	struct blob_attr *attr;
+};
+
 static struct ubus_context *ubus_ctx;
-static int timeout = 5000;
 static json_object *json_res = NULL;
 static char ubus_method[32] = {0};
 static bool ubus_method_exists = false;
+static bool local_ctx_g = false;
+static int soft_limit_g = 0; /* In seconds */
+static int hard_limit_g = 0; /* In seconds */
 
-static void dm_libubus_free()
-{
-	if (ubus_ctx) {
-		ubus_free(ubus_ctx);
-		ubus_ctx = NULL;
-	}
-
-	blob_buf_free(&b);
-	memset(&b, 0, sizeof(b));
-}
+static const struct dm_ubus_cache_entry * dm_ubus_cache_lookup(unsigned hash);
 
 static struct ubus_context * dm_libubus_init()
 {
+	local_ctx_g = true;
 	return ubus_connect(NULL);
+}
+
+static void dm_libubus_free()
+{
+	if (local_ctx_g && ubus_ctx) {
+		ubus_free(ubus_ctx);
+		ubus_ctx = NULL;
+		local_ctx_g = false;
+	}
+}
+
+static void prepare_blob_message(struct blob_buf *b, const struct ubus_arg u_args[], int u_args_size)
+{
+	if (!b)
+		return;
+
+	blob_buf_init(b, 0);
+	for (int i = 0; i < u_args_size; i++) {
+		if (u_args[i].type == Integer) {
+			blobmsg_add_u32(b, u_args[i].key, atoi(u_args[i].val));
+		} else if (u_args[i].type == Boolean) {
+			bool val = false;
+			string_to_bool((char *)u_args[i].val, &val);
+			blobmsg_add_u8(b, u_args[i].key, val);
+		} else if (u_args[i].type == Table) {
+			json_object *jobj = json_tokener_parse(u_args[i].val);
+			blobmsg_add_json_element(b, u_args[i].key, jobj);
+			json_object_put(jobj);
+		} else {
+			blobmsg_add_string(b, u_args[i].key, u_args[i].val);
+		}
+	}
 }
 
 static void receive_call_result_data(struct ubus_request *req, int type, struct blob_attr *msg)
@@ -72,40 +110,86 @@ static void receive_call_result_data(struct ubus_request *req, int type, struct 
 	free((char *)str); //MEM should be free and not dmfree
 }
 
-static int __dm_ubus_call(const char *obj, const char *method, const struct ubus_arg u_args[], int u_args_size)
+static void __async_result_callback(struct ubus_request *req, int type, struct blob_attr *msg)
+{
+	const char *str;
+	time_t resp_time = time(NULL);
+
+	const unsigned *hash = (unsigned *)req->priv;
+
+	if (!hash) {
+		// This should not happen
+		printf("Hash found NULL in callback request\n\r");
+		return;
+	}
+
+	struct dm_ubus_cache_entry *entry = (struct dm_ubus_cache_entry *)dm_ubus_cache_lookup(*hash);
+
+	if (!entry) {
+		// This should not happen unless resp took too long
+		printf("Hash not found in cache\n\r");
+	} else {
+		entry->resp_time = resp_time;
+		entry->async_call_running = false;
+
+		if (entry->data) {
+			json_object_put(entry->data);
+		}
+
+		if (difftime(resp_time, entry->last_request) >= UBUS_TIMEOUT/1000) {
+			printf("Req [%s:%s] has been timedout in async call %lu, %lu\n\r",
+				entry->obj, entry->method, resp_time, entry->last_request);
+			entry->failed = true;
+		} else {
+			entry->failed = false;
+		}
+
+		if (!msg) {
+			entry->data = NULL;
+			return;
+		}
+
+		str = blobmsg_format_json_indent(msg, true, -1);
+		if (!str) {
+			entry->data = NULL;
+			return;
+		}
+
+		json_object *json_resp = json_tokener_parse(str);
+		entry->data = json_resp;
+		free((char *)str); //MEM should be free and not dmfree
+	}
+}
+
+static void __async_complete_callback(struct ubus_request *req, int ret)
+{
+	if (req) {
+		if (req->priv) {
+			free(req->priv);
+		}
+
+		free(req);
+	}
+}
+
+static int __dm_ubus_call(const char *obj, const char *method, struct blob_attr *attr)
 {
 	uint32_t id;
-	int i = 0;
 	int rc = 0;
 
 	json_res = NULL;
 
 	if (ubus_ctx == NULL) {
 		ubus_ctx = dm_libubus_init();
-		if (ubus_ctx == NULL)
+		if (ubus_ctx == NULL) {
+			printf("UBUS context is null\n\r");
 			return -1;
-	}
-
-	blob_buf_init(&b, 0);
-	for (i = 0; i < u_args_size; i++) {
-		if (u_args[i].type == Integer) {
-			blobmsg_add_u32(&b, u_args[i].key, atoi(u_args[i].val));
-		} else if (u_args[i].type == Boolean) {
-			bool val = false;
-			string_to_bool((char *)u_args[i].val, &val);
-			blobmsg_add_u8(&b, u_args[i].key, val);
-		} else if (u_args[i].type == Table) {
-			json_object *obj = json_tokener_parse(u_args[i].val);
-			blobmsg_add_json_element(&b, u_args[i].key, obj);
-			json_object_put(obj);
-		} else {
-			blobmsg_add_string(&b, u_args[i].key, u_args[i].val);
 		}
 	}
 
 	if (!ubus_lookup_id(ubus_ctx, obj, &id))
-		rc = ubus_invoke(ubus_ctx, id, method, b.head,
-				receive_call_result_data, NULL, timeout);
+		rc = ubus_invoke(ubus_ctx, id, method, attr,
+				receive_call_result_data, NULL, UBUS_TIMEOUT);
 	else
 		rc = -1;
 
@@ -114,13 +198,77 @@ static int __dm_ubus_call(const char *obj, const char *method, const struct ubus
 
 int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size)
 {
-	int rc = __dm_ubus_call(obj, method, u_args, u_args_size);
+	struct blob_buf b;
+
+	memset(&b, 0, sizeof(struct blob_buf));
+	prepare_blob_message(&b, u_args, u_args_size);
+
+	int rc = __dm_ubus_call(obj, method, b.head);
 
 	if (json_res != NULL) {
 		json_object_put(json_res);
 		json_res = NULL;
 	}
+
+	blob_buf_free(&b);
 	return rc;
+}
+
+static inline json_object *ubus_call_req(char *obj, char *method, struct blob_attr *attr)
+{
+	__dm_ubus_call(obj, method, attr);
+	return json_res;
+}
+
+static int ubus_call_req_async(const char *obj, const char *method, const unsigned hash, struct blob_attr *attr)
+{
+	uint32_t id;
+	int rc = 0;
+	struct ubus_request *req;
+
+	if (ubus_ctx == NULL) {
+		ubus_ctx = dm_libubus_init();
+		if (ubus_ctx == NULL) {
+			printf("UBUS context is null\n\r");
+			return -1;
+		}
+	}
+
+	if (!ubus_lookup_id(ubus_ctx, obj, &id)) {
+		req = (struct ubus_request *)malloc(sizeof(struct ubus_request));
+		if (req == NULL) {
+			printf("Out of memory!\n\r");
+			return -1;
+		}
+
+		memset(req, 0, sizeof(struct ubus_request));
+
+		rc = ubus_invoke_async(ubus_ctx, id, method, attr, req);
+		if (rc) {
+			printf("Ubus async invoke failed (%s)\n\r", ubus_strerror(rc));
+			free(req);
+			return -1;
+		}
+
+		unsigned *p = (unsigned *)malloc(sizeof(unsigned));
+		if (p == NULL) {
+			printf("memory allocation failed\n\r");
+			free(req);
+			return -1;
+		}
+
+		*p = hash;
+		req->data_cb = __async_result_callback;
+		req->complete_cb = __async_complete_callback;
+		req->priv = (void *)p;
+
+		ubus_complete_request_async(ubus_ctx, req);
+	} else {
+		printf("Ubus lookup id failed from async call\n\r");
+		return -1;
+	}
+
+	return 0;
 }
 
 int dmubus_operate_blob_set(char *obj, char *method, void *value, json_object **resp)
@@ -134,8 +282,10 @@ int dmubus_operate_blob_set(char *obj, char *method, void *value, json_object **
 
 	if (ubus_ctx == NULL) {
 		ubus_ctx = dm_libubus_init();
-		if (ubus_ctx == NULL)
-			return rc;
+		if (ubus_ctx == NULL) {
+			printf("UBUS context is null\n\r");
+			return -1;
+		}
 	}
 
 	memset(&blob, 0, sizeof(struct blob_buf));
@@ -150,19 +300,12 @@ int dmubus_operate_blob_set(char *obj, char *method, void *value, json_object **
 
 	if (!ubus_lookup_id(ubus_ctx, obj, &id)) {
 		rc = ubus_invoke(ubus_ctx, id, method, blob.head,
-				 receive_call_result_data, NULL, timeout);
+				 receive_call_result_data, NULL, UBUS_TIMEOUT);
 	}
 
 	*resp = json_res;
 	blob_buf_free(&blob);
 	return rc;
-
-}
-
-static inline json_object *ubus_call_req(char *obj, char *method, struct ubus_arg u_args[], int u_args_size)
-{
-	__dm_ubus_call(obj, method, u_args, u_args_size);
-	return json_res;
 }
 
 /* Based on an efficient hash function published by D. J. Bernstein
@@ -177,18 +320,23 @@ static unsigned int djbhash(unsigned hash, const char *data, unsigned len)
 	return (hash & 0x7FFFFFFF);
 }
 
-static unsigned dm_ubus_req_hash(const struct dm_ubus_req *req)
+static unsigned dm_ubus_req_hash_from_blob(const struct dm_ubus_hash_req *req)
 {
 	unsigned hash = 5381;
-	unsigned i;
+	if (!req) {
+		return hash;
+	}
 
 	hash = djbhash(hash, req->obj, strlen(req->obj));
 	hash = djbhash(hash, req->method, strlen(req->method));
 
-	for (i = 0; i < req->n_args; i++) {
-		hash = djbhash(hash, req->args[i].key, strlen(req->args[i].key));
-		hash = djbhash(hash, req->args[i].val, strlen(req->args[i].val));
+	char *jmsg = blobmsg_format_json(req->attr, true);
+	if (!jmsg) {
+		return hash;
 	}
+
+	hash = djbhash(hash, jmsg, strlen(jmsg));
+	free(jmsg);
 	return hash;
 }
 
@@ -206,13 +354,21 @@ static const struct dm_ubus_cache_entry * dm_ubus_cache_lookup(unsigned hash)
 	return entry_match;
 }
 
-static void dm_ubus_cache_entry_new(unsigned hash, json_object *data)
+static void dm_ubus_cache_entry_new(unsigned hash, json_object *data, char *obj, char *method,
+		time_t req_time, time_t resp_time, struct blob_attr *breq)
 {
 	struct dm_ubus_cache_entry *entry = malloc(sizeof(*entry));
 
 	if (entry) {
 		entry->data = data;
 		entry->hash = hash;
+		entry->last_request = req_time;
+		entry->resp_time = resp_time;
+		entry->breq = breq;
+		entry->failed = data ? true : false;
+		entry->async_call_running = false;
+		DM_STRNCPY(entry->obj, obj, sizeof(entry->obj));
+		DM_STRNCPY(entry->method, method,  sizeof(entry->method));
 		list_add_tail(&entry->list, &dmubus_cache);
 	}
 }
@@ -220,30 +376,75 @@ static void dm_ubus_cache_entry_new(unsigned hash, json_object *data)
 static void dm_ubus_cache_entry_free(struct dm_ubus_cache_entry *entry)
 {
 	list_del(&entry->list);
-	json_object_put(entry->data);
-	free(entry);
+
+	if (entry->breq)
+		FREE(entry->breq);
+
+	if (entry->data)
+		json_object_put(entry->data);
+
+	FREE(entry);
 }
 
 int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
 {
-	const struct dm_ubus_req req = {
+	struct blob_buf bmsg;
+
+	memset(&bmsg, 0, sizeof(struct blob_buf));
+	prepare_blob_message(&bmsg, u_args, u_args_size);
+
+	const struct dm_ubus_hash_req hash_req = {
 		.obj = obj,
 		.method = method,
-		.args = u_args,
-		.n_args = u_args_size
+		.attr = bmsg.head
 	};
-	const unsigned hash = dm_ubus_req_hash(&req);
+
+	const unsigned hash = dm_ubus_req_hash_from_blob(&hash_req);
 	const struct dm_ubus_cache_entry *entry = dm_ubus_cache_lookup(hash);
 	json_object *res;
 
 	if (entry) {
 		res = entry->data;
 	} else {
-		res = ubus_call_req(obj, method, u_args, u_args_size);
-		dm_ubus_cache_entry_new(hash, res);
+		time_t req_time = time(NULL);
+		res = ubus_call_req(obj, method, bmsg.head);
+		time_t resp_time = time(NULL);
+
+		dm_ubus_cache_entry_new(hash, res, obj, method, req_time, resp_time, blob_memdup(bmsg.head));
 	}
 
+	blob_buf_free(&bmsg);
 	*req_res = res;
+	return 0;
+}
+
+static int dmubus_call_async(const char *obj, const char *method, struct blob_attr *attr)
+{
+	const struct dm_ubus_hash_req hash_req = {
+		.obj = obj,
+		.method = method,
+		.attr = attr
+	};
+
+	const unsigned hash = dm_ubus_req_hash_from_blob(&hash_req);
+	struct dm_ubus_cache_entry *entry = (struct dm_ubus_cache_entry *)dm_ubus_cache_lookup(hash);
+
+	if (entry) {
+		entry->last_request = time(NULL);
+		entry->failed = false;
+		entry->async_call_running = true;
+		if (-1 == ubus_call_req_async(obj, method, hash, attr)) {
+			printf("Ubus call async failed\n\r");
+			entry->failed = true;
+			entry->resp_time = time(NULL);
+			if (entry->data) {
+				json_object_put(entry->data);
+				entry->data = NULL;
+			}
+			entry->async_call_running = false;
+		}
+	}
+
 	return 0;
 }
 
@@ -268,8 +469,10 @@ bool dmubus_object_method_exists(const char *obj)
 {
 	if (ubus_ctx == NULL) {
 		ubus_ctx = dm_libubus_init();
-		if (ubus_ctx == NULL)
-			return false;
+		if (ubus_ctx == NULL) {
+			printf("UBUS context is null\n\r");
+			return -1;
+		}
 	}
 
 	char *method = "";
@@ -293,6 +496,50 @@ bool dmubus_object_method_exists(const char *obj)
 	return true;
 }
 
+void dmubus_configure(struct ubus_context *ctx)
+{
+	ubus_ctx = ctx;
+}
+
+void dmubus_clean_endlife_entries()
+{
+	if (hard_limit_g != 0) {
+		struct dm_ubus_cache_entry *entry, *tmp;
+		time_t curr_time = time(NULL);
+
+		list_for_each_entry_safe(entry, tmp, &dmubus_cache, list) {
+			if (difftime(curr_time, entry->last_request) >= hard_limit_g) {
+				dm_ubus_cache_entry_free(entry);
+			}
+		}
+	}
+}
+
+void dmubus_update_cached_entries()
+{
+	if (hard_limit_g == 0 || local_ctx_g == true) {
+		dmubus_free();
+		dm_libubus_free();
+	} else {
+		struct dm_ubus_cache_entry *entry;
+		time_t curr_time = time(NULL);
+
+		list_for_each_entry(entry, &dmubus_cache, list) {
+			// There could be a case when async call done previously but response still
+			// not received or the previous ubus call took >= soft_limit_g sec, so in that case no
+			// need to perform async call again & wait for HARD_LIMIT to delete the entry from cache
+
+			if (entry->async_call_running || entry->failed)
+				continue;
+
+			double time_elapsed = difftime(curr_time, entry->last_request);
+			if (time_elapsed >= soft_limit_g && time_elapsed < hard_limit_g) {
+				dmubus_call_async(entry->obj, entry->method, entry->breq);
+			}
+		}
+	}
+}
+
 void dmubus_free()
 {
 	struct dm_ubus_cache_entry *entry, *tmp;
@@ -300,5 +547,13 @@ void dmubus_free()
 	list_for_each_entry_safe(entry, tmp, &dmubus_cache, list)
 		dm_ubus_cache_entry_free(entry);
 
-	dm_libubus_free();
+}
+
+void dmubus_set_caching_time(int seconds)
+{
+	if (seconds < 2)
+		return;
+
+	soft_limit_g = seconds/2;
+	hard_limit_g = seconds;
 }

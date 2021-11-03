@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include <libubus.h>
 #include <libbbfdm/dmentry.h>
 #include <libbbfdm/dmbbfcommon.h>
 
@@ -88,12 +89,19 @@ int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
 
 int main(int argc, char *argv[])
 {
+	static struct ubus_context *ubus_ctx = NULL;
 	char *param = NULL, *value = NULL, *version = NULL;
 	int cmd;
 
 	if (argc < 3) {
 		print_help(argv[0]);
 	}
+
+	ubus_ctx = ubus_connect(NULL);
+	if (ubus_ctx == NULL)
+		return -1;
+
+	dm_config_ubus(ubus_ctx);
 
 	if (strcmp(argv[1], "-c") == 0)
 		g_proto = BBFDM_CWMP;
@@ -110,5 +118,6 @@ int main(int argc, char *argv[])
 		version = argv[5];
 	
 	usp_dm_exec(cmd, param, value, version);
-	free_dynamic_arrays();
+	bbf_dm_cleanup();
+	ubus_free(ubus_ctx);
 }

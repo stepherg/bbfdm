@@ -14,6 +14,10 @@
 #ifndef __DMUBUS_H
 #define __DMUBUS_H
 
+#include <json-c/json.h>
+#include <libubus.h>
+#include <time.h>
+
 #define UBUS_ARGS (struct ubus_arg[])
 
 enum ubus_arg_type {
@@ -34,5 +38,9 @@ int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_arg
 int dmubus_operate_blob_set(char *obj, char *method, void *value, json_object **resp);
 bool dmubus_object_method_exists(const char *obj);
 void dmubus_free();
+void dmubus_configure(struct ubus_context *ctx);
+void dmubus_update_cached_entries();
+void dmubus_clean_endlife_entries();
+void dmubus_set_caching_time(int seconds);
 
 #endif

@@ -3,6 +3,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+#include <libubus.h>
 #include <libbbf_api/dmuci.h>
 #include <libbbfdm/dmentry.h>
 
@@ -10,6 +11,18 @@
 #define DROPBEAR_JSON_PATH "/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json"
 #define LIBBBF_TEST_PATH "/builds/iopsys/bbf/test/bbf_test/libbbf_test.so"
 #define LIBBBF_TEST_BBFDM_PATH "/usr/lib/bbfdm/libbbf_test.so"
+
+static struct ubus_context *ubus_ctx = NULL;
+
+static int group_setup(void **state)
+{
+	ubus_ctx = ubus_connect(NULL);
+	if (ubus_ctx == NULL)
+		return -1;
+
+	dm_config_ubus(ubus_ctx);
+	return 0;
+}
 
 static int setup(void **state)
 {
@@ -59,7 +72,12 @@ static int teardown_revert(void **state)
 
 static int group_teardown(void **state)
 {
-	free_dynamic_arrays();
+	bbf_dm_cleanup();
+	if (ubus_ctx != NULL) {
+		ubus_free(ubus_ctx);
+		ubus_ctx = NULL;
+	}
+
 	return 0;
 }
 
@@ -803,5 +821,5 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_library_delete_object, setup, teardown_commit),
 	};
 
-	return cmocka_run_group_tests(tests, NULL, group_teardown);
+	return cmocka_run_group_tests(tests, group_setup, group_teardown);
 }
