@@ -4131,6 +4131,8 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 
 			uint8_t len = obj ? json_object_array_length(obj) : 0;
 			for (uint8_t j = 0; j < len; j++ ) {
+				uint8_t index = j + 1;
+
 				json_object *array_obj = json_object_array_get_idx(obj, j);
 				ssid[1] = dmjson_get_value(array_obj, 1, "ssid");
 				bssid[1] = dmjson_get_value(array_obj, 1, "bssid");
@@ -4139,12 +4141,12 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 				signal_strength[1] = dmjson_get_value(array_obj, 1, "rssi");
 				noise[1] = dmjson_get_value(array_obj, 1, "noise");
 
-				dmasprintf(&ssid[0], "Result.%d.SSID", j);
-				dmasprintf(&bssid[0], "Result.%d.BSSID", j);
-				dmasprintf(&channel[0], "Result.%d.Channel", j);
-				dmasprintf(&frequency[0], "Result.%d.OperatingFrequencyBand", j);
-				dmasprintf(&signal_strength[0], "Result.%d.SignalStrength", j);
-				dmasprintf(&noise[0], "Result.%d.Noise", j);
+				dmasprintf(&ssid[0], "Result.%d.SSID", index);
+				dmasprintf(&bssid[0], "Result.%d.BSSID", index);
+				dmasprintf(&channel[0], "Result.%d.Channel", index);
+				dmasprintf(&frequency[0], "Result.%d.OperatingFrequencyBand", index);
+				dmasprintf(&signal_strength[0], "Result.%d.SignalStrength", index);
+				dmasprintf(&noise[0], "Result.%d.Noise", index);
 
 				add_list_parameter(ctx, ssid[0], ssid[1], DMT_TYPE[DMT_STRING], NULL);
 				add_list_parameter(ctx, bssid[0], bssid[1], DMT_TYPE[DMT_STRING], NULL);
