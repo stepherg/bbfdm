@@ -175,8 +175,7 @@ event_schema = {
 	"required": [
 		"type",
 		"version",
-		"protocols",
-		"version"
+		"protocols"
 	]
 }
 
