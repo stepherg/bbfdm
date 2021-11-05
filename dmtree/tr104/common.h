@@ -25,8 +25,8 @@ struct codec_info {
 struct call_log_entry {
 	struct list_head list;
 
-	char calling_num[20], called_num[20];
-	char source[64], destination[64], used_line[64];
+	char calling_num[256], called_num[256];
+	char source[256], destination[256], used_line[256];
 	char direction[16];
 	char start_time[32];
 	char duration[8];
