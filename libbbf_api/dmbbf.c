@@ -659,7 +659,8 @@ char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_secti
 		if (instance && *instance == '\0') {
 			int max_inst = find_max_instance(dmctx, parent_node);
 			snprintf(buf, sizeof(buf), "%d", max_inst);
-			instance = dmuci_set_value_by_section(s, inst_opt, buf);
+			dmuci_set_value_by_section(s, inst_opt, buf);
+			instance = dmstrdup(buf);
 		}
 
 		int inst_mode = get_instance_mode(dmctx, parent_node);
@@ -670,7 +671,8 @@ char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_secti
 			dmuci_get_value_by_section_string(s, alias_opt, &alias);
 			if (alias && alias[0] == '\0') {
 				snprintf(buf, sizeof(buf), "cpe-%s", instance);
-				alias = dmuci_set_value_by_section(s, alias_opt, buf);
+				dmuci_set_value_by_section(s, alias_opt, buf);
+				alias = dmstrdup(buf);
 			}
 			snprintf(buf, sizeof(buf), "[%s]", alias);
 			instance = dmstrdup(buf);
@@ -790,8 +792,8 @@ char *update_instance_alias(int action, char **last_inst, char **max_inst, void 
 	dmuci_get_value_by_section_string(s, inst_opt, &instance);
 	if (instance[0] == '\0') {
 		snprintf(buf, sizeof(buf), "%d", max_instance + 1);
-		instance = dmuci_set_value_by_section(s, inst_opt, buf);
-		*max_inst = instance;
+		dmuci_set_value_by_section(s, inst_opt, buf);
+		*max_inst = dmstrdup(instance);
 	} else {
 		dmasprintf(max_inst, "%d", max_instance);
 	}
@@ -801,7 +803,8 @@ char *update_instance_alias(int action, char **last_inst, char **max_inst, void 
 		dmuci_get_value_by_section_string(s, alias_opt, &alias);
 		if (alias[0] == '\0') {
 			snprintf(buf, sizeof(buf), "cpe-%s", instance);
-			alias = dmuci_set_value_by_section(s, alias_opt, buf);
+			dmuci_set_value_by_section(s, alias_opt, buf);
+			alias = dmstrdup(buf);
 		}
 		snprintf(buf, sizeof(buf), "[%s]", alias);
 		instance = dmstrdup(buf);

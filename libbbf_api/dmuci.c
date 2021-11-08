@@ -474,20 +474,17 @@ int dmuci_change_packages(struct list_head *clist)
 }
 
 /**** UCI SET *****/
-char *dmuci_set_value(char *package, char *section, char *option, char *value)
+int dmuci_set_value(char *package, char *section, char *option, char *value)
 {
 	struct uci_ptr ptr = {0};
 
 	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, option, value))
-		return "";
+		return -1;
 
 	if (uci_set(uci_ctx, &ptr) != UCI_OK)
-		return "";
+		return -1;
 
-	if (ptr.o)
-		return dmstrdup(ptr.o->v.string); // MEM WILL BE FREED IN DMMEMCLEAN
-
-	return "";
+	return 0;
 }
 
 /**** UCI ADD LIST *****/
@@ -519,10 +516,10 @@ int dmuci_del_list_value(char *package, char *section, char *option, char *value
 }
 
 /****** UCI ADD *******/
-char *dmuci_add_section(char *package, char *stype, struct uci_section **s)
+int dmuci_add_section(char *package, char *stype, struct uci_section **s)
 {
 	struct uci_ptr ptr = {0};
-	char fname[128], *val = "";
+	char fname[128];
 
 	*s = NULL;
 
@@ -532,14 +529,16 @@ char *dmuci_add_section(char *package, char *stype, struct uci_section **s)
 		if (fptr)
 			fclose(fptr);
 		else
-			return val;
+			return -1;
 	}
 
-	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, NULL, NULL, NULL) == 0
-		&& uci_add_section(uci_ctx, ptr.p, stype, s) == UCI_OK)
-		val = dmstrdup((*s)->e.name);
+	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, NULL, NULL, NULL))
+		return -1;
 
-	return val;
+	if (uci_add_section(uci_ctx, ptr.p, stype, s) != UCI_OK)
+		return -1;
+
+	return 0;
 }
 
 /**** UCI DELETE *****/
@@ -682,20 +681,17 @@ int dmuci_get_value_by_section_list(struct uci_section *s, char *option, struct 
 }
 
 /**** UCI SET by section pointer ****/
-char *dmuci_set_value_by_section(struct uci_section *s, char *option, char *value)
+int dmuci_set_value_by_section(struct uci_section *s, char *option, char *value)
 {
 	struct uci_ptr up = {0};
 
 	if (dmuci_lookup_ptr_by_section(uci_ctx, &up, s, option, value) == -1)
-		return "";
+		return -1;
 
 	if (uci_set(uci_ctx, &up) != UCI_OK)
-		return "";
+		return -1;
 
-	if (up.o)
-		return dmstrdup(up.o->v.string); // MEM WILL BE FREED IN DMMEMCLEAN
-
-	return "";
+	return 0;
 }
 
 /**** UCI DELETE by section pointer *****/

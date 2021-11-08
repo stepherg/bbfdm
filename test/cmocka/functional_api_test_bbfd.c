@@ -217,16 +217,16 @@ static void test_bbf_api_uci(void **state)
 	 */
 
 	// dmuci_set_value: test with correct section/option and wrong config name
-	value = dmuci_set_value("netwo", "wan", "vendorid", "dg400prime");
-	assert_string_equal(value, "");
+	uci_res = dmuci_set_value("netwo", "wan", "vendorid", "dg400prime");
+	assert_int_equal(uci_res, -1);
 
 	// dmuci_set_value: test with correct config/option and wrong section name
-	value = dmuci_set_value("network", "wann", "vendorid", "dg400prime");
-	assert_string_equal(value, "");
+	uci_res = dmuci_set_value("network", "wann", "vendorid", "dg400prime");
+	assert_int_equal(uci_res, -1);
 
 	// dmuci_set_value: test correct config/section/option
-	value = dmuci_set_value("network", "wan", "vendorid", "dg400prime");
-	assert_string_equal(value, "dg400prime");
+	uci_res = dmuci_set_value("network", "wan", "vendorid", "dg400prime");
+	assert_int_equal(uci_res, 0);
 	uci_res = dmuci_commit_package("network");
 	assert_int_equal(uci_res, 0);
 	uci_res = dmuci_get_option_value_string("network", "wan", "vendorid", &value);
@@ -234,8 +234,8 @@ static void test_bbf_api_uci(void **state)
 	assert_string_equal(value, "dg400prime");
 
 	// dmuci_set_value: test correct config/section/option
-	value = dmuci_set_value("dropbear", "@dropbear[0]", "Port", "7845");
-	assert_string_equal(value, "7845");
+	uci_res = dmuci_set_value("dropbear", "@dropbear[0]", "Port", "7845");
+	assert_int_equal(uci_res, 0);
 	uci_res = dmuci_commit_package("dropbear");
 	assert_int_equal(uci_res, 0);
 	uci_res = dmuci_get_option_value_string("dropbear", "@dropbear[0]", "Port", &value);
@@ -247,8 +247,8 @@ static void test_bbf_api_uci(void **state)
 	 */
 
 	// dmuci_add_section: test with only config name
-	value = dmuci_add_section("network", "section_test", &uci_s);
-	assert_string_not_equal(value, "");
+	uci_res = dmuci_add_section("network", "section_test", &uci_s);
+	assert_int_equal(uci_res, 0);
 	assert_non_null(uci_s);
 	uci_res = dmuci_commit_package("network");
 	assert_int_equal(uci_res, 0);
@@ -313,8 +313,8 @@ static void test_bbf_api_uci(void **state)
 	 */
 
 	// dmuci_set_value_by_section: test with correct option name
-	value = dmuci_set_value_by_section(uci_s, "reqopts", "44");
-	assert_string_equal(value, "44");
+	uci_res = dmuci_set_value_by_section(uci_s, "reqopts", "44");
+	assert_int_equal(uci_res, 0);
 	uci_res = dmuci_get_value_by_section_string(uci_s, "reqopts", &value);
 	assert_int_equal(uci_res, 0);
 	assert_string_equal(value, "44");
