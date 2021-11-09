@@ -20,7 +20,7 @@ static struct uci_context *uci_ctx = NULL;
 static char *db_config = NULL;
 
 NEW_UCI_PATH(bbfdm, BBFDM_CONFIG, BBFDM_SAVEDIR)
-NEW_UCI_PATH(varstate, VARSTATE_CONFDIR, NULL)
+NEW_UCI_PATH(varstate, VARSTATE_CONFDIR, VARSTATE_SAVEDIR)
 
 int dmuci_init(void)
 {
