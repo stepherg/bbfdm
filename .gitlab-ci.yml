@@ -81,15 +81,8 @@ run_memory_test:
       when: always
       paths:
           - timestamp.log
-          - memory-report-usp-get.xml
-          - memory-report-usp-operate.xml
-          - memory-report-usp-schema.xml
-          - memory-report-usp-instances.xml
-          - memory-report-cwmp-get.xml
-          - memory-report-cwmp-operate.xml
-          - memory-report-cwmp-schema.xml
-          - memory-report-cwmp-instances.xml
           - memory-test-coverage.xml
+          - bbf_out.zip
 
 run_uspd:
   stage: uspd

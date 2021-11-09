@@ -37,17 +37,24 @@ struct dm_json_obj {
 	struct list_head list;
 	json_object *data;
 	char *name;
+	int json_version;
 	operation_args command_arg;
 	event_args event_arg;
 };
 
-static void save_json_data(struct list_head *json_list, char *name, json_object *data,
+enum json_plugin_version {
+	JSON_VERSION_0,
+	JSON_VERSION_1
+};
+
+static void save_json_data(struct list_head *json_list, char *name, json_object *data, int json_version,
 			   const char **in_p, const char **out_p, const char **ev_arg)
 {
 	struct dm_json_obj *dm_json_obj = dm_dynamic_calloc(&json_memhead, 1, sizeof(struct dm_json_obj));
 
 	if (name) dm_json_obj->name = dm_dynamic_strdup(&json_memhead, name);
 	if (data) dm_json_obj->data = data;
+	dm_json_obj->json_version = json_version;
 	dm_json_obj->command_arg.in = in_p;
 	dm_json_obj->command_arg.out = out_p;
 	dm_json_obj->event_arg.param = ev_arg;
@@ -189,7 +196,7 @@ static char *generate_path_without_instance(char *full_obj, bool is_obj)
 	char *str = dm_dynamic_strdup(&json_memhead, full_obj);
 
 	for (pch = strtok_r(str, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
-		if (atoi(pch) == 0) {
+		if (atoi(pch) == 0 && strcmp(pch, "{i}") != 0) {
 			pos  += snprintf(buf + pos, sizeof(buf) - pos, "%s.", pch);
 		}
 	}
@@ -215,17 +222,26 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 {
 	struct dm_json_obj *pobj = NULL;
 	struct json_object *mapping_obj = NULL;
+	struct json_object *mapping_0 = NULL;
 	struct json_object *type = NULL;
+	int json_version = JSON_VERSION_0;
 
 	char *obj = generate_path_without_instance(parent_node->current_object, true);
 	list_for_each_entry(pobj, &json_list, list) {
 		if (strcmp(pobj->name, obj) == 0) {
 			mapping_obj = pobj->data;
+			json_version = pobj->json_version;
 			break;
 		}
 	}
 
-	json_object_object_get_ex(mapping_obj, "type", &type);
+	if (json_version == JSON_VERSION_1 && mapping_obj && json_object_get_type(mapping_obj) == json_type_array) {
+		mapping_0 = json_object_array_get_idx(mapping_obj, 0);
+		json_object_object_get_ex(mapping_0, "type", &type);
+	} else {
+		json_object_object_get_ex(mapping_obj, "type", &type);
+	}
+
 	if (type && strcmp(json_object_get_string(type), "uci") == 0) {
 		char buf_instance[64], buf_alias[64], *object = NULL;
 		struct json_object *uci_obj = NULL;
@@ -237,7 +253,7 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 		struct dmmap_dup *p = NULL;
 		LIST_HEAD(dup_list);
 
-		json_object_object_get_ex(mapping_obj, "uci", &uci_obj);
+		json_object_object_get_ex((mapping_0 && json_version == JSON_VERSION_1) ? mapping_0 : mapping_obj, "uci", &uci_obj);
 		json_object_object_get_ex(uci_obj, "file", &file);
 		json_object_object_get_ex(uci_obj, "section", &section);
 		json_object_object_get_ex(section, "type", &section_type);
@@ -275,7 +291,7 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 		struct json_object *key = NULL;
 		char *args1 = NULL;
 
-		json_object_object_get_ex(mapping_obj, "ubus", &ubus_obj);
+		json_object_object_get_ex((mapping_0 && json_version == JSON_VERSION_1) ? mapping_0 : mapping_obj, "ubus", &ubus_obj);
 		json_object_object_get_ex(ubus_obj, "object", &object);
 		json_object_object_get_ex(ubus_obj, "method", &method);
 		json_object_object_get_ex(ubus_obj, "args", &args_obj);
@@ -306,18 +322,27 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 {
 	struct dm_json_obj *pobj = NULL;
 	struct json_object *mapping_obj = NULL;
-	struct json_object *type = NULL;
+	struct json_object *mapping_0 = NULL;
+	struct json_object *obj_type = NULL;
+	int json_version = JSON_VERSION_0;
 
 	char *obj = generate_path_without_instance(refparam, true);
 	list_for_each_entry(pobj, &json_list, list) {
 		if (strcmp(pobj->name, obj) == 0) {
 			mapping_obj = pobj->data;
+			json_version = pobj->json_version;
 			break;
 		}
 	}
 
-	json_object_object_get_ex(mapping_obj, "type", &type);
-	if (type && strcmp(json_object_get_string(type), "uci") == 0) {
+	if (json_version == JSON_VERSION_1 && mapping_obj && json_object_get_type(mapping_obj) == json_type_array) {
+		mapping_0 = json_object_array_get_idx(mapping_obj, 0);
+		json_object_object_get_ex(mapping_0, "type", &obj_type);
+	} else {
+		json_object_object_get_ex(mapping_obj, "type", &obj_type);
+	}
+
+	if (obj_type && strcmp(json_object_get_string(obj_type), "uci") == 0) {
 		struct json_object *uci_obj = NULL;
 		struct json_object *file = NULL;
 		struct json_object *section = NULL;
@@ -326,7 +351,7 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 		char *object = NULL;
 		char buf_instance[64];
 
-		json_object_object_get_ex(mapping_obj, "uci", &uci_obj);
+		json_object_object_get_ex((mapping_0 && json_version == JSON_VERSION_1) ? mapping_0 : mapping_obj, "uci", &uci_obj);
 		json_object_object_get_ex(uci_obj, "file", &file);
 		json_object_object_get_ex(uci_obj, "section", &section);
 		json_object_object_get_ex(section, "type", &section_type);
@@ -356,17 +381,26 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 {
 	struct dm_json_obj *pobj = NULL;
 	struct json_object *mapping_obj = NULL;
+	struct json_object *mapping_0 = NULL;
 	struct json_object *type_obj = NULL;
+	int json_version = JSON_VERSION_0;
 
 	char *obj = generate_path_without_instance(refparam, true);
 	list_for_each_entry(pobj, &json_list, list) {
 		if (strcmp(pobj->name, obj) == 0) {
 			mapping_obj = pobj->data;
+			json_version = pobj->json_version;
 			break;
 		}
 	}
 
-	json_object_object_get_ex(mapping_obj, "type", &type_obj);
+	if (json_version == JSON_VERSION_1 && mapping_obj && json_object_get_type(mapping_obj) == json_type_array) {
+		mapping_0 = json_object_array_get_idx(mapping_obj, 0);
+		json_object_object_get_ex(mapping_0, "type", &type_obj);
+	} else {
+		json_object_object_get_ex(mapping_obj, "type", &type_obj);
+	}
+
 	if (type_obj && strcmp(json_object_get_string(type_obj), "uci") == 0) {
 		struct json_object *uci_obj = NULL;
 		struct json_object *file = NULL;
@@ -374,7 +408,7 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 		struct json_object *section_type = NULL;
 		struct json_object *dmmap_file = NULL;
 
-		json_object_object_get_ex(mapping_obj, "uci", &uci_obj);
+		json_object_object_get_ex((mapping_0 && json_version == JSON_VERSION_1) ? mapping_0 : mapping_obj, "uci", &uci_obj);
 		json_object_object_get_ex(uci_obj, "file", &file);
 		json_object_object_get_ex(uci_obj, "section", &section);
 		json_object_object_get_ex(section, "type", &section_type);
@@ -436,7 +470,7 @@ static void replace_indexes(struct dmctx *ctx, char *refparam, char *obj, size_t
 	}
 }
 
-static char *uci_get_value(json_object *mapping_obj, char *refparam, struct dmctx *ctx, void *data, char *instance)
+static char *uci_get_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance)
 {
 	struct json_object *obj = NULL;
 	struct json_object *file = NULL;
@@ -446,7 +480,6 @@ static char *uci_get_value(json_object *mapping_obj, char *refparam, struct dmct
 	struct json_object *option = NULL;
 	struct json_object *option_name = NULL;
 	struct json_object *path = NULL;
-	struct json_object *ref = NULL;
 	char *value = "";
 
 	json_object_object_get_ex(mapping_obj, "uci", &obj);
@@ -457,7 +490,21 @@ static char *uci_get_value(json_object *mapping_obj, char *refparam, struct dmct
 	json_object_object_get_ex(obj, "option", &option);
 	json_object_object_get_ex(option, "name", &option_name);
 	json_object_object_get_ex(obj, "path", &path);
-	json_object_object_get_ex(obj, "ref", &ref);
+
+	if (file && type && option_name && strstr(refparam, "NumberOfEntries") && json_version == JSON_VERSION_1) {
+
+		if (strcmp(json_object_get_string(option_name), "@Count") != 0)
+			goto end;
+
+		struct uci_section *s = NULL;
+		int cnt = 0;
+
+		uci_foreach_sections(json_object_get_string(file), json_object_get_string(type), s) {
+			cnt++;
+		}
+		dmasprintf(&value, "%d", cnt);
+		goto end;
+	}
 
 	if (data && file && type && option_name) {
 		if (strcmp(json_object_get_string(option_name), "@Name") == 0) {
@@ -466,13 +513,6 @@ static char *uci_get_value(json_object *mapping_obj, char *refparam, struct dmct
 			char uci_type[32] = {0};
 			snprintf(uci_type, sizeof(uci_type), "@%s[%d]", json_object_get_string(type), instance ? atoi(instance)-1 : 0);
 			value = bbf_uci_get_value(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name));
-			if (ref) {
-				char *linker = dmstrdup(value);
-				adm_entry_get_linker_param(ctx, json_object_get_string(path), linker, &value);
-				dmfree(linker);
-				if (value == NULL)
-					value = "";
-			}
 		}
 	} else if (file && section_name && option_name) {
 		value = bbf_uci_get_value(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), json_object_get_string(option_name));
@@ -481,10 +521,11 @@ static char *uci_get_value(json_object *mapping_obj, char *refparam, struct dmct
 	if (strstr(refparam, "Alias") && value[0] == '\0')
 		dmasprintf(&value, "cpe-%s", instance);
 
+end:
 	return value;
 }
 
-static char *ubus_get_value(json_object *mapping_obj, char *refparam, struct dmctx *ctx, void *data, char *instance)
+static char *ubus_get_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance)
 {
 	struct json_object *ubus_obj = NULL;
 	struct json_object *object = NULL;
@@ -508,14 +549,14 @@ static char *ubus_get_value(json_object *mapping_obj, char *refparam, struct dmc
 	if ((opt = strstr(json_object_get_string(object), "@Name"))) {
 		*opt = '\0';
 		snprintf(arg2_1, sizeof(arg2_1), "%s%s", json_object_get_string(object), section_name((struct uci_section *)data));
-	} else if ((opt = strstr(json_object_get_string(object), "@i-1"))) {
+	} else if ((opt = strstr(json_object_get_string(object), (json_version == JSON_VERSION_1) ? "@index" : "@i-1"))) {
 		*opt = '\0';
 		snprintf(arg2_1, sizeof(arg2_1), "%s%d", json_object_get_string(object), atoi(instance) - 1);
 	} else {
 		DM_STRNCPY(arg2_1, json_object_get_string(object), sizeof(arg2_1));
 	}
 
-	if (args1 && args2) {
+	if (args1 && args2 && method) {
 		if (data && (strcmp(json_object_get_string(args2), "@Name") == 0)) {
 			dmubus_call(arg2_1, json_object_get_string(method), UBUS_ARGS{{args1, section_name((struct uci_section *)data), String}}, 1, &res);
 		} else if (strstr(json_object_get_string(args2), "{i}")) {
@@ -530,23 +571,91 @@ static char *ubus_get_value(json_object *mapping_obj, char *refparam, struct dmc
 		dmubus_call(arg2_1, json_object_get_string(method), UBUS_ARGS{0}, 0, &res);
 	}
 
-	if (json_object_get_string(key)) {
+	if (key && strstr(refparam, "NumberOfEntries") && json_version == JSON_VERSION_1) {
+		char buf[64] = {0};
+		char *str = NULL;
+
+		DM_STRNCPY(buf, json_object_get_string(key), sizeof(buf));
+		if ((str = strstr(buf, ".@Count")) == NULL || res == NULL)
+			goto end;
+
+		json_object *arr_obj = NULL;
+		int nbre_entries = 0;
+		*str = 0;
+
+		json_object_object_get_ex(res, buf, &arr_obj);
+		nbre_entries = (arr_obj) ? json_object_array_length(arr_obj) : 0;
+		dmasprintf(&value, "%d", nbre_entries);
+		goto end;
+	}
+
+	if (key) {
 		char arg6_buf[128] = "";
 
 		DM_STRNCPY(arg6_buf, json_object_get_string(key), sizeof(arg6_buf));
-		char *is_array = strstr(arg6_buf, "[@i-1]");
+		char *is_array = strstr(arg6_buf, (json_version == JSON_VERSION_1) ? "[@index]" : "[@i-1]");
 		if (is_array) {
-			char *arguments = is_array + sizeof("[@i-1]");
+			char *arguments = (json_version == JSON_VERSION_1) ? is_array + sizeof("[@index]") : is_array + sizeof("[@i-1]");
 			value = get_param_ubus_value((json_object *)data, arguments);
 		} else {
 			value = get_param_ubus_value(res, arg6_buf);
 		}
 	}
 
+end:
 	return value;
 }
 
-static char *get_value_from_mapping(json_object *param_obj, char *refparam, struct dmctx *ctx, void *data, char *instance)
+static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct dmctx *ctx, void *data, char *instance)
+{
+	struct json_object *data_s = NULL;
+	struct json_object *key = NULL;
+	char *value = "";
+
+	json_object_object_get_ex(mapping_obj, "data", &data_s);
+	json_object_object_get_ex(mapping_obj, "key", &key);
+
+	if (data == NULL || data_s == NULL || (data_s && strcmp(json_object_get_string(data_s), "@Parent") != 0))
+		goto end;
+
+
+	if (key) {
+		if (strcmp(json_object_get_string(key), "@Name") == 0) {
+			dmasprintf(&value, "%s", section_name((struct uci_section *)data));
+		} else {
+			dmuci_get_value_by_section_string((struct uci_section *)data, json_object_get_string(key), &value);
+		}
+	}
+
+end:
+	return value;
+}
+
+static char *ubus_v1_get_value(json_object *mapping_obj, char *refparam, struct dmctx *ctx, void *data, char *instance)
+{
+	struct json_object *data_json = NULL;
+	struct json_object *key = NULL;
+	char *value = "";
+
+	json_object_object_get_ex(mapping_obj, "data", &data_json);
+	json_object_object_get_ex(mapping_obj, "key", &key);
+
+	if (data == NULL || data_json == NULL || (data_json && strcmp(json_object_get_string(data_json), "@Parent") != 0))
+		goto end;
+
+	if (key) {
+		char key_buf[128] = "";
+
+		DM_STRNCPY(key_buf, json_object_get_string(key), sizeof(key_buf));
+		value = get_param_ubus_value((json_object *)data, key_buf);
+
+	}
+
+end:
+	return value;
+}
+
+static char *get_value_from_mapping(json_object *param_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance)
 {
 	struct json_object *mapping_arr = NULL, *mapping = NULL;
 
@@ -554,20 +663,30 @@ static char *get_value_from_mapping(json_object *param_obj, char *refparam, stru
 		return "";
 
 	json_object_object_get_ex(param_obj, "mapping", &mapping_arr);
-	if (mapping_arr && json_object_get_type(mapping_arr) == json_type_array)
-		mapping = json_object_array_get_idx(mapping_arr, 0);
+	if (mapping_arr && json_object_get_type(mapping_arr) == json_type_array) {
 
-	if (mapping) {
-		struct json_object *type = NULL;
+		for (int idx = 0; (mapping = json_object_array_get_idx(mapping_arr, idx)) != NULL; idx++) {
+			struct json_object *type = NULL;
+			struct json_object *rpc = NULL;
 
-		json_object_object_get_ex(mapping, "type", &type);
+			json_object_object_get_ex(mapping, "rpc", &rpc);
+			json_object_object_get_ex(mapping, "type", &type);
 
-		if (type && strcmp(json_object_get_string(type), "uci") == 0)
-			return uci_get_value(mapping, refparam, ctx, data, instance);
-		else if (type && strcmp(json_object_get_string(type), "ubus") == 0)
-			return ubus_get_value(mapping, refparam, ctx, data, instance);
-		else
-			return "";
+			if (rpc && json_version == JSON_VERSION_1 && strcmp(json_object_get_string(rpc), "get") != 0)
+				continue;
+
+			if (type && strcmp(json_object_get_string(type), "uci") == 0)
+				return uci_get_value(mapping, json_version, refparam, ctx, data, instance);
+			else if (type && strcmp(json_object_get_string(type), "ubus") == 0)
+				return ubus_get_value(mapping, json_version, refparam, ctx, data, instance);
+			else if (type && strcmp(json_object_get_string(type), "uci_sec") == 0 && json_version == JSON_VERSION_1)
+				return uci_v1_get_value(mapping, refparam, ctx, data, instance);
+			else if (type && strcmp(json_object_get_string(type), "json") == 0 && json_version == JSON_VERSION_1)
+				return ubus_v1_get_value(mapping, refparam, ctx, data, instance);
+			else
+				return "";
+		}
+
 	}
 
 	return "";
@@ -577,20 +696,22 @@ static int getvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 {
 	struct dm_json_obj *pleaf = NULL;
 	json_object *param_obj = NULL;
+	int json_version = JSON_VERSION_0;
 
 	char *obj = generate_path_without_instance(refparam, false);
 	list_for_each_entry(pleaf, &json_list, list) {
 		if (strcmp(pleaf->name, obj) == 0) {
 			param_obj = pleaf->data;
+			json_version = pleaf->json_version;
 			break;
 		}
 	}
 
-	*value = get_value_from_mapping(param_obj, refparam, ctx, data, instance);
+	*value = get_value_from_mapping(param_obj, json_version, refparam, ctx, data, instance);
 	return 0;
 }
 
-static int ubus_set_operate(json_object *mapping_obj, struct dmctx *ctx, void *data, void *value, char *instance)
+static int ubus_set_operate(json_object *mapping_obj, int json_version, struct dmctx *ctx, void *data, void *value, char *instance)
 {
 	struct json_object *ubus_obj = NULL;
 	struct json_object *object = NULL;
@@ -605,7 +726,7 @@ static int ubus_set_operate(json_object *mapping_obj, struct dmctx *ctx, void *d
 	if ((opt = strstr(json_object_get_string(object), "@Name"))) {
 		*opt = '\0';
 		snprintf(obj_name, sizeof(obj_name), "%s%s", json_object_get_string(object), section_name((struct uci_section *)data));
-	} else if ((opt = strstr(json_object_get_string(object), "@i-1"))) {
+	} else if ((opt = strstr(json_object_get_string(object), (json_version == JSON_VERSION_1) ? "@index" : "@i-1"))) {
 		*opt = '\0';
 		snprintf(obj_name, sizeof(obj_name), "%s%d", json_object_get_string(object), atoi(instance) - 1);
 	} else {
@@ -622,40 +743,6 @@ static int ubus_set_operate(json_object *mapping_obj, struct dmctx *ctx, void *d
 	}
 
 	return CMD_SUCCESS;
-}
-
-static int setcommand_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	struct dm_json_obj *leaf_node = NULL;
-	struct json_object *p_obj = NULL, *map_arr = NULL, *map_obj = NULL, *type = NULL;
-
-	char *obj = generate_path_without_instance(refparam, false);
-	list_for_each_entry(leaf_node, &json_list, list) {
-		if (strcmp(leaf_node->name, obj) == 0) {
-			p_obj = leaf_node->data;
-			break;
-		}
-	}
-
-	if (p_obj == NULL) {
-		return CMD_FAIL;
-	}
-
-	json_object_object_get_ex(p_obj, "mapping", &map_arr);
-	if (map_arr && json_object_get_type(map_arr) == json_type_array)
-		map_obj = json_object_array_get_idx(map_arr, 0);
-
-	if (!map_obj) {
-		return CMD_FAIL;
-	}
-
-	json_object_object_get_ex(map_obj, "type", &type);
-
-	if (type && strcmp(json_object_get_string(type), "ubus") == 0) {
-		return ubus_set_operate(map_obj, ctx, data, value, instance);
-	}
-
-	return CMD_FAIL;
 }
 
 static int getcommand_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -678,6 +765,42 @@ static int getcommand_param(char *refparam, struct dmctx *ctx, void *data, char 
 	}
 
 	return 0;
+}
+
+static int setcommand_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct dm_json_obj *leaf_node = NULL;
+	struct json_object *p_obj = NULL, *map_arr = NULL, *map_obj = NULL, *type = NULL;
+	int json_version = JSON_VERSION_0;
+
+	char *obj = generate_path_without_instance(refparam, false);
+	list_for_each_entry(leaf_node, &json_list, list) {
+		if (strcmp(leaf_node->name, obj) == 0) {
+			p_obj = leaf_node->data;
+			json_version = leaf_node->json_version;
+			break;
+		}
+	}
+
+	if (p_obj == NULL) {
+		return CMD_FAIL;
+	}
+
+	json_object_object_get_ex(p_obj, "mapping", &map_arr);
+	if (map_arr && json_object_get_type(map_arr) == json_type_array)
+		map_obj = json_object_array_get_idx(map_arr, 0);
+
+	if (!map_obj) {
+		return CMD_FAIL;
+	}
+
+	json_object_object_get_ex(map_obj, "type", &type);
+
+	if (type && strcmp(json_object_get_string(type), "ubus") == 0) {
+		return ubus_set_operate(map_obj, json_version, ctx, data, value, instance);
+	}
+
+	return CMD_FAIL;
 }
 
 static int getevent_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -907,7 +1030,101 @@ static int dm_validate_value(json_object *json_obj, char *value)
 	return 0;
 }
 
-static void set_value_from_mapping(json_object *param_obj, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)
+static void uci_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)
+{
+	struct json_object *uci_obj = NULL;
+	struct json_object *file = NULL;
+	struct json_object *section = NULL;
+	struct json_object *type = NULL;
+	struct json_object *section_name = NULL;
+	struct json_object *option = NULL;
+	struct json_object *option_name = NULL;
+	struct json_object *path = NULL;
+
+	json_object_object_get_ex(mapping_obj, "uci", &uci_obj);
+	json_object_object_get_ex(uci_obj, "file", &file);
+	json_object_object_get_ex(uci_obj, "section", &section);
+	json_object_object_get_ex(section, "type", &type);
+	json_object_object_get_ex(section, "name", &section_name);
+	json_object_object_get_ex(uci_obj, "option", &option);
+	json_object_object_get_ex(option, "name", &option_name);
+	json_object_object_get_ex(uci_obj, "path", &path);
+
+	if (data && file && type && option_name) {
+		char uci_type[32] = {0};
+
+		snprintf(uci_type, sizeof(uci_type), "@%s[%d]", json_object_get_string(type), instance ? atoi(instance)-1 : 0);
+		bbf_uci_set_value(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name), value);
+	} else if (file && section_name && option_name) {
+		bbf_uci_set_value(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), json_object_get_string(option_name), value);
+	}
+}
+
+static void ubus_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)
+{
+	struct json_object *ubus_obj = NULL;
+	struct json_object *object = NULL;
+	struct json_object *method = NULL;
+	struct json_object *args = NULL;
+	char *args1 = NULL, *opt = NULL;
+	char obj_buf[128] = {0};
+	char object_buf[256] = {0};
+
+	json_object_object_get_ex(mapping_obj, "ubus", &ubus_obj);
+	json_object_object_get_ex(ubus_obj, "object", &object);
+	json_object_object_get_ex(ubus_obj, "method", &method);
+	json_object_object_get_ex(ubus_obj, "args", &args);
+	json_object_object_foreach(args, arg1, args2) {
+		args1 = arg1;
+	}
+
+	DM_STRNCPY(obj_buf, json_object_get_string(object), sizeof(obj_buf));
+
+	if ((opt = strstr(obj_buf, "@Name"))) {
+		*opt = '\0';
+		snprintf(object_buf, sizeof(object_buf), "%s%s", obj_buf, section_name((struct uci_section *)data));
+	} else if ((opt = strstr(obj_buf, (json_version == JSON_VERSION_1) ? "@index" : "@i-1"))) {
+		*opt = '\0';
+		snprintf(object_buf, sizeof(object_buf), "%s%d", obj_buf, atoi(instance) - 1);
+	} else {
+		DM_STRNCPY(object_buf, json_object_get_string(object), sizeof(object_buf));
+	}
+
+	if (args1 && args2 && method) {
+		if (data && (strcmp(json_object_get_string(args2), "@Name") == 0)) {
+			dmubus_call_set(object_buf, json_object_get_string(method), UBUS_ARGS{{args1, section_name((struct uci_section *)data), String}}, 1);
+		} else if (strstr(json_object_get_string(args2), "{i}")) {
+			char arg2_buf[512] = {0};
+
+			replace_indexes(ctx, json_object_get_string(args2), arg2_buf, sizeof(arg2_buf));
+			dmubus_call_set(object_buf, json_object_get_string(method), UBUS_ARGS{{args1, arg2_buf, String}}, 1);
+		} else if (strcmp(json_object_get_string(args2), "@Value") == 0) {
+			dmubus_call_set(object_buf, json_object_get_string(method), UBUS_ARGS{{args1, value, String}}, 1);
+		} else {
+			dmubus_call_set(object_buf, json_object_get_string(method), UBUS_ARGS{{args1, json_object_get_string(args2), String}}, 1);
+		}
+	} else {
+		dmubus_call_set(object_buf, json_object_get_string(method), UBUS_ARGS{0}, 0);
+	}
+}
+
+static void uci_v1_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)
+{
+	struct json_object *data_s = NULL;
+	struct json_object *key = NULL;
+
+	json_object_object_get_ex(mapping_obj, "data", &data_s);
+	json_object_object_get_ex(mapping_obj, "key", &key);
+
+	if (data == NULL || data_s == NULL || (data_s && strcmp(json_object_get_string(data_s), "@Parent") != 0))
+		return;
+
+	if (key) {
+		dmuci_set_value_by_section((struct uci_section *)data, json_object_get_string(key), value);
+	}
+}
+
+static void set_value_from_mapping(json_object *param_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)
 {
 	struct json_object *mapping_arr = NULL, *mapping = NULL;
 
@@ -915,50 +1132,28 @@ static void set_value_from_mapping(json_object *param_obj, char *refparam, struc
 		return;
 
 	json_object_object_get_ex(param_obj, "mapping", &mapping_arr);
-	if (mapping_arr && json_object_get_type(mapping_arr) == json_type_array)
-		mapping = json_object_array_get_idx(mapping_arr, 0);
+	if (mapping_arr && json_object_get_type(mapping_arr) == json_type_array) {
 
-	if (mapping) {
-		struct json_object *type = NULL;
+		for (int idx = 0; (mapping = json_object_array_get_idx(mapping_arr, idx)) != NULL; idx++) {
+			struct json_object *type = NULL;
+			struct json_object *rpc = NULL;
 
-		json_object_object_get_ex(mapping, "type", &type);
+			json_object_object_get_ex(mapping, "rpc", &rpc);
+			json_object_object_get_ex(mapping, "type", &type);
 
-		if (type && strcmp(json_object_get_string(type), "uci") == 0) {
-			struct json_object *uci_obj = NULL;
-			struct json_object *file = NULL;
-			struct json_object *section = NULL;
-			struct json_object *section_name = NULL;
-			struct json_object *option = NULL;
-			struct json_object *option_name = NULL;
-			struct json_object *path = NULL;
-			struct json_object *ref = NULL;
+			if (rpc && json_version == JSON_VERSION_1 && strcmp(json_object_get_string(rpc), "set") != 0)
+				continue;
 
-			json_object_object_get_ex(mapping, "uci", &uci_obj);
-			json_object_object_get_ex(uci_obj, "file", &file);
-			json_object_object_get_ex(uci_obj, "section", &section);
-			json_object_object_get_ex(section, "type", &type);
-			json_object_object_get_ex(section, "name", &section_name);
-			json_object_object_get_ex(uci_obj, "option", &option);
-			json_object_object_get_ex(option, "name", &option_name);
-			json_object_object_get_ex(uci_obj, "path", &path);
-			json_object_object_get_ex(uci_obj, "ref", &ref);
+			if (type && strcmp(json_object_get_string(type), "uci") == 0)
+				uci_set_value(mapping, json_version, refparam, ctx, data, instance, value);
+			else if (type && strcmp(json_object_get_string(type), "ubus") == 0)
+				ubus_set_value(mapping, json_version, refparam, ctx, data, instance, value);
+			else if (type && strcmp(json_object_get_string(type), "uci_sec") == 0 && json_version == JSON_VERSION_1)
+				uci_v1_set_value(mapping, json_version, refparam, ctx, data, instance, value);
+			else
+				return;
+		}
 
-			if (data && file && type && option_name) {
-				char uci_type[32] = {0};
-				snprintf(uci_type, sizeof(uci_type), "@%s[%d]", json_object_get_string(type), instance ? atoi(instance)-1 : 0);
-				if (ref) {
-					char *linker;
-					adm_entry_get_linker_value(ctx, value, &linker);
-					if (linker) bbf_uci_set_value(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name), linker);
-					dmfree(linker);
-				} else {
-					bbf_uci_set_value(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name), value);
-				}
-			} else if (file && section_name && option_name) {
-				bbf_uci_set_value(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), json_object_get_string(option_name), value);
-			}
-		} else
-			return;
 	}
 }
 
@@ -966,11 +1161,13 @@ static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 {
 	struct dm_json_obj *pleaf = NULL;
 	json_object *param_obj = NULL;
+	int json_version = JSON_VERSION_0;
 
 	char *obj = generate_path_without_instance(refparam, false);
 	list_for_each_entry(pleaf, &json_list, list) {
 		if (strcmp(pleaf->name, obj) == 0) {
 			param_obj = pleaf->data;
+			json_version = pleaf->json_version;
 			break;
 		}
 	}
@@ -981,7 +1178,7 @@ static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			set_value_from_mapping(param_obj, refparam, ctx, data, instance, value);
+			set_value_from_mapping(param_obj, json_version, refparam, ctx, data, instance, value);
 			break;
 	}
 
@@ -999,12 +1196,12 @@ static bool is_obj(char *object, json_object *jobj)
 	return false;
 }
 
-static void parse_mapping_obj(char *object, json_object *mapping_obj, struct list_head *list)
+static void parse_mapping_obj(char *object, json_object *mapping_obj, int json_version, struct list_head *list)
 {
 	if (!mapping_obj)
 		return;
 
-	save_json_data(list, object, mapping_obj, NULL, NULL, NULL);
+	save_json_data(list, object, mapping_obj, json_version, NULL, NULL, NULL);
 }
 
 static bool valid_event_param(char *param)
@@ -1044,7 +1241,7 @@ static char** fill_command_param(int count, struct json_object *obj)
 	return res_p;
 }
 
-static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pleaf, int i, struct list_head *list)
+static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pleaf, int i, int json_version, struct list_head *list)
 {
 	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(6)*/
 	struct json_object *type = NULL, *protocols = NULL, *write = NULL, *async = NULL, *version =  NULL;;
@@ -1120,7 +1317,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 			ev_arg[param_count - 1] = NULL;
 		}
 
-		pleaf[i].getvalue = getevent_param;
+		pleaf[i].getvalue = ev_arg ? getevent_param : NULL;
 	} else if (pleaf[i].type == DMT_COMMAND) {
 		struct json_object *input_obj = NULL, *output_obj = NULL;
 
@@ -1173,12 +1370,10 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	
 	//Version
 	json_object_object_get_ex(jobj, "version", &version);
-	if(version)
-		DM_STRNCPY(pleaf[i].version, json_object_get_string(version), 10);
-
+	DM_STRNCPY(pleaf[i].version, version ? json_object_get_string(version) : "", 10);
 
 	snprintf(full_param, sizeof(full_param), "%s%s", object, param);
-	save_json_data(list, full_param, jobj, (const char**)in_p, (const char**)out_p, (const char**)ev_arg);
+	save_json_data(list, full_param, jobj, json_version, (const char**)in_p, (const char**)out_p, (const char**)ev_arg);
 }
 
 static void count_obj_param_under_jsonobj(json_object *jsonobj, int *obj_number, int *param_number)
@@ -1198,7 +1393,7 @@ static void count_obj_param_under_jsonobj(json_object *jsonobj, int *obj_number,
 	}
 }
 
-static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, struct list_head *list)
+static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json_version, struct list_head *list)
 {
 	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys(13)*/
 
@@ -1275,20 +1470,22 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, s
 			pobj[index].get_linker = NULL;
 		}
 		//Version
-		if(strcmp(key,"version")==0)
+		if (strcmp(key,"version") == 0)
 			DM_STRNCPY(pobj[index].version, json_object_get_string(json_obj), 10);
 
-		if (strcmp(key, "mapping") == 0 && json_object_get_type(json_obj) == json_type_object) {
-			parse_mapping_obj(full_obj, json_obj, list);
+		if (strcmp(key, "mapping") == 0 &&
+				((json_object_get_type(json_obj) == json_type_object && json_version == JSON_VERSION_0) ||
+				(json_object_get_type(json_obj) == json_type_array && json_version == JSON_VERSION_1))) {
+			parse_mapping_obj(full_obj, json_obj, json_version, list);
 		}
 
 		if (json_object_get_type(json_obj) == json_type_object && is_obj(key, json_obj)) {
-			parse_obj(key, json_obj, next_obj, j, list);
+			parse_obj(key, json_obj, next_obj, j, json_version, list);
 			j++;
 		}
 
 		if (json_object_get_type(json_obj) == json_type_object && !is_obj(key, json_obj) && strcmp(key, "mapping") != 0) {
-			parse_param(full_obj, key, json_obj, next_leaf, i, list);
+			parse_param(full_obj, key, json_obj, next_leaf, i, json_version, list);
 			i++;
 		}
 	}
@@ -1306,6 +1503,8 @@ int load_json_dynamic_arrays(struct dmctx *ctx)
 				continue;
 
 			char buf[512] = {0};
+			int json_plugin_version = JSON_VERSION_0;
+
 			snprintf(buf, sizeof(buf), "%s/%s", JSON_FOLDER_PATH, ent->d_name);
 
 			json_object *json = json_object_from_file(buf);
@@ -1314,6 +1513,11 @@ int load_json_dynamic_arrays(struct dmctx *ctx)
 			json_object_object_foreach(json, key, jobj) {
 				if (!key)
 					break;
+
+				if (strcmp(key, "json_plugin_version") == 0) {
+					json_plugin_version = json_object_get_int(jobj);
+					continue;
+				}
 
 				DMOBJ *dm_entryobj = NULL;
 				char *obj_prefix = find_prefix_obj(key);
@@ -1335,12 +1539,12 @@ int load_json_dynamic_arrays(struct dmctx *ctx)
 
 				if (dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] == NULL) {
 					dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_calloc(&json_memhead, 2, sizeof(struct dm_obj_s));
-					parse_obj(key, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], 0, &json_list);
+					parse_obj(key, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], 0, json_plugin_version, &json_list);
 				} else {
 					int idx = get_index_of_available_entry(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0]);
 					dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_realloc(&json_memhead, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
 					memset(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
-					parse_obj(key, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], idx, &json_list);
+					parse_obj(key, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], idx, json_plugin_version, &json_list);
 				}
 			}
 			save_loaded_json_files(&loaded_json_files, json);

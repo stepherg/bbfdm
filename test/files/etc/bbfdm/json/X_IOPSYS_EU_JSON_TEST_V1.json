@@ -1,0 +1,401 @@
+{
+	"json_plugin_version": 1,
+	"Device.UCI_TEST_V1.": {
+		"type": "object",
+		"version": "2.14",
+		"protocols": [
+			"cwmp",
+			"usp"
+		],
+		"access": false,
+		"array": false,
+		"Password": {
+			"type": "string",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"mapping": [
+				{
+					"rpc": "get"
+				},
+				{
+					"rpc": "set",
+					"type": "uci",
+					"uci": {
+						"file": "users",
+						"section": {
+							"name": "user"
+						},
+						"option": {
+							"name": "password_required"
+						}
+					}
+				}
+			]
+		},
+		"OWSDNumberOfEntries": {
+			"type": "unsignedInt",
+			"read": true,
+			"write": false,
+			"version": "2.14",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],			
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "owsd",
+						"section": {
+							"type": "owsd-listen"
+						},
+						"option": {
+							"name": "@Count"
+						}
+					}
+				}
+			]	
+		},		
+		"Device.UCI_TEST_V1.OWSD.{i}.": {
+			"type": "object",
+			"version": "2.14",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"access": true,
+			"array": true,
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "owsd", 
+						"section": {
+							"type": "owsd-listen"
+						}, 
+						"dmmapfile": "dmmap_owsd"
+					}
+				}
+			],
+			"IPv6": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.14",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "ipv6"
+					}
+				]
+			},
+			"Port": {
+				"type": "unsignedInt",
+				"version": "2.14",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"range": [
+					{
+						"min": 0,
+						"max": 65535
+					}
+				],
+				"mapping": [
+					{
+						"type": "uci", 
+						"uci": {
+							"file": "owsd", 
+							"section": {
+								"type": "owsd-listen"
+							}, 
+							"option": {
+								"name": "port"
+							}
+						}
+					}
+				]
+			},
+			"Password": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.14",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"mapping": [
+					{
+						"rpc": "get"
+					},
+					{
+						"rpc": "set",
+						"type": "uci", 
+						"uci": {
+							"file": "owsd", 
+							"section": {
+								"type": "owsd-listen"
+							}, 
+							"option": {
+								"name": "password"
+							}
+						}						
+					}
+				]
+			}
+		}
+	},
+	"Device.UBUS_TEST_V1.": {
+		"type": "object",
+		"version": "2.14",
+		"protocols": [
+			"cwmp",
+			"usp"
+		],
+		"access": false,
+		"array": false,
+		"Uptime": {
+			"type": "string",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"mapping": [
+				{
+					"rpc": "get",
+					"type": "ubus",
+					"ubus": {
+						"object": "network.interface",
+						"method": "status",
+						"args": {
+							"interface":"lan"
+						},
+						"key": "uptime"
+					}
+				},
+				{
+					"rpc": "set",
+					"type": "ubus",
+					"ubus": {
+						"object": "network.interface",
+						"method": "status",
+						"args": {"interface":"@Value"}
+					}
+				}
+			]
+		},
+		"InterfaceNumberOfEntries": {
+			"type": "unsignedInt",
+			"read": true,
+			"write": false,
+			"version": "2.14",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],			
+			"mapping": [
+				{
+					"type": "ubus",
+					"ubus": {
+						"object": "ieee1905",
+						"method": "info",
+						"args": {},
+						"key": "interface.@Count"
+					}
+				}
+			]
+		},
+		"Device.UBUS_TEST_V1.Interface.{i}.": {
+			"type": "object",
+			"version": "2.14",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"access": false,
+			"array": true,
+			"mapping": [
+				{
+					"type": "ubus",
+					"ubus": {
+						"object": "ieee1905",
+						"method": "info",
+						"args": {},
+						"key": "interface"
+					}
+				}
+			],
+			"MacAddress": {
+				"type": "string",
+				"read": true,
+				"write": false,
+				"version": "2.14",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "json",
+						"key": "macaddress"
+					}
+				]
+			},
+			"Ifname": {
+				"type": "string",
+				"version": "2.14",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"mapping": [
+					{
+						"type": "ubus", 
+						"ubus": {
+							"object": "ieee1905",
+							"method": "info",
+							"args": {},
+							"key": "interface[@index].ifname"
+						}
+					}
+				]
+			},
+			"Media": {
+				"type": "string",
+				"version": "2.14",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"mapping": [
+					{
+						"rpc": "get",
+						"type": "ubus", 
+						"ubus": {
+							"object": "ieee1905",
+							"method": "info",
+							"args": {},
+							"key": "interface[@index].media"
+						}
+					}
+				]
+			},	
+			"Push!": {
+				"type": "event",
+				"version": "2.14",
+				"protocols": [
+					"usp"
+				],
+				"Data": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.14",
+					"protocols": [
+						"usp"
+					]
+				},
+				"Status": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.14",
+					"protocols": [
+						"usp"
+					]
+				},
+				"Value": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.14",
+					"protocols": [
+						"usp"
+					]
+				}
+			},
+			"Periodic!": {
+				"type": "event",
+				"version": "2.13",
+				"protocols": [
+					"usp"
+				]
+			},
+			"Status()": {
+				"type": "command",
+				"async": true,
+				"version" : "2.12",
+				"protocols": [
+					"usp"
+				],
+				"input": {
+					"Option" : {
+						"type" : "string",
+						"read" : "true",
+						"write" : "true",
+						"protocol" : [
+							"usp"
+						]
+					},
+					"Value" : {
+						"type" : "string",
+						"read" : "true",
+						"write" : "true",
+						"protocol" : [
+							"usp"
+						]
+					}				
+				},
+				"output": {
+					"Result" : {
+						"type" : "string",
+						"read" : "true",
+						"write" : "false",
+						"protocol" : [
+							"usp"
+						]
+					},
+					"Value" : {
+						"type" : "string",
+						"read" : "true",
+						"write" : "false",
+						"protocol" : [
+							"usp"
+						]
+					}
+				},
+				"mapping": [
+					{
+						"type" : "ubus",
+						"ubus" : {
+							"object" : "test",
+							"method" : "status"
+						}
+					}
+				]
+			}
+		}
+	}	
+}

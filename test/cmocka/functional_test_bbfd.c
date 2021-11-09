@@ -181,6 +181,185 @@ static void test_api_bbfdm_get_set_json_parameter(void **state)
 	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.2.Stats.BytesSent", "14417451", "xsd:unsignedInt");
 }
 
+static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	char *value = NULL;
+	int fault = 0;
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UCI_TEST_V1.Password", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UCI_TEST_V1.Password", "", "xsd:string");
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UCI_TEST_V1.Password", "iopsys_test", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UCI_TEST_V1.Password", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UCI_TEST_V1.Password", "", "xsd:string");
+
+	// validate uci config
+	fault = dmuci_get_option_value_string("users", "user", "password_required", &value);
+	assert_int_equal(fault, 0);
+	assert_string_equal(value, "iopsys_test");
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UCI_TEST_V1.OWSDNumberOfEntries", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSDNumberOfEntries", "3", "xsd:unsignedInt");
+
+	// set value ==> expected "9008" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UCI_TEST_V1.OWSDNumberOfEntries", "5", NULL);
+	assert_int_equal(fault, FAULT_9008);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UCI_TEST_V1.OWSD.2.IPv6", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.2.IPv6", "off", "xsd:unsignedInt");
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UCI_TEST_V1.OWSD.2.IPv6", "on", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UCI_TEST_V1.OWSD.2.IPv6", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.2.IPv6", "on", "xsd:unsignedInt");
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UCI_TEST_V1.OWSD.1.Port", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.1.Port", "80", "xsd:unsignedInt");
+
+	// set value ==> expected "9007" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UCI_TEST_V1.OWSD.1.Port", "65536", NULL);
+	assert_int_equal(fault, FAULT_9007);
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UCI_TEST_V1.OWSD.1.Port", "8081", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UCI_TEST_V1.OWSD.1.Port", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.1.Port", "8081", "xsd:unsignedInt");
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UCI_TEST_V1.OWSD.3.Password", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.3.Password", "", "xsd:string");
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UCI_TEST_V1.OWSD.3.Password", "owsd_pwd", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UCI_TEST_V1.OWSD.3.Password", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.3.Password", "", "xsd:string");
+
+	// validate uci config
+	fault = dmuci_get_option_value_string("owsd", "@owsd-listen[2]", "password", &value);
+	assert_int_equal(fault, 0);
+	assert_string_equal(value, "owsd_pwd");
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UBUS_TEST_V1.Uptime", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UBUS_TEST_V1.Uptime", "5859", "xsd:string");
+
+	// set value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UBUS_TEST_V1.Uptime", "lan", NULL);
+	assert_int_equal(fault, 0);
+
+	// apply value ==> expected "0" error
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	assert_int_equal(fault, 0);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UBUS_TEST_V1.InterfaceNumberOfEntries", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UBUS_TEST_V1.InterfaceNumberOfEntries", "4", "xsd:unsignedInt");
+
+	// set value ==> expected "9008" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UBUS_TEST_V1.InterfaceNumberOfEntries", "5", NULL);
+	assert_int_equal(fault, FAULT_9008);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UBUS_TEST_V1.Interface.3.MacAddress", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UBUS_TEST_V1.Interface.3.MacAddress", "44:d4:37:71:b8:1f", "xsd:string");
+
+	// set value ==> expected "9008" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UBUS_TEST_V1.Interface.3.MacAddress", "49:d4:40:71:7e:55", NULL);
+	assert_int_equal(fault, FAULT_9008);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UBUS_TEST_V1.Interface.4.Ifname", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UBUS_TEST_V1.Interface.4.Ifname", "wl1", "xsd:string");
+
+	// set value ==> expected "9008" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UBUS_TEST_V1.Interface.4.Ifname", "lan5", NULL);
+	assert_int_equal(fault, FAULT_9008);
+
+	// get value ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UBUS_TEST_V1.Interface.2.Media", NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UBUS_TEST_V1.Interface.2.Media", "IEEE 802_3AB_GIGABIT_ETHERNET", "xsd:string");
+
+	// set value ==> expected "9008" error
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UBUS_TEST_V1.Interface.2.Media", "IEEE 802_11AX_5_GHZ", NULL);
+	assert_int_equal(fault, FAULT_9008);
+}
+
 static void test_api_bbfdm_get_set_library_parameter(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -910,6 +1089,48 @@ static void test_api_bbfdm_add_del_json_object(void **state)
 	assert_int_equal(fault, FAULT_9005);
 }
 
+static void test_api_bbfdm_add_del_json_v1_object(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	int fault = 0;
+
+	// Get name object ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.UCI_TEST_V1.OWSD.", "1", NULL);
+	assert_int_equal(fault, 0);
+
+	// add object ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.UCI_TEST_V1.OWSD.", "test", NULL);
+	assert_int_equal(fault, 0);
+
+	// check the new instance
+	assert_non_null(ctx->addobj_instance);
+	assert_string_equal(ctx->addobj_instance, "4");
+
+	// delete object ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.UCI_TEST_V1.OWSD.2.", "test_key", NULL);
+	assert_int_equal(fault, 0);
+
+	// Get name object after deleting instance 2 ==> expected "9005" error
+	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.UCI_TEST_V1.OWSD.2.", "1", NULL);
+	assert_int_equal(fault, FAULT_9005);
+
+	// delete all object ==> expected "0" error
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.UCI_TEST_V1.OWSD.", "test", NULL);
+	assert_int_equal(fault, 0);
+
+	// Get name object after deleting all instances ==> expected "9005" error
+	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.UCI_TEST_V1.OWSD.1.", "1", NULL);
+	assert_int_equal(fault, FAULT_9005);
+
+	// add object ==> expected "9005" error
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.UBUS_TEST_V1.Interface.", "test_key", NULL);
+	assert_int_equal(fault, FAULT_9005);
+
+	// delete all object ==> expected "9005" error
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.UBUS_TEST_V1.Interface.", "test", NULL);
+	assert_int_equal(fault, FAULT_9005);
+}
+
 static void test_api_bbfdm_add_del_library_object(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -966,6 +1187,77 @@ static void test_api_bbfdm_valid_standard_operate(void **state)
 	}
 }
 
+static void test_api_bbfdm_valid_standard_list_operate(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *n;
+	int fault = 0, i = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_USP_LIST_OPERATE, "Device.", NULL, NULL);
+	assert_int_equal(fault, CMD_SUCCESS);
+
+	list_for_each_entry(n, &ctx->list_parameter, list) {
+
+		if (strcmp(n->name, "Device.FactoryReset()") == 0) {
+			assert_string_equal(n->type, "xsd:command");
+			assert_string_equal(n->additional_data, "sync");
+			assert_null(n->data);
+		}
+
+		if (strcmp(n->name, "Device.DeviceInfo.VendorLogFile.{i}.Upload()") == 0) {
+			assert_string_equal(n->type, "xsd:command");
+			assert_string_equal(n->additional_data, "async");
+			operation_args *args = (operation_args *)n->data;
+			assert_non_null(args);
+			const char **command_in = args->in;
+			const char **command_out = args->out;
+			assert_non_null(command_in);
+			assert_null(command_out);
+
+			for (i = 0; command_in[i] != NULL; i++) {
+				switch (i) {
+				case 0:
+					assert_string_equal(command_in[i], "URL");
+					break;
+				case 1:
+					assert_string_equal(command_in[i], "Username");
+					break;
+				case 2:
+					assert_string_equal(command_in[i], "Password");
+					break;
+				}
+			}
+			assert_int_equal(i, 3);
+		}
+
+		if (strcmp(n->name, "Device.WiFi.NeighboringWiFiDiagnostic()") == 0) {
+			assert_string_equal(n->type, "xsd:command");
+			assert_string_equal(n->additional_data, "async");
+			operation_args *args = (operation_args *)n->data;
+			assert_non_null(args);
+			const char **command_in = args->in;
+			const char **command_out = args->out;
+			assert_null(command_in);
+			assert_non_null(command_out);
+
+			for (i = 0; command_out[i] != NULL; i++) {
+				switch (i) {
+				case 0:
+					assert_string_equal(command_out[i], "Status");
+					break;
+				case 1:
+					assert_string_equal(command_out[i], "Result.{i}.Radio");
+					break;
+				case 2:
+					assert_string_equal(command_out[i], "Result.{i}.SSID");
+					break;
+				}
+			}
+			assert_int_equal(i, 18);
+		}
+	}
+}
+
 static void test_api_bbfdm_valid_library_operate(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -979,6 +1271,59 @@ static void test_api_bbfdm_valid_library_operate(void **state)
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 		assert_string_not_equal(n->data, "0");
 		assert_string_equal(n->type, "xsd:unsignedInt");
+	}}
+
+static void test_api_bbfdm_valid_library_list_operate(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *n;
+	int fault = 0, i = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_USP_LIST_OPERATE, "Device.", NULL, NULL);
+	assert_int_equal(fault, CMD_SUCCESS);
+
+	list_for_each_entry(n, &ctx->list_parameter, list) {
+
+		if (strcmp(n->name, "Device.X_IOPSYS_EU_Reboot()") == 0) {
+			assert_string_equal(n->type, "xsd:command");
+			assert_string_equal(n->additional_data, "sync");
+			assert_null(n->data);
+		}
+
+		if (strcmp(n->name, "Device.X_IOPSYS_EU_PingTEST.Run()") == 0) {
+			assert_string_equal(n->type, "xsd:command");
+			assert_string_equal(n->additional_data, "async");
+			operation_args *args = (operation_args *)n->data;
+			assert_non_null(args);
+			const char **command_in = args->in;
+			const char **command_out = args->out;
+			assert_non_null(command_in);
+			assert_non_null(command_out);
+
+			for (i = 0; command_in[i] != NULL; i++) {
+				switch (i) {
+				case 0:
+					assert_string_equal(command_in[i], "Host");
+					break;
+				}
+			}
+			assert_int_equal(i, 1);
+
+			for (i = 0; command_out[i] != NULL; i++) {
+				switch (i) {
+				case 0:
+					assert_string_equal(command_out[i], "AverageResponseTime");
+					break;
+				case 1:
+					assert_string_equal(command_out[i], "MinimumResponseTime");
+					break;
+				case 2:
+					assert_string_equal(command_out[i], "MaximumResponseTime");
+					break;
+				}
+			}
+			assert_int_equal(i, 3);
+		}
 	}
 }
 
@@ -994,6 +1339,111 @@ static void test_api_bbfdm_valid_json_operate(void **state)
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 		assert_string_not_equal(n->data, "Success");
 		assert_string_equal(n->type, "xsd:string");
+	}
+}
+
+static void test_api_bbfdm_valid_json_list_operate(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *n;
+	int fault = 0, i = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_USP_LIST_OPERATE, "Device.", NULL, NULL);
+	assert_int_equal(fault, CMD_SUCCESS);
+
+	list_for_each_entry(n, &ctx->list_parameter, list) {
+
+		if (strcmp(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Status()") == 0) {
+			assert_string_equal(n->type, "xsd:command");
+			assert_string_equal(n->additional_data, "async");
+			operation_args *args = (operation_args *)n->data;
+			assert_non_null(args);
+			const char **command_in = args->in;
+			const char **command_out = args->out;
+			assert_non_null(command_in);
+			assert_non_null(command_out);
+
+			for (i = 0; command_in[i] != NULL; i++) {
+				switch (i) {
+				case 0:
+					assert_string_equal(command_in[i], "Option");
+					break;
+				}
+			}
+			assert_int_equal(i, 1);
+
+			for (i = 0; command_out[i] != NULL; i++) {
+				switch (i) {
+				case 0:
+					assert_string_equal(command_out[i], "Result");
+					break;
+				}
+			}
+			assert_int_equal(i, 1);
+		}
+	}
+}
+
+static void test_api_bbfdm_valid_json_v1_operate(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *n;
+	int fault = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.UBUS_TEST_V1.Interface.3.Status()", NULL, NULL);
+	assert_int_equal(fault, CMD_SUCCESS);
+
+	list_for_each_entry(n, &ctx->list_parameter, list) {
+		assert_string_not_equal(n->data, "Success");
+		assert_string_equal(n->type, "xsd:string");
+	}
+}
+
+static void test_api_bbfdm_valid_json_v1_list_operate(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *n;
+	int fault = 0, i = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_USP_LIST_OPERATE, "Device.", NULL, NULL);
+	assert_int_equal(fault, CMD_SUCCESS);
+
+	list_for_each_entry(n, &ctx->list_parameter, list) {
+
+		if (strcmp(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Status()") == 0) {
+			assert_string_equal(n->type, "xsd:command");
+			assert_string_equal(n->additional_data, "async");
+			operation_args *args = (operation_args *)n->data;
+			assert_non_null(args);
+			const char **command_in = args->in;
+			const char **command_out = args->out;
+			assert_non_null(command_in);
+			assert_non_null(command_out);
+
+			for (i = 0; command_in[i] != NULL; i++) {
+				switch (i) {
+				case 0:
+					assert_string_equal(command_in[i], "Option");
+					break;
+				case 1:
+					assert_string_equal(command_out[i], "Value");
+					break;
+				}
+			}
+			assert_int_equal(i, 2);
+
+			for (i = 0; command_out[i] != NULL; i++) {
+				switch (i) {
+				case 0:
+					assert_string_equal(command_out[i], "Result");
+					break;
+				case 1:
+					assert_string_equal(command_out[i], "Value");
+					break;
+				}
+			}
+			assert_int_equal(i, 2);
+		}
 	}
 }
 
@@ -1040,7 +1490,7 @@ static void test_api_bbfdm_valid_library_event(void **state)
 		idx++;
 	}
 
-	assert_int_equal(idx, 4);
+	assert_int_equal(idx, 6);
 }
 
 static void test_api_bbfdm_valid_json_event(void **state)
@@ -1054,12 +1504,12 @@ static void test_api_bbfdm_valid_json_event(void **state)
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
-		if (strcmp(n->name, "Device.X_IOPSYS_EU_TEST.1.Periodic!") == 0) {
+		if (strcmp(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Periodic!") == 0) {
 			assert_string_equal(n->type, "xsd:event");
 			assert_null(n->data);
 		}
 
-		if (strcmp(n->name, "Device.X_IOPSYS_EU_TEST.1.Push!") == 0) {
+		if (strcmp(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Push!") == 0) {
 			assert_string_equal(n->type, "xsd:event");
 			event_args *args = (event_args *)n->data;
 			assert_non_null(args);
@@ -1080,7 +1530,49 @@ static void test_api_bbfdm_valid_json_event(void **state)
 		idx++;
 	}
 
-	assert_int_equal(idx, 4);
+	assert_int_equal(idx, 6);
+}
+
+static void test_api_bbfdm_valid_json_v1_event(void **state)
+{
+	struct dmctx *ctx = (struct dmctx *) *state;
+	struct dm_parameter *n;
+	int fault = 0, idx = 0;
+
+	fault = dm_entry_param_method(ctx, CMD_USP_LIST_EVENT, NULL, NULL, NULL);
+	assert_int_equal(fault, 0);
+
+	list_for_each_entry(n, &ctx->list_parameter, list) {
+		if (strcmp(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Periodic!") == 0) {
+			assert_string_equal(n->type, "xsd:event");
+			assert_null(n->data);
+		}
+
+		if (strcmp(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Push!") == 0) {
+			assert_string_equal(n->type, "xsd:event");
+			event_args *args = (event_args *)n->data;
+			assert_non_null(args);
+			const char **event_param = args->param;
+			assert_non_null(event_param);
+			for (int i = 0; event_param[i] != NULL; i++) {
+				switch (i) {
+				case 0:
+					assert_string_equal(event_param[i], "Data");
+					break;
+				case 1:
+					assert_string_equal(event_param[i], "Status");
+					break;
+				case 2:
+					assert_string_equal(event_param[i], "Value");
+					break;
+				}
+			}
+		}
+
+		idx++;
+	}
+
+	assert_int_equal(idx, 6);
 }
 
 int main(void)
@@ -1089,6 +1581,7 @@ int main(void)
 		// Get/Set Value method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_standard_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_json_parameter, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_json_v1_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_library_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_standard_parameter_alias, setup_alias, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_input_value_validation_json_parameter, setup, teardown_commit),
@@ -1096,16 +1589,23 @@ int main(void)
 		// Add/Delete Object method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_standard_object, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_json_object, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_json_v1_object, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_library_object, setup, teardown_commit),
 
 		// Operate method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_standard_operate, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_standard_list_operate, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_library_operate, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_library_list_operate, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_json_operate, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_json_list_operate, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_json_v1_operate, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_json_v1_list_operate, setup, teardown_commit),
 
 		// Event method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_library_event, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_json_event, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_json_v1_event, setup, teardown_commit),
 	};
 
 	return cmocka_run_group_tests(tests, group_setup, group_teardown);

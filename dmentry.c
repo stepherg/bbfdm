@@ -206,7 +206,10 @@ int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_
 	ctx->in_param = path;
 
 	dmentry_instance_lookup_inparam(ctx);
+
 	ctx->stop = false;
+	ctx->nextlevel = first_level;
+
 	switch(schema_type) {
 		case ALL_SCHEMA:
 			ctx->isinfo = 1;
@@ -223,7 +226,6 @@ int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_
 			ctx->iscommand = 1;
 			break;
 	}
-	ctx->nextlevel = first_level;
 
 	fault = dm_entry_get_supported_dm(ctx);
 
