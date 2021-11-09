@@ -129,7 +129,7 @@ static char *get_path_without_instance(char *path)
 
 	res_path[0] = 0;
 	for (pch = strtok_r(str, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
-		if (atoi(pch) == 0)
+		if (atoi(pch) == 0 && strcmp(pch, "{i}") != 0)
 			pos += snprintf(&res_path[pos], sizeof(res_path) - pos, "%s%s", pch, (pchr != NULL && *pchr != '\0') ? "." : "");
 	}
 
