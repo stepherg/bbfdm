@@ -21,7 +21,7 @@ static int get_management_server_url(char *refparam, struct dmctx *ctx, void *da
 
 	dmuci_get_option_value_string("cwmp", "acs", "dhcp_discovery", &dhcp);
 	dmuci_get_option_value_string("cwmp", "acs", "url", &url);
-	dmuci_get_option_value_string_varstate("cwmp", "acs", "dhcp_url", &provisioning_value);
+	varstate_get_value_string("cwmp", "acs", "dhcp_url", &provisioning_value);
 
 	if ( ((dhcp && strcmp(dhcp, "enable") == 0 ) || ((url == NULL) || (url[0] == '\0'))) && ((provisioning_value != NULL) && (provisioning_value[0] != '\0')) )
 		*value = provisioning_value;
@@ -133,7 +133,7 @@ static int set_management_server_delay_reboot(char *refparam, struct dmctx *ctx,
 /*#Device.ManagementServer.ParameterKey!UCI:cwmp/acs,acs/ParameterKey*/
 static int get_management_server_key(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string_varstate("cwmp", "cpe", "ParameterKey", value);
+	dmuci_get_option_value_string("cwmp", "acs", "ParameterKey", value);
 	return 0;	
 }
 
