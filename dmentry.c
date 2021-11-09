@@ -267,7 +267,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			fault = dm_entry_add_object(ctx);
 			if (!fault) {
 				dmuci_set_value_varstate("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
-				dmuci_save_package_varstate("cwmp");
+				dmuci_commit_package_varstate("cwmp");
 				dmuci_change_packages(&head_package_change);
 			}
 			break;
@@ -275,7 +275,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			fault = dm_entry_delete_object(ctx);
 			if (!fault) {
 				dmuci_set_value_varstate("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
-				dmuci_save_package_varstate("cwmp");
+				dmuci_commit_package_varstate("cwmp");
 				dmuci_change_packages(&head_package_change);
 			}
 			break;
@@ -308,12 +308,10 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1)
 {
 	struct set_tmp *n = NULL, *p = NULL;
 	int fault = 0;
-	bool set_success = false;
 
 	switch(cmd) {
 		case CMD_SET_VALUE:
 			ctx->setaction = VALUESET;
-			set_success = false;
 			list_for_each_entry_safe(n, p, &ctx->set_list_tmp, list) {
 				ctx->in_param = n->name;
 				ctx->in_value = n->value ? n->value : "";
@@ -323,11 +321,10 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1)
 					add_list_fault_param(ctx, ctx->in_param, usp_fault_map(fault));
 					break;
 				}
-				set_success = true;
 			}
-			if (!fault && set_success == true) {
+			if (!fault) {
 				dmuci_set_value_varstate("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
-				dmuci_save_package_varstate("cwmp");
+				dmuci_commit_package_varstate("cwmp");
 				dmuci_change_packages(&head_package_change);
 				dmuci_save();
 			}
@@ -410,8 +407,6 @@ int dm_entry_restart_services(void)
 			dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
 		}
 	}
-
-	dmuci_commit_package_varstate("cwmp");
 	free_all_list_package_change(&head_package_change);
 
 	return 0;
@@ -426,7 +421,6 @@ int dm_entry_revert_changes(void)
 	list_for_each_entry(pc, &head_package_change, list) {
 		dmubus_call_set("uci", "revert", UBUS_ARGS{{"config", pc->package, String}}, 1);
 	}
-	dmuci_revert_package_varstate("cwmp");
 	free_all_list_package_change(&head_package_change);
 
 	return 0;

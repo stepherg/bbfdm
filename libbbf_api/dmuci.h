@@ -31,7 +31,6 @@
 #define BBFDM_SAVEDIR "/tmp/.bbfdm"
 #define UCI_CONFIG_DIR "/etc/config/"
 #define VARSTATE_CONFDIR "/var/state/"
-#define VARSTATE_SAVEDIR "/tmp/.bbfdm_var"
 
 enum dm_uci_cmp {
 	CMP_SECTION,
@@ -308,15 +307,6 @@ int dmuci_save_package_##UCI_PATH(char *package) \
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-int dmuci_revert_package_##UCI_PATH(char *package) \
-{\
-	struct uci_context *save_uci_ctx;	\
-	save_uci_ctx = uci_ctx;			\
-	uci_ctx = uci_ctx_##UCI_PATH;	\
-	int res = dmuci_revert_package(package); \
-	uci_ctx = save_uci_ctx;			\
-	return res;						\
-}\
 int dmuci_delete_by_section_unnamed_##UCI_PATH(struct uci_section *s, char *option, char *value)\
 {\
 	struct uci_context *save_uci_ctx;	\
@@ -376,8 +366,6 @@ int dmuci_commit_package_bbfdm(char *package);
 int dmuci_commit_bbfdm(void);
 int dmuci_revert_bbfdm(void);
 int dmuci_commit_package_varstate(char *package);
-int dmuci_save_package_varstate(char *package);
-int dmuci_revert_package_varstate(char *package);
 struct uci_section *dmuci_walk_section_bbfdm(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
 
 int dmuci_init_bbfdm(void);
