@@ -1,0 +1,69 @@
+{
+  "Device.PD2.{i}.": {
+    "type": "object",
+    "protocols": [
+      "cwmp",
+      "usp"
+    ],
+    "access": false,
+    "array": true,
+    "mapping": {
+      "type": "ubus",
+      "ubus": {
+        "object": "proxd",
+        "method": "list",
+        "args": {},
+        "key": "devices"
+      }
+    },
+    "Device.PD2.{i}.MiniHub.{i}.": {
+      "type": "object",
+      "protocols": [
+        "cwmp",
+        "usp"
+      ],
+      "access": false,
+      "array": true,
+      "mapping": {
+        "type": "ubus",
+        "ubus": {
+          "object": "proxd",
+          "method": "list",
+          "args": {},
+          "key": "devices"
+        }
+      },
+      "Device.PD2.{i}.MiniHub.{i}.DeviceInfo.": {
+        "type": "object",
+        "protocols": [
+          "cwmp",
+          "usp"
+        ],
+        "access": false,
+        "array": false,
+        "Description": {
+          "type": "string",
+          "read": true,
+          "write": false,
+          "protocols": [
+            "cwmp",
+            "usp"
+          ],
+          "mapping": [
+            {
+              "type": "ubus",
+              "ubus": {
+                "object": "proxd",
+                "method": "get",
+                "args": {
+                  "path": "Device.ProxiedDevice.{i}.MiniHub.{i}.DeviceInfo.Description"
+                },
+                "key": "Description"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

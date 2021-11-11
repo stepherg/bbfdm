@@ -1,0 +1,6 @@
+{
+	"devices": [
+		{ "name": "one"},
+		{"name": "two"}
+	]
+}
