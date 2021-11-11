@@ -247,7 +247,7 @@ typedef struct dm_map_operate {
 	operation operate;
 	char *type; // sync or async
 	operation_args args;
-} DM_MAP_OPERATE;
+} DM_MAP_OPERATE __attribute__ ((deprecated));
 
 enum set_value_action {
 	VALUECHECK,

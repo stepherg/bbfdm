@@ -249,7 +249,7 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 			}
 
 			//Dynamic Operate is deprecated now.  It will be removed later.
-			DM_MAP_OPERATE *dynamic_operate = NULL;
+			struct dm_map_operate *dynamic_operate = NULL;
 			*(void **) (&dynamic_operate) = dlsym(handle, "tDynamicOperate");
 			if (dynamic_operate) {
 
