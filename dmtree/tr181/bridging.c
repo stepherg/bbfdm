@@ -2773,7 +2773,12 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 							}
 						}
 
-						/* Update the name dmmap section */
+						/* Update ports list  in dmmap_bridge */
+						get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_vlanport_args *)data)->bridge_sec), &s);
+						remove_port_from_bridge_section(s, curr_ifname);
+						add_port_to_bridge_section(s, new_name);
+
+						 /* Update the name dmmap section */
 						dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "name", new_name);
 					} else {
 						// the current ifname is empty in device section
