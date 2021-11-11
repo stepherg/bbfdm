@@ -816,13 +816,6 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 > Note4: Each object definition in JSON file must begin with "Device." and should have the full parent path if it is under another object
 
-> Note5: You can validate any JSON file using [Validate_JSON_Plugin](/test/tools/validate_json_plugin.py) python script.
-
-```bash
-$ ./test/tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
-$ ./test/tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
-```
-
 - For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [UserInterface](/test/files/etc/bbfdm/json/UserInterface.json), [X_IOPSYS_EU_Dropbear](/test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json), [X_IOPSYS_EU_TEST](/test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json)
 
 ## BBFDM Tools
@@ -845,6 +838,7 @@ $ pip3 install jsonschema xlwt
 |generate_dm.py           | Generate list of supported/un-supported parameters based of json input|
 |generate_dm_xml.py       | Generate list of supported/un-supported parameters in xml format |
 |generate_dm_excel.py     | Generate list of supported/un-supported parameters in xls format |
+|validate_json_plugin.py  | Validate json plugin files for dynamic library or standard data model |
 
 > Note: Currently all the tools needs to be executed in tools directory.
 
@@ -942,6 +936,15 @@ $ ./generate_dm_excel.py -d tr181 -v iopsys -v openwrt -o datamodel.xls
 $ ./generate_dm_excel.py -d tr181 -d tr104 -v iopsys -o datamodel.xls
 $ ./generate_dm_excel.py -d tr181 -v iopsys -p X_IOPSYS_EU_ -r git^https://dev.iopsys.eu/iopsys/xmppc.git^devel -o datamodel_iopsys.xls
 ```
+### Validate JSON plugin
+It is a [python script](./tools/validate_json_plugin.py) to validate JSON plugin files for dynamic library or standard data model [TR181](./dmtree/json/tr181.json), [TR104](./dmtree/json/tr104.json), etc..
+
+```bash
+$ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
+$ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
+$ ./tools/validate_json_plugin.py dmtree/json/tr181.json
+```
+
 ### Data Model generator
 
 This is a pipeline friendly master script to generate the list of supported and un-supported datamodels in xml and xls formats based on provided input in a json file.

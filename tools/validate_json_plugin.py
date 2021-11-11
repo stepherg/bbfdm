@@ -3,7 +3,6 @@
 # Copyright (C) 2021 iopsys Software Solutions AB
 # Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-import os
 import sys
 import json
 from jsonschema import validate
@@ -220,33 +219,33 @@ def print_validate_json_usage():
 
 def parse_value( key , value ):
 
-	if key.endswith('.') and not key.startswith('Device.'):
-		print(key + " is not a valid path")
-		exit(1)
-	
-	if key.endswith('.'):
-		__schema = obj_schema
-	elif key.endswith('!'):
-		__schema = event_schema
-	elif key.endswith('()'):
-		__schema = command_schema
-	else:
-		__schema = param_schema
-
-	validate(instance = value, schema = __schema)
-
-	for k, v in value.items():
-		if k != "list" and k != "mapping" and k != "input" and k != "output" and isinstance(v, dict):
-			parse_value(k, v)
+    if key.endswith('.') and not key.startswith('Device.'):
+        print(key + " is not a valid path")
+        exit(1)
+        
+    if key.endswith('.'):
+        __schema = obj_schema
+    elif key.endswith('!'):
+        __schema = event_schema
+    elif key.endswith('()'):
+        __schema = command_schema
+    else:
+        __schema = param_schema
+    
+    validate(instance = value, schema = __schema)
+    
+    for k, v in value.items():
+        if k != "list" and k != "mapping" and k != "input" and k != "output" and isinstance(v, dict):
+            parse_value(k, v)
 
 ### main ###
 if len(sys.argv) < 2:
     print_validate_json_usage()
     
-json_file = open(sys.argv[1], "r")
+json_file = open(sys.argv[1], "r", encoding='utf-8')
 json_data = json.loads(json_file.read())
 
-for key, value in json_data.items():	
-	parse_value(key , value)
+for __key, __value in json_data.items():
+    parse_value(__key , __value)
 
 print("JSON File is Valid")
