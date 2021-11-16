@@ -707,45 +707,42 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 				"version": "2.13",
 				"protocols": [
 					"usp"
-				],
-				"datatype": "string"
+				]
 			}
 		},
 		"Status()": {
 			"type": "command",
 			"async": true,
-			"version" : "2.12",
+			"version": "2.12",
 			"protocols": [
 				"usp"
 			],
 			"input": {
-				"Option" : {
-					"type" : "string",
-					"read" : "true",
-					"write" : "true",
-					"protocol" : [
+				"Option": {
+					"type": "string",
+					"read": "true",
+					"write": "true",
+					"protocols": [
 						"usp"
-					],
-					"datatype" : "string"
+					]
 				}
 			},
 			"output": {
-				"Result" : {
-					"type" : "string",
-					"read" : "true",
-					"write" : "false",
-					"protocol" : [
+				"Result": {
+					"type": "string",
+					"read": "true",
+					"write": "false",
+					"protocols": [
 						"usp"
-					],
-					"datatype" : "string"
+					]
 				}
 			},
 			"mapping": [
 				{
-					"type" : "ubus",
-					"ubus" : {
-						"object" : "test",
-						"method" : "status"
+					"type": "ubus",
+					"ubus": {
+						"object": "test",
+						"method": "status"
 					}
 				}
 			]

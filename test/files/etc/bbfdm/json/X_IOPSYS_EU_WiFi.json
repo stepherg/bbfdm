@@ -26,7 +26,6 @@
 				"cwmp",
 				"usp"
 			],
-			"datatype": "int",
 			"mapping": [
 				{
 					"type" : "ubus",
@@ -48,7 +47,6 @@
 				"cwmp",
 				"usp"
 			],
-			"datatype": "string",
 			"mapping": [
 				{
 					"type" : "ubus",
@@ -79,7 +77,6 @@
 					"cwmp",
 					"usp"
 				],
-				"datatype": "unsignedInt",
 				"mapping": [
 					{
 						"type" : "ubus",
@@ -101,7 +98,6 @@
 					"cwmp",
 					"usp"
 				],
-				"datatype": "unsignedInt",
 				"mapping": [
 					{
 						"type" : "ubus",

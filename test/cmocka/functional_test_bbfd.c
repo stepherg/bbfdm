@@ -1337,7 +1337,8 @@ static void test_api_bbfdm_valid_json_operate(void **state)
 	assert_int_equal(fault, CMD_SUCCESS);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
-		assert_string_not_equal(n->data, "Success");
+		assert_string_equal(n->name, "Result");
+		assert_string_equal(n->data, "Success");
 		assert_string_equal(n->type, "xsd:string");
 	}
 }
@@ -1394,7 +1395,8 @@ static void test_api_bbfdm_valid_json_v1_operate(void **state)
 	assert_int_equal(fault, CMD_SUCCESS);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
-		assert_string_not_equal(n->data, "Success");
+		assert_string_equal(n->name, "Result");
+		assert_string_equal(n->data, "Success");
 		assert_string_equal(n->type, "xsd:string");
 	}
 }

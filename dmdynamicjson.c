@@ -218,6 +218,141 @@ static int get_index_of_available_entry(DMOBJ *jentryobj)
 	return idx;
 }
 
+static json_object *get_requested_json_obj(json_object *json_obj, char *instance, const char *key, char *arr_name, size_t arr_len)
+{
+	struct json_object *res = json_obj;
+	char *pch = NULL, *pchr = NULL;
+	char buf_args[256] = {0};
+
+	DM_STRNCPY(buf_args, key, sizeof(buf_args));
+
+	for (pch = strtok_r(buf_args, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
+
+		if (pchr && *pchr && (strchr(pch, '['))) {
+			char buf[32] = {0};
+			unsigned idx_pos = 0;
+
+			DM_STRNCPY(buf, pch, sizeof(buf));
+			buf[strlen(buf) - 1] = 0;
+			char *p = strchr(buf, '[');
+
+			if (strcmp(p+1, "@index") == 0 || strcmp(p+1, "@i-1") == 0) {
+				idx_pos = instance ? atoi(instance)-1 : 1;
+			} else {
+				idx_pos = atoi(p+1);
+			}
+			*p = 0;
+
+			res = (idx_pos >= 0) ? dmjson_select_obj_in_array_idx(res, idx_pos, 1, buf) : res;
+
+		} else if (pchr && *pchr) {
+			res = dmjson_get_obj(res, 1, pch);
+		}
+
+		DM_STRNCPY(arr_name, pch, arr_len);
+	}
+
+	return res;
+}
+
+static int get_number_of_instances(char *refparam)
+{
+	char *pch = NULL, *pchr = NULL;
+	char buf_path[512] = {0};
+	int nbr_inst = 0;
+
+	DM_STRNCPY(buf_path, refparam, sizeof(buf_path));
+
+	for (pch = strtok_r(buf_path, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
+		if (atoi(pch) != 0)
+			nbr_inst++;
+	}
+
+	return nbr_inst;
+}
+
+static void replace_indexes(struct dmctx *ctx, char *old_key, char *new_key, size_t key_len)
+{
+	char buf_key[256] = {0};
+	unsigned char idx = 0;
+	unsigned pos = 0;
+
+	DM_STRNCPY(buf_key, old_key, sizeof(buf_key));
+
+	for (int i = 0; buf_key[i] != '\0'; i++) {
+		if (strstr(&buf_key[i], "{i}") == &buf_key[i]) {
+			pos += snprintf(&new_key[pos], key_len - pos, "%s", ctx->inst_buf[idx] ? ctx->inst_buf[idx] : "");
+			idx++;
+			i += 3; // increase i with length of "{i}"
+		}
+
+		pos += snprintf(&new_key[pos], key_len - pos, "%c", buf_key[i]);
+	}
+}
+
+static void resolve_all_symbols(struct dmctx *ctx, void *data, char *instance, char *value, int nbr_instances, int json_version,
+		const char *old_key, char *new_key, size_t key_len)
+{
+	char *pch = NULL, *pchr = NULL;
+	char buf_key[256] = {0};
+	unsigned pos = 0;
+
+	DM_STRNCPY(buf_key, old_key, sizeof(buf_key));
+
+	for (pch = strtok_r(buf_key, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
+
+		if (strcmp(pch, "@Name") == 0)
+			pos += snprintf(&new_key[pos], key_len - pos, "%s.", data ? section_name((struct uci_section *)data) : "");
+		else if (strcmp(pch, "@Value") == 0)
+			pos += snprintf(&new_key[pos], key_len - pos, "%s.", value);
+		else if (strcmp(pch, (json_version == JSON_VERSION_1) ? "@index" : "@i-1") == 0)
+			pos += snprintf(&new_key[pos], key_len - pos, "%d.", instance ? atoi(instance)-1 : 1);
+		else if (strstr(pch, "@index-")) {
+			char *p = strchr(pch, '-');
+			int idx_pos = atoi(p + 1);
+
+			if (idx_pos != 0 && nbr_instances - idx_pos >= 0)
+				pos += snprintf(&new_key[pos], key_len - pos, "%s.", ctx->inst_buf[nbr_instances - idx_pos] ? ctx->inst_buf[nbr_instances - idx_pos] : "");
+		} else
+			pos += snprintf(&new_key[pos], key_len - pos, "%s.", pch);
+	}
+
+	if (pos)
+		new_key[pos - 1] = 0;
+
+	if (strstr(new_key, "{i}"))
+		replace_indexes(ctx, new_key, new_key, key_len);
+}
+
+static int fill_ubus_arguments(struct dmctx *ctx, void *data, char *instance, char *value, int nbr_instances, int json_version,
+		struct json_object *args_obj, struct ubus_arg u_args[])
+{
+	int u_args_size = 0;
+
+	json_object_object_foreach(args_obj, key, val) {
+		char buf_key[256] = {0};
+		char buf_val[256] = {0};
+
+		resolve_all_symbols(ctx, data, instance, value, nbr_instances, json_version, key, buf_key, sizeof(buf_key));
+		resolve_all_symbols(ctx, data, instance, value, nbr_instances, json_version, json_object_get_string(val), buf_val, sizeof(buf_val));
+
+		u_args[u_args_size].key = dm_dynamic_strdup(&json_memhead, buf_key);
+		u_args[u_args_size].val = dm_dynamic_strdup(&json_memhead, buf_val);
+		u_args[u_args_size].type = String;
+		u_args_size++;
+	}
+
+	return u_args_size;
+}
+
+static void free_ubus_arguments(struct ubus_arg u_args[], int u_args_size)
+{
+	for (int i = 0; i < u_args_size; i++) {
+		dmfree((char *)u_args[i].key);
+		dmfree((char *)u_args[i].val);
+	}
+}
+
 static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct dm_json_obj *pobj = NULL;
@@ -289,25 +424,39 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 		struct json_object *method = NULL;
 		struct json_object *args_obj = NULL;
 		struct json_object *key = NULL;
-		char *args1 = NULL;
+		struct ubus_arg u_args[16] = {0};
+		char buf_object[256] = {0};
+		char buf_method[256] = {0};
+		int u_args_size = 0;
+
+		int nbr_instances = get_number_of_instances(parent_node->current_object);
 
 		json_object_object_get_ex((mapping_0 && json_version == JSON_VERSION_1) ? mapping_0 : mapping_obj, "ubus", &ubus_obj);
 		json_object_object_get_ex(ubus_obj, "object", &object);
 		json_object_object_get_ex(ubus_obj, "method", &method);
 		json_object_object_get_ex(ubus_obj, "args", &args_obj);
-		json_object_object_foreach(args_obj, arg1, args2) {
-			args1 = arg1;
-		}
 		json_object_object_get_ex(ubus_obj, "key", &key);
 
-		if (object && method && args1 && args2)
-			dmubus_call(json_object_get_string(object), json_object_get_string(method), UBUS_ARGS{{args1, json_object_get_string(args2), String}}, 1, &res);
-		else
-			dmubus_call(json_object_get_string(object), json_object_get_string(method), UBUS_ARGS{0}, 0, &res);
+		if (object)
+			resolve_all_symbols(dmctx, prev_data, prev_instance, "", nbr_instances, json_version, json_object_get_string(object), buf_object, sizeof(buf_object));
+
+		if (method)
+			resolve_all_symbols(dmctx, prev_data, prev_instance, "", nbr_instances, json_version, json_object_get_string(method), buf_method, sizeof(buf_method));
+
+		if (args_obj)
+			u_args_size = fill_ubus_arguments(dmctx, prev_data, prev_instance, "", nbr_instances, json_version, args_obj, u_args);
+
+		dmubus_call(buf_object, buf_method, u_args, u_args_size, &res);
+
+		free_ubus_arguments(u_args, u_args_size);
+
 		if (res && key) {
+			char arr_name[32] = {0};
 			int id = 0, i = 0;
 
-			dmjson_foreach_obj_in_array(res, arrobj, dyn_obj, i, 1, json_object_get_string(key)) {
+			json_object *arr_obj = get_requested_json_obj(res, prev_instance, json_object_get_string(key), arr_name, sizeof(arr_name));
+
+			dmjson_foreach_obj_in_array(arr_obj, arrobj, dyn_obj, i, 1, arr_name) {
 				char *inst = handle_instance_without_section(dmctx, parent_node, ++id);
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)dyn_obj, inst) == DM_STOP)
 					break;
@@ -439,37 +588,6 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 	return 0;
 }
 
-static char *get_param_ubus_value(json_object *json_obj, char *arguments)
-{
-	char *value = "";
-
-	char *opt = strchr(arguments, '.');
-	if (opt) {
-		*opt = '\0';
-		value = dmjson_get_value(json_obj, 2, arguments, opt + 1);
-	} else {
-		value = dmjson_get_value(json_obj, 1, arguments);
-	}
-
-	return value;
-}
-
-static void replace_indexes(struct dmctx *ctx, char *refparam, char *obj, size_t obj_size)
-{
-	unsigned pos = 0;
-	unsigned char idx = 0;
-
-	for (int i = 0; refparam[i] != '\0'; i++) {
-		if (strstr(&refparam[i], "{i}") == &refparam[i]) {
-			pos += snprintf(&obj[pos], obj_size - pos, "%s", ctx->inst_buf[idx] ? ctx->inst_buf[idx] : "");
-			idx++;
-			i += 3; // increase i with length of "{i}"
-		}
-
-		pos += snprintf(&obj[pos], obj_size - pos, "%c", refparam[i]);
-	}
-}
-
 static char *uci_get_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance)
 {
 	struct json_object *obj = NULL;
@@ -491,9 +609,9 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 	json_object_object_get_ex(option, "name", &option_name);
 	json_object_object_get_ex(obj, "path", &path);
 
-	if (file && type && option_name && strstr(refparam, "NumberOfEntries") && json_version == JSON_VERSION_1) {
+	if (file && type && option_name && strstr(refparam, "NumberOfEntries")) {
 
-		if (strcmp(json_object_get_string(option_name), "@Count") != 0)
+		if (strcmp(json_object_get_string(option_name), "@Count") != 0 && json_version == JSON_VERSION_1)
 			goto end;
 
 		struct uci_section *s = NULL;
@@ -533,55 +651,51 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 	struct json_object *key = NULL;
 	struct json_object *args = NULL;
 	struct json_object *res = NULL;
-	char arg2_1[128] = {0}, *opt = NULL;
-	char *args1 = NULL;
+	char buf_object[256] = {0};
+	char buf_method[256] = {0};
+	struct ubus_arg u_args[16] = {0};
+	int u_args_size = 0;
 	char *value = "";
+
+	int nbr_instances = get_number_of_instances(refparam);
 
 	json_object_object_get_ex(mapping_obj, "ubus", &ubus_obj);
 	json_object_object_get_ex(ubus_obj, "object", &object);
 	json_object_object_get_ex(ubus_obj, "method", &method);
 	json_object_object_get_ex(ubus_obj, "args", &args);
-	json_object_object_foreach(args, arg1, args2) {
-		args1 = arg1;
-	}
 	json_object_object_get_ex(ubus_obj, "key", &key);
 
-	if ((opt = strstr(json_object_get_string(object), "@Name"))) {
-		*opt = '\0';
-		snprintf(arg2_1, sizeof(arg2_1), "%s%s", json_object_get_string(object), section_name((struct uci_section *)data));
-	} else if ((opt = strstr(json_object_get_string(object), (json_version == JSON_VERSION_1) ? "@index" : "@i-1"))) {
-		*opt = '\0';
-		snprintf(arg2_1, sizeof(arg2_1), "%s%d", json_object_get_string(object), atoi(instance) - 1);
-	} else {
-		DM_STRNCPY(arg2_1, json_object_get_string(object), sizeof(arg2_1));
-	}
+	if (object)
+		resolve_all_symbols(ctx, data, instance, "", nbr_instances, json_version, json_object_get_string(object), buf_object, sizeof(buf_object));
 
-	if (args1 && args2 && method) {
-		if (data && (strcmp(json_object_get_string(args2), "@Name") == 0)) {
-			dmubus_call(arg2_1, json_object_get_string(method), UBUS_ARGS{{args1, section_name((struct uci_section *)data), String}}, 1, &res);
-		} else if (strstr(json_object_get_string(args2), "{i}")) {
-			char arg2_buf[512] = {0};
+	if (method)
+		resolve_all_symbols(ctx, data, instance, "", nbr_instances, json_version, json_object_get_string(method), buf_method, sizeof(buf_method));
 
-			replace_indexes(ctx, json_object_get_string(args2), arg2_buf, sizeof(arg2_buf));
-			dmubus_call(arg2_1, json_object_get_string(method), UBUS_ARGS{{args1, arg2_buf, String}}, 1, &res);
-		} else {
-			dmubus_call(arg2_1, json_object_get_string(method), UBUS_ARGS{{args1, json_object_get_string(args2), String}}, 1, &res);
-		}
-	} else {
-		dmubus_call(arg2_1, json_object_get_string(method), UBUS_ARGS{0}, 0, &res);
-	}
+	if (args)
+		u_args_size = fill_ubus_arguments(ctx, data, instance, "", nbr_instances, json_version, args, u_args);
 
-	if (key && strstr(refparam, "NumberOfEntries") && json_version == JSON_VERSION_1) {
+	dmubus_call(buf_object, buf_method, u_args, u_args_size, &res);
+
+	free_ubus_arguments(u_args, u_args_size);
+
+	if (key && strstr(refparam, "NumberOfEntries")) {
+		json_object *arr_obj = NULL;
 		char buf[64] = {0};
-		char *str = NULL;
+		int nbre_entries = 0;
 
 		DM_STRNCPY(buf, json_object_get_string(key), sizeof(buf));
-		if ((str = strstr(buf, ".@Count")) == NULL || res == NULL)
+
+		if (res == NULL)
 			goto end;
 
-		json_object *arr_obj = NULL;
-		int nbre_entries = 0;
-		*str = 0;
+		if (json_version == JSON_VERSION_1) {
+			char *str = NULL;
+
+			if ((str = strstr(buf, ".@Count")) == NULL)
+				goto end;
+
+			*str = 0;
+		}
 
 		json_object_object_get_ex(res, buf, &arr_obj);
 		nbre_entries = (arr_obj) ? json_object_array_length(arr_obj) : 0;
@@ -590,15 +704,18 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 	}
 
 	if (key) {
-		char arg6_buf[128] = "";
+		char key_buf[128] = {0};
+		char key_name[32] = {0};
 
-		DM_STRNCPY(arg6_buf, json_object_get_string(key), sizeof(arg6_buf));
-		char *is_array = strstr(arg6_buf, (json_version == JSON_VERSION_1) ? "[@index]" : "[@i-1]");
-		if (is_array) {
+		DM_STRNCPY(key_buf, json_object_get_string(key), sizeof(key_buf));
+		char *is_array = strstr(key_buf, (json_version == JSON_VERSION_1) ? "[@index]" : "[@i-1]");
+		if (data && is_array) {
 			char *arguments = (json_version == JSON_VERSION_1) ? is_array + sizeof("[@index]") : is_array + sizeof("[@i-1]");
-			value = get_param_ubus_value((json_object *)data, arguments);
+			json_object *json_obj = get_requested_json_obj((json_object *)data, instance, arguments, key_name, sizeof(key_name));
+			value = dmjson_get_value(json_obj, 1, key_name);
 		} else {
-			value = get_param_ubus_value(res, arg6_buf);
+			json_object *json_obj = get_requested_json_obj(res, instance, key_buf, key_name, sizeof(key_name));
+			value = dmjson_get_value(json_obj, 1, key_name);
 		}
 	}
 
@@ -644,11 +761,10 @@ static char *ubus_v1_get_value(json_object *mapping_obj, char *refparam, struct 
 		goto end;
 
 	if (key) {
-		char key_buf[128] = "";
+		char key_name[128] = {32};
 
-		DM_STRNCPY(key_buf, json_object_get_string(key), sizeof(key_buf));
-		value = get_param_ubus_value((json_object *)data, key_buf);
-
+		json_object *json_obj = get_requested_json_obj((json_object *)data, instance, json_object_get_string(key), key_name, sizeof(key_name));
+		value = dmjson_get_value(json_obj, 1, key_name);
 	}
 
 end:
@@ -711,33 +827,38 @@ static int getvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 	return 0;
 }
 
-static int ubus_set_operate(json_object *mapping_obj, int json_version, struct dmctx *ctx, void *data, void *value, char *instance)
+static int ubus_set_operate(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, void *value, char *instance)
 {
 	struct json_object *ubus_obj = NULL;
 	struct json_object *object = NULL;
 	struct json_object *method = NULL;
 	struct json_object *res = NULL;
-	char obj_name[128] = {0}, *opt = NULL;
+	char buf_object[256] = {0};
+	char buf_method[256] = {0};
+
+	int nbr_instances = get_number_of_instances(refparam);
 
 	json_object_object_get_ex(mapping_obj, "ubus", &ubus_obj);
 	json_object_object_get_ex(ubus_obj, "object", &object);
 	json_object_object_get_ex(ubus_obj, "method", &method);
 
-	if ((opt = strstr(json_object_get_string(object), "@Name"))) {
-		*opt = '\0';
-		snprintf(obj_name, sizeof(obj_name), "%s%s", json_object_get_string(object), section_name((struct uci_section *)data));
-	} else if ((opt = strstr(json_object_get_string(object), (json_version == JSON_VERSION_1) ? "@index" : "@i-1"))) {
-		*opt = '\0';
-		snprintf(obj_name, sizeof(obj_name), "%s%d", json_object_get_string(object), atoi(instance) - 1);
-	} else {
-		DM_STRNCPY(obj_name, json_object_get_string(object), sizeof(obj_name));
-	}
+	if (object)
+		resolve_all_symbols(ctx, data, instance, "", nbr_instances, json_version, json_object_get_string(object), buf_object, sizeof(buf_object));
 
-	dmubus_operate_blob_set(obj_name, json_object_get_string(method), value, &res);
+	if (method)
+		resolve_all_symbols(ctx, data, instance, "", nbr_instances, json_version, json_object_get_string(method), buf_method, sizeof(buf_method));
+
+	dmubus_operate_blob_set(buf_object, buf_method, value, &res);
 
 	if (res) {
 		json_object_object_foreach(res, key, val) {
-			add_list_parameter(ctx, dmstrdup(key), dmstrdup(json_object_to_json_string(val)), DMT_TYPE[DMT_STRING], NULL);
+			char buf_key[256] = {0};
+			char buf_val[256] = {0};
+
+			resolve_all_symbols(ctx, data, instance, "", nbr_instances, json_version, key, buf_key, sizeof(buf_key));
+			resolve_all_symbols(ctx, data, instance, "", nbr_instances, json_version, json_object_get_string(val), buf_val, sizeof(buf_val));
+
+			add_list_parameter(ctx, dmstrdup(buf_key), dmstrdup(buf_val), DMT_TYPE[DMT_STRING], NULL);
 		}
 		json_object_put(res);
 	}
@@ -797,7 +918,7 @@ static int setcommand_param(char *refparam, struct dmctx *ctx, void *data, char 
 	json_object_object_get_ex(map_obj, "type", &type);
 
 	if (type && strcmp(json_object_get_string(type), "ubus") == 0) {
-		return ubus_set_operate(map_obj, json_version, ctx, data, value, instance);
+		return ubus_set_operate(map_obj, json_version, refparam, ctx, data, value, instance);
 	}
 
 	return CMD_FAIL;
@@ -1066,46 +1187,30 @@ static void ubus_set_value(json_object *mapping_obj, int json_version, char *ref
 	struct json_object *object = NULL;
 	struct json_object *method = NULL;
 	struct json_object *args = NULL;
-	char *args1 = NULL, *opt = NULL;
-	char obj_buf[128] = {0};
-	char object_buf[256] = {0};
+	char buf_object[256] = {0};
+	char buf_method[256] = {0};
+	struct ubus_arg u_args[16] = {0};
+	int u_args_size = 0;
+
+	int nbr_instances = get_number_of_instances(refparam);
 
 	json_object_object_get_ex(mapping_obj, "ubus", &ubus_obj);
 	json_object_object_get_ex(ubus_obj, "object", &object);
 	json_object_object_get_ex(ubus_obj, "method", &method);
 	json_object_object_get_ex(ubus_obj, "args", &args);
-	json_object_object_foreach(args, arg1, args2) {
-		args1 = arg1;
-	}
 
-	DM_STRNCPY(obj_buf, json_object_get_string(object), sizeof(obj_buf));
+	if (object)
+		resolve_all_symbols(ctx, data, instance, value, json_version, nbr_instances, json_object_get_string(object), buf_object, sizeof(buf_object));
 
-	if ((opt = strstr(obj_buf, "@Name"))) {
-		*opt = '\0';
-		snprintf(object_buf, sizeof(object_buf), "%s%s", obj_buf, section_name((struct uci_section *)data));
-	} else if ((opt = strstr(obj_buf, (json_version == JSON_VERSION_1) ? "@index" : "@i-1"))) {
-		*opt = '\0';
-		snprintf(object_buf, sizeof(object_buf), "%s%d", obj_buf, atoi(instance) - 1);
-	} else {
-		DM_STRNCPY(object_buf, json_object_get_string(object), sizeof(object_buf));
-	}
+	if (method)
+		resolve_all_symbols(ctx, data, instance, value, json_version, nbr_instances, json_object_get_string(method), buf_method, sizeof(buf_method));
 
-	if (args1 && args2 && method) {
-		if (data && (strcmp(json_object_get_string(args2), "@Name") == 0)) {
-			dmubus_call_set(object_buf, json_object_get_string(method), UBUS_ARGS{{args1, section_name((struct uci_section *)data), String}}, 1);
-		} else if (strstr(json_object_get_string(args2), "{i}")) {
-			char arg2_buf[512] = {0};
+	if (args)
+		u_args_size = fill_ubus_arguments(ctx, data, instance, value, nbr_instances, json_version, args, u_args);
 
-			replace_indexes(ctx, json_object_get_string(args2), arg2_buf, sizeof(arg2_buf));
-			dmubus_call_set(object_buf, json_object_get_string(method), UBUS_ARGS{{args1, arg2_buf, String}}, 1);
-		} else if (strcmp(json_object_get_string(args2), "@Value") == 0) {
-			dmubus_call_set(object_buf, json_object_get_string(method), UBUS_ARGS{{args1, value, String}}, 1);
-		} else {
-			dmubus_call_set(object_buf, json_object_get_string(method), UBUS_ARGS{{args1, json_object_get_string(args2), String}}, 1);
-		}
-	} else {
-		dmubus_call_set(object_buf, json_object_get_string(method), UBUS_ARGS{0}, 0);
-	}
+	dmubus_call_set(buf_object, buf_method, u_args, u_args_size);
+
+	free_ubus_arguments(u_args, u_args_size);
 }
 
 static void uci_v1_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)

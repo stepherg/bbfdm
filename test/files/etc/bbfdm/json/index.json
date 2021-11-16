@@ -1,6 +1,7 @@
 {
   "Device.PD2.{i}.": {
     "type": "object",
+    "version": "2.14",
     "protocols": [
       "cwmp",
       "usp"
@@ -16,8 +17,31 @@
         "key": "devices"
       }
     },
+    "MiniHubNumberOfEntries": {
+      "type": "int",
+      "version": "2.14",
+      "protocols": [
+        "cwmp",
+        "usp"
+      ],
+      "read": true,
+      "write": false,
+      "datatype": "int",
+      "mapping": [
+        {
+          "type": "ubus",
+          "ubus": {
+            "object": "proxd",
+            "method": "list",
+            "args": {},
+            "key": "devices"
+          }
+        }
+      ]
+    },
     "Device.PD2.{i}.MiniHub.{i}.": {
       "type": "object",
+      "version": "2.14",
       "protocols": [
         "cwmp",
         "usp"
@@ -35,6 +59,7 @@
       },
       "Device.PD2.{i}.MiniHub.{i}.DeviceInfo.": {
         "type": "object",
+        "version": "2.14",
         "protocols": [
           "cwmp",
           "usp"
@@ -43,6 +68,7 @@
         "array": false,
         "Description": {
           "type": "string",
+          "version": "2.14",
           "read": true,
           "write": false,
           "protocols": [
