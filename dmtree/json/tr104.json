@@ -1046,7 +1046,7 @@
 								"name": "sip_options"
 							},
 							"option": {
-								"name": "rtpstart"
+								"name": "rtp_start"
 							}
 						}
 					}
@@ -1074,7 +1074,7 @@
 								"name": "sip_options"
 							},
 							"option": {
-								"name": "rtpend"
+								"name": "rtp_end"
 							}
 						}
 					}
@@ -2080,7 +2080,7 @@
 					"uci": {
 						"file": "asterisk",
 						"section": {
-							"type": "tel_line"
+							"type": "extension"
 						},
 						"dmmapfile": "dmmap_asterisk"
 					}
@@ -2150,7 +2150,7 @@
 							"uci": {
 								"file": "asterisk",
 								"section": {
-									"type": "tel_line",
+									"type": "extension",
 									"index": "@i-1"
 								},
 								"option": {
@@ -2239,7 +2239,7 @@
 							"uci": {
 								"file": "asterisk",
 								"section": {
-									"type": "tel_line",
+									"type": "extension",
 									"index": "@i-1"
 								},
 								"option": {
@@ -3558,7 +3558,7 @@
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "enabled"
+									"name": "enable"
 								}
 							}
 						}
@@ -4136,7 +4136,7 @@
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "enabled"
+									"name": "enable"
 								}
 							}
 						}
@@ -7744,7 +7744,7 @@
 					"uci": {
 						"file": "asterisk",
 						"section": {
-							"type": "tel_line"
+							"type": "line"
 						},
 						"dmmapfile": "dmmap_asterisk"
 					}
@@ -7765,11 +7765,11 @@
 							"uci": {
 								"file": "asterisk",
 								"section": {
-									"type": "tel_line",
+									"type": "line",
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "enabled"
+									"name": "enable"
 								}
 							}
 						}
@@ -7891,11 +7891,11 @@
 							"uci": {
 								"file": "asterisk",
 								"section": {
-									"type": "tel_line",
+									"type": "line",
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "sip_account"
+									"name": "provider"
 								}
 							}
 						}
@@ -7915,7 +7915,22 @@
 						{
 							"max": 256
 						}
-					]
+					],
+                                        "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "line",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "calling_features"
+                                                                }
+                                                        }
+                                                }
+                                        ]
 				},
 				"Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats.": {
 					"type": "object",
@@ -8179,7 +8194,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+                                         "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "extension",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "enable"
+                                                                }
+                                                        }
+                                                }
+                                        ]
 				},
 				"QuiescentMode": {
 					"type": "boolean",
@@ -8339,7 +8369,22 @@
 						{
 							"max": 256
 						}
-					]
+					],
+                                        "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "extension",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "calling_features"
+                                                                }
+                                                        }
+                                                }
+                                        ]
 				},
 				"CallWaitingStatus": {
 					"type": "string",
@@ -8684,7 +8729,22 @@
 					],
 					"list": {
 						"datatype": "string"
-					}
+					},
+                                        "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "group",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "extensions"
+                                                                }
+                                                        }
+                                                }
+                                        ]
 				},
 				"RingType": {
 					"type": "string",
@@ -8911,7 +8971,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+                                        "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "incoming_map",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "enable"
+                                                                }
+                                                        }
+                                                }
+                                        ]
 				},
 				"Alias": {
 					"type": "string",
@@ -8950,11 +9025,11 @@
 							"uci": {
 								"file": "asterisk",
 								"section": {
-									"type": "sip_service_provider",
+									"type": "incoming_map",
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "call_lines"
+									"name": "line"
 								}
 							}
 						}
@@ -8974,7 +9049,22 @@
 						{
 							"max": 256
 						}
-					]
+					],
+                                        "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "incoming_map",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "extension"
+                                                                }
+                                                        }
+                                                }
+                                        ]
 				},
 				"Order": {
 					"type": "unsignedInt",
@@ -9024,7 +9114,7 @@
 					"uci": {
 						"file": "asterisk",
 						"section": {
-							"type": "sip_service_provider"
+							"type": "outgoing_map"
 						},
 						"dmmapfile": "dmmap_asterisk"
 					}
@@ -9038,7 +9128,22 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean"
+					"datatype": "boolean",
+                                        "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "outgoing_map",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "enable"
+                                                                }
+                                                        }
+                                                }
+                                        ]
 				},
 				"Alias": {
 					"type": "string",
@@ -9101,7 +9206,22 @@
 						{
 							"max": 256
 						}
-					]
+					],
+                                        "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "outgoing_map",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "extension"
+                                                                }
+                                                        }
+                                                }
+                                        ]
 				},
 				"Line": {
 					"type": "string",
@@ -9117,7 +9237,22 @@
 						{
 							"max": 256
 						}
-					]
+					],
+                                        "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "outgoing_map",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "line"
+                                                                }
+                                                        }
+                                                }
+                                        ]
 				},
 				"Order": {
 					"type": "unsignedInt",
@@ -9568,7 +9703,7 @@
 						"uci": {
 							"file": "asterisk",
 							"section": {
-								"type": "advanced_features"
+								"type": "calling_features"
 							},
 							"dmmapfile": "dmmap_asterisk"
 						}
@@ -9598,7 +9733,23 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+                                                "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "set",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "caller_id_enable"
+                                                                }
+                                                        }
+                                                }
+                                        ]
+
 					},
 					"CallerIDNameEnable": {
 						"type": "boolean",
@@ -9609,7 +9760,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+                                                "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "set",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "caller_name_enable"
+                                                                }
+                                                        }
+                                                }
+                                             ]
 					},
 					"CallWaitingEnable": {
 						"type": "boolean",
@@ -9620,7 +9786,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+                                                "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "set",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "call_waiting_enable"
+                                                                }
+                                                        }
+                                                }
+                                           ]
 					},
 					"CallForwardUnconditionalEnable": {
 						"type": "boolean",
@@ -9631,7 +9812,23 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+                                                "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "set",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "call_forward_unconditional"
+                                                                }
+                                                        }
+                                                }
+                                        ]
+
 					},
 					"CallForwardUnconditionalNumber": {
 						"type": "string",
@@ -9658,7 +9855,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+                                                "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "set",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "call_forward_on_busy"
+                                                                }
+                                                        }
+                                                }
+                                             ]
 					},
 					"CallForwardOnBusyNumber": {
 						"type": "string",
@@ -9697,7 +9909,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+                                                "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "set",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "call_forward_on_no_answer"
+                                                                }
+                                                        }
+                                                }
+                                             ]
 					},
 					"CallForwardOnNoAnswerNumber": {
 						"type": "string",
@@ -9747,7 +9974,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+                                                "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "set",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "mwi_enable"
+                                                                }
+                                                        }
+                                                }
+                                             ]
 					},
 					"VMWIEnable": {
 						"type": "boolean",
@@ -9791,7 +10033,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+                                                "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "set",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "anonymous_call_enable"
+                                                                }
+                                                        }
+                                                }
+                                             ]
 					},
 					"DoNotDisturbEnable": {
 						"type": "boolean",
@@ -9802,7 +10059,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+                                                "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "set",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "dnd_enable"
+                                                                }
+                                                        }
+                                                }
+                                             ]
 					},
 					"RepeatDialEnable": {
 						"type": "boolean",
@@ -9824,7 +10096,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+                                                "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "set",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "voice_mail_enable"
+                                                                }
+                                                        }
+                                                }
+                                             ]
 					},
 					"CallPickUpEnable": {
 						"type": "boolean",
@@ -9846,7 +10133,22 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "boolean"
+						"datatype": "boolean",
+                                                "mapping": [
+                                                {
+                                                        "type": "uci",
+                                                        "uci": {
+                                                                "file": "asterisk",
+                                                                "section": {
+                                                                        "type": "set",
+                                                                        "index": "@i-1"
+                                                                },
+                                                                "option": {
+                                                                        "name": "ccbs_enable"
+                                                                }
+                                                        }
+                                                }
+                                             ]
 					},
 					"IIFCEnable": {
 						"type": "boolean",
@@ -12557,7 +12859,7 @@
 								"name": "sip_options"
 							},
 							"option": {
-								"name": "dtmfmode"
+								"name": "dtmf_mode"
 							}
 						}
 					}
@@ -12654,7 +12956,7 @@
 									"name": "sip_options"
 								},
 								"option": {
-									"name": "rtpstart"
+									"name": "rtp_start"
 								}
 							}
 						}
@@ -12686,7 +12988,7 @@
 									"name": "sip_options"
 								},
 								"option": {
-									"name": "rtpend"
+									"name": "rtp_end"
 								}
 							}
 						}
@@ -12829,7 +13131,7 @@
 									"name": "tel_options"
 								},
 								"option": {
-									"name": "jbimpl"
+									"name": "jb_impl"
 								}
 							}
 						}
@@ -12856,7 +13158,7 @@
 									"name": "tel_options"
 								},
 								"option": {
-									"name": "jbmaxsize"
+									"name": "jb_maxsize"
 								}
 							}
 						}

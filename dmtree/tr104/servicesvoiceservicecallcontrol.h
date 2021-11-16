@@ -17,6 +17,8 @@ extern DMOBJ tServicesVoiceServiceCallControlObj[];
 extern DMLEAF tServicesVoiceServiceCallControlLineParams[];
 extern DMLEAF tServicesVoiceServiceCallControlIncomingMapParams[];
 extern DMLEAF tServicesVoiceServiceCallControlOutgoingMapParams[];
+extern DMLEAF tServicesVoiceServiceCallControlGroupParams[];
+extern DMLEAF tServicesVoiceServiceCallControlExtensionParams[];
 extern DMLEAF tServicesVoiceServiceCallControlNumberingPlanParams[];
 extern DMOBJ tServicesVoiceServiceCallControlCallingFeaturesObj[];
 extern DMOBJ tServicesVoiceServiceCallControlCallingFeaturesSetObj[];

@@ -79,24 +79,10 @@ static int addObjServicesVoiceServiceSIPClient(char *refparam, struct dmctx *ctx
 
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "", "sip_service_provider");
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "name", value);
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "enabled", "0");
+	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "enable", "0");
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "codec0", "alaw");
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "ptime_alaw", "20");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "cbbs_key", "5");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "cbbs_maxretry", "5");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "cbbs_retrytime", "300");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "cbbs_waittime", "30");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "autoframing", "1");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "cfim_on", "*21*");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "cfim_off", "#21#");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "cfbs_on", "*61*");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "cfbs_off", "#61#");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "cw_on", "*43*");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "cw_off", "#43#");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "cw_status", "*#43#");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "call_return", "*69");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "redial", "*66");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "is_fax", "0");
+	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "support_fax", "0");
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "transport", "udp");
 
 	dmuci_add_section_bbfdm("dmmap_asterisk", "sip_service_provider", &dmmap);
@@ -165,10 +151,10 @@ static int delObjServicesVoiceServiceSIPNetworkFQDNServer(char *refparam, struct
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
-/*#Device.Services.VoiceService.{i}.SIP.Client.{i}.Enable!UCI:asterisk/sip_service_provider,@i-1/enabled*/
+/*#Device.Services.VoiceService.{i}.SIP.Client.{i}.Enable!UCI:asterisk/sip_service_provider,@i-1/enable*/
 static int get_ServicesVoiceServiceSIPClient_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enable", "1");
 	return 0;
 }
 
@@ -183,7 +169,7 @@ static int set_ServicesVoiceServiceSIPClient_Enable(char *refparam, struct dmctx
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -194,7 +180,7 @@ static int get_ServicesVoiceServiceSIPClient_Status(char *refparam, struct dmctx
 	struct uci_section *section = ((struct dmmap_dup *)data)->config_section;
 	char *enabled = NULL;
 
-	dmuci_get_value_by_section_string(section, "enabled", &enabled);
+	dmuci_get_value_by_section_string(section, "enable", &enabled);
 	if (enabled && *enabled == '0') {
 		*value = "Disabled";
 
@@ -427,10 +413,10 @@ static int get_ServicesVoiceServiceSIPClientContact_UserAgent(char *refparam, st
 	return 0;
 }
 
-/*#Device.Services.VoiceService.{i}.SIP.Network.{i}.Enable!UCI:asterisk/sip_service_provider,@i-1/enabled*/
+/*#Device.Services.VoiceService.{i}.SIP.Network.{i}.Enable!UCI:asterisk/sip_service_provider,@i-1/enable*/
 static int get_ServicesVoiceServiceSIPNetwork_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enable", "1");
 	return 0;
 }
 
@@ -445,7 +431,7 @@ static int set_ServicesVoiceServiceSIPNetwork_Enable(char *refparam, struct dmct
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", b ? "1" : "0");
 			break;
 	}
 	return 0;

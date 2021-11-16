@@ -122,6 +122,7 @@ endif #BBF_TR181
 
 if BBF_TR104
 libbbfdm_la_SOURCES +=	\
+	../dmtree/vendor/iopsys/tr104/servicesvoiceservicecallcontrol.c          \
 	../dmtree/vendor/iopsys/tr104/servicesvoiceservicecalllog.c              \
 	../dmtree/vendor/iopsys/tr104/servicesvoiceservicedect.c
 endif #BBF_TR104
