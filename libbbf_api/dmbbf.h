@@ -42,7 +42,7 @@
 #define BBF_ATTR_UNUSED(x) (void)(x)
 #endif
 
-#define DEFAULT_DMVERSION "2.14"
+#define DEFAULT_DMVERSION "2.15"
 
 #define DM_STRNCPY(DST, SRC, SIZE) \
 do { \

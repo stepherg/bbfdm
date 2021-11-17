@@ -289,7 +289,8 @@ int dm_validate_int_list(char *value, int min_item, int max_item, int max_size, 
 int dm_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 int dm_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 int dm_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-char *decode64(char *enc);
+char *base64_decode(const char *src);
+void string_to_mac(const char *str, size_t str_len, char *out, size_t out_len);
 bool folder_exists(const char *path);
 bool file_exists(const char *path);
 bool is_regular_file(const char *path);

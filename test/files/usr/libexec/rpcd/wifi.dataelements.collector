@@ -4,7 +4,7 @@
 
 case "$1" in
         list)
-                echo '{ "dump" : {}, "event": {} }'
+                echo '{ "dump" : {}, "event": {}, "dump2": {} }'
         ;;
         call)
                 case "$2" in
@@ -13,6 +13,9 @@ case "$1" in
                         ;;
                         event)
                                 cat /tmp/wifi.dataelements.collector.event.data 2>/dev/null
+                        ;;
+                         dump2)
+                                cat /tmp/wifi.dataelements.collector.dump2.data 2>/dev/null
                         ;;
                 esac
         ;;

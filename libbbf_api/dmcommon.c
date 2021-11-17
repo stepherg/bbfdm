@@ -1552,30 +1552,51 @@ unsigned long file_system_size(const char *path, const enum fs_size_type_enum ty
 	}
 }
 
-int get_base64char_value(char b64)
+static int get_base64_char(char b64)
 {
 	char *base64C = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-	int i;
-	for (i = 0; i < 64; i++)
+
+	for (int i = 0; i < 64; i++)
 		if (base64C[i] == b64)
 		return i;
+
 	return -1;
 }
 
-char *decode64(char *enc)
+char *base64_decode(const char *src)
 {
 	int i, j = 0;
-	size_t decsize = strlen(enc)*6/8;
-	char *dec = (char *)dmmalloc((decsize +1) * sizeof(char));
 
-	for (i = 0; i < strlen(enc)-1; i++) {
-		dec[j] = (get_base64char_value(enc[i]) << (j%3==0?2:(j%3==1?4:6))) + (get_base64char_value(enc[i+1]) >> (j%3==0?4:(j%3==1? 2:0)));
+	if (!src)
+		return "";
+
+	size_t decsize = strlen(src)*6/8;
+	char *out = (char *)dmmalloc((decsize +1) * sizeof(char));
+
+	for (i = 0; i < strlen(src)-1; i++) {
+		out[j] = (get_base64_char(src[i]) << (j%3==0?2:(j%3==1?4:6))) + (get_base64_char(src[i+1]) >> (j%3==0?4:(j%3==1? 2:0)));
 		if (j%3 == 2)
 			i++;
 		j++;
 	}
-	dec[j] = '\0';
-	return dec;
+	out[j] = '\0';
+
+	return out;
+}
+
+void string_to_mac(const char *str, size_t str_len, char *out, size_t out_len)
+{
+	unsigned pos = 0;
+	int i, j;
+
+	if (!str || !str_len)
+		return;
+
+	for (i = 0, j = 0; i < str_len; ++i, j += 3) {
+		pos += snprintf(out + j, out_len - pos, "%02x", str[i] & 0xff);
+		if (i < str_len - 1)
+			pos += snprintf(out + j + 2, out_len - pos, "%c", ':');
+	}
 }
 
 char *replace_char(char *str, char find, char replace)

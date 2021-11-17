@@ -1,45 +1,45 @@
 {
-	"date": "Wed Aug 26 04:54:52 2020",
-	"version": "",
+	"date": "Thu Dec  9 15:57:41 2021",
+	"version": "0.2",
 	"description": "WFA Data Elements",
-	"TimeStamp": "2020-07-26T04:54:52+01:00",
+	"TimeStamp": "2021-12-09T15:57:41+01:00",
 	"name": "wifi",
 	"data": [
 		{
 			"wfa-dataelements:Network": {
 				"ID": "",
-				"NumberOfDevices": 2,
-				"ControllerID": "00:00:00:00:00:00",
-				"TimeStamp": "",
+				"NumberOfDevices": 1,
+				"ControllerID": "02:11:11:aa:bb:cc",
+				"TimeStamp": "2021-12-09T14:46:53+01:00",
 				"DeviceList": [
 					{
-						"ID": "00:00:00:00:00:00",
+						"ID": "02:11:11:aa:bb:cc",
 						"NumberOfRadios": 2,
-						"CollectionInterval": 0,
+						"CollectionInterval": 1230,
 						"RadioList": [
 							{
-								"ID": "00:22:07:a2:f0:58",
-								"Noise": -90,
+								"ID": "AhISu8zd",
+								"Noise": 95,
 								"NumberOfBSS": 1,
 								"Enabled": true,
 								"NumberOfCurrOpClass": 1,
 								"NumberOfUnassocSta": 0,
-								"Utilization": 0,
+								"Utilization": 56,
 								"Transmit": 0,
 								"ReceiveSelf": 0,
 								"RecieveOther": 0,
 								"BSSList": [
 									{
-										"BSSID": "00:22:07:a2:f0:58",
+										"BSSID": "02:12:12:bb:cc:dd",
 										"SSID": "iopsysWrt-002207A2F052",
-										"TimeStamp": "",
+										"TimeStamp": "2021-12-09T14:46:53+01:00",
 										"Enabled": false,
 										"LastChange": 0,
 										"NumberofSTA": 0,
-										"EstServiceParametersBE": "AAAA\n",
-										"EstServiceParametersBK": "AAAA\n",
-										"EstServiceParameterVO": "AAAA\n",
-										"EstServieParameterVI": "AAAA\n",
+										"EstServiceParametersBE": "AAAA",
+										"EstServiceParametersBK": "AAAA",
+										"EstServiceParameterVO": "AAAA",
+										"EstServieParameterVI": "AAAA",
 										"UnicastBytesReceived": 0,
 										"UnicastBytesSent": 0,
 										"MulticastBytesReceived": 0,
@@ -59,7 +59,7 @@
 											"MaxTxPower": 20,
 											"NumberOfNonOperChan": 0,
 											"NonOperable": [
-
+												93
 											]
 										},
 										{
@@ -79,8 +79,9 @@
 											]
 										}
 									],
-									"HTCapabilities": "Dg==\n",
-									"VHTCapabilities": "AA==\n"
+									"HTCapabilities": "Dg==",
+									"VHTCapabilities": "AA==",
+									"HECapabilities": "AAA="
 								},
 								"CurrentOperatingClasses": [
 									{
@@ -109,7 +110,7 @@
 															{
 																"StationCount": 1,
 																"ChannelUtilization": 14,
-																"BSSID": "00:22:07:9f:b7:fe",
+																"BSSID": "02:12:12:bb:cc:de",
 																"SSID": "iopsysWrt-0022079FB7FC",
 																"SignalStrengh": -32,
 																"ChannelBandwidth": 0
@@ -270,30 +271,30 @@
 								}
 							},
 							{
-								"ID": "00:22:07:a2:f0:59",
-								"Noise": -90,
+								"ID": "AhISu8ze",
+								"Noise": 90,
 								"NumberOfBSS": 1,
 								"Enabled": true,
 								"NumberOfCurrOpClass": 1,
 								"NumberOfUnassocSta": 0,
 								"Utilization": 0,
-								"Transmit": 0,
+								"Transmit": 156,
 								"ReceiveSelf": 0,
-								"RecieveOther": 0,
+								"RecieveOther": 121,
 								"BSSList": [
 									{
-										"BSSID": "00:22:07:a2:f0:59",
+										"BSSID": "02:12:12:bb:cc:de",
 										"SSID": "iopsysWrt-002207A2F052-new",
-										"TimeStamp": "",
+										"TimeStamp": "2021-12-09T14:46:53+01:00",
 										"Enabled": false,
 										"LastChange": 0,
 										"NumberofSTA": 0,
-										"EstServiceParametersBE": "AAAA\n",
-										"EstServiceParametersBK": "AAAA\n",
-										"EstServiceParameterVO": "AAAA\n",
-										"EstServieParameterVI": "AAAA\n",
+										"EstServiceParametersBE": "AAAA",
+										"EstServiceParametersBK": "AAAA",
+										"EstServiceParameterVO": "AAAA",
+										"EstServieParameterVI": "AAAA",
 										"UnicastBytesReceived": 0,
-										"UnicastBytesSent": 0,
+										"UnicastBytesSent": 35,
 										"MulticastBytesReceived": 0,
 										"MulticastBytesSent": 0,
 										"BroadcastBytesReceived": 0,
@@ -311,7 +312,7 @@
 											"MaxTxPower": 23,
 											"NumberOfNonOperChan": 0,
 											"NonOperable": [
-
+												93
 											]
 										},
 										{
@@ -411,8 +412,9 @@
 											]
 										}
 									],
-									"HTCapabilities": "Dg==\n",
-									"VHTCapabilities": "AA==\n"
+									"HTCapabilities": "Dg==",
+									"VHTCapabilities": "AA==",
+									"HECapabilities": "AAA="
 								},
 								"CurrentOperatingClasses": [
 									{
@@ -769,693 +771,6 @@
 												"NumberOfChannelScans": 0,
 												"ChannelScanList": [
 
-												]
-											}
-										]
-									}
-								],
-								"UnassociatedStaList": [
-
-								],
-								"BackhaulSta": {
-									"MACAddress": "00:00:00:00:00:00"
-								}
-							}
-						]
-					},
-					{
-						"ID": "00:22:07:9f:b7:fc",
-						"NumberOfRadios": 2,
-						"CollectionInterval": 0,
-						"RadioList": [
-							{
-								"ID": "00:22:07:9f:b7:fd",
-								"Noise": 164,
-								"NumberOfBSS": 1,
-								"Enabled": true,
-								"NumberOfCurrOpClass": 1,
-								"NumberOfUnassocSta": 0,
-								"Utilization": 0,
-								"Transmit": 0,
-								"ReceiveSelf": 0,
-								"RecieveOther": 0,
-								"BSSList": [
-									{
-										"BSSID": "00:22:07:9f:b7:fd",
-										"SSID": "iopsysWrt-0022079FB7FC",
-										"TimeStamp": "2020-07-26T04:54:21+01:00",
-										"Enabled": false,
-										"LastChange": 0,
-										"NumberofSTA": 0,
-										"EstServiceParametersBE": "AAAA\n",
-										"EstServiceParametersBK": "AAAA\n",
-										"EstServiceParameterVO": "AAAA\n",
-										"EstServieParameterVI": "AAAA\n",
-										"UnicastBytesReceived": 0,
-										"UnicastBytesSent": 0,
-										"MulticastBytesReceived": 0,
-										"MulticastBytesSent": 17,
-										"BroadcastBytesReceived": 0,
-										"BroadcastBytesSent": 0,
-										"STAList": [
-
-										]
-									}
-								],
-								"Capabilites": {
-									"NumberOfOpClass": 13,
-									"OperatingClasses": [
-										{
-											"Class": 115,
-											"MaxTxPower": 23,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 118,
-											"MaxTxPower": 23,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 121,
-											"MaxTxPower": 30,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 116,
-											"MaxTxPower": 23,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 119,
-											"MaxTxPower": 23,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 122,
-											"MaxTxPower": 30,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 117,
-											"MaxTxPower": 23,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 120,
-											"MaxTxPower": 23,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 123,
-											"MaxTxPower": 30,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 125,
-											"MaxTxPower": 30,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 128,
-											"MaxTxPower": 30,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 129,
-											"MaxTxPower": 23,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 130,
-											"MaxTxPower": 23,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										}
-									],
-									"HTCapabilities": "AA==\n",
-									"VHTCapabilities": "AA==\n"
-								},
-								"CurrentOperatingClasses": [
-									{
-										"TimeStamp": "2020-07-26T04:54:21+01:00",
-										"Channel": 100,
-										"Class": 128,
-										"TxPower": 30
-									}
-								],
-								"ScanResultList": [
-									{
-										"TimeStamp": "2020-07-26T04:54:21+01:00",
-										"NumberOfOpClassScans": 4,
-										"OpClassScanList": [
-											{
-												"OperatingClass": 115,
-												"NumberOfChannelScans": 2,
-												"ChannelScanList": [
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 36,
-														"NumberofNeighbors": 1,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-															{
-																"StationCount": 0,
-																"ChannelUtilization": 0,
-																"BSSID": "00:22:07:a2:f0:59",
-																"SSID": "iopsysWrt-002207A2F052-new",
-																"SignalStrengh": 234,
-																"ChannelBandwidth": 0
-															}
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 0,
-														"NumberofNeighbors": 0,
-														"Noise": 0,
-														"Utilization": 0,
-														"NeighborList": [
-
-														]
-													}
-												]
-											},
-											{
-												"OperatingClass": 118,
-												"NumberOfChannelScans": 4,
-												"ChannelScanList": [
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 52,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 56,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 60,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 64,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													}
-												]
-											},
-											{
-												"OperatingClass": 121,
-												"NumberOfChannelScans": 11,
-												"ChannelScanList": [
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 100,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 104,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 108,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 112,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 116,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 120,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 124,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 128,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 132,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 136,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 140,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													}
-												]
-											},
-											{
-												"OperatingClass": 125,
-												"NumberOfChannelScans": 6,
-												"ChannelScanList": [
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 149,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 153,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 157,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 161,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 165,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 169,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													}
-												]
-											}
-										]
-									}
-								],
-								"UnassociatedStaList": [
-
-								],
-								"BackhaulSta": {
-									"MACAddress": "00:00:00:00:00:00"
-								}
-							},
-							{
-								"ID": "00:22:07:9f:b7:fe",
-								"Noise": 171,
-								"NumberOfBSS": 1,
-								"Enabled": true,
-								"NumberOfCurrOpClass": 1,
-								"NumberOfUnassocSta": 0,
-								"Utilization": 0,
-								"Transmit": 0,
-								"ReceiveSelf": 0,
-								"RecieveOther": 0,
-								"BSSList": [
-									{
-										"BSSID": "00:22:07:9f:b7:fe",
-										"SSID": "iopsysWrt-0022079FB7FC",
-										"TimeStamp": "2020-07-26T04:54:21+01:00",
-										"Enabled": false,
-										"LastChange": 0,
-										"NumberofSTA": 1,
-										"EstServiceParametersBE": "AAAA\n",
-										"EstServiceParametersBK": "AAAA\n",
-										"EstServiceParameterVO": "AAAA\n",
-										"EstServieParameterVI": "AAAA\n",
-										"UnicastBytesReceived": 0,
-										"UnicastBytesSent": 0,
-										"MulticastBytesReceived": 25,
-										"MulticastBytesSent": 29,
-										"BroadcastBytesReceived": 0,
-										"BroadcastBytesSent": 0,
-										"STAList": [
-											{
-												"MACAddress": "0a:68:d4:d2:2e:77",
-												"TimeStamp": "2020-07-26T04:54:21+01:00",
-												"SignalStrength": -49,
-												"HTCapabilities": "AA==\n",
-												"VHTCapabilities": "AAAAAAAA\n",
-												"EstMACDataRateDownlink": 0,
-												"EstMACDataRateUplink": 0,
-												"LastDataUplinkRate": 65,
-												"UtilizationTransmit": 0,
-												"UtilizationReceive": 0,
-												"LastConnectTime": 24,
-												"Hostname": "",
-												"BytesSent": 26232,
-												"BytesReceived": 56718,
-												"PacketsSent": 245,
-												"PacketsReceived": 486,
-												"ErrorsSent": 1,
-												"ErrorsReceived": 0,
-												"NumberOfMeasureReports": 0,
-												"Measurementreport": [
-
-												]
-											}
-										]
-									}
-								],
-								"Capabilites": {
-									"NumberOfOpClass": 3,
-									"OperatingClasses": [
-										{
-											"Class": 81,
-											"MaxTxPower": 20,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 83,
-											"MaxTxPower": 20,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										},
-										{
-											"Class": 84,
-											"MaxTxPower": 20,
-											"NumberOfNonOperChan": 0,
-											"NonOperable": [
-
-											]
-										}
-									],
-									"HTCapabilities": "AA==\n",
-									"VHTCapabilities": "AA==\n"
-								},
-								"CurrentOperatingClasses": [
-									{
-										"TimeStamp": "2020-07-26T04:54:21+01:00",
-										"Channel": 1,
-										"Class": 4,
-										"TxPower": 30
-									}
-								],
-								"ScanResultList": [
-									{
-										"TimeStamp": "2020-07-26T04:54:21+01:00",
-										"NumberOfOpClassScans": 1,
-										"OpClassScanList": [
-											{
-												"OperatingClass": 81,
-												"NumberOfChannelScans": 12,
-												"ChannelScanList": [
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 1,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 2,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 3,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 4,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 5,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 6,
-														"NumberofNeighbors": 1,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-															{
-																"StationCount": 0,
-																"ChannelUtilization": 0,
-																"BSSID": "50:0f:f5:89:20:41",
-																"SSID": "404 not found",
-																"SignalStrengh": 228,
-																"ChannelBandwidth": 0
-															}
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 7,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 8,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 9,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 10,
-														"NumberofNeighbors": 0,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 11,
-														"NumberofNeighbors": 1,
-														"Noise": 100,
-														"Utilization": 50,
-														"NeighborList": [
-															{
-																"StationCount": 0,
-																"ChannelUtilization": 0,
-																"BSSID": "00:22:07:a2:f0:58",
-																"SSID": "iopsysWrt-002207A2F052",
-																"SignalStrengh": 227,
-																"ChannelBandwidth": 0
-															}
-														]
-													},
-													{
-														"TimeStamp": "2020-07-26T04:54:21+01:00",
-														"Channel": 0,
-														"NumberofNeighbors": 0,
-														"Noise": 0,
-														"Utilization": 0,
-														"NeighborList": [
-
-														]
-													}
 												]
 											}
 										]

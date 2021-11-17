@@ -44,6 +44,8 @@ extern DMLEAF tWiFiEndPointProfileSecurityParams[];
 extern DMOBJ tWiFiDataElementsObj[];
 extern DMOBJ tWiFiDataElementsNetworkObj[];
 extern DMLEAF tWiFiDataElementsNetworkParams[];
+extern DMLEAF tWiFiDataElementsNetworkSSIDParams[];
+extern DMLEAF tWiFiDataElementsNetworkMultiAPSteeringSummaryStatsParams[];
 extern DMOBJ tWiFiDataElementsNetworkDeviceObj[];
 extern DMLEAF tWiFiDataElementsNetworkDeviceParams[];
 extern DMOBJ tWiFiDataElementsNetworkDeviceRadioObj[];
@@ -63,36 +65,28 @@ extern DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanParams[];
 extern DMOBJ tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanObj[];
 extern DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanParams[];
 extern DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSSParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceRadioScanCapabilityObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioScanCapabilityParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannelsParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceRadioCACCapabilityObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioCACCapabilityParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannelsParams[];
 extern DMLEAF tWiFiDataElementsNetworkDeviceRadioUnassociatedSTAParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceMultiAPDeviceObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceParams[];
+extern DMOBJ tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulObj[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfileParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStatsParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceDefault8021QParams[];
+extern DMLEAF tWiFiDataElementsNetworkDeviceSSIDtoVIDMappingParams[];
 extern DMOBJ tWiFiDataElementsAssociationEventObj[];
 extern DMLEAF tWiFiDataElementsAssociationEventParams[];
 extern DMLEAF tWiFiDataElementsAssociationEventAssociationEventDataParams[];
 extern DMOBJ tWiFiDataElementsDisassociationEventObj[];
 extern DMLEAF tWiFiDataElementsDisassociationEventParams[];
 extern DMLEAF tWiFiDataElementsDisassociationEventDisassociationEventDataParams[];
-
-struct wifi_radio_args
-{
-	struct dmmap_dup *sections;
-};
-
-struct wifi_ssid_args
-{
-	struct dmmap_dup *sections;
-	char *ifname;
-	char *linker;
-};
-
-struct wifi_enp_args
-{
-	struct dmmap_dup *sections;
-	char *ifname;
-};
-
-struct wifi_acp_args
-{
-	struct dmmap_dup *sections;
-	char *ifname;
-};
 
 #endif
