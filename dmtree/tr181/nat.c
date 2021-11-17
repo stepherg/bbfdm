@@ -548,7 +548,11 @@ static int set_nat_port_mapping_external_port_end_range(char *refparam, struct d
 			if (tmp)
 				*tmp = '\0';
 
-			snprintf(buffer, sizeof(buffer), "%s:%s", src_dport, value);
+			if (!tmp || (src_dport[0] == '\0'))
+				snprintf(buffer, sizeof(buffer), "%s:%s", "0", value);
+			else
+				snprintf(buffer, sizeof(buffer), "%s:%s", src_dport, value);
+
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_dport", buffer);
 			return 0;
 	}
