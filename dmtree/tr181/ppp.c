@@ -410,7 +410,6 @@ static int get_PPPInterface_CurrentMRUSize(char *refparam, struct dmctx *ctx, vo
 static int get_PPPInterface_LCPEcho(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *lcp_echo = NULL, *token = NULL;
-	char echo_val[50] = {0};
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "keepalive", &lcp_echo);
 	if (lcp_echo && *lcp_echo == '\0') {
@@ -420,6 +419,8 @@ static int get_PPPInterface_LCPEcho(char *refparam, struct dmctx *ctx, void *dat
 
 	token = strtok(lcp_echo , " ");
 	if (NULL != token) {
+		char echo_val[50] = {0};
+
 		DM_STRNCPY(echo_val, token, sizeof(echo_val));
 		*value = dmstrdup(echo_val);
 	}
@@ -430,13 +431,15 @@ static int get_PPPInterface_LCPEcho(char *refparam, struct dmctx *ctx, void *dat
 static int get_PPPInterface_LCPEchoRetry(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *lcp_retry = NULL, *token = NULL;
-	char lcp_interval[50] = {0};
+
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "keepalive", &lcp_retry);
-	if (lcp_retry && *lcp_retry == '\0') {
+	if (!lcp_retry || *lcp_retry == '\0') {
 		*value = "5";
 	} else {
 		token = strchr(lcp_retry , ' ');
 		if (NULL != token) {
+			char lcp_interval[50] = {0};
+
 			DM_STRNCPY(lcp_interval, token + 1, sizeof(lcp_interval));
 			*value = dmstrdup(lcp_interval);
 		}
@@ -449,7 +452,6 @@ static int configure_supported_ncp_options(struct uci_section *ss, char *value, 
 {
 	char *proto, *pppd_opt = NULL;
 	char list_options[1024] = {0};
-	unsigned pos = 0;
 
 	dmuci_get_value_by_section_string(ss, "proto", &proto);
 	if (0 == strcmp(proto, "pppoe")) {
@@ -459,6 +461,7 @@ static int configure_supported_ncp_options(struct uci_section *ss, char *value, 
 	if (pppd_opt && *pppd_opt != '\0') {
 		char *token = NULL, *end = NULL;
 		bool found = false;
+		unsigned pos = 0;
 
 		list_options[0] = 0;
 		token = strtok_r(pppd_opt, " ", &end);
@@ -583,15 +586,14 @@ static int set_PPPInterface_IPv6CPEnable(char *refparam, struct dmctx *ctx, void
 
 static int get_PPPInterfacePPPoE_SessionID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char path[1024] = {0};
-	char session_id[20] = {0};
-	FILE *fp;
-	int i = 0;
-
-	fp = fopen("/proc/net/pppoe" ,"r");
+	FILE *fp = fopen("/proc/net/pppoe" ,"r");
 	if (NULL == fp) {
 		*value  = "1";
 	} else {
+		char session_id[20] = {0};
+		char path[1024] = {0};
+		int i = 0;
+
 		while (fgets(path, sizeof(path), fp) != NULL) {
 			i++;
 			if (2 == i) {
@@ -749,7 +751,7 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 	dev = get_device(section_name(((struct dmmap_dup *)data)->config_section));
 
 	// Check if interface name is same as dev value.
-	char *token, *end = linker;
+	char *token = NULL, *end = linker;
 	while ((token = strtok_r(end, " ", &end))) {
 		if (0 == strcmp(dev, token)) {
 			ret = 1;
@@ -757,7 +759,7 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 		}
 	}
 
-	if (0 == ret) {
+	if (ret == 0 || !token) {
 		*value = "";
 		return 0;
 	}

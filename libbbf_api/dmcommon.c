@@ -169,7 +169,7 @@ int dmcmd(char *cmd, int n, ...)
 		dup2(dmcmd_pfds[1], 1);
 		close(dmcmd_pfds[1]);
 
-		execvp(argv[0], (char **) argv);
+		execvp(argv[0], (char **) argv); /* Flawfinder: ignore */
 		exit(ESRCH);
 	} else if (pid < 0)
 		return -1;
@@ -210,7 +210,7 @@ int dmcmd_no_wait(char *cmd, int n, ...)
 		return -1;
 
 	if (pid == 0) {
-		execvp(argv[0], (char **) argv);
+		execvp(argv[0], (char **) argv); /* Flawfinder: ignore */
 		exit(ESRCH);
 	} else if (pid < 0)
 		return -1;
@@ -907,13 +907,12 @@ static inline int char_is_valid(char c)
 
 int dm_read_sysfs_file(const char *file, char *dst, unsigned len)
 {
-	char *content;
+	char content[len];
 	int fd;
 	int rlen;
 	int i, n;
 	int rc = 0;
 
-	content = alloca(len);
 	dst[0] = 0;
 
 	fd = open(file, O_RDONLY);

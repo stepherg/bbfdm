@@ -453,7 +453,7 @@ static int set_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (value && atoi(value) == 0)
+			if (!value || atoi(value) == 0)
 				break;
 
 			snprintf(expiry_date, sizeof(expiry_date), "%lld", (long long)(atoi(value) + time(NULL)));

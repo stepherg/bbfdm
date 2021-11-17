@@ -283,7 +283,7 @@ static int get_operate_args_XIOPSYSEUPingTEST_Run(char *refparam, struct dmctx *
 
 static int operate_DeviceXIOPSYSEUPingTEST_Run(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *p, *min = NULL, *avg = NULL, *max = NULL, line[512], command[512];
+	char *p, *min = NULL, *avg = NULL, *max = NULL, command[512];
 	FILE *log = NULL;
 
 	char *host = dmjson_get_value((json_object *)value, 1, "Host");
@@ -292,11 +292,13 @@ static int operate_DeviceXIOPSYSEUPingTEST_Run(char *refparam, struct dmctx *ctx
 
 	snprintf(command, sizeof(command), "ping -c 1 -W 1 %s", host);
 
-	if ((log = popen(command, "r"))) {
+	if ((log = popen(command, "r"))) { /* Flawfinder: ignore */
+		char line[512] = {0};
+
 		while (fgets(line, sizeof(line), log) != NULL) {
 			if (strstr(line, "rtt")) {
 				strtok_r(line, "=", &min);
-				strtok_r(min+1, "/", &avg);
+				strtok_r(min ? min+1 : "", "/", &avg);
 				add_list_parameter(ctx, dmstrdup("MinimumResponseTime"), dmstrdup(min ? min+1 : ""), "xsd:unsignedInt", NULL);
 				strtok_r(avg, "/", &max);
 				add_list_parameter(ctx, dmstrdup("AverageResponseTime"), dmstrdup(avg ? avg : ""), "xsd:unsignedInt", NULL);

@@ -781,7 +781,6 @@ static void dmmap_synchronizeBridgingBridgePort(struct dmctx *dmctx, DMNODE *par
 	uci_path_foreach_option_eq_safe(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_args->br_inst, stmp, s) {
 
 		// section added by user ==> skip it
-		char *s_user = NULL;
 		dmuci_get_value_by_section_string(s, "added_by_user", &s_user);
 		if (s_user && strcmp(s_user, "1") == 0)
 			continue;
@@ -1068,16 +1067,16 @@ static void update_vlanport_and_device_section(void *data, char *linker, char **
 				if (device_name && strcmp(section_name(s), device_name) == 0) {
 					char *vid = NULL;
 					dmuci_get_value_by_section_string(s, "vid", &vid);
-					if (vid && vid [0] == '\0') {
-						dmuci_set_value_by_section(s, "ifname", linker);
-						dmuci_set_value_by_section(s, "name", linker);
-					} else {
+					if (vid && *vid) {
 						char new_name[32] = {0};
 
 						snprintf(new_name, sizeof(new_name), "%s.%s", linker, vid);
 						dmuci_set_value_by_section(s, "ifname", linker);
 						dmuci_set_value_by_section(s, "name", new_name);
 						*new_linker = dmstrdup(new_name);
+					} else {
+						dmuci_set_value_by_section(s, "ifname", linker);
+						dmuci_set_value_by_section(s, "name", linker);
 					}
 					break;
 				}
@@ -1602,7 +1601,7 @@ static int delObjBridgingBridgePort(char *refparam, struct dmctx *ctx, void *dat
 		if ((port && port[0] == '\0') || (management && strcmp(management, "1") == 0)) {
 			// Remove only dmmap section
 			dmuci_delete_by_section_bbfdm(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, NULL, NULL);
-		} else {
+		} else if (port && *port) {
 			// Remove device from management port section
 			remove_device_from_management_port((struct bridge_port_args *)data, port);
 
@@ -2869,7 +2868,7 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 							/* Update dmmap vlanport section */
 							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "name", port_linker);
 							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "port_name", section_name);
-						} else {
+						} else if (vid && *vid) {
 							struct uci_section *s = NULL;
 							char new_name[32] = {0};
 

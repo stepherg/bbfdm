@@ -32,13 +32,6 @@ struct dm_ubus_cache_entry {
 	struct blob_attr *breq;
 };
 
-struct dm_ubus_req {
-	const char *obj;
-	const char *method;
-	struct ubus_arg *args;
-	unsigned n_args;
-};
-
 struct dm_ubus_hash_req {
 	const char *obj;
 	const char *method;
@@ -112,7 +105,6 @@ static void receive_call_result_data(struct ubus_request *req, int type, struct 
 
 static void __async_result_callback(struct ubus_request *req, int type, struct blob_attr *msg)
 {
-	const char *str;
 	time_t resp_time = time(NULL);
 
 	const unsigned *hash = (unsigned *)req->priv;
@@ -149,7 +141,7 @@ static void __async_result_callback(struct ubus_request *req, int type, struct b
 			return;
 		}
 
-		str = blobmsg_format_json_indent(msg, true, -1);
+		const char *str = blobmsg_format_json_indent(msg, true, -1);
 		if (!str) {
 			entry->data = NULL;
 			return;
@@ -223,8 +215,6 @@ static inline json_object *ubus_call_req(char *obj, char *method, struct blob_at
 static int ubus_call_req_async(const char *obj, const char *method, const unsigned hash, struct blob_attr *attr)
 {
 	uint32_t id;
-	int rc = 0;
-	struct ubus_request *req;
 
 	if (ubus_ctx == NULL) {
 		ubus_ctx = dm_libubus_init();
@@ -235,7 +225,7 @@ static int ubus_call_req_async(const char *obj, const char *method, const unsign
 	}
 
 	if (!ubus_lookup_id(ubus_ctx, obj, &id)) {
-		req = (struct ubus_request *)malloc(sizeof(struct ubus_request));
+		struct ubus_request *req = (struct ubus_request *)malloc(sizeof(struct ubus_request));
 		if (req == NULL) {
 			printf("Out of memory!\n\r");
 			return -1;
@@ -243,7 +233,7 @@ static int ubus_call_req_async(const char *obj, const char *method, const unsign
 
 		memset(req, 0, sizeof(struct ubus_request));
 
-		rc = ubus_invoke_async(ubus_ctx, id, method, attr, req);
+		int rc = ubus_invoke_async(ubus_ctx, id, method, attr, req);
 		if (rc) {
 			printf("Ubus async invoke failed (%s)\n\r", ubus_strerror(rc));
 			free(req);
@@ -401,7 +391,7 @@ int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_si
 
 	const unsigned hash = dm_ubus_req_hash_from_blob(&hash_req);
 	const struct dm_ubus_cache_entry *entry = dm_ubus_cache_lookup(hash);
-	json_object *res;
+	json_object *res = NULL;
 
 	if (entry) {
 		res = entry->data;
@@ -470,8 +460,7 @@ bool dmubus_object_method_exists(const char *obj)
 	if (ubus_ctx == NULL) {
 		ubus_ctx = dm_libubus_init();
 		if (ubus_ctx == NULL) {
-			printf("UBUS context is null\n\r");
-			return -1;
+			return false;
 		}
 	}
 

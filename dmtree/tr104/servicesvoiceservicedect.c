@@ -18,10 +18,11 @@ static int browseServicesVoiceServiceDECTBaseInst(struct dmctx *dmctx, DMNODE *p
 {
 	json_object *res = NULL, *obj = NULL, *arrobj = NULL;
 	char *inst = NULL;
-	int id = 0, i = 0;
 
 	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	if (res) {
+		int id = 0, i = 0;
+
 		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "base") {
 
 			inst = handle_instance_without_section(dmctx, parent_node, ++id);
@@ -38,10 +39,11 @@ static int browseServicesVoiceServiceDECTPortableInst(struct dmctx *dmctx, DMNOD
 {
 	json_object *res = NULL, *obj = NULL, *arrobj = NULL;
 	char *inst = NULL;
-	int id = 0, i = 0;
 
 	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	if (res) {
+		int id = 0, i = 0;
+
 		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "handsets") {
 
 			inst = handle_instance_without_section(dmctx, parent_node, ++id);
@@ -310,11 +312,12 @@ static int get_ServicesVoiceServiceDECTPortable_IPUI(char *refparam, struct dmct
 static int get_ServicesVoiceServiceDECTPortable_IPEI(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *ipui = dmjson_get_value((json_object *)data, 1, "ipui");
-	char buff[14] = {0};
 
 	*value = "";
 	// Check for N type PUT
 	if (ipui[0] == '0') {
+		char buff[14] = {0};
+
 		DM_STRNCPY(buff, &ipui[1], sizeof(buff));
 		dmasprintf(value, "%s0", buff);
 	}

@@ -40,7 +40,7 @@ int command_exec_output_to_array(const char *cmd, char **output, int *length)
 	int i = 0;
 
 	/* Open the command for reading. */
-	FILE *fp = popen(cmd, "r");
+	FILE *fp = popen(cmd, "r"); /* Flawfinder: ignore */
 	if (fp == NULL)
 		return -1;
 

@@ -178,7 +178,7 @@ static char *____dmjson_get_value_array_all(json_object *mainjobj, char *delim, 
 	int i, dlen, rlen;
 
 	delim = (delim) ? delim : ",";
-	dlen = strlen(delim);
+	dlen = (delim) ? strlen(delim) : 1;
 
 	for (i = 0, arrobj = NULL, v = ____dmjson_get_value_in_array_idx(mainjobj, &arrobj, i, argv);
 		v;

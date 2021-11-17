@@ -137,10 +137,10 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj = calloc(2, sizeof(DMOBJ *));
 						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[0] = vendor_obj[i].root_obj;
 					} else {
-						int idx = get_obj_idx_dynamic_array(dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj);
-						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj = realloc(dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj, (idx + 2) * sizeof(DMOBJ *));
-						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[idx] = vendor_obj[i].root_obj;
-						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[idx+1] = NULL;
+						int obj_idx = get_obj_idx_dynamic_array(dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj);
+						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj = realloc(dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj, (obj_idx + 2) * sizeof(DMOBJ *));
+						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[obj_idx] = vendor_obj[i].root_obj;
+						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[obj_idx+1] = NULL;
 					}
 				}
 
@@ -156,10 +156,10 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf = calloc(2, sizeof(DMLEAF *));
 						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[0] = vendor_obj[i].root_leaf;
 					} else {
-						int idx = get_leaf_idx_dynamic_array(dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf);
-						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf = realloc(dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf, (idx + 2) * sizeof(DMLEAF *));
-						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[idx] = vendor_obj[i].root_leaf;
-						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[idx+1] = NULL;
+						int leaf_idx = get_leaf_idx_dynamic_array(dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf);
+						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf = realloc(dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf, (leaf_idx + 2) * sizeof(DMLEAF *));
+						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[leaf_idx] = vendor_obj[i].root_leaf;
+						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[leaf_idx+1] = NULL;
 					}
 				}
 

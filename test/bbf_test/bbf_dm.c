@@ -55,7 +55,6 @@ int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
 {
 	int fault = 0;
 	struct dmctx bbf_ctx;
-	struct dm_parameter *n;
 
 	memset(&bbf_ctx, 0, sizeof(struct dmctx));
 
@@ -64,10 +63,10 @@ int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
 
 	dm_ctx_init(&bbf_ctx, 0);
 
-	if (arg2)
+	if (arg2 && *arg2) {
 		bbf_ctx.dm_version = arg2;
-
-	printf("config version %s\n", bbf_ctx.dm_version);
+		printf("config version %s\n", bbf_ctx.dm_version);
+	}
 
 	if (cmd == CMD_GET_INFO){
 		fault = dm_get_supported_dm(&bbf_ctx, path, false, atoi(arg1));
@@ -76,6 +75,8 @@ int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
 	}
 
 	if (!fault) {
+		struct dm_parameter *n;
+
 		list_for_each_entry(n, &bbf_ctx.list_parameter, list) {
 			printf(" %s::%s::%s\n", n->name, n->data, n->type);
 		}
@@ -90,7 +91,7 @@ int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
 int main(int argc, char *argv[])
 {
 	static struct ubus_context *ubus_ctx = NULL;
-	char *param = NULL, *value = NULL, *version = NULL;
+	char *param = "", *value = "", *version = "";
 	int cmd;
 
 	if (argc < 3) {

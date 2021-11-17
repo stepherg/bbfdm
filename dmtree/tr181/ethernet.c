@@ -919,7 +919,7 @@ static int get_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 	char *device_s_type = NULL;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &linker);
-	if (linker && *linker == '\0')
+	if (!linker || *linker == '\0')
 		return 0;
 
 	// get device section mapped to this device name
@@ -988,7 +988,7 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 					dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &int_name);
 
 					//Generate the device name for bridge as br-<NETWORK>
-					snprintf(device, sizeof(device), "br-%s", int_name);
+					snprintf(device, sizeof(device), "br-%s", int_name ? int_name : "");
 
 					uci_foreach_sections("network", "interface", s) {
 						if (int_name && strcmp(section_name(s), int_name) == 0) {

@@ -12,6 +12,7 @@ stages:
 variables:
   DEBUG: 'TRUE'
   SOURCE_FOLDER: "."
+  RUN_CPPCHECK: "cppcheck --enable=all --error-exitcode=1 --suppress=unusedFunction --suppress=unreadVariable --suppress=knownConditionTrueFalse --suppress=duplicateCondition ."
 
 run_unit_test:
   stage: unit_test

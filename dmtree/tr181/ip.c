@@ -1263,12 +1263,11 @@ static int get_IPInterface_LastChange(char *refparam, struct dmctx *ctx, void *d
 
 static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char linker[32] = {0};
+	char linker[64] = {0};
 	char *proto;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
 	if (strstr(proto, "ppp")) {
-		char linker[64] = {0};
 		snprintf(linker, sizeof(linker), "%s", section_name((struct uci_section *)data));
 		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", linker, value);
 		if (*value != NULL)
@@ -1278,7 +1277,7 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 	char *device = get_device(section_name((struct uci_section *)data));
 
 	/* If the device value is empty, then get its value directly from device option */
-	if (device && *device == '\0')
+	if (*device == '\0')
 		dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
 
 	if (device[0] != '\0') {
@@ -1352,12 +1351,12 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 				} else {
 					// Check if there is an interface that has the same name of device ==> if yes, remove it
-					char device[32] = {0};
-					DM_STRNCPY(device, ip_linker, sizeof(device));
-					char *vid = strchr(device, '.');
+					char dev_buf[32] = {0};
+					DM_STRNCPY(dev_buf, ip_linker, sizeof(dev_buf));
+					char *vid = strchr(dev_buf, '.');
 					if (vid) {
 						*vid = '\0';
-						uci_foreach_option_eq_safe("network", "interface", "device", device, stmp, s) {
+						uci_foreach_option_eq_safe("network", "interface", "device", dev_buf, stmp, s) {
 							dmuci_delete_by_section(s, NULL, NULL);
 						}
 					}

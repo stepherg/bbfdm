@@ -180,14 +180,14 @@ static bool check_version(const char *obj_version, struct dmctx *ctx)
 	if (!config_version || !obj_version)
 		return true;
 
-	if (config_version) {
+	if (*config_version) {
 		config_major = atoi(config_version);
 		char *temp = strchr(config_version, '.');
 		if (temp)
 			config_minor = atoi(temp + 1);
 	}
 
-	if (obj_version) {
+	if (*obj_version) {
 		obj_major = atoi(obj_version);
 		char *temp = strchr(obj_version, '.');
 		if (temp)

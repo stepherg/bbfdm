@@ -243,7 +243,7 @@ static json_object *get_requested_json_obj(json_object *json_obj, char *instance
 			}
 			*p = 0;
 
-			res = (idx_pos >= 0) ? dmjson_select_obj_in_array_idx(res, idx_pos, 1, buf) : res;
+			res = dmjson_select_obj_in_array_idx(res, idx_pos, 1, buf);
 
 		} else if (pchr && *pchr) {
 			res = dmjson_get_obj(res, 1, pch);
@@ -513,13 +513,13 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 		}
 
 		if (file && section_type && dmmap_file) {
-			struct uci_section *section = NULL, *dmmap = NULL;
+			struct uci_section *s = NULL, *dmmap_s = NULL;
 
-			dmuci_add_section(json_object_get_string(file), json_object_get_string(section_type), &section);
+			dmuci_add_section(json_object_get_string(file), json_object_get_string(section_type), &s);
 
-			dmuci_add_section_bbfdm(json_object_get_string(dmmap_file), json_object_get_string(section_type), &dmmap);
-			dmuci_set_value_by_section(dmmap, "section_name", section_name(section));
-			dmuci_set_value_by_section(dmmap, buf_instance, *instance);
+			dmuci_add_section_bbfdm(json_object_get_string(dmmap_file), json_object_get_string(section_type), &dmmap_s);
+			dmuci_set_value_by_section(dmmap_s, "section_name", section_name(s));
+			dmuci_set_value_by_section(dmmap_s, buf_instance, *instance);
 		}
 	}
 

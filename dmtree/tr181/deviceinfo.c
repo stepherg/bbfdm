@@ -136,9 +136,10 @@ static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 static int browseDeviceInfoProcessorInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL;
+	int nbr_cpus = get_number_of_cpus();
 	int i;
 
-	for (i = 0; i < get_number_of_cpus(); i++) {
+	for (i = 0; i < nbr_cpus; i++) {
 		inst = handle_instance_without_section(dmctx, parent_node, i+1);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, NULL, inst) == DM_STOP)
 			break;
