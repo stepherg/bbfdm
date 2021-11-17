@@ -11759,7 +11759,7 @@
 							"datatype": "StatsCounter32"
 						},
 						"PacketsReceived": {
-							"type": "unsignedInt",
+							"type": "unsignedLong",
 							"read": true,
 							"write": false,
 							"version": "2.0",
@@ -11770,7 +11770,7 @@
 							"datatype": "StatsCounter64"
 						},
 						"PacketsSent": {
-							"type": "unsignedInt",
+							"type": "unsignedLong",
 							"read": true,
 							"write": false,
 							"version": "2.0",
@@ -11803,7 +11803,7 @@
 							"datatype": "StatsCounter32"
 						},
 						"BytesReceived": {
-							"type": "unsignedInt",
+							"type": "unsignedLong",
 							"read": true,
 							"write": false,
 							"version": "2.0",
@@ -11814,7 +11814,7 @@
 							"datatype": "StatsCounter64"
 						},
 						"BytesSent": {
-							"type": "unsignedInt",
+							"type": "unsignedLong",
 							"read": true,
 							"write": false,
 							"version": "2.0",
@@ -12339,7 +12339,7 @@
 							"datatype": "StatsCounter32"
 						},
 						"PacketsReceived": {
-							"type": "unsignedInt",
+							"type": "unsignedLong",
 							"read": true,
 							"write": false,
 							"version": "2.0",
@@ -12350,7 +12350,7 @@
 							"datatype": "StatsCounter64"
 						},
 						"PacketsSent": {
-							"type": "unsignedInt",
+							"type": "unsignedLong",
 							"read": true,
 							"write": false,
 							"version": "2.0",
@@ -12383,7 +12383,7 @@
 							"datatype": "StatsCounter32"
 						},
 						"BytesReceived": {
-							"type": "unsignedInt",
+							"type": "unsignedLong",
 							"read": true,
 							"write": false,
 							"version": "2.0",
@@ -12394,7 +12394,7 @@
 							"datatype": "StatsCounter64"
 						},
 						"BytesSent": {
-							"type": "unsignedInt",
+							"type": "unsignedLong",
 							"read": true,
 							"write": false,
 							"version": "2.0",

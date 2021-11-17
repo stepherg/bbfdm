@@ -75,10 +75,13 @@ def getparamtype(dmparam):
                     break
                 if c.tag == "dataType":
                     reftype = c.get("ref")
-                    if "StatsCounter" in reftype:
+                    if reftype == "StatsCounter32" or reftype == "PSDBreakPointIndexAndLevel" or reftype == "PSMBreakPointIndexAndLevel" or reftype == "SELTPAttenuationCharacteristicsIndexAndTFlog":
                         ptype = "unsignedInt"
                         break
-                    elif "Dbm1000" in reftype:
+                    elif reftype == "StatsCounter64":
+                        ptype = "unsignedLong"
+                        break
+                    elif reftype == "Dbm1000" or reftype == "UERComplex":
                         ptype = "int"
                         break
                     else:

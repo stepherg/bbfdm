@@ -13,7 +13,6 @@ import bbf_common as bbf
 
 DMC_DIR = "datamodel"
 
-
 def getlastname(name):
     return name.replace(".{i}", "").split('.')[-2]
 
@@ -335,7 +334,7 @@ def printheaderObjCommon(objname):
 def cprintheaderOBJS(objname):
     fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     print("DMOBJ %s[] = {" % ("t" + getname(objname) + "Obj"), file=fp)
-    print("/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/", file=fp)
+    print("/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/", file=fp)
     fp.close()
 
 
