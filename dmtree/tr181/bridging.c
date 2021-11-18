@@ -1567,13 +1567,17 @@ static int addObjBridgingBridgePort(char *refparam, struct dmctx *ctx, void *dat
 {
 	struct uci_section *br_port_s = NULL;
 	char *dev_name = NULL;
+	char buf[32];
 
 	dmuci_get_value_by_section_string(((struct bridge_args *)data)->bridge_sec, "name", &dev_name);
 	int inst = get_last_inst("dmmap_bridge_port", "bridge_port", "br_inst", "bridge_port_instance", ((struct bridge_args *)data)->br_inst);
 	dmasprintf(instance, "%d", inst+1);
 
+	snprintf(buf, sizeof(buf), "br_%s_port_%s", ((struct bridge_args *)data)->br_inst, *instance);
+
 	// Add dmmap section for devices
 	dmuci_add_section_bbfdm("dmmap_bridge_port", "bridge_port", &br_port_s);
+	dmuci_rename_section_by_section(br_port_s, buf);
 	dmuci_set_value_by_section(br_port_s, "config", "network");
 	dmuci_set_value_by_section(br_port_s, "br_inst", ((struct bridge_args *)data)->br_inst);
 	dmuci_set_value_by_section(br_port_s, "bridge_port_instance", *instance);
