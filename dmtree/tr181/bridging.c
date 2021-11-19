@@ -2207,7 +2207,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 					// Update port option in dmmap
 					dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "port", linker);
 
-					update_device_management_port(port_device, linker, ((struct bridge_port_args *)data)->br_inst);
+					update_device_management_port(section_name(((struct bridge_port_args *)data)->bridge_port_dmmap_sec), linker, ((struct bridge_port_args *)data)->br_inst);
 				} else {
 					char *tag = strchr(port_device, '.');
 					if (tag) {
