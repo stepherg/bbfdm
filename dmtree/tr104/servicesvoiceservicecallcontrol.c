@@ -553,13 +553,13 @@ static int get_ServicesVoiceServiceCallControlLine_Status(char *refparam, struct
 	return 0;
 }
 
+/*#Device.Services.VoiceService.{i}.CallControl.Line.{i}.CallStatus!UBUS:asterisk/call_status/line,@i-1/call_status*/
 static int get_ServicesVoiceServiceCallControlLine_CallStatus(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL;
-	int line_num = atoi(instance) - 1;
 	char line_str[16];
 
-	snprintf(line_str, sizeof(line_str), "%d", line_num);
+	snprintf(line_str, sizeof(line_str), "%d", instance ? atoi(instance) - 1 : 0);
 	dmubus_call("asterisk", "call_status", UBUS_ARGS{{"line", line_str, Integer}}, 1, &res);
 	if (res) {
 		*value = dmjson_get_value(res, 1, "call_status");
@@ -983,6 +983,23 @@ static int set_ServicesVoiceServiceCallControlExtension_Name(char *refparam, str
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", value);
 			break;
 	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.Extension.{i}.CallStatus!UBUS:asterisk/call_status/extension,@i-1/call_status*/
+static int get_ServicesVoiceServiceCallControlExtension_CallStatus(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL;
+	char ext_str[16];
+
+	snprintf(ext_str, sizeof(ext_str), "%d", instance ? atoi(instance) - 1 : 0);
+	dmubus_call("asterisk", "call_status", UBUS_ARGS{{"extension", ext_str, Integer}}, 1, &res);
+	if (res) {
+		*value = dmjson_get_value(res, 1, "call_status");
+	} else {
+		BBF_DEBUG("dmubus_call() failed\n");
+	}
+
 	return 0;
 }
 
@@ -1496,6 +1513,7 @@ DMLEAF tServicesVoiceServiceCallControlExtensionParams[] = {
 {"CallingFeatures", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlExtension_CallingFeatures, set_ServicesVoiceServiceCallControlExtension_CallingFeatures, BBFDM_BOTH},
 {"VoiceMail", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlExtension_VoiceMail, set_ServicesVoiceServiceCallControlExtension_VoiceMail, BBFDM_BOTH},
 {"Name", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlExtension_Name, set_ServicesVoiceServiceCallControlExtension_Name, BBFDM_BOTH},
+{"CallStatus", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallControlExtension_CallStatus, NULL, BBFDM_BOTH},
 {0}
 };
 

@@ -7837,7 +7837,20 @@
 						"Connected",
 						"Alerting",
 						"Disconnected"
-					]
+					],
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "asterisk",
+								"method": "call_status",
+								"args": {
+									"line": "@-1"
+								},
+								"key": "call_status"
+							}
+						}
+					]	
 				},
 				"Origin": {
 					"type": "string",
@@ -8274,6 +8287,19 @@
 						"Connected",
 						"Alerting",
 						"Disconnected"
+					],
+					"mapping": [
+						{
+							"type": "ubus",
+							"ubus": {
+								"object": "asterisk",
+								"method": "call_status",
+								"args": {
+									"extension": "@-1"
+								},
+								"key": "call_status"
+							}
+						}
 					]
 				},
 				"Origin": {
