@@ -141,10 +141,16 @@ static int get_supported_modes(const char *ubus_method, const char *ifname, char
 static char *get_security_mode(struct uci_section *section)
 {
 	char *encryption = NULL;
+	char *ptrch = NULL;
 
 	dmuci_get_value_by_section_string(section, "encryption", &encryption);
 	if (!encryption || *encryption == '\0')
 		return "None";
+
+	/*Here the encryption type and the cipher are seperated*/
+	ptrch  = strchr(encryption, '+');
+	if (ptrch)
+		*ptrch = '\0';
 
 	if (strstr(encryption, "wep")) {
 		char *key_index = NULL, *key = NULL;
