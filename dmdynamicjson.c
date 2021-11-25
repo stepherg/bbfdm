@@ -295,9 +295,13 @@ static void resolve_all_symbols(struct dmctx *ctx, void *data, char *instance, c
 {
 	char *pch = NULL, *pchr = NULL;
 	char buf_key[256] = {0};
+	bool has_dot = false;
 	unsigned pos = 0;
 
 	DM_STRNCPY(buf_key, old_key, sizeof(buf_key));
+
+	if (buf_key[strlen(buf_key) - 1] == '.')
+		has_dot = true;
 
 	for (pch = strtok_r(buf_key, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
 
@@ -317,7 +321,7 @@ static void resolve_all_symbols(struct dmctx *ctx, void *data, char *instance, c
 			pos += snprintf(&new_key[pos], key_len - pos, "%s.", pch);
 	}
 
-	if (pos)
+	if (pos && !has_dot)
 		new_key[pos - 1] = 0;
 
 	if (strstr(new_key, "{i}"))
