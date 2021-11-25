@@ -33,6 +33,7 @@ typedef enum {
 
 int dm_ctx_init(struct dmctx *ctx, unsigned int instance_mode);
 int dm_ctx_init_sub(struct dmctx *ctx, unsigned int instance_mode);
+int dm_ctx_init_entry(struct dmctx *ctx, DMOBJ tEntryObj[], unsigned int instance_mode);
 int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2);
 int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1);
 int dm_entry_restart_services(void);
@@ -62,5 +63,6 @@ void bbf_dm_cleanup(void);
  * object illegal access.
  */
 int dm_debug_browse_path(char *buff, size_t len);
+void dm_cleanup_dynamic_entry(DMOBJ *root);
 
 #endif

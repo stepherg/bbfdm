@@ -16,7 +16,11 @@
 #include "dmdynamicjson.h"
 #include "dmdynamiclibrary.h"
 #include "dmdynamicvendor.h"
+
+#ifdef BBF_TR181
 #include "device.h"
+#endif /* BBF_TR181 */
+
 #include "dmbbfcommon.h"
 
 LIST_HEAD(head_package_change);
@@ -129,7 +133,7 @@ int usp_fault_map(int fault)
 	return out_fault;
 }
 
-static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, int custom)
+static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, DMOBJ *tEntryObj, int custom)
 {
 	if (custom == CTX_INIT_ALL)
 		bbf_uci_init();
@@ -138,7 +142,7 @@ static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, int
 	INIT_LIST_HEAD(&ctx->set_list_tmp);
 	INIT_LIST_HEAD(&ctx->list_fault_param);
 	ctx->instance_mode = instance_mode;
-	ctx->dm_entryobj = tEntry181Obj;
+	ctx->dm_entryobj = tEntryObj;
 	ctx->dm_version = DEFAULT_DMVERSION;
 	ctx->end_session_flag = 0;
 	return 0;
@@ -162,10 +166,19 @@ void dm_config_ubus(struct ubus_context *ctx)
 	dmubus_configure(ctx);
 }
 
+int dm_ctx_init_entry(struct dmctx *ctx, DMOBJ *tEntryObj, unsigned int instance_mode)
+{
+	return dm_ctx_init_custom(ctx, instance_mode, tEntryObj, CTX_INIT_ALL);
+}
+
 int dm_ctx_init(struct dmctx *ctx, unsigned int instance_mode)
 {
+#ifdef BBF_TR181
 	dmubus_clean_endlife_entries();
-	return dm_ctx_init_custom(ctx, instance_mode, CTX_INIT_ALL);
+	return dm_ctx_init_custom(ctx, instance_mode, tEntry181Obj, CTX_INIT_ALL);
+#else
+	return 0;
+#endif /* BBF_TR181 */
 }
 
 int dm_ctx_clean(struct dmctx *ctx)
@@ -182,7 +195,11 @@ int dm_ctx_init_cache(int time)
 
 int dm_ctx_init_sub(struct dmctx *ctx, unsigned int instance_mode)
 {
-	return dm_ctx_init_custom(ctx, instance_mode, CTX_INIT_SUB);
+#ifdef BBF_TR181
+	return dm_ctx_init_custom(ctx, instance_mode, tEntry181Obj, CTX_INIT_SUB);
+#else
+	return 0;
+#endif /* BBF_TR181 */
 }
 
 int dm_ctx_clean_sub(struct dmctx *ctx)
@@ -197,11 +214,12 @@ int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_
 	// Load dynamic objects and parameters
 	load_dynamic_arrays(ctx);
 
-	if (strlen(path) == 0)
-		path = "Device.";
-
-	if (path[strlen(path) - 1] != '.')
-		return usp_fault_map(USP_FAULT_INVALID_PATH);
+	if (strlen(path) == 0) {
+		path = "";
+	} else {
+		if (path[strlen(path) - 1] != '.')
+			return usp_fault_map(USP_FAULT_INVALID_PATH);
+	}
 
 	ctx->in_param = path;
 
@@ -545,7 +563,9 @@ static void load_dynamic_arrays(struct dmctx *ctx)
 
 static void free_dynamic_arrays(void)
 {
+#ifdef BBF_TR181
 	DMOBJ *root = tEntry181Obj;
+
 	DMNODE node = {.current_object = ""};
 
 #ifdef BBFDM_ENABLE_JSON_PLUGIN
@@ -560,6 +580,7 @@ static void free_dynamic_arrays(void)
 	free_vendor_dynamic_arrays(tEntry181Obj);
 #endif
 	free_dm_browse_node_dynamic_object_tree(&node, root);
+#endif /* BBF_TR181 */
 }
 
 void bbf_dm_cleanup(void)
@@ -567,4 +588,12 @@ void bbf_dm_cleanup(void)
 	dmubus_free();
 	dm_dynamic_cleanmem(&main_memhead);
 	free_dynamic_arrays();
+}
+
+void dm_cleanup_dynamic_entry(DMOBJ *root)
+{
+	DMNODE node = {.current_object = ""};
+
+	dm_dynamic_cleanmem(&main_memhead);
+	free_dm_browse_node_dynamic_object_tree(&node, root);
 }

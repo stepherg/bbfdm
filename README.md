@@ -1,6 +1,15 @@
 # BroadBand Forum Data Models (BBFDM)
 
 `bbfdm` is a data model library implementation which includes a list of objects, parameters and operates used for CPE management through remote control protocols such as [TR-069/CWMP](https://cwmp-data-models.broadband-forum.org/) or [TR-369/USP](https://usp.technology/).
+This package comprises of the below libraries:
+
+| Library |                    Description                    |
+| ------- | ------------------------------------------------- |
+| libbbfdm | This provides the mechanism to add new parameters or extend the existing DM tree using json plugin or shared library plugin. |
+| libbbf_api | This provides the APIs for UCI, Ubus, JSON, CLI and memory management. |
+| libbbf_ubus | This library helps to expose the datamodel directly over ubus. Application can expose any datamodel(need not be part of "Device."/TR-181) using this library. |
+
+Note: Applications that use libbbf_ubus to expose datamodel, not required to use libbbfdm.
 
 ## Design of bbfdm
 
@@ -19,6 +28,7 @@
 │       ├── openwrt
 │       └── vendor.h
 ├── libbbf_api
+├── libbbf_ubus
 ├── scripts
 └── tools
 ```
@@ -36,6 +46,8 @@
 	- `json` folder : TR-181 and TR-104 JSON files
 
 - `libbbf_api` folder which contains the source code of all API functions (UCI, Ubus, JSON, CLI and memory management)
+
+- `libbbf_ubus` folder which contains the source code of all API functions helps in exposing datamodel directly over ubus
 
 - `scripts` folder which contains the Diagnostics scripts
 
@@ -1034,9 +1046,21 @@ The input json file should be defined as follow:
 
 - For more examples of tools input json file, you can see this link: [tools_input.json](./devel/tools/tools_input.json)
 
-## Dependencies
+# How to expose datamodel over ubus directly with the help of libbbf APIs
 
-To successfully build libbbfdm, the following libraries are needed:
+`Libbbf_ubus` is the library that helps in exposing the datamodel over ubus directly using libbbf_api.
+Application using `libbbf_ubus`, shall not use the `libbbfdm` library because all needed operations from `libbbfdm` library has been internally handled in `libbbf_ubus`.
+
+To identify the mechanism of exposing datamodel directly over ubus please refer to the sample code [dmtest.c](./test/dynamicdm_ubus_test/bbf_ubus.c)
+
+For more info you can see the schemas at:
+
+- Raw schema [link](./schemas/dmtest.json)
+- Markdown schema [link](./docs/api/dmtest.md)
+
+## Dependencies of of libbbfdm and libbbf_ubus
+
+To successfully build libbbfdm or libbbf_ubus, the following libraries are needed:
 
 | Dependency  | Link                                        | License        |
 | ----------- | ------------------------------------------- | -------------- |
@@ -1047,3 +1071,4 @@ To successfully build libbbfdm, the following libraries are needed:
 | libcurl     | https://dl.uxnr.de/mirror/curl              | MIT            |
 | libtrace    | https://github.com/apietila/libtrace.git    | GPLv2          |
 | libbbf_api  | https://dev.iopsys.eu/iopsys/bbf.git        | LGPL 2.1       |
+

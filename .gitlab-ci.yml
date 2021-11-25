@@ -6,6 +6,7 @@ stages:
     - static_code_analysis
     - unit_test
     - functional_test
+    - libbbf_ubus_test
     - memory_test
     - uspd
 
@@ -54,6 +55,23 @@ run_functional_api_test:
       paths:
           - timestamp.log
           - functional-api-test-coverage.xml
+
+run_libbbf_ubus_test:
+  stage: libbbf_ubus_test
+  image: iopsys/code-analysis:latest
+  allow_failure: false
+  script:
+  - "./gitlab-ci/setup.sh"
+  - "./gitlab-ci/libbbf_ubus_api_test.sh"
+
+  artifacts:
+      when: always
+      reports:
+          junit: ./report/tap.xml
+      paths:
+          - timestamp.log
+          - memory-report.xml
+          - api-result.log
 
 run_tools_test:
   stage: unit_test
