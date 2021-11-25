@@ -312,7 +312,11 @@ if len(sys.argv) < 2:
     print_validate_json_usage()
     
 json_file = open(sys.argv[1], "r", encoding='utf-8')
-json_data = json.loads(json_file.read())
+try:
+    json_data = json.loads(json_file.read())
+except ValueError:
+    print(sys.argv[1] + " file has a wrong JSON format!!!!!")
+    exit(1)
 
 for __key, __value in json_data.items():
 
