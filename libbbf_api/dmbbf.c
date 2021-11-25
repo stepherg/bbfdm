@@ -1398,8 +1398,7 @@ static int mparam_get_schema_name(DMPARAM_ARGS)
  * ***********************/
 static int mobj_get_supported_dm(DMOBJECT_ARGS)
 {
-
-	char *perm = permission->val;
+	char *perm = permission ? permission->val : "0";
 	char *refparam = node->current_object;
 	const char **unique_keys = NULL;
 
@@ -1420,22 +1419,21 @@ static int mparam_get_supported_dm(DMPARAM_ARGS)
 
 	dmastrcat(&refparam, node->current_object, lastname);
 
-	if(node->matched) {
-		if(type == DMT_EVENT) {
-			if(dmctx->isevent) {
+	if (node->matched) {
+		if (type == DMT_EVENT) {
+			if (dmctx->isevent) {
 				if (get_cmd)
 					(get_cmd)(refparam, dmctx, data, instance, &value);
 
 				add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL);
 			}
 
-		} else if(type == DMT_COMMAND) {
+		} else if (type == DMT_COMMAND) {
 			if(dmctx->iscommand) {
 
 				if (get_cmd)
 					(get_cmd)(refparam, dmctx, data, instance, &value);
 
-				//add_list_parameter(dmctx, refparam, value, permission->val, NULL);
 				add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], permission->val);
 			}
 		}

@@ -1532,6 +1532,9 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, i
 		pobj[index].leaf = NULL;
 	}
 
+	//permission: Define object as readable by default
+	pobj[index].permission = &DMREAD;
+
 	json_object_object_foreach(jobj, key, json_obj) {
 		//bbfdm_type
 		if (strcmp(key, "protocols") == 0) {
