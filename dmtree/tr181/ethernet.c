@@ -356,6 +356,7 @@ static int addObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 	/* Add device section */
 	dmuci_add_section("network", "interface", &s);
 	dmuci_rename_section_by_section(s, interface_name);
+	dmuci_set_value_by_section(s, "disabled", "0");
 
 	/* Add link section in dmmap file */
 	dmuci_add_section_bbfdm(DMMAP, "link", &dmmap_link);
@@ -848,27 +849,47 @@ static int get_EthernetInterfaceStats_UnknownProtoPacketsReceived(char *refparam
 
 static int get_EthernetLink_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "true";
+	char *int_name;
+	struct uci_section *s = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &int_name);
+	s = get_origin_section_from_config("network", "interface", int_name);
+	dmuci_get_value_by_section_string(s, "disabled", value);
+	*value = (strcmp(*value, "1") == 0) ? "False" : "True";
 	return 0;
 }
 
 static int set_EthernetLink_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			break;
-	}
-	return 0;
+	bool b;
+        char *int_name;
+        struct uci_section *s = NULL;
+
+        switch (action) {
+                case VALUECHECK:
+                        if (dm_validate_boolean(value))
+                                return FAULT_9007;
+                        break;
+                case VALUESET:
+		        string_to_bool(value, &b);
+			dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &int_name);
+			s = get_origin_section_from_config("network", "interface", int_name);
+                        dmuci_set_value_by_section(s, "disabled", b ? "0" : "1");
+                        break;
+			}
+        return 0;
+
 }
 
 static int get_EthernetLink_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "Up";
-	return 0;
+       char *interface_name = NULL, *dev_name = NULL;
+       struct uci_section *s = NULL;
+
+       dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &interface_name);
+       s = get_origin_section_from_config("network", "interface", interface_name);
+       dmuci_get_value_by_section_string(s, "device", &dev_name);
+       return get_net_device_status(dev_name, value);
 }
 
 static int get_EthernetLink_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
