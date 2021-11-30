@@ -157,6 +157,16 @@ static void create_link(char *sec_name, char *mac_addr)
 	if (macaddr[0] == '\0')
 		return;
 
+	struct uci_section *s = NULL;
+	char *dev_sec_name;
+	uci_path_foreach_sections(bbfdm, DMMAP, "link", s) {
+		dmuci_get_value_by_section_string(s, "section_name", &dev_sec_name);
+		if (strcmp(sec_name, dev_sec_name) == 0) {
+			dmuci_set_value_by_section(s, "mac", macaddr);
+			return;
+		}
+	}
+
 	char *device = get_device(sec_name);
 	if (device[0] == '\0')
 		return;
@@ -185,16 +195,6 @@ static void create_link(char *sec_name, char *mac_addr)
 			add_new_dmmap_section(macaddr, intf, sec_name);
 		}
 		return;
-	}
-
-	struct uci_section *s = NULL;
-	char *dev_sec_name;
-	uci_path_foreach_sections(bbfdm, DMMAP, "link", s) {
-		dmuci_get_value_by_section_string(s, "section_name", &dev_sec_name);
-		if (strcmp(sec_name, dev_sec_name) == 0) {
-			dmuci_set_value_by_section(s, "mac", macaddr);
-			return;
-		}
 	}
 
 	/* Add new dmmap section */
