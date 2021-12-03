@@ -348,15 +348,10 @@ static int get_linker_vlan_term(char *refparam, struct dmctx *dmctx, void *data,
 **************************************************************/
 static int addObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	struct uci_section *s = NULL, *dmmap_link = NULL;
+	struct uci_section *dmmap_link = NULL;
 	char interface_name[32];
 
 	snprintf(interface_name, sizeof(interface_name), "link_%s", *instance);
-
-	/* Add device section */
-	dmuci_add_section("network", "interface", &s);
-	dmuci_rename_section_by_section(s, interface_name);
-	dmuci_set_value_by_section(s, "disabled", "0");
 
 	/* Add link section in dmmap file */
 	dmuci_add_section_bbfdm(DMMAP, "link", &dmmap_link);

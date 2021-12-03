@@ -1383,23 +1383,34 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 				dmuci_get_value_by_section_string(s, "section_name", &interface_list);
 				char *interface = strchr(interface_list, ',');
-
 				if (!interface) {
 					bool ip_interface_s = false;
 					bool is_br_sec = false;
-					// Update the new interface section with proto=none if its proto is empty
+					char link_name[20] = { 0 };
+
+					// Update the new interface section with device=br- if its device is empty
 					uci_foreach_sections("network", "interface", s) {
-						if (strcmp(section_name(s), interface_list) == 0) {
+						if (strcmp(section_name(s), section_name((struct uci_section *)data)) == 0) {
 							char *proto, *device;
+							char *ptr = NULL;
+							struct uci_section *dmmap_link = NULL;
+
 							dmuci_get_value_by_section_string(s, "proto", &proto);
 							dmuci_get_value_by_section_string(s, "device", &device);
-							if (*proto == '\0') {
-								dmuci_set_value_by_section(s, "proto", "none");
+							if (*device == '\0') {
+								dmuci_set_value_by_section(s, "device", ip_linker);
+								dmuci_get_value_by_section_string(s, "device", &device);
 								if (!new_eth_link_s && device && strncmp(device, "br-", 3) != 0)
 									set_ip_interface_ifname_option(s, ip_linker, instance, false);
 							} else {
 								ip_interface_s = true;
 								is_br_sec = (device && strncmp(device, "br-", 3) == 0) ? true : false;
+							}
+							ptr = strchr(ip_linker, '-');
+							if (ptr) {
+								strcpy(link_name, ptr+1);
+								dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_link);
+								dmuci_set_value_by_section(dmmap_link, "section_name", link_name);
 							}
 							break;
 						}
@@ -1410,7 +1421,6 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 						// Get dmmap section related to this interface section and remove it
 						struct uci_section *dmmap_section = NULL;
 						get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
-
 						// Get the current ip instance
 						char *ip_int_instance;
 						dmuci_get_value_by_section_string(dmmap_section, "ip_int_instance", &ip_int_instance);
@@ -1423,8 +1433,9 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 						// remove dmmap section
 						dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
-						// remove the current interface section
-						dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+						//rename the section to the link section name so that sync can be done
+						dmuci_rename_section_by_section(s, link_name);
+
 					} else {
 						set_ip_interface_ifname_option((struct uci_section *)data, ip_linker, instance, is_br_sec);
 					}
