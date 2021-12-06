@@ -682,52 +682,39 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 
 	free_ubus_arguments(u_args, u_args_size);
 
-	if (key && strstr(refparam, "NumberOfEntries")) {
-		json_object *arr_obj = NULL;
-		char buf[64] = {0};
-		int nbre_entries = 0;
-
-		DM_STRNCPY(buf, json_object_get_string(key), sizeof(buf));
-
-		if (res == NULL)
-			goto end;
-
-		if (json_version == JSON_VERSION_1) {
-			char *str = NULL;
-
-			if ((str = strstr(buf, ".@Count")) == NULL)
-				goto end;
-
-			*str = 0;
-		}
-
-		json_object_object_get_ex(res, buf, &arr_obj);
-
-		if (arr_obj != NULL && json_object_is_type(arr_obj, json_type_array) == 1) {
-			nbre_entries = json_object_array_length(arr_obj);
-		}
-
-		dmasprintf(&value, "%d", nbre_entries);
-		goto end;
-	}
-
 	if (key) {
+		json_object *json_obj = NULL;
+		json_object *arr_obj = NULL;
 		char key_buf[128] = {0};
 		char key_name[32] = {0};
 
 		DM_STRNCPY(key_buf, json_object_get_string(key), sizeof(key_buf));
+
+		if (json_version == JSON_VERSION_1) {
+			char *str = NULL;
+
+			if ((str = strstr(key_buf, ".@Count")) != NULL)
+				*str = 0;
+		}
+
 		char *is_array = strstr(key_buf, (json_version == JSON_VERSION_1) ? "[@index]" : "[@i-1]");
 		if (data && is_array) {
 			char *arguments = (json_version == JSON_VERSION_1) ? is_array + sizeof("[@index]") : is_array + sizeof("[@i-1]");
-			json_object *json_obj = get_requested_json_obj((json_object *)data, instance, arguments, key_name, sizeof(key_name));
-			value = dmjson_get_value(json_obj, 1, key_name);
+			json_obj = get_requested_json_obj((json_object *)data, instance, arguments, key_name, sizeof(key_name));
 		} else {
-			json_object *json_obj = get_requested_json_obj(res, instance, key_buf, key_name, sizeof(key_name));
+			json_obj = get_requested_json_obj(res, instance, key_buf, key_name, sizeof(key_name));
+		}
+
+		json_object_object_get_ex(json_obj, key_name, &arr_obj);
+
+		if (arr_obj && json_object_get_type(arr_obj) == json_type_array) {
+			int nbre_entries = json_object_array_length(arr_obj);
+			dmasprintf(&value, "%d", nbre_entries);
+		} else {
 			value = dmjson_get_value(json_obj, 1, key_name);
 		}
 	}
 
-end:
 	return value;
 }
 

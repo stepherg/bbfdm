@@ -18,7 +18,7 @@
       }
     },
     "MiniHubNumberOfEntries": {
-      "type": "int",
+      "type": "unsignedInt",
       "version": "2.14",
       "protocols": [
         "cwmp",
@@ -26,7 +26,6 @@
       ],
       "read": true,
       "write": false,
-      "datatype": "int",
       "mapping": [
         {
           "type": "ubus",
@@ -40,7 +39,7 @@
       ]
     },
     "MHubNumberOfEntries": {
-      "type": "int",
+      "type": "unsignedInt",
       "version": "2.14",
       "protocols": [
         "cwmp",
@@ -48,7 +47,6 @@
       ],
       "read": true,
       "write": false,
-      "datatype": "int",
       "mapping": [
         {
           "type": "ubus",
