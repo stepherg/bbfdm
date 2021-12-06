@@ -702,7 +702,11 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 		}
 
 		json_object_object_get_ex(res, buf, &arr_obj);
-		nbre_entries = (arr_obj) ? json_object_array_length(arr_obj) : 0;
+
+		if (arr_obj != NULL && json_object_is_type(arr_obj, json_type_array) == 1) {
+			nbre_entries = json_object_array_length(arr_obj);
+		}
+
 		dmasprintf(&value, "%d", nbre_entries);
 		goto end;
 	}

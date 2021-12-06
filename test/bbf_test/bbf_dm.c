@@ -99,8 +99,10 @@ int main(int argc, char *argv[])
 	}
 
 	ubus_ctx = ubus_connect(NULL);
-	if (ubus_ctx == NULL)
+	if (ubus_ctx == NULL) {
+		fprintf(stderr, "Failed to connect with ubus\n");
 		return -1;
+	}
 
 	dm_config_ubus(ubus_ctx);
 

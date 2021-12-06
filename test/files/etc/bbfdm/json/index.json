@@ -39,6 +39,28 @@
         }
       ]
     },
+    "MHubNumberOfEntries": {
+      "type": "int",
+      "version": "2.14",
+      "protocols": [
+        "cwmp",
+        "usp"
+      ],
+      "read": true,
+      "write": false,
+      "datatype": "int",
+      "mapping": [
+        {
+          "type": "ubus",
+          "ubus": {
+            "object": "proxd",
+            "method": "list",
+            "args": {},
+            "key": "numofdevices"
+          }
+        }
+      ]
+    },
     "Device.PD2.{i}.MiniHub.{i}.": {
       "type": "object",
       "version": "2.14",

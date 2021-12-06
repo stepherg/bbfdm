@@ -40,3 +40,4 @@ tools/__pycache__
 *.gcno
 *\.log
 .libs
+m4/
