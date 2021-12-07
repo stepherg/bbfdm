@@ -913,18 +913,80 @@ static int set_ServicesVoiceServiceCallControlExtension_ExtensionNumber(char *re
 /*#Device.Services.VoiceService.{i}.CallControl.Extension.{i}.Provider!UCI:asterisk/extension,@i-1/provider*/
 static int get_ServicesVoiceServiceCallControlExtension_Provider(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = NULL;
+	struct uci_list *provider_list = NULL;
+	char buf[512] = {0};
+	char *type = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "provider", &linker);
-	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
-	if (*value == NULL)
-		*value = "";
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", &type);
+	dmuci_get_value_by_section_list(((struct dmmap_dup *)data)->config_section, "provider", &provider_list);
+	if (provider_list != NULL) {
+		struct uci_element *e = NULL;
+		unsigned pos = 0;
+
+		buf[0] = 0;
+		uci_foreach_element(provider_list, e) {
+			char *linker = NULL;
+
+			adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", !strcmp(type, "fxs") ? section_name(((struct dmmap_dup *)data)->config_section) : e->name, &linker);
+			if (linker)
+				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", linker);
+		}
+
+		if (pos)
+			buf[pos - 1] = 0;
+	}
+
+	*value = (buf[0] != '\0') ? dmstrdup(buf) : "";
 	return 0;
 }
 
 static int set_ServicesVoiceServiceCallControlExtension_Provider(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return set_SIP_Client(refparam, ctx, data, instance, value, action);
+	char fxs_extension[64] = "Device.Services.VoiceService.1.POTS.FXS.";
+	char dect_extension[64] = "Device.Services.VoiceService.1.DECT.Portable.";
+	size_t fxs_len = strlen(fxs_extension);
+	size_t dect_len = strlen(dect_extension);
+	char *pch = NULL, *spch = NULL;
+	char value_buf[512] = {0};
+	char *type;
+
+	DM_STRNCPY(value_buf, value, sizeof(value_buf));
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string_list(value_buf, -1, -1, -1, -1, -1, NULL, NULL))
+				return FAULT_9007;
+
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", &type);
+
+			for (pch = strtok_r(value_buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+				char *linker = NULL;
+
+				if (strncmp(pch, !strcmp(type, "fxs") ? fxs_extension : dect_extension, !strcmp(type, "fxs") ? fxs_len : dect_len) != 0)
+					return FAULT_9007;
+
+				adm_entry_get_linker_value(ctx, pch, &linker);
+				if (linker == NULL)
+					return FAULT_9007;
+			}
+			break;
+		case VALUESET:
+			// Empty the existing list first
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", "");
+			for (pch = strtok_r(value_buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+				char *linker = NULL;
+
+				adm_entry_get_linker_value(ctx, pch, &linker);
+				if(!strcmp(linker, "extension3"))
+					dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", "fxs1");
+				else if(!strcmp(linker, "extension4"))
+					dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", "fxs2");
+				else
+					dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", linker);
+			}
+			break;
+	}
+	return 0;
 }
 
 /*#Device.Services.VoiceService.{i}.CallControl.Extension.{i}.CallingFeatures!UCI:asterisk/extension,@i-1/calling_features*/

@@ -80,8 +80,6 @@ static int addObjServicesVoiceServiceSIPClient(char *refparam, struct dmctx *ctx
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "", "sip_service_provider");
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "name", value);
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "enable", "0");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "codec0", "alaw");
-	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "ptime_alaw", "20");
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "support_fax", "0");
 	dmuci_set_value(TR104_UCI_PACKAGE, new_sec_name, "transport", "udp");
 

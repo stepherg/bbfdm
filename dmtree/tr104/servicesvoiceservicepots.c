@@ -11,6 +11,15 @@
 #include "servicesvoiceservicepots.h"
 #include "common.h"
 
+/**************************************************************************
+* LINKER
+***************************************************************************/
+static int get_voice_service_pots_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	*linker = data ? section_name(((struct dmmap_dup *)data)->config_section) : "";
+	return 0;
+}
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -203,7 +212,7 @@ static int set_ServicesVoiceServicePOTSFXS_Alias(char *refparam, struct dmctx *c
 /* *** Device.Services.VoiceService.{i}.POTS. *** */
 DMOBJ tServicesVoiceServicePOTSObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"FXS", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServicePOTSFXSInst, NULL, NULL, tServicesVoiceServicePOTSFXSObj, tServicesVoiceServicePOTSFXSParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"FXS", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServicePOTSFXSInst, NULL, NULL, tServicesVoiceServicePOTSFXSObj, tServicesVoiceServicePOTSFXSParams, get_voice_service_pots_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 

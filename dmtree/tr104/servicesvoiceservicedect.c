@@ -10,6 +10,15 @@
 
 #include "servicesvoiceservicedect.h"
 
+/**************************************************************************
+* LINKER
+***************************************************************************/
+static int get_voice_service_dect_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	*linker = data ? dmjson_get_value((json_object *)data, 1, "ipui") : "";
+	return 0;
+}
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -348,8 +357,7 @@ static int get_ServicesVoiceServiceDECTPortable_BaseAttachedTo(char *refparam, s
 /*#Device.Services.VoiceService.{i}.DECT.Portable.{i}.PortableType!UBUS:dect/status//handsets[@i-1].portable_type*/
 static int get_ServicesVoiceServiceDECTPortable_PortableType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "portable_type");
-
+        *value = dmjson_get_value((json_object *)data, 1, "portable_type");
 	return 0;
 }
 
@@ -400,7 +408,7 @@ static int get_ServicesVoiceServiceDECTPortable_LastUpdateDateTime(char *refpara
 DMOBJ tServicesVoiceServiceDECTObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Base", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceDECTBaseInst, NULL, NULL, NULL, tServicesVoiceServiceDECTBaseParams, NULL, BBFDM_BOTH, LIST_KEY{"RFPI", "Name", "Alias", NULL}},
-{"Portable", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceDECTPortableInst, NULL, NULL, NULL, tServicesVoiceServiceDECTPortableParams, NULL, BBFDM_BOTH, LIST_KEY{"IPEI", "Alias", NULL}},
+{"Portable", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceDECTPortableInst, NULL, NULL, NULL, tServicesVoiceServiceDECTPortableParams, get_voice_service_dect_linker, BBFDM_BOTH, LIST_KEY{"IPEI", "Alias", NULL}},
 {0}
 };
 
