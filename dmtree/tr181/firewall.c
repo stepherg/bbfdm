@@ -12,6 +12,29 @@
 #include "dmentry.h"
 #include "firewall.h"
 
+static int dmmap_synchronizeNATPortMappingEnable(const char *intf, bool value)
+{
+	struct uci_section *s = NULL;
+
+	uci_foreach_sections("firewall", "redirect", s) {
+		char *src = NULL;
+
+		dmuci_get_value_by_section_string(s, "src", &src);
+		if (intf && src && !strcmp(src, intf)) {
+			struct uci_section *dmmap_section = NULL;
+			char *redirect_enable = NULL;
+
+			get_dmmap_section_of_config_section("dmmap_firewall", "redirect", section_name(s), &dmmap_section);
+
+			dmuci_get_value_by_section_string(dmmap_section, "enabled", &redirect_enable);
+			bool enable_val = value && (*redirect_enable == '1' ? true : false);
+			dmuci_set_value_by_section(s, "enabled", enable_val ? "1" : "0");
+		}
+	}
+
+	return 0;
+}
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -724,7 +747,7 @@ static int set_level_port_mapping_enabled(char *refparam, struct dmctx *ctx, voi
 {
 	bool b;
 	struct uci_section *s = NULL;
-	char *v, *v2;
+	char *src = NULL, *zone_name = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -735,16 +758,19 @@ static int set_level_port_mapping_enabled(char *refparam, struct dmctx *ctx, voi
 			string_to_bool(value, &b);
 			if (b) {
 				uci_foreach_sections("firewall", "zone", s) {
-					dmuci_get_value_by_section_string(s, "src", &v);
-					dmuci_get_value_by_section_string(s, "name", &v2);
-					if (strcasestr(v, "wan") || strcasestr(v2, "wan")) {
+					dmuci_get_value_by_section_string(s, "src", &src);
+					dmuci_get_value_by_section_string(s, "name", &zone_name);
+					if (strcasestr(src, "wan") || strcasestr(zone_name, "wan")) {
 						dmuci_set_value_by_section(s, "masq", "1");
+						dmmap_synchronizeNATPortMappingEnable(zone_name, b);
 						return 0;
 					}
 				}
 			} else {
 				uci_foreach_sections("firewall", "zone", s) {
 					dmuci_set_value_by_section(s, "masq", "");
+					dmuci_get_value_by_section_string(s, "name", &zone_name);
+					dmmap_synchronizeNATPortMappingEnable(zone_name, b);
 				}
 			}
 			break;
