@@ -1233,7 +1233,9 @@ static int get_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 		char *inner_vid, *dev_name;
 
 		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "inner_vid", &inner_vid);
-		dmasprintf(&dev_name, "%s.%s", name, inner_vid);
+		if (*ifname == '\0' || *inner_vid == '\0')
+			return -1;
+		dmasprintf(&dev_name, "%s.%s", ifname, inner_vid);
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", dev_name, value);
 	} else {
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", name, value);
