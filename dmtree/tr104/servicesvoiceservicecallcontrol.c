@@ -854,7 +854,6 @@ static int set_ServicesVoiceServiceCallControlGroup_Extensions(char *refparam, s
 		case VALUESET:
 			// Empty the existing code list first
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "extensions", "");
-
 			for (pch = strtok_r(value_buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 				char *linker = NULL;
 
@@ -913,23 +912,25 @@ static int set_ServicesVoiceServiceCallControlExtension_ExtensionNumber(char *re
 /*#Device.Services.VoiceService.{i}.CallControl.Extension.{i}.Provider!UCI:asterisk/extension,@i-1/provider*/
 static int get_ServicesVoiceServiceCallControlExtension_Provider(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_list *provider_list = NULL;
+	char *provider_string = NULL;
 	char buf[512] = {0};
 	char *type = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", &type);
-	dmuci_get_value_by_section_list(((struct dmmap_dup *)data)->config_section, "provider", &provider_list);
-	if (provider_list != NULL) {
-		struct uci_element *e = NULL;
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "provider", &provider_string);
+	if (strlen(provider_string)) {
 		unsigned pos = 0;
-
+                char *ptr = NULL, *spch = NULL;
 		buf[0] = 0;
-		uci_foreach_element(provider_list, e) {
+                char *provider = dmstrdup(provider_string);
+                ptr = strtok_r(provider, ",", &spch);
+                while(ptr != NULL){
 			char *linker = NULL;
 
-			adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", !strcmp(type, "fxs") ? section_name(((struct dmmap_dup *)data)->config_section) : e->name, &linker);
+			adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", !strcmp(type, "fxs") ? section_name(((struct dmmap_dup *)data)->config_section) : ptr, &linker);
 			if (linker)
 				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", linker);
+                        ptr = strtok_r(NULL, ",", &spch);
 		}
 
 		if (pos)
@@ -949,7 +950,8 @@ static int set_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 	char *pch = NULL, *spch = NULL;
 	char value_buf[512] = {0};
 	char *type;
-
+        char buf[512] = {0};
+        unsigned pos = 0;
 	DM_STRNCPY(value_buf, value, sizeof(value_buf));
 
 	switch (action) {
@@ -975,15 +977,17 @@ static int set_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", "");
 			for (pch = strtok_r(value_buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 				char *linker = NULL;
-
+                                if(pos != 0)
+                                    pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", ",");
 				adm_entry_get_linker_value(ctx, pch, &linker);
 				if(!strcmp(linker, "extension3"))
-					dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", "fxs1");
+                                        pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", "fxs1");
 				else if(!strcmp(linker, "extension4"))
-					dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", "fxs2");
+                                        pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", "fxs2");
 				else
-					dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", linker);
+                                        pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", linker);
 			}
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", buf);
 			break;
 	}
 	return 0;
