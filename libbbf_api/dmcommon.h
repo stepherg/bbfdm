@@ -298,4 +298,7 @@ unsigned long file_system_size(const char *path, const enum fs_size_type_enum ty
 char *replace_char(char *str, char find, char replace);
 char *replace_str(const char *str, const char *substr, const char *replacement);
 int check_browse_section(struct uci_section *s, void *data);
+int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, size_t str_len);
+char *ioctl_get_ipv4(char *interface_name);
+char *get_ipv6(char *interface_name);
 #endif

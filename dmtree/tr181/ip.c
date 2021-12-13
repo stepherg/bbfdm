@@ -66,32 +66,6 @@ static int get_ip_iface_sysfs(const struct uci_section *data, const char *name, 
 	return get_net_iface_sysfs(section_name((struct uci_section *)data), name, value);
 }
 
-static int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, size_t str_len)
-{
-	char ip6buf[INET6_ADDRSTRLEN] = {0}, dev[32] = {0};
-	unsigned int ip[4], prefix;
-
-	sscanf(line, "%8x%8x%8x%8x %*s %x %*s %*s %31s",
-				&ip[0], &ip[1], &ip[2], &ip[3],
-				&prefix, dev);
-
-	if (strcmp(dev, device) != 0)
-		return -1;
-
-	ip[0] = htonl(ip[0]);
-	ip[1] = htonl(ip[1]);
-	ip[2] = htonl(ip[2]);
-	ip[3] = htonl(ip[3]);
-
-	inet_ntop(AF_INET6, ip, ip6buf, INET6_ADDRSTRLEN);
-	snprintf(ipstr, str_len, "%s/%u", ip6buf, prefix);
-
-	if (strncmp(ipstr, "fe80:", 5) != 0)
-		return -1;
-
-	return 0;
-}
-
 static bool proc_intf6_line_exists(char *parent_section, char *address)
 {
 	struct uci_section *s = NULL;

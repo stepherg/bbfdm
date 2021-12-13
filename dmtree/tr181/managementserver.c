@@ -230,13 +230,17 @@ static int network_get_ipaddr(char *iface, int ipver, char **value)
 /*#Device.ManagementServer.ConnectionRequestURL!UCI:cwmp/cpe,cpe/port*/
 static int get_management_server_connection_request_url(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ip = NULL, *port = NULL, *iface = NULL, *ip_version = NULL;
+	char *ip = NULL, *port = NULL, *interface = NULL, *iface_name = NULL, *ip_version = NULL;
 
-	dmuci_get_option_value_string("cwmp", "cpe", "default_wan_interface", &iface);
+	dmuci_get_option_value_string("cwmp", "cpe", "default_wan_interface", &interface);
+	dmuci_get_option_value_string("cwmp", "cpe", "interface", &iface_name);
 	dmuci_get_option_value_string("cwmp", "acs", "ip_version", &ip_version);
-
-	network_get_ipaddr(iface, ip_version&&ip_version[0]=='6'?6:4, &ip);
 	dmuci_get_option_value_string("cwmp", "cpe", "port", &port);
+
+	if (network_get_ipaddr(interface, *ip_version == '6' ? 6 : 4, &ip) == -1) {
+		// get ip from ioctl
+		ip = (*ip_version == '6') ? get_ipv6(iface_name) : ioctl_get_ipv4(iface_name);
+	}
 
 	if (ip[0] != '\0' && port[0] != '\0') {
 		char *path;

@@ -1649,3 +1649,84 @@ int check_browse_section(struct uci_section *s, void *data)
 		return 0;
 	return -1;
 }
+
+int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, size_t str_len)
+{
+	char ip6buf[INET6_ADDRSTRLEN] = {0}, dev[32] = {0};
+	unsigned int ip[4], prefix;
+
+	sscanf(line, "%8x%8x%8x%8x %*s %x %*s %*s %31s",
+				&ip[0], &ip[1], &ip[2], &ip[3],
+				&prefix, dev);
+
+	if (strcmp(dev, device) != 0)
+		return -1;
+
+	ip[0] = htonl(ip[0]);
+	ip[1] = htonl(ip[1]);
+	ip[2] = htonl(ip[2]);
+	ip[3] = htonl(ip[3]);
+
+	inet_ntop(AF_INET6, ip, ip6buf, INET6_ADDRSTRLEN);
+	snprintf(ipstr, str_len, "%s/%u", ip6buf, prefix);
+
+	if (strncmp(ipstr, "fe80:", 5) != 0)
+		return -1;
+
+	return 0;
+}
+
+// Get IPv4 address assigned to an interface using ioctl
+// return ==> dynamically allocated IPv4 address on success,
+//        ==> empty string on failure
+// Note: Ownership of returned dynamically allocated IPv4 address is with caller
+char *ioctl_get_ipv4(char *interface_name)
+{
+	int fd;
+	struct ifreq ifr;
+	char *ip = "";
+
+	fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd == -1)
+		goto exit;
+
+	ifr.ifr_addr.sa_family = AF_INET;
+	DM_STRNCPY(ifr.ifr_name, interface_name, IFNAMSIZ);
+
+	if (ioctl(fd, SIOCGIFADDR, &ifr) == -1)
+		goto exit;
+
+	ip = dmstrdup(inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr )->sin_addr));
+
+exit:
+	close(fd);
+
+	return ip;
+}
+
+char *get_ipv6(char *interface_name)
+{
+	FILE *fp = NULL;
+	char buf[512] = {0};
+	char ipstr[64] = {0};
+
+	fp = fopen(PROC_INTF6, "r");
+	if (fp == NULL)
+		return "";
+
+	while (fgets(buf, 512, fp) != NULL) {
+		ipstr[0] = '\0';
+
+		if (parse_proc_intf6_line(buf, interface_name, ipstr, sizeof(ipstr)) == 0) {
+			if (strlen(ipstr) != 0) {
+				char *slash = strchr(ipstr, '/');
+				if (slash)
+					*slash = '\0';
+			}
+			break;
+		}
+	}
+	fclose(fp);
+
+	return (*ipstr) ? dmstrdup(ipstr) : "";
+}
