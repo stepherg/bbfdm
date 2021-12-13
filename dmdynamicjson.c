@@ -634,10 +634,10 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 		} else {
 			char uci_type[32] = {0};
 			snprintf(uci_type, sizeof(uci_type), "@%s[%d]", json_object_get_string(type), instance ? atoi(instance)-1 : 0);
-			value = bbf_uci_get_value(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name));
+			value = dmuci_get_value_by_path(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name));
 		}
 	} else if (file && section_name && option_name) {
-		value = bbf_uci_get_value(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), json_object_get_string(option_name));
+		value = dmuci_get_value_by_path(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), json_object_get_string(option_name));
 	}
 
 	if (strstr(refparam, "Alias") && value[0] == '\0')
@@ -1170,9 +1170,9 @@ static void uci_set_value(json_object *mapping_obj, int json_version, char *refp
 		char uci_type[32] = {0};
 
 		snprintf(uci_type, sizeof(uci_type), "@%s[%d]", json_object_get_string(type), instance ? atoi(instance)-1 : 0);
-		bbf_uci_set_value(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name), value);
+		dmuci_set_value_by_path(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name), value);
 	} else if (file && section_name && option_name) {
-		bbf_uci_set_value(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), json_object_get_string(option_name), value);
+		dmuci_set_value_by_path(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), json_object_get_string(option_name), value);
 	}
 }
 

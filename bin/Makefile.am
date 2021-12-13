@@ -6,7 +6,8 @@ libbbf_api_la_SOURCES =				\
 	../libbbf_api/dmjson.c			\
 	../libbbf_api/dmuci.c			\
 	../libbbf_api/dmcommon.c 		\
-	../libbbf_api/dmmem.c
+	../libbbf_api/dmmem.c			\
+	../libbbf_api/dmapi.c
 
 libbbf_api_la_CFLAGS =		\
 	$(AM_CFLAGS)			\

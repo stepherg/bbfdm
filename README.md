@@ -234,140 +234,20 @@ In this function, there are two functions that need to be defined:
 > Note3: you can use [bbf_test plugin](./test/bbf_test/bbf_test.c) as a reference in order to develop any new object/leaf/browse.
 
 
-## BBF API
+## LIBBBF API
 
 `libbbf_api` is a library which contains the source code of all API functions (UCI, Ubus, JSON, CLI and memory management). these API are used for GET/SET/ADD/Delete/Operate calls which can be called in internal or external packages.
 
-The most used one are as follow:
+All APIs exposed by libbbf_api are presented in this header file [libbbf_api.h](./include/libbbf_api.h).
 
-#### 1. dmuci_get_option_value_string: execute the uci get value
+## LIBBBF UBUS
 
-```bash
-int dmuci_get_option_value_string(char *package, char *section, char *option, char **value)
-```
-**Argument:**
-- **package:** package name
-- **section:** section name
-- **option:** option name
-- **value:** the value of the returned option
+`Libbbf_ubus` is a library that provides APIs to expose the datamodel constructed with the help of libbbf API over the ubus directly.
 
-#### 2. dmuci_get_value_by_section_string: execute the uci get value
-
-```bash
-int dmuci_get_value_by_section_string(struct uci_section *s, char *option, char **value)
-```
-**Argument:**
-- **section:** section name
-- **option:** option name
-- **value:** the value of the returned option
-
-#### 3. uci_foreach_sections: browse all sections by package and section type
-
-```bash
-#define uci_foreach_sections(package, stype, section)
-```
-
-**Argument:**
-- **package:** package name
-- **stype:** section type to browse
-- **section:** return section pointer for each loop iteration
-
-#### 4. dmubus_call: execute the ubus call
-
-```bash
-int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
-```
-
-**Argument:**
-- **obj:** ubus obj
-- **method:** ubus method
-- **u_args:** ubus arguments
-- **u_args_size:** number of ubus arguments
-- **req_res:** the json message of the ubus call
-
-#### 5. dmubus_call_set: set the ubus call
-
-```bash
-int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size);
-```
-
-**Argument:**
-- **obj:** ubus obj
-- **method:** ubus method
-- **u_args: ubus** arguments
-- **u_args_size:** number of ubus arguments
-
-#### 6. handle_instance: allow to retrieve/attribute the instances from uci config sections
-
-```bash
-char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, char *inst_opt, char *alias_opt);
-```
-
-**Argument:**
-- **dmctx:** the current dmctx struct passed when calling this object
-- **parent_node:** the current node struct passed when calling this object
-- **s:** the uci section used to get the instance 
-- **inst_opt:** the option name of the instance number used for this object
-- **alias_opt:** the option name of the instance alias used for this object
-
-#### 7. handle_instance_without_section: allow to attribute instances with constant values
-
-```bash
-char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, int inst_nbr);
-```
-
-**Argument:** the current dmctx struct passed when calling this object
-- **dmctx:** the current dmctx struct passed when calling this object
-- **parent_node:** the current node struct passed when calling this object
-- **inst_nbr:** the instance to attribute for this object
-
-#### 8. DM_LINK_INST_OBJ: link the instance to the data model tree
-
-```bash
-int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)
-```
-
-**Argument:**
-- **dmctx:** the current dmctx struct passed when calling this object
-- **parent_node:** the current node struct passed when calling this object
-- **data:** the data transmitted for the next sub object and parameters that can be uci section, json object, or any type of data
-- **instance:** the current instance used for this object
+All APIs exposed by libbbf_ubus are presented in this header file [libbbf_ubus.h](./include/libbbf_ubus.h).
 
 
-> Note1: For other funtions, please refer to dmuci, dmubus, dmjson, dmcommon and dmmem (.c and .h) files in the [link](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbf_api)
-
-> Note2: When developing a new parameters/features in the Data Model, it's highly recommended to use the memory management functions of `libbbf_api` allocate and free because it's freed at the end of each RPCs.
-
-The list of memory management functions of `libbbf_api` are:
-
-```bash
-dmmalloc(x)
-dmcalloc(n, x)
-dmrealloc(x, n)
-dmstrdup(x)
-dmasprintf(s, format, ...)
-dmastrcat(s, b, m)
-dmfree(x)
-```
-
-> Note3: There are several APIs that have been deprecated and replaced with new ones. the table below summarizes them
-
-|             Deprecated API             |                       New API                      |
-| -------------------------------------- | -------------------------------------------------- |
-| handle_update_instance                 | handle_instance or handle_instance_without_section |
-| update_instance_alias                  | handle_instance                                    |
-| update_instance_without_section        | handle_instance_without_section                    |
-| update_instance                        |                      Not Used                      |
-| get_last_instance_bbfdm                |                      Not Used                      |
-| get_last_instance                      | find_max_instance                                  |
-| get_last_instance_lev2_bbfdm_dmmap_opt |                      Not Used                      |
-| get_last_instance_lev2_bbfdm           |                      Not Used                      |
-| is_section_unnamed                     |                      Not Used                      |
-| delete_sections_save_next_sections     |                      Not Used                      |
-| update_dmmap_sections                  |                      Not Used                      |
-| check_browse_section                   |                      Not Used                      |
-| dmuci_delete_by_section_unnamed        | dmuci_delete_by_section                            |
-| dmuci_delete_by_section_unnamed_bbfdm  | dmuci_delete_by_section                            |
+> Note: Anyone wants to check out libbbf_api or libbbf_ubus APIs and how to use them, all documentation will be available in their header files [libbbf_api.h](./include/libbbf_api.h) and [libbbf_ubus.h](./include/libbbf_ubus.h).
 
 ## BBFDM Vendor
 

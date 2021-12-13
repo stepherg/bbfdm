@@ -857,7 +857,7 @@ void commit_and_free_uci_ctx_bbfdm(char *dmmap_config)
 	uci_ctx_bbfdm = NULL;
 }
 
-char *bbf_uci_get_value(char *path, char *package, char *section, char *option)
+char *dmuci_get_value_by_path(char *path, char *package, char *section, char *option)
 {
 	struct uci_option *o;
 	char *val = "";
@@ -879,7 +879,7 @@ char *bbf_uci_get_value(char *path, char *package, char *section, char *option)
 	return val;
 }
 
-char *bbf_uci_set_value(char *path, char *package, char *section, char *option, char *value)
+char *dmuci_set_value_by_path(char *path, char *package, char *section, char *option, char *value)
 {
 	struct uci_context *save_uci_ctx = NULL;
 	struct uci_ptr ptr = {0};

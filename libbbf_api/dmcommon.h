@@ -125,7 +125,6 @@ extern char *PowerState[];
 #define DHCP_LEASES_FILE "/tmp/dhcp.leases"
 #define DHCP_CLIENT_OPTIONS_FILE "/var/dhcp.client.options"
 #define DMMAP "dmmap"
-#define RANGE_ARGS (struct range_args[])
 #define LIST_KEY (const char *[])
 #define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
 
@@ -188,18 +187,6 @@ enum fs_size_type_enum {
 #define sysfs_foreach_file(path,dir,ent) \
         if ((dir = opendir(path)) == NULL) return 0; \
         while ((ent = readdir (dir)) != NULL) \
-
-struct range_args {
-	const char *min;
-	const char *max;
-};
-
-struct dmmap_dup
-{
-	struct list_head list;
-	struct uci_section *config_section;
-	struct uci_section *dmmap_section;
-};
 
 struct dmmap_sect {
 	struct list_head list;

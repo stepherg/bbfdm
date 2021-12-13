@@ -577,7 +577,7 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
                     get_value += "\n"
                     get_value += "	snprintf(uci_type, sizeof(uci_type), \"@%s[%s]\", instance ? atoi(instance)-1 : 0);\n" % (
                         res2, "%d")
-                    get_value += "	*value = bbf_uci_get_value(\"%s\", \"%s\", uci_type, \"%s\");" % (
+                    get_value += "	*value = dmuci_get_value_by_path(\"%s\", \"%s\", uci_type, \"%s\");" % (
                         res6, res1, res5)
                 elif instance == "TRUE" and res7 is not None:
                     get_value += "	char *linker = dmstrdup(*value);\n"
@@ -586,7 +586,7 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
                     get_value += "	if (*value == NULL)\n"
                     get_value += "		*value = \"\";"
                 elif res6 is not None:
-                    get_value += "	*value = bbf_uci_get_value(\"%s\", \"%s\", \"%s\", \"%s\");" % (
+                    get_value += "	*value = dmuci_get_value_by_path(\"%s\", \"%s\", \"%s\", \"%s\");" % (
                         res6, res1, res3, res5)
                 elif instance == "TRUE":
                     get_value += "	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, \"%s\", value);" % res5

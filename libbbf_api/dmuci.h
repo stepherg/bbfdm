@@ -33,21 +33,6 @@
 #define VARSTATE_CONFDIR "/var/state/"
 #define VARSTATE_SAVEDIR "/tmp/.bbfdm_var"
 
-enum dm_uci_cmp {
-	CMP_SECTION,
-	CMP_OPTION_EQUAL,
-	CMP_OPTION_REGEX,
-	CMP_OPTION_CONTAINING,
-	CMP_OPTION_CONT_WORD,
-	CMP_LIST_CONTAINING,
-	CMP_FILTER_FUNC
-};
-
-enum dm_uci_walk {
-	GET_FIRST_SECTION,
-	GET_NEXT_SECTION
-};
-
 struct package_change
 {
 	struct list_head list;
@@ -390,8 +375,8 @@ int db_get_value_string(char *package, char *section, char *option, char **value
 int dmuci_get_option_value_string_varstate(char *package, char *section, char *option, char **value);
 int dmuci_set_value_varstate(char *package, char *section, char *option, char *value);
 
-char *bbf_uci_get_value(char *path, char *package, char *section, char *option);
-char *bbf_uci_set_value(char *path, char *package, char *section, char *option, char *value);
+char *dmuci_get_value_by_path(char *path, char *package, char *section, char *option);
+char *dmuci_set_value_by_path(char *path, char *package, char *section, char *option, char *value);
 
 #endif
 

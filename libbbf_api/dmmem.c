@@ -110,13 +110,19 @@ const char *file, const char *func, int line,
 struct list_head *mem_list, const char *s
 )
 {
+	if (s == NULL)
+		return NULL;
+
 	size_t len = strlen(s) + 1;
 #ifdef WITH_MEMTRACK
 	void *new = __dmmalloc(file, func, line, mem_list, len);
 #else
 	void *new = __dmmalloc(mem_list, len);
 #endif /*WITH_MEMTRACK*/
-	if (new == NULL) return NULL;
+
+	if (new == NULL)
+		return NULL;
+
 	return (char *) memcpy(new, s, len);
 }
 #endif /*WITH_MEMLEACKSEC*/

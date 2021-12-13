@@ -17,21 +17,7 @@
 #include <json-c/json.h>
 #include <libubus.h>
 #include <time.h>
-
-#define UBUS_ARGS (struct ubus_arg[])
-
-enum ubus_arg_type {
-	String,
-	Integer,
-	Boolean,
-	Table
-};
-
-struct ubus_arg {
-	const char *key;
-	const char *val;
-	enum ubus_arg_type type;
-};
+#include "dmapi.h"
 
 int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
 int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size);
