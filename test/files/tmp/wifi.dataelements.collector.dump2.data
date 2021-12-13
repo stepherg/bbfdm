@@ -1,204 +1,160 @@
 {
-	"num_ssid": 1,
-	"ssidlist": [
-		{
-			"ssid": "5GHz-main",
-			"band": "5GHz",
-			"vid": 100,
-			"security": "WPA"
-		},
-		{
-			"ssid": "5GHz-guest",
-			"band": "5GHz",
-			"vid": 200,
-			"security": "WPA"
-		},
-		{
-			"ssid": "MAP-608D26C4983C-2.4GHz",
-			"band": "2.4GHz",
-			"vid": 100,
-			"security": "WPA"
-		},
-		{
-			"ssid": "MAP-608D26C4983C-BH-5GHz",
-			"band": "5GHz",
-			"vid": 100,
-			"security": "WPA"
-		},
-		{
-			"ssid": "MAP-608D26C4983C-BH-2.4GHz",
-			"band": "2.4GHz",
-			"vid": 100,
-			"security": "WPA"
-		}
-	],
-	"num_ap_devices":1,
-	"APDeviceList": [
-		{
-			"macaddr": "02:11:11:aa:bb:cc",
-			"manufacturer": "IOPSYS",
-			"oui": "00:22:07",
-			"product_class": "AP",
-			"serialnumber": "12345",
-			"version": "6.4",
-			"last_connect_time": "TODO",	
-			"backhaul_type": "TODO",
-			"backhaul_macaddr": "TODO",
-			"backhaul_tx_bytes": 0,
-			"backhaul_rx_bytes": 0,
-			"backhaul_utilization": 0,
-			"backhaul_rcpi": 0,
-			"radar_detections": [
-			],		
-			"MaxReportingRate": 80,
-			"MultiAPProfile": "TODO",
-			"MaxVIDs": 4095,
-			"DFSEnable": true,
-			"EasyMeshControllerOperationMode": "TODO",
-			"EasyMeshAgentOperationMode": "TODO",
-			"Backhaul_BackhaulMACAddress": "TODO",
-			"Backhaul_BackhaulDeviceID": "TODO",
-			"Backhaul_CurrentOperatingClassProfileNumberOfEntries": 1,
-			"Backhaul_CurrentOperatingClassProfile": [
-				{
-					"Class": 10,
-					"Channel": 15,
-					"TxPower": -50,
-					"TimeStamp": "TODO"
-				}
-			],
-			"Backhaul_BytesSent": 1,
-			"Backhaul_BytesReceived": 2,
-			"Backhaul_PacketsSent": 3,
-			"Backhaul_PacketsReceived": 4,
-			"Backhaul_ErrorsSent": 5,
-			"Backhaul_ErrorsReceived": 6,
-			"Backhaul_LinkUtilization": 7,
-			"Backhaul_SignalStrength": 8,
-			"Backhaul_LastDataDownlinkRate": 9,
-			"Backhaul_LastDataUplinkRate": 10,
-			"Backhaul_TimeStamp": "TODO",
-			"num_radios": 2,
-			"RadioList": [
-				{
-					"ID": "AhISu8zd",
-					"band": 2,
-					"standard": "ax",
-					"channel": 8,
-					"bandwidth": 40,
-					"channel_ext": 1,
-					"mcs": 7,
-					"txpower": 23,
-					"channels": [
-					
-					],
-					"num_bss": 1,
-					"APList": [
-						{
-							"bssid": "",
-							"ssid": "",
-							"num_steer_assoc_control": 12,
-							"num_steer_btm": 5,
-							"num_steer_btm_query": 1,
-							"num_stations": 1,
-							"StationList": [
-								{
-									"macaddr": "",
-									"standard": "a",
-									"active": true,
-									"connect_time": 51,
-									"dl_rate": -52,
-									"ul_rate": -40,
-									"rcpi": 55,
-									"noise": -90,
-									"tx_bytes": 1,
-									"rx_bytes": 2,
-									"tx_packets": 3,
-									"rx_packets": 4,
-									"tx_error_packets": 5,
-									"rx_error_packets": 6,
-									"tx_retrans_packets": 7
-								}
-							]
-						}
-					],
-					"scan_boot_only": true,
-					"scan_impact": 2,
-					"scan_interval": 50,
-					"scan_num_opclass": 1,
-					"OpClassChannels": [
-						{
-							"OpClass": 10,
-							"ChannelList": "TODO"
-						}
-					],
-					"num_CACMethod": 1,
-					"CACMethod": [
-						{
-							"Method": 12
-						}
-					]
-				},
-				{
-					"ID": "AhISu8ze",
-					"band": 2,
-					"standard": "ax",
-					"channel": 8,
-					"bandwidth": 40,
-					"channel_ext": 1,
-					"mcs": 7,
-					"txpower": 23,
-					"channels": [
-					
-					],
-					"num_bss": 1,
-					"APList": [
-						{
-							"bssid": "",
-							"ssid": "",
-							"num_steer_assoc_control": 12,
-							"num_steer_btm": 5,
-							"num_steer_btm_query": 1,
-							"num_stations": 1,
-							"StationList": [
-								{
-									"macaddr": "",
-									"standard": "a",
-									"active": true,
-									"connect_time": 51,
-									"dl_rate": -52,
-									"ul_rate": -40,
-									"rcpi": 55,
-									"noise": -90,
-									"tx_bytes": 1,
-									"rx_bytes": 2,
-									"tx_packets": 3,
-									"rx_packets": 4,
-									"tx_error_packets": 5,
-									"rx_error_packets": 6,
-									"tx_retrans_packets": 7
-								}
-							]
-						}
-					],
-					"scan_boot_only": true,
-					"scan_impact": 2,
-					"scan_interval": 50,
-					"scan_num_opclass": 1,
-					"OpClassChannels": [
-						{
-							"OpClass": 10,
-							"ChannelList": "TODO"
-						}
-					],
-					"num_CACMethod": 1,
-					"CACMethod": [
-						{
-							"Method": 12
-						}
-					]
-				}
-			]
-		}
-	]
+        "num_ssid": 4,
+        "ssidlist": [
+                {
+                        "ssid": "iopsysWrt-44D43771B410",
+                        "band": "5GHz",
+                        "vid": 1,
+                        "security": "WPA3PSK/WPA2PSK+WPA3PSK"
+                },
+                {
+                        "ssid": "iopsysWrt-44D43771B410",
+                        "band": "2.4GHz",
+                        "vid": 1,
+                        "security": "WPA3PSK/WPA2PSK+WPA3PSK"
+                },
+                {
+                        "ssid": "MAP-44D43771B410-BH-5GHz",
+                        "band": "5GHz",
+                        "vid": 1,
+                        "security": "WPA3PSK"
+                },
+                {
+                        "ssid": "MAP-44D43771B410-BH-2.4GHz",
+                        "band": "2.4GHz",
+                        "vid": 1,
+                        "security": "WPA3PSK"
+                }
+        ],
+        "num_ap_devices": 1,
+        "APDeviceList": [
+                {
+                        "macaddr": "46:d4:37:71:b4:10",
+                        "manufacturer": "IOPSYS",
+                        "oui": "00:22:07",
+                        "product_class": "AP",
+                        "serialnumber": "12345",
+                        "version": "6.4",
+                        "last_connect_time": "TODO",
+                        "backhaul_type": "TODO",
+                        "backhaul_macaddr": "TODO",
+                        "backhaul_tx_bytes": 0,
+                        "backhaul_rx_bytes": 0,
+                        "backhaul_utilization": 0,
+                        "backhaul_rcpi": 0,
+                        "radar_detections": [
+
+                        ],
+                        "num_radios": 2,
+                        "RadioList": [
+                                {
+                                        "macaddr": "44:d4:37:71:b4:1f",
+                                        "band": 5,
+                                        "standard": "ax",
+                                        "channel": 36,
+                                        "bandwidth": 80,
+                                        "channel_ext": 0,
+                                        "mcs": 0,
+                                        "txpower": 23,
+                                        "channels": [
+                                                36,
+                                                40,
+                                                44,
+                                                48,
+                                                52,
+                                                56,
+                                                60,
+                                                64,
+                                                100,
+                                                104,
+                                                108,
+                                                112,
+                                                116,
+                                                120,
+                                                124,
+                                                128,
+                                                132,
+                                                136,
+                                                140,
+                                                144
+                                        ],
+                                        "num_bss": 2,
+                                        "APList": [
+                                                {
+                                                        "bssid": "7e:d4:37:71:b4:18",
+                                                        "ssid": "MAP-44D43771B410-BH-5GHz",
+                                                        "num_steer_assoc_control": 0,
+                                                        "num_steer_btm": 0,
+                                                        "num_steer_btm_query": 0,
+                                                        "num_stations": 0,
+                                                        "StationList": [
+
+                                                        ]
+                                                },
+                                                {
+                                                        "bssid": "44:d4:37:71:b4:1f",
+                                                        "ssid": "iopsysWrt-44D43771B410",
+                                                        "num_steer_assoc_control": 0,
+                                                        "num_steer_btm": 0,
+                                                        "num_steer_btm_query": 0,
+                                                        "num_stations": 0,
+                                                        "StationList": [
+
+                                                        ]
+                                                }
+                                        ]
+                                },
+                                {
+                                        "macaddr": "44:d4:37:71:b4:1e",
+                                        "band": 2,
+                                        "standard": "ax",
+                                        "channel": 6,
+                                        "bandwidth": 20,
+                                        "channel_ext": 0,
+                                        "mcs": 0,
+                                        "txpower": 20,
+                                        "channels": [
+                                                1,
+                                                2,
+                                                3,
+                                                4,
+                                                5,
+                                                6,
+                                                7,
+                                                8,
+                                                9,
+                                                10,
+                                                11,
+                                                12,
+                                                13
+                                        ],
+                                        "num_bss": 2,
+                                        "APList": [
+                                                {
+                                                        "bssid": "7a:d4:37:71:b4:1f",
+                                                        "ssid": "MAP-44D43771B410-BH-2.4GHz",
+                                                        "num_steer_assoc_control": 0,
+                                                        "num_steer_btm": 0,
+                                                        "num_steer_btm_query": 0,
+                                                        "num_stations": 0,
+                                                        "StationList": [
+
+                                                        ]
+                                                },
+                                                {
+                                                        "bssid": "44:d4:37:71:b4:1e",
+                                                        "ssid": "iopsysWrt-44D43771B410",
+                                                        "num_steer_assoc_control": 0,
+                                                        "num_steer_btm": 0,
+                                                        "num_steer_btm_query": 0,
+                                                        "num_stations": 0,
+                                                        "StationList": [
+
+                                                        ]
+                                                }
+                                        ]
+                                }
+                        ]
+                }
+        ]
 }

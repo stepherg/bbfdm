@@ -656,7 +656,7 @@ static json_object *dump2_find_device_object(const char *unique_key)
 	return NULL;
 }
 
-static json_object *find_radio_object(json_object *device_obj, const char *unique_key)
+static json_object *dump_find_radio_object(json_object *device_obj, const char *unique_key)
 {
 	json_object *radio_arr = NULL;
 	json_object *radio_obj = NULL;
@@ -668,6 +668,22 @@ static json_object *find_radio_object(json_object *device_obj, const char *uniqu
 		char *id = dmjson_get_value(radio_obj, 1, "ID");
 		char *str = base64_decode(id);
 		string_to_mac(str, strlen(str), mac, sizeof(mac));
+		if (strcmp(unique_key, mac) == 0)
+			return radio_obj;
+	}
+
+	return NULL;
+}
+
+static json_object *dump2_find_radio_object(json_object *device_obj, const char *unique_key)
+{
+	json_object *radio_arr = NULL;
+	json_object *radio_obj = NULL;
+	int i = 0;
+
+	dmjson_foreach_obj_in_array(device_obj, radio_arr, radio_obj, i, 1, "RadioList") {
+
+		char *mac = dmjson_get_value(radio_obj, 1, "macaddr");
 		if (strcmp(unique_key, mac) == 0)
 			return radio_obj;
 	}
@@ -734,8 +750,8 @@ static int browseWiFiDataElementsNetworkDeviceRadioInst(struct dmctx *dmctx, DMN
 			continue;
 
 		wifi_da_radio_args.uci_s = p;
-		wifi_da_radio_args.dump_obj = find_radio_object(wifi_da_device->dump_obj, key);
-		wifi_da_radio_args.dump2_obj = find_radio_object(wifi_da_device->dump2_obj, key);
+		wifi_da_radio_args.dump_obj = dump_find_radio_object(wifi_da_device->dump_obj, key);
+		wifi_da_radio_args.dump2_obj = dump2_find_radio_object(wifi_da_device->dump2_obj, key);
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "wifi_da_device_instance", "wifi_da_device_alias");
 

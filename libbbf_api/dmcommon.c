@@ -1567,7 +1567,7 @@ char *base64_decode(const char *src)
 {
 	int i, j = 0;
 
-	if (!src)
+	if (!src || *src == '\0')
 		return "";
 
 	size_t decsize = strlen(src)*6/8;

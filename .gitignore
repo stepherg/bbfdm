@@ -41,3 +41,6 @@ tools/__pycache__
 *\.log
 .libs
 m4/
+bbf_ubus
+memory-report.xml
+*.la
