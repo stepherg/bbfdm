@@ -601,16 +601,24 @@ static int browse_wifi_associated_device(struct dmctx *dmctx, DMNODE *parent_nod
 
 static int browseWiFiDataElementsNetworkSSIDInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *ssid_arr = NULL, *ssid_obj = NULL;
+	struct dmmap_dup *p = NULL;
 	char *inst = NULL;
-	int id = 0, i = 0;
+	LIST_HEAD(dup_list);
 
-	dmubus_call("wifi.dataelements.collector", "dump2", UBUS_ARGS{0}, 0, &res);
-	dmjson_foreach_obj_in_array(res, ssid_arr, ssid_obj, i, 1, "ssidlist") {
-		inst = handle_instance_without_section(dmctx, parent_node, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)ssid_obj, inst) == DM_STOP)
+	synchronize_specific_config_sections_with_dmmap("mapcontroller", "ap", "dmmap_mapcontroller", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+		char *type = NULL;
+
+		dmuci_get_value_by_section_string(p->config_section, "type", &type);
+		if (strcmp(type, "fronthaul") != 0)
+			continue;
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "wifi_da_ssid_instance", "wifi_da_ssid_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
+	free_dmmap_config_dup_list(&dup_list);
 	return 0;
 }
 
@@ -3511,13 +3519,16 @@ static int get_WiFiDataElementsNetwork_SSIDNumberOfEntries(char *refparam, struc
 
 static int get_WiFiDataElementsNetworkSSID_SSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "ssid");
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ssid", value);
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkSSID_Band(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "band");
+	char *band = NULL;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "band", &band);
+	*value = (!strcmp(band, "2")) ? "2.4" : "5";
 	return 0;
 }
 
@@ -5417,6 +5428,7 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 {
 	struct uci_section *s = NULL, *stmp = NULL;
 	char *status = "Success";
+	char *curr_ssid = NULL;
 	char *curr_band = NULL;
 	bool ssid_exist = false, b = false;
 
@@ -5439,9 +5451,10 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 	if (b) {
 		// Add this SSID
 
-		uci_foreach_option_eq("mapcontroller", "ap", "ssid", ssid, s) {
+		uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
+			dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
 			dmuci_get_value_by_section_string(s, "band", &curr_band);
-			if (strncmp(curr_band, band, 1) == 0) {
+			if (strcmp(curr_ssid, ssid) == 0 && strncmp(curr_band, band, 1) == 0) {
 				if (*key) dmuci_set_value_by_section(s, "key", key);
 				ssid_exist = true;
 				break;
@@ -5452,15 +5465,17 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 			dmuci_add_section("mapcontroller", "ap", &s);
 			dmuci_set_value_by_section(s, "ssid", ssid);
 			dmuci_set_value_by_section(s, "key", key);
+			dmuci_set_value_by_section(s, "type", "fronthaul");
 			dmuci_set_value_by_section(s, "band", (*band == '5') ? "5" : "2");
 		}
 
 	} else {
 		// Remove this SSID
 
-		uci_foreach_option_eq_safe("mapcontroller", "ap", "ssid", ssid, stmp, s) {
+		uci_foreach_option_eq_safe("mapcontroller", "ap", "type", "fronthaul", stmp, s) {
+			dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
 			dmuci_get_value_by_section_string(s, "band", &curr_band);
-			if (strncmp(curr_band, band, 1) == 0) {
+			if (strcmp(curr_ssid, ssid) == 0 && strncmp(curr_band, band, 1) == 0) {
 				dmuci_delete_by_section(s, NULL, NULL);
 				ssid_exist = true;
 				break;
