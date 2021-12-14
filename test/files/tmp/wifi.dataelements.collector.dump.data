@@ -35,7 +35,7 @@
                                                                                 "TimeStamp": "2021-12-13T06:06:35+01:00",
                                                                                 "Enabled": true,
                                                                                 "LastChange": 0,
-                                                                                "NumberofSTA": 0,
+                                                                                "NumberofSTA": 1,
                                                                                 "EstServiceParametersBE": "AAAA",
                                                                                 "EstServiceParametersBK": "AAAA",
                                                                                 "EstServiceParametersVO": "AAAA",
@@ -47,7 +47,33 @@
                                                                                 "BroadcastBytesReceived": 0,
                                                                                 "BroadcastBytesSent": 0,
                                                                                 "STAList": [
-
+																					{
+																						"MACAddress": "44:d4:37:71:be:6f",
+																						"TimeStamp": "2021-12-14T16:54:08+01:00",
+																						"SignalStrength": 158,
+																						"HTCapabilities": "/g==",
+																						"VHTCapabilities": "qv+q/24w",
+																						"HECapabilities": "qv+q/2wA",
+																						"EstMACDataRateDownlink": 0,
+																						"EstMACDataRateUplink": 0,
+																						"LastDataDownlinkRate": 1361,
+																						"LastDataUplinkRate": 1633,
+																						"UtilizationTransmit": 0,
+																						"UtilizationReceive": 0,
+																						"LastConnectTime": 6,
+																						"Hostname": "",
+																						"BytesSent": 85439,
+																						"BytesReceived": 7872,
+																						"PacketsSent": 827,
+																						"PacketsReceived": 44,
+																						"ErrorsSent": 0,
+																						"ErrorsReceived": 0,
+																						"RetransCount": 2,
+																						"NumberOfMeasureReports": 0,
+																						"Measurementreport": [
+																							
+																						]
+																					}
                                                                                 ]
                                                                         },
                                                                         {
@@ -183,7 +209,7 @@
 
                                                                 ],
                                                                 "BackhaulSta": {
-                                                                        "MACAddress": "00:00:00:00:00:00"
+                                                                        "MACAddress": "44:d4:37:71:be:6f"
                                                                 }
                                                         },
                                                         {

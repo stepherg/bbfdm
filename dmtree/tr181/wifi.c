@@ -4703,25 +4703,25 @@ static int get_WiFiDataElementsNetworkDeviceMultiAPDevice_EasyMeshAgentOperation
 
 static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_LinkType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "Backhaul_LinkType");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "backhaul_type");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulMACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "Backhaul_BackhaulMACAddress");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "backhaul_macaddr");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulDeviceID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "Backhaul_BackhaulDeviceID");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "backhaul_macaddr");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "Backhaul_MACAddress");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "macaddr");
 	return 0;
 }
 
@@ -4757,13 +4757,13 @@ static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatin
 
 static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "Backhaul_BytesSent");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "backhaul_tx_bytes");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "Backhaul_BytesReceived");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "backhaul_rx_bytes");
 	return 0;
 }
 
