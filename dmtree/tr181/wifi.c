@@ -1777,10 +1777,15 @@ static bool is_different_group(const char *mode1, const char *mode2)
 
 }
 
-static void set_security_mode(struct uci_section *section, char *value)
+static void set_security_mode(struct uci_section *section, char *value, bool is_endpoint)
 {
+	struct uci_section *map_ssid_s = NULL;
 	char *wpa_key = NULL;
 	char *mode = get_security_mode(section);
+
+	// mapcontroller config: find the corresponding fronthaul ssid section if exist
+	if (!is_endpoint)
+		map_ssid_s = find_mapcontroller_ssid_section(section);
 
 	// Use default key only in case the key is not set
 	dmuci_get_value_by_section_string(section, "key", &wpa_key);
@@ -1794,6 +1799,8 @@ static void set_security_mode(struct uci_section *section, char *value)
 
 		if (strcmp(value, "None") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "none");
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "none");
 		} else if (strcmp(value, "WEP-64") == 0) {
 			char key[16], buf[11];
 			int i;
@@ -1805,6 +1812,8 @@ static void set_security_mode(struct uci_section *section, char *value)
 			}
 			dmuci_set_value_by_section(section, "encryption", "wep-open");
 			dmuci_set_value_by_section(section, "key", "1");
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "none");
 		} else if (strcmp(value, "WEP-128") == 0) {
 			char key[16], buf[27];
 			int i;
@@ -1816,38 +1825,63 @@ static void set_security_mode(struct uci_section *section, char *value)
 			}
 			dmuci_set_value_by_section(section, "encryption", "wep-open");
 			dmuci_set_value_by_section(section, "key", "1");
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "none");
 		} else if (strcmp(value, "WPA-Personal") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "psk");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "psk");
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
 		} else if (strcmp(value, "WPA-Enterprise") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "wpa");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "wpa");
 		} else if (strcmp(value, "WPA2-Personal") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "psk2");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
 			dmuci_set_value_by_section(section, "wps", "1");
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "psk2");
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
 		} else if (strcmp(value, "WPA2-Enterprise") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "wpa2");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "wpa2");
 		} else if (strcmp(value, "WPA-WPA2-Personal") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "psk-mixed");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
 			dmuci_set_value_by_section(section, "wps", "1");
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "psk-mixed");
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
 		} else if (strcmp(value, "WPA-WPA2-Enterprise") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "wpa-mixed");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "wpa-mixed");
 		} else if (strcmp(value, "WPA3-Personal") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "sae");
 			dmuci_set_value_by_section(section, "key", wpa_key);
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "sae");
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
 		} else if (strcmp(value, "WPA3-Enterprise") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "wpa3");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "wpa");
 		} else if (strcmp(value, "WPA3-Personal-Transition") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "sae-mixed");
 			dmuci_set_value_by_section(section, "key", wpa_key);
+
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "sae-mixed");
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
 		}
 	}
 }
@@ -1877,7 +1911,7 @@ static int set_access_point_security_modes(char *refparam, struct dmctx *ctx, vo
 
 			return 0;
 		case VALUESET:
-			set_security_mode((((struct wifi_acp_args *)data)->sections)->config_section, value);
+			set_security_mode((((struct wifi_acp_args *)data)->sections)->config_section, value, false);
 			return 0;
 	}
 	return 0;
@@ -2467,7 +2501,7 @@ static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 
 			return 0;
 		case VALUESET:
-			set_security_mode((struct uci_section *)data, value);
+			set_security_mode((struct uci_section *)data, value, true);
 			return 0;
 	}
 	return 0;
