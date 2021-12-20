@@ -21,7 +21,7 @@
 /**
  * \file libbbf_api.h
  *
- * This Library provides APIs for UCI, UBUS, JSON and memory management.
+ * This Library provides APIs, structures and macros for UCI, UBUS, JSON and memory management to interface with data model from dmtree.
  */
 
 #ifndef __LIBBBF_API_H__
@@ -38,32 +38,84 @@
  * BBF UCI API
  *
  ******************/
-
+ 
+ 
+/*********************************************************************//**
+**
+** bbf_uci_foreach_sections
+**
+** This macro is used to parse through each of the section in the given uci package
+** \param   package - uci package name
+** \param   stype - section type name
+** \param   section - pointer to uci_section
+ *********************************************************************************/
 #define bbf_uci_foreach_sections(package, stype, section) \
 	for (section = bbf_uci_walk_section(package, stype, NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION); \
 		section != NULL; \
 		section = bbf_uci_walk_section(package, stype, NULL, NULL, CMP_SECTION, NULL, section, GET_NEXT_SECTION))
-
+/*********************************************************************//**
+**
+** bbf_uci_foreach_sections_safe
+**
+** This macro is used to parse through each of the section in the given uci package.
+** in addition to what bbf_uci_foreach_sections does, it checks the value of the section before
+** assigning
+** \param   package - uci package name
+** \param   stype - section type name
+** \param   section - pointer to uci_section
+**************************************************************************/
 #define bbf_uci_foreach_sections_safe(package, stype, _tmp, section) \
 	for (section = bbf_uci_walk_section(package, stype, NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION), \
 		_tmp = (section) ? bbf_uci_walk_section(package, stype, NULL, NULL, CMP_SECTION, NULL, section, GET_NEXT_SECTION) : NULL;	\
 		section != NULL; \
 		section = _tmp, _tmp = (section) ? bbf_uci_walk_section(package, stype, NULL, NULL, CMP_SECTION, NULL, section, GET_NEXT_SECTION) : NULL)
-
+/*********************************************************************//**
+**
+** bbf_uci_foreach_option_eq
+**
+** This macro is used to parse through each of the options available in the 
+** given section of the uci package
+**************************************************************************/
 #define bbf_uci_foreach_option_eq(package, stype, option, val, section) \
 	for (section = bbf_uci_walk_section(package, stype, option, val, CMP_OPTION_EQUAL, NULL, NULL, GET_FIRST_SECTION); \
 		section != NULL; \
 		section = bbf_uci_walk_section(package, stype, option, val, CMP_OPTION_EQUAL, NULL, section, GET_NEXT_SECTION))
-
+/*********************************************************************//**
+**
+** bbf_uci_foreach_option_eq_safe
+**
+** This macro is used to parse through each of the options available in the 
+** given section of the uci package, in addition to what bbf_uci_foreach_option_eq 
+** does, it checks the value of the options before assigning
+**************************************************************************/
 #define bbf_uci_foreach_option_eq_safe(package, stype, option, val, _tmp, section) \
 	for (section = bbf_uci_walk_section(package, stype, option, val, CMP_OPTION_EQUAL, NULL, NULL, GET_FIRST_SECTION), \
 		_tmp = (section) ? bbf_uci_walk_section(package, stype, option, val, CMP_OPTION_EQUAL, NULL, section, GET_NEXT_SECTION) : NULL;	\
 		section != NULL; \
 		section = _tmp, _tmp = (section) ? bbf_uci_walk_section(package, stype, option, val, CMP_OPTION_EQUAL, NULL, section, GET_NEXT_SECTION) : NULL)
 
+/*********************************************************************//**
+**
+** section_name
+**
+** This macro is used to get the name of the given section 
+**************************************************************************/
 #define section_name(s) s ? (s)->e.name : ""
+/*********************************************************************//**
+**
+** section_type
+**
+** This macro is used to get the type of the given section 
+**************************************************************************/
 #define section_type(s) s ? (s)->type : ""
+/*********************************************************************//**
+**
+** section_config
+**
+** This macro is used to get the package name of the given section 
+**************************************************************************/
 #define section_config(s) s ? (s)->package->e.name : ""
+
 
 
 /*********************************************************************//**
@@ -243,7 +295,7 @@ struct uci_section *bbf_uci_walk_section(char *package, char *type, void *arg1, 
 
 /*******************
  *
- * BBF UBUS API
+ * BBF UBUS API 
  *
  ******************/
 

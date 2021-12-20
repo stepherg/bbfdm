@@ -8,6 +8,7 @@ stages:
     - functional_test
     - libbbf_ubus_test
     - memory_test
+    - doxygen
     - uspd
 
 variables:
@@ -102,6 +103,20 @@ run_memory_test:
           - timestamp.log
           - memory-test-coverage.xml
           - bbf_out.zip
+
+doxygen:
+  stage: unit_test
+  image: iopsys/code-analysis:latest
+  before_script:
+      - apt update
+      - apt --assume-yes install doxygen
+      - apt --assume-yes install doxygen graphviz
+  script:
+      - doxygen Doxyfile
+  artifacts:
+      when: always
+      paths:
+          - docs/doxygen
 
 run_uspd:
   stage: uspd
