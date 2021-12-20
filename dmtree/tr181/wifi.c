@@ -1942,7 +1942,8 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 
 static int set_access_point_security_shared_key(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *encryption;
+	struct uci_section *map_ssid_s = NULL;
+	char *encryption = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1951,8 +1952,14 @@ static int set_access_point_security_shared_key(char *refparam, struct dmctx *ct
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "encryption", &encryption);
-			if (strstr(encryption, "psk"))
+			if (strstr(encryption, "psk")) {
 				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "key", value);
+
+				// mapcontroller config: Update the corresponding fronthaul ssid section if exist
+				map_ssid_s = find_mapcontroller_ssid_section((((struct wifi_acp_args *)data)->sections)->config_section);
+				if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", value);
+			}
+
 			return 0;
 	}
 	return 0;
@@ -2004,7 +2011,8 @@ static int set_access_point_security_rekey_interval(char *refparam, struct dmctx
 /*#Device.WiFi.AccessPoint.{i}.Security.SAEPassphrase!UCI:wireless/wifi-iface,@i-1/key*/
 static int set_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *encryption;
+	struct uci_section *map_ssid_s = NULL;
+	char *encryption = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -2013,8 +2021,13 @@ static int set_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmct
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "encryption", &encryption);
-			if (strstr(encryption, "sae"))
+			if (strstr(encryption, "sae")) {
 				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "key", value);
+
+				// mapcontroller config: Update the corresponding fronthaul ssid section if exist
+				map_ssid_s = find_mapcontroller_ssid_section((((struct wifi_acp_args *)data)->sections)->config_section);
+				if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", value);
+			}
 			break;
 	}
 	return 0;
