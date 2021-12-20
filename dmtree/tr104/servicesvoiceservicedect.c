@@ -54,8 +54,16 @@ static int browseServicesVoiceServiceDECTPortableInst(struct dmctx *dmctx, DMNOD
 		int id = 0, i = 0;
 
 		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "handsets") {
+			char *str_id = dmjson_get_value(obj, 1, "id");
 
-			inst = handle_instance_without_section(dmctx, parent_node, ++id);
+			/* Use the id from the UBUS call if it is found */
+			if (str_id && *str_id) {
+				id = atoi(str_id);
+			} else {
+				id++;
+			}
+
+			inst = handle_instance_without_section(dmctx, parent_node, id);
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
 				break;
