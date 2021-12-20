@@ -114,12 +114,12 @@ static inline int init_wifi_enp(struct wifi_enp_args *args, struct dmmap_dup *s,
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
-static char *get_radio_option_nocache(const struct wifi_radio_args *args, char *option)
+static char *get_radio_option_nocache(const char *device_name, char *option)
 {
 	json_object *res = NULL;
 	char object[32];
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(args->sections->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", device_name);
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 
 	return (res) ? dmjson_get_value(res, 1, option) : "";
@@ -266,6 +266,46 @@ static void wifi_start_scan(const char *radio)
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", radio);
 	dmubus_call_set(object, "scan", UBUS_ARGS{0}, 0);
+}
+
+struct uci_section *find_mapcontroller_ssid_section(struct uci_section *wireless_ssid_s)
+{
+	struct uci_section *s = NULL;
+	char *multi_ap = NULL;
+	char *network = NULL;
+	char *device = NULL;
+	char *ssid = NULL;
+	char *band = NULL;
+
+	if (!file_exists("/etc/config/mapcontroller"))
+		return NULL;
+
+	dmuci_get_value_by_section_string(wireless_ssid_s, "multi_ap", &multi_ap);
+	if (strcmp(multi_ap, "2") != 0)
+		return NULL;
+
+	dmuci_get_value_by_section_string(wireless_ssid_s, "network", &network);
+	dmuci_get_value_by_section_string(wireless_ssid_s, "ssid", &ssid);
+	dmuci_get_value_by_section_string(wireless_ssid_s, "device", &device);
+	band = get_radio_option_nocache(device, "band");
+
+	uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
+		char *curr_ssid = NULL;
+		char *curr_band = NULL;
+		char *curr_network = NULL;
+
+		dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
+		dmuci_get_value_by_section_string(s, "band", &curr_band);
+		dmuci_get_value_by_section_string(s, "network", &curr_network);
+
+		if (strcmp(network, curr_network) == 0 &&
+			strcmp(curr_ssid, ssid) == 0 &&
+			curr_band[0] == band[0]) {
+			return s;
+		}
+	}
+
+	return NULL;
 }
 
 /*************************************************************
@@ -1056,7 +1096,6 @@ static int get_wifi_status (char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
-
 /*#Device.WiFi.SSID.{i}.SSID!UCI:wireless/wifi-iface,@i-1/ssid*/
 static int get_wlan_ssid(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1066,13 +1105,21 @@ static int get_wlan_ssid(char *refparam, struct dmctx *ctx, void *data, char *in
 
 static int set_wlan_ssid(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *map_ssid_s = NULL;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 32, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			// mapcontroller config: Update the corresponding fronthaul ssid section if exist
+			map_ssid_s = find_mapcontroller_ssid_section((((struct wifi_ssid_args *)data)->sections)->config_section);
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "ssid", value);
+
+			// wireless config: Update ssid option
 			dmuci_set_value_by_section((((struct wifi_ssid_args *)data)->sections)->config_section, "ssid", value);
+
 			return 0;
 	}
 	return 0;
@@ -1504,7 +1551,7 @@ static int set_radio_auto_channel_enable(char *refparam, struct dmctx *ctx, void
 			if (b)
 				value = "auto";
 			else
-				value = get_radio_option_nocache(data, "channel");
+				value = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "channel");
 
 			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "channel", value);
 			return 0;
@@ -3335,7 +3382,7 @@ static int get_WiFiRadio_CurrentOperatingChannelBandwidth(char *refparam, struct
 /*#Device.WiFi.Radio.{i}.SupportedStandards!UBUS:wifi.radio.@Name/status//standard*/
 static int get_radio_supported_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *freq = get_radio_option_nocache(data, "band");
+	char *freq = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "band");
 	*value = (freq && *freq == '5') ? "a,n,ac,ax" : "b,g,n,ax";
 	return 0;
 }
@@ -3392,7 +3439,7 @@ static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void 
 					freq = !strcmp(curr_htmode, "NOHT") ? 20 : freq;
 				}
 
-				band = get_radio_option_nocache(data, "band");
+				band = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "band");
 
 				if (strcmp(band, "5GHz") == 0) {
 					if (strstr(value, "ax"))
