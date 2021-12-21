@@ -111,7 +111,7 @@ doxygen:
 
   script:
     - doxygen Doxyfile
-    - mv doxygen/documentation/html/ public/
+    - mv doxygen/html/ public/
 
   artifacts:
     paths:
