@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <syslog.h>
 #include <libubox/list.h>
 #include <json-c/json.h>
 #include "dmuci.h"
@@ -81,9 +82,7 @@ static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, voi
 
 #ifndef TRACE
 #define TRACE(MESSAGE, ...) do { \
-	fprintf(stderr, "TRACE: %s@%s:%d " MESSAGE, __FUNCTION__,__FILE__,__LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
-	fprintf(stderr, "\n"); \
-	fflush(stderr); \
+	syslog(LOG_INFO, "[%s:%d] " MESSAGE, __FUNCTION__,__LINE__, ##__VA_ARGS__); \
 } while(0)
 #endif
 
