@@ -107,7 +107,7 @@ doxygen:
   image: iopsys/code-analysis:latest
   before_script:
       - apt update
-      - apt --assume-yes install doxygen graphviz ttf-freefont
+      - apt --assume-yes install doxygen graphviz
 
   script:
     - doxygen Doxyfile
