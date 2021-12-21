@@ -221,6 +221,17 @@ static void add_port_to_bridge_section(struct uci_section *br_sec, char *device_
 		dmuci_add_list_value_by_section(br_sec, "ports", device_port);
 }
 
+static void replace_existing_port_to_bridge_section(struct uci_section *br_sec, char *new_port, char* existing_port)
+{
+	struct uci_list *uci_list = NULL;
+
+	dmuci_get_value_by_section_list(br_sec, "ports", &uci_list);
+	if (value_exists_in_uci_list(uci_list, existing_port)) {
+		dmuci_del_list_value_by_section(br_sec, "ports", existing_port);
+		dmuci_add_list_value_by_section(br_sec, "ports", new_port);
+	}
+}
+
 static void remove_port_from_bridge_section(struct uci_section *br_sec, char *device_port)
 {
 	struct uci_list *uci_list = NULL;
@@ -2183,8 +2194,16 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 				set_lowerlayers_management_port(ctx, data, value);
 			} else {
 				/* Management Port ==> false */
+				bool is_wireless_config = false;
 
 				adm_entry_get_linker_value(ctx, value, &linker);
+
+				// Update config section on dmmap_bridge_port if the linker is wirelss port or network port
+				if (strncmp(value, "Device.WiFi.SSID.", 17) == 0) {
+					dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "config", "wireless");
+					is_wireless_config = true;
+				} else
+					dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "config", "network");
 
 				struct uci_section *dmmap_bridge_s = NULL;
 				char *port_device;
@@ -2209,7 +2228,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 					update_device_management_port(section_name(((struct bridge_port_args *)data)->bridge_port_dmmap_sec), linker, ((struct bridge_port_args *)data)->br_inst);
 				} else {
 					char *tag = strchr(port_device, '.');
-					if (tag) {
+					if (tag && !is_wireless_config) {
 						char *cur_vid = dmstrdup(tag+1);
 						char new_name[32] = {0};
 
@@ -2249,7 +2268,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 
 						// dmmap_bridge: add port to ports list
 						get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
-						add_port_to_bridge_section(dmmap_bridge_s, new_name);
+						replace_existing_port_to_bridge_section(dmmap_bridge_s, new_name, port_device);
 
 						// Update port option in dmmap
 						dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "port", new_name);
@@ -2259,10 +2278,12 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 						// Remove port from ports list network/device
 						remove_port_from_bridge_section(((struct bridge_port_args *)data)->bridge_sec, port_device);
 
-						// Check if there is a vlan port pointed at me
-						char *new_linker = NULL;
-						update_vlanport_and_device_section(data, linker, &new_linker);
-						if (new_linker) linker = new_linker;
+						if (!is_wireless_config) {
+							// Check if there is a vlan port pointed at me
+							char *new_linker = NULL;
+							update_vlanport_and_device_section(data, linker, &new_linker);
+							if (new_linker) linker = new_linker;
+						}
 
 						// Add new port to ports list network/device
 						add_port_to_bridge_section(((struct bridge_port_args *)data)->bridge_sec, linker);
@@ -2272,7 +2293,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 
 						// dmmap_bridge: add port to ports list
 						get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
-						add_port_to_bridge_section(dmmap_bridge_s, linker);
+						replace_existing_port_to_bridge_section(dmmap_bridge_s, linker, port_device);
 
 						update_device_management_port(port_device, linker, ((struct bridge_port_args *)data)->br_inst);
 					}
