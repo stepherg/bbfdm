@@ -547,7 +547,7 @@ static int set_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx,
 			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_dport", &src_dport);
 			src_dport = src_dport ? strchr(src_dport, ':') : NULL;
 			if (src_dport == NULL)
-				snprintf(buffer, sizeof(buffer), "%s:0", value);
+				snprintf(buffer, sizeof(buffer), "%s", value);
 			else
 				snprintf(buffer, sizeof(buffer), "%s%s", value, src_dport);
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_dport", buffer);
@@ -581,7 +581,7 @@ static int set_nat_port_mapping_external_port_end_range(char *refparam, struct d
 			if (tmp)
 				*tmp = '\0';
 
-			if (!tmp || (src_dport[0] == '\0'))
+			if ((src_dport[0] == '\0'))
 				snprintf(buffer, sizeof(buffer), "%s:%s", "0", value);
 			else
 				snprintf(buffer, sizeof(buffer), "%s:%s", src_dport, value);
