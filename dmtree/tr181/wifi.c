@@ -1796,6 +1796,7 @@ static void set_security_mode(struct uci_section *section, char *value, bool is_
 		// Only reset the wlan key section if its belongs to different group
 		if (is_different_group(value, mode))
 			reset_wlan(section);
+		dmuci_set_value_by_section(section, "ieee80211w", "0");
 
 		if (strcmp(value, "None") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "none");
@@ -1844,12 +1845,14 @@ static void set_security_mode(struct uci_section *section, char *value, bool is_
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
 			dmuci_set_value_by_section(section, "wps", "1");
+			dmuci_set_value_by_section(section, "ieee80211w", "1");
 
 			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "psk2");
 			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
 		} else if (strcmp(value, "WPA2-Enterprise") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "wpa2");
 			dmuci_set_value_by_section(section, "auth_port", "1812");
+			dmuci_set_value_by_section(section, "ieee80211w", "1");
 
 			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "wpa2");
 		} else if (strcmp(value, "WPA-WPA2-Personal") == 0) {
@@ -1868,6 +1871,7 @@ static void set_security_mode(struct uci_section *section, char *value, bool is_
 		} else if (strcmp(value, "WPA3-Personal") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "sae");
 			dmuci_set_value_by_section(section, "key", wpa_key);
+			dmuci_set_value_by_section(section, "ieee80211w", "2");
 
 			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "sae");
 			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
@@ -1879,6 +1883,7 @@ static void set_security_mode(struct uci_section *section, char *value, bool is_
 		} else if (strcmp(value, "WPA3-Personal-Transition") == 0) {
 			dmuci_set_value_by_section(section, "encryption", "sae-mixed");
 			dmuci_set_value_by_section(section, "key", wpa_key);
+			dmuci_set_value_by_section(section, "ieee80211w", "1");
 
 			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "sae-mixed");
 			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
@@ -2115,6 +2120,67 @@ static int get_WiFiAccessPointSecurity_MFPConfig(char *refparam, struct dmctx *c
 	return 0;
 }
 
+static void get_cipher(char *encryption, bool *aes, bool *sae, bool *tkip)
+{
+	char *token = NULL, *saveptr = NULL;
+
+	for (token = strtok_r(encryption, "+", &saveptr); token; token = strtok_r(NULL, "+", &saveptr)) {
+
+		if (strcmp(token, "aes") == 0)
+			*aes = true;
+
+		if (strcmp(token, "sae") == 0)
+			*sae = true;
+
+		if (strcmp(token, "tkip") == 0)
+			*tkip = true;
+	}
+}
+
+
+static int validate_mfp_config(struct uci_section *section, const char *value)
+{
+	char *encryption = NULL;
+	char *mode = NULL;
+
+	bool aes = false, sae = false, tkip = false;
+
+	if (!value || *value == '\0')
+		return -1;
+
+	mode = get_security_mode(section);
+	if (!mode || *mode == '\0')
+		return -1;
+
+	dmuci_get_value_by_section_string(section, "encryption", &encryption);
+	if (!encryption || *encryption == '\0')
+		return -1;
+
+	/*Here we get which cipher is true*/
+	get_cipher(encryption, &aes, &sae, &tkip);
+
+	if ((strcmp(mode, "WPA3-Personal")) == 0) {
+		if ((sae == true || aes == true) && (tkip == false) && (strcmp(value, "Required") == 0))
+			return 0;
+		else
+			return -1;
+	} else if (strcmp(mode, "WPA2-Personal") == 0) {
+		if ((aes == true) && (tkip == false) && (strcmp(value, "Optional") == 0))
+			return 0;
+		else
+			return -1;
+
+	} else if (strcmp(mode, "WPA3-Personal-Transition") == 0) {
+		if ((sae == true || aes == true) && (tkip == false) && (strcmp(value, "Optional") == 0))
+			return 0;
+		else
+			return -1;
+	} else if (strcmp(value, "Disabled") == 0)
+		return 0;
+	else
+		return -1;
+}
+
 static int set_WiFiAccessPointSecurity_MFPConfig(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char buf[2];
@@ -2123,6 +2189,11 @@ static int set_WiFiAccessPointSecurity_MFPConfig(char *refparam, struct dmctx *c
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, MFPConfig, NULL))
 				return FAULT_9007;
+
+			/*Here we also need to validate the encyption algo whether the MFP can be set*/
+			if (validate_mfp_config((((struct wifi_acp_args *)data)->sections)->config_section, value))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			if (strcmp(value, "Disabled") == 0)
