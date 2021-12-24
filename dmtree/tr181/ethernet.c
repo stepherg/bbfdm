@@ -322,10 +322,7 @@ static int browseEthernetRMONStatsInst(struct dmctx *dmctx, DMNODE *parent_node,
 **************************************************************/
 static int get_linker_interface(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	if (data && ((struct eth_port_args *)data)->ifname)
-		*linker = ((struct eth_port_args *)data)->ifname;
-	else
-		*linker = "";
+	*linker = data ? ((struct eth_port_args *)data)->ifname : "";
 	return 0;
 }
 
@@ -333,7 +330,7 @@ static int get_linker_link(char *refparam, struct dmctx *dmctx, void *data, char
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "device", linker);
 	if ((*linker)[0] == '\0')
-		dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", linker);
+		dmuci_get_value_by_section_string((struct uci_section *)data, "linker", linker);
 	return 0;
 }
 
@@ -349,13 +346,13 @@ static int get_linker_vlan_term(char *refparam, struct dmctx *dmctx, void *data,
 static int addObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *dmmap_link = NULL;
-	char interface_name[32];
+	char eth_linker[32];
 
-	snprintf(interface_name, sizeof(interface_name), "link_%s", *instance);
+	snprintf(eth_linker, sizeof(eth_linker), "link_%s", *instance);
 
 	/* Add link section in dmmap file */
 	dmuci_add_section_bbfdm(DMMAP, "link", &dmmap_link);
-	dmuci_set_value_by_section(dmmap_link, "section_name", interface_name);
+	dmuci_set_value_by_section(dmmap_link, "linker", eth_linker);
 	dmuci_set_value_by_section(dmmap_link, "link_instance", *instance);
 	return 0;
 }
@@ -857,34 +854,33 @@ static int get_EthernetLink_Enable(char *refparam, struct dmctx *ctx, void *data
 static int set_EthernetLink_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
-        char *int_name;
-        struct uci_section *s = NULL;
+	char *int_name;
+	struct uci_section *s = NULL;
 
-        switch (action) {
-                case VALUECHECK:
-                        if (dm_validate_boolean(value))
-                                return FAULT_9007;
-                        break;
-                case VALUESET:
-		        string_to_bool(value, &b);
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &int_name);
 			s = get_origin_section_from_config("network", "interface", int_name);
-                        dmuci_set_value_by_section(s, "disabled", b ? "0" : "1");
-                        break;
-			}
-        return 0;
-
+			dmuci_set_value_by_section(s, "disabled", b ? "0" : "1");
+			break;
+	}
+	return 0;
 }
 
 static int get_EthernetLink_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-       char *interface_name = NULL, *dev_name = NULL;
-       struct uci_section *s = NULL;
+	char *interface_name = NULL, *dev_name = NULL;
+	struct uci_section *s = NULL;
 
-       dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &interface_name);
-       s = get_origin_section_from_config("network", "interface", interface_name);
-       dmuci_get_value_by_section_string(s, "device", &dev_name);
-       return get_net_device_status(dev_name, value);
+	dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &interface_name);
+	s = get_origin_section_from_config("network", "interface", interface_name);
+	dmuci_get_value_by_section_string(s, "device", &dev_name);
+	return get_net_device_status(dev_name, value);
 }
 
 static int get_EthernetLink_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -996,15 +992,17 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 					char br_inst[8] = {0};
 					char device[32] = {0};
 					char *int_name = NULL;
+					char *linker = NULL;
 					char *dev_s_name = NULL;
 
 					*bridge = '\0';
 					DM_STRNCPY(br_inst, br_linker+3, sizeof(br_inst));
 
 					dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &int_name);
+					dmuci_get_value_by_section_string((struct uci_section *)data, "linker", &linker);
 
 					//Generate the device name for bridge as br-<NETWORK>
-					snprintf(device, sizeof(device), "br-%s", int_name ? int_name : "");
+					snprintf(device, sizeof(device), "br-%s", (int_name && *int_name) ? int_name : linker);
 
 					uci_foreach_sections("network", "interface", s) {
 						if (int_name && strcmp(section_name(s), int_name) == 0) {

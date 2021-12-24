@@ -82,7 +82,7 @@ static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, voi
 
 #ifndef TRACE
 #define TRACE(MESSAGE, ...) do { \
-	syslog(LOG_INFO, "[%s:%d] " MESSAGE, __FUNCTION__,__LINE__, ##__VA_ARGS__); \
+	syslog(LOG_INFO, "[%s:%d] " MESSAGE, __FUNCTION__,__LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
 } while(0)
 #endif
 
