@@ -3138,9 +3138,9 @@ static int get_WiFiAccessPointAssociatedDevice_MACAddress(char *refparam, struct
 static int get_WiFiAccessPointAssociatedDevice_LastDataDownlinkRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *rate_mbps = dmjson_get_value((json_object *)data, 3, "stats", "rx_rate_latest", "rate");
-	unsigned int rate_kbps = (rate_mbps && *rate_mbps != '\0') ? atoi(rate_mbps) * 1000 : 1000;
+	float rate_kbps = (rate_mbps && *rate_mbps != '\0') ? atof(rate_mbps) * 1000 : 1000;
 
-	dmasprintf(value, "%u", rate_kbps);
+	dmasprintf(value, "%u", (unsigned int)rate_kbps);
 	return 0;
 }
 
@@ -3148,9 +3148,9 @@ static int get_WiFiAccessPointAssociatedDevice_LastDataDownlinkRate(char *refpar
 static int get_WiFiAccessPointAssociatedDevice_LastDataUplinkRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *rate_mbps = dmjson_get_value((json_object *)data, 3, "stats", "tx_rate_latest", "rate");
-	unsigned int rate_kbps = (rate_mbps && *rate_mbps != '\0') ? atoi(rate_mbps) * 1000 : 1000;
+	float rate_kbps = (rate_mbps && *rate_mbps != '\0') ? atof(rate_mbps) * 1000 : 1000;
 
-	dmasprintf(value, "%u", rate_kbps);
+	dmasprintf(value, "%u", (unsigned int)rate_kbps);
 	return 0;
 }
 
