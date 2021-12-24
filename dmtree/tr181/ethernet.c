@@ -850,7 +850,7 @@ static int get_EthernetLink_Enable(char *refparam, struct dmctx *ctx, void *data
 	dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &int_name);
 	s = get_origin_section_from_config("network", "interface", int_name);
 	dmuci_get_value_by_section_string(s, "disabled", value);
-	*value = (strcmp(*value, "1") == 0) ? "False" : "True";
+	*value = (strcmp(*value, "1") == 0) ? "0" : "1";
 	return 0;
 }
 
