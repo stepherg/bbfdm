@@ -179,32 +179,16 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst(
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(device, arrobj, non1905_neighbor, i, 1, "non1905_neighbors") {
-		json_object *neighbor_arr = NULL;
+		json_object *neighbor_val = NULL;
+		char *neighbor = NULL;
+		int j = 0;
 
 		curr_nonieee1905neighbor_args.mac_addr = dmjson_get_value(non1905_neighbor, 1, "interface_macaddress");
-		json_object_object_get_ex(non1905_neighbor, "neighbors", &neighbor_arr);
-
-		if (neighbor_arr &&
-			json_object_get_type(neighbor_arr) == json_type_array &&
-			json_object_array_length(neighbor_arr) != 0) {
-
-			json_object *neighbor_val = NULL;
-			char *neighbor = NULL;
-			int j = 0;
-
-			dmjson_foreach_value_in_array(non1905_neighbor, neighbor_val, neighbor, j, 1, "neighbors") {
-				curr_nonieee1905neighbor_args.neighbor = neighbor;
-				inst = handle_instance_without_section(dmctx, parent_node, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_nonieee1905neighbor_args, inst) == DM_STOP)
-					break;
-			}
-
-		} else {
-			curr_nonieee1905neighbor_args.neighbor = NULL;
+		dmjson_foreach_value_in_array(non1905_neighbor, neighbor_val, neighbor, j, 1, "neighbors") {
+			curr_nonieee1905neighbor_args.neighbor = neighbor;
 			inst = handle_instance_without_section(dmctx, parent_node, ++id);
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_nonieee1905neighbor_args, inst) == DM_STOP)
 				break;
-
 		}
 	}
 	return 0;
