@@ -364,6 +364,16 @@ static int delete_ip_intertace_instance(struct uci_section *s)
 			dmuci_delete_by_section(ss, NULL, NULL);
 		}
 
+		/* Remove "DHCPv4.Client.{i}.ReqOption." sections related to this "IP.Interface." object */
+		uci_path_foreach_option_eq_safe(bbfdm, "dmmap_dhcp_client", "req_option", "section_name", section_name(int_ss), stmp, ss) {
+			dmuci_delete_by_section(ss, NULL, NULL);
+		}
+
+		/* Remove "DHCPv4.Client.{i}.SentOption." sections related to this "IP.Interface." object */
+		uci_path_foreach_option_eq_safe(bbfdm, "dmmap_dhcp_client", "send_option", "section_name", section_name(int_ss), stmp, ss) {
+			dmuci_delete_by_section(ss, NULL, NULL);
+		}
+
 		/* remove interface section */
 		dmuci_delete_by_section(int_ss, NULL, NULL);
 
