@@ -320,7 +320,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.UBUS_TEST_V1.InterfaceNumberOfEntries", "4", "xsd:unsignedInt");
+	validate_parameter(ctx, "Device.UBUS_TEST_V1.InterfaceNumberOfEntries", "10", "xsd:unsignedInt");
 
 	// set value ==> expected "9008" error
 	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UBUS_TEST_V1.InterfaceNumberOfEntries", "5", NULL);
@@ -331,7 +331,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.UBUS_TEST_V1.Interface.3.MacAddress", "44:d4:37:71:b8:1f", "xsd:string");
+	validate_parameter(ctx, "Device.UBUS_TEST_V1.Interface.3.MacAddress", "60:8d:26:c4:96:f7", "xsd:string");
 
 	// set value ==> expected "9008" error
 	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UBUS_TEST_V1.Interface.3.MacAddress", "49:d4:40:71:7e:55", NULL);
@@ -342,7 +342,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.UBUS_TEST_V1.Interface.4.Ifname", "wl1", "xsd:string");
+	validate_parameter(ctx, "Device.UBUS_TEST_V1.Interface.4.Ifname", "eth4", "xsd:string");
 
 	// set value ==> expected "9008" error
 	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UBUS_TEST_V1.Interface.4.Ifname", "lan5", NULL);

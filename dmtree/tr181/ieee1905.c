@@ -12,6 +12,12 @@
 #include "dmentry.h"
 #include "ieee1905.h"
 
+struct ieee1905_device_nonieee1905neighbor_args
+{
+	char *mac_addr;
+	char *neighbor;
+};
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -168,13 +174,38 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceInterfaceInst(struct dmc
 static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *arrobj = NULL, *non1905_neighbor = NULL, *device = (json_object *)prev_data;
+	struct ieee1905_device_nonieee1905neighbor_args curr_nonieee1905neighbor_args = {0};
 	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmjson_foreach_obj_in_array(device, arrobj, non1905_neighbor, i, 1, "non1905_neighbors") {
-		inst = handle_instance_without_section(dmctx, parent_node, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)non1905_neighbor, inst) == DM_STOP)
-			break;
+		json_object *neighbor_arr = NULL;
+
+		curr_nonieee1905neighbor_args.mac_addr = dmjson_get_value(non1905_neighbor, 1, "interface_macaddress");
+		json_object_object_get_ex(non1905_neighbor, "neighbors", &neighbor_arr);
+
+		if (neighbor_arr &&
+			json_object_get_type(neighbor_arr) == json_type_array &&
+			json_object_array_length(neighbor_arr) != 0) {
+
+			json_object *neighbor_val = NULL;
+			char *neighbor = NULL;
+			int j = 0;
+
+			dmjson_foreach_value_in_array(non1905_neighbor, neighbor_val, neighbor, j, 1, "neighbors") {
+				curr_nonieee1905neighbor_args.neighbor = neighbor;
+				inst = handle_instance_without_section(dmctx, parent_node, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_nonieee1905neighbor_args, inst) == DM_STOP)
+					break;
+			}
+
+		} else {
+			curr_nonieee1905neighbor_args.neighbor = NULL;
+			inst = handle_instance_without_section(dmctx, parent_node, ++id);
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_nonieee1905neighbor_args, inst) == DM_STOP)
+				break;
+
+		}
 	}
 	return 0;
 }
@@ -1112,7 +1143,8 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905Device_InterfaceNumberOfEntries(
 /*#Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.NonIEEE1905NeighborNumberOfEntries!UBUS:ieee1905/info//topology.device[@i-1].num_neighbor_non1905*/
 static int get_IEEE1905ALNetworkTopologyIEEE1905Device_NonIEEE1905NeighborNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "num_neighbor_non1905");
+	int cnt = get_number_of_entries(ctx, data, instance, browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -1347,7 +1379,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex2(
 /*#Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.NonIEEE1905Neighbor.{i}.LocalInterface!UBUS:ieee1905/info//topology.device[@i-1].non1905_neighbors[@i-1].interface_macaddress*/
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_LocalInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = dmjson_get_value((json_object *)data, 1, "interface_macaddress");
+	char *linker = ((struct ieee1905_device_nonieee1905neighbor_args *)data)->mac_addr;
 	adm_entry_get_linker_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", linker, value);
 	if (*value == NULL)
 		*value = "";
@@ -1357,7 +1389,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_LocalI
 /*#Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.NonIEEE1905Neighbor.{i}.NeighborInterfaceId!UBUS:ieee1905/info//topology.device[@i-1].non1905_neighbors[@i-1].neighbors*/
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_NeighborInterfaceId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value_array_all((json_object *)data, ",", 1, "neighbors");
+	*value = (data && ((struct ieee1905_device_nonieee1905neighbor_args *)data)->neighbor) ? ((struct ieee1905_device_nonieee1905neighbor_args *)data)->neighbor : "";
 	return 0;
 }
 
