@@ -33,8 +33,7 @@ static int get_voice_service_callcontrol_linker(char *refparam, struct dmctx *dm
 **************************************************************/
 static int set_CallControl_Line(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char callcontrol_line[64] = "Device.Services.VoiceService.1.CallControl.Line.";
-	size_t line_len = strlen(callcontrol_line);
+	char *allowed_objects[] = {"Device.Services.VoiceService.1.CallControl.Line.", NULL};
 	char *linker = NULL;
 
 	switch (action)	{
@@ -42,16 +41,13 @@ static int set_CallControl_Line(char *refparam, struct dmctx *ctx, void *data, c
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (strncmp(value, callcontrol_line, line_len) != 0)
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "line", linker);
-				dmfree(linker);
-			}
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "line", linker ? linker : "");
 			break;
 	}
 	return 0;
@@ -59,8 +55,7 @@ static int set_CallControl_Line(char *refparam, struct dmctx *ctx, void *data, c
 
 static int set_CallControl_Group(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char callcontrol_extension[64] = "Device.Services.VoiceService.1.CallControl.Group.";
-	size_t extension_len = strlen(callcontrol_extension);
+	char *allowed_objects[] = {"Device.Services.VoiceService.1.CallControl.Group.", NULL};
 	char *linker = NULL;
 
 	switch (action) {
@@ -68,16 +63,13 @@ static int set_CallControl_Group(char *refparam, struct dmctx *ctx, void *data, 
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (strncmp(value, callcontrol_extension, extension_len) != 0)
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "extension", linker);
-				dmfree(linker);
-			}
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "extension", linker ? linker : "");
 			break;
 	}
 	return 0;
@@ -85,8 +77,7 @@ static int set_CallControl_Group(char *refparam, struct dmctx *ctx, void *data, 
 
 static int set_CallControl_CallingFeaturesSet(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char feature_set[64] = "Device.Services.VoiceService.1.CallControl.CallingFeatures.Set.";
-	size_t set_len = strlen(feature_set);
+	char *allowed_objects[] = {"Device.Services.VoiceService.1.CallControl.CallingFeatures.Set.", NULL};
 	char *linker = NULL;
 
 	switch (action) {
@@ -94,16 +85,13 @@ static int set_CallControl_CallingFeaturesSet(char *refparam, struct dmctx *ctx,
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (strncmp(value, feature_set, set_len) != 0)
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "calling_features", linker);
-				dmfree(linker);
-			}
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "calling_features", linker ? linker : "");
 			break;
 	}
 	return 0;
@@ -111,8 +99,7 @@ static int set_CallControl_CallingFeaturesSet(char *refparam, struct dmctx *ctx,
 
 static int set_SIP_Client(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char sip_client[64] = "Device.Services.VoiceService.1.SIP.Client.";
-	size_t client_len = strlen(sip_client);
+	char *allowed_objects[] = {"Device.Services.VoiceService.1.SIP.Client.", NULL};
 	char *linker = NULL;
 
 	switch (action)	{
@@ -120,16 +107,13 @@ static int set_SIP_Client(char *refparam, struct dmctx *ctx, void *data, char *i
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (strncmp(value, sip_client, client_len) != 0)
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", linker);
-				dmfree(linker);
-			}
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", linker ? linker : "");
 			break;
 	}
 	return 0;
@@ -610,8 +594,6 @@ static int get_ServicesVoiceServiceCallControlLine_Provider(char *refparam, stru
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "provider", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -627,8 +609,6 @@ static int get_ServicesVoiceServiceCallControlLine_CallingFeatures(char *refpara
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "calling_features", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -668,8 +648,6 @@ static int get_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, s
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "line", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -707,8 +685,6 @@ static int get_ServicesVoiceServiceCallControlIncomingMap_Extension(char *refpar
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "extension", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -769,8 +745,6 @@ static int get_ServicesVoiceServiceCallControlOutgoingMap_Line(char *refparam, s
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "line", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -786,8 +760,6 @@ static int get_ServicesVoiceServiceCallControlOutgoingMap_Extension(char *refpar
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "extension", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -813,7 +785,7 @@ static int get_ServicesVoiceServiceCallControlGroup_Extensions(char *refparam, s
 			char *linker = NULL;
 
 			adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", e->name, &linker);
-			if (linker)
+			if (linker && *linker)
 				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", linker);
 		}
 
@@ -827,8 +799,7 @@ static int get_ServicesVoiceServiceCallControlGroup_Extensions(char *refparam, s
 
 static int set_ServicesVoiceServiceCallControlGroup_Extensions(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char callcontrol_extension[64] = "Device.Services.VoiceService.1.CallControl.Extension.";
-	size_t extension_len = strlen(callcontrol_extension);
+	char *allowed_objects[] = {"Device.Services.VoiceService.1.CallControl.Extension.", NULL};
 	char *pch = NULL, *spch = NULL;
 	char value_buf[512] = {0};
 
@@ -840,13 +811,8 @@ static int set_ServicesVoiceServiceCallControlGroup_Extensions(char *refparam, s
 				return FAULT_9007;
 
 			for (pch = strtok_r(value_buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
-				char *linker = NULL;
 
-				if (strncmp(pch, callcontrol_extension, extension_len) != 0)
-					return FAULT_9007;
-
-				adm_entry_get_linker_value(ctx, pch, &linker);
-				if (linker == NULL)
+				if (dm_entry_validate_allowed_objects(ctx, pch, allowed_objects))
 					return FAULT_9007;
 			}
 
@@ -920,17 +886,18 @@ static int get_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "provider", &provider_string);
 	if (strlen(provider_string)) {
 		unsigned pos = 0;
-                char *ptr = NULL, *spch = NULL;
+		char *ptr = NULL, *spch = NULL;
 		buf[0] = 0;
-                char *provider = dmstrdup(provider_string);
-                ptr = strtok_r(provider, ",", &spch);
-                while(ptr != NULL){
+		char *provider = dmstrdup(provider_string);
+		ptr = strtok_r(provider, ",", &spch);
+		while (ptr != NULL) {
 			char *linker = NULL;
 
 			adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", !strcmp(type, "fxs") ? section_name(((struct dmmap_dup *)data)->config_section) : ptr, &linker);
-			if (linker)
+			if (linker && *linker)
 				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", linker);
-                        ptr = strtok_r(NULL, ",", &spch);
+
+			ptr = strtok_r(NULL, ",", &spch);
 		}
 
 		if (pos)
@@ -950,14 +917,18 @@ static int set_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 	char *pch = NULL, *spch = NULL;
 	char value_buf[512] = {0};
 	char *type;
-        char buf[512] = {0};
-        unsigned pos = 0;
+	char buf[512] = {0};
+	unsigned pos = 0;
+
 	DM_STRNCPY(value_buf, value, sizeof(value_buf));
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string_list(value_buf, -1, -1, -1, -1, -1, NULL, NULL))
 				return FAULT_9007;
+
+			if (value_buf[0] == 0)
+				break;
 
 			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", &type);
 
@@ -977,15 +948,17 @@ static int set_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", "");
 			for (pch = strtok_r(value_buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 				char *linker = NULL;
-                                if(pos != 0)
-                                    pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", ",");
+
+				if (pos != 0)
+					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", ",");
+
 				adm_entry_get_linker_value(ctx, pch, &linker);
 				if(!strcmp(linker, "extension3"))
-                                        pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", "fxs1");
+					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", "fxs1");
 				else if(!strcmp(linker, "extension4"))
-                                        pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", "fxs2");
+					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", "fxs2");
 				else
-                                        pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", linker);
+					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", linker);
 			}
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", buf);
 			break;
@@ -1000,8 +973,6 @@ static int get_ServicesVoiceServiceCallControlExtension_CallingFeatures(char *re
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "calling_features", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 

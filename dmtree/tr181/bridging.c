@@ -975,7 +975,7 @@ static void remove_vlanid_from_ifname_list(struct uci_section *bridge_sec, char 
 	}
 }
 
-static void set_lowerlayers_management_port(struct dmctx *ctx, void *data, char *value)
+static int set_lowerlayers_management_port(struct dmctx *ctx, void *data, char *value)
 {
 	char *pch = NULL, *spch = NULL, new_device[1024] = { 0, 0 };
 	unsigned pos = 0;
@@ -994,6 +994,8 @@ static void set_lowerlayers_management_port(struct dmctx *ctx, void *data, char 
 				continue;
 
 			pos += snprintf(&new_device[pos], sizeof(new_device) - pos, "%s,", linker);
+		} else {
+			return FAULT_9007;
 		}
 	}
 
@@ -1001,6 +1003,7 @@ static void set_lowerlayers_management_port(struct dmctx *ctx, void *data, char 
 		new_device[pos - 1] = 0;
 
 	dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "port", new_device);
+	return 0;
 }
 
 static void update_device_management_port(char *old_name, char *new_name, char *br_inst)
@@ -2167,7 +2170,8 @@ static int get_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 		lbuf[0] = 0;
 		for (pch = strtok_r(port_device, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 			adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", pch, value);
-			pos += snprintf(&lbuf[pos], sizeof(lbuf) - pos, "%s,", *value ? *value : "");
+			if (*value && (*value)[0] != 0)
+				pos += snprintf(&lbuf[pos], sizeof(lbuf) - pos, "%s,", *value);
 		}
 
 		if (pos)
@@ -2185,21 +2189,24 @@ static int get_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 		}
 
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", port_device ? port_device : "", value);
-		if (*value == NULL)
+		if (!(*value) || (*value)[0] == 0)
 			adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", port_device ? port_device : "", value);
-		if (*value == NULL)
+		if (!(*value) || (*value)[0] == 0)
 			adm_entry_get_linker_param(ctx, "Device.ATM.Link.", port_device ? port_device : "", value);
-		if (*value == NULL)
+		if (!(*value) || (*value)[0] == 0)
 			adm_entry_get_linker_param(ctx, "Device.PTM.Link.", port_device ? port_device : "", value);
-
-		if (*value == NULL)
-			*value = "";
 	}
 	return 0;
 }
 
 static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {
+			"Device.Ethernet.Interface.",
+			"Device.WiFi.SSID.",
+			"Device.ATM.Link.",
+			"Device.PTM.Link.",
+			NULL};
 	char *management = NULL, *linker = NULL;
 
 	dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "management", &management);
@@ -2212,26 +2219,24 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 			if (management && strcmp(management, "1") == 0)
 				break;
 
-			if (strncmp(value, "Device.Ethernet.Interface.", 26) != 0 &&
-				strncmp(value, "Device.WiFi.SSID.", 17) != 0 &&
-				strncmp(value, "Device.ATM.Link.", 16) != 0 &&
-				strncmp(value, "Device.PTM.Link.", 16) != 0)
-				return FAULT_9007;
-
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker == NULL || *linker == '\0')
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
 			if (management && strcmp(management, "1") == 0) {
 				/* Management Port ==> true */
-				set_lowerlayers_management_port(ctx, data, value);
+				return set_lowerlayers_management_port(ctx, data, value);
 			} else {
 				/* Management Port ==> false */
 				bool is_wireless_config = false;
 
 				adm_entry_get_linker_value(ctx, value, &linker);
+
+				if (!linker || *linker == 0) {
+					dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "port", "");
+					return 0;
+				}
 
 				// Update config section on dmmap_bridge_port if the linker is wirelss port or network port
 				if (strncmp(value, "Device.WiFi.SSID.", 17) == 0) {
@@ -2770,23 +2775,28 @@ static int get_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 	/* Get linker */
 	snprintf(linker, sizeof(linker),"br_%s:vlan_%s", ((struct bridge_vlanport_args *)data)->br_inst, vid);
 	adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char lower_layer_path[256] = {0};
+	char *allowed_objects[] = {
+			lower_layer_path,
+			NULL};
+
+	snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.VLAN.", ((struct bridge_vlanport_args *)data)->br_inst);
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
-			snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.VLAN.", ((struct bridge_vlanport_args *)data)->br_inst);
-
 			/* Check the path object is correct or no */
 			if (strncmp(value, lower_layer_path, strlen(lower_layer_path)) == 0) {
 				/* Check linker exist */
@@ -2878,25 +2888,29 @@ static int get_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 	dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "port_name", &port_name);
 
 	snprintf(linker, sizeof(linker), "br_%s:%s+%s", ((struct bridge_vlanport_args *)data)->br_inst, port_name, name);
-
 	adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char lower_layer_path[256] = {0};
+	char *allowed_objects[] = {
+			lower_layer_path,
+			NULL};
+
+	snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.Port.", ((struct bridge_vlanport_args *)data)->br_inst);
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
-			snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.Port.", ((struct bridge_vlanport_args *)data)->br_inst);
-
 			if (strncmp(value, lower_layer_path, strlen(lower_layer_path)) == 0) {
 
 				char *linker = NULL;
@@ -3079,19 +3093,15 @@ static int get_BridgingBridgeProviderBridge_SVLANcomponent(char *refparam, struc
 
 static int set_BridgingBridgeProviderBridge_SVLANcomponent(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *bridge_linker = NULL;
+	char *allowed_objects[] = {"Device.Bridging.Bridge.", NULL};
 
 	switch (action)	{
 	case VALUECHECK:
 		if (dm_validate_string(value, -1, 256, NULL, NULL))
 			return FAULT_9007;
 
-		if (strncmp(value, "Device.Bridging.Bridge.", 23) != 0)
+		if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 			return FAULT_9007;
-
-		adm_entry_get_linker_value(ctx, value, &bridge_linker);
-		if (bridge_linker == NULL)
-			return FAULT_9005;
 
 		break;
 	case VALUESET:
@@ -3127,8 +3137,8 @@ static int get_BridgingBridgeProviderBridge_CVLANcomponents(char *refparam, stru
 
 static int set_BridgingBridgeProviderBridge_CVLANcomponents(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.Bridging.Bridge.", NULL};
 	char *pch = NULL, *pchr = NULL;
-	char *bridge_linker = NULL;
 	char buf[512] = {0};
 
 	DM_STRNCPY(buf, value, sizeof(buf));
@@ -3142,12 +3152,8 @@ static int set_BridgingBridgeProviderBridge_CVLANcomponents(char *refparam, stru
 			for (pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
 				// Parse each Bridge path and validate:
 
-				if (strncmp(pch, "Device.Bridging.Bridge.", 23) != 0)
+				if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 					return FAULT_9007;
-
-				adm_entry_get_linker_value(ctx, pch, &bridge_linker);
-				if (bridge_linker == NULL)
-					return FAULT_9005;
 			}
 
 			break;

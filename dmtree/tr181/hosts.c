@@ -98,8 +98,6 @@ static int get_HostsHost_DHCPClient(char *refparam, struct dmctx *ctx, void *dat
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "macaddr");
 	adm_entry_get_linker_param(ctx, "Device.DHCPv4.Server.Pool.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -107,8 +105,6 @@ static int get_HostsHost_AssociatedDevice(char *refparam, struct dmctx *ctx, voi
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "macaddr");
 	adm_entry_get_linker_param(ctx, "Device.WiFi.AccessPoint.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -120,8 +116,6 @@ static int get_HostsHost_Layer1Interface(char *refparam, struct dmctx *ctx, void
 		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
 	else
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -129,8 +123,6 @@ static int get_HostsHost_Layer3Interface(char *refparam, struct dmctx *ctx, void
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "network");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 

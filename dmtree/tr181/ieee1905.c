@@ -1365,8 +1365,6 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_LocalI
 {
 	char *linker = ((struct ieee1905_device_nonieee1905neighbor_args *)data)->mac_addr;
 	adm_entry_get_linker_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -1402,8 +1400,6 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_LocalInte
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "macaddress");
 	adm_entry_get_linker_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -1496,8 +1492,6 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceLis
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "macaddress");
 	adm_entry_get_linker_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 

@@ -341,33 +341,38 @@ static int get_QInterface(char *refparam, struct dmctx *ctx, void *data, char *i
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
 
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", ifname, value);
-	if (*value == NULL)
+	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", ifname, value);
-	if (*value == NULL)
+	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", ifname, value);
-	if (*value == NULL)
+	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", ifname, value);
-	if (*value == NULL)
-		*value = "";
 
 	return 0;
 }
 
 static int set_QInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {
+			"Device.IP.Interface.",
+			"Device.PPP.Interface.",
+			"Device.Ethernet.Interface.",
+			"Device.WiFi.Radio.",
+			NULL};
 	char *linker = NULL;
 
 	switch (action)	{
 	case VALUECHECK:
 		if (dm_validate_string(value, -1, 256, NULL, NULL))
 			return FAULT_9007;
+
+		if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			return FAULT_9007;
+
 		break;
 	case VALUESET:
 		adm_entry_get_linker_value(ctx, value, &linker);
-		if (linker && *linker) {
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", linker);
-			dmfree(linker);
-		}
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", linker ? linker : "");
 		break;
 	}
 	return 0;
@@ -1533,40 +1538,30 @@ static int set_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data
 
 static int get_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *queue_link;
+	char *queue_link = NULL;
+
 	dmuci_get_value_by_section_string((struct uci_section *)data, "queue", &queue_link);
 	adm_entry_get_linker_param(ctx, "Device.QoS.Queue.", queue_link, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *queue_link = NULL;
+	char *allowed_objects[] = {"Device.QoS.Queue.", NULL};
+	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (value == NULL || *value == '\0')
-				break;
-
-			if (strncmp(value, "Device.QoS.Queue.", 17) != 0)
-				return FAULT_9007;
-
-			adm_entry_get_linker_value(ctx, value, &queue_link);
-			if (queue_link == NULL || *queue_link == '\0')
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			if (value == NULL || *value == '\0')
-				break;
-
-			adm_entry_get_linker_value(ctx, value, &queue_link);
-			dmuci_set_value_by_section((struct uci_section *)data, "queue", queue_link);
+			adm_entry_get_linker_value(ctx, value, &linker);
+			dmuci_set_value_by_section((struct uci_section *)data, "queue", linker ? linker : "");
 			break;
 	}
 	return 0;
@@ -1574,41 +1569,39 @@ static int set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data
 
 static int get_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *intf_link;
+	char *intf_link = NULL;
+
 	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &intf_link);
 	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", intf_link, value);
-	if (*value == NULL)
+	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", intf_link, value);
-	if (*value == NULL)
+	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", intf_link, value);
-	if (*value == NULL)
-		*value = "";
+
 	return 0;
 }
 
 static int set_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *intf_link = NULL;
+	char *allowed_objects[] = {
+			"Device.Ethernet.Interface.",
+			"Device.IP.Interface.",
+			"Device.PPP.Interface.",
+			NULL};
+	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (value == NULL || *value == '\0')
-				break;
-
-			adm_entry_get_linker_value(ctx, value, &intf_link);
-			if (intf_link == NULL || *intf_link == '\0')
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			if (value == NULL || *value == '\0')
-				break;
-
-			adm_entry_get_linker_value(ctx, value, &intf_link);
-			dmuci_set_value_by_section((struct uci_section *)data, "interface", intf_link);
+			adm_entry_get_linker_value(ctx, value, &linker);
+			dmuci_set_value_by_section((struct uci_section *)data, "interface", linker ? linker : "");
 			break;
 	}
 	return 0;

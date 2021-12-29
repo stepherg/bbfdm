@@ -436,6 +436,7 @@ static int get_mldp_cgrp_stats_lrcvd(char *refparam, struct dmctx *ctx, void *da
 
 static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *linker = NULL, *interface_linker = NULL;
 	char ifname[16];
 	char *up, *f_inst, *if_type;
@@ -446,6 +447,10 @@ static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 	case VALUECHECK:
 		if (dm_validate_string(value, -1, 256, NULL, NULL))
 			return FAULT_9007;
+
+		if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			return FAULT_9007;
+
 		break;
 	case VALUESET:
 		// First check if this is a bridge type interface
@@ -465,8 +470,11 @@ static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 						dmuci_get_value_by_section_string(s, "device", &interface_linker);
 					break;
 				}
+			} else {
+				interface_linker = "";
 			}
 		}
+
 		uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface",
 				"section_name", section_name((struct uci_section *)data), d_sec) {
 			dmuci_get_value_by_section_string(d_sec, "iface_instance", &f_inst);
@@ -551,16 +559,10 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 			}
 		}
 
-		if (tmp_linker == NULL)
-			goto end;
-
 		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", tmp_linker, value);
 	}
 
 end:
-	if (*value == NULL)
-		*value = "";
-
 	return 0;
 }
 

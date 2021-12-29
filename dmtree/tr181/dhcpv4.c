@@ -177,6 +177,7 @@ int get_value_in_mac_format(struct uci_section *s, char *option_name, bool type,
 
 int set_DHCP_Interface(struct dmctx *ctx, char *value, struct uci_section *config_s, struct uci_section *dmmap_s, char *dmmap_name, char *proto, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *linker = NULL, *added_by_controller = NULL, *curr_proto = NULL;
 	struct uci_section *interface_s = NULL;
 
@@ -185,14 +186,7 @@ int set_DHCP_Interface(struct dmctx *ctx, char *value, struct uci_section *confi
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (value == NULL || *value == '\0')
-				break;
-
-			if (strncmp(value, "Device.IP.Interface.", 20) != 0)
-				return FAULT_9007;
-
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker == NULL || linker[0] == '\0')
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;
@@ -1328,27 +1322,26 @@ static int get_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 {
 	char *linker = dmstrdup(((struct dhcp_args *)data)->interface);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
-	dmfree(linker);
 	return 0;
 }
 
 static int set_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "interface", linker);
-				dmfree(linker);
-			}
+			dmuci_set_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "interface", linker ? linker : "");
 			return 0;
 	}
 	return 0;
@@ -2032,8 +2025,6 @@ static int get_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 	char *linker = dmstrdup(dhcp_s ? section_name(dhcp_s) : "");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 

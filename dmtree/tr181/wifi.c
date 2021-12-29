@@ -2448,9 +2448,7 @@ static int set_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_WiFiEndPoint_SSIDReference(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", ((struct wifi_enp_args *)data)->ifname, value); // MEM WILL BE FREED IN DMMEMCLEAN
-	if (*value == NULL)
-		*value = "";
+	adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", ((struct wifi_enp_args *)data)->ifname, value);
 	return 0;
 }
 
@@ -2854,29 +2852,27 @@ static int set_access_point_alias(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	if (data && ((struct wifi_ssid_args *)data)->linker[0] != '\0') {
-		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", ((struct wifi_ssid_args *)data)->linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
-		if (*value == NULL)
-			*value = "";
-	}
+	adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", ((struct wifi_ssid_args *)data)->linker, value);
 	return 0;
 }
 
 static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *ssid_linker = NULL;
+	char *allowed_objects[] = {"Device.WiFi.Radio.", NULL};
+	char *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &ssid_linker);
-			if (ssid_linker && *ssid_linker) {
-				dmuci_set_value_by_section((((struct wifi_ssid_args *)data)->sections)->config_section, "device", ssid_linker);
-				dmfree(ssid_linker);
-			}
+			adm_entry_get_linker_value(ctx, value, &linker);
+			dmuci_set_value_by_section((((struct wifi_ssid_args *)data)->sections)->config_section, "device", linker ? linker : "");
 			return 0;
 	}
 	return 0;
@@ -2884,14 +2880,13 @@ static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", ((struct wifi_acp_args *)data)->ifname, value); // MEM WILL BE FREED IN DMMEMCLEAN
-	if (*value == NULL)
-		*value = "";
+	adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", ((struct wifi_acp_args *)data)->ifname, value);
 	return 0;
 }
 
 static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.WiFi.SSID.", NULL};
 	struct uci_section *s = NULL, *ssid_dmmap_s = NULL;
 	char *linker = NULL;
 
@@ -2900,14 +2895,7 @@ static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (*value == '\0')
-				break;
-
-			if (strncmp(value, "Device.WiFi.SSID.", 17) != 0)
-				return FAULT_9007;
-
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker == NULL || linker[0] == '\0')
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;

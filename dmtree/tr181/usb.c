@@ -895,7 +895,7 @@ out:
 
 static int get_USBUSBHostsHostDevice_USBPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct usb_port *port= (struct usb_port *)data;
+	struct usb_port *port = (struct usb_port *)data;
 	adm_entry_get_linker_param(ctx, "Device.USB.Port.", port->folder_name, value);
 	return 0;
 }
@@ -912,15 +912,15 @@ static int get_USBUSBHostsHostDevice_Parent(char *refparam, struct dmctx *ctx, v
 	regex_t regex1 = {};
 
 	regcomp(&regex1, "^[0-9][0-9]*-[0-9]*[0-9]\\.[0-9]*[0-9]$", 0);
-	if(regexec(&regex1, port->folder_name, 0, NULL, 0) != 0 || port->dmsect == NULL){
+	if (regexec(&regex1, port->folder_name, 0, NULL, 0) != 0 || port->dmsect == NULL) {
 		*value = "";
 		goto out;
 	}
+
 	dmuci_get_value_by_section_string(port->dmsect, "usb_host_instance", &host_inst);
 	snprintf(usb_host_path, sizeof(usb_host_path), "Device.USB.USBHosts.Host.%s.Device.", host_inst);
 	adm_entry_get_linker_param(ctx, usb_host_path, port->folder_name, value);
-	if (*value == NULL)
-		*value = "";
+
 out:
 	regfree(&regex1);
 	return 0;

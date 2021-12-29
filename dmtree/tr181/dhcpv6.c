@@ -488,8 +488,6 @@ static int get_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 	char *linker = dmstrdup(parent_s ? parent_s + 1 : dhcpv6_s ? section_name(dhcpv6_s) : "");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -730,30 +728,28 @@ static int set_DHCPv6ServerPool_Order(char *refparam, struct dmctx *ctx, void *d
 
 static int get_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker;
-	linker = dmstrdup(((struct dhcpv6_args *)data)->interface);
+	char *linker = dmstrdup(((struct dhcpv6_args *)data)->interface);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
-	dmfree(linker);
 	return 0;
 }
 
 static int set_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section((((struct dhcpv6_args *)data)->dhcp_sections)->config_section, "interface", linker);
-				dmfree(linker);
-			}
+			dmuci_set_value_by_section((((struct dhcpv6_args *)data)->dhcp_sections)->config_section, "interface", linker ? linker : "");
 			break;
 	}
 	return 0;

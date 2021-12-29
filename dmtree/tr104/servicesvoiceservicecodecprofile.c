@@ -18,12 +18,10 @@
 /*#Device.Services.VoiceService.{i}.CodecProfile.{i}.Codec!UCI:asterisk/codec_profile,@i-1/name*/
 static int get_ServicesVoiceServiceCodecProfile_Codec(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker;
+	char *linker = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 

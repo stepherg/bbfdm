@@ -674,29 +674,27 @@ static int get_RoutingRouterForwarding_Interface(char *refparam, struct dmctx *c
 	char *linker = NULL;
 
 	dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "interface", &linker);
-	if (linker && linker[0] != '\0') {
-		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
-		if (*value == NULL)
-			*value = "";
-	}
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
 	return 0;
 }
 
 static int set_RoutingRouterForwarding_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "interface", linker);
-				dmfree(linker);
-			}
+			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "interface", linker ? linker : "");
 			return 0;
 	}
 	return 0;
@@ -957,11 +955,9 @@ static int get_RoutingRouteInformationInterfaceSetting_Interface(char *refparam,
 		}
 	}
 
-	if (iface[0] != '\0') {
+	if (iface && *iface != 0)
 		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface, value);
-		if (*value == NULL)
-			*value = "";
-	}
+
 	return 0;
 }
 

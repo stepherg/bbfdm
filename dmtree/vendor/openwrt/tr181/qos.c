@@ -262,12 +262,10 @@ static int openwrt__get_QoSClassification_Interface(char *refparam, struct dmctx
 		dmuci_get_value_by_section_string(s, "classgroup", &ifaceclassgrp);
 		if (ifaceclassgrp != NULL && strcmp(ifaceclassgrp, classgroup) == 0) {
 			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", section_name(s), value);
-			if (*value == NULL)
+			if (!(*value) || (*value)[0] == 0)
 				adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", section_name(s), value);
-			if (*value == NULL)
+			if (!(*value) || (*value)[0] == 0)
 				adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", section_name(s), value);
-			if (*value == NULL)
-				*value = "";
 		}
 	}
 	return 0;
@@ -485,14 +483,12 @@ static int openwrt__get_QoSQueueStats_Interface(char *refparam, struct dmctx *ct
 	struct queuestats *qts = (struct queuestats*)data;
 
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", qts->dev, value);
-	if (*value == NULL)
+	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", qts->dev, value);
-	if (*value == NULL)
+	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", qts->dev, value);
-	if (*value == NULL)
+	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", qts->dev, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 

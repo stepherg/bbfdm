@@ -1353,20 +1353,14 @@ static int get_igmp_cgrp_assoc_dev_no_of_entries(char *refparam, struct dmctx *c
 static int get_igmp_cgrp_adev_iface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *ifname = dmjson_get_value((json_object *)data, 1, "device");
-
 	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", ifname, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int get_igmp_cgrp_adev_host(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *ipaddr = dmjson_get_value((json_object *)data, 1, "ipaddr");
-
 	adm_entry_get_linker_param(ctx, "Device.Hosts.Host.", ipaddr, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -1737,6 +1731,7 @@ static void set_igmpp_iface_val(void *data, char *instance, char *linker, char *
 
 static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *linker = NULL, *interface_linker = NULL;
 	char ifname[16] = {0};
 	char *if_type = NULL;
@@ -1747,6 +1742,10 @@ static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 	case VALUECHECK:
 		if (dm_validate_string(value, -1, 256, NULL, NULL))
 			return FAULT_9007;
+
+		if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			return FAULT_9007;
+
 		break;
 	case VALUESET:
 		// First check if this is a bridge type interface
@@ -1770,6 +1769,8 @@ static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 					}
 					break;
 				}
+			} else {
+				interface_linker = "";
 			}
 		}
 
@@ -1833,16 +1834,11 @@ static int get_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 	} else {
 		// in case its a L3 interface, the ifname would be section name of network file in the dmmap file,
 		// which infact is the linker, just use that directly.
-		if (igmpp_ifname == NULL)
-			goto end;
 
 		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", igmpp_ifname, value);
 	}
 
 end:
-	if (*value == NULL)
-		*value = "";
-
 	return 0;
 }
 

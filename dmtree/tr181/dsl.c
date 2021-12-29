@@ -998,10 +998,9 @@ static int get_DSLChannel_Name(char *refparam, struct dmctx *ctx, void *data, ch
 static int get_DSLChannel_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char linker[8];
+
 	snprintf(linker, sizeof(linker), "line_%s", ((struct dsl_line_args *)data)->id);
-	adm_entry_get_linker_param(ctx, "Device.DSL.Line.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
-	if (*value == NULL)
-		*value = "";
+	adm_entry_get_linker_param(ctx, "Device.DSL.Line.", linker, value);
 	return 0;
 }
 

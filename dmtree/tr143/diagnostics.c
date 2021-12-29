@@ -58,17 +58,21 @@ static int get_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, 
 {
 	char *linker = get_diagnostics_option("ipping", "interface");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			IPPING_STOP
@@ -291,17 +295,21 @@ static int get_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *c
 {
 	char *linker = get_diagnostics_option("traceroute", "interface");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			TRACEROUTE_STOP
@@ -533,18 +541,22 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 static int get_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("download", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
-	if (*value == NULL)
-		*value = "";
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	return 0;
 }
 
 static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			DOWNLOAD_DIAGNOSTIC_STOP
@@ -859,18 +871,22 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 static int get_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("upload", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
-	if (*value == NULL)
-		*value = "";
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	return 0;
 }
 
 static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			UPLOAD_DIAGNOSTIC_STOP
@@ -1203,17 +1219,21 @@ static int get_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct 
 {
 	char *linker = get_diagnostics_option("udpechodiag", "interface");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
@@ -1462,17 +1482,21 @@ static int get_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam,
 {
 	char *linker = get_diagnostics_option("serverselection", "interface");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			SERVERSELECTION_STOP

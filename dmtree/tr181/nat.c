@@ -234,7 +234,7 @@ static int get_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 
 		uci_foreach_element(v, e) {
 			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
-			if (ifaceobj)
+			if (ifaceobj && *ifaceobj)
 				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", ifaceobj);
 		}
 	}
@@ -249,22 +249,24 @@ static int get_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 
 static int set_nat_interface_setting_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *iface, *pch, *pchr, buf[256] = "";
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			DM_STRNCPY(buf, value, sizeof(buf));
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "network", "");
 			for(pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
 				adm_entry_get_linker_value(ctx, pch, &iface);
-				if (iface && *iface) {
-					dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "network", iface);
-					dmfree(iface);
-				}
+				dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "network", iface);
 			}
 			return 0;
 	}
@@ -372,7 +374,7 @@ static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 
 		uci_foreach_element(v, e) {
 			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
-			if (ifaceobj)
+			if (ifaceobj && *ifaceobj)
 				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", ifaceobj);
 		}
 	}
@@ -387,12 +389,17 @@ static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 
 static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *iface = NULL;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &iface);
@@ -424,6 +431,8 @@ static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 					}
 				}
 				dmfree(iface);
+			} else {
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src", "");
 			}
 			break;
 	}

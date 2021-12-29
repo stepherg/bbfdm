@@ -269,8 +269,7 @@ static int get_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 	char atm_file[128];
 
 	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->dmmap_section, "atm_ll_link", &linker);
-	if (linker != NULL)
-		adm_entry_get_linker_param(ctx, "Device.DSL.Channel.", linker, value);
+	adm_entry_get_linker_param(ctx, "Device.DSL.Channel.", linker, value);
 	if (*value != NULL && (*value)[0] != '\0')
 		return 0;
 

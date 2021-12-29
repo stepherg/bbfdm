@@ -260,8 +260,6 @@ static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *da
 
 	snprintf(linker, sizeof(linker), "fw_image:%s", id ? id : "");
 	adm_entry_get_linker_param(ctx, "Device.DeviceInfo.FirmwareImage.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -283,13 +281,12 @@ static int get_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 
 	snprintf(linker, sizeof(linker), "fw_image:%s", id ? id : "");
 	adm_entry_get_linker_param(ctx, "Device.DeviceInfo.FirmwareImage.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.DeviceInfo.FirmwareImage.", NULL};
 	char *linker = NULL;
 
 	switch (action)	{
@@ -297,11 +294,7 @@ static int set_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 			if (dm_validate_string(value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			if (strncmp(value, "Device.DeviceInfo.FirmwareImage.", 32) != 0)
-				return FAULT_9007;
-
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker == NULL || *linker == '\0')
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;

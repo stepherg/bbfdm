@@ -193,10 +193,7 @@ static int find_lower_layer_by_dmmap_link(struct dmctx *ctx, void *data, char* d
 	char *linker = NULL;
 
 	dmuci_get_value_by_section_string((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", &linker);
-	if (linker != NULL)
-		adm_entry_get_linker_param(ctx, dm_object, linker, value);
-	if (*value == NULL)
-		*value = "";
+	adm_entry_get_linker_param(ctx, dm_object, linker, value);
 	return 0;
 }
 

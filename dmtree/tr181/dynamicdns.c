@@ -425,29 +425,30 @@ static int get_DynamicDNSClient_LastError(char *refparam, struct dmctx *ctx, voi
 /*#Device.DynamicDNS.Client.{i}.Server!UCI:ddns/service,@i-1/service_name*/
 static int get_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *service_name;
+	char *service_name = NULL;
+
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "service_name", &service_name);
 	adm_entry_get_linker_param(ctx, "Device.DynamicDNS.Server.", service_name, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.DynamicDNS.Server.", NULL};
 	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "service_name", linker);
-				dmfree(linker);
-			}
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "service_name", linker ? linker : "");
 			break;
 	}
 	return 0;
@@ -456,29 +457,30 @@ static int set_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *
 /*#Device.DynamicDNS.Client.{i}.Interface!UCI:ddns/service,@i-1/interface*/
 static int get_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *interface;
+	char *interface = NULL;
+
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &interface);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", interface, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", linker);
-				dmfree(linker);
-			}
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", linker ? linker : "");
 			break;
 	}
 	return 0;

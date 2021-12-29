@@ -361,9 +361,13 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1)
 int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value)
 {
 	struct dmctx dmctx = {0};
+	*value = "";
+
+	if (!param || !linker)
+		return 0;
 
 	dm_ctx_init_sub(&dmctx, ctx->instance_mode);
-	dmctx.in_param = param ? param : "";
+	dmctx.in_param = param;
 	dmctx.linker = linker;
 
 	dm_entry_get_linker(&dmctx);
@@ -392,6 +396,28 @@ int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value)
 
 	dm_ctx_clean_sub(&dmctx);
 	return 0;
+}
+
+int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[])
+{
+	if (!value || !objects)
+		return -1;
+
+	if (*value == '\0')
+		return 0;
+
+	for (; *objects; objects++) {
+
+		if (strncmp(value, *objects, strlen(*objects)) == 0) {
+			char *linker = NULL;
+
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker)
+				return 0;
+		}
+	}
+
+	return -1;
 }
 
 int dm_entry_manage_services(struct blob_buf *bb, bool restart)

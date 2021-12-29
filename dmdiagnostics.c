@@ -64,18 +64,14 @@ void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *v
 {
 	char *linker = NULL;
 
-	if (value[0] == 0)
+	if (!value)
 		return;
 
-	if (strncmp(value, "Device.IP.Interface.", 20) != 0)
+	if (*value && strncmp(value, "Device.IP.Interface.", 20) != 0)
 		return;
 
 	adm_entry_get_linker_value(ctx, value, &linker);
-
-	if (linker && *linker) {
-		set_diagnostics_option(sec_name, "interface", linker);
-		dmfree(linker);
-	}
+	set_diagnostics_option(sec_name, "interface", linker ? linker : "");
 }
 
 static bool get_response_code_status(const char *url, int response_code)

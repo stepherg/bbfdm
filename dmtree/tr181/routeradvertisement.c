@@ -283,26 +283,26 @@ static int get_RouterAdvertisementInterfaceSetting_Interface(char *refparam, str
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &linker);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_RouterAdvertisementInterfaceSetting_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", linker);
-				dmfree(linker);
-			}
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", linker ? linker : "");
 			break;
 	}
 	return 0;

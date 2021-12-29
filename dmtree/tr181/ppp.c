@@ -776,32 +776,37 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 	}
 
 	adm_entry_get_linker_param(ctx, "Device.ATM.Link.", ifname, value);
-	if (*value == NULL)
+	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.PTM.Link.", ifname, value);
-	if (*value == NULL)
+	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", ifname, value);
-	if (*value == NULL)
+	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", ifname, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {
+			"Device.Ethernet.Interface.",
+			"Device.ATM.Link.",
+			"Device.PTM.Link.",
+			"Device.WiFi.SSID.",
+			NULL};
 	char *ppp_linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &ppp_linker);
-			if (ppp_linker && *ppp_linker) {
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "device", ppp_linker);
-				dmfree(ppp_linker);
-			}
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "device", ppp_linker ? ppp_linker : "");
 			return 0;
 	}
 	return 0;

@@ -395,7 +395,7 @@ static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 		src_iface[0] = 0;
 		uci_foreach_element(net_list, e) {
 			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj);
-			if (ifaceobj)
+			if (ifaceobj && *ifaceobj)
 				pos += snprintf(&src_iface[pos], sizeof(src_iface) - pos, "%s,", ifaceobj);
 		}
 
@@ -403,7 +403,7 @@ static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 			src_iface[pos - 1] = 0;
 	} else {
 		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", src, &ifaceobj);
-		if (ifaceobj)
+		if (ifaceobj && *ifaceobj)
 			DM_STRNCPY(src_iface, ifaceobj, sizeof(src_iface));
 	}
 
@@ -450,7 +450,7 @@ static int get_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 		dst_iface[0] = 0;
 		uci_foreach_element(net_list, e) {
 			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj);
-			if (ifaceobj)
+			if (ifaceobj && *ifaceobj)
 				pos += snprintf(&dst_iface[pos], sizeof(dst_iface) - pos, "%s,", ifaceobj);
 		}
 
@@ -458,7 +458,7 @@ static int get_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 			dst_iface[pos - 1] = 0;
 	} else {
 		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", dest, &ifaceobj);
-		if (ifaceobj)
+		if (ifaceobj && *ifaceobj)
 			DM_STRNCPY(dst_iface, ifaceobj, sizeof(dst_iface));
 	}
 
@@ -943,6 +943,7 @@ static int set_rule_log(char *refparam, struct dmctx *ctx, void *data, char *ins
 
 static int set_rule_interface(struct dmctx *ctx, void *data, char *type, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *iface = NULL, *option = NULL;
 
 	switch (action) {
@@ -950,11 +951,7 @@ static int set_rule_interface(struct dmctx *ctx, void *data, char *type, char *v
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (*value == '\0')
-				break;
-
-			adm_entry_get_linker_value(ctx, value, &iface);
-			if (iface == NULL ||  iface[0] == '\0')
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;

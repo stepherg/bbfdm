@@ -583,8 +583,6 @@ def cprintGetSetValue(getvalue, setvalue, mappingparam, instance, typeparam, par
                     get_value += "	char *linker = dmstrdup(*value);\n"
                     get_value += "	adm_entry_get_linker_param(ctx, \"%s\", linker, value);\n" % res7
                     get_value += "	dmfree(linker);\n"
-                    get_value += "	if (*value == NULL)\n"
-                    get_value += "		*value = \"\";"
                 elif res6 is not None:
                     get_value += "	*value = dmuci_get_value_by_path(\"%s\", \"%s\", \"%s\", \"%s\");" % (
                         res6, res1, res3, res5)

@@ -1773,9 +1773,13 @@ static int get_linker_value_check_obj(DMOBJECT_ARGS)
 		return FAULT_9005;
 
 	if (strcmp(node->current_object, dmctx->in_param) == 0) {
-		char *link_val;
+		char *link_val = NULL;
+
+		if (!data || !instance)
+			return FAULT_9005;
+
 		get_linker(node->current_object, dmctx, data, instance, &link_val);
-		dmctx->linker = dmstrdup(link_val);
+		dmctx->linker = link_val ? dmstrdup(link_val) : "";
 		dmctx->stop = true;
 		return 0;
 	}

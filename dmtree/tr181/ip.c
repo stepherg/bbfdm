@@ -1236,50 +1236,67 @@ static int get_IPInterface_LastChange(char *refparam, struct dmctx *ctx, void *d
 
 static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char linker[64] = {0};
-	char *proto;
+	struct uci_section *dmmap_section = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
-	if (strstr(proto, "ppp")) {
-		snprintf(linker, sizeof(linker), "%s", section_name((struct uci_section *)data));
-		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", linker, value);
-		if (*value != NULL)
-			return 0;
-	}
+	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
+	dmuci_get_value_by_section_string(dmmap_section, "LowerLayers", value);
 
-	char *device = get_device(section_name((struct uci_section *)data));
+	if ((*value)[0] == '\0') {
+		char linker[64] = {0};
+		char *proto;
 
-	/* If the device value is empty, then get its value directly from device option */
-	if (*device == '\0')
-		dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+		dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
+		if (strstr(proto, "ppp")) {
+			snprintf(linker, sizeof(linker), "%s", section_name((struct uci_section *)data));
+			adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", linker, value);
+			if (*value != NULL && (*value)[0] != 0)
+				return 0;
+		}
 
-	if (device[0] != '\0') {
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", device, value);
-		if (*value != NULL)
-			return 0;
-	}
+		char *device = get_device(section_name((struct uci_section *)data));
 
-	if (device[0] != '\0') {
-		DM_STRNCPY(linker, device, sizeof(linker));
-		char *vid = strchr(linker, '.');
-		if (vid) *vid = '\0';
+		/* If the device value is empty, then get its value directly from device option */
+		if (*device == '\0')
+			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+
+		if (device[0] != '\0') {
+			adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", device, value);
+			if (*value != NULL && (*value)[0] != 0)
+				return 0;
+		}
+
+		if (device[0] != '\0') {
+			DM_STRNCPY(linker, device, sizeof(linker));
+			char *vid = strchr(linker, '.');
+			if (vid) *vid = '\0';
+		} else {
+			struct uci_section *s = NULL;
+
+			get_dmmap_section_of_config_section_eq("dmmap", "link", "section_name", section_name((struct uci_section *)data), &s);
+			dmuci_get_value_by_section_string(s, "linker", &device);
+			DM_STRNCPY(linker, device, sizeof(linker));
+		}
+
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", linker, value);
 	} else {
-		struct uci_section *s = NULL;
+		char *linker = NULL;
 
-		get_dmmap_section_of_config_section_eq("dmmap", "link", "section_name", section_name((struct uci_section *)data), &s);
-		dmuci_get_value_by_section_string(s, "linker", &device);
-		DM_STRNCPY(linker, device, sizeof(linker));
+		adm_entry_get_linker_value(ctx, *value, &linker);
+		if (!linker || *linker == 0)
+			*value = "";
 	}
-
-	adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", linker, value);
-	if (*value == NULL)
-		*value = "";
-
 	return 0;
 }
 
 static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *dmmap_section = NULL;
+	char eth_vlan_term[64] = "Device.Ethernet.VLANTermination.";
+	char eth_link[32] = "Device.Ethernet.Link.";
+	char *allowed_objects[] = {
+			eth_vlan_term,
+			eth_link,
+			NULL};
 	char linker_buf[32] = {0};
 	char *ip_linker = NULL;
 
@@ -1288,21 +1305,26 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			if (strncmp(value, "Device.Ethernet.VLANTermination.", 32) != 0 &&
-				strncmp(value, "Device.Ethernet.Link.", 21) != 0)
-				return FAULT_9007;
-
-			adm_entry_get_linker_value(ctx, value, &ip_linker);
-			if (ip_linker == NULL || *ip_linker == '\0')
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &ip_linker);
 
+			// Store LowerLayers value under dmmap_network section
+			get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "LowerLayers", value);
+
+			if (!ip_linker || *ip_linker == 0) {
+				// Update device option
+				dmuci_set_value_by_section((struct uci_section *)data, "device", "");
+				return 0;
+			}
+
 			DM_STRNCPY(linker_buf, ip_linker, sizeof(linker_buf));
 
-			if (strncmp(value, "Device.Ethernet.VLANTermination.", 32) == 0) {
+			if (strncmp(value, eth_vlan_term, strlen(eth_vlan_term)) == 0) {
 				struct uci_section *s = NULL, *stmp = NULL;
 
 				// Remove the device section corresponding to this interface if exists
@@ -1341,7 +1363,7 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 				// Update device option
 				dmuci_set_value_by_section((struct uci_section *)data, "device", linker_buf);
 
-			} else if (strncmp(value, "Device.Ethernet.Link.", 21) == 0) {
+			} else if (strncmp(value, eth_link, strlen(eth_link)) == 0) {
 
 				// Get interface name from Ethernet.Link. object
 				struct uci_section *eth_link_s = NULL;
@@ -2020,10 +2042,7 @@ static int get_IPInterfaceIPv6Prefix_ParentPrefix(char *refparam, struct dmctx *
 	char *linker = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "address", &linker);
-	if (linker && *linker)
-		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	return 0;
 }
 

@@ -250,12 +250,10 @@ static int get_server_dns_server(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_dns_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker;
+	char *linker = NULL;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &linker);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -336,8 +334,6 @@ static int get_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, 
 {
 	char *linker = get_diagnostics_option("nslookup", "interface");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -521,29 +517,38 @@ static int set_dns_server(char *refparam, struct dmctx *ctx, void *data, char *i
 
 static int set_dns_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *str, *interface, *ip, *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker == NULL || linker[0] == '\0')
+			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
+			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &ip);
+
+			if (!linker || linker[0] == 0) {
+				dmuci_del_list_value("network", interface, "dns", ip);
+				return 0;
+			} else if (strcmp(interface, linker) == 0)
 				return 0;
 
-			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
-			if (strcmp(interface, linker) == 0)
-				return 0;
 			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &str);
 			if (str[0] == '1')
 				return 0;
-			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &ip);
+
 			dmuci_del_list_value("network", interface, "dns", ip);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &str);
 			if (str[0] == '1')
 				dmuci_add_list_value("network", linker, "dns", ip);
+
 			dmuci_set_value_by_section((struct uci_section *)data, "interface", interface);
 			break;
 	}
@@ -601,10 +606,16 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 
 static int set_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			NSLOOKUP_STOP
