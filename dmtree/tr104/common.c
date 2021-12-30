@@ -458,6 +458,13 @@ int init_call_log(void)
 				end = strstr(token, ",");
 				CHECK_RESULT(end);
 				strncpy(cdr.maxJitter, token, end - token);
+
+				token = strstr(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = strstr(token, ",");
+				CHECK_RESULT(end);
+				strncpy(cdr.averageRoundTripDelay, token, end - token);
 			}
 			// Skip invalid call logs
 			if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||

@@ -193,6 +193,13 @@ static int get_ServicesVoiceServiceCallLog_Src_MaxJitter(char *refparam, struct 
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCallLog_Src_AverageRoundTripDelay(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->averageRoundTripDelay) : "0";
+	return 0;
+}
+
 /* Get Alias - Device.Services.VoiceService.{i}.CallLog.{i}. */
 static int get_ServicesVoiceServiceCallLog_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -303,5 +310,6 @@ DMLEAF tServicesVoiceServiceCallLogSessionSourceRTPParams[] = {
 {"FarEndInterarrivalJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_FarEndInterarrivalJitter, NULL, BBFDM_BOTH},
 {"FarEndPacketLossRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Src_FarEndPacketLossRate, NULL, BBFDM_BOTH},
 {"MaxJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_MaxJitter, NULL, BBFDM_BOTH},
+{"AverageRoundTripDelay", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_AverageRoundTripDelay, NULL, BBFDM_BOTH},
 {0}
 };
