@@ -45,7 +45,7 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 						dmuci_get_value_by_section_string(dmmap_s, "link_instance", &link_instance);
 						snprintf(new_name, sizeof(new_name), "%s_%s", ifname, link_instance);
 
-						if (ethernet_name_exists_in_devices(new_name))
+						if (ethernet___name_exists_in_devices(new_name))
 							return -1;
 
 						dmuci_set_value_by_section(dmmap_s, "device", new_name);
@@ -69,13 +69,13 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 							char *sec_name;
 							dmuci_get_value_by_section_string(dmmap_s, "section_name", &sec_name);
 							/* Check section name exist => if yes, continue*/
-							if (!ethernet_check_section_in_curr_section(sec_name, section_name(ss)))
+							if (!ethernet___check_section_in_curr_section(sec_name, section_name(ss)))
 								continue;
 
 							dmuci_get_value_by_section_string(dmmap_s, "link_instance", &link_instance);
 							snprintf(new_name, sizeof(new_name), "%s_%s", ifname, link_instance);
 
-							if (ethernet_name_exists_in_devices(new_name))
+							if (ethernet___name_exists_in_devices(new_name))
 								return -1;
 
 							dmuci_set_value_by_section(dmmap_s, "device", new_name);
@@ -94,7 +94,7 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 							dmuci_get_value_by_section_string(dmmap_s, "link_instance", &link_instance);
 							snprintf(new_name, sizeof(new_name), "%s_%s", ifname, link_instance);
 
-							if (ethernet_name_exists_in_devices(new_name))
+							if (ethernet___name_exists_in_devices(new_name))
 								return -1;
 
 							dmuci_set_value_by_section(dmmap_s, "device", new_name);
@@ -119,7 +119,7 @@ static int set_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx
 						else
 							snprintf(new_name, sizeof(new_name), "%s", ifname);
 
-						if (ethernet_name_exists_in_devices(new_name))
+						if (ethernet___name_exists_in_devices(new_name))
 							return -1;
 
 						dmuci_set_value_by_section(dmmap_s, "device", new_name);

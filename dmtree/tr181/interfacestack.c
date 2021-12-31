@@ -314,7 +314,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		char *linker, *value = NULL, *device_s_type = NULL;
 
 		dmuci_get_value_by_section_string(s, "device", &linker);
-		struct uci_section *br_device_s = get_device_section(linker);
+		struct uci_section *br_device_s = ethernet___get_device_section(linker);
 		if (br_device_s) dmuci_get_value_by_section_string(br_device_s, "type", &device_s_type);
 
 		if (br_device_s && strcmp(device_s_type, "bridge") == 0) {

@@ -45,7 +45,7 @@ static inline int init_eth_rmon(struct eth_rmon_args *args, struct dmmap_dup *s,
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
-struct uci_section *get_device_section(char *dev_name)
+struct uci_section *ethernet___get_device_section(char *dev_name)
 {
 	struct uci_section *s = NULL;
 
@@ -108,7 +108,7 @@ static struct uci_section *is_device_section_exist(char *device)
 	return s;
 }
 
-bool ethernet_check_section_in_curr_section(char *curr_section, char *section)
+bool ethernet___check_section_in_curr_section(const char *curr_section, const char *section)
 {
 	char *pch = NULL, *pchr = NULL, section_list[256] = {0};
 
@@ -131,7 +131,7 @@ static void add_section_in_curr_section(struct uci_section *dmmap_section, char 
 	dmuci_set_value_by_section(dmmap_section, "section_name", section_list);
 }
 
-bool ethernet_name_exists_in_devices(char *name)
+bool ethernet___name_exists_in_devices(char *name)
 {
 	struct uci_section *s = NULL;
 
@@ -184,7 +184,7 @@ static void create_link(char *sec_name, char *mac_addr)
 			dmuci_get_value_by_section_string(dmmap_section, "section_name", &section_name);
 
 			/* Check section name exist => if yes, return*/
-			if (ethernet_check_section_in_curr_section(section_name, sec_name))
+			if (ethernet___check_section_in_curr_section(section_name, sec_name))
 				return;
 
 			/* Update only section name */
@@ -935,7 +935,7 @@ static int get_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 		return 0;
 
 	// get device section mapped to this device name
-	struct uci_section *br_device_s = get_device_section(linker);
+	struct uci_section *br_device_s = ethernet___get_device_section(linker);
 
 	if (br_device_s) dmuci_get_value_by_section_string(br_device_s, "type", &device_s_type);
 
@@ -1276,7 +1276,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 					snprintf(link_inst, sizeof(link_inst), "%c", value[21]);
 					snprintf(new_name, sizeof(new_name), "%s_%s", vlan_linker, link_inst);
 
-					if (ethernet_name_exists_in_devices(new_name))
+					if (ethernet___name_exists_in_devices(new_name))
 						return -1;
 
 					uci_foreach_option_eq("network", "interface", "device", vlan_linker, s) {
@@ -1301,7 +1301,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 					else
 						snprintf(new_name, sizeof(new_name), "%s", vlan_linker);
 
-					if (ethernet_name_exists_in_devices(new_name))
+					if (ethernet___name_exists_in_devices(new_name))
 						return -1;
 
 					// if device is lowerlayer to an ip interface, then
@@ -1328,7 +1328,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 					break;
 				}
 				snprintf(new_name, sizeof(new_name), "%s.%s.%s", dev_name, inner_vid, vid);
-				if (ethernet_name_exists_in_devices(new_name))
+				if (ethernet___name_exists_in_devices(new_name))
 					return -1;
 
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", dev_name);
@@ -1384,7 +1384,7 @@ static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 						snprintf(new_name, sizeof(new_name), "%s.%s", ifname, value);
 					}
 
-					if (ethernet_name_exists_in_devices(new_name))
+					if (ethernet___name_exists_in_devices(new_name))
 						return -1;
 
 					// Update the corresponding device '8021ad' section that maps to this section
