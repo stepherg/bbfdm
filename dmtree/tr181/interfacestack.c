@@ -156,6 +156,11 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			char *value = NULL;
 			int found = 0;
 			char *device = get_device(section_name(s));
+
+			/* If the device value is empty, then get its value directly from device option */
+			if (*device == '\0')
+				dmuci_get_value_by_section_string(s, "device", &device);
+
 			if (device[0] != '\0') {
 				struct uci_section *vlan_sect = NULL;
 				adm_entry_get_linker_param(dmctx, "Device.Ethernet.VLANTermination.", device, &value);
@@ -219,6 +224,11 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		int found = 0;
 		// The lower layer is Device.Ethernet.VLANTermination.{i}.
 		char *ppp_device = get_device(section_name(s));
+
+		/* If the device value is empty, then get its value directly from device option */
+		if (*ppp_device == '\0')
+			dmuci_get_value_by_section_string(s, "device", &ppp_device);
+
 		if (ppp_device[0] != '\0') {
 			struct uci_section *vlan_sect = NULL;
 			adm_entry_get_linker_param(dmctx, "Device.Ethernet.VLANTermination.", ppp_device, &value);

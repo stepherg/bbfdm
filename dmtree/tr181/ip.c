@@ -763,7 +763,7 @@ static int addObjIPInterface(char *refparam, struct dmctx *ctx, void *data, char
 	struct uci_section *dmmap_ip_interface;
 	char ip_name[32] = {0};
 
-	snprintf(ip_name, sizeof(ip_name), "ip_interface_%s", *instance);
+	snprintf(ip_name, sizeof(ip_name), "iface%s", *instance);
 
 	dmuci_set_value("network", ip_name, "", "interface");
 	dmuci_set_value("network", ip_name, "proto", "none");
@@ -812,7 +812,7 @@ static int addObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 	if (!strcmp(*instance, "1")) {
 		char device_buf[32] = {0};
 
-		snprintf(ipv4_name, sizeof(ipv4_name), "ip_interface_%s_ipv4_%s", ip_inst, *instance);
+		snprintf(ipv4_name, sizeof(ipv4_name), "iface%s_ipv4_%s", ip_inst, *instance);
 		snprintf(device_buf, sizeof(device_buf), "@%s", section_name((struct uci_section *)data));
 
 		dmuci_set_value("network", ipv4_name, "", "interface");
@@ -893,7 +893,7 @@ static int addObjIPInterfaceIPv6Address(char *refparam, struct dmctx *ctx, void 
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_ip_interface);
 	dmuci_get_value_by_section_string(dmmap_ip_interface, "ip_int_instance", &ip_inst);
 
-	snprintf(ipv6_name, sizeof(ipv6_name), "ip_interface_%s_ipv6_%s", ip_inst, *instance);
+	snprintf(ipv6_name, sizeof(ipv6_name), "iface%s_ipv6_%s", ip_inst, *instance);
 	snprintf(device_buf, sizeof(device_buf), "@%s", section_name((struct uci_section *)data));
 
 	dmuci_set_value("network", ipv6_name, "", "interface");
@@ -922,7 +922,7 @@ static int addObjIPInterfaceIPv6Prefix(char *refparam, struct dmctx *ctx, void *
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_ip_interface);
 	dmuci_get_value_by_section_string(dmmap_ip_interface, "ip_int_instance", &ip_inst);
 
-	snprintf(ipv6_prefix_name, sizeof(ipv6_prefix_name), "ip_interface_%s_ipv6_prefix_%s", ip_inst, *instance);
+	snprintf(ipv6_prefix_name, sizeof(ipv6_prefix_name), "iface%s_ipv6_prefix_%s", ip_inst, *instance);
 	snprintf(device_buf, sizeof(device_buf), "@%s", section_name((struct uci_section *)data));
 
 	dmuci_set_value("network", ipv6_prefix_name, "", "interface");
