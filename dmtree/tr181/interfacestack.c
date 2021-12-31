@@ -266,7 +266,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		char *type, *name, *value = NULL;
 		dmuci_get_value_by_section_string(s, "type", &type);
 		dmuci_get_value_by_section_string(s, "name", &name);
-		if (strcmp(type, "bridge") == 0 || strcmp(type, "untagged") == 0)
+		if (strcmp(type, "bridge") == 0 || strcmp(type, "untagged") == 0 || (*name != 0 && !ethernet___check_vlan_termination_section(name)))
 			continue;
 
 		// The higher layer is Device.Ethernet.VLANTermination.{i}.
