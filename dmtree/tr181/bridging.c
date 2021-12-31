@@ -1153,22 +1153,30 @@ static void remove_vlanport_section(struct uci_section *vlanport_dmmap_sec, stru
 	// Update  port section if vid != 0
 	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_inst, s) {
 		if (port_name && strcmp(section_name(s), port_name) == 0) {
+			char curr_port[32] = {0};
 			char *port = NULL;
 
 			// Get port device from dmmap section
 			dmuci_get_value_by_section_string(s, "port", &port);
+			DM_STRNCPY(curr_port, port, sizeof(curr_port));
+
 			char *vid = port ? strchr(port, '.') : NULL;
 			if (vid) {
-				// Remove curr port from port list of bridge section
-				remove_port_from_bridge_section(bridge_sec, port);
+				// network: Remove curr port from ports list of bridge section
+				remove_port_from_bridge_section(bridge_sec, curr_port);
 
 				// Remove vid from device
 				vid[0] = '\0';
 
-				// Add new device to ifname list
+				// network: Add new port to ports list
 				add_port_to_bridge_section(bridge_sec, port);
 
-				// Update device in dmmap
+				// dmmap_bridge: Add new port to ports list
+				struct uci_section *dmmap_bridge_s = NULL;
+				get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(bridge_sec), &dmmap_bridge_s);
+				replace_existing_port_to_bridge_section(dmmap_bridge_s, port, curr_port);
+
+				// dmmap_bridge_port: Update port option
 				dmuci_set_value_by_section(s, "port", port);
 			}
 			break;
