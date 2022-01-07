@@ -48,7 +48,7 @@ int bbf_uci_init(void)
 
 	dmuci_init_bbfdm();
 
-	db_config = (folder_exists(LIB_DB_CONFIG)) ? LIB_DB_CONFIG : ETC_DB_CONFIG;
+	db_config = ETC_DB_CONFIG;
 
 	return 0;
 }
@@ -838,7 +838,7 @@ int db_get_value_string(char *package, char *section, char *option, char **value
 {
 	struct uci_option *o;
 
-	o = dmuci_get_option_ptr((db_config) ? db_config : LIB_DB_CONFIG, package, section, option);
+	o = dmuci_get_option_ptr((db_config) ? db_config : ETC_DB_CONFIG, package, section, option);
 	if (o) {
 		*value = o->v.string ? dmstrdup(o->v.string) : ""; // MEM WILL BE FREED IN DMMEMCLEAN
 	} else {

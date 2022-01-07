@@ -226,13 +226,19 @@ static int get_device_productclass(char *refparam, struct dmctx *ctx, void *data
 
 static int get_device_serialnumber(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	db_get_value_string("device", "deviceinfo", "SerialNumber", value);
+	dmuci_get_option_value_string("cwmp", "cpe", "serial_number", value);
+	if (*value[0] == '\0')
+		db_get_value_string("device", "deviceinfo", "SerialNumber", value);
+
 	return 0;
 }
 
 static int get_device_softwareversion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	db_get_value_string("device", "deviceinfo", "SoftwareVersion", value);
+	dmuci_get_option_value_string("cwmp", "cpe", "software_version", value);
+	if (*value[0] == '\0')
+		db_get_value_string("device", "deviceinfo", "SoftwareVersion", value);
+
 	return 0;
 }
 
