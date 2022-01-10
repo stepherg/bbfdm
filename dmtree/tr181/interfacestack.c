@@ -263,10 +263,18 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 	/* Higher layers are Device.Ethernet.VLANTermination.{i}. */
 	uci_foreach_sections("network", "device", s) {
-		char *type, *name, *value = NULL;
+		struct uci_section *dmmap_section = NULL;
+		char *type, *name, *is_vlan, *value = NULL;
+
+		get_dmmap_section_of_config_section("dmmap_network", "device", section_name(s), &dmmap_section);
+		dmuci_get_value_by_section_string(dmmap_section, "is_vlan_ter", &is_vlan);
+
 		dmuci_get_value_by_section_string(s, "type", &type);
 		dmuci_get_value_by_section_string(s, "name", &name);
-		if (strcmp(type, "bridge") == 0 || strcmp(type, "untagged") == 0 || (*name != 0 && !ethernet___check_vlan_termination_section(name)))
+		if (strcmp(type, "bridge") == 0 ||
+			strcmp(type, "untagged") == 0 ||
+			(*name == 0 && strcmp(is_vlan, "1") != 0) ||
+			(*name != 0 && !ethernet___check_vlan_termination_section(name)))
 			continue;
 
 		// The higher layer is Device.Ethernet.VLANTermination.{i}.

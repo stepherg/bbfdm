@@ -288,7 +288,7 @@ static int browseEthernetLinkInst(struct dmctx *dmctx, DMNODE *parent_node, void
 /*#Device.Ethernet.VLANTermination.{i}.!UCI:network/device/dmmap_network*/
 static int browseEthernetVLANTerminationInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *type, *name, *inst = NULL;
+	char *type, *name, *is_vlan, *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
@@ -297,7 +297,11 @@ static int browseEthernetVLANTerminationInst(struct dmctx *dmctx, DMNODE *parent
 
 		dmuci_get_value_by_section_string(p->config_section, "type", &type);
 		dmuci_get_value_by_section_string(p->config_section, "name", &name);
-		if (strcmp(type, "bridge") == 0 || strcmp(type, "untagged") == 0 || (*name != 0 && !ethernet___check_vlan_termination_section(name)))
+		dmuci_get_value_by_section_string(p->dmmap_section, "is_vlan_ter", &is_vlan);
+		if (strcmp(type, "bridge") == 0 ||
+			strcmp(type, "untagged") == 0 ||
+			(*name == 0 && strcmp(is_vlan, "1") != 0) ||
+			(*name != 0 && !ethernet___check_vlan_termination_section(name)))
 			continue;
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "vlan_term_instance", "vlan_term_alias");
@@ -433,6 +437,7 @@ static int addObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 	// Add device section in dmmap_network file
 	dmuci_add_section_bbfdm("dmmap_network", "device", &dmmap_network);
 	dmuci_set_value_by_section(dmmap_network, "section_name", device_name);
+	dmuci_set_value_by_section(dmmap_network, "is_vlan_ter", "1");
 	dmuci_set_value_by_section(dmmap_network, "vlan_term_instance", *instance);
 	return 0;
 }
@@ -440,7 +445,7 @@ static int addObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 static int delObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *s_dev = NULL, *sdevtmp = NULL;
-	char *name, *type;
+	char *name, *type, *is_vlan;
 
 	switch (del_action) {
 	case DEL_INST:
@@ -454,13 +459,18 @@ static int delObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 		uci_foreach_sections_safe("network", "device", sdevtmp, s_dev) {
 			struct uci_section *dmmap_section = NULL;
 
+			get_dmmap_section_of_config_section("dmmap_network", "device", section_name(s_dev), &dmmap_section);
+			dmuci_get_value_by_section_string(dmmap_section, "is_vlan_ter", &is_vlan);
+
 			dmuci_get_value_by_section_string(s_dev, "type", &type);
 			dmuci_get_value_by_section_string(s_dev, "name", &name);
-			if (strcmp(type, "bridge") == 0 || strcmp(type, "untagged") == 0 || (*name != 0 && !ethernet___check_vlan_termination_section(name)))
+			if (strcmp(type, "bridge") == 0 ||
+				strcmp(type, "untagged") == 0 ||
+				(*name == 0 && strcmp(is_vlan, "1") != 0) ||
+				(*name != 0 && !ethernet___check_vlan_termination_section(name)))
 				continue;
 
 			// Remove device section in dmmap_network file
-			get_dmmap_section_of_config_section("dmmap_network", "device", section_name(s_dev), &dmmap_section);
 			dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
 			// Remove device section
