@@ -63,18 +63,22 @@ static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 static int add_NAT_InterfaceSetting(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s = NULL, *dmmap_firewall = NULL;
-	char name[32];
+	char zone_name[16] = {0};
+	char name[16] = {0};
 
-	snprintf(name, sizeof(name), "iface_set_%s", *instance);
+	snprintf(zone_name, sizeof(zone_name), "zone_iface_%s", *instance);
+	snprintf(name, sizeof(name), "iface_%s", *instance);
 
 	dmuci_add_section("firewall", "zone", &s);
+	dmuci_rename_section_by_section(s, zone_name);
 	dmuci_set_value_by_section(s, "input", "REJECT");
 	dmuci_set_value_by_section(s, "output", "ACCEPT");
 	dmuci_set_value_by_section(s, "forward", "REJECT");
 	dmuci_set_value_by_section(s, "name", name);
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "zone", &dmmap_firewall);
-	dmuci_set_value_by_section(dmmap_firewall, "section_name", section_name(s));
+	dmuci_set_value_by_section(dmmap_firewall, "section_name", zone_name);
+	dmuci_set_value_by_section(dmmap_firewall, "added_by_controller", "1");
 	dmuci_set_value_by_section(dmmap_firewall, "interface_setting_instance", *instance);
 	return 0;
 }

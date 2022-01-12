@@ -12,6 +12,9 @@
 #include "dmentry.h"
 #include "firewall.h"
 
+/*************************************************************
+* COMMON FUNCTIONS
+**************************************************************/
 static int dmmap_synchronizeNATPortMappingEnable(const char *intf, bool value)
 {
 	struct uci_section *s = NULL;
@@ -34,6 +37,16 @@ static int dmmap_synchronizeNATPortMappingEnable(const char *intf, bool value)
 
 	return 0;
 }
+
+static char *get_rule_perm(char *refparam, struct dmctx *dmctx, void *data, char *instance)
+{
+	char *rule_perm = NULL;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "is_rule", &rule_perm);
+	return rule_perm;
+}
+
+struct dm_permession_s DMRule = {"1", &get_rule_perm};
 
 /*************************************************************
 * ENTRY METHOD
@@ -63,15 +76,33 @@ static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
-	synchronize_specific_config_sections_with_dmmap("firewall", "rule", "dmmap_firewall", &dup_list);
+	// Forwarding sections
+	synchronize_specific_config_sections_with_dmmap("firewall", "forwarding", "dmmap_firewall", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
+
+		dmuci_set_value_by_section(p->dmmap_section, "is_rule", "0");
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "firewall_chain_rule_instance", "firewall_chain_rule_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
-			break;
+			goto end;
 	}
 	free_dmmap_config_dup_list(&dup_list);
+
+	// Rule sections
+	synchronize_specific_config_sections_with_dmmap("firewall", "rule", "dmmap_firewall", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		dmuci_set_value_by_section(p->dmmap_section, "is_rule", "1");
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "firewall_chain_rule_instance", "firewall_chain_rule_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+			goto end;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+
+end:
 	return 0;
 }
 
@@ -129,11 +160,7 @@ static int delete_firewall_rule(char *refparam, struct dmctx *ctx, void *data, c
 **************************************************************/
 static int get_firewall_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *path = "/etc/rc.d/*firewall";
-	if (check_file(path))
-		*value = "1";
-	else
-		*value = "0";
+	*value = dmuci_get_option_value_fallback_def("firewall", "globals", "enabled", "1");
 	return 0;
 }
 
@@ -216,6 +243,20 @@ static int get_level_default_log_policy(char *refparam, struct dmctx *ctx, void 
 		}
 	}
 	*value = "0";
+	return 0;
+}
+
+static int get_level_default_policy(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *input = NULL;
+
+	dmuci_get_option_value_string("firewall", "@defaults[0]", "input", &input);
+	if (!input || *input == 0) {
+		*value = "Drop";
+		return 0;
+	}
+
+	*value = (*input == 'A') ? "Accept" : (*input == 'R') ? "Reject" : "Drop";
 	return 0;
 }
 
@@ -665,7 +706,7 @@ static int set_firewall_enable(char *refparam, struct dmctx *ctx, void *data, ch
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmcmd("/etc/init.d/firewall", 1, b ? "enable" : "disable");
+			dmuci_set_value("firewall", "globals", "enabled", b ? "1" : "0");
 			break;
 	}
         return 0;
@@ -776,6 +817,31 @@ static int set_level_port_mapping_enabled(char *refparam, struct dmctx *ctx, voi
 			break;
 	}
         return 0;
+}
+
+static int set_level_default_policy(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *DefaultPolicy[] = {"Drop", "Accept", "Reject", NULL};
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, -1, DefaultPolicy, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			if (strcmp(value, "Drop") == 0) {
+				dmuci_set_value("firewall", "@defaults[0]", "input", "DROP");
+				dmuci_set_value("firewall", "@defaults[0]", "output", "DROP");
+			} else if (strcmp(value, "Accept") == 0) {
+				dmuci_set_value("firewall", "@defaults[0]", "input", "ACCEPT");
+				dmuci_set_value("firewall", "@defaults[0]", "output", "ACCEPT");
+			} else {
+				dmuci_set_value("firewall", "@defaults[0]", "input", "REJECT");
+				dmuci_set_value("firewall", "@defaults[0]", "output", "REJECT");
+			}
+			break;
+	}
+	return 0;
 }
 
 static int set_level_default_log_policy(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -1326,6 +1392,7 @@ DMLEAF tFirewallLevelParams[] = {
 {"Description", &DMWRITE, DMT_STRING, get_level_description, set_level_description, BBFDM_BOTH, "2.2"},
 {"Chain", &DMREAD, DMT_STRING, get_level_chain, NULL, BBFDM_BOTH, "2.2"},
 {"PortMappingEnabled", &DMWRITE, DMT_BOOL, get_level_port_mapping_enabled, set_level_port_mapping_enabled, BBFDM_BOTH, "2.2"},
+{"DefaultPolicy", &DMWRITE, DMT_STRING, get_level_default_policy, set_level_default_policy, BBFDM_BOTH, "2.2"},
 {"DefaultLogPolicy", &DMWRITE, DMT_BOOL, get_level_default_log_policy, set_level_default_log_policy, BBFDM_BOTH, "2.2"},
 {0}
 };
@@ -1350,29 +1417,29 @@ DMLEAF tFirewallChainParams[] = {
 /* *** Device.Firewall.Chain.{i}.Rule.{i}. *** */
 DMLEAF tFirewallChainRuleParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMWRITE, DMT_BOOL, get_rule_enable, set_rule_enable, BBFDM_BOTH, "2.2"},
-{"Status", &DMREAD, DMT_STRING, get_rule_status, NULL, BBFDM_BOTH, "2.2"},
+{"Enable", &DMRule, DMT_BOOL, get_rule_enable, set_rule_enable, BBFDM_BOTH, "2.2"},
+{"Status", &DMRule, DMT_STRING, get_rule_status, NULL, BBFDM_BOTH, "2.2"},
 {"Order", &DMWRITE, DMT_UNINT, get_rule_order, set_rule_order, BBFDM_BOTH, "2.2"},
 {"Alias", &DMWRITE, DMT_STRING, get_rule_alias, set_rule_alias, BBFDM_BOTH, "2.2"},
-{"Description", &DMWRITE, DMT_STRING, get_rule_description, set_rule_description, BBFDM_BOTH, "2.2"},
-{"Target", &DMWRITE, DMT_STRING, get_rule_target, set_rule_target, BBFDM_BOTH, "2.2"},
-//{"TargetChain", &DMWRITE, DMT_STRING, get_rule_target_chain, set_rule_target_chain, BBFDM_BOTH, "2.2"},
-{"Log", &DMWRITE, DMT_BOOL, get_rule_log, set_rule_log, BBFDM_BOTH, "2.2"},
-{"CreationDate", &DMREAD, DMT_TIME, get_FirewallChainRule_CreationDate, NULL, BBFDM_BOTH, "2.2"},
-{"ExpiryDate", &DMWRITE, DMT_TIME, get_FirewallChainRule_ExpiryDate, set_FirewallChainRule_ExpiryDate, BBFDM_BOTH, "2.2"},
-{"SourceInterface", &DMWRITE, DMT_STRING, get_rule_source_interface, set_rule_source_interface, BBFDM_BOTH, "2.2"},
-{"SourceAllInterfaces", &DMWRITE, DMT_BOOL, get_rule_source_all_interfaces, set_rule_source_all_interfaces, BBFDM_BOTH, "2.2"},
-{"DestInterface", &DMWRITE, DMT_STRING, get_rule_dest_interface, set_rule_dest_interface, BBFDM_BOTH, "2.2"},
+{"Description", &DMRule, DMT_STRING, get_rule_description, set_rule_description, BBFDM_BOTH, "2.2"},
+{"Target", &DMRule, DMT_STRING, get_rule_target, set_rule_target, BBFDM_BOTH, "2.2"},
+//{"TargetChain", &DMRule, DMT_STRING, get_rule_target_chain, set_rule_target_chain, BBFDM_BOTH, "2.2"},
+{"Log", &DMRule, DMT_BOOL, get_rule_log, set_rule_log, BBFDM_BOTH, "2.2"},
+{"CreationDate", &DMRule, DMT_TIME, get_FirewallChainRule_CreationDate, NULL, BBFDM_BOTH, "2.2"},
+{"ExpiryDate", &DMRule, DMT_TIME, get_FirewallChainRule_ExpiryDate, set_FirewallChainRule_ExpiryDate, BBFDM_BOTH, "2.2"},
+{"SourceInterface", &DMRule, DMT_STRING, get_rule_source_interface, set_rule_source_interface, BBFDM_BOTH, "2.2"},
+{"SourceAllInterfaces", &DMRule, DMT_BOOL, get_rule_source_all_interfaces, set_rule_source_all_interfaces, BBFDM_BOTH, "2.2"},
+{"DestInterface", &DMRule, DMT_STRING, get_rule_dest_interface, set_rule_dest_interface, BBFDM_BOTH, "2.2"},
 {"DestAllInterfaces", &DMWRITE, DMT_BOOL, get_rule_dest_all_interfaces, set_rule_dest_all_interfaces, BBFDM_BOTH, "2.2"},
-{"IPVersion", &DMWRITE, DMT_INT, get_rule_i_p_version, set_rule_i_p_version, BBFDM_BOTH, "2.2"},
-{"DestIP", &DMWRITE, DMT_STRING, get_rule_dest_ip, set_rule_dest_ip, BBFDM_BOTH, "2.2"},
-{"DestMask", &DMWRITE, DMT_STRING, get_rule_dest_mask, set_rule_dest_mask, BBFDM_BOTH, "2.2"},
-{"SourceIP", &DMWRITE, DMT_STRING, get_rule_source_ip, set_rule_source_ip, BBFDM_BOTH, "2.2"},
-{"SourceMask", &DMWRITE, DMT_STRING, get_rule_source_mask, set_rule_source_mask, BBFDM_BOTH, "2.2"},
-{"Protocol", &DMWRITE, DMT_INT, get_rule_protocol, set_rule_protocol, BBFDM_BOTH, "2.2"},
-{"DestPort", &DMWRITE, DMT_INT, get_rule_dest_port, set_rule_dest_port, BBFDM_BOTH, "2.2"},
-{"DestPortRangeMax", &DMWRITE, DMT_INT, get_rule_dest_port_range_max, set_rule_dest_port_range_max, BBFDM_BOTH, "2.2"},
-{"SourcePort", &DMWRITE, DMT_INT, get_rule_source_port, set_rule_source_port, BBFDM_BOTH, "2.2"},
-{"SourcePortRangeMax", &DMWRITE, DMT_INT, get_rule_source_port_range_max, set_rule_source_port_range_max, BBFDM_BOTH, "2.2"},
+{"IPVersion", &DMRule, DMT_INT, get_rule_i_p_version, set_rule_i_p_version, BBFDM_BOTH, "2.2"},
+{"DestIP", &DMRule, DMT_STRING, get_rule_dest_ip, set_rule_dest_ip, BBFDM_BOTH, "2.2"},
+{"DestMask", &DMRule, DMT_STRING, get_rule_dest_mask, set_rule_dest_mask, BBFDM_BOTH, "2.2"},
+{"SourceIP", &DMRule, DMT_STRING, get_rule_source_ip, set_rule_source_ip, BBFDM_BOTH, "2.2"},
+{"SourceMask", &DMRule, DMT_STRING, get_rule_source_mask, set_rule_source_mask, BBFDM_BOTH, "2.2"},
+{"Protocol", &DMRule, DMT_INT, get_rule_protocol, set_rule_protocol, BBFDM_BOTH, "2.2"},
+{"DestPort", &DMRule, DMT_INT, get_rule_dest_port, set_rule_dest_port, BBFDM_BOTH, "2.2"},
+{"DestPortRangeMax", &DMRule, DMT_INT, get_rule_dest_port_range_max, set_rule_dest_port_range_max, BBFDM_BOTH, "2.2"},
+{"SourcePort", &DMRule, DMT_INT, get_rule_source_port, set_rule_source_port, BBFDM_BOTH, "2.2"},
+{"SourcePortRangeMax", &DMRule, DMT_INT, get_rule_source_port_range_max, set_rule_source_port_range_max, BBFDM_BOTH, "2.2"},
 {0}
 };
