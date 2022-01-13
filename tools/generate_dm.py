@@ -43,47 +43,56 @@ json_data = json.loads(json_file.read())
 for option, value in json_data.items():
     if option is None:
         print("!!!! %s : Wrong JSON format!" % sys.argv[1])
+        print_dm_usage()
         exit(1)
 
-    if option == "manufacturer":
+    elif option == "manufacturer":
         bbf_xml.MANUFACTURER = value
         continue
 
-    if option == "protocol":
+    elif option == "protocol":
         bbf_xml.DEVICE_PROTOCOL = value
         continue
 
-    if option == "manufacturer_oui":
+    elif option == "manufacturer_oui":
         bbf_xml.MANUFACTURER_OUI = value
         continue
 
-    if option == "product_class":
+    elif option == "product_class":
         bbf_xml.PRODUCT_CLASS = value
         continue
 
-    if option == "model_name":
+    elif option == "model_name":
         bbf_xml.MODEL_NAME = value
         continue
 
-    if option == "software_version":
+    elif option == "software_version":
         bbf_xml.SOFTWARE_VERSION = value
         continue
 
-    if option == "vendor_prefix":
+    elif option == "vendor_prefix":
         VENDOR_PREFIX = value
         continue
 
-    if option == "vendor_list":
+    elif option == "vendor_list":
         VENDOR_LIST = value
         continue
 
-    if option == "plugins":
+    elif option == "plugins":
         PLUGINS = value
         continue
 
-    if option == "output":
+    elif option == "output":
         OUTPUT = value
         continue
+
+    elif option == "root_node":
+        bbf.set_root_node(value)
+        continue
+
+    else:
+        print_dm_usage()
+        exit(1)
 
 bbf.generate_supported_dm(VENDOR_PREFIX, VENDOR_LIST, PLUGINS)
 

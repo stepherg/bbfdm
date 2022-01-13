@@ -147,6 +147,7 @@ def generate_hdm_xml_file(output_file):
     #param_array = np.empty(15, dtype=ET.Element)
     param_array = [ET.Element] * 15
     param_array[0] = parameters
+    root_dot_count = bbf.get_root_node().count('.') - 1 if (bbf.get_root_node()) else 0
 
     for value in bbf.LIST_SUPPORTED_DM:
 
@@ -158,7 +159,7 @@ def generate_hdm_xml_file(output_file):
         if obj[2] == "DMT_OBJ":
             # Object
             obj_tag = ET.SubElement(
-                param_array[obj[0].replace(".{i}", "").count('.')-1], "parameter")
+                param_array[obj[0].replace(".{i}", "").count('.') - root_dot_count -1], "parameter")
             obj_name = ET.SubElement(obj_tag, "parameterName")
             obj_name.text = str(obj[0].replace(".{i}", "").split('.')[-2])
             obj_type = ET.SubElement(obj_tag, "parameterType")
@@ -167,12 +168,12 @@ def generate_hdm_xml_file(output_file):
             obj_array.text = str(
                 "true" if obj[0].endswith(".{i}.") else "false")
             parameters = ET.SubElement(obj_tag, "parameters")
-            param_array[obj[0].replace(".{i}", "").count('.')] = parameters
+            param_array[obj[0].replace(".{i}", "").count('.') - root_dot_count] = parameters
             DM_OBJ_COUNT += 1
         else:
             # Parameter
             param_tag = ET.SubElement(
-                param_array[obj[0].replace(".{i}", "").count('.')], "parameter")
+                param_array[obj[0].replace(".{i}", "").count('.') - root_dot_count], "parameter")
             param_name = ET.SubElement(param_tag, "parameterName")
             param_name.text = str(obj[0][obj[0].rindex('.')+1:])
             param_type = ET.SubElement(param_tag, "parameterType")

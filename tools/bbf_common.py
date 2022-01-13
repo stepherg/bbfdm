@@ -10,6 +10,7 @@ import json
 from collections import OrderedDict
 
 CURRENT_PATH = os.getcwd()
+ROOT = None
 BBF_ERROR_CODE = 0
 BBF_TR181_ROOT_FILE = "device.c"
 BBF_TR104_ROOT_FILE = "servicesvoiceservice.c"
@@ -43,6 +44,12 @@ Array_Types = {"string": "DMT_STRING",
                "command": "DMT_COMMAND",
                "event": "DMT_EVENT"}
 
+def get_root_node():
+    return ROOT
+
+def set_root_node(rootdm = "Device."):
+    global ROOT
+    ROOT = rootdm
 
 def rename_file(old_file_name, new_file_name):
     try:
@@ -125,7 +132,11 @@ def fill_list_supported_dm():
 def fill_data_model_file():
     fp = open(DATA_MODEL_FILE, 'a', encoding='utf-8')
     for value in LIST_SUPPORTED_DM:
-        print(f'{value}', file=fp)
+        if (ROOT):
+            if (value.startswith(ROOT)):
+                print(f'{value}', file=fp)
+        else:
+            print(f'{value}', file=fp)
     fp.close()
 
 

@@ -38,8 +38,12 @@ def is_param_obj_command_event_supported(dmobject):
 
 
 def add_data_to_list_dm(obj, supported, protocols, types):
-    LIST_DM.append(obj + "," + protocols + "," + supported + "," + types)
-
+    rootdm = bbf.get_root_node()
+    if (rootdm):
+        if (obj.startswith(rootdm)):
+            LIST_DM.append(obj + "," + protocols + "," + supported + "," + types)
+    else:
+        LIST_DM.append(obj + "," + protocols + "," + supported + "," + types)
 
 def parse_standard_object(dmobject, value):
     hasobj = bbf.obj_has_child(value)

@@ -5,6 +5,7 @@
   "product_class": "DG400PRIME",
   "model_name": "DG400PRIME-A",
   "software_version": "1.2.3.4",
+  "root_node": "Device.",
   "vendor_list": [
     "iopsys",
     "openwrt"
