@@ -908,3 +908,19 @@ end:
 
 	return val;
 }
+
+bool dmuci_string_to_boolean(char *value)
+{
+	if (!value)
+		return false;
+
+	if (strncasecmp(value, "true", 4) == 0 ||
+	    value[0] == '1' ||
+	    strncasecmp(value, "on", 2) == 0 ||
+	    strncasecmp(value, "yes", 3) == 0 ||
+	    strncasecmp(value, "enable", 6) == 0)
+		return true;
+
+	return false;
+}
+

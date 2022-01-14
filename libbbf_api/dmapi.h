@@ -56,6 +56,8 @@ do { \
 	DST[SIZE-1] = '\0'; \
 } while(0)
 
+#define DM_STRLEN(SRC) (SRC != NULL) ? strlen(SRC) : 0
+
 #define UBUS_ARGS (struct ubus_arg[])
 #define RANGE_ARGS (struct range_args[])
 #define LIST_KEY (const char *[])

@@ -376,6 +376,7 @@ int dmuci_set_value_varstate(char *package, char *section, char *option, char *v
 
 char *dmuci_get_value_by_path(char *path, char *package, char *section, char *option);
 char *dmuci_set_value_by_path(char *path, char *package, char *section, char *option, char *value);
+bool dmuci_string_to_boolean(char *value);
 
 #endif
 

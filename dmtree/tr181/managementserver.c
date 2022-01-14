@@ -17,18 +17,22 @@
 /*#Device.ManagementServer.URL!UCI:cwmp/acs,acs/url*/
 static int get_management_server_url(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *dhcp = NULL, *url = NULL, *provisioning_value = NULL;
+	char *dhcp = NULL, *url = NULL, *dhcp_url = NULL;
+	bool discovery = false;
 
 	dmuci_get_option_value_string("cwmp", "acs", "dhcp_discovery", &dhcp);
 	dmuci_get_option_value_string("cwmp", "acs", "url", &url);
-	dmuci_get_option_value_string("cwmp", "acs", "dhcp_url", &provisioning_value);
+	dmuci_get_option_value_string("cwmp", "acs", "dhcp_url", &dhcp_url);
 
-	if ( ((dhcp && strcmp(dhcp, "enable") == 0 ) || ((url == NULL) || (url[0] == '\0'))) && ((provisioning_value != NULL) && (provisioning_value[0] != '\0')) )
-		*value = provisioning_value;
-	else if ((url != NULL) && (url[0] != '\0'))
+	discovery = dmuci_string_to_boolean(dhcp);
+
+	if ((discovery == true) && (DM_STRLEN(dhcp_url) != 0))
+		*value = dhcp_url;
+	else if (DM_STRLEN(url) != 0)
 		*value = url;
 	else
 		*value = "";
+
 	return 0;
 }
 
