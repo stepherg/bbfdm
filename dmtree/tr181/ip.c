@@ -1391,15 +1391,30 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 						if (strcmp(device, linker_buf) != 0) {
 							struct uci_section *s = NULL;
 
+							// Remove unused Interface section created by Bridge Object if it exists
+							uci_foreach_sections("network", "interface", s) {
+								char *br_device = NULL;
+
+								dmuci_get_value_by_section_string(s, "device", &br_device);
+								if (br_device && strcmp(br_device, linker_buf) == 0) {
+									dmuci_delete_by_section(s, NULL, NULL);
+									break;
+								}
+	 						}
+
+							// Update all bridge_port section with the new device value
 							uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "device", linker_buf, s) {
 								dmuci_set_value_by_section(s, "device", device);
 							}
 
+							// Update device section with the new name value
 							uci_foreach_option_eq("network", "device", "name", linker_buf, s) {
 								dmuci_set_value_by_section(s, "name", device);
 							}
 
+							// Update device option in dmmap section related to this Interface section
 							dmuci_set_value_by_section(eth_link_s, "device", device);
+
 							DM_STRNCPY(linker_buf, device, sizeof(linker_buf));
 						}
 					}

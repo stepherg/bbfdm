@@ -1531,13 +1531,24 @@ void remove_bridge_from_provider_bridge(char *bridge_inst)
 static int addObjBridgingBridge(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s = NULL, *dmmap_bridge = NULL;
-	char device_name[32];
+	char iface_s_name[16];
+	char dev_s_name[16];
+	char device_name[16];
 
-	snprintf(device_name, sizeof(device_name), "br_%s", *instance);
+	snprintf(iface_s_name, sizeof(iface_s_name), "iface_br%s", *instance);
+	snprintf(dev_s_name, sizeof(dev_s_name), "dev_br%s", *instance);
+	snprintf(device_name, sizeof(device_name), "br-dev%s", *instance);
+
+	// Add network bridge section
+	dmuci_add_section("network", "interface", &s);
+	dmuci_rename_section_by_section(s, iface_s_name);
+	dmuci_set_value_by_section(s, "device", device_name);
+	dmuci_set_value_by_section(s, "bridge_empty", "1");
 
 	// Add device bridge section
 	dmuci_add_section("network", "device", &s);
-	dmuci_rename_section_by_section(s, device_name);
+	dmuci_rename_section_by_section(s, dev_s_name);
+	dmuci_set_value_by_section(s, "name", device_name);
 	dmuci_set_value_by_section(s, "type", "bridge");
 
 	// Add dmmap bridge section
@@ -1551,6 +1562,7 @@ static int addObjBridgingBridge(char *refparam, struct dmctx *ctx, void *data, c
 static int delObjBridgingBridge(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *s = NULL, *stmp = NULL;
+	char *curr_device = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
@@ -1572,11 +1584,28 @@ static int delObjBridgingBridge(char *refparam, struct dmctx *ctx, void *data, c
 			// Remove cvlan/svaln from dmmap_provider_bridge section if this bridge instance is a part of it
 			remove_bridge_from_provider_bridge(((struct bridge_args *)data)->br_inst);
 
+			// Remove interface bridge that maps to this device
+			dmuci_get_value_by_section_string(((struct bridge_args *)data)->bridge_sec, "name", &curr_device);
+			if (curr_device && *curr_device) {
+				uci_foreach_sections("network", "interface", s) {
+					char *device = NULL;
+					char *proto = NULL;
+
+					dmuci_get_value_by_section_string(s, "proto", &proto);
+					dmuci_get_value_by_section_string(s, "device", &device);
+					if (device && strcmp(device, curr_device) == 0) {
+						dmuci_delete_by_section(s, (proto && *proto == 0) ? NULL : "device", NULL);
+						break;
+					}
+				}
+			}
+
 			// Remove device bridge section
 			dmuci_delete_by_section(((struct bridge_args *)data)->bridge_sec, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_option_eq_safe("network", "device", "type", "bridge", stmp, s) {
+				struct uci_section *ss = NULL;
 				struct uci_list *br_ports_list = NULL;
 				struct uci_section *dmmap_section = NULL;
 				char *bridge_inst = NULL;
@@ -1602,6 +1631,22 @@ static int delObjBridgingBridge(char *refparam, struct dmctx *ctx, void *data, c
 
 				// Remove dmmap device bridge section
 				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				// Remove interface bridge that maps to this device
+				dmuci_get_value_by_section_string(s, "name", &curr_device);
+				if (curr_device && *curr_device) {
+					uci_foreach_sections("network", "interface", ss) {
+						char *device = NULL;
+						char *proto = NULL;
+
+						dmuci_get_value_by_section_string(ss, "proto", &proto);
+						dmuci_get_value_by_section_string(ss, "device", &device);
+						if (device && strcmp(device, curr_device) == 0) {
+							dmuci_delete_by_section(ss, (proto && *proto == 0) ? NULL : "device", NULL);
+							break;
+						}
+					}
+				}
 
 				// Remove device bridge section
 				dmuci_delete_by_section(s, NULL, NULL);
