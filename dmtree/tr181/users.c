@@ -106,7 +106,7 @@ static int get_user_enable(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int get_user_username(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmstrdup(section_name(((struct dmmap_dup *)data)->config_section));
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "section_name", value);
     return 0;
 }
 

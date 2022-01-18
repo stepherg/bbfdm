@@ -264,10 +264,14 @@ struct uci_section *get_origin_section_from_config(char *package, char *section_
 	struct uci_section *s = NULL;
 
 	uci_foreach_sections(package, section_type, s) {
-		if (strcmp(section_name(s), orig_section_name) == 0) {
+		char sec_name[32] = {0};
+
+		dmuci_replace_invalid_characters_from_section_name(orig_section_name, sec_name, sizeof(sec_name));
+
+		if (strcmp(section_name(s), sec_name) == 0)
 			return s;
-		}
 	}
+
 	return NULL;
 }
 
@@ -275,8 +279,15 @@ struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_
 {
 	struct uci_section *s;
 
-	uci_path_foreach_option_eq(bbfdm, dmmap_package, section_type, "section_name", orig_section_name, s) {
-		return s;
+	uci_path_foreach_sections(bbfdm, dmmap_package, section_type, s) {
+		char *dmmap_sec_name = NULL;
+		char sec_name[32] = {0};
+
+		dmuci_get_value_by_section_string(s, "section_name", &dmmap_sec_name);
+		dmuci_replace_invalid_characters_from_section_name(dmmap_sec_name, sec_name, sizeof(sec_name));
+
+		if (strcmp(sec_name, orig_section_name) == 0)
+			return s;
 	}
 
 	return NULL;

@@ -1813,11 +1813,15 @@ static int delObjBridgingBridgeVLANPort(char *refparam, struct dmctx *ctx, void 
 static int addObjBridgingBridgeVLAN(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *br_vlan_s = NULL;
+	char vlan_name[32]= {0};
 
 	int inst = get_last_inst("dmmap_bridge_vlan", "bridge_vlan", "br_inst", "bridge_vlan_instance", ((struct bridge_args *)data)->br_inst);
 	dmasprintf(instance, "%d", inst+1);
 
+	snprintf(vlan_name, sizeof(vlan_name), "br_%s_vlan_%s", ((struct bridge_args *)data)->br_inst, *instance);
+
 	dmuci_add_section_bbfdm("dmmap_bridge_vlan", "bridge_vlan", &br_vlan_s);
+	dmuci_set_value_by_section(br_vlan_s, "name", vlan_name);
 	dmuci_set_value_by_section(br_vlan_s, "br_inst", ((struct bridge_args *)data)->br_inst);
 	dmuci_set_value_by_section(br_vlan_s, "bridge_vlan_instance", *instance);
 	dmuci_set_value_by_section(br_vlan_s, "device", ((struct bridge_args *)data)->bridge_sec_name);
@@ -2646,33 +2650,19 @@ static int set_BridgingBridgeVLAN_Alias(char *refparam, struct dmctx *ctx, void 
 
 static int get_BridgingBridgeVLAN_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct bridge_vlan_args *)data)->bridge_vlan_sec, "device", value);
+	dmuci_get_value_by_section_string(((struct bridge_vlan_args *)data)->bridge_vlan_sec, "name", value);
 	return 0;
 }
 
 static int set_BridgingBridgeVLAN_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s = NULL;
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_rename_section_by_section(((struct bridge_vlan_args *)data)->bridge_sec, value);
-
-			// Update name in dmmap_bridge section of this bridge instance
-			uci_path_foreach_option_eq(bbfdm, "dmmap_bridge", "device", "bridge_instance", ((struct bridge_vlan_args *)data)->br_inst, s) {
-				dmuci_set_value_by_section(s, "section_name", value);
-			}
-
-			// Update name in dmmap_bridge_port sections of this bridge instance
-			uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", ((struct bridge_vlan_args *)data)->br_inst, s) {
-				dmuci_set_value_by_section(s, "device_section_name", value);
-			}
-
-			// Update name in dmmap_bridge_vlan section of this bridge instance
-			dmuci_set_value_by_section(((struct bridge_vlan_args *)data)->bridge_vlan_sec, "device", value);
+			dmuci_set_value_by_section(((struct bridge_vlan_args *)data)->bridge_vlan_sec, "name", value);
 			return 0;
 	}
 	return 0;

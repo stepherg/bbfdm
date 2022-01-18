@@ -697,6 +697,7 @@ static int set_DynamicDNSServer_Name(char *refparam, struct dmctx *ctx, void *da
 {
 	struct uci_section *s;
 	char *service_name;
+	char *curr_sec_name;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -704,12 +705,24 @@ static int set_DynamicDNSServer_Name(char *refparam, struct dmctx *ctx, void *da
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "section_name", value);
+			dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &curr_sec_name);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "service_name", &service_name);
+
+			// Setting section name
+			dmuci_set_value_by_section((struct uci_section *)data, "section_name", value);
+
+			// Update section name of config ddns service section
 			uci_foreach_option_eq("ddns", "service", "service_name", service_name, s) {
 				dmuci_rename_section_by_section(s, value);
 				break;
 			}
+
+			// Update section name of dmmap_ddns service section
+			uci_path_foreach_option_eq(bbfdm, "dmmap_ddns", "service", "section_name", curr_sec_name, s) {
+				dmuci_set_value_by_section(s, "section_name", value);
+				break;
+			}
+
 			break;
 	}
 	return 0;
