@@ -1696,6 +1696,12 @@ static int delObjBridgingBridgePort(char *refparam, struct dmctx *ctx, void *dat
 			// Remove only dmmap section
 			dmuci_delete_by_section_bbfdm(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, NULL, NULL);
 		} else if (port && *port) {
+
+			// Remove network option from wireless wifi-iface section
+			uci_foreach_option_eq("wireless", "wifi-iface", "device", port, s) {
+				dmuci_set_value_by_section(s, "network", "");
+			}
+
 			// Remove device from management port section
 			remove_device_from_management_port((struct bridge_port_args *)data, port);
 
@@ -1730,6 +1736,11 @@ static int delObjBridgingBridgePort(char *refparam, struct dmctx *ctx, void *dat
 
 			if ((port && port[0] != '\0') && (management && strcmp(management, "0") == 0)) {
 				struct uci_section *ss = NULL;
+
+				// Remove network option from wireless wifi-iface section
+				uci_foreach_option_eq("wireless", "wifi-iface", "device", port, ss) {
+					dmuci_set_value_by_section(ss, "network", "");
+				}
 
 				// Remove ifname from device section
 				uci_foreach_option_eq("network", "device", "name", port, ss) {
