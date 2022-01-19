@@ -2812,15 +2812,17 @@ static int set_BridgingBridgeVLANPort_Alias(char *refparam, struct dmctx *ctx, v
 
 static int get_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char linker[32] = {0};
 	char *vid = NULL;
 
-	/* Get vid from device network section */
 	dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "vid", &vid);
+	if (!vid || *vid == 0) {
+		*value = "";
+	} else {
+		char linker[32] = {0};
 
-	/* Get linker */
-	snprintf(linker, sizeof(linker),"br_%s:vlan_%s", ((struct bridge_vlanport_args *)data)->br_inst, vid);
-	adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", linker, value);
+		snprintf(linker, sizeof(linker),"br_%s:vlan_%s", ((struct bridge_vlanport_args *)data)->br_inst, vid);
+		adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", linker, value);
+	}
 	return 0;
 }
 
@@ -2830,6 +2832,10 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 	char *allowed_objects[] = {
 			lower_layer_path,
 			NULL};
+	char *curr_ifname = NULL;
+	char *curr_name = NULL;
+	char *curr_vid = NULL;
+	char *linker = NULL;
 
 	snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.VLAN.", ((struct bridge_vlanport_args *)data)->br_inst);
 
@@ -2843,33 +2849,61 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 
 			return 0;
 		case VALUESET:
-			/* Check the path object is correct or no */
-			if (strncmp(value, lower_layer_path, strlen(lower_layer_path)) == 0) {
-				/* Check linker exist */
-				char *linker = NULL;
-				adm_entry_get_linker_value(ctx, value, &linker);
-				if (!linker || *linker == '\0')
+			/* Get the current vid, ifname and name in the device section */
+			dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "ifname", &curr_ifname);
+			dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "name", &curr_name);
+			dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "vid", &curr_vid);
+
+			adm_entry_get_linker_value(ctx, value, &linker);
+
+			if (!linker || *linker == '\0') {
+
+				if (curr_vid && *curr_vid == 0)
 					return 0;
 
+				if (curr_name && curr_name[0] != '\0') {
+
+					/* Update device network section */
+					dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "name", curr_ifname);
+					remove_port_from_bridge_section(((struct bridge_vlanport_args *)data)->bridge_sec, curr_name);
+					add_port_to_bridge_section(((struct bridge_vlanport_args *)data)->bridge_sec, curr_ifname);
+
+					/* Update port section in dmmap */
+					struct uci_section *s = NULL;
+					uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", ((struct bridge_vlanport_args *)data)->br_inst, s) {
+						char *port = NULL;
+
+						dmuci_get_value_by_section_string(s, "port", &port);
+						if (port && strcmp(port, curr_name) == 0) {
+							dmuci_set_value_by_section(s, "port", curr_ifname);
+							update_device_management_port(port, curr_ifname, ((struct bridge_vlanport_args *)data)->br_inst);
+							break;
+						}
+					}
+
+					/* Update ports list  in dmmap_bridge */
+					get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_vlanport_args *)data)->bridge_sec), &s);
+					remove_port_from_bridge_section(s, curr_name);
+					add_port_to_bridge_section(s, curr_ifname);
+
+					 /* Update the name dmmap section */
+					dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "name", curr_ifname);
+				}
+
+				dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "vid", "");
+			} else {
 				char *br = strstr(linker, ":vlan_");
 				if (br) {
-					char *curr_name = NULL, *new_vid = dmstrdup(br+6);
-
-					/* Check the current ifname in the device section */
-					dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "name", &curr_name);
+					char *new_vid = dmstrdup(br+6);
 
 					if (curr_name && curr_name[0] != '\0') {
-						// the current ifname is not empty in device section
-
+						// the current name is not empty in device section
 						char new_name[32] = {0};
-						char *curr_ifname = NULL;
-
-						dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "ifname", &curr_ifname);
 
 						/* create the new name */
 						snprintf(new_name, sizeof(new_name), "%s.%s", curr_ifname ? curr_ifname : "", new_vid);
 
-						/* Update interface and device network section */
+						/* Update device network section */
 						dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "name", new_name);
 						dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "vid", new_vid);
 						remove_port_from_bridge_section(((struct bridge_vlanport_args *)data)->bridge_sec, curr_name);
@@ -2890,7 +2924,7 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 
 						/* Update ports list  in dmmap_bridge */
 						get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_vlanport_args *)data)->bridge_sec), &s);
-						remove_port_from_bridge_section(s, curr_ifname);
+						remove_port_from_bridge_section(s, curr_name);
 						add_port_to_bridge_section(s, new_name);
 
 						 /* Update the name dmmap section */
@@ -2918,8 +2952,10 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 						}
 					}
 				}
+
+				handle_inner_vid();
 			}
-			handle_inner_vid();
+
 			return 0;
 	}
 	return 0;
@@ -2928,13 +2964,17 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 static int get_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *name = NULL, *port_name = NULL;
-	char linker[128] = {0};
 
 	dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "name", &name);
 	dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "port_name", &port_name);
+	if (!name || *name == 0 || !port_name || *port_name == 0) {
+		*value = "";
+	} else {
+		char linker[128] = {0};
 
-	snprintf(linker, sizeof(linker), "br_%s:%s+%s", ((struct bridge_vlanport_args *)data)->br_inst, port_name, name);
-	adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", linker, value);
+		snprintf(linker, sizeof(linker), "br_%s:%s+%s", ((struct bridge_vlanport_args *)data)->br_inst, port_name, name);
+		adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", linker, value);
+	}
 	return 0;
 }
 
@@ -2944,6 +2984,7 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 	char *allowed_objects[] = {
 			lower_layer_path,
 			NULL};
+	char *linker = NULL;
 
 	snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.Port.", ((struct bridge_vlanport_args *)data)->br_inst);
 
@@ -2957,25 +2998,63 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 
 			return 0;
 		case VALUESET:
-			if (strncmp(value, lower_layer_path, strlen(lower_layer_path)) == 0) {
+			adm_entry_get_linker_value(ctx, value, &linker);
 
-				char *linker = NULL;
-				adm_entry_get_linker_value(ctx, value, &linker);
-				if (!linker || *linker == '\0')
+			if (!linker || *linker == '\0') {
+				struct uci_section *s = NULL;
+				char *curr_name = NULL;
+				char *port_name = NULL;
+				char name[32] = {0};
+
+				dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "port_name", &port_name);
+				dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "name", &curr_name);
+
+				if (curr_name && *curr_name == 0)
 					return 0;
 
+				DM_STRNCPY(name, curr_name, sizeof(name));
+				char *tag = strchr(curr_name, '.');
+				if (tag) tag[0] = '\0';
+
+				/* Update device section */
+				dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "name", "");
+				dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "ifname", "");
+
+				/* network->device : Update ports list */
+				remove_port_from_bridge_section(((struct bridge_vlanport_args *)data)->bridge_sec, name);
+				add_port_to_bridge_section(((struct bridge_vlanport_args *)data)->bridge_sec, curr_name);
+
+				/* dmmap_bridge->device : Update ports list */
+				get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_vlanport_args *)data)->bridge_sec), &s);
+				remove_port_from_bridge_section(s, name);
+				add_port_to_bridge_section(s, curr_name);
+
+				/* Update dmmap vlanport section */
+				dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "name", "");
+				dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "port_name", "");
+
+				/* Update dmmap bridge_port section */
+				uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", ((struct bridge_vlanport_args *)data)->br_inst, s) {
+					if (port_name && strcmp(section_name(s), port_name) == 0) {
+						dmuci_set_value_by_section(s, "port", curr_name);
+						update_device_management_port(name, curr_name, ((struct bridge_vlanport_args *)data)->br_inst);
+						break;
+					}
+				}
+			} else {
 				char *br = strchr(linker, ':');
 				if (br) {
 
 					char *section_name = dmstrdup(br+1);
 					char *br_link = strchr(section_name, '+');
 					if (br_link) {
+						char *curr_vid = NULL;
 						char *port_linker = dmstrdup(br_link+1);
 						*br_link = '\0';
 
-						char *vid = NULL;
-						dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "vid", &vid);
-						if (vid && vid[0] == '\0') {
+						dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "vid", &curr_vid);
+
+						if (curr_vid && curr_vid[0] == '\0') {
 
 							/* Update device section */
 							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "name", port_linker);
@@ -2984,7 +3063,7 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 							/* Update dmmap vlanport section */
 							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "name", port_linker);
 							dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "port_name", section_name);
-						} else if (vid && *vid) {
+						} else if (curr_vid && *curr_vid) {
 							struct uci_section *s = NULL;
 							char new_name[32] = {0};
 
@@ -2992,7 +3071,7 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 							if (port_linker[0] != '\0'){
 								char *tag = strchr(port_linker, '.');
 								if (tag) tag[0] = '\0';
-								snprintf(new_name, sizeof(new_name), "%s.%s", port_linker, vid);
+								snprintf(new_name, sizeof(new_name), "%s.%s", port_linker, curr_vid);
 							}
 
 							/* Update device section */
@@ -3023,8 +3102,9 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 						}
 					}
 				}
+
+				handle_inner_vid();
 			}
-			handle_inner_vid();
 			return 0;
 	}
 	return 0;

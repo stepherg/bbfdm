@@ -482,6 +482,13 @@ static int get_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 {
 	struct uci_section *dhcpv6_s = (((struct dhcpv6_client_args *)data)->dhcp_client_sections)->config_section;
 	char *device = NULL;
+	char *is_empty = NULL;
+
+	dmuci_get_value_by_section_string((((struct dhcpv6_client_args *)data)->dhcp_client_sections)->dmmap_section, "is_empty", &is_empty);
+	if ((is_empty && strcmp(is_empty, "1") == 0)) {
+		*value = "";
+		return 0;
+	}
 
 	dmuci_get_value_by_section_string(dhcpv6_s, "device", &device);
 	char *parent_s = (device && *device) ? strchr(device, '@') : NULL;

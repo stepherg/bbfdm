@@ -191,18 +191,21 @@ int set_DHCP_Interface(struct dmctx *ctx, char *value, struct uci_section *confi
 
 			break;
 		case VALUESET:
-			// Return if the value is empty
-			if (value == NULL || *value == '\0')
-				break;
-
 			// Get linker
 			adm_entry_get_linker_value(ctx, value, &linker);
+
+			if (!linker || *linker == 0) {
+				dmuci_set_value_by_section_bbfdm(dmmap_s, "is_empty", "1");
+				break;
+			}
+
+			dmuci_set_value_by_section_bbfdm(dmmap_s, "is_empty", "");
 
 			// Get the corresponding network config
 			get_config_section_of_dmmap_section("network", "interface", linker, &interface_s);
 
 			// break if interface section is not found
-			if (interface_s == NULL)
+			if (interface_s == NULL || (strcmp(section_name(interface_s), section_name(config_s)) == 0))
 				break;
 
 			// Get the current proto value
@@ -2022,6 +2025,13 @@ static int set_DHCPv4Client_Alias(char *refparam, struct dmctx *ctx, void *data,
 static int get_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *dhcp_s = (((struct dhcp_client_args *)data)->dhcp_client_sections)->config_section;
+	char *is_empty = NULL;
+
+	dmuci_get_value_by_section_string((((struct dhcp_client_args *)data)->dhcp_client_sections)->dmmap_section, "is_empty", &is_empty);
+	if (is_empty && strcmp(is_empty, "1") == 0) {
+		*value = "";
+		return 0;
+	}
 
 	char *linker = dmstrdup(dhcp_s ? section_name(dhcp_s) : "");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
@@ -2759,11 +2769,16 @@ static int set_DHCPv4RelayForwarding_Alias(char *refparam, struct dmctx *ctx, vo
 
 static int get_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	if ((((struct dhcp_client_args *)data)->dhcp_client_sections)->config_section == NULL) {
+	struct uci_section *dhcp_s = (((struct dhcp_client_args *)data)->dhcp_client_sections)->config_section;
+	char *is_empty = NULL;
+
+	dmuci_get_value_by_section_string((((struct dhcp_client_args *)data)->dhcp_client_sections)->dmmap_section, "is_empty", &is_empty);
+	if ((is_empty && strcmp(is_empty, "1") == 0) || !dhcp_s) {
 		*value = "";
 		return 0;
 	}
-	char *linker = dmstrdup(section_name((((struct dhcp_client_args *)data)->dhcp_client_sections)->config_section));
+
+	char *linker = dmstrdup(dhcp_s ? section_name(dhcp_s) : "");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	return 0;
 }
