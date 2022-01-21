@@ -5353,9 +5353,22 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 			char *signal_strength[2] = {0};
 
 			char *radio_name = dmjson_get_value(radios, 1, "name");
+			if (!DM_STRLEN(radio_name))
+				continue;
+
 			snprintf(object, sizeof(object), "wifi.radio.%s", radio_name);
+
+			struct blob_buf bb;
+			memset(&bb, 0, sizeof(struct blob_buf));
+			blob_buf_init(&bb, 0);
+			blobmsg_add_string(&bb, "radio", radio_name);
+			blobmsg_add_string(&bb, "action", "scan_finished");
+
 			dmubus_call_set(object, "scan", UBUS_ARGS{0}, 0);
-			sleep(2); // Wait for results to get populated in scanresults
+
+			dmubus_register_event_blocking("wifi.radio", 30, bb.head);
+			blob_buf_free(&bb);
+
 			dmubus_call(object, "scanresults", UBUS_ARGS{0}, 0, &scan_res);
 
 			if (!scan_res)

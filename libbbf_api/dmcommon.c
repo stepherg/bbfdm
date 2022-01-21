@@ -1746,3 +1746,83 @@ char *get_ipv6(char *interface_name)
 
 	return (*ipstr) ? dmstrdup(ipstr) : "";
 }
+
+static bool validate_blob_dataval(struct blob_attr *src_attr, struct blob_attr *dst_attr)
+{
+	if (!src_attr || !dst_attr)
+		return false;
+
+	int src_type = blob_id(src_attr);
+	int dst_type = blob_id(dst_attr);
+	if (src_type != dst_type)
+		return false;
+
+	void *src_val = blobmsg_data(src_attr);
+	void *dst_val = blobmsg_data(dst_attr);
+
+	switch (src_type) {
+	case BLOBMSG_TYPE_STRING:
+		if (src_val == NULL && dst_val == NULL)
+			return true;
+
+		if (src_val && dst_val && strcmp((char *)src_val, (char*)dst_val) == 0)
+			return true;
+		break;
+	default:
+		break;
+	}
+
+	return false;
+}
+
+/*********************************************************************//**
+**
+** validate_blob_message
+**
+** This API is to validate the 'src' blob message against 'dst' blob message. It
+** validates the attributes(key:value pair) present in 'src' are also exist in 'dst'.
+** 'dst' may have more attributes than 'src'.
+**
+** NOTE: currently we only support string type value in key:val i.e if the attribute
+** in 'src' blob message is other than of type string (like array, table etc) this
+** API will return false.
+**
+** \param   src - blob message to validate
+** \param   dst - blob message against which the validation is performed
+**
+** \return  true: if all key:value pairs in 'src' are present in 'dst'
+**          false: otherwise
+**
+**************************************************************************/
+bool validate_blob_message(struct blob_attr *src, struct blob_attr *dst)
+{
+	if (!src || !dst)
+		return false;
+
+	size_t src_len = (size_t)blobmsg_data_len(src);
+	size_t dst_len = (size_t)blobmsg_data_len(dst);
+
+	if (dst_len < src_len)
+		return false;
+
+	bool res = true;
+	struct blob_attr *src_attr, *dst_attr;
+
+	__blob_for_each_attr(src_attr, blobmsg_data(src), src_len) {
+		bool matched = false;
+		__blob_for_each_attr(dst_attr, blobmsg_data(dst), dst_len) {
+			if (strcmp(blobmsg_name(src_attr), blobmsg_name(dst_attr)) != 0) {
+				continue;
+			}
+
+			matched = validate_blob_dataval(src_attr, dst_attr);
+			break;
+		}
+		if (matched == false) {
+			res = false;
+			break;
+		}
+	}
+
+	return res;
+}

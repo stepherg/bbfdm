@@ -206,6 +206,78 @@ int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_arg
 	return rc;
 }
 
+struct dmubus_event_data {
+	struct uloop_timeout tm;
+	struct ubus_event_handler ev;
+	struct blob_attr *ev_msg;
+};
+
+static void dmubus_receive_event(struct ubus_context *ctx, struct ubus_event_handler *ev,
+				const char *type, struct blob_attr *msg)
+{
+	struct dmubus_event_data *data = container_of(ev, struct dmubus_event_data, ev);
+
+	if (!msg)
+		return;
+
+	if (validate_blob_message(data->ev_msg, msg) == true) {
+		uloop_end();
+	}
+
+	return;
+}
+
+static void dmubus_listen_timeout(struct uloop_timeout *timeout)
+{
+	uloop_end();
+}
+
+/*********************************************************************//**
+**
+** dmubus_register_event_blocking
+**
+** This API is to wait for the specified event to arrive on ubus or the timeout
+** whichever is earlier
+**
+** NOTE: since this is a blocking call so it should only be called from DM_ASYNC
+**       operations.
+**
+** \param   event - event to be listened on ubus
+** \param   timeout - max time (seconds) to wait for the event
+** \param   type - event type for which the process need to wait
+**
+** E.G: event: wifi.radio, type: {"radio":"wl1","action":"scan_finished"}
+**
+**************************************************************************/
+void dmubus_register_event_blocking(char *event, int timeout, struct blob_attr *type)
+{
+	struct ubus_context *ctx = ubus_connect(NULL);
+	if (!ctx)
+		return;
+
+	struct dmubus_event_data data = {
+		.tm.cb = dmubus_listen_timeout,
+		.ev.cb = dmubus_receive_event,
+		.ev_msg = type,
+	};
+
+	uloop_init();
+	ubus_add_uloop(ctx);
+
+	int ret = ubus_register_event_handler(ctx, &data.ev, event);
+	if (ret)
+		goto end;
+
+	uloop_timeout_set(&data.tm, timeout * 1000);
+	uloop_run();
+	uloop_done();
+	ubus_unregister_event_handler(ctx, &data.ev);
+
+end:
+	ubus_free(ctx);
+	return;
+}
+
 static inline json_object *ubus_call_req(char *obj, char *method, struct blob_attr *attr)
 {
 	__dm_ubus_call(obj, method, attr);
