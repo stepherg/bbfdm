@@ -1327,6 +1327,14 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 			if (strncmp(value, eth_vlan_term, strlen(eth_vlan_term)) == 0) {
 				struct uci_section *s = NULL, *stmp = NULL;
 
+				// Check linker value
+				struct uci_section *vlan_ter_s = get_dup_section_in_config_opt("network", "device", "name", linker_buf);
+				if (vlan_ter_s == NULL) {
+					vlan_ter_s = get_dup_section_in_dmmap_opt("dmmap_network", "device", "default_linker", linker_buf);
+					dmuci_set_value_by_section_bbfdm(vlan_ter_s, "iface_name", section_name((struct uci_section *)data));
+					return 0;
+				}
+
 				// Remove the device section corresponding to this interface if exists
 				char *device = get_device(section_name((struct uci_section *)data));
 				uci_foreach_option_eq_safe("network", "device", "name", device, stmp, s) {

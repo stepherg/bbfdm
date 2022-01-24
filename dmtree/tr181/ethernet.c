@@ -365,6 +365,8 @@ static int get_linker_link(char *refparam, struct dmctx *dmctx, void *data, char
 static int get_linker_vlan_term(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", linker);
+	if ((*linker)[0] == '\0')
+		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "default_linker", linker);
 	return 0;
 }
 
@@ -442,6 +444,7 @@ static int addObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 	// Add device section in dmmap_network file
 	dmuci_add_section_bbfdm("dmmap_network", "device", &dmmap_network);
 	dmuci_set_value_by_section(dmmap_network, "section_name", device_name);
+	dmuci_set_value_by_section(dmmap_network, "default_linker", device_name);
 	dmuci_set_value_by_section(dmmap_network, "is_vlan_ter", "1");
 	dmuci_set_value_by_section(dmmap_network, "vlan_term_instance", *instance);
 	return 0;
@@ -1349,6 +1352,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", "");
 			} else if (strncmp(value, eth_link, strlen(eth_link)) == 0) {
 				char new_name[16] = {0}, *type;
+				char *iface_name = NULL;
 
 				// Get type option from device section
 				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", &type);
@@ -1398,6 +1402,14 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 							dmuci_set_value_by_section(s, "device", new_name);
 						}
 					}
+				}
+
+				// Update interface->device option linked to this VLANTermination if exists
+				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "iface_name", &iface_name);
+				if (iface_name && *iface_name != 0) {
+					struct uci_section *s = get_origin_section_from_config("network", "interface", iface_name);
+					dmuci_set_value_by_section(s, "device", new_name);
+					dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "iface_name", "");
 				}
 
 				// Set ifname and name options of device section

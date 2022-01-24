@@ -246,6 +246,7 @@ void add_elt_to_str_list(char **str_list, char *elt);
 void remove_elt_from_str_list(char **str_list, char *ifname);
 struct uci_section *get_origin_section_from_config(char *package, char *section_type, char *orig_section_name);
 struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_type, char *orig_section_name);
+struct uci_section *get_dup_section_in_config_opt(char *package, char *section_type, char *opt_name, char *opt_value);
 struct uci_section *get_dup_section_in_dmmap_opt(char *dmmap_package, char *section_type, char *opt_name, char *opt_value);
 struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* section_type, char*sect_name, char *opt_name, char* opt_value);
 bool elt_exists_in_array(char **str_array, char *str, int length);

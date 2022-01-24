@@ -293,6 +293,17 @@ struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_
 	return NULL;
 }
 
+struct uci_section *get_dup_section_in_config_opt(char *package, char *section_type, char *opt_name, char *opt_value)
+{
+	struct uci_section *s;
+
+	uci_foreach_option_eq(package, section_type, opt_name, opt_value, s) {
+		return s;
+	}
+
+	return NULL;
+}
+
 struct uci_section *get_dup_section_in_dmmap_opt(char *dmmap_package, char *section_type, char *opt_name, char *opt_value)
 {
 	struct uci_section *s;
