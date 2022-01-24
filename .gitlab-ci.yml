@@ -125,6 +125,7 @@ run_uspd:
   variables:
     UPSTREAM_BBF_SHA: $CI_COMMIT_SHA
     SOURCE_FOLDER: "src"
+    RUN_CPPCHECK: "cppcheck --enable=all --error-exitcode=1 --suppress=unusedFunction ./src"
   allow_failure: false
   trigger:
     project: iopsys/uspd
