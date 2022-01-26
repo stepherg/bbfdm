@@ -217,17 +217,36 @@ static int browseServicesVoiceServiceCallControlOutgoingMapInst(struct dmctx *dm
 
 }
 
-/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.!UCI:asterisk/tel_advanced/dmmap_asterisk*/
+/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.!UCI:asterisk/numberingplan/dmmap_asterisk*/
 static int browseServicesVoiceServiceCallControlNumberingPlanInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
-	synchronize_specific_config_sections_with_dmmap("asterisk", "tel_advanced", "dmmap_asterisk", &dup_list);
+	synchronize_specific_config_sections_with_dmmap("asterisk", "numberingplan", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "numberingplaninstance", "numberingplanalias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.PrefixInfo!UCI:asterisk/prefixinfo/dmmap_asterisk*/
+static int browseServicesVoiceServiceCallControlNumberingPlanPrefixInfo(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL;
+	struct dmmap_dup *p = NULL;
+	LIST_HEAD(dup_list);
+
+	synchronize_specific_config_sections_with_dmmap("asterisk", "prefixinfo", "dmmap_asterisk", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "prefixinfoinstance", "prefixinfoalias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
@@ -452,6 +471,18 @@ static int addObjServicesVoiceServiceCallControlNumberingPlan(char *refparam, st
 static int delObjServicesVoiceServiceCallControlNumberingPlan(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	BBF_DEBUG("VoiceService.1.CallControl.NumberingPlan. has only one instance so it can't be added or deleted\n");
+	return 0;
+}
+
+static int addObjServicesVoiceServiceCallControlNumberingPlanPrefixInfo(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	BBF_DEBUG("VoiceService.1.CallControl.NumberingPlan.PrefixInfo cant be added or deleted\n");
+	return 0;
+}
+
+static int delObjServicesVoiceServiceCallControlNumberingPlanPrefixInfo(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	BBF_DEBUG("VoiceService.1.CallControl.NumberingPlan.PrefixInfo can't be added or deleted\n");
 	return 0;
 }
 
@@ -1040,10 +1071,10 @@ static int get_ServicesVoiceServiceCallControlExtension_CallStatus(char *refpara
 	return 0;
 }
 
-/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.InterDigitTimerStd!UCI:asterisk/tel_advanced,tel_options/interdigit*/
+/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.InterDigitTimerStd!UCI:asterisk/numberingplan/interdigitstdmsec*/
 static int get_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("asterisk", "tel_options", "interdigit", "15000");
+	*value = dmuci_get_option_value_fallback_def("asterisk", "numberingplan", "interdigitstdmsec", "15000");
 	return 0;
 }
 
@@ -1055,7 +1086,7 @@ static int set_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd(c
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value("asterisk", "tel_options", "interdigit", value);
+			dmuci_set_value("asterisk", "numberingplan", "interdigitstdmsec", value);
 			break;
 	}
 	return 0;
@@ -1119,6 +1150,72 @@ static int set_ServicesVoiceServiceCallControlNumberingPlan_MaximumNumberOfDigit
 			break;
 		case VALUESET:
 			dmuci_set_value("asterisk", "numberingplan", "maxnumdigits", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.PrefixInfo.{i}.Enable!UCI:asterisk/prefixinfo,@i-1/prefixenable*/
+static int get_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "prefixenable", "0");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+	case VALUESET:
+		string_to_bool(value, &b);
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "prefixenable", b ? "1" : "0");
+		break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.PrefixInfo.{i}.PrefixRange!UCI:asterisk/prefixrange,@i-1/prefixrange*/
+static int get_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_PrefixRange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "prefixrange", value);
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_PrefixRange(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "prefixrange", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.PrefixInfo.{i}.FacilityAction!UCI:asterisk/prefixinfo,@i-1/facilityaction*/
+static int get_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_FacilityAction(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "facilityaction", value);
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_FacilityAction(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "facilityaction", value);
 			break;
 	}
 	return 0;
@@ -1494,7 +1591,7 @@ DMOBJ tServicesVoiceServiceCallControlObj[] = {
 {"Line", &DMWRITE, addObjServicesVoiceServiceCallControlLine, delObjServicesVoiceServiceCallControlLine, NULL, browseServicesVoiceServiceCallControlLineInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineParams, get_voice_service_line_linker, BBFDM_BOTH, LIST_KEY{"DirectoryNumber", "Alias", NULL}},
 {"IncomingMap", &DMWRITE, addObjServicesVoiceServiceCallControlIncomingMap, delObjServicesVoiceServiceCallControlIncomingMap, NULL, browseServicesVoiceServiceCallControlIncomingMapInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlIncomingMapParams, get_voice_service_callcontrol_linker, BBFDM_BOTH, LIST_KEY{"Line", "Extension", "Alias", NULL}},
 {"OutgoingMap", &DMWRITE, addObjServicesVoiceServiceCallControlOutgoingMap, delObjServicesVoiceServiceCallControlOutgoingMap, NULL, browseServicesVoiceServiceCallControlOutgoingMapInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlOutgoingMapParams, get_voice_service_callcontrol_linker, BBFDM_BOTH, LIST_KEY{"Extension", "Line", "Alias", NULL}},
-{"NumberingPlan", &DMWRITE, addObjServicesVoiceServiceCallControlNumberingPlan, delObjServicesVoiceServiceCallControlNumberingPlan, NULL, browseServicesVoiceServiceCallControlNumberingPlanInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlNumberingPlanParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"NumberingPlan", &DMWRITE, addObjServicesVoiceServiceCallControlNumberingPlan, delObjServicesVoiceServiceCallControlNumberingPlan, NULL, browseServicesVoiceServiceCallControlNumberingPlanInst, NULL, NULL, tServicesVoiceServiceCallControlNumberingPlanObj, tServicesVoiceServiceCallControlNumberingPlanParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {"CallingFeatures", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlCallingFeaturesObj, NULL, NULL, BBFDM_BOTH},
 {"Group", &DMWRITE, addObjServicesVoiceServiceCallControlGroup, delObjServicesVoiceServiceCallControlGroup, NULL, browseServicesVoiceServiceCallControlGroupInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlGroupParams, get_voice_service_callcontrol_linker, BBFDM_BOTH},
 {"Extension", &DMWRITE, addObjServicesVoiceServiceCallControlExtension, delObjServicesVoiceServiceCallControlExtension, NULL, browseServicesVoiceServiceCallControlExtensionInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlExtensionParams, get_voice_service_callcontrol_linker, BBFDM_BOTH, LIST_KEY{"ExtensionNumber", NULL}},
@@ -1555,6 +1652,12 @@ DMLEAF tServicesVoiceServiceCallControlExtensionParams[] = {
 };
 
 /* *** Device.Services.VoiceService.{i}.CallControl.NumberingPlan. *** */
+DMOBJ tServicesVoiceServiceCallControlNumberingPlanObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"PrefixInfo", &DMWRITE, addObjServicesVoiceServiceCallControlNumberingPlanPrefixInfo, delObjServicesVoiceServiceCallControlNumberingPlanPrefixInfo, NULL, browseServicesVoiceServiceCallControlNumberingPlanPrefixInfo, NULL, NULL, NULL, tServicesVoiceServiceCallControlNumberingPlanPrefixInfoParams, NULL, BBFDM_BOTH},
+{0}
+};
+
 DMLEAF tServicesVoiceServiceCallControlNumberingPlanParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"InterDigitTimerStd", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd, set_ServicesVoiceServiceCallControlNumberingPlan_InterDigitTimerStd, BBFDM_BOTH},
@@ -1562,6 +1665,15 @@ DMLEAF tServicesVoiceServiceCallControlNumberingPlanParams[] = {
 {"MinimumNumberOfDigits", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_MinimumNumberOfDigits, set_ServicesVoiceServiceCallControlNumberingPlan_MinimumNumberOfDigits, BBFDM_BOTH},
 {"MaximumNumberOfDigits", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceCallControlNumberingPlan_MaximumNumberOfDigits, set_ServicesVoiceServiceCallControlNumberingPlan_MaximumNumberOfDigits, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlNumberingPlan_Alias, set_ServicesVoiceServiceCallControlNumberingPlan_Alias, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.PrefixInfo. *** */
+DMLEAF tServicesVoiceServiceCallControlNumberingPlanPrefixInfoParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_Enable, set_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_Enable, BBFDM_BOTH},
+{"PrefixRange", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_PrefixRange, set_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_PrefixRange, BBFDM_BOTH},
+{"FacilityAction", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_FacilityAction, set_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_FacilityAction, BBFDM_BOTH},
 {0}
 };
 
