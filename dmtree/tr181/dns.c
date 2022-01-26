@@ -34,35 +34,49 @@ static unsigned char is_dns_server_in_dmmap(char *chk_ip, char *chk_interface)
 static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *jobj = NULL, *arrobj = NULL;
-	struct uci_list *v;
+	struct uci_list *dns_list;
 	struct uci_element *e = NULL;
-	struct uci_section *s = NULL, *sdns = NULL, *stmp = NULL, *ss;
-	char *ipdns = NULL, *str, *vip = NULL, *viface;
+	struct uci_section *s = NULL, *stmp = NULL;
+	char *ipdns = NULL;
 	int j = 0;
 
 	uci_path_foreach_sections_safe(bbfdm, "dmmap_dns", "dns_server", stmp, s) {
-		dmuci_get_value_by_section_string(s, "ip", &vip);
-		dmuci_get_value_by_section_string(s, "interface", &viface);
-		int found = 0;
+		struct uci_section *ss = NULL;
+		char *added_by_controller = NULL;
+		char *ip = NULL;
+		char *iface = NULL;
+		bool found = false;
+
+		dmuci_get_value_by_section_string(s, "added_by_controller", &added_by_controller);
+		if (strcmp(added_by_controller, "1") == 0)
+			continue;
+
+		dmuci_get_value_by_section_string(s, "ip", &ip);
+		dmuci_get_value_by_section_string(s, "interface", &iface);
+
 		uci_foreach_sections("network", "interface", ss) {
-			if (strcmp(section_name(ss), viface) != 0)
+
+			if (strcmp(section_name(ss), iface) != 0)
 				continue;
-			dmuci_get_value_by_section_list(ss, "dns", &v);
-			if (v != NULL) {
-				uci_foreach_element(v, e) {
-					if (strcmp(e->name, vip) == 0) {
-						found = 1;
+
+			dmuci_get_value_by_section_list(ss, "dns", &dns_list);
+			if (dns_list != NULL) {
+				uci_foreach_element(dns_list, e) {
+					if (strcmp(e->name, ip) == 0) {
+						found = true;
 						break;
 					}
 				}
 			}
+
 			if (found)
 				break;
+
 			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(ss), String}}, 1, &jobj);
 			if (!jobj) break;
 			dmjson_foreach_value_in_array(jobj, arrobj, ipdns, j, 1, "dns-server") {
-				if (strcmp(ipdns, vip) == 0) {
-					found = 1;
+				if (strcmp(ipdns, ip) == 0) {
+					found = true;
 					break;
 				}
 			}
@@ -74,30 +88,39 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 	}
 
 	uci_foreach_sections("network", "interface", s) {
-		dmuci_get_value_by_section_list(s, "dns", &v);
-		if (v != NULL) {
-			uci_foreach_element(v, e) {
+		struct uci_section *dns_s = NULL;
+		char *peerdns = NULL;
+
+		dmuci_get_value_by_section_list(s, "dns", &dns_list);
+		if (dns_list != NULL) {
+			uci_foreach_element(dns_list, e) {
+
 				if (is_dns_server_in_dmmap(e->name, section_name(s)))
 					continue;
-				dmuci_add_section_bbfdm("dmmap_dns", "dns_server", &sdns);
-				dmuci_set_value_by_section(sdns, "ip", e->name);
-				dmuci_set_value_by_section(sdns, "interface", section_name(s));
-				dmuci_set_value_by_section(sdns, "enable", "1");
+
+				dmuci_add_section_bbfdm("dmmap_dns", "dns_server", &dns_s);
+				dmuci_set_value_by_section(dns_s, "ip", e->name);
+				dmuci_set_value_by_section(dns_s, "interface", section_name(s));
+				dmuci_set_value_by_section(dns_s, "enable", "1");
 			}
 		}
-		dmuci_get_value_by_section_string(s, "peerdns", &str);
-		if (str[0] == '0')
+
+		dmuci_get_value_by_section_string(s, "peerdns", &peerdns);
+		if (peerdns[0] == '0')
 			continue;
+
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &jobj);
 		if (!jobj) break;
 		dmjson_foreach_value_in_array(jobj, arrobj, ipdns, j, 1, "dns-server") {
+
 			if (ipdns[0] == '\0' || is_dns_server_in_dmmap(ipdns, section_name(s)))
 				continue;
-			dmuci_add_section_bbfdm("dmmap_dns", "dns_server", &sdns);
-			dmuci_set_value_by_section(sdns, "ip", ipdns);
-			dmuci_set_value_by_section(sdns, "interface", section_name(s));
-			dmuci_set_value_by_section(sdns, "enable", "1");
-			dmuci_set_value_by_section(sdns, "peerdns", "1");
+
+			dmuci_add_section_bbfdm("dmmap_dns", "dns_server", &dns_s);
+			dmuci_set_value_by_section(dns_s, "ip", ipdns);
+			dmuci_set_value_by_section(dns_s, "interface", section_name(s));
+			dmuci_set_value_by_section(dns_s, "enable", "1");
+			dmuci_set_value_by_section(dns_s, "peerdns", "1");
 		}
 	}
 	return 0;
@@ -144,12 +167,10 @@ static int add_dns_server(char *refparam, struct dmctx *ctx, void *data, char **
 {
 	struct uci_section *s = NULL;
 
-	dmuci_add_list_value("network", "lan", "dns", "0.0.0.0");
-
 	dmuci_add_section_bbfdm("dmmap_dns", "dns_server", &s);
+	dmuci_set_value_by_section(s, "enable", "0");
 	dmuci_set_value_by_section(s, "ip", "0.0.0.0");
-	dmuci_set_value_by_section(s, "interface", "lan");
-	dmuci_set_value_by_section(s, "enable", "1");
+	dmuci_set_value_by_section(s, "added_by_controller", "1");
 	dmuci_set_value_by_section(s, "dns_server_instance", *instance);
 	return 0;
 }
@@ -254,6 +275,15 @@ static int get_dns_interface(char *refparam, struct dmctx *ctx, void *data, char
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &linker);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	if (!(*value) || (*value)[0] == 0) {
+		char *device = NULL;
+
+		dmuci_get_option_value_string("network", linker, "device", &device);
+		if (DM_STRLEN(device)) {
+			char *sec_name = strchr(device, '@');
+			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", sec_name ? sec_name + 1 : "", value);
+		}
+	}
 	return 0;
 }
 
@@ -425,30 +455,35 @@ static int set_client_enable(char *refparam, struct dmctx *ctx, void *data, char
 
 static int set_dns_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *str, *ip, *interface;
-	bool b, ob;
+	char *interface = NULL;
+	char *peerdns = NULL;
+	char *ip = NULL;
+	bool b;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
+
+			// If peerdns = '1' then it is a dynamic dns and not allowed to disable it
+			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &peerdns);
+			if (peerdns && peerdns[0] == '1')
+				return FAULT_9008;
+
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &str);
 			string_to_bool(value, &b);
-			string_to_bool(str, &ob);
-			if (ob == b)
-				return 0;
-			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &str);
-			if (str[0] == '1')
-				return 0;
+
 			dmuci_set_value_by_section((struct uci_section *)data, "enable", b ? "1" : "0");
+
 			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &ip);
-			if (b == 1)
-				dmuci_add_list_value("network", interface, "dns", ip);
-			else
-				dmuci_del_list_value("network", interface, "dns", ip);
+			if (DM_STRLEN(interface) && DM_STRLEN(ip)) {
+				if (b == true)
+					dmuci_add_list_value("network", interface, "dns", ip);
+				else
+					dmuci_del_list_value("network", interface, "dns", ip);
+			}
 			break;
 	}
 	return 0;
@@ -470,45 +505,36 @@ static int set_server_alias(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int set_dns_server(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *str, *oip, *interface;
-	struct uci_list *v;
-	struct uci_element *e = NULL;
-	int count = 0;
-	char *dns[32] = {0};
+	struct uci_list *dns_list = NULL;
+	char *interface = NULL;
+	char *peerdns = NULL;
+	char *oip = NULL;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 45, NULL, IPAddress))
 				return FAULT_9007;
+
+			// If peerdns = '1' then it is a dynamic dns and not allowed to set this parameter
+			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &peerdns);
+			if (peerdns && peerdns[0] == '1')
+				return FAULT_9008;
+
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &oip);
 			if (strcmp(oip, value) == 0)
 				return 0;
-			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &str);
-			if (str[0] == '1')
-				return 0;
-			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
-			dmuci_get_option_value_list("network", interface, "dns", &v);
-			if (v) {
-				uci_foreach_element(v, e) {
-					if (strcmp(e->name, oip)==0)
-						dns[count] = dmstrdup(value);
-					else
-						dns[count] = dmstrdup(e->name);
-					count++;
-				}
-			}
-			dmuci_delete("network", interface, "dns", NULL);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &str);
-			if (str[0] == '1') {
-				int i = 0;
 
-				for (i = 0; i < count; i++) {
-					dmuci_add_list_value("network", interface, "dns", dns[i] ? dns[i] : "");
-					dmfree(dns[i]);
+			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
+			if (DM_STRLEN(interface)) {
+				dmuci_get_option_value_list("network", interface, "dns", &dns_list);
+				if (value_exists_in_uci_list(dns_list, oip)) {
+					dmuci_del_list_value("network", interface, "dns", oip);
+					dmuci_add_list_value("network", interface, "dns", value);
 				}
 			}
+
 			dmuci_set_value_by_section((struct uci_section *)data, "ip", value);
 			break;
 	}
@@ -518,7 +544,11 @@ static int set_dns_server(char *refparam, struct dmctx *ctx, void *data, char *i
 static int set_dns_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *str, *interface, *ip, *linker = NULL;
+	struct uci_list *dns_list = NULL;
+	char *interface = NULL;
+	char *peerdns = NULL;
+	char *linker = NULL;
+	char *oip = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -528,28 +558,36 @@ static int set_dns_interface(char *refparam, struct dmctx *ctx, void *data, char
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
+			// If peerdns = '1' then it is a dynamic dns and not allowed to set this parameter
+			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &peerdns);
+			if (peerdns && peerdns[0] == '1')
+				return FAULT_9008;
+
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
+
 			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &ip);
+			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &oip);
 
 			if (!linker || linker[0] == 0) {
-				dmuci_del_list_value("network", interface, "dns", ip);
+				dmuci_del_list_value("network", interface, "dns", oip);
+				dmuci_set_value_by_section((struct uci_section *)data, "interface", "");
 				return 0;
-			} else if (strcmp(interface, linker) == 0)
+			}
+
+			if (strcmp(interface, linker) == 0)
 				return 0;
 
-			dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &str);
-			if (str[0] == '1')
-				return 0;
+			if (DM_STRLEN(interface)) {
+				dmuci_get_option_value_list("network", interface, "dns", &dns_list);
+				if (value_exists_in_uci_list(dns_list, oip)) {
+					dmuci_del_list_value("network", interface, "dns", oip);
+					dmuci_add_list_value("network", linker, "dns", oip);
+				}
+			}
 
-			dmuci_del_list_value("network", interface, "dns", ip);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &str);
-			if (str[0] == '1')
-				dmuci_add_list_value("network", linker, "dns", ip);
-
-			dmuci_set_value_by_section((struct uci_section *)data, "interface", interface);
+			dmuci_set_value_by_section((struct uci_section *)data, "interface", linker);
 			break;
 	}
 	return 0;
