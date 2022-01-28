@@ -685,7 +685,7 @@ def printusage():
           sys.argv[0] + " <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]")
     print("Examples:")
     print("  - " + sys.argv[0] +
-          " tr-181-2-14-1-cwmp-full.xml tr-181-2-14-1-usp-full.xml Device.")
+          " tr-181-2-15-0-cwmp-full.xml tr-181-2-15-0-usp-full.xml Device.")
     print("    ==> Generate the json file of the sub tree Device. in tr181.json")
     print("  - " + sys.argv[0] +
           " tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.")
@@ -693,7 +693,7 @@ def printusage():
     print("  - " + sys.argv[0] + " tr-106-1-2-0-full.xml Device.")
     print("    ==> Generate the json file of the sub tree Device. in tr106.json")
     print("")
-    print("Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-14-1-cwmp-full.xml")
+    print("Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-15-0-cwmp-full.xml")
     exit(1)
 
 
