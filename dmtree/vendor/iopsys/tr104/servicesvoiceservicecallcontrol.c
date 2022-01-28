@@ -299,6 +299,173 @@ static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CBBSWaitTime(ch
 	return 0;
 }
 
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.CFIMOn!UCI:asterisk/calling_features/cfim_on*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_CFIMOn(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "cfim_on", "cfimon");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFIMOn(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "cfim_on", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.CFIMOff!UCI:asterisk/calling_features/cfim_off*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_CFIMOff(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "cfim_off", "cfimoff");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFIMOff(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "cfim_off", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.CFBSOnOn!UCI:asterisk/calling_features/cfbs_onn*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBSOn(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "cfbs_on", "cfbson");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBSOn(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "cfbs_on", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.CFBSOff!UCI:asterisk/calling_features/cfbs_off*/
+static int get_SerCFBSOffvicesVoiceServiceCallControlCallingFeaturesSet_CFBSOff(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "cfbs_off", "cfbsoff");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBSOff(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "cfbs_off", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.CFBOn!UCI:asterisk/calling_features/cfb_on*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBOn(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "cfb_on", "cfbon");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBOn(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "cfb_on", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.CFBOff!UCI:asterisk/calling_features/cfb_off*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBOff(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "cfb_off", "cfboff");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBOff(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "cfb_off", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.CWOn!UCI:asterisk/calling_features/cw_on*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_CWOn(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "cw_on", "cwon");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CWOn(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "cw_on", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.CWOff!UCI:asterisk/calling_features/cw_off*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_CWOff(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "cw_off", "cwoff");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CWOff(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "cw_off", value);
+			break;
+	}
+	return 0;
+}
 
 /*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.CWStatus!UCI:asterisk/calling_features/cw_status*/
 static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_CWStatus(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -316,6 +483,69 @@ static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_CWStatus(char *
 			break;
 		case VALUESET:
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "cw_status", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.DNDOn!UCI:asterisk/calling_features/dnd_on*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDOn(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "dnd_on", "dndon");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDOn(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dnd_on", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.DNDOff!UCI:asterisk/calling_features/dnd_off*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDOff(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "dnd_off", "dndoff");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDOff(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dnd_off", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.DNDStatus!UCI:asterisk/calling_features/dnd_status*/
+static int get_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDStatus(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "dnd_status", "dndstatus");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDStatus(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 32, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dnd_status", value);
 			break;
 	}
 	return 0;
@@ -388,7 +618,18 @@ DMLEAF tIOPSYS_VoiceServiceCallControlCallingFeaturesSetParams[] = {
 {BBF_VENDOR_PREFIX"CBBSMaxRetry", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CBBSMaxRetry, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CBBSMaxRetry, BBFDM_BOTH},
 {BBF_VENDOR_PREFIX"CBBSRetryTime", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CBBSRetryTime, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CBBSRetryTime, BBFDM_BOTH},
 {BBF_VENDOR_PREFIX"CBBSWaitTime", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CBBSWaitTime, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CBBSWaitTime, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"CFIMOn", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CFIMOn, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFIMOn, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"CFIMOff", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CFIMOff, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFIMOff, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"CFBSOn", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBSOn, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBSOn, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"CFBSOff", &DMWRITE, DMT_STRING, get_SerCFBSOffvicesVoiceServiceCallControlCallingFeaturesSet_CFBSOff, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBSOff, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"CFBOn", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBOn, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBOn, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"CFBOff", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBOff, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CFBOff, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"CWOn", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CWOn, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CWOn, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"CWOff", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CWOff, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CWOff, BBFDM_BOTH},
 {BBF_VENDOR_PREFIX"CWStatus", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CWStatus, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CWStatus, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"DNDOn", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDOn, set_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDOn, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"DNDOff", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDOff, set_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDOff, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"DNDStatus", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDStatus, set_ServicesVoiceServiceCallControlCallingFeaturesSet_DNDStatus, BBFDM_BOTH},
 {BBF_VENDOR_PREFIX"CallReturn", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_CallReturn, set_ServicesVoiceServiceCallControlCallingFeaturesSet_CallReturn, BBFDM_BOTH},
 {BBF_VENDOR_PREFIX"Redial", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlCallingFeaturesSet_Redial, set_ServicesVoiceServiceCallControlCallingFeaturesSet_Redial, BBFDM_BOTH},
 {0}
