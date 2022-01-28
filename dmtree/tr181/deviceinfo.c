@@ -940,6 +940,7 @@ static operation_args firmware_image_download_args = {
 		"FileSize",
 		"CheckSumAlgorithm",
 		"CheckSum",
+		"CommandKey",
 		NULL
 	}
 };
@@ -969,16 +970,19 @@ static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx
 	char *file_size = dmjson_get_value((json_object *)value, 1, "FileSize");
 	char *checksum_algorithm = dmjson_get_value((json_object *)value, 1, "CheckSumAlgorithm");
 	char *checksum = dmjson_get_value((json_object *)value, 1, "CheckSum");
+	char *commandKey = dmjson_get_value((json_object *)value, 1, "CommandKey");
+
 
 	char *bank_id = dmjson_get_value((json_object *)data, 1, "id");
 
-	int res = bbf_fw_image_download(url, auto_activate, username, password, file_size, checksum_algorithm, checksum, bank_id, command, obj_path);
+	int res = bbf_fw_image_download(url, auto_activate, username, password, file_size, checksum_algorithm, checksum, bank_id, command, obj_path, commandKey);
 
 	return res ? CMD_FAIL : CMD_SUCCESS;
 }
 
 static operation_args firmware_image_activate_args = {
 	.in = (const char *[]) {
+		
 		"TimeWindow.{i}.Start",
 		"TimeWindow.{i}.End",
 		"TimeWindow.{i}.Mode",

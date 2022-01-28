@@ -87,7 +87,7 @@ static bool get_response_code_status(const char *url, int response_code)
 }
 
 static void send_transfer_complete_event(const char *command, const char *obj_path, const char *transfer_url,
-	long res_code, time_t start_t, time_t complete_t, const char *transfer_type)
+	long res_code, time_t start_t, time_t complete_t,const char *commandKey, const char *transfer_type)
 {
 	char start_time[32] = {0};
 	char complete_time[32] = {0};
@@ -105,7 +105,10 @@ static void send_transfer_complete_event(const char *command, const char *obj_pa
 	struct json_object *obj = json_object_new_object();
 
 	json_object_object_add(obj, "Command", json_object_new_string(command));
-	json_object_object_add(obj, "CommandKey", json_object_new_string(""));
+	if(commandKey)
+		json_object_object_add(obj, "CommandKey", json_object_new_string(commandKey));
+	else
+		json_object_object_add(obj, "CommandKey", json_object_new_string(""));
 	json_object_object_add(obj, "Requestor", json_object_new_string(""));
 	json_object_object_add(obj, "TransferType", json_object_new_string(transfer_type));
 	json_object_object_add(obj, "Affected", json_object_new_string(obj_path));
@@ -413,7 +416,7 @@ int bbf_config_backup(const char *url, const char *username, const char *passwor
 	time_t complete_time = time(NULL);
 
 	// Send Transfer Complete Event
-	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, "Upload");
+	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time,NULL,"Upload");
 
 	// Check if the upload operation was successful
 	if (!get_response_code_status(url, res_code)) {
@@ -440,7 +443,7 @@ int bbf_upload_log(const char *url, const char *username, const char *password,
 	time_t complete_time = time(NULL);
 
 	// Send Transfer Complete Event
-	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, "Upload");
+	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time,NULL, "Upload");
 
 	// Check if the upload operation was successful
 	if (!get_response_code_status(url, res_code)) {
@@ -468,7 +471,7 @@ int bbf_config_restore(const char *url, const char *username, const char *passwo
 	time_t complete_time = time(NULL);
 
 	// Send Transfer Complete Event
-	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, "Download");
+	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, NULL, "Download");
 
 	// Check if the download operation was successful
 	if (!get_response_code_status(url, res_code)) {
@@ -496,7 +499,7 @@ end:
 
 int bbf_fw_image_download(const char *url, const char *auto_activate, const char *username, const char *password,
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
-		const char *bank_id, const char *command, const char *obj_path)
+		const char *bank_id, const char *command, const char *obj_path, const char *commandKey)
 {
 	char fw_image_path[256] = "/tmp/firmware.bin";
 	json_object *json_obj = NULL;
@@ -515,7 +518,7 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	time_t complete_time = time(NULL);
 
 	// Send Transfer Complete Event
-	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, "Download");
+	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time,commandKey, "Download");
 
 	// Check if the download operation was successful
 	if (!get_response_code_status(url, res_code)) {

@@ -80,7 +80,7 @@ int bbf_config_restore(const char *url, const char *username, const char *passwo
 		const char *command, const char *obj_path);
 int bbf_fw_image_download(const char *url, const char *auto_activate, const char *username, const char *password,
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
-		const char *bank_id, const char *command, const char *obj_path);
+		const char *bank_id, const char *command, const char *obj_path, const char *commandKey);
 int bbf_fw_image_activate(const char *bank_id, struct activate_image *active_img);
 
 #endif
