@@ -15,27 +15,15 @@
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
-static int dmmap_synchronizeNATPortMappingEnable(const char *intf, bool value)
+static void create_portmapping_section(bool b)
 {
 	struct uci_section *s = NULL;
 
-	uci_foreach_sections("firewall", "redirect", s) {
-		char *src = NULL;
-
-		dmuci_get_value_by_section_string(s, "src", &src);
-		if (intf && src && !strcmp(src, intf)) {
-			struct uci_section *dmmap_section = NULL;
-			char *redirect_enable = NULL;
-
-			get_dmmap_section_of_config_section("dmmap_firewall", "redirect", section_name(s), &dmmap_section);
-
-			dmuci_get_value_by_section_string(dmmap_section, "enabled", &redirect_enable);
-			bool enable_val = value && (*redirect_enable == '1' ? true : false);
-			dmuci_set_value_by_section(s, "enabled", enable_val ? "1" : "0");
-		}
-	}
-
-	return 0;
+	dmuci_add_section("firewall", "include", &s);
+	dmuci_rename_section_by_section(s, "portmapping");
+	dmuci_set_value_by_section(s, "enabled", b ? "0" : "1");
+	dmuci_set_value_by_section(s, "path", "/etc/firewall.portmapping");
+	dmuci_set_value_by_section(s, "reload", "1");
 }
 
 static char *get_rule_perm(char *refparam, struct dmctx *dmctx, void *data, char *instance)
@@ -217,17 +205,25 @@ static int get_level_chain(char *refparam, struct dmctx *ctx, void *data, char *
 static int get_level_port_mapping_enabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
-	char *v;
+	bool portmapping_sec_exists = false;
+	char *enable = NULL;
 
-	uci_foreach_sections("firewall", "zone", s) {
-		dmuci_get_value_by_section_string(s, "masq", &v);
-		if (*v == '1') {
-			*value = "1";
-			return 0;
+	uci_foreach_sections("firewall", "include", s) {
+		if (strncmp(section_name(s), "portmapping", 11) == 0) {
+			portmapping_sec_exists = true ;
+
+			dmuci_get_value_by_section_string(s, "enabled", &enable);
+			if (*enable == '0') {
+				*value = "1";
+				break;
+			}
 		}
 	}
-	*value = "0";
-    return 0;
+
+	if (portmapping_sec_exists == false)
+		*value = "1";
+
+	return 0;
 }
 
 static int get_level_default_log_policy(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -786,9 +782,8 @@ static int set_level_description(char *refparam, struct dmctx *ctx, void *data, 
 
 static int set_level_port_mapping_enabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	bool b;
+	bool b, portmapping_sec_exists = false;
 	struct uci_section *s = NULL;
-	char *src = NULL, *zone_name = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -797,26 +792,21 @@ static int set_level_port_mapping_enabled(char *refparam, struct dmctx *ctx, voi
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			if (b) {
-				uci_foreach_sections("firewall", "zone", s) {
-					dmuci_get_value_by_section_string(s, "src", &src);
-					dmuci_get_value_by_section_string(s, "name", &zone_name);
-					if (strcasestr(src, "wan") || strcasestr(zone_name, "wan")) {
-						dmuci_set_value_by_section(s, "masq", "1");
-						dmmap_synchronizeNATPortMappingEnable(zone_name, b);
-						return 0;
-					}
+			uci_foreach_sections("firewall", "include", s) {
+				if (strncmp(section_name(s), "portmapping", 11) == 0) {
+					portmapping_sec_exists = true;
+					break;
 				}
+			}
+
+			if (portmapping_sec_exists == true) {
+				dmuci_set_value_by_section(s, "enabled", b ? "0" : "1");
 			} else {
-				uci_foreach_sections("firewall", "zone", s) {
-					dmuci_set_value_by_section(s, "masq", "");
-					dmuci_get_value_by_section_string(s, "name", &zone_name);
-					dmmap_synchronizeNATPortMappingEnable(zone_name, b);
-				}
+				create_portmapping_section(b);
 			}
 			break;
 	}
-        return 0;
+	return 0;
 }
 
 static int set_level_default_policy(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
