@@ -493,6 +493,12 @@ static int delObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
+static int get_Ethernet_FlowControlSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "1";
+	return 0;
+}
+
 /*#Device.Ethernet.InterfaceNumberOfEntries!UCI:ports/ethport/*/
 static int get_Ethernet_InterfaceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -909,6 +915,149 @@ static int set_EthernetLink_Enable(char *refparam, struct dmctx *ctx, void *data
 	}
 	return 0;
 }
+
+static int get_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *is_eth = NULL;
+	char *device = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "is_eth", &is_eth);
+	if (!is_eth || *is_eth == '0')
+		goto end;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+	if (DM_STRLEN(device)) {
+		struct uci_section *port_s = NULL;
+		char *is_bridge = strstr(device, "br-");
+
+		if (is_bridge) {
+			/* Ethernet.Link.{i}. ---> Bridging.Bridge.{i}.Port.{i}. */
+
+			struct uci_section *dev_s = get_dup_section_in_config_opt("network", "device", "name", device);
+			if (dev_s) {
+				struct uci_list *ports_list = NULL;
+
+				dmuci_get_value_by_section_list(dev_s, "ports", &ports_list);
+				if (ports_list != NULL) {
+					struct uci_element *e = NULL;
+					char *default_value = "0";
+
+					uci_foreach_element(ports_list, e) {
+						char buf[16] = {0};
+
+						DM_STRNCPY(buf, e->name, sizeof(buf));
+
+						char *is_tagged = strchr(buf, '.');
+						if (is_tagged)
+							*is_tagged = 0;
+
+						port_s = get_dup_section_in_config_opt("ports", "ethport", "ifname", buf);
+						char *pause = port_s ? dmuci_get_value_by_section_fallback_def(port_s, "pause", "0") : "0";
+						char *curr_value = dmuci_string_to_boolean(pause) ? "1" : "0";
+
+						if (strcmp(curr_value, default_value) != 0) {
+							*value = "1";
+							return 0;
+						}
+					}
+
+					*value = default_value;
+					return 0;
+				}
+			}
+		} else {
+			/* Ethernet.Link.{i}. ---> Ethernet.Interface.{i}. */
+
+			char *is_mac_vlan = strchr(device, '_');
+			if (is_mac_vlan)
+				*is_mac_vlan = 0;
+
+			char *is_tagged = strchr(device, '.');
+			if (is_tagged)
+				*is_tagged = 0;
+
+			port_s = get_dup_section_in_config_opt("ports", "ethport", "ifname", device);
+			char *pause = port_s ? dmuci_get_value_by_section_fallback_def(port_s, "pause", "0") : "0";
+			*value = dmuci_string_to_boolean(pause) ? "1" : "0";
+			return 0;
+		}
+	}
+
+end:
+	*value = "0";
+	return 0;
+}
+
+static int set_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *is_eth = NULL;
+	char *device = NULL;
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+
+			dmuci_get_value_by_section_string((struct uci_section *)data, "is_eth", &is_eth);
+			if (!is_eth || *is_eth == '0')
+				break;
+
+			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+			if (DM_STRLEN(device)) {
+				struct uci_section *port_s = NULL;
+				char *is_bridge = strstr(device, "br-");
+
+				if (is_bridge) {
+					/* Ethernet.Link.{i}. ---> Bridging.Bridge.{i}.Port.{i}. */
+
+					struct uci_section *dev_s = get_dup_section_in_config_opt("network", "device", "name", device);
+					if (dev_s) {
+						struct uci_list *ports_list = NULL;
+
+						dmuci_get_value_by_section_list(dev_s, "ports", &ports_list);
+						if (ports_list != NULL) {
+							struct uci_element *e = NULL;
+
+							uci_foreach_element(ports_list, e) {
+								char buf[16] = {0};
+
+								DM_STRNCPY(buf, e->name, sizeof(buf));
+
+								char *is_tagged = strchr(buf, '.');
+								if (is_tagged)
+									*is_tagged = 0;
+
+								port_s = get_dup_section_in_config_opt("ports", "ethport", "ifname", buf);
+								if (port_s)
+									dmuci_set_value_by_section(port_s, "pause", b ? "1" : "0");
+							}
+						}
+					}
+				} else {
+					/* Ethernet.Link.{i}. ---> Ethernet.Interface.{i}. */
+
+					char *is_mac_vlan = strchr(device, '_');
+					if (is_mac_vlan)
+						*is_mac_vlan = 0;
+
+					char *is_tagged = strchr(device, '.');
+					if (is_tagged)
+						*is_tagged = 0;
+
+					port_s = get_dup_section_in_config_opt("ports", "ethport", "ifname", device);
+					if (port_s)
+						dmuci_set_value_by_section(port_s, "pause", b ? "1" : "0");
+				}
+			}
+			break;
+	}
+	return 0;
+}
+
 
 static int get_EthernetLink_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1913,6 +2062,7 @@ DMOBJ tEthernetObj[] = {
 
 DMLEAF tEthernetParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"FlowControlSupported", &DMREAD, DMT_BOOL, get_Ethernet_FlowControlSupported, NULL, BBFDM_BOTH, "2.14"},
 {"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_Ethernet_InterfaceNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {"LinkNumberOfEntries", &DMREAD, DMT_UNINT, get_Ethernet_LinkNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {"VLANTerminationNumberOfEntries", &DMREAD, DMT_UNINT, get_Ethernet_VLANTerminationNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
@@ -1982,6 +2132,7 @@ DMLEAF tEthernetLinkParams[] = {
 {"LastChange", &DMREAD, DMT_UNINT, get_EthernetLink_LastChange, NULL, BBFDM_BOTH, "2.0"},
 {"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetLink_LowerLayers, set_EthernetLink_LowerLayers, BBFDM_BOTH, "2.0"},
 {"MACAddress", &DMREAD, DMT_STRING, get_EthernetLink_MACAddress, NULL, BBFDM_BOTH, "2.0"},
+{"FlowControl", &DMWRITE, DMT_BOOL, get_EthernetLink_FlowControl, set_EthernetLink_FlowControl, BBFDM_BOTH, "2.14"},
 {0}
 };
 
