@@ -26,4 +26,7 @@ extern DMLEAF tPPPInterfaceIPCPParams[];
 extern DMLEAF tPPPInterfaceIPv6CPParams[];
 extern DMLEAF tPPPInterfaceStatsParams[];
 
+void ppp___update_sections(struct uci_section *s_from, struct uci_section *s_to);
+void ppp___reset_options(struct uci_section *ppp_s);
+
 #endif

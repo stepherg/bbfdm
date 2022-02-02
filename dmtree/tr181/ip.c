@@ -10,6 +10,7 @@
  *
  */
 
+#include "ppp.h"
 #include "ip.h"
 #include "dmentry.h"
 #ifdef BBF_TR143
@@ -315,6 +316,7 @@ static int delete_ip_intertace_instance(struct uci_section *s)
 		struct uci_section *ss = NULL;
 		struct uci_section *stmp = NULL;
 		char *int_device = NULL;
+		char *proto = NULL;
 
 		dmuci_get_value_by_section_string(int_ss, "device", &int_device);
 		if (strcmp(section_name(int_ss), int_sec_name) != 0 && strcmp(int_device, buf) != 0)
@@ -364,20 +366,20 @@ static int delete_ip_intertace_instance(struct uci_section *s)
 			dmuci_delete_by_section(ss, NULL, NULL);
 		}
 
-		/* Remove "DHCPv4.Client.{i}.ReqOption." sections related to this "IP.Interface." object */
-		uci_path_foreach_option_eq_safe(bbfdm, "dmmap_dhcp_client", "req_option", "section_name", section_name(int_ss), stmp, ss) {
-			dmuci_delete_by_section(ss, NULL, NULL);
-		}
+		dmuci_get_value_by_section_string(int_ss, "proto", &proto);
 
-		/* Remove "DHCPv4.Client.{i}.SentOption." sections related to this "IP.Interface." object */
-		uci_path_foreach_option_eq_safe(bbfdm, "dmmap_dhcp_client", "send_option", "section_name", section_name(int_ss), stmp, ss) {
-			dmuci_delete_by_section(ss, NULL, NULL);
+		if (strncmp(proto, "ppp", 3) == 0) {
+			struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "iface_name", section_name(int_ss));
+
+			if (ppp_s) {
+
+				/* Remove "PPP.Interface." section related to this "IP.Interface." object */
+				dmuci_delete_by_section(ppp_s, NULL, NULL);
+			}
 		}
 
 		/* remove interface section */
 		dmuci_delete_by_section(int_ss, NULL, NULL);
-
-
 	}
 	return 0;
 }
@@ -1246,7 +1248,7 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 		char *proto;
 
 		dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
-		if (strstr(proto, "ppp")) {
+		if (strncmp(proto, "ppp", 3) == 0) {
 			snprintf(linker, sizeof(linker), "%s", section_name((struct uci_section *)data));
 			adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", linker, value);
 			if (*value != NULL && (*value)[0] != 0)
@@ -1293,9 +1295,11 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 	struct uci_section *dmmap_section = NULL;
 	char eth_vlan_term[64] = "Device.Ethernet.VLANTermination.";
 	char eth_link[32] = "Device.Ethernet.Link.";
+	char ppp_iface[32] = "Device.PPP.Interface.";
 	char *allowed_objects[] = {
 			eth_vlan_term,
 			eth_link,
+			ppp_iface,
 			NULL};
 	char linker_buf[32] = {0};
 	char *ip_linker = NULL;
@@ -1317,8 +1321,21 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 			dmuci_set_value_by_section(dmmap_section, "LowerLayers", value);
 
 			if (!ip_linker || *ip_linker == 0) {
+				char *curr_proto = NULL;
+
 				// Update device option
 				dmuci_set_value_by_section((struct uci_section *)data, "device", "");
+
+				dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &curr_proto);
+				if (strncmp(curr_proto, "ppp", 3) == 0) {
+					struct uci_section *ppp_s = NULL;
+
+					ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "iface_name", section_name((struct uci_section *)data));
+					dmuci_set_value_by_section_bbfdm(ppp_s, "iface_name", "");
+
+					dmuci_set_value_by_section((struct uci_section *)data, "proto", "none");
+					ppp___reset_options((struct uci_section *)data);
+				}
 				return 0;
 			}
 
@@ -1436,6 +1453,17 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 					set_ip_interface_device_option((struct uci_section *)data, linker_buf, instance, is_br_sec);
 				}
+			} else if (strncmp(value, ppp_iface, strlen(ppp_iface)) == 0) {
+				struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "name", linker_buf);
+				if (ppp_s == NULL)
+					ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "iface_name", linker_buf);
+
+				if (ppp_s == NULL)
+					break;
+
+				dmuci_set_value_by_section_bbfdm(ppp_s, "iface_name", section_name((struct uci_section *)data));
+
+				ppp___update_sections(ppp_s, (struct uci_section *)data);
 			}
 			break;
 	}
