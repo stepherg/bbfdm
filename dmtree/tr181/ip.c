@@ -368,6 +368,16 @@ static int delete_ip_intertace_instance(struct uci_section *s)
 
 		dmuci_get_value_by_section_string(int_ss, "proto", &proto);
 
+		if (strcmp(proto, "dhcpv6") == 0) {
+			struct uci_section *dhcpv6_client_s = get_dup_section_in_dmmap_opt("dmmap_dhcpv6", "interface", "iface_name", section_name(int_ss));
+
+			if (dhcpv6_client_s) {
+
+				/* Remove "DHCPv6.Client." section related to this "IP.Interface." object */
+				dmuci_delete_by_section(dhcpv6_client_s, NULL, NULL);
+			}
+		}
+
 		if (strncmp(proto, "ppp", 3) == 0) {
 			struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "iface_name", section_name(int_ss));
 
@@ -522,17 +532,6 @@ static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 			get_dmmap_section_of_config_section("dmmap_dhcp_client", "interface", section_name(p->config_section), &dmmap_section);
 			dmuci_get_value_by_section_string(dmmap_section, "added_by_controller", &dhcpv4_user_s);
 			if (dhcpv4_user_s && strcmp(dhcpv4_user_s, "1") == 0)
-				continue;
-		}
-
-		// skip dhcpv6 sections added by controller
-		if (strcmp(proto, "dhcpv6") == 0) {
-			struct uci_section *dmmap_section = NULL;
-			char *dhcpv6_user_s = NULL;
-
-			get_dmmap_section_of_config_section("dmmap_dhcpv6", "interface", section_name(p->config_section), &dmmap_section);
-			dmuci_get_value_by_section_string(dmmap_section, "added_by_controller", &dhcpv6_user_s);
-			if (dhcpv6_user_s && strcmp(dhcpv6_user_s, "1") == 0)
 				continue;
 		}
 
