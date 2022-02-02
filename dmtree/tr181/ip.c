@@ -368,6 +368,29 @@ static int delete_ip_intertace_instance(struct uci_section *s)
 
 		dmuci_get_value_by_section_string(int_ss, "proto", &proto);
 
+		if (strcmp(proto, "dhcp") == 0) {
+			struct uci_section *dhcpv4_client_s = get_dup_section_in_dmmap_opt("dmmap_dhcp_client", "interface", "iface_name", section_name(int_ss));
+
+			if (dhcpv4_client_s) {
+				char *dhcp_client_key = NULL;
+
+				dmuci_get_value_by_section_string(dhcpv4_client_s, "dhcp_client_key", &dhcp_client_key);
+
+				/* Remove "DHCPv4.Client.{i}.ReqOption." sections related to this "IP.Interface." object */
+				uci_path_foreach_option_eq_safe(bbfdm, "dmmap_dhcp_client", "req_option", "dhcp_client_key", dhcp_client_key, stmp, ss) {
+					dmuci_delete_by_section(ss, NULL, NULL);
+				}
+
+				/* Remove "DHCPv4.Client.{i}.SentOption." sections related to this "IP.Interface." object */
+				uci_path_foreach_option_eq_safe(bbfdm, "dmmap_dhcp_client", "send_option", "dhcp_client_key", dhcp_client_key, stmp, ss) {
+					dmuci_delete_by_section(ss, NULL, NULL);
+				}
+
+				/* Remove "DHCPv4.Client." section related to this "IP.Interface." object */
+				dmuci_delete_by_section(dhcpv4_client_s, NULL, NULL);
+			}
+		}
+
 		if (strcmp(proto, "dhcpv6") == 0) {
 			struct uci_section *dhcpv6_client_s = get_dup_section_in_dmmap_opt("dmmap_dhcpv6", "interface", "iface_name", section_name(int_ss));
 
@@ -523,17 +546,6 @@ static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 			*proto == '\0' ||
 			strchr(device, '@'))
 			continue;
-
-		// skip dhcpv4 sections added by controller
-		if (strcmp(proto, "dhcp") == 0) {
-			struct uci_section *dmmap_section = NULL;
-			char *dhcpv4_user_s = NULL;
-
-			get_dmmap_section_of_config_section("dmmap_dhcp_client", "interface", section_name(p->config_section), &dmmap_section);
-			dmuci_get_value_by_section_string(dmmap_section, "added_by_controller", &dhcpv4_user_s);
-			if (dhcpv4_user_s && strcmp(dhcpv4_user_s, "1") == 0)
-				continue;
-		}
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "ip_int_instance", "ip_int_alias");
 

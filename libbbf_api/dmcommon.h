@@ -249,6 +249,7 @@ struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_
 struct uci_section *get_dup_section_in_config_opt(char *package, char *section_type, char *opt_name, char *opt_value);
 struct uci_section *get_dup_section_in_dmmap_opt(char *dmmap_package, char *section_type, char *opt_name, char *opt_value);
 struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* section_type, char*sect_name, char *opt_name, char* opt_value);
+struct uci_section *get_section_in_dmmap_with_options_eq(char *dmmap_package, char *section_type, char *opt1_name, char *opt1_value, char *opt2_name, char *opt2_value);
 bool elt_exists_in_array(char **str_array, char *str, int length);
 int get_shift_utc_time(int shift_time, char *utc_time, int size);
 int get_shift_time_time(int shift_time, char *local_time, int size);

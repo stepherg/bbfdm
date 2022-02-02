@@ -328,6 +328,21 @@ struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* secti
 	return NULL;
 }
 
+struct uci_section *get_section_in_dmmap_with_options_eq(char *dmmap_package, char *section_type, char *opt1_name, char *opt1_value, char *opt2_name, char *opt2_value)
+{
+	struct uci_section *s = NULL;
+
+	uci_path_foreach_option_eq(bbfdm, dmmap_package, section_type, opt1_name, opt1_value, s) {
+		char *value = NULL;
+
+		dmuci_get_value_by_section_string(s, opt2_name, &value);
+		if (opt2_value && value && strcmp(value, opt2_value) == 0)
+			return s;
+	}
+
+	return NULL;
+}
+
 void synchronize_specific_config_sections_with_dmmap(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list)
 {
 	struct uci_section *s, *stmp, *dmmap_sect;

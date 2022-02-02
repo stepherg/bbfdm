@@ -363,7 +363,7 @@ int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, cha
 	struct dmctx dmctx = {0};
 	*value = "";
 
-	if (!param || !linker)
+	if (!param || !linker || *linker == 0)
 		return 0;
 
 	dm_ctx_init_sub(&dmctx, ctx->instance_mode);
