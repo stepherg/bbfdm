@@ -1068,12 +1068,19 @@ static int delObjDHCPv4Client(char *refparam, struct dmctx *ctx, void *data, cha
 			dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dmmap_s, "dhcp_client_key", &dhcp_client_key);
 
 			if (((struct dhcp_client_args *)data)->iface_s) {
-				dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "proto", "none");
-				dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "clientid", "");
-				dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "vendorid", "");
-				dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "hostname", "");
-				dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "sendopts", "");
-				dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "reqopts", "");
+				char *device = NULL;
+
+				dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->iface_s, "device", &device);
+				if (device && strchr(device, '@')) {
+					dmuci_delete_by_section(((struct dhcp_client_args *)data)->iface_s, NULL, NULL);
+				} else {
+					dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "proto", "none");
+					dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "clientid", "");
+					dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "vendorid", "");
+					dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "hostname", "");
+					dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "sendopts", "");
+					dmuci_set_value_by_section(((struct dhcp_client_args *)data)->iface_s, "reqopts", "");
+				}
 			}
 
 			uci_path_foreach_option_eq_safe(bbfdm, "dmmap_dhcp_client", "send_option", "dhcp_client_key", dhcp_client_key, stmp, s) {
@@ -1098,12 +1105,19 @@ static int delObjDHCPv4Client(char *refparam, struct dmctx *ctx, void *data, cha
 					get_config_section_of_dmmap_section("network", "interface", iface_name, &iface_s);
 
 				if (iface_s) {
-					dmuci_set_value_by_section(iface_s, "proto", "none");
-					dmuci_set_value_by_section(s, "clientid", "");
-					dmuci_set_value_by_section(s, "vendorid", "");
-					dmuci_set_value_by_section(s, "hostname", "");
-					dmuci_set_value_by_section(s, "sendopts", "");
-					dmuci_set_value_by_section(s, "reqopts", "");
+					char *device = NULL;
+
+					dmuci_get_value_by_section_string(iface_s, "device", &device);
+					if (device && strchr(device, '@')) {
+						dmuci_delete_by_section(iface_s, NULL, NULL);
+					} else {
+						dmuci_set_value_by_section(iface_s, "proto", "none");
+						dmuci_set_value_by_section(s, "clientid", "");
+						dmuci_set_value_by_section(s, "vendorid", "");
+						dmuci_set_value_by_section(s, "hostname", "");
+						dmuci_set_value_by_section(s, "sendopts", "");
+						dmuci_set_value_by_section(s, "reqopts", "");
+					}
 				}
 
 				uci_path_foreach_option_eq_safe(bbfdm, "dmmap_dhcp_client", "send_option", "dhcp_client_key", dhcp_client_key, sstmp, ss) {
@@ -2103,10 +2117,19 @@ static int set_DHCPv4Client_Alias(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+	struct dhcp_client_args *dhcpv4_client = (struct dhcp_client_args *)data;
 	char *iface_name = NULL;
 
-	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dmmap_s, "iface_name", &iface_name);
+	dmuci_get_value_by_section_string(dhcpv4_client->dmmap_s, "iface_name", &iface_name);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface_name, value);
+
+	if ((!(*value) || (*value)[0] == 0) && dhcpv4_client->iface_s) {
+		char *device = NULL;
+
+		dmuci_get_value_by_section_string(dhcpv4_client->iface_s, "device", &device);
+		iface_name = (device && *device) ? strchr(device, '@') : NULL;
+		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface_name ? iface_name + 1 : "", value);
+	}
 	return 0;
 }
 
@@ -2144,65 +2167,93 @@ static int set_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 			if (interface_s && (strcmp(section_name(interface_s), curr_iface_name) == 0))
 				break;
 
-			dmuci_set_value_by_section(dhcpv4_client->iface_s, "proto", "none");
-			dmuci_set_value_by_section(dhcpv4_client->iface_s, "clientid", "");
-			dmuci_set_value_by_section(dhcpv4_client->iface_s, "vendorid", "");
-			dmuci_set_value_by_section(dhcpv4_client->iface_s, "hostname", "");
-			dmuci_set_value_by_section(dhcpv4_client->iface_s, "sendopts", "");
-			dmuci_set_value_by_section(dhcpv4_client->iface_s, "reqopts", "");
+			if (dhcpv4_client->iface_s) {
+				char *device = NULL;
+
+				dmuci_get_value_by_section_string(dhcpv4_client->iface_s, "device", &device);
+				if (device && strchr(device, '@')) {
+					dmuci_delete_by_section(dhcpv4_client->iface_s, NULL, NULL);
+				} else {
+					dmuci_set_value_by_section(dhcpv4_client->iface_s, "proto", "none");
+					dmuci_set_value_by_section(dhcpv4_client->iface_s, "clientid", "");
+					dmuci_set_value_by_section(dhcpv4_client->iface_s, "vendorid", "");
+					dmuci_set_value_by_section(dhcpv4_client->iface_s, "hostname", "");
+					dmuci_set_value_by_section(dhcpv4_client->iface_s, "sendopts", "");
+					dmuci_set_value_by_section(dhcpv4_client->iface_s, "reqopts", "");
+				}
+			}
 
 			if (!linker || *linker == 0) {
 				dmuci_set_value_by_section_bbfdm(dhcpv4_client->dmmap_s, "added_by_controller", "1");
 				dmuci_set_value_by_section_bbfdm(dhcpv4_client->dmmap_s, "iface_name", "");
 			} else {
-				char buf[128] = {0};
-				unsigned pos = 0;
 
-				// Update proto option of config section
-				dmuci_set_value_by_section(interface_s, "proto", "dhcp");
+				if (interface_s) {
+					struct uci_section *iface_s = NULL;
+					char iface_name[32];
+					char buf[128] = {0};
+					unsigned pos = 0;
+					char *proto = NULL;
 
-				// Added the enabled options for sendopts
-				uci_path_foreach_option_eq(bbfdm, "dmmap_dhcp_client", "send_option", "dhcp_client_key", dhcp_client_key, option_s) {
-					char *enable = NULL;
+					dmuci_get_value_by_section_string(interface_s, "proto", &proto);
+					if (strncmp(proto, "dhcp", 4) == 0) {
+						char dev_name[32];
 
+						snprintf(iface_name, sizeof(iface_name), "%s_4", linker);
+						snprintf(dev_name, sizeof(dev_name), "@%s", linker);
 
-					dmuci_get_value_by_section_string(option_s, "enable", &enable);
-					if (strcmp(enable, "1") == 0) {
-						char *opt_tag = NULL;
-						char *opt_value = NULL;
-
-						dmuci_get_value_by_section_string(option_s, "option_tag", &opt_tag);
-						dmuci_get_value_by_section_string(option_s, "option_value", &opt_value);
-						pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s:%s ", opt_tag, opt_value);
+						// Create a new interface section
+						dmuci_add_section("network", "interface", &iface_s);
+						dmuci_rename_section_by_section(iface_s, iface_name);
+						dmuci_set_value_by_section(iface_s, "device", dev_name);
 					}
-				}
 
-				if (pos) {
-					buf[pos - 1] = 0;
-					dmuci_set_value_by_section(interface_s, "sendopts", buf);
-				}
+					// Update proto option of config section
+					dmuci_set_value_by_section(iface_s ? iface_s : interface_s, "proto", "dhcp");
 
-				// Added the enabled options for reqopts
-				pos = 0;
-				uci_path_foreach_option_eq(bbfdm, "dmmap_dhcp_client", "req_option", "dhcp_client_key", dhcp_client_key, option_s) {
-					char *enable = NULL;
+					// Added the enabled options for sendopts
+					uci_path_foreach_option_eq(bbfdm, "dmmap_dhcp_client", "send_option", "dhcp_client_key", dhcp_client_key, option_s) {
+						char *enable = NULL;
 
-					dmuci_get_value_by_section_string(option_s, "enable", &enable);
-					if (strcmp(enable, "1") == 0) {
-						char *opt_tag = NULL;
 
-						dmuci_get_value_by_section_string(option_s, "option_tag", &opt_tag);
-						pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s ", opt_tag);
+						dmuci_get_value_by_section_string(option_s, "enable", &enable);
+						if (strcmp(enable, "1") == 0) {
+							char *opt_tag = NULL;
+							char *opt_value = NULL;
+
+							dmuci_get_value_by_section_string(option_s, "option_tag", &opt_tag);
+							dmuci_get_value_by_section_string(option_s, "option_value", &opt_value);
+							pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s:%s ", opt_tag, opt_value);
+						}
 					}
-				}
 
-				if (pos) {
-					buf[pos - 1] = 0;
-					dmuci_set_value_by_section(interface_s, "reqopts", buf);
-				}
+					if (pos) {
+						buf[pos - 1] = 0;
+						dmuci_set_value_by_section(iface_s ? iface_s : interface_s, "sendopts", buf);
+					}
 
-				// Update dmmap section
-				dmuci_set_value_by_section_bbfdm(dhcpv4_client->dmmap_s, "iface_name", linker);
+					// Added the enabled options for reqopts
+					pos = 0;
+					uci_path_foreach_option_eq(bbfdm, "dmmap_dhcp_client", "req_option", "dhcp_client_key", dhcp_client_key, option_s) {
+						char *enable = NULL;
+
+						dmuci_get_value_by_section_string(option_s, "enable", &enable);
+						if (strcmp(enable, "1") == 0) {
+							char *opt_tag = NULL;
+
+							dmuci_get_value_by_section_string(option_s, "option_tag", &opt_tag);
+							pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s ", opt_tag);
+						}
+					}
+
+					if (pos) {
+						buf[pos - 1] = 0;
+						dmuci_set_value_by_section(iface_s ? iface_s : interface_s, "reqopts", buf);
+					}
+
+					// Update dmmap section
+					dmuci_set_value_by_section_bbfdm(dhcpv4_client->dmmap_s, "iface_name", iface_s ? iface_name : linker);
+				}
 			}
 			break;
 	}
