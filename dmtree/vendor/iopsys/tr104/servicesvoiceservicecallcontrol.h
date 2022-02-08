@@ -14,7 +14,6 @@
 #include <libbbf_api/dmcommon.h>
 
 extern DMLEAF tIOPSYS_VoiceServiceCallControlExtensionParams[];
-extern DMLEAF tIOPSYS_VoiceServiceCallControlCallingFeaturesSetParams[];
 
 #endif //__IOPSYS_VOICESERVICECALLCONTROL_H
 

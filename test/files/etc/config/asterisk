@@ -153,6 +153,67 @@ config call_filter 'call_filter0'
 	option block_outgoing '0'
 	option block_incoming '0'
 
+config numberingplan 'numberingplan'
+	option interdigitstdmsec '15000'
+	option interdigitopenmsec '3000'
+	option minimumnumberdigits '1'
+	option maxnumdigits '15'
+
+config prefixinfo 'prefixinfo1'
+        option prefixenable '1'
+        option prefixrange '*21*'
+        option facilityaction 'CFU_ACTIVATE'
+
+config prefixinfo 'prefixinfo2'
+        option prefixenable '1'
+        option prefixrange '#21#'
+        option facilityaction 'CFU_DEACTIVATE'
+
+config prefixinfo 'prefixinfo3'
+        option prefixenable '1'
+        option prefixrange '*61*'
+        option facilityaction 'CFNR_ACTIVATE'
+
+config prefixinfo 'prefixinfo4'
+        option prefixenable '1'
+        option prefixrange '#61#'
+        option facilityaction 'CFNR_DEACTIVATE'
+
+config prefixinfo 'prefixinfo5'
+        option prefixenable '1'
+        option prefixrange '*67*'
+        option facilityaction 'CFB_ACTIVATE'
+
+config prefixinfo 'prefixinfo6'
+        option prefixenable '1'
+        option prefixrange '#67#'
+        option facilityaction 'CFB_DEACTIVATE'
+
+config prefixinfo 'prefixinfo7'
+        option prefixenable '1'
+        option prefixrange '*43#'
+        option facilityaction 'CW_ACTIVATE'
+
+config prefixinfo 'prefixinfo8'
+        option prefixenable '1'
+        option prefixrange '#43#'
+        option facilityaction 'CW_DEACTIVATE'
+
+config prefixinfo 'prefixinfo10'
+        option prefixenable '1'
+        option prefixrange '*261#'
+        option facilityaction 'DND_ACTIVATE'
+
+config prefixinfo 'prefixinfo11'
+        option prefixenable '1'
+        option prefixrange '#261#'
+        option facilityaction 'DND_DEACTIVATE'
+
+config prefixinfo 'prefixinfo12'
+        option prefixenable '1'
+        option prefixrange '*#261#'
+        option facilityaction 'DND_INTERROGATE'
+
 config sip_service_provider 'sip0'
 	list codecs 'alaw'
 	list codecs 'ulaw'

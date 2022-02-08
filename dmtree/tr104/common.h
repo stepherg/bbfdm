@@ -76,6 +76,7 @@ extern char *RegistrarServerTransport[];
 extern char *DTMFMethod[];
 extern char *JitterBufferType[];
 extern char *KeyingMethods[];
+extern char *FacilityAction[];
 
 int init_supported_codecs(void);
 int init_call_log(void);
