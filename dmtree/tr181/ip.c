@@ -822,7 +822,7 @@ static int addObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_ip_interface);
 	dmuci_get_value_by_section_string(dmmap_ip_interface, "ip_int_instance", &ip_inst);
 
-	if (!strcmp(*instance, "1")) {
+	if (strcmp(*instance, "1") != 0) {
 		char device_buf[32] = {0};
 
 		snprintf(ipv4_name, sizeof(ipv4_name), "iface%s_ipv4_%s", ip_inst, *instance);
@@ -832,15 +832,12 @@ static int addObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 		dmuci_set_value("network", ipv4_name, "device", device_buf);
 		dmuci_set_value("network", ipv4_name, "proto", "static");
 	} else {
-		char *proto;
-
-		dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
-		dmuci_set_value_by_section((struct uci_section *)data, "proto", strcmp(proto, "dhcp") == 0 ? proto : "static");
+		dmuci_set_value_by_section((struct uci_section *)data, "proto", "static");
 	}
 
 	dmuci_add_section_bbfdm("dmmap_network_ipv4", "intf_ipv4", &dmmap_ip_interface_ipv4);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "parent_section", section_name((struct uci_section *)data));
-	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "section_name", !strcmp(*instance, "1") ? ipv4_name : section_name((struct uci_section *)data));
+	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "section_name", (strcmp(*instance, "1") != 0) ? ipv4_name : section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "added_by_controller", "1");
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "ipv4_instance", *instance);
 	return 0;
