@@ -18,6 +18,7 @@
 static int read_next;
 static struct diagnostic_stats diag_stats = {0};
 static const int READ_BUF_SIZE = { 1024 * 16 };
+static struct uloop_timeout activate_timer[MAX_TIME_WINDOW] = {0};
 
 char *get_diagnostics_option(char *sec_name, char *option)
 {
@@ -561,17 +562,15 @@ static void launch_activate_iamge_cb(struct uloop_timeout *t)
 	dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0);
 }
 
-static void activate_fw_images(struct activate_image *active_img)
+static void activate_fw_images(char *start_time[])
 {
-	int i = 0;
-
-	for (i = 0; i < MAX_TIME_WINDOW && *active_img->start_time; i++, active_img++) {
-		active_img->activate_timer.cb = launch_activate_iamge_cb;
-		uloop_timeout_set(&active_img->activate_timer, atoi(active_img->start_time) * 1000);
+	for (int i = 0; i < MAX_TIME_WINDOW && DM_STRLEN(start_time[i]); i++) {
+		activate_timer[i].cb = launch_activate_iamge_cb;
+		uloop_timeout_set(&activate_timer[i], atoi(start_time[i]) * 1000);
 	}
 }
 
-int bbf_fw_image_activate(const char *bank_id, struct activate_image *active_img)
+int bbf_fw_image_activate(const char *bank_id, char *start_time[])
 {
 	json_object *json_obj = NULL;
 
@@ -580,8 +579,8 @@ int bbf_fw_image_activate(const char *bank_id, struct activate_image *active_img
 	if (strcmp(status, "true") != 0)
 		return -1;
 
-	if (*active_img->start_time) {
-		activate_fw_images(active_img);
+	if (DM_STRLEN(start_time[0])) {
+		activate_fw_images(start_time);
 	} else {
 		if (dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) != 0)
 			return -1;

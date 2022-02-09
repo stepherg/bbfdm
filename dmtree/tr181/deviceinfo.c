@@ -1009,14 +1009,14 @@ static int get_operate_args_DeviceInfoFirmwareImage_Activate(char *refparam, str
 
 static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct activate_image active_images[MAX_TIME_WINDOW] = {0};
+	char *start_time[MAX_TIME_WINDOW] = {0};
 
 	for (int i = 0; i < ARRAY_SIZE(firmware_image_activate_in); i++)
-		active_images[i].start_time = dmjson_get_value((json_object *)value, 1, firmware_image_activate_in[i]);
+		start_time[i] = dmjson_get_value((json_object *)value, 1, firmware_image_activate_in[i]);
 
 	char *bank_id = dmjson_get_value((json_object *)data, 1, "id");
 
-	int res = bbf_fw_image_activate(bank_id, active_images);
+	int res = bbf_fw_image_activate(bank_id, start_time);
 
 	return res ? CMD_FAIL : CMD_SUCCESS;
 }
