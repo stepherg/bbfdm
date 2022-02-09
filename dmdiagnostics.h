@@ -48,12 +48,6 @@ struct diagnostic_stats
 	uint32_t ftp_syn;
 };
 
-struct activate_image
-{
-	struct uloop_timeout activate_timer;
-	char *start_time;
-};
-
 enum diagnostic_protocol {
 	DIAGNOSTIC_HTTP = 1,
 	DIAGNOSTIC_FTP
@@ -81,6 +75,6 @@ int bbf_config_restore(const char *url, const char *username, const char *passwo
 int bbf_fw_image_download(const char *url, const char *auto_activate, const char *username, const char *password,
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
 		const char *bank_id, const char *command, const char *obj_path, const char *commandKey);
-int bbf_fw_image_activate(const char *bank_id, struct activate_image *active_img);
+int bbf_fw_image_activate(const char *bank_id, char *start_time[]);
 
 #endif
