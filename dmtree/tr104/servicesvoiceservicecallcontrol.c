@@ -1222,8 +1222,6 @@ static int set_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_FacilityAc
 		case VALUECHECK:
                         if (dm_validate_string(value, -1, -1, FacilityAction, NULL))
                                 return FAULT_9007;
-			if (dm_validate_string(value, -1, 32, NULL, NULL))
-				return FAULT_9007;
 			break;
 		case VALUESET:
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "facilityaction", value);
