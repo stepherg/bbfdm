@@ -465,6 +465,13 @@ int init_call_log(void)
 				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
 				DM_STRNCPY(cdr.averageRoundTripDelay, token, end - token + 1);
+
+				token = DM_STRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_STRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.averageFarEndInterarrivalJitter, token, end - token + 1);
 			}
 			// Skip invalid call logs
 			if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||

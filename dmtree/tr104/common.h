@@ -61,6 +61,7 @@ struct call_log_entry {
 	char jitter[20];
 	char maxJitter[20];
 	char averageRoundTripDelay[20];
+	char averageFarEndInterarrivalJitter[20];
 };
 
 #define MAX_SUPPORTED_CODECS 8
