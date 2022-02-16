@@ -333,19 +333,26 @@ static int get_rule_description(char *refparam, struct dmctx *ctx, void *data, c
 /*#Device.Firewall.Chain.{i}.Rule.{i}.Target!UCI:firewall/rule,@i-1/target*/
 static int get_rule_target(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *v;
+	char *target;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "target", &v);
-	if (strcasecmp(v, "Accept") == 0)
-		*value = "Accept";
-	else if (strcasecmp(v, "Reject") == 0)
-		*value = "Reject";
-	else if (strcasecmp(v, "Drop") == 0)
-		*value = "Drop";
-	else if (strcasecmp(v, "MARK") == 0)
-		*value = "Return";
-	else
-		*value = v;
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "target", &target);
+	if (DM_STRLEN(target) == 0) {
+		char *rule_perm = NULL;
+
+		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "is_rule", &rule_perm);
+		*value = (DM_STRCMP(rule_perm, "1") == 0) ? "Drop" : "Accept";
+	} else {
+		if (strcasecmp(target, "Accept") == 0)
+			*value = "Accept";
+		else if (strcasecmp(target, "Reject") == 0)
+			*value = "Reject";
+		else if (strcasecmp(target, "Drop") == 0)
+			*value = "Drop";
+		else if (strcasecmp(target, "MARK") == 0)
+			*value = "Return";
+		else
+			*value = target;
+	}
     return 0;
 }
 
