@@ -15,11 +15,11 @@ UCI_COMMIT_BBF_DMMAP="uci -q -c /etc/bbfdm/dmmap commit"
 UCI_SHOW_BBF_DMMAP="uci -q -c /etc/bbfdm/dmmap show"
 
 uci_get() {
-	local val=`$UCI_GET $1`
+	val=$($UCI_GET $1)
 	echo ${val:-$2}
 }
 
 uci_get_bbf_dmmap() {
-	local val=`$UCI_GET_BBF_DMMAP $1`
+	val=$($UCI_GET_BBF_DMMAP $1)
 	echo ${val:-$2}
 }

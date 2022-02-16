@@ -110,7 +110,7 @@ static int get_time_ntpserver(char *refparam, struct dmctx *ctx, char **value, i
 		*value = "";
 		return 0;
 	}
-	if (strcmp(*value, "none") == 0) {
+	if (DM_STRCMP(*value, "none") == 0) {
 		*value = "";
 	}
 	return 0;

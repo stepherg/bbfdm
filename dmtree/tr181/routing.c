@@ -70,7 +70,7 @@ static bool is_proc_route_in_config(struct proc_routing *proute)
 		char *mask;
 
 		dmuci_get_value_by_section_string(s, "netmask", &mask);
-		if (mask[0] == '\0' || strcmp(proute->mask, mask) == 0)
+		if (mask[0] == '\0' || DM_STRCMP(proute->mask, mask) == 0)
 			return true;
 	}
 
@@ -78,7 +78,7 @@ static bool is_proc_route_in_config(struct proc_routing *proute)
 		char *mask;
 
 		dmuci_get_value_by_section_string(s, "netmask", &mask);
-		if (mask[0] == '\0' || strcmp(proute->mask, mask) == 0)
+		if (mask[0] == '\0' || DM_STRCMP(proute->mask, mask) == 0)
 			return true;
 	}
 
@@ -88,7 +88,7 @@ static bool is_proc_route_in_config(struct proc_routing *proute)
 		dmuci_get_value_by_section_string(s, "target", &target);
 		dmuci_get_value_by_section_string(s, "gateway", &gateway);
 		dmuci_get_value_by_section_string(s, "device", &device);
-		if (strcmp(target, proute->destination) == 0 && strcmp(gateway, proute->gateway) == 0 && strcmp(device, proute->iface) == 0)
+		if (DM_STRCMP(target, proute->destination) == 0 && DM_STRCMP(gateway, proute->gateway) == 0 && DM_STRCMP(device, proute->iface) == 0)
 			return true;
 	}
 
@@ -108,7 +108,7 @@ static bool is_proc_route6_in_config(char *cdev, char *cip, char *cgw)
 		dmuci_get_value_by_section_string(s, "interface", &intf_r);
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", intf_r, String}}, 1, &jobj);
 		char *dev_r = (jobj) ? dmjson_get_value(jobj, 1, "device") : "";
-		if (strcmp(cdev, dev_r) == 0 && strcmp(cgw, gw_r) == 0 && strcmp(cip, ip_r) == 0)
+		if (DM_STRCMP(cdev, dev_r) == 0 && DM_STRCMP(cgw, gw_r) == 0 && DM_STRCMP(cip, ip_r) == 0)
 			return true;
 	}
 
@@ -121,7 +121,7 @@ static bool is_proc_route6_in_config(char *cdev, char *cip, char *cgw)
 		dmuci_get_value_by_section_string(s, "interface", &intf_r6);
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", intf_r6, String}}, 1, &jobj);
 		char *dev_r6 = (jobj) ? dmjson_get_value(jobj, 1, "device") : "";
-		if (strcmp(cdev, dev_r6) == 0 && strcmp(cgw, gw_r6) == 0 && strcmp(cip, ip_r6) == 0)
+		if (DM_STRCMP(cdev, dev_r6) == 0 && DM_STRCMP(cgw, gw_r6) == 0 && DM_STRCMP(cip, ip_r6) == 0)
 			return true;
 	}
 
@@ -131,7 +131,7 @@ static bool is_proc_route6_in_config(char *cdev, char *cip, char *cgw)
 		dmuci_get_value_by_section_string(s, "target", &ip_r6d);
 		dmuci_get_value_by_section_string(s, "gateway", &gw_r6d);
 		dmuci_get_value_by_section_string(s, "device", &dev_r6d);
-		if (strcmp(cdev, dev_r6d) == 0 && strcmp(cgw, gw_r6d) == 0 && strcmp(cip, ip_r6d) == 0)
+		if (DM_STRCMP(cdev, dev_r6d) == 0 && DM_STRCMP(cgw, gw_r6d) == 0 && DM_STRCMP(cip, ip_r6d) == 0)
 			return true;
 	}
 
@@ -144,15 +144,15 @@ static void parse_proc_route_line(char *line, struct proc_routing *proute)
 
 	proute->iface = strtok_r(line, " \t", &spch);
 	pch = strtok_r(NULL, " \t", &spch);
-	hex_to_ip(pch, proute->destination);
+	hex_to_ip(pch, proute->destination, sizeof(proute->destination));
 	pch = strtok_r(NULL, " \t", &spch);
-	hex_to_ip(pch, proute->gateway);
+	hex_to_ip(pch, proute->gateway, sizeof(proute->gateway));
 	proute->flags = strtok_r(NULL, " \t", &spch);
 	proute->refcnt = strtok_r(NULL, " \t", &spch);
 	proute->use = strtok_r(NULL, " \t", &spch);
 	proute->metric = strtok_r(NULL, " \t", &spch);
 	pch = strtok_r(NULL, " \t", &spch);
-	hex_to_ip(pch, proute->mask);
+	hex_to_ip(pch, proute->mask, sizeof(proute->mask));
 	proute->mtu = strtok_r(NULL, " \t", &spch);
 	proute->window = strtok_r(NULL, " \t", &spch);
 	proute->irtt = strtok_r(NULL, " \t\n\r", &spch);
@@ -171,7 +171,7 @@ static int parse_proc_route6_line(const char *line, char *ipstr, char *gwstr, ch
 				&gw[0], &gw[1], &gw[2], &gw[3], metric,
 				&refcnt, &use, &flags, dev);
 
-	if (strcmp(dev, "lo") == 0)
+	if (DM_STRCMP(dev, "lo") == 0)
 		return -1;
 
 	ip[0] = htonl(ip[0]);
@@ -212,7 +212,7 @@ static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMN
 					continue;
 				}
 				parse_proc_route_line(line, &proute);
-				if ((strcmp(iface, proute.iface) == 0) && strcmp(target, proute.destination) == 0) {
+				if ((DM_STRCMP(iface, proute.iface) == 0) && DM_STRCMP(target, proute.destination) == 0) {
 					found = true;
 					break;
 				}
@@ -242,7 +242,7 @@ static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMN
 					return 0;
 				}
 				str = dmjson_get_value(jobj, 1, "l3_device");
-				if (strcmp(str, proute.iface) == 0) {
+				if (DM_STRCMP(str, proute.iface) == 0) {
 					iface = section_name(s);
 					break;
 				}
@@ -283,7 +283,7 @@ static int dmmap_synchronizeRoutingRouterIPv6Forwarding(struct dmctx *dmctx, DMN
 			if (parse_proc_route6_line(buf, ipstr, gwstr, dev, &metric))
 				continue;
 
-			if (strcmp(iface, dev) == 0 && strcmp(ipstr, target) == 0) {
+			if (DM_STRCMP(iface, dev) == 0 && DM_STRCMP(ipstr, target) == 0) {
 				found = 1;
 				break;
 			}
@@ -316,7 +316,7 @@ static int dmmap_synchronizeRoutingRouterIPv6Forwarding(struct dmctx *dmctx, DMN
 				return 0;
 			}
 			char *str = dmjson_get_value(jobj, 1, "device");
-			if (strcmp(str, dev) == 0) {
+			if (DM_STRCMP(str, dev) == 0) {
 				iface = section_name(s);
 				break;
 			}
@@ -459,7 +459,7 @@ static int browseRoutingRouteInformationInterfaceSettingInst(struct dmctx *dmctx
 
 		dmuci_get_value_by_section_string(s, "proto", &proto);
 		dmuci_get_value_by_section_string(s, "ip6addr", &ip6addr);
-		if ((proto && strcmp(proto, "dhcpv6") == 0) || (ip6addr && ip6addr[0] != '\0')) {
+		if ((proto && DM_STRCMP(proto, "dhcpv6") == 0) || (ip6addr && ip6addr[0] != '\0')) {
 			json_object *res = NULL, *route_obj = NULL, *arrobj = NULL;
 
 			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &res);
@@ -643,7 +643,7 @@ static int get_router_ipv4forwarding_origin(char *refparam, struct dmctx *ctx, v
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", interface, String}}, 1, &res);
 		DM_ASSERT(res, *value = "DHCPv4");
 		char *proto = dmjson_get_value(res, 1, "proto");
-		*value = (proto && strncmp(proto, "ppp", 3) == 0) ? "IPCP" : "DHCPv4";
+		*value = (proto && DM_STRNCMP(proto, "ppp", 3) == 0) ? "IPCP" : "DHCPv4";
 	}
 	return 0;
 }
@@ -885,7 +885,7 @@ static int get_RoutingRouteInformation_InterfaceSettingNumberOfEntries(char *ref
 
 		dmuci_get_value_by_section_string(s, "proto", &proto);
 		dmuci_get_value_by_section_string(s, "ip6addr", &ip6addr);
-		if ((proto && strcmp(proto, "dhcpv6") == 0) || (ip6addr && ip6addr[0] != '\0')) {
+		if ((proto && DM_STRCMP(proto, "dhcpv6") == 0) || (ip6addr && ip6addr[0] != '\0')) {
 			json_object *res = NULL, *routes = NULL;
 
 			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &res);
@@ -911,7 +911,7 @@ static int get_RoutingRouteInformationInterfaceSetting_Status(char *refparam, st
 	uci_foreach_sections("network", "route6", s) {
 		dmuci_get_value_by_section_string(s, "target", &ip_target);
 		dmuci_get_value_by_section_string(s, "gateway", &gateway);
-		if(strcmp(ip_target, buf) == 0 && strcmp(nexthop, gateway) == 0) {
+		if(DM_STRCMP(ip_target, buf) == 0 && DM_STRCMP(nexthop, gateway) == 0) {
 			*value = "ForwardingEntryCreated";
 			return 0;
 		}
@@ -938,7 +938,7 @@ static int get_RoutingRouteInformationInterfaceSetting_Interface(char *refparam,
 		if (parse_proc_route6_line(buf, ipstr, gwstr, dev, &metric))
 			continue;
 
-		if((strcmp(source, ipstr) == 0) && (strcmp(nexthop, gwstr) == 0))
+		if((DM_STRCMP(source, ipstr) == 0) && (DM_STRCMP(nexthop, gwstr) == 0))
 			break;
 	}
 	fclose(fp);
@@ -949,7 +949,7 @@ static int get_RoutingRouteInformationInterfaceSetting_Interface(char *refparam,
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &jobj);
 		if (!jobj) return 0;
 		char *str = dmjson_get_value(jobj, 1, "device");
-		if (strcmp(str, dev) == 0) {
+		if (DM_STRCMP(str, dev) == 0) {
 			iface = section_name(s);
 			break;
 		}
@@ -972,10 +972,10 @@ static int get_RoutingRouteInformationInterfaceSetting_RouteLifetime(char *refpa
 	*value = "0001-01-01T00:00:00Z";
 
 	char *valid = dmjson_get_value((struct json_object *)data, 1, "valid");
-	if (valid && *valid != '\0' && atoi(valid) > 0) {
+	if (valid && *valid != '\0' && DM_STRTOL(valid) > 0) {
 		char local_time[32] = {0};
 
-		if (get_shift_utc_time(atoi(valid), local_time, sizeof(local_time)) == -1)
+		if (get_shift_utc_time(DM_STRTOL(valid), local_time, sizeof(local_time)) == -1)
 			return 0;
 		*value = dmstrdup(local_time);
 	}

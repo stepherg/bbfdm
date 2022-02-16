@@ -115,7 +115,7 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 	for (i = 0; i < nbre_devices; i++) {
 		device = json_object_array_get_idx(devices, i);
 		is_root_device = dmjson_get_value(device, 1, "is_root_device");
-		if(strcmp(is_root_device, "0") == 0)
+		if(DM_STRCMP(is_root_device, "0") == 0)
 			continue;
 
 		descurl = dmjson_get_value(device, 1, "descurl");

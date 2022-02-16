@@ -65,10 +65,10 @@ void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *v
 {
 	char *linker = NULL;
 
-	if (!value)
+	if (!value || *value == 0)
 		return;
 
-	if (*value && strncmp(value, "Device.IP.Interface.", 20) != 0)
+	if (strncmp(value, "Device.IP.Interface.", 20) != 0)
 		return;
 
 	adm_entry_get_linker_value(ctx, value, &linker);
@@ -226,7 +226,7 @@ const bool validate_sha1sum_value(const char *file_path, const char *checksum)
 	for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
 		snprintf(&sha1_res[i * 2], sizeof(sha1_res) - (i * 2), "%02x", hash[i]);
 
-	if (strcmp(sha1_res, checksum) == 0)
+	if (DM_STRCMP(sha1_res, checksum) == 0)
 		res = true;
 
 end:
@@ -262,7 +262,7 @@ const bool validate_sha224sum_value(const char *file_path, const char *checksum)
 	for (int i = 0; i < SHA224_DIGEST_LENGTH; i++)
 		snprintf(&sha224_res[i * 2], sizeof(sha224_res) - (i * 2), "%02x", hash[i]);
 
-	if (strcmp(sha224_res, checksum) == 0)
+	if (DM_STRCMP(sha224_res, checksum) == 0)
 		res = true;
 
 end:
@@ -298,7 +298,7 @@ const bool validate_sha256sum_value(const char *file_path, const char *checksum)
 	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
 		snprintf(&sha256_res[i * 2], sizeof(sha256_res) - (i * 2), "%02x", hash[i]);
 
-	if (strcmp(sha256_res, checksum) == 0)
+	if (DM_STRCMP(sha256_res, checksum) == 0)
 		res = true;
 
 end:
@@ -334,7 +334,7 @@ const bool validate_sha384sum_value(const char *file_path, const char *checksum)
 	for (int i = 0; i < SHA384_DIGEST_LENGTH; i++)
 		snprintf(&sha384_res[i * 2], sizeof(sha384_res) - (i * 2), "%02x", hash[i]);
 
-	if (strcmp(sha384_res, checksum) == 0)
+	if (DM_STRCMP(sha384_res, checksum) == 0)
 		res = true;
 
 end:
@@ -370,7 +370,7 @@ const bool validate_sha512sum_value(const char *file_path, const char *checksum)
 	for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
 		snprintf(&sha512_res[i * 2], sizeof(sha512_res) - (i * 2), "%02x", hash[i]);
 
-	if (strcmp(sha512_res, checksum) == 0)
+	if (DM_STRCMP(sha512_res, checksum) == 0)
 		res = true;
 
 end:
@@ -566,7 +566,7 @@ static void activate_fw_images(char *start_time[])
 {
 	for (int i = 0; i < MAX_TIME_WINDOW && DM_STRLEN(start_time[i]); i++) {
 		activate_timer[i].cb = launch_activate_iamge_cb;
-		uloop_timeout_set(&activate_timer[i], atoi(start_time[i]) * 1000);
+		uloop_timeout_set(&activate_timer[i], DM_STRTOL(start_time[i]) * 1000);
 	}
 }
 
@@ -680,7 +680,7 @@ static void http_download_per_packet(libtrace_packet_t *packet)
 			diag_stats.test_bytes_received = strlen(nexthdr);
 			val += strlen("Content-Length: ");
 			pch = strtok_r(val, " \r\n\t", &pchr);
-			diag_stats.test_bytes_received += atoi(pch);
+			diag_stats.test_bytes_received += DM_STRTOL(pch);
 			diag_stats.first_data = 1;
 			return;
 		}
@@ -705,16 +705,16 @@ static void ftp_download_per_packet(libtrace_packet_t *packet)
 	gmtime_r(&(ftp_download_ts.tv_sec), &ftp_download_lt);
 	strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%S", &ftp_download_lt);
 
-	if (strcmp(tcp_flag, "PSH ACK ") == 0 && strlen(nexthdr) > strlen(FTP_SIZE_RESPONSE) && strncmp(nexthdr, FTP_SIZE_RESPONSE, strlen(FTP_SIZE_RESPONSE)) == 0) {
+	if (strcmp(tcp_flag, "PSH ACK ") == 0 && DM_STRLEN(nexthdr) > strlen(FTP_SIZE_RESPONSE) && strncmp(nexthdr, FTP_SIZE_RESPONSE, strlen(FTP_SIZE_RESPONSE)) == 0) {
 		char *val = strstr(nexthdr,"213");
 		char *pch, *pchr;
 		val += strlen("213 ");
 		pch =strtok_r(val, " \r\n\t", &pchr);
-		diag_stats.test_bytes_received = atoi(pch);
+		diag_stats.test_bytes_received = DM_STRTOL(pch);
 		return;
 	}
 
-	if (strcmp(tcp_flag, "PSH ACK ") == 0 && strlen(nexthdr) > strlen(FTP_PASV_RESPONSE) && strncmp(nexthdr, FTP_PASV_RESPONSE, strlen(FTP_PASV_RESPONSE)) == 0) {
+	if (strcmp(tcp_flag, "PSH ACK ") == 0 && DM_STRLEN(nexthdr) > strlen(FTP_PASV_RESPONSE) && strncmp(nexthdr, FTP_PASV_RESPONSE, strlen(FTP_PASV_RESPONSE)) == 0) {
 		diag_stats.ftp_syn = 1;
 		return;
 	}
@@ -731,7 +731,7 @@ static void ftp_download_per_packet(libtrace_packet_t *packet)
 		return;
 	}
 
-	if (strcmp(tcp_flag, "PSH ACK ") == 0 && strlen(nexthdr) > strlen(FTP_RETR_REQUEST) && strncmp(nexthdr, FTP_RETR_REQUEST, strlen(FTP_RETR_REQUEST)) == 0) {
+	if (strcmp(tcp_flag, "PSH ACK ") == 0 && DM_STRLEN(nexthdr) > strlen(FTP_RETR_REQUEST) && strncmp(nexthdr, FTP_RETR_REQUEST, strlen(FTP_RETR_REQUEST)) == 0) {
 		snprintf(diag_stats.romtime, sizeof(diag_stats.romtime), "%s.%06ldZ", s_now, (long) ftp_download_ts.tv_usec);
 		return;
 	}
@@ -835,7 +835,7 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 	if (get_tcp_flag_from_packet(packet, &tcp, tcp_flag, &nexthdr))
 		return;
 
-	if (strcmp(tcp_flag, "PSH ACK ") == 0 && strlen(nexthdr) > strlen(FTP_PASV_RESPONSE) && strncmp(nexthdr, FTP_PASV_RESPONSE, strlen(FTP_PASV_RESPONSE)) == 0) {
+	if (strcmp(tcp_flag, "PSH ACK ") == 0 && DM_STRLEN(nexthdr) > strlen(FTP_PASV_RESPONSE) && strncmp(nexthdr, FTP_PASV_RESPONSE, strlen(FTP_PASV_RESPONSE)) == 0) {
 		diag_stats.ftp_syn = 1;
 		return;
 	}
@@ -856,7 +856,7 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 		return;
 	}
 
-	if (strcmp(tcp_flag, "PSH ACK ") == 0 && strlen(nexthdr) > strlen(FTP_STOR_REQUEST) && strncmp(nexthdr, FTP_STOR_REQUEST, strlen(FTP_STOR_REQUEST)) == 0) {
+	if (strcmp(tcp_flag, "PSH ACK ") == 0 && DM_STRLEN(nexthdr) > strlen(FTP_STOR_REQUEST) && strncmp(nexthdr, FTP_STOR_REQUEST, strlen(FTP_STOR_REQUEST)) == 0) {
 		snprintf(diag_stats.romtime, sizeof(diag_stats.romtime), "%s.%06ldZ", s_now, (long) ftp_upload_ts.tv_usec);
 		return;
 	}
@@ -880,7 +880,7 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 		return;
 	}
 
-	if ( (strcmp(tcp_flag, "PSH ACK ") == 0 || strcmp(tcp_flag, "FIN PSH ACK ") == 0) &&  strlen(nexthdr) > strlen(FTP_TRANSFERT_COMPLETE) && strncmp(nexthdr, FTP_TRANSFERT_COMPLETE, strlen(FTP_TRANSFERT_COMPLETE)) == 0) {
+	if ( (strcmp(tcp_flag, "PSH ACK ") == 0 || strcmp(tcp_flag, "FIN PSH ACK ") == 0) &&  DM_STRLEN(nexthdr) > strlen(FTP_TRANSFERT_COMPLETE) && strncmp(nexthdr, FTP_TRANSFERT_COMPLETE, strlen(FTP_TRANSFERT_COMPLETE)) == 0) {
 		snprintf(diag_stats.eomtime, sizeof(diag_stats.eomtime), "%s.%06ldZ", s_now, (long) ftp_upload_ts.tv_usec);
 		read_next = 0;
 		return;
@@ -947,11 +947,10 @@ static int extract_stats(char *dump_file, int proto, int diagnostic_type)
 
 static char *get_default_gateway_device(void)
 {
-	char *device = "";
-
     FILE *f = fopen(PROC_ROUTE, "r");
 	if (f != NULL) {
 		char line[100] = {0}, *p = NULL, *c = NULL, *saveptr = NULL;
+		char *device = NULL;
 
 		while(fgets(line, sizeof(line), f)) {
 			p = strtok_r(line, " \t", &saveptr);
@@ -962,9 +961,11 @@ static char *get_default_gateway_device(void)
 			}
 		}
 		fclose(f);
+
+		return device ? device : "";
 	}
 
-    return device;
+    return "";
 }
 
 int start_upload_download_diagnostic(int diagnostic_type)
@@ -980,10 +981,9 @@ int start_upload_download_diagnostic(int diagnostic_type)
 		interface = get_diagnostics_option("upload", "interface");
 	}
 
-	if ((url[0] == '\0') ||
-		(strncmp(url, HTTP_URI, strlen(HTTP_URI)) != 0 &&
+	if (strncmp(url, HTTP_URI, strlen(HTTP_URI)) != 0 &&
 		strncmp(url, FTP_URI, strlen(FTP_URI)) != 0 &&
-		strstr(url,"@") != NULL))
+		strchr(url,'@') != NULL)
 		return -1;
 
 	device = (interface && *interface) ? get_device(interface) : get_default_gateway_device();

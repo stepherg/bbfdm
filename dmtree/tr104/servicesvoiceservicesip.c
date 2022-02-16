@@ -288,7 +288,7 @@ static int set_ServicesVoiceServiceSIPClient_RegisterURI(char *refparam, struct 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			value_domain = strchr(value, '@');
+			value_domain = DM_STRCHR(value, '@');
 			if (value_domain) {
 				value_domain++;
 				value_user = dmstrdup(value);
@@ -362,12 +362,12 @@ static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, s
 
 						dmuci_get_option_value_string(TR104_UCI_PACKAGE, "sip_options", "defaultexpiry", &period_str);
 						if (period_str && *period_str) {
-							period = atoi(period_str);
+							period = DM_STRTOL(period_str);
 							dmfree(period_str);
 						}
 						if (period <= 0) {
 							BBF_DEBUG("Use default registration expires\n");
-							period = atoi(DEFAULT_SIP_REGISTER_EXPIRY_STR);
+							period = DM_STRTOL(DEFAULT_SIP_REGISTER_EXPIRY_STR);
 						}
 						time_expires = time_last + period;
 
@@ -445,7 +445,7 @@ static int get_server_address(struct uci_section *section, char *option, char **
 {
 	dmuci_get_value_by_section_string(section, option, value);
 	if (*value && **value) {
-		char *port = strchr(*value, ':');
+		char *port = DM_STRCHR(*value, ':');
 		if (port) {
 			char *server = dmstrdup(*value);
 			if (server) {
@@ -464,7 +464,7 @@ static int set_server_address(struct uci_section *section, char *option, char *v
 	char *old_value = NULL;
 
 	dmuci_get_value_by_section_string(section, option, &old_value);
-	char *port = (old_value && *old_value) ? strchr(old_value, ':') : NULL;
+	char *port = (old_value && *old_value) ? DM_STRCHR(old_value, ':') : NULL;
 	if (port) {
 		char new_value[32] = {0};
 
@@ -487,7 +487,7 @@ static int get_server_port(struct uci_section *section, char *option, char **val
 
 	dmuci_get_value_by_section_string(section, option, &domain);
 	if (domain && *domain) {
-		port = strchr(domain, ':');
+		port = DM_STRCHR(domain, ':');
 		if (port)
 			port++;
 	}
@@ -505,7 +505,7 @@ static int set_server_port(struct uci_section *section, char *option, char *valu
 	char *old_value = NULL, new_value[32] = {0};
 
 	dmuci_get_value_by_section_string(section, option, &old_value);
-	char *tmp = old_value ? strchr(old_value, ':') : NULL;
+	char *tmp = old_value ? DM_STRCHR(old_value, ':') : NULL;
 	if (tmp)
 		*tmp = '\0';
 
@@ -910,7 +910,7 @@ static int set_ServicesVoiceServiceSIPNetwork_CodecList(char *refparam, struct d
 static int get_ServicesVoiceServiceSIPNetworkFQDNServer_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_option_value_string("asterisk", "sip_options", "srvlookup", value);
-	*value = (strcmp(*value, "yes") == 0) ? "1" : "0";
+	*value = (DM_STRCMP(*value, "yes") == 0) ? "1" : "0";
 	return 0;
 }
 

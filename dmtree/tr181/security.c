@@ -95,14 +95,16 @@ static char *get_certificate_sig_alg(int sig_nid)
 
 static char *generate_serial_number(char *text, int length)
 {
-	int i, j;
 	char *hex = (char *)dmcalloc(100, sizeof(char));
+	unsigned pos = 0;
 
-	for (i = 0, j = 0; i < length; ++i, j += 3) {
-		sprintf(hex + j, "%02x", text[i] & 0xff);
-		if (i < length-1)
-			sprintf(hex + j + 2, "%c", ':');
+	for (int i = 0; i < length; i++) {
+		pos += snprintf(&hex[pos], 100 - pos, "%02x:", text[i] & 0xff);
 	}
+
+	if (pos)
+		hex[pos - 1] = 0;
+
 	return hex;
 }
 
@@ -168,7 +170,7 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 	get_certificate_paths();
 	int i;
 	for (i = 0; i < MAX_CERT; i++) {
-		if(!strlen(certifcates_paths[i]))
+		if(!DM_STRLEN(certifcates_paths[i]))
 			break;
 		FILE *fp = fopen(certifcates_paths[i], "r");
 		if (fp == NULL)

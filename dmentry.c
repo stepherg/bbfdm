@@ -210,11 +210,12 @@ int dm_ctx_clean_sub(struct dmctx *ctx)
 int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_type_t schema_type)
 {
 	int fault = 0;
+	int len = DM_STRLEN(path);
 
 	// Load dynamic objects and parameters
 	load_dynamic_arrays(ctx);
 
-	if (strlen(path) == 0) {
+	if (len == 0) {
 		path = "";
 	} else {
 		if (path[strlen(path) - 1] != '.')
@@ -263,13 +264,13 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 	ctx->stop = false;
 	switch(cmd) {
 		case CMD_GET_VALUE:
-			if (ctx->in_param[0] == '.' && strlen(ctx->in_param) == 1)
+			if (ctx->in_param[0] == '.' && DM_STRLEN(ctx->in_param) == 1)
 				fault = FAULT_9005;
 			else
 				fault = dm_entry_get_value(ctx);
 			break;
 		case CMD_GET_NAME:
-			if (ctx->in_param[0] == '.' && strlen(ctx->in_param) == 1)
+			if (ctx->in_param[0] == '.' && DM_STRLEN(ctx->in_param) == 1)
 				fault = FAULT_9005;
 			else if (arg1 && string_to_bool(arg1, &ctx->nextlevel) == 0)
 				fault = dm_entry_get_name(ctx);
@@ -386,7 +387,7 @@ int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value)
 	if (!param || param[0] == '\0')
 		return 0;
 
-	snprintf(linker, sizeof(linker), "%s%c", param, (param[strlen(param) - 1] != '.') ? '.' : '\0');
+	snprintf(linker, sizeof(linker), "%s%c", param, (param[DM_STRLEN(param) - 1] != '.') ? '.' : '\0');
 
 	dm_ctx_init_sub(&dmctx, ctx->instance_mode);
 	dmctx.in_param = linker;
@@ -408,7 +409,7 @@ int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *obje
 
 	for (; *objects; objects++) {
 
-		if (strncmp(value, *objects, strlen(*objects)) == 0) {
+		if (DM_STRNCMP(value, *objects, DM_STRLEN(*objects)) == 0) {
 			char *linker = NULL;
 
 			adm_entry_get_linker_value(ctx, value, &linker);
@@ -541,15 +542,15 @@ static int check_stats_folder(bool json_path)
 
 	if (json_path) {
 #ifdef BBFDM_ENABLE_JSON_PLUGIN
-		if (strcmp(buf, json_hash) != 0) {
-			strncpy(json_hash, buf, 64);
+		if (DM_STRCMP(buf, json_hash) != 0) {
+			DM_STRNCPY(json_hash, buf, sizeof(json_hash));
 			return 1;
 		}
 #endif  /* BBFDM_ENABLE_JSON_PLUGIN */
 	} else {
 #ifdef BBFDM_ENABLE_DOTSO_PLUGIN
-		if (strcmp(buf, library_hash) != 0) {
-			strncpy(library_hash, buf, 64);
+		if (DM_STRCMP(buf, library_hash) != 0) {
+			DM_STRNCPY(library_hash, buf, sizeof(library_hash));
 			return 1;
 		}
 #endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */

@@ -139,9 +139,9 @@ static int get_protocol(const char *val)
 {
 	int type;
 
-	if (strcmp("cwmp", val) == 0)
+	if (DM_STRCMP("cwmp", val) == 0)
 		type = BBFDM_CWMP;
-	else if (strcmp("usp", val) == 0)
+	else if (DM_STRCMP("usp", val) == 0)
 		type = BBFDM_USP;
 	else
 		type = BBFDM_BOTH;
@@ -177,7 +177,7 @@ static struct obj_node* find_obj_node(const char *ubus_name)
 	if (temp == NULL)
 		return NULL;
 
-	while (strcmp(ubus_name, temp->obj_name) != 0) {
+	while (DM_STRCMP(ubus_name, temp->obj_name) != 0) {
 		if (temp->next == NULL) {
 			return NULL;
 		} else {
@@ -306,7 +306,7 @@ static int handle_add_del_req(struct ubus_context *ctx, const char *ubus_name, s
 	set_bbfdatamodel_type(proto);
 	dm_ctx_init_entry(&bbf_ctx, tEntryObj, 0);
 
-	if (strcmp(method, "add_object") == 0) {
+	if (DM_STRCMP(method, "add_object") == 0) {
 		fault = dm_entry_param_method(&bbf_ctx, CMD_ADD_OBJECT, path, pkey, NULL);
 	} else {
 		fault = dm_entry_param_method(&bbf_ctx, CMD_DEL_OBJECT, path, pkey, NULL);
@@ -320,7 +320,7 @@ static int handle_add_del_req(struct ubus_context *ctx, const char *ubus_name, s
 		blobmsg_add_u32(&bb, "fault", fault);
 		blobmsg_add_u8(&bb, "status", 0);
 	} else {
-		if (strcmp(method, "add_object") == 0) {
+		if (DM_STRCMP(method, "add_object") == 0) {
 			if (bbf_ctx.addobj_instance) {
 				blobmsg_add_u8(&bb, "status", 1);
 				bb_add_string(&bb, "instance", bbf_ctx.addobj_instance);
@@ -537,7 +537,7 @@ static int libbbf_ubus_operate(struct ubus_context *ctx, struct ubus_object *obj
 
 	snprintf(path, PATH_MAX, "%s", (char *)blobmsg_data(tb[LIBBBF_UBUS_OPERATE_PATH]));
 
-	len = strlen(path);
+	len = DM_STRLEN(path);
 	if (path[len - 1] == '.') {
 		printf("path can't end with (.)\n\r");
 		if (input)
@@ -627,7 +627,7 @@ static int libbbf_ubus_add_del_handler(struct ubus_context *ctx, struct ubus_obj
 
 	snprintf(path, PATH_MAX, "%s", (char *)blobmsg_data(tb[LIBBBF_UBUS_ADD_DEL_PATH]));
 
-	plen = strlen(path);
+	plen = DM_STRLEN(path);
 	if (path[plen - 1] != '.') {
 		if (plen > PATH_MAX - 2) {
 			printf("path too long(%d) can't append (.)\n\r", plen);
@@ -672,7 +672,7 @@ static int libbbf_ubus_set_handler(struct ubus_context *ctx, struct ubus_object 
 	snprintf(path, PATH_MAX, "%s", (char *)blobmsg_data(tb[LIBBBF_UBUS_SET_PATH]));
 	snprintf(value, PATH_MAX, "%s", (char *)blobmsg_data(tb[LIBBBF_UBUS_SET_VALUE]));
 
-	int plen = strlen(path);
+	int plen = DM_STRLEN(path);
 	if (path[plen - 1] == '.') {
 		printf("path can't end with (.)\n\r");
 		return UBUS_STATUS_INVALID_ARGUMENT;
@@ -763,7 +763,7 @@ static int libbbf_ubus_transaction_handler(struct ubus_context *ctx, struct ubus
 	memset(&bb, 0, sizeof(struct blob_buf));
 	blob_buf_init(&bb, 0);
 
-	if (strcmp(method, "transaction_start") == 0) {
+	if (DM_STRCMP(method, "transaction_start") == 0) {
 		if (!g_dynamicdm_transaction_start) {
 			g_dynamicdm_transaction_start = true;
 			blobmsg_add_u8(&bb, "status", true);
@@ -771,7 +771,7 @@ static int libbbf_ubus_transaction_handler(struct ubus_context *ctx, struct ubus
 			printf("Transaction already in process\n");
 			blobmsg_add_u8(&bb, "status", false);
 		}
-	} else if(strcmp(method, "transaction_abort") == 0) {
+	} else if(DM_STRCMP(method, "transaction_abort") == 0) {
 		if (g_dynamicdm_transaction_start) {
 			g_dynamicdm_transaction_start = false;
 			dm_ctx_init_entry(&bbf_ctx, tEntryObj, 0);
@@ -782,7 +782,7 @@ static int libbbf_ubus_transaction_handler(struct ubus_context *ctx, struct ubus
 			printf("Transaction still not started\n\r");
 			blobmsg_add_u8(&bb, "status", false);
 		}
-	} else if (strcmp(method, "transaction_commit") == 0) {
+	} else if (DM_STRCMP(method, "transaction_commit") == 0) {
 		if (g_dynamicdm_transaction_start) {
 			g_dynamicdm_transaction_start = false;
 			dm_ctx_init_entry(&bbf_ctx, tEntryObj, 0);
@@ -907,7 +907,7 @@ void dynamicdm_free(struct ubus_context *ctx, const char *ubus_name)
 	if (curr == NULL)
 		return;
 
-	while (strcmp(ubus_name, curr->obj_name) != 0) {
+	while (DM_STRCMP(ubus_name, curr->obj_name) != 0) {
 		if (curr->next == NULL) {
 			return;
 		} else {

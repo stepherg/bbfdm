@@ -129,7 +129,7 @@ static char *get_path_without_instance(char *path)
 
 	res_path[0] = 0;
 	for (pch = strtok_r(str, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
-		if (atoi(pch) == 0 && strcmp(pch, "{i}") != 0)
+		if (DM_STRTOL(pch) == 0 && strcmp(pch, "{i}") != 0)
 			pos += snprintf(&res_path[pos], sizeof(res_path) - pos, "%s%s", pch, (pchr != NULL && *pchr != '\0') ? "." : "");
 	}
 
@@ -145,7 +145,7 @@ static int get_dynamic_operate_args(char *refparam, struct dmctx *ctx, void *dat
 
 	char *operate_path = get_path_without_instance(refparam);
 	list_for_each_entry(dyn_operate, &dynamic_operate_list, list) {
-		if (strcmp(dyn_operate->operate_path, operate_path) == 0) {
+		if (DM_STRCMP(dyn_operate->operate_path, operate_path) == 0) {
 			operate_args = (operation_args *)dyn_operate->operate_args;
 			break;
 		}
@@ -162,7 +162,7 @@ static int dynamic_operate_leaf(char *refparam, struct dmctx *ctx, void *data, c
 
 	char *operate_path = get_path_without_instance(refparam);
 	list_for_each_entry(dyn_operate, &dynamic_operate_list, list) {
-		if (strcmp(dyn_operate->operate_path, operate_path) == 0) {
+		if (DM_STRCMP(dyn_operate->operate_path, operate_path) == 0) {
 			operate_func = (operation)dyn_operate->operate;
 			break;
 		}
@@ -264,7 +264,7 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 						dmfree(object_path);
 
 						char *ret = strrchr(operate_path, '.');
-						strncpy(parent_path, operate_path, ret - operate_path +1);
+						DM_STRNCPY(parent_path, operate_path, ret - operate_path + 2);
 
 						bool obj_exists = operate_find_root_entry(ctx, parent_path, &dm_entryobj);
 						if (obj_exists == false || !dm_entryobj)

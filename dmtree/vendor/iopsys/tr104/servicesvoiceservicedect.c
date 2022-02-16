@@ -20,7 +20,7 @@ static int get_ServicesVoiceServiceDECTPortable_Name(char *refparam, struct dmct
 
 	dmuci_get_option_value_string("dect", ipui, "name", value);
 	if ((*value)[0] == '\0') {
-		if (strlen(id))
+		if (DM_STRLEN(id))
 			dmasprintf(value, "DECT%s", id);
 		else
 			dmasprintf(value, "DECT%s", instance);

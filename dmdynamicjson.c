@@ -196,7 +196,7 @@ static char *generate_path_without_instance(char *full_obj, bool is_obj)
 	char *str = dm_dynamic_strdup(&json_memhead, full_obj);
 
 	for (pch = strtok_r(str, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
-		if (atoi(pch) == 0 && strcmp(pch, "{i}") != 0) {
+		if (DM_STRTOL(pch) == 0 && strcmp(pch, "{i}") != 0) {
 			pos  += snprintf(buf + pos, sizeof(buf) - pos, "%s.", pch);
 		}
 	}
@@ -237,9 +237,9 @@ static json_object *get_requested_json_obj(json_object *json_obj, char *instance
 			char *p = strchr(buf, '[');
 
 			if (strcmp(p+1, "@index") == 0 || strcmp(p+1, "@i-1") == 0) {
-				idx_pos = instance ? atoi(instance)-1 : 1;
+				idx_pos = instance ? DM_STRTOL(instance)-1 : 1;
 			} else {
-				idx_pos = atoi(p+1);
+				idx_pos = DM_STRTOL(p+1);
 			}
 			*p = 0;
 
@@ -264,7 +264,7 @@ static int get_number_of_instances(char *refparam)
 	DM_STRNCPY(buf_path, refparam, sizeof(buf_path));
 
 	for (pch = strtok_r(buf_path, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
-		if (atoi(pch) != 0)
+		if (DM_STRTOL(pch) != 0)
 			nbr_inst++;
 	}
 
@@ -310,10 +310,10 @@ static void resolve_all_symbols(struct dmctx *ctx, void *data, char *instance, c
 		else if (strcmp(pch, "@Value") == 0)
 			pos += snprintf(&new_key[pos], key_len - pos, "%s.", value);
 		else if (strcmp(pch, (json_version == JSON_VERSION_1) ? "@index" : "@i-1") == 0)
-			pos += snprintf(&new_key[pos], key_len - pos, "%d.", instance ? atoi(instance)-1 : 1);
+			pos += snprintf(&new_key[pos], key_len - pos, "%ld.", instance ? DM_STRTOL(instance)-1 : 1);
 		else if (strstr(pch, "@index-")) {
 			char *p = strchr(pch, '-');
-			int idx_pos = atoi(p + 1);
+			int idx_pos = DM_STRTOL(p + 1);
 
 			if (idx_pos != 0 && nbr_instances - idx_pos >= 0)
 				pos += snprintf(&new_key[pos], key_len - pos, "%s.", ctx->inst_buf[nbr_instances - idx_pos] ? ctx->inst_buf[nbr_instances - idx_pos] : "");
@@ -367,7 +367,7 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 
 	char *obj = generate_path_without_instance(parent_node->current_object, true);
 	list_for_each_entry(pobj, &json_list, list) {
-		if (strcmp(pobj->name, obj) == 0) {
+		if (DM_STRCMP(pobj->name, obj) == 0) {
 			mapping_obj = pobj->data;
 			json_version = pobj->json_version;
 			break;
@@ -481,7 +481,7 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 
 	char *obj = generate_path_without_instance(refparam, true);
 	list_for_each_entry(pobj, &json_list, list) {
-		if (strcmp(pobj->name, obj) == 0) {
+		if (DM_STRCMP(pobj->name, obj) == 0) {
 			mapping_obj = pobj->data;
 			json_version = pobj->json_version;
 			break;
@@ -540,7 +540,7 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 
 	char *obj = generate_path_without_instance(refparam, true);
 	list_for_each_entry(pobj, &json_list, list) {
-		if (strcmp(pobj->name, obj) == 0) {
+		if (DM_STRCMP(pobj->name, obj) == 0) {
 			mapping_obj = pobj->data;
 			json_version = pobj->json_version;
 			break;
@@ -633,7 +633,7 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 			dmasprintf(&value, "%s", section_name((struct uci_section *)data));
 		} else {
 			char uci_type[32] = {0};
-			snprintf(uci_type, sizeof(uci_type), "@%s[%d]", json_object_get_string(type), instance ? atoi(instance)-1 : 0);
+			snprintf(uci_type, sizeof(uci_type), "@%s[%ld]", json_object_get_string(type), instance ? DM_STRTOL(instance)-1 : 0);
 			value = dmuci_get_value_by_path(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name));
 		}
 	} else if (file && section_name && option_name) {
@@ -811,7 +811,7 @@ static int getvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	char *obj = generate_path_without_instance(refparam, false);
 	list_for_each_entry(pleaf, &json_list, list) {
-		if (strcmp(pleaf->name, obj) == 0) {
+		if (DM_STRCMP(pleaf->name, obj) == 0) {
 			param_obj = pleaf->data;
 			json_version = pleaf->json_version;
 			break;
@@ -868,7 +868,7 @@ static int getcommand_param(char *refparam, struct dmctx *ctx, void *data, char 
 
 	char *obj = generate_path_without_instance(refparam, false);
 	list_for_each_entry(leaf, &json_list, list) {
-		if (strcmp(leaf->name, obj) == 0) {
+		if (DM_STRCMP(leaf->name, obj) == 0) {
 			found = true;
 			break;
 		}
@@ -891,7 +891,7 @@ static int setcommand_param(char *refparam, struct dmctx *ctx, void *data, char 
 
 	char *obj = generate_path_without_instance(refparam, false);
 	list_for_each_entry(leaf_node, &json_list, list) {
-		if (strcmp(leaf_node->name, obj) == 0) {
+		if (DM_STRCMP(leaf_node->name, obj) == 0) {
 			p_obj = leaf_node->data;
 			json_version = leaf_node->json_version;
 			break;
@@ -926,7 +926,7 @@ static int getevent_param(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	char *obj = generate_path_without_instance(refparam, false);
 	list_for_each_entry(leaf, &json_list, list) {
-		if (strcmp(leaf->name, obj) == 0) {
+		if (DM_STRCMP(leaf->name, obj) == 0) {
 			found = true;
 			break;
 		}
@@ -979,8 +979,8 @@ static int fill_string_arguments(struct json_object *json_obj, int *min_length, 
 		json_object_object_get_ex(range_obj, "min", &range_min);
 		json_object_object_get_ex(range_obj, "max", &range_max);
 
-		*min_length = range_min ? atoi(json_object_get_string(range_min)) : -1;
-		*max_length = range_max ? atoi(json_object_get_string(range_max)) : -1;
+		*min_length = range_min ? DM_STRTOL(json_object_get_string(range_min)) : -1;
+		*max_length = range_max ? DM_STRTOL(json_object_get_string(range_max)) : -1;
 	}
 
 	json_object_object_get_ex(json_obj, "enumerations", &enum_obj);
@@ -1088,7 +1088,7 @@ static int dm_validate_value(json_object *json_obj, char *value)
 				return -1;
 
 			json_object_object_get_ex(list_obj, "maxsize", &maxsize);
-			max_size = maxsize ? atoi(json_object_get_string(maxsize)) : -1;
+			max_size = maxsize ? DM_STRTOL(json_object_get_string(maxsize)) : -1;
 
 			json_object_object_get_ex(list_obj, "item", &item_obj);
 			if (item_obj) {
@@ -1097,8 +1097,8 @@ static int dm_validate_value(json_object *json_obj, char *value)
 
 				json_object_object_get_ex(item_obj, "min", &item_min);
 				json_object_object_get_ex(item_obj, "max", &item_max);
-				min_item = item_min ? atoi(json_object_get_string(item_min)) : -1;
-				max_item = item_max ? atoi(json_object_get_string(item_max)) : -1;
+				min_item = item_min ? DM_STRTOL(json_object_get_string(item_min)) : -1;
+				max_item = item_max ? DM_STRTOL(json_object_get_string(item_max)) : -1;
 			}
 
 			if (strcmp(datatype, "unsignedInt") == 0 ||
@@ -1169,7 +1169,7 @@ static void uci_set_value(json_object *mapping_obj, int json_version, char *refp
 	if (data && file && type && option_name) {
 		char uci_type[32] = {0};
 
-		snprintf(uci_type, sizeof(uci_type), "@%s[%d]", json_object_get_string(type), instance ? atoi(instance)-1 : 0);
+		snprintf(uci_type, sizeof(uci_type), "@%s[%ld]", json_object_get_string(type), instance ? DM_STRTOL(instance)-1 : 0);
 		dmuci_set_value_by_path(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name), value);
 	} else if (file && section_name && option_name) {
 		dmuci_set_value_by_path(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), json_object_get_string(option_name), value);
@@ -1265,7 +1265,7 @@ static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	char *obj = generate_path_without_instance(refparam, false);
 	list_for_each_entry(pleaf, &json_list, list) {
-		if (strcmp(pleaf->name, obj) == 0) {
+		if (DM_STRCMP(pleaf->name, obj) == 0) {
 			param_obj = pleaf->data;
 			json_version = pleaf->json_version;
 			break;

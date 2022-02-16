@@ -47,7 +47,7 @@ static bool check_file_dir(char *name)
 
 	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
 		while ((d_file = readdir (dir)) != NULL) {
-			if (strcmp(name, d_file->d_name) == 0) {
+			if (DM_STRCMP(name, d_file->d_name) == 0) {
 				closedir(dir);
 				return true;
 			}
@@ -62,8 +62,8 @@ static int get_number_of_cpus(void)
 	char val[16];
 
 	dm_read_sysfs_file("/sys/devices/system/cpu/present", val, sizeof(val));
-	char *max = strchr(val, '-');
-	return max ? atoi(max+1)+1 : 0;
+	char *max = DM_STRCHR(val, '-');
+	return max ? DM_STRTOL(max+1)+1 : 0;
 }
 
 static int dmmap_synchronizeVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
@@ -252,7 +252,7 @@ static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *da
 	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
 		active = dmjson_get_value(bank_obj, 1, "active");
-		if (active && strcmp(active, "true") == 0) {
+		if (active && DM_STRCMP(active, "true") == 0) {
 			id = dmjson_get_value(bank_obj, 1, "id");
 			break;
 		}
@@ -273,7 +273,7 @@ static int get_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
 		boot = dmjson_get_value(bank_obj, 1, "boot");
-		if (boot && strcmp(boot, "true") == 0) {
+		if (boot && DM_STRCMP(boot, "true") == 0) {
 			id = dmjson_get_value(bank_obj, 1, "id");
 			break;
 		}
@@ -301,13 +301,13 @@ static int set_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
 			if (linker && *linker) {
-				char *bank_id = strchr(linker, ':');
+				char *bank_id = DM_STRCHR(linker, ':');
 				if (bank_id) {
 					json_object *res = NULL;
 
 					dmubus_call("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id+1, Integer}}, 1, &res);
 					char *success = dmjson_get_value(res, 1, "success");
-					if (strcmp(success, "true") != 0)
+					if (DM_STRCMP(success, "true") != 0)
 						return FAULT_9001;
 				}
 			}
@@ -451,7 +451,7 @@ static int get_vcf_date(char *refparam, struct dmctx *ctx, void *data, char *ins
 	dmuci_get_value_by_section_string((struct uci_section *)data, "name", &config_name);
 	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
 		while ((d_file = readdir (dir)) != NULL) {
-			if (config_name && strcmp(config_name, d_file->d_name) == 0) {
+			if (config_name && DM_STRCMP(config_name, d_file->d_name) == 0) {
 				char date[sizeof("AAAA-MM-JJTHH:MM:SSZ")], path[280] = {0};
 				struct stat attr;
 
@@ -535,7 +535,7 @@ static int get_vlf_max_size (char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "log_size", value);
 
 	// Value defined in system is in KiB in datamodel this is in bytes, convert the value in bytes
-	size = (*value && **value) ? atoi(*value) * 1000 : 0;
+	size = (*value && **value) ? DM_STRTOL(*value) * 1000 : 0;
 
 	dmasprintf(value, "%d", size);
 	return 0;
@@ -589,9 +589,9 @@ static int get_DeviceInfoProcessor_Architecture(char *refparam, struct dmctx *ct
 	if (uname(&utsname) < 0)
 		return 0;
 
-	if (strstr(utsname.machine, "arm") || strstr(utsname.machine, "aarch64")) {
+	if (DM_STRSTR(utsname.machine, "arm") || DM_STRSTR(utsname.machine, "aarch64")) {
 		*value = "arm";
-	} else if(strstr(utsname.machine, "mips")) {
+	} else if(DM_STRSTR(utsname.machine, "mips")) {
 		const bool is_big_endian = IS_BIG_ENDIAN;
 		*value = (is_big_endian) ? "mipseb" : "mipsel";
 	} else
@@ -783,7 +783,7 @@ static int get_process_priority(char* refparam, struct dmctx *ctx, void *data, c
 
 	*value = dmjson_get_value((json_object *)data, 1, "priority");
 
-	priority = (*value && **value) ? atoi(*value) : 0;
+	priority = (*value && **value) ? DM_STRTOL(*value) : 0;
 
 	/* Convert Linux priority to a value between 0 and 99 */
 	priority = round((priority + 100) * 99 / 139);
@@ -804,7 +804,7 @@ static int get_process_cpu_time(char* refparam, struct dmctx *ctx, void *data, c
 static int get_process_state(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *state = dmjson_get_value((json_object *)data, 1, "state");
-	*value = (state && strcmp(state, "Unknown") == 0) ? "Idle" : state;
+	*value = (state && DM_STRCMP(state, "Unknown") == 0) ? "Idle" : state;
 	return 0;
 }
 
@@ -913,7 +913,7 @@ static int operate_DeviceInfoVendorConfigFile_Restore(char *refparam, struct dmc
 	char restore_command[32] = {'\0'};
 
 	char *ret = strrchr(refparam, '.');
-	strncpy(restore_path, refparam, ret - refparam +1);
+	DM_STRNCPY(restore_path, refparam, ret - refparam + 2);
 	DM_STRNCPY(restore_command, ret+1, sizeof(restore_command));
 
 	char *url = dmjson_get_value((json_object *)value, 1, "URL");
@@ -957,7 +957,7 @@ static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx
 	char command[32] = {'\0'};
 
 	char *ret = strrchr(refparam, '.');
-	strncpy(obj_path, refparam, ret - refparam +1);
+	DM_STRNCPY(obj_path, refparam, ret - refparam + 2);
 	DM_STRNCPY(command, ret+1, sizeof(command));
 
 	char *url = dmjson_get_value((json_object *)value, 1, "URL");

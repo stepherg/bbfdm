@@ -52,7 +52,7 @@ static struct uci_section *update_create_dmmap_fast_line(char *curr_id)
 	if (!s) {
 		char instance[16];
 
-		snprintf(instance, sizeof(instance), "%d", atoi(curr_id));
+		snprintf(instance, sizeof(instance), "%ld", DM_STRTOL(curr_id));
 		dmuci_add_section_bbfdm("dmmap", "fast_line", &s);
 		dmuci_set_value_by_section_bbfdm(s, "id", curr_id);
 		dmuci_set_value_by_section_bbfdm(s, "fast_line_instance", instance);
@@ -144,7 +144,7 @@ static int get_FAST_LineNumberOfEntries(char *refparam, struct dmctx *ctx, void 
 static int get_FASTLine_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *status = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "status", "status");
-		*value = (strcmp(status, "up") == 0) ? "1" : "0";
+		*value = (DM_STRCMP(status, "up") == 0) ? "1" : "0";
 		return 0;
 }
 
@@ -165,7 +165,7 @@ static int set_FASTLine_Enable(char *refparam, struct dmctx *ctx, void *data, ch
 static int get_FASTLine_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *status = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "status", "status");
-	*value = (strcmp(status, "up") == 0) ? "Up" : "Down";
+	*value = (DM_STRCMP(status, "up") == 0) ? "Up" : "Down";
 	return 0;
 }
 
@@ -249,7 +249,7 @@ static int get_FASTLine_AllowedProfiles(char *refparam, struct dmctx *ctx, void 
 
 	list_profile[0] = 0;
 	dmjson_foreach_value_in_array(res, allowed_profiles, profile, idx, 1, "allowed_profiles") {
-		if (profile && (strcmp(profile, "106a") == 0 || strcmp(profile, "212a") == 0))
+		if (profile && (DM_STRCMP(profile, "106a") == 0 || DM_STRCMP(profile, "212a") == 0))
 			pos += snprintf(&list_profile[pos], sizeof(list_profile) - pos, "%s,", profile);
 	}
 
@@ -265,7 +265,7 @@ static int get_FASTLine_AllowedProfiles(char *refparam, struct dmctx *ctx, void 
 static int get_FASTLine_CurrentProfile(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *current_profile = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "status", "current_profile");
-	*value = (current_profile && strcmp(current_profile, "unknown") == 0) ? "" : current_profile;
+	*value = (current_profile && DM_STRCMP(current_profile, "unknown") == 0) ? "" : current_profile;
 	return 0;
 }
 
@@ -273,13 +273,13 @@ static int get_FASTLine_CurrentProfile(char *refparam, struct dmctx *ctx, void *
 static int get_FASTLine_PowerManagementState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *power_mng_state = get_fast_value_without_argument("fast.line", ((struct fast_line_args*)data)->id, "status", "power_management_state");
-	if(strcmp(power_mng_state, "l0") == 0)
+	if(DM_STRCMP(power_mng_state, "l0") == 0)
 		*value = "L0";
-	else if(strcmp(power_mng_state, "l1") == 0)
+	else if(DM_STRCMP(power_mng_state, "l1") == 0)
 		*value = "L2.1";
-	else if(strcmp(power_mng_state, "l2") == 0)
+	else if(DM_STRCMP(power_mng_state, "l2") == 0)
 		*value = "L2.2";
-	else if(strcmp(power_mng_state, "l3") == 0)
+	else if(DM_STRCMP(power_mng_state, "l3") == 0)
 		*value = "L3";
 	else
 		*value = power_mng_state;

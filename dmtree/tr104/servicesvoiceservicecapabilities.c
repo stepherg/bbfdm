@@ -63,7 +63,7 @@ static int get_ServicesVoiceServiceCapabilities_MaxSessionCount(char *refparam, 
 
 	db_get_value_string("hw", "board", "VoicePorts", &max_line);
 	if (max_line && *max_line) {
-		int max_session = 2 * atoi(max_line);
+		int max_session = 2 * DM_STRTOL(max_line);
 		dmasprintf(value, "%d", max_session);
 	} else
 		*value = "-1";

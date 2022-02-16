@@ -58,7 +58,7 @@ static int browseServicesVoiceServiceDECTPortableInst(struct dmctx *dmctx, DMNOD
 
 			/* Use the id from the UBUS call if it is found */
 			if (str_id && *str_id) {
-				id = atoi(str_id);
+				id = DM_STRTOL(str_id);
 			} else {
 				id++;
 			}

@@ -296,7 +296,7 @@ static int operate_DeviceXIOPSYSEUPingTEST_Run(char *refparam, struct dmctx *ctx
 		char line[512] = {0};
 
 		while (fgets(line, sizeof(line), log) != NULL) {
-			if (strstr(line, "rtt")) {
+			if (DM_STRSTR(line, "rtt")) {
 				strtok_r(line, "=", &min);
 				strtok_r(min ? min+1 : "", "/", &avg);
 				add_list_parameter(ctx, dmstrdup("MinimumResponseTime"), dmstrdup(min ? min+1 : ""), "xsd:unsignedInt", NULL);

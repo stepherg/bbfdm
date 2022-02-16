@@ -1176,9 +1176,9 @@ static void test_api_bbfdm_valid_standard_operate(void **state)
 	assert_int_equal(fault, CMD_SUCCESS);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
-		if (strcmp(n->name, "SuccessCount") == 0) {
+		if (DM_STRCMP(n->name, "SuccessCount") == 0) {
 			assert_string_equal(n->data, "1");
-		} else if (strcmp(n->name, "FailureCount") == 0) {
+		} else if (DM_STRCMP(n->name, "FailureCount") == 0) {
 			assert_string_equal(n->data, "0");
 		} else {
 			assert_string_not_equal(n->data, "0");
@@ -1198,13 +1198,13 @@ static void test_api_bbfdm_valid_standard_list_operate(void **state)
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
-		if (strcmp(n->name, "Device.FactoryReset()") == 0) {
+		if (DM_STRCMP(n->name, "Device.FactoryReset()") == 0) {
 			assert_string_equal(n->type, "xsd:command");
 			assert_string_equal(n->additional_data, "sync");
 			assert_null(n->data);
 		}
 
-		if (strcmp(n->name, "Device.DeviceInfo.VendorLogFile.{i}.Upload()") == 0) {
+		if (DM_STRCMP(n->name, "Device.DeviceInfo.VendorLogFile.{i}.Upload()") == 0) {
 			assert_string_equal(n->type, "xsd:command");
 			assert_string_equal(n->additional_data, "async");
 			operation_args *args = (operation_args *)n->data;
@@ -1230,7 +1230,7 @@ static void test_api_bbfdm_valid_standard_list_operate(void **state)
 			assert_int_equal(i, 3);
 		}
 
-		if (strcmp(n->name, "Device.WiFi.NeighboringWiFiDiagnostic()") == 0) {
+		if (DM_STRCMP(n->name, "Device.WiFi.NeighboringWiFiDiagnostic()") == 0) {
 			assert_string_equal(n->type, "xsd:command");
 			assert_string_equal(n->additional_data, "async");
 			operation_args *args = (operation_args *)n->data;
@@ -1284,13 +1284,13 @@ static void test_api_bbfdm_valid_library_list_operate(void **state)
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
-		if (strcmp(n->name, "Device.X_IOPSYS_EU_Reboot()") == 0) {
+		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_Reboot()") == 0) {
 			assert_string_equal(n->type, "xsd:command");
 			assert_string_equal(n->additional_data, "sync");
 			assert_null(n->data);
 		}
 
-		if (strcmp(n->name, "Device.X_IOPSYS_EU_PingTEST.Run()") == 0) {
+		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_PingTEST.Run()") == 0) {
 			assert_string_equal(n->type, "xsd:command");
 			assert_string_equal(n->additional_data, "async");
 			operation_args *args = (operation_args *)n->data;
@@ -1354,7 +1354,7 @@ static void test_api_bbfdm_valid_json_list_operate(void **state)
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
-		if (strcmp(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Status()") == 0) {
+		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Status()") == 0) {
 			assert_string_equal(n->type, "xsd:command");
 			assert_string_equal(n->additional_data, "async");
 			operation_args *args = (operation_args *)n->data;
@@ -1412,7 +1412,7 @@ static void test_api_bbfdm_valid_json_v1_list_operate(void **state)
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
-		if (strcmp(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Status()") == 0) {
+		if (DM_STRCMP(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Status()") == 0) {
 			assert_string_equal(n->type, "xsd:command");
 			assert_string_equal(n->additional_data, "async");
 			operation_args *args = (operation_args *)n->data;
@@ -1460,12 +1460,12 @@ static void test_api_bbfdm_valid_library_event(void **state)
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
-		if (strcmp(n->name, "Device.X_IOPSYS_EU_WakeUp!") == 0) {
+		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_WakeUp!") == 0) {
 			assert_string_equal(n->type, "xsd:event");
 			assert_null(n->data);
 		}
 
-		if (strcmp(n->name, "Device.X_IOPSYS_EU_Boot!") == 0) {
+		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_Boot!") == 0) {
 			assert_string_equal(n->type, "xsd:event");
 			event_args *args = (event_args *)n->data;
 			assert_non_null(args);
@@ -1506,12 +1506,12 @@ static void test_api_bbfdm_valid_json_event(void **state)
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
-		if (strcmp(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Periodic!") == 0) {
+		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Periodic!") == 0) {
 			assert_string_equal(n->type, "xsd:event");
 			assert_null(n->data);
 		}
 
-		if (strcmp(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Push!") == 0) {
+		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Push!") == 0) {
 			assert_string_equal(n->type, "xsd:event");
 			event_args *args = (event_args *)n->data;
 			assert_non_null(args);
@@ -1545,12 +1545,12 @@ static void test_api_bbfdm_valid_json_v1_event(void **state)
 	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
-		if (strcmp(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Periodic!") == 0) {
+		if (DM_STRCMP(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Periodic!") == 0) {
 			assert_string_equal(n->type, "xsd:event");
 			assert_null(n->data);
 		}
 
-		if (strcmp(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Push!") == 0) {
+		if (DM_STRCMP(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Push!") == 0) {
 			assert_string_equal(n->type, "xsd:event");
 			event_args *args = (event_args *)n->data;
 			assert_non_null(args);

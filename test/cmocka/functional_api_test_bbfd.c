@@ -1016,7 +1016,7 @@ static void test_bbf_api_common(void **state)
 	 */
 
 	// hex_to_ip: test
-	hex_to_ip("0000FEA9", buf);
+	hex_to_ip("0000FEA9", buf, sizeof(buf));
 	assert_string_equal(buf, "169.254.0.0");
 
 }

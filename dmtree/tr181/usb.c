@@ -146,7 +146,7 @@ static int browseUSBInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void
 			snprintf(port_link, sizeof(port_link), "%s", foldersplit[0]);
 		}
 		sysfs_foreach_file(netfolderpath, dir, ent) {
-			if(strcmp(ent->d_name, ".")==0 || strcmp(ent->d_name, "..")==0)
+			if(DM_STRCMP(ent->d_name, ".")==0 || DM_STRCMP(ent->d_name, "..")==0)
 				continue;
 
 			snprintf(iface_name, sizeof(iface_name), "%s", ent->d_name);
@@ -188,7 +188,7 @@ static int browseUSBPortInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 		if (regexec(&regex1, p->sysfs_folder_name, 0, NULL, 0) != 0 &&
 			regexec(&regex2, p->sysfs_folder_name, 0, NULL, 0) !=0 &&
-			strstr(p->sysfs_folder_name, "usb") != p->sysfs_folder_name)
+			DM_STRSTR(p->sysfs_folder_name, "usb") != p->sysfs_folder_name)
 			continue;
 
 		init_usb_port(p->dmmap_section, p->sysfs_folder_name, p->sysfs_folder_path, &port);
@@ -215,7 +215,7 @@ static int browseUSBUSBHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, v
 
 	list_for_each_entry(p, &dup_list, list) {
 
-		if(!strstr(p->sysfs_folder_name, "usb"))
+		if(!DM_STRSTR(p->sysfs_folder_name, "usb"))
 			continue;
 
 		init_usb_port(p->dmmap_section, p->sysfs_folder_name, p->sysfs_folder_path, &port);
@@ -245,7 +245,7 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 	LIST_HEAD(dup_list_no_inst);
 
 	sysfs_foreach_file(sysfsrep, dir, ent) {
-		if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
+		if (DM_STRCMP(ent->d_name, ".") == 0 || DM_STRCMP(ent->d_name, "..") == 0)
 			continue;
 
 		if (regexec(&regex1, ent->d_name, 0, NULL, 0) == 0 || regexec(&regex2, ent->d_name, 0, NULL, 0) ==0) {
@@ -255,7 +255,7 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 			snprintf(deviceClassFile, sizeof(deviceClassFile), "%s/%s/bDeviceClass", sysfsrep, ent->d_name);
 			dm_read_sysfs_file(deviceClassFile, deviceClass, sizeof(deviceClass));
 
-			if (strncmp(deviceClass, "09", 2) == 0) {
+			if (DM_STRNCMP(deviceClass, "09", 2) == 0) {
 				char hubpath[270];
 
 				snprintf(hubpath, sizeof(hubpath), "%s/%s", sysfsrep, ent->d_name);
@@ -375,7 +375,7 @@ static int browseUSBUSBHostsHostDeviceConfigurationInterfaceInst(struct dmctx *d
 
 	sysfs_foreach_file(usb_dev->folder_path, dir, ent) {
 
-		if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
+		if (DM_STRCMP(ent->d_name, ".") == 0 || DM_STRCMP(ent->d_name, "..") == 0)
 			continue;
 
 		if (regexec(&regex1, ent->d_name, 0, NULL, 0) == 0 || regexec(&regex2, ent->d_name, 0, NULL, 0) == 0) {
@@ -610,9 +610,9 @@ static int get_USBPort_Type(char *refparam, struct dmctx *ctx, void *data, char 
 
 	__read_sysfs_usb_port(port, "bDeviceClass", deviceclass, sizeof(deviceclass));
 
-	if(strstr(port->folder_name, "usb") == port->folder_name)
+	if(DM_STRSTR(port->folder_name, "usb") == port->folder_name)
 		*value= "Host";
-	else if (strcmp(deviceclass, "09") == 0)
+	else if (DM_STRCMP(deviceclass, "09") == 0)
 		*value= "Hub";
 	else
 		*value= "Device";
@@ -625,11 +625,11 @@ static int get_USBPort_Rate(char *refparam, struct dmctx *ctx, void *data, char 
 
 	__read_sysfs_usb_port(data, "speed", speed, sizeof(speed));
 
-	if(strcmp(speed, "1.5") == 0)
+	if(DM_STRCMP(speed, "1.5") == 0)
 		*value= "Low";
-	else if(strcmp(speed, "12") == 0)
+	else if(DM_STRCMP(speed, "12") == 0)
 		*value= "Full";
-	else if(strcmp(speed, "480") == 0)
+	else if(DM_STRCMP(speed, "480") == 0)
 		*value= "High";
 	else
 		*value= "Super";
@@ -644,7 +644,7 @@ static int get_USBPort_Power(char *refparam, struct dmctx *ctx, void *data, char
 
 	if (pwrctl[0] == 0)
 		*value = "Unknown";
-	else if (!strcmp(pwrctl, "auto"))
+	else if (!DM_STRCMP(pwrctl, "auto"))
 		*value ="Self";
 	else
 		*value ="Bus";
@@ -688,7 +688,7 @@ static int get_USBUSBHostsHost_Enable(char *refparam, struct dmctx *ctx, void *d
 	char up[32];
 
 	__read_sysfs_usb_port(data, "power/wakeup", up, sizeof(up));
-	*value = strcmp(up, "enabled") == 0 ? "1" : "0";
+	*value = DM_STRCMP(up, "enabled") == 0 ? "1" : "0";
 	return 0;
 }
 
@@ -745,7 +745,7 @@ static int get_USBUSBHostsHost_PowerManagementEnable(char *refparam, struct dmct
 
 	__read_sysfs_usb_port(data, "power/level", power, sizeof(power));
 
-	if(power[0] == 0 || strcmp(power, "suspend") == 0)
+	if(power[0] == 0 || DM_STRCMP(power, "suspend") == 0)
 		*value= "false";
 	else
 		*value= "true";
@@ -936,7 +936,7 @@ static int get_USBUSBHostsHostDevice_IsSuspended(char *refparam, struct dmctx *c
 	char status[16] = {0};
 
 	__read_sysfs_usb_port(data, "power/runtime_status", status, sizeof(status));
-	if(strncmp(status, "suspended", 9) == 0)
+	if(DM_STRNCMP(status, "suspended", 9) == 0)
 		*value= "1";
 	else
 		*value = "0";

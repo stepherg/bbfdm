@@ -74,12 +74,12 @@ static int plugin_obj_match(DMOBJECT_ARGS)
 {
 	if (node->matched)
 		return 0;
-	if (!dmctx->inparam_isparam && strstr(node->current_object, dmctx->in_param) == node->current_object) {
+	if (!dmctx->inparam_isparam && DM_STRSTR(node->current_object, dmctx->in_param) == node->current_object) {
 		node->matched++;
 		dmctx->findparam = 1;
 		return 0;
 	}
-	if (strstr(dmctx->in_param, node->current_object) == dmctx->in_param) {
+	if (DM_STRSTR(dmctx->in_param, node->current_object) == dmctx->in_param) {
 		return 0;
 	}
 	return FAULT_9005;
@@ -89,7 +89,7 @@ static int obj_match_supported_dm(DMOBJECT_ARGS)
 {
 	if(node->matched)
 		return 0;
-	if(!dmctx->inparam_isparam && strstr(node->current_object,dmctx->in_param) == node->current_object) {
+	if(!dmctx->inparam_isparam && DM_STRSTR(node->current_object,dmctx->in_param) == node->current_object) {
 		node->matched ++;
 		dmctx->findparam = 1;
 		return 0;
@@ -104,8 +104,8 @@ static int plugin_leaf_match(DMOBJECT_ARGS)
 		return 0;
 	if (!dmctx->inparam_isparam)
 		return FAULT_9005;
-	str = dmctx->in_param + strlen(node->current_object);
-	if (!strchr(str, '.'))
+	str = dmctx->in_param + DM_STRLEN(node->current_object);
+	if (!DM_STRCHR(str, '.'))
 		return 0;
 	return FAULT_9005;
 }
@@ -123,12 +123,12 @@ static int plugin_obj_nextlevel_match(DMOBJECT_ARGS)
 		node->matched++;
 		return 0;
 	}
-	if (!dmctx->inparam_isparam && strstr(node->current_object, dmctx->in_param) == node->current_object) {
+	if (!dmctx->inparam_isparam && DM_STRSTR(node->current_object, dmctx->in_param) == node->current_object) {
 		node->matched++;
 		dmctx->findparam = 1;
 		return 0;
 	}
-	if (strstr(dmctx->in_param, node->current_object) == dmctx->in_param) {
+	if (DM_STRSTR(dmctx->in_param, node->current_object) == dmctx->in_param) {
 		return 0;
 	}
 	return FAULT_9005;
@@ -143,8 +143,8 @@ static int plugin_leaf_nextlevel_match(DMOBJECT_ARGS)
 		return 0;
 	if (!dmctx->inparam_isparam)
 		return FAULT_9005;
-	str = dmctx->in_param + strlen(node->current_object);
-	if (!strchr(str, '.'))
+	str = dmctx->in_param + DM_STRLEN(node->current_object);
+	if (!DM_STRCHR(str, '.'))
 		return 0;
 	return FAULT_9005;
 }
@@ -154,13 +154,13 @@ static int plugin_dynamic_obj_match(struct dmctx *dmctx, struct dmnode *node, ch
 	if (node->matched)
 		return 0;
 
-	if (!dmctx->inparam_isparam && strstr(node->current_object, full_obj) == node->current_object) {
+	if (!dmctx->inparam_isparam && DM_STRSTR(node->current_object, full_obj) == node->current_object) {
 		node->matched++;
 		dmctx->findparam = 1;
 		return 0;
 	}
 
-	if (strstr(full_obj, node->current_object) == full_obj)
+	if (DM_STRSTR(full_obj, node->current_object) == full_obj)
 		return 0;
 
 	return FAULT_9005;
@@ -181,17 +181,17 @@ static bool check_version(const char *obj_version, struct dmctx *ctx)
 		return true;
 
 	if (*config_version) {
-		config_major = atoi(config_version);
-		char *temp = strchr(config_version, '.');
+		config_major = DM_STRTOL(config_version);
+		char *temp = DM_STRCHR(config_version, '.');
 		if (temp)
-			config_minor = atoi(temp + 1);
+			config_minor = DM_STRTOL(temp + 1);
 	}
 
 	if (*obj_version) {
-		obj_major = atoi(obj_version);
-		char *temp = strchr(obj_version, '.');
+		obj_major = DM_STRTOL(obj_version);
+		char *temp = DM_STRCHR(obj_version, '.');
 		if (temp)
-			obj_minor = atoi(temp + 1);
+			obj_minor = DM_STRTOL(temp + 1);
 	}
 
 	if (obj_major > config_major || obj_minor > config_minor)
@@ -217,7 +217,7 @@ static bool check_dependency(const char *conf_obj)
 	DM_STRNCPY(conf_list, conf_obj, sizeof(conf_list));
 
 	for (pch = strtok_r(conf_list, ";", &spch); pch != NULL; pch = strtok_r(NULL, ";", &spch)) {
-		char *conf_type = strchr(pch, ':');
+		char *conf_type = DM_STRCHR(pch, ':');
 		if (!conf_type)
 			return false;
 
@@ -407,7 +407,7 @@ int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char 
 	DMNODE node = {0};
 
 	if (parent_node->browse_type == BROWSE_FIND_MAX_INST) {
-		int curr_inst = (instance && *instance != '\0') ? atoi(instance) : 0;
+		int curr_inst = (instance && *instance != '\0') ? DM_STRTOL(instance) : 0;
 		if (curr_inst > parent_node->max_instance)
 			parent_node->max_instance = curr_inst;
 		return 0;
@@ -474,7 +474,7 @@ void dm_exclude_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, c
 		node.matched = parent_node->matched;
 
 		dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
-		if (strcmp(node.current_object, data) == 0) {
+		if (DM_STRCMP(node.current_object, data) == 0) {
 			entryobj->bbfdm_type = BBFDM_NONE;
 			return;
 		}
@@ -497,7 +497,7 @@ static void dm_check_dynamic_obj_entry(struct dmctx *dmctx, DMNODE *parent_node,
 	node.matched = parent_node->matched;
 
 	dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
-	if (strcmp(node.current_object, obj) == 0) {
+	if (DM_STRCMP(node.current_object, obj) == 0) {
 		*root_entry = entryobj;
 		*obj_found = 1;
 		return;
@@ -606,7 +606,7 @@ static int rootcmp(char *inparam, char *rootobj)
 {
 	char buf[32];
 	snprintf(buf, sizeof(buf), "%s.", rootobj);
-	return strcmp(inparam, buf);
+	return DM_STRCMP(inparam, buf);
 }
 
 /***************************
@@ -763,10 +763,12 @@ static int get_max_instance(char *dmmap_package, char *section_type, char *inst_
 			continue;
 
 		dmuci_get_value_by_section_string(s, inst_opt, &inst);
-		if (inst[0] == '\0')
+		if (DM_STRLEN(inst) == 0)
 			continue;
 
-		max = max > atoi(inst) ? max : atoi(inst);
+		int instance = DM_STRTOL(inst);
+
+		max = max > instance ? max : instance;
 	}
 
 	return max;
@@ -787,7 +789,7 @@ char *update_instance_alias(int action, char **last_inst, char **max_inst, void 
 	if (*max_inst == NULL)
 		max_instance = get_max_instance(section_config(s), section_type(s), inst_opt, check_browse, data);
 	else
-		max_instance = atoi(*max_inst);
+		max_instance = DM_STRTOL(*max_inst);
 
 	dmuci_get_value_by_section_string(s, inst_opt, &instance);
 	if (instance[0] == '\0') {
@@ -914,7 +916,7 @@ void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, c
 
 	list_for_each(ilist, &ctx->list_parameter) {
 		dm_parameter = list_entry(ilist, struct dm_parameter, list);
-		int cmp = strcmp(dm_parameter->name, param_name);
+		int cmp = DM_STRCMP(dm_parameter->name, param_name);
 		if (cmp == 0) {
 			return;
 		} else if (cmp > 0) {
@@ -1032,7 +1034,7 @@ static int is64digit(char c)
 
 static char *check_value_by_type(char *value, int type)
 {
-	int i = 0, len = strlen(value);
+	int i = 0, len = DM_STRLEN(value);
 	char buf[len + 1];
 	struct tm tm;
 
@@ -1140,7 +1142,7 @@ int dm_entry_get_value(struct dmctx *dmctx)
 		dmctx->findparam = 1;
 		dmctx->stop = 0;
 		findparam_check = 1;
-	} else if (dmctx->in_param[strlen(dmctx->in_param) - 1] == '.') {
+	} else if (dmctx->in_param[DM_STRLEN(dmctx->in_param) - 1] == '.') {
 		dmctx->inparam_isparam = 0;
 		dmctx->findparam = 0;
 		dmctx->stop = 0;
@@ -1194,7 +1196,7 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 	char *value = "";
 
 	dmastrcat(&full_param, node->current_object, lastname);
-	if (strcmp(dmctx->in_param, full_param) != 0) {
+	if (DM_STRCMP(dmctx->in_param, full_param) != 0) {
 		dmfree(full_param);
 		return FAULT_9005;
 	}
@@ -1236,7 +1238,7 @@ int dm_entry_get_name(struct dmctx *ctx)
 		ctx->in_param = root->obj;
 		node.matched = 1;
 		findparam_check = 1;
-	} else if (*(ctx->in_param + strlen(ctx->in_param) - 1) == '.') {
+	} else if (*(ctx->in_param + DM_STRLEN(ctx->in_param) - 1) == '.') {
 		ctx->inparam_isparam = 0;
 		ctx->findparam = 0;
 		ctx->stop = 0;
@@ -1292,7 +1294,7 @@ static int mparam_get_name_in_param(DMPARAM_ARGS)
 	char *perm = permission->val;
 
 	dmastrcat(&refparam, node->current_object, lastname);
-	if (strcmp(refparam, dmctx->in_param) != 0) {
+	if (DM_STRCMP(refparam, dmctx->in_param) != 0) {
 		dmfree(refparam);
 		return FAULT_9005;
 	}
@@ -1338,7 +1340,7 @@ static int mobj_get_name_in_obj(DMOBJECT_ARGS)
 	if (!node->matched)
 		return FAULT_9005;
 
-	if (dmctx->nextlevel && strcmp(node->current_object, dmctx->in_param) == 0)
+	if (dmctx->nextlevel && DM_STRCMP(node->current_object, dmctx->in_param) == 0)
 		return 0;
 
 	if (permission->get_permission != NULL)
@@ -1476,7 +1478,7 @@ int dm_entry_get_instances(struct dmctx *ctx)
 	if (ctx->in_param[0] == 0)
 		ctx->in_param = dmstrdup(".");
 
-	plen = strlen(ctx->in_param);
+	plen = DM_STRLEN(ctx->in_param);
 	if (ctx->in_param[plen - 1] != '.')
 		return FAULT_9005;
 
@@ -1501,7 +1503,7 @@ static int mobj_get_instances_in_obj(DMOBJECT_ARGS)
 		char *name = dmstrdup(node->current_object);
 
 		if (name) {
-			name[strlen(name) - 1] = 0;
+			name[DM_STRLEN(name) - 1] = 0;
 			add_list_parameter(dmctx, name, NULL, "xsd:object", NULL);
 		}
 	}
@@ -1524,7 +1526,7 @@ int dm_entry_add_object(struct dmctx *dmctx)
 	int err;
 
 	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0'
-			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != '.'))
+			|| (*(dmctx->in_param + DM_STRLEN(dmctx->in_param) - 1) != '.'))
 		return FAULT_9005;
 
 	dmctx->inparam_isparam = 0;
@@ -1552,7 +1554,7 @@ static int mobj_add_object(DMOBJECT_ARGS)
 	char *new_instance = NULL;
 	int fault = 0;
 
-	if (strcmp(refparam, dmctx->in_param) != 0)
+	if (DM_STRCMP(refparam, dmctx->in_param) != 0)
 		return FAULT_9005;
 
 	if (node->is_instanceobj)
@@ -1589,7 +1591,7 @@ int dm_entry_delete_object(struct dmctx *dmctx)
 	int err;
 
 	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0'
-			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != '.'))
+			|| (*(dmctx->in_param + DM_STRLEN(dmctx->in_param) - 1) != '.'))
 		return FAULT_9005;
 
 	dmctx->inparam_isparam = 0;
@@ -1611,7 +1613,7 @@ static int delete_object_obj(DMOBJECT_ARGS)
 	char *perm = permission->val;
 	unsigned char del_action = DEL_INST;
 
-	if (strcmp(refparam, dmctx->in_param) != 0)
+	if (DM_STRCMP(refparam, dmctx->in_param) != 0)
 		return FAULT_9005;
 
 	dmctx->stop = 1;
@@ -1643,7 +1645,7 @@ int dm_entry_set_value(struct dmctx *dmctx)
 	int err;
 
 	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0'
-			|| (*(dmctx->in_param + strlen(dmctx->in_param) - 1) == '.'))
+			|| (*(dmctx->in_param + DM_STRLEN(dmctx->in_param) - 1) == '.'))
 		return FAULT_9005;
 
 	dmctx->inparam_isparam = 1;
@@ -1669,7 +1671,7 @@ static int mparam_set_value(DMPARAM_ARGS)
 	char refparam[MAX_DM_PATH];
 
 	snprintf(refparam, MAX_DM_PATH, "%s%s", node->current_object, lastname);
-	if (strcmp(refparam, dmctx->in_param) != 0)
+	if (DM_STRCMP(refparam, dmctx->in_param) != 0)
 		return FAULT_9005;
 
 	dmctx->stop = 1;
@@ -1730,9 +1732,9 @@ static int get_linker_check_obj(DMOBJECT_ARGS)
 	if (dmctx->linker[0] == '\0')
 		return  FAULT_9005;
 
-	if (link_val && link_val[0] != '\0' && strcmp(link_val, dmctx->linker) == 0) {
-		if (node->current_object[strlen(node->current_object) - 1] == '.')
-			node->current_object[strlen(node->current_object) - 1] = 0;
+	if (link_val && link_val[0] != '\0' && DM_STRCMP(link_val, dmctx->linker) == 0) {
+		if (node->current_object[DM_STRLEN(node->current_object) - 1] == '.')
+			node->current_object[DM_STRLEN(node->current_object) - 1] = 0;
 		dmctx->linker_param = dmstrdup(node->current_object);
 		dmctx->stop = true;
 		return 0;
@@ -1772,7 +1774,7 @@ static int get_linker_value_check_obj(DMOBJECT_ARGS)
 	if (!get_linker)
 		return FAULT_9005;
 
-	if (strcmp(node->current_object, dmctx->in_param) == 0) {
+	if (DM_STRCMP(node->current_object, dmctx->in_param) == 0) {
 		char *link_val = NULL;
 
 		if (!data || !instance)
@@ -1844,7 +1846,7 @@ static int mparam_operate(DMPARAM_ARGS)
 	char full_param[MAX_DM_PATH];
 
 	snprintf(full_param, MAX_DM_PATH, "%s%s", node->current_object, lastname);
-	if (strcmp(full_param, dmctx->in_param) != 0)
+	if (DM_STRCMP(full_param, dmctx->in_param) != 0)
 		return CMD_NOT_FOUND;
 
 	dmctx->stop = 1;
@@ -1864,7 +1866,7 @@ int dm_entry_operate(struct dmctx *dmctx)
 	DMNODE node = { .current_object = "" };
 	int err;
 
-	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0' || (*(dmctx->in_param + strlen(dmctx->in_param) - 1) != ')'))
+	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0' || (*(dmctx->in_param + DM_STRLEN(dmctx->in_param) - 1) != ')'))
 		return CMD_NOT_FOUND;
 
 	dmctx->iscommand = 1;

@@ -84,7 +84,7 @@ pid_t get_pid(const char *pname)
 		if (fp) {
 			if (fgets(buf, sizeof(buf), fp) != NULL) {
 				char* first = strtok(buf, " ");
-				if (strstr(first, pname)) {
+				if (DM_STRSTR(first, pname)) {
 					fclose(fp);
 					closedir(dir);
 					return (pid_t)lpid;
@@ -122,8 +122,8 @@ char *cidr2netmask(int bits)
 bool is_strword_in_optionvalue(char *optionvalue, char *str)
 {
 	char *s = optionvalue;
-	while ((s = strstr(s, str))) {
-		int len = strlen(str); //should be inside while, optimization reason
+	while ((s = DM_STRSTR(s, str))) {
+		int len = DM_STRLEN(str); //should be inside while, optimization reason
 		if(s[len] == '\0' || s[len] == ' ')
 			return true;
 		s++;
@@ -134,7 +134,7 @@ bool is_strword_in_optionvalue(char *optionvalue, char *str)
 void remove_new_line(char *buf)
 {
 	int len;
-	len = strlen(buf) - 1;
+	len = DM_STRLEN(buf) - 1;
 	if (buf[len] == '\n')
 		buf[len] = 0;
 }
@@ -143,7 +143,7 @@ int dmcmd(char *cmd, int n, ...)
 {
 	va_list arg;
 	int i, pid;
-	static int dmcmd_pfds[2];
+	int dmcmd_pfds[2];
 	char *argv[n+2];
 
 	argv[0] = cmd;
@@ -194,7 +194,7 @@ int dmcmd_no_wait(char *cmd, int n, ...)
 	va_list arg;
 	int i, pid;
 	char *argv[n+2];
-	static char sargv[4][128];
+	char sargv[4][128];
 
 	argv[0] = cmd;
 	va_start(arg, n);
@@ -217,15 +217,15 @@ int dmcmd_no_wait(char *cmd, int n, ...)
 	return 0;
 }
 
-void hex_to_ip(char *address, char *ret)
+void hex_to_ip(char *address, char *ret, size_t size)
 {
 	unsigned int ip[4] = {0};
 
 	sscanf(address, "%2x%2x%2x%2x", &(ip[0]), &(ip[1]), &(ip[2]), &(ip[3]));
 	if (htonl(13) == 13) {
-		sprintf(ret, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+		snprintf(ret, size, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
 	} else {
-		sprintf(ret, "%u.%u.%u.%u", ip[3], ip[2], ip[1], ip[0]);
+		snprintf(ret, size, "%u.%u.%u.%u", ip[3], ip[2], ip[1], ip[0]);
 	}
 }
 
@@ -286,7 +286,7 @@ struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_
 		dmuci_get_value_by_section_string(s, "section_name", &dmmap_sec_name);
 		dmuci_replace_invalid_characters_from_section_name(dmmap_sec_name, sec_name, sizeof(sec_name));
 
-		if (strcmp(sec_name, orig_section_name) == 0)
+		if (DM_STRCMP(sec_name, orig_section_name) == 0)
 			return s;
 	}
 
@@ -322,7 +322,7 @@ struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* secti
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section_type, "section_name", sect_name, s) {
 		dmuci_get_value_by_section_string(s, opt_name, &v);
-		if (opt_value && strcmp(v, opt_value) == 0)
+		if (opt_value && DM_STRCMP(v, opt_value) == 0)
 			return s;
 	}
 	return NULL;
@@ -336,7 +336,7 @@ struct uci_section *get_section_in_dmmap_with_options_eq(char *dmmap_package, ch
 		char *value = NULL;
 
 		dmuci_get_value_by_section_string(s, opt2_name, &value);
-		if (opt2_value && value && strcmp(value, opt2_value) == 0)
+		if (opt2_value && value && DM_STRCMP(value, opt2_value) == 0)
 			return s;
 	}
 
@@ -555,14 +555,20 @@ __attribute__ ((deprecated)) int is_section_unnamed(char *section_name)
 {
 	int i;
 
+	if (section_name == NULL)
+		return 0;
+
 	if (strlen(section_name) != 9)
 		return 0;
+
 	if(strstr(section_name, "cfg") != section_name)
 		return 0;
+
 	for (i = 3; i < 9; i++) {
 		if (!isxdigit(section_name[i]))
 			return 0;
 	}
+
 	return 1;
 }
 
@@ -586,7 +592,7 @@ __attribute__ ((deprecated)) void delete_sections_save_next_sections(char* dmmap
 
 	uci_path_foreach_sections(bbfdm, dmmap_package, section_type, s) {
 		dmuci_get_value_by_section_string(s, instancename, &v);
-		inst = atoi(v);
+		inst = DM_STRTOL(v);
 		if (inst > instance){
 			dmuci_get_value_by_section_string(s, "section_name", &tmp);
 			add_dmmap_list_section(dup_list, lsectname, v);
@@ -602,7 +608,7 @@ __attribute__ ((deprecated)) void delete_sections_save_next_sections(char* dmmap
 
 	uci_path_foreach_sections_safe(bbfdm, dmmap_package, section_type, stmp, s) {
 		dmuci_get_value_by_section_string(s, instancename, &v);
-		inst = atoi(v);
+		inst = DM_STRTOL(v);
 		if (inst >= instance)
 			dmuci_delete_by_section_unnamed_bbfdm(s, NULL, NULL);
 	}
@@ -663,12 +669,12 @@ static inline int isword_delim(char c)
 
 char *dm_strword(char *src, char *str)
 {
-	char *ret = src;
-
-	if (src[0] == 0 || str[0] == 0)
+	if (!src || src[0] == 0 || !str || str[0] == 0)
 		return NULL;
 
 	int len = strlen(str);
+	char *ret = src;
+
 	while ((ret = strstr(ret, str)) != NULL) {
 		if ((ret == src && isword_delim(ret[len])) ||
 			(ret != src && isword_delim(ret[len]) && isword_delim(*(ret - 1))))
@@ -718,12 +724,12 @@ char **strsplit_by_str(const char str[], char *delim)
 		if (strparse == NULL || strparse[0] == '\0')
 			break;
 
-		substr = strstr(strparse, delim);
+		substr = DM_STRSTR(strparse, delim);
 
 		if (substr == NULL) {
 			substr = strdup(strparse);
-			tokens[tokens_used] = dmcalloc(strlen(substr)+1, sizeof(char));
-			DM_STRNCPY(tokens[tokens_used], strparse, strlen(substr)+1);
+			tokens[tokens_used] = dmcalloc(DM_STRLEN(substr)+1, sizeof(char));
+			DM_STRNCPY(tokens[tokens_used], strparse, DM_STRLEN(substr)+1);
 			tokens_used++;
 			FREE(strparse);
 			break;
@@ -738,10 +744,10 @@ char **strsplit_by_str(const char str[], char *delim)
 		}
 
 		tokens[tokens_used] = dmcalloc(substr-strparse+1, sizeof(char));
-		strncpy(tokens[tokens_used], strparse, substr-strparse);
+		DM_STRNCPY(tokens[tokens_used], strparse, substr - strparse + 1);
 		tokens_used++;
 		FREE(strparse);
-		strparse = strdup(substr+strlen(delim));
+		strparse = strdup(substr+DM_STRLEN(delim));
 	} while (substr != NULL);
 	FREE(strparse);
 	tokens[tokens_used] = NULL;
@@ -789,7 +795,7 @@ char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_sectio
 	unsigned n = 0, i;
 	const char *ifname = "";
 
-	if (wifi_iface[0] == 0 || wifi_section[0] == 0)
+	if (!wifi_iface || wifi_iface[0] == 0 || !wifi_section || wifi_section[0] == 0)
 		return "";
 
 	dmubus_call("network.wireless", "status", UBUS_ARGS{{}}, 0, &jobj);
@@ -824,7 +830,7 @@ bool value_exists_in_uci_list(struct uci_list *list, const char *value)
 		return false;
 
 	uci_foreach_element(list, e) {
-		if (!strcmp(e->name, value))
+		if (!DM_STRCMP(e->name, value))
 			return true;
 	}
 
@@ -840,7 +846,7 @@ bool value_exits_in_str_list(char *str_list, const char *delimitor, const char *
 
 	char *list = dmstrdup(str_list);
 	for (pch = strtok_r(list, delimitor, &spch); pch != NULL; pch = strtok_r(NULL, delimitor, &spch)) {
-		if (strcmp(pch, value) == 0)
+		if (DM_STRCMP(pch, value) == 0)
 			return true;
 	}
 	return false;
@@ -848,7 +854,7 @@ bool value_exits_in_str_list(char *str_list, const char *delimitor, const char *
 
 void add_elt_to_str_list(char **str_list, char *elt)
 {
-	if (*str_list == NULL || strlen(*str_list) == 0) {
+	if (*str_list == NULL || DM_STRLEN(*str_list) == 0) {
 		dmasprintf(str_list, "%s", elt);
 		return;
 	}
@@ -863,7 +869,7 @@ void remove_elt_from_str_list(char **str_list, char *ifname)
 {
 	char *list = NULL, *tmp = NULL, *pch = NULL, *spch = NULL;
 
-	if (*str_list == NULL || strlen(*str_list) == 0)
+	if (*str_list == NULL || DM_STRLEN(*str_list) == 0)
 		return;
 
 	list = dmstrdup(*str_list);
@@ -871,7 +877,7 @@ void remove_elt_from_str_list(char **str_list, char *ifname)
 	*str_list = NULL;
 
 	for (pch = strtok_r(list, " ", &spch); pch != NULL; pch = strtok_r(NULL, " ", &spch)) {
-		if (strcmp(pch, ifname) == 0)
+		if (DM_STRCMP(pch, ifname) == 0)
 			continue;
 
 		if (tmp == NULL)
@@ -899,7 +905,7 @@ bool elt_exists_in_array(char **str_array, char *str, int length)
 	int i;
 
 	for (i = 0; i < length; i++) {
-		if (strcmp(str_array[i], str) == 0)
+		if (DM_STRCMP(str_array[i], str) == 0)
 			return true;
 	}
 	return false;
@@ -1079,24 +1085,28 @@ int dm_time_format(time_t ts, char **dst)
 
 void convert_string_to_hex(const char *str, char *hex, size_t size)
 {
-	int i, j, len = strlen(str);
+	int i, len = DM_STRLEN(str);
+	unsigned pos = 0;
 
-	for (i = 0, j = 0; i < len && j < size - 2; i++, j += 2) {
-		sprintf((char *)hex + j, "%02X", str[i]);
+	for (i = 0; i < len && pos < size - 2; i++) {
+		pos += snprintf((char *)hex + pos, size - pos, "%02X", str[i]);
 	}
-	hex[j] = '\0';
+
+	hex[pos] = '\0';
 }
 
 void convert_hex_to_string(const char *hex, char *str, size_t size)
 {
-	int i, j, len = strlen(hex);
+	int i, len = DM_STRLEN(hex);
+	unsigned pos = 0;
 	char buf[3] = {0};
 
-	for (i = 0, j = 0; i < len && j < size - 1; i += 2, j++) {
+	for (i = 0; i < len && pos < size - 1; i += 2) {
 		DM_STRNCPY(buf, &hex[i], 3);
-		sprintf((char *)str + j, "%c", (char)strtol(buf, NULL, 16));
+		pos += snprintf((char *)str + pos, size - pos, "%c", (char)strtol(buf, NULL, 16));
 	}
-	str[j] = '\0';
+
+	str[pos] = '\0';
 }
 
 bool match(const char *string, const char *pattern)
@@ -1111,7 +1121,7 @@ bool match(const char *string, const char *pattern)
 
 static int dm_validate_string_length(char *value, int min_length, int max_length)
 {
-	if (((min_length > 0) && (strlen(value) < min_length)) || ((max_length > 0) && (strlen(value) > max_length)))
+	if (((min_length > 0) && (DM_STRLEN(value) < min_length)) || ((max_length > 0) && (DM_STRLEN(value) > max_length)))
 		return -1;
 	return 0;
 }
@@ -1119,7 +1129,7 @@ static int dm_validate_string_length(char *value, int min_length, int max_length
 static int dm_validate_string_enumeration(char *value, char *enumeration[])
 {
 	for (; *enumeration; enumeration++) {
-		if (strcmp(*enumeration, value) == 0)
+		if (DM_STRCMP(*enumeration, value) == 0)
 			return 0;
 	}
 	return -1;
@@ -1165,10 +1175,11 @@ int dm_validate_boolean(char *value)
 
 int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size)
 {
-	int i;
+	if (!value || value[0] == 0)
+		return -1;
 
 	/* check size for each range */
-	for (i = 0; i < r_args_size; i++) {
+	for (int i = 0; i < r_args_size; i++) {
 		unsigned long ui_val = 0, minval = 0, maxval = 0;
 		char *endval = NULL, *endmin = NULL, *endmax = NULL;
 
@@ -1208,10 +1219,11 @@ int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_
 
 int dm_validate_int(char *value, struct range_args r_args[], int r_args_size)
 {
-	int i;
+	if (!value || value[0] == 0)
+		return -1;
 
 	/* check size for each range */
-	for (i = 0; i < r_args_size; i++) {
+	for (int i = 0; i < r_args_size; i++) {
 		long i_val = 0, minval = 0, maxval = 0;
 		char *endval = NULL, *endmin = NULL, *endmax = NULL;
 
@@ -1246,10 +1258,11 @@ int dm_validate_int(char *value, struct range_args r_args[], int r_args_size)
 
 int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size)
 {
-	int i;
+	if (!value || value[0] == 0)
+		return -1;
 
 	/* check size for each range */
-	for (i = 0; i < r_args_size; i++) {
+	for (int i = 0; i < r_args_size; i++) {
 		unsigned long ul_val = 0, minval = 0, maxval = 0;
 		char *endval = NULL, *endmin = NULL, *endmax = NULL;
 
@@ -1284,10 +1297,11 @@ int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args
 
 int dm_validate_long(char *value, struct range_args r_args[], int r_args_size)
 {
-	int i;
+	if (!value || value[0] == 0)
+		return -1;
 
 	/* check size for each range */
-	for (i = 0; i < r_args_size; i++) {
+	for (int i = 0; i < r_args_size; i++) {
 		long u_val = 0, minval = 0, maxval = 0;
 		char *endval = NULL, *endmin = NULL, *endmax = NULL;
 
@@ -1338,11 +1352,11 @@ int dm_validate_dateTime(char *value)
 		return 0;
 
 	p = strptime(value, "%Y-%m-%dT%H:%M:%S.", &tm);
-	if (!p || *p == '\0' || value[strlen(value) - 1] != 'Z')
+	if (!p || *p == '\0' || value[DM_STRLEN(value) - 1] != 'Z')
 		return -1;
 
 	int num_parsed = sscanf(p, "%dZ", &m);
-	if (num_parsed != 1 || (strlen(p) != 7 && strlen(p) != 4))
+	if (num_parsed != 1 || (DM_STRLEN(p) != 7 && DM_STRLEN(p) != 4))
 		return -1;
 
 	return 0;
@@ -1353,7 +1367,7 @@ int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_si
 	int i;
 
 	/* check format */
-	for (i = 0; i < strlen(value); i++) {
+	for (i = 0; i < DM_STRLEN(value); i++) {
 		if (!isxdigit(value[i]))
 			return -1;
 	}
@@ -1361,9 +1375,9 @@ int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_si
 	/* check size */
 	for (i = 0; i < r_args_size; i++) {
 
-		if (r_args[i].min && r_args[i].max && (atoi(r_args[i].min) == atoi(r_args[i].max))) {
+		if (r_args[i].min && r_args[i].max && (DM_STRTOL(r_args[i].min) == DM_STRTOL(r_args[i].max))) {
 
-			if (strlen(value) == 2 * atoi(r_args[i].max))
+			if (DM_STRLEN(value) == 2 * DM_STRTOL(r_args[i].max))
 				break;
 
 			if (i == r_args_size - 1)
@@ -1372,8 +1386,8 @@ int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_si
 			continue;
 		}
 
-		if ((r_args[i].min && (strlen(value) < atoi(r_args[i].min))) ||
-			(r_args[i].max && (strlen(value) > atoi(r_args[i].max)))) {
+		if ((r_args[i].min && (DM_STRLEN(value) < DM_STRTOL(r_args[i].min))) ||
+			(r_args[i].max && (DM_STRLEN(value) > DM_STRTOL(r_args[i].max)))) {
 			return -1;
 		}
 	}
@@ -1397,6 +1411,9 @@ int dm_validate_string_list(char *value, int min_item, int max_item, int max_siz
 {
 	char *pch, *pchr;
 	int nbr_item = 0;
+
+	if (!value)
+		return -1;
 
 	/* check length of list */
 	if ((max_size > 0) && (strlen(value) > max_size))
@@ -1425,6 +1442,9 @@ int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int ma
 	char *tmp, *saveptr;
 	int nbr_item = 0;
 
+	if (!value)
+		return -1;
+
 	/* check length of list */
 	if ((max_size > 0) && (strlen(value) > max_size))
 			return -1;
@@ -1451,6 +1471,9 @@ int dm_validate_int_list(char *value, int min_item, int max_item, int max_size, 
 {
 	char *token, *pchr;
 	int nbr_item = 0;
+
+	if (!value)
+		return -1;
 
 	/* check length of list */
 	if ((max_size > 0) && (strlen(value) > max_size))
@@ -1479,6 +1502,9 @@ int dm_validate_unsignedLong_list(char *value, int min_item, int max_item, int m
 	char *token, *tmp;
 	int nbr_item = 0;
 
+	if (!value)
+		return -1;
+
 	/* check length of list */
 	if ((max_size > 0) && (strlen(value) > max_size))
 			return -1;
@@ -1506,6 +1532,9 @@ int dm_validate_long_list(char *value, int min_item, int max_item, int max_size,
 	char *pch, *saveptr;
 	int nbr_item = 0;
 
+	if (!value)
+		return -1;
+
 	/* check length of list */
 	if ((max_size > 0) && (strlen(value) > max_size))
 			return -1;
@@ -1532,6 +1561,9 @@ int dm_validate_hexBinary_list(char *value, int min_item, int max_item, int max_
 {
 	char *pch, *spch;
 	int nbr_item = 0;
+
+	if (!value)
+		return -1;
 
 	/* check length of list */
 	if ((max_size > 0) && (strlen(value) > max_size))
@@ -1612,10 +1644,10 @@ char *base64_decode(const char *src)
 	if (!src || *src == '\0')
 		return "";
 
-	size_t decsize = strlen(src)*6/8;
+	size_t decsize = DM_STRLEN(src)*6/8;
 	char *out = (char *)dmmalloc((decsize +1) * sizeof(char));
 
-	for (i = 0; i < strlen(src)-1; i++) {
+	for (i = 0; i < DM_STRLEN(src)-1; i++) {
 		out[j] = (get_base64_char(src[i]) << (j%3==0?2:(j%3==1?4:6))) + (get_base64_char(src[i+1]) >> (j%3==0?4:(j%3==1? 2:0)));
 		if (j%3 == 2)
 			i++;
@@ -1643,22 +1675,22 @@ void string_to_mac(const char *str, size_t str_len, char *out, size_t out_len)
 
 char *replace_char(char *str, char find, char replace)
 {
-	char *current_pos = strchr(str, find);
+	char *current_pos = DM_STRCHR(str, find);
 	while (current_pos) {
 		*current_pos = replace;
-		current_pos = strchr(current_pos, find);
+		current_pos = DM_STRCHR(current_pos, find);
 	}
 	return str;
 }
 
 char *replace_str(const char *str, const char *substr, const char *replacement)
 {
-	int replacement_len = strlen(replacement);
-	int substr_len = strlen(substr);
+	int replacement_len = DM_STRLEN(replacement);
+	int substr_len = DM_STRLEN(substr);
 	int i, cnt = 0;
 
 	for (i = 0; str[i] != '\0'; i++) {
-		if (strstr(&str[i], substr) == &str[i]) {
+		if (DM_STRSTR(&str[i], substr) == &str[i]) {
 			cnt++;
 			i += substr_len - 1;
 		}
@@ -1687,7 +1719,7 @@ int check_browse_section(struct uci_section *s, void *data)
 	char *opt_val;
 
 	dmuci_get_value_by_section_string(s, browse_args->option, &opt_val);
-	if (strcmp(opt_val, browse_args->value) == 0)
+	if (DM_STRCMP(opt_val, browse_args->value) == 0)
 		return 0;
 	return -1;
 }
@@ -1701,7 +1733,7 @@ int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, siz
 				&ip[0], &ip[1], &ip[2], &ip[3],
 				&prefix, dev);
 
-	if (strcmp(dev, device) != 0)
+	if (DM_STRCMP(dev, device) != 0)
 		return -1;
 
 	ip[0] = htonl(ip[0]);
@@ -1760,8 +1792,8 @@ char *get_ipv6(char *interface_name)
 		ipstr[0] = '\0';
 
 		if (parse_proc_intf6_line(buf, interface_name, ipstr, sizeof(ipstr)) == 0) {
-			if (strlen(ipstr) != 0) {
-				char *slash = strchr(ipstr, '/');
+			if (DM_STRLEN(ipstr) != 0) {
+				char *slash = DM_STRCHR(ipstr, '/');
 				if (slash)
 					*slash = '\0';
 			}
@@ -1791,7 +1823,7 @@ static bool validate_blob_dataval(struct blob_attr *src_attr, struct blob_attr *
 		if (src_val == NULL && dst_val == NULL)
 			return true;
 
-		if (src_val && dst_val && strcmp((char *)src_val, (char*)dst_val) == 0)
+		if (src_val && dst_val && DM_STRCMP((char *)src_val, (char*)dst_val) == 0)
 			return true;
 		break;
 	default:
@@ -1837,7 +1869,7 @@ bool validate_blob_message(struct blob_attr *src, struct blob_attr *dst)
 	__blob_for_each_attr(src_attr, blobmsg_data(src), src_len) {
 		bool matched = false;
 		__blob_for_each_attr(dst_attr, blobmsg_data(dst), dst_len) {
-			if (strcmp(blobmsg_name(src_attr), blobmsg_name(dst_attr)) != 0) {
+			if (DM_STRCMP(blobmsg_name(src_attr), blobmsg_name(dst_attr)) != 0) {
 				continue;
 			}
 

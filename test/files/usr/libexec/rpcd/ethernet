@@ -12,13 +12,13 @@ case "$1" in
                         		read input;
                         		json_load "$input"
                         		json_get_var ifname ifname
-                        		if [ "$ifname" == "eth1" ]; then
+                        		if [ "$ifname" = "eth1" ]; then
                                 	cat /tmp/rmonstats_eth1.data 2>/dev/null
-                                elif [ "$ifname" == "eth2" ]; then
+                                elif [ "$ifname" = "eth2" ]; then
                                 	cat /tmp/rmonstats_eth2.data 2>/dev/null
-                                elif [ "$ifname" == "eth3" ]; then
+                                elif [ "$ifname" = "eth3" ]; then
                                 	cat /tmp/rmonstats_eth3.data 2>/dev/null
-                                elif [ "$ifname" == "eth4" ]; then
+                                elif [ "$ifname" = "eth4" ]; then
                                 	cat /tmp/rmonstats_eth4.data 2>/dev/null
                                 else
                                 	cat /tmp/rmonstats_eth0.data 2>/dev/null

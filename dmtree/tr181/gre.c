@@ -147,7 +147,7 @@ static int delObjGRETunnelInterface(char *refparam, struct dmctx *ctx, void *dat
 				dmuci_get_value_by_section_string(s, "device", &device);
 				snprintf(device_buf, sizeof(device_buf), "@%s", section_name(((struct dmmap_dup *)data)->config_section));
 
-				if (!device || strcmp(device, device_buf) != 0)
+				if (!device || DM_STRCMP(device, device_buf) != 0)
 					continue;
 
 				get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(s), &dmmap_section);

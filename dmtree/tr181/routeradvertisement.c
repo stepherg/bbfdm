@@ -59,7 +59,7 @@ static int browseRouterAdvertisementInterfaceSettingInst(struct dmctx *dmctx, DM
 
 		// skip the section if option ignore = '1'
 		dmuci_get_value_by_section_string(p->config_section, "ignore", &ignore);
-		if (ignore && strcmp(ignore, "1") == 0)
+		if (ignore && DM_STRCMP(ignore, "1") == 0)
 			continue;
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "radv_intf_instance", "radv_intf_alias");
@@ -225,7 +225,7 @@ static int get_RouterAdvertisement_InterfaceSettingNumberOfEntries(char *refpara
 static int get_RouterAdvertisementInterfaceSetting_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ra", value);
-	*value = (*value && strcmp(*value, "disabled") == 0) ? "0" : "1";
+	*value = (*value && DM_STRCMP(*value, "disabled") == 0) ? "0" : "1";
 	return 0;
 }
 
@@ -250,7 +250,7 @@ static int set_RouterAdvertisementInterfaceSetting_Enable(char *refparam, struct
 static int get_RouterAdvertisementInterfaceSetting_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ra", value);
-	*value = (*value && strcmp(*value, "disabled") == 0) ? "Disabled" : "Enabled";
+	*value = (*value && DM_STRCMP(*value, "disabled") == 0) ? "Disabled" : "Enabled";
 	return 0;
 }
 
@@ -329,7 +329,7 @@ static int get_RouterAdvertisementInterfaceSetting_Prefixes(char *refparam, stru
 
 		uci_path_foreach_option_eq(bbfdm, "dmmap_network_ipv6_prefix", "intf_ipv6_prefix", "section_name", interface, dmmap_s) {
 			dmuci_get_value_by_section_string(dmmap_s, "address", &address);
-			if (address && strcmp(address, ipv6_prefix) == 0) {
+			if (address && DM_STRCMP(address, ipv6_prefix) == 0) {
 				dmuci_get_value_by_section_string(dmmap_s, "ipv6_prefix_instance", &ipv6_prefix_inst);
 				break;
 			}

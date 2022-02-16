@@ -22,6 +22,7 @@ struct codec_info supported_codecs[MAX_SUPPORTED_CODECS];
 int codecs_num;
 
 LIST_HEAD(call_log_list);
+static struct stat prev_stat = { 0 };
 static int call_log_list_size = 0;
 int call_log_count = 0;
 
@@ -99,11 +100,11 @@ static void convert_src_dst(char *src_or_dst, size_t buf_size)
 	int inst;
 
 	// Examples, "TELCHAN/5/2", "SIP/sip0-00000000",
-	if ((token = strstr(src_or_dst, TEL_LINE_PREFIX))) {
-		inst = atoi(token + strlen(TEL_LINE_PREFIX)) + 1;
+	if ((token = DM_STRSTR(src_or_dst, TEL_LINE_PREFIX))) {
+		inst = DM_STRTOL(token + DM_STRLEN(TEL_LINE_PREFIX)) + 1;
 		snprintf(src_or_dst, buf_size, "Device.Services.VoiceService.1.CallControl.Line.%d", inst);
-	} else if ((token = strstr(src_or_dst, SIP_ACCOUNT_PREFIX))) {
-		inst = atoi(token + strlen(SIP_ACCOUNT_PREFIX)) + 1;
+	} else if ((token = DM_STRSTR(src_or_dst, SIP_ACCOUNT_PREFIX))) {
+		inst = DM_STRTOL(token + DM_STRLEN(SIP_ACCOUNT_PREFIX)) + 1;
 		snprintf(src_or_dst, buf_size, "Device.Services.VoiceService.1.SIP.Client.%d", inst);
 	}
 }
@@ -120,7 +121,6 @@ int init_call_log(void)
 		cdr.calling_num, cdr.called_num, cdr.start_time, end_time); \
 		continue; \
 }
-	static struct stat prev_stat = { 0 };
 	struct stat cur_stat;
 	int res = 0, i = 0, j = 0;
 	struct call_log_entry *entry;
@@ -187,284 +187,284 @@ int init_call_log(void)
 			* "1598364701.4",""
 			*/
 			// calling number
-			token = strstr(line, SEPARATOR);
+			token = DM_STRSTR(line, SEPARATOR);
 			CHECK_RESULT(token);
 			token += SEPARATOR_SIZE;
-			end = strstr(token, SEPARATOR);
+			end = DM_STRSTR(token, SEPARATOR);
 			CHECK_RESULT(end);
-			strncpy(cdr.calling_num, token, end - token);
+			DM_STRNCPY(cdr.calling_num, token, end - token + 1);
 			// called number
 			token = end + SEPARATOR_SIZE;
-			end = strstr(token, SEPARATOR);
+			end = DM_STRSTR(token, SEPARATOR);
 			CHECK_RESULT(end);
-			strncpy(cdr.called_num, token, end - token);
+			DM_STRNCPY(cdr.called_num, token, end - token + 1);
 			// source
 			token = end + SEPARATOR_SIZE; // sip0 in the last example
-			token = strstr(token, SEPARATOR);
+			token = DM_STRSTR(token, SEPARATOR);
 			CHECK_RESULT(token);
 			token += SEPARATOR_SIZE; // ""8001"" <8001> in the last example
-			token = strstr(token, SEPARATOR);
+			token = DM_STRSTR(token, SEPARATOR);
 			CHECK_RESULT(token);
 			token += SEPARATOR_SIZE; // TELCHAN/5/1 in the last example
-			end = strstr(token, SEPARATOR);
+			end = DM_STRSTR(token, SEPARATOR);
 			CHECK_RESULT(end);
-			strncpy(cdr.source, token, end - token);
+			DM_STRNCPY(cdr.source, token, end - token + 1);
 			// destination
 			token = end + SEPARATOR_SIZE; // SIP/sip0-00000001 in the last example
-			end = strstr(token, SEPARATOR);
+			end = DM_STRSTR(token, SEPARATOR);
 			CHECK_RESULT(end);
-			strncpy(cdr.destination, token, end - token);
+			DM_STRNCPY(cdr.destination, token, end - token + 1);
 			// start time and end time
 			token = end + SEPARATOR_SIZE; // Dial in the last example
-			token = strstr(token, SEPARATOR);
+			token = DM_STRSTR(token, SEPARATOR);
 			CHECK_RESULT(token);
 			token += SEPARATOR_SIZE; // SIP/7001@sip0,,gT in the last example
-			token = strstr(token, SEPARATOR);
+			token = DM_STRSTR(token, SEPARATOR);
 			CHECK_RESULT(token);
 			token += SEPARATOR_SIZE; // The first date
-			end = strstr(token, "\",,\"");
+			end = DM_STRSTR(token, "\",,\"");
 			if (end) {
 				// Not answered, e.g. "2020-08-27 11:02:40",,"2020-08-27 11:02:40",21,11,
-				strncpy(cdr.start_time, token, end - token);
+				DM_STRNCPY(cdr.start_time, token, end - token + 1);
 				token = end + 4;
 			} else {
 				// Answered, e.g. "2020-08-25 16:11:41","2020-08-25 16:11:50","2020-08-25 16:12:02",21,11,
-				end = strstr(token, SEPARATOR);
+				end = DM_STRSTR(token, SEPARATOR);
 				CHECK_RESULT(end);
-				strncpy(cdr.start_time, token, end - token);
-				token = strstr(end + SEPARATOR_SIZE, SEPARATOR); // Skip the middle date and come to the last date
+				DM_STRNCPY(cdr.start_time, token, end - token + 1);
+				token = DM_STRSTR(end + SEPARATOR_SIZE, SEPARATOR); // Skip the middle date and come to the last date
 				CHECK_RESULT(token);
 				token += SEPARATOR_SIZE;
 			}
-			end = strstr(token, "\",");
+			end = DM_STRSTR(token, "\",");
 			CHECK_RESULT(end);
-			strncpy(end_time, token, end - token);
+			DM_STRNCPY(end_time, token, end - token + 1);
 			// termination cause
-			token = strstr(end + 2, ",\""); // ANSWERED in the last example
+			token = DM_STRSTR(end + 2, ",\""); // ANSWERED in the last example
 			CHECK_RESULT(token);
 			token += 2;
-			end = strstr(token, SEPARATOR);
+			end = DM_STRSTR(token, SEPARATOR);
 			CHECK_RESULT(end);
-			strncpy(cdr.termination_cause, token, end - token);
+			DM_STRNCPY(cdr.termination_cause, token, end - token + 1);
 
 			// session id
-			token = strstr(token, ",");
+			token = DM_STRSTR(token, ",");
 			CHECK_RESULT(token);
 			token += 1;
-			end = strstr(token, ",");
+			end = DM_STRSTR(token, ",");
 			CHECK_RESULT(end);
-			strncpy(cdr.sessionId, token, end - token);
+			DM_STRNCPY(cdr.sessionId, token, end - token + 1);
 
 			// SIP IP Address
-			token = strstr(token, ",\"");
+			token = DM_STRSTR(token, ",\"");
 			CHECK_RESULT(token);
 			token += 2;
-			end = strstr(token, "\",");
+			end = DM_STRSTR(token, "\",");
 			CHECK_RESULT(end);
-			strncpy(cdr.sipIpAddress, token, end - token);
+			DM_STRNCPY(cdr.sipIpAddress, token, end - token + 1);
 
 			// Far End IP Address
-			token = strstr(token, ",\"");
+			token = DM_STRSTR(token, ",\"");
 			CHECK_RESULT(token);
 			token += 2;
-			end = strstr(token, "\",");
+			end = DM_STRSTR(token, "\",");
 			CHECK_RESULT(end);
-			strncpy(cdr.farEndIPAddress, token, end - token);
+			DM_STRNCPY(cdr.farEndIPAddress, token, end - token + 1);
 
 			// Sip Response Code
-			token = strstr(token, ",");
+			token = DM_STRSTR(token, ",");
 			CHECK_RESULT(token);
 			token += 1;
-			end = strstr(token, ",");
+			end = DM_STRSTR(token, ",");
 			CHECK_RESULT(end);
-			strncpy(cdr.sipResponseCode, token, end - token);
+			DM_STRNCPY(cdr.sipResponseCode, token, end - token + 1);
 
 			// Codec
-			token = strstr(token, ",\"");
+			token = DM_STRSTR(token, ",\"");
 			CHECK_RESULT(token);
 			token += 2;
-			end = strstr(token, "\",");
+			end = DM_STRSTR(token, "\",");
 			CHECK_RESULT(end);
-			strncpy(cdr.codec, token, end - token);
+			DM_STRNCPY(cdr.codec, token, end - token + 1);
 
 			// RTP statistic values
-			token = strstr(token, ",");
+			token = DM_STRSTR(token, ",");
 			CHECK_RESULT(token);
 			token += 1;
-			end = strstr(token, ",");
+			end = DM_STRSTR(token, ",");
 			CHECK_RESULT(end);
-			strncpy(cdr.localBurstDensity, token, end - token);
+			DM_STRNCPY(cdr.localBurstDensity, token, end - token + 1);
 			// for incoming unanswered call cdr does not contain RTP stats
 			if (strcasecmp(cdr.localBurstDensity, "\"DOCUMENTATION\"") == 0) {
 				cdr.localBurstDensity[0] = '\0';
 			} else {
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.remoteBurstDensity, token, end - token);
+				DM_STRNCPY(cdr.remoteBurstDensity, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.localBurstDuration, token, end - token);
+				DM_STRNCPY(cdr.localBurstDuration, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.remoteBurstDuration, token, end - token);
+				DM_STRNCPY(cdr.remoteBurstDuration, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.localGapDensity, token, end - token);
+				DM_STRNCPY(cdr.localGapDensity, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.remoteGapDensity, token, end - token);
+				DM_STRNCPY(cdr.remoteGapDensity, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.localGapDuration, token, end - token);
+				DM_STRNCPY(cdr.localGapDuration, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.remoteGapDuration, token, end - token);
+				DM_STRNCPY(cdr.remoteGapDuration, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.localJbRate, token, end - token);
+				DM_STRNCPY(cdr.localJbRate, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.remoteJbRate, token, end - token);
+				DM_STRNCPY(cdr.remoteJbRate, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.localJbMax, token, end - token);
+				DM_STRNCPY(cdr.localJbMax, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.remoteJbMax, token, end - token);
+				DM_STRNCPY(cdr.remoteJbMax, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.localJbNominal, token, end - token);
+				DM_STRNCPY(cdr.localJbNominal, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.remoteJbNominal, token, end - token);
+				DM_STRNCPY(cdr.remoteJbNominal, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.localJbAbsMax, token, end - token);
+				DM_STRNCPY(cdr.localJbAbsMax, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.remoteJbAbsMax, token, end - token);
+				DM_STRNCPY(cdr.remoteJbAbsMax, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.jbAvg, token, end - token);
+				DM_STRNCPY(cdr.jbAvg, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.uLossRate, token, end - token);
+				DM_STRNCPY(cdr.uLossRate, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.discarded, token, end - token);
+				DM_STRNCPY(cdr.discarded, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.lost, token, end - token);
+				DM_STRNCPY(cdr.lost, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.rxpkts, token, end - token);
+				DM_STRNCPY(cdr.rxpkts, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.txpkts, token, end - token);
+				DM_STRNCPY(cdr.txpkts, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.jitter, token, end - token);
+				DM_STRNCPY(cdr.jitter, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.maxJitter, token, end - token);
+				DM_STRNCPY(cdr.maxJitter, token, end - token + 1);
 
-				token = strstr(token, ",");
+				token = DM_STRSTR(token, ",");
 				CHECK_RESULT(token);
 				token += 1;
-				end = strstr(token, ",");
+				end = DM_STRSTR(token, ",");
 				CHECK_RESULT(end);
-				strncpy(cdr.averageRoundTripDelay, token, end - token);
+				DM_STRNCPY(cdr.averageRoundTripDelay, token, end - token + 1);
 			}
 			// Skip invalid call logs
 			if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||

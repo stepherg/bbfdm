@@ -79,7 +79,7 @@ static void dmmap_synchronizePPPInterface(struct dmctx *dmctx, DMNODE *parent_no
 		char *iface_name = NULL;
 
 		dmuci_get_value_by_section_string(s, "added_by_controller", &added_by_controller);
-		if (strcmp(added_by_controller, "1") == 0)
+		if (DM_STRCMP(added_by_controller, "1") == 0)
 			continue;
 
 		dmuci_get_value_by_section_string(s, "iface_name", &iface_name);
@@ -95,7 +95,7 @@ static void dmmap_synchronizePPPInterface(struct dmctx *dmctx, DMNODE *parent_no
 		char *proto = NULL;
 
 		dmuci_get_value_by_section_string(s, "proto", &proto);
-		if (strncmp(proto, "ppp", 3) != 0)
+		if (DM_STRNCMP(proto, "ppp", 3) != 0)
 			continue;
 
 		if (is_ppp_section_exist(section_name(s)))
@@ -225,7 +225,7 @@ static int set_ppp_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 static int get_PPPInterface_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	get_ppp_enable(refparam, ctx, data, instance, value);
-	*value = (strcmp(*value, "1") == 0) ? "Up" : "Down";
+	*value = (DM_STRCMP(*value, "1") == 0) ? "Up" : "Down";
 	return 0;
 }
 
@@ -328,7 +328,7 @@ static int get_ppp_status(char *refparam, struct dmctx *ctx, void *data, char *i
 				string_to_bool(pending, &bpend);
 			}
 		}
-		if (uptime && atoi(uptime) > 0)
+		if (uptime && DM_STRTOL(uptime) > 0)
 			*value = "Connected";
 		else if (pending && bpend)
 			*value = "Pending Disconnect";
@@ -351,7 +351,7 @@ static int get_PPPInterface_LastConnectionError(char *refparam, struct dmctx *ct
 		DM_ASSERT(res, *value = "ERROR_NONE");
 		char *status = dmjson_get_value(res, 2, "data", "lastconnectionerror");
 
-		switch (atoi(status)) {
+		switch (DM_STRTOL(status)) {
 			case 0:
 				*value = "ERROR_NONE";
 				break;
@@ -446,7 +446,7 @@ static int get_PPPInterface_MaxMRUSize(char *refparam, struct dmctx *ctx, void *
 	char *token = NULL , *end = NULL;
 	token = strtok_r(pppd_opt, " ", &end);
 	while (NULL != token) {
-		if (0 == strcmp(token, "mru")) {
+		if (0 == DM_STRCMP(token, "mru")) {
 			char mru_val[1024] = {0}, mru_str[1024] = {0};
 			DM_STRNCPY(mru_val, end, sizeof(mru_val));
 			sscanf(mru_val, "%1023s", mru_str);
@@ -475,7 +475,7 @@ static int configure_pppd_mru(char *pppd_opt, char *mru_str, struct uci_section 
 	list_options[0] = 0;
 	token = strtok_r(pppd_opt, " ", &end);
 	while (NULL != token) {
-		if (0 == strcmp(token, "mru")) {
+		if (0 == DM_STRCMP(token, "mru")) {
 			found = true;
 			pos += snprintf(&list_options[pos], sizeof(list_options) - pos, "%s %s", token, value);
 			DM_STRNCPY(mru_opt, end, sizeof(mru_opt));
@@ -576,7 +576,7 @@ static int get_PPPInterface_LCPEchoRetry(char *refparam, struct dmctx *ctx, void
 		if (!lcp_retry || *lcp_retry == '\0') {
 			*value = "5";
 		} else {
-			token = strchr(lcp_retry , ' ');
+			token = DM_STRCHR(lcp_retry , ' ');
 			if (NULL != token) {
 				char lcp_interval[50] = {0};
 
@@ -594,7 +594,7 @@ static int configure_supported_ncp_options(struct uci_section *ss, char *value, 
 	char list_options[1024] = {0};
 
 	dmuci_get_value_by_section_string(ss, "proto", &proto);
-	if (0 == strcmp(proto, "pppoe")) {
+	if (0 == DM_STRCMP(proto, "pppoe")) {
 		dmuci_get_value_by_section_string(ss, "pppd_options", &pppd_opt);
 	}
 
@@ -608,9 +608,9 @@ static int configure_supported_ncp_options(struct uci_section *ss, char *value, 
 		while (NULL != token) {
 			char ncp_opt[1024] = {0};
 			DM_STRNCPY(ncp_opt, token, sizeof(ncp_opt));
-			if (0 == strncmp(ncp_opt, option, sizeof(ncp_opt))) {
+			if (0 == DM_STRNCMP(ncp_opt, option, sizeof(ncp_opt))) {
 				found = true;
-				if (0 == strcmp(value, "1") && NULL != end) {
+				if (0 == DM_STRCMP(value, "1") && NULL != end) {
 					if (pos != 0)
 						pos += snprintf(&list_options[pos], sizeof(list_options) - pos, "%c", ' ');
 
@@ -626,7 +626,7 @@ static int configure_supported_ncp_options(struct uci_section *ss, char *value, 
 			token = strtok_r(NULL, " ", &end);
 		}
 
-		if ((0 == strcmp(value, "0")) && found == false) {
+		if ((0 == DM_STRCMP(value, "0")) && found == false) {
 			if (pos != 0)
 				pos += snprintf(&list_options[pos], sizeof(list_options) - pos, "%c", ' ');
 
@@ -635,7 +635,7 @@ static int configure_supported_ncp_options(struct uci_section *ss, char *value, 
 
 		dmuci_set_value_by_section(ss, "pppd_options", list_options);
 	} else {
-		if (0 == strcmp(value, "0")) {
+		if (0 == DM_STRCMP(value, "0")) {
 			dmuci_set_value_by_section(ss, "pppd_options", option);
 		}
 	}
@@ -653,11 +653,11 @@ static int parse_pppd_options(char *pppd_opt, int option)
 		char value[50] = {0};
 		DM_STRNCPY(value, token, sizeof(value));
 
-		if ((4 == strlen(value)) && 0 == strcmp(value, "noip")) {
+		if ((4 == DM_STRLEN(value)) && 0 == DM_STRCMP(value, "noip")) {
 			noip = 1;
 		}
 
-		if (0 == strncmp(value, "noipv6", 6)) {
+		if (0 == DM_STRNCMP(value, "noipv6", 6)) {
 			noipv6 = 1;
 		}
 
@@ -676,7 +676,7 @@ static int handle_supported_ncp_options(struct uci_section *s, char *instance, i
 	char *pppd_opt = NULL, *proto = NULL;
 
 	dmuci_get_value_by_section_string(s, "proto", &proto);
-	if (proto && strcmp(proto, "pppoe") == 0)
+	if (proto && DM_STRCMP(proto, "pppoe") == 0)
 		dmuci_get_value_by_section_string(s, "pppd_options", &pppd_opt);
 
 	return pppd_opt ? parse_pppd_options(pppd_opt, option) : 0;
@@ -852,7 +852,7 @@ static int ppp_read_sysfs(void *data, const char *name, char **value)
 		char *proto;
 
 		dmuci_get_value_by_section_string(ppp_s, "proto", &proto);
-		if (!strcmp(proto, "pppoe")) {
+		if (!DM_STRCMP(proto, "pppoe")) {
 			char *l3_device = get_l3_device(section_name(ppp_s));
 			get_net_device_sysfs(l3_device, name, value);
 		}
@@ -946,7 +946,7 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 			char linker[64] = {0};
 
 			DM_STRNCPY(linker, device, sizeof(linker));
-			char *vid = strchr(linker, '.');
+			char *vid = DM_STRCHR(linker, '.');
 			if (vid) *vid = '\0';
 
 			adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", linker, value);
@@ -994,7 +994,7 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 				dmuci_set_value_by_section(ppp->dmmap_s, "device", "");
 				if (ppp->iface_s)
 					dmuci_set_value_by_section(ppp->iface_s, "device", "");
-			} else if (strncmp(value, eth_vlan_term, strlen(eth_vlan_term)) == 0) {
+			} else if (DM_STRNCMP(value, eth_vlan_term, DM_STRLEN(eth_vlan_term)) == 0) {
 
 				// Check VLANTremination linker and required options
 				struct uci_section *vlan_ter_s = get_dup_section_in_config_opt("network", "device", "name", ppp_linker);
@@ -1010,7 +1010,7 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 				dmuci_set_value_by_section(ppp->dmmap_s, "proto", "pppoe");
 				if (ppp->iface_s)
 					dmuci_set_value_by_section(ppp->iface_s, "proto", "pppoe");
-			} else if (strncmp(value, eth_link, strlen(eth_link)) == 0) {
+			} else if (DM_STRNCMP(value, eth_link, DM_STRLEN(eth_link)) == 0) {
 				struct uci_section *eth_link_s = NULL;
 
 				// Check Ethernet.Link linker and required options
@@ -1030,9 +1030,9 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 					dmuci_get_value_by_section_string(eth_link_s, "is_eth", &is_eth);
 
 					// Update proto option
-					dmuci_set_value_by_section(ppp->dmmap_s, "proto", !strcmp(is_eth, "1") ? "pppoe" : "pppoa");
+					dmuci_set_value_by_section(ppp->dmmap_s, "proto", !DM_STRCMP(is_eth, "1") ? "pppoe" : "pppoa");
 					if (ppp->iface_s)
-						dmuci_set_value_by_section(ppp->iface_s, "proto", !strcmp(is_eth, "1") ? "pppoe" : "pppoa");
+						dmuci_set_value_by_section(ppp->iface_s, "proto", !DM_STRCMP(is_eth, "1") ? "pppoe" : "pppoa");
 				}
 			}
 			return 0;
@@ -1060,7 +1060,7 @@ static int get_PPPInterfacePPPoE_ACName(char *refparam, struct dmctx *ctx, void 
 	char *proto;
 
 	dmuci_get_value_by_section_string(ppp->iface_s ? ppp->iface_s : ppp->dmmap_s, "proto", &proto);
-	if (strcmp(proto, "pppoe") == 0) {
+	if (DM_STRCMP(proto, "pppoe") == 0) {
 		dmuci_get_value_by_section_string(ppp->iface_s ? ppp->iface_s : ppp->dmmap_s, "ac", value);
 		return 0;
 	}
@@ -1078,7 +1078,7 @@ static int set_PPPInterfacePPPoE_ACName(char *refparam, struct dmctx *ctx, void 
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(ppp->iface_s ? ppp->iface_s : ppp->dmmap_s, "proto", &proto_intf);
-			if (strcmp(proto_intf, "pppoe") != 0)
+			if (DM_STRCMP(proto_intf, "pppoe") != 0)
 				return FAULT_9001;
 			break;
 		case VALUESET:
@@ -1097,7 +1097,7 @@ static int get_PPPInterfacePPPoE_ServiceName(char *refparam, struct dmctx *ctx, 
 	char *proto;
 
 	dmuci_get_value_by_section_string(ppp->iface_s ? ppp->iface_s : ppp->dmmap_s, "proto", &proto);
-	if (strcmp(proto, "pppoe") == 0) {
+	if (DM_STRCMP(proto, "pppoe") == 0) {
 		dmuci_get_value_by_section_string(ppp->iface_s ? ppp->iface_s : ppp->dmmap_s, "service", value);
 		return 0;
 	}
@@ -1115,7 +1115,7 @@ static int set_PPPInterfacePPPoE_ServiceName(char *refparam, struct dmctx *ctx, 
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(ppp->iface_s ? ppp->iface_s : ppp->dmmap_s, "proto", &proto);
-			if (strcmp(proto, "pppoe") != 0)
+			if (DM_STRCMP(proto, "pppoe") != 0)
 				return FAULT_9001;
 			break;
 		case VALUESET:

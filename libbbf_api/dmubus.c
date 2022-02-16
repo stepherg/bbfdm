@@ -71,7 +71,7 @@ static void prepare_blob_message(struct blob_buf *b, const struct ubus_arg u_arg
 	blob_buf_init(b, 0);
 	for (int i = 0; i < u_args_size; i++) {
 		if (u_args[i].type == Integer) {
-			blobmsg_add_u32(b, u_args[i].key, atoi(u_args[i].val));
+			blobmsg_add_u32(b, u_args[i].key, DM_STRTOL(u_args[i].val));
 		} else if (u_args[i].type == Boolean) {
 			bool val = false;
 			string_to_bool((char *)u_args[i].val, &val);
@@ -389,15 +389,15 @@ static unsigned dm_ubus_req_hash_from_blob(const struct dm_ubus_hash_req *req)
 		return hash;
 	}
 
-	hash = djbhash(hash, req->obj, strlen(req->obj));
-	hash = djbhash(hash, req->method, strlen(req->method));
+	hash = djbhash(hash, req->obj, DM_STRLEN(req->obj));
+	hash = djbhash(hash, req->method, DM_STRLEN(req->method));
 
 	char *jmsg = blobmsg_format_json(req->attr, true);
 	if (!jmsg) {
 		return hash;
 	}
 
-	hash = djbhash(hash, jmsg, strlen(jmsg));
+	hash = djbhash(hash, jmsg, DM_STRLEN(jmsg));
 	free(jmsg);
 	return hash;
 }
@@ -520,7 +520,7 @@ static void receive_list_result(struct ubus_context *ctx, struct ubus_object_dat
 
 	blob_for_each_attr(cur, obj->signature, rem) {
 		const char *method_name = blobmsg_name(cur);
-		if (!strcmp(ubus_method, method_name)) {
+		if (!DM_STRCMP(ubus_method, method_name)) {
 			ubus_method_exists = true;
 			return;
 		}
@@ -529,6 +529,9 @@ static void receive_list_result(struct ubus_context *ctx, struct ubus_object_dat
 
 bool dmubus_object_method_exists(const char *obj)
 {
+	if (obj == NULL)
+		return false;
+
 	if (ubus_ctx == NULL) {
 		ubus_ctx = dm_libubus_init();
 		if (ubus_ctx == NULL) {

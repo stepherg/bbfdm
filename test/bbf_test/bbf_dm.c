@@ -7,6 +7,7 @@
 #ifndef CMD_GET_INFO
 #define CMD_GET_INFO (CMD_EXTERNAL_COMMAND + 1)
 #endif
+static struct ubus_context *ubus_ctx = NULL;
 static int g_proto = BBFDM_USP;
 
 typedef struct {
@@ -34,7 +35,7 @@ int get_cmd_from_str(char *str)
 	int i, cmd = CMD_GET_VALUE;
 
 	for (i = 0; i < ARRAY_SIZE(CMD); i++) {
-		if (strcmp(CMD[i].str, str) == 0) {
+		if (DM_STRCMP(CMD[i].str, str) == 0) {
 			cmd = CMD[i].id;
 			break;
 		}
@@ -68,8 +69,8 @@ int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
 		printf("config version %s\n", bbf_ctx.dm_version);
 	}
 
-	if (cmd == CMD_GET_INFO){
-		fault = dm_get_supported_dm(&bbf_ctx, path, false, atoi(arg1));
+	if (cmd == CMD_GET_INFO) {
+		fault = dm_get_supported_dm(&bbf_ctx, path, false, DM_STRTOL(arg1));
 	} else {
 		fault = dm_entry_param_method(&bbf_ctx, cmd, path, arg1, arg2);
 	}
@@ -90,7 +91,6 @@ int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
 
 int main(int argc, char *argv[])
 {
-	static struct ubus_context *ubus_ctx = NULL;
 	char *param = "", *value = "", *version = "";
 	int cmd;
 
@@ -106,18 +106,18 @@ int main(int argc, char *argv[])
 
 	dm_config_ubus(ubus_ctx);
 
-	if (strcmp(argv[1], "-c") == 0)
+	if (DM_STRCMP(argv[1], "-c") == 0)
 		g_proto = BBFDM_CWMP;
 
 	cmd = get_cmd_from_str(argv[2]);
 
-	if (argc > 3 && strlen(argv[3]))
+	if (argc > 3 && DM_STRLEN(argv[3]))
 		param = argv[3];
 
-	if (argc > 4 && strlen(argv[4]))
+	if (argc > 4 && DM_STRLEN(argv[4]))
 		value = argv[4];
 
-	if (argc > 5 && strlen(argv[5]))
+	if (argc > 5 && DM_STRLEN(argv[5]))
 		version = argv[5];
 	
 	usp_dm_exec(cmd, param, value, version);

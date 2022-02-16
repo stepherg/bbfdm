@@ -34,7 +34,7 @@ static int browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node,
 		//synchronizing option src_ip of uci classify section to src_mask/src_ip of dmmap's classify section
 		dmuci_get_value_by_section_string(p->config_section, "src_ip", &value);
 		//checking if src_ip is an ip-prefix or ip address and synchronizing accordingly
-		ret = strstr(value, "/");
+		ret = DM_STRSTR(value, "/");
 		if (ret)
 			dmuci_set_value_by_section_bbfdm(p->dmmap_section, "src_mask", value);
 		else
@@ -43,7 +43,7 @@ static int browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node,
 		//synchronizing option dest_ip of uci classify section to dest_mask/dest_ip of dmmap's classify section
 		dmuci_get_value_by_section_string(p->config_section, "dest_ip", &value);
 		//checking if src_ip is an ip-prefix or ip address and synchronizing accordingly
-		ret = strstr(value, "/");
+		ret = DM_STRSTR(value, "/");
 		if (ret)
 			dmuci_set_value_by_section_bbfdm(p->dmmap_section, "dest_mask", value);
 		else
@@ -1100,7 +1100,7 @@ static int set_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (strncmp(value, "Device.QoS.Policer.", 19) != 0)
+			if (DM_STRNCMP(value, "Device.QoS.Policer.", 19) != 0)
 				return 0;
 
 			snprintf(link_inst, sizeof(link_inst), "%c", value[19]);
@@ -1266,9 +1266,9 @@ static int set_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void 
 static int get_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "meter_type", value);
-	if (strncmp(*value, "1", 1) == 0)
+	if (DM_STRNCMP(*value, "1", 1) == 0)
 		*value = "SingleRateThreeColor";
-	else if (strncmp(*value, "2", 1) == 0)
+	else if (DM_STRNCMP(*value, "2", 1) == 0)
 		*value = "TwoRateThreeColor";
 	else
 		*value = "SimpleTokenBucket";
@@ -1280,15 +1280,15 @@ static int set_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *dat
 {
 	switch (action)	{
 		case VALUECHECK:
-			if ((strcmp("SimpleTokenBucket", value) != 0) && (strcmp("SingleRateThreeColor", value) != 0) && (strcmp("TwoRateThreeColor", value) != 0))
+			if ((DM_STRCMP("SimpleTokenBucket", value) != 0) && (DM_STRCMP("SingleRateThreeColor", value) != 0) && (DM_STRCMP("TwoRateThreeColor", value) != 0))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (strcmp("SimpleTokenBucket", value) == 0)
+			if (DM_STRCMP("SimpleTokenBucket", value) == 0)
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "meter_type", "0");
-			else if (strcmp("SingleRateThreeColor", value) == 0)
+			else if (DM_STRCMP("SingleRateThreeColor", value) == 0)
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "meter_type", "1");
-			else if (strcmp("TwoRateThreeColor", value) == 0)
+			else if (DM_STRCMP("TwoRateThreeColor", value) == 0)
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "meter_type", "2");
 			break;
 	}
@@ -1509,7 +1509,7 @@ static int set_QoSQueueStats_Enable(char *refparam, struct dmctx *ctx, void *dat
 static int get_QoSQueueStats_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	get_QoSQueueStats_Enable(refparam, ctx, data, instance, value);
-	*value = (strcmp(*value, "1") == 0) ? "Enabled" : "Disabled";
+	*value = (DM_STRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
 	return 0;
 
 }

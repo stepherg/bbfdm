@@ -72,7 +72,7 @@ static struct uci_section *update_create_dmmap_dsl_line(char *curr_id)
 	if (!s) {
 		char instance[16];
 
-		snprintf(instance, sizeof(instance), "%d", atoi(curr_id));
+		snprintf(instance, sizeof(instance), "%ld", DM_STRTOL(curr_id));
 		dmuci_add_section_bbfdm("dmmap", "dsl_line", &s);
 		dmuci_set_value_by_section_bbfdm(s, "id", curr_id);
 		dmuci_set_value_by_section_bbfdm(s, "dsl_line_instance", instance);
@@ -90,7 +90,7 @@ static struct uci_section *update_create_dmmap_dsl_channel(char *curr_id)
 	if (!s) {
 		char instance[16];
 
-		snprintf(instance, sizeof(instance), "%d", atoi(curr_id));
+		snprintf(instance, sizeof(instance), "%ld", DM_STRTOL(curr_id));
 		dmuci_add_section_bbfdm("dmmap", "dsl_channel", &s);
 		dmuci_set_value_by_section_bbfdm(s, "id", curr_id);
 		dmuci_set_value_by_section_bbfdm(s, "dsl_channel_instance", instance);
@@ -217,17 +217,17 @@ int get_line_linkstatus(char *method, char *id, char **value)
 {
 	char *link_status = get_dsl_value_without_argument(method, id, "status", "link_status");
 
-	if (strcmp(link_status, "up") == 0)
+	if (DM_STRCMP(link_status, "up") == 0)
 		*value = "Up";
-	else if (strcmp(link_status, "initializing") == 0)
+	else if (DM_STRCMP(link_status, "initializing") == 0)
 		*value = "Initializing";
-	else if (strcmp(link_status, "no_signal") == 0)
+	else if (DM_STRCMP(link_status, "no_signal") == 0)
 		*value = "NoSignal";
-	else if (strcmp(link_status, "disabled") == 0)
+	else if (DM_STRCMP(link_status, "disabled") == 0)
 		*value = "Disabled";
-	else if (strcmp(link_status, "establishing") == 0)
+	else if (DM_STRCMP(link_status, "establishing") == 0)
 		*value = "EstablishingLink";
-	else if (strcmp(link_status, "error") == 0)
+	else if (DM_STRCMP(link_status, "error") == 0)
 		*value = "Error";
 	else
 		*value = link_status;
@@ -255,7 +255,7 @@ static int get_DSL_ChannelNumberOfEntries(char *refparam, struct dmctx *ctx, voi
 static int get_DSLLine_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *status = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "status");
-		*value = (strcmp(status, "up") == 0) ? "1" : "0";
+		*value = (DM_STRCMP(status, "up") == 0) ? "1" : "0";
 		return 0;
 }
 
@@ -276,7 +276,7 @@ static int set_DSLLine_Enable(char *refparam, struct dmctx *ctx, void *data, cha
 static int get_DSLLine_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *status = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "status");
-	*value = (strcmp(status, "up") == 0) ? "Up" : "Down";
+	*value = (DM_STRCMP(status, "up") == 0) ? "Up" : "Down";
 	return 0;
 }
 
@@ -351,55 +351,55 @@ static char *get_dsl_standard(char *str)
 {
 	char *dsl_standard;
 
-	if(strcmp(str, "gdmt_annexa") == 0)
+	if(DM_STRCMP(str, "gdmt_annexa") == 0)
 		dsl_standard = "G.992.1_Annex_A";
-	else if(strcmp(str, "gdmt_annexb") == 0)
+	else if(DM_STRCMP(str, "gdmt_annexb") == 0)
 		dsl_standard = "G.992.1_Annex_B";
-	else if(strcmp(str, "gdmt_annexc") == 0)
+	else if(DM_STRCMP(str, "gdmt_annexc") == 0)
 		dsl_standard = "G.992.1_Annex_C";
-	else if(strcmp(str, "t1413") == 0)
+	else if(DM_STRCMP(str, "t1413") == 0)
 		dsl_standard = "T1.413";
-	else if(strcmp(str, "t1413_i2") == 0)
+	else if(DM_STRCMP(str, "t1413_i2") == 0)
 		dsl_standard = "T1.413i2";
-	else if(strcmp(str, "glite") == 0)
+	else if(DM_STRCMP(str, "glite") == 0)
 		dsl_standard = "G.992.2";
-	else if(strcmp(str, "etsi_101_388") == 0)
+	else if(DM_STRCMP(str, "etsi_101_388") == 0)
 		dsl_standard = "ETSI_101_388";
-	else if(strcmp(str, "adsl2_annexa") == 0)
+	else if(DM_STRCMP(str, "adsl2_annexa") == 0)
 		dsl_standard = "G.992.3_Annex_A";
-	else if(strcmp(str, "adsl2_annexb") == 0)
+	else if(DM_STRCMP(str, "adsl2_annexb") == 0)
 		dsl_standard = "G.992.3_Annex_B";
-	else if(strcmp(str, "adsl2_annexc") == 0)
+	else if(DM_STRCMP(str, "adsl2_annexc") == 0)
 		dsl_standard = "G.992.3_Annex_C";
-	else if(strcmp(str, "adsl2_annexi") == 0)
+	else if(DM_STRCMP(str, "adsl2_annexi") == 0)
 		dsl_standard = "G.992.3_Annex_I";
-	else if(strcmp(str, "adsl2_annexj") == 0)
+	else if(DM_STRCMP(str, "adsl2_annexj") == 0)
 		dsl_standard = "G.992.3_Annex_J";
-	else if(strcmp(str, "adsl2_annexl") == 0)
+	else if(DM_STRCMP(str, "adsl2_annexl") == 0)
 		dsl_standard = "G.992.3_Annex_L";
-	else if(strcmp(str, "adsl2_annexm") == 0)
+	else if(DM_STRCMP(str, "adsl2_annexm") == 0)
 		dsl_standard = "G.992.3_Annex_M";
-	else if(strcmp(str, "splitterless_adsl2") == 0)
+	else if(DM_STRCMP(str, "splitterless_adsl2") == 0)
 		dsl_standard = "G.992.4";
-	else if(strcmp(str, "adsl2p_annexa") == 0)
+	else if(DM_STRCMP(str, "adsl2p_annexa") == 0)
 		dsl_standard = "G.992.5_Annex_A";
-	else if(strcmp(str, "adsl2p_annexb") == 0)
+	else if(DM_STRCMP(str, "adsl2p_annexb") == 0)
 		dsl_standard = "G.992.5_Annex_B";
-	else if(strcmp(str, "adsl2p_annexc") == 0)
+	else if(DM_STRCMP(str, "adsl2p_annexc") == 0)
 		dsl_standard = "G.992.5_Annex_C";
-	else if(strcmp(str, "adsl2p_annexi") == 0)
+	else if(DM_STRCMP(str, "adsl2p_annexi") == 0)
 		dsl_standard = "G.992.5_Annex_I";
-	else if(strcmp(str, "adsl2p_annexj") == 0)
+	else if(DM_STRCMP(str, "adsl2p_annexj") == 0)
 		dsl_standard = "G.992.5_Annex_J";
-	else if(strcmp(str, "adsl2p_annexm") == 0)
+	else if(DM_STRCMP(str, "adsl2p_annexm") == 0)
 		dsl_standard = "G.992.5_Annex_M";
-	else if(strcmp(str, "vdsl") == 0)
+	else if(DM_STRCMP(str, "vdsl") == 0)
 		dsl_standard = "G.993.1";
-	else if(strcmp(str, "vdsl2_annexa") == 0)
+	else if(DM_STRCMP(str, "vdsl2_annexa") == 0)
 		dsl_standard = "G.993.2_Annex_A";
-	else if(strcmp(str, "vdsl2_annexb") == 0)
+	else if(DM_STRCMP(str, "vdsl2_annexb") == 0)
 		dsl_standard = "G.993.2_Annex_B";
-	else if(strcmp(str, "vdsl2_annexc") == 0)
+	else if(DM_STRCMP(str, "vdsl2_annexc") == 0)
 		dsl_standard = "G.993.2_Annex_C";
 	else
 		dsl_standard = str;
@@ -489,17 +489,17 @@ static int get_DSLLine_XTSUsed(char *refparam, struct dmctx *ctx, void *data, ch
 static int get_DSLLine_LineEncoding(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *line_encoding = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "line_encoding");
-	if(strcmp(line_encoding, "dmt") == 0)
+	if(DM_STRCMP(line_encoding, "dmt") == 0)
 		*value = "DMT";
-	else if(strcmp(line_encoding, "cap") == 0)
+	else if(DM_STRCMP(line_encoding, "cap") == 0)
 		*value = "CAP";
-	else if(strcmp(line_encoding, "2b1q") == 0)
+	else if(DM_STRCMP(line_encoding, "2b1q") == 0)
 		*value = "2B1Q";
-	else if(strcmp(line_encoding, "43bt") == 0)
+	else if(DM_STRCMP(line_encoding, "43bt") == 0)
 		*value = "43BT";
-	else if(strcmp(line_encoding, "pam") == 0)
+	else if(DM_STRCMP(line_encoding, "pam") == 0)
 		*value = "PAM";
-	else if(strcmp(line_encoding, "qam") == 0)
+	else if(DM_STRCMP(line_encoding, "qam") == 0)
 		*value = "QAM";
 	else
 		*value = line_encoding;
@@ -517,7 +517,7 @@ static int get_DSLLine_AllowedProfiles(char *refparam, struct dmctx *ctx, void *
 static int get_DSLLine_CurrentProfile(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *current_profile = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "current_profile");
-	*value = (current_profile && strcmp(current_profile, "unknown") == 0) ? "" : current_profile;
+	*value = (current_profile && DM_STRCMP(current_profile, "unknown") == 0) ? "" : current_profile;
 	return 0;
 }
 
@@ -525,15 +525,15 @@ static int get_DSLLine_CurrentProfile(char *refparam, struct dmctx *ctx, void *d
 static int get_DSLLine_PowerManagementState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *power_mng_state = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "power_management_state");
-	if(strcmp(power_mng_state, "l0") == 0)
+	if(DM_STRCMP(power_mng_state, "l0") == 0)
 		*value = "L0";
-	else if(strcmp(power_mng_state, "l1") == 0)
+	else if(DM_STRCMP(power_mng_state, "l1") == 0)
 		*value = "L1";
-	else if(strcmp(power_mng_state, "l2") == 0)
+	else if(DM_STRCMP(power_mng_state, "l2") == 0)
 		*value = "L2";
-	else if(strcmp(power_mng_state, "l3") == 0)
+	else if(DM_STRCMP(power_mng_state, "l3") == 0)
 		*value = "L3";
-	else if(strcmp(power_mng_state, "l4") == 0)
+	else if(DM_STRCMP(power_mng_state, "l4") == 0)
 		*value = "L4";
 	else
 		*value = power_mng_state;
@@ -929,7 +929,7 @@ static int get_DSLLineStatsQuarterHour_SeverelyErroredSecs(char *refparam, struc
 static int get_DSLChannel_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *status = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "status", "status");
-	*value = (strcmp(status, "up") == 0) ? "1" : "0";
+	*value = (DM_STRCMP(status, "up") == 0) ? "1" : "0";
 	return 0;
 }
 
@@ -950,17 +950,17 @@ static int set_DSLChannel_Enable(char *refparam, struct dmctx *ctx, void *data, 
 static int get_DSLChannel_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *status = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "status", "status");
-	if (strcmp(status, "up") == 0)
+	if (DM_STRCMP(status, "up") == 0)
 		*value = "Up";
-	else if (strcmp(status, "down") == 0)
+	else if (DM_STRCMP(status, "down") == 0)
 		*value = "Down";
-	else if (strcmp(status, "dormant") == 0)
+	else if (DM_STRCMP(status, "dormant") == 0)
 		*value = "Dormant";
-	else if (strcmp(status, "not_present") == 0)
+	else if (DM_STRCMP(status, "not_present") == 0)
 		*value = "NotPresent";
-	else if (strcmp(status, "lower_layer_down") == 0)
+	else if (DM_STRCMP(status, "lower_layer_down") == 0)
 		*value = "LowerLayerDown";
-	else if (strcmp(status, "error") == 0)
+	else if (DM_STRCMP(status, "error") == 0)
 		*value = "Error";
 	else
 		*value = "Unknown";
@@ -1008,13 +1008,13 @@ static char *get_dsl_link_encapsulation_standard(char *str)
 {
 	char *dsl_link_encapsulation_standard = "";
 
-	if(strcmp(str, "adsl2_atm") == 0)
+	if(DM_STRCMP(str, "adsl2_atm") == 0)
 		dsl_link_encapsulation_standard = "G.992.3_Annex_K_ATM";
-	else if(strcmp(str, "adsl2_ptm") == 0)
+	else if(DM_STRCMP(str, "adsl2_ptm") == 0)
 		dsl_link_encapsulation_standard = "G.992.3_Annex_K_PTM";
-	else if(strcmp(str, "vdsl2_atm") == 0)
+	else if(DM_STRCMP(str, "vdsl2_atm") == 0)
 		dsl_link_encapsulation_standard = "G.993.2_Annex_K_ATM";
-	else if(strcmp(str, "vdsl2_ptm") == 0)
+	else if(DM_STRCMP(str, "vdsl2_ptm") == 0)
 		dsl_link_encapsulation_standard = "G.993.2_Annex_K_PTM";
 	else
 		dsl_link_encapsulation_standard = "G.994.1";
@@ -1050,7 +1050,7 @@ static int get_DSLChannel_LinkEncapsulationSupported(char *refparam, struct dmct
 static int get_DSLChannel_LinkEncapsulationUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *link_encapsulation_used = get_dsl_value_without_argument("dsl.channel", ((struct dsl_channel_args*)data)->id, "status", "link_encapsulation_used");
-	*value = (strcmp(link_encapsulation_used, "auto") != 0) ? get_dsl_link_encapsulation_standard(link_encapsulation_used) : "G.993.2_Annex_K_PTM";
+	*value = (DM_STRCMP(link_encapsulation_used, "auto") != 0) ? get_dsl_link_encapsulation_standard(link_encapsulation_used) : "G.993.2_Annex_K_PTM";
 	return 0;
 }
 

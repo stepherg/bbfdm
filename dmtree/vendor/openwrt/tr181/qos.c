@@ -93,7 +93,7 @@ static int openwrt__browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_
 {
 	struct uci_section *dmmap_sect;
 	char *questatsout[256], *inst = NULL, *max_inst = NULL, *lastinstancestore = NULL, dev[50] = "", user[50] = "";
-	static int length = 0, i, ret = 0;
+	int length = 0;
 	struct queuestats queuests = {0}, emptyquestats = {0};
 	regex_t regex1 = {}, regex2 = {};
 
@@ -102,40 +102,43 @@ static int openwrt__browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_
 
 	command_exec_output_to_array("tc -s qdisc", questatsout, &length);
 
-	for (i = 0; i < length; i++) {
+	for (int i = 0; i < length; i++) {
 		switch (i%3) {
-			case 0: ret = regexec(&regex1, questatsout[i], 0, NULL, 0);
-				 	if (ret == 0)
-				 		sscanf(questatsout[i], "qdisc noqueue %d: dev %49s %49s refcnt %d\n", &queuests.noqueue, dev, user, &queuests.refcnt);
-				 	else {
-				 		ret= regexec(&regex2, questatsout[i], 0, NULL, 0);
-				 		if (ret == 0)
-				 			sscanf(questatsout[i], "qdisc pfifo_fast %d: dev %49s %49s refcnt %d\n", &queuests.pfifo_fast, dev, user, &queuests.refcnt);
-				 	}
-					DM_STRNCPY(queuests.dev, dev, sizeof(queuests.dev));
-					break;
-			case 1: sscanf(questatsout[i], " Sent %d bytes %d pkt (dropped %d, overlimits %d requeues %d)\n", &queuests.bytes_sent, &queuests.pkt_sent, &queuests.pkt_dropped, &queuests.pkt_overlimits, &queuests.pkt_requeues);
-					break;
-			case 2: sscanf(questatsout[i], " backlog %db %dp requeues %d\n", &queuests.backlog_b, &queuests.backlog_p, &queuests.backlog_requeues);
-					if ((dmmap_sect = get_dup_qstats_section_in_dmmap("dmmap_qos", "qqueue_stats", queuests.dev)) == NULL) {
-						dmuci_add_section_bbfdm("dmmap_qos", "qqueue_stats", &dmmap_sect);
-						dmuci_set_value_by_section_bbfdm(dmmap_sect, "dev_link", queuests.dev);
-					}
+			case 0:
+				int ret = regexec(&regex1, questatsout[i], 0, NULL, 0);
+				if (ret == 0)
+					sscanf(questatsout[i], "qdisc noqueue %d: dev %49s %49s refcnt %d\n", &queuests.noqueue, dev, user, &queuests.refcnt);
+				else {
+					ret= regexec(&regex2, questatsout[i], 0, NULL, 0);
+					if (ret == 0)
+						sscanf(questatsout[i], "qdisc pfifo_fast %d: dev %49s %49s refcnt %d\n", &queuests.pfifo_fast, dev, user, &queuests.refcnt);
+				}
+				DM_STRNCPY(queuests.dev, dev, sizeof(queuests.dev));
+				break;
+			case 1:
+				sscanf(questatsout[i], " Sent %d bytes %d pkt (dropped %d, overlimits %d requeues %d)\n", &queuests.bytes_sent, &queuests.pkt_sent, &queuests.pkt_dropped, &queuests.pkt_overlimits, &queuests.pkt_requeues);
+				break;
+			case 2:
+				sscanf(questatsout[i], " backlog %db %dp requeues %d\n", &queuests.backlog_b, &queuests.backlog_p, &queuests.backlog_requeues);
+				if ((dmmap_sect = get_dup_qstats_section_in_dmmap("dmmap_qos", "qqueue_stats", queuests.dev)) == NULL) {
+					dmuci_add_section_bbfdm("dmmap_qos", "qqueue_stats", &dmmap_sect);
+					dmuci_set_value_by_section_bbfdm(dmmap_sect, "dev_link", queuests.dev);
+				}
 
-					queuests.dmsect= dmmap_sect;
+				queuests.dmsect= dmmap_sect;
 
-					if (lastinstancestore != NULL && max_inst != NULL)
-						max_inst = dmstrdup(lastinstancestore);
+				if (lastinstancestore != NULL && max_inst != NULL)
+					max_inst = dmstrdup(lastinstancestore);
 
-					inst = handle_instance(dmctx, parent_node, dmmap_sect, "queuestatsinstance", "queuestatsalias");
+				inst = handle_instance(dmctx, parent_node, dmmap_sect, "queuestatsinstance", "queuestatsalias");
 
-					lastinstancestore = dmstrdup(max_inst);
+				lastinstancestore = dmstrdup(max_inst);
 
-					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&queuests, inst) == DM_STOP)
-						goto end;
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&queuests, inst) == DM_STOP)
+					goto end;
 
-					queuests = emptyquestats;
-					break;
+				queuests = emptyquestats;
+				break;
 		}
 	}
 
@@ -260,7 +263,7 @@ static int openwrt__get_QoSClassification_Interface(char *refparam, struct dmctx
 		return 0;
 	uci_foreach_sections("qos", "interface", s) {
 		dmuci_get_value_by_section_string(s, "classgroup", &ifaceclassgrp);
-		if (ifaceclassgrp != NULL && strcmp(ifaceclassgrp, classgroup) == 0) {
+		if (ifaceclassgrp != NULL && DM_STRCMP(ifaceclassgrp, classgroup) == 0) {
 			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", section_name(s), value);
 			if (!(*value) || (*value)[0] == 0)
 				adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", section_name(s), value);

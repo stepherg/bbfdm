@@ -583,7 +583,7 @@ static int get_ServicesVoiceServiceCallControlLine_CallStatus(char *refparam, st
 	json_object *res = NULL;
 	char line_str[16];
 
-	snprintf(line_str, sizeof(line_str), "%d", instance ? atoi(instance) - 1 : 0);
+	snprintf(line_str, sizeof(line_str), "%ld", instance ? DM_STRTOL(instance) - 1 : 0);
 	dmubus_call("asterisk", "call_status", UBUS_ARGS{{"line", line_str, Integer}}, 1, &res);
 	if (res) {
 		*value = dmjson_get_value(res, 1, "call_status");
@@ -924,7 +924,7 @@ static int get_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", &type);
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "provider", &provider_string);
-	if (strlen(provider_string)) {
+	if (DM_STRLEN(provider_string)) {
 		unsigned pos = 0;
 		char *ptr = NULL, *spch = NULL;
 		buf[0] = 0;
@@ -933,7 +933,7 @@ static int get_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 		while (ptr != NULL) {
 			char *linker = NULL;
 
-			adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", !strcmp(type, "fxs") ? section_name(((struct dmmap_dup *)data)->config_section) : ptr, &linker);
+			adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", !DM_STRCMP(type, "fxs") ? section_name(((struct dmmap_dup *)data)->config_section) : ptr, &linker);
 			if (linker && *linker)
 				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", linker);
 
@@ -952,8 +952,8 @@ static int set_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 {
 	char fxs_extension[64] = "Device.Services.VoiceService.1.POTS.FXS.";
 	char dect_extension[64] = "Device.Services.VoiceService.1.DECT.Portable.";
-	size_t fxs_len = strlen(fxs_extension);
-	size_t dect_len = strlen(dect_extension);
+	size_t fxs_len = DM_STRLEN(fxs_extension);
+	size_t dect_len = DM_STRLEN(dect_extension);
 	char *pch = NULL, *spch = NULL;
 	char value_buf[512] = {0};
 	char *type;
@@ -975,7 +975,7 @@ static int set_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 			for (pch = strtok_r(value_buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 				char *linker = NULL;
 
-				if (strncmp(pch, !strcmp(type, "fxs") ? fxs_extension : dect_extension, !strcmp(type, "fxs") ? fxs_len : dect_len) != 0)
+				if (strncmp(pch, !DM_STRCMP(type, "fxs") ? fxs_extension : dect_extension, !DM_STRCMP(type, "fxs") ? fxs_len : dect_len) != 0)
 					return FAULT_9007;
 
 				adm_entry_get_linker_value(ctx, pch, &linker);
@@ -993,9 +993,9 @@ static int set_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", ",");
 
 				adm_entry_get_linker_value(ctx, pch, &linker);
-				if(!strcmp(linker, "extension3"))
+				if(!DM_STRCMP(linker, "extension3"))
 					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", "fxs1");
-				else if(!strcmp(linker, "extension4"))
+				else if(!DM_STRCMP(linker, "extension4"))
 					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", "fxs2");
 				else
 					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", linker);
@@ -1069,7 +1069,7 @@ static int get_ServicesVoiceServiceCallControlExtension_CallStatus(char *refpara
 	json_object *res = NULL;
 	char ext_str[16];
 
-	snprintf(ext_str, sizeof(ext_str), "%d", instance ? atoi(instance) - 1 : 0);
+	snprintf(ext_str, sizeof(ext_str), "%ld", instance ? DM_STRTOL(instance) - 1 : 0);
 	dmubus_call("asterisk", "call_status", UBUS_ARGS{{"extension", ext_str, Integer}}, 1, &res);
 	if (res) {
 		*value = dmjson_get_value(res, 1, "call_status");

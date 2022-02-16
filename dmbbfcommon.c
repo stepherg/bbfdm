@@ -56,27 +56,27 @@ int get_dm_type(char *dm_str)
 	if (dm_str == NULL)
 		return DMT_STRING;
 
-	if (strcmp(dm_str, DMT_TYPE[DMT_STRING]) == 0)
+	if (DM_STRCMP(dm_str, DMT_TYPE[DMT_STRING]) == 0)
 		return DMT_STRING;
-	else if (strcmp(dm_str, DMT_TYPE[DMT_UNINT]) == 0)
+	else if (DM_STRCMP(dm_str, DMT_TYPE[DMT_UNINT]) == 0)
 		return DMT_UNINT;
-	else if (strcmp(dm_str, DMT_TYPE[DMT_INT]) == 0)
+	else if (DM_STRCMP(dm_str, DMT_TYPE[DMT_INT]) == 0)
 		return DMT_INT;
-	else if (strcmp(dm_str, DMT_TYPE[DMT_UNLONG]) == 0)
+	else if (DM_STRCMP(dm_str, DMT_TYPE[DMT_UNLONG]) == 0)
 		return DMT_UNLONG;
-	else if (strcmp(dm_str, DMT_TYPE[DMT_LONG]) == 0)
+	else if (DM_STRCMP(dm_str, DMT_TYPE[DMT_LONG]) == 0)
 		return DMT_LONG;
-	else if (strcmp(dm_str, DMT_TYPE[DMT_BOOL]) == 0)
+	else if (DM_STRCMP(dm_str, DMT_TYPE[DMT_BOOL]) == 0)
 		return DMT_BOOL;
-	else if (strcmp(dm_str, DMT_TYPE[DMT_TIME]) == 0)
+	else if (DM_STRCMP(dm_str, DMT_TYPE[DMT_TIME]) == 0)
 		return DMT_TIME;
-	else if (strcmp(dm_str, DMT_TYPE[DMT_HEXBIN]) == 0)
+	else if (DM_STRCMP(dm_str, DMT_TYPE[DMT_HEXBIN]) == 0)
 		return DMT_HEXBIN;
-	else if (strcmp(dm_str, DMT_TYPE[DMT_BASE64]) == 0)
+	else if (DM_STRCMP(dm_str, DMT_TYPE[DMT_BASE64]) == 0)
 		return DMT_BASE64;
-	else if (strcmp(dm_str, DMT_TYPE[DMT_COMMAND]) == 0)
+	else if (DM_STRCMP(dm_str, DMT_TYPE[DMT_COMMAND]) == 0)
 		return DMT_COMMAND;
-	else if (strcmp(dm_str, DMT_TYPE[DMT_EVENT]) == 0)
+	else if (DM_STRCMP(dm_str, DMT_TYPE[DMT_EVENT]) == 0)
 		return DMT_EVENT;
 	else
 		return DMT_STRING;

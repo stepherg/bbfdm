@@ -15,7 +15,7 @@
 static int get_EthernetVLANTermination_MACVLAN(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", value);
-	*value = (strcmp(*value, "macvlan") == 0) ? "1" : "0";
+	*value = (DM_STRCMP(*value, "macvlan") == 0) ? "1" : "0";
 	return 0;
 }
 

@@ -24,7 +24,7 @@ static unsigned char is_dns_server_in_dmmap(char *chk_ip, char *chk_interface)
 	uci_path_foreach_sections(bbfdm, "dmmap_dns", "dns_server", s) {
 		dmuci_get_value_by_section_string(s, "ip", &ip);
 		dmuci_get_value_by_section_string(s, "interface", &interface);
-		if (strcmp(interface, chk_interface) == 0 && strcmp(ip, chk_ip) == 0) {
+		if (DM_STRCMP(interface, chk_interface) == 0 && DM_STRCMP(ip, chk_ip) == 0) {
 			return 1;
 		}
 	}
@@ -48,7 +48,7 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 		bool found = false;
 
 		dmuci_get_value_by_section_string(s, "added_by_controller", &added_by_controller);
-		if (strcmp(added_by_controller, "1") == 0)
+		if (DM_STRCMP(added_by_controller, "1") == 0)
 			continue;
 
 		dmuci_get_value_by_section_string(s, "ip", &ip);
@@ -62,7 +62,7 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 			dmuci_get_value_by_section_list(ss, "dns", &dns_list);
 			if (dns_list != NULL) {
 				uci_foreach_element(dns_list, e) {
-					if (strcmp(e->name, ip) == 0) {
+					if (DM_STRCMP(e->name, ip) == 0) {
 						found = true;
 						break;
 					}
@@ -75,7 +75,7 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(ss), String}}, 1, &jobj);
 			if (!jobj) break;
 			dmjson_foreach_value_in_array(jobj, arrobj, ipdns, j, 1, "dns-server") {
-				if (strcmp(ipdns, ip) == 0) {
+				if (DM_STRCMP(ipdns, ip) == 0) {
 					found = true;
 					break;
 				}
@@ -280,7 +280,7 @@ static int get_dns_interface(char *refparam, struct dmctx *ctx, void *data, char
 
 		dmuci_get_option_value_string("network", linker, "device", &device);
 		if (DM_STRLEN(device)) {
-			char *sec_name = strchr(device, '@');
+			char *sec_name = DM_STRCHR(device, '@');
 			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", sec_name ? sec_name + 1 : "", value);
 		}
 	}
@@ -294,7 +294,7 @@ static int get_dns_type(char *refparam, struct dmctx *ctx, void *data, char *ins
 	dmuci_get_value_by_section_string((struct uci_section *)data, "peerdns", &v);
 	if (*v == '1') {
 		dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &v);
-		if (strchr(v, ':') == NULL)
+		if (DM_STRCHR(v, ':') == NULL)
 			*value = "DHCPv4";
 		else
 			*value = "DHCPv6";
@@ -523,7 +523,7 @@ static int set_dns_server(char *refparam, struct dmctx *ctx, void *data, char *i
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &oip);
-			if (strcmp(oip, value) == 0)
+			if (DM_STRCMP(oip, value) == 0)
 				return 0;
 
 			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
@@ -576,7 +576,7 @@ static int set_dns_interface(char *refparam, struct dmctx *ctx, void *data, char
 				return 0;
 			}
 
-			if (strcmp(interface, linker) == 0)
+			if (DM_STRCMP(interface, linker) == 0)
 				return 0;
 
 			if (DM_STRLEN(interface)) {
@@ -632,7 +632,7 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (strcmp(value, "Requested") == 0) {
+			if (DM_STRCMP(value, "Requested") == 0) {
 				NSLOOKUP_STOP
 				set_diagnostics_option("nslookup", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_NSLOOKUP_DIAGNOSTIC);

@@ -138,7 +138,7 @@ do { \
 
 #define dmstrappendstr(dest, src) \
 do { \
-	int len = strlen(src); \
+	int len = DM_STRLEN(src); \
 	memcpy(dest, src, len); \
 	dest += len; \
 } while(0)
@@ -213,7 +213,7 @@ bool is_strword_in_optionvalue(char *optionvalue, char *str);
 void remove_new_line(char *buf);
 int dmcmd(char *cmd, int n, ...);
 int dmcmd_no_wait(char *cmd, int n, ...);
-void hex_to_ip(char *address, char *ret);
+void hex_to_ip(char *address, char *ret, size_t size);
 void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section);
 void free_dmmap_config_dup_list(struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list);

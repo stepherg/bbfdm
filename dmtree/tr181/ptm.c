@@ -201,7 +201,7 @@ static int get_ptm_dsl_channel(struct dmctx *ctx, void *data, char *instance, ch
 {
 	char *ptm_file = NULL;
 
-	dmasprintf(&ptm_file, "/sys/class/net/ptm%d", atoi(instance) - 1);
+	dmasprintf(&ptm_file, "/sys/class/net/ptm%ld", DM_STRTOL(instance) - 1);
 	if (folder_exists(ptm_file)) {
 		*value = "Device.DSL.Channel.1";
 		dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", "fast_line_1");
@@ -220,7 +220,7 @@ static int get_ptm_fast_line(struct dmctx *ctx, void *data, char *instance, char
 	line_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "line");
 	if (!line_obj)
 		return 0;
-	if ( strcmp(dmjson_get_value(line_obj, 1, "status"), "up") == 0) {
+	if ( DM_STRCMP(dmjson_get_value(line_obj, 1, "status"), "up") == 0) {
 		*value = "Device.FAST.Line.1";
 		dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", "fast_line_1");
 	}
@@ -243,11 +243,11 @@ static int set_ptm_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action) {
 		case VALUECHECK:
-			if (strncmp(value, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0 && strncmp(value, "Device.FAST.Line.1", strlen("Device.FAST.Line.1")) != 0)
+			if (DM_STRNCMP(value, "Device.DSL.Channel.1", DM_STRLEN("Device.DSL.Channel.1")) != 0 && DM_STRNCMP(value, "Device.FAST.Line.1", DM_STRLEN("Device.FAST.Line.1")) != 0)
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (strcmp(value, "Device.DSL.Channel.1") == 0)
+			if (DM_STRCMP(value, "Device.DSL.Channel.1") == 0)
 				dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", "dsl_channel_1");
 			else
 				dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", "fast_line_1");
