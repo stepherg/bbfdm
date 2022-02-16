@@ -377,7 +377,20 @@ static int get_device_info_uptime(char *refparam, struct dmctx *ctx, void *data,
 /*#Device.DeviceInfo.ProvisioningCode!UCI:cwmp/cpe,cpe/provisioning_code*/
 static int get_device_provisioningcode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp", "cpe", "provisioning_code", value);
+	char *dhcp = NULL, *provisioning_code = NULL, *dhcp_provisioning_code = NULL;
+	bool discovery = false;
+
+	dmuci_get_option_value_string("cwmp", "acs", "dhcp_discovery", &dhcp);
+	dmuci_get_option_value_string("cwmp", "cpe", "provisioning_code", &provisioning_code);
+	dmuci_get_option_value_string("cwmp", "cpe", "dhcp_provisioning_code", &dhcp_provisioning_code);
+
+	discovery = dmuci_string_to_boolean(dhcp);
+
+	if ((discovery == true) && (DM_STRLEN(dhcp_provisioning_code) != 0))
+		*value = dhcp_provisioning_code;
+	else
+		*value = provisioning_code;
+
 	return 0;
 }
 

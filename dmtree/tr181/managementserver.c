@@ -428,7 +428,19 @@ static int set_management_server_http_compression(char *refparam, struct dmctx *
 /*#Device.ManagementServer.CWMPRetryMinimumWaitInterval!UCI:cwmp/acs,acs/retry_min_wait_interval*/
 static int get_management_server_retry_min_wait_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "retry_min_wait_interval", "5");
+	char *dhcp = NULL, *dhcp_retry_min_wait_interval = NULL;
+	bool discovery = false;
+
+	dmuci_get_option_value_string("cwmp", "acs", "dhcp_discovery", &dhcp);
+	dmuci_get_option_value_string("cwmp", "acs", "dhcp_retry_min_wait_interval", &dhcp_retry_min_wait_interval);
+
+	discovery = dmuci_string_to_boolean(dhcp);
+
+	if ((discovery == true) && (DM_STRLEN(dhcp_retry_min_wait_interval) != 0))
+		*value = dhcp_retry_min_wait_interval;
+	else
+		*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "retry_min_wait_interval", "5");
+
 	return 0;
 }
 
@@ -450,7 +462,19 @@ static int set_management_server_retry_min_wait_interval(char *refparam, struct 
 /*#Device.ManagementServer.CWMPRetryIntervalMultiplier!UCI:cwmp/acs,acs/retry_interval_multiplier*/
 static int get_management_server_retry_interval_multiplier(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "retry_interval_multiplier", "2000");
+	char *dhcp = NULL, *dhcp_retry_interval_multiplier = NULL;
+	bool discovery = false;
+
+	dmuci_get_option_value_string("cwmp", "acs", "dhcp_discovery", &dhcp);
+	dmuci_get_option_value_string("cwmp", "acs", "dhcp_retry_interval_multiplier", &dhcp_retry_interval_multiplier);
+
+	discovery = dmuci_string_to_boolean(dhcp);
+
+	if ((discovery == true) && (DM_STRLEN(dhcp_retry_interval_multiplier) != 0))
+		*value = dhcp_retry_interval_multiplier;
+	else
+		*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "retry_interval_multiplier", "2000");
+
 	return 0;
 }
 
