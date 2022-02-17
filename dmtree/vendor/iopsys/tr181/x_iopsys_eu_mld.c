@@ -169,7 +169,7 @@ static int get_mld_version(char *refparam, struct dmctx *ctx, void *data, char *
 {
 	char *val;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "version", &val);
-	*value = (DM_STRCMP(val, "2") == 0) ? "V2" : "V1";
+	*value = (DM_STRCMP(val, "1") == 0) ? "V1" : "V2";
 	return 0;
 }
 

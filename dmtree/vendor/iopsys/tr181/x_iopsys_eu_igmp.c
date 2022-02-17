@@ -774,7 +774,7 @@ int set_mcasts_filter_address(char *refparam, struct dmctx *ctx, void *data, cha
 
 int get_mcast_snooping_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enable", "1");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enable", "0");
 	return 0;
 }
 
@@ -800,7 +800,7 @@ static int get_igmp_version(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	char *val;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "version", &val);
-	*value = (DM_STRCMP(val, "2") == 0) ? "V2" : "V3";
+	*value = (DM_STRCMP(val, "3") == 0) ? "V3" : "V2";
 	return 0;
 }
 
@@ -883,10 +883,7 @@ int set_mcasts_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, c
 
 int get_mcasts_fast_leave(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *val = NULL;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "fast_leave", &val);
-	*value = (val && DM_STRCMP(val, "1") == 0) ? "true" : "false";
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "fast_leave", "1");
 	return 0;
 }
 
@@ -910,7 +907,7 @@ int set_mcasts_fast_leave(char *refparam, struct dmctx *ctx, void *data, char *i
 
 int get_mcast_snooping_robustness(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "robustness", "0");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "robustness", "2");
 	return 0;
 }
 
@@ -1446,7 +1443,7 @@ static int get_igmpp_cgrp_stats_lrcvd(char *refparam, struct dmctx *ctx, void *d
 
 int get_mcast_proxy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enable", "1");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "enable", "0");
 	return 0;
 }
 int set_mcast_proxy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -1469,25 +1466,25 @@ int set_mcast_proxy_enable(char *refparam, struct dmctx *ctx, void *data, char *
 
 int get_mcast_proxy_robustness(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "robustness", "0");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "robustness", "2");
 	return 0;
 }
 
 int get_mcastp_query_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "query_interval", "0");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "query_interval", "125");
 	return 0;
 }
 
 int get_mcastp_q_response_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "query_response_interval", "0");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "query_response_interval", "100");
 	return 0;
 }
 
 int get_mcastp_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "last_member_query_interval", "0");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "last_member_query_interval", "10");
 	return 0;
 }
 
