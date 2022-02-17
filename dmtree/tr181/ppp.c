@@ -258,7 +258,7 @@ static int get_PPPInterface_LastChange(char *refparam, struct dmctx *ctx, void *
 	struct uci_section *ppp_s = ((struct ppp_args *)data)->iface_s;
 
 	if (ppp_s) {
-		json_object *res;
+		json_object *res = NULL;
 
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(ppp_s), String}}, 1, &res);
 		DM_ASSERT(res, *value = "0");

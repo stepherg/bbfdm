@@ -714,7 +714,7 @@ static int get_DeviceInfoFirmwareImage_Status(char *refparam, struct dmctx *ctx,
 /*#Device.DeviceInfo.MemoryStatus.Total!UBUS:router.system/memory//total*/
 static int get_memory_status_total(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res;
+	json_object *res = NULL;
 	dmubus_call("router.system", "memory", UBUS_ARGS{{}}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "total");
@@ -724,7 +724,7 @@ static int get_memory_status_total(char* refparam, struct dmctx *ctx, void *data
 /*#Device.DeviceInfo.MemoryStatus.Free!UBUS:router.system/memory//free*/
 static int get_memory_status_free(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res;
+	json_object *res = NULL;
 	dmubus_call("router.system", "memory", UBUS_ARGS{{}}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "free");
@@ -734,7 +734,7 @@ static int get_memory_status_free(char* refparam, struct dmctx *ctx, void *data,
 /*#Device.DeviceInfo.ProcessStatus.CPUUsage!UBUS:router.system/process//cpu_usage*/
 static int get_process_cpu_usage(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res;
+	json_object *res = NULL;
 	dmubus_call("router.system", "process", UBUS_ARGS{{}}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "cpu_usage");

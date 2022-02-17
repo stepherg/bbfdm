@@ -500,7 +500,7 @@ static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *mldp_s = NULL;
-	char *mldp_ifname, *f_inst;
+	char *mldp_ifname = NULL, *f_inst;
 	char sec_name[16] = {0};
 	int found = 0;
 
@@ -513,7 +513,7 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 		}
 	}
 
-	if ((found == 0) || (mldp_ifname[0] == '\0')) {
+	if ((found == 0) || DM_STRLEN(mldp_ifname) == 0) {
 		*value = "";
 		return 0;
 	}

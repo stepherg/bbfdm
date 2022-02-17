@@ -12,7 +12,7 @@ stages:
 variables:
   DEBUG: 'TRUE'
   SOURCE_FOLDER: "."
-  RUN_CPPCHECK: "cppcheck --enable=all --error-exitcode=1 --suppress=unusedFunction --suppress=unreadVariable --suppress=knownConditionTrueFalse --suppress=duplicateCondition ."
+  RUN_CPPCHECK: "cppcheck --enable=all --error-exitcode=1 -DBBF_VENDOR_IOPSYS -DBBF_VENDOR_OPENWRT --include=/usr/local/include/json-c/json.h -I./include/ --suppress=unusedFunction --suppress=unreadVariable --suppress=knownConditionTrueFalse --suppress=nullPointerRedundantCheck --suppress=unknownMacro --suppress=internalAstError"
 
 run_unit_test:
   stage: unit_test
@@ -122,10 +122,10 @@ doxygen:
 
 run_uspd:
   stage: uspd
+  inherit:
+    variables: false
   variables:
     UPSTREAM_BBF_SHA: $CI_COMMIT_SHA
-    SOURCE_FOLDER: "src"
-    RUN_CPPCHECK: "cppcheck --enable=all --error-exitcode=1 --suppress=unusedFunction ./src"
   allow_failure: false
   trigger:
     project: iopsys/uspd

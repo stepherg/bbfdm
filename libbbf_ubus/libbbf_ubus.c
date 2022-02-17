@@ -859,18 +859,20 @@ int dynamicdm_init(struct ubus_context *ctx, char *ubus_name, DMOBJ *entry)
 int dynamicdm_init_plugin_object(struct ubus_context *ctx, char *ubus_name, DM_MAP_OBJ *entry)
 {
 	int i;
-	DMOBJ *tEntryObj = NULL;
+	DMOBJ *tEntryObj = NULL, *tmp = NULL;
 
 	if (!entry)
 		return -1;
 	
 	for (i = 0; entry[i].path != NULL; i++) {
-		tEntryObj = (DMOBJ*)realloc(tEntryObj, sizeof(DMOBJ) * (i+1));
-		if (!tEntryObj) {
+		tmp = (DMOBJ*)realloc(tEntryObj, sizeof(DMOBJ) * (i+1));
+		if (tmp == NULL) {
+			FREE(tEntryObj);
 			printf("No Memory exists\n\r");
 			return -1;
 		}
 
+		tEntryObj = tmp;
 		memset(&tEntryObj[i], 0, sizeof(DMOBJ));
 
 		tEntryObj[i].obj = entry[i].path;
@@ -881,12 +883,14 @@ int dynamicdm_init_plugin_object(struct ubus_context *ctx, char *ubus_name, DM_M
 	}
 
 	/* Make the last empty entry */
-	tEntryObj = (DMOBJ*)realloc(tEntryObj, sizeof(DMOBJ) * (i+1));
-	if (!tEntryObj) {
+	tmp = (DMOBJ*)realloc(tEntryObj, sizeof(DMOBJ) * (i+1));
+	if (tmp == NULL) {
+		FREE(tEntryObj);
 		printf("No Memory exists\n\r");
 		return -1;
 	}
 
+	tEntryObj = tmp;
 	memset(&tEntryObj[i], 0, sizeof(DMOBJ));
 
 	if (0 != dynamicdm_init(ctx, ubus_name, tEntryObj)) {

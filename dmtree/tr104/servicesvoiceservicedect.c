@@ -79,7 +79,7 @@ static int browseServicesVoiceServiceDECTPortableInst(struct dmctx *dmctx, DMNOD
 static int get_ServicesVoiceServiceDECT_BaseNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	size_t num = 0;
-	json_object *res, *base;
+	json_object *res = NULL, *base;
 
 	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
@@ -96,7 +96,7 @@ static int get_ServicesVoiceServiceDECT_BaseNumberOfEntries(char *refparam, stru
 static int get_ServicesVoiceServiceDECT_PortableNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	size_t num = 0;
-	json_object *res, *handsets;
+	json_object *res = NULL, *handsets;
 
 	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");

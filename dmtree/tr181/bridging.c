@@ -2123,7 +2123,8 @@ static int get_BridgingBridgePort_Enable(char *refparam, struct dmctx *ctx, void
 			// network config => device sections
 
 			json_object *res = NULL;
-			dmubus_call("network.device", "status", UBUS_ARGS{{"name", device ? device : "", String}}, 1, &res);
+			char *dev = device ? device : "";
+			dmubus_call("network.device", "status", UBUS_ARGS{{"name", dev, String}}, 1, &res);
 			DM_ASSERT(res, *value = "0");
 			char *up = dmjson_get_value(res, 1, "up");
 			*value = up ? "1" :"0";

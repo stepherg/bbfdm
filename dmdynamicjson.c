@@ -984,24 +984,25 @@ static int fill_string_arguments(struct json_object *json_obj, int *min_length, 
 	}
 
 	json_object_object_get_ex(json_obj, "enumerations", &enum_obj);
-	if (enum_obj && json_object_get_type(enum_obj) == json_type_array) {
-		int enum_len = (enum_obj) ? json_object_array_length(enum_obj) + 1 : 1;
-
-		for (int i = 0; i < enum_len - 1; i++) {
-			struct json_object *enum_val = NULL;
-
-			if ((enum_val = json_object_array_get_idx(enum_obj, i)) == NULL)
-				return -1;
-
-			enumeration[i] = json_object_get_string(enum_val);
-
-		}
-		enumeration[enum_len - 1] = NULL;
-
+	if (enum_obj && json_object_get_type(enum_obj) != json_type_array) {
+		return -1;
 	}
 
+	int enum_len = (enum_obj) ? json_object_array_length(enum_obj) + 1 : 1;
+	for (int i = 0; i < enum_len - 1; i++) {
+		struct json_object *enum_val = NULL;
+
+		if ((enum_val = json_object_array_get_idx(enum_obj, i)) == NULL)
+			return -1;
+
+		enumeration[i] = json_object_get_string(enum_val);
+
+	}
+	enumeration[enum_len - 1] = NULL;
+
+
 	json_object_object_get_ex(json_obj, "pattern", &pattern_obj);
-	if (pattern_obj && json_object_get_type(pattern_obj) == json_type_array) {
+	if ((pattern_obj != NULL) && json_object_get_type(pattern_obj) == json_type_array) {
 		int pattern_len = (pattern_obj) ? json_object_array_length(pattern_obj) + 1 : 1;
 
 		for (int i = 0; i < pattern_len - 1; i++) {
@@ -1146,7 +1147,7 @@ static int dm_validate_value(json_object *json_obj, char *value)
 	return 0;
 }
 
-static void uci_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)
+static void uci_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, const void *data, char *instance, char *value)
 {
 	struct json_object *uci_obj = NULL;
 	struct json_object *file = NULL;
@@ -1347,7 +1348,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	struct json_object *type = NULL, *protocols = NULL, *write = NULL, *async = NULL, *version =  NULL;;
 	char full_param[512] = {0};
 	size_t n_proto;
-	char **in_p = NULL, **out_p = NULL, **ev_arg = NULL;
+	char **in_p = NULL, **out_p = NULL, **ev_arg = NULL, **tmp = NULL;
 
 	if (!jobj || !pleaf)
 		return;
@@ -1394,26 +1395,33 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	//getvalue
 	if (pleaf[i].type == DMT_EVENT) {
 		int param_count = 0;
-		json_object_object_foreach(jobj, param, val) {
-			if (valid_event_param(param)) {
+		json_object_object_foreach(jobj, key, val) {
+			if (valid_event_param(key)) {
 				param_count++;
 				if (!ev_arg) {
 					ev_arg = malloc(sizeof(char*) * param_count);
 					if (!ev_arg)
 						break;
 				} else {
-					ev_arg = realloc(ev_arg, sizeof(char*) * param_count);
-					if (!ev_arg)
+					tmp = realloc(ev_arg, sizeof(char*) * param_count);
+					if (tmp == NULL) {
+						FREE(ev_arg);
 						break;
+					}
+					ev_arg = tmp;
 				}
 
-				ev_arg[param_count - 1] = dm_dynamic_strdup(&json_memhead, param);
+				ev_arg[param_count - 1] = dm_dynamic_strdup(&json_memhead, key);
 			}
 		}
 
 		if (ev_arg) {
 			param_count++;
-			ev_arg = realloc(ev_arg, sizeof(char*) * param_count);
+			tmp = realloc(ev_arg, sizeof(char*) * param_count);
+			if (tmp == NULL) {
+				FREE(ev_arg);
+			}
+			ev_arg = tmp;
 			ev_arg[param_count - 1] = NULL;
 		}
 

@@ -720,7 +720,7 @@ int set_mcasts_filter_enable(char *refparam, struct dmctx *ctx, void *data, char
 int get_mcasts_filter_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *d_sec = NULL;
-	char *f_inst, *ip_addr;
+	char *f_inst, *ip_addr = NULL;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "snooping_filter",
 			"section_name", section_name((struct uci_section *)data), d_sec) {
@@ -731,7 +731,7 @@ int get_mcasts_filter_address(char *refparam, struct dmctx *ctx, void *data, cha
 		}
 	}
 
-	if (ip_addr[0] == '\0') {
+	if (DM_STRLEN(ip_addr) == 0) {
 		*value = "";
 	} else {
 		*value = dmstrdup(ip_addr);
@@ -1784,7 +1784,7 @@ static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 static int get_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *igmpp_s = NULL;
-	char *igmpp_ifname, *f_inst;
+	char *igmpp_ifname = NULL, *f_inst = NULL;
 	char sec_name[16] = {0};
 	int found = 0;
 
@@ -1797,7 +1797,7 @@ static int get_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 		}
 	}
 
-	if ((found == 0) || (igmpp_ifname[0] == '\0')) {
+	if ((found == 0) || DM_STRLEN(igmpp_ifname) == 0) {
 		*value = "";
 		return 0;
 	}

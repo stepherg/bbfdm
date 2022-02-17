@@ -212,7 +212,7 @@ static int set_management_server_periodic_inform_time(char *refparam, struct dmc
 
 static int network_get_ipaddr(char *iface, int ipver, char **value)
 {
-	json_object *res, *jobj;
+	json_object *res = NULL, *jobj = NULL;
 
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", iface, String}}, 1, &res);
 	DM_ASSERT(res, *value = "");

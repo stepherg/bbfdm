@@ -215,11 +215,12 @@ struct dmubus_event_data {
 static void dmubus_receive_event(struct ubus_context *ctx, struct ubus_event_handler *ev,
 				const char *type, struct blob_attr *msg)
 {
-	struct dmubus_event_data *data = container_of(ev, struct dmubus_event_data, ev);
+	struct dmubus_event_data *data;
 
-	if (!msg)
+	if (!msg || !ev)
 		return;
 
+	data = container_of(ev, struct dmubus_event_data, ev);
 	if (validate_blob_message(data->ev_msg, msg) == true) {
 		uloop_end();
 	}
