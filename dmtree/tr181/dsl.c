@@ -715,10 +715,15 @@ static int get_DSLLine_XTURVendor(char *refparam, struct dmctx *ctx, void *data,
 	return 0;
 }
 
+/*#Device.DSL.Line.{i}.XTURCountry!UBUS:dsl.line.1/status//xtur_country*/
 /*#Device.DSL.Line.{i}.XTURCountry!UCI:dsl/oem-parameters,oem/country_code*/
 static int get_DSLLine_XTURCountry(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("dsl", "oem", "country_code", "0000");
+	*value = get_dsl_value_without_argument("dsl.line", ((struct dsl_line_args*)data)->id, "status", "xtur_country");
+
+	if ((*value)[0] == '0' || (*value)[0] == '\0')
+		*value = dmuci_get_option_value_fallback_def("dsl", "oem", "country_code", "0000");
+
 	return 0;
 }
 
