@@ -827,6 +827,8 @@ static int ubus_set_operate(json_object *mapping_obj, int json_version, char *re
 	struct json_object *ubus_obj = NULL;
 	struct json_object *object = NULL;
 	struct json_object *method = NULL;
+	struct json_object *args = NULL;
+	struct json_object *in_args = NULL;
 	struct json_object *res = NULL;
 	char buf_object[256] = {0};
 	char buf_method[256] = {0};
@@ -836,6 +838,7 @@ static int ubus_set_operate(json_object *mapping_obj, int json_version, char *re
 	json_object_object_get_ex(mapping_obj, "ubus", &ubus_obj);
 	json_object_object_get_ex(ubus_obj, "object", &object);
 	json_object_object_get_ex(ubus_obj, "method", &method);
+	json_object_object_get_ex(ubus_obj, "args", &args);
 
 	if (object)
 		resolve_all_symbols(ctx, data, instance, "", nbr_instances, json_version, json_object_get_string(object), buf_object, sizeof(buf_object));
@@ -843,7 +846,23 @@ static int ubus_set_operate(json_object *mapping_obj, int json_version, char *re
 	if (method)
 		resolve_all_symbols(ctx, data, instance, "", nbr_instances, json_version, json_object_get_string(method), buf_method, sizeof(buf_method));
 
-	dmubus_operate_blob_set(buf_object, buf_method, value, &res);
+	if (args) {
+		struct ubus_arg u_args[16] = {0};
+
+		int u_args_size = fill_ubus_arguments(ctx, data, instance, "", nbr_instances, json_version, args, u_args);
+
+		if (u_args_size != 0) {
+			in_args = json_object_new_object();
+
+			for (int i = 0; i < u_args_size; i++)
+				json_object_object_add(in_args, u_args[i].key, json_object_new_string(u_args[i].val));
+		}
+	}
+
+	dmubus_operate_blob_set(buf_object, buf_method, in_args, &res);
+
+	if (in_args)
+		json_object_put(in_args);
 
 	if (res) {
 		json_object_object_foreach(res, key, val) {

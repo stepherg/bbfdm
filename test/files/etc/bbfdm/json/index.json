@@ -108,6 +108,29 @@
               }
             }
           ]
+        },
+        "Reboot()": {
+          "type": "command",
+          "async": true,
+          "version" : "2.12",
+          "protocols": [
+            "usp"
+          ],
+          "input": {},
+          "output": {},
+          "mapping": [
+            {
+              "type" : "ubus",
+              "ubus" : {
+                "object" : "proxd",
+                "method" : "get",
+                "args":{
+                  "path": "Device.ProxiedDevice.{i}.MiniHub.{i}.DeviceInfo.",
+                  "action": "Reboot()"
+                }
+              }
+            }
+          ]
         }
       }
     }
