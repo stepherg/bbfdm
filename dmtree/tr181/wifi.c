@@ -678,7 +678,7 @@ static json_object *dump_find_device_object(const char *unique_key)
 		dmjson_foreach_obj_in_array(data_obj, dev_arr, dev_obj, j, 2, "wfa-dataelements:Network", "DeviceList") {
 
 			char *id = dmjson_get_value(dev_obj, 1, "ID");
-			if (strcmp(unique_key, id) == 0)
+			if (strcasecmp(unique_key, id) == 0)
 				return dev_obj;
 		}
 	}
@@ -697,7 +697,7 @@ static json_object *dump2_find_device_object(const char *unique_key)
 	dmjson_foreach_obj_in_array(res, device_arr, device_obj, i, 1, "APDeviceList") {
 
 		char *macaddr = dmjson_get_value(device_obj, 1, "macaddr");
-		if (strcmp(unique_key, macaddr) == 0)
+		if (strcasecmp(unique_key, macaddr) == 0)
 			return device_obj;
 	}
 
@@ -757,6 +757,9 @@ static int browseWiFiDataElementsNetworkDeviceInst(struct dmctx *dmctx, DMNODE *
 		wifi_da_device_args.uci_s = p;
 		wifi_da_device_args.dump_obj = dump_find_device_object(key);
 		wifi_da_device_args.dump2_obj = dump2_find_device_object(key);
+
+		if (wifi_da_device_args.dump_obj == NULL && wifi_da_device_args.dump2_obj == NULL)
+			continue;
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "wifi_da_device_instance", "wifi_da_device_alias");
 
