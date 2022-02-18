@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -z "${CI_PROJECT_PATH}" ]; then
+	CI_PROJECT_PATH=${PWD}
+fi
+
 function check_ret()
 {
 	ret=$1

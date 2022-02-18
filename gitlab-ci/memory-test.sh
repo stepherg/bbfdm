@@ -2,7 +2,12 @@
 
 echo "Functional API Tests"
 pwd
-source ./gitlab-ci/shared.sh
+. ./gitlab-ci/shared.sh
+
+echo "Starting supervisor in current directory"
+supervisorctl shutdown
+sleep 1
+supervisord -c supervisord.conf
 
 # install required packages
 exec_cmd apt update
@@ -27,7 +32,7 @@ ret=0
 function run_valgrind()
 {
     echo "Running bbf_dm $1 in valgrind"
-    valgrind --xml=yes --xml-file=/builds/iopsys/bbf/$2 --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm $1 > /builds/iopsys/bbf/$3
+    valgrind --xml=yes --xml-file=$2 --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $1 > $3
     ret=$(( ret + $? ))
 }
 

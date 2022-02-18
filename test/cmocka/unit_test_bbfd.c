@@ -7,9 +7,9 @@
 #include <libbbf_api/dmuci.h>
 #include <libbbfdm/dmentry.h>
 
-#define DROPBEAR_FILE_PATH "/builds/iopsys/bbf/test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json"
+#define DROPBEAR_FILE_PATH "../files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json"
 #define DROPBEAR_JSON_PATH "/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json"
-#define LIBBBF_TEST_PATH "/builds/iopsys/bbf/test/bbf_test/libbbf_test.so"
+#define LIBBBF_TEST_PATH "../bbf_test/libbbf_test.so"
 #define LIBBBF_TEST_BBFDM_PATH "/usr/lib/bbfdm/libbbf_test.so"
 
 static struct ubus_context *ubus_ctx = NULL;

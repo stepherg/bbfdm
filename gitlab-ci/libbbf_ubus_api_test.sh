@@ -2,8 +2,12 @@
 
 echo "$0 preparation script"
 pwd
-
 source ./gitlab-ci/shared.sh
+
+echo "Starting supervisor in current directory"
+supervisorctl shutdown
+sleep 1
+supervisord -c supervisord.conf
 
 # clean and make
 # compile and install libbbf
