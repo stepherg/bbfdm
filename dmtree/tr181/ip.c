@@ -633,7 +633,7 @@ static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 static int browseIPInterfaceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *parent_sec = (struct uci_section *)prev_data, *intf_s = NULL, *dmmap_s = NULL;
-	char *inst = NULL, *ipaddr, *added_by_controller = NULL, *device, buf[32] = {0};
+	char *inst = NULL, *ipaddr, *added_by_controller = NULL, *proto = NULL, *device = NULL, buf[32] = {0};
 	json_object *res = NULL, *ipv4_obj = NULL;
 	struct intf_ip_args curr_intf_ip_args = {0};
 
@@ -643,6 +643,10 @@ static int browseIPInterfaceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_
 
 		dmuci_get_value_by_section_string(intf_s, "device", &device);
 		if (strcmp(section_name(intf_s), section_name(parent_sec)) != 0 && DM_STRCMP(device, buf) != 0)
+			continue;
+
+		dmuci_get_value_by_section_string(intf_s, "proto", &proto);
+		if (DM_STRCMP(proto, "none") == 0)
 			continue;
 
 		dmmap_s = check_dmmap_network_interface_ipv4("dmmap_network_ipv4", "intf_ipv4", section_name(parent_sec), section_name(intf_s));
