@@ -42,19 +42,23 @@ static inline int init_atm_link(struct atm_args *args, struct dmmap_dup *s, char
 **************************************************************/
 void remove_device_from_interface(struct uci_section *interface_s, char *device)
 {
-	char *curr_device  = NULL, *pch = NULL, *spch = NULL;
+	char *curr_device  = NULL;
 	char new_device[64] = {0};
 	unsigned pos = 0;
 
 	dmuci_get_value_by_section_string(interface_s, "device", &curr_device);
 
 	new_device[0] = '\0';
-	for (pch = strtok_r(curr_device, " ", &spch); pch; pch = strtok_r(NULL, " ", &spch)) {
 
-		if (DM_STRCMP(pch, device) == 0)
-			continue;
+	if (device != NULL) {
+		char *pch = NULL, *spch = NULL;
+		for (pch = strtok_r(curr_device, " ", &spch); pch; pch = strtok_r(NULL, " ", &spch)) {
 
-		pos += snprintf(&new_device[pos], sizeof(new_device) - pos, "%s ", pch);
+			if (strcmp(pch, device) == 0)
+				continue;
+
+			pos += snprintf(&new_device[pos], sizeof(new_device) - pos, "%s ", pch);
+		}
 	}
 
 	if (pos)
@@ -203,7 +207,7 @@ static int get_atm_encapsulation(char *refparam, struct dmctx *ctx, void *data, 
 
 	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->config_section, "encapsulation", &encapsulation);
 
-	*value = (DM_STRCMP(encapsulation, "vcmux") == 0) ? "VCMUX" : "LLC";
+	*value = (DM_LSTRCMP(encapsulation, "vcmux") == 0) ? "VCMUX" : "LLC";
 	return 0;
 }
 
@@ -215,7 +219,7 @@ static int set_atm_encapsulation(char *refparam, struct dmctx *ctx, void *data, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "encapsulation", (DM_STRCMP(value, "LLC") == 0) ? "llc" : "vcmux");
+			dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "encapsulation", (DM_LSTRCMP(value, "LLC") == 0) ? "llc" : "vcmux");
 			return 0;
 	}
 	return 0;
@@ -227,13 +231,13 @@ static int get_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 	char *link_type;
 
 	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->config_section, "link_type", &link_type);
-	if (DM_STRCMP(link_type, "eoa") == 0)
+	if (DM_LSTRCMP(link_type, "eoa") == 0)
 		*value = "EoA";
-	else if (DM_STRCMP(link_type, "ipoa") == 0)
+	else if (DM_LSTRCMP(link_type, "ipoa") == 0)
 		*value = "IPoA";
-	else if (DM_STRCMP(link_type, "pppoa") == 0)
+	else if (DM_LSTRCMP(link_type, "pppoa") == 0)
 		*value = "PPPoA";
-	else if (DM_STRCMP(link_type, "cip") == 0)
+	else if (DM_LSTRCMP(link_type, "cip") == 0)
 		*value = "CIP";
 	else
 		*value = "Unconfigured";
@@ -248,13 +252,13 @@ static int set_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value, "EoA") == 0)
+			if (DM_LSTRCMP(value, "EoA") == 0)
 				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "eoa");
-			else if (DM_STRCMP(value, "IPoA") == 0)
+			else if (DM_LSTRCMP(value, "IPoA") == 0)
 				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "ipoa");
-			else if (DM_STRCMP(value, "PPPoA") == 0)
+			else if (DM_LSTRCMP(value, "PPPoA") == 0)
 				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "pppoa");
-			else if (DM_STRCMP(value, "CIP") == 0)
+			else if (DM_LSTRCMP(value, "CIP") == 0)
 				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "cip");
 			else
 				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "");
@@ -285,7 +289,7 @@ static int set_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action) {
 		case VALUECHECK:
-			if (DM_STRNCMP(value, "Device.DSL.Channel.1", DM_STRLEN("Device.DSL.Channel.1")) != 0)
+			if (DM_LSTRNCMP(value, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0)
 				return FAULT_9007;
 			break;
 		case VALUESET:

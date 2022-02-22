@@ -112,7 +112,7 @@ static int get_HostsHost_Layer1Interface(char *refparam, struct dmctx *ctx, void
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "device");
 	char *type = dmjson_get_value((json_object *)data, 1, "interface_type");
-	if (DM_STRCMP(type, "Wi-Fi") == 0)
+	if (DM_LSTRCMP(type, "Wi-Fi") == 0)
 		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
 	else
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);

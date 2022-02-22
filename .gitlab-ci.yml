@@ -6,7 +6,7 @@ variables:
   DEBUG: 'TRUE'
   SOURCE_FOLDER: "."
   COMMON_IMAGE: iopsys/code-analysis:0.26
-  RUN_CPPCHECK: "cppcheck --enable=style --error-exitcode=1 -DBBF_VENDOR_IOPSYS -DBBF_VENDOR_OPENWRT --suppress=unreadVariable --suppress=knownConditionTrueFalse --suppress=nullPointerRedundantCheck --suppress=unknownMacro --suppress=internalAstError"
+  RUN_CPPCHECK: "cppcheck --enable=style --error-exitcode=1 --inline-suppr --include=/usr/local/include/json-c/json_object.h --include=/usr/include/libubox/list.h -I . -I ./include/ -I ./libbbf_api/ -i test/ -DBBF_VENDOR_IOPSYS -DBBF_VENDOR_OPENWRT"
 
 stages:
     - static_code_analysis

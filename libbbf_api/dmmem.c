@@ -62,6 +62,10 @@ struct list_head *mem_list, void *n, size_t size
 {
 	struct dmmem *m = NULL;
 	if (n != NULL) {
+		/* container_of() is an external macro and which cppcheck can't track so
+		 * throws warning of null pointer dereferencing for second argument.
+		 * Suppressed the warning */
+		// cppcheck-suppress nullPointer
 		m = container_of(n, struct dmmem, mem);
 		list_del(&m->list);
 	}
@@ -84,6 +88,10 @@ inline void dmfree(void *m)
 {
 	if (m == NULL) return;
 	struct dmmem *rm;
+	/* container_of() is an external macro and which cppcheck can't track so
+	 * throws warning of null pointer dereferencing for second argument.
+	 * Suppressed the warning */
+	// cppcheck-suppress nullPointer
 	rm = container_of(m, struct dmmem, mem);
 	list_del(&rm->list);
 	free(rm);
@@ -93,6 +101,10 @@ inline void __dmcleanmem(struct list_head *mem_list)
 {
 	struct dmmem *dmm;
 	while (mem_list->next != mem_list) {
+		/* list_entry() is an external macro and which cppcheck can't track so
+		 * throws warning of null pointer dereferencing for second argument.
+		 * Suppressed the warning */
+		// cppcheck-suppress nullPointer
 		dmm = list_entry(mem_list->next, struct dmmem, list);
 #ifdef WITH_MEMTRACK
 		fprintf(stderr, "Allocated memory in {%s, %s(), line %d} is not freed\n", dmm->file, dmm->func, dmm->line);

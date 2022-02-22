@@ -139,9 +139,9 @@ static int get_protocol(const char *val)
 {
 	int type;
 
-	if (DM_STRCMP("cwmp", val) == 0)
+	if (DM_LSTRCMP(val, "cwmp") == 0)
 		type = BBFDM_CWMP;
-	else if (DM_STRCMP("usp", val) == 0)
+	else if (DM_LSTRCMP(val, "usp") == 0)
 		type = BBFDM_USP;
 	else
 		type = BBFDM_BOTH;
@@ -306,7 +306,7 @@ static int handle_add_del_req(struct ubus_context *ctx, const char *ubus_name, s
 	set_bbfdatamodel_type(proto);
 	dm_ctx_init_entry(&bbf_ctx, tEntryObj, 0);
 
-	if (DM_STRCMP(method, "add_object") == 0) {
+	if (DM_LSTRCMP(method, "add_object") == 0) {
 		fault = dm_entry_param_method(&bbf_ctx, CMD_ADD_OBJECT, path, pkey, NULL);
 	} else {
 		fault = dm_entry_param_method(&bbf_ctx, CMD_DEL_OBJECT, path, pkey, NULL);
@@ -320,7 +320,7 @@ static int handle_add_del_req(struct ubus_context *ctx, const char *ubus_name, s
 		blobmsg_add_u32(&bb, "fault", fault);
 		blobmsg_add_u8(&bb, "status", 0);
 	} else {
-		if (DM_STRCMP(method, "add_object") == 0) {
+		if (DM_LSTRCMP(method, "add_object") == 0) {
 			if (bbf_ctx.addobj_instance) {
 				blobmsg_add_u8(&bb, "status", 1);
 				bb_add_string(&bb, "instance", bbf_ctx.addobj_instance);
@@ -538,6 +538,13 @@ static int libbbf_ubus_operate(struct ubus_context *ctx, struct ubus_object *obj
 	snprintf(path, PATH_MAX, "%s", (char *)blobmsg_data(tb[LIBBBF_UBUS_OPERATE_PATH]));
 
 	len = DM_STRLEN(path);
+	if (len == 0) {
+		if (input)
+			free(input);
+
+		return UBUS_STATUS_INVALID_ARGUMENT;
+	}
+
 	if (path[len - 1] == '.') {
 		printf("path can't end with (.)\n\r");
 		if (input)
@@ -628,6 +635,10 @@ static int libbbf_ubus_add_del_handler(struct ubus_context *ctx, struct ubus_obj
 	snprintf(path, PATH_MAX, "%s", (char *)blobmsg_data(tb[LIBBBF_UBUS_ADD_DEL_PATH]));
 
 	plen = DM_STRLEN(path);
+	if (plen == 0) {
+		return UBUS_STATUS_INVALID_ARGUMENT;
+	}
+
 	if (path[plen - 1] != '.') {
 		if (plen > PATH_MAX - 2) {
 			printf("path too long(%d) can't append (.)\n\r", plen);
@@ -673,6 +684,10 @@ static int libbbf_ubus_set_handler(struct ubus_context *ctx, struct ubus_object 
 	snprintf(value, PATH_MAX, "%s", (char *)blobmsg_data(tb[LIBBBF_UBUS_SET_VALUE]));
 
 	int plen = DM_STRLEN(path);
+	if (plen == 0) {
+		return UBUS_STATUS_INVALID_ARGUMENT;
+	}
+
 	if (path[plen - 1] == '.') {
 		printf("path can't end with (.)\n\r");
 		return UBUS_STATUS_INVALID_ARGUMENT;
@@ -703,6 +718,10 @@ static int libbbf_ubus_set_handler(struct ubus_context *ctx, struct ubus_object 
 	}
 
 	while (bbf_ctx.list_fault_param.next != &bbf_ctx.list_fault_param) {
+		/* list_entry() is an external macro and which cppcheck can't track so
+		 * throws warning of null pointer dereferencing for second argument.
+		 * Suppressed the warning */
+		// cppcheck-suppress nullPointer
 		struct param_fault *p = list_entry(bbf_ctx.list_fault_param.next, struct param_fault, list);
 		table = blobmsg_open_table(&bb, NULL);
 		bb_add_string(&bb, "path", p->name);
@@ -723,6 +742,10 @@ static int libbbf_ubus_set_handler(struct ubus_context *ctx, struct ubus_object 
 			array = blobmsg_open_array(&bb, "parameters");
 
 		while (bbf_ctx.list_fault_param.next != &bbf_ctx.list_fault_param) {
+			/* list_entry() is an external macro and which cppcheck can't track so
+			 * throws warning of null pointer dereferencing for second argument.
+			 * Suppressed the warning */
+			// cppcheck-suppress nullPointer
 			struct param_fault *p = list_entry(bbf_ctx.list_fault_param.next, struct param_fault, list);
 			table = blobmsg_open_table(&bb, NULL);
 			bb_add_string(&bb, "path", p->name);
@@ -763,7 +786,7 @@ static int libbbf_ubus_transaction_handler(struct ubus_context *ctx, struct ubus
 	memset(&bb, 0, sizeof(struct blob_buf));
 	blob_buf_init(&bb, 0);
 
-	if (DM_STRCMP(method, "transaction_start") == 0) {
+	if (DM_LSTRCMP(method, "transaction_start") == 0) {
 		if (!g_dynamicdm_transaction_start) {
 			g_dynamicdm_transaction_start = true;
 			blobmsg_add_u8(&bb, "status", true);
@@ -771,7 +794,7 @@ static int libbbf_ubus_transaction_handler(struct ubus_context *ctx, struct ubus
 			printf("Transaction already in process\n");
 			blobmsg_add_u8(&bb, "status", false);
 		}
-	} else if(DM_STRCMP(method, "transaction_abort") == 0) {
+	} else if(DM_LSTRCMP(method, "transaction_abort") == 0) {
 		if (g_dynamicdm_transaction_start) {
 			g_dynamicdm_transaction_start = false;
 			dm_ctx_init_entry(&bbf_ctx, tEntryObj, 0);
@@ -782,7 +805,7 @@ static int libbbf_ubus_transaction_handler(struct ubus_context *ctx, struct ubus
 			printf("Transaction still not started\n\r");
 			blobmsg_add_u8(&bb, "status", false);
 		}
-	} else if (DM_STRCMP(method, "transaction_commit") == 0) {
+	} else if (DM_LSTRCMP(method, "transaction_commit") == 0) {
 		if (g_dynamicdm_transaction_start) {
 			g_dynamicdm_transaction_start = false;
 			dm_ctx_init_entry(&bbf_ctx, tEntryObj, 0);

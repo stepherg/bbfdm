@@ -251,6 +251,10 @@ void free_dmmap_config_dup_list(struct list_head *dup_list)
 {
 	struct dmmap_dup *dmmap_config = NULL;
 	while (dup_list->next != dup_list) {
+		/* list_entry() is an external macro and which cppcheck can't track so
+		 * throws warning of null pointer dereferencing for second argument.
+		 * Suppressed the warning */
+		// cppcheck-suppress nullPointer
 		dmmap_config = list_entry(dup_list->next, struct dmmap_dup, list);
 		dmmap_config_dup_delete(dmmap_config);
 	}
@@ -736,10 +740,7 @@ char **strsplit_by_str(const char str[], char *delim)
 		}
 
 		if (tokens_used == tokens_alloc) {
-			if (strparse == NULL)
-				tokens_alloc++;
-			else
-				tokens_alloc += 2;
+			tokens_alloc += 2;
 			tokens = dmrealloc(tokens, tokens_alloc * sizeof(char*));
 		}
 

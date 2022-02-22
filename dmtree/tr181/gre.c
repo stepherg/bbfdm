@@ -173,6 +173,10 @@ static char *get_gre_tunnel_interface_statistics(char *interface, char *key)
 	char *device, *value = "0";
 
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", interface, String}}, 1, &res);
+	/* value of 'res' is being changed inside dmubus_call by pointer reference,
+	 * which cppcheck can't track and throws warning as !res is always true. so
+	 * suppressed the warning */
+	// cppcheck-suppress knownConditionTrueFalse
 	if (!res) return value;
 	device = dmjson_get_value(res, 1, "device");
 	if(device[0] != '\0') {

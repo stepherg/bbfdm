@@ -44,7 +44,7 @@ static void sync_mcast_dmmap_iface_sec(struct uci_list *proxy_iface, char *s_mod
 
 	uci_foreach_element(proxy_iface, e) {
 		char *p_ifname = dmstrdup(e->name);
-		if (DM_STRSTR(p_ifname, "br-") != NULL)
+		if (DM_LSTRSTR(p_ifname, "br-") != NULL)
 			DM_STRNCPY(key, p_ifname, sizeof(key));
 		else
 			get_mcast_iface_key(p_ifname, key, sizeof(key));
@@ -103,7 +103,7 @@ void get_mcast_bridge_port_linker(struct dmctx *ctx, char *device_name, char **v
 			char *mg = NULL;
 
 			dmuci_get_value_by_section_string(bridge_port_s, "management", &mg);
-			if (mg && DM_STRCMP(mg, "1") == 0) {
+			if (mg && DM_LSTRCMP(mg, "1") == 0) {
 				char *device, linker[512] = "";
 
 				dmuci_get_value_by_section_string(bridge_port_s, "port", &device);
@@ -206,7 +206,7 @@ void synchronize_specific_config_sections_with_dmmap_mcast_filter(char *package,
 			dmuci_get_value_by_section_string(dmmap_sect, "ipaddr", &f_ip);
 			dmuci_get_value_by_section_string(dmmap_sect, "enable", &f_enable);
 
-			if ((f_ip[0] == '\0') || (DM_STRCMP(f_enable, "0") == 0))
+			if ((f_ip[0] == '\0') || (DM_LSTRCMP(f_enable, "0") == 0))
 				add_dmmap_config_dup_list(dup_list, s, dmmap_sect);
 		}
 	}
@@ -223,7 +223,7 @@ void synchronize_specific_config_sections_with_dmmap_mcast_filter(char *package,
 
 static int get_br_key_from_lower_layer(char *lower_layer, char *key, size_t s_key)
 {
-	char *p = DM_STRSTR(lower_layer, "Port");
+	char *p = DM_LSTRSTR(lower_layer, "Port");
 
 	if (!p)
 		return -1;
@@ -246,7 +246,7 @@ static int get_br_key_from_lower_layer(char *lower_layer, char *key, size_t s_ke
 int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
 {
 	/* Check if the value is valid or not. */
-	if (DM_STRNCMP(value, "Device.Bridging.Bridge.", 23) != 0)
+	if (DM_LSTRNCMP(value, "Device.Bridging.Bridge.", 23) != 0)
 		return -1;
 
 	char key[10] = {0};
@@ -275,7 +275,7 @@ int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
 
 		char *type, *name;
 		dmuci_get_value_by_section_string(device_s, "type", &type);
-		if (*type == '\0' || DM_STRCMP(type, "bridge") != 0)
+		if (*type == '\0' || DM_LSTRCMP(type, "bridge") != 0)
 			continue;
 
 		dmuci_get_value_by_section_string(device_s, "name", &name);
@@ -540,6 +540,10 @@ static int browse_igmp_cgrp_inst(struct dmctx *dmctx, DMNODE *parent_node, void 
 	char *inst = NULL;
 
 	dmubus_call("mcast", "stats", UBUS_ARGS{0}, 0, &res);
+	/* value of 'res' is being changed inside dmubus_call by pointer reference,
+	 * which cppcheck can't track and throws warning as if(res) is always false.
+	 * so suppressed the warning */
+	// cppcheck-suppress knownConditionTrueFalse
 	if (res) {
 		int i = 0, id = 0;
 
@@ -651,6 +655,10 @@ static int get_igmp_cgrps_no_of_entries(char *refparam, struct dmctx *ctx, void 
 	json_object *res = NULL, *jobj = NULL, *arrobj = NULL, *group_obj = NULL;
 
 	dmubus_call("mcast", "stats", UBUS_ARGS{0}, 0, &res);
+	/* value of 'res' is being changed inside dmubus_call by pointer reference,
+	 * which cppcheck can't track and throws warning as if(res) is always false.
+	 * so suppressed the warning */
+	// cppcheck-suppress knownConditionTrueFalse
 	if (res) {
 		int i = 0;
 
@@ -666,7 +674,7 @@ static int get_igmp_cgrps_no_of_entries(char *refparam, struct dmctx *ctx, void 
 int get_mcasts_filter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *f_sec = NULL;
-	char *f_inst, *f_enable;
+	char *f_inst, *f_enable = NULL;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "snooping_filter",
 			"section_name", section_name((struct uci_section *)data), f_sec) {
@@ -677,7 +685,7 @@ int get_mcasts_filter_enable(char *refparam, struct dmctx *ctx, void *data, char
 		}
 	}
 
-	if (DM_STRCMP(f_enable, "1") == 0) {
+	if (DM_LSTRCMP(f_enable, "1") == 0) {
 		*value = "true";
 	} else {
 		*value = "false";
@@ -800,7 +808,7 @@ static int get_igmp_version(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	char *val;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "version", &val);
-	*value = (DM_STRCMP(val, "3") == 0) ? "V3" : "V2";
+	*value = (DM_LSTRCMP(val, "3") == 0) ? "V3" : "V2";
 	return 0;
 }
 
@@ -808,11 +816,11 @@ static int set_igmp_version(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	switch (action) {
 	case VALUECHECK:
-		if ((DM_STRCMP("V2", value) != 0) && (DM_STRCMP("V3", value) != 0))
+		if ((DM_LSTRCMP(value, "V2") != 0) && (DM_LSTRCMP(value, "V3") != 0))
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section((struct uci_section *)data, "version", (DM_STRCMP(value, "V2") == 0) ? "2" : "3");
+		dmuci_set_value_by_section((struct uci_section *)data, "version", (DM_LSTRCMP(value, "V2") == 0) ? "2" : "3");
 		break;
 	}
 
@@ -824,9 +832,9 @@ int get_mcast_snooping_mode(char *refparam, struct dmctx *ctx, void *data, char 
 	char *val;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "snooping_mode", &val);
 
-	if (DM_STRCMP(val, "1") == 0)
+	if (DM_LSTRCMP(val, "1") == 0)
 		*value = "Standard";
-	else if (DM_STRCMP(val, "2") == 0)
+	else if (DM_LSTRCMP(val, "2") == 0)
 		*value = "Blocking";
 	else
 		*value = "Disabled";
@@ -840,15 +848,15 @@ int set_mcast_snooping_mode(char *refparam, struct dmctx *ctx, void *data, char 
 
 	switch (action) {
 	case VALUECHECK:
-		if ((DM_STRCMP("Standard", value) != 0)
-			&& (DM_STRCMP("Blocking", value) != 0)
-			&& (DM_STRCMP("Disabled", value) != 0))
+		if ((DM_LSTRCMP(value, "Standard") != 0)
+			&& (DM_LSTRCMP(value, "Blocking") != 0)
+			&& (DM_LSTRCMP(value, "Disabled") != 0))
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		if (DM_STRCMP(value, "Standard") == 0)
+		if (DM_LSTRCMP(value, "Standard") == 0)
 			DM_STRNCPY(val, "1", sizeof(val));
-		else if (DM_STRCMP(value, "Blocking") == 0)
+		else if (DM_LSTRCMP(value, "Blocking") == 0)
 			DM_STRNCPY(val, "2", sizeof(val));
 		else
 			DM_STRNCPY(val, "0", sizeof(val));
@@ -967,7 +975,7 @@ int get_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, 
 	if ((tok == NULL) || (end == NULL))
 		return 0;
 
-	if (DM_STRCMP(tok, "br") != 0)
+	if (DM_LSTRCMP(tok, "br") != 0)
 		return 0;
 
 	DM_STRNCPY(sec_name, end, sizeof(sec_name));
@@ -1016,7 +1024,7 @@ static void get_igmpp_iface_del_key_val(char *key, size_t key_size, char *if_nam
 {
 	struct uci_section *s = NULL;
 	char *ifval;
-	if (DM_STRSTR(if_name, "br-") != NULL) {
+	if (DM_LSTRSTR(if_name, "br-") != NULL) {
 		DM_STRNCPY(key, if_name, key_size);
 	} else {
 		uci_foreach_sections("network", "interface", s) {
@@ -1030,7 +1038,7 @@ static void get_igmpp_iface_del_key_val(char *key, size_t key_size, char *if_nam
 }
 static void del_igmpp_iface_val(char *upstream, void *data, char *pch)
 {
-	if (DM_STRCMP(upstream, "1") == 0) {
+	if (DM_LSTRCMP(upstream, "1") == 0) {
 		dmuci_del_list_value_by_section((struct uci_section *)data,
 				"upstream_interface", pch);
 	} else {
@@ -1216,7 +1224,7 @@ int get_mcastp_filter_enable(char *refparam, struct dmctx *ctx, void *data, char
 		}
 	}
 
-	if (f_enable && DM_STRCMP(f_enable, "1") == 0) {
+	if (f_enable && DM_LSTRCMP(f_enable, "1") == 0) {
 		*value = "true";
 	} else {
 		*value = "false";
@@ -1758,7 +1766,7 @@ static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 						continue;
 
 					dmuci_get_value_by_section_string(s, "type", &if_type);
-					if (if_type && DM_STRCMP(if_type, "bridge") == 0) {
+					if (if_type && DM_LSTRCMP(if_type, "bridge") == 0) {
 						dmasprintf(&interface_linker, "br-%s", linker);
 						is_br = true;
 					} else {
@@ -1800,13 +1808,13 @@ static int get_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 	}
 
 	// Check if this is bridge type interface
-	if (DM_STRSTR(igmpp_ifname, "br-")) {
+	if (DM_LSTRSTR(igmpp_ifname, "br-")) {
 		// Interface is bridge type, convert to network uci file section name
 		char val[16] = {0};
 		DM_STRNCPY(val, igmpp_ifname, sizeof(val));
 		char *token, *end;
 		token = strtok_r(val, "-", &end);
-		if (DM_STRCMP(token, "br") == 0) {
+		if (DM_LSTRCMP(token, "br") == 0) {
 			DM_STRNCPY(sec_name, end, sizeof(sec_name));
 		} else {
 			goto end;
@@ -1865,7 +1873,7 @@ static int set_igmpp_interface_upstream(char *refparam, struct dmctx *ctx, void 
 				char key[1024];
 				char *ifval;
 				dmuci_get_value_by_section_string(d_sec, "ifname", &ifname);
-				if (DM_STRSTR(ifname, "br-") != NULL) {
+				if (DM_LSTRSTR(ifname, "br-") != NULL) {
 					DM_STRNCPY(key, ifname, sizeof(key));
 				} else {
 					uci_foreach_sections("network", "interface", s) {
@@ -1906,7 +1914,7 @@ int get_mcastp_interface_upstream(char *refparam, struct dmctx *ctx, void *data,
 		}
 	}
 
-	*value = (up && DM_STRCMP(up, "1") == 0) ? "true" : "false";
+	*value = (up && DM_LSTRCMP(up, "1") == 0) ? "true" : "false";
 	return 0;
 }
 
@@ -1924,9 +1932,9 @@ int get_mcastp_iface_snoop_mode(char *refparam, struct dmctx *ctx, void *data, c
 		}
 	}
 
-	if (val && DM_STRCMP(val, "1") == 0)
+	if (val && DM_LSTRCMP(val, "1") == 0)
 		*value = "Standard";
-	else if (val && DM_STRCMP(val, "2") == 0)
+	else if (val && DM_LSTRCMP(val, "2") == 0)
 		*value = "Blocking";
 	else
 		*value = "Disabled";
@@ -1943,15 +1951,15 @@ int set_mcastp_iface_snoop_mode(char *refparam, struct dmctx *ctx, void *data, c
 
 	switch (action) {
 	case VALUECHECK:
-		if ((DM_STRCMP("Standard", value) != 0)
-			&& (DM_STRCMP("Blocking", value) != 0)
-			&& (DM_STRCMP("Disabled", value) != 0))
+		if ((DM_LSTRCMP(value, "Standard") != 0)
+			&& (DM_LSTRCMP(value, "Blocking") != 0)
+			&& (DM_LSTRCMP(value, "Disabled") != 0))
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		if (DM_STRCMP(value, "Standard") == 0)
+		if (DM_LSTRCMP(value, "Standard") == 0)
 			strcpy(val, "1");
-		else if (DM_STRCMP(value, "Blocking") == 0)
+		else if (DM_LSTRCMP(value, "Blocking") == 0)
 			strcpy(val, "2");
 		else
 			strcpy(val, "0");

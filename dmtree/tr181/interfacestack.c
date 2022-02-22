@@ -143,7 +143,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		higheralias = get_alias_by_section("dmmap_network", "interface", s, "ip_int_alias");
 		snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *higheralias ? higheralias : *layer_inst ? "cpe-" : "", (*higheralias == '\0' && *layer_inst) ? layer_inst : "");
 
-		if (DM_STRSTR(proto, "ppp")) {
+		if (DM_LSTRSTR(proto, "ppp")) {
 			// The lower layer is Device.PPP.Interface.{i}.
 			layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_network", "interface", "section_name", section_name(s), "ppp_int_instance", "ppp_int_alias");
 			if (*layer_inst == '\0')
@@ -208,7 +208,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	uci_foreach_sections("network", "interface", s) {
 		char *proto;
 		dmuci_get_value_by_section_string(s, "proto", &proto);
-		if (!DM_STRSTR(proto, "ppp"))
+		if (!DM_LSTRSTR(proto, "ppp"))
 			continue;
 
 		// The higher layer is Device.PPP.Interface.{i}.
@@ -272,9 +272,9 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmuci_get_value_by_section_string(s, "type", &type);
 		dmuci_get_value_by_section_string(s, "name", &name);
 		dmuci_get_value_by_section_string(s, "ifname", &ifname);
-		if (DM_STRCMP(type, "bridge") == 0 ||
-			DM_STRCMP(type, "untagged") == 0 ||
-			(*name == 0 && DM_STRCMP(is_vlan, "1") != 0) ||
+		if (DM_LSTRCMP(type, "bridge") == 0 ||
+			DM_LSTRCMP(type, "untagged") == 0 ||
+			(*name == 0 && DM_LSTRCMP(is_vlan, "1") != 0) ||
 			(*name != 0 && !ethernet___check_vlan_termination_section(name)))
 			continue;
 
@@ -289,7 +289,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *higheralias ? higheralias : *layer_inst ? "cpe-" : "", (*higheralias == '\0' && *layer_inst) ? layer_inst : "");
 
 		// The lower layer can be Device.Ethernet.VLANTermination.{i}. or Device.Ethernet.Link.{i}.
-		if (DM_STRNCMP(type, "8021ad", 6) == 0) {
+		if (DM_LSTRNCMP(type, "8021ad", 6) == 0) {
 			// The lower layer is Device.Ethernet.VLANTermination.{i}.
 			struct uci_section *vlan_sect = NULL;
 			char *inner_vid = NULL;
@@ -347,7 +347,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		struct uci_section *br_device_s = ethernet___get_device_section(linker);
 		if (br_device_s) dmuci_get_value_by_section_string(br_device_s, "type", &device_s_type);
 
-		if (br_device_s && DM_STRCMP(device_s_type, "bridge") == 0) {
+		if (br_device_s && DM_LSTRCMP(device_s_type, "bridge") == 0) {
 			// The lower layer is Device.Bridging.Bridge.{i}.Port.{i}.
 			struct uci_section *dmmap_section, *port = NULL;
 
@@ -359,7 +359,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				dmuci_get_value_by_section_string(dmmap_section, "bridge_instance", &br_inst);
 				uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_inst, port) {
 					dmuci_get_value_by_section_string(port, "management", &mg);
-					if (mg && DM_STRCMP(mg, "1") == 0) {
+					if (mg && DM_LSTRCMP(mg, "1") == 0) {
 						char *device, linker_buf[512] = {0};
 
 						dmuci_get_value_by_section_string(port, "port", &device);
@@ -419,7 +419,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			char *mg = NULL;
 
 			dmuci_get_value_by_section_string(port, "management", &mg);
-			if (mg && DM_STRCMP(mg, "1") == 0) {
+			if (mg && DM_LSTRCMP(mg, "1") == 0) {
 				char *device, linker[512] = {0};
 
 				dmuci_get_value_by_section_string(port, "port", &device);
@@ -440,7 +440,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_inst, sd) {
 			char *mg = NULL;
 			dmuci_get_value_by_section_string(sd, "management", &mg);
-			if (mg && DM_STRCMP(mg, "1") == 0)
+			if (mg && DM_LSTRCMP(mg, "1") == 0)
 				continue;
 
 			char *vb = NULL, *device, linker[512] = {0};
@@ -555,7 +555,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 				goto end;
 
 			// The lower layer is Device.WiFi.Radio.{i}.
-			if(DM_STRCMP(package, "wireless") == 0) {
+			if(DM_LSTRCMP(package, "wireless") == 0) {
 
 				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
@@ -588,7 +588,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			}
 
 			// The lower layer is Device.DSL.Channel.{i}.
-			if(DM_STRCMP(package, "dsl:atm") == 0) {
+			if(DM_LSTRCMP(package, "dsl:atm") == 0) {
 
 				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 
@@ -610,7 +610,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			}
 
 			// The lower layer is Device.DSL.Line.{i}.
-			if(DM_STRCMP(package, "dsl:ptm") == 0) {
+			if(DM_LSTRCMP(package, "dsl:ptm") == 0) {
 
 				snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *loweralias ? loweralias : *bridge_port_inst ? "cpe-" : "", (*loweralias == '\0' && *bridge_port_inst) ? bridge_port_inst : "");
 

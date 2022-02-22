@@ -117,6 +117,10 @@ void free_all_list_package_change(struct list_head *clist)
 {
 	struct package_change *pc;
 	while (clist->next != clist) {
+		/* list_entry() is an external macro and which cppcheck can't track so
+		 * throws warning of null pointer dereferencing for second argument.
+		 * Suppressed the warning */
+		// cppcheck-suppress nullPointer
 		pc = list_entry(clist->next, struct package_change, list);
 		list_del(&pc->list);
 		free(pc->package);//TODO !!!!! Do not use dmfree here
@@ -331,7 +335,10 @@ int dmuci_export(const char *output_path)
 	char **configs = NULL;
 	char **p;
 
-	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs)
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK)
+		return -1;
+
+	if (!configs)
 		return -1;
 
 	for (p = configs; *p; p++)
@@ -360,7 +367,10 @@ int dmuci_commit(void)
 	char **configs = NULL;
 	char **p;
 
-	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs)
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK)
+		return -1;
+
+	if (!configs)
 		return -1;
 
 	for (p = configs; *p; p++)
@@ -391,18 +401,30 @@ int dmuci_save(void)
 	char **p;
 	int rc = 0;
 
-	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs) {
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK) {
 		rc = -1;
 		goto end;
 	}
+
+	if (!configs) {
+		rc = -1;
+		goto end;
+	}
+
 	for (p = configs; *p; p++)
 		dmuci_save_package(*p);
 
 	if (uci_ctx_bbfdm) {
-		if ((uci_list_configs(uci_ctx_bbfdm, &bbfdm_configs) != UCI_OK) || !bbfdm_configs) {
+		if (uci_list_configs(uci_ctx_bbfdm, &bbfdm_configs) != UCI_OK) {
 			rc = -1;
 			goto out;
 		}
+
+		if (!bbfdm_configs) {
+			rc = -1;
+			goto out;
+		}
+
 		for (p = bbfdm_configs; *p; p++)
 			dmuci_save_package_bbfdm(*p);
 
@@ -434,7 +456,10 @@ int dmuci_revert(void)
 	char **configs = NULL;
 	char **p;
 
-	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs)
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK)
+		return -1;
+
+	if (!configs)
 		return -1;
 
 	for (p = configs; *p; p++)
@@ -450,7 +475,10 @@ int dmuci_change_packages(struct list_head *clist)
 	char **configs = NULL;
 	char **p;
 
-	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs)
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK)
+		return -1;
+
+	if (!configs)
 		return -1;
 
 	for (p = configs; *p; p++) {

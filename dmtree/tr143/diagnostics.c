@@ -44,7 +44,7 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				IPPING_STOP
 				set_diagnostics_option("ipping", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_IPPING_DIAGNOSTIC);
@@ -281,7 +281,7 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				TRACEROUTE_STOP
 				set_diagnostics_option("traceroute", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_TRACEROUTE_DIAGNOSTIC);
@@ -528,7 +528,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				DOWNLOAD_DIAGNOSTIC_STOP
 				set_diagnostics_option("download", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_DOWNLOAD_DIAGNOSTIC);
@@ -858,7 +858,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				UPLOAD_DIAGNOSTIC_STOP
 				set_diagnostics_option("upload", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_UPLOAD_DIAGNOSTIC);
@@ -1205,7 +1205,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				UDPECHO_STOP;
 				set_diagnostics_option("udpechodiag", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_UDPECHO_DIAGNOSTIC);
@@ -1468,7 +1468,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				SERVERSELECTION_STOP
 				set_diagnostics_option("serverselection", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_SERVERSELECTION_DIAGNOSTIC);
@@ -2181,7 +2181,7 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 
 	char *port = dmjson_get_value((json_object *)value, 1, "Port");
 	char *proto = dmjson_get_value((json_object *)value, 1, "Protocol");
-	if (DM_STRCMP(proto, "ICMP") && port[0] == '\0')
+	if (DM_LSTRCMP(proto, "ICMP") && port[0] == '\0')
 		return CMD_INVALID_ARGUMENTS;
 
 	char *protocol_version = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");

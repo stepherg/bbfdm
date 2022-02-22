@@ -252,7 +252,7 @@ static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *da
 	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
 		active = dmjson_get_value(bank_obj, 1, "active");
-		if (active && DM_STRCMP(active, "true") == 0) {
+		if (active && DM_LSTRCMP(active, "true") == 0) {
 			id = dmjson_get_value(bank_obj, 1, "id");
 			break;
 		}
@@ -273,7 +273,7 @@ static int get_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
 		boot = dmjson_get_value(bank_obj, 1, "boot");
-		if (boot && DM_STRCMP(boot, "true") == 0) {
+		if (boot && DM_LSTRCMP(boot, "true") == 0) {
 			id = dmjson_get_value(bank_obj, 1, "id");
 			break;
 		}
@@ -307,7 +307,7 @@ static int set_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 
 					dmubus_call("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id+1, Integer}}, 1, &res);
 					char *success = dmjson_get_value(res, 1, "success");
-					if (DM_STRCMP(success, "true") != 0)
+					if (DM_LSTRCMP(success, "true") != 0)
 						return FAULT_9001;
 				}
 			}
@@ -589,9 +589,9 @@ static int get_DeviceInfoProcessor_Architecture(char *refparam, struct dmctx *ct
 	if (uname(&utsname) < 0)
 		return 0;
 
-	if (DM_STRSTR(utsname.machine, "arm") || DM_STRSTR(utsname.machine, "aarch64")) {
+	if (DM_LSTRSTR(utsname.machine, "arm") || DM_LSTRSTR(utsname.machine, "aarch64")) {
 		*value = "arm";
-	} else if(DM_STRSTR(utsname.machine, "mips")) {
+	} else if(DM_LSTRSTR(utsname.machine, "mips")) {
 		const bool is_big_endian = IS_BIG_ENDIAN;
 		*value = (is_big_endian) ? "mipseb" : "mipsel";
 	} else
@@ -804,7 +804,7 @@ static int get_process_cpu_time(char* refparam, struct dmctx *ctx, void *data, c
 static int get_process_state(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *state = dmjson_get_value((json_object *)data, 1, "state");
-	*value = (state && DM_STRCMP(state, "Unknown") == 0) ? "Idle" : state;
+	*value = (state && DM_LSTRCMP(state, "Unknown") == 0) ? "Idle" : state;
 	return 0;
 }
 

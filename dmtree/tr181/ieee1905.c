@@ -318,35 +318,35 @@ static int ubus_ieee1905_info_options(const char *option1, const char *option2, 
 
 static char *get_datamodel_media_type(const char *media)
 {
-	if (!DM_STRCMP(media, "IEEE 802_3U_FAST_ETHERNET"))
+	if (!DM_LSTRCMP(media, "IEEE 802_3U_FAST_ETHERNET"))
 		return "IEEE 802.3u";
-	else if (!DM_STRCMP(media, "IEEE 802_3AB_GIGABIT_ETHERNET"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_3AB_GIGABIT_ETHERNET"))
 		return "IEEE 802.3ab";
-	else if (!DM_STRCMP(media, "IEEE 802_11B_2_4_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11B_2_4_GHZ"))
 		return "IEEE 802.11b";
-	else if (!DM_STRCMP(media, "IEEE 802_11G_2_4_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11G_2_4_GHZ"))
 		return "IEEE 802.11g";
-	else if (!DM_STRCMP(media, "IEEE 802_11A_5_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11A_5_GHZ"))
 		return "IEEE 802.11a";
-	else if (!DM_STRCMP(media, "IEEE 802_11N_2_4_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11N_2_4_GHZ"))
 		return "IEEE 802.11n 2.4";
-	else if (!DM_STRCMP(media, "IEEE 802_11N_5_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11N_5_GHZ"))
 		return "IEEE 802.11n 5.0";
-	else if (!DM_STRCMP(media, "IEEE 802_11AC_5_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AC_5_GHZ"))
 		return "IEEE 802.11ac";
-	else if (!DM_STRCMP(media, "IEEE 802_11AX_2_4_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AX_2_4_GHZ"))
 		return "IEEE 802.11ax 2.4";
-	else if (!DM_STRCMP(media, "IEEE 802_11AX_5_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AX_5_GHZ"))
 		return "IEEE 802.11ax 5.0";
-	else if (!DM_STRCMP(media, "IEEE 802_11AD_60_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AD_60_GHZ"))
 		return "IEEE 802.11ad";
-	else if (!DM_STRCMP(media, "IEEE 802_11AF_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AF_GHZ"))
 		return "IEEE 802.11af";
-	else if (!DM_STRCMP(media, "IEEE 1901_WAVELET"))
+	else if (!DM_LSTRCMP(media, "IEEE 1901_WAVELET"))
 		return "IEEE 1901 Wavelet";
-	else if (!DM_STRCMP(media, "IEEE 1901_FFT"))
+	else if (!DM_LSTRCMP(media, "IEEE 1901_FFT"))
 		return "IEEE 1901 FFT";
-	else if (!DM_STRCMP(media, "IEEE MOCA_V1_1"))
+	else if (!DM_LSTRCMP(media, "IEEE MOCA_V1_1"))
 		return "MoCAv1.1";
 	else
 		return (char *)media;
@@ -1288,15 +1288,15 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_Role(char *refpa
 {
 	char *role = dmjson_get_value((json_object *)data, 1, "role");
 
-	if (!DM_STRCMP(role, "ap"))
+	if (!DM_LSTRCMP(role, "ap"))
 		*value = "AP";
-	else if (!DM_STRCMP(role, "sta"))
+	else if (!DM_LSTRCMP(role, "sta"))
 		*value = "non-AP/non-PCP STA";
-	else if (!DM_STRCMP(role, "p2p_client"))
+	else if (!DM_LSTRCMP(role, "p2p_client"))
 		*value = "Wi-Fi P2P Client";
-	else if (!DM_STRCMP(role, "p2p_go"))
+	else if (!DM_LSTRCMP(role, "p2p_go"))
 		*value = "Wi-Fi P2P Group Owner";
-	else if (!DM_STRCMP(role, "pcp"))
+	else if (!DM_LSTRCMP(role, "pcp"))
 		*value = "802.11adPCP";
 	else
 		*value = role;

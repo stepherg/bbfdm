@@ -215,12 +215,16 @@ static int get_ptm_fast_line(struct dmctx *ctx, void *data, char *instance, char
 	json_object *res = NULL, *line_obj = NULL;
 
 	dmubus_call("fast", "status", UBUS_ARGS{0}, 0, &res);
+	/* value of 'res' is being changed inside dmubus_call by pointer reference,
+	 * which cppcheck can't track and throws warning as !res is always true. so
+	 * suppressed the warning */
+	// cppcheck-suppress knownConditionTrueFalse
 	if (!res)
 		return 0;
 	line_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "line");
 	if (!line_obj)
 		return 0;
-	if ( DM_STRCMP(dmjson_get_value(line_obj, 1, "status"), "up") == 0) {
+	if ( DM_LSTRCMP(dmjson_get_value(line_obj, 1, "status"), "up") == 0) {
 		*value = "Device.FAST.Line.1";
 		dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", "fast_line_1");
 	}
@@ -243,11 +247,11 @@ static int set_ptm_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action) {
 		case VALUECHECK:
-			if (DM_STRNCMP(value, "Device.DSL.Channel.1", DM_STRLEN("Device.DSL.Channel.1")) != 0 && DM_STRNCMP(value, "Device.FAST.Line.1", DM_STRLEN("Device.FAST.Line.1")) != 0)
+			if (DM_LSTRNCMP(value, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0 && DM_LSTRNCMP(value, "Device.FAST.Line.1", strlen("Device.FAST.Line.1")) != 0)
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (DM_STRCMP(value, "Device.DSL.Channel.1") == 0)
+			if (DM_LSTRCMP(value, "Device.DSL.Channel.1") == 0)
 				dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", "dsl_channel_1");
 			else
 				dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", "fast_line_1");

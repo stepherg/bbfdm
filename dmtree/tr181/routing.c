@@ -70,7 +70,10 @@ static bool is_proc_route_in_config(struct proc_routing *proute)
 		char *mask;
 
 		dmuci_get_value_by_section_string(s, "netmask", &mask);
-		if (mask[0] == '\0' || DM_STRCMP(proute->mask, mask) == 0)
+		if (DM_STRLEN(mask) == 0)
+			return true;
+
+		if (DM_STRCMP(proute->mask, mask) == 0)
 			return true;
 	}
 
@@ -78,7 +81,10 @@ static bool is_proc_route_in_config(struct proc_routing *proute)
 		char *mask;
 
 		dmuci_get_value_by_section_string(s, "netmask", &mask);
-		if (mask[0] == '\0' || DM_STRCMP(proute->mask, mask) == 0)
+		if (DM_STRLEN(mask) == 0)
+			return true;
+
+		if (DM_STRCMP(proute->mask, mask) == 0)
 			return true;
 	}
 
@@ -107,6 +113,10 @@ static bool is_proc_route6_in_config(char *cdev, char *cip, char *cgw)
 		dmuci_get_value_by_section_string(s, "gateway", &gw_r);
 		dmuci_get_value_by_section_string(s, "interface", &intf_r);
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", intf_r, String}}, 1, &jobj);
+		/* value of 'jobj' is being changed inside dmubus_call by pointer reference,
+		 * which cppcheck can't track and throws warning as if(jobj) is always false.
+		 * so suppressed the warning */
+		// cppcheck-suppress knownConditionTrueFalse
 		char *dev_r = (jobj) ? dmjson_get_value(jobj, 1, "device") : "";
 		if (DM_STRCMP(cdev, dev_r) == 0 && DM_STRCMP(cgw, gw_r) == 0 && DM_STRCMP(cip, ip_r) == 0)
 			return true;
@@ -120,6 +130,10 @@ static bool is_proc_route6_in_config(char *cdev, char *cip, char *cgw)
 		dmuci_get_value_by_section_string(s, "gateway", &gw_r6);
 		dmuci_get_value_by_section_string(s, "interface", &intf_r6);
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", intf_r6, String}}, 1, &jobj);
+		/* value of 'jobj' is being changed inside dmubus_call by pointer reference,
+		 * which cppcheck can't track and throws warning as if(jobj) is always false.
+		 * so suppressed the warning */
+		// cppcheck-suppress knownConditionTrueFalse
 		char *dev_r6 = (jobj) ? dmjson_get_value(jobj, 1, "device") : "";
 		if (DM_STRCMP(cdev, dev_r6) == 0 && DM_STRCMP(cgw, gw_r6) == 0 && DM_STRCMP(cip, ip_r6) == 0)
 			return true;
@@ -171,7 +185,7 @@ static int parse_proc_route6_line(const char *line, char *ipstr, char *gwstr, ch
 				&gw[0], &gw[1], &gw[2], &gw[3], metric,
 				&refcnt, &use, &flags, dev);
 
-	if (DM_STRCMP(dev, "lo") == 0)
+	if (DM_LSTRCMP(dev, "lo") == 0)
 		return -1;
 
 	ip[0] = htonl(ip[0]);
@@ -236,7 +250,8 @@ static int dmmap_synchronizeRoutingRouterIPv4Forwarding(struct dmctx *dmctx, DMN
 				continue;
 			iface = "";
 			uci_foreach_sections("network", "interface", s) {
-				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &jobj);
+				char *if_name = section_name(s);
+				dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &jobj);
 				if (!jobj) {
 					fclose(fp);
 					return 0;
@@ -310,7 +325,12 @@ static int dmmap_synchronizeRoutingRouterIPv6Forwarding(struct dmctx *dmctx, DMN
 		uci_foreach_sections("network", "interface", s) {
 			json_object *jobj = NULL;
 
-			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &jobj);
+			char *if_name = section_name(s);
+			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &jobj);
+			/* value of 'jobj' is being changed inside dmubus_call by pointer reference,
+			 * which cppcheck can't track and throws warning as if(jobj) is always false.
+			 * so suppressed the warning */
+			// cppcheck-suppress knownConditionTrueFalse
 			if (!jobj) {
 				fclose(fp);
 				return 0;
@@ -452,17 +472,18 @@ static int browseRoutingRouteInformationInterfaceSettingInst(struct dmctx *dmctx
 {
 	struct uci_section *s = NULL;
 	char *inst = NULL;
-	int id = 0, i = 0;
+	int id = 0, i;
 
 	uci_foreach_sections("network", "interface", s) {
 		char *proto = NULL, *ip6addr = NULL;
 
 		dmuci_get_value_by_section_string(s, "proto", &proto);
 		dmuci_get_value_by_section_string(s, "ip6addr", &ip6addr);
-		if ((proto && DM_STRCMP(proto, "dhcpv6") == 0) || (ip6addr && ip6addr[0] != '\0')) {
+		if ((proto && DM_LSTRCMP(proto, "dhcpv6") == 0) || (ip6addr && ip6addr[0] != '\0')) {
 			json_object *res = NULL, *route_obj = NULL, *arrobj = NULL;
 
-			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &res);
+			char *if_name = section_name(s);
+			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
 			dmjson_foreach_obj_in_array(res, arrobj, route_obj, i, 1, "route") {
 				inst = handle_instance_without_section(dmctx, parent_node, ++id);
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)route_obj, inst) == DM_STOP)
@@ -643,7 +664,7 @@ static int get_router_ipv4forwarding_origin(char *refparam, struct dmctx *ctx, v
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", interface, String}}, 1, &res);
 		DM_ASSERT(res, *value = "DHCPv4");
 		char *proto = dmjson_get_value(res, 1, "proto");
-		*value = (proto && DM_STRNCMP(proto, "ppp", 3) == 0) ? "IPCP" : "DHCPv4";
+		*value = (proto && DM_LSTRNCMP(proto, "ppp", 3) == 0) ? "IPCP" : "DHCPv4";
 	}
 	return 0;
 }
@@ -885,10 +906,11 @@ static int get_RoutingRouteInformation_InterfaceSettingNumberOfEntries(char *ref
 
 		dmuci_get_value_by_section_string(s, "proto", &proto);
 		dmuci_get_value_by_section_string(s, "ip6addr", &ip6addr);
-		if ((proto && DM_STRCMP(proto, "dhcpv6") == 0) || (ip6addr && ip6addr[0] != '\0')) {
+		if ((proto && DM_LSTRCMP(proto, "dhcpv6") == 0) || (ip6addr && ip6addr[0] != '\0')) {
 			json_object *res = NULL, *routes = NULL;
 
-			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &res);
+			char *if_name = section_name(s);
+			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
 			DM_ASSERT(res, *value = "0");
 			json_object_object_get_ex(res, "route", &routes);
 			nbre_routes = (routes) ? json_object_array_length(routes) : 0;
@@ -946,7 +968,12 @@ static int get_RoutingRouteInformationInterfaceSetting_Interface(char *refparam,
 	uci_foreach_sections("network", "interface", s) {
 		json_object *jobj = NULL;
 
-		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &jobj);
+		char *if_name = section_name(s);
+		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &jobj);
+		/* value of 'jobj' is being changed inside dmubus_call by pointer reference,
+		 * which cppcheck can't track and throws warning as if(jobj) is always false.
+		 * so suppressed the warning */
+		// cppcheck-suppress knownConditionTrueFalse
 		if (!jobj) return 0;
 		char *str = dmjson_get_value(jobj, 1, "device");
 		if (DM_STRCMP(str, dev) == 0) {

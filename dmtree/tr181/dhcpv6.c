@@ -64,7 +64,7 @@ static void dmmap_synchronizeDHCPv6Client(struct dmctx *dmctx, DMNODE *parent_no
 		char *iface_name = NULL;
 
 		dmuci_get_value_by_section_string(s, "added_by_controller", &added_by_controller);
-		if (DM_STRCMP(added_by_controller, "1") == 0)
+		if (DM_LSTRCMP(added_by_controller, "1") == 0)
 			continue;
 
 		dmuci_get_value_by_section_string(s, "iface_name", &iface_name);
@@ -80,7 +80,7 @@ static void dmmap_synchronizeDHCPv6Client(struct dmctx *dmctx, DMNODE *parent_no
 		char *proto = NULL;
 
 		dmuci_get_value_by_section_string(s, "proto", &proto);
-		if (DM_STRCMP(proto, "dhcpv6") != 0)
+		if (DM_LSTRCMP(proto, "dhcpv6") != 0)
 			continue;
 
 		if (is_dhcpv6_client_section_exist(section_name(s)))
@@ -178,7 +178,7 @@ static int browseDHCPv6ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, 
 
 		// skip the section if option ignore = '1'
 		dmuci_get_value_by_section_string(p->config_section, "ignore", &ignore);
-		if (ignore && DM_STRCMP(ignore, "1") == 0)
+		if (ignore && DM_LSTRCMP(ignore, "1") == 0)
 			continue;
 
 		dmuci_get_value_by_section_string(p->config_section, "interface", &interface);
@@ -206,7 +206,12 @@ static int browseDHCPv6ServerPoolClientInst(struct dmctx *dmctx, DMNODE *parent_
 	int i = 0;
 	char *inst = NULL, *device;
 
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(dhcp_arg->dhcp_sections->config_section), String}}, 1, &res1);
+	char *if_name = section_name(dhcp_arg->dhcp_sections->config_section);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res1);
+	/* value of 'res' is being changed inside dmubus_call by pointer reference,
+	 * which cppcheck can't track and throws warning as !res1 is always true. so
+	 * suppressed the warning */
+	// cppcheck-suppress knownConditionTrueFalse
 	if (!res1) return 0;
 	device = dmjson_get_value(res1, 1, "device");
 	dmubus_call("dhcp", "ipv6leases", UBUS_ARGS{0}, 0, &res);
@@ -418,7 +423,7 @@ static int delObjDHCPv6ServerPool(char *refparam, struct dmctx *ctx, void *data,
 				char *dhcpv6 = NULL;
 
 				dmuci_get_value_by_section_string(s, "dhcpv6", &dhcpv6);
-				if (DM_STRCMP(dhcpv6, "server") == 0) {
+				if (DM_LSTRCMP(dhcpv6, "server") == 0) {
 					struct uci_section *dmmap_section = NULL;
 
 					get_dmmap_section_of_config_section("dmmap_dhcpv6", "dhcp", section_name(s), &dmmap_section);
@@ -617,7 +622,7 @@ static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 					char *proto = NULL;
 
 					dmuci_get_value_by_section_string(interface_s, "proto", &proto);
-					if (DM_STRNCMP(proto, "dhcp", 4) == 0) {
+					if (DM_LSTRNCMP(proto, "dhcp", 4) == 0) {
 						char dev_name[32];
 
 						snprintf(iface_name, sizeof(iface_name), "%s_6", linker);
@@ -648,7 +653,7 @@ static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 static int get_DHCPv6Client_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	get_DHCPv6Client_Enable(refparam, ctx, data, instance, value);
-	*value = (DM_STRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
+	*value = (DM_LSTRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
 	return 0;
 }
 
@@ -659,7 +664,12 @@ static int get_DHCPv6Client_DUID(char *refparam, struct dmctx *ctx, void *data, 
 	if (dhcpv6_s) {
 		json_object *res = NULL;
 
-		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(dhcpv6_s), String}}, 1, &res);
+		char *if_name = section_name(dhcpv6_s);
+		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
+		/* value of 'res' is being changed inside dmubus_call by pointer reference,
+		 * which cppcheck can't track and throws warning as if(res) is always false.
+		 * so suppressed the warning */
+		// cppcheck-suppress knownConditionTrueFalse
 		*value = res ? dmjson_get_value(res, 2, "data", "passthru") : "";
 	}
 	return 0;
@@ -672,7 +682,7 @@ static int get_DHCPv6Client_RequestAddresses(char *refparam, struct dmctx *ctx, 
 	char *reqaddress = NULL;
 
 	dmuci_get_value_by_section_string(dhcpv6_client->iface_s ? dhcpv6_client->iface_s : dhcpv6_client->dmmap_s, "reqaddress", &reqaddress);
-	*value = (reqaddress && DM_STRCMP(reqaddress, "none") == 0) ? "0" : "1";
+	*value = (reqaddress && DM_LSTRCMP(reqaddress, "none") == 0) ? "0" : "1";
 	return 0;
 }
 
@@ -703,7 +713,7 @@ static int get_DHCPv6Client_RequestPrefixes(char *refparam, struct dmctx *ctx, v
 	char *reqprefix = NULL;
 
 	dmuci_get_value_by_section_string(dhcpv6_client->iface_s ? dhcpv6_client->iface_s : dhcpv6_client->dmmap_s, "reqprefix", &reqprefix);
-	*value = (reqprefix && DM_STRCMP(reqprefix, "auto") == 0) ? "1" : "0";
+	*value = (reqprefix && DM_LSTRCMP(reqprefix, "auto") == 0) ? "1" : "0";
 	return 0;
 }
 
@@ -746,8 +756,10 @@ static int set_DHCPv6Client_Renew(char *refparam, struct dmctx *ctx, void *data,
 		case VALUESET:
 			string_to_bool(value, &b);
 			if (!b) break;
-			if (dhcpv6_s)
-				dmubus_call_set("network.interface", "renew", UBUS_ARGS{{"interface", section_name(dhcpv6_s), String}}, 1);
+			if (dhcpv6_s) {
+				char *if_name = section_name(dhcpv6_s);
+				dmubus_call_set("network.interface", "renew", UBUS_ARGS{{"interface", if_name, String}}, 1);
+			}
 			break;
 	}
 	return 0;
@@ -818,7 +830,7 @@ static int get_DHCPv6Server_PoolNumberOfEntries(char *refparam, struct dmctx *ct
 static int get_DHCPv6ServerPool_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((((struct dhcpv6_args *)data)->dhcp_sections)->config_section, "dhcpv6", value);
-	*value = (*value && DM_STRCMP(*value, "disabled") == 0) ? "0" : "1";
+	*value = (*value && DM_LSTRCMP(*value, "disabled") == 0) ? "0" : "1";
 	return 0;
 }
 
@@ -843,7 +855,7 @@ static int set_DHCPv6ServerPool_Enable(char *refparam, struct dmctx *ctx, void *
 static int get_DHCPv6ServerPool_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((((struct dhcpv6_args *)data)->dhcp_sections)->config_section, "dhcpv6", value);
-	*value = (*value && DM_STRCMP(*value, "disabled") == 0) ? "Disabled" : "Enabled";
+	*value = (*value && DM_LSTRCMP(*value, "disabled") == 0) ? "Disabled" : "Enabled";
 	return 0;
 }
 
@@ -1271,7 +1283,8 @@ static int set_DHCPv6ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, voi
 			if (dhcpv6_client_s->option_tag && DM_STRCMP(dhcpv6_client_s->option_tag, value) == 0)
 				break;
 
-			if (tag_option_exists("dmmap_dhcpv6", "servpool_option", "section_name", section_name(dhcpv6_client_s->client_sect), "option_tag", value))
+			char *name = section_name(dhcpv6_client_s->client_sect);
+			if (tag_option_exists("dmmap_dhcpv6", "servpool_option", "section_name", name, "option_tag", value))
 				return FAULT_9007;
 
 			break;
@@ -1370,8 +1383,10 @@ static int operate_DHCPv6Client_Renew(char *refparam, struct dmctx *ctx, void *d
 {
 	struct uci_section *dhcpv6_s = ((struct dhcpv6_client_args *)data)->iface_s;
 
-	if (dhcpv6_s)
-		dmubus_call_set("network.interface", "renew", UBUS_ARGS{{"interface", section_name(dhcpv6_s), String}}, 1);
+	if (dhcpv6_s) {
+		char *if_name = section_name(dhcpv6_s);
+		dmubus_call_set("network.interface", "renew", UBUS_ARGS{{"interface", if_name, String}}, 1);
+	}
 
 	return CMD_SUCCESS;
 }

@@ -48,7 +48,7 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 		bool found = false;
 
 		dmuci_get_value_by_section_string(s, "added_by_controller", &added_by_controller);
-		if (DM_STRCMP(added_by_controller, "1") == 0)
+		if (DM_LSTRCMP(added_by_controller, "1") == 0)
 			continue;
 
 		dmuci_get_value_by_section_string(s, "ip", &ip);
@@ -72,7 +72,8 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 			if (found)
 				break;
 
-			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(ss), String}}, 1, &jobj);
+			char *if_name = section_name(ss);
+			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &jobj);
 			if (!jobj) break;
 			dmjson_foreach_value_in_array(jobj, arrobj, ipdns, j, 1, "dns-server") {
 				if (DM_STRCMP(ipdns, ip) == 0) {
@@ -109,7 +110,8 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 		if (peerdns[0] == '0')
 			continue;
 
-		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &jobj);
+		char *if_name = section_name(s);
+		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &jobj);
 		if (!jobj) break;
 		dmjson_foreach_value_in_array(jobj, arrobj, ipdns, j, 1, "dns-server") {
 
@@ -632,7 +634,7 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				NSLOOKUP_STOP
 				set_diagnostics_option("nslookup", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_NSLOOKUP_DIAGNOSTIC);

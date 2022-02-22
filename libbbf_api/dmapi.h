@@ -64,6 +64,14 @@ do { \
 #define DM_STRNCMP(S1, S2, LEN) ((S1 != NULL && S2 != NULL && LEN > 0) ? strncmp(S1, S2, LEN) : -1)
 #define DM_STRCASECMP(S1, S2) ((S1 != NULL && S2 != NULL) ? strcasecmp(S1, S2) : -1)
 
+/* below macros are only useful when the second argument is a string literal.
+ * these macros are introduced to autofix the cppcheck warnings for null check
+ * against string literal
+ */
+#define DM_LSTRSTR(STR, MATCH) ((STR != NULL) ? strstr(STR, MATCH) : NULL)
+#define DM_LSTRCMP(S1, S2) ((S1 != NULL) ? strcmp(S1, S2) : -1)
+#define DM_LSTRNCMP(S1, S2, LEN) ((S1 != NULL && LEN > 0) ? strncmp(S1, S2, LEN) : -1)
+
 #define UBUS_ARGS (struct ubus_arg[])
 #define RANGE_ARGS (struct range_args[])
 #define LIST_KEY (const char *[])

@@ -188,6 +188,10 @@ static int get_ServicesVoiceServiceSIPClient_Status(char *refparam, struct dmctx
 		json_object *res = NULL, *sip = NULL, *client = NULL;
 
 		dmubus_call("voice.asterisk", "status", UBUS_ARGS{0}, 0, &res);
+		/* value of res is being changed inside dmubus_call through pointer referencing
+		 * which cppcheck can't track hence throws warning for 'res' value always false.
+		 * So suppressed the warning */
+		// cppcheck-suppress knownConditionTrueFalse
 		if (res) {
 			sip = dmjson_get_obj(res, 1, "sip");
 			if (sip) {
@@ -367,7 +371,7 @@ static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, s
 						}
 						if (period <= 0) {
 							BBF_DEBUG("Use default registration expires\n");
-							period = DM_STRTOL(DEFAULT_SIP_REGISTER_EXPIRY_STR);
+							period = strtol(DEFAULT_SIP_REGISTER_EXPIRY_STR, NULL, 10);
 						}
 						time_expires = time_last + period;
 
@@ -910,7 +914,7 @@ static int set_ServicesVoiceServiceSIPNetwork_CodecList(char *refparam, struct d
 static int get_ServicesVoiceServiceSIPNetworkFQDNServer_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_option_value_string("asterisk", "sip_options", "srvlookup", value);
-	*value = (DM_STRCMP(*value, "yes") == 0) ? "1" : "0";
+	*value = (DM_LSTRCMP(*value, "yes") == 0) ? "1" : "0";
 	return 0;
 }
 

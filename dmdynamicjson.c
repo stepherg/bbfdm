@@ -79,6 +79,10 @@ static void free_json_data(struct list_head *json_list)
 	struct dm_json_obj *dm_json_obj = NULL;
 
 	while (json_list->next != json_list) {
+		/* list_entry() is an external macro and which cppcheck can't track so
+		 * throws warning of null pointer dereferencing for second argument.
+		 * Suppressed the warning */
+		// cppcheck-suppress nullPointer
 		dm_json_obj = list_entry(json_list->next, struct dm_json_obj, list);
 		list_del(&dm_json_obj->list);
 		dmfree(dm_json_obj->name);
@@ -100,6 +104,10 @@ static void free_loaded_json_files(struct list_head *json_list)
 {
 	struct loaded_json_file *json_file;
 	while (json_list->next != json_list) {
+		/* list_entry() is an external macro and which cppcheck can't track so
+		 * throws warning of null pointer dereferencing for second argument.
+		 * Suppressed the warning */
+		// cppcheck-suppress nullPointer
 		json_file = list_entry(json_list->next, struct loaded_json_file, list);
 		list_del(&json_file->list);
 		if (json_file->data)
@@ -727,6 +735,10 @@ static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct d
 	json_object_object_get_ex(mapping_obj, "data", &data_s);
 	json_object_object_get_ex(mapping_obj, "key", &key);
 
+	/* json_object_object_get_ex is an external macro which changes the
+	 * value of data_s that cppcheck can't track and throws warning as
+	 * data_s value check always true. So suppressed the warning */
+	// cppcheck-suppress knownConditionTrueFalse
 	if (data == NULL || data_s == NULL || (data_s && strcmp(json_object_get_string(data_s), "@Parent") != 0))
 		goto end;
 
@@ -752,6 +764,10 @@ static char *ubus_v1_get_value(json_object *mapping_obj, char *refparam, struct 
 	json_object_object_get_ex(mapping_obj, "data", &data_json);
 	json_object_object_get_ex(mapping_obj, "key", &key);
 
+	/* json_object_object_get_ex is an external macro which changes the
+	 * value of data_json that cppcheck can't track and throws warning as
+	 * data_json value check always true. So suppressed the warning */
+	// cppcheck-suppress knownConditionTrueFalse
 	if (data == NULL || data_json == NULL || (data_json && strcmp(json_object_get_string(data_json), "@Parent") != 0))
 		goto end;
 
@@ -1022,6 +1038,10 @@ static int fill_string_arguments(struct json_object *json_obj, int *min_length, 
 
 	json_object_object_get_ex(json_obj, "pattern", &pattern_obj);
 	if ((pattern_obj != NULL) && json_object_get_type(pattern_obj) == json_type_array) {
+		/* json_object_object_get_ex is an external macro which changes the
+		 * value of pattern_obj that cppcheck can't track and throws warning as
+		 * pattern_obj value check always true. So suppressed the warning */
+		// cppcheck-suppress knownConditionTrueFalse
 		int pattern_len = (pattern_obj) ? json_object_array_length(pattern_obj) + 1 : 1;
 
 		for (int i = 0; i < pattern_len - 1; i++) {
@@ -1236,6 +1256,10 @@ static void uci_v1_set_value(json_object *mapping_obj, int json_version, char *r
 	json_object_object_get_ex(mapping_obj, "data", &data_s);
 	json_object_object_get_ex(mapping_obj, "key", &key);
 
+	/* json_object_object_get_ex is an external macro which changes the
+	 * value of data_s that cppcheck can't track and throws warning as
+	 * data_s value check always true. So suppressed the warning */
+	// cppcheck-suppress knownConditionTrueFalse
 	if (data == NULL || data_s == NULL || (data_s && strcmp(json_object_get_string(data_s), "@Parent") != 0))
 		return;
 

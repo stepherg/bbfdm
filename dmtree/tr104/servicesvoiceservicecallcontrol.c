@@ -585,6 +585,10 @@ static int get_ServicesVoiceServiceCallControlLine_CallStatus(char *refparam, st
 
 	snprintf(line_str, sizeof(line_str), "%ld", instance ? DM_STRTOL(instance) - 1 : 0);
 	dmubus_call("asterisk", "call_status", UBUS_ARGS{{"line", line_str, Integer}}, 1, &res);
+	/* value of res is being changed inside dmubus_call through pointer referencing
+	 * which cppcheck can't track hence throws warning for 'res' value always false.
+	 * So suppressed the warning */
+	// cppcheck-suppress knownConditionTrueFalse
 	if (res) {
 		*value = dmjson_get_value(res, 1, "call_status");
 	} else {
@@ -933,7 +937,7 @@ static int get_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 		while (ptr != NULL) {
 			char *linker = NULL;
 
-			adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", !DM_STRCMP(type, "fxs") ? section_name(((struct dmmap_dup *)data)->config_section) : ptr, &linker);
+			adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", !DM_LSTRCMP(type, "fxs") ? section_name(((struct dmmap_dup *)data)->config_section) : ptr, &linker);
 			if (linker && *linker)
 				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", linker);
 
@@ -975,7 +979,7 @@ static int set_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 			for (pch = strtok_r(value_buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 				char *linker = NULL;
 
-				if (strncmp(pch, !DM_STRCMP(type, "fxs") ? fxs_extension : dect_extension, !DM_STRCMP(type, "fxs") ? fxs_len : dect_len) != 0)
+				if (strncmp(pch, !DM_LSTRCMP(type, "fxs") ? fxs_extension : dect_extension, !DM_LSTRCMP(type, "fxs") ? fxs_len : dect_len) != 0)
 					return FAULT_9007;
 
 				adm_entry_get_linker_value(ctx, pch, &linker);
@@ -993,9 +997,9 @@ static int set_ServicesVoiceServiceCallControlExtension_Provider(char *refparam,
 					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", ",");
 
 				adm_entry_get_linker_value(ctx, pch, &linker);
-				if(!DM_STRCMP(linker, "extension3"))
+				if(!DM_LSTRCMP(linker, "extension3"))
 					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", "fxs1");
-				else if(!DM_STRCMP(linker, "extension4"))
+				else if(!DM_LSTRCMP(linker, "extension4"))
 					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", "fxs2");
 				else
 					pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s", linker);
@@ -1071,6 +1075,10 @@ static int get_ServicesVoiceServiceCallControlExtension_CallStatus(char *refpara
 
 	snprintf(ext_str, sizeof(ext_str), "%ld", instance ? DM_STRTOL(instance) - 1 : 0);
 	dmubus_call("asterisk", "call_status", UBUS_ARGS{{"extension", ext_str, Integer}}, 1, &res);
+	/* value of res is being changed inside dmubus_call through pointer referencing
+	 * which cppcheck can't track hence throws warning for 'res' value always false.
+	 * So suppressed the warning */
+	// cppcheck-suppress knownConditionTrueFalse
 	if (res) {
 		*value = dmjson_get_value(res, 1, "call_status");
 	} else {

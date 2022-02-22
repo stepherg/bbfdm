@@ -169,7 +169,7 @@ static int get_mld_version(char *refparam, struct dmctx *ctx, void *data, char *
 {
 	char *val;
 	dmuci_get_value_by_section_string((struct uci_section *)data, "version", &val);
-	*value = (DM_STRCMP(val, "1") == 0) ? "V1" : "V2";
+	*value = (DM_LSTRCMP(val, "1") == 0) ? "V1" : "V2";
 	return 0;
 }
 
@@ -177,11 +177,11 @@ static int set_mld_version(char *refparam, struct dmctx *ctx, void *data, char *
 {
 	switch (action) {
 	case VALUECHECK:
-		if ((DM_STRCMP("V2", value) != 0) && (DM_STRCMP("V1", value) != 0))
+		if ((DM_LSTRCMP(value, "V2") != 0) && (DM_LSTRCMP(value, "V1") != 0))
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section((struct uci_section *)data, "version", (DM_STRCMP(value, "V2") == 0) ? "2" : "1");
+		dmuci_set_value_by_section((struct uci_section *)data, "version", (DM_LSTRCMP(value, "V2") == 0) ? "2" : "1");
 		break;
 	}
 
@@ -220,7 +220,7 @@ static int del_mldp_interface_obj(char *refparam, struct dmctx *ctx, void *data,
 			}
 
 			if (found) {
-				if (upstream && DM_STRCMP(upstream, "1") == 0)
+				if (upstream && DM_LSTRCMP(upstream, "1") == 0)
 					dmuci_del_list_value_by_section((struct uci_section *)data, "upstream_interface", if_name);
 				else
 					dmuci_del_list_value_by_section((struct uci_section *)data, "downstream_interface", if_name);
@@ -237,7 +237,7 @@ static int del_mldp_interface_obj(char *refparam, struct dmctx *ctx, void *data,
 			dmuci_get_value_by_section_string(mldp_s, "upstream", &upstream);
 
 			if (if_name[0] != '\0') {
-				if (DM_STRCMP(upstream, "1") == 0)
+				if (DM_LSTRCMP(upstream, "1") == 0)
 					dmuci_del_list_value_by_section((struct uci_section *)data, "upstream_interface", if_name);
 				else
 					dmuci_del_list_value_by_section((struct uci_section *)data, "downstream_interface", if_name);
@@ -464,7 +464,7 @@ static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 						continue;
 					}
 					dmuci_get_value_by_section_string(s, "type", &if_type);
-					if (DM_STRCMP(if_type, "bridge") == 0)
+					if (DM_LSTRCMP(if_type, "bridge") == 0)
 						dmasprintf(&interface_linker, "br-%s", linker);
 					else
 						dmuci_get_value_by_section_string(s, "device", &interface_linker);
@@ -519,13 +519,13 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 	}
 
 	// Check if this is bridge type interface
-	if (DM_STRSTR(mldp_ifname, "br-")) {
+	if (DM_LSTRSTR(mldp_ifname, "br-")) {
 		// Interface is bridge type, convert to network uci file section name
 		char val[16] = {0};
 		DM_STRNCPY(val, mldp_ifname, sizeof(val));
 		char *tok, *end;
 		tok = strtok_r(val, "-", &end);
-		if (DM_STRCMP(tok, "br") == 0) {
+		if (DM_LSTRCMP(tok, "br") == 0) {
 			DM_STRNCPY(sec_name, end, sizeof(sec_name));
 		} else {
 			goto end;

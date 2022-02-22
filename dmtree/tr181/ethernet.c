@@ -88,7 +88,7 @@ static void get_bridge_port_linker(struct dmctx *ctx, char *device_s_name, char 
 			char *management = NULL;
 
 			dmuci_get_value_by_section_string(bridge_port, "management", &management);
-			if (management && DM_STRCMP(management, "1") == 0) {
+			if (management && DM_LSTRCMP(management, "1") == 0) {
 				char linker[512] = {0};
 				char *port = NULL;
 
@@ -167,7 +167,7 @@ static void add_new_dmmap_section(char *macaddr, char*interface, char *section_n
 	dmuci_add_section_bbfdm(DMMAP, "link", &dmmap);
 	dmuci_set_value_by_section(dmmap, "mac", macaddr);
 	dmuci_set_value_by_section(dmmap, "device", interface);
-	dmuci_set_value_by_section(dmmap, "is_eth", (!DM_STRNCMP(interface, "atm", 3) || !DM_STRNCMP(interface, "ptm", 3)) ? "0" : "1");
+	dmuci_set_value_by_section(dmmap, "is_eth", (!DM_LSTRNCMP(interface, "atm", 3) || !DM_LSTRNCMP(interface, "ptm", 3)) ? "0" : "1");
 	dmuci_set_value_by_section(dmmap, "section_name", section_name);
 }
 
@@ -304,9 +304,9 @@ static int browseEthernetVLANTerminationInst(struct dmctx *dmctx, DMNODE *parent
 		dmuci_get_value_by_section_string(p->config_section, "type", &type);
 		dmuci_get_value_by_section_string(p->config_section, "name", &name);
 		dmuci_get_value_by_section_string(p->dmmap_section, "is_vlan_ter", &is_vlan);
-		if (DM_STRCMP(type, "bridge") == 0 ||
-			DM_STRCMP(type, "untagged") == 0 ||
-			(*name == 0 && DM_STRCMP(is_vlan, "1") != 0) ||
+		if (DM_LSTRCMP(type, "bridge") == 0 ||
+			DM_LSTRCMP(type, "untagged") == 0 ||
+			(*name == 0 && DM_LSTRCMP(is_vlan, "1") != 0) ||
 			(*name != 0 && !ethernet___check_vlan_termination_section(name)))
 			continue;
 
@@ -333,6 +333,10 @@ static int browseEthernetRMONStatsInst(struct dmctx *dmctx, DMNODE *parent_node,
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
 
 		dmubus_call("ethernet", "rmonstats", UBUS_ARGS{{"ifname", ifname, String}}, 1, &res);
+		/* value of 'res' is being changed inside dmubus_call by pointer reference,
+		 * which cppcheck can't track and throws warning as !res is always true. so
+		 * suppressed the warning */
+		// cppcheck-suppress knownConditionTrueFalse
 		if (!res) continue;
 
 		init_eth_rmon(&curr_eth_rmon_args, p, res);
@@ -473,9 +477,9 @@ static int delObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 
 			dmuci_get_value_by_section_string(s_dev, "type", &type);
 			dmuci_get_value_by_section_string(s_dev, "name", &name);
-			if (DM_STRCMP(type, "bridge") == 0 ||
-				DM_STRCMP(type, "untagged") == 0 ||
-				(*name == 0 && DM_STRCMP(is_vlan, "1") != 0) ||
+			if (DM_LSTRCMP(type, "bridge") == 0 ||
+				DM_LSTRCMP(type, "untagged") == 0 ||
+				(*name == 0 && DM_LSTRCMP(is_vlan, "1") != 0) ||
 				(*name != 0 && !ethernet___check_vlan_termination_section(name)))
 				continue;
 
@@ -603,7 +607,7 @@ static int get_EthernetInterface_LastChange(char *refparam, struct dmctx *ctx, v
 	*value ="0";
 	uci_foreach_sections("network", "interface", s) {
 		dmuci_get_value_by_section_string(s, "device", &device);
-		if (0 == DM_STRNCMP(device, "br-", 3)) {
+		if (0 == DM_LSTRNCMP(device, "br-", 3)) {
 			uci_foreach_option_eq("network", "device", "name", device, dev_s) {
 				dmuci_get_value_by_section_list(dev_s, "ports", &uci_list);
 				if (value_exists_in_uci_list(uci_list, ((struct eth_port_args *)data)->ifname)) {
@@ -617,7 +621,8 @@ static int get_EthernetInterface_LastChange(char *refparam, struct dmctx *ctx, v
 		}
 
 		if (1 == intf_found) {
-			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &res);
+			char *if_name = section_name(s);
+			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
 			DM_ASSERT(res, *value = "0");
 			*value = dmjson_get_value(res, 1, "uptime");
 			if((*value)[0] == '\0')
@@ -675,7 +680,7 @@ static int get_EthernetInterface_MaxBitRate(char *refparam, struct dmctx *ctx, v
 
 	dmuci_get_value_by_section_string((((struct eth_port_args *)data)->sections)->config_section, "autoneg", &autoneg);
 
-	if (autoneg && DM_STRCMP(autoneg, "0") == 0)
+	if (autoneg && DM_LSTRCMP(autoneg, "0") == 0)
 		dmuci_get_value_by_section_string((((struct eth_port_args *)data)->sections)->config_section, "speed", value);
 	else
 		*value = "-1";
@@ -691,7 +696,7 @@ static int set_EthernetInterface_MaxBitRate(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value, "-1") == 0)
+			if (DM_LSTRCMP(value, "-1") == 0)
 				dmuci_set_value_by_section((((struct eth_port_args *)data)->sections)->config_section, "autoneg", "1");
 			else {
 				dmuci_set_value_by_section((((struct eth_port_args *)data)->sections)->config_section, "autoneg", "0");
@@ -723,11 +728,11 @@ static int get_EthernetInterface_DuplexMode(char *refparam, struct dmctx *ctx, v
 
 	dmuci_get_value_by_section_string((((struct eth_port_args *)data)->sections)->config_section, "autoneg", &autoneg);
 
-	if (autoneg && DM_STRCMP(autoneg, "0") == 0) {
+	if (autoneg && DM_LSTRCMP(autoneg, "0") == 0) {
 		char *duplex = NULL;
 
 		dmuci_get_value_by_section_string((((struct eth_port_args *)data)->sections)->config_section, "duplex", &duplex);
-		*value = (duplex && DM_STRCMP(duplex, "full") == 0) ? "Full" : "Half";
+		*value = (duplex && DM_LSTRCMP(duplex, "full") == 0) ? "Full" : "Half";
 	} else {
 		*value = "Auto";
 	}
@@ -742,7 +747,7 @@ static int set_EthernetInterface_DuplexMode(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value, "Auto") == 0)
+			if (DM_LSTRCMP(value, "Auto") == 0)
 				dmuci_set_value_by_section((((struct eth_port_args *)data)->sections)->config_section, "autoneg", "1");
 			else {
 				dmuci_set_value_by_section((((struct eth_port_args *)data)->sections)->config_section, "autoneg", "0");
@@ -841,7 +846,11 @@ static int eth_port_ubus(const struct eth_port_args *args, const char *name, cha
 {
 	json_object *res = NULL;
 
-	dmubus_call("ethernet", "ifstats", UBUS_ARGS{{"ifname", args->ifname, String}}, 1, &res);
+	if (args == NULL)
+		DM_ASSERT(res, *value = "0");
+
+	char *if_name = args->ifname;
+	dmubus_call("ethernet", "ifstats", UBUS_ARGS{{"ifname", if_name, String}}, 1, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, name);
 	return 0;
@@ -891,7 +900,7 @@ static int get_EthernetLink_Enable(char *refparam, struct dmctx *ctx, void *data
 	dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &int_name);
 	s = get_origin_section_from_config("network", "interface", int_name);
 	dmuci_get_value_by_section_string(s, "disabled", value);
-	*value = (DM_STRCMP(*value, "1") == 0) ? "0" : "1";
+	*value = (DM_LSTRCMP(*value, "1") == 0) ? "0" : "1";
 	return 0;
 }
 
@@ -928,7 +937,7 @@ static int get_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
 	if (DM_STRLEN(device)) {
 		struct uci_section *port_s = NULL;
-		char *is_bridge = DM_STRSTR(device, "br-");
+		char *is_bridge = DM_LSTRSTR(device, "br-");
 
 		if (is_bridge) {
 			/* Ethernet.Link.{i}. ---> Bridging.Bridge.{i}.Port.{i}. */
@@ -1009,7 +1018,7 @@ static int set_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void 
 			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
 			if (DM_STRLEN(device)) {
 				struct uci_section *port_s = NULL;
-				char *is_bridge = DM_STRSTR(device, "br-");
+				char *is_bridge = DM_LSTRSTR(device, "br-");
 
 				if (is_bridge) {
 					/* Ethernet.Link.{i}. ---> Bridging.Bridge.{i}.Port.{i}. */
@@ -1100,7 +1109,7 @@ static int get_EthernetLink_Name(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_EthernetLink_LastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res;
+	json_object *res = NULL;
 	char *interface;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &interface);
@@ -1138,7 +1147,7 @@ static int get_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 
 		if (br_device_s) dmuci_get_value_by_section_string(br_device_s, "type", &device_s_type);
 
-		if (br_device_s && DM_STRCMP(device_s_type, "bridge") == 0) {
+		if (br_device_s && DM_LSTRCMP(device_s_type, "bridge") == 0) {
 			get_bridge_port_linker(ctx, section_name(br_device_s), value);
 		} else {
 			char *vid = DM_STRCHR(linker, '.');
@@ -1468,7 +1477,8 @@ static int get_EthernetVLANTermination_LastChange(char *refparam, struct dmctx *
 	*value = "0";
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &devname);
 	uci_foreach_option_eq("network", "interface", "device", devname, s) {
-		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &res);
+		char *if_name = section_name(s);
+		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
 		DM_ASSERT(res, *value = "0");
 		*value = dmjson_get_value(res, 1, "uptime");
 		if((*value)[0] == '\0')
@@ -1486,7 +1496,7 @@ static int get_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", &type);
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
 
-	if (DM_STRNCMP(type, "8021ad", 6) == 0) {
+	if (DM_LSTRNCMP(type, "8021ad", 6) == 0) {
 		// 8021ad device, will have a vlan termination object as its lowerlayer
 
 		char *inner_vid, *dev_name;
@@ -1542,7 +1552,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &old_name);
 				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid", &vid);
 
-				if ((DM_STRCMP(type, "macvlan") == 0)) {
+				if ((DM_LSTRCMP(type, "macvlan") == 0)) {
 					/* type == macvlan */
 
 					struct uci_section *s = NULL, *dmmap_s = NULL;
@@ -1630,6 +1640,11 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 					dmuci_get_value_by_section_string(ss, "ifname", &dev_name);
 					break;
 				}
+
+				/* dev_name, inner_vud are assigned by dmuci_get_value_by_section_string() by
+				 * pointer referencing and cppcheck can't track it so throws warning of
+				 * uninitialized variable. so suppressed the warning */
+				// cppcheck-suppress uninitvar 
 				snprintf(new_name, sizeof(new_name), "%s.%s.%s", dev_name, inner_vid, vid);
 				if (ethernet___name_exists_in_devices(new_name))
 					return -1;
@@ -1663,7 +1678,7 @@ static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 			// Get type option from device section
 			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", &type);
 
-			if (DM_STRCMP(type, "macvlan") != 0) {
+			if (DM_LSTRCMP(type, "macvlan") != 0) {
 				/* only when type != macvlan */
 				char *ifname = NULL;
 
@@ -1678,7 +1693,7 @@ static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 
 					dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid", &old_vid);
 
-					if (DM_STRCMP(type, "8021ad") == 0) {
+					if (DM_LSTRCMP(type, "8021ad") == 0) {
 						dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "inner_vid", &inner_vid);
 						snprintf(old_name, sizeof(old_name), "%s.%s.%s", ifname, inner_vid, old_vid);
 						snprintf(new_name, sizeof(new_name), "%s.%s.%s", ifname, inner_vid, value);
@@ -1755,9 +1770,9 @@ static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 static int get_EthernetVLANTermination_TPID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", value);
-	if (DM_STRCMP(*value, "8021q") == 0)
+	if (DM_LSTRCMP(*value, "8021q") == 0)
 		*value = "33024";
-	else if (DM_STRCMP(*value, "8021ad") == 0)
+	else if (DM_LSTRCMP(*value, "8021ad") == 0)
 		*value = "34984";
 	else
 		*value = "37120";
@@ -1772,9 +1787,9 @@ static int set_EthernetVLANTermination_TPID(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value, "33024") == 0)
+			if (DM_LSTRCMP(value, "33024") == 0)
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "type", "8021q");
-			else if (DM_STRCMP(value, "34984") == 0)
+			else if (DM_LSTRCMP(value, "34984") == 0)
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "type", "8021ad");
 			return 0;
 	}
@@ -1862,7 +1877,7 @@ static int set_EthernetRMONStats_Enable(char *refparam, struct dmctx *ctx, void 
 static int get_EthernetRMONStats_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	get_EthernetRMONStats_Enable(refparam, ctx, data, instance, value);
-	*value = (DM_STRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
+	*value = (DM_LSTRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
 	return 0;
 }
 

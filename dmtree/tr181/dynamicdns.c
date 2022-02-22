@@ -75,6 +75,9 @@ static int dmmap_synchronizeDynamicDNSServer(struct dmctx *dmctx, DMNODE *parent
 
 	uci_foreach_sections("ddns", "service", s) {
 		dmuci_get_value_by_section_string(s, "service_name", &service_name);
+		if (service_name == NULL)
+			continue;
+
 		if (*service_name == '\0')
 			continue;
 		dmuci_get_value_by_section_string(s, "enabled", &enabled);
@@ -88,7 +91,10 @@ static int dmmap_synchronizeDynamicDNSServer(struct dmctx *dmctx, DMNODE *parent
 		found = 0;
 		uci_path_foreach_sections(bbfdm, "dmmap_ddns", "ddns_server", ss) {
 			dmuci_get_value_by_section_string(ss, "service_name", &dmmap_service_name);
-			if (DM_STRCMP(service_name, dmmap_service_name) == 0) {
+			if (dmmap_service_name == NULL)
+				continue;
+
+			if (strcmp(service_name, dmmap_service_name) == 0) {
 				found = 1;
 				//Update dmmap with ddns config
 				dmuci_set_value_by_section(ss, "section_name", section_name(s));
@@ -284,9 +290,9 @@ static int get_DynamicDNS_SupportedServices(char *refparam, struct dmctx *ctx, v
 				continue;
 
 			pch = strtok_r(line, "\t", &spch);
-			pch = DM_STRSTR(pch, "\"") + 1;
+			pch = DM_LSTRSTR(pch, "\"") + 1;
 			pch[DM_STRCHR(pch, '\"')-pch] = 0;
-			if (DM_STRCMP(buf, "") == 0) {
+			if (DM_LSTRCMP(buf, "") == 0) {
 				snprintf(buf, sizeof(buf), "%s", pch);
 			} else {
 				DM_STRNCPY(buf_tmp, buf, sizeof(buf_tmp));
@@ -329,7 +335,7 @@ static int get_DynamicDNSClient_Status(char *refparam, struct dmctx *ctx, void *
 	char status[32] = {0}, *enable, *logdir = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enabled", &enable);
-	if (*enable == '\0' || DM_STRCMP(enable, "0") == 0) {
+	if (*enable == '\0' || DM_LSTRCMP(enable, "0") == 0) {
 		DM_STRNCPY(status, "Disabled", sizeof(status));
 	} else {
 		char path[64] = {0};
@@ -344,13 +350,13 @@ static int get_DynamicDNSClient_Status(char *refparam, struct dmctx *ctx, void *
 
 			DM_STRNCPY(status, "Connecting", sizeof(status));
 			while (fgets(buf, 512, fp) != NULL) {
-				if (DM_STRSTR(buf, "Update successful"))
+				if (DM_LSTRSTR(buf, "Update successful"))
 					DM_STRNCPY(status, "Updated", sizeof(status));
-				else if (DM_STRSTR(buf, "ERROR") && DM_STRSTR(buf, "Please check your configuration"))
+				else if (DM_LSTRSTR(buf, "ERROR") && DM_LSTRSTR(buf, "Please check your configuration"))
 					DM_STRNCPY(status, "Error_Misconfigured", sizeof(status));
-				else if (DM_STRSTR(buf, "Registered IP"))
+				else if (DM_LSTRSTR(buf, "Registered IP"))
 					DM_STRNCPY(status, "Connecting", sizeof(status));
-				else if (DM_STRSTR(buf, "failed"))
+				else if (DM_LSTRSTR(buf, "failed"))
 					DM_STRNCPY(status, "Error", sizeof(status));
 			}
 			fclose(fp);
@@ -389,7 +395,7 @@ static int get_DynamicDNSClient_LastError(char *refparam, struct dmctx *ctx, voi
 	char last_err[64] = {0}, *enable = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enabled", &enable);
-	if (enable && (*enable == '\0' || DM_STRCMP(enable, "0") == 0)) {
+	if (enable && (*enable == '\0' || DM_LSTRCMP(enable, "0") == 0)) {
 		DM_STRNCPY(last_err, "NO_ERROR", sizeof(last_err));
 	} else {
 		char path[128] = {0}, *logdir = NULL;
@@ -403,15 +409,15 @@ static int get_DynamicDNSClient_LastError(char *refparam, struct dmctx *ctx, voi
 
 			DM_STRNCPY(last_err, "NO_ERROR", sizeof(last_err));
 			while (fgets(buf, 512, fp) != NULL) {
-				if (DM_STRSTR(buf, "ERROR") && DM_STRSTR(buf, "Please check your configuration"))
+				if (DM_LSTRSTR(buf, "ERROR") && DM_LSTRSTR(buf, "Please check your configuration"))
 					DM_STRNCPY(last_err, "MISCONFIGURATION_ERROR", sizeof(last_err));
-				else if (DM_STRSTR(buf, "NO valid IP found"))
+				else if (DM_LSTRSTR(buf, "NO valid IP found"))
 					DM_STRNCPY(last_err, "DNS_ERROR", sizeof(last_err));
-				else if (DM_STRSTR(buf, "Authentication Failed"))
+				else if (DM_LSTRSTR(buf, "Authentication Failed"))
 					DM_STRNCPY(last_err, "AUTHENTICATION_ERROR", sizeof(last_err));
-				else if (DM_STRSTR(buf, "Transfer failed") || (DM_STRSTR(buf, "WARN") && DM_STRSTR(buf, "failed")))
+				else if (DM_LSTRSTR(buf, "Transfer failed") || (DM_LSTRSTR(buf, "WARN") && DM_LSTRSTR(buf, "failed")))
 					DM_STRNCPY(last_err, "CONNECTION_ERROR", sizeof(last_err));
-				else if (DM_STRSTR(buf, "Registered IP") || DM_STRSTR(buf, "Update successful"))
+				else if (DM_LSTRSTR(buf, "Registered IP") || DM_LSTRSTR(buf, "Update successful"))
 					DM_STRNCPY(last_err, "NO_ERROR", sizeof(last_err));
 			}
 			fclose(fp);
@@ -564,7 +570,7 @@ static int get_DynamicDNSClientHostname_Status(char *refparam, struct dmctx *ctx
 	char status[32] = {0}, *enable = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enabled", &enable);
-	if (enable && (*enable == '\0' || DM_STRCMP(enable, "0") == 0)) {
+	if (enable && (*enable == '\0' || DM_LSTRCMP(enable, "0") == 0)) {
 		DM_STRNCPY(status, "Disabled", sizeof(status));
 	} else {
 		char path[128] = {0}, *logdir = NULL;
@@ -577,11 +583,11 @@ static int get_DynamicDNSClientHostname_Status(char *refparam, struct dmctx *ctx
 
 			DM_STRNCPY(status, "Registered", sizeof(status));
 			while (fgets(buf, 512, fp) != NULL) {
-				if (DM_STRSTR(buf, "Registered IP") || DM_STRSTR(buf, "Update successful"))
+				if (DM_LSTRSTR(buf, "Registered IP") || DM_LSTRSTR(buf, "Update successful"))
 					DM_STRNCPY(status, "Registered", sizeof(status));
-				else if (DM_STRSTR(buf, "Update needed"))
+				else if (DM_LSTRSTR(buf, "Update needed"))
 					DM_STRNCPY(status, "UpdateNeeded", sizeof(status));
-				else if (DM_STRSTR(buf, "NO valid IP found"))
+				else if (DM_LSTRSTR(buf, "NO valid IP found"))
 					DM_STRNCPY(status, "Error", sizeof(status));
 			}
 			fclose(fp);
@@ -899,7 +905,7 @@ static int get_DynamicDNSServer_SupportedProtocols(char *refparam, struct dmctx 
 static int get_DynamicDNSServer_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "use_https", value);
-	if (*value[0] == '\0' || DM_STRCMP(*value, "0") == 0)
+	if (*value[0] == '\0' || DM_LSTRCMP(*value, "0") == 0)
 		*value = "HTTP";
 	else
 		*value = "HTTPS";
@@ -917,10 +923,10 @@ static int set_DynamicDNSServer_Protocol(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "use_https", (DM_STRCMP(value, "HTTPS") == 0) ? "1" : "0");
+			dmuci_set_value_by_section((struct uci_section *)data, "use_https", (DM_LSTRCMP(value, "HTTPS") == 0) ? "1" : "0");
 			dmuci_get_value_by_section_string((struct uci_section *)data, "service_name", &service_name);
 			uci_foreach_option_eq("ddns", "service", "service_name", service_name, s) {
-				dmuci_set_value_by_section(s, "use_https", (DM_STRCMP(value, "HTTPS") == 0) ? "1" : "0");
+				dmuci_set_value_by_section(s, "use_https", (DM_LSTRCMP(value, "HTTPS") == 0) ? "1" : "0");
 			}
 			break;
 	}
@@ -947,9 +953,9 @@ static int set_DynamicDNSServer_CheckInterval(char *refparam, struct dmctx *ctx,
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "check_unit", &check_unit);
-			if (DM_STRCMP(check_unit, "hours") == 0)
+			if (DM_LSTRCMP(check_unit, "hours") == 0)
 				check_interval = DM_STRTOL(value) * 3600;
-			else if (DM_STRCMP(check_unit, "minutes") == 0)
+			else if (DM_LSTRCMP(check_unit, "minutes") == 0)
 				check_interval = DM_STRTOL(value) * 60;
 			else
 				check_interval = DM_STRTOL(value);
@@ -985,9 +991,9 @@ static int set_DynamicDNSServer_RetryInterval(char *refparam, struct dmctx *ctx,
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "retry_unit", &retry_unit);
-			if (DM_STRCMP(retry_unit, "hours") == 0)
+			if (DM_LSTRCMP(retry_unit, "hours") == 0)
 				retry_interval = DM_STRTOL(value) * 3600;
-			else if (DM_STRCMP(retry_unit, "minutes") == 0)
+			else if (DM_LSTRCMP(retry_unit, "minutes") == 0)
 				retry_interval = DM_STRTOL(value) * 60;
 			else
 				retry_interval = DM_STRTOL(value);

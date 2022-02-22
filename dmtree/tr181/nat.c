@@ -45,7 +45,7 @@ static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 	synchronize_specific_config_sections_with_dmmap("firewall", "redirect", "dmmap_firewall", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		dmuci_get_value_by_section_string(p->config_section, "target", &target);
-		if (*target != '\0' && DM_STRCMP(target, "DNAT") != 0)
+		if (*target != '\0' && DM_LSTRCMP(target, "DNAT") != 0)
 			continue;
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "port_mapping_instance", "port_mapping_alias");
@@ -324,7 +324,7 @@ static int set_nat_port_mapping_enable(char *refparam, struct dmctx *ctx, void *
 static int get_nat_port_mapping_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	get_nat_port_mapping_enable(refparam, ctx, data, instance, value);
-	*value = (DM_STRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
+	*value = (DM_LSTRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
 	return 0;
 }
 
@@ -359,7 +359,7 @@ static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 	unsigned pos = 0;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_dip", &src_dip);
-	if (src_dip && DM_STRCMP(src_dip, "*") == 0)
+	if (src_dip && DM_LSTRCMP(src_dip, "*") == 0)
 		return 0;
 
 	buf[0] = 0;
@@ -409,7 +409,7 @@ static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 			adm_entry_get_linker_value(ctx, value, &iface);
 			if (iface && *iface) {
 				struct uci_section *s = NULL;
-				bool zone_enable = false, sect_enable = false;
+				bool zone_enable, sect_enable;
 
 				uci_foreach_sections("firewall", "zone", s) {
 					char *network = NULL;
@@ -631,7 +631,7 @@ static int get_nat_port_mapping_protocol(char *refparam, struct dmctx *ctx, void
 {
 	char *proto = NULL;
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "proto", &proto);
-	*value = (proto && DM_STRCMP(proto, "udp") == 0) ? "UDP" : "TCP";
+	*value = (proto && DM_LSTRCMP(proto, "udp") == 0) ? "UDP" : "TCP";
 	return 0;
 }
 
@@ -643,7 +643,7 @@ static int set_nat_port_mapping_protocol(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "proto", (DM_STRCMP("UDP", value) == 0) ? "udp" : "tcp");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "proto", (DM_LSTRCMP(value, "UDP") == 0) ? "udp" : "tcp");
 			return 0;
 	}
 	return 0;

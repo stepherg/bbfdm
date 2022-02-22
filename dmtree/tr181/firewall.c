@@ -340,7 +340,7 @@ static int get_rule_target(char *refparam, struct dmctx *ctx, void *data, char *
 		char *rule_perm = NULL;
 
 		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "is_rule", &rule_perm);
-		*value = (DM_STRCMP(rule_perm, "1") == 0) ? "Drop" : "Accept";
+		*value = (DM_LSTRCMP(rule_perm, "1") == 0) ? "Drop" : "Accept";
 	} else {
 		if (strcasecmp(target, "Accept") == 0)
 			*value = "Accept";
@@ -417,7 +417,7 @@ static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 	if (src == NULL || *src == '\0')
 		return 0;
 
-	if (DM_STRCMP(src, "*") == 0) {
+	if (DM_LSTRCMP(src, "*") == 0) {
 		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "src", &src);
 	} else {
 		struct uci_section *s = NULL;
@@ -472,7 +472,7 @@ static int get_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 	if (dest == NULL || *dest == '\0')
 		return 0;
 
-	if (DM_STRCMP(dest, "*") == 0) {
+	if (DM_LSTRCMP(dest, "*") == 0) {
 		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "dest", &dest);
 	} else {
 		struct uci_section *s = NULL;
@@ -563,7 +563,7 @@ static int get_rule_dest_mask(char *refparam, struct dmctx *ctx, void *data, cha
 		char *family;
 
 		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "family", &family);
-		dmasprintf(value, "%s/%s", destip, DM_STRCMP(family, "ipv6") == 0 ? "128" : "32");
+		dmasprintf(value, "%s/%s", destip, DM_LSTRCMP(family, "ipv6") == 0 ? "128" : "32");
 	}
 	return 0;
 }
@@ -598,7 +598,7 @@ static int get_rule_source_mask(char *refparam, struct dmctx *ctx, void *data, c
 		char *family;
 
 		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "family", &family);
-		dmasprintf(value, "%s/%s", srcip, DM_STRCMP(family, "ipv6") == 0 ? "128" : "32");
+		dmasprintf(value, "%s/%s", srcip, DM_LSTRCMP(family, "ipv6") == 0 ? "128" : "32");
 	}
 	return 0;
 }
@@ -826,10 +826,10 @@ static int set_level_default_policy(char *refparam, struct dmctx *ctx, void *dat
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (DM_STRCMP(value, "Drop") == 0) {
+			if (DM_LSTRCMP(value, "Drop") == 0) {
 				dmuci_set_value("firewall", "@defaults[0]", "input", "DROP");
 				dmuci_set_value("firewall", "@defaults[0]", "output", "DROP");
-			} else if (DM_STRCMP(value, "Accept") == 0) {
+			} else if (DM_LSTRCMP(value, "Accept") == 0) {
 				dmuci_set_value("firewall", "@defaults[0]", "input", "ACCEPT");
 				dmuci_set_value("firewall", "@defaults[0]", "output", "ACCEPT");
 			} else {
@@ -1022,7 +1022,7 @@ static int set_rule_interface(struct dmctx *ctx, void *data, char *type, char *v
 			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, type, &option);
 
 			if (*value == '\0') {
-				dmuci_set_value_by_section((option && DM_STRCMP(option, "*") == 0) ? ((struct dmmap_dup *)data)->dmmap_section : ((struct dmmap_dup *)data)->config_section, type, "");
+				dmuci_set_value_by_section((option && DM_LSTRCMP(option, "*") == 0) ? ((struct dmmap_dup *)data)->dmmap_section : ((struct dmmap_dup *)data)->config_section, type, "");
 			} else {
 				adm_entry_get_linker_value(ctx, value, &iface);
 				if (iface && iface[0] != '\0') {
@@ -1035,7 +1035,7 @@ static int set_rule_interface(struct dmctx *ctx, void *data, char *type, char *v
 							char *zone_name;
 
 							dmuci_get_value_by_section_string(s, "name", &zone_name);
-							dmuci_set_value_by_section((option && DM_STRCMP(option, "*") == 0) ? ((struct dmmap_dup *)data)->dmmap_section : ((struct dmmap_dup *)data)->config_section, type, zone_name);
+							dmuci_set_value_by_section((option && DM_LSTRCMP(option, "*") == 0) ? ((struct dmmap_dup *)data)->dmmap_section : ((struct dmmap_dup *)data)->config_section, type, zone_name);
 							break;
 						}
 					}
@@ -1131,11 +1131,11 @@ static int set_rule_i_p_version(char *refparam, struct dmctx *ctx, void *data, c
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (DM_STRCMP(value, "4") == 0)
+			if (DM_LSTRCMP(value, "4") == 0)
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "family", "ipv4");
-			else if (DM_STRCMP(value, "6") == 0)
+			else if (DM_LSTRCMP(value, "6") == 0)
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "family", "ipv6");
-			else if (DM_STRCMP(value, "-1") == 0)
+			else if (DM_LSTRCMP(value, "-1") == 0)
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "family", "");
 			break;
 	}
@@ -1181,6 +1181,8 @@ static int set_rule_dest_mask(char *refparam, struct dmctx *ctx, void *data, cha
 				*pch = '\0';
 
 			pch = DM_STRCHR(value, '/');
+			if (pch == NULL)
+				return FAULT_9007;
 
 			snprintf(new, sizeof(new), "%s%s", destip, pch);
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_ip", new);
@@ -1228,6 +1230,8 @@ static int set_rule_source_mask(char *refparam, struct dmctx *ctx, void *data, c
 				*pch = '\0';
 
 			pch = DM_STRCHR(value, '/');
+			if (pch == NULL)
+				return FAULT_9007;
 
 			snprintf(new, sizeof(new), "%s%s", srcip, pch);
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_ip", new);

@@ -341,7 +341,7 @@ static int set_lwn_protocol_used(char *refparam, struct dmctx *ctx, void *data, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_STRCMP(value,"UDP") == 0)
+			if (DM_LSTRCMP(value,"UDP") == 0)
 				dmuci_set_value("cwmp", "lwn", "enable", "1");
 			else
 				dmuci_set_value("cwmp", "lwn", "enable", "0");
@@ -567,7 +567,7 @@ static int set_management_server_conn_req_xmpp_connection(char *refparam, struct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if ((str = DM_STRSTR(value, "Device.XMPP.Connection."))) {
+			if ((str = DM_LSTRSTR(value, "Device.XMPP.Connection."))) {
 				value = dmstrdup(str + sizeof("Device.XMPP.Connection.") - 1); //MEM WILL BE FREED IN DMMEMCLEAN
 			}
 			uci_foreach_sections("xmpp", "connection", s) {
