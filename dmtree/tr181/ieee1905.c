@@ -660,6 +660,7 @@ static int get_IEEE1905ALForwardingTable_SetForwardingEnabled(char *refparam, st
 
 static int set_IEEE1905ALForwardingTable_SetForwardingEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	int res = 0;
 	bool b;
 
 	switch (action) {
@@ -669,7 +670,14 @@ static int set_IEEE1905ALForwardingTable_SetForwardingEnabled(char *refparam, st
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value("ieee1905", "forwarding_table", "forwarding_enabled", b ? "1" : "0");
+		res = dmuci_set_value("ieee1905", "forwarding_table", "forwarding_enabled", b ? "1" : "0");
+		if (res) {
+			struct uci_section *s = NULL;
+
+			dmuci_add_section("ieee1905", "forwarding_table", &s);
+			dmuci_rename_section_by_section(s, "forwarding_table");
+			dmuci_set_value("ieee1905", "forwarding_table", "forwarding_enabled", b ? "1" : "0");
+		}
 		break;
 	}
 	return 0;
