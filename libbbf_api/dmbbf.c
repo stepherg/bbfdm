@@ -1076,9 +1076,7 @@ static char *check_value_by_type(char *value, int type)
 			}
 			break;
 		case DMT_BOOL:
-			if (dm_validate_boolean(buf))
-				return "0";
-			break;
+			return dmuci_string_to_boolean(buf) ? "1" : "0";
 		case DMT_HEXBIN:
 			while (buf[i] != 0) {
 				if (isxdigit(buf[i]) == 0)
