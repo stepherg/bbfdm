@@ -38,6 +38,23 @@ function exec_cmd_verbose()
 
 function install_libbbf()
 {
+	CUR="${PWD}"
+
+	echo "Installing wolfssl-4.8.1"
+	cd /opt/dev/
+	rm -rf wolfssl*
+
+	wget -q https://github.com/wolfSSL/wolfssl/archive/refs/tags/v4.8.1-stable.tar.gz -O wolfssl.tgz
+	tar xf wolfssl.tgz
+
+	cd wolfssl-4.8.1-stable
+	autoreconf -i -f
+	exec_cmd ./configure --program-prefix="" --program-suffix="" --prefix=/usr --exec-prefix=/usr --bindir=/usr/bin --sbindir=/usr/sbin --libexecdir=/usr/lib --sysconfdir=/etc --datadir=/usr/share --localstatedir=/var --mandir=/usr/man --infodir=/usr/info --disable-nls  --enable-reproducible-build --enable-lighty --enable-opensslall --enable-opensslextra --enable-sni --enable-stunnel --disable-crypttests --disable-examples --disable-jobserver --enable-ipv6 --enable-aesccm --enable-certgen --enable-chacha --enable-poly1305 --enable-dh --enable-arc4 --enable-tlsv10 --enable-tls13 --enable-session-ticket --disable-dtls --disable-curve25519 --disable-afalg --enable-devcrypto=no --enable-ocsp --enable-ocspstapling --enable-ocspstapling2 --enable-wpas --enable-fortress --enable-fastmath
+
+	exec_cmd make
+	exec_cmd make install
+
+	cd ${CUR}
 	COV_CFLAGS='-fprofile-arcs -ftest-coverage'
 	COV_LDFLAGS='--coverage'
 	VENDOR_LIST='iopsys'
@@ -53,8 +70,8 @@ function install_libbbf()
 	fi
 
 	exec_cmd autoreconf -i
-	exec_cmd ./configure --enable-tr181 --enable-tr104 --enable-tr143 --enable-libopenssl --enable-json-plugin --enable-shared-library --enable-vendor-extension BBF_VENDOR_LIST="$VENDOR_LIST" BBF_VENDOR_PREFIX="$VENDOR_PREFIX"
-	make CFLAGS="-D_GNU_SOURCE -Wall -Werror" CFLAGS+="$COV_CFLAGS" LDFLAGS="$COV_LDFLAGS" >/dev/null 2>&1
+	exec_cmd ./configure --enable-tr181 --enable-tr104 --enable-tr143 --enable-libssl --enable-json-plugin --enable-shared-library --enable-vendor-extension BBF_VENDOR_LIST="$VENDOR_LIST" BBF_VENDOR_PREFIX="$VENDOR_PREFIX"
+	make CFLAGS="-D_GNU_SOURCE -Wall -Werror -DWC_NO_HARDEN" CFLAGS+="$COV_CFLAGS" LDFLAGS="$COV_LDFLAGS" >/dev/null 2>&1
 
 	echo "installing libbbf"
 	exec_cmd make install
@@ -96,7 +113,7 @@ function install_libbulkdata()
 	exec_cmd git clone -b devel https://dev.iopsys.eu/iopsys/bulkdata.git /opt/dev/bulkdata
 	echo "Compiling libbulkdata"
 	make clean -C /opt/dev/bulkdata/
-	make CFLAGS="-D_GNU_SOURCE" -C /opt/dev/bulkdata/
+	make CFLAGS="-D_GNU_SOURCE -DWC_NO_HARDEN" -C /opt/dev/bulkdata/
 
 	echo "installing libbulkdata"
 	cp -f /opt/dev/bulkdata/libbulkdata.so /usr/lib/bbfdm

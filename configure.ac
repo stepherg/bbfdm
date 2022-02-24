@@ -14,8 +14,8 @@ AM_CONDITIONAL([BBF_TR104],[test "x$enable_tr104" = "xyes"])
 AC_ARG_ENABLE(tr143, [AS_HELP_STRING([--enable-tr143], [enable tr143 diagnostics feature])], AC_DEFINE(BBF_TR143),)
 AM_CONDITIONAL([BBF_TR143],[test "x$enable_tr143" = "xyes"])
 
-AC_ARG_ENABLE(libopenssl, [AS_HELP_STRING([--enable-libopenssl], [enable libopenssl feature])], AC_DEFINE(LOPENSSL),)
-AM_CONDITIONAL([LOPENSSL],[test "x$enable_libopenssl" = "xyes"])
+AC_ARG_ENABLE(libssl, [AS_HELP_STRING([--enable-libssl], [enable libssl feature])], AC_DEFINE(LSSL),)
+AM_CONDITIONAL([LSSL],[test "x$enable_libssl" = "xyes"])
 
 AC_ARG_ENABLE(vendor_extension, [AS_HELP_STRING([--enable-vendor-extension], [enable vendor extension])], AC_DEFINE(BBF_VENDOR_EXTENSION),)
 AM_CONDITIONAL([BBF_VENDOR_EXTENSION],[test "x$enable_vendor_extension" = "xyes"])
@@ -108,9 +108,9 @@ AC_SUBST([LIBCURL_LIBS])
 LIBCRYPTO_LIBS='-lcrypto'
 AC_SUBST([LIBCRYPTO_LIBS])
 
-AM_COND_IF([LOPENSSL], [
-	LIBOPENSSL_LIBS='-lssl'
-	AC_SUBST([LIBOPENSSL_LIBS])
+AM_COND_IF([LSSL], [
+	LIBSSL_LIBS='-lwolfssl'
+	AC_SUBST([LIBSSL_LIBS])
 ])
 
 # checks for header files

@@ -13,7 +13,11 @@
 #define DATE_LEN 128
 #define MAX_CERT 32
 
-#ifdef LOPENSSL
+#ifdef LSSL
+#include <wolfssl/openssl/x509.h>
+#include <wolfssl/openssl/pem.h>
+#include <wolfssl/openssl/evp.h>
+
 static char certifcates_paths[MAX_CERT][256];
 
 struct certificate_profile {
@@ -41,56 +45,21 @@ static char *get_certificate_sig_alg(int sig_nid)
 {
 	switch(sig_nid) {
 	case NID_sha256WithRSAEncryption:
-		return LN_sha256WithRSAEncryption;
+		return "sha256WithRSAEncryption";
 	case NID_sha384WithRSAEncryption:
-		return LN_sha384WithRSAEncryption;
+		return "sha384WithRSAEncryption";
 	case NID_sha512WithRSAEncryption:
-		return LN_sha512WithRSAEncryption;
+		return "sha512WithRSAEncryption";
 	case NID_sha224WithRSAEncryption:
-		return LN_sha224WithRSAEncryption;
-	case NID_sha512_224WithRSAEncryption:
-		return LN_sha512_224WithRSAEncryption;
-	case NID_sha512_256WithRSAEncryption:
-		return LN_sha512_224WithRSAEncryption;
-	case NID_pbeWithMD2AndDES_CBC:
-		return LN_pbeWithMD2AndDES_CBC;
-	case NID_pbeWithMD5AndDES_CBC:
-		return LN_pbeWithMD5AndDES_CBC;
-	case NID_pbeWithMD2AndRC2_CBC:
-		return LN_pbeWithMD5AndDES_CBC;
-	case NID_pbeWithMD5AndRC2_CBC:
-		return LN_pbeWithMD5AndRC2_CBC;
-	case NID_pbeWithSHA1AndDES_CBC:
-		return LN_pbeWithSHA1AndDES_CBC;
-	case NID_pbeWithSHA1AndRC2_CBC:
-		return LN_pbeWithSHA1AndDES_CBC;
-	case NID_pbe_WithSHA1And128BitRC4:
-		return LN_pbe_WithSHA1And128BitRC4;
-	case NID_pbe_WithSHA1And40BitRC4:
-		return LN_pbe_WithSHA1And40BitRC4;
-	case NID_pbe_WithSHA1And3_Key_TripleDES_CBC:
-		return LN_pbe_WithSHA1And3_Key_TripleDES_CBC;
-	case NID_pbe_WithSHA1And2_Key_TripleDES_CBC:
-		return LN_pbe_WithSHA1And2_Key_TripleDES_CBC;
-	case NID_pbe_WithSHA1And128BitRC2_CBC:
-		return LN_pbe_WithSHA1And128BitRC2_CBC;
-	case NID_pbe_WithSHA1And40BitRC2_CBC:
-		return LN_pbe_WithSHA1And40BitRC2_CBC;
-	case NID_sm3WithRSAEncryption:
-		return LN_sm3WithRSAEncryption;
-	case NID_shaWithRSAEncryption:
-		return LN_shaWithRSAEncryption;
-	case NID_md2WithRSAEncryption:
-		return LN_md2WithRSAEncryption;
-	case NID_md4WithRSAEncryption:
-		return LN_md4WithRSAEncryption;
+		return "sha224WithRSAEncryption";
 	case NID_md5WithRSAEncryption:
-		return LN_md5WithRSAEncryption;
+		return "md5WithRSAEncryption";
 	case NID_sha1WithRSAEncryption:
-		return LN_sha1WithRSAEncryption;
+		return "sha1WithRSAEncryption";
 	default:
 		return "";
 	}
+	return "";
 }
 
 static char *generate_serial_number(char *text, int length)
@@ -245,13 +214,10 @@ static int get_SecurityCertificate_Issuer(char *refparam, struct dmctx *ctx, voi
 
 static int get_SecurityCertificate_NotBefore(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "0001-01-01T00:00:00Z";
-	struct tm not_before_time;
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	char not_before_str[DATE_LEN];
 	const ASN1_TIME *not_before = X509_get0_notBefore(cert_profile->openssl_cert);
-	ASN1_TIME_to_tm(not_before, &not_before_time);
-	strftime(not_before_str, sizeof(not_before_str), "%Y-%m-%dT%H:%M:%SZ", &not_before_time);
+	ASN1_TIME_to_string((ASN1_TIME *)not_before, not_before_str, DATE_LEN);
 	*value = dmstrdup(not_before_str);
 	return 0;
 }
@@ -259,12 +225,10 @@ static int get_SecurityCertificate_NotBefore(char *refparam, struct dmctx *ctx, 
 static int get_SecurityCertificate_NotAfter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "0001-01-01T00:00:00Z";
-	struct tm not_after_time;
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	char not_after_str[DATE_LEN];
 	const ASN1_TIME *not_after = X509_get0_notAfter(cert_profile->openssl_cert);
-	ASN1_TIME_to_tm(not_after, &not_after_time);
-	strftime(not_after_str, sizeof(not_after_str), "%Y-%m-%dT%H:%M:%SZ", &not_after_time);
+	ASN1_TIME_to_string((ASN1_TIME *)not_after, not_after_str, DATE_LEN);
 	*value = dmstrdup(not_after_str);
 	return 0;
 }
@@ -321,4 +285,4 @@ DMLEAF tSecurityCertificateParams[] = {
 {0}
 };
 
-#endif /* LOPENSSL */
+#endif /* LSSL */

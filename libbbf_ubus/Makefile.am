@@ -28,10 +28,7 @@ libbbf_ubus_la_LIBADD =		\
 	$(LIBJSON_LIBS)			\
 	$(LIBTRACE_LIBS)		\
 	$(LBLOBMSG_LIBS) 		\
-	$(LIBDLOPEN_LIBS)		\
 	$(LIBCURL_LIBS)			\
-	$(LIBOPENSSL_LIBS)		\
-	$(LIBCRYPTO_LIBS)		\
 	-L../bin/ -lbbf_api
 
 libbbf_ubus_la_CFLAGS+=-I../

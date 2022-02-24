@@ -9,7 +9,8 @@
  *
  */
 
-#include <openssl/sha.h>
+#include <wolfssl/options.h>
+#include <wolfssl/openssl/sha.h>
 #include <curl/curl.h>
 #include <libtrace.h>
 #include "dmentry.h"
@@ -237,12 +238,13 @@ end:
 
 const bool validate_sha224sum_value(const char *file_path, const char *checksum)
 {
+#ifdef WOLFSSL_SHA224
 	unsigned char hash[SHA224_DIGEST_LENGTH];
 	unsigned char buffer[READ_BUF_SIZE];
 	char sha224_res[1 + SHA224_DIGEST_LENGTH * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA256_CTX ctx;
+	SHA224_CTX ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
@@ -269,6 +271,9 @@ end:
 	fclose(file);
 
 	return res;
+#else
+	return false;
+#endif
 }
 
 const bool validate_sha256sum_value(const char *file_path, const char *checksum)
@@ -309,12 +314,13 @@ end:
 
 const bool validate_sha384sum_value(const char *file_path, const char *checksum)
 {
+#ifdef WOLFSSL_SHA384
 	unsigned char hash[SHA384_DIGEST_LENGTH];
 	unsigned char buffer[READ_BUF_SIZE];
 	char sha384_res[1 + SHA384_DIGEST_LENGTH * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA512_CTX ctx;
+	SHA384_CTX ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
@@ -341,10 +347,14 @@ end:
 	fclose(file);
 
 	return res;
+#else
+	return false;
+#endif
 }
 
 const bool validate_sha512sum_value(const char *file_path, const char *checksum)
 {
+#ifdef WOLFSSL_SHA512
 	unsigned char hash[SHA512_DIGEST_LENGTH];
 	unsigned char buffer[READ_BUF_SIZE];
 	char sha512_res[1 + SHA512_DIGEST_LENGTH * 2];
@@ -377,6 +387,9 @@ end:
 	fclose(file);
 
 	return res;
+#else
+	return false;
+#endif
 }
 
 const bool validate_checksum_value(const char *file_path, const char *checksum_algorithm, const char *checksum)

@@ -167,7 +167,7 @@ libbbfdm_la_LDFLAGS = 		\
 	$(LIBUCI_LDFLAGS)		\
 	$(LIBUBOX_LDFLAGS)		\
 	$(LIBUBUS_LDFLAGS)		\
-	$(LIBOPENSSL_LIBS)		\
+	$(LIBSSL_LIBS)		\
 	$(LIBMBETLS_LIBS)			
 
 libbbfdm_la_LIBADD =		\
@@ -180,7 +180,7 @@ libbbfdm_la_LIBADD =		\
 	$(LBLOBMSG_LIBS) 		\
 	$(LIBDLOPEN_LIBS) 		\
 	$(LIBCURL_LIBS)			\
-	$(LIBOPENSSL_LIBS)		\
+	$(LIBSSL_LIBS)		\
 	$(LIBCRYPTO_LIBS)		\
 	-lbbf_api
 

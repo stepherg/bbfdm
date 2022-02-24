@@ -11,17 +11,13 @@
 #ifndef __SECURITY_H
 #define __SECURITY_H
 
-#ifdef LOPENSSL
+#ifdef LSSL
 #include <libbbf_api/dmcommon.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/pem.h>
-#include <openssl/obj_mac.h>
 
 extern DMOBJ tSecurityObj[];
 extern DMLEAF tSecurityParams[];
 extern DMLEAF tSecurityCertificateParams[];
-#endif /* LOPENSSL */
+#endif /* LSSL */
 
 #endif //__SECURITY_H
 

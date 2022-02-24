@@ -950,5 +950,4 @@ To successfully build libbbfdm or libbbf_ubus, the following libraries are neede
 | libjson-c   | https://s3.amazonaws.com/json-c_releases    | MIT            |
 | libcurl     | https://dl.uxnr.de/mirror/curl              | MIT            |
 | libtrace    | https://github.com/apietila/libtrace.git    | GPLv2          |
-| libbbf_api  | https://dev.iopsys.eu/iopsys/bbf.git        | LGPL 2.1       |
-
+| libwolfssl  | https://github.com/wolfSSL/wolfssl          | GPL-2.0        |
