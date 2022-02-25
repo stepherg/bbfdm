@@ -16,7 +16,6 @@
 #ifdef LSSL
 #include <wolfssl/openssl/x509.h>
 #include <wolfssl/openssl/pem.h>
-#include <wolfssl/openssl/evp.h>
 
 static char certifcates_paths[MAX_CERT][256];
 
@@ -44,18 +43,20 @@ struct uci_section *dmsect, struct certificate_profile *certprofile)
 static char *get_certificate_sig_alg(int sig_nid)
 {
 	switch(sig_nid) {
-	case NID_sha256WithRSAEncryption:
+	case CTC_SHA256wRSA:
 		return "sha256WithRSAEncryption";
-	case NID_sha384WithRSAEncryption:
+	case CTC_SHA384wRSA:
 		return "sha384WithRSAEncryption";
-	case NID_sha512WithRSAEncryption:
+	case CTC_SHA512wRSA:
 		return "sha512WithRSAEncryption";
-	case NID_sha224WithRSAEncryption:
+	case CTC_SHA224wRSA:
 		return "sha224WithRSAEncryption";
-	case NID_md5WithRSAEncryption:
+	case CTC_MD5wRSA:
 		return "md5WithRSAEncryption";
-	case NID_sha1WithRSAEncryption:
+	case CTC_SHAwRSA:
 		return "sha1WithRSAEncryption";
+	case CTC_MD2wRSA:
+		return "md2WithRSAEncryption";
 	default:
 		return "";
 	}
@@ -192,7 +193,6 @@ static int get_SecurityCertificate_LastModif(char *refparam, struct dmctx *ctx, 
 
 static int get_SecurityCertificate_SerialNumber(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	ASN1_INTEGER *serial = X509_get_serialNumber(cert_profile->openssl_cert);
 	*value = generate_serial_number((char *)serial->data, serial->length);
@@ -214,21 +214,34 @@ static int get_SecurityCertificate_Issuer(char *refparam, struct dmctx *ctx, voi
 
 static int get_SecurityCertificate_NotBefore(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	char not_before_str[DATE_LEN];
+	struct tm tm;
+
+	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	const ASN1_TIME *not_before = X509_get0_notBefore(cert_profile->openssl_cert);
 	ASN1_TIME_to_string((ASN1_TIME *)not_before, not_before_str, DATE_LEN);
+
+	if (!strptime(not_before_str, "%b %d %H:%M:%S %Y", &tm))
+		return -1;
+
+	strftime(not_before_str, sizeof(not_before_str), "%Y-%m-%dT%H:%M:%SZ", &tm);
 	*value = dmstrdup(not_before_str);
 	return 0;
 }
 
 static int get_SecurityCertificate_NotAfter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "0001-01-01T00:00:00Z";
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	char not_after_str[DATE_LEN];
+	struct tm tm;
+
+	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	const ASN1_TIME *not_after = X509_get0_notAfter(cert_profile->openssl_cert);
 	ASN1_TIME_to_string((ASN1_TIME *)not_after, not_after_str, DATE_LEN);
+
+	if (!strptime(not_after_str, "%b %d %H:%M:%S %Y", &tm))
+		return -1;
+
+	strftime(not_after_str, sizeof(not_after_str), "%Y-%m-%dT%H:%M:%SZ", &tm);
 	*value = dmstrdup(not_after_str);
 	return 0;
 }
@@ -248,7 +261,6 @@ static int get_SecurityCertificate_Subject(char *refparam, struct dmctx *ctx, vo
 
 static int get_SecurityCertificate_SignatureAlgorithm(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	*value = dmstrdup(get_certificate_sig_alg(X509_get_signature_nid(cert_profile->openssl_cert)));
 	return 0;
