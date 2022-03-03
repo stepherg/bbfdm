@@ -9,8 +9,10 @@
  *
  */
 
-#include <wolfssl/options.h>
-#include <wolfssl/openssl/sha.h>
+#ifdef LWOLFSSL
+#include <options.h>
+#endif
+#include <openssl/sha.h>
 #include <curl/curl.h>
 #include <libtrace.h>
 #include "dmentry.h"

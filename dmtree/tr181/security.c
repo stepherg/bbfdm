@@ -14,8 +14,13 @@
 #define MAX_CERT 32
 
 #ifdef LSSL
-#include <wolfssl/openssl/x509.h>
-#include <wolfssl/openssl/pem.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/evp.h>
+
+#ifdef LOPENSSL
+#include <openssl/obj_mac.h>
+#endif
 
 static char certifcates_paths[MAX_CERT][256];
 
@@ -43,20 +48,18 @@ struct uci_section *dmsect, struct certificate_profile *certprofile)
 static char *get_certificate_sig_alg(int sig_nid)
 {
 	switch(sig_nid) {
-	case CTC_SHA256wRSA:
+	case NID_sha256WithRSAEncryption:
 		return "sha256WithRSAEncryption";
-	case CTC_SHA384wRSA:
+	case NID_sha384WithRSAEncryption:
 		return "sha384WithRSAEncryption";
-	case CTC_SHA512wRSA:
+	case NID_sha512WithRSAEncryption:
 		return "sha512WithRSAEncryption";
-	case CTC_SHA224wRSA:
+	case NID_sha224WithRSAEncryption:
 		return "sha224WithRSAEncryption";
-	case CTC_MD5wRSA:
+	case NID_md5WithRSAEncryption:
 		return "md5WithRSAEncryption";
-	case CTC_SHAwRSA:
+	case NID_sha1WithRSAEncryption:
 		return "sha1WithRSAEncryption";
-	case CTC_MD2wRSA:
-		return "md2WithRSAEncryption";
 	default:
 		return "";
 	}
@@ -219,10 +222,15 @@ static int get_SecurityCertificate_NotBefore(char *refparam, struct dmctx *ctx, 
 
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	const ASN1_TIME *not_before = X509_get0_notBefore(cert_profile->openssl_cert);
-	ASN1_TIME_to_string((ASN1_TIME *)not_before, not_before_str, DATE_LEN);
 
+	*value = "0001-01-01T00:00:00Z";
+#ifdef LWOLFSSL
+	ASN1_TIME_to_string((ASN1_TIME *)not_before, not_before_str, DATE_LEN);
 	if (!strptime(not_before_str, "%b %d %H:%M:%S %Y", &tm))
 		return -1;
+#else
+	ASN1_TIME_to_tm(not_before, &tm);
+#endif
 
 	strftime(not_before_str, sizeof(not_before_str), "%Y-%m-%dT%H:%M:%SZ", &tm);
 	*value = dmstrdup(not_before_str);
@@ -236,10 +244,15 @@ static int get_SecurityCertificate_NotAfter(char *refparam, struct dmctx *ctx, v
 
 	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
 	const ASN1_TIME *not_after = X509_get0_notAfter(cert_profile->openssl_cert);
-	ASN1_TIME_to_string((ASN1_TIME *)not_after, not_after_str, DATE_LEN);
 
+	*value = "0001-01-01T00:00:00Z";
+#ifdef LWOLFSSL
+	ASN1_TIME_to_string((ASN1_TIME *)not_after, not_after_str, DATE_LEN);
 	if (!strptime(not_after_str, "%b %d %H:%M:%S %Y", &tm))
 		return -1;
+#else
+	ASN1_TIME_to_tm((ASN1_TIME *)not_after, &tm);
+#endif
 
 	strftime(not_after_str, sizeof(not_after_str), "%Y-%m-%dT%H:%M:%SZ", &tm);
 	*value = dmstrdup(not_after_str);
