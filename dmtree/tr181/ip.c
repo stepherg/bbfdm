@@ -1475,7 +1475,6 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 					// Check if there is an dmmap link section that has the same device ==> if yes, update section name
 					get_dmmap_section_of_config_section_eq("dmmap", "link", "device", linker_buf, &s);
-					dmuci_set_value_by_section_bbfdm(s, "section_name", section_name((struct uci_section *)data));
 
 				} else {
 					// Check if there is an interface that has the same name of device ==> if yes, remove it
@@ -1488,11 +1487,20 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 							dmuci_delete_by_section(s, NULL, NULL);
 						}
 					}
+
+					get_dmmap_section_of_config_section_eq("dmmap", "link", "device", dev_buf, &s);
 				}
 
 				// Update device option
 				dmuci_set_value_by_section((struct uci_section *)data, "device", linker_buf);
 
+				if (s) {
+					char *macaddr = NULL;
+
+					dmuci_get_value_by_section_string((struct uci_section *)data, "macaddr", &macaddr);
+					dmuci_set_value_by_section_bbfdm(s, "mac", macaddr);
+					dmuci_set_value_by_section_bbfdm(s, "section_name", section_name((struct uci_section *)data));
+				}
 			} else if (DM_STRNCMP(value, eth_link, DM_STRLEN(eth_link)) == 0) {
 
 				// Get interface name from Ethernet.Link. object
