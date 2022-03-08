@@ -609,7 +609,7 @@ static int get_ServicesVoiceServiceCallControlLine_DirectoryNumber(char *refpara
 {
 	char *sip_account = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "sip_account", &sip_account);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "provider", &sip_account);
 	dmuci_get_option_value_string("asterisk", sip_account, "directory_number", value);
 	return 0;
 }
@@ -624,7 +624,7 @@ static int set_ServicesVoiceServiceCallControlLine_DirectoryNumber(char *refpara
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "sip_account", &sip_account);
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "provider", &sip_account);
 			dmuci_set_value("asterisk", sip_account, "directory_number", value);
 			break;
 	}
