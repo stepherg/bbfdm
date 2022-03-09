@@ -459,6 +459,7 @@ static int delObjWiFiEndPoint(char *refparam, struct dmctx *ctx, void *data, cha
 	return 0;
 }
 
+/*
 static int addObjWiFiDataElementsNetworkDeviceDefault8021Q(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	//TODO
@@ -470,6 +471,7 @@ static int delObjWiFiDataElementsNetworkDeviceDefault8021Q(char *refparam, struc
 	//TODO
 	return 0;
 }
+*/
 
 /*************************************************************
 * ENTRY METHOD
@@ -774,6 +776,7 @@ static int browseWiFiDataElementsNetworkDeviceInst(struct dmctx *dmctx, DMNODE *
 	return 0;
 }
 
+/*
 static int browseWiFiDataElementsNetworkDeviceDefault8021QInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, "1");
@@ -785,6 +788,7 @@ static int browseWiFiDataElementsNetworkDeviceSSIDtoVIDMappingInst(struct dmctx 
 	//TODO
 	return 0;
 }
+*/
 
 static int browseWiFiDataElementsNetworkDeviceRadioInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -949,7 +953,8 @@ static int browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelS
 	return 0;
 }
 
-/*static int browseWiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannelsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+/*
+static int browseWiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannelsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *wifi_da_radio = ((struct wifi_data_element_args *)prev_data)->dump2_obj;
 	json_object *opclass_arr = NULL, *opclass_obj = NULL;
@@ -4987,6 +4992,7 @@ static int set_WiFiDataElementsNetworkDeviceDefault8021Q_DefaultPCP(char *refpar
 	return 0;
 }
 
+/*
 static int get_WiFiDataElementsNetworkDeviceSSIDtoVIDMapping_SSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	//TODO
@@ -4998,6 +5004,7 @@ static int get_WiFiDataElementsNetworkDeviceSSIDtoVIDMapping_VID(char *refparam,
 	//TODO
 	return 0;
 }
+*/
 
 static int get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -5652,6 +5659,7 @@ end:
 	return CMD_SUCCESS;
 }
 
+/*
 static operation_args WiFiDataElementsNetworkDevice_SetDFSState_args = {
 	.in = (const char *[]) {
 		"DFSEnable",
@@ -5674,6 +5682,7 @@ static int operate_WiFiDataElementsNetworkDevice_SetDFSState(char *refparam, str
 	//TODO
 	return CMD_SUCCESS;
 }
+*/
 
 /**********************************************************************************************************************************
 *                                            OBJ & LEAF DEFINITION
@@ -6063,8 +6072,8 @@ DMLEAF tWiFiDataElementsNetworkMultiAPSteeringSummaryStatsParams[] = {
 /* *** Device.WiFi.DataElements.Network.Device.{i}. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Default8021Q", &DMWRITE, addObjWiFiDataElementsNetworkDeviceDefault8021Q, delObjWiFiDataElementsNetworkDeviceDefault8021Q, NULL, browseWiFiDataElementsNetworkDeviceDefault8021QInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceDefault8021QParams, NULL, BBFDM_BOTH, LIST_KEY{"PrimaryVID", NULL}, "2.15"},
-{"SSIDtoVIDMapping", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceSSIDtoVIDMappingInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceSSIDtoVIDMappingParams, NULL, BBFDM_BOTH, LIST_KEY{"SSID", NULL}, "2.15"},
+// {"Default8021Q", &DMWRITE, addObjWiFiDataElementsNetworkDeviceDefault8021Q, delObjWiFiDataElementsNetworkDeviceDefault8021Q, NULL, browseWiFiDataElementsNetworkDeviceDefault8021QInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceDefault8021QParams, NULL, BBFDM_BOTH, LIST_KEY{"PrimaryVID", NULL}, "2.15"},
+// {"SSIDtoVIDMapping", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceSSIDtoVIDMappingInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceSSIDtoVIDMappingParams, NULL, BBFDM_BOTH, LIST_KEY{"SSID", NULL}, "2.15"},
 {"MultiAPDevice", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceObj, tWiFiDataElementsNetworkDeviceMultiAPDeviceParams, NULL, BBFDM_BOTH, NULL, "2.15"},
 {"Radio", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioObj, tWiFiDataElementsNetworkDeviceRadioParams, NULL, BBFDM_BOTH, LIST_KEY{"ID", NULL}, "2.13"},
 {0}
@@ -6088,7 +6097,7 @@ DMLEAF tWiFiDataElementsNetworkDeviceParams[] = {
 //{"TrafficSeparationAllowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_TrafficSeparationAllowed, NULL, BBFDM_BOTH, "2.15"},
 {"RadioNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_RadioNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
 {"SetSTASteeringState()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetSTASteeringState, operate_WiFiDataElementsNetworkDevice_SetSTASteeringState, BBFDM_USP, "2.15"},
-{"SetDFSState()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetDFSState, operate_WiFiDataElementsNetworkDevice_SetDFSState, BBFDM_USP, "2.15"},
+// {"SetDFSState()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetDFSState, operate_WiFiDataElementsNetworkDevice_SetDFSState, BBFDM_USP, "2.15"},
 {0}
 };
 
@@ -6369,12 +6378,12 @@ DMLEAF tWiFiDataElementsNetworkDeviceDefault8021QParams[] = {
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.SSIDtoVIDMapping.{i}. *** */
-DMLEAF tWiFiDataElementsNetworkDeviceSSIDtoVIDMappingParams[] = {
+//DMLEAF tWiFiDataElementsNetworkDeviceSSIDtoVIDMappingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"SSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceSSIDtoVIDMapping_SSID, NULL, BBFDM_BOTH, "2.15"},
-{"VID", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceSSIDtoVIDMapping_VID, NULL, BBFDM_BOTH, "2.15"},
-{0}
-};
+//{"SSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceSSIDtoVIDMapping_SSID, NULL, BBFDM_BOTH, "2.15"},
+//{"VID", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceSSIDtoVIDMapping_VID, NULL, BBFDM_BOTH, "2.15"},
+//{0}
+//};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceMultiAPDeviceObj[] = {
