@@ -350,7 +350,17 @@ static int fill_ubus_arguments(struct dmctx *ctx, void *data, char *instance, ch
 
 		u_args[u_args_size].key = dm_dynamic_strdup(&json_memhead, buf_key);
 		u_args[u_args_size].val = dm_dynamic_strdup(&json_memhead, buf_val);
-		u_args[u_args_size].type = String;
+		switch (json_object_get_type(val)) {
+			case json_type_boolean:
+				u_args[u_args_size].type = Boolean;
+				break;
+			case json_type_int:
+				u_args[u_args_size].type = Integer;
+				break;
+			default:
+				u_args[u_args_size].type = String;
+				break;
+		}
 		u_args_size++;
 	}
 
