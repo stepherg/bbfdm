@@ -112,6 +112,7 @@ static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "enabled", "0");
 	dmuci_set_value_by_section(s, "target", "DROP");
+	dmuci_set_value_by_section(s, "proto", "0");
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "rule", &dmmap_firewall_rule);
 	dmuci_set_value_by_section(dmmap_firewall_rule, "section_name", s_name);
@@ -606,24 +607,32 @@ static int get_rule_source_mask(char *refparam, struct dmctx *ctx, void *data, c
 /*#Device.Firewall.Chain.{i}.Rule.{i}.Protocol!UCI:firewall/rule,@i-1/proto*/
 static int get_rule_protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	FILE *fp;
-	char *v, buf[256], protocol[32], protocol_nbr[16];
+	char *proto = NULL, buf[256], protocol[32], protocol_nbr[16];
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "proto", &v);
-	*value = "-1";
-	if (*v == '\0' || *v == '0') {
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "proto", &proto);
+
+	if (!proto || *proto == 0 || strchr(proto, ' ')) {
+		*value = "255";
 		return 0;
 	}
-	if (isdigit_str(v)) {
-		*value = v;
+
+	if (*proto == '0' || strcmp(proto, "all") == 0) {
+		*value = "-1";
 		return 0;
 	}
-	fp = fopen("/etc/protocols", "r");
+
+	if (isdigit_str(proto)) {
+		*value = proto;
+		return 0;
+	}
+
+	FILE *fp = fopen("/etc/protocols", "r");
 	if (fp == NULL)
 		return 0;
+
 	while (fgets (buf , 256 , fp) != NULL) {
 		sscanf(buf, "%31s %15s", protocol, protocol_nbr);
-		if (DM_STRCMP(protocol, v) == 0) {
+		if (DM_STRCMP(protocol, proto) == 0) {
 			*value = dmstrdup(protocol_nbr);
 			fclose(fp);
 			return 0;
@@ -1248,7 +1257,7 @@ static int set_rule_protocol(char *refparam, struct dmctx *ctx, void *data, char
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "proto", (*value == '-') ? "" : value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "proto", (*value == '-') ? "0" : value);
 			break;
 	}
         return 0;
