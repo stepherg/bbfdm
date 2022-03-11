@@ -21,7 +21,6 @@
 static int read_next;
 static struct diagnostic_stats diag_stats = {0};
 static const int READ_BUF_SIZE = { 1024 * 16 };
-static struct uloop_timeout activate_timer[MAX_TIME_WINDOW] = {0};
 
 char *get_diagnostics_option(char *sec_name, char *option)
 {
@@ -570,38 +569,6 @@ end:
 		res = -1;
 
 	return res;
-}
-
-static void launch_activate_iamge_cb(struct uloop_timeout *t)
-{
-	dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0);
-}
-
-static void activate_fw_images(char *start_time[])
-{
-	for (int i = 0; i < MAX_TIME_WINDOW && DM_STRLEN(start_time[i]); i++) {
-		activate_timer[i].cb = launch_activate_iamge_cb;
-		uloop_timeout_set(&activate_timer[i], DM_STRTOL(start_time[i]) * 1000);
-	}
-}
-
-int bbf_fw_image_activate(const char *bank_id, char *start_time[])
-{
-	json_object *json_obj = NULL;
-
-	dmubus_call("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id, Integer}}, 1, &json_obj);
-	char *status = dmjson_get_value(json_obj, 1, "success");
-	if (strcmp(status, "true") != 0)
-		return -1;
-
-	if (DM_STRLEN(start_time[0])) {
-		activate_fw_images(start_time);
-	} else {
-		if (dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) != 0)
-			return -1;
-	}
-
-	return 0;
 }
 
 static void libtrace_cleanup(libtrace_t *trace, libtrace_packet_t *packet)

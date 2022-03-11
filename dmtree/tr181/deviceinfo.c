@@ -1005,15 +1005,6 @@ static operation_args firmware_image_activate_args = {
 	}
 };
 
-
-static const char *firmware_image_activate_in[] = {
-	"TimeWindow.1.Start",
-	"TimeWindow.2.Start",
-	"TimeWindow.3.Start",
-	"TimeWindow.4.Start",
-	"TimeWindow.5.Start",
-};
-
 static int get_operate_args_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = (char *)&firmware_image_activate_args;
@@ -1023,13 +1014,101 @@ static int get_operate_args_DeviceInfoFirmwareImage_Activate(char *refparam, str
 static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *start_time[MAX_TIME_WINDOW] = {0};
+	char *end_time[MAX_TIME_WINDOW] = {0};
+	char *mode[MAX_TIME_WINDOW] = {0};
+	char *user_message[MAX_TIME_WINDOW] = {0};
+	char *max_retries[MAX_TIME_WINDOW] = {0};
+	int res = 0, last_idx = -1;
 
-	for (int i = 0; i < ARRAY_SIZE(firmware_image_activate_in); i++)
-		start_time[i] = dmjson_get_value((json_object *)value, 1, firmware_image_activate_in[i]);
+	for (int i = 0; i < MAX_TIME_WINDOW; i++) {
+		char buf[32] = {0};
+
+		snprintf(buf, sizeof(buf), "TimeWindow.%d.Start", i + 1);
+		start_time[i] = dmjson_get_value((json_object *)value, 1, buf);
+
+		snprintf(buf, sizeof(buf), "TimeWindow.%d.End", i + 1);
+		end_time[i] = dmjson_get_value((json_object *)value, 1, buf);
+
+		snprintf(buf, sizeof(buf), "TimeWindow.%d.Mode", i + 1);
+		mode[i] = dmjson_get_value((json_object *)value, 1, buf);
+
+		snprintf(buf, sizeof(buf), "TimeWindow.%d.UserMessage", i + 1);
+		user_message[i] = dmjson_get_value((json_object *)value, 1, buf);
+
+		snprintf(buf, sizeof(buf), "TimeWindow.%d.MaxRetries", i + 1);
+		max_retries[i] = dmjson_get_value((json_object *)value, 1, buf);
+
+		if (!DM_STRLEN(start_time[i]))
+			break;
+
+		if (!DM_STRLEN(end_time[i]) || !DM_STRLEN(mode[i]))
+			return CMD_INVALID_ARGUMENTS;
+
+		if (dm_validate_unsignedInt(start_time[i], RANGE_ARGS{{NULL,NULL}}, 1))
+			return CMD_INVALID_ARGUMENTS;
+
+		if (dm_validate_unsignedInt(end_time[i], RANGE_ARGS{{NULL,NULL}}, 1))
+			return CMD_INVALID_ARGUMENTS;
+
+		if (DM_STRLEN(max_retries[i]) && dm_validate_int(max_retries[i], RANGE_ARGS{{"-1","10"}}, 1))
+			return CMD_INVALID_ARGUMENTS;
+
+		if (dm_validate_string(mode[i], -1, -1, FW_Mode, NULL))
+			return CMD_INVALID_ARGUMENTS;
+
+		if (DM_STRTOL(start_time[i]) > DM_STRTOL(end_time[i]))
+			return CMD_INVALID_ARGUMENTS;
+
+		if (i != 0 && DM_STRTOL(end_time[i - 1]) > DM_STRTOL(start_time[i]))
+			return CMD_INVALID_ARGUMENTS;
+
+		last_idx++;
+	}
 
 	char *bank_id = dmjson_get_value((json_object *)data, 1, "id");
+	if (!DM_STRLEN(bank_id))
+		return CMD_FAIL;
 
-	int res = bbf_fw_image_activate(bank_id, start_time);
+	if (DM_STRLEN(start_time[0])) {
+		FILE *file = fopen(CRONTABS_ROOT, "a");
+		if (!file)
+			return CMD_FAIL;
+
+		for (int i = 0; i < MAX_TIME_WINDOW && DM_STRLEN(start_time[i]); i++) {
+			char buffer[512] = {0};
+			time_t t_time = time(NULL);
+			t_time = t_time + DM_STRTOL(start_time[i]);
+			struct tm *tm_local = localtime(&t_time);
+
+			snprintf(buffer, sizeof(buffer), "%d %d %d %d * sh %s '%s' '%s' '%ld' '%d' '%s' '%s'\n",
+											tm_local->tm_min,
+											tm_local->tm_hour,
+											tm_local->tm_mday,
+											tm_local->tm_mon + 1,
+											ACTIVATE_HANDLER_FILE,
+											mode[i],
+											bank_id,
+											(DM_STRTOL(end_time[i]) - DM_STRTOL(start_time[i])),
+											(i == last_idx),
+											user_message[i],
+											max_retries[i]);
+
+			fprintf(file, "%s", buffer);
+		}
+
+		fclose(file);
+
+		res = dmcmd_no_wait("/etc/init.d/cron", 1, "restart");
+	} else {
+		json_object *json_obj = NULL;
+
+		dmubus_call("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id, Integer}}, 1, &json_obj);
+		char *status = dmjson_get_value(json_obj, 1, "success");
+		if (strcasecmp(status, "true") != 0)
+			return CMD_FAIL;
+
+		res = dmubus_call_set("rpc-sys", "reboot", UBUS_ARGS{0}, 0);
+	}
 
 	return res ? CMD_FAIL : CMD_SUCCESS;
 }

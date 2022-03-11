@@ -114,7 +114,10 @@ extern char *SupportedFrequencyBands[];
 extern char *Provider_Bridge_Type[];
 extern char *AdvPreferredRouterFlag[];
 extern char *PowerState[];
+extern char *FW_Mode[];
 
+#define CRONTABS_ROOT "/etc/crontabs/root"
+#define ACTIVATE_HANDLER_FILE "/usr/share/bbfdm/bbf_activate_handler.sh"
 #define UPTIME "/proc/uptime"
 #define DEFAULT_CONFIG_DIR "/etc/config/"
 #define PROC_ROUTE "/proc/net/route"
