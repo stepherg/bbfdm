@@ -668,14 +668,14 @@ static int browseWiFiDataElementsNetworkSSIDInst(struct dmctx *dmctx, DMNODE *pa
 	return 0;
 }
 
-static json_object *dump_find_device_object(const char *unique_key)
+static json_object *find_device_object(char *method_name, const char *unique_key)
 {
 	json_object *data_arr = NULL;
 	json_object *data_obj = NULL;
 	json_object *res = NULL;
 	int i = 0;
 
-	dmubus_call("wifi.dataelements.collector", "dump", UBUS_ARGS{0}, 0, &res);
+	dmubus_call("wifi.dataelements.collector", method_name, UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, data_arr, data_obj, i, 1, "data") {
 		json_object *dev_arr = NULL;
 		json_object *dev_obj = NULL;
@@ -692,25 +692,7 @@ static json_object *dump_find_device_object(const char *unique_key)
 	return NULL;
 }
 
-static json_object *dump2_find_device_object(const char *unique_key)
-{
-	json_object *device_arr = NULL;
-	json_object *device_obj = NULL;
-	json_object *res = NULL;
-	int i = 0;
-
-	dmubus_call("wifi.dataelements.collector", "dump2", UBUS_ARGS{0}, 0, &res);
-	dmjson_foreach_obj_in_array(res, device_arr, device_obj, i, 1, "APDeviceList") {
-
-		char *macaddr = dmjson_get_value(device_obj, 1, "macaddr");
-		if (DM_STRCASECMP(unique_key, macaddr) == 0)
-			return device_obj;
-	}
-
-	return NULL;
-}
-
-static json_object *dump_find_radio_object(json_object *device_obj, const char *unique_key)
+static json_object *find_radio_object(json_object *device_obj, const char *unique_key)
 {
 	json_object *radio_arr = NULL;
 	json_object *radio_obj = NULL;
@@ -722,22 +704,6 @@ static json_object *dump_find_radio_object(json_object *device_obj, const char *
 		char *id = dmjson_get_value(radio_obj, 1, "ID");
 		char *str = base64_decode(id);
 		string_to_mac(str, DM_STRLEN(str), mac, sizeof(mac));
-		if (DM_STRCMP(unique_key, mac) == 0)
-			return radio_obj;
-	}
-
-	return NULL;
-}
-
-static json_object *dump2_find_radio_object(json_object *device_obj, const char *unique_key)
-{
-	json_object *radio_arr = NULL;
-	json_object *radio_obj = NULL;
-	int i = 0;
-
-	dmjson_foreach_obj_in_array(device_obj, radio_arr, radio_obj, i, 1, "RadioList") {
-
-		char *mac = dmjson_get_value(radio_obj, 1, "macaddr");
 		if (DM_STRCMP(unique_key, mac) == 0)
 			return radio_obj;
 	}
@@ -761,8 +727,8 @@ static int browseWiFiDataElementsNetworkDeviceInst(struct dmctx *dmctx, DMNODE *
 			continue;
 
 		wifi_da_device_args.uci_s = p;
-		wifi_da_device_args.dump_obj = dump_find_device_object(key);
-		wifi_da_device_args.dump2_obj = dump2_find_device_object(key);
+		wifi_da_device_args.dump_obj = find_device_object("dump", key);
+		wifi_da_device_args.dump2_obj = find_device_object("dump2", key);
 
 		if (wifi_da_device_args.dump_obj == NULL && wifi_da_device_args.dump2_obj == NULL)
 			continue;
@@ -809,8 +775,8 @@ static int browseWiFiDataElementsNetworkDeviceRadioInst(struct dmctx *dmctx, DMN
 			continue;
 
 		wifi_da_radio_args.uci_s = p;
-		wifi_da_radio_args.dump_obj = dump_find_radio_object(wifi_da_device->dump_obj, key);
-		wifi_da_radio_args.dump2_obj = dump2_find_radio_object(wifi_da_device->dump2_obj, key);
+		wifi_da_radio_args.dump_obj = find_radio_object(wifi_da_device->dump_obj, key);
+		wifi_da_radio_args.dump2_obj = find_radio_object(wifi_da_device->dump2_obj, key);
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "wifi_da_device_instance", "wifi_da_device_alias");
 
@@ -3672,50 +3638,54 @@ static int get_WiFiDataElementsNetworkSSID_Band(char *refparam, struct dmctx *ct
 static int ubus_get_multiap_steering_summary_stats(const char *option, char **value)
 {
 	json_object *res = NULL;
-	dmubus_call("map.controller", "steer_summary", UBUS_ARGS{0}, 0, &res);
+	json_object *jobj = NULL;
+
+	dmubus_call("wifi.dataelements.collector", "dump2", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
-	*value = dmjson_get_value(res, 1, option);
+	jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "data");
+	DM_ASSERT(jobj, *value = "0");
+	*value = dmjson_get_value(res, 3, "wfa-dataelements:Network", "MultiAPSteeringSummaryStats", option);
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_NoCandidateAPFailures(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_get_multiap_steering_summary_stats("fail_no_candidate", value);
+	return ubus_get_multiap_steering_summary_stats("NoCandidateAPFailures", value);
 }
 
 static int get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BlacklistAttempts(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_get_multiap_steering_summary_stats("assoc_cntlr_attempts", value);
+	return ubus_get_multiap_steering_summary_stats("BlacklistAttempts", value);
 }
 
 static int get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BlacklistSuccesses(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_get_multiap_steering_summary_stats("assoc_cntlr_success", value);
+	return ubus_get_multiap_steering_summary_stats("BlacklistSuccesses", value);
 }
 
 static int get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BlacklistFailures(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_get_multiap_steering_summary_stats("assoc_cntlr_fail", value);
+	return ubus_get_multiap_steering_summary_stats("BlacklistFailures", value);
 }
 
 static int get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMAttempts(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_get_multiap_steering_summary_stats("btm_attempts", value);
+	return ubus_get_multiap_steering_summary_stats("BTMAttempts", value);
 }
 
 static int get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMSuccesses(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_get_multiap_steering_summary_stats("btm_success", value);
+	return ubus_get_multiap_steering_summary_stats("BTMSuccesses", value);
 }
 
 static int get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMFailures(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_get_multiap_steering_summary_stats("btm_fail", value);
+	return ubus_get_multiap_steering_summary_stats("BTMFailures", value);
 }
 
 static int get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMQueryResponses(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ubus_get_multiap_steering_summary_stats("btm_query_resp", value);
+	return ubus_get_multiap_steering_summary_stats("BTMQueryResponses", value);
 }
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.ID!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].ID*/
