@@ -50,6 +50,10 @@ config ap
 
 config node
         option agent_id '46:d4:37:71:b4:10'
+        option primary_vid '55'
+        option primary_pcp '16'
+        list steer_exclude '00:aa:bb:cc:dd:ee'
+        list steer_exclude_btm '00:aa:bb:cc:dd:ee'
 
 config radio
         option agent_id '46:d4:37:71:b4:10'
