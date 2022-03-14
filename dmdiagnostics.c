@@ -9,6 +9,7 @@
  *
  */
 
+#include <stdlib.h>
 #ifdef LWOLFSSL
 #include <options.h>
 #endif
@@ -224,7 +225,7 @@ const bool validate_sha1sum_value(const char *file_path, const char *checksum)
 
 	if (!SHA1_Final(hash, &ctx))
 		goto end;
-	
+
 	for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
 		snprintf(&sha1_res[i * 2], sizeof(sha1_res) - (i * 2), "%02x", hash[i]);
 
@@ -261,7 +262,7 @@ const bool validate_sha224sum_value(const char *file_path, const char *checksum)
 
 	if (!SHA224_Final(hash, &ctx))
 		goto end;
-	
+
 	for (int i = 0; i < SHA224_DIGEST_LENGTH; i++)
 		snprintf(&sha224_res[i * 2], sizeof(sha224_res) - (i * 2), "%02x", hash[i]);
 
@@ -300,7 +301,7 @@ const bool validate_sha256sum_value(const char *file_path, const char *checksum)
 
 	if (!SHA256_Final(hash, &ctx))
 		goto end;
-	
+
 	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
 		snprintf(&sha256_res[i * 2], sizeof(sha256_res) - (i * 2), "%02x", hash[i]);
 
@@ -337,7 +338,7 @@ const bool validate_sha384sum_value(const char *file_path, const char *checksum)
 
 	if (!SHA384_Final(hash, &ctx))
 		goto end;
-	
+
 	for (int i = 0; i < SHA384_DIGEST_LENGTH; i++)
 		snprintf(&sha384_res[i * 2], sizeof(sha384_res) - (i * 2), "%02x", hash[i]);
 
@@ -377,7 +378,7 @@ const bool validate_sha512sum_value(const char *file_path, const char *checksum)
 
 	if (!SHA512_Final(hash, &ctx))
 		goto end;
-	
+
 	for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
 		snprintf(&sha512_res[i * 2], sizeof(sha512_res) - (i * 2), "%02x", hash[i]);
 
@@ -477,7 +478,7 @@ int bbf_config_restore(const char *url, const char *username, const char *passwo
 	// Check the file system size if there is sufficient space for downloading the config file
 	if (!validate_file_system_size(file_size)) {
 		res = -1;
-		goto end;		
+		goto end;
 	}
 
 	// Download the firmware image
@@ -516,7 +517,7 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
 		const char *bank_id, const char *command, const char *obj_path, const char *commandKey)
 {
-	char fw_image_path[256] = "/tmp/firmware.bin";
+	char fw_image_path[256] = "/tmp/firmware-XXXXXX.bin";
 	json_object *json_obj = NULL;
 	bool activate = false;
 	int res = 0;
@@ -524,9 +525,10 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	// Check the file system size if there is sufficient space for downloading the firmware image
 	if (!validate_file_system_size(file_size)) {
 		res = -1;
-		goto end;		
+		goto end;
 	}
 
+	mkstemp(fw_image_path);
 	// Download the firmware image
 	time_t start_time = time(NULL);
 	long res_code = download_file(fw_image_path, url, username, password);
@@ -548,7 +550,7 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	}
 
 	// Apply Firmware Image
-	dmubus_call("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", auto_activate, Boolean}, {"bank", bank_id, Integer}}, 3, &json_obj);
+	dmubus_call_blocking("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", auto_activate, Boolean}, {"bank", bank_id, Integer}}, 3, &json_obj);
 
 	if (!json_obj) {
 		res = -1;
@@ -703,7 +705,7 @@ static void ftp_download_per_packet(libtrace_packet_t *packet)
 
 	if (diag_stats.random_seq == 0 && strcmp(tcp_flag, "SYN ") == 0 && diag_stats.ftp_syn == 1) {
 		snprintf(diag_stats.tcpopenrequesttime, sizeof(diag_stats.tcpopenrequesttime), "%s.%06ldZ", s_now, (long) ftp_download_ts.tv_usec);
-		diag_stats.random_seq = ntohl(tcp->seq);		
+		diag_stats.random_seq = ntohl(tcp->seq);
 		return;
 	}
 
@@ -829,7 +831,7 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 	if (strcmp(tcp_flag, "SYN ") == 0 && diag_stats.ftp_syn == 1) {
 		diag_stats.random_seq = ntohl(tcp->seq);
 		snprintf(diag_stats.tcpopenrequesttime, sizeof(diag_stats.tcpopenrequesttime), "%s.%06ldZ", s_now, (long) ftp_upload_ts.tv_usec);
-		return;	
+		return;
 	}
 
 	if (strcmp(tcp_flag, "SYN ACK ") == 0 && diag_stats.random_seq != 0 && (ntohl(tcp->ack_seq) - 1 ) == diag_stats.random_seq) {

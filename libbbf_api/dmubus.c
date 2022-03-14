@@ -16,6 +16,7 @@
 #include "dmcommon.h"
 
 #define UBUS_TIMEOUT 5000
+#define UBUS_MAX_BLOCK_TIME (60000) // 60 sec
 
 static LIST_HEAD(dmubus_cache);
 
@@ -184,6 +185,31 @@ static int __dm_ubus_call(const char *obj, const char *method, struct blob_attr 
 				receive_call_result_data, NULL, UBUS_TIMEOUT);
 	else
 		rc = -1;
+
+	return rc;
+}
+
+static int __ubus_call_blocking(const char *obj, const char *method, struct blob_attr *attr)
+{
+	uint32_t id = 0;
+	int rc = 0;
+
+	json_res = NULL;
+
+	if (ubus_ctx == NULL) {
+		ubus_ctx = dm_libubus_init();
+		if (ubus_ctx == NULL) {
+			printf("UBUS context is null\n\r");
+			return -1;
+		}
+	}
+
+	if (ubus_lookup_id(ubus_ctx, obj, &id) != 0) {
+		return -1;
+	}
+
+	rc = ubus_invoke(ubus_ctx, id, method, attr,
+			receive_call_result_data, NULL, UBUS_MAX_BLOCK_TIME);
 
 	return rc;
 }
@@ -483,6 +509,22 @@ int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_si
 	blob_buf_free(&bmsg);
 	*req_res = res;
 	return 0;
+}
+
+int dmubus_call_blocking(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
+{
+	int rc = 0;
+	struct blob_buf bmsg;
+
+	memset(&bmsg, 0, sizeof(struct blob_buf));
+	prepare_blob_message(&bmsg, u_args, u_args_size);
+
+	rc = __ubus_call_blocking(obj, method, bmsg.head);
+
+	blob_buf_free(&bmsg);
+	*req_res = json_res;
+
+	return rc;
 }
 
 static int dmubus_call_async(const char *obj, const char *method, struct blob_attr *attr)
