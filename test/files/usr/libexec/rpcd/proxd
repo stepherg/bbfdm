@@ -17,7 +17,6 @@ case "$1" in
 							json_get_var path path
 							json_init
 							json_add_string "Description" "$path"
-							json_dump >/dev/console
 							json_dump
                         ;;
                 esac
