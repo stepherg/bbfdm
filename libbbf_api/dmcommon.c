@@ -758,6 +758,15 @@ char **strsplit_by_str(const char str[], char *delim)
 	return tokens;
 }
 
+void convert_str_to_uppercase(char *str)
+{
+	for (int i = 0; str[i] != '\0'; i++) {
+		if (str[i] >= 'a' && str[i] <= 'z') {
+			str[i] = str[i] - 32;
+		}
+	}
+}
+
 char *get_macaddr(char *interface_name)
 {
 	char *device = get_device(interface_name);
@@ -769,6 +778,7 @@ char *get_macaddr(char *interface_name)
 
 		snprintf(file, sizeof(file), "/sys/class/net/%s/address", device);
 		dm_read_sysfs_file(file, val, sizeof(val));
+		convert_str_to_uppercase(val);
 		mac = dmstrdup(val);
 	} else {
 		mac = "";
@@ -993,18 +1003,13 @@ int get_net_device_sysfs(const char *device, const char *name, char **value)
 {
 	if (device && device[0]) {
 		char file[256];
-		char val[64] = {0};
+		char val[32] = {0};
 
 		snprintf(file, sizeof(file), "/sys/class/net/%s/%s", device, name);
 		dm_read_sysfs_file(file, val, sizeof(val));
-		if (0 == strcmp(name, "address")) {
-			// Convert the mac address to upper case.
-			int i;
-			for (i = 0; val[i] != '\0'; i++) {
-				if (val[i] >= 'a' && val[i] <= 'z') {
-					val[i] = val[i] - 32;
-				}
-			}
+		if (strcmp(name, "address") == 0) {
+			// Convert the mac address to upper case
+			convert_str_to_uppercase(val);
 		}
 		*value = dmstrdup(val);
 	} else {

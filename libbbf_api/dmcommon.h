@@ -242,6 +242,7 @@ unsigned char isdigit_str(char *str);
 char *dm_strword(char *src, char *str);
 char **strsplit(const char* str, const char* delim, size_t* numtokens);
 char **strsplit_by_str(const char str[], char *delim);
+void convert_str_to_uppercase(char *str);
 char *get_macaddr(char *interface_name);
 char *get_device(char *interface_name);
 char *get_l3_device(char *interface_name);

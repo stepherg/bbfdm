@@ -160,45 +160,55 @@ bool ethernet___name_exists_in_devices(char *name)
 	return false;
 }
 
-static void add_new_dmmap_section(char *macaddr, char*interface, char *section_name)
+static void add_new_dmmap_section(char *macaddr, char *iface_device, char *iface_name)
 {
 	struct uci_section *dmmap = NULL;
 
 	dmuci_add_section_bbfdm(DMMAP, "link", &dmmap);
 	dmuci_set_value_by_section(dmmap, "mac", macaddr);
-	dmuci_set_value_by_section(dmmap, "device", interface);
-	dmuci_set_value_by_section(dmmap, "is_eth", (!DM_LSTRNCMP(interface, "atm", 3) || !DM_LSTRNCMP(interface, "ptm", 3)) ? "0" : "1");
-	dmuci_set_value_by_section(dmmap, "section_name", section_name);
+	dmuci_set_value_by_section(dmmap, "device", iface_device);
+	dmuci_set_value_by_section(dmmap, "is_eth", (!DM_LSTRNCMP(iface_device, "atm", 3) || !DM_LSTRNCMP(iface_device, "ptm", 3)) ? "0" : "1");
+	dmuci_set_value_by_section(dmmap, "section_name", iface_name);
 }
 
-static void create_link(char *sec_name, char *mac_addr)
+static void create_link(char *sec_name, char *mac_addr, char *iface_device)
 {
-	char *macaddr = (*mac_addr != '\0') ? mac_addr : get_macaddr(sec_name);
+	struct uci_section *s = NULL;
+	char iface_dev[32] = {0};
+	char *macaddr = NULL;
+
+	char *device = get_device(sec_name);
+	if (device[0] == '\0')
+		device = iface_device;
+
+	DM_STRNCPY(iface_dev, device, sizeof(iface_dev));
+
+	char *has_vid = DM_STRCHR(iface_dev, '.');
+	if (has_vid) {
+		*has_vid = '\0';
+		get_net_device_sysfs(iface_dev, "address", &macaddr);
+	} else {
+		macaddr = (*mac_addr != '\0') ? mac_addr : get_macaddr(sec_name);
+	}
+
 	if (macaddr[0] == '\0')
 		return;
 
-	struct uci_section *s = NULL;
-	char *dev_sec_name;
 	uci_path_foreach_sections(bbfdm, DMMAP, "link", s) {
-		dmuci_get_value_by_section_string(s, "section_name", &dev_sec_name);
-		if (DM_STRCMP(sec_name, dev_sec_name) == 0) {
+		char *link_device = NULL;
+
+		dmuci_get_value_by_section_string(s, "device", &link_device);
+		if (DM_STRCMP(iface_dev, link_device) == 0) {
 			dmuci_set_value_by_section(s, "mac", macaddr);
 			return;
 		}
 	}
 
-	char *device = get_device(sec_name);
-	if (device[0] == '\0')
-		return;
-
 	/* For all the Ethernet link objects pointing to same Ethernet Interface, only one ethernet link */
-	char intf[32] = {0};
-	DM_STRNCPY(intf, device, sizeof(intf));
-	char *vid = DM_STRCHR(intf, '.');
-	char *macvlan = DM_STRCHR(intf, '_');
-	if (vid != NULL || !macvlan) {
-		if (vid) *vid = '\0';
-		struct uci_section *dmmap_section = is_device_section_exist(intf);
+	char *is_macvlan = DM_STRCHR(iface_dev, '_');
+	if (has_vid != NULL || !is_macvlan) {
+
+		struct uci_section *dmmap_section = is_device_section_exist(iface_dev);
 		if (dmmap_section) {
 			char *section_name;
 			dmuci_get_value_by_section_string(dmmap_section, "section_name", &section_name);
@@ -212,13 +222,13 @@ static void create_link(char *sec_name, char *mac_addr)
 
 		} else {
 			/* Add new dmmap section */
-			add_new_dmmap_section(macaddr, intf, sec_name);
+			add_new_dmmap_section(macaddr, iface_dev, sec_name);
 		}
 		return;
 	}
 
 	/* Add new dmmap section */
-	add_new_dmmap_section(macaddr, intf, sec_name);
+	add_new_dmmap_section(macaddr, iface_dev, sec_name);
 }
 
 static int dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
@@ -243,7 +253,7 @@ static int dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_nod
 			continue;
 
 		dmuci_get_value_by_section_string(s, "macaddr", &macaddr);
-		create_link(section_name(s), macaddr);
+		create_link(section_name(s), macaddr, device);
 	}
 	return 0;
 }
@@ -1308,19 +1318,7 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 
 static int get_EthernetLink_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *mac_addr;
-	char address[64] = {0};
-	int i;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "mac", &mac_addr);
-	DM_STRNCPY(address, mac_addr, sizeof(address));
-	for (i = 0; address[i] != '\0'; i++) {
-		if(address[i] >= 'a' && address[i] <= 'z') {
-			address[i] = address[i] - 32;
-		}
-	}
-
-	*value = dmstrdup(address);
+	dmuci_get_value_by_section_string((struct uci_section *)data, "mac", value);
 	return 0;
 }
 
