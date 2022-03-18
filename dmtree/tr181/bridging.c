@@ -885,23 +885,12 @@ end:
 static void get_bridge_vlanport_device_section(struct uci_section *dmmap_section, struct uci_section **device_section)
 {
 	struct uci_section *s = NULL;
-	char *name = NULL, *device_name = NULL;
-
-	/* Get name from dmmap section */
-	dmuci_get_value_by_section_string(dmmap_section, "name", &name);
-
-	if (name && name[0] != '\0') {
-		/* Find the device network section corresponding to this name */
-		uci_foreach_option_eq("network", "device", "name", name, s) {
-			*device_section = s;
-			return;
-		}
-	}
+	char *device_name = NULL;
 
 	/* Get section_name from dmmap section */
 	dmuci_get_value_by_section_string(dmmap_section, "device_name", &device_name);
 
-	if (device_name && device_name[0] != '\0') {
+	if (DM_STRLEN(device_name)) {
 		/* Find the device network section corresponding to this device_name */
 		uci_foreach_sections("network", "device", s) {
 			if (strcmp(section_name(s), device_name) == 0) {
