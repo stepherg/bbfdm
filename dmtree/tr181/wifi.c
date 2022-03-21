@@ -5645,6 +5645,7 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 	if (res) {
 		json_object *radios = NULL, *arrobj = NULL;
 		int i = 0;
+		uint8_t index = 1;
 
 		dmjson_foreach_obj_in_array(res, arrobj, radios, i, 1, "radios") {
 			json_object *scan_res = NULL, *obj = NULL;
@@ -5683,7 +5684,6 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 
 			uint8_t len = obj ? json_object_array_length(obj) : 0;
 			for (uint8_t j = 0; j < len; j++ ) {
-				uint8_t index = j + 1;
 
 				json_object *array_obj = json_object_array_get_idx(obj, j);
 				ssid[1] = dmjson_get_value(array_obj, 1, "ssid");
@@ -5706,6 +5706,7 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 				add_list_parameter(ctx, frequency[0], frequency[1], DMT_TYPE[DMT_STRING], NULL);
 				add_list_parameter(ctx, signal_strength[0], signal_strength[1], DMT_TYPE[DMT_INT], NULL);
 				add_list_parameter(ctx, noise[0], noise[1], DMT_TYPE[DMT_INT], NULL);
+				index++;
 			}
 		}
 	}
