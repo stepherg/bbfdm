@@ -21,7 +21,8 @@
 
 int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
 int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size);
-int dmubus_operate_blob_set(char *obj, char *method, void *value, json_object **resp);
+int dmubus_call_blob(char *obj, char *method, void *value, json_object **resp);
+int dmubus_call_blob_set(char *obj, char *method, void *value);
 bool dmubus_object_method_exists(const char *obj);
 void dmubus_free();
 void dmubus_configure(struct ubus_context *ctx);

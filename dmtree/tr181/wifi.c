@@ -6025,7 +6025,7 @@ static int operate_WiFiDataElementsNetworkDevice_SetDFSState(char *refparam, str
 {
 	//TODO
 	return CMD_SUCCESS;
-}
+}*/
 
 static operation_args wifidataelementsnetworkdeviceradio_channelscanrequest_args = {
     .in = (const char *[]) {
@@ -6047,11 +6047,57 @@ static int get_operate_args_WiFiDataElementsNetworkDeviceRadio_ChannelScanReques
 
 static int operate_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-    //TODO
+	char *status = "Success";
+	char *agent_id = NULL;
+	char *macaddr = NULL;
+	char *pch = NULL;
+	char *spch = NULL;
+
+	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "agent_id", &agent_id);
+	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "macaddr", &macaddr);
+
+	if ((dm_validate_string(agent_id, -1, 17, NULL, MACAddress)) ||
+		(dm_validate_string(macaddr, -1, 17, NULL, MACAddress))) {
+		status = "Error_Invalid_Input";
+		goto end;
+	}
+
+	char *channel_list = dmjson_get_value((json_object *)value, 1, "ChannelList");
+
+	if (dm_validate_unsignedInt_list(channel_list, -1, -1, -1, RANGE_ARGS{{NULL,"255"}}, 1)) {
+		status = "Error_Invalid_Input";
+		goto end;
+	}
+
+	struct json_object *in_args = json_object_new_object();
+	json_object_object_add(in_args, "agent", json_object_new_string(agent_id));
+
+	struct json_object *radio_array = json_object_new_array();
+	json_object_array_add(radio_array, json_object_new_string(macaddr));
+	json_object_object_add(in_args, "radio", radio_array);
+
+	struct json_object *channel_array = json_object_new_array();
+
+	for (pch = strtok_r(channel_list, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+		struct json_object *val_array = json_object_new_array();
+		json_object_array_add(val_array, json_object_new_int(DM_STRTOL(pch)));
+		json_object_array_add(channel_array, val_array);
+	}
+
+	json_object_object_add(in_args, "channel", channel_array);
+
+	int res = dmubus_call_blob_set("map.controller", "scan", in_args);
+	if (res)
+		status = "Error_Invalid_Input";
+
+	json_object_put(in_args);
+
+end:
+	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
     return CMD_SUCCESS;
 }
 
-static operation_args wifidataelementsnetworkdeviceradio_wifirestart_args = {
+/*static operation_args wifidataelementsnetworkdeviceradio_wifirestart_args = {
     .out = (const char *[]) {
         "Status",
         NULL
@@ -6068,8 +6114,7 @@ static int operate_WiFiDataElementsNetworkDeviceRadio_WiFiRestart(char *refparam
 {
     //TODO
     return CMD_SUCCESS;
-}
-*/
+}*/
 
 /*************************************************************
  * EVENTS
@@ -6796,7 +6841,7 @@ DMLEAF tWiFiDataElementsNetworkDeviceRadioParams[] = {
 {"BSSNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_BSSNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
 {"ScanResultNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_ScanResultNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
 {"DisAllowedOpClassChannelsNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_DisAllowedOpClassChannelsNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
-//{"ChannelScanRequest()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest, operate_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest, BBFDM_USP, "2.15"},
+{"ChannelScanRequest()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest, operate_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest, BBFDM_USP, "2.15"},
 //{"RadioEnable()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_RadioEnable, operate_WiFiDataElementsNetworkDeviceRadio_RadioEnable, BBFDM_USP, "2.15"},
 //{"SetTxPowerLimit()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_SetTxPowerLimit, operate_WiFiDataElementsNetworkDeviceRadio_SetTxPowerLimit, BBFDM_USP, "2.15"},
 //{"SetSpatialReuse()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_SetSpatialReuse, operate_WiFiDataElementsNetworkDeviceRadio_SetSpatialReuse, BBFDM_USP, "2.15"},
