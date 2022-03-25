@@ -62,52 +62,54 @@
 			"protocols": [
 				"usp"
 			],
-			"CommandKey": {
-				"type": "string",
-				"read": true,
-				"write": true,
-				"version": "2.12",
-				"protocols": [
-					"usp"
-				],
-				"datatype": "string"
-			},
-			"Cause": {
-				"type": "string",
-				"read": true,
-				"write": true,
-				"version": "2.12",
-				"protocols": [
-					"usp"
-				],
-				"datatype": "string",
-				"enumerations": [
-					"LocalReboot",
-					"RemoteReboot",
-					"FactoryReset",
-					"LocalFactoryReset",
-					"RemoteFactoryReset"
-				]
-			},
-			"FirmwareUpdated": {
-				"type": "boolean",
-				"read": true,
-				"write": true,
-				"version": "2.12",
-				"protocols": [
-					"usp"
-				],
-				"datatype": "boolean"
-			},
-			"ParameterMap": {
-				"type": "string",
-				"read": true,
-				"write": true,
-				"version": "2.12",
-				"protocols": [
-					"usp"
-				],
-				"datatype": "JSONObject"
+			"output": {
+				"CommandKey": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string"
+				},
+				"Cause": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "string",
+					"enumerations": [
+						"LocalReboot",
+						"RemoteReboot",
+						"FactoryReset",
+						"LocalFactoryReset",
+						"RemoteFactoryReset"
+					]
+				},
+				"FirmwareUpdated": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "boolean"
+				},
+				"ParameterMap": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.12",
+					"protocols": [
+						"usp"
+					],
+					"datatype": "JSONObject"
+				}
 			}
 		},
 		"FactoryReset()": {
@@ -38535,111 +38537,113 @@
 						"protocols": [
 							"usp"
 						],
-						"BSSID": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "MACAddress",
-							"range": [
-								{
-									"max": 17
-								}
-							],
-							"pattern": [
-								"",
-								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-							]
-						},
-						"MACAddress": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "MACAddress",
-							"range": [
-								{
-									"max": 17
-								}
-							],
-							"pattern": [
-								"",
-								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-							]
-						},
-						"StatusCode": {
-							"type": "unsignedInt",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "unsignedInt"
-						},
-						"HTCapabilities": {
-							"type": "base64",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "base64",
-							"range": [
-								{
-									"min": 1,
-									"max": 1
-								}
-							]
-						},
-						"VHTCapabilities": {
-							"type": "base64",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "base64",
-							"range": [
-								{
-									"min": 2,
-									"max": 6
-								}
-							]
-						},
-						"HECapabilities": {
-							"type": "base64",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "base64",
-							"range": [
-								{
-									"min": 4,
-									"max": 14
-								}
-							]
-						},
-						"TimeStamp": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "string"
+						"output": {
+							"BSSID": {
+								"type": "string",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "MACAddress",
+								"range": [
+									{
+										"max": 17
+									}
+								],
+								"pattern": [
+									"",
+									"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+								]
+							},
+							"MACAddress": {
+								"type": "string",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "MACAddress",
+								"range": [
+									{
+										"max": 17
+									}
+								],
+								"pattern": [
+									"",
+									"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+								]
+							},
+							"StatusCode": {
+								"type": "unsignedInt",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "unsignedInt"
+							},
+							"HTCapabilities": {
+								"type": "base64",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "base64",
+								"range": [
+									{
+										"min": 1,
+										"max": 1
+									}
+								]
+							},
+							"VHTCapabilities": {
+								"type": "base64",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "base64",
+								"range": [
+									{
+										"min": 2,
+										"max": 6
+									}
+								]
+							},
+							"HECapabilities": {
+								"type": "base64",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "base64",
+								"range": [
+									{
+										"min": 4,
+										"max": 14
+									}
+								]
+							},
+							"TimeStamp": {
+								"type": "string",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "string"
+							}
 						}
 					},
 					"Device.WiFi.DataElements.AssociationEvent.AssociationEventData.{i}.": {
@@ -39070,133 +39074,135 @@
 						"protocols": [
 							"usp"
 						],
-						"BSSID": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "MACAddress",
-							"range": [
-								{
-									"max": 17
-								}
-							],
-							"pattern": [
-								"",
-								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-							]
-						},
-						"MACAddress": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "MACAddress",
-							"range": [
-								{
-									"max": 17
-								}
-							],
-							"pattern": [
-								"",
-								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-							]
-						},
-						"ReasonCode": {
-							"type": "unsignedInt",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "unsignedInt"
-						},
-						"BytesSent": {
-							"type": "unsignedLong",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "StatsCounter64"
-						},
-						"BytesReceived": {
-							"type": "unsignedLong",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "StatsCounter64"
-						},
-						"PacketsSent": {
-							"type": "unsignedLong",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "StatsCounter64"
-						},
-						"PacketsReceived": {
-							"type": "unsignedLong",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "StatsCounter64"
-						},
-						"ErrorsSent": {
-							"type": "unsignedInt",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "StatsCounter32"
-						},
-						"ErrorsReceived": {
-							"type": "unsignedInt",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "StatsCounter32"
-						},
-						"RetransCount": {
-							"type": "unsignedInt",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "StatsCounter32"
-						},
-						"TimeStamp": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "string"
+						"output": {
+							"BSSID": {
+								"type": "string",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "MACAddress",
+								"range": [
+									{
+										"max": 17
+									}
+								],
+								"pattern": [
+									"",
+									"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+								]
+							},
+							"MACAddress": {
+								"type": "string",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "MACAddress",
+								"range": [
+									{
+										"max": 17
+									}
+								],
+								"pattern": [
+									"",
+									"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+								]
+							},
+							"ReasonCode": {
+								"type": "unsignedInt",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "unsignedInt"
+							},
+							"BytesSent": {
+								"type": "unsignedLong",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "StatsCounter64"
+							},
+							"BytesReceived": {
+								"type": "unsignedLong",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "StatsCounter64"
+							},
+							"PacketsSent": {
+								"type": "unsignedLong",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "StatsCounter64"
+							},
+							"PacketsReceived": {
+								"type": "unsignedLong",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "StatsCounter64"
+							},
+							"ErrorsSent": {
+								"type": "unsignedInt",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "StatsCounter32"
+							},
+							"ErrorsReceived": {
+								"type": "unsignedInt",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "StatsCounter32"
+							},
+							"RetransCount": {
+								"type": "unsignedInt",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "StatsCounter32"
+							},
+							"TimeStamp": {
+								"type": "string",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "string"
+							}
 						}
 					},
 					"Device.WiFi.DataElements.DisassociationEvent.DisassociationEventData.{i}.": {
@@ -39375,54 +39381,56 @@
 						"protocols": [
 							"usp"
 						],
-						"MACAddress": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "MACAddress",
-							"range": [
-								{
-									"max": 17
-								}
-							],
-							"pattern": [
-								"",
-								"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-							]
-						},
-						"StatusCode": {
-							"type": "unsignedInt",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "unsignedInt"
-						},
-						"ReasonCode": {
-							"type": "unsignedInt",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "unsignedInt"
-						},
-						"TimeStamp": {
-							"type": "string",
-							"read": true,
-							"write": true,
-							"version": "2.15",
-							"protocols": [
-								"usp"
-							],
-							"datatype": "string"
+						"output": {
+							"MACAddress": {
+								"type": "string",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "MACAddress",
+								"range": [
+									{
+										"max": 17
+									}
+								],
+								"pattern": [
+									"",
+									"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+								]
+							},
+							"StatusCode": {
+								"type": "unsignedInt",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "unsignedInt"
+							},
+							"ReasonCode": {
+								"type": "unsignedInt",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "unsignedInt"
+							},
+							"TimeStamp": {
+								"type": "string",
+								"read": true,
+								"write": true,
+								"version": "2.15",
+								"protocols": [
+									"usp"
+								],
+								"datatype": "string"
+							}
 						}
 					},
 					"Device.WiFi.DataElements.FailedConnectionEvent.FailedConnectionEventData.{i}.": {
@@ -49375,16 +49383,6 @@
 				],
 				"access": true,
 				"array": true,
-				"mapping": {
-					"type": "uci",
-					"uci": {
-						"file": "network",
-						"section": {
-							"type": "interface"
-						},
-						"dmmapfile": "dmmap_network"
-					}
-				},
 				"Enable": {
 					"type": "boolean",
 					"read": true,
@@ -49394,20 +49392,7 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "boolean",
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "network.interface",
-								"method": "status",
-								"args": {
-									"interface": "@Name"
-								},
-								"key": "up"
-							}
-						}
-					]
+					"datatype": "boolean"
 				},
 				"Status": {
 					"type": "string",
@@ -49427,19 +49412,6 @@
 						"NotPresent",
 						"LowerLayerDown",
 						"Error"
-					],
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "network.interface",
-								"method": "status",
-								"args": {
-									"interface": "@Name"
-								},
-								"key": "up"
-							}
-						}
 					]
 				},
 				"Alias": {
@@ -76833,21 +76805,6 @@
 						"pattern": [
 							"",
 							"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
-						],
-						"mapping": [
-							{
-								"type": "uci",
-								"uci": {
-									"file": "network",
-									"section": {
-										"type": "interface",
-										"index": "@i-1"
-									},
-									"option": {
-										"name": "mac"
-									}
-								}
-							}
 						]
 					},
 					"ChaddrExclude": {
@@ -86046,15 +86003,17 @@
 					"protocols": [
 						"usp"
 					],
-					"Data": {
-						"type": "string",
-						"read": true,
-						"write": true,
-						"version": "2.13",
-						"protocols": [
-							"usp"
-						],
-						"datatype": "string"
+					"output": {
+						"Data": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"version": "2.13",
+							"protocols": [
+								"usp"
+							],
+							"datatype": "string"
+						}
 					}
 				},
 				"ForceCollection()": {
@@ -86661,121 +86620,123 @@
 				"protocols": [
 					"usp"
 				],
-				"UUID": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "UUID",
-					"range": [
-						{
-							"min": 36,
-							"max": 36
-						}
-					],
-					"pattern": [
-						"[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}"
-					]
-				},
-				"DeploymentUnitRef": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "string"
-				},
-				"Version": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "string",
-					"range": [
-						{
-							"max": 32
-						}
-					]
-				},
-				"CurrentState": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "string",
-					"enumerations": [
-						"Installed",
-						"UnInstalled",
-						"Failed"
-					]
-				},
-				"Resolved": {
-					"type": "boolean",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "boolean"
-				},
-				"ExecutionUnitRefList": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"list": {
+				"output": {
+					"UUID": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "UUID",
+						"range": [
+							{
+								"min": 36,
+								"max": 36
+							}
+						],
+						"pattern": [
+							"[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}"
+						]
+					},
+					"DeploymentUnitRef": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
 						"datatype": "string"
+					},
+					"Version": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 32
+							}
+						]
+					},
+					"CurrentState": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string",
+						"enumerations": [
+							"Installed",
+							"UnInstalled",
+							"Failed"
+						]
+					},
+					"Resolved": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "boolean"
+					},
+					"ExecutionUnitRefList": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"list": {
+							"datatype": "string"
+						}
+					},
+					"StartTime": {
+						"type": "dateTime",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "dateTime"
+					},
+					"CompleteTime": {
+						"type": "dateTime",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "dateTime"
+					},
+					"OperationPerformed": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string",
+						"enumerations": [
+							"Install",
+							"Update",
+							"Uninstall"
+						]
 					}
-				},
-				"StartTime": {
-					"type": "dateTime",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "dateTime"
-				},
-				"CompleteTime": {
-					"type": "dateTime",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "dateTime"
-				},
-				"OperationPerformed": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "string",
-					"enumerations": [
-						"Install",
-						"Update",
-						"Uninstall"
-					]
 				}
 			},
 			"Device.SoftwareModules.ExecEnv.{i}.": {
@@ -100076,119 +100037,121 @@
 				"protocols": [
 					"usp"
 				],
-				"Command": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "string"
-				},
-				"CommandKey": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "string"
-				},
-				"Requestor": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "string"
-				},
-				"TransferType": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "string",
-					"enumerations": [
-						"Download",
-						"Upload"
-					]
-				},
-				"Affected": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "string"
-				},
-				"TransferURL": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "URL",
-					"range": [
-						{
-							"max": 2048
-						}
-					]
-				},
-				"StartTime": {
-					"type": "dateTime",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "dateTime"
-				},
-				"CompleteTime": {
-					"type": "dateTime",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "dateTime"
-				},
-				"FaultCode": {
-					"type": "unsignedInt",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "unsignedInt"
-				},
-				"FaultString": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.12",
-					"protocols": [
-						"usp"
-					],
-					"datatype": "string",
-					"range": [
-						{
-							"max": 256
-						}
-					]
+				"output": {
+					"Command": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string"
+					},
+					"CommandKey": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string"
+					},
+					"Requestor": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string"
+					},
+					"TransferType": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string",
+						"enumerations": [
+							"Download",
+							"Upload"
+						]
+					},
+					"Affected": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string"
+					},
+					"TransferURL": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "URL",
+						"range": [
+							{
+								"max": 2048
+							}
+						]
+					},
+					"StartTime": {
+						"type": "dateTime",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "dateTime"
+					},
+					"CompleteTime": {
+						"type": "dateTime",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "dateTime"
+					},
+					"FaultCode": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "unsignedInt"
+					},
+					"FaultString": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.12",
+						"protocols": [
+							"usp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 256
+							}
+						]
+					}
 				}
 			},
 			"AddCertificate()": {
@@ -100896,15 +100859,17 @@
 					"protocols": [
 						"usp"
 					],
-					"CommandKey": {
-						"type": "string",
-						"read": true,
-						"write": true,
-						"version": "2.12",
-						"protocols": [
-							"usp"
-						],
-						"datatype": "string"
+					"output": {
+						"CommandKey": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"version": "2.12",
+							"protocols": [
+								"usp"
+							],
+							"datatype": "string"
+						}
 					}
 				},
 				"AddMyCertificate()": {
@@ -102623,25 +102588,27 @@
 					"protocols": [
 						"usp"
 					],
-					"ParamPath": {
-						"type": "string",
-						"read": true,
-						"write": true,
-						"version": "2.13",
-						"protocols": [
-							"usp"
-						],
-						"datatype": "string"
-					},
-					"ParamValue": {
-						"type": "string",
-						"read": true,
-						"write": true,
-						"version": "2.13",
-						"protocols": [
-							"usp"
-						],
-						"datatype": "string"
+					"output": {
+						"ParamPath": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"version": "2.13",
+							"protocols": [
+								"usp"
+							],
+							"datatype": "string"
+						},
+						"ParamValue": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"version": "2.13",
+							"protocols": [
+								"usp"
+							],
+							"datatype": "string"
+						}
 					}
 				}
 			}

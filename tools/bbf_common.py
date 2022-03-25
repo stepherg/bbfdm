@@ -183,7 +183,8 @@ def generate_datamodel_tree(filename):
         # Object Table
         if obj_found == 1:
             if obj_found_in_list == 0:
-                for value in LIST_OBJ:
+                obj_list = LIST_OBJ
+                for value in obj_list:
                     val = value.split(":")
                     if val[1] == table_name:
                         parent_obj = val[0]
@@ -213,7 +214,8 @@ def generate_datamodel_tree(filename):
         # Parameter Table
         if param_found == 1:
             if obj_found_in_list == 0:
-                for value in LIST_PARAM:
+                param_list = LIST_PARAM
+                for value in param_list:
                     val = value.split(":")
                     if val[1] == table_name:
                         parent_obj = val[0]

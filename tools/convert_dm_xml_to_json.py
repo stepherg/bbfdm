@@ -667,6 +667,7 @@ def printEVENT(dmparam, dmobject, _bbfdm_type):
         "\"protocols\" : [\"usp\"]"), file=fp)
 
     if has_param:
+        print("\"output\" : {", file=fp)
         fp.close()
 
     for param in dmparam:
@@ -675,6 +676,7 @@ def printEVENT(dmparam, dmobject, _bbfdm_type):
 
     if has_param:
         fp = open('./.json_tmp', 'a', encoding='utf-8')
+        print("}", file=fp)
 
     print("}", file=fp)
     fp.close()
