@@ -276,7 +276,6 @@ struct uci_section *find_mapcontroller_ssid_section(struct uci_section *wireless
 {
 	struct uci_section *s = NULL;
 	char *multi_ap = NULL;
-	char *network = NULL;
 	char *device = NULL;
 	char *ssid = NULL;
 	char *band = NULL;
@@ -288,7 +287,6 @@ struct uci_section *find_mapcontroller_ssid_section(struct uci_section *wireless
 	if (DM_LSTRCMP(multi_ap, "2") != 0)
 		return NULL;
 
-	dmuci_get_value_by_section_string(wireless_ssid_s, "network", &network);
 	dmuci_get_value_by_section_string(wireless_ssid_s, "ssid", &ssid);
 	dmuci_get_value_by_section_string(wireless_ssid_s, "device", &device);
 	band = get_radio_option_nocache(device, "band");
@@ -296,14 +294,11 @@ struct uci_section *find_mapcontroller_ssid_section(struct uci_section *wireless
 	uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
 		char *curr_ssid = NULL;
 		char *curr_band = NULL;
-		char *curr_network = NULL;
 
 		dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
 		dmuci_get_value_by_section_string(s, "band", &curr_band);
-		dmuci_get_value_by_section_string(s, "network", &curr_network);
 
-		if (DM_STRCMP(network, curr_network) == 0 &&
-			DM_STRCMP(curr_ssid, ssid) == 0 &&
+		if (DM_STRCMP(curr_ssid, ssid) == 0 &&
 			curr_band[0] == band[0]) {
 			return s;
 		}
