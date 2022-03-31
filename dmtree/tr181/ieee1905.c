@@ -18,6 +18,15 @@ struct ieee1905_device_nonieee1905neighbor_args
 	char *neighbor;
 };
 
+/**************************************************************************
+* LINKER
+***************************************************************************/
+static int get_linker_IEEE1905Device(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	*linker = dmjson_get_value((json_object *)data, 1, "ieee1905id");
+	return 0;
+}
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -1692,7 +1701,7 @@ DMLEAF tIEEE1905ALForwardingTableForwardingRuleParams[] = {
 DMOBJ tIEEE1905ALNetworkTopologyObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 //{"ChangeLog", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyChangeLogInst, NULL, NULL, NULL, tIEEE1905ALNetworkTopologyChangeLogParams, NULL, BBFDM_BOTH, NULL, "2.9"},
-{"IEEE1905Device", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceParams, NULL, BBFDM_BOTH, LIST_KEY{"IEEE1905Id", NULL}, "2.9"},
+{"IEEE1905Device", &DMREAD, NULL, NULL, NULL, browseIEEE1905ALNetworkTopologyIEEE1905DeviceInst, NULL, NULL, tIEEE1905ALNetworkTopologyIEEE1905DeviceObj, tIEEE1905ALNetworkTopologyIEEE1905DeviceParams, get_linker_IEEE1905Device, BBFDM_BOTH, LIST_KEY{"IEEE1905Id", NULL}, "2.9"},
 {0}
 };
 
