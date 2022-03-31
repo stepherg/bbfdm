@@ -231,27 +231,55 @@ static int network_get_ipaddr(char *iface, int ipver, char **value)
 	return 0;
 }
 
-/*#Device.ManagementServer.ConnectionRequestURL!UCI:cwmp/cpe,cpe/port*/
-static int get_management_server_connection_request_url(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static void get_management_ip_port(char **listen_addr)
 {
-	char *ip = NULL, *port = NULL, *interface = NULL, *iface_name = NULL, *ip_version = NULL;
+	char *ip = NULL, *port = NULL, *interface = NULL, *if_name = NULL, *version = NULL;
 
 	dmuci_get_option_value_string("cwmp", "cpe", "default_wan_interface", &interface);
-	dmuci_get_option_value_string("cwmp", "cpe", "interface", &iface_name);
-	dmuci_get_option_value_string("cwmp", "acs", "ip_version", &ip_version);
+	dmuci_get_option_value_string("cwmp", "cpe", "interface", &if_name);
+	dmuci_get_option_value_string("cwmp", "acs", "ip_version", &version);
 	dmuci_get_option_value_string("cwmp", "cpe", "port", &port);
 
-	if (network_get_ipaddr(interface, *ip_version == '6' ? 6 : 4, &ip) == -1) {
-		// get ip from ioctl
-		ip = (*ip_version == '6') ? get_ipv6(iface_name) : ioctl_get_ipv4(iface_name);
+	if (network_get_ipaddr(interface, *version == '6' ? 6 : 4, &ip) == -1) {
+		if (if_name[0] == '\0')
+			return;
+
+		ip = (*version == '6') ? get_ipv6(if_name) : ioctl_get_ipv4(if_name);
 	}
 
 	if (ip[0] != '\0' && port[0] != '\0') {
-		char *path;
-
-		dmuci_get_option_value_string("cwmp", "cpe", "path", &path);
-		dmasprintf(value, "http://%s:%s/%s", ip, port, path ? path : "");
+		dmasprintf(listen_addr, "%s:%s", ip, port);
 	}
+}
+
+/*#Device.ManagementServer.ConnectionRequestURL!UCI:cwmp/cpe,cpe/port*/
+static int get_management_server_connection_request_url(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *mgmt_addr = NULL;
+	get_management_ip_port(&mgmt_addr);
+
+	if (mgmt_addr != NULL) {
+		char *path;
+		dmuci_get_option_value_string("cwmp", "cpe", "path", &path);
+		dmasprintf(value, "http://%s/%s", mgmt_addr, path ? path : "");
+	}
+
+	return 0;
+}
+
+static int get_upd_cr_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *stunc_enabled;
+	bool enabled;
+
+	dmuci_get_option_value_string("stunc", "stunc", "enabled", &stunc_enabled);
+	enabled = dmuci_string_to_boolean(stunc_enabled);
+
+	if (enabled == true)
+		dmuci_get_option_value_string_varstate("stunc", "stunc", "crudp_address", value);
+	else
+		get_management_ip_port(value);
+
 	return 0;
 }
 
@@ -643,6 +671,24 @@ static int set_management_server_enable_cwmp(char *refparam, struct dmctx *ctx, 
 	return 0;
 }
 
+static int get_nat_detected(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *v;
+	bool en = 0;
+
+	dmuci_get_option_value_string("stunc", "stunc", "enabled", &v);
+	en = dmuci_string_to_boolean(v);
+
+	if (en == true) { //stunc is enabled
+		dmuci_get_option_value_string_varstate("stunc", "stunc", "nat_detected", &v);
+		en = dmuci_string_to_boolean(v);
+		*value = (en == true) ? "1" : "0";
+	} else {
+		*value = "0";
+	}
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -678,5 +724,7 @@ DMLEAF tManagementServerParams[] = {
 {"SupportedConnReqMethods", &DMREAD, DMT_STRING, get_management_server_supported_conn_req_methods, NULL, BBFDM_CWMP, "2.7"},
 {"InstanceWildcardsSupported", &DMREAD, DMT_BOOL, get_management_server_instance_wildcard_supported, NULL, BBFDM_CWMP, "2.12"},
 {"EnableCWMP", &DMWRITE, DMT_BOOL, get_management_server_enable_cwmp, set_management_server_enable_cwmp, BBFDM_CWMP, "2.12"},
+{"UDPConnectionRequestAddress", &DMREAD, DMT_STRING, get_upd_cr_address, NULL, BBFDM_CWMP, "2.0"},
+{"NATDetected", &DMREAD, DMT_BOOL, get_nat_detected, NULL, BBFDM_CWMP, "2.0"},
 {0}
 };
