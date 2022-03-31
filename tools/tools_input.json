@@ -60,7 +60,8 @@
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "uspd/files/etc/bbfdm/json/transferComplete.json"
+        "uspd/files/etc/bbfdm/json/transferComplete.json",
+	"obuspa/files/etc/bbfdm/json/USPAgent.json"
       ]
     },
     {

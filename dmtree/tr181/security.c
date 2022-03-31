@@ -91,9 +91,9 @@ static void get_certificate_paths(void)
 
 	cidx = 0;
 
-	uci_foreach_sections("owsd", "owsd-listen", s) {
+	uci_foreach_sections("nginx", "server", s) {
 		char *cert;
-		dmuci_get_value_by_section_string(s, "cert", &cert);
+		dmuci_get_value_by_section_string(s, "ssl_certificate", &cert);
 		if (*cert == '\0')
 			continue;
 		if (cidx >= MAX_CERT)
