@@ -141,8 +141,8 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 	struct certificate_profile certificateprofile = {};
 
 	get_certificate_paths();
-	int i;
-	for (i = 0; i < MAX_CERT; i++) {
+	int i, status;
+	for (i = 0, status = DM_OK; i < MAX_CERT && status != DM_STOP; i++) {
 		if(!DM_STRLEN(certifcates_paths[i]))
 			break;
 		FILE *fp = fopen(certifcates_paths[i], "r");
@@ -162,8 +162,7 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 
 		inst = handle_instance(dmctx, parent_node, dmmap_sect, "security_certificate_instance", "security_certificate_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst) == DM_STOP)
-			break;
+		status = DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst);
 
 		X509_free(cert);
 		cert = NULL;
