@@ -136,10 +136,9 @@ bool is_strword_in_optionvalue(char *optionvalue, char *str)
 
 void remove_new_line(char *buf)
 {
-	int len;
-	len = DM_STRLEN(buf) - 1;
-	if (buf[len] == '\n')
-		buf[len] = 0;
+	int len = DM_STRLEN(buf);
+	if (len > 0 && buf[len - 1] == '\n')
+		buf[len - 1] = 0;
 }
 
 int dmcmd(char *cmd, int n, ...)
