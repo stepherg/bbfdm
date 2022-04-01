@@ -141,81 +141,79 @@ void remove_new_line(char *buf)
 		buf[len - 1] = 0;
 }
 
-int dmcmd(char *cmd, int n, ...)
+static void dmcmd_exec(char *argv[])
 {
-	va_list arg;
-	int i, pid;
-	int dmcmd_pfds[2];
-	char *argv[n+2];
+	int devnull = open("/dev/null", O_RDWR);
 
-	argv[0] = cmd;
+	if (devnull == -1)
+		exit(127);
 
-	va_start(arg,n);
-	for (i=0; i<n; i++)
-	{
-		argv[i+1] = va_arg(arg, char*);
-	}
-	va_end(arg);
+	dup2(devnull, 0);
+	dup2(devnull, 1);
+	dup2(devnull, 2);
 
-	argv[n+1] = NULL;
+	if (devnull > 2)
+		close(devnull);
 
-	if (pipe(dmcmd_pfds) < 0)
-		return -1;
-
-	if ((pid = fork()) == -1)
-		return -1;
-
-	if (pid == 0) {
-		/* child */
-		close(dmcmd_pfds[0]);
-		dup2(dmcmd_pfds[1], 1);
-		close(dmcmd_pfds[1]);
-
-		execvp(argv[0], (char **) argv); /* Flawfinder: ignore */
-		exit(ESRCH);
-	} else if (pid < 0)
-		return -1;
-
-	/* parent */
-	close(dmcmd_pfds[1]);
-
-	int status;
-	while (waitpid(pid, &status, 0) != pid)
-	{
-		kill(pid, 0);
-		if (errno == ESRCH) {
-			return dmcmd_pfds[0];
-		}
-	}
-
-	return dmcmd_pfds[0];
+	execvp(argv[0], argv); /* Flawfinder: ignore */
+	exit(127);
 }
 
-int dmcmd_no_wait(char *cmd, int n, ...)
+int dmcmd(char *cmd, int n, ...)
 {
+	char *argv[n + 2];
 	va_list arg;
-	int i, pid;
-	char *argv[n+2];
-	char sargv[4][128];
+	int i, status;
+	pid_t pid, wpid;
 
 	argv[0] = cmd;
 	va_start(arg, n);
 	for (i = 0; i < n; i++) {
-		DM_STRNCPY(sargv[i], va_arg(arg, char*), sizeof(sargv[i]));
-		argv[i+1] = sargv[i];
+		argv[i + 1] = va_arg(arg, char *);
 	}
 	va_end(arg);
-
-	argv[n+1] = NULL;
+	argv[n + 1] = NULL;
 
 	if ((pid = fork()) == -1)
 		return -1;
 
-	if (pid == 0) {
-		execvp(argv[0], (char **) argv); /* Flawfinder: ignore */
-		exit(ESRCH);
-	} else if (pid < 0)
+	if (pid == 0)
+		dmcmd_exec(argv);
+
+	do {
+		wpid = waitpid(pid, &status, 0);
+		if (wpid == pid) {
+			if (WIFEXITED(status))
+				return WEXITSTATUS(status);
+			if (WIFSIGNALED(status))
+				return 128 + WTERMSIG(status);
+		}
+	} while (wpid == -1 && errno == EINTR);
+
+	return -1;
+}
+
+int dmcmd_no_wait(char *cmd, int n, ...)
+{
+	char *argv[n + 2];
+	va_list arg;
+	int i;
+	pid_t pid;
+
+	argv[0] = cmd;
+	va_start(arg, n);
+	for (i = 0; i < n; i++) {
+		argv[i + 1] = va_arg(arg, char *);
+	}
+	va_end(arg);
+	argv[n + 1] = NULL;
+
+	if ((pid = fork()) == -1)
 		return -1;
+
+	if (pid == 0)
+		dmcmd_exec(argv);
+
 	return 0;
 }
 

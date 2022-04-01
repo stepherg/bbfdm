@@ -1115,7 +1115,7 @@ static int set_IP_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char
 				return 0;
 
 			snprintf(buf, sizeof(buf), "net.ipv6.conf.all.disable_ipv6=%d", b ? 0 : 1);
-			DMCMD("sysctl", 2, "-w", buf);
+			dmcmd("sysctl", 2, "-w", buf);
 
 			fseek(fp, 0, SEEK_END);
 			long length = ftell(fp);

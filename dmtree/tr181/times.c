@@ -38,16 +38,16 @@ static int set_time_enable(char *refparam, struct dmctx *ctx, void *data, char *
 		case VALUESET:
 			string_to_bool(value, &b);
 			if(b) {
-				DMCMD("/etc/rc.common", 2, "/etc/init.d/ntpd", "enable");
+				dmcmd("/etc/rc.common", 2, "/etc/init.d/ntpd", "enable");
 				pid = get_pid("ntpd");
 				if (pid < 0) {
-					DMCMD("/etc/rc.common", 2, "/etc/init.d/ntpd", "start");
+					dmcmd("/etc/rc.common", 2, "/etc/init.d/ntpd", "start");
 				}
 			} else {
-				DMCMD("/etc/rc.common", 2, "/etc/init.d/ntpd", "disable");
+				dmcmd("/etc/rc.common", 2, "/etc/init.d/ntpd", "disable");
 				pid = get_pid("ntpd");
 				if (pid > 0) {
-					DMCMD("/etc/rc.common", 2, "/etc/init.d/ntpd", "stop");
+					dmcmd("/etc/rc.common", 2, "/etc/init.d/ntpd", "stop");
 				}
 			}
 			return 0;

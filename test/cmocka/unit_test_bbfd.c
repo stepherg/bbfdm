@@ -604,7 +604,7 @@ static void test_api_bbfdm_json_set_value(void **state)
 	struct param_fault *first_fault;
 	int fault = 0;
 
-	DMCMD("/bin/cp", 2, DROPBEAR_FILE_PATH, DROPBEAR_JSON_PATH);
+	dmcmd("/bin/cp", 2, DROPBEAR_FILE_PATH, DROPBEAR_JSON_PATH);
 
 	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UserInterface.Enable", "true", NULL);
 	assert_int_equal(fault, 0);
@@ -688,7 +688,7 @@ static void test_api_bbfdm_library_set_value(void **state)
 	struct param_fault *first_fault;
 	int fault = 0;
 
-	DMCMD("/bin/cp", 2, LIBBBF_TEST_PATH, LIBBBF_TEST_BBFDM_PATH);
+	dmcmd("/bin/cp", 2, LIBBBF_TEST_PATH, LIBBBF_TEST_BBFDM_PATH);
 
 	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.ManagementServer.EnableCWMP", "true", NULL);
 	assert_int_equal(fault, 0);

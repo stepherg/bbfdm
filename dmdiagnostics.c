@@ -61,7 +61,7 @@ void init_diagnostics_operation(char *sec_name, char *operation_path)
 	if (section)
 		dmuci_delete_by_section_bbfdm(section, NULL, NULL);
 
-	DMCMD("/bin/sh", 2, operation_path, "stop");
+	dmcmd("/bin/sh", 2, operation_path, "stop");
 }
 
 void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value)

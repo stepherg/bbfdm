@@ -5642,7 +5642,7 @@ static int get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeSt
  *************************************************************/
 static int operate_WiFi_Reset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return !dmcmd_no_wait("/sbin/wifi", 2, "reload", "&") ? CMD_SUCCESS : CMD_FAIL;
+	return !dmcmd_no_wait("/sbin/wifi", 1, "reload") ? CMD_SUCCESS : CMD_FAIL;
 }
 
 static operation_args neighboring_wifi_diagnostic_args = {
