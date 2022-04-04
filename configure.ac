@@ -20,6 +20,9 @@ AM_CONDITIONAL([LOPENSSL],[test "x$enable_libopenssl" = "xyes"])
 AC_ARG_ENABLE(libwolfssl, [AS_HELP_STRING([--enable-libwolfssl], [enable libwolfssl feature])], AC_DEFINE(LWOLFSSL),)
 AM_CONDITIONAL([LWOLFSSL],[test "x$enable_libwolfssl" = "xyes"])
 
+AC_ARG_ENABLE(libmbedtls, [AS_HELP_STRING([--enable-libmbedtls], [enable libmbedtls feature])], AC_DEFINE(LMBEDTLS),)
+AM_CONDITIONAL([LMBEDTLS],[test "x$enable_libmbedtls" = "xyes"])
+
 AC_ARG_ENABLE(vendor_extension, [AS_HELP_STRING([--enable-vendor-extension], [enable vendor extension])], AC_DEFINE(BBF_VENDOR_EXTENSION),)
 AM_CONDITIONAL([BBF_VENDOR_EXTENSION],[test "x$enable_vendor_extension" = "xyes"])
 
@@ -119,6 +122,12 @@ AM_COND_IF([LWOLFSSL], [
 
 AM_COND_IF([LOPENSSL], [
 	LIBSSL_LIBS='-lssl'
+	AC_SUBST([LIBSSL_LIBS])
+	AC_DEFINE(LSSL)
+])
+
+AM_COND_IF([LMBEDTLS], [
+	LIBSSL_LIBS='-lmbedtls'
 	AC_SUBST([LIBSSL_LIBS])
 	AC_DEFINE(LSSL)
 ])
