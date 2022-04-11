@@ -439,6 +439,9 @@ int dm_entry_manage_services(struct blob_buf *bb, bool restart)
 		}
 	}
 	blobmsg_close_array(bb, arr);
+
+	dmuci_commit_package_varstate("cwmp");
+	free_all_list_package_change(&head_package_change);
 	return 0;
 }
 
