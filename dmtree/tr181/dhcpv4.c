@@ -59,6 +59,8 @@ struct dhcp_client_option_args {
 	char *value;
 };
 
+static char *allowed_devices[] = {"All", "Known", "UnKnown", NULL};
+
 /**************************************************************************
 * LINKER
 ***************************************************************************/
@@ -1441,6 +1443,47 @@ static int set_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 			adm_entry_get_linker_value(ctx, value, &linker);
 			dmuci_set_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "interface", linker ? linker : "");
 			return 0;
+	}
+	return 0;
+}
+
+/*#Device.DHCPv4.Server.Pool.{i}.alloweddevices!UCI:dhcp/interface,@i-1/allowed_devices*/
+static int get_DHCPv4ServerPool_AllowedDevices(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *allowed_dev = NULL;
+
+	*value = "All";
+
+	dmuci_get_value_by_section_string((((struct dhcp_args *)data)->sections)->config_section, "allowed_devices", &allowed_dev);
+	if (DM_STRLEN(allowed_dev)) {
+		if (strcasecmp(allowed_dev, "known") == 0)
+			*value = "Known";
+		else if(strcasecmp(allowed_dev, "unknown") == 0)
+			*value = "UnKnown";
+	}
+
+	return 0;
+}
+
+static int set_DHCPv4ServerPool_AllowedDevices(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *allowed_dev = "";
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, -1, allowed_devices, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			if (strcasecmp(value, "Known") == 0)
+				allowed_dev = "known";
+			else if(strcasecmp(value, "UnKnown") == 0)
+				allowed_dev = "unknown";
+			else
+				allowed_dev = "all";
+
+			dmuci_set_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "allowed_devices", allowed_dev);
+			break;
 	}
 	return 0;
 }
@@ -3429,7 +3472,7 @@ DMLEAF tDHCPv4ServerPoolParams[] = {
 //{"Chaddr", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_Chaddr, set_DHCPv4ServerPool_Chaddr, BBFDM_BOTH, "2.0"},
 //{"ChaddrMask", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_ChaddrMask, set_DHCPv4ServerPool_ChaddrMask, BBFDM_BOTH, "2.0"},
 //{"ChaddrExclude", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_ChaddrExclude, set_DHCPv4ServerPool_ChaddrExclude, BBFDM_BOTH, "2.0"},
-//{"AllowedDevices", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_AllowedDevices, set_DHCPv4ServerPool_AllowedDevices, BBFDM_BOTH, "2.13"},
+{"AllowedDevices", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_AllowedDevices, set_DHCPv4ServerPool_AllowedDevices, BBFDM_BOTH, "2.13"},
 {"MinAddress", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_MinAddress, set_DHCPv4ServerPool_MinAddress, BBFDM_BOTH, "2.0"},
 {"MaxAddress", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_MaxAddress, set_DHCPv4ServerPool_MaxAddress, BBFDM_BOTH, "2.0"},
 {"ReservedAddresses", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_ReservedAddresses, set_DHCPv4ServerPool_ReservedAddresses, BBFDM_BOTH, "2.0"},
