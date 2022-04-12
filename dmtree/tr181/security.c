@@ -10,10 +10,9 @@
 
 #include "security.h"
 
+#if defined(LOPENSSL) || defined(LWOLFSSL) || defined(LMBEDTLS)
 #define DATE_LEN 128
 #define MAX_CERT 32
-
-#ifdef LSSL
 
 #ifdef LMBEDTLS
 #include <mbedtls/x509_crt.h>
@@ -435,4 +434,4 @@ DMLEAF tSecurityCertificateParams[] = {
 {0}
 };
 
-#endif /* LSSL */
+#endif

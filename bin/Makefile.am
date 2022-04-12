@@ -34,7 +34,14 @@ lib_LTLIBRARIES += libbbfdm.la
 libbbfdm_la_SOURCES =	\
 	../dmentry.c 		\
 	../dmdiagnostics.c	\
-	../dmbbfcommon.c
+	../dmbbfcommon.c        \
+	../libbbf_api/dmbbf.c			\
+	../libbbf_api/dmubus.c			\
+	../libbbf_api/dmjson.c			\
+	../libbbf_api/dmuci.c			\
+	../libbbf_api/dmcommon.c 		\
+	../libbbf_api/dmmem.c			\
+	../libbbf_api/dmapi.c
 
 if BBF_TR181
 libbbfdm_la_SOURCES +=							\
@@ -181,8 +188,7 @@ libbbfdm_la_LIBADD =		\
 	$(LIBDLOPEN_LIBS) 		\
 	$(LIBCURL_LIBS)			\
 	$(LIBSSL_LIBS)		\
-	$(LIBCRYPTO_LIBS)		\
-	-lbbf_api
+	$(LIBCRYPTO_LIBS)
 
 libbbfdm_la_CFLAGS+=-I../
 libbbfdm_la_CFLAGS+=-I../dmtree

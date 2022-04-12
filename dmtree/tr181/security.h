@@ -11,13 +11,13 @@
 #ifndef __SECURITY_H
 #define __SECURITY_H
 
-#ifdef LSSL
+#if defined(LOPENSSL) || defined(LWOLFSSL) || defined(LMBEDTLS)
 #include <libbbf_api/dmcommon.h>
 
 extern DMOBJ tSecurityObj[];
 extern DMLEAF tSecurityParams[];
 extern DMLEAF tSecurityCertificateParams[];
-#endif /* LSSL */
+#endif
 
 #endif //__SECURITY_H
 

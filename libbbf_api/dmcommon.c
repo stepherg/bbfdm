@@ -43,7 +43,6 @@ char *ServerSelectionProtocol[] = {"ICMP", "UDP Echo", NULL};
 char *DHCPType[] = {"DHCPv4", "DHCPv6", NULL};
 char *DropAlgorithm[] = {"RED", "DT", "WRED", "BLUE", NULL};
 char *SchedulerAlgorithm[] = {"WFQ", "WRR", "SP", NULL};
-char *DTMFMethod[] = {"InBand", "RFC2833", "SIPInfo", NULL};
 char *ProfileEnable[] = {"Disabled", "Quiescent", "Enabled", NULL};
 char *SupportedOperatingChannelBandwidth[] = {"20MHz", "40MHz", "80MHz", "160MHz", "80+80MHz", "Auto", NULL};
 char *SupportedStandards[] = {"a", "b", "g", "n", "ac", "ax", NULL};

@@ -95,7 +95,6 @@ extern char *ServerSelectionProtocol[];
 extern char *DHCPType[];
 extern char *DropAlgorithm[];
 extern char *SchedulerAlgorithm[];
-extern char *DTMFMethod[];
 extern char *ProfileEnable[];
 extern char *PIN[];
 extern char *DestinationAddress[];
