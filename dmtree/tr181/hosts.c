@@ -103,8 +103,10 @@ static int get_HostsHost_DHCPClient(char *refparam, struct dmctx *ctx, void *dat
 
 static int get_HostsHost_AssociatedDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = dmjson_get_value((json_object *)data, 1, "macaddr");
+	char *linker = dmjson_get_value((json_object *)data, 1, "link_macaddr");
 	adm_entry_get_linker_param(ctx, "Device.WiFi.AccessPoint.", linker, value);
+	if (!(*value) || (*value)[0] == 0)
+		adm_entry_get_linker_param(ctx, "Device.WiFi.DataElements.Network.Device.", linker, value);
 	return 0;
 }
 
@@ -112,9 +114,15 @@ static int get_HostsHost_Layer1Interface(char *refparam, struct dmctx *ctx, void
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "device");
 	char *type = dmjson_get_value((json_object *)data, 1, "interface_type");
-	if (DM_LSTRCMP(type, "Wi-Fi") == 0)
+	if (DM_LSTRCMP(type, "Wi-Fi") == 0) {
 		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
-	else
+		if (!(*value) || (*value)[0] == 0) {
+			char *device = dmjson_get_value((json_object *)data, 1, "parent_device");
+			struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", device);
+			dmuci_get_value_by_section_string(iface_s, "device", &linker);
+			adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
+		}
+	} else
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
 	return 0;
 }

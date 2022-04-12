@@ -80,6 +80,12 @@ static int get_linker_wfdata_Device(char *refparam, struct dmctx *dmctx, void *d
 	return 0;
 }
 
+static int get_linker_wfdata_BSS_STA(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	*linker = data ? dmjson_get_value((json_object *)data, 1, "MACAddress") : "";
+	return 0;
+}
+
 /**************************************************************************
 * INIT
 ***************************************************************************/
@@ -7163,7 +7169,7 @@ DMOBJ tWiFiDataElementsNetworkDeviceRadioBSSObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 // {"QMDescriptor", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSQMDescriptorInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSQMDescriptorParams, NULL, BBFDM_BOTH, LIST_KEY{"ClientMAC", NULL}, "2.15"},
 {"MultiAPSteering", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSMultiAPSteeringParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-{"STA", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSSTAInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAObj, tWiFiDataElementsNetworkDeviceRadioBSSSTAParams, NULL, BBFDM_BOTH, LIST_KEY{"MACAddress", NULL}, "2.13"},
+{"STA", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSSTAInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAObj, tWiFiDataElementsNetworkDeviceRadioBSSSTAParams, get_linker_wfdata_BSS_STA, BBFDM_BOTH, LIST_KEY{"MACAddress", NULL}, "2.13"},
 {0}
 };
 
