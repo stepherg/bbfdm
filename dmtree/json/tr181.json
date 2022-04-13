@@ -88497,7 +88497,18 @@
 						"list": {
 							"datatype": "string",
 							"maxsize": 1024
-						}
+						},
+						"mapping": [
+							{
+								"type": "ubus",
+								"ubus": {
+									"object": "ieee1905",
+									"method": "info",
+									"args": {},
+									"key": "interface[@i-1].ifname"
+								}
+							}
+						]
 					},
 					"InterfaceStackReference": {
 						"type": "string",

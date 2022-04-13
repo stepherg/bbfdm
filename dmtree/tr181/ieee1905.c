@@ -439,6 +439,18 @@ static int get_IEEE1905ALInterface_Status(char *refparam, struct dmctx *ctx, voi
 	return 0;
 }
 
+/*#Device.IEEE1905.AL.Interface.{i}.LowerLayers!UBUS:ieee1905/info//interface[@i-1].ifname*/
+static int get_IEEE1905ALInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *linker = dmjson_get_value((json_object *)data, 1, "ifname");
+	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
+	if (!(*value) || (*value)[0] == 0)
+		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
+	if (!(*value) || (*value)[0] == 0)
+		adm_entry_get_linker_param(ctx, "Device.WiFi.AccessPoint.", linker, value);
+	return 0;
+}
+
 #if 0
 static int get_IEEE1905ALInterface_InterfaceStackReference(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1613,6 +1625,7 @@ DMLEAF tIEEE1905ALInterfaceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"InterfaceId", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_InterfaceId, NULL, BBFDM_BOTH, "2.9"},
 {"Status", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_Status, NULL, BBFDM_BOTH, "2.9"},
+{"LowerLayers", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_LowerLayers, NULL, BBFDM_BOTH, "2.9"},
 //{"InterfaceStackReference", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_InterfaceStackReference, NULL, BBFDM_BOTH, "2.9"},
 {"MediaType", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_MediaType, NULL, BBFDM_BOTH, "2.9"},
 //{"GenericPhyOUI", &DMREAD, DMT_STRING, get_IEEE1905ALInterface_GenericPhyOUI, NULL, BBFDM_BOTH, "2.9"},
