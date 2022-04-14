@@ -443,11 +443,13 @@ static int get_IEEE1905ALInterface_Status(char *refparam, struct dmctx *ctx, voi
 static int get_IEEE1905ALInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "ifname");
+
 	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
 	if (!(*value) || (*value)[0] == 0)
-		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
-	if (!(*value) || (*value)[0] == 0)
 		adm_entry_get_linker_param(ctx, "Device.WiFi.AccessPoint.", linker, value);
+
+	if (!(*value) || (*value)[0] == 0)
+		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
 	return 0;
 }
 
