@@ -55,6 +55,11 @@ Note: Applications that use libbbf_ubus to expose datamodel, not required to use
 
 - `dm...(.c and .h)` files which contains the `bbfdm` engine (operate, diagnostics) functions
 
+More details available in below documents:
+- [activate_firmware.md](./docs/activate_firmware.md)
+- [firewall.md](./docs/firewall.md)
+- [json_plugin_v1.md](./docs/json_plugin_v1.md)
+
 ## How to add support for a new Object/Parameter
 
 As mentioned above, all Data Models are stored in the **'dmtree'** folder. In order to implement a new object/parameter, you need to expand its get/set/add/delete functions and then save them in the rigth folder.
