@@ -1,0 +1,97 @@
+ 152742       : ************ ************** ************** **************
+ 152742  note : PID '8493' started at 2022-04-12 15:27
+ 152743       : ddns version  : 2.8.2-12
+ 152743       : uci configuration:
+ddns.myddns_ipv4.domain='yourhost.example.com'
+ddns.myddns_ipv4.interface='wan'
+ddns.myddns_ipv4.ip_network='wan'
+ddns.myddns_ipv4.ip_source='network'
+ddns.myddns_ipv4.lookup_host='yourhost.example.com'
+ddns.myddns_ipv4.password='***PW***'
+ddns.myddns_ipv4.service_name='dyndns.org'
+ddns.myddns_ipv4.username='your_username'
+ddns.myddns_ipv4=service
+ 152743       : verbose mode  : 0 - run normal, NO console output
+ 152743  WARN : Service section disabled! - TERMINATE
+ 152743  WARN : PID '8493' exit WITH ERROR '1' at 2022-04-12 15:27
+ 152747       : ************ ************** ************** **************
+ 152747  note : PID '10386' started at 2022-04-12 15:27
+ 152747       : ddns version  : 2.8.2-12
+ 152747       : uci configuration:
+ddns.myddns_ipv4.domain='yourhost.example.com'
+ddns.myddns_ipv4.interface='wan'
+ddns.myddns_ipv4.ip_network='wan'
+ddns.myddns_ipv4.ip_source='network'
+ddns.myddns_ipv4.lookup_host='yourhost.example.com'
+ddns.myddns_ipv4.password='***PW***'
+ddns.myddns_ipv4.service_name='dyndns.org'
+ddns.myddns_ipv4.username='your_username'
+ddns.myddns_ipv4=service
+ 152747       : verbose mode  : 0 - run normal, NO console output
+ 152747  WARN : Service section disabled! - TERMINATE
+ 152747  WARN : PID '10386' exit WITH ERROR '1' at 2022-04-12 15:27
+ 150905       : ************ ************** ************** **************
+ 150905  note : PID '13900' started at 2022-04-13 15:09
+ 150905       : ddns version  : 2.8.2-12
+ 150905       : uci configuration:
+ddns.myddns_ipv4.domain='yourhost.example.com'
+ddns.myddns_ipv4.interface='wan'
+ddns.myddns_ipv4.ip_network='wan'
+ddns.myddns_ipv4.ip_source='network'
+ddns.myddns_ipv4.lookup_host='yourhost.example.com'
+ddns.myddns_ipv4.password='***PW***'
+ddns.myddns_ipv4.service_name='dyndns.org'
+ddns.myddns_ipv4.username='your_username'
+ddns.myddns_ipv4=service
+ 150905       : verbose mode  : 0 - run normal, NO console output
+ 150905  WARN : Service section disabled! - TERMINATE
+ 150905  WARN : PID '13900' exit WITH ERROR '1' at 2022-04-13 15:09
+ 153634       : ************ ************** ************** **************
+ 153634  note : PID '26238' started at 2022-04-13 15:36
+ 153634       : ddns version  : 2.8.2-12
+ 153634       : uci configuration:
+ddns.myddns_ipv4.check_interval='15'
+ddns.myddns_ipv4.check_unit='minutes'
+ddns.myddns_ipv4.domain='iopsys_test.ddns.net'
+ddns.myddns_ipv4.enabled='1'
+ddns.myddns_ipv4.force_interval='64'
+ddns.myddns_ipv4.force_unit='minutes'
+ddns.myddns_ipv4.interface='wan'
+ddns.myddns_ipv4.ip_source='web'
+ddns.myddns_ipv4.lookup_host='iopsys_test.ddns.net'
+ddns.myddns_ipv4.password='***PW***'
+ddns.myddns_ipv4.retry_count='5'
+ddns.myddns_ipv4.retry_interval='60'
+ddns.myddns_ipv4.retry_unit='seconds'
+ddns.myddns_ipv4.service_name='no-ip.com'
+ddns.myddns_ipv4.use_ipv6='0'
+ddns.myddns_ipv4.use_syslog='2'
+ddns.myddns_ipv4.username='iopsys'
+ddns.myddns_ipv4=service
+ 153634       : verbose mode  : 0 - run normal, NO console output
+ 153634       : check interval: 900 seconds
+ 153635       : force interval: 3840 seconds
+ 153635       : retry interval: 60 seconds
+ 153635       : retry counter : 5 times
+ 153635       : No old process
+ 153635       : last update: never
+ 153635       : Detect registered/public IP
+ 153635       : #> /usr/bin/nslookup iopsys_test.ddns.net  >/var/run/ddns/myddns_ipv4.dat 2>/var/run/ddns/myddns_ipv4.err
+ 153635       : Registered IP '9.9.9.9' detected
+ 153635  info : Starting main loop at 2022-04-13 15:36
+ 153635       : Detect local IP on 'web'
+ 153635       : #> /usr/bin/curl -RsS -o /var/run/ddns/myddns_ipv4.dat --stderr /var/run/ddns/myddns_ipv4.err --noproxy '*' 'http://checkip.dyndns.com'
+ 153635       : Local IP '41.228.252.24' detected on web at 'http://checkip.dyndns.com'
+ 153635       : Update needed - L: '41.228.252.24' <> R: '9.9.9.9'
+ 153635       : parsing script '/usr/lib/ddns/update_no-ip_com.sh'
+ 153636       : sending dummy IP to 'no-ip.com'
+ 153636       : #> /usr/bin/curl -RsS -o /var/run/ddns/myddns_ipv4.dat --stderr /var/run/ddns/myddns_ipv4.err --noproxy '*' 'http://iopsys:***PW***@dynupdate.noip.com/nic/update?hostname=iopsys_test.ddns.net&myip=127.0.0.1'
+ 153636       : 'no-ip.com' answered:
+good 127.0.0.1
+ 153637       : sending real IP to 'no-ip.com'
+ 153637       : #> /usr/bin/curl -RsS -o /var/run/ddns/myddns_ipv4.dat --stderr /var/run/ddns/myddns_ipv4.err --noproxy '*' 'http://iopsys:***PW***@dynupdate.noip.com/nic/update?hostname=iopsys_test.ddns.net&myip=41.228.252.24'
+ 153638       : 'no-ip.com' answered:
+good 41.228.252.24
+ 153638  info : Update successful - IP '41.228.252.24' send
+ 153638  info : Forced update successful - IP: '41.228.252.24' send
+ 153638       : Waiting 900 seconds (Check Interval)

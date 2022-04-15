@@ -93723,21 +93723,6 @@
 						{
 							"max": 64
 						}
-					],
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "dmmap_ddns",
-								"section": {
-									"type": "service",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "clientalias"
-								}
-							}
-						}
 					]
 				},
 				"LastError": {
@@ -94023,16 +94008,6 @@
 				],
 				"access": true,
 				"array": true,
-				"mapping": {
-					"type": "uci",
-					"uci": {
-						"file": "ddns",
-						"section": {
-							"type": "service"
-						},
-						"dmmapfile": "dmmap_ddns"
-					}
-				},
 				"Enable": {
 					"type": "string",
 					"read": true,
@@ -94046,21 +94021,6 @@
 					"range": [
 						{
 							"max": 64
-						}
-					],
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "ddns",
-								"section": {
-									"type": "service",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "enabled"
-								}
-							}
 						}
 					]
 				},
@@ -94110,21 +94070,6 @@
 						{
 							"max": 256
 						}
-					],
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "ddns",
-								"section": {
-									"type": "service",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "service_name"
-								}
-							}
-						}
 					]
 				},
 				"ServerAddress": {
@@ -94140,21 +94085,6 @@
 					"range": [
 						{
 							"max": 256
-						}
-					],
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "ddns",
-								"section": {
-									"type": "service",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "dns_server"
-								}
-							}
 						}
 					]
 				},
@@ -94172,21 +94102,6 @@
 						{
 							"min": 0,
 							"max": 65535
-						}
-					],
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "ddns",
-								"section": {
-									"type": "service",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "dns_server"
-								}
-							}
 						}
 					]
 				},
@@ -94216,22 +94131,7 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "string",
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "ddns",
-								"section": {
-									"type": "service",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "use_https"
-								}
-							}
-						}
-					]
+					"datatype": "string"
 				},
 				"CheckInterval": {
 					"type": "unsignedInt",
@@ -94243,22 +94143,7 @@
 						"usp"
 					],
 					"datatype": "unsignedInt",
-					"unit": "seconds",
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "ddns",
-								"section": {
-									"type": "service",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "check_interval"
-								}
-							}
-						}
-					]
+					"unit": "seconds"
 				},
 				"RetryInterval": {
 					"type": "unsignedInt",
@@ -94270,22 +94155,7 @@
 						"usp"
 					],
 					"datatype": "unsignedInt",
-					"unit": "seconds",
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "ddns",
-								"section": {
-									"type": "service",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "retry_interval"
-								}
-							}
-						}
-					]
+					"unit": "seconds"
 				},
 				"MaxRetries": {
 					"type": "unsignedInt",
@@ -94296,22 +94166,7 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "unsignedInt",
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "ddns",
-								"section": {
-									"type": "service",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "retry_count"
-								}
-							}
-						}
-					]
+					"datatype": "unsignedInt"
 				}
 			}
 		},
