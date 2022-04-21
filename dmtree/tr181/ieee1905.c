@@ -1518,11 +1518,28 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905NeighborMetric_RSS
 	return 0;
 }
 
-/*#Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.BridgingTuple.{i}.InterfaceList!UBUS:ieee1905/info//topology.device[@i-1].bridge_tuples[@i-1].macaddress*/
+/*#Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.BridgingTuple.{i}.InterfaceList!UBUS:ieee1905/info//topology.device[@i-1].bridge_tuples[@i-1].tuple*/
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = dmjson_get_value((json_object *)data, 1, "macaddress");
-	adm_entry_get_linker_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", linker, value);
+	json_object *json_obj = NULL;
+	char *mac_addr = NULL;
+	char buf[256] = {0};
+	unsigned pos = 0;
+	int idx = 0;
+
+	buf[0] = 0;
+	dmjson_foreach_value_in_array((json_object *)data, json_obj, mac_addr, idx, 1, "tuple") {
+		char *linker = NULL;
+
+		adm_entry_get_linker_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", mac_addr, &linker);
+		if (DM_STRLEN(linker) && (sizeof(buf) - pos) > 0)
+			pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", linker);
+	}
+
+	if (pos)
+		buf[pos - 1] = 0;
+
+	*value = (buf[0] != '\0') ? dmstrdup(buf) : "";
 	return 0;
 }
 

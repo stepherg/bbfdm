@@ -91580,7 +91580,7 @@
 											"object": "ieee1905",
 											"method": "info",
 											"args": {},
-											"key": "topology.device[@i-1].bridge_tuples[@i-1].macaddress"
+											"key": "topology.device[@i-1].bridge_tuples[@i-1].tuple"
 										}
 									}
 								]
