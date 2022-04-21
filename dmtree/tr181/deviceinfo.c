@@ -12,6 +12,25 @@
 
 #include "dmdiagnostics.h"
 #include "deviceinfo.h"
+#include "dmentry.h"
+
+LIST_HEAD(process_list);
+
+static int process_count = 0;
+
+#define PROCPS_BUFSIZE 1024
+
+struct process_entry {
+	struct list_head list;
+
+	char command[256];
+	char state[16];
+	char pid[8];
+	char size[8];
+	char priority[8];
+	char cputime[8];
+	int instance;
+};
 
 struct Supported_Data_Models
 {
@@ -40,6 +59,244 @@ static int get_device_fwimage_linker(char *refparam, struct dmctx *dmctx, void *
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
+static bool is_update_process_allowed(void)
+{
+	json_object *res = NULL;
+
+	dmubus_call("tr069", "status", UBUS_ARGS{0}, 0, &res);
+	if (!res)
+		goto end;
+
+	char *tr069_status = dmjson_get_value(res, 2, "last_session", "status");
+	if (strcmp(tr069_status, "running") == 0)
+		return false;
+
+end:
+	return true;
+}
+
+static char *get_proc_state(char state)
+{
+	switch(state) {
+		case 'R':
+			return "Running";
+		case 'S':
+			return "Sleeping";
+		case 'T':
+			return "Stopped";
+		case 'D':
+			return "Uninterruptible";
+		case 'Z':
+			return "Zombie";
+		case 'I':
+			return "Idle";
+	};
+
+	return "Idle";
+}
+
+static int find_last_instance(void)
+{
+	if (!list_empty(&process_list)) {
+		/* list_first_entry() is an external macro and which cppcheck can't
+		 * track so throws warning of null pointer dereferencing for second
+		 * argument. Suppressed the warning */
+		// cppcheck-suppress nullPointer
+		struct process_entry *entry = list_last_entry(&process_list, struct process_entry, list);
+		return entry->instance + 1;
+	} else {
+		return 1;
+	}
+}
+
+static struct process_entry *check_entry_exists(const char *pid)
+{
+	struct process_entry *entry = NULL;
+
+	list_for_each_entry(entry, &process_list, list) {
+		if (DM_STRCMP(entry->pid, pid) == 0)
+			return entry;
+	}
+
+	return NULL;
+}
+
+static void check_killed_process(void)
+{
+	struct process_entry *entry = NULL;
+	struct process_entry *entry_tmp = NULL;
+	char fstat[32];
+
+	list_for_each_entry_safe(entry, entry_tmp, &process_list, list) {
+
+		snprintf(fstat, sizeof(fstat), "/proc/%s/stat", entry->pid);
+		if (file_exists(fstat))
+			continue;
+
+		list_del(&entry->list);
+	}
+}
+
+static void procps_get_cmdline(char *buf, int bufsz, const char *pid, const char *comm)
+{
+	int sz;
+	char filename[sizeof("/proc/%s/cmdline") + sizeof(int)*3];
+
+	snprintf(filename, sizeof(filename), "/proc/%s/cmdline", pid);
+	sz = dm_file_to_buf(filename, buf, bufsz);
+	if (sz > 0) {
+		const char *base;
+		int comm_len;
+
+		while (--sz >= 0 && buf[sz] == '\0')
+			continue;
+		/* Prevent basename("process foo/bar") = "bar" */
+		strchrnul(buf, ' ')[0] = '\0';
+		base = basename(buf); /* before we replace argv0's NUL with space */
+		while (sz >= 0) {
+			if ((unsigned char)(buf[sz]) < ' ')
+				buf[sz] = ' ';
+			sz--;
+		}
+		if (base[0] == '-') /* "-sh" (login shell)? */
+			base++;
+
+		/* If comm differs from argv0, prepend "{comm} ".
+		 * It allows to see thread names set by prctl(PR_SET_NAME).
+		 */
+		if (!comm)
+			return;
+		comm_len = strlen(comm);
+		/* Why compare up to comm_len?
+		 * Well, some processes rewrite argv, and use _spaces_ there
+		 * while rewriting. (KDE is observed to do it).
+		 * I prefer to still treat argv0 "process foo bar"
+		 * as 'equal' to comm "process".
+		 */
+		if (strncmp(base, comm, comm_len) != 0) {
+			comm_len += 3;
+			if (bufsz > comm_len)
+				memmove(buf + comm_len, buf, bufsz - comm_len);
+			snprintf(buf, bufsz, "{%s}", comm);
+			if (bufsz <= comm_len)
+				return;
+			buf[comm_len - 1] = ' ';
+			buf[bufsz - 1] = '\0';
+		}
+	} else {
+		snprintf(buf, bufsz, "[%s]", comm ? comm : "?");
+	}
+}
+
+static void init_processes(void)
+{
+	DIR *dir = NULL;
+	struct dirent *entry = NULL;
+	struct stat stats = {0};
+	char buf[PROCPS_BUFSIZE];
+	char fstat[288];
+	char command[256];
+	char comm[16];
+	char bsize[16];
+	char cputime[16];
+	char priori[16];
+	char *comm1 = NULL;
+	char *comm2 = NULL;
+	char state;
+	unsigned long stime;
+	unsigned long utime;
+	unsigned long vsize;
+	int priority, n;
+	int curr_process_idx = 0;
+
+	if (!is_update_process_allowed())
+		return;
+
+	check_killed_process();
+
+	dir = opendir("/proc");
+	if (dir == NULL)
+		return;
+
+	while ((entry = readdir(dir)) != NULL) {
+		struct process_entry *pentry = NULL;
+		struct process_entry *pentry_exits = NULL;
+
+		int digit = entry->d_name[0] - '0';
+		if (digit < 0 || digit > 9)
+			continue;
+
+		snprintf(fstat, sizeof(fstat), "/proc/%s/stat", entry->d_name);
+		if (stat(fstat, &stats))
+			continue;
+
+		n = dm_file_to_buf(fstat, buf, PROCPS_BUFSIZE);
+		if (n < 0)
+			continue;
+
+		comm2 = strrchr(buf, ')'); /* split into "PID (cmd" and "<rest>" */
+		if (!comm2) /* sanity check */
+		  continue;
+
+		comm2[0] = '\0';
+		comm1 = strchr(buf, '(');
+		if (!comm1) /* sanity check */
+		  continue;
+
+		DM_STRNCPY(comm, comm1 + 1, sizeof(comm));
+
+		n = sscanf(comm2 + 2,			  /* Flawfinder: ignore */ \
+				"%c %*u "                 /* state, ppid */
+				"%*u %*u %*d %*s "        /* pgid, sid, tty, tpgid */
+				"%*s %*s %*s %*s %*s "    /* flags, min_flt, cmin_flt, maj_flt, cmaj_flt */
+				"%lu %lu "                /* utime, stime */
+				"%*u %*u %d "             /* cutime, cstime, priority */
+				"%*d "                    /* niceness */
+				"%*s %*s "                /* timeout, it_real_value */
+				"%*s "                    /* start_time */
+				"%lu "                    /* vsize */
+				,
+				&state,
+				&utime, &stime,
+				&priority,
+				&vsize
+			  );
+
+		if (n != 5)
+			continue;
+
+		procps_get_cmdline(command, sizeof(command), entry->d_name, comm);
+		curr_process_idx++;
+
+		snprintf(cputime, sizeof(cputime), "%lu", ((stime / sysconf(_SC_CLK_TCK)) + (utime / sysconf(_SC_CLK_TCK))) * 1000);
+		snprintf(bsize, sizeof(bsize), "%lu", vsize >> 10);
+		snprintf(priori, sizeof(priori), "%u", (unsigned)round((priority + 100) * 99 / 139));
+
+		if (process_count == 0 || !(pentry_exits = check_entry_exists(entry->d_name))) {
+
+			pentry = dm_dynamic_malloc(&main_memhead, sizeof(struct process_entry));
+			if (!pentry)
+				return;
+
+			pentry->instance = find_last_instance();
+			list_add_tail(&pentry->list, &process_list);
+		}
+
+		if (pentry_exits)
+			pentry = pentry_exits;
+
+		DM_STRNCPY(pentry->pid, entry->d_name, sizeof(pentry->pid));
+		DM_STRNCPY(pentry->command, command, sizeof(pentry->command));
+		DM_STRNCPY(pentry->size, bsize, sizeof(pentry->size));
+		DM_STRNCPY(pentry->priority, priori, sizeof(pentry->priority));
+		DM_STRNCPY(pentry->cputime, cputime, sizeof(pentry->cputime));
+		DM_STRNCPY(pentry->state, get_proc_state(state), sizeof(pentry->state));
+	}
+
+	closedir(dir);
+	process_count = curr_process_idx;
+}
+
 static bool check_file_dir(char *name)
 {
 	DIR *dir = NULL;
@@ -175,17 +432,17 @@ static int browseDeviceInfoFirmwareImageInst(struct dmctx *dmctx, DMNODE *parent
 	return 0;
 }
 
-/*#Device.DeviceInfo.ProcessStatus.Process.{i}.!UBUS:router.system/processes//processes*/
 static int browseProcessEntriesInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *processes = NULL, *arrobj = NULL;
+	struct process_entry *entry = NULL;
 	char *inst = NULL;
-	int id = 0, i = 0;
 
-	dmubus_call("router.system", "processes", UBUS_ARGS{0}, 0, &res);
-	dmjson_foreach_obj_in_array(res, arrobj, processes, i, 1, "processes") {
-		inst = handle_instance_without_section(dmctx, parent_node, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)processes, inst) == DM_STOP)
+	init_processes();
+	list_for_each_entry(entry, &process_list, list) {
+
+		inst = handle_instance_without_section(dmctx, parent_node, entry->instance);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, entry, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -754,70 +1011,46 @@ static int get_process_cpu_usage(char* refparam, struct dmctx *ctx, void *data, 
 	return 0;
 }
 
-/*#Device.DeviceInfo.ProcessStatus.ProcessNumberOfEntries!UBUS:router.system/processes//processes*/
 static int get_process_number_of_entries(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *processes = NULL;
-	int nbre_process = 0;
-
-	dmubus_call("router.system", "processes", UBUS_ARGS{0}, 0, &res);
-	DM_ASSERT(res, *value = "0");
-	json_object_object_get_ex(res, "processes", &processes);
-	nbre_process = (processes) ? json_object_array_length(processes) : 0;
-	dmasprintf(value, "%d", nbre_process);
+	int cnt = get_number_of_entries(ctx, data, instance, browseProcessEntriesInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
-/*#Device.DeviceInfo.ProcessStatus.Process.{i}.PID!UBUS:router.system/processes//processes[@i-1].pid*/
 static int get_process_pid(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "pid");
+	*value = data ? ((struct process_entry *)data)->pid : "";
 	return 0;
 }
 
-/*#Device.DeviceInfo.ProcessStatus.Process.{i}.Command!UBUS:router.system/processes//processes[@i-1].command*/
 static int get_process_command(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "command");
+	*value = data ? ((struct process_entry *)data)->command : "";
 	return 0;
 }
 
-/*#Device.DeviceInfo.ProcessStatus.Process.{i}.Size!UBUS:router.system/processes//processes[@i-1].vsz*/
 static int get_process_size(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "vsz");
+	*value = data ? ((struct process_entry *)data)->size : "";
 	return 0;
 }
 
-/*#Device.DeviceInfo.ProcessStatus.Process.{i}.Priority!UBUS:router.system/processes//processes[@i-1].priority*/
 static int get_process_priority(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int priority = 0;
-
-	*value = dmjson_get_value((json_object *)data, 1, "priority");
-
-	priority = (*value && **value) ? DM_STRTOL(*value) : 0;
-
-	/* Convert Linux priority to a value between 0 and 99 */
-	priority = round((priority + 100) * 99 / 139);
-
-	dmasprintf(value, "%d", priority);
-
+	*value = data ? ((struct process_entry *)data)->priority : "";
 	return 0;
 }
 
-/*#Device.DeviceInfo.ProcessStatus.Process.{i}.CPUTime!UBUS:router.system/processes//processes[@i-1].cputime*/
 static int get_process_cpu_time(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "cputime");
+	*value = data ? ((struct process_entry *)data)->cputime : "";
 	return 0;
 }
 
-/*#Device.DeviceInfo.ProcessStatus.Process.{i}.State!UBUS:router.system/processes//processes[@i-1].state*/
 static int get_process_state(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *state = dmjson_get_value((json_object *)data, 1, "state");
-	*value = (state && DM_LSTRCMP(state, "Unknown") == 0) ? "Idle" : state;
+	*value = data ? ((struct process_entry *)data)->state : "";
 	return 0;
 }
 
@@ -1178,7 +1411,7 @@ DMLEAF tDeviceInfoMemoryStatusParams[] = {
 /* *** Device.DeviceInfo.ProcessStatus. *** */
 DMOBJ tDeviceInfoProcessStatusObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Process", &DMREAD, NULL, NULL, "ubus:router.system->processes", browseProcessEntriesInst, NULL, NULL, NULL, tDeviceInfoProcessStatusProcessParams, NULL, BBFDM_BOTH, LIST_KEY{"PID", NULL}, "2.0"},
+{"Process", &DMREAD, NULL, NULL, NULL, browseProcessEntriesInst, NULL, NULL, NULL, tDeviceInfoProcessStatusProcessParams, NULL, BBFDM_BOTH, LIST_KEY{"PID", NULL}, "2.0"},
 {0}
 };
 

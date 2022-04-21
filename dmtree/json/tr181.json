@@ -1245,18 +1245,7 @@
 						"cwmp",
 						"usp"
 					],
-					"datatype": "unsignedInt",
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "router.system",
-								"method": "processes",
-								"args": {},
-								"key": "processes"
-							}
-						}
-					]
+					"datatype": "unsignedInt"
 				},
 				"Device.DeviceInfo.ProcessStatus.Process.{i}.": {
 					"type": "object",
@@ -1270,15 +1259,6 @@
 					],
 					"access": false,
 					"array": true,
-					"mapping": {
-						"type": "ubus",
-						"ubus": {
-							"object": "router.system",
-							"method": "processes",
-							"args": {},
-							"key": "processes"
-						}
-					},
 					"PID": {
 						"type": "unsignedInt",
 						"read": true,
@@ -1288,18 +1268,7 @@
 							"cwmp",
 							"usp"
 						],
-						"datatype": "unsignedInt",
-						"mapping": [
-							{
-								"type": "ubus",
-								"ubus": {
-									"object": "router.system",
-									"method": "processes",
-									"args": {},
-									"key": "processes[@i-1].pid"
-								}
-							}
-						]
+						"datatype": "unsignedInt"
 					},
 					"Command": {
 						"type": "string",
@@ -1315,17 +1284,6 @@
 							{
 								"max": 256
 							}
-						],
-						"mapping": [
-							{
-								"type": "ubus",
-								"ubus": {
-									"object": "router.system",
-									"method": "processes",
-									"args": {},
-									"key": "processes[@i-1].command"
-								}
-							}
 						]
 					},
 					"Size": {
@@ -1338,18 +1296,7 @@
 							"usp"
 						],
 						"datatype": "unsignedInt",
-						"unit": "KiB",
-						"mapping": [
-							{
-								"type": "ubus",
-								"ubus": {
-									"object": "router.system",
-									"method": "processes",
-									"args": {},
-									"key": "processes[@i-1].vsz"
-								}
-							}
-						]
+						"unit": "KiB"
 					},
 					"Priority": {
 						"type": "unsignedInt",
@@ -1365,17 +1312,6 @@
 							{
 								"max": 99
 							}
-						],
-						"mapping": [
-							{
-								"type": "ubus",
-								"ubus": {
-									"object": "router.system",
-									"method": "processes",
-									"args": {},
-									"key": "processes[@i-1].priority"
-								}
-							}
 						]
 					},
 					"CPUTime": {
@@ -1388,18 +1324,7 @@
 							"usp"
 						],
 						"datatype": "unsignedInt",
-						"unit": "milliseconds",
-						"mapping": [
-							{
-								"type": "ubus",
-								"ubus": {
-									"object": "router.system",
-									"method": "processes",
-									"args": {},
-									"key": "processes[@i-1].cputime"
-								}
-							}
-						]
+						"unit": "milliseconds"
 					},
 					"State": {
 						"type": "string",
@@ -1418,17 +1343,6 @@
 							"Idle",
 							"Uninterruptible",
 							"Zombie"
-						],
-						"mapping": [
-							{
-								"type": "ubus",
-								"ubus": {
-									"object": "router.system",
-									"method": "processes",
-									"args": {},
-									"key": "processes[@i-1].state"
-								}
-							}
 						]
 					}
 				}

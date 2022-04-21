@@ -1743,6 +1743,20 @@ void strip_lead_trail_whitespace(char *str)
 	}
 }
 
+int dm_file_to_buf(const char *filename, void *buf, size_t buf_size)
+{
+	FILE *file;
+	int ret = -1;
+
+	file = fopen(filename, "r");
+	if (file) {
+		ret = fread(buf, 1, buf_size - 1, file);
+		fclose(file);
+	}
+	((char *)buf)[ret > 0 ? ret : 0] = '\0';
+	return ret;
+}
+
 int check_browse_section(struct uci_section *s, void *data)
 {
 	struct browse_args *browse_args = (struct browse_args *)data;
