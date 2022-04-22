@@ -15,5 +15,6 @@
 #include <libbbf_api/dmcommon.h>
 
 extern DMLEAF tManagementServerParams[];
-
+extern DMLEAF tHeartbeatPolicyParams[];
+extern DMOBJ tManagementServerObj[];
 #endif

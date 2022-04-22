@@ -606,9 +606,80 @@ static int get_nat_detected(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
+
+static int get_heart_beat_policy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "heartbeat_enable", "0");
+	return 0;
+}
+
+static int set_heart_beat_policy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value("cwmp", "acs", "heartbeat_enable", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			return 0;
+	}
+	return 0;
+}
+
+
+static int get_heart_beat_policy_reporting_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "heartbeat_interval", "30");
+	return 0;
+}
+
+static int set_heart_beat_policy_reporting_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"20",NULL}}, 1))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value("cwmp", "acs", "heartbeat_interval", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			return 0;
+	}
+	return 0;
+}
+
+static int get_heart_beat_policy_initiation_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("cwmp", "acs", "heartbeat_time", value);
+	return 0;
+}
+
+static int set_heart_beat_policy_initiation_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_dateTime(value))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value("cwmp", "acs", "heartbeat_time", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			return 0;
+	}
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
+DMOBJ tManagementServerObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"HeartbeatPolicy", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHeartbeatPolicyParams, NULL, BBFDM_CWMP, NULL, "2.12"},
+{0}
+};
+
 /*** ManagementServer. ***/
 DMLEAF tManagementServerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
@@ -640,5 +711,12 @@ DMLEAF tManagementServerParams[] = {
 {"EnableCWMP", &DMWRITE, DMT_BOOL, get_management_server_enable_cwmp, set_management_server_enable_cwmp, BBFDM_CWMP, "2.12"},
 {"UDPConnectionRequestAddress", &DMREAD, DMT_STRING, get_upd_cr_address, NULL, BBFDM_CWMP, "2.0"},
 {"NATDetected", &DMREAD, DMT_BOOL, get_nat_detected, NULL, BBFDM_CWMP, "2.0"},
+{0}
+};
+
+DMLEAF tHeartbeatPolicyParams[] = {
+{"Enable", &DMWRITE, DMT_BOOL, get_heart_beat_policy_enable, set_heart_beat_policy_enable, BBFDM_CWMP, "2.12"},
+{"ReportingInterval", &DMWRITE, DMT_UNINT, get_heart_beat_policy_reporting_interval, set_heart_beat_policy_reporting_interval, BBFDM_CWMP, "2.12"},
+{"InitiationTime", &DMWRITE, DMT_TIME, get_heart_beat_policy_initiation_time, set_heart_beat_policy_initiation_time, BBFDM_CWMP, "2.12"},
 {0}
 };
