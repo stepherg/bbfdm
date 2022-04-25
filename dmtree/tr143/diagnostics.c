@@ -1268,7 +1268,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Host(char *refparam, struct dmctx
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "port", "1");
+	*value = get_diagnostics_option_fallback_def("udpechodiag", "port", "7");
 	return 0;
 }
 
@@ -2100,9 +2100,6 @@ static int operate_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx
 		return CMD_INVALID_ARGUMENTS;
 
 	char *udpecho_port = dmjson_get_value((json_object *)value, 1, "Port");
-	if (udpecho_port[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
-
 	char *udpecho_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *udpecho_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
 	char *udpecho_nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");

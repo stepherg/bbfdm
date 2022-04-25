@@ -6,7 +6,7 @@
 
 udpecho_launch() {
 	host=$(uci_get_bbf_dmmap dmmap_diagnostics.udpechodiag.Host)
-	port=$(uci_get_bbf_dmmap dmmap_diagnostics.udpechodiag.port)
+	port=$(uci_get_bbf_dmmap dmmap_diagnostics.udpechodiag.port 7)
 	cnt=$(uci_get_bbf_dmmap dmmap_diagnostics.udpechodiag.NumberOfRepetitions 1)
 	dsize=$(uci_get_bbf_dmmap dmmap_diagnostics.udpechodiag.DataBlockSize 24)
 	dscp=$(uci_get_bbf_dmmap dmmap_diagnostics.udpechodiag.DSCP 0)
@@ -19,7 +19,7 @@ udpecho_launch() {
 	inter_time=$((inter_time/1000))
 	[ "$inter_time" = "0" ] && inter_time="1"
 	[ "$host" = "" ] && return
-	[ "$port" = "" ] && return
+	[[ "$host" == *"."* ]] && proto="-4" || proto="-6"
 	micros=1000
 	success_count=0
 	avg_time_sum=0
@@ -29,11 +29,9 @@ udpecho_launch() {
 
 	while [ $i -lt "$cnt" ]; do
 		i=$((i+1))
-		res=$(nping "$proto" -c 1 --tos $tos --udp --dest-port "$port" --data-length "$dsize" "$device" "$host" 2>&1)
+		res=$(nping $proto -c 1 --tos $tos --udp --dest-port "$port" --data-length "$dsize" $device "$host" 2>&1)
 		ba=$(echo "$res" | grep "RCVD")
 		[ -z "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.udpechodiag.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; return; }
-		stc=$(echo "$res" | grep "RCVD" | grep "unreachable")
-		[ -n "$stc" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.udpechodiag.DiagnosticState=Error_Other; $UCI_COMMIT_BBF_DMMAP; return; }
 		times=$(echo "$res" | grep "rtt")
 		[ -z "$times" ] && continue
 		sc1=$(echo "$res" | grep "Rcvd" | awk -F': ' '{print $3}' | awk -F'(' '{ print $1 }')
