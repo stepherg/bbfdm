@@ -551,89 +551,6 @@ static int set_instance_mode(char *refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
-/*
- * XMPP parameters
- */
-/*#Device.ManagementServer.ConnReqAllowedJabberIDs!UCI:xmpp/xmpp,xmpp/allowed_jid*/
-static int get_management_server_conn_rep_allowed_jabber_id(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_option_value_string("xmpp", "xmpp", "allowed_jid", value);
-	return 0;
-}
-
-static int set_management_server_conn_rep_allowed_jabber_id(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, 32, -1, -1, 256, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value("xmpp", "xmpp", "allowed_jid", value);
-			return 0;
-	}
-	return 0;
-}
-
-static int get_management_server_conn_req_jabber_id(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct uci_section *s = NULL;
-	char *username, *domain, *resource, *tmpPtr = NULL, *strResponse = NULL;
-
-	uci_foreach_sections("xmpp", "xmpp_connection", s) {
-		dmuci_get_value_by_section_string(s, "username", &username);
-		dmuci_get_value_by_section_string(s, "domain", &domain);
-		dmuci_get_value_by_section_string(s, "resource", &resource);
-		if(*username != '\0' || *domain != '\0' || *resource != '\0') {
-			if(!strResponse)
-				dmasprintf(&strResponse, "%s@%s/%s", username, domain, resource);
-			else {
-				tmpPtr = dmstrdup(strResponse);
-				dmfree(strResponse);
-				dmasprintf(&strResponse, "%s,%s@%s/%s", tmpPtr, username, domain, resource);
-				dmfree(tmpPtr);
-			}
-		}
-	}
-	*value = strResponse ? strResponse : "";
-	return 0;
-}
-
-static int get_management_server_conn_req_xmpp_connection(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char *id;
-
-	dmuci_get_option_value_string("xmpp", "xmpp", "id", &id);
-	if (*id != '\0' && *id != '0') dmasprintf(value, "Device.XMPP.Connection.%s", id);
-	return 0;
-}
-
-static int set_management_server_conn_req_xmpp_connection(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *str, *xmpp_id;
-	struct uci_section *s = NULL;
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			if ((str = DM_LSTRSTR(value, "Device.XMPP.Connection."))) {
-				value = dmstrdup(str + sizeof("Device.XMPP.Connection.") - 1); //MEM WILL BE FREED IN DMMEMCLEAN
-			}
-			uci_foreach_sections("xmpp", "connection", s) {
-				dmuci_get_value_by_section_string(s, "xmpp_id", &xmpp_id);
-				if(DM_STRCMP(value, xmpp_id) == 0) {
-					dmuci_set_value("xmpp", "xmpp", "id", value);
-					break;
-				}
-			}
-			return 0;
-	}
-	return 0;
-}
-
 static int get_management_server_supported_conn_req_methods(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "HTTP,XMPP,STUN";
@@ -718,9 +635,6 @@ DMLEAF tManagementServerParams[] = {
 {"CWMPRetryIntervalMultiplier", &DMWRITE, DMT_UNINT, get_management_server_retry_interval_multiplier, set_management_server_retry_interval_multiplier, BBFDM_CWMP, "2.0"},
 {"AliasBasedAddressing", &DMREAD, DMT_BOOL, get_alias_based_addressing, NULL, BBFDM_CWMP, "2.3"},
 {"InstanceMode", &DMWRITE, DMT_STRING, get_instance_mode, set_instance_mode, BBFDM_CWMP, "2.3"},
-{"ConnReqAllowedJabberIDs", &DMWRITE, DMT_STRING, get_management_server_conn_rep_allowed_jabber_id, set_management_server_conn_rep_allowed_jabber_id, BBFDM_CWMP, "2.7"},
-{"ConnReqJabberID", &DMREAD, DMT_STRING, get_management_server_conn_req_jabber_id, NULL, BBFDM_CWMP, "2.7"},
-{"ConnReqXMPPConnection", &DMWRITE, DMT_STRING, get_management_server_conn_req_xmpp_connection, set_management_server_conn_req_xmpp_connection, BBFDM_CWMP, "2.7"},
 {"SupportedConnReqMethods", &DMREAD, DMT_STRING, get_management_server_supported_conn_req_methods, NULL, BBFDM_CWMP, "2.7"},
 {"InstanceWildcardsSupported", &DMREAD, DMT_BOOL, get_management_server_instance_wildcard_supported, NULL, BBFDM_CWMP, "2.12"},
 {"EnableCWMP", &DMWRITE, DMT_BOOL, get_management_server_enable_cwmp, set_management_server_enable_cwmp, BBFDM_CWMP, "2.12"},
