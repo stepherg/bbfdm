@@ -1523,7 +1523,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceLis
 {
 	json_object *json_obj = NULL;
 	char *mac_addr = NULL;
-	char buf[256] = {0};
+	char buf[4096] = {0};
 	unsigned pos = 0;
 	int idx = 0;
 
