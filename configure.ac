@@ -3,7 +3,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
-AC_CONFIG_SUBDIRS([libbbf_ubus])
+#AC_CONFIG_SUBDIRS([libbbf_ubus])
 
 AC_ARG_ENABLE(tr181, [AS_HELP_STRING([--enable-tr181], [enable tr181 device feature])], AC_DEFINE(BBF_TR181),)
 AM_CONDITIONAL([BBF_TR181],[test "x$enable_tr181" = "xyes"])

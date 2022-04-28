@@ -1,7 +1,6 @@
 CC = gcc
 CFLAGS = -g -Wall -Werror
-LDFLAGS = -lcmocka -lbbfdm -lbbf_api -lubus
-LDFLAGS_API_TEST = -lcmocka -lbbf_api -lubus
+LDFLAGS = -lcmocka -lbbfdm -lubus
 UNIT_TESTS = unit_test_bbfd
 FUNCTIONAL_TESTS = functional_test_bbfd
 FUNCTIONAL_API_TESTS = functional_api_test_bbfd
@@ -17,7 +16,7 @@ functional_test_bbfd: functional_test_bbfd.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 functional_api_test_bbfd: functional_api_test_bbfd.o
-	$(CC) -o $@ $^ $(LDFLAGS_API_TEST)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 unit-test: $(UNIT_TESTS)
 	$(foreach testprog, $(UNIT_TESTS), sudo $(VALGRIND) ./$(testprog);)

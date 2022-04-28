@@ -56,23 +56,6 @@ run_functional_api_test:
           - timestamp.log
           - functional-api-test-coverage.xml
 
-run_libbbf_ubus_test:
-  stage: functional_test
-  image: iopsys/code-analysis:latest
-  allow_failure: false
-  script:
-  - "./gitlab-ci/setup.sh"
-  - "./gitlab-ci/libbbf_ubus_api_test.sh"
-
-  artifacts:
-      when: always
-      reports:
-          junit: ./report/tap.xml
-      paths:
-          - timestamp.log
-          - memory-report.xml
-          - api-result.log
-
 run_tools_test:
   stage: unit_test
   image: iopsys/code-analysis:latest

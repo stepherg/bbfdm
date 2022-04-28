@@ -1,35 +1,4 @@
-lib_LTLIBRARIES = libbbf_api.la
-
-libbbf_api_la_SOURCES =				\
-	../libbbf_api/dmbbf.c			\
-	../libbbf_api/dmubus.c			\
-	../libbbf_api/dmjson.c			\
-	../libbbf_api/dmuci.c			\
-	../libbbf_api/dmcommon.c 		\
-	../libbbf_api/dmmem.c			\
-	../libbbf_api/dmapi.c
-
-libbbf_api_la_CFLAGS =		\
-	$(AM_CFLAGS)			\
-	$(LIBUCI_CFLAGS)		\
-	$(LIBUBOX_CFLAGS)		\
-	$(LIBUBUS_CFLAGS)
-
-libbbf_api_la_LDFLAGS = 	\
-	$(AM_LDFLAGS)			\
-	$(LIBUCI_LDFLAGS)		\
-	$(LIBUBOX_LDFLAGS)		\
-	$(LIBUBUS_LDFLAGS)
-
-libbbf_api_la_LIBADD =		\
-	$(AM_LIBS)				\
-	$(LIBUCI_LIBS)			\
-	$(LIBUBOX_LIBS)			\
-	$(LIBUBUS_LIBS)			\
-	$(LIBJSON_LIBS)			\
-	$(LBLOBMSG_LIBS)
-
-lib_LTLIBRARIES += libbbfdm.la
+lib_LTLIBRARIES = libbbfdm.la
 
 libbbfdm_la_SOURCES =	\
 	../dmentry.c 		\

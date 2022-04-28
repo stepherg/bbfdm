@@ -9,4 +9,4 @@ libbbfdm_include_HEADERS = *.h
 libbbf_api_include_HEADERS = libbbf_api/*.h
 libbbf_ubus_include_HEADERS = include/*.h
 
-SUBDIRS = bin libbbf_ubus
+SUBDIRS = bin

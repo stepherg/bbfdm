@@ -105,9 +105,9 @@ function install_libbbf_test()
 	ldconfig
 	
 	# compile and install libbbf_ubus_test
-	echo "Compiling libbbf_ubus_test"
-	make clean -C test/dynamicdm_ubus_test/
-	make -C test/dynamicdm_ubus_test/
+	#echo "Compiling libbbf_ubus_test"
+	#make clean -C test/dynamicdm_ubus_test/
+	#make -C test/dynamicdm_ubus_test/
 }
 
 function install_libbulkdata()
