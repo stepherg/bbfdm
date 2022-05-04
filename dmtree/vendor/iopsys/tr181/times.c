@@ -15,6 +15,8 @@
 static int get_local_time_zone_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_option_value_string("system", "@system[0]", "zonename", value);
+	replace_char(*value, ' ', '_');
+
 	return 0;
 }
 
