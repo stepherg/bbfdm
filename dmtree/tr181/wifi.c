@@ -666,9 +666,17 @@ static int browseWiFiDataElementsNetworkSSIDInst(struct dmctx *dmctx, DMNODE *pa
 	synchronize_specific_config_sections_with_dmmap("mapcontroller", "ap", "dmmap_mapcontroller", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		char *type = NULL;
+		char *disabled = NULL;
+		bool b = false;
 
 		dmuci_get_value_by_section_string(p->config_section, "type", &type);
 		if (DM_LSTRCMP(type, "fronthaul") != 0)
+			continue;
+
+		// skip the disabled fronthaul interfaces
+		dmuci_get_value_by_section_string(p->config_section, "disabled", &disabled);
+		string_to_bool(disabled, &b);
+		if (b == true)
 			continue;
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "wifi_da_ssid_instance", "wifi_da_ssid_alias");
@@ -5976,11 +5984,11 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 
 	if (b) {
 		// Add this SSID
-
 		uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
 			dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
 			dmuci_get_value_by_section_string(s, "band", &curr_band);
 			if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, band, 1) == 0) {
+				dmuci_set_value_by_section(s, "disabled", "0");
 				if (*key) dmuci_set_value_by_section(s, "key", key);
 				ssid_exist = true;
 				break;
@@ -5993,16 +6001,16 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 			dmuci_set_value_by_section(s, "key", key);
 			dmuci_set_value_by_section(s, "type", "fronthaul");
 			dmuci_set_value_by_section(s, "band", (*band == '5') ? "5" : "2");
+			dmuci_set_value_by_section(s, "disabled", "0");
 		}
 
 	} else {
 		// Remove this SSID
-
 		uci_foreach_option_eq_safe("mapcontroller", "ap", "type", "fronthaul", stmp, s) {
 			dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
 			dmuci_get_value_by_section_string(s, "band", &curr_band);
 			if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, band, 1) == 0) {
-				dmuci_delete_by_section(s, NULL, NULL);
+				dmuci_set_value_by_section(s, "disabled", "1");
 				ssid_exist = true;
 				break;
 			}
