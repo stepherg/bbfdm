@@ -54,10 +54,10 @@ def generate_bbf_xml_file(output_file):
 
     for value in bbf.LIST_SUPPORTED_DM:
 
-        if "()" in value or "!" in value:
+        obj = value.strip().split(",")
+        if obj[3] == "BBFDM_USP":
             continue
 
-        obj = value.strip().split(",")
         access = "readOnly" if obj[1] == "DMREAD" else "readWrite"
 
         if obj[2] == "DMT_OBJ":
@@ -151,10 +151,9 @@ def generate_hdm_xml_file(output_file):
 
     for value in bbf.LIST_SUPPORTED_DM:
 
-        if "()" in value or "!" in value:
-            continue
-
         obj = value.strip().split(",")
+        if obj[3] == "BBFDM_USP":
+            continue
 
         if obj[2] == "DMT_OBJ":
             # Object

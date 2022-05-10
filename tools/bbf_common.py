@@ -118,6 +118,15 @@ def get_param_type(value):
     paramtype = get_option_value(value, "type")
     return Array_Types.get(paramtype, None)
 
+def get_protocol_from_json(value):
+    val = get_option_value(value, "protocols", ["cwmp", "usp"])
+    if "cwmp" in val and "usp" in val:
+        return "BBFDM_BOTH"
+    elif "cwmp" in val:
+        return "BBFDM_CWMP"
+    else:
+        return "BBFDM_USP"
+
 def clean_supported_dm_list():
     LIST_SUPPORTED_DM.clear()
 
@@ -144,6 +153,7 @@ def generate_datamodel_tree(filename):
     if filename.endswith('.c') is False:
         return
 
+    LIST_DEL_PARAM = []
     obj_found = 0
     param_found = 0
     obj_found_in_list = 0
@@ -178,6 +188,9 @@ def generate_datamodel_tree(filename):
             obj_found_in_list = 0
             table_name = ""
             parent_obj = ""
+            for value in LIST_DEL_PARAM:
+                LIST_PARAM.remove(value)
+            LIST_DEL_PARAM.clear()
             continue
 
         # Object Table
@@ -196,6 +209,7 @@ def generate_datamodel_tree(filename):
                 "BBF_VENDOR_PREFIX", BBF_VENDOR_PREFIX).replace(" ", "")
             obj_permission = obj[1].replace("&", "").replace(" ", "")
             obj_mulinst = obj[5].replace("&", "").replace(" ", "")
+            obj_protocol = obj[11].replace("}", "").replace(" ", "").replace(",", "")
 
             if obj_mulinst == "NULL":
                 full_obj_name = obj_name + "."
@@ -203,7 +217,7 @@ def generate_datamodel_tree(filename):
                 full_obj_name = obj_name + ".{i}."
 
             LIST_SUPPORTED_DM.append(
-                full_obj_name + "," + obj_permission + ",DMT_OBJ")
+                full_obj_name + "," + obj_permission + ",DMT_OBJ" + "," + obj_protocol)
 
             if obj[8] != "NULL":
                 LIST_OBJ.append(full_obj_name + ":" + obj[8])
@@ -213,23 +227,23 @@ def generate_datamodel_tree(filename):
 
         # Parameter Table
         if param_found == 1:
-            if obj_found_in_list == 0:
-                param_list = LIST_PARAM
-                for value in param_list:
-                    val = value.split(":")
-                    if val[1] == table_name:
-                        parent_obj = val[0]
-                        obj_found_in_list = 1
-                        LIST_PARAM.remove(value)
+            param_list = LIST_PARAM
+            for value in param_list:
+                val = value.split(":")
+                if val[1] == table_name:
+                    parent_obj = val[0]
 
-            param = line.rstrip('\n').split(",")
-            param_name = parent_obj + param[0].replace("{", "").replace(
-                "\"", "").replace("BBF_VENDOR_PREFIX", BBF_VENDOR_PREFIX).replace(" ", "")
-            param_permission = param[1].replace("&", "").replace(" ", "")
-            param_type = param[2].replace(" ", "")
+                    param = line.rstrip('\n').split(",")
+                    param_name = parent_obj + param[0].replace("{", "").replace(
+                        "\"", "").replace("BBF_VENDOR_PREFIX", BBF_VENDOR_PREFIX).replace(" ", "")
+                    param_permission = param[1].replace("&", "").replace(" ", "")
+                    param_type = param[2].replace(" ", "")
+                    param_protocol = param[5].replace("}", "").replace(" ", "")
 
-            LIST_SUPPORTED_DM.append(
-                param_name + "," + param_permission + "," + param_type)
+                    LIST_SUPPORTED_DM.append(
+                        param_name + "," + param_permission + "," + param_type + "," + param_protocol)
+                    if value not in LIST_DEL_PARAM:
+                        LIST_DEL_PARAM.append(value)
 
     fp.close()
 
@@ -274,8 +288,10 @@ def generate_dynamic_datamodel_tree(filename):
 
 def parse_dynamic_json_datamodel_tree(obj, value):
     obj_permission = "DMWRITE" if get_option_value(
-        value, "array") is True else "DMREAD"
-    LIST_SUPPORTED_DM.append(obj + "," + obj_permission + ",DMT_OBJ")
+        value, "access") is True else "DMREAD"
+    obj_protocols = get_protocol_from_json(value)
+
+    LIST_SUPPORTED_DM.append(obj + "," + obj_permission + ",DMT_OBJ" + "," + obj_protocols)
 
     hasobj = obj_has_child(value)
     hasparam = obj_has_param(value)
@@ -289,8 +305,9 @@ def parse_dynamic_json_datamodel_tree(obj, value):
                         param_type = get_param_type(v)
                         param_permission = "DMWRITE" if get_option_value(
                             v, "write") is True else "DMREAD"
+                        param_protocols = get_protocol_from_json(v)
                         LIST_SUPPORTED_DM.append(
-                            param_name + "," + param_permission + "," + param_type)
+                            param_name + "," + param_permission + "," + param_type + "," + param_protocols)
                         break
 
     if hasobj and isinstance(value, dict):
