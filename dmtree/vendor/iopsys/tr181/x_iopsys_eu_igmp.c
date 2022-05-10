@@ -870,7 +870,7 @@ int set_mcast_snooping_mode(char *refparam, struct dmctx *ctx, void *data, char 
 
 int get_mcasts_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "last_member_query_interval", value);
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "last_member_query_interval", "10");
 	return 0;
 }
 
