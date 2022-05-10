@@ -311,114 +311,6 @@ static int set_ServicesVoiceServiceSIPClient_RegisterURI(char *refparam, struct 
 	return 0;
 }
 
-static int get_ServicesVoiceServiceSIPClientContact_Origin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = "Static";
-	return 0;
-}
-
-/*#Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.Port!UCI:asterisk/sip_advanced,sip_options/bindport*/
-static int get_ServicesVoiceServiceSIPClientContact_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "bindport", "0");
-	return 0;
-}
-
-static int set_ServicesVoiceServiceSIPClientContact_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","65535"}}, 1))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value("asterisk", "sip_options", "bindport", value);
-			break;
-	}
-	return 0;
-}
-
-/*#Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.ExpireTime!UCI:asterisk/sip_advanced,sip_options/defaultexpiry*/
-static int get_ServicesVoiceServiceSIPClientContact_ExpireTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct uci_section *section = ((struct dmmap_dup *)data)->config_section;
-	json_object *res = NULL, *sip = NULL, *client = NULL;
-
-	*value = "0001-01-01T00:00:00Z";
-	if (!section) {
-		BBF_DEBUG("section shall NOT be null\n");
-		return 0;
-	}
-
-	dmubus_call("voice.asterisk", "status", UBUS_ARGS{0}, 0, &res);
-	if (res) {
-		sip = dmjson_get_obj(res, 1, "sip");
-		if (sip) {
-			client = dmjson_get_obj(sip, 1, section->e.name);
-			if (client) {
-				char *last_reg_time = dmjson_get_value(client, 1, "last_successful_registration");
-				if (last_reg_time && *last_reg_time) {
-					struct tm tm_last = { 0, };
-
-					// The format of last_reg_time is like "Wed, 26 Aug 2020 11:50:13"
-					if (strptime(last_reg_time, "%a, %d %b %Y %H:%M:%S", &tm_last)) {
-						char *period_str = NULL, buf[sizeof "AAAA-MM-JJTHH:MM:SSZ"];
-						int period = 0;
-						// Let mktime determine the DST setting according to the system configuration
-						tm_last.tm_isdst = -1;
-						time_t time_last = mktime(&tm_last), time_expires;
-
-						dmuci_get_option_value_string(TR104_UCI_PACKAGE, "sip_options", "defaultexpiry", &period_str);
-						if (period_str && *period_str) {
-							period = DM_STRTOL(period_str);
-							dmfree(period_str);
-						}
-						if (period <= 0) {
-							BBF_DEBUG("Use default registration expires\n");
-							period = strtol(DEFAULT_SIP_REGISTER_EXPIRY_STR, NULL, 10);
-						}
-						time_expires = time_last + period;
-
-						if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", gmtime(&time_expires)) == 0)
-							return -1;
-
-						*value = dmstrdup(buf);
-					} else {
-						BBF_DEBUG("Unexpected time format: %s\n", last_reg_time);
-					}
-				}
-			}
-		}
-	}
-
-	return 0;
-}
-
-static int get_ServicesVoiceServiceSIPClientContact_UserAgent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct uci_section *section = ((struct dmmap_dup *)data)->config_section;
-	json_object *res = NULL, *sip = NULL, *client = NULL;
-
-	if (!section) {
-		BBF_DEBUG("section shall NOT be null\n");
-		return 0;
-	}
-
-	dmubus_call("voice.asterisk", "status", UBUS_ARGS{0}, 0, &res);
-	if (res) {
-		sip = dmjson_get_obj(res, 1, "sip");
-		if (sip) {
-			client = dmjson_get_obj(sip, 1, section->e.name);
-			if (client)
-				*value = dmjson_get_value(client, 1, "useragent");
-		}
-	} else {
-		BBF_DEBUG("dmubus_call() failed\n");
-	}
-
-	return 0;
-}
-
 /*#Device.Services.VoiceService.{i}.SIP.Network.{i}.Enable!UCI:asterisk/sip_service_provider,@i-1/enable*/
 static int get_ServicesVoiceServiceSIPNetwork_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1010,18 +902,6 @@ static int set_ServicesVoiceServiceSIPNetworkFQDNServer_Alias(char *refparam, st
     return set_Alias_value_by_name(refparam, ctx, data, instance, value, action, "FQDNServer", "FQDNServer_inst");
 }
 
-/*Get Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.{i}. Alias*/
-static int get_ServicesVoiceServiceSIPClientContact_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-    return get_Alias_value_by_name(refparam, ctx, data, instance, value, "SIPClientContact", "SIPClientContact_inst");
-}
-
-/*Set Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.{i}. Alias*/
-static int set_ServicesVoiceServiceSIPClientContact_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-    return set_Alias_value_by_name(refparam, ctx, data, instance, value, action, "SIPClientContact", "SIPClientContact_inst");
-}
-
 /*Get Device.Services.VoiceService.{i}.SIP.Client.{i}. Alias*/
 static int get_ServicesVoiceServiceSIPClient_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1061,17 +941,6 @@ DMLEAF tServicesVoiceServiceSIPClientParams[] = {
 {"AuthPassword", &DMWRITE, DMT_STRING, get_empty, set_ServicesVoiceServiceSIPClient_AuthPassword, BBFDM_BOTH},
 {"RegisterURI", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_RegisterURI, set_ServicesVoiceServiceSIPClient_RegisterURI, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClient_Alias, set_ServicesVoiceServiceSIPClient_Alias, BBFDM_BOTH},
-{0}
-};
-
-/* *** Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.{i}. *** */
-DMLEAF tServicesVoiceServiceSIPClientContactParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Origin", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClientContact_Origin, NULL, BBFDM_BOTH},
-{"Port", &DMWRITE, DMT_UNINT, get_ServicesVoiceServiceSIPClientContact_Port, set_ServicesVoiceServiceSIPClientContact_Port, BBFDM_BOTH},
-{"ExpireTime", &DMREAD, DMT_TIME, get_ServicesVoiceServiceSIPClientContact_ExpireTime, NULL, BBFDM_BOTH},
-{"UserAgent", &DMREAD, DMT_STRING, get_ServicesVoiceServiceSIPClientContact_UserAgent, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceSIPClientContact_Alias, set_ServicesVoiceServiceSIPClientContact_Alias, BBFDM_BOTH},
 {0}
 };
 
