@@ -8,7 +8,7 @@ serverselection_launch() {
 	hostlist=$(uci_get_bbf_dmmap dmmap_diagnostics.serverselection.HostList)
 	cnt=$(uci_get_bbf_dmmap dmmap_diagnostics.serverselection.NumberOfRepetitions 3)
 	timeout=$(uci_get_bbf_dmmap dmmap_diagnostics.serverselection.Timeout 1000)
-	port=$(uci_get_bbf_dmmap dmmap_diagnostics.serverselection.port)
+	port=$(uci_get_bbf_dmmap dmmap_diagnostics.serverselection.port 7)
 	interface=$(uci_get_bbf_dmmap dmmap_diagnostics.serverselection.interface)
 	protoversion=$(uci_get_bbf_dmmap dmmap_diagnostics.serverselection.ProtocolVersion Any)
 	protocol=$(uci_get_bbf_dmmap dmmap_diagnostics.serverselection.Protocol ICMP)
@@ -56,15 +56,13 @@ serverselection_launch() {
 				avg_time_sum=$((avg_time_sum+avg_time))
 			done
 		else
-			[ "$port" = "" ] && return
-			[ -n "$interface" ] && device=$(ifstatus "$interface" | jsonfilter -e @.device) && device="-e $device" || device=""
+			[[ "$host" == *"."* ]] && proto="4" || proto="6"
+			[ -n "$interface" ] && device=$(ifstatus "$interface" | jsonfilter -e @.device) && device="-i $device" || device=""
 			while [ $i -lt "$cnt" ]; do
 				i=$((i+1))
-				res=$(nping $proto -c 1 --udp --dest-port "$port" --data-length 24 "$device" "$host" 2>&1)
+				res=$(udpechoclientd -c 1 -t $timeout --host "$host" --port "$port" --protocol "$proto" $device 2>&1)
 				ba=$(echo "$res" | grep "RCVD")
 				[ -z "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; return; }
-				stc=$(echo "$res" | grep "RCVD" | grep "unreachable")
-				[ -n "$stc" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_Other; $UCI_COMMIT_BBF_DMMAP; return; }
 				times=$(echo "$res" | grep "rtt")
 				[ -z "$times" ] && continue
 				sc1=$(echo "$res" | grep "Rcvd" | awk -F': ' '{print $3}' | awk -F'(' '{ print $1 }')

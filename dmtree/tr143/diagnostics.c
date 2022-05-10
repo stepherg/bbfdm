@@ -2178,9 +2178,6 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 
 	char *port = dmjson_get_value((json_object *)value, 1, "Port");
 	char *proto = dmjson_get_value((json_object *)value, 1, "Protocol");
-	if (DM_LSTRCMP(proto, "ICMP") && port[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
-
 	char *protocol_version = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
 	char *interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
