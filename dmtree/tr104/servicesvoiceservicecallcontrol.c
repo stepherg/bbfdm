@@ -245,20 +245,16 @@ static int browseServicesVoiceServiceCallControlNumberingPlanPrefixInfo(struct d
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "prefixinfo", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-                char *type = NULL;
-                dmuci_get_value_by_section_string(p->config_section, "facilityaction", &type);
-                if( *type ){
-                        if (!dm_validate_string(type, -1, -1, FacilityAction, NULL))
-		                inst = handle_instance(dmctx, parent_node, p->dmmap_section, "prefixinfoinstance", "prefixinfoalias");
-                }
-                else
-                        inst = handle_instance(dmctx, parent_node, p->dmmap_section, "prefixinfoinstance", "prefixinfoalias");
+		char *type = NULL;
 
-                if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
-                        break;
+		dmuci_get_value_by_section_string(p->config_section, "facilityaction", &type);
+		if (dm_validate_string(type, -1, -1, FacilityAction, NULL))
+			continue;
 
-                if (type && *type)
-                        dmfree(type);
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "prefixinfoinstance", "prefixinfoalias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
 	return 0;
