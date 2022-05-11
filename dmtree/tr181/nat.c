@@ -582,11 +582,24 @@ static int get_nat_port_mapping_external_port_end_range(char *refparam, struct d
 static int set_nat_port_mapping_external_port_end_range(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *src_dport = NULL, *tmp = NULL, buffer[64];
+	uint16_t sport, dport;
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","65535"}}, 1))
 				return FAULT_9007;
+
+			// Add check to check if the endrange > src_dport
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_dport", &src_dport);
+			tmp = src_dport ? DM_STRCHR(src_dport, ':') : NULL;
+			if (tmp)
+				*tmp = '\0';
+
+			sport = DM_STRTOL(src_dport);
+			dport = DM_STRTOL(value);
+			if (dport != 0 && dport < sport)
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_dport", &src_dport);
@@ -594,10 +607,13 @@ static int set_nat_port_mapping_external_port_end_range(char *refparam, struct d
 			if (tmp)
 				*tmp = '\0';
 
-			if ((src_dport[0] == '\0'))
-				snprintf(buffer, sizeof(buffer), "%s:%s", "0", value);
+			sport = DM_STRTOL(src_dport);
+			dport = DM_STRTOL(value);
+
+			if (dport) // if not 0
+				snprintf(buffer, sizeof(buffer), "%d:%d", sport, dport);
 			else
-				snprintf(buffer, sizeof(buffer), "%s:%s", src_dport, value);
+				snprintf(buffer, sizeof(buffer), "%d", sport);
 
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_dport", buffer);
 			return 0;
