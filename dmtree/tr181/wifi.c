@@ -2374,6 +2374,38 @@ static int set_WiFiAccessPointWPS_PIN(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
+static operation_args WiFiAccessPointWPSInitiateWPSPBC_args = {
+	.out = (const char *[]) {
+		"Status",
+		NULL
+	}
+};
+
+static int get_operate_args_WiFiAccessPointWPS_InitiateWPSPBC(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&WiFiAccessPointWPSInitiateWPSPBC_args;
+	return 0;
+}
+
+static int operate_WiFiAccessPointWPS_InitiateWPSPBC(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *status = "Success";
+	char object[256];
+	char *ifname = ((struct wifi_acp_args *)data)->ifname;
+	int ubus_ret = 0;
+
+	if (ifname == NULL)
+		return CMD_FAIL;
+
+	snprintf(object, sizeof(object), "hostapd.%s", ifname);
+	ubus_ret = dmubus_call_set(object, "wps_start", UBUS_ARGS{0}, 0);
+	if (ubus_ret != 0)
+		status = "Error_Not_Ready";
+
+	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
+	return CMD_SUCCESS;
+}
+
 /*#Device.WiFi.AccessPoint.{i}.Accounting.ServerIPAddr!UCI:wireless/wifi-iface,@i-1/acct_server*/
 static int get_WiFiAccessPointAccounting_ServerIPAddr(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -6443,6 +6475,7 @@ DMLEAF tWiFiAccessPointWPSParams[] = {
 {"Status", &DMREAD, DMT_STRING, get_WiFiAccessPointWPS_Status, NULL, BBFDM_BOTH, "2.11"},
 //{"Version", &DMREAD, DMT_STRING, get_WiFiAccessPointWPS_Version, NULL, BBFDM_BOTH, "2.11"},
 {"PIN", &DMWRITE, DMT_STRING, get_empty, set_WiFiAccessPointWPS_PIN, BBFDM_BOTH, "2.11"},
+{"InitiateWPSPBC()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiAccessPointWPS_InitiateWPSPBC, operate_WiFiAccessPointWPS_InitiateWPSPBC, BBFDM_USP, "2.15"},
 {0}
 };
 
