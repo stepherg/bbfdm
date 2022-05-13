@@ -61,6 +61,8 @@ serverselection_launch() {
 			while [ $i -lt "$cnt" ]; do
 				i=$((i+1))
 				res=$(udpechoclientd -c 1 -t $timeout --host "$host" --port "$port" --protocol "$proto" $device 2>&1)
+				ba=$(echo "$res" | grep "Can't Resolve Host Name")
+				[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; return; }
 				ba=$(echo "$res" | grep "RCVD")
 				[ -z "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; return; }
 				times=$(echo "$res" | grep "rtt")
