@@ -245,11 +245,6 @@ static int browseServicesVoiceServiceCallControlNumberingPlanPrefixInfo(struct d
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "prefixinfo", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
-		char *type = NULL;
-
-		dmuci_get_value_by_section_string(p->config_section, "facilityaction", &type);
-		if (dm_validate_string(type, -1, -1, FacilityAction, NULL))
-			continue;
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "prefixinfoinstance", "prefixinfoalias");
 
@@ -1216,19 +1211,33 @@ static int set_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_PrefixRang
 /*#Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.PrefixInfo.{i}.FacilityAction!UCI:asterisk/prefixinfo,@i-1/facilityaction*/
 static int get_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_FacilityAction(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "facilityaction", value);
+	char *type = NULL;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "facilityaction", &type);
+	if (dm_validate_string(type, -1, -1, FacilityAction, NULL))
+		dmasprintf(value, "%s%s", BBF_VENDOR_PREFIX, type);
+	else
+		*value = type;
+
 	return 0;
 }
 
 static int set_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_FacilityAction(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *p = NULL;
+
 	switch (action) {
 		case VALUECHECK:
-                        if (dm_validate_string(value, -1, -1, FacilityAction, NULL))
-                                return FAULT_9007;
+			if (*value == 0 || strncmp(value, BBF_VENDOR_PREFIX, strlen(BBF_VENDOR_PREFIX)) == 0)
+				break;
+
+			if (dm_validate_string(value, -1, -1, FacilityAction, NULL))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "facilityaction", value);
+			p = strstr(value, BBF_VENDOR_PREFIX);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "facilityaction", p ? p + strlen(BBF_VENDOR_PREFIX) : value);
 			break;
 	}
 	return 0;
