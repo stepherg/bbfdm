@@ -1214,7 +1214,7 @@ static int get_ServicesVoiceServiceCallControlNumberingPlanPrefixInfo_FacilityAc
 	char *type = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "facilityaction", &type);
-	if (dm_validate_string(type, -1, -1, FacilityAction, NULL))
+	if (*type && dm_validate_string(type, -1, -1, FacilityAction, NULL))
 		dmasprintf(value, "%s%s", BBF_VENDOR_PREFIX, type);
 	else
 		*value = type;
