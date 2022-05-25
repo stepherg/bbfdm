@@ -326,6 +326,7 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
+					"mandatory": true,
 					"version": "2.12",
 					"protocols": [
 						"usp"
@@ -961,6 +962,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -976,6 +978,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -991,6 +994,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -1016,6 +1020,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -1031,6 +1036,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -1046,6 +1052,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -2038,6 +2045,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -2053,6 +2061,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -2068,6 +2077,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -2352,6 +2362,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -2367,6 +2378,7 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -10638,6 +10650,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -17003,6 +17016,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -17018,6 +17032,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -17033,6 +17048,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -24201,6 +24217,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -24216,6 +24233,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -24226,6 +24244,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -24237,6 +24256,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -24253,6 +24273,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -24263,6 +24284,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -24273,6 +24295,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -24287,6 +24310,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -24340,6 +24364,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -24355,6 +24380,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -27467,6 +27493,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -27477,6 +27504,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -27523,6 +27551,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -27533,6 +27562,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -27552,6 +27582,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -27563,6 +27594,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -29603,6 +29635,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -29617,6 +29650,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -29632,6 +29666,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -31227,6 +31262,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": true,
+								"mandatory": true,
 								"version": "2.15",
 								"protocols": [
 									"usp"
@@ -31265,6 +31301,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": true,
+								"mandatory": true,
 								"version": "2.15",
 								"protocols": [
 									"usp"
@@ -31345,6 +31382,7 @@
 								"type": "string",
 								"read": true,
 								"write": true,
+								"mandatory": true,
 								"version": "2.15",
 								"protocols": [
 									"usp"
@@ -31355,6 +31393,7 @@
 								"type": "string",
 								"read": true,
 								"write": true,
+								"mandatory": true,
 								"version": "2.15",
 								"protocols": [
 									"usp"
@@ -31429,6 +31468,7 @@
 								"type": "string",
 								"read": true,
 								"write": true,
+								"mandatory": true,
 								"version": "2.15",
 								"protocols": [
 									"usp"
@@ -31478,6 +31518,7 @@
 								"type": "string",
 								"read": true,
 								"write": true,
+								"mandatory": true,
 								"version": "2.15",
 								"protocols": [
 									"usp"
@@ -32173,6 +32214,7 @@
 									"type": "boolean",
 									"read": true,
 									"write": true,
+									"mandatory": true,
 									"version": "2.15",
 									"protocols": [
 										"usp"
@@ -32211,6 +32253,7 @@
 									"type": "boolean",
 									"read": true,
 									"write": true,
+									"mandatory": true,
 									"version": "2.15",
 									"protocols": [
 										"usp"
@@ -32249,6 +32292,7 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": true,
+									"mandatory": true,
 									"version": "2.15",
 									"protocols": [
 										"usp"
@@ -32264,6 +32308,7 @@
 									"type": "string",
 									"read": true,
 									"write": true,
+									"mandatory": true,
 									"version": "2.15",
 									"protocols": [
 										"usp"
@@ -33201,6 +33246,7 @@
 											"type": "string",
 											"read": true,
 											"write": true,
+											"mandatory": true,
 											"version": "2.15",
 											"protocols": [
 												"usp"
@@ -33230,6 +33276,7 @@
 											"type": "unsignedInt",
 											"read": true,
 											"write": true,
+											"mandatory": true,
 											"version": "2.15",
 											"protocols": [
 												"usp"
@@ -33944,6 +33991,7 @@
 										"type": "unsignedInt",
 										"read": true,
 										"write": true,
+										"mandatory": true,
 										"version": "2.15",
 										"protocols": [
 											"usp"
@@ -33959,6 +34007,7 @@
 										"type": "string",
 										"read": true,
 										"write": true,
+										"mandatory": true,
 										"version": "2.15",
 										"protocols": [
 											"usp"
@@ -34004,6 +34053,7 @@
 										"type": "boolean",
 										"read": true,
 										"write": true,
+										"mandatory": true,
 										"version": "2.15",
 										"protocols": [
 											"usp"
@@ -34053,6 +34103,7 @@
 										"type": "int",
 										"read": true,
 										"write": true,
+										"mandatory": true,
 										"version": "2.15",
 										"protocols": [
 											"usp"
@@ -34070,6 +34121,7 @@
 										"type": "unsignedInt",
 										"read": true,
 										"write": true,
+										"mandatory": true,
 										"version": "2.15",
 										"protocols": [
 											"usp"
@@ -37585,6 +37637,7 @@
 													"type": "unsignedInt",
 													"read": true,
 													"write": true,
+													"mandatory": true,
 													"version": "2.15",
 													"protocols": [
 														"usp"
@@ -37596,6 +37649,7 @@
 													"type": "unsignedInt",
 													"read": true,
 													"write": true,
+													"mandatory": true,
 													"version": "2.15",
 													"protocols": [
 														"usp"
@@ -37645,6 +37699,7 @@
 													"type": "boolean",
 													"read": true,
 													"write": true,
+													"mandatory": true,
 													"version": "2.15",
 													"protocols": [
 														"usp"
@@ -37655,6 +37710,7 @@
 													"type": "unsignedInt",
 													"read": true,
 													"write": true,
+													"mandatory": true,
 													"version": "2.15",
 													"protocols": [
 														"usp"
@@ -37666,6 +37722,7 @@
 													"type": "unsignedInt",
 													"read": true,
 													"write": true,
+													"mandatory": true,
 													"version": "2.15",
 													"protocols": [
 														"usp"
@@ -37699,6 +37756,7 @@
 													"type": "string",
 													"read": true,
 													"write": true,
+													"mandatory": true,
 													"version": "2.15",
 													"protocols": [
 														"usp"
@@ -38373,6 +38431,7 @@
 											"type": "unsignedInt",
 											"read": true,
 											"write": true,
+											"mandatory": true,
 											"version": "2.15",
 											"protocols": [
 												"usp"
@@ -38384,6 +38443,7 @@
 											"type": "unsignedInt",
 											"read": true,
 											"write": true,
+											"mandatory": true,
 											"version": "2.15",
 											"protocols": [
 												"usp"
@@ -38446,6 +38506,7 @@
 											"type": "unsignedInt",
 											"read": true,
 											"write": true,
+											"mandatory": true,
 											"version": "2.15",
 											"protocols": [
 												"usp"
@@ -38457,6 +38518,7 @@
 											"type": "unsignedInt",
 											"read": true,
 											"write": true,
+											"mandatory": true,
 											"version": "2.15",
 											"protocols": [
 												"usp"
@@ -40675,6 +40737,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.15",
 							"protocols": [
 								"usp"
@@ -40694,6 +40757,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.15",
 							"protocols": [
 								"usp"
@@ -40705,6 +40769,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.15",
 							"protocols": [
 								"usp"
@@ -40720,6 +40785,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.15",
 							"protocols": [
 								"usp"
@@ -40822,6 +40888,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.15",
 							"protocols": [
 								"usp"
@@ -40847,6 +40914,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.15",
 							"protocols": [
 								"usp"
@@ -40920,6 +40988,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.15",
 							"protocols": [
 								"usp"
@@ -40931,6 +41000,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.15",
 							"protocols": [
 								"usp"
@@ -41008,6 +41078,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.15",
 							"protocols": [
 								"usp"
@@ -41019,6 +41090,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.15",
 							"protocols": [
 								"usp"
@@ -52133,6 +52205,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -52148,6 +52221,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -52163,6 +52237,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -52178,6 +52253,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -52194,6 +52270,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -52373,6 +52450,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -52388,6 +52466,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -52602,6 +52681,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -52981,6 +53061,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -53340,6 +53421,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -53355,6 +53437,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -53386,6 +53469,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -53667,6 +53751,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.14",
 							"protocols": [
 								"usp"
@@ -53681,6 +53766,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.14",
 							"protocols": [
 								"usp"
@@ -53696,6 +53782,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.14",
 							"protocols": [
 								"usp"
@@ -54583,6 +54670,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -54598,6 +54686,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -54612,6 +54701,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -54632,6 +54722,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -54647,6 +54738,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -65475,6 +65567,7 @@
 									"type": "hexBinary",
 									"read": true,
 									"write": true,
+									"mandatory": true,
 									"version": "2.15",
 									"protocols": [
 										"usp"
@@ -65485,6 +65578,7 @@
 									"type": "hexBinary",
 									"read": true,
 									"write": true,
+									"mandatory": true,
 									"version": "2.15",
 									"protocols": [
 										"usp"
@@ -72403,6 +72497,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -72433,6 +72528,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -72444,6 +72540,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -86537,6 +86634,7 @@
 						"type": "string",
 						"read": true,
 						"write": true,
+						"mandatory": true,
 						"version": "2.12",
 						"protocols": [
 							"usp"
@@ -87052,6 +87150,7 @@
 							"type": "int",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -87701,6 +87800,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -100047,6 +100147,7 @@
 						"type": "string",
 						"read": true,
 						"write": true,
+						"mandatory": true,
 						"version": "2.12",
 						"protocols": [
 							"usp"
@@ -100705,6 +100806,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -100765,6 +100867,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -101718,6 +101821,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -101817,6 +101921,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -101895,6 +102000,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"
@@ -101905,6 +102011,7 @@
 							"type": "base64",
 							"read": true,
 							"write": true,
+							"mandatory": true,
 							"version": "2.12",
 							"protocols": [
 								"usp"

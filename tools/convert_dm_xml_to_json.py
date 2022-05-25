@@ -524,6 +524,10 @@ def printPARAM(dmparam, dmobject, bbfdm_type):
     print("\"read\" : true,", file=fp)
     print("\"write\" : %s," % ("false" if dmparam.get(
         'access') == "readOnly" else "true"), file=fp)
+
+    if dmparam.get('mandatory') == "true":
+        print("\"mandatory\" : true,", file=fp)
+
     print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
     print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
 
