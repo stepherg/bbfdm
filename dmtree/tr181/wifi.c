@@ -4952,13 +4952,13 @@ static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV4Address(char *refpar
 	*value = dmjson_get_value((json_object *)data, 1, "IPV4Address");
 	return 0;
 }
-*/
 
 static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV6Address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "IPV6Address");
 	return 0;
 }
+*/
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.Hostname!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].Hostname*/
 static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_Hostname(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -7314,7 +7314,7 @@ DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAParams[] = {
 {"MeasurementReport", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_MeasurementReport, NULL, BBFDM_BOTH, "2.13"},
 {"NumberOfMeasureReports", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_NumberOfMeasureReports, NULL, BBFDM_BOTH, "2.13"},
 // {"IPV4Address", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV4Address, NULL, BBFDM_BOTH, "2.13"},
-{"IPV6Address", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV6Address, NULL, BBFDM_BOTH, "2.13"},
+// {"IPV6Address", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV6Address, NULL, BBFDM_BOTH, "2.13"},
 {"Hostname", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_Hostname, NULL, BBFDM_BOTH, "2.13"},
 // {"CellularDataPreference", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_CellularDataPreference, set_WiFiDataElementsNetworkDeviceRadioBSSSTA_CellularDataPreference, BBFDM_BOTH, "2.15"},
 // {"ReAssociationDelay", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ReAssociationDelay, set_WiFiDataElementsNetworkDeviceRadioBSSSTA_ReAssociationDelay, BBFDM_BOTH, "2.15"},
