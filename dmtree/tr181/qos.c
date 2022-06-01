@@ -134,12 +134,16 @@ static int browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 static int addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *dmmap = NULL, *s = NULL;
+	char buf[32] = {0};
+
+	snprintf(buf, sizeof(buf), "classify_%s", *instance);
 
 	dmuci_add_section("qos", "classify", &s);
+	dmuci_rename_section_by_section(s, buf);
 	dmuci_set_value_by_section(s, "enable", "0");
 
 	dmuci_add_section_bbfdm("dmmap_qos", "classify", &dmmap);
-	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
+	dmuci_set_value_by_section(dmmap, "section_name", buf);
 	dmuci_set_value_by_section(dmmap, "classify_instance", *instance);
 	return 0;
 }
