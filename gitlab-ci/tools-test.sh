@@ -45,6 +45,10 @@ echo "Validate X_IOPSYS_EU_WiFi JSON Plugin"
 ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_WiFi.json
 check_ret $?
 
+echo "Validate X_IOPSYS_EU_URLFilter JSON Plugin"
+./tools/validate_json_plugin.py test/files/etc/bbfdm/json/urlfilter.json
+check_ret $?
+
 echo "Validate TR-181 JSON Plugin after generating from XML"
 json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-181-2-15-0-cwmp-full.xml test/tools/tr-181-2-15-0-usp-full.xml Device.)
 ./tools/validate_json_plugin.py $json_path

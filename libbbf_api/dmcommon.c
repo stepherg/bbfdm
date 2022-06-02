@@ -1718,6 +1718,31 @@ char *replace_str(const char *str, const char *substr, const char *replacement)
 	return value;
 }
 
+void strip_lead_trail_whitespace(char *str)
+{
+	if (str == NULL)
+		return;
+
+	/* First remove leading whitespace */
+	const char* first_valid = str;
+
+	while (*first_valid == ' ') {
+		++first_valid;
+	}
+
+	size_t len = strlen(first_valid) + 1;
+
+	memmove(str, first_valid, len);
+
+	/* Now remove trailing whitespace */
+	char* end_str = str + strlen(str) - 1;
+
+	while (str < end_str  && *end_str == ' ') {
+		*end_str = '\0';
+		--end_str ;
+	}
+}
+
 int check_browse_section(struct uci_section *s, void *data)
 {
 	struct browse_args *browse_args = (struct browse_args *)data;

@@ -141,7 +141,7 @@ def generate_excel_file(output_file):
     wb.set_colour_RGB(0x30, 153, 153, 153)
 
     style_title = xlwt.easyxf(
-        'pattern: pattern solid, fore_colour custom_colour_grey;''font: bold 1, color black;''alignment: horizontal center;')
+        'pattern: pattern solid, fore_colour custom_colour_grey;' + 'font: bold 1, color black;' + 'alignment: horizontal center;')
     sheet.write(0, 0, 'OBJ/PARAM/OPERATE', style_title)
     sheet.write(0, 1, 'Protocols', style_title)
     sheet.write(0, 2, 'Supported', style_title)
@@ -155,12 +155,12 @@ def generate_excel_file(output_file):
             style_name = xlwt.easyxf(
                 'pattern: pattern solid, fore_colour custom_colour_yellow')
             style = xlwt.easyxf(
-                'pattern: pattern solid, fore_colour custom_colour_yellow;''alignment: horizontal center;')
+                'pattern: pattern solid, fore_colour custom_colour_yellow;' + 'alignment: horizontal center;')
         elif param[3] == "operate" or param[3] == "event":
             style_name = xlwt.easyxf(
                 'pattern: pattern solid, fore_colour custom_colour_green')
             style = xlwt.easyxf(
-                'pattern: pattern solid, fore_colour custom_colour_green;''alignment: horizontal center;')
+                'pattern: pattern solid, fore_colour custom_colour_green;' + 'alignment: horizontal center;')
         else:
             style_name = None
             style = xlwt.easyxf('alignment: horizontal center;')

@@ -1,0 +1,385 @@
+{
+	"json_plugin_version": 1,
+	"Device.X_IOPSYS_EU_URLFilter.": {
+		"type": "object",
+		"version": "2.14",
+		"protocols": [
+			"cwmp",
+			"usp"
+		],
+		"access": false,
+		"array": false,
+		"Enable": {
+			"type": "boolean",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "urlfilter",
+						"section": {
+							"name": "globals"
+						},
+						"option": {
+							"name": "enable"
+						}
+					}
+				}
+			]
+		},
+		"GlobalBlacklist": {
+			"type": "boolean",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "urlfilter",
+						"section": {
+							"name": "globals"
+						},
+						"option": {
+							"name": "global_blacklist"
+						}
+					}
+				}
+			]
+		},
+		"BlacklistURL": {
+			"type": "string",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"list": {
+				"datatype": "string"
+			},
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "urlfilter",
+						"section": {
+							"name": "globals"
+						},
+						"list": {
+							"name": "blacklist_url"
+						}
+					}
+				}
+			]
+		},
+		"ProfileNumberOfEntries": {
+			"type": "unsignedInt",
+			"read": true,
+			"write": false,
+			"version": "2.14",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],			
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "urlfilter",
+						"section": {
+							"type": "profile"
+						},
+						"option": {
+							"name": "@Count"
+						}
+					}
+				}
+			]	
+		},
+		"Device.X_IOPSYS_EU_URLFilter.Profile.{i}.": {
+			"type": "object",
+			"version": "2.14",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"access": true,
+			"array": true,
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "urlfilter",
+						"section": {
+							"type": "profile"
+						},
+						"dmmapfile": "dmmap_urlfilter_profile"
+					}
+				}
+			],
+			"WhitelistURL": {
+				"type": "string",
+				"version": "2.14",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"list": {
+					"datatype": "string"
+				},
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "urlfilter",
+							"section": {
+								"type": "profile"
+							},
+							"list": {
+								"name": "whitelist_url"
+							}
+						}
+					}
+				]
+			},
+			"BlacklistURL": {
+				"type": "string",
+				"version": "2.14",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"list": {
+					"datatype": "string"
+				},
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "urlfilter",
+							"section": {
+								"type": "profile"
+							},
+							"list": {
+								"name": "blacklist_url"
+							}
+						}
+					}
+				]
+			}
+		},
+		"FilterNumberOfEntries": {
+			"type": "unsignedInt",
+			"read": true,
+			"write": false,
+			"version": "2.14",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],			
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "urlfilter",
+						"section": {
+							"type": "filter"
+						},
+						"option": {
+							"name": "@Count"
+						}
+					}
+				}
+			]
+		},
+		"Device.X_IOPSYS_EU_URLFilter.Filter.{i}.": {
+			"type": "object",
+			"version": "2.14",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"access": true,
+			"array": true,
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "urlfilter",
+						"section": {
+							"type": "filter"
+						},
+						"dmmapfile": "dmmap_urlfilter_filter"
+					}
+				}
+			],
+			"Enable": {
+				"type": "boolean",
+				"version": "2.14",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "urlfilter",
+							"section": {
+								"type": "filter"
+							},
+							"option": {
+								"name": "enable"
+							}
+						}
+					}
+				]
+			},
+			"Profile": {
+				"type": "string",
+				"version": "2.14",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "urlfilter",
+							"section": {
+								"type": "filter"
+							},
+							"option": {
+								"name": "profile"
+							}
+						}
+					}
+				]
+			},
+			"MacAddress": {
+				"type": "string",
+				"version": "2.14",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"list": {
+					"datatype": "string"
+				},
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "urlfilter",
+							"section": {
+								"type": "filter"
+							},
+							"list": {
+								"name": "macaddr"
+							}
+						}
+					}
+				]
+			},
+			"Day": {
+				"type": "string",
+				"version": "2.14",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"list": {
+					"datatype": "string"
+				},
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "urlfilter",
+							"section": {
+								"type": "filter"
+							},
+							"list": {
+								"name": "day"
+							}
+						}
+					}
+				]
+			},
+			"StartTime": {
+				"type": "string",
+				"version": "2.14",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "urlfilter",
+							"section": {
+								"type": "filter"
+							},
+							"option": {
+								"name": "start_time"
+							}
+						}
+					}
+				]
+			},
+			"Duration": {
+				"type": "string",
+				"version": "2.14",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "urlfilter",
+							"section": {
+								"type": "filter"
+							},
+							"option": {
+								"name": "duration"
+							}
+						}
+					}
+				]
+			}
+		}
+	}
+}
+

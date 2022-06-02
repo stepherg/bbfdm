@@ -619,6 +619,8 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 	struct json_object *section_name = NULL;
 	struct json_object *option = NULL;
 	struct json_object *option_name = NULL;
+	struct json_object *list = NULL;
+	struct json_object *list_name = NULL;
 	struct json_object *path = NULL;
 	char *value = "";
 
@@ -629,11 +631,20 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 	json_object_object_get_ex(section, "name", &section_name);
 	json_object_object_get_ex(obj, "option", &option);
 	json_object_object_get_ex(option, "name", &option_name);
+	json_object_object_get_ex(obj, "list", &list);
+	json_object_object_get_ex(list, "name", &list_name);
 	json_object_object_get_ex(obj, "path", &path);
 
-	if (file && type && option_name && strstr(refparam, "NumberOfEntries")) {
+	char *opt_temp = NULL;
+	if (list_name) {
+		opt_temp = json_object_get_string(list_name);
+	} else if (option_name) {
+		opt_temp = json_object_get_string(option_name);
+	}
 
-		if (strcmp(json_object_get_string(option_name), "@Count") != 0 && json_version == JSON_VERSION_1)
+	if (file && type && opt_temp && strstr(refparam, "NumberOfEntries")) {
+
+		if (strcmp(opt_temp, "@Count") != 0 && json_version == JSON_VERSION_1)
 			goto end;
 
 		struct uci_section *s = NULL;
@@ -646,16 +657,28 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 		goto end;
 	}
 
-	if (data && file && type && option_name) {
-		if (strcmp(json_object_get_string(option_name), "@Name") == 0) {
+	if (data && file && type && opt_temp) {
+		if (strcmp(opt_temp, "@Name") == 0) {
 			dmasprintf(&value, "%s", section_name((struct uci_section *)data));
 		} else {
 			char uci_type[32] = {0};
 			snprintf(uci_type, sizeof(uci_type), "@%s[%ld]", json_object_get_string(type), instance ? DM_STRTOL(instance)-1 : 0);
-			value = dmuci_get_value_by_path(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name));
+			if (option) {
+				value = dmuci_get_value_by_path(json_object_get_string(path), json_object_get_string(file), uci_type, opt_temp);
+			} else {
+				struct uci_list *list_val;
+				dmuci_get_option_value_list(json_object_get_string(file), uci_type, opt_temp, &list_val);
+				value = dmuci_list_to_string(list_val, ",");
+			}
 		}
-	} else if (file && section_name && option_name) {
-		value = dmuci_get_value_by_path(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), json_object_get_string(option_name));
+	} else if (file && section_name && opt_temp) {
+		if (option) {
+			value = dmuci_get_value_by_path(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), opt_temp);
+		} else {
+			struct uci_list *list_val;
+			dmuci_get_option_value_list(json_object_get_string(file), json_object_get_string(section_name), opt_temp, &list_val);
+			value = dmuci_list_to_string(list_val, ",");
+		}
 	}
 
 	if (strstr(refparam, "Alias") && value[0] == '\0')
@@ -1205,6 +1228,8 @@ static void uci_set_value(json_object *mapping_obj, int json_version, char *refp
 	struct json_object *section_name = NULL;
 	struct json_object *option = NULL;
 	struct json_object *option_name = NULL;
+	struct json_object *list = NULL;
+	struct json_object *list_name = NULL;
 	struct json_object *path = NULL;
 
 	json_object_object_get_ex(mapping_obj, "uci", &uci_obj);
@@ -1214,15 +1239,48 @@ static void uci_set_value(json_object *mapping_obj, int json_version, char *refp
 	json_object_object_get_ex(section, "name", &section_name);
 	json_object_object_get_ex(uci_obj, "option", &option);
 	json_object_object_get_ex(option, "name", &option_name);
+	json_object_object_get_ex(uci_obj, "list", &list);
+	json_object_object_get_ex(list, "name", &list_name);
 	json_object_object_get_ex(uci_obj, "path", &path);
 
-	if (data && file && type && option_name) {
+	char *opt_temp = NULL;
+	if (list_name) {
+		opt_temp = json_object_get_string(list_name);
+	} else if (option_name) {
+		opt_temp = json_object_get_string(option_name);
+	}
+
+	if (data && file && type && opt_temp) {
 		char uci_type[32] = {0};
 
 		snprintf(uci_type, sizeof(uci_type), "@%s[%ld]", json_object_get_string(type), instance ? DM_STRTOL(instance)-1 : 0);
-		dmuci_set_value_by_path(json_object_get_string(path), json_object_get_string(file), uci_type, json_object_get_string(option_name), value);
-	} else if (file && section_name && option_name) {
-		dmuci_set_value_by_path(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), json_object_get_string(option_name), value);
+		if (option) {
+			dmuci_set_value_by_path(json_object_get_string(path), json_object_get_string(file), uci_type, opt_temp, value);
+		} else {
+			if (value != NULL) {
+				dmuci_delete(json_object_get_string(file), uci_type, opt_temp, NULL);
+				char *p = strtok(value, ",");
+				while (p) {
+					strip_lead_trail_whitespace(p);
+					dmuci_add_list_value(json_object_get_string(file), uci_type, opt_temp, p);
+					p = strtok(NULL, ",");
+				}
+			}
+		}
+	} else if (file && section_name && opt_temp) {
+		if (option) {
+			dmuci_set_value_by_path(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), opt_temp, value);
+		} else {
+			if (value != NULL) {
+				dmuci_delete(json_object_get_string(file), json_object_get_string(section_name), opt_temp, NULL);
+				char *p = strtok(value, ",");
+				while (p) {
+					strip_lead_trail_whitespace(p);
+					dmuci_add_list_value(json_object_get_string(file), json_object_get_string(section_name), opt_temp, p);
+					p = strtok(NULL, ",");
+				}
+			}
+		}
 	}
 }
 
