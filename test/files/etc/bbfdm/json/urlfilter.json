@@ -1,6 +1,6 @@
 {
 	"json_plugin_version": 1,
-	"Device.X_IOPSYS_EU_URLFilter.": {
+	"Device.{BBF_VENDOR_PREFIX}URLFilter.": {
 		"type": "object",
 		"version": "2.14",
 		"protocols": [
@@ -108,7 +108,7 @@
 				}
 			]	
 		},
-		"Device.X_IOPSYS_EU_URLFilter.Profile.{i}.": {
+		"Device.{BBF_VENDOR_PREFIX}URLFilter.Profile.{i}.": {
 			"type": "object",
 			"version": "2.14",
 			"protocols": [
@@ -208,7 +208,7 @@
 				}
 			]
 		},
-		"Device.X_IOPSYS_EU_URLFilter.Filter.{i}.": {
+		"Device.{BBF_VENDOR_PREFIX}URLFilter.Filter.{i}.": {
 			"type": "object",
 			"version": "2.14",
 			"protocols": [

@@ -1621,7 +1621,8 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, i
 	DMLEAF *next_leaf = NULL;
 
 	count_obj_param_under_jsonobj(jobj, &obj_number, &param_number);
-	char *full_obj = replace_str(object, ".{i}.", ".");
+	char *obj_path = replace_str(object, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
+	char *full_obj = replace_str(obj_path, ".{i}.", ".");
 	char *curr_obj = find_current_obj(full_obj);
 
 	if (!pobj)
@@ -1742,7 +1743,9 @@ int load_json_dynamic_arrays(struct dmctx *ctx)
 				}
 
 				DMOBJ *dm_entryobj = NULL;
-				char *obj_prefix = find_prefix_obj(key);
+
+				char *obj_path = replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
+				char *obj_prefix = find_prefix_obj(obj_path);
 
 				bool obj_exists = find_root_entry(ctx, obj_prefix, &dm_entryobj);
 				if (obj_exists == 0 || !dm_entryobj)
@@ -1761,12 +1764,12 @@ int load_json_dynamic_arrays(struct dmctx *ctx)
 
 				if (dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] == NULL) {
 					dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_calloc(&json_memhead, 2, sizeof(struct dm_obj_s));
-					parse_obj(key, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], 0, json_plugin_version, &json_list);
+					parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], 0, json_plugin_version, &json_list);
 				} else {
 					int idx = get_index_of_available_entry(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0]);
 					dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_realloc(&json_memhead, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
 					memset(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
-					parse_obj(key, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], idx, json_plugin_version, &json_list);
+					parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], idx, json_plugin_version, &json_list);
 				}
 			}
 			save_loaded_json_files(&loaded_json_files, json);
