@@ -12,7 +12,7 @@
 #ifndef __TEST_FIREWALL_H
 #define __TEST_FIREWALL_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMLEAF tTEST_FirewallRuleParams[];
 extern DMOBJ tTEST_FirewallChainRuleObj[];

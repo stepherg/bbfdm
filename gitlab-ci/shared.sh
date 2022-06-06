@@ -66,28 +66,16 @@ function install_libbbf()
 
 	echo "Compiling libbbf"
 	if [ -f Makefile ]; then
-		exec_cmd make maintainer-clean
-		find -name '*.gcno' -exec rm {} -fv \;
-		find -name '*.gcov' -exec rm {} -fv \;
-		find -name '*.deps' -exec rm {} -rfv \;
+		make clean
+		rm -rf CMakeFiles CMakeCache.txt cmake_install.cmake
 		rm -f *.log *.xml
 	fi
 
-	exec_cmd autoreconf -i
-	exec_cmd ./configure --enable-tr181 --enable-tr104 --enable-tr143 --enable-libopenssl --enable-json-plugin --enable-shared-library --enable-vendor-extension BBF_VENDOR_LIST="$VENDOR_LIST" BBF_VENDOR_PREFIX="$VENDOR_PREFIX"
-	make CFLAGS="-D_GNU_SOURCE -Wall -Werror" CFLAGS+="$COV_CFLAGS" LDFLAGS="$COV_LDFLAGS" >/dev/null 2>&1
+	cmake CMakeLists.txt -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS" -DBBF_TR181=ON -DBBF_TR104=ON -DBBF_TR143=ON -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX"
+	exec_cmd make
 
 	echo "installing libbbf"
 	exec_cmd make install
-	ldconfig
-
-	echo "configuring libbbf"
-	mkdir -p /etc/bbfdm/
-	mkdir -p /etc/bbfdm/dmmap
-	mkdir -p /etc/bbfdm/json
-	mkdir -p /usr/share/bbfdm
-	mkdir -p /usr/lib/bbfdm
-	cp -f scripts/* /usr/share/bbfdm
 }
 
 function install_libbbf_test()
@@ -120,7 +108,7 @@ function install_libbulkdata()
 	make CFLAGS="-D_GNU_SOURCE -DWC_NO_HARDEN" -C /opt/dev/bulkdata/
 
 	echo "installing libbulkdata"
-	cp -f /opt/dev/bulkdata/libbulkdata.so /usr/lib/bbfdm
+	cp -f /opt/dev/bulkdata/bbf_plugin/libbulkdata.so /usr/lib/bbfdm
 }
 
 function install_libperiodicstats()
@@ -133,7 +121,7 @@ function install_libperiodicstats()
 	make -C /opt/dev/periodicstats/
 
 	echo "installing libperiodicstats"
-	cp -f /opt/dev/periodicstats/libperiodicstats.so /usr/lib/bbfdm
+	cp -f /opt/dev/periodicstats/bbf_plugin/libperiodicstats.so /usr/lib/bbfdm
 }
 
 function error_on_zero()

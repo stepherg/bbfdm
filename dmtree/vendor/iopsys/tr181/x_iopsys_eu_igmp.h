@@ -12,7 +12,7 @@
 #ifndef __IOPSYS_IGMP_H
 #define __IOPSYS_IGMP_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ X_IOPSYS_EU_IGMPObj[];
 extern DMLEAF X_IOPSYS_EU_IGMPParams[];

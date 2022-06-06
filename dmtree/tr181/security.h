@@ -12,7 +12,7 @@
 #define __SECURITY_H
 
 #if defined(LOPENSSL) || defined(LWOLFSSL) || defined(LMBEDTLS)
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tSecurityObj[];
 extern DMLEAF tSecurityParams[];

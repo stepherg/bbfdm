@@ -12,7 +12,7 @@
 #ifndef __MANAGEMENT_SERVER_H
 #define __MANAGEMENT_SERVER_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMLEAF tManagementServerParams[];
 extern DMLEAF tHeartbeatPolicyParams[];

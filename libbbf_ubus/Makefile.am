@@ -29,7 +29,7 @@ libbbf_ubus_la_LIBADD =		\
 	$(LIBTRACE_LIBS)		\
 	$(LBLOBMSG_LIBS) 		\
 	$(LIBCURL_LIBS)			\
-	-L../bin/ -lbbf_api
+	-L../bin/
 
 libbbf_ubus_la_CFLAGS+=-I../
 libbbf_ubus_la_CFLAGS+=-I../include

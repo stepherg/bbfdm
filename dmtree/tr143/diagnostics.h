@@ -12,7 +12,7 @@
 #ifndef __DIAGNOSTICS_H
 #define __DIAGNOSTICS_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tIPDiagnosticsObj[];
 extern DMLEAF tIPDiagnosticsParams[];

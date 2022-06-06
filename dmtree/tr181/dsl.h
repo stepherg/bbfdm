@@ -11,7 +11,7 @@
 #ifndef __DSL_H
 #define __DSL_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tDSLObj[];
 extern DMLEAF tDSLParams[];

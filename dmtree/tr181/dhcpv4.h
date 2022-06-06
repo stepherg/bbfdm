@@ -12,7 +12,7 @@
 #ifndef __DHCP_H
 #define __DHCP_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tDHCPv4Obj[];
 extern DMOBJ tDHCPv4ServerObj[];

@@ -12,7 +12,7 @@
 #ifndef __IOPSYS_VENDOR_H
 #define __IOPSYS_VENDOR_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DM_MAP_OBJ tVendorExtensionIOPSYS[];
 

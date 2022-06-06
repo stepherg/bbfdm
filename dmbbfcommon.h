@@ -12,7 +12,7 @@
 #ifndef __DMBBFCOMMON_H__
 #define __DMBBFCOMMON_H__
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 #include "dmentry.h"
 
 void bbf_uci_commit_bbfdm(void);

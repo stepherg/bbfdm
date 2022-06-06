@@ -12,7 +12,7 @@
 #ifndef __IOPSYS_ETHERNET_H
 #define __IOPSYS_ETHERNET_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMLEAF tIOPSYS_EthernetVLANTerminationParams[];
 

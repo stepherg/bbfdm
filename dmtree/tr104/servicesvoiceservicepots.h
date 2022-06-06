@@ -11,7 +11,7 @@
 #ifndef __SERVICESVOICESERVICEPOTS_H
 #define __SERVICESVOICESERVICEPOTS_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tServicesVoiceServicePOTSObj[];
 extern DMLEAF tServicesVoiceServicePOTSParams[];

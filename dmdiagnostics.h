@@ -12,7 +12,7 @@
 #ifndef __DMDIAGNOSTICS_H__
 #define __DMDIAGNOSTICS_H__
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 #include <libubox/uloop.h>
 
 #define HTTP_URI "http"

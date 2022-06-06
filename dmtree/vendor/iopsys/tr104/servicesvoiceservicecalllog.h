@@ -12,7 +12,7 @@
 #ifndef __IOPSYS_VOICESERVICECALLLOG_H
 #define __IOPSYS_VOICESERVICECALLLOG_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMLEAF tIOPSYS_VoiceServiceCallLogParams[];
 extern DMLEAF tIOPSYS_VoiceServiceCallLogSessionSourceRTPParams[];

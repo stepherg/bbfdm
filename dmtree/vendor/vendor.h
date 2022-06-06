@@ -12,7 +12,7 @@
 #ifndef __VENDOR_EXTENSION_H
 #define __VENDOR_EXTENSION_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DM_MAP_VENDOR tVendorExtension[];
 extern DM_MAP_VENDOR tVendorExtensionOverwrite[];

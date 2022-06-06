@@ -12,7 +12,7 @@
 #ifndef __DMENTRYVENDOR_H__
 #define __DMENTRYVENDOR_H__
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 void load_vendor_dynamic_arrays(struct dmctx *ctx);
 void free_vendor_dynamic_arrays(DMOBJ *dm_entryobj);

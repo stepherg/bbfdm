@@ -11,7 +11,7 @@
 #ifndef __SERVICESVOICESERVICEDECT_H
 #define __SERVICESVOICESERVICEDECT_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tServicesVoiceServiceDECTObj[];
 extern DMLEAF tServicesVoiceServiceDECTParams[];

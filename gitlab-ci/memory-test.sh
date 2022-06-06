@@ -20,7 +20,7 @@ install_libbbf
 
 install_libbbf_test
 install_libbulkdata
-#install_libperiodicstats
+install_libperiodicstats
 
 supervisorctl status all
 supervisorctl update

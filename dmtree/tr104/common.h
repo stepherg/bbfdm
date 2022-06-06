@@ -8,7 +8,7 @@
  *	Author: Yalu Zhang, yalu.zhang@iopsys.eu
  */
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 #define TR104_UCI_PACKAGE "asterisk"
 #define DEFAULT_SIP_PORT_STR "5060"

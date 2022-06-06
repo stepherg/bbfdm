@@ -11,7 +11,7 @@
 #ifndef __IOPSYS_VOICESERVICECALLCONTROL_H
 #define __IOPSYS_VOICESERVICECALLCONTROL_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMLEAF tIOPSYS_VoiceServiceCallControlExtensionParams[];
 

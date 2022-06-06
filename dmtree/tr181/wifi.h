@@ -13,7 +13,7 @@
 #ifndef __WIFI_H
 #define __WIFI_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tWiFiObj[];
 extern DMLEAF tWiFiParams[];

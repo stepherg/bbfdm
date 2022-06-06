@@ -15,7 +15,7 @@
 #ifndef __DMENTRY_H__
 #define __DMENTRY_H__
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern struct list_head head_package_change;
 extern struct list_head main_memhead;

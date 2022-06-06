@@ -12,7 +12,7 @@
 #ifndef __TEST_DROPBEAR_H
 #define __TEST_DROPBEAR_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMLEAF X_TEST_COM_DropbearParams[];
 
