@@ -574,7 +574,7 @@ static int get_ServicesVoiceServiceCallControlLine_CallStatus(char *refparam, st
 	json_object *res = NULL;
 	char line_str[16];
 
-	snprintf(line_str, sizeof(line_str), "%ld", instance ? DM_STRTOL(instance) - 1 : 0);
+	snprintf(line_str, sizeof(line_str), "%d", instance ? (int)DM_STRTOL(instance) - 1 : 0);
 	dmubus_call("asterisk", "call_status", UBUS_ARGS{{"line", line_str, Integer}}, 1, &res);
 	/* value of res is being changed inside dmubus_call through pointer referencing
 	 * which cppcheck can't track hence throws warning for 'res' value always false.
@@ -1064,7 +1064,7 @@ static int get_ServicesVoiceServiceCallControlExtension_CallStatus(char *refpara
 	json_object *res = NULL;
 	char ext_str[16];
 
-	snprintf(ext_str, sizeof(ext_str), "%ld", instance ? DM_STRTOL(instance) - 1 : 0);
+	snprintf(ext_str, sizeof(ext_str), "%d", instance ? (int)DM_STRTOL(instance) - 1 : 0);
 	dmubus_call("asterisk", "call_status", UBUS_ARGS{{"extension", ext_str, Integer}}, 1, &res);
 	/* value of res is being changed inside dmubus_call through pointer referencing
 	 * which cppcheck can't track hence throws warning for 'res' value always false.

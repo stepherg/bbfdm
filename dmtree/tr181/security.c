@@ -17,11 +17,16 @@
 #ifdef LMBEDTLS
 #include <mbedtls/x509_crt.h>
 #include <mbedtls/base64.h>
-#else
+#endif
+#ifdef LOPENSSL
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #endif
-
+#ifdef LWOLFSSL
+#include <wolfssl/options.h>
+#include <wolfssl/openssl/x509.h>
+#include <wolfssl/openssl/pem.h>
+#endif
 static char certifcates_paths[MAX_CERT][256];
 
 struct certificate_profile {

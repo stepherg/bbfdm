@@ -10,18 +10,32 @@
  */
 
 #include <stdlib.h>
-#ifdef LWOLFSSL
-#include <options.h>
-#endif
-#include <openssl/sha.h>
 #include <curl/curl.h>
 #include <libtrace.h>
+
+#ifdef LOPENSSL
+#include <openssl/sha.h>
+#endif
+
+#ifdef LWOLFSSL
+#include <wolfssl/options.h>
+#include <wolfssl/openssl/sha.h>
+#endif
+
+#ifdef LMBEDTLS
+#include <mbedtls/sha1.h>
+#include <mbedtls/sha256.h>
+#include <mbedtls/sha512.h>
+#endif
+
 #include "dmentry.h"
 #include "dmdiagnostics.h"
 
+
+#define READ_BUF_SIZE (1024 * 16)
+
 static int read_next;
 static struct diagnostic_stats diag_stats = {0};
-static const int READ_BUF_SIZE = { 1024 * 16 };
 
 char *get_diagnostics_option(char *sec_name, char *option)
 {
@@ -202,31 +216,45 @@ const bool validate_file_system_size(const char *file_size)
 	return true;
 }
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
+#define SHA1_DLEN SHA_DIGEST_LENGTH
+#define SHA1_CTX SHA_CTX
+#define SHA1_UPDATE SHA1_Update
+#define SHA1_FINAL SHA1_Final
+#else
+#define SHA1_DLEN (20)
+#define SHA1_CTX mbedtls_sha1_context
+#define SHA1_UPDATE mbedtls_sha1_update_ret
+#define SHA1_FINAL(X, Y) mbedtls_sha1_finish_ret(Y, X)
+#endif
 const bool validate_sha1sum_value(const char *file_path, const char *checksum)
 {
-	unsigned char hash[SHA_DIGEST_LENGTH];
+	unsigned char hash[SHA1_DLEN];
 	unsigned char buffer[READ_BUF_SIZE];
-	char sha1_res[1 + SHA_DIGEST_LENGTH * 2];
+	char sha1_res[1 + SHA1_DLEN * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA_CTX ctx;
+	SHA1_CTX ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
 	if (!SHA1_Init(&ctx))
 		goto end;
-
+#else
+	mbedtls_sha1_init(&ctx);
+#endif
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA1_Update(&ctx, buffer, bytes))
+		if (!SHA1_UPDATE(&ctx, buffer, bytes))
 			goto end;
 	}
 
-	if (!SHA1_Final(hash, &ctx))
+	if (!SHA1_FINAL(hash, &ctx))
 		goto end;
 
-	for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
+	for (int i = 0; i < SHA1_DLEN; i++)
 		snprintf(&sha1_res[i * 2], sizeof(sha1_res) - (i * 2), "%02x", hash[i]);
 
 	if (DM_STRCMP(sha1_res, checksum) == 0)
@@ -234,36 +262,56 @@ const bool validate_sha1sum_value(const char *file_path, const char *checksum)
 
 end:
 	fclose(file);
-
 	return res;
 }
 
+#if defined(LOPENSSL)
+#define SHA224_DLEN SHA256_DIGEST_LENGTH
+#define SHA224_CTX_t SHA256_CTX
+#define SHA224_UPDATE SHA224_Update
+#define SHA224_FINAL SHA224_Final
+#elif defined(LWOLFSSL)
+#define SHA224_DLEN SHA224_DIGEST_LENGTH
+#define SHA224_CTX_t SHA224_CTX
+#define SHA224_UPDATE SHA224_Update
+#define SHA224_FINAL SHA224_Final
+#else
+#define SHA224_DLEN (32)
+#define SHA224_CTX_t mbedtls_sha256_context
+#define SHA224_UPDATE mbedtls_sha256_update_ret
+#define SHA224_FINAL(X, Y) mbedtls_sha256_finish_ret(Y, X)
+#endif
 const bool validate_sha224sum_value(const char *file_path, const char *checksum)
 {
-#ifdef WOLFSSL_SHA224
-	unsigned char hash[SHA224_DIGEST_LENGTH];
+	unsigned char hash[SHA224_DLEN];
 	unsigned char buffer[READ_BUF_SIZE];
-	char sha224_res[1 + SHA224_DIGEST_LENGTH * 2];
+	char sha224_res[1 + SHA224_DLEN * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA224_CTX ctx;
+	SHA224_CTX_t ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
 	if (!SHA224_Init(&ctx))
 		goto end;
+#else
+	mbedtls_sha256_init(&ctx);
+	if (!mbedtls_sha256_starts_ret(&ctx, 1))
+		goto end;
+#endif
 
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA224_Update(&ctx, buffer, bytes))
+		if (!SHA224_UPDATE(&ctx, buffer, bytes))
 			goto end;
 	}
 
-	if (!SHA224_Final(hash, &ctx))
+	if (!SHA224_FINAL(hash, &ctx))
 		goto end;
 
-	for (int i = 0; i < SHA224_DIGEST_LENGTH; i++)
+	for (int i = 0; i < SHA224_DLEN; i++)
 		snprintf(&sha224_res[i * 2], sizeof(sha224_res) - (i * 2), "%02x", hash[i]);
 
 	if (DM_STRCMP(sha224_res, checksum) == 0)
@@ -271,38 +319,51 @@ const bool validate_sha224sum_value(const char *file_path, const char *checksum)
 
 end:
 	fclose(file);
-
 	return res;
-#else
-	return false;
-#endif
 }
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
+#define SHA256_DLEN SHA256_DIGEST_LENGTH
+#define SHA256_CTX_t SHA256_CTX
+#define SHA256_UPDATE SHA256_Update
+#define SHA256_FINAL SHA256_Final
+#else
+#define SHA256_DLEN (32)
+#define SHA256_CTX_t mbedtls_sha256_context
+#define SHA256_UPDATE mbedtls_sha256_update_ret
+#define SHA256_FINAL(X, Y) mbedtls_sha256_finish_ret(Y, X)
+#endif
 const bool validate_sha256sum_value(const char *file_path, const char *checksum)
 {
-	unsigned char hash[SHA256_DIGEST_LENGTH];
+	unsigned char hash[SHA256_DLEN];
 	unsigned char buffer[READ_BUF_SIZE];
-	char sha256_res[1 + SHA256_DIGEST_LENGTH * 2];
+	char sha256_res[1 + SHA256_DLEN * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA256_CTX ctx;
+	SHA256_CTX_t ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
 	if (!SHA256_Init(&ctx))
 		goto end;
+#else
+	mbedtls_sha256_init(&ctx);
+	if (!mbedtls_sha256_starts_ret(&ctx, 0))
+		goto end;
+#endif
 
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA256_Update(&ctx, buffer, bytes))
+		if (!SHA256_UPDATE(&ctx, buffer, bytes))
 			goto end;
 	}
 
-	if (!SHA256_Final(hash, &ctx))
+	if (!SHA256_FINAL(hash, &ctx))
 		goto end;
 
-	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+	for (int i = 0; i < SHA256_DLEN; i++)
 		snprintf(&sha256_res[i * 2], sizeof(sha256_res) - (i * 2), "%02x", hash[i]);
 
 	if (DM_STRCMP(sha256_res, checksum) == 0)
@@ -310,36 +371,56 @@ const bool validate_sha256sum_value(const char *file_path, const char *checksum)
 
 end:
 	fclose(file);
-
 	return res;
 }
 
+#if defined(LOPENSSL)
+#define SHA384_DLEN SHA384_DIGEST_LENGTH
+#define SHA384_CTX_t SHA512_CTX
+#define SHA384_UPDATE SHA384_Update
+#define SHA384_FINAL SHA384_Final
+#elif defined(LWOLFSSL)
+#define SHA384_DLEN SHA384_DIGEST_LENGTH
+#define SHA384_CTX_t SHA384_CTX
+#define SHA384_UPDATE SHA384_Update
+#define SHA384_FINAL SHA384_Final
+#else
+#define SHA384_DLEN (64)
+#define SHA384_CTX_t mbedtls_sha512_context
+#define SHA384_UPDATE mbedtls_sha512_update_ret
+#define SHA384_FINAL(X, Y) mbedtls_sha512_finish_ret(Y, X)
+#endif
 const bool validate_sha384sum_value(const char *file_path, const char *checksum)
 {
-#ifdef WOLFSSL_SHA384
-	unsigned char hash[SHA384_DIGEST_LENGTH];
+	unsigned char hash[SHA384_DLEN];
 	unsigned char buffer[READ_BUF_SIZE];
-	char sha384_res[1 + SHA384_DIGEST_LENGTH * 2];
+	char sha384_res[1 + SHA384_DLEN * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA384_CTX ctx;
+	SHA384_CTX_t ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
 	if (!SHA384_Init(&ctx))
 		goto end;
+#else
+	mbedtls_sha512_init(&ctx);
+	if (!mbedtls_sha512_starts_ret(&ctx, 1))
+		goto end;
+#endif
 
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA384_Update(&ctx, buffer, bytes))
+		if (!SHA384_UPDATE(&ctx, buffer, bytes))
 			goto end;
 	}
 
-	if (!SHA384_Final(hash, &ctx))
+	if (!SHA384_FINAL(hash, &ctx))
 		goto end;
 
-	for (int i = 0; i < SHA384_DIGEST_LENGTH; i++)
+	for (int i = 0; i < SHA384_DLEN; i++)
 		snprintf(&sha384_res[i * 2], sizeof(sha384_res) - (i * 2), "%02x", hash[i]);
 
 	if (DM_STRCMP(sha384_res, checksum) == 0)
@@ -349,37 +430,50 @@ end:
 	fclose(file);
 
 	return res;
-#else
-	return false;
-#endif
 }
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
+#define SHA512_DLEN SHA512_DIGEST_LENGTH
+#define SHA512_CTX_t SHA512_CTX
+#define SHA512_UPDATE SHA512_Update
+#define SHA512_FINAL SHA512_Final
+#else
+#define SHA512_DLEN (64)
+#define SHA512_CTX_t mbedtls_sha512_context
+#define SHA512_UPDATE mbedtls_sha512_update_ret
+#define SHA512_FINAL(X, Y) mbedtls_sha512_finish_ret(Y, X)
+#endif
 const bool validate_sha512sum_value(const char *file_path, const char *checksum)
 {
-#ifdef WOLFSSL_SHA512
-	unsigned char hash[SHA512_DIGEST_LENGTH];
+	unsigned char hash[SHA512_DLEN];
 	unsigned char buffer[READ_BUF_SIZE];
-	char sha512_res[1 + SHA512_DIGEST_LENGTH * 2];
+	char sha512_res[1 + SHA512_DLEN * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA512_CTX ctx;
+	SHA512_CTX_t ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
 	if (!SHA512_Init(&ctx))
 		goto end;
+#else
+	mbedtls_sha512_init(&ctx);
+	if (!mbedtls_sha512_starts_ret(&ctx, 0))
+		goto end;
+#endif
 
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA512_Update(&ctx, buffer, bytes))
+		if (!SHA512_UPDATE(&ctx, buffer, bytes))
 			goto end;
 	}
 
-	if (!SHA512_Final(hash, &ctx))
+	if (!SHA512_FINAL(hash, &ctx))
 		goto end;
 
-	for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
+	for (int i = 0; i < SHA512_DLEN; i++)
 		snprintf(&sha512_res[i * 2], sizeof(sha512_res) - (i * 2), "%02x", hash[i]);
 
 	if (DM_STRCMP(sha512_res, checksum) == 0)
@@ -387,11 +481,7 @@ const bool validate_sha512sum_value(const char *file_path, const char *checksum)
 
 end:
 	fclose(file);
-
 	return res;
-#else
-	return false;
-#endif
 }
 
 const bool validate_checksum_value(const char *file_path, const char *checksum_algorithm, const char *checksum)
@@ -528,7 +618,11 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 		goto end;
 	}
 
-	mkstemp(fw_image_path);
+	res = mkstemp(fw_image_path);
+	if (res == -1) {
+		goto end;
+	}
+
 	// Download the firmware image
 	time_t start_time = time(NULL);
 	long res_code = download_file(fw_image_path, url, username, password);
