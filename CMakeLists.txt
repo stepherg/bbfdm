@@ -15,7 +15,7 @@ OPTION(BBF_DOTSO_PLUGIN "build with dotso plugin" ON)
 OPTION(BBF_JSON_PLUGIN "build with json plugin" ON)
 OPTION(BBF_VENDOR_EXTENSION "build with vendor extension enabled" ON)
 OPTION(WITH_WOLFSSL "build with lib wolfssl" OFF)
-OPTION(WITH_OPENSSL "build with lib openssl" ON)
+OPTION(WITH_OPENSSL "build with lib openssl" OFF)
 OPTION(WITH_MBEDTLS "build with lib mbedtls" OFF)
 
 SET(BBF_API_SOURCES libbbf_api/dmbbf.c

@@ -268,13 +268,15 @@ end:
 #if defined(LOPENSSL)
 #define SHA224_DLEN SHA256_DIGEST_LENGTH
 #define SHA224_CTX_t SHA256_CTX
+#define SHA224_INIT SHA224_Init
 #define SHA224_UPDATE SHA224_Update
 #define SHA224_FINAL SHA224_Final
 #elif defined(LWOLFSSL)
-#define SHA224_DLEN SHA224_DIGEST_LENGTH
-#define SHA224_CTX_t SHA224_CTX
-#define SHA224_UPDATE SHA224_Update
-#define SHA224_FINAL SHA224_Final
+#define SHA224_DLEN SHA256_DIGEST_LENGTH
+#define SHA224_CTX_t SHA256_CTX
+#define SHA224_INIT SHA256_Init
+#define SHA224_UPDATE SHA256_Update
+#define SHA224_FINAL SHA256_Final
 #else
 #define SHA224_DLEN (32)
 #define SHA224_CTX_t mbedtls_sha256_context
@@ -295,7 +297,7 @@ const bool validate_sha224sum_value(const char *file_path, const char *checksum)
 		return false;
 
 #if defined(LOPENSSL) || defined(LWOLFSSL)
-	if (!SHA224_Init(&ctx))
+	if (!SHA224_INIT(&ctx))
 		goto end;
 #else
 	mbedtls_sha256_init(&ctx);
