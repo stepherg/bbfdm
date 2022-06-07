@@ -97,7 +97,6 @@ endif(BBF_JSON_PLUGIN)
 
 IF(WITH_WOLFSSL)
 	SET(SSL_LIBS wolfssl)
-	SET(CRYPTO_LIBS crypto)
 	add_compile_definitions(LWOLFSSL)
 ENDIF(WITH_WOLFSSL)
 
