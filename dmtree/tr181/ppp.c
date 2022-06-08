@@ -871,6 +871,36 @@ static int ppp_read_sysfs(void *data, const char *name, char **value)
 	return 0;
 }
 
+static int get_PPPInterfaceStats_MulticastPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
+static int get_PPPInterfaceStats_BroadcastPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
+static int get_PPPInterfaceStats_BroadcastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
+static int get_PPPInterfaceStats_UnknownProtoPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
+/*#Device.PPP.Interface.{i}.Stats.MulticastPacketsReceived!SYSFS:/sys/class/net/@Name/statistics/multicast*/
+static int get_PPPInterfaceStats_MulticastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return ppp_read_sysfs(data, "statistics/multicast", value);
+}
+
 /*#Device.PPP.Interface.{i}.Stats.BytesReceived!SYSFS:/sys/class/net/@Name/statistics/rx_bytes*/
 static int get_ppp_eth_bytes_received(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -919,10 +949,48 @@ static int get_PPPInterfaceStats_DiscardPacketsReceived(char *refparam, struct d
 	return ppp_read_sysfs(data, "statistics/rx_dropped", value);
 }
 
-/*#Device.PPP.Interface.{i}.Stats.MulticastPacketsReceived!SYSFS:/sys/class/net/@Name/statistics/multicast*/
-static int get_PPPInterfaceStats_MulticastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_PPPInterfaceStats_UnicastPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ppp_read_sysfs(data, "statistics/multicast", value);
+	char *tx_mcast, *tx_bcast, *tx_pkts;
+	unsigned long mpkt_sent = 0, bpkt_sent = 0, total_sent = 0;
+
+	get_PPPInterfaceStats_MulticastPacketsSent(refparam, ctx, data, instance, &tx_mcast);
+	get_PPPInterfaceStats_BroadcastPacketsSent(refparam, ctx, data, instance, &tx_bcast);
+	get_ppp_eth_pack_sent(refparam, ctx, data, instance, &tx_pkts);
+
+	mpkt_sent = strtoul(tx_mcast, NULL, 10);
+	bpkt_sent = strtoul(tx_bcast, NULL, 10);
+	total_sent = strtoul(tx_pkts, NULL, 10);
+
+	unsigned long ucast_sent = total_sent - mpkt_sent - bpkt_sent;
+	char tx_ucast[25] = {0};
+	snprintf(tx_ucast, sizeof(tx_ucast), "%lu", ucast_sent);
+
+	*value = dmstrdup(tx_ucast);
+	return 0;
+}
+
+static int get_PPPInterfaceStats_UnicastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *rx_mcast, *rx_bcast, *rx_other, *rx_pkts;
+	unsigned long mpkt_rcv = 0, bpkt_rcv = 0, other_rcv = 0, total_rcv = 0;
+
+	get_PPPInterfaceStats_MulticastPacketsReceived(refparam, ctx, data, instance, &rx_mcast);
+	get_PPPInterfaceStats_BroadcastPacketsReceived(refparam, ctx, data, instance, &rx_bcast);
+	get_PPPInterfaceStats_UnknownProtoPacketsReceived(refparam, ctx, data, instance, &rx_other);
+	get_ppp_eth_pack_received(refparam, ctx, data, instance, &rx_pkts);
+
+	mpkt_rcv = strtoul(rx_mcast, NULL, 10);
+	bpkt_rcv = strtoul(rx_bcast, NULL, 10);
+	other_rcv = strtoul(rx_other, NULL, 10);
+	total_rcv = strtoul(rx_pkts, NULL, 10);
+
+	unsigned long ucast_rcv = total_rcv - mpkt_rcv - bpkt_rcv - other_rcv;
+	char rx_ucast[25] = {0};
+	snprintf(rx_ucast, sizeof(rx_ucast), "%lu", ucast_rcv);
+
+	*value = dmstrdup(rx_ucast);
+	return 0;
 }
 
 static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1254,14 +1322,14 @@ DMLEAF tPPPInterfaceStatsParams[] = {
 {"PacketsSent", &DMREAD, DMT_UNLONG, get_ppp_eth_pack_sent, NULL, BBFDM_BOTH, "2.0"},
 {"ErrorsSent", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_ErrorsSent, NULL, BBFDM_BOTH, "2.0"},
 {"ErrorsReceived", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_ErrorsReceived, NULL, BBFDM_BOTH, "2.0"},
-//{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_UnicastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
-//{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_UnicastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_UnicastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_UnicastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
 {"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_DiscardPacketsSent, NULL, BBFDM_BOTH, "2.0"},
 {"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_DiscardPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-//{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_MulticastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_MulticastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
 {"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_MulticastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-//{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_BroadcastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
-//{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-//{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_BroadcastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
