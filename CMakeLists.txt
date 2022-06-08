@@ -30,6 +30,10 @@ SET(BBF_DM_SOURCES dmentry.c
 				   dmdiagnostics.c
 				   dmbbfcommon.c)
 
+IF(NOT WITH_WOLFSSL AND NOT WITH_OPENSSL AND NOT WITH_MBEDTLS)
+	MESSAGE(FATAL_ERROR "You must enable one of the SSL libraries: {'WOLFSSL','OPENSSL','MBEDTLS'}")
+ENDIF()
+
 IF(BBF_TR181)
     SET(BBF_TR181_SOURCES dmtree/tr181/device.c
     					  dmtree/tr181/deviceinfo.c
