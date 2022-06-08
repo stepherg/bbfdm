@@ -140,7 +140,7 @@ static void check_killed_process(void)
 static void procps_get_cmdline(char *buf, int bufsz, const char *pid, const char *comm)
 {
 	int sz;
-	char filename[sizeof("/proc/%s/cmdline") + sizeof(int)*3];
+	char filename[270];
 
 	snprintf(filename, sizeof(filename), "/proc/%s/cmdline", pid);
 	sz = dm_file_to_buf(filename, buf, bufsz);
