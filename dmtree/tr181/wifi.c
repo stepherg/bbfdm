@@ -5485,7 +5485,7 @@ static int get_WiFiDataElementsAssociationEventAssociationEventData_HECapabiliti
 
 static int get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 2, "wfa-dataelements:AssociationEvent", "eventTime");
+	*value = dmjson_get_value((json_object *)data, 1, "eventTime");
 	return 0;
 }
 
@@ -5692,7 +5692,7 @@ static int get_WiFiDataElementsDisassociationEventDisassociationEventData_Retran
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 2, "wfa-dataelements:DisassociationEvent", "eventTime");
+	*value = dmjson_get_value((json_object *)data, 1, "eventTime");
 	return 0;
 }
 
