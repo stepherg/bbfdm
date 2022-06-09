@@ -928,7 +928,7 @@ static int set_rule_enable(char *refparam, struct dmctx *ctx, void *data, char *
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
 			break;
 	}
         return 0;

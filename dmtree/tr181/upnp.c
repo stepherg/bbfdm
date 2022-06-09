@@ -394,7 +394,7 @@ static int set_UPnPDevice_Enable(char *refparam, struct dmctx *ctx, void *data, 
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value("upnpd", "config", "enabled", b ? "" : "0");
+			dmuci_set_value("upnpd", "config", "enabled", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
