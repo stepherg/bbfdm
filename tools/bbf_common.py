@@ -291,7 +291,8 @@ def parse_dynamic_json_datamodel_tree(obj, value):
         value, "access") is True else "DMREAD"
     obj_protocols = get_protocol_from_json(value)
 
-    LIST_SUPPORTED_DM.append(obj + "," + obj_permission + ",DMT_OBJ" + "," + obj_protocols)
+    obj_name = obj.replace("{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX)
+    LIST_SUPPORTED_DM.append(obj_name + "," + obj_permission + ",DMT_OBJ" + "," + obj_protocols)
 
     hasobj = obj_has_child(value)
     hasparam = obj_has_param(value)
@@ -301,7 +302,7 @@ def parse_dynamic_json_datamodel_tree(obj, value):
             if k != "mapping" and isinstance(v, dict):
                 for k1, v1 in v.items():
                     if k1 == "type" and v1 != "object":
-                        param_name = obj + k
+                        param_name = obj_name + k.replace("{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX)
                         param_type = get_param_type(v)
                         param_permission = "DMWRITE" if get_option_value(
                             v, "write") is True else "DMREAD"

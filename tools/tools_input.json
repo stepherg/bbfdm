@@ -61,7 +61,8 @@
       "version": "devel",
       "dm_files": [
         "uspd/files/etc/bbfdm/json/transferComplete.json",
-	"obuspa/files/etc/bbfdm/json/USPAgent.json"
+	"obuspa/files/etc/bbfdm/json/USPAgent.json",
+	"urlfilter/files/etc/bbfdm/json/urlfilter.json"
       ]
     },
     {

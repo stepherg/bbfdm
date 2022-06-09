@@ -196,10 +196,10 @@ static void init_processes(void)
 	char buf[PROCPS_BUFSIZE];
 	char fstat[288];
 	char command[256];
-	char comm[16];
-	char bsize[16];
-	char cputime[16];
-	char priori[16];
+	char comm[32];
+	char bsize[32];
+	char cputime[32];
+	char priori[32];
 	char *comm1 = NULL;
 	char *comm2 = NULL;
 	char state;
