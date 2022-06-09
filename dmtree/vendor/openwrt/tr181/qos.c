@@ -96,6 +96,7 @@ static int openwrt__browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_
 	int length = 0;
 	struct queuestats queuests = {0}, emptyquestats = {0};
 	regex_t regex1 = {}, regex2 = {};
+	int ret = 0;
 
 	regcomp(&regex1, "^qdisc noqueue [0-9]*: dev [[:alnum:]]* [[:alnum:]]* refcnt [0-9]*", 0);
 	regcomp(&regex2, "^qdisc pfifo_fast [0-9]*: dev [[:alnum:]]* [[:alnum:]]* refcnt [0-9]*", 0);
@@ -105,7 +106,7 @@ static int openwrt__browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_
 	for (int i = 0; i < length; i++) {
 		switch (i%3) {
 			case 0:
-				int ret = regexec(&regex1, questatsout[i], 0, NULL, 0);
+				ret = regexec(&regex1, questatsout[i], 0, NULL, 0);
 				if (ret == 0)
 					sscanf(questatsout[i], "qdisc noqueue %d: dev %49s %49s refcnt %d\n", &queuests.noqueue, dev, user, &queuests.refcnt);
 				else {
