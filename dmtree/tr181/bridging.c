@@ -9,7 +9,6 @@
  *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  *
  */
-#include "dmentry.h"
 #include "bridging.h"
 
 struct bridge_args

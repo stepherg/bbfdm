@@ -9,7 +9,6 @@
  *
  */
 
-#include "dmentry.h"
 #include "ppp.h"
 
 struct ppp_args

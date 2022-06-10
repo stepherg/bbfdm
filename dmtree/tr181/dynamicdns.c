@@ -8,7 +8,6 @@
  *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
-#include "dmentry.h"
 #include "dynamicdns.h"
 
 #define DDNS_SERVICES_DEFAULT "/usr/share/ddns/default"

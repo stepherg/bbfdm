@@ -5,7 +5,7 @@ include:
 variables:
   DEBUG: 'TRUE'
   SOURCE_FOLDER: "."
-  COMMON_IMAGE: iopsys/code-analysis:0.26
+  COMMON_IMAGE: iopsys/code-analysis:0.27
   RUN_CPPCHECK: "cppcheck --enable=style --error-exitcode=1 --inline-suppr --include=/usr/local/include/json-c/json_object.h --include=/usr/include/libubox/list.h -I . -I ./include/ -I ./libbbf_api/ -i test/ -DBBF_VENDOR_IOPSYS -DBBF_VENDOR_OPENWRT"
 
 stages:
@@ -78,13 +78,16 @@ run_memory_test:
   script:
   - "./gitlab-ci/setup.sh"
   - "./gitlab-ci/memory-test.sh"
-
+  - echo "BBF_TAR_URL=${CI_JOB_URL}/artifacts/raw/build/libbbf-1.0.0-Linux.sh" >build.env
   artifacts:
+      reports:
+        dotenv: build.env
       when: always
       paths:
           - timestamp.log
           - memory-test-coverage.xml
           - bbf_out.zip
+          - build/libbbf-1.0.0-Linux.sh
 
 doxygen:
   stage: unit_test
@@ -110,8 +113,12 @@ run_uspd:
     variables: false
   variables:
     UPSTREAM_BBF_SHA: $CI_COMMIT_SHA
+    BBF_TAR_URL: $BBF_TAR_URL
   allow_failure: false
   trigger:
     project: iopsys/uspd
     branch: bbf_pipeline
     strategy: depend
+  needs:
+    job: run_memory_test
+    artifacts: true

@@ -11,7 +11,6 @@
  *
  */
 
-#include "dmentry.h"
 #include "dhcpv4.h"
 
 #define DHCP_OPTION_VENDORID 60

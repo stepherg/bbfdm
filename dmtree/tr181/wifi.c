@@ -12,7 +12,6 @@
  *
  */
 
-#include "dmentry.h"
 #include "wifi.h"
 
 struct wifi_radio_args

@@ -8,7 +8,6 @@
  *		Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
-#include "dmentry.h"
 #include "dsl.h"
 
 struct dsl_line_args

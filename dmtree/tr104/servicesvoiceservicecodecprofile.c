@@ -8,7 +8,6 @@
  *	Author: Yalu Zhang, yalu.zhang@iopsys.eu
  */
 
-#include "dmentry.h"
 #include "servicesvoiceservicecodecprofile.h"
 #include "common.h"
 

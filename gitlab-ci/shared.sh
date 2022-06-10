@@ -57,6 +57,13 @@ function install_wolfssl()
 	cd ${CUR}
 }
 
+function generate_release()
+{
+	cd build
+	cpack
+	cd ..
+}
+
 function install_libbbf()
 {
 	COV_CFLAGS='-fprofile-arcs -ftest-coverage'
@@ -65,17 +72,18 @@ function install_libbbf()
 	VENDOR_PREFIX='X_IOPSYS_EU_'
 
 	echo "Compiling libbbf"
-	if [ -f Makefile ]; then
-		make clean
-		rm -rf CMakeFiles CMakeCache.txt cmake_install.cmake
-		rm -f *.log *.xml
+	if [ -d build ]; then
+		rm -rf build
 	fi
 
-	cmake CMakeLists.txt -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS" -DBBF_TR181=ON -DBBF_TR104=ON -DBBF_TR143=ON -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX"
-	exec_cmd make
+	mkdir -p build
+	cd build
+	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS" -DBBF_TR181=ON -DBBF_TR104=ON -DBBF_TR143=ON -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DCMAKE_INSTALL_PREFIX=/
+	exec_cmd_verbose make
 
 	echo "installing libbbf"
-	exec_cmd make install
+	exec_cmd_verbose make install
+	cd ..
 }
 
 function install_libbbf_test()

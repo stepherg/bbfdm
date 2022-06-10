@@ -10,7 +10,6 @@
  *
  */
 
-#include "dmentry.h"
 #include "routing.h"
 
 struct proc_routing {

@@ -10,7 +10,6 @@
  *
  */
 
-#include "dmentry.h"
 #include "ethernet.h"
 
 struct eth_port_args

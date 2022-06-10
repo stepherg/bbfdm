@@ -9,7 +9,6 @@
  *
  */
 
-#include "dmentry.h"
 #include "x_iopsys_eu_igmp.h"
 
 static void get_mcast_iface_key(char *p_ifname, char *key, size_t key_size)

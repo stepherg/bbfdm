@@ -9,7 +9,6 @@
  *
  */
 
-#include "dmentry.h"
 #include "times.h"
 
 static int get_local_time_zone_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

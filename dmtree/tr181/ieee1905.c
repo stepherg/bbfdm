@@ -9,7 +9,6 @@
  *      Author: Nevadita Chatterjee <nevadita.chatterjee@iopsys.eu>
  */
 
-#include "dmentry.h"
 #include "ieee1905.h"
 
 struct ieee1905_device_nonieee1905neighbor_args

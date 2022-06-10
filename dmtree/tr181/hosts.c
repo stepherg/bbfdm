@@ -9,7 +9,6 @@
  */
 
 #include "hosts.h"
-#include "dmentry.h"
 
 /*************************************************************
 * ENTRY METHOD

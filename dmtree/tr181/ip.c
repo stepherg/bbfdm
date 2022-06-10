@@ -12,7 +12,6 @@
 
 #include "ppp.h"
 #include "ip.h"
-#include "dmentry.h"
 #ifdef BBF_TR143
 #include "diagnostics.h"
 #endif

@@ -9,7 +9,6 @@
  *	Author: Rohit Topno <r.topno@gxgroup.eu>
  */
 
-#include "dmentry.h"
 #include "qos.h"
 
 /*************************************************************

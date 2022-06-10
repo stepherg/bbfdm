@@ -6,7 +6,7 @@ ADD_DEFINITIONS(-Wall -Werror)
 ADD_DEFINITIONS(-D_GNU_SOURCE)
 ADD_DEFINITIONS(-DBBF_VENDOR_PREFIX="${BBF_VENDOR_PREFIX}")
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I. -I./dmtree -I./dmtree/tr181 -I./dmtree/tr104 -I./dmtree/tr143")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${PROJECT_SOURCE_DIR} -I${PROJECT_SOURCE_DIR}/dmtree")
 
 OPTION(BBF_TR181 "build with tr181 datamodel" ON)
 OPTION(BBF_TR104 "build with tr104 datamodel" ON)
@@ -24,21 +24,22 @@ ENDIF()
 
 FILE(GLOB BBF_API_SOURCES ${PROJECT_SOURCE_DIR}/libbbf_api/*.c)
 
-SET(BBF_DM_SOURCES dmentry.c
-				   dmdiagnostics.c
-				   dmbbfcommon.c)
+SET(BBF_DM_SOURCES dmentry.c dmdiagnostics.c dmbbfcommon.c)
 
 IF(BBF_TR181)
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${PROJECT_SOURCE_DIR}/dmtree/tr181")
 	FILE(GLOB BBF_TR181_SOURCES ${PROJECT_SOURCE_DIR}/dmtree/tr181/*.c)
 	add_compile_definitions(BBF_TR181)
 ENDIF(BBF_TR181)
 
 IF(BBF_TR104)
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${PROJECT_SOURCE_DIR}/dmtree/tr104")
 	FILE(GLOB BBF_TR104_SOURCES ${PROJECT_SOURCE_DIR}/dmtree/tr104/*.c)
 	add_compile_definitions(BBF_TR104)
 ENDIF(BBF_TR104)
 
 IF(BBF_TR143)
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${PROJECT_SOURCE_DIR}/dmtree/tr143")
 	FILE(GLOB BBF_TR143_SOURCES ${PROJECT_SOURCE_DIR}/dmtree/tr143/*.c)
 	add_compile_definitions(BBF_TR143)
 ENDIF(BBF_TR143)
@@ -95,30 +96,39 @@ ADD_LIBRARY(bbfdm SHARED ${BBF_API_SOURCES} ${BBF_DM_SOURCES}
 TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json trace dl curl ${SSL_LIBS})
 
 INSTALL(TARGETS bbfdm
-		LIBRARY DESTINATION "/usr/lib")
+		LIBRARY DESTINATION usr/lib)
 
-INSTALL(DIRECTORY DESTINATION "/etc/bbfdm")
-INSTALL(DIRECTORY DESTINATION "/etc/bbfdm/dmmap")
-INSTALL(DIRECTORY DESTINATION "/etc/bbfdm/json")
-INSTALL(DIRECTORY DESTINATION "/usr/share/bbfdm")
-INSTALL(DIRECTORY DESTINATION "/usr/lib/bbfdm")
+INSTALL(DIRECTORY DESTINATION etc/bbfdm)
+INSTALL(DIRECTORY DESTINATION etc/bbfdm/dmmap)
+INSTALL(DIRECTORY DESTINATION etc/bbfdm/json)
+INSTALL(DIRECTORY DESTINATION usr/share/bbfdm)
+INSTALL(DIRECTORY DESTINATION usr/lib/bbfdm)
 
 FILE(GLOB headers include/*.h)
 INSTALL(FILES ${headers}
-	DESTINATION include
+	DESTINATION usr/include
 )
 
 FILE(GLOB libbbf_api_headers libbbf_api/*.h)
 INSTALL(FILES ${libbbf_api_headers}
-	DESTINATION include/libbbf_api
+	DESTINATION usr/include/libbbf_api
 )
 
 FILE(GLOB libbbfdm_headers *.h)
 INSTALL(FILES ${libbbfdm_headers}
-	DESTINATION include/libbbfdm
+	DESTINATION usr/include/libbbfdm
 )
 
 FILE(GLOB scripts scripts/*)
 INSTALL(FILES ${scripts}
-	DESTINATION "/usr/share/bbfdm"
+	DESTINATION usr/share/bbfdm
 )
+
+# add CPack to project
+SET(CPACK_PACKAGE_NAME "libbbf")
+SET(CPACK_PACKAGE_VENDOR "iopsys.io")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "libbbf - Datamodel library")
+SET(CPACK_PACKAGE_VERSION "1.0.0")
+SET(CPACK_GENERATOR STGZ)
+
+include(CPack)

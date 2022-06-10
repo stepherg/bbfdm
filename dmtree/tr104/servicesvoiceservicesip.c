@@ -11,7 +11,6 @@
 #include "servicesvoiceservice.h"
 #include "servicesvoiceservicesip.h"
 #include "common.h"
-#include "dmentry.h"
 
 /**************************************************************************
 * LINKER

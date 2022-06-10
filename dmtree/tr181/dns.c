@@ -8,7 +8,6 @@
  *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
-#include "dmentry.h"
 #include "dmdiagnostics.h"
 #include "dmbbfcommon.h"
 #include "dns.h"

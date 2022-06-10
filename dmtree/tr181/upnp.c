@@ -9,7 +9,6 @@
  *	Author: Imen Bhiri <imen.bhiri@pivasoftware.com>
  */
 
-#include "dmentry.h"
 #include "upnp.h"
 
 struct upnpdiscovery {

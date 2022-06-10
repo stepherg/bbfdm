@@ -78,4 +78,7 @@ gcovr -r . 2> /dev/null #throw away stderr
 # Artefact
 gcovr -r . 2> /dev/null --xml -o ./memory-test-coverage.xml
 
+echo "Generating release"
+generate_release
+
 echo "Memory Test :: PASS"

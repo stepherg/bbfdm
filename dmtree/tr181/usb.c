@@ -8,7 +8,6 @@
  *	Author: Omar Kallel <omar.kallel@pivasoftware.com>
  */
 
-#include "dmentry.h"
 #include "usb.h"
 
 #define SYSFS_USB_DEVICES_PATH "/sys/bus/usb/devices"

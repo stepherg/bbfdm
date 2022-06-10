@@ -9,7 +9,6 @@
  *
  */
 
-#include "dmentry.h"
 #include "atm.h"
 
 struct atm_args

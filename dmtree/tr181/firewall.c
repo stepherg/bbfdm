@@ -9,7 +9,6 @@
  *      Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
-#include "dmentry.h"
 #include "firewall.h"
 
 /*************************************************************

@@ -8,7 +8,6 @@
  *	Author: Jani Juvan <jani.juvan@iopsys.eu>
  */
 
-#include "dmentry.h"
 #include "dsl.h"
 #include "fast.h"
 

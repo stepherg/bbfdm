@@ -12,10 +12,10 @@
 
 #include "dmdiagnostics.h"
 #include "deviceinfo.h"
-#include "dmentry.h"
+
+extern struct list_head main_memhead;
 
 LIST_HEAD(process_list);
-
 static int process_count = 0;
 
 #define PROCPS_BUFSIZE 1024
