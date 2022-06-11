@@ -85,8 +85,6 @@ run_memory_test:
       when: always
       paths:
           - timestamp.log
-          - memory-test-coverage.xml
-          - bbf_out.zip
           - build/libbbf-1.0.0-Linux.sh
 
 doxygen:

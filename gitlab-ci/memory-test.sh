@@ -22,55 +22,47 @@ install_libbbf_test
 install_libbulkdata
 install_libperiodicstats
 
-supervisorctl status all
 supervisorctl update
+supervisorctl status all
+supervisorctl restart all
 sleep 5
 supervisorctl status all
 
-ret=0
-
 function run_valgrind()
 {
-    echo "Running bbf_dm $1 in valgrind"
-    valgrind --xml=yes --xml-file=$2 --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $1 > $3
-    ret=$(( ret + $? ))
+    echo "Running # bbf_dm $@ #"
+    exec_cmd valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $@
+}
+
+function run_valgrind_verbose()
+{
+    echo "Running # bbf_dm $@ #"
+    exec_cmd_verbose valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $@
 }
 
 echo "Running memory check on datamodel"
 
-run_valgrind "-u get_info Device. 0" "memory-report-usp-get_info-all-schema.xml" "output-report-usp-get_info-all-schema.log"
+run_valgrind_verbose -u get Device.RootDataModelVersion
+run_valgrind_verbose -c get Device.RootDataModelVersion
 
-run_valgrind "-u get_info Device. 1" "memory-report-usp-get_info-param-only.xml" "output-report-usp-get_info-param-only.log"
+run_valgrind_verbose -u list_operate
+run_valgrind -u get_schema
+run_valgrind -u instances Device.
+run_valgrind -c get Device.
+run_valgrind -c list_operate
+run_valgrind -c get_schema
+run_valgrind_verbose -c instances Device.
 
-run_valgrind "-u get_info Device. 2" "memory-report-usp-get_info-event-only.xml" "output-report-usp-get_info-event-only.log"
+run_valgrind -u get_info Device. 0
+run_valgrind -u get_info Device. 1
+run_valgrind -u get_info Device. 2
+run_valgrind -u get_info Device. 3
 
-run_valgrind "-u get_info Device. 3" "memory-report-usp-get_info-operate-only.xml" "output-report-usp-get_info-operate-only.log"
-
-run_valgrind "-u get Device." "memory-report-usp-get.xml" "output-report-usp-get.log"
-
-run_valgrind "-u list_operate" "memory-report-usp-operate.xml" "output-report-usp-operate.log"
-
-run_valgrind "-u get_schema" "memory-report-usp-schema.xml" "output-report-usp-schema.log"
-
-run_valgrind "-u instances Device." "memory-report-usp-instances.xml" "output-report-usp-instances.log"
-
-run_valgrind "-c get Device." "memory-report-cwmp-get.xml" "output-report-cwmp-get.log"
-
-run_valgrind "-c list_operate" "memory-report-cwmp-operate.xml" "output-report-cwmp-operate.log"
-
-run_valgrind "-c get_schema" "memory-report-cwmp-schema.xml" "output-report-cwmp-schema.log"
-
-run_valgrind "-c instances Device." "memory-report-cwmp-instances.xml" "output-report-cwmp-instances.log"
-
-if [ "$ret" -ne 0 ]; then
-	echo "Memory check failed"
-	check_ret $ret
-fi
+run_valgrind -u get Device.
+run_valgrind -c get Device.
 
 supervisorctl stop all
 supervisorctl status
-
-exec_cmd zip -r bbf_out.zip memory-report-* output-report-*
 
 #report part
 #GitLab-CI output
