@@ -277,22 +277,15 @@ static int get_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *data,
 
 static int set_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *ppp_s = ((struct ppp_args *)data)->iface_s;
-	bool b;
-
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			string_to_bool(value, &b);
-			if (b && ppp_s) {
-				char intf_obj[64] = {0};
-				snprintf(intf_obj, sizeof(intf_obj), "network.interface.%s", section_name(ppp_s));
-				dmubus_call_set(intf_obj, "down", UBUS_ARGS{0}, 0);
-				dmubus_call_set(intf_obj, "up", UBUS_ARGS{0}, 0);
-			}
+			/* Reset can disrupt on-going cwmp session, so this parameter must be
+			 * taken care by cwmp internally.
+			 */
 			break;
 	}
 	return 0;
