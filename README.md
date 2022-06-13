@@ -440,7 +440,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 **3. Parameter under object with instance:**
 
-- **UCI command:** uci get wireless.@wifi-device[0].country
+- **UCI option command:** uci get wireless.@wifi-device[0].country
 
 - **@i:** is the number of instance object
 
@@ -471,6 +471,42 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 }
 ```
 
+- **UCI list command:** uci get urlfilter.@profile[0].whitelist_url
+
+- **@i:** is the number of instance object
+
+```bash
+"WhitelistURL": {
+	"type": "string",
+	"version": "2.14",
+	"read": true,
+	"write": true,
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"list": {
+		"datatype": "string"
+	},
+	"mapping": [
+		{
+			"type": "uci",
+			"uci": {
+				"file": "urlfilter",
+				"section": {
+					"type": "profile",
+					"index": "@i-1"
+				},
+				"list": {
+					"name": "whitelist_url"
+				}
+			}
+		}
+	]
+}
+```
+
+
 - **UBUS command:** ubus call wifi status | jsonfilter -e @.radios[0].noise
 
 - **@i:** is the number of instance object
@@ -500,7 +536,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 **4. Parameter without instance:**
 
-- **UCI command:** uci get cwmp.cpe.userid
+- **UCI option command:** uci get cwmp.cpe.userid
 
 ```bash
 "Username": {
@@ -522,6 +558,39 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 	       			},
 				"option" : {
 					"name" : "userid"
+				}
+			}
+		}
+	]
+}
+```
+
+- **UCI list command:** uci get urlfilter.globals.blacklist_url
+
+- **@i:** is the number of instance object
+
+```bash
+"BlacklistURL": {
+	"type": "string",
+	"read": true,
+	"write": true,
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"list": {
+		"datatype": "string"
+	},
+	"mapping": [
+		{
+			"type": "uci",
+			"uci": {
+				"file": "urlfilter",
+				"section": {
+					"name": "globals"
+				},
+				"list": {
+					"name": "blacklist_url"
 				}
 			}
 		}
@@ -579,7 +648,41 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 }
 ```
 
-**5. Object with Event and Operate command:**
+**5. Parameter to map another data model Object:**
+
+- **UCI option command:** uci get urlfilter.@filter[0].profile
+
+- **linker_obj** is the path name of an object that is stacked immediately below this object
+
+```bash
+"Profile": {
+	"type": "string",
+	"read": true,
+	"write": true,
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"mapping": [
+		{
+			"type": "uci",
+			"uci": {
+				"file": "urlfilter",
+				"section": {
+					"type": "filter",
+					"index": "@i-1"
+				},
+				"option": {
+					"name": "profile"
+				}
+			},
+			"linker_obj": "Device.{BBF_VENDOR_PREFIX}URLFilter.Profile."
+		}
+	]
+}
+```
+
+**6. Object with Event and Operate command:**
 
 ```bash
 {

@@ -115,6 +115,9 @@
 				"cwmp",
 				"usp"
 			],
+			"uniqueKeys": [
+				"Name"
+			],
 			"access": true,
 			"array": true,
 			"mapping": [
@@ -129,6 +132,36 @@
 					}
 				}
 			],
+			"Name": {
+				"type": "string",
+				"read": true,
+				"write": false,
+				"version": "2.14",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "string",
+				"range": [
+					{
+						"max": 64
+					}
+				],
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "urlfilter",
+							"section": {
+								"type": "profile"
+							},
+							"list": {
+								"name": "@Name"
+							}
+						}
+					}
+				]
+			},
 			"WhitelistURL": {
 				"type": "string",
 				"version": "2.14",
@@ -273,11 +306,12 @@
 							"option": {
 								"name": "profile"
 							}
-						}
+						},
+						"linker_obj": "Device.{BBF_VENDOR_PREFIX}URLFilter.Profile."
 					}
 				]
 			},
-			"MacAddress": {
+			"MACAddress": {
 				"type": "string",
 				"version": "2.14",
 				"read": true,
