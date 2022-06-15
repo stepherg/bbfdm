@@ -38,6 +38,10 @@ extern int bbfdatamodel_type;
 #endif
 #define UNDEF -1
 
+#ifndef BBF_MAX_OBJECT_INSTANCES
+#define BBF_MAX_OBJECT_INSTANCES (255)
+#endif
+
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 #endif

@@ -413,10 +413,9 @@ int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char 
 		return 0;
 	}
 
-	if (parent_node->browse_type == BROWSE_NUM_OF_ENTRIES) {
-		parent_node->num_of_entries++;
+	parent_node->num_of_entries++;
+	if (parent_node->browse_type == BROWSE_NUM_OF_ENTRIES)
 		return 0;
-	}
 
 	DMOBJ *prevobj = parent_node->obj;
 	DMOBJ *nextobj = prevobj->nextobj;

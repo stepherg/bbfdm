@@ -75,7 +75,7 @@ __attribute__ ((deprecated)) char *handle_update_instance(int instance_ranck, st
 static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)
 {
 	dmctx->faultcode = dm_link_inst_obj(dmctx, parent_node, data, instance);
-	if (dmctx->stop)
+	if (dmctx->stop || parent_node->num_of_entries >= BBF_MAX_OBJECT_INSTANCES)
 		return DM_STOP;
 	return DM_OK;
 }
