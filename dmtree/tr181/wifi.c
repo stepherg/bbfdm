@@ -45,6 +45,12 @@ struct wifi_data_element_args
 	struct json_object *dump2_obj;
 };
 
+struct wifi_event_args
+{
+	struct json_object *event_obj;
+	char *event_time;
+};
+
 
 /**************************************************************************
 * LINKER
@@ -1033,16 +1039,21 @@ static int browseWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperat
 
 static int browseWiFiDataElementsAssociationEventAssociationEventDataInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *notify_arr = NULL, *notify_obj = NULL, *assoc_ev = NULL;
+	struct wifi_event_args curr_wifi_event_args = {0};
+	json_object *res = NULL, *notify_arr = NULL, *notify_obj = NULL, *assoc_ev = NULL, *assoc_obj = NULL;
 	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, notify_arr, notify_obj, i, 1, "notification") {
+		curr_wifi_event_args.event_time = dmjson_get_value(notify_obj, 1, "eventTime");
 		if (json_object_object_get_ex(notify_obj, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
-			inst = handle_instance_without_section(dmctx, parent_node, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)notify_obj, inst) == DM_STOP)
-				break;
+			if (json_object_object_get_ex(assoc_ev, "AssocData", &assoc_obj)) {
+				curr_wifi_event_args.event_obj = assoc_obj;
+				inst = handle_instance_without_section(dmctx, parent_node, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_event_args, inst) == DM_STOP)
+					break;
+			}
 		}
 	}
 	return 0;
@@ -1050,16 +1061,21 @@ static int browseWiFiDataElementsAssociationEventAssociationEventDataInst(struct
 
 static int browseWiFiDataElementsDisassociationEventDisassociationEventDataInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL, *notify_arr = NULL, *notify_obj = NULL, *disassoc_ev = NULL;
+	struct wifi_event_args curr_wifi_event_args = {0};
+	json_object *res = NULL, *notify_arr = NULL, *notify_obj = NULL, *disassoc_ev = NULL, *disassoc_obj = NULL;
 	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, notify_arr, notify_obj, i, 1, "notification") {
+		curr_wifi_event_args.event_time = dmjson_get_value(notify_obj, 1, "eventTime");
 		if (json_object_object_get_ex(notify_obj, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
-			inst = handle_instance_without_section(dmctx, parent_node, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)notify_obj, inst) == DM_STOP)
-				break;
+			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_obj)) {
+				curr_wifi_event_args.event_obj = disassoc_obj;
+				inst = handle_instance_without_section(dmctx, parent_node, ++id);
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_event_args, inst) == DM_STOP)
+					break;
+			}
 		}
 	}
 	return 0;
@@ -5448,43 +5464,43 @@ static int get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntr
 
 static int get_WiFiDataElementsAssociationEventAssociationEventData_BSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:AssociationEvent", "AssocData", "BSSID");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "BSSID");
 	return 0;
 }
 
 static int get_WiFiDataElementsAssociationEventAssociationEventData_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:AssociationEvent", "AssocData", "MACAddress");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "MACAddress");
 	return 0;
 }
 
 static int get_WiFiDataElementsAssociationEventAssociationEventData_StatusCode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:AssociationEvent", "AssocData", "StatusCode");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "StatusCode");
 	return 0;
 }
 
 static int get_WiFiDataElementsAssociationEventAssociationEventData_HTCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:AssociationEvent", "AssocData", "HTCapabilities");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "HTCapabilities");
 	return 0;
 }
 
 static int get_WiFiDataElementsAssociationEventAssociationEventData_VHTCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:AssociationEvent", "AssocData", "VHTCapabilities");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "VHTCapabilities");
 	return 0;
 }
 
 static int get_WiFiDataElementsAssociationEventAssociationEventData_HECapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:AssociationEvent", "AssocData", "HECapabilities");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "HECapabilities");
 	return 0;
 }
 
 static int get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "eventTime");
+	*value = ((struct wifi_event_args *)data)->event_time;
 	return 0;
 }
 
@@ -5631,67 +5647,67 @@ static int get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumber
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_BSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BSSID");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "BSSID");
 	return 0;
 }
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "MACAddress");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "MACAddress");
 	return 0;
 }
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_ReasonCode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ReasonCode");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "ReasonCode");
 	return 0;
 }
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BytesSent");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "BytesSent");
 	return 0;
 }
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BytesReceived");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "BytesReceived");
 	return 0;
 }
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "PacketsSent");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "PacketsSent");
 	return 0;
 }
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "PacketsReceived");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "PacketsReceived");
 	return 0;
 }
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ErrorsSent");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "ErrorsSent");
 	return 0;
 }
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ErrorsReceived");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "ErrorsReceived");
 	return 0;
 }
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_RetransCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "RetransCount");
+	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "RetransCount");
 	return 0;
 }
 
 static int get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "eventTime");
+	*value = ((struct wifi_event_args *)data)->event_time;
 	return 0;
 }
 
