@@ -128,14 +128,14 @@
 						"section": {
 							"type": "profile"
 						},
-						"dmmapfile": "dmmap_urlfilter_profile"
+						"dmmapfile": "dmmap_urlfilter"
 					}
 				}
 			],
 			"Name": {
 				"type": "string",
 				"read": true,
-				"write": false,
+				"write": true,
 				"version": "2.14",
 				"protocols": [
 					"cwmp",
@@ -155,7 +155,7 @@
 							"section": {
 								"type": "profile"
 							},
-							"list": {
+							"option": {
 								"name": "@Name"
 							}
 						}
@@ -258,7 +258,7 @@
 						"section": {
 							"type": "filter"
 						},
-						"dmmapfile": "dmmap_urlfilter_filter"
+						"dmmapfile": "dmmap_urlfilter"
 					}
 				}
 			],

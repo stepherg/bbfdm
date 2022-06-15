@@ -1296,6 +1296,19 @@ static void uci_set_value(json_object *mapping_obj, int json_version, char *refp
 		char uci_type[32] = {0};
 
 		snprintf(uci_type, sizeof(uci_type), "@%s[%ld]", json_object_get_string(type), instance ? DM_STRTOL(instance)-1 : 0);
+
+		if (strcmp(opt_temp, "@Name") == 0) {
+			struct uci_section *dmmap_section = NULL;
+			char buf[64] = {0};
+
+			snprintf(buf, sizeof(buf), "dmmap_%s", json_object_get_string(file));
+			get_dmmap_section_of_config_section(buf, json_object_get_string(type), section_name((struct uci_section *)data), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "section_name", value);
+
+			dmuci_rename_section(json_object_get_string(file), uci_type, value);
+			return;
+		}
+
 		if (option) {
 			if (linker_jobj)
 				adm_entry_get_linker_value(ctx, value, &linker);
