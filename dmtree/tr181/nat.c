@@ -285,9 +285,7 @@ static int get_nat_port_mapping_enable(char *refparam, struct dmctx *ctx, void *
 
 static int set_nat_port_mapping_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	bool b, val, port_fwd = false;
-	struct uci_section *s = NULL;
-	char *intf = NULL;
+	bool b;
 
 	switch (action) {
 		case VALUECHECK:
@@ -297,24 +295,7 @@ static int set_nat_port_mapping_enable(char *refparam, struct dmctx *ctx, void *
 		case VALUESET:
 			string_to_bool(value, &b);
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "enabled", b ? "1" : "0");
-			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src", &intf);
-
-			uci_foreach_sections("firewall", "zone", s) {
-				char *zone_name = NULL;
-
-				dmuci_get_value_by_section_string(s, "name", &zone_name);
-				if (intf && zone_name && !DM_STRCMP(intf, zone_name)) {
-					char *masq = NULL;
-
-					dmuci_get_value_by_section_string(s, "masq", &masq);
-					port_fwd = (*masq == '1') ? true : false;
-					break;
-				}
-			}
-
-			val = port_fwd && b;
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", val ? "1" : "0");
-			return 0;
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
 	}
 	return 0;
 }
