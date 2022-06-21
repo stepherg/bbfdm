@@ -116,6 +116,9 @@ json_object *__dmjson_select_obj_in_array_idx(json_object *mainjobj, json_object
 	if (mainjobj == NULL)
 		return NULL;
 
+	if (index < 0)
+		return NULL;
+
 	va_start(arg, argc);
 	for (i = 0; i < argc; i++) {
 		argv[i] = va_arg(arg, char *);

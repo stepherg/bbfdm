@@ -1045,7 +1045,7 @@ static int browseWiFiDataElementsAssociationEventAssociationEventDataInst(struct
 	int id = 0, i = 0;
 
 	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{0}, 0, &res);
-	dmjson_foreach_obj_in_array(res, notify_arr, notify_obj, i, 1, "notification") {
+	dmjson_foreach_obj_in_array_reverse(res, notify_arr, notify_obj, i, 1, "notification") {
 		curr_wifi_event_args.event_time = dmjson_get_value(notify_obj, 1, "eventTime");
 		if (json_object_object_get_ex(notify_obj, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
 			if (json_object_object_get_ex(assoc_ev, "AssocData", &assoc_obj)) {
@@ -1067,7 +1067,7 @@ static int browseWiFiDataElementsDisassociationEventDisassociationEventDataInst(
 	int id = 0, i = 0;
 
 	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{0}, 0, &res);
-	dmjson_foreach_obj_in_array(res, notify_arr, notify_obj, i, 1, "notification") {
+	dmjson_foreach_obj_in_array_reverse(res, notify_arr, notify_obj, i, 1, "notification") {
 		curr_wifi_event_args.event_time = dmjson_get_value(notify_obj, 1, "eventTime");
 		if (json_object_object_get_ex(notify_obj, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
 			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_obj)) {
