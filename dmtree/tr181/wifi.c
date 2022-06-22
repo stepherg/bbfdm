@@ -6050,7 +6050,12 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 		}
 
 		if (!ssid_exist) {
+			char sec_name[32];
+
+			snprintf(sec_name, sizeof(sec_name), "ap_%s_%s", ssid, (*band == '5') ? "5" : "2");
+
 			dmuci_add_section("mapcontroller", "ap", &s);
+			dmuci_rename_section_by_section(s, sec_name);
 			dmuci_set_value_by_section(s, "ssid", ssid);
 			dmuci_set_value_by_section(s, "key", key);
 			dmuci_set_value_by_section(s, "type", "fronthaul");
