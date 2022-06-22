@@ -1735,6 +1735,8 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, i
 
 	//permission: Define object as readable by default
 	pobj[index].permission = &DMREAD;
+	//checkdep: Define object dependency NULL by default
+	pobj[index].checkdep = NULL;
 
 	json_object_object_foreach(jobj, key, json_obj) {
 		//bbfdm_type
@@ -1776,14 +1778,16 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, i
 		}
 
 		if (strcmp(key, "array") == 0) {
-			//checkdep
-			pobj[index].checkdep = NULL;
-
 			//browseinstobj
 			pobj[index].browseinstobj = json_object_get_boolean(json_obj) ? browse_obj : NULL;
 
 			//nextdynamicobj
 			pobj[index].nextdynamicobj = NULL;
+		}
+
+		//checkdep
+		if (strcmp(key, "dependency") == 0) {
+			pobj[index].checkdep = dm_dynamic_strdup(&json_memhead, json_object_get_string(json_obj));
 		}
 
 		//Version

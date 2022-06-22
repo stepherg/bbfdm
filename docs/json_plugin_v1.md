@@ -72,6 +72,60 @@ It is often the case, that the supported mapping might not handle all the scenar
 ```
 > Note: If the `json_plugin_version` is omitted in the json then it means, it is having legacy mapping and considered as `json_plugin_version` 0.
 
+## How to add object dependency using Json plugin
+In some cases we may need to set a dependency on datamodel object. In such cases the object will only populate if its dependencies are fulfilled.
+The json object `dependency` is used to define the same. Below is an example of how to add object dependency:
+```json
+{
+	"json_plugin_version": 1,
+	"Device.CWMPManagementServer.": {
+		"type": "object",
+		"version": "2.15",
+		"protocols": [
+			"usp"
+		],
+		"access": false,
+		"array": false,
+		"dependency": "file:/etc/config/cwmp",
+		"EnableCWMP": {
+			"type": "boolean",
+			"version": "2.15",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"usp"
+			],
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "cwmp",
+						"section": {
+							"name": "cpe"
+						},
+						"option": {
+							"name": "enable"
+						}
+					}
+				}
+			]
+		}
+	}
+}
+```
+In above example the object `CWMPManagementServer` has a dependency over the UCI file of cwmp (/etc/config/cwmp), that means if the cwmp UCI file is present in the device then only `Device.CWMPManagementServer.` object will populate.
+
+### Possible values for dependency
+one file => "file:/etc/config/network"
+multiple files => "file:/etc/config/network,/lib/netifd/proto/dhcp.sh"
+one ubus => "ubus:router.network" (with method : "ubus:router.network->hosts")
+multiple ubus => "ubus:router.system->info,dsl->status,wifi"
+one package => "opkg:icwmp"
+multiple packages => "opkg:icwmp,obuspa"
+common (files, ubus and package) => "file:/etc/config/network,/etc/config/dhcp;ubus:router.system,dsl->status;opkg:icwmp"
+
+> Note: `dependency` can only be defined for datamodel objects and it can't be used for any leaf components (parameters/commands/events).
+
 Now, If we consider the datamodel tree of usp, we have
 - Non-leaf components(Objects/Multi-instance objects)
 - Leaf components (Parameters/commands/events)
