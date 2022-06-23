@@ -452,13 +452,7 @@ int dm_entry_restart_services(void)
 	bbf_uci_commit_bbfdm();
 
 	list_for_each_entry(pc, &head_package_change, list) {
-		if (strcmp(pc->package, "cwmp") == 0) {
-			dmuci_init();
-			dmuci_commit_package("cwmp");
-			dmuci_exit();
-		} else {
-			dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
-		}
+		dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
 	}
 
 	dmuci_commit_package_varstate("cwmp");
