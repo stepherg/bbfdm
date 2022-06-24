@@ -65,7 +65,7 @@ static void update_dmmap_ddns_global_settings(long int filecount)
 
 	time_t t_time = time(NULL);
 
-	snprintf(last_update, sizeof(last_update), "%ld", t_time);
+	snprintf(last_update, sizeof(last_update), "%lld", (long long) t_time);
 	snprintf(file_count, sizeof(file_count), "%ld", filecount);
 
 	dmuci_set_value_bbfdm("dmmap_ddns", "global", "last_update", last_update);

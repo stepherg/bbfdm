@@ -130,8 +130,8 @@ static void __async_result_callback(struct ubus_request *req, int type, struct b
 		}
 
 		if (difftime(resp_time, entry->last_request) >= UBUS_TIMEOUT/1000) {
-			printf("Req [%s:%s] has been timedout in async call %lu, %lu\n\r",
-				entry->obj, entry->method, resp_time, entry->last_request);
+			printf("Req [%s:%s] has been timedout in async call %lld, %lld\n\r",
+				entry->obj, entry->method, (long long) resp_time, (long long) entry->last_request);
 			entry->failed = true;
 		} else {
 			entry->failed = false;
