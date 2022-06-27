@@ -16,7 +16,7 @@
 #include "dmcommon.h"
 
 #define UBUS_TIMEOUT 5000
-#define UBUS_MAX_BLOCK_TIME (60000) // 60 sec
+#define UBUS_MAX_BLOCK_TIME (120000) // 2 min
 
 static LIST_HEAD(dmubus_cache);
 

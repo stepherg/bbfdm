@@ -609,7 +609,7 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
 		const char *bank_id, const char *command, const char *obj_path, const char *commandKey)
 {
-	char fw_image_path[256] = "/tmp/firmware-XXXXXX.bin";
+	char fw_image_path[256] = "/tmp/firmware-XXXXXX";
 	json_object *json_obj = NULL;
 	bool activate = false;
 	int res = 0;
@@ -630,6 +630,8 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	long res_code = download_file(fw_image_path, url, username, password);
 	time_t complete_time = time(NULL);
 
+	sync();
+
 	// Send Transfer Complete Event
 	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time,commandKey, "Download");
 
@@ -645,8 +647,10 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 		goto end;
 	}
 
+	string_to_bool((char *)auto_activate, &activate);
+	char *act = (activate) ? "1" : "0";
 	// Apply Firmware Image
-	dmubus_call_blocking("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", auto_activate, Boolean}, {"bank", bank_id, Integer}}, 3, &json_obj);
+	dmubus_call_blocking("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", act, Boolean}, {"bank", bank_id, Integer}}, 3, &json_obj);
 
 	if (!json_obj) {
 		res = -1;
@@ -654,7 +658,6 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	}
 
 	// Reboot the device if auto activation is true
-	string_to_bool((char *)auto_activate, &activate);
 	if (activate) {
 		sleep(30); // Wait for the image to become available
 		if (dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) != 0)
