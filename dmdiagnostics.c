@@ -623,6 +623,9 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	res = mkstemp(fw_image_path);
 	if (res == -1) {
 		goto end;
+	} else {
+		close(res); // close the fd, as only filename required
+		res = 0;
 	}
 
 	// Download the firmware image
@@ -652,7 +655,7 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	// Apply Firmware Image
 	dmubus_call_blocking("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", act, Boolean}, {"bank", bank_id, Integer}}, 3, &json_obj);
 
-	if (!json_obj) {
+	if (json_obj == NULL) {
 		res = -1;
 		goto end;
 	}
@@ -665,9 +668,12 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	}
 
 end:
-	// Remove temporary file
-	if (!json_obj && file_exists(fw_image_path) && strncmp(url, FILE_URI, strlen(FILE_URI)) && remove(fw_image_path))
+	// Remove temporary file if ubus upgrade failed and file exists
+	if (!json_obj && file_exists(fw_image_path) && strncmp(url, FILE_URI, strlen(FILE_URI))) {
+		remove(fw_image_path);
+		json_object_put(json_obj);
 		res = -1;
+	}
 
 	return res;
 }
