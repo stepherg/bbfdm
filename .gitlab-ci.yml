@@ -6,13 +6,13 @@ variables:
   DEBUG: 'TRUE'
   SOURCE_FOLDER: "."
   COMMON_IMAGE: iopsys/code-analysis:0.27
-  RUN_CPPCHECK: "cppcheck --enable=style --error-exitcode=1 --inline-suppr --include=/usr/local/include/json-c/json_object.h --include=/usr/include/libubox/list.h -I . -I ./include/ -I ./libbbf_api/ -i test/ -DBBF_VENDOR_IOPSYS -DBBF_VENDOR_OPENWRT"
+  RUN_CPPCHECK: "cppcheck --enable=information --error-exitcode=1 -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBF_TR181 -DBBF_VENDOR_IOPSYS -DBBF_VENDOR_OPENWRT --inline-suppr -i test/"
 
 stages:
     - static_code_analysis
     - unit_test
-    - functional_test
     - memory_test
+    - functional_test
     - uspd
 
 run_unit_test:

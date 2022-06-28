@@ -117,10 +117,6 @@ void free_all_list_package_change(struct list_head *clist)
 {
 	struct package_change *pc;
 	while (clist->next != clist) {
-		/* list_entry() is an external macro and which cppcheck can't track so
-		 * throws warning of null pointer dereferencing for second argument.
-		 * Suppressed the warning */
-		// cppcheck-suppress nullPointer
 		pc = list_entry(clist->next, struct package_change, list);
 		list_del(&pc->list);
 		free(pc->package);//TODO !!!!! Do not use dmfree here

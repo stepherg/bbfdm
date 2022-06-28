@@ -660,6 +660,7 @@ static int set_InterfaceStack_Alias(char *refparam, struct dmctx *ctx, void *dat
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			// cppcheck-suppress unknownMacro
 			uci_path_foreach_option_eq(bbfdm, "dmmap_interface_stack", "interface_stack", "interface_stack_instance", instance, s)
 				dmuci_set_value_by_section(s, "interface_stack_alias", value);
 			break;

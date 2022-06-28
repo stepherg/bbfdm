@@ -246,10 +246,6 @@ static void dmubus_receive_event(struct ubus_context *ctx, struct ubus_event_han
 	if (!msg || !ev)
 		return;
 
-	/* container_of() is an external macro and which cppcheck can't track
-	 * so throws warning of null pointer dereferencing for second argument
-	 * suppressed the warning */
-	// cppcheck-suppress nullPointer
 	data = container_of(ev, struct dmubus_event_data, ev);
 	if (validate_blob_message(data->ev_msg, msg) == true) {
 		uloop_end();
@@ -695,6 +691,7 @@ void dmubus_free()
 {
 	struct dm_ubus_cache_entry *entry, *tmp;
 
+	// cppcheck-suppress unknownMacro
 	list_for_each_entry_safe(entry, tmp, &dmubus_cache, list)
 		dm_ubus_cache_entry_free(entry);
 

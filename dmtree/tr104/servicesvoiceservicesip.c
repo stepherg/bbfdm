@@ -191,10 +191,6 @@ static int get_ServicesVoiceServiceSIPClient_Status(char *refparam, struct dmctx
 		json_object *res = NULL, *sip = NULL, *client = NULL;
 
 		dmubus_call("voice.asterisk", "status", UBUS_ARGS{0}, 0, &res);
-		/* value of res is being changed inside dmubus_call through pointer referencing
-		 * which cppcheck can't track hence throws warning for 'res' value always false.
-		 * So suppressed the warning */
-		// cppcheck-suppress knownConditionTrueFalse
 		if (res) {
 			sip = dmjson_get_obj(res, 1, "sip");
 			if (sip) {

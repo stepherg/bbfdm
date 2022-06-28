@@ -214,10 +214,6 @@ static int get_ptm_fast_line(struct dmctx *ctx, void *data, char *instance, char
 	json_object *res = NULL, *line_obj = NULL;
 
 	dmubus_call("fast", "status", UBUS_ARGS{0}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as !res is always true. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (!res)
 		return 0;
 	line_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "line");

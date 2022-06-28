@@ -139,10 +139,6 @@ static char *get_radio_option_nocache(const char *device_name, char *option)
 	snprintf(object, sizeof(object), "wifi.radio.%s", device_name);
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as if(res) is always false.
-	 * so suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	return (res) ? dmjson_get_value(res, 1, option) : "";
 }
 
@@ -3032,6 +3028,7 @@ static int set_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, st
 			return 0;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0) {
+				// cppcheck-suppress unknownMacro
 				uci_foreach_sections("wireless", "wifi-device", ss)
 					wifi_start_scan(section_name(ss));
 
@@ -5754,10 +5751,6 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 	json_object *res = NULL;
 
 	dmubus_call("wifi", "status", UBUS_ARGS{0}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as if(res) is always false.
-	 * so suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res) {
 		json_object *radios = NULL, *arrobj = NULL;
 		int i = 0;

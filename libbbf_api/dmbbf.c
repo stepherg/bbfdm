@@ -914,10 +914,6 @@ void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, c
 	struct list_head *ilist = NULL;
 
 	list_for_each(ilist, &ctx->list_parameter) {
-		/* list_entry() is an external macro and which cppcheck can't track so
-		 * throws warning of null pointer dereferencing for second argument.
-		 * Suppressed the warning */
-		// cppcheck-suppress nullPointer
 		dm_parameter = list_entry(ilist, struct dm_parameter, list);
 		int cmp = DM_STRCMP(dm_parameter->name, param_name);
 		if (cmp == 0) {
@@ -945,10 +941,6 @@ void free_all_list_parameter(struct dmctx *ctx)
 {
 	struct dm_parameter *dm_parameter = NULL;
 	while (ctx->list_parameter.next != &ctx->list_parameter) {
-		/* list_entry() is an external macro and which cppcheck can't track so
-		 * throws warning of null pointer dereferencing for second argument.
-		 * Suppressed the warning */
-		// cppcheck-suppress nullPointer
 		dm_parameter = list_entry(ctx->list_parameter.next, struct dm_parameter, list);
 		api_del_list_parameter(dm_parameter);
 	}
@@ -975,10 +967,6 @@ void free_all_set_list_tmp(struct dmctx *ctx)
 {
 	struct set_tmp *set_tmp = NULL;
 	while (ctx->set_list_tmp.next != &ctx->set_list_tmp) {
-		/* list_entry() is an external macro and which cppcheck can't track so
-		 * throws warning of null pointer dereferencing for second argument.
-		 * Suppressed the warning */
-		// cppcheck-suppress nullPointer
 		set_tmp = list_entry(ctx->set_list_tmp.next, struct set_tmp, list);
 		del_set_list_tmp(set_tmp);
 	}
@@ -1006,10 +994,6 @@ void free_all_list_fault_param(struct dmctx *ctx)
 {
 	struct param_fault *param_fault = NULL;
 	while (ctx->list_fault_param.next != &ctx->list_fault_param) {
-		/* list_entry() is an external macro and which cppcheck can't track so
-		 * throws warning of null pointer dereferencing for second argument.
-		 * Suppressed the warning */
-		// cppcheck-suppress nullPointer
 		param_fault = list_entry(ctx->list_fault_param.next, struct param_fault, list);
 		bbf_api_del_list_fault_param(param_fault);
 	}

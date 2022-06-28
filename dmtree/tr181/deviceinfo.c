@@ -98,10 +98,6 @@ static char *get_proc_state(char state)
 static int find_last_instance(void)
 {
 	if (!list_empty(&process_list)) {
-		/* list_first_entry() is an external macro and which cppcheck can't
-		 * track so throws warning of null pointer dereferencing for second
-		 * argument. Suppressed the warning */
-		// cppcheck-suppress nullPointer
 		struct process_entry *entry = list_last_entry(&process_list, struct process_entry, list);
 		return entry->instance + 1;
 	} else {

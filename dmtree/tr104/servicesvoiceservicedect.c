@@ -29,10 +29,6 @@ static int browseServicesVoiceServiceDECTBaseInst(struct dmctx *dmctx, DMNODE *p
 	char *inst = NULL;
 
 	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
-	/* value of res is being changed inside dmubus_call through pointer referencing
-	 * which cppcheck can't track hence throws warning for 'res' value always false.
-	 * So suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res) {
 		int id = 0, i = 0;
 
@@ -54,10 +50,6 @@ static int browseServicesVoiceServiceDECTPortableInst(struct dmctx *dmctx, DMNOD
 	char *inst = NULL;
 
 	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
-	/* value of res is being changed inside dmubus_call through pointer referencing
-	 * which cppcheck can't track hence throws warning for 'res' value always false.
-	 * So suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res) {
 		int id = 0, i = 0;
 

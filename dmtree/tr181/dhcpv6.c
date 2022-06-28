@@ -207,10 +207,6 @@ static int browseDHCPv6ServerPoolClientInst(struct dmctx *dmctx, DMNODE *parent_
 
 	char *if_name = section_name(dhcp_arg->dhcp_sections->config_section);
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res1);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as !res1 is always true. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (!res1) return 0;
 	device = dmjson_get_value(res1, 1, "device");
 	dmubus_call("dhcp", "ipv6leases", UBUS_ARGS{0}, 0, &res);
@@ -665,10 +661,6 @@ static int get_DHCPv6Client_DUID(char *refparam, struct dmctx *ctx, void *data, 
 
 		char *if_name = section_name(dhcpv6_s);
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
-		/* value of 'res' is being changed inside dmubus_call by pointer reference,
-		 * which cppcheck can't track and throws warning as if(res) is always false.
-		 * so suppressed the warning */
-		// cppcheck-suppress knownConditionTrueFalse
 		*value = res ? dmjson_get_value(res, 2, "data", "passthru") : "";
 	}
 	return 0;

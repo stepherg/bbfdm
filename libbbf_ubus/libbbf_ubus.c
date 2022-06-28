@@ -718,10 +718,6 @@ static int libbbf_ubus_set_handler(struct ubus_context *ctx, struct ubus_object 
 	}
 
 	while (bbf_ctx.list_fault_param.next != &bbf_ctx.list_fault_param) {
-		/* list_entry() is an external macro and which cppcheck can't track so
-		 * throws warning of null pointer dereferencing for second argument.
-		 * Suppressed the warning */
-		// cppcheck-suppress nullPointer
 		struct param_fault *p = list_entry(bbf_ctx.list_fault_param.next, struct param_fault, list);
 		table = blobmsg_open_table(&bb, NULL);
 		bb_add_string(&bb, "path", p->name);
@@ -742,10 +738,6 @@ static int libbbf_ubus_set_handler(struct ubus_context *ctx, struct ubus_object 
 			array = blobmsg_open_array(&bb, "parameters");
 
 		while (bbf_ctx.list_fault_param.next != &bbf_ctx.list_fault_param) {
-			/* list_entry() is an external macro and which cppcheck can't track so
-			 * throws warning of null pointer dereferencing for second argument.
-			 * Suppressed the warning */
-			// cppcheck-suppress nullPointer
 			struct param_fault *p = list_entry(bbf_ctx.list_fault_param.next, struct param_fault, list);
 			table = blobmsg_open_table(&bb, NULL);
 			bb_add_string(&bb, "path", p->name);

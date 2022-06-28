@@ -100,10 +100,6 @@ static char *get_fast_value_without_argument(char *command1, char *id, char *com
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
 	dmubus_call(command, command2, UBUS_ARGS{0}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as !res is always true. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (!res) return "";
 	value = dmjson_get_value(res, 1, key);
 	return value;
@@ -116,10 +112,6 @@ static char *get_fast_value_without_argument_and_with_two_key(char *command1, ch
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
 	dmubus_call(command, command2, UBUS_ARGS{0}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as !res is always true. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (!res) return "";
 	value = dmjson_get_value(res, 2, key1, key2);
 	return value;
@@ -132,10 +124,6 @@ static char *get_fast_value_array_without_argument(char *command1, char *id, cha
 
 	snprintf(command, sizeof(command), "%s.%s", command1, id);
 	dmubus_call(command, command2, UBUS_ARGS{0}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as !res is always true. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (!res) return "";
 	value = dmjson_get_value_array_all(res, ",", 1, key);
 	return value;

@@ -30,10 +30,6 @@ int init_supported_codecs(void)
 	json_object *res = NULL;
 
 	dmubus_call("voice.asterisk", "codecs", UBUS_ARGS{0}, 0, &res);
-	/* value of res is being changed inside dmubus_call through pointer referencing
-	 * which cppcheck can't track hence throws warning for 'res' value check always
-	 * true. So suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (!res)
 		return -1;
 
@@ -548,16 +544,8 @@ int init_call_log(void)
 			if (i < call_log_list_size) {
 				if (i > 0) {
 					pos = pos->next;
-					/* list_entry() is an external macro and which cppcheck can't track so
-					 * throws warning of null pointer dereferencing for second argument.
-					 * Suppressed the warning */
-					// cppcheck-suppress nullPointer
 					entry = list_entry(pos, struct call_log_entry, list);
 				} else {
-					/* list_first_entry() is an external macro and which cppcheck can't
-					 * track so throws warning of null pointer dereferencing for second
-					 * argument. Suppressed the warning */
-					// cppcheck-suppress nullPointer
 					entry = list_first_entry(&call_log_list, struct call_log_entry, list);
 					pos = &entry->list;
 				}

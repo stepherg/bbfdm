@@ -112,10 +112,6 @@ static bool is_proc_route6_in_config(char *cdev, char *cip, char *cgw)
 		dmuci_get_value_by_section_string(s, "gateway", &gw_r);
 		dmuci_get_value_by_section_string(s, "interface", &intf_r);
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", intf_r, String}}, 1, &jobj);
-		/* value of 'jobj' is being changed inside dmubus_call by pointer reference,
-		 * which cppcheck can't track and throws warning as if(jobj) is always false.
-		 * so suppressed the warning */
-		// cppcheck-suppress knownConditionTrueFalse
 		char *dev_r = (jobj) ? dmjson_get_value(jobj, 1, "device") : "";
 		if (DM_STRCMP(cdev, dev_r) == 0 && DM_STRCMP(cgw, gw_r) == 0 && DM_STRCMP(cip, ip_r) == 0)
 			return true;
@@ -129,10 +125,6 @@ static bool is_proc_route6_in_config(char *cdev, char *cip, char *cgw)
 		dmuci_get_value_by_section_string(s, "gateway", &gw_r6);
 		dmuci_get_value_by_section_string(s, "interface", &intf_r6);
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", intf_r6, String}}, 1, &jobj);
-		/* value of 'jobj' is being changed inside dmubus_call by pointer reference,
-		 * which cppcheck can't track and throws warning as if(jobj) is always false.
-		 * so suppressed the warning */
-		// cppcheck-suppress knownConditionTrueFalse
 		char *dev_r6 = (jobj) ? dmjson_get_value(jobj, 1, "device") : "";
 		if (DM_STRCMP(cdev, dev_r6) == 0 && DM_STRCMP(cgw, gw_r6) == 0 && DM_STRCMP(cip, ip_r6) == 0)
 			return true;
@@ -326,10 +318,6 @@ static int dmmap_synchronizeRoutingRouterIPv6Forwarding(struct dmctx *dmctx, DMN
 
 			char *if_name = section_name(s);
 			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &jobj);
-			/* value of 'jobj' is being changed inside dmubus_call by pointer reference,
-			 * which cppcheck can't track and throws warning as if(jobj) is always false.
-			 * so suppressed the warning */
-			// cppcheck-suppress knownConditionTrueFalse
 			if (!jobj) {
 				fclose(fp);
 				return 0;
@@ -969,10 +957,6 @@ static int get_RoutingRouteInformationInterfaceSetting_Interface(char *refparam,
 
 		char *if_name = section_name(s);
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &jobj);
-		/* value of 'jobj' is being changed inside dmubus_call by pointer reference,
-		 * which cppcheck can't track and throws warning as if(jobj) is always false.
-		 * so suppressed the warning */
-		// cppcheck-suppress knownConditionTrueFalse
 		if (!jobj) return 0;
 		char *str = dmjson_get_value(jobj, 1, "device");
 		if (DM_STRCMP(str, dev) == 0) {

@@ -539,10 +539,6 @@ static int browse_igmp_cgrp_inst(struct dmctx *dmctx, DMNODE *parent_node, void 
 	char *inst = NULL;
 
 	dmubus_call("mcast", "stats", UBUS_ARGS{0}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as if(res) is always false.
-	 * so suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res) {
 		int i = 0, id = 0;
 
@@ -654,10 +650,6 @@ static int get_igmp_cgrps_no_of_entries(char *refparam, struct dmctx *ctx, void 
 	json_object *res = NULL, *jobj = NULL, *arrobj = NULL, *group_obj = NULL;
 
 	dmubus_call("mcast", "stats", UBUS_ARGS{0}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as if(res) is always false.
-	 * so suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res) {
 		int i = 0;
 

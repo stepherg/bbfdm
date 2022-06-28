@@ -40,10 +40,6 @@ static void free_all_list_open_library(struct list_head *library_list)
 {
 	struct loaded_library *lib;
 	while (library_list->next != library_list) {
-		/* list_entry() is an external macro and which cppcheck can't track so
-		 * throws warning of null pointer dereferencing for second argument.
-		 * Suppressed the warning */
-		// cppcheck-suppress nullPointer
 		lib = list_entry(library_list->next, struct loaded_library, list);
 		list_del(&lib->list);
 		if (lib->library) {
@@ -66,10 +62,6 @@ static void free_list_dynamic_operates(struct list_head *operate_list)
 {
 	struct dynamic_operate *dyn_operate;
 	while (operate_list->next != operate_list) {
-		/* list_entry() is an external macro and which cppcheck can't track so
-		 * throws warning of null pointer dereferencing for second argument.
-		 * Suppressed the warning */
-		// cppcheck-suppress nullPointer
 		dyn_operate = list_entry(operate_list->next, struct dynamic_operate, list);
 		list_del(&dyn_operate->list);
 		if (dyn_operate->operate_path) {

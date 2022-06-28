@@ -342,10 +342,6 @@ static int browseEthernetRMONStatsInst(struct dmctx *dmctx, DMNODE *parent_node,
 		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
 
 		dmubus_call("ethernet", "rmonstats", UBUS_ARGS{{"ifname", ifname, String}}, 1, &res);
-		/* value of 'res' is being changed inside dmubus_call by pointer reference,
-		 * which cppcheck can't track and throws warning as !res is always true. so
-		 * suppressed the warning */
-		// cppcheck-suppress knownConditionTrueFalse
 		if (!res) continue;
 
 		init_eth_rmon(&curr_eth_rmon_args, p, res);
@@ -1638,10 +1634,6 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 					break;
 				}
 
-				/* dev_name, inner_vud are assigned by dmuci_get_value_by_section_string() by
-				 * pointer referencing and cppcheck can't track it so throws warning of
-				 * uninitialized variable. so suppressed the warning */
-				// cppcheck-suppress uninitvar 
 				snprintf(new_name, sizeof(new_name), "%s.%s.%s", dev_name, inner_vid, vid);
 				if (ethernet___name_exists_in_devices(new_name))
 					return -1;

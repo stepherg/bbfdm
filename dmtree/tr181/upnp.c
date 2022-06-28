@@ -106,10 +106,6 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 	int i;
 
 	dmubus_call("upnpc", "discovery", UBUS_ARGS{{}}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as !res is always true. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res == NULL)
 		return 0;
 	json_object_object_get_ex(res, "devices", &devices);
@@ -159,10 +155,6 @@ static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_nod
 	int i;
 
 	dmubus_call("upnpc", "discovery", UBUS_ARGS{{}}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as res==NULL is always true. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res == NULL)
 		return 0;
 	json_object_object_get_ex(res, "devices", &devices);
@@ -208,10 +200,6 @@ static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_no
 	int i;
 
 	dmubus_call("upnpc", "discovery", UBUS_ARGS{{}}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as res==NULL is always true. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res == NULL)
 		return 0;
 	json_object_object_get_ex(res, "services", &services);
@@ -255,10 +243,6 @@ static int browseUPnPDescriptionDeviceDescriptionInst(struct dmctx *dmctx, DMNOD
 	int i;
 
 	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as res==NULL is always true. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res == NULL)
 		return 0;
 	json_object_object_get_ex(res, "descriptions", &descriptions);
@@ -292,10 +276,6 @@ static int browseUPnPDescriptionDeviceInstanceInst(struct dmctx *dmctx, DMNODE *
 	int i;
 
 	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as res==NULL is always true. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res == NULL)
 		return 0;
 	json_object_object_get_ex(res, "devicesinstances", &devices_instances);
@@ -340,10 +320,6 @@ static int browseUPnPDescriptionServiceInstanceInst(struct dmctx *dmctx, DMNODE 
 	int i;
 
 	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as res==NULL is always true. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res == NULL)
 		return 0;
 	json_object_object_get_ex(res, "servicesinstances", &services_instances);

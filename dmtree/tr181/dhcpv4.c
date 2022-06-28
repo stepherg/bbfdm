@@ -292,10 +292,6 @@ static int interface_get_ipv4(const char *iface, uint32_t *addr, unsigned *bits)
 	int addr_cidr = -1;
 
 	dmubus_call("network.interface", "status", UBUS_ARGS {{"interface", iface, String}}, 1, &res);
-	/* value of 'res' is being changed inside dmubus_call by pointer reference,
-	 * which cppcheck can't track and throws warning as res is always false. so
-	 * suppressed the warning */
-	// cppcheck-suppress knownConditionTrueFalse
 	if (res) {
 		json_object *jobj;
 
@@ -2378,10 +2374,6 @@ static int get_DHCPv4Client_IPAddress(char *refparam, struct dmctx *ctx, void *d
 
 			char *if_name = section_name(dhcpv4_s);
 			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
-			/* value of 'res' is being changed inside dmubus_call by pointer reference,
-			 * which cppcheck can't track and throws warning as res is always false. so
-			 * suppressed the warning */
-			// cppcheck-suppress knownConditionTrueFalse
 			if (res) {
 				json_object *jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
 				ipaddr = dmjson_get_value(jobj, 1, "address");
@@ -2406,10 +2398,6 @@ static int get_DHCPv4Client_SubnetMask(char *refparam, struct dmctx *ctx, void *
 
 			char *if_name = section_name(dhcpv4_s);
 			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
-			/* value of 'res' is being changed inside dmubus_call by pointer reference,
-			 * which cppcheck can't track and throws warning as res is always false. so
-			 * suppressed the warning */
-			// cppcheck-suppress knownConditionTrueFalse
 			if (res) {
 				json_object *jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
 				mask = dmjson_get_value(jobj, 1, "mask");
