@@ -671,9 +671,11 @@ end:
 	// Remove temporary file if ubus upgrade failed and file exists
 	if (!json_obj && file_exists(fw_image_path) && strncmp(url, FILE_URI, strlen(FILE_URI))) {
 		remove(fw_image_path);
-		json_object_put(json_obj);
 		res = -1;
 	}
+
+	if (json_obj != NULL)
+		json_object_put(json_obj);
 
 	return res;
 }
