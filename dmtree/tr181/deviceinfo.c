@@ -554,6 +554,14 @@ static int set_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
 			if (linker && *linker) {
+				struct uci_section *dmmap_s = NULL;
+				char *available = NULL;
+
+				get_dmmap_section_of_config_section_eq("dmmap_fw_image", "fw_image", "name", linker, &dmmap_s);
+				dmuci_get_value_by_section_string(dmmap_s, "available", &available);
+				if (DM_LSTRCMP(available, "false") == 0)
+					return FAULT_9001;
+
 				char *bank_id = DM_STRCHR(linker, ':');
 				if (bank_id) {
 					json_object *res = NULL;
@@ -921,8 +929,13 @@ static int get_DeviceInfoSupportedDataModel_Features(char *refparam, struct dmct
 static int get_DeviceInfoFirmwareImage_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
+	char name[32] = {0};
+	char *id = NULL;
 
-	uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "fw_image_inst", instance, s) {
+	id = dmjson_get_value((json_object *)data, 1, "id");
+	snprintf(name, sizeof(name), "fw_image:%s", id);
+
+	uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "name", name, s) {
 		dmuci_get_value_by_section_string(s, "alias", value);
 		break;
 	}
@@ -934,6 +947,8 @@ static int get_DeviceInfoFirmwareImage_Alias(char *refparam, struct dmctx *ctx, 
 static int set_DeviceInfoFirmwareImage_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s = NULL, *dmmap = NULL;
+	char name[32] = {0};
+	char *id = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -941,12 +956,16 @@ static int set_DeviceInfoFirmwareImage_Alias(char *refparam, struct dmctx *ctx, 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "fw_image_inst", instance, s) {
+			id = dmjson_get_value((json_object *)data, 1, "id");
+			snprintf(name, sizeof(name), "fw_image:%s", id);
+
+			uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "name", name, s) {
 				dmuci_set_value_by_section_bbfdm(s, "alias", value);
 				return 0;
 			}
+
 			dmuci_add_section_bbfdm("dmmap_fw_image", "fw_image", &dmmap);
-			dmuci_set_value_by_section(dmmap, "fw_image_inst", instance);
+			dmuci_set_value_by_section(dmmap, "name", name);
 			dmuci_set_value_by_section(dmmap, "alias", value);
 			break;
 	}
@@ -967,7 +986,58 @@ static int get_DeviceInfoFirmwareImage_Version(char *refparam, struct dmctx *ctx
 
 static int get_DeviceInfoFirmwareImage_Available(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "true";
+	struct uci_section *s = NULL;
+	char name[32] = {0};
+	char *id = NULL;
+
+	id = dmjson_get_value((json_object *)data, 1, "id");
+	snprintf(name, sizeof(name), "fw_image:%s", id);
+
+	uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "name", name, s) {
+		dmuci_get_value_by_section_string(s, "available", value);
+		break;
+	}
+
+	if ((*value)[0] == '\0')
+		*value = "true";
+	return 0;
+}
+
+static int set_DeviceInfoFirmwareImage_Available(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *s = NULL, *dmmap = NULL;
+	char name[32] = {0};
+	char *id = NULL;
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+
+			if (!b) {
+				char *boot = dmjson_get_value((json_object *)data, 1, "boot");
+				char *active = dmjson_get_value((json_object *)data, 1, "active");
+				if (DM_LSTRCMP(boot, "true") == 0 || DM_LSTRCMP(active, "true") == 0)
+					return FAULT_9001;
+			}
+
+			id = dmjson_get_value((json_object *)data, 1, "id");
+			snprintf(name, sizeof(name), "fw_image:%s", id);
+
+			uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "name", name, s) {
+				dmuci_set_value_by_section_bbfdm(s, "available", b ? "true" : "false");
+				return 0;
+			}
+
+			dmuci_add_section_bbfdm("dmmap_fw_image", "fw_image", &dmmap);
+			dmuci_set_value_by_section(dmmap, "name", name);
+			dmuci_set_value_by_section(dmmap, "available", b ? "true" : "false");
+			break;
+	}
 	return 0;
 }
 
@@ -1465,7 +1535,7 @@ DMLEAF tDeviceInfoFirmwareImageParams[] = {
 {"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoFirmwareImage_Alias, set_DeviceInfoFirmwareImage_Alias, BBFDM_BOTH, "2.12"},
 {"Name", &DMREAD, DMT_STRING, get_DeviceInfoFirmwareImage_Name, NULL, BBFDM_BOTH, "2.12"},
 {"Version", &DMREAD, DMT_STRING, get_DeviceInfoFirmwareImage_Version, NULL, BBFDM_BOTH, "2.12"},
-{"Available", &DMREAD, DMT_BOOL, get_DeviceInfoFirmwareImage_Available, NULL, BBFDM_BOTH, "2.12"},
+{"Available", &DMWRITE, DMT_BOOL, get_DeviceInfoFirmwareImage_Available, set_DeviceInfoFirmwareImage_Available, BBFDM_BOTH, "2.12"},
 {"Status", &DMREAD, DMT_STRING, get_DeviceInfoFirmwareImage_Status, NULL, BBFDM_BOTH, "2.12"},
 {"BootFailureLog", &DMREAD, DMT_STRING, get_empty, NULL, BBFDM_BOTH, "2.12"},
 {"Download()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoFirmwareImage_Download, operate_DeviceInfoFirmwareImage_Download, BBFDM_USP, "2.12"},
