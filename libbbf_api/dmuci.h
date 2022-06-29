@@ -353,10 +353,12 @@ struct uci_section *dmuci_walk_section(char *package, char *stype, void *arg1, v
 int dmuci_get_option_value_string_bbfdm(char *package, char *section, char *option, char **value);
 int dmuci_set_value_bbfdm(char *package, char *section, char *option, char *value);
 int dmuci_set_value_by_section_bbfdm(struct uci_section *s, char *option, char *value);
+int dmuci_set_value_by_section_varstate(struct uci_section *s, char *option, char *value);
 int dmuci_add_section_bbfdm(char *package, char *stype, struct uci_section **s);
 int dmuci_delete_bbfdm(char *package, char *section, char *option, char *value);
 int dmuci_delete_by_section_unnamed_bbfdm(struct uci_section *s, char *option, char *value);
 int dmuci_delete_by_section_bbfdm(struct uci_section *s, char *option, char *value);
+int dmuci_delete_by_section_varstate(struct uci_section *s, char *option, char *value);
 int dmuci_commit_package_bbfdm(char *package);
 int dmuci_commit_bbfdm(void);
 int dmuci_revert_bbfdm(void);
@@ -364,11 +366,11 @@ int dmuci_commit_package_varstate(char *package);
 int dmuci_save_package_varstate(char *package);
 int dmuci_revert_package_varstate(char *package);
 struct uci_section *dmuci_walk_section_bbfdm(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
-
+struct uci_section *dmuci_walk_section_varstate(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
 int dmuci_init_bbfdm(void);
 void dmuci_exit_bbfdm(void);
 void commit_and_free_uci_ctx_bbfdm(char *dmmap_config);
-
+int dmuci_add_section_varstate(char *package, char *stype, struct uci_section **s);
 int dmuci_init_varstate(void);
 void dmuci_exit_varstate(void);
 int db_get_value_string(char *package, char *section, char *option, char **value);

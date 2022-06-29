@@ -14,6 +14,8 @@
 #include "managementserver.h"
 #include "dmbbfcommon.h"
 
+char *CWMP_EVENTS[] = {"0 BOOTSTRAP", "1 BOOT", "2 PERIODIC", "3 SCHEDULED", "5 KICKED", "6 CONNECTION REQUEST", "7 TRANSFER COMPLETE", "8 DIAGNOSTICS COMPLETE", "9 REQUEST DOWNLOAD", "10 AUTONOMOUS TRANSFER COMPLETE", "11 DU STATE CHANGE COMPLETE", "M Reboot", "M ScheduleInform", "M Download", "M ScheduleDownload", "M Upload", "M ChangeDUState", "14 HEARTBEAT"};
+
 /*#Device.ManagementServer.URL!UCI:cwmp/acs,acs/url*/
 static int get_management_server_url(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -606,7 +608,6 @@ static int get_nat_detected(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
-
 static int get_heart_beat_policy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "heartbeat_enable", "0");
@@ -671,12 +672,168 @@ static int set_heart_beat_policy_initiation_time(char *refparam, struct dmctx *c
 	return 0;
 }
 
+static int browseInformParameterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct uci_section *s = NULL, *dmmap_sect = NULL;
+	char *inst = NULL;
+	uci_path_foreach_sections(varstate, "cwmp", "inform_parameter", s) {
+		if ((dmmap_sect = get_dup_section_in_dmmap("dmmap_mgt_server", "inform_parameter", section_name(s))) == NULL) {
+			dmuci_add_section_bbfdm("dmmap_mgt_server", "inform_parameter", &dmmap_sect);
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
+		}
+		inst = handle_instance(dmctx, parent_node, dmmap_sect, "informparam_instance", "informparam_alias");
+		struct dmmap_dup inform_param_afgs = { .config_section = s, .dmmap_section = dmmap_sect };
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&inform_param_afgs, inst) == DM_STOP)
+			break;
+	}
+	return 0;
+}
+
+static int add_inform_parameter(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	struct uci_section *s = NULL, *dmmap_sect = NULL;
+	char inf_param[32] = {0};
+
+	snprintf(inf_param, sizeof(inf_param), "inf_param_%s", *instance);
+
+	dmuci_add_section_varstate("cwmp", "inform_parameter", &s);
+	dmuci_rename_section_by_section(s, inf_param);
+	dmuci_set_value_by_section(s, "enable", "0");
+
+	dmuci_add_section_bbfdm("dmmap_mgt_server", "inform_parameter", &dmmap_sect);
+	dmuci_set_value_by_section(dmmap_sect, "section_name", section_name(s));
+	dmuci_set_value_by_section(dmmap_sect, "informparam_instance", *instance);
+	return 0;
+}
+
+static int delete_inform_parameter(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+	switch (del_action) {
+		case DEL_INST:
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			break;
+		case DEL_ALL:
+			uci_path_foreach_sections_safe(varstate, "cwmp", "inform_parameter", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_mgt_server", "inform_parameter", section_name(s), &dmmap_section);
+
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section_varstate(s, NULL, NULL);
+			}
+			return 0;
+	}
+	return 0;
+}
+
+static int get_inform_parameter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct dmmap_dup *inform_param_args = (struct dmmap_dup *)data;
+	dmuci_get_value_by_section_string(inform_param_args->config_section, "enable", value);
+	return 0;
+}
+
+static int set_inform_parameter_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct dmmap_dup *inform_param_args = (struct dmmap_dup *)data;
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value_by_section_varstate(inform_param_args->config_section, "enable", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			return 0;
+	}
+	return 0;
+}
+
+static int get_inform_parameter_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct dmmap_dup *inform_param_args = (struct dmmap_dup *)data;
+	dmuci_get_value_by_section_string(inform_param_args->dmmap_section, "informparam_alias", value);
+	return 0;
+}
+
+static int set_inform_parameter_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct dmmap_dup *inform_param_args = (struct dmmap_dup *)data;
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value_by_section_varstate(inform_param_args->dmmap_section, "informparam_alias", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			return 0;
+	}
+	return 0;
+}
+
+static int get_inform_parameter_parameter_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct dmmap_dup *inform_param_args = (struct dmmap_dup *)data;
+	dmuci_get_value_by_section_string(inform_param_args->config_section, "parameter_name", value);
+	return 0;
+}
+
+static int set_inform_parameter_parameter_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct dmmap_dup *inform_param_args = (struct dmmap_dup *)data;
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value_by_section_varstate(inform_param_args->config_section, "parameter_name", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			return 0;
+	}
+	return 0;
+}
+
+static int get_inform_parameter_event_list(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct dmmap_dup *inform_param_args = (struct dmmap_dup *)data;
+	dmuci_get_value_by_section_string(inform_param_args->config_section, "events_list", value);	return 0;
+}
+
+static int set_inform_parameter_event_list(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct dmmap_dup *inform_param_args = (struct dmmap_dup *)data;
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, CWMP_EVENTS, NULL))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value_by_section_varstate(inform_param_args->config_section, "events_list", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			return 0;
+	}
+	return 0;
+}
+
+static int get_inform_parameter_number_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseInformParameterInst);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
 DMOBJ tManagementServerObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"HeartbeatPolicy", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHeartbeatPolicyParams, NULL, BBFDM_CWMP, NULL, "2.12"},
+{"InformParameter", &DMWRITE, add_inform_parameter, delete_inform_parameter, NULL, browseInformParameterInst, NULL, NULL, NULL, tInformParameterParams, NULL, BBFDM_CWMP, NULL, "2.8"},
 {0}
 };
 
@@ -711,6 +868,7 @@ DMLEAF tManagementServerParams[] = {
 {"EnableCWMP", &DMWRITE, DMT_BOOL, get_management_server_enable_cwmp, set_management_server_enable_cwmp, BBFDM_CWMP, "2.12"},
 {"UDPConnectionRequestAddress", &DMREAD, DMT_STRING, get_upd_cr_address, NULL, BBFDM_CWMP, "2.0"},
 {"NATDetected", &DMREAD, DMT_BOOL, get_nat_detected, NULL, BBFDM_CWMP, "2.0"},
+{"InformParameterNumberOfEntries", &DMREAD, DMT_UNINT, get_inform_parameter_number_of_entries, NULL, BBFDM_CWMP, "2.0"},
 {0}
 };
 
@@ -720,3 +878,12 @@ DMLEAF tHeartbeatPolicyParams[] = {
 {"InitiationTime", &DMWRITE, DMT_TIME, get_heart_beat_policy_initiation_time, set_heart_beat_policy_initiation_time, BBFDM_CWMP, "2.12"},
 {0}
 };
+
+DMLEAF tInformParameterParams[] = {
+{"Enable", &DMWRITE, DMT_BOOL, get_inform_parameter_enable, set_inform_parameter_enable, BBFDM_CWMP, "2.8"},
+{"Alias", &DMWRITE, DMT_STRING, get_inform_parameter_alias, set_inform_parameter_alias, BBFDM_CWMP, "2.8"},
+{"ParameterName", &DMWRITE, DMT_STRING, get_inform_parameter_parameter_name, set_inform_parameter_parameter_name, BBFDM_CWMP, "2.8"},
+{"EventList", &DMWRITE, DMT_STRING, get_inform_parameter_event_list, set_inform_parameter_event_list, BBFDM_CWMP, "2.8"},
+{0}
+};
+

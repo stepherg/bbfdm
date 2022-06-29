@@ -43,16 +43,6 @@ config lwn 'lwn'
 	option enable '1'
 	option hostname ''
 	option port '0'
-
-config inform_extra
-	option enabled '0'
-	option parameter 'Device.DeviceInfo.Manufacturer'
-	option events '0 BOOTSTRAP,2 PERIODIC'
-
-config inform_extra
-	option enabled '0'
-	option parameter 'Device.DeviceInfo.SerialNumber'
-	option events '0 BOOTSTRAP'
 	
 config test 'test'
 	option enable '0'

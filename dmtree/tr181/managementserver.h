@@ -16,5 +16,6 @@
 
 extern DMLEAF tManagementServerParams[];
 extern DMLEAF tHeartbeatPolicyParams[];
+extern DMLEAF tInformParameterParams[];
 extern DMOBJ tManagementServerObj[];
 #endif
