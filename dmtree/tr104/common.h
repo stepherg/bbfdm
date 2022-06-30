@@ -26,7 +26,7 @@ struct call_log_entry {
 	struct list_head list;
 
 	char calling_num[256], called_num[256];
-	char source[256], destination[256], used_line[256];
+	char source[256], destination[256], used_line[256], used_extensions[256];
 	char direction[16];
 	char start_time[32];
 	char duration[8];

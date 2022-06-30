@@ -80,6 +80,17 @@ static int get_ServicesVoiceServiceCallLog_UsedLine(char *refparam, struct dmctx
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCallLog_UsedExtensions(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+
+	if (entry) {
+		*value = dmstrdup(entry->used_extensions);
+	}
+
+	return 0;
+}
+
 static int get_ServicesVoiceServiceCallLog_Direction(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
@@ -235,6 +246,7 @@ DMLEAF tServicesVoiceServiceCallLogParams[] = {
 {"Source", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Source, NULL, BBFDM_BOTH},
 {"Destination", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Destination, NULL, BBFDM_BOTH},
 {"UsedLine", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_UsedLine, NULL, BBFDM_BOTH},
+{"UsedExtensions", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_UsedExtensions, NULL, BBFDM_BOTH},
 {"Direction", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Direction, NULL, BBFDM_BOTH},
 {"Start", &DMREAD, DMT_TIME, get_ServicesVoiceServiceCallLog_Start, NULL, BBFDM_BOTH},
 {"Duration", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Duration, NULL, BBFDM_BOTH},
