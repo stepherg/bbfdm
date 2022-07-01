@@ -150,6 +150,16 @@ static void convert_used_extensions(char *used_extensions, size_t buf_size)
 
 }
 
+// return true is having successful responses 2xx
+bool sip_response_checker(char *response_code) {
+	int code;
+	code = atoi(response_code);
+	if (code>=200 && code<=299) {
+		return true;
+	} 
+	return false;
+}
+
 #define CALL_LOG_FILE "/var/log/asterisk/cdr-csv/Master.csv"
 #define SEPARATOR "\",\""
 #define SEPARATOR_SIZE strlen(SEPARATOR)
@@ -187,424 +197,425 @@ int init_call_log(void)
 
 	struct call_log_entry buf_cdr = { {NULL, NULL}, };
 	DM_STRNCPY(buf_cdr.sessionId, "First", sizeof(buf_cdr.sessionId));
-	while (fgets(line, sizeof(line), fp) != NULL) {
-		struct call_log_entry cdr = { {NULL, NULL}, };
-		char end_time[sizeof(cdr.start_time)] = "";
-		char *token, *end;
-		/*
-		* Parse the line for one call record. Examples of call log is below
-		*
-		* Tel 1 --> Tel 2, busy
-		* "","8001","8002","sip0","""8001"" <8001>","TELCHAN/5/22","SIP/sip0-00000013","Dial","SIP/8002@sip0,,gT", \
-		* "2020-08-27 11:02:40",,"2020-08-27 11:02:40",0,0,"BUSY","DOCUMENTATION","1598518960.99",""
-		*
-		* Tel 1 --> Tel 2
-		* "","8001","8002","sip0","""8001"" <8001>","TELCHAN/5/19","SIP/sip0-00000011","Dial","SIP/8002@sip0,,gT", \
-		* "2020-08-27 11:02:16","2020-08-27 11:02:20","2020-08-27 11:02:25",8,5,"ANSWERED","DOCUMENTATION", \
-		* "1598518936.86",""
-		*
-		* External --> Tel 1
-		* "","7001","8001","call_line",""""" <7001>","SIP/sip0-00000015","TELCHAN/5/25","Dial", \
-		* "TELCHAN\/5,,tF(hangup,h,2)","2020-08-27 11:09:40","2020-08-27 11:09:45","2020-08-27 11:20:40", \
-		* 660,654,"ANSWERED","DOCUMENTATION","1598519380.114",""
-		*
-		* Tel 1 --> External
-		* "","8001","7001","sip0","""8001"" <8001>","TELCHAN/5/1","SIP/sip0-00000001","Dial","SIP/7001@sip0,,gT", \
-		* "2020-08-25 16:11:41","2020-08-25 16:11:50","2020-08-25 16:12:02",21,11,"ANSWERED","DOCUMENTATION", \
-		* "1598364701.4",""
-		*/
-		// calling number
-		token = DM_LSTRSTR(line, SEPARATOR);
-		CHECK_RESULT(token);
-		token += SEPARATOR_SIZE;
-		end = DM_LSTRSTR(token, SEPARATOR);
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.calling_num, token, end - token + 1);
-		// called number
-		token = end + SEPARATOR_SIZE;
-		end = DM_LSTRSTR(token, SEPARATOR);
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.called_num, token, end - token + 1);
-		// source
-		token = end + SEPARATOR_SIZE; // sip0 in the last example
-		token = DM_LSTRSTR(token, SEPARATOR);
-		CHECK_RESULT(token);
-		token += SEPARATOR_SIZE; // ""8001"" <8001> in the last example
-		token = DM_LSTRSTR(token, SEPARATOR);
-		CHECK_RESULT(token);
-		token += SEPARATOR_SIZE; // TELCHAN/5/1 in the last example
-		end = DM_LSTRSTR(token, SEPARATOR);
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.source, token, end - token + 1);
-		// destination
-		token = end + SEPARATOR_SIZE; // SIP/sip0-00000001 in the last example
-		end = DM_LSTRSTR(token, SEPARATOR);
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.destination, token, end - token + 1);
-		// start time and end time
-		token = end + SEPARATOR_SIZE; // Dial in the last example
-		token = DM_LSTRSTR(token, SEPARATOR);
-		CHECK_RESULT(token);
-		token += SEPARATOR_SIZE; // SIP/7001@sip0,,gT in the last example
-		end = DM_LSTRSTR(token, SEPARATOR);
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.used_extensions, token, end - token + 1);
-		token = end + SEPARATOR_SIZE; // The first date
-		end = DM_LSTRSTR(token, "\",,\"");
-		if (end) {
-			// Not answered, e.g. "2020-08-27 11:02:40",,"2020-08-27 11:02:40",21,11,
-			DM_STRNCPY(cdr.start_time, token, end - token + 1);
-			token = end + 4;
+	bool line_record = false;
+	do {
+		if(fgets(line, sizeof(line), fp) != NULL) {
+			line_record = true;
+		} else if (!line_record) {
+			// empty file, jump out without write
+			continue;
 		} else {
-			// Answered, e.g. "2020-08-25 16:11:41","2020-08-25 16:11:50","2020-08-25 16:12:02",21,11,
-			end = DM_LSTRSTR(token, SEPARATOR);
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.start_time, token, end - token + 1);
-			token = DM_LSTRSTR(end + SEPARATOR_SIZE, SEPARATOR); // Skip the middle date and come to the last date
+			line_record = false; // reaching the end, no new record from file.
+			// last buf need to be written.
+		}
+		struct call_log_entry cdr = { {NULL, NULL}, };
+		if ( line_record ){
+			char end_time[sizeof(cdr.start_time)] = "";
+			char *token, *end;
+			/*
+			* Parse the line for one call record. Examples of call log is below
+			*
+			* Tel 1 --> Tel 2, busy
+			* "","8001","8002","sip0","""8001"" <8001>","TELCHAN/5/22","SIP/sip0-00000013","Dial","SIP/8002@sip0,,gT", \
+			* "2020-08-27 11:02:40",,"2020-08-27 11:02:40",0,0,"BUSY","DOCUMENTATION","1598518960.99",""
+			*
+			* Tel 1 --> Tel 2
+			* "","8001","8002","sip0","""8001"" <8001>","TELCHAN/5/19","SIP/sip0-00000011","Dial","SIP/8002@sip0,,gT", \
+			* "2020-08-27 11:02:16","2020-08-27 11:02:20","2020-08-27 11:02:25",8,5,"ANSWERED","DOCUMENTATION", \
+			* "1598518936.86",""
+			*
+			* External --> Tel 1
+			* "","7001","8001","call_line",""""" <7001>","SIP/sip0-00000015","TELCHAN/5/25","Dial", \
+			* "TELCHAN\/5,,tF(hangup,h,2)","2020-08-27 11:09:40","2020-08-27 11:09:45","2020-08-27 11:20:40", \
+			* 660,654,"ANSWERED","DOCUMENTATION","1598519380.114",""
+			*
+			* Tel 1 --> External
+			* "","8001","7001","sip0","""8001"" <8001>","TELCHAN/5/1","SIP/sip0-00000001","Dial","SIP/7001@sip0,,gT", \
+			* "2020-08-25 16:11:41","2020-08-25 16:11:50","2020-08-25 16:12:02",21,11,"ANSWERED","DOCUMENTATION", \
+			* "1598364701.4",""
+			*/
+			// calling number
+			token = DM_LSTRSTR(line, SEPARATOR);
 			CHECK_RESULT(token);
 			token += SEPARATOR_SIZE;
-		}
-		end = DM_LSTRSTR(token, "\",");
-		CHECK_RESULT(end);
-		DM_STRNCPY(end_time, token, end - token + 1);
-		// termination cause
-		token = DM_LSTRSTR(end + 2, ",\""); // ANSWERED in the last example
-		CHECK_RESULT(token);
-		token += 2;
-		end = DM_LSTRSTR(token, "\",");
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.termination_cause, token, end - token + 1);
-
-		// session id
-		token = DM_LSTRSTR(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = DM_LSTRSTR(token, ",");
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.sessionId, token, end - token + 1);
-
-		// SIP IP Address
-		token = DM_LSTRSTR(token, ",\"");
-		CHECK_RESULT(token);
-		token += 2;
-		end = DM_LSTRSTR(token, "\",");
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.sipIpAddress, token, end - token + 1);
-
-		// Far End IP Address
-		token = DM_LSTRSTR(token, ",\"");
-		CHECK_RESULT(token);
-		token += 2;
-		end = DM_LSTRSTR(token, "\",");
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.farEndIPAddress, token, end - token + 1);
-
-		// Sip Response Code
-		token = DM_LSTRSTR(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = DM_LSTRSTR(token, ",");
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.sipResponseCode, token, end - token + 1);
-
-		// Codec
-		token = DM_LSTRSTR(token, ",\"");
-		CHECK_RESULT(token);
-		token += 2;
-		end = DM_LSTRSTR(token, "\",");
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.codec, token, end - token + 1);
-
-		// RTP statistic values
-		token = DM_LSTRSTR(token, ",");
-		CHECK_RESULT(token);
-		token += 1;
-		end = DM_LSTRSTR(token, ",");
-		CHECK_RESULT(end);
-		DM_STRNCPY(cdr.localBurstDensity, token, end - token + 1);
-		// for incoming unanswered call cdr does not contain RTP stats
-		if (strcasecmp(cdr.localBurstDensity, "\"DOCUMENTATION\"") == 0) {
-			cdr.localBurstDensity[0] = '\0';
-		} else {
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
+			end = DM_LSTRSTR(token, SEPARATOR);
 			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.remoteBurstDensity, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
+			DM_STRNCPY(cdr.calling_num, token, end - token + 1);
+			// called number
+			token = end + SEPARATOR_SIZE;
+			end = DM_LSTRSTR(token, SEPARATOR);
 			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.localBurstDuration, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
+			DM_STRNCPY(cdr.called_num, token, end - token + 1);
+			// source
+			token = end + SEPARATOR_SIZE; // sip0 in the last example
+			token = DM_LSTRSTR(token, SEPARATOR);
 			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.remoteBurstDuration, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
+			token += SEPARATOR_SIZE; // ""8001"" <8001> in the last example
+			token = DM_LSTRSTR(token, SEPARATOR);
 			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
+			token += SEPARATOR_SIZE; // TELCHAN/5/1 in the last example
+			end = DM_LSTRSTR(token, SEPARATOR);
 			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.localGapDensity, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
+			DM_STRNCPY(cdr.source, token, end - token + 1);
+			// destination
+			token = end + SEPARATOR_SIZE; // SIP/sip0-00000001 in the last example
+			end = DM_LSTRSTR(token, SEPARATOR);
+			CHECK_RESULT(end);
+			DM_STRNCPY(cdr.destination, token, end - token + 1);
+			// start time and end time
+			token = end + SEPARATOR_SIZE; // Dial in the last example
+			token = DM_LSTRSTR(token, SEPARATOR);
 			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
+			token += SEPARATOR_SIZE; // SIP/7001@sip0,,gT in the last example
+			end = DM_LSTRSTR(token, SEPARATOR);
 			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.remoteGapDensity, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.localGapDuration, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.remoteGapDuration, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.localJbRate, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.remoteJbRate, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.localJbMax, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.remoteJbMax, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.localJbNominal, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.remoteJbNominal, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.localJbAbsMax, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.remoteJbAbsMax, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.jbAvg, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.uLossRate, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.discarded, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.lost, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.rxpkts, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.txpkts, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.jitter, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.maxJitter, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.averageRoundTripDelay, token, end - token + 1);
-
-			token = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(token);
-			token += 1;
-			end = DM_LSTRSTR(token, ",");
-			CHECK_RESULT(end);
-			DM_STRNCPY(cdr.averageFarEndInterarrivalJitter, token, end - token + 1);
-		}
-		// Skip invalid call logs
-		if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||
-			cdr.start_time[0] == '\0' || end_time[0] == '\0') {
-			BBF_DEBUG("Invalid CDR: [%s]\ncalling_number = [%s], called_number = [%s], "
-				"start_time = [%s], end_time = [%s]\n", line,
-				cdr.calling_num, cdr.called_num, cdr.start_time, end_time);
-			continue;
-		} else if (cdr.destination[0] == '\0' && strcasecmp(cdr.called_num, "h") == 0) {
-			BBF_DEBUG("Invalid CDR: [%s]\ncalled_number = [%s], destination = [%s]\n", line,
-				cdr.called_num, cdr.destination);
-			continue;
-		}
-
-		// Calculate the call duration
-		struct tm tm_start, tm_end;
-		char *r1 = strptime(cdr.start_time, "%Y-%m-%d %H:%M:%S", &tm_start);
-		char *r2 = strptime(end_time, "%Y-%m-%d %H:%M:%S", &tm_end);
-
-		if (r1 && *r1 == '\0' && r2 && *r2 == '\0') {
-			time_t time_start, time_end;
-			time_start = timegm(&tm_start);
-			time_end = timegm(&tm_end);
-			snprintf(cdr.duration, sizeof(cdr.duration), "%u", (unsigned int)(time_end - time_start));
-			// Convert start time to ISO 8601 date-time format as per TR-181 data model
-			strftime(cdr.start_time, sizeof(cdr.start_time), "%Y-%m-%dT%H:%M:%SZ", &tm_start);
-		} else {
-			BBF_DEBUG("Invalid CDR: [%s]\nWrong start time and/or end time, [%s], [%s]\n",
-				line, cdr.start_time, end_time);
-			continue;
-		}
-		// Determine the call direction and used line
-		char *used_line = NULL;
-		if ((used_line = strcasestr(cdr.source, "TELCHAN")) != NULL) {
-			DM_STRNCPY(cdr.direction, "Outgoing", sizeof(cdr.direction));
-			used_line = strcasestr(cdr.destination, "SIP/sip");
-			DM_STRNCPY(cdr.used_extensions, cdr.source, sizeof(cdr.used_extensions));
-		} else if ((used_line = strcasestr(cdr.destination, "TELCHAN")) != NULL) {
-			DM_STRNCPY(cdr.direction, "Incoming", sizeof(cdr.direction));
-			used_line = strcasestr(cdr.source, "SIP/sip");
-		} else if ( ((used_line = strcasestr(cdr.source, "SIP/sip")) != NULL) && ((used_line = strcasestr(cdr.destination, "SIP/sip")) != NULL) ) {
-			DM_STRNCPY(cdr.direction, "", sizeof(cdr.direction)); //TODO fix this section for 3-way, call forward
-		} else {
-			BBF_DEBUG("Invalid CDR: [%s]\ndirection = [%s]\n", line, cdr.direction);
-			continue;
-		}
-		if (used_line == NULL){
-			// for internal call with extension number 0000/1111/2222/333
-			DM_STRNCPY(cdr.used_line, "", sizeof(cdr.used_line));
-		} else {
-			DM_STRNCPY(cdr.used_line, used_line, sizeof(cdr.used_line)); // "SIP/sip0-00000000"
-		}
-		/*
-		* Convert the termination cause to a value specified in TR-104.
-		*
-		* Note that some of the current causes provided by call log (CDR) can not be well mapped to those
-		* specified in TR-104.
-		*
-		* TODO: Asterisk needs to be changed in order to provide more TR-104 compliant call termination causes.
-		*/
-		if (strcasecmp(cdr.termination_cause, "NO ANSWER") == 0)
-			DM_STRNCPY(cdr.termination_cause, "LocalTimeout", sizeof(cdr.termination_cause));
-		else if (strcasecmp(cdr.termination_cause, "FAILED") == 0)
-			DM_STRNCPY(cdr.termination_cause, "LocalInternalError", sizeof(cdr.termination_cause));
-		else if (strcasecmp(cdr.termination_cause, "BUSY") == 0)
-			DM_STRNCPY(cdr.termination_cause, "RemoteBusy", sizeof(cdr.termination_cause));
-		else if (strcasecmp(cdr.termination_cause, "ANSWERED") == 0)
-			DM_STRNCPY(cdr.termination_cause, "RemoteDisconnect", sizeof(cdr.termination_cause));
-		else if (strcasecmp(cdr.termination_cause, "CONGESTION") == 0)
-			DM_STRNCPY(cdr.termination_cause, "RemoteNetworkFailure", sizeof(cdr.termination_cause));
-		else
-			DM_STRNCPY(cdr.termination_cause, "LocalInternalError", sizeof(cdr.termination_cause));
-		// Convert source and destination
-		convert_src_dst(cdr.source, sizeof(cdr.source)); // CallControl.Extension.{i} or SIP.Client.{i}
-		convert_src_dst(cdr.destination, sizeof(cdr.destination)); // CallControl.Extension.{i} or SIP.Client.{i}
-		// Convert used line to line{i}
-		// TODO correspond CallControl.Line.{i}
-		convert_sip_line(cdr.used_line, sizeof(cdr.used_line));
-		convert_used_extensions(cdr.used_extensions, sizeof(cdr.used_extensions));
-
-		// check session id with the record in buf
-		// skip for the first record, and put into buf
-		if (strcmp(buf_cdr.sessionId, "First")==0) {
-			buf_cdr = cdr; // first record to buf
-			continue;
-		}
-		// if having the same session id and the same starting time, then skip writing and modify the buf
-		if ( (strcmp(cdr.sessionId, buf_cdr.sessionId)==0) && (strcmp(cdr.start_time, buf_cdr.start_time)==0) ) {
-			if (strcmp(cdr.sipResponseCode, buf_cdr.sipResponseCode)==0){
-				continue; // drop the current record as same session id and same sip response code, continue for next record
+			DM_STRNCPY(cdr.used_extensions, token, end - token + 1);
+			token = end + SEPARATOR_SIZE; // The first date
+			end = DM_LSTRSTR(token, "\",,\"");
+			if (end) {
+				// Not answered, e.g. "2020-08-27 11:02:40",,"2020-08-27 11:02:40",21,11,
+				DM_STRNCPY(cdr.start_time, token, end - token + 1);
+				token = end + 4;
+			} else {
+				// Answered, e.g. "2020-08-25 16:11:41","2020-08-25 16:11:50","2020-08-25 16:12:02",21,11,
+				end = DM_LSTRSTR(token, SEPARATOR);
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.start_time, token, end - token + 1);
+				token = DM_LSTRSTR(end + SEPARATOR_SIZE, SEPARATOR); // Skip the middle date and come to the last date
+				CHECK_RESULT(token);
+				token += SEPARATOR_SIZE;
 			}
-			if ( (strcmp(buf_cdr.sipResponseCode, "200")>=0) && (strcmp(buf_cdr.sipResponseCode, "200")<=4) ) {
-				continue; // drop the current record as same session id and previous has successful response, continue for next record
-			}
-			if ( (strcmp(cdr.sipResponseCode, "200")>=0) && (strcmp(cdr.sipResponseCode, "200")<=4) ) {
-				buf_cdr = cdr; // drop the previous record as same session id and current has successful response
-				continue; // continue for next record
-			}
-			if (strcmp(cdr.sipResponseCode, buf_cdr.sipResponseCode)>0) {
-				buf_cdr = cdr; // drop the previous record as same session id and current has a higher response code
-				continue; // continue for next record
-			}
-			continue; // skip writing buf to the entry since got the same session id, check next record.
-		} // if having a different session id, then writing the buf to entry, and move the current to buf.
+			end = DM_LSTRSTR(token, "\",");
+			CHECK_RESULT(end);
+			DM_STRNCPY(end_time, token, end - token + 1);
+			// termination cause
+			token = DM_LSTRSTR(end + 2, ",\""); // ANSWERED in the last example
+			CHECK_RESULT(token);
+			token += 2;
+			end = DM_LSTRSTR(token, "\",");
+			CHECK_RESULT(end);
+			DM_STRNCPY(cdr.termination_cause, token, end - token + 1);
 
+			// session id
+			token = DM_LSTRSTR(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = DM_LSTRSTR(token, ",");
+			CHECK_RESULT(end);
+			DM_STRNCPY(cdr.sessionId, token, end - token + 1);
+
+			// SIP IP Address
+			token = DM_LSTRSTR(token, ",\"");
+			CHECK_RESULT(token);
+			token += 2;
+			end = DM_LSTRSTR(token, "\",");
+			CHECK_RESULT(end);
+			DM_STRNCPY(cdr.sipIpAddress, token, end - token + 1);
+
+			// Far End IP Address
+			token = DM_LSTRSTR(token, ",\"");
+			CHECK_RESULT(token);
+			token += 2;
+			end = DM_LSTRSTR(token, "\",");
+			CHECK_RESULT(end);
+			DM_STRNCPY(cdr.farEndIPAddress, token, end - token + 1);
+
+			// Sip Response Code
+			token = DM_LSTRSTR(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = DM_LSTRSTR(token, ",");
+			CHECK_RESULT(end);
+			DM_STRNCPY(cdr.sipResponseCode, token, end - token + 1);
+
+			// Codec
+			token = DM_LSTRSTR(token, ",\"");
+			CHECK_RESULT(token);
+			token += 2;
+			end = DM_LSTRSTR(token, "\",");
+			CHECK_RESULT(end);
+			DM_STRNCPY(cdr.codec, token, end - token + 1);
+
+			// RTP statistic values
+			token = DM_LSTRSTR(token, ",");
+			CHECK_RESULT(token);
+			token += 1;
+			end = DM_LSTRSTR(token, ",");
+			CHECK_RESULT(end);
+			DM_STRNCPY(cdr.localBurstDensity, token, end - token + 1);
+			// for incoming unanswered call cdr does not contain RTP stats
+			if (strcasecmp(cdr.localBurstDensity, "\"DOCUMENTATION\"") == 0) {
+				cdr.localBurstDensity[0] = '\0';
+			} else {
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.remoteBurstDensity, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.localBurstDuration, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.remoteBurstDuration, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.localGapDensity, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.remoteGapDensity, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.localGapDuration, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.remoteGapDuration, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.localJbRate, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.remoteJbRate, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.localJbMax, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.remoteJbMax, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.localJbNominal, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.remoteJbNominal, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.localJbAbsMax, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.remoteJbAbsMax, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.jbAvg, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.uLossRate, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.discarded, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.lost, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.rxpkts, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.txpkts, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.jitter, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.maxJitter, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.averageRoundTripDelay, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.averageFarEndInterarrivalJitter, token, end - token + 1);
+			}
+			// Skip invalid call logs
+			if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||
+				cdr.start_time[0] == '\0' || end_time[0] == '\0') {
+				BBF_DEBUG("Invalid CDR: [%s]\ncalling_number = [%s], called_number = [%s], "
+					"start_time = [%s], end_time = [%s]\n", line,
+					cdr.calling_num, cdr.called_num, cdr.start_time, end_time);
+				continue;
+			} else if (cdr.destination[0] == '\0' && strcasecmp(cdr.called_num, "h") == 0) {
+				BBF_DEBUG("Invalid CDR: [%s]\ncalled_number = [%s], destination = [%s]\n", line,
+					cdr.called_num, cdr.destination);
+				continue;
+			}
+
+			// Calculate the call duration
+			struct tm tm_start, tm_end;
+			char *r1 = strptime(cdr.start_time, "%Y-%m-%d %H:%M:%S", &tm_start);
+			char *r2 = strptime(end_time, "%Y-%m-%d %H:%M:%S", &tm_end);
+
+			if (r1 && *r1 == '\0' && r2 && *r2 == '\0') {
+				time_t time_start, time_end;
+				time_start = timegm(&tm_start);
+				time_end = timegm(&tm_end);
+				snprintf(cdr.duration, sizeof(cdr.duration), "%u", (unsigned int)(time_end - time_start));
+				// Convert start time to ISO 8601 date-time format as per TR-181 data model
+				strftime(cdr.start_time, sizeof(cdr.start_time), "%Y-%m-%dT%H:%M:%SZ", &tm_start);
+			} else {
+				BBF_DEBUG("Invalid CDR: [%s]\nWrong start time and/or end time, [%s], [%s]\n",
+					line, cdr.start_time, end_time);
+				continue;
+			}
+			// Determine the call direction and used line
+			char *used_line = NULL;
+			if ((used_line = strcasestr(cdr.source, "TELCHAN")) != NULL) {
+				DM_STRNCPY(cdr.direction, "Outgoing", sizeof(cdr.direction));
+				used_line = strcasestr(cdr.destination, "SIP/sip");
+				DM_STRNCPY(cdr.used_extensions, cdr.source, sizeof(cdr.used_extensions));
+			} else if ((used_line = strcasestr(cdr.destination, "TELCHAN")) != NULL) {
+				DM_STRNCPY(cdr.direction, "Incoming", sizeof(cdr.direction));
+				used_line = strcasestr(cdr.source, "SIP/sip");
+			} else if ( ((used_line = strcasestr(cdr.source, "SIP/sip")) != NULL) && ((used_line = strcasestr(cdr.destination, "SIP/sip")) != NULL) ) {
+				DM_STRNCPY(cdr.direction, "", sizeof(cdr.direction)); //TODO fix this section for 3-way, call forward
+			} else {
+				BBF_DEBUG("Invalid CDR: [%s]\ndirection = [%s]\n", line, cdr.direction);
+				continue;
+			}
+			if (used_line == NULL){
+				// for internal call with extension number 0000/1111/2222/333
+				DM_STRNCPY(cdr.used_line, "", sizeof(cdr.used_line));
+			} else {
+				DM_STRNCPY(cdr.used_line, used_line, sizeof(cdr.used_line)); // "SIP/sip0-00000000"
+			}
+			/*
+			* Convert the termination cause to a value specified in TR-104.
+			*
+			* Note that some of the current causes provided by call log (CDR) can not be well mapped to those
+			* specified in TR-104.
+			*
+			* TODO: Asterisk needs to be changed in order to provide more TR-104 compliant call termination causes.
+			*/
+			if (strcasecmp(cdr.termination_cause, "NO ANSWER") == 0)
+				DM_STRNCPY(cdr.termination_cause, "LocalTimeout", sizeof(cdr.termination_cause));
+			else if (strcasecmp(cdr.termination_cause, "FAILED") == 0)
+				DM_STRNCPY(cdr.termination_cause, "LocalInternalError", sizeof(cdr.termination_cause));
+			else if (strcasecmp(cdr.termination_cause, "BUSY") == 0)
+				DM_STRNCPY(cdr.termination_cause, "RemoteBusy", sizeof(cdr.termination_cause));
+			else if (strcasecmp(cdr.termination_cause, "ANSWERED") == 0)
+				DM_STRNCPY(cdr.termination_cause, "RemoteDisconnect", sizeof(cdr.termination_cause));
+			else if (strcasecmp(cdr.termination_cause, "CONGESTION") == 0)
+				DM_STRNCPY(cdr.termination_cause, "RemoteNetworkFailure", sizeof(cdr.termination_cause));
+			else
+				DM_STRNCPY(cdr.termination_cause, "LocalInternalError", sizeof(cdr.termination_cause));
+			// Convert source and destination
+			convert_src_dst(cdr.source, sizeof(cdr.source)); // CallControl.Extension.{i} or SIP.Client.{i}
+			convert_src_dst(cdr.destination, sizeof(cdr.destination)); // CallControl.Extension.{i} or SIP.Client.{i}
+			// Convert used line to line{i}
+			// TODO correspond CallControl.Line.{i}
+			convert_sip_line(cdr.used_line, sizeof(cdr.used_line));
+			convert_used_extensions(cdr.used_extensions, sizeof(cdr.used_extensions));
+
+			// check session id with the record in buf
+			// skip for the first record, and put into buf
+			if (strcmp(buf_cdr.sessionId, "First")==0) {
+				buf_cdr = cdr; // first record to buf
+				continue;
+			}
+			// if having the same session id and the same starting time, then skip writing and modify the buf
+			if ( (strcmp(cdr.sessionId, buf_cdr.sessionId)==0) && (strcmp(cdr.start_time, buf_cdr.start_time)==0) ) {
+				if ( (!sip_response_checker(buf_cdr.sipResponseCode)) && ( sip_response_checker(cdr.sipResponseCode) || strcmp(cdr.sipResponseCode, buf_cdr.sipResponseCode)>0) ) {
+					buf_cdr = cdr; // drop the previous record as same session id and the current response code has a higher priority
+				}
+				continue; // continue for next record, and see if still having the same seesion id.
+			} // if having a different session id, then writing the buf to entry, and move the current to buf.
+		
+		} // if only last buf left. write directly.
 		// Find out an existing call log entry or create a new one
 		if (i < call_log_list_size) {
 			if (i > 0) {
@@ -631,33 +642,8 @@ int init_call_log(void)
 		i++;
 		// put current record to buf
 		buf_cdr = cdr;
-	}
-	// add the last one if exists
-	if (strcmp(buf_cdr.sessionId, "First")!=0) {
-		// Find out an existing call log entry or create a new one
-		if (i < call_log_list_size) {
-			if (i > 0) {
-				pos = pos->next;
-				entry = list_entry(pos, struct call_log_entry, list);
-			} else {
-				entry = list_first_entry(&call_log_list, struct call_log_entry, list);
-				pos = &entry->list;
-			}
-		} else {
-			entry = dm_dynamic_malloc(&main_memhead, sizeof(struct call_log_entry));
-			if (!entry)
-				return -1;
-			list_add_tail(&entry->list, &call_log_list);
-			call_log_list_size++;
-		}
+	} while (line_record);
 
-		// Fill out the entry with the record in buf
-		struct list_head tmp = entry->list;
-		memcpy(entry, &buf_cdr, sizeof(*entry));
-		entry->list = tmp;
-		// Increase the call log count
-		i++;
-	}
 	// The total number of call logs could be less than the list size in case that old call logs have been removed
 	call_log_count = i;
 
