@@ -3617,6 +3617,7 @@ static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void 
 	char *supported_standards = NULL;
 	char *curr_htmode = NULL;
 	char *pch, *spch, *band;
+	char buf[16];
 	char htmode[8];
 	char hwmode[8];
 	int freq = 20;
@@ -3630,7 +3631,8 @@ static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void 
 				get_radio_supported_standard(refparam, ctx, data, instance, &supported_standards);
 
 				// Check if the input value is a valid standard value
-				for (pch = strtok_r(value, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+				snprintf(buf, sizeof(buf), "%s", value);
+				for (pch = strtok_r(buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 					if (!value_exits_in_str_list(supported_standards, ",", pch))
 						return FAULT_9007;
 				}
