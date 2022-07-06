@@ -81,7 +81,7 @@ static int get_linker_associated_device(char *refparam, struct dmctx *dmctx, voi
 
 static int get_linker_wfdata_SSID(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	*linker = data ? dmjson_get_value((json_object *)data, 1, "ssid") : "";
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ssid", linker);
 	return 0;
 }
 
