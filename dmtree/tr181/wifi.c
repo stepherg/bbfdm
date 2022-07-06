@@ -3568,11 +3568,27 @@ static int get_WiFiRadio_CurrentOperatingChannelBandwidth(char *refparam, struct
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.SupportedStandards!UBUS:wifi.radio.@Name/status//standard*/
+/*#Device.WiFi.Radio.{i}.SupportedStandards!UBUS:wifi.radio.@Name/status//supp_std*/
 static int get_radio_supported_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *freq = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "band");
-	*value = (freq && *freq == '5') ? "a,n,ac,ax" : "b,g,n,ax";
+	json_object *res = NULL, *supp_std_arr = NULL;
+	char list_supp_std[16], object[16];
+	char *supp_std = NULL;
+	unsigned pos = 0, idx = 0;
+
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
+	DM_ASSERT(res, *value = "n,ax");
+
+	list_supp_std[0] = 0;
+	dmjson_foreach_value_in_array(res, supp_std_arr, supp_std, idx, 1, "supp_std") { // supp_std has as value 11xx
+		pos += snprintf(&list_supp_std[pos], sizeof(list_supp_std) - pos, "%s,", supp_std + 2);
+	}
+
+	if (pos)
+		list_supp_std[pos - 1] = 0;
+
+	*value = dmstrdup(list_supp_std);
 	return 0;
 }
 

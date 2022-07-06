@@ -39742,7 +39742,7 @@
 								"object": "wifi.radio.@Name",
 								"method": "status",
 								"args": {},
-								"key": "standard"
+								"key": "supp_bands"
 							}
 						}
 					]
