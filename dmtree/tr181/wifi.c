@@ -5397,7 +5397,7 @@ static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_TimeStamp
 
 static int get_WiFiDataElementsNetworkDeviceDefault8021Q_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_data_element_args *)data)->uci_s)->config_section, "enabled", "1");
+	*value = "1";
 	return 0;
 }
 
@@ -5412,7 +5412,7 @@ static int set_WiFiDataElementsNetworkDeviceDefault8021Q_Enable(char *refparam, 
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "enabled", b ? "1" : "0");
+			//TODO
 			return 0;
 	}
 	return 0;
@@ -5420,7 +5420,7 @@ static int set_WiFiDataElementsNetworkDeviceDefault8021Q_Enable(char *refparam, 
 
 static int get_WiFiDataElementsNetworkDeviceDefault8021Q_PrimaryVID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "primary_vid", value);
+	dmuci_get_option_value_string("mapcontroller", "controller", "primary_vid", value);
 	return 0;
 }
 
@@ -5432,7 +5432,7 @@ static int set_WiFiDataElementsNetworkDeviceDefault8021Q_PrimaryVID(char *refpar
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "primary_vid", value);
+			dmuci_set_value("mapcontroller", "controller", "primary_vid", value);
 			return 0;
 	}
 	return 0;
@@ -5440,7 +5440,7 @@ static int set_WiFiDataElementsNetworkDeviceDefault8021Q_PrimaryVID(char *refpar
 
 static int get_WiFiDataElementsNetworkDeviceDefault8021Q_DefaultPCP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "primary_pcp", value);
+	dmuci_get_option_value_string("mapcontroller", "controller", "primary_pcp", value);
 	return 0;
 }
 
@@ -5452,7 +5452,7 @@ static int set_WiFiDataElementsNetworkDeviceDefault8021Q_DefaultPCP(char *refpar
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "primary_pcp", value);
+			dmuci_set_value("mapcontroller", "controller", "primary_pcp", value);
 			return 0;
 	}
 	return 0;
