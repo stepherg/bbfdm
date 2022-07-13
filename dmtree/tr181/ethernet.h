@@ -13,7 +13,7 @@
 #ifndef __ETHERNET_H
 #define __ETHERNET_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tEthernetObj[];
 extern DMLEAF tEthernetParams[];
@@ -28,8 +28,9 @@ extern DMLEAF tEthernetVLANTerminationParams[];
 extern DMLEAF tEthernetVLANTerminationStatsParams[];
 extern DMLEAF tEthernetRMONStatsParams[];
 
-struct uci_section *get_device_section(char *dev_name);
-bool ethernet_check_section_in_curr_section(char *curr_section, char *section);
-bool ethernet_name_exists_in_devices(char *name);
+struct uci_section *ethernet___get_device_section(char *dev_name);
+bool ethernet___check_vlan_termination_section(const char *name);
+bool ethernet___check_section_in_curr_section(const char *curr_section, const char *section);
+bool ethernet___name_exists_in_devices(char *name);
 
 #endif //__ETHERNET_H

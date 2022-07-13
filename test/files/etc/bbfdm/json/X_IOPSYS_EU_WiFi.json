@@ -1,6 +1,7 @@
 {
 	"Device.WiFi.X_IOPSYS_EU_Radio.{i}.": {
 		"type": "object",
+		"version": "2.14",
 		"protocols": [
 			"cwmp",
 			"usp"
@@ -18,13 +19,13 @@
 		},
 		"Noise": {
 			"type": "int",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"datatype": "int",
 			"mapping": [
 				{
 					"type" : "ubus",
@@ -39,13 +40,13 @@
 		},
 		"Band": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"datatype": "string",
 			"mapping": [
 				{
 					"type" : "ubus",
@@ -60,6 +61,7 @@
 		},
 		"Device.WiFi.X_IOPSYS_EU_Radio.{i}.Stats.": {
 			"type": "object",
+			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -68,13 +70,13 @@
 			"array": false,
 			"BytesSent": {
 				"type": "unsignedInt",
+				"version": "2.14",
 				"read": true,
 				"write": true,
 				"protocols": [
 					"cwmp",
 					"usp"
 				],
-				"datatype": "unsignedInt",
 				"mapping": [
 					{
 						"type" : "ubus",
@@ -89,13 +91,13 @@
 			},
 			"PacketsReceived": {
 				"type": "unsignedInt",
+				"version": "2.14",
 				"read": true,
 				"write": true,
 				"protocols": [
 					"cwmp",
 					"usp"
 				],
-				"datatype": "unsignedInt",
 				"mapping": [
 					{
 						"type" : "ubus",

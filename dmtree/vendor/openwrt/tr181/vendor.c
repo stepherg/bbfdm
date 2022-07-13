@@ -28,7 +28,6 @@ char *VendorExtensionExcludeOPENWRT[] = {
 	"Device.WiFi.NeighboringWiFiDiagnostic.", //Object
 	"Device.WiFi.DataElements.Network.", //Object
 	"Device.DeviceInfo.MemoryStatus.", //Object
-	"Device.DeviceInfo.ProcessStatus.", //Object
 	"Device.QoS.Policer.{i}.", //Object
 	"Device.QoS.Queue.{i}.", //Object
 	"Device.QoS.Shaper.{i}.", //Object

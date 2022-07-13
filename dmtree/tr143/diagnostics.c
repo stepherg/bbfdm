@@ -9,7 +9,6 @@
  *
  */
 
-#include "dmentry.h"
 #include "dmdiagnostics.h"
 #include "dmbbfcommon.h"
 #include "diagnostics.h"
@@ -44,7 +43,7 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (strcmp(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				IPPING_STOP
 				set_diagnostics_option("ipping", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_IPPING_DIAGNOSTIC);
@@ -58,17 +57,21 @@ static int get_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, 
 {
 	char *linker = get_diagnostics_option("ipping", "interface");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			IPPING_STOP
@@ -277,7 +280,7 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (strcmp(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				TRACEROUTE_STOP
 				set_diagnostics_option("traceroute", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_TRACEROUTE_DIAGNOSTIC);
@@ -291,17 +294,21 @@ static int get_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *c
 {
 	char *linker = get_diagnostics_option("traceroute", "interface");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			TRACEROUTE_STOP
@@ -520,7 +527,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (strcmp(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				DOWNLOAD_DIAGNOSTIC_STOP
 				set_diagnostics_option("download", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_DOWNLOAD_DIAGNOSTIC);
@@ -533,18 +540,22 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 static int get_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("download", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
-	if (*value == NULL)
-		*value = "";
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	return 0;
 }
 
 static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			DOWNLOAD_DIAGNOSTIC_STOP
@@ -846,7 +857,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (strcmp(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				UPLOAD_DIAGNOSTIC_STOP
 				set_diagnostics_option("upload", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_UPLOAD_DIAGNOSTIC);
@@ -859,18 +870,22 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 static int get_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("upload", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
-	if (*value == NULL)
-		*value = "";
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	return 0;
 }
 
 static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			UPLOAD_DIAGNOSTIC_STOP
@@ -1189,7 +1204,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (strcmp(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				UDPECHO_STOP;
 				set_diagnostics_option("udpechodiag", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_UDPECHO_DIAGNOSTIC);
@@ -1203,17 +1218,21 @@ static int get_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct 
 {
 	char *linker = get_diagnostics_option("udpechodiag", "interface");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			UDPECHO_STOP;
@@ -1248,7 +1267,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Host(char *refparam, struct dmctx
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "port", "1");
+	*value = get_diagnostics_option_fallback_def("udpechodiag", "port", "7");
 	return 0;
 }
 
@@ -1448,7 +1467,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (strcmp(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				SERVERSELECTION_STOP
 				set_diagnostics_option("serverselection", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_SERVERSELECTION_DIAGNOSTIC);
@@ -1462,17 +1481,21 @@ static int get_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam,
 {
 	char *linker = get_diagnostics_option("serverselection", "interface");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			SERVERSELECTION_STOP
@@ -2076,9 +2099,6 @@ static int operate_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx
 		return CMD_INVALID_ARGUMENTS;
 
 	char *udpecho_port = dmjson_get_value((json_object *)value, 1, "Port");
-	if (udpecho_port[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
-
 	char *udpecho_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *udpecho_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
 	char *udpecho_nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
@@ -2157,9 +2177,6 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 
 	char *port = dmjson_get_value((json_object *)value, 1, "Port");
 	char *proto = dmjson_get_value((json_object *)value, 1, "Protocol");
-	if (strcmp(proto, "ICMP") && port[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
-
 	char *protocol_version = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
 	char *interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");

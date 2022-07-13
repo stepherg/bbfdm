@@ -11,7 +11,7 @@
 #ifndef __SERVICESVOICESERVICECODECPROFILE_H
 #define __SERVICESVOICESERVICECODECPROFILE_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMLEAF tServicesVoiceServiceCodecProfileParams[];
 

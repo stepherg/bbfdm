@@ -6,7 +6,6 @@ config acs 'acs'
 	option periodic_inform_enable 'true'
 	option periodic_inform_interval '1800'
 	option periodic_inform_time '0'
-	option ParameterKey ''
 	option dhcp_discovery 'enable'
 	# compression possible configs: GZIP, Deflate, Disabled
 	option compression 'Disabled'
@@ -54,3 +53,7 @@ config inform_extra
 	option enabled '0'
 	option parameter 'Device.DeviceInfo.SerialNumber'
 	option events '0 BOOTSTRAP'
+	
+config test 'test'
+	option enable '0'
+	option port '0'

@@ -8,7 +8,6 @@
  *	Author: Omar Kallel <omar.kallel@pivasoftware.com>
  */
 
-#include "dmentry.h"
 #include "usb.h"
 
 #define SYSFS_USB_DEVICES_PATH "/sys/bus/usb/devices"
@@ -146,7 +145,7 @@ static int browseUSBInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void
 			snprintf(port_link, sizeof(port_link), "%s", foldersplit[0]);
 		}
 		sysfs_foreach_file(netfolderpath, dir, ent) {
-			if(strcmp(ent->d_name, ".")==0 || strcmp(ent->d_name, "..")==0)
+			if(DM_LSTRCMP(ent->d_name, ".")==0 || DM_LSTRCMP(ent->d_name, "..")==0)
 				continue;
 
 			snprintf(iface_name, sizeof(iface_name), "%s", ent->d_name);
@@ -188,7 +187,7 @@ static int browseUSBPortInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 		if (regexec(&regex1, p->sysfs_folder_name, 0, NULL, 0) != 0 &&
 			regexec(&regex2, p->sysfs_folder_name, 0, NULL, 0) !=0 &&
-			strstr(p->sysfs_folder_name, "usb") != p->sysfs_folder_name)
+			DM_LSTRSTR(p->sysfs_folder_name, "usb") != p->sysfs_folder_name)
 			continue;
 
 		init_usb_port(p->dmmap_section, p->sysfs_folder_name, p->sysfs_folder_path, &port);
@@ -215,7 +214,7 @@ static int browseUSBUSBHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, v
 
 	list_for_each_entry(p, &dup_list, list) {
 
-		if(!strstr(p->sysfs_folder_name, "usb"))
+		if(!DM_LSTRSTR(p->sysfs_folder_name, "usb"))
 			continue;
 
 		init_usb_port(p->dmmap_section, p->sysfs_folder_name, p->sysfs_folder_path, &port);
@@ -245,7 +244,7 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 	LIST_HEAD(dup_list_no_inst);
 
 	sysfs_foreach_file(sysfsrep, dir, ent) {
-		if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
+		if (DM_LSTRCMP(ent->d_name, ".") == 0 || DM_LSTRCMP(ent->d_name, "..") == 0)
 			continue;
 
 		if (regexec(&regex1, ent->d_name, 0, NULL, 0) == 0 || regexec(&regex2, ent->d_name, 0, NULL, 0) ==0) {
@@ -255,7 +254,7 @@ static int synchronize_usb_devices_with_dmmap_opt_recursively(char *sysfsrep, ch
 			snprintf(deviceClassFile, sizeof(deviceClassFile), "%s/%s/bDeviceClass", sysfsrep, ent->d_name);
 			dm_read_sysfs_file(deviceClassFile, deviceClass, sizeof(deviceClass));
 
-			if (strncmp(deviceClass, "09", 2) == 0) {
+			if (DM_LSTRNCMP(deviceClass, "09", 2) == 0) {
 				char hubpath[270];
 
 				snprintf(hubpath, sizeof(hubpath), "%s/%s", sysfsrep, ent->d_name);
@@ -375,7 +374,7 @@ static int browseUSBUSBHostsHostDeviceConfigurationInterfaceInst(struct dmctx *d
 
 	sysfs_foreach_file(usb_dev->folder_path, dir, ent) {
 
-		if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
+		if (DM_LSTRCMP(ent->d_name, ".") == 0 || DM_LSTRCMP(ent->d_name, "..") == 0)
 			continue;
 
 		if (regexec(&regex1, ent->d_name, 0, NULL, 0) == 0 || regexec(&regex2, ent->d_name, 0, NULL, 0) == 0) {
@@ -610,9 +609,9 @@ static int get_USBPort_Type(char *refparam, struct dmctx *ctx, void *data, char 
 
 	__read_sysfs_usb_port(port, "bDeviceClass", deviceclass, sizeof(deviceclass));
 
-	if(strstr(port->folder_name, "usb") == port->folder_name)
+	if(DM_LSTRSTR(port->folder_name, "usb") == port->folder_name)
 		*value= "Host";
-	else if (strcmp(deviceclass, "09") == 0)
+	else if (DM_LSTRCMP(deviceclass, "09") == 0)
 		*value= "Hub";
 	else
 		*value= "Device";
@@ -625,11 +624,11 @@ static int get_USBPort_Rate(char *refparam, struct dmctx *ctx, void *data, char 
 
 	__read_sysfs_usb_port(data, "speed", speed, sizeof(speed));
 
-	if(strcmp(speed, "1.5") == 0)
+	if(DM_LSTRCMP(speed, "1.5") == 0)
 		*value= "Low";
-	else if(strcmp(speed, "12") == 0)
+	else if(DM_LSTRCMP(speed, "12") == 0)
 		*value= "Full";
-	else if(strcmp(speed, "480") == 0)
+	else if(DM_LSTRCMP(speed, "480") == 0)
 		*value= "High";
 	else
 		*value= "Super";
@@ -644,7 +643,7 @@ static int get_USBPort_Power(char *refparam, struct dmctx *ctx, void *data, char
 
 	if (pwrctl[0] == 0)
 		*value = "Unknown";
-	else if (!strcmp(pwrctl, "auto"))
+	else if (!DM_LSTRCMP(pwrctl, "auto"))
 		*value ="Self";
 	else
 		*value ="Bus";
@@ -688,7 +687,7 @@ static int get_USBUSBHostsHost_Enable(char *refparam, struct dmctx *ctx, void *d
 	char up[32];
 
 	__read_sysfs_usb_port(data, "power/wakeup", up, sizeof(up));
-	*value = strcmp(up, "enabled") == 0 ? "1" : "0";
+	*value = DM_LSTRCMP(up, "enabled") == 0 ? "1" : "0";
 	return 0;
 }
 
@@ -745,7 +744,7 @@ static int get_USBUSBHostsHost_PowerManagementEnable(char *refparam, struct dmct
 
 	__read_sysfs_usb_port(data, "power/level", power, sizeof(power));
 
-	if(power[0] == 0 || strcmp(power, "suspend") == 0)
+	if(power[0] == 0 || DM_LSTRCMP(power, "suspend") == 0)
 		*value= "false";
 	else
 		*value= "true";
@@ -895,7 +894,7 @@ out:
 
 static int get_USBUSBHostsHostDevice_USBPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct usb_port *port= (struct usb_port *)data;
+	struct usb_port *port = (struct usb_port *)data;
 	adm_entry_get_linker_param(ctx, "Device.USB.Port.", port->folder_name, value);
 	return 0;
 }
@@ -912,15 +911,15 @@ static int get_USBUSBHostsHostDevice_Parent(char *refparam, struct dmctx *ctx, v
 	regex_t regex1 = {};
 
 	regcomp(&regex1, "^[0-9][0-9]*-[0-9]*[0-9]\\.[0-9]*[0-9]$", 0);
-	if(regexec(&regex1, port->folder_name, 0, NULL, 0) != 0 || port->dmsect == NULL){
+	if (regexec(&regex1, port->folder_name, 0, NULL, 0) != 0 || port->dmsect == NULL) {
 		*value = "";
 		goto out;
 	}
+
 	dmuci_get_value_by_section_string(port->dmsect, "usb_host_instance", &host_inst);
 	snprintf(usb_host_path, sizeof(usb_host_path), "Device.USB.USBHosts.Host.%s.Device.", host_inst);
 	adm_entry_get_linker_param(ctx, usb_host_path, port->folder_name, value);
-	if (*value == NULL)
-		*value = "";
+
 out:
 	regfree(&regex1);
 	return 0;
@@ -936,7 +935,7 @@ static int get_USBUSBHostsHostDevice_IsSuspended(char *refparam, struct dmctx *c
 	char status[16] = {0};
 
 	__read_sysfs_usb_port(data, "power/runtime_status", status, sizeof(status));
-	if(strncmp(status, "suspended", 9) == 0)
+	if(DM_LSTRNCMP(status, "suspended", 9) == 0)
 		*value= "1";
 	else
 		*value = "0";
@@ -1007,7 +1006,7 @@ static int get_linker_usb_host_device(char *refparam, struct dmctx *dmctx, void 
 ***********************************************************************************************************************************/
 /* *** Device.USB. *** */
 DMOBJ tUSBObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Interface", &DMREAD, NULL, NULL, NULL, browseUSBInterfaceInst, NULL, NULL, tUSBInterfaceObj, tUSBInterfaceParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {"Port", &DMREAD, NULL, NULL, NULL, browseUSBPortInst, NULL, NULL, NULL, tUSBPortParams, get_linker_usb_port, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {"USBHosts", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUSBUSBHostsObj, tUSBUSBHostsParams, NULL, BBFDM_BOTH},
@@ -1015,7 +1014,7 @@ DMOBJ tUSBObj[] = {
 };
 
 DMLEAF tUSBParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_USB_InterfaceNumberOfEntries, NULL, BBFDM_BOTH},
 {"PortNumberOfEntries", &DMREAD, DMT_UNINT, get_USB_PortNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
@@ -1023,144 +1022,144 @@ DMLEAF tUSBParams[] = {
 
 /* *** Device.USB.Interface.{i}. *** */
 DMOBJ tUSBInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUSBInterfaceStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUSBInterfaceStatsParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {0}
 };
 
 DMLEAF tUSBInterfaceParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_USBInterface_Enable, set_USBInterface_Enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_USBInterface_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_USBInterface_Alias, set_USBInterface_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_USBInterface_Name, NULL, BBFDM_BOTH},
-//{"LastChange", &DMREAD, DMT_UNINT, get_USBInterface_LastChange, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_USBInterface_LowerLayers, set_USBInterface_LowerLayers, BBFDM_BOTH},
-//{"Upstream", &DMREAD, DMT_BOOL, get_USBInterface_Upstream, NULL, BBFDM_BOTH},
-{"MACAddress", &DMREAD, DMT_STRING, get_USBInterface_MACAddress, NULL, BBFDM_BOTH},
-{"MaxBitRate", &DMREAD, DMT_UNINT, get_USBInterface_MaxBitRate, NULL, BBFDM_BOTH},
-//{"Port", &DMREAD, DMT_STRING, get_USBInterface_Port, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_USBInterface_Enable, set_USBInterface_Enable, BBFDM_BOTH, "2.0"},
+{"Status", &DMREAD, DMT_STRING, get_USBInterface_Status, NULL, BBFDM_BOTH, "2.0"},
+{"Alias", &DMWRITE, DMT_STRING, get_USBInterface_Alias, set_USBInterface_Alias, BBFDM_BOTH, "2.0"},
+{"Name", &DMREAD, DMT_STRING, get_USBInterface_Name, NULL, BBFDM_BOTH, "2.0"},
+//{"LastChange", &DMREAD, DMT_UNINT, get_USBInterface_LastChange, NULL, BBFDM_BOTH, "2.0"},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_USBInterface_LowerLayers, set_USBInterface_LowerLayers, BBFDM_BOTH, "2.0"},
+//{"Upstream", &DMREAD, DMT_BOOL, get_USBInterface_Upstream, NULL, BBFDM_BOTH, "2.0"},
+{"MACAddress", &DMREAD, DMT_STRING, get_USBInterface_MACAddress, NULL, BBFDM_BOTH, "2.0"},
+{"MaxBitRate", &DMREAD, DMT_UNINT, get_USBInterface_MaxBitRate, NULL, BBFDM_BOTH, "2.0"},
+//{"Port", &DMREAD, DMT_STRING, get_USBInterface_Port, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.USB.Interface.{i}.Stats. *** */
 DMLEAF tUSBInterfaceStatsParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"BytesSent", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_BytesSent, NULL, BBFDM_BOTH},
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_BytesReceived, NULL, BBFDM_BOTH},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_PacketsSent, NULL, BBFDM_BOTH},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_PacketsReceived, NULL, BBFDM_BOTH},
-{"ErrorsSent", &DMREAD, DMT_UNINT, get_USBInterfaceStats_ErrorsSent, NULL, BBFDM_BOTH},
-{"ErrorsReceived", &DMREAD, DMT_UNINT, get_USBInterfaceStats_ErrorsReceived, NULL, BBFDM_BOTH},
-//{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_UnicastPacketsSent, NULL, BBFDM_BOTH},
-//{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_UnicastPacketsReceived, NULL, BBFDM_BOTH},
-{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_USBInterfaceStats_DiscardPacketsSent, NULL, BBFDM_BOTH},
-{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_USBInterfaceStats_DiscardPacketsReceived, NULL, BBFDM_BOTH},
-//{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_MulticastPacketsSent, NULL, BBFDM_BOTH},
-{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_MulticastPacketsReceived, NULL, BBFDM_BOTH},
-//{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_BroadcastPacketsSent, NULL, BBFDM_BOTH},
-//{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH},
-//{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_USBInterfaceStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"BytesSent", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_BytesSent, NULL, BBFDM_BOTH, "2.0"},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_BytesReceived, NULL, BBFDM_BOTH, "2.0"},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_PacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_PacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"ErrorsSent", &DMREAD, DMT_UNINT, get_USBInterfaceStats_ErrorsSent, NULL, BBFDM_BOTH, "2.0"},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, get_USBInterfaceStats_ErrorsReceived, NULL, BBFDM_BOTH, "2.0"},
+//{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_UnicastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+//{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_UnicastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_USBInterfaceStats_DiscardPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_USBInterfaceStats_DiscardPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+//{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_MulticastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_MulticastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+//{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_BroadcastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+//{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_USBInterfaceStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+//{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_USBInterfaceStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.USB.Port.{i}. *** */
 DMLEAF tUSBPortParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_USBPort_Alias, set_USBPort_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_USBPort_Name, NULL, BBFDM_BOTH},
-{"Standard", &DMREAD, DMT_STRING, get_USBPort_Standard, NULL, BBFDM_BOTH},
-{"Type", &DMREAD, DMT_STRING, get_USBPort_Type, NULL, BBFDM_BOTH},
-//{"Receptacle", &DMREAD, DMT_STRING, get_USBPort_Receptacle, NULL, BBFDM_BOTH},
-{"Rate", &DMREAD, DMT_STRING, get_USBPort_Rate, NULL, BBFDM_BOTH},
-{"Power", &DMREAD, DMT_STRING, get_USBPort_Power, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Alias", &DMWRITE, DMT_STRING, get_USBPort_Alias, set_USBPort_Alias, BBFDM_BOTH, "2.0"},
+{"Name", &DMREAD, DMT_STRING, get_USBPort_Name, NULL, BBFDM_BOTH, "2.0"},
+{"Standard", &DMREAD, DMT_STRING, get_USBPort_Standard, NULL, BBFDM_BOTH, "2.0"},
+{"Type", &DMREAD, DMT_STRING, get_USBPort_Type, NULL, BBFDM_BOTH, "2.0"},
+//{"Receptacle", &DMREAD, DMT_STRING, get_USBPort_Receptacle, NULL, BBFDM_BOTH, "2.0"},
+{"Rate", &DMREAD, DMT_STRING, get_USBPort_Rate, NULL, BBFDM_BOTH, "2.0"},
+{"Power", &DMREAD, DMT_STRING, get_USBPort_Power, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.USB.USBHosts. *** */
 DMOBJ tUSBUSBHostsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Host", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostInst, NULL, NULL, tUSBUSBHostsHostObj, tUSBUSBHostsHostParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Host", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostInst, NULL, NULL, tUSBUSBHostsHostObj, tUSBUSBHostsHostParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}, "2.0"},
 {0}
 };
 
 DMLEAF tUSBUSBHostsParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"HostNumberOfEntries", &DMREAD, DMT_UNINT, get_USBUSBHosts_HostNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"HostNumberOfEntries", &DMREAD, DMT_UNINT, get_USBUSBHosts_HostNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.USB.USBHosts.Host.{i}. *** */
 DMOBJ tUSBUSBHostsHostObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Device", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceInst, NULL, NULL, tUSBUSBHostsHostDeviceObj, tUSBUSBHostsHostDeviceParams, get_linker_usb_host_device, BBFDM_BOTH, LIST_KEY{"DeviceNumber", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Device", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceInst, NULL, NULL, tUSBUSBHostsHostDeviceObj, tUSBUSBHostsHostDeviceParams, get_linker_usb_host_device, BBFDM_BOTH, LIST_KEY{"DeviceNumber", NULL}, "2.0"},
 {0}
 };
 
 DMLEAF tUSBUSBHostsHostParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_USBUSBHostsHost_Alias, set_USBUSBHostsHost_Alias, BBFDM_BOTH},
-{"Enable", &DMWRITE, DMT_BOOL, get_USBUSBHostsHost_Enable, set_USBUSBHostsHost_Enable, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_USBUSBHostsHost_Name, NULL, BBFDM_BOTH},
-{"Type", &DMREAD, DMT_STRING, get_USBUSBHostsHost_Type, NULL, BBFDM_BOTH},
-//{"Reset", &DMWRITE, DMT_BOOL, get_USBUSBHostsHost_Reset, set_USBUSBHostsHost_Reset, BBFDM_BOTH},
-{"PowerManagementEnable", &DMWRITE, DMT_BOOL, get_USBUSBHostsHost_PowerManagementEnable, set_USBUSBHostsHost_PowerManagementEnable, BBFDM_BOTH},
-{"USBVersion", &DMREAD, DMT_STRING, get_USBUSBHostsHost_USBVersion, NULL, BBFDM_BOTH},
-{"DeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_USBUSBHostsHost_DeviceNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Alias", &DMWRITE, DMT_STRING, get_USBUSBHostsHost_Alias, set_USBUSBHostsHost_Alias, BBFDM_BOTH, "2.3"},
+{"Enable", &DMWRITE, DMT_BOOL, get_USBUSBHostsHost_Enable, set_USBUSBHostsHost_Enable, BBFDM_BOTH, "2.0"},
+{"Name", &DMREAD, DMT_STRING, get_USBUSBHostsHost_Name, NULL, BBFDM_BOTH, "2.0"},
+{"Type", &DMREAD, DMT_STRING, get_USBUSBHostsHost_Type, NULL, BBFDM_BOTH, "2.0"},
+//{"Reset", &DMWRITE, DMT_BOOL, get_USBUSBHostsHost_Reset, set_USBUSBHostsHost_Reset, BBFDM_BOTH, "2.0"},
+{"PowerManagementEnable", &DMWRITE, DMT_BOOL, get_USBUSBHostsHost_PowerManagementEnable, set_USBUSBHostsHost_PowerManagementEnable, BBFDM_BOTH, "2.0"},
+{"USBVersion", &DMREAD, DMT_STRING, get_USBUSBHostsHost_USBVersion, NULL, BBFDM_BOTH, "2.0"},
+{"DeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_USBUSBHostsHost_DeviceNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.USB.USBHosts.Host.{i}.Device.{i}. *** */
 DMOBJ tUSBUSBHostsHostDeviceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Configuration", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInst, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationObj, tUSBUSBHostsHostDeviceConfigurationParams, NULL, BBFDM_BOTH, LIST_KEY{"ConfigurationNumber", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Configuration", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInst, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationObj, tUSBUSBHostsHostDeviceConfigurationParams, NULL, BBFDM_BOTH, LIST_KEY{"ConfigurationNumber", NULL}, "2.0"},
 {0}
 };
 
 DMLEAF tUSBUSBHostsHostDeviceParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"DeviceNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_DeviceNumber, NULL, BBFDM_BOTH},
-{"USBVersion", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_USBVersion, NULL, BBFDM_BOTH},
-{"DeviceClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDevice_DeviceClass, NULL, BBFDM_BOTH},
-{"DeviceSubClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDevice_DeviceSubClass, NULL, BBFDM_BOTH},
-//{"DeviceVersion", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_DeviceVersion, NULL, BBFDM_BOTH},
-{"DeviceProtocol", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDevice_DeviceProtocol, NULL, BBFDM_BOTH},
-{"ProductID", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_ProductID, NULL, BBFDM_BOTH},
-{"VendorID", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_VendorID, NULL, BBFDM_BOTH},
-{"Manufacturer", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_Manufacturer, NULL, BBFDM_BOTH},
-{"ProductClass", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_ProductClass, NULL, BBFDM_BOTH},
-{"SerialNumber", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_SerialNumber, NULL, BBFDM_BOTH},
-{"Port", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_Port, NULL, BBFDM_BOTH},
-{"USBPort", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_USBPort, NULL, BBFDM_BOTH},
-{"Rate", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_Rate, NULL, BBFDM_BOTH},
-{"Parent", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_Parent, NULL, BBFDM_BOTH},
-{"MaxChildren", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_MaxChildren, NULL, BBFDM_BOTH},
-{"IsSuspended", &DMREAD, DMT_BOOL, get_USBUSBHostsHostDevice_IsSuspended, NULL, BBFDM_BOTH},
-//{"IsSelfPowered", &DMREAD, DMT_BOOL, get_USBUSBHostsHostDevice_IsSelfPowered, NULL, BBFDM_BOTH},
-{"ConfigurationNumberOfEntries", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_ConfigurationNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"DeviceNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_DeviceNumber, NULL, BBFDM_BOTH, "2.0"},
+{"USBVersion", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_USBVersion, NULL, BBFDM_BOTH, "2.0"},
+{"DeviceClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDevice_DeviceClass, NULL, BBFDM_BOTH, "2.0"},
+{"DeviceSubClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDevice_DeviceSubClass, NULL, BBFDM_BOTH, "2.0"},
+//{"DeviceVersion", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_DeviceVersion, NULL, BBFDM_BOTH, "2.0"},
+{"DeviceProtocol", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDevice_DeviceProtocol, NULL, BBFDM_BOTH, "2.0"},
+{"ProductID", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_ProductID, NULL, BBFDM_BOTH, "2.0"},
+{"VendorID", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_VendorID, NULL, BBFDM_BOTH, "2.0"},
+{"Manufacturer", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_Manufacturer, NULL, BBFDM_BOTH, "2.0"},
+{"ProductClass", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_ProductClass, NULL, BBFDM_BOTH, "2.0"},
+{"SerialNumber", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_SerialNumber, NULL, BBFDM_BOTH, "2.0"},
+{"Port", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_Port, NULL, BBFDM_BOTH, "2.0"},
+{"USBPort", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_USBPort, NULL, BBFDM_BOTH, "2.0"},
+{"Rate", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_Rate, NULL, BBFDM_BOTH, "2.0"},
+{"Parent", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_Parent, NULL, BBFDM_BOTH, "2.0"},
+{"MaxChildren", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_MaxChildren, NULL, BBFDM_BOTH, "2.0"},
+{"IsSuspended", &DMREAD, DMT_BOOL, get_USBUSBHostsHostDevice_IsSuspended, NULL, BBFDM_BOTH, "2.0"},
+//{"IsSelfPowered", &DMREAD, DMT_BOOL, get_USBUSBHostsHostDevice_IsSelfPowered, NULL, BBFDM_BOTH, "2.0"},
+{"ConfigurationNumberOfEntries", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_ConfigurationNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.USB.USBHosts.Host.{i}.Device.{i}.Configuration.{i}. *** */
 DMOBJ tUSBUSBHostsHostDeviceConfigurationObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Interface", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInterfaceInst, NULL, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationInterfaceParams, NULL, BBFDM_BOTH, LIST_KEY{"InterfaceNumber", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Interface", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInterfaceInst, NULL, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationInterfaceParams, NULL, BBFDM_BOTH, LIST_KEY{"InterfaceNumber", NULL}, "2.0"},
 {0}
 };
 
 DMLEAF tUSBUSBHostsHostDeviceConfigurationParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"ConfigurationNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDeviceConfiguration_ConfigurationNumber, NULL, BBFDM_BOTH},
-{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDeviceConfiguration_InterfaceNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"ConfigurationNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDeviceConfiguration_ConfigurationNumber, NULL, BBFDM_BOTH, "2.0"},
+{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDeviceConfiguration_InterfaceNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.USB.USBHosts.Host.{i}.Device.{i}.Configuration.{i}.Interface.{i}. *** */
 DMLEAF tUSBUSBHostsHostDeviceConfigurationInterfaceParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"InterfaceNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceNumber, NULL, BBFDM_BOTH},
-{"InterfaceClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceClass, NULL, BBFDM_BOTH},
-{"InterfaceSubClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceSubClass, NULL, BBFDM_BOTH},
-{"InterfaceProtocol", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceProtocol, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"InterfaceNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceNumber, NULL, BBFDM_BOTH, "2.0"},
+{"InterfaceClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceClass, NULL, BBFDM_BOTH, "2.0"},
+{"InterfaceSubClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceSubClass, NULL, BBFDM_BOTH, "2.0"},
+{"InterfaceProtocol", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceProtocol, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };

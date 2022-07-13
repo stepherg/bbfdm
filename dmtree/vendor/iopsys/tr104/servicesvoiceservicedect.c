@@ -16,9 +16,15 @@
 static int get_ServicesVoiceServiceDECTPortable_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *ipui = dmjson_get_value((json_object *)data, 1, "ipui");
+	char *id = dmjson_get_value((json_object *)data, 1, "id");
+
 	dmuci_get_option_value_string("dect", ipui, "name", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "DECT%s", instance);
+	if ((*value)[0] == '\0') {
+		if (DM_STRLEN(id))
+			dmasprintf(value, "DECT%s", id);
+		else
+			dmasprintf(value, "DECT%s", instance);
+	}
 
 	return 0;
 }

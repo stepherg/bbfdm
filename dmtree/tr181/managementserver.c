@@ -17,18 +17,22 @@
 /*#Device.ManagementServer.URL!UCI:cwmp/acs,acs/url*/
 static int get_management_server_url(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *dhcp = NULL, *url = NULL, *provisioning_value = NULL;
+	char *dhcp = NULL, *url = NULL, *dhcp_url = NULL;
+	bool discovery = false;
 
 	dmuci_get_option_value_string("cwmp", "acs", "dhcp_discovery", &dhcp);
 	dmuci_get_option_value_string("cwmp", "acs", "url", &url);
-	varstate_get_value_string("cwmp", "acs", "dhcp_url", &provisioning_value);
+	dmuci_get_option_value_string("cwmp", "acs", "dhcp_url", &dhcp_url);
 
-	if ( ((dhcp && strcmp(dhcp, "enable") == 0 ) || ((url == NULL) || (url[0] == '\0'))) && ((provisioning_value != NULL) && (provisioning_value[0] != '\0')) )
-		*value = provisioning_value;
-	else if ((url != NULL) && (url[0] != '\0'))
+	discovery = dmuci_string_to_boolean(dhcp);
+
+	if ((discovery == true) && (DM_STRLEN(dhcp_url) != 0))
+		*value = dhcp_url;
+	else if (DM_STRLEN(url) != 0)
 		*value = url;
 	else
-		*value = dmstrdup("http://192.168.1.1:8080/openacs/acs");
+		*value = "";
+
 	return 0;
 }
 
@@ -133,7 +137,7 @@ static int set_management_server_delay_reboot(char *refparam, struct dmctx *ctx,
 /*#Device.ManagementServer.ParameterKey!UCI:cwmp/acs,acs/ParameterKey*/
 static int get_management_server_key(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string("cwmp", "acs", "ParameterKey", value);
+	dmuci_get_option_value_string_varstate("cwmp", "cpe", "ParameterKey", value);
 	return 0;	
 }
 
@@ -208,7 +212,7 @@ static int set_management_server_periodic_inform_time(char *refparam, struct dmc
 
 static int network_get_ipaddr(char *iface, int ipver, char **value)
 {
-	json_object *res, *jobj;
+	json_object *res = NULL, *jobj = NULL;
 
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", iface, String}}, 1, &res);
 	DM_ASSERT(res, *value = "");
@@ -227,23 +231,55 @@ static int network_get_ipaddr(char *iface, int ipver, char **value)
 	return 0;
 }
 
+static void get_management_ip_port(char **listen_addr)
+{
+	char *ip = NULL, *port = NULL, *interface = NULL, *if_name = NULL, *version = NULL;
+
+	dmuci_get_option_value_string("cwmp", "cpe", "default_wan_interface", &interface);
+	dmuci_get_option_value_string("cwmp", "cpe", "interface", &if_name);
+	dmuci_get_option_value_string("cwmp", "acs", "ip_version", &version);
+	dmuci_get_option_value_string("cwmp", "cpe", "port", &port);
+
+	if (network_get_ipaddr(interface, *version == '6' ? 6 : 4, &ip) == -1) {
+		if (if_name[0] == '\0')
+			return;
+
+		ip = (*version == '6') ? get_ipv6(if_name) : ioctl_get_ipv4(if_name);
+	}
+
+	if (ip[0] != '\0' && port[0] != '\0') {
+		dmasprintf(listen_addr, "%s:%s", ip, port);
+	}
+}
+
 /*#Device.ManagementServer.ConnectionRequestURL!UCI:cwmp/cpe,cpe/port*/
 static int get_management_server_connection_request_url(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ip = NULL, *port = NULL, *iface = NULL, *ip_version = NULL;
+	char *mgmt_addr = NULL;
+	get_management_ip_port(&mgmt_addr);
 
-	dmuci_get_option_value_string("cwmp", "cpe", "default_wan_interface", &iface);
-	dmuci_get_option_value_string("cwmp", "acs", "ip_version", &ip_version);
-
-	network_get_ipaddr(iface, ip_version&&ip_version[0]=='6'?6:4, &ip);
-	dmuci_get_option_value_string("cwmp", "cpe", "port", &port);
-
-	if (ip[0] != '\0' && port[0] != '\0') {
+	if (mgmt_addr != NULL) {
 		char *path;
-
 		dmuci_get_option_value_string("cwmp", "cpe", "path", &path);
-		dmasprintf(value, "http://%s:%s/%s", ip, port, path ? path : "");
+		dmasprintf(value, "http://%s/%s", mgmt_addr, path ? path : "");
 	}
+
+	return 0;
+}
+
+static int get_upd_cr_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *stunc_enabled;
+	bool enabled;
+
+	dmuci_get_option_value_string("stunc", "stunc", "enabled", &stunc_enabled);
+	enabled = dmuci_string_to_boolean(stunc_enabled);
+
+	if (enabled == true)
+		dmuci_get_option_value_string_varstate("stunc", "stunc", "crudp_address", value);
+	else
+		get_management_ip_port(value);
+
 	return 0;
 }
 
@@ -333,7 +369,7 @@ static int set_lwn_protocol_used(char *refparam, struct dmctx *ctx, void *data, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (strcmp(value,"UDP") == 0)
+			if (DM_LSTRCMP(value,"UDP") == 0)
 				dmuci_set_value("cwmp", "lwn", "enable", "1");
 			else
 				dmuci_set_value("cwmp", "lwn", "enable", "0");
@@ -420,7 +456,19 @@ static int set_management_server_http_compression(char *refparam, struct dmctx *
 /*#Device.ManagementServer.CWMPRetryMinimumWaitInterval!UCI:cwmp/acs,acs/retry_min_wait_interval*/
 static int get_management_server_retry_min_wait_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "retry_min_wait_interval", "5");
+	char *dhcp = NULL, *dhcp_retry_min_wait_interval = NULL;
+	bool discovery = false;
+
+	dmuci_get_option_value_string("cwmp", "acs", "dhcp_discovery", &dhcp);
+	dmuci_get_option_value_string("cwmp", "acs", "dhcp_retry_min_wait_interval", &dhcp_retry_min_wait_interval);
+
+	discovery = dmuci_string_to_boolean(dhcp);
+
+	if ((discovery == true) && (DM_STRLEN(dhcp_retry_min_wait_interval) != 0))
+		*value = dhcp_retry_min_wait_interval;
+	else
+		*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "retry_min_wait_interval", "5");
+
 	return 0;
 }
 
@@ -442,7 +490,19 @@ static int set_management_server_retry_min_wait_interval(char *refparam, struct 
 /*#Device.ManagementServer.CWMPRetryIntervalMultiplier!UCI:cwmp/acs,acs/retry_interval_multiplier*/
 static int get_management_server_retry_interval_multiplier(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "retry_interval_multiplier", "2000");
+	char *dhcp = NULL, *dhcp_retry_interval_multiplier = NULL;
+	bool discovery = false;
+
+	dmuci_get_option_value_string("cwmp", "acs", "dhcp_discovery", &dhcp);
+	dmuci_get_option_value_string("cwmp", "acs", "dhcp_retry_interval_multiplier", &dhcp_retry_interval_multiplier);
+
+	discovery = dmuci_string_to_boolean(dhcp);
+
+	if ((discovery == true) && (DM_STRLEN(dhcp_retry_interval_multiplier) != 0))
+		*value = dhcp_retry_interval_multiplier;
+	else
+		*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "retry_interval_multiplier", "2000");
+
 	return 0;
 }
 
@@ -465,7 +525,7 @@ static int set_management_server_retry_interval_multiplier(char *refparam, struc
 static int get_alias_based_addressing(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *res = dmuci_get_option_value_fallback_def("cwmp", "cpe", "amd_version", "5");
-	*value = (atoi(res) <= AMD_4) ? "false" : "true";
+	*value = (DM_STRTOL(res) <= AMD_4) ? "false" : "true";
 	return 0;
 }
 
@@ -491,127 +551,172 @@ static int set_instance_mode(char *refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
-/*
- * XMPP parameters
- */
-/*#Device.ManagementServer.ConnReqAllowedJabberIDs!UCI:xmpp/xmpp,xmpp/allowed_jid*/
-static int get_management_server_conn_rep_allowed_jabber_id(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_option_value_string("xmpp", "xmpp", "allowed_jid", value);
-	return 0;
-}
-
-static int set_management_server_conn_rep_allowed_jabber_id(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, 32, -1, -1, 256, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value("xmpp", "xmpp", "allowed_jid", value);
-			return 0;
-	}
-	return 0;
-}
-
-static int get_management_server_conn_req_jabber_id(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct uci_section *s = NULL;
-	char *username, *domain, *resource, *tmpPtr = NULL, *strResponse = NULL;
-
-	uci_foreach_sections("xmpp", "xmpp_connection", s) {
-		dmuci_get_value_by_section_string(s, "username", &username);
-		dmuci_get_value_by_section_string(s, "domain", &domain);
-		dmuci_get_value_by_section_string(s, "resource", &resource);
-		if(*username != '\0' || *domain != '\0' || *resource != '\0') {
-			if(!strResponse)
-				dmasprintf(&strResponse, "%s@%s/%s", username, domain, resource);
-			else {
-				tmpPtr = dmstrdup(strResponse);
-				dmfree(strResponse);
-				dmasprintf(&strResponse, "%s,%s@%s/%s", tmpPtr, username, domain, resource);
-				dmfree(tmpPtr);
-			}
-		}
-	}
-	*value = strResponse ? strResponse : "";
-	return 0;
-}
-
-static int get_management_server_conn_req_xmpp_connection(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char *id;
-
-	dmuci_get_option_value_string("xmpp", "xmpp", "id", &id);
-	if (*id != '\0' && *id != '0') dmasprintf(value, "Device.XMPP.Connection.%s", id);
-	return 0;
-}
-
-static int set_management_server_conn_req_xmpp_connection(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *str, *xmpp_id;
-	struct uci_section *s = NULL;
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			if ((str = strstr(value, "Device.XMPP.Connection."))) {
-				value = dmstrdup(str + sizeof("Device.XMPP.Connection.") - 1); //MEM WILL BE FREED IN DMMEMCLEAN
-			}
-			uci_foreach_sections("xmpp", "connection", s) {
-				dmuci_get_value_by_section_string(s, "xmpp_id", &xmpp_id);
-				if(strcmp(value, xmpp_id) == 0) {
-					dmuci_set_value("xmpp", "xmpp", "id", value);
-					break;
-				}
-			}
-			return 0;
-	}
-	return 0;
-}
-
 static int get_management_server_supported_conn_req_methods(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "HTTP,XMPP,STUN";
 	return 0;
 }
 
+static int get_management_server_instance_wildcard_supported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "true";
+	return 0;
+}
+
+static int get_management_server_enable_cwmp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("cwmp", "cpe", "enable", value);
+	if ((*value)[0] == '\0')
+		*value = "1";
+	return 0;
+}
+
+static int set_management_server_enable_cwmp(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value("cwmp", "cpe", "enable", b ? "1" : "0");
+			return 0;
+	}
+	return 0;
+}
+
+static int get_nat_detected(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *v;
+	bool en = 0;
+
+	dmuci_get_option_value_string("stunc", "stunc", "enabled", &v);
+	en = dmuci_string_to_boolean(v);
+
+	if (en == true) { //stunc is enabled
+		dmuci_get_option_value_string_varstate("stunc", "stunc", "nat_detected", &v);
+		en = dmuci_string_to_boolean(v);
+		*value = (en == true) ? "1" : "0";
+	} else {
+		*value = "0";
+	}
+	return 0;
+}
+
+
+static int get_heart_beat_policy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "heartbeat_enable", "0");
+	return 0;
+}
+
+static int set_heart_beat_policy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value("cwmp", "acs", "heartbeat_enable", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			return 0;
+	}
+	return 0;
+}
+
+
+static int get_heart_beat_policy_reporting_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "heartbeat_interval", "30");
+	return 0;
+}
+
+static int set_heart_beat_policy_reporting_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"20",NULL}}, 1))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value("cwmp", "acs", "heartbeat_interval", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			return 0;
+	}
+	return 0;
+}
+
+static int get_heart_beat_policy_initiation_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("cwmp", "acs", "heartbeat_time", value);
+	return 0;
+}
+
+static int set_heart_beat_policy_initiation_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_dateTime(value))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value("cwmp", "acs", "heartbeat_time", value);
+			bbf_set_end_session_flag(ctx, BBF_END_SESSION_RELOAD);
+			return 0;
+	}
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
+DMOBJ tManagementServerObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"HeartbeatPolicy", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHeartbeatPolicyParams, NULL, BBFDM_CWMP, NULL, "2.12"},
+{0}
+};
+
 /*** ManagementServer. ***/
 DMLEAF tManagementServerParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"URL", &DMWRITE, DMT_STRING, get_management_server_url, set_management_server_url, BBFDM_CWMP},
-{"Username", &DMWRITE, DMT_STRING, get_management_server_username, set_management_server_username, BBFDM_CWMP},
-{"Password", &DMWRITE, DMT_STRING, get_empty, set_management_server_passwd, BBFDM_CWMP},
-{"ScheduleReboot", &DMWRITE, DMT_TIME, get_management_server_schedule_reboot, set_management_server_schedule_reboot, BBFDM_CWMP},
-{"DelayReboot", &DMWRITE, DMT_INT, get_management_server_delay_reboot, set_management_server_delay_reboot, BBFDM_CWMP},
-{"PeriodicInformEnable", &DMWRITE, DMT_BOOL, get_management_server_periodic_inform_enable, set_management_server_periodic_inform_enable,  BBFDM_CWMP},
-{"PeriodicInformInterval", &DMWRITE, DMT_UNINT, get_management_server_periodic_inform_interval, set_management_server_periodic_inform_interval, BBFDM_CWMP},
-{"PeriodicInformTime", &DMWRITE, DMT_TIME, get_management_server_periodic_inform_time, set_management_server_periodic_inform_time, BBFDM_CWMP},
-{"ParameterKey", &DMREAD, DMT_STRING, get_management_server_key, NULL, BBFDM_CWMP},
-{"ConnectionRequestURL", &DMREAD, DMT_STRING, get_management_server_connection_request_url, NULL, BBFDM_CWMP},
-{"ConnectionRequestUsername", &DMWRITE, DMT_STRING, get_management_server_connection_request_username, set_management_server_connection_request_username, BBFDM_CWMP},
-{"ConnectionRequestPassword", &DMWRITE, DMT_STRING, get_empty, set_management_server_connection_request_passwd,  BBFDM_CWMP},
-{"UpgradesManaged", &DMWRITE, DMT_BOOL, get_upgrades_managed, set_upgrades_managed, BBFDM_CWMP},
-{"HTTPCompressionSupported", &DMREAD, DMT_STRING, get_management_server_http_compression_supportted, NULL, BBFDM_CWMP},
-{"HTTPCompression", &DMWRITE, DMT_STRING, get_management_server_http_compression, set_management_server_http_compression, BBFDM_CWMP},
-{"LightweightNotificationProtocolsSupported", &DMREAD, DMT_STRING, get_lwn_protocol_supported, NULL, BBFDM_CWMP},
-{"LightweightNotificationProtocolsUsed", &DMWRITE, DMT_STRING, get_lwn_protocol_used, set_lwn_protocol_used, BBFDM_CWMP},
-{"UDPLightweightNotificationHost", &DMWRITE, DMT_STRING, get_lwn_host, set_lwn_host, BBFDM_CWMP},
-{"UDPLightweightNotificationPort", &DMWRITE, DMT_UNINT, get_lwn_port, set_lwn_port, BBFDM_CWMP},
-{"CWMPRetryMinimumWaitInterval", &DMWRITE, DMT_UNINT, get_management_server_retry_min_wait_interval, set_management_server_retry_min_wait_interval, BBFDM_CWMP},
-{"CWMPRetryIntervalMultiplier", &DMWRITE, DMT_UNINT, get_management_server_retry_interval_multiplier, set_management_server_retry_interval_multiplier, BBFDM_CWMP},
-{"AliasBasedAddressing", &DMREAD, DMT_BOOL, get_alias_based_addressing, NULL, BBFDM_CWMP},
-{"InstanceMode", &DMWRITE, DMT_STRING, get_instance_mode, set_instance_mode, BBFDM_CWMP},
-{"ConnReqAllowedJabberIDs", &DMWRITE, DMT_STRING, get_management_server_conn_rep_allowed_jabber_id, set_management_server_conn_rep_allowed_jabber_id, BBFDM_CWMP},
-{"ConnReqJabberID", &DMREAD, DMT_STRING, get_management_server_conn_req_jabber_id, NULL, BBFDM_CWMP},
-{"ConnReqXMPPConnection", &DMWRITE, DMT_STRING, get_management_server_conn_req_xmpp_connection, set_management_server_conn_req_xmpp_connection, BBFDM_CWMP},
-{"SupportedConnReqMethods", &DMREAD, DMT_STRING, get_management_server_supported_conn_req_methods, NULL, BBFDM_CWMP},
+{"Username", &DMWRITE, DMT_STRING, get_management_server_username, set_management_server_username, BBFDM_CWMP, "2.0"},
+{"Password", &DMWRITE, DMT_STRING, get_empty, set_management_server_passwd, BBFDM_CWMP, "2.0"},
+{"ScheduleReboot", &DMWRITE, DMT_TIME, get_management_server_schedule_reboot, set_management_server_schedule_reboot, BBFDM_CWMP, "2.10"},
+{"DelayReboot", &DMWRITE, DMT_INT, get_management_server_delay_reboot, set_management_server_delay_reboot, BBFDM_CWMP, "2.10"},
+{"PeriodicInformEnable", &DMWRITE, DMT_BOOL, get_management_server_periodic_inform_enable, set_management_server_periodic_inform_enable,  BBFDM_CWMP, "2.0"},
+{"PeriodicInformInterval", &DMWRITE, DMT_UNINT, get_management_server_periodic_inform_interval, set_management_server_periodic_inform_interval, BBFDM_CWMP, "2.0"},
+{"PeriodicInformTime", &DMWRITE, DMT_TIME, get_management_server_periodic_inform_time, set_management_server_periodic_inform_time, BBFDM_CWMP, "2.0"},
+{"ParameterKey", &DMREAD, DMT_STRING, get_management_server_key, NULL, BBFDM_CWMP, "2.0"},
+{"ConnectionRequestURL", &DMREAD, DMT_STRING, get_management_server_connection_request_url, NULL, BBFDM_CWMP, "2.0"},
+{"ConnectionRequestUsername", &DMWRITE, DMT_STRING, get_management_server_connection_request_username, set_management_server_connection_request_username, BBFDM_CWMP, "2.0"},
+{"ConnectionRequestPassword", &DMWRITE, DMT_STRING, get_empty, set_management_server_connection_request_passwd,  BBFDM_CWMP, "2.0"},
+{"UpgradesManaged", &DMWRITE, DMT_BOOL, get_upgrades_managed, set_upgrades_managed, BBFDM_CWMP, "2.0"},
+{"HTTPCompressionSupported", &DMREAD, DMT_STRING, get_management_server_http_compression_supportted, NULL, BBFDM_CWMP, "2.7"},
+{"HTTPCompression", &DMWRITE, DMT_STRING, get_management_server_http_compression, set_management_server_http_compression, BBFDM_CWMP, "2.7"},
+{"LightweightNotificationProtocolsSupported", &DMREAD, DMT_STRING, get_lwn_protocol_supported, NULL, BBFDM_CWMP, "2.7"},
+{"LightweightNotificationProtocolsUsed", &DMWRITE, DMT_STRING, get_lwn_protocol_used, set_lwn_protocol_used, BBFDM_CWMP, "2.7"},
+{"UDPLightweightNotificationHost", &DMWRITE, DMT_STRING, get_lwn_host, set_lwn_host, BBFDM_CWMP, "2.7"},
+{"UDPLightweightNotificationPort", &DMWRITE, DMT_UNINT, get_lwn_port, set_lwn_port, BBFDM_CWMP, "2.7"},
+{"CWMPRetryMinimumWaitInterval", &DMWRITE, DMT_UNINT, get_management_server_retry_min_wait_interval, set_management_server_retry_min_wait_interval, BBFDM_CWMP, "2.0"},
+{"CWMPRetryIntervalMultiplier", &DMWRITE, DMT_UNINT, get_management_server_retry_interval_multiplier, set_management_server_retry_interval_multiplier, BBFDM_CWMP, "2.0"},
+{"AliasBasedAddressing", &DMREAD, DMT_BOOL, get_alias_based_addressing, NULL, BBFDM_CWMP, "2.3"},
+{"InstanceMode", &DMWRITE, DMT_STRING, get_instance_mode, set_instance_mode, BBFDM_CWMP, "2.3"},
+{"SupportedConnReqMethods", &DMREAD, DMT_STRING, get_management_server_supported_conn_req_methods, NULL, BBFDM_CWMP, "2.7"},
+{"InstanceWildcardsSupported", &DMREAD, DMT_BOOL, get_management_server_instance_wildcard_supported, NULL, BBFDM_CWMP, "2.12"},
+{"EnableCWMP", &DMWRITE, DMT_BOOL, get_management_server_enable_cwmp, set_management_server_enable_cwmp, BBFDM_CWMP, "2.12"},
+{"UDPConnectionRequestAddress", &DMREAD, DMT_STRING, get_upd_cr_address, NULL, BBFDM_CWMP, "2.0"},
+{"NATDetected", &DMREAD, DMT_BOOL, get_nat_detected, NULL, BBFDM_CWMP, "2.0"},
+{0}
+};
+
+DMLEAF tHeartbeatPolicyParams[] = {
+{"Enable", &DMWRITE, DMT_BOOL, get_heart_beat_policy_enable, set_heart_beat_policy_enable, BBFDM_CWMP, "2.12"},
+{"ReportingInterval", &DMWRITE, DMT_UNINT, get_heart_beat_policy_reporting_interval, set_heart_beat_policy_reporting_interval, BBFDM_CWMP, "2.12"},
+{"InitiationTime", &DMWRITE, DMT_TIME, get_heart_beat_policy_initiation_time, set_heart_beat_policy_initiation_time, BBFDM_CWMP, "2.12"},
 {0}
 };

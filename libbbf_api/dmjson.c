@@ -116,6 +116,9 @@ json_object *__dmjson_select_obj_in_array_idx(json_object *mainjobj, json_object
 	if (mainjobj == NULL)
 		return NULL;
 
+	if (index < 0)
+		return NULL;
+
 	va_start(arg, argc);
 	for (i = 0; i < argc; i++) {
 		argv[i] = va_arg(arg, char *);
@@ -178,7 +181,7 @@ static char *____dmjson_get_value_array_all(json_object *mainjobj, char *delim, 
 	int i, dlen, rlen;
 
 	delim = (delim) ? delim : ",";
-	dlen = strlen(delim);
+	dlen = (delim) ? DM_STRLEN(delim) : 1;
 
 	for (i = 0, arrobj = NULL, v = ____dmjson_get_value_in_array_idx(mainjobj, &arrobj, i, argv);
 		v;

@@ -11,7 +11,7 @@
 #ifndef __GRE_H
 #define __GRE_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tGREObj[];
 extern DMLEAF tGREParams[];

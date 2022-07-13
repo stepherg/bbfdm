@@ -59,7 +59,7 @@ static int browseRouterAdvertisementInterfaceSettingInst(struct dmctx *dmctx, DM
 
 		// skip the section if option ignore = '1'
 		dmuci_get_value_by_section_string(p->config_section, "ignore", &ignore);
-		if (ignore && strcmp(ignore, "1") == 0)
+		if (ignore && DM_LSTRCMP(ignore, "1") == 0)
 			continue;
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "radv_intf_instance", "radv_intf_alias");
@@ -225,7 +225,7 @@ static int get_RouterAdvertisement_InterfaceSettingNumberOfEntries(char *refpara
 static int get_RouterAdvertisementInterfaceSetting_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ra", value);
-	*value = (*value && strcmp(*value, "disabled") == 0) ? "0" : "1";
+	*value = (*value && DM_LSTRCMP(*value, "disabled") == 0) ? "0" : "1";
 	return 0;
 }
 
@@ -250,7 +250,7 @@ static int set_RouterAdvertisementInterfaceSetting_Enable(char *refparam, struct
 static int get_RouterAdvertisementInterfaceSetting_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ra", value);
-	*value = (*value && strcmp(*value, "disabled") == 0) ? "Disabled" : "Enabled";
+	*value = (*value && DM_LSTRCMP(*value, "disabled") == 0) ? "Disabled" : "Enabled";
 	return 0;
 }
 
@@ -283,26 +283,26 @@ static int get_RouterAdvertisementInterfaceSetting_Interface(char *refparam, str
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &linker);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int set_RouterAdvertisementInterfaceSetting_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", linker);
-				dmfree(linker);
-			}
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", linker ? linker : "");
 			break;
 	}
 	return 0;
@@ -329,7 +329,7 @@ static int get_RouterAdvertisementInterfaceSetting_Prefixes(char *refparam, stru
 
 		uci_path_foreach_option_eq(bbfdm, "dmmap_network_ipv6_prefix", "intf_ipv6_prefix", "section_name", interface, dmmap_s) {
 			dmuci_get_value_by_section_string(dmmap_s, "address", &address);
-			if (address && strcmp(address, ipv6_prefix) == 0) {
+			if (address && DM_STRCMP(address, ipv6_prefix) == 0) {
 				dmuci_get_value_by_section_string(dmmap_s, "ipv6_prefix_instance", &ipv6_prefix_inst);
 				break;
 			}
@@ -661,7 +661,7 @@ static int get_RouterAdvertisementInterfaceSettingOption_Value(char *refparam, s
 	char hex[65535] = {0};
 
 	if (option_value && *option_value)
-		convert_string_to_hex(option_value, hex);
+		convert_string_to_hex(option_value, hex, sizeof(hex));
 
 	*value = (*hex) ? dmstrdup(hex) : "";
 	return 0;
@@ -679,7 +679,7 @@ static int set_RouterAdvertisementInterfaceSettingOption_Value(char *refparam, s
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			convert_hex_to_string(value, res);
+			convert_hex_to_string(value, res, sizeof(res));
 
 			dmuci_get_value_by_section_list(radv_option_s->config_sect, "dns", &dns_list);
 			if (value_exists_in_uci_list(dns_list, radv_option_s->option_value)) {
@@ -699,54 +699,54 @@ static int set_RouterAdvertisementInterfaceSettingOption_Value(char *refparam, s
 /* *** Device.RouterAdvertisement. *** */
 DMOBJ tRouterAdvertisementObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"InterfaceSetting", &DMWRITE, addObjRouterAdvertisementInterfaceSetting, delObjRouterAdvertisementInterfaceSetting, NULL, browseRouterAdvertisementInterfaceSettingInst, NULL, NULL, tRouterAdvertisementInterfaceSettingObj, tRouterAdvertisementInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Interface", NULL}},
+{"InterfaceSetting", &DMWRITE, addObjRouterAdvertisementInterfaceSetting, delObjRouterAdvertisementInterfaceSetting, NULL, browseRouterAdvertisementInterfaceSettingInst, NULL, NULL, tRouterAdvertisementInterfaceSettingObj, tRouterAdvertisementInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Interface", NULL}, "2.2"},
 {0}
 };
 
 DMLEAF tRouterAdvertisementParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_RouterAdvertisement_Enable, set_RouterAdvertisement_Enable, BBFDM_BOTH},
-{"InterfaceSettingNumberOfEntries", &DMREAD, DMT_UNINT, get_RouterAdvertisement_InterfaceSettingNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_RouterAdvertisement_Enable, set_RouterAdvertisement_Enable, BBFDM_BOTH, "2.2"},
+{"InterfaceSettingNumberOfEntries", &DMREAD, DMT_UNINT, get_RouterAdvertisement_InterfaceSettingNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.RouterAdvertisement.InterfaceSetting.{i}. *** */
 DMOBJ tRouterAdvertisementInterfaceSettingObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Option", &DMWRITE, addObjRouterAdvertisementInterfaceSettingOption, delObjRouterAdvertisementInterfaceSettingOption, NULL, browseRouterAdvertisementInterfaceSettingOptionInst, NULL, NULL, NULL, tRouterAdvertisementInterfaceSettingOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Tag", NULL}},
+{"Option", &DMWRITE, addObjRouterAdvertisementInterfaceSettingOption, delObjRouterAdvertisementInterfaceSettingOption, NULL, browseRouterAdvertisementInterfaceSettingOptionInst, NULL, NULL, NULL, tRouterAdvertisementInterfaceSettingOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Tag", NULL}, "2.2"},
 {0}
 };
 
 DMLEAF tRouterAdvertisementInterfaceSettingParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_Enable, set_RouterAdvertisementInterfaceSetting_Enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Alias, set_RouterAdvertisementInterfaceSetting_Alias, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Interface, set_RouterAdvertisementInterfaceSetting_Interface, BBFDM_BOTH},
-//{"ManualPrefixes", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_ManualPrefixes, set_RouterAdvertisementInterfaceSetting_ManualPrefixes, BBFDM_BOTH},
-{"Prefixes", &DMREAD, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Prefixes, NULL, BBFDM_BOTH},
-{"MaxRtrAdvInterval", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_MaxRtrAdvInterval, set_RouterAdvertisementInterfaceSetting_MaxRtrAdvInterval, BBFDM_BOTH},
-{"MinRtrAdvInterval", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_MinRtrAdvInterval, set_RouterAdvertisementInterfaceSetting_MinRtrAdvInterval, BBFDM_BOTH},
-{"AdvDefaultLifetime", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvDefaultLifetime, set_RouterAdvertisementInterfaceSetting_AdvDefaultLifetime, BBFDM_BOTH},
-{"AdvManagedFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvManagedFlag, set_RouterAdvertisementInterfaceSetting_AdvManagedFlag, BBFDM_BOTH},
-{"AdvOtherConfigFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag, set_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag, BBFDM_BOTH},
-{"AdvMobileAgentFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag, set_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag, BBFDM_BOTH},
-{"AdvPreferredRouterFlag", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag, set_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag, BBFDM_BOTH},
-//{"AdvNDProxyFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvNDProxyFlag, set_RouterAdvertisementInterfaceSetting_AdvNDProxyFlag, BBFDM_BOTH},
-{"AdvLinkMTU", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvLinkMTU, set_RouterAdvertisementInterfaceSetting_AdvLinkMTU, BBFDM_BOTH},
-{"AdvReachableTime", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvReachableTime, set_RouterAdvertisementInterfaceSetting_AdvReachableTime, BBFDM_BOTH},
-{"AdvRetransTimer", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvRetransTimer, set_RouterAdvertisementInterfaceSetting_AdvRetransTimer, BBFDM_BOTH},
-{"AdvCurHopLimit", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvCurHopLimit, set_RouterAdvertisementInterfaceSetting_AdvCurHopLimit, BBFDM_BOTH},
-{"OptionNumberOfEntries", &DMREAD, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_OptionNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_Enable, set_RouterAdvertisementInterfaceSetting_Enable, BBFDM_BOTH, "2.2"},
+{"Status", &DMREAD, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Status, NULL, BBFDM_BOTH, "2.2"},
+{"Alias", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Alias, set_RouterAdvertisementInterfaceSetting_Alias, BBFDM_BOTH, "2.2"},
+{"Interface", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Interface, set_RouterAdvertisementInterfaceSetting_Interface, BBFDM_BOTH, "2.2"},
+//{"ManualPrefixes", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_ManualPrefixes, set_RouterAdvertisementInterfaceSetting_ManualPrefixes, BBFDM_BOTH, "2.2"},
+{"Prefixes", &DMREAD, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Prefixes, NULL, BBFDM_BOTH, "2.2"},
+{"MaxRtrAdvInterval", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_MaxRtrAdvInterval, set_RouterAdvertisementInterfaceSetting_MaxRtrAdvInterval, BBFDM_BOTH, "2.2"},
+{"MinRtrAdvInterval", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_MinRtrAdvInterval, set_RouterAdvertisementInterfaceSetting_MinRtrAdvInterval, BBFDM_BOTH, "2.2"},
+{"AdvDefaultLifetime", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvDefaultLifetime, set_RouterAdvertisementInterfaceSetting_AdvDefaultLifetime, BBFDM_BOTH, "2.2"},
+{"AdvManagedFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvManagedFlag, set_RouterAdvertisementInterfaceSetting_AdvManagedFlag, BBFDM_BOTH, "2.2"},
+{"AdvOtherConfigFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag, set_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag, BBFDM_BOTH, "2.2"},
+{"AdvMobileAgentFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag, set_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag, BBFDM_BOTH, "2.2"},
+{"AdvPreferredRouterFlag", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag, set_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag, BBFDM_BOTH, "2.2"},
+//{"AdvNDProxyFlag", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_AdvNDProxyFlag, set_RouterAdvertisementInterfaceSetting_AdvNDProxyFlag, BBFDM_BOTH, "2.2"},
+{"AdvLinkMTU", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvLinkMTU, set_RouterAdvertisementInterfaceSetting_AdvLinkMTU, BBFDM_BOTH, "2.2"},
+{"AdvReachableTime", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvReachableTime, set_RouterAdvertisementInterfaceSetting_AdvReachableTime, BBFDM_BOTH, "2.2"},
+{"AdvRetransTimer", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvRetransTimer, set_RouterAdvertisementInterfaceSetting_AdvRetransTimer, BBFDM_BOTH, "2.2"},
+{"AdvCurHopLimit", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_AdvCurHopLimit, set_RouterAdvertisementInterfaceSetting_AdvCurHopLimit, BBFDM_BOTH, "2.2"},
+{"OptionNumberOfEntries", &DMREAD, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_OptionNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.RouterAdvertisement.InterfaceSetting.{i}.Option.{i}. *** */
 DMLEAF tRouterAdvertisementInterfaceSettingOptionParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSettingOption_Enable, set_RouterAdvertisementInterfaceSettingOption_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSettingOption_Alias, set_RouterAdvertisementInterfaceSettingOption_Alias, BBFDM_BOTH},
-{"Tag", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSettingOption_Tag, set_RouterAdvertisementInterfaceSettingOption_Tag, BBFDM_BOTH},
-{"Value", &DMWRITE, DMT_HEXBIN, get_RouterAdvertisementInterfaceSettingOption_Value, set_RouterAdvertisementInterfaceSettingOption_Value, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSettingOption_Enable, set_RouterAdvertisementInterfaceSettingOption_Enable, BBFDM_BOTH, "2.2"},
+{"Alias", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSettingOption_Alias, set_RouterAdvertisementInterfaceSettingOption_Alias, BBFDM_BOTH, "2.2"},
+{"Tag", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSettingOption_Tag, set_RouterAdvertisementInterfaceSettingOption_Tag, BBFDM_BOTH, "2.2"},
+{"Value", &DMWRITE, DMT_HEXBIN, get_RouterAdvertisementInterfaceSettingOption_Value, set_RouterAdvertisementInterfaceSettingOption_Value, BBFDM_BOTH, "2.2"},
 {0}
 };

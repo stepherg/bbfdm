@@ -11,7 +11,7 @@
 #ifndef __SERVICESVOICESERVICECAPABILITIES_H
 #define __SERVICESVOICESERVICECAPABILITIES_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tServicesVoiceServiceCapabilitiesObj[];
 extern DMLEAF tServicesVoiceServiceCapabilitiesParams[];

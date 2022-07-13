@@ -57,17 +57,15 @@ static int get_ServicesVoiceServiceCapabilities_MaxSessionsPerLine(char *refpara
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCapabilities_MaxSessionsPerExtension(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "2";
+	return 0;
+}
+
 static int get_ServicesVoiceServiceCapabilities_MaxSessionCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *max_line;
-
-	db_get_value_string("hw", "board", "VoicePorts", &max_line);
-	if (max_line && *max_line) {
-		int max_session = 2 * atoi(max_line);
-		dmasprintf(value, "%d", max_session);
-	} else
-		*value = "-1";
-
+	*value = "4";
 	return 0;
 }
 
@@ -172,6 +170,16 @@ static int get_ServicesVoiceServiceCapabilitiesCodec_PacketizationPeriod(char *r
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCapabilities_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_name(refparam, ctx, data, instance, value, "Capabilities", "Capabilities_inst");
+}
+
+static int set_ServicesVoiceServiceCapabilities_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_name(refparam, ctx, data, instance, value, action, "Capabilities", "Capabilities_inst");
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -188,6 +196,7 @@ DMLEAF tServicesVoiceServiceCapabilitiesParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"MaxLineCount", &DMREAD, DMT_INT, get_ServicesVoiceServiceCapabilities_MaxLineCount, NULL, BBFDM_BOTH},
 {"MaxSessionsPerLine", &DMREAD, DMT_INT, get_ServicesVoiceServiceCapabilities_MaxSessionsPerLine, NULL, BBFDM_BOTH},
+{"MaxSessionsPerExtension", &DMREAD, DMT_INT, get_ServicesVoiceServiceCapabilities_MaxSessionsPerExtension, NULL, BBFDM_BOTH},
 {"MaxSessionCount", &DMREAD, DMT_INT, get_ServicesVoiceServiceCapabilities_MaxSessionCount, NULL, BBFDM_BOTH},
 {"NetworkConnectionModes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilities_NetworkConnectionModes, NULL, BBFDM_BOTH},
 {"UserConnectionModes", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilities_UserConnectionModes, NULL, BBFDM_BOTH},
@@ -229,6 +238,7 @@ DMLEAF tServicesVoiceServiceCapabilitiesCodecParams[] = {
 {"Codec", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesCodec_Codec, NULL, BBFDM_BOTH},
 {"BitRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCapabilitiesCodec_BitRate, NULL, BBFDM_BOTH},
 {"PacketizationPeriod", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCapabilitiesCodec_PacketizationPeriod, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCapabilities_Alias, set_ServicesVoiceServiceCapabilities_Alias, BBFDM_BOTH},
 {0}
 };
 

@@ -12,7 +12,7 @@
 #ifndef __IOPSYS_DEVICE_H
 #define __IOPSYS_DEVICE_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tIOPSYS_DeviceObj[];
 

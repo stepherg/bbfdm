@@ -103,7 +103,7 @@ static int set_x_test_com_dropbear_alias(char *refparam, struct dmctx *ctx, void
 static int get_x_test_com_dropbear_password_auth(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *res = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "PasswordAuth", "1");
-	*value = ((strcmp(res, "on") == 0) || *res == '1') ? "1" : "0";
+	*value = ((DM_STRCMP(res, "on") == 0) || *res == '1') ? "1" : "0";
 	return 0;
 }
 
@@ -127,7 +127,7 @@ static int set_x_test_com_dropbear_password_auth(char *refparam, struct dmctx *c
 static int get_x_test_com_dropbear_root_password_auth(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *res = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "RootPasswordAuth", "1");
-	*value = ((strcmp(res, "on") == 0) || *res == '1') ? "1" : "0";
+	*value = ((DM_STRCMP(res, "on") == 0) || *res == '1') ? "1" : "0";
 	return 0;
 }
 
@@ -306,7 +306,7 @@ static int set_x_test_com_dropbear_ssh_keepalive(char *refparam, struct dmctx *c
 		case VALUECHECK:
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "SSHKeepAlive", (strcmp(value, "300") == 0) ? "" : value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "SSHKeepAlive", (DM_STRCMP(value, "300") == 0) ? "" : value);
 
 			return 0;
 	}

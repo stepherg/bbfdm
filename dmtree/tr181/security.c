@@ -10,17 +10,31 @@
 
 #include "security.h"
 
+#if defined(LOPENSSL) || defined(LWOLFSSL) || defined(LMBEDTLS)
 #define DATE_LEN 128
 #define MAX_CERT 32
 
+#ifdef LMBEDTLS
+#include <mbedtls/x509_crt.h>
+#include <mbedtls/base64.h>
+#endif
+#ifdef LOPENSSL
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#endif
+#ifdef LWOLFSSL
+#include <wolfssl/options.h>
+#include <wolfssl/openssl/x509.h>
+#include <wolfssl/openssl/pem.h>
+#endif
 static char certifcates_paths[MAX_CERT][256];
 
 struct certificate_profile {
 	char *path;
-#ifdef LOPENSSL
-	X509 *openssl_cert;
-#elif LMBEDTLS
-	mbedtls_x509_crt mbdtls_cert;
+#ifdef LMBEDTLS
+	mbedtls_x509_crt cert;
+#else
+	X509 *cert;
 #endif
 	struct uci_section *dmmap_sect;
 };
@@ -29,82 +43,22 @@ struct certificate_profile {
 * INIT
 **************************************************************/
 void init_certificate(char *path,
-#ifdef LOPENSSL
-X509 *cert,
-#elif LMBEDTLS
+#ifdef LMBEDTLS
 mbedtls_x509_crt cert,
+#else
+X509 *cert,
 #endif
 struct uci_section *dmsect, struct certificate_profile *certprofile)
 {
 	certprofile->path = path;
-#ifdef LOPENSSL
-	certprofile->openssl_cert = cert;
-#elif LMBEDTLS
-	certprofile->mbdtls_cert = cert;
-#endif
+	certprofile->cert = cert;
 	certprofile->dmmap_sect = dmsect;
 }
 
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
-#ifdef LOPENSSL
-static char *get_certificate_sig_alg(int sig_nid)
-{
-	switch(sig_nid) {
-	case NID_sha256WithRSAEncryption:
-		return LN_sha256WithRSAEncryption;
-	case NID_sha384WithRSAEncryption:
-		return LN_sha384WithRSAEncryption;
-	case NID_sha512WithRSAEncryption:
-		return LN_sha512WithRSAEncryption;
-	case NID_sha224WithRSAEncryption:
-		return LN_sha224WithRSAEncryption;
-	case NID_sha512_224WithRSAEncryption:
-		return LN_sha512_224WithRSAEncryption;
-	case NID_sha512_256WithRSAEncryption:
-		return LN_sha512_224WithRSAEncryption;
-	case NID_pbeWithMD2AndDES_CBC:
-		return LN_pbeWithMD2AndDES_CBC;
-	case NID_pbeWithMD5AndDES_CBC:
-		return LN_pbeWithMD5AndDES_CBC;
-	case NID_pbeWithMD2AndRC2_CBC:
-		return LN_pbeWithMD5AndDES_CBC;
-	case NID_pbeWithMD5AndRC2_CBC:
-		return LN_pbeWithMD5AndRC2_CBC;
-	case NID_pbeWithSHA1AndDES_CBC:
-		return LN_pbeWithSHA1AndDES_CBC;
-	case NID_pbeWithSHA1AndRC2_CBC:
-		return LN_pbeWithSHA1AndDES_CBC;
-	case NID_pbe_WithSHA1And128BitRC4:
-		return LN_pbe_WithSHA1And128BitRC4;
-	case NID_pbe_WithSHA1And40BitRC4:
-		return LN_pbe_WithSHA1And40BitRC4;
-	case NID_pbe_WithSHA1And3_Key_TripleDES_CBC:
-		return LN_pbe_WithSHA1And3_Key_TripleDES_CBC;
-	case NID_pbe_WithSHA1And2_Key_TripleDES_CBC:
-		return LN_pbe_WithSHA1And2_Key_TripleDES_CBC;
-	case NID_pbe_WithSHA1And128BitRC2_CBC:
-		return LN_pbe_WithSHA1And128BitRC2_CBC;
-	case NID_pbe_WithSHA1And40BitRC2_CBC:
-		return LN_pbe_WithSHA1And40BitRC2_CBC;
-	case NID_sm3WithRSAEncryption:
-		return LN_sm3WithRSAEncryption;
-	case NID_shaWithRSAEncryption:
-		return LN_shaWithRSAEncryption;
-	case NID_md2WithRSAEncryption:
-		return LN_md2WithRSAEncryption;
-	case NID_md4WithRSAEncryption:
-		return LN_md4WithRSAEncryption;
-	case NID_md5WithRSAEncryption:
-		return LN_md5WithRSAEncryption;
-	case NID_sha1WithRSAEncryption:
-		return LN_sha1WithRSAEncryption;
-	default:
-		return "";
-	}
-}
-#elif LMBEDTLS
+#ifdef LMBEDTLS
 static char *get_certificate_md(mbedtls_md_type_t sig_md)
 {
 	switch(sig_md) {
@@ -152,18 +106,41 @@ static char *get_certificate_pk(mbedtls_pk_type_t sig_pk)
 	}
 	return "";
 }
+#else
+static char *get_certificate_sig_alg(int sig_nid)
+{
+	switch(sig_nid) {
+	case NID_sha256WithRSAEncryption:
+		return "sha256WithRSAEncryption";
+	case NID_sha384WithRSAEncryption:
+		return "sha384WithRSAEncryption";
+	case NID_sha512WithRSAEncryption:
+		return "sha512WithRSAEncryption";
+	case NID_sha224WithRSAEncryption:
+		return "sha224WithRSAEncryption";
+	case NID_md5WithRSAEncryption:
+		return "md5WithRSAEncryption";
+	case NID_sha1WithRSAEncryption:
+		return "sha1WithRSAEncryption";
+	default:
+		return "";
+	}
+	return "";
+}
 #endif
 
 static char *generate_serial_number(char *text, int length)
 {
-	int i, j;
 	char *hex = (char *)dmcalloc(100, sizeof(char));
+	unsigned pos = 0;
 
-	for (i = 0, j = 0; i < length; ++i, j += 3) {
-		sprintf(hex + j, "%02x", text[i] & 0xff);
-		if (i < length-1)
-			sprintf(hex + j + 2, "%c", ':');
+	for (int i = 0; i < length; i++) {
+		pos += snprintf(&hex[pos], 100 - pos, "%02x:", text[i] & 0xff);
 	}
+
+	if (pos)
+		hex[pos - 1] = 0;
+
 	return hex;
 }
 
@@ -172,14 +149,14 @@ static void get_certificate_paths(void)
 	struct uci_section *s = NULL;
 	int cidx;
 
-	for (cidx=0; cidx<MAX_CERT; cidx++)
+	for (cidx = 0; cidx < MAX_CERT; cidx++)
 		memset(certifcates_paths[cidx], '\0', 256);
 
 	cidx = 0;
 
-	uci_foreach_sections("owsd", "owsd-listen", s) {
+	uci_foreach_sections("nginx", "server", s) {
 		char *cert;
-		dmuci_get_value_by_section_string(s, "cert", &cert);
+		dmuci_get_value_by_section_string(s, "ssl_certificate", &cert);
 		if (*cert == '\0')
 			continue;
 		if (cidx >= MAX_CERT)
@@ -222,61 +199,56 @@ static void get_certificate_paths(void)
 **************************************************************/
 static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-#if defined(LOPENSSL) || defined(LMBEDTLS)
 	char *inst = NULL;
 	struct uci_section *dmmap_sect = NULL;
 	struct certificate_profile certificateprofile = {};
+	int i, status;
 
 	get_certificate_paths();
-	int i;
-	for (i = 0; i < MAX_CERT; i++) {
-		if(!strlen(certifcates_paths[i]))
+
+	for (i = 0, status = DM_OK; i < MAX_CERT && status != DM_STOP; i++) {
+
+		if(!DM_STRLEN(certifcates_paths[i]))
 			break;
-#ifdef LOPENSSL
+
+#ifdef LMBEDTLS
+		mbedtls_x509_crt cert;
+
+		mbedtls_x509_crt_init(&cert);
+		if (mbedtls_x509_crt_parse_file(&cert, certifcates_paths[i]) < 0)
+			continue;
+#else
 		FILE *fp = fopen(certifcates_paths[i], "r");
 		if (fp == NULL)
 			continue;
+
 		X509 *cert = PEM_read_X509(fp, NULL, NULL, NULL);
 		if (!cert) {
 			fclose(fp);
 			continue;
 		}
+#endif
 
 		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_security", "security_certificate", "path", certifcates_paths[i])) == NULL) {
 			dmuci_add_section_bbfdm("dmmap_security", "security_certificate", &dmmap_sect);
 			dmuci_set_value_by_section_bbfdm(dmmap_sect, "path", certifcates_paths[i]);
 		}
+
 		init_certificate(certifcates_paths[i], cert, dmmap_sect, &certificateprofile);
 
 		inst = handle_instance(dmctx, parent_node, dmmap_sect, "security_certificate_instance", "security_certificate_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst) == DM_STOP)
-			break;
+		status = DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst);
 
+#ifdef LMBEDTLS
+		mbedtls_x509_crt_free(&cert);
+#else
 		X509_free(cert);
 		cert = NULL;
 		fclose(fp);
 		fp = NULL;
-#elif LMBEDTLS
-		mbedtls_x509_crt cacert;
-		mbedtls_x509_crt_init( &cacert );
-		int ret = mbedtls_x509_crt_parse_file( &cacert, certifcates_paths[i]);
-		if (ret < 0)
-			continue;
-
-		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_security", "security_certificate", "path", certifcates_paths[i])) == NULL) {
-			dmuci_add_section_bbfdm("dmmap_security", "security_certificate", &dmmap_sect);
-			dmuci_set_value_by_section_bbfdm(dmmap_sect, "path", certifcates_paths[i]);
-		}
-		init_certificate(certifcates_paths[i], cacert, dmmap_sect, &certificateprofile);
-
-		inst = handle_instance(dmctx, parent_node, dmmap_sect, "security_certificate_instance", "security_certificate_alias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst) == DM_STOP)
-			break;
 #endif
 	}
-#endif
 	return 0;
 }
 
@@ -292,121 +264,147 @@ static int get_Security_CertificateNumberOfEntries(char *refparam, struct dmctx 
 
 static int get_SecurityCertificate_LastModif(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
+	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+	char buf[sizeof("AAAA-MM-JJTHH:MM:SSZ")] = "0001-01-01T00:00:00Z";
 	struct stat b;
-	char t[sizeof("AAAA-MM-JJTHH:MM:SSZ")] = "0001-01-01T00:00:00Z";
+
 	if (!stat(cert_profile->path, &b))
-		strftime(t, sizeof(t), "%Y-%m-%dT%H:%M:%SZ", gmtime(&b.st_mtime));
-	*value = dmstrdup(t);
+		strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", gmtime(&b.st_mtime));
+
+	*value = dmstrdup(buf);
 	return 0;
 }
 
 static int get_SecurityCertificate_SerialNumber(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
-#ifdef LOPENSSL
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
-	ASN1_INTEGER *serial = X509_get_serialNumber(cert_profile->openssl_cert);
+	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+
+#ifdef LMBEDTLS
+	*value = generate_serial_number((char *)cert_profile->cert.serial.p, cert_profile->cert.serial.len);
+#else
+	ASN1_INTEGER *serial = X509_get_serialNumber(cert_profile->cert);
 	*value = generate_serial_number((char *)serial->data, serial->length);
-#elif LMBEDTLS
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
-	*value = generate_serial_number(cert_profile->mbdtls_cert.serial.p, cert_profile->mbdtls_cert.serial.len);
 #endif
+
 	return 0;
 }
 
 static int get_SecurityCertificate_Issuer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-#ifdef LOPENSSL
 	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
 	char buf[256] = {0};
 
-	X509_NAME_oneline(X509_get_issuer_name(cert_profile->openssl_cert), buf, sizeof(buf));
+#ifdef LMBEDTLS
+	if (mbedtls_x509_dn_gets(buf, sizeof(buf), &cert_profile->cert.issuer) < 0)
+		return -1;
+
+	*value = dmstrdup(buf);
+#else
+	X509_NAME_oneline(X509_get_issuer_name(cert_profile->cert), buf, sizeof(buf));
 	*value = dmstrdup(buf);
 	if (*value[0] == '/')
 		(*value)++;
 	*value = replace_char(*value, '/', ' ');
-#elif LMBEDTLS
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
-	size_t olen;
-	unsigned char issuer[4096];
-	int ret2 = mbedtls_base64_encode(issuer, 4096, &olen, cert_profile->mbdtls_cert.issuer.val.p, cert_profile->mbdtls_cert.issuer.val.len );
-	if(ret2 != 0)
-		return 0;
-	*value = decode64(issuer);
 #endif
+
 	return 0;
 }
 
 static int get_SecurityCertificate_NotBefore(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "0001-01-01T00:00:00Z";
-#ifdef LOPENSSL
-	struct tm not_before_time;
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
+	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+
+#ifdef LMBEDTLS
+	dmasprintf(value, "%04d-%02d-%02dT%02d:%02d:%02dZ", cert_profile->cert.valid_from.year,
+														cert_profile->cert.valid_from.mon,
+														cert_profile->cert.valid_from.day,
+														cert_profile->cert.valid_from.hour,
+														cert_profile->cert.valid_from.min,
+														cert_profile->cert.valid_from.sec);
+#else
 	char not_before_str[DATE_LEN];
-	const ASN1_TIME *not_before = X509_get0_notBefore(cert_profile->openssl_cert);
-	ASN1_TIME_to_tm(not_before, &not_before_time);
-	strftime(not_before_str, sizeof(not_before_str), "%Y-%m-%dT%H:%M:%SZ", &not_before_time);
-	*value = dmstrdup(not_before_str);
-#elif LMBEDTLS
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
-	dmasprintf(value, "%d-%d-%dT%d:%d:%dZ", cert_profile->mbdtls_cert.valid_from.year, cert_profile->mbdtls_cert.valid_from.mon, cert_profile->mbdtls_cert.valid_from.day, cert_profile->mbdtls_cert.valid_from.hour,    cert_profile->mbdtls_cert.valid_from.min, cert_profile->mbdtls_cert.valid_from.sec);
+	struct tm tm;
+
+	const ASN1_TIME *not_before = X509_get0_notBefore(cert_profile->cert);
+
+#ifdef LWOLFSSL
+	ASN1_TIME_to_string((ASN1_TIME *)not_before, not_before_str, DATE_LEN);
+	if (!strptime(not_before_str, "%b %d %H:%M:%S %Y", &tm))
+		return -1;
+#else
+	ASN1_TIME_to_tm(not_before, &tm);
 #endif
+
+	strftime(not_before_str, sizeof(not_before_str), "%Y-%m-%dT%H:%M:%SZ", &tm);
+	*value = dmstrdup(not_before_str);
+#endif
+
 	return 0;
 }
 
 static int get_SecurityCertificate_NotAfter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "0001-01-01T00:00:00Z";
-#ifdef LOPENSSL
-	struct tm not_after_time;
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
+	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+
+#ifdef LMBEDTLS
+	dmasprintf(value, "%04d-%02d-%02dT%02d:%02d:%02dZ", cert_profile->cert.valid_to.year,
+														cert_profile->cert.valid_to.mon,
+														cert_profile->cert.valid_to.day,
+														cert_profile->cert.valid_to.hour,
+														cert_profile->cert.valid_to.min,
+														cert_profile->cert.valid_to.sec);
+#else
 	char not_after_str[DATE_LEN];
-	const ASN1_TIME *not_after = X509_get0_notAfter(cert_profile->openssl_cert);
-	ASN1_TIME_to_tm(not_after, &not_after_time);
-	strftime(not_after_str, sizeof(not_after_str), "%Y-%m-%dT%H:%M:%SZ", &not_after_time);
-	*value = dmstrdup(not_after_str);
-#elif LMBEDTLS
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
-	dmasprintf(value, "%d-%d-%dT%d:%d:%dZ", cert_profile->mbdtls_cert.valid_to.year, cert_profile->mbdtls_cert.valid_to.mon, cert_profile->mbdtls_cert.valid_to.day, cert_profile->mbdtls_cert.valid_to.hour,    cert_profile->mbdtls_cert.valid_to.min, cert_profile->mbdtls_cert.valid_to.sec);
+	struct tm tm;
+
+	const ASN1_TIME *not_after = X509_get0_notAfter(cert_profile->cert);
+
+#ifdef LWOLFSSL
+	ASN1_TIME_to_string((ASN1_TIME *)not_after, not_after_str, DATE_LEN);
+	if (!strptime(not_after_str, "%b %d %H:%M:%S %Y", &tm))
+		return -1;
+#else
+	ASN1_TIME_to_tm((ASN1_TIME *)not_after, &tm);
 #endif
+
+	strftime(not_after_str, sizeof(not_after_str), "%Y-%m-%dT%H:%M:%SZ", &tm);
+	*value = dmstrdup(not_after_str);
+#endif
+
 	return 0;
 }
 
 static int get_SecurityCertificate_Subject(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-#ifdef LOPENSSL
 	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
 	char buf[256] = {0};
 
-	X509_NAME_oneline(X509_get_subject_name(cert_profile->openssl_cert), buf, sizeof(buf));
+#if LMBEDTLS
+	if (mbedtls_x509_dn_gets(buf, sizeof(buf), &cert_profile->cert.subject) < 0)
+		return -1;
+
+	*value = dmstrdup(buf);
+#else
+	X509_NAME_oneline(X509_get_subject_name(cert_profile->cert), buf, sizeof(buf));
 	*value = dmstrdup(buf);
 	if (*value[0] == '/')
 		(*value)++;
 	*value = replace_char(*value, '/', ' ');
-#elif LMBEDTLS
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
-	size_t olen;
-	unsigned char issuer[4096];
-	int ret2 = mbedtls_base64_encode(issuer, 4096, &olen, cert_profile->mbdtls_cert.subject.val.p, cert_profile->mbdtls_cert.subject.val.len );
-	if(ret2 != 0)
-		return 0;
-	*value = decode64(issuer);
 #endif
+
 	return 0;
 }
 
 static int get_SecurityCertificate_SignatureAlgorithm(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
-#ifdef LOPENSSL
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
-	*value = dmstrdup(get_certificate_sig_alg(X509_get_signature_nid(cert_profile->openssl_cert)));
-#elif LMBEDTLS
-	struct certificate_profile *cert_profile = (struct certificate_profile*)data;
-	dmasprintf(value, "%sWith%sEncryptionn", get_certificate_md(cert_profile->mbdtls_cert.sig_md), get_certificate_pk(cert_profile->mbdtls_cert.sig_pk));
+	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+
+#ifdef LMBEDTLS
+	dmasprintf(value, "%sWith%sEncryption", get_certificate_md(cert_profile->cert.sig_md), get_certificate_pk(cert_profile->cert.sig_pk));
+#else
+	*value = dmstrdup(get_certificate_sig_alg(X509_get_signature_nid(cert_profile->cert)));
 #endif
+
 	return 0;
 }
 
@@ -415,28 +413,30 @@ static int get_SecurityCertificate_SignatureAlgorithm(char *refparam, struct dmc
 ***********************************************************************************************************************************/
 /* *** Device.Security. *** */
 DMOBJ tSecurityObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Certificate", &DMREAD, NULL, NULL, NULL, browseSecurityCertificateInst, NULL, NULL, NULL, tSecurityCertificateParams, NULL, BBFDM_BOTH, LIST_KEY{"SerialNumber", "Issuer", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Certificate", &DMREAD, NULL, NULL, NULL, browseSecurityCertificateInst, NULL, NULL, NULL, tSecurityCertificateParams, NULL, BBFDM_BOTH, LIST_KEY{"SerialNumber", "Issuer", NULL}, "2.4"},
 {0}
 };
 
 DMLEAF tSecurityParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"CertificateNumberOfEntries", &DMREAD, DMT_UNINT, get_Security_CertificateNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"CertificateNumberOfEntries", &DMREAD, DMT_UNINT, get_Security_CertificateNumberOfEntries, NULL, BBFDM_BOTH, "2.4"},
 {0}
 };
 
 /* *** Device.Security.Certificate.{i}. *** */
 DMLEAF tSecurityCertificateParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-//{"Enable", &DMWRITE, DMT_BOOL, get_SecurityCertificate_Enable, set_SecurityCertificate_Enable, BBFDM_BOTH},
-{"LastModif", &DMREAD, DMT_TIME, get_SecurityCertificate_LastModif, NULL, BBFDM_BOTH},
-{"SerialNumber", &DMREAD, DMT_STRING, get_SecurityCertificate_SerialNumber, NULL, BBFDM_BOTH},
-{"Issuer", &DMREAD, DMT_STRING, get_SecurityCertificate_Issuer, NULL, BBFDM_BOTH},
-{"NotBefore", &DMREAD, DMT_TIME, get_SecurityCertificate_NotBefore, NULL, BBFDM_BOTH},
-{"NotAfter", &DMREAD, DMT_TIME, get_SecurityCertificate_NotAfter, NULL, BBFDM_BOTH},
-{"Subject", &DMREAD, DMT_STRING, get_SecurityCertificate_Subject, NULL, BBFDM_BOTH},
-//{"SubjectAlt", &DMREAD, DMT_STRING, get_SecurityCertificate_SubjectAlt, NULL, BBFDM_BOTH},
-{"SignatureAlgorithm", &DMREAD, DMT_STRING, get_SecurityCertificate_SignatureAlgorithm, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+//{"Enable", &DMWRITE, DMT_BOOL, get_SecurityCertificate_Enable, set_SecurityCertificate_Enable, BBFDM_BOTH, "2.4"},
+{"LastModif", &DMREAD, DMT_TIME, get_SecurityCertificate_LastModif, NULL, BBFDM_BOTH, "2.4"},
+{"SerialNumber", &DMREAD, DMT_STRING, get_SecurityCertificate_SerialNumber, NULL, BBFDM_BOTH, "2.4"},
+{"Issuer", &DMREAD, DMT_STRING, get_SecurityCertificate_Issuer, NULL, BBFDM_BOTH, "2.4"},
+{"NotBefore", &DMREAD, DMT_TIME, get_SecurityCertificate_NotBefore, NULL, BBFDM_BOTH, "2.4"},
+{"NotAfter", &DMREAD, DMT_TIME, get_SecurityCertificate_NotAfter, NULL, BBFDM_BOTH, "2.4"},
+{"Subject", &DMREAD, DMT_STRING, get_SecurityCertificate_Subject, NULL, BBFDM_BOTH, "2.4"},
+//{"SubjectAlt", &DMREAD, DMT_STRING, get_SecurityCertificate_SubjectAlt, NULL, BBFDM_BOTH, "2.4"},
+{"SignatureAlgorithm", &DMREAD, DMT_STRING, get_SecurityCertificate_SignatureAlgorithm, NULL, BBFDM_BOTH, "2.4"},
 {0}
 };
+
+#endif

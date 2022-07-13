@@ -1,0 +1,24 @@
+#!/bin/sh
+
+. /usr/share/libubox/jshn.sh
+
+case "$1" in
+        list)
+                echo '{ "list" : {}, "get": {"path":"str"}}'
+        ;;
+        call)
+                case "$2" in
+                        list)
+                                cat /tmp/proxd.data 2>/dev/null
+                        ;;
+                        get)
+							read input;
+							json_load "$input"
+							json_get_var path path
+							json_init
+							json_add_string "Description" "$path"
+							json_dump
+                        ;;
+                esac
+        ;;
+esac

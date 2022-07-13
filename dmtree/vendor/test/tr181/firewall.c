@@ -24,7 +24,7 @@ static int get_rule_icmp_type(char *refparam, struct dmctx *ctx, void *data, cha
 			ptr = dmstrdup(*value);
 			dmfree(*value);
 
-			if (strlen(ptr) == 0)
+			if (DM_STRLEN(ptr) == 0)
 				dmasprintf(value, "%s", e->name);
 			else {
 				dmasprintf(value, "%s %s", ptr, e->name);

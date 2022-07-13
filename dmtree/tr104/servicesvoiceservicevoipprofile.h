@@ -11,7 +11,7 @@
 #ifndef __SERVICESVOICESERVICEVOIPPROFILE_H
 #define __SERVICESVOICESERVICEVOIPPROFILE_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tServicesVoiceServiceVoIPProfileObj[];
 extern DMLEAF tServicesVoiceServiceVoIPProfileParams[];

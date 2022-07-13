@@ -11,7 +11,7 @@
 #ifndef __HOSTS_H
 #define __HOSTS_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tHostsObj[];
 extern DMLEAF tHostsParams[];

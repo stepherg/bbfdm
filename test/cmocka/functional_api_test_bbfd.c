@@ -3,11 +3,18 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+#include <libubus.h>
 #include <libbbf_api/dmcommon.h>
 #include <libbbf_api/dmmem.h>
 
+static struct ubus_context *ubus_ctx = NULL;
 static int setup_teardown(void **state)
 {
+	ubus_ctx = ubus_connect(NULL);
+	if (ubus_ctx == NULL)
+		return -1;
+
+	dmubus_configure(ubus_ctx);
 	bbf_uci_init();
 	return 0;
 }
@@ -16,6 +23,11 @@ static int group_teardown(void **state)
 {
 	bbf_uci_exit();
 	dmubus_free();
+	if (ubus_ctx != NULL) {
+		ubus_free(ubus_ctx);
+		ubus_ctx = NULL;
+	}
+
 	dmcleanmem();
 	return 0;
 }
@@ -131,26 +143,26 @@ static void test_bbf_api_uci(void **state)
 	assert_string_equal(value, "FirstClass");
 
 	/*
-	 * Test of varstate_get_value_string function
+	 * Test of dmuci_get_option_value_string_varstate function
 	 */
 
-	// varstate_get_value_string: test with correct section/option and wrong config name
-	uci_res = varstate_get_value_string("cwm", "acs", "dhcp_url", &value);
+	// dmuci_get_option_value_string_varstate: test with correct section/option and wrong config name
+	uci_res = dmuci_get_option_value_string_varstate("cwm", "acs", "dhcp_url", &value);
 	assert_int_equal(uci_res, -1);
 	assert_string_equal(value, "");
 
-	// varstate_get_value_string: test with correct config/option and wrong section name
-	uci_res = varstate_get_value_string("cwmp", "acss", "dhcp_url", &value);
+	// dmuci_get_option_value_string_varstate: test with correct config/option and wrong section name
+	uci_res = dmuci_get_option_value_string_varstate("cwmp", "acss", "dhcp_url", &value);
 	assert_int_equal(uci_res, -1);
 	assert_string_equal(value, "");
 
-	// varstate_get_value_string: test with correct config/section and wrong option name
-	uci_res = varstate_get_value_string("cwmp", "acs", "hcp_url", &value);
+	// dmuci_get_option_value_string_varstate: test with correct config/section and wrong option name
+	uci_res = dmuci_get_option_value_string_varstate("cwmp", "acs", "hcp_url", &value);
 	assert_int_equal(uci_res, -1);
 	assert_string_equal(value, "");
 
-	// varstate_get_value_string: test correct config/section/option
-	uci_res = varstate_get_value_string("cwmp", "acs", "dhcp_url", &value);
+	// dmuci_get_option_value_string_varstate: test correct config/section/option
+	uci_res = dmuci_get_option_value_string_varstate("cwmp", "acs", "dhcp_url", &value);
 	assert_int_equal(uci_res, 0);
 	assert_string_equal(value, "http://192.168.1.123:8080/openacs");
 
@@ -205,16 +217,16 @@ static void test_bbf_api_uci(void **state)
 	 */
 
 	// dmuci_set_value: test with correct section/option and wrong config name
-	value = dmuci_set_value("netwo", "wan", "vendorid", "dg400prime");
-	assert_string_equal(value, "");
+	uci_res = dmuci_set_value("netwo", "wan", "vendorid", "dg400prime");
+	assert_int_equal(uci_res, -1);
 
 	// dmuci_set_value: test with correct config/option and wrong section name
-	value = dmuci_set_value("network", "wann", "vendorid", "dg400prime");
-	assert_string_equal(value, "");
+	uci_res = dmuci_set_value("network", "wann", "vendorid", "dg400prime");
+	assert_int_equal(uci_res, -1);
 
 	// dmuci_set_value: test correct config/section/option
-	value = dmuci_set_value("network", "wan", "vendorid", "dg400prime");
-	assert_string_equal(value, "dg400prime");
+	uci_res = dmuci_set_value("network", "wan", "vendorid", "dg400prime");
+	assert_int_equal(uci_res, 0);
 	uci_res = dmuci_commit_package("network");
 	assert_int_equal(uci_res, 0);
 	uci_res = dmuci_get_option_value_string("network", "wan", "vendorid", &value);
@@ -222,8 +234,8 @@ static void test_bbf_api_uci(void **state)
 	assert_string_equal(value, "dg400prime");
 
 	// dmuci_set_value: test correct config/section/option
-	value = dmuci_set_value("dropbear", "@dropbear[0]", "Port", "7845");
-	assert_string_equal(value, "7845");
+	uci_res = dmuci_set_value("dropbear", "@dropbear[0]", "Port", "7845");
+	assert_int_equal(uci_res, 0);
 	uci_res = dmuci_commit_package("dropbear");
 	assert_int_equal(uci_res, 0);
 	uci_res = dmuci_get_option_value_string("dropbear", "@dropbear[0]", "Port", &value);
@@ -235,8 +247,8 @@ static void test_bbf_api_uci(void **state)
 	 */
 
 	// dmuci_add_section: test with only config name
-	value = dmuci_add_section("network", "section_test", &uci_s);
-	assert_string_not_equal(value, "");
+	uci_res = dmuci_add_section("network", "section_test", &uci_s);
+	assert_int_equal(uci_res, 0);
 	assert_non_null(uci_s);
 	uci_res = dmuci_commit_package("network");
 	assert_int_equal(uci_res, 0);
@@ -301,8 +313,8 @@ static void test_bbf_api_uci(void **state)
 	 */
 
 	// dmuci_set_value_by_section: test with correct option name
-	value = dmuci_set_value_by_section(uci_s, "reqopts", "44");
-	assert_string_equal(value, "44");
+	uci_res = dmuci_set_value_by_section(uci_s, "reqopts", "44");
+	assert_int_equal(uci_res, 0);
 	uci_res = dmuci_get_value_by_section_string(uci_s, "reqopts", &value);
 	assert_int_equal(uci_res, 0);
 	assert_string_equal(value, "44");
@@ -398,11 +410,11 @@ static void test_bbf_api_ubus(void **state)
 	 */
 
 	// dmubus_call: test Wrong obj
-	dmubus_call("ucii", "configs", UBUS_ARGS{}, 0, &res);
+	dmubus_call("ucii", "configs", UBUS_ARGS{0}, 0, &res);
 	assert_null(res);
 
 	// dmubus_call: test Wrong method
-	dmubus_call("uci", "configss", UBUS_ARGS{}, 0, &res);
+	dmubus_call("uci", "configss", UBUS_ARGS{0}, 0, &res);
 	assert_null(res);
 
 	// dmubus_call: test Wrong argument
@@ -410,7 +422,7 @@ static void test_bbf_api_ubus(void **state)
 	assert_null(res);
 
 	// dmubus_call: test correct obj/method
-	dmubus_call("uci", "configs", UBUS_ARGS{}, 0, &res);
+	dmubus_call("uci", "configs", UBUS_ARGS{0}, 0, &res);
 	assert_non_null(res);
 
 	// dmubus_call: test correct obj/method
@@ -422,11 +434,11 @@ static void test_bbf_api_ubus(void **state)
 	 */
 
 	// dmubus_call_set: test Wrong obj
-	ubus_res = dmubus_call_set("ucii", "configs", UBUS_ARGS{}, 0);
+	ubus_res = dmubus_call_set("ucii", "configs", UBUS_ARGS{0}, 0);
 	assert_int_not_equal(ubus_res, 0);
 
 	// dmubus_call_set: test Wrong method
-	ubus_res = dmubus_call_set("uci", "configss", UBUS_ARGS{}, 0);
+	ubus_res = dmubus_call_set("uci", "configss", UBUS_ARGS{0}, 0);
 	assert_int_not_equal(ubus_res, 0);
 
 	// dmubus_call_set: test Wrong argument
@@ -434,7 +446,7 @@ static void test_bbf_api_ubus(void **state)
 	assert_int_not_equal(ubus_res, 0);
 
 	// dmubus_call_set: test correct obj/method
-	ubus_res = dmubus_call_set("uci", "configs", UBUS_ARGS{}, 0);
+	ubus_res = dmubus_call_set("uci", "configs", UBUS_ARGS{0}, 0);
 	assert_int_equal(ubus_res, 0);
 
 	// dmubus_call_set: test correct obj/method
@@ -477,7 +489,7 @@ static void test_bbf_api_json(void **state)
 	char *json_value = NULL;
 	int idx = 0;
 
-	dmubus_call("wifi.ap.test2", "status", UBUS_ARGS{}, 0, &wifi_status);
+	dmubus_call("wifi.ap.test2", "status", UBUS_ARGS{0}, 0, &wifi_status);
 	assert_non_null(wifi_status);
 
 	/*
@@ -679,6 +691,22 @@ static void test_bbf_api_validate(void **state)
 	validate = dm_validate_unsignedInt("112", RANGE_ARGS{{"10","1000"}}, 1);
 	assert_int_equal(validate, 0);
 
+	// dm_validate_unsignedInt: test with multi range and wrong value
+	validate = dm_validate_unsignedInt("5420", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_unsignedInt: test with multi range and correct value
+	validate = dm_validate_unsignedInt("50", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
+	assert_int_equal(validate, 0);
+
+	// dm_validate_unsignedInt: test with wrong value
+	validate = dm_validate_unsignedInt("112", RANGE_ARGS{{"4","4"}}, 1);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_unsignedInt: test with correct value
+	validate = dm_validate_unsignedInt("1124", RANGE_ARGS{{"4","4"}}, 1);
+	assert_int_equal(validate, 0);
+
 
 	/*
 	 * Test of dm_validate_int function
@@ -704,6 +732,13 @@ static void test_bbf_api_validate(void **state)
 	validate = dm_validate_int("-2", RANGE_ARGS{{"-10","1000"}}, 1);
 	assert_int_equal(validate, 0);
 
+	// dm_validate_int: test with multi range and wrong value
+	validate = dm_validate_int("-2", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_int: test with multi range and correct value
+	validate = dm_validate_int("-7", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
+	assert_int_equal(validate, 0);
 
 	/*
 	 * Test of dm_validate_unsignedLong function
@@ -729,6 +764,14 @@ static void test_bbf_api_validate(void **state)
 	validate = dm_validate_unsignedLong("20", RANGE_ARGS{{"10","1000"}}, 1);
 	assert_int_equal(validate, 0);
 
+	// dm_validate_unsignedLong: test with multi range and wrong value
+	validate = dm_validate_unsignedLong("5420", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_unsignedLong: test with multi range and correct value
+	validate = dm_validate_unsignedLong("15000", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
+	assert_int_equal(validate, 0);
+
 
 	/*
 	 * Test of dm_validate_long function
@@ -752,6 +795,14 @@ static void test_bbf_api_validate(void **state)
 
 	// dm_validate_long: test with correct min/max value
 	validate = dm_validate_long("-2", RANGE_ARGS{{"-10","1000"}}, 1);
+	assert_int_equal(validate, 0);
+
+	// dm_validate_long: test with multi range and wrong value
+	validate = dm_validate_long("-2", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_long: test with multi range and correct value
+	validate = dm_validate_long("-7", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
 	assert_int_equal(validate, 0);
 
 
@@ -816,8 +867,20 @@ static void test_bbf_api_validate(void **state)
 	validate = dm_validate_hexBinary("123bcd", RANGE_ARGS{{"1","8"}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_hexBinary: test with wrong value
+	// dm_validate_hexBinary: test with correct value
 	validate = dm_validate_hexBinary("123bcd", RANGE_ARGS{{"3","3"}}, 1);
+	assert_int_equal(validate, 0);
+
+	// dm_validate_hexBinary: test with multi range and wrong value
+	validate = dm_validate_hexBinary("123bc", RANGE_ARGS{{"3","3"},{"5","5"}}, 2);
+	assert_int_equal(validate, -1);
+
+	// dm_validate_hexBinary: test with multi range and correct value
+	validate = dm_validate_hexBinary("123bcd", RANGE_ARGS{{"3","3"},{"5","5"}}, 2);
+	assert_int_equal(validate, 0);
+
+	// dm_validate_hexBinary: test with multi range and correct value
+	validate = dm_validate_hexBinary("12345abcde", RANGE_ARGS{{"3","3"},{"5","5"}}, 2);
 	assert_int_equal(validate, 0);
 
 
@@ -922,11 +985,11 @@ static void test_bbf_api_common(void **state)
 
 
 	/*
-	 * Test of decode64 function
+	 * Test of base64_decode function
 	 */
 
-	// decode64: test
-	value = decode64("YmJmX3VuaXRfdGVzdA");
+	// base64_decode: test
+	value = base64_decode("YmJmX3VuaXRfdGVzdA");
 	assert_string_equal(value, "bbf_unit_test");
 
 
@@ -935,7 +998,7 @@ static void test_bbf_api_common(void **state)
 	 */
 
 	// convert_string_to_hex: test
-	convert_string_to_hex("bbf_unit_test", buf);
+	convert_string_to_hex("bbf_unit_test", buf, sizeof(buf));
 	assert_string_equal(buf, "6262665F756E69745F74657374");
 
 
@@ -944,7 +1007,7 @@ static void test_bbf_api_common(void **state)
 	 */
 
 	// convert_hex_to_string: test
-	convert_hex_to_string("6262665f756e69745f74657374", buf);
+	convert_hex_to_string("6262665f756e69745f74657374", buf, sizeof(buf));
 	assert_string_equal(buf, "bbf_unit_test");
 
 
@@ -953,7 +1016,7 @@ static void test_bbf_api_common(void **state)
 	 */
 
 	// hex_to_ip: test
-	hex_to_ip("0000FEA9", buf);
+	hex_to_ip("0000FEA9", buf, sizeof(buf));
 	assert_string_equal(buf, "169.254.0.0");
 
 }

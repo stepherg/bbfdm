@@ -4,6 +4,7 @@
 # Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
 import os
+import sys
 import argparse
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as MD
@@ -46,17 +47,17 @@ def generate_bbf_xml_file(output_file):
     root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
     root.set("xsi:schemaLocation", "urn:broadband-forum-org:cwmp:datamodel-1-8 https://www.broadband-forum.org/cwmp/cwmp-datamodel-1-8.xsd urn:broadband-forum-org:cwmp:datamodel-report-0-1 https://www.broadband-forum.org/cwmp/cwmp-datamodel-report.xsd")
     root.set("spec", "urn:broadband-forum-org:tr-181-2-14-1-cwmp")
-    root.set("file", "tr-181-2-14-1-cwmp-full.xml")
+    root.set("file", "tr-181-2-15-0-cwmp-full.xml")
 
     model = ET.SubElement(root, "model")
     model.set("name", "Device:2.14")
 
     for value in bbf.LIST_SUPPORTED_DM:
 
-        if "()" in value or "!" in value:
+        obj = value.strip().split(",")
+        if obj[3] == "BBFDM_USP":
             continue
 
-        obj = value.strip().split(",")
         access = "readOnly" if obj[1] == "DMREAD" else "readWrite"
 
         if obj[2] == "DMT_OBJ":
@@ -146,18 +147,18 @@ def generate_hdm_xml_file(output_file):
     #param_array = np.empty(15, dtype=ET.Element)
     param_array = [ET.Element] * 15
     param_array[0] = parameters
+    root_dot_count = bbf.get_root_node().count('.') - 1 if (bbf.get_root_node()) else 0
 
     for value in bbf.LIST_SUPPORTED_DM:
 
-        if "()" in value or "!" in value:
-            continue
-
         obj = value.strip().split(",")
+        if obj[3] == "BBFDM_USP":
+            continue
 
         if obj[2] == "DMT_OBJ":
             # Object
             obj_tag = ET.SubElement(
-                param_array[obj[0].replace(".{i}", "").count('.')-1], "parameter")
+                param_array[obj[0].replace(".{i}", "").count('.') - root_dot_count -1], "parameter")
             obj_name = ET.SubElement(obj_tag, "parameterName")
             obj_name.text = str(obj[0].replace(".{i}", "").split('.')[-2])
             obj_type = ET.SubElement(obj_tag, "parameterType")
@@ -166,12 +167,12 @@ def generate_hdm_xml_file(output_file):
             obj_array.text = str(
                 "true" if obj[0].endswith(".{i}.") else "false")
             parameters = ET.SubElement(obj_tag, "parameters")
-            param_array[obj[0].replace(".{i}", "").count('.')] = parameters
+            param_array[obj[0].replace(".{i}", "").count('.') - root_dot_count] = parameters
             DM_OBJ_COUNT += 1
         else:
             # Parameter
             param_tag = ET.SubElement(
-                param_array[obj[0].replace(".{i}", "").count('.')], "parameter")
+                param_array[obj[0].replace(".{i}", "").count('.') - root_dot_count], "parameter")
             param_name = ET.SubElement(param_tag, "parameterName")
             param_name.text = str(obj[0][obj[0].rindex('.')+1:])
             param_type = ET.SubElement(param_tag, "parameterType")
@@ -189,7 +190,7 @@ def generate_xml(acs = 'default', output_file="datamodel.xml"):
     DM_OBJ_COUNT = 0
     DM_PARAM_COUNT = 0
 
-    print("Generating BBF Data Models in xml format for %s acs..." % acs)
+    print(f'Generating BBF Data Models in xml format for {acs} acs...')
     bbf.fill_list_supported_dm()
 
     if acs == "HDM":
@@ -198,12 +199,12 @@ def generate_xml(acs = 'default', output_file="datamodel.xml"):
         generate_bbf_xml_file(output_file)
 
     if os.path.isfile(output_file):
-        print("├── XML file generated: %s" % output_file)
+        print(f' - XML file generated: {output_file}')
     else:
-        print("├── Error in generating xml file")
+        print(' - Error in generating xml file')
 
-    print("├── Number of BBF Data Models objects is %d" % DM_OBJ_COUNT)
-    print("└── Number of BBF Data Models parameters is %d" % DM_PARAM_COUNT)
+    print(f' - Number of BBF Data Models objects is {DM_OBJ_COUNT}')
+    print(f' - Number of BBF Data Models parameters is {DM_PARAM_COUNT}')
 
 ### main ###
 if __name__ == '__main__':
@@ -215,7 +216,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-r', '--remote-dm',
         action='append',
-		metavar = 'https://dev.iopsys.eu/iopsys/stunc.git^devel',
+		metavar = 'git^https://dev.iopsys.eu/iopsys/stunc.git^devel',
         help= 'Includes OBJ/PARAM defined under remote repositories defined as bbf plugin'
     )
 
@@ -228,7 +229,7 @@ if __name__ == '__main__':
 
     parser.add_argument(
         '-p', '--vendor-prefix',
-		default = 'iopsys',
+		default = 'X_IOPSYS_EU_',
 		metavar = 'X_IOPSYS_EU_',
 		help = 'Generate data model tree using provided vendor prefix for vendor defined objects.'
     )
@@ -242,8 +243,8 @@ if __name__ == '__main__':
 
     parser.add_argument(
         "-m", "--manufacturer",
-		default = 'iopsys',
-		metavar = 'iopsys',
+		default = 'IOPSYS',
+		metavar = 'IOPSYS',
 		help = 'Generate data model tree using this manufacturer.'
     )
 
@@ -304,13 +305,16 @@ if __name__ == '__main__':
         for f in args.remote_dm:
             x = f.split('^')
             r = {}
-            r["repo"] = x[0]
-            if len(x) == 2:
-                r["version"] = x[1]
+            r["proto"] = x[0]
+            if len(x) > 1:
+                r["repo"] = x[1]
+            if len(x) == 3:
+                r["version"] = x[2]
 
             plugins.append(r)
 
     bbf.generate_supported_dm(args.vendor_prefix, args.vendor_list, plugins)
     bbf.clean_supported_dm_list()
     generate_xml(args.format, args.output)
-    print("Datamodel generation completed, aritifacts available in %s" %args.output)
+    print(f'Datamodel generation completed, aritifacts available in {args.output}')
+    sys.exit(bbf.BBF_ERROR_CODE)

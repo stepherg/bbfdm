@@ -11,7 +11,7 @@
 #ifndef __DHCPV6_H
 #define __DHCPV6_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tDHCPv6Obj[];
 extern DMLEAF tDHCPv6Params[];

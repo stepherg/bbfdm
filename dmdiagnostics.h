@@ -12,7 +12,7 @@
 #ifndef __DMDIAGNOSTICS_H__
 #define __DMDIAGNOSTICS_H__
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 #include <libubox/uloop.h>
 
 #define HTTP_URI "http"
@@ -26,7 +26,7 @@
 #define FTP_TRANSFERT_COMPLETE "226 Transfer"
 #define FTP_RETR_REQUEST "RETR"
 #define FTP_STOR_REQUEST "STOR"
-#define CURL_TIMEOUT 100
+#define CURL_TIMEOUT 600
 #define DMMAP_DIAGNOSTIGS "dmmap_diagnostics"
 #define CONFIG_BACKUP "/tmp/bbf_config_backup"
 #define MAX_TIME_WINDOW 5
@@ -46,12 +46,6 @@ struct diagnostic_stats
 	uint32_t random_seq;
 	uint32_t get_ack;
 	uint32_t ftp_syn;
-};
-
-struct activate_image
-{
-	struct uloop_timeout activate_timer;
-	char *start_time;
 };
 
 enum diagnostic_protocol {
@@ -80,7 +74,6 @@ int bbf_config_restore(const char *url, const char *username, const char *passwo
 		const char *command, const char *obj_path);
 int bbf_fw_image_download(const char *url, const char *auto_activate, const char *username, const char *password,
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
-		const char *bank_id, const char *command, const char *obj_path);
-int bbf_fw_image_activate(const char *bank_id, struct activate_image *active_img);
+		const char *bank_id, const char *command, const char *obj_path, const char *commandKey);
 
 #endif

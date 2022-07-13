@@ -13,7 +13,7 @@
 #ifndef __DEVICE_INFO_H
 #define __DEVICE_INFO_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMLEAF tDeviceInfoParams[];
 extern DMLEAF tDeviceInfoVendorConfigFileParams[];

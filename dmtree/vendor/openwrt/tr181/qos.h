@@ -12,7 +12,7 @@
 #ifndef __OPENWRT_QOS_H
 #define __OPENWRT_QOS_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tOPENWRT_QoSObj[];
 extern DMLEAF tOPENWRT_QoSParams[];

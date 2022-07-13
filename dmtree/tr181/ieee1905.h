@@ -11,7 +11,7 @@
 #ifndef __IEEE1905_H
 #define __IEEE1905_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tIEEE1905Obj[];
 extern DMLEAF tIEEE1905Params[];

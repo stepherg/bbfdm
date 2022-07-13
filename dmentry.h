@@ -15,7 +15,7 @@
 #ifndef __DMENTRY_H__
 #define __DMENTRY_H__
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern struct list_head head_package_change;
 extern struct list_head main_memhead;
@@ -24,8 +24,16 @@ enum ctx_init_enum {
 	CTX_INIT_SUB
 };
 
+typedef enum {
+	ALL_SCHEMA,
+	PARAM_ONLY,
+	EVENT_ONLY,
+	COMMAND_ONLY
+} schema_type_t;
+
 int dm_ctx_init(struct dmctx *ctx, unsigned int instance_mode);
 int dm_ctx_init_sub(struct dmctx *ctx, unsigned int instance_mode);
+int dm_ctx_init_entry(struct dmctx *ctx, DMOBJ tEntryObj[], unsigned int instance_mode);
 int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2);
 int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1);
 int dm_entry_restart_services(void);
@@ -34,8 +42,10 @@ int dm_entry_revert_changes(void);
 int usp_fault_map(int fault);
 int dm_ctx_clean(struct dmctx *ctx);
 int dm_ctx_clean_sub(struct dmctx *ctx);
-void load_dynamic_arrays(struct dmctx *ctx);
-void free_dynamic_arrays(void);
+int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_type_t schema_type);
+void dm_config_ubus(struct ubus_context *ctx);
+int dm_ctx_init_cache(int time);
+void bbf_dm_cleanup(void);
 
 /**
  * @brief dm_debug_browse_path
@@ -53,5 +63,6 @@ void free_dynamic_arrays(void);
  * object illegal access.
  */
 int dm_debug_browse_path(char *buff, size_t len);
+void dm_cleanup_dynamic_entry(DMOBJ *root);
 
 #endif

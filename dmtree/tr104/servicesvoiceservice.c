@@ -234,6 +234,13 @@ static int set_service_alias(char *refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
+static int get_ServicesVoiceService_CallLogNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseServicesVoiceServiceCallLogInst);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -262,5 +269,6 @@ DMOBJ tServicesVoiceServiceObj[] = {
 DMLEAF tServicesVoiceServiceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Alias", &DMWRITE, DMT_STRING, get_service_alias, set_service_alias, BBFDM_BOTH},
+{"CallLogNumberOfEntries", &DMREAD, DMT_UNINT, get_ServicesVoiceService_CallLogNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };

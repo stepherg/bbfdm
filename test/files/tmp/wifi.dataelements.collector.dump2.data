@@ -1,0 +1,713 @@
+{
+	"date": "Thu Mar 10 09:48:56 2022",
+	"version": "0.2",
+	"description": "WFA Data Elements",
+	"TimeStamp": "2022-03-10T09:48:56+01:00",
+	"name": "wifi",
+	"data": [
+		{
+			"wfa-dataelements:Network": {
+				"ID": "46:d4:37:71:b4:19",
+				"TimeStamp": "2022-03-10T09:48:56+01:00",
+				"ControllerID": "46:d4:37:71:b4:10",
+				"DeviceNumberOfEntries": 1,
+				"MSCSDisallowedStaList": [
+					"10:20:40:50:60:88",
+					"10:20:30:50:70:90",
+					"10:30:40:90:60:90"
+				],
+				"SCSDisallowedStaList": [
+					"11:22:33:50:60:88",
+					"11:23:34:56:78:99"					
+				],
+				"SSIDNumberOfEntries": 4,
+				"SSID": [
+					{
+						"SSID": "iopsysWrt-44D43771B410",
+						"Band": "5"
+					},
+					{
+						"SSID": "iopsysWrt-44D43771B410",
+						"Band": "2.4"
+					},
+					{
+						"SSID": "MAP-44D43771B410-BH-5GHz",
+						"Band": "5"
+					},
+					{
+						"SSID": "MAP-44D43771B410-BH-2.4GHz",
+						"Band": "2.4"
+					}
+				],
+				"MultiAPSteeringSummaryStats": {
+					"NoCandidateAPFailures": 10,
+					"BlacklistAttempts": 15,
+					"BlacklistSuccesses": 13,
+					"BlacklistFailures": 2,
+					"BTMAttempts": 25,
+					"BTMSuccesses": 19,
+					"BTMFailures": 6,
+					"BTMQueryResponses": 3
+				},
+				"DeviceList": [
+					{
+						"ID": "46:d4:37:71:b4:10",
+						"MultiAPCapabilities": "DA==",
+						"CollectionInterval": 5,
+						"ReportUnsuccessfulAssociations": "true",
+						"MaxReportingRate": 55,
+						"APMetricsReportingInterval": 44,
+						"Manufacturer": "IOPSYS",
+						"SerialNumber": "46:d4:37",
+						"ManufacturerModel": "IOPSYS",
+						"SoftwareVersion": "6.5.0",
+						"ExecutionEnv": "Device.SoftwareModules.ExecEnv.1.",
+						"DSCPMap": "0x3F",
+						"MaxPrioritizationRules": 50,
+						"PrioritizationSupport": "false",
+						"MaxVIDs": 4096,
+						"APMetricsWiFi6": "true",
+						"CountryCode": "SE",
+						"LocalSteeringDisallowedSTAList": [
+							"10:20:40:50:60:88",
+							"10:20:30:50:70:90"							
+						],
+						"BTMSteeringDisallowedSTAList": [
+							"11:22:33:50:60:88",
+							"11:23:34:56:78:99"						
+						],
+						"DFSEnable": "true",
+						"ReportIndependentScans": "true",
+						"AssociatedSTAinAPMetricsWiFi6": "true",
+						"MaxUnsuccessfulAssociationReportingRate": 55,
+						"STASteeringState": "true",
+						"CoordinatedCACAllowed": "true",
+						"TrafficSeparationAllowed": "true",
+						"ServicePrioritizationAllowed": "true",
+						"RadioNumberOfEntries": 2,
+						"Default8021QNumberOfEntries": 1,
+						"SSIDtoVIDMappingNumberOfEntries": 1,
+						"CACStatusNumberOfEntries": 0,
+						"IEEE1905SecurityNumberOfEntries": 0,
+						"SPRuleNumberOfEntries": 0,
+						"AnticipatedChannelsNumberOfEntries": 0,
+						"AnticipatedChannelUsageNumberOfEntries": 0,
+						"Default8021Q": [
+							{
+								"Enable": "true",
+								"PrimaryVID": "",
+								"DefaultPCP": ""
+							}
+						],
+						"SSIDtoVIDMapping": [
+							{
+								"SSID": "MAP-44D43771B410-BH",
+								"VID": "17"
+							}							
+						],
+						"CACStatus": [
+							
+						],
+						"SPRule": [
+							
+						],
+						"IEEE1905Security": [
+							
+						],
+						"AnticipatedChannels": [
+							
+						],
+						"AnticipatedChannelUsage": [
+							
+						],
+						"MultiAPDevice": {
+							"ManufacturerOUI": "TODO",
+							"LastContactTime": "2022-03-10T20:44:35+01:00",
+							"AssocIEEE1905DeviceRef": "TODO",
+							"EasyMeshControllerOperationMode": "TODO",
+							"EasyMeshAgentOperationMode": "TODO",
+							"Backhaul": {
+								"LinkType": "TODO",
+								"BackhaulMACAddress": "TODO MACAddress",
+								"BackhaulDeviceID": "TODO MACAddress",
+								"MACAddress": "TODO MACAddress",
+								"CurrentOperatingClassProfileNumberOfEntries": 1,
+								"CurrentOperatingClassProfile": [
+									{
+										"Class": "",
+										"Channel": "",
+										"TxPower": "",
+										"TimeStamp": "2022-03-10T15:48:35+01:00"
+									}
+								],
+								"Stats": {
+									"BytesSent": 15222,
+									"BytesReceived": 4776,
+									"PacketsSent": 86868,
+									"PacketsReceived": 74177,
+									"ErrorsSent": 52,
+									"ErrorsReceived": 784,
+									"LinkUtilization": 554,
+									"SignalStrength": 96,
+									"LastDataDownlinkRate": 74,
+									"LastDataUplinkRate": 5,
+									"TimeStamp": "2022-02-18T20:00:00+01:00"
+								}
+							}
+						},
+						"RadioList": [
+							{
+								"ID": "RNQ3cbQf",
+								"Enabled": "true",
+								"Noise": 170,
+								"Utilization": 0,
+								"Transmit": 56,
+								"ReceiveSelf": 0,
+								"ReceiveOther": 56,
+								"TrafficSeparationCombinedFronthaul": "true",
+								"TrafficSeparationCombinedBackhaul": "true",
+								"SteeringPolicy": 0,
+								"ChannelUtilizationThreshold": 0,
+								"RCPISteeringThreshold": 0,
+								"STAReportingRCPIThreshold": 0,
+								"STAReportingRCPIHysteresisMarginOverride": 0,
+								"ChannelUtilizationReportingThreshold": 0,
+								"AssociatedSTATrafficStatsInclusionPolicy": "true",
+								"AssociatedSTALinkMetricsInclusionPolicy": "true",
+								"ChipsetVendor": "IOPSYS",
+								"APMetricsWiFi6": "true",
+								"CurrentOperatingClassProfileNumberOfEntries": 0,
+								"UnassociatedSTANumberOfEntries": 0,
+								"BSSNumberOfEntries": 2,
+								"ScanResultNumberOfEntries": 0,
+								"DisAllowedOpClassChannelsNumberOfEntries": 0,
+								"ScanResult": [
+									
+								],
+								"BackhaulSta": {
+									"MACAddress": "44:d4:37:71:be:6f"
+								},
+								"ScanCapability": {
+									"OnBootOnly": "true",
+									"Impact": 0,
+									"MinimumInterval": 0,
+									"OpClassChannelsNumberOfEntries": 0,
+									"OpClassChannels": [
+										
+									]
+								},
+								"CACCapability": {
+									"CACMethodNumberOfEntries": 0,
+									"CACMethod": [
+										
+									]
+								},
+								"Capabilities": {
+									"HTCapabilities": "Dg==",
+									"VHTCapabilities": "AAAAAAIw",
+									"HECapabilities": "AAA=",
+									"CapableOperatingClassProfileNumberOfEntries": 0,
+									"AKMFrontHaulNumberOfEntries": 0,
+									"AKMBackhaulNumberOfEntries": 0,
+									"WiFi6APRole": {
+										"HE160": "true",
+										"HE8080": "true",
+										"MCSNSS": "TODO base64​(4:12)",
+										"SUBeamformer": "true",
+										"SUBeamformee": "true",
+										"MUBeamformer": "true",
+										"Beamformee80orLess": "true",
+										"BeamformeeAbove80": "true",
+										"ULMUMIMO": "true",
+										"ULOFDMA": "true",
+										"MaxDLMUMIMO": 0,
+										"MaxULMUMIMO": 0,
+										"MaxDLOFDMA": 0,
+										"MaxULOFDMA": 0,
+										"RTS": "true",
+										"MURTS": "true",
+										"MultiBSSID": "true",
+										"MUEDCA": "true",
+										"TWTRequestor": "true",
+										"TWTResponder": "true",
+										"SpatialReuse": "true",
+										"AnticipatedChannelUsage": "true"
+									},
+									"WiFi6bSTARole": {
+										"HE160": "true",
+										"HE8080": "true",
+										"MCSNSS": "TODO base64​(4:12)",
+										"SUBeamformer": "true",
+										"SUBeamformee": "true",
+										"MUBeamformer": "true",
+										"Beamformee80orLess": "true",
+										"BeamformeeAbove80": "true",
+										"ULMUMIMO": "true",
+										"ULOFDMA": "true",
+										"MaxDLMUMIMO": 0,
+										"MaxULMUMIMO": 0,
+										"MaxDLOFDMA": 0,
+										"MaxULOFDMA": 0,
+										"RTS": "true",
+										"MURTS": "true",
+										"MultiBSSID": "true",
+										"MUEDCA": "true",
+										"TWTRequestor": "true",
+										"TWTResponder": "true",
+										"SpatialReuse": "true",
+										"AnticipatedChannelUsage": "true"
+									},
+									"AKMFrontHaul": [
+										
+									],
+									"AKMBackhaul": [
+										
+									],
+									"CapableOperatingClassProfile": [
+										
+									]
+								},
+								"CurrentOperatingClassProfile": [
+									
+								],
+								"DisAllowedOpClassChannels": [
+									
+								],
+								"SpatialReuse": {
+									"PartialBSSColor": 0,
+									"BSSColor": 0,
+									"HESIGASpatialReuseValue15Allowed": "true",
+									"SRGInformationValid": "true",
+									"NonSRGOffsetValid": "true",
+									"PSRDisallowed": "true",
+									"NonSRGOBSSPDMaxOffset": 0,
+									"SRGOBSSPDMinOffset": 0,
+									"SRGOBSSPDMaxOffset": 0,
+									"SRGBSSColorBitmap": "TODO hexBinary​(8:8)",
+									"SRGPartialBSSIDBitmap": "TODO hexBinary​(8:8)",
+									"NeighborBSSColorInUseBitmap": "TODO hexBinary​(8:8)"
+								},
+								"BSSList": [
+									{
+										"BSSID": "7e:d4:37:71:b4:18",
+										"SSID": "MAP-44D43771B410-BH-5GHz",
+										"Enabled": "true",
+										"LastChange": 0,
+										"TimeStamp": "2022-03-10T09:48:35+01:00",
+										"UnicastBytesSent": 7,
+										"UnicastBytesReceived": 8,
+										"MulticastBytesSent": 30,
+										"MulticastBytesReceived": 3039979,
+										"BroadcastBytesSent": 2440500,
+										"BroadcastBytesReceived": 24,
+										"ByteCounterUnits": 0,
+										"Profile1bSTAsDisallowed": "true",
+										"Profile2bSTAsDisallowed": "true",
+										"AssociationAllowanceStatus": 0,
+										"EstServiceParametersBE": "AA",
+										"EstServiceParametersBK": "BB",
+										"EstServiceParametersVI": "CC",
+										"EstServiceParametersVO": "DD",
+										"BackhaulUse": "true",
+										"FronthaulUse": "true",
+										"R1disallowed": "true",
+										"R2disallowed": "true",
+										"MultiBSSID": "true",
+										"TransmittedBSSID": "true",
+										"FronthaulAKMsAllowed": [
+											"sae",
+											"psk+sae",
+											"SuiteSelector"
+										],
+										"BackhaulAKMsAllowed": [
+											"psk",
+											"dpp"											
+										],
+										"STANumberOfEntries": 1,
+										"QMDescriptorNumberOfEntries": 0,
+										"QMDescriptor": [
+											
+										],
+										"MultiAPSteering": {
+											"BlacklistAttempts": 40,
+											"BTMAttempts": 15,
+											"BTMQueryResponses": 18
+										},
+										"STAList": [
+											{
+												"MACAddress": "44:d4:37:71:be:6f",
+												"TimeStamp": "2022-03-10T09:48:35+01:00",
+												"HTCapabilities": "/g==",
+												"VHTCapabilities": "AsAAAP6w",
+												"HECapabilities": "qv+q/2zA",
+												"ClientCapabilities": "TODO base64",
+												"LastDataDownlinkRate": 1361,
+												"LastDataUplinkRate": 1633,
+												"UtilizationReceive": 4,
+												"UtilizationTransmit": 5,
+												"EstMACDataRateDownlink": 10,
+												"EstMACDataRateUplink": 22,
+												"SignalStrength": 158,
+												"LastConnectTime": 6,
+												"BytesSent": 85439,
+												"BytesReceived": 7872,
+												"PacketsSent": 827,
+												"PacketsReceived": 44,
+												"ErrorsSent": 478,
+												"ErrorsReceived": 635,
+												"RetransCount": 2,
+												"NumberOfMeasureReports": 0,
+												"MeasurementReport": [
+													
+												],
+												"IPV4Address": "TODO IPv4Address",
+												"IPV6Address": "TODO IPv6Address",
+												"Hostname": "",
+												"CellularDataPreference": "TODO",
+												"ReAssociationDelay": 0,
+												"TIDQueueSizesNumberOfEntries": 0,
+												"MultiAPSTA": {
+													"AssociationTime": "TODO dateTime",
+													"Noise": 0,
+													"SteeringHistoryNumberOfEntries": 0,
+													"SteeringSummaryStats": {
+														"NoCandidateAPFailures": 0,
+														"BlacklistAttempts": 0,
+														"BlacklistSuccesses": 0,
+														"BlacklistFailures": 0,
+														"BTMAttempts": 0,
+														"BTMSuccesses": 0,
+														"BTMFailures": 0,
+														"BTMQueryResponses": 0,
+														"LastSteerTime": 0
+													},
+													"SteeringHistory": [
+														
+													]
+												},
+												"WiFi6Capabilities": {
+													"HE160": "true",
+													"HE8080": "true",
+													"MCSNSS": "TODO base64​(4:12)",
+													"SUBeamformer": "true",
+													"SUBeamformee": "true",
+													"MUBeamformer": "true",
+													"Beamformee80orLess": "true",
+													"BeamformeeAbove80": "true",
+													"ULMUMIMO": "true",
+													"ULOFDMA": "true",
+													"MaxDLMUMIMO": 0,
+													"MaxULMUMIMO": 0,
+													"MaxDLOFDMA": 0,
+													"MaxULOFDMA": 0,
+													"RTS": "true",
+													"MURTS": "true",
+													"MultiBSSID": "true",
+													"MUEDCA": "true",
+													"TWTRequestor": "true",
+													"TWTResponder": "true",
+													"SpatialReuse": "true",
+													"AnticipatedChannelUsage": "true"
+												},
+												"TIDQueueSizes": [
+													
+												]
+											}											
+										]
+									},
+									{
+										"BSSID": "44:d4:37:71:b4:1f",
+										"SSID": "iopsysWrt-44D43771B410",
+										"Enabled": "true",
+										"LastChange": 789,
+										"TimeStamp": "2022-03-10T09:48:35+01:00",
+										"UnicastBytesSent": 21567,
+										"UnicastBytesReceived": 5540,
+										"MulticastBytesSent": 3963880,
+										"MulticastBytesReceived": 523569,
+										"BroadcastBytesSent": 2368831,
+										"BroadcastBytesReceived": 185622,
+										"ByteCounterUnits": 0,
+										"Profile1bSTAsDisallowed": "true",
+										"Profile2bSTAsDisallowed": "true",
+										"AssociationAllowanceStatus": 0,
+										"EstServiceParametersBE": "AAAA",
+										"EstServiceParametersBK": "A=AA",
+										"EstServiceParametersVI": "AA=A",
+										"EstServiceParametersVO": "AAA=",
+										"BackhaulUse": "true",
+										"FronthaulUse": "true",
+										"R1disallowed": "true",
+										"R2disallowed": "true",
+										"MultiBSSID": "true",
+										"TransmittedBSSID": "true",
+										"FronthaulAKMsAllowed": [
+											
+										],
+										"BackhaulAKMsAllowed": [
+											
+										],
+										"STANumberOfEntries": 0,
+										"QMDescriptorNumberOfEntries": 0,
+										"QMDescriptor": [
+											
+										],
+										"MultiAPSteering": {
+											"BlacklistAttempts": 0,
+											"BTMAttempts": 0,
+											"BTMQueryResponses": 0
+										},
+										"STAList": [
+
+										]
+									}
+								],
+								"UnassociatedSTA": [
+									
+								],
+								"MultiAPRadio": {
+									
+								}
+							},
+							{
+								"ID": "RNQ3cbQe",
+								"Enabled": "true",
+								"Noise": 175,
+								"Utilization": 20,
+								"Transmit": 56,
+								"ReceiveSelf": 10,
+								"ReceiveOther": 128,
+								"TrafficSeparationCombinedFronthaul": "true",
+								"TrafficSeparationCombinedBackhaul": "true",
+								"SteeringPolicy": 0,
+								"ChannelUtilizationThreshold": 0,
+								"RCPISteeringThreshold": 0,
+								"STAReportingRCPIThreshold": 0,
+								"STAReportingRCPIHysteresisMarginOverride": 0,
+								"ChannelUtilizationReportingThreshold": 0,
+								"AssociatedSTATrafficStatsInclusionPolicy": "true",
+								"AssociatedSTALinkMetricsInclusionPolicy": "true",
+								"ChipsetVendor": "TODO",
+								"APMetricsWiFi6": "true",
+								"CurrentOperatingClassProfileNumberOfEntries": 0,
+								"UnassociatedSTANumberOfEntries": 1,
+								"BSSNumberOfEntries": 2,
+								"ScanResultNumberOfEntries": 0,
+								"DisAllowedOpClassChannelsNumberOfEntries": 0,
+								"ScanResult": [
+									
+								],
+								"BackhaulSta": {
+									"MACAddress": "10:20:40:50:60:88"
+								},
+								"ScanCapability": {
+									"OnBootOnly": "true",
+									"Impact": 0,
+									"MinimumInterval": 0,
+									"OpClassChannelsNumberOfEntries": 0,
+									"OpClassChannels": [
+										
+									]
+								},
+								"CACCapability": {
+									"CACMethodNumberOfEntries": 0,
+									"CACMethod": [
+										
+									]
+								},
+								"Capabilities": {
+									"HTCapabilities": "CA==",
+									"VHTCapabilities": "AAAAAAAA",
+									"HECapabilities": "AAA=",
+									"CapableOperatingClassProfileNumberOfEntries": 0,
+									"AKMFrontHaulNumberOfEntries": 0,
+									"AKMBackhaulNumberOfEntries": 0,
+									"WiFi6APRole": {
+										"HE160": "true",
+										"HE8080": "true",
+										"MCSNSS": "TODO base64​(4:12)",
+										"SUBeamformer": "true",
+										"SUBeamformee": "true",
+										"MUBeamformer": "true",
+										"Beamformee80orLess": "true",
+										"BeamformeeAbove80": "true",
+										"ULMUMIMO": "true",
+										"ULOFDMA": "true",
+										"MaxDLMUMIMO": 0,
+										"MaxULMUMIMO": 0,
+										"MaxDLOFDMA": 0,
+										"MaxULOFDMA": 0,
+										"RTS": "true",
+										"MURTS": "true",
+										"MultiBSSID": "true",
+										"MUEDCA": "true",
+										"TWTRequestor": "true",
+										"TWTResponder": "true",
+										"SpatialReuse": "true",
+										"AnticipatedChannelUsage": "true"
+									},
+									"WiFi6bSTARole": {
+										"HE160": "true",
+										"HE8080": "true",
+										"MCSNSS": "TODO base64​(4:12)",
+										"SUBeamformer": "true",
+										"SUBeamformee": "true",
+										"MUBeamformer": "true",
+										"Beamformee80orLess": "true",
+										"BeamformeeAbove80": "true",
+										"ULMUMIMO": "true",
+										"ULOFDMA": "true",
+										"MaxDLMUMIMO": 0,
+										"MaxULMUMIMO": 0,
+										"MaxDLOFDMA": 0,
+										"MaxULOFDMA": 0,
+										"RTS": "true",
+										"MURTS": "true",
+										"MultiBSSID": "true",
+										"MUEDCA": "true",
+										"TWTRequestor": "true",
+										"TWTResponder": "true",
+										"SpatialReuse": "true",
+										"AnticipatedChannelUsage": "true"
+									},
+									"AKMFrontHaul": [
+										
+									],
+									"AKMBackhaul": [
+										
+									],
+									"CapableOperatingClassProfile": [
+										
+									]
+								},
+								"CurrentOperatingClassProfile": [
+									
+								],
+								"DisAllowedOpClassChannels": [
+									
+								],
+								"SpatialReuse": {
+									"PartialBSSColor": 0,
+									"BSSColor": 0,
+									"HESIGASpatialReuseValue15Allowed": "true",
+									"SRGInformationValid": "true",
+									"NonSRGOffsetValid": "true",
+									"PSRDisallowed": "true",
+									"NonSRGOBSSPDMaxOffset": 0,
+									"SRGOBSSPDMinOffset": 0,
+									"SRGOBSSPDMaxOffset": 0,
+									"SRGBSSColorBitmap": "TODO hexBinary​(8:8)",
+									"SRGPartialBSSIDBitmap": "TODO hexBinary​(8:8)",
+									"NeighborBSSColorInUseBitmap": "TODO hexBinary​(8:8)"
+								},
+								"BSSList": [
+									{
+										"BSSID": "7a:d4:37:71:b4:1f",
+										"SSID": "MAP-44D43771B410-BH-2.4GHz",
+										"Enabled": "true",
+										"LastChange": 150,
+										"TimeStamp": "2022-03-10T09:48:35+01:00",
+										"UnicastBytesSent": 150,
+										"UnicastBytesReceived": 1475,
+										"MulticastBytesSent": 3040038,
+										"MulticastBytesReceived": 1520,
+										"BroadcastBytesSent": 2440491,
+										"BroadcastBytesReceived": 7450,
+										"ByteCounterUnits": 230,
+										"Profile1bSTAsDisallowed": "true",
+										"Profile2bSTAsDisallowed": "true",
+										"AssociationAllowanceStatus": 0,
+										"EstServiceParametersBE": "AA4A",
+										"EstServiceParametersBK": "1AAA",
+										"EstServiceParametersVI": "A2AA",
+										"EstServiceParametersVO": "AAA3",
+										"BackhaulUse": "true",
+										"FronthaulUse": "true",
+										"R1disallowed": "true",
+										"R2disallowed": "true",
+										"MultiBSSID": "true",
+										"TransmittedBSSID": "true",
+										"FronthaulAKMsAllowed": [
+											
+										],
+										"BackhaulAKMsAllowed": [
+											
+										],
+										"STANumberOfEntries": 0,
+										"QMDescriptorNumberOfEntries": 0,
+										"QMDescriptor": [
+											
+										],
+										"MultiAPSteering": {
+											"BlacklistAttempts": 0,
+											"BTMAttempts": 0,
+											"BTMQueryResponses": 0
+										},
+										"STAList": [
+											
+										]
+									},
+									{
+										"BSSID": "44:d4:37:71:b4:1e",
+										"SSID": "iopsysWrt-44D43771B410",
+										"Enabled": "true",
+										"LastChange": 7899,
+										"TimeStamp": "2022-03-10T09:48:35+01:00",
+										"UnicastBytesSent": 9651,
+										"UnicastBytesReceived": 4579,
+										"MulticastBytesSent": 3963894,
+										"MulticastBytesReceived": 456,
+										"BroadcastBytesSent": 2368832,
+										"BroadcastBytesReceived": 8755,
+										"ByteCounterUnits": 4857,
+										"Profile1bSTAsDisallowed": "true",
+										"Profile2bSTAsDisallowed": "true",
+										"AssociationAllowanceStatus": 0,
+										"EstServiceParametersBE": "A45A",
+										"EstServiceParametersBK": "12AA",
+										"EstServiceParametersVI": "A85A",
+										"EstServiceParametersVO": "8AA9",
+										"BackhaulUse": "true",
+										"FronthaulUse": "true",
+										"R1disallowed": "true",
+										"R2disallowed": "true",
+										"MultiBSSID": "true",
+										"TransmittedBSSID": "true",
+										"FronthaulAKMsAllowed": [
+											
+										],
+										"BackhaulAKMsAllowed": [
+											
+										],
+										"STANumberOfEntries": 0,
+										"QMDescriptorNumberOfEntries": 0,
+										"QMDescriptor": [
+											
+										],
+										"MultiAPSteering": {
+											"BlacklistAttempts": 0,
+											"BTMAttempts": 0,
+											"BTMQueryResponses": 0
+										},
+										"STAList": [
+											
+										]
+									}
+								],
+								"UnassociatedSTA": [
+									{
+										"MACAddress": "",
+										"SignalStrength": "125"
+									}
+								],
+								"MultiAPRadio": {
+									
+								}
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}

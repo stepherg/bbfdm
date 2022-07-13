@@ -10,6 +10,15 @@
 
 #include "servicesvoiceservicedect.h"
 
+/**************************************************************************
+* LINKER
+***************************************************************************/
+static int get_voice_service_dect_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	*linker = data ? dmjson_get_value((json_object *)data, 1, "ipui") : "";
+	return 0;
+}
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -18,10 +27,11 @@ static int browseServicesVoiceServiceDECTBaseInst(struct dmctx *dmctx, DMNODE *p
 {
 	json_object *res = NULL, *obj = NULL, *arrobj = NULL;
 	char *inst = NULL;
-	int id = 0, i = 0;
 
-	dmubus_call("dect", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	if (res) {
+		int id = 0, i = 0;
+
 		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "base") {
 
 			inst = handle_instance_without_section(dmctx, parent_node, ++id);
@@ -38,13 +48,22 @@ static int browseServicesVoiceServiceDECTPortableInst(struct dmctx *dmctx, DMNOD
 {
 	json_object *res = NULL, *obj = NULL, *arrobj = NULL;
 	char *inst = NULL;
-	int id = 0, i = 0;
 
-	dmubus_call("dect", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	if (res) {
-		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "handsets") {
+		int id = 0, i = 0;
 
-			inst = handle_instance_without_section(dmctx, parent_node, ++id);
+		dmjson_foreach_obj_in_array(res, arrobj, obj, i, 1, "handsets") {
+			char *str_id = dmjson_get_value(obj, 1, "id");
+
+			/* Use the id from the UBUS call if it is found */
+			if (str_id && *str_id) {
+				id = DM_STRTOL(str_id);
+			} else {
+				id++;
+			}
+
+			inst = handle_instance_without_section(dmctx, parent_node, id);
 
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)obj, inst) == DM_STOP)
 				break;
@@ -60,9 +79,9 @@ static int browseServicesVoiceServiceDECTPortableInst(struct dmctx *dmctx, DMNOD
 static int get_ServicesVoiceServiceDECT_BaseNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	size_t num = 0;
-	json_object *res, *base;
+	json_object *res = NULL, *base;
 
-	dmubus_call("dect", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	json_object_object_get_ex(res, "base", &base);
 	
@@ -77,9 +96,9 @@ static int get_ServicesVoiceServiceDECT_BaseNumberOfEntries(char *refparam, stru
 static int get_ServicesVoiceServiceDECT_PortableNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	size_t num = 0;
-	json_object *res, *handsets;
+	json_object *res = NULL, *handsets;
 
-	dmubus_call("dect", "status", UBUS_ARGS{}, 0, &res);
+	dmubus_call("dect", "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 
 	json_object_object_get_ex(res, "handsets", &handsets);
@@ -310,12 +329,13 @@ static int get_ServicesVoiceServiceDECTPortable_IPUI(char *refparam, struct dmct
 static int get_ServicesVoiceServiceDECTPortable_IPEI(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *ipui = dmjson_get_value((json_object *)data, 1, "ipui");
-	char buff[14] = {0};
 
 	*value = "";
 	// Check for N type PUT
 	if (ipui[0] == '0') {
-		strcpy(buff, &ipui[1]);
+		char buff[14] = {0};
+
+		DM_STRNCPY(buff, &ipui[1], sizeof(buff));
 		dmasprintf(value, "%s0", buff);
 	}
 
@@ -345,8 +365,7 @@ static int get_ServicesVoiceServiceDECTPortable_BaseAttachedTo(char *refparam, s
 /*#Device.Services.VoiceService.{i}.DECT.Portable.{i}.PortableType!UBUS:dect/status//handsets[@i-1].portable_type*/
 static int get_ServicesVoiceServiceDECTPortable_PortableType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "portable_type");
-
+        *value = dmjson_get_value((json_object *)data, 1, "portable_type");
 	return 0;
 }
 
@@ -397,7 +416,7 @@ static int get_ServicesVoiceServiceDECTPortable_LastUpdateDateTime(char *refpara
 DMOBJ tServicesVoiceServiceDECTObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Base", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceDECTBaseInst, NULL, NULL, NULL, tServicesVoiceServiceDECTBaseParams, NULL, BBFDM_BOTH, LIST_KEY{"RFPI", "Name", "Alias", NULL}},
-{"Portable", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceDECTPortableInst, NULL, NULL, NULL, tServicesVoiceServiceDECTPortableParams, NULL, BBFDM_BOTH, LIST_KEY{"IPEI", "Alias", NULL}},
+{"Portable", &DMREAD, NULL, NULL, NULL, browseServicesVoiceServiceDECTPortableInst, NULL, NULL, NULL, tServicesVoiceServiceDECTPortableParams, get_voice_service_dect_linker, BBFDM_BOTH, LIST_KEY{"IPEI", "Alias", NULL}},
 {0}
 };
 

@@ -12,7 +12,7 @@
 #ifndef __UPNP_H
 #define __UPNP_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tUPnPObj[];
 extern DMLEAF tUPnPDeviceParams[];

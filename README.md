@@ -1,6 +1,15 @@
 # BroadBand Forum Data Models (BBFDM)
 
 `bbfdm` is a data model library implementation which includes a list of objects, parameters and operates used for CPE management through remote control protocols such as [TR-069/CWMP](https://cwmp-data-models.broadband-forum.org/) or [TR-369/USP](https://usp.technology/).
+This package comprises of the below libraries:
+
+| Library |                    Description                    |
+| ------- | ------------------------------------------------- |
+| libbbfdm | This provides the mechanism to add new parameters or extend the existing DM tree using json plugin or shared library plugin. |
+| libbbf_api | This provides the APIs for UCI, Ubus, JSON, CLI and memory management. |
+| libbbf_ubus | This library helps to expose the datamodel directly over ubus. Application can expose any datamodel(need not be part of "Device."/TR-181) using this library. |
+
+Note: Applications that use libbbf_ubus to expose datamodel, not required to use libbbfdm.
 
 ## Design of bbfdm
 
@@ -19,6 +28,7 @@
 │       ├── openwrt
 │       └── vendor.h
 ├── libbbf_api
+├── libbbf_ubus
 ├── scripts
 └── tools
 ```
@@ -37,11 +47,18 @@
 
 - `libbbf_api` folder which contains the source code of all API functions (UCI, Ubus, JSON, CLI and memory management)
 
+- `libbbf_ubus` folder which contains the source code of all API functions helps in exposing datamodel directly over ubus
+
 - `scripts` folder which contains the Diagnostics scripts
 
 - `tools` folder which contains some tools to generate Data Model in C, JSON, XML and Excel format
 
 - `dm...(.c and .h)` files which contains the `bbfdm` engine (operate, diagnostics) functions
+
+More details available in below documents:
+- [activate_firmware.md](./docs/activate_firmware.md)
+- [firewall.md](./docs/firewall.md)
+- [json_plugin_v1.md](./docs/json_plugin_v1.md)
 
 ## How to add support for a new Object/Parameter
 
@@ -222,140 +239,20 @@ In this function, there are two functions that need to be defined:
 > Note3: you can use [bbf_test plugin](./test/bbf_test/bbf_test.c) as a reference in order to develop any new object/leaf/browse.
 
 
-## BBF API
+## LIBBBF API
 
 `libbbf_api` is a library which contains the source code of all API functions (UCI, Ubus, JSON, CLI and memory management). these API are used for GET/SET/ADD/Delete/Operate calls which can be called in internal or external packages.
 
-The most used one are as follow:
+All APIs exposed by libbbf_api are presented in this header file [libbbf_api.h](./include/libbbf_api.h).
 
-#### 1. dmuci_get_option_value_string: execute the uci get value
+## LIBBBF UBUS
 
-```bash
-int dmuci_get_option_value_string(char *package, char *section, char *option, char **value)
-```
-**Argument:**
-- **package:** package name
-- **section:** section name
-- **option:** option name
-- **value:** the value of the returned option
+`Libbbf_ubus` is a library that provides APIs to expose the datamodel constructed with the help of libbbf API over the ubus directly.
 
-#### 2. dmuci_get_value_by_section_string: execute the uci get value
-
-```bash
-int dmuci_get_value_by_section_string(struct uci_section *s, char *option, char **value)
-```
-**Argument:**
-- **section:** section name
-- **option:** option name
-- **value:** the value of the returned option
-
-#### 3. uci_foreach_sections: browse all sections by package and section type
-
-```bash
-#define uci_foreach_sections(package, stype, section)
-```
-
-**Argument:**
-- **package:** package name
-- **stype:** section type to browse
-- **section:** return section pointer for each loop iteration
-
-#### 4. dmubus_call: execute the ubus call
-
-```bash
-int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
-```
-
-**Argument:**
-- **obj:** ubus obj
-- **method:** ubus method
-- **u_args:** ubus arguments
-- **u_args_size:** number of ubus arguments
-- **req_res:** the json message of the ubus call
-
-#### 5. dmubus_call_set: set the ubus call
-
-```bash
-int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size);
-```
-
-**Argument:**
-- **obj:** ubus obj
-- **method:** ubus method
-- **u_args: ubus** arguments
-- **u_args_size:** number of ubus arguments
-
-#### 6. handle_instance: allow to retrieve/attribute the instances from uci config sections
-
-```bash
-char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, char *inst_opt, char *alias_opt);
-```
-
-**Argument:**
-- **dmctx:** the current dmctx struct passed when calling this object
-- **parent_node:** the current node struct passed when calling this object
-- **s:** the uci section used to get the instance 
-- **inst_opt:** the option name of the instance number used for this object
-- **alias_opt:** the option name of the instance alias used for this object
-
-#### 7. handle_instance_without_section: allow to attribute instances with constant values
-
-```bash
-char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, int inst_nbr);
-```
-
-**Argument:** the current dmctx struct passed when calling this object
-- **dmctx:** the current dmctx struct passed when calling this object
-- **parent_node:** the current node struct passed when calling this object
-- **inst_nbr:** the instance to attribute for this object
-
-#### 8. DM_LINK_INST_OBJ: link the instance to the data model tree
-
-```bash
-int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)
-```
-
-**Argument:**
-- **dmctx:** the current dmctx struct passed when calling this object
-- **parent_node:** the current node struct passed when calling this object
-- **data:** the data transmitted for the next sub object and parameters that can be uci section, json object, or any type of data
-- **instance:** the current instance used for this object
+All APIs exposed by libbbf_ubus are presented in this header file [libbbf_ubus.h](./include/libbbf_ubus.h).
 
 
-> Note1: For other funtions, please refer to dmuci, dmubus, dmjson, dmcommon and dmmem (.c and .h) files in the [link](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbf_api)
-
-> Note2: When developing a new parameters/features in the Data Model, it's highly recommended to use the memory management functions of `libbbf_api` allocate and free because it's freed at the end of each RPCs.
-
-The list of memory management functions of `libbbf_api` are:
-
-```bash
-dmmalloc(x)
-dmcalloc(n, x)
-dmrealloc(x, n)
-dmstrdup(x)
-dmasprintf(s, format, ...)
-dmastrcat(s, b, m)
-dmfree(x)
-```
-
-> Note3: There are several APIs that have been deprecated and replaced with new ones. the table below summarizes them
-
-|             Deprecated API             |                       New API                      |
-| -------------------------------------- | -------------------------------------------------- |
-| handle_update_instance                 | handle_instance or handle_instance_without_section |
-| update_instance_alias                  | handle_instance                                    |
-| update_instance_without_section        | handle_instance_without_section                    |
-| update_instance                        |                      Not Used                      |
-| get_last_instance_bbfdm                |                      Not Used                      |
-| get_last_instance                      | find_max_instance                                  |
-| get_last_instance_lev2_bbfdm_dmmap_opt |                      Not Used                      |
-| get_last_instance_lev2_bbfdm           |                      Not Used                      |
-| is_section_unnamed                     |                      Not Used                      |
-| delete_sections_save_next_sections     |                      Not Used                      |
-| update_dmmap_sections                  |                      Not Used                      |
-| check_browse_section                   |                      Not Used                      |
-| dmuci_delete_by_section_unnamed        | dmuci_delete_by_section                            |
-| dmuci_delete_by_section_unnamed_bbfdm  | dmuci_delete_by_section                            |
+> Note: Anyone wants to check out libbbf_api or libbbf_ubus APIs and how to use them, all documentation will be available in their header files [libbbf_api.h](./include/libbbf_api.h) and [libbbf_ubus.h](./include/libbbf_ubus.h).
 
 ## BBFDM Vendor
 
@@ -436,7 +333,7 @@ BBF_VENDOR_PREFIX="X_TEST_COM_"
 - The directory **'dmtree/vendor/test/'** contains an example of **test** vendor implementation
 
 
-## BBFDM Dynamic Object/Parameter/Operate
+## BBFDM Dynamic Object/Parameter/Operate/Event
 
 `bbfdm` library allows all applications installed on the box to import its own Data Model parameters at run time in two formats:
 
@@ -487,7 +384,8 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
         "cwmp",
         "usp"
     ],
-    "array": false
+    "array": false,
+    "access": false
 }
 ```
 
@@ -503,6 +401,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
         "usp"
     ],
     "array": true,
+    "access": true,
     "mapping": {
         "type": "uci",
         "uci": {
@@ -526,6 +425,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 		"usp"
 	],
 	"array": true,
+	"access": false,
 	"mapping": {
 		"type": "ubus",
 		"ubus": {
@@ -540,7 +440,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 **3. Parameter under object with instance:**
 
-- **UCI command:** uci get wireless.@wifi-device[0].country
+- **UCI option command:** uci get wireless.@wifi-device[0].country
 
 - **@i:** is the number of instance object
 
@@ -571,6 +471,42 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 }
 ```
 
+- **UCI list command:** uci get urlfilter.@profile[0].whitelist_url
+
+- **@i:** is the number of instance object
+
+```bash
+"WhitelistURL": {
+	"type": "string",
+	"version": "2.14",
+	"read": true,
+	"write": true,
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"list": {
+		"datatype": "string"
+	},
+	"mapping": [
+		{
+			"type": "uci",
+			"uci": {
+				"file": "urlfilter",
+				"section": {
+					"type": "profile",
+					"index": "@i-1"
+				},
+				"list": {
+					"name": "whitelist_url"
+				}
+			}
+		}
+	]
+}
+```
+
+
 - **UBUS command:** ubus call wifi status | jsonfilter -e @.radios[0].noise
 
 - **@i:** is the number of instance object
@@ -600,7 +536,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 **4. Parameter without instance:**
 
-- **UCI command:** uci get cwmp.cpe.userid
+- **UCI option command:** uci get cwmp.cpe.userid
 
 ```bash
 "Username": {
@@ -622,6 +558,39 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 	       			},
 				"option" : {
 					"name" : "userid"
+				}
+			}
+		}
+	]
+}
+```
+
+- **UCI list command:** uci get urlfilter.globals.blacklist_url
+
+- **@i:** is the number of instance object
+
+```bash
+"BlacklistURL": {
+	"type": "string",
+	"read": true,
+	"write": true,
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"list": {
+		"datatype": "string"
+	},
+	"mapping": [
+		{
+			"type": "uci",
+			"uci": {
+				"file": "urlfilter",
+				"section": {
+					"name": "globals"
+				},
+				"list": {
+					"name": "blacklist_url"
 				}
 			}
 		}
@@ -679,6 +648,163 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 }
 ```
 
+**5. Parameter to map another data model Object:**
+
+- **UCI option command:** uci get urlfilter.@filter[0].profile
+
+- **linker_obj** is the path name of an object that is stacked immediately below this object
+
+```bash
+"Profile": {
+	"type": "string",
+	"read": true,
+	"write": true,
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"mapping": [
+		{
+			"type": "uci",
+			"uci": {
+				"file": "urlfilter",
+				"section": {
+					"type": "filter",
+					"index": "@i-1"
+				},
+				"option": {
+					"name": "profile"
+				}
+			},
+			"linker_obj": "Device.{BBF_VENDOR_PREFIX}URLFilter.Profile."
+		}
+	]
+}
+```
+
+**6. Object with Event and Operate command:**
+
+```bash
+{
+	"Device.X_IOPSYS_Test.": {
+		"type": "object",
+		"protocols": [
+			"cwmp",
+			"usp"
+		],
+		"array": false,
+		"access": false,
+		"Push!": {
+			"type": "event",
+			"version": "2.13",
+			"protocols": [
+				"usp"
+			],
+			"data": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.13",
+				"protocols": [
+					"usp"
+				]
+			}
+		},
+		"Status()": {
+			"type": "command",
+			"async": true,
+			"version": "2.12",
+			"protocols": [
+				"usp"
+			],
+			"input": {
+				"Option": {
+					"type": "string",
+					"read": "true",
+					"write": "true",
+					"protocols": [
+						"usp"
+					]
+				}
+			},
+			"output": {
+				"Result": {
+					"type": "string",
+					"read": "true",
+					"write": "false",
+					"protocols": [
+						"usp"
+					]
+				}
+			},
+			"mapping": [
+				{
+					"type": "ubus",
+					"ubus": {
+						"object": "test",
+						"method": "status"
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+- **UBUS command:** ubus call usp operate '{"path":"Device.X_IOPSYS_Test.", "action":"Status()", "input":{"Option":"Last"}}'
+
+```bash
+{
+ 	"Results": [
+		{
+			"path": "Device.X_IOPSYS_Test.Status()",
+			"result": [
+				{
+					"Result": "Success"
+				}
+			]
+		}
+	]
+}
+```
+
+- **UBUS command:** ubus call usp get_supported_dm
+
+```bash
+{
+	"parameters": [
+		{
+			"parameter": "Device.X_IOPSYS_Test.Push!",
+			"type": "xsd:event",
+			"in": [
+				"data"
+			]
+		},
+		...
+	]
+}
+```
+
+- **UBUS command:** ubus call usp list_operate
+
+```bash
+{
+	"parameters": [
+		{
+			"parameter": "Device.X_IOPSYS_Test.Status()",
+			"type": "async",
+			"in": [
+				"Option"
+			],
+			"out": [
+				"Result"
+			]
+		},
+		...
+	]
+}
+```
+
 > Note1: JSON File can only add vendor or standard objects that are not implemented by `libbbfdm`
 
 > Note2: JSON File is not allowed to overwrite objects/parameters
@@ -687,7 +813,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 > Note4: Each object definition in JSON file must begin with "Device." and should have the full parent path if it is under another object
 
-- For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [UserInterface](/test/files/etc/bbfdm/json/UserInterface.json), [X_IOPSYS_EU_Dropbear](/test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json)
+- For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [UserInterface](/test/files/etc/bbfdm/json/UserInterface.json), [X_IOPSYS_EU_Dropbear](/test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json), [X_IOPSYS_EU_TEST](/test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json)
 
 ## BBFDM Tools
 BBF tools are written in python3 and has below dependencies.
@@ -709,6 +835,7 @@ $ pip3 install jsonschema xlwt
 |generate_dm.py           | Generate list of supported/un-supported parameters based of json input|
 |generate_dm_xml.py       | Generate list of supported/un-supported parameters in xml format |
 |generate_dm_excel.py     | Generate list of supported/un-supported parameters in xls format |
+|validate_json_plugin.py  | Validate json plugin files for dynamic library or standard data model |
 
 > Note: Currently all the tools needs to be executed in tools directory.
 
@@ -719,14 +846,14 @@ It is a [python script](./tools/convert_dm_xml_to_json.py) to convert Data Model
 $ ./convert_dm_xml_to_json.py
 Usage: ./convert_dm_xml_to_json.py <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]
 Examples:
-  - ./convert_dm_xml_to_json.py tr-181-2-14-1-cwmp-full.xml tr-181-2-14-1-usp-full.xml Device.
+  - ./convert_dm_xml_to_json.py tr-181-2-15-0-cwmp-full.xml tr-181-2-15-0-usp-full.xml Device.
     ==> Generate the json file of the sub tree Device. in tr181.json
   - ./convert_dm_xml_to_json.py tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.
     ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json
   - ./convert_dm_xml_to_json.py tr-106-1-2-0-full.xml Device.
     ==> Generate the json file of the sub tree Device. in tr106.json
 
-Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-14-1-cwmp-full.xml
+Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-15-0-cwmp-full.xml
 ```
 
 ### XML generator
@@ -735,14 +862,14 @@ Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-14
 
 ```bash
 $ ./generate_dm_xml.py -h
-usage: generate_dm_xml.py [-h] [-r https://dev.iopsys.eu/iopsys/stunc.git^devel] [-v iopsys] [-p X_IOPSYS_EU_] [-d DEVICE_PROTOCOL_DSLFTR069v1] [-m iopsys] [-u 002207] [-c DG400PRIME] [-n DG400PRIME-A]
+usage: generate_dm_xml.py [-h] [-r git^https://dev.iopsys.eu/iopsys/stunc.git^devel] [-v iopsys] [-p X_IOPSYS_EU_] [-d DEVICE_PROTOCOL_DSLFTR069v1] [-m iopsys] [-u 002207] [-c DG400PRIME] [-n DG400PRIME-A]
                           [-s 1.2.3.4] [-f BBF] [-o datamodel.xml]
 
 Script to generate list of supported and non-supported parameter in xml format
 
 optional arguments:
   -h, --help            show this help message and exit
-  -r https://dev.iopsys.eu/iopsys/stunc.git^devel, --remote-dm https://dev.iopsys.eu/iopsys/stunc.git^devel
+  -r git^https://dev.iopsys.eu/iopsys/stunc.git^devel, --remote-dm git^https://dev.iopsys.eu/iopsys/stunc.git^devel
                         Includes OBJ/PARAM defined under remote repositories defined as bbf plugin
   -v iopsys, --vendor-list iopsys
                         Generate data model tree with vendor extension OBJ/PARAM.
@@ -770,21 +897,25 @@ Part of BBF-tools, refer Readme for more examples
 More examples:
 ```bash
 $ ./generate_dm_xml.py -v iopsys -v openwrt
+$ ./generate_dm_xml.py -v iopsys -p X_IOPSYS_EU_ -r git^https://dev.iopsys.eu/iopsys/stunc.git^devel
+$ ./generate_dm_xml.py -f HDM -v iopsys -p X_IOPSYS_EU_ -o iopsys.xml
 ```
+
+> Note: For the remote data model, *git* is the only proto allowed to use in the *generate_dm_xml.py* script. Therefore, if you want to use vendor extensions from a local repository, you must use the *generate_dm.py* script.
 
 ### Excel generator
 [Python script](./tools/generate_dm_excel.py) to generat list of supported and un-supported parameters in excel sheet.
 
 ```bash
 $ ./generate_dm_excel.py -h
-usage: generate_dm_excel.py [-h] -d tr181 [-r https://dev.iopsys.eu/iopsys/stunc.git^devel] [-v iopsys] [-p X_IOPSYS_EU_] [-o supported_datamodel.xls]
+usage: generate_dm_excel.py [-h] -d tr181 [-r git^https://dev.iopsys.eu/iopsys/stunc.git^devel] [-v iopsys] [-p X_IOPSYS_EU_] [-o supported_datamodel.xls]
 
 Script to generate list of supported and non-supported parameter in xls format
 
 optional arguments:
   -h, --help            show this help message and exit
   -d tr181, --datamodel tr181
-  -r https://dev.iopsys.eu/iopsys/stunc.git^devel, --remote-dm https://dev.iopsys.eu/iopsys/stunc.git^devel
+  -r git^https://dev.iopsys.eu/iopsys/stunc.git^devel, --remote-dm git^https://dev.iopsys.eu/iopsys/stunc.git^devel
                         Includes OBJ/PARAM defined under remote repositories defined as bbf plugin
   -v iopsys, --vendor-list iopsys
                         Generate data model tree with vendor extension OBJ/PARAM
@@ -799,8 +930,18 @@ Part of BBF-tools, refer Readme for more examples
 More examples:
 ```bash
 $ ./generate_dm_excel.py -d tr181 -v iopsys -v openwrt -o datamodel.xls
-$ ./generate_dm_excel.py -d tr181 -d tr104 -v iopsys -v openwrt -o datamodel.xls
+$ ./generate_dm_excel.py -d tr181 -d tr104 -v iopsys -o datamodel.xls
+$ ./generate_dm_excel.py -d tr181 -v iopsys -p X_IOPSYS_EU_ -r git^https://dev.iopsys.eu/iopsys/xmppc.git^devel -o datamodel_iopsys.xls
 ```
+### Validate JSON plugin
+It is a [python script](./tools/validate_json_plugin.py) to validate JSON plugin files for dynamic library or standard data model [TR181](./dmtree/json/tr181.json), [TR104](./dmtree/json/tr104.json), etc..
+
+```bash
+$ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
+$ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
+$ ./tools/validate_json_plugin.py dmtree/json/tr181.json
+```
+
 ### Data Model generator
 
 This is a pipeline friendly master script to generate the list of supported and un-supported datamodels in xml and xls formats based on provided input in a json file.
@@ -832,6 +973,7 @@ The input json file should be defined as follow:
 	"plugins": [
 		{
 			"repo": "https://dev.iopsys.eu/iopsys/mydatamodel.git",
+			"proto": "git",
 			"version": "tag/hash/branch",
 			"dm_files": [
 				"src/datamodel.c",
@@ -840,6 +982,7 @@ The input json file should be defined as follow:
 		},
 		{
 			"repo": "https://dev.iopsys.eu/iopsys/mybbfplugin.git",
+			"proto": "git",
 			"version": "tag/hash/branch",
 			"dm_files": [
 				"dm.c"
@@ -847,9 +990,26 @@ The input json file should be defined as follow:
 		},
 		{
 			"repo": "https://dev.iopsys.eu/iopsys/mydatamodeljson.git",
+			"proto": "git",
 			"version": "tag/hash/branch",
 			"dm_files": [
 				"src/plugin/datamodel.json"
+			]
+		},
+		{
+			"repo": "/home/iopsys/sdk/mypackage/",
+			"proto": "local",
+			"dm_files": [
+				"src/datamodel.c",
+				"additional_datamodel.c"
+			]
+		},
+		{
+			"repo": "/src/feeds/mypackage/",
+			"proto": "local",
+			"dm_files": [
+				"datamodel.c",
+				"src/datamodel.json"
 			]
 		}
 	],
@@ -868,11 +1028,27 @@ The input json file should be defined as follow:
 }
 ```
 
+> Note1: For the local repository, you must use an absolute path as repo option.
+
+> Note2: If proto is not defined in the json config file, then git is used by default as proto option.  
+
 - For more examples of tools input json file, you can see this link: [tools_input.json](./devel/tools/tools_input.json)
 
-## Dependencies
+# How to expose datamodel over ubus directly with the help of libbbf APIs
 
-To successfully build libbbfdm, the following libraries are needed:
+`Libbbf_ubus` is the library that helps in exposing the datamodel over ubus directly using libbbf_api.
+Application using `libbbf_ubus`, shall not use the `libbbfdm` library because all needed operations from `libbbfdm` library has been internally handled in `libbbf_ubus`.
+
+To identify the mechanism of exposing datamodel directly over ubus please refer to the sample code [dmtest.c](./test/dynamicdm_ubus_test/bbf_ubus.c)
+
+For more info you can see the schemas at:
+
+- Raw schema [link](./schemas/dmtest.json)
+- Markdown schema [link](./docs/api/dmtest.md)
+
+## Dependencies of of libbbfdm and libbbf_ubus
+
+To successfully build libbbfdm or libbbf_ubus, the following libraries are needed:
 
 | Dependency  | Link                                        | License        |
 | ----------- | ------------------------------------------- | -------------- |
@@ -882,4 +1058,4 @@ To successfully build libbbfdm, the following libraries are needed:
 | libjson-c   | https://s3.amazonaws.com/json-c_releases    | MIT            |
 | libcurl     | https://dl.uxnr.de/mirror/curl              | MIT            |
 | libtrace    | https://github.com/apietila/libtrace.git    | GPLv2          |
-| libbbf_api  | https://dev.iopsys.eu/iopsys/bbf.git        | LGPL 2.1       |
+| libwolfssl  | https://github.com/wolfSSL/wolfssl          | GPL-2.0        |

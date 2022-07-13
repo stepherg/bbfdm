@@ -12,7 +12,7 @@
 #ifndef __DMENTRYLIBRARY_H__
 #define __DMENTRYLIBRARY_H__
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 #define LIBRARY_FOLDER_PATH "/usr/lib/bbfdm"
 

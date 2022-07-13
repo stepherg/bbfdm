@@ -12,7 +12,7 @@
 #ifndef __OPENWRT_VENDOR_H
 #define __OPENWRT_VENDOR_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DM_MAP_OBJ tVendorExtensionOverwriteOPENWRT[];
 extern char *VendorExtensionExcludeOPENWRT[];

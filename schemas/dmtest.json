@@ -1,0 +1,621 @@
+{
+  "definitions": {
+    "path_t": {
+      "description": "Complete object element path as per TR181",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 1024,
+      "examples": [
+        "Device.",
+        "Device.DeviceInfo.Manufacturer",
+        "Device.WiFi.SSID.1.",
+        "Device.WiFi."
+      ]
+    },
+    "schema_path_t": {
+      "description": "Datamodel object schema path",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 1024,
+      "examples": [
+        "Device.Bridging.Bridge.{i}.",
+        "Device.DeviceInfo.Manufacturer",
+        "Device.WiFi.SSID.{i}.SSID"
+      ]
+    },
+    "boolean_t": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1"
+      ]
+    },
+    "operate_path_t": {
+      "description": "Datamodel object schema path",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 1024,
+      "examples": [
+        "Device.DHCPv4.Client.{i}.Renew()",
+        "Device.FactoryReset()"
+      ]
+    },
+    "operate_type_t": {
+      "type": "string",
+      "enum": [
+        "async",
+        "sync"
+      ]
+    },
+    "instance_t": {
+      "description": "Multi object instances",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 256
+    },
+    "proto_t": {
+      "type": "string",
+      "default": "both",
+      "enum": [
+        "usp",
+        "cwmp",
+        "both"
+      ]
+    },
+    "type_t": {
+      "type": "string",
+      "enum": [
+        "xsd:string",
+        "xsd:unsignedInt",
+        "xsd:int",
+        "xsd:unsignedLong",
+        "xsd:long",
+        "xsd:boolean",
+        "xsd:dateTime",
+        "xsd:hexBinary",
+        "xsd:object",
+        "xsd:command",
+        "xsd:event"
+      ]
+    },
+    "fault_t": {
+      "type": "integer",
+      "minimum": 7000,
+      "maximum": 9050
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dev.iopsys.eu/iopsys/uspd/-/blob/devel/docs/api/dmtest.json",
+  "type": "object",
+  "title": "dmtest",
+  "object": "user defined dynamic DM exposed on ubus",
+  "additionalProperties": false,
+  "properties": {
+    "get_supported_dm": {
+      "title": "Get list of supported datamodel parameters",
+      "description": "Schema will have all the nodes/objects supported by libbbf",
+      "type": "object",
+      "required": [
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/path_t"
+            },
+            "proto": {
+              "$ref": "#/definitions/proto_t"
+            },
+            "next-level": {
+              "type": "boolean",
+              "description": "gets only next level objects if true"
+            },
+            "schema_type": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3,
+              "description": "0-All, 1-Parameter only 2- Event only 3- operate only"
+            }
+          }
+        },
+        "output": {
+          "oneof": [
+            {
+              "fault": {
+                "$ref": "#/definitions/fault_t",
+                "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "parameters": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "parameter": {
+                          "$ref": "#/definitions/schema_path_t"
+                        },
+                        "writable": {
+                          "$ref": "#/definitions/boolean_t"
+                        },
+                        "type": {
+                          "$ref": "#/definitions/type_t"
+                        },
+                        "cmd_type": {
+                          "$ref": "#/definitions/operate_type_t"
+                        },
+                        "in": {
+                          "type": "array",
+                          "uniqueItems": true,
+                          "items": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "out": {
+                          "type": "array",
+                          "uniqueItems": true,
+                          "items": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "parameter",
+                        "type"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "get": {
+      "title": "Get handler",
+      "description": "Query the datamodel object",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/path_t"
+            },
+            "proto": {
+              "$ref": "#/definitions/proto_t"
+            }
+          }
+        },
+        "output": {
+          "oneof": [
+            {
+              "fault": {
+                "$ref": "#/definitions/fault_t",
+                "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "parameters": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "parameter",
+                        "value",
+                        "type"
+                      ],
+                      "properties": {
+                        "parameter": {
+                          "$ref": "#/definitions/path_t"
+                        },
+                        "value": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "$ref": "#/definitions/type_t"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "add_object": {
+      "title": "Add a new object instance",
+      "description": "Add a new object in multi instance object",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/path_t"
+            },
+            "proto": {
+              "$ref": "#/definitions/proto_t"
+            }
+          }
+        },
+        "output": {
+          "oneof": [
+            {
+              "fault": {
+                "$ref": "#/definitions/fault_t",
+                "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+              }
+            },
+	    {
+              "type": "object",
+              "required": [
+                "parameters"
+              ],
+              "properties": {
+                "parameters": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "parameter",
+                        "status"
+                      ],
+                      "properties": {
+                        "parameter": {
+                          "$ref": "#/definitions/path_t"
+                        },
+                        "status": {
+                          "type": "boolean"
+                        },
+                        "fault": {
+                          "$ref": "#/definitions/fault_t",
+                          "Description": "Any discrepancy in input will result in fault. The type of fault can be determined by fault code"
+                        },
+                        "instance": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "del_object": {
+      "title": "Delete object instance",
+      "description": "Delete a object instance from multi instance object",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/path_t"
+            },
+            "proto": {
+              "$ref": "#/definitions/proto_t"
+            }
+          }
+        },
+        "output": {
+          "oneof": [
+            {
+              "fault": {
+                "$ref": "#/definitions/fault_t",
+                "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "parameters"
+              ],
+              "properties": {
+                "parameters": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "parameter",
+                        "status"
+                      ],
+                      "properties": {
+                        "parameter": {
+                          "$ref": "#/definitions/path_t"
+                        },
+                        "status": {
+                          "type": "boolean"
+                        },
+                        "fault": {
+                          "$ref": "#/definitions/fault_t"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "set": {
+      "title": "Set handler",
+      "description": "Set values of datamodel object element",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path",
+            "value"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/path_t"
+            },
+            "proto": {
+              "$ref": "#/definitions/proto_t"
+            },
+            "value": {
+              "description": "value of the object element provided in path, path should contains valid writable object element",
+              "type": "string",
+              "examples": [
+                "{\"path\":\"Device.WiFi.SSID.1.SSID\", \"value\":\"test_ssid\"}",
+                "{\"path\":\"Device.WiFi.SSID.2.Enable\", \"value\":\"true\"}",
+                "{\"path\":\"Device.WiFi.SSID.1.Enable\", \"value\":\"0\"}"
+              ]
+            }
+          }
+        },
+        "output": {
+          "oneof": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "const": "1"
+                }
+              }
+            },
+            {
+              "fault": {
+                "$ref": "#/definitions/fault_t",
+                "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "parameters"
+              ],
+              "properties": {
+                "parameters": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "parameter"
+                      ],
+                      "properties": {
+                        "parameter": {
+                          "$ref": "#/definitions/path_t"
+                        },
+                        "status": {
+                          "type": "boolean"
+                        },
+                        "fault": {
+                          "$ref": "#/definitions/fault_t"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "operate": {
+      "title": "Operate handler",
+      "description": "Operate on object element provided in path",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/operate_path_t"
+            },
+            "input": {
+              "description": "Input arguments for the operate command as defined in TR-181-2.13",
+              "examples": [
+                "{\"path\":\"Device.IP.Diagnostics.IPPing\\(\\)\", \"input\":{\"Host\":\"iopsys.eu\"}}"
+              ],
+              "type": "object",
+              "properties": {}
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "required": [
+            "Results"
+          ],
+          "properties": {
+            "Results": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "required": [
+                    "path"
+                  ],
+                  "properties": {
+                    "path": {
+                      "$ref": "#/definitions/path_t"
+                    },
+                    "parameters": {
+                      "description": "Output will have status for sync commands and for async commands parameters as defined in TR-181-2.13",
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "parameter": {
+                              "type": "string"
+                            },
+                            "value": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "$ref": "#/definitions/type_t"
+                            },
+                            "fault": {
+                              "$ref": "#/definitions/fault_t"
+                            }
+                          }
+                        }
+                      ],
+                      "examples": [
+                        "{\n\t\"status\": true}",
+                        "{\n\t\"AverageResponseTime\": \"0\",\n\t\"AverageResponseTimeDetailed\": \"130\",\n\t\"FailureCount\": \"0\",\n\t\"MaximumResponseTime\": \"0\",\n\t\"MaximumResponseTimeDetailed\": \"140\",\n\t\"MinimumResponseTime\": \"0\",\n\t\"MinimumResponseTimeDetailed\": \"120\",\n\t\"SuccessCount\": \"3\"}"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "transaction_start": {
+      "title": "Start a transaction before set/add/del operations",
+      "type": "object",
+      "properties": {
+        "input": {
+          "type": "object",
+          "properties": {}
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        }
+      },
+      "required": [
+        "output"
+      ]
+    },
+    "transaction_abort": {
+      "title": "Aborts an on-going transaction",
+      "type": "object",
+      "properties": {
+        "input": {
+          "type": "object",
+          "properties": {}
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        }
+      },
+      "required": [
+        "output"
+      ]
+    },
+    "transaction_commit": {
+      "title": "Commits an on-going transaction",
+      "type": "object",
+      "properties": {
+        "input": {
+          "type": "object",
+          "properties": {}
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        }
+      },
+      "required": [
+        "output"
+      ]
+    }
+  }
+}

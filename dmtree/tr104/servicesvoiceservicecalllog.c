@@ -80,6 +80,17 @@ static int get_ServicesVoiceServiceCallLog_UsedLine(char *refparam, struct dmctx
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCallLog_UsedExtensions(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+
+	if (entry) {
+		*value = dmstrdup(entry->used_extensions);
+	}
+
+	return 0;
+}
+
 static int get_ServicesVoiceServiceCallLog_Direction(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
@@ -193,6 +204,31 @@ static int get_ServicesVoiceServiceCallLog_Src_MaxJitter(char *refparam, struct 
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCallLog_Src_AverageRoundTripDelay(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->averageRoundTripDelay) : "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLog_Src_AverageFarEndInterarrivalJitter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->averageFarEndInterarrivalJitter) : "0";
+	return 0;
+}
+
+/* Get Alias - Device.Services.VoiceService.{i}.CallLog.{i}. */
+static int get_ServicesVoiceServiceCallLog_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_name(refparam, ctx, data, instance, value, "callLog", "callLog_inst");
+}
+
+/* Set Alias - Device.Services.VoiceService.{i}.CallLog.{i}. */
+static int set_ServicesVoiceServiceCallLog_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_name(refparam, ctx, data, instance, value, action, "callLog", "callLog_inst");
+}
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -210,10 +246,12 @@ DMLEAF tServicesVoiceServiceCallLogParams[] = {
 {"Source", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Source, NULL, BBFDM_BOTH},
 {"Destination", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Destination, NULL, BBFDM_BOTH},
 {"UsedLine", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_UsedLine, NULL, BBFDM_BOTH},
+{"UsedExtensions", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_UsedExtensions, NULL, BBFDM_BOTH},
 {"Direction", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_Direction, NULL, BBFDM_BOTH},
 {"Start", &DMREAD, DMT_TIME, get_ServicesVoiceServiceCallLog_Start, NULL, BBFDM_BOTH},
 {"Duration", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Duration, NULL, BBFDM_BOTH},
 {"CallTerminationCause", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_CallTerminationCause, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallLog_Alias, set_ServicesVoiceServiceCallLog_Alias, BBFDM_BOTH},
 {0}
 };
 
@@ -291,5 +329,7 @@ DMLEAF tServicesVoiceServiceCallLogSessionSourceRTPParams[] = {
 {"FarEndInterarrivalJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_FarEndInterarrivalJitter, NULL, BBFDM_BOTH},
 {"FarEndPacketLossRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Src_FarEndPacketLossRate, NULL, BBFDM_BOTH},
 {"MaxJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_MaxJitter, NULL, BBFDM_BOTH},
+{"AverageRoundTripDelay", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_AverageRoundTripDelay, NULL, BBFDM_BOTH},
+{"AverageFarEndInterarrivalJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_AverageFarEndInterarrivalJitter, NULL, BBFDM_BOTH},
 {0}
 };

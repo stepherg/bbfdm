@@ -10,6 +10,8 @@ import json
 from collections import OrderedDict
 
 CURRENT_PATH = os.getcwd()
+ROOT = None
+BBF_ERROR_CODE = 0
 BBF_TR181_ROOT_FILE = "device.c"
 BBF_TR104_ROOT_FILE = "servicesvoiceservice.c"
 BBF_VENDOR_ROOT_FILE = "vendor.c"
@@ -42,6 +44,12 @@ Array_Types = {"string": "DMT_STRING",
                "command": "DMT_COMMAND",
                "event": "DMT_EVENT"}
 
+def get_root_node():
+    return ROOT
+
+def set_root_node(rootdm = "Device."):
+    global ROOT
+    ROOT = rootdm
 
 def rename_file(old_file_name, new_file_name):
     try:
@@ -65,7 +73,7 @@ def create_folder(folder_name):
 
 # rmtree exception handler
 def rmtree_handler(_func, path, _exc_info):
-    print("Failed to remove %s" % path)
+    print(f'Failed to remove {path}')
 
 def remove_folder(folder_name):
     if os.path.isdir(folder_name):
@@ -110,6 +118,15 @@ def get_param_type(value):
     paramtype = get_option_value(value, "type")
     return Array_Types.get(paramtype, None)
 
+def get_protocol_from_json(value):
+    val = get_option_value(value, "protocols", ["cwmp", "usp"])
+    if "cwmp" in val and "usp" in val:
+        return "BBFDM_BOTH"
+    elif "cwmp" in val:
+        return "BBFDM_CWMP"
+    else:
+        return "BBFDM_USP"
+
 def clean_supported_dm_list():
     LIST_SUPPORTED_DM.clear()
 
@@ -124,7 +141,11 @@ def fill_list_supported_dm():
 def fill_data_model_file():
     fp = open(DATA_MODEL_FILE, 'a', encoding='utf-8')
     for value in LIST_SUPPORTED_DM:
-        print("%s" % value, file=fp)
+        if (ROOT):
+            if (value.startswith(ROOT)):
+                print(f'{value}', file=fp)
+        else:
+            print(f'{value}', file=fp)
     fp.close()
 
 
@@ -132,6 +153,7 @@ def generate_datamodel_tree(filename):
     if filename.endswith('.c') is False:
         return
 
+    LIST_DEL_PARAM = []
     obj_found = 0
     param_found = 0
     obj_found_in_list = 0
@@ -140,6 +162,10 @@ def generate_datamodel_tree(filename):
 
     fp = open(filename, 'r', encoding='utf-8')
     for line in fp:
+        line = line.lstrip()
+
+        if line.startswith(tuple(LIST_IGNORED_LINE)) is True:
+            continue
 
         if "DMOBJ" in line:
             table_name = line[:line.index('[]')].rstrip(
@@ -156,21 +182,22 @@ def generate_datamodel_tree(filename):
         if obj_found == 0 and param_found == 0:
             continue
 
-        if line.startswith(tuple(LIST_IGNORED_LINE)) is True:
-            continue
-
-        if "{0}" in line:
+        if "{0}" in line.replace(" ", ""):
             obj_found = 0
             param_found = 0
             obj_found_in_list = 0
             table_name = ""
             parent_obj = ""
+            for value in LIST_DEL_PARAM:
+                LIST_PARAM.remove(value)
+            LIST_DEL_PARAM.clear()
             continue
 
         # Object Table
         if obj_found == 1:
             if obj_found_in_list == 0:
-                for value in LIST_OBJ:
+                obj_list = LIST_OBJ
+                for value in obj_list:
                     val = value.split(":")
                     if val[1] == table_name:
                         parent_obj = val[0]
@@ -182,6 +209,7 @@ def generate_datamodel_tree(filename):
                 "BBF_VENDOR_PREFIX", BBF_VENDOR_PREFIX).replace(" ", "")
             obj_permission = obj[1].replace("&", "").replace(" ", "")
             obj_mulinst = obj[5].replace("&", "").replace(" ", "")
+            obj_protocol = obj[11].replace("}", "").replace(" ", "").replace(",", "")
 
             if obj_mulinst == "NULL":
                 full_obj_name = obj_name + "."
@@ -189,7 +217,7 @@ def generate_datamodel_tree(filename):
                 full_obj_name = obj_name + ".{i}."
 
             LIST_SUPPORTED_DM.append(
-                full_obj_name + "," + obj_permission + ",DMT_OBJ")
+                full_obj_name + "," + obj_permission + ",DMT_OBJ" + "," + obj_protocol)
 
             if obj[8] != "NULL":
                 LIST_OBJ.append(full_obj_name + ":" + obj[8])
@@ -199,22 +227,23 @@ def generate_datamodel_tree(filename):
 
         # Parameter Table
         if param_found == 1:
-            if obj_found_in_list == 0:
-                for value in LIST_PARAM:
-                    val = value.split(":")
-                    if val[1] == table_name:
-                        parent_obj = val[0]
-                        obj_found_in_list = 1
-                        LIST_PARAM.remove(value)
+            param_list = LIST_PARAM
+            for value in param_list:
+                val = value.split(":")
+                if val[1] == table_name:
+                    parent_obj = val[0]
 
-            param = line.rstrip('\n').split(", ")
-            param_name = parent_obj + param[0].replace("{", "").replace(
-                "\"", "").replace("BBF_VENDOR_PREFIX", BBF_VENDOR_PREFIX).replace(" ", "")
-            param_permission = param[1].replace("&", "").replace(" ", "")
-            param_type = param[2].replace(" ", "")
+                    param = line.rstrip('\n').split(",")
+                    param_name = parent_obj + param[0].replace("{", "").replace(
+                        "\"", "").replace("BBF_VENDOR_PREFIX", BBF_VENDOR_PREFIX).replace(" ", "")
+                    param_permission = param[1].replace("&", "").replace(" ", "")
+                    param_type = param[2].replace(" ", "")
+                    param_protocol = param[5].replace("}", "").replace(" ", "")
 
-            LIST_SUPPORTED_DM.append(
-                param_name + "," + param_permission + "," + param_type)
+                    LIST_SUPPORTED_DM.append(
+                        param_name + "," + param_permission + "," + param_type + "," + param_protocol)
+                    if value not in LIST_DEL_PARAM:
+                        LIST_DEL_PARAM.append(value)
 
     fp.close()
 
@@ -227,6 +256,10 @@ def generate_dynamic_datamodel_tree(filename):
 
     fp = open(filename, 'r', encoding='utf-8')
     for line in fp:
+        line = line.lstrip()
+
+        if line.startswith(tuple(LIST_IGNORED_LINE)) is True:
+            continue
 
         if "DM_MAP_OBJ" in line:
             obj_found = 1
@@ -234,32 +267,32 @@ def generate_dynamic_datamodel_tree(filename):
 
         if obj_found == 0:
             continue
-
-        if line.startswith(tuple(LIST_IGNORED_LINE)) is True:
-            continue
-
-        if "{0}" in line:
+        
+        if "{0}" in line.replace(" ", ""):
             obj_found = 0
             continue
 
         # Object Table
         if obj_found == 1:
             obj = line.rstrip('\n').split(", ")
-            obj_name = obj[0][1:].replace("\"", "")
+            obj_name = obj[0][1:].replace("\"", "").replace(" ", "").replace("BBF_VENDOR_PREFIX", BBF_VENDOR_PREFIX)
 
             if obj[1] != "NULL":
                 LIST_OBJ.append(obj_name + ":" + obj[1])
 
             if obj[2] != "NULL":
-                LIST_PARAM.append(obj_name + ":" + obj[2].replace("},", ""))
+                LIST_PARAM.append(obj_name + ":" + obj[2].replace("},", "").replace(" ", ""))
 
     fp.close()
 
 
 def parse_dynamic_json_datamodel_tree(obj, value):
     obj_permission = "DMWRITE" if get_option_value(
-        value, "array") is True else "DMREAD"
-    LIST_SUPPORTED_DM.append(obj + "," + obj_permission + ",DMT_OBJ")
+        value, "access") is True else "DMREAD"
+    obj_protocols = get_protocol_from_json(value)
+
+    obj_name = obj.replace("{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX)
+    LIST_SUPPORTED_DM.append(obj_name + "," + obj_permission + ",DMT_OBJ" + "," + obj_protocols)
 
     hasobj = obj_has_child(value)
     hasparam = obj_has_param(value)
@@ -269,12 +302,13 @@ def parse_dynamic_json_datamodel_tree(obj, value):
             if k != "mapping" and isinstance(v, dict):
                 for k1, v1 in v.items():
                     if k1 == "type" and v1 != "object":
-                        param_name = obj + k
+                        param_name = obj_name + k.replace("{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX)
                         param_type = get_param_type(v)
                         param_permission = "DMWRITE" if get_option_value(
                             v, "write") is True else "DMREAD"
+                        param_protocols = get_protocol_from_json(v)
                         LIST_SUPPORTED_DM.append(
-                            param_name + "," + param_permission + "," + param_type)
+                            param_name + "," + param_permission + "," + param_type + "," + param_protocols)
                         break
 
     if hasobj and isinstance(value, dict):
@@ -335,7 +369,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
     if vendor_list is not None and isinstance(vendor_list, list) and vendor_list:
         cd_dir(BBF_DMTREE_PATH)
         for vendor in vendor_list:
-            vendor_dir = "vendor/" + vendor + "/tr181"
+            vendor_dir = f'vendor/{vendor}/tr181'
             if os.path.isdir(vendor_dir):
                 cd_dir(vendor_dir)
 
@@ -352,7 +386,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
 
                 cd_dir(BBF_DMTREE_PATH)
 
-            vendor_dir = "vendor/" + vendor + "/tr104"
+            vendor_dir = f'vendor/{vendor}/tr104'
             if os.path.isdir(vendor_dir):
                 cd_dir(vendor_dir)
 
@@ -366,55 +400,103 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
                 cd_dir(BBF_DMTREE_PATH)
 
     ############## Download && Generate Plugins Data Models ##############
+    global BBF_ERROR_CODE
     if plugins is not None and isinstance(plugins, list) and plugins:
         print("Generating datamodels from defined plugins...")
 
         cd_dir(CURRENT_PATH)
         if isinstance(plugins, list):
             for plugin in plugins:
+                proto = get_option_value(plugin, "proto")
                 repo = get_option_value(plugin, "repo")
-                version = get_option_value(plugin, "version")
 
-                remove_folder(".repo")
-                try:
-                    subprocess.run(["git", "clone", repo, ".repo"],
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check = True)
-                except (OSError, subprocess.SubprocessError) as _e:
-                    print("Failed to clone %s" % repo)
+                if repo is None:
+                    BBF_ERROR_CODE += 1
+                    continue
 
-                if version is not None:
-                    try:
-                        subprocess.run(["git", "-C", ".repo", "checkout", version],
-                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-                    except (OSError, subprocess.SubprocessError) as _e:
-                        print("Failed to checkout git version %s" % version)
+                if proto is not None and proto == "local":
+                    print(f' - Processing plugin: {plugin} at {repo}')
 
-                if os.path.isdir(".repo"):
-                    if version is None:
-                        print('├── Processing ' + repo)
+                    if os.path.isdir(f"{repo}"):
+                        print(f'    Processing {repo}')
+                        
+                        dm_files = get_option_value(plugin, "dm_files")
+                        if dm_files is not None and isinstance(dm_files, list):
+                            for dm_file in dm_files:
+                                if os.path.isfile(f"{repo}/{dm_file}"):
+                                    generate_dynamic_datamodel_tree(f"{repo}/{dm_file}")
+                                    generate_datamodel_tree(f"{repo}/{dm_file}")
+                                    generate_dynamic_json_datamodel_tree(f"{repo}/{dm_file}")
+                                else:
+                                    BBF_ERROR_CODE += 1  
+                        else:
+                            files = os.popen(f'find {repo}/ -name datamodel.c').read()
+                            for file in files.split('\n'):
+                                if os.path.isfile(file):
+                                    generate_dynamic_datamodel_tree(file)
+                                    generate_datamodel_tree(file)
+                            
+                            files = os.popen(f'find {repo}/ -name "*.json"').read()
+                            for file in files.split('\n'):
+                                if os.path.isfile(file):
+                                    generate_dynamic_json_datamodel_tree(file)
                     else:
-                        print('├── Processing ' + repo + '^' + version)
+                        print(f'    {repo} is not a  directory !!!!!')
+                        BBF_ERROR_CODE += 1
 
-                    dm_files = get_option_value(plugin, "dm_files")
-                    if dm_files is not None and isinstance(dm_files, list):
-                        for dm_file in dm_files:
-                            generate_dynamic_datamodel_tree(".repo/" + dm_file)
-                            generate_datamodel_tree(".repo/" + dm_file)
-                            generate_dynamic_json_datamodel_tree(".repo/" + dm_file)
-                    else:
-                        files = os.popen('find .repo/ -name datamodel.c').read()
-                        for file in files.split('\n'):
-                            if os.path.isfile(file):
-                                generate_dynamic_datamodel_tree(file)
-                                generate_datamodel_tree(file)
-
-                        files = os.popen('find .repo/ -name "*.json"').read()
-                        for file in files.split('\n'):
-                            if os.path.isfile(file):
-                                generate_dynamic_json_datamodel_tree(file)
+                else:
+                    print(f' - Processing plugin: {plugin}')
+                    
+                    version = get_option_value(plugin, "version")
 
                     remove_folder(".repo")
-            print('└── Processing of plugins done')
+                    try:
+                        subprocess.run(["git", "clone", repo, ".repo"],
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check = True)
+                    except (OSError, subprocess.SubprocessError) as _e:
+                        print(f'    Failed to clone {repo} !!!!!')
+                        BBF_ERROR_CODE += 1
+    
+                    if version is not None:
+                        try:
+                            subprocess.run(["git", "-C", ".repo", "checkout", version],
+                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+                        except (OSError, subprocess.SubprocessError) as _e:
+                            print(f'    Failed to checkout git version {version} !!!!!')
+                            BBF_ERROR_CODE += 1
+    
+                    if os.path.isdir(".repo"):
+                        if version is None:
+                            print(f'    Processing {repo}')
+                        else:
+                            print(f'    Processing {repo}^{version}')
+    
+                        dm_files = get_option_value(plugin, "dm_files")
+                        if dm_files is not None and isinstance(dm_files, list):
+                            for dm_file in dm_files:
+                                if os.path.isfile(".repo/" + dm_file):
+                                    generate_dynamic_datamodel_tree(".repo/" + dm_file)
+                                    generate_datamodel_tree(".repo/" + dm_file)
+                                    generate_dynamic_json_datamodel_tree(".repo/" + dm_file)
+                                else:
+                                    BBF_ERROR_CODE += 1
+                        else:
+                            files = os.popen('find .repo/ -name datamodel.c').read()
+                            for file in files.split('\n'):
+                                if os.path.isfile(file):
+                                    generate_dynamic_datamodel_tree(file)
+                                    generate_datamodel_tree(file)
+    
+                            files = os.popen('find .repo/ -name "*.json"').read()
+                            for file in files.split('\n'):
+                                if os.path.isfile(file):
+                                    generate_dynamic_json_datamodel_tree(file)
+    
+                        remove_folder(".repo")
+                    else:
+                        BBF_ERROR_CODE += 1
+
+        print('Generating of plugins done')
 
     ############## Remove Duplicated Element from List ##############
     global LIST_SUPPORTED_DM

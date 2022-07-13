@@ -8,7 +8,7 @@
  *	Author: Yalu Zhang, yalu.zhang@iopsys.eu
  */
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 #define TR104_UCI_PACKAGE "asterisk"
 #define DEFAULT_SIP_PORT_STR "5060"
@@ -25,8 +25,8 @@ struct codec_info {
 struct call_log_entry {
 	struct list_head list;
 
-	char calling_num[20], called_num[20];
-	char source[64], destination[64], used_line[64];
+	char calling_num[256], called_num[256];
+	char source[256], destination[256], used_line[256], used_extensions[256];
 	char direction[16];
 	char start_time[32];
 	char duration[8];
@@ -60,6 +60,8 @@ struct call_log_entry {
 	char txpkts[20];
 	char jitter[20];
 	char maxJitter[20];
+	char averageRoundTripDelay[20];
+	char averageFarEndInterarrivalJitter[20];
 };
 
 #define MAX_SUPPORTED_CODECS 8
@@ -75,8 +77,13 @@ extern char *RegistrarServerTransport[];
 extern char *DTMFMethod[];
 extern char *JitterBufferType[];
 extern char *KeyingMethods[];
+extern char *FacilityAction[];
 
 int init_supported_codecs(void);
 int init_call_log(void);
 const char *get_codec_uci_name(const char *codec);
 const char *get_codec_name(const char *codec_profile);
+int get_Alias_value_by_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value, char *service_name, char* service_inst);
+int set_Alias_value_by_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action, char *service_name, char* service_inst);
+int get_Alias_value_by_inst(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value, char *alias_inst);
+int set_Alias_value_by_inst(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action, char *alias_inst);

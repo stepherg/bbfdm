@@ -68,6 +68,16 @@ CONFIGURE_ARGS += \
 
 endif ##CONFIG_BBF_VENDOR_EXTENSION
 
+ifeq ($(CONFIG_BBFDM_ENABLE_JSON_PLUGIN),y)
+CONFIGURE_ARGS += \
+	--enable-json-plugin
+endif
+
+ifeq ($(CONFIG_BBFDM_ENABLE_DOTSO_PLUGIN),y)
+CONFIGURE_ARGS += \
+	--enable-shared-library
+endif
+
 define Package/libbbfdm/install
 	$(INSTALL_DIR) $(1)/lib
 	$(CP) $(PKG_BUILD_DIR)/bin/.libs/libbbfdm.so* $(1)/lib/

@@ -14,12 +14,12 @@
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
-/*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.DTMFMethod!UCI:asterisk/sip_advanced,sip_options/dtmfmode*/
+/*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.DTMFMethod!UCI:asterisk/sip_advanced,sip_options/dtmf_mode*/
 static int get_ServicesVoiceServiceVoIPProfile_DTMFMethod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *method = NULL;
 
-	dmuci_get_option_value_string(TR104_UCI_PACKAGE, "sip_options", "dtmfmode", &method);
+	dmuci_get_option_value_string(TR104_UCI_PACKAGE, "sip_options", "dtmf_mode", &method);
 	if (method && *method) {
 		if (strcasecmp(method, "inband") == 0)
 			*value = "InBand";
@@ -48,17 +48,17 @@ static int set_ServicesVoiceServiceVoIPProfile_DTMFMethod(char *refparam, struct
 				new_value = "rfc4733";
 			else if (strcasecmp(value, "SIPInfo") == 0)
 				new_value = "info";
-			dmuci_set_value(TR104_UCI_PACKAGE, "sip_options", "dtmfmode", new_value);
+			dmuci_set_value(TR104_UCI_PACKAGE, "sip_options", "dtmf_mode", new_value);
 			break;
 	}
 
 	return 0;
 }
 
-/*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.LocalPortMin!UCI:asterisk/sip_advanced,sip_options/rtpstart*/
+/*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.LocalPortMin!UCI:asterisk/sip_advanced,sip_options/rtp_start*/
 static int get_ServicesVoiceServiceVoIPProfileRTP_LocalPortMin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "rtpstart", "1024");
+	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "rtp_start", "1024");
 	return 0;
 }
 
@@ -70,16 +70,16 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_LocalPortMin(char *refparam, s
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value("asterisk", "sip_options", "rtpstart", value);
+			dmuci_set_value("asterisk", "sip_options", "rtp_start", value);
 			break;
 	}
 	return 0;
 }
 
-/*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.LocalPortMax!UCI:asterisk/sip_advanced,sip_options/rtpend*/
+/*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.LocalPortMax!UCI:asterisk/sip_advanced,sip_options/rtp_end*/
 static int get_ServicesVoiceServiceVoIPProfileRTP_LocalPortMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "rtpend", "1024");
+	*value = dmuci_get_option_value_fallback_def("asterisk", "sip_options", "rtp_end", "1024");
 	return 0;
 }
 
@@ -91,7 +91,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_LocalPortMax(char *refparam, s
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value("asterisk", "sip_options", "rtpend", value);
+			dmuci_set_value("asterisk", "sip_options", "rtp_end", value);
 			break;
 	}
 	return 0;
@@ -139,12 +139,12 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_TelephoneEventPayloadType(char
 	return 0;
 }
 
-/*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.JitterBufferType!UCI:asterisk/tel_advanced,tel_options/jbimpl*/
+/*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.JitterBufferType!UCI:asterisk/tel_advanced,tel_options/jb_impl*/
 static int get_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *tmp = NULL;
 
-	dmuci_get_option_value_string("asterisk", "tel_options", "jbimpl", &tmp);
+	dmuci_get_option_value_string("asterisk", "tel_options", "jb_impl", &tmp);
 	if (tmp && *tmp) {
 		if (strcasecmp(tmp, "adaptive") == 0)
 			*value = "Dynamic";
@@ -165,16 +165,16 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferType(char *refpara
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value("asterisk", "tel_options", "jbimpl", (strcasecmp(value, "Dynamic") == 0) ? "adaptive" : "fixed");
+			dmuci_set_value("asterisk", "tel_options", "jb_impl", (strcasecmp(value, "Dynamic") == 0) ? "adaptive" : "fixed");
 			break;
 	}
 	return 0;
 }
 
-/*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.JitterBufferMaxSize!UCI:asterisk/tel_advanced,tel_options/jbmaxsize*/
+/*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.JitterBufferMaxSize!UCI:asterisk/tel_advanced,tel_options/jb_maxsize*/
 static int get_ServicesVoiceServiceVoIPProfileRTP_JitterBufferMaxSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("asterisk", "tel_options", "jbmaxsize", "0");
+	*value = dmuci_get_option_value_fallback_def("asterisk", "tel_options", "jb_maxsize", "0");
 	return 0;
 }
 
@@ -186,7 +186,7 @@ static int set_ServicesVoiceServiceVoIPProfileRTP_JitterBufferMaxSize(char *refp
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value("asterisk", "tel_options", "jbmaxsize", value);
+			dmuci_set_value("asterisk", "tel_options", "jb_maxsize", value);
 			break;
 	}
 	return 0;
@@ -277,6 +277,18 @@ static int set_ServicesVoiceServiceVoIPProfileRTPSRTP_EncryptionKeySizes(char *r
 	return 0;
 }
 
+/*Get Device.Services.VoiceService.{i}.VoIPProfile.{i}. Alias*/
+static int get_ServicesVoiceServiceVoIPProfile_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_Alias_value_by_inst(refparam, ctx, data, instance, value, "clientalias");
+}
+
+/*Set Device.Services.VoiceService.{i}.VoIPProfile.{i}. Alias*/
+static int set_ServicesVoiceServiceVoIPProfile_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return set_Alias_value_by_inst(refparam, ctx, data, instance, value, action, "clientalias");
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -290,6 +302,7 @@ DMOBJ tServicesVoiceServiceVoIPProfileObj[] = {
 DMLEAF tServicesVoiceServiceVoIPProfileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"DTMFMethod", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfile_DTMFMethod, set_ServicesVoiceServiceVoIPProfile_DTMFMethod, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfile_Alias, set_ServicesVoiceServiceVoIPProfile_Alias, BBFDM_BOTH},
 {0}
 };
 

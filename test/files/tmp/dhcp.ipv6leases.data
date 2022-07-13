@@ -20,7 +20,7 @@
 					],
 					"valid": 1284
 				},
-			{
+				{
 					"duid": "0004bc823a7bb321a63f328ef37740021102",
 					"iaid": 1420466609,
 					"hostname": "",
@@ -31,7 +31,7 @@
 					],
 					"ipv6-addr": [
 						{
-							"2001:1ba8:1458:ce00::bf3",
+							"address": "2001:1ba8:1458:ce00::bf3",
 							"preferred-lifetime": 17099,
 							"valid-lifetime": 27899
 						}

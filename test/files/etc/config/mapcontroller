@@ -1,0 +1,66 @@
+config controller 'controller'
+        option enabled '1'
+        option registrar '5 2'
+        option debug '0'
+        option enable_sta_steer '0'
+        option enable_bsta_steer '0'
+        option use_bcn_metrics '0'
+        option use_usta_metrics '0'
+        option primary_vid '1'
+        option primary_pcp '0'
+
+config interface 'lan'
+
+config ap
+        option band '5'
+        option ssid 'iopsysWrt-44D43771B410'
+        option encryption 'sae-mixed'
+        option key 'PCTQ44TNVKK5NU'
+        option vid '1'
+        option type 'fronthaul'
+        option network 'lan'
+
+config ap
+        option band '2'
+        option ssid 'iopsysWrt-44D43771B410'
+        option encryption 'sae-mixed'
+        option key 'PCTQ44TNVKK5NU'
+        option vid '1'
+        option type 'fronthaul'
+        option network 'lan'
+
+config ap
+        option band '5'
+        option ssid 'MAP-44D43771B410-BH-5GHz'
+        option encryption 'sae'
+        option type 'backhaul'
+        option vid '1'
+        option network 'lan'
+        option key '029be741b7ff7b4caf9b1b3c48c56030fed877c22f5031bc9cf0132d1672c2c'
+
+config ap
+        option band '2'
+        option ssid 'MAP-44D43771B410-BH-2.4GHz'
+        option encryption 'sae'
+        option type 'backhaul'
+        list disallow_bsta '0'
+        option vid '1'
+        option network 'lan'
+        option key '029be741b7ff7b4caf9b1b3c48c56030fed877c22f5031bc9cf0132d1672c2c'
+
+config node
+        option agent_id '46:d4:37:71:b4:10'
+        option primary_vid '55'
+        option primary_pcp '16'
+        list steer_exclude '00:aa:bb:cc:dd:ee'
+        list steer_exclude_btm '00:aa:bb:cc:dd:ee'
+
+config radio
+        option agent_id '46:d4:37:71:b4:10'
+        option macaddr '44:d4:37:71:b4:1f'
+        option band '5'
+
+config radio
+        option agent_id '46:d4:37:71:b4:10'
+        option macaddr '44:d4:37:71:b4:1e'
+        option band '2'

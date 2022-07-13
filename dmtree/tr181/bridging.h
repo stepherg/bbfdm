@@ -13,7 +13,7 @@
 #ifndef __BRIDGING_H
 #define __BRIDGING_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tBridgingObj[];
 extern DMLEAF tBridgingParams[];

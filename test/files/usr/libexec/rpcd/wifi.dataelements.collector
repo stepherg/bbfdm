@@ -4,15 +4,23 @@
 
 case "$1" in
         list)
-                echo '{ "dump" : {}, "event": {} }'
+                echo '{ "status": {}, "dump" : {}, "event": {}, "dump2": {} }'
         ;;
         call)
                 case "$2" in
+                        status)
+                                json_init
+				json_add_string status available
+				json_dump
+                        ;;
                         dump)
                                 cat /tmp/wifi.dataelements.collector.dump.data 2>/dev/null
                         ;;
                         event)
                                 cat /tmp/wifi.dataelements.collector.event.data 2>/dev/null
+                        ;;
+                         dump2)
+                                cat /tmp/wifi.dataelements.collector.dump2.data 2>/dev/null
                         ;;
                 esac
         ;;

@@ -13,7 +13,7 @@
 #ifndef __DEVICE_H
 #define __DEVICE_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tEntry181Obj[];
 extern DMOBJ tDeviceObj[];

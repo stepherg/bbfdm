@@ -11,7 +11,7 @@
 #ifndef __FAST_H
 #define __FAST_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tFASTObj[];
 extern DMLEAF tFASTParams[];

@@ -1,0 +1,7 @@
+{
+	"devices": [
+		{ "name": "one"},
+		{"name": "two"}
+	],
+	"numofdevices": "1"
+}

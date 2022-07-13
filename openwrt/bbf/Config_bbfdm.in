@@ -24,4 +24,12 @@ config BBF_TR143
 	bool "Enable TR-143 Data Model Support"
 	default y
 
+config BBFDM_ENABLE_JSON_PLUGIN
+	bool "Enable json plugin to extend datamodel"
+	default n
+
+config BBFDM_ENABLE_DOTSO_PLUGIN
+	bool "Enable shared library plugin to extend datamodel"
+	default n
+
 endif

@@ -4,6 +4,11 @@ echo "Functional Tests"
 pwd
 source ./gitlab-ci/shared.sh
 
+echo "Starting supervisor in current directory"
+supervisorctl shutdown
+sleep 1
+supervisord -c supervisord.conf
+
 # compile and install libbbf
 install_libbbf
 

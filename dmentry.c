@@ -16,19 +16,29 @@
 #include "dmdynamicjson.h"
 #include "dmdynamiclibrary.h"
 #include "dmdynamicvendor.h"
-#include "dmdynamicmem.h"
+
+#ifdef BBF_TR181
 #include "device.h"
+#endif /* BBF_TR181 */
+
 #include "dmbbfcommon.h"
 
 LIST_HEAD(head_package_change);
 LIST_HEAD(main_memhead);
 
+#ifdef BBFDM_ENABLE_JSON_PLUGIN
 static char json_hash[64] = {0};
+#endif /* BBFDM_ENABLE_JSON_PLUGIN */
+
+#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
 static char library_hash[64] = {0};
+#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
 
 #ifdef BBF_VENDOR_EXTENSION
 static bool first_boot = false;
 #endif
+
+static void load_dynamic_arrays(struct dmctx *ctx);
 
 int dm_debug_browse_path(char *buff, size_t len)
 {
@@ -123,7 +133,7 @@ int usp_fault_map(int fault)
 	return out_fault;
 }
 
-static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, int custom)
+static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, DMOBJ *tEntryObj, int custom)
 {
 	if (custom == CTX_INIT_ALL)
 		bbf_uci_init();
@@ -132,7 +142,8 @@ static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, int
 	INIT_LIST_HEAD(&ctx->set_list_tmp);
 	INIT_LIST_HEAD(&ctx->list_fault_param);
 	ctx->instance_mode = instance_mode;
-	ctx->dm_entryobj = tEntry181Obj;
+	ctx->dm_entryobj = tEntryObj;
+	ctx->dm_version = DEFAULT_DMVERSION;
 	ctx->end_session_flag = 0;
 	return 0;
 }
@@ -145,30 +156,99 @@ static int dm_ctx_clean_custom(struct dmctx *ctx, int custom)
 	DMFREE(ctx->addobj_instance);
 	if (custom == CTX_INIT_ALL) {
 		bbf_uci_exit();
-		dmubus_free();
 		dmcleanmem();
 	}
 	return 0;
 }
 
+void dm_config_ubus(struct ubus_context *ctx)
+{
+	dmubus_configure(ctx);
+}
+
+int dm_ctx_init_entry(struct dmctx *ctx, DMOBJ *tEntryObj, unsigned int instance_mode)
+{
+	return dm_ctx_init_custom(ctx, instance_mode, tEntryObj, CTX_INIT_ALL);
+}
+
 int dm_ctx_init(struct dmctx *ctx, unsigned int instance_mode)
 {
-	return dm_ctx_init_custom(ctx, instance_mode, CTX_INIT_ALL);
+#ifdef BBF_TR181
+	dmubus_clean_endlife_entries();
+	return dm_ctx_init_custom(ctx, instance_mode, tEntry181Obj, CTX_INIT_ALL);
+#else
+	return 0;
+#endif /* BBF_TR181 */
 }
 
 int dm_ctx_clean(struct dmctx *ctx)
 {
+	dmubus_update_cached_entries();
 	return dm_ctx_clean_custom(ctx, CTX_INIT_ALL);
+}
+
+int dm_ctx_init_cache(int time)
+{
+	dmubus_set_caching_time(time);
+	return 0;
 }
 
 int dm_ctx_init_sub(struct dmctx *ctx, unsigned int instance_mode)
 {
-	return dm_ctx_init_custom(ctx, instance_mode, CTX_INIT_SUB);
+#ifdef BBF_TR181
+	return dm_ctx_init_custom(ctx, instance_mode, tEntry181Obj, CTX_INIT_SUB);
+#else
+	return 0;
+#endif /* BBF_TR181 */
 }
 
 int dm_ctx_clean_sub(struct dmctx *ctx)
 {
 	return dm_ctx_clean_custom(ctx, CTX_INIT_SUB);
+}
+
+int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_type_t schema_type)
+{
+	int fault = 0;
+	int len = DM_STRLEN(path);
+
+	// Load dynamic objects and parameters
+	load_dynamic_arrays(ctx);
+
+	if (len == 0) {
+		path = "";
+	} else {
+		if (path[strlen(path) - 1] != '.')
+			return usp_fault_map(USP_FAULT_INVALID_PATH);
+	}
+
+	ctx->in_param = path;
+
+	dmentry_instance_lookup_inparam(ctx);
+
+	ctx->stop = false;
+	ctx->nextlevel = first_level;
+
+	switch(schema_type) {
+		case ALL_SCHEMA:
+			ctx->isinfo = 1;
+			ctx->isevent = 1;
+			ctx->iscommand = 1;
+			break;
+		case PARAM_ONLY:
+			ctx->isinfo = 1;
+			break;
+		case EVENT_ONLY:
+			ctx->isevent = 1;
+			break;
+		case COMMAND_ONLY:
+			ctx->iscommand = 1;
+			break;
+	}
+
+	fault = dm_entry_get_supported_dm(ctx);
+
+	return usp_fault_map(fault);
 }
 
 int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2)
@@ -184,13 +264,13 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 	ctx->stop = false;
 	switch(cmd) {
 		case CMD_GET_VALUE:
-			if (ctx->in_param[0] == '.' && strlen(ctx->in_param) == 1)
+			if (ctx->in_param[0] == '.' && DM_STRLEN(ctx->in_param) == 1)
 				fault = FAULT_9005;
 			else
 				fault = dm_entry_get_value(ctx);
 			break;
 		case CMD_GET_NAME:
-			if (ctx->in_param[0] == '.' && strlen(ctx->in_param) == 1)
+			if (ctx->in_param[0] == '.' && DM_STRLEN(ctx->in_param) == 1)
 				fault = FAULT_9005;
 			else if (arg1 && string_to_bool(arg1, &ctx->nextlevel) == 0)
 				fault = dm_entry_get_name(ctx);
@@ -207,14 +287,16 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 		case CMD_ADD_OBJECT:
 			fault = dm_entry_add_object(ctx);
 			if (!fault) {
-				dmuci_set_value("cwmp", "acs", "ParameterKey", arg1 ? arg1 : "");
+				dmuci_set_value_varstate("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
+				dmuci_save_package_varstate("cwmp");
 				dmuci_change_packages(&head_package_change);
 			}
 			break;
 		case CMD_DEL_OBJECT:
 			fault = dm_entry_delete_object(ctx);
 			if (!fault) {
-				dmuci_set_value("cwmp", "acs", "ParameterKey", arg1 ? arg1 : "");
+				dmuci_set_value_varstate("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
+				dmuci_save_package_varstate("cwmp");
 				dmuci_change_packages(&head_package_change);
 			}
 			break;
@@ -232,7 +314,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			fault = dm_entry_get_schema(ctx);
 			break;
 		case CMD_GET_INSTANCES:
-			if (!arg1 || (arg1 && string_to_bool(arg1, &ctx->nextlevel) == 0))
+			if (!arg1 || string_to_bool(arg1, &ctx->nextlevel) == 0)
 				fault = dm_entry_get_instances(ctx);
 			else
 				fault = FAULT_9003;
@@ -247,10 +329,12 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1)
 {
 	struct set_tmp *n = NULL, *p = NULL;
 	int fault = 0;
+	bool set_success = false;
 
 	switch(cmd) {
 		case CMD_SET_VALUE:
 			ctx->setaction = VALUESET;
+			set_success = false;
 			list_for_each_entry_safe(n, p, &ctx->set_list_tmp, list) {
 				ctx->in_param = n->name;
 				ctx->in_value = n->value ? n->value : "";
@@ -260,9 +344,11 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1)
 					add_list_fault_param(ctx, ctx->in_param, usp_fault_map(fault));
 					break;
 				}
+				set_success = true;
 			}
-			if (!fault) {
-				dmuci_set_value("cwmp", "acs", "ParameterKey", arg1 ? arg1 : "");
+			if (!fault && set_success == true) {
+				dmuci_set_value_varstate("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
+				dmuci_save_package_varstate("cwmp");
 				dmuci_change_packages(&head_package_change);
 				dmuci_save();
 			}
@@ -276,9 +362,13 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1)
 int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value)
 {
 	struct dmctx dmctx = {0};
+	*value = "";
+
+	if (!param || !linker || *linker == 0)
+		return 0;
 
 	dm_ctx_init_sub(&dmctx, ctx->instance_mode);
-	dmctx.in_param = param ? param : "";
+	dmctx.in_param = param;
 	dmctx.linker = linker;
 
 	dm_entry_get_linker(&dmctx);
@@ -297,7 +387,7 @@ int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value)
 	if (!param || param[0] == '\0')
 		return 0;
 
-	snprintf(linker, sizeof(linker), "%s%c", param, (param[strlen(param) - 1] != '.') ? '.' : '\0');
+	snprintf(linker, sizeof(linker), "%s%c", param, (param[DM_STRLEN(param) - 1] != '.') ? '.' : '\0');
 
 	dm_ctx_init_sub(&dmctx, ctx->instance_mode);
 	dmctx.in_param = linker;
@@ -307,6 +397,28 @@ int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value)
 
 	dm_ctx_clean_sub(&dmctx);
 	return 0;
+}
+
+int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[])
+{
+	if (!value || !objects)
+		return -1;
+
+	if (*value == '\0')
+		return 0;
+
+	for (; *objects; objects++) {
+
+		if (DM_STRNCMP(value, *objects, DM_STRLEN(*objects)) == 0) {
+			char *linker = NULL;
+
+			adm_entry_get_linker_value(ctx, value, &linker);
+			if (linker && *linker)
+				return 0;
+		}
+	}
+
+	return -1;
 }
 
 int dm_entry_manage_services(struct blob_buf *bb, bool restart)
@@ -327,6 +439,9 @@ int dm_entry_manage_services(struct blob_buf *bb, bool restart)
 		}
 	}
 	blobmsg_close_array(bb, arr);
+
+	dmuci_commit_package_varstate("cwmp");
+	free_all_list_package_change(&head_package_change);
 	return 0;
 }
 
@@ -337,14 +452,10 @@ int dm_entry_restart_services(void)
 	bbf_uci_commit_bbfdm();
 
 	list_for_each_entry(pc, &head_package_change, list) {
-		if (strcmp(pc->package, "cwmp") == 0) {
-			dmuci_init();
-			dmuci_commit_package("cwmp");
-			dmuci_exit();
-		} else {
-			dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
-		}
+		dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
 	}
+
+	dmuci_commit_package_varstate("cwmp");
 	free_all_list_package_change(&head_package_change);
 
 	return 0;
@@ -359,14 +470,34 @@ int dm_entry_revert_changes(void)
 	list_for_each_entry(pc, &head_package_change, list) {
 		dmubus_call_set("uci", "revert", UBUS_ARGS{{"config", pc->package, String}}, 1);
 	}
+	dmuci_revert_package_varstate("cwmp");
 	free_all_list_package_change(&head_package_change);
 
 	return 0;
 }
 
+#if defined(BBFDM_ENABLE_JSON_PLUGIN) || defined(BBFDM_ENABLE_DOTSO_PLUGIN)
+static char* get_folder_path(bool json_path)
+{
+	if (json_path) {
+#ifdef BBFDM_ENABLE_JSON_PLUGIN
+		return JSON_FOLDER_PATH;
+#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
+	} else {
+#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
+		return LIBRARY_FOLDER_PATH;
+#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
+	}
+
+	return NULL;
+}
+
 static int get_stats_folder(bool json_path, int *count, unsigned long *size)
 {
-	const char *path = json_path ? JSON_FOLDER_PATH : LIBRARY_FOLDER_PATH;
+	const char *path = get_folder_path(json_path);
+	if (path == NULL) {
+		return 0;
+	}
 
 	if (folder_exists(path)) {
 		struct dirent *entry = NULL;
@@ -406,27 +537,43 @@ static int check_stats_folder(bool json_path)
 
 	snprintf(buf, sizeof(buf), "count:%d,size:%lu", count, size);
 
-	if (strcmp(buf, json_path ? json_hash : library_hash) != 0) {
-		strncpy(json_path ? json_hash : library_hash, buf, 64);
-		return 1;
+	if (json_path) {
+#ifdef BBFDM_ENABLE_JSON_PLUGIN
+		if (DM_STRCMP(buf, json_hash) != 0) {
+			DM_STRNCPY(json_hash, buf, sizeof(json_hash));
+			return 1;
+		}
+#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
+	} else {
+#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
+		if (DM_STRCMP(buf, library_hash) != 0) {
+			DM_STRNCPY(library_hash, buf, sizeof(library_hash));
+			return 1;
+		}
+#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
 	}
 
 	return 0;
 }
+#endif  /* (BBFDM_ENABLE_JSON_PLUGIN || BBFDM_ENABLE_DOTSO_PLUGIN) */
 
-void load_dynamic_arrays(struct dmctx *ctx)
+static void load_dynamic_arrays(struct dmctx *ctx)
 {
+#ifdef BBFDM_ENABLE_JSON_PLUGIN
 	// Load dynamic objects and parameters exposed via a JSON file
 	if (check_stats_folder(true)) {
 		free_json_dynamic_arrays(tEntry181Obj);
 		load_json_dynamic_arrays(ctx);
 	}
+#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
 
+#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
 	// Load dynamic objects and parameters exposed via a library
 	if (check_stats_folder(false)) {
 		free_library_dynamic_arrays(tEntry181Obj);
 		load_library_dynamic_arrays(ctx);
 	}
+#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
 
 #ifdef BBF_VENDOR_EXTENSION
 	// Load objects and parameters exposed via vendor extension
@@ -438,16 +585,39 @@ void load_dynamic_arrays(struct dmctx *ctx)
 #endif
 }
 
-void free_dynamic_arrays(void)
+static void free_dynamic_arrays(void)
 {
+#ifdef BBF_TR181
 	DMOBJ *root = tEntry181Obj;
+
 	DMNODE node = {.current_object = ""};
 
+#ifdef BBFDM_ENABLE_JSON_PLUGIN
 	free_json_dynamic_arrays(tEntry181Obj);
+#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
+
+#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
 	free_library_dynamic_arrays(tEntry181Obj);
+#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
+
 #ifdef BBF_VENDOR_EXTENSION
 	free_vendor_dynamic_arrays(tEntry181Obj);
 #endif
 	free_dm_browse_node_dynamic_object_tree(&node, root);
+#endif /* BBF_TR181 */
+}
+
+void bbf_dm_cleanup(void)
+{
+	dmubus_free();
 	dm_dynamic_cleanmem(&main_memhead);
+	free_dynamic_arrays();
+}
+
+void dm_cleanup_dynamic_entry(DMOBJ *root)
+{
+	DMNODE node = {.current_object = ""};
+
+	dm_dynamic_cleanmem(&main_memhead);
+	free_dm_browse_node_dynamic_object_tree(&node, root);
 }

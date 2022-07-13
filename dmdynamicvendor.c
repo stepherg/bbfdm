@@ -52,7 +52,7 @@ static void overwrite_param(DMOBJ *entryobj, DMLEAF *leaf)
 		DMLEAF *entryleaf = entryobj->leaf;
 		for (; (entryleaf && entryleaf->parameter); entryleaf++) {
 
-			if (strcmp(entryleaf->parameter, leaf->parameter) == 0) {
+			if (DM_STRCMP(entryleaf->parameter, leaf->parameter) == 0) {
 				entryleaf->getvalue = leaf->getvalue;
 				entryleaf->setvalue = leaf->setvalue;
 				return;
@@ -69,7 +69,7 @@ static void overwrite_obj(DMOBJ *entryobj, DMOBJ *dmobj)
 		DMOBJ *entrynextobj = entryobj->nextobj;
 		for (; (entrynextobj && entrynextobj->obj); entrynextobj++) {
 
-			if (strcmp(entrynextobj->obj, dmobj->obj) == 0) {
+			if (DM_STRCMP(entrynextobj->obj, dmobj->obj) == 0) {
 
 				entrynextobj->addobj = dmobj->addobj;
 				entrynextobj->delobj = dmobj->delobj;
@@ -113,7 +113,7 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 
 		for (int j = 0; vendor_map_obj[j].vendor; j++) {
 
-			if (strcmp(vendor_map_obj[j].vendor, tokens[idx]) != 0)
+			if (DM_STRCMP(vendor_map_obj[j].vendor, tokens[idx]) != 0)
 				continue;
 
 			DM_MAP_OBJ *vendor_obj = vendor_map_obj[j].vendor_obj;
@@ -137,10 +137,10 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj = calloc(2, sizeof(DMOBJ *));
 						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[0] = vendor_obj[i].root_obj;
 					} else {
-						int idx = get_obj_idx_dynamic_array(dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj);
-						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj = realloc(dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj, (idx + 2) * sizeof(DMOBJ *));
-						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[idx] = vendor_obj[i].root_obj;
-						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[idx+1] = NULL;
+						int obj_idx = get_obj_idx_dynamic_array(dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj);
+						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj = realloc(dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj, (obj_idx + 2) * sizeof(DMOBJ *));
+						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[obj_idx] = vendor_obj[i].root_obj;
+						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[obj_idx+1] = NULL;
 					}
 				}
 
@@ -156,10 +156,10 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf = calloc(2, sizeof(DMLEAF *));
 						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[0] = vendor_obj[i].root_leaf;
 					} else {
-						int idx = get_leaf_idx_dynamic_array(dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf);
-						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf = realloc(dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf, (idx + 2) * sizeof(DMLEAF *));
-						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[idx] = vendor_obj[i].root_leaf;
-						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[idx+1] = NULL;
+						int leaf_idx = get_leaf_idx_dynamic_array(dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf);
+						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf = realloc(dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf, (leaf_idx + 2) * sizeof(DMLEAF *));
+						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[leaf_idx] = vendor_obj[i].root_leaf;
+						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[leaf_idx+1] = NULL;
 					}
 				}
 
@@ -185,7 +185,7 @@ static void load_vendor_extension_overwrite_arrays(struct dmctx *ctx)
 
 		for (int j = 0; vendor_map_obj[j].vendor; j++) {
 
-			if (strcmp(vendor_map_obj[j].vendor, tokens[idx]) != 0)
+			if (DM_STRCMP(vendor_map_obj[j].vendor, tokens[idx]) != 0)
 				continue;
 
 			DM_MAP_OBJ *dynamic_overwrite_obj = vendor_map_obj[j].vendor_obj;
@@ -234,8 +234,12 @@ static void exclude_param(struct dmctx *ctx, char *in_param)
 	DMOBJ *entryobj = NULL;
 	char obj_prefix[256] = {'\0'};
 
+	if (in_param == NULL)
+		return;
+
 	char *ret = strrchr(in_param, '.');
-	strncpy(obj_prefix, in_param, ret - in_param +1);
+	if (ret)
+		DM_STRNCPY(obj_prefix, in_param, ret - in_param + 2);
 
 	bool obj_exists = find_root_entry(ctx, obj_prefix, &entryobj);
 
@@ -273,14 +277,14 @@ static void load_vendor_extension_exclude_arrays(struct dmctx *ctx)
 
 		for (int j = 0; vendor_map_exclude_obj[j].vendor; j++) {
 
-			if (strcmp(vendor_map_exclude_obj[j].vendor, tokens[idx]) != 0)
+			if (DM_STRCMP(vendor_map_exclude_obj[j].vendor, tokens[idx]) != 0)
 				continue;
 
 			char **dynamic_exclude_obj = vendor_map_exclude_obj[j].vendor_obj;
 
 			for (; *dynamic_exclude_obj; dynamic_exclude_obj++) {
 
-				if ((*dynamic_exclude_obj)[strlen(*dynamic_exclude_obj) - 1] == '.')
+				if ((*dynamic_exclude_obj)[DM_STRLEN(*dynamic_exclude_obj) - 1] == '.')
 					exclude_obj(ctx, *dynamic_exclude_obj);
 				else
 					exclude_param(ctx, *dynamic_exclude_obj);

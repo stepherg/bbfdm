@@ -10,8 +10,8 @@
  *
  */
 
+#include "ppp.h"
 #include "ip.h"
-#include "dmentry.h"
 #ifdef BBF_TR143
 #include "diagnostics.h"
 #endif
@@ -48,7 +48,7 @@ static int get_linker_ipv6_prefix(char *refparam, struct dmctx *dmctx, void *dat
 	char *assign = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
-	if (assign && strcmp(assign, "0") == 0) {
+	if (assign && DM_LSTRCMP(assign, "0") == 0) {
 		char *address = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 3, "assigned", "lan", "address");
 		char *mask = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 3, "assigned", "lan", "mask");
 		dmasprintf(linker, "%s/%s", address, mask);
@@ -66,30 +66,68 @@ static int get_ip_iface_sysfs(const struct uci_section *data, const char *name, 
 	return get_net_iface_sysfs(section_name((struct uci_section *)data), name, value);
 }
 
-static int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, size_t str_len)
+static bool firewall_zone_exists(char *s_name)
 {
-	char ip6buf[INET6_ADDRSTRLEN] = {0}, dev[32] = {0};
-	unsigned int ip[4], prefix;
+	struct uci_section *s = NULL;
 
-	sscanf(line, "%8x%8x%8x%8x %*s %x %*s %*s %31s",
-				&ip[0], &ip[1], &ip[2], &ip[3],
-				&prefix, dev);
+	uci_foreach_option_eq("firewall", "zone", "name", s_name, s) {
+		return true;
+	}
 
-	if (strcmp(dev, device) != 0)
-		return -1;
+	return false;
+}
 
-	ip[0] = htonl(ip[0]);
-	ip[1] = htonl(ip[1]);
-	ip[2] = htonl(ip[2]);
-	ip[3] = htonl(ip[3]);
+static void create_firewall_zone_section(char *s_name)
+{
+	struct uci_section *s = NULL;
+	char zone_name[32] = {0};
+	char *input = NULL;
+	char *output = NULL;
+	char *forward = NULL;
 
-	inet_ntop(AF_INET6, ip, ip6buf, INET6_ADDRSTRLEN);
-	snprintf(ipstr, str_len, "%s/%u", ip6buf, prefix);
+	snprintf(zone_name, sizeof(zone_name), "zone_%s", s_name);
 
-	if (strncmp(ipstr, "fe80:", 5) != 0)
-		return -1;
+	dmuci_get_option_value_string("firewall", "@defaults[0]", "input", &input);
+	dmuci_get_option_value_string("firewall", "@defaults[0]", "output", &output);
+	dmuci_get_option_value_string("firewall", "@defaults[0]", "forward", &forward);
 
-	return 0;
+	dmuci_add_section("firewall", "zone", &s);
+	dmuci_rename_section_by_section(s, zone_name);
+	dmuci_set_value_by_section(s, "name", s_name);
+	dmuci_set_value_by_section(s, "input", input);
+	dmuci_set_value_by_section(s, "output", output);
+	dmuci_set_value_by_section(s, "forward", forward);
+	dmuci_add_list_value_by_section(s, "network", s_name);
+}
+
+static void remove_unused_firewall_zone_sections(void)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+
+	uci_foreach_sections_safe("firewall", "zone", stmp, s) {
+		struct uci_section *dmmap_section = NULL;
+		char *zone_added = NULL;
+		char *name = NULL;
+
+		get_dmmap_section_of_config_section("dmmap_firewall", "zone", section_name(s), &dmmap_section);
+		dmuci_get_value_by_section_string(dmmap_section, "added_by_controller", &zone_added);
+		if (zone_added && DM_LSTRCMP(zone_added, "1") == 0)
+			continue;
+
+		dmuci_get_value_by_section_string(s, "name", &name);
+		if (!get_origin_section_from_config("network", "interface", name))
+			dmuci_delete_by_section(s, NULL, NULL);
+	}
+}
+
+static void add_network_to_firewall_zone_network_list(char *zone_name, char *interface_name)
+{
+	struct uci_section *s = NULL;
+
+	uci_foreach_option_eq("firewall", "zone", "name", zone_name, s) {
+		dmuci_add_list_value_by_section(s, "network", interface_name);
+		break;
+	}
 }
 
 static bool proc_intf6_line_exists(char *parent_section, char *address)
@@ -102,8 +140,8 @@ static bool proc_intf6_line_exists(char *parent_section, char *address)
 		dmuci_get_value_by_section_string(s, "parent_section", &parent_s);
 		dmuci_get_value_by_section_string(s, "address", &addr);
 
-		if (parent_s && strcmp(parent_s, parent_section) == 0 &&
-			addr && strcmp(addr, address) == 0)
+		if (parent_s && DM_STRCMP(parent_s, parent_section) == 0 &&
+			addr && DM_STRCMP(addr, address) == 0)
 			return true;
 	}
 	return false;
@@ -123,8 +161,8 @@ static void dmmap_synchronize_ipv6_address_link_local(char *parent_section)
 		dmuci_get_value_by_section_string(s, "parent_section", &parent_s);
 		dmuci_get_value_by_section_string(s, "link_local", &link_local);
 
-		if ((parent_s && strcmp(parent_s, parent_section) != 0) ||
-			(link_local && strcmp(link_local, "1") != 0))
+		if ((parent_s && DM_STRCMP(parent_s, parent_section) != 0) ||
+			(link_local && DM_LSTRCMP(link_local, "1") != 0))
 			continue;
 
 		dmuci_get_value_by_section_string(s, "address", &address);
@@ -139,7 +177,7 @@ static void dmmap_synchronize_ipv6_address_link_local(char *parent_section)
 			if (parse_proc_intf6_line(buf, device, ipstr, sizeof(ipstr)))
 				continue;
 
-			if (address && strcmp(address, ipstr) == 0) {
+			if (address && DM_STRCMP(address, ipstr) == 0) {
 				found = true;
 				break;
 			}
@@ -178,7 +216,7 @@ static struct uci_section *check_dmmap_network_interface_ipv4(char *dmmap_file_n
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_file_name, dmmap_sec_name, "parent_section", parent_section, dmmap_section) {
 		dmuci_get_value_by_section_string(dmmap_section, "section_name", &sec_name);
-		if (strcmp(sec_name, section_name) == 0)
+		if (DM_STRCMP(sec_name, section_name) == 0)
 			return dmmap_section;
 	}
 
@@ -204,7 +242,7 @@ static struct uci_section *update_dmmap_network_interface(char *dmmap_file_name,
 	uci_path_foreach_option_eq(bbfdm, dmmap_file_name, dmmap_sec_name, "parent_section", parent_section, dmmap_section) {
 		dmuci_get_value_by_section_string(dmmap_section, "section_name", &sec_name);
 		dmuci_get_value_by_section_string(dmmap_section, option, &opt_value);
-		if (strcmp(sec_name, section_name) == 0 && strcmp(opt_value, value) == 0)
+		if (DM_STRCMP(sec_name, section_name) == 0 && DM_STRCMP(opt_value, value) == 0)
 			return dmmap_section;
 	}
 
@@ -229,7 +267,7 @@ static void synchronize_intf_ipv6_sections_with_dmmap(void)
 
 	uci_path_foreach_sections_safe(bbfdm, "dmmap_network_ipv6", "intf_ipv6", stmp, s) {
 		dmuci_get_value_by_section_string(s, "link_local", &link_local);
-		if (link_local && *link_local != '\0' && strcmp(link_local, "1") == 0)
+		if (link_local && *link_local != '\0' && DM_LSTRCMP(link_local, "1") == 0)
 			continue;
 
 		dmuci_get_value_by_section_string(s, "section_name", &dmmap_intf_s);
@@ -239,7 +277,7 @@ static void synchronize_intf_ipv6_sections_with_dmmap(void)
 		ss = get_origin_section_from_config("network", "interface", dmmap_intf_s);
 		dmuci_get_value_by_section_string(ss, "ip6addr", &ip6addr);
 
-		if (ip6addr && *ip6addr != '\0' && strcmp(ip6addr, dmmap_address) == 0)
+		if (ip6addr && *ip6addr != '\0' && DM_STRCMP(ip6addr, dmmap_address) == 0)
 			continue;
 
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", dmmap_intf_s, String}}, 1, &res);
@@ -247,7 +285,7 @@ static void synchronize_intf_ipv6_sections_with_dmmap(void)
 		dmjson_foreach_obj_in_array(res, arrobj, ipv6_obj, i, 1, "ipv6-address") {
 
 			char *address = dmjson_get_value(ipv6_obj, 1, "address");
-			if (address && *address && strcmp(address, dmmap_address) == 0) {
+			if (address && *address && DM_STRCMP(address, dmmap_address) == 0) {
 				found = true;
 				break;
 			}
@@ -260,7 +298,7 @@ static void synchronize_intf_ipv6_sections_with_dmmap(void)
 		dmjson_foreach_obj_in_array(res, arrobj, ipv6_obj, i, 1, "ipv6-prefix-assignment") {
 
 			char *address = dmjson_get_value(ipv6_obj, 2, "local-address", "address");
-			if (address && *address && strcmp(address, dmmap_address) == 0) {
+			if (address && *address && DM_STRCMP(address, dmmap_address) == 0) {
 				found = true;
 				break;
 			}
@@ -287,7 +325,7 @@ static void synchronize_intf_ipv6_prefix_sections_with_dmmap(void)
 		ss = get_origin_section_from_config("network", "interface", dmmap_intf_s);
 		dmuci_get_value_by_section_string(ss, "ip6prefix", &ip6prefix);
 
-		if (ip6prefix && *ip6prefix != '\0' && strcmp(ip6prefix, dmmap_address) == 0)
+		if (ip6prefix && *ip6prefix != '\0' && DM_STRCMP(ip6prefix, dmmap_address) == 0)
 			continue;
 
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", dmmap_intf_s, String}}, 1, &res);
@@ -300,7 +338,7 @@ static void synchronize_intf_ipv6_prefix_sections_with_dmmap(void)
 				continue;
 
 			snprintf(ipv6_prefix, sizeof(ipv6_prefix), "%s/%s", address, mask);
-			if (strcmp(ipv6_prefix, dmmap_address) == 0) {
+			if (DM_STRCMP(ipv6_prefix, dmmap_address) == 0) {
 				found = true;
 				break;
 			}
@@ -318,7 +356,7 @@ static void synchronize_intf_ipv6_prefix_sections_with_dmmap(void)
 				continue;
 
 			snprintf(ipv6_prefix, sizeof(ipv6_prefix), "%s/%s", address, mask);
-			if (strcmp(ipv6_prefix, dmmap_address) == 0) {
+			if (DM_STRCMP(ipv6_prefix, dmmap_address) == 0) {
 				found = true;
 				break;
 			}
@@ -333,78 +371,116 @@ static void synchronize_intf_ipv6_prefix_sections_with_dmmap(void)
 static int delete_ip_intertace_instance(struct uci_section *s)
 {
 	struct uci_section *int_ss = NULL, *int_stmp = NULL;
-	char buf[32], *int_device, *int_sec_name = dmstrdup(section_name(s));
+	char buf[32], *int_sec_name = dmstrdup(section_name(s));
 
 	snprintf(buf, sizeof(buf), "@%s", int_sec_name);
 
 	uci_foreach_sections_safe("network", "interface", int_stmp, int_ss) {
+		struct uci_section *ss = NULL;
+		struct uci_section *stmp = NULL;
+		char *int_device = NULL;
+		char *proto = NULL;
 
 		dmuci_get_value_by_section_string(int_ss, "device", &int_device);
-		if (strcmp(section_name(int_ss), int_sec_name) != 0 && strcmp(int_device, buf) != 0)
+		if (strcmp(section_name(int_ss), int_sec_name) != 0 && DM_STRCMP(int_device, buf) != 0)
 			continue;
 
-		// Get dmmap section related to this interface section
-		struct uci_section *dmmap_section = NULL;
-		get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(int_ss), &dmmap_section);
+		char *device = get_device( section_name(int_ss));
 
-		// Check the device value ==> if it starts with 'br-' so it is a bridge section : there is a Bridging.Bridge. object mapped to this interface, remove only proto option from the section
-		// Check the type value ==> else : there is no Bridging.Bridge. object mapped to this interface, remove the section
-		if (int_device && strncmp(int_device, "br-", 3) == 0) {
-			/* type is bridge */
+		/* Remove the device section corresponding to this interface if exists and no interface used it
+		   And it doesn't link to Device.Bridging.Bridge. Object */
+		if (device && *device && DM_LSTRNCMP(device, "br-", 3) != 0) {
+			bool device_found = false;
 
-			/* remove only proto option from the interface section and ip instance option from dmmap section */
-			dmuci_set_value_by_section(int_ss, "proto", "");
-			dmuci_set_value_by_section(dmmap_section, "ip_int_instance", "");
-		} else {
-			/* type is not bridge */
-
-			/* Remove the device section corresponding to this interface if exists and no interface used it */
-			char *device = get_device( section_name(int_ss));
-			struct uci_section *ss = NULL, *stmp = NULL;
-
-			if (device && *device) {
-				bool device_found = false;
-
-				uci_foreach_sections("network", "interface", ss) {
-					dmuci_get_value_by_section_string(ss, "device", &int_device);
-					if (strcmp(section_name(ss), section_name(int_ss)) != 0 && strcmp(int_device, buf) != 0 && strstr(int_device, device)) {
-						device_found = true;
-						break;
-					}
-				}
-
-				if (!device_found) {
-					uci_foreach_option_eq_safe("network", "device", "name", device, stmp, ss) {
-						char *device_type;
-						dmuci_get_value_by_section_string(ss, "type", &device_type);
-						if (strcmp(device_type, "untagged") == 0) dmuci_delete_by_section(ss, NULL, NULL);
-						break;
-					}
+			uci_foreach_sections("network", "interface", ss) {
+				dmuci_get_value_by_section_string(ss, "device", &int_device);
+				if (strcmp(section_name(ss), section_name(int_ss)) != 0 && DM_STRCMP(int_device, buf) != 0 && DM_STRSTR(int_device, device)) {
+					device_found = true;
+					break;
 				}
 			}
 
-			/* remove dmmap section related to this interface */
-			dmuci_delete_by_section(dmmap_section, NULL, NULL);
-
-			/* Remove "IPv4Address" child section related to this "IP.Interface." object */
-			uci_foreach_option_eq_safe("dmmap_network_ipv4", "intf_ipv4", "parent_section", section_name(int_ss), stmp, ss) {
-				dmuci_delete_by_section(ss, NULL, NULL);
+			if (!device_found) {
+				uci_foreach_option_eq_safe("network", "device", "name", device, stmp, ss) {
+					char *device_type;
+					dmuci_get_value_by_section_string(ss, "type", &device_type);
+					if (DM_LSTRCMP(device_type, "untagged") == 0) dmuci_delete_by_section(ss, NULL, NULL);
+					break;
+				}
 			}
-
-			/* Remove "IPv6Address" child section related to this "IP.Interface." object */
-			uci_foreach_option_eq_safe("dmmap_network_ipv6", "intf_ipv6", "parent_section", section_name(int_ss), stmp, ss) {
-				dmuci_delete_by_section(ss, NULL, NULL);
-			}
-
-			/* Remove "IPv6PrefixAddress" child section related to this "IP.Interface." object */
-			uci_foreach_option_eq_safe("dmmap_network_ipv6_prefix", "intf_ipv6_prefix", "parent_section", section_name(int_ss), stmp, ss) {
-				dmuci_delete_by_section(ss, NULL, NULL);
-			}
-
-			/* remove interface section */
-			dmuci_delete_by_section(int_ss, NULL, NULL);
 		}
 
+		/* remove dmmap section related to this interface */
+		get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(int_ss), &ss);
+		dmuci_delete_by_section(ss, NULL, NULL);
+
+		/* Remove "IPv4Address" child section related to this "IP.Interface." object */
+		uci_path_foreach_option_eq_safe(bbfdm, "dmmap_network_ipv4", "intf_ipv4", "parent_section", section_name(int_ss), stmp, ss) {
+			dmuci_delete_by_section(ss, NULL, NULL);
+		}
+
+		/* Remove "IPv6Address" child section related to this "IP.Interface." object */
+		uci_path_foreach_option_eq_safe(bbfdm, "dmmap_network_ipv6", "intf_ipv6", "parent_section", section_name(int_ss), stmp, ss) {
+			dmuci_delete_by_section(ss, NULL, NULL);
+		}
+
+		/* Remove "IPv6PrefixAddress" child section related to this "IP.Interface." object */
+		uci_path_foreach_option_eq_safe(bbfdm, "dmmap_network_ipv6_prefix", "intf_ipv6_prefix", "parent_section", section_name(int_ss), stmp, ss) {
+			dmuci_delete_by_section(ss, NULL, NULL);
+		}
+
+		dmuci_get_value_by_section_string(int_ss, "proto", &proto);
+
+		if (DM_LSTRCMP(proto, "dhcp") == 0) {
+			struct uci_section *dhcpv4_client_s = get_dup_section_in_dmmap_opt("dmmap_dhcp_client", "interface", "iface_name", section_name(int_ss));
+
+			if (dhcpv4_client_s) {
+				char *dhcp_client_key = NULL;
+
+				dmuci_get_value_by_section_string(dhcpv4_client_s, "dhcp_client_key", &dhcp_client_key);
+
+				/* Remove "DHCPv4.Client.{i}.ReqOption." sections related to this "IP.Interface." object */
+				uci_path_foreach_option_eq_safe(bbfdm, "dmmap_dhcp_client", "req_option", "dhcp_client_key", dhcp_client_key, stmp, ss) {
+					dmuci_delete_by_section(ss, NULL, NULL);
+				}
+
+				/* Remove "DHCPv4.Client.{i}.SentOption." sections related to this "IP.Interface." object */
+				uci_path_foreach_option_eq_safe(bbfdm, "dmmap_dhcp_client", "send_option", "dhcp_client_key", dhcp_client_key, stmp, ss) {
+					dmuci_delete_by_section(ss, NULL, NULL);
+				}
+
+				/* Remove "DHCPv4.Client." section related to this "IP.Interface." object */
+				dmuci_delete_by_section(dhcpv4_client_s, NULL, NULL);
+			}
+		}
+
+		if (DM_LSTRCMP(proto, "dhcpv6") == 0) {
+			struct uci_section *dhcpv6_client_s = get_dup_section_in_dmmap_opt("dmmap_dhcpv6", "interface", "iface_name", section_name(int_ss));
+
+			if (dhcpv6_client_s) {
+
+				/* Remove "DHCPv6.Client." section related to this "IP.Interface." object */
+				dmuci_delete_by_section(dhcpv6_client_s, NULL, NULL);
+			}
+		}
+
+		if (DM_LSTRNCMP(proto, "ppp", 3) == 0) {
+			struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "iface_name", section_name(int_ss));
+
+			if (ppp_s) {
+
+				/* Remove "PPP.Interface." section related to this "IP.Interface." object */
+				dmuci_delete_by_section(ppp_s, NULL, NULL);
+			}
+		}
+
+		/* Remove Firewall zone section related to this "IP.Interface." object */
+		uci_foreach_option_eq_safe("firewall", "zone", "name", section_name(int_ss), stmp, ss) {
+			dmuci_delete_by_section(ss, NULL, NULL);
+		}
+
+		/* remove interface section */
+		dmuci_delete_by_section(int_ss, NULL, NULL);
 	}
 	return 0;
 }
@@ -420,10 +496,10 @@ static bool interface_section_with_dhcpv6_exists(const char *sec_name)
 
 		char *device;
 		dmuci_get_value_by_section_string(s, "device", &device);
-		if (strcmp(device, buf) == 0) {
+		if (DM_STRCMP(device, buf) == 0) {
 			char *proto;
 			dmuci_get_value_by_section_string(s, "proto", &proto);
-			if (strcmp(proto, "dhcpv6") == 0)
+			if (DM_LSTRCMP(proto, "dhcpv6") == 0)
 				return true;
 		}
 	}
@@ -431,7 +507,7 @@ static bool interface_section_with_dhcpv6_exists(const char *sec_name)
 	return false;
 }
 
-static void set_ip_interface_ifname_option(struct uci_section *section, char *linker, char *instance, bool is_br_sec)
+static void set_ip_interface_device_option(struct uci_section *section, char *linker, char *instance, bool is_br_sec)
 {
 	struct uci_section *s = NULL;
 	bool device_exists = false;
@@ -475,11 +551,11 @@ static int delObjIPInterfaceIPv6(void *data, unsigned char del_action, char *dmm
 	switch (del_action) {
 		case DEL_INST:
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-			if (strcmp(proto, "static") != 0 || interface_section_with_dhcpv6_exists(section_name(((struct intf_ip_args *)data)->interface_sec)))
+			if (DM_LSTRCMP(proto, "static") != 0 || interface_section_with_dhcpv6_exists(section_name(((struct intf_ip_args *)data)->interface_sec)))
 				return FAULT_9001;
 
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "device", &device);
-			if (strchr(device, '@')) {
+			if (DM_STRCHR(device, '@')) {
 				dmuci_delete_by_section(((struct intf_ip_args *)data)->interface_sec, NULL, NULL);
 			} else {
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, option_name, "");
@@ -489,7 +565,7 @@ static int delObjIPInterfaceIPv6(void *data, unsigned char del_action, char *dmm
 			break;
 		case DEL_ALL:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
-			if (strcmp(proto, "static") != 0 || interface_section_with_dhcpv6_exists(section_name((struct uci_section *)data)))
+			if (DM_LSTRCMP(proto, "static") != 0 || interface_section_with_dhcpv6_exists(section_name((struct uci_section *)data)))
 				return FAULT_9001;
 
 			snprintf(buf, sizeof(buf), "@%s", section_name((struct uci_section *)data));
@@ -503,7 +579,7 @@ static int delObjIPInterfaceIPv6(void *data, unsigned char del_action, char *dmm
 
 					get_dmmap_section_of_config_section(dmmap_file_name, section_type, section_name(s), &dmmap_s);
 					dmuci_delete_by_section(dmmap_s, NULL, NULL);
-				} else if (strcmp(device, buf) == 0) {
+				} else if (DM_STRCMP(device, buf) == 0) {
 					get_dmmap_section_of_config_section(dmmap_file_name, section_type, section_name(s), &dmmap_s);
 					dmuci_delete_by_section(dmmap_s, NULL, NULL);
 
@@ -536,30 +612,12 @@ static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 
 		if (strcmp(section_name(p->config_section), "loopback") == 0 ||
 			*proto == '\0' ||
-			strchr(device, '@'))
+			DM_STRCHR(device, '@'))
 			continue;
 
-		// skip dhcpv4 sections added by controller
-		if (strcmp(proto, "dhcp") == 0) {
-			struct uci_section *dmmap_section = NULL;
-			char *dhcpv4_user_s = NULL;
-
-			get_dmmap_section_of_config_section("dmmap_dhcp_client", "interface", section_name(p->config_section), &dmmap_section);
-			dmuci_get_value_by_section_string(dmmap_section, "added_by_controller", &dhcpv4_user_s);
-			if (dhcpv4_user_s && strcmp(dhcpv4_user_s, "1") == 0)
-				continue;
-		}
-
-		// skip dhcpv6 sections added by controller
-		if (strcmp(proto, "dhcpv6") == 0) {
-			struct uci_section *dmmap_section = NULL;
-			char *dhcpv6_user_s = NULL;
-
-			get_dmmap_section_of_config_section("dmmap_dhcpv6", "interface", section_name(p->config_section), &dmmap_section);
-			dmuci_get_value_by_section_string(dmmap_section, "added_by_controller", &dhcpv6_user_s);
-			if (dhcpv6_user_s && strcmp(dhcpv6_user_s, "1") == 0)
-				continue;
-		}
+		// check if firewall zone exists
+		if (!firewall_zone_exists(section_name(p->config_section)))
+			create_firewall_zone_section(section_name(p->config_section));
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "ip_int_instance", "ip_int_alias");
 
@@ -567,13 +625,14 @@ static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
+	remove_unused_firewall_zone_sections();
 	return 0;
 }
 
 static int browseIPInterfaceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *parent_sec = (struct uci_section *)prev_data, *intf_s = NULL, *dmmap_s = NULL;
-	char *inst = NULL, *ipaddr, *added_by_controller = NULL, *device, buf[32] = {0};
+	char *inst = NULL, *ipaddr, *added_by_controller = NULL, *proto = NULL, *device = NULL, buf[32] = {0};
 	json_object *res = NULL, *ipv4_obj = NULL;
 	struct intf_ip_args curr_intf_ip_args = {0};
 
@@ -582,7 +641,11 @@ static int browseIPInterfaceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_
 	uci_foreach_sections("network", "interface", intf_s) {
 
 		dmuci_get_value_by_section_string(intf_s, "device", &device);
-		if (strcmp(section_name(intf_s), section_name(parent_sec)) != 0 && strcmp(device, buf) != 0)
+		if (strcmp(section_name(intf_s), section_name(parent_sec)) != 0 && DM_STRCMP(device, buf) != 0)
+			continue;
+
+		dmuci_get_value_by_section_string(intf_s, "proto", &proto);
+		if (DM_LSTRCMP(proto, "none") == 0)
 			continue;
 
 		dmmap_s = check_dmmap_network_interface_ipv4("dmmap_network_ipv4", "intf_ipv4", section_name(parent_sec), section_name(intf_s));
@@ -590,12 +653,13 @@ static int browseIPInterfaceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_
 
 		dmuci_get_value_by_section_string(intf_s, "ipaddr", &ipaddr);
 		if (*ipaddr == '\0') {
-			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(intf_s), String}}, 1, &res);
+			char *if_name = section_name(intf_s);
+			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
 			ipv4_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
 			ipaddr = dmjson_get_value(ipv4_obj, 1, "address");
 		}
 
-		if (*ipaddr == '\0' && added_by_controller && strcmp(added_by_controller, "1") != 0)
+		if (*ipaddr == '\0' && added_by_controller && DM_LSTRCMP(added_by_controller, "1") != 0)
 			continue;
 
 		if (dmmap_s == NULL)
@@ -625,12 +689,13 @@ static int browseIPInterfaceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_
 	uci_foreach_sections("network", "interface", intf_s) {
 
 		dmuci_get_value_by_section_string(intf_s, "device", &device);
-		if (strcmp(section_name(intf_s), section_name(parent_sec)) != 0 && strcmp(device, buf) != 0)
+		if (strcmp(section_name(intf_s), section_name(parent_sec)) != 0 && DM_STRCMP(device, buf) != 0)
 			continue;
 
 		dmuci_get_value_by_section_string(intf_s, "ip6addr", &ip6addr);
 
-		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(intf_s), String}}, 1, &res);
+		char *if_name = section_name(intf_s);
+		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
 
 		if (*ip6addr == '\0') {
 
@@ -680,7 +745,7 @@ static int browseIPInterfaceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_
 		}
 
 		// Get ipv6 LinkLocal address
-		if (!strchr(device, '@')) {
+		if (!DM_STRCHR(device, '@')) {
 
 			dmmap_synchronize_ipv6_address_link_local(section_name(parent_sec));
 
@@ -688,7 +753,7 @@ static int browseIPInterfaceIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_
 				char *link_local = NULL;
 
 				dmuci_get_value_by_section_string(dmmap_s, "link_local", &link_local);
-				if (link_local && strcmp(link_local, "1") != 0)
+				if (link_local && DM_LSTRCMP(link_local, "1") != 0)
 					continue;
 
 				init_interface_ip_args(&curr_intf_ip_args, NULL, dmmap_s, NULL);
@@ -719,12 +784,13 @@ static int browseIPInterfaceIPv6PrefixInst(struct dmctx *dmctx, DMNODE *parent_n
 	uci_foreach_sections("network", "interface", intf_s) {
 
 		dmuci_get_value_by_section_string(intf_s, "device", &device);
-		if (strcmp(section_name(intf_s), section_name(parent_sec)) != 0 && strcmp(device, buf) != 0)
+		if (strcmp(section_name(intf_s), section_name(parent_sec)) != 0 && DM_STRCMP(device, buf) != 0)
 			continue;
 
 		dmuci_get_value_by_section_string(intf_s, "ip6prefix", &ip6prefix);
 
-		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(intf_s), String}}, 1, &res);
+		char *if_name = section_name(intf_s);
+		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
 
 		if (*ip6prefix == '\0') {
 
@@ -790,11 +856,15 @@ static int addObjIPInterface(char *refparam, struct dmctx *ctx, void *data, char
 	struct uci_section *dmmap_ip_interface;
 	char ip_name[32] = {0};
 
-	snprintf(ip_name, sizeof(ip_name), "ip_interface_%s", *instance);
+	snprintf(ip_name, sizeof(ip_name), "iface%s", *instance);
 
+	// Network interface section
 	dmuci_set_value("network", ip_name, "", "interface");
 	dmuci_set_value("network", ip_name, "proto", "none");
 	dmuci_set_value("network", ip_name, "disabled", "1");
+
+	// Firewall zone section
+	create_firewall_zone_section(ip_name);
 
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ip_interface);
 	dmuci_set_value_by_section(dmmap_ip_interface, "section_name", ip_name);
@@ -818,7 +888,7 @@ static int delObjIPInterface(char *refparam, struct dmctx *ctx, void *data, char
 
 				if (strcmp(section_name(s), "loopback") == 0 ||
 					*proto == '\0' ||
-					strchr(device, '@'))
+					DM_STRCHR(device, '@'))
 					continue;
 
 				delete_ip_intertace_instance(s);
@@ -836,25 +906,25 @@ static int addObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_ip_interface);
 	dmuci_get_value_by_section_string(dmmap_ip_interface, "ip_int_instance", &ip_inst);
 
-	if (!strcmp(*instance, "1")) {
+	if (DM_LSTRCMP(*instance, "1") != 0) {
 		char device_buf[32] = {0};
 
-		snprintf(ipv4_name, sizeof(ipv4_name), "ip_interface_%s_ipv4_%s", ip_inst, *instance);
+		snprintf(ipv4_name, sizeof(ipv4_name), "iface%s_ipv4_%s", ip_inst, *instance);
 		snprintf(device_buf, sizeof(device_buf), "@%s", section_name((struct uci_section *)data));
 
 		dmuci_set_value("network", ipv4_name, "", "interface");
 		dmuci_set_value("network", ipv4_name, "device", device_buf);
 		dmuci_set_value("network", ipv4_name, "proto", "static");
-	} else {
-		char *proto;
 
-		dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
-		dmuci_set_value_by_section((struct uci_section *)data, "proto", strcmp(proto, "dhcp") == 0 ? proto : "static");
+		// Firewall : add this new interface to zone->network list
+		add_network_to_firewall_zone_network_list(section_name((struct uci_section *)data), ipv4_name);
+	} else {
+		dmuci_set_value_by_section((struct uci_section *)data, "proto", "static");
 	}
 
 	dmuci_add_section_bbfdm("dmmap_network_ipv4", "intf_ipv4", &dmmap_ip_interface_ipv4);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "parent_section", section_name((struct uci_section *)data));
-	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "section_name", !strcmp(*instance, "1") ? ipv4_name : section_name((struct uci_section *)data));
+	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "section_name", (DM_LSTRCMP(*instance, "1") != 0) ? ipv4_name : section_name((struct uci_section *)data));
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "added_by_controller", "1");
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv4, "ipv4_instance", *instance);
 	return 0;
@@ -868,11 +938,11 @@ static int delObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 	switch (del_action) {
 		case DEL_INST:
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-			if (strcmp(proto, "static") != 0)
+			if (DM_LSTRCMP(proto, "static") != 0)
 				return FAULT_9001;
 
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "device", &device);
-			if (strchr(device, '@')) {
+			if (DM_STRCHR(device, '@')) {
 				dmuci_delete_by_section(((struct intf_ip_args *)data)->interface_sec, NULL, NULL);
 			} else {
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "ipaddr", "");
@@ -883,7 +953,7 @@ static int delObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 			break;
 		case DEL_ALL:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
-			if (strcmp(proto, "static") != 0)
+			if (DM_LSTRCMP(proto, "static") != 0)
 				return FAULT_9001;
 
 			snprintf(buf, sizeof(buf), "@%s", section_name((struct uci_section *)data));
@@ -898,7 +968,7 @@ static int delObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 
 					get_dmmap_section_of_config_section("dmmap_network_ipv4", "intf_ipv4", section_name(s), &dmmap_s);
 					dmuci_delete_by_section(dmmap_s, NULL, NULL);
-				} else if (strcmp(device, buf) == 0) {
+				} else if (DM_STRCMP(device, buf) == 0) {
 					get_dmmap_section_of_config_section("dmmap_network_ipv4", "intf_ipv4", section_name(s), &dmmap_s);
 					dmuci_delete_by_section(dmmap_s, NULL, NULL);
 
@@ -920,13 +990,16 @@ static int addObjIPInterfaceIPv6Address(char *refparam, struct dmctx *ctx, void 
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_ip_interface);
 	dmuci_get_value_by_section_string(dmmap_ip_interface, "ip_int_instance", &ip_inst);
 
-	snprintf(ipv6_name, sizeof(ipv6_name), "ip_interface_%s_ipv6_%s", ip_inst, *instance);
+	snprintf(ipv6_name, sizeof(ipv6_name), "iface%s_ipv6_%s", ip_inst, *instance);
 	snprintf(device_buf, sizeof(device_buf), "@%s", section_name((struct uci_section *)data));
 
 	dmuci_set_value("network", ipv6_name, "", "interface");
 	dmuci_set_value("network", ipv6_name, "device", device_buf);
 	dmuci_set_value("network", ipv6_name, "proto", "static");
 	dmuci_set_value("network", ipv6_name, "ip6addr", "::");
+
+	// Firewall : add this new interface to zone->network list
+	add_network_to_firewall_zone_network_list(section_name((struct uci_section *)data), ipv6_name);
 
 	dmuci_add_section_bbfdm("dmmap_network_ipv6", "intf_ipv6", &dmmap_ip_interface_ipv6);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6, "parent_section", section_name((struct uci_section *)data));
@@ -949,13 +1022,16 @@ static int addObjIPInterfaceIPv6Prefix(char *refparam, struct dmctx *ctx, void *
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_ip_interface);
 	dmuci_get_value_by_section_string(dmmap_ip_interface, "ip_int_instance", &ip_inst);
 
-	snprintf(ipv6_prefix_name, sizeof(ipv6_prefix_name), "ip_interface_%s_ipv6_prefix_%s", ip_inst, *instance);
+	snprintf(ipv6_prefix_name, sizeof(ipv6_prefix_name), "iface%s_ipv6_prefix_%s", ip_inst, *instance);
 	snprintf(device_buf, sizeof(device_buf), "@%s", section_name((struct uci_section *)data));
 
 	dmuci_set_value("network", ipv6_prefix_name, "", "interface");
 	dmuci_set_value("network", ipv6_prefix_name, "device", device_buf);
 	dmuci_set_value("network", ipv6_prefix_name, "proto", "static");
 	dmuci_set_value("network", ipv6_prefix_name, "ip6prefix", "::/64");
+
+	// Firewall : add this new interface to zone->network list
+	add_network_to_firewall_zone_network_list(section_name((struct uci_section *)data), ipv6_prefix_name);
 
 	dmuci_add_section_bbfdm("dmmap_network_ipv6_prefix", "intf_ipv6_prefix", &dmmap_ip_interface_ipv6_prefix);
 	dmuci_set_value_by_section(dmmap_ip_interface_ipv6_prefix, "parent_section", section_name((struct uci_section *)data));
@@ -1015,7 +1091,7 @@ static int get_IP_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char
 	char buf[16] = {0};
 
 	dm_read_sysfs_file("/proc/sys/net/ipv6/conf/all/disable_ipv6", buf, sizeof(buf));
-	*value = (strcmp(buf, "1") == 0) ? "0" : "1";
+	*value = (DM_LSTRCMP(buf, "1") == 0) ? "0" : "1";
 	return 0;
 }
 
@@ -1038,7 +1114,7 @@ static int set_IP_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char
 				return 0;
 
 			snprintf(buf, sizeof(buf), "net.ipv6.conf.all.disable_ipv6=%d", b ? 0 : 1);
-			DMCMD("sysctl", 2, "-w", buf);
+			dmcmd("sysctl", 2, "-w", buf);
 
 			fseek(fp, 0, SEEK_END);
 			long length = ftell(fp);
@@ -1052,11 +1128,11 @@ static int set_IP_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char
 					break;
 				}
 
-				char *ptr = strstr(buffer, "net.ipv6.conf.all.disable_ipv6");
+				char *ptr = DM_LSTRSTR(buffer, "net.ipv6.conf.all.disable_ipv6");
 				if (ptr) {
 					*(ptr+31) = (b) ? '0' : '1';
 					fseek(fp, 0, SEEK_SET);
-					fwrite(buffer, sizeof(char), strlen(buffer), fp);
+					fwrite(buffer, sizeof(char), DM_STRLEN(buffer), fp);
 				} else {
 					fputs(buf, fp);
 				}
@@ -1072,7 +1148,7 @@ static int set_IP_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char
 static int get_IP_IPv6Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	get_IP_IPv6Enable(refparam, ctx, data, instance, value);
-	*value = (strcmp(*value, "1") == 0) ? "Enabled" : "Disabled";
+	*value = (DM_LSTRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
 	return 0;
 }
 
@@ -1209,10 +1285,11 @@ static int get_IPInterface_Status(char *refparam, struct dmctx *ctx, void *data,
 {
 	json_object *res = NULL;
 
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	char *if_name = section_name((struct uci_section *)data);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
 	DM_ASSERT(res, *value = "Down");
 	char *up = dmjson_get_value(res, 1, "up");
-	*value = (strcmp(up, "true") == 0) ? "Up" : "Down";
+	*value = (DM_LSTRCMP(up, "true") == 0) ? "Up" : "Down";
 	return 0;
 }
 
@@ -1254,8 +1331,10 @@ static int get_IPInterface_Name(char *refparam, struct dmctx *ctx, void *data, c
 /*#Device.IP.Interface.{i}.LastChange!UBUS:network.interface/status/interface,@Name/uptime*/
 static int get_IPInterface_LastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res;
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name((struct uci_section *)data), String}}, 1, &res);
+	json_object *res = NULL;
+
+	char *if_name = section_name((struct uci_section *)data);
+	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "uptime");
 	return 0;
@@ -1263,51 +1342,70 @@ static int get_IPInterface_LastChange(char *refparam, struct dmctx *ctx, void *d
 
 static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char linker[32] = {0};
-	char *proto;
+	struct uci_section *dmmap_section = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
-	if (strstr(proto, "ppp")) {
+	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
+	dmuci_get_value_by_section_string(dmmap_section, "LowerLayers", value);
+
+	if ((*value)[0] == '\0') {
 		char linker[64] = {0};
-		snprintf(linker, sizeof(linker), "%s", section_name((struct uci_section *)data));
-		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", linker, value);
-		if (*value != NULL)
-			return 0;
-	}
+		char *proto;
 
-	char *device = get_device(section_name((struct uci_section *)data));
+		dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &proto);
+		if (DM_LSTRNCMP(proto, "ppp", 3) == 0) {
+			snprintf(linker, sizeof(linker), "%s", section_name((struct uci_section *)data));
+			adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", linker, value);
+			if (*value != NULL && (*value)[0] != 0)
+				return 0;
+		}
 
-	/* If the device value is empty, then get its value directly from device option */
-	if (device && *device == '\0')
-		dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+		char *device = get_device(section_name((struct uci_section *)data));
 
-	if (device[0] != '\0') {
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", device, value);
-		if (*value != NULL)
-			return 0;
-	}
+		/* If the device value is empty, then get its value directly from device option */
+		if (*device == '\0')
+			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
 
-	if (device[0] != '\0') {
-		DM_STRNCPY(linker, device, sizeof(linker));
-		char *vid = strchr(linker, '.');
-		if (vid) *vid = '\0';
+		if (device[0] != '\0') {
+			adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", device, value);
+			if (*value != NULL && (*value)[0] != 0)
+				return 0;
+		}
+
+		if (device[0] != '\0') {
+			DM_STRNCPY(linker, device, sizeof(linker));
+			char *vid = DM_STRCHR(linker, '.');
+			if (vid) *vid = '\0';
+		} else {
+			struct uci_section *s = NULL;
+
+			get_dmmap_section_of_config_section_eq("dmmap", "link", "section_name", section_name((struct uci_section *)data), &s);
+			dmuci_get_value_by_section_string(s, "linker", &device);
+			DM_STRNCPY(linker, device, sizeof(linker));
+		}
+
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", linker, value);
 	} else {
-		struct uci_section *s = NULL;
+		char *linker = NULL;
 
-		get_dmmap_section_of_config_section_eq("dmmap", "link", "section_name", section_name((struct uci_section *)data), &s);
-		dmuci_get_value_by_section_string(s, "linker", &device);
-		DM_STRNCPY(linker, device, sizeof(linker));
+		adm_entry_get_linker_value(ctx, *value, &linker);
+		if (!linker || *linker == 0)
+			*value = "";
 	}
-
-	adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", linker, value);
-	if (*value == NULL)
-		*value = "";
-
 	return 0;
 }
 
 static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *dmmap_section = NULL;
+	char eth_vlan_term[64] = "Device.Ethernet.VLANTermination.";
+	char eth_link[32] = "Device.Ethernet.Link.";
+	char ppp_iface[32] = "Device.PPP.Interface.";
+	char *allowed_objects[] = {
+			eth_vlan_term,
+			eth_link,
+			ppp_iface,
+			NULL};
+	char linker_buf[32] = {0};
 	char *ip_linker = NULL;
 
 	switch (action)	{
@@ -1315,123 +1413,160 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			if (strncmp(value, "Device.Ethernet.VLANTermination.", 32) != 0 &&
-				strncmp(value, "Device.Ethernet.Link.", 21) != 0)
-				return FAULT_9007;
-
-			adm_entry_get_linker_value(ctx, value, &ip_linker);
-			if (ip_linker == NULL || *ip_linker == '\0')
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &ip_linker);
 
-			if (strncmp(value, "Device.Ethernet.VLANTermination.", 32) == 0) {
+			// Store LowerLayers value under dmmap_network section
+			get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "LowerLayers", value);
+
+			if (!ip_linker || *ip_linker == 0) {
+				char *curr_proto = NULL;
+
+				// Update device option
+				dmuci_set_value_by_section((struct uci_section *)data, "device", "");
+
+				dmuci_get_value_by_section_string((struct uci_section *)data, "proto", &curr_proto);
+				if (DM_LSTRNCMP(curr_proto, "ppp", 3) == 0) {
+					struct uci_section *ppp_s = NULL;
+
+					ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "iface_name", section_name((struct uci_section *)data));
+					dmuci_set_value_by_section_bbfdm(ppp_s, "iface_name", "");
+
+					dmuci_set_value_by_section((struct uci_section *)data, "proto", "none");
+					ppp___reset_options((struct uci_section *)data);
+				}
+				return 0;
+			}
+
+			DM_STRNCPY(linker_buf, ip_linker, sizeof(linker_buf));
+
+			if (DM_STRNCMP(value, eth_vlan_term, DM_STRLEN(eth_vlan_term)) == 0) {
 				struct uci_section *s = NULL, *stmp = NULL;
+
+				// Check linker value
+				struct uci_section *vlan_ter_s = get_dup_section_in_config_opt("network", "device", "name", linker_buf);
+				if (vlan_ter_s == NULL) {
+					vlan_ter_s = get_dup_section_in_dmmap_opt("dmmap_network", "device", "default_linker", linker_buf);
+					dmuci_set_value_by_section_bbfdm(vlan_ter_s, "iface_name", section_name((struct uci_section *)data));
+					return 0;
+				}
 
 				// Remove the device section corresponding to this interface if exists
 				char *device = get_device(section_name((struct uci_section *)data));
 				uci_foreach_option_eq_safe("network", "device", "name", device, stmp, s) {
 					char *type;
 					dmuci_get_value_by_section_string(s, "type", &type);
-					if (strcmp(type, "untagged") == 0) dmuci_delete_by_section(s, NULL, NULL);
+					if (DM_LSTRCMP(type, "untagged") == 0) dmuci_delete_by_section(s, NULL, NULL);
 					break;
 				}
 
-				char *mac_vlan = strchr(ip_linker, '_');
+				char *mac_vlan = DM_STRCHR(linker_buf, '_');
 				if (mac_vlan) {
 					// Check if there is an interface that has the same ifname ==> if yes, remove it
-					uci_foreach_option_eq_safe("network", "interface", "device", ip_linker, stmp, s) {
+					uci_foreach_option_eq_safe("network", "interface", "device", linker_buf, stmp, s) {
 						dmuci_delete_by_section(s, NULL, NULL);
 					}
 
 					// Check if there is an dmmap link section that has the same device ==> if yes, update section name
-					get_dmmap_section_of_config_section_eq("dmmap", "link", "device", ip_linker, &s);
+					get_dmmap_section_of_config_section_eq("dmmap", "link", "device", linker_buf, &s);
 					dmuci_set_value_by_section_bbfdm(s, "section_name", section_name((struct uci_section *)data));
-
 				} else {
 					// Check if there is an interface that has the same name of device ==> if yes, remove it
-					char device[32] = {0};
-					DM_STRNCPY(device, ip_linker, sizeof(device));
-					char *vid = strchr(device, '.');
+					char dev_buf[32] = {0};
+
+					DM_STRNCPY(dev_buf, linker_buf, sizeof(dev_buf));
+					char *vid = DM_STRCHR(dev_buf, '.');
 					if (vid) {
 						*vid = '\0';
-						uci_foreach_option_eq_safe("network", "interface", "device", device, stmp, s) {
+						uci_foreach_option_eq_safe("network", "interface", "device", dev_buf, stmp, s) {
 							dmuci_delete_by_section(s, NULL, NULL);
 						}
 					}
 				}
 
-				// Update ifname list
-				dmuci_set_value_by_section((struct uci_section *)data, "device", ip_linker);
-
-			} else if (strncmp(value, "Device.Ethernet.Link.", 21) == 0) {
+				// Update device option
+				dmuci_set_value_by_section((struct uci_section *)data, "device", linker_buf);
+			} else if (DM_STRNCMP(value, eth_link, DM_STRLEN(eth_link)) == 0) {
 
 				// Get interface name from Ethernet.Link. object
-				struct uci_section *s = NULL;
-				char *interface_list;
-				bool new_eth_link_s = false;
+				struct uci_section *eth_link_s = NULL;
+				bool eth_link_without_dev = false;
 
-				get_dmmap_section_of_config_section_eq("dmmap", "link", "device", ip_linker, &s);
-				if (s == NULL) {
-
-					// There is no dmmap section that maps to this device, so we get the requested section using section_name option
-					get_dmmap_section_of_config_section_eq("dmmap", "link", "section_name", ip_linker, &s);
-					dmuci_set_value_by_section(s, "linker", ip_linker);
-					new_eth_link_s = true;
+				get_dmmap_section_of_config_section_eq("dmmap", "link", "device", linker_buf, &eth_link_s);
+				if (eth_link_s == NULL) {
+					// There is no dmmap section that maps to this device, so we get the requested section using section_name
+					// option instead of device because it is a new Eternet.Link. object without settings its LowerLayers
+					get_dmmap_section_of_config_section_eq("dmmap", "link", "linker", linker_buf, &eth_link_s);
+					eth_link_without_dev = true;
 				}
 
-				dmuci_get_value_by_section_string(s, "section_name", &interface_list);
-				char *interface = strchr(interface_list, ',');
+				dmuci_set_value_by_section(eth_link_s, "section_name", section_name((struct uci_section *)data));
 
-				if (!interface) {
-					bool ip_interface_s = false;
-					bool is_br_sec = false;
-					// Update the new interface section with proto=none if its proto is empty
-					uci_foreach_sections("network", "interface", s) {
-						if (strcmp(section_name(s), interface_list) == 0) {
-							char *proto, *device;
-							dmuci_get_value_by_section_string(s, "proto", &proto);
-							dmuci_get_value_by_section_string(s, "device", &device);
-							if (*proto == '\0') {
-								dmuci_set_value_by_section(s, "proto", "none");
-								if (!new_eth_link_s && device && strncmp(device, "br-", 3) != 0)
-									set_ip_interface_ifname_option(s, ip_linker, instance, false);
-							} else {
-								ip_interface_s = true;
-								is_br_sec = (device && strncmp(device, "br-", 3) == 0) ? true : false;
+				if (!eth_link_without_dev) {
+					bool is_br_sec = (DM_LSTRNCMP(linker_buf, "br-", 3) == 0) ? true : false;
+
+					// Check if the Ethernet.Link. maps to bridge, if yes then check the device name
+					if (is_br_sec) {
+						char device[32] = {0};
+
+						snprintf(device, sizeof(device), "br-%s", section_name((struct uci_section *)data));
+
+						if (DM_STRCMP(device, linker_buf) != 0) {
+							struct uci_section *s = NULL;
+
+							// Remove unused Interface section created by Bridge Object if it exists
+							uci_foreach_sections("network", "interface", s) {
+								char *br_device = NULL;
+
+								dmuci_get_value_by_section_string(s, "device", &br_device);
+								if (br_device && DM_STRCMP(br_device, linker_buf) == 0) {
+									dmuci_delete_by_section(s, NULL, NULL);
+									break;
+								}
+	 						}
+
+							// Update all bridge_port section with the new device value
+							uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "device", linker_buf, s) {
+								dmuci_set_value_by_section(s, "device", device);
 							}
-							break;
+
+							// Update device section with the new name value
+							uci_foreach_option_eq("network", "device", "name", linker_buf, s) {
+								dmuci_set_value_by_section(s, "name", device);
+							}
+
+							// Update device option in dmmap section related to this Interface section
+							dmuci_set_value_by_section(eth_link_s, "device", device);
+
+							DM_STRNCPY(linker_buf, device, sizeof(linker_buf));
 						}
 					}
 
-					if (!ip_interface_s) {
-
-						// Get dmmap section related to this interface section and remove it
-						struct uci_section *dmmap_section = NULL;
-						get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
-
-						// Get the current ip instance
-						char *ip_int_instance;
-						dmuci_get_value_by_section_string(dmmap_section, "ip_int_instance", &ip_int_instance);
-
-						// Get the new dmmap section related to the new interface section and update ip instance option
-						struct uci_section *new_dmmap_section = NULL;
-						get_dmmap_section_of_config_section("dmmap_network", "interface", interface_list, &new_dmmap_section);
-						dmuci_set_value_by_section(new_dmmap_section, "ip_int_instance", ip_int_instance);
-
-						// remove dmmap section
-						dmuci_delete_by_section(dmmap_section, NULL, NULL);
-
-						// remove the current interface section
-						dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
-					} else {
-						set_ip_interface_ifname_option((struct uci_section *)data, ip_linker, instance, is_br_sec);
+					// Check if the Ethernet.Link. maps to macvlan, if yes then keep only device name
+					char *mac_vlan = DM_STRCHR(linker_buf, '_');
+					if (!is_br_sec && mac_vlan) {
+						*mac_vlan = 0;
+						dmuci_set_value_by_section(eth_link_s, "device", linker_buf);
 					}
-				} else {
-					set_ip_interface_ifname_option((struct uci_section *)data, ip_linker, instance, false);
+
+					set_ip_interface_device_option((struct uci_section *)data, linker_buf, instance, is_br_sec);
 				}
+			} else if (DM_STRNCMP(value, ppp_iface, DM_STRLEN(ppp_iface)) == 0) {
+				struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "name", linker_buf);
+				if (ppp_s == NULL)
+					ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "iface_name", linker_buf);
+
+				if (ppp_s == NULL)
+					break;
+
+				dmuci_set_value_by_section_bbfdm(ppp_s, "iface_name", section_name((struct uci_section *)data));
+
+				ppp___update_sections(ppp_s, (struct uci_section *)data);
 			}
 			break;
 	}
@@ -1465,21 +1600,15 @@ static int get_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *data, 
 
 static int set_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	bool b;
-
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			string_to_bool(value, &b);
-			if (b) {
-				char interface_obj[64] = {0};
-				snprintf(interface_obj, sizeof(interface_obj), "network.interface.%s", section_name(((struct uci_section *)data)));
-				dmubus_call_set(interface_obj, "down", UBUS_ARGS{}, 0);
-				dmubus_call_set(interface_obj, "up", UBUS_ARGS{}, 0);
-			}
+			/* Reset can disrupt on-going cwmp session, so this parameter must be
+			 * taken care by cwmp internally.
+			 */
 			break;
 	}
 	return 0;
@@ -1562,7 +1691,7 @@ static int get_IPInterfaceIPv4Address_Enable(char *refparam, struct dmctx *ctx, 
 	char *proto = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-	if (strcmp(proto, "none") != 0) {
+	if (DM_LSTRCMP(proto, "none") != 0) {
 		char *disabled = NULL;
 
 		dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "disabled", &disabled);
@@ -1586,7 +1715,7 @@ static int set_IPInterfaceIPv4Address_Enable(char *refparam, struct dmctx *ctx, 
 		case VALUESET:
 			string_to_bool(value, &b);
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-			if (strcmp(proto, "none") == 0) {
+			if (DM_LSTRCMP(proto, "none") == 0) {
 				char *ip_addr;
 
 				dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "ipaddr", &ip_addr);
@@ -1627,7 +1756,7 @@ static int set_IPInterfaceIPv4Address_Alias(char *refparam, struct dmctx *ctx, v
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-			if (proto && strcmp(proto, "static") == 0)
+			if (proto && DM_LSTRCMP(proto, "static") == 0)
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->dmmap_sec, "ipv4_alias", value);
 			break;
 	}
@@ -1661,7 +1790,7 @@ static int set_IPInterfaceIPv4Address_IPAddress(char *refparam, struct dmctx *ct
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto_intf);
-			if (proto_intf && strcmp(proto_intf, "static") == 0)
+			if (proto_intf && DM_LSTRCMP(proto_intf, "static") == 0)
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "ipaddr", value);
 			break;
 	}
@@ -1678,7 +1807,7 @@ static int get_IPInterfaceIPv4Address_SubnetMask(char *refparam, struct dmctx *c
 	if (mask && mask[0] == '\0') {
 		json_object *ipv4_obj = dmjson_select_obj_in_array_idx(((struct intf_ip_args *)data)->interface_obj, 0, 1, "ipv4-address");
 		mask = dmjson_get_value(ipv4_obj, 1, "mask");
-		mask = (mask && *mask) ? dmstrdup(cidr2netmask(atoi(mask))) : "";
+		mask = (mask && *mask) ? dmstrdup(cidr2netmask(DM_STRTOL(mask))) : "";
 	}
 
 	*value = (mask && *mask) ? mask : "";
@@ -1696,7 +1825,7 @@ static int set_IPInterfaceIPv4Address_SubnetMask(char *refparam, struct dmctx *c
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-			if (proto && strcmp(proto, "static") == 0)
+			if (proto && DM_LSTRCMP(proto, "static") == 0)
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "netmask", value);
 			break;
 	}
@@ -1709,9 +1838,9 @@ static int get_IPInterfaceIPv4Address_AddressingType(char *refparam, struct dmct
 	char *proto = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-	if (proto && strcmp(proto, "static") == 0)
+	if (proto && DM_LSTRCMP(proto, "static") == 0)
 		*value = "Static";
-	else if (proto && strncmp(proto, "ppp", 3) == 0)
+	else if (proto && DM_LSTRNCMP(proto, "ppp", 3) == 0)
 		*value = "IPCP";
 	else
 		*value = "DHCP";
@@ -1724,7 +1853,7 @@ static int get_IPInterfaceIPv6Address_Enable(char *refparam, struct dmctx *ctx, 
 	char *link_local = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "link_local", &link_local);
-	if (link_local && strcmp(link_local, "1") == 0) {
+	if (link_local && DM_LSTRCMP(link_local, "1") == 0) {
 		*value = "1";
 	} else {
 		*value = dmuci_get_value_by_section_fallback_def(((struct intf_ip_args *)data)->interface_sec, "ipv6", "1");
@@ -1746,7 +1875,7 @@ static int set_IPInterfaceIPv6Address_Enable(char *refparam, struct dmctx *ctx, 
 		case VALUESET:
 			string_to_bool(value, &b);
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "link_local", &link_local);
-			if (link_local && strcmp(link_local, "1") != 0)
+			if (link_local && DM_LSTRCMP(link_local, "1") != 0)
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "ipv6", b ? "1" : "0");
 			break;
 	}
@@ -1766,7 +1895,7 @@ static int get_IPInterfaceIPv6Address_IPAddressStatus(char *refparam, struct dmc
 	char *assign = NULL, *preferred = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
-	if (assign && strcmp(assign, "1") == 0)
+	if (assign && DM_LSTRCMP(assign, "1") == 0)
 		preferred = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 2, "local-address", "preferred");
 	else
 		preferred = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "preferred");
@@ -1802,7 +1931,7 @@ static int set_IPInterfaceIPv6Address_Alias(char *refparam, struct dmctx *ctx, v
 static int get_IPInterfaceIPv6Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "address", value);
-	char *mask = strchr(*value, '/');
+	char *mask = DM_STRCHR(*value, '/');
 	if (mask) *mask = '\0';
 	return 0;
 }
@@ -1819,7 +1948,7 @@ static int set_IPInterfaceIPv6Address_IPAddress(char *refparam, struct dmctx *ct
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "link_local", &link_local);
-			if (proto && strcmp(proto, "static") == 0 && link_local && strcmp(link_local, "1") != 0) {
+			if (proto && DM_LSTRCMP(proto, "static") == 0 && link_local && DM_LSTRCMP(link_local, "1") != 0) {
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "ip6addr", value);
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->dmmap_sec, "address", value);
 			}
@@ -1835,12 +1964,12 @@ static int get_IPInterfaceIPv6Address_Origin(char *refparam, struct dmctx *ctx, 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "link_local", &link_local);
 
-	if ((assign && strcmp(assign, "1") == 0) || (link_local && strcmp(link_local, "1") == 0)) {
+	if ((assign && DM_LSTRCMP(assign, "1") == 0) || (link_local && DM_LSTRCMP(link_local, "1") == 0)) {
 		*value = "AutoConfigured";
 	} else {
 		char *proto;
 		dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-		*value = (strcmp(proto, "dhcpv6") == 0) ? "DHCPv6" : "Static";
+		*value = (DM_LSTRCMP(proto, "dhcpv6") == 0) ? "DHCPv6" : "Static";
 	}
 	return 0;
 }
@@ -1850,7 +1979,7 @@ static int get_IPInterfaceIPv6Address_Prefix(char *refparam, struct dmctx *ctx, 
 	char *assign = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
-	if (assign && strcmp(assign, "1") == 0) {
+	if (assign && DM_LSTRCMP(assign, "1") == 0) {
 		struct uci_section *dmmap_section = NULL;
 		char *ip_inst = NULL, *ipv6_prefix_inst = NULL, *parent_section, *section_name;
 		char curr_address[64] = {0}, *address = NULL;
@@ -1865,7 +1994,7 @@ static int get_IPInterfaceIPv6Address_Prefix(char *refparam, struct dmctx *ctx, 
 		dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "section_name", &section_name);
 		uci_path_foreach_option_eq(bbfdm, "dmmap_network_ipv6_prefix", "intf_ipv6_prefix", "section_name", section_name, dmmap_section) {
 			dmuci_get_value_by_section_string(dmmap_section, "address", &address);
-			if (address && strcmp(address, curr_address) == 0) {
+			if (address && DM_STRCMP(address, curr_address) == 0) {
 				dmuci_get_value_by_section_string(dmmap_section, "ipv6_prefix_instance", &ipv6_prefix_inst);
 				break;
 			}
@@ -1895,12 +2024,12 @@ static int get_IPInterfaceIPv6Address_PreferredLifetime(char *refparam, struct d
 	char *assign = NULL, *preferred = NULL, local_time[32] = {0};
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
-	if (assign && strcmp(assign, "1") == 0)
+	if (assign && DM_LSTRCMP(assign, "1") == 0)
 		preferred = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 2, "local-address", "preferred");
 	else
 		preferred = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "preferred");
 
-	if (preferred && *preferred && get_shift_utc_time(atoi(preferred), local_time, sizeof(local_time)) == -1)
+	if (preferred && *preferred && get_shift_utc_time(DM_STRTOL(preferred), local_time, sizeof(local_time)) == -1)
 		return 0;
 
 	*value = (*local_time) ? dmstrdup(local_time) : "9999-12-31T23:59:59Z";
@@ -1925,12 +2054,12 @@ static int get_IPInterfaceIPv6Address_ValidLifetime(char *refparam, struct dmctx
 	char *assign = NULL, *preferred = NULL, local_time[32] = {0};
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
-	if (assign && strcmp(assign, "1") == 0)
+	if (assign && DM_LSTRCMP(assign, "1") == 0)
 		preferred = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 2, "local-address", "valid");
 	else
 		preferred = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "valid");
 
-	if (preferred && *preferred && get_shift_utc_time(atoi(preferred), local_time, sizeof(local_time)) == -1)
+	if (preferred && *preferred && get_shift_utc_time(DM_STRTOL(preferred), local_time, sizeof(local_time)) == -1)
 		return 0;
 
 	*value = (*local_time) ? dmstrdup(local_time) : "9999-12-31T23:59:59Z";
@@ -2032,7 +2161,7 @@ static int set_IPInterfaceIPv6Prefix_Prefix(char *refparam, struct dmctx *ctx, v
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-			if (proto && strcmp(proto, "static") == 0) {
+			if (proto && DM_LSTRCMP(proto, "static") == 0) {
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "ip6prefix", value);
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->dmmap_sec, "address", value);
 			}
@@ -2046,12 +2175,12 @@ static int get_IPInterfaceIPv6Prefix_Origin(char *refparam, struct dmctx *ctx, v
 	char *assign = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
-	if (assign && strcmp(assign, "1") == 0) {
+	if (assign && DM_LSTRCMP(assign, "1") == 0) {
 		*value = "AutoConfigured";
 	} else {
 		char *proto = NULL;
 		dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-		*value = (proto && strcmp(proto, "dhcpv6") == 0) ? "PrefixDelegation" : "Static";
+		*value = (proto && DM_LSTRCMP(proto, "dhcpv6") == 0) ? "PrefixDelegation" : "Static";
 	}
 	return 0;
 }
@@ -2061,10 +2190,7 @@ static int get_IPInterfaceIPv6Prefix_ParentPrefix(char *refparam, struct dmctx *
 	char *linker = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "address", &linker);
-	if (linker && *linker)
-		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
+	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 	return 0;
 }
 
@@ -2086,7 +2212,7 @@ static int get_IPInterfaceIPv6Prefix_ChildPrefixBits(char *refparam, struct dmct
 	char *assign = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
-	if (assign && strcmp(assign, "0") == 0) {
+	if (assign && DM_LSTRCMP(assign, "0") == 0) {
 		char *address = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 3, "assigned", "lan", "address");
 		char *mask = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 3, "assigned", "lan", "mask");
 		if (address && *address && mask && *mask)
@@ -2113,7 +2239,7 @@ static int get_IPInterfaceIPv6Prefix_PreferredLifetime(char *refparam, struct dm
 	char local_time[32] = {0};
 
 	char *preferred = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "preferred");
-	if (preferred && *preferred && get_shift_utc_time(atoi(preferred), local_time, sizeof(local_time)) == -1)
+	if (preferred && *preferred && get_shift_utc_time(DM_STRTOL(preferred), local_time, sizeof(local_time)) == -1)
 		return 0;
 
 	*value = (*local_time) ? dmstrdup(local_time) : "9999-12-31T23:59:59Z";
@@ -2138,7 +2264,7 @@ static int get_IPInterfaceIPv6Prefix_ValidLifetime(char *refparam, struct dmctx 
 	char local_time[32] = {0};
 
 	char *valid = dmjson_get_value(((struct intf_ip_args *)data)->interface_obj, 1, "valid");
-	if (valid && *valid && get_shift_time_time(atoi(valid), local_time, sizeof(local_time)) == -1)
+	if (valid && *valid && get_shift_time_time(DM_STRTOL(valid), local_time, sizeof(local_time)) == -1)
 		return 0;
 
 	*value = (*local_time) ? dmstrdup(local_time) : "9999-12-31T23:59:59Z";
@@ -2220,8 +2346,8 @@ static int operate_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *da
 	char interface_obj[64] = {0};
 
 	snprintf(interface_obj, sizeof(interface_obj), "network.interface.%s", section_name(((struct uci_section *)data)));
-	dmubus_call_set(interface_obj, "down", UBUS_ARGS{}, 0);
-	dmubus_call_set(interface_obj, "up", UBUS_ARGS{}, 0);
+	dmubus_call_set(interface_obj, "down", UBUS_ARGS{0}, 0);
+	dmubus_call_set(interface_obj, "up", UBUS_ARGS{0}, 0);
 
 	return CMD_SUCCESS;
 }
@@ -2231,125 +2357,125 @@ static int operate_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *da
 ***********************************************************************************************************************************/
 /* *** Device.IP. *** */
 DMOBJ tIPObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Interface", &DMWRITE, addObjIPInterface, delObjIPInterface, NULL, browseIPInterfaceInst, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Interface", &DMWRITE, addObjIPInterface, delObjIPInterface, NULL, browseIPInterfaceInst, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}, "2.0"},
 #ifdef BBF_TR143
-{"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsObj, tIPDiagnosticsParams, NULL, BBFDM_BOTH},
+{"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsObj, tIPDiagnosticsParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 #endif
 {0}
 };
 
 DMLEAF tIPParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"IPv4Capable", &DMREAD, DMT_BOOL, get_IP_IPv4Capable, NULL, BBFDM_BOTH},
-{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IP_IPv4Enable, set_IP_IPv4Enable, BBFDM_BOTH},
-{"IPv4Status", &DMREAD, DMT_STRING, get_IP_IPv4Status, NULL, BBFDM_BOTH},
-{"IPv6Capable", &DMREAD, DMT_BOOL, get_IP_IPv6Capable, NULL, BBFDM_BOTH},
-{"IPv6Enable", &DMWRITE, DMT_BOOL, get_IP_IPv6Enable, set_IP_IPv6Enable, BBFDM_BOTH},
-{"IPv6Status", &DMREAD, DMT_STRING, get_IP_IPv6Status, NULL, BBFDM_BOTH},
-{"ULAPrefix", &DMWRITE, DMT_STRING, get_IP_ULAPrefix, set_IP_ULAPrefix, BBFDM_BOTH},
-{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IP_InterfaceNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"IPv4Capable", &DMREAD, DMT_BOOL, get_IP_IPv4Capable, NULL, BBFDM_BOTH, "2.0"},
+{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IP_IPv4Enable, set_IP_IPv4Enable, BBFDM_BOTH, "2.2"},
+{"IPv4Status", &DMREAD, DMT_STRING, get_IP_IPv4Status, NULL, BBFDM_BOTH, "2.2"},
+{"IPv6Capable", &DMREAD, DMT_BOOL, get_IP_IPv6Capable, NULL, BBFDM_BOTH, "2.2"},
+{"IPv6Enable", &DMWRITE, DMT_BOOL, get_IP_IPv6Enable, set_IP_IPv6Enable, BBFDM_BOTH, "2.2"},
+{"IPv6Status", &DMREAD, DMT_STRING, get_IP_IPv6Status, NULL, BBFDM_BOTH, "2.2"},
+{"ULAPrefix", &DMWRITE, DMT_STRING, get_IP_ULAPrefix, set_IP_ULAPrefix, BBFDM_BOTH, "2.2"},
+{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IP_InterfaceNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.IP.Interface.{i}. *** */
 DMOBJ tIPInterfaceObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"IPv4Address", &DMWRITE, addObjIPInterfaceIPv4Address, delObjIPInterfaceIPv4Address, NULL, browseIPInterfaceIPv4AddressInst, NULL, NULL, NULL, tIPInterfaceIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", "SubnetMask", NULL}},
-{"IPv6Address", &DMWRITE, addObjIPInterfaceIPv6Address, delObjIPInterfaceIPv6Address, NULL, browseIPInterfaceIPv6AddressInst, NULL, NULL, NULL, tIPInterfaceIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", NULL}},
-{"IPv6Prefix", &DMWRITE, addObjIPInterfaceIPv6Prefix, delObjIPInterfaceIPv6Prefix, NULL, browseIPInterfaceIPv6PrefixInst, NULL, NULL, NULL, tIPInterfaceIPv6PrefixParams, get_linker_ipv6_prefix, BBFDM_BOTH, LIST_KEY{"Alias", "Prefix", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"IPv4Address", &DMWRITE, addObjIPInterfaceIPv4Address, delObjIPInterfaceIPv4Address, NULL, browseIPInterfaceIPv4AddressInst, NULL, NULL, NULL, tIPInterfaceIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", "SubnetMask", NULL}, "2.0"},
+{"IPv6Address", &DMWRITE, addObjIPInterfaceIPv6Address, delObjIPInterfaceIPv6Address, NULL, browseIPInterfaceIPv6AddressInst, NULL, NULL, NULL, tIPInterfaceIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", NULL}, "2.2"},
+{"IPv6Prefix", &DMWRITE, addObjIPInterfaceIPv6Prefix, delObjIPInterfaceIPv6Prefix, NULL, browseIPInterfaceIPv6PrefixInst, NULL, NULL, NULL, tIPInterfaceIPv6PrefixParams, get_linker_ipv6_prefix, BBFDM_BOTH, LIST_KEY{"Alias", "Prefix", NULL}, "2.2"},
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tIPInterfaceParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_IPInterface_Enable, set_IPInterface_Enable, BBFDM_BOTH},
-{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv4Enable, set_IPInterface_IPv4Enable, BBFDM_BOTH},
-{"IPv6Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv6Enable, set_IPInterface_IPv6Enable, BBFDM_BOTH},
-{"ULAEnable", &DMWRITE, DMT_BOOL, get_IPInterface_ULAEnable, set_IPInterface_ULAEnable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_IPInterface_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterface_Alias, set_IPInterface_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_IPInterface_Name, NULL, BBFDM_BOTH},
-{"LastChange", &DMREAD, DMT_UNINT, get_IPInterface_LastChange, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_IPInterface_LowerLayers, set_IPInterface_LowerLayers, BBFDM_BOTH},
-{"Router", &DMWRITE, DMT_STRING, get_IPInterface_Router, set_IPInterface_Router, BBFDM_BOTH},
-{"Reset", &DMWRITE, DMT_BOOL, get_IPInterface_Reset, set_IPInterface_Reset, BBFDM_CWMP},
-{"MaxMTUSize", &DMWRITE, DMT_UNINT, get_IPInterface_MaxMTUSize, set_IPInterface_MaxMTUSize, BBFDM_BOTH},
-{"Type", &DMREAD, DMT_STRING, get_IPInterface_Type, NULL, BBFDM_BOTH},
-{"Loopback", &DMWRITE, DMT_BOOL, get_IPInterface_Loopback, set_IPInterface_Loopback, BBFDM_BOTH},
-{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH},
-{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv6AddressNumberOfEntries, NULL, BBFDM_BOTH},
-{"IPv6PrefixNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv6PrefixNumberOfEntries, NULL, BBFDM_BOTH},
-//{"AutoIPEnable", &DMWRITE, DMT_BOOL, get_IPInterface_AutoIPEnable, set_IPInterface_AutoIPEnable, BBFDM_BOTH},
-{"Reset()", &DMSYNC, DMT_COMMAND, NULL, operate_IPInterface_Reset, BBFDM_USP},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_IPInterface_Enable, set_IPInterface_Enable, BBFDM_BOTH, "2.0"},
+{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv4Enable, set_IPInterface_IPv4Enable, BBFDM_BOTH, "2.2"},
+{"IPv6Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv6Enable, set_IPInterface_IPv6Enable, BBFDM_BOTH, "2.2"},
+{"ULAEnable", &DMWRITE, DMT_BOOL, get_IPInterface_ULAEnable, set_IPInterface_ULAEnable, BBFDM_BOTH, "2.2"},
+{"Status", &DMREAD, DMT_STRING, get_IPInterface_Status, NULL, BBFDM_BOTH, "2.0"},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterface_Alias, set_IPInterface_Alias, BBFDM_BOTH, "2.0"},
+{"Name", &DMREAD, DMT_STRING, get_IPInterface_Name, NULL, BBFDM_BOTH, "2.0"},
+{"LastChange", &DMREAD, DMT_UNINT, get_IPInterface_LastChange, NULL, BBFDM_BOTH, "2.0"},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_IPInterface_LowerLayers, set_IPInterface_LowerLayers, BBFDM_BOTH, "2.0"},
+{"Router", &DMWRITE, DMT_STRING, get_IPInterface_Router, set_IPInterface_Router, BBFDM_BOTH, "2.0"},
+{"Reset", &DMWRITE, DMT_BOOL, get_IPInterface_Reset, set_IPInterface_Reset, BBFDM_CWMP, "2.0"},
+{"MaxMTUSize", &DMWRITE, DMT_UNINT, get_IPInterface_MaxMTUSize, set_IPInterface_MaxMTUSize, BBFDM_BOTH, "2.0"},
+{"Type", &DMREAD, DMT_STRING, get_IPInterface_Type, NULL, BBFDM_BOTH, "2.0"},
+{"Loopback", &DMWRITE, DMT_BOOL, get_IPInterface_Loopback, set_IPInterface_Loopback, BBFDM_BOTH, "2.0"},
+{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
+{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv6AddressNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
+{"IPv6PrefixNumberOfEntries", &DMREAD, DMT_UNINT, get_IPInterface_IPv6PrefixNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
+//{"AutoIPEnable", &DMWRITE, DMT_BOOL, get_IPInterface_AutoIPEnable, set_IPInterface_AutoIPEnable, BBFDM_BOTH, "2.0"},
+{"Reset()", &DMSYNC, DMT_COMMAND, NULL, operate_IPInterface_Reset, BBFDM_USP, "2.12"},
 {0}
 };
 
 /* *** Device.IP.Interface.{i}.IPv4Address.{i}. *** */
 DMLEAF tIPInterfaceIPv4AddressParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv4Address_Enable, set_IPInterfaceIPv4Address_Enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv4Address_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_Alias, set_IPInterfaceIPv4Address_Alias, BBFDM_BOTH},
-{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_IPAddress, set_IPInterfaceIPv4Address_IPAddress, BBFDM_BOTH},
-{"SubnetMask", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_SubnetMask, set_IPInterfaceIPv4Address_SubnetMask, BBFDM_BOTH},
-{"AddressingType", &DMREAD, DMT_STRING, get_IPInterfaceIPv4Address_AddressingType, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv4Address_Enable, set_IPInterfaceIPv4Address_Enable, BBFDM_BOTH, "2.0"},
+{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv4Address_Status, NULL, BBFDM_BOTH, "2.2"},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_Alias, set_IPInterfaceIPv4Address_Alias, BBFDM_BOTH, "2.0"},
+{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_IPAddress, set_IPInterfaceIPv4Address_IPAddress, BBFDM_BOTH, "2.0"},
+{"SubnetMask", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_SubnetMask, set_IPInterfaceIPv4Address_SubnetMask, BBFDM_BOTH, "2.0"},
+{"AddressingType", &DMREAD, DMT_STRING, get_IPInterfaceIPv4Address_AddressingType, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.IP.Interface.{i}.IPv6Address.{i}. *** */
 DMLEAF tIPInterfaceIPv6AddressParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Address_Enable, set_IPInterfaceIPv6Address_Enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_Status, NULL, BBFDM_BOTH},
-{"IPAddressStatus", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_IPAddressStatus, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_Alias, set_IPInterfaceIPv6Address_Alias, BBFDM_BOTH},
-{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_IPAddress, set_IPInterfaceIPv6Address_IPAddress, BBFDM_BOTH},
-{"Origin", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_Origin, NULL, BBFDM_BOTH},
-{"Prefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_Prefix, set_IPInterfaceIPv6Address_Prefix, BBFDM_BOTH},
-{"PreferredLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Address_PreferredLifetime, set_IPInterfaceIPv6Address_PreferredLifetime, BBFDM_BOTH},
-{"ValidLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Address_ValidLifetime, set_IPInterfaceIPv6Address_ValidLifetime, BBFDM_BOTH},
-//{"Anycast", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Address_Anycast, set_IPInterfaceIPv6Address_Anycast, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Address_Enable, set_IPInterfaceIPv6Address_Enable, BBFDM_BOTH, "2.2"},
+{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_Status, NULL, BBFDM_BOTH, "2.2"},
+{"IPAddressStatus", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_IPAddressStatus, NULL, BBFDM_BOTH, "2.2"},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_Alias, set_IPInterfaceIPv6Address_Alias, BBFDM_BOTH, "2.2"},
+{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_IPAddress, set_IPInterfaceIPv6Address_IPAddress, BBFDM_BOTH, "2.2"},
+{"Origin", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_Origin, NULL, BBFDM_BOTH, "2.2"},
+{"Prefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_Prefix, set_IPInterfaceIPv6Address_Prefix, BBFDM_BOTH, "2.2"},
+{"PreferredLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Address_PreferredLifetime, set_IPInterfaceIPv6Address_PreferredLifetime, BBFDM_BOTH, "2.2"},
+{"ValidLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Address_ValidLifetime, set_IPInterfaceIPv6Address_ValidLifetime, BBFDM_BOTH, "2.2"},
+//{"Anycast", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Address_Anycast, set_IPInterfaceIPv6Address_Anycast, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.IP.Interface.{i}.IPv6Prefix.{i}. *** */
 DMLEAF tIPInterfaceIPv6PrefixParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_Enable, set_IPInterfaceIPv6Prefix_Enable, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_Status, NULL, BBFDM_BOTH},
-{"PrefixStatus", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_PrefixStatus, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Alias, set_IPInterfaceIPv6Prefix_Alias, BBFDM_BOTH},
-{"Prefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Prefix, set_IPInterfaceIPv6Prefix_Prefix, BBFDM_BOTH},
-{"Origin", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_Origin, NULL, BBFDM_BOTH},
-//{"StaticType", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_StaticType, set_IPInterfaceIPv6Prefix_StaticType, BBFDM_BOTH},
-{"ParentPrefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_ParentPrefix, set_IPInterfaceIPv6Prefix_ParentPrefix, BBFDM_BOTH},
-{"ChildPrefixBits", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_ChildPrefixBits, set_IPInterfaceIPv6Prefix_ChildPrefixBits, BBFDM_BOTH},
-//{"OnLink", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_OnLink, set_IPInterfaceIPv6Prefix_OnLink, BBFDM_BOTH},
-//{"Autonomous", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_Autonomous, set_IPInterfaceIPv6Prefix_Autonomous, BBFDM_BOTH},
-{"PreferredLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Prefix_PreferredLifetime, set_IPInterfaceIPv6Prefix_PreferredLifetime, BBFDM_BOTH},
-{"ValidLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Prefix_ValidLifetime, set_IPInterfaceIPv6Prefix_ValidLifetime, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_Enable, set_IPInterfaceIPv6Prefix_Enable, BBFDM_BOTH, "2.2"},
+{"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_Status, NULL, BBFDM_BOTH, "2.2"},
+{"PrefixStatus", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_PrefixStatus, NULL, BBFDM_BOTH, "2.2"},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Alias, set_IPInterfaceIPv6Prefix_Alias, BBFDM_BOTH, "2.2"},
+{"Prefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Prefix, set_IPInterfaceIPv6Prefix_Prefix, BBFDM_BOTH, "2.2"},
+{"Origin", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_Origin, NULL, BBFDM_BOTH, "2.2"},
+//{"StaticType", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_StaticType, set_IPInterfaceIPv6Prefix_StaticType, BBFDM_BOTH, "2.2"},
+{"ParentPrefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_ParentPrefix, set_IPInterfaceIPv6Prefix_ParentPrefix, BBFDM_BOTH, "2.2"},
+{"ChildPrefixBits", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_ChildPrefixBits, set_IPInterfaceIPv6Prefix_ChildPrefixBits, BBFDM_BOTH, "2.2"},
+//{"OnLink", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_OnLink, set_IPInterfaceIPv6Prefix_OnLink, BBFDM_BOTH, "2.2"},
+//{"Autonomous", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_Autonomous, set_IPInterfaceIPv6Prefix_Autonomous, BBFDM_BOTH, "2.2"},
+{"PreferredLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Prefix_PreferredLifetime, set_IPInterfaceIPv6Prefix_PreferredLifetime, BBFDM_BOTH, "2.2"},
+{"ValidLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Prefix_ValidLifetime, set_IPInterfaceIPv6Prefix_ValidLifetime, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.IP.Interface.{i}.Stats. *** */
 DMLEAF tIPInterfaceStatsParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"BytesSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BytesSent, NULL, BBFDM_BOTH},
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BytesReceived, NULL, BBFDM_BOTH},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_PacketsSent, NULL, BBFDM_BOTH},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_PacketsReceived, NULL, BBFDM_BOTH},
-{"ErrorsSent", &DMREAD, DMT_UNINT, get_IPInterfaceStats_ErrorsSent, NULL, BBFDM_BOTH},
-{"ErrorsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_ErrorsReceived, NULL, BBFDM_BOTH},
-//{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_UnicastPacketsSent, NULL, BBFDM_BOTH},
-//{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_UnicastPacketsReceived, NULL, BBFDM_BOTH},
-{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_IPInterfaceStats_DiscardPacketsSent, NULL, BBFDM_BOTH},
-{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_DiscardPacketsReceived, NULL, BBFDM_BOTH},
-//{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_MulticastPacketsSent, NULL, BBFDM_BOTH},
-{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_MulticastPacketsReceived, NULL, BBFDM_BOTH},
-//{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BroadcastPacketsSent, NULL, BBFDM_BOTH},
-//{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH},
-//{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"BytesSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BytesSent, NULL, BBFDM_BOTH, "2.0"},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BytesReceived, NULL, BBFDM_BOTH, "2.0"},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_PacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_PacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"ErrorsSent", &DMREAD, DMT_UNINT, get_IPInterfaceStats_ErrorsSent, NULL, BBFDM_BOTH, "2.0"},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_ErrorsReceived, NULL, BBFDM_BOTH, "2.0"},
+//{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_UnicastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+//{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_UnicastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_IPInterfaceStats_DiscardPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_DiscardPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+//{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_MulticastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_MulticastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+//{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BroadcastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+//{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_IPInterfaceStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+//{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_IPInterfaceStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };

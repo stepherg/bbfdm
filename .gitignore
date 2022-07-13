@@ -40,3 +40,13 @@ tools/__pycache__
 *.gcno
 *\.log
 .libs
+m4/
+bbf_ubus
+memory-report.xml
+*.la
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+*.so
+

@@ -9,7 +9,6 @@
  */
 
 #include "hosts.h"
-#include "dmentry.h"
 
 /*************************************************************
 * ENTRY METHOD
@@ -21,7 +20,7 @@ static int browseHostsHostInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 	char *inst = NULL;
 	int id = 0, i = 0;
 
-	dmubus_call("topology", "hosts", UBUS_ARGS{}, 0, &res);
+	dmubus_call("topology", "hosts", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, host_obj, i, 1, "hosts") {
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)host_obj, inst) == DM_STOP)
@@ -98,17 +97,15 @@ static int get_HostsHost_DHCPClient(char *refparam, struct dmctx *ctx, void *dat
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "macaddr");
 	adm_entry_get_linker_param(ctx, "Device.DHCPv4.Server.Pool.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
 static int get_HostsHost_AssociatedDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = dmjson_get_value((json_object *)data, 1, "macaddr");
+	char *linker = dmjson_get_value((json_object *)data, 1, "link_macaddr");
 	adm_entry_get_linker_param(ctx, "Device.WiFi.AccessPoint.", linker, value);
-	if (*value == NULL)
-		*value = "";
+	if (!(*value) || (*value)[0] == 0)
+		adm_entry_get_linker_param(ctx, "Device.WiFi.DataElements.Network.Device.", linker, value);
 	return 0;
 }
 
@@ -116,12 +113,16 @@ static int get_HostsHost_Layer1Interface(char *refparam, struct dmctx *ctx, void
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "device");
 	char *type = dmjson_get_value((json_object *)data, 1, "interface_type");
-	if (strcmp(type, "Wi-Fi") == 0)
+	if (DM_LSTRCMP(type, "Wi-Fi") == 0) {
 		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
-	else
+		if (!(*value) || (*value)[0] == 0) {
+			char *device = dmjson_get_value((json_object *)data, 1, "parent_device");
+			struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", device);
+			dmuci_get_value_by_section_string(iface_s, "device", &linker);
+			adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
+		}
+	} else
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -129,8 +130,6 @@ static int get_HostsHost_Layer3Interface(char *refparam, struct dmctx *ctx, void
 {
 	char *linker = dmjson_get_value((json_object *)data, 1, "network");
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (*value == NULL)
-		*value = "";
 	return 0;
 }
 
@@ -225,63 +224,63 @@ static int get_HostsHostWANStats_PacketsReceived(char *refparam, struct dmctx *c
 ***********************************************************************************************************************************/
 /* *** Device.Hosts. *** */
 DMOBJ tHostsObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Host", &DMREAD, NULL, NULL, NULL, browseHostsHostInst, NULL, NULL, tHostsHostObj, tHostsHostParams, get_linker_host, BBFDM_BOTH, LIST_KEY{"PhysAddress", NULL}},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Host", &DMREAD, NULL, NULL, NULL, browseHostsHostInst, NULL, NULL, tHostsHostObj, tHostsHostParams, get_linker_host, BBFDM_BOTH, LIST_KEY{"PhysAddress", NULL}, "2.0"},
 {0}
 };
 
 DMLEAF tHostsParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"HostNumberOfEntries", &DMREAD, DMT_UNINT, get_Hosts_HostNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"HostNumberOfEntries", &DMREAD, DMT_UNINT, get_Hosts_HostNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}. *** */
 DMOBJ tHostsHostObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseHostsHostIPv4AddressInst, NULL, NULL, NULL, tHostsHostIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
-{"IPv6Address", &DMREAD, NULL, NULL, NULL, browseHostsHostIPv6AddressInst, NULL, NULL, NULL, tHostsHostIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
-{"WANStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHostsHostWANStatsParams, NULL, BBFDM_BOTH},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseHostsHostIPv4AddressInst, NULL, NULL, NULL, tHostsHostIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}, "2.2"},
+{"IPv6Address", &DMREAD, NULL, NULL, NULL, browseHostsHostIPv6AddressInst, NULL, NULL, NULL, tHostsHostIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}, "2.2"},
+{"WANStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHostsHostWANStatsParams, NULL, BBFDM_BOTH, NULL, "2.12"},
 {0}
 };
 
 DMLEAF tHostsHostParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"PhysAddress", &DMREAD, DMT_STRING, get_HostsHost_PhysAddress, NULL, BBFDM_BOTH},
-{"IPAddress", &DMREAD, DMT_STRING, get_HostsHost_IPAddress, NULL, BBFDM_BOTH},
-{"DHCPClient", &DMREAD, DMT_STRING, get_HostsHost_DHCPClient, NULL, BBFDM_BOTH},
-{"AssociatedDevice", &DMREAD, DMT_STRING, get_HostsHost_AssociatedDevice, NULL, BBFDM_BOTH},
-{"Layer1Interface", &DMREAD, DMT_STRING, get_HostsHost_Layer1Interface, NULL, BBFDM_BOTH},
-{"Layer3Interface", &DMREAD, DMT_STRING, get_HostsHost_Layer3Interface, NULL, BBFDM_BOTH},
-{"InterfaceType", &DMREAD, DMT_STRING, get_HostsHost_InterfaceType, NULL, BBFDM_BOTH},
-{"HostName", &DMREAD, DMT_STRING, get_HostsHost_HostName, NULL, BBFDM_BOTH},
-{"Active", &DMREAD, DMT_BOOL, get_HostsHost_Active, NULL, BBFDM_BOTH},
-{"ActiveLastChange", &DMREAD, DMT_TIME, get_HostsHost_ActiveLastChange, NULL, BBFDM_BOTH},
-{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsHost_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH},
-{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsHost_IPv6AddressNumberOfEntries, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"PhysAddress", &DMREAD, DMT_STRING, get_HostsHost_PhysAddress, NULL, BBFDM_BOTH, "2.0"},
+{"IPAddress", &DMREAD, DMT_STRING, get_HostsHost_IPAddress, NULL, BBFDM_BOTH, "2.0"},
+{"DHCPClient", &DMREAD, DMT_STRING, get_HostsHost_DHCPClient, NULL, BBFDM_BOTH, "2.0"},
+{"AssociatedDevice", &DMREAD, DMT_STRING, get_HostsHost_AssociatedDevice, NULL, BBFDM_BOTH, "2.2"},
+{"Layer1Interface", &DMREAD, DMT_STRING, get_HostsHost_Layer1Interface, NULL, BBFDM_BOTH, "2.0"},
+{"Layer3Interface", &DMREAD, DMT_STRING, get_HostsHost_Layer3Interface, NULL, BBFDM_BOTH, "2.0"},
+{"InterfaceType", &DMREAD, DMT_STRING, get_HostsHost_InterfaceType, NULL, BBFDM_BOTH, "2.0"},
+{"HostName", &DMREAD, DMT_STRING, get_HostsHost_HostName, NULL, BBFDM_BOTH, "2.0"},
+{"Active", &DMREAD, DMT_BOOL, get_HostsHost_Active, NULL, BBFDM_BOTH, "2.0"},
+{"ActiveLastChange", &DMREAD, DMT_TIME, get_HostsHost_ActiveLastChange, NULL, BBFDM_BOTH, "2.10"},
+{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsHost_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
+{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsHost_IPv6AddressNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}.IPv4Address.{i}. *** */
 DMLEAF tHostsHostIPv4AddressParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"IPAddress", &DMREAD, DMT_STRING, get_HostsHostIPv4Address_IPAddress, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"IPAddress", &DMREAD, DMT_STRING, get_HostsHostIPv4Address_IPAddress, NULL, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}.IPv6Address.{i}. *** */
 DMLEAF tHostsHostIPv6AddressParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"IPAddress", &DMREAD, DMT_STRING, get_HostsHostIPv6Address_IPAddress, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"IPAddress", &DMREAD, DMT_STRING, get_HostsHostIPv6Address_IPAddress, NULL, BBFDM_BOTH, "2.2"},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}.WANStats. *** */
 DMLEAF tHostsHostWANStatsParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"BytesSent", &DMREAD, DMT_UNINT, get_HostsHostWANStats_BytesSent, NULL, BBFDM_BOTH},
-{"BytesReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_BytesReceived, NULL, BBFDM_BOTH},
-{"PacketsSent", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsSent, NULL, BBFDM_BOTH},
-{"PacketsReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsReceived, NULL, BBFDM_BOTH},
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"BytesSent", &DMREAD, DMT_UNINT, get_HostsHostWANStats_BytesSent, NULL, BBFDM_BOTH, "2.12"},
+{"BytesReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_BytesReceived, NULL, BBFDM_BOTH, "2.12"},
+{"PacketsSent", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsSent, NULL, BBFDM_BOTH, "2.12"},
+{"PacketsReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsReceived, NULL, BBFDM_BOTH, "2.12"},
 {0}
 };

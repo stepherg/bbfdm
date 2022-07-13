@@ -18,8 +18,8 @@ static int get_reserved_port_range(char **value)
 {
 	char *start = NULL, *end = NULL;
 
-	dmuci_get_option_value_string("asterisk", "sip_options", "rtpstart", &start);
-	dmuci_get_option_value_string("asterisk", "sip_options", "rtpend", &end);
+	dmuci_get_option_value_string("asterisk", "sip_options", "rtp_start", &start);
+	dmuci_get_option_value_string("asterisk", "sip_options", "rtp_end", &end);
 	if (start && *start && end && *end) {
 		dmasprintf(value, "%s-%s", start, end);
 		dmfree(start);
@@ -29,13 +29,13 @@ static int get_reserved_port_range(char **value)
 	return 0;
 }
 
-/*#Device.Services.VoiceService.{i}.ReservedPorts.WANPortRange!UCI:asterisk/sip_advanced,sip_options/rtpstart*/
+/*#Device.Services.VoiceService.{i}.ReservedPorts.WANPortRange!UCI:asterisk/sip_advanced,sip_options/rtp_start*/
 static int get_ServicesVoiceServiceReservedPorts_WANPortRange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return get_reserved_port_range(value);
 }
 
-/*#Device.Services.VoiceService.{i}.ReservedPorts.LANPortRange!UCI:asterisk/sip_advanced,sip_options/rtpend*/
+/*#Device.Services.VoiceService.{i}.ReservedPorts.LANPortRange!UCI:asterisk/sip_advanced,sip_options/rtp_end*/
 static int get_ServicesVoiceServiceReservedPorts_LANPortRange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return get_reserved_port_range(value);

@@ -95,7 +95,6 @@ extern char *ServerSelectionProtocol[];
 extern char *DHCPType[];
 extern char *DropAlgorithm[];
 extern char *SchedulerAlgorithm[];
-extern char *DTMFMethod[];
 extern char *ProfileEnable[];
 extern char *PIN[];
 extern char *DestinationAddress[];
@@ -114,7 +113,12 @@ extern char *SupportedFrequencyBands[];
 extern char *Provider_Bridge_Type[];
 extern char *AdvPreferredRouterFlag[];
 extern char *PowerState[];
+extern char *FW_Mode[];
+extern char *AKMsAllowed[];
+extern char *CellularDataPreference[];
 
+#define CRONTABS_ROOT "/etc/crontabs/root"
+#define ACTIVATE_HANDLER_FILE "/usr/share/bbfdm/bbf_activate_handler.sh"
 #define UPTIME "/proc/uptime"
 #define DEFAULT_CONFIG_DIR "/etc/config/"
 #define PROC_ROUTE "/proc/net/route"
@@ -125,7 +129,6 @@ extern char *PowerState[];
 #define DHCP_LEASES_FILE "/tmp/dhcp.leases"
 #define DHCP_CLIENT_OPTIONS_FILE "/var/dhcp.client.options"
 #define DMMAP "dmmap"
-#define RANGE_ARGS (struct range_args[])
 #define LIST_KEY (const char *[])
 #define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
 
@@ -139,7 +142,7 @@ do { \
 
 #define dmstrappendstr(dest, src) \
 do { \
-	int len = strlen(src); \
+	int len = DM_STRLEN(src); \
 	memcpy(dest, src, len); \
 	dest += len; \
 } while(0)
@@ -155,12 +158,6 @@ do { \
 	*dest = '\0'; \
 } while(0)
 
-#define DMCMD(CMD, N, ...) \
-do { \
-	int mpp = dmcmd(CMD, N, ## __VA_ARGS__); \
-	if (mpp) close (mpp); \
-} while (0)
-
 enum fs_size_type_enum {
 	FS_SIZE_TOTAL,
 	FS_SIZE_AVAILABLE,
@@ -168,38 +165,26 @@ enum fs_size_type_enum {
 };
 
 #define IPPING_PATH "/usr/share/bbfdm/ipping_launch"
-#define IPPING_STOP DMCMD("/bin/sh", 2, IPPING_PATH, "stop");
+#define IPPING_STOP dmcmd("/bin/sh", 2, IPPING_PATH, "stop");
 #define DOWNLOAD_DIAGNOSTIC_PATH "/usr/share/bbfdm/download_launch"
 #define DOWNLOAD_DUMP_FILE "/tmp/download_dump"
-#define DOWNLOAD_DIAGNOSTIC_STOP DMCMD("/bin/sh", 2, DOWNLOAD_DIAGNOSTIC_PATH, "stop");
+#define DOWNLOAD_DIAGNOSTIC_STOP dmcmd("/bin/sh", 2, DOWNLOAD_DIAGNOSTIC_PATH, "stop");
 #define UPLOAD_DIAGNOSTIC_PATH "/usr/share/bbfdm/upload_launch"
 #define UPLOAD_DUMP_FILE "/tmp/upload_dump"
-#define UPLOAD_DIAGNOSTIC_STOP DMCMD("/bin/sh", 2, UPLOAD_DIAGNOSTIC_PATH, "stop");
+#define UPLOAD_DIAGNOSTIC_STOP dmcmd("/bin/sh", 2, UPLOAD_DIAGNOSTIC_PATH, "stop");
 #define NSLOOKUP_PATH "/usr/share/bbfdm/nslookup_launch"
 #define NSLOOKUP_LOG_FILE "/tmp/nslookup.log"
-#define NSLOOKUP_STOP DMCMD("/bin/sh", 2, NSLOOKUP_PATH, "stop");
+#define NSLOOKUP_STOP dmcmd("/bin/sh", 2, NSLOOKUP_PATH, "stop");
 #define TRACEROUTE_PATH "/usr/share/bbfdm/traceroute_launch"
-#define TRACEROUTE_STOP DMCMD("/bin/sh", 2, TRACEROUTE_PATH, "stop");
+#define TRACEROUTE_STOP dmcmd("/bin/sh", 2, TRACEROUTE_PATH, "stop");
 #define UDPECHO_PATH "/usr/share/bbfdm/udpecho_launch"
-#define UDPECHO_STOP DMCMD("/bin/sh", 2, UDPECHO_PATH, "stop");
+#define UDPECHO_STOP dmcmd("/bin/sh", 2, UDPECHO_PATH, "stop");
 #define SERVERSELECTION_PATH "/usr/share/bbfdm/serverselection_launch"
-#define SERVERSELECTION_STOP DMCMD("/bin/sh", 2, SERVERSELECTION_PATH, "stop");
+#define SERVERSELECTION_STOP dmcmd("/bin/sh", 2, SERVERSELECTION_PATH, "stop");
 
 #define sysfs_foreach_file(path,dir,ent) \
         if ((dir = opendir(path)) == NULL) return 0; \
         while ((ent = readdir (dir)) != NULL) \
-
-struct range_args {
-	const char *min;
-	const char *max;
-};
-
-struct dmmap_dup
-{
-	struct list_head list;
-	struct uci_section *config_section;
-	struct uci_section *dmmap_section;
-};
 
 struct dmmap_sect {
 	struct list_head list;
@@ -226,7 +211,7 @@ bool is_strword_in_optionvalue(char *optionvalue, char *str);
 void remove_new_line(char *buf);
 int dmcmd(char *cmd, int n, ...);
 int dmcmd_no_wait(char *cmd, int n, ...);
-void hex_to_ip(char *address, char *ret);
+void hex_to_ip(char *address, char *ret, size_t size);
 void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section);
 void free_dmmap_config_dup_list(struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list);
@@ -241,6 +226,7 @@ void get_dmmap_section_of_config_section_cont(char* dmmap_package, char* section
 void get_config_section_of_dmmap_section(char* package, char* section_type, char *section_name, struct uci_section **config_section);
 int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value);
 int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
+int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
 char *check_create_dmmap_package(const char *dmmap_package);
 __attribute__ ((deprecated)) int is_section_unnamed(char *section_name);
 __attribute__ ((deprecated)) void delete_sections_save_next_sections(char* dmmap_package, char *section_type, char *instancename, char *section_name, int instance, struct list_head *dup_list);
@@ -249,6 +235,7 @@ unsigned char isdigit_str(char *str);
 char *dm_strword(char *src, char *str);
 char **strsplit(const char* str, const char* delim, size_t* numtokens);
 char **strsplit_by_str(const char str[], char *delim);
+void convert_str_to_uppercase(char *str);
 char *get_macaddr(char *interface_name);
 char *get_device(char *interface_name);
 char *get_l3_device(char *interface_name);
@@ -258,8 +245,10 @@ void add_elt_to_str_list(char **str_list, char *elt);
 void remove_elt_from_str_list(char **str_list, char *ifname);
 struct uci_section *get_origin_section_from_config(char *package, char *section_type, char *orig_section_name);
 struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_type, char *orig_section_name);
+struct uci_section *get_dup_section_in_config_opt(char *package, char *section_type, char *opt_name, char *opt_value);
 struct uci_section *get_dup_section_in_dmmap_opt(char *dmmap_package, char *section_type, char *opt_name, char *opt_value);
 struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* section_type, char*sect_name, char *opt_name, char* opt_value);
+struct uci_section *get_section_in_dmmap_with_options_eq(char *dmmap_package, char *section_type, char *opt1_name, char *opt1_value, char *opt2_name, char *opt2_value);
 bool elt_exists_in_array(char **str_array, char *str, int length);
 int get_shift_utc_time(int shift_time, char *utc_time, int size);
 int get_shift_time_time(int shift_time, char *local_time, int size);
@@ -272,8 +261,8 @@ int get_net_device_status(const char *device, char **value);
 char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_section);
 int dm_time_utc_format(time_t ts, char **dst);
 int dm_time_format(time_t ts, char **dst);
-void convert_string_to_hex(const char *str, char *hex);
-void convert_hex_to_string(const char *hex, char *str);
+void convert_string_to_hex(const char *str, char *hex, size_t size);
+void convert_hex_to_string(const char *hex, char *str, size_t size);
 bool match(const char *string, const char *pattern);
 int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
 int dm_validate_boolean(char *value);
@@ -285,12 +274,23 @@ int dm_validate_dateTime(char *value);
 int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size);
 int dm_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
 int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-char *decode64(char *enc);
+int dm_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int dm_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int dm_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int dm_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+char *base64_decode(const char *src);
+void string_to_mac(const char *str, size_t str_len, char *out, size_t out_len);
 bool folder_exists(const char *path);
 bool file_exists(const char *path);
 bool is_regular_file(const char *path);
 unsigned long file_system_size(const char *path, const enum fs_size_type_enum type);
 char *replace_char(char *str, char find, char replace);
 char *replace_str(const char *str, const char *substr, const char *replacement);
+int dm_file_to_buf(const char *filename, void *buf, size_t buf_size);
 int check_browse_section(struct uci_section *s, void *data);
+int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, size_t str_len);
+char *ioctl_get_ipv4(char *interface_name);
+char *get_ipv6(char *interface_name);
+bool validate_blob_message(struct blob_attr *src, struct blob_attr *dst);
+void strip_lead_trail_whitespace(char *str);
 #endif

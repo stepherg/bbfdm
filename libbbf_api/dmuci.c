@@ -17,10 +17,10 @@
 #include "dmmem.h"
 
 static struct uci_context *uci_ctx = NULL;
-static struct uci_context *uci_varstate_ctx;
 static char *db_config = NULL;
 
 NEW_UCI_PATH(bbfdm, BBFDM_CONFIG, BBFDM_SAVEDIR)
+NEW_UCI_PATH(varstate, VARSTATE_CONFDIR, VARSTATE_SAVEDIR)
 
 int dmuci_init(void)
 {
@@ -44,13 +44,11 @@ int bbf_uci_init(void)
 {
 	dmuci_init();
 
-	uci_varstate_ctx = uci_alloc_context();
-	if (!uci_varstate_ctx)
-		return -1;
+	dmuci_init_varstate();
 
 	dmuci_init_bbfdm();
 
-	db_config = (folder_exists(LIB_DB_CONFIG)) ? LIB_DB_CONFIG : ETC_DB_CONFIG;
+	db_config = ETC_DB_CONFIG;
 
 	return 0;
 }
@@ -59,9 +57,7 @@ int bbf_uci_exit(void)
 {
 	dmuci_exit();
 
-	if (uci_varstate_ctx)
-		uci_free_context(uci_varstate_ctx);
-	uci_varstate_ctx = NULL;
+	dmuci_exit_varstate();
 
 	dmuci_exit_bbfdm();
 
@@ -109,7 +105,7 @@ static void add_list_package_change(struct list_head *clist, char *package)
 	struct package_change *pc = NULL;
 
 	list_for_each_entry(pc, clist, list) {
-		if (strcmp(pc->package, package) == 0)
+		if (DM_STRCMP(pc->package, package) == 0)
 			return;
 	}
 	pc = calloc(1, sizeof(struct package_change));//TODO !!!!! Do not use dmcalloc here
@@ -335,7 +331,10 @@ int dmuci_export(const char *output_path)
 	char **configs = NULL;
 	char **p;
 
-	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs)
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK)
+		return -1;
+
+	if (!configs)
 		return -1;
 
 	for (p = configs; *p; p++)
@@ -364,7 +363,10 @@ int dmuci_commit(void)
 	char **configs = NULL;
 	char **p;
 
-	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs)
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK)
+		return -1;
+
+	if (!configs)
 		return -1;
 
 	for (p = configs; *p; p++)
@@ -395,18 +397,30 @@ int dmuci_save(void)
 	char **p;
 	int rc = 0;
 
-	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs) {
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK) {
 		rc = -1;
 		goto end;
 	}
+
+	if (!configs) {
+		rc = -1;
+		goto end;
+	}
+
 	for (p = configs; *p; p++)
 		dmuci_save_package(*p);
 
 	if (uci_ctx_bbfdm) {
-		if ((uci_list_configs(uci_ctx_bbfdm, &bbfdm_configs) != UCI_OK) || !bbfdm_configs) {
+		if (uci_list_configs(uci_ctx_bbfdm, &bbfdm_configs) != UCI_OK) {
 			rc = -1;
 			goto out;
 		}
+
+		if (!bbfdm_configs) {
+			rc = -1;
+			goto out;
+		}
+
 		for (p = bbfdm_configs; *p; p++)
 			dmuci_save_package_bbfdm(*p);
 
@@ -438,7 +452,10 @@ int dmuci_revert(void)
 	char **configs = NULL;
 	char **p;
 
-	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs)
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK)
+		return -1;
+
+	if (!configs)
 		return -1;
 
 	for (p = configs; *p; p++)
@@ -454,7 +471,10 @@ int dmuci_change_packages(struct list_head *clist)
 	char **configs = NULL;
 	char **p;
 
-	if ((uci_list_configs(uci_ctx, &configs) != UCI_OK) || !configs)
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK)
+		return -1;
+
+	if (!configs)
 		return -1;
 
 	for (p = configs; *p; p++) {
@@ -474,20 +494,17 @@ int dmuci_change_packages(struct list_head *clist)
 }
 
 /**** UCI SET *****/
-char *dmuci_set_value(char *package, char *section, char *option, char *value)
+int dmuci_set_value(char *package, char *section, char *option, char *value)
 {
 	struct uci_ptr ptr = {0};
 
 	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, option, value))
-		return "";
+		return -1;
 
 	if (uci_set(uci_ctx, &ptr) != UCI_OK)
-		return "";
+		return -1;
 
-	if (ptr.o)
-		return dmstrdup(ptr.o->v.string); // MEM WILL BE FREED IN DMMEMCLEAN
-
-	return "";
+	return 0;
 }
 
 /**** UCI ADD LIST *****/
@@ -519,10 +536,10 @@ int dmuci_del_list_value(char *package, char *section, char *option, char *value
 }
 
 /****** UCI ADD *******/
-char *dmuci_add_section(char *package, char *stype, struct uci_section **s)
+int dmuci_add_section(char *package, char *stype, struct uci_section **s)
 {
 	struct uci_ptr ptr = {0};
-	char fname[128], *val = "";
+	char fname[128];
 
 	*s = NULL;
 
@@ -532,14 +549,16 @@ char *dmuci_add_section(char *package, char *stype, struct uci_section **s)
 		if (fptr)
 			fclose(fptr);
 		else
-			return val;
+			return -1;
 	}
 
-	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, NULL, NULL, NULL) == 0
-		&& uci_add_section(uci_ctx, ptr.p, stype, s) == UCI_OK)
-		val = dmstrdup((*s)->e.name);
+	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, NULL, NULL, NULL))
+		return -1;
 
-	return val;
+	if (uci_add_section(uci_ctx, ptr.p, stype, s) != UCI_OK)
+		return -1;
+
+	return 0;
 }
 
 /**** UCI DELETE *****/
@@ -560,8 +579,11 @@ int dmuci_delete(char *package, char *section, char *option, char *value)
 int dmuci_rename_section(char *package, char *section, char *value)
 {
 	struct uci_ptr ptr = {0};
+	char sec_name[32] = {0};
 
-	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, NULL, value))
+	dmuci_replace_invalid_characters_from_section_name(value, sec_name, sizeof(sec_name));
+
+	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, NULL, sec_name))
 		return -1;
 
 	if (uci_rename(uci_ctx, &ptr) != UCI_OK)
@@ -613,7 +635,7 @@ int dmuci_get_value_by_section_string(struct uci_section *s, char *option, char 
 
 	uci_foreach_element(&s->options, e) {
 		o = (uci_to_option(e));
-		if (!strcmp(o->e.name, option)) {
+		if (!DM_STRCMP(o->e.name, option)) {
 			if (o->type == UCI_TYPE_LIST) {
 				*value = dmuci_list_to_string(&o->v.list, " ");
 			} else {
@@ -653,7 +675,7 @@ int dmuci_get_value_by_section_list(struct uci_section *s, char *option, struct 
 
 	uci_foreach_element(&s->options, e) {
 		o = (uci_to_option(e));
-		if (strcmp(o->e.name, option) == 0) {
+		if (DM_STRCMP(o->e.name, option) == 0) {
 			switch(o->type) {
 				case UCI_TYPE_LIST:
 					*value = &o->v.list;
@@ -682,20 +704,17 @@ int dmuci_get_value_by_section_list(struct uci_section *s, char *option, struct 
 }
 
 /**** UCI SET by section pointer ****/
-char *dmuci_set_value_by_section(struct uci_section *s, char *option, char *value)
+int dmuci_set_value_by_section(struct uci_section *s, char *option, char *value)
 {
 	struct uci_ptr up = {0};
 
 	if (dmuci_lookup_ptr_by_section(uci_ctx, &up, s, option, value) == -1)
-		return "";
+		return -1;
 
 	if (uci_set(uci_ctx, &up) != UCI_OK)
-		return "";
+		return -1;
 
-	if (up.o)
-		return dmstrdup(up.o->v.string); // MEM WILL BE FREED IN DMMEMCLEAN
-
-	return "";
+	return 0;
 }
 
 /**** UCI DELETE by section pointer *****/
@@ -758,8 +777,11 @@ int dmuci_del_list_value_by_section(struct uci_section *s, char *option, char *v
 int dmuci_rename_section_by_section(struct uci_section *s, char *value)
 {
 	struct uci_ptr up = {0};
+	char sec_name[32] = {0};
 
-	if (dmuci_lookup_ptr_by_section(uci_ctx, &up, s, NULL, value) == -1)
+	dmuci_replace_invalid_characters_from_section_name(value, sec_name, sizeof(sec_name));
+
+	if (dmuci_lookup_ptr_by_section(uci_ctx, &up, s, NULL, sec_name) == -1)
 		return -1;
 
 	if (uci_rename(uci_ctx, &up) != UCI_OK)
@@ -790,18 +812,18 @@ struct uci_section *dmuci_walk_section (char *package, char *stype, void *arg1, 
 
 	while(&e->list != list_section) {
 		s = uci_to_section(e);
-		if (strcmp(s->type, stype) == 0) {
+		if (DM_STRCMP(s->type, stype) == 0) {
 			switch(cmp) {
 				case CMP_SECTION:
 					goto end;
 				case CMP_OPTION_EQUAL:
 					dmuci_get_value_by_section_string(s, (char *)arg1, &value);
-					if (strcmp(value, (char *)arg2) == 0)
+					if (DM_STRCMP(value, (char *)arg2) == 0)
 						goto end;
 					break;
 				case CMP_OPTION_CONTAINING:
 					dmuci_get_value_by_section_string(s, (char *)arg1, &value);
-					if (strstr(value, (char *)arg2))
+					if (DM_STRSTR(value, (char *)arg2))
 						goto end;
 					break;
 				case CMP_OPTION_CONT_WORD:
@@ -809,7 +831,7 @@ struct uci_section *dmuci_walk_section (char *package, char *stype, void *arg1, 
 					dup = dmstrdup(value);
 					pch = strtok_r(dup, " ", &spch);
 					while (pch != NULL) {
-						if (strcmp((char *)arg2, pch) == 0) {
+						if (DM_STRCMP((char *)arg2, pch) == 0) {
 							dmfree(dup);
 							goto end;
 						}
@@ -821,7 +843,7 @@ struct uci_section *dmuci_walk_section (char *package, char *stype, void *arg1, 
 					dmuci_get_value_by_section_list(s, (char *)arg1, &list_value);
 					if (list_value != NULL) {
 						uci_foreach_element(list_value, m) {
-							if (strcmp(m->name, (char *)arg2) == 0)
+							if (DM_STRCMP(m->name, (char *)arg2) == 0)
 								goto end;
 						}
 					}										
@@ -846,30 +868,9 @@ int db_get_value_string(char *package, char *section, char *option, char **value
 {
 	struct uci_option *o;
 
-	o = dmuci_get_option_ptr((db_config) ? db_config : LIB_DB_CONFIG, package, section, option);
+	o = dmuci_get_option_ptr((db_config) ? db_config : ETC_DB_CONFIG, package, section, option);
 	if (o) {
 		*value = o->v.string ? dmstrdup(o->v.string) : ""; // MEM WILL BE FREED IN DMMEMCLEAN
-	} else {
-		*value = "";
-		return -1;
-	}
-	return 0;
-}
-
-/**** UCI GET /var/state *****/
-int varstate_get_value_string(char *package, char *section, char *option, char **value)
-{
-	struct uci_ptr ptr = {0};
-
-	uci_add_delta_path(uci_varstate_ctx, uci_varstate_ctx->savedir);
-	uci_set_savedir(uci_varstate_ctx, VARSTATE_CONFIG);
-
-	if (dmuci_lookup_ptr(uci_varstate_ctx, &ptr, package, section, option, NULL)) {
-		*value = "";
-		return -1;
-	}
-	if (ptr.o && ptr.o->v.string) {
-		*value = ptr.o->v.string;
 	} else {
 		*value = "";
 		return -1;
@@ -886,7 +887,7 @@ void commit_and_free_uci_ctx_bbfdm(char *dmmap_config)
 	uci_ctx_bbfdm = NULL;
 }
 
-char *bbf_uci_get_value(char *path, char *package, char *section, char *option)
+char *dmuci_get_value_by_path(char *path, char *package, char *section, char *option)
 {
 	struct uci_option *o;
 	char *val = "";
@@ -908,7 +909,7 @@ char *bbf_uci_get_value(char *path, char *package, char *section, char *option)
 	return val;
 }
 
-char *bbf_uci_set_value(char *path, char *package, char *section, char *option, char *value)
+char *dmuci_set_value_by_path(char *path, char *package, char *section, char *option, char *value)
 {
 	struct uci_context *save_uci_ctx = NULL;
 	struct uci_ptr ptr = {0};
@@ -936,4 +937,36 @@ end:
 		uci_ctx = save_uci_ctx;
 
 	return val;
+}
+
+bool dmuci_string_to_boolean(char *value)
+{
+	if (!value)
+		return false;
+
+	if (strncasecmp(value, "true", 4) == 0 ||
+	    value[0] == '1' ||
+	    strncasecmp(value, "on", 2) == 0 ||
+	    strncasecmp(value, "yes", 3) == 0 ||
+	    strncasecmp(value, "enable", 6) == 0)
+		return true;
+
+	return false;
+}
+
+void dmuci_replace_invalid_characters_from_section_name(char *old_sec_name, char *new_sec_name, size_t len)
+{
+	*new_sec_name = 0;
+
+	if (!DM_STRLEN(old_sec_name))
+		return;
+
+	DM_STRNCPY(new_sec_name, old_sec_name, len);
+
+	for (int i = 0; i < DM_STRLEN(new_sec_name); i++) {
+
+		// Replace all {'.' or '-'} with '_'
+		if (new_sec_name[i] == '.' || new_sec_name[i] == '-')
+			new_sec_name[i] = '_';
+	}
 }

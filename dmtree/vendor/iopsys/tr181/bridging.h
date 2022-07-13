@@ -12,7 +12,7 @@
 #ifndef __IOPSYS_BRIDGING_H
 #define __IOPSYS_BRIDGING_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMLEAF tIOPSYS_BridgingBridgePortParams[];
 extern DMLEAF tIOPSYS_BridgingBridgeVLANParams[];

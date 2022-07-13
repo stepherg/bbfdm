@@ -1,17 +1,16 @@
 {
 	"version": "1905.1a",
-	"ieee1905id": "46:d4:37:71:b8:10",
+	"ieee1905id": "62:8d:26:c4:96:f7",
 	"status": "enabled",
 	"registrar": true,
 	"registrar_band": [
 		"5GHz",
 		"2.4GHz"
 	],
-	"num_interfaces": 4,
-	"interface": [
-		{
+	"num_interfaces": 10,
+	"interface": [{
 			"ifname": "eth1",
-			"macaddress": "44:d4:37:71:b8:10",
+			"macaddress": "60:8d:26:c4:96:f7",
 			"status": "up",
 			"media": "IEEE 802_3AB_GIGABIT_ETHERNET",
 			"genphy_oui": "000000",
@@ -20,16 +19,34 @@
 			"power": "on",
 			"num_vendor_properties": 0,
 			"properties": [
-				
+
 			],
 			"num_links": 0,
 			"links": [
-				
+
+			]
+		},
+		{
+			"ifname": "eth2",
+			"macaddress": "60:8d:26:c4:96:f7",
+			"status": "up",
+			"media": "IEEE 802_3AB_GIGABIT_ETHERNET",
+			"genphy_oui": "000000",
+			"genphy_variant": "",
+			"genphy_url": "",
+			"power": "on",
+			"num_vendor_properties": 0,
+			"properties": [
+
+			],
+			"num_links": 0,
+			"links": [
+
 			]
 		},
 		{
 			"ifname": "eth3",
-			"macaddress": "44:d4:37:71:b8:10",
+			"macaddress": "60:8d:26:c4:96:f7",
 			"status": "up",
 			"media": "IEEE 802_3AB_GIGABIT_ETHERNET",
 			"genphy_oui": "000000",
@@ -38,16 +55,34 @@
 			"power": "on",
 			"num_vendor_properties": 0,
 			"properties": [
-				
+
 			],
 			"num_links": 0,
 			"links": [
-				
+
+			]
+		},
+		{
+			"ifname": "eth4",
+			"macaddress": "60:8d:26:c4:96:f7",
+			"status": "up",
+			"media": "IEEE 802_3AB_GIGABIT_ETHERNET",
+			"genphy_oui": "000000",
+			"genphy_variant": "",
+			"genphy_url": "",
+			"power": "on",
+			"num_vendor_properties": 0,
+			"properties": [
+
+			],
+			"num_links": 0,
+			"links": [
+
 			]
 		},
 		{
 			"ifname": "wl0",
-			"macaddress": "44:d4:37:71:b8:1f",
+			"macaddress": "60:8d:26:c4:96:f8",
 			"status": "up",
 			"media": "IEEE 802_11AX_5_GHZ",
 			"genphy_oui": "000000",
@@ -56,16 +91,34 @@
 			"power": "on",
 			"num_vendor_properties": 0,
 			"properties": [
-				
+
 			],
 			"num_links": 0,
 			"links": [
-				
+
+			]
+		},
+		{
+			"ifname": "wl0.1",
+			"macaddress": "e2:8d:26:c4:96:f9",
+			"status": "up",
+			"media": "IEEE 802_11AX_5_GHZ",
+			"genphy_oui": "000000",
+			"genphy_variant": "",
+			"genphy_url": "",
+			"power": "on",
+			"num_vendor_properties": 0,
+			"properties": [
+
+			],
+			"num_links": 0,
+			"links": [
+
 			]
 		},
 		{
 			"ifname": "wl1",
-			"macaddress": "44:d4:37:71:b8:1e",
+			"macaddress": "60:8d:26:c4:96:f9",
 			"status": "up",
 			"media": "IEEE 802_11AX_2_4_GHZ",
 			"genphy_oui": "000000",
@@ -74,12 +127,96 @@
 			"power": "on",
 			"num_vendor_properties": 0,
 			"properties": [
-				
+
 			],
 			"num_links": 0,
 			"links": [
-				
+
 			]
+		},
+		{
+			"ifname": "wl1.1",
+			"macaddress": "e6:8d:26:c4:96:fa",
+			"status": "up",
+			"media": "IEEE 802_11AX_2_4_GHZ",
+			"genphy_oui": "000000",
+			"genphy_variant": "",
+			"genphy_url": "",
+			"power": "on",
+			"num_vendor_properties": 0,
+			"properties": [
+
+			],
+			"num_links": 0,
+			"links": [
+
+			]
+		},
+		{
+			"ifname": "wds0.1.1",
+			"macaddress": "e2:8d:26:c4:96:f9",
+			"status": "up",
+			"media": "IEEE 802_3AB_GIGABIT_ETHERNET",
+			"genphy_oui": "000000",
+			"genphy_variant": "",
+			"genphy_url": "",
+			"power": "on",
+			"num_vendor_properties": 0,
+			"properties": [
+
+			],
+			"num_links": 1,
+			"links": [{
+				"macaddress": "ec:6c:9a:52:af:68",
+				"ieee1905id": "ee:6c:9a:52:af:64",
+				"media": "IEEE 802_3U_FAST_ETHERNET",
+				"genphy_oui": "",
+				"genphy_variant": "",
+				"genphy_url": "",
+				"metric": {
+					"has_bridge": true,
+					"tx_errors": 0,
+					"rx_errors": 0,
+					"tx_packets": 902711,
+					"rx_packets": 0,
+					"max_macrate": 0,
+					"max_phyrate": 0,
+					"rssi": 255
+				}
+			}]
+		},
+		{
+			"ifname": "wds0.1.2",
+			"macaddress": "e2:8d:26:c4:96:f9",
+			"status": "up",
+			"media": "IEEE 802_3AB_GIGABIT_ETHERNET",
+			"genphy_oui": "000000",
+			"genphy_variant": "",
+			"genphy_url": "",
+			"power": "on",
+			"num_vendor_properties": 0,
+			"properties": [
+
+			],
+			"num_links": 1,
+			"links": [{
+				"macaddress": "44:d4:37:71:b9:3f",
+				"ieee1905id": "46:d4:37:71:b9:30",
+				"media": "IEEE 802_3U_FAST_ETHERNET",
+				"genphy_oui": "",
+				"genphy_variant": "",
+				"genphy_url": "",
+				"metric": {
+					"has_bridge": true,
+					"tx_errors": 0,
+					"rx_errors": 0,
+					"tx_packets": 37840,
+					"rx_packets": 0,
+					"max_macrate": 0,
+					"max_phyrate": 0,
+					"rssi": 255
+				}
+			}]
 		}
 	],
 	"topology": {
@@ -88,9 +225,438 @@
 		"max_changelog": 100,
 		"num_changelog": 0,
 		"last_change": "",
-		"num_device": 0,
-		"device": [
-			
+		"num_device": 3,
+		"device": [{
+				"ieee1905id": "ee:6c:9a:52:af:64",
+				"version": "1905.1a",
+				"name": "",
+				"manufacturer": "",
+				"model": "",
+				"url": "",
+				"num_vendor_properties": 0,
+				"num_ipv4": 1,
+				"num_ipv6": 5,
+				"num_interface": 7,
+				"num_neighbor_non1905": 4,
+				"num_neighbor_1905": 0,
+				"num_neighbor_l2": 0,
+				"num_bridge_tuple": 1,
+				"ipv4_address": [{
+					"macaddress": "ec:6c:9a:52:af:65",
+					"ip": "192.168.1.118",
+					"type": "Unknown",
+					"dhcpserver": "0.0.0.0"
+				}],
+				"ipv6_address": [{
+						"macaddress": "9e:6c:9a:52:af:68",
+						"ip": "fe80::9c6c:9aff:fe52:af68",
+						"type": "Unknown",
+						"dhcpserver": "::"
+					},
+					{
+						"macaddress": "a2:6c:9a:52:af:69",
+						"ip": "fe80::a06c:9aff:fe52:af69",
+						"type": "Unknown",
+						"dhcpserver": "::"
+					},
+					{
+						"macaddress": "9e:6c:9a:52:af:69",
+						"ip": "fe80::9c6c:9aff:fe52:af69",
+						"type": "Unknown",
+						"dhcpserver": "::"
+					},
+					{
+						"macaddress": "a2:6c:9a:52:af:6a",
+						"ip": "fe80::a06c:9aff:fe52:af6a",
+						"type": "Unknown",
+						"dhcpserver": "::"
+					},
+					{
+						"macaddress": "ec:6c:9a:52:af:68",
+						"ip": "fe80::ee6c:9aff:fe52:af68",
+						"type": "Unknown",
+						"dhcpserver": "::"
+					}
+				],
+				"vendor_properties": [
+
+				],
+				"interface": [{
+						"macaddress": "ec:6c:9a:52:af:68",
+						"media": "IEEE 802_11AX_5_GHZ",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": "",
+						"bssid": "ec:6c:9a:52:af:68",
+						"role": "sta",
+						"bandwidth": 80,
+						"freq_seg0_idx": 52,
+						"freq_seg1_idx": 0
+					},
+					{
+						"macaddress": "ec:6c:9a:52:af:64",
+						"media": "IEEE 802_3AB_GIGABIT_ETHERNET",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": ""
+					},
+					{
+						"macaddress": "9e:6c:9a:52:af:68",
+						"media": "IEEE 802_11AX_2_4_GHZ",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": "",
+						"bssid": "9e:6c:9a:52:af:68",
+						"role": "ap",
+						"bandwidth": 20,
+						"freq_seg0_idx": 6,
+						"freq_seg1_idx": 0
+					},
+					{
+						"macaddress": "a2:6c:9a:52:af:69",
+						"media": "IEEE 802_11AX_5_GHZ",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": "",
+						"bssid": "a2:6c:9a:52:af:69",
+						"role": "ap",
+						"bandwidth": 80,
+						"freq_seg0_idx": 52,
+						"freq_seg1_idx": 0
+					},
+					{
+						"macaddress": "9e:6c:9a:52:af:69",
+						"media": "IEEE 802_11AX_2_4_GHZ",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": "",
+						"bssid": "9e:6c:9a:52:af:69",
+						"role": "ap",
+						"bandwidth": 20,
+						"freq_seg0_idx": 6,
+						"freq_seg1_idx": 0
+					},
+					{
+						"macaddress": "a2:6c:9a:52:af:6a",
+						"media": "IEEE 802_11AX_5_GHZ",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": "",
+						"bssid": "a2:6c:9a:52:af:6a",
+						"role": "ap",
+						"bandwidth": 80,
+						"freq_seg0_idx": 52,
+						"freq_seg1_idx": 0
+					},
+					{
+						"macaddress": "ec:6c:9a:52:af:65",
+						"media": "IEEE 802_3U_FAST_ETHERNET",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": ""
+					}
+				],
+				"non1905_neighbors": [{
+						"interface_macaddress": "ec:6c:9a:52:af:68",
+						"neighbors": [
+							"6a:af:ff:c6:6a:80",
+							"44:d4:37:71:b9:31",
+							"60:8d:26:c4:96:f8"
+						]
+					},
+					{
+						"interface_macaddress": "ec:6c:9a:52:af:64",
+						"neighbors": [
+
+						]
+					},
+					{
+						"interface_macaddress": "9e:6c:9a:52:af:68",
+						"neighbors": [
+
+						]
+					},
+					{
+						"interface_macaddress": "a2:6c:9a:52:af:69",
+						"neighbors": [
+							"c8:b2:9b:f8:36:f3"
+						]
+					},
+					{
+						"interface_macaddress": "9e:6c:9a:52:af:69",
+						"neighbors": [
+
+						]
+					},
+					{
+						"interface_macaddress": "a2:6c:9a:52:af:6a",
+						"neighbors": [
+
+						]
+					},
+					{
+						"interface_macaddress": "ec:6c:9a:52:af:65",
+						"neighbors": [
+
+						]
+					}
+				],
+				"ieee1905_neighbors": [
+
+				],
+				"bridge_tuples": [
+					{
+						"tuple": [
+							"ec:6c:9a:52:af:68",
+							"ec:6c:9a:52:af:64",
+							"9e:6c:9a:52:af:68"
+						]
+					},
+					{
+						"tuple": [
+							"a2:6c:9a:52:af:69",
+							"9e:6c:9a:52:af:69"
+						]
+					},
+					{
+						"tuple": [
+							"a2:6c:9a:52:af:6a",
+							"ec:6c:9a:52:af:65"
+						]
+					}					
+				]
+			},
+			{
+				"ieee1905id": "46:d4:37:71:b9:30",
+				"version": "1905.1a",
+				"name": "",
+				"manufacturer": "",
+				"model": "",
+				"url": "",
+				"num_vendor_properties": 0,
+				"num_ipv4": 1,
+				"num_ipv6": 5,
+				"num_interface": 8,
+				"num_neighbor_non1905": 7,
+				"num_neighbor_1905": 0,
+				"num_neighbor_l2": 0,
+				"num_bridge_tuple": 1,
+				"ipv4_address": [{
+					"macaddress": "44:d4:37:71:b9:31",
+					"ip": "192.168.1.138",
+					"type": "Unknown",
+					"dhcpserver": "0.0.0.0"
+				}],
+				"ipv6_address": [{
+						"macaddress": "fa:d4:37:71:b9:3f",
+						"ip": "fe80::f8d4:37ff:fe71:b93f",
+						"type": "Unknown",
+						"dhcpserver": "::"
+					},
+					{
+						"macaddress": "fe:d4:37:71:b9:38",
+						"ip": "fe80::fcd4:37ff:fe71:b938",
+						"type": "Unknown",
+						"dhcpserver": "::"
+					},
+					{
+						"macaddress": "fe:d4:37:71:b9:39",
+						"ip": "fe80::fcd4:37ff:fe71:b939",
+						"type": "Unknown",
+						"dhcpserver": "::"
+					},
+					{
+						"macaddress": "fa:d4:37:71:b9:30",
+						"ip": "fe80::f8d4:37ff:fe71:b930",
+						"type": "Unknown",
+						"dhcpserver": "::"
+					},
+					{
+						"macaddress": "44:d4:37:71:b9:3f",
+						"ip": "fe80::46d4:37ff:fe71:b93f",
+						"type": "Unknown",
+						"dhcpserver": "::"
+					}
+				],
+				"vendor_properties": [
+
+				],
+				"interface": [{
+						"macaddress": "44:d4:37:71:b9:3e",
+						"media": "IEEE 802_11AX_2_4_GHZ",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": "",
+						"bssid": "44:d4:37:71:b9:3e",
+						"role": "sta",
+						"bandwidth": 20,
+						"freq_seg0_idx": 11,
+						"freq_seg1_idx": 0
+					},
+					{
+						"macaddress": "44:d4:37:71:b9:30",
+						"media": "IEEE 802_3AB_GIGABIT_ETHERNET",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": ""
+					},
+					{
+						"macaddress": "fe:d4:37:71:b9:38",
+						"media": "IEEE 802_11AX_5_GHZ",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": "",
+						"bssid": "fe:d4:37:71:b9:38",
+						"role": "ap",
+						"bandwidth": 80,
+						"freq_seg0_idx": 52,
+						"freq_seg1_idx": 0
+					},
+					{
+						"macaddress": "fe:d4:37:71:b9:39",
+						"media": "IEEE 802_11AX_5_GHZ",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": "",
+						"bssid": "fe:d4:37:71:b9:39",
+						"role": "ap",
+						"bandwidth": 80,
+						"freq_seg0_idx": 52,
+						"freq_seg1_idx": 0
+					},
+					{
+						"macaddress": "fa:d4:37:71:b9:3f",
+						"media": "IEEE 802_11AX_2_4_GHZ",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": "",
+						"bssid": "fa:d4:37:71:b9:3f",
+						"role": "ap",
+						"bandwidth": 20,
+						"freq_seg0_idx": 11,
+						"freq_seg1_idx": 0
+					},
+					{
+						"macaddress": "fa:d4:37:71:b9:30",
+						"media": "IEEE 802_11AX_2_4_GHZ",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": "",
+						"bssid": "fa:d4:37:71:b9:30",
+						"role": "ap",
+						"bandwidth": 20,
+						"freq_seg0_idx": 11,
+						"freq_seg1_idx": 0
+					},
+					{
+						"macaddress": "44:d4:37:71:b9:3f",
+						"media": "IEEE 802_11AX_5_GHZ",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": "",
+						"bssid": "44:d4:37:71:b9:3f",
+						"role": "sta",
+						"bandwidth": 80,
+						"freq_seg0_idx": 100,
+						"freq_seg1_idx": 0
+					},
+					{
+						"macaddress": "44:d4:37:71:b9:31",
+						"media": "IEEE 802_3U_FAST_ETHERNET",
+						"power": "on",
+						"genphy_oui": "",
+						"genphy_variant": "",
+						"genphy_url": ""
+					}
+				],
+				"non1905_neighbors": [{
+						"interface_macaddress": "44:d4:37:71:b9:3e",
+						"neighbors": [
+							"ec:6c:9a:52:af:65",
+							"c8:b2:9b:f8:36:f3",
+							"60:8d:26:c4:96:f8"
+						]
+					},
+					{
+						"interface_macaddress": "44:d4:37:71:b9:30",
+						"neighbors": [
+
+						]
+					},
+					{
+						"interface_macaddress": "fe:d4:37:71:b9:38",
+						"neighbors": [
+
+						]
+					},
+					{
+						"interface_macaddress": "fe:d4:37:71:b9:39",
+						"neighbors": [
+
+						]
+					},
+					{
+						"interface_macaddress": "fa:d4:37:71:b9:3f",
+						"neighbors": [
+
+						]
+					},
+					{
+						"interface_macaddress": "fa:d4:37:71:b9:30",
+						"neighbors": [
+
+						]
+					},
+					{
+						"interface_macaddress": "44:d4:37:71:b9:3f",
+						"neighbors": [
+							"ec:6c:9a:52:af:65",
+							"6a:af:ff:c6:6a:80",
+							"c8:b2:9b:f8:36:f3",
+							"60:8d:26:c4:96:f8"
+						]
+					},
+					{
+						"interface_macaddress": "44:d4:37:71:b9:31",
+						"neighbors": [
+
+						]
+					}
+				],
+				"ieee1905_neighbors": [
+
+				],
+				"bridge_tuples": [
+					{
+						"tuple": [
+							"fa:d4:37:71:b9:30",
+							"fe:d4:37:71:b9:38",
+							"fe:d4:37:71:b9:39",
+							"fa:d4:37:71:b9:3f"	
+						]
+					},
+					{
+						"tuple": [
+							"44:d4:37:71:b9:3f",
+							"44:d4:37:71:b9:31"
+						]
+					}
+				]
+			}
 		]
 	},
 	"network_registrars": {

@@ -11,8 +11,7 @@
 #ifndef __QOS_H
 #define __QOS_H
 
-#include <libbbf_api/dmcommon.h>
-#include "dmentry.h"
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tQoSObj[];
 extern DMLEAF tQoSParams[];

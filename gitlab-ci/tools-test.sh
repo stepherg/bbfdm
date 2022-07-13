@@ -18,38 +18,54 @@ exec_cmd_verbose pylint -d R,C,W0603 tools/*.py
 echo "********* Validate JSON Plugin *********"
 
 echo "Validate BBF TR-181 JSON Plugin"
-./test/tools/validate_json_plugin.py dmtree/json/tr181.json
+./tools/validate_json_plugin.py dmtree/json/tr181.json
 check_ret $?
 
 echo "Validate BBF TR-104 JSON Plugin"
-./test/tools/validate_json_plugin.py dmtree/json/tr104.json
+./tools/validate_json_plugin.py dmtree/json/tr104.json
 check_ret $?
 
 echo "Validate BBF TR-135 JSON Plugin"
-./test/tools/validate_json_plugin.py dmtree/json/tr135.json
+./tools/validate_json_plugin.py dmtree/json/tr135.json
 check_ret $?
 
 echo "Validate X_IOPSYS_EU_Dropbear JSON Plugin"
-./test/tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json
+./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json
 check_ret $?
 
 echo "Validate UserInterface JSON Plugin"
-./test/tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
+./tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
+check_ret $?
+
+echo "Validate X_IOPSYS_EU_TEST JSON Plugin"
+./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
+check_ret $?
+
+echo "Validate X_IOPSYS_EU_WiFi JSON Plugin"
+./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_WiFi.json
+check_ret $?
+
+echo "Validate X_IOPSYS_EU_URLFilter JSON Plugin"
+./tools/validate_json_plugin.py test/files/etc/bbfdm/json/urlfilter.json
+check_ret $?
+
+echo "Validate CWMPManagementServer JSON Plugin"
+./tools/validate_json_plugin.py test/files/etc/bbfdm/json/cwmp_management_server.json
 check_ret $?
 
 echo "Validate TR-181 JSON Plugin after generating from XML"
-json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-181-2-14-1-cwmp-full.xml test/tools/tr-181-2-14-1-usp-full.xml Device.)
-./test/tools/validate_json_plugin.py $json_path
+json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-181-2-15-0-cwmp-full.xml test/tools/tr-181-2-15-0-usp-full.xml Device.)
+./tools/validate_json_plugin.py $json_path
 check_ret $?
 
 echo "Validate TR-104 JSON Plugin after generating from XML"
 json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-104-2-0-2-cwmp-full.xml test/tools/tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.)
-./test/tools/validate_json_plugin.py $json_path
+./tools/validate_json_plugin.py $json_path
 check_ret $?
 
 echo "Validate TR-135 JSON Plugin after generating from XML"
 json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-135-1-4-1-cwmp-full.xml test/tools/tr-135-1-4-1-usp-full.xml Device.Services.STBService.)
-./test/tools/validate_json_plugin.py $json_path
+./tools/validate_json_plugin.py $json_path
 check_ret $?
 
 

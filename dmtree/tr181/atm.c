@@ -9,7 +9,6 @@
  *
  */
 
-#include "dmentry.h"
 #include "atm.h"
 
 struct atm_args
@@ -42,19 +41,23 @@ static inline int init_atm_link(struct atm_args *args, struct dmmap_dup *s, char
 **************************************************************/
 void remove_device_from_interface(struct uci_section *interface_s, char *device)
 {
-	char *curr_device  = NULL, *pch = NULL, *spch = NULL;
+	char *curr_device  = NULL;
 	char new_device[64] = {0};
 	unsigned pos = 0;
 
 	dmuci_get_value_by_section_string(interface_s, "device", &curr_device);
 
 	new_device[0] = '\0';
-	for (pch = strtok_r(curr_device, " ", &spch); pch; pch = strtok_r(NULL, " ", &spch)) {
 
-		if (strcmp(pch, device) == 0)
-			continue;
+	if (device != NULL) {
+		char *pch = NULL, *spch = NULL;
+		for (pch = strtok_r(curr_device, " ", &spch); pch; pch = strtok_r(NULL, " ", &spch)) {
 
-		pos += snprintf(&new_device[pos], sizeof(new_device) - pos, "%s ", pch);
+			if (strcmp(pch, device) == 0)
+				continue;
+
+			pos += snprintf(&new_device[pos], sizeof(new_device) - pos, "%s ", pch);
+		}
 	}
 
 	if (pos)
@@ -203,7 +206,7 @@ static int get_atm_encapsulation(char *refparam, struct dmctx *ctx, void *data, 
 
 	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->config_section, "encapsulation", &encapsulation);
 
-	*value = (strcmp(encapsulation, "vcmux") == 0) ? "VCMUX" : "LLC";
+	*value = (DM_LSTRCMP(encapsulation, "vcmux") == 0) ? "VCMUX" : "LLC";
 	return 0;
 }
 
@@ -215,7 +218,7 @@ static int set_atm_encapsulation(char *refparam, struct dmctx *ctx, void *data, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "encapsulation", (strcmp(value, "LLC") == 0) ? "llc" : "vcmux");
+			dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "encapsulation", (DM_LSTRCMP(value, "LLC") == 0) ? "llc" : "vcmux");
 			return 0;
 	}
 	return 0;
@@ -227,13 +230,13 @@ static int get_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 	char *link_type;
 
 	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->config_section, "link_type", &link_type);
-	if (strcmp(link_type, "eoa") == 0)
+	if (DM_LSTRCMP(link_type, "eoa") == 0)
 		*value = "EoA";
-	else if (strcmp(link_type, "ipoa") == 0)
+	else if (DM_LSTRCMP(link_type, "ipoa") == 0)
 		*value = "IPoA";
-	else if (strcmp(link_type, "pppoa") == 0)
+	else if (DM_LSTRCMP(link_type, "pppoa") == 0)
 		*value = "PPPoA";
-	else if (strcmp(link_type, "cip") == 0)
+	else if (DM_LSTRCMP(link_type, "cip") == 0)
 		*value = "CIP";
 	else
 		*value = "Unconfigured";
@@ -248,13 +251,13 @@ static int set_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (strcmp(value, "EoA") == 0)
+			if (DM_LSTRCMP(value, "EoA") == 0)
 				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "eoa");
-			else if (strcmp(value, "IPoA") == 0)
+			else if (DM_LSTRCMP(value, "IPoA") == 0)
 				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "ipoa");
-			else if (strcmp(value, "PPPoA") == 0)
+			else if (DM_LSTRCMP(value, "PPPoA") == 0)
 				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "pppoa");
-			else if (strcmp(value, "CIP") == 0)
+			else if (DM_LSTRCMP(value, "CIP") == 0)
 				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "cip");
 			else
 				dmuci_set_value_by_section((((struct atm_args *)data)->sections)->config_section, "link_type", "");
@@ -269,12 +272,11 @@ static int get_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 	char atm_file[128];
 
 	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->dmmap_section, "atm_ll_link", &linker);
-	if (linker != NULL)
-		adm_entry_get_linker_param(ctx, "Device.DSL.Channel.", linker, value);
+	adm_entry_get_linker_param(ctx, "Device.DSL.Channel.", linker, value);
 	if (*value != NULL && (*value)[0] != '\0')
 		return 0;
 
-	snprintf(atm_file, sizeof(atm_file), "/sys/class/net/atm%d", atoi(instance) - 1);
+	snprintf(atm_file, sizeof(atm_file), "/sys/class/net/atm%ld", DM_STRTOL(instance) - 1);
 	if (folder_exists(atm_file)) {
 		*value = "Device.DSL.Channel.1";
 		dmuci_set_value_by_section((((struct atm_args *)data)->sections)->dmmap_section, "atm_ll_link", "dsl_channel_1");
@@ -286,7 +288,7 @@ static int set_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action) {
 		case VALUECHECK:
-			if (strncmp(value, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0)
+			if (DM_LSTRNCMP(value, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0)
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -394,36 +396,36 @@ static int set_atm_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 /*** ATM. ***/
 DMOBJ tATMObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Link", &DMWRITE, add_atm_link, delete_atm_link, NULL, browseAtmLinkInst, NULL, NULL, tATMLinkObj, tATMLinkParams, get_atm_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Link", &DMWRITE, add_atm_link, delete_atm_link, NULL, browseAtmLinkInst, NULL, NULL, tATMLinkObj, tATMLinkParams, get_atm_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}, "2.0"},
 {0}
 };
 
 /*** ATM.Link. ***/
 DMOBJ tATMLinkObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tATMLinkStatsParams, NULL, BBFDM_BOTH},
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tATMLinkStatsParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {0}
 };
 
 DMLEAF tATMLinkParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_atm_alias, set_atm_alias, BBFDM_BOTH},
-{"Enable", &DMWRITE, DMT_BOOL, get_atm_enable, set_atm_enable, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_atm_link_name, NULL, BBFDM_BOTH},
-{"Status", &DMREAD, DMT_STRING, get_atm_status, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_atm_lower_layer, set_atm_lower_layer, BBFDM_BOTH},
-{"LinkType", &DMWRITE, DMT_STRING, get_atm_link_type, set_atm_link_type, BBFDM_BOTH},
-{"DestinationAddress", &DMWRITE, DMT_STRING, get_atm_destination_address, set_atm_destination_address, BBFDM_BOTH},
-{"Encapsulation", &DMWRITE, DMT_STRING, get_atm_encapsulation, set_atm_encapsulation, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_atm_alias, set_atm_alias, BBFDM_BOTH, "2.0"},
+{"Enable", &DMWRITE, DMT_BOOL, get_atm_enable, set_atm_enable, BBFDM_BOTH, "2.0"},
+{"Name", &DMREAD, DMT_STRING, get_atm_link_name, NULL, BBFDM_BOTH, "2.0"},
+{"Status", &DMREAD, DMT_STRING, get_atm_status, NULL, BBFDM_BOTH, "2.0"},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_atm_lower_layer, set_atm_lower_layer, BBFDM_BOTH, "2.0"},
+{"LinkType", &DMWRITE, DMT_STRING, get_atm_link_type, set_atm_link_type, BBFDM_BOTH, "2.0"},
+{"DestinationAddress", &DMWRITE, DMT_STRING, get_atm_destination_address, set_atm_destination_address, BBFDM_BOTH, "2.0"},
+{"Encapsulation", &DMWRITE, DMT_STRING, get_atm_encapsulation, set_atm_encapsulation, BBFDM_BOTH, "2.0"},
 {0}
 };
 
 /*** ATM.Link.Stats. ***/
 DMLEAF tATMLinkStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"BytesSent", &DMREAD, DMT_UNLONG, get_atm_stats_bytes_sent, NULL, BBFDM_BOTH},
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_atm_stats_bytes_received, NULL, BBFDM_BOTH},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_atm_stats_pack_sent, NULL, BBFDM_BOTH},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_atm_stats_pack_received, NULL, BBFDM_BOTH},
+{"BytesSent", &DMREAD, DMT_UNLONG, get_atm_stats_bytes_sent, NULL, BBFDM_BOTH, "2.0"},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_atm_stats_bytes_received, NULL, BBFDM_BOTH, "2.0"},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_atm_stats_pack_sent, NULL, BBFDM_BOTH, "2.0"},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_atm_stats_pack_received, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };

@@ -1,0 +1,104 @@
+{
+    "object": "dmtest",
+        "methods": [
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.",
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "transaction_start",
+            "args": {},
+            "rc": 0
+        },
+        {
+            "method": "set",
+            "args": {
+                "path": "Device..X_IOPSYS_EU_Syslog.ConsoleLogLevel",
+                "value": "1"
+            },
+            "rc": 0
+        },
+        {
+            "method": "transaction_abort",
+            "args": {},
+            "rc": 0
+        },
+        {
+            "method": "add_object",
+            "args": {
+                "path": "Device.ManagementServer..InformParameter.",
+                "proto": "cwmp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get_supported_dm",
+            "args": {
+		"path":"Device.",
+	    	"next-level":false,
+		"schema_type":1
+	    },
+            "rc": 0
+        },
+        {
+            "method": "get_supported_dm",
+            "args": {
+		"path":"Device."
+	     },
+            "rc": 0
+        },
+        {
+            "method": "get_supported_dm",
+            "args": {
+		"path":"Device.",
+		"next-level":false,
+		"schema_type":2
+	    },
+            "rc": 0
+        },
+        {
+            "method": "get_supported_dm",
+            "args": {
+		"path":"Device.",
+		"next-level":false,
+		"schema_type":3
+	    },
+            "rc": 0
+        },
+        {
+            "method": "get_supported_dm",
+            "args": {
+		"path":"Device.",
+		"schema_type":1
+	     },
+            "rc": 0
+        },
+        {
+            "method": "get_supported_dm",
+            "args": {},
+            "rc": 0
+        },
+        {
+            "method": "transaction_start",
+            "args": {},
+            "rc": 0
+        },
+        {
+            "method": "transaction_commit",
+            "args": {},
+            "rc": 0
+        },
+        {
+            "method": "del_object",
+            "args": {
+                "path": "Device.ManagementServer..InformParameter.2",
+                "proto": "cwmp"
+            },
+            "rc": 0
+        }
+    ]
+}

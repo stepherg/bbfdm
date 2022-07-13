@@ -1,6 +1,7 @@
 {
 	"Device.UserInterface.": {
 		"type": "object",
+		"version": "2.14",
 		"protocols": [
 			"cwmp",
 			"usp"
@@ -9,13 +10,13 @@
 		"array": false,		
 		"Enable": {
 			"type": "boolean",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"datatype": "boolean",
 			"mapping": [
 				{
 					"type": "uci", 
@@ -33,13 +34,13 @@
 		},
 		"PasswordRequired": {
 			"type": "boolean",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"datatype": "boolean",
 			"mapping": [
 				{
 					"type": "uci", 
@@ -57,13 +58,13 @@
 		},
 		"PasswordUserSelectable": {
 			"type": "boolean",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"datatype": "boolean",
 			"mapping": [
 				{
 					"type": "uci", 
@@ -81,13 +82,13 @@
 		},
 		"TextColor": {
 			"type": "hexBinary",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"datatype": "hexBinary",
 			"range": [
 				{
 					"min": 3,
@@ -111,13 +112,13 @@
 		},
 		"BackgroundColor": {
 			"type": "hexBinary",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"datatype": "hexBinary",
 			"range": [
 				{
 					"min": 3,
@@ -141,13 +142,13 @@
 		},
 		"ButtonColor": {
 			"type": "hexBinary",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"datatype": "hexBinary",
 			"range": [
 				{
 					"min": 3,
@@ -171,13 +172,13 @@
 		},
 		"ButtonTextColor": {
 			"type": "hexBinary",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"datatype": "hexBinary",
 			"range": [
 				{
 					"min": 3,
@@ -201,6 +202,7 @@
 		},
 		"AvailableLanguages": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": false,
 			"protocols": [
@@ -213,12 +215,12 @@
 			},
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "userinterface", 
+						"file": "userinterface",
 						"section": {
 							"name": "global"
-						}, 
+						},
 						"option": {
 							"name": "available_languages"
 						}
@@ -228,13 +230,13 @@
 		},
 		"CurrentLanguage": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"datatype": "string",
 			"range": [
 				{
 					"max": 16
@@ -242,33 +244,33 @@
 			],
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "userinterface", 
+						"file": "userinterface",
 						"section": {
 							"name": "global"
-						}, 
+						},
 						"option": {
 							"name": "current_language"
 						}
 					}
 				}
-			]			
+			]
 		},
 		"X_IOPSYS_EU_Theme": {
 			"type": "string",
+			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"datatype": "string",
 			"mapping": [
 				{
-					"type": "uci", 
+					"type": "uci",
 					"uci": {
-						"file": "userinterface", 
+						"file": "userinterface",
 						"section": {
 							"name": "global"
 						}, 

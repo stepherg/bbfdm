@@ -9,15 +9,33 @@
  *
  */
 
-#include <openssl/sha.h>
+#include <stdlib.h>
 #include <curl/curl.h>
 #include <libtrace.h>
+
+#ifdef LOPENSSL
+#include <openssl/sha.h>
+#endif
+
+#ifdef LWOLFSSL
+#include <wolfssl/options.h>
+#include <wolfssl/openssl/sha.h>
+#endif
+
+#ifdef LMBEDTLS
+#include <mbedtls/sha1.h>
+#include <mbedtls/sha256.h>
+#include <mbedtls/sha512.h>
+#endif
+
 #include "dmentry.h"
 #include "dmdiagnostics.h"
 
+
+#define READ_BUF_SIZE (1024 * 16)
+
 static int read_next;
 static struct diagnostic_stats diag_stats = {0};
-static const int READ_BUF_SIZE = { 1024 * 16 };
 
 char *get_diagnostics_option(char *sec_name, char *option)
 {
@@ -57,25 +75,21 @@ void init_diagnostics_operation(char *sec_name, char *operation_path)
 	if (section)
 		dmuci_delete_by_section_bbfdm(section, NULL, NULL);
 
-	DMCMD("/bin/sh", 2, operation_path, "stop");
+	dmcmd("/bin/sh", 2, operation_path, "stop");
 }
 
 void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value)
 {
 	char *linker = NULL;
 
-	if (value[0] == 0)
+	if (!value || *value == 0)
 		return;
 
 	if (strncmp(value, "Device.IP.Interface.", 20) != 0)
 		return;
 
 	adm_entry_get_linker_value(ctx, value, &linker);
-
-	if (linker && *linker) {
-		set_diagnostics_option(sec_name, "interface", linker);
-		dmfree(linker);
-	}
+	set_diagnostics_option(sec_name, "interface", linker ? linker : "");
 }
 
 static bool get_response_code_status(const char *url, int response_code)
@@ -91,7 +105,7 @@ static bool get_response_code_status(const char *url, int response_code)
 }
 
 static void send_transfer_complete_event(const char *command, const char *obj_path, const char *transfer_url,
-	long res_code, time_t start_t, time_t complete_t, const char *transfer_type)
+	long res_code, time_t start_t, time_t complete_t,const char *commandKey, const char *transfer_type)
 {
 	char start_time[32] = {0};
 	char complete_time[32] = {0};
@@ -109,7 +123,10 @@ static void send_transfer_complete_event(const char *command, const char *obj_pa
 	struct json_object *obj = json_object_new_object();
 
 	json_object_object_add(obj, "Command", json_object_new_string(command));
-	json_object_object_add(obj, "CommandKey", json_object_new_string(""));
+	if(commandKey)
+		json_object_object_add(obj, "CommandKey", json_object_new_string(commandKey));
+	else
+		json_object_object_add(obj, "CommandKey", json_object_new_string(""));
 	json_object_object_add(obj, "Requestor", json_object_new_string(""));
 	json_object_object_add(obj, "TransferType", json_object_new_string(transfer_type));
 	json_object_object_add(obj, "Affected", json_object_new_string(obj_path));
@@ -199,142 +216,216 @@ const bool validate_file_system_size(const char *file_size)
 	return true;
 }
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
+#define SHA1_DLEN SHA_DIGEST_LENGTH
+#define SHA1_CTX SHA_CTX
+#define SHA1_UPDATE SHA1_Update
+#define SHA1_FINAL SHA1_Final
+#else
+#define SHA1_DLEN (20)
+#define SHA1_CTX mbedtls_sha1_context
+#define SHA1_UPDATE mbedtls_sha1_update_ret
+#define SHA1_FINAL(X, Y) mbedtls_sha1_finish_ret(Y, X)
+#endif
 const bool validate_sha1sum_value(const char *file_path, const char *checksum)
 {
-	unsigned char hash[SHA_DIGEST_LENGTH];
+	unsigned char hash[SHA1_DLEN];
 	unsigned char buffer[READ_BUF_SIZE];
-	char sha1_res[1 + SHA_DIGEST_LENGTH * 2];
+	char sha1_res[1 + SHA1_DLEN * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA_CTX ctx;
+	SHA1_CTX ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
 	if (!SHA1_Init(&ctx))
 		goto end;
-
+#else
+	mbedtls_sha1_init(&ctx);
+#endif
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA1_Update(&ctx, buffer, bytes))
+		if (!SHA1_UPDATE(&ctx, buffer, bytes))
 			goto end;
 	}
 
-	if (!SHA1_Final(hash, &ctx))
+	if (!SHA1_FINAL(hash, &ctx))
 		goto end;
-	
-	for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
+
+	for (int i = 0; i < SHA1_DLEN; i++)
 		snprintf(&sha1_res[i * 2], sizeof(sha1_res) - (i * 2), "%02x", hash[i]);
 
-	if (strcmp(sha1_res, checksum) == 0)
+	if (DM_STRCMP(sha1_res, checksum) == 0)
 		res = true;
 
 end:
 	fclose(file);
-
 	return res;
 }
 
+#if defined(LOPENSSL)
+#define SHA224_DLEN SHA256_DIGEST_LENGTH
+#define SHA224_CTX_t SHA256_CTX
+#define SHA224_INIT SHA224_Init
+#define SHA224_UPDATE SHA224_Update
+#define SHA224_FINAL SHA224_Final
+#elif defined(LWOLFSSL)
+#define SHA224_DLEN SHA256_DIGEST_LENGTH
+#define SHA224_CTX_t SHA256_CTX
+#define SHA224_INIT SHA256_Init
+#define SHA224_UPDATE SHA256_Update
+#define SHA224_FINAL SHA256_Final
+#else
+#define SHA224_DLEN (32)
+#define SHA224_CTX_t mbedtls_sha256_context
+#define SHA224_UPDATE mbedtls_sha256_update_ret
+#define SHA224_FINAL(X, Y) mbedtls_sha256_finish_ret(Y, X)
+#endif
 const bool validate_sha224sum_value(const char *file_path, const char *checksum)
 {
-	unsigned char hash[SHA224_DIGEST_LENGTH];
+	unsigned char hash[SHA224_DLEN];
 	unsigned char buffer[READ_BUF_SIZE];
-	char sha224_res[1 + SHA224_DIGEST_LENGTH * 2];
+	char sha224_res[1 + SHA224_DLEN * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA256_CTX ctx;
+	SHA224_CTX_t ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
-	if (!SHA224_Init(&ctx))
+#if defined(LOPENSSL) || defined(LWOLFSSL)
+	if (!SHA224_INIT(&ctx))
 		goto end;
+#else
+	mbedtls_sha256_init(&ctx);
+	if (!mbedtls_sha256_starts_ret(&ctx, 1))
+		goto end;
+#endif
 
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA224_Update(&ctx, buffer, bytes))
+		if (!SHA224_UPDATE(&ctx, buffer, bytes))
 			goto end;
 	}
 
-	if (!SHA224_Final(hash, &ctx))
+	if (!SHA224_FINAL(hash, &ctx))
 		goto end;
-	
-	for (int i = 0; i < SHA224_DIGEST_LENGTH; i++)
+
+	for (int i = 0; i < SHA224_DLEN; i++)
 		snprintf(&sha224_res[i * 2], sizeof(sha224_res) - (i * 2), "%02x", hash[i]);
 
-	if (strcmp(sha224_res, checksum) == 0)
+	if (DM_STRCMP(sha224_res, checksum) == 0)
 		res = true;
 
 end:
 	fclose(file);
-
 	return res;
 }
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
+#define SHA256_DLEN SHA256_DIGEST_LENGTH
+#define SHA256_CTX_t SHA256_CTX
+#define SHA256_UPDATE SHA256_Update
+#define SHA256_FINAL SHA256_Final
+#else
+#define SHA256_DLEN (32)
+#define SHA256_CTX_t mbedtls_sha256_context
+#define SHA256_UPDATE mbedtls_sha256_update_ret
+#define SHA256_FINAL(X, Y) mbedtls_sha256_finish_ret(Y, X)
+#endif
 const bool validate_sha256sum_value(const char *file_path, const char *checksum)
 {
-	unsigned char hash[SHA256_DIGEST_LENGTH];
+	unsigned char hash[SHA256_DLEN];
 	unsigned char buffer[READ_BUF_SIZE];
-	char sha256_res[1 + SHA256_DIGEST_LENGTH * 2];
+	char sha256_res[1 + SHA256_DLEN * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA256_CTX ctx;
+	SHA256_CTX_t ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
 	if (!SHA256_Init(&ctx))
 		goto end;
+#else
+	mbedtls_sha256_init(&ctx);
+	if (!mbedtls_sha256_starts_ret(&ctx, 0))
+		goto end;
+#endif
 
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA256_Update(&ctx, buffer, bytes))
+		if (!SHA256_UPDATE(&ctx, buffer, bytes))
 			goto end;
 	}
 
-	if (!SHA256_Final(hash, &ctx))
+	if (!SHA256_FINAL(hash, &ctx))
 		goto end;
-	
-	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+
+	for (int i = 0; i < SHA256_DLEN; i++)
 		snprintf(&sha256_res[i * 2], sizeof(sha256_res) - (i * 2), "%02x", hash[i]);
 
-	if (strcmp(sha256_res, checksum) == 0)
+	if (DM_STRCMP(sha256_res, checksum) == 0)
 		res = true;
 
 end:
 	fclose(file);
-
 	return res;
 }
 
+#if defined(LOPENSSL)
+#define SHA384_DLEN SHA384_DIGEST_LENGTH
+#define SHA384_CTX_t SHA512_CTX
+#define SHA384_UPDATE SHA384_Update
+#define SHA384_FINAL SHA384_Final
+#elif defined(LWOLFSSL)
+#define SHA384_DLEN SHA384_DIGEST_LENGTH
+#define SHA384_CTX_t SHA384_CTX
+#define SHA384_UPDATE SHA384_Update
+#define SHA384_FINAL SHA384_Final
+#else
+#define SHA384_DLEN (64)
+#define SHA384_CTX_t mbedtls_sha512_context
+#define SHA384_UPDATE mbedtls_sha512_update_ret
+#define SHA384_FINAL(X, Y) mbedtls_sha512_finish_ret(Y, X)
+#endif
 const bool validate_sha384sum_value(const char *file_path, const char *checksum)
 {
-	unsigned char hash[SHA384_DIGEST_LENGTH];
+	unsigned char hash[SHA384_DLEN];
 	unsigned char buffer[READ_BUF_SIZE];
-	char sha384_res[1 + SHA384_DIGEST_LENGTH * 2];
+	char sha384_res[1 + SHA384_DLEN * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA512_CTX ctx;
+	SHA384_CTX_t ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
 	if (!SHA384_Init(&ctx))
 		goto end;
+#else
+	mbedtls_sha512_init(&ctx);
+	if (!mbedtls_sha512_starts_ret(&ctx, 1))
+		goto end;
+#endif
 
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA384_Update(&ctx, buffer, bytes))
+		if (!SHA384_UPDATE(&ctx, buffer, bytes))
 			goto end;
 	}
 
-	if (!SHA384_Final(hash, &ctx))
+	if (!SHA384_FINAL(hash, &ctx))
 		goto end;
-	
-	for (int i = 0; i < SHA384_DIGEST_LENGTH; i++)
+
+	for (int i = 0; i < SHA384_DLEN; i++)
 		snprintf(&sha384_res[i * 2], sizeof(sha384_res) - (i * 2), "%02x", hash[i]);
 
-	if (strcmp(sha384_res, checksum) == 0)
+	if (DM_STRCMP(sha384_res, checksum) == 0)
 		res = true;
 
 end:
@@ -343,39 +434,55 @@ end:
 	return res;
 }
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
+#define SHA512_DLEN SHA512_DIGEST_LENGTH
+#define SHA512_CTX_t SHA512_CTX
+#define SHA512_UPDATE SHA512_Update
+#define SHA512_FINAL SHA512_Final
+#else
+#define SHA512_DLEN (64)
+#define SHA512_CTX_t mbedtls_sha512_context
+#define SHA512_UPDATE mbedtls_sha512_update_ret
+#define SHA512_FINAL(X, Y) mbedtls_sha512_finish_ret(Y, X)
+#endif
 const bool validate_sha512sum_value(const char *file_path, const char *checksum)
 {
-	unsigned char hash[SHA512_DIGEST_LENGTH];
+	unsigned char hash[SHA512_DLEN];
 	unsigned char buffer[READ_BUF_SIZE];
-	char sha512_res[1 + SHA512_DIGEST_LENGTH * 2];
+	char sha512_res[1 + SHA512_DLEN * 2];
 	bool res = false;
 	int bytes = 0;
-	SHA512_CTX ctx;
+	SHA512_CTX_t ctx;
 
 	FILE *file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
+#if defined(LOPENSSL) || defined(LWOLFSSL)
 	if (!SHA512_Init(&ctx))
 		goto end;
+#else
+	mbedtls_sha512_init(&ctx);
+	if (!mbedtls_sha512_starts_ret(&ctx, 0))
+		goto end;
+#endif
 
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA512_Update(&ctx, buffer, bytes))
+		if (!SHA512_UPDATE(&ctx, buffer, bytes))
 			goto end;
 	}
 
-	if (!SHA512_Final(hash, &ctx))
+	if (!SHA512_FINAL(hash, &ctx))
 		goto end;
-	
-	for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
+
+	for (int i = 0; i < SHA512_DLEN; i++)
 		snprintf(&sha512_res[i * 2], sizeof(sha512_res) - (i * 2), "%02x", hash[i]);
 
-	if (strcmp(sha512_res, checksum) == 0)
+	if (DM_STRCMP(sha512_res, checksum) == 0)
 		res = true;
 
 end:
 	fclose(file);
-
 	return res;
 }
 
@@ -417,7 +524,7 @@ int bbf_config_backup(const char *url, const char *username, const char *passwor
 	time_t complete_time = time(NULL);
 
 	// Send Transfer Complete Event
-	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, "Upload");
+	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time,NULL,"Upload");
 
 	// Check if the upload operation was successful
 	if (!get_response_code_status(url, res_code)) {
@@ -444,7 +551,7 @@ int bbf_upload_log(const char *url, const char *username, const char *password,
 	time_t complete_time = time(NULL);
 
 	// Send Transfer Complete Event
-	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, "Upload");
+	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time,NULL, "Upload");
 
 	// Check if the upload operation was successful
 	if (!get_response_code_status(url, res_code)) {
@@ -463,7 +570,7 @@ int bbf_config_restore(const char *url, const char *username, const char *passwo
 	// Check the file system size if there is sufficient space for downloading the config file
 	if (!validate_file_system_size(file_size)) {
 		res = -1;
-		goto end;		
+		goto end;
 	}
 
 	// Download the firmware image
@@ -472,7 +579,7 @@ int bbf_config_restore(const char *url, const char *username, const char *passwo
 	time_t complete_time = time(NULL);
 
 	// Send Transfer Complete Event
-	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, "Download");
+	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, NULL, "Download");
 
 	// Check if the download operation was successful
 	if (!get_response_code_status(url, res_code)) {
@@ -500,9 +607,9 @@ end:
 
 int bbf_fw_image_download(const char *url, const char *auto_activate, const char *username, const char *password,
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
-		const char *bank_id, const char *command, const char *obj_path)
+		const char *bank_id, const char *command, const char *obj_path, const char *commandKey)
 {
-	char fw_image_path[256] = "/tmp/firmware.bin";
+	char fw_image_path[256] = "/tmp/firmware-XXXXXX";
 	json_object *json_obj = NULL;
 	bool activate = false;
 	int res = 0;
@@ -510,7 +617,15 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	// Check the file system size if there is sufficient space for downloading the firmware image
 	if (!validate_file_system_size(file_size)) {
 		res = -1;
-		goto end;		
+		goto end;
+	}
+
+	res = mkstemp(fw_image_path);
+	if (res == -1) {
+		goto end;
+	} else {
+		close(res); // close the fd, as only filename required
+		res = 0;
 	}
 
 	// Download the firmware image
@@ -518,8 +633,10 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	long res_code = download_file(fw_image_path, url, username, password);
 	time_t complete_time = time(NULL);
 
+	sync();
+
 	// Send Transfer Complete Event
-	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, "Download");
+	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time,commandKey, "Download");
 
 	// Check if the download operation was successful
 	if (!get_response_code_status(url, res_code)) {
@@ -533,62 +650,34 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 		goto end;
 	}
 
+	string_to_bool((char *)auto_activate, &activate);
+	char *act = (activate) ? "1" : "0";
 	// Apply Firmware Image
-	dmubus_call("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", auto_activate, Boolean}, {"bank", bank_id, Integer}}, 3, &json_obj);
+	dmubus_call_blocking("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", act, Boolean}, {"bank", bank_id, Integer}}, 3, &json_obj);
 
-	if (!json_obj) {
+	if (json_obj == NULL) {
 		res = -1;
 		goto end;
 	}
 
 	// Reboot the device if auto activation is true
-	string_to_bool((char *)auto_activate, &activate);
 	if (activate) {
 		sleep(30); // Wait for the image to become available
-		if (dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0) != 0)
+		if (dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) != 0)
 			res = -1;
 	}
 
 end:
-	// Remove temporary file
-	if (!json_obj && file_exists(fw_image_path) && strncmp(url, FILE_URI, strlen(FILE_URI)) && remove(fw_image_path))
+	// Remove temporary file if ubus upgrade failed and file exists
+	if (!json_obj && file_exists(fw_image_path) && strncmp(url, FILE_URI, strlen(FILE_URI))) {
+		remove(fw_image_path);
 		res = -1;
+	}
+
+	if (json_obj != NULL)
+		json_object_put(json_obj);
 
 	return res;
-}
-
-static void launch_activate_iamge_cb(struct uloop_timeout *t)
-{
-	dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0);
-}
-
-static void activate_fw_images(struct activate_image *active_img)
-{
-	int i = 0;
-
-	for (i = 0; i < MAX_TIME_WINDOW && *active_img->start_time; i++, active_img++) {
-		active_img->activate_timer.cb = launch_activate_iamge_cb;
-		uloop_timeout_set(&active_img->activate_timer, atoi(active_img->start_time) * 1000);
-	}
-}
-
-int bbf_fw_image_activate(const char *bank_id, struct activate_image *active_img)
-{
-	json_object *json_obj = NULL;
-
-	dmubus_call("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id, Integer}}, 1, &json_obj);
-	char *status = dmjson_get_value(json_obj, 1, "success");
-	if (strcmp(status, "true") != 0)
-		return -1;
-
-	if (*active_img->start_time) {
-		activate_fw_images(active_img);
-	} else {
-		if (dmubus_call_set("system", "reboot", UBUS_ARGS{}, 0) != 0)
-			return -1;
-	}
-
-	return 0;
 }
 
 static void libtrace_cleanup(libtrace_t *trace, libtrace_packet_t *packet)
@@ -682,7 +771,7 @@ static void http_download_per_packet(libtrace_packet_t *packet)
 			diag_stats.test_bytes_received = strlen(nexthdr);
 			val += strlen("Content-Length: ");
 			pch = strtok_r(val, " \r\n\t", &pchr);
-			diag_stats.test_bytes_received += atoi(pch);
+			diag_stats.test_bytes_received += DM_STRTOL(pch);
 			diag_stats.first_data = 1;
 			return;
 		}
@@ -707,23 +796,23 @@ static void ftp_download_per_packet(libtrace_packet_t *packet)
 	gmtime_r(&(ftp_download_ts.tv_sec), &ftp_download_lt);
 	strftime(s_now, sizeof s_now, "%Y-%m-%dT%H:%M:%S", &ftp_download_lt);
 
-	if (strcmp(tcp_flag, "PSH ACK ") == 0 && strlen(nexthdr) > strlen(FTP_SIZE_RESPONSE) && strncmp(nexthdr, FTP_SIZE_RESPONSE, strlen(FTP_SIZE_RESPONSE)) == 0) {
+	if (strcmp(tcp_flag, "PSH ACK ") == 0 && DM_STRLEN(nexthdr) > strlen(FTP_SIZE_RESPONSE) && strncmp(nexthdr, FTP_SIZE_RESPONSE, strlen(FTP_SIZE_RESPONSE)) == 0) {
 		char *val = strstr(nexthdr,"213");
 		char *pch, *pchr;
 		val += strlen("213 ");
 		pch =strtok_r(val, " \r\n\t", &pchr);
-		diag_stats.test_bytes_received = atoi(pch);
+		diag_stats.test_bytes_received = DM_STRTOL(pch);
 		return;
 	}
 
-	if (strcmp(tcp_flag, "PSH ACK ") == 0 && strlen(nexthdr) > strlen(FTP_PASV_RESPONSE) && strncmp(nexthdr, FTP_PASV_RESPONSE, strlen(FTP_PASV_RESPONSE)) == 0) {
+	if (strcmp(tcp_flag, "PSH ACK ") == 0 && DM_STRLEN(nexthdr) > strlen(FTP_PASV_RESPONSE) && strncmp(nexthdr, FTP_PASV_RESPONSE, strlen(FTP_PASV_RESPONSE)) == 0) {
 		diag_stats.ftp_syn = 1;
 		return;
 	}
 
 	if (diag_stats.random_seq == 0 && strcmp(tcp_flag, "SYN ") == 0 && diag_stats.ftp_syn == 1) {
 		snprintf(diag_stats.tcpopenrequesttime, sizeof(diag_stats.tcpopenrequesttime), "%s.%06ldZ", s_now, (long) ftp_download_ts.tv_usec);
-		diag_stats.random_seq = ntohl(tcp->seq);		
+		diag_stats.random_seq = ntohl(tcp->seq);
 		return;
 	}
 
@@ -733,7 +822,7 @@ static void ftp_download_per_packet(libtrace_packet_t *packet)
 		return;
 	}
 
-	if (strcmp(tcp_flag, "PSH ACK ") == 0 && strlen(nexthdr) > strlen(FTP_RETR_REQUEST) && strncmp(nexthdr, FTP_RETR_REQUEST, strlen(FTP_RETR_REQUEST)) == 0) {
+	if (strcmp(tcp_flag, "PSH ACK ") == 0 && DM_STRLEN(nexthdr) > strlen(FTP_RETR_REQUEST) && strncmp(nexthdr, FTP_RETR_REQUEST, strlen(FTP_RETR_REQUEST)) == 0) {
 		snprintf(diag_stats.romtime, sizeof(diag_stats.romtime), "%s.%06ldZ", s_now, (long) ftp_download_ts.tv_usec);
 		return;
 	}
@@ -837,7 +926,7 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 	if (get_tcp_flag_from_packet(packet, &tcp, tcp_flag, &nexthdr))
 		return;
 
-	if (strcmp(tcp_flag, "PSH ACK ") == 0 && strlen(nexthdr) > strlen(FTP_PASV_RESPONSE) && strncmp(nexthdr, FTP_PASV_RESPONSE, strlen(FTP_PASV_RESPONSE)) == 0) {
+	if (strcmp(tcp_flag, "PSH ACK ") == 0 && DM_STRLEN(nexthdr) > strlen(FTP_PASV_RESPONSE) && strncmp(nexthdr, FTP_PASV_RESPONSE, strlen(FTP_PASV_RESPONSE)) == 0) {
 		diag_stats.ftp_syn = 1;
 		return;
 	}
@@ -849,7 +938,7 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 	if (strcmp(tcp_flag, "SYN ") == 0 && diag_stats.ftp_syn == 1) {
 		diag_stats.random_seq = ntohl(tcp->seq);
 		snprintf(diag_stats.tcpopenrequesttime, sizeof(diag_stats.tcpopenrequesttime), "%s.%06ldZ", s_now, (long) ftp_upload_ts.tv_usec);
-		return;	
+		return;
 	}
 
 	if (strcmp(tcp_flag, "SYN ACK ") == 0 && diag_stats.random_seq != 0 && (ntohl(tcp->ack_seq) - 1 ) == diag_stats.random_seq) {
@@ -858,7 +947,7 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 		return;
 	}
 
-	if (strcmp(tcp_flag, "PSH ACK ") == 0 && strlen(nexthdr) > strlen(FTP_STOR_REQUEST) && strncmp(nexthdr, FTP_STOR_REQUEST, strlen(FTP_STOR_REQUEST)) == 0) {
+	if (strcmp(tcp_flag, "PSH ACK ") == 0 && DM_STRLEN(nexthdr) > strlen(FTP_STOR_REQUEST) && strncmp(nexthdr, FTP_STOR_REQUEST, strlen(FTP_STOR_REQUEST)) == 0) {
 		snprintf(diag_stats.romtime, sizeof(diag_stats.romtime), "%s.%06ldZ", s_now, (long) ftp_upload_ts.tv_usec);
 		return;
 	}
@@ -882,7 +971,7 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 		return;
 	}
 
-	if ( (strcmp(tcp_flag, "PSH ACK ") == 0 || strcmp(tcp_flag, "FIN PSH ACK ") == 0) &&  strlen(nexthdr) > strlen(FTP_TRANSFERT_COMPLETE) && strncmp(nexthdr, FTP_TRANSFERT_COMPLETE, strlen(FTP_TRANSFERT_COMPLETE)) == 0) {
+	if ( (strcmp(tcp_flag, "PSH ACK ") == 0 || strcmp(tcp_flag, "FIN PSH ACK ") == 0) &&  DM_STRLEN(nexthdr) > strlen(FTP_TRANSFERT_COMPLETE) && strncmp(nexthdr, FTP_TRANSFERT_COMPLETE, strlen(FTP_TRANSFERT_COMPLETE)) == 0) {
 		snprintf(diag_stats.eomtime, sizeof(diag_stats.eomtime), "%s.%06ldZ", s_now, (long) ftp_upload_ts.tv_usec);
 		read_next = 0;
 		return;
@@ -949,11 +1038,10 @@ static int extract_stats(char *dump_file, int proto, int diagnostic_type)
 
 static char *get_default_gateway_device(void)
 {
-	char *device = "";
-
     FILE *f = fopen(PROC_ROUTE, "r");
 	if (f != NULL) {
 		char line[100] = {0}, *p = NULL, *c = NULL, *saveptr = NULL;
+		char *device = NULL;
 
 		while(fgets(line, sizeof(line), f)) {
 			p = strtok_r(line, " \t", &saveptr);
@@ -964,9 +1052,11 @@ static char *get_default_gateway_device(void)
 			}
 		}
 		fclose(f);
+
+		return device ? device : "";
 	}
 
-    return device;
+    return "";
 }
 
 int start_upload_download_diagnostic(int diagnostic_type)
@@ -982,10 +1072,9 @@ int start_upload_download_diagnostic(int diagnostic_type)
 		interface = get_diagnostics_option("upload", "interface");
 	}
 
-	if ((url[0] == '\0') ||
-		(strncmp(url, HTTP_URI, strlen(HTTP_URI)) != 0 &&
+	if (strncmp(url, HTTP_URI, strlen(HTTP_URI)) != 0 &&
 		strncmp(url, FTP_URI, strlen(FTP_URI)) != 0 &&
-		strstr(url,"@") != NULL))
+		strchr(url,'@') != NULL)
 		return -1;
 
 	device = (interface && *interface) ? get_device(interface) : get_default_gateway_device();

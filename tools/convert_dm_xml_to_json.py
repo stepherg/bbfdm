@@ -75,11 +75,18 @@ def getparamtype(dmparam):
                     break
                 if c.tag == "dataType":
                     reftype = c.get("ref")
-                    if "StatsCounter" in reftype:
+                    if reftype == "StatsCounter32" or reftype == "PSDBreakPointIndexAndLevel" or reftype == "PSMBreakPointIndexAndLevel" or reftype == "SELTPAttenuationCharacteristicsIndexAndTFlog":
                         ptype = "unsignedInt"
                         break
-                    ptype = "string"
-                    break
+                    elif reftype == "StatsCounter64":
+                        ptype = "unsignedLong"
+                        break
+                    elif reftype == "Dbm1000" or reftype == "UERComplex":
+                        ptype = "int"
+                        break
+                    else:
+                        ptype = "string"
+                        break
                 ptype = c.tag
                 break
             break
@@ -383,7 +390,7 @@ def printPARAMMaPPING(mapping):
     lst = mapping.split("&")
     print("\"mapping\": [", file=fp)
     for i in range(len(lst)):
-        config_type = lst[i].split(":")
+        config_type = lst[i].split(":", 1)
         config = config_type[1].split("/")
 
         print("{", file=fp)
@@ -517,6 +524,10 @@ def printPARAM(dmparam, dmobject, bbfdm_type):
     print("\"read\" : true,", file=fp)
     print("\"write\" : %s," % ("false" if dmparam.get(
         'access') == "readOnly" else "true"), file=fp)
+
+    if dmparam.get('mandatory') == "true":
+        print("\"mandatory\" : true,", file=fp)
+
     print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
     print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
 
@@ -660,6 +671,7 @@ def printEVENT(dmparam, dmobject, _bbfdm_type):
         "\"protocols\" : [\"usp\"]"), file=fp)
 
     if has_param:
+        print("\"output\" : {", file=fp)
         fp.close()
 
     for param in dmparam:
@@ -668,6 +680,7 @@ def printEVENT(dmparam, dmobject, _bbfdm_type):
 
     if has_param:
         fp = open('./.json_tmp', 'a', encoding='utf-8')
+        print("}", file=fp)
 
     print("}", file=fp)
     fp.close()
@@ -678,7 +691,7 @@ def printusage():
           sys.argv[0] + " <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]")
     print("Examples:")
     print("  - " + sys.argv[0] +
-          " tr-181-2-14-1-cwmp-full.xml tr-181-2-14-1-usp-full.xml Device.")
+          " tr-181-2-15-0-cwmp-full.xml tr-181-2-15-0-usp-full.xml Device.")
     print("    ==> Generate the json file of the sub tree Device. in tr181.json")
     print("  - " + sys.argv[0] +
           " tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.")
@@ -686,7 +699,7 @@ def printusage():
     print("  - " + sys.argv[0] + " tr-106-1-2-0-full.xml Device.")
     print("    ==> Generate the json file of the sub tree Device. in tr106.json")
     print("")
-    print("Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-14-1-cwmp-full.xml")
+    print("Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-15-0-cwmp-full.xml")
     exit(1)
 
 

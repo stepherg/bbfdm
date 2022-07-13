@@ -12,7 +12,7 @@
 #ifndef __IOPSYS_DEVICEINFO_H
 #define __IOPSYS_DEVICEINFO_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMLEAF tIOPSYS_DeviceInfoParams[];
 

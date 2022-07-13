@@ -1,0 +1,760 @@
+{
+	"Device.X_IOPSYS_EU_TEST.": {
+		"type": "object",
+		"version": "2.14",
+		"protocols": [
+			"cwmp",
+			"usp"
+		],
+		"access": true,
+		"array": true,
+		"mapping": {
+			"type": "uci", 
+			"uci": {
+				"file": "cwmp", 
+				"section": {
+					"type": "test"
+				}, 
+				"dmmapfile": "dmmap_cwmp"
+			}
+		},
+		"Enable": {
+			"type": "boolean",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "enable"
+						}
+					}
+				}
+			]
+		},
+		"Port": {
+			"type": "unsignedInt",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"range": [
+				{
+					"min": 0,
+					"max": 1000
+				},
+				{
+					"min": 15000,
+					"max": 65535
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "port"
+						}
+					}
+				}
+			]
+		},
+		"Nbr_Retries": {
+			"type": "unsignedInt",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "nbr_retries"
+						}
+					}
+				}
+			]
+		},
+		"Min_value": {
+			"type": "int",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"range": [
+				{
+					"min": -274
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "min_value"
+						}
+					}
+				}
+			]
+		},
+		"Max_value": {
+			"type": "int",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"range": [
+				{
+					"max": 275
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "max_value"
+						}
+					}
+				}
+			]
+		},
+		"Value": {
+			"type": "int",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"range": [
+				{
+					"min": -10,
+					"max": -5
+				},
+				{
+					"min": -1,
+					"max": 10
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "value"
+						}
+					}
+				}
+			]
+		},
+		"Nbr_packets": {
+			"type": "unsignedLong",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"range": [
+				{
+					"min": 0,
+					"max": 100
+				},
+				{
+					"min": 500,
+					"max": 3010
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "nbr_packets"
+						}
+					}
+				}
+			]
+		},
+		"Nbr_bytes": {
+			"type": "unsignedLong",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "nbr_bytes"
+						}
+					}
+				}
+			]
+		},
+		"TransmitPowerLimit": {
+			"type": "long",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"range": [
+				{
+					"min": -90,
+					"max": 36
+				},
+				{
+					"min": 70,
+					"max": 360
+				}			
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "power_limit"
+						}
+					}
+				}
+			]
+		},
+		"MaxTxPower": {
+			"type": "long",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "max_tx_power"
+						}
+					}
+				}
+			]
+		},
+		"ButtonColor": {
+			"type": "hexBinary",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "button_color"
+						}
+					}
+				}
+			]			
+		},
+		"BackgroundColor": {
+			"type": "hexBinary",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"range": [
+				{
+					"max": 8
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "background_color"
+						}
+					}
+				}
+			]			
+		},
+		"TextColor": {
+			"type": "hexBinary",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"range": [
+				{
+					"min": 3,
+					"max": 3
+				},
+				{
+					"min": 5,
+					"max": 5
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "text_color"
+						}
+					}
+				}
+			]			
+		},
+		"AssociationTime": {
+			"type": "dateTime",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "cwmp", 
+						"section": {
+							"name": "test"
+						}, 
+						"option": {
+							"name": "association_time"
+						}
+					}
+				}
+			]
+		},
+		"Description": {
+			"type": "string",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "cwmp",
+						"section": {
+							"name": "test"
+						},
+						"option": {
+							"name": "description"
+						}
+					}
+				}
+			]
+		},
+		"Interface": {
+			"type": "string",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"range": [
+				{
+					"min": 3,
+					"max": 128
+				}
+			],
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "cwmp",
+						"section": {
+							"name": "test"
+						},
+						"option": {
+							"name": "interface"
+						}
+					}
+				}
+			]
+		},
+		"IPAddr": {
+			"type": "string",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"range": [
+				{
+					"max": 15
+				}
+			],
+			"pattern": [
+				"^$",
+				"^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])$"
+			],
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "cwmp",
+						"section": {
+							"name": "test"
+						},
+						"option": {
+							"name": "ip_addr"
+						}
+					}
+				}
+			]
+		},
+		"Protocol": {
+			"type": "string",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"enumerations": [
+				"CWMP",
+				"USP",
+				"OMA-DM",
+				"SNMP",
+				"UPnP",
+				"HELD",
+				"DHCPv4",
+				"DHCPv6",
+				"LLDP-MED",
+				"MLP",
+				"Other"
+			],
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "cwmp",
+						"section": {
+							"name": "test"
+						},
+						"option": {
+							"name": "protocol"
+						}
+					}
+				}
+			]
+		},
+		"FailureReasons": {
+			"type": "string",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"list": {
+				"datatype": "string",
+				"maxsize": 16,
+				"item": {
+					"min": 1,
+					"max": 3
+				},
+				"enumerations": [
+					"LowRate",
+					"ExcessiveDelay",
+					"InsufficientBuffers",
+					"Other"
+				]
+			},
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "cwmp",
+						"section": {
+							"name": "test"
+						},
+						"option": {
+							"name": "failure_reasons"
+						}
+					}
+				}
+			]
+		},
+		"SupportedOperatingChannelBandwidths": {
+			"type": "string",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"list": {
+				"datatype": "string",
+				"enumerations": [
+					"20MHz",
+					"40MHz",
+					"80MHz",
+					"160MHz",
+					"80+80MHz",
+					"Auto"
+				]
+			},
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "cwmp",
+						"section": {
+							"name": "test"
+						},
+						"option": {
+							"name": "supported_operating_channel"
+						}
+					}
+				}
+			]
+		},
+		"TransmitPowerSupported": {
+			"type": "string",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"list": {
+				"datatype": "int",
+				"maxsize": 8,
+				"range": [
+					{
+						"min": -1,
+						"max": 100
+					}
+				]
+			},
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "cwmp",
+						"section": {
+							"name": "test"
+						},
+						"option": {
+							"name": "transmit_power"
+						}
+					}
+				}
+			]
+		},
+		"PriorityRegeneration": {
+			"type": "string",
+			"version": "2.14",
+			"read": true,
+			"write": true,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"list": {
+				"datatype": "unsignedInt",
+				"item": {
+					"min": 4,
+					"max": 4
+				},
+				"range": [
+					{
+						"min": 0,
+						"max": 7
+					}
+				]
+			},
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "cwmp",
+						"section": {
+							"name": "test"
+						},
+						"option": {
+							"name": "priority_regeneration"
+						}
+					}
+				}
+			]
+		},
+		"Push!": {
+			"type": "event",
+			"version": "2.13",
+			"protocols": [
+				"usp"
+			],
+			"Data": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.10",
+				"protocols": [
+					"usp"
+				]
+			},
+			"Status": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.12",
+				"protocols": [
+					"usp"
+				]
+			}
+		},
+		"Periodic!": {
+			"type": "event",
+			"version": "2.13",
+			"protocols": [
+				"usp"
+			]
+		},
+		"Status()": {
+			"type": "command",
+			"async": true,
+			"version" : "2.12",
+			"protocols": [
+				"usp"
+			],
+			"input": {
+				"Option" : {
+					"type" : "string",
+					"read" : "true",
+					"write" : "true",
+					"protocol" : [
+						"usp"
+					]
+				}
+			},
+			"output": {
+				"Result" : {
+					"type" : "string",
+					"read" : "true",
+					"write" : "false",
+					"protocol" : [
+						"usp"
+					]
+				}
+			},
+			"mapping": [
+				{
+					"type" : "ubus",
+					"ubus" : {
+						"object" : "test",
+						"method" : "status"
+					}
+				}
+			]
+		}
+	}
+}

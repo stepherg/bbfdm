@@ -1,10 +1,11 @@
 {
-  "manufacturer": "iopsys",
+  "manufacturer": "IOPSYS",
   "protocol": "DEVICE_PROTOCOL_DSLFTR069v1",
   "manufacturer_oui": "002207",
   "product_class": "DG400PRIME",
   "model_name": "DG400PRIME-A",
   "software_version": "1.2.3.4",
+  "root_node": "Device.",
   "vendor_list": [
     "iopsys",
     "openwrt"
@@ -13,15 +14,18 @@
   "plugins": [
     {
       "repo": "https://dev.iopsys.eu/iopsys/bulkdata.git",
+      "proto": "git",
       "dm_files": [
-        "datamodel.c"
+        "bbf_plugin/datamodel.c"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/xmppc.git"
+      "repo": "https://dev.iopsys.eu/iopsys/xmppc.git",
+      "proto": "git"
     },
     {
       "repo": "https://dev.iopsys.eu/iopsys/stunc.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "datamodel.c"
@@ -29,6 +33,7 @@
     },
     {
       "repo": "https://dev.iopsys.eu/iopsys/udpechoserver.git",
+      "proto": "git",
       "version": "master",
       "dm_files": [
         "datamodel.c"
@@ -36,6 +41,7 @@
     },
     {
       "repo": "https://dev.iopsys.eu/iopsys/twamp.git",
+      "proto": "git",
       "version": "master",
       "dm_files": [
         "datamodel.c"
@@ -43,9 +49,29 @@
     },
     {
       "repo": "https://dev.iopsys.eu/iopsys/periodicstats.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "bbf_plugin/bbf_plugin.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/iopsys.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "urlfilter/files/etc/bbfdm/json/urlfilter.json",
+        "obuspa/files/etc/bbfdm/json/USPAgent.json",
+        "obuspa/files/etc/bbfdm/json/TransferComplete.json",
+        "icwmp/files/etc/bbfdm/json/CWMPManagementServer.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/iopsys/swmodd.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/datamodel.c"
       ]
     }
   ],

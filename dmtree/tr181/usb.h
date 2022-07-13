@@ -11,7 +11,7 @@
 #ifndef __USB_H
 #define __USB_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tUSBObj[];
 extern DMLEAF tUSBParams[];

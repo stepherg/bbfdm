@@ -12,11 +12,11 @@ case "$1" in
 						read input;
 						json_load "$input"
 						json_get_var interface interface
-						if [ "$interface" == "lan" ]; then
+						if [ "$interface" = "lan" ]; then
 							cat /tmp/interface_lan.data 2>/dev/null
-						elif [ "$interface" == "wan" ]; then
+						elif [ "$interface" = "wan" ]; then
 							cat /tmp/interface_wan.data 2>/dev/null
-						elif [ "$interface" == "wan6" ]; then
+						elif [ "$interface" = "wan6" ]; then
 							cat /tmp/interface_wan6.data 2>/dev/null
 						else
 							cat /tmp/interface_lan.data 2>/dev/null

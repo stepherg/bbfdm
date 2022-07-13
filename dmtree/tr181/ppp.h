@@ -12,7 +12,7 @@
 #ifndef __PPP_H
 #define __PPP_H
 
-#include <libbbf_api/dmcommon.h>
+#include "libbbf_api/dmcommon.h"
 
 #define IPCP 0
 #define IPCPv6 1
@@ -25,5 +25,8 @@ extern DMLEAF tPPPInterfacePPPoEParams[];
 extern DMLEAF tPPPInterfaceIPCPParams[];
 extern DMLEAF tPPPInterfaceIPv6CPParams[];
 extern DMLEAF tPPPInterfaceStatsParams[];
+
+void ppp___update_sections(struct uci_section *s_from, struct uci_section *s_to);
+void ppp___reset_options(struct uci_section *ppp_s);
 
 #endif

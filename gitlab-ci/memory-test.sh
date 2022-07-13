@@ -2,51 +2,64 @@
 
 echo "Functional API Tests"
 pwd
-source ./gitlab-ci/shared.sh
+. ./gitlab-ci/shared.sh
+
+echo "Starting supervisor in current directory"
+supervisorctl shutdown
+sleep 1
+supervisord -c supervisord.conf
+
+# install required packages
+exec_cmd apt update
+exec_cmd apt install -y zip
 
 date +%s > timestamp.log
+
 # compile and install libbbf
 install_libbbf
 
 install_libbbf_test
 install_libbulkdata
-#install_libperiodicstats
+install_libperiodicstats
 
-supervisorctl status all
 supervisorctl update
+supervisorctl status all
+supervisorctl restart all
 sleep 5
 supervisorctl status all
 
+function run_valgrind()
+{
+    echo "Running # bbf_dm $@ #"
+    exec_cmd valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $@
+}
+
+function run_valgrind_verbose()
+{
+    echo "Running # bbf_dm $@ #"
+    exec_cmd_verbose valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $@
+}
+
 echo "Running memory check on datamodel"
-ret=0
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-usp-get.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -u get Device.
-ret=$?
 
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-usp-operate.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -u list_operate
-ret=$(( ret + $? ))
+run_valgrind_verbose -u get Device.RootDataModelVersion
+run_valgrind_verbose -c get Device.RootDataModelVersion
 
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-usp-schema.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -u get_schema
-ret=$(( ret + $? ))
+run_valgrind_verbose -u list_operate
+run_valgrind -u get_schema
+run_valgrind -u instances Device.
+run_valgrind -c get Device.
+run_valgrind -c list_operate
+run_valgrind -c get_schema
+run_valgrind_verbose -c instances Device.
 
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-usp-instances.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -u instances Device.
-ret=$(( ret + $? ))
+run_valgrind -u get_info Device. 0
+run_valgrind -u get_info Device. 1
+run_valgrind -u get_info Device. 2
+run_valgrind -u get_info Device. 3
 
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-cwmp-get.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -c get Device.
-ret=$?
-
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-cwmp-operate.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -c list_operate
-ret=$(( ret + $? ))
-
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-cwmp-schema.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -c get_schema
-ret=$(( ret + $? ))
-
-valgrind --xml=yes --xml-file=/builds/iopsys/bbf/memory-report-cwmp-instances.xml --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /builds/iopsys/bbf/test/bbf_test/bbf_dm -c instances Device.
-ret=$(( ret + $? ))
-
-if [ "$ret" -ne 0 ]; then
-	echo "Memory check failed"
-	check_ret $ret
-fi
+run_valgrind -u get Device.
+run_valgrind -c get Device.
 
 supervisorctl stop all
 supervisorctl status
@@ -56,5 +69,8 @@ supervisorctl status
 gcovr -r . 2> /dev/null #throw away stderr
 # Artefact
 gcovr -r . 2> /dev/null --xml -o ./memory-test-coverage.xml
+
+echo "Generating release"
+generate_release
 
 echo "Memory Test :: PASS"

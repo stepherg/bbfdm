@@ -4,12 +4,12 @@
 
 case "$1" in
         list)
-                echo '{ "processes" : {} }'
+                echo '{ "status" : {} }'
         ;;
         call)
                 case "$2" in
-                        processes)
-                                cat /tmp/processes.data 2>/dev/null
+                        status)
+                                cat /tmp/test_status.data
                         ;;
                 esac
         ;;

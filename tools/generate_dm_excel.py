@@ -6,6 +6,7 @@
 from collections import OrderedDict
 
 import os
+import sys
 import json
 import argparse
 import xlwt
@@ -37,8 +38,12 @@ def is_param_obj_command_event_supported(dmobject):
 
 
 def add_data_to_list_dm(obj, supported, protocols, types):
-    LIST_DM.append(obj + "," + protocols + "," + supported + "," + types)
-
+    rootdm = bbf.get_root_node()
+    if (rootdm):
+        if (obj.startswith(rootdm)):
+            LIST_DM.append(obj + "," + protocols + "," + supported + "," + types)
+    else:
+        LIST_DM.append(obj + "," + protocols + "," + supported + "," + types)
 
 def parse_standard_object(dmobject, value):
     hasobj = bbf.obj_has_child(value)
@@ -109,12 +114,12 @@ def parse_object_tree(dm_name_list):
 
             for obj, value in data.items():
                 if obj is None:
-                    print("!!!! %s : Wrong JSON Data model format!" % dm)
+                    print(f'!!!! {dm} : Wrong JSON Data model format!')
                     continue
 
                 parse_standard_object(obj, value)
         else:
-            print("!!!! %s : Data Model doesn't exist" % dm)
+            print(f"!!!! {dm} : Data Model doesn't exist")
 
     parse_dynamic_object(dm_name_list)
 
@@ -136,7 +141,7 @@ def generate_excel_file(output_file):
     wb.set_colour_RGB(0x30, 153, 153, 153)
 
     style_title = xlwt.easyxf(
-        'pattern: pattern solid, fore_colour custom_colour_grey;''font: bold 1, color black;''alignment: horizontal center;')
+        'pattern: pattern solid, fore_colour custom_colour_grey;' + 'font: bold 1, color black;' + 'alignment: horizontal center;')
     sheet.write(0, 0, 'OBJ/PARAM/OPERATE', style_title)
     sheet.write(0, 1, 'Protocols', style_title)
     sheet.write(0, 2, 'Supported', style_title)
@@ -150,12 +155,12 @@ def generate_excel_file(output_file):
             style_name = xlwt.easyxf(
                 'pattern: pattern solid, fore_colour custom_colour_yellow')
             style = xlwt.easyxf(
-                'pattern: pattern solid, fore_colour custom_colour_yellow;''alignment: horizontal center;')
+                'pattern: pattern solid, fore_colour custom_colour_yellow;' + 'alignment: horizontal center;')
         elif param[3] == "operate" or param[3] == "event":
             style_name = xlwt.easyxf(
                 'pattern: pattern solid, fore_colour custom_colour_green')
             style = xlwt.easyxf(
-                'pattern: pattern solid, fore_colour custom_colour_green;''alignment: horizontal center;')
+                'pattern: pattern solid, fore_colour custom_colour_green;' + 'alignment: horizontal center;')
         else:
             style_name = None
             style = xlwt.easyxf('alignment: horizontal center;')
@@ -183,9 +188,9 @@ def generate_excel(dm_name_list, output_file="datamodel.xml"):
     generate_excel_file(output_file)
 
     if os.path.isfile(output_file):
-        print("└── Excel file generated: %s" % output_file)
+        print(f' - Excel file generated: {output_file}')
     else:
-        print("└── Error in excel file generation %s" % output_file)
+        print(f' - Error in excel file generation {output_file}')
 
 
 ### main ###
@@ -206,7 +211,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-r', '--remote-dm',
         action='append',
-		metavar = 'https://dev.iopsys.eu/iopsys/stunc.git^devel',
+		metavar = 'git^https://dev.iopsys.eu/iopsys/stunc.git^devel',
         help= 'Includes OBJ/PARAM defined under remote repositories defined as bbf plugin'
     )
 
@@ -219,7 +224,7 @@ if __name__ == '__main__':
 
     parser.add_argument(
         '-p', '--vendor-prefix',
-		default = 'iopsys',
+		default = 'X_IOPSYS_EU_',
 		metavar = 'X_IOPSYS_EU_',
 		help = 'Generate data model tree using provided vendor prefix for vendor defined objects'
     )
@@ -238,13 +243,16 @@ if __name__ == '__main__':
         for f in args.remote_dm:
             x = f.split('^')
             r = {}
-            r["repo"] = x[0]
-            if len(x) == 2:
-                r["version"] = x[1]
+            r["proto"] = x[0]
+            if len(x) > 1:
+                r["repo"] = x[1]
+            if len(x) == 3:
+                r["version"] = x[2]
 
             plugins.append(r)
 
     bbf.generate_supported_dm(args.vendor_prefix, args.vendor_list, plugins)
     bbf.clean_supported_dm_list()
     generate_excel(args.datamodel, args.output)
-    print("Datamodel generation completed, aritifacts available in %s" %args.output)
+    print(f'Datamodel generation completed, aritifacts available in {args.output}')
+    sys.exit(bbf.BBF_ERROR_CODE)
