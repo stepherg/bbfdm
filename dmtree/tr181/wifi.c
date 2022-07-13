@@ -5921,7 +5921,7 @@ static int operate_WiFiDataElementsNetwork_SetTrafficSeparation(char *refparam, 
 	}
 
 	string_to_bool(enable, &b);
-	dmuci_set_value("mapcontroller", "controller", "traffic_separation", b ? "1" : "0");
+	dmuci_set_value("mapcontroller", "controller", "ts_enabled", b ? "1" : "0");
 	dmuci_save_package("mapcontroller");
 	dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", "mapcontroller", String}}, 1);
 
