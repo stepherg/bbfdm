@@ -79,12 +79,6 @@ static int get_linker_associated_device(char *refparam, struct dmctx *dmctx, voi
 	return 0;
 }
 
-static int get_linker_wfdata_SSID(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ssid", linker);
-	return 0;
-}
-
 static int get_linker_wfdata_Device(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
 	*linker = data ? section_name((((struct wifi_data_element_args *)data)->uci_s)->config_section) : "";
@@ -5878,7 +5872,9 @@ static int get_operate_args_WiFiDataElementsNetwork_SetTrafficSeparation(char *r
 
 static int operate_WiFiDataElementsNetwork_SetTrafficSeparation(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct wifi_operate_args operate_args[16] = {0};
+#define MAX_ARGS 16
+
+	struct wifi_operate_args operate_args[MAX_ARGS] = {0};
 	char *status = "Success";
 	bool b = false;
 
@@ -5888,46 +5884,41 @@ static int operate_WiFiDataElementsNetwork_SetTrafficSeparation(char *refparam, 
 		goto end;
 	}
 
-	for (int i = 0;; i++) {
+	for (int i = 0; i < MAX_ARGS; i++) {
 
-		char ssid_path[64] = {0};
 		char ssid[32] = {0};
 		char vid[32] = {0};
-		char *linker = NULL;
 
-		snprintf(ssid_path, sizeof(ssid_path), "Device.WiFi.DataElements.Network.SSID.%d.", i+1);
 		snprintf(ssid, sizeof(ssid), "SSIDtoVIDMapping.%d.SSID", i+1);
 		snprintf(vid, sizeof(vid), "SSIDtoVIDMapping.%d.VID", i+1);
 
 		operate_args[i].arg1 = dmjson_get_value((json_object *)value, 1, ssid);
 		operate_args[i].arg2 = dmjson_get_value((json_object *)value, 1, vid);
 
-		if (*(operate_args[i].arg1) == '\0' || *(operate_args[i].arg2) == '\0')
+		// Instance number must be assigned sequentially without gaps, if one is empty then break the loop
+		if (*(operate_args[i].arg1) == '\0')
 			break;
-
-		adm_entry_get_linker_value(ctx, ssid_path, &linker);
-		if (linker == NULL || *linker == '\0') {
-			status = "Error_Invalid_Input";
-			break;
-		}
 
 		struct uci_section *s = NULL;
 
-		uci_foreach_option_eq("mapcontroller", "ap", "ssid", linker, s) {
-			dmuci_set_value_by_section(s, "ssid", operate_args[i].arg1);
-			dmuci_set_value_by_section(s, "vid", operate_args[i].arg2);
-			break;
+		uci_foreach_option_eq("mapcontroller", "ap", "ssid", operate_args[i].arg1, s) {
+
+			// If VID is not empty then update it
+			if (*(operate_args[i].arg2) != '\0')
+				dmuci_set_value_by_section(s, "vid", operate_args[i].arg2);
 		}
 	}
 
 	string_to_bool(enable, &b);
-	dmuci_set_value("mapcontroller", "controller", "ts_enabled", b ? "1" : "0");
+	dmuci_set_value("mapcontroller", "controller", "enable_ts", b ? "1" : "0");
 	dmuci_save_package("mapcontroller");
 	dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", "mapcontroller", String}}, 1);
 
 end:
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
 	return CMD_SUCCESS;
+
+#undef MAX_ARGS
 }
 /*
 static operation_args WiFiDataElementsNetwork_SetPreferredBackhauls_args = {
@@ -6646,7 +6637,7 @@ DMOBJ tWiFiDataElementsObj[] = {
 /* *** Device.WiFi.DataElements.Network. *** */
 DMOBJ tWiFiDataElementsNetworkObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"SSID", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkSSIDInst, NULL, NULL, NULL, tWiFiDataElementsNetworkSSIDParams, get_linker_wfdata_SSID, BBFDM_BOTH, LIST_KEY{"SSID", NULL}, "2.15"},
+{"SSID", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkSSIDInst, NULL, NULL, NULL, tWiFiDataElementsNetworkSSIDParams, NULL, BBFDM_BOTH, LIST_KEY{"SSID", NULL}, "2.15"},
 {"MultiAPSteeringSummaryStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkMultiAPSteeringSummaryStatsParams, NULL, BBFDM_BOTH, NULL, "2.15"},
 {"Device", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceInst, NULL, NULL, tWiFiDataElementsNetworkDeviceObj, tWiFiDataElementsNetworkDeviceParams, get_linker_wfdata_Device, BBFDM_BOTH, LIST_KEY{"ID", NULL}, "2.13"},
 {0}
