@@ -4123,15 +4123,15 @@ static int set_WiFiDataElementsNetworkDevice_CoordinatedCACAllowed(char *refpara
 			return 0;
 	}
 	return 0;
-}
+}*/
 
 static int get_WiFiDataElementsNetworkDevice_TrafficSeparationAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "TrafficSeparationAllowed");
+	*value = dmuci_get_option_value_fallback_def("mapcontroller", "controller", "enable_ts", "1");
 	return 0;
 }
 
-static int get_WiFiDataElementsNetworkDevice_ServicePrioritizationAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+/*static int get_WiFiDataElementsNetworkDevice_ServicePrioritizationAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "ServicePrioritizationAllowed");
 	return 0;
@@ -6734,7 +6734,7 @@ DMLEAF tWiFiDataElementsNetworkDeviceParams[] = {
 // {"MaxUnsuccessfulAssociationReportingRate", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDevice_MaxUnsuccessfulAssociationReportingRate, set_WiFiDataElementsNetworkDevice_MaxUnsuccessfulAssociationReportingRate, BBFDM_BOTH, "2.15"},
 // {"STASteeringState", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_STASteeringState, NULL, BBFDM_BOTH, "2.15"},
 // {"CoordinatedCACAllowed", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDevice_CoordinatedCACAllowed, set_WiFiDataElementsNetworkDevice_CoordinatedCACAllowed, BBFDM_BOTH, "2.15"},
-//{"TrafficSeparationAllowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_TrafficSeparationAllowed, NULL, BBFDM_BOTH, "2.15"},
+{"TrafficSeparationAllowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_TrafficSeparationAllowed, NULL, BBFDM_BOTH, "2.15"},
 // {"ServicePrioritizationAllowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_ServicePrioritizationAllowed, NULL, BBFDM_BOTH, "2.15"},
 {"RadioNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_RadioNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
 {"Default8021QNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_Default8021QNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
