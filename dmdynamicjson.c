@@ -417,9 +417,16 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 		for (int i = 0; buf_alias[i]; i++)
 			buf_alias[i] = tolower(buf_alias[i]);
 
-		if(file && section_type && dmmap_file) {
+		if (file && section_type && dmmap_file) {
 			synchronize_specific_config_sections_with_dmmap(json_object_get_string(file), json_object_get_string(section_type), json_object_get_string(dmmap_file), &dup_list);
 			list_for_each_entry(p, &dup_list, list) {
+				char *dm_parent = NULL;
+
+				dmuci_get_value_by_section_string(p->config_section, "dm_parent", &dm_parent);
+				if (prev_data && DM_STRLEN(dm_parent)) {
+					if (strcmp(section_name((struct uci_section *)prev_data), dm_parent) != 0)
+						continue;
+				}
 
 				inst = handle_instance(dmctx, parent_node, p->dmmap_section, buf_instance, buf_alias);
 
@@ -465,7 +472,7 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 		free_ubus_arguments(u_args, u_args_size);
 
 		if (res && key) {
-			char arr_name[32] = {0};
+			char arr_name[64] = {0};
 			int id = 0, i = 0;
 
 			json_object *arr_obj = get_requested_json_obj(res, prev_instance, json_object_get_string(key), arr_name, sizeof(arr_name));
@@ -512,7 +519,8 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 		struct json_object *section_type = NULL;
 		struct json_object *dmmap_file = NULL;
 		char *object = NULL;
-		char buf_instance[64];
+		char buf_instance[128];
+		char sec_name[128];
 
 		json_object_object_get_ex((mapping_0 && json_version == JSON_VERSION_1) ? mapping_0 : mapping_obj, "uci", &uci_obj);
 		json_object_object_get_ex(uci_obj, "file", &file);
@@ -522,17 +530,24 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 
 		object = find_current_obj(refparam);
 		snprintf(buf_instance, sizeof(buf_instance), "%s_instance", object);
-		for (int i = 0; buf_instance[i]; i++) {
+		snprintf(sec_name, sizeof(sec_name), "%s%s_%s", data ? section_name((struct uci_section *)data) : "", object, *instance);
+
+		for (int i = 0; buf_instance[i]; i++)
 			buf_instance[i] = tolower(buf_instance[i]);
-		}
+
+		for (int i = 0; sec_name[i]; i++)
+			sec_name[i] = tolower(sec_name[i]);
 
 		if (file && section_type && dmmap_file) {
 			struct uci_section *s = NULL, *dmmap_s = NULL;
 
 			dmuci_add_section(json_object_get_string(file), json_object_get_string(section_type), &s);
+			dmuci_rename_section_by_section(s, sec_name);
+			if (data) dmuci_set_value_by_section(s, "dm_parent", section_name((struct uci_section *)data));
 
 			dmuci_add_section_bbfdm(json_object_get_string(dmmap_file), json_object_get_string(section_type), &dmmap_s);
 			dmuci_set_value_by_section(dmmap_s, "section_name", section_name(s));
+			if (data) dmuci_set_value_by_section(dmmap_s, "dm_parent", section_name((struct uci_section *)data));
 			dmuci_set_value_by_section(dmmap_s, buf_instance, *instance);
 		}
 	}
@@ -589,6 +604,17 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 					break;
 				case DEL_ALL:
 					uci_foreach_sections_safe(json_object_get_string(file), json_object_get_string(section_type), stmp, s) {
+
+						if (data) {
+							char *dm_parent = NULL;
+
+							dmuci_get_value_by_section_string(s, "dm_parent", &dm_parent);
+							if (data && DM_STRLEN(dm_parent)) {
+								if (strcmp(section_name((struct uci_section *)data), dm_parent) != 0)
+									continue;
+							}
+						}
+
 						get_dmmap_section_of_config_section(json_object_get_string(dmmap_file), json_object_get_string(section_type), section_name(s), &dmmap_section);
 						dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
@@ -613,7 +639,6 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 	struct json_object *option_name = NULL;
 	struct json_object *list = NULL;
 	struct json_object *list_name = NULL;
-	struct json_object *path = NULL;
 	struct json_object *linker_jobj = NULL;
 	char *linker = NULL;
 	char *value = "";
@@ -627,7 +652,6 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 	json_object_object_get_ex(option, "name", &option_name);
 	json_object_object_get_ex(obj, "list", &list);
 	json_object_object_get_ex(list, "name", &list_name);
-	json_object_object_get_ex(obj, "path", &path);
 	json_object_object_get_ex(mapping_obj, "linker_obj", &linker_jobj);
 
 	char *opt_temp = NULL;
@@ -651,6 +675,14 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 		int cnt = 0;
 
 		uci_foreach_sections(json_object_get_string(file), json_object_get_string(type), s) {
+			char *dm_parent = NULL;
+
+			dmuci_get_value_by_section_string(s, "dm_parent", &dm_parent);
+			if (data && DM_STRLEN(dm_parent)) {
+				if (strcmp(section_name((struct uci_section *)data), dm_parent) != 0)
+					continue;
+			}
+
 			cnt++;
 		}
 		dmasprintf(&value, "%d", cnt);
@@ -662,22 +694,35 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 			dmasprintf(&value, "%s", section_name((struct uci_section *)data));
 		} else {
 			char uci_type[32] = {0};
+
 			snprintf(uci_type, sizeof(uci_type), "@%s[%ld]", json_object_get_string(type), instance ? DM_STRTOL(instance)-1 : 0);
+
 			if (option) {
-				char *res = dmuci_get_value_by_path(json_object_get_string(path), json_object_get_string(file), uci_type, opt_temp);
+				char *res = NULL;
+
+				dmuci_get_value_by_section_string((struct uci_section *)data, opt_temp, &res);
+				if (DM_STRLEN(res) == 0)
+					dmuci_get_option_value_string(json_object_get_string(file), uci_type, opt_temp, &res);
+
 				if (linker_jobj)
 					adm_entry_get_linker_param(ctx, linker, res, &value);
 				else
 					value = res;
 			} else {
 				struct uci_list *list_val;
-				dmuci_get_option_value_list(json_object_get_string(file), uci_type, opt_temp, &list_val);
+
+				dmuci_get_value_by_section_list((struct uci_section *)data, opt_temp, &list_val);
+				if (list_val == NULL)
+					dmuci_get_option_value_list(json_object_get_string(file), uci_type, opt_temp, &list_val);
 				value = dmuci_list_to_string(list_val, ",");
 			}
 		}
 	} else if (file && section_name && opt_temp) {
 		if (option) {
-			char *res = dmuci_get_value_by_path(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), opt_temp);
+			char *res = NULL;
+
+			dmuci_get_option_value_string(json_object_get_string(file), json_object_get_string(section_name), opt_temp, &res);
+
 			if (linker_jobj)
 				adm_entry_get_linker_param(ctx, linker, res, &value);
 			else
@@ -735,7 +780,7 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 		json_object *json_obj = NULL;
 		json_object *arr_obj = NULL;
 		char key_buf[128] = {0};
-		char key_name[32] = {0};
+		char key_name[128] = {0};
 
 		DM_STRNCPY(key_buf, json_object_get_string(key), sizeof(key_buf));
 
@@ -1249,7 +1294,6 @@ static void uci_set_value(json_object *mapping_obj, int json_version, char *refp
 	struct json_object *option_name = NULL;
 	struct json_object *list = NULL;
 	struct json_object *list_name = NULL;
-	struct json_object *path = NULL;
 	struct json_object *linker_jobj = NULL;
 	char *linker = NULL;
 
@@ -1262,7 +1306,6 @@ static void uci_set_value(json_object *mapping_obj, int json_version, char *refp
 	json_object_object_get_ex(option, "name", &option_name);
 	json_object_object_get_ex(uci_obj, "list", &list);
 	json_object_object_get_ex(list, "name", &list_name);
-	json_object_object_get_ex(uci_obj, "path", &path);
 	json_object_object_get_ex(mapping_obj, "linker_obj", &linker_jobj);
 
 	char *opt_temp = NULL;
@@ -1273,6 +1316,7 @@ static void uci_set_value(json_object *mapping_obj, int json_version, char *refp
 	}
 
 	if (data && file && type && opt_temp) {
+
 		char uci_type[32] = {0};
 
 		snprintf(uci_type, sizeof(uci_type), "@%s[%ld]", json_object_get_string(type), instance ? DM_STRTOL(instance)-1 : 0);
@@ -1285,7 +1329,8 @@ static void uci_set_value(json_object *mapping_obj, int json_version, char *refp
 			get_dmmap_section_of_config_section(buf, json_object_get_string(type), section_name((struct uci_section *)data), &dmmap_section);
 			dmuci_set_value_by_section(dmmap_section, "section_name", value);
 
-			dmuci_rename_section(json_object_get_string(file), uci_type, value);
+			if (dmuci_rename_section_by_section((struct uci_section *)data, value) == -1)
+				dmuci_rename_section(json_object_get_string(file), uci_type, value);
 			return;
 		}
 
@@ -1295,14 +1340,18 @@ static void uci_set_value(json_object *mapping_obj, int json_version, char *refp
 			else
 				linker = value;
 
-			dmuci_set_value_by_path(json_object_get_string(path), json_object_get_string(file), uci_type, opt_temp, linker);
+			if (dmuci_set_value_by_section((struct uci_section *)data, opt_temp, linker) == -1)
+				dmuci_set_value(json_object_get_string(file), uci_type, opt_temp, linker);
 		} else {
 			if (value != NULL) {
-				dmuci_delete(json_object_get_string(file), uci_type, opt_temp, NULL);
+				if (dmuci_delete_by_section((struct uci_section *)data, opt_temp, NULL) == -1)
+					dmuci_delete(json_object_get_string(file), uci_type, opt_temp, NULL);
+
 				char *p = strtok(value, ",");
 				while (p) {
 					strip_lead_trail_whitespace(p);
-					dmuci_add_list_value(json_object_get_string(file), uci_type, opt_temp, p);
+					if (dmuci_add_list_value_by_section((struct uci_section *)data, opt_temp, p) == -1)
+						dmuci_add_list_value(json_object_get_string(file), uci_type, opt_temp, p);
 					p = strtok(NULL, ",");
 				}
 			}
@@ -1314,7 +1363,7 @@ static void uci_set_value(json_object *mapping_obj, int json_version, char *refp
 			else
 				linker = value;
 
-			dmuci_set_value_by_path(json_object_get_string(path), json_object_get_string(file), json_object_get_string(section_name), opt_temp, linker);
+			dmuci_set_value(json_object_get_string(file), json_object_get_string(section_name), opt_temp, linker);
 		} else {
 			if (value != NULL) {
 				dmuci_delete(json_object_get_string(file), json_object_get_string(section_name), opt_temp, NULL);

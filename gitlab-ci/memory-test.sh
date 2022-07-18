@@ -19,7 +19,6 @@ date +%s > timestamp.log
 install_libbbf
 
 install_libbbf_test
-install_libbulkdata
 install_libperiodicstats
 
 supervisorctl update
@@ -38,6 +37,12 @@ function run_valgrind_verbose()
 {
     echo "Running # bbf_dm $@ #"
     exec_cmd_verbose valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $@
+}
+
+function run_valgrind_redirect()
+{
+    echo "Running # bbf_dm $@ #" > output-report-device-get.txt
+    exec_cmd_verbose valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $@ | tee -a output-report-device-get.txt
 }
 
 echo "Running memory check on datamodel"
@@ -60,6 +65,8 @@ run_valgrind -u get_info Device. 3
 
 run_valgrind -u get Device.
 run_valgrind -c get Device.
+
+run_valgrind_redirect -u get Device.
 
 supervisorctl stop all
 supervisorctl status

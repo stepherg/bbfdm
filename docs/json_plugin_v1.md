@@ -409,6 +409,34 @@ Ubus example for the same
 }
 ```
 
+## How to map Multi Instance Object for Multiple Sections:
+
+ - This is only applicable when mapping multi-instance Objects to **uci** config sections
+ - Multi instance object must be mapped to uci 'config' sections
+ - Uci options can only be mapped to leaf dm nodes
+ - Uci list options can only be mapped to leaf dm nodes which show the values as csv list
+ - It better to use a named config sections in place of unnamed config sections for multi-instance objects
+ - Children on multi-instance objects needs to have reference to their parent using 'dm_parent' option in uci section like below:
+ 
+  ```bash
+config agent 'agent'
+	option timezone 'GMT0BST,M3.5.0/1,M10.5.0'
+	
+config task 'http_get_mt'
+	option dm_parent 'agent'
+	option name 'http_get_mt'
+	
+config task_option 'http_get_mt_target'
+	option dm_parent 'http_get_mt'
+	option id 'target'
+ ```
+ 
+This object 'Device.LMAP.MeasurementAgent.{i}.Task.{i}.Option.{i}.' maps to the config above. It contains 3 Multi instance objects:
+
+1. MeasurementAgent.{i}: parent object which maps to 'agent' section
+2. Task.{i}: child object of MeasurementAgent object which maps to 'task' section, it must have a 'dm_parent' option with the value 'agent'
+3. Option.{i}: child object of Task object which maps to 'task_option' section, it must have a 'dm_parent' option with the value 'http_get_mt'
+
 ## Feature supported with this mapping
  - Use of `json_plugin_version` for mapping extensions
  - Use different mappings for get/set

@@ -106,19 +106,6 @@ function install_libbbf_test()
 	#make -C test/dynamicdm_ubus_test/
 }
 
-function install_libbulkdata()
-{
-	# clone and compile libbulkdata
-	rm -rf /opt/dev/bulkdata
-	exec_cmd git clone -b devel https://dev.iopsys.eu/iopsys/bulkdata.git /opt/dev/bulkdata
-	echo "Compiling libbulkdata"
-	make clean -C /opt/dev/bulkdata/
-	make CFLAGS="-D_GNU_SOURCE -DWC_NO_HARDEN" -C /opt/dev/bulkdata/
-
-	echo "installing libbulkdata"
-	cp -f /opt/dev/bulkdata/bbf_plugin/libbulkdata.so /usr/lib/bbfdm
-}
-
 function install_libperiodicstats()
 {
 	# clone and compile libperiodicstats
