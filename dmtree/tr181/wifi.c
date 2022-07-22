@@ -1459,20 +1459,33 @@ static int set_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx 
 /*#Device.WiFi.Radio.{i}.PreambleType!UCI:wireless/wifi-device,@i-1/short_preamble*/
 static int get_WiFiRadio_PreambleType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "short_preamble", value);
-	*value = ((*value)[0] == '1') ? "short" : "long";
+	struct uci_section *s = NULL;
+
+	*value = "long";
+	uci_foreach_option_eq("wireless", "wifi-iface", "device", section_name((((struct wifi_radio_args *)data)->sections)->config_section), s) {
+		char *iface_short_preamble = NULL;
+
+		dmuci_get_value_by_section_string(s, "short_preamble", &iface_short_preamble);
+		if (iface_short_preamble && iface_short_preamble[0] == '1') {
+				*value = "short";
+				break;
+		}
+	}
 	return 0;
 }
 
 static int set_WiFiRadio_PreambleType(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *s = NULL;
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, PreambleType, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "short_preamble", (DM_LSTRCMP(value, "short") == 0) ? "1" : "0");
+			uci_foreach_option_eq("wireless", "wifi-iface", "device", section_name((((struct wifi_radio_args *)data)->sections)->config_section), s) {
+				dmuci_set_value_by_section(s, "short_preamble", (DM_LSTRCMP(value, "short") == 0) ? "1" : "0");
+			}
 			break;
 	}
 	return 0;
