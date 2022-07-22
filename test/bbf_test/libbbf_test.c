@@ -19,10 +19,69 @@
 /* ********** DynamicObj ********** */
 DM_MAP_OBJ tDynamicObj[] = {
 /* parentobj, nextobject, parameter */
-{"Device.ManagementServer.", NULL, tDynamicManagementServerParams},
+{"Device.ManagementServer.", tDynamicManagementServerObj, tDynamicManagementServerParams},
 {"Device.", tDynamicDeviceObj, tDynamicDeviceParams},
 {0}
 };
+
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
+static int browseManagementServerInformParameterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct dmmap_dup *p = NULL;
+	char *inst = NULL;
+	LIST_HEAD(dup_list);
+
+	synchronize_specific_config_sections_with_dmmap("cwmp", "inform_extra", "dmmap_cwmp", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "inform_instance", "inform_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
+/*************************************************************
+* ADD & DEL OBJ
+**************************************************************/
+static int addObjManagementServerInformParameter(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	struct uci_section *s = NULL, *dmmap_s = NULL;
+
+	dmuci_add_section("cwmp", "inform_extra", &s);
+
+	dmuci_add_section_bbfdm("dmmap_cwmp", "inform_extra", &dmmap_s);
+	dmuci_set_value_by_section(dmmap_s, "section_name", section_name(s));
+	dmuci_set_value_by_section(dmmap_s, "inform_instance", *instance);
+	return 0;
+}
+
+static int delObjManagementServerInformParameter(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			break;
+		case DEL_ALL:
+			uci_foreach_sections_safe("cwmp", "inform_extra", stmp, s) {
+				struct uci_section *dmmap_s = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name(s), &dmmap_s);
+				dmuci_delete_by_section(dmmap_s, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+			break;
+	}
+	return 0;
+}
 
 /*************************************************************
 * GET & SET PARAM
@@ -45,6 +104,97 @@ static int set_ManagementServer_EnableCWMP(char *refparam, struct dmctx *ctx, vo
 		case VALUESET:
 			string_to_bool(value, &b);
 			dmuci_set_value("cwmp", "acs", "enabled", b ? "1" : "0");
+			break;
+	}
+	return 0;
+}
+
+static int get_ManagementServerInformParameter_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "1");
+	return 0;
+}
+
+static int set_ManagementServerInformParameter_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
+			break;
+	}
+	return 0;
+}
+
+static int get_ManagementServerInformParameter_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *dmmap_section = NULL;
+
+	get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name(((struct dmmap_dup *)data)->config_section), &dmmap_section);
+	dmuci_get_value_by_section_string(dmmap_section, "inform_alias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+	return 0;
+}
+
+static int set_ManagementServerInformParameter_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *dmmap_section = NULL;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			get_dmmap_section_of_config_section("dmmap_cwmp", "inform_extra", section_name(((struct dmmap_dup *)data)->config_section), &dmmap_section);
+			dmuci_set_value_by_section(dmmap_section, "inform_alias", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_ManagementServerInformParameter_ParameterName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "parameter", value);
+	return 0;
+}
+
+static int set_ManagementServerInformParameter_ParameterName(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "parameter", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_ManagementServerInformParameter_EventList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "events", value);
+	return 0;
+}
+
+static int set_ManagementServerInformParameter_EventList(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "events", value);
 			break;
 	}
 	return 0;
@@ -184,9 +334,26 @@ static int get_event_args_XIOPSYSEU_Boot(char *refparam, struct dmctx *ctx, void
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
+/* *** Device.ManagementServer. *** */
+DMOBJ tDynamicManagementServerObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"InformParameter", &DMWRITE, addObjManagementServerInformParameter, delObjManagementServerInformParameter, NULL, browseManagementServerInformParameterInst, NULL, NULL, NULL, tManagementServerInformParameterParams, NULL, BBFDM_CWMP, LIST_KEY{"Alias", "ParameterName", NULL}},
+{0}
+};
+
 DMLEAF tDynamicManagementServerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"EnableCWMP", &DMWRITE, DMT_BOOL, get_ManagementServer_EnableCWMP, set_ManagementServer_EnableCWMP, BBFDM_CWMP},
+{0}
+};
+
+/* *** Device.ManagementServer.InformParameter.{i}. *** */
+DMLEAF tManagementServerInformParameterParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Enable", &DMWRITE, DMT_BOOL, get_ManagementServerInformParameter_Enable, set_ManagementServerInformParameter_Enable, BBFDM_CWMP},
+{"Alias", &DMWRITE, DMT_STRING, get_ManagementServerInformParameter_Alias, set_ManagementServerInformParameter_Alias, BBFDM_CWMP},
+{"ParameterName", &DMWRITE, DMT_STRING, get_ManagementServerInformParameter_ParameterName, set_ManagementServerInformParameter_ParameterName, BBFDM_CWMP},
+{"EventList", &DMWRITE, DMT_STRING, get_ManagementServerInformParameter_EventList, set_ManagementServerInformParameter_EventList, BBFDM_CWMP},
 {0}
 };
 

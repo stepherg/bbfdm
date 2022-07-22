@@ -54,7 +54,7 @@ static void test_bbf_api_uci(void **state)
 	assert_string_equal(value, "");
 
 	// dmuci_get_section_type: test with correct config/section
-	uci_res = dmuci_get_section_type("firewall", "@rule[0]", &value);
+	uci_res = dmuci_get_section_type("cwmp", "@inform_extra[0]", &value);
 	assert_int_equal(uci_res, 0);
 	assert_string_not_equal(value, "");
 
