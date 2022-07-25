@@ -1407,6 +1407,7 @@ static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx
 			return CMD_FAIL;
 
 		res = dmubus_call_set("rpc-sys", "reboot", UBUS_ARGS{0}, 0);
+		sleep(10); // Wait for reboot to happen
 	}
 
 	return res ? CMD_FAIL : CMD_SUCCESS;
