@@ -660,11 +660,12 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 		goto end;
 	}
 
+	sleep(30); // Wait for the image to become available
 	// Reboot the device if auto activation is true
 	if (activate) {
-		sleep(30); // Wait for the image to become available
 		if (dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) != 0)
 			res = -1;
+		sleep(10); // Wait for reboot to take action
 	}
 
 end:
