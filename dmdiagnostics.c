@@ -633,8 +633,6 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	long res_code = download_file(fw_image_path, url, username, password);
 	time_t complete_time = time(NULL);
 
-	sync();
-
 	// Send Transfer Complete Event
 	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time,commandKey, "Download");
 
