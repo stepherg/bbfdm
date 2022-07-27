@@ -119,31 +119,28 @@ static bool operate_find_root_entry(struct dmctx *ctx, char *in_param, DMOBJ **r
 }
 
 
-static char *get_path_without_instance(char *path)
+static void get_path_without_instance(char *path, char *operate_path, size_t len)
 {
 	char *pch = NULL, *pchr = NULL;
-	char res_path[512] = {0};
+	char str[1024] = {0};
 	unsigned pos = 0;
 
-	char *str = dm_dynamic_strdup(&library_memhead, path);
+	snprintf(str, sizeof(str), "%s", path);
 
-	res_path[0] = 0;
+	operate_path[0] = 0;
 	for (pch = strtok_r(str, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
 		if (DM_STRTOL(pch) == 0 && strcmp(pch, "{i}") != 0)
-			pos += snprintf(&res_path[pos], sizeof(res_path) - pos, "%s%s", pch, (pchr != NULL && *pchr != '\0') ? "." : "");
+			pos += snprintf(&operate_path[pos], len - pos, "%s%s", pch, (pchr != NULL && *pchr != '\0') ? "." : "");
 	}
-
-	dmfree(str);
-
-	return dm_dynamic_strdup(&library_memhead, res_path);
 }
 
 static int get_dynamic_operate_args(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct dynamic_operate *dyn_operate = NULL;
 	operation_args *operate_args = NULL;
+	char operate_path[1024] = {0};
 
-	char *operate_path = get_path_without_instance(refparam);
+	get_path_without_instance(refparam, operate_path, sizeof(operate_path));
 	list_for_each_entry(dyn_operate, &dynamic_operate_list, list) {
 		if (DM_STRCMP(dyn_operate->operate_path, operate_path) == 0) {
 			operate_args = (operation_args *)dyn_operate->operate_args;
@@ -159,8 +156,9 @@ static int dynamic_operate_leaf(char *refparam, struct dmctx *ctx, void *data, c
 {
 	struct dynamic_operate *dyn_operate = NULL;
 	operation operate_func = NULL;
+	char operate_path[1024] = {0};
 
-	char *operate_path = get_path_without_instance(refparam);
+	get_path_without_instance(refparam, operate_path, sizeof(operate_path));
 	list_for_each_entry(dyn_operate, &dynamic_operate_list, list) {
 		if (DM_STRCMP(dyn_operate->operate_path, operate_path) == 0) {
 			operate_func = (operation)dyn_operate->operate;

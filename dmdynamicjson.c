@@ -12,6 +12,7 @@
 #include "dmdynamicjson.h"
 #include "dmentry.h"
 
+#define MAX_DM_LENGTH (1024)
 #define json_object_get_string(x) (char *)json_object_get_string(x)
 
 static LIST_HEAD(loaded_json_files);
@@ -145,10 +146,9 @@ int free_json_dynamic_arrays(DMOBJ *dm_entryobj)
 	return 0;
 }
 
-static char *find_prefix_obj(char *full_obj)
+static void find_prefix_obj(char *full_obj, char *prefix_obj, size_t len)
 {
 	int last_occurent = 0, occur = 0;
-	char *prefix_obj = "";
 
 	char *full_object = replace_str(full_obj, ".{i}.", ".");
 	for (int i = 0; full_object[i] != 0; i++) {
@@ -160,16 +160,13 @@ static char *find_prefix_obj(char *full_obj)
 	}
 
 	*(full_object + last_occurent + 1) = 0;
-	prefix_obj = dm_dynamic_strdup(&json_memhead, full_object);
+	snprintf(prefix_obj, len, "%s", full_object);
 	dmfree(full_object);
-
-	return prefix_obj;
 }
 
-static char *find_current_obj(char *full_obj)
+static void find_current_obj(char *full_obj, char *curr_obj, size_t len)
 {
 	int last_occurent = 0, occur = 0;
-	char *curr_obj = "";
 
 	char *full_object = replace_str(full_obj, ".{i}.", ".");
 	for (int i = 0; full_object[i] != 0; i++) {
@@ -181,32 +178,26 @@ static char *find_current_obj(char *full_obj)
 	}
 
 	full_object[occur] = 0;
-	curr_obj = dm_dynamic_strdup(&json_memhead, full_object + last_occurent + 1);
+	snprintf(curr_obj, len, "%s", full_object + last_occurent + 1);
 	dmfree(full_object);
-
-	return curr_obj;
 }
 
-static char *generate_path_without_instance(char *full_obj, bool is_obj)
+static void generate_path_without_instance(char *full_obj, bool is_obj, char *obj_path, size_t len)
 {
 	char *pch = NULL, *pchr = NULL;
-	char buf[1024] = {0};
+	char str[MAX_DM_LENGTH] = {0};
 	int pos = 0;
 
-	char *str = dm_dynamic_strdup(&json_memhead, full_obj);
+	snprintf(str, MAX_DM_LENGTH, "%s", full_obj);
 
 	for (pch = strtok_r(str, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
 		if (DM_STRTOL(pch) == 0 && strcmp(pch, "{i}") != 0) {
-			pos  += snprintf(buf + pos, sizeof(buf) - pos, "%s.", pch);
+			pos  += snprintf(obj_path + pos, len - pos, "%s.", pch);
 		}
 	}
 
 	if (pos && !is_obj)
-		buf[pos - 1] = 0;
-
-	dmfree(str);
-
-	return dm_dynamic_strdup(&json_memhead, buf);
+		obj_path[pos - 1] = 0;
 }
 
 static int get_index_of_available_entry(DMOBJ *jentryobj)
@@ -373,9 +364,10 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 	struct json_object *mapping_obj = NULL;
 	struct json_object *mapping_0 = NULL;
 	struct json_object *type = NULL;
+	char obj[MAX_DM_LENGTH] = {0};
 	int json_version = JSON_VERSION_0;
 
-	char *obj = generate_path_without_instance(parent_node->current_object, true);
+	generate_path_without_instance(parent_node->current_object, true, obj, MAX_DM_LENGTH);
 	list_for_each_entry(pobj, &json_list, list) {
 		if (DM_STRCMP(pobj->name, obj) == 0) {
 			mapping_obj = pobj->data;
@@ -392,7 +384,7 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 	}
 
 	if (type && strcmp(json_object_get_string(type), "uci") == 0) {
-		char buf_instance[64], buf_alias[64], *object = NULL;
+		char buf_instance[128], buf_alias[128], object[64] = {0};
 		struct json_object *uci_obj = NULL;
 		struct json_object *file = NULL;
 		struct json_object *section = NULL;
@@ -408,7 +400,7 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 		json_object_object_get_ex(section, "type", &section_type);
 		json_object_object_get_ex(uci_obj, "dmmapfile", &dmmap_file);
 
-		object = find_current_obj(parent_node->current_object);
+		find_current_obj(parent_node->current_object, object, sizeof(object));
 		snprintf(buf_instance, sizeof(buf_instance), "%s_instance", object);
 		snprintf(buf_alias, sizeof(buf_alias), "%s_alias", object);
 		for (int i = 0; buf_instance[i]; i++)
@@ -494,9 +486,10 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 	struct json_object *mapping_obj = NULL;
 	struct json_object *mapping_0 = NULL;
 	struct json_object *obj_type = NULL;
+	char obj[MAX_DM_LENGTH] = {0};
 	int json_version = JSON_VERSION_0;
 
-	char *obj = generate_path_without_instance(refparam, true);
+	generate_path_without_instance(refparam, true, obj, MAX_DM_LENGTH);
 	list_for_each_entry(pobj, &json_list, list) {
 		if (DM_STRCMP(pobj->name, obj) == 0) {
 			mapping_obj = pobj->data;
@@ -518,7 +511,7 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 		struct json_object *section = NULL;
 		struct json_object *section_type = NULL;
 		struct json_object *dmmap_file = NULL;
-		char *object = NULL;
+		char object[64] = {0};
 		char buf_instance[128];
 		char sec_name[128];
 
@@ -528,7 +521,7 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 		json_object_object_get_ex(section, "type", &section_type);
 		json_object_object_get_ex(uci_obj, "dmmapfile", &dmmap_file);
 
-		object = find_current_obj(refparam);
+		find_current_obj(refparam, object, sizeof(object));
 		snprintf(buf_instance, sizeof(buf_instance), "%s_instance", object);
 		snprintf(sec_name, sizeof(sec_name), "%s%s_%s", data ? section_name((struct uci_section *)data) : "", object, *instance);
 
@@ -561,9 +554,10 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 	struct json_object *mapping_obj = NULL;
 	struct json_object *mapping_0 = NULL;
 	struct json_object *type_obj = NULL;
+	char obj[MAX_DM_LENGTH] = {0};
 	int json_version = JSON_VERSION_0;
 
-	char *obj = generate_path_without_instance(refparam, true);
+	generate_path_without_instance(refparam, true, obj, MAX_DM_LENGTH);
 	list_for_each_entry(pobj, &json_list, list) {
 		if (DM_STRCMP(pobj->name, obj) == 0) {
 			mapping_obj = pobj->data;
@@ -901,9 +895,10 @@ static int getvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 {
 	struct dm_json_obj *pleaf = NULL;
 	json_object *param_obj = NULL;
+	char obj[MAX_DM_LENGTH] = {0};
 	int json_version = JSON_VERSION_0;
 
-	char *obj = generate_path_without_instance(refparam, false);
+	generate_path_without_instance(refparam, false, obj, MAX_DM_LENGTH);
 	list_for_each_entry(pleaf, &json_list, list) {
 		if (DM_STRCMP(pleaf->name, obj) == 0) {
 			param_obj = pleaf->data;
@@ -977,9 +972,10 @@ static int ubus_set_operate(json_object *mapping_obj, int json_version, char *re
 static int linker_obj(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
 	struct dm_json_obj *pobj = NULL;
+	char obj[MAX_DM_LENGTH] = {0};
 	const char **keys = NULL;
 
-	char *obj = generate_path_without_instance(refparam, true);
+	generate_path_without_instance(refparam, true, obj, MAX_DM_LENGTH);
 	list_for_each_entry(pobj, &json_list, list) {
 		if (DM_STRCMP(pobj->name, obj) == 0) {
 			keys = pobj->event_arg.param;
@@ -1000,9 +996,10 @@ static int linker_obj(char *refparam, struct dmctx *dmctx, void *data, char *ins
 static int getcommand_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct dm_json_obj *leaf = NULL;
+	char obj[MAX_DM_LENGTH] = {0};
 	bool found = false;
 
-	char *obj = generate_path_without_instance(refparam, false);
+	generate_path_without_instance(refparam, false, obj, MAX_DM_LENGTH);
 	list_for_each_entry(leaf, &json_list, list) {
 		if (DM_STRCMP(leaf->name, obj) == 0) {
 			found = true;
@@ -1023,9 +1020,10 @@ static int setcommand_param(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	struct dm_json_obj *leaf_node = NULL;
 	struct json_object *p_obj = NULL, *map_arr = NULL, *map_obj = NULL, *type = NULL;
+	char obj[MAX_DM_LENGTH] = {0};
 	int json_version = JSON_VERSION_0;
 
-	char *obj = generate_path_without_instance(refparam, false);
+	generate_path_without_instance(refparam, false, obj, MAX_DM_LENGTH);
 	list_for_each_entry(leaf_node, &json_list, list) {
 		if (DM_STRCMP(leaf_node->name, obj) == 0) {
 			p_obj = leaf_node->data;
@@ -1058,9 +1056,10 @@ static int setcommand_param(char *refparam, struct dmctx *ctx, void *data, char 
 static int getevent_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct dm_json_obj *leaf = NULL;
+	char obj[MAX_DM_LENGTH] = {0};
 	bool found = false;
 
-	char *obj = generate_path_without_instance(refparam, false);
+	generate_path_without_instance(refparam, false, obj, MAX_DM_LENGTH);
 	list_for_each_entry(leaf, &json_list, list) {
 		if (DM_STRCMP(leaf->name, obj) == 0) {
 			found = true;
@@ -1463,9 +1462,10 @@ static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 {
 	struct dm_json_obj *pleaf = NULL;
 	json_object *param_obj = NULL;
+	char obj[MAX_DM_LENGTH] = {0};
 	int json_version = JSON_VERSION_0;
 
-	char *obj = generate_path_without_instance(refparam, false);
+	generate_path_without_instance(refparam, false, obj, MAX_DM_LENGTH);
 	list_for_each_entry(pleaf, &json_list, list) {
 		if (DM_STRCMP(pleaf->name, obj) == 0) {
 			param_obj = pleaf->data;
@@ -1730,17 +1730,19 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, i
 	DMOBJ *next_obj = NULL;
 	DMLEAF *next_leaf = NULL;
 	char **keys_p = NULL;
+	char curr_obj[128] = {0};
 
 	count_obj_param_under_jsonobj(jobj, &obj_number, &param_number);
 	char *obj_path = replace_str(object, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
 	char *full_obj = replace_str(obj_path, ".{i}.", ".");
-	char *curr_obj = find_current_obj(full_obj);
+	find_current_obj(full_obj, curr_obj, sizeof(curr_obj));
+	dmfree(obj_path);
 
 	if (!pobj)
 		return;
 
 	//OBJ
-	pobj[index].obj = curr_obj;
+	pobj[index].obj = dm_dynamic_strdup(&json_memhead, curr_obj);
 
 	//nextobj
 	if (obj_number != 0)
@@ -1866,9 +1868,10 @@ int load_json_dynamic_arrays(struct dmctx *ctx)
 				}
 
 				DMOBJ *dm_entryobj = NULL;
+				char obj_prefix[MAX_DM_LENGTH] = {0};
 
 				char *obj_path = replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
-				char *obj_prefix = find_prefix_obj(obj_path);
+				find_prefix_obj(obj_path, obj_prefix, MAX_DM_LENGTH);
 
 				bool obj_exists = find_root_entry(ctx, obj_prefix, &dm_entryobj);
 				if (obj_exists == 0 || !dm_entryobj)

@@ -130,6 +130,7 @@ static void check_killed_process(void)
 			continue;
 
 		list_del(&entry->list);
+		dmfree(entry);
 	}
 }
 
