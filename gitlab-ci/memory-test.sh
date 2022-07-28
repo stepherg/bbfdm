@@ -41,7 +41,7 @@ function run_valgrind_verbose()
 
 function run_valgrind_redirect()
 {
-    echo "Running # bbf_dm $@ #" > output-report-device-get.txt
+    echo "Running # bbf_dm $@ #" >> output-report-device-get.txt
     exec_cmd_verbose valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $@ | tee -a output-report-device-get.txt
 }
 
@@ -67,6 +67,7 @@ run_valgrind -u get Device.
 run_valgrind -c get Device.
 
 run_valgrind_redirect -u get Device.
+run_valgrind_redirect -c get Device.
 
 supervisorctl stop all
 supervisorctl status

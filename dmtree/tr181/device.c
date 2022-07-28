@@ -41,6 +41,7 @@
 #include "security.h"
 #include "ieee1905.h"
 #include "routeradvertisement.h"
+#include "gatewayinfo.h"
 #ifdef BBF_TR104
 #include "servicesvoiceservice.h"
 #endif
@@ -122,6 +123,7 @@ DMOBJ tDeviceObj[] = {
 #ifdef BBF_TR104
 {"Services", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesObj, NULL, NULL, BBFDM_BOTH, NULL, "2.0"},
 #endif
+{"GatewayInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGatewayInfoParams, NULL, BBFDM_CWMP, NULL, "2.0"},
 {0}
 };
 
