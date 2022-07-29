@@ -900,6 +900,8 @@ static int get_inform_parameter_alias(char *refparam, struct dmctx *ctx, void *d
 {
 	struct dmmap_dup *inform_param_args = (struct dmmap_dup *)data;
 	dmuci_get_value_by_section_string(inform_param_args->dmmap_section, "informparam_alias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
 	return 0;
 }
 
@@ -1005,8 +1007,8 @@ static int get_manageable_device_host(char *refparam, struct dmctx *ctx, void *d
 DMOBJ tManagementServerObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"HeartbeatPolicy", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHeartbeatPolicyParams, NULL, BBFDM_CWMP, NULL, "2.12"},
-{"InformParameter", &DMWRITE, add_inform_parameter, delete_inform_parameter, NULL, browseInformParameterInst, NULL, NULL, NULL, tInformParameterParams, NULL, BBFDM_CWMP, NULL, "2.8"},
 {"ManageableDevice", &DMREAD, NULL, NULL, NULL, browseManageableDevice, NULL, NULL, NULL, tManageableDeviceParams, NULL, BBFDM_CWMP, NULL, "2.12"},
+{"InformParameter", &DMWRITE, add_inform_parameter, delete_inform_parameter, NULL, browseInformParameterInst, NULL, NULL, NULL, tInformParameterParams, NULL, BBFDM_CWMP, NULL, "2.8"},
 {0}
 };
 
