@@ -12,13 +12,6 @@
 #include "servicesvoiceservicecalllog.h"
 #include "common.h"
 
-static int get_ServicesVoiceServiceCallLog_SessionId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct call_log_entry *entry = (struct call_log_entry *)data;
-	*value = (entry) ? dmstrdup(entry->sessionId) : "0";
-	return 0;
-}
-
 static int get_ServicesVoiceServiceCallLog_SipIpAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
@@ -151,7 +144,6 @@ static int get_ServicesVoiceServiceCallLog_Dst_PeakJitter(char *refparam, struct
 /* *** Device.Services.VoiceService.{i}.CallLog.{i}. *** */
 DMLEAF tIOPSYS_VoiceServiceCallLogParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{BBF_VENDOR_PREFIX"SIPSession-ID", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_SessionId, NULL, BBFDM_BOTH},
 {BBF_VENDOR_PREFIX"SIPIPAddress", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_SipIpAddress, NULL, BBFDM_BOTH},
 {BBF_VENDOR_PREFIX"SIPResponseCode", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_SipResponseCode, NULL, BBFDM_BOTH},
 {0}

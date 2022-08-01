@@ -127,6 +127,13 @@ static int get_ServicesVoiceServiceCallLog_SessionId(char *refparam, struct dmct
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCallLog_SIPSessionId(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->SIPSessionId) : "";
+	return 0;
+}
+
 static int get_ServicesVoiceServiceCallLog_CallTerminationCause(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
@@ -268,6 +275,7 @@ DMLEAF tServicesVoiceServiceCallLogSessionParams[] = {
 {"Duration", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Duration, NULL, BBFDM_BOTH},
 {"Start", &DMREAD, DMT_TIME, get_ServicesVoiceServiceCallLog_Start, NULL, BBFDM_BOTH},
 {"SessionID", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_SessionId, NULL, BBFDM_BOTH},
+{"SIPSessionID", &DMREAD, DMT_STRING, get_ServicesVoiceServiceCallLog_SIPSessionId, NULL, BBFDM_BOTH},
 {0}
 };
 
