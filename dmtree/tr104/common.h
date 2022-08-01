@@ -32,6 +32,7 @@ struct call_log_entry {
 	char duration[8];
 	char termination_cause[32];
 	char sessionId[20];
+	char SIPSessionId[33];
 	char sipIpAddress[40];
 	char farEndIPAddress[40];
 	char sipResponseCode[20];

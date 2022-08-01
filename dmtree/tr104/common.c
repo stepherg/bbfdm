@@ -304,6 +304,14 @@ int init_call_log(void)
 			CHECK_RESULT(end);
 			DM_STRNCPY(cdr.sessionId, token, end - token + 1);
 
+			// SIP Session Id
+			token = DM_LSTRSTR(token, ",\"");
+			CHECK_RESULT(token);
+			token += 2;
+			end = DM_LSTRSTR(token, "\",");
+			CHECK_RESULT(end);
+			DM_STRNCPY(cdr.SIPSessionId, token, end - token + 1);
+
 			// SIP IP Address
 			token = DM_LSTRSTR(token, ",\"");
 			CHECK_RESULT(token);
