@@ -10,7 +10,6 @@
  *
  */
 #include "bridging.h"
-
 struct bridge_args
 {
 	struct uci_section *bridge_sec;
@@ -182,7 +181,32 @@ void bridging_get_vlan_tvid(char *uci_opt_name, void *data, char **value)
 
 void bridging_set_vlan_tvid(char *uci_opt_name, void *data, char *value)
 {
-	dmuci_set_value_by_section(((struct bridge_vlan_args *)data)->bridge_sec, uci_opt_name, !DM_LSTRCMP(value, "0") ? "" : value);
+	struct uci_section *dmmap_s = NULL;
+	char *br_inst = NULL, *vlan_vid = NULL;
+
+	dmuci_get_value_by_section_string(((struct bridge_vlan_args *)data)->bridge_vlan_sec, "br_inst", &br_inst);
+	dmuci_get_value_by_section_string(((struct bridge_vlan_args *)data)->bridge_vlan_sec, "vid", &vlan_vid);
+	if (DM_STRLEN(vlan_vid) == 0)
+		goto end;
+
+	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_vlanport", "bridge_vlanport", "br_inst", br_inst, dmmap_s) {
+		char *curr_name = NULL;
+
+		dmuci_get_value_by_section_string(dmmap_s, "name", &curr_name);
+		if (DM_STRLEN(curr_name) == 0)
+			continue;
+
+		if (DM_STRSTR(curr_name, vlan_vid) != NULL) {
+			struct uci_section *s = NULL;
+			char *dev_name = NULL;
+
+			dmuci_get_value_by_section_string(dmmap_s, "device_name", &dev_name);
+			get_config_section_of_dmmap_section("network", "device", dev_name, &s);
+			if (s) dmuci_set_value_by_section(s, "tvid", value);
+		}
+	}
+
+end:
 	dmuci_set_value_by_section(((struct bridge_vlan_args *)data)->bridge_vlan_sec, uci_opt_name, !DM_LSTRCMP(value, "0") ? "" : value);
 }
 
