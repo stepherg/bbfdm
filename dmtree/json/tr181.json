@@ -50515,7 +50515,7 @@
 							"uci": {
 								"file": "network",
 								"section": {
-									"type": "interface",
+									"type": "device",
 									"index": "@i-1"
 								},
 								"option": {
