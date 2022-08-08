@@ -1232,15 +1232,24 @@ static int set_IPInterface_IPv4Enable(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
-/*#Device.IP.Interface.{i}.IPv6Enable!UCI:network/interface,@i-1/ipv6*/
+/*#Device.IP.Interface.{i}.IPv6Enable!UCI:network/device,@i-1/ipv6*/
 static int get_IPInterface_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ipv6", "1");
+	char *device = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+	if (DM_STRLEN(device)) {
+		struct uci_section *device_s = get_dup_section_in_config_opt("network", "device", "name", device);
+		*value = device_s ? dmuci_get_value_by_section_fallback_def(device_s, "ipv6", "1") : "1";
+	} else {
+		*value = "1";
+	}
 	return 0;
 }
 
 static int set_IPInterface_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *device = NULL;
 	bool b;
 
 	switch (action)	{
@@ -1250,7 +1259,11 @@ static int set_IPInterface_IPv6Enable(char *refparam, struct dmctx *ctx, void *d
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "ipv6", b ? "1" : "0");
+			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+			if (DM_STRLEN(device)) {
+				struct uci_section *device_s = get_dup_section_in_config_opt("network", "device", "name", device);
+				if (device_s) dmuci_set_value_by_section(device_s, "ipv6", b ? "1" : "0");
+			}
 			break;
 	}
 	return 0;
