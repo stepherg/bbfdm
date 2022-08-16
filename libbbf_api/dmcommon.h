@@ -164,6 +164,11 @@ enum fs_size_type_enum {
 	FS_SIZE_USED,
 };
 
+enum option_type_enum {
+	OPTION_IP,
+	OPTION_INT
+};
+
 #define IPPING_PATH "/usr/share/bbfdm/ipping_launch"
 #define IPPING_STOP dmcmd("/bin/sh", 2, IPPING_PATH, "stop");
 #define DOWNLOAD_DIAGNOSTIC_PATH "/usr/share/bbfdm/download_launch"
@@ -202,6 +207,12 @@ struct sysfs_dmsection {
 struct browse_args {
 	char *option;
 	char *value;
+};
+
+struct option_tag_type {
+	int tag;
+	int type;
+	int len;
 };
 
 pid_t get_pid(const char *pname);
@@ -263,6 +274,8 @@ int dm_time_utc_format(time_t ts, char **dst);
 int dm_time_format(time_t ts, char **dst);
 void convert_string_to_hex(const char *str, char *hex, size_t size);
 void convert_hex_to_string(const char *hex, char *str, size_t size);
+void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, size_t size);
+void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, size_t size);
 bool match(const char *string, const char *pattern);
 int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
 int dm_validate_boolean(char *value);

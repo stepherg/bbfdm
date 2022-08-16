@@ -66,6 +66,77 @@ char *IPPrefix[] = {"^$", "^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01
 char *IPv4Prefix[] = {"^$", "^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])/(3[0-2]|[012]?[0-9])$", NULL};
 char *IPv6Prefix[] = {"^$", "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/(12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$", NULL};
 
+struct option_tag_type TYPE_TAG_ARRAY[] = {
+{1, OPTION_IP, 4},
+{2, OPTION_INT, 4},
+{3, OPTION_IP, 4},
+{4, OPTION_IP, 4},
+{5, OPTION_IP, 4},
+{6, OPTION_IP, 4},
+{7, OPTION_IP, 4},
+{8, OPTION_IP, 4},
+{9, OPTION_IP, 4},
+{10, OPTION_IP, 4},
+{11, OPTION_IP, 4},
+{13, OPTION_INT, 2},
+{16, OPTION_IP, 4},
+{19, OPTION_INT, 1},
+{20, OPTION_INT, 1},
+{21, OPTION_IP, 4},
+{22, OPTION_INT, 2},
+{23, OPTION_INT, 1},
+{24, OPTION_INT, 4},
+{25, OPTION_INT, 2},
+{26, OPTION_INT, 2},
+{27, OPTION_INT, 1},
+{28, OPTION_IP, 4},
+{29, OPTION_INT, 1},
+{30, OPTION_INT, 1},
+{31, OPTION_INT, 1},
+{32, OPTION_IP, 4},
+{33, OPTION_IP, 4},
+{34, OPTION_INT, 1},
+{35, OPTION_INT, 4},
+{36, OPTION_INT, 1},
+{37, OPTION_INT, 1},
+{38, OPTION_INT, 4},
+{39, OPTION_INT, 1},
+{41, OPTION_IP, 4},
+{42, OPTION_IP, 4},
+{44, OPTION_IP, 4},
+{45, OPTION_IP, 4},
+{46, OPTION_INT, 1},
+{48, OPTION_IP, 4},
+{49, OPTION_IP, 4},
+{50, OPTION_IP, 4},
+{51, OPTION_IP, 4},
+{52, OPTION_INT, 1},
+{53, OPTION_INT, 1},
+{54, OPTION_INT, 4},
+{57, OPTION_INT, 2},
+{58, OPTION_INT, 4},
+{59, OPTION_INT, 4},
+{65, OPTION_IP, 4},
+{68, OPTION_IP, 4},
+{69, OPTION_IP, 4},
+{70, OPTION_IP, 4},
+{71, OPTION_IP, 4},
+{72, OPTION_IP, 4},
+{73, OPTION_IP, 4},
+{74, OPTION_IP, 4},
+{75, OPTION_IP, 4},
+{76, OPTION_IP, 4},
+{118, OPTION_IP, 4},
+{145, OPTION_INT, 1},
+{152, OPTION_INT, 4},
+{153, OPTION_INT, 4},
+{154, OPTION_INT, 4},
+{155, OPTION_INT, 4},
+{156, OPTION_INT, 1},
+{157, OPTION_INT, 1},
+{159, OPTION_INT, 4}
+};
+
 pid_t get_pid(const char *pname)
 {
 	DIR* dir;
@@ -1108,6 +1179,82 @@ void convert_hex_to_string(const char *hex, char *str, size_t size)
 	}
 
 	str[pos] = '\0';
+}
+
+void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, size_t size)
+{
+	int idx = -1;
+
+	for (int i = 0; i < ARRAY_SIZE(TYPE_TAG_ARRAY); i++) {
+		if (TYPE_TAG_ARRAY[i].tag == tag) {
+			idx = i;
+			break;
+		}
+	}
+
+	if (idx > 0) {
+		char *pch = NULL, *spch = NULL;
+		unsigned pos = 0;
+		char buf[512] = {0};
+
+		DM_STRNCPY(buf, str, sizeof(buf));
+		for (pch = strtok_r(buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+			if (TYPE_TAG_ARRAY[idx].type == OPTION_IP) {
+				struct in_addr ip_bin;
+
+				if (!inet_aton(pch, &ip_bin))
+					continue;
+
+				unsigned int ip = ntohl(ip_bin.s_addr);
+				pos += snprintf(&hex[pos], size - pos, "%08X", ip);
+			} else {
+				long int val = DM_STRTOL(pch);
+				pos += snprintf(&hex[pos], size - pos, (TYPE_TAG_ARRAY[idx].len == 4) ? "%08lX" : (TYPE_TAG_ARRAY[idx].len == 2) ? "%04lX" : "%02lX", val);
+			}
+		}
+	} else {
+		convert_string_to_hex(str, hex, size);
+	}
+}
+
+void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, size_t size)
+{
+	int idx = -1;
+
+	for (int i = 0; i < ARRAY_SIZE(TYPE_TAG_ARRAY); i++) {
+		if (TYPE_TAG_ARRAY[i].tag == tag) {
+			idx = i;
+			break;
+		}
+	}
+
+	if (idx > 0) {
+		unsigned pos = 0;
+		unsigned int str_len = DM_STRLEN(hex);
+		unsigned int len = TYPE_TAG_ARRAY[idx].len * 2;
+		char buf[16] = {0};
+
+		for (int i = 0; i + len <= str_len; i = i + len) {
+			DM_STRNCPY(buf, &hex[i], len + 1);
+			if (TYPE_TAG_ARRAY[idx].type == OPTION_IP) {
+				struct in_addr addr;
+				unsigned int ip;
+
+				sscanf(buf, "%X", &ip);
+				addr.s_addr = htonl(ip);
+				char *ipaddr = inet_ntoa(addr);
+				pos += snprintf(&str[pos], size - pos, "%s,", ipaddr);
+			} else {
+				int a = (int)strtol(buf, NULL, 16);
+				pos += snprintf(&str[pos], size - pos, "%d,", a);
+			}
+		}
+
+		if (pos)
+			str[pos - 1] = 0;
+	} else {
+		convert_hex_to_string(hex, str, size);
+	}
 }
 
 bool match(const char *string, const char *pattern)
