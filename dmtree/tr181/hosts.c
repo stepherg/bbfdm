@@ -121,8 +121,14 @@ static int get_HostsHost_Layer1Interface(char *refparam, struct dmctx *ctx, void
 			dmuci_get_value_by_section_string(iface_s, "device", &linker);
 			adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
 		}
-	} else
+	} else {
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
+		if (!(*value) || (*value)[0] == 0) {
+			struct uci_section *device_s = get_dup_section_in_config_opt("network", "device", "name", linker);
+			dmuci_get_value_by_section_string(device_s, "ifname", &linker);
+			adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
+		}
+	}
 	return 0;
 }
 
