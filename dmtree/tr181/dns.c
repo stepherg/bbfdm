@@ -743,11 +743,13 @@ static operation_args dns_diagnostics_nslookup_args = {
 	},
 	.out = (const char *[]) {
 		"Status",
-		"AnswerType",
-		"HostNameReturned",
-		"IPAddresses",
-		"DNSServerIP",
-		"ResponseTime",
+		"SuccessCount",
+		"Result.{i}.Status",
+		"Result.{i}.AnswerType",
+		"Result.{i}.HostNameReturned",
+		"Result.{i}.IPAddresses",
+		"Result.{i}.DNSServerIP",
+		"Result.{i}.ResponseTime",
 		NULL
 	}
 };
@@ -769,6 +771,7 @@ static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmc
 	char *nslookup_response_time[2] = {0};
 	int i = 1;
 
+	init_diagnostics_operation("NSLookupResult", NSLOOKUP_PATH);
 	init_diagnostics_operation("nslookup", NSLOOKUP_PATH);
 
 	char *hostname = dmjson_get_value((json_object *)value, 1, "HostName");
@@ -793,7 +796,9 @@ static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmc
 	// Allocate uci_ctx_bbfdm
 	dmuci_init_bbfdm();
 
+	char *status = get_diagnostics_option("nslookup", "DiagnosticState");
 	char *success_count = get_diagnostics_option("nslookup", "SuccessCount");
+	add_list_parameter(ctx, dmstrdup("Status"), status, DMT_TYPE[DMT_STRING], NULL);
 	add_list_parameter(ctx, dmstrdup("SuccessCount"), success_count, DMT_TYPE[DMT_UNINT], NULL);
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "NSLookupResult", s) {

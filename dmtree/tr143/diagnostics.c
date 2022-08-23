@@ -214,6 +214,12 @@ static int set_ip_ping_DSCP(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
+static int get_IPDiagnosticsIPPing_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_diagnostics_option("ipping", "IPAddressUsed");
+	return 0;
+}
+
 static int get_ip_ping_success_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = get_diagnostics_option_fallback_def("ipping", "SuccessCount", "0");
@@ -479,6 +485,12 @@ static int get_IPDiagnosticsTraceRoute_ResponseTime(char *refparam, struct dmctx
 	return 0;
 }
 
+static int get_IPDiagnosticsTraceRoute_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_diagnostics_option("traceroute", "IPAddressUsed");
+	return 0;
+}
+
 static int get_IPDiagnosticsTraceRoute_RouteHopsNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = get_diagnostics_option_fallback_def("traceroute", "NumberOfHops", "0");
@@ -685,6 +697,12 @@ static int set_IPDiagnosticsDownloadDiagnostics_NumberOfConnections(char *refpar
 			set_diagnostics_option("download", "NumberOfConnections", value);
 			return 0;
 	}
+	return 0;
+}
+
+static int get_IPDiagnosticsDownloadDiagnostics_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_diagnostics_option("download", "IPAddressUsed");
 	return 0;
 }
 
@@ -1031,6 +1049,12 @@ static int set_IPDiagnosticsUploadDiagnostics_NumberOfConnections(char *refparam
 			set_diagnostics_option("upload", "NumberOfConnections", value);
 			return 0;
 	}
+	return 0;
+}
+
+static int get_IPDiagnosticsUploadDiagnostics_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_diagnostics_option("upload", "IPAddressUsed");
 	return 0;
 }
 
@@ -1419,6 +1443,12 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_ProtocolVersion(char *refparam, s
 	return 0;
 }
 
+static int get_IPDiagnosticsUDPEchoDiagnostics_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_diagnostics_option("udpechodiag", "IPAddressUsed");
+	return 0;
+}
+
 static int get_IPDiagnosticsUDPEchoDiagnostics_SuccessCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = get_diagnostics_option_fallback_def("udpechodiag", "SuccessCount", "0");
@@ -1640,6 +1670,12 @@ static int get_IPDiagnosticsServerSelectionDiagnostics_MaximumResponseTime(char 
 	return 0;
 }
 
+static int get_IPDiagnosticsServerSelectionDiagnostics_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_diagnostics_option("serverselection", "IPAddressUsed");
+	return 0;
+}
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -1747,6 +1783,8 @@ static int operate_IPDiagnostics_IPPing(char *refparam, struct dmctx *ctx, void 
 	// Allocate uci_ctx_bbfdm
 	dmuci_init_bbfdm();
 
+	char *ipping_status = get_diagnostics_option("ipping", "DiagnosticState");
+	char *ipping_ip_address_used = get_diagnostics_option("ipping", "IPAddressUsed");
 	char *ipping_success_count = get_diagnostics_option("ipping", "SuccessCount");
 	char *ipping_failure_count = get_diagnostics_option("ipping", "FailureCount");
 	char *ipping_average_response_time = get_diagnostics_option("ipping", "AverageResponseTime");
@@ -1756,6 +1794,8 @@ static int operate_IPDiagnostics_IPPing(char *refparam, struct dmctx *ctx, void 
 	char *ipping_minimum_response_time_detailed = get_diagnostics_option("ipping", "MinimumResponseTimeDetailed");
 	char *ipping_maximum_response_time_detailed = get_diagnostics_option("ipping", "MaximumResponseTimeDetailed");
 
+	add_list_parameter(ctx, dmstrdup("Status"), ipping_status, DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("IPAddressUsed"), ipping_ip_address_used, DMT_TYPE[DMT_STRING], NULL);
 	add_list_parameter(ctx, dmstrdup("SuccessCount"), ipping_success_count, DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("FailureCount"), ipping_failure_count, DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("AverageResponseTime"), ipping_average_response_time, DMT_TYPE[DMT_UNINT], NULL);
@@ -1784,6 +1824,10 @@ static operation_args ip_diagnostics_trace_route_args = {
 		"Status",
 		"IPAddressUsed",
 		"ResponseTime",
+		"RouteHops.{i}.Host",
+		"RouteHops.{i}.HostAddress",
+		"RouteHops.{i}.ErrorCode",
+		"RouteHops.{i}.RTTimes",
 		NULL
 	}
 };
@@ -1803,6 +1847,7 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 	char *route_hops_errorcode = NULL;
 	int i = 1;
 
+	init_diagnostics_operation("RouteHops", TRACEROUTE_PATH);
 	init_diagnostics_operation("traceroute", TRACEROUTE_PATH);
 
 	char *host = dmjson_get_value((json_object *)value, 1, "Host");
@@ -1834,7 +1879,11 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 	// Allocate uci_ctx_bbfdm
 	dmuci_init_bbfdm();
 
+	char *status = get_diagnostics_option("traceroute", "DiagnosticState");
+	char *ip_address_used = get_diagnostics_option("traceroute", "IPAddressUsed");
 	char *response_time = get_diagnostics_option("traceroute", "ResponseTime");
+	add_list_parameter(ctx, dmstrdup("Status"), status, DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("IPAddressUsed"), ip_address_used, DMT_TYPE[DMT_STRING], NULL);
 	add_list_parameter(ctx, dmstrdup("ResponseTime"), response_time, DMT_TYPE[DMT_UNINT], NULL);
 
 	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "RouteHops", s) {
@@ -1886,6 +1935,19 @@ static operation_args ip_diagnostics_download_args = {
 		"PeriodOfFullLoading",
 		"TCPOpenRequestTime",
 		"TCPOpenResponseTime",
+		"PerConnectionResult.{i}.ROMTime",
+		"PerConnectionResult.{i}.BOMTime",
+		"PerConnectionResult.{i}.EOMTime",
+		"PerConnectionResult.{i}.TestBytesReceived",
+		"PerConnectionResult.{i}.TotalBytesReceived",
+		"PerConnectionResult.{i}.TotalBytesSent",
+		"PerConnectionResult.{i}.TCPOpenRequestTime",
+		"PerConnectionResult.{i}.TCPOpenResponseTime",
+		"IncrementalResult.{i}.TestBytesReceived",
+		"IncrementalResult.{i}.TotalBytesReceived",
+		"IncrementalResult.{i}.TotalBytesSent",
+		"IncrementalResult.{i}.StartTime",
+		"IncrementalResult.{i}.EndTime",
 		NULL
 	}
 };
@@ -1921,6 +1983,8 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 	if (start_upload_download_diagnostic(DOWNLOAD_DIAGNOSTIC) == -1)
 		return CMD_FAIL;
 
+	char *status = get_diagnostics_option("download", "DiagnosticState");
+	char *ip_address_used = get_diagnostics_option("download", "IPAddressUsed");
 	char *romtime = get_diagnostics_option("download", "ROMtime");
 	char *bomtime = get_diagnostics_option("download", "BOMtime");
 	char *eomtime = get_diagnostics_option("download", "EOMtime");
@@ -1934,6 +1998,8 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 	char *tcp_open_request_time = get_diagnostics_option("download", "TCPOpenRequestTime");
 	char *tcp_open_response_time = get_diagnostics_option("download", "TCPOpenResponseTime");
 
+	add_list_parameter(ctx, dmstrdup("Status"), status, DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("IPAddressUsed"), ip_address_used, DMT_TYPE[DMT_STRING], NULL);
 	add_list_parameter(ctx, dmstrdup("ROMTime"), romtime, DMT_TYPE[DMT_TIME], NULL);
 	add_list_parameter(ctx, dmstrdup("BOMTime"), bomtime, DMT_TYPE[DMT_TIME], NULL);
 	add_list_parameter(ctx, dmstrdup("EOMTime"), eomtime, DMT_TYPE[DMT_TIME], NULL);
@@ -1980,6 +2046,19 @@ static operation_args ip_diagnostics_upload_args = {
 		"PeriodOfFullLoading",
 		"TCPOpenRequestTime",
 		"TCPOpenResponseTime",
+		"PerConnectionResult.{i}.ROMTime",
+		"PerConnectionResult.{i}.BOMTime",
+		"PerConnectionResult.{i}.EOMTime",
+		"PerConnectionResult.{i}.TestBytesSent",
+		"PerConnectionResult.{i}.TotalBytesReceived",
+		"PerConnectionResult.{i}.TotalBytesSent",
+		"PerConnectionResult.{i}.TCPOpenRequestTime",
+		"PerConnectionResult.{i}.TCPOpenResponseTime",
+		"IncrementalResult.{i}.TestBytesSent",
+		"IncrementalResult.{i}.TotalBytesReceived",
+		"IncrementalResult.{i}.TotalBytesSent",
+		"IncrementalResult.{i}.StartTime",
+		"IncrementalResult.{i}.EndTime",
 		NULL
 	}
 };
@@ -2021,6 +2100,8 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 	if (start_upload_download_diagnostic(UPLOAD_DIAGNOSTIC) == -1)
 		return CMD_FAIL;
 
+	char *upload_status = get_diagnostics_option("upload", "DiagnosticState");
+	char *upload_ip_address_used = get_diagnostics_option("upload", "IPAddressUsed");
 	char *upload_romtime = get_diagnostics_option("upload", "ROMtime");
 	char *upload_bomtime = get_diagnostics_option("upload", "BOMtime");
 	char *upload_eomtime = get_diagnostics_option("upload", "EOMtime");
@@ -2034,6 +2115,8 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 	char *upload_tcp_open_request_time = get_diagnostics_option("upload", "TCPOpenRequestTime");
 	char *upload_tcp_open_response_time = get_diagnostics_option("upload", "TCPOpenResponseTime");
 
+	add_list_parameter(ctx, dmstrdup("Status"), upload_status, DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("IPAddressUsed"), upload_ip_address_used, DMT_TYPE[DMT_STRING], NULL);
 	add_list_parameter(ctx, dmstrdup("ROMTime"), upload_romtime, DMT_TYPE[DMT_TIME], NULL);
 	add_list_parameter(ctx, dmstrdup("BOMTime"), upload_bomtime, DMT_TYPE[DMT_TIME], NULL);
 	add_list_parameter(ctx, dmstrdup("EOMTime"), upload_eomtime, DMT_TYPE[DMT_TIME], NULL);
@@ -2053,33 +2136,33 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 static operation_args ip_diagnostics_udpecho_args = {
 	.in = (const char *[]) {
 		"Interface",
-		"UploadURL",
+		"Host",
+		"Port",
+		"NumberOfRepetitions",
+		"Timeout",
+		"DataBlockSize",
 		"DSCP",
-		"EthernetPriority",
-		"TestFileLength",
-		"TimeBasedTestDuration",
-		"TimeBasedTestMeasurementInterval",
-		"TimeBasedTestMeasurementOffset",
+		"InterTransmissionTime",
 		"ProtocolVersion",
-		"NumberOfConnections",
-		"EnablePerConnectionResults",
+		"EnableIndividualPacketResults",
 		NULL
 	},
 	.out = (const char *[]) {
 		"Status",
 		"IPAddressUsed",
-		"ROMTime",
-		"BOMTime",
-		"EOMTime",
-		"TestBytesSent",
-		"TotalBytesReceived",
-		"TotalBytesSent",
-		"TestBytesSentUnderFullLoading",
-		"TotalBytesReceivedUnderFullLoading",
-		"TotalBytesSentUnderFullLoading",
-		"PeriodOfFullLoading",
-		"TCPOpenRequestTime",
-		"TCPOpenResponseTime",
+		"SuccessCount",
+		"FailureCount",
+		"AverageResponseTime",
+		"MinimumResponseTime",
+		"MaximumResponseTime",
+		"IndividualPacketResult.{i}.PacketSuccess",
+		"IndividualPacketResult.{i}.PacketSendTime",
+		"IndividualPacketResult.{i}.PacketReceiveTime",
+		"IndividualPacketResult.{i}.TestGenSN",
+		"IndividualPacketResult.{i}.TestRespSN",
+		"IndividualPacketResult.{i}.TestRespRcvTimeStamp",
+		"IndividualPacketResult.{i}.TestRespReplyTimeStamp",
+		"IndividualPacketResult.{i}.TestRespReplyFailureCount",
 		NULL
 	}
 };
@@ -2125,12 +2208,16 @@ static int operate_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx
 	// Allocate uci_ctx_bbfdm
 	dmuci_init_bbfdm();
 
+	char *status = get_diagnostics_option("udpechodiag", "DiagnosticState");
+	char *ip_address_used = get_diagnostics_option("udpechodiag", "IPAddressUsed");
 	char *udpecho_success_count = get_diagnostics_option("udpechodiag", "SuccessCount");
 	char *udpecho_failure_count = get_diagnostics_option("udpechodiag", "FailureCount");
 	char *udpecho_average_response_time = get_diagnostics_option("udpechodiag", "AverageResponseTime");
 	char *udpecho_minimum_response_time = get_diagnostics_option("udpechodiag", "MinimumResponseTime");
 	char *udpecho_maximum_response_time = get_diagnostics_option("udpechodiag", "MaximumResponseTime");
 
+	add_list_parameter(ctx, dmstrdup("Status"), status, DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("IPAddressUsed"), ip_address_used, DMT_TYPE[DMT_STRING], NULL);
 	add_list_parameter(ctx, dmstrdup("SuccessCount"), udpecho_success_count, DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("FailureCount"), udpecho_failure_count, DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("AverageResponseTime"), udpecho_average_response_time, DMT_TYPE[DMT_UNINT], NULL);
@@ -2158,7 +2245,7 @@ static operation_args ip_diagnostics_server_selection_args = {
 		"MaximumResponseTime",
 		"IPAddressUsed",
 		NULL
-	}	
+	}
 };
 
 static int get_operate_args_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -2198,15 +2285,19 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 	// Allocate uci_ctx_bbfdm
 	dmuci_init_bbfdm();
 
+	char *status = get_diagnostics_option("serverselection", "DiagnosticState");
 	char *fasthost = get_diagnostics_option("serverselection", "FastestHost");
 	char *average_response_time = get_diagnostics_option("serverselection", "AverageResponseTime");
 	char *minimum_response_time = get_diagnostics_option("serverselection", "MinimumResponseTime");
 	char *maximum_response_time = get_diagnostics_option("serverselection", "MaximumResponseTime");
+	char *ip_address_used = get_diagnostics_option("serverselection", "IPAddressUsed");
 
+	add_list_parameter(ctx, dmstrdup("Status"), status, DMT_TYPE[DMT_STRING], NULL);
 	add_list_parameter(ctx, dmstrdup("FastestHost"), fasthost, DMT_TYPE[DMT_STRING], NULL);
 	add_list_parameter(ctx, dmstrdup("AverageResponseTime"), average_response_time, DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("MinimumResponseTime"), minimum_response_time, DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("MaximumResponseTime"), maximum_response_time, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("IPAddressUsed"), ip_address_used, DMT_TYPE[DMT_STRING], NULL);
 
 	return CMD_SUCCESS;
 }
@@ -2260,6 +2351,7 @@ DMLEAF tIPDiagnosticsIPPingParams[] = {
 {"Timeout", &DMWRITE, DMT_UNINT, get_ip_ping_timeout, set_ip_ping_timeout, BBFDM_CWMP},
 {"DataBlockSize", &DMWRITE, DMT_UNINT, get_ip_ping_block_size, set_ip_ping_block_size, BBFDM_CWMP},
 {"DSCP", &DMWRITE, DMT_UNINT, get_ip_ping_DSCP, set_ip_ping_DSCP, BBFDM_CWMP},
+{"IPAddressUsed", &DMREAD, DMT_STRING, get_IPDiagnosticsIPPing_IPAddressUsed, NULL, BBFDM_CWMP},
 {"SuccessCount", &DMREAD, DMT_UNINT, get_ip_ping_success_count, NULL, BBFDM_CWMP},
 {"FailureCount", &DMREAD, DMT_UNINT, get_ip_ping_failure_count, NULL, BBFDM_CWMP},
 {"AverageResponseTime", &DMREAD, DMT_UNINT, get_ip_ping_average_response_time, NULL, BBFDM_CWMP},
@@ -2290,6 +2382,7 @@ DMLEAF tIPDiagnosticsTraceRouteParams[] = {
 {"DSCP", &DMWRITE, DMT_UNINT, get_IPDiagnosticsTraceRoute_DSCP, set_IPDiagnosticsTraceRoute_DSCP, BBFDM_CWMP},
 {"MaxHopCount", &DMWRITE, DMT_UNINT, get_IPDiagnosticsTraceRoute_MaxHopCount, set_IPDiagnosticsTraceRoute_MaxHopCount, BBFDM_CWMP},
 {"ResponseTime", &DMREAD, DMT_UNINT, get_IPDiagnosticsTraceRoute_ResponseTime, NULL, BBFDM_CWMP},
+{"IPAddressUsed", &DMREAD, DMT_STRING, get_IPDiagnosticsTraceRoute_IPAddressUsed, NULL, BBFDM_CWMP},
 {"RouteHopsNumberOfEntries", &DMREAD, DMT_UNINT, get_IPDiagnosticsTraceRoute_RouteHopsNumberOfEntries, NULL, BBFDM_CWMP},
 {0}
 };
@@ -2322,6 +2415,7 @@ DMLEAF tIPDiagnosticsDownloadDiagnosticsParams[] = {
 {"EthernetPriority", &DMWRITE, DMT_UNINT, get_IPDiagnosticsDownloadDiagnostics_EthernetPriority, set_IPDiagnosticsDownloadDiagnostics_EthernetPriority, BBFDM_CWMP},
 {"ProtocolVersion", &DMWRITE, DMT_STRING, get_IPDiagnosticsDownloadDiagnostics_ProtocolVersion, set_IPDiagnosticsDownloadDiagnostics_ProtocolVersion, BBFDM_CWMP},
 {"NumberOfConnections", &DMWRITE, DMT_UNINT, get_IPDiagnosticsDownloadDiagnostics_NumberOfConnections, set_IPDiagnosticsDownloadDiagnostics_NumberOfConnections, BBFDM_CWMP},
+{"IPAddressUsed", &DMREAD, DMT_STRING, get_IPDiagnosticsDownloadDiagnostics_IPAddressUsed, NULL, BBFDM_CWMP},
 {"ROMTime", &DMREAD, DMT_TIME, get_IPDiagnosticsDownloadDiagnostics_ROMTime, NULL, BBFDM_CWMP},
 {"BOMTime", &DMREAD, DMT_TIME, get_IPDiagnosticsDownloadDiagnostics_BOMTime, NULL, BBFDM_CWMP},
 {"EOMTime", &DMREAD, DMT_TIME, get_IPDiagnosticsDownloadDiagnostics_EOMTime, NULL, BBFDM_CWMP},
@@ -2371,6 +2465,7 @@ DMLEAF tIPDiagnosticsUploadDiagnosticsParams[] = {
 {"TestFileLength", &DMWRITE, DMT_UNINT, get_IPDiagnosticsUploadDiagnostics_TestFileLength, set_IPDiagnosticsUploadDiagnostics_TestFileLength, BBFDM_CWMP},
 {"ProtocolVersion", &DMWRITE, DMT_STRING, get_IPDiagnosticsUploadDiagnostics_ProtocolVersion, set_IPDiagnosticsUploadDiagnostics_ProtocolVersion, BBFDM_CWMP},
 {"NumberOfConnections", &DMWRITE, DMT_UNINT, get_IPDiagnosticsUploadDiagnostics_NumberOfConnections, set_IPDiagnosticsUploadDiagnostics_NumberOfConnections, BBFDM_CWMP},
+{"IPAddressUsed", &DMREAD, DMT_STRING, get_IPDiagnosticsUploadDiagnostics_IPAddressUsed, NULL, BBFDM_CWMP},
 {"ROMTime", &DMREAD, DMT_TIME, get_IPDiagnosticsUploadDiagnostics_ROMTime, NULL, BBFDM_CWMP},
 {"BOMTime", &DMREAD, DMT_TIME, get_IPDiagnosticsUploadDiagnostics_BOMTime, NULL, BBFDM_CWMP},
 {"EOMTime", &DMREAD, DMT_TIME, get_IPDiagnosticsUploadDiagnostics_EOMTime, NULL, BBFDM_CWMP},
@@ -2415,6 +2510,7 @@ DMLEAF tIPDiagnosticsUDPEchoDiagnosticsParams[] = {
 {"DSCP", &DMWRITE, DMT_UNINT, get_IPDiagnosticsUDPEchoDiagnostics_DSCP, set_IPDiagnosticsUDPEchoDiagnostics_DSCP, BBFDM_CWMP},
 {"InterTransmissionTime", &DMWRITE, DMT_UNINT, get_IPDiagnosticsUDPEchoDiagnostics_InterTransmissionTime, set_IPDiagnosticsUDPEchoDiagnostics_InterTransmissionTime, BBFDM_CWMP},
 {"ProtocolVersion", &DMWRITE, DMT_STRING, get_IPDiagnosticsUDPEchoDiagnostics_ProtocolVersion, set_IPDiagnosticsUDPEchoDiagnostics_ProtocolVersion, BBFDM_CWMP},
+{"IPAddressUsed", &DMREAD, DMT_STRING, get_IPDiagnosticsUDPEchoDiagnostics_IPAddressUsed, NULL, BBFDM_CWMP},
 {"SuccessCount", &DMREAD, DMT_UNINT, get_IPDiagnosticsUDPEchoDiagnostics_SuccessCount, NULL, BBFDM_CWMP},
 {"FailureCount", &DMREAD, DMT_UNINT, get_IPDiagnosticsUDPEchoDiagnostics_FailureCount, NULL, BBFDM_CWMP},
 {"AverageResponseTime", &DMREAD, DMT_UNINT, get_IPDiagnosticsUDPEchoDiagnostics_AverageResponseTime, NULL, BBFDM_CWMP},
@@ -2437,5 +2533,6 @@ DMLEAF tIPDiagnosticsServerSelectionDiagnosticsParams[] = {
 {"MinimumResponseTime", &DMREAD, DMT_UNINT, get_IPDiagnosticsServerSelectionDiagnostics_MinimumResponseTime, NULL, BBFDM_CWMP},
 {"AverageResponseTime", &DMREAD, DMT_UNINT, get_IPDiagnosticsServerSelectionDiagnostics_AverageResponseTime, NULL, BBFDM_CWMP},
 {"MaximumResponseTime", &DMREAD, DMT_UNINT, get_IPDiagnosticsServerSelectionDiagnostics_MaximumResponseTime, NULL, BBFDM_CWMP},
+{"IPAddressUsed", &DMREAD, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_IPAddressUsed, NULL, BBFDM_CWMP},
 {0}
 };

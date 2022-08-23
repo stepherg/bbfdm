@@ -3,7 +3,7 @@
 # Author: IMEN Bhiri <imen.bhiri@pivasoftware.com>
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-. /usr/share/bbfdm/bbf_uci_api
+. /usr/share/bbfdm/bbf_api
 
 CAPTURE_FILE="/tmp/download_dump"
 
@@ -12,8 +12,11 @@ download_launch() {
 	device=$2
 
 	[ "$url" = "" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.download.DiagnosticState=Error_InitConnectionFailed; $UCI_COMMIT_BBF_DMMAP; return; }
+	interface=$(uci_get_bbf_dmmap dmmap_diagnostics.download.interface)
 	protocol=$(uci_get_bbf_dmmap dmmap_diagnostics.download.ProtocolVersion Any)
 	if [ "$protocol" = "IPv4" ]; then proto="--ipv4"; elif [ "$protocol" = "IPv6" ]; then proto="--ipv6"; else proto=""; fi
+	ip_addr_used=$(get_ip_addr_used $protocol $interface)
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.IPAddressUsed="$ip_addr_used"
 	# Disable acceleration on Broadcom devices to capture all packets with tcpdump
 	[ -e /usr/sbin/fcctl ] && { fcctl disable >/dev/null 2>&1; fcctl flush >/dev/null 2>&1; }
 	

@@ -2,7 +2,7 @@
 # Copyright (C) 2022 iopsys Software Solutions AB
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-. /usr/share/bbfdm/bbf_uci_api
+. /usr/share/bbfdm/bbf_api
 
 udpecho_error()
 {
@@ -27,6 +27,8 @@ udpecho_launch() {
 	inter_time=$(uci_get_bbf_dmmap dmmap_diagnostics.udpechodiag.InterTransmissionTime 1000)
 	[ -n "$interface" ] && device=$(ifstatus "$interface" | jsonfilter -e @.device) && device="-i $device" || device=""
 	if [ "$protocol" = "IPv4" ]; then proto="4"; elif [ "$protocol" = "IPv6" ]; then proto="6"; else proto="4"; fi
+	ip_addr_used=$(get_ip_addr_used $protocol $interface)
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.udpechodiag.IPAddressUsed="$ip_addr_used"
 	tos=$((dscp<<2))
 	inter_time=$((inter_time/1000))
 	[ "$inter_time" = "0" ] && inter_time="1"
