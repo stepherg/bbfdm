@@ -1176,14 +1176,22 @@ static void test_api_bbfdm_valid_standard_operate(void **state)
 	assert_int_equal(fault, CMD_SUCCESS);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
-		if (DM_STRCMP(n->name, "SuccessCount") == 0) {
+		if (DM_STRCMP(n->name, "Status") == 0) {
+			assert_string_equal(n->data, "Complete");
+			assert_string_equal(n->type, "xsd:string");
+		} else if (DM_STRCMP(n->name, "IPAddressUsed") == 0) {
+			assert_string_equal(n->data, "");
+			assert_string_equal(n->type, "xsd:string");
+		} else if (DM_STRCMP(n->name, "SuccessCount") == 0) {
 			assert_string_equal(n->data, "1");
+			assert_string_equal(n->type, "xsd:unsignedInt");
 		} else if (DM_STRCMP(n->name, "FailureCount") == 0) {
 			assert_string_equal(n->data, "0");
+			assert_string_equal(n->type, "xsd:unsignedInt");
 		} else {
 			assert_string_not_equal(n->data, "0");
+			assert_string_equal(n->type, "xsd:unsignedInt");
 		}
-		assert_string_equal(n->type, "xsd:unsignedInt");
 	}
 }
 

@@ -23,3 +23,24 @@ uci_get_bbf_dmmap() {
 	val=$($UCI_GET_BBF_DMMAP $1)
 	echo ${val:-$2}
 }
+
+get_ip_addr_used() {
+	protocol=$1
+	interface=$2
+
+	if [ "$protocol" = "IPv6" ]; then
+		if [ -n "$interface" ]; then
+			ip_addr_used=$(ifstatus "$interface" | jsonfilter -e '@["ipv6-address"][0].address')
+		else
+			ip_addr_used=$(ip -6 route | grep default | awk -F ' ' '{print $9}')
+		fi
+	else
+		if [ -n "$interface" ]; then
+			ip_addr_used=$(ifstatus "$interface" | jsonfilter -e '@["ipv4-address"][0].address')
+		else
+			ip_addr_used=$(ip route | grep default | awk -F ' ' '{print $9}')
+		fi
+	fi
+	
+	echo ${ip_addr_used}
+}

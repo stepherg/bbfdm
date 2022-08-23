@@ -2,7 +2,7 @@
 # Copyright (C) 2022 iopsys Software Solutions AB
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-. /usr/share/bbfdm/bbf_uci_api
+. /usr/share/bbfdm/bbf_api
 
 serverselection_launch() {
 	hostlist=$(uci_get_bbf_dmmap dmmap_diagnostics.serverselection.HostList)
@@ -13,6 +13,8 @@ serverselection_launch() {
 	protoversion=$(uci_get_bbf_dmmap dmmap_diagnostics.serverselection.ProtocolVersion Any)
 	protocol=$(uci_get_bbf_dmmap dmmap_diagnostics.serverselection.Protocol ICMP)
 	if [ "$protoversion" = "IPv4" ]; then proto="-4"; elif [ "$protoversion" = "IPv6" ]; then proto="-6"; else proto=""; fi
+	ip_addr_used=$(get_ip_addr_used $protoversion $interface)
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.IPAddressUsed="$ip_addr_used"
 	[ "$hostlist" = "" ] && return
 	timeout=$((timeout/1000))
 	[ "$timeout" = "0" ] && timeout="1"

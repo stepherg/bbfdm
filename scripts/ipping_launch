@@ -3,7 +3,7 @@
 # Author: MOHAMED Kallel <mohamed.kallel@pivasoftware.com>
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
-. /usr/share/bbfdm/bbf_uci_api
+. /usr/share/bbfdm/bbf_api
 
 ipping_error()
 {
@@ -28,6 +28,8 @@ ipping_launch() {
 	protocol=$(uci_get_bbf_dmmap dmmap_diagnostics.ipping.ProtocolVersion Any)
 	[ -n "$interface" ] && device=$(ifstatus "$interface" | jsonfilter -e @.device) && device="-I $device" || device=""
 	if [ "$protocol" = "IPv4" ]; then proto="-4"; elif [ "$protocol" = "IPv6" ]; then proto="-6"; else proto=""; fi
+	ip_addr_used=$(get_ip_addr_used $protocol $interface)
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.IPAddressUsed="$ip_addr_used"
 	[ "$host" = "" ] && return
 	timeout=$((timeout/1000))
 	[ "$timeout" = "0" ] && timeout="1"
