@@ -33,11 +33,11 @@ serverselection_launch() {
 				i=$((i+1))
 				res=$(ping -q $proto -c 1 -W $timeout $device $host 2>&1)
 				ba=$(echo "$res" | grep "bad address")
-				[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; break; }
+				[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; return; }
 				ba=$(echo "$res" | grep "unknown host")
-				[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; break; }
+				[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; return; }
 				stc=$(echo "$res" | grep "received")
-				[ -z "$stc" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_Other; $UCI_COMMIT_BBF_DMMAP; break; }
+				[ -z "$stc" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState=Error_Other; $UCI_COMMIT_BBF_DMMAP; return; }
 				times=$(echo "$res" | grep "min/avg/max")
 				[ -z "$times" ] && break
 				sc1=$(echo "$stc" | awk '{print $4}')

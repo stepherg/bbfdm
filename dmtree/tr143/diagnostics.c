@@ -1847,8 +1847,8 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 	char *route_hops_errorcode = NULL;
 	int i = 1;
 
-	init_diagnostics_operation("RouteHops", TRACEROUTE_PATH);
 	init_diagnostics_operation("traceroute", TRACEROUTE_PATH);
+	remove_unused_diagnostic_sections("RouteHops");
 
 	char *host = dmjson_get_value((json_object *)value, 1, "Host");
 	if (host[0] == '\0')
