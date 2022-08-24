@@ -78,6 +78,16 @@ void init_diagnostics_operation(char *sec_name, char *operation_path)
 	dmcmd("/bin/sh", 2, operation_path, "stop");
 }
 
+void remove_unused_diagnostic_sections(char *sec_name)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+
+	check_create_dmmap_package(DMMAP_DIAGNOSTIGS);
+	uci_path_foreach_sections_safe(bbfdm, DMMAP_DIAGNOSTIGS, sec_name, stmp, s) {
+		dmuci_delete_by_section_bbfdm(s, NULL, NULL);
+	}
+}
+
 void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value)
 {
 	char *linker = NULL;

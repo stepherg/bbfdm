@@ -771,8 +771,8 @@ static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmc
 	char *nslookup_response_time[2] = {0};
 	int i = 1;
 
-	init_diagnostics_operation("NSLookupResult", NSLOOKUP_PATH);
 	init_diagnostics_operation("nslookup", NSLOOKUP_PATH);
+	remove_unused_diagnostic_sections("NSLookupResult");
 
 	char *hostname = dmjson_get_value((json_object *)value, 1, "HostName");
 	if (hostname[0] == '\0')

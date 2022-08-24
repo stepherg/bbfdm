@@ -21,7 +21,11 @@ traceroute_launch() {
 	[ "$timeout" = "0" ] && timeout="1"
 	i=-2
 	rm -f /tmp/traceres
-	traceroute -m $maxhop -w $timeout -q $cnt $proto $device $host $dsize 2>&1 >/tmp/traceres
+	res=$(traceroute -m $maxhop -w $timeout -q $cnt $proto $device $host $dsize 2>&1 >/tmp/traceres)
+	error_code="$?"
+	ba=$(echo "$res" | grep "bad address")
+	[ -n "$ba" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.DiagnosticState=Error_CannotResolveHostName; $UCI_COMMIT_BBF_DMMAP; return; }
+	[ "$error_code" != "0" ] && { $UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.DiagnosticState=Error_Other; $UCI_COMMIT_BBF_DMMAP; return; }
 	while read _ host ip time _; do
 		[ "$host" = "*" ] && [ "$ip" = "*" ] && continue
 		i=$((i+1))
