@@ -56,6 +56,12 @@ static int get_device_fwimage_linker(char *refparam, struct dmctx *dmctx, void *
 	return 0;
 }
 
+static int get_linker_process(char* refparam, struct dmctx *ctx, void *data, char *instance, char **linker)
+{
+	*linker = data ? ((struct process_entry *)data)->pid : "";
+	return 0;
+}
+
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
@@ -1479,7 +1485,7 @@ DMLEAF tDeviceInfoMemoryStatusParams[] = {
 /* *** Device.DeviceInfo.ProcessStatus. *** */
 DMOBJ tDeviceInfoProcessStatusObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Process", &DMREAD, NULL, NULL, NULL, browseProcessEntriesInst, NULL, NULL, NULL, tDeviceInfoProcessStatusProcessParams, NULL, BBFDM_BOTH, LIST_KEY{"PID", NULL}, "2.0"},
+{"Process", &DMREAD, NULL, NULL, NULL, browseProcessEntriesInst, NULL, NULL, NULL, tDeviceInfoProcessStatusProcessParams, get_linker_process, BBFDM_BOTH, LIST_KEY{"PID", NULL}, "2.0"},
 {0}
 };
 
