@@ -196,9 +196,11 @@ static int browseIEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905NeighborInst(
 			curr_nonieee1905neighbor_args.neighbor = neighbor;
 			inst = handle_instance_without_section(dmctx, parent_node, ++id);
 			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_nonieee1905neighbor_args, inst) == DM_STOP)
-				break;
+				goto end;
 		}
 	}
+
+end:
 	return 0;
 }
 
