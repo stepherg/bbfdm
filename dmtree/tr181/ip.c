@@ -1588,18 +1588,62 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 static int get_IPInterface_Router(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "Device.Routing.Router.1";
+	struct uci_section *dmmap_section = NULL;
+
+	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
+	dmuci_get_value_by_section_string(dmmap_section, "Router", value);
+
+	if ((*value)[0] == '\0') {
+		char *ip4table = NULL;
+
+		dmuci_get_value_by_section_string((struct uci_section *)data, "ip4table", &ip4table);
+		adm_entry_get_linker_param(ctx, "Device.Routing.Router.", DM_STRLEN(ip4table) ? ip4table : "254", value);
+	} else {
+		char *linker = NULL;
+
+		adm_entry_get_linker_value(ctx, *value, &linker);
+		if (!linker || *linker == 0)
+			*value = "Device.Routing.Router.1";
+	}
 	return 0;
 }
 
 static int set_IPInterface_Router(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *allowed_objects[] = {"Device.Routing.Router.", NULL};
+	struct uci_section *s = NULL;
+	char *rt_table = NULL;
+	char buf[32] = {0};
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 256, NULL, NULL))
 				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
+			adm_entry_get_linker_value(ctx, value, &rt_table);
+			if (!rt_table || *rt_table == 0)
+				return FAULT_9007;
+
+			dmuci_set_value_by_section((struct uci_section *)data, "ip4table", rt_table);
+			dmuci_set_value_by_section((struct uci_section *)data, "ip6table", rt_table);
+
+			snprintf(buf, sizeof(buf), "@%s", section_name((struct uci_section *)data));
+
+			uci_foreach_sections("network", "interface", s) {
+				char *int_device = NULL;
+
+				dmuci_get_value_by_section_string(s, "device", &int_device);
+				if (DM_STRCMP(int_device, buf) != 0)
+					continue;
+
+				dmuci_set_value_by_section(s, "ip4table", rt_table);
+				dmuci_set_value_by_section(s, "ip6table", rt_table);
+			}
 			break;
 	}
 	return 0;

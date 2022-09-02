@@ -63647,7 +63647,7 @@
 							"section": {
 								"type": "route"
 							},
-							"dmmapfile": "dmmap_route_forwarding"
+							"dmmapfile": "dmmap_routing"
 						}
 					},
 					"Enable": {
@@ -63916,7 +63916,7 @@
 							"section": {
 								"type": "route6"
 							},
-							"dmmapfile": "dmmap_route_forwarding"
+							"dmmapfile": "dmmap_routing"
 						}
 					},
 					"Enable": {
