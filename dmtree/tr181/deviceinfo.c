@@ -12,6 +12,7 @@
 
 #include "dmdiagnostics.h"
 #include "deviceinfo.h"
+#include "sys/statvfs.h"
 
 extern struct list_head main_memhead;
 
@@ -1074,6 +1075,32 @@ static int get_memory_status_free(char* refparam, struct dmctx *ctx, void *data,
 	return 0;
 }
 
+static int get_memory_status_total_persistent(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct statvfs dinfo;
+	if (statvfs("/overlay/", &dinfo) == 0) {
+		unsigned int total = (dinfo.f_bsize * dinfo.f_blocks) / 1024;
+		dmasprintf(value, "%u", total);
+	} else {
+		*value = "0";
+	}
+
+	return 0;
+}
+
+static int get_memory_status_free_persistent(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct statvfs dinfo;
+	if (statvfs("/overlay/", &dinfo) == 0) {
+		unsigned int free = (dinfo.f_bsize * dinfo.f_bavail) / 1024;
+		dmasprintf(value, "%u", free);
+	} else {
+		*value = "0";
+	}
+
+	return 0;
+}
+
 /*#Device.DeviceInfo.ProcessStatus.CPUUsage!UBUS:router.system/process//cpu_usage*/
 static int get_process_cpu_usage(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1480,6 +1507,8 @@ DMLEAF tDeviceInfoMemoryStatusParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Total", &DMREAD, DMT_UNINT, get_memory_status_total, NULL, BBFDM_BOTH, "2.0"},
 {"Free", &DMREAD, DMT_UNINT, get_memory_status_free, NULL, BBFDM_BOTH, "2.0"},
+{"TotalPersistent", &DMREAD, DMT_UNINT, get_memory_status_total_persistent, NULL, BBFDM_BOTH, "2.15"},
+{"FreePersistent", &DMREAD, DMT_UNINT, get_memory_status_free_persistent, NULL, BBFDM_BOTH, "2.15"},
 {0}
 };
 /* *** Device.DeviceInfo.ProcessStatus. *** */
