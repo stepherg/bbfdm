@@ -14,6 +14,37 @@
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
+void firewall__create_zone_section(char *s_name)
+{
+	struct uci_section *s = NULL;
+	char *input = NULL;
+	char *output = NULL;
+	char *forward = NULL;
+
+	dmuci_get_option_value_string("firewall", "@defaults[0]", "input", &input);
+	dmuci_get_option_value_string("firewall", "@defaults[0]", "output", &output);
+	dmuci_get_option_value_string("firewall", "@defaults[0]", "forward", &forward);
+
+	dmuci_add_section("firewall", "zone", &s);
+	dmuci_rename_section_by_section(s, s_name);
+	dmuci_set_value_by_section(s, "name", s_name);
+	dmuci_set_value_by_section(s, "input", input);
+	dmuci_set_value_by_section(s, "output", output);
+	dmuci_set_value_by_section(s, "forward", forward);
+	dmuci_add_list_value_by_section(s, "network", s_name);
+}
+
+static bool firewall_zone_exists(char *s_name)
+{
+	struct uci_section *s = NULL;
+
+	uci_foreach_option_eq("firewall", "zone", "name", s_name, s) {
+		return true;
+	}
+
+	return false;
+}
+
 static void create_portmapping_section(bool b)
 {
 	struct uci_section *s = NULL;
@@ -1034,19 +1065,12 @@ static int set_rule_interface(struct dmctx *ctx, void *data, char *type, char *v
 			} else {
 				adm_entry_get_linker_value(ctx, value, &iface);
 				if (iface && iface[0] != '\0') {
-					struct uci_section *s = NULL;
-					char *net;
 
-					uci_foreach_sections("firewall", "zone", s) {
-						dmuci_get_value_by_section_string(s, "network", &net);
-						if (dm_strword(net, iface)) {
-							char *zone_name;
+					// check if firewall zone exists
+					if (!firewall_zone_exists(iface))
+						firewall__create_zone_section(iface);
 
-							dmuci_get_value_by_section_string(s, "name", &zone_name);
-							dmuci_set_value_by_section((option && DM_LSTRCMP(option, "*") == 0) ? ((struct dmmap_dup *)data)->dmmap_section : ((struct dmmap_dup *)data)->config_section, type, zone_name);
-							break;
-						}
-					}
+					dmuci_set_value_by_section((option && DM_LSTRCMP(option, "*") == 0) ? ((struct dmmap_dup *)data)->dmmap_section : ((struct dmmap_dup *)data)->config_section, type, iface);
 					dmfree(iface);
 				}
 			}
