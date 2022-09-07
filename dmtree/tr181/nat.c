@@ -77,7 +77,6 @@ static int add_NAT_InterfaceSetting(char *refparam, struct dmctx *ctx, void *dat
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "zone", &dmmap_firewall);
 	dmuci_set_value_by_section(dmmap_firewall, "section_name", zone_name);
-	dmuci_set_value_by_section(dmmap_firewall, "added_by_controller", "1");
 	dmuci_set_value_by_section(dmmap_firewall, "interface_setting_instance", *instance);
 	return 0;
 }

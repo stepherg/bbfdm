@@ -1,9 +1,10 @@
 # Firewall
 Aim of this document to explain the TR181 firewall datamodel parameter mappings with firewall and network uci.
 
-In TR-181 firewall definition, we have Device.Firewall.Level., Deivce.Firewall.Chain. and Firewall.Chain.{i}.Rules., which does not have one to one mapping with firewall uci sections. Also due to lack of mapping between Device.IP.Interface and Firewall uci zones, its not possible to define rules for newly created interfaces.
+In TR-181 firewall definition, we have Device.Firewall.Level., Deivce.Firewall.Chain. and Firewall.Chain.{i}.Rules., which does not have one to one mapping with firewall uci sections.
 
-To simplify the mappings, libbbf during bootstrap, does
+So for each new network interface created by libbbf, a new firewall uci zone will be created as follow:
+- Create a Network interface section
 - Create a Firewall zone section corresponding to the Interface section in the network uci file
 - Give it the same name as the interface section in the network uci file.
 - Set the default firewall zone value of input/output/forward to ACCEPT/ACCEPT/ACCEPT for all bridge interface and REJECT/ACCEPT/REJECT for all non bridge interfaces
@@ -31,6 +32,8 @@ config rule ‘x’
     option src ‘iptv’
     option target ‘ACCEPT’
 ```
+
+> Note: when trying to define a rule as Chain.1.Rule.x.SourceInterface = Device.IP.Interface.x and the zone for this interface (Device.IP.Interface.x) doesn't exist in the firewall uci file so, a new firewall zone section corresponding to this interface section will be created.
 
 Similarly, to configure firewall rules for each interfaces, add rule objects in Device.Firewall.Chain.{i}.Rule.{i}. table to the existing Device.Firewall.Chain.{i}. in the order in which they should be applied.
 

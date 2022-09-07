@@ -11,6 +11,7 @@
  */
 
 #include "ppp.h"
+#include "firewall.h"
 #include "ip.h"
 #ifdef BBF_TR143
 #include "diagnostics.h"
@@ -64,60 +65,6 @@ static int get_linker_ipv6_prefix(char *refparam, struct dmctx *dmctx, void *dat
 static int get_ip_iface_sysfs(const struct uci_section *data, const char *name, char **value)
 {
 	return get_net_iface_sysfs(section_name((struct uci_section *)data), name, value);
-}
-
-static bool firewall_zone_exists(char *s_name)
-{
-	struct uci_section *s = NULL;
-
-	uci_foreach_option_eq("firewall", "zone", "name", s_name, s) {
-		return true;
-	}
-
-	return false;
-}
-
-static void create_firewall_zone_section(char *s_name)
-{
-	struct uci_section *s = NULL;
-	char zone_name[32] = {0};
-	char *input = NULL;
-	char *output = NULL;
-	char *forward = NULL;
-
-	snprintf(zone_name, sizeof(zone_name), "zone_%s", s_name);
-
-	dmuci_get_option_value_string("firewall", "@defaults[0]", "input", &input);
-	dmuci_get_option_value_string("firewall", "@defaults[0]", "output", &output);
-	dmuci_get_option_value_string("firewall", "@defaults[0]", "forward", &forward);
-
-	dmuci_add_section("firewall", "zone", &s);
-	dmuci_rename_section_by_section(s, zone_name);
-	dmuci_set_value_by_section(s, "name", s_name);
-	dmuci_set_value_by_section(s, "input", input);
-	dmuci_set_value_by_section(s, "output", output);
-	dmuci_set_value_by_section(s, "forward", forward);
-	dmuci_add_list_value_by_section(s, "network", s_name);
-}
-
-static void remove_unused_firewall_zone_sections(void)
-{
-	struct uci_section *s = NULL, *stmp = NULL;
-
-	uci_foreach_sections_safe("firewall", "zone", stmp, s) {
-		struct uci_section *dmmap_section = NULL;
-		char *zone_added = NULL;
-		char *name = NULL;
-
-		get_dmmap_section_of_config_section("dmmap_firewall", "zone", section_name(s), &dmmap_section);
-		dmuci_get_value_by_section_string(dmmap_section, "added_by_controller", &zone_added);
-		if (zone_added && DM_LSTRCMP(zone_added, "1") == 0)
-			continue;
-
-		dmuci_get_value_by_section_string(s, "name", &name);
-		if (!get_origin_section_from_config("network", "interface", name))
-			dmuci_delete_by_section(s, NULL, NULL);
-	}
 }
 
 static void add_network_to_firewall_zone_network_list(char *zone_name, char *interface_name)
@@ -615,17 +562,12 @@ static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 			DM_STRCHR(device, '@'))
 			continue;
 
-		// check if firewall zone exists
-		if (!firewall_zone_exists(section_name(p->config_section)))
-			create_firewall_zone_section(section_name(p->config_section));
-
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "ip_int_instance", "ip_int_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
-	remove_unused_firewall_zone_sections();
 	return 0;
 }
 
@@ -864,7 +806,7 @@ static int addObjIPInterface(char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_set_value("network", ip_name, "disabled", "1");
 
 	// Firewall zone section
-	create_firewall_zone_section(ip_name);
+	firewall__create_zone_section(ip_name);
 
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_ip_interface);
 	dmuci_set_value_by_section(dmmap_ip_interface, "section_name", ip_name);
