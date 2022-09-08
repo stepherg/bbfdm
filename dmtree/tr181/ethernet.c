@@ -410,7 +410,7 @@ static int delObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 
 			// Check each network section in the list of sections
 			if (*sect_name == '\0')
-				return -1;
+				break;
 
 			section_list = dmstrdup(sect_name);
 			for (pch = strtok_r(section_list, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
