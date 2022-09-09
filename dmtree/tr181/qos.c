@@ -498,11 +498,53 @@ static int get_QPolicerNumberOfEntries(char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
+static int get_QMaxQueueEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "100";
+	return 0;
+}
+
 /*#Device.QoS.QueueNumberOfEntries!UCI:qos/queue*/
 static int get_QQueueNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	int cnt = get_number_of_entries(ctx, data, instance, browseQoSQueueInst);
 	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
+static int get_QMaxClassificationEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "50";
+	return 0;
+}
+
+static int get_QMaxAppEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
+static int get_QAppNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
+static int get_QMaxFlowEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
+static int get_QFlowNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
+static int get_QMaxPolicerEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "50";
 	return 0;
 }
 
@@ -517,6 +559,12 @@ static int get_QShaperNumberOfEntries(char *refparam, struct dmctx *ctx, void *d
 {
 	int cnt = get_number_of_entries(ctx, data, instance, browseQoSShaperInst);
 	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
+static int get_QAvailableAppList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "";
 	return 0;
 }
 
@@ -2030,14 +2078,14 @@ DMLEAF tQoSParams[] = {
 {"QueueStatsNumberOfEntries", &DMREAD, DMT_UNINT, get_QQueueStatsNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {"ShaperNumberOfEntries", &DMREAD, DMT_UNINT, get_QShaperNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {"QueueNumberOfEntries", &DMREAD, DMT_UNINT, get_QQueueNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
-//{"MaxClassificationEntries", &DMREAD, DMT_UNINT, get_QMaxClassificationEntries, NULL, BBFDM_BOTH, "2.0"},
-//{"MaxAppEntries", &DMREAD, DMT_UNINT, get_QMaxAppEntries, NULL, BBFDM_BOTH, "2.0"},
-//{"AppNumberOfEntries", &DMREAD, DMT_UNINT, get_QAppNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
-//{"MaxFlowEntries", &DMREAD, DMT_UNINT, get_QMaxFlowEntries, NULL, BBFDM_BOTH, "2.0"},
-//{"FlowNumberOfEntries", &DMREAD, DMT_UNINT, get_QFlowNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
-//{"MaxPolicerEntries", &DMREAD, DMT_UNINT, get_QMaxPolicerEntries, NULL, BBFDM_BOTH, "2.0"},
+{"MaxClassificationEntries", &DMREAD, DMT_UNINT, get_QMaxClassificationEntries, NULL, BBFDM_BOTH, "2.0"},
+{"MaxAppEntries", &DMREAD, DMT_UNINT, get_QMaxAppEntries, NULL, BBFDM_BOTH, "2.0"},
+{"AppNumberOfEntries", &DMREAD, DMT_UNINT, get_QAppNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
+{"MaxFlowEntries", &DMREAD, DMT_UNINT, get_QMaxFlowEntries, NULL, BBFDM_BOTH, "2.0"},
+{"FlowNumberOfEntries", &DMREAD, DMT_UNINT, get_QFlowNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
+{"MaxPolicerEntries", &DMREAD, DMT_UNINT, get_QMaxPolicerEntries, NULL, BBFDM_BOTH, "2.0"},
 {"PolicerNumberOfEntries", &DMREAD, DMT_UNINT, get_QPolicerNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
-//{"MaxQueueEntries", &DMREAD, DMT_UNINT, get_QMaxQueueEntries, NULL, BBFDM_BOTH, "2.0"},
+{"MaxQueueEntries", &DMREAD, DMT_UNINT, get_QMaxQueueEntries, NULL, BBFDM_BOTH, "2.0"},
 //{"MaxShaperEntries", &DMREAD, DMT_UNINT, get_QMaxShaperEntries, NULL, BBFDM_BOTH, "2.0"},
 //{"DefaultForwardingPolicy", &DMWRITE, DMT_UNINT, get_QDefaultForwardingPolicy, set_QDefaultForwardingPolicy, BBFDM_BOTH, "2.0"},
 //{"DefaultTrafficClass", &DMWRITE, DMT_UNINT, get_QDefaultTrafficClass, set_QDefaultTrafficClass, BBFDM_BOTH, "2.0"},
@@ -2046,7 +2094,7 @@ DMLEAF tQoSParams[] = {
 //{"DefaultDSCPMark", &DMWRITE, DMT_INT, get_QDefaultDSCPMark, set_QDefaultDSCPMark, BBFDM_BOTH, "2.0"},
 //{"DefaultEthernetPriorityMark", &DMWRITE, DMT_INT, get_QDefaultEthernetPriorityMark, set_QDefaultEthernetPriorityMark, BBFDM_BOTH, "2.0"},
 //{"DefaultInnerEthernetPriorityMark", &DMWRITE, DMT_INT, get_QDefaultInnerEthernetPriorityMark, set_QDefaultInnerEthernetPriorityMark, BBFDM_BOTH, "2.7"},
-//{"AvailableAppList", &DMREAD, DMT_STRING, get_QAvailableAppList, NULL, BBFDM_BOTH, "2.0"},
+{"AvailableAppList", &DMREAD, DMT_STRING, get_QAvailableAppList, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
