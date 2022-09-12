@@ -348,6 +348,8 @@ static char *get_datamodel_media_type(const char *media)
 		return "IEEE 802.11ax 2.4";
 	else if (!DM_LSTRCMP(media, "IEEE 802_11AX_5_GHZ"))
 		return "IEEE 802.11ax 5.0";
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AX_6_GHZ"))
+		return "IEEE 802.11ax 6.0";
 	else if (!DM_LSTRCMP(media, "IEEE 802_11AD_60_GHZ"))
 		return "IEEE 802.11ad";
 	else if (!DM_LSTRCMP(media, "IEEE 802_11AF_GHZ"))

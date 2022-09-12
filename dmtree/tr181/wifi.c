@@ -3414,7 +3414,7 @@ static int get_radio_supported_frequency_bands(char *refparam, struct dmctx *ctx
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
-	DM_ASSERT(res, *value = "2.4GHz,5GHz");
+	DM_ASSERT(res, *value = "2.4GHz,5GHz,6GHz");
 	*value = dmjson_get_value_array_all(res, ",", 1, "supp_bands");
 	return 0;
 }
