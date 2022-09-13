@@ -26,6 +26,7 @@ nslookup_launch() {
 		echo "++++++++++++++++++++++++++++++" >>${LOG_FILE}
 	done
 
+	AnswerType="Authoritative"
 	while IFS= read line; do
 		[ -z "$line" ] && continue;
 		server=$(echo "$line" | tr -d '\t' | tr -d ' ' | grep "Server:" | awk -F':' '{print $2}')
@@ -39,11 +40,14 @@ nslookup_launch() {
 		fi
 
 		var=$(echo "$line" | tr -d '\t' | tr -d ' ' | grep "Name:" | awk -F':' '{print $2}')
-		[ -n "$var" ] && { HostNameReturned=$var; status="Success"; AnswerType="Authoritative"; success_count=$((success_count+1)); continue; }
-	
+		[ -n "$var" ] && { HostNameReturned=$var; status="Success"; success_count=$((success_count+1)); continue; }
+
+		var=$(echo "$line" | tr -d '\t' | tr -d ' ' | grep "name=" | awk -F'=' '{print $2}')
+		[ -n "$var" ] && { HostNameReturned=$var; status="Success"; address="$hostname"; success_count=$((success_count+1)); continue; }
+
 		var=$(echo "$line" | grep "Address: " | awk -F':' '{print substr($0, index($0,$2))}' | tr -d '\t' | tr -d ' ')
 		[ -n "$var" ] && { [ -z "$address" ] && address="$var" || address="$address,$var"; continue; }
-	
+
 		var=$(echo "$line" | grep "completed" | awk -F'in' '{print $2}' | tr -d 'ms:\t ')
 		[ -n "$var" ] && { ResponseTime=$var; continue; }
 
@@ -60,6 +64,7 @@ nslookup_launch() {
 			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].ResponseTime="$ResponseTime"
 			j=$((j+1))
 			address=""
+			AnswerType="Authoritative"
 		fi
 	done <${LOG_FILE}
 	rm -f ${LOG_FILE}
