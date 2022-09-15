@@ -1175,7 +1175,12 @@ void convert_hex_to_string(const char *hex, char *str, size_t size)
 
 	for (i = 0; i < len && pos < size - 1; i += 2) {
 		DM_STRNCPY(buf, &hex[i], 3);
-		pos += snprintf((char *)str + pos, size - pos, "%c", (char)strtol(buf, NULL, 16));
+
+		char c = (char)strtol(buf, NULL, 16);
+		if (!char_is_valid(c))
+			continue;
+
+		pos += snprintf((char *)str + pos, size - pos, "%c", c);
 	}
 
 	str[pos] = '\0';
