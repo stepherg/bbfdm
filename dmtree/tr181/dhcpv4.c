@@ -974,6 +974,9 @@ static int addObjDHCPv4ServerPool(char *refparam, struct dmctx *ctx, void *data,
 	dmuci_rename_section_by_section(s, dhcp_sname);
 	dmuci_set_value_by_section(s, "ignore", "0");
 	dmuci_set_value_by_section(s, "dhcpv4", "disabled");
+	// Defaults to uci defaults value
+	dmuci_set_value_by_section(s, "start", "100");
+	dmuci_set_value_by_section(s, "limit", "150");
 
 	dmuci_add_section_bbfdm("dmmap_dhcp", "dhcp", &dmmap_dhcp);
 	dmuci_set_value_by_section(dmmap_dhcp, "section_name", dhcp_sname);
@@ -1491,8 +1494,10 @@ static int get_DHCPv4ServerPool_MinAddress(char *refparam, struct dmctx *ctx, vo
 	int start = 0, limit = 0;
 	char addr_min[32] = {0};
 
-	if (get_dhcp_iface_range((((struct dhcp_args *)data)->sections)->config_section, ((struct dhcp_args *)data)->interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit))
-		return -1;
+	if (get_dhcp_iface_range((((struct dhcp_args *)data)->sections)->config_section, ((struct dhcp_args *)data)->interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit)) {
+		*value = "";
+		return 0;
+	}
 
 	unsigned iface_start_addr = htonl((ntohl(iface_addr) & iface_bits) + start);
 	inet_ntop(AF_INET, &iface_start_addr, addr_min, INET_ADDRSTRLEN);
@@ -1550,8 +1555,10 @@ static int get_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, vo
 	int start = 0, limit = 0;
 	char addr_max[32] = {0};
 
-	if (get_dhcp_iface_range((((struct dhcp_args *)data)->sections)->config_section, ((struct dhcp_args *)data)->interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit))
-		return -1;
+	if (get_dhcp_iface_range((((struct dhcp_args *)data)->sections)->config_section, ((struct dhcp_args *)data)->interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit)) {
+		*value = "";
+		return 0;
+	}
 
 	unsigned iface_end_addr = htonl((ntohl(iface_addr) & iface_bits) + start + limit - 1);
 	inet_ntop(AF_INET, &iface_end_addr, addr_max, INET_ADDRSTRLEN);
@@ -1605,8 +1612,10 @@ static int get_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 	char list_val[512];
 	struct uci_section *s = NULL;
 
-	if (get_dhcp_iface_range((((struct dhcp_args *)data)->sections)->config_section, ((struct dhcp_args *)data)->interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit))
-		return -1;
+	if (get_dhcp_iface_range((((struct dhcp_args *)data)->sections)->config_section, ((struct dhcp_args *)data)->interface, &iface_addr, &iface_bits, &iface_net_start, &iface_net_end, &start, &limit)) {
+		*value = "";
+		return 0;
+	}
 
 	list_val[0] = 0;
 	uci_foreach_option_eq("dhcp", "host", "dhcp", ((struct dhcp_args *)data)->interface, s) {
