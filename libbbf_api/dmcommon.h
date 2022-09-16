@@ -127,6 +127,7 @@ extern char *CellularDataPreference[];
 #define MAX_DHCP_LEASES 256
 #define DHCP_LEASES_FILE "/tmp/dhcp.leases"
 #define DHCP_CLIENT_OPTIONS_FILE "/var/dhcp.client.options"
+#define SYSTEM_CERT_PATH "/etc/ssl/certs"
 #define DMMAP "dmmap"
 #define LIST_KEY (const char *[])
 #define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)

@@ -12,7 +12,8 @@
 
 #if defined(LOPENSSL) || defined(LWOLFSSL) || defined(LMBEDTLS)
 #define DATE_LEN 128
-#define MAX_CERT 32
+#define CERT_PATH_LEN 512
+#define MAX_CERT 256
 
 #ifdef LMBEDTLS
 #include <mbedtls/x509_crt.h>
@@ -27,7 +28,8 @@
 #include <wolfssl/openssl/x509.h>
 #include <wolfssl/openssl/pem.h>
 #endif
-static char certifcates_paths[MAX_CERT][256];
+
+static char certifcates_paths[MAX_CERT][CERT_PATH_LEN];
 
 struct certificate_profile {
 	char *path;
@@ -144,54 +146,67 @@ static char *generate_serial_number(char *text, int length)
 	return hex;
 }
 
-static void get_certificate_paths(void)
+static int fill_certificate_paths(char *dir_path, int *cidx)
 {
-	struct uci_section *s = NULL;
-	int cidx;
+	struct dirent *d_file = NULL;
+	DIR *dir = NULL;
+	char cert_path[CERT_PATH_LEN];
+
+	sysfs_foreach_file(dir_path, dir, d_file) {
+
+		if (d_file->d_name[0] == '.' || !strstr(d_file->d_name, ".0"))
+			continue;
+
+		if (*cidx >= MAX_CERT)
+			break;
+
+		snprintf(cert_path, sizeof(cert_path), "%s/%s", dir_path, d_file->d_name);
+
+		if (!file_exists(cert_path) || !is_regular_file(cert_path))
+			continue;
+
+		DM_STRNCPY(certifcates_paths[*cidx], cert_path, CERT_PATH_LEN);
+		(*cidx)++;
+	}
+
+	if (dir)
+		closedir (dir);
+
+	return 0;
+}
+
+static int get_certificate_paths(void)
+{
+	char *cert = NULL;
+	int cidx = 0;
 
 	for (cidx = 0; cidx < MAX_CERT; cidx++)
-		memset(certifcates_paths[cidx], '\0', 256);
+		memset(certifcates_paths[cidx], '\0', CERT_PATH_LEN);
 
 	cidx = 0;
 
-	uci_foreach_sections("nginx", "server", s) {
-		char *cert;
-		dmuci_get_value_by_section_string(s, "ssl_certificate", &cert);
-		if (*cert == '\0')
-			continue;
+	fill_certificate_paths(SYSTEM_CERT_PATH, &cidx);
+
+	dmuci_get_option_value_string("cwmp", "acs", "ssl_capath", &cert);
+	if (!DM_STRLEN(cert))
+		return 0;
+
+	if (strncmp(cert, SYSTEM_CERT_PATH, strlen(SYSTEM_CERT_PATH)) == 0)
+		return 0;
+
+	if (folder_exists(cert)) {
+		fill_certificate_paths(cert, &cidx);
+	} else {
 		if (cidx >= MAX_CERT)
-			break;
-		if(!file_exists(cert) || !is_regular_file(cert))
-			continue;
-		DM_STRNCPY(certifcates_paths[cidx], cert, 256);
-		cidx++;
+			return -1;
+
+		if (!file_exists(cert) || !is_regular_file(cert))
+			return -1;
+
+		DM_STRNCPY(certifcates_paths[cidx], cert, CERT_PATH_LEN);
 	}
 
-	uci_foreach_sections("openvpn", "openvpn", s) {
-		char *cert;
-		dmuci_get_value_by_section_string(s, "cert", &cert);
-		if (*cert == '\0')
-			continue;
-		if (cidx >= MAX_CERT)
-			break;
-		if(!file_exists(cert) || !is_regular_file(cert))
-			continue;
-		DM_STRNCPY(certifcates_paths[cidx], cert, 256);
-		cidx++;
-	}
-
-	uci_foreach_sections("obuspa", "obuspa", s) {
-		char *cert;
-		dmuci_get_value_by_section_string(s, "cert", &cert);
-		if (*cert == '\0')
-			continue;
-		if (cidx >= MAX_CERT)
-			break;
-		if(!file_exists(cert) || !is_regular_file(cert))
-			continue;
-		DM_STRNCPY(certifcates_paths[cidx], cert, 256);
-		cidx++;
-	}
+	return 0;
 }
 
 /*************************************************************
