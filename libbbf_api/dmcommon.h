@@ -165,7 +165,8 @@ enum fs_size_type_enum {
 
 enum option_type_enum {
 	OPTION_IP,
-	OPTION_INT
+	OPTION_INT,
+	OPTION_HEX
 };
 
 #define IPPING_PATH "/usr/share/bbfdm/ipping_launch"

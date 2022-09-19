@@ -103,6 +103,7 @@ struct option_tag_type TYPE_TAG_ARRAY[] = {
 {39, OPTION_INT, 1},
 {41, OPTION_IP, 4},
 {42, OPTION_IP, 4},
+{43, OPTION_HEX, 1},
 {44, OPTION_IP, 4},
 {45, OPTION_IP, 4},
 {46, OPTION_INT, 1},
@@ -127,6 +128,7 @@ struct option_tag_type TYPE_TAG_ARRAY[] = {
 {75, OPTION_IP, 4},
 {76, OPTION_IP, 4},
 {118, OPTION_IP, 4},
+{125, OPTION_HEX, 1},
 {145, OPTION_INT, 1},
 {152, OPTION_INT, 4},
 {153, OPTION_INT, 4},
@@ -1212,6 +1214,13 @@ void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, siz
 
 				unsigned int ip = ntohl(ip_bin.s_addr);
 				pos += snprintf(&hex[pos], size - pos, "%08X", ip);
+			} else if (TYPE_TAG_ARRAY[idx].type == OPTION_HEX) {
+				for (int j = 0; j < DM_STRLEN(pch); j++) {
+					if (pch[j] == ':')
+						continue;
+
+					pos += snprintf(&hex[pos], size - pos, "%c", pch[j]);
+				}
 			} else {
 				long int val = DM_STRTOL(pch);
 				pos += snprintf(&hex[pos], size - pos, (TYPE_TAG_ARRAY[idx].len == 4) ? "%08lX" : (TYPE_TAG_ARRAY[idx].len == 2) ? "%04lX" : "%02lX", val);
@@ -1249,6 +1258,8 @@ void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, 
 				addr.s_addr = htonl(ip);
 				char *ipaddr = inet_ntoa(addr);
 				pos += snprintf(&str[pos], size - pos, "%s,", ipaddr);
+			} else if (TYPE_TAG_ARRAY[idx].type == OPTION_HEX) {
+				pos += snprintf(&str[pos], size - pos, "%s:", buf);
 			} else {
 				int a = (int)strtol(buf, NULL, 16);
 				pos += snprintf(&str[pos], size - pos, "%d,", a);
