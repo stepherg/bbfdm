@@ -95,6 +95,18 @@ def getparamtype(dmparam):
     return ptype
 
 
+def getParamDefault(dmparam):
+    default = None
+    for s in dmparam:
+        if s.tag == "syntax":
+            for c in s:
+                if c.tag == "default":
+                    default = c.get("value")
+                    break
+            break
+    return default
+
+
 def getMinMaxEnumerationUnitPatternparam(paramtype, c):
     paramvalrange = None
     paramenum = None
@@ -530,6 +542,10 @@ def printPARAM(dmparam, dmobject, bbfdm_type):
 
     print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
     print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
+
+    default = getParamDefault(dmparam)
+    if default is not None and len(default) != 0 and default != "\"":
+        print("\"default\" : \"%s\"," % default, file=fp)
 
     # create list
     if islist == 1:
