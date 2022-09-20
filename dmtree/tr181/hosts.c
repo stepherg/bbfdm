@@ -10,6 +10,10 @@
 
 #include "hosts.h"
 
+static char *AccessPolicy[] = {"Allow", "Deny", NULL};
+static char *Day[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", NULL};
+static char *StartTime[] = {"^$", "^([01][0-9]|2[0-3]):[0-5][0-9]$", NULL};
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -59,6 +63,162 @@ static int browseHostsHostIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_no
 	return 0;
 }
 
+static int browseHostsAccessControlInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct dmmap_dup *p = NULL;
+	LIST_HEAD(dup_list);
+	char *inst = NULL;
+
+	synchronize_specific_config_sections_with_dmmap("hosts", "access_control", "dmmap_hosts", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "access_control_instance", "access_control_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+
+}
+
+static int browseHostsAccessControlScheduleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct uci_section *ac_s = ((struct dmmap_dup *)prev_data)->config_section;
+	struct dmmap_dup *p = NULL;
+	LIST_HEAD(dup_list);
+	char *inst = NULL;
+
+	synchronize_specific_config_sections_with_dmmap_eq("hosts", "ac_schedule", "dmmap_hosts", "dm_parent", section_name(ac_s), &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "schedule_instance", "schedule_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+
+}
+
+/*************************************************************
+* ADD & DEL OBJ
+**************************************************************/
+static int addObjHostsAccessControl(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	struct uci_section *ac_s = NULL, *dmmap_s = NULL;
+	char ac_name[32] = {0};
+
+	snprintf(ac_name, sizeof(ac_name), "ac_%s", *instance);
+
+	dmuci_add_section("hosts", "access_control", &ac_s);
+	dmuci_rename_section_by_section(ac_s, ac_name);
+	dmuci_set_value_by_section(ac_s, "enable", "0");
+	dmuci_set_value_by_section(ac_s, "access_policy", "Allow");
+
+	dmuci_add_section_bbfdm("dmmap_hosts", "access_control", &dmmap_s);
+	dmuci_set_value_by_section(dmmap_s, "section_name", section_name(ac_s));
+	dmuci_set_value_by_section(dmmap_s, "access_control_instance", *instance);
+	return 0;
+}
+
+static int delObjHostsAccessControl(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL, *dmmap_section = NULL, *stmp = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			// AccessControl Schedule section
+			uci_foreach_option_eq_safe("hosts", "ac_schedule", "dm_parent", section_name(((struct dmmap_dup *)data)->config_section), stmp, s) {
+
+				// dmmap AccessControl Schedule section
+				get_dmmap_section_of_config_section("dmmap_hosts", "ac_schedule", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+
+			// AccessControl section
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+
+			// Dmmap AccessControl section
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+
+			break;
+		case DEL_ALL:
+			// AccessControl section
+			uci_foreach_sections_safe("hosts", "access_control", stmp, s) {
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+
+			// dmmap AccessControl section
+			uci_path_foreach_sections_safe(bbfdm, "dmmap_hosts", "access_control", stmp, s) {
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+
+			// AccessControl Schedule section
+			uci_foreach_sections_safe("hosts", "ac_schedule", stmp, s) {
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+
+			// dmmap AccessControl Schedule section
+			uci_path_foreach_sections_safe(bbfdm, "dmmap_hosts", "ac_schedule", stmp, s) {
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+
+			break;
+	}
+	return 0;
+}
+
+static int addObjHostsAccessControlSchedule(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	struct uci_section *ac_s = ((struct dmmap_dup *)data)->config_section;
+	struct uci_section *ac_schedule_s = NULL, *dmmap_s = NULL;
+	char ac_schedule_name[32] = {0};
+
+	snprintf(ac_schedule_name, sizeof(ac_schedule_name), "%s_s_%s", section_name(ac_s), *instance);
+
+	dmuci_add_section("hosts", "ac_schedule", &ac_schedule_s);
+	dmuci_rename_section_by_section(ac_schedule_s, ac_schedule_name);
+	dmuci_set_value_by_section(ac_schedule_s, "dm_parent", section_name(ac_s));
+	dmuci_set_value_by_section(ac_schedule_s, "enable", "0");
+
+	dmuci_add_section_bbfdm("dmmap_hosts", "ac_schedule", &dmmap_s);
+	dmuci_set_value_by_section(dmmap_s, "section_name", section_name(ac_schedule_s));
+	dmuci_set_value_by_section(dmmap_s, "schedule_instance", *instance);
+	return 0;
+
+}
+
+static int delObjHostsAccessControlSchedule(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *ac_s = NULL, *s = NULL, *stmp = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			break;
+		case DEL_ALL:
+			ac_s = ((struct dmmap_dup *)data)->config_section;
+
+			// AccessControl Schedule section
+			uci_foreach_option_eq_safe("hosts", "ac_schedule", "dm_parent", section_name(ac_s), stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_hosts", "ac_schedule", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+
+			break;
+	}
+	return 0;
+}
+
 /*************************************************************
 * LINKER
 **************************************************************/
@@ -75,6 +235,13 @@ static int get_linker_host(char *refparam, struct dmctx *dmctx, void *data, char
 static int get_Hosts_HostNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	int cnt = get_number_of_entries(ctx, data, instance, browseHostsHostInst);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
+static int get_Hosts_AccessControlNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseHostsAccessControlInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
@@ -225,6 +392,252 @@ static int get_HostsHostWANStats_PacketsReceived(char *refparam, struct dmctx *c
 	return 0;
 }
 
+static int get_HostsAccessControl_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "access_control_alias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+	return 0;
+}
+
+static int set_HostsAccessControl_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "access_control_alias", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_HostsAccessControl_PhysAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "macaddr", value);
+	return 0;
+}
+
+static int set_HostsAccessControl_PhysAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "macaddr", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_HostsAccessControl_HostName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "host", value);
+	return 0;
+}
+
+static int set_HostsAccessControl_HostName(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "host", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_HostsAccessControl_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enable", "0");
+	return 0;
+}
+
+static int set_HostsAccessControl_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", b ? "1" : "0");
+			break;
+	}
+	return 0;
+}
+
+static int get_HostsAccessControl_AccessPolicy(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "access_policy", value);
+	return 0;
+}
+
+static int set_HostsAccessControl_AccessPolicy(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, -1, AccessPolicy, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "access_policy", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_HostsAccessControl_ScheduleNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseHostsAccessControlScheduleInst);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
+static int get_HostsAccessControlSchedule_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "schedule_alias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+	return 0;
+}
+
+static int set_HostsAccessControlSchedule_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "schedule_alias", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_HostsAccessControlSchedule_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enable", "0");
+	return 0;
+}
+
+static int set_HostsAccessControlSchedule_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", b ? "1" : "0");
+			break;
+	}
+	return 0;
+}
+
+static int get_HostsAccessControlSchedule_Day(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_list *days_list = NULL;
+	char buf[64] = {0};
+
+	dmuci_get_value_by_section_list(((struct dmmap_dup *)data)->config_section, "day", &days_list);
+
+	if (days_list != NULL) {
+		struct uci_element *e = NULL;
+		unsigned pos = 0;
+
+		buf[0] = 0;
+		uci_foreach_element(days_list, e) {
+
+			if (sizeof(buf) - pos < DM_STRLEN(e->name))
+				break;
+
+			pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", e->name);
+		}
+
+		if (pos)
+			buf[pos - 1] = 0;
+	}
+
+	*value = (buf[0] != '\0') ? dmstrdup(buf) : "";
+	return 0;
+}
+
+static int set_HostsAccessControlSchedule_Day(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *pch = NULL, *spch = NULL;
+	char value_buf[64] = {0};
+
+	DM_STRNCPY(value_buf, value, sizeof(value_buf));
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, Day, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "day", "");
+			for (pch = strtok_r(value_buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch))
+				dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "day", pch);
+			break;
+	}
+	return 0;
+}
+
+static int get_HostsAccessControlSchedule_StartTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "start_time", value);
+	return 0;
+}
+
+static int set_HostsAccessControlSchedule_StartTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 5, NULL, StartTime))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "start_time", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_HostsAccessControlSchedule_Duration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "duration", value);
+	return 0;
+}
+
+static int set_HostsAccessControlSchedule_Duration(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "duration", value);
+			break;
+	}
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & LEAF DEFINITION
 ***********************************************************************************************************************************/
@@ -232,12 +645,14 @@ static int get_HostsHostWANStats_PacketsReceived(char *refparam, struct dmctx *c
 DMOBJ tHostsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Host", &DMREAD, NULL, NULL, NULL, browseHostsHostInst, NULL, NULL, tHostsHostObj, tHostsHostParams, get_linker_host, BBFDM_BOTH, LIST_KEY{"PhysAddress", NULL}, "2.0"},
+{"AccessControl", &DMWRITE, addObjHostsAccessControl, delObjHostsAccessControl, NULL, browseHostsAccessControlInst, NULL, NULL, tHostsAccessControlObj, tHostsAccessControlParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "PhysAddress", NULL}, "2.14"},
 {0}
 };
 
 DMLEAF tHostsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"HostNumberOfEntries", &DMREAD, DMT_UNINT, get_Hosts_HostNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
+{"AccessControlNumberOfEntries", &DMREAD, DMT_UNINT, get_Hosts_AccessControlNumberOfEntries, NULL, BBFDM_BOTH, "2.14"},
 {0}
 };
 
@@ -288,5 +703,34 @@ DMLEAF tHostsHostWANStatsParams[] = {
 {"BytesReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_BytesReceived, NULL, BBFDM_BOTH, "2.12"},
 {"PacketsSent", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsSent, NULL, BBFDM_BOTH, "2.12"},
 {"PacketsReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsReceived, NULL, BBFDM_BOTH, "2.12"},
+{0}
+};
+
+/* *** Device.Hosts.AccessControl.{i}. *** */
+DMOBJ tHostsAccessControlObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Schedule", &DMWRITE, addObjHostsAccessControlSchedule, delObjHostsAccessControlSchedule, NULL, browseHostsAccessControlScheduleInst, NULL, NULL, NULL, tHostsAccessControlScheduleParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}, "2.14"},
+{0}
+};
+
+DMLEAF tHostsAccessControlParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Alias", &DMWRITE, DMT_STRING, get_HostsAccessControl_Alias, set_HostsAccessControl_Alias, BBFDM_BOTH, "2.14"},
+{"PhysAddress", &DMWRITE, DMT_STRING, get_HostsAccessControl_PhysAddress, set_HostsAccessControl_PhysAddress, BBFDM_BOTH, "2.14"},
+{"HostName", &DMWRITE, DMT_STRING, get_HostsAccessControl_HostName, set_HostsAccessControl_HostName, BBFDM_BOTH, "2.14"},
+{"Enable", &DMWRITE, DMT_BOOL, get_HostsAccessControl_Enable, set_HostsAccessControl_Enable, BBFDM_BOTH, "2.14"},
+{"AccessPolicy", &DMWRITE, DMT_STRING, get_HostsAccessControl_AccessPolicy, set_HostsAccessControl_AccessPolicy, BBFDM_BOTH, "2.14"},
+{"ScheduleNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsAccessControl_ScheduleNumberOfEntries, NULL, BBFDM_BOTH, "2.14"},
+{0}
+};
+
+/* *** Device.Hosts.AccessControl.{i}.Schedule.{i}. *** */
+DMLEAF tHostsAccessControlScheduleParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Alias", &DMWRITE, DMT_STRING, get_HostsAccessControlSchedule_Alias, set_HostsAccessControlSchedule_Alias, BBFDM_BOTH, "2.14"},
+{"Enable", &DMWRITE, DMT_BOOL, get_HostsAccessControlSchedule_Enable, set_HostsAccessControlSchedule_Enable, BBFDM_BOTH, "2.14"},
+{"Day", &DMWRITE, DMT_STRING, get_HostsAccessControlSchedule_Day, set_HostsAccessControlSchedule_Day, BBFDM_BOTH, "2.14"},
+{"StartTime", &DMWRITE, DMT_STRING, get_HostsAccessControlSchedule_StartTime, set_HostsAccessControlSchedule_StartTime, BBFDM_BOTH, "2.14"},
+{"Duration", &DMWRITE, DMT_UNINT, get_HostsAccessControlSchedule_Duration, set_HostsAccessControlSchedule_Duration, BBFDM_BOTH, "2.14"},
 {0}
 };

@@ -20,5 +20,8 @@ extern DMLEAF tHostsHostParams[];
 extern DMLEAF tHostsHostIPv4AddressParams[];
 extern DMLEAF tHostsHostIPv6AddressParams[];
 extern DMLEAF tHostsHostWANStatsParams[];
+extern DMOBJ tHostsAccessControlObj[];
+extern DMLEAF tHostsAccessControlParams[];
+extern DMLEAF tHostsAccessControlScheduleParams[];
 
 #endif //__HOSTS_H

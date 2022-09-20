@@ -2,3 +2,16 @@
 config global 'global'
 	option ageing_timer '1440'
 	option reboot_persistent '0'
+
+config access_controll 'ac_1'
+	option macaddr ''
+	option host ''
+	option enable '0'
+	option access_policy 'Allow'
+ 
+config ac_schedule 'ac_1_s_1'
+	option dm_parent 'ac_1'
+	option enable '0'
+	list day ''
+	option start_time ''
+	option duration ''
