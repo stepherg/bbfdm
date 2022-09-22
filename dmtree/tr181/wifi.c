@@ -3775,7 +3775,7 @@ static int get_WiFiDataElementsNetworkSSID_Band(char *refparam, struct dmctx *ct
 	char *band = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "band", &band);
-	*value = (!DM_LSTRCMP(band, "2")) ? "2.4" : "5";
+	*value = (!DM_LSTRCMP(band, "2")) ? "2.4" : (!DM_LSTRCMP(band, "5")) ? "5" : "6";
 	return 0;
 }
 
@@ -6063,15 +6063,19 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 
 		if (!ssid_exist) {
 			char sec_name[32];
+			unsigned idx = 1;
 
-			snprintf(sec_name, sizeof(sec_name), "ap_%s_%s", ssid, (*band == '5') ? "5" : "2");
+			uci_foreach_sections("mapcontroller", "ap", s)
+				idx++;
+
+			snprintf(sec_name, sizeof(sec_name), "ap_%s_%u", (*band == '5') ? "5" : (*band == '6') ? "6" : "2", idx);
 
 			dmuci_add_section("mapcontroller", "ap", &s);
 			dmuci_rename_section_by_section(s, sec_name);
 			dmuci_set_value_by_section(s, "ssid", ssid);
 			dmuci_set_value_by_section(s, "key", key);
 			dmuci_set_value_by_section(s, "type", "fronthaul");
-			dmuci_set_value_by_section(s, "band", (*band == '5') ? "5" : "2");
+			dmuci_set_value_by_section(s, "band", (*band == '5') ? "5" : (*band == '6') ? "6" : "2");
 			dmuci_set_value_by_section(s, "enabled", "1");
 		}
 
