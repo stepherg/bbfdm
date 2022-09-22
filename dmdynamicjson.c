@@ -1566,7 +1566,7 @@ static char** fill_unique_keys(size_t count, struct json_object *obj)
 static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pleaf, int i, int json_version, struct list_head *list)
 {
 	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(6)*/
-	struct json_object *type = NULL, *protocols = NULL, *write = NULL, *async = NULL, *version =  NULL;;
+	struct json_object *type = NULL, *protocols = NULL, *write = NULL, *async = NULL, *version =  NULL, *def_value = NULL;
 	char full_param[512] = {0};
 	size_t n_proto;
 	char **in_p = NULL, **out_p = NULL, **ev_arg = NULL, **tmp = NULL;
@@ -1612,6 +1612,14 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 		json_object_object_get_ex(jobj, "write", &write);
 		pleaf[i].permission = (write && json_object_get_boolean(write)) ? &DMWRITE : &DMREAD;
 	}
+
+	//default value
+	json_object_object_get_ex(jobj, "default", &def_value);
+	char *val = json_object_get_string(def_value);
+	if (val != NULL)
+		pleaf[i].default_value = dm_dynamic_strdup(&json_memhead, val);
+	else
+		pleaf[i].default_value = NULL;
 
 	//getvalue
 	if (pleaf[i].type == DMT_EVENT) {

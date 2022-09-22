@@ -83,11 +83,7 @@ do { \
 #define DMPARAM_ARGS \
 	struct dmctx *dmctx, \
 	struct dmnode *node, \
-	char *lastname, \
-	struct dm_permession_s *permission, \
-	int type, \
-	int (*get_cmd)(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value), \
-	int (*set_cmd)(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action), \
+	DMLEAF *leaf, \
 	void *data, \
 	char *instance
 
@@ -133,6 +129,7 @@ typedef struct dm_leaf_s {
 	int (*setvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
 	int bbfdm_type;
 	char version[10];
+	char *default_value;
 } DMLEAF;
 
 typedef struct dm_obj_s {

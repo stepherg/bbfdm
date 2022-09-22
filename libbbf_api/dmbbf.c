@@ -264,7 +264,7 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 		}
 
 		snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, leaf->parameter);
-		err = dmctx->method_param(dmctx, parent_node, leaf->parameter, leaf->permission, leaf->type, leaf->getvalue, leaf->setvalue, data, instance);
+		err = dmctx->method_param(dmctx, parent_node, leaf, data, instance);
 		if (dmctx->stop)
 			return err;
 	}
@@ -290,7 +290,7 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 							}
 
 							snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, jleaf->parameter);
-							err = dmctx->method_param(dmctx, parent_node, jleaf->parameter, jleaf->permission, jleaf->type, jleaf->getvalue, jleaf->setvalue, data, instance);
+							err = dmctx->method_param(dmctx, parent_node, jleaf, data, instance);
 							if (dmctx->stop)
 								return err;
 						}
@@ -1174,12 +1174,19 @@ static int get_value_param(DMPARAM_ARGS)
 	char *full_param;
 	char *value = "";
 
-	dmastrcat(&full_param, node->current_object, lastname);
-	(get_cmd)(full_param, dmctx, data, instance, &value);
+	dmastrcat(&full_param, node->current_object, leaf->parameter);
+	(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
-	value = (value && *value) ? check_value_by_type(value, type) : get_default_value_by_type(type);
+	if (value && *value) {
+		value = check_value_by_type(value, leaf->type);
+	} else {
+		if (leaf->default_value)
+			value = check_value_by_type(leaf->default_value, leaf->type);
+		else
+			value = get_default_value_by_type(leaf->type);
+	}
 
-	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL);
+	add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], NULL);
 	return 0;
 }
 
@@ -1192,17 +1199,24 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 	char *full_param;
 	char *value = "";
 
-	dmastrcat(&full_param, node->current_object, lastname);
+	dmastrcat(&full_param, node->current_object, leaf->parameter);
 	if (DM_STRCMP(dmctx->in_param, full_param) != 0) {
 		dmfree(full_param);
 		return FAULT_9005;
 	}
 
-	(get_cmd)(full_param, dmctx, data, instance, &value);
+	(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
-	value = (value && *value) ? check_value_by_type(value, type) : get_default_value_by_type(type);
+	if (value && *value) {
+		value = check_value_by_type(value, leaf->type);
+	} else {
+		if (leaf->default_value)
+			value = check_value_by_type(leaf->default_value, leaf->type);
+		else
+			value = get_default_value_by_type(leaf->type);
+	}
 
-	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL);
+	add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], NULL);
 	dmctx->stop = true;
 	return 0;
 }
@@ -1263,13 +1277,13 @@ int dm_entry_get_name(struct dmctx *ctx)
 static int mparam_get_name(DMPARAM_ARGS)
 {
 	char *refparam;
-	char *perm = permission->val;
+	char *perm = leaf->permission->val;
 
-	dmastrcat(&refparam, node->current_object, lastname);
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
+	dmastrcat(&refparam, node->current_object, leaf->parameter);
+	if (leaf->permission->get_permission != NULL)
+		perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
 	return 0;
 }
 
@@ -1288,9 +1302,9 @@ static int mobj_get_name(DMOBJECT_ARGS)
 static int mparam_get_name_in_param(DMPARAM_ARGS)
 {
 	char *refparam;
-	char *perm = permission->val;
+	char *perm = leaf->permission->val;
 
-	dmastrcat(&refparam, node->current_object, lastname);
+	dmastrcat(&refparam, node->current_object, leaf->parameter);
 	if (DM_STRCMP(refparam, dmctx->in_param) != 0) {
 		dmfree(refparam);
 		return FAULT_9005;
@@ -1303,10 +1317,10 @@ static int mparam_get_name_in_param(DMPARAM_ARGS)
 		return FAULT_9003;
 	}
 
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
+	if (leaf->permission->get_permission != NULL)
+		perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
 	return 0;
 }
 
@@ -1318,14 +1332,14 @@ static int mobj_get_name_in_param(DMOBJECT_ARGS)
 static int mparam_get_name_in_obj(DMPARAM_ARGS)
 {
 	char *refparam;
-	char *perm = permission->val;
+	char *perm = leaf->permission->val;
 
-	dmastrcat(&refparam, node->current_object, lastname);
+	dmastrcat(&refparam, node->current_object, leaf->parameter);
 
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
+	if (leaf->permission->get_permission != NULL)
+		perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
 	return 0;
 }
 
@@ -1384,10 +1398,10 @@ static int mobj_get_schema_name(DMOBJECT_ARGS)
 static int mparam_get_schema_name(DMPARAM_ARGS)
 {
 	char *refparam;
-	char *perm = permission->val;
-	dmastrcat(&refparam, node->current_object, lastname);
+	char *perm = leaf->permission->val;
+	dmastrcat(&refparam, node->current_object, leaf->parameter);
 
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[type], NULL);
+	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
 	return 0;
 }
 
@@ -1416,28 +1430,28 @@ static int mparam_get_supported_dm(DMPARAM_ARGS)
 	char *value = NULL;
 	char *refparam;
 
-	dmastrcat(&refparam, node->current_object, lastname);
+	dmastrcat(&refparam, node->current_object, leaf->parameter);
 
 	if (node->matched) {
-		if (type == DMT_EVENT) {
+		if (leaf->type == DMT_EVENT) {
 			if (dmctx->isevent) {
-				if (get_cmd)
-					(get_cmd)(refparam, dmctx, data, instance, &value);
+				if (leaf->getvalue)
+					(leaf->getvalue)(refparam, dmctx, data, instance, &value);
 
-				add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], NULL);
+				add_list_parameter(dmctx, refparam, value, DMT_TYPE[leaf->type], NULL);
 			}
 
-		} else if (type == DMT_COMMAND) {
+		} else if (leaf->type == DMT_COMMAND) {
 			if(dmctx->iscommand) {
 
-				if (get_cmd)
-					(get_cmd)(refparam, dmctx, data, instance, &value);
+				if (leaf->getvalue)
+					(leaf->getvalue)(refparam, dmctx, data, instance, &value);
 
-				add_list_parameter(dmctx, refparam, value, DMT_TYPE[type], permission->val);
+				add_list_parameter(dmctx, refparam, value, DMT_TYPE[leaf->type], leaf->permission->val);
 			}
 		}
 		else {
-			add_list_parameter(dmctx, refparam, permission->val, DMT_TYPE[type], NULL);
+			add_list_parameter(dmctx, refparam, leaf->permission->val, DMT_TYPE[leaf->type], NULL);
 		}
 	}
 	return 0;
@@ -1667,27 +1681,27 @@ static int mparam_set_value(DMPARAM_ARGS)
 {
 	char refparam[MAX_DM_PATH];
 
-	snprintf(refparam, MAX_DM_PATH, "%s%s", node->current_object, lastname);
+	snprintf(refparam, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
 	if (DM_STRCMP(refparam, dmctx->in_param) != 0)
 		return FAULT_9005;
 
 	dmctx->stop = 1;
 
 	if (dmctx->setaction == VALUECHECK) {
-		char *perm = permission->val;
-		if (permission->get_permission != NULL)
-			perm = permission->get_permission(refparam, dmctx, data, instance);
+		char *perm = leaf->permission->val;
+		if (leaf->permission->get_permission != NULL)
+			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
-		if (perm[0] == '0' || !set_cmd)
+		if (perm[0] == '0' || !leaf->setvalue)
 			return FAULT_9008;
 
-		int fault = (set_cmd)(refparam, dmctx, data, instance, dmctx->in_value, VALUECHECK);
+		int fault = (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUECHECK);
 		if (fault)
 			return fault;
 
 		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_value);
 	} else if (dmctx->setaction == VALUESET) {
-		int fault = (set_cmd)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
+		int fault = (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
 		if (fault)
 			return fault;
 	}
@@ -1809,11 +1823,11 @@ static int mparam_list_operates_name(DMPARAM_ARGS)
 	char *full_param;
 	char *value = NULL;
 
-	dmastrcat(&full_param, node->current_object, lastname);
-	if (get_cmd)
-		(get_cmd)(full_param, dmctx, data, instance, &value);
+	dmastrcat(&full_param, node->current_object, leaf->parameter);
+	if (leaf->getvalue)
+		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
-	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], permission->val);
+	add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], leaf->permission->val);
 	return 0;
 }
 
@@ -1848,17 +1862,17 @@ static int mparam_operate(DMPARAM_ARGS)
 {
 	char full_param[MAX_DM_PATH];
 
-	snprintf(full_param, MAX_DM_PATH, "%s%s", node->current_object, lastname);
+	snprintf(full_param, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
 	if (DM_STRCMP(full_param, dmctx->in_param) != 0)
 		return CMD_NOT_FOUND;
 
 	dmctx->stop = 1;
 
-	if (!set_cmd)
+	if (!leaf->setvalue)
 		return CMD_FAIL;
 
 	json_object *j_input = (dmctx->in_value) ? json_tokener_parse(dmctx->in_value) : NULL;
-	int fault = (set_cmd)(full_param, dmctx, data, instance, (char *)j_input, VALUESET);
+	int fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, VALUESET);
 	json_object_put(j_input);
 	return fault;
 }
@@ -1899,11 +1913,11 @@ static int mparam_list_events_name(DMPARAM_ARGS)
 	char *value = NULL;
 	char *full_param;
 
-	dmastrcat(&full_param, node->current_object, lastname);
-	if (get_cmd)
-		(get_cmd)(full_param, dmctx, data, instance, &value);
+	dmastrcat(&full_param, node->current_object, leaf->parameter);
+	if (leaf->getvalue)
+		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
-	add_list_parameter(dmctx, full_param, value, DMT_TYPE[type], NULL);
+	add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], NULL);
 	return 0;
 }
 
