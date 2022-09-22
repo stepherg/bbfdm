@@ -41,13 +41,16 @@ static void update_supported_services(void)
 {
 	struct uci_section *s = NULL;
 	char *service_name = NULL;
-	char supported_services[1024] = {0};
+	char supported_services[2048] = {0};
 	unsigned pos = 0;
 
 	supported_services[0] = 0;
 
 	uci_path_foreach_sections(bbfdm, "dmmap_ddns", "server", s) {
 		dmuci_get_value_by_section_string(s, "service_name", &service_name);
+
+		if ((sizeof(supported_services) - pos) < DM_STRLEN(service_name))
+			break;
 
 		pos += snprintf(&supported_services[pos], sizeof(supported_services) - pos, "%s,", service_name);
 	}
