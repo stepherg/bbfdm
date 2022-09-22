@@ -326,33 +326,33 @@ static int ubus_ieee1905_info_options(const char *option1, const char *option2, 
 	return 0;
 }
 
-static char *get_datamodel_media_type(const char *media)
+static char *get_datamodel_media_type(const char *media, const char *band)
 {
 	if (!DM_LSTRCMP(media, "IEEE 802_3U_FAST_ETHERNET"))
 		return "IEEE 802.3u";
 	else if (!DM_LSTRCMP(media, "IEEE 802_3AB_GIGABIT_ETHERNET"))
 		return "IEEE 802.3ab";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11B_2_4_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11B"))
 		return "IEEE 802.11b";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11G_2_4_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11G"))
 		return "IEEE 802.11g";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11A_5_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11A"))
 		return "IEEE 802.11a";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11N_2_4_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11N") && !DM_LSTRCMP(band, "2"))
 		return "IEEE 802.11n 2.4";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11N_5_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11N") && !DM_LSTRCMP(band, "5"))
 		return "IEEE 802.11n 5.0";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11AC_5_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AC"))
 		return "IEEE 802.11ac";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11AX_2_4_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AX") && !DM_LSTRCMP(band, "2"))
 		return "IEEE 802.11ax 2.4";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11AX_5_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AX") && !DM_LSTRCMP(band, "5"))
 		return "IEEE 802.11ax 5.0";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11AX_6_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AX") && !DM_LSTRCMP(band, "6"))
 		return "IEEE 802.11ax 6.0";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11AD_60_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AD") && !DM_LSTRCMP(band, "60"))
 		return "IEEE 802.11ad";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11AF_GHZ"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AF"))
 		return "IEEE 802.11af";
 	else if (!DM_LSTRCMP(media, "IEEE 1901_WAVELET"))
 		return "IEEE 1901 Wavelet";
@@ -468,7 +468,9 @@ static int get_IEEE1905ALInterface_InterfaceStackReference(char *refparam, struc
 static int get_IEEE1905ALInterface_MediaType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *media = dmjson_get_value((json_object *)data, 1, "media");
-	*value = get_datamodel_media_type(media);
+	char *band = dmjson_get_value((json_object *)data, 1, "band");
+
+	*value = get_datamodel_media_type(media, band);
 	return 0;
 }
 
@@ -585,7 +587,9 @@ static int get_IEEE1905ALInterfaceLink_IEEE1905Id(char *refparam, struct dmctx *
 static int get_IEEE1905ALInterfaceLink_MediaType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *media = dmjson_get_value((json_object *)data, 1, "media");
-	*value = get_datamodel_media_type(media);
+	char *band = dmjson_get_value((json_object *)data, 1, "band");
+
+	*value = get_datamodel_media_type(media, band);
 	return 0;
 }
 
@@ -1275,7 +1279,9 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_InterfaceId(char
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_MediaType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *media = dmjson_get_value((json_object *)data, 1, "media");
-	*value = get_datamodel_media_type(media);
+	char *band = dmjson_get_value((json_object *)data, 1, "band");
+
+	*value = get_datamodel_media_type(media, band);
 	return 0;
 }
 
