@@ -789,6 +789,10 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 		if (data && is_array) {
 			char *arguments = (json_version == JSON_VERSION_1) ? is_array + sizeof("[@index]") : is_array + sizeof("[@i-1]");
 			json_obj = get_requested_json_obj((json_object *)data, instance, arguments, key_name, sizeof(key_name));
+			/* If the json object is already extracted from array object then use that object
+                           to extract the value */
+                        if (!json_obj && data)
+                            json_obj = (json_object*)data;
 		} else {
 			json_obj = get_requested_json_obj(res, instance, key_buf, key_name, sizeof(key_name));
 		}
