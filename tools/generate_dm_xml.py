@@ -9,6 +9,7 @@ import argparse
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as MD
 import bbf_common as bbf
+import json
 
 DM_OBJ_COUNT = 0
 DM_PARAM_COUNT = 0
@@ -36,7 +37,7 @@ def pretty_format(elem):
     return reparsed.toprettyxml(indent="  ")
 
 
-def generate_bbf_xml_file(output_file):
+def generate_bbf_xml_file(output_file, dm_json_files=None):
     global DM_OBJ_COUNT
     global DM_PARAM_COUNT
 
@@ -54,30 +55,168 @@ def generate_bbf_xml_file(output_file):
 
     for value in bbf.LIST_SUPPORTED_DM:
 
-        obj = value.strip().split(",")
-        if obj[3] == "BBFDM_USP":
+        obj = json.loads(value)
+        protocol = bbf.get_option_value(obj, "protocol", None)
+        if protocol is None or protocol == "BBFDM_USP":
             continue
 
-        access = "readOnly" if obj[1] == "DMREAD" else "readWrite"
+        p_type = bbf.get_option_value(obj, "type", None)
+        if p_type is None:
+            continue
 
-        if obj[2] == "DMT_OBJ":
+        name = bbf.get_option_value(obj, "param", None)
+        permission = bbf.get_option_value(obj, "permission", None)
+        list_ob = bbf.get_option_value(obj, "list", None)
+        enum = bbf.get_option_value(obj, "enum", None)
+        desc = bbf.get_option_value(obj, "description", None)
+        rang = bbf.get_option_value(obj, "range", None)
+
+        if name is None or permission is None:
+            continue
+
+        access = "readOnly" if permission == "DMREAD" else "readWrite"
+
+        if p_type == "DMT_OBJ":
             # Object
             objec = ET.SubElement(model, "object")
-            objec.set("name", obj[0])
+            objec.set("name", name)
             objec.set("access", access)
             objec.set("minEntries", "0")
             objec.set("maxEntries", "20")
+
+            ob_description = ET.SubElement(objec, "description")
+            if desc is None or len(desc) == 0:
+                desc = bbf.get_param_info_from_json(name, dm_json_files, "description")
+            ob_description.text = desc.replace("<", "{").replace(">", "}") if desc is not None else ""
+
             DM_OBJ_COUNT += 1
         else:
             # Parameter
+            subtype = None
+            list_datatype = None
             parameter = ET.SubElement(objec, "parameter")
-            parameter.set("name", obj[0][obj[0].rindex('.')+1:])
+            parameter.set("name", name[name.rindex('.')+1:])
             parameter.set("access", access)
-            description = ET.SubElement(parameter, "description")
-            description.text = str(
-                "parameter " + obj[0][obj[0].rindex('.')+1:])
+            p_description = ET.SubElement(parameter, "description")
+            if desc is None or len(desc) == 0:
+                desc = bbf.get_param_info_from_json(name, dm_json_files, "description")
+            p_description.text = desc.replace("<", "{").replace(">", "}") if desc is not None else ""
             syntax = ET.SubElement(parameter, "syntax")
-            ET.SubElement(syntax, ARRAY_TYPES.get(obj[2], None))
+
+            if list_ob is None:
+                list_ob = bbf.get_param_info_from_json(name, dm_json_files, "list")
+
+            if list_ob is not None and len(list_ob) != 0:
+                listtag = ET.SubElement(syntax, "list")
+
+                item_ob = None
+                maxsize = None
+
+                # Handle items in list
+                try:
+                    item_ob = list_ob["item"]
+                except KeyError:
+                    item_ob = None
+
+                if item_ob is not None:
+                    minval = None
+                    maxval = None
+                    try:
+                        minval = item_ob["min"]
+                    except KeyError:
+                        minval = None
+
+                    try:
+                        maxval = item_ob["max"]
+                    except KeyError:
+                        maxval = None
+
+                    if minval is not None:
+                        listtag.set("minItems", str(minval))
+
+                    if maxval is not None:
+                        listtag.set("maxItems", str(maxval))
+
+                # Handle maxsize in list
+                try:
+                    maxsize = list_ob["maxsize"]
+                except KeyError:
+                    maxsize = None
+
+                if maxsize is not None:
+                    sizetag = ET.SubElement(listtag, "size")
+                    sizetag.set("maxLength", str(maxsize))
+
+                if enum is None or len(enum) == 0:
+                    try:
+                        enum = list_ob["enumerations"]
+                    except KeyError:
+                        enum = None
+
+                try:
+                    list_datatype = list_ob["datatype"]
+                except KeyError:
+                    list_datatype = None
+
+                if list_datatype is not None and list_datatype in ARRAY_TYPES.values():
+                    subtype = ET.SubElement(syntax, list_datatype)
+                else:
+                    subtype = ET.SubElement(syntax, ARRAY_TYPES.get(p_type, None))
+            else:
+                subtype = ET.SubElement(syntax, ARRAY_TYPES.get(p_type, None))
+
+            if enum is None:
+                enum = bbf.get_param_info_from_json(name, dm_json_files, "enumerations")
+
+            if enum is not None:
+                for val in enum:
+                    enumeration = ET.SubElement(subtype, "enumeration")
+                    enumeration.set("value", str(val))
+
+            # handle range
+            range_min = None
+            range_max = None
+
+            if rang is None:
+                try:
+                    if list_ob is not None:
+                        rang = list_ob["range"]
+                except KeyError:
+                    rang = None
+
+            if rang is None:
+                rang = bbf.get_param_info_from_json(name, dm_json_files, "range")
+
+            if rang is not None and len(rang) != 0:
+                rang_len = len(rang)
+                for i in range(rang_len):
+                    try:
+                        range_min = rang[i]["min"]
+                    except KeyError:
+                        range_min = None
+
+                    try:
+                        range_max = rang[i]["max"]
+                    except KeyError:
+                        range_max = None
+
+                    if list_datatype is not None:
+                        val_type = list_datatype
+                    else:
+                        val_type = ARRAY_TYPES.get(p_type, None)
+                    if val_type == "string" or val_type == "hexBinary" or val_type == "base64":
+                        size_tag = ET.SubElement(subtype, "size")
+                        if range_min is not None:
+                            size_tag.set("minLength", str(range_min))
+                        if range_max is not None:
+                            size_tag.set("maxLength", str(range_max))
+                    if val_type == "unsignedInt" or val_type == "unsignedLong" or val_type == "int" or val_type == "long":
+                        range_tag = ET.SubElement(subtype, "range")
+                        if range_min is not None:
+                            range_tag.set("minInclusive", str(range_min))
+                        if range_max is not None:
+                            range_tag.set("maxInclusive", str(range_max))
+
             DM_PARAM_COUNT += 1
 
     xml_file = open(output_file, "w", encoding='utf-8')
@@ -151,39 +290,49 @@ def generate_hdm_xml_file(output_file):
 
     for value in bbf.LIST_SUPPORTED_DM:
 
-        obj = value.strip().split(",")
-        if obj[3] == "BBFDM_USP":
+        obj = json.loads(value)
+        protocol = bbf.get_option_value(obj, "protocol", None)
+        if protocol is None or protocol == "BBFDM_USP":
             continue
 
-        if obj[2] == "DMT_OBJ":
+        p_type = bbf.get_option_value(obj, "type", None)
+        if p_type is None:
+            continue
+
+        name = bbf.get_option_value(obj, "param", None)
+        permission = bbf.get_option_value(obj, "permission", None)
+        if name is None or permission is None:
+            continue
+
+        if p_type == "DMT_OBJ":
             # Object
             obj_tag = ET.SubElement(
-                param_array[obj[0].replace(".{i}", "").count('.') - root_dot_count -1], "parameter")
+                param_array[name.replace(".{i}", "").count('.') - root_dot_count -1], "parameter")
             obj_name = ET.SubElement(obj_tag, "parameterName")
-            obj_name.text = str(obj[0].replace(".{i}", "").split('.')[-2])
+            obj_name.text = str(name.replace(".{i}", "").split('.')[-2])
             obj_type = ET.SubElement(obj_tag, "parameterType")
             obj_type.text = str("object")
             obj_array = ET.SubElement(obj_tag, "array")
             obj_array.text = str(
-                "true" if obj[0].endswith(".{i}.") else "false")
+                "true" if name.endswith(".{i}.") else "false")
             parameters = ET.SubElement(obj_tag, "parameters")
-            param_array[obj[0].replace(".{i}", "").count('.') - root_dot_count] = parameters
+            param_array[name.replace(".{i}", "").count('.') - root_dot_count] = parameters
             DM_OBJ_COUNT += 1
         else:
             # Parameter
             param_tag = ET.SubElement(
-                param_array[obj[0].replace(".{i}", "").count('.') - root_dot_count], "parameter")
+                param_array[name.replace(".{i}", "").count('.') - root_dot_count], "parameter")
             param_name = ET.SubElement(param_tag, "parameterName")
-            param_name.text = str(obj[0][obj[0].rindex('.')+1:])
+            param_name.text = str(name[name.rindex('.')+1:])
             param_type = ET.SubElement(param_tag, "parameterType")
-            param_type.text = str(ARRAY_TYPES.get(obj[2], None))
+            param_type.text = str(ARRAY_TYPES.get(p_type, None))
             DM_PARAM_COUNT += 1
 
     xml_file = open(output_file, "w", encoding='utf-8')
     xml_file.write(pretty_format(root))
     xml_file.close()
 
-def generate_xml(acs = 'default', output_file="datamodel.xml"):
+def generate_xml(acs = 'default', dm_json_files=None, output_file="datamodel.xml"):
     global DM_OBJ_COUNT
     global DM_PARAM_COUNT
 
@@ -196,7 +345,7 @@ def generate_xml(acs = 'default', output_file="datamodel.xml"):
     if acs == "HDM":
         generate_hdm_xml_file(output_file)
     else:
-        generate_bbf_xml_file(output_file)
+        generate_bbf_xml_file(output_file, dm_json_files)
 
     if os.path.isfile(output_file):
         print(f' - XML file generated: {output_file}')
@@ -315,6 +464,6 @@ if __name__ == '__main__':
 
     bbf.generate_supported_dm(args.vendor_prefix, args.vendor_list, plugins)
     bbf.clean_supported_dm_list()
-    generate_xml(args.format, args.output)
+    generate_xml(args.format, args.dm_json_files, args.output)
     print(f'Datamodel generation completed, aritifacts available in {args.output}')
     sys.exit(bbf.BBF_ERROR_CODE)

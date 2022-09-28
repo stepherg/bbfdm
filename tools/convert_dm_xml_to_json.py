@@ -13,6 +13,8 @@ from collections import OrderedDict
 from shutil import copyfile
 import bbf_common as bbf
 
+desc_dict = {}
+
 listTypes = ["string",
              "unsignedInt",
              "unsignedLong",
@@ -510,6 +512,7 @@ def printOBJ(dmobject, hasobj, hasparam, bbfdm_type):
     print("\"type\" : \"object\",", file=fp)
     print("\"version\" : \"%s\"," % dmobject.get('version'), file=fp)
     print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
+    print("\"description\" : \"%s\"," % getParamDesc(dmobject, None), file=fp)
     if uniquekeys is not None:
         print("\"uniqueKeys\" : [%s]," % uniquekeys, file=fp)
     if dmobject.get('access') == "readOnly":
@@ -527,8 +530,7 @@ def printOBJ(dmobject, hasobj, hasparam, bbfdm_type):
 
 def printPARAM(dmparam, dmobject, bbfdm_type):
     hasmapping, mapping = getparammapping(dmobject, dmparam)
-    islist, datatype, paramvalrange, paramenum, paramunit, parampattern, listminItem, listmaxItem, listmaxsize = getparamoption(
-        dmparam)
+    islist, datatype, paramvalrange, paramenum, paramunit, parampattern, listminItem, listmaxItem, listmaxsize = getparamoption(dmparam)
 
     fp = open('./.json_tmp', 'a', encoding='utf-8')
     print("\"%s\" : {" % dmparam.get('name').replace(" ", ""), file=fp)
@@ -542,6 +544,7 @@ def printPARAM(dmparam, dmobject, bbfdm_type):
 
     print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
     print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
+    print("\"description\" : \"%s\"," % getParamDesc(dmparam, datatype), file=fp)
 
     default = getParamDefault(dmparam)
     if default is not None and len(default) != 0 and default != "\"":
@@ -893,6 +896,96 @@ def generatejsonfromobj(pobj, pdir):
     return dmfp.name
 
 
+def processDatatypes(datatype):
+    key = None
+    enum = None
+    des = None
+    if datatype.tag == "dataType":
+        key = datatype.get("name")
+        if key is None or len(key) == 0:
+            return
+
+        if key in desc_dict.keys():
+            return
+
+        for dt in datatype:
+            if dt.tag == "description":
+                des = dt.text
+                break
+
+        if des is None:
+            desc_dict[key] = ""
+            return
+        elif des.find('{{enum}}') != -1:
+            for c in datatype:
+                if c.tag == "string":
+                    for e in c:
+                        if e.tag == "enumeration":
+                            if enum is None:
+                                enum = "Enumeration of: " + e.get("value")
+                            else:
+                                enum = enum + ", " + e.get("value")
+
+            if enum is not None:
+                enum = enum + "."
+                des = re.sub('{{enum}}', enum, des)
+
+        des = des.replace("{", "<")
+        des = des.replace("}", ">")
+        des = des.replace("\'", "")
+        des = des.replace("\"", "")
+        desc_dict[key] = des
+
+
+def getParamDesc(dmparam, key):
+    text = None
+    detail = None
+    enum = None
+    for s in dmparam:
+        if s.tag == "description":
+            text = s.text
+
+    if text is None or len(text) == 0:
+        return ""
+
+    if text.find('{{enum}}') != -1:
+        for s in dmparam:
+            if s.tag != "syntax":
+                continue
+
+            for c in s:
+                if c.tag != "string":
+                    continue
+
+                for e in c:
+                    if e.tag == "enumeration":
+                        if enum is None:
+                            enum = "Enumeration of: " + e.get("value")
+                        else:
+                            enum = enum + ", " + e.get("value")
+
+        if enum is not None:
+            enum = enum + "."
+            text = re.sub('{{enum}}', enum, text)
+
+    if text.find('{{datatype|expand}}') != -1 and key is not None:
+        try:
+            detail = desc_dict[key]
+        except KeyError:
+            detail = None
+
+        if detail is not None:
+            text = re.sub('{{datatype|expand}}', detail, text)
+
+    text = text.replace("{", "<")
+    text = text.replace("}", ">")
+    text = text.replace("\'", "")
+    text = text.replace("\"", "")
+    text = text.replace("\n", "")
+    desc = ' '.join(text.split())
+    return desc
+
+
 ### main ###
 if len(sys.argv) < 4:
     printusage()
@@ -908,6 +1001,9 @@ xmlroot1 = tree1.getroot()
 model1 = xmlroot1
 
 for child in model1:
+    if child.tag == "dataType":
+        processDatatypes(child)
+
     if child.tag == "model":
         model1 = child
 
@@ -939,6 +1035,9 @@ if "tr-181" in sys.argv[1] or "tr-104" in sys.argv[1]:
     model2 = xmlroot2
 
     for child in model2:
+        if child.tag == "dataType":
+            processDatatypes(child)
+
         if child.tag == "model":
             model2 = child
 

@@ -127,6 +127,22 @@ def get_protocol_from_json(value):
     else:
         return "BBFDM_USP"
 
+def get_description_from_json(value):
+    val = get_option_value(value, "description", "")
+    return val
+
+def get_range_from_json(value):
+    val = get_option_value(value, "range", [])
+    return val
+
+def get_list_from_json(value):
+    val = get_option_value(value, "list", {})
+    return val
+
+def get_enum_from_json(value):
+    val = get_option_value(value, "enumerations", [])
+    return val
+
 def clean_supported_dm_list():
     LIST_SUPPORTED_DM.clear()
 
@@ -142,10 +158,12 @@ def fill_data_model_file():
     fp = open(DATA_MODEL_FILE, 'a', encoding='utf-8')
     for value in LIST_SUPPORTED_DM:
         if (ROOT):
-            if (value.startswith(ROOT)):
-                print(f'{value}', file=fp)
+            js_val = json.loads(value)
+            param = get_option_value(js_val, "param")
+            if param is not None and (param.startswith(ROOT)):
+                print(f"{value}", file=fp)
         else:
-            print(f'{value}', file=fp)
+            print(f"{value}", file=fp)
     fp.close()
 
 
@@ -217,7 +235,7 @@ def generate_datamodel_tree(filename):
                 full_obj_name = obj_name + ".{i}."
 
             LIST_SUPPORTED_DM.append(
-                full_obj_name + "," + obj_permission + ",DMT_OBJ" + "," + obj_protocol)
+                "{\"param\":\"" + full_obj_name + "\",\"permission\":\"" + obj_permission + "\",\"type\":\"DMT_OBJ\",\"protocol\":\"" + obj_protocol + "\"}")
 
             if obj[8] != "NULL":
                 LIST_OBJ.append(full_obj_name + ":" + obj[8])
@@ -241,7 +259,7 @@ def generate_datamodel_tree(filename):
                     param_protocol = param[5].replace("}", "").replace(" ", "")
 
                     LIST_SUPPORTED_DM.append(
-                        param_name + "," + param_permission + "," + param_type + "," + param_protocol)
+                        "{\"param\":\"" + param_name + "\",\"permission\":\"" + param_permission + "\",\"type\":\"" + param_type + "\",\"protocol\":\"" + param_protocol + "\"}")
                     if value not in LIST_DEL_PARAM:
                         LIST_DEL_PARAM.append(value)
 
@@ -290,9 +308,10 @@ def parse_dynamic_json_datamodel_tree(obj, value):
     obj_permission = "DMWRITE" if get_option_value(
         value, "access") is True else "DMREAD"
     obj_protocols = get_protocol_from_json(value)
+    obj_description = get_description_from_json(value)
 
     obj_name = obj.replace("{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX)
-    LIST_SUPPORTED_DM.append(obj_name + "," + obj_permission + ",DMT_OBJ" + "," + obj_protocols)
+    LIST_SUPPORTED_DM.append("{\"param\":\"" + obj_name + "\",\"permission\":\"" + obj_permission + "\",\"type\":\"DMT_OBJ\",\"protocol\":\"" + obj_protocols + "\",\"description\":\"" + obj_description + "\"}")
 
     hasobj = obj_has_child(value)
     hasparam = obj_has_param(value)
@@ -307,8 +326,13 @@ def parse_dynamic_json_datamodel_tree(obj, value):
                         param_permission = "DMWRITE" if get_option_value(
                             v, "write") is True else "DMREAD"
                         param_protocols = get_protocol_from_json(v)
+                        param_list = get_list_from_json(v)
+                        param_enums = get_enum_from_json(v)
+                        param_desc = get_description_from_json(v)
+                        param_range = get_range_from_json(v)
+
                         LIST_SUPPORTED_DM.append(
-                            param_name + "," + param_permission + "," + param_type + "," + param_protocols)
+                            "{\"param\":\"" + param_name + "\",\"permission\":\"" + param_permission + "\",\"type\":\"" + param_type + "\",\"protocol\":\"" + param_protocols + "\",\"description\":\"" + param_desc + "\",\"list\":" + json.dumps(param_list) + ",\"range\":" + json.dumps(param_range) + ",\"enum\":" + json.dumps(param_enums) + "}")
                         break
 
     if hasobj and isinstance(value, dict):
@@ -511,3 +535,67 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
     ############### COPY SUPPORTED DATA MODEL TO FILE ###############
     remove_file(DATA_MODEL_FILE)
     fill_data_model_file()
+
+
+def get_param_info_from_json(data, dm_json_files=None, info="description"):
+    arr = data.split(".")
+    list_data = []
+    if len(arr) == 0:
+        return None
+
+    for i in range(0, len(arr)):
+        string = ""
+        if i == 0:
+            string=arr[i] + "."
+        elif i == (len(arr) - 1):
+            string=arr[i]
+        else:
+            for j in range(0, i + 1):
+                string=string + arr[j]
+                string=string + "."
+
+        if len(string) != 0:
+            list_data.append(string)
+
+    if len(list_data) == 0:
+        return None
+
+    found = False
+    res = None
+    if dm_json_files is not None and isinstance(dm_json_files, list) and dm_json_files:
+        for fl in dm_json_files:
+            if os.path.exists(fl):
+                f = open(fl, 'r', encoding='utf-8')
+                try:
+                    ob = json.load(f)
+                except json.decoder.JSONDecodeError:
+                    continue
+
+                index = -1
+                for key in ob.keys():
+                    if key in list_data:
+                        index = list_data.index(key)
+                        break
+
+                if index == -1:
+                    continue
+
+                for i in range(index, len(list_data)):
+                    if i != (len(list_data) - 1) and list_data[i + 1] == list_data[i] + "{i}.":
+                        continue
+                    try:
+                        ob = ob[list_data[i]]
+                        found = True
+                    except KeyError:
+                        found = False
+                        break
+
+                if found is True:
+                    try:
+                        res = ob[info]
+                        break
+                    except KeyError:
+                        res = None
+
+    return res
+

@@ -36,6 +36,7 @@ VENDOR_PREFIX = None
 VENDOR_LIST = None
 PLUGINS = None
 OUTPUT = None
+DM_JSON_FILES = None
 
 json_file = open(sys.argv[1], "r", encoding='utf-8')
 json_data = json.loads(json_file.read())
@@ -78,6 +79,10 @@ for option, value in json_data.items():
         VENDOR_LIST = value
         continue
 
+    elif option == "dm_json_files":
+        DM_JSON_FILES = value
+        continue
+
     elif option == "plugins":
         PLUGINS = value
         continue
@@ -113,10 +118,10 @@ if isinstance(file_format, list):
                     bbf.clean_supported_dm_list()
                     output_file_name = output_dir + '/' + output_file_prefix + '_' + acs_format + '.xml'
                     if acs_format == "hdm":
-                        bbf_xml.generate_xml('HDM', output_file_name)
+                        bbf_xml.generate_xml('HDM', DM_JSON_FILES, output_file_name)
 
                     if acs_format == "default":
-                        bbf_xml.generate_xml('default', output_file_name)
+                        bbf_xml.generate_xml('default', DM_JSON_FILES, output_file_name)
 
 
         if _format == "xls":

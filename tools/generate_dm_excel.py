@@ -30,8 +30,11 @@ def getprotocols(value):
 
 def is_param_obj_command_event_supported(dmobject):
     for value in bbf.LIST_SUPPORTED_DM:
-        obj = value.split(",")
-        if obj[0] == dmobject:
+        obj = json.loads(value)
+        param = bbf.get_option_value(obj, "param", None)
+        if param is None:
+            continue
+        if param == dmobject:
             bbf.LIST_SUPPORTED_DM.remove(value)
             return "Yes"
     return "No"
@@ -78,7 +81,11 @@ def parse_dynamic_object(dm_name_list):
         return None
 
     for value in bbf.LIST_SUPPORTED_DM:
-        obj = value.split(",")
+        obj = json.loads(value)
+        param = bbf.get_option_value(obj, "param", None)
+        p_type = bbf.get_option_value(obj, "type", None)
+        if param is None or p_type is None:
+            continue
 
         for dm in dm_name_list:
 
@@ -87,17 +94,17 @@ def parse_dynamic_object(dm_name_list):
             if JSON_FILE is None:
                 continue
 
-            if dm == "tr181" and ".Services." in obj[0]:
+            if dm == "tr181" and ".Services." in param:
                 continue
 
-            if dm == "tr104" and ".Services." not in obj[0]:
+            if dm == "tr104" and ".Services." not in param:
                 continue
 
-            if dm == "tr135" and ".Services." not in obj[0]:
+            if dm == "tr135" and ".Services." not in param:
                 continue
 
-            dmType = "object" if obj[2] == "DMT_OBJ" else "parameter"
-            add_data_to_list_dm(obj[0], "Yes", "CWMP+USP", dmType)
+            dmType = "object" if p_type == "DMT_OBJ" else "parameter"
+            add_data_to_list_dm(param, "Yes", "CWMP+USP", dmType)
 
 
 def parse_object_tree(dm_name_list):

@@ -10,6 +10,10 @@
     "iopsys",
     "openwrt"
   ],
+  "dm_json_files": [
+    "../dmtree/json/tr181.json",
+    "../dmtree/json/tr104.json"
+  ],
   "vendor_prefix": "X_IOPSYS_EU_",
   "plugins": [
     {
@@ -40,11 +44,11 @@
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/twamp.git",
+      "repo": "https://dev.iopsys.eu/iopsys/twamp-light.git",
       "proto": "git",
-      "version": "master",
+      "version": "devel",
       "dm_files": [
-        "datamodel.c"
+        "src/datamodel.c"
       ]
     },
     {

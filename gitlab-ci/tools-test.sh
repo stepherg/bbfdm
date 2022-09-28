@@ -25,10 +25,6 @@ echo "Validate BBF TR-104 JSON Plugin"
 ./tools/validate_json_plugin.py dmtree/json/tr104.json
 check_ret $?
 
-echo "Validate BBF TR-135 JSON Plugin"
-./tools/validate_json_plugin.py dmtree/json/tr135.json
-check_ret $?
-
 echo "Validate X_IOPSYS_EU_Dropbear JSON Plugin"
 ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json
 check_ret $?

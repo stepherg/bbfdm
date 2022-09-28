@@ -954,6 +954,20 @@ Examples:
     ==> Generate all required files defined in tools_input.json file
 ```
 
+The parameters/keys used in tools_input.json file are mostly self-explanatory but few parameters are required a bit more details.
+
+| Key | Description |
+|-----|-------------|
+| vendor_list | This option should have the same name of the vendor directory names |
+| dm_json_files | This should contain the list of json file path, where each file contains the definition of DM objects/parameters |
+| vendor_prefix | The prefix used by vendor for vendor extension in DM objects/parameters |
+| output.acs | Currently the tool support two variants of xml definitions of DM objects/parameters |
+| | hdm: This variant of xml is compatible with Nokia HDM ACS |
+| | default: This contains the generic definition which has the capability to define more descriptive DM objects/parameters |
+| output.file_format | xls: An excel file listing the supported and unsupported DM objects/parameters |
+
+> Note: To add more description about the vendor extended DM objects/parameters, it is required to add the definition of the required/related DM objects/parameters in a json file (The json structure should follow same format as given in [tr181.json](./dmtree/json/tr181.json)), The same json file need to be defined in dm_json_files list.
+
 The input json file should be defined as follow:
 
 ```bash
@@ -969,6 +983,10 @@ The input json file should be defined as follow:
 		"openwrt",
 		"test"
 	],
+	"dm_json_files": [
+		"../dmtree/json/tr181.json",
+		"../dmtree/json/tr104.json"
+	]
 	"vendor_prefix": "X_IOPSYS_EU_",
 	"plugins": [
 		{
@@ -1030,9 +1048,9 @@ The input json file should be defined as follow:
 
 > Note1: For the local repository, you must use an absolute path as repo option.
 
-> Note2: If proto is not defined in the json config file, then git is used by default as proto option.  
+> Note2: If proto is not defined in the json config file, then git is used by default as proto option.
 
-- For more examples of tools input json file, you can see this link: [tools_input.json](./devel/tools/tools_input.json)
+- For more examples of tools input json file, you can see this link: [tools_input.json](./tools/tools_input.json)
 
 # How to expose datamodel over ubus directly with the help of libbbf APIs
 
