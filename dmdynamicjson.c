@@ -523,7 +523,7 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 
 		find_current_obj(refparam, object, sizeof(object));
 		snprintf(buf_instance, sizeof(buf_instance), "%s_instance", object);
-		snprintf(sec_name, sizeof(sec_name), "%s%s_%s", data ? section_name((struct uci_section *)data) : "", object, *instance);
+		snprintf(sec_name, sizeof(sec_name), "%s%s%s_%s", data ? section_name((struct uci_section *)data) : "", data ? "_" : "", object, *instance);
 
 		for (int i = 0; buf_instance[i]; i++)
 			buf_instance[i] = tolower(buf_instance[i]);
@@ -591,6 +591,14 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 
 			switch (del_action) {
 				case DEL_INST:
+					uci_package_foreach_sections_safe(json_object_get_string(file), stmp, s) {
+						char *dm_parent = NULL;
+
+						dmuci_get_value_by_section_string(s, "dm_parent", &dm_parent);
+						if (DM_STRLEN(dm_parent) && strcmp(section_name((struct uci_section *)data), dm_parent) == 0)
+							dmuci_delete_by_section(s, NULL, NULL);
+					}
+
 					get_dmmap_section_of_config_section(json_object_get_string(dmmap_file), json_object_get_string(section_type), section_name((struct uci_section *)data), &dmmap_section);
 					dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
@@ -598,15 +606,14 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 					break;
 				case DEL_ALL:
 					uci_foreach_sections_safe(json_object_get_string(file), json_object_get_string(section_type), stmp, s) {
+						struct uci_section *ss = NULL, *sstmp = NULL;
 
-						if (data) {
+						uci_package_foreach_sections_safe(json_object_get_string(file), sstmp, ss) {
 							char *dm_parent = NULL;
 
-							dmuci_get_value_by_section_string(s, "dm_parent", &dm_parent);
-							if (data && DM_STRLEN(dm_parent)) {
-								if (strcmp(section_name((struct uci_section *)data), dm_parent) != 0)
-									continue;
-							}
+							dmuci_get_value_by_section_string(ss, "dm_parent", &dm_parent);
+							if (DM_STRLEN(dm_parent) && strcmp(section_name(s), dm_parent) == 0)
+								dmuci_delete_by_section(ss, NULL, NULL);
 						}
 
 						get_dmmap_section_of_config_section(json_object_get_string(dmmap_file), json_object_get_string(section_type), section_name(s), &dmmap_section);
@@ -1427,10 +1434,22 @@ static void uci_v1_set_value(json_object *mapping_obj, int json_version, char *r
 
 static void set_value_from_mapping(json_object *param_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)
 {
-	struct json_object *mapping_arr = NULL, *mapping = NULL;
+	struct json_object *type_obj = NULL, *mapping_arr = NULL, *mapping = NULL;
 
 	if (!param_obj)
 		return;
+
+	json_object_object_get_ex(param_obj, "type", &type_obj);
+	if (!type_obj)
+		return;
+
+	char *type = json_object_get_string(type_obj);
+	if (!type)
+		return;
+
+	if (DM_LSTRCMP(type, "boolean") == 0) {
+		value = dmuci_string_to_boolean(value) ? "1" : "0";
+	}
 
 	json_object_object_get_ex(param_obj, "mapping", &mapping_arr);
 	if (mapping_arr && json_object_get_type(mapping_arr) == json_type_array) {
