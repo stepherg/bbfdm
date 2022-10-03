@@ -1192,6 +1192,9 @@ void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, siz
 {
 	int idx = -1;
 
+	if (str == NULL || hex == NULL || size == 0)
+		return;
+
 	for (int i = 0; i < ARRAY_SIZE(TYPE_TAG_ARRAY); i++) {
 		if (TYPE_TAG_ARRAY[i].tag == tag) {
 			idx = i;
@@ -1199,35 +1202,44 @@ void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, siz
 		}
 	}
 
-	if (idx > 0) {
-		char *pch = NULL, *spch = NULL;
-		unsigned pos = 0;
-		char buf[512] = {0};
+	if (idx == -1) {
+		convert_string_to_hex(str, hex, size);
+		return;
+	}
 
-		DM_STRNCPY(buf, str, sizeof(buf));
-		for (pch = strtok_r(buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
-			if (TYPE_TAG_ARRAY[idx].type == OPTION_IP) {
-				struct in_addr ip_bin;
+	char *pch = NULL, *spch = NULL;
+	unsigned pos = 0;
+	char buf[512] = {0};
 
-				if (!inet_aton(pch, &ip_bin))
+	DM_STRNCPY(buf, str, sizeof(buf));
+	for (pch = strtok_r(buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+		if (TYPE_TAG_ARRAY[idx].type == OPTION_IP) {
+			struct in_addr ip_bin;
+
+			if (!inet_aton(pch, &ip_bin))
+				continue;
+
+			unsigned int ip = ntohl(ip_bin.s_addr);
+
+			if (size - pos < TYPE_TAG_ARRAY[idx].len * 2)
+				return;
+
+			pos += snprintf(&hex[pos], size - pos, "%08X", ip);
+		} else if (TYPE_TAG_ARRAY[idx].type == OPTION_HEX) {
+			for (int j = 0; j < DM_STRLEN(pch) && pos < size - 1; j++) {
+				if (pch[j] == ':')
 					continue;
 
-				unsigned int ip = ntohl(ip_bin.s_addr);
-				pos += snprintf(&hex[pos], size - pos, "%08X", ip);
-			} else if (TYPE_TAG_ARRAY[idx].type == OPTION_HEX) {
-				for (int j = 0; j < DM_STRLEN(pch); j++) {
-					if (pch[j] == ':')
-						continue;
-
-					pos += snprintf(&hex[pos], size - pos, "%c", pch[j]);
-				}
-			} else {
-				long int val = DM_STRTOL(pch);
-				pos += snprintf(&hex[pos], size - pos, (TYPE_TAG_ARRAY[idx].len == 4) ? "%08lX" : (TYPE_TAG_ARRAY[idx].len == 2) ? "%04lX" : "%02lX", val);
+				pos += snprintf(&hex[pos], size - pos, "%c", pch[j]);
 			}
+		} else {
+			long int val = DM_STRTOL(pch);
+
+			if (size - pos < TYPE_TAG_ARRAY[idx].len * 2)
+				return;
+
+			pos += snprintf(&hex[pos], size - pos, (TYPE_TAG_ARRAY[idx].len == 4) ? "%08lX" : (TYPE_TAG_ARRAY[idx].len == 2) ? "%04lX" : "%02lX", val);
 		}
-	} else {
-		convert_string_to_hex(str, hex, size);
 	}
 }
 
@@ -1235,6 +1247,9 @@ void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, 
 {
 	int idx = -1;
 
+	if (hex == NULL || str == NULL || size == 0)
+		return;
+
 	for (int i = 0; i < ARRAY_SIZE(TYPE_TAG_ARRAY); i++) {
 		if (TYPE_TAG_ARRAY[i].tag == tag) {
 			idx = i;
@@ -1242,35 +1257,42 @@ void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, 
 		}
 	}
 
-	if (idx > 0) {
-		unsigned pos = 0;
-		unsigned int str_len = DM_STRLEN(hex);
-		unsigned int len = TYPE_TAG_ARRAY[idx].len * 2;
-		char buf[16] = {0};
+	if (idx == -1) {
+		convert_hex_to_string(hex, str, size);
+		return;
+	}
 
-		for (int i = 0; i + len <= str_len; i = i + len) {
-			DM_STRNCPY(buf, &hex[i], len + 1);
-			if (TYPE_TAG_ARRAY[idx].type == OPTION_IP) {
-				struct in_addr addr;
-				unsigned int ip;
+	unsigned pos = 0;
+	unsigned int str_len = DM_STRLEN(hex);
+	unsigned int len = TYPE_TAG_ARRAY[idx].len * 2;
+	char buffer[32] = {0};
+	char buf[16] = {0};
 
-				sscanf(buf, "%X", &ip);
-				addr.s_addr = htonl(ip);
-				char *ipaddr = inet_ntoa(addr);
-				pos += snprintf(&str[pos], size - pos, "%s,", ipaddr);
-			} else if (TYPE_TAG_ARRAY[idx].type == OPTION_HEX) {
-				pos += snprintf(&str[pos], size - pos, "%s:", buf);
-			} else {
-				int a = (int)strtol(buf, NULL, 16);
-				pos += snprintf(&str[pos], size - pos, "%d,", a);
-			}
+	for (int i = 0; i + len <= str_len; i = i + len) {
+		DM_STRNCPY(buf, &hex[i], len + 1);
+
+		if (TYPE_TAG_ARRAY[idx].type == OPTION_IP) {
+			struct in_addr addr;
+			unsigned int ip;
+
+			sscanf(buf, "%X", &ip);
+			addr.s_addr = htonl(ip);
+			char *ipaddr = inet_ntoa(addr);
+			snprintf(buffer, sizeof(buffer), "%s,", ipaddr);
+		} else if (TYPE_TAG_ARRAY[idx].type == OPTION_HEX) {
+			snprintf(buffer, sizeof(buffer), "%s:", buf);
+		} else {
+			snprintf(buffer, sizeof(buffer), "%d,", (int)strtol(buf, NULL, 16));
 		}
 
-		if (pos)
-			str[pos - 1] = 0;
-	} else {
-		convert_hex_to_string(hex, str, size);
+		if (size - pos < DM_STRLEN(buffer) + 1)
+			break;
+
+		pos += snprintf(&str[pos], size - pos, "%s", buffer);
 	}
+
+	if (pos)
+		str[pos - 1] = 0;
 }
 
 bool match(const char *string, const char *pattern)
