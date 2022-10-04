@@ -15,6 +15,7 @@
     {
       "repo": "https://dev.iopsys.eu/iopsys/bulkdata.git",
       "proto": "git",
+      "version": "release-6.5",
       "dm_files": [
         "bbf_plugin/datamodel.c"
       ]
