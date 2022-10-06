@@ -1308,8 +1308,13 @@ static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx
 
 	char *url = dmjson_get_value((json_object *)value, 1, "URL");
 	char *auto_activate = dmjson_get_value((json_object *)value, 1, "AutoActivate");
-	if (url[0] == '\0' || auto_activate[0] == '\0')
+	if (url[0] == '\0')
 		return CMD_INVALID_ARGUMENTS;
+
+	// Assuming auto activate as false, if not provided by controller, in case of strict validation,
+	// this should result into a fault
+	if (DM_STRLEN(auto_activate) == 0)
+		auto_activate="0";
 
 	char *username = dmjson_get_value((json_object *)value, 1, "Username");
 	char *password = dmjson_get_value((json_object *)value, 1, "Password");
