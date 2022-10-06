@@ -14,6 +14,143 @@
 #include "managementserver.h"
 #include "dmbbfcommon.h"
 
+enum suboption_125 {
+	OPT_OUI,
+	OPT_SERIAL,
+	OPT_CLASS
+};
+
+struct manageable_device_args {
+	char mac[18];
+	char oui[7];
+	char serial[65];
+	char class[65];
+	char host[1025];
+};
+
+static void get_option125_suboption(char *data, int option, char *dst, int dst_len)
+{
+	int data_len = 0, len = 0;
+	char *pos = NULL;
+
+	data_len = DM_STRLEN(data);
+
+	if (data_len == 0)
+		return;
+
+	switch (option) {
+	case OPT_OUI:
+		pos = strstr(data, "oui_len");
+		if (pos == NULL)
+			return;
+
+		sscanf(pos, "oui_len=%d", &len);
+		pos = strstr(data, "device_oui=");
+		if (pos == NULL)
+			return;
+
+		pos = pos + 11;
+		if (pos >= (data + data_len))
+			return;
+
+		if (len >= dst_len)
+			len = dst_len;
+		else
+			len = len + 1;
+
+		snprintf(dst, len, "%s", pos);
+		break;
+	case OPT_SERIAL:
+		pos = strstr(data, "serial_len");
+		if (pos == NULL)
+			return;
+
+		sscanf(pos, "serial_len=%d", &len);
+		pos = strstr(data, "device_serial=");
+		if (pos == NULL)
+			return;
+
+		pos = pos + 14;
+		if (pos >= (data + data_len))
+			return;
+
+		if (len >= dst_len)
+			len = dst_len;
+		else
+			len = len + 1;
+
+		snprintf(dst, len, "%s", pos);
+		break;
+	case OPT_CLASS:
+		pos = strstr(data, "class_len");
+		if (pos == NULL)
+			return;
+
+		sscanf(pos, "class_len=%d", &len);
+		pos = strstr(data, "device_class=");
+		if (pos == NULL)
+			return;
+
+		pos = pos + 13;
+		if (pos >= (data + data_len))
+			return;
+
+		if (len >= dst_len)
+			len = dst_len;
+		else
+			len = len + 1;
+
+		snprintf(dst, len, "%s", pos);
+		break;
+	default:
+		return;
+	}
+}
+
+static int browseManageableDevice(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	FILE *f = fopen(DHCP_CLIENT_OPTIONS_FILE, "r");
+	if (f == NULL)
+		return 0;
+
+	struct manageable_device_args device;
+	char line[2048];
+	char *inst = NULL;
+	int id = 0;
+
+	while (fgets(line, sizeof(line), f) != NULL) {
+		remove_new_line(line);
+
+		memset(&device, 0, sizeof(device));
+
+		sscanf(line, "%17s", device.mac);
+
+		if (DM_STRLEN(device.mac) < 17)
+			continue;
+
+		char *linker = NULL;
+		adm_entry_get_linker_param(dmctx, "Device.Hosts.Host.", device.mac, &linker);
+		if (DM_STRLEN(linker) == 0)
+			continue;
+
+		strncpy(device.host, linker, 1024);
+		get_option125_suboption(line, OPT_OUI, device.oui, sizeof(device.oui));
+		get_option125_suboption(line, OPT_SERIAL, device.serial, sizeof(device.serial));
+		get_option125_suboption(line, OPT_CLASS, device.class, sizeof(device.class));
+
+		if (DM_STRCMP(device.oui, "-") == 0 || DM_STRCMP(device.serial, "-") == 0)
+			continue;
+
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&device, inst) == DM_STOP)
+			break;
+	}
+	fclose(f);
+	return 0;
+
+}
+
 /*#Device.ManagementServer.URL!UCI:cwmp/acs,acs/url*/
 static int get_management_server_url(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -606,6 +743,12 @@ static int get_nat_detected(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
+static int get_manageable_device_number_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseManageableDevice);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
 
 static int get_heart_beat_policy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -671,12 +814,41 @@ static int set_heart_beat_policy_initiation_time(char *refparam, struct dmctx *c
 	return 0;
 }
 
+static int get_manageable_device_oui(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct manageable_device_args *device = (struct manageable_device_args *)data;
+	*value = dmstrdup(device->oui);
+	return 0;
+}
+
+static int get_manageable_device_serial(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct manageable_device_args *device = (struct manageable_device_args *)data;
+	*value = dmstrdup(device->serial);
+	return 0;
+}
+
+static int get_manageable_device_class(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct manageable_device_args *device = (struct manageable_device_args *)data;
+	*value = (DM_STRCMP(device->class, "-") != 0) ? dmstrdup(device->class) : "";
+	return 0;
+}
+
+static int get_manageable_device_host(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct manageable_device_args *device = (struct manageable_device_args *)data;
+	*value = dmstrdup(device->host);
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
 DMOBJ tManagementServerObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"HeartbeatPolicy", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHeartbeatPolicyParams, NULL, BBFDM_CWMP, NULL, "2.12"},
+{"ManageableDevice", &DMREAD, NULL, NULL, NULL, browseManageableDevice, NULL, NULL, NULL, tManageableDeviceParams, NULL, BBFDM_CWMP, NULL, "2.12"},
 {0}
 };
 
@@ -711,6 +883,7 @@ DMLEAF tManagementServerParams[] = {
 {"EnableCWMP", &DMWRITE, DMT_BOOL, get_management_server_enable_cwmp, set_management_server_enable_cwmp, BBFDM_CWMP, "2.12"},
 {"UDPConnectionRequestAddress", &DMREAD, DMT_STRING, get_upd_cr_address, NULL, BBFDM_CWMP, "2.0"},
 {"NATDetected", &DMREAD, DMT_BOOL, get_nat_detected, NULL, BBFDM_CWMP, "2.0"},
+{"ManageableDeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_manageable_device_number_of_entries, NULL, BBFDM_CWMP, "2.0"},
 {0}
 };
 
@@ -718,5 +891,13 @@ DMLEAF tHeartbeatPolicyParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_heart_beat_policy_enable, set_heart_beat_policy_enable, BBFDM_CWMP, "2.12"},
 {"ReportingInterval", &DMWRITE, DMT_UNINT, get_heart_beat_policy_reporting_interval, set_heart_beat_policy_reporting_interval, BBFDM_CWMP, "2.12"},
 {"InitiationTime", &DMWRITE, DMT_TIME, get_heart_beat_policy_initiation_time, set_heart_beat_policy_initiation_time, BBFDM_CWMP, "2.12"},
+{0}
+};
+
+DMLEAF tManageableDeviceParams[] = {
+{"ManufacturerOUI", &DMREAD, DMT_STRING, get_manageable_device_oui, NULL, BBFDM_CWMP, "2.0"},
+{"SerialNumber", &DMREAD, DMT_STRING, get_manageable_device_serial, NULL, BBFDM_CWMP, "2.0"},
+{"ProductClass", &DMREAD, DMT_STRING, get_manageable_device_class, NULL, BBFDM_CWMP, "2.0"},
+{"Host", &DMREAD, DMT_STRING, get_manageable_device_host, NULL, BBFDM_CWMP, "2.0"},
 {0}
 };

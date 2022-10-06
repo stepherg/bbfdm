@@ -72,6 +72,8 @@
 	"data": {
 		"hostname": "iopsysWrt-44D43771AFF0",
 		"leasetime": 86400,
-		"ntpserver": "200.23.51.102"
+		"ntpserver": "200.23.51.102",
+		"vendorspecinf": "http://iopsys_genieacs:7547",
+		"vivsoinf": "4=44D437,5=Y.0721140006,6=EAGLE"
 	}
 }

@@ -31,6 +31,27 @@ static void get_mcast_iface_key(char *p_ifname, char *key, size_t key_size)
 	}
 }
 
+static char *get_host_linker(char *ipaddr)
+{
+	json_object *res = NULL, *host_obj = NULL, *arrobj = NULL;
+	char *macaddr = "";
+	int i = 0;
+
+	dmubus_call("topology", "hosts", UBUS_ARGS{0}, 0, &res);
+	if (res == NULL)
+		return "";
+
+	dmjson_foreach_obj_in_array(res, arrobj, host_obj, i, 1, "hosts") {
+		char *ip_addr = dmjson_get_value(host_obj, 1, "ipaddr");
+		if (DM_STRCMP(ip_addr, ipaddr) == 0) {
+			macaddr = dmjson_get_value(host_obj, 1, "macaddr");
+			break;
+		}
+	}
+
+	return macaddr;
+}
+
 static void sync_mcast_dmmap_iface_sec(struct uci_list *proxy_iface, char *s_mode,
                 struct uci_section *s, char *dmmap_package, char *dmmap_sec,
                 struct list_head *dup_list, char *up_iface)
@@ -1356,7 +1377,8 @@ static int get_igmp_cgrp_adev_iface(char *refparam, struct dmctx *ctx, void *dat
 static int get_igmp_cgrp_adev_host(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *ipaddr = dmjson_get_value((json_object *)data, 1, "ipaddr");
-	adm_entry_get_linker_param(ctx, "Device.Hosts.Host.", ipaddr, value);
+	char *linker = get_host_linker(ipaddr);
+	adm_entry_get_linker_param(ctx, "Device.Hosts.Host.", linker, value);
 	return 0;
 }
 

@@ -64,7 +64,7 @@ static int browseHostsHostIPv6AddressInst(struct dmctx *dmctx, DMNODE *parent_no
 **************************************************************/
 static int get_linker_host(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	*linker = dmjson_get_value((json_object *)data, 1, "ipaddr");
+	*linker = dmjson_get_value((json_object *)data, 1, "macaddr");
 	return 0;
 }
 
