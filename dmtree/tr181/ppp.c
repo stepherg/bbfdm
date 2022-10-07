@@ -865,24 +865,42 @@ static int ppp_read_sysfs(void *data, const char *name, char **value)
 
 static int get_PPPInterfaceStats_MulticastPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+/*
+ * Irrespective of underlying media, PPP is multicast incapable.
+ * The stats pertaining to Multicast recv/xmit are irrelevant to ppp interfaces.
+ * Hence the value of this stats marked ZERO.
+ */
 	*value = "0";
 	return 0;
 }
 
 static int get_PPPInterfaceStats_BroadcastPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+/*
+ * Irrespective of underlying media, PPP is broadcast incapable.
+ * The stats pertaining to broadcast recv/xmit are irrelevant to ppp interfaces.
+ * Hence the value of this stats marked ZERO.
+ */
 	*value = "0";
 	return 0;
 }
 
 static int get_PPPInterfaceStats_BroadcastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+/*
+ * Irrespective of underlying media, PPP is broadcast incapable.
+ * The stats pertaining to broadcast recv/xmit are irrelevant to ppp interfaces.
+ * Hence the value of this stats marked ZERO.
+ */
 	*value = "0";
 	return 0;
 }
 
 static int get_PPPInterfaceStats_UnknownProtoPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+ /* FIXME: As of now , there is no such counter in kernel ppp driver to track the unknown protocol packets.
+  *        Until the stats counter is implemented there, this stats attribute will be ZERO.
+  */
 	*value = "0";
 	return 0;
 }
@@ -890,7 +908,13 @@ static int get_PPPInterfaceStats_UnknownProtoPacketsReceived(char *refparam, str
 /*#Device.PPP.Interface.{i}.Stats.MulticastPacketsReceived!SYSFS:/sys/class/net/@Name/statistics/multicast*/
 static int get_PPPInterfaceStats_MulticastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return ppp_read_sysfs(data, "statistics/multicast", value);
+/*
+ * Irrespective of underlying media, PPP is multicast incapable.
+ * The stats pertaining to Multicast recv/xmit are irrelevant for ppp interfaces.
+ * Hence the value of this stats marked ZERO.
+ */
+	*value = "0";
+        return 0;
 }
 
 /*#Device.PPP.Interface.{i}.Stats.BytesReceived!SYSFS:/sys/class/net/@Name/statistics/rx_bytes*/
@@ -943,45 +967,27 @@ static int get_PPPInterfaceStats_DiscardPacketsReceived(char *refparam, struct d
 
 static int get_PPPInterfaceStats_UnicastPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *tx_mcast, *tx_bcast, *tx_pkts;
-	unsigned long mpkt_sent = 0, bpkt_sent = 0, total_sent = 0;
-
-	get_PPPInterfaceStats_MulticastPacketsSent(refparam, ctx, data, instance, &tx_mcast);
-	get_PPPInterfaceStats_BroadcastPacketsSent(refparam, ctx, data, instance, &tx_bcast);
-	get_ppp_eth_pack_sent(refparam, ctx, data, instance, &tx_pkts);
-
-	mpkt_sent = strtoul(tx_mcast, NULL, 10);
-	bpkt_sent = strtoul(tx_bcast, NULL, 10);
-	total_sent = strtoul(tx_pkts, NULL, 10);
-
-	unsigned long ucast_sent = total_sent - mpkt_sent - bpkt_sent;
-	char tx_ucast[25] = {0};
-	snprintf(tx_ucast, sizeof(tx_ucast), "%lu", ucast_sent);
-
-	*value = dmstrdup(tx_ucast);
-	return 0;
+/* By default all the data packets at a ppp end point are Unicast.
+ * Hence the number of Unicast packets is equal to the tx_packets.
+ */
+	return ppp_read_sysfs(data, "statistics/tx_packets", value);
 }
 
 static int get_PPPInterfaceStats_UnicastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *rx_mcast, *rx_bcast, *rx_other, *rx_pkts;
-	unsigned long mpkt_rcv = 0, bpkt_rcv = 0, other_rcv = 0, total_rcv = 0;
+/* Unicast Packets Received = (Total packets received - Unknown Protocol Packets Received)*/
 
-	get_PPPInterfaceStats_MulticastPacketsReceived(refparam, ctx, data, instance, &rx_mcast);
-	get_PPPInterfaceStats_BroadcastPacketsReceived(refparam, ctx, data, instance, &rx_bcast);
+	char *rx_other, *rx_pkts;
+	unsigned long other_rcv = 0, total_rcv = 0;
+
 	get_PPPInterfaceStats_UnknownProtoPacketsReceived(refparam, ctx, data, instance, &rx_other);
 	get_ppp_eth_pack_received(refparam, ctx, data, instance, &rx_pkts);
 
-	mpkt_rcv = strtoul(rx_mcast, NULL, 10);
-	bpkt_rcv = strtoul(rx_bcast, NULL, 10);
 	other_rcv = strtoul(rx_other, NULL, 10);
 	total_rcv = strtoul(rx_pkts, NULL, 10);
 
-	unsigned long ucast_rcv = total_rcv - mpkt_rcv - bpkt_rcv - other_rcv;
-	char rx_ucast[25] = {0};
-	snprintf(rx_ucast, sizeof(rx_ucast), "%lu", ucast_rcv);
-
-	*value = dmstrdup(rx_ucast);
+	unsigned long ucast_rcv = total_rcv - other_rcv;
+	dmasprintf(value, "%lu", ucast_rcv);
 	return 0;
 }
 
