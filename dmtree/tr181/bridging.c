@@ -1557,13 +1557,13 @@ static int addObjBridgingBridge(char *refparam, struct dmctx *ctx, void *data, c
 	dmuci_add_section("network", "interface", &s);
 	dmuci_rename_section_by_section(s, iface_s_name);
 	dmuci_set_value_by_section(s, "device", device_name);
-	dmuci_set_value_by_section(s, "bridge_empty", "1");
 
 	// Add device bridge section
 	dmuci_add_section("network", "device", &s);
 	dmuci_rename_section_by_section(s, dev_s_name);
 	dmuci_set_value_by_section(s, "name", device_name);
 	dmuci_set_value_by_section(s, "type", "bridge");
+	dmuci_set_value_by_section(s, "bridge_empty", "1");
 
 	// Add dmmap bridge section
 	dmuci_add_section_bbfdm("dmmap_bridge", "device", &dmmap_bridge);
