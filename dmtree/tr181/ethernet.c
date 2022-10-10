@@ -1081,6 +1081,7 @@ static int get_EthernetLink_Status(char *refparam, struct dmctx *ctx, void *data
 	dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &interface_name);
 	s = get_origin_section_from_config("network", "interface", interface_name);
 	dmuci_get_value_by_section_string(s, "device", &dev_name);
+	get_net_iface_sysfs(interface_name, "address", value);
 	return get_net_device_status(dev_name, value);
 }
 
@@ -1313,8 +1314,10 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 
 static int get_EthernetLink_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "mac", value);
-	return 0;
+	char *interface_name = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &interface_name);
+	return get_net_iface_sysfs(interface_name, "address", value);
 }
 
 static int get_EthernetLinkStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
