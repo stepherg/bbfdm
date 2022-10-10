@@ -1441,6 +1441,10 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 						uci_foreach_option_eq_safe("network", "interface", "device", dev_buf, stmp, s) {
 							dmuci_delete_by_section(s, NULL, NULL);
 						}
+
+						// Check if there is an dmmap link section that has the same device ==> if yes, update section name
+						get_dmmap_section_of_config_section_eq("dmmap", "link", "device", dev_buf, &s);
+						dmuci_set_value_by_section_bbfdm(s, "section_name", section_name((struct uci_section *)data));
 					}
 				}
 
