@@ -1,0 +1,169 @@
+#!/bin/sh
+# Copyright (C) 2022 iopsys Software Solutions AB
+# Author: MOHAMED Kallel <mohamed.kallel@pivasoftware.com>
+# Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+
+. /usr/share/libubox/jshn.sh
+
+ROOT="$(dirname $0)"
+. ${ROOT}/bbf_api
+
+ipping_error() {
+	json_init
+	json_add_string "Status" "$1"
+	json_add_string "IPAddressUsed" ""
+	json_add_int "MinimumResponseTime" "9999"
+	json_add_int "AverageResponseTime" "0"
+	json_add_int "MaximumResponseTime" "0"
+	json_add_int "MinimumResponseTimeDetailed" "999999999"
+	json_add_int "AverageResponseTimeDetailed" "0"
+	json_add_int "MaximumResponseTimeDetailed" "0"
+	json_add_int "SuccessCount" "0"
+	json_add_int "FailureCount" "$2"
+	json_dump
+
+	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
+	[ "$3" == "both_proto" ] && {
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState="$1"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.SuccessCount=0
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.FailureCount="$cnt"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.AverageResponseTime=0
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MinimumResponseTime=9999
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MaximumResponseTime=0
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.AverageResponseTimeDetailed=0
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MinimumResponseTimeDetailed=999999999
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MaximumResponseTimeDetailed=0
+		$UCI_COMMIT_BBF_DMMAP
+	}
+}
+
+ipping_launch() {
+	input="$1"
+
+	json_load "${input}"
+	
+	json_get_var host host
+	json_get_var iface iface
+	json_get_var ip_proto ip_proto
+	json_get_var nbr_of_rep nbr_of_rep
+	json_get_var timeout timeout
+	json_get_var dsize data_size
+	json_get_var dscp dscp
+	json_get_var proto proto
+
+	# Assign default value
+	[ -z "${nbr_of_rep}" ] && nbr_of_rep=3
+	[ -z "${dsize}" ] && dsize=64
+	[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.device) && device="-I $device" || device=""
+	ip_addr_used=$(get_ip_addr_used "${ip_proto}" "${iface}")
+	if [ "$ip_proto" = "IPv4" ]; then ip_proto="-4"; elif [ "$ip_proto" = "IPv6" ]; then ip_proto="-6"; else ip_proto=""; fi
+	[ -z "${timeout}" ] && timeout=1 || timeout=$((timeout/1000))
+
+	# Fail if host is empty
+	[ -z "${host}" ] && {
+		ipping_error "Error_Internal" "${nbr_of_rep}" "${proto}"
+		return
+	}
+
+	micros=1000
+	success_count=0
+	avg_time_sum=0
+	avg_time_sum_det=0
+	min=9999999
+	min_det=999999999
+	max=0
+	max_det=0
+	idx=0
+
+	while [ $idx -lt "${nbr_of_rep}" ]; do
+		idx=$((idx+1))
+
+		res=$(ping -q $ip_proto -c 1 -s $dsize -W $timeout $device $host 2>&1)
+
+		ba=$(echo "$res" | grep "bad address")
+		[ -n "$ba" ] && {
+			ipping_error "Error_CannotResolveHostName" "${nbr_of_rep}" "${proto}"
+			return
+		}
+
+		ba=$(echo "$res" | grep "unknown host")
+		[ -n "$ba" ] && {
+			ipping_error "Error_CannotResolveHostName" "${nbr_of_rep}" "${proto}"
+			return
+		}
+
+		stc=$(echo "$res" | grep "received")
+		[ -z "$stc" ] && {
+			ipping_error "Error_Other" "${nbr_of_rep}" "${proto}"
+			return
+		}
+
+		times=$(echo "$res" | grep "min/avg/max")
+		[ -z "$times" ] && continue
+		sc1=$(echo "$stc" | awk '{print $4}')
+		sc1=${sc1:-0}
+		success_count=$((success_count+sc1))
+		times=$(echo "$times" | awk -F'=' '{ print $2 }')
+		min_time=$(echo "$times" | awk -F'[=/ ]' '{ print $2 }')
+		avg_time=$(echo "$times" | awk -F'[=/ ]' '{ print $3 }')
+		max_time=$(echo "$times" | awk -F'[=/ ]' '{ print $4 }')
+		min_time=${min_time:-0}
+		avg_time=${avg_time:-0}
+		max_time=${max_time:-0}
+		min_time_det=$(echo "$min_time" "$micros" | awk '{printf "%3.0f\n",$1*$2}')
+		avg_time_det=$(echo "$avg_time" "$micros" | awk '{printf "%3.0f\n",$1*$2}')
+		max_time_det=$(echo "$max_time" "$micros" | awk '{printf "%3.0f\n",$1*$2}')
+		min_time=$(awk "BEGIN{print $min_time * 1000}")
+		avg_time=$(awk "BEGIN{print $avg_time * 1000}")
+		max_time=$(awk "BEGIN{print $max_time * 1000}")
+		[ "$min_time" -lt $min ] && min=$min_time
+		[ "$max_time" -gt $max ] && max=$max_time
+		avg_time_sum=$((avg_time_sum+avg_time))
+		[ "$min_time_det" -lt $min_det ] && min_det=$min_time_det
+		[ "$max_time_det" -gt $max_det ] && max_det=$max_time_det
+		avg_time_sum_det=$((avg_time_sum_det+avg_time_det))
+	done
+
+	failure_count=$((nbr_of_rep-success_count))
+	[ $success_count -gt 0 ] && avg_time=$((avg_time_sum/success_count)) || avg_time=0
+	[ $success_count -gt 0 ] && avg_time_det=$((avg_time_sum_det/success_count)) || avg_time_det=0
+	avg_time=$(awk "BEGIN{print int($avg_time / 1000)}")
+	min_time=$(awk "BEGIN{print int($min / 1000)}")
+	max_time=$(awk "BEGIN{print int($max / 1000)}")
+	min_time_det=$min_det
+	max_time_det=$max_det
+
+	json_init
+	json_add_string "Status" "Complete"
+	json_add_string "IPAddressUsed" "${ip_addr_used}"
+	json_add_int "MinimumResponseTime" "${min_time}"
+	json_add_int "AverageResponseTime" "${avg_time}"
+	json_add_int "MaximumResponseTime" "${max_time}"
+	json_add_int "MinimumResponseTimeDetailed" "${min_time_det}"
+	json_add_int "AverageResponseTimeDetailed" "${avg_time_det}"
+	json_add_int "MaximumResponseTimeDetailed" "${max_time_det}"
+	json_add_int "SuccessCount" "${success_count}"
+	json_add_int "FailureCount" "${failure_count}"
+	json_dump
+
+	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
+	[ "${proto}" == "both_proto" ] && {
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState="Complete"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.IPAddressUsed="${ip_addr_used}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.SuccessCount="${success_count}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.FailureCount="${failure_count}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MinimumResponseTime="${min_time}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.AverageResponseTime="${avg_time}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MaximumResponseTime="${max_time}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MinimumResponseTimeDetailed="${min_time_det}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.AverageResponseTimeDetailed="${avg_time_det}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MaximumResponseTimeDetailed="${max_time_det}"
+		$UCI_COMMIT_BBF_DMMAP
+	}
+}
+
+if [ -n "$1" ]; then
+	ipping_launch "$1"
+else
+	ipping_error "Error_Internal" "1"
+fi

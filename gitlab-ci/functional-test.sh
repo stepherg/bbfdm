@@ -17,6 +17,7 @@ install_libbbf_test
 
 supervisorctl status all
 supervisorctl update
+supervisorctl restart all
 sleep 3
 supervisorctl status all
 

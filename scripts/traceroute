@@ -1,0 +1,137 @@
+#!/bin/sh
+# Copyright (C) 2022 iopsys Software Solutions AB
+# Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+
+. /usr/share/libubox/jshn.sh
+
+ROOT="$(dirname $0)"
+. ${ROOT}/bbf_api
+
+get_traceroute_log_file() {
+	IDX=1
+	LOG_FILE="/tmp/traceroute_$IDX.log"
+	
+	while [ -e ${LOG_FILE} ]; do
+		IDX=$((IDX+1))
+		LOG_FILE="/tmp/traceroute_$IDX.log";
+	done
+
+	echo ${LOG_FILE}
+}
+
+traceroute_error() {
+	json_init
+	json_add_string "Status" "$1"
+	json_add_string "IPAddressUsed" ""
+	json_add_int "ResponseTime" "0"
+	json_dump
+
+	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
+	[ "$3" == "both_proto" ] && {
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.DiagnosticState="$1"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.IPAddressUsed=""
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.ResponseTime=0
+		$UCI_COMMIT_BBF_DMMAP
+	}
+}
+
+traceroute_launch() {
+	input="$1"
+
+	json_load "${input}"
+	
+	json_get_var host host
+	json_get_var iface iface
+	json_get_var ip_proto ip_proto
+	json_get_var cnt nbr_of_tries
+	json_get_var timeout timeout
+	json_get_var dsize data_size
+	json_get_var dscp dscp
+	json_get_var maxhop max_hop_cnt
+	json_get_var proto proto
+	
+	LOG_FILE=$(get_traceroute_log_file)
+
+	# Assign default value
+	[ -z "${cnt}" ] && cnt=1
+	[ -z "${dsize}" ] && dsize=64
+	[ -z "${maxhop}" ] && maxhop=30
+	[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.device) && device="-i $device" || device=""
+	ip_addr_used=$(get_ip_addr_used "${ip_proto}" "${iface}")
+	if [ "$ip_proto" = "IPv4" ]; then ip_proto="-4"; elif [ "$ip_proto" = "IPv6" ]; then ip_proto="-6"; else ip_proto=""; fi
+	[ -z "${timeout}" ] && timeout=5 || timeout=$((timeout/1000))
+
+	# Fail if host is empty
+	[ -z "${host}" ] && {
+		traceroute_error "Error_Internal" "${nbr_of_rep}" "${proto}"
+		return
+	}
+
+	res=$(traceroute -m $maxhop -w $timeout -q $cnt $ip_proto $device $host $dsize 2>&1 >${LOG_FILE})
+	error_code="$?"
+
+	ba=$(echo "$res" | grep "bad address")
+	[ -n "$ba" ] && {
+		traceroute_error "Error_CannotResolveHostName" "${cnt}" "${proto}"
+		return
+	}
+
+	[ "$error_code" != "0" ] && {
+		traceroute_error "Error_Other" "${cnt}" "${proto}"
+		return
+	}
+
+	i=-2
+	resp_time=0
+	json_init
+	json_add_array "RouteHops"
+
+	while read _ host ip time _; do
+		[ "$host" = "*" ] || [ "$ip" = "*" ] && continue
+		i=$((i+1))
+		[ "$i" = "-1" ] && continue;
+		ip=${ip#(}; ip=${ip%)}
+		time=${time%.*}
+		resp_time="${time}"
+
+		json_add_object ""
+		json_add_string "Host" "${host}"
+		json_add_string "HostAddress" "${ip}"
+		json_add_int "RTTimes" "${time}"
+		json_add_int "ErrorCode" "0"
+		json_close_object
+
+		# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
+		[ "$proto" == "both_proto" ] && {
+			$UCI_ADD_BBF_DMMAP dmmap_diagnostics RouteHops
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@RouteHops[$i].host="${host}"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@RouteHops[$i].ip="${ip}"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@RouteHops[$i].time="${time}"
+		}
+			
+	done < ${LOG_FILE}
+
+	rm -f ${LOG_FILE}
+	i=$((i+1))
+
+	json_close_array
+	json_add_string "Status" "Complete"
+	json_add_string "IPAddressUsed" "${ip_addr_used}"
+	json_add_int "NumberOfHops" "${i}"
+	json_add_int "ResponseTime" "${resp_time}"
+	json_dump
+
+	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
+	[ "$proto" == "both_proto" ] && {
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.DiagnosticState="Complete"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.NumberOfHops="${i}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.ResponseTime="${resp_time}"
+		$UCI_COMMIT_BBF_DMMAP
+	}
+}
+
+if [ -n "$1" ]; then
+	traceroute_launch "$1"
+else
+	traceroute_error "Error_Internal" "1"
+fi

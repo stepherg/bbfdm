@@ -1,0 +1,162 @@
+#!/bin/sh
+# Copyright (C) 2022 iopsys Software Solutions AB
+# Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+
+. /usr/share/libubox/jshn.sh
+
+ROOT="$(dirname $0)"
+. ${ROOT}/bbf_api
+
+get_nslookup_log_file() {
+	IDX=1
+	LOG_FILE="/tmp/nslookup_$IDX.log"
+	
+	while [ -e ${LOG_FILE} ]; do
+		IDX=$((IDX+1))
+		LOG_FILE="/tmp/nslookup_$IDX.log";
+	done
+
+	echo ${LOG_FILE}
+}
+
+nslookup_error() {
+	json_init
+	json_add_string "Status" "$1"
+	json_add_int "SuccessCount" "0"
+	json_dump
+
+	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
+	[ "$3" == "both_proto" ] && {
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.DiagnosticState="$1"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.SuccessCount=0
+		$UCI_COMMIT_BBF_DMMAP
+	}
+}
+
+nslookup_launch() {
+	input="$1"
+
+	json_load "${input}"
+	
+	json_get_var hostname host
+	json_get_var dnsserver dns_serevr
+	json_get_var iface iface
+	json_get_var cnt nbr_of_rep
+	json_get_var proto proto
+	
+	LOG_FILE=$(get_nslookup_log_file)
+
+	# Assign default value
+	[ -z "${cnt}" ] && cnt=1
+
+	# Fail if hostname is empty
+	[ -z "${hostname}" ] && {
+		nslookup_error "Error_Internal" "${cnt}" "${proto}"
+		return
+	}
+
+	i=0
+
+	while [ $i -lt "${cnt}" ]; do
+		i=$((i+1))
+		
+		nslookup -debug $hostname $dnsserver >>${LOG_FILE} 2>&1
+		error_code="$?"
+		
+		nxd=$(cat ${LOG_FILE} | grep "NXDOMAIN")
+		[ -n "$nxd" ] && {
+			nslookup_error "Error_DNSServerNotResolved" "${cnt}" "${proto}"
+			return;
+		}
+
+		[ "$error_code" != "0" ] && {
+			nslookup_error "Error_Other" "${cnt}" "${proto}"
+			return;
+		}
+
+		echo "++++++++++++++++++++++++++++++" >>${LOG_FILE}
+	done
+
+	AnswerType="Authoritative"
+	success_count=0
+	address=""
+	j=0
+	json_init
+	json_add_array "NSLookupResult"
+	
+	while IFS= read line; do
+		[ -z "$line" ] && continue;
+		server=$(echo "$line" | tr -d '\t' | tr -d ' ' | grep "Server:" | awk -F':' '{print $2}')
+	
+		if [ -n "$server" ] && [ "$server" = "0.0.0.0" ]; then
+		        status="Error_DNSServerNotAvailable"
+		        continue
+		elif [ -n "$server" ]; then
+		        dns_server_ip=$server
+		        continue
+		fi
+
+		var=$(echo "$line" | tr -d '\t' | tr -d ' ' | grep "Name:" | awk -F':' '{print $2}')
+		[ -n "$var" ] && { HostNameReturned=$var; status="Success"; success_count=$((success_count+1)); continue; }
+
+		var=$(echo "$line" | tr -d '\t' | tr -d ' ' | grep "name=" | awk -F'=' '{print $2}')
+		[ -n "$var" ] && { HostNameReturned=$var; status="Success"; address="$hostname"; success_count=$((success_count+1)); continue; }
+
+		var=$(echo "$line" | grep "Address: " | awk -F':' '{print substr($0, index($0,$2))}' | tr -d '\t' | tr -d ' ')
+		[ -n "$var" ] && { [ -z "$address" ] && address="$var" || address="$address,$var"; continue; }
+
+		var=$(echo "$line" | grep "completed" | awk -F'in' '{print $2}' | tr -d 'ms:\t ')
+		[ -n "$var" ] && { ResponseTime=$var; continue; }
+
+		echo "$line" | grep 'connection timed out' >/dev/null 2>&1 && { AnswerType="None"; status="Error_Timeout"; continue; }
+		echo "$line" | grep 'Non-authoritative' >/dev/null 2>&1 && { AnswerType="NonAuthoritative"; continue; }
+	
+		if echo "$line" | grep '++++++++++++++++++++++' >/dev/null 2>&1; then
+
+			json_add_object ""
+			json_add_string "Status" "${status}"
+			json_add_string "AnswerType" "${AnswerType}"
+			json_add_string "HostNameReturned" "${HostNameReturned}"
+			json_add_string "IPAddresses" "${address}"
+			json_add_string "DNSServerIP" "${dns_server_ip}"
+			json_add_string "ResponseTime" "${ResponseTime}"
+			json_close_object
+		
+			# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
+			[ "$proto" == "both_proto" ] && {
+				$UCI_ADD_BBF_DMMAP dmmap_diagnostics NSLookupResult
+				$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].Status="${status}"
+				$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].AnswerType="${AnswerType}"
+				$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].HostNameReturned="${HostNameReturned}"
+				$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].IPAddresses="${address}"
+				$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].DNSServerIP="${dns_server_ip}"
+				$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].ResponseTime="${ResponseTime}"
+				j=$((j+1))
+			}
+			
+			address=""
+			AnswerType="Authoritative"
+		fi
+
+	done <${LOG_FILE}
+	rm -f ${LOG_FILE}
+
+	json_close_array
+	json_add_string "Status" "Complete"
+	json_add_int "SuccessCount" "${success_count}"
+	json_dump
+
+	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
+	[ "$proto" == "both_proto" ] && {
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.DiagnosticState="Complete"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.SuccessCount="${success_count}"
+		$UCI_COMMIT_BBF_DMMAP
+	}
+}
+
+
+if [ -n "$1" ]; then
+	nslookup_launch "$1"
+else
+	nslookup_error "Error_Internal" "1"
+fi

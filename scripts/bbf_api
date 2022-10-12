@@ -11,6 +11,7 @@ UCI_GET_BBF_DMMAP="uci -q -c /etc/bbfdm/dmmap get"
 UCI_SET_BBF_DMMAP="uci -q -c /etc/bbfdm/dmmap set"
 UCI_ADD_BBF_DMMAP="uci -q -c /etc/bbfdm/dmmap add"
 UCI_DELETE_BBF_DMMAP="uci -q -c /etc/bbfdm/dmmap delete"
+UCI_RENAME_BBF_DMMAP="uci -q -c /etc/bbfdm/dmmap rename"
 UCI_COMMIT_BBF_DMMAP="uci -q -c /etc/bbfdm/dmmap commit"
 UCI_SHOW_BBF_DMMAP="uci -q -c /etc/bbfdm/dmmap show"
 

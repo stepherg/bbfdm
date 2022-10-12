@@ -75,7 +75,7 @@ For these modes and based on the firmware bank id, the required firmware image w
 
 Definition of WhenIdle may vary for each deployment and customer, to make it customizable [bbf_check_idle.sh](/scripts/bbf_check_idle.sh) script is used. It is assumed that customer shall overwrite this file using customer-config to match with there requirement.
 
-In this mode, [bbf_activate_handler.sh](/scripts/bbf_activate_handler.sh) script calls this script [bbf_check_idle.sh](/scripts/bbf_check_idle.sh) to determine the idle state of the device. [bbf_activate_handler.sh](/scripts/bbf_activate_handler.sh) assumes the device as idle if the exit status of the above script is 0, or if the [bbf_check_idle.sh](/scripts/bbf_check_idle.sh) is not present in the predefined path "/usr/share/bbfdm/".
+In this mode, [bbf_activate_handler.sh](/scripts/bbf_activate_handler.sh) script calls this script [bbf_check_idle.sh](/scripts/bbf_check_idle.sh) to determine the idle state of the device. [bbf_activate_handler.sh](/scripts/bbf_activate_handler.sh) assumes the device as idle if the exit status of the above script is 0, or if the [bbf_check_idle.sh](/scripts/bbf_check_idle.sh) is not present in the predefined path "ACTIVATE_HANDLER_FILE@dmcommon.h".
 
 
 If the exit code from the idle script is zero then firmware image can be activated. Otherwise, it has to wait for next time slot which is defined by 'RETRY_TIME' variable.
@@ -88,7 +88,7 @@ If the exit code from the idle script is zero then firmware image can be activat
 
 > Note4: If 1 or more TimeWindow.{i}.Mode is set to 'WhenIdle' and all of them fails to get the idle state. The latest TimeWindow instance will force the device to activate the firmware image.
 
-> Note5: If the idle script [bbf_check_idle.sh](/scripts/bbf_check_idle.sh) not present in the pre-defined path "/usr/share/bbfdm/", then the device is assumed to be in ideal state and the firmware shall be activated instantly.
+> Note5: If the idle script [bbf_check_idle.sh](/scripts/bbf_check_idle.sh) not present in the pre-defined path "ACTIVATE_HANDLER_FILE@dmcommon.h", then the device is assumed to be in ideal state and the firmware shall be activated instantly.
 
 > Note6: It is very likely that TimeWindow with 'WhenIdle' mode might not find any suitable Idle state, in that case firmware shall not be activated. If users/operators want to make sure that firmware gets activated at the end, then they can add a TimeWindow with 'AnyTime/Immediate' mode at the end, to activate the firmware.
 
