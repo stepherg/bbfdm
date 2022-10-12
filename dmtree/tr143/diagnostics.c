@@ -1921,7 +1921,6 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 	char *bytes_received = NULL;
 
 	char *download_url = dmjson_get_value((json_object *)value, 1, "DownloadURL");
-	TRACE("Downaload::download_url=%s", download_url);
 	if (download_url[0] == '\0')
 		return CMD_INVALID_ARGUMENTS;
 
@@ -1939,7 +1938,6 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 	char *download_enable_per_connection_results = dmjson_get_value((json_object *)value, 1, "EnablePerConnectionResults");
 	char *proto = (bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto";
 
-	TRACE("Downaload::download_url=%s && ip_interface=%s && download_interface=%s && download_dscp=%s && download_ethernet_priority=%s && download_proto=%s && proto=%s",
 			download_url,
 			ip_interface,
 			download_interface,
@@ -1961,8 +1959,6 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 			},
 			8, &res);
 
-	TRACE("Downaload::res=%p", res);
-
 	if (res == NULL) {
 		if (file_exists(DOWNLOAD_DUMP_FILE))
 			remove(DOWNLOAD_DUMP_FILE);
@@ -1978,9 +1974,7 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 	char *total_bytes_sent_under_full_loading = dmjson_get_value(res, 1, "TotalBytesSent");
 	char *period_of_full_loading = dmjson_get_value(res, 1, "PeriodOfFullLoading");
 
-	TRACE("Downaload::status=%s", status);
 	if (DM_LSTRCMP(status, "Complete") == 0) {
-		TRACE("Downaload::extract data");
 		memset(&diag_stats, 0, sizeof(diag_stats));
 		if (DM_LSTRNCMP(download_url, HTTP_URI, strlen(HTTP_URI)) == 0)
 			extract_stats(DOWNLOAD_DUMP_FILE, DIAGNOSTIC_HTTP, DOWNLOAD_DIAGNOSTIC);
@@ -1990,7 +1984,6 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 		if (file_exists(DOWNLOAD_DUMP_FILE))
 			remove(DOWNLOAD_DUMP_FILE);
 	} else if (DM_LSTRNCMP(status, "Error_", strlen("Error_")) == 0) {
-		TRACE("Downaload::Status error");
 		return CMD_FAIL;
 	}
 

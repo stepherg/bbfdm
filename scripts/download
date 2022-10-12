@@ -37,23 +37,17 @@ download_launch() {
 	json_get_var num_of_con num_of_con
 	json_get_var enable_per_con enable_per_con
 	json_get_var proto proto
-	
-	logger -t "usp" "download" "url=${url} && iface=${iface} && dscp=${dscp} && eth_prio=${eth_prio} && ip_proto=${ip_proto} && num_of_con=${num_of_con} && enable_per_con=${enable_per_con} && proto=${proto}"
 
 	# Check if a download process is already running
 	download_s=$(uci_get_bbf_dmmap dmmap_diagnostics.download)
-	logger -t "usp" "download" "download_s=$download_s"
 	if [ -z "${download_s}" ]; then
-		logger -t "usp" "download" "Create a download diagnostics section"
 		[ ! -f /etc/bbfdm/dmmap/dmmap_diagnostics ] && touch /etc/bbfdm/dmmap/dmmap_diagnostics
 		$UCI_ADD_BBF_DMMAP dmmap_diagnostics download
 		$UCI_RENAME_BBF_DMMAP dmmap_diagnostics.@download[0]='download'
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.Status="running"
 		$UCI_COMMIT_BBF_DMMAP
 	else
-		logger -t "usp" "download" "there is a download diagnostics section"
 		Status=$(uci_get_bbf_dmmap dmmap_diagnostics.download.Status)
-		logger -t "usp" "download" "Status=$Status"
 		[ "${Status}" == "running" ] && {
 			return
 		}
@@ -79,22 +73,19 @@ download_launch() {
 	FREE_SIZE=`free | grep Mem | awk '{print $4}'`
 	FREE_SIZE_BYTE=$((${FREE_SIZE}/1000))
 
-	logger -t "usp" "download" "tcpdump -i $device -C ${FREE_SIZE_BYTE} tcp -w ${CAPTURE_FILE}"
 	tcpdump -i "$device" -C ${FREE_SIZE_BYTE} tcp -w ${CAPTURE_FILE} > /dev/null 2>&1 &
 	PID=$!
 	sleep 1
-	
+
 	if [ ${url:0:7} = http:// -o ${url:0:6} = ftp:// ]; then
 
 		tx_bytes_before=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes)
 		rx_bytes_before=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes)
 
 		time1=$(date +%s)
-		logger -t "usp" "download" "curl $ip_proto --fail --silent -o /dev/null $url"
 		curl $ip_proto --fail --silent -o /dev/null "$url"
 		error_code="$?"
 		time2=$(date +%s)
-		logger -t "usp" "download" "error_code=$error_code"
 
 		tx_bytes_after=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes)
 		rx_bytes_after=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes)
