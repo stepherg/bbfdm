@@ -1938,14 +1938,6 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 	char *download_enable_per_connection_results = dmjson_get_value((json_object *)value, 1, "EnablePerConnectionResults");
 	char *proto = (bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto";
 
-			download_url,
-			ip_interface,
-			download_interface,
-			download_dscp,
-			download_ethernet_priority,
-			download_proto,
-			proto);
-
 	dmubus_call_blocking("bbf.diag", "download",
 			UBUS_ARGS{
 				{"url", download_url, String},
