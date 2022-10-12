@@ -83,6 +83,7 @@ function install_libbbf()
 
 	echo "installing libbbf"
 	exec_cmd_verbose make install
+	ln -sf /usr/share/bbfdm/bbf.diag /usr/libexec/rpcd/bbf.diag
 	cd ..
 }
 

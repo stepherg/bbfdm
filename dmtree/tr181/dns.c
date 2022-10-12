@@ -634,7 +634,6 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 			return 0;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0) {
-				NSLOOKUP_STOP
 				set_diagnostics_option("nslookup", "DiagnosticState", value);
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_NSLOOKUP_DIAGNOSTIC);
 			}
@@ -657,7 +656,6 @@ static int set_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, 
 
 			return 0;
 		case VALUESET:
-			NSLOOKUP_STOP
 			reset_diagnostic_state("nslookup");
 			set_diagnostics_interface_option(ctx, "nslookup", value);
 			return 0;
@@ -673,7 +671,6 @@ static int set_nslookupdiagnostics_host_name(char *refparam, struct dmctx *ctx, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			NSLOOKUP_STOP
 			reset_diagnostic_state("nslookup");
 			set_diagnostics_option("nslookup", "HostName", value);
 			return 0;
@@ -689,7 +686,6 @@ static int set_nslookupdiagnostics_d_n_s_server(char *refparam, struct dmctx *ct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			NSLOOKUP_STOP
 			reset_diagnostic_state("nslookup");
 			set_diagnostics_option("nslookup", "DNSServer", value);
 			return 0;
@@ -705,7 +701,6 @@ static int set_nslookupdiagnostics_timeout(char *refparam, struct dmctx *ctx, vo
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			NSLOOKUP_STOP
 			reset_diagnostic_state("nslookup");
 			set_diagnostics_option("nslookup", "Timeout", value);
 			return 0;
@@ -721,7 +716,6 @@ static int set_nslookupdiagnostics_number_of_repetitions(char *refparam, struct 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			NSLOOKUP_STOP
 			reset_diagnostic_state("nslookup");
 			set_diagnostics_option("nslookup", "NumberOfRepetitions", value);
 			return 0;
@@ -762,17 +756,14 @@ static int get_operate_args_DNSDiagnostics_NSLookupDiagnostics(char *refparam, s
 
 static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s = NULL;
+	json_object *res = NULL, *arr_result = NULL, *result_obj = NULL;
 	char *nslookup_status[2] = {0};
 	char *nslookup_answer_type[2] = {0};
 	char *nslookup_hostname_returned[2] = {0};
 	char *nslookup_ip_addresses[2] = {0};
 	char *nslookup_dns_server_ip[2] = {0};
 	char *nslookup_response_time[2] = {0};
-	int i = 1;
-
-	init_diagnostics_operation("nslookup", NSLOOKUP_PATH);
-	remove_unused_diagnostic_sections("NSLookupResult");
+	int idx = 0;
 
 	char *hostname = dmjson_get_value((json_object *)value, 1, "HostName");
 	if (hostname[0] == '\0')
@@ -781,27 +772,30 @@ static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmc
 	char *dnsserver = dmjson_get_value((json_object *)value, 1, "DNSServer");
 	char *timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
 	char *nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
+	char *proto = (bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto";
 
-	set_diagnostics_option("nslookup", "HostName", hostname);
-	set_diagnostics_interface_option(ctx, "nslookup", interface);
-	set_diagnostics_option("nslookup", "DNSServer", dnsserver);
-	set_diagnostics_option("nslookup", "Timeout", timeout);
-	set_diagnostics_option("nslookup", "NumberOfRepetitions", nbofrepetition);
+	dmubus_call_blocking("bbf.diag", "nslookup",
+			UBUS_ARGS{
+				{"host", hostname, String},
+				{"dns_serevr", dnsserver, String},
+				{"iface", interface, String},
+				{"nbr_of_rep", nbofrepetition, String},
+				{"timeout", timeout, String},
+				{"proto", proto, String}
+			},
+			6, &res);
 
-	// Commit and Free uci_ctx_bbfdm
-	commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
+	if (res == NULL)
+		return CMD_FAIL;
 
-	dmcmd("/bin/sh", 2, NSLOOKUP_PATH, "run");
+	char *status = dmjson_get_value(res, 1, "Status");
+	char *success_count = dmjson_get_value(res, 1, "SuccessCount");
+	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("SuccessCount"), dmstrdup(success_count), DMT_TYPE[DMT_UNINT], NULL);
 
-	// Allocate uci_ctx_bbfdm
-	dmuci_init_bbfdm();
+	dmjson_foreach_obj_in_array(res, arr_result, result_obj, idx, 1, "NSLookupResult") {
+		int i = idx + 1;
 
-	char *status = get_diagnostics_option("nslookup", "DiagnosticState");
-	char *success_count = get_diagnostics_option("nslookup", "SuccessCount");
-	add_list_parameter(ctx, dmstrdup("Status"), status, DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("SuccessCount"), success_count, DMT_TYPE[DMT_UNINT], NULL);
-
-	uci_path_foreach_sections(bbfdm, DMMAP_DIAGNOSTIGS, "NSLookupResult", s) {
 		dmasprintf(&nslookup_status[0], "Result.%d.Status", i);
 		dmasprintf(&nslookup_answer_type[0], "Result.%d.AnswerType", i);
 		dmasprintf(&nslookup_hostname_returned[0], "Result.%d.HostNameReturned", i);
@@ -809,21 +803,23 @@ static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmc
 		dmasprintf(&nslookup_dns_server_ip[0], "Result.%d.DNSServerIP", i);
 		dmasprintf(&nslookup_response_time[0], "Result.%d.ResponseTime", i);
 
-		dmuci_get_value_by_section_string(s, "Status", &nslookup_status[1]);
-		dmuci_get_value_by_section_string(s, "AnswerType", &nslookup_answer_type[1]);
-		dmuci_get_value_by_section_string(s, "HostNameReturned", &nslookup_hostname_returned[1]);
-		dmuci_get_value_by_section_string(s, "IPAddresses", &nslookup_ip_addresses[1]);
-		dmuci_get_value_by_section_string(s, "DNSServerIP", &nslookup_dns_server_ip[1]);
-		dmuci_get_value_by_section_string(s, "ResponseTime", &nslookup_response_time[1]);
+		nslookup_status[1] = dmjson_get_value(result_obj, 1, "Status");
+		nslookup_answer_type[1] = dmjson_get_value(result_obj, 1, "AnswerType");
+		nslookup_hostname_returned[1] = dmjson_get_value(result_obj, 1, "HostNameReturned");
+		nslookup_ip_addresses[1] = dmjson_get_value(result_obj, 1, "IPAddresses");
+		nslookup_dns_server_ip[1] = dmjson_get_value(result_obj, 1, "DNSServerIP");
+		nslookup_response_time[1] = dmjson_get_value(result_obj, 1, "ResponseTime");
 
-		add_list_parameter(ctx, nslookup_status[0], nslookup_status[1], DMT_TYPE[DMT_STRING], NULL);
-		add_list_parameter(ctx, nslookup_answer_type[0], nslookup_answer_type[1], DMT_TYPE[DMT_STRING], NULL);
-		add_list_parameter(ctx, nslookup_hostname_returned[0], nslookup_hostname_returned[1], DMT_TYPE[DMT_STRING], NULL);
-		add_list_parameter(ctx, nslookup_ip_addresses[0], nslookup_ip_addresses[1], DMT_TYPE[DMT_STRING], NULL);
-		add_list_parameter(ctx, nslookup_dns_server_ip[0], nslookup_dns_server_ip[1], DMT_TYPE[DMT_STRING], NULL);
-		add_list_parameter(ctx, nslookup_response_time[0], nslookup_response_time[1], DMT_TYPE[DMT_UNINT], NULL);
-		i++;
+		add_list_parameter(ctx, nslookup_status[0], dmstrdup(nslookup_status[1]), DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, nslookup_answer_type[0], dmstrdup(nslookup_answer_type[1]), DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, nslookup_hostname_returned[0], dmstrdup(nslookup_hostname_returned[1]), DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, nslookup_ip_addresses[0], dmstrdup(nslookup_ip_addresses[1]), DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, nslookup_dns_server_ip[0], dmstrdup(nslookup_dns_server_ip[1]), DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, nslookup_response_time[0], dmstrdup(nslookup_response_time[1]), DMT_TYPE[DMT_UNINT], NULL);
 	}
+
+	if (res != NULL)
+		json_object_put(res);
 
 	return CMD_SUCCESS;
 }

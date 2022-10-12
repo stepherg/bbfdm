@@ -30,6 +30,8 @@
 #define DMMAP_DIAGNOSTIGS "dmmap_diagnostics"
 #define CONFIG_BACKUP "/tmp/bbf_config_backup"
 #define MAX_TIME_WINDOW 5
+#define DOWNLOAD_DUMP_FILE "/tmp/download_dump"
+#define UPLOAD_DUMP_FILE "/tmp/upload_dump"
 
 struct diagnostic_stats
 {
@@ -48,6 +50,8 @@ struct diagnostic_stats
 	uint32_t ftp_syn;
 };
 
+extern struct diagnostic_stats diag_stats;
+
 enum diagnostic_protocol {
 	DIAGNOSTIC_HTTP = 1,
 	DIAGNOSTIC_FTP
@@ -62,10 +66,8 @@ char *get_diagnostics_option(char *sec_name, char *option);
 char *get_diagnostics_option_fallback_def(char *sec_name, char *option, char *default_value);
 void set_diagnostics_option(char *sec_name, char *option, char *value);
 void reset_diagnostic_state(char *sec_name);
-void init_diagnostics_operation(char *sec_name, char *operation_path);
-void remove_unused_diagnostic_sections(char *sec_name);
+char *get_diagnostics_interface_option(struct dmctx *ctx, char *value);
 void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value);
-int start_upload_download_diagnostic(int diagnostic_type);
 int bbf_upload_log(const char *url, const char *username, const char *password,
 		char *config_name, const char *command, const char *obj_path);
 int bbf_config_backup(const char *url, const char *username, const char *password,
@@ -76,5 +78,7 @@ int bbf_config_restore(const char *url, const char *username, const char *passwo
 int bbf_fw_image_download(const char *url, const char *auto_activate, const char *username, const char *password,
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
 		const char *bank_id, const char *command, const char *obj_path, const char *commandKey);
+
+int extract_stats(char *dump_file, int proto, int diagnostic_type);
 
 #endif

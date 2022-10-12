@@ -125,6 +125,7 @@ INSTALL(FILES ${libbbfdm_headers}
 
 FILE(GLOB scripts scripts/*)
 INSTALL(FILES ${scripts}
+	PERMISSIONS OWNER_EXECUTE
 	DESTINATION usr/share/bbfdm
 )
 

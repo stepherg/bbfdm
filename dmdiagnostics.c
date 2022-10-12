@@ -35,7 +35,7 @@
 #define READ_BUF_SIZE (1024 * 16)
 
 static int read_next;
-static struct diagnostic_stats diag_stats = {0};
+struct diagnostic_stats diag_stats = {0};
 
 char *get_diagnostics_option(char *sec_name, char *option)
 {
@@ -68,24 +68,18 @@ void reset_diagnostic_state(char *sec_name)
 	}
 }
 
-void init_diagnostics_operation(char *sec_name, char *operation_path)
+char *get_diagnostics_interface_option(struct dmctx *ctx, char *value)
 {
-	check_create_dmmap_package(DMMAP_DIAGNOSTIGS);
-	struct uci_section *section = dmuci_walk_section_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
-	if (section)
-		dmuci_delete_by_section_bbfdm(section, NULL, NULL);
+	char *linker = NULL;
 
-	dmcmd("/bin/sh", 2, operation_path, "stop");
-}
+	if (!value || *value == 0)
+		return "";
 
-void remove_unused_diagnostic_sections(char *sec_name)
-{
-	struct uci_section *s = NULL, *stmp = NULL;
+	if (strncmp(value, "Device.IP.Interface.", 20) != 0)
+		return "";
 
-	check_create_dmmap_package(DMMAP_DIAGNOSTIGS);
-	uci_path_foreach_sections_safe(bbfdm, DMMAP_DIAGNOSTIGS, sec_name, stmp, s) {
-		dmuci_delete_by_section_bbfdm(s, NULL, NULL);
-	}
+	adm_entry_get_linker_value(ctx, value, &linker);
+	return linker ? linker : "";
 }
 
 void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value)
@@ -987,7 +981,7 @@ static void ftp_upload_per_packet(libtrace_packet_t *packet)
 	}
 }
 
-static int extract_stats(char *dump_file, int proto, int diagnostic_type)
+int extract_stats(char *dump_file, int proto, int diagnostic_type)
 {
 	libtrace_t *trace = NULL;
 	libtrace_packet_t *packet = trace_create_packet();
@@ -1042,100 +1036,5 @@ static int extract_stats(char *dump_file, int proto, int diagnostic_type)
 	}
 
 	libtrace_cleanup(trace, packet);
-	return 0;
-}
-
-static char *get_default_gateway_device(void)
-{
-    FILE *f = fopen(PROC_ROUTE, "r");
-	if (f != NULL) {
-		char line[100] = {0}, *p = NULL, *c = NULL, *saveptr = NULL;
-		char *device = NULL;
-
-		while(fgets(line, sizeof(line), f)) {
-			p = strtok_r(line, " \t", &saveptr);
-			c = strtok_r(NULL, " \t", &saveptr);
-			if (p && c && strcmp(c, "00000000") == 0) {
-				device = dmstrdup(p);
-				break;
-			}
-		}
-		fclose(f);
-
-		return device ? device : "";
-	}
-
-    return "";
-}
-
-int start_upload_download_diagnostic(int diagnostic_type)
-{
-	char *url, *interface, *device, *size, *status;
-
-	if (diagnostic_type == DOWNLOAD_DIAGNOSTIC) {
-		url = get_diagnostics_option("download", "url");
-		interface = get_diagnostics_option("download", "interface");
-	} else {
-		url = get_diagnostics_option("upload", "url");
-		size = get_diagnostics_option("upload", "TestFileLength");
-		interface = get_diagnostics_option("upload", "interface");
-	}
-
-	if (strncmp(url, HTTP_URI, strlen(HTTP_URI)) != 0 &&
-		strncmp(url, FTP_URI, strlen(FTP_URI)) != 0 &&
-		strchr(url,'@') != NULL)
-		return -1;
-
-	device = (interface && *interface) ? get_device(interface) : get_default_gateway_device();
-	if (device[0] == '\0')
-		return -1;
-
-	if (diagnostic_type == DOWNLOAD_DIAGNOSTIC) {
-		// Commit and Free uci_ctx_bbfdm
-		commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
-
-		dmcmd("/bin/sh", 4, DOWNLOAD_DIAGNOSTIC_PATH, "run", url, device);
-
-		// Allocate uci_ctx_bbfdm
-		dmuci_init_bbfdm();
-
-		url = get_diagnostics_option("download", "url");
-		status = get_diagnostics_option("download", "DiagnosticState");
-		if (status && strcmp(status, "Complete") == 0) {
-			memset(&diag_stats, 0, sizeof(diag_stats));
-			if (strncmp(url, HTTP_URI, strlen(HTTP_URI)) == 0)
-				extract_stats(DOWNLOAD_DUMP_FILE, DIAGNOSTIC_HTTP, DOWNLOAD_DIAGNOSTIC);
-			if (strncmp(url, FTP_URI, strlen(FTP_URI)) == 0)
-				extract_stats(DOWNLOAD_DUMP_FILE, DIAGNOSTIC_FTP, DOWNLOAD_DIAGNOSTIC);
-
-			if (file_exists(DOWNLOAD_DUMP_FILE))
-				remove(DOWNLOAD_DUMP_FILE);
-
-		} else if (status && strncmp(status, "Error_", strlen("Error_")) == 0)
-			return -1;
-	} else {
-		// Commit and Free uci_ctx_bbfdm
-		commit_and_free_uci_ctx_bbfdm(DMMAP_DIAGNOSTIGS);
-
-		dmcmd("/bin/sh", 5, UPLOAD_DIAGNOSTIC_PATH, "run", url, device, size);
-
-		// Allocate uci_ctx_bbfdm
-		dmuci_init_bbfdm();
-
-		url = get_diagnostics_option("upload", "url");
-		status = get_diagnostics_option("upload", "DiagnosticState");
-		if (status && strcmp(status, "Complete") == 0) {
-			memset(&diag_stats, 0, sizeof(diag_stats));
-			if (strncmp(url, HTTP_URI, strlen(HTTP_URI)) == 0)
-				extract_stats(UPLOAD_DUMP_FILE, DIAGNOSTIC_HTTP, UPLOAD_DIAGNOSTIC);
-			if (strncmp(url, FTP_URI, strlen(FTP_URI)) == 0)
-				extract_stats(UPLOAD_DUMP_FILE, DIAGNOSTIC_FTP, UPLOAD_DIAGNOSTIC);
-
-			if (file_exists(UPLOAD_DUMP_FILE))
-				remove(UPLOAD_DUMP_FILE);
-
-		} else if (status && strncmp(status, "Error_", strlen("Error_")) == 0)
-			return -1;
-	}
 	return 0;
 }

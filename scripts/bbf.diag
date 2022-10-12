@@ -1,0 +1,45 @@
+#!/bin/sh
+
+BBF_SCRIPTS="/usr/share/bbfdm"
+. /usr/share/libubox/jshn.sh
+
+case "$1" in
+	list)
+		echo '{ "ipping" : { "host": "str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "data_size": "str", "dscp": "str", "proto": "str" },
+				"nslookup" : { "host": "str", "dns_serevr": "str", "iface": "str", "nbr_of_rep": "str", "timeout": "str", "proto": "str" },
+				"traceroute" : { "host": "str", "iface": "str", "ip_proto": "str", "nbr_of_tries": "str", "timeout": "str", "data_size": "str", "dscp": "str", "max_hop_cnt":"str", "proto": "str" },
+				"udpecho" : { "host": "str", "port":"str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "data_size": "str", "dscp": "str", "inter_trans_time":"str", "proto": "str" },
+				"serverselection" : { "hostlist": "str", "port":"str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "protocol_used": "str", "proto": "str" },
+				"download" : { "url": "str", "iface":"str", "dscp": "str", "eth_prio": "str", "ip_proto": "str", "num_of_con": "str", "enable_per_con": "str", "proto": "str" },
+				"upload" : { "url": "str", "iface":"str", "dscp": "str", "eth_prio": "str", "file_length":"str", "ip_proto": "str", "num_of_con": "str", "enable_per_con": "str", "proto": "str" }
+			  }'
+	;;
+	call)
+
+		# read the arguments
+		read -r input
+		case "$2" in
+			ipping)
+				sh ${BBF_SCRIPTS}/ipping "${input}"
+			;;
+			nslookup)
+				sh ${BBF_SCRIPTS}/nslookup "${input}"
+			;;
+			traceroute)
+				sh ${BBF_SCRIPTS}/traceroute "${input}"
+			;;
+			udpecho)
+				sh ${BBF_SCRIPTS}/udpecho "${input}"
+			;;
+			serverselection)
+				sh ${BBF_SCRIPTS}/serverselection "${input}"
+			;;
+			download)
+				sh ${BBF_SCRIPTS}/download "${input}"
+			;;
+			upload)
+				sh ${BBF_SCRIPTS}/upload "${input}"
+			;;
+		esac
+	;;
+esac

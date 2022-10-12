@@ -1415,7 +1415,8 @@ static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx
 		for (int i = 0; i < MAX_TIME_WINDOW && DM_STRLEN(start_time[i]); i++) {
 			char buffer[512] = {0};
 			time_t t_time = time(NULL);
-			t_time = t_time + DM_STRTOL(start_time[i]);
+			long int start_t = (DM_STRTOL(start_time[i]) > 60) ? DM_STRTOL(start_time[i]) : 60;
+			t_time += start_t;
 			struct tm *tm_local = localtime(&t_time);
 
 			snprintf(buffer, sizeof(buffer), "%d %d %d %d * sh %s '%s' '%s' '%ld' '%d' '%s' '%s'\n",

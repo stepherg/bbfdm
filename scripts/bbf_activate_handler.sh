@@ -6,7 +6,9 @@
 # Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 #
 
-CHECK_IDLE_FILE="/usr/share/bbfdm/bbf_check_idle.sh"
+ROOT="$(dirname $0)"
+
+CHECK_IDLE_FILE="${ROOT}/bbf_check_idle.sh"
 RETRY_TIME=300
 START_TIME=$(date +%s)
 MODE="${1}"
