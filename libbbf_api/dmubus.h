@@ -31,5 +31,6 @@ void dmubus_clean_endlife_entries();
 void dmubus_set_caching_time(int seconds);
 void dmubus_register_event_blocking(char *event, int timeout, struct blob_attr *type);
 int dmubus_call_blocking(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
+bool dmubus_object_exist(char *object);
 
 #endif

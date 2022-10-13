@@ -705,3 +705,20 @@ void dmubus_set_caching_time(int seconds)
 	soft_limit_g = seconds/2;
 	hard_limit_g = seconds;
 }
+
+bool dmubus_object_exist(char *object)
+{
+	uint32_t id;
+
+	if (ubus_ctx == NULL) {
+		ubus_ctx = dm_libubus_init();
+		if (ubus_ctx == NULL) {
+			return false;
+		}
+	}
+
+	if (!ubus_lookup_id(ubus_ctx, object, &id))
+		return true;
+
+	return false;
+}

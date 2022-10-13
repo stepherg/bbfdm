@@ -68,15 +68,21 @@ static int get_linker_process(char* refparam, struct dmctx *ctx, void *data, cha
 **************************************************************/
 static bool is_update_process_allowed(void)
 {
-	json_object *res = NULL;
+	char *tr069_status = NULL;
 
-	dmubus_call("tr069", "status", UBUS_ARGS{0}, 0, &res);
-	if (!res)
+	if (dmubus_object_exist("tr069")) {
+		struct uci_section *s = NULL, *stmp = NULL;
+		uci_path_foreach_sections_safe(varstate, "cwmp", "sess_status", stmp, s) {
+			dmuci_get_value_by_section_string(s, "current_status", &tr069_status);
+		}
+	}
+
+	if (tr069_status == NULL)
 		goto end;
 
-	char *tr069_status = dmjson_get_value(res, 2, "last_session", "status");
-	if (strcmp(tr069_status, "running") == 0)
+	if (strcmp(tr069_status, "running") == 0) {
 		return false;
+	}
 
 end:
 	return true;
