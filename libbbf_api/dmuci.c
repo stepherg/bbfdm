@@ -863,6 +863,26 @@ end:
 	return s;
 }
 
+struct uci_section *dmuci_walk_all_sections(char *package, struct uci_section *prev_section, int walk)
+{
+	struct uci_element *e = NULL;
+	struct uci_list *list_section;
+	struct uci_ptr ptr = {0};
+
+	if (walk == GET_FIRST_SECTION) {
+		if (dmuci_lookup_ptr(uci_ctx, &ptr, package, NULL, NULL, NULL) != UCI_OK)
+			return NULL;
+
+		list_section = &(ptr.p)->sections;
+		e = list_to_element(list_section->next);
+	} else {
+		list_section = &prev_section->package->sections;
+		e = list_to_element(prev_section->e.list.next);
+	}
+
+	return (&e->list != list_section) ? uci_to_section(e) : NULL;
+}
+
 /**** UCI GET db config *****/
 int db_get_value_string(char *package, char *section, char *option, char **value)
 {

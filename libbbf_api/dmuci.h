@@ -113,6 +113,17 @@ struct package_change
 		section != NULL; \
 		section = dmuci_walk_section(package, stype, arg, NULL, CMP_FILTER_FUNC, func, section, GET_NEXT_SECTION))
 
+#define uci_package_foreach_sections(package, section) \
+	for (section = dmuci_walk_all_sections(package, NULL, GET_FIRST_SECTION); \
+		section != NULL; \
+		section = dmuci_walk_all_sections(package, section, GET_NEXT_SECTION))
+
+#define uci_package_foreach_sections_safe(package, _tmp, section) \
+	for (section = dmuci_walk_all_sections(package, NULL, GET_FIRST_SECTION), \
+		_tmp = (section) ? dmuci_walk_all_sections(package, section, GET_NEXT_SECTION) : NULL;	\
+		section != NULL; \
+		section = _tmp, _tmp = (section) ? dmuci_walk_all_sections(package, section, GET_NEXT_SECTION) : NULL)
+
 #define section_name(s) s ? (s)->e.name : ""
 #define section_type(s) s ? (s)->type : ""
 #define section_config(s) s ? (s)->package->e.name : ""
@@ -349,6 +360,7 @@ int dmuci_add_list_value_by_section(struct uci_section *s, char *option, char *v
 int dmuci_del_list_value_by_section(struct uci_section *s, char *option, char *value);
 int dmuci_rename_section_by_section(struct uci_section *s, char *value);
 struct uci_section *dmuci_walk_section(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
+struct uci_section *dmuci_walk_all_sections(char *package, struct uci_section *prev_section, int walk);
 
 int dmuci_get_option_value_string_bbfdm(char *package, char *section, char *option, char **value);
 int dmuci_set_value_bbfdm(char *package, char *section, char *option, char *value);
