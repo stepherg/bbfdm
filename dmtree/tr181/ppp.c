@@ -898,11 +898,7 @@ static int get_PPPInterfaceStats_BroadcastPacketsReceived(char *refparam, struct
 
 static int get_PPPInterfaceStats_UnknownProtoPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
- /* FIXME: As of now , there is no such counter in kernel ppp driver to track the unknown protocol packets.
-  *        Until the stats counter is implemented there, this stats attribute will be ZERO.
-  */
-	*value = "0";
-	return 0;
+	return ppp_read_sysfs(data, "statistics/rx_unknown_packets", value);
 }
 
 /*#Device.PPP.Interface.{i}.Stats.MulticastPacketsReceived!SYSFS:/sys/class/net/@Name/statistics/multicast*/
