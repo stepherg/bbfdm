@@ -64,10 +64,7 @@ static bool is_update_process_allowed(void)
 	char *tr069_status = NULL;
 
 	if (dmubus_object_exist("tr069")) {
-		struct uci_section *s = NULL, *stmp = NULL;
-		uci_path_foreach_sections_safe(varstate, "cwmp", "sess_status", stmp, s) {
-			dmuci_get_value_by_section_string(s, "current_status", &tr069_status);
-		}
+		dmuci_get_option_value_string_varstate("cwmp", "sess_status", "current_status", &tr069_status);
 	}
 
 	if (tr069_status == NULL)
