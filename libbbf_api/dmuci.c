@@ -579,7 +579,7 @@ int dmuci_delete(char *package, char *section, char *option, char *value)
 int dmuci_rename_section(char *package, char *section, char *value)
 {
 	struct uci_ptr ptr = {0};
-	char sec_name[32] = {0};
+	char sec_name[128] = {0};
 
 	dmuci_replace_invalid_characters_from_section_name(value, sec_name, sizeof(sec_name));
 
@@ -777,7 +777,7 @@ int dmuci_del_list_value_by_section(struct uci_section *s, char *option, char *v
 int dmuci_rename_section_by_section(struct uci_section *s, char *value)
 {
 	struct uci_ptr up = {0};
-	char sec_name[32] = {0};
+	char sec_name[128] = {0};
 
 	dmuci_replace_invalid_characters_from_section_name(value, sec_name, sizeof(sec_name));
 
