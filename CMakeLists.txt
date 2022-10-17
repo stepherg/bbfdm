@@ -97,7 +97,7 @@ ADD_LIBRARY(bbfdm SHARED ${BBF_API_SOURCES} ${BBF_DM_SOURCES}
 						 ${BBF_JSON_PLUGIN_SOURCES}
 						 ${BBF_VENDOR_EXTENSION_SOURCES})
 
-TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json trace dl curl ${SSL_LIBS})
+TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json dl curl ${SSL_LIBS})
 
 INSTALL(TARGETS bbfdm
 		LIBRARY DESTINATION usr/lib)

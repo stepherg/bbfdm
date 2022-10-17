@@ -8,8 +8,6 @@
 ROOT="$(dirname $0)"
 . ${ROOT}/bbf_api
 
-CAPTURE_FILE="/tmp/download_dump"
-
 download_error() {
 	json_init
 	json_add_string "Status" "$1"
@@ -67,81 +65,130 @@ download_launch() {
 		return
 	}
 
-	# Disable acceleration on Broadcom devices to capture all packets with tcpdump
-	[ -e /usr/sbin/fcctl ] && { fcctl disable >/dev/null 2>&1; fcctl flush >/dev/null 2>&1; }
+	[ "${url:0:7}" != "http://" -a "${url:0:6}" != "ftp://" ] && {
+		download_error "Error_Other" "${proto}"
+		return
+	}
+
+	format='{ "size_download": "%{size_download}",
+			  "size_header": "%{size_header}",
+			  "time_appconnect": "%{time_appconnect}",
+			  "time_connect": "%{time_connect}",
+			  "time_pretransfer": "%{time_pretransfer}",
+			  "time_starttransfer": "%{time_starttransfer}",
+			  "time_total": "%{time_total}",
+			  "exitcode": "%{exitcode}" }'
+
+	tx_bytes_start=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes)
+	rx_bytes_start=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes)
+
+	time_start=$(date +"%s.282646") # It should be like that time_start=$(date +"%s.%6N") but since OpenWrt busybox has limitations and doesn't support nonoseconds so keep it hardcoded
+	res=$(curl $ip_proto --fail --silent -w "$format" $url --output /dev/null)
+	time_end=$(date +"%s.282646") # It should be like that time_end=$(date +"%s.%6N") but since OpenWrt busybox has limitations and doesn't support nonoseconds so keep it hardcoded
+
+	tx_bytes_end=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes)
+	rx_bytes_end=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes)
 	
-	FREE_SIZE=`free | grep Mem | awk '{print $4}'`
-	FREE_SIZE_BYTE=$((${FREE_SIZE}/1000))
+	json_load "${res}"
+	json_get_var size_download size_download
+	json_get_var size_header size_header
+	json_get_var time_appconnect time_appconnect
+	json_get_var time_connect time_connect
+	json_get_var time_pretransfer time_pretransfer
+	json_get_var time_starttransfer time_starttransfer
+	json_get_var time_total time_total
+	json_get_var exitcode exitcode
 
-	tcpdump -i "$device" -C ${FREE_SIZE_BYTE} tcp -w ${CAPTURE_FILE} > /dev/null 2>&1 &
-	PID=$!
-	sleep 1
+	[ "$exitcode" = "6" ] && {
+		download_error "Error_CannotResolveHostName" "${proto}"
+		return
+	}
 
-	if [ ${url:0:7} = http:// -o ${url:0:6} = ftp:// ]; then
+	[ "$exitcode" = "7" ] && {
+		download_error "Error_InitConnectionFailed" "${proto}"
+		return
+	}
 
-		tx_bytes_before=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes)
-		rx_bytes_before=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes)
+	[ "$exitcode" = "22" ] && {
+		download_error "Error_NoResponse" "${proto}"
+		return
+	}
 
-		time1=$(date +%s)
-		curl $ip_proto --fail --silent -o /dev/null "$url"
-		error_code="$?"
-		time2=$(date +%s)
+	[ "$exitcode" = "27" ] && {
+		download_error "Error_IncorrectSize" "${proto}"
+		return
+	}
 
-		tx_bytes_after=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes)
-		rx_bytes_after=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes)
+	[ "$exitcode" = "28" ] && {
+		download_error "Error_Timeout" "${proto}"
+		return
+	}
 
-		[ "$error_code" = "6" ] && {
-			download_error "Error_CannotResolveHostName" "${proto}"
-			kill $PID 2> /dev/null
-			return
-		}
-
-		[ "$error_code" = "7" ] && {
-			download_error "Error_InitConnectionFailed" "${proto}"
-			kill $PID 2> /dev/null
-			return
-		}
-
-		[ "$error_code" = "22" ] && {
-			download_error "Error_NoResponse" "${proto}"
-			kill $PID 2> /dev/null
-			return
-		}
-
-		[ "$error_code" = "27" ] && {
-			download_error "Error_IncorrectSize" "${proto}"
-			kill $PID 2> /dev/null
-			return
-		}
-
-		[ "$error_code" = "28" ] && {
-			download_error "Error_Timeout" "${proto}"
-			kill $PID 2> /dev/null
-			return
-		}
-
-		[ "$error_code" != "0" ] && {
-			download_error "Error_Other" "${proto}"
-			kill $PID 2> /dev/null
-			return
-		}
-	fi
+	[ "$exitcode" != "0" ] && {
+		download_error "Error_Other" "${proto}"
+		return
+	}
 	
-	tx_bytes=$((tx_bytes_after-tx_bytes_before))
-	rx_bytes=$((rx_bytes_after-rx_bytes_before))
-	periodtime=$(($((time2-time1))*1000000))
+	tcp_open_request_time=$(echo ${time_start} ${time_appconnect} | awk '{printf "%.6f", $1 + $2}')
+	tcp_open_response_time=$(echo ${time_start} ${time_connect} | awk '{printf "%.6f", $1 + $2}')
+	rom_time=$(echo ${time_start} ${time_pretransfer} | awk '{printf "%.6f", $1 + $2}')
+	bom_time=$(echo ${time_start} ${time_starttransfer} | awk '{printf "%.6f", $1 + $2}')
+	eom_time=$(echo ${time_start} ${time_total} | awk '{printf "%.6f", $1 + $2}')
+
+	separator_idx=$(expr index ${tcp_open_request_time} .)
+	TCPOpenRequestTime_MicroSec=${tcp_open_request_time:$separator_idx}
+	TCPOpenRequestTime_Sec=${tcp_open_request_time:0:$(($separator_idx-1))}
+
+	separator_idx=$(expr index ${tcp_open_response_time} .)
+	TCPOpenResponseTime_MicroSec=${tcp_open_response_time:$separator_idx}
+	TCPOpenResponseTime_Sec=${tcp_open_response_time:0:$(($separator_idx-1))}
+
+	separator_idx=$(expr index ${rom_time} .)
+	ROMTime_MicroSec=${rom_time:$separator_idx}
+	ROMTime_Sec=${rom_time:0:$(($separator_idx-1))}
+
+	separator_idx=$(expr index ${bom_time} .)
+	BOMTime_MicroSec=${bom_time:$separator_idx}
+	BOMTime_Sec=${bom_time:0:$(($separator_idx-1))}
+
+	separator_idx=$(expr index ${eom_time} .)
+	EOMTime_MicroSec=${eom_time:$separator_idx}
+	EOMTime_Sec=${eom_time:0:$(($separator_idx-1))}
+
+	TCPOpenRequestTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${TCPOpenRequestTime_MicroSec}Z" -d @$TCPOpenRequestTime_Sec)
+	TCPOpenResponseTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${TCPOpenResponseTime_MicroSec}Z" -d @$TCPOpenResponseTime_Sec)
+	ROMTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${ROMTime_MicroSec}Z" -d @$ROMTime_Sec)
+	BOMTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${BOMTime_MicroSec}Z" -d @$BOMTime_Sec)
+	EOMTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${EOMTime_MicroSec}Z" -d @$EOMTime_Sec)
+
+	tx_bytes=$((tx_bytes_end-tx_bytes_start))
+	rx_bytes=$((rx_bytes_end-rx_bytes_start))
+	test_rx_bytes=$((size_download+size_header))
+	period_time=$(echo ${time_end} ${time_start} | awk '{printf ($1 - $2) * 1000000}')
 
 	json_init
 	json_add_string "Status" "Complete"
 	json_add_string "IPAddressUsed" "${ip_addr_used}"
+	json_add_string "ROMTime" "${ROMTime}"
+	json_add_string "BOMTime" "${BOMTime}"
+	json_add_string "EOMTime" "${EOMTime}"
+	json_add_int "TestBytesReceived" "${test_rx_bytes}"
 	json_add_int "TotalBytesReceived" "${rx_bytes}"
 	json_add_int "TotalBytesSent" "${tx_bytes}"
-	json_add_int "PeriodOfFullLoading" "${periodtime}"
+	json_add_int "PeriodOfFullLoading" "${period_time}"
+	json_add_string "TCPOpenRequestTime" "${TCPOpenRequestTime}"
+	json_add_string "TCPOpenResponseTime" "${TCPOpenResponseTime}"
 	if [ "$enable_per_con" = "true" ] || [ "$enable_per_con" = "1" ]; then
 		json_add_array "DownloadPerConnection"
 		json_add_object ""
+		json_add_string "ROMTime" "${ROMTime}"
+		json_add_string "BOMTime" "${BOMTime}"
+		json_add_string "EOMTime" "${EOMTime}"
+		json_add_int "TestBytesReceived" "${test_rx_bytes}"
 		json_add_int "TotalBytesReceived" "${rx_bytes}"
 		json_add_int "TotalBytesSent" "${tx_bytes}"
+		json_add_string "TCPOpenRequestTime" "${TCPOpenRequestTime}"
+		json_add_string "TCPOpenResponseTime" "${TCPOpenResponseTime}"
 		json_close_object
 	fi
 	json_dump
@@ -150,25 +197,30 @@ download_launch() {
 	[ "${proto}" == "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.DiagnosticState="Complete"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.IPAddressUsed="${ip_addr_used}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.ROMTime="${ROMTime}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.BOMTime="${BOMTime}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.EOMTime="${EOMTime}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.TestBytesReceived="${test_rx_bytes}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.TotalBytesReceived="${rx_bytes}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.TotalBytesSent="${tx_bytes}"
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.PeriodOfFullLoading="${periodtime}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.PeriodOfFullLoading="${period_time}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.TCPOpenRequestTime="${TCPOpenRequestTime}"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.TCPOpenResponseTime="${TCPOpenResponseTime}"
 		perconnection=$($UCI_GET_BBF_DMMAP dmmap_diagnostics.download.EnablePerConnection)
 		if [ "$enable_per_con" = "true" ] || [ "$enable_per_con" = "1" ]; then
 			$UCI_ADD_BBF_DMMAP dmmap_diagnostics DownloadPerConnection
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@DownloadPerConnection[0].ROMTime="${ROMTime}"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@DownloadPerConnection[0].BOMTime="${BOMTime}"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@DownloadPerConnection[0].EOMTime="${EOMTime}"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@DownloadPerConnection[0].TestBytesReceived="${test_rx_bytes}"
 			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@DownloadPerConnection[0].TotalBytesReceived="${rx_bytes}"
 			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@DownloadPerConnection[0].TotalBytesSent="${tx_bytes}"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@DownloadPerConnection[0].TCPOpenRequestTime="${TCPOpenRequestTime}"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@DownloadPerConnection[0].TCPOpenResponseTime="${TCPOpenResponseTime}"
 		else
 			$UCI_DELETE_BBF_DMMAP dmmap_diagnostics.@DownloadPerConnection[0]
 		fi
-		$UCI_COMMIT_BBF_DMMAP
 	}
-
-	sleep 1
-	kill $PID >/dev/null 2>&1
-
-	# Enable acceleration on Broadcom devices after killing the tcpdump pid 
-	[ -e /usr/sbin/fcctl ] && { fcctl enable >/dev/null 2>&1; fcctl flush >/dev/null 2>&1; }
 
 	$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.Status="complete"
 	$UCI_COMMIT_BBF_DMMAP
