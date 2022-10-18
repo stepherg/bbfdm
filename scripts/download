@@ -8,6 +8,8 @@
 ROOT="$(dirname $0)"
 . ${ROOT}/bbf_api
 
+DOWNLOAD_TIMEOUT=1800
+
 download_error() {
 	json_init
 	json_add_string "Status" "$1"
@@ -83,12 +85,13 @@ download_launch() {
 	rx_bytes_start=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes)
 
 	time_start=$(date +"%s.282646") # It should be like that time_start=$(date +"%s.%6N") but since OpenWrt busybox has limitations and doesn't support nonoseconds so keep it hardcoded
-	res=$(curl $ip_proto --fail --silent -w "$format" $url --output /dev/null)
+	res=$(curl ${ip_proto} --fail --silent --max-time ${DOWNLOAD_TIMEOUT} -w "${format}" ${url} --output /dev/null)
 	time_end=$(date +"%s.282646") # It should be like that time_end=$(date +"%s.%6N") but since OpenWrt busybox has limitations and doesn't support nonoseconds so keep it hardcoded
 
 	tx_bytes_end=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes)
 	rx_bytes_end=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes)
 	
+	logger -t "bbf_download" "########### ${url} ==> ${res} ###########"
 	json_load "${res}"
 	json_get_var size_download size_download
 	json_get_var size_header size_header
