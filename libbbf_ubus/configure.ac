@@ -22,9 +22,6 @@ AC_SUBST([LIBUCI_LDFLAGS])
 LIBUCI_LIBS='-luci'
 AC_SUBST([LIBUCI_LIBS])
 
-LIBTRACE_LIBS='-ltrace'
-AC_SUBST([LIBTRACE_LIBS])
-
 AC_ARG_WITH([libubox-include-path],
   [AS_HELP_STRING([--with-libubox-include-path],
     [location of the libubox library headers])],

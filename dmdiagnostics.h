@@ -30,27 +30,6 @@
 #define DMMAP_DIAGNOSTIGS "dmmap_diagnostics"
 #define CONFIG_BACKUP "/tmp/bbf_config_backup"
 #define MAX_TIME_WINDOW 5
-#define DOWNLOAD_DUMP_FILE "/tmp/download_dump"
-#define UPLOAD_DUMP_FILE "/tmp/upload_dump"
-
-struct diagnostic_stats
-{
-	char romtime[default_date_size];
-	char bomtime[default_date_size];
-	char eomtime[default_date_size];
-	char tcpopenrequesttime[default_date_size];
-	char tcpopenresponsetime[default_date_size];
-	int test_bytes_received;
-	int tmp;
-	int first_data;
-	uint16_t ip_len;
-	uint32_t ack_seq;
-	uint32_t random_seq;
-	uint32_t get_ack;
-	uint32_t ftp_syn;
-};
-
-extern struct diagnostic_stats diag_stats;
 
 enum diagnostic_protocol {
 	DIAGNOSTIC_HTTP = 1,
@@ -78,7 +57,5 @@ int bbf_config_restore(const char *url, const char *username, const char *passwo
 int bbf_fw_image_download(const char *url, const char *auto_activate, const char *username, const char *password,
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
 		const char *bank_id, const char *command, const char *obj_path, const char *commandKey);
-
-int extract_stats(char *dump_file, int proto, int diagnostic_type);
 
 #endif

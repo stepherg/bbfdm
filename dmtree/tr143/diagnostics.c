@@ -13,6 +13,9 @@
 #include "dmbbfcommon.h"
 #include "diagnostics.h"
 
+#define DOWNLOAD_DIAGNOSTIC_PATH "/usr/share/bbfdm/download"
+#define UPLOAD_DIAGNOSTIC_PATH "/usr/share/bbfdm/upload"
+
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
@@ -684,19 +687,19 @@ static int get_IPDiagnosticsDownloadDiagnostics_IPAddressUsed(char *refparam, st
 
 static int get_IPDiagnosticsDownloadDiagnostics_ROMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "ROMtime", "0001-01-01T00:00:00.000000Z");
+	*value = get_diagnostics_option_fallback_def("download", "ROMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_BOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "BOMtime", "0001-01-01T00:00:00.000000Z");
+	*value = get_diagnostics_option_fallback_def("download", "BOMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_EOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "EOMtime", "0001-01-01T00:00:00.000000Z");
+	*value = get_diagnostics_option_fallback_def("download", "EOMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -786,25 +789,25 @@ static int set_IPDiagnosticsDownloadDiagnostics_EnablePerConnectionResults(char 
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_ROMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "ROMtime", "0001-01-01T00:00:00.000000Z");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "ROMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_BOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "BOMtime", "0001-01-01T00:00:00.000000Z");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "BOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_EOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "EOMtime", "0001-01-01T00:00:00.000000Z");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "EOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_TestBytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TestBytesReceived", "0");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "TestBytesReceived", "0");
 	return 0;
 }
 
@@ -822,13 +825,13 @@ static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_TotalBytesSen
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_TCPOpenRequestTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_TCPOpenResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
+	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -1027,19 +1030,19 @@ static int get_IPDiagnosticsUploadDiagnostics_IPAddressUsed(char *refparam, stru
 
 static int get_IPDiagnosticsUploadDiagnostics_ROMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "ROMtime", "0001-01-01T00:00:00.000000Z");
+	*value = get_diagnostics_option_fallback_def("upload", "ROMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_BOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "BOMtime", "0001-01-01T00:00:00.000000Z");
+	*value = get_diagnostics_option_fallback_def("upload", "BOMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_EOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "EOMtime", "0001-01-01T00:00:00.000000Z");
+	*value = get_diagnostics_option_fallback_def("upload", "EOMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -1917,10 +1920,11 @@ static int get_operate_args_IPDiagnostics_DownloadDiagnostics(char *refparam, st
 
 static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	json_object *res = NULL;
-	char *bytes_received = NULL;
-
+	char input[2048] = {0};
+	char output[2048] = {0};
+	char cmd[2096] = {0};
 	char *download_url = dmjson_get_value((json_object *)value, 1, "DownloadURL");
+
 	if (download_url[0] == '\0')
 		return CMD_INVALID_ARGUMENTS;
 
@@ -1936,65 +1940,58 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 	char *download_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
 	char *download_num_of_connections = dmjson_get_value((json_object *)value, 1, "NumberOfConnections");
 	char *download_enable_per_connection_results = dmjson_get_value((json_object *)value, 1, "EnablePerConnectionResults");
-	char *proto = (bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto";
 
-	dmubus_call_blocking("bbf.diag", "download",
-			UBUS_ARGS{
-				{"url", download_url, String},
-				{"iface", download_interface, String},
-				{"dscp", download_dscp, String},
-				{"eth_prio", download_ethernet_priority, String},
-				{"ip_proto", download_proto, String},
-				{"num_of_con", download_num_of_connections, String},
-				{"enable_per_con", download_enable_per_connection_results, String},
-				{"proto", proto, String}
-			},
-			8, &res);
+	snprintf(input, sizeof(input), "'{\"url\": \"%s\",\"iface\":\"%s\",\"dscp\":\"%s\",\"eth_prio\":\"%s\",\"ip_proto\":\"%s\",\"num_of_con\":\"%s\",\"enable_per_con\":\"%s\",\"proto\":\"%s\"}'",
+									download_url,
+									download_interface,
+									download_dscp,
+									download_ethernet_priority,
+									download_proto,
+									download_num_of_connections,
+									download_enable_per_connection_results,
+									(bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto");
 
-	if (res == NULL) {
-		if (file_exists(DOWNLOAD_DUMP_FILE))
-			remove(DOWNLOAD_DUMP_FILE);
+	snprintf(cmd, sizeof(cmd), "sh %s %s", DOWNLOAD_DIAGNOSTIC_PATH, input);
 
+	FILE *pp = popen(cmd, "r");
+	if (pp != NULL) {
+		fgets(output, sizeof(output) , pp);
+		pclose(pp);
+	} else {
 		return CMD_FAIL;
 	}
+
+	json_object *res = (DM_STRLEN(output)) ? json_tokener_parse(output) : NULL;
+
+	if (res == NULL)
+		return CMD_FAIL;
 
 	char *status = dmjson_get_value(res, 1, "Status");
 	char *ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
+	char *rom_time = dmjson_get_value(res, 1, "ROMTime");
+	char *bom_time = dmjson_get_value(res, 1, "BOMTime");
+	char *eom_time = dmjson_get_value(res, 1, "EOMTime");
+	char *test_bytes_received = dmjson_get_value(res, 1, "TestBytesReceived");
 	char *total_bytes_received = dmjson_get_value(res, 1, "TotalBytesReceived");
 	char *total_bytes_sent = dmjson_get_value(res, 1, "TotalBytesSent");
-	char *total_bytes_received_under_full_loading = dmjson_get_value(res, 1, "TotalBytesReceived");
-	char *total_bytes_sent_under_full_loading = dmjson_get_value(res, 1, "TotalBytesSent");
 	char *period_of_full_loading = dmjson_get_value(res, 1, "PeriodOfFullLoading");
-
-	if (DM_LSTRCMP(status, "Complete") == 0) {
-		memset(&diag_stats, 0, sizeof(diag_stats));
-		if (DM_LSTRNCMP(download_url, HTTP_URI, strlen(HTTP_URI)) == 0)
-			extract_stats(DOWNLOAD_DUMP_FILE, DIAGNOSTIC_HTTP, DOWNLOAD_DIAGNOSTIC);
-		if (DM_LSTRNCMP(download_url, FTP_URI, strlen(FTP_URI)) == 0)
-			extract_stats(DOWNLOAD_DUMP_FILE, DIAGNOSTIC_FTP, DOWNLOAD_DIAGNOSTIC);
-
-		if (file_exists(DOWNLOAD_DUMP_FILE))
-			remove(DOWNLOAD_DUMP_FILE);
-	} else if (DM_LSTRNCMP(status, "Error_", strlen("Error_")) == 0) {
-		return CMD_FAIL;
-	}
-
-	dmasprintf(&bytes_received, "%d", diag_stats.test_bytes_received);
+	char *tcp_open_request_time = dmjson_get_value(res, 1, "TCPOpenRequestTime");
+	char *tcp_open_response_time = dmjson_get_value(res, 1, "TCPOpenResponseTime");
 
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
 	add_list_parameter(ctx, dmstrdup("IPAddressUsed"), dmstrdup(ip_address_used), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("ROMTime"), (diag_stats.romtime)[0] != 0 ? diag_stats.romtime : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
-	add_list_parameter(ctx, dmstrdup("BOMTime"), (diag_stats.bomtime)[0] != 0 ? diag_stats.bomtime : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
-	add_list_parameter(ctx, dmstrdup("EOMTime"), (diag_stats.eomtime)[0] != 0 ? diag_stats.eomtime : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
-	add_list_parameter(ctx, dmstrdup("TestBytesReceived"), bytes_received, DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("ROMTime"), rom_time[0] != 0 ? dmstrdup(rom_time) : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("BOMTime"), bom_time[0] != 0 ? dmstrdup(bom_time) : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("EOMTime"), eom_time[0] != 0 ? dmstrdup(eom_time) : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("TestBytesReceived"), dmstrdup(test_bytes_received), DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("TotalBytesReceived"), dmstrdup(total_bytes_received), DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("TotalBytesSent"), dmstrdup(total_bytes_sent), DMT_TYPE[DMT_UNINT], NULL);
-	add_list_parameter(ctx, dmstrdup("TestBytesReceivedUnderFullLoading"), bytes_received, DMT_TYPE[DMT_UNINT], NULL);
-	add_list_parameter(ctx, dmstrdup("TotalBytesReceivedUnderFullLoading"), dmstrdup(total_bytes_received_under_full_loading), DMT_TYPE[DMT_UNINT], NULL);
-	add_list_parameter(ctx, dmstrdup("TotalBytesSentUnderFullLoading"), dmstrdup(total_bytes_sent_under_full_loading), DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TestBytesReceivedUnderFullLoading"), dmstrdup(test_bytes_received), DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TotalBytesReceivedUnderFullLoading"), dmstrdup(total_bytes_received), DMT_TYPE[DMT_UNINT], NULL);
+	add_list_parameter(ctx, dmstrdup("TotalBytesSentUnderFullLoading"), dmstrdup(total_bytes_sent), DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("PeriodOfFullLoading"), dmstrdup(period_of_full_loading), DMT_TYPE[DMT_UNINT], NULL);
-	add_list_parameter(ctx, dmstrdup("TCPOpenRequestTime"), (diag_stats.tcpopenrequesttime)[0] != 0 ? diag_stats.tcpopenrequesttime : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
-	add_list_parameter(ctx, dmstrdup("TCPOpenResponseTime"), (diag_stats.tcpopenresponsetime)[0] != 0 ? diag_stats.tcpopenresponsetime : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("TCPOpenRequestTime"), tcp_open_request_time[0] != 0 ? dmstrdup(tcp_open_request_time) : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("TCPOpenResponseTime"), tcp_open_response_time[0] != 0 ? dmstrdup(tcp_open_response_time) : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
 
 	if (res != NULL)
 		json_object_put(res);
@@ -2057,9 +2054,11 @@ static int get_operate_args_IPDiagnostics_UploadDiagnostics(char *refparam, stru
 
 static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	json_object *res = NULL;
-
+	char input[2048] = {0};
+	char output[2048] = {0};
+	char cmd[2096] = {0};
 	char *upload_url = dmjson_get_value((json_object *)value, 1, "UploadURL");
+
 	if (upload_url[0] == '\0')
 		return CMD_INVALID_ARGUMENTS;
 
@@ -2079,54 +2078,50 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 	char *upload_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
 	char *upload_num_of_connections = dmjson_get_value((json_object *)value, 1, "NumberOfConnections");
 	char *upload_enable_per_connection_results = dmjson_get_value((json_object *)value, 1, "EnablePerConnectionResults");
-	char *proto = (bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto";
 
-	dmubus_call_blocking("bbf.diag", "upload",
-			UBUS_ARGS{
-				{"url", upload_url, String},
-				{"iface", upload_interface, String},
-				{"dscp", upload_dscp, String},
-				{"eth_prio", upload_ethernet_priority, String},
-				{"file_length", upload_test_file_length, String},
-				{"ip_proto", upload_proto, String},
-				{"num_of_con", upload_num_of_connections, String},
-				{"enable_per_con", upload_enable_per_connection_results, String},
-				{"proto", proto, String}
-			},
-			9, &res);
+	snprintf(input, sizeof(input), "'{\"url\": \"%s\",\"iface\":\"%s\",\"dscp\":\"%s\",\"eth_prio\":\"%s\",\"file_length\":\"%s\",\"ip_proto\":\"%s\",\"num_of_con\":\"%s\",\"enable_per_con\":\"%s\",\"proto\":\"%s\"}'",
+			upload_url,
+									upload_interface,
+									upload_dscp,
+									upload_ethernet_priority,
+									upload_test_file_length,
+									upload_proto,
+									upload_num_of_connections,
+									upload_enable_per_connection_results,
+									(bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto");
 
-	if (res == NULL) {
-		if (file_exists(UPLOAD_DUMP_FILE))
-			remove(UPLOAD_DUMP_FILE);
+	snprintf(cmd, sizeof(cmd), "sh %s %s", UPLOAD_DIAGNOSTIC_PATH, input);
 
+	FILE *pp = popen(cmd, "r");
+	if (pp != NULL) {
+		fgets(output, sizeof(output) , pp);
+		pclose(pp);
+	} else {
 		return CMD_FAIL;
 	}
 
+	json_object *res = (DM_STRLEN(output)) ? json_tokener_parse(output) : NULL;
+
+	if (res == NULL)
+		return CMD_FAIL;
+
 	char *upload_status = dmjson_get_value(res, 1, "Status");
 	char *upload_ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
+	char *upload_rom_time = dmjson_get_value(res, 1, "ROMTime");
+	char *upload_bom_time = dmjson_get_value(res, 1, "BOMTime");
+	char *upload_eom_time = dmjson_get_value(res, 1, "EOMTime");
 	char *upload_test_bytes_sent = dmjson_get_value(res, 1, "TestBytesSent");
 	char *upload_total_bytes_received = dmjson_get_value(res, 1, "TotalBytesReceived");
 	char *upload_total_bytes_sent = dmjson_get_value(res, 1, "TotalBytesSent");
 	char *upload_period_of_full_loading = dmjson_get_value(res, 1, "PeriodOfFullLoading");
-
-	if (DM_LSTRCMP(upload_status, "Complete") == 0) {
-		memset(&diag_stats, 0, sizeof(diag_stats));
-		if (DM_LSTRNCMP(upload_url, HTTP_URI, strlen(HTTP_URI)) == 0)
-			extract_stats(UPLOAD_DUMP_FILE, DIAGNOSTIC_HTTP, UPLOAD_DIAGNOSTIC);
-		if (DM_LSTRNCMP(upload_url, FTP_URI, strlen(FTP_URI)) == 0)
-			extract_stats(UPLOAD_DUMP_FILE, DIAGNOSTIC_FTP, UPLOAD_DIAGNOSTIC);
-
-		if (file_exists(UPLOAD_DUMP_FILE))
-			remove(UPLOAD_DUMP_FILE);
-
-	} else if (DM_LSTRNCMP(upload_status, "Error_", strlen("Error_")) == 0)
-		return CMD_FAIL;
+	char *upload_tcp_open_request_time = dmjson_get_value(res, 1, "TCPOpenRequestTime");
+	char *upload_tcp_open_response_time = dmjson_get_value(res, 1, "TCPOpenResponseTime");
 
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(upload_status), DMT_TYPE[DMT_STRING], NULL);
 	add_list_parameter(ctx, dmstrdup("IPAddressUsed"), dmstrdup(upload_ip_address_used), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("ROMTime"), (diag_stats.romtime)[0] != 0 ? diag_stats.romtime : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
-	add_list_parameter(ctx, dmstrdup("BOMTime"), (diag_stats.bomtime)[0] != 0 ? diag_stats.bomtime : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
-	add_list_parameter(ctx, dmstrdup("EOMTime"), (diag_stats.eomtime)[0] != 0 ? diag_stats.eomtime : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("ROMTime"), upload_rom_time[0] != 0 ? dmstrdup(upload_rom_time) : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("BOMTime"), upload_bom_time[0] != 0 ? dmstrdup(upload_bom_time) : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("EOMTime"), upload_eom_time[0] != 0 ? dmstrdup(upload_eom_time) : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
 	add_list_parameter(ctx, dmstrdup("TestBytesSent"), dmstrdup(upload_test_bytes_sent), DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("TotalBytesReceived"), dmstrdup(upload_total_bytes_received), DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("TotalBytesSent"), dmstrdup(upload_total_bytes_sent), DMT_TYPE[DMT_UNINT], NULL);
@@ -2134,8 +2129,8 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 	add_list_parameter(ctx, dmstrdup("TotalBytesReceivedUnderFullLoading"), dmstrdup(upload_total_bytes_received), DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("TotalBytesSentUnderFullLoading"), dmstrdup(upload_total_bytes_sent), DMT_TYPE[DMT_UNINT], NULL);
 	add_list_parameter(ctx, dmstrdup("PeriodOfFullLoading"), dmstrdup(upload_period_of_full_loading), DMT_TYPE[DMT_UNINT], NULL);
-	add_list_parameter(ctx, dmstrdup("TCPOpenRequestTime"), (diag_stats.tcpopenrequesttime)[0] != 0 ? diag_stats.tcpopenrequesttime : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
-	add_list_parameter(ctx, dmstrdup("TCPOpenResponseTime"), (diag_stats.tcpopenresponsetime)[0] != 0 ? diag_stats.tcpopenresponsetime : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("TCPOpenRequestTime"), upload_tcp_open_request_time[0] != 0 ? dmstrdup(upload_tcp_open_request_time) : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
+	add_list_parameter(ctx, dmstrdup("TCPOpenResponseTime"), upload_tcp_open_response_time[0] != 0 ? dmstrdup(upload_tcp_open_response_time) : "0001-01-01T00:00:00.000000Z", DMT_TYPE[DMT_TIME], NULL);
 
 	if (res != NULL)
 		json_object_put(res);

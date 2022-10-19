@@ -26,7 +26,6 @@ libbbf_ubus_la_LIBADD =		\
 	$(LIBUBOX_LIBS)			\
 	$(LIBUBUS_LIBS)			\
 	$(LIBJSON_LIBS)			\
-	$(LIBTRACE_LIBS)		\
 	$(LBLOBMSG_LIBS) 		\
 	$(LIBCURL_LIBS)			\
 	-L../bin/
