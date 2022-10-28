@@ -633,6 +633,7 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	time_t complete_time = time(NULL);
 
 	// Send Transfer Complete Event
+	// TODO according to tr069 standard TransferComplete should be sent after applying the downloaded image
 	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time,commandKey, "Download");
 
 	// Check if the download operation was successful

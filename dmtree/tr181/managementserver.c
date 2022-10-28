@@ -15,11 +15,17 @@
 #include "dmbbfcommon.h"
 
 #define DU_STATE_CHANGE_SEC_NAME "du_state_change"
+#define TRANSFER_COMPL_SEC_NAME "transfer_complete"
 
 static char *CWMP_EVENTS[] = {"0 BOOTSTRAP", "1 BOOT", "2 PERIODIC", "3 SCHEDULED", "5 KICKED", "6 CONNECTION REQUEST", "7 TRANSFER COMPLETE", "8 DIAGNOSTICS COMPLETE", "9 REQUEST DOWNLOAD", "10 AUTONOMOUS TRANSFER COMPLETE", "11 DU STATE CHANGE COMPLETE", "M Reboot", "M ScheduleInform", "M Download", "M ScheduleDownload", "M Upload", "M ChangeDUState", "14 HEARTBEAT", NULL};
 static char *DUStateOperationType[] = {"Install", "Update", "Uninstall", NULL};
 static char *DUStateResultType[] = {"Success", "Failure", "Both", NULL};
 static char *DUStateFaultCode[] = {"9001", "9003", "9012", "9013", "9015", "9016", "9017", "9018","9022", "9023", "9024", "9025", "9026", "9027", "9028", "9029", "9030", "9031", "9032", NULL};
+
+
+static char *TCTransferType[] = {"Upload", "Download", "Both", NULL};
+static char *TCResultType[] = {"Success", "Failure", "Both", NULL};
+static char *TCFileType[] = {"1 Firmware Upgrade Image", "2 Web Content", "3 Vendor Configuration File", "4 Vendor Log File", NULL};
 
 enum suboption_125 {
 	OPT_OUI,
@@ -38,13 +44,13 @@ struct manageable_device_args {
 static struct uci_section* get_autonomous_notify_section(char *sec_name)
 {
 	struct uci_section *s = NULL;
-	uci_path_foreach_sections(varstate, "cwmp", "autonomous_notify", s) {
+	uci_foreach_sections("cwmp", "autonomous_notify", s) {
 		if (strcmp(section_name(s), sec_name) == 0) {
 			return s;
 		}
 	}
 
-	dmuci_add_section_varstate("cwmp", "autonomous_notify", &s);
+	dmuci_add_section("cwmp", "autonomous_notify", &s);
 	if (s != NULL)
 		dmuci_rename_section_by_section(s, sec_name);
 
@@ -1022,9 +1028,111 @@ static int get_manageable_device_host(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
+static int get_transfer_compl_policy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("cwmp", TRANSFER_COMPL_SEC_NAME, "enable", value);
+	if (DM_STRLEN(*value) == 0)
+		*value = "0";
+
+	return 0;
+}
+
+static int get_transfer_compl_policy_type_filter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("cwmp", TRANSFER_COMPL_SEC_NAME, "transfer_type", value);
+	if (DM_STRLEN(*value) == 0)
+		*value = dmstrdup("Both");
+	return 0;
+}
+
+static int get_transfer_compl_policy_result_type_filter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("cwmp", TRANSFER_COMPL_SEC_NAME, "result_type", value);
+	if (DM_STRLEN(*value) == 0)
+		*value = dmstrdup("Both");
+
+	return 0;
+}
+
+static int get_transfer_compl_policy_file_type_filter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("cwmp", TRANSFER_COMPL_SEC_NAME, "file_type", value);
+	return 0;
+}
+
+static int set_transfer_compl_policy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+	struct uci_section *s = NULL;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			string_to_bool(value, &b);
+			s = get_autonomous_notify_section(TRANSFER_COMPL_SEC_NAME);
+			dmuci_set_value_by_section(s, "enable", b ? "1" : "0");
+			return 0;
+	}
+	return 0;
+}
+
+static int set_transfer_compl_policy_type_filter(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *s = NULL;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, TCTransferType, NULL))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			s = get_autonomous_notify_section(TRANSFER_COMPL_SEC_NAME);
+			dmuci_set_value_by_section(s, "transfer_type", value);
+			return 0;
+	}
+	return 0;
+}
+
+static int set_transfer_compl_policy_result_type_filter(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *s = NULL;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, -1, TCResultType, NULL))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			s = get_autonomous_notify_section(TRANSFER_COMPL_SEC_NAME);
+			dmuci_set_value_by_section(s, "result_type", value);
+			return 0;
+	}
+	return 0;
+}
+
+static int set_transfer_compl_policy_file_type_filter(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *s = NULL;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, TCFileType, NULL))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			s = get_autonomous_notify_section(TRANSFER_COMPL_SEC_NAME);
+			dmuci_set_value_by_section(s, "file_type", value);
+			return 0;
+	}
+	return 0;
+}
+
 static int get_du_state_change_compl_policy_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string_varstate("cwmp", DU_STATE_CHANGE_SEC_NAME, "enable", value);
+	dmuci_get_option_value_string("cwmp", DU_STATE_CHANGE_SEC_NAME, "enable", value);
 	if (DM_STRLEN(*value) == 0)
 		*value = "0";
 
@@ -1033,22 +1141,22 @@ static int get_du_state_change_compl_policy_enable(char *refparam, struct dmctx 
 
 static int get_du_state_change_compl_policy_operation_type_filter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string_varstate("cwmp", DU_STATE_CHANGE_SEC_NAME, "operation_type", value);
+	dmuci_get_option_value_string("cwmp", DU_STATE_CHANGE_SEC_NAME, "operation_type", value);
 	return 0;
 }
 
 static int get_du_state_change_compl_policy_result_type_filter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string_varstate("cwmp", DU_STATE_CHANGE_SEC_NAME, "result_type", value);
+	dmuci_get_option_value_string("cwmp", DU_STATE_CHANGE_SEC_NAME, "result_type", value);
 	if (DM_STRLEN(*value) == 0)
-		*value = strdup("Both");
+		*value = dmstrdup("Both");
 
 	return 0;
 }
 
 static int get_du_state_change_compl_policy_fault_code_filter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string_varstate("cwmp", DU_STATE_CHANGE_SEC_NAME, "fault_code", value);
+	dmuci_get_option_value_string("cwmp", DU_STATE_CHANGE_SEC_NAME, "fault_code", value);
 	return 0;
 }
 
@@ -1065,7 +1173,7 @@ static int set_du_state_change_compl_policy_enable(char *refparam, struct dmctx 
 		case VALUESET:
 			string_to_bool(value, &b);
 			s = get_autonomous_notify_section(DU_STATE_CHANGE_SEC_NAME);
-			dmuci_set_value_by_section_varstate(s, "enable", b ? "1" : "0");
+			dmuci_set_value_by_section(s, "enable", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -1082,7 +1190,7 @@ static int set_du_state_change_compl_policy_operation_type_filter(char *refparam
 			return 0;
 		case VALUESET:
 			s = get_autonomous_notify_section(DU_STATE_CHANGE_SEC_NAME);
-			dmuci_set_value_by_section_varstate(s, "operation_type", value);
+			dmuci_set_value_by_section(s, "operation_type", value);
 			return 0;
 	}
 	return 0;
@@ -1099,7 +1207,7 @@ static int set_du_state_change_compl_policy_result_type_filter(char *refparam, s
 			return 0;
 		case VALUESET:
 			s = get_autonomous_notify_section(DU_STATE_CHANGE_SEC_NAME);
-			dmuci_set_value_by_section_varstate(s, "result_type", value);
+			dmuci_set_value_by_section(s, "result_type", value);
 			return 0;
 	}
 	return 0;
@@ -1116,7 +1224,7 @@ static int set_du_state_change_compl_policy_fault_code_filter(char *refparam, st
 			return 0;
 		case VALUESET:
 			s = get_autonomous_notify_section(DU_STATE_CHANGE_SEC_NAME);
-			dmuci_set_value_by_section_varstate(s, "fault_code", value);
+			dmuci_set_value_by_section(s, "fault_code", value);
 			return 0;
 	}
 	return 0;
@@ -1130,6 +1238,7 @@ DMOBJ tManagementServerObj[] = {
 {"HeartbeatPolicy", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHeartbeatPolicyParams, NULL, BBFDM_CWMP, NULL, "2.12"},
 {"ManageableDevice", &DMREAD, NULL, NULL, NULL, browseManageableDevice, NULL, NULL, NULL, tManageableDeviceParams, NULL, BBFDM_CWMP, NULL, "2.12"},
 {"InformParameter", &DMWRITE, add_inform_parameter, delete_inform_parameter, NULL, browseInformParameterInst, NULL, NULL, NULL, tInformParameterParams, NULL, BBFDM_CWMP, NULL, "2.8"},
+{"AutonomousTransferCompletePolicy", &DMREAD, NULL, NULL, "file:/etc/config/cwmp", NULL, NULL, NULL, NULL, tTransferComplPolicyParams, NULL, BBFDM_CWMP, NULL, "2.0"},
 {"DUStateChangeComplPolicy", &DMREAD, NULL, NULL, "file:/etc/config/swmodd", NULL, NULL, NULL, NULL, tDUStateChangeComplPolicyParams, NULL, BBFDM_CWMP, NULL, "2.1"},
 {0}
 };
@@ -1190,6 +1299,14 @@ DMLEAF tManageableDeviceParams[] = {
 {"SerialNumber", &DMREAD, DMT_STRING, get_manageable_device_serial, NULL, BBFDM_CWMP, "2.0"},
 {"ProductClass", &DMREAD, DMT_STRING, get_manageable_device_class, NULL, BBFDM_CWMP, "2.0"},
 {"Host", &DMREAD, DMT_STRING, get_manageable_device_host, NULL, BBFDM_CWMP, "2.0"},
+{0}
+};
+
+DMLEAF tTransferComplPolicyParams[] = {
+{"Enable", &DMWRITE, DMT_BOOL, get_transfer_compl_policy_enable, set_transfer_compl_policy_enable, BBFDM_CWMP, "2.0"},
+{"TransferTypeFilter", &DMWRITE, DMT_STRING, get_transfer_compl_policy_type_filter, set_transfer_compl_policy_type_filter, BBFDM_CWMP, "2.0"},
+{"ResultTypeFilter", &DMWRITE, DMT_STRING, get_transfer_compl_policy_result_type_filter, set_transfer_compl_policy_result_type_filter, BBFDM_CWMP, "2.0"},
+{"FileTypeFilter", &DMWRITE, DMT_STRING, get_transfer_compl_policy_file_type_filter, set_transfer_compl_policy_file_type_filter, BBFDM_CWMP, "2.0"},
 {0}
 };
 
