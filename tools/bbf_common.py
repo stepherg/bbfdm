@@ -167,6 +167,41 @@ def fill_data_model_file():
     fp.close()
 
 
+def reorganize_parent_child():
+    organized_dm = []
+    global LIST_SUPPORTED_DM
+
+    for value in LIST_SUPPORTED_DM:
+        obj = json.loads(value)
+        o_type = get_option_value(obj, "type", None)
+        if o_type != "DMT_OBJ":
+            continue
+
+        o_name = get_option_value(obj, "param", None)
+        if o_name is None:
+            continue
+
+        organized_dm.append(value)
+        for item in LIST_SUPPORTED_DM:
+            param = json.loads(item)
+            p_type = get_option_value(param, "type", None)
+            if p_type is None or p_type == "DMT_OBJ":
+                continue
+
+            p_name = get_option_value(param, "param", None)
+            if p_name is None:
+                continue
+
+            if p_name.find(o_name) != -1:
+                ob_dot = o_name.count('.')
+                pm_dot = p_name.count('.')
+                if ob_dot == pm_dot:
+                    organized_dm.append(item)
+
+    LIST_SUPPORTED_DM.clear()
+    LIST_SUPPORTED_DM = organized_dm
+
+
 def generate_datamodel_tree(filename):
     if filename.endswith('.c') is False:
         return
@@ -528,6 +563,9 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
 
     ############## Sort all elements in List ##############
     LIST_SUPPORTED_DM.sort(reverse=False)
+
+    ### Reorganize objects and params based on parent-child ###
+    reorganize_parent_child()
 
     ############## Back to the current directory ##############
     cd_dir(CURRENT_PATH)
