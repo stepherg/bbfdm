@@ -807,6 +807,7 @@ static struct uci_section *create_new_bridge_port_section(char *config, char *po
 	dmuci_set_value_by_section(br_port_s, "device", device);
 	dmuci_set_value_by_section(br_port_s, "device_section_name", device_s_name);
 	dmuci_set_value_by_section(br_port_s, "management", management_port);
+	dmuci_set_value_by_section(br_port_s, "enabled", "1");
 	if (is_bridge_pr_br_member(br_inst, &pr_br_inst))
 		dmuci_set_value_by_section(br_port_s, "provider_br_inst", pr_br_inst);
 
@@ -832,13 +833,19 @@ static void dmmap_synchronizeBridgingBridgePort(struct dmctx *dmctx, DMNODE *par
 
 		// section added by user ==> skip it
 		dmuci_get_value_by_section_string(s, "added_by_user", &s_user);
-		if (s_user && DM_LSTRCMP(s_user, "1") == 0)
+		if (DM_LSTRCMP(s_user, "1") == 0)
 			continue;
 
 		// section for management ==> skip it
 		char *management = NULL;
 		dmuci_get_value_by_section_string(s, "management", &management);
-		if (management && DM_LSTRCMP(management, "1") == 0)
+		if (DM_LSTRCMP(management, "1") == 0)
+			continue;
+
+		// port is disbaled ==> if yes, skip it
+		char *enabled = NULL;
+		dmuci_get_value_by_section_string(s, "enabled", &enabled);
+		if (DM_LSTRCMP(enabled, "0") == 0)
 			continue;
 
 		// port device is available in ports list ==> skip it
@@ -1691,6 +1698,7 @@ static int addObjBridgingBridgePort(char *refparam, struct dmctx *ctx, void *dat
 	dmuci_set_value_by_section(br_port_s, "device", dev_name);
 	dmuci_set_value_by_section(br_port_s, "device_section_name", ((struct bridge_args *)data)->bridge_sec_name);
 	dmuci_set_value_by_section(br_port_s, "management", "0");
+	dmuci_set_value_by_section(br_port_s, "enabled", "0");
 	dmuci_set_value_by_section(br_port_s, "added_by_user", "1");
 	return 0;
 }
@@ -2110,40 +2118,7 @@ static int get_BridgingBridge_VLANPortNumberOfEntries(char *refparam, struct dmc
 
 static int get_BridgingBridgePort_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *management = NULL;
-
-	dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "management", &management);
-	if (management && DM_LSTRCMP(management, "1") == 0) {
-		*value = "1";
-	} else {
-		char *eth_ports = NULL;
-		char *device = NULL;
-		char *config = NULL;
-
-		dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "ifname", &device);
-		dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "config", &config);
-		db_get_value_string("hw", "board", "ethernetLanPorts", &eth_ports);
-
-		if (dm_strword(eth_ports, device)) {
-			// ports config => ethport sections
-
-			*value = dmuci_get_value_by_section_fallback_def(((struct bridge_port_args *)data)->bridge_port_sec, "enabled", "1");
-		} else if (config && !DM_LSTRCMP(config, "wireless")) {
-			// wireless config => wifi-iface sections
-
-			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "disabled", value);
-			*value = ((*value)[0] == '1') ? "0" : "1";
-		} else {
-			// network config => device sections
-
-			json_object *res = NULL;
-			char *dev = device ? device : "";
-			dmubus_call("network.device", "status", UBUS_ARGS{{"name", dev, String}}, 1, &res);
-			DM_ASSERT(res, *value = "0");
-			char *up = dmjson_get_value(res, 1, "up");
-			*value = up ? "1" :"0";
-		}
-	}
+	dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "enabled", value);
 	return 0;
 }
 
@@ -2163,23 +2138,34 @@ static int set_BridgingBridgePort_Enable(char *refparam, struct dmctx *ctx, void
 			if (management && DM_LSTRCMP(management, "1") == 0) {
 				break;
 			} else {
-				char *eth_ports = NULL;
-				char *device = NULL;
 				char *config = NULL;
+				char *device = NULL;
 
-				dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "ifname", &device);
 				dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "config", &config);
-				db_get_value_string("hw", "board", "ethernetLanPorts", &eth_ports);
+				dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "device", &device);
 
-				if (dm_strword(eth_ports, device)) {
-					// ports config => ethport sections
+				if (DM_STRLEN(device)) {
+					if (DM_LSTRCMP(config, "wireless") == 0) {
+						struct uci_section *wifi_iface_s = get_interface_section(device);
+						dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, "network", b ? section_name(wifi_iface_s) : "");
+					} else {
+						struct uci_section *dmmap_bridge_s = NULL;
+						char *port = NULL;
 
-					dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, "enabled", b ? "1" : "0");
-				} else if (config && !DM_LSTRCMP(config, "wireless")) {
-					// wireless config => wifi-iface sections
+						dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "port", &port);
+						get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
 
-					dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, "disabled", b ? "0" : "1");
+						if (b) {
+							add_port_to_bridge_section(((struct bridge_port_args *)data)->bridge_sec, port);
+							add_port_to_bridge_section(dmmap_bridge_s, port);
+						} else {
+							remove_port_from_bridge_section(((struct bridge_port_args *)data)->bridge_sec, port);
+							remove_port_from_bridge_section(dmmap_bridge_s, port);
+						}
+					}
 				}
+
+				dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "enabled", b ? "1" : "0");
 			}
 			return 0;
 	}
@@ -2321,8 +2307,10 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 					dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "config", "network");
 
 				struct uci_section *dmmap_bridge_s = NULL;
-				char *port_device;
+				char *port_enabled = NULL;
+				char *port_device = NULL;
 
+				dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "enabled", &port_enabled);
 				dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "port", &port_device);
 				if (port_device[0] == '\0') {
 					// Check if there is a vlan port pointed at me
@@ -2330,12 +2318,14 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 					update_vlanport_and_device_section(data, linker, &new_linker);
 					if (new_linker) linker = new_linker;
 
-					// network config: add port to ports list
-					add_port_to_bridge_section(((struct bridge_port_args *)data)->bridge_sec, linker);
+					if (DM_STRCMP(port_enabled, "1") == 0) {
+						// network config: add port to ports list
+						add_port_to_bridge_section(((struct bridge_port_args *)data)->bridge_sec, linker);
 
-					// dmmap_bridge: add port to ports list
-					get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
-					add_port_to_bridge_section(dmmap_bridge_s, linker);
+						// dmmap_bridge: add port to ports list
+						get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
+						add_port_to_bridge_section(dmmap_bridge_s, linker);
+					}
 
 					// Update port option in dmmap
 					dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "port", linker);
@@ -2378,12 +2368,14 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 							}
 						}
 
-						// network config: add name to ifname option
-						add_port_to_bridge_section(((struct bridge_port_args *)data)->bridge_sec, new_name);
+						if (DM_STRCMP(port_enabled, "1") == 0) {
+							// network config: add name to ifname option
+							add_port_to_bridge_section(((struct bridge_port_args *)data)->bridge_sec, new_name);
 
-						// dmmap_bridge: add port to ports list
-						get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
-						replace_existing_port_to_bridge_section(dmmap_bridge_s, new_name, port_device);
+							// dmmap_bridge: add port to ports list
+							get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
+							replace_existing_port_to_bridge_section(dmmap_bridge_s, new_name, port_device);
+						}
 
 						// Update port option in dmmap
 						dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "port", new_name);
@@ -2400,15 +2392,17 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 							if (new_linker) linker = new_linker;
 						}
 
-						// Add new port to ports list network/device
-						add_port_to_bridge_section(((struct bridge_port_args *)data)->bridge_sec, linker);
+						if (DM_STRCMP(port_enabled, "1") == 0) {
+							// Add new port to ports list network/device
+							add_port_to_bridge_section(((struct bridge_port_args *)data)->bridge_sec, linker);
+
+							// dmmap_bridge: add port to ports list
+							get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
+							replace_existing_port_to_bridge_section(dmmap_bridge_s, linker, port_device);
+						}
 
 						// Update port option in dmmap
 						dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "port", linker);
-
-						// dmmap_bridge: add port to ports list
-						get_dmmap_section_of_config_section("dmmap_bridge", "device", section_name(((struct bridge_port_args *)data)->bridge_sec), &dmmap_bridge_s);
-						replace_existing_port_to_bridge_section(dmmap_bridge_s, linker, port_device);
 
 						update_device_management_port(port_device, linker, ((struct bridge_port_args *)data)->br_inst);
 					}
