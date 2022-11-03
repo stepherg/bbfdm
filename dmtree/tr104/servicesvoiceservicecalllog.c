@@ -151,7 +151,11 @@ static int get_ServicesVoiceServiceCallLog_FarEndIpAddress(char *refparam, struc
 static int get_ServicesVoiceServiceCallLog_SessionDSPCodec(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
-	*value = (entry) ? dmstrdup(entry->codec) : "";
+	if (entry) {
+		const char *codec_name = get_codec_name(entry->codec);
+		*value = codec_name ? dmstrdup(codec_name) : "";
+	}
+	
 	return 0;
 }
 
