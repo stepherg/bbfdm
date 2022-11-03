@@ -260,7 +260,14 @@ static int browseDynamicDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, 
 
 static int browseDynamicDNSClientHostnameInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, "1");
+	char *hostname = NULL, *added_by_user = NULL;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)prev_data)->config_section, "domain", &hostname);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)prev_data)->dmmap_section, "added_by_user", &added_by_user);
+	if (DM_STRLEN(hostname) != 0 || DM_STRCMP(added_by_user, "1") == 0) {
+		DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, "1");
+	}
+
 	return 0;
 }
 
@@ -310,6 +317,38 @@ static int delObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 				dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
 				dmuci_delete_by_section(s, NULL, NULL);
+			}
+			break;
+	}
+	return 0;
+}
+
+static int addObjDynamicDNSClientHostname(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	if (DM_STRCMP(*instance, "1") != 0)
+		return FAULT_9003;
+
+	dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "added_by_user", "1");
+	return 0;
+}
+
+static int delObjDynamicDNSClientHostname(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, "domain", NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, "added_by_user", NULL);
+			break;
+		case DEL_ALL:
+			uci_foreach_sections_safe("ddns", "service", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_ddns", "service", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, "added_by_user", NULL);
+
+				dmuci_delete_by_section(s, "domain", NULL);
 			}
 			break;
 	}
@@ -640,7 +679,8 @@ static int set_DynamicDNSClient_Password(char *refparam, struct dmctx *ctx, void
 
 static int get_DynamicDNSClient_HostnameNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "1";
+	int cnt = get_number_of_entries(ctx, data, instance, browseDynamicDNSClientHostnameInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -1003,7 +1043,7 @@ DMLEAF tDynamicDNSParams[] = {
 /* *** Device.DynamicDNS.Client.{i}. *** */
 DMOBJ tDynamicDNSClientObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Hostname", &DMREAD, NULL, NULL, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", NULL}, "2.10"},
+{"Hostname", &DMWRITE, addObjDynamicDNSClientHostname, delObjDynamicDNSClientHostname, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", NULL}, "2.10"},
 {0}
 };
 
