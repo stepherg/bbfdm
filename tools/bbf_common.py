@@ -622,7 +622,12 @@ def get_param_info_from_json(data, dm_json_files=None, info="description"):
                     if i != (len(list_data) - 1) and list_data[i + 1] == list_data[i] + "{i}.":
                         continue
                     try:
-                        ob = ob[list_data[i]]
+                        if str(list_data[i]).find(BBF_VENDOR_PREFIX) != -1:
+                            param = str(list_data[i]).replace(BBF_VENDOR_PREFIX, "{BBF_VENDOR_PREFIX}")
+                        else:
+                            param = str(list_data[i])
+
+                        ob = ob[param]
                         found = True
                     except KeyError:
                         found = False

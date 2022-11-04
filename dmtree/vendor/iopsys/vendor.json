@@ -1,0 +1,1675 @@
+{
+	"Device.": {
+		"type": "object",
+		"version": "2.5",
+		"protocols": [
+			"cwmp",
+			"usp"
+		],
+		"description": "The top-level object for a Device.",
+		"access": false,
+		"array": false,
+		"Device.Services.VoiceService.{i}.": {
+			"type": "object",
+			"version": "2.5",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"description": "The top-level object for VoIP CPE. At most one entry in this table can exist with a given value for Alias.",
+			"access": true,
+			"array": true,
+			"Device.Services.VoiceService.{i}.CallLog.{i}.": {
+				"type": "object",
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Contains a list of calls log.An entry is created each time a call is terminated.",
+				"access": false,
+				"array": true,
+				"{BBF_VENDOR_PREFIX}SIPIPAddress": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "URI that addresses a specific extension on a voice over IP system.",
+					"datatype": "string"
+				},
+				"{BBF_VENDOR_PREFIX}SIPResponseCode": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "SIP response code is three-digit integer code which gives status of the request.",
+					"datatype": "unsignedInt"
+				},
+				"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.RTP.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "The RTP part of the source session information.",
+					"access": false,
+					"array": false,
+					"{BBF_VENDOR_PREFIX}BurstDensity": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The fraction of RTP data packets within burst periods since the beginning of reception that were either lost or discarded.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}BurstDuration": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The mean duration, expressed in milliseconds, of the burst periods that have occurred since the beginning of reception.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}GapDensity": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The fraction of RTP data packets within inter-burst gaps since the beginning of reception that were either lost or discarded.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}GapDuration": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The mean duration, expressed in milliseconds, of the gap periods that have occurred since the beginning of reception.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}JBAvgDelay": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Average jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}JBMaxDelay": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Maximum jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}JBNomDelay": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Nominal jitter buffer delay in milliseconds, which corresponds to the nominal jitter buffer delay for packets that arrive exactly on time.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}PeakJitter": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Peak jitter / holding time (in milliseconds).",
+						"datatype": "unsignedInt"
+					}
+				},
+				"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.RTP.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"access": false,
+					"array": false,
+					"description": "The RTP part of the destination session information.",
+					"{BBF_VENDOR_PREFIX}BurstDensity": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The fraction of RTP data packets within burst periods since the beginning of reception that were either lost or discarded.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}BurstDuration": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The mean duration, expressed in milliseconds, of the burst periods that have occurred since the beginning of reception.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}GapDensity": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The fraction of RTP data packets within inter-burst gaps since the beginning of reception that were either lost or discarded.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}GapDuration": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The mean duration, expressed in milliseconds, of the gap periods that have occurred since the beginning of reception.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}JBAvgDelay": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Average jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}JBMaxDelay": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Maximum jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}JBNomDelay": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Nominal jitter buffer delay in milliseconds, which corresponds to the nominal jitter buffer delay for packets that arrive exactly on time.",
+						"datatype": "unsignedInt"
+					},
+					"{BBF_VENDOR_PREFIX}PeakJitter": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Peak jitter / holding time (in milliseconds).",
+						"datatype": "unsignedInt"
+					}
+				}
+			},
+			"Device.Services.VoiceService.{i}.CallControl.Extension.{i}.": {
+				"type": "object",
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Extension table containing the local numbers and names.",
+				"access": true,
+				"array": true,
+				"{BBF_VENDOR_PREFIX}ComfortNoise": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Comfort Noise is enabled/disabled.",
+					"datatype": "boolean"
+				},
+				"{BBF_VENDOR_PREFIX}TXGain": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Control the audio transmitted to the extension.The numbers represent db (decibels).",
+					"datatype": "string",
+					"range": [
+						{
+							"max": 32
+						}
+					]
+				},
+				"{BBF_VENDOR_PREFIX}RXGain": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Control the audio received at the extension .The numbers represent db (decibels).",
+					"datatype": "string",
+					"range": [
+						{
+							"max": 32
+						}
+					]
+				},
+				"{BBF_VENDOR_PREFIX}EchoCancel": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Enable or disable echo cancellation for this extension.",
+					"datatype": "boolean"
+				},
+				"{BBF_VENDOR_PREFIX}Type": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Specfies the type of the extension fxs/dect.",
+					"datatype": "string",
+					"range": [
+						{
+							"max": 32
+						}
+					]
+				}
+			},
+			"Device.Services.VoiceService.{i}.DECT.Portable.{i}.": {
+				"type": "object",
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "DECT portable table.",
+				"access": true,
+				"array": true,
+				"{BBF_VENDOR_PREFIX}Name": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Indicates the name of this DECT portable.",
+					"datatype": "string"
+				}
+			}
+		},
+		"Device.Bridging.Bridge.{i}.Port.{i}.": {
+			"type": "object",
+			"version": "2.5",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"description": "Bridge Port table, which MUST contain an entry for each bridge port (a stackable interface object as described in <<bibref|TR-181i2|Section 4.2>>). There are two types of bridge ports: management (upward facing) and non-management (downward facing). This is determined by configuring the Boolean <<param|ManagementPort>> parameter. The CPE will automatically configure each management bridge port to appear in the interface stack above all non-management bridge ports that share the same <<object|##.Bridge>> instance.",
+			"access": true,
+			"array": true,
+			"{BBF_VENDOR_PREFIX}EgressPriorityRegeneration": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Rewriting priority on egress, to map the pbit value of incoming packet to another value and emit it with that",
+				"list": {
+					"datatype": "unsignedInt",
+					"item": {
+						"min": 8,
+						"max": 8
+					},
+					"range": [
+						{
+							"min": 0,
+							"max": 7
+						}
+					]
+				}
+			},
+			"{BBF_VENDOR_PREFIX}DSCPEthernetPriorityMapping": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "DSCP to pbit mapping, to map pbit to untagged vlan packet created at the cpe",
+				"list": {
+					"datatype": "unsignedInt",
+					"item": {
+						"min": 1,
+						"max": 64
+					},
+					"range": [
+						{
+							"min": 0,
+							"max": 7
+						}
+					]
+				}
+			}
+		},
+		"Device.Bridging.Bridge.{i}.VLAN.{i}.": {
+			"type": "object",
+			"version": "2.5",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"description": "Bridge VLAN table. If this table is supported, if MUST contain an entry for each VLAN known to the Bridge. This table only applies to an 802.1Q <<bibref|802.1Q-2011>> Bridge.",
+			"access": true,
+			"array": true,
+			"{BBF_VENDOR_PREFIX}TVID": {
+				"type": "int",
+				"read": true,
+				"write": true,
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Translate vlan from lan network with new VLAN ID",
+				"datatype": "int",
+				"range" : [
+					{
+						"min": 0,
+						"max": 4094
+					}
+				]
+			}
+		},
+		"Device.DeviceInfo.": {
+			"type": "object",
+			"version": "2.5",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"description": "This object contains general device information.",
+			"access": false,
+			"array": false,
+			"{BBF_VENDOR_PREFIX}BaseMACAddress": {
+				"type": "string",
+				"read": true,
+				"write": false,
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "The MAC Address of the device.",
+				"datatype": "MACAddress",
+				"range": [
+					{
+						"max": 17
+					}
+				],
+				"pattern": [
+					"",
+					"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+				]
+			}
+		},
+		"Device.Ethernet.VLANTermination.{i}.": {
+			"type": "object",
+			"version": "2.5",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"description": "VLAN Termination table (a stackable interface object as described in <<bibref|TR-181i2|Section 4.2>>). A VLAN Termination entry is typically stacked on top of a <<object|#.Link>> object to receive and send frames with the configured <<param|VLANID>>.",
+			"access": true,
+			"array": true,
+			"{BBF_VENDOR_PREFIX}MACVLAN": {
+				"type": "boolean",
+				"read": true,
+				"write": true,
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Specifies if the object is macvlan or not",
+				"datatype": "boolean"
+			}
+		},
+		"Device.Time.": {
+			"type": "object",
+			"version": "2.5",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"description": "This object contains parameters relating an NTP or SNTP time client in the CPE.",
+			"access": false,
+			"array": false,
+			"{BBF_VENDOR_PREFIX}LocalTimeZoneName": {
+				"type": "string",
+				"read": true,
+				"write": false,
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "The local zone name definition.",
+				"datatype": "string"
+			},
+			"{BBF_VENDOR_PREFIX}SourceInterface": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Identifier of the IP interface in the device. This parameter can be an entry in the table <<object|Device.IP.Interface.<i>.>>.",
+				"datatype": "string"
+			}
+		},
+		"Device.{BBF_VENDOR_PREFIX}IGMP.": {
+			"type": "object",
+			"version": "2.5",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"description": "Object contains parameters related to IGMP settings for IPTV service",
+			"access": false,
+			"array": false,
+			"SnoopingNumberOfEntries": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": false,
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "<<numentries>>",
+				"datatype": "unsignedInt"
+			},
+			"ProxyNumberOfEntries": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": false,
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "<<numentries>>",
+				"datatype": "unsignedInt"
+			},
+			"Device.{BBF_VENDOR_PREFIX}IGMP.Snooping.{i}.": {
+				"type": "object",
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Object contains parameters for configuring IGMP snooping",
+				"access": true,
+				"array": true,
+				"Enable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Indicates whether or not the IGMP snooping is enabled.",
+					"datatype": "boolean"
+				},
+				"Version": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Indicates the version of IGMP.",
+					"datatype": "string",
+					"enumerations": [
+						"V2",
+						"V3"
+					]
+				},
+				"Robustness": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Number of times for retransmitting IGMP queries in case of packet loss. A higher robustness variable makes the IGMP querier more robust.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"Aggregation": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "This enables the device to forward only the first IGMP report for a multicast group to its directly connected Layer 3 device",
+					"datatype": "boolean"
+				},
+				"Interface": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Path of object on which to snoop, usually a bridge",
+					"datatype": "string"
+				},
+				"Mode": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Multicast snooping mode, when defined as standard, unknown stream flooded on all ports of the bridge, when defined as blocking unknown streams dropped it, when defined as disabled it disabled the multicast traffic.",
+					"datatype": "string",
+					"enumerations": [
+						"Standard",
+						"Blocking",
+						"Disabled"
+					]
+				},
+				"LastMemberQueryInterval": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "In IGMPv2, it sets the interval at which a querier sends group-specific queries after receiving a leave message. In IGMPv3, it sets the interval at which a querier sends group-and-source-specific queries after receiving a report that changes multicast source and group mappings.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"ImmediateLeave": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Enables the device to immediately remove a port from the forwarding entry for a multicast group when the port receives a leave message",
+					"datatype": "boolean"
+				},
+				"FilterNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "<<numentries>>",
+					"datatype": "unsignedInt"
+				},
+				"ClientGroupNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "<<numentries>>",
+					"datatype": "unsignedInt"
+				},
+				"Device.{BBF_VENDOR_PREFIX}IGMP.Snooping.{i}.ClientGroup.{i}.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Contain entries of clients associated with a multicast stream",
+					"access": false,
+					"array": true,
+					"GroupAddress": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "IP address of the multicast stream to which clients are listening to",
+						"datatype": "string"
+					},
+					"AssociatedDeviceNumberOfEntries": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "<<numentries>>",
+						"datatype": "unsignedInt"
+					},
+					"Device.{BBF_VENDOR_PREFIX}IGMP.Snooping.{i}.ClientGroup.{i}.AssociatedDevice.{i}.": {
+						"type": "object",
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Table contain details of the client devices which has joined this multicast stream, contains its IP address, the CPE interface to which it is connected to and a timeout value which is the time since this device sent the last join",
+						"access": false,
+						"array": true,
+						"Interface": {
+							"type": "string",
+							"read": true,
+							"write": false,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Identifier of the Ethernet interface in the device. This parameter can be an entry in the table <<object|Device.Ethernet.Interface.<i>.>>.",
+							"datatype": "string"
+						},
+						"Host": {
+							"type": "string",
+							"read": true,
+							"write": false,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Identifier of the Host associated with the device. This parameter can be an entry in the table <<object|Device.Hosts.Host.<i>.>>.",
+							"datatype": "string"
+						},
+						"Timeout": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": false,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Time since last join, if this elapses streaming shall stop",
+							"datatype": "unsignedInt"
+						}
+					}
+				},
+				"Device.{BBF_VENDOR_PREFIX}IGMP.Snooping.{i}.Filter.{i}.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Filter out the multicast stream with the IP Adddress specified in Filter.{i}.IPAddress",
+					"access": true,
+					"array": true,
+					"Enable": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Enables this filter instance",
+						"datatype": "boolean"
+					},
+					"IPAddress": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Filter out the multicast stream based on IPAddress",
+						"datatype": "IPAddress",
+						"range": [
+							{
+								"max": 45
+							}
+						]
+					}
+				}
+			},
+			"Device.{BBF_VENDOR_PREFIX}IGMP.Proxy.{i}.": {
+				"type": "object",
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Multicast table with proxied instances",
+				"access": true,
+				"array": true,
+				"Enable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Indicates whether or not the proxy is enabled.",
+					"datatype": "boolean"
+				},
+				"Version": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Indicates the version of the IGMP",
+					"datatype": "string",
+					"enumerations": [
+						"V2",
+						"V3"
+					]
+				},
+				"Robustness": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Number of times for retransmitting IGMP queries in case of packet loss. A higher robustness variable makes the IGMP querier more robust.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"Aggregation": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "This feature enables the device to forward only the first IGMP report for a multicast group to its directly connected Layer 3 device",
+					"datatype": "boolean"
+				},
+				"QueryInterval": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "The Query Interval is the interval between General Queries sent by the Querier.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"QueryResponseInterval": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Specify how long the querier routing device waits to receive a response to a host-query message from a host.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"LastMemberQueryInterval": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "In IGMPv2, it sets the interval at which a querier sends group-specific queries after receiving a leave message. In IGMPv3, it sets the interval at which a querier sends group-and-source-specific queries after receiving a report that changes multicast source and group mappings.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"ImmediateLeave": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Enable the device to leave the multicast group immediately after the last host leaves the multicast group",
+					"datatype": "boolean"
+				},
+				"FilterNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "<<numentries>>",
+					"datatype": "unsignedInt"
+				},
+				"ClientGroupNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "<<numentries>>",
+					"datatype": "unsignedInt"
+				},
+				"InterfaceNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "<<numentries>>",
+					"datatype": "unsignedInt"
+				},
+				"Device.{BBF_VENDOR_PREFIX}IGMP.Proxy.{i}.ClientGroup.{i}.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Contain entries of clients associated with a multicast stream",
+					"access": false,
+					"array": true,
+					"GroupAddress": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "IP address of the multicast stream to which clients are listening to",
+						"datatype": "string"
+					},
+					"AssociatedDeviceNumberOfEntries": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "<<numentries>>",
+						"datatype": "unsignedInt"
+					},
+					"Device.{BBF_VENDOR_PREFIX}IGMP.Proxy.{i}.ClientGroup.{i}.AssociatedDevice.{i}.": {
+						"type": "object",
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "#same as Snooping associated device#",
+						"access": false,
+						"array": true,
+						"Interface": {
+							"type": "string",
+							"read": true,
+							"write": false,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Identifier of the Ethernet interface in the device. This parameter can be an entry in the table <<object|Device.Ethernet.Interface.<i>.>>.",
+							"datatype": "string"
+						},
+						"Host": {
+							"type": "string",
+							"read": true,
+							"write": false,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Identifier of the Host associated with the device. This parameter can be an entry in the table <<object|Device.Hosts.Host.<i>.>>.",
+							"datatype": "string"
+						},
+						"Timeout": {
+							"type": "unsignedInt",
+							"read": true,
+							"write": false,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Time since last join, if this elapses streaming shall stop",
+							"datatype": "unsignedInt"
+						}
+					}
+				},
+				"Device.{BBF_VENDOR_PREFIX}IGMP.Proxy.{i}.Filter.{i}.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Filter table for multicast proxy",
+					"access": true,
+					"array": true,
+					"Enable": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Enables this filter instance",
+						"datatype": "boolean"
+					},
+					"IPPrefix": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Filter out the multicast stream based on IPAddress",
+						"datatype": "string"
+					}
+				},
+				"Device.{BBF_VENDOR_PREFIX}IGMP.Proxy.{i}.Interface.{i}.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Interfaces associated with proxy",
+					"access": true,
+					"array": true,
+					"Interface": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Identifier of the IP interface in the device. This parameter can be an entry in the table <<object|Device.IP.Interface.<i>.>>.",
+						"datatype": "string",
+						"range": [
+							{
+								"max": 256
+							}
+						]
+					},
+					"Upstream": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "true if interface is upstream, else downstream. usually the lan facing is downstream and wan facing is upstream",
+						"datatype": "boolean"
+					},
+					"SnoopingMode": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "defines how the unknown multicast are treated on the snooped interface. Standard means forward the unknown stream, blocking means block the unknown stream and disabled mean disable snooping",
+						"datatype": "string",
+						"enumerations": [
+							"Standard",
+							"Blocking",
+							"Disabled"
+						]
+					}
+				}
+			}
+		},
+		"Device.{BBF_VENDOR_PREFIX}MLD.": {
+			"type": "object",
+			"version": "2.5",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"description": "Object contains parameters related to MLD settings for IPTV service",
+			"access": false,
+			"array": false,
+			"SnoopingNumberOfEntries": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": false,
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "<<numentries>>",
+				"datatype": "unsignedInt"
+			},
+			"ProxyNumberOfEntries": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": false,
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "<<numentries>>",
+				"datatype": "unsignedInt"
+			},
+			"Device.{BBF_VENDOR_PREFIX}MLD.Snooping.{i}.": {
+				"type": "object",
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "#same as snooping object#",
+				"access": true,
+				"array": true,
+				"Enable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Indicates whether or not the MLD snooping is enabled.",
+					"datatype": "boolean"
+				},
+				"Version": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Indicates the version of MLD",
+					"datatype": "string",
+					"enumerations": [
+						"V1",
+						"V2"
+					]
+				},
+				"Robustness": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Number of times for retransmitting MLD queries in case of packet loss. A higher robustness variable makes the MLD querier more robust.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"Aggregation": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "This enables the device to forward only the first MLD report for a multicast group to its directly connected Layer 3 device",
+					"datatype": "boolean"
+				},
+				"Interface": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Path of object on which to snoop, usually a bridge",
+					"datatype": "string"
+				},
+				"Mode": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Multicast snooping mode, when defined as standard, unknown stream flooded on all ports of the bridge, when defined as blocking unknown streams dropped it, when defined as disabled it disabled the multicast traffic.",
+					"datatype": "string",
+					"enumerations": [
+						"Standard",
+						"Blocking",
+						"Disabled"
+					]
+				},
+				"LastMemberQueryInterval": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "In MLDv1, it sets the interval at which a querier sends group-specific queries after receiving a leave message. In MLDv2, it sets the interval at which a querier sends group-and-source-specific queries after receiving a report that changes multicast source and group mappings.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"ImmediateLeave": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Enables the device to immediately remove a port from the forwarding entry for a multicast group when the port receives a leave message",
+					"datatype": "boolean"
+				},
+				"FilterNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "<<numentries>>",
+					"datatype": "unsignedInt"
+				},
+				"Device.{BBF_VENDOR_PREFIX}MLD.Snooping.{i}.Filter.{i}.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Filter out the multicast stream with the IP Adddress specified in Filter.{i}.IPAddress",
+					"access": true,
+					"array": true,
+					"Enable": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Enables this filter instance",
+						"datatype": "boolean"
+					},
+					"IPAddress": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Filter out the multicast stream based on IPAddress",
+						"datatype": "IPAddress",
+						"range": [
+							{
+								"max": 45
+							}
+						]
+					}
+				}
+			},
+			"Device.{BBF_VENDOR_PREFIX}MLD.Proxy.{i}.": {
+				"type": "object",
+				"version": "2.5",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Multicast table with proxied instances",
+				"access": true,
+				"array": true,
+				"Enable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Indicates whether or not the proxy is enabled.",
+					"datatype": "boolean"
+				},
+				"Version": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Indicates the version of the MLD",
+					"datatype": "string",
+					"enumeration": [
+						"V1",
+						"V2"
+					]
+				},
+				"Robustness": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Number of times for retransmitting MLD queries in case of packet loss. A higher robustness variable makes the MLD querier more robust.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"Aggregation": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "This feature enables the device to forward only the first MLD report for a multicast group to its directly connected Layer 3 device",
+					"datatype": "boolean"
+				},
+				"QueryInterval": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "The Query Interval is the interval between General Queries sent by the Querier.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"QueryResponseInterval": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Specify how long the querier routing device waits to receive a response to a host-query message from a host.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"LastMemberQueryInterval": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "",
+					"description": "In MLDv1, it sets the interval at which a querier sends group-specific queries after receiving a leave message. In MLDv2, it sets the interval at which a querier sends group-and-source-specific queries after receiving a report that changes multicast source and group mappings.",
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"max": 65535
+						}
+					]
+				},
+				"ImmediateLeave": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Enable the device to leave the multicast group immediately after the last host leaves the multicast group",
+					"datatype": "boolean"
+				},
+				"FilterNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "<<numentries>>",
+					"datatype": "unsignedInt"
+				},
+				"InterfaceNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "<<numentries>>",
+					"datatype": "unsignedInt"
+				},
+				"Device.{BBF_VENDOR_PREFIX}MLD.Proxy.{i}.Interface.{i}.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Interfaces associated with proxy",
+					"access": true,
+					"array": true,
+					"Interface": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Identifier of the IP interface in the device. This parameter can be an entry in the table <<object|Device.IP.Interface.<i>.>>.",
+						"datatype": "string",
+						"range": [
+							{
+								"max": 256
+							}
+						]
+					},
+					"Upstream": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "true if interface is upstream, else downstream. usually the lan facing is downstream and wan facing is upstream",
+						"datatype": "boolean"
+					},
+					"SnoopingMode": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "defines how the unknown multicast are treated on the snooped interface. Standard means forward the unknown stream, blocking means block the unknown stream and disabled mean disable snooping",
+						"datatype": "string",
+						"enumerations": [
+							"Standard",
+							"Blocking",
+							"Disabled"
+						]
+					}
+				},
+				"Device.{BBF_VENDOR_PREFIX}MLD.Proxy.{i}.Filter.{i}.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Filter table for multicast proxy",
+					"access": true,
+					"array": true,
+					"Enable": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Enables this filter instance",
+						"datatype": "boolean"
+					},
+					"IPAddress": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Filter out the multicast stream based on IPAddress",
+						"datatype": "IPAddress",
+						"range": [
+							{
+								"max": 45
+							}
+						]
+					}
+				}
+			}
+		}
+	}
+}
+
