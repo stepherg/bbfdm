@@ -260,11 +260,10 @@ static int browseDynamicDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, 
 
 static int browseDynamicDNSClientHostnameInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *hostname = NULL, *added_by_user = NULL;
+	char *hostname = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)prev_data)->config_section, "domain", &hostname);
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)prev_data)->dmmap_section, "added_by_user", &added_by_user);
-	if (DM_STRLEN(hostname) != 0 || DM_STRCMP(added_by_user, "1") == 0) {
+	if (DM_STRLEN(hostname) != 0) {
 		DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, "1");
 	}
 
@@ -293,6 +292,7 @@ static int addObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 	dmuci_set_value_by_section(s, "retry_interval", "60");
 	dmuci_set_value_by_section(s, "retry_unit", "value");
 	dmuci_set_value_by_section(s, "ip_source", "interface");
+	dmuci_set_value_by_section(s, "domain", "yourhost.example.com");
 
 	dmuci_add_section_bbfdm("dmmap_ddns", "service", &dmmap_s);
 	dmuci_set_value_by_section(dmmap_s, "section_name", section_name(s));
@@ -325,30 +325,29 @@ static int delObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 
 static int addObjDynamicDNSClientHostname(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	if (DM_STRCMP(*instance, "1") != 0)
+	char *hostname = NULL;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "domain", &hostname);
+	if (DM_STRLEN(hostname) != 0)
 		return FAULT_9003;
 
-	dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "added_by_user", "1");
+	dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "domain", "yourhost.example.com");
 	return 0;
 }
 
 static int delObjDynamicDNSClientHostname(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *stmp = NULL;
+	struct uci_section *s = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
 			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, "domain", NULL);
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, "added_by_user", NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, "lookup_host", NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_sections_safe("ddns", "service", stmp, s) {
-				struct uci_section *dmmap_section = NULL;
-
-				get_dmmap_section_of_config_section("dmmap_ddns", "service", section_name(s), &dmmap_section);
-				dmuci_delete_by_section(dmmap_section, "added_by_user", NULL);
-
+			uci_foreach_sections("ddns", "service", s) {
 				dmuci_delete_by_section(s, "domain", NULL);
+				dmuci_delete_by_section(s, "lookup_host", NULL);
 			}
 			break;
 	}
@@ -745,7 +744,7 @@ static int get_DynamicDNSClientHostname_Status(char *refparam, struct dmctx *ctx
 /*#Device.DynamicDNS.Client.{i}.Hostname.{i}.Name!UCI:ddns/service,@i-1/domain*/
 static int get_DynamicDNSClientHostname_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "domain", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "lookup_host", value);
 	return 0;
 }
 
@@ -757,8 +756,8 @@ static int set_DynamicDNSClientHostname_Name(char *refparam, struct dmctx *ctx, 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "domain", value);
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "lookup_host", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "domain", value);
 			break;
 	}
 	return 0;
