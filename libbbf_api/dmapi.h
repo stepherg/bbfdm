@@ -60,6 +60,12 @@ do { \
 	DST[SIZE-1] = '\0'; \
 } while(0)
 
+#define DM_ULTOSTR(DST, SRC, SIZE) \
+do { \
+	const int n = snprintf(DST, SIZE, "%lu", SRC); \
+	DST[n] = '\0'; \
+} while(0)
+
 #define DM_STRLEN(SRC) ((SRC != NULL) ? strlen(SRC) : 0)
 #define DM_STRSTR(STR, MATCH) ((STR != NULL && MATCH != NULL) ? strstr(STR, MATCH) : NULL)
 #define DM_STRCHR(STR, CHR) ((STR != NULL) ? strchr(STR, CHR) : NULL)

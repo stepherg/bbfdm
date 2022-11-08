@@ -25,7 +25,7 @@ static void synchronize_qos_classify_net_rules_config(struct list_head *dup_list
 {
 	struct uci_section *s = NULL, *stmp = NULL, *dmmap_sect = NULL;
 	struct uci_section *rule_s = NULL, *classify_s = NULL;
-	char *enable = NULL;
+	char *enable = NULL, *order = NULL;
 	char buf[32] = {0};
 
 	//Browse network rule sections and add class dmmap section, if not present already.
@@ -37,11 +37,14 @@ static void synchronize_qos_classify_net_rules_config(struct list_head *dup_list
 			continue;
 		}
 
+		dmuci_get_value_by_section_string(rule_s, "priority", &order);
+
 		snprintf(buf, sizeof(buf), "classify_%s", section_name(rule_s));
 
 		// This is possible when ip rule is configured via UCI and not via tr181
 		dmuci_add_section("qos", "classify", &s);
 		dmuci_rename_section_by_section(s, buf);
+		dmuci_set_value_by_section(s, "order", order);
 
 		dmuci_add_section_bbfdm("dmmap_qos", "class", &dmmap_sect);
 		dmuci_set_value_by_section_bbfdm(dmmap_sect, "rule", section_name(rule_s));
@@ -66,11 +69,14 @@ static void synchronize_qos_classify_net_rules_config(struct list_head *dup_list
 			continue;
 		}
 
+		dmuci_get_value_by_section_string(classify_s, "order", &order);
+
 		snprintf(buf, sizeof(buf), "rule_%s", section_name(classify_s));
 
 		// This is possible when qos classify is configured via UCI and not via tr181
 		dmuci_add_section("network", "rule", &s);
 		dmuci_rename_section_by_section(s, buf);
+		dmuci_set_value_by_section(s, "priority", order);
 
 		dmuci_add_section_bbfdm("dmmap_qos", "class", &dmmap_sect);
 		dmuci_set_value_by_section_bbfdm(dmmap_sect, "rule", section_name(s));
@@ -97,6 +103,68 @@ static void synchronize_qos_classify_net_rules_config(struct list_head *dup_list
 		if (get_origin_section_from_config("qos", "classify", classify) == NULL &&
 			get_origin_section_from_config("network", "rule", rule) == NULL)
 			dmuci_delete_by_section_bbfdm(s, NULL, NULL);
+	}
+}
+
+static unsigned long qos_get_new_order(void)
+{
+	struct uci_section *s = NULL;
+	char *order = NULL;
+	unsigned long max = 0;
+
+	uci_foreach_sections("qos", "classify", s) {
+		dmuci_get_value_by_section_string(s, "order", &order);
+		unsigned long order_tol = DM_STRTOL(order);
+		if (order_tol > max)
+			max = order_tol;
+	}
+
+	return max + 1;
+}
+
+static bool qos_is_order_exists(const char *order)
+{
+	struct uci_section *s = NULL;
+	char *curr_order = NULL;
+
+	uci_foreach_sections("qos", "classify", s) {
+		dmuci_get_value_by_section_string(s, "order", &curr_order);
+		if (DM_STRCMP(curr_order, order) == 0)
+			return true;
+	}
+
+	return false;
+}
+
+static void qos_update_order(const char *order, bool is_del)
+{
+	struct uci_section *classify_s = NULL;
+	char *curr_order = NULL;
+	unsigned long order_tol = DM_STRTOL(order);
+
+	uci_foreach_sections("qos", "classify", classify_s) {
+		dmuci_get_value_by_section_string(classify_s, "order", &curr_order);
+		unsigned long curr_order_tol = DM_STRTOL(curr_order);
+		if (curr_order_tol >= order_tol) {
+			struct uci_section *dmmap_s = NULL;
+			char new_order[16] = {0};
+
+			unsigned long order_ul = is_del ? curr_order_tol - 1 : curr_order_tol + 1;
+			DM_ULTOSTR(new_order, order_ul, sizeof(new_order));
+
+			dmuci_set_value_by_section(classify_s, "order", new_order);
+
+			get_dmmap_section_of_config_section_eq("dmmap_qos", "class", "classify", section_name(classify_s), &dmmap_s);
+			if (dmmap_s) {
+				char *rule_name_s = NULL;
+
+				dmuci_get_value_by_section_string(dmmap_s, "rule", &rule_name_s);
+				if (rule_name_s) {
+					struct uci_section *rule_s = get_origin_section_from_config("network", "rule", rule_name_s);
+					dmuci_set_value_by_section(rule_s, "priority", new_order);
+				}
+			}
+		}
 	}
 }
 
@@ -219,19 +287,24 @@ static int addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data
 {
 	struct uci_section *rule_s = NULL, *classify_s = NULL, *dmmap_s = NULL;
 	char buf[32] = {0};
+	char order_str[32] = {0};
+
+	unsigned long order_ul = qos_get_new_order();
+	DM_ULTOSTR(order_str, order_ul, sizeof(order_str));
 
 	snprintf(buf, sizeof(buf), "classify_%s", *instance);
 
 	dmuci_add_section("qos", "classify", &classify_s);
 	dmuci_rename_section_by_section(classify_s, buf);
 	dmuci_set_value_by_section(classify_s, "enable", "0");
+	dmuci_set_value_by_section(classify_s, "order", order_str);
 
 	snprintf(buf, sizeof(buf), "rule_%s", *instance);
 
 	dmuci_add_section("network", "rule", &rule_s);
 	dmuci_rename_section_by_section(rule_s, buf);
 	dmuci_set_value_by_section(rule_s, "enable", "0");
-	dmuci_set_value_by_section(rule_s, "priority", *instance);
+	dmuci_set_value_by_section(rule_s, "priority", order_str);
 
 	dmuci_add_section_bbfdm("dmmap_qos", "class", &dmmap_s);
 	dmuci_set_value_by_section(dmmap_s, "classify", section_name(classify_s));
@@ -243,9 +316,13 @@ static int addObjQoSClassification(char *refparam, struct dmctx *ctx, void *data
 static int delObjQoSClassification(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *s = NULL, *stmp = NULL;
+	char *curr_order = NULL;
 
 	switch (del_action) {
 	case DEL_INST:
+		dmuci_get_value_by_section_string(((struct qos_class_args *)data)->classify_s, "order", &curr_order);
+		qos_update_order(curr_order, true);
+
 		dmuci_delete_by_section(((struct qos_class_args *)data)->classify_s, NULL, NULL);
 		dmuci_delete_by_section(((struct qos_class_args *)data)->rule_s, NULL, NULL);
 		dmuci_delete_by_section(((struct qos_class_args *)data)->dmmap_s, NULL, NULL);
@@ -594,18 +671,26 @@ static int set_QoSClassification_Enable(char *refparam, struct dmctx *ctx, void 
 
 static int get_QoSClassification_Order(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct qos_class_args *)data)->rule_s, "priority", value);
+	dmuci_get_value_by_section_string(((struct qos_class_args *)data)->classify_s, "order", value);
 	return 0;
 }
 
 static int set_QoSClassification_Order(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *curr_order = NULL;
+
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			dmuci_get_value_by_section_string(((struct qos_class_args *)data)->classify_s, "order", &curr_order);
+			if (qos_is_order_exists(value)) {
+				qos_update_order(value, false);
+			}
+
+			dmuci_set_value_by_section(((struct qos_class_args *)data)->classify_s, "order", value);
 			dmuci_set_value_by_section(((struct qos_class_args *)data)->rule_s, "priority", value);
 			break;
 	}
