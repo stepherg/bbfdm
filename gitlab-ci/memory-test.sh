@@ -66,6 +66,12 @@ run_valgrind -u get_info Device. 3
 run_valgrind -u get Device.
 run_valgrind -c get Device.
 
+run_valgrind_verbose -u get Device.IP.Interface.*.IPv4Address.
+run_valgrind_verbose -c get Device.IP.Interface.*.IPv6Address.*.IPAddress
+
+run_valgrind_verbose -u get_name Device.IP.Interface.*.IPv4Address. 1
+run_valgrind_verbose -c get_name Device.DeviceInfo.VendorConfigFile.*.Name 0
+
 run_valgrind_redirect -u get Device.
 run_valgrind_redirect -c get Device.
 

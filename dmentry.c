@@ -218,7 +218,7 @@ int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_
 	if (len == 0) {
 		path = "";
 	} else {
-		if (path[strlen(path) - 1] != '.')
+		if (path[len - 1] != '.')
 			return usp_fault_map(USP_FAULT_INVALID_PATH);
 	}
 
@@ -260,8 +260,12 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 
 	if (!inparam) inparam = "";
 	ctx->in_param = inparam;
+	ctx->iswildcard = DM_STRCHR(inparam, '*') ? 1 : 0;
+
 	dmentry_instance_lookup_inparam(ctx);
+
 	ctx->stop = false;
+
 	switch(cmd) {
 		case CMD_GET_VALUE:
 			if (ctx->in_param[0] == '.' && DM_STRLEN(ctx->in_param) == 1)

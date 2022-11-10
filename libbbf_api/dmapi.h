@@ -184,6 +184,7 @@ struct dmctx
 	struct list_head list_json_parameter;
 	DMOBJ *dm_entryobj;
 	bool nextlevel;
+	bool iswildcard;
 	int faultcode;
 	int setaction;
 	char *in_param;
