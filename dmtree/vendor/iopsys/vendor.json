@@ -9,61 +9,49 @@
 		"description": "The top-level object for a Device.",
 		"access": false,
 		"array": false,
-		"Device.Services.VoiceService.{i}.": {
+		"Device.Services.": {
 			"type": "object",
 			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"description": "The top-level object for VoIP CPE. At most one entry in this table can exist with a given value for Alias.",
-			"access": true,
-			"array": true,
-			"Device.Services.VoiceService.{i}.CallLog.{i}.": {
+			"description": "This object contains general services information.",
+			"access": false,
+			"array": false,
+			"Device.Services.VoiceService.{i}.": {
 				"type": "object",
 				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
 				],
-				"description": "Contains a list of calls log.An entry is created each time a call is terminated.",
-				"access": false,
+				"description": "The top-level object for VoIP CPE. At most one entry in this table can exist with a given value for Alias.",
+				"access": true,
 				"array": true,
-				"{BBF_VENDOR_PREFIX}SIPIPAddress": {
-					"type": "string",
-					"read": true,
-					"write": false,
-					"version": "2.5",
-					"protocols": [
-						"cwmp",
-						"usp"
-					],
-					"description": "URI that addresses a specific extension on a voice over IP system.",
-					"datatype": "string"
-				},
-				"{BBF_VENDOR_PREFIX}SIPResponseCode": {
-					"type": "unsignedInt",
-					"read": true,
-					"write": false,
-					"version": "2.5",
-					"protocols": [
-						"cwmp",
-						"usp"
-					],
-					"description": "SIP response code is three-digit integer code which gives status of the request.",
-					"datatype": "unsignedInt"
-				},
-				"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.RTP.": {
+				"Device.Services.VoiceService.{i}.CallLog.{i}.": {
 					"type": "object",
 					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
 					],
-					"description": "The RTP part of the source session information.",
+					"description": "Contains a list of calls log.An entry is created each time a call is terminated.",
 					"access": false,
-					"array": false,
-					"{BBF_VENDOR_PREFIX}BurstDensity": {
+					"array": true,
+					"{BBF_VENDOR_PREFIX}SIPIPAddress": {
+						"type": "string",
+						"read": true,
+						"write": false,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "URI that addresses a specific extension on a voice over IP system.",
+						"datatype": "string"
+					},
+					"{BBF_VENDOR_PREFIX}SIPResponseCode": {
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
@@ -72,398 +60,498 @@
 							"cwmp",
 							"usp"
 						],
-						"description": "The fraction of RTP data packets within burst periods since the beginning of reception that were either lost or discarded.",
+						"description": "SIP response code is three-digit integer code which gives status of the request.",
 						"datatype": "unsignedInt"
 					},
-					"{BBF_VENDOR_PREFIX}BurstDuration": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
+					"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.": {
+						"type": "object",
 						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
 						],
-						"description": "The mean duration, expressed in milliseconds, of the burst periods that have occurred since the beginning of reception.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}GapDensity": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "The fraction of RTP data packets within inter-burst gaps since the beginning of reception that were either lost or discarded.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}GapDuration": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "The mean duration, expressed in milliseconds, of the gap periods that have occurred since the beginning of reception.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}JBAvgDelay": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "Average jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}JBMaxDelay": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "Maximum jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}JBNomDelay": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "Nominal jitter buffer delay in milliseconds, which corresponds to the nominal jitter buffer delay for packets that arrive exactly on time.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}PeakJitter": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "Peak jitter / holding time (in milliseconds).",
-						"datatype": "unsignedInt"
+						"description": "Session information within one call. At most one entry in this table can exist with a given value for <<param|SessionID>>.",
+						"access": false,
+						"array": true,
+						"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.": {
+							"type": "object",
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "The destination part of session information within one call.",
+							"access": false,
+							"array": false,
+							"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.RTP.": {
+								"type": "object",
+								"version": "2.5",
+								"protocols": [
+									"cwmp",
+									"usp"
+								],
+								"access": false,
+								"array": false,
+								"description": "The RTP part of the destination session information.",
+								"{BBF_VENDOR_PREFIX}BurstDensity": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "The fraction of RTP data packets within burst periods since the beginning of reception that were either lost or discarded.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}BurstDuration": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "The mean duration, expressed in milliseconds, of the burst periods that have occurred since the beginning of reception.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}GapDensity": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "The fraction of RTP data packets within inter-burst gaps since the beginning of reception that were either lost or discarded.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}GapDuration": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "The mean duration, expressed in milliseconds, of the gap periods that have occurred since the beginning of reception.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}JBAvgDelay": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "Average jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}JBMaxDelay": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "Maximum jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}JBNomDelay": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "Nominal jitter buffer delay in milliseconds, which corresponds to the nominal jitter buffer delay for packets that arrive exactly on time.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}PeakJitter": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "Peak jitter / holding time (in milliseconds).",
+									"datatype": "unsignedInt"
+								}
+							}
+						},
+						"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.": {
+							"type": "object",
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "The source of the session information within one call.",
+							"access": false,
+							"array": false,
+							"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.RTP.": {
+								"type": "object",
+								"version": "2.5",
+								"protocols": [
+									"cwmp",
+									"usp"
+								],
+								"description": "The RTP part of the source session information.",
+								"access": false,
+								"array": false,
+								"{BBF_VENDOR_PREFIX}BurstDensity": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "The fraction of RTP data packets within burst periods since the beginning of reception that were either lost or discarded.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}BurstDuration": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "The mean duration, expressed in milliseconds, of the burst periods that have occurred since the beginning of reception.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}GapDensity": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "The fraction of RTP data packets within inter-burst gaps since the beginning of reception that were either lost or discarded.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}GapDuration": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "The mean duration, expressed in milliseconds, of the gap periods that have occurred since the beginning of reception.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}JBAvgDelay": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "Average jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}JBMaxDelay": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "Maximum jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}JBNomDelay": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "Nominal jitter buffer delay in milliseconds, which corresponds to the nominal jitter buffer delay for packets that arrive exactly on time.",
+									"datatype": "unsignedInt"
+								},
+								"{BBF_VENDOR_PREFIX}PeakJitter": {
+									"type": "unsignedInt",
+									"read": true,
+									"write": false,
+									"version": "2.5",
+									"protocols": [
+										"cwmp",
+										"usp"
+									],
+									"description": "Peak jitter / holding time (in milliseconds).",
+									"datatype": "unsignedInt"
+								}
+							}
+						}
 					}
 				},
-				"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.RTP.": {
+				"Device.Services.VoiceService.{i}.CallControl.": {
 					"type": "object",
 					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
 					],
+					"description": "Call control and call routing parameters. This object is a control plane application for the VoiceService that provides numbers or names based routing, local PBX functionalities and advanced telephony features. It is mutually exclusive with the <<object|.Interwork>> table which is used in case of switching capabilities.",
 					"access": false,
 					"array": false,
-					"description": "The RTP part of the destination session information.",
-					"{BBF_VENDOR_PREFIX}BurstDensity": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
+					"Device.Services.VoiceService.{i}.CallControl.Extension.{i}.": {
+						"type": "object",
 						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
 						],
-						"description": "The fraction of RTP data packets within burst periods since the beginning of reception that were either lost or discarded.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}BurstDuration": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "The mean duration, expressed in milliseconds, of the burst periods that have occurred since the beginning of reception.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}GapDensity": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "The fraction of RTP data packets within inter-burst gaps since the beginning of reception that were either lost or discarded.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}GapDuration": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "The mean duration, expressed in milliseconds, of the gap periods that have occurred since the beginning of reception.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}JBAvgDelay": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "Average jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}JBMaxDelay": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "Maximum jitter buffer delay in milliseconds which corresponds to the earliest arriving packet that would not be discarded.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}JBNomDelay": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "Nominal jitter buffer delay in milliseconds, which corresponds to the nominal jitter buffer delay for packets that arrive exactly on time.",
-						"datatype": "unsignedInt"
-					},
-					"{BBF_VENDOR_PREFIX}PeakJitter": {
-						"type": "unsignedInt",
-						"read": true,
-						"write": false,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "Peak jitter / holding time (in milliseconds).",
-						"datatype": "unsignedInt"
+						"description": "Extension table containing the local numbers and names.",
+						"access": true,
+						"array": true,
+						"{BBF_VENDOR_PREFIX}ComfortNoise": {
+							"type": "boolean",
+							"read": true,
+							"write": true,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Comfort Noise is enabled/disabled.",
+							"datatype": "boolean"
+						},
+						"{BBF_VENDOR_PREFIX}TXGain": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Control the audio transmitted to the extension.The numbers represent db (decibels).",
+							"datatype": "string",
+							"range": [
+								{
+									"max": 32
+								}
+							]
+						},
+						"{BBF_VENDOR_PREFIX}RXGain": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Control the audio received at the extension .The numbers represent db (decibels).",
+							"datatype": "string",
+							"range": [
+								{
+									"max": 32
+								}
+							]
+						},
+						"{BBF_VENDOR_PREFIX}EchoCancel": {
+							"type": "boolean",
+							"read": true,
+							"write": true,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Enable or disable echo cancellation for this extension.",
+							"datatype": "boolean"
+						},
+						"{BBF_VENDOR_PREFIX}Type": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Specfies the type of the extension fxs/dect.",
+							"datatype": "string",
+							"range": [
+								{
+									"max": 32
+								}
+							]
+						}
 					}
-				}
-			},
-			"Device.Services.VoiceService.{i}.CallControl.Extension.{i}.": {
-				"type": "object",
-				"version": "2.5",
-				"protocols": [
-					"cwmp",
-					"usp"
-				],
-				"description": "Extension table containing the local numbers and names.",
-				"access": true,
-				"array": true,
-				"{BBF_VENDOR_PREFIX}ComfortNoise": {
-					"type": "boolean",
-					"read": true,
-					"write": true,
-					"version": "2.5",
-					"protocols": [
-						"cwmp",
-						"usp"
-					],
-					"description": "Comfort Noise is enabled/disabled.",
-					"datatype": "boolean"
 				},
-				"{BBF_VENDOR_PREFIX}TXGain": {
-					"type": "string",
-					"read": true,
-					"write": true,
+				"Device.Services.VoiceService.{i}.DECT.": {
+					"type": "object",
 					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
 					],
-					"description": "Control the audio transmitted to the extension.The numbers represent db (decibels).",
-					"datatype": "string",
-					"range": [
-						{
-							"max": 32
+					"description": "DECT portable table.",
+					"access": false,
+					"array": false,
+					"Device.Services.VoiceService.{i}.DECT.Portable.{i}.": {
+						"type": "object",
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "DECT portable table.",
+						"access": true,
+						"array": true,
+						"{BBF_VENDOR_PREFIX}Name": {
+							"type": "string",
+							"read": true,
+							"write": true,
+							"version": "2.5",
+							"protocols": [
+								"cwmp",
+								"usp"
+							],
+							"description": "Indicates the name of this DECT portable.",
+							"datatype": "string"
 						}
-					]
-				},
-				"{BBF_VENDOR_PREFIX}RXGain": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.5",
-					"protocols": [
-						"cwmp",
-						"usp"
-					],
-					"description": "Control the audio received at the extension .The numbers represent db (decibels).",
-					"datatype": "string",
-					"range": [
-						{
-							"max": 32
-						}
-					]
-				},
-				"{BBF_VENDOR_PREFIX}EchoCancel": {
-					"type": "boolean",
-					"read": true,
-					"write": true,
-					"version": "2.5",
-					"protocols": [
-						"cwmp",
-						"usp"
-					],
-					"description": "Enable or disable echo cancellation for this extension.",
-					"datatype": "boolean"
-				},
-				"{BBF_VENDOR_PREFIX}Type": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.5",
-					"protocols": [
-						"cwmp",
-						"usp"
-					],
-					"description": "Specfies the type of the extension fxs/dect.",
-					"datatype": "string",
-					"range": [
-						{
-							"max": 32
-						}
-					]
-				}
-			},
-			"Device.Services.VoiceService.{i}.DECT.Portable.{i}.": {
-				"type": "object",
-				"version": "2.5",
-				"protocols": [
-					"cwmp",
-					"usp"
-				],
-				"description": "DECT portable table.",
-				"access": true,
-				"array": true,
-				"{BBF_VENDOR_PREFIX}Name": {
-					"type": "string",
-					"read": true,
-					"write": true,
-					"version": "2.5",
-					"protocols": [
-						"cwmp",
-						"usp"
-					],
-					"description": "Indicates the name of this DECT portable.",
-					"datatype": "string"
+					}
 				}
 			}
 		},
-		"Device.Bridging.Bridge.{i}.Port.{i}.": {
+		"Device.Bridging.": {
 			"type": "object",
 			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"description": "Bridge Port table, which MUST contain an entry for each bridge port (a stackable interface object as described in <<bibref|TR-181i2|Section 4.2>>). There are two types of bridge ports: management (upward facing) and non-management (downward facing). This is determined by configuring the Boolean <<param|ManagementPort>> parameter. The CPE will automatically configure each management bridge port to appear in the interface stack above all non-management bridge ports that share the same <<object|##.Bridge>> instance.",
-			"access": true,
-			"array": true,
-			"{BBF_VENDOR_PREFIX}EgressPriorityRegeneration": {
-				"type": "string",
-				"read": true,
-				"write": true,
+			"description": "Layer 2 bridging configuration. Specifies bridges between different layer 2 interfaces. Bridges can be defined to include layer 2 filter criteria to selectively bridge traffic between interfaces. This object can be used to configure both 802.1D <<bibref|802.1D-2004>> and 802.1Q <<bibref|802.1Q-2011>> bridges. Not all 802.1D and 802.1Q features are modeled, and some additional features not present in either 802.1D or 802.1Q are modeled. 802.1Q <<bibref|802.1Q-2011>> bridges incorporate 802.1Q <<bibref|802.1Q-2005>> customer and 802.1ad <<bibref|802.1ad-2005>> provider bridges.",
+			"access": false,
+			"array": false,
+			"Device.Bridging.Bridge.{i}.": {
+				"type": "object",
 				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
 				],
-				"description": "Rewriting priority on egress, to map the pbit value of incoming packet to another value and emit it with that",
-				"list": {
-					"datatype": "unsignedInt",
-					"item": {
-						"min": 8,
-						"max": 8
-					},
-					"range": [
-						{
-							"min": 0,
-							"max": 7
+				"description": "Bridge table.",
+				"access": true,
+				"array": true,
+				"Device.Bridging.Bridge.{i}.Port.{i}.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Bridge Port table, which MUST contain an entry for each bridge port (a stackable interface object as described in <<bibref|TR-181i2|Section 4.2>>). There are two types of bridge ports: management (upward facing) and non-management (downward facing). This is determined by configuring the Boolean <<param|ManagementPort>> parameter. The CPE will automatically configure each management bridge port to appear in the interface stack above all non-management bridge ports that share the same <<object|##.Bridge>> instance.",
+					"access": true,
+					"array": true,
+					"{BBF_VENDOR_PREFIX}EgressPriorityRegeneration": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Rewriting priority on egress, to map the pbit value of incoming packet to another value and emit it with that",
+						"list": {
+							"datatype": "unsignedInt",
+							"item": {
+								"min": 8,
+								"max": 8
+							},
+							"range": [
+								{
+									"min": 0,
+									"max": 7
+								}
+							]
 						}
-					]
-				}
-			},
-			"{BBF_VENDOR_PREFIX}DSCPEthernetPriorityMapping": {
-				"type": "string",
-				"read": true,
-				"write": true,
-				"version": "2.5",
-				"protocols": [
-					"cwmp",
-					"usp"
-				],
-				"description": "DSCP to pbit mapping, to map pbit to untagged vlan packet created at the cpe",
-				"list": {
-					"datatype": "unsignedInt",
-					"item": {
-						"min": 1,
-						"max": 64
 					},
-					"range": [
-						{
-							"min": 0,
-							"max": 7
+					"{BBF_VENDOR_PREFIX}DSCPEthernetPriorityMapping": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "DSCP to pbit mapping, to map pbit to untagged vlan packet created at the cpe",
+						"list": {
+							"datatype": "unsignedInt",
+							"item": {
+								"min": 1,
+								"max": 64
+							},
+							"range": [
+								{
+									"min": 0,
+									"max": 7
+								}
+							]
 						}
-					]
-				}
-			}
-		},
-		"Device.Bridging.Bridge.{i}.VLAN.{i}.": {
-			"type": "object",
-			"version": "2.5",
-			"protocols": [
-				"cwmp",
-				"usp"
-			],
-			"description": "Bridge VLAN table. If this table is supported, if MUST contain an entry for each VLAN known to the Bridge. This table only applies to an 802.1Q <<bibref|802.1Q-2011>> Bridge.",
-			"access": true,
-			"array": true,
-			"{BBF_VENDOR_PREFIX}TVID": {
-				"type": "int",
-				"read": true,
-				"write": true,
-				"version": "2.5",
-				"protocols": [
-					"cwmp",
-					"usp"
-				],
-				"description": "Translate vlan from lan network with new VLAN ID",
-				"datatype": "int",
-				"range" : [
-					{
-						"min": 0,
-						"max": 4094
 					}
-				]
+				},
+				"Device.Bridging.Bridge.{i}.VLAN.{i}.": {
+					"type": "object",
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Bridge VLAN table. If this table is supported, if MUST contain an entry for each VLAN known to the Bridge. This table only applies to an 802.1Q <<bibref|802.1Q-2011>> Bridge.",
+					"access": true,
+					"array": true,
+					"{BBF_VENDOR_PREFIX}TVID": {
+						"type": "int",
+						"read": true,
+						"write": true,
+						"version": "2.5",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Translate vlan from lan network with new VLAN ID",
+						"datatype": "int",
+						"range" : [
+							{
+								"min": 0,
+								"max": 4094
+							}
+						]
+					}
+				}
 			}
 		},
 		"Device.DeviceInfo.": {
@@ -498,27 +586,38 @@
 				]
 			}
 		},
-		"Device.Ethernet.VLANTermination.{i}.": {
+		"Device.Ethernet.": {
 			"type": "object",
 			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
 			],
-			"description": "VLAN Termination table (a stackable interface object as described in <<bibref|TR-181i2|Section 4.2>>). A VLAN Termination entry is typically stacked on top of a <<object|#.Link>> object to receive and send frames with the configured <<param|VLANID>>.",
-			"access": true,
-			"array": true,
-			"{BBF_VENDOR_PREFIX}MACVLAN": {
-				"type": "boolean",
-				"read": true,
-				"write": true,
+			"description": "Ethernet object. This object models several Ethernet interface objects, each representing a different stack layer, including: <<object|Interface>>, <<object|Link>>, and <<object|VLANTermination>>. <<object|Interface>> is media-specific and models a port, the PHY layer, and the Channel Access Method (CAM) part of the MAC layer. <<object|Link>> is media-independent and models the Logical Link Control (LLC) layer. An outer <<object|VLANTermination>>, when present, is expected to be stacked on top of <<object|Link>> objects to receive and send frames with a configured VLANID.",
+			"access": false,
+			"array": false,
+			"Device.Ethernet.VLANTermination.{i}.": {
+				"type": "object",
 				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
 				],
-				"description": "Specifies if the object is macvlan or not",
-				"datatype": "boolean"
+				"description": "VLAN Termination table (a stackable interface object as described in <<bibref|TR-181i2|Section 4.2>>). A VLAN Termination entry is typically stacked on top of a <<object|#.Link>> object to receive and send frames with the configured <<param|VLANID>>.",
+				"access": true,
+				"array": true,
+				"{BBF_VENDOR_PREFIX}MACVLAN": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.5",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Specifies if the object is macvlan or not",
+					"datatype": "boolean"
+				}
 			}
 		},
 		"Device.Time.": {
@@ -1526,7 +1625,6 @@
 						"cwmp",
 						"usp"
 					],
-					"description": "",
 					"description": "In MLDv1, it sets the interval at which a querier sends group-specific queries after receiving a leave message. In MLDv2, it sets the interval at which a querier sends group-and-source-specific queries after receiving a report that changes multicast source and group mappings.",
 					"datatype": "unsignedInt",
 					"range": [
