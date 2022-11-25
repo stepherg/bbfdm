@@ -142,6 +142,23 @@ static void get_option125_suboption(char *data, int option, char *dst, int dst_l
 	}
 }
 
+static bool is_active_host(const char *mac, json_object *res)
+{
+	json_object *host_obj = NULL, *arrobj = NULL;
+	int i = 0;
+	bool active = false;
+
+	dmjson_foreach_obj_in_array(res, arrobj, host_obj, i, 1, "hosts") {
+		if (strcmp(dmjson_get_value(host_obj, 1, "macaddr"), mac) == 0) {
+			char *val = dmjson_get_value(host_obj, 1, "active");
+			string_to_bool(val, &active);
+			break;
+		}
+	}
+
+	return active;
+}
+
 static int browseManageableDevice(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	FILE *f = fopen(DHCP_CLIENT_OPTIONS_FILE, "r");
@@ -153,7 +170,10 @@ static int browseManageableDevice(struct dmctx *dmctx, DMNODE *parent_node, void
 	char line[2048];
 	char *inst = NULL;
 	int id = 0;
+	json_object *res = NULL;
 	LIST_HEAD(dev_list);
+
+	dmubus_call("topology", "hosts", UBUS_ARGS{0}, 0, &res);
 
 	while (fgets(line, sizeof(line), f) != NULL) {
 		remove_new_line(line);
@@ -168,6 +188,10 @@ static int browseManageableDevice(struct dmctx *dmctx, DMNODE *parent_node, void
 		char *linker = NULL;
 		adm_entry_get_linker_param(dmctx, "Device.Hosts.Host.", device.mac, &linker);
 		if (DM_STRLEN(linker) == 0)
+			continue;
+
+		/* check that the host is still active or not */
+		if (!is_active_host(device.mac, res))
 			continue;
 
 		strncpy(device.host, linker, 1024);
