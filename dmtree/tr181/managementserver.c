@@ -41,6 +41,12 @@ struct manageable_device_args {
 	char host[1025];
 };
 
+struct manageable_device_node
+{
+	struct list_head list;
+	struct manageable_device_args dev;
+};
+
 static struct uci_section* get_autonomous_notify_section(char *sec_name)
 {
 	struct uci_section *s = NULL;
@@ -143,9 +149,11 @@ static int browseManageableDevice(struct dmctx *dmctx, DMNODE *parent_node, void
 		return 0;
 
 	struct manageable_device_args device;
+	struct manageable_device_node *dev_p = NULL;
 	char line[2048];
 	char *inst = NULL;
 	int id = 0;
+	LIST_HEAD(dev_list);
 
 	while (fgets(line, sizeof(line), f) != NULL) {
 		remove_new_line(line);
@@ -170,11 +178,43 @@ static int browseManageableDevice(struct dmctx *dmctx, DMNODE *parent_node, void
 		if (DM_STRCMP(device.oui, "-") == 0 || DM_STRCMP(device.serial, "-") == 0)
 			continue;
 
+		/* check if already added in the list */
+		bool found = false;
+		list_for_each_entry(dev_p, &dev_list, list) {
+			if (strcmp(dev_p->dev.oui, device.oui) == 0 && strcmp(dev_p->dev.serial, device.serial) == 0 &&
+			    strcmp(dev_p->dev.class, device.class) == 0) {
+				found = true;
+				break;
+			}
+		}
+
+		if (found == true)
+			continue;
+
+		/* add device in device list */
+		struct manageable_device_node *node = dmcalloc(1, sizeof(struct manageable_device_node));
+		if (node == NULL)
+			continue;
+
+		list_add_tail(&node->list, &dev_list);
+		snprintf(node->dev.class, sizeof(node->dev.class), "%s", device.class);
+		snprintf(node->dev.serial, sizeof(node->dev.serial), "%s", device.serial);
+		snprintf(node->dev.oui, sizeof(node->dev.oui), "%s", device.oui);
+
+		/* add device instance */
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&device, inst) == DM_STOP)
 			break;
 	}
+
+	/* free device list */
+	dev_p = NULL;
+	while (dev_list.next != &dev_list) {
+		dev_p = list_entry(dev_list.next, struct manageable_device_node, list);
+		list_del(&dev_p->list);
+	}
+
 	fclose(f);
 	return 0;
 
