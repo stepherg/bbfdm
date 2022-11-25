@@ -209,7 +209,6 @@ download_launch() {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.PeriodOfFullLoading="${period_time}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.TCPOpenRequestTime="${TCPOpenRequestTime}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.download.TCPOpenResponseTime="${TCPOpenResponseTime}"
-		perconnection=$($UCI_GET_BBF_DMMAP dmmap_diagnostics.download.EnablePerConnection)
 		if [ "$enable_per_con" = "true" ] || [ "$enable_per_con" = "1" ]; then
 			$UCI_ADD_BBF_DMMAP dmmap_diagnostics DownloadPerConnection
 			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@DownloadPerConnection[0].ROMTime="${ROMTime}"

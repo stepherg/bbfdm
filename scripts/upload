@@ -216,7 +216,6 @@ upload_launch() {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.PeriodOfFullLoading="${period_time}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.TCPOpenRequestTime="${TCPOpenRequestTime}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.TCPOpenResponseTime="${TCPOpenResponseTime}"
-		perconnection=$($UCI_GET_BBF_DMMAP dmmap_diagnostics.upload.EnablePerConnection)
 		if [ "$enable_per_con" = "true" ] || [ "$enable_per_con" = "1" ]; then
 			$UCI_ADD_BBF_DMMAP dmmap_diagnostics UploadPerConnection
 			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@UploadPerConnection[0].ROMTime="${ROMTime}"
