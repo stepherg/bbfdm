@@ -120,5 +120,6 @@ extern DMLEAF tWiFiDataElementsDisassociationEventDisassociationEventDataParams[
 extern DMOBJ tWiFiDataElementsFailedConnectionEventObj[];
 extern DMLEAF tWiFiDataElementsFailedConnectionEventParams[];
 extern DMLEAF tWiFiDataElementsFailedConnectionEventFailedConnectionEventDataParams[];
+extern DMLEAF tWiFiEndPointStatsParams[];
 
 #endif
