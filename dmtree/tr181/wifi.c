@@ -2569,19 +2569,17 @@ static int get_WiFiEndPointStats_SignalStrength(char *refparam, struct dmctx *ct
 	return 0;
 }
 
-/*
 static int get_WiFiEndPointStats_Retransmissions(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL;
 	char object[32];
 
-	snprintf(object, sizeof(object), "wifi.backhaul.%s", ifname);
+	snprintf(object, sizeof(object), "wifi.backhaul.%s", ((struct wifi_enp_args *)data)->ifname);
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
-	*value = dmjson_get_value(res, 1, "airtime");
+	*value = dmjson_get_value(res, 2, "stats", "tx_pkts_retries");
 	return 0;
 }
-*/
 
 static int get_WiFiEndPointSecurity_ModesSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -6652,7 +6650,7 @@ DMLEAF tWiFiEndPointStatsParams[] = {
 {"LastDataDownlinkRate", &DMREAD, DMT_UNINT, get_WiFiEndPointStats_LastDataDownlinkRate, NULL, BBFDM_BOTH, "2.0"},
 {"LastDataUplinkRate", &DMREAD, DMT_UNINT, get_WiFiEndPointStats_LastDataUplinkRate, NULL, BBFDM_BOTH, "2.0"},
 {"SignalStrength", &DMREAD, DMT_INT, get_WiFiEndPointStats_SignalStrength, NULL, BBFDM_BOTH, "2.0"},
-//{"Retransmissions", &DMREAD, DMT_UNINT, get_WiFiEndPointStats_Retransmissions, NULL, BBFDM_BOTH, "2.0"},
+{"Retransmissions", &DMREAD, DMT_UNINT, get_WiFiEndPointStats_Retransmissions, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
