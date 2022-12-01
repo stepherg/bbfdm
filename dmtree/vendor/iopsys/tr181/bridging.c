@@ -20,12 +20,18 @@ static int get_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, st
 
 static int set_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *type = NULL;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_unsignedInt_list(value, 8, 8, -1, RANGE_ARGS{{"0","7"}}, 1))
 				return FAULT_9007;
-			return 0;
 
+			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "type", &type);
+			if (DM_STRLEN(type) == 0)
+				return FAULT_9007;
+
+			return 0;
 		case VALUESET:
 			bridging_set_priority_list("egress_qos_mapping", data, value);
 			return 0;
@@ -41,12 +47,18 @@ static int get_BridgingBridgePort_DSCP_Eth_Priority_Map(char *refparam, struct d
 
 static int set_BridgingBridgePort_DSCP_Eth_Priority_Map(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *type = NULL;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_unsignedInt_list(value, 1, 64, -1, RANGE_ARGS{{"0","7"}}, 1))
 				return FAULT_9007;
-			return 0;
 
+			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "type", &type);
+			if (DM_STRLEN(type) == 0)
+				return FAULT_9007;
+
+			return 0;
 		case VALUESET:
 			bridging_set_priority_list("dscp2pbit", data, value);
 			return 0;
