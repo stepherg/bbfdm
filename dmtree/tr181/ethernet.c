@@ -1486,26 +1486,36 @@ static int get_EthernetVLANTermination_LastChange(char *refparam, struct dmctx *
 
 static int get_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *name, *type, *ifname;
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", value);
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &name);
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", &type);
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
+	if (DM_STRLEN(*value) == 0) {
+		char *name = NULL, *type = NULL, *ifname = NULL;
 
-	if (DM_LSTRNCMP(type, "8021ad", 6) == 0) {
-		// 8021ad device, will have a vlan termination object as its lowerlayer
+		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &name);
+		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", &type);
+		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
 
-		char *inner_vid, *dev_name;
+		if (DM_LSTRNCMP(type, "8021ad", 6) == 0) {
+			// 8021ad device, will have a vlan termination object as its lowerlayer
 
-		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "inner_vid", &inner_vid);
-		if (*ifname == '\0' || *inner_vid == '\0')
-			return -1;
-		dmasprintf(&dev_name, "%s.%s", ifname, inner_vid);
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", dev_name, value);
+			char *inner_vid, *dev_name;
+
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "inner_vid", &inner_vid);
+			if (*ifname == '\0' || *inner_vid == '\0')
+				return -1;
+			dmasprintf(&dev_name, "%s.%s", ifname, inner_vid);
+			adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", dev_name, value);
+		} else {
+			adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", name, value);
+			if (!(*value) || (*value)[0] == 0)
+				adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", ifname, value);
+		}
 	} else {
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", name, value);
-		if (!(*value) || (*value)[0] == 0)
-			adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", ifname, value);
+		char *linker = NULL;
+
+		adm_entry_get_linker_value(ctx, *value, &linker);
+		if (!linker || *linker == 0)
+			*value = "";
 	}
 
 	return 0;
@@ -1532,6 +1542,9 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 			break;
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &vlan_linker);
+
+			// Store LowerLayers value under dmmap section
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", value);
 
 			if (!vlan_linker || vlan_linker[0] == 0) {
 				// Set ifname and name options of device section to empty value
