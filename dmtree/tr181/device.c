@@ -28,7 +28,6 @@
 #include "routing.h"
 #include "firewall.h"
 #include "dns.h"
-#include "users.h"
 #include "dsl.h"
 #include "fast.h"
 #include "dhcpv6.h"
@@ -108,7 +107,6 @@ DMOBJ tDeviceObj[] = {
 {"Routing", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tRoutingObj, tRoutingParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"Firewall", &DMREAD, NULL, NULL, "file:/etc/config/firewall", NULL, NULL, NULL, tFirewallObj, tFirewallParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"DNS", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tDNSObj, tDNSParams, NULL, BBFDM_BOTH, NULL, "2.0"},
-{"Users", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, tUsersObj, tUsersParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"IEEE1905", &DMREAD, NULL, NULL, "file:/etc/config/ieee1905", NULL, NULL, NULL, tIEEE1905Obj, tIEEE1905Params, NULL, BBFDM_BOTH, NULL, "2.9"},
 {"InterfaceStack", &DMREAD, NULL, NULL, "file:/etc/config/network", browseInterfaceStackInst, NULL, NULL, NULL, tInterfaceStackParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"USB", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUSBObj, tUSBParams, NULL, BBFDM_BOTH, NULL, "2.0"},

@@ -1042,6 +1042,16 @@ static void test_api_bbfdm_add_del_standard_object(void **state)
 	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Users.User.2.", "test_key", NULL);
 	assert_int_equal(fault, 0);
 
+	// delete the section from uci based on 'deleted' option since uci section is deleted from init script
+	struct uci_section *s = NULL, *stmp = NULL;
+	uci_foreach_sections_safe("users", "user", stmp, s) {
+		char *deleted = NULL;
+		dmuci_get_value_by_section_string(s, "deleted", &deleted);
+		if (deleted != NULL && strcmp(deleted, "1") == 0)
+			dmuci_delete_by_section(s, NULL, NULL);
+	}
+	dmuci_commit_package("users");
+
 	// Get name object after deleting instance 2 ==> expected "9005" error
 	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.Users.User.2.", "1", NULL);
 	assert_int_equal(fault, FAULT_9005);
@@ -1049,6 +1059,16 @@ static void test_api_bbfdm_add_del_standard_object(void **state)
 	// delete all object ==> expected "0" error
 	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Users.User.", "test_key", NULL);
 	assert_int_equal(fault, 0);
+
+	// delete the section from uci based on 'deleted' option since uci section is deleted from init script
+	s = NULL, stmp = NULL;
+	uci_foreach_sections_safe("users", "user", stmp, s) {
+		char *deleted = NULL;
+		dmuci_get_value_by_section_string(s, "deleted", &deleted);
+		if (deleted != NULL && strcmp(deleted, "1") == 0)
+			dmuci_delete_by_section(s, NULL, NULL);
+	}
+	dmuci_commit_package("users");
 
 	// Get name object after deleting all instances ==> expected "9005" error
 	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.Users.User.1.", "1", NULL);

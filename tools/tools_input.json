@@ -79,6 +79,14 @@
       "dm_files": [
         "src/datamodel.c"
       ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/iopsys/usermngr.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/users.c"
+      ]
     }
   ],
   "output": {

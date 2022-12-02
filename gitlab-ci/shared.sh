@@ -64,6 +64,20 @@ function generate_release()
 	cd ..
 }
 
+function install_libusermngr()
+{
+	# clone and compile libusermngr
+	rm -rf /opt/dev/usermngr
+	exec_cmd git clone -b devel https://dev.iopsys.eu/iopsys/usermngr.git /opt/dev/usermngr
+
+	echo "Compiling libusermngr"
+	make clean -C /opt/dev/usermngr/src/
+	make -C /opt/dev/usermngr/src/
+
+	echo "installing libusermngr"
+	cp -f /opt/dev/usermngr/src/libusermngr.so /usr/lib/bbfdm
+}
+
 function install_libbbf()
 {
 	COV_CFLAGS='-fprofile-arcs -ftest-coverage'
@@ -85,6 +99,9 @@ function install_libbbf()
 	exec_cmd_verbose make install
 	ln -sf /usr/share/bbfdm/bbf.diag /usr/libexec/rpcd/bbf.diag
 	cd ..
+
+	echo "installing libusermngr"
+	install_libusermngr
 }
 
 function install_libbbf_test()
