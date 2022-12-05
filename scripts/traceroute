@@ -54,7 +54,6 @@ traceroute_launch() {
 
 	# Assign default value
 	[ -z "${cnt}" ] && cnt=1
-	[ -z "${dsize}" ] && dsize=64
 	[ -z "${maxhop}" ] && maxhop=30
 	[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.device) && device="-i $device" || device=""
 	ip_addr_used=$(get_ip_addr_used "${ip_proto}" "${iface}")
