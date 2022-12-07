@@ -7,13 +7,11 @@ case "$1" in
 	list)
 		echo '{ "ipping" : { "host": "str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "data_size": "str", "dscp": "str", "proto": "str" },
 				"nslookup" : { "host": "str", "dns_serevr": "str", "iface": "str", "nbr_of_rep": "str", "timeout": "str", "proto": "str" },
-				"traceroute" : { "host": "str", "iface": "str", "ip_proto": "str", "nbr_of_tries": "str", "timeout": "str", "data_size": "str", "dscp": "str", "max_hop_cnt":"str", "proto": "str" },
 				"udpecho" : { "host": "str", "port":"str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "data_size": "str", "dscp": "str", "inter_trans_time":"str", "proto": "str" },
 				"serverselection" : { "hostlist": "str", "port":"str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "protocol_used": "str", "proto": "str" },
 			  }'
 	;;
 	call)
-
 		# read the arguments
 		read -r input
 		case "$2" in
@@ -22,9 +20,6 @@ case "$1" in
 			;;
 			nslookup)
 				sh ${BBF_SCRIPTS}/nslookup "${input}"
-			;;
-			traceroute)
-				sh ${BBF_SCRIPTS}/traceroute "${input}"
 			;;
 			udpecho)
 				sh ${BBF_SCRIPTS}/udpecho "${input}"

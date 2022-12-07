@@ -13,6 +13,7 @@
 #include "dmbbfcommon.h"
 #include "diagnostics.h"
 
+#define TRACEROUTE_DIAGNOSTIC_PATH "/usr/share/bbfdm/traceroute"
 #define DOWNLOAD_DIAGNOSTIC_PATH "/usr/share/bbfdm/download"
 #define UPLOAD_DIAGNOSTIC_PATH "/usr/share/bbfdm/upload"
 
@@ -1797,11 +1798,14 @@ static int get_operate_args_IPDiagnostics_TraceRoute(char *refparam, struct dmct
 
 static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	json_object *res = NULL, *arr_route_hops = NULL, *route_hops_obj = NULL;
+	json_object *arr_route_hops = NULL, *route_hops_obj = NULL;
 	char *route_hops_host[2] = {0};
 	char *route_hops_host_address[2] = {0};
 	char *route_hops_rttimes[2] = {0};
 	char *route_hops_errorcode = NULL;
+	char input[2048] = {0};
+	char output[2048] = {0};
+	char cmd[2096] = {0};
 	int idx = 0;
 
 	char *host = dmjson_get_value((json_object *)value, 1, "Host");
@@ -1816,21 +1820,29 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 	char *datablocksize = dmjson_get_value((json_object *)value, 1, "DataBlockSize");
 	char *dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
 	char *maxhops = dmjson_get_value((json_object *)value, 1, "MaxHopCount");
-	char *proto = (bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto";
 
-	dmubus_call_blocking("bbf.diag", "traceroute",
-			UBUS_ARGS{
-				{"host", host, String},
-				{"iface", interface, String},
-				{"ip_proto", ip_proto, String},
-				{"nbr_of_tries", nboftries, String},
-				{"timeout", timeout, String},
-				{"data_size", datablocksize, String},
-				{"dscp", dscp, String},
-				{"max_hop_cnt", maxhops, String},
-				{"proto", proto, String}
-			},
-			9, &res);
+	snprintf(input, sizeof(input), "'{\"host\": \"%s\",\"iface\":\"%s\",\"ip_proto\":\"%s\",\"nbr_of_tries\":\"%s\",\"timeout\":\"%s\",\"data_size\":\"%s\",\"dscp\":\"%s\",\"max_hop_cnt\":\"%s\",\"proto\":\"%s\"}'",
+									host,
+									interface,
+									ip_proto,
+									nboftries,
+									timeout,
+									datablocksize,
+									dscp,
+									maxhops,
+									(bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto");
+
+	snprintf(cmd, sizeof(cmd), "sh %s %s", TRACEROUTE_DIAGNOSTIC_PATH, input);
+
+	FILE *pp = popen(cmd, "r");
+	if (pp != NULL) {
+		fgets(output, sizeof(output) , pp);
+		pclose(pp);
+	} else {
+		return CMD_FAIL;
+	}
+
+	json_object *res = (DM_STRLEN(output)) ? json_tokener_parse(output) : NULL;
 
 	if (res == NULL)
 		return CMD_FAIL;
