@@ -31,7 +31,7 @@ struct call_log_entry {
 	char start_time[32];
 	char duration[8];
 	char termination_cause[32];
-	char sessionId[20];
+	char sessionId[17];
 	char SIPSessionId[33];
 	char sipIpAddress[40];
 	char farEndIPAddress[40];
