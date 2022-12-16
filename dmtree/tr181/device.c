@@ -90,7 +90,7 @@ DMOBJ tDeviceObj[] = {
 {"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoObj, tDeviceInfoParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"ManagementServer", &DMREAD, NULL, NULL, "file:/etc/config/cwmp", NULL, NULL, NULL, tManagementServerObj, tManagementServerParams, NULL, BBFDM_CWMP, NULL, "2.1"},
 {"Time", &DMREAD, NULL, NULL, "file:/etc/config/system", NULL, NULL, NULL, NULL, tTimeParams, NULL, BBFDM_BOTH, NULL, "2.0"},
-{"UPnP", &DMREAD, NULL, NULL, "file:/etc/config/upnpd", NULL, NULL, NULL, tUPnPObj, NULL, NULL, BBFDM_BOTH, NULL, "2.0"},
+{"UPnP", &DMREAD, NULL, NULL, "file:/etc/init.d/minissdpd", NULL, NULL, NULL, tUPnPObj, NULL, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"WiFi", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiObj, tWiFiParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"Bridging", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tBridgingObj, tBridgingParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"IP", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tIPObj, tIPParams, NULL, BBFDM_BOTH, NULL, "2.0"},

@@ -85722,7 +85722,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "discovery",
 									"args": {},
 									"key": "devices[i-1].st"
@@ -85750,7 +85750,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "discovery",
 									"args": {},
 									"key": "devices[i-1].usn"
@@ -85791,7 +85791,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "discovery",
 									"args": {},
 									"key": "devices[i-1].descurl"
@@ -85902,7 +85902,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "discovery",
 									"args": {},
 									"key": "devices[i-1].st"
@@ -85930,7 +85930,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "discovery",
 									"args": {},
 									"key": "devices[i-1].usn"
@@ -85971,7 +85971,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "discovery",
 									"args": {},
 									"key": "devices[i-1].descurl"
@@ -86079,7 +86079,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "discovery",
 									"args": {},
 									"key": "services[i-1].usn"
@@ -86120,7 +86120,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "discovery",
 									"args": {},
 									"key": "services[i-1].descurl"
@@ -86275,7 +86275,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "descriptions[i-1].descurl"
@@ -86361,7 +86361,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].UDN"
@@ -86423,7 +86423,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].deviceType"
@@ -86451,7 +86451,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].friendlyName"
@@ -86493,7 +86493,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].manufacturer"
@@ -86543,7 +86543,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].manufacturerURL"
@@ -86571,7 +86571,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].modelDescription"
@@ -86599,7 +86599,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].modelName"
@@ -86627,7 +86627,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].modelNumber"
@@ -86655,7 +86655,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].modelURL"
@@ -86683,7 +86683,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].serialNumber"
@@ -86711,7 +86711,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].UPC"
@@ -86739,7 +86739,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "devicesinstances[i-1].preentation_url"
@@ -86799,7 +86799,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "servicesinstances[i-1].serviceId"
@@ -86844,7 +86844,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "servicesinstances[i-1].serviceType"
@@ -86872,7 +86872,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "servicesinstances[i-1].SCPDURL"
@@ -86900,7 +86900,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "servicesinstances[i-1].controlURL"
@@ -86928,7 +86928,7 @@
 							{
 								"type": "ubus",
 								"ubus": {
-									"object": "upnpc",
+									"object": "upnp",
 									"method": "description",
 									"args": {},
 									"key": "servicesinstances[i-1].eventSubURL"
