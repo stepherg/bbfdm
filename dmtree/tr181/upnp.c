@@ -98,21 +98,22 @@ static int get_service_linker(char *refparam, struct dmctx *dmctx, void *data, c
 static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL,  *devices = NULL, *device = NULL;
-	struct upnpdiscovery upnp_dev = {};
+	struct upnpdiscovery upnp_dev = {0};
 	char *descurl = NULL, *st = NULL, *usn = NULL, *is_root_device = NULL, *inst = NULL;
-	char **stparams = NULL, **uuid, **urn;
-	size_t length;
 	struct uci_section* dmmap_sect = NULL;
-	int i;
+	char buf[512] = {0};
+	int root_inst = 0;
 
-	dmubus_call("upnpc", "discovery", UBUS_ARGS{{}}, 0, &res);
+	dmubus_call("upnp", "discovery", UBUS_ARGS{{}}, 0, &res);
 	if (res == NULL)
 		return 0;
+
 	json_object_object_get_ex(res, "devices", &devices);
 	size_t nbre_devices = (devices) ? json_object_array_length(devices) : 0;
 
-	for (i = 0; i < nbre_devices; i++) {
+	for (int i = 0; i < nbre_devices; i++) {
 		device = json_object_array_get_idx(devices, i);
+
 		is_root_device = dmjson_get_value(device, 1, "is_root_device");
 		if(DM_LSTRCMP(is_root_device, "0") == 0)
 			continue;
@@ -120,23 +121,36 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 		descurl = dmjson_get_value(device, 1, "descurl");
 		st = dmjson_get_value(device, 1, "st");
 		usn = dmjson_get_value(device, 1, "usn");
-		stparams = strsplit_by_str(usn, "::");
-		uuid = strsplit(stparams[0], ":", &length);
-		urn = strsplit(stparams[1], ":", &length);
-		dmasprintf(&upnp_dev.descurl, "%s", descurl);
-		dmasprintf(&upnp_dev.st, "%s", st);
-		dmasprintf(&upnp_dev.usn, "%s", usn);
-		dmasprintf(&upnp_dev.uuid, "%s", uuid[1]);
-		dmasprintf(&upnp_dev.urn, "%s", urn[1]);
 
-		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_root_device", "uuid", uuid[1])) == NULL) {
+		snprintf(buf, sizeof(buf), "%s", usn);
+
+		char *p = strstr(buf, "::");
+		char *urn_p = NULL;
+
+		if (p) {
+			urn_p = p + 2;
+			*p = 0;
+			char *uuid = strchr(buf, ':');
+			upnp_dev.uuid = uuid ? dmstrdup(uuid + 1) : "";
+		}
+
+		if (urn_p) {
+			char *urn = strchr(urn_p, ':');
+			upnp_dev.urn = urn ? dmstrdup(urn + 1) : "";
+		}
+
+		upnp_dev.descurl = dmstrdup(descurl);
+		upnp_dev.st = dmstrdup(st);
+		upnp_dev.usn = dmstrdup(usn);
+
+		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_root_device", "uuid", upnp_dev.urn)) == NULL) {
 			dmuci_add_section_bbfdm("dmmap_upnp", "upnp_root_device", &dmmap_sect);
-			dmuci_set_value_by_section_bbfdm(dmmap_sect, "uuid", uuid[1]);
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "uuid", upnp_dev.urn);
 		}
 
 		upnp_dev.dmmap_sect = dmmap_sect;
 
-		inst = handle_instance_without_section(dmctx, parent_node, i+1);
+		inst = handle_instance_without_section(dmctx, parent_node, ++root_inst);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, &upnp_dev, inst) == DM_STOP)
 			break;
@@ -147,36 +161,49 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL,  *devices = NULL, *device = NULL;
-	struct upnpdiscovery upnp_dev = {};
+	struct upnpdiscovery upnp_dev = {0};
 	char *dev_descurl = NULL, *dev_st = NULL, *dev_usn = NULL, *inst = NULL;
-	char **stparams = NULL, **uuid = NULL, **urn = NULL;
-	size_t lengthuuid, lengthurn;
 	struct uci_section* dmmap_sect = NULL;
-	int i;
+	char buf[512] = {0};
 
-	dmubus_call("upnpc", "discovery", UBUS_ARGS{{}}, 0, &res);
+	dmubus_call("upnp", "discovery", UBUS_ARGS{{}}, 0, &res);
 	if (res == NULL)
 		return 0;
+
 	json_object_object_get_ex(res, "devices", &devices);
 	size_t nbre_devices = (devices) ? json_object_array_length(devices) : 0;
 
-	for (i = 0; i < nbre_devices; i++) {
+	for (int i = 0; i < nbre_devices; i++) {
 		device = json_object_array_get_idx(devices, i);
+
 		dev_descurl = dmjson_get_value(device, 1, "descurl");
 		dev_st = dmjson_get_value(device, 1, "st");
 		dev_usn = dmjson_get_value(device, 1, "usn");
-		stparams = strsplit_by_str(dev_usn, "::");
-		uuid = strsplit(stparams[0], ":", &lengthuuid);
-		urn = strsplit(stparams[1], ":", &lengthurn);
-		dmasprintf(&upnp_dev.descurl, "%s", dev_descurl ? dev_descurl : "");
-		dmasprintf(&upnp_dev.st, "%s", dev_st ? dev_st : "");
-		dmasprintf(&upnp_dev.usn, "%s", dev_usn ? dev_usn : "");
-		dmasprintf(&upnp_dev.uuid, "%s", (lengthuuid > 0) ? uuid[1] : "");
-		dmasprintf(&upnp_dev.urn, "%s", (lengthurn > 0) ? urn[1] : "");
 
-		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_device", "uuid", uuid[1])) == NULL) {
+		snprintf(buf, sizeof(buf), "%s", dev_usn);
+
+		char *p = strstr(buf, "::");
+		char *urn_p = NULL;
+
+		if (p) {
+			urn_p = p + 2;
+			*p = 0;
+			char *uuid = strchr(buf, ':');
+			upnp_dev.uuid = uuid ? dmstrdup(uuid + 1) : "";
+		}
+
+		if (urn_p) {
+			char *urn = strchr(urn_p, ':');
+			upnp_dev.urn = urn ? dmstrdup(urn + 1) : "";
+		}
+
+		upnp_dev.descurl = dmstrdup(dev_descurl);
+		upnp_dev.st = dmstrdup(dev_st);
+		upnp_dev.usn = dmstrdup(dev_usn);
+
+		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_device", "uuid", upnp_dev.uuid)) == NULL) {
 			dmuci_add_section_bbfdm("dmmap_upnp", "upnp_device", &dmmap_sect);
-			dmuci_set_value_by_section_bbfdm(dmmap_sect, "uuid", uuid[1]);
+			dmuci_set_value_by_section_bbfdm(dmmap_sect, "uuid", upnp_dev.uuid);
 		}
 
 		upnp_dev.dmmap_sect = dmmap_sect;
@@ -192,32 +219,46 @@ static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_nod
 static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL,  *services = NULL, *service = NULL;
-	struct upnpdiscovery upnp_dev = {};
+	struct upnpdiscovery upnp_dev = {0};
 	char *srv_descurl = NULL, *srv_st = NULL, *srv_usn = NULL, *inst = NULL;
-	char **stparams = NULL, **uuid = NULL, **urn = NULL;
-	size_t lengthuuid, lengthurn;
 	struct uci_section* dmmap_sect = NULL;
-	int i;
+	char buf[512] = {0};
 
-	dmubus_call("upnpc", "discovery", UBUS_ARGS{{}}, 0, &res);
+	dmubus_call("upnp", "discovery", UBUS_ARGS{{}}, 0, &res);
 	if (res == NULL)
 		return 0;
+
 	json_object_object_get_ex(res, "services", &services);
 	size_t nbre_services = (services) ? json_object_array_length(services) : 0;
 
-	for (i = 0; i < nbre_services; i++){
+	for (int i = 0; i < nbre_services; i++){
 		service = json_object_array_get_idx(services, i);
+
 		srv_descurl = dmjson_get_value(service, 1, "descurl");
 		srv_st = dmjson_get_value(service, 1, "st");
 		srv_usn = dmjson_get_value(service, 1, "usn");
-		stparams = strsplit_by_str(srv_usn, "::");
-		uuid = strsplit(stparams[0], ":", &lengthuuid);
-		urn = strsplit(stparams[1], ":", &lengthurn);
-		dmasprintf(&upnp_dev.descurl, "%s", srv_descurl ? srv_descurl : "");
-		dmasprintf(&upnp_dev.st, "%s", srv_st ? srv_st : "");
-		dmasprintf(&upnp_dev.usn, "%s", srv_usn ? srv_usn : "");
-		dmasprintf(&upnp_dev.uuid, "%s", (lengthuuid > 0) ? uuid[1] : "");
-		dmasprintf(&upnp_dev.urn, "%s", (lengthurn > 0) ? urn[1] : "");
+
+
+		snprintf(buf, sizeof(buf), "%s", srv_usn);
+
+		char *p = strstr(buf, "::");
+		char *urn_p = NULL;
+
+		if (p) {
+			urn_p = p + 2;
+			*p = 0;
+			char *uuid = strchr(buf, ':');
+			upnp_dev.uuid = uuid ? dmstrdup(uuid + 1) : "";
+		}
+
+		if (urn_p) {
+			char *urn = strchr(urn_p, ':');
+			upnp_dev.urn = urn ? dmstrdup(urn + 1) : "";
+		}
+
+		upnp_dev.descurl = dmstrdup(srv_descurl);
+		upnp_dev.st = dmstrdup(srv_st);
+		upnp_dev.usn = dmstrdup(srv_usn);
 
 		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_service", "usn", srv_usn)) == NULL) {
 			dmuci_add_section_bbfdm("dmmap_upnp", "upnp_service", &dmmap_sect);
@@ -237,21 +278,22 @@ static int browseUPnPDiscoveryServiceInst(struct dmctx *dmctx, DMNODE *parent_no
 static int browseUPnPDescriptionDeviceDescriptionInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *descriptions = NULL, *description = NULL;
-	struct upnp_description_file_info upnp_desc = {};
+	struct upnp_description_file_info upnp_desc = {0};
 	char *descurl = NULL, *inst = NULL;
 	struct uci_section* dmmap_sect = NULL;
-	int i;
 
-	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);
+	dmubus_call("upnp", "description", UBUS_ARGS{{}}, 0, &res);
 	if (res == NULL)
 		return 0;
+
 	json_object_object_get_ex(res, "descriptions", &descriptions);
 	size_t nbre_descriptions = (descriptions) ? json_object_array_length(descriptions) : 0;
 
-	for (i = 0; i < nbre_descriptions; i++) {
+	for (int i = 0; i < nbre_descriptions; i++) {
 		description = json_object_array_get_idx(descriptions, i);
-		descurl = dmjson_get_value(description, 1, "descurl");
-		dmasprintf(&upnp_desc.desc_url, "%s", descurl?descurl:"");
+
+		descurl = dmjson_get_value(description, 1, "desc_url");
+		upnp_desc.desc_url = dmstrdup(descurl);
 
 		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_upnp", "upnp_description", "descurl", descurl)) == NULL) {
 			dmuci_add_section_bbfdm("dmmap_upnp", "upnp_description", &dmmap_sect);
@@ -275,14 +317,16 @@ static int browseUPnPDescriptionDeviceInstanceInst(struct dmctx *dmctx, DMNODE *
 	struct uci_section* dmmap_sect = NULL;
 	int i;
 
-	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);
+	dmubus_call("upnp", "description", UBUS_ARGS{{}}, 0, &res);
 	if (res == NULL)
 		return 0;
-	json_object_object_get_ex(res, "devicesinstances", &devices_instances);
+
+	json_object_object_get_ex(res, "devices", &devices_instances);
 	size_t nbre_devices_inst = (devices_instances) ? json_object_array_length(devices_instances) : 0;
 
 	for (i = 0; i < nbre_devices_inst; i++){
 		device_inst = json_object_array_get_idx(devices_instances, i);
+
 		dmasprintf(&upnp_dev_inst.parentudn, "%s", dmjson_get_value(device_inst, 1, "parent_dev"));
 		dmasprintf(&upnp_dev_inst.device_type, "%s", dmjson_get_value(device_inst, 1, "deviceType"));
 		dmasprintf(&upnp_dev_inst.friendly_name, "%s", dmjson_get_value(device_inst, 1, "friendlyName"));
@@ -319,10 +363,10 @@ static int browseUPnPDescriptionServiceInstanceInst(struct dmctx *dmctx, DMNODE 
 	struct uci_section* dmmap_sect = NULL;
 	int i;
 
-	dmubus_call("upnpc", "description", UBUS_ARGS{{}}, 0, &res);
+	dmubus_call("upnp", "description", UBUS_ARGS{{}}, 0, &res);
 	if (res == NULL)
 		return 0;
-	json_object_object_get_ex(res, "servicesinstances", &services_instances);
+	json_object_object_get_ex(res, "services", &services_instances);
 	size_t nbre_devices_inst = (services_instances) ? json_object_array_length(services_instances) : 0;
 
 	for (i = 0; i < nbre_devices_inst; i++) {
@@ -658,7 +702,7 @@ static int get_UPnPDescriptionServiceInstance_ServiceId(char *refparam, struct d
 
 static int get_UPnPDescriptionServiceInstance_ServiceDiscovery(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char usn[64] = {0};
+	char usn[512] = {0};
 
 	snprintf(usn, sizeof(usn), "%s::%s", ((struct upnp_service_inst *)data)->parentudn, ((struct upnp_service_inst *)data)->servicetype);
 	adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.Service.", usn, value);
