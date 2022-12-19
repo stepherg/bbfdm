@@ -11,99 +11,38 @@
 #include "gatewayinfo.h"
 #include "dmbbfcommon.h"
 
-enum gateway_param {
-	E_OUI,
-	E_SERIAL,
-	E_CLASS
-};
-
-static void get_gateway_params(int param, char *dst, int size)
-{
-	char *interface = NULL, *vivso = NULL, search[3] = {0};
-	json_object *res = NULL;
-
-	if (dst == NULL)
-		return;
-
-	switch (param) {
-	case E_OUI:
-		if (2 != snprintf(search, sizeof(search), "4="))
-			return;
-
-		break;
-	case E_SERIAL:
-		if (2 != snprintf(search, sizeof(search), "5="))
-			return;
-
-		break;
-	case E_CLASS:
-		if (2 != snprintf(search, sizeof(search), "6="))
-			return;
-
-		break;
-	default:
-		return;
-	}
-
-
-	dmuci_get_option_value_string("cwmp", "cpe", "default_wan_interface", &interface);
-	if (DM_STRLEN(interface) == 0)
-		return;
-
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", interface, String}}, 1, &res);
-	if (!res)
-		return;
-
-	vivso = dmjson_get_value(res, 2, "data", "vivsoinf");
-	int len = DM_STRLEN(vivso);
-	if (len == 0)
-		return;
-
-	char value[len + 1];
-	memset(value, 0, sizeof(value));
-	snprintf(value, len+1, "%s", vivso);
-
-	char *temp = strtok(value, ",");
-	while (temp) {
-		if (DM_STRNCMP(temp, search, 2) != 0) {
-			temp = strtok(NULL, ",");
-			continue;
-		}
-
-		temp = temp + 2;
-		snprintf(dst, size, "%s", temp);
-		return;
-	}
-
-	return;
-}
-
 static int get_manufacturer_oui(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char oui[7] = {0};
-
-	get_gateway_params(E_OUI, oui, sizeof(oui));
-	*value = dmstrdup(oui);
+	dmuci_get_option_value_string_varstate("cwmp", "gatewayinfo", "oui", value);
+	if (*value[0] == '\0') {
+		dmuci_get_option_value_string("cwmp", "cpe", "manufacturer_oui", value);
+		if (*value[0] == '\0')
+			db_get_value_string("device", "deviceinfo", "ManufacturerOUI", value);
+	}
 
 	return 0;
 }
 
 static int get_product_class(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char class[65] = {0};
-
-	get_gateway_params(E_CLASS, class, sizeof(class));
-	*value = dmstrdup(class);
+	dmuci_get_option_value_string_varstate("cwmp", "gatewayinfo", "class", value);
+	if (*value[0] == '\0') {
+		dmuci_get_option_value_string("cwmp", "cpe", "product_class", value);
+		if (*value[0] == '\0')
+			db_get_value_string("device", "deviceinfo", "ProductClass", value);
+	}
 
 	return 0;
 }
 
 static int get_serial_number(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char serial[65] = {0};
-
-	get_gateway_params(E_SERIAL, serial, sizeof(serial));
-	*value = dmstrdup(serial);
+	dmuci_get_option_value_string_varstate("cwmp", "gatewayinfo", "serial", value);
+	if (*value[0] == '\0') {
+		dmuci_get_option_value_string("cwmp", "cpe", "serial_number", value);
+		if (*value[0] == '\0')
+			db_get_value_string("device", "deviceinfo", "SerialNumber", value);
+	}
 
 	return 0;
 }
