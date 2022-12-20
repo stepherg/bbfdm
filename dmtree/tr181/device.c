@@ -41,6 +41,7 @@
 #include "ieee1905.h"
 #include "routeradvertisement.h"
 #include "gatewayinfo.h"
+#include "mqtt.h"
 #ifdef BBF_TR104
 #include "servicesvoiceservice.h"
 #endif
@@ -122,6 +123,7 @@ DMOBJ tDeviceObj[] = {
 {"Services", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesObj, NULL, NULL, BBFDM_BOTH, NULL, "2.0"},
 #endif
 {"GatewayInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGatewayInfoParams, NULL, BBFDM_CWMP, NULL, "2.0"},
+{"MQTT", &DMREAD, NULL, NULL, "file:/etc/config/mosquitto", NULL, NULL, NULL, tMQTTObj, tMQTTParams, NULL, BBFDM_BOTH, NULL, "2.10"},
 {0}
 };
 
