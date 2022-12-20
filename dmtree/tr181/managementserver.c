@@ -478,7 +478,7 @@ static void get_management_ip_port(char **listen_addr)
 	}
 
 	if (ip[0] != '\0' && port[0] != '\0') {
-		dmasprintf(listen_addr, "%s:%s", ip, port);
+		dmasprintf(listen_addr, (*version == '6') ? "[%s]:%s" : "%s:%s", ip, port);
 	}
 }
 
