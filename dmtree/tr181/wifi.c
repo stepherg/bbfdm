@@ -4187,7 +4187,7 @@ static int set_WiFiDataElementsNetworkDevice_CoordinatedCACAllowed(char *refpara
 
 static int get_WiFiDataElementsNetworkDevice_TrafficSeparationAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("mapcontroller", "controller", "enable_ts", "1");
+	*value = dmuci_get_option_value_fallback_def("mapcontroller", "controller", "enable_ts", "0");
 	return 0;
 }
 
