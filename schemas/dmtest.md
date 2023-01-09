@@ -1,9 +1,5 @@
 # dmtest Schema
 
-```
-https://dev.iopsys.eu/iopsys/uspd/-/blob/devel/docs/api/dmtest.json
-```
-
 | Custom Properties | Additional Properties |
 | ----------------- | --------------------- |
 | Forbidden         | Forbidden             |

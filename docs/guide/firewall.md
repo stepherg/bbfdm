@@ -1,5 +1,6 @@
-# Firewall
-Aim of this document to explain the TR181 firewall datamodel parameter mappings with firewall and network uci.
+# TR181 Firewall datamodel mapping
+
+Aim of this document is to explain the TR181 firewall datamodel parameter mappings with firewall and network uci.
 
 In TR-181 firewall definition, we have Device.Firewall.Level., Deivce.Firewall.Chain. and Firewall.Chain.{i}.Rules., which does not have one to one mapping with firewall uci sections.
 

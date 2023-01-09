@@ -1,4 +1,5 @@
 # How to extend Datamodel parameters using Json plugins
+
 It is often required to extend datamodel parameters of the device, extending the datamodel parameters using json plugin is the simplest way for the same.
 
 To extend the datamodel using json plugin, its required to be defined it, as it is defined in `TR181.json` file and then place that json in '/etc/bbfdm/json/' directory of device.
