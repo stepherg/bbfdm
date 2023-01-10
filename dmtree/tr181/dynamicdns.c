@@ -283,15 +283,6 @@ static int addObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 	dmuci_add_section("ddns", "service", &s);
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "enabled", "0");
-	dmuci_set_value_by_section(s, "use_syslog", "0");
-	dmuci_set_value_by_section(s, "use_https", "0");
-	dmuci_set_value_by_section(s, "force_interval", "72");
-	dmuci_set_value_by_section(s, "force_unit", "hours");
-	dmuci_set_value_by_section(s, "check_interval", "10");
-	dmuci_set_value_by_section(s, "check_unit", "minutes");
-	dmuci_set_value_by_section(s, "retry_interval", "60");
-	dmuci_set_value_by_section(s, "retry_unit", "value");
-	dmuci_set_value_by_section(s, "ip_source", "interface");
 	dmuci_set_value_by_section(s, "domain", "yourhost.example.com");
 
 	dmuci_add_section_bbfdm("dmmap_ddns", "service", &dmmap_s);
@@ -629,6 +620,7 @@ static int set_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, voi
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", linker ? linker : "");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ip_network", linker ? linker : "");
 			break;
 	}
 	return 0;
