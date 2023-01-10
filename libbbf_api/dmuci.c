@@ -579,11 +579,11 @@ int dmuci_delete(char *package, char *section, char *option, char *value)
 int dmuci_rename_section(char *package, char *section, char *value)
 {
 	struct uci_ptr ptr = {0};
-	char sec_name[128] = {0};
 
-	dmuci_replace_invalid_characters_from_section_name(value, sec_name, sizeof(sec_name));
+	if (special_char_exits(value))
+		return -1;
 
-	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, NULL, sec_name))
+	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, NULL, value))
 		return -1;
 
 	if (uci_rename(uci_ctx, &ptr) != UCI_OK)
@@ -777,11 +777,11 @@ int dmuci_del_list_value_by_section(struct uci_section *s, char *option, char *v
 int dmuci_rename_section_by_section(struct uci_section *s, char *value)
 {
 	struct uci_ptr up = {0};
-	char sec_name[128] = {0};
 
-	dmuci_replace_invalid_characters_from_section_name(value, sec_name, sizeof(sec_name));
+	if (special_char_exits(value))
+		return -1;
 
-	if (dmuci_lookup_ptr_by_section(uci_ctx, &up, s, NULL, sec_name) == -1)
+	if (dmuci_lookup_ptr_by_section(uci_ctx, &up, s, NULL, value) == -1)
 		return -1;
 
 	if (uci_rename(uci_ctx, &up) != UCI_OK)
@@ -920,21 +920,4 @@ bool dmuci_string_to_boolean(char *value)
 		return true;
 
 	return false;
-}
-
-void dmuci_replace_invalid_characters_from_section_name(char *old_sec_name, char *new_sec_name, size_t len)
-{
-	*new_sec_name = 0;
-
-	if (!DM_STRLEN(old_sec_name))
-		return;
-
-	DM_STRNCPY(new_sec_name, old_sec_name, len);
-
-	for (int i = 0; i < DM_STRLEN(new_sec_name); i++) {
-
-		// Replace all {'.' or '-'} with '_'
-		if (new_sec_name[i] == '.' || new_sec_name[i] == '-')
-			new_sec_name[i] = '_';
-	}
 }

@@ -336,11 +336,7 @@ struct uci_section *get_origin_section_from_config(char *package, char *section_
 	struct uci_section *s = NULL;
 
 	uci_foreach_sections(package, section_type, s) {
-		char sec_name[128] = {0};
-
-		dmuci_replace_invalid_characters_from_section_name(orig_section_name, sec_name, sizeof(sec_name));
-
-		if (strcmp(section_name(s), sec_name) == 0)
+		if (strcmp(section_name(s), orig_section_name) == 0)
 			return s;
 	}
 
@@ -353,12 +349,10 @@ struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_
 
 	uci_path_foreach_sections(bbfdm, dmmap_package, section_type, s) {
 		char *dmmap_sec_name = NULL;
-		char sec_name[128] = {0};
 
 		dmuci_get_value_by_section_string(s, "section_name", &dmmap_sec_name);
-		dmuci_replace_invalid_characters_from_section_name(dmmap_sec_name, sec_name, sizeof(sec_name));
 
-		if (DM_STRCMP(sec_name, orig_section_name) == 0)
+		if (DM_STRCMP(dmmap_sec_name, orig_section_name) == 0)
 			return s;
 	}
 
@@ -723,6 +717,35 @@ unsigned char isdigit_str(char *str)
 	if (!(*str)) return 0;
 	while(isdigit(*str++));
 	return ((*(str-1)) ? 0 : 1);
+}
+
+bool special_char(char c)
+{
+	if ((c >= 'a' && c <= 'z') ||
+	    (c >= 'A' && c <= 'Z') ||
+		(c >= '0' && c <= '9') ||
+		(c == '_'))
+		return false;
+	else
+		return true;
+}
+
+bool special_char_exits(const char *str)
+{
+	if (!DM_STRLEN(str))
+		return false;
+
+	while (!special_char(*str++));
+
+	return (*(str-1)) ? true : false;
+}
+
+void replace_special_char(char *str, char c)
+{
+	for (int i = 0; i < DM_STRLEN(str); i++) {
+		if (special_char(str[i]))
+			str[i] = c;
+	}
 }
 
 static inline int isword_delim(char c)

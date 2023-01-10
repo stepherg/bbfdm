@@ -390,7 +390,6 @@ int dmuci_get_option_value_string_varstate(char *package, char *section, char *o
 int dmuci_set_value_varstate(char *package, char *section, char *option, char *value);
 
 bool dmuci_string_to_boolean(char *value);
-void dmuci_replace_invalid_characters_from_section_name(char *old_sec_name, char *new_sec_name, size_t len);
 
 #endif
 
