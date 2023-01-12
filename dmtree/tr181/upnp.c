@@ -97,10 +97,10 @@ static int get_service_linker(char *refparam, struct dmctx *dmctx, void *data, c
 **************************************************************/
 static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL,  *devices = NULL, *device = NULL;
+	json_object *res = NULL, *root_devices = NULL, *device = NULL;
 	struct upnpdiscovery upnp_dev = {0};
-	char *descurl = NULL, *st = NULL, *usn = NULL, *is_root_device = NULL, *inst = NULL;
-	struct uci_section* dmmap_sect = NULL;
+	char *descurl = NULL, *st = NULL, *usn = NULL, *inst = NULL;
+	struct uci_section *dmmap_sect = NULL;
 	char buf[512] = {0};
 	int root_inst = 0;
 
@@ -108,15 +108,11 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 	if (res == NULL)
 		return 0;
 
-	json_object_object_get_ex(res, "devices", &devices);
-	size_t nbre_devices = (devices) ? json_object_array_length(devices) : 0;
+	json_object_object_get_ex(res, "root_devices", &root_devices);
+	size_t nbre_devices = (root_devices) ? json_object_array_length(root_devices) : 0;
 
 	for (int i = 0; i < nbre_devices; i++) {
-		device = json_object_array_get_idx(devices, i);
-
-		is_root_device = dmjson_get_value(device, 1, "is_root_device");
-		if(DM_LSTRCMP(is_root_device, "0") == 0)
-			continue;
+		device = json_object_array_get_idx(root_devices, i);
 
 		descurl = dmjson_get_value(device, 1, "descurl");
 		st = dmjson_get_value(device, 1, "st");
@@ -160,10 +156,10 @@ static int browseUPnPDiscoveryRootDeviceInst(struct dmctx *dmctx, DMNODE *parent
 
 static int browseUPnPDiscoveryDeviceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *res = NULL,  *devices = NULL, *device = NULL;
+	json_object *res = NULL, *devices = NULL, *device = NULL;
 	struct upnpdiscovery upnp_dev = {0};
 	char *dev_descurl = NULL, *dev_st = NULL, *dev_usn = NULL, *inst = NULL;
-	struct uci_section* dmmap_sect = NULL;
+	struct uci_section *dmmap_sect = NULL;
 	char buf[512] = {0};
 
 	dmubus_call("upnp", "discovery", UBUS_ARGS{{}}, 0, &res);
@@ -366,6 +362,7 @@ static int browseUPnPDescriptionServiceInstanceInst(struct dmctx *dmctx, DMNODE 
 	dmubus_call("upnp", "description", UBUS_ARGS{{}}, 0, &res);
 	if (res == NULL)
 		return 0;
+
 	json_object_object_get_ex(res, "services", &services_instances);
 	size_t nbre_devices_inst = (services_instances) ? json_object_array_length(services_instances) : 0;
 
@@ -419,51 +416,22 @@ static int set_UPnPDevice_Enable(char *refparam, struct dmctx *ctx, void *data, 
 	return 0;
 }
 
-static int get_UPnPDevice_UPnPMediaServer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_UPnPDeviceCapabilities_UPnPArchitecture(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *path = "/etc/rc.d/*minidlna";
-	*value = (check_file(path)) ? "1" : "0";
+	*value = "1";
 	return 0;
 }
 
-static int set_UPnPDevice_UPnPMediaServer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+static int get_UPnPDeviceCapabilities_UPnPArchitectureMinorVer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	bool b;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			string_to_bool(value, &b);
-			dmcmd("/etc/init.d/minidlna", 1, b ? "enable" : "disable");
-			break;
-	}
+	*value = "1";
 	return 0;
 }
 
-static int get_UPnPDevice_UPnPIGD(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_UPnPDeviceCapabilities_UPnPIGD(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *path = "/etc/rc.d/*miniupnpd";
-	*value = (check_file(path)) ? "1" : "0";
-	return 0;
-}
-
-static int set_UPnPDevice_UPnPIGD(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	bool b;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			string_to_bool(value, &b);
-			dmcmd("/etc/init.d/miniupnpd", 1, b ? "enable" : "disable");
-			break;
-	}
+	dmuci_get_option_value_string("upnpd", "config", "igdv1", value);
+	*value = (DM_STRLEN(*value) && *value[0] == '1') ? "1" : "2";
 	return 0;
 }
 
@@ -743,25 +711,40 @@ static int get_UPnPDescriptionServiceInstance_EventSubURL(char *refparam, struct
 /* *** Device.UPnP. *** */
 DMOBJ tUPnPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceParams, NULL, BBFDM_BOTH, NULL, "2.0"},
+{"Device", &DMREAD, NULL, NULL, "file:/etc/config/upnpd", NULL, NULL, NULL, tUPnPDeviceObj, tUPnPDeviceParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"Discovery", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDiscoveryObj, tUPnPDiscoveryParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"Description", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDescriptionObj, tUPnPDescriptionParams, NULL, BBFDM_BOTH, NULL, "2.6"},
 {0}
 };
 
 /* *** Device.UPnP.Device. *** */
+DMOBJ tUPnPDeviceObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceCapabilitiesParams, NULL, BBFDM_BOTH, NULL, "2.0"},
+{0}
+};
+
 DMLEAF tUPnPDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_UPnPDevice_Enable, set_UPnPDevice_Enable, BBFDM_BOTH, "2.0"},
-{"UPnPMediaServer", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPMediaServer, set_UPnPDevice_UPnPMediaServer, BBFDM_BOTH, "2.0"},
+//{"UPnPMediaServer", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPMediaServer, set_UPnPDevice_UPnPMediaServer, BBFDM_BOTH, "2.0"},
 //{"UPnPMediaRenderer", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPMediaRenderer, set_UPnPDevice_UPnPMediaRenderer, BBFDM_BOTH, "2.0"},
 //{"UPnPWLANAccessPoint", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPWLANAccessPoint, set_UPnPDevice_UPnPWLANAccessPoint, BBFDM_BOTH, "2.0"},
 //{"UPnPQoSDevice ", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPQoSDevice , set_UPnPDevice_UPnPQoSDevice , BBFDM_BOTH, "2.0"},
 //{"UPnPQoSPolicyHolder", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPQoSPolicyHolder, set_UPnPDevice_UPnPQoSPolicyHolder, BBFDM_BOTH, "2.0"},
-{"UPnPIGD", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPIGD, set_UPnPDevice_UPnPIGD, BBFDM_BOTH, "2.0"},
+//{"UPnPIGD", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPIGD, set_UPnPDevice_UPnPIGD, BBFDM_BOTH, "2.0"},
 //{"UPnPDMBasicMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMBasicMgmt, set_UPnPDevice_UPnPDMBasicMgmt, BBFDM_BOTH, "2.0"},
 //{"UPnPDMConfigurationMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMConfigurationMgmt, set_UPnPDevice_UPnPDMConfigurationMgmt, BBFDM_BOTH, "2.0"},
 //{"UPnPDMSoftwareMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMSoftwareMgmt, set_UPnPDevice_UPnPDMSoftwareMgmt, BBFDM_BOTH, "2.0"},
+{0}
+};
+
+/* *** Device.UPnP.Device.Capabilities. *** */
+DMLEAF tUPnPDeviceCapabilitiesParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"UPnPArchitecture", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPArchitecture, NULL, BBFDM_BOTH, "2.0"},
+{"UPnPArchitectureMinorVer", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPArchitectureMinorVer, NULL, BBFDM_BOTH, "2.0"},
+{"UPnPIGD", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPIGD, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
