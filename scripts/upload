@@ -94,13 +94,13 @@ upload_launch() {
 	rx_bytes_start=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes)
 
 	time_start=$(date +"%s.282646") # It should be like that time_start=$(date +"%s.%6N") but since OpenWrt busybox has limitations and doesn't support nonoseconds so keep it hardcoded
-	res=$(dd if=/dev/zero bs=$bs count=$count 2>/dev/null | curl ${ip_proto} --fail --silent --max-time ${UPLOAD_TIMEOUT} -T - ${url} -w "${format}")
+	res=$(dd if=/dev/zero bs=$bs count=$count 2>/dev/null | curl ${ip_proto} --fail --silent --max-time ${UPLOAD_TIMEOUT} -T - ${url} -w "${format}"|grep -wo '{.*}')
 	time_end=$(date +"%s.282646") # It should be like that time_end=$(date +"%s.%6N") but since OpenWrt busybox has limitations and doesn't support nonoseconds so keep it hardcoded
 
 	tx_bytes_end=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes)
 	rx_bytes_end=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes)
 
-	logger -t "bbf_upload" "########### ${url} ==> ${res} ###########"
+	logger -t "bbf_upload" "# ${url} => ${res} #"
 	json_load "${res}"
 	json_get_var size_upload size_upload
 	json_get_var time_appconnect time_appconnect
