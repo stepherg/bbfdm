@@ -366,18 +366,18 @@ static void test_api_bbfdm_get_set_library_parameter(void **state)
 	int fault = 0;
 
 	// get value ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.ManagementServer.EnableCWMP", NULL, NULL);
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.SSID.1.Enable", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.ManagementServer.EnableCWMP", "1", "xsd:boolean");
+	validate_parameter(ctx, "Device.WiFi.SSID.1.Enable", "1", "xsd:boolean");
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.ManagementServer.EnableCWMP", "truee", NULL);
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.WiFi.SSID.1.Enable", "truee", NULL);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.ManagementServer.EnableCWMP", "0", NULL);
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.WiFi.SSID.1.Enable", "0", NULL);
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
@@ -385,11 +385,11 @@ static void test_api_bbfdm_get_set_library_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.ManagementServer.EnableCWMP", NULL, NULL);
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.SSID.1.Enable", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to 0: name, type, value
-	validate_parameter(ctx, "Device.ManagementServer.EnableCWMP", "0", "xsd:boolean");
+	validate_parameter(ctx, "Device.WiFi.SSID.1.Enable", "0", "xsd:boolean");
 }
 
 static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
@@ -1137,11 +1137,11 @@ static void test_api_bbfdm_add_del_library_object(void **state)
 	int fault = 0;
 
 	// Get name object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.ManagementServer.InformParameter.", "1", NULL);
+	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.WiFi.SSID.", "1", NULL);
 	assert_int_equal(fault, 0);
 
 	// add object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.ManagementServer.InformParameter.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.SSID.", "test_key", NULL);
 	assert_int_equal(fault, 0);
 
 	// check the new instance
@@ -1149,7 +1149,7 @@ static void test_api_bbfdm_add_del_library_object(void **state)
 	assert_string_equal(ctx->addobj_instance, "3");
 
 	// delete object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.ManagementServer.InformParameter.2.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.2.", "test_key", NULL);
 	assert_int_equal(fault, 0);
 
 	// Get name object after deleting instance 2 ==> expected "9005" error
@@ -1157,11 +1157,11 @@ static void test_api_bbfdm_add_del_library_object(void **state)
 	assert_int_equal(fault, FAULT_9005);
 
 	// delete all object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.ManagementServer.InformParameter.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.", "test_key", NULL);
 	assert_int_equal(fault, 0);
 
 	// Get name object after deleting all instances ==> expected "9005" error
-	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.ManagementServer.InformParameter.1.", "1", NULL);
+	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.WiFi.SSID.1.", "1", NULL);
 	assert_int_equal(fault, FAULT_9005);
 }
 

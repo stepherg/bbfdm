@@ -12,7 +12,6 @@
 
 #include "device.h"
 #include "deviceinfo.h"
-#include "managementserver.h"
 #include "times.h"
 #include "upnp.h"
 #include "ip.h"
@@ -89,7 +88,6 @@ DMOBJ tEntry181Obj[] = {
 DMOBJ tDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoObj, tDeviceInfoParams, NULL, BBFDM_BOTH, NULL, "2.0"},
-{"ManagementServer", &DMREAD, NULL, NULL, "file:/etc/config/cwmp", NULL, NULL, NULL, tManagementServerObj, tManagementServerParams, NULL, BBFDM_CWMP, NULL, "2.1"},
 {"Time", &DMREAD, NULL, NULL, "file:/etc/config/system", NULL, NULL, NULL, NULL, tTimeParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"UPnP", &DMREAD, NULL, NULL, "file:/etc/init.d/ssdpd", NULL, NULL, NULL, tUPnPObj, NULL, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"WiFi", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiObj, tWiFiParams, NULL, BBFDM_BOTH, NULL, "2.0"},

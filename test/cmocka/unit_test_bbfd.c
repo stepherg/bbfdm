@@ -664,7 +664,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	dm_ctx_clean_sub(ctx);
 	dm_ctx_init_sub(ctx, INSTANCE_MODE_NUMBER);
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.ManagementServer.EnableCWMP", NULL, NULL);
+	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.SSID.1.Enable", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -690,7 +690,7 @@ static void test_api_bbfdm_library_set_value(void **state)
 
 	dmcmd("/bin/cp", 2, LIBBBF_TEST_PATH, LIBBBF_TEST_BBFDM_PATH);
 
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.ManagementServer.EnableCWMP", "true", NULL);
+	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.WiFi.SSID.1.Enable", "true", NULL);
 	assert_int_equal(fault, 0);
 
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
@@ -714,7 +714,7 @@ static void test_api_bbfdm_library_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.ManagementServer.InformParameter.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.SSID.", "test_key", NULL);
 	assert_int_equal(fault, 0);
 
 	assert_non_null(ctx->addobj_instance);
@@ -726,10 +726,10 @@ static void test_api_bbfdm_library_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.ManagementServer.InformParameter.1.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.1.", "test_key", NULL);
 	assert_int_equal(fault, 0);
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.ManagementServer.InformParameter.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.", "test_key", NULL);
 	assert_int_equal(fault, 0);
 }
 
