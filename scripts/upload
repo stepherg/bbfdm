@@ -73,13 +73,7 @@ upload_launch() {
 		return
 	}
 	
-	format='{ "size_upload": "%{size_upload}",
-			  "time_appconnect": "%{time_appconnect}",
-			  "time_connect": "%{time_connect}",
-			  "time_pretransfer": "%{time_pretransfer}",
-			  "time_starttransfer": "%{time_starttransfer}",
-			  "time_total": "%{time_total}",
-			  "exitcode": "%{exitcode}" }'
+	format='{ "size_upload":"%{size_upload}", "time_appconnect":"%{time_appconnect}", "time_connect":"%{time_connect}", "time_pretransfer":"%{time_pretransfer}", "time_starttransfer":"%{time_starttransfer}", "time_total":"%{time_total}", "exitcode":"%{exitcode}" }'
 
 	len_mb=$((file_length/(1000*1000)))
 	if [ $len_mb -gt 0 ]; then
