@@ -1122,6 +1122,7 @@ static int get_wifi_enable(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int set_wifi_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *map_ssid_s = NULL;
 	bool b;
 
 	switch (action) {
@@ -1132,6 +1133,11 @@ static int set_wifi_enable(char *refparam, struct dmctx *ctx, void *data, char *
 		case VALUESET:
 			string_to_bool(value, &b);
 			dmuci_set_value_by_section((((struct wifi_ssid_args *)data)->sections)->config_section, "disabled", b ? "0" : "1");
+
+			// mapcontroller config: Update the corresponding fronthaul ssid section if exist
+			map_ssid_s = find_mapcontroller_ssid_section((((struct wifi_ssid_args *)data)->sections)->config_section);
+			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "enabled", b ? "1" : "0");
+
 			return 0;
 	}
 	return 0;
