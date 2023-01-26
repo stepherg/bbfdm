@@ -1088,19 +1088,9 @@ int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, cha
 void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *additional_data)
 {
 	struct dm_parameter *dm_parameter;
-	struct list_head *ilist = NULL;
 
-	list_for_each(ilist, &ctx->list_parameter) {
-		dm_parameter = list_entry(ilist, struct dm_parameter, list);
-		int cmp = DM_STRCMP(dm_parameter->name, param_name);
-		if (cmp == 0) {
-			return;
-		} else if (cmp > 0) {
-			break;
-		}
-	}
 	dm_parameter = dmcalloc(1, sizeof(struct dm_parameter));
-	_list_add(&dm_parameter->list, ilist->prev, ilist);
+	list_add_tail(&dm_parameter->list, &ctx->list_parameter);
 	dm_parameter->name = param_name;
 	dm_parameter->data = param_data;
 	dm_parameter->type = param_type;

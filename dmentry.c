@@ -255,6 +255,14 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 {
 	int fault = 0;
 
+#ifdef DM_DEBUG
+	time_t s;  // Seconds
+	long ms; // Milliseconds
+	struct timespec tstart, tend;
+
+	clock_gettime(CLOCK_REALTIME, &tstart); // START TIME
+#endif //DM_DEBUG
+
 	// Load dynamic objects and parameters
 	load_dynamic_arrays(ctx);
 
@@ -326,6 +334,21 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 	}
 
 	dmuci_save();
+
+#ifdef DM_DEBUG
+	clock_gettime(CLOCK_REALTIME, &tend); // END TIME
+	s = tend.tv_sec - tstart.tv_sec;
+	ms = (tend.tv_nsec - tstart.tv_nsec) / 1.0e6; // Convert nanoseconds to milliseconds
+	if (ms < 0) {
+		ms = 1000 + ms;
+		s--;
+	}
+
+	TRACE("-----------------------------\n");
+	TRACE("CMD: %d : PATH: %s :: End: %ld s : %ld ms\n", cmd, inparam, (long)s, ms);
+	TRACE("-----------------------------\n");
+#endif //DM_DEBUG
+
 	return usp_fault_map(fault);
 }
 
