@@ -40,20 +40,21 @@ def is_param_obj_command_event_supported(dmobject):
     return "No"
 
 
-def add_data_to_list_dm(obj, supported, protocols, types):
+def add_data_to_list_dm(obj, supported, protocols, types, version):
     rootdm = bbf.get_root_node()
     if (rootdm):
         if (obj.startswith(rootdm)):
-            LIST_DM.append(obj + "," + protocols + "," + supported + "," + types)
+            LIST_DM.append(obj + "," + protocols + "," + supported + "," + types + "," + version)
     else:
-        LIST_DM.append(obj + "," + protocols + "," + supported + "," + types)
+        LIST_DM.append(obj + "," + protocols + "," + supported + "," + types + "," + version)
 
 def parse_standard_object(dmobject, value):
     hasobj = bbf.obj_has_child(value)
     hasparam = bbf.obj_has_param(value)
 
     supported = is_param_obj_command_event_supported(dmobject)
-    add_data_to_list_dm(dmobject, supported, getprotocols(value), "object")
+    version = bbf.get_option_value(value, "version", "2.0")
+    add_data_to_list_dm(dmobject, supported, getprotocols(value), "object", version)
 
     if hasparam:
         if isinstance(value, dict):
@@ -64,7 +65,8 @@ def parse_standard_object(dmobject, value):
                     for k1, v1 in v.items():
                         if k1 == "type" and v1 != "object":
                             supported = is_param_obj_command_event_supported(dmobject + k)
-                            add_data_to_list_dm(dmobject + k, supported, getprotocols(v), "operate" if "()" in k else "event" if "!" in k else "parameter")
+                            version = bbf.get_option_value(v, "version", "2.0")
+                            add_data_to_list_dm(dmobject + k, supported, getprotocols(v), "operate" if "()" in k else "event" if "!" in k else "parameter", version)
                             break
 
     if hasobj:
@@ -84,6 +86,7 @@ def parse_dynamic_object(dm_name_list):
         obj = json.loads(value)
         param = bbf.get_option_value(obj, "param", None)
         p_type = bbf.get_option_value(obj, "type", None)
+        version = bbf.get_option_value(obj, "version", "2.0")
         if param is None or p_type is None:
             continue
 
@@ -104,7 +107,7 @@ def parse_dynamic_object(dm_name_list):
                 continue
 
             dmType = "object" if p_type == "DMT_OBJ" else "parameter"
-            add_data_to_list_dm(param, "Yes", "CWMP+USP", dmType)
+            add_data_to_list_dm(param, "Yes", "CWMP+USP", dmType, version)
 
 
 def parse_object_tree(dm_name_list):
@@ -151,7 +154,8 @@ def generate_excel_file(output_file):
         'pattern: pattern solid, fore_colour custom_colour_grey;' + 'font: bold 1, color black;' + 'alignment: horizontal center;')
     sheet.write(0, 0, 'OBJ/PARAM/OPERATE', style_title)
     sheet.write(0, 1, 'Protocols', style_title)
-    sheet.write(0, 2, 'Supported', style_title)
+    sheet.write(0, 2, 'Version', style_title)
+    sheet.write(0, 3, 'Supported', style_title)
 
     i = 0
     for value in LIST_DM:
@@ -178,11 +182,13 @@ def generate_excel_file(output_file):
             sheet.write(i, 0, param[0])
 
         sheet.write(i, 1, param[1], style)
-        sheet.write(i, 2, param[2], style)
+        sheet.write(i, 2, param[4], style)
+        sheet.write(i, 3, param[2], style)
 
     sheet.col(0).width = 1300*20
     sheet.col(1).width = 175*20
     sheet.col(2).width = 175*20
+    sheet.col(3).width = 175*20
 
     wb.save(output_file)
 
