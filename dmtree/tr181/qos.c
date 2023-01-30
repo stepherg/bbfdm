@@ -566,15 +566,15 @@ static int set_QoSClassification_Order(char *refparam, struct dmctx *ctx, void *
 
 static int get_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ip_addr = NULL;
+	char *dest_ip = NULL;
+	char *mask = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dest_ip", &ip_addr);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dest_ip", &dest_ip);
 	// dest_ip can be of type, 'x.x.x.x' or 'x.x.x.x/y'
-	if (DM_STRLEN(ip_addr)) {
-		char *mask = strchr(ip_addr, '/');
-		if (mask != NULL)
-			*value = cidr2netmask(DM_STRTOL(mask + 1));
-	}
+	if (DM_STRLEN(dest_ip))
+		mask = strchr(dest_ip, '/');
+
+	*value = mask ? dest_ip : "";
 	return 0;
 }
 
@@ -616,15 +616,15 @@ static int set_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, voi
 
 static int get_QoSClassification_SourceMask(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ip_addr = NULL;
+	char *src_ip = NULL;
+	char *mask = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_ip", &ip_addr);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_ip", &src_ip);
 	// src_ip can be of type, 'x.x.x.x' or 'x.x.x.x/y'
-	if (DM_STRLEN(ip_addr)) {
-		char *mask = strchr(ip_addr, '/');
-		if (mask != NULL)
-			*value = cidr2netmask(DM_STRTOL(mask + 1));
-	}
+	if (DM_STRLEN(src_ip))
+		mask = strchr(src_ip, '/');
+
+	*value = mask ? src_ip : "";
 	return 0;
 }
 
@@ -698,7 +698,16 @@ static int set_QoSClassification_Interface(char *refparam, struct dmctx *ctx, vo
 
 static int get_QoSClassification_DestIP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dest_ip", value);
+	char *dest_ip = NULL;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dest_ip", &dest_ip);
+	if (DM_STRLEN(dest_ip)) {
+		char *mask = strchr(dest_ip, '/');
+		if (mask)
+			*mask = 0;
+	}
+
+	*value = dest_ip;
 	return 0;
 }
 
@@ -738,7 +747,16 @@ static int set_QoSClassification_DestIP(char *refparam, struct dmctx *ctx, void 
 
 static int get_QoSClassification_SourceIP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_ip", value);
+	char *src_ip = NULL;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_ip", &src_ip);
+	if (DM_STRLEN(src_ip)) {
+		char *mask = strchr(src_ip, '/');
+		if (mask)
+			*mask = 0;
+	}
+
+	*value = src_ip;
 	return 0;
 }
 
