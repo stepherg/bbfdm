@@ -587,8 +587,6 @@ static int browseIPInterfaceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_
 			continue;
 
 		dmuci_get_value_by_section_string(intf_s, "proto", &proto);
-		if (DM_LSTRCMP(proto, "none") == 0)
-			continue;
 
 		dmmap_s = check_dmmap_network_interface_ipv4("dmmap_network_ipv4", "intf_ipv4", section_name(parent_sec), section_name(intf_s));
 		dmuci_get_value_by_section_string(dmmap_s, "added_by_controller", &added_by_controller);
@@ -601,7 +599,7 @@ static int browseIPInterfaceIPv4AddressInst(struct dmctx *dmctx, DMNODE *parent_
 			ipaddr = dmjson_get_value(ipv4_obj, 1, "address");
 		}
 
-		if (*ipaddr == '\0' && added_by_controller && DM_LSTRCMP(added_by_controller, "1") != 0)
+		if (*ipaddr == '\0' && DM_LSTRCMP(added_by_controller, "1") != 0 && DM_LSTRCMP(proto, "none") != 0)
 			continue;
 
 		if (dmmap_s == NULL)
@@ -1707,7 +1705,9 @@ static int get_IPInterfaceIPv4Address_Enable(char *refparam, struct dmctx *ctx, 
 
 static int set_IPInterfaceIPv4Address_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *proto;
+	char *proto = NULL;
+	char *parent_section = NULL;
+	char *enable = NULL;
 	bool b;
 
 	switch (action)	{
@@ -1717,15 +1717,40 @@ static int set_IPInterfaceIPv4Address_Enable(char *refparam, struct dmctx *ctx, 
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
+
+			get_IPInterfaceIPv4Address_Enable(refparam, ctx, data, instance, &enable);
+			if (enable && ((*enable == '1' && b) || (*enable == '0' && !b)))
+				return 0;
+
+			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "parent_section", &parent_section);
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-			if (DM_LSTRCMP(proto, "none") == 0) {
-				char *ip_addr;
 
-				dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "ipaddr", &ip_addr);
-				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "proto", b ? (*ip_addr == '\0' ? "dhcp" : "static") : "none");
+			if (strcmp(parent_section, section_name(((struct intf_ip_args *)data)->interface_sec)) == 0) {
+				// This is the main section, so not possible to set 'disabled' option to 1
+				// Instead of that set 'proto' to 'none'
+				char *saved_proto = NULL;
+
+				dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "saved_proto", &saved_proto);
+
+				if (b) {
+					// Set current 'proto' to saved proto
+					dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "proto", saved_proto);
+				} else {
+					// Store current 'proto' in dmmap
+					dmuci_set_value_by_section(((struct intf_ip_args *)data)->dmmap_sec, "saved_proto", proto);
+
+					// Set current 'proto' to 'none'
+					dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "proto", "none");
+				}
+			} else {
+				if (DM_LSTRCMP(proto, "none") == 0) {
+					char *ip_addr;
+
+					dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "ipaddr", &ip_addr);
+					dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "proto", b ? (*ip_addr == '\0' ? "dhcp" : "static") : "none");
+				}
+				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "disabled", b ? "0" : "1");
 			}
-			dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "disabled", b ? "0" : "1");
-
 			break;
 	}
 	return 0;
@@ -1751,6 +1776,7 @@ static int get_IPInterfaceIPv4Address_Alias(char *refparam, struct dmctx *ctx, v
 static int set_IPInterfaceIPv4Address_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *proto = NULL;
+	char *saved_proto = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -1759,7 +1785,8 @@ static int set_IPInterfaceIPv4Address_Alias(char *refparam, struct dmctx *ctx, v
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-			if (proto && DM_LSTRCMP(proto, "static") == 0)
+			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "saved_proto", &saved_proto);
+			if (DM_LSTRCMP(proto, "static") == 0 || DM_LSTRCMP(saved_proto, "static") == 0)
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->dmmap_sec, "ipv4_alias", value);
 			break;
 	}
@@ -1784,7 +1811,8 @@ static int get_IPInterfaceIPv4Address_IPAddress(char *refparam, struct dmctx *ct
 
 static int set_IPInterfaceIPv4Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *proto_intf = NULL;
+	char *proto = NULL;
+	char *saved_proto = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -1792,8 +1820,9 @@ static int set_IPInterfaceIPv4Address_IPAddress(char *refparam, struct dmctx *ct
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto_intf);
-			if (proto_intf && DM_LSTRCMP(proto_intf, "static") == 0)
+			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
+			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "saved_proto", &saved_proto);
+			if (DM_LSTRCMP(proto, "static") == 0 || DM_LSTRCMP(saved_proto, "static") == 0)
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "ipaddr", value);
 			break;
 	}
@@ -1820,6 +1849,7 @@ static int get_IPInterfaceIPv4Address_SubnetMask(char *refparam, struct dmctx *c
 static int set_IPInterfaceIPv4Address_SubnetMask(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *proto = NULL;
+	char *saved_proto = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -1828,7 +1858,8 @@ static int set_IPInterfaceIPv4Address_SubnetMask(char *refparam, struct dmctx *c
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-			if (proto && DM_LSTRCMP(proto, "static") == 0)
+			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "saved_proto", &saved_proto);
+			if (DM_LSTRCMP(proto, "static") == 0 || DM_LSTRCMP(saved_proto, "static") == 0)
 				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "netmask", value);
 			break;
 	}
@@ -1839,11 +1870,14 @@ static int set_IPInterfaceIPv4Address_SubnetMask(char *refparam, struct dmctx *c
 static int get_IPInterfaceIPv4Address_AddressingType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *proto = NULL;
+	char *saved_proto = NULL;
 
 	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
-	if (proto && DM_LSTRCMP(proto, "static") == 0)
+	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "saved_proto", &saved_proto);
+
+	if (DM_LSTRCMP(proto, "static") == 0 || DM_LSTRCMP(saved_proto, "static") == 0)
 		*value = "Static";
-	else if (proto && DM_LSTRNCMP(proto, "ppp", 3) == 0)
+	else if (DM_LSTRNCMP(proto, "ppp", 3) == 0)
 		*value = "IPCP";
 	else
 		*value = "DHCP";
