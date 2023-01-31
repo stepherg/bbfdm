@@ -48362,21 +48362,6 @@
 								"min": 8,
 								"max": 8
 							}
-						],
-						"mapping": [
-							{
-								"type": "uci",
-								"uci": {
-									"file": "wireless",
-									"section": {
-										"type": "wifi-iface",
-										"index": "@i-1"
-									},
-									"option": {
-										"name": "wps_pin"
-									}
-								}
-							}
 						]
 					}
 				},

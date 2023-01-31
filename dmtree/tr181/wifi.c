@@ -2289,67 +2289,14 @@ static int set_WiFiAccessPointWPS_Enable(char *refparam, struct dmctx *ctx, void
 
 static int get_WiFiAccessPointWPS_ConfigMethodsSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "PushButton,Label,PIN";
+	*value = "PushButton";
 	return 0;
-}
-
-static int get_wps_config_methods_enabled(struct uci_section *section, char **value)
-{
-	char *pushbut = NULL, *label = NULL, *pin = NULL;
-	char buf[32] = {0};
-
-	dmuci_get_value_by_section_string(section, "wps_pushbutton", &pushbut);
-	dmuci_get_value_by_section_string(section, "wps_label", &label);
-	dmuci_get_value_by_section_string(section, "wps_pin", &pin);
-
-	if (*pushbut && DM_LSTRCMP(pushbut, "1") == 0)
-		DM_STRNCPY(buf, "PushButton", sizeof(buf));
-
-	if (*label && DM_LSTRCMP(label, "1") == 0) {
-		if (*buf)
-			strcat(buf, ",");
-
-		strcat(buf, "Label");
-	}
-
-	if (*pin && DM_LSTRCMP(pin, "1") == 0) {
-		if (*buf)
-			strcat(buf, ",");
-
-		strcat(buf, "PIN");
-	}
-
-	*value = dmstrdup(buf);
-	return 0;
-}
-
-static void set_wps_config_methods_enabled(struct uci_section *section, char *value)
-{
-	char *token = NULL, *saveptr = NULL;
-	bool pushbut = false, label = false, pin = false;
-
-	char *wps_list = dmstrdup(value);
-	for (token = strtok_r(wps_list, ",", &saveptr); token; token = strtok_r(NULL, ",", &saveptr)) {
-
-		if (DM_LSTRCMP(token, "PushButton") == 0)
-			pushbut = true;
-
-		if (DM_LSTRCMP(token, "Label") == 0)
-			label = true;
-
-		if (DM_LSTRCMP(token, "PIN") == 0)
-			pin = true;
-	}
-	dmfree(wps_list);
-
-	dmuci_set_value_by_section(section, "wps_pushbutton", pushbut ? "1" : "0");
-	dmuci_set_value_by_section(section, "wps_label", label ? "1" : "0");
-	dmuci_set_value_by_section(section, "wps_pin", pin ? "1" : "0");
 }
 
 static int get_WiFiAccessPointWPS_ConfigMethodsEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_wps_config_methods_enabled((((struct wifi_acp_args *)data)->sections)->config_section, value);
+	*value = "PushButton";
+	return 0;
 }
 
 static int set_WiFiAccessPointWPS_ConfigMethodsEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -2358,9 +2305,13 @@ static int set_WiFiAccessPointWPS_ConfigMethodsEnabled(char *refparam, struct dm
 		case VALUECHECK:
 			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, NULL, NULL))
 				return FAULT_9007;
+
+			if (DM_STRCMP(value, "PushButton") != 0)
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
-			set_wps_config_methods_enabled((((struct wifi_acp_args *)data)->sections)->config_section, value);
+			// Don't do anything since we only support 'PushButton'
 			break;
 	}
 	return 0;
@@ -2372,20 +2323,6 @@ static int get_WiFiAccessPointWPS_Status(char *refparam, struct dmctx *ctx, void
 	char *wps_status;
 	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "wps_pushbutton", &wps_status);
 	*value = (wps_status[0] == '1') ? "Configured" : "Disabled";
-	return 0;
-}
-
-static int set_WiFiAccessPointWPS_PIN(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 8, NULL, PIN))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "wps_pin", value);
-			break;
-	}
 	return 0;
 }
 
@@ -2859,13 +2796,14 @@ static int set_WiFiEndPointWPS_Enable(char *refparam, struct dmctx *ctx, void *d
 
 static int get_WiFiEndPointWPS_ConfigMethodsSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "PushButton,Label,PIN";
+	*value = "PushButton";
 	return 0;
 }
 
 static int get_WiFiEndPointWPS_ConfigMethodsEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_wps_config_methods_enabled((((struct wifi_enp_args *)data)->sections)->config_section, value);
+	*value = "PushButton";
+	return 0;
 }
 
 static int set_WiFiEndPointWPS_ConfigMethodsEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -2874,9 +2812,13 @@ static int set_WiFiEndPointWPS_ConfigMethodsEnabled(char *refparam, struct dmctx
 		case VALUECHECK:
 			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, NULL, NULL))
 				return FAULT_9007;
+
+			if (DM_STRCMP(value, "PushButton") != 0)
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
-			set_wps_config_methods_enabled((((struct wifi_enp_args *)data)->sections)->config_section, value);
+			// Don't do anything since we only support 'PushButton'
 			break;
 	}
 	return 0;
@@ -2888,27 +2830,6 @@ static int get_WiFiEndPointWPS_Status(char *refparam, struct dmctx *ctx, void *d
 	char *wps_status;
 	dmuci_get_value_by_section_string((((struct wifi_enp_args *)data)->sections)->config_section, "wps_pushbutton", &wps_status);
 	*value = (wps_status[0] == '1') ? "Configured" : "Disabled";
-	return 0;
-}
-
-/*#Device.WiFi.EndPoint.{i}.WPS.PIN!UCI:wireless/wifi-iface,@i-1/wps_pin*/
-static int get_WiFiEndPointWPS_PIN(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = "0";
-	return 0;
-}
-
-static int set_WiFiEndPointWPS_PIN(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"4","4"},{"8","8"}}, 2))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_enp_args *)data)->sections)->config_section, "wps_pin", value);
-			break;
-	}
 	return 0;
 }
 
@@ -6573,7 +6494,7 @@ DMLEAF tWiFiAccessPointWPSParams[] = {
 {"ConfigMethodsEnabled", &DMWRITE, DMT_STRING, get_WiFiAccessPointWPS_ConfigMethodsEnabled, set_WiFiAccessPointWPS_ConfigMethodsEnabled, BBFDM_BOTH, "2.0"},
 {"Status", &DMREAD, DMT_STRING, get_WiFiAccessPointWPS_Status, NULL, BBFDM_BOTH, "2.11"},
 //{"Version", &DMREAD, DMT_STRING, get_WiFiAccessPointWPS_Version, NULL, BBFDM_BOTH, "2.11"},
-{"PIN", &DMWRITE, DMT_STRING, get_empty, set_WiFiAccessPointWPS_PIN, BBFDM_BOTH, "2.11"},
+//{"PIN", &DMWRITE, DMT_STRING, get_empty, set_WiFiAccessPointWPS_PIN, BBFDM_BOTH, "2.11"},
 {"InitiateWPSPBC()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiAccessPointWPS_InitiateWPSPBC, operate_WiFiAccessPointWPS_InitiateWPSPBC, BBFDM_USP, "2.15"},
 {0}
 };
@@ -6703,7 +6624,7 @@ DMLEAF tWiFiEndPointWPSParams[] = {
 {"ConfigMethodsEnabled", &DMWRITE, DMT_STRING, get_WiFiEndPointWPS_ConfigMethodsEnabled, set_WiFiEndPointWPS_ConfigMethodsEnabled, BBFDM_BOTH, "2.0"},
 {"Status", &DMREAD, DMT_STRING, get_WiFiEndPointWPS_Status, NULL, BBFDM_BOTH, "2.11"},
 //{"Version", &DMREAD, DMT_STRING, get_WiFiEndPointWPS_Version, NULL, BBFDM_BOTH, "2.11"},
-{"PIN", &DMWRITE, DMT_UNINT, get_WiFiEndPointWPS_PIN, set_WiFiEndPointWPS_PIN, BBFDM_BOTH, "2.11"},
+//{"PIN", &DMWRITE, DMT_UNINT, get_WiFiEndPointWPS_PIN, set_WiFiEndPointWPS_PIN, BBFDM_BOTH, "2.11"},
 {0}
 };
 
