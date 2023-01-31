@@ -244,7 +244,6 @@ static char *get_security_mode(struct uci_section *section)
 static void reset_wlan(struct uci_section *s)
 {
 	dmuci_delete_by_section(s, "wpa_group_rekey", NULL);
-	dmuci_delete_by_section(s, "wps", NULL);
 	dmuci_delete_by_section(s, "key", NULL);
 	dmuci_delete_by_section(s, "key1", NULL);
 	dmuci_delete_by_section(s, "key2", NULL);
@@ -1888,7 +1887,7 @@ static void set_security_mode(struct uci_section *section, char *value, bool is_
 			dmuci_set_value_by_section(section, "encryption", "psk2");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
-			dmuci_set_value_by_section(section, "wps", "1");
+			dmuci_set_value_by_section(section, "wps_pushbutton", "1");
 			dmuci_set_value_by_section(section, "ieee80211w", "1");
 
 			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "psk2");
@@ -1903,7 +1902,7 @@ static void set_security_mode(struct uci_section *section, char *value, bool is_
 			dmuci_set_value_by_section(section, "encryption", "psk-mixed");
 			dmuci_set_value_by_section(section, "key", wpa_key);
 			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
-			dmuci_set_value_by_section(section, "wps", "1");
+			dmuci_set_value_by_section(section, "wps_pushbutton", "1");
 
 			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "psk-mixed");
 			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
@@ -2253,10 +2252,10 @@ static int set_WiFiAccessPointSecurity_MFPConfig(char *refparam, struct dmctx *c
 	return 0;
 }
 
-/*#Device.WiFi.AccessPoint.{i}.WPS.Enable!UCI:wireless/wifi-iface,@i-1/wps*/
+/*#Device.WiFi.AccessPoint.{i}.WPS.Enable!UCI:wireless/wifi-iface,@i-1/wps_pushbutton*/
 static int get_WiFiAccessPointWPS_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_acp_args *)data)->sections)->config_section, "wps", "0");
+	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_acp_args *)data)->sections)->config_section, "wps_pushbutton", "0");
 	return 0;
 }
 
@@ -2271,7 +2270,7 @@ static int set_WiFiAccessPointWPS_Enable(char *refparam, struct dmctx *ctx, void
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "wps", b ? "1" : "0");
+			dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "wps_pushbutton", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -2356,11 +2355,11 @@ static int set_WiFiAccessPointWPS_ConfigMethodsEnabled(char *refparam, struct dm
 	return 0;
 }
 
-/*#Device.WiFi.AccessPoint.{i}.WPS.Status!UCI:wireless/wifi-iface,@i-1/wps*/
+/*#Device.WiFi.AccessPoint.{i}.WPS.Status!UCI:wireless/wifi-iface,@i-1/wps_pushbutton*/
 static int get_WiFiAccessPointWPS_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *wps_status;
-	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "wps", &wps_status);
+	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "wps_pushbutton", &wps_status);
 	*value = (wps_status[0] == '1') ? "Configured" : "Disabled";
 	return 0;
 }
@@ -2823,10 +2822,10 @@ static int set_WiFiEndPointProfileSecurity_MFPConfig(char *refparam, struct dmct
 	return 0;
 }
 
-/*#Device.WiFi.EndPoint.{i}.WPS.Enable!UCI:wireless/wifi-iface,@i-1/wps*/
+/*#Device.WiFi.EndPoint.{i}.WPS.Enable!UCI:wireless/wifi-iface,@i-1/wps_pushbutton*/
 static int get_WiFiEndPointWPS_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_enp_args *)data)->sections)->config_section, "wps", "0");
+	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_enp_args *)data)->sections)->config_section, "wps_pushbutton", "0");
 	return 0;
 }
 
@@ -2841,7 +2840,7 @@ static int set_WiFiEndPointWPS_Enable(char *refparam, struct dmctx *ctx, void *d
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_enp_args *)data)->sections)->config_section, "wps", b ? "1" : "0");
+			dmuci_set_value_by_section((((struct wifi_enp_args *)data)->sections)->config_section, "wps_pushbutton", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -2872,11 +2871,11 @@ static int set_WiFiEndPointWPS_ConfigMethodsEnabled(char *refparam, struct dmctx
 	return 0;
 }
 
-/*#Device.WiFi.EndPoint.{i}.WPS.Status!UCI:wireless/wifi-iface,@i-1/wps*/
+/*#Device.WiFi.EndPoint.{i}.WPS.Status!UCI:wireless/wifi-iface,@i-1/wps_pushbutton*/
 static int get_WiFiEndPointWPS_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *wps_status;
-	dmuci_get_value_by_section_string((((struct wifi_enp_args *)data)->sections)->config_section, "wps", &wps_status);
+	dmuci_get_value_by_section_string((((struct wifi_enp_args *)data)->sections)->config_section, "wps_pushbutton", &wps_status);
 	*value = (wps_status[0] == '1') ? "Configured" : "Disabled";
 	return 0;
 }
@@ -5897,7 +5896,6 @@ static int operate_WiFiAccessPointSecurity_Reset(char *refparam, struct dmctx *c
 {
 	dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "encryption", "psk");
 	dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "key", get_default_wpa_key());
-	dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "wps", "1");
 	dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "wps_pushbutton", "1");
 
 	return CMD_SUCCESS;

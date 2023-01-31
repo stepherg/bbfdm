@@ -43676,7 +43676,7 @@
 										"index": "@i-1"
 									},
 									"option": {
-										"name": "wps"
+										"name": "wps_pushbutton"
 									}
 								}
 							}
@@ -43750,7 +43750,7 @@
 										"index": "@i-1"
 									},
 									"option": {
-										"name": "wps"
+										"name": "wps_pushbutton"
 									}
 								}
 							}
@@ -43808,21 +43808,6 @@
 									"Error_Not_Ready",
 									"Error_Timeout",
 									"Error_Other"
-								],
-								"mapping": [
-									{
-										"type": "uci",
-										"uci": {
-											"file": "wireless",
-											"section": {
-												"type": "wifi-iface",
-												"index": "@i-1"
-											},
-											"option": {
-												"name": "wps"
-											}
-										}
-									}
 								]
 							}
 						}
@@ -45274,7 +45259,7 @@
 										"index": "@i-1"
 									},
 									"option": {
-										"name": "wps"
+										"name": "wps_pushbutton"
 									}
 								}
 							}
@@ -45347,7 +45332,7 @@
 										"index": "@i-1"
 									},
 									"option": {
-										"name": "wps"
+										"name": "wps_pushbutton"
 									}
 								}
 							}
