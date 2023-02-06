@@ -13,6 +13,7 @@
  */
 
 #include "wifi.h"
+#include "dmbbfcommon.h"
 
 struct wifi_radio_args
 {
@@ -268,14 +269,6 @@ static char *get_default_wpa_key()
 	char *wpakey;
 	db_get_value_string("hw", "board", "wpa_key", &wpakey);
 	return wpakey;
-}
-
-static void wifi_start_scan(const char *radio)
-{
-	char object[32];
-
-	snprintf(object, sizeof(object), "wifi.radio.%s", radio);
-	dmubus_call_set(object, "scan", UBUS_ARGS{0}, 0);
 }
 
 struct uci_section *find_mapcontroller_ssid_section(struct uci_section *wireless_ssid_s)
@@ -619,18 +612,12 @@ static int browseWiFiEndPointProfileInst(struct dmctx *dmctx, DMNODE *parent_nod
 static int browseWifiNeighboringWiFiDiagnosticResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	json_object *res = NULL, *accesspoints = NULL, *arrobj = NULL;
-	char object[32], *inst = NULL;
-	int id = 0, i;
+	char *inst = NULL;
 
-	uci_foreach_sections("wireless", "wifi-device", s) {
-		snprintf(object, sizeof(object), "wifi.radio.%s", section_name(s));
-		dmubus_call(object, "scanresults", UBUS_ARGS{0}, 0, &res);
-		dmjson_foreach_obj_in_array(res, arrobj, accesspoints, i, 1, "accesspoints") {
-			inst = handle_instance_without_section(dmctx, parent_node, ++id);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)accesspoints, inst) == DM_STOP)
-				return 0;
-		}
+	uci_path_foreach_sections(bbfdm, "dmmap_wifi_neighboring", "result", s) {
+		inst = handle_instance(dmctx, parent_node, s, "wifineighbor_instance", "wifineighbor_alias");
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
+			break;
 	}
 	return 0;
 }
@@ -2992,7 +2979,7 @@ static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int set_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *ss = NULL;
+	struct uci_section *s;
 
 	switch (action) {
 		case VALUECHECK:
@@ -3000,13 +2987,14 @@ static int set_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, st
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			if (file_exists("/etc/bbfdm/dmmap/dmmap_wifi_neighboring"))
+				remove("/etc/bbfdm/dmmap/dmmap_wifi_neighboring");
+			dmuci_add_section_bbfdm("dmmap_wifi_neighboring", "diagnostic_status", &s);
+			dmuci_set_value_by_section(s, "DiagnosticsState", value);
 			if (DM_LSTRCMP(value, "Requested") == 0) {
-				// cppcheck-suppress unknownMacro
-				uci_foreach_sections("wireless", "wifi-device", ss)
-					wifi_start_scan(section_name(ss));
-
-				dmubus_call_set("tr069", "inform", UBUS_ARGS{{"event", "8 DIAGNOSTICS COMPLETE", String}}, 1);
+				bbf_set_end_session_flag(ctx, BBF_END_SESSION_NEIGBORING_WIFI_DIAGNOSTIC);
 			}
+
 			return 0;
 	}
 	return 0;
@@ -3451,22 +3439,9 @@ static int get_radio_channel(char *refparam, struct dmctx *ctx, void *data, char
 
 static int get_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *ss = NULL;
-	json_object *res = NULL, *neighboring_wifi_obj = NULL;
-	char object[32];
-
-	*value = "None";
-	uci_foreach_sections("wireless", "wifi-device", ss) {
-		snprintf(object, sizeof(object), "wifi.radio.%s", section_name(ss));
-		dmubus_call(object, "scanresults", UBUS_ARGS{0}, 0, &res);
-		DM_ASSERT(res, *value = "None");
-		neighboring_wifi_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "accesspoints");
-		if (neighboring_wifi_obj) {
-			*value = "Complete";
-			break;
-		} else
-			*value = "None";
-	}
+	dmuci_get_option_value_string_bbfdm("dmmap_wifi_neighboring", "@diagnostic_status[0]", "DiagnosticsState", value);
+	if ((*value)[0] == '\0')
+		*value = "None";
 	return 0;
 }
 
@@ -3480,42 +3455,42 @@ static int get_neighboring_wifi_diagnostics_result_number_entries(char *refparam
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.SSID!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].ssid*/
 static int get_neighboring_wifi_diagnostics_result_ssid(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "ssid");
+	dmuci_get_value_by_section_string((struct uci_section *)data, "ssid", value);
 	return 0;
 }
 
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.BSSID!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].bssid*/
 static int get_neighboring_wifi_diagnostics_result_bssid(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "bssid");
+	dmuci_get_value_by_section_string((struct uci_section *)data, "bssid", value);
 	return 0;
 }
 
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.Channel!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].channel*/
 static int get_neighboring_wifi_diagnostics_result_channel(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "channel");
+	dmuci_get_value_by_section_string((struct uci_section *)data, "channel", value);
 	return 0;
 }
 
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.SignalStrength!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].rssi*/
 static int get_neighboring_wifi_diagnostics_result_signal_strength(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "rssi");
+	dmuci_get_value_by_section_string((struct uci_section *)data, "rssi", value);
 	return 0;
 }
 
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.OperatingFrequencyBand!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].band*/
 static int get_neighboring_wifi_diagnostics_result_operating_frequency_band(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "band");
+	dmuci_get_value_by_section_string((struct uci_section *)data, "band", value);
 	return 0;
 }
 
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.Noise!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].noise*/
 static int get_neighboring_wifi_diagnostics_result_noise(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "noise");
+	dmuci_get_value_by_section_string((struct uci_section *)data, "noise", value);
 	return 0;
 }
 
@@ -5803,6 +5778,16 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 				signal_strength[1] = dmjson_get_value(array_obj, 1, "rssi");
 				noise[1] = dmjson_get_value(array_obj, 1, "noise");
 
+				if (bbfdatamodel_type != BBFDM_USP) {
+					struct uci_section *dmmap_s = NULL;
+					dmuci_add_section_bbfdm("dmmap_wifi_neighboring", "result", &dmmap_s);
+					dmuci_set_value_by_section(dmmap_s, "ssid", ssid[1]);
+					dmuci_set_value_by_section(dmmap_s, "bssid", bssid[1]);
+					dmuci_set_value_by_section(dmmap_s, "channel", channel[1]);
+					dmuci_set_value_by_section(dmmap_s, "rssi", signal_strength[1]);
+					dmuci_set_value_by_section(dmmap_s, "band", frequency[1]);
+					dmuci_set_value_by_section(dmmap_s, "noise", noise[1]);
+				}
 				dmasprintf(&ssid[0], "Result.%d.SSID", index);
 				dmasprintf(&bssid[0], "Result.%d.BSSID", index);
 				dmasprintf(&channel[0], "Result.%d.Channel", index);
@@ -5818,6 +5803,11 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 				add_list_parameter(ctx, noise[0], noise[1], DMT_TYPE[DMT_INT], NULL);
 				index++;
 			}
+		}
+
+		if (bbfdatamodel_type != BBFDM_USP) {
+			dmuci_set_value_bbfdm("dmmap_wifi_neighboring", "@diagnostic_status[0]", "DiagnosticsState", "Complete");
+			dmuci_commit_package_bbfdm("dmmap_wifi_neighboring");
 		}
 	}
 
