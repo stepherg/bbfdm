@@ -12,18 +12,9 @@ config controller 'controller'
 config interface 'lan'
 
 config ap
-        option band '5'
-        option ssid 'iopsysWrt-44D43771B410'
-        option encryption 'sae-mixed'
-        option key 'PCTQ44TNVKK5NU'
-        option vid '1'
-        option type 'fronthaul'
-        option network 'lan'
-
-config ap
         option band '2'
-        option ssid 'iopsysWrt-44D43771B410'
-        option encryption 'sae-mixed'
+        option ssid 'iopsysWrt-44D43771B810'
+        option encryption 'MPUEO3L7WHJ45P'
         option key 'PCTQ44TNVKK5NU'
         option vid '1'
         option type 'fronthaul'
@@ -31,19 +22,9 @@ config ap
 
 config ap
         option band '5'
-        option ssid 'MAP-44D43771B410-BH-5GHz'
+        option ssid 'MAP-44D43771B810-BH-5GHz'
         option encryption 'sae'
         option type 'backhaul'
-        option vid '1'
-        option network 'lan'
-        option key '029be741b7ff7b4caf9b1b3c48c56030fed877c22f5031bc9cf0132d1672c2c'
-
-config ap
-        option band '2'
-        option ssid 'MAP-44D43771B410-BH-2.4GHz'
-        option encryption 'sae'
-        option type 'backhaul'
-        list disallow_bsta '0'
         option vid '1'
         option network 'lan'
         option key '029be741b7ff7b4caf9b1b3c48c56030fed877c22f5031bc9cf0132d1672c2c'

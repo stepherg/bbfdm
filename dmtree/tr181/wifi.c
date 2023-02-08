@@ -271,10 +271,9 @@ static char *get_default_wpa_key()
 	return wpakey;
 }
 
-struct uci_section *find_mapcontroller_ssid_section(struct uci_section *wireless_ssid_s)
+struct uci_section *find_mapcontroller_section(struct uci_section *wireless_s)
 {
 	struct uci_section *s = NULL;
-	char *multi_ap = NULL;
 	char *device = NULL;
 	char *ssid = NULL;
 	char *band = NULL;
@@ -282,15 +281,11 @@ struct uci_section *find_mapcontroller_ssid_section(struct uci_section *wireless
 	if (!file_exists("/etc/config/mapcontroller"))
 		return NULL;
 
-	dmuci_get_value_by_section_string(wireless_ssid_s, "multi_ap", &multi_ap);
-	if (DM_LSTRCMP(multi_ap, "2") != 0)
-		return NULL;
-
-	dmuci_get_value_by_section_string(wireless_ssid_s, "ssid", &ssid);
-	dmuci_get_value_by_section_string(wireless_ssid_s, "device", &device);
+	dmuci_get_value_by_section_string(wireless_s, "ssid", &ssid);
+	dmuci_get_value_by_section_string(wireless_s, "device", &device);
 	band = get_radio_option_nocache(device, "band");
 
-	uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
+	uci_foreach_sections("mapcontroller", "ap", s) {
 		char *curr_ssid = NULL;
 		char *curr_band = NULL;
 
@@ -1108,21 +1103,31 @@ static int get_wifi_enable(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int set_wifi_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *map_ssid_s = NULL;
+	struct uci_section *map_s = NULL;
+	char *multi_ap = NULL;
 	bool b;
+
+	map_s = find_mapcontroller_section((((struct wifi_ssid_args *)data)->sections)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
+
+			dmuci_get_value_by_section_string((((struct wifi_ssid_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
+			if (DM_STRLEN(multi_ap) && !map_s)
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
+
+			// wireless config: Update disabled option
 			dmuci_set_value_by_section((((struct wifi_ssid_args *)data)->sections)->config_section, "disabled", b ? "0" : "1");
 
-			// mapcontroller config: Update the corresponding fronthaul ssid section if exist
-			map_ssid_s = find_mapcontroller_ssid_section((((struct wifi_ssid_args *)data)->sections)->config_section);
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "enabled", b ? "1" : "0");
+			// mapcontroller config: Update the corresponding ap section if exists
+			if (map_s)
+				dmuci_set_value_by_section(map_s, "enabled", b ? "1" : "0");
 
 			return 0;
 	}
@@ -1146,20 +1151,28 @@ static int get_wlan_ssid(char *refparam, struct dmctx *ctx, void *data, char *in
 
 static int set_wlan_ssid(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *map_ssid_s = NULL;
+	struct uci_section *map_s = NULL;
+	char *multi_ap = NULL;
+
+	map_s = find_mapcontroller_section((((struct wifi_ssid_args *)data)->sections)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, 32, NULL, NULL))
 				return FAULT_9007;
+
+			dmuci_get_value_by_section_string((((struct wifi_ssid_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
+			if (DM_STRLEN(multi_ap) && !map_s)
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
-			// mapcontroller config: Update the corresponding fronthaul ssid section if exist
-			map_ssid_s = find_mapcontroller_ssid_section((((struct wifi_ssid_args *)data)->sections)->config_section);
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "ssid", value);
-
 			// wireless config: Update ssid option
 			dmuci_set_value_by_section((((struct wifi_ssid_args *)data)->sections)->config_section, "ssid", value);
+
+			// mapcontroller config: Update the corresponding ap section if exists
+			if (map_s)
+				dmuci_set_value_by_section(map_s, "ssid", value);
 
 			return 0;
 	}
@@ -1818,31 +1831,26 @@ static bool is_different_group(const char *mode1, const char *mode2)
 
 }
 
-static void set_security_mode(struct uci_section *section, char *value, bool is_endpoint)
+static void set_security_mode(struct uci_section *wireless_s, struct uci_section *map_s, char *value)
 {
-	struct uci_section *map_ssid_s = NULL;
 	char *wpa_key = NULL;
-	char *mode = get_security_mode(section);
-
-	// mapcontroller config: find the corresponding fronthaul ssid section if exist
-	if (!is_endpoint)
-		map_ssid_s = find_mapcontroller_ssid_section(section);
+	char *mode = get_security_mode(wireless_s);
 
 	// Use default key only in case the key is not set
-	dmuci_get_value_by_section_string(section, "key", &wpa_key);
+	dmuci_get_value_by_section_string(wireless_s, "key", &wpa_key);
 	if (DM_STRLEN(wpa_key) == 0)
 		wpa_key = get_default_wpa_key();
 
 	if (mode && DM_STRCMP(value, mode) != 0) {
 		// Only reset the wlan key section if its belongs to different group
 		if (is_different_group(value, mode))
-			reset_wlan(section);
-		dmuci_set_value_by_section(section, "ieee80211w", "0");
+			reset_wlan(wireless_s);
+		dmuci_set_value_by_section(wireless_s, "ieee80211w", "0");
 
 		if (DM_LSTRCMP(value, "None") == 0) {
-			dmuci_set_value_by_section(section, "encryption", "none");
+			dmuci_set_value_by_section(wireless_s, "encryption", "none");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "none");
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "none");
 		} else if (DM_LSTRCMP(value, "WEP-64") == 0) {
 			char key[16], buf[11];
 			int i;
@@ -1850,12 +1858,12 @@ static void set_security_mode(struct uci_section *section, char *value, bool is_
 			generate_wep_key("iopsys", buf, sizeof(buf));
 			for (i = 0; i < 4; i++) {
 				snprintf(key, sizeof(key), "key%d", i + 1);
-				dmuci_set_value_by_section(section, key, buf);
+				dmuci_set_value_by_section(wireless_s, key, buf);
 			}
-			dmuci_set_value_by_section(section, "encryption", "wep-open");
-			dmuci_set_value_by_section(section, "key", "1");
+			dmuci_set_value_by_section(wireless_s, "encryption", "wep-open");
+			dmuci_set_value_by_section(wireless_s, "key", "1");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "none");
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "none");
 		} else if (DM_LSTRCMP(value, "WEP-128") == 0) {
 			char key[16], buf[27];
 			int i;
@@ -1863,71 +1871,71 @@ static void set_security_mode(struct uci_section *section, char *value, bool is_
 			generate_wep_key("iopsys_wep128", buf, sizeof(buf));
 			for (i = 0; i < 4; i++) {
 				snprintf(key, sizeof(key), "key%d", i + 1);
-				dmuci_set_value_by_section(section, key, buf);
+				dmuci_set_value_by_section(wireless_s, key, buf);
 			}
-			dmuci_set_value_by_section(section, "encryption", "wep-open");
-			dmuci_set_value_by_section(section, "key", "1");
+			dmuci_set_value_by_section(wireless_s, "encryption", "wep-open");
+			dmuci_set_value_by_section(wireless_s, "key", "1");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "none");
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "none");
 		} else if (DM_LSTRCMP(value, "WPA-Personal") == 0) {
-			dmuci_set_value_by_section(section, "encryption", "psk");
-			dmuci_set_value_by_section(section, "key", wpa_key);
-			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
+			dmuci_set_value_by_section(wireless_s, "encryption", "psk");
+			dmuci_set_value_by_section(wireless_s, "key", wpa_key);
+			dmuci_set_value_by_section(wireless_s, "wpa_group_rekey", "3600");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "psk");
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "psk");
+			if (map_s) dmuci_set_value_by_section(map_s, "key", wpa_key);
 		} else if (DM_LSTRCMP(value, "WPA-Enterprise") == 0) {
-			dmuci_set_value_by_section(section, "encryption", "wpa");
-			dmuci_set_value_by_section(section, "auth_port", "1812");
+			dmuci_set_value_by_section(wireless_s, "encryption", "wpa");
+			dmuci_set_value_by_section(wireless_s, "auth_port", "1812");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "wpa");
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "wpa");
 		} else if (DM_LSTRCMP(value, "WPA2-Personal") == 0) {
-			dmuci_set_value_by_section(section, "encryption", "psk2");
-			dmuci_set_value_by_section(section, "key", wpa_key);
-			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
-			dmuci_set_value_by_section(section, "wps_pushbutton", "1");
-			dmuci_set_value_by_section(section, "ieee80211w", "1");
+			dmuci_set_value_by_section(wireless_s, "encryption", "psk2");
+			dmuci_set_value_by_section(wireless_s, "key", wpa_key);
+			dmuci_set_value_by_section(wireless_s, "wpa_group_rekey", "3600");
+			dmuci_set_value_by_section(wireless_s, "wps_pushbutton", "1");
+			dmuci_set_value_by_section(wireless_s, "ieee80211w", "1");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "psk2");
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "psk2");
+			if (map_s) dmuci_set_value_by_section(map_s, "key", wpa_key);
 		} else if (DM_LSTRCMP(value, "WPA2-Enterprise") == 0) {
-			dmuci_set_value_by_section(section, "encryption", "wpa2");
-			dmuci_set_value_by_section(section, "auth_port", "1812");
-			dmuci_set_value_by_section(section, "ieee80211w", "1");
+			dmuci_set_value_by_section(wireless_s, "encryption", "wpa2");
+			dmuci_set_value_by_section(wireless_s, "auth_port", "1812");
+			dmuci_set_value_by_section(wireless_s, "ieee80211w", "1");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "wpa2");
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "wpa2");
 		} else if (DM_LSTRCMP(value, "WPA-WPA2-Personal") == 0) {
-			dmuci_set_value_by_section(section, "encryption", "psk-mixed");
-			dmuci_set_value_by_section(section, "key", wpa_key);
-			dmuci_set_value_by_section(section, "wpa_group_rekey", "3600");
-			dmuci_set_value_by_section(section, "wps_pushbutton", "1");
+			dmuci_set_value_by_section(wireless_s, "encryption", "psk-mixed");
+			dmuci_set_value_by_section(wireless_s, "key", wpa_key);
+			dmuci_set_value_by_section(wireless_s, "wpa_group_rekey", "3600");
+			dmuci_set_value_by_section(wireless_s, "wps_pushbutton", "1");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "psk-mixed");
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "psk-mixed");
+			if (map_s) dmuci_set_value_by_section(map_s, "key", wpa_key);
 		} else if (DM_LSTRCMP(value, "WPA-WPA2-Enterprise") == 0) {
-			dmuci_set_value_by_section(section, "encryption", "wpa-mixed");
-			dmuci_set_value_by_section(section, "auth_port", "1812");
+			dmuci_set_value_by_section(wireless_s, "encryption", "wpa-mixed");
+			dmuci_set_value_by_section(wireless_s, "auth_port", "1812");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "wpa-mixed");
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "wpa-mixed");
 		} else if (DM_LSTRCMP(value, "WPA3-Personal") == 0) {
-			dmuci_set_value_by_section(section, "encryption", "sae");
-			dmuci_set_value_by_section(section, "key", wpa_key);
-			dmuci_set_value_by_section(section, "ieee80211w", "2");
+			dmuci_set_value_by_section(wireless_s, "encryption", "sae");
+			dmuci_set_value_by_section(wireless_s, "key", wpa_key);
+			dmuci_set_value_by_section(wireless_s, "ieee80211w", "2");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "sae");
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "sae");
+			if (map_s) dmuci_set_value_by_section(map_s, "key", wpa_key);
 		} else if (DM_LSTRCMP(value, "WPA3-Enterprise") == 0) {
-			dmuci_set_value_by_section(section, "encryption", "wpa3");
-			dmuci_set_value_by_section(section, "auth_port", "1812");
+			dmuci_set_value_by_section(wireless_s, "encryption", "wpa3");
+			dmuci_set_value_by_section(wireless_s, "auth_port", "1812");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "wpa");
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "wpa");
 		} else if (DM_LSTRCMP(value, "WPA3-Personal-Transition") == 0) {
-			dmuci_set_value_by_section(section, "encryption", "sae-mixed");
-			dmuci_set_value_by_section(section, "key", wpa_key);
-			dmuci_set_value_by_section(section, "ieee80211w", "1");
+			dmuci_set_value_by_section(wireless_s, "encryption", "sae-mixed");
+			dmuci_set_value_by_section(wireless_s, "key", wpa_key);
+			dmuci_set_value_by_section(wireless_s, "ieee80211w", "1");
 
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "encryption", "sae-mixed");
-			if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", wpa_key);
+			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "sae-mixed");
+			if (map_s) dmuci_set_value_by_section(map_s, "key", wpa_key);
 		}
 	}
 }
@@ -1941,7 +1949,11 @@ static int get_access_point_security_modes(char *refparam, struct dmctx *ctx, vo
 
 static int set_access_point_security_modes(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *map_s = NULL;
 	char *supported_modes = NULL;
+	char *multi_ap = NULL;
+
+	map_s = find_mapcontroller_section((((struct wifi_acp_args *)data)->sections)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
@@ -1955,9 +1967,13 @@ static int set_access_point_security_modes(char *refparam, struct dmctx *ctx, vo
 			if (!value_exits_in_str_list(supported_modes, ",", value))
 				return FAULT_9007;
 
+			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
+			if (DM_STRLEN(multi_ap) && !map_s)
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
-			set_security_mode((((struct wifi_acp_args *)data)->sections)->config_section, value, false);
+			set_security_mode((((struct wifi_acp_args *)data)->sections)->config_section, map_s, value);
 			return 0;
 	}
 	return 0;
@@ -1965,12 +1981,21 @@ static int set_access_point_security_modes(char *refparam, struct dmctx *ctx, vo
 
 static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *map_s = NULL;
 	char *encryption;
+	char *multi_ap = NULL;
+
+	map_s = find_mapcontroller_section((((struct wifi_acp_args *)data)->sections)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_hexBinary(value, RANGE_ARGS{{"5","5"},{"13","13"}}, 2))
 				return FAULT_9007;
+
+			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
+			if (DM_STRLEN(multi_ap) && !map_s)
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "encryption", &encryption);
@@ -1979,7 +2004,13 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 
 				dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "key", &key_index);
 				snprintf(buf, sizeof(buf),"key%s", key_index ? key_index : "1");
+
+				// wireless config: Update key option
 				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, buf, value);
+
+				// mapcontroller config: Update the corresponding ap section if exists
+				if (map_s)
+					dmuci_set_value_by_section(map_s, buf, value);
 			}
 			return 0;
 	}
@@ -1988,22 +2019,32 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 
 static int set_access_point_security_shared_key(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *map_ssid_s = NULL;
+	struct uci_section *map_s = NULL;
 	char *encryption = NULL;
+	char *multi_ap = NULL;
+
+	map_s = find_mapcontroller_section((((struct wifi_ssid_args *)data)->sections)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"32"}}, 1))
 				return FAULT_9007;
+
+			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
+			if (DM_STRLEN(multi_ap) && !map_s)
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "psk")) {
+
+				// wireless config: Update key option
 				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "key", value);
 
-				// mapcontroller config: Update the corresponding fronthaul ssid section if exist
-				map_ssid_s = find_mapcontroller_ssid_section((((struct wifi_acp_args *)data)->sections)->config_section);
-				if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", value);
+				// mapcontroller config: Update the corresponding ap section if exists
+				if (map_s)
+					dmuci_set_value_by_section(map_s, "key", value);
 			}
 
 			return 0;
@@ -2057,22 +2098,32 @@ static int set_access_point_security_rekey_interval(char *refparam, struct dmctx
 /*#Device.WiFi.AccessPoint.{i}.Security.SAEPassphrase!UCI:wireless/wifi-iface,@i-1/key*/
 static int set_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *map_ssid_s = NULL;
+	struct uci_section *map_s = NULL;
 	char *encryption = NULL;
+	char *multi_ap = NULL;
+
+	map_s = find_mapcontroller_section((((struct wifi_ssid_args *)data)->sections)->config_section);
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_string(value, -1, -1, NULL, NULL))
 				return FAULT_9007;
+
+			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
+			if (DM_STRLEN(multi_ap) && !map_s)
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "sae")) {
+
+				// wireless config: Update key option
 				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "key", value);
 
-				// mapcontroller config: Update the corresponding fronthaul ssid section if exist
-				map_ssid_s = find_mapcontroller_ssid_section((((struct wifi_acp_args *)data)->sections)->config_section);
-				if (map_ssid_s) dmuci_set_value_by_section(map_ssid_s, "key", value);
+				// mapcontroller config: Update the corresponding ap section if exists
+				if (map_s)
+					dmuci_set_value_by_section(map_s, "key", value);
 			}
 			break;
 	}
@@ -2625,7 +2676,11 @@ static int get_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 
 static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *map_s = NULL;
 	char *supported_modes = NULL;
+	char *multi_ap = NULL;
+
+	map_s = find_mapcontroller_section((((struct wifi_ssid_args *)data)->sections)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
@@ -2639,9 +2694,13 @@ static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 			if (!value_exits_in_str_list(supported_modes, ",", value))
 				return FAULT_9007;
 
+			dmuci_get_value_by_section_string((struct uci_section *)data, "multi_ap", &multi_ap);
+			if (DM_STRLEN(multi_ap) && !map_s)
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
-			set_security_mode((struct uci_section *)data, value, true);
+			set_security_mode((struct uci_section *)data, map_s, value);
 			return 0;
 	}
 	return 0;
@@ -2989,8 +3048,10 @@ static int set_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, st
 		case VALUESET:
 			if (file_exists("/etc/bbfdm/dmmap/dmmap_wifi_neighboring"))
 				remove("/etc/bbfdm/dmmap/dmmap_wifi_neighboring");
+
 			dmuci_add_section_bbfdm("dmmap_wifi_neighboring", "diagnostic_status", &s);
 			dmuci_set_value_by_section(s, "DiagnosticsState", value);
+
 			if (DM_LSTRCMP(value, "Requested") == 0) {
 				bbf_set_end_session_flag(ctx, BBF_END_SESSION_NEIGBORING_WIFI_DIAGNOSTIC);
 			}
@@ -5788,6 +5849,7 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 					dmuci_set_value_by_section(dmmap_s, "band", frequency[1]);
 					dmuci_set_value_by_section(dmmap_s, "noise", noise[1]);
 				}
+
 				dmasprintf(&ssid[0], "Result.%d.SSID", index);
 				dmasprintf(&bssid[0], "Result.%d.BSSID", index);
 				dmasprintf(&channel[0], "Result.%d.Channel", index);

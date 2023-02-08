@@ -1146,7 +1146,7 @@ static void test_api_bbfdm_add_del_library_object(void **state)
 
 	// check the new instance
 	assert_non_null(ctx->addobj_instance);
-	assert_string_equal(ctx->addobj_instance, "3");
+	assert_string_equal(ctx->addobj_instance, "4");
 
 	// delete object ==> expected "0" error
 	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.2.", "test_key", NULL);
