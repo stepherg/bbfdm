@@ -299,16 +299,14 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 		case CMD_ADD_OBJECT:
 			fault = dm_entry_add_object(ctx);
 			if (!fault) {
-				dmuci_set_value_varstate("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
-				dmuci_save_package_varstate("cwmp");
+				dmuci_set_value("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
 				dmuci_change_packages(&head_package_change);
 			}
 			break;
 		case CMD_DEL_OBJECT:
 			fault = dm_entry_delete_object(ctx);
 			if (!fault) {
-				dmuci_set_value_varstate("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
-				dmuci_save_package_varstate("cwmp");
+				dmuci_set_value("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
 				dmuci_change_packages(&head_package_change);
 			}
 			break;
@@ -374,8 +372,7 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1)
 				set_success = true;
 			}
 			if (!fault && set_success == true) {
-				dmuci_set_value_varstate("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
-				dmuci_save_package_varstate("cwmp");
+				dmuci_set_value("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
 				dmuci_change_packages(&head_package_change);
 				dmuci_save();
 			}
@@ -469,7 +466,6 @@ int dm_entry_manage_services(struct blob_buf *bb, bool restart)
 
 	bbf_uci_commit_bbfdm();
 
-	dmuci_commit_package_varstate("cwmp");
 	free_all_list_package_change(&head_package_change);
 	return 0;
 }
@@ -484,7 +480,6 @@ int dm_entry_restart_services(void)
 		dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
 	}
 
-	dmuci_commit_package_varstate("cwmp");
 	free_all_list_package_change(&head_package_change);
 
 	return 0;
@@ -499,7 +494,6 @@ int dm_entry_revert_changes(void)
 	list_for_each_entry(pc, &head_package_change, list) {
 		dmubus_call_set("uci", "revert", UBUS_ARGS{{"config", pc->package, String}}, 1);
 	}
-	dmuci_revert_package_varstate("cwmp");
 	free_all_list_package_change(&head_package_change);
 
 	return 0;
