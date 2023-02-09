@@ -13,7 +13,7 @@
 #include "ppp.h"
 #include "firewall.h"
 #include "ip.h"
-#ifdef BBF_TR143
+#if defined(BBF_TR143) || defined(BBF_TR471)
 #include "diagnostics.h"
 #endif
 
@@ -2326,7 +2326,7 @@ static int operate_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *da
 DMOBJ tIPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Interface", &DMWRITE, addObjIPInterface, delObjIPInterface, NULL, browseIPInterfaceInst, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}, "2.0"},
-#ifdef BBF_TR143
+#if defined(BBF_TR143) || defined(BBF_TR471)
 {"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsObj, tIPDiagnosticsParams, NULL, BBFDM_BOTH, NULL, "2.0"},
 #endif
 {0}

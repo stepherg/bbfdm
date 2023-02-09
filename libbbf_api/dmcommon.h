@@ -116,6 +116,10 @@ extern char *PowerState[];
 extern char *FW_Mode[];
 extern char *AKMsAllowed[];
 extern char *CellularDataPreference[];
+extern char *IPLayerCapacityRole[];
+extern char *UDPPayloadContent[];
+extern char *IPLayerCapacityTestType[];
+extern char *RateAdjAlgorithm[];
 
 #define CRONTABS_ROOT "/etc/crontabs/root"
 #define ACTIVATE_HANDLER_FILE "/usr/share/bbfdm/bbf_activate_handler.sh"

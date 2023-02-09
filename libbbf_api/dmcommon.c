@@ -53,6 +53,10 @@ char *PowerState[] = {"On", "Power_Save", "Off", "Unsupported", NULL};
 char *FW_Mode[] = {"AnyTime", "Immediately", "WhenIdle", "ConfirmationNeeded", NULL};
 char *AKMsAllowed[] = {"psk", "dpp", "sae", "psk+sae", "dpp+sae", "dpp+psk+sae", "SuiteSelector", NULL};
 char *CellularDataPreference[] = {"Excluded", "Should not use", "Should use", NULL};
+char *IPLayerCapacityRole[] = {"Receiver", "Sender", NULL};
+char *UDPPayloadContent[] = {"zeroes", "random", NULL};
+char *IPLayerCapacityTestType[] = {"Search", "Fixed", NULL};
+char *RateAdjAlgorithm[] = {"B", "C", NULL};
 
 char *PIN[] = {"^\\d{4}|\\d{8}$", NULL};
 char *DestinationAddress[] = {"^\\d+/\\d+$", NULL};
