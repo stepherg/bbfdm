@@ -39,37 +39,11 @@ static int set_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, st
 	return 0;
 }
 
-static int get_BridgingBridgeVLAN_TVID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	bridging_get_vlan_tvid("tvid", data, value);
-	return 0;
-}
-
-static int set_BridgingBridgeVLAN_TVID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"0","4094"}}, 1))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			bridging_set_vlan_tvid("tvid", data, value);
-			return 0;
-	}
-	return 0;
-}
-
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
 DMLEAF tIOPSYS_BridgingBridgePortParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {BBF_VENDOR_PREFIX"EgressPriorityRegeneration", &DMWRITE, DMT_STRING, get_BridgingBridgePort_Egress_PriorityRegeneration, set_BridgingBridgePort_Egress_PriorityRegeneration, BBFDM_BOTH},
-{0}
-};
-
-DMLEAF tIOPSYS_BridgingBridgeVLANParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{BBF_VENDOR_PREFIX"TVID", &DMWRITE, DMT_INT, get_BridgingBridgeVLAN_TVID, set_BridgingBridgeVLAN_TVID, BBFDM_BOTH},
 {0}
 };

@@ -498,35 +498,6 @@
 							]
 						}
 					}
-				},
-				"Device.Bridging.Bridge.{i}.VLAN.{i}.": {
-					"type": "object",
-					"version": "2.5",
-					"protocols": [
-						"cwmp",
-						"usp"
-					],
-					"description": "Bridge VLAN table. If this table is supported, if MUST contain an entry for each VLAN known to the Bridge. This table only applies to an 802.1Q <<bibref|802.1Q-2011>> Bridge.",
-					"access": true,
-					"array": true,
-					"{BBF_VENDOR_PREFIX}TVID": {
-						"type": "int",
-						"read": true,
-						"write": true,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "Translate vlan from lan network with new VLAN ID",
-						"datatype": "int",
-						"range" : [
-							{
-								"min": 0,
-								"max": 4094
-							}
-						]
-					}
 				}
 			}
 		},
