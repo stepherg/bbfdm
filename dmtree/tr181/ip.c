@@ -332,31 +332,6 @@ static int delete_ip_intertace_instance(struct uci_section *s)
 		if (strcmp(section_name(int_ss), int_sec_name) != 0 && DM_STRCMP(int_device, buf) != 0)
 			continue;
 
-		char *device = get_device( section_name(int_ss));
-
-		/* Remove the device section corresponding to this interface if exists and no interface used it
-		   And it doesn't link to Device.Bridging.Bridge. Object */
-		if (device && *device && DM_LSTRNCMP(device, "br-", 3) != 0) {
-			bool device_found = false;
-
-			uci_foreach_sections("network", "interface", ss) {
-				dmuci_get_value_by_section_string(ss, "device", &int_device);
-				if (strcmp(section_name(ss), section_name(int_ss)) != 0 && DM_STRCMP(int_device, buf) != 0 && DM_STRSTR(int_device, device)) {
-					device_found = true;
-					break;
-				}
-			}
-
-			if (!device_found) {
-				uci_foreach_option_eq_safe("network", "device", "name", device, stmp, ss) {
-					char *device_type;
-					dmuci_get_value_by_section_string(ss, "type", &device_type);
-					if (DM_LSTRCMP(device_type, "untagged") == 0) dmuci_delete_by_section(ss, NULL, NULL);
-					break;
-				}
-			}
-		}
-
 		/* remove dmmap section related to this interface */
 		get_dmmap_section_of_config_section("dmmap_network", "interface", section_name(int_ss), &ss);
 		dmuci_delete_by_section(ss, NULL, NULL);
@@ -452,42 +427,6 @@ static bool interface_section_with_dhcpv6_exists(const char *sec_name)
 	}
 
 	return false;
-}
-
-static void set_ip_interface_device_option(struct uci_section *section, char *linker, char *instance, bool is_br_sec)
-{
-	struct uci_section *s = NULL;
-	bool device_exists = false;
-	char int_device[64];
-
-	if (is_br_sec) {
-		snprintf(int_device, sizeof(int_device), "%s", linker);
-		goto end;
-	} else {
-		snprintf(int_device, sizeof(int_device), "%s.1", linker);
-	}
-
-	// Check if device exists
-	uci_foreach_option_eq("network", "device", "name", int_device, s) {
-		device_exists = true;
-		break;
-	}
-
-	// if device dosn't exist ==> create a new device section
-	if (!device_exists) {
-		char device_name[32];
-
-		snprintf(device_name, sizeof(device_name), "dev_ip_int_%s", instance);
-
-		dmuci_add_section("network", "device", &s);
-		dmuci_rename_section_by_section(s, device_name);
-		dmuci_set_value_by_section(s, "type", "untagged");
-		dmuci_set_value_by_section(s, "ifname", linker);
-		dmuci_set_value_by_section(s, "name", int_device);
-	}
-
-end:
-	dmuci_set_value_by_section(section, "device", int_device);
 }
 
 static int delObjIPInterfaceIPv6(void *data, unsigned char del_action, char *dmmap_file_name, char *section_type, char *option_name)
@@ -1409,15 +1348,6 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 					return 0;
 				}
 
-				// Remove the device section corresponding to this interface if exists
-				char *device = get_device(section_name((struct uci_section *)data));
-				uci_foreach_option_eq_safe("network", "device", "name", device, stmp, s) {
-					char *type;
-					dmuci_get_value_by_section_string(s, "type", &type);
-					if (DM_LSTRCMP(type, "untagged") == 0) dmuci_delete_by_section(s, NULL, NULL);
-					break;
-				}
-
 				char *mac_vlan = DM_STRCHR(linker_buf, '_');
 				if (mac_vlan) {
 					// Check if there is an interface that has the same ifname ==> if yes, remove it
@@ -1504,14 +1434,14 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 						}
 					}
 
+					dmuci_set_value_by_section((struct uci_section *)data, "device", linker_buf);
+
 					// Check if the Ethernet.Link. maps to macvlan, if yes then keep only device name
 					char *mac_vlan = DM_STRCHR(linker_buf, '_');
 					if (!is_br_sec && mac_vlan) {
 						*mac_vlan = 0;
 						dmuci_set_value_by_section(eth_link_s, "device", linker_buf);
 					}
-
-					set_ip_interface_device_option((struct uci_section *)data, linker_buf, instance, is_br_sec);
 				}
 			} else if (DM_STRNCMP(value, ppp_iface, DM_STRLEN(ppp_iface)) == 0) {
 				struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "name", linker_buf);

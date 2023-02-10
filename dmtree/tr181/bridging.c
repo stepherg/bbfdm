@@ -1224,7 +1224,6 @@ static int handle_inner_vid(void)
 			char *cur_vid = NULL;
 
 			cur_vid = fetch_and_configure_inner_vid(br_inst, "8021q", "");
-			cur_vid = (!cur_vid) ? fetch_and_configure_inner_vid(br_inst, "untagged", "") : NULL;
 
 			//loop device section with type 8021ad and fetch the br_inst of it,
 			//if same br_inst then add vid as inner_vid
@@ -1270,12 +1269,10 @@ static int configure_device_type(const struct bridge_port_args *data, char *type
 		char *cur_vid = NULL;
 
 		cur_vid = fetch_and_configure_inner_vid(data->br_inst, "8021q", "");
-		cur_vid = (!cur_vid) ? fetch_and_configure_inner_vid(data->br_inst, "untagged", "") : NULL;
 
 		//apply the vid of the interface as the inner_vid of 8021ad port
 		if (cur_vid != NULL && cur_vid[0] != '\0')
 			dmuci_set_value_by_section(data->bridge_port_sec, "inner_vid", cur_vid);
-
 	}
 	return 0;
 }
@@ -2408,7 +2405,7 @@ static int set_BridgingBridgePort_DefaultUserPriority(char *refparam, struct dmc
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "type", &type);
-			if (DM_STRLEN(type) == 0 || (DM_LSTRCMP(type, "untagged") != 0 && DM_LSTRCMP(type, "8021q") != 0))
+			if (DM_STRLEN(type) == 0 || DM_LSTRCMP(type, "8021q") != 0)
 				return FAULT_9007;
 
 			return 0;
@@ -2463,7 +2460,7 @@ static int set_BridgingBridgePort_PVID(char *refparam, struct dmctx *ctx, void *
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "type", &type);
-			if (DM_STRLEN(type) == 0 || (DM_LSTRCMP(type, "untagged") != 0 && DM_LSTRCMP(type, "8021q") != 0))
+			if (DM_STRLEN(type) == 0 || DM_LSTRCMP(type, "8021q") != 0)
 				return FAULT_9007;
 
 			return 0;
@@ -2504,9 +2501,9 @@ static int get_BridgingBridgePort_TPID(char *refparam, struct dmctx *ctx, void *
 	char *type = NULL;
 
 	dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "type", &type);
-	if (type && (DM_LSTRCMP(type, "8021q") == 0 || DM_LSTRCMP(type, "untagged") == 0))
+	if (DM_LSTRCMP(type, "8021q") == 0)
 		*value = "33024";
-	else if (type && DM_LSTRCMP(type, "8021ad") == 0)
+	else if (DM_LSTRCMP(type, "8021ad") == 0)
 		*value = "34984";
 	else
 		*value = "37120";
@@ -3083,7 +3080,7 @@ static int get_BridgingBridgeVLANPort_Untagged(char *refparam, struct dmctx *ctx
 {
 	char *type;
 	dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "type", &type);
-	*value = (DM_LSTRCMP(type, "untagged") == 0) ? "1" : "0";
+	*value = (DM_STRLEN(type) == 0) ? "1" : "0";
 	return 0;
 }
 
@@ -3098,7 +3095,7 @@ static int set_BridgingBridgeVLANPort_Untagged(char *refparam, struct dmctx *ctx
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "type", (b) ? "untagged" : "8021q");
+			dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_sec, "type", (!b) ? "8021q" : "");
 			return 0;
 	}
 	return 0;

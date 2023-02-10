@@ -272,7 +272,6 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmuci_get_value_by_section_string(s, "name", &name);
 		dmuci_get_value_by_section_string(s, "ifname", &ifname);
 		if (DM_LSTRCMP(type, "bridge") == 0 ||
-			DM_LSTRCMP(type, "untagged") == 0 ||
 			(*name == 0 && DM_LSTRCMP(is_vlan, "1") != 0) ||
 			(*name != 0 && !ethernet___check_vlan_termination_section(name)))
 			continue;

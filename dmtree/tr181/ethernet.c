@@ -314,7 +314,6 @@ static int browseEthernetVLANTerminationInst(struct dmctx *dmctx, DMNODE *parent
 		dmuci_get_value_by_section_string(p->config_section, "name", &name);
 		dmuci_get_value_by_section_string(p->dmmap_section, "is_vlan_ter", &is_vlan);
 		if (DM_LSTRCMP(type, "bridge") == 0 ||
-			DM_LSTRCMP(type, "untagged") == 0 ||
 			(*name == 0 && DM_LSTRCMP(is_vlan, "1") != 0) ||
 			(*name != 0 && !ethernet___check_vlan_termination_section(name)))
 			continue;
@@ -483,7 +482,6 @@ static int delObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 			dmuci_get_value_by_section_string(s_dev, "type", &type);
 			dmuci_get_value_by_section_string(s_dev, "name", &name);
 			if (DM_LSTRCMP(type, "bridge") == 0 ||
-				DM_LSTRCMP(type, "untagged") == 0 ||
 				(*name == 0 && DM_LSTRCMP(is_vlan, "1") != 0) ||
 				(*name != 0 && !ethernet___check_vlan_termination_section(name)))
 				continue;
