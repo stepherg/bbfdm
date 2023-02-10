@@ -497,30 +497,6 @@
 								}
 							]
 						}
-					},
-					"{BBF_VENDOR_PREFIX}DSCPEthernetPriorityMapping": {
-						"type": "string",
-						"read": true,
-						"write": true,
-						"version": "2.5",
-						"protocols": [
-							"cwmp",
-							"usp"
-						],
-						"description": "DSCP to pbit mapping, to map pbit to untagged vlan packet created at the cpe",
-						"list": {
-							"datatype": "unsignedInt",
-							"item": {
-								"min": 1,
-								"max": 64
-							},
-							"range": [
-								{
-									"min": 0,
-									"max": 7
-								}
-							]
-						}
 					}
 				},
 				"Device.Bridging.Bridge.{i}.VLAN.{i}.": {
