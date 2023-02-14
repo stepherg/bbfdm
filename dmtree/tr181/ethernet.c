@@ -1494,15 +1494,7 @@ static int get_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
 
 		if (DM_LSTRNCMP(type, "8021ad", 6) == 0) {
-			// 8021ad device, will have a vlan termination object as its lowerlayer
-
-			char *inner_vid, *dev_name;
-
-			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "inner_vid", &inner_vid);
-			if (*ifname == '\0' || *inner_vid == '\0')
-				return -1;
-			dmasprintf(&dev_name, "%s.%s", ifname, inner_vid);
-			adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", dev_name, value);
+			adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", ifname, value);
 		} else {
 			adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", name, value);
 			if (!(*value) || (*value)[0] == 0)
@@ -1637,24 +1629,18 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
 
 			} else if (DM_STRNCMP(value, eth_vlan_term, DM_STRLEN(eth_vlan_term)) == 0) {
-				struct uci_section *ss = NULL;
-				char *dev_name, *inner_vid, *vid, new_name[16] = {0};
+				char new_name[32] = {0};
+				char *vid = NULL;
 
 				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid", &vid);
 
-				uci_foreach_option_eq("network", "device", "name", vlan_linker, ss) {
-					dmuci_get_value_by_section_string(ss, "vid", &inner_vid);
-					dmuci_get_value_by_section_string(ss, "ifname", &dev_name);
-					break;
-				}
+				snprintf(new_name, sizeof(new_name), "%s.%s", vlan_linker, vid);
 
-				snprintf(new_name, sizeof(new_name), "%s.%s.%s", dev_name, inner_vid, vid);
 				if (ethernet___name_exists_in_devices(new_name))
 					return -1;
 
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", dev_name);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", vlan_linker);
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "inner_vid", inner_vid);
 			}
 			break;
 	}
@@ -1670,7 +1656,9 @@ static int get_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 
 static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *ifname = NULL;
 	char *type = NULL;
+	char *vid = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1678,88 +1666,74 @@ static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			// Get type option from device section
 			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "type", &type);
+			if (DM_LSTRCMP(type, "macvlan") == 0)
+				return 0;
 
-			if (DM_LSTRCMP(type, "macvlan") != 0) {
-				/* only when type != macvlan */
-				char *ifname = NULL;
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid", &vid);
 
-				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
-				if (*ifname != '\0') {
-					struct uci_section *uci_s = NULL;
-					char *interface_macaddr = NULL;
-					char *inner_vid = NULL;
-					char *old_vid = NULL;
-					char old_name[32] = {0};
-					char new_name[32] = {0};
+			if (DM_STRLEN(ifname) != 0 && DM_STRLEN(vid) != 0) {
+				struct uci_section *uci_s = NULL;
+				char *iface_macaddr = NULL;
+				char old_name[32] = {0};
+				char new_name[32] = {0};
+				char *name = NULL;
 
-					dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid", &old_vid);
+				snprintf(old_name, sizeof(old_name), "%s.%s", ifname, vid);
+				snprintf(new_name, sizeof(new_name), "%s.%s", ifname, value);
 
-					if (DM_LSTRCMP(type, "8021ad") == 0) {
-						dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "inner_vid", &inner_vid);
-						snprintf(old_name, sizeof(old_name), "%s.%s.%s", ifname, inner_vid, old_vid);
-						snprintf(new_name, sizeof(new_name), "%s.%s.%s", ifname, inner_vid, value);
-					} else {
-						snprintf(old_name, sizeof(old_name), "%s%s%s", ifname, (*old_vid) ? "." : "", (*old_vid) ? old_vid : "");
-						snprintf(new_name, sizeof(new_name), "%s.%s", ifname, value);
+				if (ethernet___name_exists_in_devices(new_name))
+					return 0;
+
+				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &name);
+
+				uci_foreach_option_eq("network", "device", "type", "8021ad", uci_s) {
+					char *curr_ifname = NULL;
+
+					dmuci_get_value_by_section_string(uci_s, "ifname", &curr_ifname);
+
+					if (DM_STRCMP(curr_ifname, name) == 0) {
+						char __new_name[32] = {0};
+						char *curr_name = NULL;
+						char *curr_vid = NULL;
+
+						dmuci_get_value_by_section_string(uci_s, "name", &curr_name);
+						dmuci_get_value_by_section_string(uci_s, "vid", &curr_vid);
+
+						snprintf(__new_name, sizeof(__new_name), "%s.%s.%s", ifname, value, curr_vid);
+
+						dmuci_set_value_by_section(uci_s, "ifname", new_name);
+						dmuci_set_value_by_section(uci_s, "name", __new_name);
+
+						struct uci_section *iface_s = get_dup_section_in_config_opt("network", "interface", "device", curr_name);
+						dmuci_set_value_by_section(iface_s, "device", __new_name);
 					}
+				}
 
-					if (ethernet___name_exists_in_devices(new_name))
-						return -1;
+				// set device option of the corresponding interface section
+				uci_s = get_dup_section_in_config_opt("network", "interface", "device", old_name);
+				dmuci_get_value_by_section_string(uci_s, "macaddr", &iface_macaddr);
+				dmuci_set_value_by_section(uci_s, "device", new_name);
 
-					// Update the corresponding device '8021ad' section that maps to this section
-					uci_foreach_option_eq("network", "device", "type", "8021ad", uci_s) {
-						char *curr_ifname = NULL;
+				// Write vlan change to the dmmap file
+				uci_path_foreach_sections(bbfdm, "dmmap", "link", uci_s) {
+					char *link_device, *link_macaddr;
 
-						dmuci_get_value_by_section_string(uci_s, "inner_vid", &inner_vid);
-						dmuci_get_value_by_section_string(uci_s, "ifname", &curr_ifname);
-						if (DM_STRCMP(inner_vid, old_vid) == 0 && DM_STRCMP(curr_ifname, ifname) == 0) {
-							struct uci_section *__s = NULL;
-							char __new_name[32] = {0};
-							char *curr_name = NULL;
-							char *curr_vid = NULL;
+					dmuci_get_value_by_section_string(uci_s, "device", &link_device);
+					dmuci_get_value_by_section_string(uci_s, "mac", &link_macaddr);
 
-							dmuci_get_value_by_section_string(uci_s, "name", &curr_name);
-							dmuci_get_value_by_section_string(uci_s, "vid", &curr_vid);
-							snprintf(__new_name, sizeof(__new_name), "%s.%s.%s", ifname, value, curr_vid);
+					if (DM_STRLEN(iface_macaddr) != 0 && DM_STRCMP(link_macaddr, iface_macaddr) != 0)
+						continue;
 
-							dmuci_set_value_by_section(uci_s, "inner_vid", value);
-							dmuci_set_value_by_section(uci_s, "name", __new_name);
-
-							uci_foreach_option_eq("network", "interface", "device", curr_name, __s) {
-								dmuci_set_value_by_section(__s, "device", __new_name);
-								break;
-							}
-						}
-					}
-
-					// set device option of the corresponding interface section
-					uci_foreach_option_eq("network", "interface", "device", old_name, uci_s) {
-						dmuci_get_value_by_section_string(uci_s, "macaddr", &interface_macaddr);
+					if (DM_STRCMP(link_device, old_name) == 0) {
 						dmuci_set_value_by_section(uci_s, "device", new_name);
 						break;
 					}
-
-					/* Write vlan change to the dmmap file  */
-					uci_path_foreach_sections(bbfdm, "dmmap", "link", uci_s) {
-						char *link_device, *link_macaddr;
-
-						dmuci_get_value_by_section_string(uci_s, "device", &link_device);
-						dmuci_get_value_by_section_string(uci_s, "mac", &link_macaddr);
-
-						if (interface_macaddr && *interface_macaddr && DM_STRCMP(link_macaddr, interface_macaddr) != 0)
-							continue;
-
-						if (DM_STRCMP(link_device, old_name) == 0) {
-							dmuci_set_value_by_section(uci_s, "device", new_name);
-							break;
-						}
-					}
-
-					// set name option of the device section
-					dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
 				}
+
+				// set name option of the device section
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
 			}
 
 			// set vid option of the device section
