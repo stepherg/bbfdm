@@ -2389,33 +2389,6 @@ static int set_BridgingBridgePort_ManagementPort(char *refparam, struct dmctx *c
 	return 0;
 }
 
-static int get_BridgingBridgePort_DefaultUserPriority(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmuci_get_value_by_section_fallback_def(((struct bridge_port_args *)data)->bridge_port_sec, "priority", "0");
-	return 0;
-}
-
-static int set_BridgingBridgePort_DefaultUserPriority(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *type = NULL;
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","7"}}, 1))
-				return FAULT_9007;
-
-			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "type", &type);
-			if (DM_STRLEN(type) == 0 || DM_LSTRCMP(type, "8021q") != 0)
-				return FAULT_9007;
-
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct bridge_port_args *)data)->bridge_port_sec, "priority", value);
-			return 0;
-	}
-	return 0;
-}
-
 static int get_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	bridging_get_priority_list("ingress_qos_mapping", data, value);
@@ -3435,7 +3408,7 @@ DMLEAF tBridgingBridgePortParams[] = {
 {"LowerLayers", &DMWRITE, DMT_STRING, get_BridgingBridgePort_LowerLayers, set_BridgingBridgePort_LowerLayers, BBFDM_BOTH, "2.0"},
 {"ManagementPort", &DMWRITE, DMT_BOOL, get_BridgingBridgePort_ManagementPort, set_BridgingBridgePort_ManagementPort, BBFDM_BOTH, "2.0"},
 //{"Type", &DMWRITE, DMT_STRING, get_BridgingBridgePort_Type, set_BridgingBridgePort_Type, BBFDM_BOTH, "2.7"},
-{"DefaultUserPriority", &DMWRITE, DMT_UNINT, get_BridgingBridgePort_DefaultUserPriority, set_BridgingBridgePort_DefaultUserPriority, BBFDM_BOTH, "2.0"},
+//{"DefaultUserPriority", &DMWRITE, DMT_UNINT, get_BridgingBridgePort_DefaultUserPriority, set_BridgingBridgePort_DefaultUserPriority, BBFDM_BOTH, "2.0"},
 {"PriorityRegeneration", &DMWRITE, DMT_STRING, get_BridgingBridgePort_PriorityRegeneration, set_BridgingBridgePort_PriorityRegeneration, BBFDM_BOTH, "2.0"},
 //{"PortState", &DMREAD, DMT_STRING, get_BridgingBridgePort_PortState, NULL, BBFDM_BOTH, "2.0"},
 {"PVID", &DMWRITE, DMT_INT, get_BridgingBridgePort_PVID, set_BridgingBridgePort_PVID, BBFDM_BOTH, "2.0"},
