@@ -4,8 +4,8 @@
 
 . /usr/share/libubox/jshn.sh
 
-ROOT="$(dirname $0)"
-. ${ROOT}/bbf_api
+ROOT="$(dirname "${0}")"
+. "${ROOT}"/bbf_api
 
 get_nslookup_log_file() {
 	IDX=1
@@ -26,7 +26,7 @@ nslookup_error() {
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-	[ "$3" == "both_proto" ] && {
+	[ "$3" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.DiagnosticState="$1"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.SuccessCount=0
 		$UCI_COMMIT_BBF_DMMAP
@@ -60,10 +60,10 @@ nslookup_launch() {
 	while [ $i -lt "${cnt}" ]; do
 		i=$((i+1))
 		
-		nslookup -debug $hostname $dnsserver >>${LOG_FILE} 2>&1
+		nslookup -debug "${hostname}" "${dnsserver}" >>"${LOG_FILE}" 2>&1
 		error_code="$?"
 		
-		nxd=$(cat ${LOG_FILE} | grep "NXDOMAIN")
+		nxd=$(cat "${LOG_FILE}" | grep "NXDOMAIN")
 		[ -n "$nxd" ] && {
 			nslookup_error "Error_DNSServerNotResolved" "${cnt}" "${proto}"
 			return;
@@ -74,7 +74,7 @@ nslookup_launch() {
 			return;
 		}
 
-		echo "++++++++++++++++++++++++++++++" >>${LOG_FILE}
+		echo "++++++++++++++++++++++++++++++" >>"${LOG_FILE}"
 	done
 
 	AnswerType="Authoritative"
@@ -123,7 +123,7 @@ nslookup_launch() {
 			json_close_object
 		
 			# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-			[ "$proto" == "both_proto" ] && {
+			[ "$proto" = "both_proto" ] && {
 				$UCI_ADD_BBF_DMMAP dmmap_diagnostics NSLookupResult
 				$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].Status="${status}"
 				$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].AnswerType="${AnswerType}"
@@ -138,8 +138,8 @@ nslookup_launch() {
 			AnswerType="Authoritative"
 		fi
 
-	done <${LOG_FILE}
-	rm -f ${LOG_FILE}
+	done <"${LOG_FILE}"
+	rm -f "${LOG_FILE}"
 
 	json_close_array
 	json_add_string "Status" "Complete"
@@ -147,7 +147,7 @@ nslookup_launch() {
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-	[ "$proto" == "both_proto" ] && {
+	[ "$proto" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.DiagnosticState="Complete"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.SuccessCount="${success_count}"
 		$UCI_COMMIT_BBF_DMMAP

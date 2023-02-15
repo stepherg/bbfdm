@@ -4,8 +4,8 @@
 
 . /usr/share/libubox/jshn.sh
 
-ROOT="$(dirname $0)"
-. ${ROOT}/bbf_api
+ROOT="$(dirname "${0}")"
+. "${ROOT}"/bbf_api
 
 iplayercap_error() {
 	json_init
@@ -13,7 +13,7 @@ iplayercap_error() {
 	json_dump
 
 	# Store data in dmmap
-	[ "$2" == "both_proto" ] && {
+	[ "$2" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.DiagnosticState="${1}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.SoftwareVersion=""
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.BOMTime=""
@@ -107,7 +107,7 @@ iplayercap_launch() {
 	[ -z "${slow_adj_thresh}" ] && slow_adj_thresh=3
 	[ -z "${num_interval}" ] && num_interval=10
 
-	if [ -z "${role}" ] || [ "${role}" == "Sender" ]; then
+	if [ -z "${role}" ] || [ "${role}" = "Sender" ]; then
 		options="$options -u"
 	else
 		options="$options -d"
@@ -117,17 +117,17 @@ iplayercap_launch() {
 		options="$options -j"
 	fi
 
-	if [ -n "${DSCP}" ] && [ ${DSCP} -gt 0 ]; then
+	if [ -n "${DSCP}" ] && [ "${DSCP}" -gt 0 ]; then
 		options="$options -m $DSCP"
 	fi
 
-	if [ "${proto_ver}" == "IPv4" ]; then
+	if [ "${proto_ver}" = "IPv4" ]; then
 		options="$options -4"
-	elif [ "${proto_ver}" == "IPv6" ]; then
+	elif [ "${proto_ver}" = "IPv6" ]; then
 		options="$options -6"
 	fi
 
-	if [ "${udp_content}" == "random" ]; then
+	if [ "${udp_content}" = "random" ]; then
 		options="$options -X"
 	fi
 
@@ -158,8 +158,8 @@ iplayercap_launch() {
 		return
 	fi
 
-	if [ -n "${mode_subintervals}" ] && [ ${mode_subintervals} -gt 0 ]; then
-		if [ ${mode_subintervals} -lt ${num_interval} ]; then
+	if [ -n "${mode_subintervals}" ] && [ "${mode_subintervals}" -gt 0 ]; then
+		if [ "${mode_subintervals}" -lt ${num_interval} ]; then
 			options="$options -i ${mode_subintervals}"
 		else
 			iplayercap_error "Error_Internal" "${proto}"
@@ -169,14 +169,14 @@ iplayercap_launch() {
 
 	options="$options -P ${test_subinterval} -t ${t_val} -F ${feedback_interval}"
 
-	if [ "${test_type}" == "Search" ]; then
+	if [ "${test_type}" = "Search" ]; then
 		options="$options -q ${seq_err_thresh} -L ${lower_thresh} -U ${upper_thresh} -h ${high_speed_delta} -c ${slow_adj_thresh}"
 		if [ "${dup_ignore}" -eq 0 ]; then
 			options="$options -R"
 		fi
 	fi
 
-	output=$(udpst $options -f jsonf $host 2>&1)
+	output=$(udpst "${options}" -f jsonf "${host}" 2>&1)
 	if [ "$?" -eq 127 ] || [ "$?" -eq 255 ]; then
 		iplayercap_error "Error_Internal" "${proto}"
 		return
@@ -185,7 +185,7 @@ iplayercap_launch() {
 	json_init
 	json_load "$output"
 
-	[ "${proto}" == "both_proto" ] && {
+	[ "${proto}" = "both_proto" ] && {
 		json_get_var err ErrorStatus
 		if [ "${err}" -ne 0 ]; then
 			iplayercap_error "Error_Internal" "${proto}"
@@ -326,7 +326,7 @@ iplayercap_launch() {
 				while json_is_a ${idx} object
 				do
 					json_select ${idx}
-					if ["$?" -ne 0 ]; then
+					if [ "$?" -ne 0 ]; then
 						iplayercap_error "Error_Internal" "${proto}"
 						failed=1
 						break

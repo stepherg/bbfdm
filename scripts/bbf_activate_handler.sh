@@ -6,7 +6,7 @@
 # Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 #
 
-ROOT="$(dirname $0)"
+ROOT="$(dirname "${0}")"
 
 CHECK_IDLE_FILE="${ROOT}/bbf_check_idle.sh"
 RETRY_TIME=300
@@ -46,7 +46,6 @@ handle_whenidle_mode() {
 	if [ "$?" = "0" ]; then
 		activate_and_reboot_device "${bank_id}"
 	else
-
 		[ "${end_time}" -gt "$((diff + RETRY_TIME))" ] && {
 			sleep "${RETRY_TIME}"
 		}
@@ -55,7 +54,6 @@ handle_whenidle_mode() {
 	fi
 
 	while [ "${end_time}" -gt "${diff}" ]; do
-
 		sh "${CHECK_IDLE_FILE}"
 		if [ "$?" = "0" ]; then
 			activate_and_reboot_device "${bank_id}"

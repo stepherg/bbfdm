@@ -5,8 +5,8 @@
 
 . /usr/share/libubox/jshn.sh
 
-ROOT="$(dirname $0)"
-. ${ROOT}/bbf_api
+ROOT="$(dirname "${0}")"
+. "${ROOT}"/bbf_api
 
 ipping_error() {
 	json_init
@@ -23,7 +23,7 @@ ipping_error() {
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-	[ "$3" == "both_proto" ] && {
+	[ "$3" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState="$1"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.SuccessCount=0
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.FailureCount="$cnt"
@@ -78,7 +78,7 @@ ipping_launch() {
 	while [ $idx -lt "${nbr_of_rep}" ]; do
 		idx=$((idx+1))
 
-		res=$(ping -q $ip_proto -c 1 -s $dsize -W $timeout $device $host 2>&1)
+		res=$(ping -q ${ip_proto} -c 1 -s ${dsize} -W ${timeout} ${device} "${host}" 2>&1)
 
 		ba=$(echo "$res" | grep "bad address")
 		[ -n "$ba" ] && {
@@ -147,7 +147,7 @@ ipping_launch() {
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-	[ "${proto}" == "both_proto" ] && {
+	[ "${proto}" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState="Complete"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.IPAddressUsed="${ip_addr_used}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.SuccessCount="${success_count}"

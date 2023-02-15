@@ -5,8 +5,8 @@
 
 . /usr/share/libubox/jshn.sh
 
-ROOT="$(dirname $0)"
-. ${ROOT}/bbf_api
+ROOT="$(dirname "${0}")"
+. "${ROOT}"/bbf_api
 
 UPLOAD_TIMEOUT=1800
 
@@ -16,7 +16,7 @@ upload_error() {
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-	[ "$2" == "both_proto" ] && {
+	[ "$2" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState="$1"
 	}
 
@@ -49,7 +49,7 @@ upload_launch() {
 		$UCI_COMMIT_BBF_DMMAP
 	else
 		Status=$(uci_get_bbf_dmmap dmmap_diagnostics.upload.Status)
-		[ "${Status}" == "running" ] && {
+		[ "${Status}" = "running" ] && {
 			return
 		}
 
@@ -68,7 +68,7 @@ upload_launch() {
 		return
 	}
 
-	[ "${url:0:7}" != "http://" -a "${url:0:6}" != "ftp://" ] && {
+	[ "${url:0:7}" != "http://" ] && [ "${url:0:6}" != "ftp://" ] && {
 		upload_error "Error_Other" "${proto}"
 		return
 	}
@@ -88,7 +88,7 @@ upload_launch() {
 	rx_bytes_start=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.rx_bytes)
 
 	time_start=$(date +"%s.282646") # It should be like that time_start=$(date +"%s.%6N") but since OpenWrt busybox has limitations and doesn't support nonoseconds so keep it hardcoded
-	res=$(dd if=/dev/zero bs=$bs count=$count 2>/dev/null | curl ${ip_proto} --fail --silent --max-time ${UPLOAD_TIMEOUT} -T - ${url} -w "${format}"|grep -wo '{.*}')
+	res=$(dd if=/dev/zero bs="${bs}" count=${count} 2>/dev/null | curl ${ip_proto} --fail --silent --max-time ${UPLOAD_TIMEOUT} -T - "${url}" -w "${format}"|grep -wo '{.*}')
 	time_end=$(date +"%s.282646") # It should be like that time_end=$(date +"%s.%6N") but since OpenWrt busybox has limitations and doesn't support nonoseconds so keep it hardcoded
 
 	tx_bytes_end=$(ubus call network.device status "{'name':'$device'}" | jsonfilter -e @.statistics.tx_bytes)
@@ -134,41 +134,41 @@ upload_launch() {
 		return
 	}
 
-	tcp_open_request_time=$(echo ${time_start} ${time_appconnect} | awk '{printf "%.6f", $1 + $2}')
-	tcp_open_response_time=$(echo ${time_start} ${time_connect} | awk '{printf "%.6f", $1 + $2}')
-	rom_time=$(echo ${time_start} ${time_pretransfer} | awk '{printf "%.6f", $1 + $2}')
-	bom_time=$(echo ${time_start} ${time_starttransfer} | awk '{printf "%.6f", $1 + $2}')
-	eom_time=$(echo ${time_start} ${time_total} | awk '{printf "%.6f", $1 + $2}')
+	tcp_open_request_time=$(echo "${time_start}" "${time_appconnect}" | awk '{printf "%.6f", $1 + $2}')
+	tcp_open_response_time=$(echo "${time_start}" "${time_connect}" | awk '{printf "%.6f", $1 + $2}')
+	rom_time=$(echo "${time_start}" "${time_pretransfer}" | awk '{printf "%.6f", $1 + $2}')
+	bom_time=$(echo "${time_start}" "${time_starttransfer}" | awk '{printf "%.6f", $1 + $2}')
+	eom_time=$(echo "${time_start}" "${time_total}" | awk '{printf "%.6f", $1 + $2}')
 
-	separator_idx=$(expr index ${tcp_open_request_time} .)
+	separator_idx=$(expr index "${tcp_open_request_time}" .)
 	TCPOpenRequestTime_MicroSec=${tcp_open_request_time:$separator_idx}
-	TCPOpenRequestTime_Sec=${tcp_open_request_time:0:$(($separator_idx-1))}
+	TCPOpenRequestTime_Sec=${tcp_open_request_time:0:$((separator_idx-1))}
 
-	separator_idx=$(expr index ${tcp_open_response_time} .)
+	separator_idx=$(expr index "${tcp_open_response_time}" .)
 	TCPOpenResponseTime_MicroSec=${tcp_open_response_time:$separator_idx}
-	TCPOpenResponseTime_Sec=${tcp_open_response_time:0:$(($separator_idx-1))}
+	TCPOpenResponseTime_Sec=${tcp_open_response_time:0:$((separator_idx-1))}
 
-	separator_idx=$(expr index ${rom_time} .)
+	separator_idx=$(expr index "${rom_time}" .)
 	ROMTime_MicroSec=${rom_time:$separator_idx}
-	ROMTime_Sec=${rom_time:0:$(($separator_idx-1))}
+	ROMTime_Sec=${rom_time:0:$((separator_idx-1))}
 
-	separator_idx=$(expr index ${bom_time} .)
+	separator_idx=$(expr index "${bom_time}" .)
 	BOMTime_MicroSec=${bom_time:$separator_idx}
-	BOMTime_Sec=${bom_time:0:$(($separator_idx-1))}
+	BOMTime_Sec=${bom_time:0:$((separator_idx-1))}
 
-	separator_idx=$(expr index ${eom_time} .)
+	separator_idx=$(expr index "${eom_time}" .)
 	EOMTime_MicroSec=${eom_time:$separator_idx}
-	EOMTime_Sec=${eom_time:0:$(($separator_idx-1))}
+	EOMTime_Sec=${eom_time:0:$((separator_idx-1))}
 
-	TCPOpenRequestTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${TCPOpenRequestTime_MicroSec}Z" -d @$TCPOpenRequestTime_Sec)
-	TCPOpenResponseTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${TCPOpenResponseTime_MicroSec}Z" -d @$TCPOpenResponseTime_Sec)
-	ROMTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${ROMTime_MicroSec}Z" -d @$ROMTime_Sec)
-	BOMTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${BOMTime_MicroSec}Z" -d @$BOMTime_Sec)
-	EOMTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${EOMTime_MicroSec}Z" -d @$EOMTime_Sec)
+	TCPOpenRequestTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${TCPOpenRequestTime_MicroSec}Z" -d @"${TCPOpenRequestTime_Sec}")
+	TCPOpenResponseTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${TCPOpenResponseTime_MicroSec}Z" -d @"${TCPOpenResponseTime_Sec}")
+	ROMTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${ROMTime_MicroSec}Z" -d @"${ROMTime_Sec}")
+	BOMTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${BOMTime_MicroSec}Z" -d @"${BOMTime_Sec}")
+	EOMTime=$(date -u +"%Y-%m-%dT%H:%M:%S.${EOMTime_MicroSec}Z" -d @"${EOMTime_Sec}")
 
 	tx_bytes=$((tx_bytes_end-tx_bytes_start))
 	rx_bytes=$((rx_bytes_end-rx_bytes_start))
-	period_time=$(echo ${time_end} ${time_start} | awk '{printf ($1 - $2) * 1000000}')
+	period_time=$(echo "${time_end}" "${time_start}" | awk '{printf ($1 - $2) * 1000000}')
 	
 	json_init
 	json_add_string "Status" "Complete"
@@ -198,7 +198,7 @@ upload_launch() {
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-	[ "${proto}" == "both_proto" ] && {
+	[ "${proto}" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.DiagnosticState="Complete"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.IPAddressUsed="${ip_addr_used}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.upload.ROMTime="${ROMTime}"

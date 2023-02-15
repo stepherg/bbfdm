@@ -4,8 +4,8 @@
 
 . /usr/share/libubox/jshn.sh
 
-ROOT="$(dirname $0)"
-. ${ROOT}/bbf_api
+ROOT="$(dirname "${0}")"
+. "${ROOT}"/bbf_api
 
 serverselection_error() {
 	json_init
@@ -18,7 +18,7 @@ serverselection_error() {
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-	[ "$3" == "both_proto" ] && {
+	[ "$3" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState="$1"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.FastestHost=""
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.MinimumResponseTime=9999
@@ -71,7 +71,7 @@ serverselection_launch() {
 			while [ $i -lt "$nbr_of_rep" ]; do
 				i=$((i+1))
 
-				res=$(ping -q $ip_proto -c 1 -W $timeout $device $host 2>&1)
+				res=$(ping -q ${ip_proto} -c 1 -W ${timeout} ${device} "${host}" 2>&1)
 
 				ba=$(echo "$res" | grep "bad address")
 				[ -n "$ba" ] && {
@@ -172,7 +172,7 @@ serverselection_launch() {
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-	[ "${proto}" == "both_proto" ] && {
+	[ "${proto}" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState="Complete"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.FastestHost="${fasthost}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.IPAddressUsed="${ip_addr_used}"

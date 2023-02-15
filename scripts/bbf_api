@@ -16,13 +16,13 @@ UCI_COMMIT_BBF_DMMAP="uci -q -c /etc/bbfdm/dmmap commit"
 UCI_SHOW_BBF_DMMAP="uci -q -c /etc/bbfdm/dmmap show"
 
 uci_get() {
-	val=$($UCI_GET $1)
-	echo ${val:-$2}
+	val=$($UCI_GET "${1}")
+	echo "${val:-$2}"
 }
 
 uci_get_bbf_dmmap() {
-	val=$($UCI_GET_BBF_DMMAP $1)
-	echo ${val:-$2}
+	val=$($UCI_GET_BBF_DMMAP "${1}")
+	echo "${val:-$2}"
 }
 
 get_ip_addr_used() {
@@ -43,5 +43,5 @@ get_ip_addr_used() {
 		fi
 	fi
 	
-	echo ${ip_addr_used}
+	echo "${ip_addr_used}"
 }

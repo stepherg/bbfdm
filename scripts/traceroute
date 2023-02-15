@@ -4,8 +4,8 @@
 
 . /usr/share/libubox/jshn.sh
 
-ROOT="$(dirname $0)"
-. ${ROOT}/bbf_api
+ROOT="$(dirname "${0}")"
+. "${ROOT}"/bbf_api
 
 get_traceroute_log_file() {
 	IDX=1
@@ -27,7 +27,7 @@ traceroute_error() {
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-	[ "$3" == "both_proto" ] && {
+	[ "$3" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.DiagnosticState="$1"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.IPAddressUsed=""
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.ResponseTime=0
@@ -66,7 +66,7 @@ traceroute_launch() {
 		return
 	}
 
-	res=$(traceroute -m $maxhop -w $timeout -q $cnt $ip_proto $device $host $dsize 2>&1 >${LOG_FILE})
+	res=$(traceroute -m ${maxhop} -w ${timeout} -q ${cnt} ${ip_proto} ${device} "${host}" "${dsize}" 2>&1 >"${LOG_FILE}")
 	error_code="$?"
 
 	ba=$(echo "$res" | grep "bad address")
@@ -101,16 +101,16 @@ traceroute_launch() {
 		json_close_object
 
 		# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-		[ "$proto" == "both_proto" ] && {
+		[ "$proto" = "both_proto" ] && {
 			$UCI_ADD_BBF_DMMAP dmmap_diagnostics RouteHops
 			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@RouteHops[$i].host="${host}"
 			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@RouteHops[$i].ip="${ip}"
 			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@RouteHops[$i].time="${time}"
 		}
 			
-	done < ${LOG_FILE}
+	done < "${LOG_FILE}"
 
-	rm -f ${LOG_FILE}
+	rm -f "${LOG_FILE}"
 	i=$((i+1))
 
 	json_close_array
@@ -121,7 +121,7 @@ traceroute_launch() {
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-	[ "$proto" == "both_proto" ] && {
+	[ "$proto" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.DiagnosticState="Complete"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.NumberOfHops="${i}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.ResponseTime="${resp_time}"
