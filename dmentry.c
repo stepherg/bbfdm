@@ -288,6 +288,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			fault = dm_entry_add_object(ctx);
 			if (!fault) {
 				dmuci_set_value("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
+				dmuci_commit_package("cwmp");
 				dmuci_change_packages(&head_package_change);
 			}
 			break;
@@ -295,6 +296,7 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 			fault = dm_entry_delete_object(ctx);
 			if (!fault) {
 				dmuci_set_value("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
+				dmuci_commit_package("cwmp");
 				dmuci_change_packages(&head_package_change);
 			}
 			break;
@@ -346,6 +348,7 @@ int dm_entry_apply(struct dmctx *ctx, int cmd, char *arg1)
 			}
 			if (!fault && set_success == true) {
 				dmuci_set_value("cwmp", "cpe", "ParameterKey", arg1 ? arg1 : "");
+				dmuci_commit_package("cwmp");
 				dmuci_change_packages(&head_package_change);
 				dmuci_save();
 			}
