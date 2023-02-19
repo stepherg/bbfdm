@@ -109,32 +109,6 @@ static void add_empty_mcast_iface_to_list(char *dmmap_package, char *dmmap_sec,
 	}
 }
 
-void get_mcast_bridge_port_linker(struct dmctx *ctx, char *device_name, char **value)
-{
-	struct uci_section *dmmap_br_section = NULL, *bridge_port_s = NULL;
-
-	*value = NULL;
-	get_dmmap_section_of_config_section("dmmap_bridge", "device", device_name, &dmmap_br_section);
-	if (dmmap_br_section != NULL) {
-		char *br_inst;
-
-		dmuci_get_value_by_section_string(dmmap_br_section, "bridge_instance", &br_inst);
-		uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_inst, bridge_port_s) {
-			char *mg = NULL;
-
-			dmuci_get_value_by_section_string(bridge_port_s, "management", &mg);
-			if (mg && DM_LSTRCMP(mg, "1") == 0) {
-				char *device, linker[512] = "";
-
-				dmuci_get_value_by_section_string(bridge_port_s, "port", &device);
-				snprintf(linker, sizeof(linker), "br_%s:%s+%s", br_inst, section_name(bridge_port_s), device);
-				adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", linker, value);
-				break;
-			}
-		}
-	}
-}
-
 void synchronize_specific_config_sections_with_dmmap_mcast_iface(char *package, char *section_type,
 		void *data, char *dmmap_package, char *dmmap_sec, char *proto,
 		struct list_head *dup_list)
@@ -263,7 +237,7 @@ static int get_br_key_from_lower_layer(char *lower_layer, char *key, size_t s_ke
 	return 0;
 }
 
-int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
+int get_mcast_snooping_interface_val(struct dmctx *ctx, char *value, char *ifname, size_t s_ifname)
 {
 	/* Check if the value is valid or not. */
 	if (DM_LSTRNCMP(value, "Device.Bridging.Bridge.", 23) != 0)
@@ -273,35 +247,9 @@ int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname)
 	if (get_br_key_from_lower_layer(value, key, sizeof(key)) != 0)
 		return -1;
 
-	/* Find out bridge section name using bridge key. */
-	struct uci_section *s = NULL;
-	char *device_sec_name = NULL;
-
-	uci_path_foreach_option_eq(bbfdm, "dmmap_bridge", "device", "bridge_instance", key, s) {
-		dmuci_get_value_by_section_string(s, "section_name", &device_sec_name);
-		break;
-	}
-
-	if (!device_sec_name)
-		return -1;
-
-	// Check if network uci file has this section, if yes, then
-	// update the snooping interface with value as br-<section name>
-	struct uci_section *device_s = NULL;
-	uci_foreach_sections("network", "device", device_s) {
-
-		if (strcmp(section_name(device_s), device_sec_name) != 0)
-			continue;
-
-		char *type, *name;
-		dmuci_get_value_by_section_string(device_s, "type", &type);
-		if (*type == '\0' || DM_LSTRCMP(type, "bridge") != 0)
-			continue;
-
-		dmuci_get_value_by_section_string(device_s, "name", &name);
-		snprintf(ifname, s_ifname, "%s", name);
-		break;
-	}
+	char *linker = NULL;
+	adm_entry_get_linker_value(ctx, value, &linker);
+	snprintf(ifname, s_ifname, "%s", linker);
 
 	return 0;
 }
@@ -993,10 +941,7 @@ int get_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, 
 	DM_STRNCPY(sec_name, end, sizeof(sec_name));
 	// In the dmmap_bridge file, the details related to the instance id etc. associated with this bridge
 	// is stored, we now switch our focus to it to extract the necessary information.
-	get_mcast_bridge_port_linker(ctx, sec_name, value);
-
-	if (*value == NULL)
-		*value = "";
+	adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", val1, value);
 	return 0;
 }
 
@@ -1010,7 +955,7 @@ int set_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, 
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		if (get_mcast_snooping_interface_val(value, ifname, sizeof(ifname)) != 0)
+		if (get_mcast_snooping_interface_val(ctx, value, ifname, sizeof(ifname)) != 0)
 			return -1;
 
 		dmuci_set_value_by_section((struct uci_section *)data, "interface", ifname);
@@ -1767,7 +1712,7 @@ static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 		break;
 	case VALUESET:
 		// First check if this is a bridge type interface
-		if (get_mcast_snooping_interface_val(value, ifname, sizeof(ifname)) == 0) {
+		if (get_mcast_snooping_interface_val(ctx, value, ifname, sizeof(ifname)) == 0) {
 			interface_linker = dmstrdup(ifname);
 			is_br = true;
 		} else {
@@ -1845,7 +1790,7 @@ static int get_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 				adm_entry_get_linker_param(ctx, "Device.IP.Interface.", sec_name, value);
 			} else {
 				// It is a L2 bridge, get the linker accordingly
-				get_mcast_bridge_port_linker(ctx, sec_name, value);
+				adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", igmpp_ifname, value);
 			}
 			break;
 		}

@@ -1407,25 +1407,16 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 							struct uci_section *s = NULL;
 
 							// Remove unused Interface section created by Bridge Object if it exists
-							uci_foreach_sections("network", "interface", s) {
-								char *br_device = NULL;
+							s = get_dup_section_in_config_opt("network", "interface", "device", linker_buf);
+							dmuci_delete_by_section(s, NULL, NULL);
 
-								dmuci_get_value_by_section_string(s, "device", &br_device);
-								if (br_device && DM_STRCMP(br_device, linker_buf) == 0) {
-									dmuci_delete_by_section(s, NULL, NULL);
-									break;
-								}
-	 						}
-
-							// Update all bridge_port section with the new device value
-							uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "device", linker_buf, s) {
-								dmuci_set_value_by_section(s, "device", device);
-							}
+							// Update amanagement port section with the new port value if it exists
+							s = get_dup_section_in_dmmap_opt("dmmap_bridge_port", "bridge_port", "port", linker_buf);
+							dmuci_set_value_by_section(s, "port", device);
 
 							// Update device section with the new name value
-							uci_foreach_option_eq("network", "device", "name", linker_buf, s) {
-								dmuci_set_value_by_section(s, "name", device);
-							}
+							s = get_dup_section_in_config_opt("network", "device", "name", linker_buf);
+							dmuci_set_value_by_section(s, "name", device);
 
 							// Update device option in dmmap section related to this Interface section
 							dmuci_set_value_by_section(eth_link_s, "device", device);

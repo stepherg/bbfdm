@@ -17,11 +17,12 @@
 
 struct bridge_port_args
 {
+	struct uci_section *bridge_sec;
+	struct uci_section *bridge_dmmap_sec;
 	struct uci_section *bridge_port_sec;
 	struct uci_section *bridge_port_dmmap_sec;
-	struct uci_section *bridge_sec;
+	bool is_management_port;
 	char *br_inst;
-	char *br_port_device;
 };
 
 extern DMOBJ tBridgingObj[];

@@ -453,7 +453,7 @@ static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 		break;
 	case VALUESET:
 		// First check if this is a bridge type interface
-		if (get_mcast_snooping_interface_val(value, ifname, sizeof(ifname)) == 0) {
+		if (get_mcast_snooping_interface_val(ctx, value, ifname, sizeof(ifname)) == 0) {
 			interface_linker = dmstrdup(ifname);
 		} else {
 			adm_entry_get_linker_value(ctx, value, &linker);
@@ -542,7 +542,7 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 				adm_entry_get_linker_param(ctx, "Device.IP.Interface.", sec_name, value);
 			} else {
 				// It is a L2 bridge, get the linker accordingly
-				get_mcast_bridge_port_linker(ctx, sec_name, value);
+				adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", mldp_ifname, value);
 			}
 			break;
 		}

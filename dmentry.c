@@ -433,7 +433,7 @@ int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *obje
 
 	for (; *objects; objects++) {
 
-		if (DM_STRNCMP(value, *objects, DM_STRLEN(*objects)) == 0) {
+		if (match(value, *objects)) {
 			char *linker = NULL;
 
 			adm_entry_get_linker_value(ctx, value, &linker);

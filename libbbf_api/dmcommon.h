@@ -245,6 +245,7 @@ bool value_exits_in_str_list(char *str_list, const char *delimitor, const char *
 void add_elt_to_str_list(char **str_list, char *elt);
 void remove_elt_from_str_list(char **str_list, char *ifname);
 struct uci_section *get_origin_section_from_config(char *package, char *section_type, char *orig_section_name);
+struct uci_section *get_origin_section_from_dmmap(char *package, char *section_type, char *orig_section_name);
 struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_type, char *orig_section_name);
 struct uci_section *get_dup_section_in_config_opt(char *package, char *section_type, char *opt_name, char *opt_value);
 struct uci_section *get_dup_section_in_dmmap_opt(char *dmmap_package, char *section_type, char *opt_name, char *opt_value);

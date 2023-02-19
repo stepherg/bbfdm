@@ -347,6 +347,18 @@ struct uci_section *get_origin_section_from_config(char *package, char *section_
 	return NULL;
 }
 
+struct uci_section *get_origin_section_from_dmmap(char *package, char *section_type, char *orig_section_name)
+{
+	struct uci_section *s = NULL;
+
+	uci_path_foreach_sections(bbfdm, package, section_type, s) {
+		if (strcmp(section_name(s), orig_section_name) == 0)
+			return s;
+	}
+
+	return NULL;
+}
+
 struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_type, char *orig_section_name)
 {
 	struct uci_section *s;
@@ -930,7 +942,7 @@ char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_sectio
 
 bool value_exists_in_uci_list(struct uci_list *list, const char *value)
 {
-	struct uci_element *e;
+	struct uci_element *e = NULL;
 
 	if (list == NULL)
 		return false;

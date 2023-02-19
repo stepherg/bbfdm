@@ -81,12 +81,11 @@ int get_mcasts_filter_no_of_entries(char *refparam, struct dmctx *ctx, void *dat
 int del_mcasts_filter_obj(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action);
 
 void update_snooping_mode(struct uci_section *s);
-int get_mcast_snooping_interface_val(char *value, char *ifname, size_t s_ifname);
+int get_mcast_snooping_interface_val(struct dmctx *ctx, char *value, char *ifname, size_t s_ifname);
 int del_proxy_obj(void *data, char *proto, unsigned char del_action);
 void del_dmmap_sec_with_opt_eq(char *dmmap_file, char *section, char *option, char *value);
 void sync_dmmap_bool_to_uci_list(struct uci_section *s, char *section, char *value, bool b);
 int del_snooping_obj(void *data, char *proto, unsigned char del_action);
-void get_mcast_bridge_port_linker(struct dmctx *ctx, char *intf_name, char **value);
 int browse_proxy_interface_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *proto);
 int browse_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *section_type,
 		char *option_name, char *option_value);

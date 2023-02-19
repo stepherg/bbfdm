@@ -28,7 +28,7 @@ static int set_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, st
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "type", &type);
-			if (DM_STRLEN(type) == 0)
+			if (((struct bridge_port_args *)data)->is_management_port || DM_STRLEN(type) == 0)
 				return FAULT_9007;
 
 			return 0;
