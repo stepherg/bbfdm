@@ -29,6 +29,7 @@ extern DMOBJ tBridgingObj[];
 extern DMLEAF tBridgingParams[];
 extern DMOBJ tBridgingBridgeObj[];
 extern DMLEAF tBridgingBridgeParams[];
+extern DMLEAF tBridgingBridgeSTPParams[];
 extern DMLEAF tBridgingBridgeVLANParams[];
 extern DMLEAF tBridgingBridgePortParams[];
 extern DMLEAF tBridgingBridgeVLANPortParams[];

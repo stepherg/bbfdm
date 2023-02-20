@@ -1799,6 +1799,156 @@ static int get_BridgingBridge_VLANPortNumberOfEntries(char *refparam, struct dmc
 	return 0;
 }
 
+
+static int get_BridgingBridgeSTP_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct bridge_args *)data)->bridge_sec, "stp", "0");
+	return 0;
+}
+
+static int set_BridgingBridgeSTP_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section(((struct bridge_args *)data)->bridge_sec, "stp", b ? "1" : "0");
+			return 0;
+	}
+	return 0;
+}
+
+static int get_BridgingBridgeSTP_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	get_BridgingBridgeSTP_Enable(refparam, ctx, data, instance, value);
+	*value = (DM_LSTRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
+	return 0;
+}
+
+static int get_BridgingBridgeSTP_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "STP";
+	return 0;
+}
+
+static int set_BridgingBridgeSTP_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *Protocol[] = {"STP", NULL};
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, -1, Protocol, NULL))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			return 0;
+	}
+	return 0;
+}
+
+static int get_BridgingBridgeSTP_BridgePriority(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct bridge_args *)data)->bridge_sec, "priority", "32767");
+	return 0;
+}
+
+static int set_BridgingBridgeSTP_BridgePriority(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","61440"}}, 1))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct bridge_args *)data)->bridge_sec, "priority", value);
+			return 0;
+	}
+	return 0;
+}
+
+static int get_BridgingBridgeSTP_HelloTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct bridge_args *)data)->bridge_sec, "hello_time", value);
+
+	// Value defined in system is in seconds but in datamodel this is in centiseconds, convert the value to centiseconds
+	int hello_time = DM_STRLEN(*value) ? DM_STRTOL(*value) * 100 : 200;
+
+	dmasprintf(value, "%d", hello_time);
+	return 0;
+}
+
+static int set_BridgingBridgeSTP_HelloTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char buf[16] = {0};
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"100","1000"}}, 1))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			// Value defined in system is in seconds but in datamodel this is in centiseconds, convert the value to seconds
+			snprintf(buf, sizeof(buf), "%ld", DM_STRTOL(value) / 100);
+			dmuci_set_value_by_section(((struct bridge_args *)data)->bridge_sec, "hello_time", buf);
+			return 0;
+	}
+	return 0;
+}
+
+static int get_BridgingBridgeSTP_MaxAge(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct bridge_args *)data)->bridge_sec, "max_age", value);
+
+	// Value defined in system is in seconds but in datamodel this is in centiseconds, convert the value to centiseconds
+	int max_age = DM_STRLEN(*value) ? DM_STRTOL(*value) * 100 : 2000;
+
+	dmasprintf(value, "%d", max_age);
+	return 0;
+}
+
+static int set_BridgingBridgeSTP_MaxAge(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char buf[16] = {0};
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"600","4000"}}, 1))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			// Value defined in system is in seconds but in datamodel this is in centiseconds, convert the value to seconds
+			snprintf(buf, sizeof(buf), "%ld", DM_STRTOL(value) / 100);
+			dmuci_set_value_by_section(((struct bridge_args *)data)->bridge_sec, "max_age", buf);
+			return 0;
+	}
+	return 0;
+}
+
+static int get_BridgingBridgeSTP_ForwardingDelay(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct bridge_args *)data)->bridge_sec, "forward_delay", "4");
+	return 0;
+}
+
+static int set_BridgingBridgeSTP_ForwardingDelay(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"4","30"}}, 1))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct bridge_args *)data)->bridge_sec, "forward_delay", value);
+			return 0;
+	}
+	return 0;
+}
+
 static int get_BridgingBridgePort_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct bridge_port_args *args = (struct bridge_port_args *)data;
@@ -2867,6 +3017,7 @@ DMLEAF tBridgingParams[] = {
 /*** Bridging.Bridge.{i}. ***/
 DMOBJ tBridgingBridgeObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"STP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tBridgingBridgeSTPParams, NULL, BBFDM_BOTH, NULL, "2.16"},
 {"Port", &DMWRITE, addObjBridgingBridgePort, delObjBridgingBridgePort, NULL, browseBridgingBridgePortInst, NULL, NULL, tBridgingBridgePortObj, tBridgingBridgePortParams, get_linker_br_port, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}, "2.0"},
 {"VLAN", &DMWRITE, addObjBridgingBridgeVLAN, delObjBridgingBridgeVLAN, NULL, browseBridgingBridgeVLANInst, NULL, NULL, NULL, tBridgingBridgeVLANParams, get_linker_br_vlan, BBFDM_BOTH, LIST_KEY{"VLANID", "Alias", NULL}, "2.0"},
 {"VLANPort", &DMWRITE, addObjBridgingBridgeVLANPort, delObjBridgingBridgeVLANPort, NULL, browseBridgingBridgeVLANPortInst, NULL, NULL, NULL, tBridgingBridgeVLANPortParams, NULL, BBFDM_BOTH, LIST_KEY{"VLAN", "Port", "Alias", NULL}, "2.0"},
@@ -2882,6 +3033,19 @@ DMLEAF tBridgingBridgeParams[] = {
 {"PortNumberOfEntries", &DMREAD, DMT_UNINT, get_BridgingBridge_PortNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {"VLANNumberOfEntries", &DMREAD, DMT_UNINT, get_BridgingBridge_VLANNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
 {"VLANPortNumberOfEntries", &DMREAD, DMT_UNINT, get_BridgingBridge_VLANPortNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
+{0}
+};
+
+/*** Bridging.Bridge.{i}.STP. ***/
+DMLEAF tBridgingBridgeSTPParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Enable", &DMWRITE, DMT_BOOL, get_BridgingBridgeSTP_Enable, set_BridgingBridgeSTP_Enable, BBFDM_BOTH, "2.16"},
+{"Status", &DMREAD, DMT_STRING, get_BridgingBridgeSTP_Status, NULL, BBFDM_BOTH, "2.16"},
+{"Protocol", &DMWRITE, DMT_STRING, get_BridgingBridgeSTP_Protocol, set_BridgingBridgeSTP_Protocol, BBFDM_BOTH, "2.16"},
+{"BridgePriority", &DMWRITE, DMT_UNINT, get_BridgingBridgeSTP_BridgePriority, set_BridgingBridgeSTP_BridgePriority, BBFDM_BOTH, "2.16"},
+{"HelloTime", &DMWRITE, DMT_UNINT, get_BridgingBridgeSTP_HelloTime, set_BridgingBridgeSTP_HelloTime, BBFDM_BOTH, "2.16"},
+{"MaxAge", &DMWRITE, DMT_UNINT, get_BridgingBridgeSTP_MaxAge, set_BridgingBridgeSTP_MaxAge, BBFDM_BOTH, "2.16"},
+{"ForwardingDelay", &DMWRITE, DMT_UNINT, get_BridgingBridgeSTP_ForwardingDelay, set_BridgingBridgeSTP_ForwardingDelay, BBFDM_BOTH, "2.16"},
 {0}
 };
 
