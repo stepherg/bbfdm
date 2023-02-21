@@ -27,7 +27,7 @@
 #include "dmmem.h"
 #include "dmapi.h"
 
-#define DEFAULT_DMVERSION "2.15"
+#define DEFAULT_DMVERSION "2.16"
 
 int get_number_of_entries(struct dmctx *ctx, void *data, char *instance, int (*browseinstobj)(struct dmctx *ctx, struct dmnode *node, void *data, char *instance));
 char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, char *inst_opt, char *alias_opt);
