@@ -288,7 +288,7 @@ static void test_api_bbfdm_set_value_parameter(void **state)
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list == &ctx->list_fault_param);
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 }
 
@@ -356,7 +356,7 @@ static void test_api_bbfdm_set_value_parameter_alias(void **state)
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list == &ctx->list_fault_param);
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 }
 
@@ -365,7 +365,7 @@ static void test_api_bbfdm_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.Users.User.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.Users.User.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	assert_non_null(ctx->addobj_instance);
@@ -377,7 +377,7 @@ static void test_api_bbfdm_add_wrong_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.Users.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.Users.", NULL, NULL);
 	assert_int_equal(fault, FAULT_9005);
 
 	assert_null(ctx->addobj_instance);
@@ -388,7 +388,7 @@ static void test_api_bbfdm_add_object_non_writable(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.Radio.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.Radio.", NULL, NULL);
 	assert_int_equal(fault, FAULT_9005);
 
 	assert_null(ctx->addobj_instance);
@@ -399,7 +399,7 @@ static void test_api_bbfdm_add_object_empty(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "", NULL, NULL);
 	assert_int_equal(fault, FAULT_9005);
 
 	assert_null(ctx->addobj_instance);
@@ -410,7 +410,7 @@ static void test_api_bbfdm_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.1.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.1.", NULL, NULL);
 	assert_int_equal(fault, 0);
 }
 
@@ -419,7 +419,7 @@ static void test_api_bbfdm_delete_object_all_instances(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Users.User.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Users.User.", NULL, NULL);
 	assert_int_equal(fault, 0);
 }
 
@@ -428,7 +428,7 @@ static void test_api_bbfdm_delete_wrong_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID", NULL, NULL);
 	assert_int_equal(fault, FAULT_9005);
 }
 
@@ -437,7 +437,7 @@ static void test_api_bbfdm_delete_object_non_writable(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Hosts.Host.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Hosts.Host.", NULL, NULL);
 	assert_int_equal(fault, FAULT_9005);
 }
 
@@ -446,7 +446,7 @@ static void test_api_bbfdm_delete_object_empty(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "", NULL, NULL);
 	assert_int_equal(fault, FAULT_9005);
 }
 
@@ -612,7 +612,7 @@ static void test_api_bbfdm_json_set_value(void **state)
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list == &ctx->list_fault_param);
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_Dropbear.1.Port", "9856", NULL);
@@ -621,7 +621,7 @@ static void test_api_bbfdm_json_set_value(void **state)
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list == &ctx->list_fault_param);
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 }
 
@@ -630,7 +630,7 @@ static void test_api_bbfdm_json_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.X_IOPSYS_EU_Dropbear.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.X_IOPSYS_EU_Dropbear.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	assert_non_null(ctx->addobj_instance);
@@ -642,10 +642,10 @@ static void test_api_bbfdm_json_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.X_IOPSYS_EU_Dropbear.1.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.X_IOPSYS_EU_Dropbear.1.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.X_IOPSYS_EU_Dropbear.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.X_IOPSYS_EU_Dropbear.", NULL, NULL);
 	assert_int_equal(fault, 0);
 }
 
@@ -696,7 +696,7 @@ static void test_api_bbfdm_library_set_value(void **state)
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list == &ctx->list_fault_param);
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_Syslog.ServerPort", "9856", NULL);
@@ -705,7 +705,7 @@ static void test_api_bbfdm_library_set_value(void **state)
 	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
 	assert_true(&first_fault->list == &ctx->list_fault_param);
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 }
 
@@ -714,7 +714,7 @@ static void test_api_bbfdm_library_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.SSID.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.SSID.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	assert_non_null(ctx->addobj_instance);
@@ -726,10 +726,10 @@ static void test_api_bbfdm_library_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.1.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.1.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.", NULL, NULL);
 	assert_int_equal(fault, 0);
 }
 

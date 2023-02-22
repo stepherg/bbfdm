@@ -107,7 +107,7 @@ static void test_api_bbfdm_get_set_standard_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -135,7 +135,7 @@ static void test_api_bbfdm_get_set_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -199,7 +199,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -237,7 +237,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -263,7 +263,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -285,7 +285,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -312,7 +312,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -381,7 +381,7 @@ static void test_api_bbfdm_get_set_library_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -413,7 +413,7 @@ static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -428,7 +428,7 @@ static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -443,7 +443,7 @@ static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -476,7 +476,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -499,7 +499,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -518,7 +518,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -533,7 +533,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -556,7 +556,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -575,7 +575,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -594,7 +594,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -609,7 +609,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -632,7 +632,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -651,7 +651,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -666,7 +666,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -689,7 +689,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -708,7 +708,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -727,7 +727,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -754,7 +754,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -777,7 +777,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -796,7 +796,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -811,7 +811,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -830,7 +830,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -853,7 +853,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -872,7 +872,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -891,7 +891,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -906,7 +906,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -933,7 +933,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -956,7 +956,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -983,7 +983,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -1010,7 +1010,7 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// apply value ==> expected "0" error
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE, "test_key");
+	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
@@ -1031,7 +1031,7 @@ static void test_api_bbfdm_add_del_standard_object(void **state)
 	assert_int_equal(fault, 0);
 
 	// add object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.Users.User.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.Users.User.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// check the new instance
@@ -1039,7 +1039,7 @@ static void test_api_bbfdm_add_del_standard_object(void **state)
 	assert_string_equal(ctx->addobj_instance, "2");
 
 	// delete object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Users.User.2.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Users.User.2.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// Get name object after deleting instance 2 ==> expected "9005" error
@@ -1047,7 +1047,7 @@ static void test_api_bbfdm_add_del_standard_object(void **state)
 	assert_int_equal(fault, FAULT_9005);
 
 	// delete all object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Users.User.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Users.User.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// Get name object after deleting all instances ==> expected "9005" error
@@ -1065,7 +1065,7 @@ static void test_api_bbfdm_add_del_json_object(void **state)
 	assert_int_equal(fault, 0);
 
 	// add object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.X_IOPSYS_EU_Dropbear.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.X_IOPSYS_EU_Dropbear.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// check the new instance
@@ -1073,7 +1073,7 @@ static void test_api_bbfdm_add_del_json_object(void **state)
 	assert_string_equal(ctx->addobj_instance, "2");
 
 	// delete object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.X_IOPSYS_EU_Dropbear.2.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.X_IOPSYS_EU_Dropbear.2.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// Get name object after deleting instance 2 ==> expected "9005" error
@@ -1081,7 +1081,7 @@ static void test_api_bbfdm_add_del_json_object(void **state)
 	assert_int_equal(fault, FAULT_9005);
 
 	// delete all object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.X_IOPSYS_EU_Dropbear.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.X_IOPSYS_EU_Dropbear.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// Get name object after deleting all instances ==> expected "9005" error
@@ -1107,7 +1107,7 @@ static void test_api_bbfdm_add_del_json_v1_object(void **state)
 	assert_string_equal(ctx->addobj_instance, "4");
 
 	// delete object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.UCI_TEST_V1.OWSD.2.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.UCI_TEST_V1.OWSD.2.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// Get name object after deleting instance 2 ==> expected "9005" error
@@ -1123,7 +1123,7 @@ static void test_api_bbfdm_add_del_json_v1_object(void **state)
 	assert_int_equal(fault, FAULT_9005);
 
 	// add object ==> expected "9005" error
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.UBUS_TEST_V1.Interface.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.UBUS_TEST_V1.Interface.", NULL, NULL);
 	assert_int_equal(fault, FAULT_9005);
 
 	// delete all object ==> expected "9005" error
@@ -1141,7 +1141,7 @@ static void test_api_bbfdm_add_del_library_object(void **state)
 	assert_int_equal(fault, 0);
 
 	// add object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.SSID.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.SSID.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// check the new instance
@@ -1149,7 +1149,7 @@ static void test_api_bbfdm_add_del_library_object(void **state)
 	assert_string_equal(ctx->addobj_instance, "4");
 
 	// delete object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.2.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.2.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// Get name object after deleting instance 2 ==> expected "9005" error
@@ -1157,7 +1157,7 @@ static void test_api_bbfdm_add_del_library_object(void **state)
 	assert_int_equal(fault, FAULT_9005);
 
 	// delete all object ==> expected "0" error
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.", "test_key", NULL);
+	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.", NULL, NULL);
 	assert_int_equal(fault, 0);
 
 	// Get name object after deleting all instances ==> expected "9005" error

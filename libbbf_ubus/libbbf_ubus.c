@@ -728,7 +728,7 @@ static int libbbf_ubus_set_handler(struct ubus_context *ctx, struct ubus_object 
 	}
 
 	//Apply the parameter
-	fault = dm_entry_apply(&bbf_ctx, CMD_SET_VALUE, NULL);
+	fault = dm_entry_apply(&bbf_ctx, CMD_SET_VALUE);
 	if (fault == 0 && fault_occured == false) {
 		blobmsg_add_u8(&bb, "status", true);
 		if (get_bbfdatamodel_type() == BBFDM_CWMP)
