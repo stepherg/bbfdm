@@ -1893,7 +1893,7 @@ static int set_BridgingBridgeSTP_HelloTime(char *refparam, struct dmctx *ctx, vo
 			return 0;
 		case VALUESET:
 			// Value defined in system is in seconds but in datamodel this is in centiseconds, convert the value to seconds
-			snprintf(buf, sizeof(buf), "%ld", DM_STRTOL(value) / 100);
+			snprintf(buf, sizeof(buf), "%u", (uint32_t)DM_STRTOL(value) / 100);
 			dmuci_set_value_by_section(((struct bridge_args *)data)->bridge_sec, "hello_time", buf);
 			return 0;
 	}
@@ -1922,7 +1922,7 @@ static int set_BridgingBridgeSTP_MaxAge(char *refparam, struct dmctx *ctx, void 
 			return 0;
 		case VALUESET:
 			// Value defined in system is in seconds but in datamodel this is in centiseconds, convert the value to seconds
-			snprintf(buf, sizeof(buf), "%ld", DM_STRTOL(value) / 100);
+			snprintf(buf, sizeof(buf), "%u", (uint32_t)DM_STRTOL(value) / 100);
 			dmuci_set_value_by_section(((struct bridge_args *)data)->bridge_sec, "max_age", buf);
 			return 0;
 	}
