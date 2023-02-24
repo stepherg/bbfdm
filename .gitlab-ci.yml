@@ -9,7 +9,7 @@ include:
 variables:
   DEBUG: 'TRUE'
   SOURCE_FOLDER: "."
-  COMMON_IMAGE: iopsys/code-analysis:0.27
+  COMMON_IMAGE: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:0.27
   RUN_CPPCHECK: "cppcheck --enable=information --error-exitcode=1 -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBF_TR181 -DBBF_VENDOR_IOPSYS -DBBF_VENDOR_OPENWRT --inline-suppr -i test/"
 
 stages:
@@ -22,7 +22,7 @@ stages:
 
 run_unit_test:
   stage: unit_test
-  image: iopsys/code-analysis:latest
+  image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
   allow_failure: false
   script:
   - "./gitlab-ci/setup.sh"
@@ -35,7 +35,7 @@ run_unit_test:
 
 run_functional_test:
   stage: functional_test
-  image: iopsys/code-analysis:latest
+  image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
   allow_failure: false
   script:
   - "./gitlab-ci/setup.sh"
@@ -49,7 +49,7 @@ run_functional_test:
 
 run_functional_api_test:
   stage: functional_test
-  image: iopsys/code-analysis:latest
+  image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
   allow_failure: false
   script:
   - "./gitlab-ci/setup.sh"
@@ -78,7 +78,7 @@ run_tools_test:
 
 run_memory_test:
   stage: memory_test
-  image: iopsys/code-analysis:latest
+  image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
   allow_failure: false
   script:
   - "./gitlab-ci/setup.sh"
@@ -95,7 +95,7 @@ run_memory_test:
 
 doxygen:
   stage: unit_test
-  image: iopsys/code-analysis:latest
+  image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
   before_script:
       - apt update
       - apt --assume-yes install doxygen graphviz
