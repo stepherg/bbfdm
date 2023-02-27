@@ -411,7 +411,7 @@ static int set_IPDiagnosticsTraceRoute_Timeout(char *refparam, struct dmctx *ctx
 
 static int get_IPDiagnosticsTraceRoute_DataBlockSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("traceroute", "DataBlockSize", "38");
+	*value = get_diagnostics_option_fallback_def("traceroute", "DataBlockSize", "72");
 	return 0;
 }
 

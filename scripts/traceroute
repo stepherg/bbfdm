@@ -65,6 +65,8 @@ traceroute_launch() {
 		traceroute_error "Error_Internal" "${nbr_of_rep}" "${proto}"
 		return
 	}
+	
+	[ -z "${dsize}" ] && dsize="72"
 
 	res=$(traceroute -m ${maxhop} -w ${timeout} -q ${cnt} ${ip_proto} ${device} "${host}" "${dsize}" 2>&1 >"${LOG_FILE}")
 	error_code="$?"
