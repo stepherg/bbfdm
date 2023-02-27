@@ -52,6 +52,11 @@ struct wifi_event_args
 	char *event_time;
 };
 
+struct wifi_ap_fronthaul_args
+{
+	char *ssid;
+	char *band_list;
+};
 
 /**************************************************************************
 * LINKER
@@ -299,6 +304,58 @@ struct uci_section *find_mapcontroller_section(struct uci_section *wireless_s)
 	}
 
 	return NULL;
+}
+
+static bool is_ssid_exists(const char *sec_name, const char *ssid, char **band_list)
+{
+	struct uci_section *s = NULL;
+	char *curr_ssid = NULL;
+	char buf[256] = {0};
+	unsigned pos = 0;
+
+	*band_list = NULL;
+
+	if (DM_STRLEN(sec_name) == 0 || DM_STRLEN(ssid) == 0)
+		return false;
+
+	uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
+		struct uci_section *dmmap_s = NULL;
+		char *ap_inst = NULL;
+
+		// skip the disabled fronthaul interfaces
+		char *enabled = NULL;
+		dmuci_get_value_by_section_string(s, "enabled", &enabled);
+		if (DM_STRLEN(enabled)) {
+			bool b = false;
+
+			string_to_bool(enabled, &b);
+			if (b == false)
+				continue;
+		}
+
+		dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
+		if (DM_STRLEN(curr_ssid) == 0 ||
+			DM_STRCMP(curr_ssid, ssid) != 0)
+			continue;
+
+		if ((dmmap_s = get_dup_section_in_dmmap("dmmap_mapcontroller", "ap", section_name(s))) != NULL) {
+			dmuci_get_value_by_section_string(dmmap_s, "wifi_da_ssid_instance", &ap_inst);
+
+			if (strcmp(sec_name, section_name(s)) != 0 && DM_STRLEN(ap_inst) != 0)
+				return true;
+		}
+
+		// Update band list
+		char *band = NULL;
+		dmuci_get_value_by_section_string(s, "band", &band);
+		pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", (!DM_LSTRCMP(band, "2")) ? "2.4" : (!DM_LSTRCMP(band, "5")) ? "5" : "6");
+	}
+
+	if (pos)
+		buf[pos - 1] = 0;
+
+	*band_list = dmstrdup(buf);
+	return false;
 }
 
 /*************************************************************
@@ -635,14 +692,17 @@ static int browse_wifi_associated_device(struct dmctx *dmctx, DMNODE *parent_nod
 
 static int browseWiFiDataElementsNetworkSSIDInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
+	struct wifi_ap_fronthaul_args curr_wifi_ap_fronthaul_args = {0};
 	struct dmmap_dup *p = NULL;
 	char *inst = NULL;
+	char *band_list = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("mapcontroller", "ap", "dmmap_mapcontroller", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		char *type = NULL;
 		char *enabled = NULL;
+		char *ssid = NULL;
 		bool b = false;
 
 		dmuci_get_value_by_section_string(p->config_section, "type", &type);
@@ -657,9 +717,19 @@ static int browseWiFiDataElementsNetworkSSIDInst(struct dmctx *dmctx, DMNODE *pa
 				continue;
 		}
 
+		dmuci_get_value_by_section_string(p->config_section, "ssid", &ssid);
+		if (DM_STRLEN(ssid) == 0)
+			continue;
+
+		if (is_ssid_exists(section_name(p->config_section), ssid, &band_list))
+			continue;
+
+		curr_wifi_ap_fronthaul_args.ssid = ssid;
+		curr_wifi_ap_fronthaul_args.band_list = band_list;
+
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "wifi_da_ssid_instance", "wifi_da_ssid_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_ap_fronthaul_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -3781,16 +3851,17 @@ static int get_WiFiDataElementsNetwork_SSIDNumberOfEntries(char *refparam, struc
 
 static int get_WiFiDataElementsNetworkSSID_SSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ssid", value);
+	struct wifi_ap_fronthaul_args *data_args = (struct wifi_ap_fronthaul_args *)data;
+
+	*value = (data_args && data_args->ssid) ? data_args->ssid : "";
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkSSID_Band(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *band = NULL;
+	struct wifi_ap_fronthaul_args *data_args = (struct wifi_ap_fronthaul_args *)data;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "band", &band);
-	*value = (!DM_LSTRCMP(band, "2")) ? "2.4" : (!DM_LSTRCMP(band, "5")) ? "5" : "6";
+	*value = (data_args && data_args->band_list) ? data_args->band_list : "";
 	return 0;
 }
 
