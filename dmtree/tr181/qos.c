@@ -574,7 +574,7 @@ static int get_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, voi
 	if (DM_STRLEN(dest_ip))
 		mask = strchr(dest_ip, '/');
 
-	*value = mask ? dest_ip : "";
+	*value = mask ? mask : "";
 	return 0;
 }
 
@@ -624,7 +624,7 @@ static int get_QoSClassification_SourceMask(char *refparam, struct dmctx *ctx, v
 	if (DM_STRLEN(src_ip))
 		mask = strchr(src_ip, '/');
 
-	*value = mask ? src_ip : "";
+	*value = mask ? mask : "";
 	return 0;
 }
 
