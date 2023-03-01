@@ -1650,8 +1650,9 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	if (!jobj || !pleaf)
 		return;
 
+	char *param_ext = replace_str(param, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
 	//PARAM
-	pleaf[i].parameter = dm_dynamic_strdup(&json_memhead, param);
+	pleaf[i].parameter = dm_dynamic_strdup(&json_memhead, param_ext);
 
 	//type
 	json_object_object_get_ex(jobj, "type", &type);
@@ -1785,7 +1786,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	json_object_object_get_ex(jobj, "version", &version);
 	DM_STRNCPY(pleaf[i].version, version ? json_object_get_string(version) : "", 10);
 
-	snprintf(full_param, sizeof(full_param), "%s%s", object, param);
+	snprintf(full_param, sizeof(full_param), "%s%s", object, param_ext);
 	save_json_data(list, full_param, jobj, json_version, (const char**)in_p, (const char**)out_p, (const char**)ev_arg);
 }
 
