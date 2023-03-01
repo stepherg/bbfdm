@@ -81,3 +81,19 @@ To successfully build libbbfdm or libbbf_ubus, the following libraries are neede
 | libjson-c   | https://s3.amazonaws.com/json-c_releases    | MIT            |
 | libcurl     | https://dl.uxnr.de/mirror/curl              | MIT            |
 | libwolfssl  | https://github.com/wolfSSL/wolfssl          | GPL-2.0        |
+
+
+## External dependencies for datamodel objects
+
+| Datamodel                                | Package        | Link                                         |
+| ---------------------------------------- | -------------- | -------------------------------------------- |
+| Device.BulkData.                         | bulkdata       | https://dev.iopsys.eu/iopsys/bulkdata.git    |
+| Device.CWMPManagementServer.             | icwmp          | https://dev.iopsys.eu/iopsys/icwmp.git       |
+| Device.IP.Diagnostics.UDPEchoConfig.     | udpecho-server | https://dev.iopsys.eu/iopsys/udpecho.git     |
+| Device.IP.Diagnostics.UDPEchoDiagnostics.| udpecho-client | https://dev.iopsys.eu/iopsys/udpecho.git     |
+| Device.IP.Interface.{i}.TWAMPReflector.  | twamp          | https://dev.iopsys.eu/iopsys/twamp-light.git |
+| Device.UPNP.                             | ssdpd          | https://github.com/miniupnp/miniupnp.git     |
+| Device.XMPP.                             | xmppc          | https://dev.iopsys.eu/iopsys/xmppc.git       |
+| Device.XPON.                             | ponmngr        | https://dev.iopsys.eu/iopsys/ponmngr.git     |
+| Device.USPAgent.                         | obuspa         | https://dev.iopsys.eu/fork/obuspa.git        |
+| STUN parameters                          | stunc          | https://dev.iopsys.eu/iopsys/stunc.git       |
