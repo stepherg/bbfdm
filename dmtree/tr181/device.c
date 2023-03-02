@@ -44,6 +44,7 @@
 #ifdef BBF_TR104
 #include "servicesvoiceservice.h"
 #endif
+#include "ssh.h"
 
 /*************************************************************
 * GET & SET PARAM
@@ -122,6 +123,7 @@ DMOBJ tDeviceObj[] = {
 #endif
 {"GatewayInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGatewayInfoParams, NULL, BBFDM_CWMP, NULL, "2.0"},
 {"MQTT", &DMREAD, NULL, NULL, "file:/etc/config/mosquitto", NULL, NULL, NULL, tMQTTObj, tMQTTParams, NULL, BBFDM_BOTH, NULL, "2.10"},
+{"SSH", &DMREAD, NULL, NULL, "file:/etc/config/dropbear", NULL, NULL, NULL, tSSHObj, tSSHParams, NULL, BBFDM_BOTH, NULL, "2.16"},
 {0}
 };
 
