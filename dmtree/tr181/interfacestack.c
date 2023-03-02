@@ -9,6 +9,7 @@
  */
 
 #include "ethernet.h"
+#include "ip.h"
 #include "interfacestack.h"
 
 struct interfacestack_data {
@@ -130,7 +131,8 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 		if (strcmp(section_name(s), "loopback") == 0 ||
 			*proto == '\0' ||
-			DM_STRCHR(device_s, '@'))
+			DM_STRCHR(device_s, '@') ||
+			ip___is_ipinterface_exists(section_name(s), device_s))
 			continue;
 
 		// The higher layer is Device.IP.Interface.{i}.

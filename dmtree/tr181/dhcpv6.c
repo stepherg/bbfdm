@@ -343,17 +343,10 @@ static int delObjDHCPv6Client(char *refparam, struct dmctx *ctx, void *data, cha
 			dmuci_delete_by_section(((struct dhcpv6_client_args *)data)->dmmap_s, NULL, NULL);
 
 			if (((struct dhcpv6_client_args *)data)->iface_s) {
-				char *device = NULL;
-
-				dmuci_get_value_by_section_string(((struct dhcpv6_client_args *)data)->iface_s, "device", &device);
-				if (device && DM_STRCHR(device, '@')) {
-					dmuci_delete_by_section(((struct dhcpv6_client_args *)data)->iface_s, NULL, NULL);
-				} else {
-					dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "proto", "none");
-					dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "reqaddress", "");
-					dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "reqprefix", "");
-					dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "reqopts", "");
-				}
+				dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "proto", "none");
+				dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "reqaddress", "");
+				dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "reqprefix", "");
+				dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "reqopts", "");
 			}
 			break;
 		case DEL_ALL:
@@ -366,17 +359,10 @@ static int delObjDHCPv6Client(char *refparam, struct dmctx *ctx, void *data, cha
 					get_config_section_of_dmmap_section("network", "interface", iface_name, &iface_s);
 
 				if (iface_s) {
-					char *device = NULL;
-
-					dmuci_get_value_by_section_string(iface_s, "device", &device);
-					if (device && DM_STRCHR(device, '@')) {
-						dmuci_delete_by_section(iface_s, NULL, NULL);
-					} else {
-						dmuci_set_value_by_section(iface_s, "proto", "none");
-						dmuci_set_value_by_section(iface_s, "reqaddress", "");
-						dmuci_set_value_by_section(iface_s, "reqprefix", "");
-						dmuci_set_value_by_section(iface_s, "reqopts", "");
-					}
+					dmuci_set_value_by_section(iface_s, "proto", "none");
+					dmuci_set_value_by_section(iface_s, "reqaddress", "");
+					dmuci_set_value_by_section(iface_s, "reqprefix", "");
+					dmuci_set_value_by_section(iface_s, "reqopts", "");
 				}
 
 				dmuci_delete_by_section(s, NULL, NULL);
@@ -542,14 +528,6 @@ static int get_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 	dmuci_get_value_by_section_string(dhcpv6_client->dmmap_s, "iface_name", &iface_name);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface_name, value);
-
-	if ((!(*value) || (*value)[0] == 0) && dhcpv6_client->iface_s) {
-		char *device = NULL;
-
-		dmuci_get_value_by_section_string(dhcpv6_client->iface_s, "device", &device);
-		iface_name = (device && *device) ? DM_STRCHR(device, '@') : NULL;
-		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface_name ? iface_name + 1 : "", value);
-	}
 	return 0;
 }
 
@@ -585,17 +563,10 @@ static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 				break;
 
 			if (dhcpv6_client->iface_s) {
-				char *device = NULL;
-
-				dmuci_get_value_by_section_string(dhcpv6_client->iface_s, "device", &device);
-				if (device && DM_STRCHR(device, '@')) {
-					dmuci_delete_by_section(dhcpv6_client->iface_s, NULL, NULL);
-				} else {
-					dmuci_set_value_by_section(dhcpv6_client->iface_s, "proto", "none");
-					dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqaddress", "");
-					dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqprefix", "");
-					dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqopts", "");
-				}
+				dmuci_set_value_by_section(dhcpv6_client->iface_s, "proto", "none");
+				dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqaddress", "");
+				dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqprefix", "");
+				dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqopts", "");
 			}
 
 			if (!linker || *linker == 0) {
@@ -618,10 +589,11 @@ static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 					dmuci_get_value_by_section_string(interface_s, "proto", &proto);
 					if (DM_LSTRNCMP(proto, "dhcp", 4) == 0) {
-						char dev_name[32];
+						char *dev_name = NULL;
 
 						snprintf(iface_name, sizeof(iface_name), "%s_6", linker);
-						snprintf(dev_name, sizeof(dev_name), "@%s", linker);
+
+						dmuci_get_value_by_section_string(interface_s, "device", &dev_name);
 
 						// Create a new interface section
 						dmuci_add_section("network", "interface", &iface_s);

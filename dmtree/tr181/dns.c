@@ -276,15 +276,6 @@ static int get_dns_interface(char *refparam, struct dmctx *ctx, void *data, char
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &linker);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
-	if (!(*value) || (*value)[0] == 0) {
-		char *device = NULL;
-
-		dmuci_get_option_value_string("network", linker, "device", &device);
-		if (DM_STRLEN(device)) {
-			char *sec_name = DM_STRCHR(device, '@');
-			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", sec_name ? sec_name + 1 : "", value);
-		}
-	}
 	return 0;
 }
 

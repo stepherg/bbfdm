@@ -143,7 +143,7 @@ static void add_new_dmmap_section(char *macaddr, char *iface_device, char *iface
 	dmuci_set_value_by_section(dmmap, "section_name", iface_name);
 }
 
-static void create_link(char *sec_name, char *mac_addr, char *iface_device)
+static void create_link(char *sec_name, char *mac_addr)
 {
 	struct uci_section *s = NULL;
 	char iface_dev[32] = {0};
@@ -151,7 +151,7 @@ static void create_link(char *sec_name, char *mac_addr, char *iface_device)
 
 	char *device = get_device(sec_name);
 	if (device[0] == '\0')
-		device = iface_device;
+		return;
 
 	DM_STRNCPY(iface_dev, device, sizeof(iface_dev));
 
@@ -224,8 +224,13 @@ static int dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_nod
 		if (*device == 0 || DM_STRCHR(device, '@'))
 			continue;
 
+		// Skip this interface section if its device option isn't a real device
+		get_net_device_sysfs(device, "address", &macaddr);
+		if (DM_STRLEN(macaddr) == 0)
+			continue;
+
 		dmuci_get_value_by_section_string(s, "macaddr", &macaddr);
-		create_link(section_name(s), macaddr, device);
+		create_link(section_name(s), macaddr);
 	}
 	return 0;
 }
@@ -371,39 +376,38 @@ static int addObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int delObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *stmp = NULL;
-	char *sect_name = NULL, *section_list = NULL, *pch = NULL, *pchr = NULL;
+	char *sect_name = NULL, *pch = NULL, *pchr = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "section_name", &sect_name);
+
 			// Remove dmmap section
 			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
 
 			// Check each network section in the list of sections
-			if (*sect_name == '\0')
+			if (DM_STRLEN(sect_name) == 0)
 				break;
 
-			section_list = dmstrdup(sect_name);
-			for (pch = strtok_r(section_list, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
-				// Remove network and device section
-				uci_foreach_sections_safe("network", "interface", stmp, s) {
-					if (strcmp(section_name(s), pch) == 0) {
-						char *device = NULL;
+			for (pch = strtok_r(sect_name, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
+				char *device = NULL;
 
-						dmuci_get_value_by_section_string(s, "device", &device);
-						if (device && *device) {
-							// Remove only device option
-							dmuci_delete_by_section(s, "device", NULL);
-						} else {
-							// Remove network section
-							dmuci_delete_by_section(s, NULL, NULL);
-						}
-						break;
+				struct uci_section *s = get_origin_section_from_config("network", "interface", pch);
+
+				if (!s)
+					continue;
+
+				dmuci_get_value_by_section_string(s, "device", &device);
+				if (DM_STRLEN(device) != 0) {
+					struct uci_section *ss = NULL;
+
+					uci_foreach_option_eq("network", "interface", "device", device, ss) {
+						dmuci_set_value_by_section(ss, "device", section_name(s));
 					}
 				}
+
+				dmuci_set_value_by_section(s, "device", section_name(s));
 			}
-			dmfree(section_list);
 			return 0;
 		case DEL_ALL:
 			return FAULT_9005;
