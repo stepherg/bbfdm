@@ -1116,19 +1116,152 @@ Device.DHCPv4.Client.1.Interface => Device.IP.Interface.1
 - **TR-181 Commands**
 
 ```bash
+obuspa -c del Device.DHCPv4.Client.*
+obuspa -c del Device.DHCPv6.Client.*
+obuspa -c del Device.Ethernet.Link.*
+obuspa -c del Device.Bridging.Bridge.*
+obuspa -c del Device.IP.Interface.*
 
+obuspa -c add Device.Bridging.Bridge.
+obuspa -c add Device.Bridging.Bridge.1.Port.
+obuspa -c set Device.Bridging.Bridge.1.Port.1.ManagementPort 1
+obuspa -c add Device.Bridging.Bridge.1.Port.
+obuspa -c set Device.Bridging.Bridge.1.Port.2.ManagementPort 0
+obuspa -c set Device.Bridging.Bridge.1.Port.2.LowerLayers Device.Ethernet.Interface.1
+obuspa -c set Device.Bridging.Bridge.1.Port.2.Enable 1
+
+obuspa -c add Device.Bridging.Bridge.
+obuspa -c add Device.Bridging.Bridge.2.Port.
+obuspa -c set Device.Bridging.Bridge.2.Port.1.ManagementPort 1
+obuspa -c add Device.Bridging.Bridge.2.Port.
+obuspa -c set Device.Bridging.Bridge.2.Port.2.ManagementPort 0
+obuspa -c set Device.Bridging.Bridge.2.Port.2.LowerLayers Device.Ethernet.Interface.2
+obuspa -c set Device.Bridging.Bridge.2.Port.2.Enable 1
+
+obuspa -c add Device.Bridging.Bridge.
+obuspa -c add Device.Bridging.Bridge.3.Port.
+obuspa -c set Device.Bridging.Bridge.3.Port.1.ManagementPort 1
+obuspa -c add Device.Bridging.Bridge.3.Port.
+obuspa -c set Device.Bridging.Bridge.3.Port.2.ManagementPort 0
+obuspa -c set Device.Bridging.Bridge.3.Port.2.LowerLayers Device.Ethernet.Interface.3
+obuspa -c set Device.Bridging.Bridge.3.Port.2.Enable 1
+
+obuspa -c add Device.Bridging.Bridge.3.VLAN.
+obuspa -c set Device.Bridging.Bridge.3.VLAN.1.VLANID 100
+
+obuspa -c add Device.Bridging.Bridge.3.VLANPort.
+obuspa -c set Device.Bridging.Bridge.3.VLANPort.1.Enable 1
+obuspa -c set Device.Bridging.Bridge.3.VLANPort.1.VLAN Device.Bridging.Bridge.3.VLAN.1
+obuspa -c set Device.Bridging.Bridge.3.VLANPort.1.Port Device.Bridging.Bridge.3.Port.2
+
+obuspa -c add Device.Bridging.Bridge.
+obuspa -c add Device.Bridging.Bridge.4.Port.
+obuspa -c set Device.Bridging.Bridge.4.Port.1.ManagementPort 1
+obuspa -c add Device.Bridging.Bridge.4.Port.
+obuspa -c set Device.Bridging.Bridge.4.Port.2.ManagementPort 0
+obuspa -c set Device.Bridging.Bridge.4.Port.2.TPID 34984
+obuspa -c set Device.Bridging.Bridge.4.Port.2.LowerLayers Device.Bridging.Bridge.3.Port.2
+obuspa -c set Device.Bridging.Bridge.4.Port.2.Enable 1
+
+obuspa -c add Device.Bridging.Bridge.4.VLAN.
+obuspa -c set Device.Bridging.Bridge.4.VLAN.1.VLANID 300
+
+obuspa -c add Device.Bridging.Bridge.4.VLANPort.
+obuspa -c set Device.Bridging.Bridge.4.VLANPort.1.Enable 1
+obuspa -c set Device.Bridging.Bridge.4.VLANPort.1.VLAN Device.Bridging.Bridge.4.VLAN.1
+obuspa -c set Device.Bridging.Bridge.4.VLANPort.1.Port Device.Bridging.Bridge.4.Port.2
+
+obuspa -c add  Device.Bridging.ProviderBridge.
+
+obuspa -c set Device.Bridging.ProviderBridge.1.Type S-VLAN
+obuspa -c set Device.Bridging.ProviderBridge.1.CVLANcomponents Device.Bridging.Bridge.1,Device.Bridging.Bridge.2
+obuspa -c set Device.Bridging.ProviderBridge.1.SVLANcomponent Device.Bridging.Bridge.4
 ```
 
 - **Network UCI Config**
 
 ```bash
+$ cat /etc/config/network 
 
+config interface 'loopback'
+        option device 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config globals 'globals'
+        option ula_prefix 'fda2:6377:44eb::/48'
+
+config interface 'iface_br1'
+        option device 'br-dev1'
+        option macaddr '44:D4:37:71:B5:53'
+
+config device 'pr_br_1'
+        option name 'br-dev1'
+        option type 'bridge'
+        option bridge_empty '1'
+        list ports 'eth1'
+        list ports 'eth3'
+        list ports 'eth4.100.300'
+        option macaddr '44:D4:37:71:B5:53'
+
+config device 'br_3_port_1'
+        option type '8021q'
+        option enabled '1'
+        option vid '100'
+        option name 'eth4.100'
+        option ifname 'eth4'
+        option macaddr '44:D4:37:71:B5:55'
+
+config device 'br_4_port_1'
+        option enabled '1'
+        option vid '300'
+        option type '8021ad'
+        option name 'eth4.100.300'
+        option ifname 'eth4.100'
+        option macaddr '44:D4:37:71:B5:53'
+ 
 ```
 
 - **TR-181 Data Model**
 
 ```bash
-
+$ obuspa -c get Device.Bridging.Bridge.*.Port.*.LowerLayers
+Device.Bridging.Bridge.1.Port.1.LowerLayers => Device.Bridging.Bridge.1.Port.2
+Device.Bridging.Bridge.1.Port.2.LowerLayers => Device.Ethernet.Interface.1
+Device.Bridging.Bridge.2.Port.1.LowerLayers => Device.Bridging.Bridge.2.Port.2
+Device.Bridging.Bridge.2.Port.2.LowerLayers => Device.Ethernet.Interface.2
+Device.Bridging.Bridge.3.Port.1.LowerLayers => Device.Bridging.Bridge.3.Port.2
+Device.Bridging.Bridge.3.Port.2.LowerLayers => Device.Ethernet.Interface.3
+Device.Bridging.Bridge.4.Port.1.LowerLayers => Device.Bridging.Bridge.4.Port.2
+Device.Bridging.Bridge.4.Port.2.LowerLayers => Device.Bridging.Bridge.3.Port.2
+$ obuspa -c get Device.Bridging.Bridge.*.VLANPort.
+Device.Bridging.Bridge.3.VLANPort.1.Enable => 1
+Device.Bridging.Bridge.3.VLANPort.1.Alias => cpe-1
+Device.Bridging.Bridge.3.VLANPort.1.VLAN => Device.Bridging.Bridge.3.VLAN.1
+Device.Bridging.Bridge.3.VLANPort.1.Port => Device.Bridging.Bridge.3.Port.2
+Device.Bridging.Bridge.3.VLANPort.1.Untagged => 0
+Device.Bridging.Bridge.4.VLANPort.1.Enable => 1
+Device.Bridging.Bridge.4.VLANPort.1.Alias => cpe-1
+Device.Bridging.Bridge.4.VLANPort.1.VLAN => Device.Bridging.Bridge.4.VLAN.1
+Device.Bridging.Bridge.4.VLANPort.1.Port => Device.Bridging.Bridge.4.Port.2
+Device.Bridging.Bridge.4.VLANPort.1.Untagged => 0
+$ obuspa -c get Device.Bridging.Bridge.*.VLAN.
+Device.Bridging.Bridge.3.VLAN.1.Enable => 1
+Device.Bridging.Bridge.3.VLAN.1.Alias => cpe-1
+Device.Bridging.Bridge.3.VLAN.1.Name => br_3_vlan_1
+Device.Bridging.Bridge.3.VLAN.1.VLANID => 100
+Device.Bridging.Bridge.4.VLAN.1.Enable => 1
+Device.Bridging.Bridge.4.VLAN.1.Alias => cpe-1
+Device.Bridging.Bridge.4.VLAN.1.Name => br_4_vlan_1
+Device.Bridging.Bridge.4.VLAN.1.VLANID => 300
+$ obuspa -c get Device.Bridging.ProviderBridge.
+Device.Bridging.ProviderBridge.1.Enable => 1
+Device.Bridging.ProviderBridge.1.Status => Enabled
+Device.Bridging.ProviderBridge.1.Alias => cpe-1
+Device.Bridging.ProviderBridge.1.Type => S-VLAN
+Device.Bridging.ProviderBridge.1.SVLANcomponent => Device.Bridging.Bridge.4
+Device.Bridging.ProviderBridge.1.CVLANcomponents => Device.Bridging.Bridge.1,Device.Bridging.Bridge.2
 ```
 
 ### 9. QinQ (Route mode)
