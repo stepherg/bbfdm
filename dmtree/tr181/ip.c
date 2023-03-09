@@ -900,15 +900,20 @@ static int addObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 	dmuci_get_value_by_section_string(dmmap_ip_interface, "ip_int_instance", &ip_inst);
 
 	if (DM_LSTRCMP(*instance, "1") != 0) {
+		struct uci_section *device_s = NULL;
 		char *device = NULL;
+		char *ipv6 = NULL;
 
 		snprintf(ipv4_name, sizeof(ipv4_name), "iface%s_ipv4_%s", ip_inst, *instance);
 		dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+		dmuci_get_value_by_section_string((struct uci_section *)data, "ipv6", &ipv6);
+		device_s = get_dup_section_in_config_opt("network", "device", "name", device);
 
 		dmuci_set_value("network", ipv4_name, "", "interface");
 		dmuci_set_value("network", ipv4_name, "device", device);
 		dmuci_set_value("network", ipv4_name, "proto", "static");
 		dmuci_set_value("network", ipv4_name, "disabled", "1");
+		if (!device_s) dmuci_set_value("network", ipv4_name, "ipv6", ipv6);
 
 		// Firewall : add this new interface to zone->network list
 		add_network_to_firewall_zone_network_list(section_name((struct uci_section *)data), ipv4_name);
@@ -979,19 +984,23 @@ static int delObjIPInterfaceIPv4Address(char *refparam, struct dmctx *ctx, void 
 static int addObjIPInterfaceIPv6Address(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	char *ip_inst = NULL, *device = NULL, ipv6_name[64] = {0};
-	struct uci_section *dmmap_ip_interface = NULL, *dmmap_ip_interface_ipv6 = NULL;
+	struct uci_section *dmmap_ip_interface = NULL, *dmmap_ip_interface_ipv6 = NULL, *device_s = NULL;
+	char *ipv6 = NULL;
 
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_ip_interface);
 	dmuci_get_value_by_section_string(dmmap_ip_interface, "ip_int_instance", &ip_inst);
 
 	snprintf(ipv6_name, sizeof(ipv6_name), "iface%s_ipv6_%s", ip_inst, *instance);
+	dmuci_get_value_by_section_string((struct uci_section *)data, "ipv6", &ipv6);
 	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+	device_s = get_dup_section_in_config_opt("network", "device", "name", device);
 
 	dmuci_set_value("network", ipv6_name, "", "interface");
 	dmuci_set_value("network", ipv6_name, "device", device);
 	dmuci_set_value("network", ipv6_name, "proto", "static");
 	dmuci_set_value("network", ipv6_name, "ip6addr", "::");
 	dmuci_set_value("network", ipv6_name, "disabled", "1");
+	if (!device_s) dmuci_set_value("network", ipv6_name, "ipv6", ipv6);
 
 	// Firewall : add this new interface to zone->network list
 	add_network_to_firewall_zone_network_list(section_name((struct uci_section *)data), ipv6_name);
@@ -1012,19 +1021,23 @@ static int delObjIPInterfaceIPv6Address(char *refparam, struct dmctx *ctx, void 
 static int addObjIPInterfaceIPv6Prefix(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	char *ip_inst = NULL, *device = NULL, ipv6_prefix_name[64] = {0};
-	struct uci_section *dmmap_ip_interface = NULL, *dmmap_ip_interface_ipv6_prefix = NULL;
+	struct uci_section *dmmap_ip_interface = NULL, *dmmap_ip_interface_ipv6_prefix = NULL, *device_s = NULL;
+	char *ipv6 = NULL;
 
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_ip_interface);
 	dmuci_get_value_by_section_string(dmmap_ip_interface, "ip_int_instance", &ip_inst);
 
 	snprintf(ipv6_prefix_name, sizeof(ipv6_prefix_name), "iface%s_ipv6_prefix_%s", ip_inst, *instance);
 	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+	dmuci_get_value_by_section_string((struct uci_section *)data, "ipv6", &ipv6);
+	device_s = get_dup_section_in_config_opt("network", "device", "name", device);
 
 	dmuci_set_value("network", ipv6_prefix_name, "", "interface");
 	dmuci_set_value("network", ipv6_prefix_name, "device", device);
 	dmuci_set_value("network", ipv6_prefix_name, "proto", "static");
 	dmuci_set_value("network", ipv6_prefix_name, "ip6prefix", "::/64");
 	dmuci_set_value("network", ipv6_prefix_name, "disabled", "1");
+	if (!device_s) dmuci_set_value("network", ipv6_prefix_name, "ipv6", ipv6);
 
 	// Firewall : add this new interface to zone->network list
 	add_network_to_firewall_zone_network_list(section_name((struct uci_section *)data), ipv6_prefix_name);
@@ -1048,25 +1061,6 @@ static int delObjIPInterfaceIPv6Prefix(char *refparam, struct dmctx *ctx, void *
 static int get_IP_IPv4Capable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = folder_exists("/proc/sys/net/ipv4") ? "1" : "0";
-	return 0;
-}
-
-static int get_IP_IPv4Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = "1";
-	return 0;
-}
-
-static int set_IP_IPv4Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			break;
-	}
 	return 0;
 }
 
@@ -1171,49 +1165,21 @@ static int set_IPInterface_Enable(char *refparam, struct dmctx *ctx, void *data,
 	return 0;
 }
 
-/*#Device.IP.Interface.{i}.IPv4Enable!UCI:network/interface,@i-1/disabled*/
-static int get_IPInterface_IPv4Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char *disabled;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "disabled", &disabled);
-	*value = (*disabled == '1') ? "0" : "1";
-	return 0;
-}
-
-static int set_IPInterface_IPv4Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *device = NULL;
-	bool b;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			string_to_bool(value, &b);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
-			update_child_interfaces(device, "disabled", b ? "0" : "1");
-			break;
-	}
-	return 0;
-}
-
 static int get_IPInterface_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *device = NULL;
-	char *ipv6 = NULL;
+	struct uci_section *device_s = NULL;
+	char *device_val = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
-
-	get_sysctl_disable_ipv6_per_device(device, &ipv6);
-	*value = (DM_LSTRCMP(ipv6, "1") == 0) ? "0" : "1";
+	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device_val);
+	device_s = get_dup_section_in_config_opt("network", "device", "name", device_val);
+	*value = dmuci_get_value_by_section_fallback_def(device_s ? device_s : (struct uci_section *)data, "ipv6", "1");
 	return 0;
 }
 
 static int set_IPInterface_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *device = NULL;
+	struct uci_section *device_s = NULL;
+	char *device_val = NULL;
 	bool b;
 
 	switch (action)	{
@@ -1223,8 +1189,16 @@ static int set_IPInterface_IPv6Enable(char *refparam, struct dmctx *ctx, void *d
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
-			set_sysctl_disable_ipv6_per_device(device, b);
+			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device_val);
+			device_s = get_dup_section_in_config_opt("network", "device", "name", device_val);
+
+			if (device_s) {
+				dmuci_set_value_by_section(device_s, "ipv6", b ? "1" : "0");
+			} else {
+				uci_foreach_option_eq("network", "interface", "device", device_val, device_s) {
+					dmuci_set_value_by_section(device_s, "ipv6", b ? "1" : "0");
+				}
+			}
 			break;
 	}
 	return 0;
@@ -1841,7 +1815,7 @@ static int get_IPInterfaceIPv4Address_AddressingType(char *refparam, struct dmct
 	return 0;
 }
 
-/*#Device.IP.Interface.{i}.IPv6Address.{i}.Enable!UCI:network/interface,@i-1/ipv6*/
+/*#Device.IP.Interface.{i}.IPv6Address.{i}.Enable!UCI:network/interface,@i-1/disabled*/
 static int get_IPInterfaceIPv6Address_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *link_local = NULL;
@@ -1850,7 +1824,10 @@ static int get_IPInterfaceIPv6Address_Enable(char *refparam, struct dmctx *ctx, 
 	if (DM_LSTRCMP(link_local, "1") == 0) {
 		*value = "1";
 	} else {
-		*value = dmuci_get_value_by_section_fallback_def(((struct intf_ip_args *)data)->interface_sec, "ipv6", "1");
+		char *disabled = NULL;
+
+		dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "disabled", &disabled);
+		*value = (disabled && *disabled == '1') ? "0" : "1";
 	}
 
 	return 0;
@@ -1870,7 +1847,7 @@ static int set_IPInterfaceIPv6Address_Enable(char *refparam, struct dmctx *ctx, 
 			string_to_bool(value, &b);
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "link_local", &link_local);
 			if (DM_LSTRCMP(link_local, "1") != 0)
-				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "ipv6", b ? "1" : "0");
+				dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "disabled", b ? "0" : "1");
 			break;
 	}
 	return 0;
@@ -2073,12 +2050,13 @@ static int set_IPInterfaceIPv6Address_ValidLifetime(char *refparam, struct dmctx
 	return 0;
 }
 
-/*#Device.IP.Interface.{i}.IPv6Prefix.{i}.Enable!UCI:network/interface,@i-1/ipv6*/
+/*#Device.IP.Interface.{i}.IPv6Prefix.{i}.Enable!UCI:network/interface,@i-1/disabled*/
 static int get_IPInterfaceIPv6Prefix_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ipv6 = NULL;
-	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "ipv6", &ipv6);
-	*value = (ipv6 && *ipv6 != '0') ? "1" : "0";
+	char *disabled = NULL;
+
+	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "disabled", &disabled);
+	*value = (disabled && *disabled == '1') ? "0" : "1";
 	return 0;
 }
 
@@ -2093,7 +2071,7 @@ static int set_IPInterfaceIPv6Prefix_Enable(char *refparam, struct dmctx *ctx, v
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "ipv6", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct intf_ip_args *)data)->interface_sec, "disabled", b ? "0" : "1");
 			break;
 	}
 	return 0;
@@ -2362,7 +2340,7 @@ DMOBJ tIPObj[] = {
 DMLEAF tIPParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"IPv4Capable", &DMREAD, DMT_BOOL, get_IP_IPv4Capable, NULL, BBFDM_BOTH, "2.0"},
-{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IP_IPv4Enable, set_IP_IPv4Enable, BBFDM_BOTH, "2.2"},
+//{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IP_IPv4Enable, set_IP_IPv4Enable, BBFDM_BOTH, "2.2"},
 {"IPv4Status", &DMREAD, DMT_STRING, get_IP_IPv4Status, NULL, BBFDM_BOTH, "2.2"},
 {"IPv6Capable", &DMREAD, DMT_BOOL, get_IP_IPv6Capable, NULL, BBFDM_BOTH, "2.2"},
 {"IPv6Enable", &DMWRITE, DMT_BOOL, get_IP_IPv6Enable, set_IP_IPv6Enable, BBFDM_BOTH, "2.2"},
@@ -2385,7 +2363,7 @@ DMOBJ tIPInterfaceObj[] = {
 DMLEAF tIPInterfaceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_IPInterface_Enable, set_IPInterface_Enable, BBFDM_BOTH, "2.0"},
-{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv4Enable, set_IPInterface_IPv4Enable, BBFDM_BOTH, "2.2"},
+//{"IPv4Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv4Enable, set_IPInterface_IPv4Enable, BBFDM_BOTH, "2.2"},
 {"IPv6Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv6Enable, set_IPInterface_IPv6Enable, BBFDM_BOTH, "2.2"},
 {"ULAEnable", &DMWRITE, DMT_BOOL, get_IPInterface_ULAEnable, set_IPInterface_ULAEnable, BBFDM_BOTH, "2.2"},
 {"Status", &DMREAD, DMT_STRING, get_IPInterface_Status, NULL, BBFDM_BOTH, "2.0"},
