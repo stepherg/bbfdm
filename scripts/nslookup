@@ -26,7 +26,7 @@ nslookup_error() {
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
-	[ "$3" = "both_proto" ] && {
+	[ "$2" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.DiagnosticState="$1"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.SuccessCount=0
 		$UCI_COMMIT_BBF_DMMAP
@@ -49,9 +49,18 @@ nslookup_launch() {
 	# Assign default value
 	[ -z "${cnt}" ] && cnt=1
 
+	# Clear all nslookup result instances
+	[ "$proto" = "both_proto" ] && {
+		res=$($UCI_SHOW_BBF_DMMAP dmmap_diagnostics | grep -E "=NSLookupResult$" | cut -d= -f 1)
+		for i in $res; do
+			$UCI_DELETE_BBF_DMMAP "${i}"
+		done
+		$UCI_COMMIT_BBF_DMMAP
+	}
+
 	# Fail if hostname is empty
 	[ -z "${hostname}" ] && {
-		nslookup_error "Error_Internal" "${cnt}" "${proto}"
+		nslookup_error "Error_Internal" "${proto}"
 		return
 	}
 
@@ -67,12 +76,12 @@ nslookup_launch() {
 		
 		nxd=$(cat "${LOG_FILE}" | grep "NXDOMAIN")
 		[ -n "$nxd" ] && {
-			nslookup_error "Error_DNSServerNotResolved" "${cnt}" "${proto}"
+			nslookup_error "Error_DNSServerNotResolved" "${proto}"
 			return;
 		}
 
 		[ "$error_code" != "0" ] && {
-			nslookup_error "Error_Other" "${cnt}" "${proto}"
+			nslookup_error "Error_Other" "${proto}"
 			return;
 		}
 
@@ -127,6 +136,7 @@ nslookup_launch() {
 			# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
 			[ "$proto" = "both_proto" ] && {
 				$UCI_ADD_BBF_DMMAP dmmap_diagnostics NSLookupResult
+				$UCI_RENAME_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j]="nslookup_result_${j}"
 				$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].Status="${status}"
 				$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].AnswerType="${AnswerType}"
 				$UCI_SET_BBF_DMMAP dmmap_diagnostics.@NSLookupResult[$j].HostNameReturned="${HostNameReturned}"
@@ -160,5 +170,5 @@ nslookup_launch() {
 if [ -n "$1" ]; then
 	nslookup_launch "$1"
 else
-	nslookup_error "Error_Internal" "1"
+	nslookup_error "Error_Internal"
 fi
