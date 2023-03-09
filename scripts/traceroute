@@ -22,15 +22,17 @@ get_traceroute_log_file() {
 traceroute_error() {
 	json_init
 	json_add_string "Status" "$1"
-	json_add_string "IPAddressUsed" ""
+	json_add_string "IPAddressUsed" "$2"
 	json_add_int "ResponseTime" "0"
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
 	[ "$3" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.DiagnosticState="$1"
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.IPAddressUsed=""
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.IPAddressUsed="$2"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.ResponseTime=0
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.NumberOfHops=0
+
 		$UCI_COMMIT_BBF_DMMAP
 	}
 }
@@ -60,9 +62,18 @@ traceroute_launch() {
 	if [ "$ip_proto" = "IPv4" ]; then ip_proto="-4"; elif [ "$ip_proto" = "IPv6" ]; then ip_proto="-6"; else ip_proto=""; fi
 	[ -z "${timeout}" ] && timeout=5 || timeout=$((timeout/1000))
 
+	# Clear all route hops instances
+	[ "$proto" = "both_proto" ] && {
+		res=$($UCI_SHOW_BBF_DMMAP dmmap_diagnostics | grep -E "=RouteHops$" | cut -d= -f 1)
+		for i in $res; do
+			$UCI_DELETE_BBF_DMMAP "${i}"
+		done
+		$UCI_COMMIT_BBF_DMMAP
+	}
+
 	# Fail if host is empty
 	[ -z "${host}" ] && {
-		traceroute_error "Error_Internal" "${nbr_of_rep}" "${proto}"
+		traceroute_error "Error_Internal" "${ip_addr_used}" "${proto}"
 		return
 	}
 	
@@ -73,12 +84,12 @@ traceroute_launch() {
 
 	ba=$(echo "$res" | grep "bad address")
 	[ -n "$ba" ] && {
-		traceroute_error "Error_CannotResolveHostName" "${cnt}" "${proto}"
+		traceroute_error "Error_CannotResolveHostName" "${ip_addr_used}" "${proto}"
 		return
 	}
 
 	[ "$error_code" != "0" ] && {
-		traceroute_error "Error_Other" "${cnt}" "${proto}"
+		traceroute_error "Error_Other" "${ip_addr_used}" "${proto}"
 		return
 	}
 
@@ -105,6 +116,7 @@ traceroute_launch() {
 		# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
 		[ "$proto" = "both_proto" ] && {
 			$UCI_ADD_BBF_DMMAP dmmap_diagnostics RouteHops
+			$UCI_RENAME_BBF_DMMAP dmmap_diagnostics.@RouteHops[$i]="route_hops_${i}"
 			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@RouteHops[$i].host="${host}"
 			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@RouteHops[$i].ip="${ip}"
 			$UCI_SET_BBF_DMMAP dmmap_diagnostics.@RouteHops[$i].time="${time}"
@@ -118,13 +130,13 @@ traceroute_launch() {
 	json_close_array
 	json_add_string "Status" "Complete"
 	json_add_string "IPAddressUsed" "${ip_addr_used}"
-	json_add_int "NumberOfHops" "${i}"
 	json_add_int "ResponseTime" "${resp_time}"
 	json_dump
 
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
 	[ "$proto" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.DiagnosticState="Complete"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.IPAddressUsed="${ip_addr_used}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.NumberOfHops="${i}"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.ResponseTime="${resp_time}"
 		$UCI_COMMIT_BBF_DMMAP
@@ -134,5 +146,5 @@ traceroute_launch() {
 if [ -n "$1" ]; then
 	traceroute_launch "$1"
 else
-	traceroute_error "Error_Internal" "1"
+	traceroute_error "Error_Internal"
 fi
