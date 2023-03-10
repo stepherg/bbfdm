@@ -624,10 +624,8 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_LSTRCMP(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0)
 				set_diagnostics_option("nslookup", "DiagnosticState", value);
-				bbf_set_end_session_flag(ctx, BBF_END_SESSION_NSLOOKUP_DIAGNOSTIC);
-			}
 			return 0;
 	}
 	return 0;

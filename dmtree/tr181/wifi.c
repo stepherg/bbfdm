@@ -3121,11 +3121,6 @@ static int set_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, st
 
 			dmuci_add_section_bbfdm("dmmap_wifi_neighboring", "diagnostic_status", &s);
 			dmuci_set_value_by_section(s, "DiagnosticsState", value);
-
-			if (DM_LSTRCMP(value, "Requested") == 0) {
-				bbf_set_end_session_flag(ctx, BBF_END_SESSION_NEIGBORING_WIFI_DIAGNOSTIC);
-			}
-
 			return 0;
 	}
 	return 0;

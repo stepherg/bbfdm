@@ -59,10 +59,8 @@ static int set_IPDiagnosticsIPLayerCapacity_DiagnosticsState(char *refparam, str
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_LSTRCMP(value, "Requested") == 0) {
+			if (DM_LSTRCMP(value, "Requested") == 0)
 				set_diagnostics_option("iplayercapacity", "DiagnosticState", value);
-				bbf_set_end_session_flag(ctx, BBF_END_SESSION_IPLAYERCAPACITY_DIAGNOSTIC);
-			}
 			return 0;
 	}
 	return 0;
