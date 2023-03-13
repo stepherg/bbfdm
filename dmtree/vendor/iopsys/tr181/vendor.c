@@ -15,6 +15,7 @@
 #include "ethernet.h"
 #include "ip.h"
 #include "times.h"
+#include "wifi.h"
 #include "../tr104/servicesvoiceservicecallcontrol.h"
 #include "../tr104/servicesvoiceservicecalllog.h"
 #include "../tr104/servicesvoiceservicedect.h"
@@ -32,5 +33,6 @@ DM_MAP_OBJ tVendorExtensionIOPSYS[] = {
 {"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.RTP.", NULL, tIOPSYS_VoiceServiceCallLogSessionDestinationRTPParams},
 {"Device.Services.VoiceService.{i}.DECT.Portable.{i}.", NULL, tIOPSYS_VoiceServiceDECTPortableParams},
 {"Device.Services.VoiceService.{i}.CallControl.Extension.{i}.", NULL, tIOPSYS_VoiceServiceCallControlExtensionParams},
+{"Device.WiFi.AccessPoint.{i}.", NULL, tIOPSYS_WiFiAccessPointParams},
 {0}
 };
