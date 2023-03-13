@@ -21,7 +21,6 @@ int set_bbfdatamodel_type(int bbf_type);
 int get_bbfdatamodel_type(void);
 void del_list_fault_param(struct param_fault *param_fault);
 
-void bbf_set_end_session_flag (struct dmctx *ctx, unsigned int flag);
 int bbfdmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);
 int get_dm_type(char *dm_str);
 

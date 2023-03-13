@@ -11,11 +11,6 @@
 
 #include "dmbbfcommon.h"
 
-void bbf_set_end_session_flag(struct dmctx *ctx, unsigned int flag)
-{
-	ctx->end_session_flag |= flag;
-}
-
 int set_bbfdatamodel_type(int bbf_type)
 {
 	bbfdatamodel_type = bbf_type;

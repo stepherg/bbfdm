@@ -205,7 +205,6 @@ struct dmctx
 	unsigned char inparam_isparam;
 	unsigned char findparam;
 	char *inst_buf[16];
-	unsigned int end_session_flag;
 	bool isgetschema;
 	bool iscommand;
 	bool isevent;

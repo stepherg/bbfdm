@@ -144,7 +144,6 @@ static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, DMO
 	ctx->instance_mode = instance_mode;
 	ctx->dm_entryobj = tEntryObj;
 	ctx->dm_version = DEFAULT_DMVERSION;
-	ctx->end_session_flag = 0;
 	return 0;
 }
 
