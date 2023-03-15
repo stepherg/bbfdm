@@ -30,7 +30,5 @@ extern DMLEAF tEthernetRMONStatsParams[];
 
 struct uci_section *ethernet___get_device_section(char *dev_name);
 bool ethernet___check_vlan_termination_section(const char *name);
-bool ethernet___check_section_in_curr_section(const char *curr_section, const char *section);
-bool ethernet___name_exists_in_devices(char *name);
 
 #endif //__ETHERNET_H
