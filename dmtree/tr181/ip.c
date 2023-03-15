@@ -116,7 +116,7 @@ static int set_sysctl_disable_ipv6_per_device(const char *device, bool value)
 	char cmd[128] = {0};
 	char path[64] = {0};
 
-	fp = fopen("/etc/sysctl.conf", "r+");
+	fp = fopen("/etc/bbfdm/sysctl.conf", "r+");
 	if (!fp)
 		return -1;
 
