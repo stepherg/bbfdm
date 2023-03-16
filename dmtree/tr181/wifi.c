@@ -6122,11 +6122,12 @@ static int get_operate_args_WiFiDataElementsNetwork_SetSSID(char *refparam, stru
 
 static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s = NULL, *stmp = NULL;
+	struct uci_section *s = NULL;
 	char *status = "Success";
-	char *curr_ssid = NULL;
-	char *curr_band = NULL;
+	char *curr_ssid = NULL, *curr_band = NULL;
+	char *pch = NULL, *spch = NULL;
 	bool ssid_exist = false, b = false;
+	char band_list[64] = {0};
 
 	char *add_remove = dmjson_get_value((json_object *)value, 1, "AddRemove");
 	if (!add_remove || *add_remove == '\0' || dm_validate_boolean(add_remove)) {
@@ -6137,60 +6138,90 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 	char *ssid = dmjson_get_value((json_object *)value, 1, "SSID");
 	char *key = dmjson_get_value((json_object *)value, 1, "PassPhrase");
 	char *band = dmjson_get_value((json_object *)value, 1, "Band");
-	if (!ssid || *ssid == '\0' || !band || *band == '\0') {
+	if (DM_STRLEN(ssid) == 0 || DM_STRLEN(band) == 0) {
 		status = "Error_Invalid_Input";
 		goto end;
 	}
 
+	// Check band list
+	DM_STRNCPY(band_list, band, sizeof(band_list));
+	for (pch = strtok_r(band_list, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+		if (DM_STRCMP(pch, "2.4") != 0 && DM_STRCMP(pch, "5") != 0 && DM_STRCMP(pch, "6") != 0) {
+			status = "Error_Invalid_Input";
+			goto end;
+		}
+	}
+
+	DM_STRNCPY(band_list, band, sizeof(band_list));
 	string_to_bool(add_remove, &b);
 
 	if (b) {
 		// Add this SSID
-		uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
-			dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
-			dmuci_get_value_by_section_string(s, "band", &curr_band);
-			if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, band, 1) == 0) {
+
+		for (pch = strtok_r(band_list, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+			ssid_exist = false;
+
+			uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
+				dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
+				dmuci_get_value_by_section_string(s, "band", &curr_band);
+				if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, pch, 1) == 0) {
+					dmuci_set_value_by_section(s, "enabled", "1");
+					if (*key) dmuci_set_value_by_section(s, "key", key);
+					ssid_exist = true;
+					break;
+				}
+			}
+
+			if (!ssid_exist) {
+				char sec_name[32];
+				unsigned idx = 1;
+
+				uci_foreach_sections("mapcontroller", "ap", s)
+					idx++;
+
+				snprintf(sec_name, sizeof(sec_name), "ap_%s_%u", (*pch == '2') ? "2" : pch, idx);
+
+				dmuci_add_section("mapcontroller", "ap", &s);
+				dmuci_rename_section_by_section(s, sec_name);
+				dmuci_set_value_by_section(s, "ssid", ssid);
+				dmuci_set_value_by_section(s, "key", key);
+				dmuci_set_value_by_section(s, "type", "fronthaul");
+				dmuci_set_value_by_section(s, "band", (*pch == '2') ? "2" : pch);
 				dmuci_set_value_by_section(s, "enabled", "1");
-				if (*key) dmuci_set_value_by_section(s, "key", key);
-				ssid_exist = true;
-				break;
 			}
 		}
-
-		if (!ssid_exist) {
-			char sec_name[32];
-			unsigned idx = 1;
-
-			uci_foreach_sections("mapcontroller", "ap", s)
-				idx++;
-
-			snprintf(sec_name, sizeof(sec_name), "ap_%s_%u", (*band == '5') ? "5" : (*band == '6') ? "6" : "2", idx);
-
-			dmuci_add_section("mapcontroller", "ap", &s);
-			dmuci_rename_section_by_section(s, sec_name);
-			dmuci_set_value_by_section(s, "ssid", ssid);
-			dmuci_set_value_by_section(s, "key", key);
-			dmuci_set_value_by_section(s, "type", "fronthaul");
-			dmuci_set_value_by_section(s, "band", (*band == '5') ? "5" : (*band == '6') ? "6" : "2");
-			dmuci_set_value_by_section(s, "enabled", "1");
-		}
-
 	} else {
-		// Remove this SSID
-		uci_foreach_option_eq_safe("mapcontroller", "ap", "type", "fronthaul", stmp, s) {
-			dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
-			dmuci_get_value_by_section_string(s, "band", &curr_band);
-			if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, band, 1) == 0) {
-				dmuci_set_value_by_section(s, "enabled", "0");
-				ssid_exist = true;
-				break;
+		// Remove each band in the list linked to this SSID
+
+		for (pch = strtok_r(band_list, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+			ssid_exist = false;
+
+			uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
+				dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
+				dmuci_get_value_by_section_string(s, "band", &curr_band);
+				if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, pch, 1) == 0) {
+					dmuci_set_value_by_section(s, "enabled", "0");
+					ssid_exist = true;
+					break;
+				}
+			}
+
+			if (!ssid_exist) {
+				status = "Error_Invalid_Input";
+				dmuci_revert_package("mapcontroller");
+				goto end;
 			}
 		}
-
-		if (!ssid_exist)
-			status = "Error_Invalid_Input";
 	}
 
+	// Commit dmmap_mapcontroller changes
+	uci_path_foreach_sections(bbfdm, "dmmap_mapcontroller", "ap", s) {
+		dmuci_delete_by_section(s, "wifi_da_ssid_instance", NULL);
+	}
+
+	dmuci_commit_package_bbfdm("dmmap_mapcontroller");
+
+	// Commit mapcontroller config changes
 	dmuci_save_package("mapcontroller");
 	dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", "mapcontroller", String}}, 1);
 
