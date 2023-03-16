@@ -411,7 +411,7 @@ static int get_IEEE1905AL_RegistrarFreqBand(char *refparam, struct dmctx *ctx, v
 
 	list_bands[0] = 0;
 	dmjson_foreach_value_in_array(res, registrar_band, band, idx, 1, "registrar_band") {
-		pos += snprintf(&list_bands[pos], sizeof(list_bands) - pos, "802.11 %s GHz,", (*band == '2') ? "2.4" : (*band == '5') ? "5" : "60");
+		pos += snprintf(&list_bands[pos], sizeof(list_bands) - pos, "802.11 %s GHz,", (*band == '2') ? "2.4" : band);
 	}
 
 	if (pos)
