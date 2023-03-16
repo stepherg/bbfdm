@@ -514,9 +514,9 @@ static int get_UPnPDiscoveryService_Location(char *refparam, struct dmctx *ctx, 
 
 static int get_UPnPDiscoveryService_ParentDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.RootDevice.", ((struct upnpdiscovery *)data)->uuid, value);
+	adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.Device.", ((struct upnpdiscovery *)data)->uuid, value);
 	if (!(*value) || (*value)[0] == 0)
-		adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.Device.", ((struct upnpdiscovery *)data)->uuid, value);
+		adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.RootDevice.", ((struct upnpdiscovery *)data)->uuid, value);
 	return 0;
 }
 
@@ -570,9 +570,9 @@ static int get_UPnPDescriptionDeviceInstance_DiscoveryDevice(char *refparam, str
 		size_t length = 0;
 
 		udnarray = strsplit(upnpdevinst->udn, ":", &length);
-		adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.RootDevice.", udnarray[1], value);
+		adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.Device.", udnarray[1], value);
 		if (!(*value) || (*value)[0] == 0)
-			adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.Device.", udnarray[1], value);
+			adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.RootDevice.", udnarray[1], value);
 	}
 
 	return 0;
