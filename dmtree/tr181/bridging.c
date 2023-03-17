@@ -2298,6 +2298,29 @@ static int br_get_sysfs(const struct bridge_port_args *br, const char *name, cha
 	return get_net_device_sysfs(device, name, value);
 }
 
+static int br_get_ubus_eth(const struct bridge_port_args *br, const char *name, char **value)
+{
+	json_object *res = NULL;
+	char *device = NULL;
+	char *config = NULL;
+
+	dmuci_get_value_by_section_string(br->bridge_port_sec, "ifname", &device);
+	dmuci_get_value_by_section_string(br->bridge_port_dmmap_sec, "config", &config);
+
+	if (DM_LSTRCMP(config, "network") == 0) {
+		dmubus_call("ethernet", "ifstats", UBUS_ARGS{{"ifname", device, String}}, 1, &res);
+	} else {
+		char object[32];
+
+		snprintf(object, sizeof(object), "wifi.radio.%s", device);
+		dmubus_call(object, "stats", UBUS_ARGS{0}, 0, &res);
+	}
+
+	DM_ASSERT(res, *value = "0");
+	*value = dmjson_get_value(res, 1, name);
+	return 0;
+}
+
 /*#Device.Bridging.Bridge.{i}.Port.{i}.Stats.BytesSent!SYSFS:/sys/class/net/@Name/statistics/tx_bytes*/
 static int get_BridgingBridgePortStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2334,6 +2357,16 @@ static int get_BridgingBridgePortStats_ErrorsReceived(char *refparam, struct dmc
 	return br_get_sysfs(data, "statistics/rx_errors", value);
 }
 
+static int get_BridgingBridgePortStats_UnicastPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return br_get_ubus_eth(data, "tx_unicast_packets", value);
+}
+
+static int get_BridgingBridgePortStats_UnicastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return br_get_ubus_eth(data, "rx_unicast_packets", value);
+}
+
 /*#Device.Bridging.Bridge.{i}.Port.{i}.Stats.DiscardPacketsSent!SYSFS:/sys/class/net/@Name/statistics/tx_dropped*/
 static int get_BridgingBridgePortStats_DiscardPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2346,10 +2379,30 @@ static int get_BridgingBridgePortStats_DiscardPacketsReceived(char *refparam, st
 	return br_get_sysfs(data, "statistics/rx_dropped", value);
 }
 
+static int get_BridgingBridgePortStats_MulticastPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return br_get_ubus_eth(data, "tx_multicast_packets", value);
+}
+
 /*#Device.Bridging.Bridge.{i}.Port.{i}.Stats.MulticastPacketsReceived!SYSFS:/sys/class/net/@Name/statistics/multicast*/
 static int get_BridgingBridgePortStats_MulticastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return br_get_sysfs(data, "statistics/multicast", value);
+}
+
+static int get_BridgingBridgePortStats_BroadcastPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return br_get_ubus_eth(data, "tx_broadcast_packets", value);
+}
+
+static int get_BridgingBridgePortStats_BroadcastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return br_get_ubus_eth(data, "rx_broadcast_packets", value);
+}
+
+static int get_BridgingBridgePortStats_UnknownProtoPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return br_get_ubus_eth(data, "rx_unknown_packets", value);
 }
 
 static int get_BridgingBridgeVLAN_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -3002,15 +3055,15 @@ DMLEAF tBridgingBridgePortStatsParams[] = {
 {"PacketsReceived", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_PacketsReceived, NULL, BBFDM_BOTH, "2.0"},
 {"ErrorsSent", &DMREAD, DMT_UNINT, get_BridgingBridgePortStats_ErrorsSent, NULL, BBFDM_BOTH, "2.0"},
 {"ErrorsReceived", &DMREAD, DMT_UNINT, get_BridgingBridgePortStats_ErrorsReceived, NULL, BBFDM_BOTH, "2.0"},
-//{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_UnicastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
-//{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_UnicastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_UnicastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_UnicastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
 {"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_BridgingBridgePortStats_DiscardPacketsSent, NULL, BBFDM_BOTH, "2.0"},
 {"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_BridgingBridgePortStats_DiscardPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-//{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_MulticastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_MulticastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
 {"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_MulticastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-//{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_BroadcastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
-//{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-//{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_BridgingBridgePortStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_BroadcastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
+{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_BridgingBridgePortStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_BridgingBridgePortStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
 {0}
 };
 
