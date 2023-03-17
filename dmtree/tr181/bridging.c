@@ -544,7 +544,6 @@ static void dmmap_synchronizeBridgingProviderBridge(struct dmctx *dmctx, DMNODE 
 		dmuci_set_value_by_section(dmmap_pr_br_sec, "provider_bridge_instance", current_inst);
 		dmuci_set_value_by_section(dmmap_pr_br_sec, "section_name", section_name(s));
 		dmuci_set_value_by_section(dmmap_pr_br_sec, "enable", "1");
-		dmuci_set_value_by_section(dmmap_pr_br_sec, "type", "S-VLAN");
 
 		dmuci_get_value_by_section_list(s, "ports", &ports_list);
 		if (ports_list == NULL)
@@ -1541,7 +1540,6 @@ static int addObjBridgingProviderBridge(char *refparam, struct dmctx *ctx, void 
 	// Add dmmap section
 	dmuci_add_section_bbfdm("dmmap_provider_bridge", "provider_bridge", &pr_br_sec);
 	dmuci_set_value_by_section(pr_br_sec, "enable", "1");
-	dmuci_set_value_by_section(pr_br_sec, "type", "S-VLAN");
 	dmuci_set_value_by_section(pr_br_sec, "provider_bridge_instance", *instance);
 	return 0;
 }
@@ -2827,26 +2825,6 @@ static int set_BridgingBridgeProviderBridge_Alias(char *refparam, struct dmctx *
 	return 0;
 }
 
-static int get_BridgingBridgeProviderBridge_Type(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmuci_get_value_by_section_fallback_def(((struct provider_bridge_args *)data)->provider_bridge_sec, "type", "S-VLAN");
-	return 0;
-}
-
-int set_BridgingBridgeProviderBridge_Type(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-	case VALUECHECK:
-		if (dm_validate_string(value, -1, -1, Provider_Bridge_Type, NULL))
-			return FAULT_9007;
-		break;
-	case VALUESET:
-		dmuci_set_value_by_section(((struct provider_bridge_args *)data)->provider_bridge_sec, "type", value);
-		break;
-	}
-	return 0;
-}
-
 static int get_BridgingBridgeProviderBridge_SVLANcomponent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *br_inst = NULL;
@@ -3063,7 +3041,6 @@ DMLEAF tBridgingProviderBridgeParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_BridgingBridgeProviderBridge_Enable, set_BridgingBridgeProviderBridge_Enable, BBFDM_BOTH, "2.7"},
 {"Status", &DMREAD, DMT_STRING, get_BridgingBridgeProviderBridge_Status, NULL, BBFDM_BOTH, "2.7"},
 {"Alias", &DMWRITE, DMT_STRING, get_BridgingBridgeProviderBridge_Alias, set_BridgingBridgeProviderBridge_Alias, BBFDM_BOTH, "2.7"},
-{"Type", &DMWRITE, DMT_STRING, get_BridgingBridgeProviderBridge_Type, set_BridgingBridgeProviderBridge_Type, BBFDM_BOTH, "2.7"},
 {"SVLANcomponent", &DMWRITE, DMT_STRING, get_BridgingBridgeProviderBridge_SVLANcomponent, set_BridgingBridgeProviderBridge_SVLANcomponent, BBFDM_BOTH, "2.7"},
 {"CVLANcomponents", &DMWRITE, DMT_STRING, get_BridgingBridgeProviderBridge_CVLANcomponents, set_BridgingBridgeProviderBridge_CVLANcomponents, BBFDM_BOTH, "2.7"},
 {0}
