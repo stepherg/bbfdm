@@ -1163,18 +1163,13 @@ static int get_QoSClassification_DSCPCheck(char *refparam, struct dmctx *ctx, vo
 
 static int set_QoSClassification_DSCPCheck(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char tos_str[16] = {0};
-
 	switch (action)	{
 	case VALUECHECK:
 		if (dm_validate_int(value, RANGE_ARGS{{"-1","63"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		// DSCP right shift 2 to get TOS value
-		snprintf(tos_str, sizeof(tos_str), "%ld", DM_STRTOL(value) << 2);
-
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dscp_filter", tos_str);
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dscp_filter", value);
 		break;
 	}
 	return 0;
