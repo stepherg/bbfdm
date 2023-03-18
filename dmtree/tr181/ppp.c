@@ -1034,13 +1034,11 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct ppp_args *ppp = (struct ppp_args *)data;
-	char eth_vlan_term[64] = "Device.Ethernet.VLANTermination.";
-	char eth_link[32] = "Device.Ethernet.Link.";
 	char *allowed_objects[] = {
-			eth_vlan_term,
-			eth_link,
+			"Device.Ethernet.VLANTermination.",
+			"Device.Ethernet.Link.",
 			NULL};
-	char *ppp_linker = NULL;
+	char *linker = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -1052,59 +1050,33 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &ppp_linker);
+			adm_entry_get_linker_value(ctx, value, &linker);
 
 			// Store LowerLayers value under dmmap_ppp section
 			dmuci_set_value_by_section(ppp->dmmap_s, "LowerLayers", value);
 
-			if (!ppp_linker || ppp_linker[0] == 0) {
-				dmuci_set_value_by_section(ppp->dmmap_s, "vlan_ter_linker", "");
-				dmuci_set_value_by_section(ppp->dmmap_s, "eth_link_linker", "");
-
-				dmuci_set_value_by_section(ppp->dmmap_s, "device", "");
-				if (ppp->iface_s)
-					dmuci_set_value_by_section(ppp->iface_s, "device", "");
-			} else if (DM_STRNCMP(value, eth_vlan_term, DM_STRLEN(eth_vlan_term)) == 0) {
-
-				// Check VLANTremination linker and required options
-				struct uci_section *vlan_ter_s = get_dup_section_in_config_opt("network", "device", "name", ppp_linker);
-				if (vlan_ter_s) {
-					dmuci_set_value_by_section(ppp->dmmap_s, "device", ppp_linker);
-					if (ppp->iface_s)
-						dmuci_set_value_by_section(ppp->iface_s, "device", ppp_linker);
-				} else {
-					dmuci_set_value_by_section(ppp->dmmap_s, "vlan_ter_linker", ppp_linker);
-				}
-
+			if (DM_STRNCMP(value, "Device.Ethernet.VLANTermination.", DM_STRLEN("Device.Ethernet.VLANTermination.")) == 0) {
 				// Update proto option
 				dmuci_set_value_by_section(ppp->dmmap_s, "proto", "pppoe");
-				if (ppp->iface_s)
-					dmuci_set_value_by_section(ppp->iface_s, "proto", "pppoe");
-			} else if (DM_STRNCMP(value, eth_link, DM_STRLEN(eth_link)) == 0) {
-				struct uci_section *eth_link_s = NULL;
-
-				// Check Ethernet.Link linker and required options
-				get_dmmap_section_of_config_section_eq("dmmap", "link", "device", ppp_linker, &eth_link_s);
-				if (eth_link_s) {
-					dmuci_set_value_by_section(ppp->dmmap_s, "device", ppp_linker);
-					if (ppp->iface_s)
-						dmuci_set_value_by_section(ppp->iface_s, "device", ppp_linker);
-				} else {
-					get_dmmap_section_of_config_section_eq("dmmap", "link", "linker", ppp_linker, &eth_link_s);
-					dmuci_set_value_by_section(ppp->dmmap_s, "eth_link_linker", ppp_linker);
-				}
-
-				if (eth_link_s) {
-					char *is_eth = NULL;
-
-					dmuci_get_value_by_section_string(eth_link_s, "is_eth", &is_eth);
-
-					// Update proto option
-					dmuci_set_value_by_section(ppp->dmmap_s, "proto", !DM_LSTRCMP(is_eth, "1") ? "pppoe" : "pppoa");
-					if (ppp->iface_s)
-						dmuci_set_value_by_section(ppp->iface_s, "proto", !DM_LSTRCMP(is_eth, "1") ? "pppoe" : "pppoa");
-				}
+				if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "proto", "pppoe");
 			}
+
+			if (DM_STRNCMP(value, "Device.Ethernet.Link.", DM_STRLEN("Device.Ethernet.Link.")) == 0) {
+				struct uci_section *eth_link_s = NULL;
+				char *is_eth = NULL;
+
+				get_dmmap_section_of_config_section_eq("dmmap_ethernet", "link", "device", linker, &eth_link_s);
+				if (eth_link_s) dmuci_get_value_by_section_string(eth_link_s, "is_eth", &is_eth);
+
+				// Update proto option
+				dmuci_set_value_by_section(ppp->dmmap_s, "proto", !DM_LSTRCMP(is_eth, "1") ? "pppoe" : "pppoa");
+				if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "proto", !DM_LSTRCMP(is_eth, "1") ? "pppoe" : "pppoa");
+
+			}
+
+			// Update device option
+			dmuci_set_value_by_section(ppp->dmmap_s, "device", DM_STRLEN(linker) ? linker : "");
+			if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "device", DM_STRLEN(linker) ? linker : "");
 			return 0;
 	}
 	return 0;
