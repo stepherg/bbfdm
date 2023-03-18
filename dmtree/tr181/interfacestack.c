@@ -324,7 +324,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 	}
 
 	/* Higher layers are Device.Ethernet.Link.{i}. */
-	uci_path_foreach_sections(bbfdm, DMMAP, "link", s) {
+	uci_path_foreach_sections(bbfdm, "dmmap_ethernet", "link", s) {
 
 		// The higher layer is Device.Ethernet.Link.{i}.
 		dmuci_get_value_by_section_string(s, "link_instance", &layer_inst);
