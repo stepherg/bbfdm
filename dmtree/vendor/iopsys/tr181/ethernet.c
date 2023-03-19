@@ -11,9 +11,92 @@
 
 #include "ethernet.h"
 
+/*************************************************************
+* ENTRY METHOD
+**************************************************************/
+static int browseEthernetMACVLANInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct dmmap_dup *p = NULL;
+	LIST_HEAD(dup_list);
+	char *inst = NULL;
+
+	synchronize_specific_config_sections_with_dmmap_eq("network", "device", "dmmap_network", "type", "macvlan", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "mac_vlan_instance", "mac_vlan_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
+/*************************************************************
+* LINKER
+**************************************************************/
+static int get_linker_mac_vlan(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", linker);
+	return 0;
+}
+
+/*************************************************************
+* ADD & DEL OBJ
+**************************************************************/
+static int addObjEthernetMACVLAN(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	struct uci_section *s = NULL, *dmmap_network = NULL;
+	char device_name[32];
+
+	snprintf(device_name, sizeof(device_name), "mac_vlan_%s", *instance);
+
+	// Add device section
+	dmuci_add_section("network", "device", &s);
+	dmuci_rename_section_by_section(s, device_name);
+	dmuci_set_value_by_section(s, "type", "macvlan");
+
+	// Add device section in dmmap_network file
+	dmuci_add_section_bbfdm("dmmap_network", "device", &dmmap_network);
+	dmuci_set_value_by_section(dmmap_network, "section_name", device_name);
+	dmuci_set_value_by_section(dmmap_network, "mac_vlan_instance", *instance);
+	return 0;
+}
+
+static int delObjEthernetMACVLAN(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+
+	switch (del_action) {
+	case DEL_INST:
+		// Remove device section
+		dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+
+		// Remove device section in dmmap_network file
+		dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+		break;
+	case DEL_ALL:
+		uci_foreach_option_eq_safe("network", "device", "type", "macvlan", stmp, s) {
+
+			// Remove dmmap section
+			struct uci_section *dmmap_section = NULL;
+			get_dmmap_section_of_config_section("dmmap_network", "device", section_name(s), &dmmap_section);
+			dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+			// Remove device section
+			dmuci_delete_by_section(s, NULL, NULL);
+		}
+		break;
+	}
+	return 0;
+}
+
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
 static int get_EthernetMACVLAN_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	//TODO
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "1");
 	return 0;
 }
 
@@ -28,7 +111,7 @@ static int set_EthernetMACVLAN_Enable(char *refparam, struct dmctx *ctx, void *d
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			//TODO
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -38,13 +121,13 @@ static int get_EthernetMACVLAN_Status(char *refparam, struct dmctx *ctx, void *d
 {
 	char *device = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &device);
 	return get_net_device_status(device, value);
 }
 
 static int get_EthernetMACVLAN_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "link_alias", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "mac_vlan_alias", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "cpe-%s", instance);
 	return 0;
@@ -58,7 +141,7 @@ static int set_EthernetMACVLAN_Alias(char *refparam, struct dmctx *ctx, void *da
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "link_alias", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "mac_vlan_alias", value);
 			break;
 	}
 	return 0;
@@ -66,7 +149,7 @@ static int set_EthernetMACVLAN_Alias(char *refparam, struct dmctx *ctx, void *da
 
 static int get_EthernetMACVLAN_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "device", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", value);
 	return 0;
 }
 
@@ -74,26 +157,19 @@ static int get_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 {
 	char *linker = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "LowerLayers", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", value);
 
 	if ((*value)[0] == '\0') {
-		dmuci_get_value_by_section_string((struct uci_section *)data, "device", &linker);
+		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &linker);
 		if (!linker || *linker == '\0')
 			return 0;
 
-		adm_entry_get_linker_param(ctx, "Device.ATM.Link.", linker, value);
+
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", linker, value);
 		if (*value != NULL && (*value)[0] != 0)
 			return 0;
 
-		adm_entry_get_linker_param(ctx, "Device.PTM.Link.", linker, value);
-		if (*value != NULL && (*value)[0] != 0)
-			return 0;
-
-		adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", linker, value);
-		if (*value != NULL && (*value)[0] != 0)
-			return 0;
-
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", linker, value);
 	} else {
 		adm_entry_get_linker_value(ctx, *value, &linker);
 		if (!linker || *linker == 0)
@@ -104,17 +180,11 @@ static int get_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 
 static int set_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char eth_interface[64] = "Device.Ethernet.Interface.";
-	char bridge_port[64] = "Device.Bridging.Bridge.*.Port.";
-	char atm_link[32] = "Device.ATM.Link.";
-	char ptm_link[32] = "Device.PTM.Link.";
 	char *allowed_objects[] = {
-			eth_interface,
-			bridge_port,
-			atm_link,
-			ptm_link,
+			"Device.Ethernet.VLANTermination.",
+			"Device.Ethernet.Link.",
 			NULL};
-	char *link_linker = NULL;
+	char *linker = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -126,13 +196,26 @@ static int set_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &link_linker);
+			adm_entry_get_linker_value(ctx, value, &linker);
 
 			// Store LowerLayers value under dmmap section
-			dmuci_set_value_by_section((struct uci_section *)data, "LowerLayers", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", value);
 
-			if (!link_linker || link_linker[0] == 0) {
-				dmuci_set_value_by_section((struct uci_section *)data, "device", "");
+			if (DM_STRLEN(linker)) {
+				char name[16] = {0};
+
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", linker);
+
+				char *vid = DM_STRCHR(linker, '.');
+				if (vid) *vid = 0;
+
+				snprintf(name, sizeof(name), "%s_%s", linker, instance);
+
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", name);
+			} else {
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", "");
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", "");
+
 			}
 			break;
 	}
@@ -141,98 +224,112 @@ static int set_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 
 static int get_EthernetMACVLAN_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "mac", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "mac", value);
 	return 0;
 }
 
-static int eth_iface_sysfs(const struct uci_section *data, const char *name, char **value)
+static int set_EthernetMACVLAN_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "mac", value);
+			break;
+	}
+	return 0;
+}
+
+static int eth_macvlan_sysfs(const struct uci_section *data, const char *name, char **value)
 {
 	char *device;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &device);
 	return get_net_device_sysfs(device, name, value);
 }
 
 static int get_EthernetMACVLANStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return eth_iface_sysfs(data, "statistics/tx_bytes", value);
+	return eth_macvlan_sysfs(data, "statistics/tx_bytes", value);
 }
 
 static int get_EthernetMACVLANStats_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return eth_iface_sysfs(data, "statistics/rx_bytes", value);
+	return eth_macvlan_sysfs(data, "statistics/rx_bytes", value);
 }
 
 static int get_EthernetMACVLANStats_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return eth_iface_sysfs(data, "statistics/tx_packets", value);
+	return eth_macvlan_sysfs(data, "statistics/tx_packets", value);
 }
 
 static int get_EthernetMACVLANStats_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return eth_iface_sysfs(data, "statistics/rx_packets", value);
+	return eth_macvlan_sysfs(data, "statistics/rx_packets", value);
 }
 
 static int get_EthernetMACVLANStats_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return eth_iface_sysfs(data, "statistics/tx_errors", value);
+	return eth_macvlan_sysfs(data, "statistics/tx_errors", value);
 }
 
 static int get_EthernetMACVLANStats_ErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return eth_iface_sysfs(data, "statistics/rx_errors", value);
+	return eth_macvlan_sysfs(data, "statistics/rx_errors", value);
 }
 
 static int get_EthernetMACVLANStats_DiscardPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return eth_iface_sysfs(data, "statistics/tx_dropped", value);
+	return eth_macvlan_sysfs(data, "statistics/tx_dropped", value);
 }
 
 static int get_EthernetMACVLANStats_DiscardPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return eth_iface_sysfs(data, "statistics/rx_dropped", value);
+	return eth_macvlan_sysfs(data, "statistics/rx_dropped", value);
 }
 
 static int get_EthernetMACVLANStats_MulticastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return eth_iface_sysfs(data, "statistics/multicast", value);
+	return eth_macvlan_sysfs(data, "statistics/multicast", value);
 }
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
-DMOBJ tIOPSYS_EthernetObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{BBF_VENDOR_PREFIX"MACVLAN", &DMWRITE, NULL, NULL, NULL, NULL, NULL, NULL, X_IOPSYS_EU_MACVLANObj, X_IOPSYS_EU_MACVLANParams, NULL, BBFDM_BOTH},
+DMOBJ tIOPSYS_EthernetObj[] = {//BBF_VENDOR_PREFIX
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"MACVLAN", &DMWRITE, addObjEthernetMACVLAN, delObjEthernetMACVLAN, NULL, browseEthernetMACVLANInst, NULL, NULL, tEthernetMACVLANObj, tEthernetMACVLANParams, get_linker_mac_vlan, BBFDM_BOTH, NULL, "2.16"},
 {0}
 };
 
-DMLEAF X_IOPSYS_EU_MACVLANParams[] = {
+DMLEAF tEthernetMACVLANParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMWRITE, DMT_BOOL, get_EthernetMACVLAN_Enable, set_EthernetMACVLAN_Enable, BBFDM_BOTH, "2.0"},
-{"Status", &DMREAD, DMT_STRING, get_EthernetMACVLAN_Status, NULL, BBFDM_BOTH, "2.0"},
-{"Alias", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_Alias, set_EthernetMACVLAN_Alias, BBFDM_BOTH, "2.0"},
-{"Name", &DMREAD, DMT_STRING, get_EthernetMACVLAN_Name, NULL, BBFDM_BOTH, "2.0"},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_LowerLayers, set_EthernetMACVLAN_LowerLayers, BBFDM_BOTH, "2.0"},
-{"MACAddress", &DMREAD, DMT_STRING, get_EthernetMACVLAN_MACAddress, NULL, BBFDM_BOTH, "2.0"},
+{"Enable", &DMWRITE, DMT_BOOL, get_EthernetMACVLAN_Enable, set_EthernetMACVLAN_Enable, BBFDM_BOTH, "2.16"},
+{"Status", &DMREAD, DMT_STRING, get_EthernetMACVLAN_Status, NULL, BBFDM_BOTH, "2.16"},
+{"Alias", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_Alias, set_EthernetMACVLAN_Alias, BBFDM_BOTH, "2.16"},
+{"Name", &DMREAD, DMT_STRING, get_EthernetMACVLAN_Name, NULL, BBFDM_BOTH, "2.16"},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_LowerLayers, set_EthernetMACVLAN_LowerLayers, BBFDM_BOTH, "2.16"},
+{"MACAddress", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_MACAddress, set_EthernetMACVLAN_MACAddress, BBFDM_BOTH, "2.16"},
 {0}
 };
 
-DMOBJ X_IOPSYS_EU_MACVLANObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, X_IOPSYS_EU_MACVLANStatsParams, NULL, BBFDM_BOTH},
+DMOBJ tEthernetMACVLANObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tEthernetMACVLANStatsParams, NULL, BBFDM_BOTH, NULL, "2.16"},
 {0}
 };
 
-DMLEAF X_IOPSYS_EU_MACVLANStatsParams[] = {
+DMLEAF tEthernetMACVLANStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BytesSent", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_BytesSent, NULL, BBFDM_BOTH, "2.0"},
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_BytesReceived, NULL, BBFDM_BOTH, "2.0"},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_PacketsSent, NULL, BBFDM_BOTH, "2.0"},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_PacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-{"ErrorsSent", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_ErrorsSent, NULL, BBFDM_BOTH, "2.0"},
-{"ErrorsReceived", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_ErrorsReceived, NULL, BBFDM_BOTH, "2.0"},
-{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_DiscardPacketsSent, NULL, BBFDM_BOTH, "2.0"},
-{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_DiscardPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_MulticastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"BytesSent", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_BytesSent, NULL, BBFDM_BOTH, "2.16"},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_BytesReceived, NULL, BBFDM_BOTH, "2.16"},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_PacketsSent, NULL, BBFDM_BOTH, "2.16"},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_PacketsReceived, NULL, BBFDM_BOTH, "2.16"},
+{"ErrorsSent", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_ErrorsSent, NULL, BBFDM_BOTH, "2.16"},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_ErrorsReceived, NULL, BBFDM_BOTH, "2.16"},
+{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_DiscardPacketsSent, NULL, BBFDM_BOTH, "2.16"},
+{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_DiscardPacketsReceived, NULL, BBFDM_BOTH, "2.16"},
+{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_MulticastPacketsReceived, NULL, BBFDM_BOTH, "2.16"},
 {0}
 };
