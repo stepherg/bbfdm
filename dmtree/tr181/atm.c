@@ -45,19 +45,22 @@ void remove_device_from_interface(struct uci_section *interface_s, char *device)
 	char new_device[64] = {0};
 	unsigned pos = 0;
 
+	if (!interface_s || !device)
+		return;
+
 	dmuci_get_value_by_section_string(interface_s, "device", &curr_device);
+	if (DM_STRLEN(curr_device) == 0)
+		return;
 
 	new_device[0] = '\0';
 
-	if (device != NULL) {
-		char *pch = NULL, *spch = NULL;
-		for (pch = strtok_r(curr_device, " ", &spch); pch; pch = strtok_r(NULL, " ", &spch)) {
+	char *pch = NULL, *spch = NULL;
+	for (pch = strtok_r(curr_device, " ", &spch); pch; pch = strtok_r(NULL, " ", &spch)) {
 
-			if (strcmp(pch, device) == 0)
-				continue;
+		if (strcmp(pch, device) == 0)
+			continue;
 
-			pos += snprintf(&new_device[pos], sizeof(new_device) - pos, "%s ", pch);
-		}
+		pos += snprintf(&new_device[pos], sizeof(new_device) - pos, "%s ", pch);
 	}
 
 	if (pos)
@@ -122,32 +125,27 @@ static int delete_atm_link(char *refparam, struct dmctx *ctx, void *data, char *
 	switch (del_action) {
 		case DEL_INST:
 			uci_foreach_option_cont("network", "interface", "device", ((struct atm_args *)data)->device, s) {
-				if (stmp != NULL && ((struct atm_args *)data)->device != NULL)
-					remove_device_from_interface(stmp, ((struct atm_args *)data)->device);
-				stmp = s;
-			}
-			if (stmp != NULL && ((struct atm_args *)data)->device != NULL)
 				remove_device_from_interface(stmp, ((struct atm_args *)data)->device);
+			}
 
 			dmuci_delete_by_section((((struct atm_args *)data)->sections)->dmmap_section, NULL, NULL);
 			dmuci_delete_by_section((((struct atm_args *)data)->sections)->config_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("dsl", "atm-device", stmp, s) {
-				struct uci_section *ns = NULL, *nss = NULL, *dmmap_section = NULL;
+				struct uci_section *ns = NULL;
 				char *device = NULL;
 
 				dmuci_get_value_by_section_string(s, "device", &device);
-				uci_foreach_option_cont("network", "interface", "device", device, ns) {
-					if (nss != NULL && device != NULL)
-						remove_device_from_interface(nss, device);
-					nss = ns;
-				}
-				if (nss != NULL && device != NULL)
-					remove_device_from_interface(nss, device);
+				if (DM_STRLEN(device) == 0)
+					continue;
 
-				get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(s), &dmmap_section);
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+				uci_foreach_option_cont("network", "interface", "device", device, ns) {
+					remove_device_from_interface(ns, device);
+				}
+
+				get_dmmap_section_of_config_section("dmmap_dsl", "atm-device", section_name(s), &ns);
+				dmuci_delete_by_section(ns, NULL, NULL);
 
 				dmuci_delete_by_section(s, NULL, NULL);
 			}

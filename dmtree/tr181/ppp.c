@@ -996,31 +996,15 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 	if ((*value)[0] == '\0') {
 		char *device = NULL;
 
-		if (ppp->iface_s) {
-			device = get_device(section_name(ppp->iface_s));
+		dmuci_get_value_by_section_string(ppp->dmmap_s, "device", &device);
+		if (DM_STRLEN(device) == 0)
+			return 0;
 
-			/* If the device value is empty, then get its value directly from device option */
-			if (*device == '\0')
-				dmuci_get_value_by_section_string(ppp->iface_s, "device", &device);
-		} else {
-			dmuci_get_value_by_section_string(ppp->dmmap_s, "device", &device);
-		}
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", device, value);
+		if (*value != NULL && (*value)[0] != 0)
+			return 0;
 
-		if (device[0] != '\0') {
-			adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", device, value);
-			if (*value != NULL && (*value)[0] != 0)
-				return 0;
-		}
-
-		if (device[0] != '\0') {
-			char linker[64] = {0};
-
-			DM_STRNCPY(linker, device, sizeof(linker));
-			char *vid = DM_STRCHR(linker, '.');
-			if (vid) *vid = '\0';
-
-			adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", linker, value);
-		}
+		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", device, value);
 	} else {
 		char *linker = NULL;
 
@@ -1034,7 +1018,9 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct ppp_args *ppp = (struct ppp_args *)data;
+	char eth_mac_vlan[] = "Device."BBF_VENDOR_PREFIX"MACVLAN";
 	char *allowed_objects[] = {
+			eth_mac_vlan,
 			"Device.Ethernet.VLANTermination.",
 			"Device.Ethernet.Link.",
 			NULL};
@@ -1055,11 +1041,9 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 			// Store LowerLayers value under dmmap_ppp section
 			dmuci_set_value_by_section(ppp->dmmap_s, "LowerLayers", value);
 
-			if (DM_STRNCMP(value, "Device.Ethernet.VLANTermination.", DM_STRLEN("Device.Ethernet.VLANTermination.")) == 0) {
-				// Update proto option
-				dmuci_set_value_by_section(ppp->dmmap_s, "proto", "pppoe");
-				if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "proto", "pppoe");
-			}
+			// Update proto option
+			dmuci_set_value_by_section(ppp->dmmap_s, "proto", "pppoe");
+			if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "proto", "pppoe");
 
 			if (DM_STRNCMP(value, "Device.Ethernet.Link.", DM_STRLEN("Device.Ethernet.Link.")) == 0) {
 				struct uci_section *eth_link_s = NULL;
@@ -1071,7 +1055,6 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 				// Update proto option
 				dmuci_set_value_by_section(ppp->dmmap_s, "proto", !DM_LSTRCMP(is_eth, "1") ? "pppoe" : "pppoa");
 				if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "proto", !DM_LSTRCMP(is_eth, "1") ? "pppoe" : "pppoa");
-
 			}
 
 			// Update device option
@@ -1174,12 +1157,7 @@ static int set_PPPInterfacePPPoE_ServiceName(char *refparam, struct dmctx *ctx, 
 ***************************************************************************/
 static int get_linker_ppp_interface(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	struct ppp_args *ppp = (struct ppp_args *)data;
-
-	if (ppp->iface_s)
-		*linker = dmstrdup(section_name(ppp->iface_s));
-	else
-		dmuci_get_value_by_section_string(ppp->dmmap_s, "name", linker);
+	dmuci_get_value_by_section_string(((struct ppp_args *)data)->dmmap_s, "device", linker);
 	return 0;
 }
 
