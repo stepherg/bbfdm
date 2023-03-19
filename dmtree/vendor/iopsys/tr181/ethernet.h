@@ -15,8 +15,8 @@
 #include "libbbf_api/dmcommon.h"
 
 extern DMOBJ tIOPSYS_EthernetObj[];
-extern DMLEAF X_IOPSYS_EU_MACVLANParams[];
-extern DMOBJ X_IOPSYS_EU_MACVLANObj[];
-extern DMLEAF X_IOPSYS_EU_MACVLANStatsParams[];
+extern DMLEAF tEthernetMACVLANParams[];
+extern DMOBJ tEthernetMACVLANObj[];
+extern DMLEAF tEthernetMACVLANStatsParams[];
 
 #endif //__IOPSYS_ETHERNET_H
