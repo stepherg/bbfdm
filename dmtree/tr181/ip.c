@@ -164,6 +164,9 @@ static void update_child_interfaces(char *device, char *option_name, char *optio
 {
 	struct uci_section *s = NULL;
 
+	if (DM_STRLEN(device) == 0)
+		return;
+
 	uci_foreach_option_eq("network", "interface", "device", device, s) {
 		dmuci_set_value_by_section(s, option_name, option_value);
 	}
@@ -1316,17 +1319,14 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *dmmap_section = NULL;
-	char ppp_iface[] = "Device.PPP.Interface.";
 	char eth_mac_vlan[] = "Device."BBF_VENDOR_PREFIX"MACVLAN";
-	char eth_vlan_term[] = "Device.Ethernet.VLANTermination.";
-	char eth_link[] = "Device.Ethernet.Link.";
 	char *allowed_objects[] = {
-			ppp_iface,
+			"Device.PPP.Interface.",
 			eth_mac_vlan,
-			eth_vlan_term,
-			eth_link,
+			"Device.Ethernet.VLANTermination.",
+			"Device.Ethernet.Link.",
 			NULL};
-	char *ip_linker = NULL;
+	char *linker = NULL;
 	char *curr_device = NULL;
 
 	switch (action)	{
@@ -1339,13 +1339,13 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &ip_linker);
+			adm_entry_get_linker_value(ctx, value, &linker);
 
 			// Store LowerLayers value under dmmap_network section
 			get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
 			dmuci_set_value_by_section(dmmap_section, "LowerLayers", value);
 
-			if (!ip_linker || *ip_linker == 0) {
+			if (DM_STRLEN(linker) == 0) {
 				char *curr_proto = NULL;
 
 				// Update device option
@@ -1365,21 +1365,11 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 			}
 
 			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &curr_device);
+			update_child_interfaces(curr_device, "device", linker);
 
-			if (DM_STRNCMP(value, eth_vlan_term, DM_STRLEN(eth_vlan_term)) == 0 ||
-				DM_STRNCMP(value, eth_link, DM_STRLEN(eth_link)) == 0 ||
-				DM_STRNCMP(value, eth_mac_vlan, DM_STRLEN(eth_mac_vlan)) == 0) {
-				update_child_interfaces(curr_device, "device", ip_linker);
-			} else if (DM_STRNCMP(value, ppp_iface, DM_STRLEN(ppp_iface)) == 0) {
-				struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "name", ip_linker);
-				if (ppp_s == NULL)
-					ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "iface_name", ip_linker);
-
-				if (ppp_s == NULL)
-					break;
-
+			if (DM_STRNCMP(value, "Device.PPP.Interface.", strlen("Device.PPP.Interface.")) == 0) {
+				struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "device", linker);
 				dmuci_set_value_by_section_bbfdm(ppp_s, "iface_name", section_name((struct uci_section *)data));
-
 				ppp___update_sections(ppp_s, (struct uci_section *)data);
 			}
 			break;

@@ -90,32 +90,27 @@ static int delete_ptm_link(char *refparam, struct dmctx *ctx, void *data, char *
 	switch (del_action) {
 	case DEL_INST:
 		uci_foreach_option_cont("network", "interface", "device", ((struct ptm_args *)data)->device, s) {
-			if (stmp && ((struct ptm_args *)data)->device != NULL)
-				remove_device_from_interface(stmp, ((struct ptm_args *)data)->device);
-			stmp = s;
-		}
-		if (stmp != NULL && ((struct ptm_args *)data)->device != NULL)
 			remove_device_from_interface(stmp, ((struct ptm_args *)data)->device);
+		}
 
 		dmuci_delete_by_section((((struct ptm_args *)data)->sections)->dmmap_section, NULL, NULL);
 		dmuci_delete_by_section((((struct ptm_args *)data)->sections)->config_section, NULL, NULL);
 		break;
 	case DEL_ALL:
 		uci_foreach_sections_safe("dsl", "ptm-device", stmp, s) {
-			struct uci_section *ns = NULL, *nss = NULL, *dmmap_section = NULL;
+			struct uci_section *ns = NULL;
 			char *device = NULL;
 
 			dmuci_get_value_by_section_string(s, "device", &device);
-			uci_foreach_option_cont("network", "interface", "device", device, ns) {
-				if (nss != NULL && device != NULL)
-					remove_device_from_interface(nss, device);
-				nss = ns;
-			}
-			if (nss != NULL && device != NULL)
-				remove_device_from_interface(nss, device);
+			if (DM_STRLEN(device) == 0)
+				continue;
 
-			get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(s), &dmmap_section);
-			dmuci_delete_by_section(dmmap_section, NULL, NULL);
+			uci_foreach_option_cont("network", "interface", "device", device, ns) {
+				remove_device_from_interface(ns, device);
+			}
+
+			get_dmmap_section_of_config_section("dmmap_dsl", "ptm-device", section_name(s), &ns);
+			dmuci_delete_by_section(ns, NULL, NULL);
 
 			dmuci_delete_by_section(s, NULL, NULL);
 		}
