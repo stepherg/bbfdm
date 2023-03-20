@@ -45,6 +45,7 @@
 #include "servicesvoiceservice.h"
 #endif
 #include "ssh.h"
+#include "userinterface.h"
 
 /*************************************************************
 * GET & SET PARAM
@@ -124,6 +125,7 @@ DMOBJ tDeviceObj[] = {
 {"GatewayInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGatewayInfoParams, NULL, BBFDM_CWMP, NULL, "2.0"},
 {"MQTT", &DMREAD, NULL, NULL, "file:/etc/config/mosquitto", NULL, NULL, NULL, tMQTTObj, tMQTTParams, NULL, BBFDM_BOTH, NULL, "2.10"},
 {"SSH", &DMREAD, NULL, NULL, "file:/etc/config/dropbear", NULL, NULL, NULL, tSSHObj, tSSHParams, NULL, BBFDM_BOTH, NULL, "2.16"},
+{"UserInterface", &DMREAD, NULL, NULL, "file:/etc/config/userinterface", NULL, NULL, NULL, tUIHTTPAccessObj, tUIParams, NULL, BBFDM_BOTH, NULL, "2.16"},
 {0}
 };
 
