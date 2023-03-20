@@ -1,6 +1,6 @@
 # Network Deployment Scenarios using TR-181 Data Model
 
-The purpose of this document is to explain the different deployment scenarios supported by our devices and how to configure each scenario using TR-181 data model
+The purpose of this document is to explain the different deployment scenarios supported by our devices and how to configure each scenario using TR-181 data model.
 
 ## Deployment scenarios
 
