@@ -1298,7 +1298,7 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 		if (*value != NULL && (*value)[0] != 0)
 			return 0;
 
-		adm_entry_get_linker_param(ctx, "Device."BBF_VENDOR_PREFIX"MACVLAN", device, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN", device, value);
 		if (*value != NULL && (*value)[0] != 0)
 			return 0;
 
@@ -1320,7 +1320,7 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *dmmap_section = NULL;
-	char eth_mac_vlan[] = "Device."BBF_VENDOR_PREFIX"MACVLAN";
+	char eth_mac_vlan[] = "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN";
 	char *allowed_objects[] = {
 			"Device.PPP.Interface.",
 			eth_mac_vlan,

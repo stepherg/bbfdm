@@ -167,7 +167,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 		// The lower layer is Device.Ethernet.X_IOPSYS_EU_MACVLAN.{i}.
 		if (found == false) {
-			adm_entry_get_linker_param(dmctx, "Device."BBF_VENDOR_PREFIX"MACVLAN", device, &value);
+			adm_entry_get_linker_param(dmctx, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN", device, &value);
 			if (DM_STRLEN(value)) {
 				found = true;
 				loweralias = get_alias_by_section("dmmap_network", "device", dev_s, "mac_vlan_alias");
@@ -222,7 +222,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		struct uci_section *dev_s = get_dup_section_in_config_opt("network", "device", "name", ppp_device);
 
 		// The lower layer is Device.Ethernet.X_IOPSYS_EU_MACVLAN.{i}.
-		adm_entry_get_linker_param(dmctx, "Device."BBF_VENDOR_PREFIX"MACVLAN", ppp_device, &value);
+		adm_entry_get_linker_param(dmctx, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN", ppp_device, &value);
 		if (DM_STRLEN(value)) {
 			found = true;
 			loweralias = get_alias_by_section("dmmap_network", "device", dev_s, "mac_vlan_alias");
@@ -268,7 +268,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		if (DM_STRLEN(ifname) == 0)
 			continue;
 
-		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device."BBF_VENDOR_PREFIX"MACVLAN.%s", layer_inst);
+		snprintf(buf_higherlayer, sizeof(buf_higherlayer), "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN.%s", layer_inst);
 
 		higheralias = get_alias_by_section("dmmap_network", "device", s, "mac_vlan_alias");
 		snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *higheralias ? higheralias : *layer_inst ? "cpe-" : "", (*higheralias == '\0' && *layer_inst) ? layer_inst : "");

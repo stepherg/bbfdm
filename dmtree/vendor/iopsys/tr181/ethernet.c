@@ -297,9 +297,9 @@ static int get_EthernetMACVLANStats_MulticastPacketsReceived(char *refparam, str
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
-DMOBJ tIOPSYS_EthernetObj[] = {//BBF_VENDOR_PREFIX
+DMOBJ tIOPSYS_EthernetObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"MACVLAN", &DMWRITE, addObjEthernetMACVLAN, delObjEthernetMACVLAN, NULL, browseEthernetMACVLANInst, NULL, NULL, tEthernetMACVLANObj, tEthernetMACVLANParams, get_linker_mac_vlan, BBFDM_BOTH, NULL, "2.16"},
+{BBF_VENDOR_PREFIX"MACVLAN", &DMWRITE, addObjEthernetMACVLAN, delObjEthernetMACVLAN, NULL, browseEthernetMACVLANInst, NULL, NULL, tEthernetMACVLANObj, tEthernetMACVLANParams, get_linker_mac_vlan, BBFDM_BOTH, NULL, "2.16"},
 {0}
 };
 
