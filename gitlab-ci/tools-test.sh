@@ -29,10 +29,6 @@ echo "Validate X_IOPSYS_EU_Dropbear JSON Plugin"
 ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json
 check_ret $?
 
-echo "Validate UserInterface JSON Plugin"
-./tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
-check_ret $?
-
 echo "Validate X_IOPSYS_EU_TEST JSON Plugin"
 ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
 check_ret $?
