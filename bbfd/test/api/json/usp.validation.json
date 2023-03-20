@@ -1,0 +1,117 @@
+{
+    "object": "usp",
+        "methods": [
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "object_names",
+            "args": {
+                "path": "Device.WiFi.SSID.1.",
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "instances",
+            "args": {
+                "path": "Device.Users.User.",
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "validate",
+            "args": {
+                "path": "Device.Users.User.1.Alias",
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "set",
+            "args": {
+                "path": "Device.WiFi.SSID.1.SSID",
+                "value": "test-2g"
+            },
+            "rc": 0
+        },
+        {
+            "method": "operate",
+            "args": {
+                "path":"Device.IP.Diagnostics.",
+                "action":"IPPing()",
+                "input":{
+                    "Host":"127.0.0.1"
+                }
+            },
+            "rc": 0
+        },
+        {
+            "method": "add_object",
+            "args": {
+                "path": "Device.Users.User.",
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "list_operate",
+            "args": {},
+            "rc": 0
+        },
+	{
+            "method": "get_supported_dm",
+            "args": {
+		"path":"Device.USB.",
+		"next-level":false,
+		"schema_type":1
+	     },
+            "rc": 0
+        },
+        {
+            "method": "get_supported_dm",
+            "args": {
+		"path":"Device.WiFi."
+	     },
+            "rc": 0
+        },
+        {
+            "method": "get_supported_dm",
+            "args": {
+		"path":"Device.WiFi.",
+		"next-level":false,
+		"schema_type":2
+	     },
+            "rc": 0
+        },
+        {
+            "method": "get_supported_dm",
+            "args": {
+		"path":"Device.USB.",
+		"next-level":false,
+		"schema_type":3
+	     },
+            "rc": 0
+        },
+        {
+            "method": "get_supported_dm",
+            "args": {
+		"Path":"Device.WiFi.",
+		"schema_type":1
+	     },
+            "rc": 0
+        },
+	{
+            "method": "get_supported_dm",
+            "args": {},
+            "rc": 0
+        }
+    ]
+}
+

@@ -1,0 +1,315 @@
+{
+  "definitions": {
+    "path_t": {
+      "description": "Complete object element path as per TR181",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 1024,
+      "examples": [
+        "Device.",
+        "Device.DeviceInfo.Manufacturer",
+        "Device.WiFi.SSID.1.",
+        "Device.WiFi."
+      ]
+    },
+    "schema_path_t": {
+      "description": "Datamodel object schema path",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 1024,
+      "examples": [
+        "Device.Bridging.Bridge.{i}.",
+        "Device.DeviceInfo.Manufacturer",
+        "Device.WiFi.SSID.{i}.SSID"
+      ]
+    },
+    "boolean_t": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1"
+      ]
+    },
+    "operate_path_t": {
+      "description": "Datamodel object schema path",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 1024,
+      "examples": [
+        "Device.DHCPv4.Client.{i}.Renew()",
+        "Device.FactoryReset()"
+      ]
+    },
+    "operate_type_t": {
+      "type": "string",
+      "enum": [
+        "async",
+        "sync"
+      ]
+    },
+    "query_path_t": {
+      "description": "DM object path with search queries",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 1024,
+      "examples": [
+        "Device.",
+        "Device.DeviceInfo.Manufacturer",
+        "Device.WiFi.SSID.[SSID==\"test_ssid\"].BSSID",
+        "Device.WiFi.SSID.*.BSSID",
+        "Device.WiFi.SSID.[SSID!=\"test_ssid\"&&Enable==1].BSSID",
+        "Device.WiFi."
+      ]
+    },
+    "instance_t": {
+      "description": "Multi object instances",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 256
+    },
+    "proto_t": {
+      "type": "string",
+      "default": "both",
+      "enum": [
+        "usp",
+        "cwmp",
+        "both"
+      ]
+    },
+    "type_t": {
+      "type": "string",
+      "enum": [
+        "xsd:string",
+        "xsd:unsignedInt",
+        "xsd:int",
+        "xsd:unsignedLong",
+        "xsd:long",
+        "xsd:boolean",
+        "xsd:dateTime",
+        "xsd:hexBinary",
+        "xsd:object"
+      ]
+    },
+    "fault_t": {
+      "type": "integer",
+      "minimum": 7000,
+      "maximum": 9050
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dev.iopsys.eu/iopsys/uspd/-/blob/devel/docs/api/usp.md",
+  "type": "object",
+  "title": "usp",
+  "object": "usp",
+  "additionalProperties": false,
+  "properties": {
+    "get": {
+      "title": "Get handler",
+      "description": "Query the datamodel object",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/query_path_t"
+            },
+            "proto": {
+              "$ref": "#/definitions/proto_t"
+            },
+            "maxdepth": {
+              "type": "integer",
+              "description": "Integer to decide the depth of data model to be parsed"
+            },
+            "next-level": {
+              "type": "boolean",
+              "description": "gets only next level objects if true"
+            },
+            "instance-mode": {
+              "type": "integer",
+              "description": ""
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    },
+    "set": {
+      "title": "Set handler",
+      "description": "Set values of datamodel object element",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path",
+            "value"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/query_path_t"
+            },
+            "proto": {
+              "$ref": "#/definitions/proto_t"
+            },
+            "value": {
+              "type": "string"
+             },
+            "values": {
+              "description": "To set multiple values at once, path should be relative to object elements",
+              "type": "object",
+              "properties": {}
+            },
+            "instance_mode": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "const": true
+            }
+          }
+        }
+      }
+    },
+    "add_object": {
+      "title": "Add a new object instance",
+      "description": "Add a new object in multi instance object",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/path_t"
+            },
+            "proto": {
+              "$ref": "#/definitions/proto_t"
+            },
+            "instance_mode": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "required": [
+            "parameters"
+          ],
+          "properties": {
+            "parameters": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "parameter",
+                  "status",
+                  "instance"
+                ],
+                "properties": {
+                  "parameter": {
+                    "$ref": "#/definitions/path_t"
+                  },
+                  "status": {
+                    "type": "boolean"
+                  },
+                  "instance": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "del_object": {
+      "title": "Delete object instance",
+      "description": "Delete a object instance from multi instance object",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/query_path_t"
+            },
+            "proto": {
+              "$ref": "#/definitions/proto_t"
+            },
+            "instance_mode": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "required": [
+            "parameters"
+          ],
+          "properties": {
+            "parameters": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "parameter",
+                  "status"
+                ],
+                "properties": {
+                  "parameter": {
+                    "$ref": "#/definitions/path_t"
+                  },
+                  "status": {
+                    "type": "boolean",
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+config uspd 'usp'
+	option granularitylevel  '0'
+	option debug '1'
+	option loglevel  '2'
+	option subprocess_level '1'
+	option refresh_time '0'
