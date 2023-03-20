@@ -543,27 +543,239 @@
 			"description": "Ethernet object. This object models several Ethernet interface objects, each representing a different stack layer, including: <<object|Interface>>, <<object|Link>>, and <<object|VLANTermination>>. <<object|Interface>> is media-specific and models a port, the PHY layer, and the Channel Access Method (CAM) part of the MAC layer. <<object|Link>> is media-independent and models the Logical Link Control (LLC) layer. An outer <<object|VLANTermination>>, when present, is expected to be stacked on top of <<object|Link>> objects to receive and send frames with a configured VLANID.",
 			"access": false,
 			"array": false,
-			"Device.Ethernet.VLANTermination.{i}.": {
+			"Device.Ethernet.{BBF_VENDOR_PREFIX}MACVLAN.{i}.": {
 				"type": "object",
-				"version": "2.5",
+				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
 				],
-				"description": "VLAN Termination table (a stackable interface object as described in <<bibref|TR-181i2|Section 4.2>>). A VLAN Termination entry is typically stacked on top of a <<object|#.Link>> object to receive and send frames with the configured <<param|VLANID>>.",
+				"description": "A MACVLAN entry is typically stacked on top of a <<object|#.Link>> object or <<object|#.VLANTermination>> to receive and send frames with the configured <<param|MACAddress>>.",
 				"access": true,
 				"array": true,
-				"{BBF_VENDOR_PREFIX}MACVLAN": {
+				"Enable": {
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
+					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
 					],
-					"description": "Specifies if the object is macvlan or not",
+					"description": "Enables or disables the MACVLAN entry",
+					"default": "false",
 					"datatype": "boolean"
+				},
+				"Status": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"version": "2.16",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "The current operational state of the MACVLAN entry. Enumeration of: Up, Down, Unknown, Dormant, NotPresent, LowerLayerDown, Error. When <<param|Enable>> is <<false>> then <<param>> SHOULD normally be <<enum|Down>> (or <<enum|NotPresent>> or <<enum|Error>> if there is a fault condition on the interface). When <<param|Enable>> is changed to <<true>> then <<param>> SHOULD change to <<enum|Up>> if and only if the interface is able to transmit and receive network traffic; it SHOULD change to <<enum|Dormant>> if and only if the interface is operable but is waiting for external actions before it can transmit and receive network traffic (and subsequently change to <<enum|Up>> if still operable when the expected actions have completed); it SHOULD change to <<enum|LowerLayerDown>> if and only if the interface is prevented from entering the <<enum|Up>> state because one or more of the interfaces beneath it is down; it SHOULD remain in the <<enum|Error>> state if there is an error or other fault condition detected on the interface; it SHOULD remain in the <<enum|NotPresent>> state if the interface has missing (typically hardware) components; it SHOULD change to <<enum|Unknown>> if the state of the interface can not be determined for some reason. This parameter is based on ifOperStatus from <<bibref|RFC2863>>.",
+					"default": "Down",
+					"datatype": "string",
+					"enumerations": [
+						"Up",
+						"Down",
+						"Unknown",
+						"Dormant",
+						"NotPresent",
+						"LowerLayerDown",
+						"Error"
+					]
+				},
+				"Alias": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.16",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "A non-volatile handle used to reference this instance. Alias provides a mechanism for an ACS to label this instance for future reference. If the CPE supports the Alias-based Addressing feature as defined in <<bibref|TR-069|3.6.1>> and described in <<bibref|TR-069|Appendix II>>, the following mandatory constraints MUST be enforced: * Its value MUST NOT be empty. * Its value MUST start with a letter. * If its value is not assigned by the ACS, it MUST start with a cpe- prefix. * The CPE MUST NOT change the parameter value. | A non-volatile handle used to reference this instance. Alias provides a mechanism for an ACS to label this instance for future reference. If the CPE supports the Alias-based Addressing feature as defined in <<bibref|TR-069|3.6.1>> and described in <<bibref|TR-069|Appendix II>>, the following mandatory constraints MUST be enforced: * Its value MUST NOT be empty. * Its value MUST start with a letter. * If its value is not assigned by the ACS, it MUST start with a cpe- prefix. * The CPE MUST NOT change the parameter value.",
+					"datatype": "Alias",
+					"range": [
+						{
+							"max": 64
+						}
+					]
+				},
+				"Name": {
+					"type": "string",
+					"read": true,
+					"write": false,
+					"version": "2.16",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "The textual name of the MACVLAN entry as assigned by the CPE.",
+					"datatype": "string",
+					"range": [
+						{
+							"max": 64
+						}
+					]
+				},
+				"LowerLayers": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.16",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "<<list>> <<reference|an interface object that is stacked immediately below this interface object>> See <<bibref|TR-181i2|Section 4.2.1>>.",
+					"list": {
+						"datatype": "string",
+						"maxsize": 1024
+					}
+				},
+				"MACAddress": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.16",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "The MAC address used for packets sent via this interface. Provides the source MAC address for outgoing traffic and the destination MAC address for incoming traffic.",
+					"datatype": "MACAddress",
+					"range": [
+						{
+							"max": 17
+						}
+					],
+					"pattern": [
+						"",
+						"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+					]
+				},
+				"Device.Ethernet.{BBF_VENDOR_PREFIX}MACVLAN.{i}.Stats.": {
+					"type": "object",
+					"version": "2.16",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Throughput statistics for this MACVLAN entry. The CPE MUST reset the links Stats parameters (unless otherwise stated in individual object or parameter descriptions) either when the link becomes operationally down due to a previous administrative down (i.e. the links <<param|#.Status>> parameter transitions to a down state after the link is disabled) or when the link becomes administratively up (i.e. the links <<param|#.Enable>> parameter transitions from <<false>> to <<true>>). Administrative and operational link status is discussed in <<bibref|TR-181i2|section 4.2.2>>.",
+					"access": false,
+					"array": false,
+					"BytesSent": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"version": "2.16",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The total number of bytes transmitted out of the MACVLAN entry, including framing characters.",
+						"datatype": "unsignedLong"
+					},
+					"BytesReceived": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"version": "2.16",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The total number of bytes received on the MACVLAN entry, including framing characters.",
+						"datatype": "unsignedLong"
+					},
+					"PacketsSent": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"version": "2.16",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The total number of Ethernet frames transmitted out of the MACVLAN entry.",
+						"datatype": "unsignedLong"
+					},
+					"PacketsReceived": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"version": "2.16",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The total number of Ethernet frames received on the MACVLAN entry.",
+						"datatype": "unsignedLong"
+					},
+					"ErrorsSent": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.16",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The total number of outbound Ethernet frames that could not be transmitted because of errors.",
+						"datatype": "unsignedInt"
+					},
+					"ErrorsReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.16",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The total number of inbound Ethernet frames that contained errors preventing them from being delivered to a higher-layer protocol.",
+						"datatype": "unsignedInt"
+					},
+					"DiscardPacketsSent": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.16",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The total number of outbound Ethernet frames which were chosen to be discarded even though no errors had been detected to prevent their being transmitted. One possible reason for discarding such a packet could be to free up buffer space.",
+						"datatype": "unsignedInt"
+					},
+					"DiscardPacketsReceived": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": false,
+						"version": "2.16",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The total number of inbound Ethernet frames which were chosen to be discarded even though no errors had been detected to prevent their being delivered. One possible reason for discarding such a packet could be to free up buffer space.",
+						"datatype": "unsignedInt"
+					},
+					"MulticastPacketsReceived": {
+						"type": "unsignedLong",
+						"read": true,
+						"write": false,
+						"version": "2.16",
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "The total number of received Ethernet frames, delivered by this layer to a higher layer, which were addressed to a multicast address at this layer.",
+						"datatype": "unsignedLong"
+					}
 				}
 			}
 		},
