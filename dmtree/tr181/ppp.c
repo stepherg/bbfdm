@@ -1001,7 +1001,7 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 		if (DM_STRLEN(device) == 0)
 			return 0;
 
-		adm_entry_get_linker_param(ctx, "Device."BBF_VENDOR_PREFIX"MACVLAN", device, value);
+		adm_entry_get_linker_param(ctx, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN", device, value);
 		if (*value != NULL && (*value)[0] != 0)
 			return 0;
 
@@ -1023,7 +1023,7 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct ppp_args *ppp = (struct ppp_args *)data;
-	char eth_mac_vlan[] = "Device."BBF_VENDOR_PREFIX"MACVLAN";
+	char eth_mac_vlan[] = "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN";
 	char *allowed_objects[] = {
 			eth_mac_vlan,
 			"Device.Ethernet.VLANTermination.",
