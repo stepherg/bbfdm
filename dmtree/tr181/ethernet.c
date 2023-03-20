@@ -124,7 +124,9 @@ static void add_ethernet_link_section(char *device, char *macaddr)
 static void dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *proto = NULL, *macaddr = NULL;
+	char *proto = NULL;
+	char *macaddr = NULL;
+	char *device = NULL;
 	char dev_name[32] = {0};
 
 	uci_foreach_sections("network", "interface", s) {
@@ -138,8 +140,13 @@ static void dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_no
 		if (strcmp(section_name(s), "loopback") == 0)
 			continue;
 
+		// Skip this interface section if its device starts with prfix 'link_'
+		dmuci_get_value_by_section_string(s, "device", &device);
+		if (DM_STRNCMP(device, "link_", 5) == 0)
+			continue;
+
 		// Skip this interface section if its device is empty
-		char *device = get_device(section_name(s));
+		device = get_device(section_name(s));
 		if (DM_STRLEN(device) == 0)
 			continue;
 
@@ -302,9 +309,26 @@ static int addObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 	return 0;
 }
 
+static void update_all_interfaces(char *old_device)
+{
+	struct uci_section *s = NULL;
+	char buf[32] = {0};
+
+	if (DM_STRLEN(old_device) == 0)
+		return;
+
+	snprintf(buf, sizeof(buf), "link_%s", old_device);
+	replace_special_char(buf, '_');
+
+	uci_foreach_option_eq("network", "interface", "device", old_device, s) {
+		dmuci_set_value_by_section(s, "device", buf);
+	}
+}
+
 static int delObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *s = NULL, *stmp = NULL;
+	char *device_iface = NULL;
 	char *device = NULL;
 
 	switch (del_action) {
@@ -312,7 +336,8 @@ static int delObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
 			if (DM_STRLEN(device)) {
 				uci_foreach_option_cont("network", "interface", "device", device, s) {
-					dmuci_set_value_by_section(s, "device", "");
+					dmuci_get_value_by_section_string(s, "device", &device_iface);
+					update_all_interfaces(device_iface);
 				}
 			}
 
@@ -324,7 +349,8 @@ static int delObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 				dmuci_get_value_by_section_string(s, "device", &device);
 				if (DM_STRLEN(device)) {
 					uci_foreach_option_cont("network", "interface", "device", device, s) {
-						dmuci_set_value_by_section(s, "device", "");
+						dmuci_get_value_by_section_string(s, "device", &device_iface);
+						update_all_interfaces(device_iface);
 					}
 				}
 
