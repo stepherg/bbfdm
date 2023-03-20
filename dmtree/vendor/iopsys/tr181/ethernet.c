@@ -161,7 +161,6 @@ static int get_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 
 	if ((*value)[0] == '\0') {
 		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &linker);
-		TRACE("Ethernet.MACVLAN: linker=%s", linker);
 		if (!linker || *linker == '\0')
 			return 0;
 

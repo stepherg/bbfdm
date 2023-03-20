@@ -1290,7 +1290,6 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 	if ((*value)[0] == '\0') {
 		char *device = get_device(section_name((struct uci_section *)data));
-		TRACE("IP.Interface: device=%s", device);
 		if (DM_STRLEN(device) == 0)
 			return 0;
 
