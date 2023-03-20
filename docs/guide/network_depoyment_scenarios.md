@@ -766,19 +766,104 @@ Device.Bridging.Bridge.2.VLAN.1.VLANID => 200
 - **TR-181 Commands**
 
 ```bash
+obuspa -c del Device.DHCPv4.Client.*
+obuspa -c del Device.DHCPv6.Client.*
+obuspa -c del Device.Ethernet.Link.*
+obuspa -c del Device.Bridging.Bridge.*
+obuspa -c del Device.IP.Interface.*
 
+obuspa -c add Device.Ethernet.Link.
+obuspa -c set Device.Ethernet.Link.1.LowerLayers Device.Ethernet.Interface.3
+
+obuspa -c add Device.Ethernet.VLANTermination
+obuspa -c set Device.Ethernet.VLANTermination.1.VLANID 100
+obuspa -c set Device.Ethernet.VLANTermination.1.LowerLayers Device.Ethernet.Link.1
+
+obuspa -c add Device.Ethernet.X_IOPSYS_EU_MACVLAN
+obuspa -c set Device.Ethernet.X_IOPSYS_EU_MACVLAN.1.LowerLayers Device.Ethernet.VLANTermination.1
+
+obuspa -c add Device.Ethernet.X_IOPSYS_EU_MACVLAN
+obuspa -c set Device.Ethernet.X_IOPSYS_EU_MACVLAN.2.LowerLayers Device.Ethernet.VLANTermination.1
+
+obuspa -c add Device.IP.Interface.
+obuspa -c set Device.IP.Interface.1.Enable 1
+obuspa -c set Device.IP.Interface.1.LowerLayers Device.Ethernet.X_IOPSYS_EU_MACVLAN.1
+
+obuspa -c add Device.IP.Interface.
+obuspa -c set Device.IP.Interface.2.Enable 1
+obuspa -c set Device.IP.Interface.2.LowerLayers Device.Ethernet.X_IOPSYS_EU_MACVLAN.2
+
+obuspa -c add Device.DHCPv4.Client.
+obuspa -c set Device.DHCPv4.Client.1.Enable 1
+obuspa -c set Device.DHCPv4.Client.1.Interface Device.IP.Interface.1
+
+obuspa -c add Device.DHCPv4.Client.
+obuspa -c set Device.DHCPv4.Client.2.Enable 1
+obuspa -c set Device.DHCPv4.Client.2.Interface Device.IP.Interface.2
 ```
 
 - **Network UCI Config**
 
 ```bash
 
+config interface 'loopback'
+        option device 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config globals 'globals'
+        option ula_prefix 'fd32:1646:1526::/48'
+
+config device 'vlan_ter_1'
+        option type '8021q'
+        option vid '100'
+        option ifname 'eth4'
+        option name 'eth4.100'
+
+config device 'mac_vlan_1'
+        option type 'macvlan'
+        option ifname 'eth4.100'
+        option name 'eth4_1'
+        option macaddr 'EC:6C:9A:79:FD:7E'
+
+config device 'mac_vlan_2'
+        option type 'macvlan'
+        option ifname 'eth4.100'
+        option name 'eth4_2'
+
+config interface 'iface1'
+        option disabled '0'
+        option macaddr 'EC:6C:9A:79:FD:7E'
+        option device 'eth4_1'
+        option proto 'dhcp'
+
+config interface 'iface2'
+        option disabled '0'
+        option device 'eth4_2'
+        option proto 'dhcp'
+
 ```
 
 - **TR-181 Data Model**
 
 ```bash
-
+$ obuspa -c get Device.IP.Interface.*.LowerLayers
+Device.IP.Interface.1.LowerLayers => Device.Ethernet.X_IOPSYS_EU_MACVLAN.1
+Device.IP.Interface.2.LowerLayers => Device.Ethernet.X_IOPSYS_EU_MACVLAN.2
+$ obuspa -c get Device.Ethernet.X_IOPSYS_EU_MACVLAN.*.LowerLayers
+Device.Ethernet.X_IOPSYS_EU_MACVLAN.1.LowerLayers => Device.Ethernet.VLANTermination.1
+Device.Ethernet.X_IOPSYS_EU_MACVLAN.2.LowerLayers => Device.Ethernet.VLANTermination.1
+$ obuspa -c get Device.Ethernet.VLANTermination.*.LowerLayers
+Device.Ethernet.VLANTermination.1.LowerLayers => Device.Ethernet.Link.1
+$ obuspa -c get Device.Ethernet.Link.*.LowerLayers
+Device.Ethernet.Link.1.LowerLayers => Device.Ethernet.Interface.3
+$ obuspa -c get Device.DHCPv4.Client.*.Interface
+Device.DHCPv4.Client.1.Interface => Device.IP.Interface.1
+Device.DHCPv4.Client.2.Interface => Device.IP.Interface.2
+$ obuspa -c get Device.Bridging.Bridge.*.Port.*.LowerLayers
+$ obuspa -c get Device.Bridging.Bridge.*.VLAN.
+$ obuspa -c get Device.Bridging.Bridge.*.VLANPort.
 ```
 
 ### 6. VLAN Translation
