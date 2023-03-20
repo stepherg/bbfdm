@@ -997,7 +997,12 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 		char *device = NULL;
 
 		dmuci_get_value_by_section_string(ppp->dmmap_s, "device", &device);
+		TRACE("PPP.Interface: device=%s", device);
 		if (DM_STRLEN(device) == 0)
+			return 0;
+
+		adm_entry_get_linker_param(ctx, "Device."BBF_VENDOR_PREFIX"MACVLAN", device, value);
+		if (*value != NULL && (*value)[0] != 0)
 			return 0;
 
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", device, value);

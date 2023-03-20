@@ -161,9 +161,9 @@ static int get_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 
 	if ((*value)[0] == '\0') {
 		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &linker);
+		TRACE("Ethernet.MACVLAN: linker=%s", linker);
 		if (!linker || *linker == '\0')
 			return 0;
-
 
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", linker, value);
 		if (*value != NULL && (*value)[0] != 0)
@@ -224,7 +224,7 @@ static int set_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 
 static int get_EthernetMACVLAN_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "mac", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "macaddr", value);
 	return 0;
 }
 
@@ -232,11 +232,11 @@ static int set_EthernetMACVLAN_MACAddress(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (dm_validate_string(value, -1, 17, NULL, MACAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "mac", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "macaddr", value);
 			break;
 	}
 	return 0;
