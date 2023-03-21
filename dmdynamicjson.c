@@ -1381,11 +1381,8 @@ static int uci_set_value(json_object *mapping_obj, int json_version, char *refpa
 				res = dmuci_set_value(json_object_get_string(file), uci_type, opt_temp, linker);
 		} else {
 			if (value != NULL) {
-				if ((res = dmuci_delete_by_section((struct uci_section *)data, opt_temp, NULL)))
-					res = dmuci_delete(json_object_get_string(file), uci_type, opt_temp, NULL);
-
-				if (res)
-					return -1;
+				if (dmuci_delete_by_section((struct uci_section *)data, opt_temp, NULL))
+					dmuci_delete(json_object_get_string(file), uci_type, opt_temp, NULL);
 
 				char *p = strtok(value, ",");
 				while (p) {
@@ -1411,8 +1408,7 @@ static int uci_set_value(json_object *mapping_obj, int json_version, char *refpa
 			res = dmuci_set_value(json_object_get_string(file), json_object_get_string(section_name), opt_temp, linker);
 		} else {
 			if (value != NULL) {
-				if (dmuci_delete(json_object_get_string(file), json_object_get_string(section_name), opt_temp, NULL))
-					return -1;
+				dmuci_delete(json_object_get_string(file), json_object_get_string(section_name), opt_temp, NULL);
 
 				char *p = strtok(value, ",");
 				while (p) {
