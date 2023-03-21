@@ -28,7 +28,6 @@ extern DMLEAF tEthernetVLANTerminationParams[];
 extern DMLEAF tEthernetVLANTerminationStatsParams[];
 extern DMLEAF tEthernetRMONStatsParams[];
 
-struct uci_section *ethernet___get_device_section(char *dev_name);
 bool ethernet___check_vlan_termination_section(const char *name);
 
 #endif //__ETHERNET_H
