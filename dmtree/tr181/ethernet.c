@@ -63,16 +63,6 @@ bool ethernet___check_vlan_termination_section(const char *name)
 	return true;
 }
 
-struct uci_section *ethernet___get_device_section(char *dev_name)
-{
-	struct uci_section *s = NULL;
-
-	uci_foreach_option_eq("network", "device", "name", dev_name, s) {
-		return s;
-	}
-	return NULL;
-}
-
 static int eth_iface_sysfs(const struct uci_section *data, const char *name, char **value)
 {
 	char *device;
