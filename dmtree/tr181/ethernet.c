@@ -875,6 +875,26 @@ static int get_EthernetLink_Name(char *refparam, struct dmctx *ctx, void *data, 
 	return 0;
 }
 
+static int get_EthernetLink_LastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct uci_section *s = NULL;
+	char *device = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+	if (DM_STRLEN(device) == 0)
+		return 0;
+
+	uci_foreach_option_cont("network", "interface", "device", device, s) {
+		json_object *res = NULL;
+
+		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", section_name(s), String}}, 1, &res);
+		DM_ASSERT(res, *value = "0");
+		*value = dmjson_get_value(res, 1, "uptime");
+		break;
+	}
+	return 0;
+}
+
 static int get_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = NULL;
@@ -1808,7 +1828,7 @@ DMLEAF tEthernetLinkParams[] = {
 {"Status", &DMREAD, DMT_STRING, get_EthernetLink_Status, NULL, BBFDM_BOTH, "2.0"},
 {"Alias", &DMWRITE, DMT_STRING, get_EthernetLink_Alias, set_EthernetLink_Alias, BBFDM_BOTH, "2.0"},
 {"Name", &DMREAD, DMT_STRING, get_EthernetLink_Name, NULL, BBFDM_BOTH, "2.0"},
-//{"LastChange", &DMREAD, DMT_UNINT, get_EthernetLink_LastChange, NULL, BBFDM_BOTH, "2.0"},
+{"LastChange", &DMREAD, DMT_UNINT, get_EthernetLink_LastChange, NULL, BBFDM_BOTH, "2.0"},
 {"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetLink_LowerLayers, set_EthernetLink_LowerLayers, BBFDM_BOTH, "2.0"},
 {"MACAddress", &DMREAD, DMT_STRING, get_EthernetLink_MACAddress, NULL, BBFDM_BOTH, "2.0"},
 {"FlowControl", &DMWRITE, DMT_BOOL, get_EthernetLink_FlowControl, set_EthernetLink_FlowControl, BBFDM_BOTH, "2.14"},
