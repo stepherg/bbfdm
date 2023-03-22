@@ -25,7 +25,7 @@ DM_MAP_OBJ tVendorExtensionIOPSYS[] = {
 /* parentobj, nextobject, parameter */
 {"Device.", tIOPSYS_DeviceObj, NULL},
 {"Device.DeviceInfo.", NULL, tIOPSYS_DeviceInfoParams},
-{"Device.Ethernet.VLANTermination.{i}.", NULL, tIOPSYS_EthernetVLANTerminationParams},
+{"Device.Ethernet.", tIOPSYS_EthernetObj, NULL},
 {"Device.Time.", NULL, tIOPSYS_TimeParams},
 {"Device.Bridging.Bridge.{i}.Port.{i}.", NULL, tIOPSYS_BridgingBridgePortParams},
 {"Device.Services.VoiceService.{i}.CallLog.{i}.", NULL, tIOPSYS_VoiceServiceCallLogParams},
