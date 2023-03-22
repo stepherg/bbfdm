@@ -528,6 +528,21 @@ static int get_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 	dmuci_get_value_by_section_string(dhcpv6_client->dmmap_s, "iface_name", &iface_name);
 	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface_name, value);
+
+	if (DM_STRLEN(*value) == 0 && dhcpv6_client->iface_s) {
+		struct uci_section *s = NULL;
+		char *device = NULL;
+
+		dmuci_get_value_by_section_string(dhcpv6_client->iface_s, "device", &device);
+		if (DM_STRLEN(device) == 0)
+			return 0;
+
+		uci_foreach_option_eq("network", "interface", "device", device, s) {
+			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", section_name(s), value);
+			if (DM_STRLEN(*value))
+				return 0;
+		}
+	}
 	return 0;
 }
 
