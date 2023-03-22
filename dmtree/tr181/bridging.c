@@ -1880,12 +1880,12 @@ static int set_BridgingBridgePort_Enable(char *refparam, struct dmctx *ctx, void
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
 
-			if (args->is_management_port)
-				return FAULT_9007;
-
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
+
+			if (args->is_management_port)
+				return 0;
 
 			dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "enabled", b ? "1" : "0");
 
@@ -2038,7 +2038,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 
 			if (args->is_management_port)
-				return FAULT_9007;
+				return 0;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
 				return FAULT_9007;
@@ -2049,6 +2049,9 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 
 			return 0;
 		case VALUESET:
+			if (args->is_management_port)
+				return 0;
+
 			adm_entry_get_linker_value(ctx, value, &linker);
 
 			if (!linker || *linker == 0) {
@@ -2145,6 +2148,10 @@ static int set_BridgingBridgePort_ManagementPort(char *refparam, struct dmctx *c
 				return FAULT_9007;
 
 			string_to_bool(value, &b);
+
+			if (args->is_management_port == b)
+				return 0;
+
 			if (b && is_section_exist("dmmap_bridge_port", "bridge_port", "br_inst", args->br_inst, "management", "1"))
 				return FAULT_9007;
 
@@ -2180,12 +2187,18 @@ static int set_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dm
 			if (dm_validate_unsignedInt_list(value, 8, 8, -1, RANGE_ARGS{{"0","7"}}, 1))
 				return FAULT_9007;
 
+			if (args->is_management_port)
+				return 0;
+
 			dmuci_get_value_by_section_string(args->bridge_port_sec, "type", &type);
-			if (args->is_management_port || DM_STRLEN(type) == 0)
+			if (DM_STRLEN(type) == 0)
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
+			if (args->is_management_port)
+				return 0;
+
 			bridging_set_priority_list("ingress_qos_mapping", data, value);
 			break;
 	}
@@ -2209,12 +2222,18 @@ static int set_BridgingBridgePort_PVID(char *refparam, struct dmctx *ctx, void *
 			if (dm_validate_int(value, RANGE_ARGS{{"1","4094"}}, 1))
 				return FAULT_9007;
 
+			if (args->is_management_port)
+				return 0;
+
 			dmuci_get_value_by_section_string(args->bridge_port_sec, "type", &type);
-			if (args->is_management_port || DM_LSTRCMP(type, "8021q") != 0)
+			if (DM_LSTRCMP(type, "8021q") != 0)
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
+			if (args->is_management_port)
+				return 0;
+
 			dmuci_set_value_by_section(args->bridge_port_sec, "vid", value);
 
 			dmuci_get_value_by_section_string(args->bridge_port_sec, "ifname", &ifname);
@@ -2274,11 +2293,11 @@ static int set_BridgingBridgePort_TPID(char *refparam, struct dmctx *ctx, void *
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 
-			if (args->is_management_port)
-				return FAULT_9007;
-
 			return 0;
 		case VALUESET:
+			if (args->is_management_port)
+				return 0;
+
 			if (DM_LSTRCMP(value, "33024") == 0)
 				dmuci_set_value_by_section(args->bridge_port_sec, "type", "8021q");
 			else if (DM_LSTRCMP(value, "34984") == 0)
