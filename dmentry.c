@@ -275,15 +275,10 @@ int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1,
 
 	switch(cmd) {
 		case CMD_GET_VALUE:
-			if (ctx->in_param[0] == '.' && DM_STRLEN(ctx->in_param) == 1)
-				fault = FAULT_9005;
-			else
-				fault = dm_entry_get_value(ctx);
+			fault = dm_entry_get_value(ctx);
 			break;
 		case CMD_GET_NAME:
-			if (ctx->in_param[0] == '.' && DM_STRLEN(ctx->in_param) == 1)
-				fault = FAULT_9005;
-			else if (arg1 && string_to_bool(arg1, &ctx->nextlevel) == 0)
+			if (arg1 && string_to_bool(arg1, &ctx->nextlevel) == 0)
 				fault = dm_entry_get_name(ctx);
 			else
 				fault = FAULT_9003;

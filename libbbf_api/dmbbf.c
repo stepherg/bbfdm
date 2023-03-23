@@ -1296,6 +1296,11 @@ int dm_entry_get_value(struct dmctx *dmctx)
 	unsigned char findparam_check = 0;
 	DMOBJ *root = dmctx->dm_entryobj;
 	DMNODE node = {.current_object = ""};
+	unsigned int len = DM_STRLEN(dmctx->in_param);
+
+	if ((len > 2 && dmctx->in_param[len - 1] == '.' && dmctx->in_param[len - 2] == '*') ||
+			(dmctx->in_param[0] == '.' && len == 1))
+		return FAULT_9005;
 
 	if (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, root->obj) == 0) {
 		dmctx->inparam_isparam = 0;
@@ -1306,7 +1311,7 @@ int dm_entry_get_value(struct dmctx *dmctx)
 		dmctx->findparam = 1;
 		dmctx->stop = 0;
 		findparam_check = 1;
-	} else if (dmctx->in_param[DM_STRLEN(dmctx->in_param) - 1] == '.') {
+	} else if (dmctx->in_param[len - 1] == '.') {
 		dmctx->inparam_isparam = 0;
 		dmctx->findparam = 0;
 		dmctx->stop = 0;
@@ -1406,7 +1411,12 @@ int dm_entry_get_name(struct dmctx *ctx)
 	DMOBJ *root = ctx->dm_entryobj;
 	DMNODE node = {.current_object = ""};
 	unsigned char findparam_check = 0;
+	unsigned int len = DM_STRLEN(ctx->in_param);
 	int err = 0;
+
+	if ((len > 2 && ctx->in_param[len - 1] == '.' && ctx->in_param[len - 2] == '*') ||
+			(ctx->in_param[0] == '.' && len == 1))
+		return FAULT_9005;
 
 	if (ctx->nextlevel == 0	&& (ctx->in_param[0] == '\0' || rootcmp(ctx->in_param, root->obj) == 0)) {
 		ctx->inparam_isparam = 0;
@@ -1427,7 +1437,7 @@ int dm_entry_get_name(struct dmctx *ctx)
 		ctx->in_param = root->obj;
 		node.matched = 1;
 		findparam_check = 1;
-	} else if (*(ctx->in_param + DM_STRLEN(ctx->in_param) - 1) == '.') {
+	} else if (*(ctx->in_param + len - 1) == '.') {
 		ctx->inparam_isparam = 0;
 		ctx->findparam = 0;
 		ctx->stop = 0;
