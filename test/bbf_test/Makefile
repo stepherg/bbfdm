@@ -5,7 +5,7 @@ BIN_OBJ = bbf_dm.o
 LIB_OBJS = libbbf_test.o
 LIB_CFLAGS = $(CFLAGS) -Wall -Werror -fPIC -I /usr/local/include/
 LIB_LDFLAGS = $(LDFLAGS) -lubus
-BIN_LDFLAGS = $(LDFLAGS) -lbbfdm -lubus
+BIN_LDFLAGS = $(LDFLAGS) -lbbf_api -lbbf_dm -lubus
 
 %.o: %.c
 	$(CC) $(LIB_CFLAGS) $(FPIC) -c -o $@ $<

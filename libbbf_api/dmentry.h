@@ -15,7 +15,7 @@
 #ifndef __DMENTRY_H__
 #define __DMENTRY_H__
 
-#include "libbbf_api/dmcommon.h"
+#include "dmcommon.h"
 
 extern struct list_head head_package_change;
 extern struct list_head main_memhead;
@@ -31,9 +31,9 @@ typedef enum {
 	COMMAND_ONLY
 } schema_type_t;
 
-int dm_ctx_init(struct dmctx *ctx, unsigned int instance_mode);
-int dm_ctx_init_sub(struct dmctx *ctx, unsigned int instance_mode);
-int dm_ctx_init_entry(struct dmctx *ctx, DMOBJ tEntryObj[], unsigned int instance_mode);
+int dm_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj, DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude, unsigned int instance_mode);
+int dm_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj, DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude, unsigned int instance_mode);
+int dm_ctx_init_entry(struct dmctx *ctx, DMOBJ *tEntryObj, DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude, unsigned int instance_mode);
 int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2);
 int dm_entry_apply(struct dmctx *ctx, int cmd);
 int dm_entry_restart_services(void);
@@ -45,7 +45,7 @@ int dm_ctx_clean_sub(struct dmctx *ctx);
 int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_type_t schema_type);
 void dm_config_ubus(struct ubus_context *ctx);
 int dm_ctx_init_cache(int time);
-void bbf_dm_cleanup(void);
+void bbf_dm_cleanup(DMOBJ *tEntryObj);
 
 /**
  * @brief dm_debug_browse_path
@@ -64,5 +64,6 @@ void bbf_dm_cleanup(void);
  */
 int dm_debug_browse_path(char *buff, size_t len);
 void dm_cleanup_dynamic_entry(DMOBJ *root);
+int set_bbfdatamodel_type(int bbf_type);
 
 #endif

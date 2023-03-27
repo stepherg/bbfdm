@@ -8,7 +8,6 @@
  *	Author: Suvendhu Hansa <suvendhu.hansa@iopsys.eu>
  */
 
-#include "include/libbbf_api.h"
 #include "mqtt.h"
 
 static bool duplicate_entry_exist(char *name, char *section_type)
@@ -37,13 +36,13 @@ static int addMQTTBroker(char *refparam, struct dmctx *ctx, void *data, char **i
 
 	snprintf(sec_name, sizeof(sec_name), "broker_%s", *instance);
 
-	if (bbf_uci_add_section("mosquitto", "listener", &s) == 0) {
-		bbf_uci_rename_section(s, sec_name);
-		bbf_uci_set_value_by_section(s, "enabled", "0");
-		bbf_uci_set_value_by_section(s, "port", "1883");
-		bbf_uci_add_section_bbfdm("dmmap_mqtt", "listener", &dmmap_broker);
-		bbf_uci_set_value_by_section(dmmap_broker, "section_name", sec_name);
-		bbf_uci_set_value_by_section(dmmap_broker, "listener_instance", *instance);
+	if (dmuci_add_section("mosquitto", "listener", &s) == 0) {
+		dmuci_rename_section_by_section(s, sec_name);
+		dmuci_set_value_by_section(s, "enabled", "0");
+		dmuci_set_value_by_section(s, "port", "1883");
+		dmuci_add_section_bbfdm("dmmap_mqtt", "listener", &dmmap_broker);
+		dmuci_set_value_by_section(dmmap_broker, "section_name", sec_name);
+		dmuci_set_value_by_section(dmmap_broker, "listener_instance", *instance);
 	}
 
 	return 0;
@@ -55,15 +54,15 @@ static int delMQTTBroker(char *refparam, struct dmctx *ctx, void *data, char *in
 
 	switch (del_action) {
 	case DEL_INST:
-		bbf_uci_delete_section_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-		bbf_uci_delete_section_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+		dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+		dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 		break;
 	case DEL_ALL:
-		bbf_uci_foreach_sections_safe("mosquitto", "listener", stmp, s) {
+		uci_foreach_sections_safe("mosquitto", "listener", stmp, s) {
 			struct uci_section *dmmap_section = NULL;
 			get_dmmap_section_of_config_section("dmmap_mqtt", "listener", section_name(s), &dmmap_section);
-			bbf_uci_delete_section_by_section(s, NULL, NULL);
-			bbf_uci_delete_section_by_section(dmmap_section, NULL, NULL);
+			dmuci_delete_by_section(s, NULL, NULL);
+			dmuci_delete_by_section(dmmap_section, NULL, NULL);
 		}
 		break;
 	}
@@ -96,14 +95,14 @@ static int browseMQTTBrokerInst(struct dmctx *dmctx, DMNODE *parent_node, void *
 **************************************************************/
 static int get_MQTT_BrokerNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int cnt = bbf_get_number_of_entries(ctx, data, instance, browseMQTTBrokerInst);
+	int cnt = get_number_of_entries(ctx, data, instance, browseMQTTBrokerInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 static int get_MQTTBroker_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	bbf_uci_get_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "listener_alias", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "listener_alias", value);
 	if ((*value)[0] == '\0')
 		dmasprintf(value, "cpe-%s", instance);
 	return 0;
@@ -117,7 +116,7 @@ static int set_MQTTBroker_Alias(char *refparam, struct dmctx *ctx, void *data, c
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			bbf_uci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "listener_alias", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "listener_alias", value);
 			return 0;
 	}
 	return 0;
@@ -125,7 +124,7 @@ static int set_MQTTBroker_Alias(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_MQTTBroker_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = bbf_uci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "0");
 	return 0;
 }
 
@@ -139,7 +138,7 @@ static int set_MQTTBroker_Enable(char *refparam, struct dmctx *ctx, void *data, 
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			bbf_uci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -147,7 +146,7 @@ static int set_MQTTBroker_Enable(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_MQTTBroker_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	bbf_uci_get_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "section_name", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "section_name", value);
 	return 0;
 }
 
@@ -181,11 +180,11 @@ static int set_MQTTBroker_Name(char *refparam, struct dmctx *ctx, void *data, ch
 				break;
 
 			// Update mosquitto config
-			if (0 != bbf_uci_rename_section(((struct dmmap_dup *)data)->config_section, value))
+			if (0 != dmuci_rename_section_by_section(((struct dmmap_dup *)data)->config_section, value))
 				return FAULT_9001;
 
 			// Update dmmap_mqtt file
-			bbf_uci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "section_name", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "section_name", value);
 
 			break;
 	}
@@ -194,7 +193,7 @@ static int set_MQTTBroker_Name(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_MQTTBroker_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	bbf_uci_get_value_by_section(((struct dmmap_dup *)data)->config_section, "port", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "port", value);
 	return 0;
 }
 
@@ -206,7 +205,7 @@ static int set_MQTTBroker_Port(char *refparam, struct dmctx *ctx, void *data, ch
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			bbf_uci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "port", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "port", value);
 			break;
 	}
 	return 0;
@@ -216,7 +215,7 @@ static int get_MQTTBroker_Interface(char *refparam, struct dmctx *ctx, void *dat
 {
 	char *intf = NULL;
 
-	bbf_uci_get_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", &intf);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &intf);
 	if (DM_STRLEN(intf) == 0)
 		return 0;
 
@@ -241,7 +240,7 @@ static int set_MQTTBroker_Interface(char *refparam, struct dmctx *ctx, void *dat
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &iface);
 			if (DM_STRLEN(iface) != 0)
-				bbf_uci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", iface);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", iface);
 			break;
 	}
 	return 0;
@@ -249,7 +248,7 @@ static int set_MQTTBroker_Interface(char *refparam, struct dmctx *ctx, void *dat
 
 static int get_MQTTBroker_Username(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	bbf_uci_get_value_by_section(((struct dmmap_dup *)data)->config_section, "username", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "username", value);
 	return 0;
 }
 
@@ -265,7 +264,7 @@ static int set_MQTTBroker_Username(char *refparam, struct dmctx *ctx, void *data
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			bbf_uci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "username", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "username", value);
 			break;
 	}
 	return 0;
@@ -285,7 +284,7 @@ static int set_MQTTBroker_Password(char *refparam, struct dmctx *ctx, void *data
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			bbf_uci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "password", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "password", value);
 			break;
 	}
 	return 0;

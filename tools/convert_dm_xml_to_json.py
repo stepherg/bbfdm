@@ -253,12 +253,12 @@ listmapping = []
 def generatelistfromfile(dmobject):
     obj = dmobject.get('name').split(".")
     if "tr-104" in sys.argv[1]:
-        pathfilename = "../dmtree/tr104/" + obj[1].lower() + ".c"
-        pathiopsyswrtfilename = "../dmtree/tr104/" + \
+        pathfilename = "../libbbf_dm/dmtree/tr104/" + obj[1].lower() + ".c"
+        pathiopsyswrtfilename = "../libbbf_dm/dmtree/tr104/" + \
             obj[1].lower() + "-iopsyswrt.c"
     else:
-        pathfilename = "../dmtree/tr181/" + obj[1].lower() + ".c"
-        pathiopsyswrtfilename = "../dmtree/tr181/" + \
+        pathfilename = "../libbbf_dm/dmtree/tr181/" + obj[1].lower() + ".c"
+        pathiopsyswrtfilename = "../libbbf_dm/dmtree/tr181/" + \
             obj[1].lower() + "-iopsyswrt.c"
 
     for x in range(0, 2):

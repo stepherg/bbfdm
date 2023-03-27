@@ -176,6 +176,16 @@ struct dm_parameter {
 	char *additional_data;
 };
 
+typedef struct dm_map_vendor {
+	char *vendor;
+	struct dm_map_obj *vendor_obj;
+} DM_MAP_VENDOR;
+
+typedef struct dm_map_vendor_exclude {
+	char *vendor;
+	char **vendor_obj;
+} DM_MAP_VENDOR_EXCLUDE;
+
 struct dmctx
 {
 	bool stop;
@@ -189,6 +199,8 @@ struct dmctx
 	struct list_head list_fault_param;
 	struct list_head list_json_parameter;
 	DMOBJ *dm_entryobj;
+	DM_MAP_VENDOR *dm_vendor_extension[2];
+	DM_MAP_VENDOR_EXCLUDE *dm_vendor_extension_exclude;
 	bool nextlevel;
 	bool iswildcard;
 	int faultcode;
@@ -230,16 +242,6 @@ typedef struct dm_map_obj {
 	struct dm_obj_s *root_obj;
 	struct dm_leaf_s *root_leaf;
 } DM_MAP_OBJ;
-
-typedef struct dm_map_vendor {
-	char *vendor;
-	struct dm_map_obj *vendor_obj;
-} DM_MAP_VENDOR;
-
-typedef struct dm_map_vendor_exclude {
-	char *vendor;
-	char **vendor_obj;
-} DM_MAP_VENDOR_EXCLUDE;
 
 enum operate_ret_status {
 	CMD_SUCCESS,
