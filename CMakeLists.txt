@@ -6,7 +6,3 @@ OPTION(BBFD_ENABLED "build bbfd daemon with their dependencies" OFF)
 
 add_subdirectory(libbbf_api)
 add_subdirectory(libbbf_dm)
-
-IF(BBFD_ENABLED)
-	add_subdirectory(bbfd)
-ENDIF(BBFD_ENABLED)

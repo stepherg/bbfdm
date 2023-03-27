@@ -12,6 +12,6 @@ cp -r ./test/files/var/* /var/
 cp -r ./test/files/tmp/* /tmp/
 cp -r ./test/files/lib/* /lib/
 
-apt install -y iproute2
+apt update && apt install -y iproute2
 ls /etc/config/
 

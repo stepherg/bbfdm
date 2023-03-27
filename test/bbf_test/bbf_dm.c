@@ -2,6 +2,15 @@
 
 #include <libubus.h>
 #include <libbbf_api/dmentry.h>
+#include <libbbf_dm/device.h>
+#include <libbbf_dm/vendor.h>
+
+static DMOBJ *TR181_ROOT_TREE = tEntry181Obj;
+static DM_MAP_VENDOR *TR181_VENDOR_EXTENSION[2] = {
+		tVendorExtension,
+		tVendorExtensionOverwrite
+};
+static DM_MAP_VENDOR_EXCLUDE *TR181_VENDOR_EXTENSION_EXCLUDE = tVendorExtensionExclude;
 
 #ifndef CMD_GET_INFO
 #define CMD_GET_INFO (CMD_EXTERNAL_COMMAND + 1)
@@ -61,7 +70,7 @@ int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
 	printf("cmd[%d], path[%s]\n", cmd, path);
 	set_bbfdatamodel_type(g_proto);
 
-	dm_ctx_init(&bbf_ctx, 0);
+	dm_ctx_init(&bbf_ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, 0);
 
 	if (arg2 && *arg2) {
 		bbf_ctx.dm_version = arg2;
@@ -120,6 +129,6 @@ int main(int argc, char *argv[])
 		version = argv[5];
 	
 	usp_dm_exec(cmd, param, value, version);
-	bbf_dm_cleanup();
+	bbf_dm_cleanup(TR181_ROOT_TREE);
 	ubus_free(ubus_ctx);
 }

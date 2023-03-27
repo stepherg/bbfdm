@@ -6,6 +6,15 @@
 #include <libubus.h>
 #include <libbbf_api/dmuci.h>
 #include <libbbf_api/dmentry.h>
+#include <libbbf_dm/device.h>
+#include <libbbf_dm/vendor.h>
+
+static DMOBJ *TR181_ROOT_TREE = tEntry181Obj;
+static DM_MAP_VENDOR *TR181_VENDOR_EXTENSION[2] = {
+		tVendorExtension,
+		tVendorExtensionOverwrite
+};
+static DM_MAP_VENDOR_EXCLUDE *TR181_VENDOR_EXTENSION_EXCLUDE = tVendorExtensionExclude;
 
 #define DROPBEAR_FILE_PATH "../files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json"
 #define DROPBEAR_JSON_PATH "/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json"
@@ -30,7 +39,7 @@ static int setup(void **state)
 	if (!ctx)
 		return -1;
 
-	dm_ctx_init(ctx, INSTANCE_MODE_NUMBER);
+	dm_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_NUMBER);
 	*state = ctx;
 
 	return 0;
@@ -42,7 +51,7 @@ static int setup_alias(void **state)
 	if (!ctx)
 		return -1;
 
-	dm_ctx_init(ctx, INSTANCE_MODE_ALIAS);
+	dm_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_ALIAS);
 	*state = ctx;
 
 	return 0;
@@ -72,7 +81,7 @@ static int teardown_revert(void **state)
 
 static int group_teardown(void **state)
 {
-	bbf_dm_cleanup();
+	bbf_dm_cleanup(TR181_ROOT_TREE);
 	if (ubus_ctx != NULL) {
 		ubus_free(ubus_ctx);
 		ubus_ctx = NULL;
@@ -575,7 +584,7 @@ static void test_api_bbfdm_json_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	dm_ctx_clean_sub(ctx);
-	dm_ctx_init_sub(ctx, INSTANCE_MODE_NUMBER);
+	dm_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_NUMBER);
 
 	/*
 	 * Test of JSON Parameter Path
@@ -587,7 +596,7 @@ static void test_api_bbfdm_json_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	dm_ctx_clean_sub(ctx);
-	dm_ctx_init_sub(ctx, INSTANCE_MODE_NUMBER);
+	dm_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_NUMBER);
 
 	remove(DROPBEAR_JSON_PATH);
 
@@ -662,7 +671,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	dm_ctx_clean_sub(ctx);
-	dm_ctx_init_sub(ctx, INSTANCE_MODE_NUMBER);
+	dm_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_NUMBER);
 
 	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.SSID.1.Enable", NULL, NULL);
 	assert_int_equal(fault, 0);
@@ -671,7 +680,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	dm_ctx_clean_sub(ctx);
-	dm_ctx_init_sub(ctx, INSTANCE_MODE_NUMBER);
+	dm_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_NUMBER);
 
 	remove(LIBBBF_TEST_BBFDM_PATH);
 
