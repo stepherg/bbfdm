@@ -5,7 +5,7 @@
 
 #include <libubus.h>
 #include <libbbf_api/dmuci.h>
-#include <libbbfdm/dmentry.h>
+#include <libbbf_api/dmentry.h>
 
 #define DROPBEAR_FILE_PATH "../files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json"
 #define DROPBEAR_JSON_PATH "/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json"

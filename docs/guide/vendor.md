@@ -68,7 +68,7 @@ BBF_VENDOR_LIST="iopsys,test"
 BBF_VENDOR_PREFIX="X_TEST_COM_"
 ```
 
-> Note1: The `libbbfdm` vendor list can support multi-vendor with comma seperated.
+> Note1: The `libbbf_dm` vendor list can support multi-vendor with comma seperated.
 
 > Note2: If multi vendors are supported and there is a object/parameter that is implmented by multi customers in different way, the implemented object/parameter of the first vendor name in the **BBF_VENDOR_LIST** will be considered.
 

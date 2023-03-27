@@ -10,7 +10,6 @@
  */
 
 #include "dmdynamicvendor.h"
-#include "dmtree/vendor/vendor.h"
 
 static void dm_browse_node_vendor_object_tree(DMNODE *parent_node, DMOBJ *entryobj)
 {
@@ -109,9 +108,9 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 
 	for (int idx = length - 1; idx >= 0; idx--) {
 
-		DM_MAP_VENDOR *vendor_map_obj = tVendorExtension;
+		DM_MAP_VENDOR *vendor_map_obj = ctx->dm_vendor_extension[0];
 
-		for (int j = 0; vendor_map_obj[j].vendor; j++) {
+		for (int j = 0; vendor_map_obj && vendor_map_obj[j].vendor; j++) {
 
 			if (DM_STRCMP(vendor_map_obj[j].vendor, tokens[idx]) != 0)
 				continue;
@@ -181,9 +180,9 @@ static void load_vendor_extension_overwrite_arrays(struct dmctx *ctx)
 
 	for (int idx = length - 1; idx >= 0; idx--) {
 
-		DM_MAP_VENDOR *vendor_map_obj = tVendorExtensionOverwrite;
+		DM_MAP_VENDOR *vendor_map_obj = ctx->dm_vendor_extension[1];
 
-		for (int j = 0; vendor_map_obj[j].vendor; j++) {
+		for (int j = 0; vendor_map_obj && vendor_map_obj[j].vendor; j++) {
 
 			if (DM_STRCMP(vendor_map_obj[j].vendor, tokens[idx]) != 0)
 				continue;
@@ -273,9 +272,9 @@ static void load_vendor_extension_exclude_arrays(struct dmctx *ctx)
 
 	for (int idx = length - 1; idx >= 0; idx--) {
 
-		DM_MAP_VENDOR_EXCLUDE *vendor_map_exclude_obj = tVendorExtensionExclude;
+		DM_MAP_VENDOR_EXCLUDE *vendor_map_exclude_obj = ctx->dm_vendor_extension_exclude;
 
-		for (int j = 0; vendor_map_exclude_obj[j].vendor; j++) {
+		for (int j = 0; vendor_map_exclude_obj && vendor_map_exclude_obj[j].vendor; j++) {
 
 			if (DM_STRCMP(vendor_map_exclude_obj[j].vendor, tokens[idx]) != 0)
 				continue;

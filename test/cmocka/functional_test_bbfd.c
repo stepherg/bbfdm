@@ -5,7 +5,7 @@
 
 #include <libubus.h>
 #include <libbbf_api/dmuci.h>
-#include <libbbfdm/dmentry.h>
+#include <libbbf_api/dmentry.h>
 
 static struct ubus_context *ubus_ctx = NULL;
 

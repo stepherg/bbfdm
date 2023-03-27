@@ -1,8 +1,7 @@
 #include <stdio.h>
 
 #include <libubus.h>
-#include <libbbfdm/dmentry.h>
-#include <libbbfdm/dmbbfcommon.h>
+#include <libbbf_api/dmentry.h>
 
 #ifndef CMD_GET_INFO
 #define CMD_GET_INFO (CMD_EXTERNAL_COMMAND + 1)

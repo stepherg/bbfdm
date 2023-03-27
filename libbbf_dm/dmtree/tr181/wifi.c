@@ -13,7 +13,6 @@
  */
 
 #include "wifi.h"
-#include "dmbbfcommon.h"
 
 struct wifi_radio_args
 {

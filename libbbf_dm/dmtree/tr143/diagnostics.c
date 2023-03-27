@@ -10,7 +10,6 @@
  */
 
 #include "dmdiagnostics.h"
-#include "dmbbfcommon.h"
 #include "diagnostics.h"
 #ifdef BBF_TR471
 #include "iplayercap.h"
