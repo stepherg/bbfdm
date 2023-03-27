@@ -114,14 +114,7 @@ function install_libbbf_test()
 	echo "installing libbbf_test"
 	cp -f test/bbf_test/libbbf_test.so /usr/lib/bbfdm
 
-	echo "pre-installation for libbbf_ubus_test"
-	cp -f test/bbf_test/libbbf_test.so /usr/local/lib
 	ldconfig
-	
-	# compile and install libbbf_ubus_test
-	#echo "Compiling libbbf_ubus_test"
-	#make clean -C test/dynamicdm_ubus_test/
-	#make -C test/dynamicdm_ubus_test/
 }
 
 function install_libperiodicstats()
