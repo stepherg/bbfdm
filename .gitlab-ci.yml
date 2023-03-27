@@ -115,13 +115,13 @@ run_uspd:
   stage: uspd
   inherit:
     variables: false
-  variables:
-    UPSTREAM_BBF_SHA: $CI_COMMIT_SHA
-    BBF_TAR_URL: $BBF_TAR_URL
+#  variables:
+#    UPSTREAM_BBF_SHA: $CI_COMMIT_SHA
+#    BBF_TAR_URL: $BBF_TAR_URL
   allow_failure: false
   trigger:
     project: iopsys/uspd
-    branch: bbf_pipeline
+    branch: ticket_8966
     strategy: depend
   needs:
     job: run_memory_test
