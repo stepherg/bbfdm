@@ -9,7 +9,6 @@
  *
  */
 
-#include "dmbbfcommon.h"
 #include "ssh.h"
 
 #define DROPBEAR_KEY_FILE "/etc/dropbear/authorized_keys"

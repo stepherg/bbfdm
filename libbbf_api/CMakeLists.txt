@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 3.0)
+
+PROJECT(libbbf_api)
+
+ADD_DEFINITIONS(-Wall -Werror)
+ADD_DEFINITIONS(-D_GNU_SOURCE)
+ADD_DEFINITIONS(-DBBF_VENDOR_PREFIX="${BBF_VENDOR_PREFIX}")
+
+IF(${BBF_MAX_OBJECT_INSTANCES})
+	ADD_DEFINITIONS(-DBBF_MAX_OBJECT_INSTANCES=${BBF_MAX_OBJECT_INSTANCES})
+ENDIF()
+
+OPTION(BBF_DOTSO_PLUGIN "build with dotso plugin" ON)
+OPTION(BBF_JSON_PLUGIN "build with json plugin" ON)
+OPTION(BBF_VENDOR_EXTENSION "build with vendor extension enabled" ON)
+
+IF(BBF_DOTSO_PLUGIN)
+	SET(BBF_DOTSO_PLUGIN_SOURCES dm_plugin/dmdynamiclibrary.c)
+	add_compile_definitions(BBFDM_ENABLE_DOTSO_PLUGIN)
+ENDIF(BBF_DOTSO_PLUGIN)
+
+IF(BBF_JSON_PLUGIN)
+	SET(BBF_JSON_PLUGIN_SOURCES dm_plugin/dmdynamicjson.c)
+	add_compile_definitions(BBFDM_ENABLE_JSON_PLUGIN)
+endif(BBF_JSON_PLUGIN)
+
+IF(BBF_VENDOR_EXTENSION)
+	SET(BBF_VENDOR_EXTENSION_SOURCES dm_plugin/dmdynamicvendor.c)
+	ADD_DEFINITIONS(-DBBF_VENDOR_LIST="${BBF_VENDOR_LIST}")
+	add_compile_definitions(BBF_VENDOR_EXTENSION)
+	SET(BBF_VENDOR_LIST "iopsys" CACHE STRING "vendor list to be used")
+	STRING(REPLACE "," ";" VENDOR_LIST ${BBF_VENDOR_LIST})
+ENDIF(BBF_VENDOR_EXTENSION)
+
+FILE(GLOB BBF_API_SOURCES *.c)
+
+ADD_LIBRARY(bbf_api SHARED ${BBF_API_SOURCES} ${BBF_DOTSO_PLUGIN_SOURCES} ${BBF_JSON_PLUGIN_SOURCES} ${BBF_VENDOR_EXTENSION_SOURCES})
+
+TARGET_LINK_LIBRARIES(bbf_api uci ubus ubox json-c blobmsg_json dl)
+
+INSTALL(TARGETS bbf_api
+		LIBRARY DESTINATION usr/lib)
+
+FILE(GLOB libbbf_api_headers *.h)
+INSTALL(FILES ${libbbf_api_headers}
+	DESTINATION usr/include/libbbf_api
+)
+
+FILE(GLOB libbbf_api_include_headers include/*.h)
+INSTALL(FILES ${libbbf_api_include_headers}
+	DESTINATION usr/include
+)

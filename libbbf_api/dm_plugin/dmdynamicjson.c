@@ -10,7 +10,6 @@
  */
 
 #include "dmdynamicjson.h"
-#include "dmentry.h"
 
 #define MAX_DM_LENGTH (1024)
 #define json_object_get_string(x) (char *)json_object_get_string(x)

@@ -13,15 +13,9 @@
  */
 
 #include "dmentry.h"
-#include "dmdynamicjson.h"
-#include "dmdynamiclibrary.h"
-#include "dmdynamicvendor.h"
-
-#ifdef BBF_TR181
-#include "device.h"
-#endif /* BBF_TR181 */
-
-#include "dmbbfcommon.h"
+#include "dm_plugin/dmdynamicjson.h"
+#include "dm_plugin/dmdynamiclibrary.h"
+#include "dm_plugin/dmdynamicvendor.h"
 
 LIST_HEAD(head_package_change);
 LIST_HEAD(main_memhead);
@@ -133,7 +127,8 @@ int usp_fault_map(int fault)
 	return out_fault;
 }
 
-static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, DMOBJ *tEntryObj, int custom)
+static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, DMOBJ *tEntryObj,
+		DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude, int custom)
 {
 	if (custom == CTX_INIT_ALL)
 		bbf_uci_init();
@@ -143,6 +138,9 @@ static int dm_ctx_init_custom(struct dmctx *ctx, unsigned int instance_mode, DMO
 	INIT_LIST_HEAD(&ctx->list_fault_param);
 	ctx->instance_mode = instance_mode;
 	ctx->dm_entryobj = tEntryObj;
+	ctx->dm_vendor_extension[0] = tVendorExtension ? tVendorExtension[0] : NULL;
+	ctx->dm_vendor_extension[1] = tVendorExtension ? tVendorExtension[1] : NULL;
+	ctx->dm_vendor_extension_exclude = tVendorExtensionExclude;
 	ctx->dm_version = DEFAULT_DMVERSION;
 	return 0;
 }
@@ -165,19 +163,15 @@ void dm_config_ubus(struct ubus_context *ctx)
 	dmubus_configure(ctx);
 }
 
-int dm_ctx_init_entry(struct dmctx *ctx, DMOBJ *tEntryObj, unsigned int instance_mode)
+int dm_ctx_init_entry(struct dmctx *ctx, DMOBJ *tEntryObj, DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude, unsigned int instance_mode)
 {
-	return dm_ctx_init_custom(ctx, instance_mode, tEntryObj, CTX_INIT_ALL);
+	return dm_ctx_init_custom(ctx, instance_mode, tEntryObj, tVendorExtension, tVendorExtensionExclude, CTX_INIT_ALL);
 }
 
-int dm_ctx_init(struct dmctx *ctx, unsigned int instance_mode)
+int dm_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj, DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude, unsigned int instance_mode)
 {
-#ifdef BBF_TR181
 	dmubus_clean_endlife_entries();
-	return dm_ctx_init_custom(ctx, instance_mode, tEntry181Obj, CTX_INIT_ALL);
-#else
-	return 0;
-#endif /* BBF_TR181 */
+	return dm_ctx_init_custom(ctx, instance_mode, tEntryObj, tVendorExtension, tVendorExtensionExclude, CTX_INIT_ALL);
 }
 
 int dm_ctx_clean(struct dmctx *ctx)
@@ -192,13 +186,9 @@ int dm_ctx_init_cache(int time)
 	return 0;
 }
 
-int dm_ctx_init_sub(struct dmctx *ctx, unsigned int instance_mode)
+int dm_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj, DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude, unsigned int instance_mode)
 {
-#ifdef BBF_TR181
-	return dm_ctx_init_custom(ctx, instance_mode, tEntry181Obj, CTX_INIT_SUB);
-#else
-	return 0;
-#endif /* BBF_TR181 */
+	return dm_ctx_init_custom(ctx, instance_mode, tEntryObj, tVendorExtension, tVendorExtensionExclude, CTX_INIT_SUB);
 }
 
 int dm_ctx_clean_sub(struct dmctx *ctx)
@@ -380,7 +370,7 @@ int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, cha
 	if (!param || !linker || *linker == 0)
 		return 0;
 
-	dm_ctx_init_sub(&dmctx, ctx->instance_mode);
+	dm_ctx_init_sub(&dmctx, ctx->dm_entryobj, ctx->dm_vendor_extension, ctx->dm_vendor_extension_exclude, ctx->instance_mode);
 	dmctx.in_param = param;
 	dmctx.linker = linker;
 
@@ -402,7 +392,7 @@ int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value)
 
 	snprintf(linker, sizeof(linker), "%s%c", param, (param[DM_STRLEN(param) - 1] != '.') ? '.' : '\0');
 
-	dm_ctx_init_sub(&dmctx, ctx->instance_mode);
+	dm_ctx_init_sub(&dmctx, ctx->dm_entryobj, ctx->dm_vendor_extension, ctx->dm_vendor_extension_exclude, ctx->instance_mode);
 	dmctx.in_param = linker;
 
 	dm_entry_get_linker_value(&dmctx);
@@ -453,7 +443,7 @@ int dm_entry_manage_services(struct blob_buf *bb, bool restart)
 	}
 	blobmsg_close_array(bb, arr);
 
-	bbf_uci_commit_bbfdm();
+	dmuci_commit_bbfdm();
 
 	free_all_list_package_change(&head_package_change);
 	return 0;
@@ -463,7 +453,7 @@ int dm_entry_restart_services(void)
 {
 	struct package_change *pc = NULL;
 
-	bbf_uci_commit_bbfdm();
+	dmuci_commit_bbfdm();
 
 	list_for_each_entry(pc, &head_package_change, list) {
 		dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
@@ -478,7 +468,7 @@ int dm_entry_revert_changes(void)
 {
 	struct package_change *pc = NULL;
 
-	bbf_uci_revert_bbfdm();
+	dmuci_revert_bbfdm();
 
 	list_for_each_entry(pc, &head_package_change, list) {
 		dmubus_call_set("uci", "revert", UBUS_ARGS{{"config", pc->package, String}}, 1);
@@ -574,7 +564,7 @@ static void load_dynamic_arrays(struct dmctx *ctx)
 #ifdef BBFDM_ENABLE_JSON_PLUGIN
 	// Load dynamic objects and parameters exposed via a JSON file
 	if (check_stats_folder(true)) {
-		free_json_dynamic_arrays(tEntry181Obj);
+		free_json_dynamic_arrays(ctx->dm_entryobj);
 		load_json_dynamic_arrays(ctx);
 	}
 #endif  /* BBFDM_ENABLE_JSON_PLUGIN */
@@ -582,7 +572,7 @@ static void load_dynamic_arrays(struct dmctx *ctx)
 #ifdef BBFDM_ENABLE_DOTSO_PLUGIN
 	// Load dynamic objects and parameters exposed via a library
 	if (check_stats_folder(false)) {
-		free_library_dynamic_arrays(tEntry181Obj);
+		free_library_dynamic_arrays(ctx->dm_entryobj);
 		load_library_dynamic_arrays(ctx);
 	}
 #endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
@@ -590,40 +580,36 @@ static void load_dynamic_arrays(struct dmctx *ctx)
 #ifdef BBF_VENDOR_EXTENSION
 	// Load objects and parameters exposed via vendor extension
 	if (first_boot == false) {
-		free_vendor_dynamic_arrays(tEntry181Obj);
+		free_vendor_dynamic_arrays(ctx->dm_entryobj);
 		load_vendor_dynamic_arrays(ctx);
 		first_boot = true;
 	}
 #endif
 }
 
-static void free_dynamic_arrays(void)
+static void free_dynamic_arrays(DMOBJ *tEntryObj)
 {
-#ifdef BBF_TR181
-	DMOBJ *root = tEntry181Obj;
-
 	DMNODE node = {.current_object = ""};
 
 #ifdef BBFDM_ENABLE_JSON_PLUGIN
-	free_json_dynamic_arrays(tEntry181Obj);
+	free_json_dynamic_arrays(tEntryObj);
 #endif  /* BBFDM_ENABLE_JSON_PLUGIN */
 
 #ifdef BBFDM_ENABLE_DOTSO_PLUGIN
-	free_library_dynamic_arrays(tEntry181Obj);
+	free_library_dynamic_arrays(tEntryObj);
 #endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
 
 #ifdef BBF_VENDOR_EXTENSION
-	free_vendor_dynamic_arrays(tEntry181Obj);
+	free_vendor_dynamic_arrays(tEntryObj);
 #endif
-	free_dm_browse_node_dynamic_object_tree(&node, root);
-#endif /* BBF_TR181 */
+	free_dm_browse_node_dynamic_object_tree(&node, tEntryObj);
 }
 
-void bbf_dm_cleanup(void)
+void bbf_dm_cleanup(DMOBJ *tEntryObj)
 {
 	dmubus_free();
 	dm_dynamic_cleanmem(&main_memhead);
-	free_dynamic_arrays();
+	free_dynamic_arrays(tEntryObj);
 }
 
 void dm_cleanup_dynamic_entry(DMOBJ *root)
@@ -633,3 +619,10 @@ void dm_cleanup_dynamic_entry(DMOBJ *root)
 	dm_dynamic_cleanmem(&main_memhead);
 	free_dm_browse_node_dynamic_object_tree(&node, root);
 }
+
+int set_bbfdatamodel_type(int bbf_type)
+{
+	bbfdatamodel_type = bbf_type;
+	return 0;
+}
+

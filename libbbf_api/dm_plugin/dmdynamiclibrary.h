@@ -9,12 +9,14 @@
  *
  */
 
-#ifndef __DMENTRYVENDOR_H__
-#define __DMENTRYVENDOR_H__
+#ifndef __DMENTRYLIBRARY_H__
+#define __DMENTRYLIBRARY_H__
 
-#include "libbbf_api/dmcommon.h"
+#include "../dmcommon.h"
 
-void load_vendor_dynamic_arrays(struct dmctx *ctx);
-void free_vendor_dynamic_arrays(DMOBJ *dm_entryobj);
+#define LIBRARY_FOLDER_PATH "/usr/lib/bbfdm"
 
-#endif //__DMENTRYVENDOR_H__
+int load_library_dynamic_arrays(struct dmctx *ctx);
+void free_library_dynamic_arrays(DMOBJ *dm_entryobj);
+
+#endif //__DMENTRYLIBRARY_H__

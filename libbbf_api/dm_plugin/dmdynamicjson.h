@@ -12,7 +12,7 @@
 #ifndef __DMENTRYJSON_H__
 #define __DMENTRYJSON_H__
 
-#include "libbbf_api/dmcommon.h"
+#include "../dmcommon.h"
 
 #define JSON_FOLDER_PATH "/etc/bbfdm/json"
 

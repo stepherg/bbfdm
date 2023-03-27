@@ -9,7 +9,6 @@
  */
 
 #include "gatewayinfo.h"
-#include "dmbbfcommon.h"
 
 static int get_manufacturer_oui(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {

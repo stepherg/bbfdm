@@ -27,7 +27,6 @@
 #include <mbedtls/sha512.h>
 #endif
 
-#include "dmentry.h"
 #include "dmdiagnostics.h"
 
 #define READ_BUF_SIZE (1024 * 16)
