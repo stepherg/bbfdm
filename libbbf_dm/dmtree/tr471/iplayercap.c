@@ -1066,7 +1066,7 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 					ip_proto, content, test_type, DM_STRLEN(ipdv) > 0 ? (ipdv_en ? "1" : "0") : "\0",
 					dscp, start_rate, mode_test, sub_interval, feed_interval, seq_err,
 					DM_STRLEN(dup_ignore) > 0 ? (dup_ignore_en ? "1" : "0") : "\0", low_thresh, up_thresh,
-					speed_delta, rate_adj, slow_adj, num_interval, (bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto");
+					speed_delta, rate_adj, slow_adj, num_interval, (ctx->dm_type == BBFDM_USP) ? "usp" : "both_proto");
 
 	snprintf(cmd, sizeof(cmd), "sh %s %s", IPLAYER_CAP_DIAGNOSTIC_PATH, input);
 

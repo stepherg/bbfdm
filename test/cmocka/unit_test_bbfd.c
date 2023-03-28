@@ -3,9 +3,9 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
-#include <libubus.h>
 #include <libbbf_api/dmuci.h>
-#include <libbbf_api/dmentry.h>
+#include <libbbf_api/dmapi.h>
+#include <libbbf_api/entry.h>
 #include <libbbf_dm/device.h>
 #include <libbbf_dm/vendor.h>
 
@@ -21,37 +21,14 @@ static DM_MAP_VENDOR_EXCLUDE *TR181_VENDOR_EXTENSION_EXCLUDE = tVendorExtensionE
 #define LIBBBF_TEST_PATH "../bbf_test/libbbf_test.so"
 #define LIBBBF_TEST_BBFDM_PATH "/usr/lib/bbfdm/libbbf_test.so"
 
-static struct ubus_context *ubus_ctx = NULL;
-
-static int group_setup(void **state)
-{
-	ubus_ctx = ubus_connect(NULL);
-	if (ubus_ctx == NULL)
-		return -1;
-
-	dm_config_ubus(ubus_ctx);
-	return 0;
-}
-
 static int setup(void **state)
 {
 	struct dmctx *ctx = calloc(1, sizeof(struct dmctx));
 	if (!ctx)
 		return -1;
 
-	dm_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_NUMBER);
-	*state = ctx;
+	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
-	return 0;
-}
-
-static int setup_alias(void **state)
-{
-	struct dmctx *ctx = calloc(1, sizeof(struct dmctx));
-	if (!ctx)
-		return -1;
-
-	dm_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_ALIAS);
 	*state = ctx;
 
 	return 0;
@@ -61,8 +38,8 @@ static int teardown_commit(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
 
-	dm_entry_restart_services();
-	dm_ctx_clean(ctx);
+	bbf_entry_restart_services(NULL, true);
+	bbf_ctx_clean(ctx);
 	free(ctx);
 
 	return 0;
@@ -72,8 +49,8 @@ static int teardown_revert(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
 
-	dm_entry_revert_changes();
-	dm_ctx_clean(ctx);
+	bbf_entry_revert_changes(NULL);
+	bbf_ctx_clean(ctx);
 	free(ctx);
 
 	return 0;
@@ -81,12 +58,7 @@ static int teardown_revert(void **state)
 
 static int group_teardown(void **state)
 {
-	bbf_dm_cleanup(TR181_ROOT_TREE);
-	if (ubus_ctx != NULL) {
-		ubus_free(ubus_ctx);
-		ubus_ctx = NULL;
-	}
-
+	bbf_global_clean(TR181_ROOT_TREE);
 	return 0;
 }
 
@@ -96,7 +68,9 @@ static void test_api_bbfdm_get_value_object(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.", NULL, NULL);
+	ctx->in_param = "Device.";
+
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -109,7 +83,9 @@ static void test_api_bbfdm_get_value_parameter(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.Radio.1.Alias", NULL, NULL);
+	ctx->in_param = "Device.WiFi.Radio.1.Alias";
+
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -122,7 +98,9 @@ static void test_api_bbfdm_get_value_empty(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "", NULL, NULL);
+	ctx->in_param = "";
+
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -135,7 +113,9 @@ static void test_api_bbfdm_get_value_wrong_object_path(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.DSLL.", NULL, NULL);
+	ctx->in_param = "Device.DSLL.";
+
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, FAULT_9005);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -148,7 +128,9 @@ static void test_api_bbfdm_get_value_wrong_parameter_path(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.Users.User.1.Enabl", NULL, NULL);
+	ctx->in_param = "Device.Users.User.1.Enabl";
+
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, FAULT_9005);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -161,7 +143,10 @@ static void test_api_bbfdm_get_value_object_alias(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.", NULL, NULL);
+	ctx->in_param = "Device.";
+	ctx->instance_mode = INSTANCE_MODE_ALIAS;
+
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -174,7 +159,10 @@ static void test_api_bbfdm_get_value_parameter_alias(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.Radio.[cpe-1].Alias", NULL, NULL);
+	ctx->in_param = "Device.WiFi.Radio.[cpe-1].Alias";
+	ctx->instance_mode = INSTANCE_MODE_ALIAS;
+
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -187,7 +175,10 @@ static void test_api_bbfdm_get_name_object(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.", "0", NULL);
+	ctx->in_param = "Device.";
+	ctx->nextlevel = false;
+
+	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -200,7 +191,10 @@ static void test_api_bbfdm_get_name_parameter(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.WiFi.Radio.1.Enable", "false", NULL);
+	ctx->in_param = "Device.WiFi.Radio.1.Enable";
+	ctx->nextlevel = false;
+
+	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -213,7 +207,10 @@ static void test_api_bbfdm_get_name_dot(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_NAME, ".", "0", NULL);
+	ctx->in_param = ".";
+	ctx->nextlevel = false;
+
+	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, FAULT_9005);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -226,34 +223,11 @@ static void test_api_bbfdm_get_name_wrong_object_path(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.WiFii.", "0", NULL);
+	ctx->in_param = "Device.WiFii.";
+	ctx->nextlevel = false;
+
+	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, FAULT_9005);
-
-	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
-	assert_true(&first_entry->list == &ctx->list_parameter);
-}
-
-static void test_api_bbfdm_get_name_without_next_level(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *first_entry;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.", NULL, NULL);
-	assert_int_equal(fault, FAULT_9003);
-
-	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
-	assert_true(&first_entry->list == &ctx->list_parameter);
-}
-
-static void test_api_bbfdm_get_name_wrong_next_level(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *first_entry;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.WiFi.", "test", NULL);
-	assert_int_equal(fault, FAULT_9003);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
 	assert_true(&first_entry->list == &ctx->list_parameter);
@@ -265,7 +239,11 @@ static void test_api_bbfdm_get_name_parameter_alias(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_NAME, "Device.WiFi.Radio.[cpe-1].Enable", "false", NULL);
+	ctx->in_param = "Device.WiFi.Radio.[cpe-1].Enable";
+	ctx->instance_mode = INSTANCE_MODE_ALIAS;
+	ctx->nextlevel = false;
+
+	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -275,97 +253,85 @@ static void test_api_bbfdm_get_name_parameter_alias(void **state)
 static void test_api_bbfdm_set_value_object(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct param_fault *first_fault;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.Users.User.", "test", NULL);
-	assert_int_equal(fault, FAULT_9005);
+	ctx->in_param = "Device.Users.User.";
+	ctx->in_value = "test";
 
-	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
-	assert_true(&first_fault->list != &ctx->list_fault_param);
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
+	assert_int_equal(fault, FAULT_9005);
 }
 
 static void test_api_bbfdm_set_value_parameter(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct param_fault *first_fault;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.Users.User.1.Username", "test", NULL);
-	assert_int_equal(fault, 0);
+	ctx->in_param = "Device.Users.User.1.Username";
+	ctx->in_value = "test";
 
-	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
-	assert_true(&first_fault->list == &ctx->list_fault_param);
-
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 }
 
 static void test_api_bbfdm_set_value_empty(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct param_fault *first_fault;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "", "test", NULL);
-	assert_int_equal(fault, FAULT_9005);
+	ctx->in_param = "";
+	ctx->in_value = "test";
 
-	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
-	assert_true(&first_fault->list != &ctx->list_fault_param);
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
+	assert_int_equal(fault, FAULT_9005);
 }
 
 static void test_api_bbfdm_set_value_wrong_parameter_path(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct param_fault *first_fault;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.Users.User.Username", "test", NULL);
-	assert_int_equal(fault, FAULT_9005);
+	ctx->in_param = "Device.Users.User.Username";
+	ctx->in_value = "test";
 
-	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
-	assert_true(&first_fault->list != &ctx->list_fault_param);
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
+	assert_int_equal(fault, FAULT_9005);
 }
 
 static void test_api_bbfdm_set_value_parameter_non_writable(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct param_fault *first_fault;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.WiFi.Radio.1.Status", "Enabled", NULL);
-	assert_int_equal(fault, FAULT_9008);
+	ctx->in_param = "Device.WiFi.Radio.1.Status";
+	ctx->in_value = "Enabled";
 
-	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
-	assert_true(&first_fault->list != &ctx->list_fault_param);
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
+	assert_int_equal(fault, FAULT_9008);
 }
 
 static void test_api_bbfdm_set_value_parameter_wrong_value(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct param_fault *first_fault;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.WiFi.Radio.1.Enable", "truee", NULL);
-	assert_int_equal(fault, FAULT_9007);
+	ctx->in_param = "Device.WiFi.Radio.1.Enable";
+	ctx->in_value = "truee";
 
-	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
-	assert_true(&first_fault->list != &ctx->list_fault_param);
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
+	assert_int_equal(fault, FAULT_9007);
 }
 
 static void test_api_bbfdm_set_value_parameter_alias(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct param_fault *first_fault;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.Users.User.[cpe-1].Username", "test", NULL);
-	assert_int_equal(fault, 0);
+	ctx->in_param = "Device.Users.User.[cpe-1].Username";
+	ctx->in_value = "test";
+	ctx->instance_mode = INSTANCE_MODE_ALIAS;
 
-	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
-	assert_true(&first_fault->list == &ctx->list_fault_param);
-
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 }
 
@@ -374,7 +340,9 @@ static void test_api_bbfdm_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.Users.User.", NULL, NULL);
+	ctx->in_param = "Device.Users.User.";
+
+	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, 0);
 
 	assert_non_null(ctx->addobj_instance);
@@ -386,7 +354,9 @@ static void test_api_bbfdm_add_wrong_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.Users.", NULL, NULL);
+	ctx->in_param = "Device.WiFi.Users.";
+
+	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
 
 	assert_null(ctx->addobj_instance);
@@ -397,7 +367,9 @@ static void test_api_bbfdm_add_object_non_writable(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.Radio.", NULL, NULL);
+	ctx->in_param = "Device.WiFi.Radio.";
+
+	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
 
 	assert_null(ctx->addobj_instance);
@@ -408,7 +380,9 @@ static void test_api_bbfdm_add_object_empty(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "", NULL, NULL);
+	ctx->in_param = "";
+
+	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
 
 	assert_null(ctx->addobj_instance);
@@ -419,7 +393,9 @@ static void test_api_bbfdm_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.1.", NULL, NULL);
+	ctx->in_param = "Device.WiFi.SSID.1.";
+
+	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);
 }
 
@@ -428,7 +404,9 @@ static void test_api_bbfdm_delete_object_all_instances(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Users.User.", NULL, NULL);
+	ctx->in_param = "Device.Users.User.";
+
+	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);
 }
 
@@ -437,7 +415,9 @@ static void test_api_bbfdm_delete_wrong_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID", NULL, NULL);
+	ctx->in_param = "Device.WiFi.SSID";
+
+	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
 }
 
@@ -446,7 +426,9 @@ static void test_api_bbfdm_delete_object_non_writable(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.Hosts.Host.", NULL, NULL);
+	ctx->in_param = "Device.Hosts.Host.";
+
+	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
 }
 
@@ -455,7 +437,9 @@ static void test_api_bbfdm_delete_object_empty(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "", NULL, NULL);
+	ctx->in_param = "";
+
+	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
 }
 
@@ -464,7 +448,9 @@ static void test_api_bbfdm_valid_operate(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.WiFi.AccessPoint.1.Security.Reset()", NULL, NULL);
+	ctx->in_param = "Device.WiFi.AccessPoint.1.Security.Reset()";
+
+	fault = bbf_entry_method(ctx, BBF_OPERATE);
 	assert_int_equal(fault, CMD_SUCCESS);
 }
 
@@ -473,7 +459,9 @@ static void test_api_bbfdm_wrong_operate(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_USP_OPERATE, "Device.IP.Diagnostics.IPing()", NULL, NULL);
+	ctx->in_param = "Device.IP.Diagnostics.IPing()";
+
+	fault = bbf_entry_method(ctx, BBF_OPERATE);
 	assert_int_equal(fault, CMD_NOT_FOUND);
 }
 
@@ -483,7 +471,14 @@ static void test_api_bbfdm_get_list_operate(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_USP_LIST_OPERATE, NULL, NULL, NULL);
+	ctx->in_param = "Device.";
+	ctx->dm_type = BBFDM_USP;
+	ctx->nextlevel = false;
+	ctx->iscommand = true;
+	ctx->isevent = false;
+	ctx->isinfo = false;
+
+	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -496,7 +491,14 @@ static void test_api_bbfdm_get_list_event(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_USP_LIST_EVENT, NULL, NULL, NULL);
+	ctx->in_param = "Device.";
+	ctx->dm_type = BBFDM_USP;
+	ctx->nextlevel = false;
+	ctx->iscommand = false;
+	ctx->isevent = true;
+	ctx->isinfo = false;
+
+	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -509,7 +511,14 @@ static void test_api_bbfdm_get_schema(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_SCHEMA, NULL, NULL, NULL);
+	ctx->in_param = "Device.";
+	ctx->dm_type = BBFDM_USP;
+	ctx->nextlevel = false;
+	ctx->iscommand = true;
+	ctx->isevent = true;
+	ctx->isinfo = true;
+
+	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -522,7 +531,10 @@ static void test_api_bbfdm_get_instances_object(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_INSTANCES, "Device.", "0", NULL);
+	ctx->in_param = "Device.";
+	ctx->nextlevel = false;
+
+	fault = bbf_entry_method(ctx, BBF_GET_INSTANCES);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -535,7 +547,10 @@ static void test_api_bbfdm_get_instances_wrong_object(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_INSTANCES, "Device.WiFii.", "true", NULL);
+	ctx->in_param = "Device.WiFii.";
+	ctx->nextlevel = false;
+
+	fault = bbf_entry_method(ctx, BBF_GET_INSTANCES);
 	assert_int_equal(fault, FAULT_9005);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -548,24 +563,14 @@ static void test_api_bbfdm_get_instances_without_next_level(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_INSTANCES, "Device.WiFi.", NULL, NULL);
+	ctx->in_param = "Device.WiFi.";
+	ctx->nextlevel = false;
+
+	fault = bbf_entry_method(ctx, BBF_GET_INSTANCES);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
 	assert_true(&first_entry->list != &ctx->list_parameter);
-}
-
-static void test_api_bbfdm_get_instances_wrong_next_level(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *first_entry;
-	int fault = 0;
-
-	fault = dm_entry_param_method(ctx, CMD_GET_INSTANCES, "Device.WiFi.", "test", NULL);
-	assert_int_equal(fault, FAULT_9003);
-
-	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
-	assert_true(&first_entry->list == &ctx->list_parameter);
 }
 
 static void test_api_bbfdm_json_get_value(void **state)
@@ -577,30 +582,33 @@ static void test_api_bbfdm_json_get_value(void **state)
 	/*
 	 * Test of JSON Object Path
 	 */
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_Dropbear.", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
-	dm_ctx_clean_sub(ctx);
-	dm_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_NUMBER);
+	bbf_ctx_clean_sub(ctx);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
 	/*
 	 * Test of JSON Parameter Path
 	 */
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.UserInterface.Enable", NULL, NULL);
+	ctx->in_param = "Device.UserInterface.Enable";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
-	dm_ctx_clean_sub(ctx);
-	dm_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_NUMBER);
+	bbf_ctx_clean_sub(ctx);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
 	remove(DROPBEAR_JSON_PATH);
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_Dropbear.", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, FAULT_9005);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -610,27 +618,20 @@ static void test_api_bbfdm_json_get_value(void **state)
 static void test_api_bbfdm_json_set_value(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct param_fault *first_fault;
 	int fault = 0;
 
 	dmcmd("/bin/cp", 2, DROPBEAR_FILE_PATH, DROPBEAR_JSON_PATH);
 
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.UserInterface.Enable", "true", NULL);
+	ctx->in_param = "Device.UserInterface.Enable";
+	ctx->in_value = "true";
+
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
-	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
-	assert_true(&first_fault->list == &ctx->list_fault_param);
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.Port";
+	ctx->in_value = "9856";
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
-	assert_int_equal(fault, 0);
-
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_Dropbear.1.Port", "9856", NULL);
-	assert_int_equal(fault, 0);
-
-	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
-	assert_true(&first_fault->list == &ctx->list_fault_param);
-
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 }
 
@@ -639,7 +640,9 @@ static void test_api_bbfdm_json_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.X_IOPSYS_EU_Dropbear.", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
+
+	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, 0);
 
 	assert_non_null(ctx->addobj_instance);
@@ -651,10 +654,14 @@ static void test_api_bbfdm_json_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.X_IOPSYS_EU_Dropbear.1.", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.";
+
+	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.X_IOPSYS_EU_Dropbear.", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
+
+	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);
 }
 
@@ -664,27 +671,33 @@ static void test_api_bbfdm_library_get_value(void **state)
 	struct dm_parameter *first_entry;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_Syslog.", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_Syslog.";
+
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
-	dm_ctx_clean_sub(ctx);
-	dm_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_NUMBER);
+	bbf_ctx_clean_sub(ctx);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.WiFi.SSID.1.Enable", NULL, NULL);
+	ctx->in_param = "Device.WiFi.SSID.1.Enable";
+
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
-	dm_ctx_clean_sub(ctx);
-	dm_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, INSTANCE_MODE_NUMBER);
+	bbf_ctx_clean_sub(ctx);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
 	remove(LIBBBF_TEST_BBFDM_PATH);
 
-	fault = dm_entry_param_method(ctx, CMD_GET_VALUE, "Device.X_IOPSYS_EU_Syslog.", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_Syslog.";
+
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, FAULT_9005);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -694,27 +707,20 @@ static void test_api_bbfdm_library_get_value(void **state)
 static void test_api_bbfdm_library_set_value(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct param_fault *first_fault;
 	int fault = 0;
 
 	dmcmd("/bin/cp", 2, LIBBBF_TEST_PATH, LIBBBF_TEST_BBFDM_PATH);
 
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.WiFi.SSID.1.Enable", "true", NULL);
+	ctx->in_param = "Device.WiFi.SSID.1.Enable";
+	ctx->in_value = "true";
+
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
-	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
-	assert_true(&first_fault->list == &ctx->list_fault_param);
+	ctx->in_param = "Device.X_IOPSYS_EU_Syslog.ServerPort";
+	ctx->in_value = "9856";
 
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
-	assert_int_equal(fault, 0);
-
-	fault = dm_entry_param_method(ctx, CMD_SET_VALUE, "Device.X_IOPSYS_EU_Syslog.ServerPort", "9856", NULL);
-	assert_int_equal(fault, 0);
-
-	first_fault = list_first_entry(&ctx->list_fault_param, struct param_fault, list);
-	assert_true(&first_fault->list == &ctx->list_fault_param);
-
-	fault = dm_entry_apply(ctx, CMD_SET_VALUE);
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 }
 
@@ -723,7 +729,9 @@ static void test_api_bbfdm_library_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_ADD_OBJECT, "Device.WiFi.SSID.", NULL, NULL);
+	ctx->in_param = "Device.WiFi.SSID.";
+
+	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, 0);
 
 	assert_non_null(ctx->addobj_instance);
@@ -735,10 +743,14 @@ static void test_api_bbfdm_library_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.1.", NULL, NULL);
+	ctx->in_param = "Device.WiFi.SSID.1.";
+
+	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);
 
-	fault = dm_entry_param_method(ctx, CMD_DEL_OBJECT, "Device.WiFi.SSID.", NULL, NULL);
+	ctx->in_param = "Device.WiFi.SSID.";
+
+	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);
 }
 
@@ -752,17 +764,15 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_empty, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_wrong_object_path, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_wrong_parameter_path, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_object_alias, setup_alias, teardown_commit),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_parameter_alias, setup_alias, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_object_alias, setup, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_value_parameter_alias, setup, teardown_commit),
 
 		// Get Name method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_object, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_dot, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_wrong_object_path, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_without_next_level, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_wrong_next_level, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_parameter_alias, setup_alias, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_name_parameter_alias, setup, teardown_commit),
 
 		// Set Value method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_object, setup, teardown_revert),
@@ -771,7 +781,7 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_wrong_parameter_path, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_parameter_non_writable, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_parameter_wrong_value, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_parameter_alias, setup_alias, teardown_commit),
+		cmocka_unit_test_setup_teardown(test_api_bbfdm_set_value_parameter_alias, setup, teardown_commit),
 
 		// Add Object method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_object, setup, teardown_commit),
@@ -790,7 +800,6 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_instances_object, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_instances_wrong_object, setup, teardown_revert),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_instances_without_next_level, setup, teardown_revert),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_instances_wrong_next_level, setup, teardown_revert),
 
 		// Operate method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_operate, setup, teardown_commit),
@@ -830,5 +839,5 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_library_delete_object, setup, teardown_commit),
 	};
 
-	return cmocka_run_group_tests(tests, group_setup, group_teardown);
+	return cmocka_run_group_tests(tests, NULL, group_teardown);
 }
