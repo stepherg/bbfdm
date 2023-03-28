@@ -113,7 +113,7 @@ Part of BBF-tools, refer Readme for more examples
 
 More examples:
 ```bash
-$ ./generate_dm_excel.py -d tr181 -v iopsys -v openwrt -o datamodel.xls
+$ ./generate_dm_excel.py -d tr181 -v iopsys -o datamodel.xls
 $ ./generate_dm_excel.py -d tr181 -d tr104 -v iopsys -o datamodel.xls
 $ ./generate_dm_excel.py -d tr181 -v iopsys -p X_IOPSYS_EU_ -r git^https://dev.iopsys.eu/iopsys/xmppc.git^devel -o datamodel_iopsys.xls
 ```
@@ -165,7 +165,6 @@ The input json file should be defined as follow:
 	"software_version": "1.2.3.4",
 	"vendor_list": [
 		"iopsys",
-		"openwrt",
 		"test"
 	],
 	"dm_json_files": [
