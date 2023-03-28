@@ -334,7 +334,7 @@ def printheaderObjCommon(objname):
 def cprintheaderOBJS(objname):
     fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     print("DMOBJ %s[] = {" % ("t" + getname(objname) + "Obj"), file=fp)
-    print("/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/", file=fp)
+    print("/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys */", file=fp)
     fp.close()
 
 
@@ -853,7 +853,7 @@ def cprintEvent(geteventargs, param_args, struct_name):
 def cprintheaderPARAMS(objname):
     fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     print("DMLEAF %s[] = {" % ("t" + getname(objname) + "Params"), file=fp)
-    print("/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/", file=fp)
+    print("/* PARAM, permission, type, getvalue, setvalue, bbfdm_type */", file=fp)
     fp.close()
 
 
@@ -871,7 +871,6 @@ def printPARAMline(parentname, dmparam, value):
     typeparam = bbf.get_option_value(value, "type")
     bbfdm = getprotocolsparam(value, "protocols")
     accessparam = bbf.get_option_value(value, "write")
-    version = bbf.get_option_value(value, "version")
 
     if accessparam:
         access = "&DMWRITE"
@@ -889,8 +888,8 @@ def printPARAMline(parentname, dmparam, value):
                       instance, typeparam, parentname, dmparam, value)
 
     fp = open('./.objparamarray.c', 'a', encoding='utf-8')
-    print("{\"%s\", %s, %s, %s, %s, %s, \"%s\"}," %
-          (dmparam, access, ptype, getvalue, setvalue, bbfdm, version), file=fp)
+    print("{\"%s\", %s, %s, %s, %s, %s}," %
+          (dmparam, access, ptype, getvalue, setvalue, bbfdm), file=fp)
     fp.close()
 
 
@@ -902,7 +901,6 @@ def printCOMMANDline( parentname, dmparam, value ):
     asyncparam = bbf.get_option_value(value, "async")
     in_args = bbf.get_option_value(value, "input")
     out_args = bbf.get_option_value(value, "output")
-    version = bbf.get_option_value(value, "version")
 
     if asyncparam:
         c_type = "&DMASYNC"
@@ -917,7 +915,7 @@ def printCOMMANDline( parentname, dmparam, value ):
     cprintOperateCommands(getoperateargs, operate, in_args, out_args, commonname.replace("()", "").lower()+"_args")
 
     fp = open('./.objparamarray.c', 'a', encoding='utf-8')
-    print("{\"%s\", %s, %s, %s, %s, %s, \"%s\"}," % (dmparam, c_type, ptype, getoperateargs, operate, bbfdm, version), file=fp)
+    print("{\"%s\", %s, %s, %s, %s, %s}," % (dmparam, c_type, ptype, getoperateargs, operate, bbfdm), file=fp)
     fp.close()
 
 
@@ -926,8 +924,7 @@ def printEVENTline( parentname, dmparam, value ):
     ptype = bbf.get_param_type(value)
     bbfdm = getprotocolsparam(value, "protocols")
     hasparam = bbf.obj_has_param(value)
-    version = bbf.get_option_value(value, "version")
-        
+
     if hasparam:
         geteventargs = "get_event_args_" + commonname.replace("!", "")
         cprintEvent(geteventargs, value, commonname.replace("!", "").lower()+"_args")
@@ -935,7 +932,7 @@ def printEVENTline( parentname, dmparam, value ):
         geteventargs = "NULL"
 
     fp = open('./.objparamarray.c', 'a', encoding='utf-8')
-    print("{\"%s\", &DMREAD, %s, %s, NULL, %s, \"%s\"}," % (dmparam, ptype, geteventargs, bbfdm, version), file=fp)
+    print("{\"%s\", &DMREAD, %s, %s, NULL, %s}," % (dmparam, ptype, geteventargs, bbfdm), file=fp)
     fp.close()
 
 
@@ -955,7 +952,6 @@ def printOBJline(dmobject, value):
     mappingobj = bbf.get_option_value(value, "mapping")
     bbfdm = getprotocolsparam(value, "protocols")
     uniquekeys = getuniquekeys(value, "uniqueKeys")
-    version = bbf.get_option_value(value, "version")
 
     if accessobj:
         access = "&DMWRITE"
@@ -987,11 +983,11 @@ def printOBJline(dmobject, value):
 
     fp = open('./.objparamarray.c', 'a', encoding='utf-8')
     if uniquekeys:
-        print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, %s, %s, NULL, %s, %s, \"%s\"}," % (getlastname(
-            dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm, uniquekeys, version), file=fp)
+        print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, %s, %s, NULL, %s, %s}," % (getlastname(
+            dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm, uniquekeys), file=fp)
     else:
-        print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, %s, %s, NULL, %s, NULL, \"%s\"}," % (getlastname(
-            dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm, version), file=fp)
+        print("{\"%s\", %s, %s, %s, NULL, %s, NULL, NULL, %s, %s, NULL, %s, NULL}," % (getlastname(
+            dmobject), access, faddobj, fdelobj, fbrowse, objchildarray, paramarray, bbfdm), file=fp)
     fp.close()
 
 

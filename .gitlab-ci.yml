@@ -17,7 +17,6 @@ stages:
     - unit_test
     - memory_test
     - functional_test
-    - uspd
     - deploy
 
 run_unit_test:
@@ -111,18 +110,3 @@ doxygen:
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
 
-run_uspd:
-  stage: uspd
-  inherit:
-    variables: false
-  variables:
-    UPSTREAM_BBF_SHA: $CI_COMMIT_SHA
-    BBF_TAR_URL: $BBF_TAR_URL
-  allow_failure: false
-  trigger:
-    project: iopsys/uspd
-    branch: bbf_pipeline
-    strategy: depend
-  needs:
-    job: run_memory_test
-    artifacts: true

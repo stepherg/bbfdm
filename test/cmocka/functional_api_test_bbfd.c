@@ -3,31 +3,19 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
-#include <libubus.h>
 #include <libbbf_api/dmcommon.h>
 #include <libbbf_api/dmmem.h>
 
-static struct ubus_context *ubus_ctx = NULL;
 static int setup_teardown(void **state)
 {
-	ubus_ctx = ubus_connect(NULL);
-	if (ubus_ctx == NULL)
-		return -1;
-
-	dmubus_configure(ubus_ctx);
-	bbf_uci_init();
+	dm_uci_init();
 	return 0;
 }
 
 static int group_teardown(void **state)
 {
-	bbf_uci_exit();
+	dm_uci_exit();
 	dmubus_free();
-	if (ubus_ctx != NULL) {
-		ubus_free(ubus_ctx);
-		ubus_ctx = NULL;
-	}
-
 	dmcleanmem();
 	return 0;
 }

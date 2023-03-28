@@ -22,104 +22,64 @@
 
 #include "set.h"
 #include "get_helper.h"
+
 #include <libubus.h>
-#include <libbbfdm/dmbbfcommon.h>
 
-
-static const struct blobmsg_policy dm_setm_value_policy[] = {
-	[DM_SET_V_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
-	[DM_SET_V_VALUE] = { .name = "value", .type = BLOBMSG_TYPE_STRING },
-};
-
-int usp_set_value(usp_data_t *data)
+int usp_set_value(struct dmctx *bbf_ctx, usp_data_t *data, struct blob_buf *bb)
 {
-	struct blob_buf bb;
-	struct ubus_context *ctx;
-	struct ubus_request_data *req;
-	void *array = NULL;
 	struct pvNode *pv = NULL;
-	struct dmctx bbf_ctx;
+	void *array = NULL;
 	int fault = USP_ERR_OK;
-	struct param_fault *p = NULL;
-	void *table;
-	bool fault_occured = false;
 
-	memset(&bbf_ctx, 0, sizeof(struct dmctx));
-
-	set_bbfdatamodel_type(data->proto);
-	bbf_init(&bbf_ctx, data->instance);
-
-	ctx = data->ctx;
-	req = data->req;
-
-	memset(&bb, 0, sizeof(struct blob_buf));
-	blob_buf_init(&bb, 0);
+	array = blobmsg_open_array(bb, "parameters");
 
 	list_for_each_entry(pv, data->pv_list, list) {
-		fault = usp_dm_set(&bbf_ctx, pv->param, pv->val);
-		if (fault == 0)
-			fault = usp_dm_exec_apply(&bbf_ctx, CMD_SET_VALUE);
+		bbf_ctx->in_param = pv->param;
+		bbf_ctx->in_value = pv->val;
 
-		if (fault) {
-			if (fault_occured == false) {
-				fault_occured = true;
-				if (!array)
-					array = blobmsg_open_array(&bb, "parameters");
-			}
+		fault = usp_dm_exec(bbf_ctx, BBF_SET_VALUE);
 
-			while (bbf_ctx.list_fault_param.next != &bbf_ctx.list_fault_param) {
-				p = list_entry(bbf_ctx.list_fault_param.next, struct param_fault, list);
-				table = blobmsg_open_table(&bb, NULL);
-				bb_add_string(&bb, "path", p->name);
-				blobmsg_add_u8(&bb, "status", false);
-				blobmsg_add_u32(&bb, "fault", (uint32_t)p->fault);
-				blobmsg_close_table(&bb, table);
-				del_list_fault_param(p);
-			}
-		}
+		void *table = blobmsg_open_table(bb, NULL);
+		bb_add_string(bb, "path", bbf_ctx->in_param);
+		blobmsg_add_u8(bb, "status", fault ? false : true);
+		if (fault) blobmsg_add_u32(bb, "fault", fault);
+		blobmsg_close_table(bb, table);
 	}
 
-	if (fault_occured == false)
-		blobmsg_add_u8(&bb, "status", true);
-
-	if (array)
-		blobmsg_close_array(&bb, array);
-
-	ubus_send_reply(ctx, req, bb.head);
-
-	// free
-	blob_buf_free(&bb);
-	bbf_cleanup(&bbf_ctx);
+	blobmsg_close_array(bb, array);
 
 	return fault;
 }
 
-int fill_pvlist_from_table(char *bpath, struct blob_attr *blob_value, struct list_head *pv_list, int instance)
+int fill_pvlist_set(struct dmctx *bbf_ctx, struct blob_attr *blob_table, struct list_head *pv_list)
 {
 	struct blob_attr *attr;
+	struct blobmsg_hdr *hdr;
 	char path[MAX_DM_PATH], value[MAX_DM_VALUE];
-	struct dmctx bbf_ctx;
-	int fault = USP_ERR_OK;
-	struct pathNode *p;
-	size_t tlen;
-	LIST_HEAD(resolved_paths);
 
-	if (!blob_value)
-		return 0;
+	size_t plen = DM_STRLEN(bbf_ctx->in_param);
+	if (plen == 0)
+		return USP_FAULT_INVALID_PATH;
 
-	tlen = (size_t)blobmsg_data_len(blob_value);
-	memset(&bbf_ctx, 0, sizeof(struct dmctx));
-	bbf_init(&bbf_ctx, instance);
+	if (!bbf_ctx->in_value)
+		goto blob__table;
 
-	fault = get_resolved_paths(&bbf_ctx, bpath, &resolved_paths);
-	if (fault) {
-		bbf_cleanup(&bbf_ctx);
-		free_path_list(&resolved_paths);
-		return fault;
-	}
+	if (bbf_ctx->in_param[plen - 1] == '.')
+		return USP_FAULT_INVALID_PATH;
 
-	__blob_for_each_attr(attr, blobmsg_data(blob_value), tlen) {
-		struct blobmsg_hdr *hdr = blob_data(attr);
+	add_pv_list(bbf_ctx->in_param, bbf_ctx->in_value, NULL, pv_list);
+
+	return USP_ERR_OK;
+
+blob__table:
+
+	if (!blob_table)
+		return USP_ERR_OK;
+
+	size_t tlen = (size_t)blobmsg_data_len(blob_table);
+
+	__blob_for_each_attr(attr, blobmsg_data(blob_table), tlen) {
+		hdr = blob_data(attr);
 
 		switch (blob_id(attr)) {
 		case BLOBMSG_TYPE_STRING:
@@ -139,87 +99,12 @@ int fill_pvlist_from_table(char *bpath, struct blob_attr *blob_value, struct lis
 			break;
 		default:
 			INFO("Unhandled set request type|%x|", blob_id(attr));
-			bbf_cleanup(&bbf_ctx);
-			free_path_list(&resolved_paths);
 			return USP_FAULT_INVALID_ARGUMENT;
 		}
 
-		list_for_each_entry(p, &resolved_paths, list) {
-			snprintf(path, MAX_DM_PATH, "%s%s", p->path, (char *)hdr->name);
-			add_pv_node(path, value, NULL, pv_list);
-		}
+		snprintf(path, MAX_DM_PATH, "%s%s", bbf_ctx->in_param, (char *)hdr->name);
+		add_pv_list(path, value, NULL, pv_list);
 	}
 
-	bbf_cleanup(&bbf_ctx);
-	free_path_list(&resolved_paths);
-
-	return fault;
-}
-
-int fill_pvlist_from_tuple(struct blob_attr *blob, struct list_head *pv_list)
-{
-	size_t rem;
-	struct blob_attr *cur;
-
-	blobmsg_for_each_attr(cur, blob, rem) {
-		struct blob_attr *tb[__DM_SET_V_MAX];
-		char *path, *value, *key;
-
-		key = NULL;
-		blobmsg_parse(dm_setm_value_policy, __DM_SET_V_MAX, tb,
-			      blobmsg_data(cur), blobmsg_len(cur));
-
-		// ignore the tuples which does not have path and values
-		if (!tb[DM_SET_V_PATH] || !tb[DM_SET_V_VALUE])
-			continue;
-
-		path = blobmsg_get_string(tb[DM_SET_V_PATH]);
-		value = blobmsg_get_string(tb[DM_SET_V_VALUE]);
-
-		add_pv_node(path, value, key, pv_list);
-	}
-
-	return 0;
-}
-
-int fill_pvlist_from_path(char *path, struct blob_attr *val_blob, struct list_head *pv_list, int instance)
-{
-	int fault = USP_ERR_OK;
-	size_t plen;
-	char *val = NULL;
-	struct dmctx bbf_ctx;
-
-	LIST_HEAD(resolved_paths);
-
-	if (!val_blob)
-		return 0;
-
-	memset(&bbf_ctx, 0, sizeof(struct dmctx));
-	bbf_init(&bbf_ctx, instance);
-
-	plen = DM_STRLEN(path);
-	if (plen == 0)
-		fault = USP_FAULT_INVALID_PATH;
-
-	if (fault == USP_ERR_OK) {
-		if (path[plen - 1] == '.')
-			fault = USP_FAULT_INVALID_PATH;
-	}
-
-	if (fault == USP_ERR_OK)
-		fault = get_resolved_paths(&bbf_ctx, path, &resolved_paths);
-
-	if (fault == USP_ERR_OK) {
-		struct pathNode *p;
-
-		list_for_each_entry(p, &resolved_paths, list) {
-			val = blobmsg_get_string(val_blob);
-			add_pv_node(p->path, val, NULL, pv_list);
-		}
-	}
-
-	free_path_list(&resolved_paths);
-	bbf_cleanup(&bbf_ctx);
-
-	return fault;
+	return USP_ERR_OK;
 }
