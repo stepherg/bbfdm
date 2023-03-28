@@ -23,7 +23,6 @@
 #include "common.h"
 #include "events.h"
 #include "get_helper.h"
-#include <libbbfdm/dmentry.h>
 #include <libubus.h>
 
 static struct event_map_list ev_map_list[] = {
@@ -106,23 +105,23 @@ static void serialize_blob_msg(struct blob_attr *msg, char *node, struct list_he
 		switch (blobmsg_type(attr)) {
 			case BLOBMSG_TYPE_STRING:
 				snprintf(value, MAX_DM_VALUE, "%s", blobmsg_get_string(attr));
-				add_pv_node(path, value, NULL, pv_list);
+				add_pv_list(path, value, NULL, pv_list);
 				break;
 			case BLOBMSG_TYPE_INT8:
 				snprintf(value, MAX_DM_VALUE, "%d", blobmsg_get_u8(attr));
-				add_pv_node(path, value, NULL, pv_list);
+				add_pv_list(path, value, NULL, pv_list);
 				break;
 			case BLOBMSG_TYPE_INT16:
 				snprintf(value, MAX_DM_VALUE, "%d", blobmsg_get_u16(attr));
-				add_pv_node(path, value, NULL, pv_list);
+				add_pv_list(path, value, NULL, pv_list);
 				break;
 			case BLOBMSG_TYPE_INT32:
 				snprintf(value, MAX_DM_VALUE, "%u", blobmsg_get_u32(attr));
-				add_pv_node(path, value, NULL, pv_list);
+				add_pv_list(path, value, NULL, pv_list);
 				break;
 			case BLOBMSG_TYPE_INT64:
 				snprintf(value, MAX_DM_VALUE, "%"PRIu64"", blobmsg_get_u64(attr));
-				add_pv_node(path, value, NULL, pv_list);
+				add_pv_list(path, value, NULL, pv_list);
 				break;
 			case BLOBMSG_TYPE_TABLE:
 				serialize_blob_msg(attr, path, pv_list);
@@ -204,16 +203,6 @@ static void add_ubus_event_handler(struct ubus_event_handler *ev, struct list_he
 	node->ev_handler = ev;
 	INIT_LIST_HEAD(&node->list);
 	list_add_tail(&node->list, ev_list);
-}
-
-void list_event_schema(struct blob_buf *bb)
-{
-	bbf_dm_get_supported_dm(bb, ROOT_NODE, false, EVENT_ONLY);
-}
-
-bool is_registered_event(char *name)
-{
-	return bbf_dm_event_registered(name);
 }
 
 void free_ubus_event_handler(struct ubus_context *ctx, struct list_head *ev_list)

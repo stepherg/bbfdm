@@ -27,18 +27,12 @@
 #include "dmmem.h"
 #include "dmapi.h"
 
-#define DEFAULT_DMVERSION "2.16"
-
 int get_number_of_entries(struct dmctx *ctx, void *data, char *instance, int (*browseinstobj)(struct dmctx *ctx, struct dmnode *node, void *data, char *instance));
 char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, char *inst_opt, char *alias_opt);
 char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, int inst_nbr);
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *additional_data);
 void free_all_list_parameter(struct dmctx *ctx);
-void free_all_set_list_tmp(struct dmctx *ctx);
-void add_list_fault_param(struct dmctx *ctx, char *param, int fault);
-void bbf_api_del_list_fault_param(struct param_fault *param_fault);
-void free_all_list_fault_param(struct dmctx *ctx);
 int string_to_bool(char *v, bool *b);
 void dmentry_instance_lookup_inparam(struct dmctx *ctx);
 int dm_entry_get_value(struct dmctx *dmctx);
@@ -65,12 +59,6 @@ void free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryob
 
 char *update_instance_alias(int action, char **last_inst, char **max_inst, void *argv[]);
 char *update_instance(char *max_inst, int argc, ...);
-__attribute__ ((deprecated)) char *update_instance_without_section(int action, char **last_inst, char **max_inst, void *argv[]);
-__attribute__ ((deprecated)) char *get_last_instance(char *package, char *section, char *opt_inst);
-__attribute__ ((deprecated)) char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst);
-__attribute__ ((deprecated)) char *get_last_instance_lev2_bbfdm_dmmap_opt(char* dmmap_package, char *section,  char *opt_inst, char *opt_check, char *value_check);
-__attribute__ ((deprecated)) char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check);
-__attribute__ ((deprecated)) char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...);
 
 static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)
 {

@@ -5904,7 +5904,7 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 				signal_strength[1] = dmjson_get_value(array_obj, 1, "rssi");
 				noise[1] = dmjson_get_value(array_obj, 1, "noise");
 
-				if (bbfdatamodel_type != BBFDM_USP) {
+				if (ctx->dm_type != BBFDM_USP) {
 					struct uci_section *dmmap_s = NULL;
 					dmuci_add_section_bbfdm("dmmap_wifi_neighboring", "result", &dmmap_s);
 					dmuci_set_value_by_section(dmmap_s, "ssid", ssid[1]);
@@ -5932,7 +5932,7 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 			}
 		}
 
-		if (bbfdatamodel_type != BBFDM_USP) {
+		if (ctx->dm_type != BBFDM_USP) {
 			dmuci_set_value_bbfdm("dmmap_wifi_neighboring", "@diagnostic_status[0]", "DiagnosticsState", "Complete");
 			dmuci_commit_package_bbfdm("dmmap_wifi_neighboring");
 		}

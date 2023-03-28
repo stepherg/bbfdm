@@ -31,12 +31,6 @@ extern struct dm_permession_s DMSYNC;
 extern struct dm_permession_s DMASYNC;
 
 extern char *DMT_TYPE[];
-extern int bbfdatamodel_type;
-
-#ifdef UNDEF
-#undef UNDEF
-#endif
-#define UNDEF -1
 
 #ifndef BBF_MAX_OBJECT_INSTANCES
 #define BBF_MAX_OBJECT_INSTANCES (255)
@@ -127,19 +121,19 @@ struct dm_notif_s {
 };
 
 typedef struct dm_leaf_s {
-	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version(7)*/
+	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(6)*/
 	char *parameter;
 	struct dm_permession_s *permission;
 	int type;
 	int (*getvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 	int (*setvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
 	int bbfdm_type;
-	char version[10];
+	char version[10]; //To be removed
 	char *default_value;
 } DMLEAF;
 
 typedef struct dm_obj_s {
-	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version(14)*/
+	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys (13)*/
 	char *obj;
 	struct dm_permession_s *permission;
 	int (*addobj)(char *refparam, struct dmctx *ctx, void *data, char **instance);
@@ -153,20 +147,8 @@ typedef struct dm_obj_s {
 	int (*get_linker)(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker);
 	int bbfdm_type;
 	const char **unique_keys;
-	char version[10];
+	char version[10]; //To be removed
 } DMOBJ;
-
-struct set_tmp {
-	struct list_head list;
-	char *name;
-	char *value;
-};
-
-struct param_fault {
-	struct list_head list;
-	char *name;
-	int fault;
-};
 
 struct dm_parameter {
 	struct list_head list;
@@ -175,6 +157,12 @@ struct dm_parameter {
 	char *type;
 	char *additional_data;
 };
+
+typedef struct dm_map_obj {
+	char *path;
+	struct dm_obj_s *root_obj;
+	struct dm_leaf_s *root_leaf;
+} DM_MAP_OBJ;
 
 typedef struct dm_map_vendor {
 	char *vendor;
@@ -186,8 +174,7 @@ typedef struct dm_map_vendor_exclude {
 	char **vendor_obj;
 } DM_MAP_VENDOR_EXCLUDE;
 
-struct dmctx
-{
+struct dmctx {
 	bool stop;
 	bool match;
 	int (*method_param)(DMPARAM_ARGS);
@@ -195,9 +182,6 @@ struct dmctx
 	int (*checkobj)(DMOBJECT_ARGS);
 	int (*checkleaf)(DMOBJECT_ARGS);
 	struct list_head list_parameter;
-	struct list_head set_list_tmp;
-	struct list_head list_fault_param;
-	struct list_head list_json_parameter;
 	DMOBJ *dm_entryobj;
 	DM_MAP_VENDOR *dm_vendor_extension[2];
 	DM_MAP_VENDOR_EXCLUDE *dm_vendor_extension_exclude;
@@ -210,10 +194,10 @@ struct dmctx
 	char *addobj_instance;
 	char *linker;
 	char *linker_param;
-	char *dm_version;
 	unsigned int alias_register;
 	unsigned int nbrof_instance;
 	unsigned int instance_mode;
+	unsigned int dm_type;
 	unsigned char inparam_isparam;
 	unsigned char findparam;
 	char *inst_buf[16];
@@ -237,24 +221,12 @@ typedef struct dmnode {
 	int num_of_entries;
 } DMNODE;
 
-typedef struct dm_map_obj {
-	char *path;
-	struct dm_obj_s *root_obj;
-	struct dm_leaf_s *root_leaf;
-} DM_MAP_OBJ;
-
 enum operate_ret_status {
 	CMD_SUCCESS,
 	CMD_INVALID_ARGUMENTS,
 	CMD_FAIL,
 	CMD_NOT_FOUND,
 	__STATUS_MAX,
-};
-
-enum deprecated_operate_ret_status {
-	SUCCESS,
-	UBUS_INVALID_ARGUMENTS,
-	FAIL,
 };
 
 typedef struct {
@@ -265,17 +237,6 @@ typedef struct {
 typedef struct {
 	const char **param;
 } event_args;
-
-typedef enum operate_ret_status opr_ret_t;
-
-typedef opr_ret_t (*operation) (struct dmctx *dmctx, char *p, json_object *input);
-
-typedef struct dm_map_operate {
-	char *path;
-	operation operate;
-	char *type; // sync or async
-	operation_args args;
-} DM_MAP_OPERATE __attribute__ ((deprecated));
 
 enum set_value_action {
 	VALUECHECK,
@@ -305,6 +266,17 @@ enum {
 	CMD_GET_SCHEMA,
 	CMD_GET_INSTANCES,
 	CMD_EXTERNAL_COMMAND
+};
+
+enum {
+	BBF_GET_VALUE,
+	BBF_GET_SUPPORTED_DM,
+	BBF_GET_INSTANCES,
+	BBF_GET_NAME,
+	BBF_SET_VALUE,
+	BBF_ADD_OBJECT,
+	BBF_DEL_OBJECT,
+	BBF_OPERATE,
 };
 
 enum usp_fault_code_enum {
@@ -385,14 +357,32 @@ enum fault_code_enum {
 	__FAULT_MAX
 };
 
-enum {
-	INSTANCE_UPDATE_NUMBER,
-	INSTANCE_UPDATE_ALIAS
-};
-
 enum instance_mode {
 	INSTANCE_MODE_NUMBER,
 	INSTANCE_MODE_ALIAS
+};
+
+enum amd_version_enum {
+	AMD_1 = 1,
+	AMD_2,
+	AMD_3,
+	AMD_4,
+	AMD_5,
+};
+
+enum bbf_end_session_enum {
+	BBF_END_SESSION_REBOOT = 1,
+	BBF_END_SESSION_EXTERNAL_ACTION = 1<<1,
+	BBF_END_SESSION_RELOAD = 1<<2,
+	BBF_END_SESSION_FACTORY_RESET = 1<<3,
+	BBF_END_SESSION_IPPING_DIAGNOSTIC = 1<<4,
+	BBF_END_SESSION_DOWNLOAD_DIAGNOSTIC = 1<<5,
+	BBF_END_SESSION_UPLOAD_DIAGNOSTIC = 1<<6,
+	BBF_END_SESSION_X_FACTORY_RESET_SOFT = 1<<7,
+	BBF_END_SESSION_NSLOOKUP_DIAGNOSTIC = 1<<8,
+	BBF_END_SESSION_TRACEROUTE_DIAGNOSTIC = 1<<9,
+	BBF_END_SESSION_UDPECHO_DIAGNOSTIC = 1<<10,
+	BBF_END_SESSION_SERVERSELECTION_DIAGNOSTIC = 1<<11
 };
 
 enum dm_browse_enum {
@@ -413,14 +403,6 @@ enum dmt_type_enum {
 	DMT_BASE64,
 	DMT_COMMAND,
 	DMT_EVENT,
-};
-
-enum amd_version_enum {
-	AMD_1 = 1,
-	AMD_2,
-	AMD_3,
-	AMD_4,
-	AMD_5,
 };
 
 enum bbfdm_type_enum {
