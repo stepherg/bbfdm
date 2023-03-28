@@ -1,0 +1,5 @@
+
+config bbfd 'bbf'
+        option loglevel '1'
+        option refresh_time '10'
+        option transaction_timeout '10'

@@ -23,8 +23,6 @@
 #include "common.h"
 #include "get_helper.h"
 #include "pretty_print.h"
-#include <libbbfdm/dmbbfcommon.h>
-
 
 // private function and structures
 struct resultstack {
@@ -159,13 +157,12 @@ static size_t get_glob_len(char *path)
 	return(ret);
 }
 
-static void resulting(uint8_t maxdepth, char *path, char *qPath, struct dmctx *bbf_ctx, struct list_head *pv_local)
+static void resulting(uint8_t maxdepth, char *path, struct dmctx *bbf_ctx, struct list_head *pv_local)
 {
 	struct dm_parameter *n;
 	uint8_t count;
 
-	size_t plen = get_glob_len(qPath);
-	//size_t plen = 0;
+	size_t plen = get_glob_len(bbf_ctx->in_param);
 	size_t path_len = DM_STRLEN(path);
 
 	list_for_each_entry(n, &bbf_ctx->list_parameter, list) {
@@ -174,28 +171,28 @@ static void resulting(uint8_t maxdepth, char *path, char *qPath, struct dmctx *b
 
 		if (path[path_len - 1] == DELIM) {
 			if (!strncmp(n->name, path, path_len)) {
-				if (is_search_by_reference(qPath))
+				if (is_search_by_reference(bbf_ctx->in_param))
 					plen = 0;
 
 				if (maxdepth > 4 || maxdepth == 0) {
-					add_pv_node(n->name + plen, n->data, n->type, pv_local);
+					add_pv_list(n->name + plen, n->data, n->type, pv_local);
 				} else {
 					count = count_delim(n->name + path_len);
 					if (count < maxdepth)
-						add_pv_node(n->name + plen, n->data, n->type, pv_local);
+						add_pv_list(n->name + plen, n->data, n->type, pv_local);
 				}
 			}
 		} else {
 			if (!strcmp(n->name, path)) {
-				if (is_search_by_reference(qPath))
+				if (is_search_by_reference(bbf_ctx->in_param))
 					plen = 0;
 
 				if (maxdepth > 4 || maxdepth == 0) {
-					add_pv_node(n->name + plen, n->data, n->type, pv_local);
+					add_pv_list(n->name + plen, n->data, n->type, pv_local);
 				} else {
 					count = count_delim(n->name + path_len);
 					if (count < maxdepth)
-						add_pv_node(n->name + plen, n->data, n->type, pv_local);
+						add_pv_list(n->name + plen, n->data, n->type, pv_local);
 				}
 			}
 		}
@@ -208,7 +205,7 @@ static void add_data_blob(struct blob_buf *bb, char *param, char *value, char *t
 		return;
 
 	DEBUG("# Adding BLOB (%s)::(%s)", param, value);
-	switch (get_dm_type(type)) {
+	switch (bbf_get_dm_type(type)) {
 	case DMT_UNINT:
 		blobmsg_add_u64(bb, param, (uint32_t)strtoul(value, NULL, 10));
 		break;
@@ -404,87 +401,13 @@ void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list)
 	free_result_list(&result_stack);
 }
 
-void prepare_pretty_result(uint8_t maxdepth, char *qPath, struct blob_buf *bb,
-			   struct dmctx *bbf_ctx, struct list_head *rslvd)
+void prepare_pretty_result(uint8_t maxdepth, struct blob_buf *bb, struct dmctx *bbf_ctx)
 {
-	struct pathNode *iter = NULL;
-
 	LIST_HEAD(pv_local);
 
-	list_for_each_entry(iter, rslvd, list) {
-		resulting(maxdepth, iter->path, qPath, bbf_ctx, &pv_local);
-	}
-
-	struct pvNode *pv;
-
-	DEBUG("################### DATA to PROCESS ##################");
-	list_for_each_entry(pv, &pv_local, list) {
-		DEBUG("## %s ##", pv->param);
-	}
-	DEBUG("######################################################");
+	resulting(maxdepth, bbf_ctx->in_param, bbf_ctx, &pv_local);
 
 	prepare_result_blob(bb, &pv_local);
 
 	free_pv_list(&pv_local);
-}
-
-/* This function is not used anywhere but kept for debugging purpose hence suppressed */
-// cppcheck-suppress unusedFunction
-void dump_pv_list(struct list_head *pv_list)
-{
-	struct pvNode *pv = NULL;
-
-	INFO("############### PV list Dump #########");
-	list_for_each_entry(pv, pv_list, list) {
-		INFO("## (%s)::(%s)::(%s) ##", pv->param, pv->val, pv->type);
-	}
-	INFO("############# dump done ###############");
-}
-
-/* This function is not used anywhere but kept for debugging purpose hence suppressed */
-// cppcheck-suppress unusedFunction
-void dump_resolved_list(struct list_head *resolved_list)
-{
-	struct pathNode *iter;
-
-	INFO("********************Resolved List Dump***********************");
-	list_for_each_entry(iter, resolved_list, list) {
-		INFO("## %s ##", iter->path);
-	}
-	INFO("**************************DONE*******************************");
-}
-
-void prepare_result_raw(struct blob_buf *bb, struct dmctx *bbf_ctx, struct list_head *rslvd)
-{
-	struct pathNode *iter = NULL;
-	struct dm_parameter *n;
-	void *array, *table;
-
-	array = blobmsg_open_array(bb, "parameters");
-	list_for_each_entry(iter, rslvd, list) {
-		size_t ilen = DM_STRLEN(iter->path);
-		if (ilen == 0)
-			continue;
-
-		list_for_each_entry(n, &bbf_ctx->list_parameter, list) {
-			if (iter->path[ilen - 1] == DELIM) {
-				if (!strncmp(n->name, iter->path, ilen)) {
-					table = blobmsg_open_table(bb, NULL);
-					bb_add_string(bb, "parameter", n->name);
-					bb_add_string(bb, "value", n->data);
-					bb_add_string(bb, "type", n->type);
-					blobmsg_close_table(bb, table);
-				}
-			} else {
-				if (!strcmp(n->name, iter->path)) {
-					table = blobmsg_open_table(bb, NULL);
-					bb_add_string(bb, "parameter", n->name);
-					bb_add_string(bb, "value", n->data);
-					bb_add_string(bb, "type", n->type);
-					blobmsg_close_table(bb, table);
-				}
-			}
-		}
-	}
-	blobmsg_close_array(bb, array);
 }
