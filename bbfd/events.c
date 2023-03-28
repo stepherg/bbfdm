@@ -23,7 +23,7 @@
 #include "common.h"
 #include "events.h"
 #include "get_helper.h"
-#include <libbbfdm/dmentry.h>
+#include "libbbf_api/dmentry.h"
 #include <libubus.h>
 
 static struct event_map_list ev_map_list[] = {

@@ -25,7 +25,7 @@
 #include "get_helper.h"
 #include "pretty_print.h"
 #include "ipc.h"
-#include <libbbfdm/dmbbfcommon.h>
+#include "libbbf_api/dmentry.h"
 #include <libubus.h>
 
 static void usp_operate_cmd(usp_data_t *data, struct blob_buf *bb)

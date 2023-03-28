@@ -24,8 +24,8 @@
 #include "get_helper.h"
 #include "pretty_print.h"
 #include "ipc.h"
+#include "libbbf_api/dmentry.h"
 #include <libubus.h>
-#include <libbbfdm/dmbbfcommon.h>
 
 void init_dmmap(void)
 {
@@ -38,7 +38,7 @@ void init_dmmap(void)
 	get_resolved_paths(&bbf_ctx, ROOT_NODE, &resolved_list);
 
 	// Commit dmmap
-	bbf_uci_commit_bbfdm();
+	dmuci_commit_bbfdm();
 
 	free_path_list(&resolved_list);
 	bbf_cleanup(&bbf_ctx);
@@ -130,7 +130,7 @@ void usp_get_value(usp_data_t *data)
 
 	// Apply all bbfdm changes
 	if (is_transaction_running() == false)
-		bbf_uci_commit_bbfdm();
+		dmuci_commit_bbfdm();
 
 	// free
 	blob_buf_free(&bb);
@@ -177,7 +177,7 @@ void usp_validate_path(usp_data_t *data)
 
 	// Apply all bbfdm changes
 	if (is_transaction_running() == false)
-		bbf_uci_commit_bbfdm();
+		dmuci_commit_bbfdm();
 
 	// free
 	blob_buf_free(&bb);
@@ -227,7 +227,7 @@ void usp_get_instance(usp_data_t *data)
 
 	// Apply all bbfdm changes
 	if (is_transaction_running() == false)
-		bbf_uci_commit_bbfdm();
+		dmuci_commit_bbfdm();
 
 	// free
 	blob_buf_free(&bb);
@@ -278,7 +278,7 @@ void usp_get_name(usp_data_t *data)
 
 	// Commit all bbfdm changes if transaction is not in progress
 	if (is_transaction_running() == false)
-		bbf_uci_commit_bbfdm();
+		dmuci_commit_bbfdm();
 
 	// free
 	blob_buf_free(&bb);

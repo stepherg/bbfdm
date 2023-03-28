@@ -28,6 +28,8 @@ struct pathNode {
 	char path[MAX_DM_PATH];
 };
 
+extern DMOBJ *DM_ROOT_OBJ;
+
 int resolve_path(struct dmctx *bbf_ctx, char *qPath, size_t pos,
 		 struct list_head *resolved_plist);
 

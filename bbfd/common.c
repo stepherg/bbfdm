@@ -21,7 +21,6 @@
  */
 
 #include "common.h"
-#include <libbbfdm/dmbbfcommon.h>
 #include "ipc.h"
 #include "get_helper.h"
 
@@ -145,7 +144,7 @@ bool get_uci_option_string(char *package, char *section,
 	if (!uci_ctx)
 		return false;
 
-	if (bbfdmuci_lookup_ptr(uci_ctx, &ptr, package, section, option, NULL)) {
+	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, option, NULL)) {
 		*value = NULL;
 		ret = false;
 	} else if (ptr.o && ptr.o->v.string) {
@@ -207,4 +206,37 @@ bool validate_msglen(struct blob_buf *bb)
 	}
 
 	return true;
+}
+
+int get_dm_type(char *dm_type)
+{
+	if (dm_type == NULL)
+		return DMT_STRING;
+
+	if (DM_STRCMP(dm_type, DMT_TYPE[DMT_STRING]) == 0)
+		return DMT_STRING;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_UNINT]) == 0)
+		return DMT_UNINT;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_INT]) == 0)
+		return DMT_INT;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_UNLONG]) == 0)
+		return DMT_UNLONG;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_LONG]) == 0)
+		return DMT_LONG;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_BOOL]) == 0)
+		return DMT_BOOL;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_TIME]) == 0)
+		return DMT_TIME;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_HEXBIN]) == 0)
+		return DMT_HEXBIN;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_BASE64]) == 0)
+		return DMT_BASE64;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_COMMAND]) == 0)
+		return DMT_COMMAND;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_EVENT]) == 0)
+		return DMT_EVENT;
+	else
+		return DMT_STRING;
+
+	return DMT_STRING;
 }

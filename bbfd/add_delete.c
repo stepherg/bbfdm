@@ -23,7 +23,7 @@
 #include "common.h"
 #include "add_delete.h"
 #include "get_helper.h"
-#include <libbbfdm/dmbbfcommon.h>
+#include "libbbf_api/dmentry.h"
 
 typedef int (*ADD_DEL_CB_T)(struct dmctx *bbf_ctx, struct blob_buf *bb, char *path, const char *pkey);
 

@@ -46,7 +46,7 @@ void print_info(const char *format, ...);
 void print_debug(const char *format, ...);
 bool get_boolean_string(char *value);
 bool validate_msglen(struct blob_buf *bb);
-
+int get_dm_type(char *dm_type);
 
 #define DEBUG(fmt, args...) \
 	print_debug("[%s:%d]"fmt, __func__, __LINE__, ##args)

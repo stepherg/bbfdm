@@ -23,7 +23,6 @@
 #include "common.h"
 #include "get_helper.h"
 #include "pretty_print.h"
-#include <libbbfdm/dmbbfcommon.h>
 
 
 // private function and structures

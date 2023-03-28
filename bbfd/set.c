@@ -22,9 +22,8 @@
 
 #include "set.h"
 #include "get_helper.h"
+#include "libbbf_api/dmentry.h"
 #include <libubus.h>
-#include <libbbfdm/dmbbfcommon.h>
-
 
 static const struct blobmsg_policy dm_setm_value_policy[] = {
 	[DM_SET_V_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
@@ -74,7 +73,7 @@ int usp_set_value(usp_data_t *data)
 				blobmsg_add_u8(&bb, "status", false);
 				blobmsg_add_u32(&bb, "fault", (uint32_t)p->fault);
 				blobmsg_close_table(&bb, table);
-				del_list_fault_param(p);
+				bbf_api_del_list_fault_param(p);
 			}
 		}
 	}

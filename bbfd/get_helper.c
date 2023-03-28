@@ -26,11 +26,20 @@
 #include <time.h>
 #include <setjmp.h>
 
-#include <libbbfdm/dmbbfcommon.h>
-
 #include "get_helper.h"
 #include "common.h"
 #include "pretty_print.h"
+
+#include "libbbf_api/dmentry.h"
+#include "libbbf_dm/dmtree/tr181/device.h"
+#include "libbbf_dm/dmtree/vendor/vendor.h"
+
+DMOBJ *DM_ROOT_OBJ = tEntry181Obj;
+DM_MAP_VENDOR *DM_VENDOR_EXTENSION[2] = {
+		tVendorExtension,
+		tVendorExtensionOverwrite
+};
+DM_MAP_VENDOR_EXCLUDE *DM_VENDOR_EXTENSION_EXCLUDE = tVendorExtensionExclude;
 
 // uloop.h does not have versions, below line is to use
 // deprecated uloop_timeout_remaining for the time being
@@ -97,7 +106,7 @@ void bbf_configure_ubus(struct ubus_context *ctx)
 
 void bbf_init(struct dmctx *dm_ctx, int instance)
 {
-	dm_ctx_init(dm_ctx, instance);
+	dm_ctx_init(dm_ctx, DM_ROOT_OBJ, DM_VENDOR_EXTENSION, DM_VENDOR_EXTENSION_EXCLUDE, instance);
 }
 
 void bbf_cleanup(struct dmctx *dm_ctx)
@@ -117,7 +126,7 @@ static void bbf_sub_init(struct dmctx *dm_ctx, char *path)
 			instance = INSTANCE_MODE_ALIAS;
 	}
 	DEBUG("instance|%u|", instance);
-	dm_ctx_init_sub(dm_ctx, instance);
+	dm_ctx_init_sub(dm_ctx, DM_ROOT_OBJ, DM_VENDOR_EXTENSION, DM_VENDOR_EXTENSION_EXCLUDE, instance);
 }
 
 static void bbf_sub_cleanup(struct dmctx *dm_ctx)

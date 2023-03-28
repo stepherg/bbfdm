@@ -31,8 +31,6 @@
 #include <libubus.h>
 #include <sys/prctl.h>
 
-#include <libbbfdm/dmbbfcommon.h>
-
 #include "usp.h"
 #include "set.h"
 #include "get.h"
@@ -43,6 +41,7 @@
 #include "events.h"
 #include "pretty_print.h"
 #include "get_helper.h"
+#include "libbbf_api/dmentry.h"
 
 #define INSTANCE_UPDATE_TIMEOUT (25 * 1000)
 
@@ -1577,7 +1576,7 @@ bool usp_cleanup(struct usp_context *u)
 	free_ubus_obj_list(&u->obj_list);
 	free_path_list(&u->instances);
 	free_path_list(&u->old_instances);
-	bbf_dm_cleanup();
+	bbf_dm_cleanup(DM_ROOT_OBJ);
 
 	return true;
 }
