@@ -1713,7 +1713,7 @@ static int operate_IPDiagnostics_IPPing(char *refparam, struct dmctx *ctx, void 
 	char *ipping_timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
 	char *ipping_datablocksize = dmjson_get_value((json_object *)value, 1, "DataBlockSize");
 	char *ipping_dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
-	char *proto = (bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto";
+	char *proto = (ctx->dm_type == BBFDM_USP) ? "usp" : "both_proto";
 
 	dmubus_call_blocking("bbf.diag", "ipping",
 			UBUS_ARGS{
@@ -1823,7 +1823,7 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 									datablocksize,
 									dscp,
 									maxhops,
-									(bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto");
+									(ctx->dm_type == BBFDM_USP) ? "usp" : "both_proto");
 
 	snprintf(cmd, sizeof(cmd), "sh %s %s", TRACEROUTE_DIAGNOSTIC_PATH, input);
 
@@ -1954,7 +1954,7 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 									download_proto,
 									download_num_of_connections,
 									download_enable_per_connection_results,
-									(bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto");
+									(ctx->dm_type == BBFDM_USP) ? "usp" : "both_proto");
 
 	snprintf(cmd, sizeof(cmd), "sh %s %s", DOWNLOAD_DIAGNOSTIC_PATH, input);
 
@@ -2093,7 +2093,7 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 									upload_proto,
 									upload_num_of_connections,
 									upload_enable_per_connection_results,
-									(bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto");
+									(ctx->dm_type == BBFDM_USP) ? "usp" : "both_proto");
 
 	snprintf(cmd, sizeof(cmd), "sh %s %s", UPLOAD_DIAGNOSTIC_PATH, input);
 
@@ -2200,7 +2200,7 @@ static int operate_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx
 	char *udpecho_datablocksize = dmjson_get_value((json_object *)value, 1, "DataBlockSize");
 	char *udpecho_dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
 	char *udpecho_inter_transmission_time = dmjson_get_value((json_object *)value, 1, "InterTransmissionTime");
-	char *proto = (bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto";
+	char *proto = (ctx->dm_type == BBFDM_USP) ? "usp" : "both_proto";
 
 	dmubus_call_blocking("bbf.diag", "udpecho",
 			UBUS_ARGS{
@@ -2284,7 +2284,7 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 	char *interface = get_diagnostics_interface_option(ctx, ip_interface);
 	char *nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
 	char *timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
-	char *proto = (bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto";
+	char *proto = (ctx->dm_type == BBFDM_USP) ? "usp" : "both_proto";
 
 	dmubus_call_blocking("bbf.diag", "serverselection",
 			UBUS_ARGS{
