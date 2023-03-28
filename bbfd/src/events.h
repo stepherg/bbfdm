@@ -1,7 +1,7 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include "usp.h"
+#include "bbfd.h"
 #include "common.h"
 
 struct event_args_list {
@@ -15,8 +15,6 @@ struct event_map_list {
 	struct event_args_list args[16];
 };
 
-void list_event_schema(struct blob_buf *bb);
-bool is_registered_event(char *name);
 void free_ubus_event_handler(struct ubus_context *ctx, struct list_head *ev_list);
 int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list);
 
