@@ -103,9 +103,14 @@ INSTALL(FILES ${root_device}
 
 IF(BBF_TR143)
 	INSTALL(DIRECTORY DESTINATION usr/share/bbfdm)
+	INSTALL(DIRECTORY DESTINATION usr/libexec/rpcd)
 	FILE(GLOB scripts scripts/*)
 	INSTALL(FILES ${scripts}
 		PERMISSIONS OWNER_EXECUTE
 		DESTINATION usr/share/bbfdm
+	)
+	INSTALL(FILES scripts/bbf.diag
+		PERMISSIONS OWNER_EXECUTE
+		DESTINATION usr/libexec/rpcd
 	)
 ENDIF(BBF_TR143)
