@@ -3,21 +3,23 @@
 
 #include "usp.h"
 
+#include "libbbf_api/dmbbf.h"
+
 enum {
 	DM_ADD_PATH,
-	DM_ADD_PROTO,
-	DM_ADD_INSTANCE,
+	DM_ADD_OBJ_PATH,
+	DM_ADD_OPTIONAL,
 	__DM_ADD_MAX
 };
 
 enum {
-	DM_RAW_ADD_PATH,
-	DM_RAW_ADD_PROTO,
-	DM_RAW_ADD_INSTANCE,
-	DM_RAW_ADD_TRANS_ID,
-	__DM_RAW_ADD_MAX
+	DM_DELETE_PATH,
+	DM_DELETE_PATHS,
+	DM_DELETE_OPTIONAL,
+	__DM_DELETE_MAX
 };
 
-int create_add_response(usp_data_t *data, struct blob_buf *bb);
-int create_del_response(usp_data_t *data, struct blob_buf *bb);
+int create_add_response(struct dmctx *bbf_ctx, usp_data_t *data, struct blob_buf *bb);
+int create_del_response(struct dmctx *bbf_ctx, usp_data_t *data, struct blob_buf *bb);
+
 #endif /* ADD_DEL_H */

@@ -4,16 +4,17 @@
 #include "usp.h"
 #include "common.h"
 
+#include "libbbf_api/dmbbf.h"
+
 enum {
-	DM_OPERATE_PATH,
-	DM_OPERATE_ACTION,
+	DM_OPERATE_COMMAND,
+	DM_OPERATE_COMMAND_KEY,
 	DM_OPERATE_INPUT,
-	DM_OPERATE_PROTO,
-	DM_OPERATE_INSTANCE,
+	DM_OPERATE_OPTIONAL,
 	__DM_OPERATE_MAX,
 };
 
-void list_operate_schema(struct blob_buf *bb);
-void usp_operate_cmd_async(usp_data_t *data, void *output);
-void usp_operate_cmd_sync(usp_data_t *data);
+void usp_operate_cmd_async(struct dmctx *bbf_ctx, usp_data_t *data, void *output);
+void usp_operate_cmd_sync(struct dmctx *bbf_ctx, usp_data_t *data);
+
 #endif /* OPERATE_H */
