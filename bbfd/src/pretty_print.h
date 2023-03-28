@@ -1,5 +1,5 @@
 /*
- * ipc.h: File to handle ipc related functionality
+ * pretty_print.h: utils for pretty printing of results
  *
  * Copyright (C) 2020 iopsys Software Solutions AB. All rights reserved.
  *
@@ -20,15 +20,10 @@
  * 02110-1301 USA
  */
 
-#ifndef IPC_H
-#define IPC_H
+#ifndef PRETTY_PRINT_H
+#define PRETTY_PRINT_H
 
-#include <sys/mman.h>
+void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list);
+void prepare_pretty_result(uint8_t maxdepth, struct blob_buf *bb, struct dmctx *bbf_ctx);
 
-#ifdef USPD_MAX_MSG_LEN
-  #define DEF_IPC_DATA_LEN (USPD_MAX_MSG_LEN - 128) // Configured Len - 128 bytes
-#else
-  #define DEF_IPC_DATA_LEN (10 * 1024 * 1024 - 128) // 10M - 128 bytes
-#endif
-
-#endif // end IPC_H
+#endif /* PRETTY_PRINT_H */
