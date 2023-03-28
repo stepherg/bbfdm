@@ -7,8 +7,7 @@
   "software_version": "1.2.3.4",
   "root_node": "Device.",
   "vendor_list": [
-    "iopsys",
-    "openwrt"
+    "iopsys"
   ],
   "dm_json_files": [
     "../dmtree/json/tr181.json",

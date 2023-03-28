@@ -74,8 +74,9 @@ echo "Check if the required tools are generated"
 
 cd ..
 
+echo "Validate datamodel_default generated XML file"
 xmllint --schema test/tools/cwmp-datamodel-1-8.xsd tools/out/datamodel_default.xml --noout
-#check_ret $? ## Need to be reviewed to remove all duplicate key-sequence
+check_ret $?
 
 echo "********* Validate C File *********"
 
