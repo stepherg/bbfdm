@@ -50,27 +50,17 @@ echo "Running memory check on datamodel"
 run_valgrind_verbose -u get Device.RootDataModelVersion
 run_valgrind_verbose -c get Device.RootDataModelVersion
 
-run_valgrind_verbose -u list_operate
-run_valgrind -u get_schema
-run_valgrind -u instances Device.
-run_valgrind -c get Device.
-run_valgrind -c list_operate
-run_valgrind -c get_schema
-run_valgrind_verbose -c instances Device.
-
-run_valgrind -u get_info Device. 0
-run_valgrind -u get_info Device. 1
-run_valgrind -u get_info Device. 2
-run_valgrind -u get_info Device. 3
-
 run_valgrind -u get Device.
 run_valgrind -c get Device.
 
+run_valgrind -u get_instances Device.
+run_valgrind -c get_instances Device.
+
+run_valgrind -u get_supported_dm Device.
+run_valgrind -c get_supported_dm Device.
+
 run_valgrind_verbose -u get Device.IP.Interface.*.IPv4Address.
 run_valgrind_verbose -c get Device.IP.Interface.*.IPv6Address.*.IPAddress
-
-run_valgrind_verbose -u get_name Device.IP.Interface.*.IPv4Address. 1
-run_valgrind_verbose -c get_name Device.DeviceInfo.VendorConfigFile.*.Name 0
 
 run_valgrind_redirect -u get Device.
 run_valgrind_redirect -c get Device.

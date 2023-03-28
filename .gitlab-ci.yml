@@ -17,7 +17,6 @@ stages:
     - unit_test
     - memory_test
     - functional_test
-    - uspd
     - deploy
 
 run_unit_test:
@@ -83,15 +82,11 @@ run_memory_test:
   script:
   - "./gitlab-ci/setup.sh"
   - "./gitlab-ci/memory-test.sh"
-  - echo "BBF_TAR_URL=${CI_JOB_URL}/artifacts/raw/build/libbbf-1.0.0-Linux.sh" >build.env
   artifacts:
-      reports:
-        dotenv: build.env
       when: always
       paths:
           - timestamp.log
           - output-report-device-get.txt
-          - build/libbbf-1.0.0-Linux.sh
 
 doxygen:
   stage: unit_test
@@ -111,18 +106,3 @@ doxygen:
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
 
-run_uspd:
-  stage: uspd
-  inherit:
-    variables: false
-  variables:
-    UPSTREAM_BBF_SHA: $CI_COMMIT_SHA
-    BBF_TAR_URL: $BBF_TAR_URL
-  allow_failure: false
-  trigger:
-    project: iopsys/uspd
-    branch: bbf_pipeline
-    strategy: depend
-  needs:
-    job: run_memory_test
-    artifacts: true

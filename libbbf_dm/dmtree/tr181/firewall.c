@@ -93,7 +93,7 @@ static void free_firewall_config_dup_list(struct list_head *dup_list)
 
 	list_for_each_entry_safe(rule_args, tmp, dup_list, list) {
 		list_del(&rule_args->list);
-		DMFREE(rule_args);
+		dmfree(rule_args);
 	}
 }
 
