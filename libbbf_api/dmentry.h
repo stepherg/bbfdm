@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 iopsys Software Solutions AB
+ * Copyright (C) 2023 iopsys Software Solutions AB
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 2.1
@@ -8,47 +8,41 @@
  *	  Author MOHAMED Kallel <mohamed.kallel@pivasoftware.com>
  *	  Author Imen Bhiri <imen.bhiri@pivasoftware.com>
  *	  Author Feten Besbes <feten.besbes@pivasoftware.com>
- *	  Author Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+ *	  Author Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  *	  Author: Omar Kallel <omar.kallel@pivasoftware.com>
  */
 
 #ifndef __DMENTRY_H__
 #define __DMENTRY_H__
 
-#include "dmcommon.h"
+extern struct list_head global_memhead;
 
-extern struct list_head head_package_change;
-extern struct list_head main_memhead;
-enum ctx_init_enum {
-	CTX_INIT_ALL,
-	CTX_INIT_SUB
-};
+void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj,
+		DM_MAP_VENDOR *tVendorExtension[],
+		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude);
+void bbf_ctx_clean(struct dmctx *ctx);
 
-typedef enum {
-	ALL_SCHEMA,
-	PARAM_ONLY,
-	EVENT_ONLY,
-	COMMAND_ONLY
-} schema_type_t;
+void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj,
+		DM_MAP_VENDOR *tVendorExtension[],
+		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude);
+void bbf_ctx_clean_sub(struct dmctx *ctx);
 
-int dm_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj, DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude, unsigned int instance_mode);
-int dm_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj, DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude, unsigned int instance_mode);
-int dm_ctx_init_entry(struct dmctx *ctx, DMOBJ *tEntryObj, DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude, unsigned int instance_mode);
-int dm_entry_param_method(struct dmctx *ctx, int cmd, char *inparam, char *arg1, char *arg2);
-int dm_entry_apply(struct dmctx *ctx, int cmd);
-int dm_entry_restart_services(void);
-int dm_entry_manage_services(struct blob_buf *bb, bool restart);
-int dm_entry_revert_changes(void);
-int usp_fault_map(int fault);
-int dm_ctx_clean(struct dmctx *ctx);
-int dm_ctx_clean_sub(struct dmctx *ctx);
-int dm_get_supported_dm(struct dmctx *ctx, char *path, bool first_level, schema_type_t schema_type);
-void dm_config_ubus(struct ubus_context *ctx);
-int dm_ctx_init_cache(int time);
-void bbf_dm_cleanup(DMOBJ *tEntryObj);
+int bbf_fault_map(unsigned int dm_type, int fault);
+
+int bbf_entry_method(struct dmctx *ctx, int cmd);
+
+void bbf_global_clean(DMOBJ *dm_entryobj);
+int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
+
+int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value);
+int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
+
+void bbf_entry_restart_services(struct blob_buf *bb, bool restart_services);
+void bbf_entry_revert_changes(struct blob_buf *bb);
+
 
 /**
- * @brief dm_debug_browse_path
+ * @brief bbf_debug_browse_path
  *
  * Debug API to get the last datamodel access object by datamodel browse
  * function.
@@ -62,8 +56,6 @@ void bbf_dm_cleanup(DMOBJ *tEntryObj);
  * @note This is debug API, mostly be useful in debugging in last datamodel
  * object illegal access.
  */
-int dm_debug_browse_path(char *buff, size_t len);
-void dm_cleanup_dynamic_entry(DMOBJ *root);
-int set_bbfdatamodel_type(int bbf_type);
+int bbf_debug_browse_path(char *buff, size_t len);
 
-#endif
+#endif //__DMENTRY_H__

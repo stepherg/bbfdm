@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -g -Wall -Werror
-LDFLAGS = -lcmocka -lbbf_api -lbbf_dm -lubus
+LDFLAGS = -lcmocka -lbbf_api -lbbf_dm
 UNIT_TESTS = unit_test_bbfd
 FUNCTIONAL_TESTS = functional_test_bbfd
 FUNCTIONAL_API_TESTS = functional_api_test_bbfd

@@ -144,7 +144,7 @@ static void free_ssh_config_dup_list(struct list_head *dup_list)
 
 	list_for_each_entry_safe(dmmap_config, tmp, dup_list, list) {
 		list_del(&dmmap_config->list);
-		DMFREE(dmmap_config);
+		dmfree(dmmap_config);
 	}
 }
 
@@ -235,7 +235,7 @@ static void free_ssh_session_list(struct list_head *sess_list)
 	struct ssh_session_args *session = NULL, *tmp = NULL;
 	list_for_each_entry_safe(session, tmp, sess_list, list) {
 		list_del(&session->list);
-		DMFREE(session);
+		dmfree(session);
 	}
 }
 

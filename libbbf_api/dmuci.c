@@ -40,7 +40,7 @@ void dmuci_exit(void)
 	uci_ctx = NULL;
 }
 
-int bbf_uci_init(void)
+int dm_uci_init(void)
 {
 	dmuci_init();
 
@@ -53,7 +53,7 @@ int bbf_uci_init(void)
 	return 0;
 }
 
-int bbf_uci_exit(void)
+int dm_uci_exit(void)
 {
 	dmuci_exit();
 
@@ -108,9 +108,9 @@ static void add_list_package_change(struct list_head *clist, char *package)
 		if (DM_STRCMP(pc->package, package) == 0)
 			return;
 	}
-	pc = calloc(1, sizeof(struct package_change));//TODO !!!!! Do not use dmcalloc here
+	pc = calloc(1, sizeof(struct package_change));
 	list_add_tail(&pc->list, clist);
-	pc->package = strdup(package); //TODO !!!!! Do not use dmstrdup here
+	pc->package = strdup(package);
 }
 
 void free_all_list_package_change(struct list_head *clist)
@@ -119,8 +119,8 @@ void free_all_list_package_change(struct list_head *clist)
 	while (clist->next != clist) {
 		pc = list_entry(clist->next, struct package_change, list);
 		list_del(&pc->list);
-		free(pc->package);//TODO !!!!! Do not use dmfree here
-		free(pc);//TODO !!!!! Do not use dmfree here
+		free(pc->package);
+		free(pc);
 	}
 }
 
