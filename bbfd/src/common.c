@@ -21,7 +21,6 @@
  */
 
 #include "common.h"
-#include <libbbfdm/dmbbfcommon.h>
 #include "ipc.h"
 #include "get_helper.h"
 
@@ -132,34 +131,6 @@ bool is_node_instance(char *path)
 	return ret;
 }
 
-bool get_uci_option_string(char *package, char *section,
-			   char *option, char **value)
-{
-	struct uci_context *uci_ctx;
-	struct uci_ptr ptr = {0};
-	bool ret = true;
-
-	*value = NULL;
-	uci_ctx = uci_alloc_context();
-
-	if (!uci_ctx)
-		return false;
-
-	if (bbfdmuci_lookup_ptr(uci_ctx, &ptr, package, section, option, NULL)) {
-		*value = NULL;
-		ret = false;
-	} else if (ptr.o && ptr.o->v.string) {
-		*value = strdup(ptr.o->v.string);
-	} else {
-		*value = NULL;
-		ret = false;
-	}
-
-	uci_free_context(uci_ctx);
-
-	return ret;
-}
-
 // RE utilities
 bool match(const char *string, const char *pattern)
 {
@@ -194,17 +165,50 @@ int count_delim(const char *path)
 	return (count - 1);
 }
 
-bool validate_msglen(struct blob_buf *bb)
+bool validate_msglen(usp_data_t *data)
 {
-	size_t data_len = blob_pad_len(bb->head);
+	size_t data_len = blob_pad_len(data->bb.head);
 
 	if (data_len >= DEF_IPC_DATA_LEN) {
 		ERR("Blob exceed max len(%zd), data len(%zd)", DEF_IPC_DATA_LEN, data_len);
-		blob_buf_free(bb);
-		blob_buf_init(bb, 0);
-		fill_err_code(bb, FAULT_9002);
+		blob_buf_free(&data->bb);
+		blob_buf_init(&data->bb, 0);
+		fill_err_code_table(data, FAULT_9002);
 		return false;
 	}
 
 	return true;
+}
+
+int bbf_get_dm_type(char *dm_type)
+{
+	if (dm_type == NULL)
+		return DMT_STRING;
+
+	if (DM_STRCMP(dm_type, DMT_TYPE[DMT_STRING]) == 0)
+		return DMT_STRING;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_UNINT]) == 0)
+		return DMT_UNINT;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_INT]) == 0)
+		return DMT_INT;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_UNLONG]) == 0)
+		return DMT_UNLONG;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_LONG]) == 0)
+		return DMT_LONG;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_BOOL]) == 0)
+		return DMT_BOOL;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_TIME]) == 0)
+		return DMT_TIME;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_HEXBIN]) == 0)
+		return DMT_HEXBIN;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_BASE64]) == 0)
+		return DMT_BASE64;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_COMMAND]) == 0)
+		return DMT_COMMAND;
+	else if (DM_STRCMP(dm_type, DMT_TYPE[DMT_EVENT]) == 0)
+		return DMT_EVENT;
+	else
+		return DMT_STRING;
+
+	return DMT_STRING;
 }

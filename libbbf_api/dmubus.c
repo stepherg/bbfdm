@@ -666,7 +666,6 @@ void dmubus_update_cached_entries()
 {
 	if (hard_limit_g == 0 || local_ctx_g == true) {
 		dmubus_free();
-		dm_libubus_free();
 	} else {
 		struct dm_ubus_cache_entry *entry;
 		time_t curr_time = time(NULL);
@@ -694,6 +693,8 @@ void dmubus_free()
 	// cppcheck-suppress unknownMacro
 	list_for_each_entry_safe(entry, tmp, &dmubus_cache, list)
 		dm_ubus_cache_entry_free(entry);
+
+	dm_libubus_free();
 
 }
 

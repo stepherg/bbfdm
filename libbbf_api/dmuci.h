@@ -324,8 +324,8 @@ int dmuci_delete_by_section_unnamed_##UCI_PATH(struct uci_section *s, char *opti
 
 int dmuci_init(void);
 void dmuci_exit(void);
-int bbf_uci_init(void);
-int bbf_uci_exit(void);
+int dm_uci_init(void);
+int dm_uci_exit(void);
 char *dmuci_list_to_string(struct uci_list *list, const char *delimitor);
 void free_all_list_package_change(struct list_head *clist);
 int dmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);

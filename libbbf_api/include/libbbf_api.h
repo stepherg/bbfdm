@@ -31,7 +31,7 @@
 #include <libubox/list.h>
 #include <json-c/json.h>
 
-#include "libbbf_api/dmapi.h"
+#include <libbbf_api/dmapi.h>
 
 /*******************
  *
