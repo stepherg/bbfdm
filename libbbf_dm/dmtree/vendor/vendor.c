@@ -15,10 +15,6 @@
 #include "iopsys/tr181/vendor.h"
 #endif
 
-#ifdef BBF_VENDOR_OPENWRT
-#include "openwrt/tr181/vendor.h"
-#endif
-
 #ifdef BBF_VENDOR_TEST
 #include "test/tr181/vendor.h"
 #endif
@@ -42,10 +38,6 @@ DM_MAP_VENDOR tVendorExtension[] = {
 DM_MAP_VENDOR tVendorExtensionOverwrite[] = {
 /* customer, tableobject */
 
-#ifdef BBF_VENDOR_OPENWRT
-{"openwrt", tVendorExtensionOverwriteOPENWRT},
-#endif
-
 #ifdef BBF_VENDOR_TEST
 {"test", tVendorExtensionOverwriteTEST},
 #endif
@@ -56,10 +48,6 @@ DM_MAP_VENDOR tVendorExtensionOverwrite[] = {
 /** This table is defined to exclude some obj/param from the tree **/
 DM_MAP_VENDOR_EXCLUDE tVendorExtensionExclude[] = {
 /* customer, tableobject */
-
-#ifdef BBF_VENDOR_OPENWRT
-{"openwrt", VendorExtensionExcludeOPENWRT},
-#endif
 
 #ifdef BBF_VENDOR_TEST
 {"test", VendorExtensionExcludeTEST},

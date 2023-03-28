@@ -22,7 +22,6 @@ This package comprises of the below libraries:
 │   ├── tr181
 │   └── vendor
 │       ├── iopsys
-│       ├── openwrt
 │       └── vendor.h
 ├── libbbf_api
 ├── scripts
