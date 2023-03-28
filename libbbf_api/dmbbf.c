@@ -49,8 +49,6 @@ static int get_linker_value_check_param(DMPARAM_ARGS);
 static int mobj_get_supported_dm(DMOBJECT_ARGS);
 static int mparam_get_supported_dm(DMPARAM_ARGS);
 
-int bbfdatamodel_type = BBFDM_BOTH;
-
 char *DMT_TYPE[] = {
 	[DMT_STRING] = "xsd:string",
 	[DMT_UNINT] = "xsd:unsignedInt",
@@ -341,38 +339,9 @@ static int plugin_leaf_wildcard_nextlevel_match(DMOBJECT_ARGS)
 	return FAULT_9005;
 }
 
-static int bbfdatamodel_matches(const enum bbfdm_type_enum type)
+static int bbfdatamodel_matches(unsigned int dm_type, const enum bbfdm_type_enum type)
 {
-	return (bbfdatamodel_type == BBFDM_BOTH || type == BBFDM_BOTH || bbfdatamodel_type == type) && type != BBFDM_NONE;
-}
-
-static bool check_version(const char *obj_version, struct dmctx *ctx)
-{
-	char *config_version = ctx->dm_version;
-	int config_major = 0, config_minor = 0;
-	int obj_major = 0, obj_minor = 0;
-
-	if (!config_version || !obj_version)
-		return true;
-
-	if (*config_version) {
-		config_major = DM_STRTOL(config_version);
-		char *temp = DM_STRCHR(config_version, '.');
-		if (temp)
-			config_minor = DM_STRTOL(temp + 1);
-	}
-
-	if (*obj_version) {
-		obj_major = DM_STRTOL(obj_version);
-		char *temp = DM_STRCHR(obj_version, '.');
-		if (temp)
-			obj_minor = DM_STRTOL(temp + 1);
-	}
-
-	if (obj_major > config_major || obj_minor > config_minor)
-		return false;
-
-	return true;
+	return (dm_type == BBFDM_BOTH || type == BBFDM_BOTH || dm_type == type) && type != BBFDM_NONE;
 }
 
 static bool check_dependency(const char *conf_obj)
@@ -427,10 +396,7 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 
 	for (; (leaf && leaf->parameter); leaf++) {
 
-		if (!bbfdatamodel_matches(leaf->bbfdm_type))
-			continue;
-
-		if (!check_version(leaf->version, dmctx))
+		if (!bbfdatamodel_matches(dmctx->dm_type, leaf->bbfdm_type))
 			continue;
 
 		if (!dmctx->isinfo) {
@@ -453,10 +419,7 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 						DMLEAF *jleaf = next_dyn_array->nextleaf[j];
 						for (; (jleaf && jleaf->parameter); jleaf++) {
 
-							if (!bbfdatamodel_matches(jleaf->bbfdm_type))
-								continue;
-
-							if (!check_version(jleaf->version, dmctx))
+							if (!bbfdatamodel_matches(dmctx->dm_type, jleaf->bbfdm_type))
 								continue;
 
 							if (!dmctx->isinfo) {
@@ -489,13 +452,10 @@ static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *ent
 	node.prev_data = data;
 	node.prev_instance = instance;
 
-	if (!bbfdatamodel_matches(entryobj->bbfdm_type))
+	if (!bbfdatamodel_matches(dmctx->dm_type, entryobj->bbfdm_type))
 		return;
 
 	if (entryobj->checkdep && (check_dependency(entryobj->checkdep) == false))
-		return;
-
-	if (!check_version(entryobj->version, dmctx))
 		return;
 
 	if (entryobj->browseinstobj && dmctx->isgetschema)
@@ -723,7 +683,9 @@ bool find_root_entry(struct dmctx *ctx, char *in_param, DMOBJ **root_entry)
 	DMNODE node = {.current_object = ""};
 
 	char *obj_path = replace_str(in_param, ".{i}.", ".");
+	char *old_in_param = ctx->in_param;
 	dm_check_dynamic_obj(ctx, &node, root, obj_path, obj_path, root_entry, &obj_found);
+	ctx->in_param = old_in_param;
 	dmfree(obj_path);
 
 	return (obj_found && *root_entry) ? true : false;
@@ -883,33 +845,6 @@ char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, 
 	return instance;
 }
 
-__attribute__ ((deprecated)) char *handle_update_instance(int instance_ranck, struct dmctx *ctx, char **max_inst, char * (*up_instance)(int action, char **last_inst, char **max_inst, void *argv[]), int argc, ...)
-{
-	va_list arg;
-	char *instance, *last_inst = NULL;
-	int i = 0;
-	unsigned int action, pos = instance_ranck - 1;
-	void *argv[argc+1];
-
-	va_start(arg, argc);
-	for (i = 0; i < argc; i++) {
-		argv[i] = va_arg(arg, void*);
-	}
-	argv[argc] = NULL;
-	va_end(arg);
-
-	if (pos < ctx->nbrof_instance)
-		action = (ctx->alias_register & (1 << pos)) ? INSTANCE_UPDATE_ALIAS : INSTANCE_UPDATE_NUMBER;
-	else
-		action = (ctx->instance_mode == INSTANCE_MODE_ALIAS) ? INSTANCE_UPDATE_ALIAS : INSTANCE_UPDATE_NUMBER;
-
-	instance = up_instance(action, &last_inst, max_inst, argv);
-	if (last_inst)
-		ctx->inst_buf[pos] = dmstrdup(last_inst);
-
-	return instance;
-}
-
 char *update_instance(char *max_inst, int argc, ...)
 {
 	va_list arg;
@@ -990,95 +925,6 @@ char *update_instance_alias(int action, char **last_inst, char **max_inst, void 
 	return instance;
 }
 
-__attribute__ ((deprecated)) char *update_instance_without_section(int action, char **last_inst, char **max_inst, void *argv[])
-{
-	char *instance, buf[64] = {0};
-	int instnbr = (int)(long)argv[0];
-
-	snprintf(buf, sizeof(buf), "%d", instnbr);
-	instance = dmstrdup(buf);
-	*last_inst = instance;
-
-	if (action == INSTANCE_MODE_ALIAS) {
-		snprintf(buf, sizeof(buf), "[cpe-%d]", instnbr);
-		instance = dmstrdup(buf);
-	}
-
-	return instance;
-}
-
-__attribute__ ((deprecated)) char *get_last_instance_bbfdm(char *package, char *section, char *opt_inst)
-{
-	struct uci_section *s;
-	char *inst = NULL, *last_inst = NULL;
-
-	uci_path_foreach_sections(bbfdm, package, section, s) {
-		inst = update_instance(last_inst, 2, s, opt_inst);
-		if(last_inst)
-			dmfree(last_inst);
-		last_inst = dmstrdup(inst);
-	}
-
-	return inst;
-}
-
-__attribute__ ((deprecated)) char *get_last_instance(char *package, char *section, char *opt_inst)
-{
-	struct uci_section *s;
-	char *inst = NULL, *last_inst = NULL;
-
-	if (strcmp(package, DMMAP) == 0) {
-		uci_path_foreach_sections(bbfdm, "dmmap", section, s) {
-			inst = update_instance(last_inst, 2, s, opt_inst);
-			if(last_inst)
-				dmfree(last_inst);
-			last_inst = dmstrdup(inst);
-		}
-	} else {
-		uci_foreach_sections(package, section, s) {
-			inst = update_instance(inst, 2, s, opt_inst);
-		}
-	}
-	return inst;
-}
-
-__attribute__ ((deprecated)) char *get_last_instance_lev2_bbfdm_dmmap_opt(char *dmmap_package, char *section, char *opt_inst, char *opt_check, char *value_check)
-{
-	struct uci_section *s;
-	char *instance = NULL, *last_inst = NULL;
-	struct browse_args browse_args = {0};
-
-	browse_args.option = opt_check;
-	browse_args.value = value_check;
-
-	uci_path_foreach_option_eq(bbfdm, dmmap_package, section, opt_check, value_check, s) {
-		instance = update_instance(last_inst, 5, s, opt_inst, 0, check_browse_section, (void *)&browse_args);
-		if(last_inst)
-			dmfree(last_inst);
-		last_inst = dmstrdup(instance);
-	}
-	return instance;
-}
-
-__attribute__ ((deprecated)) char *get_last_instance_lev2_bbfdm(char *package, char *section, char* dmmap_package, char *opt_inst, char *opt_check, char *value_check)
-{
-	struct uci_section *s = NULL, *dmmap_section = NULL;
-	char *instance = NULL, *last_inst = NULL;
-
-	uci_foreach_option_cont(package, section, opt_check, value_check, s) {
-		get_dmmap_section_of_config_section(dmmap_package, section, section_name(s), &dmmap_section);
-		if (dmmap_section == NULL) {
-			dmuci_add_section_bbfdm(dmmap_package, section, &dmmap_section);
-			dmuci_set_value_by_section(dmmap_section, "section_name", section_name(s));
-		}
-		instance = update_instance(last_inst, 2, dmmap_section, opt_inst);
-		if(last_inst)
-			dmfree(last_inst);
-		last_inst = dmstrdup(instance);
-	}
-	return instance;
-}
-
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = "";
@@ -1110,59 +956,6 @@ void free_all_list_parameter(struct dmctx *ctx)
 	while (ctx->list_parameter.next != &ctx->list_parameter) {
 		dm_parameter = list_entry(ctx->list_parameter.next, struct dm_parameter, list);
 		api_del_list_parameter(dm_parameter);
-	}
-}
-
-static void add_set_list_tmp(struct dmctx *ctx, char *param, char *value)
-{
-	struct set_tmp *set_tmp;
-	set_tmp = dmcalloc(1, sizeof(struct set_tmp));
-	list_add_tail(&set_tmp->list, &ctx->set_list_tmp);
-	set_tmp->name = dmstrdup(param);
-	set_tmp->value = value ? dmstrdup(value) : NULL;
-}
-
-static void del_set_list_tmp(struct set_tmp *set_tmp)
-{
-	list_del(&set_tmp->list);
-	dmfree(set_tmp->name);
-	dmfree(set_tmp->value);
-	dmfree(set_tmp);
-}
-
-void free_all_set_list_tmp(struct dmctx *ctx)
-{
-	struct set_tmp *set_tmp = NULL;
-	while (ctx->set_list_tmp.next != &ctx->set_list_tmp) {
-		set_tmp = list_entry(ctx->set_list_tmp.next, struct set_tmp, list);
-		del_set_list_tmp(set_tmp);
-	}
-}
-
-void add_list_fault_param(struct dmctx *ctx, char *param, int fault)
-{
-	struct param_fault *param_fault;
-	if (param == NULL) param = "";
-
-	param_fault = dmcalloc(1, sizeof(struct param_fault));
-	list_add_tail(&param_fault->list, &ctx->list_fault_param);
-	param_fault->name = dmstrdup(param);
-	param_fault->fault = fault;
-}
-
-void bbf_api_del_list_fault_param(struct param_fault *param_fault)
-{
-	list_del(&param_fault->list);
-	dmfree(param_fault->name);
-	dmfree(param_fault);
-}
-
-void free_all_list_fault_param(struct dmctx *ctx)
-{
-	struct param_fault *param_fault = NULL;
-	while (ctx->list_fault_param.next != &ctx->list_fault_param) {
-		param_fault = list_entry(ctx->list_fault_param.next, struct param_fault, list);
-		bbf_api_del_list_fault_param(param_fault);
 	}
 }
 
@@ -1667,6 +1460,10 @@ int dm_entry_get_supported_dm(struct dmctx *ctx)
 {
 	DMOBJ *root = ctx->dm_entryobj;
 	DMNODE node = {.current_object = ""};
+	size_t plen = DM_STRLEN(ctx->in_param);
+
+	if (plen == 0 || ctx->in_param[plen - 1] != '.')
+		return FAULT_9005;
 
 	ctx->inparam_isparam = 0;
 	ctx->isgetschema = 1;
@@ -1898,15 +1695,9 @@ static int mparam_set_value(DMPARAM_ARGS)
 		if (perm[0] == '0' || !leaf->setvalue)
 			return FAULT_9008;
 
-		int fault = (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUECHECK);
-		if (fault)
-			return fault;
-
-		add_set_list_tmp(dmctx, dmctx->in_param, dmctx->in_value);
+		return (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUECHECK);
 	} else if (dmctx->setaction == VALUESET) {
-		int fault = (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
-		if (fault)
-			return fault;
+		return (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
 	}
 	return 0;
 }

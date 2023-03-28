@@ -14,7 +14,7 @@ START_TIME=$(date +%s)
 MODE="${1}"
 
 log() {
-    echo "${@}"|logger -t usp.activate_firmware -p info
+    echo "${@}"|logger -t bbf.activate_firmware -p info
 }
 
 activate_and_reboot_device() {
