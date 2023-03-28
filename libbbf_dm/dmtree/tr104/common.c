@@ -19,7 +19,7 @@ char *KeyingMethods[] = {"Null", "Static", "SDP", "IKE", NULL};
 char *FacilityAction[] = {"AA_REGISTER", "AA_ERASE", "AA_INTERROGATE", "CA_ACTIVATE", "CCBS_ACTIVATE", "CCBS_DEACTIVATE", "CCBS_INTERROGATE", "CCNR_ACTIVATE", "CCNR_DEACTIVATE", "CCNR_INTERROGATE", "CFB_REGISTER", "CFB_ACTIVATE", "CFB_DEACTIVATE", "CFB_ERASE", "CFB_INTERROGATE", "CFNR_REGISTER", "CFNR_ACTIVATE", "CFNR_DEACTIVATE", "CFNR_ERASE", "CFNR_INTERROGATE", "CFNR_TIMER", "CFT_ACTIVATE", "CFT_DEACTIVATE", "CFT_INTERROGATE", "CFU_REGISTER", "CFU_ACTIVATE", "CFU_DEACTIVATE", "CFU_ERASE", "CFU_INTERROGATE", "CLIR_ACTIVATE", "CLIR_DEACTIVATE", "CLIR_INTERROGATE", "CP_INVOKE", "CW_ACTIVATE", "CW_DEACTIVATE", "CW_INVOKE", "DND_ACTIVATE", "DND_DEACTIVATE", "DND_INTERROGATE", "EXT_INVOKE", "LINE_INVOKE", "MAILBOX_INVOKE", "OCB_ACTIVATE", "OCB_DEACTIVATE", "OCB_INTERROGATE", "PSO_ACTIVATE", "PW_SET", "SCF_ACTIVATE", "SCF_DEACTIVATE", "SCF_INTERROGATE", "SCREJ_ACTIVATE", "SCREJ_DEACTIVATE", "SCREJ_INTERROGATE", "SR_ACTIVATE", "SR_DEACTIVATE", "SR_INTERROGATE", NULL};
 struct codec_info supported_codecs[MAX_SUPPORTED_CODECS];
 int codecs_num;
-extern struct list_head main_memhead;
+extern struct list_head global_memhead;
 LIST_HEAD(call_log_list);
 static struct stat prev_stat = { 0 };
 static int call_log_list_size = 0;
@@ -634,7 +634,7 @@ int init_call_log(void)
 				pos = &entry->list;
 			}
 		} else {
-			entry = dm_dynamic_malloc(&main_memhead, sizeof(struct call_log_entry));
+			entry = dm_dynamic_malloc(&global_memhead, sizeof(struct call_log_entry));
 			if (!entry)
 				return -1;
 
