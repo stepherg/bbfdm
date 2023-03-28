@@ -760,7 +760,7 @@ static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmc
 	char *dnsserver = dmjson_get_value((json_object *)value, 1, "DNSServer");
 	char *timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
 	char *nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
-	char *proto = (bbfdatamodel_type == BBFDM_USP) ? "usp" : "both_proto";
+	char *proto = (ctx->dm_type == BBFDM_USP) ? "usp" : "both_proto";
 
 	dmubus_call_blocking("bbf.diag", "nslookup",
 			UBUS_ARGS{

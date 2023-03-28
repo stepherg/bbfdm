@@ -23,55 +23,81 @@
 #include "common.h"
 #include "add_delete.h"
 #include "get_helper.h"
-#include <libbbfdm/dmbbfcommon.h>
 
-typedef int (*ADD_DEL_CB_T)(struct dmctx *bbf_ctx, struct blob_buf *bb, char *path, const char *pkey);
+typedef int (*ADD_DEL_CB_T)(struct dmctx *bbf_ctx, usp_data_t *data, struct blob_buf *bb);
 
-static int handle_add_del_req(usp_data_t *data, struct blob_buf *bb, ADD_DEL_CB_T req_cb)
+static int usp_add_object(struct dmctx *bbf_ctx, usp_data_t *data __attribute__((unused)), struct blob_buf *bb)
 {
 	int fault = 0;
-	struct dmctx bbf_ctx;
-	LIST_HEAD(resolved_paths);
 
-	memset(&bbf_ctx, 0, sizeof(struct dmctx));
-	set_bbfdatamodel_type(data->proto);
+	INFO("Req to add object |%s|", bbf_ctx->in_param);
 
-	bbf_init(&bbf_ctx, data->instance);
+	fault = usp_dm_exec(bbf_ctx, BBF_ADD_OBJECT);
 
-	fault = get_resolved_paths(&bbf_ctx, data->qpath, &resolved_paths);
+	void *table = blobmsg_open_table(bb, NULL);
+	bb_add_string(bb, "path", bbf_ctx->in_param);
 	if (fault) {
-		fill_resolve_err(bb, data->qpath, fault);
+		blobmsg_add_u32(bb, "fault", fault);
+		blobmsg_add_u8(bb, "status", 0);
 	} else {
-		struct pathNode *p;
-		void *array;
-
-		array = blobmsg_open_array(bb, "parameters");
-		list_for_each_entry(p, &resolved_paths, list) {
-			void *table = blobmsg_open_table(bb, NULL);
-			int op_fault;
-
-			op_fault = req_cb(&bbf_ctx, bb, p->path, data->set_key);
-			blobmsg_close_table(bb, table);
-			// Preserve the first error
-			if (fault == USP_ERR_OK && op_fault != USP_ERR_OK)
-				fault = op_fault;
+		if (bbf_ctx->addobj_instance) {
+			blobmsg_add_u8(bb, "status", 1);
+			bb_add_string(bb, "instance", bbf_ctx->addobj_instance);
+		} else {
+			blobmsg_add_u8(bb, "status", 0);
 		}
-		blobmsg_close_array(bb, array);
 	}
-
-	// Free
-	bbf_cleanup(&bbf_ctx);
-	free_path_list(&resolved_paths);
+	blobmsg_close_table(bb, table);
 
 	return fault;
 }
 
-int create_add_response(usp_data_t *data, struct blob_buf *bb)
+static int usp_del_object(struct dmctx *bbf_ctx, usp_data_t *data, struct blob_buf *bb)
 {
-	return handle_add_del_req(data, bb, &usp_add_object);
+	struct pathNode *pn;
+	int fault = 0;
+
+	list_for_each_entry(pn, data->plist, list) {
+		bbf_sub_init(bbf_ctx);
+		bbf_ctx->in_param = pn->path;
+
+		INFO("Req to delete object |%s|", bbf_ctx->in_param);
+		fault = usp_dm_exec(bbf_ctx, BBF_DEL_OBJECT);
+
+		void *table = blobmsg_open_table(bb, NULL);
+		bb_add_string(bb, "path", bbf_ctx->in_param);
+		if (fault) {
+			blobmsg_add_u8(bb, "status", 0);
+			blobmsg_add_u32(bb, "fault", fault);
+		} else {
+			blobmsg_add_u8(bb, "status", 1);
+		}
+		blobmsg_close_table(bb, table);
+
+		bbf_sub_cleanup(bbf_ctx);
+	}
+
+	return fault;
 }
 
-int create_del_response(usp_data_t *data, struct blob_buf *bb)
+static int handle_add_del_req(struct dmctx *bbf_ctx, usp_data_t *data, struct blob_buf *bb, ADD_DEL_CB_T req_cb)
 {
-	return handle_add_del_req(data, bb, &usp_del_object);
+	void *array = NULL;
+	int fault = 0;
+
+	array = blobmsg_open_array(bb, "objects");
+	fault = req_cb(bbf_ctx, data, bb);
+	blobmsg_close_array(bb, array);
+
+	return fault;
+}
+
+int create_add_response(struct dmctx *bbf_ctx, usp_data_t *data, struct blob_buf *bb)
+{
+	return handle_add_del_req(bbf_ctx, data, bb, &usp_add_object);
+}
+
+int create_del_response(struct dmctx *bbf_ctx, usp_data_t *data, struct blob_buf *bb)
+{
+	return handle_add_del_req(bbf_ctx, data, bb, &usp_del_object);
 }

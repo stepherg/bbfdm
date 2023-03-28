@@ -31,4 +31,4 @@
   #define DEF_IPC_DATA_LEN (10 * 1024 * 1024 - 128) // 10M - 128 bytes
 #endif
 
-#endif // end IPC_H
+#endif /* IPC_H */
