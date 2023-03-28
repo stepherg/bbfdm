@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include <libubus.h>
+#include <libbbf_api/dmapi.h>
 #include <libbbf_api/dmentry.h>
 #include <libbbf_dm/device.h>
 #include <libbbf_dm/vendor.h>
@@ -12,12 +12,6 @@ static DM_MAP_VENDOR *TR181_VENDOR_EXTENSION[2] = {
 };
 static DM_MAP_VENDOR_EXCLUDE *TR181_VENDOR_EXTENSION_EXCLUDE = tVendorExtensionExclude;
 
-#ifndef CMD_GET_INFO
-#define CMD_GET_INFO (CMD_EXTERNAL_COMMAND + 1)
-#endif
-static struct ubus_context *ubus_ctx = NULL;
-static int g_proto = BBFDM_USP;
-
 typedef struct {
 	int id;
 	char *str;
@@ -25,22 +19,18 @@ typedef struct {
 
 
 cmd_t CMD[] = {
-	{ CMD_GET_VALUE, "get"},
-	{ CMD_GET_NAME, "get_name"},
-	//{ CMD_SET_VALUE, "set"},
-	//{ CMD_ADD_OBJECT, "add"},
-	//{ CMD_DEL_OBJECT, "del"},
-	//{ CMD_USP_OPERATE, "operate"},
-	{ CMD_USP_LIST_OPERATE, "list_operate"},
-	{ CMD_USP_LIST_EVENT, "list_event"},
-	{ CMD_GET_SCHEMA, "get_schema"},
-	{ CMD_GET_INSTANCES, "instances"},
-	{ CMD_GET_INFO, "get_info"}
+	{ BBF_GET_VALUE, "get"},
+	{ BBF_GET_SUPPORTED_DM, "get_supported_dm"},
+	{ BBF_GET_INSTANCES, "get_instances"},
+	//{ BBF_SET_VALUE, "set"},
+	//{ BBF_ADD_OBJECT, "add"},
+	//{ BBF_DEL_OBJECT, "del"},
+	//{ BBF_USP_OPERATE, "operate"},
 };
 
-int get_cmd_from_str(char *str)
+static int get_cmd_from_str(char *str)
 {
-	int i, cmd = CMD_GET_VALUE;
+	int i, cmd = BBF_GET_VALUE;
 
 	for (i = 0; i < ARRAY_SIZE(CMD); i++) {
 		if (DM_STRCMP(CMD[i].str, str) == 0) {
@@ -52,7 +42,7 @@ int get_cmd_from_str(char *str)
 	return cmd;
 }
 
-void print_help(char *prog)
+static void print_help(char *prog)
 {
 	printf("Valid commands:\n");
 	printf("%s -c => Run with cwmp proto\n", prog);
@@ -60,29 +50,43 @@ void print_help(char *prog)
 	exit(0);
 }
 
-int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
+int bbf_dm_exec(int argc, char *argv[])
 {
-	int fault = 0;
 	struct dmctx bbf_ctx;
+	int fault = 0;
+	int cmd = 0;
 
 	memset(&bbf_ctx, 0, sizeof(struct dmctx));
 
-	printf("cmd[%d], path[%s]\n", cmd, path);
-	set_bbfdatamodel_type(g_proto);
+	cmd = get_cmd_from_str(argv[2]);
 
-	dm_ctx_init(&bbf_ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, 0);
+	bbf_ctx.instance_mode = INSTANCE_MODE_NUMBER;
 
-	if (arg2 && *arg2) {
-		bbf_ctx.dm_version = arg2;
-		printf("config version %s\n", bbf_ctx.dm_version);
+	if (DM_STRCMP(argv[1], "-c") == 0)
+		bbf_ctx.dm_type = BBFDM_CWMP;
+	else
+		bbf_ctx.dm_type = BBFDM_USP;
+
+	if (argc > 3 && DM_STRLEN(argv[3]))
+		bbf_ctx.in_param = argv[3];
+
+	if (cmd == 1) {
+		bbf_ctx.nextlevel = false;
+		bbf_ctx.iscommand = true;
+		bbf_ctx.isevent = true;
+		bbf_ctx.isinfo = true;
 	}
 
-	if (cmd == CMD_GET_INFO) {
-		fault = dm_get_supported_dm(&bbf_ctx, path, false, DM_STRTOL(arg1));
-	} else {
-		fault = dm_entry_param_method(&bbf_ctx, cmd, path, arg1, arg2);
+	if (cmd == 2) {
+		bbf_ctx.nextlevel = false;
 	}
 
+	if (cmd == 3 && argc > 4 && DM_STRLEN(argv[4]))
+		bbf_ctx.in_value = argv[4];
+
+	bbf_ctx_init(&bbf_ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+
+	fault = bbf_entry_method(&bbf_ctx, cmd);
 	if (!fault) {
 		struct dm_parameter *n;
 
@@ -93,42 +97,16 @@ int usp_dm_exec(int cmd, char *path, char *arg1, char *arg2)
 		printf("Fault %d\n", fault);
 	}
 
-	dm_ctx_clean(&bbf_ctx);
+	bbf_ctx_clean(&bbf_ctx);
 	return fault;
 }
 
 int main(int argc, char *argv[])
 {
-	char *param = "", *value = "", *version = "";
-	int cmd;
-
-	if (argc < 3) {
+	if (argc < 3)
 		print_help(argv[0]);
-	}
 
-	ubus_ctx = ubus_connect(NULL);
-	if (ubus_ctx == NULL) {
-		fprintf(stderr, "Failed to connect with ubus\n");
-		return -1;
-	}
+	bbf_dm_exec(argc, argv);
 
-	dm_config_ubus(ubus_ctx);
-
-	if (DM_STRCMP(argv[1], "-c") == 0)
-		g_proto = BBFDM_CWMP;
-
-	cmd = get_cmd_from_str(argv[2]);
-
-	if (argc > 3 && DM_STRLEN(argv[3]))
-		param = argv[3];
-
-	if (argc > 4 && DM_STRLEN(argv[4]))
-		value = argv[4];
-
-	if (argc > 5 && DM_STRLEN(argv[5]))
-		version = argv[5];
-	
-	usp_dm_exec(cmd, param, value, version);
-	bbf_dm_cleanup(TR181_ROOT_TREE);
-	ubus_free(ubus_ctx);
+	bbf_global_clean(TR181_ROOT_TREE);
 }

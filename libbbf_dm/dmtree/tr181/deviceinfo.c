@@ -14,7 +14,7 @@
 #include "deviceinfo.h"
 #include "sys/statvfs.h"
 
-extern struct list_head main_memhead;
+extern struct list_head global_memhead;
 
 LIST_HEAD(process_list);
 static int process_count = 0;
@@ -285,7 +285,7 @@ static void init_processes(void)
 
 		if (process_count == 0 || !(pentry_exits = check_entry_exists(entry->d_name))) {
 
-			pentry = dm_dynamic_malloc(&main_memhead, sizeof(struct process_entry));
+			pentry = dm_dynamic_malloc(&global_memhead, sizeof(struct process_entry));
 			if (!pentry)
 				return;
 

@@ -226,9 +226,6 @@ int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, cha
 int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
 int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
 char *check_create_dmmap_package(const char *dmmap_package);
-__attribute__ ((deprecated)) int is_section_unnamed(char *section_name);
-__attribute__ ((deprecated)) void delete_sections_save_next_sections(char* dmmap_package, char *section_type, char *instancename, char *section_name, int instance, struct list_head *dup_list);
-__attribute__ ((deprecated)) void update_dmmap_sections(struct list_head *dup_list, char *instancename, char* dmmap_package, char *section_type);
 unsigned char isdigit_str(char *str);
 bool special_char(char c);
 bool special_char_exits(const char *str);
