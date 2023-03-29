@@ -86,6 +86,14 @@
       "dm_files": [
         "src/users.c"
       ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/iopsys/icwmp.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/cwmp_dm/datamodel.c"
+      ]
     }
   ],
   "output": {
