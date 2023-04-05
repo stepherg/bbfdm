@@ -179,23 +179,47 @@ static long upload_file(const char *file_path, const char *url, const char *user
 {
 	long res_code = 0;
 
-	CURL *curl = curl_easy_init();
-	if (curl) {
-		curl_easy_setopt(curl, CURLOPT_URL, url);
-		curl_easy_setopt(curl, CURLOPT_USERNAME, username);
-		curl_easy_setopt(curl, CURLOPT_PASSWORD, password);
-		curl_easy_setopt(curl, CURLOPT_TIMEOUT, CURL_TIMEOUT);
-		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-
-		FILE *fp = fopen(file_path, "rb");
-		if (fp) {
-			curl_easy_setopt(curl, CURLOPT_READDATA, fp);
-			curl_easy_perform(curl);
-			fclose(fp);
+	if (strncmp(url, FILE_URI, strlen(FILE_URI)) == 0) {
+		char dst_path[2046] = {0};
+		snprintf(dst_path, sizeof(dst_path), "%s", url+strlen(FILE_URI));
+		FILE *fp = fopen(file_path, "r");
+		if (fp == NULL) {
+			return -1;
 		}
 
-		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &res_code);
-		curl_easy_cleanup(curl);
+		fseek(fp, 0, SEEK_END);
+		int length = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+		fclose(fp);
+
+		char buff[length];
+		memset(buff, 0, length);
+
+		if (dm_file_to_buf(file_path, buff, length) > 0) {
+			if (dm_buf_to_file(buff, dst_path) < 0)
+				res_code = -1;
+		} else {
+			res_code = -1;
+		}
+	} else {
+		CURL *curl = curl_easy_init();
+		if (curl) {
+			curl_easy_setopt(curl, CURLOPT_URL, url);
+			curl_easy_setopt(curl, CURLOPT_USERNAME, username);
+			curl_easy_setopt(curl, CURLOPT_PASSWORD, password);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, CURL_TIMEOUT);
+			curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+			FILE *fp = fopen(file_path, "rb");
+			if (fp) {
+				curl_easy_setopt(curl, CURLOPT_READDATA, fp);
+				curl_easy_perform(curl);
+				fclose(fp);
+			}
+
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &res_code);
+			curl_easy_cleanup(curl);
+		}
 	}
 
 	return res_code;

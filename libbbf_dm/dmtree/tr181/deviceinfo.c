@@ -20,6 +20,7 @@ LIST_HEAD(process_list);
 static int process_count = 0;
 
 #define PROCPS_BUFSIZE 1024
+#define DEF_VENDOR_LOG_FILE "/tmp/.vend_log"
 
 struct process_entry {
 	struct list_head list;
@@ -1214,7 +1215,17 @@ static int operate_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "log_file", &vlf_file_path);
 
+	if (DM_STRLEN(vlf_file_path) == 0) {
+		vlf_file_path = DEF_VENDOR_LOG_FILE;
+		char cmd[64] = {0};
+		snprintf(cmd, sizeof(cmd), "logread > %s", DEF_VENDOR_LOG_FILE);
+		system(cmd);
+	}
+
 	int res = bbf_upload_log(url, user, pass, vlf_file_path, upload_command, upload_path);
+
+	if (file_exists(DEF_VENDOR_LOG_FILE))
+		remove(DEF_VENDOR_LOG_FILE);
 
 	return res ? CMD_FAIL : CMD_SUCCESS;
 }

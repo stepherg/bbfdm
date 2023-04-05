@@ -297,4 +297,5 @@ char *ioctl_get_ipv4(char *interface_name);
 char *get_ipv6(char *interface_name);
 bool validate_blob_message(struct blob_attr *src, struct blob_attr *dst);
 void strip_lead_trail_whitespace(char *str);
+int dm_buf_to_file(char *buf, const char *filename);
 #endif
