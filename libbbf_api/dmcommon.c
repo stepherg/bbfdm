@@ -1963,6 +1963,23 @@ void strip_lead_trail_whitespace(char *str)
 	}
 }
 
+int dm_buf_to_file(char *buf, const char *filename)
+{
+	FILE *file;
+	int ret = -1;
+
+	if (buf == NULL || filename == NULL)
+		return ret;
+
+	file = fopen(filename, "w");
+	if (file) {
+		ret = fputs(buf, file);
+		fclose(file);
+	}
+
+	return ret;
+}
+
 int dm_file_to_buf(const char *filename, void *buf, size_t buf_size)
 {
 	FILE *file;
