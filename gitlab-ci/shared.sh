@@ -115,19 +115,6 @@ function install_libbbf_test()
 	cp -f test/bbf_test/libbbf_test.so /usr/lib/bbfdm
 }
 
-function install_libperiodicstats()
-{
-	# clone and compile libperiodicstats
-	rm -rf /opt/dev/periodicstats
-	exec_cmd git clone -b devel https://dev.iopsys.eu/iopsys/periodicstats.git /opt/dev/periodicstats
-	echo "Compiling libperiodicstats"
-	make clean -C /opt/dev/periodicstats/
-	make -C /opt/dev/periodicstats/
-
-	echo "installing libperiodicstats"
-	cp -f /opt/dev/periodicstats/bbf_plugin/libperiodicstats.so /usr/lib/bbfdm
-}
-
 function error_on_zero()
 {
 	ret=$1

@@ -1460,7 +1460,7 @@ static void test_api_bbfdm_valid_library_event(void **state)
 		idx++;
 	}
 
-	assert_int_equal(idx, 8);
+	assert_int_equal(idx, 9);
 }
 
 static void test_api_bbfdm_valid_json_event(void **state)
@@ -1507,7 +1507,7 @@ static void test_api_bbfdm_valid_json_event(void **state)
 		idx++;
 	}
 
-	assert_int_equal(idx, 8);
+	assert_int_equal(idx, 9);
 }
 
 static void test_api_bbfdm_valid_json_v1_event(void **state)
@@ -1556,7 +1556,7 @@ static void test_api_bbfdm_valid_json_v1_event(void **state)
 		idx++;
 	}
 
-	assert_int_equal(idx, 8);
+	assert_int_equal(idx, 9);
 }
 
 int main(void)

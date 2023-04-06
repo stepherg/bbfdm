@@ -19,7 +19,6 @@ date +%s > timestamp.log
 install_libbbf
 
 install_libbbf_test
-install_libperiodicstats
 
 supervisorctl update
 supervisorctl status all
