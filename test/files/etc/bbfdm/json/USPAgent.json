@@ -1,0 +1,1063 @@
+{
+	"json_plugin_version": 1,
+	"Device.USPAgent.": {
+		"type": "object",
+		"version": "2.15",
+		"protocols": [
+			"cwmp"
+		],
+		"access": false,
+		"array": false,
+		"EndpointID": {
+			"type": "string",
+			"read": true,
+			"write": false,
+			"version": "2.15",
+			"protocols": [
+				"cwmp"
+			],
+			"datatype": "string",
+			"mapping": [
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "obuspa", 
+						"section": {
+							"name": "localagent"
+						}, 
+						"option": {
+							"name": "EndpointID"
+						}
+					}
+				}
+			]
+		},
+		"MTPNumberOfEntries": {
+			"type": "unsignedInt",
+			"read": true,
+			"write": false,
+			"version": "2.15",
+			"protocols": [
+				"cwmp"
+			],
+			"datatype": "unsignedInt",
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "obuspa",
+						"section": {
+							"type": "mtp"
+						},
+						"option": {
+							"name": "@Count"
+						}
+					}
+				}
+			]	
+		},
+		"ControllerNumberOfEntries": {
+			"type": "unsignedInt",
+			"read": true,
+			"write": false,
+			"version": "2.15",
+			"protocols": [
+				"cwmp"
+			],
+			"datatype": "unsignedInt",
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "obuspa",
+						"section": {
+							"type": "controller"
+						},
+						"option": {
+							"name": "@Count"
+						}
+					}
+				}
+			]	
+		},
+		"Device.USPAgent.MTP.{i}.": {
+			"type": "object",
+			"version": "2.15",
+			"protocols": [
+				"cwmp"
+			],
+			"uniqueKeys": [
+				"Alias"
+			],
+			"access": true,
+			"array": true,
+			"mapping":[
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "obuspa", 
+						"section": {
+							"type": "mtp"
+						}, 
+						"dmmapfile": "dmmap_obuspa"
+					}
+				}
+			],
+			"Enable": {
+				"type": "boolean",
+				"read": true,
+				"write": true,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"datatype": "boolean",
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "Enable"
+					}
+				]
+			},
+			"Protocol": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"datatype": "string",
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "Protocol"
+					}
+				]
+			},
+			"Device.USPAgent.MTP.{i}.STOMP.": {
+				"type": "object",
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"access": false,
+				"array": false,
+				"Reference": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "string",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Reference"
+						}
+					]
+				},
+				"Destination": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "string",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Destination"
+						}
+					]
+				}
+			},
+			"Device.USPAgent.MTP.{i}.WebSocket.": {
+				"type": "object",
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"access": false,
+				"array": false,
+				"Port": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"min": 1,
+							"max": 65535
+						}
+					],
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Port"
+						}
+					]
+				},
+				"Path": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "string",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Path"
+						}
+					]
+				},
+				"EnableEncryption": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "EnableEncryption"
+						}
+					]
+				},
+				"KeepAliveInterval": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"min": 1
+						}
+					],
+					"unit": "seconds",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "KeepAliveInterval"
+						}
+					]
+				}
+			},
+			"Device.USPAgent.MTP.{i}.MQTT.": {
+				"type": "object",
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"access": false,
+				"array": false,
+				"Reference": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "string",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Reference"
+						}
+					]
+				},
+				"ResponseTopicConfigured": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "string",
+					"range": [
+						{
+							"max": 65535
+						}
+					],
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "ResponseTopicConfigured"
+						}
+					]
+				},
+				"PublishQoS": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "unsignedInt",
+					"range": [
+						{
+							"min": 0,
+							"max": 2
+						}
+					],
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "PublishQoS"
+						}
+					]
+				}
+			}
+		},
+		"Device.USPAgent.Controller.{i}.": {
+			"type": "object",
+			"version": "2.15",
+			"protocols": [
+				"cwmp"
+			],
+			"uniqueKeys": [
+				"EndpointID",
+				"Alias"
+			],
+			"access": true,
+			"array": true,
+			"mapping":[
+				{
+					"type": "uci", 
+					"uci": {
+						"file": "obuspa", 
+						"section": {
+							"type": "controller"
+						}, 
+						"dmmapfile": "dmmap_obuspa"
+					}
+				}
+			],
+			"EndpointID": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"datatype": "string",
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "EndpointID"
+					}
+				]
+			},
+			"ControllerCode": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"datatype": "string",
+				"range": [
+					{
+						"max": 128
+					}
+				],
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "ControllerCode"
+					}
+				]
+			},
+			"ProvisioningCode": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"datatype": "string",
+				"range": [
+					{
+						"max": 64
+					}
+				],
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "ProvisioningCode"
+					}
+				]
+			},
+			"Enable": {
+				"type": "boolean",
+				"read": true,
+				"write": true,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"datatype": "boolean",
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "Enable"
+					}
+				]
+			},
+			"AssignedRole": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"list": {
+					"datatype": "string"
+				},
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "AssignedRole"
+					}
+				]
+			},
+			"PeriodicNotifInterval": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": true,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"datatype": "unsignedInt",
+				"range": [
+					{
+						"min": 1
+					}
+				],
+				"unit": "seconds",
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "PeriodicNotifInterval"
+					}
+				]
+			},
+			"PeriodicNotifTime": {
+				"type": "dateTime",
+				"read": true,
+				"write": true,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"datatype": "dateTime",
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "PeriodicNotifTime"
+					}
+				]
+			},
+			"USPNotifRetryMinimumWaitInterval": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": true,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"datatype": "unsignedInt",
+				"range": [
+					{
+						"min": 1,
+						"max": 65535
+					}
+				],
+				"unit": "seconds",
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "USPNotifRetryMinimumWaitInterval"
+					}
+				]
+			},
+			"USPNotifRetryIntervalMultiplier": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": true,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"datatype": "unsignedInt",
+				"range": [
+					{
+						"min": 1000,
+						"max": 65535
+					}
+				],
+				"mapping": [
+					{
+						"data": "@Parent",
+						"type": "uci_sec",
+						"key": "USPNotifRetryIntervalMultiplier"
+					}
+				]
+			},
+			"Device.USPAgent.Controller.{i}.MTP.{i}.": {
+				"type": "object",
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"uniqueKeys": [
+					"Protocol",
+					"Alias"
+				],
+				"access": true,
+				"array": true,
+				"mapping":[
+					{
+						"type": "uci", 
+						"uci": {
+							"file": "obuspa", 
+							"section": {
+								"type": "controller"
+							}, 
+							"dmmapfile": "dmmap_obuspa"
+						}
+					}
+				],
+				"Enable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Enable"
+						}
+					]
+				},
+				"Protocol": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "string",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Protocol"
+						}
+					]
+				},
+				"Device.USPAgent.Controller.{i}.MTP.{i}.STOMP.": {
+					"type": "object",
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"access": false,
+					"array": false,
+					"Reference": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "string",
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "Reference"
+							}
+						]
+					},
+					"Destination": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "string",
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "Destination"
+							}
+						]
+					}
+				},
+				"Device.USPAgent.Controller.{i}.MTP.{i}.WebSocket.": {
+					"type": "object",
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"access": false,
+					"array": false,
+					"Host": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 256
+							}
+						],
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "Host"
+							}
+						]
+					},
+					"Port": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1,
+								"max": 65535
+							}
+						],
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "Port"
+							}
+						]
+					},
+					"Path": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "string",
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "Path"
+							}
+						]
+					},
+					"EnableEncryption": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "boolean",
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "EnableEncryption"
+							}
+						]
+					},
+					"KeepAliveInterval": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1
+							}
+						],
+						"unit": "seconds",
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "KeepAliveInterval"
+							}
+						]
+					},
+					"SessionRetryMinimumWaitInterval": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1,
+								"max": 65535
+							}
+						],
+						"unit": "seconds",
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "SessionRetryMinimumWaitInterval"
+							}
+						]
+					},
+					"SessionRetryIntervalMultiplier": {
+						"type": "unsignedInt",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "unsignedInt",
+						"range": [
+							{
+								"min": 1000,
+								"max": 65535
+							}
+						],
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "SessionRetryIntervalMultiplier"
+							}
+						]
+					}
+				},
+				"Device.USPAgent.Controller.{i}.MTP.{i}.MQTT.": {
+					"type": "object",
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"access": false,
+					"array": false,
+					"Reference": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "string",
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "Reference"
+							}
+						]
+					},
+					"Topic": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 65535
+							}
+						],
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "Topic"
+							}
+						]
+					},
+					"PublishRetainResponse": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "boolean",
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "PublishRetainResponse"
+							}
+						]
+					},
+					"PublishRetainNotify": {
+						"type": "boolean",
+						"read": true,
+						"write": true,
+						"version": "2.15",
+						"protocols": [
+							"cwmp"
+						],
+						"datatype": "boolean",
+						"mapping": [
+							{
+								"data": "@Parent",
+								"type": "uci_sec",
+								"key": "PublishRetainNotify"
+							}
+						]
+					}
+				}
+			}
+		},
+		"Device.USPAgent.ControllerTrust.": {
+			"type": "object",
+			"version": "2.15",
+			"protocols": [
+				"cwmp"
+			],
+			"access": false,
+			"array": false,
+			"ChallengeNumberOfEntries": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": false,
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"datatype": "unsignedInt",
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "obuspa",
+							"section": {
+								"type": "challenge"
+							},
+							"option": {
+								"name": "@Count"
+							}
+						}
+					}
+				]	
+			},
+			"Device.USPAgent.ControllerTrust.Challenge.{i}.": {
+				"type": "object",
+				"version": "2.15",
+				"protocols": [
+					"cwmp"
+				],
+				"uniqueKeys": [
+					"Alias"
+				],
+				"access": true,
+				"array": true,
+				"mapping":[
+					{
+						"type": "uci", 
+						"uci": {
+							"file": "obuspa", 
+							"section": {
+								"type": "challenge"
+							}, 
+							"dmmapfile": "dmmap_obuspa"
+						}
+					}
+				],
+				"Description": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "string",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Description"
+						}
+					]
+				},
+				"Role": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"list": {
+						"datatype": "string"
+					},
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Role"
+						}
+					]
+				},
+				"Enable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Enable"
+						}
+					]
+				},
+				"Value": {
+					"type": "base64",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "base64",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Value"
+						}
+					]
+				},
+				"Retries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "unsignedInt",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "Retries"
+						}
+					]
+				},
+				"LockoutPeriod": {
+					"type": "int",
+					"read": true,
+					"write": true,
+					"version": "2.15",
+					"protocols": [
+						"cwmp"
+					],
+					"datatype": "int",
+					"range": [
+						{
+							"min": 0
+						}
+					],
+					"unit": "seconds",
+					"mapping": [
+						{
+							"data": "@Parent",
+							"type": "uci_sec",
+							"key": "LockoutPeriod"
+						}
+					]
+				}
+			}
+		}
+	}
+}
