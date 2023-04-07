@@ -11,7 +11,6 @@
 #ifndef __LIBBBFD_TEST_H
 #define __LIBBBFD_TEST_H
 
-extern DMLEAF tDynamicManagementServerParams[];
 extern DMOBJ tDynamicDeviceObj[];
 extern DMLEAF tDynamicDeviceParams[];
 extern DMLEAF tX_IOPSYS_EU_SyslogParam[];

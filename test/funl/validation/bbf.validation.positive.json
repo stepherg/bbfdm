@@ -1,0 +1,368 @@
+{
+    "object": "usp.raw",
+        "methods": [
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "proto": "cwmp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Users.User.*.Alias",
+                "proto": "cwmp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "proto": "both"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "proto": "usp",
+                "maxdepth": "1"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "proto": "usp",
+                "maxdepth": "1",
+                "next-level": true 
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.SSID.1.LowerLayers+.Name"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.SSID.1.LowerLayers#1+.Name"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Users.User.*.Alias"
+            },
+            "rc": 0
+        },
+
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.SSID.1.LowerLayers#*+.Name"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.SSID.[Status==\"Up\"].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.SSID.[SSID==\"test-2g\"&&Status==\"Up\"].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.SSID.[SSID==\"test-2g\"&&Stats.PacketsSent>0].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.SSID.[BytesSent>0].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.SSID.[Enable==true].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.SSID.[Enable!=true].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.USB.USBHosts.Host.[Enable==0].Device."
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.USB.USBHosts.Host.*.Device."
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[DestPort==68].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[DestPort!=68].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[DestPort>68].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[DestPort<68].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[DestPort>=68].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[DestPort<=68].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[Order==1].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[Order!=1].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[Order>8].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[Order>=8].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[Order<2].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Firewall.Chain.1.Rule.[Order<=2].Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.AccessPoint.[SSIDReference+.Alias==\"cpe-1\"].AssociatedDeviceNumberOfEntries"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.AccessPoint.[SSIDReference#1+.Alias==\"cpe-1\"].WPS.ConfigMethodsSupported"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.USB.USBHosts.Host.[Enable==0].Device."
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.USB.USBHosts.Host.*.Device."
+            },
+            "rc": 0
+        },
+        {
+            "method": "hello",
+            "rc": 3
+        },
+        {
+            "method": "instances",
+            "args": {
+                "path": "Device.Users.User.",
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "set",
+            "args": {
+                "path": "Device.WiFi.SSID.1.SSID",
+                "value": "test-2g",
+                "transaction_id": 123
+            },
+            "rc": 0
+        },
+        {
+            "method": "object_names",
+            "args": {
+                "path": "Device.WiFi.SSID.1.",
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "operate",
+            "args": {
+                "path":"Device.IP.Diagnostics.",
+                "action":"IPPing()",
+                "input":{
+                    "Host":"iopsys.eu"
+                }
+            },
+            "rc": 0
+        },
+        {
+            "method": "dump_schema",
+            "args": {},
+            "rc": 0
+        },
+        {
+            "method": "list_operate",
+            "args": {},
+            "rc": 0
+        },
+        {
+            "method": "get_supported_dm",
+            "args": {
+                "path": "Device.DeviceInfo.",
+            },
+            "rc": 0
+        },
+        {
+            "method": "operate",
+            "args": {
+                "path":"Device.IP.Diagnostics.",
+                "action":"IPPing()",
+                "input":{
+                    "Host":"iopsys.eu"
+                }
+            },
+            "rc": 0
+        },
+        {
+            "method": "transaction_commit",
+            "args": {
+                    "transaction_id": 123
+            },
+            "rc": 0
+        },
+        {
+            "method": "transaction_abort",
+            "args": {
+                    "transaction_id": 123
+            },
+            "rc": 0
+        },
+        {
+            "method": "getm_names",
+            "args": {
+                "paths": ["Device.WiFi.SSID.1.SSID","Device.WiFi.SSID.2.SSID"],
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "setm_values",
+            "args": {
+                "pv_tuple": [{"path":"Device.Users.User.1.Alias", "value":"cpe-1"}, {"path":"Device.Users.User.2.Alias", "value":"cpe-2"}],
+                "proto": "usp",
+                "transaction_id": 123
+            },
+            "rc": 0
+        },
+    ]
+}
+
