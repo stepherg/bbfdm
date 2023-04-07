@@ -1,0 +1,155 @@
+{
+    "object": "bbf",
+        "methods": [
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "optional": {"format":"raw", "proto":"usp"}
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "optional": {"format":"raw", "proto":"cwmp"}
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Users.User.*.Alias",
+                "optional": {"format":"raw", "proto":"cwmp"}
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "optional": {"format":"raw", "proto":"both"}
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "optional": {"format":"raw", "proto":"usp"},
+                "maxdepth": "1"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.SSID.1.LowerLayers"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.WiFi.SSID.1.Name"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.Users.User.*.Alias"
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.USB.USBHosts.Host.*.Device."
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "path":"Device.USB.USBHosts.Host.*.Device."
+            },
+            "rc": 0
+        },
+        {
+            "method": "hello",
+            "rc": 3
+        },
+        {
+            "method": "instances",
+            "args": {
+                "path": "Device.Users.User.",
+                "optional": {"format":"raw", "proto":"usp"}
+            },
+            "rc": 0
+        },
+        {
+            "method": "set",
+            "args": {
+                "path": "Device.WiFi.SSID.1.SSID",
+                "value": "test-2g"
+            },
+            "rc": 0
+        },
+        {
+            "method": "schema",
+            "args": {
+                "path": "Device.Users.User."
+            },
+            "rc": 0
+        },
+        {
+            "method": "schema",
+            "args": {
+                "path": "Device.DeviceInfo."
+            },
+            "rc": 0
+        },
+        {
+            "method": "transaction",
+            "args": {
+                    "cmd": "commit",
+                    "optional":{"transaction_id":123}
+            },
+            "rc": 0
+        },
+        {
+            "method": "transaction",
+            "args": {
+                    "cmd": "abort",
+                    "optional":{"transaction_id":123}
+            },
+            "rc": 0
+        },
+        {
+            "method": "get",
+            "args": {
+                "paths": ["Device.WiFi.SSID.1.SSID","Device.WiFi.SSID.2.SSID"],
+                "proto": "usp"
+            },
+            "rc": 0
+        },
+        {
+            "method": "set",
+            "args": {
+                "path": "Device.Users.User.1.",
+                "obj_path": {"Alias":"test", "Enable":"1"},
+                "optional":{"transaction_id":123}
+            },
+            "rc": 0
+        }
+    ]
+}

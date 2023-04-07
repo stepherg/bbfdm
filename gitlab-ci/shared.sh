@@ -36,34 +36,6 @@ function exec_cmd_verbose()
 	fi
 }
 
-function install_wolfssl()
-{
-	CUR="${PWD}"
-
-	echo "Installing wolfssl-4.8.1"
-	cd /opt/dev/
-	rm -rf wolfssl*
-
-	wget -q https://github.com/wolfSSL/wolfssl/archive/refs/tags/v4.8.1-stable.tar.gz -O wolfssl.tgz
-	tar xf wolfssl.tgz
-
-	cd wolfssl-4.8.1-stable
-	autoreconf -i -f
-	exec_cmd ./configure --program-prefix="" --program-suffix="" --prefix=/usr --exec-prefix=/usr --bindir=/usr/bin --sbindir=/usr/sbin --libexecdir=/usr/lib --sysconfdir=/etc --datadir=/usr/share --localstatedir=/var --mandir=/usr/man --infodir=/usr/info --disable-nls  --enable-reproducible-build --enable-lighty --enable-opensslall --enable-opensslextra --enable-sni --enable-stunnel --disable-crypttests --disable-examples --disable-jobserver --enable-ipv6 --enable-aesccm --enable-certgen --enable-chacha --enable-poly1305 --enable-dh --enable-arc4 --enable-tlsv10 --enable-tls13 --enable-session-ticket --disable-dtls --disable-curve25519 --disable-afalg --enable-devcrypto=no --enable-ocsp --enable-ocspstapling --enable-ocspstapling2 --enable-wpas --enable-fortress --enable-fastmath
-
-	exec_cmd make
-	exec_cmd make install
-
-	cd ${CUR}
-}
-
-function generate_release()
-{
-	cd build
-	cpack
-	cd ..
-}
-
 function install_libusermngr()
 {
 	# clone and compile libusermngr
@@ -71,8 +43,8 @@ function install_libusermngr()
 	exec_cmd git clone -b devel https://dev.iopsys.eu/iopsys/usermngr.git /opt/dev/usermngr
 
 	echo "Compiling libusermngr"
-	make clean -C /opt/dev/usermngr/src/
-	make -C /opt/dev/usermngr/src/
+	exec_cmd_verbose make clean -C /opt/dev/usermngr/src/
+	exec_cmd_verbose make -C /opt/dev/usermngr/src/
 
 	echo "installing libusermngr"
 	cp -f /opt/dev/usermngr/src/libusermngr.so /usr/lib/bbfdm
@@ -92,24 +64,21 @@ function install_libbbf()
 
 	mkdir -p build
 	cd build
-	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS" -DBBFD_ENABLED=ON -DBBF_TR181=ON -DBBF_TR104=ON -DBBF_TR143=ON -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DCMAKE_INSTALL_PREFIX=/
+	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS" -DBBFD_ENABLED=ON -DBBF_TR181=ON -DBBF_TR104=ON -DBBF_TR143=ON -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
 	exec_cmd_verbose make
 
 	echo "installing libbbf"
 	exec_cmd_verbose make install
 	ln -sf /usr/share/bbfdm/bbf.diag /usr/libexec/rpcd/bbf.diag
 	cd ..
-
-	echo "installing libusermngr"
-	install_libusermngr
 }
 
 function install_libbbf_test()
 {
 	# compile and install libbbf_test
 	echo "Compiling libbbf_test"
-	make clean -C test/bbf_test/
-	make -C test/bbf_test/
+	exec_cmd_verbose make clean -C test/bbf_test/
+	exec_cmd_verbose make -C test/bbf_test/
 
 	echo "installing libbbf_test"
 	cp -f test/bbf_test/libbbf_test.so /usr/lib/bbfdm
@@ -120,12 +89,30 @@ function install_libperiodicstats()
 	# clone and compile libperiodicstats
 	rm -rf /opt/dev/periodicstats
 	exec_cmd git clone -b devel https://dev.iopsys.eu/iopsys/periodicstats.git /opt/dev/periodicstats
+
 	echo "Compiling libperiodicstats"
-	make clean -C /opt/dev/periodicstats/
-	make -C /opt/dev/periodicstats/
+	exec_cmd_verbose make clean -C /opt/dev/periodicstats/
+	exec_cmd_verbose make -C /opt/dev/periodicstats/
 
 	echo "installing libperiodicstats"
 	cp -f /opt/dev/periodicstats/bbf_plugin/libperiodicstats.so /usr/lib/bbfdm
+}
+
+function install_libcwmpdm()
+{
+	# clone and compile libcwmpdm
+	rm -rf /opt/dev/icwmp
+	exec_cmd git clone -b ticket_8966 --depth 1 https://dev.iopsys.eu/iopsys/icwmp.git /opt/dev/icwmp
+
+	echo "Compiling libcwmpdm"
+	cd /opt/dev/icwmp
+	cmake -DWITH_OPENSSL=ON -DCMAKE_INSTALL_PREFIX=/
+	exec_cmd_verbose make
+
+	echo "installing libcwmpdm"
+	cp -f /opt/dev/icwmp/libcwmpdm.so /usr/lib/bbfdm
+
+	cd /builds/iopsys/bbf
 }
 
 function error_on_zero()
@@ -136,5 +123,11 @@ function error_on_zero()
 		exit $ret
 	fi
 
+}
+
+function generate_report()
+{
+	exec_cmd tap-junit --name "${1}" --input "${2}" --output report
+	sync
 }
 
