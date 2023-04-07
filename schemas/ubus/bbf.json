@@ -1,0 +1,817 @@
+{
+  "definitions": {
+    "path_t": {
+      "description": "Complete object element path as per TR181",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 1024,
+      "examples": [
+        "Device.",
+        "Device.DeviceInfo.Manufacturer",
+        "Device.WiFi.SSID.1.",
+        "Device.WiFi."
+      ]
+    },
+    "schema_path_t": {
+      "description": "Datamodel object schema path",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 1024,
+      "examples": [
+        "Device.Bridging.Bridge.{i}.",
+        "Device.DeviceInfo.Manufacturer",
+        "Device.WiFi.SSID.{i}.SSID"
+      ]
+    },
+    "boolean_t": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1"
+      ]
+    },
+    "operate_path_t": {
+      "description": "Datamodel object schema path",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 1024,
+      "examples": [
+      	"Device.IP.Diagnostics.IPPing()",
+        "Device.DHCPv4.Client.{i}.Renew()",
+        "Device.FactoryReset()"
+      ]
+    },
+    "operate_type_t": {
+      "type": "string",
+      "enum": [
+        "async",
+        "sync"
+      ]
+    },
+    "query_path_t": {
+      "description": "DM object path with search queries",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 1024,
+      "examples": [
+        "Device.",
+        "Device.DeviceInfo.Manufacturer",
+        "Device.WiFi.SSID.1.BSSID",
+        "Device.WiFi.SSID.*.BSSID",
+        "Device.WiFi."
+      ]
+    },
+    "instance_t": {
+      "description": "Multi object instances",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 256
+    },
+    "proto_t": {
+      "type": "string",
+      "default": "both",
+      "enum": [
+        "usp",
+        "cwmp",
+        "both"
+      ]
+    },
+    "type_t": {
+      "type": "string",
+      "enum": [
+        "xsd:string",
+        "xsd:unsignedInt",
+        "xsd:int",
+        "xsd:unsignedLong",
+        "xsd:long",
+        "xsd:boolean",
+        "xsd:dateTime",
+        "xsd:hexBinary",
+        "xsd:object",
+        "xsd:command",
+        "xsd:event"
+      ]
+    },
+    "fault_t": {
+      "type": "integer",
+      "minimum": 7000,
+      "maximum": 9050
+    },
+    "trans_type_t": {
+      "type": "string",
+      "enum": [
+        "start",
+        "commit",
+        "abort",
+        "status"
+      ]    
+    },
+    "format_t": {
+      "type": "string",
+      "enum": [
+        "raw",
+        "pretty"
+      ]
+    },
+    "instance_mode_t": {
+      "type": "integer",
+	  "minimum": 0,
+	  "maximum": 1
+    },
+    "trans_id_t": {
+      "type": "integer",
+	  "minimum": 1
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dev.iopsys.eu/iopsys/bbf/-/blob/devel/docs/api/bbf.md",
+  "type": "object",
+  "title": "bbf",
+  "object": "bbf",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "title": "Get list of supported datamodel parameters",
+      "description": "Schema will have all the nodes/objects supported by libbbf",
+      "type": "object",
+      "required": [
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/query_path_t"
+            },
+            "paths": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": [
+                {
+                  "$ref": "#/definitions/query_path_t"
+                }
+              ]
+            },
+            "first_level": {
+              "type": "boolean",
+              "description": "gets only first level objects if true"
+            },
+            "commands": {
+              "type": "boolean",
+              "description": "includes commands in the list if true"
+            },
+            "events": {
+              "type": "boolean",
+              "description": "includes events in the list if true"
+            },
+            "params": {
+              "type": "boolean",
+              "description": "includes objs/params in the list if true"
+            },
+            "optional": {
+              "type": "object",
+              "properties": {
+                "proto": {
+                  "$ref": "#/definitions/proto_t"
+                }
+              }
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "results": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "$ref": "#/definitions/schema_path_t"
+                    },
+                    "data": {
+                      "$ref": "#/definitions/boolean_t"
+                    },
+                    "type": {
+                      "$ref": "#/definitions/type_t"
+                    },
+                    "fault": {
+                      "$ref": "#/definitions/fault_t",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    },
+                    "fault_msg": {
+                      "type": "string",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    },
+                    "input": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "$ref": "#/definitions/schema_path_t"
+                            },
+                            "data": {
+                              "$ref": "#/definitions/boolean_t"
+                            },
+                            "type": {
+                              "$ref": "#/definitions/type_t"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "output": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "$ref": "#/definitions/schema_path_t"
+                            },
+                            "data": {
+                              "$ref": "#/definitions/boolean_t"
+                            },
+                            "type": {
+                              "$ref": "#/definitions/type_t"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "get": {
+      "title": "Get handler",
+      "description": "Query the datamodel object",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/query_path_t"
+            },
+            "paths": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": [
+                {
+                  "$ref": "#/definitions/query_path_t"
+                }
+              ]
+            },
+            "maxdepth": {
+              "type": "integer",
+              "description": "Integer to decide the depth of data model to be parsed"
+            },
+            "optional": {
+              "type": "object",
+              "properties": {
+                "format": {
+                  "$ref": "#/definitions/format_t"
+                },
+                "proto": {
+                  "$ref": "#/definitions/proto_t"
+                },
+                "instance_mode": {
+                  "$ref": "#/definitions/instance_mode_t"
+                }
+              }
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "results": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "$ref": "#/definitions/schema_path_t"
+                    },
+                    "data": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "$ref": "#/definitions/type_t"
+                    },
+                    "fault": {
+                      "$ref": "#/definitions/fault_t",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    },
+                    "fault_msg": {
+                      "type": "string",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "instances": {
+      "title": "Instance query handler",
+      "description": "Get the instances of multi object",
+      "type": "object",
+      "required": [
+        "input"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/query_path_t"
+            },
+            "first_level": {
+              "type": "boolean",
+              "description": "gets only first level objects if true"
+            },
+            "optional": {
+              "type": "object",
+              "properties": {
+                "proto": {
+                  "$ref": "#/definitions/proto_t"
+                },
+                "instance_mode": {
+                  "$ref": "#/definitions/instance_mode_t"
+                }
+              }
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "results": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "$ref": "#/definitions/schema_path_t"
+                    },
+                    "fault": {
+                      "$ref": "#/definitions/fault_t",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    },
+                    "fault_msg": {
+                      "type": "string",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "add": {
+      "title": "Add a new object instance",
+      "description": "Add a new object in multi instance object",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path",
+            "optional"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/path_t"
+            },
+            "obj_path": {
+              "type": "object",
+              "properties": {}
+            },
+            "optional": {
+              "type": "object",
+              "properties": {
+                "transaction_id": {
+                  "$ref": "#/definitions/trans_id_t"
+                }
+              }
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "results": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "$ref": "#/definitions/schema_path_t"
+                    },
+                    "data": {
+                      "type": "string"
+                    },
+                    "fault": {
+                      "$ref": "#/definitions/fault_t",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    },
+                    "fault_msg": {
+                      "type": "string",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "del": {
+      "title": "Delete object instance",
+      "description": "Delete a object instance from multi instance object",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path",
+            "transaction_id"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/query_path_t"
+            },
+            "paths": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": [
+                {
+                  "$ref": "#/definitions/query_path_t"
+                }
+              ]
+            },
+            "optional": {
+              "type": "object",
+              "properties": {
+                "transaction_id": {
+                  "$ref": "#/definitions/trans_id_t"
+                }
+              }
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "results": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "$ref": "#/definitions/schema_path_t"
+                    },
+                    "data": {
+                      "type": "string"
+                    },
+                    "fault": {
+                      "$ref": "#/definitions/fault_t",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    },
+                    "fault_msg": {
+                      "type": "string",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    }
+                  },
+                  "required": [
+                    "parameter",
+                    "type"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "set": {
+      "title": "Set handler",
+      "description": "Set values of datamodel object element",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "path",
+            "value",
+            "optional"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/definitions/query_path_t"
+            },
+            "value": {
+              "description": "value of the object element provided in path, path should contains valid writable object element",
+              "type": "string",
+              "examples": [
+                "{\"path\":\"Device.WiFi.SSID.1.SSID\", \"value\":\"test_ssid\"}",
+                "{\"path\":\"Device.WiFi.SSID.2.Enable\", \"value\":\"true\"}",
+                "{\"path\":\"Device.WiFi.SSID.1.Enable\", \"value\":\"0\"}"
+              ]
+            },
+            "obj_path": {
+              "description": "To set multiple values at once, path should be relative to object elements",
+              "examples": [
+                "{\"path\":\"Device.WiFi.SSID.1\", \"values\":{\".SSID\":\"test_ssid\",\".Name\":\"test_name\"}}",
+                "{\"path\":\"Device.WiFi.SSID.2\", \"values\":{\".SSID\":\"test_ssid\"}}"
+              ],
+              "type": "object",
+              "properties": {}
+            },
+            "optional": {
+              "type": "object",
+              "properties": {
+                "proto": {
+                  "$ref": "#/definitions/proto_t"
+                },
+                "instance_mode": {
+                  "$ref": "#/definitions/instance_mode_t"
+                },
+                "transaction_id": {
+                  "$ref": "#/definitions/trans_id_t"
+                }
+              }
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "results": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "$ref": "#/definitions/schema_path_t"
+                    },
+                    "data": {
+                      "$ref": "#/definitions/boolean_t"
+                    },
+                    "fault": {
+                      "$ref": "#/definitions/fault_t",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    },
+                    "fault_msg": {
+                      "type": "string",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "operate": {
+      "title": "Operate handler",
+      "description": "Operate on object element provided in path",
+      "type": "object",
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "command"
+          ],
+          "properties": {
+            "command": {
+              "$ref": "#/definitions/query_path_t"
+            },
+            "command_key": {
+              "description": "Opreate command as defined in TR-369, TR-181-2.13",
+              "type": "string",
+              "examples": [
+                "{\"path\":\"Device.WiFi.\", \"action\":\"Reset\\(\\)\"}"
+              ]
+            },
+            "input": {
+              "description": "Input arguments for the operate command as defined in TR-181-2.13",
+              "examples": [
+                "{\"path\":\"Device.IP.Diagnostics\", \"action\":\"IPPing\\(\\)\", \"input\":{\"Host\":\"iopsys.eu\"}}"
+              ],
+              "type": "object",
+              "properties": {}
+            },
+            "optional": {
+              "type": "object",
+              "properties": {
+                "format": {
+                  "$ref": "#/definitions/format_t"
+                },
+                "proto": {
+                  "$ref": "#/definitions/proto_t"
+                },
+                "instance_mode": {
+                  "$ref": "#/definitions/instance_mode_t"
+                }
+              }
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "results": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "$ref": "#/definitions/schema_path_t"
+                    },
+                    "data": {
+                      "$ref": "#/definitions/boolean_t"
+                    },
+                    "fault": {
+                      "$ref": "#/definitions/fault_t",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    },
+                    "fault_msg": {
+                      "type": "string",
+                      "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
+                    },
+                    "output": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "$ref": "#/definitions/schema_path_t"
+                            },
+                            "data": {
+                              "$ref": "#/definitions/boolean_t"
+                            },
+                            "type": {
+                              "$ref": "#/definitions/type_t"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "path",
+                    "data"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "transaction": {
+      "title": "Start/commit/abort/status a transaction before set/add/del operations",
+      "type": "object",
+      "properties": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "cmd": {
+              "$ref": "#/definitions/trans_type_t"
+            },
+            "timeout": {
+              "type": "integer",
+              "minimum":0
+            },
+            "restart_services": {
+              "type": "boolean"
+            },
+            "optional": {
+              "type": "object",
+              "properties": {
+                "transaction_id": {
+                  "$ref": "#/definitions/trans_id_t"
+                }
+              }
+            }
+          },
+          "required": [
+            "cmd"
+          ]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "boolean"
+            },
+            "transaction_id": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "error": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        }
+      },
+      "required": [
+        "input",
+        "output"
+      ]
+    },
+    "notify_event": {
+      "title": "notify occurance of an event on ubus",
+      "type": "object",
+      "required": [
+        "input"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "input": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        },
+        "output": {}
+      }
+    }
+  }
+}
