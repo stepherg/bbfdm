@@ -1,0 +1,60 @@
+{
+  "bbfd": [
+    {
+      "section": "bbfd",
+      "description": "BBF daemon Settings",
+      "multi": false,
+      "options": [
+        {
+          "name": "debug",
+          "type": "boolean",
+          "required": "no",
+          "default": "",
+          "description": "Enabled debug logging"
+        },
+        {
+          "name": "sock",
+          "type": "string",
+          "required": "no",
+          "default": "",
+          "description": "Path for ubus socket to register bbfd services"
+        },
+        {
+          "name": "transaction_timeout",
+          "type": "integer",
+          "required": "no",
+          "default": "10",
+          "description": "Transaction timeout value in seconds"
+        },
+        {
+          "name": "loglevel",
+          "type": "integer",
+          "required": "no",
+          "default": "1",
+          "description": "Internal loglevel for debugging {0: No Logs; 1: Errors only; 2: Errors and warnings; 3: Error, warning and info; 4: Everything}"
+        },
+        {
+          "name": "subprocess_level",
+          "type": "integer",
+          "required": "no",
+          "default": "2",
+          "description": "This parameter configures when subprocess can be used for get operation. Level here denotes the Datamodel object depth up-to which subprocess will be used to collect the get data. For example, if this is configured to 1, then only get for 'Device.' shall be called within the subprocess. If configured as level 2, then all the get with up-to depth 2 like 'Device.WiFi.', 'Device.IP.' shall be called in subprocess."
+        },
+        {
+          "name": "bbf_caching_time",
+          "type": "integer",
+          "required": "no",
+          "default": "0",
+          "description": "Max caching time in seconds for ubus output used in datamodel parameters. If not configured, output shall be cleared end the end of call."
+        },
+        {
+          "name": "refresh_time",
+          "type": "integer",
+          "required": "no",
+          "default": "5",
+          "description": "The time period in seconds after which bbfd will refresh the datamodel instances in a periodic manner. If configured to '0' then instance updater will be disabled. If not configured at all then after every 5 seconds datamodel instances will be refreshed."
+        }
+      ]
+    }
+  ]
+}
