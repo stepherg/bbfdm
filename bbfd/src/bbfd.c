@@ -545,6 +545,8 @@ int usp_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	INFO("ubus method|%s|, name|%s|, path(%s)", method, obj->name, path);
 
+	data.bbf_ctx.in_param = path;
+
 	fault = fill_pvlist_set(path, tb[DM_SET_VALUE] ? blobmsg_get_string(tb[DM_SET_VALUE]) : NULL, tb[DM_SET_OBJ_PATH], &pv_list);
 	if (fault) {
 		ERR("Fault in fill pvlist set path |%s|", data.bbf_ctx.in_param);
@@ -795,6 +797,8 @@ int usp_delete_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	blob_buf_init(&data.bb, 0);
 	bbf_init(&data.bbf_ctx);
 
+	data.bbf_ctx.in_param = tb[DM_DELETE_PATH] ? blobmsg_get_string(tb[DM_DELETE_PATH]) : "";
+
 	// no need to process it further since transaction-id is not valid
 	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
 		WARNING("Transaction not started yet");
@@ -938,7 +942,7 @@ static int usp_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 	INFO("ubus method|%s|, name|%s|", method, obj->name);
 	event_name = blobmsg_get_string(tb[BBF_NOTIFY_NAME]);
 	if (is_registered_event(event_name)) {
-		ubus_send_event(ctx, "usp.event", msg);
+		ubus_send_event(ctx, "bbf.event", msg);
 	} else {
 		WARNING("Event %s not registered", event_name);
 	}

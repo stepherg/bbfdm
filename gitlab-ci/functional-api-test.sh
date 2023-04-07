@@ -4,17 +4,6 @@ echo "Functional API Tests"
 pwd
 source ./gitlab-ci/shared.sh
 
-echo "Starting supervisor in current directory"
-supervisorctl shutdown
-sleep 1
-supervisord -c supervisord.conf
-
-# compile and install libbbf
-install_libbbf
-
-supervisorctl status all
-supervisorctl update
-sleep 3
 supervisorctl status all
 
 echo "Running the functional API test cases"
