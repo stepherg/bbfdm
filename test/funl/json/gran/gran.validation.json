@@ -1,0 +1,13 @@
+{
+    "object": "usp.Device.",
+        "methods": [
+        {
+            "method": "get",
+            "args": {
+                "path": "Users."
+            },
+            "rc": 0
+        }
+    ]
+}
+

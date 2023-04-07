@@ -19,7 +19,6 @@
 /* ********** DynamicObj ********** */
 DM_MAP_OBJ tDynamicObj[] = {
 /* parentobj, nextobject, parameter */
-{"Device.ManagementServer.", NULL, tDynamicManagementServerParams},
 {"Device.", tDynamicDeviceObj, tDynamicDeviceParams},
 {0}
 };
@@ -27,29 +26,6 @@ DM_MAP_OBJ tDynamicObj[] = {
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
-static int get_ManagementServer_EnableCWMP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmuci_get_option_value_fallback_def("cwmp", "acs", "enabled", "1");
-	return 0;
-}
-
-static int set_ManagementServer_EnableCWMP(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	bool b;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			string_to_bool(value, &b);
-			dmuci_set_value("cwmp", "acs", "enabled", b ? "1" : "0");
-			break;
-	}
-	return 0;
-}
-
 static int get_X_IOPSYS_EU_Syslog_ServerIPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_option_value_string("system", "@system[0]", "log_ip", value);
@@ -184,12 +160,6 @@ static int get_event_args_XIOPSYSEU_Boot(char *refparam, struct dmctx *ctx, void
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
-DMLEAF tDynamicManagementServerParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"EnableCWMP", &DMWRITE, DMT_BOOL, get_ManagementServer_EnableCWMP, set_ManagementServer_EnableCWMP, BBFDM_CWMP},
-{0}
-};
-
 /* *** Device. *** */
 DMOBJ tDynamicDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
