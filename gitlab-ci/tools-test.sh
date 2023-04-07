@@ -42,7 +42,7 @@ echo "Validate X_IOPSYS_EU_URLFilter JSON Plugin"
 check_ret $?
 
 echo "Validate CWMPManagementServer JSON Plugin"
-./tools/validate_json_plugin.py test/files/etc/bbfdm/json/cwmp_management_server.json
+./tools/validate_json_plugin.py test/files/etc/bbfdm/json/CWMPManagementServer.json
 check_ret $?
 
 echo "Validate TR-181 JSON Plugin after generating from XML"

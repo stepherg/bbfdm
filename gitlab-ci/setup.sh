@@ -12,6 +12,9 @@ cp -r ./test/files/var/* /var/
 cp -r ./test/files/tmp/* /tmp/
 cp -r ./test/files/lib/* /lib/
 
-apt update && apt install -y iproute2
+cp ./gitlab-ci/iopsys-supervisord.conf /etc/supervisor/conf.d/
+
 ls /etc/config/
 
+supervisorctl shutdown
+supervisord -c /etc/supervisor/supervisord.conf

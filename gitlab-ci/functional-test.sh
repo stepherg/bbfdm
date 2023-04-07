@@ -9,12 +9,6 @@ supervisorctl shutdown
 sleep 1
 supervisord -c supervisord.conf
 
-# compile and install libbbf
-install_libbbf
-
-#compile and install libbbf_test dynamic extension library
-install_libbbf_test
-
 supervisorctl status all
 supervisorctl update
 supervisorctl restart all
