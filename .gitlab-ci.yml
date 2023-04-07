@@ -15,7 +15,6 @@ variables:
 stages:
     - static_code_analysis
     - unit_test
-    - memory_test
     - functional_test
     - deploy
 
@@ -24,6 +23,7 @@ run_unit_test:
   image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
   allow_failure: false
   script:
+  - "./gitlab-ci/install-dependencies.sh"
   - "./gitlab-ci/setup.sh"
   - "./gitlab-ci/unit-test.sh"
   artifacts:
@@ -31,34 +31,6 @@ run_unit_test:
     paths:
       - timestamp.log
       - unit-test-coverage.xml
-
-run_functional_test:
-  stage: functional_test
-  image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
-  allow_failure: false
-  script:
-  - "./gitlab-ci/setup.sh"
-  - "./gitlab-ci/functional-test.sh"
-
-  artifacts:
-      when: always
-      paths:
-          - timestamp.log
-          - functional-test-coverage.xml
-
-run_functional_api_test:
-  stage: functional_test
-  image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
-  allow_failure: false
-  script:
-  - "./gitlab-ci/setup.sh"
-  - "./gitlab-ci/functional-api-test.sh"
-
-  artifacts:
-      when: always
-      paths:
-          - timestamp.log
-          - functional-api-test-coverage.xml
 
 run_tools_test:
   stage: unit_test
@@ -75,11 +47,42 @@ run_tools_test:
           - tools/out/datamodel_hdm.xml
           - tools/out/datamodel.xls
 
-run_memory_test:
-  stage: memory_test
+run_libbbf_api_functional_test:
+  stage: functional_test
   image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
   allow_failure: false
   script:
+  - "./gitlab-ci/install-dependencies.sh"
+  - "./gitlab-ci/setup.sh"
+  - "./gitlab-ci/functional-api-test.sh"
+
+  artifacts:
+      when: always
+      paths:
+          - timestamp.log
+          - functional-api-test-coverage.xml
+
+run_libbbf_dm_functional_test:
+  stage: functional_test
+  image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
+  allow_failure: false
+  script:
+  - "./gitlab-ci/install-dependencies.sh"
+  - "./gitlab-ci/setup.sh"
+  - "./gitlab-ci/functional-test.sh"
+
+  artifacts:
+      when: always
+      paths:
+          - timestamp.log
+          - functional-test-coverage.xml
+
+run_libbbf_dm_memory_test:
+  stage: functional_test
+  image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
+  allow_failure: false
+  script:
+  - "./gitlab-ci/install-dependencies.sh"
   - "./gitlab-ci/setup.sh"
   - "./gitlab-ci/memory-test.sh"
   artifacts:
@@ -88,21 +91,22 @@ run_memory_test:
           - timestamp.log
           - output-report-device-get.txt
 
-doxygen:
-  stage: unit_test
-  image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
-  before_script:
-      - apt update
-      - apt --assume-yes install doxygen graphviz
-
-  script:
-    - doxygen Doxyfile
-    - mv doxygen/html/ public/
-
-  artifacts:
-    paths:
-      - public
-
-  rules:
-    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+run_bbfd_functional_test:
+    stage: functional_test
+    image: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest
+    allow_failure: false
+    script:
+    - "./gitlab-ci/install-dependencies.sh"
+    - "./gitlab-ci/setup.sh"
+    - "./gitlab-ci/bbfd-functional-test.sh"
+    artifacts:
+        when: always
+        reports:
+            junit: ./report/*.xml
+        paths:
+            - funl-result.log
+            - funl-test-coverage.xml
+            - memory-report.xml
+            - timestamp.log
+            - report/
 
