@@ -9,17 +9,7 @@ supervisorctl shutdown
 sleep 1
 supervisord -c supervisord.conf
 
-# install required packages
-exec_cmd apt update
-exec_cmd apt install -y zip
-
 date +%s > timestamp.log
-
-# compile and install libbbf
-install_libbbf
-
-install_libbbf_test
-install_libperiodicstats
 
 supervisorctl update
 supervisorctl status all
@@ -73,8 +63,5 @@ supervisorctl status
 gcovr -r . 2> /dev/null #throw away stderr
 # Artefact
 gcovr -r . 2> /dev/null --xml -o ./memory-test-coverage.xml
-
-echo "Generating release"
-generate_release
 
 echo "Memory Test :: PASS"

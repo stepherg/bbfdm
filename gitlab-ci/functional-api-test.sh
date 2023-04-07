@@ -9,9 +9,6 @@ supervisorctl shutdown
 sleep 1
 supervisord -c supervisord.conf
 
-# compile and install libbbf
-install_libbbf
-
 supervisorctl status all
 supervisorctl update
 sleep 3

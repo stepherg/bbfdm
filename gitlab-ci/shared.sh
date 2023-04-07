@@ -71,8 +71,8 @@ function install_libusermngr()
 	exec_cmd git clone -b devel https://dev.iopsys.eu/iopsys/usermngr.git /opt/dev/usermngr
 
 	echo "Compiling libusermngr"
-	make clean -C /opt/dev/usermngr/src/
-	make -C /opt/dev/usermngr/src/
+	exec_cmd_verbose make clean -C /opt/dev/usermngr/src/
+	exec_cmd_verbose make -C /opt/dev/usermngr/src/
 
 	echo "installing libusermngr"
 	cp -f /opt/dev/usermngr/src/libusermngr.so /usr/lib/bbfdm
@@ -99,17 +99,14 @@ function install_libbbf()
 	exec_cmd_verbose make install
 	ln -sf /usr/share/bbfdm/bbf.diag /usr/libexec/rpcd/bbf.diag
 	cd ..
-
-	echo "installing libusermngr"
-	install_libusermngr
 }
 
 function install_libbbf_test()
 {
 	# compile and install libbbf_test
 	echo "Compiling libbbf_test"
-	make clean -C test/bbf_test/
-	make -C test/bbf_test/
+	exec_cmd_verbose make clean -C test/bbf_test/
+	exec_cmd_verbose make -C test/bbf_test/
 
 	echo "installing libbbf_test"
 	cp -f test/bbf_test/libbbf_test.so /usr/lib/bbfdm
@@ -120,12 +117,30 @@ function install_libperiodicstats()
 	# clone and compile libperiodicstats
 	rm -rf /opt/dev/periodicstats
 	exec_cmd git clone -b devel https://dev.iopsys.eu/iopsys/periodicstats.git /opt/dev/periodicstats
+
 	echo "Compiling libperiodicstats"
-	make clean -C /opt/dev/periodicstats/
-	make -C /opt/dev/periodicstats/
+	exec_cmd_verbose make clean -C /opt/dev/periodicstats/
+	exec_cmd_verbose make -C /opt/dev/periodicstats/
 
 	echo "installing libperiodicstats"
 	cp -f /opt/dev/periodicstats/bbf_plugin/libperiodicstats.so /usr/lib/bbfdm
+}
+
+function install_libcwmpdm()
+{
+	# clone and compile libcwmpdm
+	rm -rf /opt/dev/icwmp
+	exec_cmd git clone -b ticket_8966 --depth 1 https://dev.iopsys.eu/iopsys/icwmp.git /opt/dev/icwmp
+
+	echo "Compiling libcwmpdm"
+	cd /opt/dev/icwmp
+	cmake -DWITH_OPENSSL=ON -DCMAKE_INSTALL_PREFIX=/
+	exec_cmd_verbose make
+
+	echo "installing libcwmpdm"
+	cp -f /opt/dev/icwmp/libcwmpdm.so /usr/lib/bbfdm
+
+	cd /builds/iopsys/bbf
 }
 
 function error_on_zero()
