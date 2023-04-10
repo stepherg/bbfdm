@@ -848,6 +848,8 @@ static int ppp_read_sysfs(void *data, const char *name, char **value)
 {
 	struct uci_section *ppp_s = ((struct ppp_args *)data)->iface_s;
 
+	*value = "0";
+
 	if (ppp_s) {
 		char *proto;
 
@@ -856,8 +858,6 @@ static int ppp_read_sysfs(void *data, const char *name, char **value)
 			char *l3_device = get_l3_device(section_name(ppp_s));
 			get_net_device_sysfs(l3_device, name, value);
 		}
-	} else {
-		*value = "0";
 	}
 
 	return 0;
@@ -973,14 +973,14 @@ static int get_PPPInterfaceStats_UnicastPacketsReceived(char *refparam, struct d
 {
 /* Unicast Packets Received = (Total packets received - Unknown Protocol Packets Received)*/
 
-	char *rx_other, *rx_pkts;
+	char *rx_other = NULL, *rx_pkts = NULL;
 	unsigned long other_rcv = 0, total_rcv = 0;
 
 	get_PPPInterfaceStats_UnknownProtoPacketsReceived(refparam, ctx, data, instance, &rx_other);
 	get_ppp_eth_pack_received(refparam, ctx, data, instance, &rx_pkts);
 
-	other_rcv = strtoul(rx_other, NULL, 10);
-	total_rcv = strtoul(rx_pkts, NULL, 10);
+	other_rcv = DM_STRTOUL(rx_other);
+	total_rcv = DM_STRTOUL(rx_pkts);
 
 	unsigned long ucast_rcv = total_rcv - other_rcv;
 	dmasprintf(value, "%lu", ucast_rcv);
