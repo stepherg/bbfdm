@@ -848,6 +848,8 @@ static int ppp_read_sysfs(void *data, const char *name, char **value)
 {
 	struct uci_section *ppp_s = ((struct ppp_args *)data)->iface_s;
 
+	*value = "0";
+
 	if (ppp_s) {
 		char *proto;
 
@@ -856,8 +858,6 @@ static int ppp_read_sysfs(void *data, const char *name, char **value)
 			char *l3_device = get_l3_device(section_name(ppp_s));
 			get_net_device_sysfs(l3_device, name, value);
 		}
-	} else {
-		*value = "0";
 	}
 
 	return 0;
@@ -943,16 +943,16 @@ static int get_PPPInterfaceStats_DiscardPacketsReceived(char *refparam, struct d
 
 static int get_PPPInterfaceStats_UnicastPacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *tx_mcast, *tx_bcast, *tx_pkts;
+	char *tx_mcast = NULL, *tx_bcast = NULL, *tx_pkts = NULL;
 	unsigned long mpkt_sent = 0, bpkt_sent = 0, total_sent = 0;
 
 	get_PPPInterfaceStats_MulticastPacketsSent(refparam, ctx, data, instance, &tx_mcast);
 	get_PPPInterfaceStats_BroadcastPacketsSent(refparam, ctx, data, instance, &tx_bcast);
 	get_ppp_eth_pack_sent(refparam, ctx, data, instance, &tx_pkts);
 
-	mpkt_sent = strtoul(tx_mcast, NULL, 10);
-	bpkt_sent = strtoul(tx_bcast, NULL, 10);
-	total_sent = strtoul(tx_pkts, NULL, 10);
+	mpkt_sent = DM_STRTOUL(tx_mcast);
+	bpkt_sent = DM_STRTOUL(tx_bcast);
+	total_sent = DM_STRTOUL(tx_pkts);
 
 	unsigned long ucast_sent = total_sent - mpkt_sent - bpkt_sent;
 	char tx_ucast[25] = {0};
@@ -964,7 +964,7 @@ static int get_PPPInterfaceStats_UnicastPacketsSent(char *refparam, struct dmctx
 
 static int get_PPPInterfaceStats_UnicastPacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *rx_mcast, *rx_bcast, *rx_other, *rx_pkts;
+	char *rx_mcast = NULL, *rx_bcast = NULL, *rx_other = NULL, *rx_pkts = NULL;
 	unsigned long mpkt_rcv = 0, bpkt_rcv = 0, other_rcv = 0, total_rcv = 0;
 
 	get_PPPInterfaceStats_MulticastPacketsReceived(refparam, ctx, data, instance, &rx_mcast);
@@ -972,10 +972,10 @@ static int get_PPPInterfaceStats_UnicastPacketsReceived(char *refparam, struct d
 	get_PPPInterfaceStats_UnknownProtoPacketsReceived(refparam, ctx, data, instance, &rx_other);
 	get_ppp_eth_pack_received(refparam, ctx, data, instance, &rx_pkts);
 
-	mpkt_rcv = strtoul(rx_mcast, NULL, 10);
-	bpkt_rcv = strtoul(rx_bcast, NULL, 10);
-	other_rcv = strtoul(rx_other, NULL, 10);
-	total_rcv = strtoul(rx_pkts, NULL, 10);
+	mpkt_rcv = DM_STRTOUL(rx_mcast);
+	bpkt_rcv = DM_STRTOUL(rx_bcast);
+	other_rcv = DM_STRTOUL(rx_other);
+	total_rcv = DM_STRTOUL(rx_pkts);
 
 	unsigned long ucast_rcv = total_rcv - mpkt_rcv - bpkt_rcv - other_rcv;
 	char rx_ucast[25] = {0};

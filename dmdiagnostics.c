@@ -205,7 +205,7 @@ static long upload_file(const char *file_path, const char *url, const char *user
 const bool validate_file_system_size(const char *file_size)
 {
 	if (file_size && *file_size) {
-		unsigned long f_size = strtoul(file_size, NULL, 10);
+		unsigned long f_size = DM_STRTOUL(file_size);
 		unsigned long fs_available_size = file_system_size("/tmp", FS_SIZE_AVAILABLE);
 
 		if (fs_available_size < f_size)
