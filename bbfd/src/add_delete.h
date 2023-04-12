@@ -11,10 +11,10 @@ enum {
 };
 
 enum {
-	DM_DELETE_PATH,
-	DM_DELETE_PATHS,
-	DM_DELETE_OPTIONAL,
-	__DM_DELETE_MAX
+	DM_DEL_PATH,
+	DM_DEL_PATHS,
+	DM_DEL_OPTIONAL,
+	__DM_DEL_MAX
 };
 
 int create_add_response(usp_data_t *data);

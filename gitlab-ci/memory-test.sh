@@ -53,11 +53,11 @@ run_valgrind_verbose -c get Device.RootDataModelVersion
 run_valgrind -u get Device.
 run_valgrind -c get Device.
 
-run_valgrind -u get_instances Device.
-run_valgrind -c get_instances Device.
+run_valgrind -u instances Device.
+run_valgrind -c instances Device.
 
-run_valgrind -u get_supported_dm Device.
-run_valgrind -c get_supported_dm Device.
+run_valgrind -u schema Device.
+run_valgrind -c schema Device.
 
 run_valgrind_verbose -u get Device.IP.Interface.*.IPv4Address.
 run_valgrind_verbose -c get Device.IP.Interface.*.IPv6Address.*.IPAddress

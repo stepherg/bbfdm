@@ -275,7 +275,7 @@ bool is_registered_event(char *name)
 
 	bbf_init(&bbf_ctx);
 
-	if (0 == usp_dm_exec(&bbf_ctx, BBF_GET_SUPPORTED_DM)) {
+	if (0 == usp_dm_exec(&bbf_ctx, BBF_SCHEMA)) {
 		struct dm_parameter *param;
 
 		list_for_each_entry(param, &bbf_ctx.list_parameter, list) {
