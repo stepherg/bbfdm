@@ -306,10 +306,10 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 	case BBF_GET_VALUE:
 		fault = dm_entry_get_value(ctx);
 		break;
-	case BBF_GET_SUPPORTED_DM:
+	case BBF_SCHEMA:
 		fault = dm_entry_get_supported_dm(ctx);
 		break;
-	case BBF_GET_INSTANCES:
+	case BBF_INSTANCES:
 		fault = dm_entry_get_instances(ctx);
 		break;
 	case BBF_GET_NAME:

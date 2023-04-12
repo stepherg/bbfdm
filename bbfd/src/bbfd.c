@@ -383,40 +383,40 @@ static int usp_get_handler(struct ubus_context *ctx, struct ubus_object *obj __a
 	return 0;
 }
 
-static const struct blobmsg_policy get_supported_dm_policy[] = {
-	[DM_SUPPORTED_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
-	[DM_SUPPORTED_PATHS] = { .name = "paths", .type = BLOBMSG_TYPE_ARRAY },
-	[DM_SUPPORTED_FIRST_LEVEL] = { .name = "first_level", .type = BLOBMSG_TYPE_BOOL},
-	[DM_SUPPORTED_COMMANDS] = { .name = "commands", .type = BLOBMSG_TYPE_BOOL},
-	[DM_SUPPORTED_EVENTS] = { .name = "events", .type = BLOBMSG_TYPE_BOOL},
-	[DM_SUPPORTED_PARAMS] = { .name = "params", .type = BLOBMSG_TYPE_BOOL},
-	[DM_SUPPORTED_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE},
+static const struct blobmsg_policy dm_schema_policy[] = {
+	[DM_SCHEMA_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
+	[DM_SCHEMA_PATHS] = { .name = "paths", .type = BLOBMSG_TYPE_ARRAY },
+	[DM_SCHEMA_FIRST_LEVEL] = { .name = "first_level", .type = BLOBMSG_TYPE_BOOL},
+	[DM_SCHEMA_COMMANDS] = { .name = "commands", .type = BLOBMSG_TYPE_BOOL},
+	[DM_SCHEMA_EVENTS] = { .name = "events", .type = BLOBMSG_TYPE_BOOL},
+	[DM_SCHEMA_PARAMS] = { .name = "params", .type = BLOBMSG_TYPE_BOOL},
+	[DM_SCHEMA_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE},
 };
 
-static int usp_list_supported_dm(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
+static int usp_schema_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
 		    struct ubus_request_data *req, const char *method __attribute__((unused)),
 		    struct blob_attr *msg)
 {
-	struct blob_attr *tb[__DM_SUPPORTED_MAX];
+	struct blob_attr *tb[__DM_SCHEMA_MAX];
 	LIST_HEAD(paths_list);
 	usp_data_t data;
 
 	memset(&data, 0, sizeof(usp_data_t));
 
-	if (blobmsg_parse(get_supported_dm_policy, __DM_SUPPORTED_MAX, tb, blob_data(msg), blob_len(msg))) {
+	if (blobmsg_parse(dm_schema_policy, __DM_SCHEMA_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
 		return UBUS_STATUS_UNKNOWN_ERROR;
 	}
 
-	if (!(tb[DM_SUPPORTED_PATH]) && !(tb[DM_SUPPORTED_PATHS]))
+	if (!(tb[DM_SCHEMA_PATH]) && !(tb[DM_SCHEMA_PATHS]))
 		return UBUS_STATUS_INVALID_ARGUMENT;
 
-	if (tb[DM_SUPPORTED_PATH]) {
-		char *path = blobmsg_get_string(tb[DM_SUPPORTED_PATH]);
+	if (tb[DM_SCHEMA_PATH]) {
+		char *path = blobmsg_get_string(tb[DM_SCHEMA_PATH]);
 		add_path_list(path, &paths_list);
 	}
 
-	if (tb[DM_SUPPORTED_PATHS]) {
+	if (tb[DM_SCHEMA_PATHS]) {
 		struct blob_attr *paths = tb[DM_GET_PATHS];
 		struct blob_attr *path = NULL;
 		size_t rem;
@@ -428,14 +428,14 @@ static int usp_list_supported_dm(struct ubus_context *ctx, struct ubus_object *o
 		}
 	}
 
-	fill_optional_data(&data, tb[DM_SUPPORTED_OPTIONAL]);
+	fill_optional_data(&data, tb[DM_SCHEMA_OPTIONAL]);
 
 	unsigned int dm_type = data.bbf_ctx.dm_type;
 
-	data.bbf_ctx.nextlevel = (tb[DM_SUPPORTED_FIRST_LEVEL]) ? blobmsg_get_bool(tb[DM_SUPPORTED_FIRST_LEVEL]) : false;
-	data.bbf_ctx.iscommand = (tb[DM_SUPPORTED_COMMANDS]) ? blobmsg_get_bool(tb[DM_SUPPORTED_COMMANDS]) : (dm_type == BBFDM_CWMP) ? false : true;
-	data.bbf_ctx.isevent = (tb[DM_SUPPORTED_EVENTS]) ? blobmsg_get_bool(tb[DM_SUPPORTED_EVENTS]) : (dm_type == BBFDM_CWMP) ? false : true;
-	data.bbf_ctx.isinfo = (tb[DM_SUPPORTED_PARAMS]) ? blobmsg_get_bool(tb[DM_SUPPORTED_PARAMS]) : (dm_type == BBFDM_CWMP) ? false : true;
+	data.bbf_ctx.nextlevel = (tb[DM_SCHEMA_FIRST_LEVEL]) ? blobmsg_get_bool(tb[DM_SCHEMA_FIRST_LEVEL]) : false;
+	data.bbf_ctx.iscommand = (tb[DM_SCHEMA_COMMANDS]) ? blobmsg_get_bool(tb[DM_SCHEMA_COMMANDS]) : (dm_type == BBFDM_CWMP) ? false : true;
+	data.bbf_ctx.isevent = (tb[DM_SCHEMA_EVENTS]) ? blobmsg_get_bool(tb[DM_SCHEMA_EVENTS]) : (dm_type == BBFDM_CWMP) ? false : true;
+	data.bbf_ctx.isinfo = (tb[DM_SCHEMA_PARAMS]) ? blobmsg_get_bool(tb[DM_SCHEMA_PARAMS]) : (dm_type == BBFDM_CWMP) ? false : true;
 	data.plist = &paths_list;
 
 	blob_buf_init(&data.bb, 0);
@@ -452,38 +452,38 @@ static int usp_list_supported_dm(struct ubus_context *ctx, struct ubus_object *o
 	return 0;
 }
 
-static const struct blobmsg_policy dm_get_instances_policy[] = {
-	[DM_GET_INSTANCES_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
-	[DM_GET_INSTANCES_PATHS] = { .name = "paths", .type = BLOBMSG_TYPE_ARRAY },
-	[DM_GET_INSTANCES_FIRST_LEVEL] = { .name = "first_level", .type = BLOBMSG_TYPE_BOOL },
-	[DM_GET_INSTANCES_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
+static const struct blobmsg_policy dm_instances_policy[] = {
+	[DM_INSTANCES_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
+	[DM_INSTANCES_PATHS] = { .name = "paths", .type = BLOBMSG_TYPE_ARRAY },
+	[DM_INSTANCES_FIRST_LEVEL] = { .name = "first_level", .type = BLOBMSG_TYPE_BOOL },
+	[DM_INSTANCES_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
 };
 
-static int usp_get_instances_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
+static int usp_instances_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
 		    struct ubus_request_data *req, const char *method __attribute__((unused)),
 		    struct blob_attr *msg)
 {
-	struct blob_attr *tb[__DM_GET_INSTANCES_MAX];
+	struct blob_attr *tb[__DM_INSTANCES_MAX];
 	LIST_HEAD(paths_list);
 	usp_data_t data;
 
 	memset(&data, 0, sizeof(usp_data_t));
 
-	if (blobmsg_parse(dm_get_instances_policy, __DM_GET_INSTANCES_MAX, tb, blob_data(msg), blob_len(msg))) {
+	if (blobmsg_parse(dm_instances_policy, __DM_INSTANCES_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
 		return UBUS_STATUS_UNKNOWN_ERROR;
 	}
 
-	if (!(tb[DM_GET_INSTANCES_PATH]) && !(tb[DM_GET_INSTANCES_PATHS]))
+	if (!(tb[DM_INSTANCES_PATH]) && !(tb[DM_INSTANCES_PATHS]))
 		return UBUS_STATUS_INVALID_ARGUMENT;
 
-	if (tb[DM_GET_INSTANCES_PATH]) {
-		char *path = blobmsg_get_string(tb[DM_GET_INSTANCES_PATH]);
+	if (tb[DM_INSTANCES_PATH]) {
+		char *path = blobmsg_get_string(tb[DM_INSTANCES_PATH]);
 		add_path_list(path, &paths_list);
 	}
 
-	if (tb[DM_GET_INSTANCES_PATHS]) {
-		struct blob_attr *paths = tb[DM_GET_INSTANCES_PATHS];
+	if (tb[DM_INSTANCES_PATHS]) {
+		struct blob_attr *paths = tb[DM_INSTANCES_PATHS];
 		struct blob_attr *path = NULL;
 		size_t rem;
 
@@ -494,10 +494,10 @@ static int usp_get_instances_handler(struct ubus_context *ctx, struct ubus_objec
 		}
 	}
 
-	data.bbf_ctx.nextlevel = (tb[DM_GET_INSTANCES_FIRST_LEVEL]) ? blobmsg_get_bool(tb[DM_GET_INSTANCES_FIRST_LEVEL]) : false;
+	data.bbf_ctx.nextlevel = (tb[DM_INSTANCES_FIRST_LEVEL]) ? blobmsg_get_bool(tb[DM_INSTANCES_FIRST_LEVEL]) : false;
 	data.plist = &paths_list;
 
-	fill_optional_data(&data, tb[DM_GET_INSTANCES_OPTIONAL]);
+	fill_optional_data(&data, tb[DM_INSTANCES_OPTIONAL]);
 
 	blob_buf_init(&data.bb, 0);
 	usp_get_instances(&data);
@@ -544,6 +544,8 @@ int usp_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	fill_optional_data(&data, tb[DM_SET_OPTIONAL]);
 
 	INFO("ubus method|%s|, name|%s|, path(%s)", method, obj->name, path);
+
+	data.bbf_ctx.in_param = path;
 
 	fault = fill_pvlist_set(path, tb[DM_SET_VALUE] ? blobmsg_get_string(tb[DM_SET_VALUE]) : NULL, tb[DM_SET_OBJ_PATH], &pv_list);
 	if (fault) {
@@ -614,15 +616,12 @@ static int usp_operate_handler(struct ubus_context *ctx, struct ubus_object *obj
 	if (!(tb[DM_OPERATE_COMMAND]))
 		return UBUS_STATUS_INVALID_ARGUMENT;
 
-	if (!(tb[DM_OPERATE_COMMAND_KEY]))
-		return UBUS_STATUS_INVALID_ARGUMENT;
-
 	snprintf(path, PATH_MAX, "%s", (char *)blobmsg_data(tb[DM_OPERATE_COMMAND]));
 
 	data.ctx = ctx;
 	data.req = req;
 	data.bbf_ctx.in_param = path;
-	data.bbf_ctx.linker = blobmsg_get_string(tb[DM_OPERATE_COMMAND_KEY]);
+	data.bbf_ctx.linker = tb[DM_OPERATE_COMMAND_KEY] ? blobmsg_get_string(tb[DM_OPERATE_COMMAND_KEY]) : "";
 
 	if (tb[DM_OPERATE_INPUT])
 		data.bbf_ctx.in_value = blobmsg_format_json(tb[DM_OPERATE_INPUT], true);
@@ -744,38 +743,38 @@ end:
 	return 0;
 }
 
-static const struct blobmsg_policy dm_delete_policy[] = {
-	[DM_DELETE_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
-	[DM_DELETE_PATHS] = { .name = "paths", .type = BLOBMSG_TYPE_ARRAY },
-	[DM_DELETE_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
+static const struct blobmsg_policy dm_del_policy[] = {
+	[DM_DEL_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
+	[DM_DEL_PATHS] = { .name = "paths", .type = BLOBMSG_TYPE_ARRAY },
+	[DM_DEL_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
 };
 
-int usp_delete_handler(struct ubus_context *ctx, struct ubus_object *obj,
+int usp_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 			struct ubus_request_data *req, const char *method,
 			struct blob_attr *msg)
 {
-	struct blob_attr *tb[__DM_DELETE_MAX];
+	struct blob_attr *tb[__DM_DEL_MAX];
 	LIST_HEAD(paths_list);
 	usp_data_t data;
 	int trans_id = 0;
 
 	memset(&data, 0, sizeof(usp_data_t));
 
-	if (blobmsg_parse(dm_delete_policy, __DM_DELETE_MAX, tb, blob_data(msg), blob_len(msg))) {
+	if (blobmsg_parse(dm_del_policy, __DM_DEL_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
 		return UBUS_STATUS_UNKNOWN_ERROR;
 	}
 
-	if (!tb[DM_DELETE_PATH] && !tb[DM_DELETE_PATHS])
+	if (!tb[DM_DEL_PATH] && !tb[DM_DEL_PATHS])
 		return UBUS_STATUS_INVALID_ARGUMENT;
 
-	if (tb[DM_DELETE_PATH]) {
-		char *path = blobmsg_get_string(tb[DM_DELETE_PATH]);
+	if (tb[DM_DEL_PATH]) {
+		char *path = blobmsg_get_string(tb[DM_DEL_PATH]);
 		add_path_list(path, &paths_list);
 	}
 
-	if (tb[DM_DELETE_PATHS]) {
-		struct blob_attr *paths = tb[DM_DELETE_PATHS];
+	if (tb[DM_DEL_PATHS]) {
+		struct blob_attr *paths = tb[DM_DEL_PATHS];
 		struct blob_attr *path = NULL;
 		size_t rem;
 
@@ -788,12 +787,14 @@ int usp_delete_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	data.plist = &paths_list;
 
-	fill_optional_data(&data, tb[DM_DELETE_OPTIONAL]);
+	fill_optional_data(&data, tb[DM_DEL_OPTIONAL]);
 
 	INFO("ubus method|%s|, name|%s|", method, obj->name);
 
 	blob_buf_init(&data.bb, 0);
 	bbf_init(&data.bbf_ctx);
+
+	data.bbf_ctx.in_param = tb[DM_DEL_PATH] ? blobmsg_get_string(tb[DM_DEL_PATH]) : "";
 
 	// no need to process it further since transaction-id is not valid
 	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
@@ -938,7 +939,7 @@ static int usp_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 	INFO("ubus method|%s|, name|%s|", method, obj->name);
 	event_name = blobmsg_get_string(tb[BBF_NOTIFY_NAME]);
 	if (is_registered_event(event_name)) {
-		ubus_send_event(ctx, "usp.event", msg);
+		ubus_send_event(ctx, "bbf.event", msg);
 	} else {
 		WARNING("Event %s not registered", event_name);
 	}
@@ -948,12 +949,12 @@ static int usp_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 
 static struct ubus_method bbf_methods[] = {
 	UBUS_METHOD("get", usp_get_handler, dm_get_policy),
-	UBUS_METHOD("get_supported_dm", usp_list_supported_dm, get_supported_dm_policy),
-	UBUS_METHOD("get_instances", usp_get_instances_handler, dm_get_instances_policy),
+	UBUS_METHOD("schema", usp_schema_handler, dm_schema_policy),
+	UBUS_METHOD("instances", usp_instances_handler, dm_instances_policy),
 	UBUS_METHOD("set", usp_set_handler, dm_set_policy),
 	UBUS_METHOD("operate", usp_operate_handler, dm_operate_policy),
 	UBUS_METHOD("add", usp_add_handler, dm_add_policy),
-	UBUS_METHOD("delete", usp_delete_handler, dm_delete_policy),
+	UBUS_METHOD("del", usp_del_handler, dm_del_policy),
 	UBUS_METHOD("transaction", usp_transaction_handler, transaction_policy),
 	UBUS_METHOD("notify_event", usp_notify_event, dm_notify_event_policy),
 };
@@ -1050,7 +1051,7 @@ static void update_instances_list(struct list_head *inst)
 
 	bbf_init(&bbf_ctx);
 
-	if (0 == usp_dm_exec(&bbf_ctx, BBF_GET_INSTANCES)) {
+	if (0 == usp_dm_exec(&bbf_ctx, BBF_INSTANCES)) {
 		struct dm_parameter *nptr_dp;
 
 		list_for_each_entry(nptr_dp, &bbf_ctx.list_parameter, list) {

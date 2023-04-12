@@ -69,7 +69,7 @@ static int usp_dm_operate(usp_data_t *data)
 			array = blobmsg_open_array(&data->bb, "output");
 			list_for_each_entry(n, &data->bbf_ctx.list_parameter, list) {
 				table = blobmsg_open_table(&data->bb, NULL);
-				bb_add_string(&data->bb, "parameter", n->name);
+				bb_add_string(&data->bb, "path", n->name);
 				bb_add_string(&data->bb, "data", n->data);
 				bb_add_string(&data->bb, "type", n->type);
 				blobmsg_close_table(&data->bb, table);

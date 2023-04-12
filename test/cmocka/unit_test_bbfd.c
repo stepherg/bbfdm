@@ -478,7 +478,7 @@ static void test_api_bbfdm_get_list_operate(void **state)
 	ctx->isevent = false;
 	ctx->isinfo = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
+	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -498,7 +498,7 @@ static void test_api_bbfdm_get_list_event(void **state)
 	ctx->isevent = true;
 	ctx->isinfo = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
+	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -518,7 +518,7 @@ static void test_api_bbfdm_get_schema(void **state)
 	ctx->isevent = true;
 	ctx->isinfo = true;
 
-	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
+	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -534,7 +534,7 @@ static void test_api_bbfdm_get_instances_object(void **state)
 	ctx->in_param = "Device.";
 	ctx->nextlevel = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_INSTANCES);
+	fault = bbf_entry_method(ctx, BBF_INSTANCES);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -550,7 +550,7 @@ static void test_api_bbfdm_get_instances_wrong_object(void **state)
 	ctx->in_param = "Device.WiFii.";
 	ctx->nextlevel = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_INSTANCES);
+	fault = bbf_entry_method(ctx, BBF_INSTANCES);
 	assert_int_equal(fault, FAULT_9005);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
@@ -566,7 +566,7 @@ static void test_api_bbfdm_get_instances_without_next_level(void **state)
 	ctx->in_param = "Device.WiFi.";
 	ctx->nextlevel = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_INSTANCES);
+	fault = bbf_entry_method(ctx, BBF_INSTANCES);
 	assert_int_equal(fault, 0);
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
