@@ -20,8 +20,8 @@ typedef struct {
 
 cmd_t CMD[] = {
 	{ BBF_GET_VALUE, "get"},
-	{ BBF_GET_SUPPORTED_DM, "get_supported_dm"},
-	{ BBF_GET_INSTANCES, "get_instances"},
+	{ BBF_SCHEMA, "schema"},
+	{ BBF_INSTANCES, "instances"},
 	//{ BBF_SET_VALUE, "set"},
 	//{ BBF_ADD_OBJECT, "add"},
 	//{ BBF_DEL_OBJECT, "del"},

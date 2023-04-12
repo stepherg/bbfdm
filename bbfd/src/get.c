@@ -206,7 +206,7 @@ void usp_get_instances(usp_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = usp_dm_exec(&data->bbf_ctx, BBF_GET_INSTANCES);
+		fault = usp_dm_exec(&data->bbf_ctx, BBF_INSTANCES);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -335,7 +335,7 @@ int bbf_dm_get_supported_dm(usp_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = usp_dm_exec(&data->bbf_ctx, BBF_GET_SUPPORTED_DM);
+		fault = usp_dm_exec(&data->bbf_ctx, BBF_SCHEMA);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {

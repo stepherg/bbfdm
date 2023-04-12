@@ -1127,7 +1127,7 @@ static void test_api_bbfdm_valid_standard_list_operate(void **state)
 	ctx->isevent = false;
 	ctx->isinfo = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
+	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, CMD_SUCCESS);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
@@ -1222,7 +1222,7 @@ static void test_api_bbfdm_valid_library_list_operate(void **state)
 	ctx->isevent = false;
 	ctx->isinfo = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
+	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, CMD_SUCCESS);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
@@ -1301,7 +1301,7 @@ static void test_api_bbfdm_valid_json_list_operate(void **state)
 	ctx->isevent = false;
 	ctx->isinfo = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
+	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, CMD_SUCCESS);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
@@ -1368,7 +1368,7 @@ static void test_api_bbfdm_valid_json_v1_list_operate(void **state)
 	ctx->isevent = false;
 	ctx->isinfo = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
+	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, CMD_SUCCESS);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
@@ -1423,7 +1423,7 @@ static void test_api_bbfdm_valid_library_event(void **state)
 	ctx->isevent = true;
 	ctx->isinfo = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
+	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
@@ -1476,7 +1476,7 @@ static void test_api_bbfdm_valid_json_event(void **state)
 	ctx->isevent = true;
 	ctx->isinfo = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
+	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
@@ -1523,7 +1523,7 @@ static void test_api_bbfdm_valid_json_v1_event(void **state)
 	ctx->isevent = true;
 	ctx->isinfo = false;
 
-	fault = bbf_entry_method(ctx, BBF_GET_SUPPORTED_DM);
+	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
