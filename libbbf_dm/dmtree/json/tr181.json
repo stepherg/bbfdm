@@ -1209,18 +1209,7 @@
 					],
 					"description": "The total physical volatile RAM, in <<units>>, installed on the device.",
 					"datatype": "unsignedInt",
-					"unit": "KiB",
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "router.system",
-								"method": "memory",
-								"args": {},
-								"key": "total"
-							}
-						}
-					]
+					"unit": "KiB"
 				},
 				"Free": {
 					"type": "unsignedInt",
@@ -1233,18 +1222,7 @@
 					],
 					"description": "The free physical volatile RAM, in <<units>>, currently available on the device.",
 					"datatype": "unsignedInt",
-					"unit": "KiB",
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "router.system",
-								"method": "memory",
-								"args": {},
-								"key": "free"
-							}
-						}
-					]
+					"unit": "KiB"
 				},
 				"TotalPersistent": {
 					"type": "unsignedInt",
@@ -1299,18 +1277,7 @@
 							"max": 100
 						}
 					],
-					"unit": "percent",
-					"mapping": [
-						{
-							"type": "ubus",
-							"ubus": {
-								"object": "router.system",
-								"method": "process",
-								"args": {},
-								"key": "cpu_usage"
-							}
-						}
-					]
+					"unit": "percent"
 				},
 				"ProcessNumberOfEntries": {
 					"type": "unsignedInt",

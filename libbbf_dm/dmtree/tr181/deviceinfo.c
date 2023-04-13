@@ -34,6 +34,13 @@ struct process_entry {
 	int instance;
 };
 
+typedef struct jiffy_counts_t {
+	unsigned long long usr, nic, sys, idle;
+	unsigned long long iowait, irq, softirq, steal;
+	unsigned long long total;
+	unsigned long long busy;
+} jiffy_counts_t;
+
 struct Supported_Data_Models
 {
 	char url[128];
@@ -67,6 +74,57 @@ static int get_linker_process(char* refparam, struct dmctx *ctx, void *data, cha
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
+static void get_jif_val(jiffy_counts_t *p_jif)
+{
+	FILE *file = NULL;
+	char line[128];
+	int ret;
+
+	if ((file = fopen("/proc/stat", "r"))) {
+		while(fgets(line, sizeof(line), file) != NULL)
+		{
+			remove_new_line(line);
+			ret = sscanf(line, "cpu %llu %llu %llu %llu %llu %llu %llu %llu", &p_jif->usr, &p_jif->nic, &p_jif->sys, &p_jif->idle,
+				&p_jif->iowait, &p_jif->irq, &p_jif->softirq, &p_jif->steal);
+
+			if (ret >= 4) {
+				p_jif->total = p_jif->usr + p_jif->nic + p_jif->sys + p_jif->idle
+					+ p_jif->iowait + p_jif->irq + p_jif->softirq + p_jif->steal;
+
+				p_jif->busy = p_jif->total - p_jif->idle - p_jif->iowait;
+				break;
+			}
+		}
+		fclose(file);
+	}
+}
+
+static unsigned int get_cpu_load(jiffy_counts_t *prev_jif, jiffy_counts_t *cur_jif)
+{
+	unsigned total_diff, cpu;
+
+	total_diff = (unsigned)(cur_jif->total - prev_jif->total);
+
+	if (total_diff == 0)
+		total_diff = 1;
+
+	cpu = 100 * (unsigned)(cur_jif->busy - prev_jif->busy) / total_diff;
+
+	return cpu;
+}
+
+static unsigned int get_cpu_usage(void)
+{
+	jiffy_counts_t prev_jif = {0};
+	jiffy_counts_t cur_jif = {0};
+
+	get_jif_val(&prev_jif);
+	usleep(100000);
+	get_jif_val(&cur_jif);
+
+	return get_cpu_load(&prev_jif, &cur_jif);
+}
+
 static bool is_update_process_allowed(void)
 {
 	char *tr069_status = NULL;
@@ -1080,23 +1138,23 @@ static int get_DeviceInfoFirmwareImage_Status(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
-/*#Device.DeviceInfo.MemoryStatus.Total!UBUS:router.system/memory//total*/
 static int get_memory_status_total(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL;
-	dmubus_call("router.system", "memory", UBUS_ARGS{{}}, 0, &res);
+	dmubus_call("system", "info", UBUS_ARGS{{}}, 0, &res);
 	DM_ASSERT(res, *value = "0");
-	*value = dmjson_get_value(res, 1, "total");
+	char *total = dmjson_get_value(res, 2, "memory", "total");
+	dmasprintf(value, "%lu", DM_STRTOUL(total) / 1024);
 	return 0;
 }
 
-/*#Device.DeviceInfo.MemoryStatus.Free!UBUS:router.system/memory//free*/
 static int get_memory_status_free(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL;
-	dmubus_call("router.system", "memory", UBUS_ARGS{{}}, 0, &res);
+	dmubus_call("system", "info", UBUS_ARGS{{}}, 0, &res);
 	DM_ASSERT(res, *value = "0");
-	*value = dmjson_get_value(res, 1, "free");
+	char *free = dmjson_get_value(res, 2, "memory", "free");
+	dmasprintf(value, "%lu", DM_STRTOUL(free) / 1024);
 	return 0;
 }
 
@@ -1126,13 +1184,9 @@ static int get_memory_status_free_persistent(char* refparam, struct dmctx *ctx, 
 	return 0;
 }
 
-/*#Device.DeviceInfo.ProcessStatus.CPUUsage!UBUS:router.system/process//cpu_usage*/
 static int get_process_cpu_usage(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL;
-	dmubus_call("router.system", "process", UBUS_ARGS{{}}, 0, &res);
-	DM_ASSERT(res, *value = "0");
-	*value = dmjson_get_value(res, 1, "cpu_usage");
+	dmasprintf(value, "%u", get_cpu_usage());
 	return 0;
 }
 

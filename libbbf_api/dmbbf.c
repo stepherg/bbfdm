@@ -381,10 +381,10 @@ static bool check_dependency(const char *conf_obj)
 	/* one file => "file:/etc/config/network" */
 	/* multiple files => "file:/etc/config/network,/lib/netifd/proto/dhcp.sh" */
 	/* one ubus => "ubus:router.network" (with method : "ubus:router.network->hosts") */
-	/* multiple ubus => "ubus:router.system->info,dsl->status,wifi" */
+	/* multiple ubus => "ubus:system->info,dsl->status,wifi" */
 	/* one package => "opkg:icwmp" */
 	/* multiple packages => "opkg:icwmp,obuspa" */
-	/* common (files, ubus and opkg) => "file:/etc/config/network,/etc/config/dhcp;ubus:router.system,dsl->status;opkg:icwmp" */
+	/* common (files, ubus and opkg) => "file:/etc/config/network,/etc/config/dhcp;ubus:system,dsl->status;opkg:icwmp" */
 
 	char *pch = NULL, *spch = NULL;
 	char conf_list[512] = {0};
