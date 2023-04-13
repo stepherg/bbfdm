@@ -15,9 +15,3 @@ cp -r ./test/files/lib/* /lib/
 cp ./gitlab-ci/iopsys-supervisord.conf /etc/supervisor/conf.d/
 
 ls /etc/config/
-
-echo "Starting supervisor"
-supervisorctl shutdown
-sleep 1
-supervisord -c /etc/supervisor/supervisord.conf
-sleep 3

@@ -6,6 +6,12 @@ pwd
 
 date +%s > timestamp.log
 
+echo "Starting supervisor"
+supervisorctl shutdown
+sleep 1
+supervisord -c /etc/supervisor/supervisord.conf
+sleep 3
+
 supervisorctl status all
 
 function run_valgrind()
