@@ -134,7 +134,7 @@ static void send_transfer_complete_event(const char *command, const char *obj_pa
 	json_object_object_add(obj, "FaultCode", json_object_new_uint64(fault_code));
 	json_object_object_add(obj, "FaultString", json_object_new_string(fault_string));
 
-	dmubus_call_set("bbf", "notify_event", UBUS_ARGS{{"name", "Device.LocalAgent.TransferComplete!", String}, {"input", json_object_to_json_string(obj), Table}}, 2);
+	dmubus_call_set("bbfdm", "notify_event", UBUS_ARGS{{"name", "Device.LocalAgent.TransferComplete!", String}, {"input", json_object_to_json_string(obj), Table}}, 2);
 
 	json_object_put(obj);
 }

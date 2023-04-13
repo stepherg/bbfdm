@@ -181,7 +181,7 @@ static void uspd_event_handler(struct ubus_context *ctx, struct ubus_event_handl
 	blobmsg_add_string(&b, "name", dm_path);
 	generate_blob_input(&bb, type, &pv_list);
 	blobmsg_add_field(&b, BLOBMSG_TYPE_TABLE, "input", blob_data(bb.head), blob_len(bb.head));
-	ubus_send_event(ctx, "bbf.event", b.head);
+	ubus_send_event(ctx, BBF_EVENT, b.head);
 
 	blob_buf_free(&bb);
 	blob_buf_free(&b);

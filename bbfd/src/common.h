@@ -17,9 +17,10 @@
 #include "bbfd.h"
 
 #define ROOT_NODE "Device."
-#define METHOD_NAME "bbf"
-#define BBF_ADD_EVENT "bbf.AddObj"
-#define BBF_DEL_EVENT "bbf.DelObj"
+#define METHOD_NAME "bbfdm"
+#define BBF_ADD_EVENT METHOD_NAME".AddObj"
+#define BBF_DEL_EVENT METHOD_NAME".DelObj"
+#define BBF_EVENT METHOD_NAME".event"
 
 #define MAX_DM_KEY_LEN 256
 #define MAX_DM_PATH 1024

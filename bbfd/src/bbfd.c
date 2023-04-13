@@ -939,7 +939,7 @@ static int usp_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 	INFO("ubus method|%s|, name|%s|", method, obj->name);
 	event_name = blobmsg_get_string(tb[BBF_NOTIFY_NAME]);
 	if (is_registered_event(event_name)) {
-		ubus_send_event(ctx, "bbf.event", msg);
+		ubus_send_event(ctx, BBF_EVENT, msg);
 	} else {
 		WARNING("Event %s not registered", event_name);
 	}
@@ -1206,7 +1206,7 @@ static int usp_get_config(void)
 		if (s == NULL || s->type == NULL)
 			continue;
 
-		if (strcmp(s->type, "bbfd") == 0) {
+		if (strcmp(s->type, "globals") == 0) {
 			struct uci_option *opn = NULL;
 
 			opn = uci_lookup_option(ctx, s, "loglevel");
@@ -1269,7 +1269,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	openlog("bbfd", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+	openlog("bbfdm", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
 	memset(&usp_ctx, 0, sizeof(struct usp_context));
 
