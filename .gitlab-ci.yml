@@ -98,7 +98,7 @@ run_bbfd_functional_test:
     script:
     - "./gitlab-ci/install-dependencies.sh"
     - "./gitlab-ci/setup.sh"
-    - "./gitlab-ci/bbfd-functional-test.sh"
+    - "./gitlab-ci/bbfdmd-functional-test.sh"
     artifacts:
         when: always
         reports:

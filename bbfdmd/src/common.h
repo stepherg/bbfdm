@@ -14,7 +14,7 @@
 #include <libubox/utils.h>
 #include <libubox/list.h>
 
-#include "bbfd.h"
+#include "bbfdmd.h"
 
 #define ROOT_NODE "Device."
 #define METHOD_NAME "bbfdm"

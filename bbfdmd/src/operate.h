@@ -1,7 +1,7 @@
 #ifndef OPERATE_H
 #define OPERATE_H
 
-#include "bbfd.h"
+#include "bbfdmd.h"
 #include "common.h"
 
 #include "libbbf_api/dmbbf.h"

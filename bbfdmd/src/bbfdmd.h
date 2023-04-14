@@ -1,5 +1,5 @@
-#ifndef USP_H
-#define USP_H
+#ifndef BBFDMD_H
+#define BBFDMD_H
 
 #include <libubus.h>
 #include <libubox/blobmsg.h>
@@ -40,4 +40,4 @@ typedef struct usp_data {
 	int trans_id;
 } usp_data_t;
 
-#endif /* USP_H */
+#endif /* BBFDMD_H */

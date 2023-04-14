@@ -1,7 +1,7 @@
 #ifndef GET_H
 #define GET_H
 
-#include "bbfd.h"
+#include "bbfdmd.h"
 #include "common.h"
 
 enum {
