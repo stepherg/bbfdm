@@ -3,7 +3,7 @@
 <tbody>
     <tr>
         <td colspan="2">
-            <div style="font-weight: bold">bbfd</div>
+            <div style="font-weight: bold">bbfdmd</div>
             <table style="width:100%">
                 <tbody>
                     <tr>
@@ -81,7 +81,7 @@
                                             <div class="td_row_even"></div>
                                         </td>
                                         <td class="td_row_even">
-                                            <div class="td_row_even">Path for ubus socket to register bbfd services</div>
+                                            <div class="td_row_even">Path for ubus socket to register bbfdmd services</div>
                                         </td>
                                     </tr>
                                     <tr>
@@ -167,7 +167,7 @@
                                             <div class="td_row_even">5</div>
                                         </td>
                                         <td class="td_row_even">
-                                            <div class="td_row_even">The time period in seconds after which bbfd will refresh the datamodel instances in a periodic manner. If configured to '0' then instance updater will be disabled. If not configured at all then after every 5 seconds datamodel instances will be refreshed.</div>
+                                            <div class="td_row_even">The time period in seconds after which bbfdmd will refresh the datamodel instances in a periodic manner. If configured to '0' then instance updater will be disabled. If not configured at all then after every 5 seconds datamodel instances will be refreshed.</div>
                                         </td>
                                     </tr>
                                 </tbody>

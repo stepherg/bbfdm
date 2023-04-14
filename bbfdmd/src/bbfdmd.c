@@ -1,5 +1,5 @@
 /*
- * bbfd.c: BBFD deamon
+ * bbfdmd.c: BBFDMD deamon
  *
  * Copyright (C) 2023 iopsys Software Solutions AB. All rights reserved.
  *
@@ -29,7 +29,7 @@
 #include <libubus.h>
 #include <sys/prctl.h>
 
-#include "bbfd.h"
+#include "bbfdmd.h"
 #include "set.h"
 #include "get.h"
 #include "get_helper.h"

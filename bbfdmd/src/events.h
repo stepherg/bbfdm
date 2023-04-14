@@ -1,7 +1,7 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include "bbfd.h"
+#include "bbfdmd.h"
 #include "common.h"
 
 struct event_args_list {
