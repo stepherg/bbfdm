@@ -52,8 +52,12 @@ function install_libusermngr()
 
 function install_libbbf()
 {
-	COV_CFLAGS='-fprofile-arcs -ftest-coverage'
-	COV_LDFLAGS='--coverage'
+	# Enable coverage flags only for test
+	if [ -z "${1}" ]; then
+		COV_CFLAGS='-fprofile-arcs -ftest-coverage'
+		COV_LDFLAGS='--coverage'
+	fi
+
 	VENDOR_LIST='iopsys'
 	VENDOR_PREFIX='X_IOPSYS_EU_'
 
@@ -70,11 +74,15 @@ function install_libbbf()
 	echo "installing libbbf"
 	exec_cmd_verbose make install
 	ln -sf /usr/share/bbfdm/bbf.diag /usr/libexec/rpcd/bbf.diag
+	cp bbfdmd/src/bbfdmd /usr/sbin/bbfdmd
 	cd ..
 }
 
 function install_libbbf_test()
 {
+	# Enable coverage flags only for test
+	[ -n "${1}" ] && return 0;
+
 	# compile and install libbbf_test
 	echo "Compiling libbbf_test"
 	exec_cmd_verbose make clean -C test/bbf_test/
@@ -102,7 +110,7 @@ function install_libcwmpdm()
 {
 	# clone and compile libcwmpdm
 	rm -rf /opt/dev/icwmp
-	exec_cmd git clone -b ticket_8966 --depth 1 https://dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
+	exec_cmd git clone --depth 1 https://dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
 
 	echo "Compiling libcwmpdm"
 	cd /opt/dev/icwmp

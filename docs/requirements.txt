@@ -1,7 +1,0 @@
-mkdocs
-mkdocs-material
-mkdocs-awesome-pages-plugin
-mkdocs-section-index
-fontawesome_markdown
-mkdocs-print-site-plugin
-mkdocs-mermaid2-plugin

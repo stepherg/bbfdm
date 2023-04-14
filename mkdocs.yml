@@ -1,90 +1,10 @@
 site_name: BroadBand Forum Data Models (BBFDM)
-site_url: https://dev.iopsys.eu/iopsys/bbf
-edit_uri: "https://dev.iopsys.eu/iopsys/bbf"
+site_url: https://dev.iopsys.eu/bbf/bbfdm
+edit_uri: "https://dev.iopsys.eu/bbf/bbfdm"
 
-site_description: IOWRT Technical Documentation
+site_description: Datamodel utilities
 site_author: IOPSYS
 
 docs_dir: 'docs'
 site_dir: 'site'
 
-
-theme:
-  name: material
-  include_sidebar: true
-  highlightjs: true
-  hljs_languages:
-      - yaml
-      - python
-  language: en
-  font:
-    text: Roboto
-    code: Roboto Mono
-  logo: iopsys-white.svg
-  icon:
-    logo: icon.png
-    repo: fontawesome/brands/gitlab
-  extra:
-    social:
-      - icon: fontawesome/brands/github-alt
-        link: https://github.com/squidfunk
-  features:
-    - toc.autohide
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.top
-    - navigation.tracking
-    - navigation.expand
-
-  palette:
-    # Primary color used for header, sidebar and links, default: indigo
-    primary: black
-    # Accent color for highlighting user interaction, default: indigo
-    accent: deep orange
-
-extra_css:
-  - css/extra.css
-  - https://unpkg.com/mermaid@8.5.1/dist/mermaid.css
-  - https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css
-
-extra_javascript:
-  - https://unpkg.com/mermaid/dist/mermaid.min.js
-  - https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js
-  - https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js
-
-markdown_extensions:
-  - meta
-  - admonition
-  - pymdownx.arithmatex
-  - pymdownx.betterem:
-      smart_enable: all
-  - pymdownx.caret
-  - pymdownx.critic
-  - pymdownx.details
-  - pymdownx.emoji:
-     emoji_index: !!python/name:materialx.emoji.twemoji
-     emoji_generator: !!python/name:materialx.emoji.to_svg
-  - pymdownx.inlinehilite
-  - pymdownx.magiclink
-  - pymdownx.mark
-  - pymdownx.smartsymbols
-  - pymdownx.tasklist:
-      custom_checkbox: true
-  - pymdownx.tilde
-  - pymdownx.superfences:
-      # make exceptions to highlighting of code:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:mermaid2.fence_mermaid
-  - fontawesome_markdown
-
-plugins:
-  - search:
-      lang:
-        - en
-      separator: '[\s\-\.]+'
-  - awesome-pages:
-        collapse_single_pages: true
-  - mermaid2
-  - section-index

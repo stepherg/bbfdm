@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "install dependencies of bbf"
-pwd
 
 source ./gitlab-ci/shared.sh
 
@@ -11,10 +10,10 @@ apt install -y python3-pip iproute2 libmxml-dev uuid-dev zip
 pip3 install pexpect ubus
 
 # compile and install libbbf
-install_libbbf
+install_libbbf ${1}
 
 #compile and install libbbf_test dynamic extension library
-install_libbbf_test
+install_libbbf_test ${1}
 
 git clone -b devel --depth 1 https://dev.iopsys.eu/feed/iopsys.git /opt/dev/iopsys
 git clone -b devel --depth 1 https://dev.iopsys.eu/bbf/bulkdata.git /opt/dev/bulkdata
