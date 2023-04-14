@@ -1,5 +1,5 @@
 {
-  "bbfd": [
+  "bbfdmd": [
     {
       "section": "globals",
       "description": "BBF daemon Settings",
@@ -17,7 +17,7 @@
           "type": "string",
           "required": "no",
           "default": "",
-          "description": "Path for ubus socket to register bbfd services"
+          "description": "Path for ubus socket to register bbfdmd services"
         },
         {
           "name": "transaction_timeout",
@@ -52,7 +52,7 @@
           "type": "integer",
           "required": "no",
           "default": "5",
-          "description": "The time period in seconds after which bbfd will refresh the datamodel instances in a periodic manner. If configured to '0' then instance updater will be disabled. If not configured at all then after every 5 seconds datamodel instances will be refreshed."
+          "description": "The time period in seconds after which bbfdmd will refresh the datamodel instances in a periodic manner. If configured to '0' then instance updater will be disabled. If not configured at all then after every 5 seconds datamodel instances will be refreshed."
         }
       ]
     }
