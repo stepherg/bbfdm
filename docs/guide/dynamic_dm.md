@@ -416,60 +416,6 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 }
 ```
 
-- **UBUS command:** ubus call usp operate '{"path":"Device.X_IOPSYS_Test.", "action":"Status()", "input":{"Option":"Last"}}'
-
-```bash
-{
- 	"Results": [
-		{
-			"path": "Device.X_IOPSYS_Test.Status()",
-			"result": [
-				{
-					"Result": "Success"
-				}
-			]
-		}
-	]
-}
-```
-
-- **UBUS command:** ubus call usp get_supported_dm
-
-```bash
-{
-	"parameters": [
-		{
-			"parameter": "Device.X_IOPSYS_Test.Push!",
-			"type": "xsd:event",
-			"in": [
-				"data"
-			]
-		},
-		...
-	]
-}
-```
-
-- **UBUS command:** ubus call usp list_operate
-
-```bash
-{
-	"parameters": [
-		{
-			"parameter": "Device.X_IOPSYS_Test.Status()",
-			"type": "async",
-			"in": [
-				"Option"
-			],
-			"out": [
-				"Result"
-			]
-		},
-		...
-	]
-}
-```
-
 > Note1: JSON File can only add vendor or standard objects that are not implemented by `libbbf_dm`
 
 > Note2: JSON File is not allowed to overwrite objects/parameters

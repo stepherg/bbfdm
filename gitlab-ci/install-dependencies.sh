@@ -1,0 +1,39 @@
+#!/bin/bash
+
+echo "install dependencies of bbf"
+pwd
+
+source ./gitlab-ci/shared.sh
+
+# install required packages
+apt update
+apt install -y python3-pip iproute2 libmxml-dev uuid-dev zip
+pip3 install pexpect ubus
+
+# compile and install libbbf
+install_libbbf
+
+#compile and install libbbf_test dynamic extension library
+install_libbbf_test
+
+git clone -b devel --depth 1 https://dev.iopsys.eu/feed/iopsys.git /opt/dev/iopsys
+git clone -b devel --depth 1 https://dev.iopsys.eu/bbf/bulkdata.git /opt/dev/bulkdata
+
+cp -f /opt/dev/iopsys/urlfilter/files/etc/bbfdm/json/urlfilter.json /etc/bbfdm/json
+cp -f /opt/dev/iopsys/obuspa/files/etc/bbfdm/json/USPAgent.json /etc/bbfdm/json
+cp -f /opt/dev/iopsys/obuspa/files/etc/bbfdm/json/TransferComplete.json /etc/bbfdm/json
+cp -f /opt/dev/iopsys/icwmp/files/etc/bbfdm/json/CWMPManagementServer.json /etc/bbfdm/json
+cp -f /opt/dev/iopsys/ponmngr/files/etc/bbfdm/json/xpon.json /etc/bbfdm/json
+cp -f /opt/dev/bulkdata/bbf_plugin/bulkdata.json /etc/bbfdm/json
+
+# install usermngr plugin
+install_libusermngr
+
+# install periodicstats plugin
+install_libperiodicstats
+
+# install cwmpdm plugin
+install_libcwmpdm
+
+ls /usr/lib/bbfdm/
+ls /etc/bbfdm/json/
