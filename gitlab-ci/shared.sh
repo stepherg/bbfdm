@@ -52,8 +52,12 @@ function install_libusermngr()
 
 function install_libbbf()
 {
-	COV_CFLAGS='-fprofile-arcs -ftest-coverage'
-	COV_LDFLAGS='--coverage'
+	# Enable coverage flags only for test
+	if [ -z "${1}" ]; then
+		COV_CFLAGS='-fprofile-arcs -ftest-coverage'
+		COV_LDFLAGS='--coverage'
+	fi
+
 	VENDOR_LIST='iopsys'
 	VENDOR_PREFIX='X_IOPSYS_EU_'
 
@@ -64,7 +68,7 @@ function install_libbbf()
 
 	mkdir -p build
 	cd build
-	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS" -DBBFDMD_ENABLED=ON -DBBF_TR181=ON -DBBF_TR104=ON -DBBF_TR143=ON -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
+	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS" -DBBFDMD_ENABLED=ON -DBBF_TR181=ON -DBBF_TR104=ON -DBBF_TR143=ON -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
 	exec_cmd_verbose make
 
 	echo "installing libbbf"
@@ -75,6 +79,9 @@ function install_libbbf()
 
 function install_libbbf_test()
 {
+	# Enable coverage flags only for test
+	[ -n "${1}" ] && return 0;
+
 	# compile and install libbbf_test
 	echo "Compiling libbbf_test"
 	exec_cmd_verbose make clean -C test/bbf_test/
@@ -102,7 +109,7 @@ function install_libcwmpdm()
 {
 	# clone and compile libcwmpdm
 	rm -rf /opt/dev/icwmp
-	exec_cmd git clone -b ticket_8966 --depth 1 https://dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
+	exec_cmd git clone --depth 1 https://dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
 
 	echo "Compiling libcwmpdm"
 	cd /opt/dev/icwmp
