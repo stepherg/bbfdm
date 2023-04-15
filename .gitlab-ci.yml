@@ -104,7 +104,7 @@ run_bbfd_functional_test:
         paths:
             - funl-result.log
             - funl-test-coverage.xml
-            - memory-report.xml
+            - /tmp/memory-report.xml
             - timestamp.log
             - report/
 

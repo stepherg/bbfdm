@@ -62,7 +62,7 @@ gcovr -r .
 date +%s > timestamp.log
 
 echo "Checking memory leaks..."
-grep -q "Leak" memory-report.xml
+grep -q "Leak" /tmp/memory-report.xml
 error_on_zero $?
 
 if [ "${fault}" -ne 0 ]; then

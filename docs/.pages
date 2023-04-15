@@ -1,5 +1,8 @@
-title: "DOCS"
+title: "Datamodel Daemon and library"
 
 nav:
+    - "arch"
+    - "api"
+    - "spec"
     - "guide"
     - "..."
