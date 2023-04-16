@@ -2323,6 +2323,7 @@ static int br_get_ubus_eth(const struct bridge_port_args *br, const char *name, 
 	char *device = NULL;
 	char *config = NULL;
 
+	DM_ASSERT(br, *value = "0");
 	dmuci_get_value_by_section_string(br->bridge_port_sec, "ifname", &device);
 	dmuci_get_value_by_section_string(br->bridge_port_dmmap_sec, "config", &config);
 
