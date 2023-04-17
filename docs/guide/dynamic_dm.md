@@ -1,6 +1,6 @@
 # BBFDM Dynamic Object/Parameter/Operate/Event
 
-`bbfdm` library allows all applications installed on the box to import its own Data Model parameters at run time in two formats:
+`bbf_dm` library allows all applications installed on the box to import its own Data Model parameters at run time in two formats:
 
 - **Shared library**
 
@@ -32,7 +32,7 @@ For the other tables, they are defined in the same way as the Object and Paramet
 
 > Note2: Shared library is not allowed to overwrite objects/parameters
 
-- For more examples on the external packages, you can see these links: [BulkData](https://dev.iopsys.eu/iopsys/bulkdata/-/blob/master/datamodel.c), [XMPP](https://dev.iopsys.eu/iopsys/xmppc/-/blob/master/datamodel.c)
+- For more examples on the external packages, you can see these links: [BulkData](https://dev.iopsys.eu/bbf/bulkdata/-/blob/master/datamodel.c), [XMPP](https://dev.iopsys.eu/bbf/xmppc/-/blob/master/datamodel.c)
 
 ### 2. JSON File via external package
 
@@ -424,6 +424,6 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 > Note4: Each object definition in JSON file must begin with "Device." and should have the full parent path if it is under another object
 
-- For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [UserInterface](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/test/files/etc/bbfdm/json/UserInterface.json), [X_IOPSYS_EU_Dropbear](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json), [X_IOPSYS_EU_TEST](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json)
+- For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [UserInterface](https://dev.iopsys.eu/bbf/bbfdm/-/tree/devel/test/files/etc/bbfdm/json/UserInterface.json), [X_IOPSYS_EU_Dropbear](https://dev.iopsys.eu/bbf/bbfdm/-/tree/devel/test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json), [X_IOPSYS_EU_TEST](https://dev.iopsys.eu/bbf/bbfdm/-/tree/devel/test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json)
 
 
