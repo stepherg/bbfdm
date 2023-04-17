@@ -3,8 +3,8 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
-#include <libbbf_api/dmcommon.h>
-#include <libbbf_api/dmmem.h>
+#include <libbbfdm-api/dmcommon.h>
+#include <libbbfdm-api/dmmem.h>
 
 static int setup_teardown(void **state)
 {

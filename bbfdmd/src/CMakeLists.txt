@@ -12,5 +12,5 @@ ENDIF()
 
 FILE(GLOB BBF_SOURCES *.c)
 ADD_EXECUTABLE(bbfdmd ${BBF_SOURCES})
-TARGET_LINK_LIBRARIES(bbfdmd uci ubus ubox blobmsg_json bbf_api bbf_dm)
+TARGET_LINK_LIBRARIES(bbfdmd uci ubus ubox blobmsg_json bbfdm-api bbfdm)
 INSTALL(TARGETS bbfdmd DESTINATION usr/sbin)

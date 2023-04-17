@@ -30,9 +30,9 @@
 #include "common.h"
 #include "pretty_print.h"
 
-#include "libbbf_api/dmentry.h"
-#include "libbbf_dm/dmtree/tr181/device.h"
-#include "libbbf_dm/dmtree/vendor/vendor.h"
+#include "libbbfdm-api/dmentry.h"
+#include "libbbfdm/dmtree/tr181/device.h"
+#include "libbbfdm/dmtree/vendor/vendor.h"
 
 DMOBJ *DM_ROOT_OBJ = tEntry181Obj;
 DM_MAP_VENDOR *DM_VENDOR_EXTENSION[2] = {
