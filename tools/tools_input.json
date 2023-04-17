@@ -32,7 +32,7 @@
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "datamodel.c"
+        "src/datamodel.c"
       ]
     },
     {
