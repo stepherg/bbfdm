@@ -119,7 +119,7 @@ $ ./generate_dm_excel.py -d tr181 -v iopsys -p X_IOPSYS_EU_ -r git^https://dev.i
 ```
 
 ## Validate JSON plugin
-It is a [python script](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/tools/validate_json_plugin.py) to validate JSON plugin files for dynamic library or standard data model [TR181](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbf_dm/dmtree/json/tr181.json), [TR104](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbf_dm/dmtree/json/tr104.json), etc..
+It is a [python script](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/tools/validate_json_plugin.py) to validate JSON plugin files for dynamic library or standard data model [TR181](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbfdm/dmtree/json/tr181.json), [TR104](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbfdm/dmtree/json/tr104.json), etc..
 
 ```bash
 $ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
@@ -151,7 +151,7 @@ The parameters/keys used in tools_input.json file are mostly self-explanatory bu
 | | default: This contains the generic definition which has the capability to define more descriptive DM objects/parameters |
 | output.file_format | xls: An excel file listing the supported and unsupported DM objects/parameters |
 
-> Note: To add more description about the vendor extended DM objects/parameters, it is required to add the definition of the required/related DM objects/parameters in a json file (The json structure should follow same format as given in [tr181.json](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbf_dm/dmtree/json/tr181.json)), The same json file need to be defined in dm_json_files list.
+> Note: To add more description about the vendor extended DM objects/parameters, it is required to add the definition of the required/related DM objects/parameters in a json file (The json structure should follow same format as given in [tr181.json](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbfdm/dmtree/json/tr181.json)), The same json file need to be defined in dm_json_files list.
 
 The input json file should be defined as follow:
 
@@ -168,8 +168,8 @@ The input json file should be defined as follow:
 		"test"
 	],
 	"dm_json_files": [
-		"../libbbf_dm/dmtree/json/tr181.json",
-		"../libbbf_dm/dmtree/json/tr104.json"
+		"../libbbfdm/dmtree/json/tr181.json",
+		"../libbbfdm/dmtree/json/tr104.json"
 	]
 	"vendor_prefix": "X_IOPSYS_EU_",
 	"plugins": [

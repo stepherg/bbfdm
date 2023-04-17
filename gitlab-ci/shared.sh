@@ -109,7 +109,7 @@ function install_libcwmpdm()
 {
 	# clone and compile libcwmpdm
 	rm -rf /opt/dev/icwmp
-	exec_cmd git clone --depth 1 https://dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
+	exec_cmd git clone -b devel --depth 1 https://dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
 
 	echo "Compiling libcwmpdm"
 	cd /opt/dev/icwmp

@@ -373,7 +373,7 @@ def hprinttopfile(fp, filename):
     print("#ifndef __%s_H" % filename.upper(), file=fp)
     print("#define __%s_H" % filename.upper(), file=fp)
     print("", file=fp)
-    print("#include <libbbf_api/dmcommon.h>", file=fp)
+    print("#include <libbbfdm-api/dmcommon.h>", file=fp)
     print("", file=fp)
 
 
