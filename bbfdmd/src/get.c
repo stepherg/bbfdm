@@ -25,7 +25,7 @@
 #include "get_helper.h"
 #include "pretty_print.h"
 #include "ipc.h"
-#include "libbbf_api/dmentry.h"
+#include "libbbfdm-api/dmentry.h"
 
 #include <libubus.h>
 
