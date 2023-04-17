@@ -8,11 +8,11 @@
  *	Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
-#include <libbbf_api/dmbbf.h>
-#include <libbbf_api/dmcommon.h>
-#include <libbbf_api/dmuci.h>
-#include <libbbf_api/dmubus.h>
-#include <libbbf_api/dmjson.h>
+#include <libbbfdm-api/dmbbf.h>
+#include <libbbfdm-api/dmcommon.h>
+#include <libbbfdm-api/dmuci.h>
+#include <libbbfdm-api/dmubus.h>
+#include <libbbfdm-api/dmjson.h>
 
 #include "libbbf_test.h"
 

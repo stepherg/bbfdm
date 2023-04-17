@@ -39,7 +39,7 @@
 #include "events.h"
 #include "pretty_print.h"
 #include "get_helper.h"
-#include "libbbf_api/dmentry.h"
+#include "libbbfdm-api/dmentry.h"
 
 #define USP_SUBPROCESS_DEPTH (2)
 #define BBF_SCHEMA_UPDATE_TIMEOUT (60 * 1000)

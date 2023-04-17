@@ -45,7 +45,7 @@ run_tools_test:
           - tools/out/datamodel_hdm.xml
           - tools/out/datamodel.xls
 
-run_libbbf_api_functional_test:
+run_libbbfdm_api_functional_test:
   stage: functional_test
   image: ${COMMON_IMAGE}
   allow_failure: false
@@ -60,7 +60,7 @@ run_libbbf_api_functional_test:
           - timestamp.log
           - functional-api-test-coverage.xml
 
-run_libbbf_dm_functional_test:
+run_libbbfdm_functional_test:
   stage: functional_test
   image: ${COMMON_IMAGE}
   allow_failure: false
@@ -75,7 +75,7 @@ run_libbbf_dm_functional_test:
           - timestamp.log
           - functional-test-coverage.xml
 
-run_libbbf_dm_memory_test:
+run_libbbfdm_memory_test:
   stage: functional_test
   image: ${COMMON_IMAGE}
   allow_failure: false
