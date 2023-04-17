@@ -4,7 +4,7 @@
 #include "bbfdmd.h"
 #include "common.h"
 
-#include "libbbf_api/dmbbf.h"
+#include "libbbfdm-api/dmbbf.h"
 
 enum {
 	DM_OPERATE_COMMAND,

@@ -3,11 +3,11 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
-#include <libbbf_api/dmuci.h>
-#include <libbbf_api/dmapi.h>
-#include <libbbf_api/dmentry.h>
-#include <libbbf_dm/device.h>
-#include <libbbf_dm/vendor.h>
+#include <libbbfdm-api/dmuci.h>
+#include <libbbfdm-api/dmapi.h>
+#include <libbbfdm-api/dmentry.h>
+#include <libbbfdm/device.h>
+#include <libbbfdm/vendor.h>
 
 static DMOBJ *TR181_ROOT_TREE = tEntry181Obj;
 static DM_MAP_VENDOR *TR181_VENDOR_EXTENSION[2] = {

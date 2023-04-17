@@ -5,8 +5,8 @@ This package comprises of the below libraries:
 
 | Library |                    Description                    |
 | ------- | ------------------------------------------------- |
-| libbbf_dm | This provides the mechanism to add new parameters or extend the existing DM tree using json plugin or shared library plugin. |
-| libbbf_api | This provides the APIs for UCI, Ubus, JSON, CLI and memory management. |
+| libbbfdm | This provides the mechanism to add new parameters or extend the existing DM tree using json plugin or shared library plugin. |
+| libbbfdm-api | This provides the APIs for UCI, Ubus, JSON, CLI and memory management. |
 
 ## Design of bbfdm
 
@@ -23,7 +23,7 @@ This package comprises of the below libraries:
 │   └── vendor
 │       ├── iopsys
 │       └── vendor.h
-├── libbbf_api
+├── libbbfdm-api
 ├── scripts
 └── tools
 ```
@@ -40,8 +40,8 @@ This package comprises of the below libraries:
 
 	- `json` folder : TR-181 and TR-104 JSON files
 
-- `libbbf_api` folder which contains the source code of all API functions (UCI, Ubus, JSON, CLI and memory management). These API are used for GET/SET/ADD/Delete/Operate calls which can be called in internal or external packages.
-All APIs exposed by libbbf_api are presented in this header file [libbbf_api.h](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbf_api/include/libbbf_api.h).
+- `libbbfdm-api` folder which contains the source code of all API functions (UCI, Ubus, JSON, CLI and memory management). These API are used for GET/SET/ADD/Delete/Operate calls which can be called in internal or external packages.
+All APIs exposed by libbbfdm-api are presented in this header file [libbbfdm-api.h](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbfdm-api/include/libbbfdm-api.h).
 
 - `scripts` folder which contains the Diagnostics scripts
 
