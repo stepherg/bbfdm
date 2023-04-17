@@ -39,7 +39,7 @@
 #include "events.h"
 #include "pretty_print.h"
 #include "get_helper.h"
-#include "libbbf_api/dmentry.h"
+#include "libbbfdm-api/dmentry.h"
 
 #define USP_SUBPROCESS_DEPTH (2)
 #define BBF_SCHEMA_UPDATE_TIMEOUT (60 * 1000)
@@ -1195,7 +1195,7 @@ static int usp_get_config(void)
 	if (!ctx)
 		return -1;
 
-	if (uci_load(ctx, "bbfdmd", &pkg)) {
+	if (uci_load(ctx, "bbfdm", &pkg)) {
 		uci_free_context(ctx);
 		return -1;
 	}
@@ -1206,7 +1206,7 @@ static int usp_get_config(void)
 		if (s == NULL || s->type == NULL)
 			continue;
 
-		if (strcmp(s->type, "globals") == 0) {
+		if (strcmp(s->type, "bbfdmd") == 0) {
 			struct uci_option *opn = NULL;
 
 			opn = uci_lookup_option(ctx, s, "loglevel");

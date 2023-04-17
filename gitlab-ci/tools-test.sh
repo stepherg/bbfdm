@@ -18,11 +18,11 @@ exec_cmd_verbose pylint -d R,C,W0603 tools/*.py
 echo "********* Validate JSON Plugin *********"
 
 echo "Validate BBF TR-181 JSON Plugin"
-./tools/validate_json_plugin.py libbbf_dm/dmtree/json/tr181.json
+./tools/validate_json_plugin.py libbbfdm/dmtree/json/tr181.json
 check_ret $?
 
 echo "Validate BBF TR-104 JSON Plugin"
-./tools/validate_json_plugin.py libbbf_dm/dmtree/json/tr104.json
+./tools/validate_json_plugin.py libbbfdm/dmtree/json/tr104.json
 check_ret $?
 
 echo "Validate X_IOPSYS_EU_Dropbear JSON Plugin"
