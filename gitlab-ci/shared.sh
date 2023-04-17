@@ -40,7 +40,7 @@ function install_libusermngr()
 {
 	# clone and compile libusermngr
 	rm -rf /opt/dev/usermngr
-	exec_cmd git clone -b devel https://dev.iopsys.eu/bbf/usermngr.git /opt/dev/usermngr
+	exec_cmd git clone -b bbfdm https://dev.iopsys.eu/bbf/usermngr.git /opt/dev/usermngr
 
 	echo "Compiling libusermngr"
 	exec_cmd_verbose make clean -C /opt/dev/usermngr/src/
@@ -95,7 +95,7 @@ function install_libperiodicstats()
 {
 	# clone and compile libperiodicstats
 	rm -rf /opt/dev/periodicstats
-	exec_cmd git clone -b devel https://dev.iopsys.eu/bbf/periodicstats.git /opt/dev/periodicstats
+	exec_cmd git clone -b bbfdm https://dev.iopsys.eu/bbf/periodicstats.git /opt/dev/periodicstats
 
 	echo "Compiling libperiodicstats"
 	exec_cmd_verbose make clean -C /opt/dev/periodicstats/
@@ -109,7 +109,7 @@ function install_libcwmpdm()
 {
 	# clone and compile libcwmpdm
 	rm -rf /opt/dev/icwmp
-	exec_cmd git clone --depth 1 https://dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
+	exec_cmd git clone -b bbfdm --depth 1 https://dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
 
 	echo "Compiling libcwmpdm"
 	cd /opt/dev/icwmp
