@@ -28,7 +28,7 @@ The **DM_MAP_OBJ** structure contains three arguments:
 
 For the other tables, they are defined in the same way as the Object and Parameter definition described above.
 
-> Note1: Shared library can only add vendor or standard objects that are not implemented by `libbbf_dm`
+> Note1: Shared library can only add vendor or standard objects that are not implemented by `libbbfdm`
 
 > Note2: Shared library is not allowed to overwrite objects/parameters
 
@@ -416,7 +416,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 }
 ```
 
-> Note1: JSON File can only add vendor or standard objects that are not implemented by `libbbf_dm`
+> Note1: JSON File can only add vendor or standard objects that are not implemented by `libbbfdm`
 
 > Note2: JSON File is not allowed to overwrite objects/parameters
 
