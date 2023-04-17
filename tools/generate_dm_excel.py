@@ -224,7 +224,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-r', '--remote-dm',
         action='append',
-		metavar = 'git^https://dev.iopsys.eu/iopsys/stunc.git^devel',
+		metavar = 'git^https://dev.iopsys.eu/bbf/stunc.git^devel',
         help= 'Includes OBJ/PARAM defined under remote repositories defined as bbf plugin'
     )
 
