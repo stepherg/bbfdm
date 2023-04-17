@@ -15,7 +15,7 @@
 
 #include "libbbfdm-api/dmcommon.h"
 
-extern DMOBJ tEntry181Obj[];
+extern DMOBJ tEntryRoot[];
 extern DMOBJ tDeviceObj[];
 extern DMLEAF tDeviceParams[];
 

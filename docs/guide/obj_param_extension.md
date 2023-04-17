@@ -2,7 +2,7 @@
 
 As mentioned in README, all Data Models are stored in the **'dmtree'** folder. In order to implement a new object/parameter, you need to expand its get/set/add/delete functions and then save them in the right folder.
 
-`bbfdm` library offers a tool to generate templates of the source code from json files placed under **'dmtree/json'**. So, any developer can fill these json files ([tr181](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbfdm/dmtree/json/tr181.json) or [tr104](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/libbbfdm/dmtree/json/tr104.json)) with mapping field according to UCI, UBUS or CLI commands then generate the source code in C.
+`bbfdm` library offers a tool to generate templates of the source code from json files placed under **'dmtree/json'**. So, any developer can fill these json files ([tr181](https://dev.iopsys.eu/bbf/bbfdm/-/tree/devel/libbbfdm/dmtree/json/tr181.json) or [tr104](https://dev.iopsys.eu/bbf/bbfdm/-/tree/devel/libbbfdm/dmtree/json/tr104.json)) with mapping field according to UCI, UBUS or CLI commands then generate the source code in C.
 
 ```bash
 $ ./convert_dm_json_to_c.py

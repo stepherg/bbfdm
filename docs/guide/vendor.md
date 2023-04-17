@@ -28,13 +28,13 @@ The **DM_MAP_OBJ** structure contains three arguments:
 
 Each entry in the exclude table is a string which could be a path of object or parameter that need to be excluded from the tree
 
-The following [link](https://dev.iopsys.eu/iopsys/bbf/-/blob/devel/libbbfdm/dmtree/vendor/test/tr181/vendor.c) contains example of Extend, Overwrite and Exclude table.
+The following [link](https://dev.iopsys.eu/bbf/bbfdm/-/blob/devel/libbbfdm/dmtree/vendor/test/tr181/vendor.c) contains example of Extend, Overwrite and Exclude table.
 
 ### 3. Adding vendor and standard objects/Parameters
 
 Implement the new vendor/standard objects and parameters as defined above in the first section.
 
-Example: [Custom Vendor Object Dropbear](https://dev.iopsys.eu/iopsys/bbf/-/blob/devel/libbbfdm/dmtree/vendor/test/tr181/x_test_com_dropbear.c)
+Example: [Custom Vendor Object Dropbear](https://dev.iopsys.eu/bbf/bbfdm/-/blob/devel/libbbfdm/dmtree/vendor/test/tr181/x_test_com_dropbear.c)
 
 ### 4. link vendor tables to the main tree
 
@@ -48,7 +48,7 @@ To register the new vendor tables, you need to link them in the main three table
 
 These tables are defined in the file **'dmtree/vendor/vendor.c'**.
 
-Example: [Link vendor tables to the main tree](https://dev.iopsys.eu/iopsys/bbf/-/blob/devel/libbbfdm/dmtree/vendor/vendor.c)
+Example: [Link vendor tables to the main tree](https://dev.iopsys.eu/bbf/bbfdm/-/blob/devel/libbbfdm/dmtree/vendor/vendor.c)
 
 ### 5. Enable vendor
 

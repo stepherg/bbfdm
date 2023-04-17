@@ -80,7 +80,7 @@ static int operate_Device_FactoryReset(char *refparam, struct dmctx *ctx, void *
 *                                            OBJ & LEAF DEFINITION
 ***********************************************************************************************************************************/
 /* *** BBFDM *** */
-DMOBJ tEntry181Obj[] = {
+DMOBJ tEntryRoot[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceObj, tDeviceParams, NULL, BBFDM_BOTH},
 {0}
