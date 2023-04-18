@@ -1,8 +1,8 @@
-site_name: BroadBand Forum Data Models (BBFDM)
+site_name: BBFDM
 site_url: https://dev.iopsys.eu/bbf/bbfdm
 edit_uri: "https://dev.iopsys.eu/bbf/bbfdm"
 
-site_description: Datamodel utilities
+site_description: BroadBand Forum Data Models (BBFDM)
 site_author: IOPSYS
 
 docs_dir: 'docs'

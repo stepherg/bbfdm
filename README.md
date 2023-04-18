@@ -65,13 +65,13 @@ All APIs exposed by libbbfdm-api are presented in this header file [libbbfdm-api
 
 | Datamodel                                | Package        | Link                                         |
 | ---------------------------------------- | -------------- | -------------------------------------------- |
-| Device.BulkData.                         | bulkdata       | https://dev.iopsys.eu/iopsys/bulkdata.git    |
-| Device.CWMPManagementServer.             | icwmp          | https://dev.iopsys.eu/iopsys/icwmp.git       |
-| Device.IP.Diagnostics.UDPEchoConfig.     | udpecho-server | https://dev.iopsys.eu/iopsys/udpecho.git     |
-| Device.IP.Diagnostics.UDPEchoDiagnostics.| udpecho-client | https://dev.iopsys.eu/iopsys/udpecho.git     |
-| Device.IP.Interface.{i}.TWAMPReflector.  | twamp          | https://dev.iopsys.eu/iopsys/twamp-light.git |
+| Device.BulkData.                         | bulkdata       | https://dev.iopsys.eu/bbf/bulkdata.git       |
+| Device.CWMPManagementServer.             | icwmp          | https://dev.iopsys.eu/bbf/icwmp.git          |
+| Device.IP.Diagnostics.UDPEchoConfig.     | udpecho-server | https://dev.iopsys.eu/bbf/udpecho.git        |
+| Device.IP.Diagnostics.UDPEchoDiagnostics.| udpecho-client | https://dev.iopsys.eu/bbf/udpecho.git        |
+| Device.IP.Interface.{i}.TWAMPReflector.  | twamp          | https://dev.iopsys.eu/bbf/twamp-light.git    |
+| Device.XMPP.                             | xmppc          | https://dev.iopsys.eu/bbf/xmppc.git          |
+| Device.USPAgent.                         | obuspa         | https://dev.iopsys.eu/bbf/obuspa.git         |
+| STUN parameters                          | stunc          | https://dev.iopsys.eu/bbf/stunc.git          |
+| Device.XPON.                             | ponmngr        | https://dev.iopsys.eu/hal/ponmngr.git        |
 | Device.UPNP.                             | ssdpd          | https://github.com/miniupnp/miniupnp.git     |
-| Device.XMPP.                             | xmppc          | https://dev.iopsys.eu/iopsys/xmppc.git       |
-| Device.XPON.                             | ponmngr        | https://dev.iopsys.eu/iopsys/ponmngr.git     |
-| Device.USPAgent.                         | obuspa         | https://dev.iopsys.eu/fork/obuspa.git        |
-| STUN parameters                          | stunc          | https://dev.iopsys.eu/iopsys/stunc.git       |

@@ -3,6 +3,8 @@ include:
     file: '/static-code-analysis.yml'
   - project: 'docs/portal2/pipeline-template'
     file: 'MkDocs.gitlab-ci.yml'
+    rules:
+       - if: $CI_COMMIT_BRANCH == "devel"
 
 variables:
   DEBUG: 'TRUE'
@@ -107,4 +109,3 @@ run_bbfd_functional_test:
             - /tmp/memory-report.xml
             - timestamp.log
             - report/
-
