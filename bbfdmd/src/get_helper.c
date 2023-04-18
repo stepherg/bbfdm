@@ -34,7 +34,7 @@
 #include "libbbfdm/dmtree/tr181/device.h"
 #include "libbbfdm/dmtree/vendor/vendor.h"
 
-DMOBJ *DM_ROOT_OBJ = tEntry181Obj;
+DMOBJ *DM_ROOT_OBJ = tEntryRoot;
 DM_MAP_VENDOR *DM_VENDOR_EXTENSION[2] = {
 		tVendorExtension,
 		tVendorExtensionOverwrite

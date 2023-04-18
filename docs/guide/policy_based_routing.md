@@ -19,11 +19,11 @@ config interface 'lan'
 
 config interface 'wan'
     option proto 'dhcp'
-    option device 'eth4.1'
+    option device 'eth0'
 
 config interface 'wan6'
     option proto 'dhcpv6'
-    option device '@wan'
+    option device 'eth0'
 ```
 
 Its table id should be 254 according to rt_tables as defined below:
@@ -88,13 +88,13 @@ config interface 'lan'
 
 config interface 'wan'
     option proto 'dhcp'
-    option device 'eth4.1'
+    option device 'eth0'
     option ip4table '256'
     option ip6table '256'
 
 config interface 'wan6'
     option proto 'dhcpv6'
-    option device '@wan'
+    option device 'eth0'
     option ip4table '256'
     option ip6table '256'
 ```
@@ -129,13 +129,13 @@ config interface 'lan'
 
 config interface 'wan'
     option proto 'dhcp'
-    option device 'eth4.1'
+    option device 'eth0'
     option ip4table '256'
     option ip6table '256'
 
 config interface 'wan6'
     option proto 'dhcpv6'
-    option device '@wan'
+    option device 'eth0'
     option ip4table '256'
     option ip6table '256'
 

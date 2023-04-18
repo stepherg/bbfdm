@@ -511,7 +511,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
 
                     remove_folder(".repo")
                     try:
-                        subprocess.run(["git", "clone", repo, ".repo"],
+                        subprocess.run(["git", "clone", "--depth", "1", repo, ".repo"],
                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check = True)
                     except (OSError, subprocess.SubprocessError) as _e:
                         print(f'    Failed to clone {repo} !!!!!')

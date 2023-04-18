@@ -48,7 +48,7 @@ rm /usr/share/rpcd/schemas/bbf.json
 fault=0
 
 # run functional on bbf object validation
-cp -r ./schemas/ubus/bbf.json /usr/share/rpcd/schemas/bbf.json
+cp -r ./schemas/ubus/bbfdm.json /usr/share/rpcd/schemas/bbf.json
 ubus-api-validator -t 5 -f ./test/funl/validation/bbf.validation.json > ./funl-result.log
 fault=$(( $fault + $? ))
 generate_report bbf_positive ./funl-result.log

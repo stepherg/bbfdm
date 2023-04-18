@@ -22,10 +22,10 @@
                     </tr>
                     <tr>
                         <td class="td_row_even">
-                            <div class="td_row_even">globals</div>
+                            <div class="td_row_even">bbfdmd</div>
                         </td>
                         <td class="td_row_even">
-                            <div class="td_row_even">BBF daemon Settings</div>
+                            <div class="td_row_even">BBFDM daemon Settings</div>
                         </td>
                         <td class="td_row_even">
                             <div class="td_row_even">false</div>

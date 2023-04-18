@@ -1,7 +1,7 @@
 # bbf Schema
 
 ```
-https://dev.iopsys.eu/bbf/bbfdm/-/blob/devel/docs/api/bbfdm.md
+https://dev.iopsys.eu/bbf/bbfdm/-/blob/devel/docs/api/ubus/bbfdm.md
 ```
 
 | Custom Properties | Additional Properties |

@@ -34,7 +34,7 @@ root@iopsys-44d43771aff0:~#
 
 ```
 
-For those cron jobs it is required to give the handler script to be executed which is in our case [bbf_activate_handler.sh](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/scripts/bbf_activate_handler.sh). And, it is located under '/usr/share/bbfdm/' in the device.
+For those cron jobs it is required to give the handler script to be executed which is in our case [bbf_activate_handler.sh](../../libbbfdm/scripts/bbf_activate_handler.sh). And, it is located under '/usr/share/bbfdm/' in the device.
 
 
 ## Cron job specification
@@ -62,7 +62,7 @@ For each cron job related to the activated firmware, it is needed to define it a
 
 ## Activate Handler script
 
-As described, we create a cron job for each TimeWindow in order to activate the required firmware within a specified time by running the [bbf_activate_handler.sh](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/scripts/bbf_activate_handler.sh) handler script.
+As described, we create a cron job for each TimeWindow in order to activate the required firmware within a specified time by running the [bbf_activate_handler.sh](../../libbbfdm/scripts/bbf_activate_handler.sh) handler script.
 
 In fact, the aim of this script is to manage firmware images based on the **mode** and the other passed arguments.
 
@@ -73,22 +73,22 @@ For these modes and based on the firmware bank id, the required firmware image w
 
 ### 2. How to handle 'WhenIdle' mode:
 
-Definition of WhenIdle may vary for each deployment and customer, to make it customizable [bbf_check_idle.sh](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/scripts/bbf_check_idle.sh) script is used. It is assumed that customer shall overwrite this file using customer-config to match with there requirement.
+Definition of WhenIdle may vary for each deployment and customer, to make it customizable [bbf_check_idle.sh](../../libbbfdm/scripts/bbf_check_idle.sh) script is used. It is assumed that customer shall overwrite this file using customer-config to match with there requirement.
 
-In this mode, [bbf_activate_handler.sh](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/scripts/bbf_activate_handler.sh) script calls this script [bbf_check_idle.sh](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/scripts/bbf_check_idle.sh) to determine the idle state of the device. [bbf_activate_handler.sh](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/scripts/bbf_activate_handler.sh) assumes the device as idle if the exit status of the above script is 0, or if the [bbf_check_idle.sh](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/scripts/bbf_check_idle.sh) is not present in the predefined path "ACTIVATE_HANDLER_FILE@dmcommon.h".
+In this mode, [bbf_activate_handler.sh](../../libbbfdm/scripts/bbf_activate_handler.sh) script calls this script [bbf_check_idle.sh](../../libbbfdm/scripts/bbf_check_idle.sh) to determine the idle state of the device. [bbf_activate_handler.sh](../../libbbfdm/scripts/bbf_activate_handler.sh) assumes the device as idle if the exit status of the above script is 0, or if the [bbf_check_idle.sh](../../libbbfdm/scripts/bbf_check_idle.sh) is not present in the predefined path "ACTIVATE_HANDLER_FILE@dmcommon.h".
 
 
 If the exit code from the idle script is zero then firmware image can be activated. Otherwise, it has to wait for next time slot which is defined by 'RETRY_TIME' variable.
 
 > Note1: The time slot is set through 'RETRY_TIME' variable which is defined under '/usr/share/bbfdm/bbf_activate_handler.sh' script.
 
-> Note2: The exit status of the script [bbf_check_idle.sh](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/scripts/bbf_check_idle.sh) is important because based on it, the '[bbf_activate_handler.sh](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/scripts/bbf_activate_handler.sh) script will decide whether the image can be activated or not.
+> Note2: The exit status of the script [bbf_check_idle.sh](../../libbbfdm/scripts/bbf_check_idle.sh) is important because based on it, the '[bbf_activate_handler.sh](../../libbbfdm/scripts/bbf_activate_handler.sh) script will decide whether the image can be activated or not.
 
 > Note3: Algorithm/Logic to determine the Idle state of device is out of scope of this document and it is expected that users overwrite this script with the logic to determine the same in actual deployment.
 
 > Note4: If 1 or more TimeWindow.{i}.Mode is set to 'WhenIdle' and all of them fails to get the idle state. The latest TimeWindow instance will force the device to activate the firmware image.
 
-> Note5: If the idle script [bbf_check_idle.sh](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/scripts/bbf_check_idle.sh) not present in the pre-defined path "ACTIVATE_HANDLER_FILE@dmcommon.h", then the device is assumed to be in ideal state and the firmware shall be activated instantly.
+> Note5: If the idle script [bbf_check_idle.sh](../../libbbfdm/scripts/bbf_check_idle.sh) not present in the pre-defined path "ACTIVATE_HANDLER_FILE@dmcommon.h", then the device is assumed to be in ideal state and the firmware shall be activated instantly.
 
 > Note6: It is very likely that TimeWindow with 'WhenIdle' mode might not find any suitable Idle state, in that case firmware shall not be activated. If users/operators want to make sure that firmware gets activated at the end, then they can add a TimeWindow with 'AnyTime/Immediate' mode at the end, to activate the firmware.
 
@@ -101,7 +101,7 @@ If the exit code from the idle script is zero then firmware image can be activat
 
 * If TimeWindow.{i}.Start is set, TimeWindow.{i}.End and TimeWindow.{i}.Mode become mondatory.
 
-* The firmware activation is done by [bbf_activate_handler.sh](https://dev.iopsys.eu/iopsys/bbf/-/tree/devel/scripts/bbf_activate_handler.sh) script as per the defined Mode in TimeWindow, but if the TimeWindow is not defined, it will activate the requested FirmwareImage instance immediately.
+* The firmware activation is done by [bbf_activate_handler.sh](../../libbbfdm/scripts/bbf_activate_handler.sh) script as per the defined Mode in TimeWindow, but if the TimeWindow is not defined, it will activate the requested FirmwareImage instance immediately.
 
 * If the customer wants to be sure that the required firmware is getting activated at the end then they can define the TimeWindow.{i}.Mode as 'AnyTime' or 'Immediately' in the last TimeWindow instance.
 

@@ -5,7 +5,7 @@
 #include <libbbfdm/device.h>
 #include <libbbfdm/vendor.h>
 
-static DMOBJ *TR181_ROOT_TREE = tEntry181Obj;
+static DMOBJ *TR181_ROOT_TREE = tEntryRoot;
 static DM_MAP_VENDOR *TR181_VENDOR_EXTENSION[2] = {
 		tVendorExtension,
 		tVendorExtensionOverwrite

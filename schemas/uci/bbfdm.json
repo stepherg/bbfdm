@@ -2,7 +2,7 @@
   "bbfdmd": [
     {
       "section": "bbfdmd",
-      "description": "BBF daemon Settings",
+      "description": "BBFDM daemon Settings",
       "multi": false,
       "options": [
         {

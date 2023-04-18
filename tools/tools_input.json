@@ -17,18 +17,18 @@
   "vendor_prefix": "X_IOPSYS_EU_",
   "plugins": [
     {
-      "repo": "https://dev.iopsys.eu/iopsys/bulkdata.git",
+      "repo": "https://dev.iopsys.eu/bbf/bulkdata.git",
       "proto": "git",
       "dm_files": [
         "bbf_plugin/bulkdata.json"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/xmppc.git",
+      "repo": "https://dev.iopsys.eu/bbf/xmppc.git",
       "proto": "git"
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/stunc.git",
+      "repo": "https://dev.iopsys.eu/bbf/stunc.git",
       "proto": "git",
       "version": "devel",
       "dm_files": [
@@ -36,15 +36,7 @@
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/udpechoserver.git",
-      "proto": "git",
-      "version": "master",
-      "dm_files": [
-        "datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/iopsys/twamp-light.git",
+      "repo": "https://dev.iopsys.eu/bbf/udpecho.git",
       "proto": "git",
       "version": "devel",
       "dm_files": [
@@ -52,7 +44,15 @@
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/periodicstats.git",
+      "repo": "https://dev.iopsys.eu/bbf/twamp-light.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/periodicstats.git",
       "proto": "git",
       "version": "devel",
       "dm_files": [
@@ -72,7 +72,7 @@
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/swmodd.git",
+      "repo": "https://dev.iopsys.eu/lcm/swmodd.git",
       "proto": "git",
       "version": "devel",
       "dm_files": [
@@ -80,7 +80,7 @@
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/usermngr.git",
+      "repo": "https://dev.iopsys.eu/bbf/usermngr.git",
       "proto": "git",
       "version": "devel",
       "dm_files": [
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/icwmp.git",
+      "repo": "https://dev.iopsys.eu/bbf/icwmp.git",
       "proto": "git",
       "version": "devel",
       "dm_files": [
