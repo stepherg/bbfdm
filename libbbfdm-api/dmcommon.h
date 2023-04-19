@@ -55,6 +55,7 @@
 #include <sys/utsname.h>
 #include <net/if.h>
 #include <net/if_arp.h>
+#include <ifaddrs.h>
 #include <uci.h>
 #include <libubox/blobmsg_json.h>
 #include <libubox/list.h>
@@ -291,7 +292,7 @@ int dm_file_to_buf(const char *filename, void *buf, size_t buf_size);
 int check_browse_section(struct uci_section *s, void *data);
 int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, size_t str_len);
 char *ioctl_get_ipv4(char *interface_name);
-char *get_ipv6(char *interface_name);
+char *ifaddrs_get_global_ipv6(char *interface_name);
 bool validate_blob_message(struct blob_attr *src, struct blob_attr *dst);
 void strip_lead_trail_whitespace(char *str);
 int dm_buf_to_file(char *buf, const char *filename);

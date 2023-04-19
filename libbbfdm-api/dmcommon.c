@@ -1962,9 +1962,12 @@ int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, siz
 // Note: Ownership of returned dynamically allocated IPv4 address is with caller
 char *ioctl_get_ipv4(char *interface_name)
 {
-	int fd;
 	struct ifreq ifr;
 	char *ip = "";
+	int fd;
+
+	if (!DM_STRLEN(interface_name))
+		return ip;
 
 	fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (fd == -1)
@@ -1984,31 +1987,58 @@ exit:
 	return ip;
 }
 
-char *get_ipv6(char *interface_name)
+// Get Global IPv6 address assigned to an interface using ifaddrs
+// return ==> dynamically allocated IPv6 address on success,
+//        ==> empty string on failure
+// Note: Ownership of returned dynamically allocated IPv6 address is with caller
+char *ifaddrs_get_global_ipv6(char *interface_name)
 {
-	FILE *fp = NULL;
-	char buf[512] = {0};
-	char ipstr[64] = {0};
+	struct ifaddrs *ifaddr = NULL,*ifa = NULL;
+	void *in_addr = NULL;
+	int family, err = 0;
+	char *ip = "";
 
-	fp = fopen(PROC_INTF6, "r");
-	if (fp == NULL)
-		return "";
+	if (!DM_STRLEN(interface_name))
+		return ip;
 
-	while (fgets(buf, 512, fp) != NULL) {
-		ipstr[0] = '\0';
+	err = getifaddrs(&ifaddr);
+	if (err != 0)
+		return ip;
 
-		if (parse_proc_intf6_line(buf, interface_name, ipstr, sizeof(ipstr)) == 0) {
-			if (DM_STRLEN(ipstr) != 0) {
-				char *slash = DM_STRCHR(ipstr, '/');
-				if (slash)
-					*slash = '\0';
-			}
-			break;
-		}
+	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+
+		if (ifa->ifa_addr == NULL || ifa->ifa_name == NULL || strcmp(ifa->ifa_name, interface_name) != 0)
+			continue;
+
+		// Skip this result, if it is not an IPv6 node
+		family = ifa->ifa_addr->sa_family;
+		if (family != AF_INET6)
+		    continue;
+
+		#define NOT_GLOBAL_UNICAST(addr) \
+            		( (IN6_IS_ADDR_UNSPECIFIED(addr)) || (IN6_IS_ADDR_LOOPBACK(addr))  ||   \
+              		(IN6_IS_ADDR_MULTICAST(addr))   || (IN6_IS_ADDR_LINKLOCAL(addr)) ||   \
+              		(IN6_IS_ADDR_SITELOCAL(addr)) )
+
+
+		char buf[INET6_ADDRSTRLEN] = {0};
+
+		in_addr = &((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
+
+		// Skip this result, if it is an IPv6 address, but not globally routable
+		if (NOT_GLOBAL_UNICAST((struct in6_addr *)in_addr))
+			continue;
+
+		inet_ntop(family, in_addr, buf, sizeof(buf));
+
+		ip = dmstrdup(buf);
+		break;
 	}
-	fclose(fp);
 
-	return (*ipstr) ? dmstrdup(ipstr) : "";
+	if (ifaddr)
+		freeifaddrs(ifaddr);
+
+	return ip;
 }
 
 static bool validate_blob_dataval(struct blob_attr *src_attr, struct blob_attr *dst_attr)
