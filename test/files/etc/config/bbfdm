@@ -1,5 +1,0 @@
-
-config bbfdmd 'bbfdmd'
-        option loglevel '1'
-        option refresh_time '10'
-        option transaction_timeout '10'

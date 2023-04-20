@@ -327,7 +327,6 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 		if (!fault)
 			dmuci_change_packages(&head_package_change);
 		break;
-		break;
 	case BBF_ADD_OBJECT:
 		fault = dm_entry_add_object(ctx);
 		if (!fault)

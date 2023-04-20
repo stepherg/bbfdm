@@ -342,7 +342,7 @@ int bbf_dm_get_supported_dm(usp_data_t *data)
 			INFO("Preparing result for(%s)", data->bbf_ctx.in_param);
 
 			list_for_each_entry(param, &data->bbf_ctx.list_parameter, list) {
-				int cmd = bbf_get_dm_type(param->type);
+				int cmd = get_dm_type(param->type);
 
 				void *table = blobmsg_open_table(&data->bb, NULL);
 				if (cmd == DMT_COMMAND) {

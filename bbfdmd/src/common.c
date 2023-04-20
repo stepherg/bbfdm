@@ -181,7 +181,7 @@ bool validate_msglen(usp_data_t *data)
 	return true;
 }
 
-int bbf_get_dm_type(char *dm_type)
+int get_dm_type(char *dm_type)
 {
 	if (dm_type == NULL)
 		return DMT_STRING;
@@ -212,4 +212,28 @@ int bbf_get_dm_type(char *dm_type)
 		return DMT_STRING;
 
 	return DMT_STRING;
+}
+
+int get_proto_type(const char *proto)
+{
+	int type = BBFDM_BOTH;
+
+	if (proto) {
+		if (is_str_eq("cwmp", proto))
+			type = BBFDM_CWMP;
+		else if (is_str_eq("usp", proto))
+			type = BBFDM_USP;
+		else
+			type = BBFDM_BOTH;
+	}
+
+	return type;
+}
+
+int get_instance_mode(int instance_mode)
+{
+	if (instance_mode > INSTANCE_MODE_ALIAS)
+		instance_mode = INSTANCE_MODE_NUMBER;
+
+	return instance_mode;
 }

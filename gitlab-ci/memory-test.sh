@@ -16,41 +16,41 @@ supervisorctl status all
 
 function run_valgrind()
 {
-    echo "Running # bbf_dm $@ #"
-    exec_cmd valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $@
+    echo "Running # bbfdmd $@ #"
+    exec_cmd valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /usr/sbin/bbfdmd $@
 }
 
 function run_valgrind_verbose()
 {
-    echo "Running # bbf_dm $@ #"
-    exec_cmd_verbose valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $@
+    echo "Running # bbfdmd $@ #"
+    exec_cmd_verbose valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /usr/sbin/bbfdmd $@
 }
 
 function run_valgrind_redirect()
 {
-    echo "Running # bbf_dm $@ #" >> output-report-device-get.txt
-    exec_cmd_verbose valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes ./test/bbf_test/bbf_dm $@ | tee -a output-report-device-get.txt
+    echo "Running # bbfdmd $@ #" >> output-report-device-get.txt
+    exec_cmd_verbose valgrind -q --leak-check=full --show-reachable=yes --show-leak-kinds=all --errors-for-leak-kinds=all --error-exitcode=1 --track-origins=yes /usr/sbin/bbfdmd $@ | tee -a output-report-device-get.txt
 }
 
 echo "Running memory check on datamodel"
 
-run_valgrind_verbose -u get Device.RootDataModelVersion
-run_valgrind_verbose -c get Device.RootDataModelVersion
-
-run_valgrind -u get Device.
 run_valgrind -c get Device.
 
-run_valgrind -u instances Device.
 run_valgrind -c instances Device.
 
-run_valgrind -u schema Device.
 run_valgrind -c schema Device.
 
-run_valgrind_verbose -u get Device.IP.Interface.*.IPv4Address.
+run_valgrind_redirect -c get Device.
+
+run_valgrind_redirect -c schema Device.
+
+run_valgrind_verbose -c get Device.RootDataModelVersion
+
 run_valgrind_verbose -c get Device.IP.Interface.*.IPv6Address.*.IPAddress
 
-run_valgrind_redirect -u get Device.
-run_valgrind_redirect -c get Device.
+run_valgrind -c set Device.WiFi.SSID.1.Enable 1
+run_valgrind -c add Device.WiFi.SSID.
+run_valgrind -c del Device.WiFi.SSID.3.
 
 supervisorctl stop all
 supervisorctl status

@@ -39,11 +39,15 @@
 #include "events.h"
 #include "pretty_print.h"
 #include "get_helper.h"
+#include "cli.h"
 #include "libbbfdm-api/dmentry.h"
+#include "libbbfdm-api/dmjson.h"
 
 #define USP_SUBPROCESS_DEPTH (2)
 #define BBF_SCHEMA_UPDATE_TIMEOUT (60 * 1000)
 #define BBF_INSTANCES_UPDATE_TIMEOUT (25 * 1000)
+
+#define DEFAULT_JSON_INPUT "/etc/bbfdm/input.json"
 
 // Global variables
 static unsigned int g_refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
@@ -69,8 +73,10 @@ static void usage(char *prog)
 	fprintf(stderr, "Usage: %s [options]\n", prog);
 	fprintf(stderr, "\n");
 	fprintf(stderr, "options:\n");
-	fprintf(stderr, "    -s <socket path>   ubus socket\n");
-	fprintf(stderr, "    -t <timeout>       Transaction timeout in sec\n");
+	fprintf(stderr, "    -s <socket path>    ubus socket\n");
+	fprintf(stderr, "    -I <json path>      json input configuration\n");
+	fprintf(stderr, "    -c <command input>  Run cli command\n");
+	fprintf(stderr, "    -h                 Displays this help\n");
 	fprintf(stderr, "\n");
 }
 
@@ -101,37 +107,6 @@ static bool is_subprocess_required(const char *path)
 	return ret;
 }
 
-static int get_proto_type(struct blob_attr *proto)
-{
-	int type = BBFDM_BOTH;
-
-	if (proto) {
-		const char *val = blobmsg_get_string(proto);
-
-		if (is_str_eq("cwmp", val))
-			type = BBFDM_CWMP;
-		else if (is_str_eq("usp", val))
-			type = BBFDM_USP;
-		else
-			type = BBFDM_BOTH;
-	}
-
-	return type;
-}
-
-static int get_instance_mode(struct blob_attr *ins)
-{
-	int instance_mode = INSTANCE_MODE_NUMBER;
-
-	if (ins)
-		instance_mode = blobmsg_get_u32(ins);
-
-	if (instance_mode > INSTANCE_MODE_ALIAS)
-		instance_mode = INSTANCE_MODE_NUMBER;
-
-	return instance_mode;
-}
-
 static void fill_optional_data(usp_data_t *data, struct blob_attr *msg)
 {
 	struct blob_attr *attr;
@@ -141,11 +116,16 @@ static void fill_optional_data(usp_data_t *data, struct blob_attr *msg)
 		return;
 
 	blobmsg_for_each_attr(attr, msg, rem) {
-		if (is_str_eq(blobmsg_name(attr), "proto"))
-			data->bbf_ctx.dm_type = get_proto_type(attr);
 
-		if (is_str_eq(blobmsg_name(attr), "instance_mode"))
-			data->bbf_ctx.instance_mode = get_instance_mode(attr);
+		if (is_str_eq(blobmsg_name(attr), "proto")) {
+			const char *val = blobmsg_get_string(attr);
+			data->bbf_ctx.dm_type = get_proto_type(val);
+		}
+
+		if (is_str_eq(blobmsg_name(attr), "instance_mode")) {
+			int instance_mode = blobmsg_get_u32(attr);
+			data->bbf_ctx.instance_mode = get_instance_mode(instance_mode);
+		}
 
 		if (is_str_eq(blobmsg_name(attr), "transaction_id"))
 			data->trans_id = blobmsg_get_u32(attr);
@@ -1185,88 +1165,81 @@ static void periodic_instance_updater(struct uloop_timeout *t)
 	fork_instance_checker(u);
 }
 
-static int usp_get_config(void)
+static int bbfdm_load_config(const char *json_path)
 {
-	struct uci_context *ctx = NULL;
-	struct uci_package *pkg = NULL;
-	struct uci_element *e = NULL;
+	json_object *json_obj = NULL;
+	char *opt_val = NULL;
 
-	ctx = uci_alloc_context();
-	if (!ctx)
+	if (!json_path || !strlen(json_path))
 		return -1;
 
-	if (uci_load(ctx, "bbfdm", &pkg)) {
-		uci_free_context(ctx);
+	json_obj = json_object_from_file(json_path);
+	if (!json_obj)
 		return -1;
+
+	opt_val = dmjson_get_value(json_obj, 3, "daemon", "config", "loglevel");
+	if (opt_val && strlen(opt_val)) {
+		uint8_t log_level = (uint8_t) strtoul(opt_val, NULL, 10);
+		set_debug_level(log_level);
 	}
 
-	uci_foreach_element(&pkg->sections, e) {
-
-		struct uci_section *s = uci_to_section(e);
-		if (s == NULL || s->type == NULL)
-			continue;
-
-		if (strcmp(s->type, "bbfdmd") == 0) {
-			struct uci_option *opn = NULL;
-
-			opn = uci_lookup_option(ctx, s, "loglevel");
-			if (opn) {
-				uint8_t log_level = (uint8_t) strtoul(opn->v.string, NULL, 10);
-				set_debug_level(log_level);
-			}
-
-			opn = uci_lookup_option(ctx, s, "subprocess_level");
-			if (opn) {
-				g_subprocess_level = (unsigned int) strtoul(opn->v.string, NULL, 10);
-			}
-
-			opn = uci_lookup_option(ctx, s, "refresh_time");
-			if (opn) {
-				unsigned int refresh_time = (unsigned int) strtoul(opn->v.string, NULL, 10);
-				g_refresh_time = refresh_time * 1000;
-			}
-		}
+	opt_val = dmjson_get_value(json_obj, 3, "daemon", "config", "refresh_time");
+	if (opt_val && strlen(opt_val)) {
+		unsigned int refresh_time = (unsigned int) strtoul(opt_val, NULL, 10);
+		g_refresh_time = refresh_time * 1000;
 	}
 
-	uci_unload(ctx, pkg);
-	uci_free_context(ctx);
+	opt_val = dmjson_get_value(json_obj, 3, "daemon", "config", "transaction_timeout");
+	if (opt_val && strlen(opt_val)) {
+		int trans_timeout = (int) strtol(opt_val, NULL, 10);
+		configure_transaction_timeout(trans_timeout);
+	}
+
+	opt_val = dmjson_get_value(json_obj, 3, "daemon", "config", "subprocess_level");
+	if (opt_val && strlen(opt_val)) {
+		g_subprocess_level = (unsigned int) strtoul(opt_val, NULL, 10);
+	}
+
+	json_object_put(json_obj);
 	return 0;
 }
 
 static int usp_init(struct usp_context *u)
 {
-	int ret;
-
-	ret = usp_get_config();
-	if (ret)
-		return ret;
-
 	INFO("Registering ubus objects....");
-	ret = ubus_add_object(&u->ubus_ctx, &bbf_object);
-
-	return ret;
+	return ubus_add_object(&u->ubus_ctx, &bbf_object);
 }
 
 int main(int argc, char **argv)
 {
 	struct usp_context usp_ctx;
+	const char *input_json = DEFAULT_JSON_INPUT;
 	const char *ubus_socket = NULL;
-	int ret = 0, ch;
+	int err = 0, ch;
 
-	while ((ch = getopt(argc, argv, "hs:t:")) != -1) {
+	while ((ch = getopt(argc, argv, "hs:I:c:")) != -1) {
 		switch (ch) {
 		case 's':
 			ubus_socket = optarg;
 			break;
-		case 't':
-			configure_transaction_timeout(strtol(optarg, NULL, 10));
+		case 'I':
+			input_json = optarg;
 			break;
+		case 'c':
+			err = bbfdm_cli_exec_command(input_json, argc-optind+1, &argv[optind-1]);
+			exit(err);
 		case 'h':
 			usage(argv[0]);
 			exit(0);
 		default:
 			break;
 		}
+	}
+
+	err = bbfdm_load_config(input_json);
+	if (err != UBUS_STATUS_OK) {
+		fprintf(stderr, "Failed to load bbfdm config from json file '%s'\n", input_json);
+		return -1;
 	}
 
 	openlog("bbfdm", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
@@ -1279,26 +1252,23 @@ int main(int argc, char **argv)
 
 	uloop_init();
 
-	ret = ubus_connect_ctx(&usp_ctx.ubus_ctx, ubus_socket);
-	if (ret != UBUS_STATUS_OK) {
+	err = ubus_connect_ctx(&usp_ctx.ubus_ctx, ubus_socket);
+	if (err != UBUS_STATUS_OK) {
 		fprintf(stderr, "Failed to connect to ubus\n");
 		return -1;
 	}
 
 	signal_init();
 
-	ret = register_events_to_ubus(&usp_ctx.ubus_ctx, &usp_ctx.event_handlers);
-	if (ret != 0) {
+	err = register_events_to_ubus(&usp_ctx.ubus_ctx, &usp_ctx.event_handlers);
+	if (err != 0)
 		goto exit;
-	}
 
 	ubus_add_uloop(&usp_ctx.ubus_ctx);
 
-	ret = usp_init(&usp_ctx);
-	if (ret != UBUS_STATUS_OK) {
-		ret = UBUS_STATUS_UNKNOWN_ERROR;
+	err = usp_init(&usp_ctx);
+	if (err != UBUS_STATUS_OK)
 		goto exit;
-	}
 
 	usp_ctx.schema_timer.cb = periodic_schema_updater;
 	uloop_timeout_set(&usp_ctx.schema_timer, BBF_SCHEMA_UPDATE_TIMEOUT);
@@ -1317,5 +1287,5 @@ exit:
 	usp_cleanup(&usp_ctx);
 	closelog();
 
-	return ret;
+	return err;
 }

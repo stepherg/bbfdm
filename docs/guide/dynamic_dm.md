@@ -1,6 +1,6 @@
 # BBFDM Dynamic Object/Parameter/Operate/Event
 
-`bbf_dm` library allows all applications installed on the box to import its own Data Model parameters at run time in two formats:
+`bbfdm` library allows all applications installed on the box to import its own Data Model parameters at run time in two formats:
 
 - **Shared library**
 

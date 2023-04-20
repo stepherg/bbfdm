@@ -34,6 +34,10 @@
 
 #define USP_ERR_OK 0
 
+extern DMOBJ *DM_ROOT_OBJ;
+extern DM_MAP_VENDOR *DM_VENDOR_EXTENSION[2];
+extern DM_MAP_VENDOR_EXCLUDE *DM_VENDOR_EXTENSION_EXCLUDE;
+
 bool match(const char *string, const char *pattern);
 bool is_str_eq(const char *s1, const char *s2);
 bool is_node_instance(char *path);
@@ -46,7 +50,10 @@ void print_info(const char *format, ...);
 void print_debug(const char *format, ...);
 bool get_boolean_string(char *value);
 bool validate_msglen(usp_data_t *data);
-int bbf_get_dm_type(char *dm_type);
+
+int get_dm_type(char *dm_type);
+int get_proto_type(const char *proto);
+int get_instance_mode(int instance_mode);
 
 #define DEBUG(fmt, args...) \
 	print_debug("[%s:%d]"fmt, __func__, __LINE__, ##args)

@@ -1,0 +1,27 @@
+{
+	"daemon": {
+		"config": {
+		},
+		"input": {
+			"type": "DotSO",
+			"name": "/usr/lib/libbbfdm.so"
+		},
+		"output": {
+			"type": "UBUS",
+			"name": "bbfdm"
+		}
+	},
+	"client": {
+		"config": {
+			"proto": "usp",
+			"instance_mode": 0
+		},
+		"input": {
+			"type": "UBUS",
+			"name": "bbfdm"
+		},
+		"output": {
+			"type": "CLI"
+		}
+	}
+}

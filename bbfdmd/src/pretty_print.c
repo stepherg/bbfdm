@@ -205,7 +205,7 @@ static void add_data_blob(struct blob_buf *bb, char *param, char *value, char *t
 		return;
 
 	DEBUG("# Adding BLOB (%s)::(%s)", param, value);
-	switch (bbf_get_dm_type(type)) {
+	switch (get_dm_type(type)) {
 	case DMT_UNINT:
 		blobmsg_add_u64(bb, param, (uint32_t)strtoul(value, NULL, 10));
 		break;

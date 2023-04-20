@@ -78,10 +78,6 @@ echo "Validate datamodel_default generated XML file"
 xmllint --schema test/tools/cwmp-datamodel-1-8.xsd tools/out/datamodel_default.xml --noout
 check_ret $?
 
-echo "********* Validate C File *********"
-
-## TODO
-
 date +%s > timestamp.log
 
 echo "Tools Test :: PASS"

@@ -41,6 +41,115 @@ When a ubus method is called it first fills `usp_data_t` structure with the nece
 
 In short, it covers/supports all methods introduced in `TR-069` and `TR-369` by using the `bbf_entry_method` API from `libbbfdm-api`  with the differents methods and the existing data-model available with `libbbfdm`.
 
+## BBFDMD Command Line Arguments
+
+`bbfdmd` supports two modes, a daemon mode (seen above) and a command (or CLI) mode, which supports interactively querying the data model and setting values in the configuration via the data model.
+
+Actually, the CLI mode is an utility to simplify the interaction with data model that gives to customer the visibility to expose any kind of data model (which can be a `DotSo` plugin, `JSON` plugin, `UBUS` command or `UNIX` socket) with a specific format (`CLI` or `JSON`).
+
+The CLI mode is specified with the `-c` option and can be run using `cwmp` or `usp` protocol.
+
+All of the above configurations should be done by json file which can be located anywhere, just don't forget to pass the path with `-I` option.
+
+```console
+root@iopsys:~# bbfdmd -I /tmp/test.json -c help
+Valid commands:
+   help
+   get [path-expr]
+   set [path-expr] [value]
+   add [object]
+   del [path-expr]
+   instances [path-expr]
+   schema [path-expr]
+
+```
+
+Below is an example of json file:
+
+```json
+{
+    "client": {
+        "config": {
+            "proto": "usp", // usp, cwmp
+            "instance_mode": 0 // 0:number, 1:alias
+        },
+        "input": {
+            "type": "UBUS", // JSON, UBUS, DotSO, UNIX
+            "name": "bbfdm"
+        },
+        "output": {
+            "type": "CLI" // CLI, JSON
+        }
+    }
+}
+```
+
+> NOTE: If `-I` option is not passed when starting `bbfdmd`, so configuration options will be loaded from the default [INPUT.JSON](../../json/input.json) located in '/etc/bbfdm/input.json'.
+
+* To see a list of arguments supported by `bbfdmd` use:
+
+```console
+root@iopsys:~# bbfdmd -h
+Usage: bbfdmd [options]
+
+options:
+    -s <socket path>    ubus socket
+    -I <json path>      json input configuration
+    -c <command input>  Run cli command
+    -h                 Displays this help
+
+```
+
+* To see a list of commands supported by `bbfdmd` in CLI mode use:
+
+```console
+root@iopsys:~# bbfdmd -c help
+Valid commands:
+   help
+   get [path-expr]
+   set [path-expr] [value]
+   add [object]
+   del [path-expr]
+   instances [path-expr]
+   schema [path-expr]
+
+```
+
+* To see the currently implemented data model use:
+
+```console
+$ bbfdmd -c schema Device.
+```
+
+* To query the value of a parameter use:
+
+```console
+root@iopsys:~# bbfdmd -c get Device.Time.           
+Device.Time.Enable => 0
+Device.Time.Status => Disabled
+Device.Time.NTPServer1 => ntp1.sth.netnod.se
+Device.Time.NTPServer2 => ntp1.gbg.netnod.se
+Device.Time.NTPServer3 => 
+Device.Time.NTPServer4 => 
+Device.Time.NTPServer5 => 
+Device.Time.CurrentLocalTime => 2023-04-22T13:45:01+00:00
+Device.Time.LocalTimeZone => CET-1CEST,M3.5.0,M10.5.0/3
+root@iopsys:~# bbfdmd -c get Device.WiFi.SSID.1.SSID
+Device.WiFi.SSID.1.SSID => test-5g
+```
+
+> Note: The "parameter" may contain wildcard intance and partial paths.
+
+
+* To set the value of a data model parameter use:
+
+```console
+$ bbfdmd -c set "parameter" "value"
+```
+
+> Note: The CLI mode also supports adding and deleting instances of data model objects and supported instances.
+
+
 ## Important topics
 * [UBUS methods](../docs/guide/bbfdm_ubus_methods.md)
 * [UBUS Errors](../docs/guide/bbfdm_ubus_errors.md)

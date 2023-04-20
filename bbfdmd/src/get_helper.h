@@ -19,8 +19,6 @@ struct pathNode {
 	char path[MAX_DM_PATH];
 };
 
-extern DMOBJ *DM_ROOT_OBJ;
-
 void handle_pending_signal(int sig);
 void print_last_dm_object(void);
 
