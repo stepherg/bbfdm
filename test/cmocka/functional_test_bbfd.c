@@ -268,7 +268,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.3.Password", "", "xsd:string");
 
 	// validate uci config
-	fault = dmuci_get_option_value_string("owsd", "@owsd-listen[2]", "password", &value);
+	fault = dmuci_get_option_value_string("owsd", "@owsd_listen[2]", "password", &value);
 	assert_int_equal(fault, 0);
 	assert_string_equal(value, "owsd_pwd");
 

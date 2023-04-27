@@ -383,7 +383,6 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 	}
 
 	if (type && strcmp(json_object_get_string(type), "uci") == 0) {
-		char buf_instance[128], buf_alias[128], object[64] = {0};
 		struct json_object *uci_obj = NULL;
 		struct json_object *file = NULL;
 		struct json_object *section = NULL;
@@ -399,17 +398,22 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 		json_object_object_get_ex(section, "type", &section_type);
 		json_object_object_get_ex(uci_obj, "dmmapfile", &dmmap_file);
 
-		find_current_obj(parent_node->current_object, object, sizeof(object));
-		snprintf(buf_instance, sizeof(buf_instance), "%s_instance", object);
-		snprintf(buf_alias, sizeof(buf_alias), "%s_alias", object);
-		for (int i = 0; buf_instance[i]; i++)
-			buf_instance[i] = tolower(buf_instance[i]);
-
-		for (int i = 0; buf_alias[i]; i++)
-			buf_alias[i] = tolower(buf_alias[i]);
-
 		if (file && section_type && dmmap_file) {
-			synchronize_specific_config_sections_with_dmmap(json_object_get_string(file), json_object_get_string(section_type), json_object_get_string(dmmap_file), &dup_list);
+			char buf_instance[128];
+			char buf_alias[128];
+
+			char *uci_sec_name = json_object_get_string(section_type);
+
+			snprintf(buf_instance, sizeof(buf_instance), "%s_instance", uci_sec_name);
+			snprintf(buf_alias, sizeof(buf_alias), "%s_alias", uci_sec_name);
+
+			for (int i = 0; buf_instance[i]; i++)
+				buf_instance[i] = tolower(buf_instance[i]);
+
+			for (int i = 0; buf_alias[i]; i++)
+				buf_alias[i] = tolower(buf_alias[i]);
+
+			synchronize_specific_config_sections_with_dmmap(json_object_get_string(file), uci_sec_name, json_object_get_string(dmmap_file), &dup_list);
 			list_for_each_entry(p, &dup_list, list) {
 				char *dm_parent = NULL;
 
@@ -510,9 +514,6 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 		struct json_object *section = NULL;
 		struct json_object *section_type = NULL;
 		struct json_object *dmmap_file = NULL;
-		char object[64] = {0};
-		char buf_instance[128];
-		char sec_name[128];
 
 		json_object_object_get_ex((mapping_0 && json_version == JSON_VERSION_1) ? mapping_0 : mapping_obj, "uci", &uci_obj);
 		json_object_object_get_ex(uci_obj, "file", &file);
@@ -520,20 +521,23 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 		json_object_object_get_ex(section, "type", &section_type);
 		json_object_object_get_ex(uci_obj, "dmmapfile", &dmmap_file);
 
-		find_current_obj(refparam, object, sizeof(object));
-		snprintf(buf_instance, sizeof(buf_instance), "%s_instance", object);
-		snprintf(sec_name, sizeof(sec_name), "%s%s%s_%s", data ? section_name((struct uci_section *)data) : "", data ? "_" : "", object, *instance);
-
-		for (int i = 0; buf_instance[i]; i++)
-			buf_instance[i] = tolower(buf_instance[i]);
-
-		for (int i = 0; sec_name[i]; i++)
-			sec_name[i] = tolower(sec_name[i]);
-
 		if (file && section_type && dmmap_file) {
 			struct uci_section *s = NULL, *dmmap_s = NULL;
+			char buf_instance[128];
+			char sec_name[128];
 
-			if (dmuci_add_section(json_object_get_string(file), json_object_get_string(section_type), &s))
+			char *uci_sec_name = json_object_get_string(section_type);
+
+			snprintf(buf_instance, sizeof(buf_instance), "%s_instance", uci_sec_name);
+			snprintf(sec_name, sizeof(sec_name), "%s%s%s_%s", data ? section_name((struct uci_section *)data) : "", data ? "_" : "", uci_sec_name, *instance);
+
+			for (int i = 0; buf_instance[i]; i++)
+				buf_instance[i] = tolower(buf_instance[i]);
+
+			for (int i = 0; sec_name[i]; i++)
+				sec_name[i] = tolower(sec_name[i]);
+
+			if (dmuci_add_section(json_object_get_string(file), uci_sec_name, &s))
 				return -1;
 
 			if (dmuci_rename_section_by_section(s, sec_name))
@@ -542,7 +546,7 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 			if (dmuci_set_value_by_section(s, "dm_parent", section_name((struct uci_section *)data)))
 				return -1;
 
-			if (dmuci_add_section_bbfdm(json_object_get_string(dmmap_file), json_object_get_string(section_type), &dmmap_s))
+			if (dmuci_add_section_bbfdm(json_object_get_string(dmmap_file), uci_sec_name, &dmmap_s))
 				return -1;
 
 			if (dmuci_set_value_by_section(dmmap_s, "section_name", section_name(s)))

@@ -52,7 +52,7 @@
 					"uci": {
 						"file": "owsd",
 						"section": {
-							"type": "owsd-listen"
+							"type": "owsd_listen"
 						},
 						"option": {
 							"name": "@Count"
@@ -76,7 +76,7 @@
 					"uci": {
 						"file": "owsd", 
 						"section": {
-							"type": "owsd-listen"
+							"type": "owsd_listen"
 						}, 
 						"dmmapfile": "dmmap_owsd"
 					}
@@ -120,7 +120,7 @@
 						"uci": {
 							"file": "owsd", 
 							"section": {
-								"type": "owsd-listen"
+								"type": "owsd_listen"
 							}, 
 							"option": {
 								"name": "port"
@@ -148,7 +148,7 @@
 						"uci": {
 							"file": "owsd", 
 							"section": {
-								"type": "owsd-listen"
+								"type": "owsd_listen"
 							}, 
 							"option": {
 								"name": "password"
