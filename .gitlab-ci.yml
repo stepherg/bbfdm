@@ -1,6 +1,7 @@
 include:
   - project: 'iopsys/gitlab-ci-pipeline'
     file: '/static-code-analysis.yml'
+    ref: '0.27'
   - project: 'docs/portal2/pipeline-template'
     file: 'MkDocs.gitlab-ci.yml'
     rules:
@@ -9,7 +10,6 @@ include:
 variables:
   DEBUG: 'TRUE'
   SOURCE_FOLDER: "."
-  COMMON_IMAGE: dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:0.27
   RUN_CPPCHECK: "cppcheck --enable=information --error-exitcode=1 -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBF_TR181 -DBBF_VENDOR_IOPSYS --inline-suppr -i test/"
 
 stages:
