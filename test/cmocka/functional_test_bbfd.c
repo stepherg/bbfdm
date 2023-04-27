@@ -51,8 +51,6 @@ static void validate_parameter(struct dmctx *ctx, const char *name, const char *
 {
 	struct dm_parameter *n;
 
-	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
@@ -65,6 +63,9 @@ static void validate_parameter(struct dmctx *ctx, const char *name, const char *
 		// check the returned type
 		assert_string_equal(n->type, type);
 	}
+
+	bbf_ctx_clean_sub(ctx);
+	bbf_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 }
 
 static void test_api_bbfdm_get_set_standard_parameter(void **state)
@@ -78,7 +79,7 @@ static void test_api_bbfdm_get_set_standard_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.Radio.1.Channel", "1", "xsd:unsignedInt");
+	validate_parameter(ctx, "Device.WiFi.Radio.1.Channel", "36", "xsd:unsignedInt");
 
 	// Set Wrong Value ==> expected "9007" error
 	ctx->in_param = "Device.WiFi.Radio.1.Channel";
@@ -88,7 +89,7 @@ static void test_api_bbfdm_get_set_standard_parameter(void **state)
 
 	// set value ==> expected "0" error
 	ctx->in_param = "Device.WiFi.Radio.1.Channel";
-	ctx->in_value = "64";
+	ctx->in_value = "100";
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
@@ -98,7 +99,7 @@ static void test_api_bbfdm_get_set_standard_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to 64: name, type, value
-	validate_parameter(ctx, "Device.WiFi.Radio.1.Channel", "64", "xsd:unsignedInt");
+	validate_parameter(ctx, "Device.WiFi.Radio.1.Channel", "100", "xsd:unsignedInt");
 }
 
 static void test_api_bbfdm_get_set_json_parameter(void **state)
@@ -112,7 +113,7 @@ static void test_api_bbfdm_get_set_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.2.Noise", "-87", "xsd:int");
+	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.1.Noise", "-87", "xsd:int");
 
 	// get value ==> expected "0" error
 	ctx->in_param = "Device.WiFi.X_IOPSYS_EU_Radio.2.Noise";
@@ -136,7 +137,7 @@ static void test_api_bbfdm_get_set_json_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.1.Stats.BytesSent", "14418177,", "xsd:unsignedInt");
+	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.1.Stats.BytesSent", "14418177", "xsd:unsignedInt");
 
 	// get value ==> expected "0" error
 	ctx->in_param = "Device.WiFi.X_IOPSYS_EU_Radio.2.Stats.BytesSent";
@@ -200,7 +201,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.2.IPv6", "off", "xsd:unsignedInt");
+	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.2.IPv6", "off", "xsd:string");
 
 	// set value ==> expected "0" error
 	ctx->in_param = "Device.UCI_TEST_V1.OWSD.2.IPv6";
@@ -214,7 +215,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.2.IPv6", "on", "xsd:unsignedInt");
+	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.2.IPv6", "on", "xsd:string");
 
 	// get value ==> expected "0" error
 	ctx->in_param = "Device.UCI_TEST_V1.OWSD.1.Port";
@@ -389,7 +390,7 @@ static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.Radio.[cpe-1].Channel", "64", "xsd:unsignedInt");
+	validate_parameter(ctx, "Device.WiFi.Radio.[cpe-1].Channel", "100", "xsd:unsignedInt");
 
 	// Set Wrong Value ==> expected "9007" error
 	ctx->in_param = "Device.WiFi.Radio.[cpe-1].Channel";
@@ -399,7 +400,7 @@ static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
 
 	// set value ==> expected "0" error
 	ctx->in_param = "Device.WiFi.Radio.[cpe-1].Channel";
-	ctx->in_value = "84";
+	ctx->in_value = "52";
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
@@ -409,7 +410,7 @@ static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to 64: name, type, value
-	validate_parameter(ctx, "Device.WiFi.Radio.[cpe-1].Channel", "84", "xsd:unsignedInt");
+	validate_parameter(ctx, "Device.WiFi.Radio.[cpe-1].Channel", "52", "xsd:unsignedInt");
 
 	// set value ==> expected "0" error
 	ctx->in_param = "Device.WiFi.Radio.[cpe-1].Alias";
@@ -427,7 +428,7 @@ static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
 
 	// set value ==> expected "0" error
 	ctx->in_param = "Device.WiFi.Radio.[iopsys_test].Channel";
-	ctx->in_value = "74";
+	ctx->in_value = "116";
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
@@ -437,7 +438,7 @@ static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to 64: name, type, value
-	validate_parameter(ctx, "Device.WiFi.Radio.[iopsys_test].Channel", "74", "xsd:unsignedInt");
+	validate_parameter(ctx, "Device.WiFi.Radio.[iopsys_test].Channel", "116", "xsd:unsignedInt");
 }
 
 #if 0

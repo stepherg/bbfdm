@@ -1635,12 +1635,63 @@ static int set_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, voi
 	return 0;
 }
 
+/*#Device.WiFi.Radio.{i}.PossibleChannels!UBUS:wifi.radio.@Name/status//supp_channels[0].channels*/
+static int get_radio_possible_channels(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL, *supp_channels = NULL, *arrobj = NULL;
+	char object[32], *cur_opclass = NULL;
+	int i = 0;
+
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
+	DM_ASSERT(res, *value = "");
+	cur_opclass = dmjson_get_value(res, 1, "opclass");
+	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
+		char *opclass = dmjson_get_value(supp_channels, 1, "opclass");
+		if (DM_STRCMP(opclass, cur_opclass) != 0)
+			continue;
+
+		*value = dmjson_get_value_array_all(supp_channels, ",", 1, "channels");
+		break;
+	}
+	return 0;
+}
+
+static int get_radio_channels_in_use(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "channel");
+	return 0;
+}
+
+static int get_radio_channel(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *channel = NULL;
+
+	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "channel", &channel);
+
+	if (DM_LSTRCMP(channel, "auto") == 0 || DM_STRLEN(channel) == 0)
+		channel = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "channel");
+
+	*value = channel;
+	return 0;
+}
+
 static int set_radio_channel(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *supported_channels = NULL;
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","255"}}, 1))
 				return FAULT_9007;
+
+			// Get the list of all supported channels
+			get_radio_possible_channels(refparam, ctx, data, instance, &supported_channels);
+
+			// Check if the input value is a valid channel
+			if (!value_exits_in_str_list(supported_channels, ",", value))
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
 			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "channel", value);
@@ -1649,7 +1700,6 @@ static int set_radio_channel(char *refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.AutoChannelEnable!UCI:wireless/wifi-device,@i-1/channel*/
 static int get_radio_auto_channel_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "channel", value);
@@ -3548,20 +3598,6 @@ static int set_radio_frequency(char *refparam, struct dmctx *ctx, void *data, ch
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.ChannelsInUse!UCI:wireless/wifi-device,@i-1/channel*/
-static int get_radio_channel(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char object[32];
-	json_object *res = NULL;
-
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
-	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
-	DM_ASSERT(res, *value = "0");
-	*value = dmjson_get_value(res, 1, "channel");
-
-	return 0;
-}
-
 static int get_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_option_value_string_bbfdm("dmmap_wifi_neighboring", "@diagnostic_status[0]", "DiagnosticsState", value);
@@ -3616,28 +3652,6 @@ static int get_neighboring_wifi_diagnostics_result_operating_frequency_band(char
 static int get_neighboring_wifi_diagnostics_result_noise(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "noise", value);
-	return 0;
-}
-
-/*#Device.WiFi.Radio.{i}.PossibleChannels!UBUS:wifi.radio.@Name/status//supp_channels[0].channels*/
-static int get_radio_possible_channels(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	json_object *res = NULL, *supp_channels = NULL, *arrobj = NULL;
-	char object[32], *cur_opclass = NULL;
-	int i = 0;
-
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
-	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
-	DM_ASSERT(res, *value = "");
-	cur_opclass = dmjson_get_value(res, 1, "opclass");
-	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
-		char *opclass = dmjson_get_value(supp_channels, 1, "opclass");
-		if (opclass && DM_STRCMP(opclass, cur_opclass) != 0)
-			continue;
-
-		*value = dmjson_get_value_array_all(supp_channels, ",", 1, "channels");
-		break;
-	}
 	return 0;
 }
 
@@ -6476,7 +6490,7 @@ DMLEAF tWiFiRadioParams[] = {
 {"OperatingFrequencyBand", &DMWRITE, DMT_STRING, get_radio_frequency, set_radio_frequency, BBFDM_BOTH, "2.0"},
 {"SupportedStandards", &DMREAD, DMT_STRING, get_radio_supported_standard, NULL, BBFDM_BOTH, "2.0"},
 {"OperatingStandards", &DMWRITE, DMT_STRING, get_radio_operating_standard, set_radio_operating_standard, BBFDM_BOTH, "2.0"},
-{"ChannelsInUse", &DMREAD, DMT_STRING, get_radio_channel, NULL, BBFDM_BOTH, "2.0"},
+{"ChannelsInUse", &DMREAD, DMT_STRING, get_radio_channels_in_use, NULL, BBFDM_BOTH, "2.0"},
 {"Channel", &DMWRITE, DMT_UNINT, get_radio_channel, set_radio_channel, BBFDM_BOTH, "2.0"},
 {"AutoChannelEnable", &DMWRITE, DMT_BOOL, get_radio_auto_channel_enable, set_radio_auto_channel_enable, BBFDM_BOTH, "2.0"},
 {"PossibleChannels", &DMREAD, DMT_STRING, get_radio_possible_channels, NULL, BBFDM_BOTH, "2.0"},
