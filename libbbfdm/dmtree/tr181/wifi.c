@@ -1203,12 +1203,12 @@ static int set_wifi_enable(char *refparam, struct dmctx *ctx, void *data, char *
 	return 0;
 }
 
-/*#Device.WiFi.SSID.{i}.Status!UCI:wireless/wifi-iface,@i-1/disabled*/
-static int get_wifi_status (char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_wifi_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_ssid_args *)data)->sections)->config_section, "disabled", value);
-	*value = ((*value)[0] == '1') ? "Down" : "Up";
-	return 0;
+	char *ifname = NULL;
+
+	dmuci_get_value_by_section_string((((struct wifi_ssid_args *)data)->sections)->config_section, "ifname", &ifname);
+	return get_net_device_status(ifname, value);
 }
 
 /*#Device.WiFi.SSID.{i}.SSID!UCI:wireless/wifi-iface,@i-1/ssid*/
@@ -1285,11 +1285,10 @@ static int set_radio_enable(char *refparam, struct dmctx *ctx, void *data, char 
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.Status!UCI:wireless/wifi-device,@i-1/disabled*/
-static int get_radio_status (char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_radio_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "disabled", value);
-	*value = ((*value)[0] == '1') ? "Down" : "Up";
+	char *isup = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "isup");
+	*value = (DM_STRCMP(isup, "false") == 0) ? "Down" : "Up";
 	return 0;
 }
 
@@ -2595,12 +2594,12 @@ static int set_WiFiEndPoint_Enable(char *refparam, struct dmctx *ctx, void *data
 	return 0;
 }
 
-/*#Device.WiFi.EndPoint.{i}.Status!UCI:wireless/wifi-iface,@i-1/disabled*/
 static int get_WiFiEndPoint_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_enp_args *)data)->sections)->config_section, "disabled", value);
-	*value = ((*value)[0] == '1') ? "Disabled" : "Enabled";
-	return 0;
+	char *ifname = NULL;
+
+	dmuci_get_value_by_section_string((((struct wifi_enp_args *)data)->sections)->config_section, "ifname", &ifname);
+	return get_net_device_status(ifname, value);
 }
 
 /*#Device.WiFi.EndPoint.{i}.Alias!UCI:dmmap_wireless/wifi-iface,@i-1/endpointalias*/

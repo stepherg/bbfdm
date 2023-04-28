@@ -1221,17 +1221,10 @@ static int set_IPInterface_ULAEnable(char *refparam, struct dmctx *ctx, void *da
 	return 0;
 }
 
-/*#Device.IP.Interface.{i}.Status!UCI:network/interface,@i-1/disabled*/
 static int get_IPInterface_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL;
-
-	char *if_name = section_name((struct uci_section *)data);
-	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
-	DM_ASSERT(res, *value = "Down");
-	char *up = dmjson_get_value(res, 1, "up");
-	*value = (DM_LSTRCMP(up, "true") == 0) ? "Up" : "Down";
-	return 0;
+	char *device = get_device(section_name((struct uci_section *)data));
+	return get_net_device_status(device, value);
 }
 
 /*#Device.IP.Interface.{i}.Alias!UCI:dmmap_network/interface,@i-1/ip_int_alias*/

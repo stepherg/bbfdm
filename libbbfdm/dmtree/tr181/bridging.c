@@ -1643,9 +1643,10 @@ static int set_BridgingBridge_Enable(char *refparam, struct dmctx *ctx, void *da
 /*#Device.Bridging.Bridge.{i}.Status!UCI:network/device,@i-1/enabled*/
 static int get_BridgingBridge_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	get_BridgingBridge_Enable(refparam, ctx, data, instance, value);
-	*value = (DM_LSTRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
-	return 0;
+	char *name = NULL;
+
+	dmuci_get_value_by_section_string(((struct bridge_args *)data)->bridge_sec, "name", &name);
+	return get_net_device_status(name, value);
 }
 
 /*#Device.Bridging.Bridge.{i}.Alias!UCI:dmmap_bridge/device,@i-1/bridge_alias*/
@@ -1737,9 +1738,10 @@ static int set_BridgingBridgeSTP_Enable(char *refparam, struct dmctx *ctx, void 
 
 static int get_BridgingBridgeSTP_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	get_BridgingBridgeSTP_Enable(refparam, ctx, data, instance, value);
-	*value = (DM_LSTRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
-	return 0;
+	char *name = NULL;
+
+	dmuci_get_value_by_section_string(((struct bridge_args *)data)->bridge_sec, "name", &name);
+	return get_net_device_status(name, value);
 }
 
 static int get_BridgingBridgeSTP_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1916,9 +1918,11 @@ static int set_BridgingBridgePort_Enable(char *refparam, struct dmctx *ctx, void
 
 static int get_BridgingBridgePort_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	get_BridgingBridgePort_Enable(refparam, ctx, data, instance, value);
-	*value = (DM_LSTRCMP(*value, "1") == 0) ? "Up" : "Down";
-	return 0;
+	struct bridge_port_args *args = (struct bridge_port_args *)data;
+	char *port = NULL;
+
+	dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "port", &port);
+	return get_net_device_status(port, value);
 }
 
 static int get_BridgingBridgePort_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -2871,9 +2875,10 @@ static int set_BridgingBridgeProviderBridge_Enable(char *refparam, struct dmctx 
 
 static int get_BridgingBridgeProviderBridge_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct provider_bridge_args *)data)->provider_bridge_sec, "enable", value);
-	*value = (DM_LSTRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
-	return 0;
+	char *name = NULL;
+
+	dmuci_get_value_by_section_string(((struct provider_bridge_args *)data)->provider_bridge_sec, "name", &name);
+	return get_net_device_status(name, value);
 }
 
 static int get_BridgingBridgeProviderBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

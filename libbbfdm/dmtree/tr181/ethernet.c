@@ -1550,9 +1550,10 @@ static int set_EthernetRMONStats_Enable(char *refparam, struct dmctx *ctx, void 
 
 static int get_EthernetRMONStats_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	get_EthernetRMONStats_Enable(refparam, ctx, data, instance, value);
-	*value = (DM_LSTRCMP(*value, "1") == 0) ? "Enabled" : "Disabled";
-	return 0;
+	char *ifname = NULL;
+
+	dmuci_get_value_by_section_string((((struct eth_rmon_args *)data)->sections)->config_section, "ifname", &ifname);
+	return get_net_device_status(ifname, value);
 }
 
 /*#Device.Ethernet.RMONStats.{i}.Alias!UCI:dmmap_eth_rmon/ethport,@i-1/eth_rmon_alias*/
