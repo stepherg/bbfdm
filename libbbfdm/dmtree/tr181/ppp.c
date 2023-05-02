@@ -996,7 +996,11 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 	if ((*value)[0] == '\0') {
 		char *device = NULL;
 
-		dmuci_get_value_by_section_string(ppp->dmmap_s, "device", &device);
+		if (ppp->iface_s)
+			device = get_device(section_name(ppp->iface_s));
+		else
+			dmuci_get_value_by_section_string(ppp->dmmap_s, "device", &device);
+
 		if (DM_STRLEN(device) == 0)
 			return 0;
 
