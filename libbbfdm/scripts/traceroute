@@ -77,7 +77,7 @@ traceroute_launch() {
 		return
 	}
 	
-	[ -z "${dsize}" ] && dsize="72"
+	[ -z "${dsize}" ] && dsize="38"
 
 	res=$(traceroute -m ${maxhop} -w ${timeout} -q ${cnt} ${ip_proto} ${device} "${host}" "${dsize}" 2>&1 >"${LOG_FILE}")
 	error_code="$?"
