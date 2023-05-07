@@ -39,9 +39,14 @@
 #include "events.h"
 #include "pretty_print.h"
 #include "get_helper.h"
+#include "plugin.h"
 #include "cli.h"
 #include "libbbfdm-api/dmentry.h"
 #include "libbbfdm-api/dmjson.h"
+
+extern struct list_head loaded_json_files;
+extern struct list_head json_list;
+extern struct list_head json_memhead;
 
 #define USP_SUBPROCESS_DEPTH (2)
 #define BBF_SCHEMA_UPDATE_TIMEOUT (60 * 1000)
@@ -52,6 +57,10 @@
 // Global variables
 static unsigned int g_refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
 static int g_subprocess_level = USP_SUBPROCESS_DEPTH;
+static void *deamon_lib_handle = NULL;
+
+char UBUS_METHOD_NAME[32] = "bbfdm";
+bool enable_plugins = true;
 
 static void sig_handler(int sig)
 {
@@ -84,7 +93,8 @@ static void usp_cleanup(struct usp_context *u)
 {
 	free_path_list(&u->instances);
 	free_path_list(&u->old_instances);
-	bbf_global_clean(DM_ROOT_OBJ);
+	bbf_global_clean(DEAMON_DM_ROOT_OBJ);
+	free_dotso_plugin(deamon_lib_handle);
 }
 
 static bool is_sync_operate_cmd(usp_data_t *data __attribute__((unused)))
@@ -133,6 +143,8 @@ static void fill_optional_data(usp_data_t *data, struct blob_attr *msg)
 		if (is_str_eq(blobmsg_name(attr), "format"))
 			data->is_raw = is_str_eq(blobmsg_get_string(attr), "raw") ? true : false;
 	}
+
+	data->bbf_ctx.enable_plugins = enable_plugins;
 
 	DEBUG("Proto:|%s|, Inst Mode:|%s|, Tran-id:|%d|, Format:|%s|",
 			(data->bbf_ctx.dm_type == BBFDM_BOTH) ? "both" : (data->bbf_ctx.dm_type == BBFDM_CWMP) ? "cwmp" : "usp",
@@ -919,7 +931,11 @@ static int usp_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 	INFO("ubus method|%s|, name|%s|", method, obj->name);
 	event_name = blobmsg_get_string(tb[BBF_NOTIFY_NAME]);
 	if (is_registered_event(event_name)) {
-		ubus_send_event(ctx, BBF_EVENT, msg);
+		char method_name[40] = {0};
+
+		snprintf(method_name, sizeof(method_name), "%s.%s", UBUS_METHOD_NAME, BBF_EVENT);
+
+		ubus_send_event(ctx, method_name, msg);
 	} else {
 		WARNING("Event %s not registered", event_name);
 	}
@@ -939,10 +955,10 @@ static struct ubus_method bbf_methods[] = {
 	UBUS_METHOD("notify_event", usp_notify_event, dm_notify_event_policy),
 };
 
-static struct ubus_object_type bbf_type = UBUS_OBJECT_TYPE(METHOD_NAME, bbf_methods);
+static struct ubus_object_type bbf_type = UBUS_OBJECT_TYPE(UBUS_METHOD_NAME, bbf_methods);
 
 static struct ubus_object bbf_object = {
-	.name = METHOD_NAME,
+	.name = UBUS_METHOD_NAME,
 	.type = &bbf_type,
 	.methods = bbf_methods,
 	.n_methods = ARRAY_SIZE(bbf_methods)
@@ -974,7 +990,7 @@ static void periodic_schema_updater(struct uloop_timeout *t)
 		INFO("Schema update available");
 		blob_buf_init(&bb, 0);
 		blobmsg_add_string(&bb, "action", "schema_update_available");
-		ubus_notify(&u->ubus_ctx, &bbf_object, METHOD_NAME, bb.head, 1000);
+		ubus_notify(&u->ubus_ctx, &bbf_object, UBUS_METHOD_NAME, bb.head, 1000);
 		blob_buf_free(&bb);
 	}
 
@@ -988,6 +1004,7 @@ static void broadcast_add_del_event(struct list_head *inst, bool is_add)
 	struct ubus_context ctx;
 	struct blob_buf bb;
 	struct pathNode *ptr;
+	char method_name[40];
 	void *a;
 	int ret;
 
@@ -1011,10 +1028,12 @@ static void broadcast_add_del_event(struct list_head *inst, bool is_add)
 	}
 	blobmsg_close_array(&bb, a);
 
+	snprintf(method_name, sizeof(method_name), "%s.%s", UBUS_METHOD_NAME, is_add ? BBF_ADD_EVENT : BBF_DEL_EVENT);
+
 	if (is_add)
-		ubus_send_event(&ctx, BBF_ADD_EVENT, bb.head);
+		ubus_send_event(&ctx, method_name, bb.head);
 	else
-		ubus_send_event(&ctx, BBF_DEL_EVENT, bb.head);
+		ubus_send_event(&ctx, method_name, bb.head);
 
 	blob_buf_free(&bb);
 	ubus_shutdown(&ctx);
@@ -1025,6 +1044,7 @@ static void update_instances_list(struct list_head *inst)
 	struct dmctx bbf_ctx = {
 			.in_param = ROOT_NODE,
 			.nextlevel = false,
+			.enable_plugins = enable_plugins,
 			.instance_mode = INSTANCE_MODE_NUMBER,
 			.dm_type = BBFDM_USP
 	};
@@ -1165,43 +1185,79 @@ static void periodic_instance_updater(struct uloop_timeout *t)
 	fork_instance_checker(u);
 }
 
-static int bbfdm_load_config(const char *json_path)
+static int bbfdm_load_deamon_config(const char *json_path)
 {
-	json_object *json_obj = NULL;
 	char *opt_val = NULL;
+	int err = 0;
 
 	if (!json_path || !strlen(json_path))
 		return -1;
 
-	json_obj = json_object_from_file(json_path);
+	json_object *json_obj = json_object_from_file(json_path);
 	if (!json_obj)
 		return -1;
 
-	opt_val = dmjson_get_value(json_obj, 3, "daemon", "config", "loglevel");
+	json_object *deamon_obj = dmjson_get_obj(json_obj, 1, "daemon");
+	if (!deamon_obj) {
+		err = -1;
+		goto exit;
+	}
+
+	opt_val = dmjson_get_value(deamon_obj, 2, "config", "loglevel");
 	if (opt_val && strlen(opt_val)) {
 		uint8_t log_level = (uint8_t) strtoul(opt_val, NULL, 10);
 		set_debug_level(log_level);
 	}
 
-	opt_val = dmjson_get_value(json_obj, 3, "daemon", "config", "refresh_time");
+	opt_val = dmjson_get_value(deamon_obj, 2, "config", "refresh_time");
 	if (opt_val && strlen(opt_val)) {
 		unsigned int refresh_time = (unsigned int) strtoul(opt_val, NULL, 10);
 		g_refresh_time = refresh_time * 1000;
 	}
 
-	opt_val = dmjson_get_value(json_obj, 3, "daemon", "config", "transaction_timeout");
+	opt_val = dmjson_get_value(deamon_obj, 2, "config", "transaction_timeout");
 	if (opt_val && strlen(opt_val)) {
 		int trans_timeout = (int) strtol(opt_val, NULL, 10);
 		configure_transaction_timeout(trans_timeout);
 	}
 
-	opt_val = dmjson_get_value(json_obj, 3, "daemon", "config", "subprocess_level");
+	opt_val = dmjson_get_value(deamon_obj, 2, "config", "subprocess_level");
 	if (opt_val && strlen(opt_val)) {
 		g_subprocess_level = (unsigned int) strtoul(opt_val, NULL, 10);
 	}
 
+	opt_val = dmjson_get_value(deamon_obj, 2, "config", "enable_plugins");
+	if (opt_val && strlen(opt_val)) {
+		enable_plugins = (unsigned int) strtoul(opt_val, NULL, 10);
+	}
+
+	opt_val = dmjson_get_value(deamon_obj, 2, "output", "name");
+	if (opt_val && strlen(opt_val)) {
+		strncpyt(UBUS_METHOD_NAME, opt_val, sizeof(UBUS_METHOD_NAME));
+	}
+
+	opt_val = dmjson_get_value(deamon_obj, 2, "input", "type");
+	if (opt_val && strlen(opt_val)) {
+		char *file_path = dmjson_get_value(deamon_obj, 2, "input", "name");
+
+		if (strcasecmp(opt_val, "JSON") == 0)
+			err= load_json_plugin(&loaded_json_files, &json_list, &json_memhead, file_path,
+					&DEAMON_DM_ROOT_OBJ);
+		else if (strcasecmp(opt_val, "DotSo") == 0)
+			err = load_dotso_plugin(&deamon_lib_handle, file_path,
+					&DEAMON_DM_ROOT_OBJ,
+					DEAMON_DM_VENDOR_EXTENSION,
+					&DEAMON_DM_VENDOR_EXTENSION_EXCLUDE);
+		else
+			err = -1;
+	} else {
+		err = -1;
+	}
+
+exit:
 	json_object_put(json_obj);
-	return 0;
+
+	return err;
 }
 
 static int usp_init(struct usp_context *u)
@@ -1236,7 +1292,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	err = bbfdm_load_config(input_json);
+	err = bbfdm_load_deamon_config(input_json);
 	if (err != UBUS_STATUS_OK) {
 		fprintf(stderr, "Failed to load bbfdm config from json file '%s'\n", input_json);
 		return -1;

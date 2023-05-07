@@ -686,7 +686,7 @@ bool find_root_entry(struct dmctx *ctx, char *in_param, DMOBJ **root_entry)
 	char *old_in_param = ctx->in_param;
 	dm_check_dynamic_obj(ctx, &node, root, obj_path, obj_path, root_entry, &obj_found);
 	ctx->in_param = old_in_param;
-	dmfree(obj_path);
+	FREE(obj_path);
 
 	return (obj_found && *root_entry) ? true : false;
 }

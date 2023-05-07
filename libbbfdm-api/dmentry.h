@@ -15,8 +15,6 @@
 #ifndef __DMENTRY_H__
 #define __DMENTRY_H__
 
-extern struct list_head global_memhead;
-
 void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj,
 		DM_MAP_VENDOR *tVendorExtension[],
 		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude);

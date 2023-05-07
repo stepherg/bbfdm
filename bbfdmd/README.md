@@ -83,8 +83,9 @@ Below is an example of json file:
     }
 }
 ```
+> NOTE1: `bbfdmd` CLI mode is an experimentation feature and it can be updated later.
 
-> NOTE: If `-I` option is not passed when starting `bbfdmd`, so configuration options will be loaded from the default [INPUT.JSON](../../json/input.json) located in '/etc/bbfdm/input.json'.
+> NOTE2: If `-I` option is not passed when starting `bbfdmd`, so configuration options will be loaded from the default [INPUT.JSON](../../json/input.json) located in '/etc/bbfdm/input.json'.
 
 * To see a list of arguments supported by `bbfdmd` use:
 

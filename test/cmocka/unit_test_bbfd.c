@@ -6,6 +6,7 @@
 #include <libbbfdm-api/dmuci.h>
 #include <libbbfdm-api/dmapi.h>
 #include <libbbfdm-api/dmentry.h>
+
 #include <libbbfdm/device.h>
 #include <libbbfdm/vendor.h>
 
@@ -28,6 +29,9 @@ static int setup(void **state)
 		return -1;
 
 	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+
+	// Enable Plugins
+	ctx->enable_plugins = true;
 
 	*state = ctx;
 
@@ -592,6 +596,9 @@ static void test_api_bbfdm_json_get_value(void **state)
 	bbf_ctx_clean_sub(ctx);
 	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
+	// Enable Plugins
+	ctx->enable_plugins = true;
+
 	/*
 	 * Test of JSON Parameter Path
 	 */
@@ -604,6 +611,9 @@ static void test_api_bbfdm_json_get_value(void **state)
 
 	bbf_ctx_clean_sub(ctx);
 	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+
+	// Enable Plugins
+	ctx->enable_plugins = true;
 
 	remove(DROPBEAR_JSON_PATH);
 
@@ -682,6 +692,9 @@ static void test_api_bbfdm_library_get_value(void **state)
 	bbf_ctx_clean_sub(ctx);
 	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
+	// Enable Plugins
+	ctx->enable_plugins = true;
+
 	ctx->in_param = "Device.WiFi.SSID.1.Enable";
 
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
@@ -692,6 +705,9 @@ static void test_api_bbfdm_library_get_value(void **state)
 
 	bbf_ctx_clean_sub(ctx);
 	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+
+	// Enable Plugins
+	ctx->enable_plugins = true;
 
 	remove(LIBBBF_TEST_BBFDM_PATH);
 

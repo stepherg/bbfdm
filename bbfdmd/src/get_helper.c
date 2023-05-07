@@ -31,15 +31,10 @@
 #include "pretty_print.h"
 
 #include "libbbfdm-api/dmentry.h"
-#include "libbbfdm/dmtree/tr181/device.h"
-#include "libbbfdm/dmtree/vendor/vendor.h"
 
-DMOBJ *DM_ROOT_OBJ = tEntryRoot;
-DM_MAP_VENDOR *DM_VENDOR_EXTENSION[2] = {
-		tVendorExtension,
-		tVendorExtensionOverwrite
-};
-DM_MAP_VENDOR_EXCLUDE *DM_VENDOR_EXTENSION_EXCLUDE = tVendorExtensionExclude;
+DMOBJ *DEAMON_DM_ROOT_OBJ = NULL;
+DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2] = {0};
+DM_MAP_VENDOR_EXCLUDE *DEAMON_DM_VENDOR_EXTENSION_EXCLUDE = NULL;
 
 // uloop.h does not have versions, below line is to use
 // deprecated uloop_timeout_remaining for the time being
@@ -79,7 +74,7 @@ void bb_add_string(struct blob_buf *bb, const char *name, const char *value)
 
 void bbf_init(struct dmctx *dm_ctx)
 {
-	bbf_ctx_init(dm_ctx, DM_ROOT_OBJ, DM_VENDOR_EXTENSION, DM_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(dm_ctx, DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE);
 }
 
 void bbf_cleanup(struct dmctx *dm_ctx)
@@ -89,7 +84,7 @@ void bbf_cleanup(struct dmctx *dm_ctx)
 
 void bbf_sub_init(struct dmctx *dm_ctx)
 {
-	bbf_ctx_init_sub(dm_ctx, DM_ROOT_OBJ, DM_VENDOR_EXTENSION, DM_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init_sub(dm_ctx, DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE);
 }
 
 void bbf_sub_cleanup(struct dmctx *dm_ctx)

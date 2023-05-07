@@ -17,10 +17,9 @@
 #include "bbfdmd.h"
 
 #define ROOT_NODE "Device."
-#define METHOD_NAME "bbfdm"
-#define BBF_ADD_EVENT METHOD_NAME".AddObj"
-#define BBF_DEL_EVENT METHOD_NAME".DelObj"
-#define BBF_EVENT METHOD_NAME".event"
+#define BBF_ADD_EVENT "AddObj"
+#define BBF_DEL_EVENT "DelObj"
+#define BBF_EVENT "event"
 
 #define MAX_DM_KEY_LEN 256
 #define MAX_DM_PATH 1024
@@ -34,9 +33,9 @@
 
 #define USP_ERR_OK 0
 
-extern DMOBJ *DM_ROOT_OBJ;
-extern DM_MAP_VENDOR *DM_VENDOR_EXTENSION[2];
-extern DM_MAP_VENDOR_EXCLUDE *DM_VENDOR_EXTENSION_EXCLUDE;
+extern DMOBJ *DEAMON_DM_ROOT_OBJ;
+extern DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2];
+extern DM_MAP_VENDOR_EXCLUDE *DEAMON_DM_VENDOR_EXTENSION_EXCLUDE;
 
 bool match(const char *string, const char *pattern);
 bool is_str_eq(const char *s1, const char *s2);

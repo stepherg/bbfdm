@@ -1,31 +1,22 @@
 /*
- * Copyright (C) 2021 iopsys Software Solutions AB
+ * Copyright (C) 2023 iopsys Software Solutions AB
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation
  *
- *	  Author Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+ *	  Author Amin Ben Romdhane <amin.benramdhane@iopsys.eu>
  *
  */
 
 #include "dmdynamiclibrary.h"
 
 LIST_HEAD(loaded_library_list);
-LIST_HEAD(library_memhead);
 
 struct loaded_library
 {
 	struct list_head list;
 	void *library;
-};
-
-struct dynamic_operate
-{
-	struct list_head list;
-	char *operate_path;
-	void *operate;
-	void *operate_args;
 };
 
 static void add_list_loaded_libraries(struct list_head *library_list, void *library)
@@ -79,7 +70,6 @@ void free_library_dynamic_arrays(DMOBJ *dm_entryobj)
 	DMNODE node = {.current_object = ""};
 
 	free_all_list_open_library(&loaded_library_list);
-	dm_dynamic_cleanmem(&library_memhead);
 	dm_browse_node_dynamic_object_tree(&node, root);
 }
 
@@ -99,10 +89,9 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 
 			void *handle = dlopen(buf, RTLD_NOW|RTLD_LOCAL);
 			if (!handle) {
-				fprintf(stderr, "Plugin failed [%s]", dlerror());
+				fprintf(stderr, "Plugin failed [%s]\n", dlerror());
 				continue;
 			}
-
 
 			//Dynamic Object
 			DM_MAP_OBJ *dynamic_obj = NULL;

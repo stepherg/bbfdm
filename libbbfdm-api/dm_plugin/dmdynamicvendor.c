@@ -225,7 +225,7 @@ static void exclude_obj(struct dmctx *ctx, char *in_obj)
 
 	char *obj_path = replace_str(in_obj, ".{i}.", ".");
 	dm_exclude_obj(ctx, &node, root, obj_path);
-	dmfree(obj_path);
+	FREE(obj_path);
 }
 
 static void exclude_param(struct dmctx *ctx, char *in_param)

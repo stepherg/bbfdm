@@ -295,7 +295,8 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 		return bbf_fault_map(ctx->dm_type, USP_FAULT_INVALID_PATH);
 
 	// Load dynamic objects and parameters
-	load_dynamic_arrays(ctx);
+	if (ctx->enable_plugins)
+		load_dynamic_arrays(ctx);
 
 	dmentry_instance_lookup_inparam(ctx);
 
@@ -348,8 +349,8 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 
 void bbf_global_clean(DMOBJ *dm_entryobj)
 {
-	dm_dynamic_cleanmem(&global_memhead);
 	free_dynamic_arrays(dm_entryobj);
+	dm_dynamic_cleanmem(&global_memhead);
 }
 
 int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[])

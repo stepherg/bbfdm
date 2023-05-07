@@ -965,11 +965,13 @@ static void test_bbf_api_common(void **state)
 	DM_STRNCPY(buf, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IPv4Address.{i}.", sizeof(buf));
 	value = replace_str(buf, ".{i}.", ".");
 	assert_string_equal(value, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.IPv4Address.");
+	FREE(value);
 
 	// replace_str: test
 	DM_STRNCPY(buf, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IPv4Address.{i}.", sizeof(buf));
 	value = replace_str(buf, ".{i}.", ".*.");
 	assert_string_equal(value, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.IPv4Address.*.");
+	FREE(value);
 
 
 	/*

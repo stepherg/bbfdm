@@ -197,6 +197,7 @@ struct dmctx {
 	bool iscommand;
 	bool isevent;
 	bool isinfo;
+	bool enable_plugins;
 };
 
 typedef struct dmnode {

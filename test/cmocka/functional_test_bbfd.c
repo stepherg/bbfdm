@@ -6,6 +6,7 @@
 #include <libbbfdm-api/dmuci.h>
 #include <libbbfdm-api/dmapi.h>
 #include <libbbfdm-api/dmentry.h>
+
 #include <libbbfdm/device.h>
 #include <libbbfdm/vendor.h>
 
@@ -23,6 +24,9 @@ static int setup(void **state)
 		return -1;
 
 	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+
+	// Enable Plugins
+	ctx->enable_plugins = true;
 
 	*state = ctx;
 

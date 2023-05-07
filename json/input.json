@@ -1,10 +1,12 @@
 {
 	"daemon": {
 		"config": {
+			"refresh_time": 10,
+			"enable_plugins": 1
 		},
 		"input": {
-			"type": "DotSO",
-			"name": "/usr/lib/libbbfdm.so"
+			"type": "DotSo",
+			"name": "/lib/libbbfdm.so"
 		},
 		"output": {
 			"type": "UBUS",
@@ -14,7 +16,8 @@
 	"client": {
 		"config": {
 			"proto": "usp",
-			"instance_mode": 0
+			"instance_mode": 0,
+			"enable_plugins": 0
 		},
 		"input": {
 			"type": "UBUS",

@@ -14,9 +14,9 @@
 #define MAX_DM_LENGTH (1024)
 #define json_object_get_string(x) (char *)json_object_get_string(x)
 
-static LIST_HEAD(loaded_json_files);
-static LIST_HEAD(json_list);
-static LIST_HEAD(json_memhead);
+LIST_HEAD(loaded_json_files);
+LIST_HEAD(json_list);
+LIST_HEAD(json_memhead);
 
 static operation_args empty_cmd = {
 	.in = (const char**)NULL,
@@ -89,7 +89,7 @@ static void free_json_data(struct list_head *json_list)
 	}
 }
 
-static void save_loaded_json_files(struct list_head *json_list, json_object *data)
+void save_loaded_json_files(struct list_head *json_list, json_object *data)
 {
 	struct loaded_json_file *json_file = calloc(1, sizeof(struct loaded_json_file));
 	list_add_tail(&json_file->list, json_list);
@@ -145,7 +145,15 @@ int free_json_dynamic_arrays(DMOBJ *dm_entryobj)
 	return 0;
 }
 
-static void find_prefix_obj(char *full_obj, char *prefix_obj, size_t len)
+int free_json_loaded_object(void)
+{
+	free_loaded_json_files(&loaded_json_files);
+	free_json_data(&json_list);
+	dm_dynamic_cleanmem(&json_memhead);
+	return 0;
+}
+
+void find_prefix_obj(char *full_obj, char *prefix_obj, size_t len)
 {
 	int last_occurent = 0, occur = 0;
 
@@ -160,7 +168,7 @@ static void find_prefix_obj(char *full_obj, char *prefix_obj, size_t len)
 
 	*(full_object + last_occurent + 1) = 0;
 	snprintf(prefix_obj, len, "%s", full_object);
-	dmfree(full_object);
+	FREE(full_object);
 }
 
 static void find_current_obj(char *full_obj, char *curr_obj, size_t len)
@@ -178,7 +186,7 @@ static void find_current_obj(char *full_obj, char *curr_obj, size_t len)
 
 	full_object[occur] = 0;
 	snprintf(curr_obj, len, "%s", full_object + last_occurent + 1);
-	dmfree(full_object);
+	FREE(full_object);
 }
 
 static void generate_path_without_instance(char *full_obj, bool is_obj, char *obj_path, size_t len)
@@ -763,6 +771,7 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 		dmasprintf(&value, "cpe-%s", instance);
 
 end:
+	FREE(linker);
 	return value;
 }
 
@@ -1782,6 +1791,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 		pleaf[i].bbfdm_type = BBFDM_BOTH;
 
 	snprintf(full_param, sizeof(full_param), "%s%s", object, param_ext);
+	FREE(param_ext);
 	save_json_data(list, full_param, jobj, json_version, (const char**)in_p, (const char**)out_p, (const char**)ev_arg);
 }
 
@@ -1802,7 +1812,7 @@ static void count_obj_param_under_jsonobj(json_object *jsonobj, int *obj_number,
 	}
 }
 
-static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json_version, struct list_head *list)
+void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json_version, struct list_head *list)
 {
 	/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys(13)*/
 
@@ -1816,7 +1826,7 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, i
 	char *obj_path = replace_str(object, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
 	char *full_obj = replace_str(obj_path, ".{i}.", ".");
 	find_current_obj(full_obj, curr_obj, sizeof(curr_obj));
-	dmfree(obj_path);
+	FREE(obj_path);
 
 	if (!pobj)
 		return;
@@ -1913,6 +1923,8 @@ static void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, i
 			i++;
 		}
 	}
+
+	FREE(full_obj);
 }
 
 int load_json_dynamic_arrays(struct dmctx *ctx)
@@ -1950,8 +1962,10 @@ int load_json_dynamic_arrays(struct dmctx *ctx)
 				find_prefix_obj(obj_path, obj_prefix, MAX_DM_LENGTH);
 
 				bool obj_exists = find_root_entry(ctx, obj_prefix, &dm_entryobj);
-				if (obj_exists == 0 || !dm_entryobj)
+				if (obj_exists == 0 || !dm_entryobj) {
+					FREE(obj_path);
 					continue;
+				}
 
 				if (dm_entryobj->nextdynamicobj == NULL) {
 					dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
@@ -1973,6 +1987,8 @@ int load_json_dynamic_arrays(struct dmctx *ctx)
 					memset(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
 					parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], idx, json_plugin_version, &json_list);
 				}
+
+				FREE(obj_path);
 			}
 			save_loaded_json_files(&loaded_json_files, json);
 		}

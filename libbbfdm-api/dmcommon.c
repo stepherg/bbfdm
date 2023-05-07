@@ -1847,7 +1847,7 @@ char *replace_str(const char *str, const char *substr, const char *replacement)
 	}
 
 	size_t new_str_len = i + cnt * (replacement_len - substr_len) + 1;
-	char *value = (char *)dmmalloc(new_str_len * sizeof(char));
+	char *value = (char *)malloc(new_str_len * sizeof(char));
 
 	i = 0;
 	while (*str) {
