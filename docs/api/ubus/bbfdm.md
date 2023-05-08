@@ -1890,11 +1890,11 @@ To set multiple values at once, path should be relative to object elements
 ##### obj_path Examples
 
 ```json
-{ "path": "Device.WiFi.SSID.1", "values": { ".SSID": "test_ssid", ".Name": "test_name" } }
+{ "path": "Device.WiFi.SSID.1.", "obj_path": { "SSID": "test_ssid", "Name": "test_name" } }
 ```
 
 ```json
-{ "path": "Device.WiFi.SSID.2", "values": { ".SSID": "test_ssid" } }
+{ "path": "Device.WiFi.SSID.2.", "obj_path": { "SSID": "test_ssid" } }
 ```
 
 #### optional
