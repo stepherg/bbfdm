@@ -131,7 +131,7 @@ iplayercap_launch() {
 		options="$options -X"
 	fi
 
-	if [ -n "${ipdb_enable}" ] && [ "${ipdv_enable}" -eq 1 ]; then
+	if [ -n "${ipdv_enable}" ] && [ "${ipdv_enable}" -eq 1 ]; then
 		options="$options -o"
 	fi
 
@@ -176,7 +176,8 @@ iplayercap_launch() {
 		fi
 	fi
 
-	output=$(udpst "${options}" -f jsonf "${host}" 2>&1)
+	cmd="udpst ${options} -f jsonf ${host}"
+	output=$(${cmd} 2>&1)
 	if [ "$?" -eq 127 ] || [ "$?" -eq 255 ]; then
 		iplayercap_error "Error_Internal" "${proto}"
 		return
@@ -321,8 +322,8 @@ iplayercap_launch() {
 		if json_is_a ModalResult array; then
 			json_select ModalResult
 			if [ "$?" -eq 0 ]; then
-				local idx=1
-				local inst=0
+				idx=1
+				inst=0
 				while json_is_a ${idx} object
 				do
 					json_select ${idx}
@@ -375,8 +376,8 @@ iplayercap_launch() {
 		if json_is_a IncrementalResult array; then
 			json_select IncrementalResult
 			if [ "$?" -eq 0 ]; then
-				local idx=1
-				local inst=0
+				idx=1
+				inst=0
 				while json_is_a ${idx} object
 				do
 					json_select ${idx}
