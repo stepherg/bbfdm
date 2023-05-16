@@ -17,7 +17,8 @@
 
 void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj,
 		DM_MAP_VENDOR *tVendorExtension[],
-		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude);
+		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude,
+		json_object *services_obj);
 void bbf_ctx_clean(struct dmctx *ctx);
 
 void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj,
@@ -30,6 +31,7 @@ int bbf_fault_map(unsigned int dm_type, int fault);
 int bbf_entry_method(struct dmctx *ctx, int cmd);
 
 void bbf_global_clean(DMOBJ *dm_entryobj);
+
 int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
 
 int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value);

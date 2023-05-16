@@ -34,7 +34,6 @@ do
 	$test
 	if [ $? -eq 0 ]; then
 		echo "ok ${num} - $test" >> ./funl-result.log
-
 	else
 		echo "not ok ${num} - $test" >>  ./funl-result.log
 	fi

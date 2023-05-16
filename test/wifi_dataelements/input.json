@@ -6,14 +6,9 @@
 		},
 		"services": [
 			{
-				"ubus_obj": "bbfdm.bulkdata",
-				"obj_mount": "Device.",
-				"obj_name": "BulkData"
-			},
-			{
-				"ubus_obj": "bbfdm.periodicstats",
-				"obj_mount": "Device.",
-				"obj_name": "PeriodicStatistics"
+				"ubus_obj": "bbfdm.dataelements",
+				"obj_mount": "Device.WiFi.",
+				"obj_name": "DataElements"
 			}
 		],
 		"input": {

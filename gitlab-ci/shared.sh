@@ -68,7 +68,7 @@ function install_libbbf()
 
 	mkdir -p build
 	cd build
-	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS" -DBBFDMD_ENABLED=ON -DBBF_TR181=ON -DBBF_TR104=ON -DBBF_TR143=ON -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
+	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS" -DBBFDMD_ENABLED=ON -DBBF_TR181=ON -DBBF_TR104=ON -DBBF_TR143=ON -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_WIFI_DATAELEMENTS=OFF -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
 	exec_cmd_verbose make
 
 	echo "installing libbbf"
@@ -89,6 +89,22 @@ function install_libbbf_test()
 
 	echo "installing libbbf_test"
 	cp -f test/bbf_test/libbbf_test.so /usr/lib/bbfdm
+}
+
+function install_libwifi_dataelements()
+{
+	# Enable coverage flags only for test
+	[ -n "${1}" ] && return 0;
+
+	# compile and install libwifi_dataelements
+	echo "Compiling libwifi_dataelements"
+	exec_cmd_verbose make clean -C test/wifi_dataelements/
+	exec_cmd_verbose make -C test/wifi_dataelements/
+
+	echo "installing libwifi_dataelements"
+	cp -f test/wifi_dataelements/input.json /etc/bbfdm/input.json
+	cp -f test/wifi_dataelements/wifi_dataelements.json /tmp/wifi_dataelements.json
+	cp -f test/wifi_dataelements/libwifi_dataelements.so /tmp/libwifi_dataelements.so
 }
 
 function install_libperiodicstats()

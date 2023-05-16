@@ -22,32 +22,6 @@
 static char dm_browse_path[MAX_DM_PATH];
 
 static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance);
-static int get_value_obj(DMOBJECT_ARGS);
-static int get_value_param(DMPARAM_ARGS);
-static int mobj_get_value_in_param(DMOBJECT_ARGS);
-static int mparam_get_value_in_param(DMPARAM_ARGS);
-static int mparam_get_name(DMPARAM_ARGS);
-static int mobj_get_name(DMOBJECT_ARGS);
-static int mparam_get_name_in_param(DMPARAM_ARGS);
-static int mobj_get_name_in_param(DMOBJECT_ARGS);
-static int mparam_get_name_in_obj(DMPARAM_ARGS);
-static int mobj_get_name_in_obj(DMOBJECT_ARGS);
-static int mobj_get_schema_name(DMOBJECT_ARGS);
-static int mparam_get_schema_name(DMPARAM_ARGS);
-static int mobj_get_instances_in_obj(DMOBJECT_ARGS);
-static int mparam_get_instances_in_obj(DMPARAM_ARGS);
-static int mparam_add_object(DMPARAM_ARGS);
-static int mobj_add_object(DMOBJECT_ARGS);
-static int delete_object_obj(DMOBJECT_ARGS);
-static int delete_object_param(DMPARAM_ARGS);
-static int mobj_set_value(DMOBJECT_ARGS);
-static int mparam_set_value(DMPARAM_ARGS);
-static int get_linker_check_obj(DMOBJECT_ARGS);
-static int get_linker_check_param(DMPARAM_ARGS);
-static int get_linker_value_check_obj(DMOBJECT_ARGS);
-static int get_linker_value_check_param(DMPARAM_ARGS);
-static int mobj_get_supported_dm(DMOBJECT_ARGS);
-static int mparam_get_supported_dm(DMPARAM_ARGS);
 
 char *DMT_TYPE[] = {
 	[DMT_STRING] = "xsd:string",
@@ -441,6 +415,29 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 	return err;
 }
 
+static void dm_browse_service(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance, char *parent_obj, int *err)
+{
+	DMNODE node = {0};
+
+	node.obj = entryobj;
+	node.parent = parent_node;
+	node.is_ubus_service = true;
+
+	dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
+
+	if (dmctx->checkobj) {
+		*err = dmctx->checkobj(dmctx, &node, NULL, NULL, NULL, NULL, data, instance);
+		if (*err)
+			return;
+	}
+
+	*err = dmctx->method_obj(dmctx, &node, NULL, NULL, NULL, NULL, data, instance);
+	if (dmctx->stop)
+		return;
+
+	*err = dmctx->method_param(dmctx, &node, NULL, data, instance);
+}
+
 static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance, char *parent_obj, int *err)
 {
 	DMNODE node = {0};
@@ -522,7 +519,10 @@ static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, 
 						DMOBJ *jentryobj = next_dyn_array->nextobj[j];
 						for (; (jentryobj && jentryobj->obj); jentryobj++) {
 							snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_obj, jentryobj->obj);
-							dm_browse_entry(dmctx, parent_node, jentryobj, data, instance, parent_obj, &err);
+							if (i == INDX_SERVICE_MOUNT)
+								dm_browse_service(dmctx, parent_node, jentryobj, data, instance, parent_obj, &err);
+							else
+								dm_browse_entry(dmctx, parent_node, jentryobj, data, instance, parent_obj, &err);
 							if (dmctx->stop)
 								return err;
 						}
@@ -594,150 +594,6 @@ int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char 
 			return err;
 	}
 	return err;
-}
-
-void dm_exclude_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *data)
-{
-	char *parent_obj = parent_node->current_object;
-
-	for (; (entryobj && entryobj->obj); entryobj++) {
-		DMNODE node = {0};
-		node.obj = entryobj;
-		node.parent = parent_node;
-		node.instance_level = parent_node->instance_level;
-		node.matched = parent_node->matched;
-
-		dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
-		if (DM_STRCMP(node.current_object, data) == 0) {
-			entryobj->bbfdm_type = BBFDM_NONE;
-			return;
-		}
-
-		dmctx->in_param = data;
-		int err = plugin_obj_match(dmctx, &node, NULL, NULL, NULL, NULL, NULL, NULL);
-		if (err)
-			continue;
-
-		if (entryobj->nextobj)
-			dm_exclude_obj(dmctx, &node, entryobj->nextobj, data);
-	}
-}
-
-static void dm_check_dynamic_obj_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *parent_obj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found)
-{
-	DMNODE node = {0};
-	node.obj = entryobj;
-	node.parent = parent_node;
-	node.instance_level = parent_node->instance_level;
-	node.matched = parent_node->matched;
-
-	dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
-	if (DM_STRCMP(node.current_object, obj) == 0) {
-		*root_entry = entryobj;
-		*obj_found = 1;
-		return;
-	}
-
-	dmctx->in_param = full_obj;
-	int err = plugin_obj_match(dmctx, &node, NULL, NULL, NULL, NULL, NULL, NULL);
-	if (err)
-		return;
-
-	if (entryobj->nextobj || entryobj->nextdynamicobj)
-		dm_check_dynamic_obj(dmctx, &node, entryobj->nextobj, full_obj, obj, root_entry, obj_found);
-}
-
-void dm_check_dynamic_obj(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, char *obj, DMOBJ **root_entry, int *obj_found)
-{
-	char *parent_obj = parent_node->current_object;
-
-	for (; (entryobj && entryobj->obj); entryobj++) {
-		dm_check_dynamic_obj_entry(dmctx, parent_node, entryobj, parent_obj, full_obj, obj, root_entry, obj_found);
-		if (*obj_found == 1)
-			return;
-	}
-
-	if (parent_node->obj) {
-		if (parent_node->obj->nextdynamicobj) {
-			for (int i = 0; i < __INDX_DYNAMIC_MAX; i++) {
-				struct dm_dynamic_obj *next_dyn_array = parent_node->obj->nextdynamicobj + i;
-				if (next_dyn_array->nextobj) {
-					for (int j = 0; next_dyn_array->nextobj[j]; j++) {
-						DMOBJ *jentryobj = next_dyn_array->nextobj[j];
-						for (; (jentryobj && jentryobj->obj); jentryobj++) {
-							dm_check_dynamic_obj_entry(dmctx, parent_node, jentryobj, parent_obj, full_obj, obj, root_entry, obj_found);
-							if (*obj_found == 1)
-								return;
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-bool find_root_entry(struct dmctx *ctx, char *in_param, DMOBJ **root_entry)
-{
-	int obj_found = 0;
-	DMOBJ *root = ctx->dm_entryobj;
-	DMNODE node = {.current_object = ""};
-
-	char *obj_path = replace_str(in_param, ".{i}.", ".");
-	char *old_in_param = ctx->in_param;
-	dm_check_dynamic_obj(ctx, &node, root, obj_path, obj_path, root_entry, &obj_found);
-	ctx->in_param = old_in_param;
-	FREE(obj_path);
-
-	return (obj_found && *root_entry) ? true : false;
-}
-
-int get_obj_idx_dynamic_array(DMOBJ **entryobj)
-{
-	int i, idx = 0;
-	for (i = 0; entryobj[i]; i++) {
-		idx++;
-	}
-	return idx;
-}
-
-int get_leaf_idx_dynamic_array(DMLEAF **entryleaf)
-{
-	int i, idx = 0;
-	for (i = 0; entryleaf[i]; i++) {
-		idx++;
-	}
-	return idx;
-}
-
-void free_dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj)
-{
-	for (; (entryobj && entryobj->obj); entryobj++) {
-
-		if (entryobj->nextdynamicobj) {
-			for (int i = 0; i < __INDX_DYNAMIC_MAX; i++) {
-				struct dm_dynamic_obj *next_dyn_array = entryobj->nextdynamicobj + i;
-				FREE(next_dyn_array->nextobj);
-			}
-			FREE(entryobj->nextdynamicobj);
-		}
-
-		if (entryobj->dynamicleaf) {
-			for (int i = 0; i < __INDX_DYNAMIC_MAX; i++) {
-				struct dm_dynamic_leaf *next_dyn_array = entryobj->dynamicleaf + i;
-				FREE(next_dyn_array->nextleaf);
-			}
-			FREE(entryobj->dynamicleaf);
-		}
-
-		DMNODE node = {0};
-		node.obj = entryobj;
-		node.parent = parent_node;
-		node.instance_level = parent_node->instance_level;
-		node.matched = parent_node->matched;
-
-		if (entryobj->nextobj)
-			free_dm_browse_node_dynamic_object_tree(&node, entryobj->nextobj);
-	}
 }
 
 static int rootcmp(char *inparam, char *rootobj)
@@ -1080,9 +936,533 @@ void dmentry_instance_lookup_inparam(struct dmctx *ctx)
 	ctx->nbrof_instance = i;
 }
 
+static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
+{
+	json_object *res = NULL, *res_obj = NULL;
+	char *ubus_name = node->obj->checkdep;
+
+	json_object *in_args = json_object_new_object();
+	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
+	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
+	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+
+	dmubus_call(ubus_name, "get",
+			UBUS_ARGS{
+						{"path", dmctx->in_param, String},
+						{"optional", json_object_to_json_string(in_args), Table}
+			},
+			2, &res);
+
+	json_object_put(in_args);
+
+	if (!res)
+		return FAULT_9005;
+
+	json_object *res_array = dmjson_get_obj(res, 1, "results");
+	if (!res_array)
+		return FAULT_9005;
+
+	size_t nbre_obj = json_object_array_length(res_array);
+
+	if (nbre_obj == 0) {
+		dmctx->findparam = 1;
+		return 0;
+	}
+
+	for (size_t i = 0; i < nbre_obj; i++) {
+		res_obj = json_object_array_get_idx(res_array, i);
+
+		char *fault = dmjson_get_value(res_obj, 1, "fault");
+		if (DM_STRLEN(fault))
+			return DM_STRTOUL(fault);
+
+		dmctx->findparam = 1;
+
+		char *path = dmjson_get_value(res_obj, 1, "path");
+		char *data = dmjson_get_value(res_obj, 1, "data");
+		char *type = dmjson_get_value(res_obj, 1, "type");
+
+		add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), NULL);
+	}
+
+	return 0;
+}
+
+static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
+{
+	json_object *res = NULL, *res_obj = NULL;
+	char *ubus_name = node->obj->checkdep;
+
+	json_object *in_args = json_object_new_object();
+	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
+	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
+	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+
+	dmubus_call(ubus_name, "schema",
+			UBUS_ARGS{
+						{"path", dmctx->in_param, String},
+						{"first_level", dmctx->nextlevel ? "1" : "0", Boolean},
+						{"commands", dmctx->iscommand ? "1" : "0", Boolean},
+						{"events", dmctx->isevent ? "1" : "0", Boolean},
+						{"params", dmctx->isinfo ? "1" : "0", Boolean},
+						{"optional", json_object_to_json_string(in_args), Table}
+			},
+			6, &res);
+
+	json_object_put(in_args);
+
+	if (!res)
+		return FAULT_9005;
+
+	json_object *res_array = dmjson_get_obj(res, 1, "results");
+	if (!res_array)
+		return FAULT_9005;
+
+	size_t nbre_obj = json_object_array_length(res_array);
+
+	for (size_t i = 0; i < nbre_obj; i++) {
+		res_obj = json_object_array_get_idx(res_array, i);
+
+		char *fault = dmjson_get_value(res_obj, 1, "fault");
+		if (DM_STRLEN(fault))
+			return DM_STRTOUL(fault);
+
+		char *path = dmjson_get_value(res_obj, 1, "path");
+		char *data = dmjson_get_value(res_obj, 1, "data");
+		char *type = dmjson_get_value(res_obj, 1, "type");
+
+		if (DM_STRCMP(type, "xsd:object") == 0) { //Object
+			const char **unique_keys = NULL;
+
+			json_object *input_array = dmjson_get_obj(res_obj, 1, "input");
+			if (input_array) {
+				size_t j = 0;
+				size_t in_nbre = json_object_array_length(input_array);
+
+				unique_keys = dmcalloc(in_nbre + 1, sizeof(char *));
+
+				for (j = 0; j < in_nbre; j++) {
+					json_object *res_obj = json_object_array_get_idx(input_array, j);
+
+					char *in_path = dmjson_get_value(res_obj, 1, "path");
+					unique_keys[j] = dmstrdup(in_path);
+				}
+				unique_keys[j] = NULL;
+			}
+
+			add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), "xsd:object", (char *)unique_keys);
+		} else if (DM_STRCMP(type, "xsd:command") == 0) { //Command Leaf
+			operation_args *op = NULL;
+
+			op = dmcalloc(1, sizeof(operation_args));
+
+			json_object *input_array = dmjson_get_obj(res_obj, 1, "input");
+			if (input_array) {
+				size_t j = 0;
+				size_t in_nbre = json_object_array_length(input_array);
+				op->in = dmcalloc(in_nbre + 1, sizeof(char *));
+
+				for (j = 0; j < in_nbre; j++) {
+					json_object *res_obj = json_object_array_get_idx(input_array, j);
+
+					char *in_path = dmjson_get_value(res_obj, 1, "path");
+					op->in[j] = dmstrdup(in_path);
+				}
+				op->in[j] = NULL;
+			}
+
+			json_object *output_array = dmjson_get_obj(res_obj, 1, "output");
+			if (output_array) {
+				size_t j = 0;
+				size_t out_nbre = json_object_array_length(output_array);
+				op->out = dmcalloc(out_nbre + 1, sizeof(char *));
+
+				for (j = 0; j < out_nbre; j++) {
+					json_object *res_obj = json_object_array_get_idx(output_array, j);
+
+					char *in_path = dmjson_get_value(res_obj, 1, "path");
+					op->out[j] = dmstrdup(in_path);
+				}
+				op->out[j] = NULL;
+			}
+
+			add_list_parameter(dmctx, dmstrdup(path), (char *)op, "xsd:command", dmstrdup(data));
+		} else if (DM_STRCMP(type, "xsd:event") == 0) { //Event Leaf
+			event_args *ev = NULL;
+
+			json_object *input_array = dmjson_get_obj(res_obj, 1, "input");
+			if (input_array) {
+				ev = dmcalloc(1, sizeof(event_args));
+
+				size_t j = 0;
+				size_t in_nbre = json_object_array_length(input_array);
+				ev->param = dmcalloc(in_nbre + 1, sizeof(char *));
+
+				for (j = 0; j < in_nbre; j++) {
+					json_object *res_obj = json_object_array_get_idx(input_array, j);
+
+					char *in_path = dmjson_get_value(res_obj, 1, "path");
+					ev->param[j] = dmstrdup(in_path);
+				}
+				ev->param[j] = NULL;
+			}
+
+			add_list_parameter(dmctx, dmstrdup(path), (char *)ev, "xsd:event", NULL);
+		} else { //Param Leaf
+			add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), NULL);
+		}
+	}
+
+	return 0;
+}
+
+static int get_ubus_instances(struct dmctx *dmctx, struct dmnode *node)
+{
+	json_object *res = NULL, *res_obj = NULL;
+	char *ubus_name = node->obj->checkdep;
+
+	json_object *in_args = json_object_new_object();
+	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
+	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
+	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+
+	dmubus_call(ubus_name, "instances",
+			UBUS_ARGS{
+						{"path", dmctx->in_param, String},
+						{"first_level", dmctx->nextlevel ? "1" : "0", Boolean},
+						{"optional", json_object_to_json_string(in_args), Table}
+			},
+			3, &res);
+
+	json_object_put(in_args);
+
+	if (!res)
+		return FAULT_9005;
+
+	json_object *res_array = dmjson_get_obj(res, 1, "results");
+	if (!res_array)
+		return FAULT_9005;
+
+	size_t nbre_obj = json_object_array_length(res_array);
+
+	for (size_t i = 0; i < nbre_obj; i++) {
+		res_obj = json_object_array_get_idx(res_array, i);
+
+		char *fault = dmjson_get_value(res_obj, 1, "fault");
+		if (DM_STRLEN(fault))
+			return DM_STRTOUL(fault);
+
+		char *path = dmjson_get_value(res_obj, 1, "path");
+
+		add_list_parameter(dmctx, dmstrdup(path), NULL, "xsd:object", NULL);
+	}
+
+	return 0;
+}
+
+static int add_ubus_object(struct dmctx *dmctx, struct dmnode *node)
+{
+	json_object *res = NULL, *res_obj = NULL;
+	char *ubus_name = node->obj->checkdep;
+
+	json_object *in_args = json_object_new_object();
+	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
+	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
+	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+
+	dmubus_call(ubus_name, "add",
+			UBUS_ARGS{
+						{"path", dmctx->in_param, String},
+						{"optional", json_object_to_json_string(in_args), Table}
+			},
+			2, &res);
+	json_object_put(in_args);
+
+	if (!res)
+		return FAULT_9005;
+
+	json_object *res_array = dmjson_get_obj(res, 1, "results");
+	if (!res_array)
+		return FAULT_9005;
+
+	size_t nbre_obj = json_object_array_length(res_array);
+
+	for (size_t i = 0; i < nbre_obj; i++) {
+		res_obj = json_object_array_get_idx(res_array, i);
+
+		char *fault = dmjson_get_value(res_obj, 1, "fault");
+		if (DM_STRLEN(fault))
+			return DM_STRTOUL(fault);
+
+		char *data = dmjson_get_value(res_obj, 1, "data");
+
+		dmctx->stop = 1;
+		dmctx->addobj_instance = dmstrdup(data);
+	}
+
+	return 0;
+}
+
+static int del_ubus_object(struct dmctx *dmctx, struct dmnode *node)
+{
+	json_object *res = NULL, *res_obj = NULL;
+	char *ubus_name = node->obj->checkdep;
+
+	json_object *in_args = json_object_new_object();
+	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
+	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
+	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+
+	dmubus_call(ubus_name, "del",
+			UBUS_ARGS{
+						{"path", dmctx->in_param, String},
+						{"optional", json_object_to_json_string(in_args), Table}
+			},
+			2, &res);
+	json_object_put(in_args);
+
+	if (!res)
+		return FAULT_9005;
+
+	json_object *res_array = dmjson_get_obj(res, 1, "results");
+	if (!res_array)
+		return FAULT_9005;
+
+	size_t nbre_obj = json_object_array_length(res_array);
+
+	for (size_t i = 0; i < nbre_obj; i++) {
+		res_obj = json_object_array_get_idx(res_array, i);
+
+		dmctx->stop = 1;
+
+		char *fault = dmjson_get_value(res_obj, 1, "fault");
+		if (DM_STRLEN(fault))
+			return DM_STRTOUL(fault);
+	}
+
+	return 0;
+}
+
+static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
+{
+	json_object *res = NULL, *res_obj = NULL;
+	char *ubus_name = node->obj->checkdep;
+
+	json_object *in_args = json_object_new_object();
+	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
+	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
+	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+
+	dmubus_call(ubus_name, "set",
+			UBUS_ARGS{
+						{"path", dmctx->in_param, String},
+						{"value", dmctx->in_value, String},
+						{"optional", json_object_to_json_string(in_args), Table}
+			},
+			3, &res);
+	json_object_put(in_args);
+
+	if (!res)
+		return FAULT_9005;
+
+	json_object *res_array = dmjson_get_obj(res, 1, "results");
+	if (!res_array)
+		return FAULT_9005;
+
+	size_t nbre_obj = json_object_array_length(res_array);
+
+	for (size_t i = 0; i < nbre_obj; i++) {
+		res_obj = json_object_array_get_idx(res_array, i);
+
+		dmctx->stop = 1;
+
+		char *fault = dmjson_get_value(res_obj, 1, "fault");
+		if (DM_STRLEN(fault))
+			return DM_STRTOUL(fault);
+	}
+
+	return 0;
+}
+
+static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
+{
+	json_object *res = NULL, *res_obj = NULL;
+	char *ubus_name = node->obj->checkdep;
+
+	json_object *in_args = json_object_new_object();
+	json_object_object_add(in_args, "proto", json_object_new_string("cwmp"));
+	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
+	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+
+	dmubus_call(ubus_name, "schema",
+			UBUS_ARGS{
+						{"path", dmctx->in_param, String},
+						{"first_level", dmctx->nextlevel ? "1" : "0", Boolean},
+						{"optional", json_object_to_json_string(in_args), Table}
+			},
+			3, &res);
+
+	json_object_put(in_args);
+
+	if (!res)
+		return FAULT_9005;
+
+	json_object *res_array = dmjson_get_obj(res, 1, "results");
+	if (!res_array)
+		return FAULT_9005;
+
+	size_t nbre_obj = json_object_array_length(res_array);
+
+	if (nbre_obj == 0) {
+		dmctx->findparam = 1;
+		return 0;
+	}
+
+	for (size_t i = 0; i < nbre_obj; i++) {
+		res_obj = json_object_array_get_idx(res_array, i);
+
+		char *fault = dmjson_get_value(res_obj, 1, "fault");
+		if (DM_STRLEN(fault))
+			return DM_STRTOUL(fault);
+
+		dmctx->findparam = 1;
+
+		char *path = dmjson_get_value(res_obj, 1, "path");
+		char *data = dmjson_get_value(res_obj, 1, "data");
+		char *type = dmjson_get_value(res_obj, 1, "type");
+
+		add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), NULL);
+	}
+
+	return 0;
+}
+
+static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
+{
+	json_object *res = NULL, *res_obj = NULL;
+	char *ubus_name = node->obj->checkdep;
+
+	json_object *in_args = json_object_new_object();
+	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
+	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+
+	dmubus_call(ubus_name, "operate",
+			UBUS_ARGS{
+						{"path", dmctx->in_param, String},
+						{"command_key", dmctx->linker, String},
+						{"optional", json_object_to_json_string(in_args), Table}
+			},
+			3, &res);
+
+	json_object_put(in_args);
+
+	if (!res)
+		return FAULT_9005;
+
+	json_object *res_array = dmjson_get_obj(res, 1, "results");
+	if (!res_array)
+		return FAULT_9005;
+
+	size_t nbre_obj = json_object_array_length(res_array);
+
+	for (size_t i = 0; i < nbre_obj; i++) {
+		res_obj = json_object_array_get_idx(res_array, i);
+
+		char *fault = dmjson_get_value(res_obj, 1, "fault");
+		if (DM_STRLEN(fault))
+			return DM_STRTOUL(fault);
+
+		//TODO
+	}
+
+	return 0;
+}
+
 /* **********
  * get value 
  * **********/
+static int get_value_obj(DMOBJECT_ARGS)
+{
+	return 0;
+}
+
+static int get_value_param(DMPARAM_ARGS)
+{
+	if (node->is_ubus_service) {
+		return get_ubus_value(dmctx, node);
+	} else {
+		char *full_param;
+		char *value = "";
+
+		dmastrcat(&full_param, node->current_object, leaf->parameter);
+		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
+
+		if (value && *value) {
+			value = check_value_by_type(value, leaf->type);
+		} else {
+			if (leaf->default_value)
+				value = check_value_by_type(leaf->default_value, leaf->type);
+			else
+				value = get_default_value_by_type(leaf->type);
+		}
+
+		add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], NULL);
+	}
+
+	return 0;
+}
+
+static int mobj_get_value_in_param(DMOBJECT_ARGS)
+{
+	return 0;
+}
+static int mparam_get_value_in_param(DMPARAM_ARGS)
+{
+	if (node->is_ubus_service) {
+		int err = get_ubus_value(dmctx, node);
+		if (err)
+			return FAULT_9005;
+
+		dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
+		dmctx->stop = (dmctx->iswildcard) ? false : true;
+	} else {
+		char *full_param;
+		char *value = "";
+
+		dmastrcat(&full_param, node->current_object, leaf->parameter);
+
+		if (dmctx->iswildcard) {
+			if (dm_strcmp_wildcard(dmctx->in_param, full_param) != 0) {
+				dmfree(full_param);
+				return FAULT_9005;
+			}
+		} else {
+			if (DM_STRCMP(dmctx->in_param, full_param) != 0) {
+				dmfree(full_param);
+				return FAULT_9005;
+			}
+		}
+
+		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
+
+		if (value && *value) {
+			value = check_value_by_type(value, leaf->type);
+		} else {
+			if (leaf->default_value)
+				value = check_value_by_type(leaf->default_value, leaf->type);
+			else
+				value = get_default_value_by_type(leaf->type);
+		}
+
+		add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], NULL);
+
+		dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
+		dmctx->stop = (dmctx->iswildcard) ? false : true;
+	}
+
+	return 0;
+}
+
 int dm_entry_get_value(struct dmctx *dmctx)
 {
 	int err = 0;
@@ -1129,76 +1509,131 @@ int dm_entry_get_value(struct dmctx *dmctx)
 	return (findparam_check && dmctx->findparam) ? 0 : err;
 }
 
-static int get_value_obj(DMOBJECT_ARGS)
-{
-	return 0;
-}
-
-static int get_value_param(DMPARAM_ARGS)
-{
-	char *full_param;
-	char *value = "";
-
-	dmastrcat(&full_param, node->current_object, leaf->parameter);
-	(leaf->getvalue)(full_param, dmctx, data, instance, &value);
-
-	if (value && *value) {
-		value = check_value_by_type(value, leaf->type);
-	} else {
-		if (leaf->default_value)
-			value = check_value_by_type(leaf->default_value, leaf->type);
-		else
-			value = get_default_value_by_type(leaf->type);
-	}
-
-	add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], NULL);
-	return 0;
-}
-
-static int mobj_get_value_in_param(DMOBJECT_ARGS)
-{
-	return 0;
-}
-static int mparam_get_value_in_param(DMPARAM_ARGS)
-{
-	char *full_param;
-	char *value = "";
-
-	dmastrcat(&full_param, node->current_object, leaf->parameter);
-
-	if (dmctx->iswildcard) {
-		if (dm_strcmp_wildcard(dmctx->in_param, full_param) != 0) {
-			dmfree(full_param);
-			return FAULT_9005;
-		}
-	} else {
-		if (DM_STRCMP(dmctx->in_param, full_param) != 0) {
-			dmfree(full_param);
-			return FAULT_9005;
-		}
-	}
-
-	(leaf->getvalue)(full_param, dmctx, data, instance, &value);
-
-	if (value && *value) {
-		value = check_value_by_type(value, leaf->type);
-	} else {
-		if (leaf->default_value)
-			value = check_value_by_type(leaf->default_value, leaf->type);
-		else
-			value = get_default_value_by_type(leaf->type);
-	}
-
-	add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], NULL);
-
-	dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
-	dmctx->stop = (dmctx->iswildcard) ? false : true;
-	return 0;
-}
-
 /* **********
  * get name 
  * **********/
+static int mobj_get_name(DMOBJECT_ARGS)
+{
+	if (node->is_ubus_service) {
+		return 0;
+	} else {
+		char *refparam = node->current_object;
+		char *perm = permission->val;
+
+		if (permission->get_permission != NULL)
+			perm = permission->get_permission(refparam, dmctx, data, instance);
+
+		add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL);
+		return 0;
+	}
+}
+
+static int mparam_get_name(DMPARAM_ARGS)
+{
+	if (node->is_ubus_service) {
+		return get_ubus_name(dmctx, node);
+	} else {
+		char *refparam;
+		char *perm = leaf->permission->val;
+
+		dmastrcat(&refparam, node->current_object, leaf->parameter);
+		if (leaf->permission->get_permission != NULL)
+			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
+
+		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
+		return 0;
+	}
+}
+
+static int mobj_get_name_in_param(DMOBJECT_ARGS)
+{
+	return 0;
+}
+
+static int mparam_get_name_in_param(DMPARAM_ARGS)
+{
+	if (node->is_ubus_service) {
+		return get_ubus_name(dmctx, node);
+	} else {
+		char *refparam;
+		char *perm = leaf->permission->val;
+
+		dmastrcat(&refparam, node->current_object, leaf->parameter);
+
+		if (dmctx->iswildcard) {
+			if (dm_strcmp_wildcard(refparam, dmctx->in_param) != 0) {
+				dmfree(refparam);
+				return FAULT_9005;
+			}
+		} else {
+			if (DM_STRCMP(refparam, dmctx->in_param) != 0) {
+				dmfree(refparam);
+				return FAULT_9005;
+			}
+		}
+
+		dmctx->stop = (dmctx->iswildcard) ? 0 : 1;
+
+		if (dmctx->nextlevel == 1) {
+			dmctx->stop = 1;
+			dmfree(refparam);
+			return FAULT_9003;
+		}
+
+		if (leaf->permission->get_permission != NULL)
+			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
+
+		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
+		dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
+		return 0;
+	}
+}
+
+static int mobj_get_name_in_obj(DMOBJECT_ARGS)
+{
+	if (node->is_ubus_service) {
+		return 0;
+	} else {
+		char *refparam = node->current_object;
+		char *perm = permission->val;
+
+		if (!node->matched)
+			return FAULT_9005;
+
+		if (dmctx->iswildcard) {
+			if (dmctx->nextlevel && dm_strcmp_wildcard(node->current_object, dmctx->in_param) == 0)
+				return 0;
+		} else {
+			if (dmctx->nextlevel && DM_STRCMP(node->current_object, dmctx->in_param) == 0)
+				return 0;
+		}
+
+		if (permission->get_permission != NULL)
+			perm = permission->get_permission(refparam, dmctx, data, instance);
+
+		add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL);
+		return 0;
+	}
+}
+
+static int mparam_get_name_in_obj(DMPARAM_ARGS)
+{
+	if (node->is_ubus_service) {
+		return get_ubus_name(dmctx, node);
+	} else {
+		char *refparam;
+		char *perm = leaf->permission->val;
+
+		dmastrcat(&refparam, node->current_object, leaf->parameter);
+
+		if (leaf->permission->get_permission != NULL)
+			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
+
+		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
+		return 0;
+	}
+}
+
 int dm_entry_get_name(struct dmctx *ctx)
 {
 	DMOBJ *root = ctx->dm_entryobj;
@@ -1260,165 +1695,24 @@ int dm_entry_get_name(struct dmctx *ctx)
 	return (findparam_check && ctx->findparam) ? 0 : err;
 }
 
-static int mparam_get_name(DMPARAM_ARGS)
-{
-	char *refparam;
-	char *perm = leaf->permission->val;
-
-	dmastrcat(&refparam, node->current_object, leaf->parameter);
-	if (leaf->permission->get_permission != NULL)
-		perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
-
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
-	return 0;
-}
-
-static int mobj_get_name(DMOBJECT_ARGS)
-{
-	char *refparam = node->current_object;
-	char *perm = permission->val;
-
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
-
-	add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL);
-	return 0;
-}
-
-static int mparam_get_name_in_param(DMPARAM_ARGS)
-{
-	char *refparam;
-	char *perm = leaf->permission->val;
-
-	dmastrcat(&refparam, node->current_object, leaf->parameter);
-
-	if (dmctx->iswildcard) {
-		if (dm_strcmp_wildcard(refparam, dmctx->in_param) != 0) {
-			dmfree(refparam);
-			return FAULT_9005;
-		}
-	} else {
-		if (DM_STRCMP(refparam, dmctx->in_param) != 0) {
-			dmfree(refparam);
-			return FAULT_9005;
-		}
-	}
-
-	dmctx->stop = (dmctx->iswildcard) ? 0 : 1;
-
-	if (dmctx->nextlevel == 1) {
-		dmctx->stop = 1;
-		dmfree(refparam);
-		return FAULT_9003;
-	}
-
-	if (leaf->permission->get_permission != NULL)
-		perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
-
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
-	dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
-	return 0;
-}
-
-static int mobj_get_name_in_param(DMOBJECT_ARGS)
-{
-	return 0;
-}
-
-static int mparam_get_name_in_obj(DMPARAM_ARGS)
-{
-	char *refparam;
-	char *perm = leaf->permission->val;
-
-	dmastrcat(&refparam, node->current_object, leaf->parameter);
-
-	if (leaf->permission->get_permission != NULL)
-		perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
-
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
-	return 0;
-}
-
-static int mobj_get_name_in_obj(DMOBJECT_ARGS)
-{
-	char *refparam = node->current_object;
-	char *perm = permission->val;
-
-	if (!node->matched)
-		return FAULT_9005;
-
-	if (dmctx->iswildcard) {
-		if (dmctx->nextlevel && dm_strcmp_wildcard(node->current_object, dmctx->in_param) == 0)
-			return 0;
-	} else {
-		if (dmctx->nextlevel && DM_STRCMP(node->current_object, dmctx->in_param) == 0)
-			return 0;
-	}
-
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
-
-	add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL);
-	return 0;
-}
-
-/* **********
- * get schema
- * **********/
-int dm_entry_get_schema(struct dmctx *ctx)
-{
-	DMOBJ *root = ctx->dm_entryobj;
-	DMNODE node = {.current_object = ""};
-
-	ctx->inparam_isparam = 0;
-	ctx->isgetschema = 1;
-	ctx->findparam = 0;
-	ctx->stop = 0;
-	ctx->checkobj = NULL;
-	ctx->checkleaf = NULL;
-	ctx->method_obj = mobj_get_schema_name;
-	ctx->method_param = mparam_get_schema_name;
-
-	return dm_browse(ctx, &node, root, NULL, NULL);
-}
-
-static int mobj_get_schema_name(DMOBJECT_ARGS)
-{
-	char *perm = permission->val;
-	char *refparam = node->current_object;
-	const char **unique_keys = NULL;
-
-	if (node->obj)
-		unique_keys = node->obj->unique_keys;
-
-	add_list_parameter(dmctx, refparam, perm, "xsd:object", (char *)unique_keys);
-	return 0;
-}
-
-static int mparam_get_schema_name(DMPARAM_ARGS)
-{
-	char *refparam;
-	char *perm = leaf->permission->val;
-	dmastrcat(&refparam, node->current_object, leaf->parameter);
-
-	add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
-	return 0;
-}
-
 /* ***********************
  * get supported data model
  * ***********************/
 static int mobj_get_supported_dm(DMOBJECT_ARGS)
 {
-	char *perm = permission ? permission->val : "0";
-	char *refparam = node->current_object;
-	const char **unique_keys = NULL;
+	if (node->is_ubus_service) {
+		return 0;
+	} else {
+		char *perm = permission ? permission->val : "0";
+		char *refparam = node->current_object;
+		const char **unique_keys = NULL;
 
-	if (node->matched && dmctx->isinfo) {
-		if (node->obj)
-			unique_keys = node->obj->unique_keys;
+		if (node->matched && dmctx->isinfo) {
+			if (node->obj)
+				unique_keys = node->obj->unique_keys;
 
-		add_list_parameter(dmctx, refparam, perm, "xsd:object", (char *)unique_keys);
+			add_list_parameter(dmctx, refparam, perm, "xsd:object", (char *)unique_keys);
+		}
 	}
 
 	return 0;
@@ -1426,34 +1720,38 @@ static int mobj_get_supported_dm(DMOBJECT_ARGS)
 
 static int mparam_get_supported_dm(DMPARAM_ARGS)
 {
-	char *value = NULL;
-	char *refparam;
+	if (node->is_ubus_service) {
+		return get_ubus_supported_dm(dmctx, node);
+	} else {
+		char *value = NULL;
+		char *refparam;
 
-	dmastrcat(&refparam, node->current_object, leaf->parameter);
+		dmastrcat(&refparam, node->current_object, leaf->parameter);
 
-	if (node->matched) {
-		if (leaf->type == DMT_EVENT) {
-			if (dmctx->isevent) {
-				if (leaf->getvalue)
-					(leaf->getvalue)(refparam, dmctx, data, instance, &value);
+		if (node->matched) {
+			if (leaf->type == DMT_EVENT) {
+				if (dmctx->isevent) {
+					if (leaf->getvalue)
+						(leaf->getvalue)(refparam, dmctx, data, instance, &value);
 
-				add_list_parameter(dmctx, refparam, value, DMT_TYPE[leaf->type], NULL);
-			}
+					add_list_parameter(dmctx, refparam, value, DMT_TYPE[leaf->type], NULL);
+				}
 
-		} else if (leaf->type == DMT_COMMAND) {
-			if (dmctx->iscommand) {
+			} else if (leaf->type == DMT_COMMAND) {
+				if (dmctx->iscommand) {
 
-				if (leaf->getvalue)
-					(leaf->getvalue)(refparam, dmctx, data, instance, &value);
+					if (leaf->getvalue)
+						(leaf->getvalue)(refparam, dmctx, data, instance, &value);
 
-				add_list_parameter(dmctx, refparam, value, DMT_TYPE[leaf->type], leaf->permission->val);
+					add_list_parameter(dmctx, refparam, value, DMT_TYPE[leaf->type], leaf->permission->val);
+				}
+			} else {
+				add_list_parameter(dmctx, refparam, leaf->permission->val, DMT_TYPE[leaf->type], NULL);
 			}
 		}
-		else {
-			add_list_parameter(dmctx, refparam, leaf->permission->val, DMT_TYPE[leaf->type], NULL);
-		}
+
+		return 0;
 	}
-	return 0;
 }
 
 int dm_entry_get_supported_dm(struct dmctx *ctx)
@@ -1480,6 +1778,29 @@ int dm_entry_get_supported_dm(struct dmctx *ctx)
 /* **************
  * get_instances
  * **************/
+static int mobj_get_instances_in_obj(DMOBJECT_ARGS)
+{
+	if (node->is_ubus_service) {
+		return get_ubus_instances(dmctx, node);
+	} else {
+		if (node->matched && node->is_instanceobj) {
+			char *name = dmstrdup(node->current_object);
+
+			if (name) {
+				name[DM_STRLEN(name) - 1] = 0;
+				add_list_parameter(dmctx, name, NULL, "xsd:object", NULL);
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int mparam_get_instances_in_obj(DMPARAM_ARGS)
+{
+	return 0;
+}
+
 int dm_entry_get_instances(struct dmctx *ctx)
 {
 	DMOBJ *root = ctx->dm_entryobj;
@@ -1496,6 +1817,7 @@ int dm_entry_get_instances(struct dmctx *ctx)
 	ctx->inparam_isparam = 0;
 	ctx->findparam = 0;
 	ctx->stop = 0;
+
 	if (ctx->iswildcard) {
 		ctx->checkobj = (ctx->nextlevel) ? plugin_obj_wildcard_nextlevel_match : plugin_obj_wildcard_match;
 		ctx->checkleaf = (ctx->nextlevel) ? plugin_leaf_wildcard_nextlevel_match : plugin_leaf_wildcard_match;
@@ -1511,28 +1833,52 @@ int dm_entry_get_instances(struct dmctx *ctx)
 	return (ctx->findparam == 0) ? err : 0;
 }
 
-static int mobj_get_instances_in_obj(DMOBJECT_ARGS)
-{
-	if (node->matched && node->is_instanceobj) {
-		char *name = dmstrdup(node->current_object);
-
-		if (name) {
-			name[DM_STRLEN(name) - 1] = 0;
-			add_list_parameter(dmctx, name, NULL, "xsd:object", NULL);
-		}
-	}
-
-	return 0;
-}
-
-static int mparam_get_instances_in_obj(DMPARAM_ARGS)
-{
-	return 0;
-}
-
 /* **************
  * add object 
  * **************/
+static int mobj_add_object(DMOBJECT_ARGS)
+{
+	if (node->is_ubus_service) {
+		return add_ubus_object(dmctx, node);
+	} else {
+		char *refparam = node->current_object;
+		char *perm = permission->val;
+		char *new_instance = NULL;
+		int fault = 0;
+
+		if (DM_STRCMP(refparam, dmctx->in_param) != 0)
+			return FAULT_9005;
+
+		if (node->is_instanceobj)
+			return FAULT_9005;
+
+		if (permission->get_permission != NULL)
+			perm = permission->get_permission(refparam, dmctx, data, instance);
+
+		if (perm[0] == '0' || addobj == NULL)
+			return FAULT_9005;
+
+		int max_inst = find_max_instance(dmctx, node);
+		fault = dmasprintf(&new_instance, "%d", max_inst);
+		if (fault)
+			return fault;
+
+		dmctx->stop = 1;
+
+		fault = (addobj)(refparam, dmctx, data, &new_instance);
+		if (fault)
+			return fault;
+
+		dmctx->addobj_instance = new_instance;
+		return 0;
+	}
+}
+
+static int mparam_add_object(DMPARAM_ARGS)
+{
+	return FAULT_9005;
+}
+
 int dm_entry_add_object(struct dmctx *dmctx)
 {
 	DMOBJ *root = dmctx->dm_entryobj;
@@ -1555,48 +1901,43 @@ int dm_entry_add_object(struct dmctx *dmctx)
 	return (dmctx->stop) ? err : FAULT_9005;
 }
 
-static int mparam_add_object(DMPARAM_ARGS)
+/* **************
+ * del object 
+ * **************/
+static int delete_object_obj(DMOBJECT_ARGS)
+{
+	if (node->is_ubus_service) {
+		return del_ubus_object(dmctx, node);
+	} else {
+		char *refparam = node->current_object;
+		char *perm = permission->val;
+		unsigned char del_action = DEL_INST;
+
+		if (DM_STRCMP(refparam, dmctx->in_param) != 0)
+			return FAULT_9005;
+
+		dmctx->stop = 1;
+
+		if (permission->get_permission != NULL)
+			perm = permission->get_permission(refparam, dmctx, data, instance);
+
+		if (perm[0] == '0' || delobj == NULL)
+			return FAULT_9005;
+
+		if (!node->is_instanceobj)
+			del_action = DEL_ALL;
+
+		return (delobj)(refparam, dmctx, data, instance, del_action);
+	}
+
+	return 0;
+}
+
+static int delete_object_param(DMPARAM_ARGS)
 {
 	return FAULT_9005;
 }
 
-static int mobj_add_object(DMOBJECT_ARGS)
-{
-	char *refparam = node->current_object;
-	char *perm = permission->val;
-	char *new_instance = NULL;
-	int fault = 0;
-
-	if (DM_STRCMP(refparam, dmctx->in_param) != 0)
-		return FAULT_9005;
-
-	if (node->is_instanceobj)
-		return FAULT_9005;
-
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
-
-	if (perm[0] == '0' || addobj == NULL)
-		return FAULT_9005;
-
-	int max_inst = find_max_instance(dmctx, node);
-	fault = dmasprintf(&new_instance, "%d", max_inst);
-	if (fault)
-		return fault;
-
-	dmctx->stop = 1;
-
-	fault = (addobj)(refparam, dmctx, data, &new_instance);
-	if (fault)
-		return fault;
-
-	dmctx->addobj_instance = new_instance;
-	return 0;
-}
-
-/* **************
- * del object 
- * **************/
 int dm_entry_delete_object(struct dmctx *dmctx)
 {
 	DMOBJ *root = dmctx->dm_entryobj;
@@ -1619,37 +1960,44 @@ int dm_entry_delete_object(struct dmctx *dmctx)
 	return (dmctx->stop) ? err : FAULT_9005;
 }
 
-static int delete_object_obj(DMOBJECT_ARGS)
-{
-	char *refparam = node->current_object;
-	char *perm = permission->val;
-	unsigned char del_action = DEL_INST;
-
-	if (DM_STRCMP(refparam, dmctx->in_param) != 0)
-		return FAULT_9005;
-
-	dmctx->stop = 1;
-
-	if (permission->get_permission != NULL)
-		perm = permission->get_permission(refparam, dmctx, data, instance);
-
-	if (perm[0] == '0' || delobj == NULL)
-		return FAULT_9005;
-
-	if (!node->is_instanceobj)
-		del_action = DEL_ALL;
-
-	return (delobj)(refparam, dmctx, data, instance, del_action);
-}
-
-static int delete_object_param(DMPARAM_ARGS)
+/* **************
+ * set value  
+ * **************/
+static int mobj_set_value(DMOBJECT_ARGS)
 {
 	return FAULT_9005;
 }
 
-/* **************
- * set value  
- * **************/
+static int mparam_set_value(DMPARAM_ARGS)
+{
+	if (node->is_ubus_service) {
+		return set_ubus_value(dmctx, node);
+	} else {
+		char refparam[MAX_DM_PATH];
+
+		snprintf(refparam, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
+		if (DM_STRCMP(refparam, dmctx->in_param) != 0)
+			return FAULT_9005;
+
+		dmctx->stop = 1;
+
+		if (dmctx->setaction == VALUECHECK) {
+			char *perm = leaf->permission->val;
+			if (leaf->permission->get_permission != NULL)
+				perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
+
+			if (perm[0] == '0' || !leaf->setvalue)
+				return FAULT_9008;
+
+			return (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUECHECK);
+		} else if (dmctx->setaction == VALUESET) {
+			return (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
+		}
+
+		return 0;
+	}
+}
+
 int dm_entry_set_value(struct dmctx *dmctx)
 {
 	DMOBJ *root = dmctx->dm_entryobj;
@@ -1672,55 +2020,9 @@ int dm_entry_set_value(struct dmctx *dmctx)
 	return (dmctx->stop) ? err : FAULT_9005;
 }
 
-static int mobj_set_value(DMOBJECT_ARGS)
-{
-	return FAULT_9005;
-}
-
-static int mparam_set_value(DMPARAM_ARGS)
-{
-	char refparam[MAX_DM_PATH];
-
-	snprintf(refparam, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
-	if (DM_STRCMP(refparam, dmctx->in_param) != 0)
-		return FAULT_9005;
-
-	dmctx->stop = 1;
-
-	if (dmctx->setaction == VALUECHECK) {
-		char *perm = leaf->permission->val;
-		if (leaf->permission->get_permission != NULL)
-			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
-
-		if (perm[0] == '0' || !leaf->setvalue)
-			return FAULT_9008;
-
-		return (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUECHECK);
-	} else if (dmctx->setaction == VALUESET) {
-		return (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
-	}
-	return 0;
-}
-
 /******************
  * get linker param
  *****************/
-int dm_entry_get_linker(struct dmctx *dmctx)
-{
-	int err = 0;
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-
-	dmctx->method_obj = get_linker_check_obj;
-	dmctx->method_param = get_linker_check_param;
-	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_onlyobj_match;
-
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-
-	return (dmctx->stop) ? err : FAULT_9005;
-}
-
 static int get_linker_check_obj(DMOBJECT_ARGS)
 {
 	char *link_val = "";
@@ -1758,26 +2060,25 @@ static int get_linker_check_param(DMPARAM_ARGS)
 	return FAULT_9005;
 }
 
-/******************
- * get linker value
- *****************/
-int dm_entry_get_linker_value(struct dmctx *dmctx)
+int dm_entry_get_linker(struct dmctx *dmctx)
 {
 	int err = 0;
 	DMOBJ *root = dmctx->dm_entryobj;
 	DMNODE node = { .current_object = "" };
 
-	dmctx->method_obj = get_linker_value_check_obj;
-	dmctx->method_param = get_linker_value_check_param;
+	dmctx->method_obj = get_linker_check_obj;
+	dmctx->method_param = get_linker_check_param;
 	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_match;
-	dmentry_instance_lookup_inparam(dmctx);
+	dmctx->checkleaf = plugin_leaf_onlyobj_match;
 
 	err = dm_browse(dmctx, &node, root, NULL, NULL);
 
 	return (dmctx->stop) ? err : FAULT_9005;
 }
 
+/******************
+ * get linker value
+ *****************/
 static int get_linker_value_check_obj(DMOBJECT_ARGS)
 {
 	if (!get_linker)
@@ -1802,43 +2103,21 @@ static int get_linker_value_check_param(DMPARAM_ARGS)
 	return FAULT_9005;
 }
 
-/* ************
- * list operate
- * ************/
-static int mobj_list_operates_name(DMOBJECT_ARGS)
+int dm_entry_get_linker_value(struct dmctx *dmctx)
 {
-	return 0;
-}
-
-static int mparam_list_operates_name(DMPARAM_ARGS)
-{
-	char *full_param;
-	char *value = NULL;
-
-	dmastrcat(&full_param, node->current_object, leaf->parameter);
-	if (leaf->getvalue)
-		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
-
-	add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], leaf->permission->val);
-	return 0;
-}
-
-int dm_entry_list_operates(struct dmctx *dmctx)
-{
+	int err = 0;
 	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = {.current_object = ""};
+	DMNODE node = { .current_object = "" };
 
-	dmctx->inparam_isparam = 0;
-	dmctx->isgetschema = 1;
-	dmctx->iscommand = 1;
-	dmctx->findparam = 0;
-	dmctx->stop = 0;
-	dmctx->checkobj = NULL;
-	dmctx->checkleaf = NULL;
-	dmctx->method_obj = mobj_list_operates_name;
-	dmctx->method_param = mparam_list_operates_name;
+	dmctx->method_obj = get_linker_value_check_obj;
+	dmctx->method_param = get_linker_value_check_param;
+	dmctx->checkobj = plugin_obj_match;
+	dmctx->checkleaf = plugin_leaf_match;
+	dmentry_instance_lookup_inparam(dmctx);
 
-	return dm_browse(dmctx, &node, root, NULL, NULL);
+	err = dm_browse(dmctx, &node, root, NULL, NULL);
+
+	return (dmctx->stop) ? err : FAULT_9005;
 }
 
 /* **************
@@ -1851,21 +2130,26 @@ static int mobj_operate(DMOBJECT_ARGS)
 
 static int mparam_operate(DMPARAM_ARGS)
 {
-	char full_param[MAX_DM_PATH];
+	if (node->is_ubus_service) {
+		return operate_ubus(dmctx, node);
+	} else {
+		char full_param[MAX_DM_PATH];
 
-	snprintf(full_param, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
-	if (DM_STRCMP(full_param, dmctx->in_param) != 0)
-		return CMD_NOT_FOUND;
+		snprintf(full_param, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
+		if (DM_STRCMP(full_param, dmctx->in_param) != 0)
+			return CMD_NOT_FOUND;
 
-	dmctx->stop = 1;
+		dmctx->stop = 1;
 
-	if (!leaf->setvalue)
-		return CMD_FAIL;
+		if (!leaf->setvalue)
+			return CMD_FAIL;
 
-	json_object *j_input = (dmctx->in_value) ? json_tokener_parse(dmctx->in_value) : NULL;
-	int fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, VALUESET);
-	json_object_put(j_input);
-	return fault;
+		json_object *j_input = (dmctx->in_value) ? json_tokener_parse(dmctx->in_value) : NULL;
+		int fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, VALUESET);
+		json_object_put(j_input);
+
+		return fault;
+	}
 }
 
 int dm_entry_operate(struct dmctx *dmctx)
@@ -1888,45 +2172,6 @@ int dm_entry_operate(struct dmctx *dmctx)
 	err = dm_browse(dmctx, &node, root, NULL, NULL);
 
 	return (dmctx->stop) ? err : CMD_NOT_FOUND;
-}
-
-/* ************
- * list event
- * ************/
-static int mobj_list_events_name(DMOBJECT_ARGS)
-{
-	return 0;
-}
-
-static int mparam_list_events_name(DMPARAM_ARGS)
-{
-	char *value = NULL;
-	char *full_param;
-
-	dmastrcat(&full_param, node->current_object, leaf->parameter);
-	if (leaf->getvalue)
-		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
-
-	add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], NULL);
-	return 0;
-}
-
-int dm_entry_list_events(struct dmctx *dmctx)
-{
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = {.current_object = ""};
-
-	dmctx->inparam_isparam = 0;
-	dmctx->isgetschema = 1;
-	dmctx->isevent = 1;
-	dmctx->findparam = 0;
-	dmctx->stop = 0;
-	dmctx->checkobj = NULL;
-	dmctx->checkleaf = NULL;
-	dmctx->method_obj = mobj_list_events_name;
-	dmctx->method_param = mparam_list_events_name;
-
-	return dm_browse(dmctx, &node, root, NULL, NULL);
 }
 
 int dm_browse_last_access_path(char *path, size_t len)

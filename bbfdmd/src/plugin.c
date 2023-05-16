@@ -26,7 +26,7 @@
 
 #include "common.h"
 #include "libbbfdm-api/dmapi.h"
-#include "libbbfdm-api/dm_plugin/dmdynamicjson.h"
+#include "libbbfdm-api/plugin/json_plugin.h"
 
 extern struct list_head global_memhead;
 
@@ -98,8 +98,10 @@ int load_dotso_plugin(void **lib_handle, const char *file_path,
 
 int free_dotso_plugin(void *lib_handle)
 {
-	if (lib_handle)
+	if (lib_handle) {
 		dlclose(lib_handle);
+		lib_handle = NULL;
+	}
 
 	return 0;
 }
@@ -161,5 +163,5 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 
 int free_json_plugin(void)
 {
-	return free_json_loaded_object();
+	return free_json_plugins();
 }

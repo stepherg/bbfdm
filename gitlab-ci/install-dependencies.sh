@@ -15,6 +15,9 @@ install_libbbf ${1}
 #compile and install libbbf_test dynamic extension library
 install_libbbf_test ${1}
 
+#compile and install libwifi_dataelements dynamic extension library
+install_libwifi_dataelements ${1}
+
 # Install datamodel plugins only when pipeline trigger for bbfdm
 if [ -z "${1}" ]; then
 	git clone -b devel --depth 1 https://dev.iopsys.eu/feed/iopsys.git /opt/dev/iopsys

@@ -14,4 +14,6 @@ cp -r ./test/files/lib/* /lib/
 
 [ -z "${1}" ] && cp ./gitlab-ci/iopsys-supervisord.conf /etc/supervisor/conf.d/
 
+rm -f /etc/bbfdm/dmmap/*
+
 ls /etc/config/

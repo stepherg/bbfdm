@@ -5,11 +5,12 @@
  * it under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation
  *
- *	  Author Amin Ben Romdhane <amin.benramdhane@iopsys.eu>
+ *	  Author Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  *
  */
 
-#include "dmdynamiclibrary.h"
+#include "dotso_plugin.h"
+#include "../dmplugin.h"
 
 LIST_HEAD(loaded_library_list);
 
@@ -22,13 +23,15 @@ struct loaded_library
 static void add_list_loaded_libraries(struct list_head *library_list, void *library)
 {
 	struct loaded_library *lib = calloc(1, sizeof(struct loaded_library));
+
 	list_add_tail(&lib->list, library_list);
 	lib->library = library;
 }
 
 static void free_all_list_open_library(struct list_head *library_list)
 {
-	struct loaded_library *lib;
+	struct loaded_library *lib = NULL;
+
 	while (library_list->next != library_list) {
 		lib = list_entry(library_list->next, struct loaded_library, list);
 		list_del(&lib->list);
@@ -39,41 +42,7 @@ static void free_all_list_open_library(struct list_head *library_list)
 	}
 }
 
-static void dm_browse_node_dynamic_object_tree(DMNODE *parent_node, DMOBJ *entryobj)
-{
-	for (; (entryobj && entryobj->obj); entryobj++) {
-
-		if (entryobj->nextdynamicobj) {
-			struct dm_dynamic_obj *next_dyn_array = entryobj->nextdynamicobj + INDX_LIBRARY_MOUNT;
-			FREE(next_dyn_array->nextobj);
-		}
-
-		if (entryobj->dynamicleaf) {
-			struct dm_dynamic_leaf *next_dyn_array = entryobj->dynamicleaf + INDX_LIBRARY_MOUNT;
-			FREE(next_dyn_array->nextleaf);
-		}
-
-		DMNODE node = {0};
-		node.obj = entryobj;
-		node.parent = parent_node;
-		node.instance_level = parent_node->instance_level;
-		node.matched = parent_node->matched;
-
-		if (entryobj->nextobj)
-			dm_browse_node_dynamic_object_tree(&node, entryobj->nextobj);
-	}
-}
-
-void free_library_dynamic_arrays(DMOBJ *dm_entryobj)
-{
-	DMOBJ *root = dm_entryobj;
-	DMNODE node = {.current_object = ""};
-
-	free_all_list_open_library(&loaded_library_list);
-	dm_browse_node_dynamic_object_tree(&node, root);
-}
-
-int load_library_dynamic_arrays(struct dmctx *ctx)
+int load_dotso_plugins(struct dmctx *ctx)
 {
 	struct dirent *ent = NULL;
 	DIR *dir = NULL;
@@ -101,7 +70,7 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 				for (int i = 0; dynamic_obj[i].path; i++) {
 
 					DMOBJ *dm_entryobj = NULL;
-					bool obj_exists = find_root_entry(ctx, dynamic_obj[i].path, &dm_entryobj);
+					bool obj_exists = find_entry_obj(ctx->dm_entryobj, dynamic_obj[i].path, &dm_entryobj);
 					if (obj_exists == false || !dm_entryobj)
 						continue;
 
@@ -118,7 +87,7 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 							dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj = calloc(2, sizeof(DMOBJ *));
 							dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[0] = dynamic_obj[i].root_obj;
 						} else {
-							int idx = get_obj_idx_dynamic_array(dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj);
+							int idx = get_obj_idx(dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj);
 							dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj = realloc(dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj, (idx + 2) * sizeof(DMOBJ *));
 							dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[idx] = dynamic_obj[i].root_obj;
 							dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[idx+1] = NULL;
@@ -139,7 +108,7 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = calloc(2, sizeof(DMLEAF *));
 							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[0] = dynamic_obj[i].root_leaf;
 						} else {
-							int idx = get_leaf_idx_dynamic_array(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf);
+							int idx = get_leaf_idx(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf);
 							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = realloc(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf, (idx + 2) * sizeof(DMLEAF *));
 							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[idx] = dynamic_obj[i].root_leaf;
 							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[idx+1] = NULL;
@@ -154,5 +123,11 @@ int load_library_dynamic_arrays(struct dmctx *ctx)
 		}
 		if (dir) closedir(dir);
 	}
+	return 0;
+}
+
+int free_dotso_plugins(void)
+{
+	free_all_list_open_library(&loaded_library_list);
 	return 0;
 }

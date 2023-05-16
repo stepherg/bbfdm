@@ -57,7 +57,9 @@ extern struct list_head json_memhead;
 // Global variables
 static unsigned int g_refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
 static int g_subprocess_level = USP_SUBPROCESS_DEPTH;
+
 static void *deamon_lib_handle = NULL;
+static json_object *deamon_json_obj = NULL;
 
 char UBUS_METHOD_NAME[32] = "bbfdm";
 bool enable_plugins = true;
@@ -94,7 +96,18 @@ static void usp_cleanup(struct usp_context *u)
 	free_path_list(&u->instances);
 	free_path_list(&u->old_instances);
 	bbf_global_clean(DEAMON_DM_ROOT_OBJ);
+
+	/* DotSo Plugin */
 	free_dotso_plugin(deamon_lib_handle);
+
+	/* JSON Plugin */
+	free_json_plugin();
+
+	/* Input JSON File */
+	if (deamon_json_obj) {
+		json_object_put(deamon_json_obj);
+		deamon_json_obj = NULL;
+	}
 }
 
 static bool is_sync_operate_cmd(usp_data_t *data __attribute__((unused)))
@@ -1193,14 +1206,13 @@ static int bbfdm_load_deamon_config(const char *json_path)
 	if (!json_path || !strlen(json_path))
 		return -1;
 
-	json_object *json_obj = json_object_from_file(json_path);
-	if (!json_obj)
+	deamon_json_obj = json_object_from_file(json_path);
+	if (!deamon_json_obj)
 		return -1;
 
-	json_object *deamon_obj = dmjson_get_obj(json_obj, 1, "daemon");
+	json_object *deamon_obj = dmjson_get_obj(deamon_json_obj, 1, "daemon");
 	if (!deamon_obj) {
-		err = -1;
-		goto exit;
+		return -1;
 	}
 
 	opt_val = dmjson_get_value(deamon_obj, 2, "config", "loglevel");
@@ -1236,26 +1248,27 @@ static int bbfdm_load_deamon_config(const char *json_path)
 		strncpyt(UBUS_METHOD_NAME, opt_val, sizeof(UBUS_METHOD_NAME));
 	}
 
+	DEAMON_DM_SERVICES = dmjson_get_obj(deamon_obj, 1, "services");
+
 	opt_val = dmjson_get_value(deamon_obj, 2, "input", "type");
 	if (opt_val && strlen(opt_val)) {
 		char *file_path = dmjson_get_value(deamon_obj, 2, "input", "name");
 
-		if (strcasecmp(opt_val, "JSON") == 0)
+		if (strcasecmp(opt_val, "JSON") == 0) {
+			enable_plugins = false; // To be sure that all additional plugins will be ignored
 			err= load_json_plugin(&loaded_json_files, &json_list, &json_memhead, file_path,
 					&DEAMON_DM_ROOT_OBJ);
-		else if (strcasecmp(opt_val, "DotSo") == 0)
+		} else if (strcasecmp(opt_val, "DotSo") == 0) {
 			err = load_dotso_plugin(&deamon_lib_handle, file_path,
 					&DEAMON_DM_ROOT_OBJ,
 					DEAMON_DM_VENDOR_EXTENSION,
 					&DEAMON_DM_VENDOR_EXTENSION_EXCLUDE);
-		else
+		} else {
 			err = -1;
+		}
 	} else {
 		err = -1;
 	}
-
-exit:
-	json_object_put(json_obj);
 
 	return err;
 }

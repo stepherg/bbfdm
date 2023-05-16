@@ -23,7 +23,7 @@ static int setup(void **state)
 	if (!ctx)
 		return -1;
 
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, NULL);
 
 	// Enable Plugins
 	ctx->enable_plugins = true;
@@ -1465,7 +1465,7 @@ static void test_api_bbfdm_valid_library_event(void **state)
 		idx++;
 	}
 
-	assert_int_equal(idx, 9);
+	assert_int_equal(idx, 7);
 }
 
 static void test_api_bbfdm_valid_json_event(void **state)
@@ -1512,7 +1512,7 @@ static void test_api_bbfdm_valid_json_event(void **state)
 		idx++;
 	}
 
-	assert_int_equal(idx, 9);
+	assert_int_equal(idx, 7);
 }
 
 static void test_api_bbfdm_valid_json_v1_event(void **state)
@@ -1561,7 +1561,7 @@ static void test_api_bbfdm_valid_json_v1_event(void **state)
 		idx++;
 	}
 
-	assert_int_equal(idx, 9);
+	assert_int_equal(idx, 7);
 }
 
 int main(void)

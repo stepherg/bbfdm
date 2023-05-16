@@ -1,0 +1,30 @@
+{
+	"daemon": {
+		"config": {
+			"refresh_time": 3600,
+			"enable_plugins": 0
+		},
+		"input": {
+			"type": "DotSo",
+			"name": "/tmp/libwifi_dataelements.so"
+		},
+		"output": {
+			"type": "UBUS",
+			"name": "bbfdm.dataelements"
+		}
+	},
+	"client": {
+		"config": {
+			"proto": "both",
+			"instance_mode": 0,
+			"enable_plugins": 0
+		},
+		"input": {
+			"type": "UBUS",
+			"name": "bbfdm.dataelements"
+		},
+		"output": {
+			"type": "CLI"
+		}
+	}
+}

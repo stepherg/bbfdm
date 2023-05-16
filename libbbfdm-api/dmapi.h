@@ -177,6 +177,7 @@ struct dmctx {
 	DMOBJ *dm_entryobj;
 	DM_MAP_VENDOR *dm_vendor_extension[2];
 	DM_MAP_VENDOR_EXCLUDE *dm_vendor_extension_exclude;
+	json_object *services_obj;
 	bool nextlevel;
 	bool iswildcard;
 	int faultcode;
@@ -212,6 +213,7 @@ typedef struct dmnode {
 	unsigned char browse_type;
 	int max_instance;
 	int num_of_entries;
+	bool is_ubus_service;
 } DMNODE;
 
 enum operate_ret_status {
@@ -372,6 +374,7 @@ enum {
 	INDX_JSON_MOUNT,
 	INDX_LIBRARY_MOUNT,
 	INDX_VENDOR_MOUNT,
+	INDX_SERVICE_MOUNT,
 	__INDX_DYNAMIC_MAX
 };
 

@@ -9,10 +9,10 @@ ret = 1
 child = pexpect.spawn('ubus monitor')
 
 # force change in schema, by removing dependency uci file
-os.rename("/etc/config/users", "/etc/config/users_1")
+os.rename("/etc/config/dropbear", "/etc/config/dropbear_1")
 
 try:
-    ret = child.expect('notify', timeout=35)
+    ret = child.expect('notify', timeout=65)
 except:
     print("FAIL: Schema updater notification")
 
@@ -23,7 +23,7 @@ if ret == 0:
         print("FAIL: Schema updater notification")
 
 # Revert back uci changes
-os.rename("/etc/config/users_1", "/etc/config/users")
+os.rename("/etc/config/dropbear_1", "/etc/config/dropbear")
 
 if ret == 0:
     print("PASS: Schema updater notification")

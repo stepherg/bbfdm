@@ -35,6 +35,7 @@
 DMOBJ *DEAMON_DM_ROOT_OBJ = NULL;
 DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2] = {0};
 DM_MAP_VENDOR_EXCLUDE *DEAMON_DM_VENDOR_EXTENSION_EXCLUDE = NULL;
+json_object *DEAMON_DM_SERVICES = NULL;
 
 // uloop.h does not have versions, below line is to use
 // deprecated uloop_timeout_remaining for the time being
@@ -74,7 +75,7 @@ void bb_add_string(struct blob_buf *bb, const char *name, const char *value)
 
 void bbf_init(struct dmctx *dm_ctx)
 {
-	bbf_ctx_init(dm_ctx, DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(dm_ctx, DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE, DEAMON_DM_SERVICES);
 }
 
 void bbf_cleanup(struct dmctx *dm_ctx)

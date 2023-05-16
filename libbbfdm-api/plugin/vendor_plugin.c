@@ -1,48 +1,16 @@
 /*
- * Copyright (C) 2021 iopsys Software Solutions AB
+ * Copyright (C) 2023 iopsys Software Solutions AB
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation
  *
- *	  Author Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+ *	  Author Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  *
  */
 
-#include "dmdynamicvendor.h"
-
-static void dm_browse_node_vendor_object_tree(DMNODE *parent_node, DMOBJ *entryobj)
-{
-	for (; (entryobj && entryobj->obj); entryobj++) {
-
-		if (entryobj->nextdynamicobj) {
-			struct dm_dynamic_obj *next_dyn_array = entryobj->nextdynamicobj + INDX_VENDOR_MOUNT;
-			FREE(next_dyn_array->nextobj);
-		}
-
-		if (entryobj->dynamicleaf) {
-			struct dm_dynamic_leaf *next_dyn_array = entryobj->dynamicleaf + INDX_VENDOR_MOUNT;
-			FREE(next_dyn_array->nextleaf);
-		}
-
-		DMNODE node = {0};
-		node.obj = entryobj;
-		node.parent = parent_node;
-		node.instance_level = parent_node->instance_level;
-		node.matched = parent_node->matched;
-
-		if (entryobj->nextobj)
-			dm_browse_node_vendor_object_tree(&node, entryobj->nextobj);
-	}
-}
-
-void free_vendor_dynamic_arrays(DMOBJ *dm_entryobj)
-{
-	DMOBJ *root = dm_entryobj;
-	DMNODE node = {.current_object = ""};
-
-	dm_browse_node_vendor_object_tree(&node, root);
-}
+#include "vendor_plugin.h"
+#include "../dmplugin.h"
 
 static void overwrite_param(DMOBJ *entryobj, DMLEAF *leaf)
 {
@@ -120,7 +88,7 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 			for (int i = 0; vendor_obj[i].path; i++) {
 
 				DMOBJ *dm_entryobj = NULL;
-				bool obj_exists = find_root_entry(ctx, vendor_obj[i].path, &dm_entryobj);
+				bool obj_exists = find_entry_obj(ctx->dm_entryobj, vendor_obj[i].path, &dm_entryobj);
 				if (obj_exists == false || !dm_entryobj)
 					continue;
 
@@ -130,13 +98,14 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 						dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
 						dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
 						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
+						dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
 					}
 
 					if (dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj == NULL) {
 						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj = calloc(2, sizeof(DMOBJ *));
 						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[0] = vendor_obj[i].root_obj;
 					} else {
-						int obj_idx = get_obj_idx_dynamic_array(dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj);
+						int obj_idx = get_obj_idx(dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj);
 						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj = realloc(dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj, (obj_idx + 2) * sizeof(DMOBJ *));
 						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[obj_idx] = vendor_obj[i].root_obj;
 						dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].nextobj[obj_idx+1] = NULL;
@@ -155,7 +124,7 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf = calloc(2, sizeof(DMLEAF *));
 						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[0] = vendor_obj[i].root_leaf;
 					} else {
-						int leaf_idx = get_leaf_idx_dynamic_array(dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf);
+						int leaf_idx = get_leaf_idx(dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf);
 						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf = realloc(dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf, (leaf_idx + 2) * sizeof(DMLEAF *));
 						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[leaf_idx] = vendor_obj[i].root_leaf;
 						dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].nextleaf[leaf_idx+1] = NULL;
@@ -192,7 +161,7 @@ static void load_vendor_extension_overwrite_arrays(struct dmctx *ctx)
 
 			for (int i = 0; dynamic_overwrite_obj[i].path; i++) {
 
-				bool obj_exists = find_root_entry(ctx, dynamic_overwrite_obj[i].path, &dm_entryobj);
+				bool obj_exists = find_entry_obj(ctx->dm_entryobj, dynamic_overwrite_obj[i].path, &dm_entryobj);
 				if (obj_exists == false || !dm_entryobj)
 					continue;
 
@@ -220,11 +189,10 @@ static void load_vendor_extension_overwrite_arrays(struct dmctx *ctx)
 
 static void exclude_obj(struct dmctx *ctx, char *in_obj)
 {
-	DMOBJ *root = ctx->dm_entryobj;
 	DMNODE node = {.current_object = ""};
 
 	char *obj_path = replace_str(in_obj, ".{i}.", ".");
-	dm_exclude_obj(ctx, &node, root, obj_path);
+	dm_exclude_obj(ctx->dm_entryobj, &node, obj_path);
 	FREE(obj_path);
 }
 
@@ -240,7 +208,7 @@ static void exclude_param(struct dmctx *ctx, char *in_param)
 	if (ret)
 		DM_STRNCPY(obj_prefix, in_param, ret - in_param + 2);
 
-	bool obj_exists = find_root_entry(ctx, obj_prefix, &entryobj);
+	bool obj_exists = find_entry_obj(ctx->dm_entryobj, obj_prefix, &entryobj);
 
 	if (entryobj && obj_exists == true) {
 		DMLEAF *leaf = entryobj->leaf;

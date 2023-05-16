@@ -9,14 +9,14 @@
  *
  */
 
-#ifndef __DMENTRYLIBRARY_H__
-#define __DMENTRYLIBRARY_H__
+#ifndef __DOTSO_PLUGIN_H__
+#define __DOTSO_PLUGIN_H__
 
 #include "../dmcommon.h"
 
 #define LIBRARY_FOLDER_PATH "/usr/lib/bbfdm"
 
-int load_library_dynamic_arrays(struct dmctx *ctx);
-void free_library_dynamic_arrays(DMOBJ *dm_entryobj);
+int load_dotso_plugins(struct dmctx *ctx);
+int free_dotso_plugins(void);
 
-#endif //__DMENTRYLIBRARY_H__
+#endif //__DOTSO_PLUGIN_H__

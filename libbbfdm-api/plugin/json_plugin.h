@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2020 iopsys Software Solutions AB
+ * Copyright (C) 2023 iopsys Software Solutions AB
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation
  *
- *	  Author Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+ *	  Author Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  *
  */
 
@@ -19,10 +19,8 @@
 void save_loaded_json_files(struct list_head *json_list, json_object *data);
 void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json_version, struct list_head *list);
 void find_prefix_obj(char *full_obj, char *prefix_obj, size_t len);
-int free_json_loaded_object(void);
 
-
-int load_json_dynamic_arrays(struct dmctx *ctx);
-int free_json_dynamic_arrays(DMOBJ *dm_entryobj);
+int load_json_plugins(struct dmctx *ctx);
+int free_json_plugins(void);
 
 #endif //__DMENTRYJSON_H__

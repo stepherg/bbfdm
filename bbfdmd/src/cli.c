@@ -38,8 +38,10 @@ extern struct list_head json_memhead;
 static DMOBJ *CLIENT_DM_ROOT_OBJ = NULL;
 static DM_MAP_VENDOR *CLIENT_DM_VENDOR_EXTENSION[2] = {0};
 static DM_MAP_VENDOR_EXCLUDE *CLIENT_DM_VENDOR_EXTENSION_EXCLUDE = NULL;
+static json_object *CLIENT_DM_SERVICES = NULL;
 
 static void *client_lib_handle = NULL;
+static json_object *client_json_obj = NULL;
 
 typedef struct {
 	struct dmctx bbf_ctx;
@@ -145,6 +147,11 @@ static void __ubus_callback(struct ubus_request *req, int type __attribute__((un
 		return;
 	}
 
+	if (blobmsg_len(parameters) == 0) {
+		client_data->ubus_status = true;
+		return;
+	}
+
 	blobmsg_for_each_attr(cur, parameters, rem) {
 		struct blob_attr *tb[6] = {0};
 
@@ -162,7 +169,7 @@ static void __ubus_callback(struct ubus_request *req, int type __attribute__((un
 		if (strcmp(client_data->cmd, "get") == 0)
 			printf("%s => %s\n", name, data);
 		else if (strcmp(client_data->cmd, "set") == 0) {
-			printf("%s => Set value is successfully done\n", name);
+			printf("Set value of %s is successfully done\n", name);
 		} else if (strcmp(client_data->cmd, "add") == 0) {
 			printf("Added %s%s.\n", name, data);
 		} else if (strcmp(client_data->cmd, "del") == 0) {
@@ -267,7 +274,6 @@ static int in_ubus_out_cli_exec_cmd(client_data_t *client_data, const char *path
 
 static int bbfdm_load_client_config(const char *json_path, client_data_t *client_data)
 {
-	json_object *json_obj = NULL;
 	char *opt_val = NULL;
 
 	if (!json_path || !strlen(json_path)) {
@@ -275,20 +281,20 @@ static int bbfdm_load_client_config(const char *json_path, client_data_t *client
 		return -1;
 	}
 
-	json_obj = json_object_from_file(json_path);
-	if (!json_obj) {
+	client_json_obj = json_object_from_file(json_path);
+	if (!client_json_obj) {
 		printf("ERROR: not possible to load json file (%s)\n", json_path);
 		return -1;
 	}
 
-	opt_val = dmjson_get_value(json_obj, 3, "client", "config", "proto");
+	opt_val = dmjson_get_value(client_json_obj, 3, "client", "config", "proto");
 	if (opt_val && strlen(opt_val)) {
 		client_data->proto = get_proto_type(opt_val);
 	} else {
 		client_data->proto = BBFDM_BOTH;
 	}
 
-	opt_val = dmjson_get_value(json_obj, 3, "client", "config", "instance_mode");
+	opt_val = dmjson_get_value(client_json_obj, 3, "client", "config", "instance_mode");
 	if (opt_val && strlen(opt_val)) {
 		int inst_mode = (int) strtol(opt_val, NULL, 10);
 		client_data->instance_mode = get_instance_mode(inst_mode);
@@ -296,14 +302,14 @@ static int bbfdm_load_client_config(const char *json_path, client_data_t *client
 		client_data->instance_mode = INSTANCE_MODE_NUMBER;
 	}
 
-	opt_val = dmjson_get_value(json_obj, 3, "client", "config", "enable_plugins");
+	opt_val = dmjson_get_value(client_json_obj, 3, "client", "config", "enable_plugins");
 	if (opt_val && strlen(opt_val)) {
 		client_data->enable_plugins = (unsigned int) strtoul(opt_val, NULL, 10);
 	} else {
 		client_data->enable_plugins = false;
 	}
 
-	opt_val = dmjson_get_value(json_obj, 3, "client", "input", "type");
+	opt_val = dmjson_get_value(client_json_obj, 3, "client", "input", "type");
 	if (opt_val && strlen(opt_val)) {
 		snprintf(client_data->in_type, sizeof(client_data->in_type), "%s", opt_val);
 	} else {
@@ -311,7 +317,7 @@ static int bbfdm_load_client_config(const char *json_path, client_data_t *client
 		return -1;
 	}
 
-	opt_val = dmjson_get_value(json_obj, 3, "client", "input", "name");
+	opt_val = dmjson_get_value(client_json_obj, 3, "client", "input", "name");
 	if (opt_val && strlen(opt_val)) {
 		snprintf(client_data->in_name, sizeof(client_data->in_name), "%s", opt_val);
 	} else {
@@ -319,7 +325,7 @@ static int bbfdm_load_client_config(const char *json_path, client_data_t *client
 		return -1;
 	}
 
-	opt_val = dmjson_get_value(json_obj, 3, "client", "output", "type");
+	opt_val = dmjson_get_value(client_json_obj, 3, "client", "output", "type");
 	if (opt_val && strlen(opt_val)) {
 		snprintf(client_data->out_type, sizeof(client_data->out_type), "%s", opt_val);
 	} else {
@@ -327,7 +333,8 @@ static int bbfdm_load_client_config(const char *json_path, client_data_t *client
 		return -1;
 	}
 
-	json_object_put(json_obj);
+	CLIENT_DM_SERVICES = dmjson_get_obj(client_json_obj, 2, "client", "services");
+
 	return 0;
 }
 
@@ -645,6 +652,7 @@ static int cli_exec_command(client_data_t *client_data, int argc, char *argv[])
 				goto end;
 			}
 		} else {
+			client_data->enable_plugins = false;
 			if (load_json_plugin(&loaded_json_files, &json_list, &json_memhead, client_data->in_name,
 					&CLIENT_DM_ROOT_OBJ) != 0) {
 				err = EXIT_FAILURE;
@@ -657,7 +665,7 @@ static int cli_exec_command(client_data_t *client_data, int argc, char *argv[])
 			goto end;
 		}
 
-		bbf_ctx_init(&client_data->bbf_ctx, CLIENT_DM_ROOT_OBJ, CLIENT_DM_VENDOR_EXTENSION, CLIENT_DM_VENDOR_EXTENSION_EXCLUDE);
+		bbf_ctx_init(&client_data->bbf_ctx, CLIENT_DM_ROOT_OBJ, CLIENT_DM_VENDOR_EXTENSION, CLIENT_DM_VENDOR_EXTENSION_EXCLUDE, CLIENT_DM_SERVICES);
 
 		client_data->bbf_ctx.dm_type = client_data->proto;
 		client_data->bbf_ctx.instance_mode = client_data->instance_mode;
@@ -692,11 +700,16 @@ static int cli_exec_command(client_data_t *client_data, int argc, char *argv[])
 
 end:
 	if (strcasecmp(client_data->in_type, "DotSO") == 0) {
-		bbf_ctx_clean(&client_data->bbf_ctx);
-		bbf_global_clean(CLIENT_DM_ROOT_OBJ);
+		if (CLIENT_DM_ROOT_OBJ) {
+			bbf_ctx_clean(&client_data->bbf_ctx);
+			bbf_global_clean(CLIENT_DM_ROOT_OBJ);
+		}
 		free_dotso_plugin(client_lib_handle);
 	} else if (strcasecmp(client_data->in_type, "JSON") == 0) {
-		bbf_ctx_clean(&client_data->bbf_ctx);
+		if (CLIENT_DM_ROOT_OBJ) {
+			bbf_ctx_clean(&client_data->bbf_ctx);
+			bbf_global_clean(CLIENT_DM_ROOT_OBJ);
+		}
 		free_json_plugin();
 	}
 
@@ -720,5 +733,11 @@ int bbfdm_cli_exec_command(const char *json_path, int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	return cli_exec_command(&client_data, argc, argv);
+	err = cli_exec_command(&client_data, argc, argv);
+
+	if (client_json_obj) {
+		json_object_put(client_json_obj);
+		client_json_obj = NULL;
+	}
+	return err;
 }

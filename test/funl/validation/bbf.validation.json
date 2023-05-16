@@ -20,7 +20,7 @@
         {
             "method": "get",
             "args": {
-                "path":"Device.Users.User.*.Alias",
+                "path":"Device.WiFi.SSID.*.Alias",
                 "optional": {"format":"raw", "proto":"cwmp"}
             },
             "rc": 0
@@ -66,7 +66,7 @@
         {
             "method": "get",
             "args": {
-                "path":"Device.Users.User.*.Alias"
+                "path":"Device.WiFi.SSID.*.Alias"
             },
             "rc": 0
         },
@@ -91,7 +91,7 @@
         {
             "method": "instances",
             "args": {
-                "path": "Device.Users.User.",
+                "path": "Device.WiFi.SSID.",
                 "optional": {"format":"raw", "proto":"usp"}
             },
             "rc": 0
@@ -107,7 +107,7 @@
         {
             "method": "schema",
             "args": {
-                "path": "Device.Users.User."
+                "path": "Device.WiFi."
             },
             "rc": 0
         },
@@ -145,7 +145,7 @@
         {
             "method": "set",
             "args": {
-                "path": "Device.Users.User.1.",
+                "path": "Device.WiFi.SSID.1.",
                 "obj_path": {"Alias":"test", "Enable":"1"},
                 "optional":{"transaction_id":123}
             },

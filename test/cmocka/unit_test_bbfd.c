@@ -28,7 +28,7 @@ static int setup(void **state)
 	if (!ctx)
 		return -1;
 
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, NULL);
 
 	// Enable Plugins
 	ctx->enable_plugins = true;
@@ -594,7 +594,7 @@ static void test_api_bbfdm_json_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, NULL);
 
 	// Enable Plugins
 	ctx->enable_plugins = true;
@@ -610,7 +610,7 @@ static void test_api_bbfdm_json_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, NULL);
 
 	// Enable Plugins
 	ctx->enable_plugins = true;
@@ -690,7 +690,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, NULL);
 
 	// Enable Plugins
 	ctx->enable_plugins = true;
@@ -704,7 +704,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, NULL);
 
 	// Enable Plugins
 	ctx->enable_plugins = true;
