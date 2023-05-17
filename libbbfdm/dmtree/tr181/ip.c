@@ -1143,9 +1143,24 @@ static int get_IP_InterfaceNumberOfEntries(char *refparam, struct dmctx *ctx, vo
 /*#Device.IP.Interface.{i}.Enable!UCI:network/interface,@i-1/disabled*/
 static int get_IPInterface_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *disabled;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "disabled", &disabled);
-	*value = (*disabled == '1') ? "0" : "1";
+	struct uci_section *s = NULL;
+	char *device = NULL;
+
+	*value = "0";
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+
+	uci_foreach_option_eq("network", "interface", "device", device, s) {
+		char *disabled = NULL;
+
+		dmuci_get_value_by_section_string(s, "disabled", &disabled);
+
+		if (DM_STRCMP(disabled, "1") != 0) {
+			*value = "1";
+			break;
+		}
+	}
+
 	return 0;
 }
 
