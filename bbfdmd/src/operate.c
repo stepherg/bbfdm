@@ -1,5 +1,5 @@
 /*
- * operate.c: Operate handler for uspd
+ * operate.c: Operate handler for bbfdmd
  *
  * Copyright (C) 2023 iopsys Software Solutions AB. All rights reserved.
  *
@@ -29,32 +29,32 @@
 
 #include <libubus.h>
 
-static int usp_dm_operate(usp_data_t *data)
+static int bbfdm_dm_operate(bbfdm_data_t *data)
 {
 	int fault = 0, ret = 0;
 	void *table, *array;
 
 	bbf_init(&data->bbf_ctx);
 
-	ret = usp_dm_exec(&data->bbf_ctx, BBF_OPERATE);
+	ret = bbfdm_dm_exec(&data->bbf_ctx, BBF_OPERATE);
 	// This switch should be removed in the future and will be treated internally
 	switch (ret) {
 	case CMD_NOT_FOUND:
-		fault = USP_FAULT_INVALID_PATH;
+		fault = bbfdm_FAULT_INVALID_PATH;
 		break;
 	case CMD_INVALID_ARGUMENTS:
-		fault = USP_FAULT_INVALID_ARGUMENT;
+		fault = bbfdm_FAULT_INVALID_ARGUMENT;
 		break;
 	case CMD_FAIL:
-		fault = USP_FAULT_COMMAND_FAILURE;
+		fault = bbfdm_FAULT_COMMAND_FAILURE;
 		break;
 	case CMD_SUCCESS:
-		fault = USP_ERR_OK;
+		fault = bbfdm_ERR_OK;
 		DEBUG("command executed successfully");
 		break;
 	default:
 		WARNING("Case(%d) not defined", fault);
-		fault = USP_FAULT_INVALID_PATH;
+		fault = bbfdm_FAULT_INVALID_PATH;
 		break;
 	}
 
@@ -99,36 +99,36 @@ static int usp_dm_operate(usp_data_t *data)
 
 	bbf_cleanup(&data->bbf_ctx);
 
-	if (fault != USP_ERR_OK) {
+	if (fault != bbfdm_ERR_OK) {
 		WARNING("Fault(%d) path(%s) input(%s)", fault, data->bbf_ctx.in_param, data->bbf_ctx.in_value);
 		return fault;
 	}
 
-	return USP_ERR_OK;
+	return bbfdm_ERR_OK;
 }
 
-static void usp_operate_cmd(usp_data_t *data)
+static void bbfdm_operate_cmd(bbfdm_data_t *data)
 {
 	void *array = blobmsg_open_array(&data->bb, "results");
-	usp_dm_operate(data);
+	bbfdm_dm_operate(data);
 	blobmsg_close_array(&data->bb, array);
 }
 
-void usp_operate_cmd_async(usp_data_t *data, void *output)
+void bbfdm_operate_cmd_async(bbfdm_data_t *data, void *output)
 {
 	blob_buf_init(&data->bb, 0);
 
-	usp_operate_cmd(data);
+	bbfdm_operate_cmd(data);
 
 	memcpy(output, data->bb.head, blob_pad_len(data->bb.head));
 	blob_buf_free(&data->bb);
 }
 
-void usp_operate_cmd_sync(usp_data_t *data)
+void bbfdm_operate_cmd_sync(bbfdm_data_t *data)
 {
 	blob_buf_init(&data->bb, 0);
 
-	usp_operate_cmd(data);
+	bbfdm_operate_cmd(data);
 
 	ubus_send_reply(data->ctx, data->req, data->bb.head);
 	blob_buf_free(&data->bb);

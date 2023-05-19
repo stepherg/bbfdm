@@ -25,8 +25,8 @@
 
 #include <sys/mman.h>
 
-#ifdef USPD_MAX_MSG_LEN
-  #define DEF_IPC_DATA_LEN (USPD_MAX_MSG_LEN - 128) // Configured Len - 128 bytes
+#ifdef BBFDM_MAX_MSG_LEN
+  #define DEF_IPC_DATA_LEN (BBFDM_MAX_MSG_LEN - 128) // Configured Len - 128 bytes
 #else
   #define DEF_IPC_DATA_LEN (10 * 1024 * 1024 - 128) // 10M - 128 bytes
 #endif

@@ -1,5 +1,5 @@
 /*
- * add_delete.c: Add/Delete handler for uspd
+ * add_delete.c: Add/Delete handler for bbfdmd
  *
  * Copyright (C) 2023 iopsys Software Solutions AB. All rights reserved.
  *
@@ -25,9 +25,9 @@
 #include "add_delete.h"
 #include "get_helper.h"
 
-typedef int (*ADD_DEL_CB_T)(usp_data_t *data);
+typedef int (*ADD_DEL_CB_T)(bbfdm_data_t *data);
 
-static int usp_add_object(usp_data_t *data)
+static int bbfdm_add_object(bbfdm_data_t *data)
 {
 	int fault = 0;
 
@@ -35,7 +35,7 @@ static int usp_add_object(usp_data_t *data)
 
 	void *array = blobmsg_open_array(&data->bb, "results");
 
-	fault = usp_dm_exec(&data->bbf_ctx, BBF_ADD_OBJECT);
+	fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_ADD_OBJECT);
 	if (fault) {
 		fill_err_code_table(data, fault);
 	} else {
@@ -50,7 +50,7 @@ static int usp_add_object(usp_data_t *data)
 	return fault;
 }
 
-static int usp_del_object(usp_data_t *data)
+static int bbfdm_del_object(bbfdm_data_t *data)
 {
 	struct pathNode *pn;
 	int fault = 0;
@@ -64,7 +64,7 @@ static int usp_del_object(usp_data_t *data)
 
 		INFO("Req to delete object |%s|", data->bbf_ctx.in_param);
 
-		fault = usp_dm_exec(&data->bbf_ctx, BBF_DEL_OBJECT);
+		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_DEL_OBJECT);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -82,7 +82,7 @@ static int usp_del_object(usp_data_t *data)
 	return fault;
 }
 
-static int handle_add_del_req(usp_data_t *data, ADD_DEL_CB_T req_cb)
+static int handle_add_del_req(bbfdm_data_t *data, ADD_DEL_CB_T req_cb)
 {
 	int fault = 0;
 
@@ -91,12 +91,12 @@ static int handle_add_del_req(usp_data_t *data, ADD_DEL_CB_T req_cb)
 	return fault;
 }
 
-int create_add_response(usp_data_t *data)
+int create_add_response(bbfdm_data_t *data)
 {
-	return handle_add_del_req(data, &usp_add_object);
+	return handle_add_del_req(data, &bbfdm_add_object);
 }
 
-int create_del_response(usp_data_t *data)
+int create_del_response(bbfdm_data_t *data)
 {
-	return handle_add_del_req(data, &usp_del_object);
+	return handle_add_del_req(data, &bbfdm_del_object);
 }

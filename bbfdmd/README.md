@@ -13,7 +13,7 @@ The configuration file is an `uci` file `/etc/config/bbfdm`. Sample configuratio
 ```bash
 config bbfdmd 'bbfdmd'
         option loglevel  '2'
-        option sock '/tmp/usp.sock'
+        option sock '/tmp/bbfdm.sock'
         option transaction_timeout 10
         option subprocess_level '1'
         option refresh_time '10'
@@ -35,7 +35,7 @@ For more info on the `bbfdmd` UCI configuration visit [uci documentation](../doc
 
 `bbfdmd` internally uses both `libbbfdm-api` and `libbbfdm` to get the data-model objects. On startup it parses the uci file to check the different configurations and then based on that it registers the `bbfdm` ubus namespace.
 
-When a ubus method is called it first fills `usp_data_t` structure with the necessary information, then proceeds the `Get/Set/Operate/Add/Del` operation based on that information.
+When a ubus method is called it first fills `bbfdm_data_t` structure with the necessary information, then proceeds the `Get/Set/Operate/Add/Del` operation based on that information.
 
 `bbfdmd` uses `bbf_entry_method` API from `libbbfdm-api` and  `tEntryRoot`, `tVendorExtension`, `tVendorExtensionOverwrite` and `tVendorExtensionExclude` global shared arrays from `libbbfdm` to get the device tree schema and its values.
 

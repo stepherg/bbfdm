@@ -2,7 +2,7 @@
 
 ## Path syntax and possible error cases
 
-Please note some error scenerios with the uspd.
+Please note some error scenerios with the bbfdm.
 
 1. The path parameter value must start with 'Device.'. The command below doesn't have Device before path "Users.User."
 

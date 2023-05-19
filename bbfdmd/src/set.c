@@ -1,5 +1,5 @@
 /*
- * set.c: Set handler for uspd
+ * set.c: Set handler for bbfdmd
  *
  * Copyright (C) 2023 iopsys Software Solutions AB. All rights reserved.
  *
@@ -26,11 +26,11 @@
 
 #include <libubus.h>
 
-int usp_set_value(usp_data_t *data)
+int bbfdm_set_value(bbfdm_data_t *data)
 {
 	struct pvNode *pv = NULL;
 	void *array = NULL;
-	int fault = USP_ERR_OK;
+	int fault = bbfdm_ERR_OK;
 
 	array = blobmsg_open_array(&data->bb, "results");
 
@@ -38,7 +38,7 @@ int usp_set_value(usp_data_t *data)
 		data->bbf_ctx.in_param = pv->param;
 		data->bbf_ctx.in_value = pv->val;
 
-		fault = usp_dm_exec(&data->bbf_ctx, BBF_SET_VALUE);
+		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_SET_VALUE);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -62,20 +62,20 @@ int fill_pvlist_set(char *param_name, char *param_value, struct blob_attr *blob_
 
 	size_t plen = DM_STRLEN(param_name);
 	if (plen == 0)
-		return USP_FAULT_INVALID_PATH;
+		return bbfdm_FAULT_INVALID_PATH;
 
 	if (!param_value)
 		goto blob__table;
 
 	if (param_name[plen - 1] == '.')
-		return USP_FAULT_INVALID_PATH;
+		return bbfdm_FAULT_INVALID_PATH;
 
 	add_pv_list(param_name, param_value, NULL, pv_list);
 
 blob__table:
 
 	if (!blob_table)
-		return USP_ERR_OK;
+		return bbfdm_ERR_OK;
 
 	size_t tlen = (size_t)blobmsg_data_len(blob_table);
 
@@ -100,12 +100,12 @@ blob__table:
 			break;
 		default:
 			INFO("Unhandled set request type|%x|", blob_id(attr));
-			return USP_FAULT_INVALID_ARGUMENT;
+			return bbfdm_FAULT_INVALID_ARGUMENT;
 		}
 
 		snprintf(path, MAX_DM_PATH, "%s%s", param_name, (char *)hdr->name);
 		add_pv_list(path, value, NULL, pv_list);
 	}
 
-	return USP_ERR_OK;
+	return bbfdm_ERR_OK;
 }

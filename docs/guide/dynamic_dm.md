@@ -8,7 +8,7 @@
 
 ## 1. Shared library via external package
 
-The application should bring its shared library under **'/usr/lib/bbfdm/'** path that contains the sub tree of **Objects/Parameters** and the related functions **Get/Set/Add/Delete/Operate**. The new added objects, parameters and operates will be automatically shown by icwmpd and uspd/obuspa.
+The application should bring its shared library under **'/usr/lib/bbfdm/'** path that contains the sub tree of **Objects/Parameters** and the related functions **Get/Set/Add/Delete/Operate**. The new added objects, parameters and operates will be automatically shown by icwmpd and bbfdmd/obuspa.
 
 Each library should contains the Root table: **“tDynamicObj”**
 
@@ -36,7 +36,7 @@ For the other tables, they are defined in the same way as the Object and Paramet
 
 ### 2. JSON File via external package
 
-The application should bring its JSON file under **'/etc/bbfdm/json/'** path with **UCI** and **UBUS** mappings. The new added parameters will be automatically shown by icwmpd and uspd/obuspa.
+The application should bring its JSON file under **'/etc/bbfdm/json/'** path with **UCI** and **UBUS** mappings. The new added parameters will be automatically shown by icwmpd and bbfdmd/obuspa.
 
 #### Some examples on JSON Definition
 

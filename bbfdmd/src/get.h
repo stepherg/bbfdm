@@ -31,13 +31,13 @@ enum {
 	__DM_SCHEMA_MAX
 };
 
-void usp_get_value(usp_data_t *data);
-void usp_get_value_async(usp_data_t *data, void *output);
+void bbfdm_get_value(bbfdm_data_t *data);
+void bbfdm_get_value_async(bbfdm_data_t *data, void *output);
 
-void usp_get_names(usp_data_t *data);
+void bbfdm_get_names(bbfdm_data_t *data);
 
-void usp_get_instances(usp_data_t *data);
+void bbfdm_get_instances(bbfdm_data_t *data);
 
-int bbf_dm_get_supported_dm(usp_data_t *data);
+int bbf_dm_get_supported_dm(bbfdm_data_t *data);
 
 #endif /* GET_H */

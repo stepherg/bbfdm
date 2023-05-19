@@ -9,8 +9,7 @@
 ipkg-arm_xscale/
 *.o
 *.so
-src/uspd
-uspd
+src/bbfdmd
 *.gcda
 *.gcno
 report/

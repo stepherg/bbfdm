@@ -14,7 +14,7 @@ enum {
 	__DM_OPERATE_MAX,
 };
 
-void usp_operate_cmd_async(usp_data_t *data, void *output);
-void usp_operate_cmd_sync(usp_data_t *data);
+void bbfdm_operate_cmd_async(bbfdm_data_t *data, void *output);
+void bbfdm_operate_cmd_sync(bbfdm_data_t *data);
 
 #endif /* OPERATE_H */

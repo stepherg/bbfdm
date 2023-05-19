@@ -166,7 +166,7 @@ int count_delim(const char *path)
 	return (count - 1);
 }
 
-bool validate_msglen(usp_data_t *data)
+bool validate_msglen(bbfdm_data_t *data)
 {
 	size_t data_len = blob_pad_len(data->bb.head);
 

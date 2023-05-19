@@ -7,14 +7,14 @@
 
 #include "libbbfdm-api/dmbbf.h"
 
-struct uspd_async_req {
+struct bbfdm_async_req {
 	struct ubus_context *ctx;
 	struct ubus_request_data req;
 	struct uloop_process process;
 	void *result;
 };
 
-struct usp_context {
+struct bbfdm_context {
 	struct ubus_context ubus_ctx;
 	size_t dm_schema_len;
 	struct uloop_timeout schema_timer;
@@ -29,7 +29,7 @@ struct ev_handler_node {
 	struct list_head list;
 };
 
-typedef struct usp_data {
+typedef struct bbfdm_data {
 	struct ubus_context *ctx;
 	struct ubus_request_data *req;
 	struct list_head *plist;
@@ -38,6 +38,6 @@ typedef struct usp_data {
 	uint8_t depth;
 	bool is_raw;
 	int trans_id;
-} usp_data_t;
+} bbfdm_data_t;
 
 #endif /* BBFDMD_H */

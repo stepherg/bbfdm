@@ -1,5 +1,5 @@
 /*
- * get.c: Get handler for uspd
+ * get.c: Get handler for bbfdmd
  *
  * Copyright (C) 2023 iopsys Software Solutions AB. All rights reserved.
  *
@@ -29,9 +29,9 @@
 
 #include <libubus.h>
 
-void usp_get_value_async(usp_data_t *data, void *output)
+void bbfdm_get_value_async(bbfdm_data_t *data, void *output)
 {
-	int fault = USP_ERR_OK;
+	int fault = bbfdm_ERR_OK;
 	struct pathNode *pn;
 	void *array = NULL;
 
@@ -46,7 +46,7 @@ void usp_get_value_async(usp_data_t *data, void *output)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = usp_dm_exec(&data->bbf_ctx, BBF_GET_VALUE);
+		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_GET_VALUE);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -88,9 +88,9 @@ void usp_get_value_async(usp_data_t *data, void *output)
 	bbf_cleanup(&data->bbf_ctx);
 }
 
-void usp_get_value(usp_data_t *data)
+void bbfdm_get_value(bbfdm_data_t *data)
 {
-	int fault = USP_ERR_OK;
+	int fault = bbfdm_ERR_OK;
 	struct pathNode *pn;
 	void *array = NULL;
 
@@ -107,7 +107,7 @@ void usp_get_value(usp_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = usp_dm_exec(&data->bbf_ctx, BBF_GET_VALUE);
+		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_GET_VALUE);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -150,9 +150,9 @@ void usp_get_value(usp_data_t *data)
 	bbf_cleanup(&data->bbf_ctx);
 }
 
-void usp_get_names(usp_data_t *data)
+void bbfdm_get_names(bbfdm_data_t *data)
 {
-	int fault = USP_ERR_OK;
+	int fault = bbfdm_ERR_OK;
 	struct pathNode *pn;
 
 	bbf_init(&data->bbf_ctx);
@@ -164,7 +164,7 @@ void usp_get_names(usp_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = usp_dm_exec(&data->bbf_ctx, BBF_GET_NAME);
+		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_GET_NAME);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -192,9 +192,9 @@ void usp_get_names(usp_data_t *data)
 	bbf_cleanup(&data->bbf_ctx);
 }
 
-void usp_get_instances(usp_data_t *data)
+void bbfdm_get_instances(bbfdm_data_t *data)
 {
-	int fault = USP_ERR_OK;
+	int fault = bbfdm_ERR_OK;
 	struct pathNode *pn;
 
 	bbf_init(&data->bbf_ctx);
@@ -206,7 +206,7 @@ void usp_get_instances(usp_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = usp_dm_exec(&data->bbf_ctx, BBF_INSTANCES);
+		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_INSTANCES);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -320,11 +320,11 @@ static void fill_param_schema(struct blob_buf *bb, struct dm_parameter *param)
 	}
 }
 
-int bbf_dm_get_supported_dm(usp_data_t *data)
+int bbf_dm_get_supported_dm(bbfdm_data_t *data)
 {
 	struct dm_parameter *param;
 	struct pathNode *pn;
-	int fault = USP_ERR_OK;
+	int fault = bbfdm_ERR_OK;
 
 	bbf_init(&data->bbf_ctx);
 
@@ -335,7 +335,7 @@ int bbf_dm_get_supported_dm(usp_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = usp_dm_exec(&data->bbf_ctx, BBF_SCHEMA);
+		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_SCHEMA);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {

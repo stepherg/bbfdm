@@ -114,7 +114,7 @@ static void send_transfer_complete_event(const char *command, const char *obj_pa
 	strftime(complete_time, sizeof(complete_time), "%Y-%m-%dT%H:%M:%SZ", gmtime(&complete_t));
 
 	if (!get_response_code_status(transfer_url, res_code)) {
-		fault_code = USP_FAULT_GENERAL_FAILURE;
+		fault_code = bbfdm_FAULT_GENERAL_FAILURE;
 		snprintf(fault_string, sizeof(fault_string), "%s operation is failed, fault code (%ld)", transfer_type, res_code);
 	}
 

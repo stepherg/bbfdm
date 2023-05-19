@@ -48,7 +48,7 @@ extern struct list_head loaded_json_files;
 extern struct list_head json_list;
 extern struct list_head json_memhead;
 
-#define USP_SUBPROCESS_DEPTH (2)
+#define bbfdm_SUBPROCESS_DEPTH (2)
 #define BBF_SCHEMA_UPDATE_TIMEOUT (60 * 1000)
 #define BBF_INSTANCES_UPDATE_TIMEOUT (25 * 1000)
 
@@ -56,7 +56,7 @@ extern struct list_head json_memhead;
 
 // Global variables
 static unsigned int g_refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
-static int g_subprocess_level = USP_SUBPROCESS_DEPTH;
+static int g_subprocess_level = bbfdm_SUBPROCESS_DEPTH;
 
 static void *deamon_lib_handle = NULL;
 static json_object *deamon_json_obj = NULL;
@@ -91,7 +91,7 @@ static void usage(char *prog)
 	fprintf(stderr, "\n");
 }
 
-static void usp_cleanup(struct usp_context *u)
+static void bbfdm_cleanup(struct bbfdm_context *u)
 {
 	free_path_list(&u->instances);
 	free_path_list(&u->old_instances);
@@ -110,7 +110,7 @@ static void usp_cleanup(struct usp_context *u)
 	}
 }
 
-static bool is_sync_operate_cmd(usp_data_t *data __attribute__((unused)))
+static bool is_sync_operate_cmd(bbfdm_data_t *data __attribute__((unused)))
 {
 	return false;
 }
@@ -130,7 +130,7 @@ static bool is_subprocess_required(const char *path)
 	return ret;
 }
 
-static void fill_optional_data(usp_data_t *data, struct blob_attr *msg)
+static void fill_optional_data(bbfdm_data_t *data, struct blob_attr *msg)
 {
 	struct blob_attr *attr;
 	size_t rem;
@@ -166,14 +166,14 @@ static void fill_optional_data(usp_data_t *data, struct blob_attr *msg)
 			data->is_raw ? "raw" : "pretty");
 }
 
-static void async_req_free(struct uspd_async_req *r)
+static void async_req_free(struct bbfdm_async_req *r)
 {
 	free(r);
 }
 
 static void async_complete_cb(struct uloop_process *p, __attribute__((unused)) int ret)
 {
-	struct uspd_async_req *r = container_of(p, struct uspd_async_req, process);
+	struct bbfdm_async_req *r = container_of(p, struct bbfdm_async_req, process);
 
 	if (r) {
 		INFO("Async call with pid(%d) completes", r->process.pid);
@@ -188,9 +188,9 @@ static void async_complete_cb(struct uloop_process *p, __attribute__((unused)) i
 
 }
 
-static struct uspd_async_req *async_req_new(void)
+static struct bbfdm_async_req *async_req_new(void)
 {
-	struct uspd_async_req *r = malloc(sizeof(*r));
+	struct bbfdm_async_req *r = malloc(sizeof(*r));
 
 	if (r) {
 		memset(&r->process, 0, sizeof(r->process));
@@ -200,11 +200,11 @@ static struct uspd_async_req *async_req_new(void)
 	return r;
 }
 
-static int uspd_start_deferred(usp_data_t *data, void (*EXEC_CB)(usp_data_t *data, void *d))
+static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t *data, void *d))
 {
-	struct uspd_async_req *r = NULL;
+	struct bbfdm_async_req *r = NULL;
 	pid_t child;
-	struct usp_context *u;
+	struct bbfdm_context *u;
 	void *result = NULL;
 
 	result = mmap(NULL, DEF_IPC_DATA_LEN, PROT_READ| PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
@@ -224,9 +224,9 @@ static int uspd_start_deferred(usp_data_t *data, void (*EXEC_CB)(usp_data_t *dat
 		ERR("fork error");
 		goto err_out;
 	} else if (child == 0) {
-		u = container_of(data->ctx, struct usp_context, ubus_ctx);
+		u = container_of(data->ctx, struct bbfdm_context, ubus_ctx);
 		if (u == NULL) {
-			ERR("Failed to get the usp context");
+			ERR("Failed to get the bbfdm context");
 			exit(EXIT_FAILURE);
 		}
 
@@ -243,14 +243,14 @@ static int uspd_start_deferred(usp_data_t *data, void (*EXEC_CB)(usp_data_t *dat
 		INFO("Calling from subprocess");
 		EXEC_CB(data, result);
 
-		usp_cleanup(u);
+		bbfdm_cleanup(u);
 		closelog();
 		/* write result and exit */
 		exit(EXIT_SUCCESS);
 	}
 
 	// parent
-	INFO("Creating usp(%d) sub process(%d) for path(%s)", getpid(), child, data->bbf_ctx.in_param);
+	INFO("Creating bbfdm(%d) sub process(%d) for path(%s)", getpid(), child, data->bbf_ctx.in_param);
 	r->result = result;
 	r->ctx = data->ctx;
 	r->process.pid = child;
@@ -269,11 +269,11 @@ err_out:
 	return UBUS_STATUS_UNKNOWN_ERROR;
 }
 
-static bool is_object_schema_update_available(struct usp_context *u)
+static bool is_object_schema_update_available(struct bbfdm_context *u)
 {
 	size_t ll, min_len;
 	LIST_HEAD(paths_list);
-	usp_data_t data = {
+	bbfdm_data_t data = {
 			.is_raw = true,
 			.plist = &paths_list,
 			.bbf_ctx.nextlevel = false,
@@ -327,17 +327,17 @@ static const struct blobmsg_policy dm_get_policy[] = {
 	[DM_GET_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE},
 };
 
-static int usp_get_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
+static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
 		    struct ubus_request_data *req, const char *method __attribute__((unused)),
 		    struct blob_attr *msg)
 {
 	struct blob_attr *tb[__DM_GET_MAX];
 	LIST_HEAD(paths_list);
-	usp_data_t data;
+	bbfdm_data_t data;
 	uint8_t maxdepth = 0;
 	bool is_subprocess_needed = false;
 
-	memset(&data, 0, sizeof(usp_data_t));
+	memset(&data, 0, sizeof(bbfdm_data_t));
 
 	if (blobmsg_parse(dm_get_policy, __DM_GET_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
@@ -379,9 +379,9 @@ static int usp_get_handler(struct ubus_context *ctx, struct ubus_object *obj __a
 
 	if (is_subprocess_needed) {
 		INFO("Creating subprocess for get method");
-		uspd_start_deferred(&data, usp_get_value_async);
+		bbfdm_start_deferred(&data, bbfdm_get_value_async);
 	} else {
-		usp_get_value(&data);
+		bbfdm_get_value(&data);
 	}
 
 	free_path_list(&paths_list);
@@ -398,15 +398,15 @@ static const struct blobmsg_policy dm_schema_policy[] = {
 	[DM_SCHEMA_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE},
 };
 
-static int usp_schema_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
+static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
 		    struct ubus_request_data *req, const char *method __attribute__((unused)),
 		    struct blob_attr *msg)
 {
 	struct blob_attr *tb[__DM_SCHEMA_MAX];
 	LIST_HEAD(paths_list);
-	usp_data_t data;
+	bbfdm_data_t data;
 
-	memset(&data, 0, sizeof(usp_data_t));
+	memset(&data, 0, sizeof(bbfdm_data_t));
 
 	if (blobmsg_parse(dm_schema_policy, __DM_SCHEMA_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
@@ -446,7 +446,7 @@ static int usp_schema_handler(struct ubus_context *ctx, struct ubus_object *obj 
 	blob_buf_init(&data.bb, 0);
 
 	if (dm_type == BBFDM_CWMP)
-		usp_get_names(&data);
+		bbfdm_get_names(&data);
 	else
 		bbf_dm_get_supported_dm(&data);
 
@@ -464,15 +464,15 @@ static const struct blobmsg_policy dm_instances_policy[] = {
 	[DM_INSTANCES_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
 };
 
-static int usp_instances_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
+static int bbfdm_instances_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
 		    struct ubus_request_data *req, const char *method __attribute__((unused)),
 		    struct blob_attr *msg)
 {
 	struct blob_attr *tb[__DM_INSTANCES_MAX];
 	LIST_HEAD(paths_list);
-	usp_data_t data;
+	bbfdm_data_t data;
 
-	memset(&data, 0, sizeof(usp_data_t));
+	memset(&data, 0, sizeof(bbfdm_data_t));
 
 	if (blobmsg_parse(dm_instances_policy, __DM_INSTANCES_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
@@ -505,7 +505,7 @@ static int usp_instances_handler(struct ubus_context *ctx, struct ubus_object *o
 	fill_optional_data(&data, tb[DM_INSTANCES_OPTIONAL]);
 
 	blob_buf_init(&data.bb, 0);
-	usp_get_instances(&data);
+	bbfdm_get_instances(&data);
 	ubus_send_reply(ctx, req, data.bb.head);
 
 	blob_buf_free(&data.bb);
@@ -520,18 +520,18 @@ static const struct blobmsg_policy dm_set_policy[] = {
 	[DM_SET_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
 };
 
-int usp_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
+int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	    struct ubus_request_data *req, const char *method,
 	    struct blob_attr *msg)
 {
 	struct blob_attr *tb[__DM_SET_MAX] = {NULL};
 	char path[PATH_MAX] = {'\0'};
-	usp_data_t data;
-	int fault = USP_ERR_OK;
+	bbfdm_data_t data;
+	int fault = bbfdm_ERR_OK;
 	int trans_id = 0;
 	LIST_HEAD(pv_list);
 
-	memset(&data, 0, sizeof(usp_data_t));
+	memset(&data, 0, sizeof(bbfdm_data_t));
 
 	if (blobmsg_parse(dm_set_policy, __DM_SET_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
@@ -555,7 +555,7 @@ int usp_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	fault = fill_pvlist_set(path, tb[DM_SET_VALUE] ? blobmsg_get_string(tb[DM_SET_VALUE]) : NULL, tb[DM_SET_OBJ_PATH], &pv_list);
 	if (fault) {
 		ERR("Fault in fill pvlist set path |%s|", data.bbf_ctx.in_param);
-		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
+		fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
 		goto end;
 	}
 
@@ -567,7 +567,7 @@ int usp_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	// no need to process it further since transaction-id is not valid
 	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
 		WARNING("Transaction not started yet");
-		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
+		fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
 		goto end;
 	}
 
@@ -576,12 +576,12 @@ int usp_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		trans_id = transaction_start(0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
-			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
+			fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
 			goto end;
 		}
 	}
 
-	usp_set_value(&data);
+	bbfdm_set_value(&data);
 
 	if (data.trans_id == 0) {
 		// Internal transaction: need to commit the changes
@@ -603,15 +603,15 @@ static const struct blobmsg_policy dm_operate_policy[__DM_OPERATE_MAX] = {
 	[DM_OPERATE_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
 };
 
-static int usp_operate_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
+static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
 		struct ubus_request_data *req, const char *method __attribute__((unused)),
 		struct blob_attr *msg)
 {
 	struct blob_attr *tb[__DM_OPERATE_MAX] = {NULL};
 	char path[MAX_DM_PATH] = {0};
-	usp_data_t data;
+	bbfdm_data_t data;
 
-	memset(&data, 0, sizeof(usp_data_t));
+	memset(&data, 0, sizeof(bbfdm_data_t));
 
 	if (blobmsg_parse(dm_operate_policy, __DM_OPERATE_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
@@ -636,9 +636,9 @@ static int usp_operate_handler(struct ubus_context *ctx, struct ubus_object *obj
 	INFO("ubus method|%s|, name|%s|, path(%s)", method, obj->name, data.bbf_ctx.in_param);
 
 	if (is_sync_operate_cmd(&data)) {
-		usp_operate_cmd_sync(&data);
+		bbfdm_operate_cmd_sync(&data);
 	} else {
-		uspd_start_deferred(&data, usp_operate_cmd_async);
+		bbfdm_start_deferred(&data, bbfdm_operate_cmd_async);
 	}
 
 	return 0;
@@ -650,17 +650,17 @@ static const struct blobmsg_policy dm_add_policy[] = {
 	[DM_ADD_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
 };
 
-int usp_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
+int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 			struct ubus_request_data *req, const char *method,
 			struct blob_attr *msg)
 {
 	struct blob_attr *tb[__DM_ADD_MAX];
 	char path[PATH_MAX];
-	usp_data_t data;
+	bbfdm_data_t data;
 	int trans_id = 0;
 	int fault = 0;
 
-	memset(&data, 0, sizeof(usp_data_t));
+	memset(&data, 0, sizeof(bbfdm_data_t));
 
 	if (blobmsg_parse(dm_add_policy, __DM_ADD_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
@@ -684,7 +684,7 @@ int usp_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	// no need to process it further since transaction-id is not valid
 	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
 		WARNING("Transaction not started yet");
-		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
+		fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
 		goto end;
 	}
 
@@ -693,7 +693,7 @@ int usp_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		trans_id = transaction_start(0);
 		if (trans_id == 0) {
 			ERR("Failed to get the lock for the transaction");
-			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
+			fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
 			goto end;
 		}
 	}
@@ -718,7 +718,7 @@ int usp_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		fault = fill_pvlist_set(path, NULL, tb[DM_ADD_OBJ_PATH], &pv_list);
 		if (fault) {
 			ERR("Fault in fill pvlist set path |%s|", path);
-			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
+			fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
 
 			if (data.trans_id == 0) {
 				// Internal transaction: need to abort the changes
@@ -731,7 +731,7 @@ int usp_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 		data.plist = &pv_list;
 
-		usp_set_value(&data);
+		bbfdm_set_value(&data);
 
 		free_pv_list(&pv_list);
 	}
@@ -754,16 +754,16 @@ static const struct blobmsg_policy dm_del_policy[] = {
 	[DM_DEL_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
 };
 
-int usp_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
+int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 			struct ubus_request_data *req, const char *method,
 			struct blob_attr *msg)
 {
 	struct blob_attr *tb[__DM_DEL_MAX];
 	LIST_HEAD(paths_list);
-	usp_data_t data;
+	bbfdm_data_t data;
 	int trans_id = 0;
 
-	memset(&data, 0, sizeof(usp_data_t));
+	memset(&data, 0, sizeof(bbfdm_data_t));
 
 	if (blobmsg_parse(dm_del_policy, __DM_DEL_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
@@ -804,7 +804,7 @@ int usp_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	// no need to process it further since transaction-id is not valid
 	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
 		WARNING("Transaction not started yet");
-		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
+		fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
 		goto end;
 	}
 
@@ -813,7 +813,7 @@ int usp_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		trans_id = transaction_start(0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
-			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
+			fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
 			goto end;
 		}
 	}
@@ -848,19 +848,19 @@ static const struct blobmsg_policy transaction_policy[] = {
 	[TRANS_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
 };
 
-static int usp_transaction_handler(struct ubus_context *ctx, struct ubus_object *obj,
+static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_object *obj,
 			    struct ubus_request_data *req, const char *method,
 			    struct blob_attr *msg)
 {
 	struct blob_attr *tb[__TRANS_MAX] = {NULL};
-	usp_data_t data;
+	bbfdm_data_t data;
 
 	bool is_service_restart = true;
 	uint32_t max_timeout = 0;
 	char *trans_cmd = "status";
 	int ret;
 
-	memset(&data, 0, sizeof(usp_data_t));
+	memset(&data, 0, sizeof(bbfdm_data_t));
 
 	if (blobmsg_parse(transaction_policy, __TRANS_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
@@ -926,7 +926,7 @@ static const struct blobmsg_policy dm_notify_event_policy[] = {
 	[BBF_NOTIFY_PRAMS] = { .name = "input", .type = BLOBMSG_TYPE_TABLE },
 };
 
-static int usp_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
+static int bbfdm_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 			    struct ubus_request_data *req __attribute__((unused)), const char *method,
 			    struct blob_attr *msg)
 {
@@ -957,15 +957,15 @@ static int usp_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 }
 
 static struct ubus_method bbf_methods[] = {
-	UBUS_METHOD("get", usp_get_handler, dm_get_policy),
-	UBUS_METHOD("schema", usp_schema_handler, dm_schema_policy),
-	UBUS_METHOD("instances", usp_instances_handler, dm_instances_policy),
-	UBUS_METHOD("set", usp_set_handler, dm_set_policy),
-	UBUS_METHOD("operate", usp_operate_handler, dm_operate_policy),
-	UBUS_METHOD("add", usp_add_handler, dm_add_policy),
-	UBUS_METHOD("del", usp_del_handler, dm_del_policy),
-	UBUS_METHOD("transaction", usp_transaction_handler, transaction_policy),
-	UBUS_METHOD("notify_event", usp_notify_event, dm_notify_event_policy),
+	UBUS_METHOD("get", bbfdm_get_handler, dm_get_policy),
+	UBUS_METHOD("schema", bbfdm_schema_handler, dm_schema_policy),
+	UBUS_METHOD("instances", bbfdm_instances_handler, dm_instances_policy),
+	UBUS_METHOD("set", bbfdm_set_handler, dm_set_policy),
+	UBUS_METHOD("operate", bbfdm_operate_handler, dm_operate_policy),
+	UBUS_METHOD("add", bbfdm_add_handler, dm_add_policy),
+	UBUS_METHOD("del", bbfdm_del_handler, dm_del_policy),
+	UBUS_METHOD("transaction", bbfdm_transaction_handler, transaction_policy),
+	UBUS_METHOD("notify_event", bbfdm_notify_event, dm_notify_event_policy),
 };
 
 static struct ubus_object_type bbf_type = UBUS_OBJECT_TYPE(UBUS_METHOD_NAME, bbf_methods);
@@ -980,12 +980,12 @@ static struct ubus_object bbf_object = {
 static void periodic_schema_updater(struct uloop_timeout *t)
 {
 	bool ret;
-	struct usp_context *u;
+	struct bbfdm_context *u;
 	struct blob_buf bb;
 
-	u = container_of(t, struct usp_context, schema_timer);
+	u = container_of(t, struct bbfdm_context, schema_timer);
 	if (u == NULL) {
-		ERR("Failed to get the usp context");
+		ERR("Failed to get the bbfdm context");
 		return;
 	}
 
@@ -1064,7 +1064,7 @@ static void update_instances_list(struct list_head *inst)
 
 	bbf_init(&bbf_ctx);
 
-	if (0 == usp_dm_exec(&bbf_ctx, BBF_INSTANCES)) {
+	if (0 == bbfdm_dm_exec(&bbf_ctx, BBF_INSTANCES)) {
 		struct dm_parameter *nptr_dp;
 
 		list_for_each_entry(nptr_dp, &bbf_ctx.list_parameter, list) {
@@ -1078,11 +1078,11 @@ static void update_instances_list(struct list_head *inst)
 static void periodic_instance_updater(struct uloop_timeout *t);
 static void instance_fork_done(struct uloop_process *p, int ret)
 {
-	struct uspd_async_req *r = container_of(p, struct uspd_async_req, process);
+	struct bbfdm_async_req *r = container_of(p, struct bbfdm_async_req, process);
 
 	if (r) {
 		INFO("Instance updater(%d) completed, starting a new instance timer", r->process.pid);
-		struct usp_context *u = (struct usp_context *)r->result;
+		struct bbfdm_context *u = (struct bbfdm_context *)r->result;
 
 		u->instance_timer.cb = periodic_instance_updater;
 		uloop_timeout_set(&u->instance_timer, g_refresh_time);
@@ -1116,9 +1116,9 @@ static void instance_compare_publish(struct list_head *new_inst, struct list_hea
 	free_path_list(&inst_list);
 }
 
-static int fork_instance_checker(struct usp_context *u)
+static int fork_instance_checker(struct bbfdm_context *u)
 {
-	struct uspd_async_req *r = NULL;
+	struct bbfdm_async_req *r = NULL;
 	pid_t child;
 
 	r = async_req_new();
@@ -1131,7 +1131,7 @@ static int fork_instance_checker(struct usp_context *u)
 	}
 	child = fork();
 	if (child == 0) {
-		prctl(PR_SET_NAME, (unsigned long) "usp_instance");
+		prctl(PR_SET_NAME, (unsigned long) "bbfdm_instance");
 		// child initialise signal to prevent segfaults
 		signal_init();
 		/* free fd's and memory inherited from parent */
@@ -1144,7 +1144,7 @@ static int fork_instance_checker(struct usp_context *u)
 
 		DEBUG("subprocess instances checker");
 		instance_compare_publish(&u->instances, &u->old_instances);
-		usp_cleanup(u);
+		bbfdm_cleanup(u);
 		closelog();
 		/* write result and exit */
 		exit(EXIT_SUCCESS);
@@ -1167,11 +1167,11 @@ err_out:
 
 static void periodic_instance_updater(struct uloop_timeout *t)
 {
-	struct usp_context *u;
+	struct bbfdm_context *u;
 
-	u = container_of(t, struct usp_context, instance_timer);
+	u = container_of(t, struct bbfdm_context, instance_timer);
 	if (u == NULL) {
-		ERR("Failed to get the usp context");
+		ERR("Failed to get the bbfdm context");
 		return;
 	}
 
@@ -1273,7 +1273,7 @@ static int bbfdm_load_deamon_config(const char *json_path)
 	return err;
 }
 
-static int usp_init(struct usp_context *u)
+static int bbfdm_init(struct bbfdm_context *u)
 {
 	INFO("Registering ubus objects....");
 	return ubus_add_object(&u->ubus_ctx, &bbf_object);
@@ -1281,7 +1281,7 @@ static int usp_init(struct usp_context *u)
 
 int main(int argc, char **argv)
 {
-	struct usp_context usp_ctx;
+	struct bbfdm_context bbfdm_ctx;
 	const char *input_json = DEFAULT_JSON_INPUT;
 	const char *ubus_socket = NULL;
 	int err = 0, ch;
@@ -1313,15 +1313,15 @@ int main(int argc, char **argv)
 
 	openlog("bbfdm", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
-	memset(&usp_ctx, 0, sizeof(struct usp_context));
+	memset(&bbfdm_ctx, 0, sizeof(struct bbfdm_context));
 
-	INIT_LIST_HEAD(&usp_ctx.instances);
-	INIT_LIST_HEAD(&usp_ctx.old_instances);
-	INIT_LIST_HEAD(&usp_ctx.event_handlers);
+	INIT_LIST_HEAD(&bbfdm_ctx.instances);
+	INIT_LIST_HEAD(&bbfdm_ctx.old_instances);
+	INIT_LIST_HEAD(&bbfdm_ctx.event_handlers);
 
 	uloop_init();
 
-	err = ubus_connect_ctx(&usp_ctx.ubus_ctx, ubus_socket);
+	err = ubus_connect_ctx(&bbfdm_ctx.ubus_ctx, ubus_socket);
 	if (err != UBUS_STATUS_OK) {
 		fprintf(stderr, "Failed to connect to ubus\n");
 		return -1;
@@ -1329,31 +1329,31 @@ int main(int argc, char **argv)
 
 	signal_init();
 
-	err = register_events_to_ubus(&usp_ctx.ubus_ctx, &usp_ctx.event_handlers);
+	err = register_events_to_ubus(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);
 	if (err != 0)
 		goto exit;
 
-	ubus_add_uloop(&usp_ctx.ubus_ctx);
+	ubus_add_uloop(&bbfdm_ctx.ubus_ctx);
 
-	err = usp_init(&usp_ctx);
+	err = bbfdm_init(&bbfdm_ctx);
 	if (err != UBUS_STATUS_OK)
 		goto exit;
 
-	usp_ctx.schema_timer.cb = periodic_schema_updater;
-	uloop_timeout_set(&usp_ctx.schema_timer, BBF_SCHEMA_UPDATE_TIMEOUT);
+	bbfdm_ctx.schema_timer.cb = periodic_schema_updater;
+	uloop_timeout_set(&bbfdm_ctx.schema_timer, BBF_SCHEMA_UPDATE_TIMEOUT);
 
 	// initial timer should be bigger to give more space to other applications to initialize
-	usp_ctx.instance_timer.cb = periodic_instance_updater;
-	uloop_timeout_set(&usp_ctx.instance_timer, 3 * g_refresh_time);
+	bbfdm_ctx.instance_timer.cb = periodic_instance_updater;
+	uloop_timeout_set(&bbfdm_ctx.instance_timer, 3 * g_refresh_time);
 
 	INFO("Waiting on uloop....");
 	uloop_run();
 
 exit:
-	free_ubus_event_handler(&usp_ctx.ubus_ctx, &usp_ctx.event_handlers);
-	ubus_shutdown(&usp_ctx.ubus_ctx);
+	free_ubus_event_handler(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);
+	ubus_shutdown(&bbfdm_ctx.ubus_ctx);
 	uloop_done();
-	usp_cleanup(&usp_ctx);
+	bbfdm_cleanup(&bbfdm_ctx);
 	closelog();
 
 	return err;

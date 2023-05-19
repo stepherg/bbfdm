@@ -1,5 +1,5 @@
 /*
- * get_helper.c: Get Fast handler for uspd
+ * get_helper.c: Get Fast handler for bbfdmd
  *
  * Copyright (C) 2019 iopsys Software Solutions AB. All rights reserved.
  *
@@ -167,12 +167,12 @@ void free_path_list(struct list_head *plist)
 	}
 }
 
-int usp_dm_exec(struct dmctx *bbf_ctx, int cmd)
+int bbfdm_dm_exec(struct dmctx *bbf_ctx, int cmd)
 {
 	int fault = 0;
 
 	if (bbf_ctx->in_param == NULL)
-		return USP_FAULT_INTERNAL_ERROR;
+		return bbfdm_FAULT_INTERNAL_ERROR;
 
 	if (sigsetjmp(gs_jump_location, 1) == 0) {
 		gs_jump_called_by_bbf = true;
@@ -180,7 +180,7 @@ int usp_dm_exec(struct dmctx *bbf_ctx, int cmd)
 	} else {
 		ERR("PID [%ld]::Exception on [%d => %s]", getpid(), cmd, bbf_ctx->in_param);
 		print_last_dm_object();
-		fault = USP_FAULT_INTERNAL_ERROR;
+		fault = bbfdm_FAULT_INTERNAL_ERROR;
 	}
 
 	gs_jump_called_by_bbf = false;
@@ -191,7 +191,7 @@ int usp_dm_exec(struct dmctx *bbf_ctx, int cmd)
 	return fault;
 }
 
-void fill_err_code_table(usp_data_t *data, int fault)
+void fill_err_code_table(bbfdm_data_t *data, int fault)
 {
 	void *table = blobmsg_open_table(&data->bb, NULL);
 	blobmsg_add_string(&data->bb, "path", data->bbf_ctx.in_param);
@@ -200,7 +200,7 @@ void fill_err_code_table(usp_data_t *data, int fault)
 	blobmsg_close_table(&data->bb, table);
 }
 
-void fill_err_code_array(usp_data_t *data, int fault)
+void fill_err_code_array(bbfdm_data_t *data, int fault)
 {
 	void *array = blobmsg_open_array(&data->bb, "results");
 	void *table = blobmsg_open_table(&data->bb, NULL);

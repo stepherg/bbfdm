@@ -66,69 +66,69 @@ int bbf_fault_map(unsigned int dm_type, int fault)
 	if (dm_type == BBFDM_USP) {
 		switch(fault) {
 		case FAULT_9000:
-			out_fault = USP_FAULT_MESSAGE_NOT_UNDERSTOOD;
+			out_fault = bbfdm_FAULT_MESSAGE_NOT_UNDERSTOOD;
 			break;
 		case FAULT_9001:
-			out_fault = USP_FAULT_REQUEST_DENIED;
+			out_fault = bbfdm_FAULT_REQUEST_DENIED;
 			break;
 		case FAULT_9002:
-			out_fault = USP_FAULT_INTERNAL_ERROR;
+			out_fault = bbfdm_FAULT_INTERNAL_ERROR;
 			break;
 		case FAULT_9003:
-			out_fault = USP_FAULT_INVALID_ARGUMENT;
+			out_fault = bbfdm_FAULT_INVALID_ARGUMENT;
 			break;
 		case FAULT_9004:
 		case FAULT_9027:
-			out_fault = USP_FAULT_RESOURCES_EXCEEDED;
+			out_fault = bbfdm_FAULT_RESOURCES_EXCEEDED;
 			break;
 		case FAULT_9005:
-			out_fault = USP_FAULT_INVALID_PATH;
+			out_fault = bbfdm_FAULT_INVALID_PATH;
 			break;
 		case FAULT_9006:
-			out_fault = USP_FAULT_INVALID_TYPE;
+			out_fault = bbfdm_FAULT_INVALID_TYPE;
 			break;
 		case FAULT_9007:
-			out_fault = USP_FAULT_INVALID_VALUE;
+			out_fault = bbfdm_FAULT_INVALID_VALUE;
 			break;
 		case FAULT_9008:
-			out_fault = USP_FAULT_PARAM_READ_ONLY;
+			out_fault = bbfdm_FAULT_PARAM_READ_ONLY;
 			break;
 		default:
 			if (fault >= FAULT_9000)
-				out_fault = USP_FAULT_GENERAL_FAILURE;
+				out_fault = bbfdm_FAULT_GENERAL_FAILURE;
 			else
 				out_fault = fault;
 		}
 	} else if (dm_type == BBFDM_CWMP) {
 		switch(fault) {
-		case USP_FAULT_GENERAL_FAILURE:
+		case bbfdm_FAULT_GENERAL_FAILURE:
 			out_fault = FAULT_9002;
 			break;
-		case USP_FAULT_MESSAGE_NOT_UNDERSTOOD:
+		case bbfdm_FAULT_MESSAGE_NOT_UNDERSTOOD:
 			out_fault = FAULT_9000;
 			break;
-		case USP_FAULT_REQUEST_DENIED:
+		case bbfdm_FAULT_REQUEST_DENIED:
 			out_fault = FAULT_9001;
 			break;
-		case USP_FAULT_INTERNAL_ERROR:
+		case bbfdm_FAULT_INTERNAL_ERROR:
 			out_fault = FAULT_9002;
 			break;
-		case USP_FAULT_INVALID_ARGUMENT:
+		case bbfdm_FAULT_INVALID_ARGUMENT:
 			out_fault = FAULT_9003;
 			break;
-		case USP_FAULT_RESOURCES_EXCEEDED:
+		case bbfdm_FAULT_RESOURCES_EXCEEDED:
 			out_fault = FAULT_9004;
 			break;
-		case USP_FAULT_INVALID_TYPE:
+		case bbfdm_FAULT_INVALID_TYPE:
 			out_fault = FAULT_9006;
 			break;
-		case USP_FAULT_INVALID_VALUE:
+		case bbfdm_FAULT_INVALID_VALUE:
 			out_fault = FAULT_9007;
 			break;
-		case USP_FAULT_PARAM_READ_ONLY:
+		case bbfdm_FAULT_PARAM_READ_ONLY:
 			out_fault =  FAULT_9008;
 			break;
-		case USP_FAULT_INVALID_PATH:
+		case bbfdm_FAULT_INVALID_PATH:
 			out_fault = FAULT_9005;
 			break;
 		default:
@@ -146,10 +146,10 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 	int fault = 0;
 
 	if (!ctx || !ctx->dm_entryobj)
-		return bbf_fault_map(ctx->dm_type, USP_FAULT_INVALID_CONFIGURATION);
+		return bbf_fault_map(ctx->dm_type, bbfdm_FAULT_INVALID_CONFIGURATION);
 
 	if (!ctx->in_param)
-		return bbf_fault_map(ctx->dm_type, USP_FAULT_INVALID_PATH);
+		return bbf_fault_map(ctx->dm_type, bbfdm_FAULT_INVALID_PATH);
 
 	load_plugins(ctx);
 

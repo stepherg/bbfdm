@@ -260,45 +260,45 @@ enum {
 	BBF_OPERATE,
 };
 
-enum usp_fault_code_enum {
-	USP_FAULT_GENERAL_FAILURE = 7000, // general failure
-	USP_FAULT_MESSAGE_NOT_UNDERSTOOD = 7001, // message was not understood
-	USP_FAULT_REQUEST_DENIED = 7002, // Cannot or will not process message
-	USP_FAULT_INTERNAL_ERROR = 7003, // Message failed due to an internal error
-	USP_FAULT_INVALID_ARGUMENT = 7004, // invalid values in the request elements
-	USP_FAULT_RESOURCES_EXCEEDED = 7005, // Message failed due to memory or processing limitations
-	USP_FAULT_PERMISSION_DENIED = 7006, // Source endpoint does not have authorisation to use this message
-	USP_FAULT_INVALID_CONFIGURATION = 7007, // invalid or unstable state
+enum bbfdm_fault_code_enum {
+	bbfdm_FAULT_GENERAL_FAILURE = 7000, // general failure
+	bbfdm_FAULT_MESSAGE_NOT_UNDERSTOOD = 7001, // message was not understood
+	bbfdm_FAULT_REQUEST_DENIED = 7002, // Cannot or will not process message
+	bbfdm_FAULT_INTERNAL_ERROR = 7003, // Message failed due to an internal error
+	bbfdm_FAULT_INVALID_ARGUMENT = 7004, // invalid values in the request elements
+	bbfdm_FAULT_RESOURCES_EXCEEDED = 7005, // Message failed due to memory or processing limitations
+	bbfdm_FAULT_PERMISSION_DENIED = 7006, // Source endpoint does not have authorisation to use this message
+	bbfdm_FAULT_INVALID_CONFIGURATION = 7007, // invalid or unstable state
 
 	// ParamError codes
-	USP_FAULT_INVALID_PATH_SYNTAX = 7008, // Requested path was invalid or a reference was invalid
-	USP_FAULT_PARAM_ACTION_FAILED = 7009, // Parameter failed to update for a general reason described in an err_msg element.
-	USP_FAULT_UNSUPPORTED_PARAM = 7010, // Requested Path Name associated with this ParamError did not match any instantiated parameters
-	USP_FAULT_INVALID_TYPE = 7011, // Unable to convert string value to correct data type
-	USP_FAULT_INVALID_VALUE = 7012, // Out of range or invalid enumeration
-	USP_FAULT_PARAM_READ_ONLY = 7013, // Attempted to write to a read only parameter
-	USP_FAULT_VALUE_CONFLICT = 7014, // Requested value would result in an invalid configuration
+	bbfdm_FAULT_INVALID_PATH_SYNTAX = 7008, // Requested path was invalid or a reference was invalid
+	bbfdm_FAULT_PARAM_ACTION_FAILED = 7009, // Parameter failed to update for a general reason described in an err_msg element.
+	bbfdm_FAULT_UNSUPPORTED_PARAM = 7010, // Requested Path Name associated with this ParamError did not match any instantiated parameters
+	bbfdm_FAULT_INVALID_TYPE = 7011, // Unable to convert string value to correct data type
+	bbfdm_FAULT_INVALID_VALUE = 7012, // Out of range or invalid enumeration
+	bbfdm_FAULT_PARAM_READ_ONLY = 7013, // Attempted to write to a read only parameter
+	bbfdm_FAULT_VALUE_CONFLICT = 7014, // Requested value would result in an invalid configuration
 
-	USP_FAULT_CRUD_FAILURE = 7015, // General failure to perform the CRUD operation
-	USP_FAULT_OBJECT_DOES_NOT_EXIST = 7016, // Requested object instance does not exist
-	USP_FAULT_CREATION_FAILURE = 7017, // General failure to create the object
-	USP_FAULT_NOT_A_TABLE = 7018, // The requested pathname was expected to be a multi-instance object, but wasn't
-	USP_FAULT_OBJECT_NOT_CREATABLE = 7019, // Attempted to create an object which was non-creatable (for non-writable multi-instance objects)
-	USP_FAULT_SET_FAILURE = 7020, // General failure to set a parameter
-	USP_FAULT_REQUIRED_PARAM_FAILED = 7021, // The CRUD operation failed because a required parameter failed to update
+	bbfdm_FAULT_CRUD_FAILURE = 7015, // General failure to perform the CRUD operation
+	bbfdm_FAULT_OBJECT_DOES_NOT_EXIST = 7016, // Requested object instance does not exist
+	bbfdm_FAULT_CREATION_FAILURE = 7017, // General failure to create the object
+	bbfdm_FAULT_NOT_A_TABLE = 7018, // The requested pathname was expected to be a multi-instance object, but wasn't
+	bbfdm_FAULT_OBJECT_NOT_CREATABLE = 7019, // Attempted to create an object which was non-creatable (for non-writable multi-instance objects)
+	bbfdm_FAULT_SET_FAILURE = 7020, // General failure to set a parameter
+	bbfdm_FAULT_REQUIRED_PARAM_FAILED = 7021, // The CRUD operation failed because a required parameter failed to update
 
-	USP_FAULT_COMMAND_FAILURE = 7022, // Command failed to operate
-	USP_FAULT_COMMAND_CANCELLED = 7023, // Command failed to complete because it was cancelled
-	USP_FAULT_OBJECT_NOT_DELETABLE = 7024, // Attempted to delete an object which was non-deletable, or object failed to be deleted
-	USP_FAULT_UNIQUE_KEY_CONFLICT = 7025, // unique keys would conflict
-	USP_FAULT_INVALID_PATH = 7026, // Path is not present in the data model schema
+	bbfdm_FAULT_COMMAND_FAILURE = 7022, // Command failed to operate
+	bbfdm_FAULT_COMMAND_CANCELLED = 7023, // Command failed to complete because it was cancelled
+	bbfdm_FAULT_OBJECT_NOT_DELETABLE = 7024, // Attempted to delete an object which was non-deletable, or object failed to be deleted
+	bbfdm_FAULT_UNIQUE_KEY_CONFLICT = 7025, // unique keys would conflict
+	bbfdm_FAULT_INVALID_PATH = 7026, // Path is not present in the data model schema
 
 	// Brokered USP Record Errors
-	USP_FAULT_RECORD_NOT_PARSED = 7100, // Record could not be parsed
-	USP_FAULT_SECURE_SESS_REQUIRED = 7101, // A secure session must be started before pasing any records
-	USP_FAULT_SECURE_SESS_NOT_SUPPORTED = 7102, // Secure session is not supported by this endpoint
-	USP_FAULT_SEG_NOT_SUPPORTED = 7103, // Segmentation and reassembly is not supported by this endpoint
-	USP_FAULT_RECORD_FIELD_INVALID = 7104, // A USP record field was invalid
+	bbfdm_FAULT_RECORD_NOT_PARSED = 7100, // Record could not be parsed
+	bbfdm_FAULT_SECURE_SESS_REQUIRED = 7101, // A secure session must be started before pasing any records
+	bbfdm_FAULT_SECURE_SESS_NOT_SUPPORTED = 7102, // Secure session is not supported by this endpoint
+	bbfdm_FAULT_SEG_NOT_SUPPORTED = 7103, // Segmentation and reassembly is not supported by this endpoint
+	bbfdm_FAULT_RECORD_FIELD_INVALID = 7104, // A USP record field was invalid
 };
 
 enum fault_code_enum {

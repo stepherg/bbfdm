@@ -15,7 +15,7 @@ enum {
 };
 
 int fill_pvlist_set(char *param_name, char *param_value, struct blob_attr *blob_table, struct list_head *pv_list);
-int usp_set_value(usp_data_t *data);
+int bbfdm_set_value(bbfdm_data_t *data);
 
 #endif /* SET_H */
 

@@ -29,9 +29,9 @@
 
 #define GLOB_CHAR "[[+*]+"
 #define GLOB_EXPR "[=><]+"
-#define GLOB_USP_PATH "[+#=><]+"
+#define GLOB_bbfdm_PATH "[+#=><]+"
 
-#define USP_ERR_OK 0
+#define bbfdm_ERR_OK 0
 
 extern DMOBJ *DEAMON_DM_ROOT_OBJ;
 extern DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2];
@@ -49,7 +49,7 @@ void print_warning(const char *format, ...);
 void print_info(const char *format, ...);
 void print_debug(const char *format, ...);
 bool get_boolean_string(char *value);
-bool validate_msglen(usp_data_t *data);
+bool validate_msglen(bbfdm_data_t *data);
 
 int get_dm_type(char *dm_type);
 int get_proto_type(const char *proto);

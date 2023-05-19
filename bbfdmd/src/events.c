@@ -1,5 +1,5 @@
 /*
- * events.c: Handler to generate usp events on ubus
+ * events.c: Handler to generate bbfdm events on ubus
  *
  * Copyright (C) 2023 iopsys Software Solutions AB. All rights reserved.
  *
@@ -157,7 +157,7 @@ static void generate_blob_input(struct blob_buf *b, const char *type, struct lis
 	}
 }
 
-static void uspd_event_handler(struct ubus_context *ctx, struct ubus_event_handler *ev,
+static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_handler *ev,
 				const char *type, struct blob_attr *msg)
 {
 	(void)ev;
@@ -249,7 +249,7 @@ int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list)
 		}
 
 		memset(ev, 0, sizeof(struct ubus_event_handler));
-		ev->cb = uspd_event_handler;
+		ev->cb = bbfdm_event_handler;
 
 		if (0 != ubus_register_event_handler(ctx, ev, ev_map_list[i].event)) {
 			ERR("Failed to register: %s", ev_map_list[i].event);
@@ -282,7 +282,7 @@ bool is_registered_event(char *name)
 
 	bbf_init(&bbf_ctx);
 
-	if (0 == usp_dm_exec(&bbf_ctx, BBF_SCHEMA)) {
+	if (0 == bbfdm_dm_exec(&bbf_ctx, BBF_SCHEMA)) {
 		struct dm_parameter *param;
 
 		list_for_each_entry(param, &bbf_ctx.list_parameter, list) {

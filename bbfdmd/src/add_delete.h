@@ -17,7 +17,7 @@ enum {
 	__DM_DEL_MAX
 };
 
-int create_add_response(usp_data_t *data);
-int create_del_response(usp_data_t *data);
+int create_add_response(bbfdm_data_t *data);
+int create_del_response(bbfdm_data_t *data);
 
 #endif /* ADD_DEL_H */
