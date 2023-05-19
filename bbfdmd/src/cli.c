@@ -96,7 +96,7 @@ static int bbfdm_ubus_invoke(const char *obj, const char *method, struct blob_at
 	}
 
 	if (!ubus_lookup_id(ctx, obj, &id))
-		rc = ubus_invoke(ctx, id, method, msg, bbfdm_ubus_callback, callback_arg, 20000);
+		rc = ubus_invoke(ctx, id, method, msg, bbfdm_ubus_callback, callback_arg, 30000);
 	else
 		rc = -1;
 
