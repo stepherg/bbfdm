@@ -27,11 +27,15 @@
 #define DM_VALUE_SEP ","
 #define DELIM '.'
 
+#ifdef BBFDM_MAX_MSG_LEN
+  #define DEF_IPC_DATA_LEN (BBFDM_MAX_MSG_LEN - 128) // Configured Len - 128 bytes
+#else
+  #define DEF_IPC_DATA_LEN (10 * 1024 * 1024 - 128) // 10M - 128 bytes
+#endif
+
 #define GLOB_CHAR "[[+*]+"
 #define GLOB_EXPR "[=><]+"
 #define GLOB_bbfdm_PATH "[+#=><]+"
-
-#define bbfdm_ERR_OK 0
 
 extern DMOBJ *DEAMON_DM_ROOT_OBJ;
 extern DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2];

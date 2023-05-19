@@ -25,7 +25,6 @@
 #include "operate.h"
 #include "get_helper.h"
 #include "pretty_print.h"
-#include "ipc.h"
 
 #include <libubus.h>
 
@@ -36,7 +35,7 @@ static int bbfdm_dm_operate(bbfdm_data_t *data)
 
 	bbf_init(&data->bbf_ctx);
 
-	ret = bbfdm_dm_exec(&data->bbf_ctx, BBF_OPERATE);
+	ret = bbf_entry_method(&data->bbf_ctx, BBF_OPERATE);
 	// This switch should be removed in the future and will be treated internally
 	switch (ret) {
 	case CMD_NOT_FOUND:
@@ -49,7 +48,7 @@ static int bbfdm_dm_operate(bbfdm_data_t *data)
 		fault = bbfdm_FAULT_COMMAND_FAILURE;
 		break;
 	case CMD_SUCCESS:
-		fault = bbfdm_ERR_OK;
+		fault = 0;
 		DEBUG("command executed successfully");
 		break;
 	default:
@@ -99,12 +98,12 @@ static int bbfdm_dm_operate(bbfdm_data_t *data)
 
 	bbf_cleanup(&data->bbf_ctx);
 
-	if (fault != bbfdm_ERR_OK) {
+	if (fault != 0) {
 		WARNING("Fault(%d) path(%s) input(%s)", fault, data->bbf_ctx.in_param, data->bbf_ctx.in_value);
 		return fault;
 	}
 
-	return bbfdm_ERR_OK;
+	return 0;
 }
 
 static void bbfdm_operate_cmd(bbfdm_data_t *data)

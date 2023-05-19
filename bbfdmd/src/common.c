@@ -22,7 +22,6 @@
  */
 
 #include "common.h"
-#include "ipc.h"
 #include "get_helper.h"
 
 #define DEFAULT_LOG_LEVEL (2)

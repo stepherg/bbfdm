@@ -40,22 +40,4 @@ int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
 void bbf_entry_restart_services(struct blob_buf *bb, bool restart_services);
 void bbf_entry_revert_changes(struct blob_buf *bb);
 
-
-/**
- * @brief bbf_debug_browse_path
- *
- * Debug API to get the last datamodel access object by datamodel browse
- * function.
- *
- * @param buff Memory address to store the last access object, ownership
- *  of the address belongs to caller.
- * @param len maximum size of buffer.
- *
- * @return 0, on success and -1, in case of error.
- *
- * @note This is debug API, mostly be useful in debugging in last datamodel
- * object illegal access.
- */
-int bbf_debug_browse_path(char *buff, size_t len);
-
 #endif //__DMENTRY_H__

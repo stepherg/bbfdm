@@ -18,7 +18,6 @@ bbf_ctx_clean
 bbf_ctx_clean_sub
 bbf_entry_restart_services
 bbf_entry_revert_changes
-bbf_debug_browse_path
 ```
 
 ## Methods
@@ -153,20 +152,4 @@ input
 	
 return
 	None
-```
-
-### bbf_debug_browse_path
-
-This method returns the last accessed path in the data model
-
-``` 
-int bbf_debug_browse_path(char *buff, size_t len)
-input 
-	char *buff
-		pointer to the buffer in which the path will be returned
-	size_t len
-		length of the buffer
-return
-	int 
-		returns 0 on success.
 ```

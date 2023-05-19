@@ -24,14 +24,13 @@
 #include "get.h"
 #include "get_helper.h"
 #include "pretty_print.h"
-#include "ipc.h"
 #include "libbbfdm-api/dmentry.h"
 
 #include <libubus.h>
 
 void bbfdm_get_value_async(bbfdm_data_t *data, void *output)
 {
-	int fault = bbfdm_ERR_OK;
+	int fault = 0;
 	struct pathNode *pn;
 	void *array = NULL;
 
@@ -46,7 +45,7 @@ void bbfdm_get_value_async(bbfdm_data_t *data, void *output)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_GET_VALUE);
+		fault = bbf_entry_method(&data->bbf_ctx, BBF_GET_VALUE);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -90,7 +89,7 @@ void bbfdm_get_value_async(bbfdm_data_t *data, void *output)
 
 void bbfdm_get_value(bbfdm_data_t *data)
 {
-	int fault = bbfdm_ERR_OK;
+	int fault = 0;
 	struct pathNode *pn;
 	void *array = NULL;
 
@@ -107,7 +106,7 @@ void bbfdm_get_value(bbfdm_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_GET_VALUE);
+		fault = bbf_entry_method(&data->bbf_ctx, BBF_GET_VALUE);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -152,7 +151,7 @@ void bbfdm_get_value(bbfdm_data_t *data)
 
 void bbfdm_get_names(bbfdm_data_t *data)
 {
-	int fault = bbfdm_ERR_OK;
+	int fault = 0;
 	struct pathNode *pn;
 
 	bbf_init(&data->bbf_ctx);
@@ -164,7 +163,7 @@ void bbfdm_get_names(bbfdm_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_GET_NAME);
+		fault = bbf_entry_method(&data->bbf_ctx, BBF_GET_NAME);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -194,7 +193,7 @@ void bbfdm_get_names(bbfdm_data_t *data)
 
 void bbfdm_get_instances(bbfdm_data_t *data)
 {
-	int fault = bbfdm_ERR_OK;
+	int fault = 0;
 	struct pathNode *pn;
 
 	bbf_init(&data->bbf_ctx);
@@ -206,7 +205,7 @@ void bbfdm_get_instances(bbfdm_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_INSTANCES);
+		fault = bbf_entry_method(&data->bbf_ctx, BBF_INSTANCES);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -324,7 +323,7 @@ int bbf_dm_get_supported_dm(bbfdm_data_t *data)
 {
 	struct dm_parameter *param;
 	struct pathNode *pn;
-	int fault = bbfdm_ERR_OK;
+	int fault = 0;
 
 	bbf_init(&data->bbf_ctx);
 
@@ -335,7 +334,7 @@ int bbf_dm_get_supported_dm(bbfdm_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_SCHEMA);
+		fault = bbf_entry_method(&data->bbf_ctx, BBF_SCHEMA);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {

@@ -317,14 +317,3 @@ void bbf_entry_revert_changes(struct blob_buf *bb)
 
 	free_all_list_package_change(&head_package_change);
 }
-
-int bbf_debug_browse_path(char *buff, size_t len)
-{
-	if (!buff)
-		return -1;
-
-	// initialise with default value
-	buff[0] = '\0';
-
-	return dm_browse_last_access_path(buff, len);
-}

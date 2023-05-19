@@ -45,7 +45,6 @@ int dm_entry_set_value(struct dmctx *dmctx);
 int dm_entry_operate(struct dmctx *dmctx);
 int dm_entry_get_linker(struct dmctx *dmctx);
 int dm_entry_get_linker_value(struct dmctx *dmctx);
-int dm_browse_last_access_path(char *path, size_t len);
 int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
 
 char *update_instance_alias(int action, char **last_inst, char **max_inst, void *argv[]);

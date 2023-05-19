@@ -30,7 +30,7 @@ int bbfdm_set_value(bbfdm_data_t *data)
 {
 	struct pvNode *pv = NULL;
 	void *array = NULL;
-	int fault = bbfdm_ERR_OK;
+	int fault = 0;
 
 	array = blobmsg_open_array(&data->bb, "results");
 
@@ -38,7 +38,7 @@ int bbfdm_set_value(bbfdm_data_t *data)
 		data->bbf_ctx.in_param = pv->param;
 		data->bbf_ctx.in_value = pv->val;
 
-		fault = bbfdm_dm_exec(&data->bbf_ctx, BBF_SET_VALUE);
+		fault = bbf_entry_method(&data->bbf_ctx, BBF_SET_VALUE);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -75,7 +75,7 @@ int fill_pvlist_set(char *param_name, char *param_value, struct blob_attr *blob_
 blob__table:
 
 	if (!blob_table)
-		return bbfdm_ERR_OK;
+		return 0;
 
 	size_t tlen = (size_t)blobmsg_data_len(blob_table);
 
@@ -107,5 +107,5 @@ blob__table:
 		add_pv_list(path, value, NULL, pv_list);
 	}
 
-	return bbfdm_ERR_OK;
+	return 0;
 }

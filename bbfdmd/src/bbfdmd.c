@@ -28,6 +28,7 @@
 #include <libubox/uloop.h>
 #include <libubus.h>
 #include <sys/prctl.h>
+#include <sys/mman.h>
 
 #include "bbfdmd.h"
 #include "set.h"
@@ -35,7 +36,6 @@
 #include "get_helper.h"
 #include "operate.h"
 #include "add_delete.h"
-#include "ipc.h"
 #include "events.h"
 #include "pretty_print.h"
 #include "get_helper.h"
@@ -63,21 +63,6 @@ static json_object *deamon_json_obj = NULL;
 
 char UBUS_METHOD_NAME[32] = "bbfdm";
 bool enable_plugins = true;
-
-static void sig_handler(int sig)
-{
-	if (sig == SIGSEGV) {
-		handle_pending_signal(sig);
-	} else if (sig == SIGUSR1) {
-		print_last_dm_object();
-	}
-}
-
-static void signal_init(void)
-{
-	signal(SIGSEGV, sig_handler);
-	signal(SIGUSR1, sig_handler);
-}
 
 static void usage(char *prog)
 {
@@ -230,8 +215,6 @@ static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t
 			exit(EXIT_FAILURE);
 		}
 
-		// child initialise signal to prevent segfaults
-		signal_init();
 		/* free fd's and memory inherited from parent */
 		ubus_shutdown(data->ctx);
 		uloop_done();
@@ -527,7 +510,7 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	struct blob_attr *tb[__DM_SET_MAX] = {NULL};
 	char path[PATH_MAX] = {'\0'};
 	bbfdm_data_t data;
-	int fault = bbfdm_ERR_OK;
+	int fault = 0;
 	int trans_id = 0;
 	LIST_HEAD(pv_list);
 
@@ -1064,7 +1047,7 @@ static void update_instances_list(struct list_head *inst)
 
 	bbf_init(&bbf_ctx);
 
-	if (0 == bbfdm_dm_exec(&bbf_ctx, BBF_INSTANCES)) {
+	if (0 == bbf_entry_method(&bbf_ctx, BBF_INSTANCES)) {
 		struct dm_parameter *nptr_dp;
 
 		list_for_each_entry(nptr_dp, &bbf_ctx.list_parameter, list) {
@@ -1132,8 +1115,6 @@ static int fork_instance_checker(struct bbfdm_context *u)
 	child = fork();
 	if (child == 0) {
 		prctl(PR_SET_NAME, (unsigned long) "bbfdm_instance");
-		// child initialise signal to prevent segfaults
-		signal_init();
 		/* free fd's and memory inherited from parent */
 		ubus_shutdown(&u->ubus_ctx);
 		uloop_done();
@@ -1326,8 +1307,6 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Failed to connect to ubus\n");
 		return -1;
 	}
-
-	signal_init();
 
 	err = register_events_to_ubus(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);
 	if (err != 0)

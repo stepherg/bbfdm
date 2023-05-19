@@ -47,27 +47,6 @@ static struct {
 	int timeout_ms;
 } g_current_trans = {.trans_id=0, .timeout_ms=10000};
 
-static jmp_buf gs_jump_location;
-static bool gs_jump_called_by_bbf = false;
-
-void print_last_dm_object(void)
-{
-	char buff[MAX_DM_PATH];
-
-	bbf_debug_browse_path(buff, MAX_DM_PATH);
-	ERR("# PID[%ld] Last DM path [%s] #", getpid(), buff);
-}
-
-void handle_pending_signal(int sig)
-{
-	if (gs_jump_called_by_bbf) {
-		siglongjmp(gs_jump_location, 1);
-	}
-
-	ERR("Exception [%d] not cause by bbf dm, exit with error", sig);
-	exit(1);
-}
-
 void bb_add_string(struct blob_buf *bb, const char *name, const char *value)
 {
 	blobmsg_add_string(bb, name, value ? value : "");
@@ -165,30 +144,6 @@ void free_path_list(struct list_head *plist)
 		list_del(&iter->list);
 		free(iter);
 	}
-}
-
-int bbfdm_dm_exec(struct dmctx *bbf_ctx, int cmd)
-{
-	int fault = 0;
-
-	if (bbf_ctx->in_param == NULL)
-		return bbfdm_FAULT_INTERNAL_ERROR;
-
-	if (sigsetjmp(gs_jump_location, 1) == 0) {
-		gs_jump_called_by_bbf = true;
-		fault = bbf_entry_method(bbf_ctx, cmd);
-	} else {
-		ERR("PID [%ld]::Exception on [%d => %s]", getpid(), cmd, bbf_ctx->in_param);
-		print_last_dm_object();
-		fault = bbfdm_FAULT_INTERNAL_ERROR;
-	}
-
-	gs_jump_called_by_bbf = false;
-
-	if (fault)
-		WARNING("Fault [%d => %d => %s]", fault, cmd, bbf_ctx->in_param);
-
-	return fault;
 }
 
 void fill_err_code_table(bbfdm_data_t *data, int fault)

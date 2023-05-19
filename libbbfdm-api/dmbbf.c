@@ -19,8 +19,6 @@
 
 #define MAX_DM_PATH (1024)
 
-static char dm_browse_path[MAX_DM_PATH];
-
 static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance);
 
 char *DMT_TYPE[] = {
@@ -378,7 +376,6 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 				continue;
 		}
 
-		snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, leaf->parameter);
 		err = dmctx->method_param(dmctx, parent_node, leaf, data, instance);
 		if (dmctx->stop)
 			return err;
@@ -401,7 +398,6 @@ static int dm_browse_leaf(struct dmctx *dmctx, DMNODE *parent_node, DMLEAF *leaf
 									continue;
 							}
 
-							snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_node->current_object, jleaf->parameter);
 							err = dmctx->method_param(dmctx, parent_node, jleaf, data, instance);
 							if (dmctx->stop)
 								return err;
@@ -460,7 +456,6 @@ static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *ent
 	else
 		dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
 
-	snprintf(dm_browse_path, MAX_DM_PATH, "%s", node.current_object);
 	if (dmctx->checkobj) {
 		*err = dmctx->checkobj(dmctx, &node, entryobj->permission, entryobj->addobj, entryobj->delobj, entryobj->get_linker, data, instance);
 		if (*err)
@@ -504,7 +499,6 @@ static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, 
 	int err = 0;
 
 	for (; (entryobj && entryobj->obj); entryobj++) {
-		snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_obj, entryobj->obj);
 		dm_browse_entry(dmctx, parent_node, entryobj, data, instance, parent_obj, &err);
 		if (dmctx->stop)
 			return err;
@@ -518,7 +512,6 @@ static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, 
 					for (int j = 0; next_dyn_array->nextobj[j]; j++) {
 						DMOBJ *jentryobj = next_dyn_array->nextobj[j];
 						for (; (jentryobj && jentryobj->obj); jentryobj++) {
-							snprintf(dm_browse_path, MAX_DM_PATH, "%s%s", parent_obj, jentryobj->obj);
 							if (i == INDX_SERVICE_MOUNT)
 								dm_browse_service(dmctx, parent_node, jentryobj, data, instance, parent_obj, &err);
 							else
@@ -1356,6 +1349,8 @@ static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
 
 	json_object_put(in_args);
 
+	dmctx->stop = 1;
+
 	if (!res)
 		return FAULT_9005;
 
@@ -2172,10 +2167,4 @@ int dm_entry_operate(struct dmctx *dmctx)
 	err = dm_browse(dmctx, &node, root, NULL, NULL);
 
 	return (dmctx->stop) ? err : CMD_NOT_FOUND;
-}
-
-int dm_browse_last_access_path(char *path, size_t len)
-{
-	snprintf(path, len, "%s", dm_browse_path);
-	return 0;
 }

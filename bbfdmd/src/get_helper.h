@@ -4,6 +4,7 @@
 #include "bbfdmd.h"
 #include "common.h"
 #include "libbbfdm-api/dmbbf.h"
+#include "libbbfdm-api/dmentry.h"
 
 #include <libubus.h>
 
@@ -19,17 +20,12 @@ struct pathNode {
 	char path[MAX_DM_PATH];
 };
 
-void handle_pending_signal(int sig);
-void print_last_dm_object(void);
-
 void bbf_init(struct dmctx *dm_ctx);
 void bbf_cleanup(struct dmctx *dm_ctx);
 void bbf_sub_init(struct dmctx *dm_ctx);
 void bbf_sub_cleanup(struct dmctx *dm_ctx);
 
 bool present_in_path_list(struct list_head *plist, char *entry);
-
-int bbfdm_dm_exec(struct dmctx *bbf_ctx, int cmd);
 
 void add_pv_list(char *para, char *val, char *type, struct list_head *pv_list);
 void free_pv_list(struct list_head *pv_list);

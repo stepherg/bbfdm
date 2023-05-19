@@ -282,7 +282,7 @@ bool is_registered_event(char *name)
 
 	bbf_init(&bbf_ctx);
 
-	if (0 == bbfdm_dm_exec(&bbf_ctx, BBF_SCHEMA)) {
+	if (0 == bbf_entry_method(&bbf_ctx, BBF_SCHEMA)) {
 		struct dm_parameter *param;
 
 		list_for_each_entry(param, &bbf_ctx.list_parameter, list) {
