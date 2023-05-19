@@ -30,38 +30,17 @@
 
 static int bbfdm_dm_operate(bbfdm_data_t *data)
 {
-	int fault = 0, ret = 0;
+	int fault = 0;
 	void *table, *array;
 
 	bbf_init(&data->bbf_ctx);
-
-	ret = bbf_entry_method(&data->bbf_ctx, BBF_OPERATE);
-	// This switch should be removed in the future and will be treated internally
-	switch (ret) {
-	case CMD_NOT_FOUND:
-		fault = bbfdm_FAULT_INVALID_PATH;
-		break;
-	case CMD_INVALID_ARGUMENTS:
-		fault = bbfdm_FAULT_INVALID_ARGUMENT;
-		break;
-	case CMD_FAIL:
-		fault = bbfdm_FAULT_COMMAND_FAILURE;
-		break;
-	case CMD_SUCCESS:
-		fault = 0;
-		DEBUG("command executed successfully");
-		break;
-	default:
-		WARNING("Case(%d) not defined", fault);
-		fault = bbfdm_FAULT_INVALID_PATH;
-		break;
-	}
 
 	void *global_table = blobmsg_open_table(&data->bb, NULL);
 	blobmsg_add_string(&data->bb, "path", data->bbf_ctx.in_param);
 	blobmsg_add_string(&data->bb, "data", data->bbf_ctx.linker);
 
-	if (ret == CMD_SUCCESS) {
+	fault = bbf_entry_method(&data->bbf_ctx, BBF_OPERATE);
+	if (fault == 0) {
 		struct dm_parameter *n;
 
 		if (data->is_raw) {
@@ -98,12 +77,7 @@ static int bbfdm_dm_operate(bbfdm_data_t *data)
 
 	bbf_cleanup(&data->bbf_ctx);
 
-	if (fault != 0) {
-		WARNING("Fault(%d) path(%s) input(%s)", fault, data->bbf_ctx.in_param, data->bbf_ctx.in_value);
-		return fault;
-	}
-
-	return 0;
+	return fault;
 }
 
 static void bbfdm_operate_cmd(bbfdm_data_t *data)

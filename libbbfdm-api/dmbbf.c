@@ -1341,11 +1341,12 @@ static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
 
 	dmubus_call(ubus_name, "operate",
 			UBUS_ARGS{
-						{"path", dmctx->in_param, String},
+						{"command", dmctx->in_param, String},
 						{"command_key", dmctx->linker, String},
+						{"input", dmctx->in_value ? dmctx->in_value : "{}", Table},
 						{"optional", json_object_to_json_string(in_args), Table}
 			},
-			3, &res);
+			4, &res);
 
 	json_object_put(in_args);
 
@@ -1367,7 +1368,20 @@ static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
 		if (DM_STRLEN(fault))
 			return DM_STRTOUL(fault);
 
-		//TODO
+		json_object *output_array = dmjson_get_obj(res_obj, 1, "output");
+		if (output_array) {
+			size_t out_nbre = json_object_array_length(output_array);
+
+			for (size_t j = 0; j < out_nbre; j++) {
+				json_object *out_obj = json_object_array_get_idx(output_array, j);
+
+				char *path = dmjson_get_value(out_obj, 1, "path");
+				char *data = dmjson_get_value(out_obj, 1, "data");
+				char *type = dmjson_get_value(out_obj, 1, "type");
+
+				add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), NULL);
+			}
+		}
 	}
 
 	return 0;
@@ -2120,7 +2134,7 @@ int dm_entry_get_linker_value(struct dmctx *dmctx)
  * **************/
 static int mobj_operate(DMOBJECT_ARGS)
 {
-	return CMD_NOT_FOUND;
+	return bbfdm_FAULT_INVALID_PATH;
 }
 
 static int mparam_operate(DMPARAM_ARGS)
@@ -2132,12 +2146,12 @@ static int mparam_operate(DMPARAM_ARGS)
 
 		snprintf(full_param, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
 		if (DM_STRCMP(full_param, dmctx->in_param) != 0)
-			return CMD_NOT_FOUND;
+			return bbfdm_FAULT_INVALID_PATH;
 
 		dmctx->stop = 1;
 
 		if (!leaf->setvalue)
-			return CMD_FAIL;
+			return bbfdm_FAULT_COMMAND_FAILURE;
 
 		json_object *j_input = (dmctx->in_value) ? json_tokener_parse(dmctx->in_value) : NULL;
 		int fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, VALUESET);
@@ -2154,7 +2168,7 @@ int dm_entry_operate(struct dmctx *dmctx)
 	int err = 0;
 
 	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0' || (*(dmctx->in_param + DM_STRLEN(dmctx->in_param) - 1) != ')'))
-		return CMD_NOT_FOUND;
+		return bbfdm_FAULT_INVALID_PATH;
 
 	dmctx->iscommand = 1;
 	dmctx->inparam_isparam = 1;
@@ -2166,5 +2180,5 @@ int dm_entry_operate(struct dmctx *dmctx)
 
 	err = dm_browse(dmctx, &node, root, NULL, NULL);
 
-	return (dmctx->stop) ? err : CMD_NOT_FOUND;
+	return (dmctx->stop) ? err : bbfdm_FAULT_INVALID_PATH;
 }

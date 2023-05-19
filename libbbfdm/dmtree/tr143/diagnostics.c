@@ -1705,7 +1705,7 @@ static int operate_IPDiagnostics_IPPing(char *refparam, struct dmctx *ctx, void 
 
 	char *ipping_host = dmjson_get_value((json_object *)value, 1, "Host");
 	if (ipping_host[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *ipping_interface = get_diagnostics_interface_option(ctx, ip_interface);
 	char *ipping_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
@@ -1729,7 +1729,7 @@ static int operate_IPDiagnostics_IPPing(char *refparam, struct dmctx *ctx, void 
 			8, &res);
 
 	if (res == NULL)
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 
 	char *ipping_status = dmjson_get_value(res, 1, "Status");
 	char *ipping_ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
@@ -1756,7 +1756,7 @@ static int operate_IPDiagnostics_IPPing(char *refparam, struct dmctx *ctx, void 
 	if (res != NULL)
 		json_object_put(res);
 
-	return CMD_SUCCESS;
+	return 0;
 }
 
 static operation_args ip_diagnostics_trace_route_args = {
@@ -1803,7 +1803,7 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 
 	char *host = dmjson_get_value((json_object *)value, 1, "Host");
 	if (host[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *interface = get_diagnostics_interface_option(ctx, ip_interface);
@@ -1832,13 +1832,13 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 		fgets(output, sizeof(output) , pp);
 		pclose(pp);
 	} else {
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 	}
 
 	json_object *res = (DM_STRLEN(output)) ? json_tokener_parse(output) : NULL;
 
 	if (res == NULL)
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 
 	char *status = dmjson_get_value(res, 1, "Status");
 	char *ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
@@ -1868,7 +1868,7 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 	if (res != NULL)
 		json_object_put(res);
 
-	return CMD_SUCCESS;
+	return 0;
 }
 
 static operation_args ip_diagnostics_download_args = {
@@ -1931,12 +1931,12 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 	char *download_url = dmjson_get_value((json_object *)value, 1, "DownloadURL");
 
 	if (download_url[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	if (strncmp(download_url, HTTP_URI, strlen(HTTP_URI)) != 0 &&
 		strncmp(download_url, FTP_URI, strlen(FTP_URI)) != 0 &&
 		strchr(download_url,'@') != NULL)
-		return CMD_INVALID_ARGUMENTS;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *download_interface = get_diagnostics_interface_option(ctx, ip_interface);
@@ -1963,13 +1963,13 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 		fgets(output, sizeof(output) , pp);
 		pclose(pp);
 	} else {
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 	}
 
 	json_object *res = (DM_STRLEN(output)) ? json_tokener_parse(output) : NULL;
 
 	if (res == NULL)
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 
 	char *status = dmjson_get_value(res, 1, "Status");
 	char *ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
@@ -2001,7 +2001,7 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 	if (res != NULL)
 		json_object_put(res);
 
-	return CMD_SUCCESS;
+	return 0;
 }
 
 static operation_args ip_diagnostics_upload_args = {
@@ -2065,16 +2065,16 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 	char *upload_url = dmjson_get_value((json_object *)value, 1, "UploadURL");
 
 	if (upload_url[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	if (strncmp(upload_url, HTTP_URI, strlen(HTTP_URI)) != 0 &&
 		strncmp(upload_url, FTP_URI, strlen(FTP_URI)) != 0 &&
 		strchr(upload_url,'@') != NULL)
-		return CMD_INVALID_ARGUMENTS;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *upload_test_file_length = dmjson_get_value((json_object *)value, 1, "TestFileLength");
 	if (upload_test_file_length[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *upload_interface = get_diagnostics_interface_option(ctx, ip_interface);
@@ -2102,13 +2102,13 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 		fgets(output, sizeof(output) , pp);
 		pclose(pp);
 	} else {
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 	}
 
 	json_object *res = (DM_STRLEN(output)) ? json_tokener_parse(output) : NULL;
 
 	if (res == NULL)
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 
 	char *upload_status = dmjson_get_value(res, 1, "Status");
 	char *upload_ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
@@ -2140,7 +2140,7 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 	if (res != NULL)
 		json_object_put(res);
 
-	return CMD_SUCCESS;
+	return 0;
 }
 
 static operation_args ip_diagnostics_udpecho_args = {
@@ -2189,7 +2189,7 @@ static int operate_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx
 
 	char *udpecho_host = dmjson_get_value((json_object *)value, 1, "Host");
 	if (udpecho_host[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *udpecho_port = dmjson_get_value((json_object *)value, 1, "Port");
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
@@ -2218,7 +2218,7 @@ static int operate_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx
 			10, &res);
 
 	if (res == NULL)
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 
 	char *status = dmjson_get_value(res, 1, "Status");
 	char *ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
@@ -2239,7 +2239,7 @@ static int operate_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx
 	if (res != NULL)
 		json_object_put(res);
 
-	return CMD_SUCCESS;
+	return 0;
 }
 
 static operation_args ip_diagnostics_server_selection_args = {
@@ -2275,7 +2275,7 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 
 	char *hostlist = dmjson_get_value((json_object *)value, 1, "HostList");
 	if (hostlist[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *port = dmjson_get_value((json_object *)value, 1, "Port");
 	char *protocol_used = dmjson_get_value((json_object *)value, 1, "Protocol");
@@ -2300,7 +2300,7 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 			8, &res);
 
 	if (res == NULL)
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 
 	char *status = dmjson_get_value(res, 1, "Status");
 	char *fasthost = dmjson_get_value(res, 1, "FastestHost");
@@ -2319,7 +2319,7 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 	if (res != NULL)
 		json_object_put(res);
 
-	return CMD_SUCCESS;
+	return 0;
 }
 #endif
 

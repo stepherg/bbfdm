@@ -1968,7 +1968,7 @@ static int operate_WiFiAccessPointWPS_InitiateWPSPBC(char *refparam, struct dmct
 	int ubus_ret = 0;
 
 	if (ifname == NULL)
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 
 	snprintf(object, sizeof(object), "hostapd.%s", ifname);
 	ubus_ret = dmubus_call_set(object, "wps_start", UBUS_ARGS{0}, 0);
@@ -1976,7 +1976,7 @@ static int operate_WiFiAccessPointWPS_InitiateWPSPBC(char *refparam, struct dmct
 		status = "Error_Not_Ready";
 
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
-	return CMD_SUCCESS;
+	return 0;
 }
 
 /*#Device.WiFi.AccessPoint.{i}.Accounting.ServerIPAddr!UCI:wireless/wifi-iface,@i-1/acct_server*/
@@ -3267,7 +3267,7 @@ static int get_access_point_total_associations(char *refparam, struct dmctx *ctx
  *************************************************************/
 static int operate_WiFi_Reset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return !dmcmd_no_wait("/sbin/wifi", 1, "reload") ? CMD_SUCCESS : CMD_FAIL;
+	return !dmcmd_no_wait("/sbin/wifi", 1, "reload") ? 0 : bbfdm_FAULT_COMMAND_FAILURE;
 }
 
 static operation_args neighboring_wifi_diagnostic_args = {
@@ -3390,7 +3390,7 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 		}
 	}
 
-	return CMD_SUCCESS;
+	return 0;
 }
 
 static int operate_WiFiAccessPointSecurity_Reset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -3399,7 +3399,7 @@ static int operate_WiFiAccessPointSecurity_Reset(char *refparam, struct dmctx *c
 	dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "key", get_default_wpa_key());
 	dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "wps_pushbutton", "1");
 
-	return CMD_SUCCESS;
+	return 0;
 }
 
 /**********************************************************************************************************************************

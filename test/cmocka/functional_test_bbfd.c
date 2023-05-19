@@ -1097,7 +1097,7 @@ static void test_api_bbfdm_valid_standard_operate(void **state)
 	ctx->in_value = "{\"Host\":\"iopsys.eu\",\"NumberOfRepetitions\":\"1\",\"Timeout\":\"5000\",\"DataBlockSize\":\"64\"}";
 
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
-	assert_int_equal(fault, CMD_SUCCESS);
+	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 		if (DM_STRCMP(n->name, "Status") == 0) {
@@ -1133,7 +1133,7 @@ static void test_api_bbfdm_valid_standard_list_operate(void **state)
 	ctx->isinfo = false;
 
 	fault = bbf_entry_method(ctx, BBF_SCHEMA);
-	assert_int_equal(fault, CMD_SUCCESS);
+	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
@@ -1207,7 +1207,7 @@ static void test_api_bbfdm_valid_library_operate(void **state)
 	ctx->in_value = "{\"Host\":\"iopsys.eu\"}";
 
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
-	assert_int_equal(fault, CMD_SUCCESS);
+	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 		assert_string_not_equal(n->data, "0");
@@ -1228,7 +1228,7 @@ static void test_api_bbfdm_valid_library_list_operate(void **state)
 	ctx->isinfo = false;
 
 	fault = bbf_entry_method(ctx, BBF_SCHEMA);
-	assert_int_equal(fault, CMD_SUCCESS);
+	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
@@ -1284,7 +1284,7 @@ static void test_api_bbfdm_valid_json_operate(void **state)
 	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Status()";
 
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
-	assert_int_equal(fault, CMD_SUCCESS);
+	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 		assert_string_equal(n->name, "Result");
@@ -1307,7 +1307,7 @@ static void test_api_bbfdm_valid_json_list_operate(void **state)
 	ctx->isinfo = false;
 
 	fault = bbf_entry_method(ctx, BBF_SCHEMA);
-	assert_int_equal(fault, CMD_SUCCESS);
+	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 
@@ -1351,7 +1351,7 @@ static void test_api_bbfdm_valid_json_v1_operate(void **state)
 	ctx->in_param = "Device.UBUS_TEST_V1.Interface.3.Status()";
 
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
-	assert_int_equal(fault, CMD_SUCCESS);
+	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 		assert_string_equal(n->name, "Result");
@@ -1374,7 +1374,7 @@ static void test_api_bbfdm_valid_json_v1_list_operate(void **state)
 	ctx->isinfo = false;
 
 	fault = bbf_entry_method(ctx, BBF_SCHEMA);
-	assert_int_equal(fault, CMD_SUCCESS);
+	assert_int_equal(fault, 0);
 
 	list_for_each_entry(n, &ctx->list_parameter, list) {
 

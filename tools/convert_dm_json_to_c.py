@@ -814,7 +814,7 @@ def cprintOperateCommands(getoperateargs, operate, in_args, out_args, struct_nam
     print("static int %s(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)" % operate, file=fp)
     print("{", file=fp)
     print("    //TODO", file=fp)
-    print("    return CMD_SUCCESS;", file=fp)
+    print("    return 0;", file=fp)
     print("}", file=fp)
     print("", file=fp)
 

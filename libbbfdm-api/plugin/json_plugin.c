@@ -958,7 +958,7 @@ static int ubus_set_operate(json_object *mapping_obj, int json_version, char *re
 		json_object_put(res);
 	}
 
-	return CMD_SUCCESS;
+	return 0;
 }
 
 static int linker_obj(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
@@ -1025,7 +1025,7 @@ static int setcommand_param(char *refparam, struct dmctx *ctx, void *data, char 
 	}
 
 	if (p_obj == NULL) {
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 	}
 
 	json_object_object_get_ex(p_obj, "mapping", &map_arr);
@@ -1033,7 +1033,7 @@ static int setcommand_param(char *refparam, struct dmctx *ctx, void *data, char 
 		map_obj = json_object_array_get_idx(map_arr, 0);
 
 	if (!map_obj) {
-		return CMD_FAIL;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 	}
 
 	json_object_object_get_ex(map_obj, "type", &type);
@@ -1042,7 +1042,7 @@ static int setcommand_param(char *refparam, struct dmctx *ctx, void *data, char 
 		return ubus_set_operate(map_obj, json_version, refparam, ctx, data, value, instance);
 	}
 
-	return CMD_FAIL;
+	return bbfdm_FAULT_COMMAND_FAILURE;
 }
 
 static int getevent_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

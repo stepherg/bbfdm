@@ -3347,7 +3347,7 @@ static int operate_DHCPv4Client_Renew(char *refparam, struct dmctx *ctx, void *d
 		dmubus_call_set("network.interface", "renew", UBUS_ARGS{{"interface", if_name, String}}, 1);
 	}
 
-	return CMD_SUCCESS;
+	return 0;
 }
 
 /**********************************************************************************************************************************

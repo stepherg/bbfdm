@@ -2196,7 +2196,7 @@ static int operate_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *da
 	dmubus_call_set(interface_obj, "down", UBUS_ARGS{0}, 0);
 	dmubus_call_set(interface_obj, "up", UBUS_ARGS{0}, 0);
 
-	return CMD_SUCCESS;
+	return 0;
 }
 
 /**********************************************************************************************************************************

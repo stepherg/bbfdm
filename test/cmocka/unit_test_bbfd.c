@@ -455,7 +455,7 @@ static void test_api_bbfdm_valid_operate(void **state)
 	ctx->in_param = "Device.WiFi.AccessPoint.1.Security.Reset()";
 
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
-	assert_int_equal(fault, CMD_SUCCESS);
+	assert_int_equal(fault, 0);
 }
 
 static void test_api_bbfdm_wrong_operate(void **state)
@@ -466,7 +466,7 @@ static void test_api_bbfdm_wrong_operate(void **state)
 	ctx->in_param = "Device.IP.Diagnostics.IPing()";
 
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
-	assert_int_equal(fault, CMD_NOT_FOUND);
+	assert_int_equal(fault, bbfdm_FAULT_INVALID_PATH);
 }
 
 static void test_api_bbfdm_get_list_operate(void **state)

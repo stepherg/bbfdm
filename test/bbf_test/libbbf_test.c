@@ -85,7 +85,7 @@ static int set_X_IOPSYS_EU_Syslog_ConsoleLogLevel(char *refparam, struct dmctx *
  *************************************************************/
 static int operate_Device_X_IOPSYS_EU_Reboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return !dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) ? CMD_SUCCESS : CMD_FAIL;
+	return !dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) ? 0 : bbfdm_FAULT_COMMAND_FAILURE;
 }
 
 static operation_args x_iopsys_eu_ping_test_run_args = {
@@ -114,7 +114,7 @@ static int operate_DeviceXIOPSYSEUPingTEST_Run(char *refparam, struct dmctx *ctx
 
 	char *host = dmjson_get_value((json_object *)value, 1, "Host");
 	if(host[0] == '\0')
-		return CMD_INVALID_ARGUMENTS;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	snprintf(command, sizeof(command), "ping -c 1 -W 1 %s", host);
 
@@ -135,7 +135,7 @@ static int operate_DeviceXIOPSYSEUPingTEST_Run(char *refparam, struct dmctx *ctx
 		}
 		pclose(log);
 	}
-	return CMD_SUCCESS;
+	return 0;
 }
 
 /*************************************************************

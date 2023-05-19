@@ -1184,7 +1184,7 @@ static int operate_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *d
 		dmubus_call_set(interface_obj, "up", UBUS_ARGS{0}, 0);
 	}
 
-	return CMD_SUCCESS;
+	return 0;
 }
 
 /**********************************************************************************************************************************

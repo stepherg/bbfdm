@@ -3163,7 +3163,7 @@ static int operate_WiFiDataElementsNetwork_SetTrafficSeparation(char *refparam, 
 
 end:
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
-	return CMD_SUCCESS;
+	return 0;
 
 #undef MAX_ARGS
 }
@@ -3237,7 +3237,7 @@ static int operate_WiFiDataElementsNetwork_SetPreferredBackhauls(char *refparam,
 	dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", "mapcontroller", String}}, 1);
 
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
-	return CMD_SUCCESS;
+	return 0;
 }
 
 static operation_args WiFiDataElementsNetwork_SetSSID_args = {
@@ -3367,7 +3367,7 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 
 end:
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
-	return CMD_SUCCESS;
+	return 0;
 }
 
 /*
@@ -3406,7 +3406,7 @@ static int operate_WiFiDataElementsNetworkDevice_SetSTASteeringState(char *refpa
 
 end:
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
-	return CMD_SUCCESS;
+	return 0;
 }
 
 static operation_args WiFiDataElementsNetworkDevice_SetDFSState_args = {
@@ -3429,7 +3429,7 @@ static int get_operate_args_WiFiDataElementsNetworkDevice_SetDFSState(char *refp
 static int operate_WiFiDataElementsNetworkDevice_SetDFSState(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	//TODO
-	return CMD_SUCCESS;
+	return 0;
 }*/
 
 static operation_args wifidataelementsnetworkdeviceradio_channelscanrequest_args = {
@@ -3499,7 +3499,7 @@ static int operate_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest(char *r
 
 end:
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
-    return CMD_SUCCESS;
+    return 0;
 }
 
 /*static operation_args wifidataelementsnetworkdeviceradio_wifirestart_args = {
@@ -3518,7 +3518,7 @@ static int get_operate_args_WiFiDataElementsNetworkDeviceRadio_WiFiRestart(char 
 static int operate_WiFiDataElementsNetworkDeviceRadio_WiFiRestart(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
     //TODO
-    return CMD_SUCCESS;
+    return 0;
 }*/
 
 /*************************************************************

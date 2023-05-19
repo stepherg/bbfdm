@@ -928,7 +928,7 @@ static int operate_session_delete(char *refparam, struct dmctx *ctx, void *data,
 		ret = system(cmd);
 	}
 
-	return (ret != -1) ? CMD_SUCCESS : CMD_FAIL;
+	return (ret != -1) ? 0 : bbfdm_FAULT_COMMAND_FAILURE;
 }
 
 /**********************************************************************************************************************************
