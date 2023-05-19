@@ -171,13 +171,24 @@ static void get_server_port(struct uci_section *sec, char **port)
 	}
 }
 
+static void get_server_enable(struct uci_section *sec, bool *en)
+{
+	if (sec == NULL || en == NULL)
+		return;
+
+	char *val = dmuci_get_value_by_section_fallback_def(sec, "uci_enable", "1");
+	*en = dmuci_string_to_boolean(val);
+}
+
 static bool port_used(char *port)
 {
 	struct uci_section *s = NULL, *stmp = NULL;
 	uci_foreach_sections_safe("nginx", "server", stmp, s) {
 		char *tmp = NULL;
+		bool en = false;
 		get_server_port(s, &tmp);
-		if (DM_STRCMP(tmp, port) == 0)
+		get_server_enable(s, &en);
+		if (en && (DM_STRCMP(tmp, port) == 0))
 			return true;
 	}
 
@@ -227,6 +238,8 @@ static int addHTTPAccess(char *refparam, struct dmctx *ctx, void *data, char **i
 	dmuci_set_value_by_section(s, "uci_enable", "0");
 	dmuci_set_value_by_section(s, "server_name", s_name);
 	dmuci_set_value_by_section(s, "root", "/www");
+	dmuci_add_list_value_by_section(s, "listen", "443");
+	dmuci_add_list_value_by_section(s, "listen", "[::]:443");
 
 	dmuci_add_section_bbfdm("dmmap_nginx", "nginx", &dmmap_s);
 	dmuci_set_value_by_section(dmmap_s, "section_name", s_name);
@@ -292,9 +305,11 @@ static int browseHTTPAccess(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 static int browseHTTPSession(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *tmp = NULL;
+	bool enable = false;
 
+	get_server_enable(((struct dmmap_http *)prev_data)->config_section, &enable);
 	get_server_port(((struct dmmap_http *)prev_data)->config_section, &tmp);
-	if (DM_STRLEN(tmp) == 0)
+	if (!enable || DM_STRLEN(tmp) == 0)
 		return 0;
 
 	char *inst = NULL;
@@ -359,17 +374,36 @@ static int get_http_access_enable(char *refparam, struct dmctx *ctx, void *data,
 
 static int set_http_access_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	bool new_val;
+	bool new_val, cur_val;
+	char *cur;
 
 	switch (action)	{
 		case VALUECHECK:
 			if (dm_validate_boolean(value))
 				return FAULT_9007;
+
+			// check if same as current value
+			string_to_bool(value, &new_val);
+			cur = dmuci_get_value_by_section_fallback_def(((struct dmmap_http *)data)->config_section, "uci_enable", "1");
+			cur_val = dmuci_string_to_boolean(cur);
+
+			if (new_val == cur_val)
+				break;
+
+			if (new_val == false)
+				break;
+
+			// check if any enabled server is configured with same port
+			char *port = NULL;
+			get_server_port(((struct dmmap_http *)data)->config_section, &port);
+
+			if (port_used(port))
+				return FAULT_9001;
 			break;
 		case VALUESET:
 			string_to_bool(value, &new_val);
-			char *cur = dmuci_get_value_by_section_fallback_def(((struct dmmap_http *)data)->config_section, "uci_enable", "1");
-			bool cur_val = dmuci_string_to_boolean(cur);
+			cur = dmuci_get_value_by_section_fallback_def(((struct dmmap_http *)data)->config_section, "uci_enable", "1");
+			cur_val = dmuci_string_to_boolean(cur);
 
 			if (new_val == cur_val)
 				break;
@@ -504,8 +538,10 @@ static int set_http_access_port(char *refparam, struct dmctx *ctx, void *data, c
 			if (DM_STRCMP(value, cur_val) == 0)
 				break;
 
-			// check if any server is configured with same port
-			if (port_used(value))
+			char *enable = dmuci_get_value_by_section_fallback_def(((struct dmmap_http *)data)->config_section, "uci_enable", "1");
+			bool en = dmuci_string_to_boolean(enable);
+			// check if any enabled server is configured with same port
+			if (en && port_used(value))
 				return FAULT_9001;
 			break;
 		case VALUESET:
