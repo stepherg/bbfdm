@@ -1053,6 +1053,8 @@ static void update_instances_list(struct list_head *inst)
 		list_for_each_entry(nptr_dp, &bbf_ctx.list_parameter, list) {
 			add_path_list(nptr_dp->name, inst);
 		}
+	} else {
+		WARNING("Failed to get instances");
 	}
 
 	bbf_cleanup(&bbf_ctx);

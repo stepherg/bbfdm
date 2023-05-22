@@ -1005,11 +1005,11 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 	json_object_put(in_args);
 
 	if (!res)
-		return FAULT_9005;
+		return 0;
 
 	json_object *res_array = dmjson_get_obj(res, 1, "results");
 	if (!res_array)
-		return FAULT_9005;
+		return 0;
 
 	size_t nbre_obj = json_object_array_length(res_array);
 
@@ -1018,7 +1018,7 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 
 		char *fault = dmjson_get_value(res_obj, 1, "fault");
 		if (DM_STRLEN(fault))
-			return DM_STRTOUL(fault);
+			continue;
 
 		char *path = dmjson_get_value(res_obj, 1, "path");
 		char *data = dmjson_get_value(res_obj, 1, "data");
