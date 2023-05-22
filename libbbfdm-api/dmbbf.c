@@ -2134,7 +2134,7 @@ int dm_entry_get_linker_value(struct dmctx *dmctx)
  * **************/
 static int mobj_operate(DMOBJECT_ARGS)
 {
-	return bbfdm_FAULT_INVALID_PATH;
+	return USP_FAULT_INVALID_PATH;
 }
 
 static int mparam_operate(DMPARAM_ARGS)
@@ -2146,12 +2146,12 @@ static int mparam_operate(DMPARAM_ARGS)
 
 		snprintf(full_param, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
 		if (DM_STRCMP(full_param, dmctx->in_param) != 0)
-			return bbfdm_FAULT_INVALID_PATH;
+			return USP_FAULT_INVALID_PATH;
 
 		dmctx->stop = 1;
 
 		if (!leaf->setvalue)
-			return bbfdm_FAULT_COMMAND_FAILURE;
+			return USP_FAULT_COMMAND_FAILURE;
 
 		json_object *j_input = (dmctx->in_value) ? json_tokener_parse(dmctx->in_value) : NULL;
 		int fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, VALUESET);
@@ -2168,7 +2168,7 @@ int dm_entry_operate(struct dmctx *dmctx)
 	int err = 0;
 
 	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0' || (*(dmctx->in_param + DM_STRLEN(dmctx->in_param) - 1) != ')'))
-		return bbfdm_FAULT_INVALID_PATH;
+		return USP_FAULT_INVALID_PATH;
 
 	dmctx->iscommand = 1;
 	dmctx->inparam_isparam = 1;
@@ -2180,5 +2180,5 @@ int dm_entry_operate(struct dmctx *dmctx)
 
 	err = dm_browse(dmctx, &node, root, NULL, NULL);
 
-	return (dmctx->stop) ? err : bbfdm_FAULT_INVALID_PATH;
+	return (dmctx->stop) ? err : USP_FAULT_INVALID_PATH;
 }

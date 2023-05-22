@@ -1265,7 +1265,7 @@ static int operate_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *
 	char *url = dmjson_get_value((json_object *)value, 1, "URL");
 
 	if (url[0] == '\0')
-		return bbfdm_FAULT_INVALID_ARGUMENT;
+		return USP_FAULT_INVALID_ARGUMENT;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "log_file", &vlf_file_path);
 
@@ -1281,7 +1281,7 @@ static int operate_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *
 	if (file_exists(DEF_VENDOR_LOG_FILE))
 		remove(DEF_VENDOR_LOG_FILE);
 
-	return res ? bbfdm_FAULT_COMMAND_FAILURE : 0;
+	return res ? USP_FAULT_COMMAND_FAILURE : 0;
 }
 
 static operation_args vendor_config_file_backup_args = {
@@ -1311,7 +1311,7 @@ static int operate_DeviceInfoVendorConfigFile_Backup(char *refparam, struct dmct
 
 	char *url = dmjson_get_value((json_object *)value, 1, "URL");
 	if (url[0] == '\0')
-		return bbfdm_FAULT_INVALID_ARGUMENT;
+		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *user = dmjson_get_value((json_object *)value, 1, "Username");
 	char *pass = dmjson_get_value((json_object *)value, 1, "Password");
@@ -1320,7 +1320,7 @@ static int operate_DeviceInfoVendorConfigFile_Backup(char *refparam, struct dmct
 
 	int res = bbf_config_backup(url, user, pass, vcf_name, backup_command, backup_path);
 
-	return res ? bbfdm_FAULT_COMMAND_FAILURE : 0;
+	return res ? USP_FAULT_COMMAND_FAILURE : 0;
 }
 
 static operation_args vendor_config_file_restore_args = {
@@ -1353,7 +1353,7 @@ static int operate_DeviceInfoVendorConfigFile_Restore(char *refparam, struct dmc
 
 	char *url = dmjson_get_value((json_object *)value, 1, "URL");
 	if (url[0] == '\0')
-		return bbfdm_FAULT_INVALID_ARGUMENT;
+		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *user = dmjson_get_value((json_object *)value, 1, "Username");
 	char *pass = dmjson_get_value((json_object *)value, 1, "Password");
@@ -1363,7 +1363,7 @@ static int operate_DeviceInfoVendorConfigFile_Restore(char *refparam, struct dmc
 
 	int res = bbf_config_restore(url, user, pass, file_size, checksum_algorithm, checksum, restore_command, restore_path);
 
-	return res ? bbfdm_FAULT_COMMAND_FAILURE : 0;
+	return res ? USP_FAULT_COMMAND_FAILURE : 0;
 }
 
 static operation_args firmware_image_download_args = {
@@ -1398,7 +1398,7 @@ static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx
 	char *url = dmjson_get_value((json_object *)value, 1, "URL");
 	char *auto_activate = dmjson_get_value((json_object *)value, 1, "AutoActivate");
 	if (url[0] == '\0')
-		return bbfdm_FAULT_INVALID_ARGUMENT;
+		return USP_FAULT_INVALID_ARGUMENT;
 
 	// Assuming auto activate as false, if not provided by controller, in case of strict validation,
 	// this should result into a fault
@@ -1417,7 +1417,7 @@ static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx
 
 	int res = bbf_fw_image_download(url, auto_activate, username, password, file_size, checksum_algorithm, checksum, bank_id, command, obj_path, commandKey);
 
-	return res ? bbfdm_FAULT_COMMAND_FAILURE : 0;
+	return res ? USP_FAULT_COMMAND_FAILURE : 0;
 }
 
 static operation_args firmware_image_activate_args = {
@@ -1469,37 +1469,37 @@ static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx
 			break;
 
 		if (!DM_STRLEN(end_time[i]) || !DM_STRLEN(mode[i]))
-			return bbfdm_FAULT_INVALID_ARGUMENT;
+			return USP_FAULT_INVALID_ARGUMENT;
 
 		if (dm_validate_unsignedInt(start_time[i], RANGE_ARGS{{NULL,NULL}}, 1))
-			return bbfdm_FAULT_INVALID_ARGUMENT;
+			return USP_FAULT_INVALID_ARGUMENT;
 
 		if (dm_validate_unsignedInt(end_time[i], RANGE_ARGS{{NULL,NULL}}, 1))
-			return bbfdm_FAULT_INVALID_ARGUMENT;
+			return USP_FAULT_INVALID_ARGUMENT;
 
 		if (DM_STRLEN(max_retries[i]) && dm_validate_int(max_retries[i], RANGE_ARGS{{"-1","10"}}, 1))
-			return bbfdm_FAULT_INVALID_ARGUMENT;
+			return USP_FAULT_INVALID_ARGUMENT;
 
 		if (dm_validate_string(mode[i], -1, -1, FW_Mode, NULL))
-			return bbfdm_FAULT_INVALID_ARGUMENT;
+			return USP_FAULT_INVALID_ARGUMENT;
 
 		if (DM_STRTOL(start_time[i]) > DM_STRTOL(end_time[i]))
-			return bbfdm_FAULT_INVALID_ARGUMENT;
+			return USP_FAULT_INVALID_ARGUMENT;
 
 		if (i != 0 && DM_STRTOL(end_time[i - 1]) > DM_STRTOL(start_time[i]))
-			return bbfdm_FAULT_INVALID_ARGUMENT;
+			return USP_FAULT_INVALID_ARGUMENT;
 
 		last_idx++;
 	}
 
 	char *bank_id = dmjson_get_value((json_object *)data, 1, "id");
 	if (!DM_STRLEN(bank_id))
-		return bbfdm_FAULT_COMMAND_FAILURE;
+		return USP_FAULT_COMMAND_FAILURE;
 
 	if (DM_STRLEN(start_time[0])) {
 		FILE *file = fopen(CRONTABS_ROOT, "a");
 		if (!file)
-			return bbfdm_FAULT_COMMAND_FAILURE;
+			return USP_FAULT_COMMAND_FAILURE;
 
 		for (int i = 0; i < MAX_TIME_WINDOW && DM_STRLEN(start_time[i]); i++) {
 			char buffer[512] = {0};
@@ -1533,13 +1533,13 @@ static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx
 		dmubus_call("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id, Integer}}, 1, &json_obj);
 		char *status = dmjson_get_value(json_obj, 1, "success");
 		if (strcasecmp(status, "true") != 0)
-			return bbfdm_FAULT_COMMAND_FAILURE;
+			return USP_FAULT_COMMAND_FAILURE;
 
 		res = dmubus_call_set("rpc-sys", "reboot", UBUS_ARGS{0}, 0);
 		sleep(10); // Wait for reboot to happen
 	}
 
-	return res ? bbfdm_FAULT_COMMAND_FAILURE : 0;
+	return res ? USP_FAULT_COMMAND_FAILURE : 0;
 }
 
 /**********************************************************************************************************************************

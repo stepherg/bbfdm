@@ -1968,7 +1968,7 @@ static int operate_WiFiAccessPointWPS_InitiateWPSPBC(char *refparam, struct dmct
 	int ubus_ret = 0;
 
 	if (ifname == NULL)
-		return bbfdm_FAULT_COMMAND_FAILURE;
+		return USP_FAULT_COMMAND_FAILURE;
 
 	snprintf(object, sizeof(object), "hostapd.%s", ifname);
 	ubus_ret = dmubus_call_set(object, "wps_start", UBUS_ARGS{0}, 0);
@@ -3267,7 +3267,7 @@ static int get_access_point_total_associations(char *refparam, struct dmctx *ctx
  *************************************************************/
 static int operate_WiFi_Reset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return !dmcmd_no_wait("/sbin/wifi", 1, "reload") ? 0 : bbfdm_FAULT_COMMAND_FAILURE;
+	return !dmcmd_no_wait("/sbin/wifi", 1, "reload") ? 0 : USP_FAULT_COMMAND_FAILURE;
 }
 
 static operation_args neighboring_wifi_diagnostic_args = {

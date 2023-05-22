@@ -48,7 +48,7 @@ extern struct list_head loaded_json_files;
 extern struct list_head json_list;
 extern struct list_head json_memhead;
 
-#define bbfdm_SUBPROCESS_DEPTH (2)
+#define BBFDM_SUBPROCESS_DEPTH (2)
 #define BBF_SCHEMA_UPDATE_TIMEOUT (60 * 1000)
 #define BBF_INSTANCES_UPDATE_TIMEOUT (25 * 1000)
 
@@ -56,7 +56,7 @@ extern struct list_head json_memhead;
 
 // Global variables
 static unsigned int g_refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
-static int g_subprocess_level = bbfdm_SUBPROCESS_DEPTH;
+static int g_subprocess_level = BBFDM_SUBPROCESS_DEPTH;
 
 static void *deamon_lib_handle = NULL;
 static json_object *deamon_json_obj = NULL;
@@ -538,7 +538,7 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	fault = fill_pvlist_set(path, tb[DM_SET_VALUE] ? blobmsg_get_string(tb[DM_SET_VALUE]) : NULL, tb[DM_SET_OBJ_PATH], &pv_list);
 	if (fault) {
 		ERR("Fault in fill pvlist set path |%s|", data.bbf_ctx.in_param);
-		fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
+		fill_err_code_array(&data, USP_FAULT_COMMAND_FAILURE);
 		goto end;
 	}
 
@@ -550,7 +550,7 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	// no need to process it further since transaction-id is not valid
 	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
 		WARNING("Transaction not started yet");
-		fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
+		fill_err_code_array(&data, USP_FAULT_COMMAND_FAILURE);
 		goto end;
 	}
 
@@ -559,7 +559,7 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		trans_id = transaction_start(0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
-			fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
+			fill_err_code_array(&data, USP_FAULT_COMMAND_FAILURE);
 			goto end;
 		}
 	}
@@ -667,7 +667,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	// no need to process it further since transaction-id is not valid
 	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
 		WARNING("Transaction not started yet");
-		fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
+		fill_err_code_array(&data, USP_FAULT_COMMAND_FAILURE);
 		goto end;
 	}
 
@@ -676,7 +676,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		trans_id = transaction_start(0);
 		if (trans_id == 0) {
 			ERR("Failed to get the lock for the transaction");
-			fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
+			fill_err_code_array(&data, USP_FAULT_COMMAND_FAILURE);
 			goto end;
 		}
 	}
@@ -701,7 +701,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		fault = fill_pvlist_set(path, NULL, tb[DM_ADD_OBJ_PATH], &pv_list);
 		if (fault) {
 			ERR("Fault in fill pvlist set path |%s|", path);
-			fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
+			fill_err_code_array(&data, USP_FAULT_COMMAND_FAILURE);
 
 			if (data.trans_id == 0) {
 				// Internal transaction: need to abort the changes
@@ -787,7 +787,7 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	// no need to process it further since transaction-id is not valid
 	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
 		WARNING("Transaction not started yet");
-		fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
+		fill_err_code_array(&data, USP_FAULT_COMMAND_FAILURE);
 		goto end;
 	}
 
@@ -796,7 +796,7 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		trans_id = transaction_start(0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
-			fill_err_code_array(&data, bbfdm_FAULT_INTERNAL_ERROR);
+			fill_err_code_array(&data, USP_FAULT_COMMAND_FAILURE);
 			goto end;
 		}
 	}

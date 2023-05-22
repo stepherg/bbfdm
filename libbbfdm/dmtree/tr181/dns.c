@@ -755,7 +755,7 @@ static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmc
 
 	char *hostname = dmjson_get_value((json_object *)value, 1, "HostName");
 	if (hostname[0] == '\0')
-		return bbfdm_FAULT_INVALID_ARGUMENT;
+		return USP_FAULT_INVALID_ARGUMENT;
 	char *interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *dnsserver = dmjson_get_value((json_object *)value, 1, "DNSServer");
 	char *timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
@@ -774,7 +774,7 @@ static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmc
 			6, &res);
 
 	if (res == NULL)
-		return bbfdm_FAULT_COMMAND_FAILURE;
+		return USP_FAULT_COMMAND_FAILURE;
 
 	char *status = dmjson_get_value(res, 1, "Status");
 	char *success_count = dmjson_get_value(res, 1, "SuccessCount");
