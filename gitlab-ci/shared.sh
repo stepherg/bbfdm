@@ -68,7 +68,7 @@ function install_libbbf()
 
 	mkdir -p build
 	cd build
-	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS" -DBBFDMD_ENABLED=ON -DBBF_TR181=ON -DBBF_TR104=ON -DBBF_TR143=ON -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_WIFI_DATAELEMENTS=OFF -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
+	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS" -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_WIFI_DATAELEMENTS=OFF -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
 	exec_cmd_verbose make
 
 	echo "installing libbbf"
@@ -102,7 +102,6 @@ function install_libwifi_dataelements()
 	exec_cmd_verbose make -C test/wifi_dataelements/
 
 	echo "installing libwifi_dataelements"
-	cp -f test/wifi_dataelements/input.json /etc/bbfdm/input.json
 	cp -f test/wifi_dataelements/wifi_dataelements.json /tmp/wifi_dataelements.json
 	cp -f test/wifi_dataelements/libwifi_dataelements.so /tmp/libwifi_dataelements.so
 }
@@ -118,7 +117,9 @@ function install_libperiodicstats()
 	exec_cmd_verbose make -C /opt/dev/periodicstats/
 
 	echo "installing libperiodicstats"
-	cp -f /opt/dev/periodicstats/bbf_plugin/libperiodicstats.so /usr/lib/bbfdm
+	mkdir -p /etc/bbfdm/services/periodicstats
+	cp -f /opt/dev/periodicstats/bbf_plugin/libperiodicstats.so /etc/bbfdm/services/periodicstats
+	cp -f /opt/dev/iopsys/periodicstats/files/etc/bbfdm/services/periodicstats/input.json /etc/bbfdm/services/periodicstats
 }
 
 function install_libcwmpdm()
@@ -146,6 +147,21 @@ function error_on_zero()
 		exit $ret
 	fi
 
+}
+
+function check_valgrind_xml() {
+	echo "${1}: Checking memory leaks..."
+	echo "checking UninitCondition"
+	grep -q "<kind>UninitCondition</kind>" ${2}
+	error_on_zero $?
+
+	echo "checking Leak_PossiblyLost"
+	grep -q "<kind>Leak_PossiblyLost</kind>" ${2}
+	error_on_zero $?
+
+	echo "checking Leak_DefinitelyLost"
+	grep -q "<kind>Leak_DefinitelyLost</kind>" ${2}
+	error_on_zero $?
 }
 
 function generate_report()

@@ -20,4 +20,4 @@
  * 02110-1301 USA
  */
 
-int bbfdm_cli_exec_command(const char *json_path, int argc, char *argv[]);
+int bbfdm_cli_exec_command(int argc, char *argv[]);

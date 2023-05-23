@@ -29,6 +29,14 @@ static bool first_boot = false;
 
 extern struct list_head global_memhead;
 
+struct service
+{
+	struct list_head list;
+	char *name;
+	char *parent_dm;
+	char *object;
+};
+
 #if defined(BBFDM_ENABLE_JSON_PLUGIN) || defined(BBFDM_ENABLE_DOTSO_PLUGIN)
 static char *get_folder_path(bool json_path)
 {
@@ -109,58 +117,106 @@ static bool check_stats_folder(bool json_path)
 }
 #endif  /* (BBFDM_ENABLE_JSON_PLUGIN || BBFDM_ENABLE_DOTSO_PLUGIN) */
 
-static void load_services(struct dmctx *ctx)
+
+static bool add_service_to_main_tree(DMOBJ *main_dm, char *srv_name, char *srv_parent_dm, char *srv_obj)
 {
-	json_object *service = NULL;
+	DMOBJ *dm_entryobj = NULL;
 
-	if (!ctx->services_obj)
-		return;
+	bool obj_exists = find_entry_obj(main_dm, srv_parent_dm, &dm_entryobj);
+	if (obj_exists == false || !dm_entryobj)
+		return false;
 
-	size_t nbre_services = json_object_array_length(ctx->services_obj);
+	if (dm_entryobj->nextdynamicobj == NULL) {
+		dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
+		dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
+		dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
+		dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
+		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
+	}
 
-	for (size_t i = 0; i < nbre_services; i++) {
-		service = json_object_array_get_idx(ctx->services_obj, i);
+	if (dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj == NULL) {
+		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj = calloc(2, sizeof(DMOBJ *));
+	}
 
-		char *obj_mount = dmjson_get_value(service, 1, "obj_mount");
-		if (DM_STRLEN(obj_mount) == 0)
-			continue;
+	if (dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] == NULL) {
+		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] = dm_dynamic_calloc(&global_memhead, 2, sizeof(struct dm_obj_s));
+		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).obj = dm_dynamic_strdup(&global_memhead, srv_obj);
+		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).checkdep = dm_dynamic_strdup(&global_memhead, srv_name);
+	} else {
+		int idx = get_entry_idx(dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0]);
+		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] = dm_dynamic_realloc(&global_memhead, dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
+		memset(dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
+		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[idx]).obj = dm_dynamic_strdup(&global_memhead, srv_obj);
+		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[idx]).checkdep = dm_dynamic_strdup(&global_memhead, srv_name);
+	}
 
-		char *obj_name = dmjson_get_value(service, 1, "obj_name");
-		if (DM_STRLEN(obj_name) == 0)
-			continue;
+	return true;
+}
 
-		char *ubus_obj = dmjson_get_value(service, 1, "ubus_obj");
-		if (DM_STRLEN(ubus_obj) == 0)
-			continue;
+static bool is_service_registered(struct list_head *srvlist, char *srv_name)
+{
+	struct service *srv = NULL;
 
-		DMOBJ *dm_entryobj = NULL;
-		bool obj_exists = find_entry_obj(ctx->dm_entryobj, obj_mount, &dm_entryobj);
-		if (obj_exists == false || !dm_entryobj)
-			continue;
+	list_for_each_entry(srv, srvlist, list) {
+		if (DM_STRCMP(srv->name, srv_name) == 0)
+			return true;
+	}
 
-		if (dm_entryobj->nextdynamicobj == NULL) {
-			dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
-			dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
-			dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-			dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
-			dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
-		}
+	return false;
+}
 
-		if (dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj == NULL) {
-			dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj = calloc(2, sizeof(DMOBJ *));
-		}
+static void add_service_to_list(struct list_head *srvlist, char *srv_name, char *srv_parent_dm, char *srv_object)
+{
+	struct service *srv = NULL;
 
-		if (dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] == NULL) {
-			dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] = dm_dynamic_calloc(&global_memhead, 2, sizeof(struct dm_obj_s));
-			((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).obj = dm_dynamic_strdup(&global_memhead, obj_name);
-			((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).checkdep = dm_dynamic_strdup(&global_memhead, ubus_obj);
-		} else {
-			int idx = get_entry_idx(dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0]);
-			dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] = dm_dynamic_realloc(&global_memhead, dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
-			memset(dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
-			((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[idx]).obj = dm_dynamic_strdup(&global_memhead, obj_name);
-			((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[idx]).checkdep = dm_dynamic_strdup(&global_memhead, ubus_obj);
-		}
+	srv = calloc(1, sizeof(struct service));
+	list_add_tail(&srv->list, srvlist);
+
+	srv->name = strdup(srv_name);
+	srv->parent_dm = strdup(srv_parent_dm);
+	srv->object = strdup(srv_object);
+}
+
+void free_services_from_list(struct list_head *clist)
+{
+	struct service *srv = NULL;
+
+	while (clist->next != clist) {
+		srv = list_entry(clist->next, struct service, list);
+		list_del(&srv->list);
+		free(srv->name);
+		free(srv->parent_dm);
+		free(srv->object);
+		free(srv);
+	}
+}
+
+bool load_service(DMOBJ *main_dm, struct list_head *srv_list, char *srv_name, char *srv_parent_dm, char *srv_obj)
+{
+	if (!main_dm || !srv_list || !srv_name || !srv_parent_dm || !srv_obj)
+		return false;
+
+	if (is_service_registered(srv_list, srv_name))
+		return false;
+
+	if (!add_service_to_main_tree(main_dm, srv_name, srv_parent_dm, srv_obj))
+		return false;
+
+	add_service_to_list(srv_list, srv_name, srv_parent_dm, srv_obj);
+	return true;
+}
+
+void get_list_of_registered_service(struct list_head *srvlist, struct blob_buf *bb)
+{
+	struct service *srv = NULL;
+	void *table = NULL;
+
+	list_for_each_entry(srv, srvlist, list) {
+		table = blobmsg_open_table(bb, NULL);
+		blobmsg_add_string(bb, "name", srv->name);
+		blobmsg_add_string(bb, "parent_dm", srv->parent_dm);
+		blobmsg_add_string(bb, "object", srv->object);
+		blobmsg_close_table(bb, table);
 	}
 }
 
@@ -376,12 +432,6 @@ void load_plugins(struct dmctx *ctx)
 		load_vendor_dynamic_arrays(ctx);
 	}
 #endif /* BBF_VENDOR_EXTENSION */
-	}
-
-	if (first_boot == false) {
-		// Load main objects exposed via services section
-		free_specific_dynamic_node(ctx->dm_entryobj, INDX_SERVICE_MOUNT);
-		load_services(ctx);
 	}
 
 	first_boot = true;

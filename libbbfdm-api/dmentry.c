@@ -22,15 +22,13 @@ LIST_HEAD(global_memhead);
 
 void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj,
 		DM_MAP_VENDOR *tVendorExtension[],
-		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude,
-		json_object *services_obj)
+		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude)
 {
 	INIT_LIST_HEAD(&ctx->list_parameter);
 	ctx->dm_entryobj = tEntryObj;
 	ctx->dm_vendor_extension[0] = tVendorExtension ? tVendorExtension[0] : NULL;
 	ctx->dm_vendor_extension[1] = tVendorExtension ? tVendorExtension[1] : NULL;
 	ctx->dm_vendor_extension_exclude = tVendorExtensionExclude;
-	ctx->services_obj = services_obj;
 	dm_uci_init();
 }
 

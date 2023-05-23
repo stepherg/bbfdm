@@ -33,15 +33,16 @@ extern struct list_head loaded_json_files;
 extern struct list_head json_list;
 extern struct list_head json_memhead;
 
+extern char *input_json;
+
 #define UNUSED  __attribute__((unused))
 
-static DMOBJ *CLIENT_DM_ROOT_OBJ = NULL;
-static DM_MAP_VENDOR *CLIENT_DM_VENDOR_EXTENSION[2] = {0};
-static DM_MAP_VENDOR_EXCLUDE *CLIENT_DM_VENDOR_EXTENSION_EXCLUDE = NULL;
-static json_object *CLIENT_DM_SERVICES = NULL;
+static DMOBJ *CLI_DM_ROOT_OBJ = NULL;
+static DM_MAP_VENDOR *CLI_DM_VENDOR_EXTENSION[2] = {0};
+static DM_MAP_VENDOR_EXCLUDE *CLI_DM_VENDOR_EXTENSION_EXCLUDE = NULL;
 
-static void *client_lib_handle = NULL;
-static json_object *client_json_obj = NULL;
+static void *cli_lib_handle = NULL;
+static json_object *cli_json_obj = NULL;
 
 typedef struct {
 	struct dmctx bbf_ctx;
@@ -52,23 +53,22 @@ typedef struct {
 	char out_type[8];
 	char *cmd;
 	bool ubus_status;
-	bool enable_plugins;
-} client_data_t;
+} cli_data_t;
 
 typedef struct {
     char *name;
     int num_args;
-    int (*exec_cmd)(client_data_t *client_data, char *argv[]);
+    int (*exec_cmd)(cli_data_t *cli_data, char *argv[]);
     char *usage;
 } cli_cmd_t;
 
-static int cli_exec_help(client_data_t *client_data UNUSED, char *argv[] UNUSED);
-static int cli_exec_get(client_data_t *client_data, char *argv[]);
-static int cli_exec_set(client_data_t *client_data, char *argv[]);
-static int cli_exec_add(client_data_t *client_data, char *argv[]);
-static int cli_exec_del(client_data_t *client_data, char *argv[]);
-static int cli_exec_instances(client_data_t *client_data, char *argv[]);
-static int cli_exec_schema(client_data_t *client_data, char *argv[]);
+static int cli_exec_help(cli_data_t *cli_data UNUSED, char *argv[] UNUSED);
+static int cli_exec_get(cli_data_t *cli_data, char *argv[]);
+static int cli_exec_set(cli_data_t *cli_data, char *argv[]);
+static int cli_exec_add(cli_data_t *cli_data, char *argv[]);
+static int cli_exec_del(cli_data_t *cli_data, char *argv[]);
+static int cli_exec_instances(cli_data_t *cli_data, char *argv[]);
+static int cli_exec_schema(cli_data_t *cli_data, char *argv[]);
 
 cli_cmd_t cli_commands[] = {
 //    Name    NumArgs   Exec callback     Usage String
@@ -139,16 +139,16 @@ static void __ubus_callback(struct ubus_request *req, int type __attribute__((un
 	if (msg == NULL || req == NULL)
 		return;
 
-	client_data_t *client_data = (client_data_t *)req->priv;
+	cli_data_t *cli_data = (cli_data_t *)req->priv;
 	struct blob_attr *parameters = get_results_array(msg);
 
 	if (parameters == NULL) {
-		client_data->ubus_status = false;
+		cli_data->ubus_status = false;
 		return;
 	}
 
 	if (blobmsg_len(parameters) == 0) {
-		client_data->ubus_status = true;
+		cli_data->ubus_status = true;
 		return;
 	}
 
@@ -162,21 +162,21 @@ static void __ubus_callback(struct ubus_request *req, int type __attribute__((un
 
 		if (tb[3]) {
 			printf("ERROR: %u retrieving %s\n", blobmsg_get_u32(tb[3]), name);
-			client_data->ubus_status = false;
+			cli_data->ubus_status = false;
 			return;
 		}
 
-		if (strcmp(client_data->cmd, "get") == 0)
+		if (strcmp(cli_data->cmd, "get") == 0)
 			printf("%s => %s\n", name, data);
-		else if (strcmp(client_data->cmd, "set") == 0) {
+		else if (strcmp(cli_data->cmd, "set") == 0) {
 			printf("Set value of %s is successfully done\n", name);
-		} else if (strcmp(client_data->cmd, "add") == 0) {
+		} else if (strcmp(cli_data->cmd, "add") == 0) {
 			printf("Added %s%s.\n", name, data);
-		} else if (strcmp(client_data->cmd, "del") == 0) {
+		} else if (strcmp(cli_data->cmd, "del") == 0) {
 			printf("Deleted %s\n", name);
-		} else if (strcmp(client_data->cmd, "instances") == 0) {
+		} else if (strcmp(cli_data->cmd, "instances") == 0) {
 			printf("%s\n", name);
-		} else if (strcmp(client_data->cmd, "schema") == 0) {
+		} else if (strcmp(cli_data->cmd, "schema") == 0) {
 			char *type = tb[2] ? blobmsg_get_string(tb[2]) : "";
 			int cmd = get_dm_type(type);
 
@@ -232,11 +232,11 @@ static void __ubus_callback(struct ubus_request *req, int type __attribute__((un
 			}
 		}
 
-		client_data->ubus_status = true;
+		cli_data->ubus_status = true;
 	}
 }
 
-static int in_ubus_out_cli_exec_cmd(client_data_t *client_data, const char *path, const char *value)
+static int in_ubus_out_cli_exec_cmd(cli_data_t *cli_data, const char *path, const char *value)
 {
 	struct blob_buf b = {0};
 	void *table = NULL;
@@ -250,20 +250,20 @@ static int in_ubus_out_cli_exec_cmd(client_data_t *client_data, const char *path
 	if (value) blobmsg_add_string(&b, "value", value);
 
 	table = blobmsg_open_table(&b, "optional");
-	blobmsg_add_string(&b, "proto", (client_data->proto == BBFDM_CWMP) ? "cwmp" : "usp");
+	blobmsg_add_string(&b, "proto", (cli_data->proto == BBFDM_CWMP) ? "cwmp" : "usp");
 	blobmsg_add_string(&b, "format", "raw");
-	blobmsg_add_u32(&b, "instance_mode", client_data->instance_mode);
+	blobmsg_add_u32(&b, "instance_mode", cli_data->instance_mode);
 	blobmsg_close_table(&b, table);
 
-	int e = bbfdm_ubus_invoke(client_data->in_name, client_data->cmd, b.head, __ubus_callback, client_data);
+	int e = bbfdm_ubus_invoke(cli_data->in_name, cli_data->cmd, b.head, __ubus_callback, cli_data);
 
 	if (e < 0) {
-		printf("ERROR: ubus invoke for [object:%s method:%s] exit with error(%d)\n", client_data->in_name, client_data->cmd, e);
+		printf("ERROR: ubus invoke for [object:%s method:%s] exit with error(%d)\n", cli_data->in_name, cli_data->cmd, e);
 		err = EXIT_FAILURE;
 	}
 
-	if (client_data->ubus_status == false) {
-		printf("ERROR: ubus call for [object:%s method:%s] exit with error\n", client_data->in_name, client_data->cmd);
+	if (cli_data->ubus_status == false) {
+		printf("ERROR: ubus call for [object:%s method:%s] exit with error\n", cli_data->in_name, cli_data->cmd);
 		err = EXIT_FAILURE;
 	}
 
@@ -272,8 +272,9 @@ static int in_ubus_out_cli_exec_cmd(client_data_t *client_data, const char *path
 	return err;
 }
 
-static int bbfdm_load_client_config(const char *json_path, client_data_t *client_data)
+static int bbfdm_load_cli_config(cli_data_t *cli_data)
 {
+	const char *json_path = input_json ? input_json : BBF_JSON_INPUT;
 	char *opt_val = NULL;
 
 	if (!json_path || !strlen(json_path)) {
@@ -281,64 +282,55 @@ static int bbfdm_load_client_config(const char *json_path, client_data_t *client
 		return -1;
 	}
 
-	client_json_obj = json_object_from_file(json_path);
-	if (!client_json_obj) {
+	cli_json_obj = json_object_from_file(json_path);
+	if (!cli_json_obj) {
 		printf("ERROR: not possible to load json file (%s)\n", json_path);
 		return -1;
 	}
 
-	opt_val = dmjson_get_value(client_json_obj, 3, "client", "config", "proto");
+	opt_val = dmjson_get_value(cli_json_obj, 3, "cli", "config", "proto");
 	if (opt_val && strlen(opt_val)) {
-		client_data->proto = get_proto_type(opt_val);
+		cli_data->proto = get_proto_type(opt_val);
 	} else {
-		client_data->proto = BBFDM_BOTH;
+		cli_data->proto = BBFDM_BOTH;
 	}
 
-	opt_val = dmjson_get_value(client_json_obj, 3, "client", "config", "instance_mode");
+	opt_val = dmjson_get_value(cli_json_obj, 3, "cli", "config", "instance_mode");
 	if (opt_val && strlen(opt_val)) {
 		int inst_mode = (int) strtol(opt_val, NULL, 10);
-		client_data->instance_mode = get_instance_mode(inst_mode);
+		cli_data->instance_mode = get_instance_mode(inst_mode);
 	} else {
-		client_data->instance_mode = INSTANCE_MODE_NUMBER;
+		cli_data->instance_mode = INSTANCE_MODE_NUMBER;
 	}
 
-	opt_val = dmjson_get_value(client_json_obj, 3, "client", "config", "enable_plugins");
+	opt_val = dmjson_get_value(cli_json_obj, 3, "cli", "input", "type");
 	if (opt_val && strlen(opt_val)) {
-		client_data->enable_plugins = (unsigned int) strtoul(opt_val, NULL, 10);
+		snprintf(cli_data->in_type, sizeof(cli_data->in_type), "%s", opt_val);
 	} else {
-		client_data->enable_plugins = false;
-	}
-
-	opt_val = dmjson_get_value(client_json_obj, 3, "client", "input", "type");
-	if (opt_val && strlen(opt_val)) {
-		snprintf(client_data->in_type, sizeof(client_data->in_type), "%s", opt_val);
-	} else {
-		printf("ERROR: [client.input.type] not specified\n");
+		printf("ERROR: [cli.input.type] not specified\n");
 		return -1;
 	}
 
-	opt_val = dmjson_get_value(client_json_obj, 3, "client", "input", "name");
+	opt_val = dmjson_get_value(cli_json_obj, 3, "cli", "input", "name");
 	if (opt_val && strlen(opt_val)) {
-		snprintf(client_data->in_name, sizeof(client_data->in_name), "%s", opt_val);
+		snprintf(cli_data->in_name, sizeof(cli_data->in_name), "%s", opt_val);
 	} else {
-		printf("ERROR: [client.input.name] not specified\n");
+		printf("ERROR: [cli.input.name] not specified\n");
 		return -1;
 	}
 
-	opt_val = dmjson_get_value(client_json_obj, 3, "client", "output", "type");
+	opt_val = dmjson_get_value(cli_json_obj, 3, "cli", "output", "type");
 	if (opt_val && strlen(opt_val)) {
-		snprintf(client_data->out_type, sizeof(client_data->out_type), "%s", opt_val);
+		snprintf(cli_data->out_type, sizeof(cli_data->out_type), "%s", opt_val);
 	} else {
-		printf("ERROR: [client.output.type] not specified\n");
+		printf("ERROR: [cli.output.type] not specified\n");
 		return -1;
 	}
-
-	CLIENT_DM_SERVICES = dmjson_get_obj(client_json_obj, 2, "client", "services");
 
 	return 0;
 }
 
-static int cli_exec_help(client_data_t *client_data UNUSED, char *argv[] UNUSED)
+static int cli_exec_help(cli_data_t *cli_data UNUSED, char *argv[] UNUSED)
 {
 	cli_cmd_t *cli_cmd;
 
@@ -353,59 +345,59 @@ static int cli_exec_help(client_data_t *client_data UNUSED, char *argv[] UNUSED)
 	return EXIT_SUCCESS;
 }
 
-static int in_dotso_out_cli_exec_get(client_data_t *client_data, char *argv[])
+static int in_dotso_out_cli_exec_get(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	client_data->bbf_ctx.in_param = argv[0];
+	cli_data->bbf_ctx.in_param = argv[0];
 
-	err = bbf_entry_method(&client_data->bbf_ctx, BBF_GET_VALUE);
+	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_GET_VALUE);
 	if (!err) {
 		struct dm_parameter *n;
 
-		list_for_each_entry(n, &client_data->bbf_ctx.list_parameter, list) {
+		list_for_each_entry(n, &cli_data->bbf_ctx.list_parameter, list) {
 			printf("%s => %s\n", n->name, n->data);
 		}
 	} else {
-		printf("ERROR: %d retrieving %s\n", err, client_data->bbf_ctx.in_param);
+		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);
 		err = EXIT_FAILURE;
 	}
 
 	return err;
 }
 
-static int in_ubus_out_cli_exec_get(client_data_t *client_data, char *argv[])
+static int in_ubus_out_cli_exec_get(cli_data_t *cli_data, char *argv[])
 {
-	return in_ubus_out_cli_exec_cmd(client_data, argv[0], argv[1]);
+	return in_ubus_out_cli_exec_cmd(cli_data, argv[0], argv[1]);
 }
 
-static int cli_exec_get(client_data_t *client_data, char *argv[])
+static int cli_exec_get(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	if (strcasecmp(client_data->in_type, "DotSO") == 0 || strcasecmp(client_data->in_type, "JSON") == 0)
-		err = in_dotso_out_cli_exec_get(client_data, argv);
-	else if (strcasecmp(client_data->in_type, "UBUS") == 0)
-		err = in_ubus_out_cli_exec_get(client_data, argv);
+	if (strcasecmp(cli_data->in_type, "DotSO") == 0 || strcasecmp(cli_data->in_type, "JSON") == 0)
+		err = in_dotso_out_cli_exec_get(cli_data, argv);
+	else if (strcasecmp(cli_data->in_type, "UBUS") == 0)
+		err = in_ubus_out_cli_exec_get(cli_data, argv);
 	else
 		err = EXIT_FAILURE;
 
 	return err;
 }
 
-static int in_dotso_out_cli_exec_set(client_data_t *client_data, char *argv[])
+static int in_dotso_out_cli_exec_set(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	client_data->bbf_ctx.in_param = argv[0];
-	client_data->bbf_ctx.in_value = argv[1];
+	cli_data->bbf_ctx.in_param = argv[0];
+	cli_data->bbf_ctx.in_value = argv[1];
 
-	err = bbf_entry_method(&client_data->bbf_ctx, BBF_SET_VALUE);
+	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_SET_VALUE);
 	if (!err) {
-		printf("%s => Set value is successfully done\n", client_data->bbf_ctx.in_param);
+		printf("%s => Set value is successfully done\n", cli_data->bbf_ctx.in_param);
 		bbf_entry_restart_services(NULL, true);
 	} else {
-		printf("ERROR: %d retrieving %s => %s\n", err, client_data->bbf_ctx.in_param, client_data->bbf_ctx.in_value);
+		printf("ERROR: %d retrieving %s => %s\n", err, cli_data->bbf_ctx.in_param, cli_data->bbf_ctx.in_value);
 		bbf_entry_revert_changes(NULL);
 		err = EXIT_FAILURE;
 	}
@@ -413,37 +405,37 @@ static int in_dotso_out_cli_exec_set(client_data_t *client_data, char *argv[])
 	return err;
 }
 
-static int in_ubus_out_cli_exec_set(client_data_t *client_data, char *argv[])
+static int in_ubus_out_cli_exec_set(cli_data_t *cli_data, char *argv[])
 {
-	return in_ubus_out_cli_exec_cmd(client_data, argv[0], argv[1]);
+	return in_ubus_out_cli_exec_cmd(cli_data, argv[0], argv[1]);
 }
 
-static int cli_exec_set(client_data_t *client_data, char *argv[])
+static int cli_exec_set(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	if (strcasecmp(client_data->in_type, "DotSO") == 0 || strcasecmp(client_data->in_type, "JSON") == 0)
-		err = in_dotso_out_cli_exec_set(client_data, argv);
-	else if (strcasecmp(client_data->in_type, "UBUS") == 0)
-		err = in_ubus_out_cli_exec_set(client_data, argv);
+	if (strcasecmp(cli_data->in_type, "DotSO") == 0 || strcasecmp(cli_data->in_type, "JSON") == 0)
+		err = in_dotso_out_cli_exec_set(cli_data, argv);
+	else if (strcasecmp(cli_data->in_type, "UBUS") == 0)
+		err = in_ubus_out_cli_exec_set(cli_data, argv);
 	else
 		err = EXIT_FAILURE;
 
 	return err;
 }
 
-static int in_dotso_out_cli_exec_add(client_data_t *client_data, char *argv[])
+static int in_dotso_out_cli_exec_add(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	client_data->bbf_ctx.in_param = argv[0];
+	cli_data->bbf_ctx.in_param = argv[0];
 
-	err = bbf_entry_method(&client_data->bbf_ctx, BBF_ADD_OBJECT);
+	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_ADD_OBJECT);
 	if (!err) {
-		printf("Added %s%s.\n", client_data->bbf_ctx.in_param, client_data->bbf_ctx.addobj_instance);
+		printf("Added %s%s.\n", cli_data->bbf_ctx.in_param, cli_data->bbf_ctx.addobj_instance);
 		bbf_entry_restart_services(NULL, true);
 	} else {
-		printf("ERROR: %d retrieving %s\n", err, client_data->bbf_ctx.in_param);
+		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);
 		bbf_entry_revert_changes(NULL);
 		err = EXIT_FAILURE;
 	}
@@ -451,37 +443,37 @@ static int in_dotso_out_cli_exec_add(client_data_t *client_data, char *argv[])
 	return err;
 }
 
-static int in_ubus_out_cli_exec_add(client_data_t *client_data, char *argv[])
+static int in_ubus_out_cli_exec_add(cli_data_t *cli_data, char *argv[])
 {
-	return in_ubus_out_cli_exec_cmd(client_data, argv[0], argv[1]);
+	return in_ubus_out_cli_exec_cmd(cli_data, argv[0], argv[1]);
 }
 
-static int cli_exec_add(client_data_t *client_data, char *argv[])
+static int cli_exec_add(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	if (strcasecmp(client_data->in_type, "DotSO") == 0 || strcasecmp(client_data->in_type, "JSON") == 0)
-		err = in_dotso_out_cli_exec_add(client_data, argv);
-	else if (strcasecmp(client_data->in_type, "UBUS") == 0)
-		err = in_ubus_out_cli_exec_add(client_data, argv);
+	if (strcasecmp(cli_data->in_type, "DotSO") == 0 || strcasecmp(cli_data->in_type, "JSON") == 0)
+		err = in_dotso_out_cli_exec_add(cli_data, argv);
+	else if (strcasecmp(cli_data->in_type, "UBUS") == 0)
+		err = in_ubus_out_cli_exec_add(cli_data, argv);
 	else
 		err = EXIT_FAILURE;
 
 	return err;
 }
 
-static int in_dotso_out_cli_exec_del(client_data_t *client_data, char *argv[])
+static int in_dotso_out_cli_exec_del(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	client_data->bbf_ctx.in_param = argv[0];
+	cli_data->bbf_ctx.in_param = argv[0];
 
-	err = bbf_entry_method(&client_data->bbf_ctx, BBF_DEL_OBJECT);
+	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_DEL_OBJECT);
 	if (!err) {
-		printf("Deleted %s\n", client_data->bbf_ctx.in_param);
+		printf("Deleted %s\n", cli_data->bbf_ctx.in_param);
 		bbf_entry_restart_services(NULL, true);
 	} else {
-		printf("ERROR: %d retrieving %s\n", err, client_data->bbf_ctx.in_param);
+		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);
 		bbf_entry_revert_changes(NULL);
 		err = EXIT_FAILURE;
 	}
@@ -489,83 +481,83 @@ static int in_dotso_out_cli_exec_del(client_data_t *client_data, char *argv[])
 	return err;
 }
 
-static int in_ubus_out_cli_exec_del(client_data_t *client_data, char *argv[])
+static int in_ubus_out_cli_exec_del(cli_data_t *cli_data, char *argv[])
 {
-	return in_ubus_out_cli_exec_cmd(client_data, argv[0], argv[1]);
+	return in_ubus_out_cli_exec_cmd(cli_data, argv[0], argv[1]);
 }
 
-static int cli_exec_del(client_data_t *client_data, char *argv[])
+static int cli_exec_del(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	if (strcasecmp(client_data->in_type, "DotSO") == 0 || strcasecmp(client_data->in_type, "JSON") == 0)
-		err = in_dotso_out_cli_exec_del(client_data, argv);
-	else if (strcasecmp(client_data->in_type, "UBUS") == 0)
-		err = in_ubus_out_cli_exec_del(client_data, argv);
+	if (strcasecmp(cli_data->in_type, "DotSO") == 0 || strcasecmp(cli_data->in_type, "JSON") == 0)
+		err = in_dotso_out_cli_exec_del(cli_data, argv);
+	else if (strcasecmp(cli_data->in_type, "UBUS") == 0)
+		err = in_ubus_out_cli_exec_del(cli_data, argv);
 	else
 		err = EXIT_FAILURE;
 
 	return err;
 }
 
-static int in_dotso_out_cli_exec_instances(client_data_t *client_data, char *argv[])
+static int in_dotso_out_cli_exec_instances(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	client_data->bbf_ctx.in_param = argv[0];
-	client_data->bbf_ctx.nextlevel = false;
+	cli_data->bbf_ctx.in_param = argv[0];
+	cli_data->bbf_ctx.nextlevel = false;
 
-	err = bbf_entry_method(&client_data->bbf_ctx, BBF_INSTANCES);
+	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_INSTANCES);
 	if (!err) {
 		struct dm_parameter *n;
 
-		list_for_each_entry(n, &client_data->bbf_ctx.list_parameter, list) {
+		list_for_each_entry(n, &cli_data->bbf_ctx.list_parameter, list) {
 			printf("%s\n", n->name);
 		}
 	} else {
-		printf("ERROR: %d retrieving %s\n", err, client_data->bbf_ctx.in_param);
+		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);
 		err = EXIT_FAILURE;
 	}
 
 	return err;
 }
 
-static int in_ubus_out_cli_exec_instances(client_data_t *client_data, char *argv[])
+static int in_ubus_out_cli_exec_instances(cli_data_t *cli_data, char *argv[])
 {
-	return in_ubus_out_cli_exec_cmd(client_data, argv[0], argv[1]);
+	return in_ubus_out_cli_exec_cmd(cli_data, argv[0], argv[1]);
 }
 
-static int cli_exec_instances(client_data_t *client_data, char *argv[])
+static int cli_exec_instances(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	if (strcasecmp(client_data->in_type, "DotSO") == 0 || strcasecmp(client_data->in_type, "JSON") == 0)
-		err = in_dotso_out_cli_exec_instances(client_data, argv);
-	else if (strcasecmp(client_data->in_type, "UBUS") == 0)
-		err = in_ubus_out_cli_exec_instances(client_data, argv);
+	if (strcasecmp(cli_data->in_type, "DotSO") == 0 || strcasecmp(cli_data->in_type, "JSON") == 0)
+		err = in_dotso_out_cli_exec_instances(cli_data, argv);
+	else if (strcasecmp(cli_data->in_type, "UBUS") == 0)
+		err = in_ubus_out_cli_exec_instances(cli_data, argv);
 	else
 		err = EXIT_FAILURE;
 
 	return err;
 }
 
-static int in_dotso_out_cli_exec_schema(client_data_t *client_data, char *argv[])
+static int in_dotso_out_cli_exec_schema(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	client_data->bbf_ctx.in_param = argv[0];
-	client_data->bbf_ctx.nextlevel = false;
-	client_data->bbf_ctx.iscommand = true;
-	client_data->bbf_ctx.isevent = true;
-	client_data->bbf_ctx.isinfo = true;
+	cli_data->bbf_ctx.in_param = argv[0];
+	cli_data->bbf_ctx.nextlevel = false;
+	cli_data->bbf_ctx.iscommand = true;
+	cli_data->bbf_ctx.isevent = true;
+	cli_data->bbf_ctx.isinfo = true;
 
-	err = bbf_entry_method(&client_data->bbf_ctx, BBF_SCHEMA);
+	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_SCHEMA);
 	if (!err) {
 		struct dm_parameter *n;
 
-	    printf("\nDumping %s Schema...\n\n", client_data->bbf_ctx.in_param);
+	    printf("\nDumping %s Schema...\n\n", cli_data->bbf_ctx.in_param);
 
-		list_for_each_entry(n, &client_data->bbf_ctx.list_parameter, list) {
+		list_for_each_entry(n, &cli_data->bbf_ctx.list_parameter, list) {
 			int cmd = get_dm_type(n->type);
 
 			printf("%s\n", n->name);
@@ -605,110 +597,109 @@ static int in_dotso_out_cli_exec_schema(client_data_t *client_data, char *argv[]
 			}
 		}
 	} else {
-		printf("ERROR: %d retrieving %s\n", err, client_data->bbf_ctx.in_param);
+		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);
 		err = EXIT_FAILURE;
 	}
 
 	return err;
 }
 
-static int in_ubus_out_cli_exec_schema(client_data_t *client_data, char *argv[])
+static int in_ubus_out_cli_exec_schema(cli_data_t *cli_data, char *argv[])
 {
-	return in_ubus_out_cli_exec_cmd(client_data, argv[0], argv[1]);
+	return in_ubus_out_cli_exec_cmd(cli_data, argv[0], argv[1]);
 }
 
-static int cli_exec_schema(client_data_t *client_data, char *argv[])
+static int cli_exec_schema(cli_data_t *cli_data, char *argv[])
 {
 	int err = EXIT_SUCCESS;
 
-	if (strcasecmp(client_data->in_type, "DotSO") == 0 || strcasecmp(client_data->in_type, "JSON") == 0)
-		err = in_dotso_out_cli_exec_schema(client_data, argv);
-	else if (strcasecmp(client_data->in_type, "UBUS") == 0)
-		err = in_ubus_out_cli_exec_schema(client_data, argv);
+	if (strcasecmp(cli_data->in_type, "DotSO") == 0 || strcasecmp(cli_data->in_type, "JSON") == 0)
+		err = in_dotso_out_cli_exec_schema(cli_data, argv);
+	else if (strcasecmp(cli_data->in_type, "UBUS") == 0)
+		err = in_ubus_out_cli_exec_schema(cli_data, argv);
 	else
 		err = EXIT_FAILURE;
 
 	return err;
 }
 
-static int cli_exec_command(client_data_t *client_data, int argc, char *argv[])
+static int cli_exec_command(cli_data_t *cli_data, int argc, char *argv[])
 {
 	cli_cmd_t *cli_cmd = NULL;
 	int err = EXIT_SUCCESS;
 	bool registred_command = false;
 
-	client_data->cmd = argv[0];
-	if (!client_data->cmd || strlen(client_data->cmd) == 0)
+	cli_data->cmd = argv[0];
+	if (!cli_data->cmd || strlen(cli_data->cmd) == 0)
 		return EXIT_FAILURE;
 
-	if (strcasecmp(client_data->in_type, "DotSO") == 0 || strcasecmp(client_data->in_type, "JSON") == 0) {
+	if (strcasecmp(cli_data->in_type, "DotSO") == 0 || strcasecmp(cli_data->in_type, "JSON") == 0) {
 
-		if (strcasecmp(client_data->in_type, "DotSO") == 0) {
-			if (load_dotso_plugin(&client_lib_handle, client_data->in_name,
-					&CLIENT_DM_ROOT_OBJ,
-					CLIENT_DM_VENDOR_EXTENSION,
-					&CLIENT_DM_VENDOR_EXTENSION_EXCLUDE) != 0) {
+		if (strcasecmp(cli_data->in_type, "DotSO") == 0) {
+			if (load_dotso_plugin(&cli_lib_handle, cli_data->in_name,
+					&CLI_DM_ROOT_OBJ,
+					CLI_DM_VENDOR_EXTENSION,
+					&CLI_DM_VENDOR_EXTENSION_EXCLUDE) != 0) {
 				err = EXIT_FAILURE;
 				goto end;
 			}
 		} else {
-			client_data->enable_plugins = false;
-			if (load_json_plugin(&loaded_json_files, &json_list, &json_memhead, client_data->in_name,
-					&CLIENT_DM_ROOT_OBJ) != 0) {
+			if (load_json_plugin(&loaded_json_files, &json_list, &json_memhead, cli_data->in_name,
+					&CLI_DM_ROOT_OBJ) != 0) {
 				err = EXIT_FAILURE;
 				goto end;
 			}
 		}
 
-		if (CLIENT_DM_ROOT_OBJ == NULL) {
+		if (CLI_DM_ROOT_OBJ == NULL) {
 			err = EXIT_FAILURE;
 			goto end;
 		}
 
-		bbf_ctx_init(&client_data->bbf_ctx, CLIENT_DM_ROOT_OBJ, CLIENT_DM_VENDOR_EXTENSION, CLIENT_DM_VENDOR_EXTENSION_EXCLUDE, CLIENT_DM_SERVICES);
+		bbf_ctx_init(&cli_data->bbf_ctx, CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE);
 
-		client_data->bbf_ctx.dm_type = client_data->proto;
-		client_data->bbf_ctx.instance_mode = client_data->instance_mode;
-		client_data->bbf_ctx.enable_plugins = client_data->enable_plugins;
-	} else if (strcasecmp(client_data->in_type, "UBUS") != 0) {
+		cli_data->bbf_ctx.dm_type = cli_data->proto;
+		cli_data->bbf_ctx.instance_mode = cli_data->instance_mode;
+		cli_data->bbf_ctx.enable_plugins = input_json ? false : true;
+	} else if (strcasecmp(cli_data->in_type, "UBUS") != 0) {
 		return -1;
 	}
 
 	for (size_t i = 0; i < ARRAY_SIZE(cli_commands); i++) {
 
         cli_cmd = &cli_commands[i];
-        if (strcmp(client_data->cmd, cli_cmd->name) == 0) {
+        if (strcmp(cli_data->cmd, cli_cmd->name) == 0) {
 
         	if (argc-1 < cli_cmd->num_args) {
         		printf("ERROR: Number of arguments for %s method is wrong(%d), it should be %d\n", cli_cmd->name, argc-1, cli_cmd->num_args);
-        		cli_commands[0].exec_cmd(client_data, NULL);
+        		cli_commands[0].exec_cmd(cli_data, NULL);
         		err = EXIT_FAILURE;
         		goto end;
         	}
 
-        	err = cli_cmd->exec_cmd(client_data, &argv[1]);
+        	err = cli_cmd->exec_cmd(cli_data, &argv[1]);
         	registred_command = true;
         	break;
         }
 	}
 
 	if (!registred_command) {
-		printf("ERROR: Unknown command: %s\n", client_data->cmd);
-		cli_commands[0].exec_cmd(client_data, NULL);
+		printf("ERROR: Unknown command: %s\n", cli_data->cmd);
+		cli_commands[0].exec_cmd(cli_data, NULL);
 		err = EXIT_FAILURE;
 	}
 
 end:
-	if (strcasecmp(client_data->in_type, "DotSO") == 0) {
-		if (CLIENT_DM_ROOT_OBJ) {
-			bbf_ctx_clean(&client_data->bbf_ctx);
-			bbf_global_clean(CLIENT_DM_ROOT_OBJ);
+	if (strcasecmp(cli_data->in_type, "DotSO") == 0) {
+		if (CLI_DM_ROOT_OBJ) {
+			bbf_ctx_clean(&cli_data->bbf_ctx);
+			bbf_global_clean(CLI_DM_ROOT_OBJ);
 		}
-		free_dotso_plugin(client_lib_handle);
-	} else if (strcasecmp(client_data->in_type, "JSON") == 0) {
-		if (CLIENT_DM_ROOT_OBJ) {
-			bbf_ctx_clean(&client_data->bbf_ctx);
-			bbf_global_clean(CLIENT_DM_ROOT_OBJ);
+		free_dotso_plugin(cli_lib_handle);
+	} else if (strcasecmp(cli_data->in_type, "JSON") == 0) {
+		if (CLI_DM_ROOT_OBJ) {
+			bbf_ctx_clean(&cli_data->bbf_ctx);
+			bbf_global_clean(CLI_DM_ROOT_OBJ);
 		}
 		free_json_plugin();
 	}
@@ -716,14 +707,14 @@ end:
 	return err;
 }
 
-int bbfdm_cli_exec_command(const char *json_path, int argc, char *argv[])
+int bbfdm_cli_exec_command(int argc, char *argv[])
 {
-	client_data_t client_data = {0};
+	cli_data_t cli_data = {0};
 	int err = EXIT_SUCCESS;
 
-	memset(&client_data, 0, sizeof(client_data_t));
+	memset(&cli_data, 0, sizeof(cli_data_t));
 
-	err = bbfdm_load_client_config(json_path, &client_data);
+	err = bbfdm_load_cli_config(&cli_data);
 	if (err)
 		return EXIT_FAILURE;
 
@@ -733,11 +724,11 @@ int bbfdm_cli_exec_command(const char *json_path, int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	err = cli_exec_command(&client_data, argc, argv);
+	err = cli_exec_command(&cli_data, argc, argv);
 
-	if (client_json_obj) {
-		json_object_put(client_json_obj);
-		client_json_obj = NULL;
+	if (cli_json_obj) {
+		json_object_put(cli_json_obj);
+		cli_json_obj = NULL;
 	}
 	return err;
 }

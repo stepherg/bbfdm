@@ -20,6 +20,7 @@
 #define BBF_ADD_EVENT "AddObj"
 #define BBF_DEL_EVENT "DelObj"
 #define BBF_EVENT "event"
+#define BBF_JSON_INPUT "/etc/bbfdm/input.json"
 
 #define MAX_DM_KEY_LEN 256
 #define MAX_DM_PATH 1024
@@ -39,7 +40,6 @@
 extern DMOBJ *DEAMON_DM_ROOT_OBJ;
 extern DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2];
 extern DM_MAP_VENDOR_EXCLUDE *DEAMON_DM_VENDOR_EXTENSION_EXCLUDE;
-extern json_object *DEAMON_DM_SERVICES;
 
 bool match(const char *string, const char *pattern);
 bool is_str_eq(const char *s1, const char *s2);

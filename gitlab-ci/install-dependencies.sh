@@ -20,7 +20,7 @@ install_libwifi_dataelements ${1}
 
 # Install datamodel plugins only when pipeline trigger for bbfdm
 if [ -z "${1}" ]; then
-	git clone -b devel --depth 1 https://dev.iopsys.eu/feed/iopsys.git /opt/dev/iopsys
+	git clone -b service_registration --depth 1 https://dev.iopsys.eu/feed/iopsys.git /opt/dev/iopsys
 	git clone -b devel --depth 1 https://dev.iopsys.eu/bbf/bulkdata.git /opt/dev/bulkdata
 
 	cp -f /opt/dev/iopsys/urlfilter/files/etc/bbfdm/json/urlfilter.json /etc/bbfdm/json
@@ -28,7 +28,10 @@ if [ -z "${1}" ]; then
 	cp -f /opt/dev/iopsys/obuspa/files/etc/bbfdm/json/TransferComplete.json /etc/bbfdm/json
 	cp -f /opt/dev/iopsys/icwmp/files/etc/bbfdm/json/CWMPManagementServer.json /etc/bbfdm/json
 	cp -f /opt/dev/iopsys/ponmngr/files/etc/bbfdm/json/xpon.json /etc/bbfdm/json
-	cp -f /opt/dev/bulkdata/bbf_plugin/bulkdata.json /etc/bbfdm/json
+	
+	mkdir -p /etc/bbfdm/services/bulkdata
+	cp -f /opt/dev/bulkdata/bbf_plugin/bulkdata.json /etc/bbfdm/services/bulkdata
+	cp -f /opt/dev/iopsys/bulkdata/files/etc/bbfdm/services/bulkdata/input.json /etc/bbfdm/services/bulkdata
 
 	# install usermngr plugin
 	install_libusermngr

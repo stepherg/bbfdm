@@ -57,16 +57,19 @@ ENDIF(BBF_TR471)
 
 IF(WITH_WOLFSSL)
 	SET(SSL_LIBS wolfssl)
+	SET(CRYPTO_LIBS crypto)
 	add_compile_definitions(LWOLFSSL)
 ENDIF(WITH_WOLFSSL)
 
 IF(WITH_OPENSSL)
 	SET(SSL_LIBS ssl)
+	SET(CRYPTO_LIBS crypto)
 	add_compile_definitions(LOPENSSL)
 ENDIF(WITH_OPENSSL)
 
 IF(WITH_MBEDTLS)
 	SET(SSL_LIBS mbedtls)
+	SET(CRYPTO_LIBS mbedcrypto)
 	add_compile_definitions(LMBEDTLS)
 ENDIF(WITH_MBEDTLS)
 
@@ -90,7 +93,7 @@ ENDIF(BBF_VENDOR_EXTENSION)
 
 ADD_LIBRARY(bbfdm SHARED ${BBF_DM_SOURCES} ${BBF_TR181_SOURCES} ${BBF_TR104_SOURCES} ${BBF_TR143_SOURCES} ${BBF_TR471_SOURCES} ${BBF_VENDOR_EXTENSION_SOURCES})
 
-TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json curl bbfdm-api ${SSL_LIBS})
+TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json curl bbfdm-api ${SSL_LIBS} ${CRYPTO_LIBS})
 
 INSTALL(TARGETS bbfdm
 		LIBRARY DESTINATION usr/lib)

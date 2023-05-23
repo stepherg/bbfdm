@@ -27,7 +27,7 @@
 #include <libubus.h>
 
 extern char UBUS_METHOD_NAME[32];
-extern bool enable_plugins;
+extern char *input_json;
 
 static struct event_map_list ev_map_list[] = {
 	/* { event name,                     DM Path,   .arguments[] = { event_args, dm_args } } */
@@ -275,7 +275,7 @@ bool is_registered_event(char *name)
 			.iscommand = false,
 			.isevent = true,
 			.isinfo = false,
-			.enable_plugins = enable_plugins,
+			.enable_plugins = input_json ? false : true,
 			.instance_mode = INSTANCE_MODE_NUMBER,
 			.dm_type = BBFDM_USP
 	};

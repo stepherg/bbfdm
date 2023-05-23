@@ -177,7 +177,6 @@ struct dmctx {
 	DMOBJ *dm_entryobj;
 	DM_MAP_VENDOR *dm_vendor_extension[2];
 	DM_MAP_VENDOR_EXCLUDE *dm_vendor_extension_exclude;
-	json_object *services_obj;
 	bool nextlevel;
 	bool iswildcard;
 	int faultcode;

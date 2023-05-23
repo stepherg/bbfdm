@@ -44,6 +44,8 @@ run_valgrind_redirect -c get Device.
 
 run_valgrind_redirect -c schema Device.
 
+run_valgrind_verbose -c get Device.BulkData.
+
 run_valgrind_verbose -c get Device.RootDataModelVersion
 
 run_valgrind_verbose -c get Device.IP.Interface.*.IPv6Address.*.IPAddress

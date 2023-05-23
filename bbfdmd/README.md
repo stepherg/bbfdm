@@ -68,7 +68,7 @@ Below is an example of json file:
 
 ```json
 {
-    "client": {
+    "cli": {
         "config": {
             "proto": "usp", // usp, cwmp
             "instance_mode": 0 // 0:number, 1:alias

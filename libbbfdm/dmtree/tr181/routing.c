@@ -1008,9 +1008,9 @@ static int get_RoutingRouteInformationInterfaceSetting_Interface(char *refparam,
 
 	snprintf(cmd, sizeof(cmd), "ip -6 route show");
 
-	FILE *pp = fopen(PROC_ROUTE6, "r");
-	if (pp != NULL) {
-		while (fgets(line, MAX_ROUTE_LEN, pp) != NULL) {
+	FILE *fp = fopen(PROC_ROUTE6, "r");
+	if (fp != NULL) {
+		while (fgets(line, MAX_ROUTE_LEN, fp) != NULL) {
 			remove_new_line(line);
 
 			if (parse_route6_line(line, &route6))
@@ -1020,7 +1020,7 @@ static int get_RoutingRouteInformationInterfaceSetting_Interface(char *refparam,
 				break;
 		}
 
-		pclose(pp);
+		fclose(fp);
 	}
 
 	if (DM_STRLEN(route6.iface)) {

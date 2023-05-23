@@ -99,6 +99,13 @@
         "status"
       ]    
     },
+    "srv_type_t": {
+      "type": "string",
+      "enum": [
+        "register",
+        "list"
+      ]    
+    },
     "format_t": {
       "type": "string",
       "default": "pretty",
@@ -764,6 +771,53 @@
             "transaction_id": {
               "type": "integer",
               "minimum": 1
+            },
+            "error": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        }
+      },
+      "required": [
+        "input",
+        "output"
+      ]
+    },
+    "service": {
+      "title": "Register a micro-service in the main service",
+      "type": "object",
+      "properties": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "cmd": {
+              "$ref": "#/definitions/srv_type_t"
+            },
+            "name": {
+              "type": "string",
+              "description": "Name of the micro-service ubus object"
+            },
+            "parent_dm": {
+              "type": "string",
+              "description": "Object path where the micro-service object will be added"
+            },
+            "object": {
+              "type": "string",
+              "description": "Name of the micro-service object"
+            }
+          },
+          "required": [
+            "cmd"
+          ]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "boolean"
             },
             "error": {
               "type": "string"
