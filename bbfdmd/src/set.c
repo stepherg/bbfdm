@@ -62,13 +62,13 @@ int fill_pvlist_set(char *param_name, char *param_value, struct blob_attr *blob_
 
 	size_t plen = DM_STRLEN(param_name);
 	if (plen == 0)
-		return bbfdm_FAULT_INVALID_PATH;
+		return USP_FAULT_INVALID_PATH;
 
 	if (!param_value)
 		goto blob__table;
 
 	if (param_name[plen - 1] == '.')
-		return bbfdm_FAULT_INVALID_PATH;
+		return USP_FAULT_INVALID_PATH;
 
 	add_pv_list(param_name, param_value, NULL, pv_list);
 
@@ -100,7 +100,7 @@ blob__table:
 			break;
 		default:
 			INFO("Unhandled set request type|%x|", blob_id(attr));
-			return bbfdm_FAULT_INVALID_ARGUMENT;
+			return USP_FAULT_INVALID_ARGUMENT;
 		}
 
 		snprintf(path, MAX_DM_PATH, "%s%s", param_name, (char *)hdr->name);

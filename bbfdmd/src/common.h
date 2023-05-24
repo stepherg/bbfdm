@@ -35,7 +35,6 @@
 
 #define GLOB_CHAR "[[+*]+"
 #define GLOB_EXPR "[=><]+"
-#define GLOB_bbfdm_PATH "[+#=><]+"
 
 extern DMOBJ *DEAMON_DM_ROOT_OBJ;
 extern DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2];

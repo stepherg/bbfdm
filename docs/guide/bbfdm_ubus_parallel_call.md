@@ -1,6 +1,6 @@
 # Parallel UBUS calls
 
-All `operate` operation and `get` operation with a depth up to 'bbfdm_SUBPROCESS_DEPTH(2)'
+All `operate` operation and `get` operation with a depth up to 'BBF_SUBPROCESS_DEPTH(2)'
 runs in a parallel subprocess to avoid blocking the next call.
 
 ```console
