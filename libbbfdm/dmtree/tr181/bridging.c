@@ -848,6 +848,8 @@ static void dmmap_synchronizeBridgingBridgePort(struct dmctx *dmctx, DMNODE *par
 
 		// get ifname from wireless/wifi-iface section
 		dmuci_get_value_by_section_string(s, "ifname", &ifname);
+		if (DM_STRLEN(ifname) == 0)
+			continue;
 
 		if (is_section_exist("dmmap_bridge_port", "bridge_port", "br_inst", args->br_inst, "port", ifname))
 			continue;
