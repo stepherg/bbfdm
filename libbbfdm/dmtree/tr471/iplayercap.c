@@ -977,17 +977,17 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 
 	char *host = dmjson_get_value((json_object *)value, 1, "Host");
 	if (host[0] == '\0')
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *interface = get_diagnostics_interface_option(ctx, ip_interface);
 	char *role = dmjson_get_value((json_object *)value, 1, "Role");
 	if (role[0] != '\0' && dm_validate_string(role, -1, -1, IPLayerCapacityRole, NULL))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *port = dmjson_get_value((json_object *)value, 1, "Port");
 	if (port[0] != '\0' && dm_validate_unsignedInt(port, RANGE_ARGS{{"1","65535"}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *jumbo = dmjson_get_value((json_object *)value, 1, "JumboFramesPermitted");
 	bool jumbo_en = false;
@@ -995,19 +995,19 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 
 	char *dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
 	if (dscp[0] != '\0' && dm_validate_unsignedInt(dscp, RANGE_ARGS{{"0","63"}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *ip_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
 	if (ip_proto[0] != '\0' && dm_validate_string(ip_proto, -1, -1, ProtocolVersion, NULL))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *content = dmjson_get_value((json_object *)value, 1, "UDPPayloadContent");
 	if (content[0] != '\0' && dm_validate_string(content, -1, -1, UDPPayloadContent, NULL))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *test_type = dmjson_get_value((json_object *)value, 1, "TestType");
 	if (test_type[0] != '\0' && dm_validate_string(test_type, -1, -1, IPLayerCapacityTestType, NULL))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *ipdv = dmjson_get_value((json_object *)value, 1, "IPDVEnable");
 	bool ipdv_en = false;
@@ -1015,27 +1015,27 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 
 	char *start_rate = dmjson_get_value((json_object *)value, 1, "StartSendingRateIndex");
 	if (start_rate[0] != '\0' && dm_validate_unsignedInt(start_rate, RANGE_ARGS{{"0","1108"}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *num_interval = dmjson_get_value((json_object *)value, 1, "NumberTestSubIntervals");
 	if (num_interval[0] != '\0' && dm_validate_unsignedInt(num_interval, RANGE_ARGS{{"1","60"}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *mode_test = dmjson_get_value((json_object *)value, 1, "NumberFirstModeTestSubIntervals");
 	if (mode_test[0] != '\0' && dm_validate_unsignedInt(mode_test, RANGE_ARGS{{"0","100"}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *sub_interval = dmjson_get_value((json_object *)value, 1, "TestSubInterval");
 	if (sub_interval[0] != '\0' && dm_validate_unsignedInt(sub_interval, RANGE_ARGS{{"1000","6000"}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *feed_interval = dmjson_get_value((json_object *)value, 1, "StatusFeedbackInterval");
 	if (feed_interval[0] != '\0' && dm_validate_unsignedInt(feed_interval, RANGE_ARGS{{"5","250"}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *seq_err = dmjson_get_value((json_object *)value, 1, "SeqErrThresh");
 	if (seq_err[0] != '\0' && dm_validate_unsignedInt(seq_err, RANGE_ARGS{{"0","100"}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *dup_ignore = dmjson_get_value((json_object *)value, 1, "ReordDupIgnoreEnable");
 	bool dup_ignore_en = false;
@@ -1043,23 +1043,23 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 
 	char *low_thresh = dmjson_get_value((json_object *)value, 1, "LowerThresh");
 	if (low_thresh[0] != '\0' && dm_validate_unsignedInt(low_thresh, RANGE_ARGS{{"5","250"}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *up_thresh = dmjson_get_value((json_object *)value, 1, "UpperThresh");
 	if (up_thresh[0] != '\0' && dm_validate_unsignedInt(up_thresh, RANGE_ARGS{{"5","250"}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *speed_delta = dmjson_get_value((json_object *)value, 1, "HighSpeedDelta");
 	if (speed_delta[0] != '\0' && dm_validate_unsignedInt(speed_delta, RANGE_ARGS{{"2", NULL}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *slow_adj = dmjson_get_value((json_object *)value, 1, "SlowAdjThresh");
 	if (slow_adj[0] != '\0' && dm_validate_unsignedInt(slow_adj, RANGE_ARGS{{"2", NULL}}, 1))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	char *rate_adj = dmjson_get_value((json_object *)value, 1, "RateAdjAlgorithm");
 	if (rate_adj[0] != '\0' && dm_validate_string(rate_adj, -1, -1, RateAdjAlgorithm, NULL))
-		return USP_FAULT_INVALID_ARGUMENT;
+		return bbfdm_FAULT_INVALID_ARGUMENT;
 
 	snprintf(input, sizeof(input), "'{\"host\": \"%s\",\"interface\":\"%s\",\"role\":\"%s\",\"port\":\"%s\",\"jumbo_frames\":\"%s\",\"proto_ver\":\"%s\",\"udp_content\":\"%s\",\"test_type\":\"%s\",\"ipdv_enable\":\"%s\",\"DSCP\":\"%s\",\"rate_index\":\"%s\",\"mode_subintervals\":\"%s\",\"test_subinterval\":\"%s\",\"feedback_interval\":\"%s\",\"seq_err_thresh\":\"%s\",\"dup_ignore\":\"%s\",\"lower_thresh\":\"%s\",\"upper_thresh\":\"%s\",\"high_speed_delta\":\"%s\",\"algorithm\":\"%s\",\"slow_adj_thresh\":\"%s\",\"num_interval\":\"%s\",\"proto\":\"%s\"}'",
 					host, interface, role, port, DM_STRLEN(jumbo) > 0 ? (jumbo_en ? "1" : "0") : "\0",
@@ -1075,13 +1075,13 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 		fgets(output, sizeof(output), pp);
 		pclose(pp);
 	} else {
-		return USP_FAULT_COMMAND_FAILURE;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 	}
 
 	json_object *res = (DM_STRLEN(output)) ? json_tokener_parse(output) : NULL;
 
 	if (res == NULL) {
-		return USP_FAULT_COMMAND_FAILURE;
+		return bbfdm_FAULT_COMMAND_FAILURE;
 	}
 
 	char *status = NULL;

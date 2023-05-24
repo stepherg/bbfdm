@@ -466,7 +466,7 @@ static void test_api_bbfdm_wrong_operate(void **state)
 	ctx->in_param = "Device.IP.Diagnostics.IPing()";
 
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
-	assert_int_equal(fault, USP_FAULT_INVALID_PATH);
+	assert_int_equal(fault, bbfdm_FAULT_INVALID_PATH);
 }
 
 static void test_api_bbfdm_get_list_operate(void **state)
