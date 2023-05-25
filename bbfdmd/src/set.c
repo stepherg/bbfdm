@@ -38,7 +38,7 @@ int bbfdm_set_value(bbfdm_data_t *data)
 		data->bbf_ctx.in_param = pv->param;
 		data->bbf_ctx.in_value = pv->val;
 
-		fault = bbf_entry_method(&data->bbf_ctx, BBF_SET_VALUE);
+		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_SET_VALUE);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {

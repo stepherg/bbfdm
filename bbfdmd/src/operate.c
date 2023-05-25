@@ -39,7 +39,7 @@ static int bbfdm_dm_operate(bbfdm_data_t *data)
 	blobmsg_add_string(&data->bb, "path", data->bbf_ctx.in_param);
 	blobmsg_add_string(&data->bb, "data", data->bbf_ctx.linker);
 
-	fault = bbf_entry_method(&data->bbf_ctx, BBF_OPERATE);
+	fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_OPERATE);
 	if (fault == 0) {
 		struct dm_parameter *n;
 

@@ -64,6 +64,21 @@ static json_object *deamon_json_obj = NULL;
 char UBUS_METHOD_NAME[32] = "bbfdm";
 bool enable_plugins = true;
 
+static void sig_handler(int sig)
+{
+	if (sig == SIGSEGV) {
+		handle_pending_signal(sig);
+	} else if (sig == SIGUSR1) {
+		ERR("# Exception in PID[%ld]", getpid());
+	}
+}
+
+static void signal_init(void)
+{
+	signal(SIGSEGV, sig_handler);
+	signal(SIGUSR1, sig_handler);
+}
+
 static void usage(char *prog)
 {
 	fprintf(stderr, "Usage: %s [options]\n", prog);
@@ -215,6 +230,8 @@ static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t
 			exit(EXIT_FAILURE);
 		}
 
+		// child initialise signal to prevent segfaults
+		signal_init();
 		/* free fd's and memory inherited from parent */
 		ubus_shutdown(data->ctx);
 		uloop_done();
@@ -1047,7 +1064,7 @@ static void update_instances_list(struct list_head *inst)
 
 	bbf_init(&bbf_ctx);
 
-	if (0 == bbf_entry_method(&bbf_ctx, BBF_INSTANCES)) {
+	if (0 == bbfdm_cmd_exec(&bbf_ctx, BBF_INSTANCES)) {
 		struct dm_parameter *nptr_dp;
 
 		list_for_each_entry(nptr_dp, &bbf_ctx.list_parameter, list) {
@@ -1117,6 +1134,8 @@ static int fork_instance_checker(struct bbfdm_context *u)
 	child = fork();
 	if (child == 0) {
 		prctl(PR_SET_NAME, (unsigned long) "bbfdm_instance");
+		// child initialise signal to prevent segfaults
+		signal_init();
 		/* free fd's and memory inherited from parent */
 		ubus_shutdown(&u->ubus_ctx);
 		uloop_done();
@@ -1309,6 +1328,8 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Failed to connect to ubus\n");
 		return -1;
 	}
+
+	signal_init();
 
 	err = register_events_to_ubus(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);
 	if (err != 0)

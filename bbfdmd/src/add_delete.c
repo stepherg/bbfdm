@@ -35,7 +35,7 @@ static int bbfdm_add_object(bbfdm_data_t *data)
 
 	void *array = blobmsg_open_array(&data->bb, "results");
 
-	fault = bbf_entry_method(&data->bbf_ctx, BBF_ADD_OBJECT);
+	fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_ADD_OBJECT);
 	if (fault) {
 		fill_err_code_table(data, fault);
 	} else {
@@ -64,7 +64,7 @@ static int bbfdm_del_object(bbfdm_data_t *data)
 
 		INFO("Req to delete object |%s|", data->bbf_ctx.in_param);
 
-		fault = bbf_entry_method(&data->bbf_ctx, BBF_DEL_OBJECT);
+		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_DEL_OBJECT);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {

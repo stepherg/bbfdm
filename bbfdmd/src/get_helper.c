@@ -47,6 +47,42 @@ static struct {
 	int timeout_ms;
 } g_current_trans = {.trans_id=0, .timeout_ms=10000};
 
+static jmp_buf gs_jump_location;
+static bool gs_jump_called_by_bbf = false;
+
+void handle_pending_signal(int sig)
+{
+	if (gs_jump_called_by_bbf) {
+		siglongjmp(gs_jump_location, 1);
+	}
+
+	ERR("Exception [%d] not cause by bbf dm, exit with error", sig);
+	exit(1);
+}
+
+int bbfdm_cmd_exec(struct dmctx *bbf_ctx, int cmd)
+{
+	int fault = 0;
+
+	if (bbf_ctx->in_param == NULL)
+		return USP_FAULT_INTERNAL_ERROR;
+
+	if (sigsetjmp(gs_jump_location, 1) == 0) {
+		gs_jump_called_by_bbf = true;
+		fault = bbf_entry_method(bbf_ctx, cmd);
+	} else {
+		ERR("PID [%ld]::Exception on [%d => %s]", getpid(), cmd, bbf_ctx->in_param);
+		fault = USP_FAULT_INTERNAL_ERROR;
+	}
+
+	gs_jump_called_by_bbf = false;
+
+	if (fault)
+		WARNING("Fault [%d => %d => %s]", fault, cmd, bbf_ctx->in_param);
+
+	return fault;
+}
+
 void bb_add_string(struct blob_buf *bb, const char *name, const char *value)
 {
 	blobmsg_add_string(bb, name, value ? value : "");

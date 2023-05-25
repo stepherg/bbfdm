@@ -45,7 +45,7 @@ void bbfdm_get_value_async(bbfdm_data_t *data, void *output)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = bbf_entry_method(&data->bbf_ctx, BBF_GET_VALUE);
+		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_GET_VALUE);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -106,7 +106,7 @@ void bbfdm_get_value(bbfdm_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = bbf_entry_method(&data->bbf_ctx, BBF_GET_VALUE);
+		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_GET_VALUE);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -163,7 +163,7 @@ void bbfdm_get_names(bbfdm_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = bbf_entry_method(&data->bbf_ctx, BBF_GET_NAME);
+		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_GET_NAME);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -205,7 +205,7 @@ void bbfdm_get_instances(bbfdm_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = bbf_entry_method(&data->bbf_ctx, BBF_INSTANCES);
+		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_INSTANCES);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
@@ -334,7 +334,7 @@ int bbf_dm_get_supported_dm(bbfdm_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		fault = bbf_entry_method(&data->bbf_ctx, BBF_SCHEMA);
+		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_SCHEMA);
 		if (fault) {
 			fill_err_code_table(data, fault);
 		} else {
