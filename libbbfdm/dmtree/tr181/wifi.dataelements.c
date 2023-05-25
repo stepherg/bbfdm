@@ -2540,6 +2540,7 @@ static int get_WiFiDataElementsNetworkDeviceMultiAPDevice_EasyMeshAgentOperation
 	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 2, "MultiAPDevice", "EasyMeshAgentOperationMode");
 	return 0;
 }
+*/
 
 static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_LinkType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2565,6 +2566,7 @@ static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_MACAddress(cha
 	return 0;
 }
 
+/*
 static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_CurrentOperatingClassProfileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 3, "MultiAPDevice", "Backhaul", "CurrentOperatingClassProfileNumberOfEntries");
@@ -3814,7 +3816,7 @@ DMLEAF tWiFiDataElementsNetworkDeviceIEEE1905SecurityParams[] = {
 /* *** Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceMultiAPDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-// {"Backhaul", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulObj, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulParams, NULL, BBFDM_BOTH, NULL, "2.15"},
+{"Backhaul", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulObj, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulParams, NULL, BBFDM_BOTH, NULL, "2.15"},
 {0}
 };
 
@@ -3829,23 +3831,23 @@ DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceParams[] = {
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice.Backhaul. *** */
-// DMOBJ tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulObj[] = {
+DMOBJ tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 //{"CurrentOperatingClassProfile", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfileInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfileParams, NULL, BBFDM_BOTH, LIST_KEY{"Class", NULL}, "2.15"},
 //{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStatsParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-//{0}
-//};
+{0}
+};
 
-//DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulParams[] = {
+DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-// {"LinkType", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_LinkType, NULL, BBFDM_BOTH, "2.15"},
-// {"BackhaulMACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulMACAddress, NULL, BBFDM_BOTH, "2.15"},
-// {"BackhaulDeviceID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulDeviceID, NULL, BBFDM_BOTH, "2.15"},
-// {"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_MACAddress, NULL, BBFDM_BOTH, "2.15"},
-// {"CurrentOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_CurrentOperatingClassProfileNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
+{"LinkType", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_LinkType, NULL, BBFDM_BOTH, "2.15"},
+{"BackhaulMACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulMACAddress, NULL, BBFDM_BOTH, "2.15"},
+{"BackhaulDeviceID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulDeviceID, NULL, BBFDM_BOTH, "2.15"},
+{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_MACAddress, NULL, BBFDM_BOTH, "2.15"},
+//{"CurrentOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_CurrentOperatingClassProfileNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
 //{"SteerWiFiBackhaul()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul, operate_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul, BBFDM_USP, "2.15"},
-//{0}
-//};
+{0}
+};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice.Backhaul.CurrentOperatingClassProfile.{i}. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfileParams[] = {
