@@ -1652,7 +1652,7 @@ static int get_BridgingBridge_Status(char *refparam, struct dmctx *ctx, void *da
 	if (DM_STRCMP(*value, "Up") == 0) {
 		*value = "Enabled";
 	} else {
-		*value = "Disable";
+		*value = "Disabled";
 	}
 	return 0;
 }
@@ -1753,7 +1753,7 @@ static int get_BridgingBridgeSTP_Status(char *refparam, struct dmctx *ctx, void 
 	if (DM_STRCMP(*value, "Up") == 0) {
 		*value = "Enabled";
 	} else {
-		*value = "Disable";
+		*value = "Disabled";
 	}
 	return 0;
 }
@@ -2896,7 +2896,7 @@ static int get_BridgingBridgeProviderBridge_Status(char *refparam, struct dmctx 
 	if (DM_STRCMP(*value, "Up") == 0) {
 		*value = "Enabled";
 	} else {
-		*value = "Disable";
+		*value = "Disabled";
 	}
 	return 0;
 }
