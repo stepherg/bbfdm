@@ -1,0 +1,12 @@
+{
+	"line": 0,
+	"call_status": "Idle",
+	"stats": {
+		"RTP": {
+			"PacketsReceived": 468,
+			"PacketsSent": 751,
+			"BytesReceived": 1560,
+			"BytesSent": 8954
+		}
+	}
+}

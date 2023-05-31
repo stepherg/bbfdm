@@ -14,7 +14,10 @@
 #include "libbbfdm-api/dmcommon.h"
 
 extern DMOBJ tServicesVoiceServiceCallControlObj[];
+extern DMOBJ tServicesVoiceServiceCallControlLineObj[];
 extern DMLEAF tServicesVoiceServiceCallControlLineParams[];
+extern DMOBJ tServicesVoiceServiceCallControlLineStatsObj[];
+extern DMLEAF tServicesVoiceServiceCallControlLineStatsRTPParams[];
 extern DMLEAF tServicesVoiceServiceCallControlIncomingMapParams[];
 extern DMLEAF tServicesVoiceServiceCallControlOutgoingMapParams[];
 extern DMLEAF tServicesVoiceServiceCallControlGroupParams[];

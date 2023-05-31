@@ -30,6 +30,18 @@ static int get_voice_service_callcontrol_linker(char *refparam, struct dmctx *dm
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
+static int get_ServicesVoiceServiceCallControlLine_Stats(char *instance, char *type, char *option, char **value)
+{
+	json_object *res = NULL;
+	char line[16];
+
+	snprintf(line, sizeof(line), "%d", instance ? (int)DM_STRTOL(instance) - 1 : 0);
+
+	dmubus_call("asterisk", "call_status", UBUS_ARGS{{"line", line, Integer}}, 1, &res);
+	*value = res ? dmjson_get_value(res, 3, "stats", type, option) : "0";
+	return 0;
+}
+
 static int set_CallControl_Line(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.Services.VoiceService.1.CallControl.Line.", NULL};
@@ -669,6 +681,26 @@ static int set_ServicesVoiceServiceCallControlLine_Enable(char *refparam, struct
 			break;
 	}
 	return 0;
+}
+
+static int get_ServicesVoiceServiceCallControlLineStatsRTP_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_ServicesVoiceServiceCallControlLine_Stats(instance, "RTP", "PacketsReceived", value);
+}
+
+static int get_ServicesVoiceServiceCallControlLineStatsRTP_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_ServicesVoiceServiceCallControlLine_Stats(instance, "RTP", "PacketsSent", value);
+}
+
+static int get_ServicesVoiceServiceCallControlLineStatsRTP_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_ServicesVoiceServiceCallControlLine_Stats(instance, "RTP", "BytesSent", value);
+}
+
+static int get_ServicesVoiceServiceCallControlLineStatsRTP_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_ServicesVoiceServiceCallControlLine_Stats(instance, "RTP", "BytesReceived", value);
 }
 
 /*#Device.Services.VoiceService.{i}.CallControl.IncomingMap.{i}.Line!UCI:asterisk/incoming_map,@i-1/line*/
@@ -1601,7 +1633,7 @@ static int set_ServicesVoiceServiceCallControlNumberingPlan_Alias(char *refparam
 /* *** Device.Services.VoiceService.{i}.CallControl. *** */
 DMOBJ tServicesVoiceServiceCallControlObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Line", &DMWRITE, addObjServicesVoiceServiceCallControlLine, delObjServicesVoiceServiceCallControlLine, NULL, browseServicesVoiceServiceCallControlLineInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineParams, get_voice_service_line_linker, BBFDM_BOTH, LIST_KEY{"DirectoryNumber", "Alias", NULL}},
+{"Line", &DMWRITE, addObjServicesVoiceServiceCallControlLine, delObjServicesVoiceServiceCallControlLine, NULL, browseServicesVoiceServiceCallControlLineInst, NULL, NULL, tServicesVoiceServiceCallControlLineObj, tServicesVoiceServiceCallControlLineParams, get_voice_service_line_linker, BBFDM_BOTH, LIST_KEY{"DirectoryNumber", "Alias", NULL}},
 {"IncomingMap", &DMWRITE, addObjServicesVoiceServiceCallControlIncomingMap, delObjServicesVoiceServiceCallControlIncomingMap, NULL, browseServicesVoiceServiceCallControlIncomingMapInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlIncomingMapParams, get_voice_service_callcontrol_linker, BBFDM_BOTH, LIST_KEY{"Line", "Extension", "Alias", NULL}},
 {"OutgoingMap", &DMWRITE, addObjServicesVoiceServiceCallControlOutgoingMap, delObjServicesVoiceServiceCallControlOutgoingMap, NULL, browseServicesVoiceServiceCallControlOutgoingMapInst, NULL, NULL, NULL, tServicesVoiceServiceCallControlOutgoingMapParams, get_voice_service_callcontrol_linker, BBFDM_BOTH, LIST_KEY{"Extension", "Line", "Alias", NULL}},
 {"NumberingPlan", &DMWRITE, addObjServicesVoiceServiceCallControlNumberingPlan, delObjServicesVoiceServiceCallControlNumberingPlan, NULL, browseServicesVoiceServiceCallControlNumberingPlanInst, NULL, NULL, tServicesVoiceServiceCallControlNumberingPlanObj, tServicesVoiceServiceCallControlNumberingPlanParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
@@ -1612,6 +1644,12 @@ DMOBJ tServicesVoiceServiceCallControlObj[] = {
 };
 
 /* *** Device.Services.VoiceService.{i}.CallControl.Line.{i}. *** */
+DMOBJ tServicesVoiceServiceCallControlLineObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys */
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineStatsObj, NULL, NULL, BBFDM_BOTH, NULL},
+{0}
+};
+
 DMLEAF tServicesVoiceServiceCallControlLineParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceCallControlLine_Enable, set_ServicesVoiceServiceCallControlLine_Enable, BBFDM_BOTH},
@@ -1622,6 +1660,23 @@ DMLEAF tServicesVoiceServiceCallControlLineParams[] = {
 {"Provider", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Provider, set_ServicesVoiceServiceCallControlLine_Provider, BBFDM_BOTH},
 {"CallingFeatures", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_CallingFeatures, set_ServicesVoiceServiceCallControlLine_CallingFeatures, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceCallControlLine_Alias, set_ServicesVoiceServiceCallControlLine_Alias, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats. *** */
+DMOBJ tServicesVoiceServiceCallControlLineStatsObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys */
+{"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineStatsRTPParams, NULL, BBFDM_BOTH, NULL},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats.RTP. *** */
+DMLEAF tServicesVoiceServiceCallControlLineStatsRTPParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type */
+{"PacketsReceived", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_PacketsReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_PacketsSent, NULL, BBFDM_BOTH},
+{"BytesSent", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_BytesReceived, NULL, BBFDM_BOTH},
 {0}
 };
 

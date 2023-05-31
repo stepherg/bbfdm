@@ -1,0 +1,16 @@
+#!/bin/sh
+
+. /usr/share/libubox/jshn.sh
+
+case "$1" in
+        list)
+                echo '{ "call_status" : {"line":32} }'
+        ;;
+        call)
+                case "$2" in
+                        call_status)
+                                cat /tmp/call_status.data
+                        ;;
+                esac
+        ;;
+esac
