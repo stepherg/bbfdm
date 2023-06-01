@@ -12,7 +12,7 @@
 
 static int get_manufacturer_oui(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string_varstate("cwmp", "gatewayinfo", "oui", value);
+	dmuci_get_option_value_string_varstate("icwmp", "gatewayinfo", "oui", value);
 	if (*value[0] == '\0') {
 		dmuci_get_option_value_string("cwmp", "cpe", "manufacturer_oui", value);
 		if (*value[0] == '\0')
@@ -24,7 +24,7 @@ static int get_manufacturer_oui(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_product_class(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string_varstate("cwmp", "gatewayinfo", "class", value);
+	dmuci_get_option_value_string_varstate("icwmp", "gatewayinfo", "class", value);
 	if (*value[0] == '\0') {
 		dmuci_get_option_value_string("cwmp", "cpe", "product_class", value);
 		if (*value[0] == '\0')
@@ -36,7 +36,7 @@ static int get_product_class(char *refparam, struct dmctx *ctx, void *data, char
 
 static int get_serial_number(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_option_value_string_varstate("cwmp", "gatewayinfo", "serial", value);
+	dmuci_get_option_value_string_varstate("icwmp", "gatewayinfo", "serial", value);
 	if (*value[0] == '\0') {
 		dmuci_get_option_value_string("cwmp", "cpe", "serial_number", value);
 		if (*value[0] == '\0')

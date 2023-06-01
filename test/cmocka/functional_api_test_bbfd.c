@@ -140,17 +140,17 @@ static void test_bbf_api_uci(void **state)
 	assert_string_equal(value, "");
 
 	// dmuci_get_option_value_string_varstate: test with correct config/option and wrong section name
-	uci_res = dmuci_get_option_value_string_varstate("cwmp", "acss", "dhcp_url", &value);
+	uci_res = dmuci_get_option_value_string_varstate("icwmp", "acss", "dhcp_url", &value);
 	assert_int_equal(uci_res, -1);
 	assert_string_equal(value, "");
 
 	// dmuci_get_option_value_string_varstate: test with correct config/section and wrong option name
-	uci_res = dmuci_get_option_value_string_varstate("cwmp", "acs", "hcp_url", &value);
+	uci_res = dmuci_get_option_value_string_varstate("icwmp", "acs", "hcp_url", &value);
 	assert_int_equal(uci_res, -1);
 	assert_string_equal(value, "");
 
 	// dmuci_get_option_value_string_varstate: test correct config/section/option
-	uci_res = dmuci_get_option_value_string_varstate("cwmp", "acs", "dhcp_url", &value);
+	uci_res = dmuci_get_option_value_string_varstate("icwmp", "acs", "dhcp_url", &value);
 	assert_int_equal(uci_res, 0);
 	assert_string_equal(value, "http://192.168.1.123:8080/openacs");
 

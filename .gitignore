@@ -7,3 +7,4 @@ install_manifest.txt
 *.so
 bbfdmd/src/bbfdmd
 docs/index.md
+__pycache__
