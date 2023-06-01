@@ -376,22 +376,16 @@ static void create_routing_route_section(char *rt_table)
 static int browseRouterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL;
-	char *inst = NULL, *idx = NULL, *device = NULL, *proto = NULL;
+	char *inst = NULL, *idx = NULL;
 	struct uci_section *dmmap_route = NULL;
 
 	create_routing_route_section("254");
 	uci_foreach_sections("network", "interface", s) {
 
-		dmuci_get_value_by_section_string(s, "proto", &proto);
-		dmuci_get_value_by_section_string(s, "device", &device);
-		dmuci_get_value_by_section_string(s, "ip4table", &idx);
-
-		if (strcmp(section_name(s), "loopback") == 0 ||
-			*proto == '\0' ||
-			DM_STRCHR(device, '@') ||
-			ip___is_ipinterface_exists(section_name(s), device))
+		if (!ip___is_ipinterface_section(s))
 			continue;
 
+		dmuci_get_value_by_section_string(s, "ip4table", &idx);
 		if (DM_STRLEN(idx))
 			create_routing_route_section(idx);
 	}

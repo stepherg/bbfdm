@@ -24,7 +24,7 @@ extern DMLEAF tIPInterfaceIPv6AddressParams[];
 extern DMLEAF tIPInterfaceIPv6PrefixParams[];
 extern DMLEAF tIPInterfaceStatsParams[];
 
-bool ip___is_ipinterface_exists(const char *sec_name, const char *device);
+bool ip___is_ipinterface_section(struct uci_section *iface_s);
 
 #endif //__IP_H
 

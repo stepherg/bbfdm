@@ -124,19 +124,11 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 	/* Higher layers are Device.IP.Interface.{i}. */
 	uci_foreach_sections("network", "interface", s) {
-		char *proto = NULL;
-		char *device_s = NULL;
 		char *value = NULL;
 		bool found = false;
 		char *device = get_device(section_name(s));
 
-		dmuci_get_value_by_section_string(s, "proto", &proto);
-		dmuci_get_value_by_section_string(s, "device", &device_s);
-
-		if (strcmp(section_name(s), "loopback") == 0 ||
-			*proto == '\0' ||
-			DM_STRCHR(device_s, '@') ||
-			ip___is_ipinterface_exists(section_name(s), device_s))
+		if (!ip___is_ipinterface_section(s))
 			continue;
 
 		// The higher layer is Device.IP.Interface.{i}.
@@ -150,7 +142,8 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		snprintf(buf_higheralias, sizeof(buf_higheralias), "%s%s", *higheralias ? higheralias : *layer_inst ? "cpe-" : "", (*higheralias == '\0' && *layer_inst) ? layer_inst : "");
 
 		/* If the device value is empty, then get its value directly from device option */
-		if (DM_STRLEN(device) == 0) device = device_s;
+		if (DM_STRLEN(device) == 0)
+			dmuci_get_value_by_section_string(s, "device", &device);
 
 		if (DM_STRLEN(device) == 0)
 			continue;
