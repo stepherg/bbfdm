@@ -1298,8 +1298,11 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 	if ((*value)[0] == '\0') {
 		char *device = get_device(section_name((struct uci_section *)data));
-		if (DM_STRLEN(device) == 0)
-			return 0;
+		if (DM_STRLEN(device) == 0) {
+			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+			if (DM_STRLEN(device) == 0)
+				return 0;
+		}
 
 		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", device, value);
 		if (*value != NULL && (*value)[0] != 0)
@@ -1427,6 +1430,9 @@ static int set_IPInterface_Router(char *refparam, struct dmctx *ctx, void *data,
 			adm_entry_get_linker_value(ctx, value, &rt_table);
 			if (!rt_table || *rt_table == 0)
 				return FAULT_9007;
+
+			get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &s);
+			dmuci_set_value_by_section(s, "Router", value);
 
 			dmuci_set_value_by_section((struct uci_section *)data, "ip4table", rt_table);
 			dmuci_set_value_by_section((struct uci_section *)data, "ip6table", rt_table);

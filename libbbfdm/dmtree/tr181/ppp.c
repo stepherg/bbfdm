@@ -996,10 +996,13 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 	if ((*value)[0] == '\0') {
 		char *device = NULL;
 
-		if (ppp->iface_s)
+		if (ppp->iface_s) {
 			device = get_device(section_name(ppp->iface_s));
-		else
+			if (DM_STRLEN(device) == 0)
+				dmuci_get_value_by_section_string(ppp->iface_s, "device", &device);
+		} else {
 			dmuci_get_value_by_section_string(ppp->dmmap_s, "device", &device);
+		}
 
 		if (DM_STRLEN(device) == 0)
 			return 0;
@@ -1165,7 +1168,14 @@ static int set_PPPInterfacePPPoE_ServiceName(char *refparam, struct dmctx *ctx, 
 ***************************************************************************/
 static int get_linker_ppp_interface(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	dmuci_get_value_by_section_string(((struct ppp_args *)data)->dmmap_s, "device", linker);
+	if (((struct ppp_args *)data)->iface_s) {
+		*linker = get_device(section_name(((struct ppp_args *)data)->iface_s));
+		if (DM_STRLEN(*linker) == 0)
+			dmuci_get_value_by_section_string(((struct ppp_args *)data)->iface_s, "device", linker);
+	} else {
+		dmuci_get_value_by_section_string(((struct ppp_args *)data)->dmmap_s, "device", linker);
+	}
+
 	return 0;
 }
 

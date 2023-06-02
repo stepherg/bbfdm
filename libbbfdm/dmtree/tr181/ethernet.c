@@ -132,7 +132,7 @@ static void dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_no
 
 		// Skip this interface section if its device starts with prfix 'link_'
 		dmuci_get_value_by_section_string(s, "device", &device);
-		if (DM_STRNCMP(device, "link_", 5) == 0)
+		if (DM_STRNCMP(device, "link_", 5) == 0 || DM_STRNCMP(device, "iface", 5) == 0)
 			continue;
 
 		// Skip this interface section if its device is empty
@@ -140,10 +140,7 @@ static void dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_no
 		if (DM_STRLEN(device) == 0)
 			continue;
 
-		// Skip this interface section if its device name isn't a real device
 		get_net_device_sysfs(device, "address", &macaddr);
-		if (DM_STRLEN(macaddr) == 0)
-			continue;
 
 		DM_STRNCPY(dev_name, device, sizeof(dev_name));
 
