@@ -18,9 +18,13 @@
 #include "wifi.dataelements.h"
 #endif
 
+#define MAX_POWER_INDEX 64
+
 struct wifi_radio_args
 {
 	struct dmmap_dup *sections;
+	int transmit_power[MAX_POWER_INDEX];
+	int power_count;
 };
 
 struct wifi_ssid_args
@@ -74,7 +78,39 @@ static int get_linker_associated_device(char *refparam, struct dmctx *dmctx, voi
 ***************************************************************************/
 static inline int init_wifi_radio(struct wifi_radio_args *args, struct dmmap_dup *s)
 {
+	char *device = NULL;
+	json_object *res = NULL, *arrobj = NULL, *power = NULL;
+	int i = 0, j = 0, ind = 0;
+
 	args->sections = s;
+	device = section_name(s->config_section);
+	if (DM_STRLEN(device) == 0)
+		return 0;
+
+	dmubus_call("iwinfo", "txpowerlist", UBUS_ARGS{{"device", device, String}}, 1, &res);
+	dmjson_foreach_obj_in_array(res, arrobj, power, i, 1, "results") {
+		char *dbm = dmjson_get_value(power, 1, "dbm");
+		if (!dbm)
+			continue;
+		int power = (int)strtod(dbm, NULL);
+		if (ind < MAX_POWER_INDEX) {
+			args->transmit_power[ind] = power;
+			ind++;
+		}
+	}
+
+	args->power_count = ind;
+	/* sort the power list */
+	for (i = 0; i < ind; i++)  {
+		for (j = i + 1; j < ind; j++) {
+			if (args->transmit_power[i] > args->transmit_power[j]) {
+				int tmp =  args->transmit_power[i];
+				args->transmit_power[i] = args->transmit_power[j];
+				args->transmit_power[j] = tmp;
+			}
+		}
+	}
+
 	return 0;
 }
 
@@ -432,10 +468,11 @@ static int delObjWiFiEndPoint(char *refparam, struct dmctx *ctx, void *data, cha
 static int browseWifiRadioInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL;
-	struct wifi_radio_args curr_wifi_radio_args = {0};
+	struct wifi_radio_args curr_wifi_radio_args;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
+	memset(&curr_wifi_radio_args, 0, sizeof(struct wifi_radio_args));
 	synchronize_specific_config_sections_with_dmmap("wireless", "wifi-device", "dmmap_wireless", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		init_wifi_radio(&curr_wifi_radio_args, p);
@@ -1050,24 +1087,108 @@ static int set_WiFiRadio_IEEE80211hEnabled(char *refparam, struct dmctx *ctx, vo
 	return 0;
 }
 
-/*#Device.WiFi.Radio.{i}.TransmitPower!UCI:wireless/wifi-device,@i-1/txpower*/
+static int get_WiFiRadio_TransmitPowerSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int i = 0, len = 0;
+	char supported_list[125] = {0};
+	int space_left = sizeof(supported_list);
+
+	snprintf(supported_list, sizeof(supported_list), "-1,");
+	space_left = space_left - 3;
+
+	struct wifi_radio_args *args = (struct wifi_radio_args *)data;
+
+	if (args->power_count <= 0)
+		goto end;
+
+	int max_power = args->transmit_power[args->power_count - 1];
+
+	for (i = 0; i < args->power_count; i++) {
+		int percent = ceil((double)(args->transmit_power[i] * 100) / max_power);
+		char strval[4] = {0};
+		snprintf(strval, sizeof(strval), "%d", percent);
+
+		if (space_left >= strlen(strval) + 1) {
+			snprintf(supported_list + strlen(supported_list), space_left, "%s,", strval);
+			space_left = space_left - (strlen(strval) + 1);
+		}
+	}
+
+end:
+	len = strlen(supported_list);
+	if ((len > 0) && (supported_list[len -1] == ','))
+		supported_list[len - 1] = '\0';
+
+	*value = dmstrdup(supported_list);
+	return 0;
+}
+
 static int get_WiFiRadio_TransmitPower(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_radio_args *)data)->sections)->config_section, "txpower", "100");
+	struct wifi_radio_args *args = (struct wifi_radio_args *)data;
+	char *config = dmuci_get_value_by_section_fallback_def((args->sections)->config_section, "txpower", "-1");
+	if (DM_STRCMP(config, "-1") == 0) {
+		*value = "-1";
+		return 0;
+	}
+
+	if (args->power_count <= 0)
+		return 0;
+
+	int max_power = args->transmit_power[args->power_count - 1];
+	int dbm = (int)strtod(config, NULL);
+	int percent = ceil((double)(dbm * 100) / max_power);
+
+	dmasprintf(value, "%d", percent);
+
 	return 0;
 }
 
 static int set_WiFiRadio_TransmitPower(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *supported_list = NULL;
+	bool found = false;
+	struct wifi_radio_args *args = (struct wifi_radio_args *)data;
+
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1","100"}}, 1))
+			get_WiFiRadio_TransmitPowerSupported(refparam, ctx, data, instance, &supported_list);
+			if (!supported_list)
 				return FAULT_9007;
+
+			/* check if requested value is present in supported list */
+			char *token;
+			char *rest= supported_list;
+			while ((token = strtok_r(rest, ",", &rest))) {
+				if (DM_STRCMP(value, token) == 0) {
+					found = true;
+					break;
+				}
+			}
+
+			if (found == false)
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "txpower", value);
+			if (DM_STRCMP(value, "-1") == 0) {
+				dmuci_set_value_by_section((args->sections)->config_section, "txpower", "");
+				break;
+			}
+
+			if (args->power_count <= 0)
+				break;
+
+			int max_power = args->transmit_power[args->power_count - 1];
+			int req_val = (int)strtod(value, NULL);
+			int percent = (int)round((max_power * req_val) / 100);
+
+			char str_val[10] = {0};
+			snprintf(str_val, sizeof(str_val), "%d", percent);
+			dmuci_set_value_by_section((args->sections)->config_section, "txpower", str_val);
 			break;
 	}
+
 	return 0;
 }
 
@@ -3466,6 +3587,7 @@ DMLEAF tWiFiRadioParams[] = {
 {"PreambleType", &DMWRITE, DMT_STRING, get_WiFiRadio_PreambleType, set_WiFiRadio_PreambleType, BBFDM_BOTH, "2.8"},
 {"IEEE80211hSupported", &DMREAD, DMT_BOOL, get_WiFiRadio_IEEE80211hSupported, NULL, BBFDM_BOTH, "2.0"},
 {"IEEE80211hEnabled", &DMWRITE, DMT_BOOL, get_WiFiRadio_IEEE80211hEnabled, set_WiFiRadio_IEEE80211hEnabled, BBFDM_BOTH, "2.0"},
+{"TransmitPowerSupported", &DMREAD, DMT_STRING, get_WiFiRadio_TransmitPowerSupported, NULL, BBFDM_BOTH, "2.0"},
 {"TransmitPower", &DMWRITE, DMT_INT, get_WiFiRadio_TransmitPower, set_WiFiRadio_TransmitPower, BBFDM_BOTH, "2.0"},
 {"RegulatoryDomain", &DMWRITE, DMT_STRING, get_WiFiRadio_RegulatoryDomain, set_WiFiRadio_RegulatoryDomain, BBFDM_BOTH, "2.0"},
 {0}
