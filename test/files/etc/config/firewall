@@ -8,14 +8,14 @@ config defaults
 	option output 'ACCEPT'
 	option forward 'REJECT'
 
-config zone
+config zone 'lan'
 	option name 'lan'
 	list network 'lan'
 	option input 'ACCEPT'
 	option output 'ACCEPT'
 	option forward 'ACCEPT'
 
-config zone
+config zone 'wan'
 	option name 'wan'
 	list network 'wan'
 	list network 'wan6'
@@ -25,11 +25,11 @@ config zone
 	option masq '1'
 	option mtu_fix '1'
 
-config forwarding
+config forwarding 'default_fwd_1'
 	option src 'lan'
 	option dest 'wan'
 
-config rule
+config rule 'default_rule_1'
 	option name 'Allow-DHCP-Renew'
 	option src 'wan'
 	option proto 'udp'
@@ -37,7 +37,7 @@ config rule
 	option target 'ACCEPT'
 	option family 'ipv4'
 
-config rule
+config rule 'default_rule_2'
 	option name 'Allow-Ping'
 	option src 'wan'
 	option proto 'icmp'
@@ -45,14 +45,14 @@ config rule
 	option family 'ipv4'
 	option target 'ACCEPT'
 
-config rule
+config rule 'default_rule_3'
 	option name 'Allow-IGMP'
 	option src 'wan'
 	option proto 'igmp'
 	option family 'ipv4'
 	option target 'ACCEPT'
 
-config rule
+config rule 'default_rule_4'
 	option name 'Allow-DHCPv6'
 	option src 'wan'
 	option proto 'udp'
@@ -62,7 +62,7 @@ config rule
 	option family 'ipv6'
 	option target 'ACCEPT'
 
-config rule
+config rule 'default_rule_5'
 	option name 'Allow-MLD'
 	option src 'wan'
 	option proto 'icmp'
@@ -74,7 +74,7 @@ config rule
 	option family 'ipv6'
 	option target 'ACCEPT'
 
-config rule
+config rule 'default_rule_6'
 	option name 'Allow-ICMPv6-Input'
 	option src 'wan'
 	option proto 'icmp'
@@ -93,7 +93,7 @@ config rule
 	option family 'ipv6'
 	option target 'ACCEPT'
 
-config rule
+config rule 'default_rule_7'
 	option name 'Allow-ICMPv6-Forward'
 	option src 'wan'
 	option dest '*'
@@ -109,14 +109,14 @@ config rule
 	option family 'ipv6'
 	option target 'ACCEPT'
 
-config rule
+config rule 'default_rule_8'
 	option name 'Allow-IPSec-ESP'
 	option src 'wan'
 	option dest 'lan'
 	option proto 'esp'
 	option target 'ACCEPT'
 
-config rule
+config rule 'default_rule_9'
 	option name 'Allow-ISAKMP'
 	option src 'wan'
 	option dest 'lan'
@@ -124,7 +124,7 @@ config rule
 	option proto 'udp'
 	option target 'ACCEPT'
 
-config rule
+config rule 'default_rule_10'
 	option name 'Support-UDP-Traceroute'
 	option src 'wan'
 	option dest_port '33434:33689'

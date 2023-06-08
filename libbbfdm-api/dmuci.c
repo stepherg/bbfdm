@@ -790,6 +790,20 @@ int dmuci_rename_section_by_section(struct uci_section *s, char *value)
 	return 0;
 }
 
+/**** UCI REORDER SECTION by section pointer *****/
+int dmuci_reoder_section_by_section(struct uci_section *s, char *pos)
+{
+	struct uci_ptr up = {0};
+
+	if (dmuci_lookup_ptr_by_section(uci_ctx, &up, s, NULL, pos) == -1)
+		return -1;
+
+	if (uci_reorder_section(uci_ctx, up.s, strtoul(up.value, NULL, 10)) != UCI_OK)
+		return -1;
+
+	return 0;
+}
+
 /**** UCI WALK SECTIONS *****/
 struct uci_section *dmuci_walk_section (char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk)
 {
