@@ -12,6 +12,21 @@
 #include "servicesvoiceservicecallcontrol.h"
 #include "common.h"
 
+#define MAX_SIP_CLIENTS 5
+
+struct line_stats_t {
+	unsigned int out_calls_attempted;
+	unsigned int out_calls_failed;
+	unsigned int out_calls_answered;
+	unsigned int out_duration;
+	unsigned int inc_calls_attempted;
+	unsigned int inc_calls_failed;
+	unsigned int inc_calls_answered;
+	unsigned int inc_duration;
+};
+
+static struct line_stats_t line_stats[MAX_SIP_CLIENTS];
+
 /**************************************************************************
 * LINKER
 ***************************************************************************/
@@ -130,6 +145,41 @@ static int set_SIP_Client(char *refparam, struct dmctx *ctx, void *data, char *i
 	return 0;
 }
 
+static void fill_callcontrol_line_stats(void)
+{
+	struct call_log_entry *entry = NULL;
+	int sip_client_id = -1;
+
+	init_call_log();
+
+	memset(line_stats, 0, sizeof(line_stats));
+
+	list_for_each_entry(entry, &call_log_list, list) {
+		sscanf(entry->used_line, "Device.Services.VoiceService.1.CallControl.Line.%d", &sip_client_id);
+		sip_client_id--; //Line.1 -> sip0, Line.2 -> sip1, etc
+		// determine call stats per call direction and per sip client id
+		if (sip_client_id >= 0 && sip_client_id < MAX_SIP_CLIENTS) {
+			if (strcasestr(entry->direction, "Incoming") != NULL) {
+				line_stats[sip_client_id].inc_calls_attempted++;
+				if (strcasestr(entry->termination_cause, "RemoteDisconnect") != NULL) {
+					line_stats[sip_client_id].inc_calls_answered++;
+					line_stats[sip_client_id].inc_duration += strtoul(entry->duration, NULL, 10);
+				} else {
+					line_stats[sip_client_id].inc_calls_failed++;
+				}
+			} else if (strcasestr(entry->direction, "Outgoing") != NULL) {
+				line_stats[sip_client_id].out_calls_attempted++;
+				if (strcasestr(entry->termination_cause, "RemoteDisconnect") != NULL) {
+					line_stats[sip_client_id].out_calls_answered++;
+					line_stats[sip_client_id].out_duration += strtoul(entry->duration, NULL, 10);
+				} else {
+					line_stats[sip_client_id].out_calls_failed++;
+				}
+			}
+		}
+	}
+}
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -139,6 +189,8 @@ static int browseServicesVoiceServiceCallControlLineInst(struct dmctx *dmctx, DM
 	char *inst = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
+
+	fill_callcontrol_line_stats();
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "line", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
@@ -680,6 +732,96 @@ static int set_ServicesVoiceServiceCallControlLine_Enable(char *refparam, struct
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", b ? "1" : "0");
 			break;
 	}
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
+
+	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
+		*value = "0";
+
+	dmasprintf(value, "%u", line_stats[line_id].inc_calls_attempted);
+	return 0;
+}
+
+/*static int get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsConnected(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	//TODO
+	return 0;
+}*/
+
+static int get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsFailed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
+
+	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
+		*value = "0";
+
+	dmasprintf(value, "%u", line_stats[line_id].inc_calls_failed);
+	return 0;
+}
+
+/*static int get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsDropped(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	//TODO
+	return 0;
+}*/
+
+static int get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_TotalCallTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
+
+	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
+		*value = "0";
+
+	dmasprintf(value, "%u", line_stats[line_id].inc_duration);
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsAttempted(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
+
+	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
+		*value = "0";
+
+	dmasprintf(value, "%u", line_stats[line_id].out_calls_attempted);
+	return 0;
+}
+
+/*static int get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsConnected(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	//TODO
+	return 0;
+}*/
+
+static int get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsFailed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
+
+	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
+		*value = "0";
+
+	dmasprintf(value, "%u", line_stats[line_id].out_calls_failed);
+	return 0;
+}
+
+/*static int get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsDropped(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	//TODO
+	return 0;
+}*/
+
+static int get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_TotalCallTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
+
+	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
+		*value = "0";
+
+	dmasprintf(value, "%u", line_stats[line_id].out_duration);
 	return 0;
 }
 
@@ -1671,7 +1813,31 @@ DMLEAF tServicesVoiceServiceCallControlLineParams[] = {
 /* *** Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats. *** */
 DMOBJ tServicesVoiceServiceCallControlLineStatsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys */
+{"IncomingCalls", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineStatsIncomingCallsParams, NULL, BBFDM_BOTH, NULL},
+{"OutgoingCalls", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineStatsOutgoingCallsParams, NULL, BBFDM_BOTH, NULL},
 {"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineStatsRTPParams, NULL, BBFDM_BOTH, NULL},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats.IncomingCalls. *** */
+DMLEAF tServicesVoiceServiceCallControlLineStatsIncomingCallsParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type */
+{"CallsReceived", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsReceived, NULL, BBFDM_BOTH},
+//{"CallsConnected", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsConnected, NULL, BBFDM_BOTH},
+{"CallsFailed", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsFailed, NULL, BBFDM_BOTH},
+//{"CallsDropped", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsDropped, NULL, BBFDM_BOTH},
+{"TotalCallTime", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_TotalCallTime, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats.OutgoingCalls. *** */
+DMLEAF tServicesVoiceServiceCallControlLineStatsOutgoingCallsParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type */
+{"CallsAttempted", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsAttempted, NULL, BBFDM_BOTH},
+//{"CallsConnected", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsConnected, NULL, BBFDM_BOTH},
+{"CallsFailed", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsFailed, NULL, BBFDM_BOTH},
+//{"CallsDropped", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsDropped, NULL, BBFDM_BOTH},
+{"TotalCallTime", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_TotalCallTime, NULL, BBFDM_BOTH},
 {0}
 };
 
