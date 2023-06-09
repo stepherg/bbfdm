@@ -5,6 +5,7 @@
 		"RTP": {
 			"PacketsReceived": 468,
 			"PacketsSent": 751,
+			"PacketsLost": 2,
 			"BytesReceived": 1560,
 			"BytesSent": 8954
 		}

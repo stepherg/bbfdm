@@ -693,6 +693,11 @@ static int get_ServicesVoiceServiceCallControlLineStatsRTP_PacketsSent(char *ref
 	return get_ServicesVoiceServiceCallControlLine_Stats(instance, "RTP", "PacketsSent", value);
 }
 
+static int get_ServicesVoiceServiceCallControlLineStatsRTP_PacketsLost(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return get_ServicesVoiceServiceCallControlLine_Stats(instance, "RTP", "PacketsLost", value);
+}
+
 static int get_ServicesVoiceServiceCallControlLineStatsRTP_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	return get_ServicesVoiceServiceCallControlLine_Stats(instance, "RTP", "BytesSent", value);
@@ -1675,6 +1680,7 @@ DMLEAF tServicesVoiceServiceCallControlLineStatsRTPParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type */
 {"PacketsReceived", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_PacketsReceived, NULL, BBFDM_BOTH},
 {"PacketsSent", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsLost", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_PacketsLost, NULL, BBFDM_BOTH},
 {"BytesSent", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_BytesSent, NULL, BBFDM_BOTH},
 {"BytesReceived", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_BytesReceived, NULL, BBFDM_BOTH},
 {0}
