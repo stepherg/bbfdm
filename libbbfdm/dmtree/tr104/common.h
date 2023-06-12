@@ -84,6 +84,7 @@ int init_supported_codecs(void);
 int init_call_log(void);
 const char *get_codec_uci_name(const char *codec);
 const char *get_codec_name(const char *codec_profile);
+bool sip_response_checker(char *response_code);
 int get_Alias_value_by_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value, char *service_name, char* service_inst);
 int set_Alias_value_by_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action, char *service_name, char* service_inst);
 int get_Alias_value_by_inst(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value, char *alias_inst);

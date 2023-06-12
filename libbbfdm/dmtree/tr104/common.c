@@ -186,7 +186,7 @@ int init_call_log(void)
 			prev_stat = cur_stat;
 		}
 	}
-		
+
 	// Master.csv
 	fp = fopen(CALL_LOG_FILE, "r");
 	if (!fp) {

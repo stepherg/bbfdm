@@ -12,8 +12,6 @@
 #include "servicesvoiceservicecallcontrol.h"
 #include "common.h"
 
-#define MAX_SIP_CLIENTS 5
-
 struct line_stats_t {
 	unsigned int out_calls_attempted;
 	unsigned int out_calls_failed;
@@ -25,21 +23,25 @@ struct line_stats_t {
 	unsigned int inc_duration;
 };
 
-static struct line_stats_t line_stats[MAX_SIP_CLIENTS];
+struct callcontrol_line_args
+{
+	struct dmmap_dup *sections;
+	struct line_stats_t line_stats;
+};
 
 /**************************************************************************
 * LINKER
 ***************************************************************************/
 static int get_voice_service_line_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	*linker = data ? section_name(((struct dmmap_dup *)data)->config_section) : "";
+	*linker = data ? section_name((((struct callcontrol_line_args *)data)->sections)->config_section) : "";
 	return 0;
 }
 
 static int get_voice_service_callcontrol_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-        *linker = data ? section_name(((struct dmmap_dup *)data)->config_section) : "";
-        return 0;
+	*linker = data ? section_name(((struct dmmap_dup *)data)->config_section) : "";
+	return 0;
 }
 
 /*************************************************************
@@ -101,80 +103,44 @@ static int set_CallControl_Group(char *refparam, struct dmctx *ctx, void *data, 
 	return 0;
 }
 
-static int set_CallControl_CallingFeaturesSet(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *allowed_objects[] = {"Device.Services.VoiceService.1.CallControl.CallingFeatures.Set.", NULL};
-	char *linker = NULL;
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
-				return FAULT_9007;
-
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
-				return FAULT_9007;
-
-			break;
-		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "calling_features", linker ? linker : "");
-			break;
-	}
-	return 0;
-}
-
-static int set_SIP_Client(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *allowed_objects[] = {"Device.Services.VoiceService.1.SIP.Client.", NULL};
-	char *linker = NULL;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
-				return FAULT_9007;
-
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
-				return FAULT_9007;
-
-			break;
-		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "provider", linker ? linker : "");
-			break;
-	}
-	return 0;
-}
-
-static void fill_callcontrol_line_stats(void)
+static void fill_callcontrol_line_stats(char *instance, struct callcontrol_line_args *callcontrol_line)
 {
 	struct call_log_entry *entry = NULL;
-	int sip_client_id = -1;
+
+	if (DM_STRLEN(instance) == 0)
+		return;
 
 	init_call_log();
+	if (call_log_count <= 0)
+		return;
 
-	memset(line_stats, 0, sizeof(line_stats));
+	memset(&callcontrol_line->line_stats, 0, sizeof(callcontrol_line->line_stats));
 
 	list_for_each_entry(entry, &call_log_list, list) {
-		sscanf(entry->used_line, "Device.Services.VoiceService.1.CallControl.Line.%d", &sip_client_id);
-		sip_client_id--; //Line.1 -> sip0, Line.2 -> sip1, etc
-		// determine call stats per call direction and per sip client id
-		if (sip_client_id >= 0 && sip_client_id < MAX_SIP_CLIENTS) {
-			if (strcasestr(entry->direction, "Incoming") != NULL) {
-				line_stats[sip_client_id].inc_calls_attempted++;
-				if (strcasestr(entry->termination_cause, "RemoteDisconnect") != NULL) {
-					line_stats[sip_client_id].inc_calls_answered++;
-					line_stats[sip_client_id].inc_duration += strtoul(entry->duration, NULL, 10);
-				} else {
-					line_stats[sip_client_id].inc_calls_failed++;
-				}
-			} else if (strcasestr(entry->direction, "Outgoing") != NULL) {
-				line_stats[sip_client_id].out_calls_attempted++;
-				if (strcasestr(entry->termination_cause, "RemoteDisconnect") != NULL) {
-					line_stats[sip_client_id].out_calls_answered++;
-					line_stats[sip_client_id].out_duration += strtoul(entry->duration, NULL, 10);
-				} else {
-					line_stats[sip_client_id].out_calls_failed++;
-				}
+		int line_id = -1;
+
+		if (DM_STRLEN(entry->used_line) == 0)
+			continue;
+
+		sscanf(entry->used_line, "Device.Services.VoiceService.1.CallControl.Line.%d", &line_id);
+		if (line_id != DM_STRTOUL(instance))
+			continue;
+
+		if (strcasestr(entry->direction, "Incoming") != NULL) {
+			callcontrol_line->line_stats.inc_calls_attempted++;
+			if (sip_response_checker(entry->sipResponseCode) == true) {
+				callcontrol_line->line_stats.inc_calls_answered++;
+				callcontrol_line->line_stats.inc_duration += strtoul(entry->duration, NULL, 10);
+			} else {
+				callcontrol_line->line_stats.inc_calls_failed++;
+			}
+		} else if (strcasestr(entry->direction, "Outgoing") != NULL) {
+			callcontrol_line->line_stats.out_calls_attempted++;
+			if (sip_response_checker(entry->sipResponseCode) == true) {
+				callcontrol_line->line_stats.out_calls_answered++;
+				callcontrol_line->line_stats.out_duration += strtoul(entry->duration, NULL, 10);
+			} else {
+				callcontrol_line->line_stats.out_calls_failed++;
 			}
 		}
 	}
@@ -186,18 +152,21 @@ static void fill_callcontrol_line_stats(void)
 /*#Device.Services.VoiceService.{i}.CallControl.Line.{i}.!UCI:asterisk/line/dmmap_asterisk*/
 static int browseServicesVoiceServiceCallControlLineInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
+	struct callcontrol_line_args callcontrol_line = {0};
 	struct dmmap_dup *p = NULL;
+	char *inst = NULL;
 	LIST_HEAD(dup_list);
-
-	fill_callcontrol_line_stats();
 
 	synchronize_specific_config_sections_with_dmmap("asterisk", "line", "dmmap_asterisk", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
+		callcontrol_line.sections = p;
+
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "lineinstance", "linealias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		fill_callcontrol_line_stats(inst, &callcontrol_line);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&callcontrol_line, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -381,8 +350,8 @@ static int delObjServicesVoiceServiceCallControlLine(char *refparam, struct dmct
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section((((struct callcontrol_line_args *)data)->sections)->config_section, NULL, NULL);
+			dmuci_delete_by_section((((struct callcontrol_line_args *)data)->sections)->dmmap_section, NULL, NULL);
 			break;
 	case DEL_ALL:
 		uci_foreach_sections_safe("asterisk", "line", stmp, s) {
@@ -659,7 +628,7 @@ static int get_ServicesVoiceServiceCallControlLine_DirectoryNumber(char *refpara
 {
 	char *sip_account = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "provider", &sip_account);
+	dmuci_get_value_by_section_string((((struct callcontrol_line_args *)data)->sections)->config_section, "provider", &sip_account);
 	dmuci_get_option_value_string("asterisk", sip_account, "directory_number", value);
 	return 0;
 }
@@ -674,7 +643,7 @@ static int set_ServicesVoiceServiceCallControlLine_DirectoryNumber(char *refpara
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "provider", &sip_account);
+			dmuci_get_value_by_section_string((((struct callcontrol_line_args *)data)->sections)->config_section, "provider", &sip_account);
 			dmuci_set_value("asterisk", sip_account, "directory_number", value);
 			break;
 	}
@@ -686,14 +655,31 @@ static int get_ServicesVoiceServiceCallControlLine_Provider(char *refparam, stru
 {
 	char *linker = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "provider", &linker);
+	dmuci_get_value_by_section_string((((struct callcontrol_line_args *)data)->sections)->config_section, "provider", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
 	return 0;
 }
 
 static int set_ServicesVoiceServiceCallControlLine_Provider(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return set_SIP_Client(refparam, ctx, data, instance, value, action);
+	char *allowed_objects[] = {"Device.Services.VoiceService.1.SIP.Client.", NULL};
+	char *linker = NULL;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
+				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
+			break;
+		case VALUESET:
+			adm_entry_get_linker_value(ctx, value, &linker);
+			dmuci_set_value_by_section((((struct callcontrol_line_args *)data)->sections)->config_section, "provider", linker ? linker : "");
+			break;
+	}
+	return 0;
 }
 
 /*#Device.Services.VoiceService.{i}.CallControl.Line.{i}.CallingFeatures!UCI:asterisk/line,@i-1/calling_features*/
@@ -701,20 +687,37 @@ static int get_ServicesVoiceServiceCallControlLine_CallingFeatures(char *refpara
 {
 	char *linker = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "calling_features", &linker);
+	dmuci_get_value_by_section_string((((struct callcontrol_line_args *)data)->sections)->config_section, "calling_features", &linker);
 	adm_entry_get_linker_param(ctx, "Device.Services.VoiceService.", linker, value);
 	return 0;
 }
 
 static int set_ServicesVoiceServiceCallControlLine_CallingFeatures(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return set_CallControl_CallingFeaturesSet(refparam, ctx, data, instance, value, action);
+	char *allowed_objects[] = {"Device.Services.VoiceService.1.CallControl.CallingFeatures.Set.", NULL};
+	char *linker = NULL;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
+				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
+			break;
+		case VALUESET:
+			adm_entry_get_linker_value(ctx, value, &linker);
+			dmuci_set_value_by_section((((struct callcontrol_line_args *)data)->sections)->config_section, "calling_features", linker ? linker : "");
+			break;
+	}
+	return 0;
 }
 
 /*#Device.Services.VoiceService.{i}.CallControl.Line.{i}.Enable!UCI:asterisk/line,@i-1/enable*/
 static int get_ServicesVoiceServiceCallControlLine_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enable", "0");
+	*value = dmuci_get_value_by_section_fallback_def((((struct callcontrol_line_args *)data)->sections)->config_section, "enable", "0");
 	return 0;
 }
 
@@ -729,7 +732,7 @@ static int set_ServicesVoiceServiceCallControlLine_Enable(char *refparam, struct
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", b ? "1" : "0");
+			dmuci_set_value_by_section((((struct callcontrol_line_args *)data)->sections)->config_section, "enable", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -737,12 +740,7 @@ static int set_ServicesVoiceServiceCallControlLine_Enable(char *refparam, struct
 
 static int get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
-
-	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
-		*value = "0";
-
-	dmasprintf(value, "%u", line_stats[line_id].inc_calls_attempted);
+	dmasprintf(value, "%u", ((struct callcontrol_line_args *)data)->line_stats.inc_calls_attempted);
 	return 0;
 }
 
@@ -754,12 +752,7 @@ static int get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsReceiv
 
 static int get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsFailed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
-
-	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
-		*value = "0";
-
-	dmasprintf(value, "%u", line_stats[line_id].inc_calls_failed);
+	dmasprintf(value, "%u", ((struct callcontrol_line_args *)data)->line_stats.inc_calls_failed);
 	return 0;
 }
 
@@ -771,23 +764,13 @@ static int get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_CallsFailed
 
 static int get_ServicesVoiceServiceCallControlLineStatsIncomingCalls_TotalCallTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
-
-	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
-		*value = "0";
-
-	dmasprintf(value, "%u", line_stats[line_id].inc_duration);
+	dmasprintf(value, "%u", ((struct callcontrol_line_args *)data)->line_stats.inc_duration);
 	return 0;
 }
 
 static int get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsAttempted(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
-
-	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
-		*value = "0";
-
-	dmasprintf(value, "%u", line_stats[line_id].out_calls_attempted);
+	dmasprintf(value, "%u", ((struct callcontrol_line_args *)data)->line_stats.out_calls_attempted);
 	return 0;
 }
 
@@ -799,12 +782,7 @@ static int get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsAttemp
 
 static int get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsFailed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
-
-	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
-		*value = "0";
-
-	dmasprintf(value, "%u", line_stats[line_id].out_calls_failed);
+	dmasprintf(value, "%u", ((struct callcontrol_line_args *)data)->line_stats.out_calls_failed);
 	return 0;
 }
 
@@ -816,12 +794,7 @@ static int get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_CallsFailed
 
 static int get_ServicesVoiceServiceCallControlLineStatsOutgoingCalls_TotalCallTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	int line_id = instance ? (int)DM_STRTOL(instance) - 1 : 0;
-
-	if (line_id < 0 || line_id > MAX_SIP_CLIENTS)
-		*value = "0";
-
-	dmasprintf(value, "%u", line_stats[line_id].out_duration);
+	dmasprintf(value, "%u", ((struct callcontrol_line_args *)data)->line_stats.out_duration);
 	return 0;
 }
 
@@ -1187,7 +1160,24 @@ static int get_ServicesVoiceServiceCallControlExtension_CallingFeatures(char *re
 
 static int set_ServicesVoiceServiceCallControlExtension_CallingFeatures(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return set_CallControl_CallingFeaturesSet(refparam, ctx, data, instance, value, action);
+	char *allowed_objects[] = {"Device.Services.VoiceService.1.CallControl.CallingFeatures.Set.", NULL};
+	char *linker = NULL;
+
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 256, NULL, NULL))
+				return FAULT_9007;
+
+			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+				return FAULT_9007;
+
+			break;
+		case VALUESET:
+			adm_entry_get_linker_value(ctx, value, &linker);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "calling_features", linker ? linker : "");
+			break;
+	}
+	return 0;
 }
 
 /*#Device.Services.VoiceService.{i}.CallControl.Extension.{i}.VoiceMail!UCI:asterisk/extension,@i-1/voice_mail*/
@@ -1728,13 +1718,25 @@ static int set_ServicesVoiceServiceCallControlCallingFeaturesSetSCREJ_CallingNum
 /*Get Alias -  #Device.Services.VoiceService.{i}.CallControl.Line.{i}.*/
 static int get_ServicesVoiceServiceCallControlLine_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_Alias_value_by_inst(refparam, ctx, data, instance, value, "linealias");
+	dmuci_get_value_by_section_string((((struct callcontrol_line_args *)data)->sections)->dmmap_section, "linealias", value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+	return 0;
 }
 
 /*Set Alias - #Device.Services.VoiceService.{i}.CallControl.Line.{i}.*/
 static int set_ServicesVoiceServiceCallControlLine_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return set_Alias_value_by_inst(refparam, ctx, data, instance, value, action, "linealias");
+	switch (action) {
+		case VALUECHECK:
+			if (dm_validate_string(value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			return 0;
+		case VALUESET:
+			dmuci_set_value_by_section((((struct callcontrol_line_args *)data)->sections)->dmmap_section, "linealias", value);
+			return 0;
+	}
+	return 0;
 }
 
 /*Get Alias - #Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.Alias*/
