@@ -14,6 +14,29 @@
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
+static int get_ServicesVoiceServiceVoIPProfile_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("asterisk", "general", "profile_enable", "1");
+	return 0;
+}
+
+static int set_ServicesVoiceServiceVoIPProfile_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (dm_validate_boolean(value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value("asterisk", "general", "profile_enable", b ? "1" : "0");
+			break;
+	}
+	return 0;
+}
+
 /*#Device.Services.VoiceService.{i}.VoIPProfile.{i}.DTMFMethod!UCI:asterisk/sip_advanced,sip_options/dtmf_mode*/
 static int get_ServicesVoiceServiceVoIPProfile_DTMFMethod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -303,6 +326,7 @@ DMLEAF tServicesVoiceServiceVoIPProfileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"DTMFMethod", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfile_DTMFMethod, set_ServicesVoiceServiceVoIPProfile_DTMFMethod, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_ServicesVoiceServiceVoIPProfile_Alias, set_ServicesVoiceServiceVoIPProfile_Alias, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_ServicesVoiceServiceVoIPProfile_Enable, set_ServicesVoiceServiceVoIPProfile_Enable, BBFDM_BOTH},
 {0}
 };
 

@@ -823,6 +823,18 @@ static int get_ServicesVoiceServiceCallControlLineStatsRTP_BytesReceived(char *r
 	return get_ServicesVoiceServiceCallControlLine_Stats(instance, "RTP", "BytesReceived", value);
 }
 
+static int get_ServicesVoiceServiceCallControlLineStatsDSP_Overruns(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallControlLineStatsDSP_Underruns(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
 /*#Device.Services.VoiceService.{i}.CallControl.IncomingMap.{i}.Line!UCI:asterisk/incoming_map,@i-1/line*/
 static int get_ServicesVoiceServiceCallControlIncomingMap_Line(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -1818,6 +1830,7 @@ DMOBJ tServicesVoiceServiceCallControlLineStatsObj[] = {
 {"IncomingCalls", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineStatsIncomingCallsParams, NULL, BBFDM_BOTH, NULL},
 {"OutgoingCalls", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineStatsOutgoingCallsParams, NULL, BBFDM_BOTH, NULL},
 {"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineStatsRTPParams, NULL, BBFDM_BOTH, NULL},
+{"DSP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallControlLineStatsDSPParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1851,6 +1864,14 @@ DMLEAF tServicesVoiceServiceCallControlLineStatsRTPParams[] = {
 {"PacketsLost", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_PacketsLost, NULL, BBFDM_BOTH},
 {"BytesSent", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_BytesSent, NULL, BBFDM_BOTH},
 {"BytesReceived", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsRTP_BytesReceived, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats.DSP. *** */
+DMLEAF tServicesVoiceServiceCallControlLineStatsDSPParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type */
+{"Overruns", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsDSP_Overruns, NULL, BBFDM_BOTH},
+{"Underruns", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallControlLineStatsDSP_Underruns, NULL, BBFDM_BOTH},
 {0}
 };
 

@@ -20,6 +20,7 @@ extern DMLEAF tServicesVoiceServiceCallLogSessionParams[];
 extern DMOBJ tServicesVoiceServiceCallLogSessionDestinationObj[];
 extern DMOBJ tServicesVoiceServiceCallLogSessionSourceObj[];
 extern DMOBJ tServicesVoiceServiceCallLogSessionDestinationDSPObj[];
+extern DMLEAF tServicesVoiceServiceCallLogSessionDestinationRTPParams[];
 extern DMOBJ tServicesVoiceServiceCallLogSessionSourceDSPObj[];
 extern DMLEAF tServicesVoiceServiceCallLogSessionDestinationDSPCodecParams[];
 extern DMLEAF tServicesVoiceServiceCallLogSessionSourceDSPCodecParams[];

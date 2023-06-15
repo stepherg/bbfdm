@@ -229,6 +229,18 @@ static int get_ServicesVoiceServiceCallLog_Src_AverageFarEndInterarrivalJitter(c
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCallLog_Src__ReceivePacketLossRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLogSessionDestinationRTP_ReceivePacketLossRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = "0";
+	return 0;
+}
+
 /* Get Alias - Device.Services.VoiceService.{i}.CallLog.{i}. */
 static int get_ServicesVoiceServiceCallLog_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -287,7 +299,7 @@ DMLEAF tServicesVoiceServiceCallLogSessionParams[] = {
 DMOBJ tServicesVoiceServiceCallLogSessionDestinationObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"DSP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionDestinationDSPObj, NULL, NULL, BBFDM_BOTH},
-{"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH},
+{"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionDestinationRTPParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -304,6 +316,13 @@ DMOBJ tServicesVoiceServiceCallLogSessionDestinationDSPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"ReceiveCodec", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionDestinationDSPCodecParams, NULL, BBFDM_BOTH},
 {"TransmitCodec", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionDestinationDSPCodecParams, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.RTP. *** */
+DMLEAF tServicesVoiceServiceCallLogSessionDestinationRTPParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type */
+{"ReceivePacketLossRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLogSessionDestinationRTP_ReceivePacketLossRate, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -343,5 +362,6 @@ DMLEAF tServicesVoiceServiceCallLogSessionSourceRTPParams[] = {
 {"MaxJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_MaxJitter, NULL, BBFDM_BOTH},
 {"AverageRoundTripDelay", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_AverageRoundTripDelay, NULL, BBFDM_BOTH},
 {"AverageFarEndInterarrivalJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_AverageFarEndInterarrivalJitter, NULL, BBFDM_BOTH},
+{"ReceivePacketLossRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Src__ReceivePacketLossRate, NULL, BBFDM_BOTH},
 {0}
 };
