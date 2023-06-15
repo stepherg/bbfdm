@@ -48,7 +48,7 @@ def generate_bbf_xml_file(output_file, dm_json_files=None):
     root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
     root.set("xsi:schemaLocation", "urn:broadband-forum-org:cwmp:datamodel-1-8 https://www.broadband-forum.org/cwmp/cwmp-datamodel-1-8.xsd urn:broadband-forum-org:cwmp:datamodel-report-0-1 https://www.broadband-forum.org/cwmp/cwmp-datamodel-report.xsd")
     root.set("spec", "urn:broadband-forum-org:tr-181-2-14-1-cwmp")
-    root.set("file", "tr-181-2-15-0-cwmp-full.xml")
+    root.set("file", "tr-181-2-16-0-cwmp-full.xml")
 
     model = ET.SubElement(root, "model")
     model.set("name", "Device:2.14")

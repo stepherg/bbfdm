@@ -510,7 +510,10 @@ def printOBJ(dmobject, hasobj, hasparam, bbfdm_type):
 
     fp = open('./.json_tmp', 'a', encoding='utf-8')
     print("\"type\" : \"object\",", file=fp)
-    print("\"version\" : \"%s\"," % dmobject.get('version'), file=fp)
+
+    if dmobject.get('version'):
+        print("\"version\" : \"%s\"," % dmobject.get('version'), file=fp)
+
     print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
     print("\"description\" : \"%s\"," % getParamDesc(dmobject, None), file=fp)
     if uniquekeys is not None:
@@ -542,7 +545,9 @@ def printPARAM(dmparam, dmobject, bbfdm_type):
     if dmparam.get('mandatory') == "true":
         print("\"mandatory\" : true,", file=fp)
 
-    print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
+    if dmparam.get('version'):
+        print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
+
     print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
     print("\"description\" : \"%s\"," % getParamDesc(dmparam, datatype), file=fp)
 
@@ -641,7 +646,10 @@ def printCOMMAND(dmparam, dmobject, _bbfdm_type):
     print("\"type\" : \"command\",", file=fp)
     print("\"async\" : %s," %
           ("true" if dmparam.get('async') is not None else "false"), file=fp)
-    print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
+
+    if dmparam.get('version'):
+        print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
+
     inputfound = 0
     outputfound = 0
     for c in dmparam:
@@ -680,7 +688,10 @@ def printEVENT(dmparam, dmobject, _bbfdm_type):
     fp = open('./.json_tmp', 'a', encoding='utf-8')
     print("\"%s\" : {" % dmparam.get('name'), file=fp)
     print("\"type\" : \"event\",", file=fp)
-    print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
+
+    if dmparam.get('version'):
+        print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
+
     has_param = 0
     for c in dmparam:
         if c.tag == "parameter":
@@ -710,15 +721,15 @@ def printusage():
           sys.argv[0] + " <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]")
     print("Examples:")
     print("  - " + sys.argv[0] +
-          " tr-181-2-15-0-cwmp-full.xml tr-181-2-15-0-usp-full.xml Device.")
+          " test/tools/tr-181-2-*-cwmp-full.xml test/tools/tr-181-2-*-usp-full.xml Device.")
     print("    ==> Generate the json file of the sub tree Device. in tr181.json")
     print("  - " + sys.argv[0] +
-          " tr-104-2-0-2-cwmp-full.xml tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.")
+          " test/tools/tr-104-2-0-2-cwmp-full.xml test/tools/tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.")
     print("    ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json")
-    print("  - " + sys.argv[0] + " tr-106-1-2-0-full.xml Device.")
+    print("  - " + sys.argv[0] + " test/tools/tr-106-1-2-0-full.xml Device.")
     print("    ==> Generate the json file of the sub tree Device. in tr106.json")
     print("")
-    print("Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-15-0-cwmp-full.xml")
+    print("Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-*-cwmp-full.xml")
     exit(1)
 
 

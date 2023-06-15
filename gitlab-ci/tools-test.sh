@@ -46,7 +46,7 @@ echo "Validate CWMPManagementServer JSON Plugin"
 check_ret $?
 
 echo "Validate TR-181 JSON Plugin after generating from XML"
-json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-181-2-15-0-cwmp-full.xml test/tools/tr-181-2-15-0-usp-full.xml Device.)
+json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-181-2-*-cwmp-full.xml test/tools/tr-181-2-*-usp-full.xml Device.)
 ./tools/validate_json_plugin.py $json_path
 check_ret $?
 

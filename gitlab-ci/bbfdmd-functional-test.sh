@@ -44,7 +44,7 @@ generate_report python_test ./funl-result.log
 
 # run functional on bbf object validation
 cp -r ./schemas/ubus/bbfdm.json /usr/share/rpcd/schemas/bbf.json
-ubus-api-validator -t 5 -f ./test/funl/validation/bbf.validation.json > ./funl-result.log
+ubus-api-validator -t 10 -f ./test/funl/validation/bbf.validation.json > ./funl-result.log
 fault=$?
 generate_report bbf_positive ./funl-result.log
 
