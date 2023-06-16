@@ -73,7 +73,6 @@ static void dmmap_synchronizePPPInterface(struct dmctx *dmctx, DMNODE *parent_no
 	struct uci_section *s = NULL, *stmp = NULL;
 
 	uci_path_foreach_sections_safe(bbfdm, "dmmap_ppp", "interface", stmp, s) {
-		struct uci_section *iface_s = NULL;
 		char *added_by_controller = NULL;
 		char *iface_name = NULL;
 
@@ -82,11 +81,14 @@ static void dmmap_synchronizePPPInterface(struct dmctx *dmctx, DMNODE *parent_no
 			continue;
 
 		dmuci_get_value_by_section_string(s, "iface_name", &iface_name);
-		if (DM_STRLEN(iface_name))
+		if (DM_STRLEN(iface_name)) {
+			struct uci_section *iface_s = NULL;
+
 			get_config_section_of_dmmap_section("network", "interface", iface_name, &iface_s);
 
-		if (!iface_s)
-			dmuci_delete_by_section(s, NULL, NULL);
+			if (!iface_s)
+				dmuci_delete_by_section(s, NULL, NULL);
+		}
 	}
 
 	uci_foreach_sections("network", "interface", s) {
