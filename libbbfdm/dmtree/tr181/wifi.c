@@ -789,7 +789,12 @@ static int set_radio_enable(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int get_radio_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *isup = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "isup");
+	json_object *res = NULL;
+
+	dmubus_call("network.wireless", "status", UBUS_ARGS{0}, 0, &res);
+	DM_ASSERT(res, *value = "Down");
+
+	char *isup = dmjson_get_value(res, 2, section_name((((struct wifi_radio_args *)data)->sections)->config_section), "up");
 	*value = (DM_STRCMP(isup, "false") == 0) ? "Down" : "Up";
 	return 0;
 }
@@ -3105,12 +3110,11 @@ static int get_access_point_associative_device_statistics_retrans_count(char *re
 static int get_wifi_access_point_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL;
-	char object[32], *status = NULL, *iface;
+	char object[32], *status = NULL;
 
-	dmuci_get_value_by_section_string((((struct wifi_ssid_args *)data)->sections)->config_section, "device", &iface);
-	snprintf(object, sizeof(object), "wifi.ap.%s", iface);
+	snprintf(object, sizeof(object), "wifi.ap.%s", ((struct wifi_acp_args *)data)->ifname);
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
-	DM_ASSERT(res, *value = "Error_Misconfigured");
+	DM_ASSERT(res, *value = "Disabled");
 	status = dmjson_get_value(res, 1, "status");
 
 	if (DM_LSTRCMP(status, "running") == 0 || DM_LSTRCMP(status, "up") == 0)

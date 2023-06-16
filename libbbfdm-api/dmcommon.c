@@ -831,40 +831,6 @@ char *get_l3_device(char *interface_name)
 	return dmjson_get_value(res, 1, "l3_device");
 }
 
-char *get_device_from_wifi_iface(const char *wifi_iface, const char *wifi_section)
-{
-	json_object *jobj;
-	array_list *jarr;
-	unsigned n = 0, i;
-	const char *ifname = "";
-
-	if (!wifi_iface || wifi_iface[0] == 0 || !wifi_section || wifi_section[0] == 0)
-		return "";
-
-	dmubus_call("network.wireless", "status", UBUS_ARGS{{}}, 0, &jobj);
-	if (jobj == NULL)
-		return "";
-
-	json_object_object_get_ex(jobj, wifi_iface, &jobj);
-	json_object_object_get_ex(jobj, "interfaces", &jobj);
-
-	jarr = json_object_get_array(jobj);
-	if (jarr)
-		n = array_list_length(jarr);
-
-	for (i = 0; i < n; i++) {
-		json_object *j_e = jarr->array[i];
-		const char *sect;
-
-		sect = dmjson_get_value(j_e, 1, "section");
-		if (!strcmp(sect, wifi_section)) {
-			ifname = dmjson_get_value(j_e, 2, "config", "ifname");
-			break;
-		}
-	}
-	return (char *)ifname;
-}
-
 bool value_exists_in_uci_list(struct uci_list *list, const char *value)
 {
 	struct uci_element *e = NULL;
