@@ -72,7 +72,7 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 
 			char *if_name = section_name(ss);
 			dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &jobj);
-			if (!jobj) break;
+			if (!jobj) continue;
 			dmjson_foreach_value_in_array(jobj, arrobj, ipdns, j, 1, "dns-server") {
 				if (DM_STRCMP(ipdns, ip) == 0) {
 					found = true;
@@ -110,7 +110,7 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 
 		char *if_name = section_name(s);
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &jobj);
-		if (!jobj) break;
+		if (!jobj) continue;
 		dmjson_foreach_value_in_array(jobj, arrobj, ipdns, j, 1, "dns-server") {
 
 			if (ipdns[0] == '\0' || is_dns_server_in_dmmap(ipdns, section_name(s)))
