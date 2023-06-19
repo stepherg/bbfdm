@@ -402,22 +402,13 @@ static int get_IEEE1905AL_Status(char *refparam, struct dmctx *ctx, void *data, 
 /*#Device.IEEE1905.AL.RegistrarFreqBand!UBUS:ieee1905/info//registrar_band*/
 static int get_IEEE1905AL_RegistrarFreqBand(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *registrar_band = NULL;
-	char list_bands[64], *band = NULL;
-	unsigned pos = 0, idx = 0;
+	json_object *res = NULL;
 
 	dmubus_call("ieee1905", "info", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 
-	list_bands[0] = 0;
-	dmjson_foreach_value_in_array(res, registrar_band, band, idx, 1, "registrar_band") {
-		pos += snprintf(&list_bands[pos], sizeof(list_bands) - pos, "802.11 %s GHz,", (*band == '2') ? "2.4" : band);
-	}
+	*value = dmjson_get_value_array_all(res, ",", 1, "registrar_band");
 
-	if (pos)
-		list_bands[pos - 1] = 0;
-
-	*value = dmstrdup(list_bands);
 	return 0;
 }
 
