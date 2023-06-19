@@ -12,6 +12,8 @@
 
 #include "nat.h"
 
+static int get_nat_port_mapping_external_port_end_range(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -42,10 +44,22 @@ static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("firewall", "redirect", "dmmap_firewall", &dup_list);
+
 	list_for_each_entry(p, &dup_list, list) {
 		dmuci_get_value_by_section_string(p->config_section, "target", &target);
 		if (*target != '\0' && DM_LSTRCMP(target, "DNAT") != 0)
 			continue;
+
+		/*
+		 * Add port range end in dmmap section if needed
+		 */
+		char *src_dport = NULL;
+		dmuci_get_value_by_section_string(p->config_section, "src_dport", &src_dport);
+		if (DM_STRLEN(src_dport) != 0) {
+			char *tmp = DM_STRCHR(src_dport, '-');
+			if (tmp)
+				dmuci_set_value_by_section(p->dmmap_section, "src_dport_end", tmp + 1);
+		}
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "port_mapping_instance", "port_mapping_alias");
 
@@ -115,6 +129,7 @@ static int add_NAT_PortMapping(char *refparam, struct dmctx *ctx, void *data, ch
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "target", "DNAT");
 	dmuci_set_value_by_section(s, "enabled", "0");
+	dmuci_set_value_by_section(s, "proto", "tcp");
 
 	dmuci_add_section_bbfdm("dmmap_firewall", "redirect", &dmmap_firewall);
 	dmuci_set_value_by_section(dmmap_firewall, "section_name", s_name);
@@ -519,7 +534,7 @@ static int get_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx,
 		return 0;
 	}
 
-	char *tmp = src_dport ? DM_STRCHR(src_dport, ':') : NULL;
+	char *tmp = src_dport ? DM_STRCHR(src_dport, '-') : NULL;
 	if (tmp)
 		*tmp = '\0';
 	*value = src_dport;
@@ -528,20 +543,34 @@ static int get_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx,
 
 static int set_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *src_dport = NULL, buffer[64];
+	char *dport_end = NULL, buffer[64];
+	uint16_t start_port, end_port;
+
+	get_nat_port_mapping_external_port_end_range(refparam, ctx, data, instance, &dport_end);
+	end_port = DM_STRTOL(dport_end);
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","65535"}}, 1))
 				return FAULT_9007;
+
+			start_port = DM_STRTOL(value);
+			if (start_port && end_port && start_port > end_port)
+				return FAULT_9007;
+
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_dport", &src_dport);
-			src_dport = src_dport ? DM_STRCHR(src_dport, ':') : NULL;
-			if (src_dport == NULL)
-				snprintf(buffer, sizeof(buffer), "%s", value);
+			if (strcmp(value, "0") == 0) { /* 0 means no external port */
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_dport", "");
+				return 0;
+			}
+
+			start_port = DM_STRTOL(value);
+			if (!end_port) // if end range is 0
+				snprintf(buffer, sizeof(buffer), "%d", start_port);
 			else
-				snprintf(buffer, sizeof(buffer), "%s%s", value, src_dport);
+				snprintf(buffer, sizeof(buffer), "%d-%d", start_port, end_port);
+
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_dport", buffer);
 			return 0;
 	}
@@ -551,50 +580,44 @@ static int set_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx,
 /*#Device.NAT.PortMapping.{i}.ExternalPortEndRange!UCI:firewall/redirect,@i-1/src_dport*/
 static int get_nat_port_mapping_external_port_end_range(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *src_dport = NULL;
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_dport", &src_dport);
-	char *tmp = src_dport ? DM_STRCHR(src_dport, ':') : NULL;
-	*value = tmp ? tmp + 1 : "0";
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->dmmap_section, "src_dport_end", "0");
 	return 0;
 }
 
 static int set_nat_port_mapping_external_port_end_range(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *src_dport = NULL, *tmp = NULL, buffer[64];
+	char *src_dport = NULL, buffer[64];
 	uint16_t sport, dport;
+
+	get_nat_port_mapping_external_port(refparam, ctx, data, instance, &src_dport);
+	sport = DM_STRTOL(src_dport);
 
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","65535"}}, 1))
 				return FAULT_9007;
 
-			// Add check to check if the endrange > src_dport
-			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_dport", &src_dport);
-			tmp = src_dport ? DM_STRCHR(src_dport, ':') : NULL;
-			if (tmp)
-				*tmp = '\0';
-
-			sport = DM_STRTOL(src_dport);
 			dport = DM_STRTOL(value);
+
+			// Add check to check if the endrange > src_dport
 			if (dport != 0 && dport < sport)
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_dport", &src_dport);
-			tmp = src_dport ? DM_STRCHR(src_dport, ':') : NULL;
-			if (tmp)
-				*tmp = '\0';
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "src_dport_end", value);
 
-			sport = DM_STRTOL(src_dport);
 			dport = DM_STRTOL(value);
 
-			if (dport) // if not 0
-				snprintf(buffer, sizeof(buffer), "%d:%d", sport, dport);
-			else
-				snprintf(buffer, sizeof(buffer), "%d", sport);
+			if (sport) { // if not 0
+				if (dport) // if not 0
+					snprintf(buffer, sizeof(buffer), "%d-%d", sport, dport);
+				else
+					snprintf(buffer, sizeof(buffer), "%d", sport);
 
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_dport", buffer);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_dport", buffer);
+			}
+
 			return 0;
 	}
 	return 0;
