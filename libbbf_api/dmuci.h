@@ -359,6 +359,7 @@ int dmuci_delete_by_section_unnamed(struct uci_section *s, char *option, char *v
 int dmuci_add_list_value_by_section(struct uci_section *s, char *option, char *value);
 int dmuci_del_list_value_by_section(struct uci_section *s, char *option, char *value);
 int dmuci_rename_section_by_section(struct uci_section *s, char *value);
+int dmuci_reoder_section_by_section(struct uci_section *s, char *pos);
 struct uci_section *dmuci_walk_section(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
 struct uci_section *dmuci_walk_all_sections(char *package, struct uci_section *prev_section, int walk);
 

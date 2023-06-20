@@ -31,6 +31,7 @@ void firewall__create_zone_section(char *s_name)
 	dmuci_set_value_by_section(s, "input", input);
 	dmuci_set_value_by_section(s, "output", output);
 	dmuci_set_value_by_section(s, "forward", forward);
+
 	dmuci_add_list_value_by_section(s, "network", s_name);
 }
 
@@ -66,6 +67,85 @@ static char *get_rule_perm(char *refparam, struct dmctx *dmctx, void *data, char
 
 struct dm_permession_s DMRule = {"1", &get_rule_perm};
 
+static void fill_rules_info(struct uci_section *s)
+{
+	struct uci_context *fw_ctx = NULL;
+	struct uci_package *fw_pkg = NULL;
+	struct uci_element *fw_elmnt = NULL;
+	char rule_start_pos[8], rules_num[8];
+	unsigned int pos = 0, num = 0, idx = 0;
+
+	fw_ctx = uci_alloc_context();
+	if (!fw_ctx)
+		return;
+
+	uci_load(fw_ctx, "firewall", &fw_pkg);
+	if (!fw_pkg)
+		goto end;
+
+
+	uci_foreach_element(&fw_pkg->sections, fw_elmnt) {
+		struct uci_section *uci_sec = uci_to_section(fw_elmnt);
+
+		if (DM_STRCMP(uci_sec->type, "forwarding") == 0) {
+			pos = idx;
+			num++;
+		}
+
+		if (DM_STRCMP(uci_sec->type, "rule") == 0)
+			num++;
+
+		idx++;
+	}
+
+	uci_unload(fw_ctx, fw_pkg);
+
+	snprintf(rule_start_pos, sizeof(rule_start_pos), "%u", pos);
+	snprintf(rules_num, sizeof(rules_num), "%u", num);
+
+	dmuci_set_value_by_section(s, "rule_start_pos", rule_start_pos);
+	dmuci_set_value_by_section(s, "rules_num", rules_num);
+
+end:
+	uci_free_context(fw_ctx);
+}
+
+static void update_rule_order(const char *start_order, const char *stop_order, bool incr)
+{
+	struct uci_section *s = NULL;
+	char *order = NULL;
+
+	uci_path_foreach_sections(bbfdm, "dmmap_firewall", "forwarding", s) {
+
+		dmuci_get_value_by_section_string(s, "order", &order);
+
+		if (DM_STRTOUL(order) >= DM_STRTOUL(start_order)) {
+			char buf[8] = {0};
+
+			snprintf(buf, sizeof(buf), "%lu", incr ? (DM_STRTOUL(order) + 1) : (DM_STRTOUL(order) - 1));
+			dmuci_set_value_by_section(s, "order", buf);
+		}
+
+		if (DM_STRTOUL(order) == DM_STRTOUL(stop_order))
+			return;
+	}
+
+	uci_path_foreach_sections(bbfdm, "dmmap_firewall", "rule", s) {
+
+		dmuci_get_value_by_section_string(s, "order", &order);
+
+		if (DM_STRTOUL(order) >= DM_STRTOUL(start_order)) {
+			char buf[8] = {0};
+
+			snprintf(buf, sizeof(buf), "%lu", incr ? (DM_STRTOUL(order) + 1) : (DM_STRTOUL(order) - 1));
+			dmuci_set_value_by_section(s, "order", buf);
+		}
+
+		if (DM_STRTOUL(order) == DM_STRTOUL(stop_order))
+			return;
+	}
+}
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -81,7 +161,11 @@ static int browseLevelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 static int browseChainInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = is_dmmap_section_exist("dmmap_firewall", "chain");
-	if (!s) dmuci_add_section_bbfdm("dmmap_firewall", "chain", &s);
+	if (!s) {
+		dmuci_add_section_bbfdm("dmmap_firewall", "chain", &s);
+		fill_rules_info(s);
+	}
+
 	handle_instance(dmctx, parent_node, s, "firewall_chain_instance", "firewall_chain_alias");
 	DM_LINK_INST_OBJ(dmctx, parent_node, s, "1");
 	return 0;
@@ -90,7 +174,7 @@ static int browseChainInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_
 /*#Device.Firewall.Chain.{i}.Rule.{i}.!UCI:firewall/rule/dmmap_firewall*/
 static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
+	char *inst = NULL, *order = NULL;
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(dup_list);
 
@@ -102,8 +186,16 @@ static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "firewall_chain_rule_instance", "firewall_chain_rule_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
-			goto end;
+		dmuci_get_value_by_section_string(p->dmmap_section, "order", &order);
+		if (DM_STRLEN(order) == 0) {
+			// Fill order only first time
+			dmuci_set_value_by_section(p->dmmap_section, "order", inst);
+		}
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP) {
+			free_dmmap_config_dup_list(&dup_list);
+			return 0;
+		}
 	}
 	free_dmmap_config_dup_list(&dup_list);
 
@@ -115,12 +207,17 @@ static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "firewall_chain_rule_instance", "firewall_chain_rule_alias");
 
+		dmuci_get_value_by_section_string(p->dmmap_section, "order", &order);
+		if (DM_STRLEN(order) == 0) {
+			// Fill order only first time
+			dmuci_set_value_by_section(p->dmmap_section, "order", inst);
+		}
+
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
-			goto end;
+			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
 
-end:
 	return 0;
 }
 
@@ -129,10 +226,16 @@ end:
 **************************************************************/
 static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
+	struct uci_section *chain_args = (struct uci_section *)data;
 	struct uci_section *s = NULL, *dmmap_firewall_rule = NULL;
 	char creation_date[32] = {0};
 	char s_name[16] = {0};
+	char buf[8] = {0};
+	char *rule_start_pos = NULL, *rules_num = NULL;
 	time_t now = time(NULL);
+
+	dmuci_get_value_by_section_string(chain_args, "rule_start_pos", &rule_start_pos);
+	dmuci_get_value_by_section_string(chain_args, "rules_num", &rules_num);
 
 	strftime(creation_date, sizeof(creation_date), "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
 
@@ -144,6 +247,14 @@ static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char
 	dmuci_set_value_by_section(s, "target", "DROP");
 	dmuci_set_value_by_section(s, "proto", "0");
 
+	// Update rule section order
+	snprintf(buf, sizeof(buf), "%lu", DM_STRTOUL(rule_start_pos) + DM_STRTOUL(rules_num));
+	dmuci_reoder_section_by_section(s, buf);
+
+	// Update rules number
+	snprintf(buf, sizeof(buf), "%lu", DM_STRTOUL(rules_num) + 1);
+	dmuci_set_value_by_section(chain_args, "rules_num", buf);
+
 	dmuci_add_section_bbfdm("dmmap_firewall", "rule", &dmmap_firewall_rule);
 	dmuci_set_value_by_section(dmmap_firewall_rule, "section_name", s_name);
 	dmuci_set_value_by_section(dmmap_firewall_rule, "creation_date", creation_date);
@@ -154,9 +265,13 @@ static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char
 static int delete_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *s = NULL, *stmp = NULL;
+	char *order = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "order", &order);
+			update_rule_order(order, "0", false);
+
 			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
 			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 			break;
@@ -341,7 +456,7 @@ static int get_rule_status(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int get_rule_order(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "firewall_chain_rule_instance", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "order", value);
 	return 0;
 }
 
@@ -966,12 +1081,36 @@ static int set_rule_enable(char *refparam, struct dmctx *ctx, void *data, char *
 
 static int set_rule_order(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *s = NULL;
+	char *rule_start_pos = NULL;
+	char *rules_num = NULL;
+	char *curr_order = NULL;
+	char buf[8] = {0};
+
+	s = is_dmmap_section_exist("dmmap_firewall", "chain");
+
 	switch (action) {
 		case VALUECHECK:
 			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
+
+			dmuci_get_value_by_section_string(s, "rules_num", &rules_num);
+			if (DM_STRTOUL(value) > DM_STRTOUL(rules_num))
+				return FAULT_9007;
+
 			break;
 		case VALUESET:
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "order", &curr_order);
+			if (DM_STRTOUL(curr_order) > DM_STRTOUL(value))
+				update_rule_order(value, curr_order, true);
+			else
+				update_rule_order(curr_order, value, false);
+
+			dmuci_get_value_by_section_string(s, "rule_start_pos", &rule_start_pos);
+			snprintf(buf, sizeof(buf), "%lu", DM_STRTOUL(rule_start_pos) + DM_STRTOUL(value) - 1);
+
+			dmuci_reoder_section_by_section(((struct dmmap_dup *)data)->config_section, buf);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "order", value);
 			break;
 	}
         return 0;
@@ -1451,8 +1590,8 @@ DMLEAF tFirewallChainParams[] = {
 DMLEAF tFirewallChainRuleParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMRule, DMT_BOOL, get_rule_enable, set_rule_enable, BBFDM_BOTH, "2.2"},
-{"Status", &DMRule, DMT_STRING, get_rule_status, NULL, BBFDM_BOTH, "2.2"},
-{"Order", &DMWRITE, DMT_UNINT, get_rule_order, set_rule_order, BBFDM_BOTH, "2.2"},
+{"Status", &DMREAD, DMT_STRING, get_rule_status, NULL, BBFDM_BOTH, "2.2"},
+{"Order", &DMRule, DMT_UNINT, get_rule_order, set_rule_order, BBFDM_BOTH, "2.2"},
 {"Alias", &DMWRITE, DMT_STRING, get_rule_alias, set_rule_alias, BBFDM_BOTH, "2.2"},
 {"Description", &DMRule, DMT_STRING, get_rule_description, set_rule_description, BBFDM_BOTH, "2.2"},
 {"Target", &DMRule, DMT_STRING, get_rule_target, set_rule_target, BBFDM_BOTH, "2.2"},
