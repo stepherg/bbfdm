@@ -13,7 +13,7 @@
   "vendor_prefix": "X_IOPSYS_EU_",
   "plugins": [
     {
-      "repo": "https://dev.iopsys.eu/iopsys/bulkdata.git",
+      "repo": "https://dev.iopsys.eu/bbf/bulkdata.git",
       "proto": "git",
       "version": "release-6.5",
       "dm_files": [
@@ -21,37 +21,36 @@
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/xmppc.git",
+      "repo": "https://dev.iopsys.eu/bbf/xmppc.git",
       "proto": "git"
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/stunc.git",
+      "repo": "https://dev.iopsys.eu/bbf/stunc.git",
       "proto": "git",
-      "version": "devel",
+      "version": "release-6.5",
       "dm_files": [
         "datamodel.c"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/udpechoserver.git",
+      "repo": "https://dev.iopsys.eu/bbf/udpecho.git",
       "proto": "git",
-      "version": "master",
+      "version": "release-6.5",
+      "dm_files": [
+        "src/datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/twamp.git",
+      "proto": "git",
       "dm_files": [
         "datamodel.c"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/twamp.git",
+      "repo": "https://dev.iopsys.eu/bbf/periodicstats.git",
       "proto": "git",
-      "version": "master",
-      "dm_files": [
-        "datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/iopsys/periodicstats.git",
-      "proto": "git",
-      "version": "devel",
+      "version": "release-6.5",
       "dm_files": [
         "bbf_plugin/bbf_plugin.c"
       ]
@@ -59,7 +58,7 @@
     {
       "repo": "https://dev.iopsys.eu/feed/iopsys.git",
       "proto": "git",
-      "version": "devel",
+      "version": "release-6.5",
       "dm_files": [
         "urlfilter/files/etc/bbfdm/json/urlfilter.json",
         "obuspa/files/etc/bbfdm/json/USPAgent.json",
@@ -68,9 +67,9 @@
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/swmodd.git",
+      "repo": "https://dev.iopsys.eu/lcm/swmodd.git",
       "proto": "git",
-      "version": "devel",
+      "version": "release-6.5",
       "dm_files": [
         "src/datamodel.c"
       ]

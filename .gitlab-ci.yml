@@ -1,6 +1,7 @@
 include:
   - project: 'iopsys/gitlab-ci-pipeline'
     file: '/static-code-analysis.yml'
+    ref: '0.27'
 
 variables:
   DEBUG: 'TRUE'
@@ -17,7 +18,7 @@ stages:
 
 run_unit_test:
   stage: unit_test
-  image: iopsys/code-analysis:latest
+  image: "${COMMON_IMAGE}"
   allow_failure: false
   script:
   - "./gitlab-ci/setup.sh"
@@ -30,7 +31,7 @@ run_unit_test:
 
 run_functional_test:
   stage: functional_test
-  image: iopsys/code-analysis:latest
+  image: "${COMMON_IMAGE}"
   allow_failure: false
   script:
   - "./gitlab-ci/setup.sh"
@@ -44,7 +45,7 @@ run_functional_test:
 
 run_functional_api_test:
   stage: functional_test
-  image: iopsys/code-analysis:latest
+  image: "${COMMON_IMAGE}"
   allow_failure: false
   script:
   - "./gitlab-ci/setup.sh"
@@ -58,7 +59,7 @@ run_functional_api_test:
 
 run_tools_test:
   stage: unit_test
-  image: iopsys/code-analysis:latest
+  image: "${COMMON_IMAGE}"
   allow_failure: false
   script:
   - "./gitlab-ci/tools-test.sh"
@@ -73,7 +74,7 @@ run_tools_test:
 
 run_memory_test:
   stage: memory_test
-  image: iopsys/code-analysis:latest
+  image: "${COMMON_IMAGE}"
   allow_failure: false
   script:
   - "./gitlab-ci/setup.sh"
@@ -90,7 +91,7 @@ run_memory_test:
 
 doxygen:
   stage: unit_test
-  image: iopsys/code-analysis:latest
+  image: "${COMMON_IMAGE}"
   before_script:
       - apt update
       - apt --assume-yes install doxygen graphviz
@@ -115,7 +116,7 @@ run_uspd:
     BBF_TAR_URL: $BBF_TAR_URL
   allow_failure: false
   trigger:
-    project: iopsys/uspd
+    project: bbf/uspd
     branch: bbf_pipeline_6.5
     strategy: depend
   needs:

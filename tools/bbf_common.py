@@ -411,6 +411,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
                 repo = get_option_value(plugin, "repo")
 
                 if repo is None:
+                    print("# Skipping sec with emtpy repo ...")
                     BBF_ERROR_CODE += 1
                     continue
 
@@ -428,6 +429,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
                                     generate_datamodel_tree(f"{repo}/{dm_file}")
                                     generate_dynamic_json_datamodel_tree(f"{repo}/{dm_file}")
                                 else:
+                                    print(f"# Missing {repo}/{dm_file} ...")
                                     BBF_ERROR_CODE += 1  
                         else:
                             files = os.popen(f'find {repo}/ -name datamodel.c').read()
@@ -441,7 +443,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
                                 if os.path.isfile(file):
                                     generate_dynamic_json_datamodel_tree(file)
                     else:
-                        print(f'    {repo} is not a  directory !!!!!')
+                        print(f'    # {repo} is not a  directory !!!!!')
                         BBF_ERROR_CODE += 1
 
                 else:
@@ -454,7 +456,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
                         subprocess.run(["git", "clone", repo, ".repo"],
                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check = True)
                     except (OSError, subprocess.SubprocessError) as _e:
-                        print(f'    Failed to clone {repo} !!!!!')
+                        print(f'    # Failed to clone {repo} !!!!!')
                         BBF_ERROR_CODE += 1
     
                     if version is not None:
@@ -462,7 +464,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
                             subprocess.run(["git", "-C", ".repo", "checkout", version],
                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
                         except (OSError, subprocess.SubprocessError) as _e:
-                            print(f'    Failed to checkout git version {version} !!!!!')
+                            print(f'    # Failed to checkout git version {version} !!!!!')
                             BBF_ERROR_CODE += 1
     
                     if os.path.isdir(".repo"):
@@ -479,6 +481,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
                                     generate_datamodel_tree(".repo/" + dm_file)
                                     generate_dynamic_json_datamodel_tree(".repo/" + dm_file)
                                 else:
+                                    print(f"# Missing {repo}/{dm_file} ..")
                                     BBF_ERROR_CODE += 1
                         else:
                             files = os.popen('find .repo/ -name datamodel.c').read()
@@ -494,6 +497,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
     
                         remove_folder(".repo")
                     else:
+                        print("# Internal error ...")
                         BBF_ERROR_CODE += 1
 
         print('Generating of plugins done')
