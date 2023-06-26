@@ -281,6 +281,11 @@ static int get_HostsHost_Layer1Interface(char *refparam, struct dmctx *ctx, void
 	char *linker = dmjson_get_value((json_object *)data, 1, "device");
 	char *type = dmjson_get_value((json_object *)data, 1, "interface_type");
 	if (DM_LSTRCMP(type, "Wi-Fi") == 0) {
+		char *mac_addr = dmjson_get_value((json_object *)data, 1, "link_macaddr");
+		adm_entry_get_linker_param(ctx, "Device.WiFi.AccessPoint.", mac_addr, value);
+		if (DM_STRLEN(*value) == 0)
+			return 0;
+
 		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
 		if (!(*value) || (*value)[0] == 0) {
 			char *device = dmjson_get_value((json_object *)data, 1, "parent_device");
