@@ -531,11 +531,9 @@ int init_call_log(void)
 				DM_STRNCPY(cdr.averageFarEndInterarrivalJitter, token, end - token + 1);
 			}
 			// Skip invalid call logs
-			if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||
-				cdr.start_time[0] == '\0' || end_time[0] == '\0') {
-				BBF_DEBUG("Invalid CDR: [%s]\ncalling_number = [%s], called_number = [%s], "
-					"start_time = [%s], end_time = [%s]\n", line,
-					cdr.calling_num, cdr.called_num, cdr.start_time, end_time);
+			if (cdr.called_num[0] == '\0' || cdr.start_time[0] == '\0' || end_time[0] == '\0') {
+				BBF_DEBUG("Invalid CDR: [%s]\ncalled_number = [%s], start_time = [%s], end_time = [%s]\n",
+					line, cdr.called_num, cdr.start_time, end_time);
 				continue;
 			} else if (cdr.destination[0] == '\0' && strcasecmp(cdr.called_num, "h") == 0) {
 				BBF_DEBUG("Invalid CDR: [%s]\ncalled_number = [%s], destination = [%s]\n", line,
