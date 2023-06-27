@@ -52,7 +52,7 @@ udpecho_launch() {
 	[ -z "${port}" ] && port=7
 	[ -z "${dsize}" ] && dsize=24
 	[ -z "${dscp}" ] && dscp=0
-	[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.device) && device="-i $device" || device=""
+	[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.l3_device) && device="-i $device" || device=""
 	ip_addr_used=$(get_ip_addr_used "${ip_proto}" "${iface}")
 	if [ "$ip_proto" = "IPv4" ]; then ip_proto="4"; elif [ "$ip_proto" = "IPv6" ]; then ip_proto="6"; else ip_proto="4"; fi
 	[ -z "${timeout}" ] && timeout=1 || timeout=$((timeout/1000))

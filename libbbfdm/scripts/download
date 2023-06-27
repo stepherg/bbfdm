@@ -57,7 +57,7 @@ download_launch() {
 	fi
 
 	# Assign default value
-	[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.device) || device=$(route -n | grep 'UG[ \t]' | awk '{print $8}')
+	[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.l3_device) || device=$(route -n | grep 'UG[ \t]' | awk '{print $8}')
 	ip_addr_used=$(get_ip_addr_used "${ip_proto}" "${iface}")
 	if [ "$ip_proto" = "IPv4" ]; then ip_proto="--ipv4"; elif [ "$ip_proto" = "IPv6" ]; then ip_proto="--ipv6"; else ip_proto=""; fi
 

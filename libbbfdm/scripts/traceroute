@@ -57,7 +57,7 @@ traceroute_launch() {
 	# Assign default value
 	[ -z "${cnt}" ] && cnt=1
 	[ -z "${maxhop}" ] && maxhop=30
-	[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.device) && device="-i $device" || device=""
+	[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.l3_device) && device="-i $device" || device=""
 	ip_addr_used=$(get_ip_addr_used "${ip_proto}" "${iface}")
 	if [ "$ip_proto" = "IPv4" ]; then ip_proto="-4"; elif [ "$ip_proto" = "IPv6" ]; then ip_proto="-6"; else ip_proto=""; fi
 	[ -z "${timeout}" ] && timeout=5 || timeout=$((timeout/1000))
