@@ -1748,13 +1748,17 @@ static int get_BridgingBridgeSTP_Status(char *refparam, struct dmctx *ctx, void 
 {
 	char *name = NULL;
 
+	*value = "Disabled";
 	dmuci_get_value_by_section_string(((struct bridge_args *)data)->bridge_sec, "name", &name);
-	get_net_device_status(name, value);
-	if (DM_STRCMP(*value, "Up") == 0) {
-		*value = "Enabled";
-	} else {
-		*value = "Disabled";
+	if (DM_STRLEN(name) == 0) {
+		return 0;
 	}
+
+	char *enable = NULL;
+	get_net_device_sysfs(name, "bridge/stp_state", &enable);
+	if (DM_STRCMP(enable, "1") == 0)
+		*value = "Enabled";
+
 	return 0;
 }
 
