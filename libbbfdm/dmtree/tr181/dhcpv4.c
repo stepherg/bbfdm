@@ -669,15 +669,15 @@ static int browseDHCPv4ServerPoolClientOptionInst(struct dmctx *dmctx, DMNODE *p
 
 	const struct client_args *args = (struct client_args *)prev_data;
 	struct client_options_args curr_client_options_args = {0};
-	char line[2048], macaddr[24], vcid[128], clid[128], ucid[128];
+	char line[2048], macaddr[24]={0}, vcid[128]={0}, clid[128]={0}, ucid[128]={0}, hostname[128]={0}, paramlist[256]={0};
 	char *inst = NULL;
 	int id = 0;
 
 	while (fgets(line, sizeof(line), f) != NULL) {
 		remove_new_line(line);
 
-		sscanf(line, "%23s vcid=%127s clid=%127s ucid=%127s",
-				macaddr, vcid, clid, ucid);
+		sscanf(line, "%23s vcid=%127s clid=%127s ucid=%127s hostname=%127s paramlist=%255s",
+				macaddr, vcid, clid, ucid, hostname, paramlist);
 
 		if (DM_STRNCMP(macaddr, (char *)args->lease->hwaddr, 24) == 0) {
 
@@ -702,6 +702,24 @@ static int browseDHCPv4ServerPoolClientOptionInst(struct dmctx *dmctx, DMNODE *p
 
 			if (DM_LSTRCMP(ucid, "-") != 0) {
 				init_client_options_args(&curr_client_options_args, "77", dmstrdup(ucid));
+
+				inst = handle_instance_without_section(dmctx, parent_node, ++id);
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
+					break;
+			}
+
+			if (DM_LSTRCMP(hostname, "-") != 0) {
+				init_client_options_args(&curr_client_options_args, "12", dmstrdup(hostname));
+
+				inst = handle_instance_without_section(dmctx, parent_node, ++id);
+
+				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
+					break;
+			}
+
+			if (DM_LSTRCMP(paramlist, "-") != 0) {
+				init_client_options_args(&curr_client_options_args, "55", dmstrdup(paramlist));
 
 				inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
