@@ -402,15 +402,23 @@ static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char
 static int delete_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *s = NULL, *stmp = NULL;
-	char *order = NULL;
+	char *order = NULL, *rules_num = NULL;
+	char buf[8] = {0};
 
 	switch (del_action) {
 		case DEL_INST:
 			if (((struct rule_sec *)data)->is_dynamic_rule)
 				return FAULT_9003;
 
+			s = get_dup_section_in_dmmap_opt("dmmap_firewall", "chain", "creator", "Defaults");
+			dmuci_get_value_by_section_string(s, "rules_num", &rules_num);
+
 			dmuci_get_value_by_section_string(((struct rule_sec *)data)->dmmap_section, "order", &order);
-			update_rule_order(order, "0", false);
+			update_rule_order(order, rules_num, false);
+
+			// Update rules number
+			snprintf(buf, sizeof(buf), "%lu", DM_STRTOUL(rules_num) - 1);
+			dmuci_set_value_by_section(s, "rules_num", buf);
 
 			dmuci_delete_by_section(((struct rule_sec *)data)->config_section, NULL, NULL);
 			dmuci_delete_by_section(((struct rule_sec *)data)->dmmap_section, NULL, NULL);
