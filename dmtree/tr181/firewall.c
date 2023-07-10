@@ -119,30 +119,24 @@ static void update_rule_order(const char *start_order, const char *stop_order, b
 
 		dmuci_get_value_by_section_string(s, "order", &order);
 
-		if (DM_STRTOUL(order) >= DM_STRTOUL(start_order)) {
+		if ((DM_STRTOUL(order) >= DM_STRTOUL(start_order)) && (DM_STRTOUL(order) <= DM_STRTOUL(stop_order))) {
 			char buf[8] = {0};
 
 			snprintf(buf, sizeof(buf), "%lu", incr ? (DM_STRTOUL(order) + 1) : (DM_STRTOUL(order) - 1));
 			dmuci_set_value_by_section(s, "order", buf);
 		}
-
-		if (DM_STRTOUL(order) == DM_STRTOUL(stop_order))
-			return;
 	}
 
 	uci_path_foreach_sections(bbfdm, "dmmap_firewall", "rule", s) {
 
 		dmuci_get_value_by_section_string(s, "order", &order);
 
-		if (DM_STRTOUL(order) >= DM_STRTOUL(start_order)) {
+		if ((DM_STRTOUL(order) >= DM_STRTOUL(start_order)) && (DM_STRTOUL(order) <= DM_STRTOUL(stop_order))) {
 			char buf[8] = {0};
 
 			snprintf(buf, sizeof(buf), "%lu", incr ? (DM_STRTOUL(order) + 1) : (DM_STRTOUL(order) - 1));
 			dmuci_set_value_by_section(s, "order", buf);
 		}
-
-		if (DM_STRTOUL(order) == DM_STRTOUL(stop_order))
-			return;
 	}
 }
 
@@ -265,12 +259,20 @@ static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char
 static int delete_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
 	struct uci_section *s = NULL, *stmp = NULL;
-	char *order = NULL;
+	char *order = NULL, *rules_num = NULL;
+	char buf[8] = {0};
 
 	switch (del_action) {
 		case DEL_INST:
+			s = is_dmmap_section_exist("dmmap_firewall", "chain");
+			dmuci_get_value_by_section_string(s, "rules_num", &rules_num);
+
 			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "order", &order);
-			update_rule_order(order, "0", false);
+			update_rule_order(order, rules_num, false);
+
+			// Update rules number
+			snprintf(buf, sizeof(buf), "%lu", DM_STRTOUL(rules_num) - 1);
+			dmuci_set_value_by_section(s, "rules_num", buf);
 
 			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
 			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
