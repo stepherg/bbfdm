@@ -117,9 +117,9 @@ function install_libperiodicstats()
 	exec_cmd_verbose make -C /opt/dev/periodicstats/
 
 	echo "installing libperiodicstats"
-	mkdir -p /etc/bbfdm/services/periodicstats
-	cp -f /opt/dev/periodicstats/bbf_plugin/libperiodicstats.so /etc/bbfdm/services/periodicstats
-	cp -f /opt/dev/iopsys/periodicstats/files/etc/bbfdm/services/periodicstats/input.json /etc/bbfdm/services/periodicstats
+	mkdir -p /etc/periodicstats
+	cp -f /opt/dev/periodicstats/bbf_plugin/libperiodicstats.so /etc/periodicstats/
+	cp -f /opt/dev/iopsys/periodicstats/files/etc/periodicstats/input.json /etc/periodicstats
 }
 
 function install_libcwmpdm()
