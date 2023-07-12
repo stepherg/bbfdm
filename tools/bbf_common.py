@@ -419,6 +419,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
     for DIR in LIST_DM_DIR:
         cd_dir(DIR)
         for _root, _dirs, files in os.walk("."):
+            files.sort()
             for filename in files:
                 if filename.endswith('.c') is False or filename == BBF_TR181_ROOT_FILE or filename == BBF_TR104_ROOT_FILE:
                     continue
@@ -438,6 +439,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
                     generate_datamodel_tree(BBF_TR181_ROOT_FILE)
 
                 for _root, _dirs, files in os.walk("."):
+                    files.sort()
                     for filename in files:
                         if filename.endswith('.c') is False or filename == BBF_VENDOR_ROOT_FILE or filename == BBF_TR181_ROOT_FILE:
                             continue
@@ -451,6 +453,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
                 cd_dir(vendor_dir)
 
                 for _root, _dirs, files in os.walk("."):
+                    files.sort()
                     for filename in files:
                         if filename.endswith('.c') is False:
                             continue
