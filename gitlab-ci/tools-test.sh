@@ -62,6 +62,11 @@ check_ret $?
 
 
 echo "********* Validate XML File *********"
+if [ -n "${CI_SERVER_HOST}" ]; then
+	echo "machine ${CI_SERVER_HOST}" >>~/.netrc
+	echo "login gitlab-ci-token" >>~/.netrc
+	echo "password ${CI_JOB_TOKEN}" >>~/.netrc
+fi
 
 cd tools
 ./generate_dm.py tools_input.json

@@ -13,12 +13,10 @@ CURRENT_PATH = os.getcwd()
 ROOT = None
 BBF_ERROR_CODE = 0
 BBF_TR181_ROOT_FILE = "device.c"
-BBF_TR104_ROOT_FILE = "servicesvoiceservice.c"
 BBF_VENDOR_ROOT_FILE = "vendor.c"
 BBF_VENDOR_PREFIX = "X_IOPSYS_EU_"
 BBF_DMTREE_PATH = CURRENT_PATH + "/../libbbfdm/dmtree"
 BBF_DMTREE_PATH_TR181 = BBF_DMTREE_PATH + "/tr181"
-BBF_DMTREE_PATH_TR104 = BBF_DMTREE_PATH + "/tr104"
 BBF_DMTREE_PATH_TR143 = BBF_DMTREE_PATH + "/tr143"
 BBF_DMTREE_PATH_TR471 = BBF_DMTREE_PATH + "/tr471"
 BBF_DMTREE_PATH_TR181_JSON = BBF_DMTREE_PATH + "/json/tr181.json"
@@ -26,8 +24,7 @@ BBF_DMTREE_PATH_TR104_JSON = BBF_DMTREE_PATH + "/json/tr104.json"
 DATA_MODEL_FILE = ".data_model.txt"
 ARRAY_JSON_FILES = {"tr181": BBF_DMTREE_PATH_TR181_JSON,
                     "tr104": BBF_DMTREE_PATH_TR104_JSON}
-LIST_DM_DIR = [BBF_DMTREE_PATH_TR181,
-               BBF_DMTREE_PATH_TR104, BBF_DMTREE_PATH_TR143, BBF_DMTREE_PATH_TR471]
+LIST_DM_DIR = [BBF_DMTREE_PATH_TR181, BBF_DMTREE_PATH_TR143, BBF_DMTREE_PATH_TR471]
 LIST_IGNORED_LINE = ['/*', '//', '#']
 LIST_OBJ = []
 LIST_PARAM = []
@@ -413,15 +410,12 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
     cd_dir(BBF_DMTREE_PATH_TR181)
     generate_datamodel_tree(BBF_TR181_ROOT_FILE)
 
-    cd_dir(BBF_DMTREE_PATH_TR104)
-    generate_datamodel_tree(BBF_TR104_ROOT_FILE)
-
     for DIR in LIST_DM_DIR:
         cd_dir(DIR)
         for _root, _dirs, files in os.walk("."):
             files.sort()
             for filename in files:
-                if filename.endswith('.c') is False or filename == BBF_TR181_ROOT_FILE or filename == BBF_TR104_ROOT_FILE:
+                if filename.endswith('.c') is False or filename == BBF_TR181_ROOT_FILE:
                     continue
 
                 generate_datamodel_tree(filename)
@@ -442,20 +436,6 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
                     files.sort()
                     for filename in files:
                         if filename.endswith('.c') is False or filename == BBF_VENDOR_ROOT_FILE or filename == BBF_TR181_ROOT_FILE:
-                            continue
-
-                        generate_datamodel_tree(filename)
-
-                cd_dir(BBF_DMTREE_PATH)
-
-            vendor_dir = f'vendor/{vendor}/tr104'
-            if os.path.isdir(vendor_dir):
-                cd_dir(vendor_dir)
-
-                for _root, _dirs, files in os.walk("."):
-                    files.sort()
-                    for filename in files:
-                        if filename.endswith('.c') is False:
                             continue
 
                         generate_datamodel_tree(filename)
@@ -514,7 +494,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
 
                     remove_folder(".repo")
                     try:
-                        subprocess.run(["git", "clone", "--depth", "1", repo, ".repo"],
+                        subprocess.run(["git", "clone", repo, ".repo"],
                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check = True)
                     except (OSError, subprocess.SubprocessError) as _e:
                         print(f'    Failed to clone {repo} !!!!!')

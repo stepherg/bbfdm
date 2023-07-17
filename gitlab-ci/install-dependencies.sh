@@ -20,8 +20,8 @@ install_libwifi_dataelements ${1}
 
 # Install datamodel plugins only when pipeline trigger for bbfdm
 if [ -z "${1}" ]; then
-	git clone --depth 1 https://dev.iopsys.eu/feed/iopsys.git /opt/dev/iopsys
-	git clone --depth 1 https://dev.iopsys.eu/bbf/bulkdata.git /opt/dev/bulkdata
+	git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/feed/iopsys.git /opt/dev/iopsys
+	git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/bulkdata.git /opt/dev/bulkdata
 
 	cp -f /opt/dev/iopsys/urlfilter/files/etc/bbfdm/json/urlfilter.json /etc/bbfdm/json
 	cp -f /opt/dev/iopsys/obuspa/files/etc/bbfdm/json/USPAgent.json /etc/bbfdm/json

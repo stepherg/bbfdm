@@ -11,7 +11,6 @@
   ],
   "dm_json_files": [
     "../libbbfdm/dmtree/json/tr181.json",
-    "../libbbfdm/dmtree/json/tr104.json",
     "../libbbfdm/dmtree/vendor/iopsys/vendor.json"
   ],
   "vendor_prefix": "X_IOPSYS_EU_",
@@ -93,6 +92,26 @@
       "version": "devel",
       "dm_files": [
         "src/cwmp_dm/datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/voice/tr104.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "libdm/dmtree/servicesvoiceservice.c",
+        "libdm/dmtree/servicesvoiceservicecallcontrol.c",
+        "libdm/dmtree/servicesvoiceservicecalllog.c",
+        "libdm/dmtree/servicesvoiceservicecapabilities.c",
+        "libdm/dmtree/servicesvoiceservicecodecprofile.c",
+        "libdm/dmtree/servicesvoiceservicedect.c",
+        "libdm/dmtree/servicesvoiceservicepots.c",
+        "libdm/dmtree/servicesvoiceservicereservedports.c",
+        "libdm/dmtree/servicesvoiceservicesip.c",
+        "libdm/dmtree/servicesvoiceservicevoipprofile.c",
+        "libdm/dmtree/vendor_ext/servicesvoiceservicecallcontrol.c",
+        "libdm/dmtree/vendor_ext/servicesvoiceservicecalllog.c",
+        "libdm/dmtree/vendor_ext/servicesvoiceservicedect.c"
       ]
     }
   ],

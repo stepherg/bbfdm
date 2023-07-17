@@ -125,9 +125,7 @@ DMOBJ tDeviceObj[] = {
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_BOTH, NULL, "2.4"},
 #endif
 {"RouterAdvertisement", &DMREAD, NULL, NULL, "file:/etc/config/dhcp", NULL, NULL, NULL, tRouterAdvertisementObj, tRouterAdvertisementParams, NULL, BBFDM_BOTH, NULL, "2.2"},
-#ifdef BBF_TR104
-{"Services", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesObj, NULL, NULL, BBFDM_BOTH, NULL, "2.0"},
-#endif
+{"Services", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH, NULL, "2.0"},
 {"GatewayInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGatewayInfoParams, NULL, BBFDM_CWMP, NULL, "2.0"},
 {"MQTT", &DMREAD, NULL, NULL, "file:/etc/config/mosquitto", NULL, NULL, NULL, tMQTTObj, tMQTTParams, NULL, BBFDM_BOTH, NULL, "2.10"},
 {"SSH", &DMREAD, NULL, NULL, "file:/etc/config/dropbear", NULL, NULL, NULL, tSSHObj, tSSHParams, NULL, BBFDM_BOTH, NULL, "2.16"},
