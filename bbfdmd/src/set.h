@@ -14,7 +14,7 @@ enum {
 	__DM_SET_MAX,
 };
 
-int fill_pvlist_set(char *param_name, char *param_value, struct blob_attr *blob_table, struct list_head *pv_list);
+int fill_pvlist_set(bbfdm_data_t *data, char *param_name, char *param_value, struct blob_attr *blob_table, struct list_head *pv_list);
 int bbfdm_set_value(bbfdm_data_t *data);
 
 #endif /* SET_H */

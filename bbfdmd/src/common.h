@@ -70,6 +70,8 @@ int get_instance_mode(int instance_mode);
 #define WARNING(fmt, args...) \
 	print_warning("[%s:%d] " fmt, __func__, __LINE__, ##args)
 
+int get_resolved_paths(struct dmctx *bbf_ctx, char *qpath, struct list_head *resolved_paths);
+
 // glibc doesn't guarantee a 0 termianted string on strncpy
 // strncpy with always 0 terminated string
 static inline void strncpyt(char *dst, const char *src, size_t n)

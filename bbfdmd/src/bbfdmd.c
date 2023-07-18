@@ -367,9 +367,9 @@ static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj _
 
 	if (is_subprocess_needed) {
 		INFO("Creating subprocess for get method");
-		bbfdm_start_deferred(&data, bbfdm_get_value_async);
+		bbfdm_start_deferred(&data, bbfdm_get_value);
 	} else {
-		bbfdm_get_value(&data);
+		bbfdm_get_value(&data, NULL);
 	}
 
 	free_path_list(&paths_list);
@@ -538,19 +538,25 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	INFO("ubus method|%s|, name|%s|, path(%s)", method, obj->name, path);
 
+	blob_buf_init(&data.bb, 0);
+	bbf_init(&data.bbf_ctx);
+
 	data.bbf_ctx.in_param = path;
 
-	fault = fill_pvlist_set(path, tb[DM_SET_VALUE] ? blobmsg_get_string(tb[DM_SET_VALUE]) : NULL, tb[DM_SET_OBJ_PATH], &pv_list);
+	fault = fill_pvlist_set(&data, path, tb[DM_SET_VALUE] ? blobmsg_get_string(tb[DM_SET_VALUE]) : NULL, tb[DM_SET_OBJ_PATH], &pv_list);
 	if (fault) {
-		ERR("Fault in fill pvlist set path |%s|", data.bbf_ctx.in_param);
+		ERR("Fault in fill pvlist set path |%s| : |%d|", data.bbf_ctx.in_param, fault);
+		fill_err_code_array(&data, fault);
+		goto end;
+	}
+
+	if (list_empty(&pv_list)) {
+		ERR("Fault in fill pvlist set path |%s| : |list is empty|", data.bbf_ctx.in_param);
 		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
 		goto end;
 	}
 
 	data.plist = &pv_list;
-
-	blob_buf_init(&data.bb, 0);
-	bbf_init(&data.bbf_ctx);
 
 	// no need to process it further since transaction-id is not valid
 	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
@@ -703,7 +709,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 		snprintf(path, PATH_MAX, "%s%s.", (char *)blobmsg_data(tb[DM_ADD_PATH]), data.bbf_ctx.addobj_instance);
 
-		fault = fill_pvlist_set(path, NULL, tb[DM_ADD_OBJ_PATH], &pv_list);
+		fault = fill_pvlist_set(&data, path, NULL, tb[DM_ADD_OBJ_PATH], &pv_list);
 		if (fault) {
 			ERR("Fault in fill pvlist set path |%s|", path);
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);

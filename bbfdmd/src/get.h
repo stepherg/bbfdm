@@ -31,8 +31,7 @@ enum {
 	__DM_SCHEMA_MAX
 };
 
-void bbfdm_get_value(bbfdm_data_t *data);
-void bbfdm_get_value_async(bbfdm_data_t *data, void *output);
+void bbfdm_get_value(bbfdm_data_t *data, void *output);
 
 void bbfdm_get_names(bbfdm_data_t *data);
 

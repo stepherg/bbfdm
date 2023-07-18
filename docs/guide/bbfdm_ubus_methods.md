@@ -163,7 +163,6 @@ root@iopsys:~# ubus call bbfdm get '{"path":"Device.IP.Diagnostics.", "optional"
                 }
         }
 }
-
 root@iopsys:~#
 root@iopsys:~# ubus call bbfdm get '{"path":"Device.Users."}'
 {
@@ -511,7 +510,134 @@ root@iopsys:~# ubus call bbfdm get '{"path":"Device.Users.", "optional": {"forma
                 }
         ]
 }
-
+root@iopsys:~#
+root@iopsys:~# ubus call bbfdm get '{"path":"Device.WiFi.SSID.*.SSID"}'
+{
+	"SSID": [
+		{
+			"SSID": "iopsysWrt-44D43771B120"
+		},
+		{
+			"SSID": "MAP-44D43771B120-BH-5GHz"
+		},
+		{
+			"SSID": "iopsysWrt-44D43771B120"
+		},
+		{
+			"SSID": "MAP-44D43771B120-BH-2.4GHz"
+		}
+	]
+}
+root@iopsys:~# 
+root@iopsys:~# ubus call bbfdm get '{"path":"Device.WiFi.SSID.*.SSID", "optional":{"format":"raw"}}'
+{
+	"results": [
+		{
+			"path": "Device.WiFi.SSID.1.SSID",
+			"data": "iopsysWrt-44D43771B120",
+			"type": "xsd:string"
+		},
+		{
+			"path": "Device.WiFi.SSID.2.SSID",
+			"data": "MAP-44D43771B120-BH-5GHz",
+			"type": "xsd:string"
+		},
+		{
+			"path": "Device.WiFi.SSID.3.SSID",
+			"data": "iopsysWrt-44D43771B120",
+			"type": "xsd:string"
+		},
+		{
+			"path": "Device.WiFi.SSID.4.SSID",
+			"data": "MAP-44D43771B120-BH-2.4GHz",
+			"type": "xsd:string"
+		}
+	]
+}
+root@iopsys:~#
+root@iopsys:~# ubus call bbfdm get '{"path":"Device.WiFi.SSID.[BSSID==\"be:d4:37:71:b1:28\"].SSID"}'
+{
+	"SSID": [
+		{
+			"SSID": "MAP-44D43771B120-BH-5GHz"
+		}
+	]
+}
+root@iopsys:~#
+root@iopsys:~# ubus call bbfdm get '{"path":"Device.IP.Interface.[Status==\"Up\"].IPv4Address.[AddressingType==\"DHCP\"].IPAddress"}'
+{
+	"Interface": [
+		{
+			"IPv4Address": [
+				{
+					"IPAddress": "10.100.1.201"
+				}
+			]
+		}
+	]
+}
+root@iopsys:~#
+root@iopsys:~# ubus call bbfdm get '{"path":"Device.IP.Interface.[Status==\"Up\"].IPv4Address.[AddressingType==\"DHCP\"&&Status==\"Up\"]."}'
+{
+	"Interface": [
+		{
+			"IPv4Address": [
+				{
+					"Enable": true,
+					"Status": "Enabled",
+					"Alias": "cpe-1",
+					"IPAddress": "10.100.1.201",
+					"SubnetMask": "255.255.255.0",
+					"AddressingType": "DHCP"
+				}
+			]
+		}
+	]
+}
+root@iopsys:~#
+root@iopsys:~# ubus call bbfdm get '{"path":"Device.IP.Interface.[Type==\"Normal\"&&Stats.PacketsSent<=500].IPv4Address.[AddressingType==\"DHCP\"].IPAddress"}'
+{
+	"Interface": [
+		{
+			"IPv4Address": [
+				{
+					"IPAddress": "10.100.1.201"
+				}
+			]
+		}
+	]
+}
+root@iopsys:~#
+root@iopsys:~# ubus call bbfdm get '{"path": "Device.Firewall.Chain.1.Rule.[Description==\"Allow-Ping\"]."}'
+{
+	"Rule": [
+		{
+			"Enable": true,
+			"Status": "Enabled",
+			"Order": 3,
+			"Alias": "cpe-3",
+			"Description": "Allow-Ping",
+			"Target": "Accept",
+			"Log": false,
+			"CreationDate": "0001-01-01T00:00:00Z",
+			"ExpiryDate": "9999-12-31T23:59:59Z",
+			"SourceInterface": "Device.IP.Interface.2",
+			"SourceAllInterfaces": false,
+			"DestInterface": "",
+			"DestAllInterfaces": false,
+			"IPVersion": 4,
+			"DestIP": "",
+			"DestMask": "",
+			"SourceIP": "",
+			"SourceMask": "",
+			"Protocol": 1,
+			"DestPort": -1,
+			"DestPortRangeMax": -1,
+			"SourcePort": -1,
+			"SourcePortRangeMax": -1
+		}
+	]
+}
 ```
 
 - For more info on the `bbfdm` ubus API see [link](../api/ubus/bbfdm.md#get)
@@ -605,6 +731,15 @@ root@iopsys:~# ubus call bbfdm get '{"paths":["Device.WiFi.SSID.1.Enable", "Devi
 {
         "Enable": false,
         "SSID": "test-2g"
+}
+root@iopsys:~# ubus call bbfdm set '{"path": "Device.Firewall.Chain.1.Rule.[Description==\"Allow-Ping\"].", "obj_path": {"Target": "Accept"}}'
+{
+	"results": [
+		{
+			"path": "Device.Firewall.Chain.1.Rule.3.Target",
+			"data": "1"
+		}
+	]
 }
 ```
 

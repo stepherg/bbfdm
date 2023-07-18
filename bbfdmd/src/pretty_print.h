@@ -12,6 +12,7 @@
 #define PRETTY_PRINT_H
 
 void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list);
-void prepare_pretty_result(uint8_t maxdepth, struct blob_buf *bb, struct dmctx *bbf_ctx);
+void prepare_raw_result(struct blob_buf *bb, struct dmctx *bbf_ctx, struct list_head *rslvd);
+void prepare_pretty_result(uint8_t maxdepth, struct blob_buf *bb, struct dmctx *bbf_ctx, struct list_head *rslvd);
 
 #endif /* PRETTY_PRINT_H */

@@ -18,7 +18,7 @@ supervisorctl status all
 # debug logging
 echo "Checking ubus status [$(date '+%d/%m/%Y %H:%M:%S')]"
 ubus list
-ubus -v list bbf
+ubus -v list bbfdm
 
 echo "Checking system resources"
 free -h

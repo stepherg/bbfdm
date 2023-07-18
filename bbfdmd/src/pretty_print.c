@@ -389,11 +389,51 @@ void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list)
 	free_result_list(&result_stack);
 }
 
-void prepare_pretty_result(uint8_t maxdepth, struct blob_buf *bb, struct dmctx *bbf_ctx)
+void prepare_raw_result(struct blob_buf *bb, struct dmctx *bbf_ctx, struct list_head *rslvd)
 {
+	struct pathNode *iter = NULL;
+	struct dm_parameter *n = NULL;
+	void *table = NULL;
+
+	list_for_each_entry(iter, rslvd, list) {
+		size_t ilen = DM_STRLEN(iter->path);
+		if (ilen == 0)
+			continue;
+
+		list_for_each_entry(n, &bbf_ctx->list_parameter, list) {
+			if (iter->path[ilen - 1] == DELIM) {
+				if (!strncmp(n->name, iter->path, ilen)) {
+					table = blobmsg_open_table(bb, NULL);
+					bb_add_string(bb, "path", n->name);
+					bb_add_string(bb, "data", n->data);
+					bb_add_string(bb, "type", n->type);
+					blobmsg_close_table(bb, table);
+				}
+			} else {
+				if (!strcmp(n->name, iter->path)) {
+					table = blobmsg_open_table(bb, NULL);
+					bb_add_string(bb, "path", n->name);
+					bb_add_string(bb, "data", n->data);
+					bb_add_string(bb, "type", n->type);
+					blobmsg_close_table(bb, table);
+				}
+			}
+		}
+	}
+}
+
+void prepare_pretty_result(uint8_t maxdepth, struct blob_buf *bb, struct dmctx *bbf_ctx, struct list_head *rslvd)
+{
+	struct pathNode *iter = NULL;
+
 	LIST_HEAD(pv_local);
 
-	resulting(maxdepth, bbf_ctx->in_param, bbf_ctx, &pv_local);
+	DEBUG("################### DATA to PROCESS ##################");
+	list_for_each_entry(iter, rslvd, list) {
+		DEBUG("## %s ##", iter->path);
+		resulting(maxdepth, iter->path, bbf_ctx, &pv_local);
+	}
+	DEBUG("######################################################");
 
 	prepare_result_blob(bb, &pv_local);
 

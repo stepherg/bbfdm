@@ -14,6 +14,8 @@
 
 #include <libubus.h>
 
+extern char *input_json;
+
 int bbfdm_set_value(bbfdm_data_t *data)
 {
 	struct pvNode *pv = NULL;
@@ -42,11 +44,42 @@ int bbfdm_set_value(bbfdm_data_t *data)
 	return fault;
 }
 
-int fill_pvlist_set(char *param_name, char *param_value, struct blob_attr *blob_table, struct list_head *pv_list)
+static int set_resolved_paths(unsigned int dm_type, char *path, char *value, struct list_head *pv_list)
+{
+	int fault = 0;
+	struct dmctx bbf_ctx = {
+			.enable_plugins = input_json ? false : true,
+			.instance_mode = INSTANCE_MODE_NUMBER,
+			.dm_type = dm_type
+	};
+
+	if (!path || !value || !pv_list)
+		return -1;
+
+	LIST_HEAD(resolved_paths);
+	bbf_sub_init(&bbf_ctx);
+
+	fault = get_resolved_paths(&bbf_ctx, path, &resolved_paths);
+	if (!fault) {
+		struct pathNode *p;
+
+		list_for_each_entry(p, &resolved_paths, list) {
+			add_pv_list(p->path, value, NULL, pv_list);
+		}
+	}
+
+	bbf_sub_cleanup(&bbf_ctx);
+	free_path_list(&resolved_paths);
+
+	return fault;
+}
+
+int fill_pvlist_set(bbfdm_data_t *data, char *param_name, char *param_value, struct blob_attr *blob_table, struct list_head *pv_list)
 {
 	struct blob_attr *attr;
 	struct blobmsg_hdr *hdr;
 	char path[MAX_DM_PATH], value[MAX_DM_VALUE];
+	int fault = 0;
 
 	size_t plen = DM_STRLEN(param_name);
 	if (plen == 0)
@@ -58,7 +91,9 @@ int fill_pvlist_set(char *param_name, char *param_value, struct blob_attr *blob_
 	if (param_name[plen - 1] == '.')
 		return USP_FAULT_INVALID_PATH;
 
-	add_pv_list(param_name, param_value, NULL, pv_list);
+	fault = set_resolved_paths(data->bbf_ctx.dm_type, param_name, param_value, pv_list);
+	if (fault)
+		return fault;
 
 blob__table:
 
@@ -92,7 +127,9 @@ blob__table:
 		}
 
 		snprintf(path, MAX_DM_PATH, "%s%s", param_name, (char *)hdr->name);
-		add_pv_list(path, value, NULL, pv_list);
+		fault = set_resolved_paths(data->bbf_ctx.dm_type, path, value, pv_list);
+		if (fault)
+			return fault;
 	}
 
 	return 0;
