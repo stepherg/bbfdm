@@ -1,21 +1,19 @@
 # BroadBand Forum Data Models (BBFDM)
 
-`bbfdm` is an implementation developed by iopsys that conforms to Broadband Forum Data Models and which includes a list objects, parameters, events and operates used for CPE management through remote control protocols such as [TR-069/CWMP](https://cwmp-data-models.broadband-forum.org/) or [TR-369/USP](https://usp.technology/).
+`bbfdm` is a datamodel backend for Higher layer management protocols like [TR-069/CWMP](https://cwmp-data-models.broadband-forum.org/) or [TR-369/USP](https://usp.technology/). It is designed in a hardware agnostic way and provides the available datamodel parameters over ubus on the northbound interface and creates the datamodel mapping based on uci and ubus on southbound interface.
 
-
-This implementation comprises of the three main components:
+`bbfdm` has three main components:
 
 | Component  |                    Description                    |
 | ---------- | ------------------------------------------------- |
-| libbbfdm-api | It is a library that provides many APIs used to interact with UCI configurations, Ubus objects, JSON schema, CLI commands and memory management. It also provides a mechanism to add new objects, parameters, events and operates or extend the existing DM tree using json plugin or shared library plugin. |
-| libbbfdm  | It's a libarry that provides the different data models supported by iopsys |
-| bbfdmd | It's a deamon which used to expose data model objects over ubus |
+| bbfdmd | A daemon to expose data model objects over ubus in pretty and raw format |
+| libbbfdm-api | A shared library which provides API to build and parse datamodel tree, it also provides API to create datamodel extensions using shared DotSo plugin, or with JSON Plugin. |
+| libbbfdm  | A datamodel tree/library build with libbbfdm-api, it includes core TR181 and related datamodel |
 
 
-## Design of bbfdm
+## Directory Structure
 
-`bbfdm` package is structred as follow:
-
+`bbfdm` package is structured as follow:
 
 ```bash
 ├── bbfdmd
@@ -24,7 +22,6 @@ This implementation comprises of the three main components:
 ├── libbbfdm
 │   ├── dmtree
 │   │   ├── json
-│   │   ├── tr104
 │   │   ├── tr143
 │   │   ├── tr181
 │   │   ├── tr471
@@ -34,15 +31,13 @@ This implementation comprises of the three main components:
 ```
 
 - `bbfdmd` folder which contains the source code of bbfdm deamon.
-More explanation on how this daemon works and all supported methods are presented in this file [BBFDMD](./bbfdmd/README.md)
+More explanation on how this daemon works and all supported methods are presented in this file [BBFDMD](./docs/arch/bbfdmd.md)
 
 - `libbbfdm` folder which contains the different data models supported by iopsys
 
 	- `dmtree` folder which includes all supported Data Models and vendor extension objects. It contains 6 folders:
 
 		- `tr181` folder : TR-181 Data Model files
-
-		- `tr104` folder : Voice Services Data Model files
 
 		- `tr143` folder : Diagnostics Data Model files
 
@@ -63,32 +58,36 @@ All supported tools are presented in this file[BBFDM Tools](./docs/guide/tools.m
 - `docs` folder which contains all documentation files.
 
 
-## Important Topics
-* [Design for firmware activation](./docs/guide/activate_firmware.md)
-* [TR181 Firewall datamodel mappings](./docs/guide/firewall.md)
+## Design
+* [BBFDMD Design](./docs/arch/bbfdmd.md)
 * [Datamodel extension using JSON plugin](./docs/guide/json_plugin_v1.md)
+* [Datamodel Plugins and Microservice](./docs/guide/datamodel_as_microservice.md)
+* [BBFDM Tools](./docs/guide/tools.md)
+
+## Important Topics
 * [Add support of a new Object/Parameter](./docs/guide/obj_param_extension.md)
 * [How to add new vendor](./docs/guide/vendor.md)
 * [Dynamic Object/Parameter/Operate/Event](./docs/guide/dynamic_dm.md)
-* [BBFDM Tools](./docs/guide/tools.md)
+* [Design for firmware activation](./docs/guide/activate_firmware.md)
+* [TR181 Firewall datamodel mappings](./docs/guide/firewall.md)
 * [Wireless Configuration handling](./docs/guide/wireless_easymesh.md)
 * [Explain the different Network Deployment Scenarios](./docs/guide/network_depoyment_scenarios.md)
 * [How to Configure MACVLAN](./docs/guide/macvlan_interface.md)
 * [Explain Policy Based Routing Management](./docs/guide/policy_based_routing.md)
 
-
 ## External dependencies for datamodel objects
 
 | Datamodel                                | Package        | Link                                         |
 | ---------------------------------------- | -------------- | -------------------------------------------- |
-| Device.BulkData.                         | bulkdata       | https://dev.iopsys.eu/bbf/bulkdata.git    |
-| Device.ManagementServer.                 | icwmp          | https://dev.iopsys.eu/bbf/icwmp.git       |
-| Device.CWMPManagementServer.             | icwmp          | https://dev.iopsys.eu/bbf/icwmp.git       |
-| Device.IP.Diagnostics.UDPEchoConfig.     | udpecho-server | https://dev.iopsys.eu/bbf/udpecho.git     |
-| Device.IP.Diagnostics.UDPEchoDiagnostics.| udpecho-client | https://dev.iopsys.eu/bbf/udpecho.git     |
-| Device.IP.Interface.{i}.TWAMPReflector.  | twamp          | https://dev.iopsys.eu/bbf/twamp-light.git |
+| Device.BulkData.                         | bulkdata       | https://dev.iopsys.eu/bbf/bulkdata.git       |
+| Device.ManagementServer.                 | icwmp          | https://dev.iopsys.eu/bbf/icwmp.git          |
+| Device.CWMPManagementServer.             | icwmp          | https://dev.iopsys.eu/bbf/icwmp.git          |
+| Device.IP.Diagnostics.UDPEchoConfig.     | udpecho-server | https://dev.iopsys.eu/bbf/udpecho.git        |
+| Device.IP.Diagnostics.UDPEchoDiagnostics.| udpecho-client | https://dev.iopsys.eu/bbf/udpecho.git        |
+| Device.IP.Interface.{i}.TWAMPReflector.  | twamp          | https://dev.iopsys.eu/bbf/twamp-light.git    |
 | Device.XMPP.                             | xmppc          | https://dev.iopsys.eu/bbf/xmppc.git          |
 | Device.USPAgent.                         | obuspa         | https://dev.iopsys.eu/bbf/obuspa.git         |
 | STUN parameters                          | stunc          | https://dev.iopsys.eu/bbf/stunc.git          |
 | Device.XPON.                             | ponmngr        | https://dev.iopsys.eu/hal/ponmngr.git        |
 | Device.UPNP.                             | ssdpd          | https://github.com/miniupnp/miniupnp.git     |
+| Device.Services.VoiceService.            | tr104          | https://dev.iopsys.eu/voice/tr104.git        |
