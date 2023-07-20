@@ -4,4 +4,4 @@ PROJECT(bbf C)
 
 add_subdirectory(libbbfdm-api)
 add_subdirectory(libbbfdm)
-add_subdirectory(bbfdmd/src)
+add_subdirectory(bbfdmd)
