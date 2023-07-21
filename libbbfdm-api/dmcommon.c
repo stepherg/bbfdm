@@ -653,6 +653,22 @@ struct uci_section *is_dmmap_section_exist_eq(char* package, char* section, char
 	return NULL;
 }
 
+unsigned int count_occurrences(char *str, char c)
+{
+	int count = 0;
+
+	if (!str)
+		return 0;
+
+	char *pch = strchr(str, c);
+	while (pch) {
+		count++;
+		pch = strchr(pch + 1, c);
+	}
+
+	return count;
+}
+
 unsigned char isdigit_str(char *str)
 {
 	if (!(*str)) return 0;

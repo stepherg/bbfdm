@@ -1279,6 +1279,7 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 
 static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 {
+	unsigned int in_path_dot_num = count_occurrences(dmctx->in_param, '.');
 	json_object *res = NULL, *res_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
 
@@ -1323,6 +1324,15 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 		char *path = dmjson_get_value(res_obj, 1, "path");
 		char *data = dmjson_get_value(res_obj, 1, "data");
 		char *type = dmjson_get_value(res_obj, 1, "type");
+
+		if (dmctx->nextlevel) {
+			unsigned int path_dot_num = count_occurrences(path, '.');
+			size_t len = DM_STRLEN(path);
+
+			if ((path[len - 1] == '.' && path_dot_num > in_path_dot_num + 1) ||
+				(path[len - 1] != '.' && path_dot_num > in_path_dot_num))
+				continue;
+		}
 
 		add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), NULL);
 	}

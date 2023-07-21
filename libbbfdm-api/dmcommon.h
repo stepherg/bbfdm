@@ -227,6 +227,7 @@ int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, cha
 int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
 int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
 char *check_create_dmmap_package(const char *dmmap_package);
+unsigned int count_occurrences(char *str, char c);
 unsigned char isdigit_str(char *str);
 bool special_char(char c);
 bool special_char_exits(const char *str);
