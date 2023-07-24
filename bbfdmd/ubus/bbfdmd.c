@@ -1438,11 +1438,6 @@ static void lookup_event_cb(struct ubus_context *ctx,
 	if (path && strcmp(path, UBUS_MAIN_METHOD_NAME) == 0) {
 		// register micro-service
 		register_service(ctx);
-
-		// adding ubus method for micro-service
- 		int err = bbfdm_init(ctx);
-		if (err != UBUS_STATUS_OK)
-			uloop_end();
 	}
 }
 
@@ -1516,13 +1511,11 @@ int main(int argc, char **argv)
 
 	} else { // It's a micro-service instance
 
+		err = bbfdm_init(&bbfdm_ctx.ubus_ctx);
+		if (err != 0)
+			goto exit;
 		bool is_registred = register_service(&bbfdm_ctx.ubus_ctx);
-		if (is_registred) {
-			// service is registred, so add ubus method for micro-service
-			err = bbfdm_init(&bbfdm_ctx.ubus_ctx);
-			if (err != UBUS_STATUS_OK)
-				goto exit;
-		} else {
+		if (is_registred == false) {
 			// register for add event
 			struct ubus_event_handler add_event;
 
