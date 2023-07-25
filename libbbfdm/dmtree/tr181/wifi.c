@@ -1213,12 +1213,16 @@ static int set_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, 3, 3, NULL, RegulatoryDomain))
+			if (bbfdm_validate_string(ctx, value, 2, 3, NULL, RegulatoryDomain))
 				return FAULT_9007;
 			break;
 		case VALUESET:
 			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->dmmap_section, "country", value);
-			value[2] = '\0';
+
+			// uci only support country code, so strip I/O from value before setting
+			if (DM_STRLEN(value) == 3)
+				value[2] = '\0';
+
 			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "country", value);
 			break;
 	}
