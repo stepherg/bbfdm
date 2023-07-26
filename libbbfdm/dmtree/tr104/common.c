@@ -613,8 +613,10 @@ int init_call_log(void)
 				buf_cdr = cdr; // first record to buf
 				continue;
 			}
-			// if having the same session id and the same starting time, then skip writing and modify the buf
-			if ( (strcmp(cdr.sessionId, buf_cdr.sessionId)==0) && (strcmp(cdr.start_time, buf_cdr.start_time)==0) ) {
+			// if having the same session id and the same starting time and the same direction, then skip writing and modify the buf
+			if ( (strcmp(cdr.sessionId, buf_cdr.sessionId)==0) &&
+				 (strcmp(cdr.start_time, buf_cdr.start_time)==0) &&
+				 (strcmp(cdr.direction, buf_cdr.direction)==0) ) {
 				if ( (!sip_response_checker(buf_cdr.sipResponseCode)) && ( sip_response_checker(cdr.sipResponseCode) || strcmp(cdr.sipResponseCode, buf_cdr.sipResponseCode)>0) ) {
 					buf_cdr = cdr; // drop the previous record as same session id and the current response code has a higher priority
 				}
