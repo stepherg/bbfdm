@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DEFAULT_BRANCH="${DEFAULT_BRANCH:-release-7.2}"
+
 if [ -z "${CI_PROJECT_PATH}" ]; then
 	CI_PROJECT_PATH=${PWD}
 fi
@@ -40,7 +42,7 @@ function install_libusermngr()
 {
 	# clone and compile libusermngr
 	rm -rf /opt/dev/usermngr
-	exec_cmd git clone -b devel https://dev.iopsys.eu/bbf/usermngr.git /opt/dev/usermngr
+	exec_cmd git clone -b ${DEFAULT_BRANCH} https://dev.iopsys.eu/bbf/usermngr.git /opt/dev/usermngr
 
 	echo "Compiling libusermngr"
 	exec_cmd_verbose make clean -C /opt/dev/usermngr/src/
@@ -110,7 +112,7 @@ function install_libperiodicstats()
 {
 	# clone and compile libperiodicstats
 	rm -rf /opt/dev/periodicstats
-	exec_cmd git clone -b devel https://dev.iopsys.eu/bbf/periodicstats.git /opt/dev/periodicstats
+	exec_cmd git clone -b ${DEFAULT_BRANCH} https://dev.iopsys.eu/bbf/periodicstats.git /opt/dev/periodicstats
 
 	echo "Compiling libperiodicstats"
 	exec_cmd_verbose make clean -C /opt/dev/periodicstats/
@@ -126,7 +128,7 @@ function install_libcwmpdm()
 {
 	# clone and compile libcwmpdm
 	rm -rf /opt/dev/icwmp
-	exec_cmd git clone -b devel --depth 1 https://dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
+	exec_cmd git clone -b ${DEFAULT_BRANCH} --depth 1 https://dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
 
 	echo "Compiling libcwmpdm"
 	cd /opt/dev/icwmp
