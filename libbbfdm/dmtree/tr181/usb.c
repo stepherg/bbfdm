@@ -433,7 +433,7 @@ static int set_USBInterface_Enable(char *refparam, struct dmctx *ctx, void *data
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -469,7 +469,7 @@ static int set_USBInterface_Alias(char *refparam, struct dmctx *ctx, void *data,
 	struct usb_interface *usbiface= (struct usb_interface *)data;
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -498,7 +498,7 @@ static int set_USBInterface_LowerLayers(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -576,7 +576,7 @@ static int set_USBPort_Alias(char *refparam, struct dmctx *ctx, void *data, char
 	struct usb_port* port = (struct usb_port *)data;
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -672,7 +672,7 @@ static int set_USBUSBHostsHost_Alias(char *refparam, struct dmctx *ctx, void *da
 	struct usb_port* port=(struct usb_port *)data;
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -699,7 +699,7 @@ static int set_USBUSBHostsHost_Enable(char *refparam, struct dmctx *ctx, void *d
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -759,7 +759,7 @@ static int set_USBUSBHostsHost_PowerManagementEnable(char *refparam, struct dmct
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:

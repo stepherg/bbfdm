@@ -661,7 +661,7 @@ int set_mcasts_filter_enable(char *refparam, struct dmctx *ctx, void *data, char
 	bool b;
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -716,7 +716,7 @@ int set_mcasts_filter_address(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+		if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
 			return FAULT_9007;
 
 		break;
@@ -752,7 +752,7 @@ int set_mcast_snooping_enable(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -838,7 +838,7 @@ int set_mcasts_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, c
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+		if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -861,7 +861,7 @@ int set_mcasts_fast_leave(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -884,7 +884,7 @@ int set_mcast_snooping_robustness(char *refparam, struct dmctx *ctx, void *data,
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+		if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -907,7 +907,7 @@ int set_mcast_snooping_aggregation(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -951,7 +951,7 @@ int set_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, 
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+		if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1197,7 +1197,7 @@ int set_mcastp_filter_enable(char *refparam, struct dmctx *ctx, void *data, char
 	bool b;
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1244,7 +1244,7 @@ static int set_igmpp_filter_address(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+		if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1418,7 +1418,7 @@ int set_mcast_proxy_enable(char *refparam, struct dmctx *ctx, void *data, char *
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1458,7 +1458,7 @@ int set_mcastp_query_interval(char *refparam, struct dmctx *ctx, void *data, cha
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+		if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1474,7 +1474,7 @@ int set_mcastp_q_response_interval(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+		if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1490,7 +1490,7 @@ int set_mcastp_last_mq_interval(char *refparam, struct dmctx *ctx, void *data, c
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+		if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1506,7 +1506,7 @@ int set_mcast_proxy_robustness(char *refparam, struct dmctx *ctx, void *data, ch
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+		if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1535,7 +1535,7 @@ int set_mcast_proxy_fast_leave(char *refparam, struct dmctx *ctx, void *data, ch
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1553,7 +1553,7 @@ int set_mcast_proxy_aggregation(char *refparam, struct dmctx *ctx, void *data, c
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1703,7 +1703,7 @@ static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 256, NULL, NULL))
+		if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 			return FAULT_9007;
 
 		if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1813,7 +1813,7 @@ static int set_igmpp_interface_upstream(char *refparam, struct dmctx *ctx, void 
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:

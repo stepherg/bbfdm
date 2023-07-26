@@ -194,7 +194,7 @@ static int set_nat_interface_setting_enable(char *refparam, struct dmctx *ctx, v
 	bool b;
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -227,7 +227,7 @@ static int set_nat_interface_setting_alias(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -271,7 +271,7 @@ static int set_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -303,7 +303,7 @@ static int set_nat_port_mapping_enable(char *refparam, struct dmctx *ctx, void *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -335,7 +335,7 @@ static int set_nat_port_mapping_alias(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -392,7 +392,7 @@ static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -453,7 +453,7 @@ static int set_nat_port_mapping_all_interface(char *refparam, struct dmctx *ctx,
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -489,7 +489,7 @@ static int set_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -514,7 +514,7 @@ static int set_nat_port_mapping_remote_host(char *refparam, struct dmctx *ctx, v
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -551,12 +551,14 @@ static int set_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
 				return FAULT_9007;
 
 			start_port = DM_STRTOL(value);
-			if (start_port && end_port && start_port > end_port)
+			if (start_port && end_port && start_port > end_port) {
+				bbfdm_set_fault_message(ctx, "The start port value '%s' should be lower than the end port value '%s'.", value, dport_end);
 				return FAULT_9007;
+			}
 
 			return 0;
 		case VALUESET:
@@ -594,14 +596,16 @@ static int set_nat_port_mapping_external_port_end_range(char *refparam, struct d
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
 				return FAULT_9007;
 
 			dport = DM_STRTOL(value);
 
 			// Add check to check if the endrange > src_dport
-			if (dport != 0 && dport < sport)
+			if (dport != 0 && dport < sport) {
+				bbfdm_set_fault_message(ctx, "The end port value '%s' should be greater than the start port value '%s'.", value, src_dport);
 				return FAULT_9007;
+			}
 
 			return 0;
 		case VALUESET:
@@ -634,7 +638,7 @@ static int set_nat_port_mapping_internal_port(char *refparam, struct dmctx *ctx,
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -657,7 +661,7 @@ static int set_nat_port_mapping_protocol(char *refparam, struct dmctx *ctx, void
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NATProtocol, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NATProtocol, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -678,7 +682,7 @@ static int set_nat_port_mapping_internal_client(char *refparam, struct dmctx *ct
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -699,7 +703,7 @@ static int set_nat_port_mapping_description(char *refparam, struct dmctx *ctx, v
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:

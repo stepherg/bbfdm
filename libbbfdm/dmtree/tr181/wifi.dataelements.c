@@ -856,7 +856,7 @@ static int set_WiFiDataElementsNetworkDevice_ReportUnsuccessfulAssociations(char
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -883,7 +883,7 @@ static int set_WiFiDataElementsNetworkDevice_APMetricsReportingInterval(char *re
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"255"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"255"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -988,7 +988,7 @@ static int set_WiFiDataElementsNetworkDevice_LocalSteeringDisallowedSTAList(char
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, 17, NULL, MACAddress))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, 17, NULL, MACAddress))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1016,7 +1016,7 @@ static int set_WiFiDataElementsNetworkDevice_BTMSteeringDisallowedSTAList(char *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, 17, NULL, MACAddress))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, 17, NULL, MACAddress))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1049,7 +1049,7 @@ static int set_WiFiDataElementsNetworkDevice_ReportIndependentScans(char *refpar
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1071,7 +1071,7 @@ static int set_WiFiDataElementsNetworkDevice_AssociatedSTAinAPMetricsWiFi6(char 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1091,7 +1091,7 @@ static int set_WiFiDataElementsNetworkDevice_MaxUnsuccessfulAssociationReporting
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1122,7 +1122,7 @@ static int set_WiFiDataElementsNetworkDevice_CoordinatedCACAllowed(char *refpara
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1269,7 +1269,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_SteeringPolicy(char *refparam,
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"2"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"2"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1290,7 +1290,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationThreshold(ch
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"255"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"255"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1310,7 +1310,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_RCPISteeringThreshold(char *re
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"220"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"220"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1330,7 +1330,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIThreshold(char
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"220"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"220"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1350,7 +1350,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIHysteresisMarg
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1370,7 +1370,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationReportingThr
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1392,7 +1392,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_AssociatedSTATrafficStatsInclu
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1415,7 +1415,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_AssociatedSTALinkMetricsInclus
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2025,7 +2025,7 @@ static int set_WiFiDataElementsNetworkDeviceRadioBSS_FronthaulAKMsAllowed(char *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, AKMsAllowed, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, -1, AKMsAllowed, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2045,7 +2045,7 @@ static int set_WiFiDataElementsNetworkDeviceRadioBSS_BackhaulAKMsAllowed(char *r
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, AKMsAllowed, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, -1, AKMsAllowed, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2282,7 +2282,7 @@ static int set_WiFiDataElementsNetworkDeviceRadioBSSSTA_CellularDataPreference(c
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, CellularDataPreference, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, CellularDataPreference, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2302,7 +2302,7 @@ static int set_WiFiDataElementsNetworkDeviceRadioBSSSTA_ReAssociationDelay(char 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2733,7 +2733,7 @@ static int set_WiFiDataElementsNetworkDeviceDefault8021Q_Enable(char *refparam, 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2754,7 +2754,7 @@ static int set_WiFiDataElementsNetworkDeviceDefault8021Q_PrimaryVID(char *refpar
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"4095"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"4095"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2774,7 +2774,7 @@ static int set_WiFiDataElementsNetworkDeviceDefault8021Q_DefaultPCP(char *refpar
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"7"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"7"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -3185,7 +3185,7 @@ static int operate_WiFiDataElementsNetwork_SetTrafficSeparation(char *refparam, 
 	bool b = false;
 
 	char *enable = dmjson_get_value((json_object *)value, 1, "Enable");
-	if (!enable || *enable == '\0' || dm_validate_boolean(enable)) {
+	if (!enable || *enable == '\0' || bbfdm_validate_boolean(ctx, enable)) {
 		status = "Error_Invalid_Input";
 		goto end;
 	}
@@ -3267,12 +3267,12 @@ static int operate_WiFiDataElementsNetwork_SetPreferredBackhauls(char *refparam,
 		if (*(operate_args[i].arg1) == '\0' && *(operate_args[i].arg2) == '\0')
 			break;
 
-		if (*(operate_args[i].arg1) && dm_validate_string(operate_args[i].arg1, -1, 17, NULL, MACAddress)) {
+		if (*(operate_args[i].arg1) && bbfdm_validate_string(ctx, operate_args[i].arg1, -1, 17, NULL, MACAddress)) {
 			status = "Error_Invalid_Input";
 			break;
 		}
 
-		if (*(operate_args[i].arg2) && dm_validate_string(operate_args[i].arg2, -1, 17, NULL, MACAddress)) {
+		if (*(operate_args[i].arg2) && bbfdm_validate_string(ctx, operate_args[i].arg2, -1, 17, NULL, MACAddress)) {
 			status = "Error_Invalid_Input";
 			break;
 		}
@@ -3329,7 +3329,7 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 	char band_list[64] = {0};
 
 	char *add_remove = dmjson_get_value((json_object *)value, 1, "AddRemove");
-	if (!add_remove || *add_remove == '\0' || dm_validate_boolean(add_remove)) {
+	if (!add_remove || *add_remove == '\0' || bbfdm_validate_boolean(ctx, add_remove)) {
 		status = "Error_Invalid_Input";
 		goto end;
 	}
@@ -3453,7 +3453,7 @@ static int operate_WiFiDataElementsNetworkDevice_SetSTASteeringState(char *refpa
 	bool b = false;
 
 	char *disallowed = dmjson_get_value((json_object *)value, 1, "Disallowed");
-	if (!disallowed || *disallowed == '\0' || dm_validate_boolean(disallowed)) {
+	if (!disallowed || *disallowed == '\0' || bbfdm_validate_boolean(ctx, disallowed)) {
 		status = "Error_Invalid_Input";
 		goto end;
 	}
@@ -3520,15 +3520,15 @@ static int operate_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest(char *r
 	dmuci_get_value_by_section_string(((struct wifi_data_element_args *)data)->uci_s, "agent_id", &agent_id);
 	dmuci_get_value_by_section_string(((struct wifi_data_element_args *)data)->uci_s, "macaddr", &macaddr);
 
-	if ((dm_validate_string(agent_id, -1, 17, NULL, MACAddress)) ||
-		(dm_validate_string(macaddr, -1, 17, NULL, MACAddress))) {
+	if ((bbfdm_validate_string(ctx, agent_id, -1, 17, NULL, MACAddress)) ||
+		(bbfdm_validate_string(ctx, macaddr, -1, 17, NULL, MACAddress))) {
 		status = "Error_Invalid_Input";
 		goto end;
 	}
 
 	char *channel_list = dmjson_get_value((json_object *)value, 1, "ChannelList");
 
-	if (dm_validate_unsignedInt_list(channel_list, -1, -1, -1, RANGE_ARGS{{NULL,"255"}}, 1)) {
+	if (bbfdm_validate_unsignedInt_list(ctx, channel_list, -1, -1, -1, RANGE_ARGS{{NULL,"255"}}, 1)) {
 		status = "Error_Invalid_Input";
 		goto end;
 	}

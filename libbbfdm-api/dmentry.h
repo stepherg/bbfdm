@@ -25,7 +25,7 @@ void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj,
 		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude);
 void bbf_ctx_clean_sub(struct dmctx *ctx);
 
-int bbf_fault_map(unsigned int dm_type, int fault);
+int bbf_fault_map(struct dmctx *ctx, int fault);
 
 int bbf_entry_method(struct dmctx *ctx, int cmd);
 

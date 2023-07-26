@@ -115,13 +115,14 @@ static void __ubus_callback(struct ubus_request *req, int type __attribute__((un
 	struct blob_attr *cur = NULL;
 	bool print_msg = false;
 	int rem = 0;
-	const struct blobmsg_policy p[6] = {
+	const struct blobmsg_policy p[7] = {
 			{ "path", BLOBMSG_TYPE_STRING },
 			{ "data", BLOBMSG_TYPE_STRING },
 			{ "type", BLOBMSG_TYPE_STRING },
 			{ "fault", BLOBMSG_TYPE_INT32 },
 			{ "input", BLOBMSG_TYPE_ARRAY },
 			{ "output", BLOBMSG_TYPE_ARRAY },
+			{ "fault_msg", BLOBMSG_TYPE_STRING }
 	};
 
 	if (msg == NULL || req == NULL)
@@ -141,15 +142,15 @@ static void __ubus_callback(struct ubus_request *req, int type __attribute__((un
 	}
 
 	blobmsg_for_each_attr(cur, parameters, rem) {
-		struct blob_attr *tb[6] = {0};
+		struct blob_attr *tb[7] = {0};
 
-		blobmsg_parse(p, 6, tb, blobmsg_data(cur), blobmsg_len(cur));
+		blobmsg_parse(p, 7, tb, blobmsg_data(cur), blobmsg_len(cur));
 
 		char *name = tb[0] ? blobmsg_get_string(tb[0]) : "";
 		char *data = tb[1] ? blobmsg_get_string(tb[1]) : "";
 
 		if (tb[3]) {
-			printf("ERROR: %u retrieving %s\n", blobmsg_get_u32(tb[3]), name);
+			printf("Fault %u: %s\n", blobmsg_get_u32(tb[3]), tb[6] ? blobmsg_get_string(tb[6]) : "");
 			cli_data->ubus_status = false;
 			return;
 		}
@@ -183,9 +184,9 @@ static void __ubus_callback(struct ubus_request *req, int type __attribute__((un
 
 				if (input) {
 					blobmsg_for_each_attr(in_cur, input, in_rem) {
-						struct blob_attr *in_tb[6] = {0};
+						struct blob_attr *in_tb[7] = {0};
 
-						blobmsg_parse(p, 6, in_tb, blobmsg_data(in_cur), blobmsg_len(in_cur));
+						blobmsg_parse(p, 7, in_tb, blobmsg_data(in_cur), blobmsg_len(in_cur));
 
 						char *arg = in_tb[0] ? blobmsg_get_string(in_tb[0]) : "";
 						printf("%s input:%s\n", name, arg);
@@ -194,9 +195,9 @@ static void __ubus_callback(struct ubus_request *req, int type __attribute__((un
 
 				if (output) {
 					blobmsg_for_each_attr(out_cur, output, out_rem) {
-						struct blob_attr *out_tb[6] = {0};
+						struct blob_attr *out_tb[7] = {0};
 
-						blobmsg_parse(p, 6, out_tb, blobmsg_data(out_cur), blobmsg_len(out_cur));
+						blobmsg_parse(p, 7, out_tb, blobmsg_data(out_cur), blobmsg_len(out_cur));
 
 						char *arg = out_tb[0] ? blobmsg_get_string(out_tb[0]) : "";
 						printf("%s output:%s\n", name, arg);
@@ -209,9 +210,9 @@ static void __ubus_callback(struct ubus_request *req, int type __attribute__((un
 
 				if (input) {
 					blobmsg_for_each_attr(in_cur, input, in_rem) {
-						struct blob_attr *in_tb[6] = {0};
+						struct blob_attr *in_tb[7] = {0};
 
-						blobmsg_parse(p, 6, in_tb, blobmsg_data(in_cur), blobmsg_len(in_cur));
+						blobmsg_parse(p, 7, in_tb, blobmsg_data(in_cur), blobmsg_len(in_cur));
 
 						char *arg = in_tb[0] ? blobmsg_get_string(in_tb[0]) : "";
 						printf("%s event_arg:%s\n", name, arg);
@@ -385,7 +386,7 @@ static int in_dotso_out_cli_exec_set(cli_data_t *cli_data, char *argv[])
 		printf("%s => Set value is successfully done\n", cli_data->bbf_ctx.in_param);
 		bbf_entry_restart_services(NULL, true);
 	} else {
-		printf("ERROR: %d retrieving %s => %s\n", err, cli_data->bbf_ctx.in_param, cli_data->bbf_ctx.in_value);
+		printf("Fault %d: %s\n", err, cli_data->bbf_ctx.fault_msg);
 		bbf_entry_revert_changes(NULL);
 		err = EXIT_FAILURE;
 	}
@@ -423,7 +424,7 @@ static int in_dotso_out_cli_exec_add(cli_data_t *cli_data, char *argv[])
 		printf("Added %s%s.\n", cli_data->bbf_ctx.in_param, cli_data->bbf_ctx.addobj_instance);
 		bbf_entry_restart_services(NULL, true);
 	} else {
-		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);
+		printf("Fault %d: %s\n", err, cli_data->bbf_ctx.fault_msg);
 		bbf_entry_revert_changes(NULL);
 		err = EXIT_FAILURE;
 	}
@@ -461,7 +462,7 @@ static int in_dotso_out_cli_exec_del(cli_data_t *cli_data, char *argv[])
 		printf("Deleted %s\n", cli_data->bbf_ctx.in_param);
 		bbf_entry_restart_services(NULL, true);
 	} else {
-		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);
+		printf("Fault %d: %s\n", err, cli_data->bbf_ctx.fault_msg);
 		bbf_entry_revert_changes(NULL);
 		err = EXIT_FAILURE;
 	}

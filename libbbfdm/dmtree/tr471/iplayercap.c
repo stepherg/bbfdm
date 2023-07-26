@@ -54,7 +54,7 @@ static int set_IPDiagnosticsIPLayerCapacity_DiagnosticsState(char *refparam, str
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -108,7 +108,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Interface(char *refparam, struct dmc
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -133,7 +133,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Role(char *refparam, struct dmctx *c
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, IPLayerCapacityRole, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, IPLayerCapacityRole, NULL))
 				return FAULT_9007;
 
 			return 0;
@@ -155,7 +155,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Host(char *refparam, struct dmctx *c
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -176,7 +176,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Port(char *refparam, struct dmctx *c
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","65535"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -199,7 +199,7 @@ static int set_IPDiagnosticsIPLayerCapacity_JumboFramesPermitted(char *refparam,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -221,7 +221,7 @@ static int set_IPDiagnosticsIPLayerCapacity_DSCP(char *refparam, struct dmctx *c
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","63"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","63"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -242,7 +242,7 @@ static int set_IPDiagnosticsIPLayerCapacity_ProtocolVersion(char *refparam, stru
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -263,7 +263,7 @@ static int set_IPDiagnosticsIPLayerCapacity_UDPPayloadContent(char *refparam, st
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, UDPPayloadContent, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, UDPPayloadContent, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -284,7 +284,7 @@ static int set_IPDiagnosticsIPLayerCapacity_TestType(char *refparam, struct dmct
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, IPLayerCapacityTestType, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, IPLayerCapacityTestType, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -307,7 +307,7 @@ static int set_IPDiagnosticsIPLayerCapacity_IPDVEnable(char *refparam, struct dm
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -330,7 +330,7 @@ static int set_IPDiagnosticsIPLayerCapacity_StartSendingRateIndex(char *refparam
 	switch (action) {
 		case VALUECHECK:
 			/* As per TR max should be 11108 but udpst supports 1108 */
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","1108"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","1108"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -351,7 +351,7 @@ static int set_IPDiagnosticsIPLayerCapacity_NumberFirstModeTestSubIntervals(char
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","100"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","100"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -376,7 +376,7 @@ static int set_IPDiagnosticsIPLayerCapacity_NumberTestSubIntervals(char *refpara
 			 * since supported min value of TestSubInterval by udpst is 1 sec, so can be supported
 			 * upto 60 value
 			 */
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","60"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","60"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -398,7 +398,7 @@ static int set_IPDiagnosticsIPLayerCapacity_TestSubInterval(char *refparam, stru
 	switch (action) {
 		case VALUECHECK:
 			/* As per DM min should be 100 but udpst supports min 1000 */
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1000","6000"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1000","6000"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -419,7 +419,7 @@ static int set_IPDiagnosticsIPLayerCapacity_StatusFeedbackInterval(char *refpara
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"5","250"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"5","250"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -440,7 +440,7 @@ static int set_IPDiagnosticsIPLayerCapacity_SeqErrThresh(char *refparam, struct 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","100"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","100"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -463,7 +463,7 @@ static int set_IPDiagnosticsIPLayerCapacity_ReordDupIgnoreEnable(char *refparam,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -485,7 +485,7 @@ static int set_IPDiagnosticsIPLayerCapacity_LowerThresh(char *refparam, struct d
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"5","250"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"5","250"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -506,7 +506,7 @@ static int set_IPDiagnosticsIPLayerCapacity_UpperThresh(char *refparam, struct d
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"5","250"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"5","250"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -527,7 +527,7 @@ static int set_IPDiagnosticsIPLayerCapacity_HighSpeedDelta(char *refparam, struc
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"2", NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"2", NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -548,7 +548,7 @@ static int set_IPDiagnosticsIPLayerCapacity_RateAdjAlgorithm(char *refparam, str
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, RateAdjAlgorithm, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, RateAdjAlgorithm, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -563,7 +563,7 @@ static int set_IPDiagnosticsIPLayerCapacity_SlowAdjThresh(char *refparam, struct
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"2",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"2",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -976,17 +976,19 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 	unsigned int idx = 0;
 
 	char *host = dmjson_get_value((json_object *)value, 1, "Host");
-	if (host[0] == '\0')
+	if (host[0] == '\0') {
+		bbfdm_set_fault_message(ctx, "IPLayerCapacity: 'Host' input should be defined");
 		return USP_FAULT_INVALID_ARGUMENT;
+	}
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *interface = get_diagnostics_interface_option(ctx, ip_interface);
 	char *role = dmjson_get_value((json_object *)value, 1, "Role");
-	if (role[0] != '\0' && dm_validate_string(role, -1, -1, IPLayerCapacityRole, NULL))
+	if (role[0] != '\0' && bbfdm_validate_string(ctx, role, -1, -1, IPLayerCapacityRole, NULL))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *port = dmjson_get_value((json_object *)value, 1, "Port");
-	if (port[0] != '\0' && dm_validate_unsignedInt(port, RANGE_ARGS{{"1","65535"}}, 1))
+	if (port[0] != '\0' && bbfdm_validate_unsignedInt(ctx, port, RANGE_ARGS{{"1","65535"}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *jumbo = dmjson_get_value((json_object *)value, 1, "JumboFramesPermitted");
@@ -994,19 +996,19 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 	string_to_bool(jumbo, &jumbo_en);
 
 	char *dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
-	if (dscp[0] != '\0' && dm_validate_unsignedInt(dscp, RANGE_ARGS{{"0","63"}}, 1))
+	if (dscp[0] != '\0' && bbfdm_validate_unsignedInt(ctx, dscp, RANGE_ARGS{{"0","63"}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *ip_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
-	if (ip_proto[0] != '\0' && dm_validate_string(ip_proto, -1, -1, ProtocolVersion, NULL))
+	if (ip_proto[0] != '\0' && bbfdm_validate_string(ctx, ip_proto, -1, -1, ProtocolVersion, NULL))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *content = dmjson_get_value((json_object *)value, 1, "UDPPayloadContent");
-	if (content[0] != '\0' && dm_validate_string(content, -1, -1, UDPPayloadContent, NULL))
+	if (content[0] != '\0' && bbfdm_validate_string(ctx, content, -1, -1, UDPPayloadContent, NULL))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *test_type = dmjson_get_value((json_object *)value, 1, "TestType");
-	if (test_type[0] != '\0' && dm_validate_string(test_type, -1, -1, IPLayerCapacityTestType, NULL))
+	if (test_type[0] != '\0' && bbfdm_validate_string(ctx, test_type, -1, -1, IPLayerCapacityTestType, NULL))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *ipdv = dmjson_get_value((json_object *)value, 1, "IPDVEnable");
@@ -1014,27 +1016,27 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 	string_to_bool(ipdv, &ipdv_en);
 
 	char *start_rate = dmjson_get_value((json_object *)value, 1, "StartSendingRateIndex");
-	if (start_rate[0] != '\0' && dm_validate_unsignedInt(start_rate, RANGE_ARGS{{"0","1108"}}, 1))
+	if (start_rate[0] != '\0' && bbfdm_validate_unsignedInt(ctx, start_rate, RANGE_ARGS{{"0","1108"}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *num_interval = dmjson_get_value((json_object *)value, 1, "NumberTestSubIntervals");
-	if (num_interval[0] != '\0' && dm_validate_unsignedInt(num_interval, RANGE_ARGS{{"1","60"}}, 1))
+	if (num_interval[0] != '\0' && bbfdm_validate_unsignedInt(ctx, num_interval, RANGE_ARGS{{"1","60"}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *mode_test = dmjson_get_value((json_object *)value, 1, "NumberFirstModeTestSubIntervals");
-	if (mode_test[0] != '\0' && dm_validate_unsignedInt(mode_test, RANGE_ARGS{{"0","100"}}, 1))
+	if (mode_test[0] != '\0' && bbfdm_validate_unsignedInt(ctx, mode_test, RANGE_ARGS{{"0","100"}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *sub_interval = dmjson_get_value((json_object *)value, 1, "TestSubInterval");
-	if (sub_interval[0] != '\0' && dm_validate_unsignedInt(sub_interval, RANGE_ARGS{{"1000","6000"}}, 1))
+	if (sub_interval[0] != '\0' && bbfdm_validate_unsignedInt(ctx, sub_interval, RANGE_ARGS{{"1000","6000"}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *feed_interval = dmjson_get_value((json_object *)value, 1, "StatusFeedbackInterval");
-	if (feed_interval[0] != '\0' && dm_validate_unsignedInt(feed_interval, RANGE_ARGS{{"5","250"}}, 1))
+	if (feed_interval[0] != '\0' && bbfdm_validate_unsignedInt(ctx, feed_interval, RANGE_ARGS{{"5","250"}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *seq_err = dmjson_get_value((json_object *)value, 1, "SeqErrThresh");
-	if (seq_err[0] != '\0' && dm_validate_unsignedInt(seq_err, RANGE_ARGS{{"0","100"}}, 1))
+	if (seq_err[0] != '\0' && bbfdm_validate_unsignedInt(ctx, seq_err, RANGE_ARGS{{"0","100"}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *dup_ignore = dmjson_get_value((json_object *)value, 1, "ReordDupIgnoreEnable");
@@ -1042,23 +1044,23 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 	string_to_bool(dup_ignore, &dup_ignore_en);
 
 	char *low_thresh = dmjson_get_value((json_object *)value, 1, "LowerThresh");
-	if (low_thresh[0] != '\0' && dm_validate_unsignedInt(low_thresh, RANGE_ARGS{{"5","250"}}, 1))
+	if (low_thresh[0] != '\0' && bbfdm_validate_unsignedInt(ctx, low_thresh, RANGE_ARGS{{"5","250"}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *up_thresh = dmjson_get_value((json_object *)value, 1, "UpperThresh");
-	if (up_thresh[0] != '\0' && dm_validate_unsignedInt(up_thresh, RANGE_ARGS{{"5","250"}}, 1))
+	if (up_thresh[0] != '\0' && bbfdm_validate_unsignedInt(ctx, up_thresh, RANGE_ARGS{{"5","250"}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *speed_delta = dmjson_get_value((json_object *)value, 1, "HighSpeedDelta");
-	if (speed_delta[0] != '\0' && dm_validate_unsignedInt(speed_delta, RANGE_ARGS{{"2", NULL}}, 1))
+	if (speed_delta[0] != '\0' && bbfdm_validate_unsignedInt(ctx, speed_delta, RANGE_ARGS{{"2", NULL}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *slow_adj = dmjson_get_value((json_object *)value, 1, "SlowAdjThresh");
-	if (slow_adj[0] != '\0' && dm_validate_unsignedInt(slow_adj, RANGE_ARGS{{"2", NULL}}, 1))
+	if (slow_adj[0] != '\0' && bbfdm_validate_unsignedInt(ctx, slow_adj, RANGE_ARGS{{"2", NULL}}, 1))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *rate_adj = dmjson_get_value((json_object *)value, 1, "RateAdjAlgorithm");
-	if (rate_adj[0] != '\0' && dm_validate_string(rate_adj, -1, -1, RateAdjAlgorithm, NULL))
+	if (rate_adj[0] != '\0' && bbfdm_validate_string(ctx, rate_adj, -1, -1, RateAdjAlgorithm, NULL))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	snprintf(input, sizeof(input), "'{\"host\": \"%s\",\"interface\":\"%s\",\"role\":\"%s\",\"port\":\"%s\",\"jumbo_frames\":\"%s\",\"proto_ver\":\"%s\",\"udp_content\":\"%s\",\"test_type\":\"%s\",\"ipdv_enable\":\"%s\",\"DSCP\":\"%s\",\"rate_index\":\"%s\",\"mode_subintervals\":\"%s\",\"test_subinterval\":\"%s\",\"feedback_interval\":\"%s\",\"seq_err_thresh\":\"%s\",\"dup_ignore\":\"%s\",\"lower_thresh\":\"%s\",\"upper_thresh\":\"%s\",\"high_speed_delta\":\"%s\",\"algorithm\":\"%s\",\"slow_adj_thresh\":\"%s\",\"num_interval\":\"%s\",\"proto\":\"%s\"}'",
@@ -1075,12 +1077,14 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 		fgets(output, sizeof(output), pp);
 		pclose(pp);
 	} else {
+		bbfdm_set_fault_message(ctx, "IPLayerCapacity: 'sh %s {input}' command failed to run", IPLAYER_CAP_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
 	}
 
 	json_object *res = (DM_STRLEN(output)) ? json_tokener_parse(output) : NULL;
 
 	if (res == NULL) {
+		bbfdm_set_fault_message(ctx, "IPLayerCapacity: there is no output from '%s' script", IPLAYER_CAP_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
 	}
 

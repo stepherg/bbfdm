@@ -48,7 +48,7 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -72,7 +72,7 @@ static int set_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -97,7 +97,7 @@ static int set_ip_ping_protocolversion(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -118,7 +118,7 @@ static int set_ip_ping_host(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -139,7 +139,7 @@ static int set_ip_ping_repetition_number(char *refparam, struct dmctx *ctx, void
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -160,7 +160,7 @@ static int set_ip_ping_timeout(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -181,7 +181,7 @@ static int set_ip_ping_block_size(char *refparam, struct dmctx *ctx, void *data,
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","65535"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -202,7 +202,7 @@ static int set_ip_ping_DSCP(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","63"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","63"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -281,7 +281,7 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -305,7 +305,7 @@ static int set_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -330,7 +330,7 @@ static int set_IPDiagnosticsTraceRoute_ProtocolVersion(char *refparam, struct dm
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -351,7 +351,7 @@ static int set_IPDiagnosticsTraceRoute_Host(char *refparam, struct dmctx *ctx, v
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -372,7 +372,7 @@ static int set_IPDiagnosticsTraceRoute_NumberOfTries(char *refparam, struct dmct
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","3"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","3"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -393,7 +393,7 @@ static int set_IPDiagnosticsTraceRoute_Timeout(char *refparam, struct dmctx *ctx
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -414,7 +414,7 @@ static int set_IPDiagnosticsTraceRoute_DataBlockSize(char *refparam, struct dmct
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","65535"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -435,7 +435,7 @@ static int set_IPDiagnosticsTraceRoute_DSCP(char *refparam, struct dmctx *ctx, v
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","63"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","63"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -456,7 +456,7 @@ static int set_IPDiagnosticsTraceRoute_MaxHopCount(char *refparam, struct dmctx 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","64"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","64"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -523,7 +523,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -547,7 +547,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -572,7 +572,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DownloadURL(char *refparam, stru
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -605,7 +605,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DSCP(char *refparam, struct dmct
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","63"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","63"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -626,7 +626,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_EthernetPriority(char *refparam,
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","7"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","7"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -647,7 +647,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_ProtocolVersion(char *refparam, 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -668,7 +668,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_NumberOfConnections(char *refpar
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -776,7 +776,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_EnablePerConnectionResults(char 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -849,7 +849,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -873,7 +873,7 @@ static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct d
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -898,7 +898,7 @@ static int set_IPDiagnosticsUploadDiagnostics_UploadURL(char *refparam, struct d
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -925,7 +925,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DSCP(char *refparam, struct dmctx 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","63"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","63"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -946,7 +946,7 @@ static int set_IPDiagnosticsUploadDiagnostics_EthernetPriority(char *refparam, s
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","7"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","7"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -967,7 +967,7 @@ static int set_IPDiagnosticsUploadDiagnostics_TestFileLength(char *refparam, str
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -988,7 +988,7 @@ static int set_IPDiagnosticsUploadDiagnostics_ProtocolVersion(char *refparam, st
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1009,7 +1009,7 @@ static int set_IPDiagnosticsUploadDiagnostics_NumberOfConnections(char *refparam
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1117,7 +1117,7 @@ static int set_IPDiagnosticsUploadDiagnostics_EnablePerConnectionResults(char *r
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1191,7 +1191,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1215,7 +1215,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1240,7 +1240,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Host(char *refparam, struct dmctx
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1261,7 +1261,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Port(char *refparam, struct dmctx
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","65535"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1282,7 +1282,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_NumberOfRepetitions(char *refpara
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1303,7 +1303,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Timeout(char *refparam, struct dm
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1324,7 +1324,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DataBlockSize(char *refparam, str
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","65535"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1345,7 +1345,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DSCP(char *refparam, struct dmctx
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","63"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","63"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1366,7 +1366,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_InterTransmissionTime(char *refpa
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","65535"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1387,7 +1387,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_ProtocolVersion(char *refparam, s
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1448,7 +1448,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1472,7 +1472,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1497,7 +1497,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_ProtocolVersion(char *ref
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ProtocolVersion, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1518,7 +1518,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Protocol(char *refparam, 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, ServerSelectionProtocol, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, ServerSelectionProtocol, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1539,7 +1539,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_HostList(char *refparam, 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, 10, -1, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, 10, -1, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1560,7 +1560,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_NumberOfRepetitions(char 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1581,7 +1581,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Timeout(char *refparam, s
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1704,8 +1704,11 @@ static int operate_IPDiagnostics_IPPing(char *refparam, struct dmctx *ctx, void 
 	json_object *res = NULL;
 
 	char *ipping_host = dmjson_get_value((json_object *)value, 1, "Host");
-	if (ipping_host[0] == '\0')
+	if (ipping_host[0] == '\0') {
+		bbfdm_set_fault_message(ctx, "IPPing: 'Host' input should be defined");
 		return USP_FAULT_INVALID_ARGUMENT;
+	}
+
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *ipping_interface = get_diagnostics_interface_option(ctx, ip_interface);
 	char *ipping_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
@@ -1728,8 +1731,10 @@ static int operate_IPDiagnostics_IPPing(char *refparam, struct dmctx *ctx, void 
 			},
 			8, &res);
 
-	if (res == NULL)
+	if (res == NULL) {
+		bbfdm_set_fault_message(ctx, "IPPing: ubus 'bbf.diag ipping' method doesn't exist");
 		return USP_FAULT_COMMAND_FAILURE;
+	}
 
 	char *ipping_status = dmjson_get_value(res, 1, "Status");
 	char *ipping_ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
@@ -1802,8 +1807,10 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 	int idx = 0;
 
 	char *host = dmjson_get_value((json_object *)value, 1, "Host");
-	if (host[0] == '\0')
+	if (host[0] == '\0') {
+		bbfdm_set_fault_message(ctx, "TraceRoute: 'Host' input should be defined");
 		return USP_FAULT_INVALID_ARGUMENT;
+	}
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *interface = get_diagnostics_interface_option(ctx, ip_interface);
@@ -1832,13 +1839,16 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 		fgets(output, sizeof(output) , pp);
 		pclose(pp);
 	} else {
+		bbfdm_set_fault_message(ctx, "TraceRoute: 'sh %s {input}' command failed to run", TRACEROUTE_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
 	}
 
 	json_object *res = (DM_STRLEN(output)) ? json_tokener_parse(output) : NULL;
 
-	if (res == NULL)
+	if (res == NULL) {
+		bbfdm_set_fault_message(ctx, "TraceRoute: there is no output from '%s' script", TRACEROUTE_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
+	}
 
 	char *status = dmjson_get_value(res, 1, "Status");
 	char *ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
@@ -1930,13 +1940,17 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 	char cmd[2096] = {0};
 	char *download_url = dmjson_get_value((json_object *)value, 1, "DownloadURL");
 
-	if (download_url[0] == '\0')
+	if (download_url[0] == '\0') {
+		bbfdm_set_fault_message(ctx, "DownloadDiagnostics: 'DownloadURL' input should be defined");
 		return USP_FAULT_INVALID_ARGUMENT;
+	}
 
 	if (strncmp(download_url, HTTP_URI, strlen(HTTP_URI)) != 0 &&
 		strncmp(download_url, FTP_URI, strlen(FTP_URI)) != 0 &&
-		strchr(download_url,'@') != NULL)
+		strchr(download_url,'@') != NULL) {
+		bbfdm_set_fault_message(ctx, "DownloadDiagnostics: '%s' DownloadURL is not a correct url value", download_url);
 		return USP_FAULT_INVALID_ARGUMENT;
+	}
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *download_interface = get_diagnostics_interface_option(ctx, ip_interface);
@@ -1963,13 +1977,16 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 		fgets(output, sizeof(output) , pp);
 		pclose(pp);
 	} else {
+		bbfdm_set_fault_message(ctx, "DownloadDiagnostics: 'sh %s {input}' command failed to run", DOWNLOAD_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
 	}
 
 	json_object *res = (DM_STRLEN(output)) ? json_tokener_parse(output) : NULL;
 
-	if (res == NULL)
+	if (res == NULL) {
+		bbfdm_set_fault_message(ctx, "DownloadDiagnostics: there is no output from '%s' script", DOWNLOAD_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
+	}
 
 	char *status = dmjson_get_value(res, 1, "Status");
 	char *ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
@@ -2064,8 +2081,10 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 	char cmd[2096] = {0};
 	char *upload_url = dmjson_get_value((json_object *)value, 1, "UploadURL");
 
-	if (upload_url[0] == '\0')
+	if (upload_url[0] == '\0') {
+		bbfdm_set_fault_message(ctx, "UploadDiagnostics: 'UploadURL' input should be defined");
 		return USP_FAULT_INVALID_ARGUMENT;
+	}
 
 	if (strncmp(upload_url, HTTP_URI, strlen(HTTP_URI)) != 0 &&
 		strncmp(upload_url, FTP_URI, strlen(FTP_URI)) != 0 &&
@@ -2073,8 +2092,10 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *upload_test_file_length = dmjson_get_value((json_object *)value, 1, "TestFileLength");
-	if (upload_test_file_length[0] == '\0')
+	if (upload_test_file_length[0] == '\0') {
+		bbfdm_set_fault_message(ctx, "UploadDiagnostics: 'TestFileLength' input should be defined");
 		return USP_FAULT_INVALID_ARGUMENT;
+	}
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *upload_interface = get_diagnostics_interface_option(ctx, ip_interface);
@@ -2102,13 +2123,16 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 		fgets(output, sizeof(output) , pp);
 		pclose(pp);
 	} else {
+		bbfdm_set_fault_message(ctx, "UploadDiagnostics: 'sh %s {input}' command failed to run", UPLOAD_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
 	}
 
 	json_object *res = (DM_STRLEN(output)) ? json_tokener_parse(output) : NULL;
 
-	if (res == NULL)
+	if (res == NULL) {
+		bbfdm_set_fault_message(ctx, "UploadDiagnostics: there is no output from '%s' script", UPLOAD_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
+	}
 
 	char *upload_status = dmjson_get_value(res, 1, "Status");
 	char *upload_ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
@@ -2188,8 +2212,10 @@ static int operate_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx
 	json_object *res = NULL;
 
 	char *udpecho_host = dmjson_get_value((json_object *)value, 1, "Host");
-	if (udpecho_host[0] == '\0')
+	if (udpecho_host[0] == '\0') {
+		bbfdm_set_fault_message(ctx, "UDPEchoDiagnostics: 'Host' input should be defined");
 		return USP_FAULT_INVALID_ARGUMENT;
+	}
 
 	char *udpecho_port = dmjson_get_value((json_object *)value, 1, "Port");
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
@@ -2217,8 +2243,10 @@ static int operate_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx
 			},
 			10, &res);
 
-	if (res == NULL)
+	if (res == NULL) {
+		bbfdm_set_fault_message(ctx, "UDPEchoDiagnostics: ubus 'bbf.diag udpecho' method doesn't exist");
 		return USP_FAULT_COMMAND_FAILURE;
+	}
 
 	char *status = dmjson_get_value(res, 1, "Status");
 	char *ip_address_used = dmjson_get_value(res, 1, "IPAddressUsed");
@@ -2274,8 +2302,10 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 	json_object *res = NULL;
 
 	char *hostlist = dmjson_get_value((json_object *)value, 1, "HostList");
-	if (hostlist[0] == '\0')
+	if (hostlist[0] == '\0') {
+		bbfdm_set_fault_message(ctx, "ServerSelectionDiagnostics: 'HostList' input should be defined");
 		return USP_FAULT_INVALID_ARGUMENT;
+	}
 
 	char *port = dmjson_get_value((json_object *)value, 1, "Port");
 	char *protocol_used = dmjson_get_value((json_object *)value, 1, "Protocol");
@@ -2299,8 +2329,10 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 			},
 			8, &res);
 
-	if (res == NULL)
+	if (res == NULL) {
+		bbfdm_set_fault_message(ctx, "ServerSelectionDiagnostics: ubus 'bbf.diag serverselection' method doesn't exist");
 		return USP_FAULT_COMMAND_FAILURE;
+	}
 
 	char *status = dmjson_get_value(res, 1, "Status");
 	char *fasthost = dmjson_get_value(res, 1, "FastestHost");

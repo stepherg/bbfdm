@@ -573,7 +573,7 @@ static int set_ssh_server_enable(char *refparam, struct dmctx *ctx, void *data, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -612,7 +612,7 @@ static int set_ssh_server_alias(char *refparam, struct dmctx *ctx, void *data, c
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -639,7 +639,7 @@ static int set_ssh_server_interface(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -664,7 +664,7 @@ static int set_ssh_server_port(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","65535"}},1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","65535"}},1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -684,7 +684,7 @@ static int set_ssh_server_idle(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}},1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}},1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -704,7 +704,7 @@ static int set_ssh_server_keepalive(char *refparam, struct dmctx *ctx, void *dat
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}},1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}},1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -726,7 +726,7 @@ static int set_ssh_server_rootlogin(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -749,7 +749,7 @@ static int set_ssh_server_passwordlogin(char *refparam, struct dmctx *ctx, void 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -772,7 +772,7 @@ static int set_ssh_server_rootpasswordlogin(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -793,7 +793,7 @@ static int set_ssh_server_maxauthtries(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}},1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}},1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -870,7 +870,7 @@ static int set_ssh_key_alias(char *refparam, struct dmctx *ctx, void *data, char
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -892,7 +892,7 @@ static int set_ssh_key_pubkey(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			/* check if same as current key value */

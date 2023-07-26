@@ -1631,7 +1631,7 @@ static int set_BridgingBridge_Enable(char *refparam, struct dmctx *ctx, void *da
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1670,7 +1670,7 @@ static int set_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *dat
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1690,7 +1690,7 @@ static int set_BridgingBridge_Standard(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, BridgeStandard, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, BridgeStandard, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1733,7 +1733,7 @@ static int set_BridgingBridgeSTP_Enable(char *refparam, struct dmctx *ctx, void 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1774,7 +1774,7 @@ static int set_BridgingBridgeSTP_Protocol(char *refparam, struct dmctx *ctx, voi
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, Protocol, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Protocol, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1793,7 +1793,7 @@ static int set_BridgingBridgeSTP_BridgePriority(char *refparam, struct dmctx *ct
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","61440"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","61440"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1820,7 +1820,7 @@ static int set_BridgingBridgeSTP_HelloTime(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"100","1000"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"100","1000"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1849,7 +1849,7 @@ static int set_BridgingBridgeSTP_MaxAge(char *refparam, struct dmctx *ctx, void 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"600","4000"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"600","4000"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1871,7 +1871,7 @@ static int set_BridgingBridgeSTP_ForwardingDelay(char *refparam, struct dmctx *c
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"4","30"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"4","30"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1897,7 +1897,7 @@ static int set_BridgingBridgePort_Enable(char *refparam, struct dmctx *ctx, void
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 
 			return 0;
@@ -1963,7 +1963,7 @@ static int set_BridgingBridgePort_Alias(char *refparam, struct dmctx *ctx, void 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2061,7 +2061,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (args->is_management_port)
@@ -2174,7 +2174,7 @@ static int set_BridgingBridgePort_ManagementPort(char *refparam, struct dmctx *c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 
 			string_to_bool(value, &b);
@@ -2214,7 +2214,7 @@ static int set_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dm
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt_list(value, 8, 8, -1, RANGE_ARGS{{"0","7"}}, 1))
+			if (bbfdm_validate_unsignedInt_list(ctx, value, 8, 8, -1, RANGE_ARGS{{"0","7"}}, 1))
 				return FAULT_9007;
 
 			if (args->is_management_port)
@@ -2249,7 +2249,7 @@ static int set_BridgingBridgePort_PVID(char *refparam, struct dmctx *ctx, void *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"1","4094"}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"1","4094"}}, 1))
 				return FAULT_9007;
 
 			if (args->is_management_port)
@@ -2320,7 +2320,7 @@ static int set_BridgingBridgePort_TPID(char *refparam, struct dmctx *ctx, void *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 
 			return 0;
@@ -2465,7 +2465,7 @@ static int set_BridgingBridgeVLAN_Enable(char *refparam, struct dmctx *ctx, void
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2486,7 +2486,7 @@ static int set_BridgingBridgeVLAN_Alias(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2506,7 +2506,7 @@ static int set_BridgingBridgeVLAN_Name(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2533,7 +2533,7 @@ static int set_BridgingBridgeVLAN_VLANID(char *refparam, struct dmctx *ctx, void
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"1","4094"}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"1","4094"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2601,7 +2601,7 @@ static int set_BridgingBridgeVLANPort_Enable(char *refparam, struct dmctx *ctx, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2624,7 +2624,7 @@ static int set_BridgingBridgeVLANPort_Alias(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2666,7 +2666,7 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -2747,7 +2747,7 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -2865,7 +2865,7 @@ static int set_BridgingBridgeVLANPort_Untagged(char *refparam, struct dmctx *ctx
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2888,7 +2888,7 @@ static int set_BridgingBridgeProviderBridge_Enable(char *refparam, struct dmctx 
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -2925,7 +2925,7 @@ static int set_BridgingBridgeProviderBridge_Alias(char *refparam, struct dmctx *
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 64, NULL, NULL))
+		if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -2951,7 +2951,7 @@ static int set_BridgingBridgeProviderBridge_SVLANcomponent(char *refparam, struc
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 256, NULL, NULL))
+		if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 			return FAULT_9007;
 
 		if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -2999,7 +2999,7 @@ static int set_BridgingBridgeProviderBridge_CVLANcomponents(char *refparam, stru
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			// Validate each item in list and Check if bridge is present

@@ -90,4 +90,7 @@ All supported tools are presented in this file[BBFDM Tools](./docs/guide/tools.m
 | STUN parameters                          | stunc          | https://dev.iopsys.eu/bbf/stunc.git          |
 | Device.XPON.                             | ponmngr        | https://dev.iopsys.eu/hal/ponmngr.git        |
 | Device.UPNP.                             | ssdpd          | https://github.com/miniupnp/miniupnp.git     |
+| Device.Users.				   | usermngr       | https://dev.iopsys.eu/bbf/usermngr.git       |
+| Device.PeriodicStatistics.		   | periodicstats  | https://dev.iopsys.eu/bbf/periodicstats.git  |
+| Device.SoftwareModules.		   | swmodd         | https://dev.iopsys.eu/lcm/swmodd.git         |
 | Device.Services.VoiceService.            | tr104          | https://dev.iopsys.eu/voice/tr104.git        |

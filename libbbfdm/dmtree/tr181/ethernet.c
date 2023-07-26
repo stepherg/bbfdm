@@ -455,7 +455,7 @@ static int set_EthernetInterface_Enable(char *refparam, struct dmctx *ctx, void 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -487,7 +487,7 @@ static int set_EthernetInterface_Alias(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -556,7 +556,7 @@ static int set_EthernetInterface_LowerLayers(char *refparam, struct dmctx *ctx, 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (*value != '\0')
@@ -601,7 +601,7 @@ static int set_EthernetInterface_MaxBitRate(char *refparam, struct dmctx *ctx, v
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -652,7 +652,7 @@ static int set_EthernetInterface_DuplexMode(char *refparam, struct dmctx *ctx, v
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DuplexMode, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, DuplexMode, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -686,7 +686,7 @@ static int set_EthernetInterface_EEEEnable(char *refparam, struct dmctx *ctx, vo
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -813,7 +813,7 @@ static int set_EthernetLink_Enable(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -843,7 +843,7 @@ static int set_EthernetLink_Alias(char *refparam, struct dmctx *ctx, void *data,
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -923,7 +923,7 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1029,7 +1029,7 @@ static int set_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1182,7 +1182,7 @@ static int set_EthernetVLANTermination_Enable(char *refparam, struct dmctx *ctx,
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1214,7 +1214,7 @@ static int set_EthernetVLANTermination_Alias(char *refparam, struct dmctx *ctx, 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1266,7 +1266,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1374,7 +1374,7 @@ static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","4094"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","4094"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1451,7 +1451,7 @@ static int set_EthernetVLANTermination_TPID(char *refparam, struct dmctx *ctx, v
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1531,7 +1531,7 @@ static int set_EthernetRMONStats_Enable(char *refparam, struct dmctx *ctx, void 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1572,7 +1572,7 @@ static int set_EthernetRMONStats_Alias(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1602,7 +1602,7 @@ static int set_EthernetRMONStats_Interface(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1621,7 +1621,7 @@ static int set_EthernetRMONStats_VLANID(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","4094"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","4094"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1640,7 +1640,7 @@ static int set_EthernetRMONStats_AllQueues(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:

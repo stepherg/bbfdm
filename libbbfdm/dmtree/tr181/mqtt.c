@@ -112,7 +112,7 @@ static int set_MQTTBroker_Alias(char *refparam, struct dmctx *ctx, void *data, c
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -133,7 +133,7 @@ static int set_MQTTBroker_Enable(char *refparam, struct dmctx *ctx, void *data, 
 	bool b;
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -156,12 +156,14 @@ static int set_MQTTBroker_Name(char *refparam, struct dmctx *ctx, void *data, ch
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 
 			// Check if the value is empty
-			if (*value == '\0')
+			if (*value == '\0') {
+				bbfdm_set_fault_message(ctx, "Entry name should not be blank.");
 				return FAULT_9007;
+			}
 
 			// Check if new name is same as current name
 			curr_name = section_name(((struct dmmap_dup *)data)->config_section);
@@ -169,8 +171,10 @@ static int set_MQTTBroker_Name(char *refparam, struct dmctx *ctx, void *data, ch
 				break;
 
 			// check if duplicate entry already exists
-			if (duplicate_entry_exist(value, "listener"))
+			if (duplicate_entry_exist(value, "listener")) {
+				bbfdm_set_fault_message(ctx, "Entry name '%s' is already exist.", value);
 				return FAULT_9001;
+			}
 
 			break;
 		case VALUESET:
@@ -180,8 +184,10 @@ static int set_MQTTBroker_Name(char *refparam, struct dmctx *ctx, void *data, ch
 				break;
 
 			// Update mosquitto config
-			if (0 != dmuci_rename_section_by_section(((struct dmmap_dup *)data)->config_section, value))
+			if (0 != dmuci_rename_section_by_section(((struct dmmap_dup *)data)->config_section, value)) {
+				bbfdm_set_fault_message(ctx, "Rename the entry name with '%s' value was failed.", value);
 				return FAULT_9001;
+			}
 
 			// Update dmmap_mqtt file
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "section_name", value);
@@ -201,7 +207,7 @@ static int set_MQTTBroker_Port(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -230,7 +236,7 @@ static int set_MQTTBroker_Interface(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -256,12 +262,15 @@ static int set_MQTTBroker_Username(char *refparam, struct dmctx *ctx, void *data
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 
 			// Check if the value is empty
-			if (*value == '\0')
+			if (*value == '\0') {
+				bbfdm_set_fault_message(ctx, "Username value should not be blank.");
 				return FAULT_9007;
+			}
+
 			break;
 		case VALUESET:
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "username", value);
@@ -280,7 +289,7 @@ static int set_MQTTBroker_Password(char *refparam, struct dmctx *ctx, void *data
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

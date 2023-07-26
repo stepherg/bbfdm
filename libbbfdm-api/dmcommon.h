@@ -266,20 +266,21 @@ void convert_hex_to_string(const char *hex, char *str, size_t size);
 void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, size_t size);
 void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, size_t size);
 bool match(const char *string, const char *pattern);
-int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
-int dm_validate_boolean(char *value);
-int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size);
-int dm_validate_int(char *value, struct range_args r_args[], int r_args_size);
-int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size);
-int dm_validate_long(char *value, struct range_args r_args[], int r_args_size);
-int dm_validate_dateTime(char *value);
-int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size);
-int dm_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
-int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-int dm_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-int dm_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-int dm_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-int dm_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+void bbfdm_set_fault_message(struct dmctx *ctx, const char *format, ...);
+int bbfdm_validate_boolean(struct dmctx *ctx, char *value);
+int bbfdm_validate_unsignedInt(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_int(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_unsignedLong(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_long(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_string(struct dmctx *ctx, char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
+int bbfdm_validate_dateTime(struct dmctx *ctx, char *value);
+int bbfdm_validate_hexBinary(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_unsignedInt_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_int_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_unsignedLong_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_long_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_string_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
+int bbfdm_validate_hexBinary_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 char *base64_decode(const char *src);
 void string_to_mac(const char *str, size_t str_len, char *out, size_t out_len);
 bool folder_exists(const char *path);
@@ -297,4 +298,22 @@ char *ifaddrs_get_global_ipv6(char *interface_name);
 bool validate_blob_message(struct blob_attr *src, struct blob_attr *dst);
 void strip_lead_trail_whitespace(char *str);
 int dm_buf_to_file(char *buf, const char *filename);
+
+/* Deprecated functions */
+__attribute__ ((deprecated)) int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
+__attribute__ ((deprecated)) int dm_validate_boolean(char *value);
+__attribute__ ((deprecated)) int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int dm_validate_int(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int dm_validate_long(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int dm_validate_dateTime(char *value);
+__attribute__ ((deprecated)) int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int dm_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
+__attribute__ ((deprecated)) int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int dm_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int dm_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int dm_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int dm_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+/************************/
+
 #endif

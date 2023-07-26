@@ -1148,7 +1148,7 @@ static int fill_string_arguments(struct json_object *json_obj, int *min_length, 
 	return 0;
 }
 
-static int dm_validate_value(json_object *json_obj, char *value)
+static int dm_validate_value(struct dmctx *ctx, json_object *json_obj, char *value)
 {
 	struct json_object *type_obj = NULL;
 
@@ -1164,10 +1164,10 @@ static int dm_validate_value(json_object *json_obj, char *value)
 		return -1;
 
 	if (strcmp(type, "boolean") == 0) {
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 	} else if (strcmp(type, "dateTime") == 0) {
-		if (dm_validate_dateTime(value))
+		if (bbfdm_validate_dateTime(ctx, value))
 			return FAULT_9007;
 	} else if (strcmp(type, "unsignedInt") == 0 || strcmp(type, "unsignedLong") == 0 ||
 			strcmp(type, "hexBinary") == 0 || strcmp(type, "int") == 0 || strcmp(type, "long") == 0) {
@@ -1184,11 +1184,11 @@ static int dm_validate_value(json_object *json_obj, char *value)
 				return -1;
 		}
 
-		if ((strcmp(type, "unsignedInt") == 0 && dm_validate_unsignedInt(value, range_arg, range_len)) ||
-			(strcmp(type, "unsignedLong") == 0 && dm_validate_unsignedLong(value, range_arg, range_len)) ||
-			(strcmp(type, "hexBinary") == 0 && dm_validate_hexBinary(value, range_arg, range_len)) ||
-			(strcmp(type, "int") == 0 && dm_validate_int(value, range_arg, range_len)) ||
-			(strcmp(type, "long") == 0 && dm_validate_long(value, range_arg, range_len)))
+		if ((strcmp(type, "unsignedInt") == 0 && bbfdm_validate_unsignedInt(ctx, value, range_arg, range_len)) ||
+			(strcmp(type, "unsignedLong") == 0 && bbfdm_validate_unsignedLong(ctx, value, range_arg, range_len)) ||
+			(strcmp(type, "hexBinary") == 0 && bbfdm_validate_hexBinary(ctx, value, range_arg, range_len)) ||
+			(strcmp(type, "int") == 0 && bbfdm_validate_int(ctx, value, range_arg, range_len)) ||
+			(strcmp(type, "long") == 0 && bbfdm_validate_long(ctx, value, range_arg, range_len)))
 			return FAULT_9007;
 	} else if (strcmp(type, "string") == 0) {
 		struct json_object *list_obj = NULL;
@@ -1247,24 +1247,24 @@ static int dm_validate_value(json_object *json_obj, char *value)
 						return -1;
 				}
 
-				if ((strcmp(datatype, "unsignedInt") == 0 && dm_validate_unsignedInt_list(value, min_item, max_item, max_size, range_arg, range_len)) ||
-					(strcmp(datatype, "unsignedLong") == 0 && dm_validate_unsignedLong_list(value, min_item, max_item, max_size, range_arg, range_len)) ||
-					(strcmp(datatype, "hexBinary") == 0 && dm_validate_hexBinary_list(value, min_item, max_item, max_size, range_arg, range_len)) ||
-					(strcmp(datatype, "int") == 0 && dm_validate_int_list(value, min_item, max_item, max_size, range_arg, range_len)) ||
-					(strcmp(datatype, "long") == 0 && dm_validate_long_list(value, min_item, max_item, max_size, range_arg, range_len)))
+				if ((strcmp(datatype, "unsignedInt") == 0 && bbfdm_validate_unsignedInt_list(ctx, value, min_item, max_item, max_size, range_arg, range_len)) ||
+					(strcmp(datatype, "unsignedLong") == 0 && bbfdm_validate_unsignedLong_list(ctx, value, min_item, max_item, max_size, range_arg, range_len)) ||
+					(strcmp(datatype, "hexBinary") == 0 && bbfdm_validate_hexBinary_list(ctx, value, min_item, max_item, max_size, range_arg, range_len)) ||
+					(strcmp(datatype, "int") == 0 && bbfdm_validate_int_list(ctx, value, min_item, max_item, max_size, range_arg, range_len)) ||
+					(strcmp(datatype, "long") == 0 && bbfdm_validate_long_list(ctx, value, min_item, max_item, max_size, range_arg, range_len)))
 					return FAULT_9007;
 			} else if (strcmp(datatype, "string") == 0) {
 				if (fill_string_arguments(list_obj, &min_length, &max_length, enum_tab, pattern_tab))
 					return -1;
 
-				if (dm_validate_string_list(value, min_item, max_item, max_size, min_length, max_length, *enum_tab ? enum_tab : NULL, *pattern_tab ? pattern_tab : NULL))
+				if (bbfdm_validate_string_list(ctx, value, min_item, max_item, max_size, min_length, max_length, *enum_tab ? enum_tab : NULL, *pattern_tab ? pattern_tab : NULL))
 					return FAULT_9007;
 			}
 		} else {
 			if (fill_string_arguments(json_obj, &min_length, &max_length, enum_tab, pattern_tab))
 				return -1;
 
-			if (dm_validate_string(value, min_length, max_length, *enum_tab ? enum_tab : NULL, *pattern_tab ? pattern_tab : NULL))
+			if (bbfdm_validate_string(ctx, value, min_length, max_length, *enum_tab ? enum_tab : NULL, *pattern_tab ? pattern_tab : NULL))
 				return FAULT_9007;
 		}
 	} else {
@@ -1507,7 +1507,7 @@ static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_value(param_obj, value))
+			if (dm_validate_value(ctx, param_obj, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:

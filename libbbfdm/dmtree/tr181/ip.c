@@ -1099,7 +1099,7 @@ static int set_IP_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1128,7 +1128,7 @@ static int set_IP_ULAPrefix(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, IPv6Prefix))
+			if (bbfdm_validate_string(ctx, value, -1, 49, NULL, IPv6Prefix))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1176,7 +1176,7 @@ static int set_IPInterface_Enable(char *refparam, struct dmctx *ctx, void *data,
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1205,7 +1205,7 @@ static int set_IPInterface_IPv6Enable(char *refparam, struct dmctx *ctx, void *d
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1230,7 +1230,7 @@ static int set_IPInterface_ULAEnable(char *refparam, struct dmctx *ctx, void *da
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1265,7 +1265,7 @@ static int set_IPInterface_Alias(char *refparam, struct dmctx *ctx, void *data, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1347,7 +1347,7 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1424,7 +1424,7 @@ static int set_IPInterface_Router(char *refparam, struct dmctx *ctx, void *data,
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1463,7 +1463,7 @@ static int set_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *data, 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1490,7 +1490,7 @@ static int set_IPInterface_MaxMTUSize(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"64","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"64","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1516,7 +1516,7 @@ static int set_IPInterface_Loopback(char *refparam, struct dmctx *ctx, void *dat
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1559,7 +1559,7 @@ static int set_IPInterfaceIPv4Address_Enable(char *refparam, struct dmctx *ctx, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
@@ -1613,7 +1613,7 @@ static int set_IPInterfaceIPv4Address_Alias(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1635,7 +1635,7 @@ static int set_IPInterfaceIPv4Address_IPAddress(char *refparam, struct dmctx *ct
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
@@ -1672,7 +1672,7 @@ static int set_IPInterfaceIPv4Address_SubnetMask(char *refparam, struct dmctx *c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
@@ -1740,7 +1740,7 @@ static int set_IPInterfaceIPv6Address_Enable(char *refparam, struct dmctx *ctx, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
@@ -1794,7 +1794,7 @@ static int set_IPInterfaceIPv6Address_Alias(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1819,7 +1819,7 @@ static int set_IPInterfaceIPv6Address_IPAddress(char *refparam, struct dmctx *ct
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, IPv6Address))
+			if (bbfdm_validate_string(ctx, value, -1, 45, NULL, IPv6Address))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
@@ -1891,7 +1891,7 @@ static int set_IPInterfaceIPv6Address_Prefix(char *refparam, struct dmctx *ctx, 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1921,7 +1921,7 @@ static int set_IPInterfaceIPv6Address_PreferredLifetime(char *refparam, struct d
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_dateTime(value))
+			if (bbfdm_validate_dateTime(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1951,7 +1951,7 @@ static int set_IPInterfaceIPv6Address_ValidLifetime(char *refparam, struct dmctx
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_dateTime(value))
+			if (bbfdm_validate_dateTime(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1977,7 +1977,7 @@ static int set_IPInterfaceIPv6Prefix_Enable(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
@@ -2023,7 +2023,7 @@ static int set_IPInterfaceIPv6Prefix_Alias(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2046,7 +2046,7 @@ static int set_IPInterfaceIPv6Prefix_Prefix(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, IPv6Prefix))
+			if (bbfdm_validate_string(ctx, value, -1, 49, NULL, IPv6Prefix))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->interface_sec, "proto", &proto);
@@ -2092,7 +2092,7 @@ static int set_IPInterfaceIPv6Prefix_ParentPrefix(char *refparam, struct dmctx *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2119,7 +2119,7 @@ static int set_IPInterfaceIPv6Prefix_ChildPrefixBits(char *refparam, struct dmct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, IPv6Prefix))
+			if (bbfdm_validate_string(ctx, value, -1, 49, NULL, IPv6Prefix))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2144,7 +2144,7 @@ static int set_IPInterfaceIPv6Prefix_PreferredLifetime(char *refparam, struct dm
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_dateTime(value))
+			if (bbfdm_validate_dateTime(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2169,7 +2169,7 @@ static int set_IPInterfaceIPv6Prefix_ValidLifetime(char *refparam, struct dmctx 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_dateTime(value))
+			if (bbfdm_validate_dateTime(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:

@@ -173,8 +173,8 @@ void fill_err_code_table(bbfdm_data_t *data, int fault)
 {
 	void *table = blobmsg_open_table(&data->bb, NULL);
 	blobmsg_add_string(&data->bb, "path", data->bbf_ctx.in_param ? data->bbf_ctx.in_param : "");
-	blobmsg_add_u32(&data->bb, "fault", bbf_fault_map(data->bbf_ctx.dm_type, fault));
-	bb_add_string(&data->bb, "fault_msg", "");
+	blobmsg_add_u32(&data->bb, "fault", bbf_fault_map(&data->bbf_ctx, fault));
+	bb_add_string(&data->bb, "fault_msg", data->bbf_ctx.fault_msg);
 	blobmsg_close_table(&data->bb, table);
 }
 
@@ -183,8 +183,8 @@ void fill_err_code_array(bbfdm_data_t *data, int fault)
 	void *array = blobmsg_open_array(&data->bb, "results");
 	void *table = blobmsg_open_table(&data->bb, NULL);
 	blobmsg_add_string(&data->bb, "path", data->bbf_ctx.in_param);
-	blobmsg_add_u32(&data->bb, "fault", bbf_fault_map(data->bbf_ctx.dm_type, fault));
-	bb_add_string(&data->bb, "fault_msg", "");
+	blobmsg_add_u32(&data->bb, "fault", bbf_fault_map(&data->bbf_ctx, fault));
+	bb_add_string(&data->bb, "fault_msg", data->bbf_ctx.fault_msg);
 	blobmsg_close_table(&data->bb, table);
 	blobmsg_close_array(&data->bb, array);
 }

@@ -224,14 +224,14 @@ def generate_validate_value(dmparam, value):
             patternparam = "NULL"
 
         if datatypeparam == "unsignedInt":
-            validate_value += "			if (dm_validate_unsignedInt_list(value, %s, %s, %s, %s))\n" % (
+            validate_value += "			if (bbfdm_validate_unsignedInt_list(ctx, value, %s, %s, %s, %s))\n" % (
                 itemminparam, itemmaxparam, maxsizeparam, rangeargs)
         else:
             if rangeminparam == "NULL":
                 rangeminparam = "-1"
             if rangemaxparam == "NULL":
                 rangemaxparam = "-1"
-            validate_value += "			if (dm_validate_string_list(value, %s, %s, %s, %s, %s, %s, %s))\n" % (
+            validate_value += "			if (bbfdm_validate_string_list(ctx, value, %s, %s, %s, %s, %s, %s, %s))\n" % (
                 itemminparam, itemmaxparam, maxsizeparam, rangeminparam, rangemaxparam, enumarationsparam, patternparam)
     else:
         datatypeparam = bbf.get_option_value(value, "datatype")
@@ -296,29 +296,29 @@ def generate_validate_value(dmparam, value):
             patternparam = "NULL"
 
         if datatypeparam == "boolean":
-            validate_value += "			if (dm_validate_boolean(value))\n"
+            validate_value += "			if (bbfdm_validate_boolean(ctx, value))\n"
         elif datatypeparam == "unsignedInt":
-            validate_value += "			if (dm_validate_unsignedInt(value, %s))\n" % rangeargs
+            validate_value += "			if (bbfdm_validate_unsignedInt(ctx, value, %s))\n" % rangeargs
         elif datatypeparam == "int":
-            validate_value += "			if (dm_validate_int(value, %s))\n" % rangeargs
+            validate_value += "			if (bbfdm_validate_int(ctx, value, %s))\n" % rangeargs
         elif datatypeparam == "unsignedLong":
-            validate_value += "			if (dm_validate_unsignedLong(value, %s))\n" % rangeargs
+            validate_value += "			if (bbfdm_validate_unsignedLong(ctx, value, %s))\n" % rangeargs
         elif datatypeparam == "long":
-            validate_value += "			if (dm_validate_long(value, %s))\n" % rangeargs
+            validate_value += "			if (bbfdm_validate_long(ctx, value, %s))\n" % rangeargs
         elif datatypeparam == "dateTime":
-            validate_value += "			if (dm_validate_dateTime(value))\n"
+            validate_value += "			if (bbfdm_validate_dateTime(ctx, value))\n"
         elif datatypeparam == "hexBinary":
             if rangeminparam == "NULL":
                 rangeminparam = "-1"
             if rangemaxparam == "NULL":
                 rangemaxparam = "-1"
-            validate_value += "			if (dm_validate_hexBinary(value, %s))\n" % rangeargs
+            validate_value += "			if (bbfdm_validate_hexBinary(ctx, value, %s))\n" % rangeargs
         else:
             if rangeminparam == "NULL":
                 rangeminparam = "-1"
             if rangemaxparam == "NULL":
                 rangemaxparam = "-1"
-            validate_value += "			if (dm_validate_string(value, %s, %s, %s, %s))\n" % (
+            validate_value += "			if (bbfdm_validate_string(ctx, value, %s, %s, %s, %s))\n" % (
                 rangeminparam, rangemaxparam, enumarationsparam, patternparam)
     validate_value += "				return FAULT_9007;"
     validate_value = validate_value.replace("\"NULL\"", "NULL")

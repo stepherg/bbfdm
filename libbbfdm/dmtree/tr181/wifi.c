@@ -682,7 +682,7 @@ static int set_wifi_enable(char *refparam, struct dmctx *ctx, void *data, char *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string((((struct wifi_ssid_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
@@ -729,7 +729,7 @@ static int set_wlan_ssid(char *refparam, struct dmctx *ctx, void *data, char *in
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 32, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 32, NULL, NULL))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string((((struct wifi_ssid_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
@@ -776,7 +776,7 @@ static int set_radio_enable(char *refparam, struct dmctx *ctx, void *data, char 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -809,7 +809,7 @@ static int set_WiFiRadio_LowerLayers(char *refparam, struct dmctx *ctx, void *da
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -841,7 +841,7 @@ static int set_WiFiRadio_AutoChannelRefreshPeriod(char *refparam, struct dmctx *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -869,7 +869,7 @@ static int set_WiFiRadio_FragmentationThreshold(char *refparam, struct dmctx *ct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -890,7 +890,7 @@ static int set_WiFiRadio_RTSThreshold(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -911,7 +911,7 @@ static int set_WiFiRadio_BeaconPeriod(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -934,7 +934,7 @@ static int set_WiFiRadio_DTIMPeriod(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1012,7 +1012,7 @@ static int set_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, SupportedOperatingChannelBandwidth, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, SupportedOperatingChannelBandwidth, NULL))
 				return FAULT_9007;
 
 			// Get the list of all supported operating channel bandwidths
@@ -1053,7 +1053,7 @@ static int set_WiFiRadio_PreambleType(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, PreambleType, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, PreambleType, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1081,7 +1081,7 @@ static int set_WiFiRadio_IEEE80211hEnabled(char *refparam, struct dmctx *ctx, vo
 	bool b;
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1213,7 +1213,7 @@ static int set_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, 3, 3, NULL, RegulatoryDomain))
+			if (bbfdm_validate_string(ctx, value, 3, 3, NULL, RegulatoryDomain))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1272,7 +1272,7 @@ static int set_radio_channel(char *refparam, struct dmctx *ctx, void *data, char
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","255"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","255"}}, 1))
 				return FAULT_9007;
 
 			// Get the list of all supported channels
@@ -1306,7 +1306,7 @@ static int set_radio_auto_channel_enable(char *refparam, struct dmctx *ctx, void
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1336,7 +1336,7 @@ static int set_wlan_ssid_advertisement_enable(char *refparam, struct dmctx *ctx,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1361,7 +1361,7 @@ static int set_wmm_enabled(char *refparam, struct dmctx *ctx, void *data, char *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1402,7 +1402,7 @@ static int set_WiFiAccessPoint_MaxAllowedAssociations(char *refparam, struct dmc
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1425,7 +1425,7 @@ static int set_WiFiAccessPoint_IsolationEnable(char *refparam, struct dmctx *ctx
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1453,7 +1453,7 @@ static int set_WiFiAccessPoint_AllowedMACAddress(char *refparam, struct dmctx *c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, 17, NULL, MACAddress))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, 17, NULL, MACAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1478,7 +1478,7 @@ static int set_access_point_control_enable(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1502,7 +1502,7 @@ static int set_WiFiAccessPoint_UAPSDEnable(char *refparam, struct dmctx *ctx, vo
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1666,7 +1666,7 @@ static int set_access_point_security_modes(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			// Get the list of all supported security modes
@@ -1698,7 +1698,7 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{"5","5"},{"13","13"}}, 2))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{"5","5"},{"13","13"}}, 2))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
@@ -1736,7 +1736,7 @@ static int set_access_point_security_shared_key(char *refparam, struct dmctx *ct
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"32"}}, 1))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{NULL,"32"}}, 1))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
@@ -1767,7 +1767,7 @@ static int set_access_point_security_passphrase(char *refparam, struct dmctx *ct
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, 8, 63, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, 8, 63, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1792,7 +1792,7 @@ static int set_access_point_security_rekey_interval(char *refparam, struct dmctx
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1815,7 +1815,7 @@ static int set_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmct
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
@@ -1852,7 +1852,7 @@ static int set_access_point_security_radius_ip_address(char *refparam, struct dm
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, IPAddress))
+			if (bbfdm_validate_string(ctx, value, -1, 45, NULL, IPAddress))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1877,7 +1877,7 @@ static int set_access_point_security_radius_server_port(char *refparam, struct d
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1895,7 +1895,7 @@ static int set_access_point_security_radius_secret(char *refparam, struct dmctx 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1988,7 +1988,7 @@ static int set_WiFiAccessPointSecurity_MFPConfig(char *refparam, struct dmctx *c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, MFPConfig, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, MFPConfig, NULL))
 				return FAULT_9007;
 
 			/*Here we also need to validate the encyption algo whether the MFP can be set*/
@@ -2023,7 +2023,7 @@ static int set_WiFiAccessPointWPS_Enable(char *refparam, struct dmctx *ctx, void
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2050,7 +2050,7 @@ static int set_WiFiAccessPointWPS_ConfigMethodsEnabled(char *refparam, struct dm
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (DM_STRCMP(value, "PushButton") != 0)
@@ -2116,7 +2116,7 @@ static int set_WiFiAccessPointAccounting_ServerIPAddr(char *refparam, struct dmc
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, IPAddress))
+			if (bbfdm_validate_string(ctx, value, -1, 45, NULL, IPAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2137,7 +2137,7 @@ static int set_WiFiAccessPointAccounting_ServerPort(char *refparam, struct dmctx
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2151,7 +2151,7 @@ static int set_WiFiAccessPointAccounting_Secret(char *refparam, struct dmctx *ct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2174,7 +2174,7 @@ static int set_WiFiEndPoint_Enable(char *refparam, struct dmctx *ctx, void *data
 	bool b;
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2206,7 +2206,7 @@ static int set_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data,
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2285,7 +2285,7 @@ static int set_WiFiEndPointProfile_Enable(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2319,7 +2319,7 @@ static int set_dmmap_wireless_section(char *refparam, struct dmctx *ctx, void *d
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2366,7 +2366,7 @@ static int set_WiFiEndPointProfile_SSID(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 32, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 32, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2393,7 +2393,7 @@ static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			// Get the list of all supported security modes
@@ -2421,7 +2421,7 @@ static int set_WiFiEndPointProfileSecurity_WEPKey(char *refparam, struct dmctx *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{"5","5"},{"13","13"}}, 2))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{"5","5"},{"13","13"}}, 2))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2444,7 +2444,7 @@ static int set_WiFiEndPointProfileSecurity_PreSharedKey(char *refparam, struct d
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"32"}}, 1))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{NULL,"32"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2462,7 +2462,7 @@ static int set_WiFiEndPointProfileSecurity_KeyPassphrase(char *refparam, struct 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, 8, 63, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, 8, 63, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2481,7 +2481,7 @@ static int set_WiFiEndPointProfileSecurity_SAEPassphrase(char *refparam, struct 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2510,7 +2510,7 @@ static int set_WiFiEndPointProfileSecurity_MFPConfig(char *refparam, struct dmct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, MFPConfig, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, MFPConfig, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2538,7 +2538,7 @@ static int set_WiFiEndPointWPS_Enable(char *refparam, struct dmctx *ctx, void *d
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2565,7 +2565,7 @@ static int set_WiFiEndPointWPS_ConfigMethodsEnabled(char *refparam, struct dmctx
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (DM_STRCMP(value, "PushButton") != 0)
@@ -2604,7 +2604,7 @@ static int set_radio_alias(char *refparam, struct dmctx *ctx, void *data, char *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2627,7 +2627,7 @@ static int set_ssid_alias(char *refparam, struct dmctx *ctx, void *data, char *i
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2650,7 +2650,7 @@ static int set_access_point_alias(char *refparam, struct dmctx *ctx, void *data,
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2673,7 +2673,7 @@ static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -2702,7 +2702,7 @@ static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -2751,7 +2751,7 @@ static int set_neighboring_wifi_diagnostics_diagnostics_state(char *refparam, st
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -3169,7 +3169,7 @@ static int set_radio_frequency(char *refparam, struct dmctx *ctx, void *data, ch
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, SupportedFrequencyBands, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, SupportedFrequencyBands, NULL))
 				return FAULT_9007;
 
 			// Get the list of all supported frequency bands
@@ -3313,7 +3313,7 @@ static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void 
 
 	switch (action) {
 			case VALUECHECK:
-				if (dm_validate_string_list(value, -1, -1, -1, -1, -1, SupportedStandards, NULL))
+				if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, -1, SupportedStandards, NULL))
 					return FAULT_9007;
 
 				// Get the list of all supported standards

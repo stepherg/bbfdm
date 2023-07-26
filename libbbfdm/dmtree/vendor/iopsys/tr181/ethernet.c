@@ -106,7 +106,7 @@ static int set_EthernetMACVLAN_Enable(char *refparam, struct dmctx *ctx, void *d
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -137,7 +137,7 @@ static int set_EthernetMACVLAN_Alias(char *refparam, struct dmctx *ctx, void *da
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -187,7 +187,7 @@ static int set_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -231,7 +231,7 @@ static int set_EthernetMACVLAN_MACAddress(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, MACAddress))
+			if (bbfdm_validate_string(ctx, value, -1, 17, NULL, MACAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:

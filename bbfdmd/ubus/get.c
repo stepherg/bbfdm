@@ -813,7 +813,7 @@ static int resolve_path(struct dmctx *bbf_ctx, char *qPath, size_t pos, struct l
 
 	if (check == false && list_empty(&plist_local)) {
 		free_path_list(&plist_local);
-		return bbf_fault_map(bbf_ctx->dm_type, FAULT_9005);
+		return bbf_fault_map(bbf_ctx, FAULT_9005);
 	}
 
 	refresh_path_list(resolved_plist, &plist_local);
@@ -843,7 +843,7 @@ int get_resolved_paths(struct dmctx *bbf_ctx, char *qpath, struct list_head *res
 		}
 	} else {
 		INFO("Not able to get base path");
-		fault = bbf_fault_map(bbf_ctx->dm_type, FAULT_9005);
+		fault = bbf_fault_map(bbf_ctx, FAULT_9005);
 	}
 
 	if (fault)

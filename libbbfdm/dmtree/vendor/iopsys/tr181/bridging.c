@@ -24,7 +24,7 @@ static int set_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, st
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt_list(value, 8, 8, -1, RANGE_ARGS{{"0","7"}}, 1))
+			if (bbfdm_validate_unsignedInt_list(ctx, value, 8, 8, -1, RANGE_ARGS{{"0","7"}}, 1))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct bridge_port_args *)data)->bridge_port_sec, "type", &type);

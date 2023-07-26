@@ -412,7 +412,7 @@ static int set_QInterface(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 256, NULL, NULL))
+		if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 			return FAULT_9007;
 
 		if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -527,7 +527,7 @@ static int set_QoSClassification_Enable(char *refparam, struct dmctx *ctx, void 
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -550,7 +550,7 @@ static int set_QoSClassification_Order(char *refparam, struct dmctx *ctx, void *
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -585,7 +585,7 @@ static int set_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, voi
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 49 , NULL, IPPrefix))
+		if (bbfdm_validate_string(ctx, value, -1, 49 , NULL, IPPrefix))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -635,7 +635,7 @@ static int set_QoSClassification_SourceMask(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 49 , NULL, IPPrefix))
+		if (bbfdm_validate_string(ctx, value, -1, 49 , NULL, IPPrefix))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -676,7 +676,7 @@ static int set_QoSClassification_Alias(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 64, NULL, NULL))
+		if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -717,7 +717,7 @@ static int set_QoSClassification_DestIP(char *refparam, struct dmctx *ctx, void 
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 45 , NULL, IPAddress))
+		if (bbfdm_validate_string(ctx, value, -1, 45 , NULL, IPAddress))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -766,7 +766,7 @@ static int set_QoSClassification_SourceIP(char *refparam, struct dmctx *ctx, voi
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 45 , NULL, IPAddress))
+		if (bbfdm_validate_string(ctx, value, -1, 45 , NULL, IPAddress))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -804,7 +804,7 @@ static int set_QoSClassification_Protocol(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_int(value, RANGE_ARGS{{"-1","255"}}, 1))
+		if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","255"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -825,7 +825,7 @@ static int set_QoSClassification_DestPort(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_int(value, RANGE_ARGS{{"-1","65535"}}, 1))
+		if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -845,7 +845,7 @@ static int set_QoSClassification_DestPortRangeMax(char *refparam, struct dmctx *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1","65535"}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -865,7 +865,7 @@ static int set_QoSClassification_SourcePort(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1","65535"}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -885,7 +885,7 @@ static int set_QoSClassification_SourcePortRangeMax(char *refparam, struct dmctx
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_int(value, RANGE_ARGS{{"-1","65535"}}, 1))
+		if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -905,7 +905,7 @@ static int set_QoSClassification_SourceMACAddress(char *refparam, struct dmctx *
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 17, NULL, MACAddress))
+		if (bbfdm_validate_string(ctx, value, -1, 17, NULL, MACAddress))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -925,7 +925,7 @@ static int set_QoSClassification_DestMACAddress(char *refparam, struct dmctx *ct
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 17, NULL, MACAddress))
+		if (bbfdm_validate_string(ctx, value, -1, 17, NULL, MACAddress))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -945,7 +945,7 @@ static int set_QoSClassification_Ethertype(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+		if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -965,7 +965,7 @@ static int set_QoSClassification_SourceVendorClassID(char *refparam, struct dmct
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 255, NULL, NULL))
+		if (bbfdm_validate_string(ctx, value, -1, 255, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -985,7 +985,7 @@ static int set_QoSClassification_DestVendorClassID(char *refparam, struct dmctx 
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 255, NULL, NULL))
+		if (bbfdm_validate_string(ctx, value, -1, 255, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1014,7 +1014,7 @@ static int set_QoSClassification_SourceClientID(char *refparam, struct dmctx *ct
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1044,7 +1044,7 @@ static int set_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx,
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1074,7 +1074,7 @@ static int set_QoSClassification_SourceUserClassID(char *refparam, struct dmctx 
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+		if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1104,7 +1104,7 @@ static int set_QoSClassification_DestUserClassID(char *refparam, struct dmctx *c
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+		if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1125,7 +1125,7 @@ static int set_QoSClassification_IPLengthMin(char *refparam, struct dmctx *ctx, 
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_int(value, RANGE_ARGS{{"0",NULL}}, 1))
+		if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"0",NULL}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1145,7 +1145,7 @@ static int set_QoSClassification_IPLengthMax(char *refparam, struct dmctx *ctx, 
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_int(value, RANGE_ARGS{{"0",NULL}}, 1))
+		if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"0",NULL}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1165,7 +1165,7 @@ static int set_QoSClassification_DSCPCheck(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_int(value, RANGE_ARGS{{"-1","63"}}, 1))
+		if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","63"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1186,7 +1186,7 @@ static int set_QoSClassification_DSCPMark(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_int(value, RANGE_ARGS{{"-2",NULL}}, 1))
+		if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-2",NULL}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1205,7 +1205,7 @@ static int set_QoSClassification_EthernetPriorityCheck(char *refparam, struct dm
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+		if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1225,7 +1225,7 @@ static int set_QoSClassification_VLANIDCheck(char *refparam, struct dmctx *ctx, 
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+		if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1245,7 +1245,7 @@ static int set_QoSClassification_ForwardingPolicy(char *refparam, struct dmctx *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1265,7 +1265,7 @@ static int set_QoSClassification_TrafficClass(char *refparam, struct dmctx *ctx,
 {
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+		if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1298,7 +1298,7 @@ static int set_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1327,7 +1327,7 @@ static int set_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, 
 	bool b;
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1357,7 +1357,7 @@ static int set_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, c
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1377,7 +1377,7 @@ static int set_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1397,7 +1397,7 @@ static int set_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1417,7 +1417,7 @@ static int set_QoSPolicer_ExcessBurstSize(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1437,7 +1437,7 @@ static int set_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1457,7 +1457,7 @@ static int set_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1516,7 +1516,7 @@ static int set_QoSQueue_Enable(char *refparam, struct dmctx *ctx, void *data, ch
 	bool b;
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1546,7 +1546,7 @@ static int set_QoSQueue_Alias(char *refparam, struct dmctx *ctx, void *data, cha
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1594,7 +1594,7 @@ static int set_QoSQueue_Weight(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 			case VALUESET:
@@ -1615,7 +1615,7 @@ static int set_QoSQueue_Precedence(char *refparam, struct dmctx *ctx, void *data
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1635,7 +1635,7 @@ static int set_QoSQueue_SchedulerAlgorithm(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, SchedulerAlgorithm, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, SchedulerAlgorithm, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1657,7 +1657,7 @@ static int set_QoSQueue_ShapingRate(char *refparam, struct dmctx *ctx, void *dat
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1677,7 +1677,7 @@ static int set_QoSQueue_ShapingBurstSize(char *refparam, struct dmctx *ctx, void
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1699,7 +1699,7 @@ static int set_QoSQueueStats_Enable(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1730,7 +1730,7 @@ static int set_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1756,7 +1756,7 @@ static int set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1796,7 +1796,7 @@ static int set_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1863,7 +1863,7 @@ static int set_QoSShaper_Enable(char *refparam, struct dmctx *ctx, void *data, c
 	bool b;
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1893,7 +1893,7 @@ static int set_QoSShaper_Alias(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1923,7 +1923,7 @@ static int set_QoSShaper_ShapingRate(char *refparam, struct dmctx *ctx, void *da
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1943,7 +1943,7 @@ static int set_QoSShaper_ShapingBurstSize(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:

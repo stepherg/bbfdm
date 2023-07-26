@@ -32,7 +32,7 @@ static int set_time_enable(char *refparam, struct dmctx *ctx, void *data, char *
 	
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -77,7 +77,7 @@ static int set_time_LocalTimeZone(char *refparam, struct dmctx *ctx, void *data,
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -150,7 +150,7 @@ static int set_time_ntpserver(char *refparam, struct dmctx *ctx, int action, cha
 	
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:

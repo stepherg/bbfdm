@@ -524,7 +524,7 @@ void bbf_find_dmmap_section_by_option(char *dmmap_package, char *section_type, c
 
 /*********************************************************************//**
 **
-** bbf_validate_string
+** bbfdm_validate_string
 **
 ** This API is to validate a string value
 **
@@ -537,24 +537,25 @@ void bbf_find_dmmap_section_by_option(char *dmmap_package, char *section_type, c
 ** \return  0 if the string value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
+int bbfdm_validate_string(struct dmctx *ctx, char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
 
 /*********************************************************************//**
 **
-** bbf_validate_boolean
+** bbfdm_validate_boolean
 **
 ** This API is to validate a bool value
 **
+** \param   ctx - pointer to the bbf context
 ** \param   value - pointer to the value to validate
 **
 ** \return  0 if the bool value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_boolean(char *value);
+int bbfdm_validate_boolean(struct dmctx *ctx, char *value);
 
 /*********************************************************************//**
 **
-** bbf_validate_unsignedInt
+** bbfdm_validate_unsignedInt
 **
 ** This API is to validate an unsigned int value
 **
@@ -565,11 +566,11 @@ int bbf_validate_boolean(char *value);
 ** \return  0 if the unsigned int value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_unsignedInt(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
-** bbf_validate_int
+** bbfdm_validate_int
 **
 ** This API is to validate a int value
 **
@@ -580,11 +581,11 @@ int bbf_validate_unsignedInt(char *value, struct range_args r_args[], int r_args
 ** \return  0 if the int value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_int(char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_int(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
-** bbf_validate_unsignedLong
+** bbfdm_validate_unsignedLong
 **
 ** This API is to validate a unsigned long value
 **
@@ -595,11 +596,11 @@ int bbf_validate_int(char *value, struct range_args r_args[], int r_args_size);
 ** \return  0 if the unsigned long value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_unsignedLong(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
-** bbf_validate_long
+** bbfdm_validate_long
 **
 ** This API is to validate a long value
 **
@@ -610,11 +611,11 @@ int bbf_validate_unsignedLong(char *value, struct range_args r_args[], int r_arg
 ** \return  0 if the long value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_long(char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_long(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
-** bbf_validate_dateTime
+** bbfdm_validate_dateTime
 **
 ** This API is to validate a date time value
 **
@@ -623,11 +624,11 @@ int bbf_validate_long(char *value, struct range_args r_args[], int r_args_size);
 ** \return  0 if the date time value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_dateTime(char *value);
+int bbfdm_validate_dateTime(struct dmctx *ctx, char *value);
 
 /*********************************************************************//**
 **
-** bbf_validate_hexBinary
+** bbfdm_validate_hexBinary
 **
 ** This API is to validate a hexbinary value
 **
@@ -638,11 +639,11 @@ int bbf_validate_dateTime(char *value);
 ** \return  0 if the hexbinary value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_hexBinary(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
-** bbf_validate_string_list
+** bbfdm_validate_string_list
 **
 ** This API is to validate a list of string value
 **
@@ -658,11 +659,11 @@ int bbf_validate_hexBinary(char *value, struct range_args r_args[], int r_args_s
 ** \return  0 if the list of string value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
+int bbfdm_validate_string_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
 
 /*********************************************************************//**
 **
-** bbf_validate_unsignedInt_list
+** bbfdm_validate_unsignedInt_list
 **
 ** This API is to validate a list of unsigned int value
 **
@@ -676,11 +677,11 @@ int bbf_validate_string_list(char *value, int min_item, int max_item, int max_si
 ** \return  0 if the list of unsigned int value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_unsignedInt_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
-** bbf_validate_int_list
+** bbfdm_validate_int_list
 **
 ** This API is to validate a list of int value
 **
@@ -694,11 +695,11 @@ int bbf_validate_unsignedInt_list(char *value, int min_item, int max_item, int m
 ** \return  0 if the list of int value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_int_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
-** bbf_validate_unsignedLong_list
+** bbfdm_validate_unsignedLong_list
 **
 ** This API is to validate a list of unsigned long value
 **
@@ -712,11 +713,11 @@ int bbf_validate_int_list(char *value, int min_item, int max_item, int max_size,
 ** \return  0 if the list of unsigned long value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_unsignedLong_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
-** bbf_validate_long_list
+** bbfdm_validate_long_list
 **
 ** This API is to validate a list of long value
 **
@@ -730,11 +731,11 @@ int bbf_validate_unsignedLong_list(char *value, int min_item, int max_item, int 
 ** \return  0 if the list of long value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_long_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
-** bbf_validate_hexBinary_list
+** bbfdm_validate_hexBinary_list
 **
 ** This API is to validate a list of hexBinary value
 **
@@ -748,6 +749,28 @@ int bbf_validate_long_list(char *value, int min_item, int max_item, int max_size
 ** \return  0 if the list of hexBinary value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbf_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_hexBinary_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+
+
+/**********************
+ *
+ * BBF DEPRECATED APIs
+ *
+ **********************/
+
+__attribute__ ((deprecated)) int bbf_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
+__attribute__ ((deprecated)) int bbf_validate_boolean(char *value);
+__attribute__ ((deprecated)) int bbf_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int bbf_validate_int(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int bbf_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int bbf_validate_long(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int bbf_validate_dateTime(char *value);
+__attribute__ ((deprecated)) int bbf_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int bbf_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
+__attribute__ ((deprecated)) int bbf_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int bbf_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int bbf_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int bbf_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated)) int bbf_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 
 #endif //__LIBBBFDM_API_H__

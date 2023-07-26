@@ -368,8 +368,10 @@ static int add_firewall_rule(char *refparam, struct dmctx *ctx, void *data, char
 	time_t now = time(NULL);
 
 	dmuci_get_value_by_section_string(chain_args, "creator", &creator);
-	if (DM_STRCMP(creator, "PortMapping") == 0)
+	if (DM_STRCMP(creator, "PortMapping") == 0) {
+		bbfdm_set_fault_message(ctx, "This is a dynamic 'Chain' instance which is created by 'Port Mapping', so it's not permitted to add a static 'Rule'.");
 		return FAULT_9003;
+	}
 
 	dmuci_get_value_by_section_string(chain_args, "rule_start_pos", &rule_start_pos);
 	dmuci_get_value_by_section_string(chain_args, "rules_num", &rules_num);
@@ -407,8 +409,10 @@ static int delete_firewall_rule(char *refparam, struct dmctx *ctx, void *data, c
 
 	switch (del_action) {
 		case DEL_INST:
-			if (((struct rule_sec *)data)->is_dynamic_rule)
+			if (((struct rule_sec *)data)->is_dynamic_rule) {
+				bbfdm_set_fault_message(ctx, "This is a dynamic 'Rule' instance, therefore it's not permitted to delete it.");
 				return FAULT_9003;
+			}
 
 			s = get_dup_section_in_dmmap_opt("dmmap_firewall", "chain", "creator", "Defaults");
 			dmuci_get_value_by_section_string(s, "rules_num", &rules_num);
@@ -751,7 +755,7 @@ static int set_FirewallChainRule_ExpiryDate(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_dateTime(value))
+			if (bbfdm_validate_dateTime(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1159,7 +1163,7 @@ static int set_firewall_enable(char *refparam, struct dmctx *ctx, void *data, ch
 	bool b;
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1174,12 +1178,14 @@ static int set_firewall_config(char *refparam, struct dmctx *ctx, void *data, ch
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, Config, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Config, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (strcasecmp(value, "Advanced") != 0)
+			if (strcasecmp(value, "Advanced") != 0) {
+				bbfdm_set_fault_message(ctx, "The current Firewall implementation supports only 'Advanced' config.");
 				return FAULT_9007;
+			}
 			break;
 	}
         return 0;
@@ -1189,12 +1195,14 @@ static int set_firewall_advanced_level(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (strcasecmp(value, "Device.Firewall.Level.1.") != 0)
+			if (strcasecmp(value, "Device.Firewall.Level.1.") != 0) {
+				bbfdm_set_fault_message(ctx, "The current Firewall implementation supports only one Level. So the value should be 'Device.Firewall.Level.1'.");
 				return FAULT_9007;
+			}
 			break;
 	}
         return 0;
@@ -1204,7 +1212,7 @@ static int set_level_alias(char *refparam, struct dmctx *ctx, void *data, char *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1218,7 +1226,7 @@ static int set_level_name(char *refparam, struct dmctx *ctx, void *data, char *i
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1232,7 +1240,7 @@ static int set_level_description(char *refparam, struct dmctx *ctx, void *data, 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1249,7 +1257,7 @@ static int set_level_port_mapping_enabled(char *refparam, struct dmctx *ctx, voi
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1277,7 +1285,7 @@ static int set_level_default_policy(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DefaultPolicy, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, DefaultPolicy, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1303,7 +1311,7 @@ static int set_level_default_log_policy(char *refparam, struct dmctx *ctx, void 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1326,7 +1334,7 @@ static int set_chain_enable(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1339,7 +1347,7 @@ static int set_chain_alias(char *refparam, struct dmctx *ctx, void *data, char *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1353,7 +1361,7 @@ static int set_chain_name(char *refparam, struct dmctx *ctx, void *data, char *i
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1369,7 +1377,7 @@ static int set_rule_enable(char *refparam, struct dmctx *ctx, void *data, char *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1392,12 +1400,14 @@ static int set_rule_order(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(s, "rules_num", &rules_num);
-			if (DM_STRTOUL(value) > DM_STRTOUL(rules_num))
+			if (DM_STRTOUL(value) > DM_STRTOUL(rules_num)) {
+				bbfdm_set_fault_message(ctx, "The order value '%s' should be lower than the greater order value '%s'.", value, rules_num);
 				return FAULT_9007;
+			}
 
 			break;
 		case VALUESET:
@@ -1421,7 +1431,7 @@ static int set_rule_alias(char *refparam, struct dmctx *ctx, void *data, char *i
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1435,7 +1445,7 @@ static int set_rule_description(char *refparam, struct dmctx *ctx, void *data, c
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1449,7 +1459,7 @@ static int set_rule_target(char *refparam, struct dmctx *ctx, void *data, char *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, Target, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Target, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1472,7 +1482,7 @@ static int set_rule_log(char *refparam, struct dmctx *ctx, void *data, char *ins
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1490,7 +1500,7 @@ static int set_rule_interface(struct dmctx *ctx, void *data, char *type, char *v
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1531,7 +1541,7 @@ static int set_rule_source_all_interfaces(char *refparam, struct dmctx *ctx, voi
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1569,7 +1579,7 @@ static int set_rule_dest_all_interfaces(char *refparam, struct dmctx *ctx, void 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1599,7 +1609,7 @@ static int set_rule_i_p_version(char *refparam, struct dmctx *ctx, void *data, c
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1","15"}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","15"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1620,7 +1630,7 @@ static int set_rule_dest_ip(char *refparam, struct dmctx *ctx, void *data, char 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, IPAddress))
+			if (bbfdm_validate_string(ctx, value, -1, 45, NULL, IPAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1643,7 +1653,7 @@ static int set_rule_dest_mask(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, IPPrefix))
+			if (bbfdm_validate_string(ctx, value, -1, 49, NULL, IPPrefix))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1654,7 +1664,7 @@ static int set_rule_dest_mask(char *refparam, struct dmctx *ctx, void *data, cha
 
 			pch = DM_STRCHR(value, '/');
 			if (pch == NULL)
-				return FAULT_9007;
+				return 0;
 
 			snprintf(new, sizeof(new), "%s%s", destip, pch);
 			dmuci_set_value_by_section(((struct rule_sec *)data)->config_section, "dest_ip", new);
@@ -1669,7 +1679,7 @@ static int set_rule_source_ip(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, IPAddress))
+			if (bbfdm_validate_string(ctx, value, -1, 45, NULL, IPAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1692,7 +1702,7 @@ static int set_rule_source_mask(char *refparam, struct dmctx *ctx, void *data, c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, IPPrefix))
+			if (bbfdm_validate_string(ctx, value, -1, 49, NULL, IPPrefix))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1703,7 +1713,7 @@ static int set_rule_source_mask(char *refparam, struct dmctx *ctx, void *data, c
 
 			pch = DM_STRCHR(value, '/');
 			if (pch == NULL)
-				return FAULT_9007;
+				return 0;
 
 			snprintf(new, sizeof(new), "%s%s", srcip, pch);
 			dmuci_set_value_by_section(((struct rule_sec *)data)->config_section, "src_ip", new);
@@ -1716,7 +1726,7 @@ static int set_rule_protocol(char *refparam, struct dmctx *ctx, void *data, char
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1","255"}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","255"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1732,7 +1742,7 @@ static int set_rule_dest_port(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1","65535"}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1758,7 +1768,7 @@ static int set_rule_dest_port_range_max(char *refparam, struct dmctx *ctx, void 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1","65535"}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1787,7 +1797,7 @@ static int set_rule_source_port(char *refparam, struct dmctx *ctx, void *data, c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1","65535"}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1813,7 +1823,7 @@ static int set_rule_source_port_range_max(char *refparam, struct dmctx *ctx, voi
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1","65535"}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:

@@ -545,7 +545,7 @@ static int set_RoutingRouter_Enable(char *refparam, struct dmctx *ctx, void *dat
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -595,7 +595,7 @@ static int set_router_ipv4forwarding_enable(char *refparam, struct dmctx *ctx, v
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -624,7 +624,7 @@ static int set_router_ipv4forwarding_destip(char *refparam, struct dmctx *ctx, v
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -645,7 +645,7 @@ static int set_router_ipv4forwarding_destmask(char *refparam, struct dmctx *ctx,
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -673,7 +673,7 @@ static int set_router_ipv4forwarding_forwarding_policy(char *refparam, struct dm
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 				return FAULT_9007;
 
 			uci_path_foreach_sections(bbfdm, "dmmap_routing", "router", s) {
@@ -684,6 +684,7 @@ static int set_router_ipv4forwarding_forwarding_policy(char *refparam, struct dm
 					return 0;
 			}
 
+			bbfdm_set_fault_message(ctx, "Route table '%s' value doesn't exist on the device. It's only allowed to set an available route table.");
 			return FAULT_9007;
 		case VALUESET:
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "table", value);
@@ -723,7 +724,7 @@ static int set_router_ipv4forwarding_gatewayip(char *refparam, struct dmctx *ctx
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -749,7 +750,7 @@ static int set_RoutingRouterForwarding_Interface(char *refparam, struct dmctx *c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -775,7 +776,7 @@ static int set_router_ipv4forwarding_metric(char *refparam, struct dmctx *ctx, v
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -804,7 +805,7 @@ static int set_RoutingRouterIPv6Forwarding_Enable(char *refparam, struct dmctx *
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -833,7 +834,7 @@ static int set_RoutingRouterIPv6Forwarding_DestIPPrefix(char *refparam, struct d
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 49, NULL, IPv6Prefix))
+			if (bbfdm_validate_string(ctx, value, -1, 49, NULL, IPv6Prefix))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -855,7 +856,7 @@ static int set_RoutingRouterIPv6Forwarding_ForwardingPolicy(char *refparam, stru
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 				return FAULT_9007;
 
 			uci_path_foreach_sections(bbfdm, "dmmap_routing", "router", s) {
@@ -866,6 +867,7 @@ static int set_RoutingRouterIPv6Forwarding_ForwardingPolicy(char *refparam, stru
 					return 0;
 			}
 
+			bbfdm_set_fault_message(ctx, "Route table '%s' value doesn't exist on the device. It's only allowed to set an available route table.");
 			return FAULT_9007;
 		case VALUESET:
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "table", value);
@@ -888,7 +890,7 @@ static int set_RoutingRouterIPv6Forwarding_NextHop(char *refparam, struct dmctx 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, IPv6Address))
+			if (bbfdm_validate_string(ctx, value, -1, 45, NULL, IPv6Address))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -915,7 +917,7 @@ static int set_RoutingRouterIPv6Forwarding_ForwardingMetric(char *refparam, stru
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -941,7 +943,7 @@ static int set_RoutingRouteInformation_Enable(char *refparam, struct dmctx *ctx,
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1073,7 +1075,7 @@ static int set_RoutingRouter_Alias(char *refparam, struct dmctx *ctx, void *data
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1106,7 +1108,7 @@ static int set_router_ipv4forwarding_alias(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1144,7 +1146,7 @@ static int set_RoutingRouterIPv6Forwarding_Alias(char *refparam, struct dmctx *c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1194,8 +1196,10 @@ static int delete_router(char *refparam, struct dmctx *ctx, void *data, char *in
 	switch (del_action) {
 		case DEL_INST:
 			dmuci_get_value_by_section_string((struct uci_section *)data, "rt_table", &rt_table);
-			if(DM_LSTRCMP(rt_table, "254") == 0)
-				break;
+			if(DM_LSTRCMP(rt_table, "254") == 0) {
+				bbfdm_set_fault_message(ctx, "It's not allowed to delete the main '254' routing table.");
+				return FAULT_9003;
+			}
 
 			uci_foreach_sections("network", "interface", s) {
 				char *curr_rt_table = NULL;
@@ -1208,6 +1212,7 @@ static int delete_router(char *refparam, struct dmctx *ctx, void *data, char *in
 			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
 			break;
 		case DEL_ALL:
+			bbfdm_set_fault_message(ctx, "It's not allowed to delete all routing tables since there are some routing tables defined by the system '/etc/iproute2/rt_tables'.");
 			return FAULT_9005;
 		}
 	return 0;
@@ -1241,8 +1246,10 @@ static int delete_ipv4forwarding(char *refparam, struct dmctx *ctx, void *data, 
 	switch (del_action) {
 		case DEL_INST:
 			// Return 9008 error if the removed route is dynamic
-			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC) {
+				bbfdm_set_fault_message(ctx, "This is a dynamic 'route' instance, therefore it's not permitted to delete it.");
 				return FAULT_9008;
+			}
 
 			// Remove dmmap section
 			get_dmmap_section_of_config_section("dmmap_routing", "route", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
@@ -1297,8 +1304,10 @@ static int delete_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, 
 	switch (del_action) {
 		case DEL_INST:
 			// Return 9008 error if the removed route6 is dynamic
-			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC) {
+				bbfdm_set_fault_message(ctx, "This is a dynamic 'route' instance, therefore it's not permitted to delete it.");
 				return FAULT_9008;
+			}
 
 			// Remove dmmap section
 			get_dmmap_section_of_config_section("dmmap_routing", "route6", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);

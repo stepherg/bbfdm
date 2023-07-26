@@ -120,7 +120,7 @@ typedef struct dm_leaf_s {
 	int (*getvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 	int (*setvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
 	int bbfdm_type;
-	char version[10]; //To be removed
+	char version[10] __attribute__((deprecated));
 	char *default_value;
 } DMLEAF;
 
@@ -139,7 +139,7 @@ typedef struct dm_obj_s {
 	int (*get_linker)(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker);
 	int bbfdm_type;
 	const char **unique_keys;
-	char version[10]; //To be removed later
+	char version[10] __attribute__((deprecated));
 } DMOBJ;
 
 struct dm_parameter {
@@ -180,6 +180,7 @@ struct dmctx {
 	bool nextlevel;
 	bool iswildcard;
 	int faultcode;
+	char fault_msg[256];
 	int setaction;
 	char *in_param;
 	char *in_value;
@@ -410,11 +411,15 @@ struct range_args {
 	const char *max;
 };
 
-struct dmmap_dup
-{
+struct dmmap_dup {
 	struct list_head list;
 	struct uci_section *config_section;
 	struct uci_section *dmmap_section;
+};
+
+struct dm_fault {
+	int code;
+	char *description;
 };
 
 #endif //__DMAPI_H__

@@ -58,7 +58,7 @@ static int bbfdm_dm_operate(bbfdm_data_t *data)
 		}
 	} else {
 		blobmsg_add_u32(&data->bb, "fault", fault);
-		bb_add_string(&data->bb, "fault_msg", "");
+		bb_add_string(&data->bb, "fault_msg", data->bbf_ctx.fault_msg);
 	}
 
 	blobmsg_close_table(&data->bb, global_table);

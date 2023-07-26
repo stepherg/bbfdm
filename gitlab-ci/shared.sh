@@ -39,8 +39,13 @@ function exec_cmd_verbose()
 function install_libusermngr()
 {
 	# clone and compile libusermngr
-	rm -rf /opt/dev/usermngr
-	exec_cmd git clone -b devel https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/usermngr.git /opt/dev/usermngr
+	[ -d "/opt/dev/usermngr" ] && rm -rf /opt/dev/usermngr
+	
+	if [ -n "${USERMNGR_BRANCH}" ]; then
+		exec_cmd git clone -b ${USERMNGR_BRANCH} https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/usermngr.git /opt/dev/usermngr
+	else
+		exec_cmd git clone -b devel https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/usermngr.git /opt/dev/usermngr
+	fi
 
 	echo "Compiling libusermngr"
 	exec_cmd_verbose make clean -C /opt/dev/usermngr/src/
@@ -109,8 +114,13 @@ function install_libwifi_dataelements()
 function install_libperiodicstats()
 {
 	# clone and compile libperiodicstats
-	rm -rf /opt/dev/periodicstats
-	exec_cmd git clone -b devel https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/periodicstats.git /opt/dev/periodicstats
+	[ -d "/opt/dev/periodicstats" ] && rm -rf /opt/dev/periodicstats
+
+	if [ -n "${PERIODICSTATS_BRANCH}" ]; then
+		exec_cmd git clone -b ${PERIODICSTATS_BRANCH} https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/periodicstats.git /opt/dev/periodicstats
+	else
+		exec_cmd git clone -b devel https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/periodicstats.git /opt/dev/periodicstats
+	fi
 
 	echo "Compiling libperiodicstats"
 	exec_cmd_verbose make clean -C /opt/dev/periodicstats/
@@ -125,8 +135,13 @@ function install_libperiodicstats()
 function install_libcwmpdm()
 {
 	# clone and compile libcwmpdm
-	rm -rf /opt/dev/icwmp
-	exec_cmd git clone -b devel --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
+	[ -d "/opt/dev/icwmp" ] && rm -rf /opt/dev/icwmp
+
+	if [ -n "${ICWMP_BRANCH}" ]; then
+		exec_cmd git clone -b ${ICWMP_BRANCH} --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
+	else
+		exec_cmd git clone -b devel --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/icwmp.git /opt/dev/icwmp
+	fi
 
 	echo "Compiling libcwmpdm"
 	cd /opt/dev/icwmp

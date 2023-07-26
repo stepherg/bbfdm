@@ -409,7 +409,7 @@ static int set_HostsAccessControl_Alias(char *refparam, struct dmctx *ctx, void 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -429,7 +429,7 @@ static int set_HostsAccessControl_PhysAddress(char *refparam, struct dmctx *ctx,
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -449,7 +449,7 @@ static int set_HostsAccessControl_HostName(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -471,7 +471,7 @@ static int set_HostsAccessControl_Enable(char *refparam, struct dmctx *ctx, void
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -492,7 +492,7 @@ static int set_HostsAccessControl_AccessPolicy(char *refparam, struct dmctx *ctx
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, AccessPolicy, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, AccessPolicy, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -521,7 +521,7 @@ static int set_HostsAccessControlSchedule_Alias(char *refparam, struct dmctx *ct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -543,7 +543,7 @@ static int set_HostsAccessControlSchedule_Enable(char *refparam, struct dmctx *c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -591,7 +591,7 @@ static int set_HostsAccessControlSchedule_Day(char *refparam, struct dmctx *ctx,
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, Day, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, -1, Day, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -613,7 +613,7 @@ static int set_HostsAccessControlSchedule_StartTime(char *refparam, struct dmctx
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 5, NULL, StartTime))
+			if (bbfdm_validate_string(ctx, value, -1, 5, NULL, StartTime))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -633,7 +633,7 @@ static int set_HostsAccessControlSchedule_Duration(char *refparam, struct dmctx 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:

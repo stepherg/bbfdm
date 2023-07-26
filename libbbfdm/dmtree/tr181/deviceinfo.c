@@ -617,7 +617,7 @@ static int set_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -732,7 +732,7 @@ static int set_device_provisioningcode(char *refparam, struct dmctx *ctx, void *
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -855,7 +855,7 @@ static int set_vcf_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -877,7 +877,7 @@ static int set_vlf_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -931,7 +931,7 @@ static int set_DeviceInfoProcessor_Alias(char *refparam, struct dmctx *ctx, void
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -983,7 +983,7 @@ static int set_DeviceInfoSupportedDataModel_Alias(char *refparam, struct dmctx *
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1043,7 +1043,7 @@ static int set_DeviceInfoFirmwareImage_Alias(char *refparam, struct dmctx *ctx, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1103,7 +1103,7 @@ static int set_DeviceInfoFirmwareImage_Available(char *refparam, struct dmctx *c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1471,16 +1471,16 @@ static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx
 		if (!DM_STRLEN(end_time[i]) || !DM_STRLEN(mode[i]))
 			return USP_FAULT_INVALID_ARGUMENT;
 
-		if (dm_validate_unsignedInt(start_time[i], RANGE_ARGS{{NULL,NULL}}, 1))
+		if (bbfdm_validate_unsignedInt(ctx, start_time[i], RANGE_ARGS{{NULL,NULL}}, 1))
 			return USP_FAULT_INVALID_ARGUMENT;
 
-		if (dm_validate_unsignedInt(end_time[i], RANGE_ARGS{{NULL,NULL}}, 1))
+		if (bbfdm_validate_unsignedInt(ctx, end_time[i], RANGE_ARGS{{NULL,NULL}}, 1))
 			return USP_FAULT_INVALID_ARGUMENT;
 
-		if (DM_STRLEN(max_retries[i]) && dm_validate_int(max_retries[i], RANGE_ARGS{{"-1","10"}}, 1))
+		if (DM_STRLEN(max_retries[i]) && bbfdm_validate_int(ctx, max_retries[i], RANGE_ARGS{{"-1","10"}}, 1))
 			return USP_FAULT_INVALID_ARGUMENT;
 
-		if (dm_validate_string(mode[i], -1, -1, FW_Mode, NULL))
+		if (bbfdm_validate_string(ctx, mode[i], -1, -1, FW_Mode, NULL))
 			return USP_FAULT_INVALID_ARGUMENT;
 
 		if (DM_STRTOL(start_time[i]) > DM_STRTOL(end_time[i]))

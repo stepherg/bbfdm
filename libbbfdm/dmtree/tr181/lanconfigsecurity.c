@@ -21,7 +21,7 @@ static int set_LANConfigSecurity_ConfigPassword(char *refparam, struct dmctx *ct
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 64, NULL, NULL))
+		if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:

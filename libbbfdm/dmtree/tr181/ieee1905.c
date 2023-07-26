@@ -499,7 +499,7 @@ static int set_IEEE1905ALInterface_SetIntfPowerStateEnabled(char *refparam, stru
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -522,7 +522,7 @@ static int set_IEEE1905ALInterface_PowerState(char *refparam, struct dmctx *ctx,
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, -1, PowerState, NULL))
+		if (bbfdm_validate_string(ctx, value, -1, -1, PowerState, NULL))
 		      return FAULT_9007;
 		break;
 	case VALUESET:
@@ -686,7 +686,7 @@ static int set_IEEE1905ALForwardingTable_SetForwardingEnabled(char *refparam, st
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -728,7 +728,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_InterfaceList(char *refpa
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string_list(value, -1, -1, -1, -1, 256, NULL, NULL))
+		if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, 256, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -749,7 +749,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress(cha
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 17, NULL, MACAddress))
+		if (bbfdm_validate_string(ctx, value, -1, 17, NULL, MACAddress))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -772,7 +772,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddressFlag
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -794,7 +794,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress(char *re
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, 17, NULL, MACAddress))
+		if (bbfdm_validate_string(ctx, value, -1, 17, NULL, MACAddress))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -817,7 +817,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag(char
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -839,7 +839,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_EtherType(char *refparam,
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+		if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -862,7 +862,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag(char *refpa
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -884,7 +884,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_Vid(char *refparam, struc
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","4095"}}, 1))
+		if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","4095"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -907,7 +907,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_VidFlag(char *refparam, s
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -929,7 +929,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_PCP(char *refparam, struc
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","7"}}, 1))
+		if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","7"}}, 1))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -952,7 +952,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_PCPFlag(char *refparam, s
 
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -973,7 +973,7 @@ static int set_IEEE1905ALNetworkTopology_Enable(char *refparam, struct dmctx *ct
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1002,7 +1002,7 @@ static int set_IEEE1905ALNetworkTopology_MaxChangeLogEntries(char *refparam, str
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1554,7 +1554,7 @@ static int set_IEEE1905ALSecurity_SetupMethod(char *refparam, struct dmctx *ctx,
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+		if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
@@ -1568,7 +1568,7 @@ static int set_IEEE1905ALSecurity_Password(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action) {
 	case VALUECHECK:
-		if (dm_validate_string(value, -1, -1, NULL, NULL))
+		if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:

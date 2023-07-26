@@ -90,7 +90,7 @@ static int set_x_test_com_dropbear_alias(char *refparam, struct dmctx *ctx, void
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -113,7 +113,7 @@ static int set_x_test_com_dropbear_password_auth(char *refparam, struct dmctx *c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -137,7 +137,7 @@ static int set_x_test_com_dropbear_root_password_auth(char *refparam, struct dmc
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -183,7 +183,7 @@ static int set_x_test_com_dropbear_root_login(char *refparam, struct dmctx *ctx,
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -206,7 +206,7 @@ static int set_x_test_com_dropbear_verbose(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -229,7 +229,7 @@ static int set_x_test_com_dropbear_gateway_ports(char *refparam, struct dmctx *c
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:

@@ -210,7 +210,7 @@ static int set_ppp_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -243,7 +243,7 @@ static int set_ppp_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -281,7 +281,7 @@ static int set_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *data,
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -398,7 +398,7 @@ static int set_ppp_username(char *refparam, struct dmctx *ctx, void *data, char 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -417,7 +417,7 @@ static int set_ppp_password(char *refparam, struct dmctx *ctx, void *data, char 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -502,7 +502,7 @@ static int set_PPPInterface_MaxMRUSize(char *refparam, struct dmctx *ctx, void *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"64","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"64","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -694,7 +694,7 @@ static int set_PPPInterface_IPCPEnable(char *refparam, struct dmctx *ctx, void *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -722,7 +722,7 @@ static int set_PPPInterface_IPv6CPEnable(char *refparam, struct dmctx *ctx, void
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1041,7 +1041,7 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1112,7 +1112,7 @@ static int set_PPPInterfacePPPoE_ACName(char *refparam, struct dmctx *ctx, void 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(ppp->iface_s ? ppp->iface_s : ppp->dmmap_s, "proto", &proto_intf);
@@ -1149,7 +1149,7 @@ static int set_PPPInterfacePPPoE_ServiceName(char *refparam, struct dmctx *ctx, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(ppp->iface_s ? ppp->iface_s : ppp->dmmap_s, "proto", &proto);

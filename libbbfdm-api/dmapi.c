@@ -178,72 +178,100 @@ void bbf_find_dmmap_section_by_option(char *dmmap_package, char *section_type, c
 	return get_dmmap_section_of_config_section_eq(dmmap_package, section_type, option_name, option_value, dmmap_section);
 }
 
-int bbf_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[])
+__attribute__ ((deprecated)) int bbf_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[])
 {
-	return dm_validate_string(value, min_length, max_length, enumeration, pattern);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_string(&ctx, value, min_length, max_length, enumeration, pattern);
 }
 
-int bbf_validate_boolean(char *value)
+__attribute__ ((deprecated)) int bbf_validate_boolean(char *value)
 {
-	return dm_validate_boolean(value);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_boolean(&ctx, value);
 }
 
-int bbf_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size)
+__attribute__ ((deprecated)) int bbf_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size)
 {
-	return dm_validate_unsignedInt(value, r_args, r_args_size);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_unsignedInt(&ctx, value, r_args, r_args_size);
 }
 
-int bbf_validate_int(char *value, struct range_args r_args[], int r_args_size)
+__attribute__ ((deprecated)) int bbf_validate_int(char *value, struct range_args r_args[], int r_args_size)
 {
-	return dm_validate_int(value, r_args, r_args_size);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_int(&ctx, value, r_args, r_args_size);
 }
 
-int bbf_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size)
+__attribute__ ((deprecated)) int bbf_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size)
 {
-	return dm_validate_unsignedLong(value, r_args, r_args_size);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_unsignedLong(&ctx, value, r_args, r_args_size);
 }
 
-int bbf_validate_long(char *value, struct range_args r_args[], int r_args_size)
+__attribute__ ((deprecated)) int bbf_validate_long(char *value, struct range_args r_args[], int r_args_size)
 {
-	return dm_validate_long(value, r_args, r_args_size);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_long(&ctx, value, r_args, r_args_size);
 }
 
-int bbf_validate_dateTime(char *value)
+__attribute__ ((deprecated)) int bbf_validate_dateTime(char *value)
 {
-	return dm_validate_dateTime(value);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_dateTime(&ctx, value);
 }
 
-int bbf_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size)
+__attribute__ ((deprecated)) int bbf_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size)
 {
-	return dm_validate_hexBinary(value, r_args, r_args_size);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_hexBinary(&ctx, value, r_args, r_args_size);
 }
 
-int bbf_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[])
+__attribute__ ((deprecated)) int bbf_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[])
 {
-	return dm_validate_string_list(value, min_item,max_item, max_size, min, max, enumeration, pattern);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_string_list(&ctx, value, min_item,max_item, max_size, min, max, enumeration, pattern);
 }
 
-int bbf_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+__attribute__ ((deprecated)) int bbf_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
-	return dm_validate_unsignedInt_list(value, min_item, max_item, max_size, r_args, r_args_size);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_unsignedInt_list(&ctx, value, min_item, max_item, max_size, r_args, r_args_size);
 }
 
-int bbf_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+__attribute__ ((deprecated)) int bbf_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
-	return dm_validate_int_list(value, min_item, max_item, max_size, r_args, r_args_size);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_int_list(&ctx, value, min_item, max_item, max_size, r_args, r_args_size);
 }
 
-int bbf_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+__attribute__ ((deprecated)) int bbf_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
-	return dm_validate_unsignedLong_list(value, min_item, max_item, max_size, r_args, r_args_size);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_unsignedLong_list(&ctx, value, min_item, max_item, max_size, r_args, r_args_size);
 }
 
-int bbf_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+__attribute__ ((deprecated)) int bbf_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
-	return dm_validate_long_list(value, min_item, max_item, max_size, r_args, r_args_size);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_long_list(&ctx, value, min_item, max_item, max_size, r_args, r_args_size);
 }
 
-int bbf_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+__attribute__ ((deprecated)) int bbf_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
-	return dm_validate_hexBinary_list(value, min_item, max_item, max_size, r_args, r_args_size);
+	struct dmctx ctx = {0};
+
+	return bbfdm_validate_hexBinary_list(&ctx, value, min_item, max_item, max_size, r_args, r_args_size);
 }

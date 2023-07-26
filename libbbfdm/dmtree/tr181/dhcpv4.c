@@ -1362,7 +1362,7 @@ static int set_DHCPv4ServerPool_Enable(char *refparam, struct dmctx *ctx, void *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1394,7 +1394,7 @@ static int set_DHCPv4ServerPool_Alias(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1414,7 +1414,7 @@ static int set_DHCPv4ServerPool_Order(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1438,7 +1438,7 @@ static int set_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -1477,7 +1477,7 @@ static int set_DHCPv4ServerPool_AllowedDevices(char *refparam, struct dmctx *ctx
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, allowed_devices, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, allowed_devices, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1520,7 +1520,7 @@ static int set_DHCPv4ServerPool_MinAddress(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1581,7 +1581,7 @@ static int set_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, vo
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1659,7 +1659,7 @@ static int set_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, 32, -1, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string_list(ctx, value, -1, 32, -1, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 
 			local_value = dmstrdup(value);
@@ -1734,7 +1734,7 @@ static int set_DHCPv4ServerPool_SubnetMask(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1758,7 +1758,7 @@ static int set_DHCPv4ServerPool_DNSServers(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, 4, -1, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string_list(ctx, value, -1, 4, -1, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1778,7 +1778,7 @@ static int set_DHCPv4ServerPool_DomainName(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1801,7 +1801,7 @@ static int set_DHCPv4ServerPool_IPRouters(char *refparam, struct dmctx *ctx, voi
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, 4, -1, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string_list(ctx, value, -1, 4, -1, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1847,7 +1847,7 @@ static int set_DHCPv4ServerPool_LeaseTime(char *refparam, struct dmctx *ctx, voi
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_int(value, RANGE_ARGS{{"-1",NULL}}, 1))
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1899,7 +1899,7 @@ static int set_DHCPv4ServerPoolStaticAddress_Enable(char *refparam, struct dmctx
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -1926,7 +1926,7 @@ static int set_DHCPv4ServerPoolStaticAddress_Alias(char *refparam, struct dmctx 
 	switch (action) {
 		case VALUECHECK:
 			// Validate value string -> length
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 
 			// Check if alias is assigned by user
@@ -1962,7 +1962,7 @@ static int set_DHCPv4ServerPoolStaticAddress_Chaddr(char *refparam, struct dmctx
 	switch (action) {
 		case VALUECHECK:
 			// Validate value string -> MAC Address
-			if (dm_validate_string(value, -1, 17, NULL, MACAddress))
+			if (bbfdm_validate_string(ctx, value, -1, 17, NULL, MACAddress))
 				return FAULT_9007;
 
 			// Check if mac exists
@@ -1993,7 +1993,7 @@ static int set_DHCPv4ServerPoolStaticAddress_Yiaddr(char *refparam, struct dmctx
 	switch (action) {
 		case VALUECHECK:
 			// Validate value string -> IPv4 Address
-			if (dm_validate_string(value, -1, 15, NULL, IPv4Address))
+			if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
 				return FAULT_9007;
 
 			// Check if ip address is out dhcp pool
@@ -2040,7 +2040,7 @@ static int set_DHCPv4ServerPoolClient_Alias(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2143,7 +2143,7 @@ static int set_DHCPv4Client_Enable(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 
 			if (dhcpv4_client->iface_s) {
@@ -2179,7 +2179,7 @@ static int set_DHCPv4Client_Alias(char *refparam, struct dmctx *ctx, void *data,
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2223,7 +2223,7 @@ static int set_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -2351,7 +2351,7 @@ static int set_DHCPv4Client_Renew(char *refparam, struct dmctx *ctx, void *data,
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2506,7 +2506,7 @@ static int set_DHCPv4ClientSentOption_Enable(char *refparam, struct dmctx *ctx, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2554,7 +2554,7 @@ static int set_DHCPv4ClientSentOption_Alias(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2579,7 +2579,7 @@ static int set_DHCPv4ClientSentOption_Tag(char *refparam, struct dmctx *ctx, voi
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","254"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","254"}}, 1))
 				return FAULT_9007;
 
 			if (dhcp_client_s->option_tag && DM_STRCMP(dhcp_client_s->option_tag, value) == 0)
@@ -2677,7 +2677,7 @@ static int set_DHCPv4ClientSentOption_Value(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{"0","255"}}, 1))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{"0","255"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2729,7 +2729,7 @@ static int set_DHCPv4ClientReqOption_Enable(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2765,7 +2765,7 @@ static int set_DHCPv4ClientReqOption_Alias(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2789,7 +2789,7 @@ static int set_DHCPv4ClientReqOption_Tag(char *refparam, struct dmctx *ctx, void
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","254"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","254"}}, 1))
 				return FAULT_9007;
 
 			if (dhcp_client_s->option_tag && DM_STRCMP(dhcp_client_s->option_tag, value) == 0)
@@ -2837,7 +2837,7 @@ static int set_DHCPv4Server_Enable(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -2886,7 +2886,7 @@ static int set_DHCPv4ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2927,7 +2927,7 @@ static int set_DHCPv4ServerPoolOption_Alias(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2951,7 +2951,7 @@ static int set_DHCPv4ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, voi
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","254"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","254"}}, 1))
 				return FAULT_9007;
 
 			if (dhcp_client_s->option_tag && DM_STRCMP(dhcp_client_s->option_tag, value) == 0)
@@ -3014,7 +3014,7 @@ static int set_DHCPv4ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{"0","255"}}, 1))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{"0","255"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3066,7 +3066,7 @@ static int set_DHCPv4Relay_Enable(char *refparam, struct dmctx *ctx, void *data,
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3112,7 +3112,7 @@ static int set_DHCPv4RelayForwarding_Enable(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -3145,7 +3145,7 @@ static int set_DHCPv4RelayForwarding_Alias(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3174,7 +3174,7 @@ static int set_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -3236,7 +3236,7 @@ static int set_DHCPv4RelayForwarding_VendorClassID(char *refparam, struct dmctx 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 255, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 255, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3277,7 +3277,7 @@ static int set_DHCPv4RelayForwarding_Chaddr(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 17, NULL, MACAddress))
+			if (bbfdm_validate_string(ctx, value, -1, 17, NULL, MACAddress))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3319,7 +3319,7 @@ static int set_DHCPv4RelayForwarding_UserClassID(char *refparam, struct dmctx *c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"255"}}, 1))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{NULL,"255"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:

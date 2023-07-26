@@ -435,7 +435,7 @@ static int set_client_enable(char *refparam, struct dmctx *ctx, void *data, char
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -453,7 +453,7 @@ static int set_dns_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 
 			// If peerdns = '1' then it is a dynamic dns and not allowed to disable it
@@ -484,7 +484,7 @@ static int set_server_alias(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -503,7 +503,7 @@ static int set_dns_server(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, IPAddress))
+			if (bbfdm_validate_string(ctx, value, -1, 45, NULL, IPAddress))
 				return FAULT_9007;
 
 			// If peerdns = '1' then it is a dynamic dns and not allowed to set this parameter
@@ -543,7 +543,7 @@ static int set_dns_interface(char *refparam, struct dmctx *ctx, void *data, char
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -590,7 +590,7 @@ static int set_relay_enable(char *refparam, struct dmctx *ctx, void *data, char 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -605,7 +605,7 @@ static int set_forwarding_alias(char *refparam, struct dmctx *ctx, void *data, c
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -619,7 +619,7 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, DiagnosticsState, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, DiagnosticsState, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -636,7 +636,7 @@ static int set_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, 
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -655,7 +655,7 @@ static int set_nslookupdiagnostics_host_name(char *refparam, struct dmctx *ctx, 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -670,7 +670,7 @@ static int set_nslookupdiagnostics_d_n_s_server(char *refparam, struct dmctx *ct
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -685,7 +685,7 @@ static int set_nslookupdiagnostics_timeout(char *refparam, struct dmctx *ctx, vo
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -700,7 +700,7 @@ static int set_nslookupdiagnostics_number_of_repetitions(char *refparam, struct 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -754,8 +754,11 @@ static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmc
 	int idx = 0;
 
 	char *hostname = dmjson_get_value((json_object *)value, 1, "HostName");
-	if (hostname[0] == '\0')
+	if (hostname[0] == '\0') {
+		bbfdm_set_fault_message(ctx, "NSLookupDiagnostics: 'HostName' input should be defined");
 		return USP_FAULT_INVALID_ARGUMENT;
+	}
+
 	char *interface = dmjson_get_value((json_object *)value, 1, "Interface");
 	char *dnsserver = dmjson_get_value((json_object *)value, 1, "DNSServer");
 	char *timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
@@ -773,8 +776,10 @@ static int operate_DNSDiagnostics_NSLookupDiagnostics(char *refparam, struct dmc
 			},
 			6, &res);
 
-	if (res == NULL)
+	if (res == NULL) {
+		bbfdm_set_fault_message(ctx, "NSLookupDiagnostics: ubus 'bbf.diag nslookup' method doesn't exist");
 		return USP_FAULT_COMMAND_FAILURE;
+	}
 
 	char *status = dmjson_get_value(res, 1, "Status");
 	char *success_count = dmjson_get_value(res, 1, "SuccessCount");

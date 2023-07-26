@@ -203,7 +203,7 @@ static int set_RouterAdvertisement_Enable(char *refparam, struct dmctx *ctx, voi
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -235,7 +235,7 @@ static int set_RouterAdvertisementInterfaceSetting_Enable(char *refparam, struct
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -266,7 +266,7 @@ static int set_RouterAdvertisementInterfaceSetting_Alias(char *refparam, struct 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -293,7 +293,7 @@ static int set_RouterAdvertisementInterfaceSetting_Interface(char *refparam, str
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -358,7 +358,7 @@ static int set_RouterAdvertisementInterfaceSetting_MaxRtrAdvInterval(char *refpa
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"4","1800"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"4","1800"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -379,7 +379,7 @@ static int set_RouterAdvertisementInterfaceSetting_MinRtrAdvInterval(char *refpa
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"3","1350"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"3","1350"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -400,7 +400,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvDefaultLifetime(char *refp
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -422,7 +422,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvManagedFlag(char *refparam
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -444,7 +444,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvOtherConfigFlag(char *refp
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -466,7 +466,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvMobileAgentFlag(char *refp
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -490,7 +490,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag(char *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, AdvPreferredRouterFlag, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, AdvPreferredRouterFlag, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -511,7 +511,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvLinkMTU(char *refparam, st
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -532,7 +532,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvReachableTime(char *refpar
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"3600000"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"3600000"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -553,7 +553,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvRetransTimer(char *refpara
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -574,7 +574,7 @@ static int set_RouterAdvertisementInterfaceSetting_AdvCurHopLimit(char *refparam
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"255"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,"255"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -604,7 +604,7 @@ static int set_RouterAdvertisementInterfaceSettingOption_Enable(char *refparam, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -626,7 +626,7 @@ static int set_RouterAdvertisementInterfaceSettingOption_Alias(char *refparam, s
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -646,7 +646,7 @@ static int set_RouterAdvertisementInterfaceSettingOption_Tag(char *refparam, str
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -675,7 +675,7 @@ static int set_RouterAdvertisementInterfaceSettingOption_Value(char *refparam, s
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{"0","65535"}}, 1))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:

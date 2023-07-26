@@ -174,7 +174,7 @@ static int set_atm_destination_address(char *refparam, struct dmctx *ctx, void *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, DestinationAddress))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, DestinationAddress))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -212,7 +212,7 @@ static int set_atm_encapsulation(char *refparam, struct dmctx *ctx, void *data, 
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, Encapsulation, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Encapsulation, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -245,7 +245,7 @@ static int set_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, LinkType, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, LinkType, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -348,7 +348,7 @@ static int set_atm_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -378,7 +378,7 @@ static int set_atm_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:

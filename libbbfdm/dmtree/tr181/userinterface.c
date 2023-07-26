@@ -342,7 +342,7 @@ static int set_ui_enable(char *refparam, struct dmctx *ctx, void *data, char *in
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -379,7 +379,7 @@ static int set_http_access_enable(char *refparam, struct dmctx *ctx, void *data,
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 
 			// check if same as current value
@@ -433,7 +433,7 @@ static int set_http_access_alias(char *refparam, struct dmctx *ctx, void *data, 
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -460,7 +460,7 @@ static int set_http_access_type(char *refparam, struct dmctx *ctx, void *data, c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, allowed_values, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, allowed_values, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -495,7 +495,7 @@ static int set_http_access_interface(char *refparam, struct dmctx *ctx, void *da
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -530,7 +530,7 @@ static int set_http_access_port(char *refparam, struct dmctx *ctx, void *data, c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1","65535"}},1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1","65535"}},1))
 				return FAULT_9007;
 
 			// check if same as current value
@@ -632,7 +632,7 @@ static int set_http_access_hosts(char *refparam, struct dmctx *ctx, void *data, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -699,7 +699,7 @@ static int set_http_access_path(char *refparam, struct dmctx *ctx, void *data, c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

@@ -488,7 +488,7 @@ static int set_DHCPv6Client_Enable(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action)	{
 	case VALUECHECK:
-		if (dm_validate_boolean(value))
+		if (bbfdm_validate_boolean(ctx, value))
 			return FAULT_9007;
 		return 0;
 	case VALUESET:
@@ -513,7 +513,7 @@ static int set_DHCPv6Client_Alias(char *refparam, struct dmctx *ctx, void *data,
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -556,7 +556,7 @@ static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -647,7 +647,7 @@ static int set_DHCPv6Client_RequestAddresses(char *refparam, struct dmctx *ctx, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -678,7 +678,7 @@ static int set_DHCPv6Client_RequestPrefixes(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -704,7 +704,7 @@ static int set_DHCPv6Client_Renew(char *refparam, struct dmctx *ctx, void *data,
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -734,7 +734,7 @@ static int set_DHCPv6Client_RequestedOptions(char *refparam, struct dmctx *ctx, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt_list(value, -1, -1, -1, RANGE_ARGS{{NULL,NULL}}, 1))
+			if (bbfdm_validate_unsignedInt_list(ctx, value, -1, -1, -1, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -762,7 +762,7 @@ static int set_DHCPv6Server_Enable(char *refparam, struct dmctx *ctx, void *data
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -794,7 +794,7 @@ static int set_DHCPv6ServerPool_Enable(char *refparam, struct dmctx *ctx, void *
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -826,7 +826,7 @@ static int set_DHCPv6ServerPool_Alias(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -846,7 +846,7 @@ static int set_DHCPv6ServerPool_Order(char *refparam, struct dmctx *ctx, void *d
 {
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"1",NULL}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"1",NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -870,7 +870,7 @@ static int set_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
@@ -907,7 +907,7 @@ static int set_DHCPv6ServerPool_VendorClassID(char *refparam, struct dmctx *ctx,
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -946,7 +946,7 @@ static int set_DHCPv6ServerPool_UserClassID(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{NULL,"65535"}}, 1))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{NULL,"65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -978,7 +978,7 @@ static int set_DHCPv6ServerPool_SourceAddress(char *refparam, struct dmctx *ctx,
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, IPv6Address))
+			if (bbfdm_validate_string(ctx, value, -1, 45, NULL, IPv6Address))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1002,7 +1002,7 @@ static int set_DHCPv6ServerPool_SourceAddressMask(char *refparam, struct dmctx *
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 45, NULL, IPv6Address))
+			if (bbfdm_validate_string(ctx, value, -1, 45, NULL, IPv6Address))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1050,7 +1050,7 @@ static int set_DHCPv6ServerPoolClient_Alias(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1165,7 +1165,7 @@ static int set_DHCPv6ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_boolean(value))
+			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1207,7 +1207,7 @@ static int set_DHCPv6ServerPoolOption_Alias(char *refparam, struct dmctx *ctx, v
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_string(value, -1, 64, NULL, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1231,7 +1231,7 @@ static int set_DHCPv6ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, voi
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{"0","65535"}}, 1))
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
 				return FAULT_9007;
 
 			if (dhcpv6_client_s->option_tag && DM_STRCMP(dhcpv6_client_s->option_tag, value) == 0)
@@ -1294,7 +1294,7 @@ static int set_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 
 	switch (action)	{
 		case VALUECHECK:
-			if (dm_validate_hexBinary(value, RANGE_ARGS{{"0","65535"}}, 1))
+			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
