@@ -29,7 +29,7 @@ In the above uci, loglevel can have below value:
 |  3      | Log everything except debug              |
 |  4      | Everything will be logged                |
 
-For more info on the `bbfdmd` UCI configuration visit [uci documentation](../docs/api/uci/bbfdm.md) OR [raw uci schema](../../schemas/uci/bbfdm.json)
+For more info on the `bbfdmd` UCI configuration visit [uci documentation](../api/uci/bbfdm.md) OR [raw uci schema](../../schemas/uci/bbfdm.json)
 
 ## Concepts and Workflow
 
@@ -164,10 +164,10 @@ $ bbfdmd -c set "parameter" "value"
 
 
 ## Important topics
-* [UBUS methods](../docs/guide/bbfdm_ubus_methods.md)
-* [UBUS Errors](../docs/guide/bbfdm_ubus_errors.md)
-* [Parallel UBUS call](../docs/guide/bbfdm_ubus_parallel_call.md)
-* [Third party datamodel integration](../docs/guide/bbfdm_dm_integration.md)
+* [UBUS methods](../guide/bbfdm_ubus_methods.md)
+* [UBUS Errors](../guide/bbfdm_ubus_errors.md)
+* [Parallel UBUS call](../guide/bbfdm_ubus_parallel_call.md)
+* [Third party datamodel integration](../guide/bbfdm_dm_integration.md)
 
 
 ## Dependencies
