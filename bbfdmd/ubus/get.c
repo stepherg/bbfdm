@@ -73,8 +73,9 @@ static bool get_base_path(const char *query_path, char *base_path)
 			}
 			break;
 		case '*':
-			if (query_path[i - 1] != '.' &&
-			    query_path[i + 1] != '.')
+			if (query_path[i - 1] != '.' ||
+			    query_path[i + 1] != '.' ||
+				query_path[i + 2] == 0)
 				return false;
 			found = true;
 			break;
