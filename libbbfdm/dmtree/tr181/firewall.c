@@ -476,10 +476,7 @@ static int get_firewall_chain_number_of_entries(char *refparam, struct dmctx *ct
 
 static int get_level_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "firewall_level_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-    return 0;
+	return bbf_get_alias(ctx, (struct uci_section *)data, "firewall_level_alias", instance, value);
 }
 
 static int get_level_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -562,10 +559,7 @@ static int get_chain_enable(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int get_chain_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "firewall_chain_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-    return 0;
+	return bbf_get_alias(ctx, (struct uci_section *)data, "firewall_chain_alias", instance, value);
 }
 
 static int get_chain_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1210,16 +1204,7 @@ static int set_firewall_advanced_level(char *refparam, struct dmctx *ctx, void *
 
 static int set_level_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section_bbfdm((struct uci_section *)data, "firewall_level_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (struct uci_section *)data, "firewall_level_alias", instance, value);
 }
 
 static int set_level_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -1345,16 +1330,7 @@ static int set_chain_enable(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int set_chain_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section_bbfdm((struct uci_section *)data, "firewall_chain_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (struct uci_section *)data, "firewall_chain_alias", instance, value);
 }
 
 static int set_chain_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -1429,16 +1405,7 @@ static int set_rule_order(char *refparam, struct dmctx *ctx, void *data, char *i
 
 static int set_rule_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct rule_sec *)data)->dmmap_section, "firewall_chain_rule_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct rule_sec *)data)->dmmap_section, "firewall_chain_rule_alias", instance, value);
 }
 
 static int set_rule_description(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)

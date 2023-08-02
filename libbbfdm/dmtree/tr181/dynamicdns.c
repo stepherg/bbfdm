@@ -503,24 +503,12 @@ static int get_DynamicDNSClient_Status(char *refparam, struct dmctx *ctx, void *
 /*#Device.DynamicDNS.Client.{i}.Alias!UCI:dmmap_ddns/service,@i-1/clientalias*/
 static int get_DynamicDNSClient_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "client_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "client_alias", instance, value);
 }
 
 static int set_DynamicDNSClient_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "client_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "client_alias", instance, value);
 }
 
 static int get_DynamicDNSClient_LastError(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -875,24 +863,12 @@ static int set_DynamicDNSServer_Name(char *refparam, struct dmctx *ctx, void *da
 
 static int get_DynamicDNSServer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "server_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (struct uci_section *)data, "server_alias", instance, value);
 }
 
 static int set_DynamicDNSServer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "server_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (struct uci_section *)data, "server_alias", instance, value);
 }
 
 static int get_DynamicDNSServer_ServiceName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

@@ -251,9 +251,12 @@ static void resolve_all_symbols(struct dmctx *ctx, void *data, char *instance, c
 
 	for (pch = strtok_r(buf_key, ".", &pchr); pch != NULL; pch = strtok_r(NULL, ".", &pchr)) {
 
-		if (strcmp(pch, "@Name") == 0)
-			pos += snprintf(&new_key[pos], key_len - pos, "%s.", data ? section_name((struct uci_section *)data) : "");
-		else if (strcmp(pch, "@Value") == 0)
+		if (strcmp(pch, "@Name") == 0) {
+			char *sec_name = NULL;
+
+			dmuci_get_section_name(section_name((struct uci_section *)data), &sec_name);
+			pos += snprintf(&new_key[pos], key_len - pos, "%s.", sec_name ? sec_name : "");
+		} else if (strcmp(pch, "@Value") == 0)
 			pos += snprintf(&new_key[pos], key_len - pos, "%s.", value);
 		else if (strcmp(pch, (json_version == JSON_VERSION_1) ? "@index" : "@i-1") == 0)
 			pos += snprintf(&new_key[pos], key_len - pos, "%ld.", instance ? DM_STRTOL(instance)-1 : 1);
@@ -672,7 +675,7 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 
 	if (data && file && type && opt_temp) {
 		if (strcmp(opt_temp, "@Name") == 0) {
-			dmasprintf(&value, "%s", section_name((struct uci_section *)data));
+			dmuci_get_section_name(section_name((struct uci_section *)data), &value);
 		} else {
 			char uci_type[32] = {0};
 
@@ -813,7 +816,7 @@ static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct d
 
 	if (key) {
 		if (strcmp(json_object_get_string(key), "@Name") == 0) {
-			dmasprintf(&value, "%s", section_name((struct uci_section *)data));
+			dmuci_get_section_name(section_name((struct uci_section *)data), &value);
 		} else {
 			dmuci_get_value_by_section_string((struct uci_section *)data, json_object_get_string(key), &value);
 		}
@@ -1315,18 +1318,22 @@ static int uci_set_value(json_object *mapping_obj, int json_version, char *refpa
 
 		if (strcmp(opt_temp, "@Name") == 0) {
 			struct uci_section *dmmap_section = NULL;
+			char sec_name[256] = {0};
 			char buf[64] = {0};
+
+			if (dmuci_set_section_name(value, sec_name, sizeof(sec_name)))
+				return -1;
 
 			snprintf(buf, sizeof(buf), "dmmap_%s", json_object_get_string(file));
 			get_dmmap_section_of_config_section(buf, json_object_get_string(type), section_name((struct uci_section *)data), &dmmap_section);
 			if (!dmmap_section)
 				return -1;
 
-			if (dmuci_set_value_by_section(dmmap_section, "section_name", value))
+			if (dmuci_set_value_by_section(dmmap_section, "section_name", sec_name))
 				return -1;
 
-			if ((res = dmuci_rename_section_by_section((struct uci_section *)data, value)))
-				res = dmuci_rename_section(json_object_get_string(file), uci_type, value);
+			if ((res = dmuci_rename_section_by_section((struct uci_section *)data, sec_name)))
+				res = dmuci_rename_section(json_object_get_string(file), uci_type, sec_name);
 
 			return res;
 		}

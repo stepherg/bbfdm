@@ -852,24 +852,12 @@ static int get_EthernetLink_Status(char *refparam, struct dmctx *ctx, void *data
 
 static int get_EthernetLink_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "link_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (struct uci_section *)data, "link_alias", instance, value);
 }
 
 static int set_EthernetLink_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "link_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (struct uci_section *)data, "link_alias", instance, value);
 }
 
 static int get_EthernetLink_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1223,24 +1211,12 @@ static int get_EthernetVLANTermination_Status(char *refparam, struct dmctx *ctx,
 /*#Device.Ethernet.VLANTermination.{i}.Alias!UCI:dmmap_network/device,@i-1/vlan_term_alias*/
 static int get_EthernetVLANTermination_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "vlan_term_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "vlan_term_alias", instance, value);
 }
 
 static int set_EthernetVLANTermination_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "vlan_term_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "vlan_term_alias", instance, value);
 }
 
 static int get_EthernetVLANTermination_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1581,24 +1557,12 @@ static int get_EthernetRMONStats_Status(char *refparam, struct dmctx *ctx, void 
 /*#Device.Ethernet.RMONStats.{i}.Alias!UCI:dmmap_eth_rmon/ethport,@i-1/eth_rmon_alias*/
 static int get_EthernetRMONStats_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct eth_rmon_args *)data)->sections)->dmmap_section, "eth_rmon_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (((struct eth_rmon_args *)data)->sections)->dmmap_section, "eth_rmon_alias", instance, value);
 }
 
 static int set_EthernetRMONStats_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((((struct eth_rmon_args *)data)->sections)->dmmap_section, "eth_rmon_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (((struct eth_rmon_args *)data)->sections)->dmmap_section, "eth_rmon_alias", instance, value);
 }
 
 /*#Device.Ethernet.RMONStats.{i}.Name!UCI:ports/ethport,@i-1/ifname*/

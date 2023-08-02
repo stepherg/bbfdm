@@ -457,26 +457,12 @@ static int get_USBInterface_Status(char *refparam, struct dmctx *ctx, void *data
 
 static int get_USBInterface_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct usb_interface *usbiface= (struct usb_interface *)data;
-	dmuci_get_value_by_section_string(usbiface->dm_usb_iface, "usb_iface_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct usb_interface *)data)->dm_usb_iface, "usb_iface_alias", instance, value);
 }
 
 static int set_USBInterface_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct usb_interface *usbiface= (struct usb_interface *)data;
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section_bbfdm(usbiface->dm_usb_iface, "usb_iface_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct usb_interface *)data)->dm_usb_iface, "usb_iface_alias", instance, value);
 }
 
 static int get_USBInterface_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -564,26 +550,12 @@ static int get_USBInterfaceStats_MulticastPacketsReceived(char *refparam, struct
 
 static int get_USBPort_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct usb_port* port=(struct usb_port *)data;
-	dmuci_get_value_by_section_string(port->dm_usb_port, "usb_port_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct usb_port *)data)->dm_usb_port, "usb_port_alias", instance, value);
 }
 
 static int set_USBPort_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct usb_port* port = (struct usb_port *)data;
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(port->dm_usb_port, "usb_port_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct usb_port *)data)->dm_usb_port, "usb_port_alias", instance, value);
 }
 
 static int get_USBPort_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -660,26 +632,12 @@ static int get_USBUSBHosts_HostNumberOfEntries(char *refparam, struct dmctx *ctx
 
 static int get_USBUSBHostsHost_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct usb_port* port=(struct usb_port *)data;
-	dmuci_get_value_by_section_string(port->dm_usb_port, "usb_host_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct usb_port *)data)->dm_usb_port, "usb_host_alias", instance, value);
 }
 
 static int set_USBUSBHostsHost_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct usb_port* port=(struct usb_port *)data;
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(port->dm_usb_port, "usb_host_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct usb_port *)data)->dm_usb_port, "usb_host_alias", instance, value);
 }
 
 static int get_USBUSBHostsHost_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

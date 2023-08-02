@@ -2235,24 +2235,12 @@ static int get_WiFiEndPoint_Status(char *refparam, struct dmctx *ctx, void *data
 /*#Device.WiFi.EndPoint.{i}.Alias!UCI:dmmap_wireless/wifi-iface,@i-1/endpointalias*/
 static int get_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_enp_args *)data)->sections)->dmmap_section, "endpointalias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (((struct wifi_enp_args *)data)->sections)->dmmap_section, "endpointalias", instance, value);
 }
 
 static int set_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_enp_args *)data)->sections)->dmmap_section, "endpointalias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (((struct wifi_enp_args *)data)->sections)->dmmap_section, "endpointalias", instance, value);
 }
 
 static int get_WiFiEndPoint_SSIDReference(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -2633,70 +2621,34 @@ static int get_WiFiEndPointWPS_Status(char *refparam, struct dmctx *ctx, void *d
 /*#Device.WiFi.Radio.{i}.Alias!UCI:dmmap_wireless/wifi-device,@i-1/radioalias*/
 static int get_radio_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->dmmap_section, "radioalias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (((struct wifi_radio_args *)data)->sections)->dmmap_section, "radioalias", instance, value);
 }
 
 static int set_radio_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->dmmap_section, "radioalias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (((struct wifi_radio_args *)data)->sections)->dmmap_section, "radioalias", instance, value);
 }
 
 /*#Device.WiFi.SSID.{i}.Alias!UCI:dmmap_wireless/wifi-iface,@i-1/ssidalias*/
 static int get_ssid_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "ssid_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct wifi_ssid_args *)data)->dmmap_s, "ssid_alias", instance, value);
 }
 
 static int set_ssid_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->dmmap_s, "ssid_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct wifi_ssid_args *)data)->dmmap_s, "ssid_alias", instance, value);
 }
 
 /*#Device.WiFi.AccessPoint.{i}.Alias!UCI:dmmap_wireless/wifi-iface,@i-1/ap_alias*/
 static int get_access_point_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->dmmap_section, "ap_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (((struct wifi_acp_args *)data)->sections)->dmmap_section, "ap_alias", instance, value);
 }
 
 static int set_access_point_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->dmmap_section, "ap_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (((struct wifi_acp_args *)data)->sections)->dmmap_section, "ap_alias", instance, value);
 }
 
 static int get_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

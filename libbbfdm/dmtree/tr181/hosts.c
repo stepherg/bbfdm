@@ -399,24 +399,12 @@ static int get_HostsHostWANStats_PacketsReceived(char *refparam, struct dmctx *c
 
 static int get_HostsAccessControl_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "access_control_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "access_control_alias", instance, value);
 }
 
 static int set_HostsAccessControl_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "access_control_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "access_control_alias", instance, value);
 }
 
 static int get_HostsAccessControl_PhysAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -511,24 +499,12 @@ static int get_HostsAccessControl_ScheduleNumberOfEntries(char *refparam, struct
 
 static int get_HostsAccessControlSchedule_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "schedule_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "schedule_alias", instance, value);
 }
 
 static int set_HostsAccessControlSchedule_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "schedule_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "schedule_alias", instance, value);
 }
 
 static int get_HostsAccessControlSchedule_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

@@ -233,24 +233,12 @@ static int get_PPPInterface_Status(char *refparam, struct dmctx *ctx, void *data
 /*#Device.PPP.Interface.{i}.Alias!UCI:dmmap_network/interface,@i-1/ppp_int_alias*/
 static int get_ppp_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct ppp_args *)data)->dmmap_s, "ppp_int_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct ppp_args *)data)->dmmap_s, "ppp_int_alias", instance, value);
 }
 
 static int set_ppp_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct ppp_args *)data)->dmmap_s, "ppp_int_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct ppp_args *)data)->dmmap_s, "ppp_int_alias", instance, value);
 }
 
 /*#Device.PPP.Interface.{i}.LastChange!UBUS:network.interface/status/interface,@Name/uptime*/

@@ -666,24 +666,12 @@ static int set_QoSClassification_SourceMask(char *refparam, struct dmctx *ctx, v
 
 static int get_QoSClassification_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "classify_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "classify_alias", instance, value);
 }
 
 static int set_QoSClassification_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-	case VALUECHECK:
-		if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-			return FAULT_9007;
-		break;
-	case VALUESET:
-		dmuci_set_value_by_section_bbfdm(((struct dmmap_dup *)data)->dmmap_section, "classify_alias", value);
-		break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "classify_alias", instance, value);
 }
 
 static int get_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1347,24 +1335,12 @@ static int get_QoSPolicer_Status(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "policeralias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "policeralias", instance, value);
 }
 
 static int set_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section_bbfdm(((struct dmmap_dup *)data)->dmmap_section, "policeralias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "policeralias", instance, value);
 }
 
 static int get_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1536,24 +1512,12 @@ static int get_QoSQueue_Status(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_QoSQueue_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "queuealias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "queuealias", instance, value);
 }
 
 static int set_QoSQueue_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section_bbfdm(((struct dmmap_dup *)data)->dmmap_section, "queuealias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "queuealias", instance, value);
 }
 
 static int get_QoSQueue_TrafficClasses(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1720,24 +1684,12 @@ static int get_QoSQueueStats_Status(char *refparam, struct dmctx *ctx, void *dat
 
 static int get_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (struct uci_section *)data, "alias", instance, value);
 }
 
 static int set_QoSQueueStats_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (struct uci_section *)data, "alias", instance, value);
 }
 
 static int get_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1883,24 +1835,12 @@ static int get_QoSShaper_Status(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_QoSShaper_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "shaperalias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "shaperalias", instance, value);
 }
 
 static int set_QoSShaper_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section_bbfdm(((struct dmmap_dup *)data)->dmmap_section, "shaperalias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "shaperalias", instance, value);
 }
 
 static int get_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

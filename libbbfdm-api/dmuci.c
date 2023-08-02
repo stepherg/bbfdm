@@ -580,9 +580,6 @@ int dmuci_rename_section(char *package, char *section, char *value)
 {
 	struct uci_ptr ptr = {0};
 
-	if (special_char_exits(value))
-		return -1;
-
 	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, NULL, value))
 		return -1;
 
@@ -778,9 +775,6 @@ int dmuci_rename_section_by_section(struct uci_section *s, char *value)
 {
 	struct uci_ptr up = {0};
 
-	if (special_char_exits(value))
-		return -1;
-
 	if (dmuci_lookup_ptr_by_section(uci_ctx, &up, s, NULL, value) == -1)
 		return -1;
 
@@ -934,4 +928,46 @@ bool dmuci_string_to_boolean(char *value)
 		return true;
 
 	return false;
+}
+
+int dmuci_get_section_name(char *sec_name, char **value)
+{
+	if (!sec_name)
+		return -1;
+
+	int len = DM_STRLEN(sec_name);
+	if (len == 0)
+		return 0;
+
+	if (len > 2 && sec_name[0] == '4' && sec_name[1] == '0') {
+		char res[256] = {0};
+
+		convert_hex_to_string(sec_name + 2, res, sizeof(res));
+		*value = dmstrdup(res);
+	} else {
+		*value = dmstrdup(sec_name);
+	}
+
+	return 0;
+}
+
+int dmuci_set_section_name(char *sec_name, char *str, size_t size)
+{
+	if (!sec_name || !str || size == 0)
+		return -1;
+
+	if (special_char_exits(sec_name)) {
+		if (size < 2)
+			return -1;
+
+		// section_name in hex should start with "40" as a prefix to indicate that the section name will be encoded
+		str[0] = '4';
+		str[1] = '0';
+
+		convert_string_to_hex(sec_name, str + 2, size - 2);
+	} else {
+		snprintf(str, size, "%s", sec_name);
+	}
+
+	return 0;
 }

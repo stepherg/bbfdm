@@ -281,6 +281,8 @@ int bbfdm_validate_unsignedLong_list(struct dmctx *ctx, char *value, int min_ite
 int bbfdm_validate_long_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 int bbfdm_validate_string_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
 int bbfdm_validate_hexBinary_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char **value);
+int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char *value);
 char *base64_decode(const char *src);
 void string_to_mac(const char *str, size_t str_len, char *out, size_t out_len);
 bool folder_exists(const char *path);

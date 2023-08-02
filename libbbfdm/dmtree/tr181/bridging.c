@@ -1660,24 +1660,12 @@ static int get_BridgingBridge_Status(char *refparam, struct dmctx *ctx, void *da
 /*#Device.Bridging.Bridge.{i}.Alias!UCI:dmmap_bridge/device,@i-1/bridge_alias*/
 static int get_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct bridge_args *)data)->bridge_dmmap_sec, "bridge_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct bridge_args *)data)->bridge_dmmap_sec, "bridge_alias", instance, value);
 }
 
 static int set_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct bridge_args *)data)->bridge_dmmap_sec, "bridge_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct bridge_args *)data)->bridge_dmmap_sec, "bridge_alias", instance, value);
 }
 
 static int get_BridgingBridge_Standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1945,32 +1933,12 @@ static int get_BridgingBridgePort_Status(char *refparam, struct dmctx *ctx, void
 
 static int get_BridgingBridgePort_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct bridge_port_args *args = (struct bridge_port_args *)data;
-
-	dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "bridge_port_alias", value);
-	if ((*value)[0] == '\0') {
-		if (!args->is_management_port)
-			dmuci_get_value_by_section_string(args->bridge_port_sec, "name", value);
-		if ((*value)[0] == '\0')
-			dmasprintf(value, "cpe-%s", instance);
-	}
-	return 0;
+	return bbf_get_alias(ctx, ((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "bridge_port_alias", instance, value);
 }
 
 static int set_BridgingBridgePort_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct bridge_port_args *args = (struct bridge_port_args *)data;
-
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "bridge_port_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct bridge_port_args *)data)->bridge_port_dmmap_sec, "bridge_port_alias", instance, value);
 }
 
 static int get_BridgingBridgePort_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -2476,24 +2444,12 @@ static int set_BridgingBridgeVLAN_Enable(char *refparam, struct dmctx *ctx, void
 
 static int get_BridgingBridgeVLAN_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct bridge_vlan_args *)data)->bridge_vlan_sec, "bridge_vlan_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct bridge_vlan_args *)data)->bridge_vlan_sec, "bridge_vlan_alias", instance, value);
 }
 
 static int set_BridgingBridgeVLAN_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct bridge_vlan_args *)data)->bridge_vlan_sec, "bridge_vlan_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct bridge_vlan_args *)data)->bridge_vlan_sec, "bridge_vlan_alias", instance, value);
 }
 
 static int get_BridgingBridgeVLAN_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -2614,24 +2570,12 @@ static int set_BridgingBridgeVLANPort_Enable(char *refparam, struct dmctx *ctx, 
 
 static int get_BridgingBridgeVLANPort_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "bridge_vlanport_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "bridge_vlanport_alias", instance, value);
 }
 
 static int set_BridgingBridgeVLANPort_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "bridge_vlanport_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct bridge_vlanport_args *)data)->bridge_vlanport_dmmap_sec, "bridge_vlanport_alias", instance, value);
 }
 
 static int get_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -2915,10 +2859,7 @@ static int get_BridgingBridgeProviderBridge_Status(char *refparam, struct dmctx 
 
 static int get_BridgingBridgeProviderBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct provider_bridge_args *)data)->provider_bridge_sec, "provider_bridge_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct provider_bridge_args *)data)->provider_bridge_sec, "provider_bridge_alias", instance, value);
 }
 
 static int set_BridgingBridgeProviderBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)

@@ -1065,24 +1065,12 @@ static int get_RoutingRouteInformationInterfaceSetting_RouteLifetime(char *refpa
 **************************************************************/
 static int get_RoutingRouter_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "router_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (struct uci_section *)data, "router_alias", instance, value);
 }
 
 static int set_RoutingRouter_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "router_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (struct uci_section *)data, "router_alias", instance, value);
 }
 
 static int get_router_ipv4forwarding_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

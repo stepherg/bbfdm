@@ -289,6 +289,34 @@ int bbf_uci_set_value_by_section(struct uci_section *s, char *option, char *valu
 **************************************************************************/
 int bbf_uci_delete_section_by_section(struct uci_section *s, char *option, char *value);
 
+/*********************************************************************//**
+**
+** bbf_uci_get_section_name
+**
+** This API is used to get the section name either as a hexbin value if it contains special characters, or the same name as defined
+**
+** \param   sec_name - section name
+** \param   value - pointer to where the value will be stored
+**
+** \return  0 if the operation is successful, -1 otherwise
+**
+**************************************************************************/
+int bbf_uci_get_section_name(char *sec_name, char **value);
+
+/*********************************************************************//**
+**
+** bbf_uci_set_section_name
+**
+** This API is used to set the section name either as a hexbin value if it contains special characters, or the same name as defined
+**
+** \param   sec_name - section name
+** \param   value - pointer to where the value will be stored
+**
+** \return  0 if the operation is successful, -1 otherwise
+**
+**************************************************************************/
+int bbf_uci_set_section_name(char *sec_name, char *str, size_t size);
+
 
 struct uci_section *bbf_uci_walk_section(char *package, char *type, void *arg1, void *arg2, int cmp, int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
 
@@ -524,6 +552,40 @@ void bbf_find_dmmap_section_by_option(char *dmmap_package, char *section_type, c
 
 /*********************************************************************//**
 **
+** bbf_get_alias
+**
+** This API is used to get the Alias parameter value based on s and option_name
+**
+** \param   ctx - bbf context
+** \param   s - uci section from where will get Alias value
+** \param   option_name - option name
+** \param   instance - instance value
+** \param   value - pointer to where the value will be stored
+**
+** \return  0 if operation is successful, -1 otherwise
+**
+**************************************************************************/
+int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char **value);
+
+/*********************************************************************//**
+**
+** bbf_set_alias
+**
+** This API is used to set the Alias parameter value
+**
+** \param   ctx - bbf context
+** \param   s - uci section to where will save Alias value
+** \param   option_name - option name
+** \param   instance - instance value
+** \param   value - the value to be set
+**
+** \return  0 if operation is successful, -1 otherwise
+**
+**************************************************************************/
+int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char *value);
+
+/*********************************************************************//**
+**
 ** bbfdm_validate_string
 **
 ** This API is to validate a string value
@@ -750,6 +812,18 @@ int bbfdm_validate_long_list(struct dmctx *ctx, char *value, int min_item, int m
 **
 **************************************************************************/
 int bbfdm_validate_hexBinary_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+
+/*********************************************************************//**
+**
+** bbfdm_set_fault_message
+**
+** This API is used to define fault message
+**
+** \param   ctx - bbf context
+** \param   format - message to define
+**
+**************************************************************************/
+void bbfdm_set_fault_message(struct dmctx *ctx, const char *format, ...);
 
 
 /**********************

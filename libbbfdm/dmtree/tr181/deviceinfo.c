@@ -845,46 +845,22 @@ static int get_vcf_desc(char *refparam, struct dmctx *ctx, void *data, char *ins
 
 static int get_vcf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "vcf_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (struct uci_section *)data, "vcf_alias", instance, value);
 }
 
 static int set_vcf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "vcf_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (struct uci_section *)data, "vcf_alias", instance, value);
 }
 
 static int get_vlf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "vlf_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "vlf_alias", instance, value);
 }
 
 static int set_vlf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "vlf_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "vlf_alias", instance, value);
 }
 
 static int get_vlf_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

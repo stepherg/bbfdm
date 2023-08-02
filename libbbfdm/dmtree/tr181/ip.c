@@ -1603,24 +1603,12 @@ static int get_IPInterfaceIPv4Address_Status(char *refparam, struct dmctx *ctx, 
 /*#Device.IP.Interface.{i}.IPv4Address.{i}.Alias!UCI:dmmap_network_ipv4/intf_ipv4,@i-1/ipv4_alias*/
 static int get_IPInterfaceIPv4Address_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "ipv4_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct intf_ip_args *)data)->dmmap_sec, "ipv4_alias", instance, value);
 }
 
 static int set_IPInterfaceIPv4Address_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct intf_ip_args *)data)->dmmap_sec, "ipv4_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct intf_ip_args *)data)->dmmap_sec, "ipv4_alias", instance, value);
 }
 
 static int get_IPInterfaceIPv4Address_IPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1784,24 +1772,12 @@ static int get_IPInterfaceIPv6Address_IPAddressStatus(char *refparam, struct dmc
 /*#Device.IP.Interface.{i}.IPv6Address.{i}.Alias!UCI:dmmap_network_ipv6/intf_ipv6,@i-1/ipv6_alias*/
 static int get_IPInterfaceIPv6Address_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "ipv6_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct intf_ip_args *)data)->dmmap_sec, "ipv6_alias", instance, value);
 }
 
 static int set_IPInterfaceIPv6Address_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct intf_ip_args *)data)->dmmap_sec, "ipv6_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct intf_ip_args *)data)->dmmap_sec, "ipv6_alias", instance, value);
 }
 
 /*#Device.IP.Interface.{i}.IPv6Address.{i}.IPAddress!UCI:network/interface,@i-1/ip6addr*/
@@ -2013,24 +1989,12 @@ static int get_IPInterfaceIPv6Prefix_PrefixStatus(char *refparam, struct dmctx *
 /*#Device.IP.Interface.{i}.IPv6Prefix.{i}.Alias!UCI:dmmap_network_ipv6_prefix/intf_ipv6_prefix,@i-1/ipv6_prefix_alias*/
 static int get_IPInterfaceIPv6Prefix_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "ipv6_prefix_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct intf_ip_args *)data)->dmmap_sec, "ipv6_prefix_alias", instance, value);
 }
 
 static int set_IPInterfaceIPv6Prefix_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct intf_ip_args *)data)->dmmap_sec, "ipv6_prefix_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct intf_ip_args *)data)->dmmap_sec, "ipv6_prefix_alias", instance, value);
 }
 
 /*#Device.IP.Interface.{i}.IPv6Prefix.{i}.Prefix!UCI:network/interface,@i-1/ip6prefix*/

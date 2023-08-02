@@ -281,24 +281,12 @@ static int get_DSLLine_Status(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int get_DSLLine_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dsl_line_args *)data)->line_sec, "dsl_line_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dsl_line_args *)data)->line_sec, "dsl_line_alias", instance, value);
 }
 
 static int set_DSLLine_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dsl_line_args *)data)->line_sec, "dsl_line_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dsl_line_args *)data)->line_sec, "dsl_line_alias", instance, value);
 }
 
 static int get_DSLLine_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -973,24 +961,13 @@ static int get_DSLChannel_Status(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_DSLChannel_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dsl_channel_args *)data)->channel_sec, "dsl_channel_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dsl_channel_args *)data)->channel_sec, "dsl_channel_alias", instance, value);
 }
 
 static int set_DSLChannel_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dsl_channel_args *)data)->channel_sec, "dsl_channel_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dsl_channel_args *)data)->channel_sec, "dsl_channel_alias", instance, value);
+
 }
 
 static int get_DSLChannel_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

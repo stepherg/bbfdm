@@ -503,24 +503,12 @@ static int set_DHCPv6Client_Enable(char *refparam, struct dmctx *ctx, void *data
 
 static int get_DHCPv6Client_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dhcpv6_client_args *)data)->dmmap_s, "bbf_dhcpv6client_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dhcpv6_client_args *)data)->dmmap_s, "bbf_dhcpv6client_alias", instance, value);
 }
 
 static int set_DHCPv6Client_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->dmmap_s, "bbf_dhcpv6client_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dhcpv6_client_args *)data)->dmmap_s, "bbf_dhcpv6client_alias", instance, value);
 }
 
 static int get_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -816,24 +804,12 @@ static int get_DHCPv6ServerPool_Status(char *refparam, struct dmctx *ctx, void *
 /*#Device.DHCPv6.Server.Pool.{i}.Alias!UCI:dmmap_dhcpv6/dhcp,@i-1/dhcpv6_serv_pool_alias*/
 static int get_DHCPv6ServerPool_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct dhcpv6_args *)data)->dhcp_sections)->dmmap_section, "dhcpv6_serv_pool_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (((struct dhcpv6_args *)data)->dhcp_sections)->dmmap_section, "dhcpv6_serv_pool_alias", instance, value);
 }
 
 static int set_DHCPv6ServerPool_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section_bbfdm((((struct dhcpv6_args *)data)->dhcp_sections)->dmmap_section, "dhcpv6_serv_pool_alias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (((struct dhcpv6_args *)data)->dhcp_sections)->dmmap_section, "dhcpv6_serv_pool_alias", instance, value);
 }
 
 static int get_DHCPv6ServerPool_Order(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1196,25 +1172,12 @@ static int set_DHCPv6ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 
 static int get_DHCPv6ServerPoolOption_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dhcpv6_client_option_args *)data)->dmmap_sect, "bbf_dhcpv6_servpool_option_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
-
+	return bbf_get_alias(ctx, ((struct dhcpv6_client_option_args *)data)->dmmap_sect, "bbf_dhcpv6_servpool_option_alias", instance, value);
 }
 
 static int set_DHCPv6ServerPoolOption_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section_bbfdm(((struct dhcpv6_client_option_args *)data)->dmmap_sect, "bbf_dhcpv6_servpool_option_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dhcpv6_client_option_args *)data)->dmmap_sect, "bbf_dhcpv6_servpool_option_alias", instance, value);
 }
 
 static int get_DHCPv6ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

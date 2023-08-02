@@ -368,24 +368,12 @@ static int get_atm_status(char *refparam, struct dmctx *ctx, void *data, char *i
 /*#Device.ATM.Link.{i}.Alias!UCI:dmmap_dsl/atm-device,@i-1/atmlinkalias*/
 static int get_atm_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->dmmap_section, "atmlinkalias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (((struct atm_args *)data)->sections)->dmmap_section, "atmlinkalias", instance, value);
 }
 
 static int set_atm_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section((((struct atm_args *)data)->sections)->dmmap_section, "atmlinkalias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (((struct atm_args *)data)->sections)->dmmap_section, "atmlinkalias", instance, value);
 }
 
 /**********************************************************************************************************************************

@@ -256,24 +256,12 @@ static int get_RouterAdvertisementInterfaceSetting_Status(char *refparam, struct
 
 static int get_RouterAdvertisementInterfaceSetting_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "radv_intf_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "radv_intf_alias", instance, value);
 }
 
 static int set_RouterAdvertisementInterfaceSetting_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section_bbfdm(((struct dmmap_dup *)data)->dmmap_section, "radv_intf_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "radv_intf_alias", instance, value);
 }
 
 /*#Device.RouterAdvertisement.InterfaceSetting.{i}.Interface!UCI:dhcp/dhcp,@i-1/interface*/
@@ -616,24 +604,12 @@ static int set_RouterAdvertisementInterfaceSettingOption_Enable(char *refparam, 
 
 static int get_RouterAdvertisementInterfaceSettingOption_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct radv_option_args *)data)->dmmap_sect, "radv_option_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct radv_option_args *)data)->dmmap_sect, "radv_option_alias", instance, value);
 }
 
 static int set_RouterAdvertisementInterfaceSettingOption_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section_bbfdm(((struct radv_option_args *)data)->dmmap_sect, "radv_option_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct radv_option_args *)data)->dmmap_sect, "radv_option_alias", instance, value);
 }
 
 static int get_RouterAdvertisementInterfaceSettingOption_Tag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

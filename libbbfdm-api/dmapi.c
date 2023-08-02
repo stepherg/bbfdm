@@ -81,6 +81,16 @@ int bbf_uci_delete_section_by_section(struct uci_section *s, char *option, char 
 	return dmuci_delete_by_section(s, option, value);
 }
 
+int bbf_uci_get_section_name(char *sec_name, char **value)
+{
+	return dmuci_get_section_name(sec_name, value);
+}
+
+int bbf_uci_set_section_name(char *sec_name, char *str, size_t size)
+{
+	return dmuci_set_section_name(sec_name, str, size);
+}
+
 struct uci_section *bbf_uci_walk_section(char *package, char *type, void *arg1, void *arg2, int cmp, int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk)
 {
 	return dmuci_walk_section(package, type, arg1, arg2, cmp, filter, prev_section, walk);
@@ -176,6 +186,36 @@ void bbf_find_dmmap_section(char *dmmap_package, char *section_type, char *secti
 void bbf_find_dmmap_section_by_option(char *dmmap_package, char *section_type, char *option_name, char *option_value, struct uci_section **dmmap_section)
 {
 	return get_dmmap_section_of_config_section_eq(dmmap_package, section_type, option_name, option_value, dmmap_section);
+}
+
+int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char **value)
+{
+	if (!ctx || !s || !option_name || !instance || !value)
+		return -1;
+
+	dmuci_get_value_by_section_string(s, option_name, value);
+	if ((*value)[0] == '\0')
+		dmasprintf(value, "cpe-%s", instance);
+
+	return 0;
+}
+
+int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char *value)
+{
+	if (!ctx || !s || !option_name || !instance || !value)
+		return -1;
+
+	switch (ctx->setaction) {
+	case VALUECHECK:
+		if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		dmuci_set_value_by_section(s, option_name, value);
+		break;
+	}
+
+	return 0;
 }
 
 __attribute__ ((deprecated)) int bbf_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[])

@@ -390,6 +390,8 @@ int db_get_value_string(char *package, char *section, char *option, char **value
 int dmuci_get_option_value_string_varstate(char *package, char *section, char *option, char **value);
 int dmuci_set_value_varstate(char *package, char *section, char *option, char *value);
 
+int dmuci_get_section_name(char *sec_name, char **value);
+int dmuci_set_section_name(char *sec_name, char *str, size_t size);
 bool dmuci_string_to_boolean(char *value);
 
 #endif

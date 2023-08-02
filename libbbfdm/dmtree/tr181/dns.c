@@ -257,10 +257,7 @@ static int get_server_status(char *refparam, struct dmctx *ctx, void *data, char
 
 static int get_server_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "dns_server_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (struct uci_section *)data, "dns_server_alias", instance, value);
 }
 
 static int get_server_dns_server(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -333,10 +330,7 @@ static int get_forwarding_status(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_forwarding_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "dns_server_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (struct uci_section *)data, "dns_server_alias", instance, value);
 }
 
 static int get_forwarding_dns_server(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -482,16 +476,7 @@ static int set_dns_enable(char *refparam, struct dmctx *ctx, void *data, char *i
 
 static int set_server_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "dns_server_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (struct uci_section *)data, "dns_server_alias", instance, value);
 }
 
 static int set_dns_server(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -603,16 +588,7 @@ static int set_relay_enable(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int set_forwarding_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "dns_server_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (struct uci_section *)data, "dns_server_alias", instance, value);
 }
 
 static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)

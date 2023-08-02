@@ -80,24 +80,12 @@ int delete_dropbear_instance(char *refparam, struct dmctx *ctx, void *data, char
 **************************************************************/
 static int get_x_test_com_dropbear_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "dropbearalias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "dropbearalias", instance, value);
 }
 
 static int set_x_test_com_dropbear_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "dropbearalias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "dropbearalias", instance, value);
 }
 
 static int get_x_test_com_dropbear_password_auth(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

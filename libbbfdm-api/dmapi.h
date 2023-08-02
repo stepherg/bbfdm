@@ -218,11 +218,11 @@ typedef struct dmnode {
 } DMNODE;
 
 enum operate_ret_status {
-	CMD_SUCCESS,
-	CMD_INVALID_ARGUMENTS,
-	CMD_FAIL,
-	CMD_NOT_FOUND,
-	__STATUS_MAX,
+	CMD_SUCCESS __attribute__ ((deprecated)),
+	CMD_INVALID_ARGUMENTS __attribute__ ((deprecated)),
+	CMD_FAIL __attribute__ ((deprecated)),
+	CMD_NOT_FOUND __attribute__ ((deprecated)),
+	__STATUS_MAX __attribute__ ((deprecated)),
 };
 
 typedef struct {

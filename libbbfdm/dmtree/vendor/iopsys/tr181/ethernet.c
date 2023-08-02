@@ -127,24 +127,12 @@ static int get_EthernetMACVLAN_Status(char *refparam, struct dmctx *ctx, void *d
 
 static int get_EthernetMACVLAN_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "mac_vlan_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "mac_vlan_alias", instance, value);
 }
 
 static int set_EthernetMACVLAN_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "mac_vlan_alias", value);
-			break;
-	}
-	return 0;
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "mac_vlan_alias", instance, value);
 }
 
 static int get_EthernetMACVLAN_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)

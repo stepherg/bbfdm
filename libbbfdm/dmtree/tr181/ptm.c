@@ -155,24 +155,12 @@ static int get_ptm_status(char *refparam, struct dmctx *ctx, void *data, char *i
 /*#Device.PTM.Link.{i}.Alias!UCI:dmmap_dsl/ptm-device,@i-1/ptmlinkalias*/
 static int get_ptm_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct ptm_args *)data)->sections)->dmmap_section, "ptmlinkalias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, (((struct ptm_args *)data)->sections)->dmmap_section, "ptmlinkalias", instance, value);
 }
 
 static int set_ptm_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptmlinkalias", value);
-			return 0;
-	}
-	return 0;
+	return bbf_set_alias(ctx, (((struct ptm_args *)data)->sections)->dmmap_section, "ptmlinkalias", instance, value);
 }
 
 /*#Device.PTM.Link.{i}.Name!UCI:dsl/ptm-device,@i-1/name*/

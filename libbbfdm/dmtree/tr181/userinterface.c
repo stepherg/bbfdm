@@ -423,24 +423,12 @@ static int set_http_access_enable(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_http_access_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_http *)data)->dmmap_section, "server_alias", value);
-	if (DM_STRLEN(*value) == 0)
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct dmmap_http *)data)->dmmap_section, "server_alias", instance, value);
 }
 
 static int set_http_access_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_http *)data)->dmmap_section, "server_alias", value);
-			break;
-	}
-	return 0;	
+	return bbf_set_alias(ctx, ((struct dmmap_http *)data)->dmmap_section, "server_alias", instance, value);
 }
 
 static int get_http_access_type(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
