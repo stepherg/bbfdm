@@ -59,6 +59,7 @@ do { \
 #define DM_STRLEN(SRC) ((SRC != NULL) ? strlen(SRC) : 0)
 #define DM_STRSTR(STR, MATCH) ((STR != NULL && MATCH != NULL) ? strstr(STR, MATCH) : NULL)
 #define DM_STRCHR(STR, CHR) ((STR != NULL) ? strchr(STR, CHR) : NULL)
+#define DM_STRRCHR(STR, CHR) ((STR != NULL) ? strrchr(STR, CHR) : NULL)
 #define DM_STRTOL(SRC) ((SRC != NULL) ? strtol(SRC, NULL, 10) : 0)
 #define DM_STRTOUL(SRC) ((SRC != NULL) ? strtoul(SRC, NULL, 10) : 0)
 #define DM_STRCMP(S1, S2) ((S1 != NULL && S2 != NULL) ? strcmp(S1, S2) : -1)

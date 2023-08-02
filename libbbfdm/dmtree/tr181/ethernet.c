@@ -161,12 +161,12 @@ static void dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_no
 
 		DM_STRNCPY(dev_name, device, sizeof(dev_name));
 
-		char *has_vid = DM_STRCHR(dev_name, '.');
+		char *has_vid = DM_STRRCHR(dev_name, '.');
 		if (has_vid)
 			*has_vid = '\0';
 
 		if (is_mac_vlan_interface(dev_name)) {
-			char *p = DM_STRCHR(dev_name, '_');
+			char *p = DM_STRRCHR(dev_name, '_');
 			if (p)
 				*p = '\0';
 		}
