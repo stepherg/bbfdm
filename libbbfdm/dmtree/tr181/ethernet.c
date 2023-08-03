@@ -63,6 +63,22 @@ bool ethernet___check_vlan_termination_section(const char *name)
 	return true;
 }
 
+bool ethernet___is_ethernet_interface_inst(const char *device_name)
+{
+	struct uci_section *s = NULL;
+
+	uci_foreach_sections("ports", "ethport", s) {
+		char *ifname = NULL;
+
+		dmuci_get_value_by_section_string(s, "ifname", &ifname);
+
+		if (DM_STRCMP(ifname, device_name) == 0)
+			return true;
+	}
+
+	return false;
+}
+
 static int eth_iface_sysfs(const struct uci_section *data, const char *name, char **value)
 {
 	char *device;
@@ -90,7 +106,7 @@ static struct uci_section *is_ethernet_link_exist(char *device)
 	return NULL;
 }
 
-bool ethernet___name_exists_in_devices(char *name)
+static bool name_exists_in_devices(char *name)
 {
 	struct uci_section *s = NULL;
 
@@ -161,9 +177,11 @@ static void dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_no
 
 		DM_STRNCPY(dev_name, device, sizeof(dev_name));
 
-		char *has_vid = DM_STRRCHR(dev_name, '.');
-		if (has_vid)
-			*has_vid = '\0';
+		if (!ethernet___is_ethernet_interface_inst(dev_name)) {
+			char *has_vid = DM_STRRCHR(dev_name, '.');
+			if (has_vid)
+				*has_vid = '\0';
+		}
 
 		if (is_mac_vlan_interface(dev_name)) {
 			char *p = DM_STRRCHR(dev_name, '_');
@@ -997,9 +1015,11 @@ static int get_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void 
 
 				DM_STRNCPY(buf, e->name, sizeof(buf));
 
-				char *is_tagged = DM_STRCHR(buf, '.');
-				if (is_tagged)
-					*is_tagged = 0;
+				if (!ethernet___is_ethernet_interface_inst(buf)) {
+					char *is_tagged = DM_STRRCHR(buf, '.');
+					if (is_tagged)
+						*is_tagged = 0;
+				}
 
 				port_s = get_dup_section_in_config_opt("ports", "ethport", "ifname", buf);
 				char *pause = port_s ? dmuci_get_value_by_section_fallback_def(port_s, "pause", "0") : "0";
@@ -1067,9 +1087,11 @@ static int set_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void 
 
 							DM_STRNCPY(buf, e->name, sizeof(buf));
 
-							char *is_tagged = DM_STRCHR(buf, '.');
-							if (is_tagged)
-								*is_tagged = 0;
+							if (!ethernet___is_ethernet_interface_inst(buf)) {
+								char *is_tagged = DM_STRRCHR(buf, '.');
+								if (is_tagged)
+									*is_tagged = 0;
+							}
 
 							port_s = get_dup_section_in_config_opt("ports", "ethport", "ifname", buf);
 							if (port_s)
@@ -1291,7 +1313,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 
 				snprintf(new_name, sizeof(new_name), "%s%s%s", vlan_linker, DM_STRLEN(vid) ? "." : "", DM_STRLEN(vid) ? vid : "");
 
-				if (ethernet___name_exists_in_devices(new_name))
+				if (name_exists_in_devices(new_name))
 					return -1;
 
 				if (DM_STRLEN(old_name)) {
@@ -1343,7 +1365,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 
 				snprintf(new_name, sizeof(new_name), "%s%s%s", vlan_linker, DM_STRLEN(vid) ? "." : "", DM_STRLEN(vid) ? vid : "");
 
-				if (ethernet___name_exists_in_devices(new_name))
+				if (name_exists_in_devices(new_name))
 					return -1;
 
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", vlan_linker);
@@ -1385,7 +1407,7 @@ static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 				snprintf(old_name, sizeof(old_name), "%s.%s", ifname, vid);
 				snprintf(new_name, sizeof(new_name), "%s.%s", ifname, value);
 
-				if (ethernet___name_exists_in_devices(new_name))
+				if (name_exists_in_devices(new_name))
 					return 0;
 
 				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &name);

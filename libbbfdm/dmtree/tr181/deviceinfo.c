@@ -1232,7 +1232,7 @@ static int operate_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *
 	char upload_command[32] = {'\0'};
 	char *vlf_file_path = NULL;
 
-	char *ret = strrchr(refparam, '.');
+	char *ret = DM_STRRCHR(refparam, '.');
 	strncpy(upload_path, refparam, ret - refparam +1);
 	DM_STRNCPY(upload_command, ret+1, sizeof(upload_command));
 
@@ -1281,7 +1281,7 @@ static int operate_DeviceInfoVendorConfigFile_Backup(char *refparam, struct dmct
 	char backup_command[32] = {'\0'};
 	char *vcf_name = NULL;
 
-	char *ret = strrchr(refparam, '.');
+	char *ret = DM_STRRCHR(refparam, '.');
 	strncpy(backup_path, refparam, ret - refparam +1);
 	DM_STRNCPY(backup_command, ret+1, sizeof(backup_command));
 
@@ -1323,7 +1323,7 @@ static int operate_DeviceInfoVendorConfigFile_Restore(char *refparam, struct dmc
 	char restore_path[256] = {'\0'};
 	char restore_command[32] = {'\0'};
 
-	char *ret = strrchr(refparam, '.');
+	char *ret = DM_STRRCHR(refparam, '.');
 	DM_STRNCPY(restore_path, refparam, ret - refparam + 2);
 	DM_STRNCPY(restore_command, ret+1, sizeof(restore_command));
 
@@ -1367,7 +1367,7 @@ static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx
 	char obj_path[256] = {'\0'};
 	char command[32] = {'\0'};
 
-	char *ret = strrchr(refparam, '.');
+	char *ret = DM_STRRCHR(refparam, '.');
 	DM_STRNCPY(obj_path, refparam, ret - refparam + 2);
 	DM_STRNCPY(command, ret+1, sizeof(command));
 

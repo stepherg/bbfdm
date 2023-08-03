@@ -468,7 +468,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 			// The lower layer is Device.ATM.Link.{i}.
 			if (!found && value == NULL) {
-				char *tag = DM_STRCHR(device, '.');
+				char *tag = DM_STRRCHR(device, '.');
 				if (tag) *tag = '\0';
 				adm_entry_get_linker_param(dmctx, "Device.ATM.Link.", device, &value);
 			}
@@ -486,7 +486,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 			// The lower layer is Device.PTM.Link.{i}.
 			if (!found && value == NULL) {
-				char *tag = DM_STRCHR(device, '.');
+				char *tag = DM_STRRCHR(device, '.');
 				if (tag) *tag = '\0';
 				adm_entry_get_linker_param(dmctx, "Device.PTM.Link.", device, &value);
 			}
@@ -504,7 +504,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 			// The lower layer is Device.Ethernet.Interface.{i}.
 			if (!found && value == NULL) {
-				char *tag = DM_STRCHR(device, '.');
+				char *tag = DM_STRRCHR(device, '.');
 				if (tag) *tag = '\0';
 				adm_entry_get_linker_param(dmctx, "Device.Ethernet.Interface.", device, &value);
 			}

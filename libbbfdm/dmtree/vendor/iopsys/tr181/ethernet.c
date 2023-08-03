@@ -193,8 +193,10 @@ static int set_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", linker);
 
-				char *vid = DM_STRCHR(linker, '.');
-				if (vid) *vid = 0;
+				if (DM_STRNCMP(value, allowed_objects[0], strlen(allowed_objects[0])) == 0) {
+					char *vid = DM_STRRCHR(linker, '.');
+					if (vid) *vid = 0;
+				}
 
 				snprintf(name, sizeof(name), "%s_%s", linker, instance);
 
