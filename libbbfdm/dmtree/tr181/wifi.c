@@ -1098,9 +1098,16 @@ static int set_WiFiRadio_PreambleType(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
+/*#Device.WiFi.Radio.{i}.IEEE80211hSupported!UBUS:wifi.radio.@Name/dot11h_capable*/
 static int get_WiFiRadio_IEEE80211hSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "true";
+	json_object *res = NULL;
+	char object[32];
+
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
+	DM_ASSERT(res, *value = "0");
+	*value = dmjson_get_value(res, 1, "dot11h_capable");
 	return 0;
 }
 
