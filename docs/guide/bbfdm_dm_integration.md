@@ -153,3 +153,59 @@ input
 return
 	None
 ```
+
+### Datamodel Tree
+`libbbfdm-api` provides API to easily extend and define datamodel tree.
+
+#### Alias handling
+In general datamodel parameters with multi-instance objects has a parameter named as '.Alias' to uniquely identify the instance. libbbf-api provides two generic APIs to handle the get/set of Alias parameters.
+
+These APIs only applicable for standard/dmmap uci mappings.
+```bash
+/*********************************************************************//**
+**
+** bbf_get_alias
+**
+** This API is used to get the Alias parameter value based on s and option_name
+**
+** \param   ctx - bbf context
+** \param   s - uci section from where will get Alias value
+** \param   option_name - option name
+** \param   instance - instance value
+** \param   value - pointer to where the value will be stored
+**
+** \return  0 if operation is successful, -1 otherwise
+**
+**************************************************************************/
+int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char **value);
+
+/*********************************************************************//**
+**
+** bbf_set_alias
+**
+** This API is used to set the Alias parameter value
+**
+** \param   ctx - bbf context
+** \param   s - uci section to where will save Alias value
+** \param   option_name - option name
+** \param   instance - instance value
+** \param   value - the value to be set
+**
+** \return  0 if operation is successful, -1 otherwise
+**
+**************************************************************************/
+int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char *value);
+```
+
+Example:
+```bash
+static int get_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return bbf_get_alias(ctx, (((struct wifi_enp_args *)data)->sections)->dmmap_section, "endpointalias", instance, value);
+}
+
+static int set_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return bbf_set_alias(ctx, (((struct wifi_enp_args *)data)->sections)->dmmap_section, "endpointalias", instance, value);
+}
+```
