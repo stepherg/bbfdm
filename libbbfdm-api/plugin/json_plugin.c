@@ -1882,7 +1882,7 @@ void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json
 	FREE(full_obj);
 }
 
-int load_json_plugins(struct dmctx *ctx)
+int load_json_plugins(DMOBJ *entryobj)
 {
 	struct dirent *ent = NULL;
 	DIR *dir = NULL;
@@ -1916,7 +1916,7 @@ int load_json_plugins(struct dmctx *ctx)
 				char *obj_path = replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
 				find_prefix_obj(obj_path, obj_prefix, MAX_DM_LENGTH);
 
-				bool obj_exists = find_entry_obj(ctx->dm_entryobj, obj_prefix, &dm_entryobj);
+				bool obj_exists = find_entry_obj(entryobj, obj_prefix, &dm_entryobj);
 				if (obj_exists == 0 || !dm_entryobj) {
 					FREE(obj_path);
 					continue;

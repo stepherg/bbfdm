@@ -16,7 +16,7 @@
 
 #define LIBRARY_FOLDER_PATH "/usr/lib/bbfdm"
 
-int load_dotso_plugins(struct dmctx *ctx);
+int load_dotso_plugins(DMOBJ *entryobj);
 int free_dotso_plugins(void);
 
 #endif //__DOTSO_PLUGIN_H__

@@ -83,7 +83,7 @@ static void usage(char *prog)
 
 static void bbfdm_cleanup(struct bbfdm_context *u)
 {
-	bbf_global_clean(DEAMON_DM_ROOT_OBJ);
+	bbf_global_clean(DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE, input_json ? false : true);
 
 	if (!input_json) { // It's not a micro-service instance
 		free_path_list(&u->instances);
@@ -268,6 +268,7 @@ static bool is_object_schema_update_available(struct bbfdm_context *u)
 			.bbf_ctx.iscommand = true,
 			.bbf_ctx.isevent = true,
 			.bbf_ctx.isinfo = true,
+			.bbf_ctx.enable_plugins = input_json ? false : true,
 			.bbf_ctx.dm_type = BBFDM_USP
 	};
 
@@ -1489,6 +1490,8 @@ int main(int argc, char **argv)
 	ubus_add_uloop(&bbfdm_ctx.ubus_ctx);
 
 	if (!input_json) { // It's not a micro-service instance
+
+		bbf_global_init(DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE, true);
 
 		err = bbfdm_init(&bbfdm_ctx.ubus_ctx);
 		if (err != UBUS_STATUS_OK)

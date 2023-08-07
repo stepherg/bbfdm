@@ -42,7 +42,7 @@ static void free_all_list_open_library(struct list_head *library_list)
 	}
 }
 
-int load_dotso_plugins(struct dmctx *ctx)
+int load_dotso_plugins(DMOBJ *entryobj)
 {
 	struct dirent *ent = NULL;
 	DIR *dir = NULL;
@@ -70,7 +70,7 @@ int load_dotso_plugins(struct dmctx *ctx)
 				for (int i = 0; dynamic_obj[i].path; i++) {
 
 					DMOBJ *dm_entryobj = NULL;
-					bool obj_exists = find_entry_obj(ctx->dm_entryobj, dynamic_obj[i].path, &dm_entryobj);
+					bool obj_exists = find_entry_obj(entryobj, dynamic_obj[i].path, &dm_entryobj);
 					if (obj_exists == false || !dm_entryobj)
 						continue;
 

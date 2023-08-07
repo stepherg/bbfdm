@@ -118,6 +118,21 @@ static bool check_stats_folder(bool json_path)
 #endif  /* (BBFDM_ENABLE_JSON_PLUGIN || BBFDM_ENABLE_DOTSO_PLUGIN) */
 
 
+static void disable_srv_obj(DMOBJ *entryobj, char *srv_parent_dm, char *srv_obj)
+{
+	DMOBJ *dm_entryobj = NULL;
+	char obj_path[1024];
+
+	if (!entryobj || !srv_parent_dm || !srv_obj)
+		return;
+
+	snprintf(obj_path, sizeof(obj_path), "%s%s.", srv_parent_dm, srv_obj);
+
+	bool obj_exists = find_entry_obj(entryobj, obj_path, &dm_entryobj);
+	if (obj_exists == true && dm_entryobj)
+		dm_entryobj->bbfdm_type = BBFDM_NONE;
+}
+
 static bool add_service_to_main_tree(DMOBJ *main_dm, char *srv_name, char *srv_parent_dm, char *srv_obj)
 {
 	DMOBJ *dm_entryobj = NULL;
@@ -125,6 +140,9 @@ static bool add_service_to_main_tree(DMOBJ *main_dm, char *srv_name, char *srv_p
 	bool obj_exists = find_entry_obj(main_dm, srv_parent_dm, &dm_entryobj);
 	if (obj_exists == false || !dm_entryobj)
 		return false;
+
+	// Disable service object if it already exists in the main tree
+	disable_srv_obj(main_dm, srv_parent_dm, srv_obj);
 
 	if (dm_entryobj->nextdynamicobj == NULL) {
 		dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
@@ -404,48 +422,50 @@ int get_leaf_idx(DMLEAF **entryleaf)
 	return idx;
 }
 
-void load_plugins(struct dmctx *ctx)
+void load_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, bool enable_plugins)
 {
-	if (ctx->enable_plugins) {
+	if (enable_plugins) {
 #ifdef BBFDM_ENABLE_JSON_PLUGIN
-	// Load dynamic objects and parameters exposed via JSON file plugin
-	if (check_stats_folder(true)) {
-		free_json_plugins();
-		free_specific_dynamic_node(ctx->dm_entryobj, INDX_JSON_MOUNT);
-		load_json_plugins(ctx);
-	}
+		// Load dynamic objects and parameters exposed via JSON file plugin
+		if (check_stats_folder(true)) {
+			free_json_plugins();
+			free_specific_dynamic_node(dm_entryobj, INDX_JSON_MOUNT);
+			load_json_plugins(dm_entryobj);
+		}
 #endif  /* BBFDM_ENABLE_JSON_PLUGIN */
 
 #ifdef BBFDM_ENABLE_DOTSO_PLUGIN
-	// Load dynamic objects and parameters exposed via a dotso plugin
-	if (check_stats_folder(false)) {
-		free_dotso_plugins();
-		free_specific_dynamic_node(ctx->dm_entryobj, INDX_LIBRARY_MOUNT);
-		load_dotso_plugins(ctx);
-	}
+		// Load dynamic objects and parameters exposed via a dotso plugin
+		if (check_stats_folder(false)) {
+			free_dotso_plugins();
+			free_specific_dynamic_node(dm_entryobj, INDX_LIBRARY_MOUNT);
+			load_dotso_plugins(dm_entryobj);
+		}
 #endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
 
 #ifdef BBF_VENDOR_EXTENSION
-	// Load objects and parameters exposed via vendor extension plugin
-	if (first_boot == false) {
-		free_specific_dynamic_node(ctx->dm_entryobj, INDX_VENDOR_MOUNT);
-		load_vendor_dynamic_arrays(ctx);
-	}
+		// Load objects and parameters exposed via vendor extension plugin
+		if (first_boot == false) {
+			free_specific_dynamic_node(dm_entryobj, INDX_VENDOR_MOUNT);
+			load_vendor_dynamic_arrays(dm_entryobj, dm_VendorExtension, dm_VendorExtensionExclude);
+		}
 #endif /* BBF_VENDOR_EXTENSION */
 	}
 
 	first_boot = true;
 }
 
-void free_plugins(DMOBJ *dm_entryobj)
+void free_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, bool enable_plugins)
 {
 	free_all_dynamic_nodes(dm_entryobj);
 
+	if (enable_plugins) {
 #ifdef BBFDM_ENABLE_JSON_PLUGIN
-	free_json_plugins();
+		free_json_plugins();
 #endif  /* BBFDM_ENABLE_JSON_PLUGIN */
 
 #ifdef BBFDM_ENABLE_DOTSO_PLUGIN
-	free_dotso_plugins();
+		free_dotso_plugins();
 #endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
+	}
 }

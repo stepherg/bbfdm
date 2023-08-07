@@ -66,7 +66,7 @@ static void overwrite_obj(DMOBJ *entryobj, DMOBJ *dmobj)
 	}
 }
 
-static void load_vendor_extension_arrays(struct dmctx *ctx)
+static void load_vendor_extension_arrays(DMOBJ *entryobj, DM_MAP_VENDOR *vendor_map_obj)
 {
 	char vendor_list[512] = {0};
 	size_t length = 0;
@@ -75,8 +75,6 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 	char **tokens = strsplit(vendor_list, ",", &length);
 
 	for (int idx = length - 1; idx >= 0; idx--) {
-
-		DM_MAP_VENDOR *vendor_map_obj = ctx->dm_vendor_extension[0];
 
 		for (int j = 0; vendor_map_obj && vendor_map_obj[j].vendor; j++) {
 
@@ -88,7 +86,7 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 			for (int i = 0; vendor_obj[i].path; i++) {
 
 				DMOBJ *dm_entryobj = NULL;
-				bool obj_exists = find_entry_obj(ctx->dm_entryobj, vendor_obj[i].path, &dm_entryobj);
+				bool obj_exists = find_entry_obj(entryobj, vendor_obj[i].path, &dm_entryobj);
 				if (obj_exists == false || !dm_entryobj)
 					continue;
 
@@ -139,7 +137,7 @@ static void load_vendor_extension_arrays(struct dmctx *ctx)
 	}
 }
 
-static void load_vendor_extension_overwrite_arrays(struct dmctx *ctx)
+static void load_vendor_extension_overwrite_arrays(DMOBJ *entryobj, DM_MAP_VENDOR *vendor_map_obj)
 {
 	char vendor_list[512] = {0};
 	size_t length = 0;
@@ -148,8 +146,6 @@ static void load_vendor_extension_overwrite_arrays(struct dmctx *ctx)
 	char **tokens = strsplit(vendor_list, ",", &length);
 
 	for (int idx = length - 1; idx >= 0; idx--) {
-
-		DM_MAP_VENDOR *vendor_map_obj = ctx->dm_vendor_extension[1];
 
 		for (int j = 0; vendor_map_obj && vendor_map_obj[j].vendor; j++) {
 
@@ -161,7 +157,7 @@ static void load_vendor_extension_overwrite_arrays(struct dmctx *ctx)
 
 			for (int i = 0; dynamic_overwrite_obj[i].path; i++) {
 
-				bool obj_exists = find_entry_obj(ctx->dm_entryobj, dynamic_overwrite_obj[i].path, &dm_entryobj);
+				bool obj_exists = find_entry_obj(entryobj, dynamic_overwrite_obj[i].path, &dm_entryobj);
 				if (obj_exists == false || !dm_entryobj)
 					continue;
 
@@ -187,16 +183,16 @@ static void load_vendor_extension_overwrite_arrays(struct dmctx *ctx)
 	}
 }
 
-static void exclude_obj(struct dmctx *ctx, char *in_obj)
+static void exclude_obj(DMOBJ *dm_entryobj, char *in_obj)
 {
 	DMNODE node = {.current_object = ""};
 
 	char *obj_path = replace_str(in_obj, ".{i}.", ".");
-	dm_exclude_obj(ctx->dm_entryobj, &node, obj_path);
+	dm_exclude_obj(dm_entryobj, &node, obj_path);
 	FREE(obj_path);
 }
 
-static void exclude_param(struct dmctx *ctx, char *in_param)
+static void exclude_param(DMOBJ *dm_entryobj, char *in_param)
 {
 	DMOBJ *entryobj = NULL;
 	char obj_prefix[256] = {'\0'};
@@ -208,29 +204,28 @@ static void exclude_param(struct dmctx *ctx, char *in_param)
 	if (ret)
 		DM_STRNCPY(obj_prefix, in_param, ret - in_param + 2);
 
-	bool obj_exists = find_entry_obj(ctx->dm_entryobj, obj_prefix, &entryobj);
+	bool obj_exists = find_entry_obj(dm_entryobj, obj_prefix, &entryobj);
 
 	if (entryobj && obj_exists == true) {
 		DMLEAF *leaf = entryobj->leaf;
 
 		for (; (leaf && leaf->parameter); leaf++) {
 
-			char *full_param;
+			char param[1024];
 
-			dmastrcat(&full_param, obj_prefix, leaf->parameter);
-			if (strcmp(full_param, in_param) == 0) {
+			snprintf(param, sizeof(param), obj_prefix, leaf->parameter);
+
+			if (strcmp(param, in_param) == 0) {
 				leaf->bbfdm_type = BBFDM_NONE;
-				dmfree(full_param);
 				return;
 			}
 
-			dmfree(full_param);
 		}
 
 	}
 }
 
-static void load_vendor_extension_exclude_arrays(struct dmctx *ctx)
+static void load_vendor_extension_exclude_arrays(DMOBJ *entryobj, DM_MAP_VENDOR_EXCLUDE *vendor_map_exclude_obj)
 {
 	char vendor_list[512] = {0};
 	size_t length = 0;
@@ -239,8 +234,6 @@ static void load_vendor_extension_exclude_arrays(struct dmctx *ctx)
 	char **tokens = strsplit(vendor_list, ",", &length);
 
 	for (int idx = length - 1; idx >= 0; idx--) {
-
-		DM_MAP_VENDOR_EXCLUDE *vendor_map_exclude_obj = ctx->dm_vendor_extension_exclude;
 
 		for (int j = 0; vendor_map_exclude_obj && vendor_map_exclude_obj[j].vendor; j++) {
 
@@ -252,9 +245,9 @@ static void load_vendor_extension_exclude_arrays(struct dmctx *ctx)
 			for (; *dynamic_exclude_obj; dynamic_exclude_obj++) {
 
 				if ((*dynamic_exclude_obj)[DM_STRLEN(*dynamic_exclude_obj) - 1] == '.')
-					exclude_obj(ctx, *dynamic_exclude_obj);
+					exclude_obj(entryobj, *dynamic_exclude_obj);
 				else
-					exclude_param(ctx, *dynamic_exclude_obj);
+					exclude_param(entryobj, *dynamic_exclude_obj);
 			}
 
 			break;
@@ -263,9 +256,9 @@ static void load_vendor_extension_exclude_arrays(struct dmctx *ctx)
 	}
 }
 
-void load_vendor_dynamic_arrays(struct dmctx *ctx)
+void load_vendor_dynamic_arrays(DMOBJ *entryobj, DM_MAP_VENDOR *VendorExtension[], DM_MAP_VENDOR_EXCLUDE *VendorExtensionExclude)
 {
-	load_vendor_extension_arrays(ctx);
-	load_vendor_extension_overwrite_arrays(ctx);
-	load_vendor_extension_exclude_arrays(ctx);
+	load_vendor_extension_arrays(entryobj, VendorExtension[0]);
+	load_vendor_extension_overwrite_arrays(entryobj, VendorExtension[1]);
+	load_vendor_extension_exclude_arrays(entryobj, VendorExtensionExclude);
 }

@@ -19,7 +19,7 @@ int get_entry_idx(DMOBJ *entryobj);
 int get_obj_idx(DMOBJ **entryobj);
 int get_leaf_idx(DMLEAF **entryleaf);
 
-void load_plugins(struct dmctx *ctx);
-void free_plugins(DMOBJ *dm_entryobj);
+void load_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, bool enable_plugins);
+void free_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, bool enable_plugins);
 
 #endif //__DMPLUGIN_H__

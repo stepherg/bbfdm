@@ -645,6 +645,8 @@ static int cli_exec_command(cli_data_t *cli_data, int argc, char *argv[])
 			goto end;
 		}
 
+		bbf_global_init(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, input_json ? false : true);
+
 		bbf_ctx_init(&cli_data->bbf_ctx, CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE);
 
 		cli_data->bbf_ctx.dm_type = cli_data->proto;
@@ -682,13 +684,13 @@ end:
 	if (strcasecmp(cli_data->in_type, "DotSO") == 0) {
 		if (CLI_DM_ROOT_OBJ) {
 			bbf_ctx_clean(&cli_data->bbf_ctx);
-			bbf_global_clean(CLI_DM_ROOT_OBJ);
+			bbf_global_clean(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, input_json ? false : true);
 		}
 		free_dotso_plugin(cli_lib_handle);
 	} else if (strcasecmp(cli_data->in_type, "JSON") == 0) {
 		if (CLI_DM_ROOT_OBJ) {
 			bbf_ctx_clean(&cli_data->bbf_ctx);
-			bbf_global_clean(CLI_DM_ROOT_OBJ);
+			bbf_global_clean(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, input_json ? false : true);
 		}
 		free_json_plugin();
 	}

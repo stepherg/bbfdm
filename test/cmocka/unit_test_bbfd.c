@@ -60,9 +60,15 @@ static int teardown_revert(void **state)
 	return 0;
 }
 
+static int group_init(void **state)
+{
+	bbf_global_init(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, true);
+	return 0;
+}
+
 static int group_teardown(void **state)
 {
-	bbf_global_clean(TR181_ROOT_TREE);
+	bbf_global_clean(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, true);
 	return 0;
 }
 
@@ -855,5 +861,5 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_library_delete_object, setup, teardown_commit),
 	};
 
-	return cmocka_run_group_tests(tests, NULL, group_teardown);
+	return cmocka_run_group_tests(tests, group_init, group_teardown);
 }

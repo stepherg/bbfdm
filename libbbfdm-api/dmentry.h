@@ -29,7 +29,8 @@ int bbf_fault_map(struct dmctx *ctx, int fault);
 
 int bbf_entry_method(struct dmctx *ctx, int cmd);
 
-void bbf_global_clean(DMOBJ *dm_entryobj);
+void bbf_global_init(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, bool enable_plugins);
+void bbf_global_clean(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, bool enable_plugins);
 
 int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
 

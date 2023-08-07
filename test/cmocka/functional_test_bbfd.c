@@ -44,12 +44,17 @@ static int teardown_commit(void **state)
 	return 0;
 }
 
-static int group_teardown(void **state)
+static int group_init(void **state)
 {
-	bbf_global_clean(TR181_ROOT_TREE);
+	bbf_global_init(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, true);
 	return 0;
 }
 
+static int group_teardown(void **state)
+{
+	bbf_global_clean(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, true);
+	return 0;
+}
 
 static void validate_parameter(struct dmctx *ctx, const char *name, const char *value, const char *type)
 {
@@ -1634,7 +1639,7 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_json_v1_event, setup, teardown_commit),
 	};
 
-	return cmocka_run_group_tests(tests, NULL, group_teardown);
+	return cmocka_run_group_tests(tests, group_init, group_teardown);
 }
 
 

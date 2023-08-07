@@ -14,6 +14,6 @@
 
 #include "../dmcommon.h"
 
-void load_vendor_dynamic_arrays(struct dmctx *ctx);
+void load_vendor_dynamic_arrays(DMOBJ *entryobj, DM_MAP_VENDOR *VendorExtension[], DM_MAP_VENDOR_EXCLUDE *VendorExtensionExclude);
 
 #endif //__VENDOR_PLUGIN_H__
