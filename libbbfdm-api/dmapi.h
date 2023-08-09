@@ -122,7 +122,6 @@ typedef struct dm_leaf_s {
 	int (*setvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
 	int bbfdm_type;
 	char version[10] __attribute__((deprecated));
-	char *default_value;
 } DMLEAF;
 
 typedef struct dm_obj_s {

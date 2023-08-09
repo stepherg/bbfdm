@@ -1419,10 +1419,7 @@ static int get_value_param(DMPARAM_ARGS)
 		if (value && *value) {
 			value = check_value_by_type(value, leaf->type);
 		} else {
-			if (leaf->default_value)
-				value = check_value_by_type(leaf->default_value, leaf->type);
-			else
-				value = get_default_value_by_type(leaf->type);
+			value = get_default_value_by_type(leaf->type);
 		}
 
 		add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], NULL);
@@ -1467,10 +1464,7 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 		if (value && *value) {
 			value = check_value_by_type(value, leaf->type);
 		} else {
-			if (leaf->default_value)
-				value = check_value_by_type(leaf->default_value, leaf->type);
-			else
-				value = get_default_value_by_type(leaf->type);
+			value = get_default_value_by_type(leaf->type);
 		}
 
 		add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], NULL);
