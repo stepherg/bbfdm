@@ -279,33 +279,33 @@ static int get_ptm_stats_pack_sent(char *refparam, struct dmctx *ctx, void *data
 /* *** Device.PTM. *** */
 DMOBJ tPTMObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Link", &DMWRITE, add_ptm_link, delete_ptm_link, NULL, browsePtmLinkInst, NULL, NULL, tPTMLinkObj, tPTMLinkParams, get_ptm_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}, "2.0"},
+{"Link", &DMWRITE, add_ptm_link, delete_ptm_link, NULL, browsePtmLinkInst, NULL, NULL, tPTMLinkObj, tPTMLinkParams, get_ptm_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
 /* *** Device.PTM.Link.{i}. *** */
 DMOBJ tPTMLinkObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPTMLinkStatsParams, NULL, BBFDM_BOTH, NULL, "2.0"},
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPTMLinkStatsParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tPTMLinkParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMWRITE, DMT_BOOL, get_ptm_enable, set_ptm_enable, BBFDM_BOTH, "2.0"},
-{"Status", &DMREAD, DMT_STRING, get_ptm_status, NULL, BBFDM_BOTH, "2.0"},
-{"Alias", &DMWRITE, DMT_STRING, get_ptm_alias, set_ptm_alias, BBFDM_BOTH, "2.0"},
-{"Name", &DMREAD, DMT_STRING, get_ptm_link_name, NULL, BBFDM_BOTH, "2.0"},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_ptm_lower_layer, set_ptm_lower_layer, BBFDM_BOTH, "2.0"},
+{"Enable", &DMWRITE, DMT_BOOL, get_ptm_enable, set_ptm_enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_ptm_status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ptm_alias, set_ptm_alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_ptm_link_name, NULL, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_ptm_lower_layer, set_ptm_lower_layer, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.PTM.Link.{i}.Stats. *** */
 DMLEAF tPTMLinkStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BytesSent", &DMREAD, DMT_UNLONG, get_ptm_stats_bytes_sent, NULL, BBFDM_BOTH, "2.0"},
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_ptm_stats_bytes_received, NULL, BBFDM_BOTH, "2.0"},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_ptm_stats_pack_sent, NULL, BBFDM_BOTH, "2.0"},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_ptm_stats_pack_received, NULL, BBFDM_BOTH, "2.0"},
+{"BytesSent", &DMREAD, DMT_UNLONG, get_ptm_stats_bytes_sent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_ptm_stats_bytes_received, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_ptm_stats_pack_sent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_ptm_stats_pack_received, NULL, BBFDM_BOTH},
 {0}
 };

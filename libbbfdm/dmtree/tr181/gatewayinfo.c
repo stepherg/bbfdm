@@ -52,9 +52,9 @@ static int get_serial_number(char *refparam, struct dmctx *ctx, void *data, char
 /* *** Device.GatewayInfo. *** */
 DMLEAF tGatewayInfoParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ManufacturerOUI", &DMREAD, DMT_STRING, get_manufacturer_oui, NULL, BBFDM_CWMP, "2.0"},
-{"ProductClass", &DMREAD, DMT_STRING, get_product_class, NULL, BBFDM_CWMP, "2.0"},
-{"SerialNumber", &DMREAD, DMT_STRING, get_serial_number, NULL, BBFDM_CWMP, "2.0"},
+{"ManufacturerOUI", &DMREAD, DMT_STRING, get_manufacturer_oui, NULL, BBFDM_CWMP},
+{"ProductClass", &DMREAD, DMT_STRING, get_product_class, NULL, BBFDM_CWMP},
+{"SerialNumber", &DMREAD, DMT_STRING, get_serial_number, NULL, BBFDM_CWMP},
 {0}
 };
 

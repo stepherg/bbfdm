@@ -730,39 +730,39 @@ static int get_http_session_port(char *refparam, struct dmctx *ctx, void *data, 
 /* *** Device.UserInterface. *** */
 DMLEAF tUIParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMWRITE, DMT_BOOL, get_ui_enable, set_ui_enable, BBFDM_BOTH, "2.16"},
-{"HTTPAccessSupportedProtocols", &DMREAD, DMT_STRING, get_http_access_protocols, NULL, BBFDM_BOTH, "2.16"},
-{"HTTPAccessNumberOfEntries", &DMREAD, DMT_UNINT, get_http_entries_count, NULL, BBFDM_BOTH, "2.16"},
+{"Enable", &DMWRITE, DMT_BOOL, get_ui_enable, set_ui_enable, BBFDM_BOTH},
+{"HTTPAccessSupportedProtocols", &DMREAD, DMT_STRING, get_http_access_protocols, NULL, BBFDM_BOTH},
+{"HTTPAccessNumberOfEntries", &DMREAD, DMT_UNINT, get_http_entries_count, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ tUIHTTPAccessObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"HTTPAccess", &DMWRITE, addHTTPAccess, delHTTPAccess, "file:/etc/config/nginx", browseHTTPAccess, NULL, NULL, tHTTPSessionObj, tHTTPAccessParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias","Port",NULL}, "2.16"},
+{"HTTPAccess", &DMWRITE, addHTTPAccess, delHTTPAccess, "file:/etc/config/nginx", browseHTTPAccess, NULL, NULL, tHTTPSessionObj, tHTTPAccessParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias","Port",NULL}},
 {0}
 };
 
 DMLEAF tHTTPAccessParams[] = {
-{"Enable", &DMWRITE, DMT_BOOL, get_http_access_enable, set_http_access_enable, BBFDM_BOTH, "2.16"},
-{"Alias", &DMWRITE, DMT_STRING, get_http_access_alias, set_http_access_alias, BBFDM_BOTH, "2.16"},
-{"AccessType", &DMWRITE, DMT_STRING, get_http_access_type, set_http_access_type, BBFDM_BOTH, "2.16"},
-{"Interface", &DMWRITE, DMT_STRING, get_http_access_interface, set_http_access_interface, BBFDM_BOTH, "2.16"},
-{"Port", &DMWRITE, DMT_UNINT, get_http_access_port, set_http_access_port, BBFDM_BOTH, "2.16"},
-{"Protocol", &DMREAD, DMT_STRING, get_http_access_protocol, NULL, BBFDM_BOTH, "2.16"},
-{"AllowedHosts", &DMWRITE, DMT_STRING, get_http_access_hosts, set_http_access_hosts, BBFDM_BOTH, "2.16"},
-{"AllowedPathPrefixes", &DMWRITE, DMT_STRING, get_http_access_path, set_http_access_path, BBFDM_BOTH, "2.16"},
-{"ActivationDate", &DMREAD, DMT_TIME, get_http_access_activationdate, NULL, BBFDM_BOTH, "2.16"},
-{"SessionNumberOfEntries", &DMREAD, DMT_UNINT, get_http_access_session_num, NULL, BBFDM_BOTH, "2.16"},
+{"Enable", &DMWRITE, DMT_BOOL, get_http_access_enable, set_http_access_enable, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_http_access_alias, set_http_access_alias, BBFDM_BOTH},
+{"AccessType", &DMWRITE, DMT_STRING, get_http_access_type, set_http_access_type, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_http_access_interface, set_http_access_interface, BBFDM_BOTH},
+{"Port", &DMWRITE, DMT_UNINT, get_http_access_port, set_http_access_port, BBFDM_BOTH},
+{"Protocol", &DMREAD, DMT_STRING, get_http_access_protocol, NULL, BBFDM_BOTH},
+{"AllowedHosts", &DMWRITE, DMT_STRING, get_http_access_hosts, set_http_access_hosts, BBFDM_BOTH},
+{"AllowedPathPrefixes", &DMWRITE, DMT_STRING, get_http_access_path, set_http_access_path, BBFDM_BOTH},
+{"ActivationDate", &DMREAD, DMT_TIME, get_http_access_activationdate, NULL, BBFDM_BOTH},
+{"SessionNumberOfEntries", &DMREAD, DMT_UNINT, get_http_access_session_num, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ tHTTPSessionObj[] = {
-{"Session", &DMREAD, NULL, NULL, NULL, browseHTTPSession, NULL, NULL, NULL, tHTTPSessionParams, NULL, BBFDM_BOTH, NULL, "2.16"},
+{"Session", &DMREAD, NULL, NULL, NULL, browseHTTPSession, NULL, NULL, NULL, tHTTPSessionParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tHTTPSessionParams[] = {
-{"IPAddress", &DMREAD, DMT_STRING, get_http_session_ip, NULL, BBFDM_BOTH, "2.16"},
-{"Port", &DMREAD, DMT_UNINT, get_http_session_port, NULL, BBFDM_BOTH, "2.16"},
+{"IPAddress", &DMREAD, DMT_STRING, get_http_session_ip, NULL, BBFDM_BOTH},
+{"Port", &DMREAD, DMT_UNINT, get_http_session_port, NULL, BBFDM_BOTH},
 {0}
 };

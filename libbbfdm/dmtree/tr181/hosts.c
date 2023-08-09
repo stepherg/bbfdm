@@ -625,93 +625,93 @@ static int set_HostsAccessControlSchedule_Duration(char *refparam, struct dmctx 
 /* *** Device.Hosts. *** */
 DMOBJ tHostsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Host", &DMREAD, NULL, NULL, NULL, browseHostsHostInst, NULL, NULL, tHostsHostObj, tHostsHostParams, get_linker_host, BBFDM_BOTH, LIST_KEY{"PhysAddress", NULL}, "2.0"},
-{"AccessControl", &DMWRITE, addObjHostsAccessControl, delObjHostsAccessControl, NULL, browseHostsAccessControlInst, NULL, NULL, tHostsAccessControlObj, tHostsAccessControlParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "PhysAddress", NULL}, "2.14"},
+{"Host", &DMREAD, NULL, NULL, NULL, browseHostsHostInst, NULL, NULL, tHostsHostObj, tHostsHostParams, get_linker_host, BBFDM_BOTH, LIST_KEY{"PhysAddress", NULL}},
+{"AccessControl", &DMWRITE, addObjHostsAccessControl, delObjHostsAccessControl, NULL, browseHostsAccessControlInst, NULL, NULL, tHostsAccessControlObj, tHostsAccessControlParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "PhysAddress", NULL}},
 {0}
 };
 
 DMLEAF tHostsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"HostNumberOfEntries", &DMREAD, DMT_UNINT, get_Hosts_HostNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
-{"AccessControlNumberOfEntries", &DMREAD, DMT_UNINT, get_Hosts_AccessControlNumberOfEntries, NULL, BBFDM_BOTH, "2.14"},
+{"HostNumberOfEntries", &DMREAD, DMT_UNINT, get_Hosts_HostNumberOfEntries, NULL, BBFDM_BOTH},
+{"AccessControlNumberOfEntries", &DMREAD, DMT_UNINT, get_Hosts_AccessControlNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}. *** */
 DMOBJ tHostsHostObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseHostsHostIPv4AddressInst, NULL, NULL, NULL, tHostsHostIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}, "2.2"},
-{"IPv6Address", &DMREAD, NULL, NULL, NULL, browseHostsHostIPv6AddressInst, NULL, NULL, NULL, tHostsHostIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}, "2.2"},
-{"WANStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHostsHostWANStatsParams, NULL, BBFDM_BOTH, NULL, "2.12"},
+{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseHostsHostIPv4AddressInst, NULL, NULL, NULL, tHostsHostIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
+{"IPv6Address", &DMREAD, NULL, NULL, NULL, browseHostsHostIPv6AddressInst, NULL, NULL, NULL, tHostsHostIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
+{"WANStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tHostsHostWANStatsParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tHostsHostParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"PhysAddress", &DMREAD, DMT_STRING, get_HostsHost_PhysAddress, NULL, BBFDM_BOTH, "2.0"},
-{"IPAddress", &DMREAD, DMT_STRING, get_HostsHost_IPAddress, NULL, BBFDM_BOTH, "2.0"},
-{"DHCPClient", &DMREAD, DMT_STRING, get_HostsHost_DHCPClient, NULL, BBFDM_BOTH, "2.0"},
-{"AssociatedDevice", &DMREAD, DMT_STRING, get_HostsHost_AssociatedDevice, NULL, BBFDM_BOTH, "2.2"},
-{"Layer1Interface", &DMREAD, DMT_STRING, get_HostsHost_Layer1Interface, NULL, BBFDM_BOTH, "2.0"},
-{"Layer3Interface", &DMREAD, DMT_STRING, get_HostsHost_Layer3Interface, NULL, BBFDM_BOTH, "2.0"},
-{"InterfaceType", &DMREAD, DMT_STRING, get_HostsHost_InterfaceType, NULL, BBFDM_BOTH, "2.0"},
-{"HostName", &DMREAD, DMT_STRING, get_HostsHost_HostName, NULL, BBFDM_BOTH, "2.0"},
-{"Active", &DMREAD, DMT_BOOL, get_HostsHost_Active, NULL, BBFDM_BOTH, "2.0"},
-{"ActiveLastChange", &DMREAD, DMT_TIME, get_HostsHost_ActiveLastChange, NULL, BBFDM_BOTH, "2.10"},
-{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsHost_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
-{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsHost_IPv6AddressNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
+{"PhysAddress", &DMREAD, DMT_STRING, get_HostsHost_PhysAddress, NULL, BBFDM_BOTH},
+{"IPAddress", &DMREAD, DMT_STRING, get_HostsHost_IPAddress, NULL, BBFDM_BOTH},
+{"DHCPClient", &DMREAD, DMT_STRING, get_HostsHost_DHCPClient, NULL, BBFDM_BOTH},
+{"AssociatedDevice", &DMREAD, DMT_STRING, get_HostsHost_AssociatedDevice, NULL, BBFDM_BOTH},
+{"Layer1Interface", &DMREAD, DMT_STRING, get_HostsHost_Layer1Interface, NULL, BBFDM_BOTH},
+{"Layer3Interface", &DMREAD, DMT_STRING, get_HostsHost_Layer3Interface, NULL, BBFDM_BOTH},
+{"InterfaceType", &DMREAD, DMT_STRING, get_HostsHost_InterfaceType, NULL, BBFDM_BOTH},
+{"HostName", &DMREAD, DMT_STRING, get_HostsHost_HostName, NULL, BBFDM_BOTH},
+{"Active", &DMREAD, DMT_BOOL, get_HostsHost_Active, NULL, BBFDM_BOTH},
+{"ActiveLastChange", &DMREAD, DMT_TIME, get_HostsHost_ActiveLastChange, NULL, BBFDM_BOTH},
+{"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsHost_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH},
+{"IPv6AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsHost_IPv6AddressNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}.IPv4Address.{i}. *** */
 DMLEAF tHostsHostIPv4AddressParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"IPAddress", &DMREAD, DMT_STRING, get_HostsHostIPv4Address_IPAddress, NULL, BBFDM_BOTH, "2.2"},
+{"IPAddress", &DMREAD, DMT_STRING, get_HostsHostIPv4Address_IPAddress, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}.IPv6Address.{i}. *** */
 DMLEAF tHostsHostIPv6AddressParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"IPAddress", &DMREAD, DMT_STRING, get_HostsHostIPv6Address_IPAddress, NULL, BBFDM_BOTH, "2.2"},
+{"IPAddress", &DMREAD, DMT_STRING, get_HostsHostIPv6Address_IPAddress, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Hosts.Host.{i}.WANStats. *** */
 DMLEAF tHostsHostWANStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BytesSent", &DMREAD, DMT_UNINT, get_HostsHostWANStats_BytesSent, NULL, BBFDM_BOTH, "2.12"},
-{"BytesReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_BytesReceived, NULL, BBFDM_BOTH, "2.12"},
-{"PacketsSent", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsSent, NULL, BBFDM_BOTH, "2.12"},
-{"PacketsReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsReceived, NULL, BBFDM_BOTH, "2.12"},
+{"BytesSent", &DMREAD, DMT_UNINT, get_HostsHostWANStats_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_BytesReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNINT, get_HostsHostWANStats_PacketsReceived, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Hosts.AccessControl.{i}. *** */
 DMOBJ tHostsAccessControlObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Schedule", &DMWRITE, addObjHostsAccessControlSchedule, delObjHostsAccessControlSchedule, NULL, browseHostsAccessControlScheduleInst, NULL, NULL, NULL, tHostsAccessControlScheduleParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}, "2.14"},
+{"Schedule", &DMWRITE, addObjHostsAccessControlSchedule, delObjHostsAccessControlSchedule, NULL, browseHostsAccessControlScheduleInst, NULL, NULL, NULL, tHostsAccessControlScheduleParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
 DMLEAF tHostsAccessControlParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_HostsAccessControl_Alias, set_HostsAccessControl_Alias, BBFDM_BOTH, "2.14"},
-{"PhysAddress", &DMWRITE, DMT_STRING, get_HostsAccessControl_PhysAddress, set_HostsAccessControl_PhysAddress, BBFDM_BOTH, "2.14"},
-{"HostName", &DMWRITE, DMT_STRING, get_HostsAccessControl_HostName, set_HostsAccessControl_HostName, BBFDM_BOTH, "2.14"},
-{"Enable", &DMWRITE, DMT_BOOL, get_HostsAccessControl_Enable, set_HostsAccessControl_Enable, BBFDM_BOTH, "2.14"},
-{"AccessPolicy", &DMWRITE, DMT_STRING, get_HostsAccessControl_AccessPolicy, set_HostsAccessControl_AccessPolicy, BBFDM_BOTH, "2.14"},
-{"ScheduleNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsAccessControl_ScheduleNumberOfEntries, NULL, BBFDM_BOTH, "2.14"},
+{"Alias", &DMWRITE, DMT_STRING, get_HostsAccessControl_Alias, set_HostsAccessControl_Alias, BBFDM_BOTH},
+{"PhysAddress", &DMWRITE, DMT_STRING, get_HostsAccessControl_PhysAddress, set_HostsAccessControl_PhysAddress, BBFDM_BOTH},
+{"HostName", &DMWRITE, DMT_STRING, get_HostsAccessControl_HostName, set_HostsAccessControl_HostName, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_HostsAccessControl_Enable, set_HostsAccessControl_Enable, BBFDM_BOTH},
+{"AccessPolicy", &DMWRITE, DMT_STRING, get_HostsAccessControl_AccessPolicy, set_HostsAccessControl_AccessPolicy, BBFDM_BOTH},
+{"ScheduleNumberOfEntries", &DMREAD, DMT_UNINT, get_HostsAccessControl_ScheduleNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Hosts.AccessControl.{i}.Schedule.{i}. *** */
 DMLEAF tHostsAccessControlScheduleParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_HostsAccessControlSchedule_Alias, set_HostsAccessControlSchedule_Alias, BBFDM_BOTH, "2.14"},
-{"Enable", &DMWRITE, DMT_BOOL, get_HostsAccessControlSchedule_Enable, set_HostsAccessControlSchedule_Enable, BBFDM_BOTH, "2.14"},
-{"Day", &DMWRITE, DMT_STRING, get_HostsAccessControlSchedule_Day, set_HostsAccessControlSchedule_Day, BBFDM_BOTH, "2.14"},
-{"StartTime", &DMWRITE, DMT_STRING, get_HostsAccessControlSchedule_StartTime, set_HostsAccessControlSchedule_StartTime, BBFDM_BOTH, "2.14"},
-{"Duration", &DMWRITE, DMT_UNINT, get_HostsAccessControlSchedule_Duration, set_HostsAccessControlSchedule_Duration, BBFDM_BOTH, "2.14"},
+{"Alias", &DMWRITE, DMT_STRING, get_HostsAccessControlSchedule_Alias, set_HostsAccessControlSchedule_Alias, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_HostsAccessControlSchedule_Enable, set_HostsAccessControlSchedule_Enable, BBFDM_BOTH},
+{"Day", &DMWRITE, DMT_STRING, get_HostsAccessControlSchedule_Day, set_HostsAccessControlSchedule_Day, BBFDM_BOTH},
+{"StartTime", &DMWRITE, DMT_STRING, get_HostsAccessControlSchedule_StartTime, set_HostsAccessControlSchedule_StartTime, BBFDM_BOTH},
+{"Duration", &DMWRITE, DMT_UNINT, get_HostsAccessControlSchedule_Duration, set_HostsAccessControlSchedule_Duration, BBFDM_BOTH},
 {0}
 };

@@ -913,57 +913,57 @@ static int operate_session_delete(char *refparam, struct dmctx *ctx, void *data,
 /* *** Device.SSH. *** */
 DMOBJ tSSHObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Server", &DMWRITE, addObjSSHServer, delObjSSHServer, NULL, browseSSHServerInst, NULL, NULL, tSSHServerObj, tSSHServerParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}, "2.16"},
-{"AuthorizedKey", &DMWRITE, addObjSSHKey, delObjSSHKey, NULL, browseSSHKeyInst, NULL, NULL, NULL, tSSHKeyParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}, "2.16"},
+{"Server", &DMWRITE, addObjSSHServer, delObjSSHServer, NULL, browseSSHServerInst, NULL, NULL, tSSHServerObj, tSSHServerParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"AuthorizedKey", &DMWRITE, addObjSSHKey, delObjSSHKey, NULL, browseSSHKeyInst, NULL, NULL, NULL, tSSHKeyParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
 DMOBJ tSSHServerObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Session", &DMREAD, NULL, NULL, NULL, browseSSHServerSessionInst, NULL, NULL, NULL, tSSHServerSessionParams, NULL, BBFDM_BOTH, NULL, "2.16"},
+{"Session", &DMREAD, NULL, NULL, NULL, browseSSHServerSessionInst, NULL, NULL, NULL, tSSHServerSessionParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 /* *** Device.SSH. *** */
 DMLEAF tSSHParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ServerNumberOfEntries", &DMREAD, DMT_UNINT, get_ssh_server_num, NULL, BBFDM_BOTH, "2.16"},
-{"AuthorizedKeyNumberOfEntries", &DMREAD, DMT_UNINT, get_ssh_key_num, NULL, BBFDM_BOTH, "2.16"},
-{"Status", &DMREAD, DMT_STRING, get_ssh_status, NULL, BBFDM_BOTH, "2.16"},
+{"ServerNumberOfEntries", &DMREAD, DMT_UNINT, get_ssh_server_num, NULL, BBFDM_BOTH},
+{"AuthorizedKeyNumberOfEntries", &DMREAD, DMT_UNINT, get_ssh_key_num, NULL, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_ssh_status, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.SSH.Server. *** */
 DMLEAF tSSHServerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMWRITE, DMT_BOOL, get_ssh_server_enable, set_ssh_server_enable, BBFDM_BOTH, "2.16"},
-{"Alias", &DMWRITE, DMT_STRING, get_ssh_server_alias, set_ssh_server_alias, BBFDM_BOTH, "2.16"},
-{"Interface", &DMWRITE, DMT_STRING, get_ssh_server_interface, set_ssh_server_interface, BBFDM_BOTH, "2.16"},
-{"Port", &DMWRITE, DMT_UNINT, get_ssh_server_port, set_ssh_server_port, BBFDM_BOTH, "2.16"},
-{"IdleTimeout", &DMWRITE, DMT_UNINT, get_ssh_server_idle, set_ssh_server_idle, BBFDM_BOTH, "2.16"},
-{"KeepAlive", &DMWRITE, DMT_UNINT, get_ssh_server_keepalive, set_ssh_server_keepalive, BBFDM_BOTH, "2.16"},
-{"AllowRootLogin", &DMWRITE, DMT_BOOL, get_ssh_server_rootlogin, set_ssh_server_rootlogin, BBFDM_BOTH, "2.16"},
-{"AllowPasswordLogin", &DMWRITE, DMT_BOOL, get_ssh_server_passwordlogin, set_ssh_server_passwordlogin, BBFDM_BOTH, "2.16"},
-{"AllowRootPasswordLogin", &DMWRITE, DMT_BOOL, get_ssh_server_rootpasswordlogin, set_ssh_server_rootpasswordlogin, BBFDM_BOTH, "2.16"},
-{"MaxAuthTries", &DMWRITE, DMT_UNINT, get_ssh_server_maxauthtries, set_ssh_server_maxauthtries, BBFDM_BOTH, "2.16"},
-{"ActivationDate", &DMREAD, DMT_TIME, get_ssh_server_activationdate, NULL, BBFDM_BOTH, "2.16"},
-{"PID", &DMREAD, DMT_UNINT, get_ssh_server_pid, NULL, BBFDM_BOTH, "2.16"},
-{"SessionNumberOfEntries", &DMREAD, DMT_UNINT, get_ssh_server_session_num, NULL, BBFDM_BOTH, "2.16"},
+{"Enable", &DMWRITE, DMT_BOOL, get_ssh_server_enable, set_ssh_server_enable, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ssh_server_alias, set_ssh_server_alias, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_ssh_server_interface, set_ssh_server_interface, BBFDM_BOTH},
+{"Port", &DMWRITE, DMT_UNINT, get_ssh_server_port, set_ssh_server_port, BBFDM_BOTH},
+{"IdleTimeout", &DMWRITE, DMT_UNINT, get_ssh_server_idle, set_ssh_server_idle, BBFDM_BOTH},
+{"KeepAlive", &DMWRITE, DMT_UNINT, get_ssh_server_keepalive, set_ssh_server_keepalive, BBFDM_BOTH},
+{"AllowRootLogin", &DMWRITE, DMT_BOOL, get_ssh_server_rootlogin, set_ssh_server_rootlogin, BBFDM_BOTH},
+{"AllowPasswordLogin", &DMWRITE, DMT_BOOL, get_ssh_server_passwordlogin, set_ssh_server_passwordlogin, BBFDM_BOTH},
+{"AllowRootPasswordLogin", &DMWRITE, DMT_BOOL, get_ssh_server_rootpasswordlogin, set_ssh_server_rootpasswordlogin, BBFDM_BOTH},
+{"MaxAuthTries", &DMWRITE, DMT_UNINT, get_ssh_server_maxauthtries, set_ssh_server_maxauthtries, BBFDM_BOTH},
+{"ActivationDate", &DMREAD, DMT_TIME, get_ssh_server_activationdate, NULL, BBFDM_BOTH},
+{"PID", &DMREAD, DMT_UNINT, get_ssh_server_pid, NULL, BBFDM_BOTH},
+{"SessionNumberOfEntries", &DMREAD, DMT_UNINT, get_ssh_server_session_num, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tSSHServerSessionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"IPAddress", &DMREAD, DMT_STRING, get_ssh_server_session_ip, NULL, BBFDM_BOTH, "2.16"},
-{"Port", &DMREAD, DMT_UNINT, get_ssh_server_session_port, NULL, BBFDM_BOTH, "2.16"},
-{"Delete()", &DMSYNC, DMT_COMMAND, NULL, operate_session_delete, BBFDM_USP, "2.16"},
+{"IPAddress", &DMREAD, DMT_STRING, get_ssh_server_session_ip, NULL, BBFDM_BOTH},
+{"Port", &DMREAD, DMT_UNINT, get_ssh_server_session_port, NULL, BBFDM_BOTH},
+{"Delete()", &DMSYNC, DMT_COMMAND, NULL, operate_session_delete, BBFDM_USP},
 {0}
 };
 
 DMLEAF tSSHKeyParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_ssh_key_alias, set_ssh_key_alias, BBFDM_BOTH, "2.16"},
-{"Key", &DMWRITE, DMT_STRING, get_ssh_key_pubkey, set_ssh_key_pubkey, BBFDM_BOTH, "2.16"},
+{"Alias", &DMWRITE, DMT_STRING, get_ssh_key_alias, set_ssh_key_alias, BBFDM_BOTH},
+{"Key", &DMWRITE, DMT_STRING, get_ssh_key_pubkey, set_ssh_key_pubkey, BBFDM_BOTH},
 {0}
 };
 

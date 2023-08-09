@@ -3637,933 +3637,933 @@ static int get_event_args_WiFiDataElementsDisassociationEvent_Disassociated(char
 /* *** Device.WiFi.DataElements. *** */
 DMOBJ tWiFiDataElementsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Network", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkObj, tWiFiDataElementsNetworkParams, NULL, BBFDM_BOTH, NULL, "2.13"},
-{"AssociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsAssociationEventObj, tWiFiDataElementsAssociationEventParams, NULL, BBFDM_BOTH, NULL, "2.13"},
-{"DisassociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsDisassociationEventObj, tWiFiDataElementsDisassociationEventParams, NULL, BBFDM_BOTH, NULL, "2.13"},
-//{"FailedConnectionEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsFailedConnectionEventObj, tWiFiDataElementsFailedConnectionEventParams, NULL, BBFDM_BOTH, NULL, "2.15"},
+{"Network", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkObj, tWiFiDataElementsNetworkParams, NULL, BBFDM_BOTH, NULL},
+{"AssociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsAssociationEventObj, tWiFiDataElementsAssociationEventParams, NULL, BBFDM_BOTH, NULL},
+{"DisassociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsDisassociationEventObj, tWiFiDataElementsDisassociationEventParams, NULL, BBFDM_BOTH, NULL},
+//{"FailedConnectionEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsFailedConnectionEventObj, tWiFiDataElementsFailedConnectionEventParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network. *** */
 DMOBJ tWiFiDataElementsNetworkObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"SSID", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkSSIDInst, NULL, NULL, NULL, tWiFiDataElementsNetworkSSIDParams, NULL, BBFDM_BOTH, LIST_KEY{"SSID", NULL}, "2.15"},
-{"MultiAPSteeringSummaryStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkMultiAPSteeringSummaryStatsParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-{"Device", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceInst, NULL, NULL, tWiFiDataElementsNetworkDeviceObj, tWiFiDataElementsNetworkDeviceParams, NULL, BBFDM_BOTH, LIST_KEY{"ID", NULL}, "2.13"},
+{"SSID", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkSSIDInst, NULL, NULL, NULL, tWiFiDataElementsNetworkSSIDParams, NULL, BBFDM_BOTH, LIST_KEY{"SSID", NULL}},
+{"MultiAPSteeringSummaryStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkMultiAPSteeringSummaryStatsParams, NULL, BBFDM_BOTH, NULL},
+{"Device", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceInst, NULL, NULL, tWiFiDataElementsNetworkDeviceObj, tWiFiDataElementsNetworkDeviceParams, NULL, BBFDM_BOTH, LIST_KEY{"ID", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetwork_ID, NULL, BBFDM_BOTH, "2.13"},
-{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetwork_TimeStamp, NULL, BBFDM_BOTH, "2.13"},
-{"ControllerID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetwork_ControllerID, NULL, BBFDM_BOTH, "2.13"},
-{"DeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetwork_DeviceNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"MSCSDisallowedStaList", &DMREAD, DMT_STRING, get_WiFiDataElementsNetwork_MSCSDisallowedStaList, NULL, BBFDM_BOTH, "2.15"},
-{"SCSDisallowedStaList", &DMREAD, DMT_STRING, get_WiFiDataElementsNetwork_SCSDisallowedStaList, NULL, BBFDM_BOTH, "2.15"},
-{"SSIDNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetwork_SSIDNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
-{"SetTrafficSeparation()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetTrafficSeparation, operate_WiFiDataElementsNetwork_SetTrafficSeparation, BBFDM_USP, "2.15"},
-//{"SetServicePrioritization()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetServicePrioritization, operate_WiFiDataElementsNetwork_SetServicePrioritization, BBFDM_USP, "2.15"},
-{"SetPreferredBackhauls()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetPreferredBackhauls, operate_WiFiDataElementsNetwork_SetPreferredBackhauls, BBFDM_USP, "2.15"},
-{"SetSSID()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetSSID, operate_WiFiDataElementsNetwork_SetSSID, BBFDM_USP, "2.15"},
-//{"SetMSCSDisallowed()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetMSCSDisallowed, operate_WiFiDataElementsNetwork_SetMSCSDisallowed, BBFDM_USP, "2.15"},
-//{"SetSCSDisallowed()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetSCSDisallowed, operate_WiFiDataElementsNetwork_SetSCSDisallowed, BBFDM_USP, "2.15"},
+{"ID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetwork_ID, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetwork_TimeStamp, NULL, BBFDM_BOTH},
+{"ControllerID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetwork_ControllerID, NULL, BBFDM_BOTH},
+{"DeviceNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetwork_DeviceNumberOfEntries, NULL, BBFDM_BOTH},
+{"MSCSDisallowedStaList", &DMREAD, DMT_STRING, get_WiFiDataElementsNetwork_MSCSDisallowedStaList, NULL, BBFDM_BOTH},
+{"SCSDisallowedStaList", &DMREAD, DMT_STRING, get_WiFiDataElementsNetwork_SCSDisallowedStaList, NULL, BBFDM_BOTH},
+{"SSIDNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetwork_SSIDNumberOfEntries, NULL, BBFDM_BOTH},
+{"SetTrafficSeparation()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetTrafficSeparation, operate_WiFiDataElementsNetwork_SetTrafficSeparation, BBFDM_USP},
+//{"SetServicePrioritization()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetServicePrioritization, operate_WiFiDataElementsNetwork_SetServicePrioritization, BBFDM_USP},
+{"SetPreferredBackhauls()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetPreferredBackhauls, operate_WiFiDataElementsNetwork_SetPreferredBackhauls, BBFDM_USP},
+{"SetSSID()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetSSID, operate_WiFiDataElementsNetwork_SetSSID, BBFDM_USP},
+//{"SetMSCSDisallowed()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetMSCSDisallowed, operate_WiFiDataElementsNetwork_SetMSCSDisallowed, BBFDM_USP},
+//{"SetSCSDisallowed()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetwork_SetSCSDisallowed, operate_WiFiDataElementsNetwork_SetSCSDisallowed, BBFDM_USP},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.SSID.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkSSIDParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"SSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkSSID_SSID, NULL, BBFDM_BOTH, "2.15"},
-{"Band", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkSSID_Band, NULL, BBFDM_BOTH, "2.15"},
+{"SSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkSSID_SSID, NULL, BBFDM_BOTH},
+{"Band", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkSSID_Band, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.MultiAPSteeringSummaryStats. *** */
 DMLEAF tWiFiDataElementsNetworkMultiAPSteeringSummaryStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"NoCandidateAPFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_NoCandidateAPFailures, NULL, BBFDM_BOTH, "2.15"},
-{"BlacklistAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BlacklistAttempts, NULL, BBFDM_BOTH, "2.15"},
-{"BlacklistSuccesses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BlacklistSuccesses, NULL, BBFDM_BOTH, "2.15"},
-{"BlacklistFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BlacklistFailures, NULL, BBFDM_BOTH, "2.15"},
-{"BTMAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMAttempts, NULL, BBFDM_BOTH, "2.15"},
-{"BTMSuccesses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMSuccesses, NULL, BBFDM_BOTH, "2.15"},
-{"BTMFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMFailures, NULL, BBFDM_BOTH, "2.15"},
-{"BTMQueryResponses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMQueryResponses, NULL, BBFDM_BOTH, "2.15"},
+{"NoCandidateAPFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_NoCandidateAPFailures, NULL, BBFDM_BOTH},
+{"BlacklistAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BlacklistAttempts, NULL, BBFDM_BOTH},
+{"BlacklistSuccesses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BlacklistSuccesses, NULL, BBFDM_BOTH},
+{"BlacklistFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BlacklistFailures, NULL, BBFDM_BOTH},
+{"BTMAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMAttempts, NULL, BBFDM_BOTH},
+{"BTMSuccesses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMSuccesses, NULL, BBFDM_BOTH},
+{"BTMFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMFailures, NULL, BBFDM_BOTH},
+{"BTMQueryResponses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkMultiAPSteeringSummaryStats_BTMQueryResponses, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Default8021Q", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceDefault8021QInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceDefault8021QParams, NULL, BBFDM_BOTH, LIST_KEY{"PrimaryVID", NULL}, "2.15"},
-{"SSIDtoVIDMapping", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceSSIDtoVIDMappingInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceSSIDtoVIDMappingParams, NULL, BBFDM_BOTH, LIST_KEY{"SSID", NULL}, "2.15"},
-{"CACStatus", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceCACStatusInst, NULL, NULL, tWiFiDataElementsNetworkDeviceCACStatusObj, tWiFiDataElementsNetworkDeviceCACStatusParams, NULL, BBFDM_BOTH, LIST_KEY{"TimeStamp", NULL}, "2.15"},
-//{"SPRule", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceSPRuleInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceSPRuleParams, NULL, BBFDM_BOTH, LIST_KEY{"ID", NULL}, "2.15"},
-{"IEEE1905Security", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceIEEE1905SecurityInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceIEEE1905SecurityParams, NULL, BBFDM_BOTH, LIST_KEY{"OnboardingProtocol", NULL}, "2.15"},
-//{"AnticipatedChannels", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceAnticipatedChannelsInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceAnticipatedChannelsParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}, "2.15"},
-//{"AnticipatedChannelUsage", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceAnticipatedChannelUsageInst, NULL, NULL, tWiFiDataElementsNetworkDeviceAnticipatedChannelUsageObj, tWiFiDataElementsNetworkDeviceAnticipatedChannelUsageParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}, "2.15"},
-{"MultiAPDevice", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceObj, tWiFiDataElementsNetworkDeviceMultiAPDeviceParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-{"Radio", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioObj, tWiFiDataElementsNetworkDeviceRadioParams, NULL, BBFDM_BOTH, LIST_KEY{"ID", NULL}, "2.13"},
+{"Default8021Q", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceDefault8021QInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceDefault8021QParams, NULL, BBFDM_BOTH, LIST_KEY{"PrimaryVID", NULL}},
+{"SSIDtoVIDMapping", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceSSIDtoVIDMappingInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceSSIDtoVIDMappingParams, NULL, BBFDM_BOTH, LIST_KEY{"SSID", NULL}},
+{"CACStatus", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceCACStatusInst, NULL, NULL, tWiFiDataElementsNetworkDeviceCACStatusObj, tWiFiDataElementsNetworkDeviceCACStatusParams, NULL, BBFDM_BOTH, LIST_KEY{"TimeStamp", NULL}},
+//{"SPRule", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceSPRuleInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceSPRuleParams, NULL, BBFDM_BOTH, LIST_KEY{"ID", NULL}},
+{"IEEE1905Security", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceIEEE1905SecurityInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceIEEE1905SecurityParams, NULL, BBFDM_BOTH, LIST_KEY{"OnboardingProtocol", NULL}},
+//{"AnticipatedChannels", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceAnticipatedChannelsInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceAnticipatedChannelsParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}},
+//{"AnticipatedChannelUsage", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceAnticipatedChannelUsageInst, NULL, NULL, tWiFiDataElementsNetworkDeviceAnticipatedChannelUsageObj, tWiFiDataElementsNetworkDeviceAnticipatedChannelUsageParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}},
+{"MultiAPDevice", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceObj, tWiFiDataElementsNetworkDeviceMultiAPDeviceParams, NULL, BBFDM_BOTH, NULL},
+{"Radio", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioObj, tWiFiDataElementsNetworkDeviceRadioParams, NULL, BBFDM_BOTH, LIST_KEY{"ID", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_ID, NULL, BBFDM_BOTH, "2.13"},
-{"MultiAPCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDevice_MultiAPCapabilities, NULL, BBFDM_BOTH, "2.13"},
-{"CollectionInterval", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_CollectionInterval, NULL, BBFDM_BOTH, "2.13"},
-{"ReportUnsuccessfulAssociations", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDevice_ReportUnsuccessfulAssociations, set_WiFiDataElementsNetworkDevice_ReportUnsuccessfulAssociations, BBFDM_BOTH, "2.15"},
-{"MaxReportingRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_MaxReportingRate, NULL, BBFDM_BOTH, "2.15"},
-{"APMetricsReportingInterval", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDevice_APMetricsReportingInterval, set_WiFiDataElementsNetworkDevice_APMetricsReportingInterval, BBFDM_BOTH, "2.15"},
-{"Manufacturer", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_Manufacturer, NULL, BBFDM_BOTH, "2.15"},
-{"SerialNumber", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_SerialNumber, NULL, BBFDM_BOTH, "2.15"},
-// {"ManufacturerModel", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_ManufacturerModel, NULL, BBFDM_BOTH, "2.15"},
-{"SoftwareVersion", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_SoftwareVersion, NULL, BBFDM_BOTH, "2.15"},
-{"ExecutionEnv", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_ExecutionEnv, NULL, BBFDM_BOTH, "2.15"},
-// {"DSCPMap", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDevice_DSCPMap, NULL, BBFDM_BOTH, "2.15"},
-{"MaxPrioritizationRules", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_MaxPrioritizationRules, NULL, BBFDM_BOTH, "2.15"},
-{"PrioritizationSupport", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_PrioritizationSupport, NULL, BBFDM_BOTH, "2.15"},
-{"MaxVIDs", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_MaxVIDs, NULL, BBFDM_BOTH, "2.15"},
-// {"APMetricsWiFi6", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_APMetricsWiFi6, NULL, BBFDM_BOTH, "2.15"},
-{"CountryCode", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_CountryCode, NULL, BBFDM_BOTH, "2.15"},
-{"LocalSteeringDisallowedSTAList", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDevice_LocalSteeringDisallowedSTAList, set_WiFiDataElementsNetworkDevice_LocalSteeringDisallowedSTAList, BBFDM_BOTH, "2.15"},
-{"BTMSteeringDisallowedSTAList", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDevice_BTMSteeringDisallowedSTAList, set_WiFiDataElementsNetworkDevice_BTMSteeringDisallowedSTAList, BBFDM_BOTH, "2.15"},
-{"DFSEnable", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_DFSEnable, NULL, BBFDM_BOTH, "2.15"},
-{"ReportIndependentScans", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDevice_ReportIndependentScans, set_WiFiDataElementsNetworkDevice_ReportIndependentScans, BBFDM_BOTH, "2.15"},
-// {"AssociatedSTAinAPMetricsWiFi6", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDevice_AssociatedSTAinAPMetricsWiFi6, set_WiFiDataElementsNetworkDevice_AssociatedSTAinAPMetricsWiFi6, BBFDM_BOTH, "2.15"},
-// {"MaxUnsuccessfulAssociationReportingRate", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDevice_MaxUnsuccessfulAssociationReportingRate, set_WiFiDataElementsNetworkDevice_MaxUnsuccessfulAssociationReportingRate, BBFDM_BOTH, "2.15"},
-{"STASteeringState", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_STASteeringState, NULL, BBFDM_BOTH, "2.15"},
-// {"CoordinatedCACAllowed", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDevice_CoordinatedCACAllowed, set_WiFiDataElementsNetworkDevice_CoordinatedCACAllowed, BBFDM_BOTH, "2.15"},
-{"TrafficSeparationAllowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_TrafficSeparationAllowed, NULL, BBFDM_BOTH, "2.15"},
-// {"ServicePrioritizationAllowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_ServicePrioritizationAllowed, NULL, BBFDM_BOTH, "2.15"},
-{"RadioNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_RadioNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"Default8021QNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_Default8021QNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"SSIDtoVIDMappingNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_SSIDtoVIDMappingNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"CACStatusNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_CACStatusNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"IEEE1905SecurityNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_IEEE1905SecurityNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"SPRuleNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_SPRuleNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"AnticipatedChannelsNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_AnticipatedChannelsNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"AnticipatedChannelUsageNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_AnticipatedChannelUsageNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-//{"SetSTASteeringState()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetSTASteeringState, operate_WiFiDataElementsNetworkDevice_SetSTASteeringState, BBFDM_USP, "2.15"},
-//{"SetDFSState()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetDFSState, operate_WiFiDataElementsNetworkDevice_SetDFSState, BBFDM_USP, "2.15"},
-//{"SetAnticipatedChannelPreference()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetAnticipatedChannelPreference, operate_WiFiDataElementsNetworkDevice_SetAnticipatedChannelPreference, BBFDM_USP, "2.15"},
+{"ID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_ID, NULL, BBFDM_BOTH},
+{"MultiAPCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDevice_MultiAPCapabilities, NULL, BBFDM_BOTH},
+{"CollectionInterval", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_CollectionInterval, NULL, BBFDM_BOTH},
+{"ReportUnsuccessfulAssociations", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDevice_ReportUnsuccessfulAssociations, set_WiFiDataElementsNetworkDevice_ReportUnsuccessfulAssociations, BBFDM_BOTH},
+{"MaxReportingRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_MaxReportingRate, NULL, BBFDM_BOTH},
+{"APMetricsReportingInterval", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDevice_APMetricsReportingInterval, set_WiFiDataElementsNetworkDevice_APMetricsReportingInterval, BBFDM_BOTH},
+{"Manufacturer", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_Manufacturer, NULL, BBFDM_BOTH},
+{"SerialNumber", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_SerialNumber, NULL, BBFDM_BOTH},
+// {"ManufacturerModel", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_ManufacturerModel, NULL, BBFDM_BOTH},
+{"SoftwareVersion", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_SoftwareVersion, NULL, BBFDM_BOTH},
+{"ExecutionEnv", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_ExecutionEnv, NULL, BBFDM_BOTH},
+// {"DSCPMap", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDevice_DSCPMap, NULL, BBFDM_BOTH},
+{"MaxPrioritizationRules", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_MaxPrioritizationRules, NULL, BBFDM_BOTH},
+{"PrioritizationSupport", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_PrioritizationSupport, NULL, BBFDM_BOTH},
+{"MaxVIDs", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_MaxVIDs, NULL, BBFDM_BOTH},
+// {"APMetricsWiFi6", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_APMetricsWiFi6, NULL, BBFDM_BOTH},
+{"CountryCode", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_CountryCode, NULL, BBFDM_BOTH},
+{"LocalSteeringDisallowedSTAList", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDevice_LocalSteeringDisallowedSTAList, set_WiFiDataElementsNetworkDevice_LocalSteeringDisallowedSTAList, BBFDM_BOTH},
+{"BTMSteeringDisallowedSTAList", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDevice_BTMSteeringDisallowedSTAList, set_WiFiDataElementsNetworkDevice_BTMSteeringDisallowedSTAList, BBFDM_BOTH},
+{"DFSEnable", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_DFSEnable, NULL, BBFDM_BOTH},
+{"ReportIndependentScans", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDevice_ReportIndependentScans, set_WiFiDataElementsNetworkDevice_ReportIndependentScans, BBFDM_BOTH},
+// {"AssociatedSTAinAPMetricsWiFi6", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDevice_AssociatedSTAinAPMetricsWiFi6, set_WiFiDataElementsNetworkDevice_AssociatedSTAinAPMetricsWiFi6, BBFDM_BOTH},
+// {"MaxUnsuccessfulAssociationReportingRate", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDevice_MaxUnsuccessfulAssociationReportingRate, set_WiFiDataElementsNetworkDevice_MaxUnsuccessfulAssociationReportingRate, BBFDM_BOTH},
+{"STASteeringState", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_STASteeringState, NULL, BBFDM_BOTH},
+// {"CoordinatedCACAllowed", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDevice_CoordinatedCACAllowed, set_WiFiDataElementsNetworkDevice_CoordinatedCACAllowed, BBFDM_BOTH},
+{"TrafficSeparationAllowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_TrafficSeparationAllowed, NULL, BBFDM_BOTH},
+// {"ServicePrioritizationAllowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDevice_ServicePrioritizationAllowed, NULL, BBFDM_BOTH},
+{"RadioNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_RadioNumberOfEntries, NULL, BBFDM_BOTH},
+{"Default8021QNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_Default8021QNumberOfEntries, NULL, BBFDM_BOTH},
+{"SSIDtoVIDMappingNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_SSIDtoVIDMappingNumberOfEntries, NULL, BBFDM_BOTH},
+{"CACStatusNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_CACStatusNumberOfEntries, NULL, BBFDM_BOTH},
+{"IEEE1905SecurityNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_IEEE1905SecurityNumberOfEntries, NULL, BBFDM_BOTH},
+{"SPRuleNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_SPRuleNumberOfEntries, NULL, BBFDM_BOTH},
+{"AnticipatedChannelsNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_AnticipatedChannelsNumberOfEntries, NULL, BBFDM_BOTH},
+{"AnticipatedChannelUsageNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_AnticipatedChannelUsageNumberOfEntries, NULL, BBFDM_BOTH},
+//{"SetSTASteeringState()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetSTASteeringState, operate_WiFiDataElementsNetworkDevice_SetSTASteeringState, BBFDM_USP},
+//{"SetDFSState()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetDFSState, operate_WiFiDataElementsNetworkDevice_SetDFSState, BBFDM_USP},
+//{"SetAnticipatedChannelPreference()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetAnticipatedChannelPreference, operate_WiFiDataElementsNetworkDevice_SetAnticipatedChannelPreference, BBFDM_USP},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Default8021Q.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceDefault8021QParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDeviceDefault8021Q_Enable, set_WiFiDataElementsNetworkDeviceDefault8021Q_Enable, BBFDM_BOTH, "2.15"},
-{"PrimaryVID", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceDefault8021Q_PrimaryVID, set_WiFiDataElementsNetworkDeviceDefault8021Q_PrimaryVID, BBFDM_BOTH, "2.15"},
-{"DefaultPCP", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceDefault8021Q_DefaultPCP, set_WiFiDataElementsNetworkDeviceDefault8021Q_DefaultPCP, BBFDM_BOTH, "2.15"},
+{"Enable", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDeviceDefault8021Q_Enable, set_WiFiDataElementsNetworkDeviceDefault8021Q_Enable, BBFDM_BOTH},
+{"PrimaryVID", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceDefault8021Q_PrimaryVID, set_WiFiDataElementsNetworkDeviceDefault8021Q_PrimaryVID, BBFDM_BOTH},
+{"DefaultPCP", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceDefault8021Q_DefaultPCP, set_WiFiDataElementsNetworkDeviceDefault8021Q_DefaultPCP, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.SSIDtoVIDMapping.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceSSIDtoVIDMappingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"SSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceSSIDtoVIDMapping_SSID, NULL, BBFDM_BOTH, "2.15"},
-{"VID", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceSSIDtoVIDMapping_VID, NULL, BBFDM_BOTH, "2.15"},
+{"SSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceSSIDtoVIDMapping_SSID, NULL, BBFDM_BOTH},
+{"VID", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceSSIDtoVIDMapping_VID, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.CACStatus.{i}. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceCACStatusObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"CACAvailableChannel", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceCACStatusCACAvailableChannelInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceCACStatusCACAvailableChannelParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}, "2.15"},
-{"CACNonOccupancyChannel", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceCACStatusCACNonOccupancyChannelInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceCACStatusCACNonOccupancyChannelParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}, "2.15"},
-{"CACActiveChannel", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceCACStatusCACActiveChannelInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceCACStatusCACActiveChannelParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}, "2.15"},
+{"CACAvailableChannel", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceCACStatusCACAvailableChannelInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceCACStatusCACAvailableChannelParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}},
+{"CACNonOccupancyChannel", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceCACStatusCACNonOccupancyChannelInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceCACStatusCACNonOccupancyChannelParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}},
+{"CACActiveChannel", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceCACStatusCACActiveChannelInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceCACStatusCACActiveChannelParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceCACStatusParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"TimeStamp", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceCACStatus_TimeStamp, NULL, BBFDM_BOTH, "2.15"},
-{"CACAvailableChannelNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatus_CACAvailableChannelNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
-{"CACNonOccupancyChannelNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatus_CACNonOccupancyChannelNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
-{"CACActiveChannelNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatus_CACActiveChannelNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
+{"TimeStamp", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceCACStatus_TimeStamp, NULL, BBFDM_BOTH},
+{"CACAvailableChannelNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatus_CACAvailableChannelNumberOfEntries, NULL, BBFDM_BOTH},
+{"CACNonOccupancyChannelNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatus_CACNonOccupancyChannelNumberOfEntries, NULL, BBFDM_BOTH},
+{"CACActiveChannelNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatus_CACActiveChannelNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.CACStatus.{i}.CACAvailableChannel.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceCACStatusCACAvailableChannelParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACAvailableChannel_OpClass, NULL, BBFDM_BOTH, "2.15"},
-{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACAvailableChannel_Channel, NULL, BBFDM_BOTH, "2.15"},
-{"Minutes", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACAvailableChannel_Minutes, NULL, BBFDM_BOTH, "2.15"},
+{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACAvailableChannel_OpClass, NULL, BBFDM_BOTH},
+{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACAvailableChannel_Channel, NULL, BBFDM_BOTH},
+{"Minutes", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACAvailableChannel_Minutes, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.CACStatus.{i}.CACNonOccupancyChannel.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceCACStatusCACNonOccupancyChannelParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACNonOccupancyChannel_OpClass, NULL, BBFDM_BOTH, "2.15"},
-{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACNonOccupancyChannel_Channel, NULL, BBFDM_BOTH, "2.15"},
-{"Seconds", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACNonOccupancyChannel_Seconds, NULL, BBFDM_BOTH, "2.15"},
+{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACNonOccupancyChannel_OpClass, NULL, BBFDM_BOTH},
+{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACNonOccupancyChannel_Channel, NULL, BBFDM_BOTH},
+{"Seconds", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACNonOccupancyChannel_Seconds, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.CACStatus.{i}.CACActiveChannel.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceCACStatusCACActiveChannelParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACActiveChannel_OpClass, NULL, BBFDM_BOTH, "2.15"},
-{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACActiveChannel_Channel, NULL, BBFDM_BOTH, "2.15"},
-{"Countdown", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACActiveChannel_Countdown, NULL, BBFDM_BOTH, "2.15"},
+{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACActiveChannel_OpClass, NULL, BBFDM_BOTH},
+{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACActiveChannel_Channel, NULL, BBFDM_BOTH},
+{"Countdown", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceCACStatusCACActiveChannel_Countdown, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.SPRule.{i}. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceSPRuleParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"ID", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceSPRule_ID, NULL, BBFDM_BOTH, "2.15"},
-//{"Precedence", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceSPRule_Precedence, NULL, BBFDM_BOTH, "2.15"},
-//{"Output", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceSPRule_Output, NULL, BBFDM_BOTH, "2.15"},
-//{"AlwaysMatch", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceSPRule_AlwaysMatch, NULL, BBFDM_BOTH, "2.15"},
+//{"ID", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceSPRule_ID, NULL, BBFDM_BOTH},
+//{"Precedence", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceSPRule_Precedence, NULL, BBFDM_BOTH},
+//{"Output", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceSPRule_Output, NULL, BBFDM_BOTH},
+//{"AlwaysMatch", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceSPRule_AlwaysMatch, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.IEEE1905Security.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceIEEE1905SecurityParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"OnboardingProtocol", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceIEEE1905Security_OnboardingProtocol, NULL, BBFDM_BOTH, "2.15"},
-{"IntegrityAlgorithm", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceIEEE1905Security_IntegrityAlgorithm, NULL, BBFDM_BOTH, "2.15"},
-{"EncryptionAlgorithm", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceIEEE1905Security_EncryptionAlgorithm, NULL, BBFDM_BOTH, "2.15"},
+{"OnboardingProtocol", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceIEEE1905Security_OnboardingProtocol, NULL, BBFDM_BOTH},
+{"IntegrityAlgorithm", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceIEEE1905Security_IntegrityAlgorithm, NULL, BBFDM_BOTH},
+{"EncryptionAlgorithm", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceIEEE1905Security_EncryptionAlgorithm, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.AnticipatedChannels.{i}. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceAnticipatedChannelsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannels_OpClass, NULL, BBFDM_BOTH, "2.15"},
-//{"ChannelList", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceAnticipatedChannels_ChannelList, NULL, BBFDM_BOTH, "2.15"},
+//{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannels_OpClass, NULL, BBFDM_BOTH},
+//{"ChannelList", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceAnticipatedChannels_ChannelList, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.AnticipatedChannelUsage.{i}. *** */
 //DMOBJ tWiFiDataElementsNetworkDeviceAnticipatedChannelUsageObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-//{"Entry", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntryInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntryParams, NULL, BBFDM_BOTH, LIST_KEY{"BurstStartTime", NULL}, "2.15"},
+//{"Entry", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntryInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntryParams, NULL, BBFDM_BOTH, LIST_KEY{"BurstStartTime", NULL}},
 //{0}
 //};
 
 //DMLEAF tWiFiDataElementsNetworkDeviceAnticipatedChannelUsageParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsage_OpClass, NULL, BBFDM_BOTH, "2.15"},
-//{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsage_Channel, NULL, BBFDM_BOTH, "2.15"},
-//{"ReferenceBSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsage_ReferenceBSSID, NULL, BBFDM_BOTH, "2.15"},
-//{"EntryNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsage_EntryNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
+//{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsage_OpClass, NULL, BBFDM_BOTH},
+//{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsage_Channel, NULL, BBFDM_BOTH},
+//{"ReferenceBSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsage_ReferenceBSSID, NULL, BBFDM_BOTH},
+//{"EntryNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsage_EntryNumberOfEntries, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.AnticipatedChannelUsage.{i}.Entry.{i}. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntryParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"BurstStartTime", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_BurstStartTime, NULL, BBFDM_BOTH, "2.15"},
-//{"BurstLength", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_BurstLength, NULL, BBFDM_BOTH, "2.15"},
-//{"Repetitions", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_Repetitions, NULL, BBFDM_BOTH, "2.15"},
-//{"BurstInterval", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_BurstInterval, NULL, BBFDM_BOTH, "2.15"},
-//{"RUBitmask", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_RUBitmask, NULL, BBFDM_BOTH, "2.15"},
-//{"TransmitterIdentifier", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_TransmitterIdentifier, NULL, BBFDM_BOTH, "2.15"},
-//{"PowerLevel", &DMREAD, DMT_INT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_PowerLevel, NULL, BBFDM_BOTH, "2.15"},
-//{"ChannelUsageReason", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_ChannelUsageReason, NULL, BBFDM_BOTH, "2.15"},
+//{"BurstStartTime", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_BurstStartTime, NULL, BBFDM_BOTH},
+//{"BurstLength", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_BurstLength, NULL, BBFDM_BOTH},
+//{"Repetitions", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_Repetitions, NULL, BBFDM_BOTH},
+//{"BurstInterval", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_BurstInterval, NULL, BBFDM_BOTH},
+//{"RUBitmask", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_RUBitmask, NULL, BBFDM_BOTH},
+//{"TransmitterIdentifier", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_TransmitterIdentifier, NULL, BBFDM_BOTH},
+//{"PowerLevel", &DMREAD, DMT_INT, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_PowerLevel, NULL, BBFDM_BOTH},
+//{"ChannelUsageReason", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceAnticipatedChannelUsageEntry_ChannelUsageReason, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceMultiAPDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Backhaul", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulObj, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulParams, NULL, BBFDM_BOTH, NULL, "2.15"},
+{"Backhaul", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulObj, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-// {"ManufacturerOUI", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDevice_ManufacturerOUI, NULL, BBFDM_BOTH, "2.15"},
-// {"LastContactTime", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceMultiAPDevice_LastContactTime, NULL, BBFDM_BOTH, "2.15"},
-{"AssocIEEE1905DeviceRef", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDevice_AssocIEEE1905DeviceRef, NULL, BBFDM_BOTH, "2.15"},
-// {"EasyMeshControllerOperationMode", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDevice_EasyMeshControllerOperationMode, NULL, BBFDM_BOTH, "2.15"},
-// {"EasyMeshAgentOperationMode", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDevice_EasyMeshAgentOperationMode, NULL, BBFDM_BOTH, "2.15"},
+// {"ManufacturerOUI", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDevice_ManufacturerOUI, NULL, BBFDM_BOTH},
+// {"LastContactTime", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceMultiAPDevice_LastContactTime, NULL, BBFDM_BOTH},
+{"AssocIEEE1905DeviceRef", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDevice_AssocIEEE1905DeviceRef, NULL, BBFDM_BOTH},
+// {"EasyMeshControllerOperationMode", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDevice_EasyMeshControllerOperationMode, NULL, BBFDM_BOTH},
+// {"EasyMeshAgentOperationMode", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDevice_EasyMeshAgentOperationMode, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice.Backhaul. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-//{"CurrentOperatingClassProfile", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfileInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfileParams, NULL, BBFDM_BOTH, LIST_KEY{"Class", NULL}, "2.15"},
-//{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStatsParams, NULL, BBFDM_BOTH, NULL, "2.15"},
+//{"CurrentOperatingClassProfile", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfileInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfileParams, NULL, BBFDM_BOTH, LIST_KEY{"Class", NULL}},
+//{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStatsParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"LinkType", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_LinkType, NULL, BBFDM_BOTH, "2.15"},
-{"BackhaulMACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulMACAddress, NULL, BBFDM_BOTH, "2.15"},
-{"BackhaulDeviceID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulDeviceID, NULL, BBFDM_BOTH, "2.15"},
-{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_MACAddress, NULL, BBFDM_BOTH, "2.15"},
-//{"CurrentOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_CurrentOperatingClassProfileNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
-//{"SteerWiFiBackhaul()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul, operate_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul, BBFDM_USP, "2.15"},
+{"LinkType", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_LinkType, NULL, BBFDM_BOTH},
+{"BackhaulMACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulMACAddress, NULL, BBFDM_BOTH},
+{"BackhaulDeviceID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulDeviceID, NULL, BBFDM_BOTH},
+{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_MACAddress, NULL, BBFDM_BOTH},
+//{"CurrentOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_CurrentOperatingClassProfileNumberOfEntries, NULL, BBFDM_BOTH},
+//{"SteerWiFiBackhaul()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul, operate_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul, BBFDM_USP},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice.Backhaul.CurrentOperatingClassProfile.{i}. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"Class", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_Class, NULL, BBFDM_BOTH, "2.15"},
-//{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_Channel, NULL, BBFDM_BOTH, "2.15"},
-//{"TxPower", &DMREAD, DMT_INT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_TxPower, NULL, BBFDM_BOTH, "2.15"},
-//{"TimeStamp", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_TimeStamp, NULL, BBFDM_BOTH, "2.15"},
+//{"Class", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_Class, NULL, BBFDM_BOTH},
+//{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_Channel, NULL, BBFDM_BOTH},
+//{"TxPower", &DMREAD, DMT_INT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_TxPower, NULL, BBFDM_BOTH},
+//{"TimeStamp", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_TimeStamp, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice.Backhaul.Stats. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"BytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_BytesSent, NULL, BBFDM_BOTH, "2.15"},
-//{"BytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_BytesReceived, NULL, BBFDM_BOTH, "2.15"},
-//{"PacketsSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_PacketsSent, NULL, BBFDM_BOTH, "2.15"},
-//{"PacketsReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_PacketsReceived, NULL, BBFDM_BOTH, "2.15"},
-//{"ErrorsSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_ErrorsSent, NULL, BBFDM_BOTH, "2.15"},
-//{"ErrorsReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_ErrorsReceived, NULL, BBFDM_BOTH, "2.15"},
-//{"LinkUtilization", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_LinkUtilization, NULL, BBFDM_BOTH, "2.15"},
-//{"SignalStrength", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_SignalStrength, NULL, BBFDM_BOTH, "2.15"},
-//{"LastDataDownlinkRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_LastDataDownlinkRate, NULL, BBFDM_BOTH, "2.15"},
-//{"LastDataUplinkRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_LastDataUplinkRate, NULL, BBFDM_BOTH, "2.15"},
-//{"TimeStamp", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_TimeStamp, NULL, BBFDM_BOTH, "2.15"},
+//{"BytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_BytesSent, NULL, BBFDM_BOTH},
+//{"BytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_BytesReceived, NULL, BBFDM_BOTH},
+//{"PacketsSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_PacketsSent, NULL, BBFDM_BOTH},
+//{"PacketsReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_PacketsReceived, NULL, BBFDM_BOTH},
+//{"ErrorsSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_ErrorsSent, NULL, BBFDM_BOTH},
+//{"ErrorsReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_ErrorsReceived, NULL, BBFDM_BOTH},
+//{"LinkUtilization", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_LinkUtilization, NULL, BBFDM_BOTH},
+//{"SignalStrength", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_SignalStrength, NULL, BBFDM_BOTH},
+//{"LastDataDownlinkRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_LastDataDownlinkRate, NULL, BBFDM_BOTH},
+//{"LastDataUplinkRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_LastDataUplinkRate, NULL, BBFDM_BOTH},
+//{"TimeStamp", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_TimeStamp, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceRadioObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"ScanResult", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioScanResultInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultObj, tWiFiDataElementsNetworkDeviceRadioScanResultParams, NULL, BBFDM_BOTH, NULL, "2.14"},
-{"BackhaulSta", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBackhaulStaParams, NULL, BBFDM_BOTH, NULL, "2.13"},
-{"ScanCapability", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanCapabilityObj, tWiFiDataElementsNetworkDeviceRadioScanCapabilityParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-{"CACCapability", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCACCapabilityObj, tWiFiDataElementsNetworkDeviceRadioCACCapabilityParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-{"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesObj, tWiFiDataElementsNetworkDeviceRadioCapabilitiesParams, NULL, BBFDM_BOTH, NULL, "2.13"},
-{"CurrentOperatingClassProfile", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileParams, NULL, BBFDM_BOTH, LIST_KEY{"Class", NULL}, "2.13"},
-//{"DisAllowedOpClassChannels", &DMWRITE, addObjWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels, delObjWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels, NULL, browseWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannelsInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannelsParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}, "2.15"},
-//{"SpatialReuse", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioSpatialReuseParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-{"BSS", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSObj, tWiFiDataElementsNetworkDeviceRadioBSSParams, NULL, BBFDM_BOTH, LIST_KEY{"BSSID", NULL}, "2.13"},
-{"UnassociatedSTA", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioUnassociatedSTAInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioUnassociatedSTAParams, NULL, BBFDM_BOTH, LIST_KEY{"MACAddress", NULL}, "2.13"},
-//{"MultiAPRadio", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioMultiAPRadioParams, NULL, BBFDM_BOTH, NULL, "2.15"},
+{"ScanResult", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioScanResultInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultObj, tWiFiDataElementsNetworkDeviceRadioScanResultParams, NULL, BBFDM_BOTH, NULL},
+{"BackhaulSta", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBackhaulStaParams, NULL, BBFDM_BOTH, NULL},
+{"ScanCapability", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanCapabilityObj, tWiFiDataElementsNetworkDeviceRadioScanCapabilityParams, NULL, BBFDM_BOTH, NULL},
+{"CACCapability", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCACCapabilityObj, tWiFiDataElementsNetworkDeviceRadioCACCapabilityParams, NULL, BBFDM_BOTH, NULL},
+{"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesObj, tWiFiDataElementsNetworkDeviceRadioCapabilitiesParams, NULL, BBFDM_BOTH, NULL},
+{"CurrentOperatingClassProfile", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileParams, NULL, BBFDM_BOTH, LIST_KEY{"Class", NULL}},
+//{"DisAllowedOpClassChannels", &DMWRITE, addObjWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels, delObjWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels, NULL, browseWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannelsInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannelsParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}},
+//{"SpatialReuse", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioSpatialReuseParams, NULL, BBFDM_BOTH, NULL},
+{"BSS", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSObj, tWiFiDataElementsNetworkDeviceRadioBSSParams, NULL, BBFDM_BOTH, LIST_KEY{"BSSID", NULL}},
+{"UnassociatedSTA", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioUnassociatedSTAInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioUnassociatedSTAParams, NULL, BBFDM_BOTH, LIST_KEY{"MACAddress", NULL}},
+//{"MultiAPRadio", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioMultiAPRadioParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ID", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadio_ID, NULL, BBFDM_BOTH, "2.13"},
-{"Enabled", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_Enabled, NULL, BBFDM_BOTH, "2.13"},
-{"Noise", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_Noise, NULL, BBFDM_BOTH, "2.13"},
-{"Utilization", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_Utilization, NULL, BBFDM_BOTH, "2.13"},
-{"Transmit", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_Transmit, NULL, BBFDM_BOTH, "2.13"},
-{"ReceiveSelf", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_ReceiveSelf, NULL, BBFDM_BOTH, "2.13"},
-{"ReceiveOther", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_ReceiveOther, NULL, BBFDM_BOTH, "2.13"},
-{"TrafficSeparationCombinedFronthaul", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_TrafficSeparationCombinedFronthaul, NULL, BBFDM_BOTH, "2.15"},
-{"TrafficSeparationCombinedBackhaul", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_TrafficSeparationCombinedBackhaul, NULL, BBFDM_BOTH, "2.15"},
-// {"SteeringPolicy", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_SteeringPolicy, set_WiFiDataElementsNetworkDeviceRadio_SteeringPolicy, BBFDM_BOTH, "2.15"},
-{"ChannelUtilizationThreshold", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationThreshold, set_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationThreshold, BBFDM_BOTH, "2.15"},
-{"RCPISteeringThreshold", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_RCPISteeringThreshold, set_WiFiDataElementsNetworkDeviceRadio_RCPISteeringThreshold, BBFDM_BOTH, "2.15"},
-{"STAReportingRCPIThreshold", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIThreshold, set_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIThreshold, BBFDM_BOTH, "2.15"},
-{"STAReportingRCPIHysteresisMarginOverride", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIHysteresisMarginOverride, set_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIHysteresisMarginOverride, BBFDM_BOTH, "2.15"},
-{"ChannelUtilizationReportingThreshold", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationReportingThreshold, set_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationReportingThreshold, BBFDM_BOTH, "2.15"},
-{"AssociatedSTATrafficStatsInclusionPolicy", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_AssociatedSTATrafficStatsInclusionPolicy, set_WiFiDataElementsNetworkDeviceRadio_AssociatedSTATrafficStatsInclusionPolicy, BBFDM_BOTH, "2.15"},
-{"AssociatedSTALinkMetricsInclusionPolicy", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_AssociatedSTALinkMetricsInclusionPolicy, set_WiFiDataElementsNetworkDeviceRadio_AssociatedSTALinkMetricsInclusionPolicy, BBFDM_BOTH, "2.15"},
-{"ChipsetVendor", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadio_ChipsetVendor, NULL, BBFDM_BOTH, "2.15"},
-// {"APMetricsWiFi6", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_APMetricsWiFi6, NULL, BBFDM_BOTH, "2.15"},
-{"CurrentOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_CurrentOperatingClassProfileNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"UnassociatedSTANumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_UnassociatedSTANumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"BSSNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_BSSNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"ScanResultNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_ScanResultNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"DisAllowedOpClassChannelsNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_DisAllowedOpClassChannelsNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
-{"ChannelScanRequest()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest, operate_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest, BBFDM_USP, "2.15"},
-//{"RadioEnable()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_RadioEnable, operate_WiFiDataElementsNetworkDeviceRadio_RadioEnable, BBFDM_USP, "2.15"},
-//{"SetTxPowerLimit()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_SetTxPowerLimit, operate_WiFiDataElementsNetworkDeviceRadio_SetTxPowerLimit, BBFDM_USP, "2.15"},
-//{"SetSpatialReuse()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_SetSpatialReuse, operate_WiFiDataElementsNetworkDeviceRadio_SetSpatialReuse, BBFDM_USP, "2.15"},
-//{"WiFiRestart()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_WiFiRestart, operate_WiFiDataElementsNetworkDeviceRadio_WiFiRestart, BBFDM_USP, "2.15"},
+{"ID", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadio_ID, NULL, BBFDM_BOTH},
+{"Enabled", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_Enabled, NULL, BBFDM_BOTH},
+{"Noise", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_Noise, NULL, BBFDM_BOTH},
+{"Utilization", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_Utilization, NULL, BBFDM_BOTH},
+{"Transmit", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_Transmit, NULL, BBFDM_BOTH},
+{"ReceiveSelf", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_ReceiveSelf, NULL, BBFDM_BOTH},
+{"ReceiveOther", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_ReceiveOther, NULL, BBFDM_BOTH},
+{"TrafficSeparationCombinedFronthaul", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_TrafficSeparationCombinedFronthaul, NULL, BBFDM_BOTH},
+{"TrafficSeparationCombinedBackhaul", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_TrafficSeparationCombinedBackhaul, NULL, BBFDM_BOTH},
+// {"SteeringPolicy", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_SteeringPolicy, set_WiFiDataElementsNetworkDeviceRadio_SteeringPolicy, BBFDM_BOTH},
+{"ChannelUtilizationThreshold", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationThreshold, set_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationThreshold, BBFDM_BOTH},
+{"RCPISteeringThreshold", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_RCPISteeringThreshold, set_WiFiDataElementsNetworkDeviceRadio_RCPISteeringThreshold, BBFDM_BOTH},
+{"STAReportingRCPIThreshold", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIThreshold, set_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIThreshold, BBFDM_BOTH},
+{"STAReportingRCPIHysteresisMarginOverride", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIHysteresisMarginOverride, set_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIHysteresisMarginOverride, BBFDM_BOTH},
+{"ChannelUtilizationReportingThreshold", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationReportingThreshold, set_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationReportingThreshold, BBFDM_BOTH},
+{"AssociatedSTATrafficStatsInclusionPolicy", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_AssociatedSTATrafficStatsInclusionPolicy, set_WiFiDataElementsNetworkDeviceRadio_AssociatedSTATrafficStatsInclusionPolicy, BBFDM_BOTH},
+{"AssociatedSTALinkMetricsInclusionPolicy", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_AssociatedSTALinkMetricsInclusionPolicy, set_WiFiDataElementsNetworkDeviceRadio_AssociatedSTALinkMetricsInclusionPolicy, BBFDM_BOTH},
+{"ChipsetVendor", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadio_ChipsetVendor, NULL, BBFDM_BOTH},
+// {"APMetricsWiFi6", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadio_APMetricsWiFi6, NULL, BBFDM_BOTH},
+{"CurrentOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_CurrentOperatingClassProfileNumberOfEntries, NULL, BBFDM_BOTH},
+{"UnassociatedSTANumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_UnassociatedSTANumberOfEntries, NULL, BBFDM_BOTH},
+{"BSSNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_BSSNumberOfEntries, NULL, BBFDM_BOTH},
+{"ScanResultNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_ScanResultNumberOfEntries, NULL, BBFDM_BOTH},
+{"DisAllowedOpClassChannelsNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadio_DisAllowedOpClassChannelsNumberOfEntries, NULL, BBFDM_BOTH},
+{"ChannelScanRequest()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest, operate_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest, BBFDM_USP},
+//{"RadioEnable()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_RadioEnable, operate_WiFiDataElementsNetworkDeviceRadio_RadioEnable, BBFDM_USP},
+//{"SetTxPowerLimit()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_SetTxPowerLimit, operate_WiFiDataElementsNetworkDeviceRadio_SetTxPowerLimit, BBFDM_USP},
+//{"SetSpatialReuse()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_SetSpatialReuse, operate_WiFiDataElementsNetworkDeviceRadio_SetSpatialReuse, BBFDM_USP},
+//{"WiFiRestart()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadio_WiFiRestart, operate_WiFiDataElementsNetworkDeviceRadio_WiFiRestart, BBFDM_USP},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceRadioScanResultObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"OpClassScan", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanObj, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanParams, NULL, BBFDM_BOTH, LIST_KEY{"OperatingClass", NULL}, "2.14"},
+{"OpClassScan", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanObj, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanParams, NULL, BBFDM_BOTH, LIST_KEY{"OperatingClass", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanResult_TimeStamp, NULL, BBFDM_BOTH, "2.14"},
-{"OpClassScanNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResult_OpClassScanNumberOfEntries, NULL, BBFDM_BOTH, "2.14"},
+{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanResult_TimeStamp, NULL, BBFDM_BOTH},
+{"OpClassScanNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResult_OpClassScanNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"ChannelScan", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanObj, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanParams, NULL, BBFDM_BOTH, LIST_KEY{"Channel", NULL}, "2.14"},
+{"ChannelScan", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanObj, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanParams, NULL, BBFDM_BOTH, LIST_KEY{"Channel", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"OperatingClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScan_OperatingClass, NULL, BBFDM_BOTH, "2.14"},
-{"ChannelScanNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScan_ChannelScanNumberOfEntries, NULL, BBFDM_BOTH, "2.14"},
+{"OperatingClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScan_OperatingClass, NULL, BBFDM_BOTH},
+{"ChannelScanNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScan_ChannelScanNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}.ChannelScan.{i}. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"NeighborBSS", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSSInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSSParams, NULL, BBFDM_BOTH, LIST_KEY{"BSSID", NULL}, "2.14"},
+{"NeighborBSS", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSSInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSSParams, NULL, BBFDM_BOTH, LIST_KEY{"BSSID", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_Channel, NULL, BBFDM_BOTH, "2.14"},
-{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_TimeStamp, NULL, BBFDM_BOTH, "2.14"},
-{"Utilization", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_Utilization, NULL, BBFDM_BOTH, "2.14"},
-{"Noise", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_Noise, NULL, BBFDM_BOTH, "2.14"},
-{"NeighborBSSNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_NeighborBSSNumberOfEntries, NULL, BBFDM_BOTH, "2.14"},
+{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_Channel, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_TimeStamp, NULL, BBFDM_BOTH},
+{"Utilization", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_Utilization, NULL, BBFDM_BOTH},
+{"Noise", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_Noise, NULL, BBFDM_BOTH},
+{"NeighborBSSNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScan_NeighborBSSNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}.ChannelScan.{i}.NeighborBSS.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSSParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_BSSID, NULL, BBFDM_BOTH, "2.14"},
-{"SSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_SSID, NULL, BBFDM_BOTH, "2.14"},
-{"SignalStrength", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_SignalStrength, NULL, BBFDM_BOTH, "2.14"},
-{"ChannelBandwidth", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_ChannelBandwidth, NULL, BBFDM_BOTH, "2.14"},
-{"ChannelUtilization", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_ChannelUtilization, NULL, BBFDM_BOTH, "2.14"},
-{"StationCount", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_StationCount, NULL, BBFDM_BOTH, "2.14"},
+{"BSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_BSSID, NULL, BBFDM_BOTH},
+{"SSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_SSID, NULL, BBFDM_BOTH},
+{"SignalStrength", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_SignalStrength, NULL, BBFDM_BOTH},
+{"ChannelBandwidth", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_ChannelBandwidth, NULL, BBFDM_BOTH},
+{"ChannelUtilization", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_ChannelUtilization, NULL, BBFDM_BOTH},
+{"StationCount", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelScanNeighborBSS_StationCount, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BackhaulSta. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceRadioBackhaulStaParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBackhaulSta_MACAddress, NULL, BBFDM_BOTH, "2.13"},
+{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBackhaulSta_MACAddress, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanCapability. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceRadioScanCapabilityObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"OpClassChannels", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannelsInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannelsParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}, "2.15"},
+{"OpClassChannels", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannelsInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannelsParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioScanCapabilityParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"OnBootOnly", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioScanCapability_OnBootOnly, NULL, BBFDM_BOTH, "2.15"},
-{"Impact", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanCapability_Impact, NULL, BBFDM_BOTH, "2.15"},
-{"MinimumInterval", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanCapability_MinimumInterval, NULL, BBFDM_BOTH, "2.15"},
-{"OpClassChannelsNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanCapability_OpClassChannelsNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
+{"OnBootOnly", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioScanCapability_OnBootOnly, NULL, BBFDM_BOTH},
+{"Impact", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanCapability_Impact, NULL, BBFDM_BOTH},
+{"MinimumInterval", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanCapability_MinimumInterval, NULL, BBFDM_BOTH},
+{"OpClassChannelsNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanCapability_OpClassChannelsNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanCapability.OpClassChannels.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannelsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannels_OpClass, NULL, BBFDM_BOTH, "2.15"},
-{"ChannelList", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannels_ChannelList, NULL, BBFDM_BOTH, "2.15"},
+{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannels_OpClass, NULL, BBFDM_BOTH},
+{"ChannelList", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannels_ChannelList, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.CACCapability. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceRadioCACCapabilityObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"CACMethod", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodObj, tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodParams, NULL, BBFDM_BOTH, LIST_KEY{"Method", NULL}, "2.15"},
+{"CACMethod", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodObj, tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodParams, NULL, BBFDM_BOTH, LIST_KEY{"Method", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioCACCapabilityParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"CACMethodNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCACCapability_CACMethodNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
+{"CACMethodNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCACCapability_CACMethodNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.CACCapability.CACMethod.{i}. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"OpClassChannels", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannelsInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannelsParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}, "2.15"},
+{"OpClassChannels", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannelsInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannelsParams, NULL, BBFDM_BOTH, LIST_KEY{"OpClass", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Method", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethod_Method, NULL, BBFDM_BOTH, "2.15"},
-{"NumberOfSeconds", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethod_NumberOfSeconds, NULL, BBFDM_BOTH, "2.15"},
-{"OpClassChannelsNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethod_OpClassChannelsNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
+{"Method", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethod_Method, NULL, BBFDM_BOTH},
+{"NumberOfSeconds", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethod_NumberOfSeconds, NULL, BBFDM_BOTH},
+{"OpClassChannelsNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethod_OpClassChannelsNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.CACCapability.CACMethod.{i}.OpClassChannels.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannelsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannels_OpClass, NULL, BBFDM_BOTH, "2.15"},
-{"ChannelList", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannels_ChannelList, NULL, BBFDM_BOTH, "2.15"},
+{"OpClass", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannels_OpClass, NULL, BBFDM_BOTH},
+{"ChannelList", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannels_ChannelList, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceRadioCapabilitiesObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"WiFi6APRole", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRoleParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-{"WiFi6bSTARole", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARoleParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-//{"AKMFrontHaul", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCapabilitiesAKMFrontHaulInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesAKMFrontHaulParams, NULL, BBFDM_BOTH, LIST_KEY{"OUI", NULL}, "2.15"},
-//{"AKMBackhaul", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCapabilitiesAKMBackhaulInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesAKMBackhaulParams, NULL, BBFDM_BOTH, LIST_KEY{"OUI", NULL}, "2.15"},
-{"CapableOperatingClassProfile", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfileInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfileParams, NULL, BBFDM_BOTH, LIST_KEY{"Class", NULL}, "2.13"},
+{"WiFi6APRole", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRoleParams, NULL, BBFDM_BOTH, NULL},
+{"WiFi6bSTARole", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARoleParams, NULL, BBFDM_BOTH, NULL},
+//{"AKMFrontHaul", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCapabilitiesAKMFrontHaulInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesAKMFrontHaulParams, NULL, BBFDM_BOTH, LIST_KEY{"OUI", NULL}},
+//{"AKMBackhaul", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCapabilitiesAKMBackhaulInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesAKMBackhaulParams, NULL, BBFDM_BOTH, LIST_KEY{"OUI", NULL}},
+{"CapableOperatingClassProfile", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfileInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfileParams, NULL, BBFDM_BOTH, LIST_KEY{"Class", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioCapabilitiesParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"HTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilities_HTCapabilities, NULL, BBFDM_BOTH, "2.13"},
-{"VHTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilities_VHTCapabilities, NULL, BBFDM_BOTH, "2.13"},
-{"HECapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilities_HECapabilities, NULL, BBFDM_BOTH, "2.13"},
-{"CapableOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilities_CapableOperatingClassProfileNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-//{"AKMFrontHaulNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilities_AKMFrontHaulNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
-//{"AKMBackhaulNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilities_AKMBackhaulNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
+{"HTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilities_HTCapabilities, NULL, BBFDM_BOTH},
+{"VHTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilities_VHTCapabilities, NULL, BBFDM_BOTH},
+{"HECapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilities_HECapabilities, NULL, BBFDM_BOTH},
+{"CapableOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilities_CapableOperatingClassProfileNumberOfEntries, NULL, BBFDM_BOTH},
+//{"AKMFrontHaulNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilities_AKMFrontHaulNumberOfEntries, NULL, BBFDM_BOTH},
+//{"AKMBackhaulNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilities_AKMBackhaulNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi6APRole. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRoleParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"HE160", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_HE160, NULL, BBFDM_BOTH, "2.15"},
-{"HE8080", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_HE8080, NULL, BBFDM_BOTH, "2.15"},
-{"MCSNSS", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MCSNSS, NULL, BBFDM_BOTH, "2.15"},
-{"SUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_SUBeamformer, NULL, BBFDM_BOTH, "2.15"},
-{"SUBeamformee", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_SUBeamformee, NULL, BBFDM_BOTH, "2.15"},
-{"MUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MUBeamformer, NULL, BBFDM_BOTH, "2.15"},
-{"Beamformee80orLess", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_Beamformee80orLess, NULL, BBFDM_BOTH, "2.15"},
-{"BeamformeeAbove80", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_BeamformeeAbove80, NULL, BBFDM_BOTH, "2.15"},
-{"ULMUMIMO", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_ULMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-{"ULOFDMA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_ULOFDMA, NULL, BBFDM_BOTH, "2.15"},
-{"MaxDLMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxDLMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-{"MaxULMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxULMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-{"MaxDLOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxDLOFDMA, NULL, BBFDM_BOTH, "2.15"},
-{"MaxULOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxULOFDMA, NULL, BBFDM_BOTH, "2.15"},
-{"RTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_RTS, NULL, BBFDM_BOTH, "2.15"},
-{"MURTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MURTS, NULL, BBFDM_BOTH, "2.15"},
-{"MultiBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MultiBSSID, NULL, BBFDM_BOTH, "2.15"},
-{"MUEDCA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MUEDCA, NULL, BBFDM_BOTH, "2.15"},
-{"TWTRequestor", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_TWTRequestor, NULL, BBFDM_BOTH, "2.15"},
-{"TWTResponder", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_TWTResponder, NULL, BBFDM_BOTH, "2.15"},
-{"SpatialReuse", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_SpatialReuse, NULL, BBFDM_BOTH, "2.15"},
-{"AnticipatedChannelUsage", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_AnticipatedChannelUsage, NULL, BBFDM_BOTH, "2.15"},
+{"HE160", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_HE160, NULL, BBFDM_BOTH},
+{"HE8080", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_HE8080, NULL, BBFDM_BOTH},
+{"MCSNSS", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MCSNSS, NULL, BBFDM_BOTH},
+{"SUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_SUBeamformer, NULL, BBFDM_BOTH},
+{"SUBeamformee", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_SUBeamformee, NULL, BBFDM_BOTH},
+{"MUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MUBeamformer, NULL, BBFDM_BOTH},
+{"Beamformee80orLess", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_Beamformee80orLess, NULL, BBFDM_BOTH},
+{"BeamformeeAbove80", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_BeamformeeAbove80, NULL, BBFDM_BOTH},
+{"ULMUMIMO", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_ULMUMIMO, NULL, BBFDM_BOTH},
+{"ULOFDMA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_ULOFDMA, NULL, BBFDM_BOTH},
+{"MaxDLMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxDLMUMIMO, NULL, BBFDM_BOTH},
+{"MaxULMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxULMUMIMO, NULL, BBFDM_BOTH},
+{"MaxDLOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxDLOFDMA, NULL, BBFDM_BOTH},
+{"MaxULOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxULOFDMA, NULL, BBFDM_BOTH},
+{"RTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_RTS, NULL, BBFDM_BOTH},
+{"MURTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MURTS, NULL, BBFDM_BOTH},
+{"MultiBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MultiBSSID, NULL, BBFDM_BOTH},
+{"MUEDCA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MUEDCA, NULL, BBFDM_BOTH},
+{"TWTRequestor", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_TWTRequestor, NULL, BBFDM_BOTH},
+{"TWTResponder", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_TWTResponder, NULL, BBFDM_BOTH},
+{"SpatialReuse", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_SpatialReuse, NULL, BBFDM_BOTH},
+{"AnticipatedChannelUsage", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_AnticipatedChannelUsage, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi6bSTARole. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARoleParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"HE160", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_HE160, NULL, BBFDM_BOTH, "2.15"},
-{"HE8080", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_HE8080, NULL, BBFDM_BOTH, "2.15"},
-{"MCSNSS", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MCSNSS, NULL, BBFDM_BOTH, "2.15"},
-{"SUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_SUBeamformer, NULL, BBFDM_BOTH, "2.15"},
-{"SUBeamformee", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_SUBeamformee, NULL, BBFDM_BOTH, "2.15"},
-{"MUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MUBeamformer, NULL, BBFDM_BOTH, "2.15"},
-{"Beamformee80orLess", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_Beamformee80orLess, NULL, BBFDM_BOTH, "2.15"},
-{"BeamformeeAbove80", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_BeamformeeAbove80, NULL, BBFDM_BOTH, "2.15"},
-{"ULMUMIMO", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_ULMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-{"ULOFDMA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_ULOFDMA, NULL, BBFDM_BOTH, "2.15"},
-{"MaxDLMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxDLMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-{"MaxULMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxULMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-{"MaxDLOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxDLOFDMA, NULL, BBFDM_BOTH, "2.15"},
-{"MaxULOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxULOFDMA, NULL, BBFDM_BOTH, "2.15"},
-{"RTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_RTS, NULL, BBFDM_BOTH, "2.15"},
-{"MURTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MURTS, NULL, BBFDM_BOTH, "2.15"},
-{"MultiBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MultiBSSID, NULL, BBFDM_BOTH, "2.15"},
-{"MUEDCA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MUEDCA, NULL, BBFDM_BOTH, "2.15"},
-{"TWTRequestor", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_TWTRequestor, NULL, BBFDM_BOTH, "2.15"},
-{"TWTResponder", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_TWTResponder, NULL, BBFDM_BOTH, "2.15"},
-{"SpatialReuse", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_SpatialReuse, NULL, BBFDM_BOTH, "2.15"},
-{"AnticipatedChannelUsage", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_AnticipatedChannelUsage, NULL, BBFDM_BOTH, "2.15"},
+{"HE160", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_HE160, NULL, BBFDM_BOTH},
+{"HE8080", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_HE8080, NULL, BBFDM_BOTH},
+{"MCSNSS", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MCSNSS, NULL, BBFDM_BOTH},
+{"SUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_SUBeamformer, NULL, BBFDM_BOTH},
+{"SUBeamformee", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_SUBeamformee, NULL, BBFDM_BOTH},
+{"MUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MUBeamformer, NULL, BBFDM_BOTH},
+{"Beamformee80orLess", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_Beamformee80orLess, NULL, BBFDM_BOTH},
+{"BeamformeeAbove80", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_BeamformeeAbove80, NULL, BBFDM_BOTH},
+{"ULMUMIMO", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_ULMUMIMO, NULL, BBFDM_BOTH},
+{"ULOFDMA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_ULOFDMA, NULL, BBFDM_BOTH},
+{"MaxDLMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxDLMUMIMO, NULL, BBFDM_BOTH},
+{"MaxULMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxULMUMIMO, NULL, BBFDM_BOTH},
+{"MaxDLOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxDLOFDMA, NULL, BBFDM_BOTH},
+{"MaxULOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxULOFDMA, NULL, BBFDM_BOTH},
+{"RTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_RTS, NULL, BBFDM_BOTH},
+{"MURTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MURTS, NULL, BBFDM_BOTH},
+{"MultiBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MultiBSSID, NULL, BBFDM_BOTH},
+{"MUEDCA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MUEDCA, NULL, BBFDM_BOTH},
+{"TWTRequestor", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_TWTRequestor, NULL, BBFDM_BOTH},
+{"TWTResponder", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_TWTResponder, NULL, BBFDM_BOTH},
+{"SpatialReuse", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_SpatialReuse, NULL, BBFDM_BOTH},
+{"AnticipatedChannelUsage", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_AnticipatedChannelUsage, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.AKMFrontHaul.{i}. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceRadioCapabilitiesAKMFrontHaulParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"OUI", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesAKMFrontHaul_OUI, NULL, BBFDM_BOTH, "2.15"},
-//{"Type", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesAKMFrontHaul_Type, NULL, BBFDM_BOTH, "2.15"},
+//{"OUI", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesAKMFrontHaul_OUI, NULL, BBFDM_BOTH},
+//{"Type", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesAKMFrontHaul_Type, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.AKMBackhaul.{i}. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceRadioCapabilitiesAKMBackhaulParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"OUI", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesAKMBackhaul_OUI, NULL, BBFDM_BOTH, "2.15"},
-//{"Type", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesAKMBackhaul_Type, NULL, BBFDM_BOTH, "2.15"},
+//{"OUI", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesAKMBackhaul_OUI, NULL, BBFDM_BOTH},
+//{"Type", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesAKMBackhaul_Type, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.CapableOperatingClassProfile.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Class", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_Class, NULL, BBFDM_BOTH, "2.13"},
-{"MaxTxPower", &DMREAD, DMT_INT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_MaxTxPower, NULL, BBFDM_BOTH, "2.13"},
-{"NonOperable", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_NonOperable, NULL, BBFDM_BOTH, "2.13"},
-{"NumberOfNonOperChan", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_NumberOfNonOperChan, NULL, BBFDM_BOTH, "2.13"},
+{"Class", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_Class, NULL, BBFDM_BOTH},
+{"MaxTxPower", &DMREAD, DMT_INT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_MaxTxPower, NULL, BBFDM_BOTH},
+{"NonOperable", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_NonOperable, NULL, BBFDM_BOTH},
+{"NumberOfNonOperChan", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfile_NumberOfNonOperChan, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.CurrentOperatingClassProfile.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Class", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_Class, NULL, BBFDM_BOTH, "2.13"},
-{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_Channel, NULL, BBFDM_BOTH, "2.13"},
-{"TxPower", &DMREAD, DMT_INT, get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_TxPower, NULL, BBFDM_BOTH, "2.13"},
-// {"TransmitPowerLimit", &DMREAD, DMT_INT, get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_TransmitPowerLimit, NULL, BBFDM_BOTH, "2.15"},
-{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_TimeStamp, NULL, BBFDM_BOTH, "2.13"},
+{"Class", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_Class, NULL, BBFDM_BOTH},
+{"Channel", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_Channel, NULL, BBFDM_BOTH},
+{"TxPower", &DMREAD, DMT_INT, get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_TxPower, NULL, BBFDM_BOTH},
+// {"TransmitPowerLimit", &DMREAD, DMT_INT, get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_TransmitPowerLimit, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_TimeStamp, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.DisAllowedOpClassChannels.{i}. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannelsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"Enable", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_Enable, set_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_Enable, BBFDM_BOTH, "2.15"},
-//{"OpClass", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_OpClass, set_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_OpClass, BBFDM_BOTH, "2.15"},
-//{"ChannelList", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_ChannelList, set_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_ChannelList, BBFDM_BOTH, "2.15"},
+//{"Enable", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_Enable, set_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_Enable, BBFDM_BOTH},
+//{"OpClass", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_OpClass, set_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_OpClass, BBFDM_BOTH},
+//{"ChannelList", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_ChannelList, set_WiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels_ChannelList, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.SpatialReuse. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceRadioSpatialReuseParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"PartialBSSColor", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_PartialBSSColor, NULL, BBFDM_BOTH, "2.15"},
-//{"BSSColor", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_BSSColor, NULL, BBFDM_BOTH, "2.15"},
-//{"HESIGASpatialReuseValue15Allowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_HESIGASpatialReuseValue15Allowed, NULL, BBFDM_BOTH, "2.15"},
-//{"SRGInformationValid", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_SRGInformationValid, NULL, BBFDM_BOTH, "2.15"},
-//{"NonSRGOffsetValid", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_NonSRGOffsetValid, NULL, BBFDM_BOTH, "2.15"},
-//{"PSRDisallowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_PSRDisallowed, NULL, BBFDM_BOTH, "2.15"},
-//{"NonSRGOBSSPDMaxOffset", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_NonSRGOBSSPDMaxOffset, NULL, BBFDM_BOTH, "2.15"},
-//{"SRGOBSSPDMinOffset", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_SRGOBSSPDMinOffset, NULL, BBFDM_BOTH, "2.15"},
-//{"SRGOBSSPDMaxOffset", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_SRGOBSSPDMaxOffset, NULL, BBFDM_BOTH, "2.15"},
-//{"SRGBSSColorBitmap", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_SRGBSSColorBitmap, NULL, BBFDM_BOTH, "2.15"},
-//{"SRGPartialBSSIDBitmap", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_SRGPartialBSSIDBitmap, NULL, BBFDM_BOTH, "2.15"},
-//{"NeighborBSSColorInUseBitmap", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_NeighborBSSColorInUseBitmap, NULL, BBFDM_BOTH, "2.15"},
+//{"PartialBSSColor", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_PartialBSSColor, NULL, BBFDM_BOTH},
+//{"BSSColor", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_BSSColor, NULL, BBFDM_BOTH},
+//{"HESIGASpatialReuseValue15Allowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_HESIGASpatialReuseValue15Allowed, NULL, BBFDM_BOTH},
+//{"SRGInformationValid", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_SRGInformationValid, NULL, BBFDM_BOTH},
+//{"NonSRGOffsetValid", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_NonSRGOffsetValid, NULL, BBFDM_BOTH},
+//{"PSRDisallowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_PSRDisallowed, NULL, BBFDM_BOTH},
+//{"NonSRGOBSSPDMaxOffset", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_NonSRGOBSSPDMaxOffset, NULL, BBFDM_BOTH},
+//{"SRGOBSSPDMinOffset", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_SRGOBSSPDMinOffset, NULL, BBFDM_BOTH},
+//{"SRGOBSSPDMaxOffset", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_SRGOBSSPDMaxOffset, NULL, BBFDM_BOTH},
+//{"SRGBSSColorBitmap", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_SRGBSSColorBitmap, NULL, BBFDM_BOTH},
+//{"SRGPartialBSSIDBitmap", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_SRGPartialBSSIDBitmap, NULL, BBFDM_BOTH},
+//{"NeighborBSSColorInUseBitmap", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceRadioSpatialReuse_NeighborBSSColorInUseBitmap, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceRadioBSSObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-// {"QMDescriptor", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSQMDescriptorInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSQMDescriptorParams, NULL, BBFDM_BOTH, LIST_KEY{"ClientMAC", NULL}, "2.15"},
-{"MultiAPSteering", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSMultiAPSteeringParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-{"STA", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSSTAInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAObj, tWiFiDataElementsNetworkDeviceRadioBSSSTAParams, get_linker_wfdata_BSS_STA, BBFDM_BOTH, LIST_KEY{"MACAddress", NULL}, "2.13"},
+// {"QMDescriptor", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSQMDescriptorInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSQMDescriptorParams, NULL, BBFDM_BOTH, LIST_KEY{"ClientMAC", NULL}},
+{"MultiAPSteering", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSMultiAPSteeringParams, NULL, BBFDM_BOTH, NULL},
+{"STA", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSSTAInst, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAObj, tWiFiDataElementsNetworkDeviceRadioBSSSTAParams, get_linker_wfdata_BSS_STA, BBFDM_BOTH, LIST_KEY{"MACAddress", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_BSSID, NULL, BBFDM_BOTH, "2.13"},
-{"SSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_SSID, NULL, BBFDM_BOTH, "2.13"},
-{"Enabled", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_Enabled, NULL, BBFDM_BOTH, "2.13"},
-{"LastChange", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_LastChange, NULL, BBFDM_BOTH, "2.13"},
-{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_TimeStamp, NULL, BBFDM_BOTH, "2.13"},
-{"UnicastBytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_UnicastBytesSent, NULL, BBFDM_BOTH, "2.13"},
-{"UnicastBytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_UnicastBytesReceived, NULL, BBFDM_BOTH, "2.13"},
-{"MulticastBytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_MulticastBytesSent, NULL, BBFDM_BOTH, "2.13"},
-{"MulticastBytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_MulticastBytesReceived, NULL, BBFDM_BOTH, "2.13"},
-{"BroadcastBytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_BroadcastBytesSent, NULL, BBFDM_BOTH, "2.13"},
-{"BroadcastBytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_BroadcastBytesReceived, NULL, BBFDM_BOTH, "2.13"},
-// {"ByteCounterUnits", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_ByteCounterUnits, NULL, BBFDM_BOTH, "2.15"},
-{"Profile1bSTAsDisallowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_Profile1bSTAsDisallowed, NULL, BBFDM_BOTH, "2.15"},
-{"Profile2bSTAsDisallowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_Profile2bSTAsDisallowed, NULL, BBFDM_BOTH, "2.15"},
-// {"AssociationAllowanceStatus", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_AssociationAllowanceStatus, NULL, BBFDM_BOTH, "2.15"},
-// {"EstServiceParametersBE", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBE, NULL, BBFDM_BOTH, "2.13"},
-// {"EstServiceParametersBK", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBK, NULL, BBFDM_BOTH, "2.13"},
-// {"EstServiceParametersVI", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVI, NULL, BBFDM_BOTH, "2.13"},
-// {"EstServiceParametersVO", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVO, NULL, BBFDM_BOTH, "2.13"},
-{"BackhaulUse", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_BackhaulUse, NULL, BBFDM_BOTH, "2.15"},
-{"FronthaulUse", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_FronthaulUse, NULL, BBFDM_BOTH, "2.15"},
-{"R1disallowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_R1disallowed, NULL, BBFDM_BOTH, "2.15"},
-{"R2disallowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_R2disallowed, NULL, BBFDM_BOTH, "2.15"},
-{"MultiBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_MultiBSSID, NULL, BBFDM_BOTH, "2.15"},
-{"TransmittedBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_TransmittedBSSID, NULL, BBFDM_BOTH, "2.15"},
-// {"FronthaulAKMsAllowed", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_FronthaulAKMsAllowed, set_WiFiDataElementsNetworkDeviceRadioBSS_FronthaulAKMsAllowed, BBFDM_BOTH, "2.15"},
-// {"BackhaulAKMsAllowed", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_BackhaulAKMsAllowed, set_WiFiDataElementsNetworkDeviceRadioBSS_BackhaulAKMsAllowed, BBFDM_BOTH, "2.15"},
-{"STANumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_STANumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-// {"QMDescriptorNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_QMDescriptorNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-//{"SetQMDescriptors()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioBSS_SetQMDescriptors, operate_WiFiDataElementsNetworkDeviceRadioBSS_SetQMDescriptors, BBFDM_USP, "2.15"},
+{"BSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_BSSID, NULL, BBFDM_BOTH},
+{"SSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_SSID, NULL, BBFDM_BOTH},
+{"Enabled", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_Enabled, NULL, BBFDM_BOTH},
+{"LastChange", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_LastChange, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_TimeStamp, NULL, BBFDM_BOTH},
+{"UnicastBytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_UnicastBytesSent, NULL, BBFDM_BOTH},
+{"UnicastBytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_UnicastBytesReceived, NULL, BBFDM_BOTH},
+{"MulticastBytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_MulticastBytesSent, NULL, BBFDM_BOTH},
+{"MulticastBytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_MulticastBytesReceived, NULL, BBFDM_BOTH},
+{"BroadcastBytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_BroadcastBytesSent, NULL, BBFDM_BOTH},
+{"BroadcastBytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSS_BroadcastBytesReceived, NULL, BBFDM_BOTH},
+// {"ByteCounterUnits", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_ByteCounterUnits, NULL, BBFDM_BOTH},
+{"Profile1bSTAsDisallowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_Profile1bSTAsDisallowed, NULL, BBFDM_BOTH},
+{"Profile2bSTAsDisallowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_Profile2bSTAsDisallowed, NULL, BBFDM_BOTH},
+// {"AssociationAllowanceStatus", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_AssociationAllowanceStatus, NULL, BBFDM_BOTH},
+// {"EstServiceParametersBE", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBE, NULL, BBFDM_BOTH},
+// {"EstServiceParametersBK", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBK, NULL, BBFDM_BOTH},
+// {"EstServiceParametersVI", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVI, NULL, BBFDM_BOTH},
+// {"EstServiceParametersVO", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVO, NULL, BBFDM_BOTH},
+{"BackhaulUse", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_BackhaulUse, NULL, BBFDM_BOTH},
+{"FronthaulUse", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_FronthaulUse, NULL, BBFDM_BOTH},
+{"R1disallowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_R1disallowed, NULL, BBFDM_BOTH},
+{"R2disallowed", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_R2disallowed, NULL, BBFDM_BOTH},
+{"MultiBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_MultiBSSID, NULL, BBFDM_BOTH},
+{"TransmittedBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSS_TransmittedBSSID, NULL, BBFDM_BOTH},
+// {"FronthaulAKMsAllowed", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_FronthaulAKMsAllowed, set_WiFiDataElementsNetworkDeviceRadioBSS_FronthaulAKMsAllowed, BBFDM_BOTH},
+// {"BackhaulAKMsAllowed", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSS_BackhaulAKMsAllowed, set_WiFiDataElementsNetworkDeviceRadioBSS_BackhaulAKMsAllowed, BBFDM_BOTH},
+{"STANumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_STANumberOfEntries, NULL, BBFDM_BOTH},
+// {"QMDescriptorNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSS_QMDescriptorNumberOfEntries, NULL, BBFDM_BOTH},
+//{"SetQMDescriptors()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioBSS_SetQMDescriptors, operate_WiFiDataElementsNetworkDeviceRadioBSS_SetQMDescriptors, BBFDM_USP},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.QMDescriptor.{i}. *** */
 // DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSQMDescriptorParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-// {"ClientMAC", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSQMDescriptor_ClientMAC, NULL, BBFDM_BOTH, "2.15"},
-// {"DescriptorElement", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceRadioBSSQMDescriptor_DescriptorElement, NULL, BBFDM_BOTH, "2.15"},
+// {"ClientMAC", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSQMDescriptor_ClientMAC, NULL, BBFDM_BOTH},
+// {"DescriptorElement", &DMREAD, DMT_HEXBIN, get_WiFiDataElementsNetworkDeviceRadioBSSQMDescriptor_DescriptorElement, NULL, BBFDM_BOTH},
 // {0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.MultiAPSteering. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSMultiAPSteeringParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BlacklistAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSMultiAPSteering_BlacklistAttempts, NULL, BBFDM_BOTH, "2.15"},
-{"BTMAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSMultiAPSteering_BTMAttempts, NULL, BBFDM_BOTH, "2.15"},
-{"BTMQueryResponses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSMultiAPSteering_BTMQueryResponses, NULL, BBFDM_BOTH, "2.15"},
+{"BlacklistAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSMultiAPSteering_BlacklistAttempts, NULL, BBFDM_BOTH},
+{"BTMAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSMultiAPSteering_BTMAttempts, NULL, BBFDM_BOTH},
+{"BTMQueryResponses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSMultiAPSteering_BTMQueryResponses, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceRadioBSSSTAObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"MultiAPSTA", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTAObj, tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTAParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-//{"WiFi6Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6CapabilitiesParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-//{"TIDQueueSizes", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSSTATIDQueueSizesInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTATIDQueueSizesParams, NULL, BBFDM_BOTH, LIST_KEY{"TID", NULL}, "2.15"},
+{"MultiAPSTA", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTAObj, tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTAParams, NULL, BBFDM_BOTH, NULL},
+//{"WiFi6Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6CapabilitiesParams, NULL, BBFDM_BOTH, NULL},
+//{"TIDQueueSizes", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSSTATIDQueueSizesInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTATIDQueueSizesParams, NULL, BBFDM_BOTH, LIST_KEY{"TID", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_MACAddress, NULL, BBFDM_BOTH, "2.13"},
-{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_TimeStamp, NULL, BBFDM_BOTH, "2.13"},
-{"HTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_HTCapabilities, NULL, BBFDM_BOTH, "2.13"},
-{"VHTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_VHTCapabilities, NULL, BBFDM_BOTH, "2.13"},
-{"HECapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_HECapabilities, NULL, BBFDM_BOTH, "2.13"},
-//{"ClientCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ClientCapabilities, NULL, BBFDM_BOTH, "2.15"},
-{"LastDataDownlinkRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastDataDownlinkRate, NULL, BBFDM_BOTH, "2.13"},
-{"LastDataUplinkRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastDataUplinkRate, NULL, BBFDM_BOTH, "2.13"},
-{"UtilizationReceive", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_UtilizationReceive, NULL, BBFDM_BOTH, "2.13"},
-{"UtilizationTransmit", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_UtilizationTransmit, NULL, BBFDM_BOTH, "2.13"},
-{"EstMACDataRateDownlink", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_EstMACDataRateDownlink, NULL, BBFDM_BOTH, "2.13"},
-{"EstMACDataRateUplink", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_EstMACDataRateUplink, NULL, BBFDM_BOTH, "2.13"},
-{"SignalStrength", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_SignalStrength, NULL, BBFDM_BOTH, "2.13"},
-{"LastConnectTime", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastConnectTime, NULL, BBFDM_BOTH, "2.13"},
-{"BytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_BytesSent, NULL, BBFDM_BOTH, "2.13"},
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_BytesReceived, NULL, BBFDM_BOTH, "2.13"},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_PacketsSent, NULL, BBFDM_BOTH, "2.13"},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_PacketsReceived, NULL, BBFDM_BOTH, "2.13"},
-{"ErrorsSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ErrorsSent, NULL, BBFDM_BOTH, "2.13"},
-{"ErrorsReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ErrorsReceived, NULL, BBFDM_BOTH, "2.13"},
-{"RetransCount", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_RetransCount, NULL, BBFDM_BOTH, "2.13"},
-{"MeasurementReport", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_MeasurementReport, NULL, BBFDM_BOTH, "2.13"},
-{"NumberOfMeasureReports", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_NumberOfMeasureReports, NULL, BBFDM_BOTH, "2.13"},
-{"IPV4Address", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV4Address, NULL, BBFDM_BOTH, "2.13"},
-{"IPV6Address", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV6Address, NULL, BBFDM_BOTH, "2.13"},
-{"Hostname", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_Hostname, NULL, BBFDM_BOTH, "2.13"},
-// {"CellularDataPreference", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_CellularDataPreference, set_WiFiDataElementsNetworkDeviceRadioBSSSTA_CellularDataPreference, BBFDM_BOTH, "2.15"},
-// {"ReAssociationDelay", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ReAssociationDelay, set_WiFiDataElementsNetworkDeviceRadioBSSSTA_ReAssociationDelay, BBFDM_BOTH, "2.15"},
-{"TIDQueueSizesNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_TIDQueueSizesNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
+{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_MACAddress, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_TimeStamp, NULL, BBFDM_BOTH},
+{"HTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_HTCapabilities, NULL, BBFDM_BOTH},
+{"VHTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_VHTCapabilities, NULL, BBFDM_BOTH},
+{"HECapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_HECapabilities, NULL, BBFDM_BOTH},
+//{"ClientCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ClientCapabilities, NULL, BBFDM_BOTH},
+{"LastDataDownlinkRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastDataDownlinkRate, NULL, BBFDM_BOTH},
+{"LastDataUplinkRate", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastDataUplinkRate, NULL, BBFDM_BOTH},
+{"UtilizationReceive", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_UtilizationReceive, NULL, BBFDM_BOTH},
+{"UtilizationTransmit", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_UtilizationTransmit, NULL, BBFDM_BOTH},
+{"EstMACDataRateDownlink", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_EstMACDataRateDownlink, NULL, BBFDM_BOTH},
+{"EstMACDataRateUplink", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_EstMACDataRateUplink, NULL, BBFDM_BOTH},
+{"SignalStrength", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_SignalStrength, NULL, BBFDM_BOTH},
+{"LastConnectTime", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastConnectTime, NULL, BBFDM_BOTH},
+{"BytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_BytesReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_PacketsReceived, NULL, BBFDM_BOTH},
+{"ErrorsSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ErrorsSent, NULL, BBFDM_BOTH},
+{"ErrorsReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ErrorsReceived, NULL, BBFDM_BOTH},
+{"RetransCount", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_RetransCount, NULL, BBFDM_BOTH},
+{"MeasurementReport", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_MeasurementReport, NULL, BBFDM_BOTH},
+{"NumberOfMeasureReports", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_NumberOfMeasureReports, NULL, BBFDM_BOTH},
+{"IPV4Address", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV4Address, NULL, BBFDM_BOTH},
+{"IPV6Address", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV6Address, NULL, BBFDM_BOTH},
+{"Hostname", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_Hostname, NULL, BBFDM_BOTH},
+// {"CellularDataPreference", &DMWRITE, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_CellularDataPreference, set_WiFiDataElementsNetworkDeviceRadioBSSSTA_CellularDataPreference, BBFDM_BOTH},
+// {"ReAssociationDelay", &DMWRITE, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ReAssociationDelay, set_WiFiDataElementsNetworkDeviceRadioBSSSTA_ReAssociationDelay, BBFDM_BOTH},
+{"TIDQueueSizesNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTA_TIDQueueSizesNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.MultiAPSTA. *** */
 DMOBJ tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTAObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"SteeringSummaryStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStatsParams, NULL, BBFDM_BOTH, NULL, "2.15"},
-//{"SteeringHistory", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryParams, NULL, BBFDM_BOTH, LIST_KEY{"Time", "APOrigin", "APDestination", NULL}, "2.15"},
+{"SteeringSummaryStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStatsParams, NULL, BBFDM_BOTH, NULL},
+//{"SteeringHistory", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryParams, NULL, BBFDM_BOTH, LIST_KEY{"Time", "APOrigin", "APDestination", NULL}},
 {0}
 };
 
 DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTAParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"AssociationTime", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_AssociationTime, NULL, BBFDM_BOTH, "2.15"},
-//{"Noise", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Noise, NULL, BBFDM_BOTH, "2.15"},
-//{"SteeringHistoryNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_SteeringHistoryNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
-//{"Disassociate()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Disassociate, operate_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Disassociate, BBFDM_USP, "2.15"},
-//{"BTMRequest()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest, operate_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest, BBFDM_USP, "2.15"},
+//{"AssociationTime", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_AssociationTime, NULL, BBFDM_BOTH},
+//{"Noise", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Noise, NULL, BBFDM_BOTH},
+//{"SteeringHistoryNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_SteeringHistoryNumberOfEntries, NULL, BBFDM_BOTH},
+//{"Disassociate()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Disassociate, operate_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Disassociate, BBFDM_USP},
+//{"BTMRequest()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest, operate_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest, BBFDM_USP},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.MultiAPSTA.SteeringSummaryStats. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"NoCandidateAPFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_NoCandidateAPFailures, NULL, BBFDM_BOTH, "2.15"},
-{"BlacklistAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BlacklistAttempts, NULL, BBFDM_BOTH, "2.15"},
-{"BlacklistSuccesses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BlacklistSuccesses, NULL, BBFDM_BOTH, "2.15"},
-{"BlacklistFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BlacklistFailures, NULL, BBFDM_BOTH, "2.15"},
-{"BTMAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BTMAttempts, NULL, BBFDM_BOTH, "2.15"},
-{"BTMSuccesses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BTMSuccesses, NULL, BBFDM_BOTH, "2.15"},
-{"BTMFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BTMFailures, NULL, BBFDM_BOTH, "2.15"},
-{"BTMQueryResponses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BTMQueryResponses, NULL, BBFDM_BOTH, "2.15"},
-{"LastSteerTime", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_LastSteerTime, NULL, BBFDM_BOTH, "2.15"},
+{"NoCandidateAPFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_NoCandidateAPFailures, NULL, BBFDM_BOTH},
+{"BlacklistAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BlacklistAttempts, NULL, BBFDM_BOTH},
+{"BlacklistSuccesses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BlacklistSuccesses, NULL, BBFDM_BOTH},
+{"BlacklistFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BlacklistFailures, NULL, BBFDM_BOTH},
+{"BTMAttempts", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BTMAttempts, NULL, BBFDM_BOTH},
+{"BTMSuccesses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BTMSuccesses, NULL, BBFDM_BOTH},
+{"BTMFailures", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BTMFailures, NULL, BBFDM_BOTH},
+{"BTMQueryResponses", &DMREAD, DMT_UNLONG, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_BTMQueryResponses, NULL, BBFDM_BOTH},
+{"LastSteerTime", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_LastSteerTime, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.MultiAPSTA.SteeringHistory.{i}. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"Time", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_Time, NULL, BBFDM_BOTH, "2.15"},
-//{"APOrigin", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_APOrigin, NULL, BBFDM_BOTH, "2.15"},
-//{"TriggerEvent", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_TriggerEvent, NULL, BBFDM_BOTH, "2.15"},
-//{"SteeringApproach", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_SteeringApproach, NULL, BBFDM_BOTH, "2.15"},
-//{"APDestination", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_APDestination, NULL, BBFDM_BOTH, "2.15"},
-//{"SteeringDuration", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_SteeringDuration, NULL, BBFDM_BOTH, "2.15"},
+//{"Time", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_Time, NULL, BBFDM_BOTH},
+//{"APOrigin", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_APOrigin, NULL, BBFDM_BOTH},
+//{"TriggerEvent", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_TriggerEvent, NULL, BBFDM_BOTH},
+//{"SteeringApproach", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_SteeringApproach, NULL, BBFDM_BOTH},
+//{"APDestination", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_APDestination, NULL, BBFDM_BOTH},
+//{"SteeringDuration", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_SteeringDuration, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.WiFi6Capabilities. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6CapabilitiesParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"HE160", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_HE160, NULL, BBFDM_BOTH, "2.15"},
-//{"HE8080", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_HE8080, NULL, BBFDM_BOTH, "2.15"},
-//{"MCSNSS", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MCSNSS, NULL, BBFDM_BOTH, "2.15"},
-//{"SUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_SUBeamformer, NULL, BBFDM_BOTH, "2.15"},
-//{"SUBeamformee", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_SUBeamformee, NULL, BBFDM_BOTH, "2.15"},
-//{"MUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MUBeamformer, NULL, BBFDM_BOTH, "2.15"},
-//{"Beamformee80orLess", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_Beamformee80orLess, NULL, BBFDM_BOTH, "2.15"},
-//{"BeamformeeAbove80", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_BeamformeeAbove80, NULL, BBFDM_BOTH, "2.15"},
-//{"ULMUMIMO", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_ULMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-//{"ULOFDMA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_ULOFDMA, NULL, BBFDM_BOTH, "2.15"},
-//{"MaxDLMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MaxDLMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-//{"MaxULMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MaxULMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-//{"MaxDLOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MaxDLOFDMA, NULL, BBFDM_BOTH, "2.15"},
-//{"MaxULOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MaxULOFDMA, NULL, BBFDM_BOTH, "2.15"},
-//{"RTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_RTS, NULL, BBFDM_BOTH, "2.15"},
-//{"MURTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MURTS, NULL, BBFDM_BOTH, "2.15"},
-//{"MultiBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MultiBSSID, NULL, BBFDM_BOTH, "2.15"},
-//{"MUEDCA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MUEDCA, NULL, BBFDM_BOTH, "2.15"},
-//{"TWTRequestor", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_TWTRequestor, NULL, BBFDM_BOTH, "2.15"},
-//{"TWTResponder", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_TWTResponder, NULL, BBFDM_BOTH, "2.15"},
-//{"SpatialReuse", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_SpatialReuse, NULL, BBFDM_BOTH, "2.15"},
-//{"AnticipatedChannelUsage", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_AnticipatedChannelUsage, NULL, BBFDM_BOTH, "2.15"},
+//{"HE160", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_HE160, NULL, BBFDM_BOTH},
+//{"HE8080", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_HE8080, NULL, BBFDM_BOTH},
+//{"MCSNSS", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MCSNSS, NULL, BBFDM_BOTH},
+//{"SUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_SUBeamformer, NULL, BBFDM_BOTH},
+//{"SUBeamformee", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_SUBeamformee, NULL, BBFDM_BOTH},
+//{"MUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MUBeamformer, NULL, BBFDM_BOTH},
+//{"Beamformee80orLess", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_Beamformee80orLess, NULL, BBFDM_BOTH},
+//{"BeamformeeAbove80", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_BeamformeeAbove80, NULL, BBFDM_BOTH},
+//{"ULMUMIMO", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_ULMUMIMO, NULL, BBFDM_BOTH},
+//{"ULOFDMA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_ULOFDMA, NULL, BBFDM_BOTH},
+//{"MaxDLMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MaxDLMUMIMO, NULL, BBFDM_BOTH},
+//{"MaxULMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MaxULMUMIMO, NULL, BBFDM_BOTH},
+//{"MaxDLOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MaxDLOFDMA, NULL, BBFDM_BOTH},
+//{"MaxULOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MaxULOFDMA, NULL, BBFDM_BOTH},
+//{"RTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_RTS, NULL, BBFDM_BOTH},
+//{"MURTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MURTS, NULL, BBFDM_BOTH},
+//{"MultiBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MultiBSSID, NULL, BBFDM_BOTH},
+//{"MUEDCA", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_MUEDCA, NULL, BBFDM_BOTH},
+//{"TWTRequestor", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_TWTRequestor, NULL, BBFDM_BOTH},
+//{"TWTResponder", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_TWTResponder, NULL, BBFDM_BOTH},
+//{"SpatialReuse", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_SpatialReuse, NULL, BBFDM_BOTH},
+//{"AnticipatedChannelUsage", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6Capabilities_AnticipatedChannelUsage, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.TIDQueueSizes.{i}. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTATIDQueueSizesParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"TID", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTATIDQueueSizes_TID, NULL, BBFDM_BOTH, "2.15"},
-//{"Size", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTATIDQueueSizes_Size, NULL, BBFDM_BOTH, "2.15"},
+//{"TID", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTATIDQueueSizes_TID, NULL, BBFDM_BOTH},
+//{"Size", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTATIDQueueSizes_Size, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.UnassociatedSTA.{i}. *** */
 DMLEAF tWiFiDataElementsNetworkDeviceRadioUnassociatedSTAParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioUnassociatedSTA_MACAddress, NULL, BBFDM_BOTH, "2.13"},
-{"SignalStrength", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioUnassociatedSTA_SignalStrength, NULL, BBFDM_BOTH, "2.13"},
+{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioUnassociatedSTA_MACAddress, NULL, BBFDM_BOTH},
+{"SignalStrength", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioUnassociatedSTA_SignalStrength, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.MultiAPRadio. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceRadioMultiAPRadioParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"RadarDetections", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioMultiAPRadio_RadarDetections, NULL, BBFDM_BOTH, "2.15"},
-//{"FullScan()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioMultiAPRadio_FullScan, operate_WiFiDataElementsNetworkDeviceRadioMultiAPRadio_FullScan, BBFDM_USP, "2.15"},
-//{"ChannelScan()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioMultiAPRadio_ChannelScan, operate_WiFiDataElementsNetworkDeviceRadioMultiAPRadio_ChannelScan, BBFDM_USP, "2.15"},
+//{"RadarDetections", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioMultiAPRadio_RadarDetections, NULL, BBFDM_BOTH},
+//{"FullScan()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioMultiAPRadio_FullScan, operate_WiFiDataElementsNetworkDeviceRadioMultiAPRadio_FullScan, BBFDM_USP},
+//{"ChannelScan()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioMultiAPRadio_ChannelScan, operate_WiFiDataElementsNetworkDeviceRadioMultiAPRadio_ChannelScan, BBFDM_USP},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.AssociationEvent. *** */
 DMOBJ tWiFiDataElementsAssociationEventObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"AssociationEventData", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsAssociationEventAssociationEventDataInst, NULL, NULL, tWiFiDataElementsAssociationEventAssociationEventDataObj, tWiFiDataElementsAssociationEventAssociationEventDataParams, NULL, BBFDM_BOTH, NULL, "2.13"},
+{"AssociationEventData", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsAssociationEventAssociationEventDataInst, NULL, NULL, tWiFiDataElementsAssociationEventAssociationEventDataObj, tWiFiDataElementsAssociationEventAssociationEventDataParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tWiFiDataElementsAssociationEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"AssociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"Associated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsAssociationEvent_Associated, NULL, BBFDM_USP, "2.15"},
+{"AssociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
+{"Associated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsAssociationEvent_Associated, NULL, BBFDM_USP},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.AssociationEvent.AssociationEventData.{i}. *** */
 DMOBJ tWiFiDataElementsAssociationEventAssociationEventDataObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-//{"WiFi6Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsAssociationEventAssociationEventDataWiFi6CapabilitiesParams, NULL, BBFDM_BOTH, NULL, "2.15"},
+//{"WiFi6Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsAssociationEventAssociationEventDataWiFi6CapabilitiesParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tWiFiDataElementsAssociationEventAssociationEventDataParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_BSSID, NULL, BBFDM_BOTH, "2.13"},
-{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_MACAddress, NULL, BBFDM_BOTH, "2.13"},
-{"StatusCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventData_StatusCode, NULL, BBFDM_BOTH, "2.13"},
-{"HTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_HTCapabilities, NULL, BBFDM_BOTH, "2.13"},
-{"VHTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_VHTCapabilities, NULL, BBFDM_BOTH, "2.13"},
-{"HECapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_HECapabilities, NULL, BBFDM_BOTH, "2.13"},
-{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp, NULL, BBFDM_BOTH, "2.13"},
+{"BSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_BSSID, NULL, BBFDM_BOTH},
+{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_MACAddress, NULL, BBFDM_BOTH},
+{"StatusCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventData_StatusCode, NULL, BBFDM_BOTH},
+{"HTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_HTCapabilities, NULL, BBFDM_BOTH},
+{"VHTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_VHTCapabilities, NULL, BBFDM_BOTH},
+{"HECapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_HECapabilities, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.AssociationEvent.AssociationEventData.{i}.WiFi6Capabilities. *** */
 //DMLEAF tWiFiDataElementsAssociationEventAssociationEventDataWiFi6CapabilitiesParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"HE160", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_HE160, NULL, BBFDM_BOTH, "2.15"},
-//{"HE8080", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_HE8080, NULL, BBFDM_BOTH, "2.15"},
-//{"MCSNSS", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MCSNSS, NULL, BBFDM_BOTH, "2.15"},
-//{"SUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SUBeamformer, NULL, BBFDM_BOTH, "2.15"},
-//{"SUBeamformee", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SUBeamformee, NULL, BBFDM_BOTH, "2.15"},
-//{"MUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MUBeamformer, NULL, BBFDM_BOTH, "2.15"},
-//{"Beamformee80orLess", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_Beamformee80orLess, NULL, BBFDM_BOTH, "2.15"},
-//{"BeamformeeAbove80", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_BeamformeeAbove80, NULL, BBFDM_BOTH, "2.15"},
-//{"ULMUMIMO", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_ULMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-//{"ULOFDMA", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_ULOFDMA, NULL, BBFDM_BOTH, "2.15"},
-//{"MaxDLMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxDLMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-//{"MaxULMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxULMUMIMO, NULL, BBFDM_BOTH, "2.15"},
-//{"MaxDLOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxDLOFDMA, NULL, BBFDM_BOTH, "2.15"},
-//{"MaxULOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxULOFDMA, NULL, BBFDM_BOTH, "2.15"},
-//{"RTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_RTS, NULL, BBFDM_BOTH, "2.15"},
-//{"MURTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MURTS, NULL, BBFDM_BOTH, "2.15"},
-//{"MultiBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MultiBSSID, NULL, BBFDM_BOTH, "2.15"},
-//{"MUEDCA", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MUEDCA, NULL, BBFDM_BOTH, "2.15"},
-//{"TWTRequestor", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_TWTRequestor, NULL, BBFDM_BOTH, "2.15"},
-//{"TWTResponder", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_TWTResponder, NULL, BBFDM_BOTH, "2.15"},
-//{"SpatialReuse", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SpatialReuse, NULL, BBFDM_BOTH, "2.15"},
-//{"AnticipatedChannelUsage", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_AnticipatedChannelUsage, NULL, BBFDM_BOTH, "2.15"},
+//{"HE160", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_HE160, NULL, BBFDM_BOTH},
+//{"HE8080", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_HE8080, NULL, BBFDM_BOTH},
+//{"MCSNSS", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MCSNSS, NULL, BBFDM_BOTH},
+//{"SUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SUBeamformer, NULL, BBFDM_BOTH},
+//{"SUBeamformee", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SUBeamformee, NULL, BBFDM_BOTH},
+//{"MUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MUBeamformer, NULL, BBFDM_BOTH},
+//{"Beamformee80orLess", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_Beamformee80orLess, NULL, BBFDM_BOTH},
+//{"BeamformeeAbove80", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_BeamformeeAbove80, NULL, BBFDM_BOTH},
+//{"ULMUMIMO", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_ULMUMIMO, NULL, BBFDM_BOTH},
+//{"ULOFDMA", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_ULOFDMA, NULL, BBFDM_BOTH},
+//{"MaxDLMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxDLMUMIMO, NULL, BBFDM_BOTH},
+//{"MaxULMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxULMUMIMO, NULL, BBFDM_BOTH},
+//{"MaxDLOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxDLOFDMA, NULL, BBFDM_BOTH},
+//{"MaxULOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxULOFDMA, NULL, BBFDM_BOTH},
+//{"RTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_RTS, NULL, BBFDM_BOTH},
+//{"MURTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MURTS, NULL, BBFDM_BOTH},
+//{"MultiBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MultiBSSID, NULL, BBFDM_BOTH},
+//{"MUEDCA", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MUEDCA, NULL, BBFDM_BOTH},
+//{"TWTRequestor", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_TWTRequestor, NULL, BBFDM_BOTH},
+//{"TWTResponder", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_TWTResponder, NULL, BBFDM_BOTH},
+//{"SpatialReuse", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SpatialReuse, NULL, BBFDM_BOTH},
+//{"AnticipatedChannelUsage", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_AnticipatedChannelUsage, NULL, BBFDM_BOTH},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.DisassociationEvent. *** */
 DMOBJ tWiFiDataElementsDisassociationEventObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"DisassociationEventData", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsDisassociationEventDisassociationEventDataInst, NULL, NULL, NULL, tWiFiDataElementsDisassociationEventDisassociationEventDataParams, NULL, BBFDM_BOTH, NULL, "2.13"},
+{"DisassociationEventData", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsDisassociationEventDisassociationEventDataInst, NULL, NULL, NULL, tWiFiDataElementsDisassociationEventDisassociationEventDataParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tWiFiDataElementsDisassociationEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"DisassociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries, NULL, BBFDM_BOTH, "2.13"},
-{"Disassociated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsDisassociationEvent_Disassociated, NULL, BBFDM_USP, "2.15"},
+{"DisassociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
+{"Disassociated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsDisassociationEvent_Disassociated, NULL, BBFDM_USP},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.DisassociationEvent.DisassociationEventData.{i}. *** */
 DMLEAF tWiFiDataElementsDisassociationEventDisassociationEventDataParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsDisassociationEventDisassociationEventData_BSSID, NULL, BBFDM_BOTH, "2.13"},
-{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsDisassociationEventDisassociationEventData_MACAddress, NULL, BBFDM_BOTH, "2.13"},
-{"ReasonCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_ReasonCode, NULL, BBFDM_BOTH, "2.13"},
-{"BytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesSent, NULL, BBFDM_BOTH, "2.13"},
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesReceived, NULL, BBFDM_BOTH, "2.13"},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsSent, NULL, BBFDM_BOTH, "2.13"},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsReceived, NULL, BBFDM_BOTH, "2.13"},
-{"ErrorsSent", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsSent, NULL, BBFDM_BOTH, "2.13"},
-{"ErrorsReceived", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsReceived, NULL, BBFDM_BOTH, "2.13"},
-{"RetransCount", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_RetransCount, NULL, BBFDM_BOTH, "2.13"},
-{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeStamp, NULL, BBFDM_BOTH, "2.13"},
+{"BSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsDisassociationEventDisassociationEventData_BSSID, NULL, BBFDM_BOTH},
+{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsDisassociationEventDisassociationEventData_MACAddress, NULL, BBFDM_BOTH},
+{"ReasonCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_ReasonCode, NULL, BBFDM_BOTH},
+{"BytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsReceived, NULL, BBFDM_BOTH},
+{"ErrorsSent", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsSent, NULL, BBFDM_BOTH},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsReceived, NULL, BBFDM_BOTH},
+{"RetransCount", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_RetransCount, NULL, BBFDM_BOTH},
+{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeStamp, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.WiFi.DataElements.FailedConnectionEvent. *** */
 //DMOBJ tWiFiDataElementsFailedConnectionEventObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-//{"FailedConnectionEventData", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsFailedConnectionEventFailedConnectionEventDataInst, NULL, NULL, NULL, tWiFiDataElementsFailedConnectionEventFailedConnectionEventDataParams, NULL, BBFDM_BOTH, NULL, "2.15"},
+//{"FailedConnectionEventData", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsFailedConnectionEventFailedConnectionEventDataInst, NULL, NULL, NULL, tWiFiDataElementsFailedConnectionEventFailedConnectionEventDataParams, NULL, BBFDM_BOTH, NULL},
 //{0}
 //};
 
 //DMLEAF tWiFiDataElementsFailedConnectionEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"FailedConnectionEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsFailedConnectionEvent_FailedConnectionEventDataNumberOfEntries, NULL, BBFDM_BOTH, "2.15"},
-//{"FailedConnection!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsFailedConnectionEvent_FailedConnection, NULL, BBFDM_USP, "2.15"},
+//{"FailedConnectionEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsFailedConnectionEvent_FailedConnectionEventDataNumberOfEntries, NULL, BBFDM_BOTH},
+//{"FailedConnection!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsFailedConnectionEvent_FailedConnection, NULL, BBFDM_USP},
 //{0}
 //};
 
 /* *** Device.WiFi.DataElements.FailedConnectionEvent.FailedConnectionEventData.{i}. *** */
 //DMLEAF tWiFiDataElementsFailedConnectionEventFailedConnectionEventDataParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_MACAddress, NULL, BBFDM_BOTH, "2.15"},
-//{"StatusCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_StatusCode, NULL, BBFDM_BOTH, "2.15"},
-//{"ReasonCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_ReasonCode, NULL, BBFDM_BOTH, "2.15"},
-//{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_TimeStamp, NULL, BBFDM_BOTH, "2.15"},
+//{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_MACAddress, NULL, BBFDM_BOTH},
+//{"StatusCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_StatusCode, NULL, BBFDM_BOTH},
+//{"ReasonCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_ReasonCode, NULL, BBFDM_BOTH},
+//{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_TimeStamp, NULL, BBFDM_BOTH},
 //{0}
 //};

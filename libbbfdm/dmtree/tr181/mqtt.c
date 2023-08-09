@@ -293,26 +293,26 @@ static int set_MQTTBroker_Password(char *refparam, struct dmctx *ctx, void *data
 /* *** Device.MQTT.Broker. *** */
 DMOBJ tMQTTObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Broker", &DMWRITE, addMQTTBroker, delMQTTBroker, NULL, browseMQTTBrokerInst, NULL, NULL, NULL, tMQTTBrokerParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}, "2.10"},
+{"Broker", &DMWRITE, addMQTTBroker, delMQTTBroker, NULL, browseMQTTBrokerInst, NULL, NULL, NULL, tMQTTBrokerParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}},
 {0}
 };
 
 DMLEAF tMQTTParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"BrokerNumberOfEntries", &DMREAD, DMT_UNINT, get_MQTT_BrokerNumberOfEntries, NULL, BBFDM_BOTH, "2.10"},
+{"BrokerNumberOfEntries", &DMREAD, DMT_UNINT, get_MQTT_BrokerNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tMQTTBrokerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Enable", &DMWRITE, DMT_BOOL, get_MQTTBroker_Enable, set_MQTTBroker_Enable, BBFDM_BOTH, "2.10"},
-{"Alias", &DMWRITE, DMT_STRING, get_MQTTBroker_Alias, set_MQTTBroker_Alias, BBFDM_BOTH, "2.10"},
-{"Name", &DMWRITE, DMT_STRING, get_MQTTBroker_Name, set_MQTTBroker_Name, BBFDM_BOTH, "2.10"},
-//{"Status", &DMREAD, DMT_STRING, get_MQTTBroker_Status, NULL, BBFDM_BOTH, "2.10"},
-{"Port", &DMWRITE, DMT_UNINT, get_MQTTBroker_Port, set_MQTTBroker_Port, BBFDM_BOTH, "2.10"},
-{"Interface", &DMWRITE, DMT_STRING, get_MQTTBroker_Interface, set_MQTTBroker_Interface, BBFDM_BOTH, "2.10"},
-{"Username", &DMWRITE, DMT_STRING, get_MQTTBroker_Username, set_MQTTBroker_Username, BBFDM_BOTH, "2.10"},
-{"Password", &DMWRITE, DMT_STRING, get_MQTTBroker_Password, set_MQTTBroker_Password, BBFDM_BOTH, "2.10"},
+{"Enable", &DMWRITE, DMT_BOOL, get_MQTTBroker_Enable, set_MQTTBroker_Enable, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_MQTTBroker_Alias, set_MQTTBroker_Alias, BBFDM_BOTH},
+{"Name", &DMWRITE, DMT_STRING, get_MQTTBroker_Name, set_MQTTBroker_Name, BBFDM_BOTH},
+//{"Status", &DMREAD, DMT_STRING, get_MQTTBroker_Status, NULL, BBFDM_BOTH},
+{"Port", &DMWRITE, DMT_UNINT, get_MQTTBroker_Port, set_MQTTBroker_Port, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_MQTTBroker_Interface, set_MQTTBroker_Interface, BBFDM_BOTH},
+{"Username", &DMWRITE, DMT_STRING, get_MQTTBroker_Username, set_MQTTBroker_Username, BBFDM_BOTH},
+{"Password", &DMWRITE, DMT_STRING, get_MQTTBroker_Password, set_MQTTBroker_Password, BBFDM_BOTH},
 {0}
 };
 

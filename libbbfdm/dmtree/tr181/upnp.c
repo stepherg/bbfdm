@@ -711,49 +711,49 @@ static int get_UPnPDescriptionServiceInstance_EventSubURL(char *refparam, struct
 /* *** Device.UPnP. *** */
 DMOBJ tUPnPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Device", &DMREAD, NULL, NULL, "file:/etc/config/upnpd", NULL, NULL, NULL, tUPnPDeviceObj, tUPnPDeviceParams, NULL, BBFDM_BOTH, NULL, "2.0"},
-{"Discovery", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDiscoveryObj, tUPnPDiscoveryParams, NULL, BBFDM_BOTH, NULL, "2.0"},
-{"Description", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDescriptionObj, tUPnPDescriptionParams, NULL, BBFDM_BOTH, NULL, "2.6"},
+{"Device", &DMREAD, NULL, NULL, "file:/etc/config/upnpd", NULL, NULL, NULL, tUPnPDeviceObj, tUPnPDeviceParams, NULL, BBFDM_BOTH, NULL},
+{"Discovery", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDiscoveryObj, tUPnPDiscoveryParams, NULL, BBFDM_BOTH, NULL},
+{"Description", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDescriptionObj, tUPnPDescriptionParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 /* *** Device.UPnP.Device. *** */
 DMOBJ tUPnPDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceCapabilitiesParams, NULL, BBFDM_BOTH, NULL, "2.0"},
+{"Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tUPnPDeviceCapabilitiesParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tUPnPDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMWRITE, DMT_BOOL, get_UPnPDevice_Enable, set_UPnPDevice_Enable, BBFDM_BOTH, "2.0"},
-//{"UPnPMediaServer", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPMediaServer, set_UPnPDevice_UPnPMediaServer, BBFDM_BOTH, "2.0"},
-//{"UPnPMediaRenderer", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPMediaRenderer, set_UPnPDevice_UPnPMediaRenderer, BBFDM_BOTH, "2.0"},
-//{"UPnPWLANAccessPoint", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPWLANAccessPoint, set_UPnPDevice_UPnPWLANAccessPoint, BBFDM_BOTH, "2.0"},
-//{"UPnPQoSDevice ", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPQoSDevice , set_UPnPDevice_UPnPQoSDevice , BBFDM_BOTH, "2.0"},
-//{"UPnPQoSPolicyHolder", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPQoSPolicyHolder, set_UPnPDevice_UPnPQoSPolicyHolder, BBFDM_BOTH, "2.0"},
-//{"UPnPIGD", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPIGD, set_UPnPDevice_UPnPIGD, BBFDM_BOTH, "2.0"},
-//{"UPnPDMBasicMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMBasicMgmt, set_UPnPDevice_UPnPDMBasicMgmt, BBFDM_BOTH, "2.0"},
-//{"UPnPDMConfigurationMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMConfigurationMgmt, set_UPnPDevice_UPnPDMConfigurationMgmt, BBFDM_BOTH, "2.0"},
-//{"UPnPDMSoftwareMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMSoftwareMgmt, set_UPnPDevice_UPnPDMSoftwareMgmt, BBFDM_BOTH, "2.0"},
+{"Enable", &DMWRITE, DMT_BOOL, get_UPnPDevice_Enable, set_UPnPDevice_Enable, BBFDM_BOTH},
+//{"UPnPMediaServer", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPMediaServer, set_UPnPDevice_UPnPMediaServer, BBFDM_BOTH},
+//{"UPnPMediaRenderer", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPMediaRenderer, set_UPnPDevice_UPnPMediaRenderer, BBFDM_BOTH},
+//{"UPnPWLANAccessPoint", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPWLANAccessPoint, set_UPnPDevice_UPnPWLANAccessPoint, BBFDM_BOTH},
+//{"UPnPQoSDevice ", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPQoSDevice , set_UPnPDevice_UPnPQoSDevice , BBFDM_BOTH},
+//{"UPnPQoSPolicyHolder", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPQoSPolicyHolder, set_UPnPDevice_UPnPQoSPolicyHolder, BBFDM_BOTH},
+//{"UPnPIGD", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPIGD, set_UPnPDevice_UPnPIGD, BBFDM_BOTH},
+//{"UPnPDMBasicMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMBasicMgmt, set_UPnPDevice_UPnPDMBasicMgmt, BBFDM_BOTH},
+//{"UPnPDMConfigurationMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMConfigurationMgmt, set_UPnPDevice_UPnPDMConfigurationMgmt, BBFDM_BOTH},
+//{"UPnPDMSoftwareMgmt", &DMWRITE, DMT_BOOL, get_UPnPDevice_UPnPDMSoftwareMgmt, set_UPnPDevice_UPnPDMSoftwareMgmt, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.UPnP.Device.Capabilities. *** */
 DMLEAF tUPnPDeviceCapabilitiesParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"UPnPArchitecture", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPArchitecture, NULL, BBFDM_BOTH, "2.0"},
-{"UPnPArchitectureMinorVer", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPArchitectureMinorVer, NULL, BBFDM_BOTH, "2.0"},
-{"UPnPIGD", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPIGD, NULL, BBFDM_BOTH, "2.0"},
+{"UPnPArchitecture", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPArchitecture, NULL, BBFDM_BOTH},
+{"UPnPArchitectureMinorVer", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPArchitectureMinorVer, NULL, BBFDM_BOTH},
+{"UPnPIGD", &DMREAD, DMT_UNINT, get_UPnPDeviceCapabilities_UPnPIGD, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.UPnP.Discovery. *** */
 DMOBJ tUPnPDiscoveryObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"RootDevice", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryRootDeviceInst, NULL, NULL, NULL, tUPnPDiscoveryRootDeviceParams, get_root_device_linker, BBFDM_BOTH, LIST_KEY{"UUID", NULL}, "2.0"},
-{"Device", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryDeviceInst, NULL, NULL, NULL, tUPnPDiscoveryDeviceParams, get_device_linker, BBFDM_BOTH, LIST_KEY{"UUID", NULL}, "2.0"},
-{"Service", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryServiceInst, NULL, NULL, NULL, tUPnPDiscoveryServiceParams, get_service_linker, BBFDM_BOTH, LIST_KEY{"USN", NULL}, "2.0"},
+{"RootDevice", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryRootDeviceInst, NULL, NULL, NULL, tUPnPDiscoveryRootDeviceParams, get_root_device_linker, BBFDM_BOTH, LIST_KEY{"UUID", NULL}},
+{"Device", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryDeviceInst, NULL, NULL, NULL, tUPnPDiscoveryDeviceParams, get_device_linker, BBFDM_BOTH, LIST_KEY{"UUID", NULL}},
+{"Service", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryServiceInst, NULL, NULL, NULL, tUPnPDiscoveryServiceParams, get_service_linker, BBFDM_BOTH, LIST_KEY{"USN", NULL}},
 {0}
 };
 
@@ -768,102 +768,102 @@ DMLEAF tUPnPDiscoveryParams[] = {
 /* *** Device.UPnP.Discovery.RootDevice.{i}. *** */
 DMLEAF tUPnPDiscoveryRootDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"Status", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_Status, NULL, BBFDM_BOTH, "2.0"},
-{"UUID", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_UUID, NULL, BBFDM_BOTH, "2.0"},
-{"USN", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_USN, NULL, BBFDM_BOTH, "2.0"},
-//{"LeaseTime", &DMREAD, DMT_UNINT, get_UPnPDiscoveryRootDevice_LeaseTime, NULL, BBFDM_BOTH, "2.0"},
-{"Location", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_Location, NULL, BBFDM_BOTH, "2.0"},
-//{"Server", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_Server, NULL, BBFDM_BOTH, "2.0"},
-//{"Host", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_Host, NULL, BBFDM_BOTH, "2.0"},
-//{"LastUpdate", &DMREAD, DMT_TIME, get_UPnPDiscoveryRootDevice_LastUpdate, NULL, BBFDM_BOTH, "2.0"},
+//{"Status", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_Status, NULL, BBFDM_BOTH},
+{"UUID", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_UUID, NULL, BBFDM_BOTH},
+{"USN", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_USN, NULL, BBFDM_BOTH},
+//{"LeaseTime", &DMREAD, DMT_UNINT, get_UPnPDiscoveryRootDevice_LeaseTime, NULL, BBFDM_BOTH},
+{"Location", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_Location, NULL, BBFDM_BOTH},
+//{"Server", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_Server, NULL, BBFDM_BOTH},
+//{"Host", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_Host, NULL, BBFDM_BOTH},
+//{"LastUpdate", &DMREAD, DMT_TIME, get_UPnPDiscoveryRootDevice_LastUpdate, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.UPnP.Discovery.Device.{i}. *** */
 DMLEAF tUPnPDiscoveryDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"Status", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_Status, NULL, BBFDM_BOTH, "2.0"},
-{"UUID", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_UUID, NULL, BBFDM_BOTH, "2.0"},
-{"USN", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_USN, NULL, BBFDM_BOTH, "2.0"},
-//{"LeaseTime", &DMREAD, DMT_UNINT, get_UPnPDiscoveryDevice_LeaseTime, NULL, BBFDM_BOTH, "2.0"},
-{"Location", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_Location, NULL, BBFDM_BOTH, "2.0"},
-//{"Server", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_Server, NULL, BBFDM_BOTH, "2.0"},
-//{"Host", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_Host, NULL, BBFDM_BOTH, "2.0"},
-//{"LastUpdate", &DMREAD, DMT_TIME, get_UPnPDiscoveryDevice_LastUpdate, NULL, BBFDM_BOTH, "2.6"},
+//{"Status", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_Status, NULL, BBFDM_BOTH},
+{"UUID", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_UUID, NULL, BBFDM_BOTH},
+{"USN", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_USN, NULL, BBFDM_BOTH},
+//{"LeaseTime", &DMREAD, DMT_UNINT, get_UPnPDiscoveryDevice_LeaseTime, NULL, BBFDM_BOTH},
+{"Location", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_Location, NULL, BBFDM_BOTH},
+//{"Server", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_Server, NULL, BBFDM_BOTH},
+//{"Host", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_Host, NULL, BBFDM_BOTH},
+//{"LastUpdate", &DMREAD, DMT_TIME, get_UPnPDiscoveryDevice_LastUpdate, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.UPnP.Discovery.Service.{i}. *** */
 DMLEAF tUPnPDiscoveryServiceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"Status", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_Status, NULL, BBFDM_BOTH, "2.0"},
-{"USN", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_USN, NULL, BBFDM_BOTH, "2.0"},
-//{"LeaseTime", &DMREAD, DMT_UNINT, get_UPnPDiscoveryService_LeaseTime, NULL, BBFDM_BOTH, "2.0"},
-{"Location", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_Location, NULL, BBFDM_BOTH, "2.0"},
-//{"Server", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_Server, NULL, BBFDM_BOTH, "2.0"},
-//{"Host", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_Host, NULL, BBFDM_BOTH, "2.0"},
-//{"LastUpdate", &DMREAD, DMT_TIME, get_UPnPDiscoveryService_LastUpdate, NULL, BBFDM_BOTH, "2.6"},
-{"ParentDevice", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_ParentDevice, NULL, BBFDM_BOTH, "2.6"},
+//{"Status", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_Status, NULL, BBFDM_BOTH},
+{"USN", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_USN, NULL, BBFDM_BOTH},
+//{"LeaseTime", &DMREAD, DMT_UNINT, get_UPnPDiscoveryService_LeaseTime, NULL, BBFDM_BOTH},
+{"Location", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_Location, NULL, BBFDM_BOTH},
+//{"Server", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_Server, NULL, BBFDM_BOTH},
+//{"Host", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_Host, NULL, BBFDM_BOTH},
+//{"LastUpdate", &DMREAD, DMT_TIME, get_UPnPDiscoveryService_LastUpdate, NULL, BBFDM_BOTH},
+{"ParentDevice", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_ParentDevice, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.UPnP.Description. *** */
 DMOBJ tUPnPDescriptionObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"DeviceDescription", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceDescriptionInst, NULL, NULL, NULL, tUPnPDescriptionDeviceDescriptionParams, NULL, BBFDM_BOTH, LIST_KEY{"URLBase", NULL}, "2.6"},
-{"DeviceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceInstanceInst, NULL, NULL, NULL, tUPnPDescriptionDeviceInstanceParams, get_device_instance_linker, BBFDM_BOTH, LIST_KEY{"UDN", NULL}, "2.6"},
-{"ServiceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionServiceInstanceInst, NULL, NULL, NULL, tUPnPDescriptionServiceInstanceParams, NULL, BBFDM_BOTH, LIST_KEY{"ParentDevice", "ServiceId", NULL}, "2.6"},
+{"DeviceDescription", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceDescriptionInst, NULL, NULL, NULL, tUPnPDescriptionDeviceDescriptionParams, NULL, BBFDM_BOTH, LIST_KEY{"URLBase", NULL}},
+{"DeviceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceInstanceInst, NULL, NULL, NULL, tUPnPDescriptionDeviceInstanceParams, get_device_instance_linker, BBFDM_BOTH, LIST_KEY{"UDN", NULL}},
+{"ServiceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionServiceInstanceInst, NULL, NULL, NULL, tUPnPDescriptionServiceInstanceParams, NULL, BBFDM_BOTH, LIST_KEY{"ParentDevice", "ServiceId", NULL}},
 {0}
 };
 
 DMLEAF tUPnPDescriptionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"DeviceDescriptionNumberOfEntries", &DMREAD, DMT_UNINT, get_UPnPDescription_DeviceDescriptionNumberOfEntries, NULL, BBFDM_BOTH, "2.6"},
-{"DeviceInstanceNumberOfEntries", &DMREAD, DMT_UNINT, get_UPnPDescription_DeviceInstanceNumberOfEntries, NULL, BBFDM_BOTH, "2.6"},
-{"ServiceInstanceNumberOfEntries", &DMREAD, DMT_UNINT, get_UPnPDescription_ServiceInstanceNumberOfEntries, NULL, BBFDM_BOTH, "2.6"},
+{"DeviceDescriptionNumberOfEntries", &DMREAD, DMT_UNINT, get_UPnPDescription_DeviceDescriptionNumberOfEntries, NULL, BBFDM_BOTH},
+{"DeviceInstanceNumberOfEntries", &DMREAD, DMT_UNINT, get_UPnPDescription_DeviceInstanceNumberOfEntries, NULL, BBFDM_BOTH},
+{"ServiceInstanceNumberOfEntries", &DMREAD, DMT_UNINT, get_UPnPDescription_ServiceInstanceNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.UPnP.Description.DeviceDescription.{i}. *** */
 DMLEAF tUPnPDescriptionDeviceDescriptionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"URLBase", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceDescription_URLBase, NULL, BBFDM_BOTH, "2.6"},
-//{"SpecVersion", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceDescription_SpecVersion, NULL, BBFDM_BOTH, "2.6"},
-//{"Host", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceDescription_Host, NULL, BBFDM_BOTH, "2.6"},
+{"URLBase", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceDescription_URLBase, NULL, BBFDM_BOTH},
+//{"SpecVersion", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceDescription_SpecVersion, NULL, BBFDM_BOTH},
+//{"Host", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceDescription_Host, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.UPnP.Description.DeviceInstance.{i}. *** */
 DMLEAF tUPnPDescriptionDeviceInstanceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"UDN", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_UDN, NULL, BBFDM_BOTH, "2.6"},
-{"ParentDevice", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ParentDevice, NULL, BBFDM_BOTH, "2.6"},
-{"DiscoveryDevice", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_DiscoveryDevice, NULL, BBFDM_BOTH, "2.6"},
-{"DeviceType", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_DeviceType, NULL, BBFDM_BOTH, "2.6"},
-{"FriendlyName", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_FriendlyName, NULL, BBFDM_BOTH, "2.6"},
-//{"DeviceCategory", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_DeviceCategory, NULL, BBFDM_BOTH, "2.6"},
-{"Manufacturer", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_Manufacturer, NULL, BBFDM_BOTH, "2.6"},
-//{"ManufacturerOUI", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ManufacturerOUI, NULL, BBFDM_BOTH, "2.6"},
-{"ManufacturerURL", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ManufacturerURL, NULL, BBFDM_BOTH, "2.6"},
-{"ModelDescription", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ModelDescription, NULL, BBFDM_BOTH, "2.6"},
-{"ModelName", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ModelName, NULL, BBFDM_BOTH, "2.6"},
-{"ModelNumber", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ModelNumber, NULL, BBFDM_BOTH, "2.6"},
-{"ModelURL", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ModelURL, NULL, BBFDM_BOTH, "2.6"},
-{"SerialNumber", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_SerialNumber, NULL, BBFDM_BOTH, "2.6"},
-{"UPC", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_UPC, NULL, BBFDM_BOTH, "2.6"},
-{"PresentationURL", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_PresentationURL, NULL, BBFDM_BOTH, "2.6"},
+{"UDN", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_UDN, NULL, BBFDM_BOTH},
+{"ParentDevice", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ParentDevice, NULL, BBFDM_BOTH},
+{"DiscoveryDevice", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_DiscoveryDevice, NULL, BBFDM_BOTH},
+{"DeviceType", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_DeviceType, NULL, BBFDM_BOTH},
+{"FriendlyName", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_FriendlyName, NULL, BBFDM_BOTH},
+//{"DeviceCategory", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_DeviceCategory, NULL, BBFDM_BOTH},
+{"Manufacturer", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_Manufacturer, NULL, BBFDM_BOTH},
+//{"ManufacturerOUI", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ManufacturerOUI, NULL, BBFDM_BOTH},
+{"ManufacturerURL", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ManufacturerURL, NULL, BBFDM_BOTH},
+{"ModelDescription", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ModelDescription, NULL, BBFDM_BOTH},
+{"ModelName", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ModelName, NULL, BBFDM_BOTH},
+{"ModelNumber", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ModelNumber, NULL, BBFDM_BOTH},
+{"ModelURL", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ModelURL, NULL, BBFDM_BOTH},
+{"SerialNumber", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_SerialNumber, NULL, BBFDM_BOTH},
+{"UPC", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_UPC, NULL, BBFDM_BOTH},
+{"PresentationURL", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_PresentationURL, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.UPnP.Description.ServiceInstance.{i}. *** */
 DMLEAF tUPnPDescriptionServiceInstanceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ParentDevice", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ParentDevice, NULL, BBFDM_BOTH, "2.6"},
-{"ServiceId", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ServiceId, NULL, BBFDM_BOTH, "2.6"},
-{"ServiceDiscovery", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ServiceDiscovery, NULL, BBFDM_BOTH, "2.6"},
-{"ServiceType", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ServiceType, NULL, BBFDM_BOTH, "2.6"},
-{"SCPDURL", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_SCPDURL, NULL, BBFDM_BOTH, "2.6"},
-{"ControlURL", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ControlURL, NULL, BBFDM_BOTH, "2.6"},
-{"EventSubURL", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_EventSubURL, NULL, BBFDM_BOTH, "2.6"},
+{"ParentDevice", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ParentDevice, NULL, BBFDM_BOTH},
+{"ServiceId", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ServiceId, NULL, BBFDM_BOTH},
+{"ServiceDiscovery", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ServiceDiscovery, NULL, BBFDM_BOTH},
+{"ServiceType", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ServiceType, NULL, BBFDM_BOTH},
+{"SCPDURL", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_SCPDURL, NULL, BBFDM_BOTH},
+{"ControlURL", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ControlURL, NULL, BBFDM_BOTH},
+{"EventSubURL", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_EventSubURL, NULL, BBFDM_BOTH},
 {0}
 };

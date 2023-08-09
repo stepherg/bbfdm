@@ -888,168 +888,168 @@ static int get_FASTLineStatsQuarterHour_SuccessTIGA(char *refparam, struct dmctx
 /* *** Device.FAST. *** */
 DMOBJ tFASTObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Line", &DMREAD, NULL, NULL, NULL, browseFASTLineInst, NULL, NULL, tFASTLineObj, tFASTLineParams, get_fast_line_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}, "2.11"},
+{"Line", &DMREAD, NULL, NULL, NULL, browseFASTLineInst, NULL, NULL, tFASTLineObj, tFASTLineParams, get_fast_line_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
 DMLEAF tFASTParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"LineNumberOfEntries", &DMREAD, DMT_UNINT, get_FAST_LineNumberOfEntries, NULL, BBFDM_BOTH, "2.11"},
+{"LineNumberOfEntries", &DMREAD, DMT_UNINT, get_FAST_LineNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.FAST.Line.{i}. *** */
 DMOBJ tFASTLineObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsObj, tFASTLineStatsParams, NULL, BBFDM_BOTH, NULL, "2.11"},
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsObj, tFASTLineStatsParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tFASTLineParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMWRITE, DMT_BOOL, get_FASTLine_Enable, set_FASTLine_Enable, BBFDM_BOTH, "2.11"},
-{"Status", &DMREAD, DMT_STRING, get_FASTLine_Status, NULL, BBFDM_BOTH, "2.11"},
-{"Alias", &DMWRITE, DMT_STRING, get_FASTLine_Alias, set_FASTLine_Alias, BBFDM_BOTH, "2.11"},
-{"Name", &DMREAD, DMT_STRING, get_FASTLine_Name, NULL, BBFDM_BOTH, "2.11"},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_FASTLine_LowerLayers, set_FASTLine_LowerLayers, BBFDM_BOTH, "2.11"},
-{"Upstream", &DMREAD, DMT_BOOL, get_FASTLine_Upstream, NULL, BBFDM_BOTH, "2.11"},
-{"FirmwareVersion", &DMREAD, DMT_STRING, get_FASTLine_FirmwareVersion, NULL, BBFDM_BOTH, "2.11"},
-{"LinkStatus", &DMREAD, DMT_STRING, get_FASTLine_LinkStatus, NULL, BBFDM_BOTH, "2.11"},
-{"AllowedProfiles", &DMREAD, DMT_STRING, get_FASTLine_AllowedProfiles, NULL, BBFDM_BOTH, "2.11"},
-{"CurrentProfile", &DMREAD, DMT_STRING, get_FASTLine_CurrentProfile, NULL, BBFDM_BOTH, "2.11"},
-{"PowerManagementState", &DMREAD, DMT_STRING, get_FASTLine_PowerManagementState, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessFailureCause", &DMREAD, DMT_UNINT, get_FASTLine_SuccessFailureCause, NULL, BBFDM_BOTH, "2.11"},
-{"UPBOKLER", &DMREAD, DMT_UNINT, get_FASTLine_UPBOKLER, NULL, BBFDM_BOTH, "2.11"},
-{"UPBOKLE", &DMREAD, DMT_UNINT, get_FASTLine_UPBOKLE, NULL, BBFDM_BOTH, "2.11"},
-{"LineNumber", &DMREAD, DMT_INT, get_FASTLine_LineNumber, NULL, BBFDM_BOTH, "2.11"},
-{"UpstreamMaxBitRate", &DMREAD, DMT_UNINT, get_FASTLine_UpstreamMaxBitRate, NULL, BBFDM_BOTH, "2.11"},
-{"DownstreamMaxBitRate", &DMREAD, DMT_UNINT, get_FASTLine_DownstreamMaxBitRate, NULL, BBFDM_BOTH, "2.11"},
-{"UpstreamNoiseMargin", &DMREAD, DMT_INT, get_FASTLine_UpstreamNoiseMargin, NULL, BBFDM_BOTH, "2.11"},
-{"DownstreamNoiseMargin", &DMREAD, DMT_INT, get_FASTLine_DownstreamNoiseMargin, NULL, BBFDM_BOTH, "2.11"},
-{"UpstreamAttenuation", &DMREAD, DMT_INT, get_FASTLine_UpstreamAttenuation, NULL, BBFDM_BOTH, "2.11"},
-{"DownstreamAttenuation", &DMREAD, DMT_INT, get_FASTLine_DownstreamAttenuation, NULL, BBFDM_BOTH, "2.11"},
-{"UpstreamPower", &DMREAD, DMT_INT, get_FASTLine_UpstreamPower, NULL, BBFDM_BOTH, "2.11"},
-{"DownstreamPower", &DMREAD, DMT_INT, get_FASTLine_DownstreamPower, NULL, BBFDM_BOTH, "2.11"},
-{"SNRMRMCds", &DMREAD, DMT_INT, get_FASTLine_SNRMRMCds, NULL, BBFDM_BOTH, "2.11"},
-{"SNRMRMCus", &DMREAD, DMT_INT, get_FASTLine_SNRMRMCus, NULL, BBFDM_BOTH, "2.11"},
+{"Enable", &DMWRITE, DMT_BOOL, get_FASTLine_Enable, set_FASTLine_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_FASTLine_Status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_FASTLine_Alias, set_FASTLine_Alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_FASTLine_Name, NULL, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_FASTLine_LowerLayers, set_FASTLine_LowerLayers, BBFDM_BOTH},
+{"Upstream", &DMREAD, DMT_BOOL, get_FASTLine_Upstream, NULL, BBFDM_BOTH},
+{"FirmwareVersion", &DMREAD, DMT_STRING, get_FASTLine_FirmwareVersion, NULL, BBFDM_BOTH},
+{"LinkStatus", &DMREAD, DMT_STRING, get_FASTLine_LinkStatus, NULL, BBFDM_BOTH},
+{"AllowedProfiles", &DMREAD, DMT_STRING, get_FASTLine_AllowedProfiles, NULL, BBFDM_BOTH},
+{"CurrentProfile", &DMREAD, DMT_STRING, get_FASTLine_CurrentProfile, NULL, BBFDM_BOTH},
+{"PowerManagementState", &DMREAD, DMT_STRING, get_FASTLine_PowerManagementState, NULL, BBFDM_BOTH},
+{"SuccessFailureCause", &DMREAD, DMT_UNINT, get_FASTLine_SuccessFailureCause, NULL, BBFDM_BOTH},
+{"UPBOKLER", &DMREAD, DMT_UNINT, get_FASTLine_UPBOKLER, NULL, BBFDM_BOTH},
+{"UPBOKLE", &DMREAD, DMT_UNINT, get_FASTLine_UPBOKLE, NULL, BBFDM_BOTH},
+{"LineNumber", &DMREAD, DMT_INT, get_FASTLine_LineNumber, NULL, BBFDM_BOTH},
+{"UpstreamMaxBitRate", &DMREAD, DMT_UNINT, get_FASTLine_UpstreamMaxBitRate, NULL, BBFDM_BOTH},
+{"DownstreamMaxBitRate", &DMREAD, DMT_UNINT, get_FASTLine_DownstreamMaxBitRate, NULL, BBFDM_BOTH},
+{"UpstreamNoiseMargin", &DMREAD, DMT_INT, get_FASTLine_UpstreamNoiseMargin, NULL, BBFDM_BOTH},
+{"DownstreamNoiseMargin", &DMREAD, DMT_INT, get_FASTLine_DownstreamNoiseMargin, NULL, BBFDM_BOTH},
+{"UpstreamAttenuation", &DMREAD, DMT_INT, get_FASTLine_UpstreamAttenuation, NULL, BBFDM_BOTH},
+{"DownstreamAttenuation", &DMREAD, DMT_INT, get_FASTLine_DownstreamAttenuation, NULL, BBFDM_BOTH},
+{"UpstreamPower", &DMREAD, DMT_INT, get_FASTLine_UpstreamPower, NULL, BBFDM_BOTH},
+{"DownstreamPower", &DMREAD, DMT_INT, get_FASTLine_DownstreamPower, NULL, BBFDM_BOTH},
+{"SNRMRMCds", &DMREAD, DMT_INT, get_FASTLine_SNRMRMCds, NULL, BBFDM_BOTH},
+{"SNRMRMCus", &DMREAD, DMT_INT, get_FASTLine_SNRMRMCus, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.FAST.Line.{i}.Stats. *** */
 DMOBJ tFASTLineStatsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsTotalParams, NULL, BBFDM_BOTH, NULL, "2.11"},
-{"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsShowtimeParams, NULL, BBFDM_BOTH, NULL, "2.11"},
-{"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsLastShowtimeParams, NULL, BBFDM_BOTH, NULL, "2.11"},
-{"CurrentDay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsCurrentDayParams, NULL, BBFDM_BOTH, NULL, "2.11"},
-{"QuarterHour", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsQuarterHourParams, NULL, BBFDM_BOTH, NULL, "2.11"},
+{"Total", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsTotalParams, NULL, BBFDM_BOTH, NULL},
+{"Showtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsShowtimeParams, NULL, BBFDM_BOTH, NULL},
+{"LastShowtime", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsLastShowtimeParams, NULL, BBFDM_BOTH, NULL},
+{"CurrentDay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsCurrentDayParams, NULL, BBFDM_BOTH, NULL},
+{"QuarterHour", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tFASTLineStatsQuarterHourParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tFASTLineStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BytesSent", &DMREAD, DMT_UNLONG, get_FASTLineStats_BytesSent, NULL, BBFDM_BOTH, "2.11"},
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_FASTLineStats_BytesReceived, NULL, BBFDM_BOTH, "2.11"},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_FASTLineStats_PacketsSent, NULL, BBFDM_BOTH, "2.11"},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_FASTLineStats_PacketsReceived, NULL, BBFDM_BOTH, "2.11"},
-{"ErrorsSent", &DMREAD, DMT_UNINT, get_FASTLineStats_ErrorsSent, NULL, BBFDM_BOTH, "2.11"},
-{"ErrorsReceived", &DMREAD, DMT_UNINT, get_FASTLineStats_ErrorsReceived, NULL, BBFDM_BOTH, "2.11"},
-{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_FASTLineStats_DiscardPacketsSent, NULL, BBFDM_BOTH, "2.11"},
-{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_FASTLineStats_DiscardPacketsReceived, NULL, BBFDM_BOTH, "2.11"},
-{"TotalStart", &DMREAD, DMT_UNINT, get_FASTLineStats_TotalStart, NULL, BBFDM_BOTH, "2.11"},
-{"ShowtimeStart", &DMREAD, DMT_UNINT, get_FASTLineStats_ShowtimeStart, NULL, BBFDM_BOTH, "2.11"},
-{"LastShowtimeStart", &DMREAD, DMT_UNINT, get_FASTLineStats_LastShowtimeStart, NULL, BBFDM_BOTH, "2.11"},
-{"CurrentDayStart", &DMREAD, DMT_UNINT, get_FASTLineStats_CurrentDayStart, NULL, BBFDM_BOTH, "2.11"},
-{"QuarterHourStart", &DMREAD, DMT_UNINT, get_FASTLineStats_QuarterHourStart, NULL, BBFDM_BOTH, "2.11"},
+{"BytesSent", &DMREAD, DMT_UNLONG, get_FASTLineStats_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_FASTLineStats_BytesReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_FASTLineStats_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_FASTLineStats_PacketsReceived, NULL, BBFDM_BOTH},
+{"ErrorsSent", &DMREAD, DMT_UNINT, get_FASTLineStats_ErrorsSent, NULL, BBFDM_BOTH},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, get_FASTLineStats_ErrorsReceived, NULL, BBFDM_BOTH},
+{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_FASTLineStats_DiscardPacketsSent, NULL, BBFDM_BOTH},
+{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_FASTLineStats_DiscardPacketsReceived, NULL, BBFDM_BOTH},
+{"TotalStart", &DMREAD, DMT_UNINT, get_FASTLineStats_TotalStart, NULL, BBFDM_BOTH},
+{"ShowtimeStart", &DMREAD, DMT_UNINT, get_FASTLineStats_ShowtimeStart, NULL, BBFDM_BOTH},
+{"LastShowtimeStart", &DMREAD, DMT_UNINT, get_FASTLineStats_LastShowtimeStart, NULL, BBFDM_BOTH},
+{"CurrentDayStart", &DMREAD, DMT_UNINT, get_FASTLineStats_CurrentDayStart, NULL, BBFDM_BOTH},
+{"QuarterHourStart", &DMREAD, DMT_UNINT, get_FASTLineStats_QuarterHourStart, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.FAST.Line.{i}.Stats.Total. *** */
 DMLEAF tFASTLineStatsTotalParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_ErroredSecs, NULL, BBFDM_BOTH, "2.11"},
-{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SeverelyErroredSecs, NULL, BBFDM_BOTH, "2.11"},
-{"LOSS", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_LOSS, NULL, BBFDM_BOTH, "2.11"},
-{"LORS", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_LORS, NULL, BBFDM_BOTH, "2.11"},
-{"UAS", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_UAS, NULL, BBFDM_BOTH, "2.11"},
-{"RTXUC", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_RTXUC, NULL, BBFDM_BOTH, "2.11"},
-{"RTXTX", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_RTXTX, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessBSW", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SuccessBSW, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessSRA", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SuccessSRA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessFRA", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SuccessFRA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessRPA", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SuccessRPA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessTIGA", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SuccessTIGA, NULL, BBFDM_BOTH, "2.11"},
+{"ErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_ErroredSecs, NULL, BBFDM_BOTH},
+{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SeverelyErroredSecs, NULL, BBFDM_BOTH},
+{"LOSS", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_LOSS, NULL, BBFDM_BOTH},
+{"LORS", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_LORS, NULL, BBFDM_BOTH},
+{"UAS", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_UAS, NULL, BBFDM_BOTH},
+{"RTXUC", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_RTXUC, NULL, BBFDM_BOTH},
+{"RTXTX", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_RTXTX, NULL, BBFDM_BOTH},
+{"SuccessBSW", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SuccessBSW, NULL, BBFDM_BOTH},
+{"SuccessSRA", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SuccessSRA, NULL, BBFDM_BOTH},
+{"SuccessFRA", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SuccessFRA, NULL, BBFDM_BOTH},
+{"SuccessRPA", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SuccessRPA, NULL, BBFDM_BOTH},
+{"SuccessTIGA", &DMREAD, DMT_UNINT, get_FASTLineStatsTotal_SuccessTIGA, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.FAST.Line.{i}.Stats.Showtime. *** */
 DMLEAF tFASTLineStatsShowtimeParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_ErroredSecs, NULL, BBFDM_BOTH, "2.11"},
-{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SeverelyErroredSecs, NULL, BBFDM_BOTH, "2.11"},
-{"LOSS", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_LOSS, NULL, BBFDM_BOTH, "2.11"},
-{"LORS", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_LORS, NULL, BBFDM_BOTH, "2.11"},
-{"UAS", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_UAS, NULL, BBFDM_BOTH, "2.11"},
-{"RTXUC", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_RTXUC, NULL, BBFDM_BOTH, "2.11"},
-{"RTXTX", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_RTXTX, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessBSW", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SuccessBSW, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessSRA", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SuccessSRA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessFRA", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SuccessFRA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessRPA", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SuccessRPA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessTIGA", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SuccessTIGA, NULL, BBFDM_BOTH, "2.11"},
+{"ErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_ErroredSecs, NULL, BBFDM_BOTH},
+{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SeverelyErroredSecs, NULL, BBFDM_BOTH},
+{"LOSS", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_LOSS, NULL, BBFDM_BOTH},
+{"LORS", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_LORS, NULL, BBFDM_BOTH},
+{"UAS", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_UAS, NULL, BBFDM_BOTH},
+{"RTXUC", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_RTXUC, NULL, BBFDM_BOTH},
+{"RTXTX", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_RTXTX, NULL, BBFDM_BOTH},
+{"SuccessBSW", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SuccessBSW, NULL, BBFDM_BOTH},
+{"SuccessSRA", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SuccessSRA, NULL, BBFDM_BOTH},
+{"SuccessFRA", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SuccessFRA, NULL, BBFDM_BOTH},
+{"SuccessRPA", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SuccessRPA, NULL, BBFDM_BOTH},
+{"SuccessTIGA", &DMREAD, DMT_UNINT, get_FASTLineStatsShowtime_SuccessTIGA, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.FAST.Line.{i}.Stats.LastShowtime. *** */
 DMLEAF tFASTLineStatsLastShowtimeParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_ErroredSecs, NULL, BBFDM_BOTH, "2.11"},
-{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SeverelyErroredSecs, NULL, BBFDM_BOTH, "2.11"},
-{"LOSS", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_LOSS, NULL, BBFDM_BOTH, "2.11"},
-{"LORS", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_LORS, NULL, BBFDM_BOTH, "2.11"},
-{"UAS", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_UAS, NULL, BBFDM_BOTH, "2.11"},
-{"RTXUC", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_RTXUC, NULL, BBFDM_BOTH, "2.11"},
-{"RTXTX", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_RTXTX, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessBSW", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SuccessBSW, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessSRA", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SuccessSRA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessFRA", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SuccessFRA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessRPA", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SuccessRPA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessTIGA", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SuccessTIGA, NULL, BBFDM_BOTH, "2.11"},
+{"ErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_ErroredSecs, NULL, BBFDM_BOTH},
+{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SeverelyErroredSecs, NULL, BBFDM_BOTH},
+{"LOSS", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_LOSS, NULL, BBFDM_BOTH},
+{"LORS", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_LORS, NULL, BBFDM_BOTH},
+{"UAS", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_UAS, NULL, BBFDM_BOTH},
+{"RTXUC", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_RTXUC, NULL, BBFDM_BOTH},
+{"RTXTX", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_RTXTX, NULL, BBFDM_BOTH},
+{"SuccessBSW", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SuccessBSW, NULL, BBFDM_BOTH},
+{"SuccessSRA", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SuccessSRA, NULL, BBFDM_BOTH},
+{"SuccessFRA", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SuccessFRA, NULL, BBFDM_BOTH},
+{"SuccessRPA", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SuccessRPA, NULL, BBFDM_BOTH},
+{"SuccessTIGA", &DMREAD, DMT_UNINT, get_FASTLineStatsLastShowtime_SuccessTIGA, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.FAST.Line.{i}.Stats.CurrentDay. *** */
 DMLEAF tFASTLineStatsCurrentDayParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_ErroredSecs, NULL, BBFDM_BOTH, "2.11"},
-{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SeverelyErroredSecs, NULL, BBFDM_BOTH, "2.11"},
-{"LOSS", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_LOSS, NULL, BBFDM_BOTH, "2.11"},
-{"LORS", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_LORS, NULL, BBFDM_BOTH, "2.11"},
-{"UAS", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_UAS, NULL, BBFDM_BOTH, "2.11"},
-{"RTXUC", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_RTXUC, NULL, BBFDM_BOTH, "2.11"},
-{"RTXTX", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_RTXTX, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessBSW", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SuccessBSW, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessSRA", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SuccessSRA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessFRA", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SuccessFRA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessRPA", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SuccessRPA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessTIGA", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SuccessTIGA, NULL, BBFDM_BOTH, "2.11"},
+{"ErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_ErroredSecs, NULL, BBFDM_BOTH},
+{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SeverelyErroredSecs, NULL, BBFDM_BOTH},
+{"LOSS", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_LOSS, NULL, BBFDM_BOTH},
+{"LORS", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_LORS, NULL, BBFDM_BOTH},
+{"UAS", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_UAS, NULL, BBFDM_BOTH},
+{"RTXUC", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_RTXUC, NULL, BBFDM_BOTH},
+{"RTXTX", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_RTXTX, NULL, BBFDM_BOTH},
+{"SuccessBSW", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SuccessBSW, NULL, BBFDM_BOTH},
+{"SuccessSRA", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SuccessSRA, NULL, BBFDM_BOTH},
+{"SuccessFRA", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SuccessFRA, NULL, BBFDM_BOTH},
+{"SuccessRPA", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SuccessRPA, NULL, BBFDM_BOTH},
+{"SuccessTIGA", &DMREAD, DMT_UNINT, get_FASTLineStatsCurrentDay_SuccessTIGA, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.FAST.Line.{i}.Stats.QuarterHour. *** */
 DMLEAF tFASTLineStatsQuarterHourParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_ErroredSecs, NULL, BBFDM_BOTH, "2.11"},
-{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SeverelyErroredSecs, NULL, BBFDM_BOTH, "2.11"},
-{"LOSS", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_LOSS, NULL, BBFDM_BOTH, "2.11"},
-{"LORS", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_LORS, NULL, BBFDM_BOTH, "2.11"},
-{"UAS", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_UAS, NULL, BBFDM_BOTH, "2.11"},
-{"RTXUC", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_RTXUC, NULL, BBFDM_BOTH, "2.11"},
-{"RTXTX", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_RTXTX, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessBSW", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SuccessBSW, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessSRA", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SuccessSRA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessFRA", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SuccessFRA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessRPA", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SuccessRPA, NULL, BBFDM_BOTH, "2.11"},
-{"SuccessTIGA", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SuccessTIGA, NULL, BBFDM_BOTH, "2.11"},
+{"ErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_ErroredSecs, NULL, BBFDM_BOTH},
+{"SeverelyErroredSecs", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SeverelyErroredSecs, NULL, BBFDM_BOTH},
+{"LOSS", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_LOSS, NULL, BBFDM_BOTH},
+{"LORS", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_LORS, NULL, BBFDM_BOTH},
+{"UAS", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_UAS, NULL, BBFDM_BOTH},
+{"RTXUC", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_RTXUC, NULL, BBFDM_BOTH},
+{"RTXTX", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_RTXTX, NULL, BBFDM_BOTH},
+{"SuccessBSW", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SuccessBSW, NULL, BBFDM_BOTH},
+{"SuccessSRA", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SuccessSRA, NULL, BBFDM_BOTH},
+{"SuccessFRA", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SuccessFRA, NULL, BBFDM_BOTH},
+{"SuccessRPA", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SuccessRPA, NULL, BBFDM_BOTH},
+{"SuccessTIGA", &DMREAD, DMT_UNINT, get_FASTLineStatsQuarterHour_SuccessTIGA, NULL, BBFDM_BOTH},
 {0}
 };

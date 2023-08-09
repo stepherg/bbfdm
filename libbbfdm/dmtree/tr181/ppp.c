@@ -1193,95 +1193,95 @@ static int operate_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *d
 /* *** Device.PPP. *** */
 DMOBJ tPPPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Interface", &DMWRITE, add_ppp_interface, delete_ppp_interface, NULL, browseInterfaceInst, NULL, NULL, tPPPInterfaceObj, tPPPInterfaceParams, get_linker_ppp_interface, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}, "2.0"},
+{"Interface", &DMWRITE, add_ppp_interface, delete_ppp_interface, NULL, browseInterfaceInst, NULL, NULL, tPPPInterfaceObj, tPPPInterfaceParams, get_linker_ppp_interface, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {0}
 };
 
 DMLEAF tPPPParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_PPP_InterfaceNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
-{"SupportedNCPs", &DMREAD, DMT_STRING, get_PPP_SupportedNCPs, NULL, BBFDM_BOTH, "2.2"},
+{"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_PPP_InterfaceNumberOfEntries, NULL, BBFDM_BOTH},
+{"SupportedNCPs", &DMREAD, DMT_STRING, get_PPP_SupportedNCPs, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.PPP.Interface.{i}. *** */
 DMOBJ tPPPInterfaceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"PPPoE", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfacePPPoEParams, NULL, BBFDM_BOTH, NULL, "2.0"},
-{"IPCP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceIPCPParams, NULL, BBFDM_BOTH, NULL, "2.0"},
-{"IPv6CP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceIPv6CPParams, NULL, BBFDM_BOTH, NULL, "2.2"},
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceStatsParams, NULL, BBFDM_BOTH, NULL, "2.0"},
+{"PPPoE", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfacePPPoEParams, NULL, BBFDM_BOTH, NULL},
+{"IPCP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceIPCPParams, NULL, BBFDM_BOTH, NULL},
+{"IPv6CP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceIPv6CPParams, NULL, BBFDM_BOTH, NULL},
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceStatsParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tPPPInterfaceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_ppp_alias, set_ppp_alias, BBFDM_BOTH, "2.0"},
-{"Enable", &DMWRITE, DMT_BOOL, get_ppp_enable, set_ppp_enable, BBFDM_BOTH, "2.0"},
-{"Status", &DMREAD, DMT_STRING, get_PPPInterface_Status, NULL, BBFDM_BOTH, "2.0"},
-{"LastChange", &DMREAD, DMT_UNINT, get_PPPInterface_LastChange, NULL, BBFDM_BOTH, "2.0"},
-{"Reset", &DMWRITE, DMT_BOOL, get_PPPInterface_Reset, set_PPPInterface_Reset, BBFDM_CWMP, "2.0"},
-{"Name", &DMREAD, DMT_STRING, get_ppp_name, NULL, BBFDM_BOTH, "2.0"},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_ppp_lower_layer, set_ppp_lower_layer, BBFDM_BOTH, "2.0"},
-{"ConnectionStatus", &DMREAD, DMT_STRING, get_ppp_status, NULL, BBFDM_BOTH, "2.0"},
-{"LastConnectionError", &DMREAD, DMT_STRING, get_PPPInterface_LastConnectionError, NULL, BBFDM_BOTH, "2.0"},
-{"Username", &DMWRITE, DMT_STRING, get_ppp_username, set_ppp_username, BBFDM_BOTH, "2.0"},
-{"Password", &DMWRITE, DMT_STRING, get_empty, set_ppp_password, BBFDM_BOTH, "2.0"},
-{"Reset()", &DMSYNC, DMT_COMMAND, NULL, operate_PPPInterface_Reset, BBFDM_USP, "2.12"},
-{"MaxMRUSize", &DMWRITE, DMT_UNINT, get_PPPInterface_MaxMRUSize, set_PPPInterface_MaxMRUSize, BBFDM_BOTH, "2.0"},
-{"CurrentMRUSize", &DMREAD, DMT_UNINT, get_PPPInterface_CurrentMRUSize, NULL, BBFDM_BOTH, "2.0"},
-{"LCPEcho", &DMREAD, DMT_UNINT, get_PPPInterface_LCPEcho, NULL, BBFDM_BOTH, "2.0"},
-{"LCPEchoRetry", &DMREAD, DMT_UNINT, get_PPPInterface_LCPEchoRetry, NULL, BBFDM_BOTH, "2.0"},
-{"IPCPEnable", &DMWRITE, DMT_BOOL, get_PPPInterface_IPCPEnable, set_PPPInterface_IPCPEnable, BBFDM_BOTH, "2.2"},
-{"IPv6CPEnable", &DMWRITE, DMT_BOOL, get_PPPInterface_IPv6CPEnable, set_PPPInterface_IPv6CPEnable, BBFDM_BOTH, "2.2"},
+{"Alias", &DMWRITE, DMT_STRING, get_ppp_alias, set_ppp_alias, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_ppp_enable, set_ppp_enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_PPPInterface_Status, NULL, BBFDM_BOTH},
+{"LastChange", &DMREAD, DMT_UNINT, get_PPPInterface_LastChange, NULL, BBFDM_BOTH},
+{"Reset", &DMWRITE, DMT_BOOL, get_PPPInterface_Reset, set_PPPInterface_Reset, BBFDM_CWMP},
+{"Name", &DMREAD, DMT_STRING, get_ppp_name, NULL, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_ppp_lower_layer, set_ppp_lower_layer, BBFDM_BOTH},
+{"ConnectionStatus", &DMREAD, DMT_STRING, get_ppp_status, NULL, BBFDM_BOTH},
+{"LastConnectionError", &DMREAD, DMT_STRING, get_PPPInterface_LastConnectionError, NULL, BBFDM_BOTH},
+{"Username", &DMWRITE, DMT_STRING, get_ppp_username, set_ppp_username, BBFDM_BOTH},
+{"Password", &DMWRITE, DMT_STRING, get_empty, set_ppp_password, BBFDM_BOTH},
+{"Reset()", &DMSYNC, DMT_COMMAND, NULL, operate_PPPInterface_Reset, BBFDM_USP},
+{"MaxMRUSize", &DMWRITE, DMT_UNINT, get_PPPInterface_MaxMRUSize, set_PPPInterface_MaxMRUSize, BBFDM_BOTH},
+{"CurrentMRUSize", &DMREAD, DMT_UNINT, get_PPPInterface_CurrentMRUSize, NULL, BBFDM_BOTH},
+{"LCPEcho", &DMREAD, DMT_UNINT, get_PPPInterface_LCPEcho, NULL, BBFDM_BOTH},
+{"LCPEchoRetry", &DMREAD, DMT_UNINT, get_PPPInterface_LCPEchoRetry, NULL, BBFDM_BOTH},
+{"IPCPEnable", &DMWRITE, DMT_BOOL, get_PPPInterface_IPCPEnable, set_PPPInterface_IPCPEnable, BBFDM_BOTH},
+{"IPv6CPEnable", &DMWRITE, DMT_BOOL, get_PPPInterface_IPv6CPEnable, set_PPPInterface_IPv6CPEnable, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.PPP.Interface.{i}.PPPoE. *** */
 DMLEAF tPPPInterfacePPPoEParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"SessionID", &DMREAD, DMT_UNINT, get_PPPInterfacePPPoE_SessionID, NULL, BBFDM_BOTH, "2.0"},
-{"ACName", &DMWRITE, DMT_STRING, get_PPPInterfacePPPoE_ACName, set_PPPInterfacePPPoE_ACName, BBFDM_BOTH, "2.0"},
-{"ServiceName", &DMWRITE, DMT_STRING, get_PPPInterfacePPPoE_ServiceName, set_PPPInterfacePPPoE_ServiceName, BBFDM_BOTH, "2.0"},
+{"SessionID", &DMREAD, DMT_UNINT, get_PPPInterfacePPPoE_SessionID, NULL, BBFDM_BOTH},
+{"ACName", &DMWRITE, DMT_STRING, get_PPPInterfacePPPoE_ACName, set_PPPInterfacePPPoE_ACName, BBFDM_BOTH},
+{"ServiceName", &DMWRITE, DMT_STRING, get_PPPInterfacePPPoE_ServiceName, set_PPPInterfacePPPoE_ServiceName, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.PPP.Interface.{i}.IPCP. *** */
 DMLEAF tPPPInterfaceIPCPParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"LocalIPAddress", &DMREAD, DMT_STRING, get_PPPInterfaceIPCP_LocalIPAddress, NULL, BBFDM_BOTH, "2.0"},
-{"RemoteIPAddress", &DMREAD, DMT_STRING, get_PPPInterfaceIPCP_RemoteIPAddress, NULL, BBFDM_BOTH, "2.0"},
-{"DNSServers", &DMREAD, DMT_STRING, get_PPPInterfaceIPCP_DNSServers, NULL, BBFDM_BOTH, "2.0"},
-//{"PassthroughEnable", &DMWRITE, DMT_BOOL, get_PPPInterfaceIPCP_PassthroughEnable, set_PPPInterfaceIPCP_PassthroughEnable, BBFDM_BOTH, "2.0"},
-//{"PassthroughDHCPPool", &DMWRITE, DMT_STRING, get_PPPInterfaceIPCP_PassthroughDHCPPool, set_PPPInterfaceIPCP_PassthroughDHCPPool, BBFDM_BOTH, "2.0"},
+{"LocalIPAddress", &DMREAD, DMT_STRING, get_PPPInterfaceIPCP_LocalIPAddress, NULL, BBFDM_BOTH},
+{"RemoteIPAddress", &DMREAD, DMT_STRING, get_PPPInterfaceIPCP_RemoteIPAddress, NULL, BBFDM_BOTH},
+{"DNSServers", &DMREAD, DMT_STRING, get_PPPInterfaceIPCP_DNSServers, NULL, BBFDM_BOTH},
+//{"PassthroughEnable", &DMWRITE, DMT_BOOL, get_PPPInterfaceIPCP_PassthroughEnable, set_PPPInterfaceIPCP_PassthroughEnable, BBFDM_BOTH},
+//{"PassthroughDHCPPool", &DMWRITE, DMT_STRING, get_PPPInterfaceIPCP_PassthroughDHCPPool, set_PPPInterfaceIPCP_PassthroughDHCPPool, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.PPP.Interface.{i}.IPv6CP. *** */
 DMLEAF tPPPInterfaceIPv6CPParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version, version*/
-{"LocalInterfaceIdentifier", &DMREAD, DMT_STRING, get_PPPInterfaceIPv6CP_LocalInterfaceIdentifier, NULL, BBFDM_BOTH, "2.2"},
-{"RemoteInterfaceIdentifier", &DMREAD, DMT_STRING, get_PPPInterfaceIPv6CP_RemoteInterfaceIdentifier, NULL, BBFDM_BOTH, "2.2"},
+{"LocalInterfaceIdentifier", &DMREAD, DMT_STRING, get_PPPInterfaceIPv6CP_LocalInterfaceIdentifier, NULL, BBFDM_BOTH},
+{"RemoteInterfaceIdentifier", &DMREAD, DMT_STRING, get_PPPInterfaceIPv6CP_RemoteInterfaceIdentifier, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.PPP.Interface.{i}.Stats. *** */
 DMLEAF tPPPInterfaceStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_ppp_eth_bytes_received, NULL, BBFDM_BOTH, "2.0"},
-{"BytesSent", &DMREAD, DMT_UNLONG, get_ppp_eth_bytes_sent, NULL, BBFDM_BOTH, "2.0"},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_ppp_eth_pack_received, NULL, BBFDM_BOTH, "2.0"},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_ppp_eth_pack_sent, NULL, BBFDM_BOTH, "2.0"},
-{"ErrorsSent", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_ErrorsSent, NULL, BBFDM_BOTH, "2.0"},
-{"ErrorsReceived", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_ErrorsReceived, NULL, BBFDM_BOTH, "2.0"},
-{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_UnicastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
-{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_UnicastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_DiscardPacketsSent, NULL, BBFDM_BOTH, "2.0"},
-{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_DiscardPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_MulticastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
-{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_MulticastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_BroadcastPacketsSent, NULL, BBFDM_BOTH, "2.0"},
-{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
-{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH, "2.0"},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_ppp_eth_bytes_received, NULL, BBFDM_BOTH},
+{"BytesSent", &DMREAD, DMT_UNLONG, get_ppp_eth_bytes_sent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_ppp_eth_pack_received, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_ppp_eth_pack_sent, NULL, BBFDM_BOTH},
+{"ErrorsSent", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_ErrorsSent, NULL, BBFDM_BOTH},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_ErrorsReceived, NULL, BBFDM_BOTH},
+{"UnicastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_UnicastPacketsSent, NULL, BBFDM_BOTH},
+{"UnicastPacketsReceived", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_UnicastPacketsReceived, NULL, BBFDM_BOTH},
+{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_DiscardPacketsSent, NULL, BBFDM_BOTH},
+{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_DiscardPacketsReceived, NULL, BBFDM_BOTH},
+{"MulticastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_MulticastPacketsSent, NULL, BBFDM_BOTH},
+{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_MulticastPacketsReceived, NULL, BBFDM_BOTH},
+{"BroadcastPacketsSent", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_BroadcastPacketsSent, NULL, BBFDM_BOTH},
+{"BroadcastPacketsReceived", &DMREAD, DMT_UNLONG, get_PPPInterfaceStats_BroadcastPacketsReceived, NULL, BBFDM_BOTH},
+{"UnknownProtoPacketsReceived", &DMREAD, DMT_UNINT, get_PPPInterfaceStats_UnknownProtoPacketsReceived, NULL, BBFDM_BOTH},
 {0}
 };

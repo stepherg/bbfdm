@@ -1328,88 +1328,88 @@ static int delete_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, 
 /* *** Device.Routing. *** */
 DMOBJ tRoutingObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Router", &DMWRITE, add_router, delete_router, NULL, browseRouterInst, NULL, NULL, tRoutingRouterObj, tRoutingRouterParams, get_linker_router, BBFDM_BOTH, LIST_KEY{"Alias", NULL}, "2.0"},
-{"RouteInformation", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tRoutingRouteInformationObj, tRoutingRouteInformationParams, NULL, BBFDM_BOTH, NULL, "2.2"},
+{"Router", &DMWRITE, add_router, delete_router, NULL, browseRouterInst, NULL, NULL, tRoutingRouterObj, tRoutingRouterParams, get_linker_router, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"RouteInformation", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tRoutingRouteInformationObj, tRoutingRouteInformationParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tRoutingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"RouterNumberOfEntries", &DMREAD, DMT_UNINT, get_router_nbr_entry, NULL, BBFDM_BOTH, "2.0"},
+{"RouterNumberOfEntries", &DMREAD, DMT_UNINT, get_router_nbr_entry, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Routing.Router.{i}. *** */
 DMOBJ tRoutingRouterObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"IPv4Forwarding", &DMWRITE, add_ipv4forwarding, delete_ipv4forwarding, NULL, browseIPv4ForwardingInst, NULL, NULL, NULL, tRoutingRouterIPv4ForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DestIPAddress", "DestSubnetMask", "ForwardingPolicy", "GatewayIPAddress", "Interface", "ForwardingMetric", "Alias", NULL}, "2.0"},
-{"IPv6Forwarding", &DMWRITE, add_ipv6Forwarding, delete_ipv6Forwarding, NULL, browseIPv6ForwardingInst, NULL, NULL, NULL, tRoutingRouterIPv6ForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DestIPPrefix", "ForwardingPolicy", "NextHop", "Interface", "ForwardingMetric", "Alias", NULL}, "2.2"},
+{"IPv4Forwarding", &DMWRITE, add_ipv4forwarding, delete_ipv4forwarding, NULL, browseIPv4ForwardingInst, NULL, NULL, NULL, tRoutingRouterIPv4ForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DestIPAddress", "DestSubnetMask", "ForwardingPolicy", "GatewayIPAddress", "Interface", "ForwardingMetric", "Alias", NULL}},
+{"IPv6Forwarding", &DMWRITE, add_ipv6Forwarding, delete_ipv6Forwarding, NULL, browseIPv6ForwardingInst, NULL, NULL, NULL, tRoutingRouterIPv6ForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DestIPPrefix", "ForwardingPolicy", "NextHop", "Interface", "ForwardingMetric", "Alias", NULL}},
 {0}
 };
 
 DMLEAF tRoutingRouterParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMWRITE, DMT_BOOL, get_RoutingRouter_Enable, set_RoutingRouter_Enable, BBFDM_BOTH, "2.0"},
-{"Status", &DMREAD, DMT_STRING, get_RoutingRouter_Status, NULL, BBFDM_BOTH, "2.0"},
-{"Alias", &DMWRITE, DMT_STRING, get_RoutingRouter_Alias, set_RoutingRouter_Alias, BBFDM_BOTH, "2.0"},
-{"IPv4ForwardingNumberOfEntries", &DMREAD, DMT_UNINT, get_RoutingRouter_IPv4ForwardingNumberOfEntries, NULL, BBFDM_BOTH, "2.0"},
-{"IPv6ForwardingNumberOfEntries", &DMREAD, DMT_UNINT, get_RoutingRouter_IPv6ForwardingNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
+{"Enable", &DMWRITE, DMT_BOOL, get_RoutingRouter_Enable, set_RoutingRouter_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_RoutingRouter_Status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_RoutingRouter_Alias, set_RoutingRouter_Alias, BBFDM_BOTH},
+{"IPv4ForwardingNumberOfEntries", &DMREAD, DMT_UNINT, get_RoutingRouter_IPv4ForwardingNumberOfEntries, NULL, BBFDM_BOTH},
+{"IPv6ForwardingNumberOfEntries", &DMREAD, DMT_UNINT, get_RoutingRouter_IPv6ForwardingNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Routing.Router.{i}.IPv4Forwarding.{i}. *** */
 DMLEAF tRoutingRouterIPv4ForwardingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMRouting, DMT_BOOL, get_router_ipv4forwarding_enable, set_router_ipv4forwarding_enable, BBFDM_BOTH, "2.0"},
-{"Status", &DMREAD, DMT_STRING, get_router_ipv4forwarding_status, NULL, BBFDM_BOTH, "2.0"},
-{"Alias", &DMWRITE, DMT_STRING, get_router_ipv4forwarding_alias, set_router_ipv4forwarding_alias, BBFDM_BOTH, "2.0"},
-{"StaticRoute", &DMREAD, DMT_BOOL, get_router_ipv4forwarding_static_route, NULL, BBFDM_BOTH, "2.0"},
-{"DestIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destip, set_router_ipv4forwarding_destip, BBFDM_BOTH, "2.0"},
-{"DestSubnetMask", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destmask, set_router_ipv4forwarding_destmask, BBFDM_BOTH, "2.0"},
-{"ForwardingPolicy", &DMRouting, DMT_INT, get_router_ipv4forwarding_forwarding_policy, set_router_ipv4forwarding_forwarding_policy, BBFDM_BOTH, "2.0"},
-{"GatewayIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_gatewayip, set_router_ipv4forwarding_gatewayip, BBFDM_BOTH, "2.0"},
-{"Interface", &DMRouting, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH, "2.0"},
-{"Origin", &DMREAD, DMT_STRING, get_router_ipv4forwarding_origin, NULL, BBFDM_BOTH, "2.2"},
-{"ForwardingMetric", &DMRouting, DMT_INT, get_router_ipv4forwarding_metric, set_router_ipv4forwarding_metric, BBFDM_BOTH, "2.0"},
+{"Enable", &DMRouting, DMT_BOOL, get_router_ipv4forwarding_enable, set_router_ipv4forwarding_enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_router_ipv4forwarding_status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_router_ipv4forwarding_alias, set_router_ipv4forwarding_alias, BBFDM_BOTH},
+{"StaticRoute", &DMREAD, DMT_BOOL, get_router_ipv4forwarding_static_route, NULL, BBFDM_BOTH},
+{"DestIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destip, set_router_ipv4forwarding_destip, BBFDM_BOTH},
+{"DestSubnetMask", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destmask, set_router_ipv4forwarding_destmask, BBFDM_BOTH},
+{"ForwardingPolicy", &DMRouting, DMT_INT, get_router_ipv4forwarding_forwarding_policy, set_router_ipv4forwarding_forwarding_policy, BBFDM_BOTH},
+{"GatewayIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_gatewayip, set_router_ipv4forwarding_gatewayip, BBFDM_BOTH},
+{"Interface", &DMRouting, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH},
+{"Origin", &DMREAD, DMT_STRING, get_router_ipv4forwarding_origin, NULL, BBFDM_BOTH},
+{"ForwardingMetric", &DMRouting, DMT_INT, get_router_ipv4forwarding_metric, set_router_ipv4forwarding_metric, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Routing.Router.{i}.IPv6Forwarding.{i}. *** */
 DMLEAF tRoutingRouterIPv6ForwardingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMRouting, DMT_BOOL, get_RoutingRouterIPv6Forwarding_Enable, set_RoutingRouterIPv6Forwarding_Enable, BBFDM_BOTH, "2.2"},
-{"Status", &DMREAD, DMT_STRING, get_RoutingRouterIPv6Forwarding_Status, NULL, BBFDM_BOTH, "2.2"},
-{"Alias", &DMWRITE, DMT_STRING, get_RoutingRouterIPv6Forwarding_Alias, set_RoutingRouterIPv6Forwarding_Alias, BBFDM_BOTH, "2.2"},
-{"DestIPPrefix", &DMRouting, DMT_STRING, get_RoutingRouterIPv6Forwarding_DestIPPrefix, set_RoutingRouterIPv6Forwarding_DestIPPrefix, BBFDM_BOTH, "2.2"},
-{"ForwardingPolicy", &DMRouting, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingPolicy, set_RoutingRouterIPv6Forwarding_ForwardingPolicy, BBFDM_BOTH, "2.2"},
-{"NextHop", &DMRouting, DMT_STRING, get_RoutingRouterIPv6Forwarding_NextHop, set_RoutingRouterIPv6Forwarding_NextHop, BBFDM_BOTH, "2.2"},
-{"Interface", &DMRouting, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH, "2.2"},
-{"Origin", &DMREAD, DMT_STRING, get_RoutingRouterIPv6Forwarding_Origin, NULL, BBFDM_BOTH, "2.2"},
-{"ForwardingMetric", &DMRouting, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingMetric, set_RoutingRouterIPv6Forwarding_ForwardingMetric, BBFDM_BOTH, "2.2"},
-{"ExpirationTime", &DMREAD, DMT_TIME, get_RoutingRouterIPv6Forwarding_ExpirationTime, NULL, BBFDM_BOTH, "2.2"},
+{"Enable", &DMRouting, DMT_BOOL, get_RoutingRouterIPv6Forwarding_Enable, set_RoutingRouterIPv6Forwarding_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_RoutingRouterIPv6Forwarding_Status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_RoutingRouterIPv6Forwarding_Alias, set_RoutingRouterIPv6Forwarding_Alias, BBFDM_BOTH},
+{"DestIPPrefix", &DMRouting, DMT_STRING, get_RoutingRouterIPv6Forwarding_DestIPPrefix, set_RoutingRouterIPv6Forwarding_DestIPPrefix, BBFDM_BOTH},
+{"ForwardingPolicy", &DMRouting, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingPolicy, set_RoutingRouterIPv6Forwarding_ForwardingPolicy, BBFDM_BOTH},
+{"NextHop", &DMRouting, DMT_STRING, get_RoutingRouterIPv6Forwarding_NextHop, set_RoutingRouterIPv6Forwarding_NextHop, BBFDM_BOTH},
+{"Interface", &DMRouting, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH},
+{"Origin", &DMREAD, DMT_STRING, get_RoutingRouterIPv6Forwarding_Origin, NULL, BBFDM_BOTH},
+{"ForwardingMetric", &DMRouting, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingMetric, set_RoutingRouterIPv6Forwarding_ForwardingMetric, BBFDM_BOTH},
+{"ExpirationTime", &DMREAD, DMT_TIME, get_RoutingRouterIPv6Forwarding_ExpirationTime, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Routing.RouteInformation. *** */
 DMOBJ tRoutingRouteInformationObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"InterfaceSetting", &DMREAD, NULL, NULL, NULL, browseRoutingRouteInformationInterfaceSettingInst, NULL, NULL, NULL, tRoutingRouteInformationInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", NULL}, "2.2"},
+{"InterfaceSetting", &DMREAD, NULL, NULL, NULL, browseRoutingRouteInformationInterfaceSettingInst, NULL, NULL, NULL, tRoutingRouteInformationInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", NULL}},
 {0}
 };
 
 DMLEAF tRoutingRouteInformationParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMWRITE, DMT_BOOL, get_RoutingRouteInformation_Enable, set_RoutingRouteInformation_Enable, BBFDM_BOTH, "2.2"},
-{"InterfaceSettingNumberOfEntries", &DMREAD, DMT_UNINT, get_RoutingRouteInformation_InterfaceSettingNumberOfEntries, NULL, BBFDM_BOTH, "2.2"},
+{"Enable", &DMWRITE, DMT_BOOL, get_RoutingRouteInformation_Enable, set_RoutingRouteInformation_Enable, BBFDM_BOTH},
+{"InterfaceSettingNumberOfEntries", &DMREAD, DMT_UNINT, get_RoutingRouteInformation_InterfaceSettingNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
 /* *** Device.Routing.RouteInformation.InterfaceSetting.{i}. *** */
 DMLEAF tRoutingRouteInformationInterfaceSettingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Status", &DMREAD, DMT_STRING, get_RoutingRouteInformationInterfaceSetting_Status, NULL, BBFDM_BOTH, "2.2"},
-{"Interface", &DMREAD, DMT_STRING, get_RoutingRouteInformationInterfaceSetting_Interface, NULL, BBFDM_BOTH, "2.2"},
-{"SourceRouter", &DMREAD, DMT_STRING, get_RoutingRouteInformationInterfaceSetting_SourceRouter, NULL, BBFDM_BOTH, "2.2"},
-{"RouteLifetime", &DMREAD, DMT_TIME, get_RoutingRouteInformationInterfaceSetting_RouteLifetime, NULL, BBFDM_BOTH, "2.2"},
+{"Status", &DMREAD, DMT_STRING, get_RoutingRouteInformationInterfaceSetting_Status, NULL, BBFDM_BOTH},
+{"Interface", &DMREAD, DMT_STRING, get_RoutingRouteInformationInterfaceSetting_Interface, NULL, BBFDM_BOTH},
+{"SourceRouter", &DMREAD, DMT_STRING, get_RoutingRouteInformationInterfaceSetting_SourceRouter, NULL, BBFDM_BOTH},
+{"RouteLifetime", &DMREAD, DMT_TIME, get_RoutingRouteInformationInterfaceSetting_RouteLifetime, NULL, BBFDM_BOTH},
 {0}
 };

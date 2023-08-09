@@ -288,37 +288,37 @@ static int get_EthernetMACVLANStats_MulticastPacketsReceived(char *refparam, str
 ***********************************************************************************************************************************/
 DMOBJ tIOPSYS_EthernetObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{BBF_VENDOR_PREFIX"MACVLAN", &DMWRITE, addObjEthernetMACVLAN, delObjEthernetMACVLAN, NULL, browseEthernetMACVLANInst, NULL, NULL, tEthernetMACVLANObj, tEthernetMACVLANParams, get_linker_mac_vlan, BBFDM_BOTH, NULL, "2.16"},
+{BBF_VENDOR_PREFIX"MACVLAN", &DMWRITE, addObjEthernetMACVLAN, delObjEthernetMACVLAN, NULL, browseEthernetMACVLANInst, NULL, NULL, tEthernetMACVLANObj, tEthernetMACVLANParams, get_linker_mac_vlan, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tEthernetMACVLANParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMWRITE, DMT_BOOL, get_EthernetMACVLAN_Enable, set_EthernetMACVLAN_Enable, BBFDM_BOTH, "2.16"},
-{"Status", &DMREAD, DMT_STRING, get_EthernetMACVLAN_Status, NULL, BBFDM_BOTH, "2.16"},
-{"Alias", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_Alias, set_EthernetMACVLAN_Alias, BBFDM_BOTH, "2.16"},
-{"Name", &DMREAD, DMT_STRING, get_EthernetMACVLAN_Name, NULL, BBFDM_BOTH, "2.16"},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_LowerLayers, set_EthernetMACVLAN_LowerLayers, BBFDM_BOTH, "2.16"},
-{"MACAddress", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_MACAddress, set_EthernetMACVLAN_MACAddress, BBFDM_BOTH, "2.16"},
+{"Enable", &DMWRITE, DMT_BOOL, get_EthernetMACVLAN_Enable, set_EthernetMACVLAN_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_EthernetMACVLAN_Status, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_Alias, set_EthernetMACVLAN_Alias, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_EthernetMACVLAN_Name, NULL, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_LowerLayers, set_EthernetMACVLAN_LowerLayers, BBFDM_BOTH},
+{"MACAddress", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_MACAddress, set_EthernetMACVLAN_MACAddress, BBFDM_BOTH},
 {0}
 };
 
 DMOBJ tEthernetMACVLANObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tEthernetMACVLANStatsParams, NULL, BBFDM_BOTH, NULL, "2.16"},
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tEthernetMACVLANStatsParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tEthernetMACVLANStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BytesSent", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_BytesSent, NULL, BBFDM_BOTH, "2.16"},
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_BytesReceived, NULL, BBFDM_BOTH, "2.16"},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_PacketsSent, NULL, BBFDM_BOTH, "2.16"},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_PacketsReceived, NULL, BBFDM_BOTH, "2.16"},
-{"ErrorsSent", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_ErrorsSent, NULL, BBFDM_BOTH, "2.16"},
-{"ErrorsReceived", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_ErrorsReceived, NULL, BBFDM_BOTH, "2.16"},
-{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_DiscardPacketsSent, NULL, BBFDM_BOTH, "2.16"},
-{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_DiscardPacketsReceived, NULL, BBFDM_BOTH, "2.16"},
-{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_MulticastPacketsReceived, NULL, BBFDM_BOTH, "2.16"},
+{"BytesSent", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_BytesSent, NULL, BBFDM_BOTH},
+{"BytesReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_BytesReceived, NULL, BBFDM_BOTH},
+{"PacketsSent", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_PacketsSent, NULL, BBFDM_BOTH},
+{"PacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_PacketsReceived, NULL, BBFDM_BOTH},
+{"ErrorsSent", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_ErrorsSent, NULL, BBFDM_BOTH},
+{"ErrorsReceived", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_ErrorsReceived, NULL, BBFDM_BOTH},
+{"DiscardPacketsSent", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_DiscardPacketsSent, NULL, BBFDM_BOTH},
+{"DiscardPacketsReceived", &DMREAD, DMT_UNINT, get_EthernetMACVLANStats_DiscardPacketsReceived, NULL, BBFDM_BOTH},
+{"MulticastPacketsReceived", &DMREAD, DMT_UNLONG, get_EthernetMACVLANStats_MulticastPacketsReceived, NULL, BBFDM_BOTH},
 {0}
 };
