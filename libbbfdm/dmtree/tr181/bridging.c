@@ -196,6 +196,10 @@ static void bridge_remove_related_device_section(struct uci_section *bridge_s)
 		struct uci_section *s = NULL, *stmp = NULL;
 
 		uci_foreach_option_eq_safe("network", "device", "name", e->name, stmp, s) {
+
+			if (dmuci_is_option_value_empty(s, "type"))
+				continue;
+
 			dmuci_delete_by_section(s, NULL, NULL);
 		}
 	}
@@ -353,6 +357,9 @@ static void set_Provider_bridge_component(char *refparam, struct dmctx *ctx, voi
 
 				s = get_dup_section_in_config_opt("network", "device", "name", e->name);
 				if (s == NULL)
+					continue;
+
+				if (dmuci_is_option_value_empty(s, "type"))
 					continue;
 
 				dmuci_get_value_by_section_string(s, "ifname", &dev_ifname);
@@ -658,10 +665,13 @@ static void dmmap_synchronizeBridgingBridgeVLAN(struct dmctx *dmctx, DMNODE *par
 		uci_foreach_option_eq("network", "device", "name", e->name, s) {
 			char *vid = NULL;
 
+			if (dmuci_is_option_value_empty(s, "type"))
+				continue;
+
 			dmuci_get_value_by_section_string(s, "vid", &vid);
 
 			if (vid && vid[0] == '\0') {
-				char *ifname = (!ethernet___is_ethernet_interface_inst(e->name)) ? DM_STRRCHR(e->name, '.') : NULL;
+				char *ifname = (!ethernet___get_ethernet_interface_section(e->name)) ? DM_STRRCHR(e->name, '.') : NULL;
 				if (ifname) vid = dmstrdup(ifname+1);
 			}
 
@@ -719,6 +729,9 @@ static void dmmap_synchronizeBridgingBridgeVLANPort(struct dmctx *dmctx, DMNODE 
 	uci_foreach_element(br_ports_list, e) {
 
 		uci_foreach_option_eq("network", "device", "name", e->name, s) {
+
+			if (dmuci_is_option_value_empty(s, "type"))
+				continue;
 
 			if (is_section_exist("dmmap_bridge_vlanport", "bridge_vlanport", "br_inst", args->br_inst, "name", e->name))
 				break;
@@ -892,8 +905,8 @@ static void get_bridge_port_device_section(struct uci_section *bridge_port_dmmap
 	if (DM_STRLEN(port) == 0)
 		return;
 
-	/* Find the ethport ports section corresponding to this device */
-	uci_foreach_option_eq("ports", "ethport", "ifname", port, s) {
+	/* Find the device port section corresponding to this device */
+	if ((s = ethernet___get_ethernet_interface_section(port))) {
 		*device_section = s;
 		return;
 	}
@@ -924,7 +937,7 @@ static void remove_vlanid_from_bridge_secions(struct uci_section *bridge_sec, st
 		return;
 
 	uci_foreach_element_safe(device_ports, tmp, e) {
-		char *vid = (!ethernet___is_ethernet_interface_inst(e->name)) ? DM_STRRCHR(e->name, '.') : NULL;
+		char *vid = (!ethernet___get_ethernet_interface_section(e->name)) ? DM_STRRCHR(e->name, '.') : NULL;
 
 		if (vid && curr_vid && DM_STRCMP(vid+1, curr_vid) == 0) {
 			struct uci_section *s = NULL;
@@ -932,9 +945,14 @@ static void remove_vlanid_from_bridge_secions(struct uci_section *bridge_sec, st
 			char *enable = NULL;
 
 			s = get_dup_section_in_config_opt("network", "device", "name", e->name);
-			dmuci_get_value_by_section_string(s, "ifname", &ifname);
+			if (!s)
+				continue;
 
-			if (!s || DM_STRLEN(ifname) == 0)
+			if (dmuci_is_option_value_empty(s, "type"))
+				continue;
+
+			dmuci_get_value_by_section_string(s, "ifname", &ifname);
+			if (DM_STRLEN(ifname) == 0)
 				continue;
 
 			/* Update vid and name of device section */
@@ -985,7 +1003,7 @@ static void remove_vlanport_section(struct uci_section *bridge_vlanport_sec, str
 		dmuci_get_value_by_section_string(port_s, "port", &port);
 
 		if (DM_STRLEN(port)) {
-			char *vid = (!ethernet___is_ethernet_interface_inst(port)) ? DM_STRRCHR(port, '.') : NULL;
+			char *vid = (!ethernet___get_ethernet_interface_section(port)) ? DM_STRRCHR(port, '.') : NULL;
 			if (vid) {
 
 				if (DM_STRCMP(enable, "1") == 0) {
@@ -1390,8 +1408,12 @@ static int delObjBridgingBridgePort(char *refparam, struct dmctx *ctx, void *dat
 
 			// Remove ifname from device section
 			s = get_dup_section_in_config_opt("network", "device", "name", port);
-			dmuci_set_value_by_section(s, "ifname", "");
-			dmuci_set_value_by_section(s, "name", "");
+			if (s) {
+				if (!dmuci_is_option_value_empty(s, "type")) {
+					dmuci_set_value_by_section(s, "ifname", "");
+					dmuci_set_value_by_section(s, "name", "");
+				}
+			}
 
 			// Remove port from vlan port section
 			s = get_dup_section_in_dmmap_opt("dmmap_bridge_vlanport", "bridge_vlanport", "name", port);
@@ -1417,8 +1439,12 @@ static int delObjBridgingBridgePort(char *refparam, struct dmctx *ctx, void *dat
 
 				// Remove ifname from device section
 				ss = get_dup_section_in_config_opt("network", "device", "name", port);
-				dmuci_set_value_by_section(ss, "ifname", "");
-				dmuci_set_value_by_section(ss, "name", "");
+				if (ss) {
+					if (!dmuci_is_option_value_empty(ss, "type")) {
+						dmuci_set_value_by_section(ss, "ifname", "");
+						dmuci_set_value_by_section(ss, "name", "");
+					}
+				}
 
 				// Remove ifname from vlan port section
 				ss = get_dup_section_in_dmmap_opt("dmmap_bridge_vlanport", "bridge_vlanport", "name", port);
@@ -2092,7 +2118,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 					remove_port_from_bridge_sections(args->bridge_sec, args->bridge_dmmap_sec, port_device);
 				}
 
-				char *tag = (!ethernet___is_ethernet_interface_inst(port_device)) ? DM_STRRCHR(port_device, '.') : NULL;
+				char *tag = (!ethernet___get_ethernet_interface_section(port_device)) ? DM_STRRCHR(port_device, '.') : NULL;
 
 				if (tag && !is_wireless_config) {
 					char new_name[32] = {0};
@@ -2181,7 +2207,6 @@ static int get_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dm
 static int set_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct bridge_port_args *args = ((struct bridge_port_args *)data);
-	char *type = NULL;
 
 	switch (action) {
 		case VALUECHECK:
@@ -2191,8 +2216,7 @@ static int set_BridgingBridgePort_PriorityRegeneration(char *refparam, struct dm
 			if (args->is_management_port)
 				return 0;
 
-			dmuci_get_value_by_section_string(args->bridge_port_sec, "type", &type);
-			if (DM_STRLEN(type) == 0)
+			if (dmuci_is_option_value_empty(args->bridge_port_sec, "type"))
 				return FAULT_9007;
 
 			break;
@@ -2508,7 +2532,7 @@ static int set_BridgingBridgeVLAN_VLANID(char *refparam, struct dmctx *ctx, void
 
 			uci_foreach_element_safe(device_ports, tmp, e) {
 
-				char *vid = (!ethernet___is_ethernet_interface_inst(e->name)) ? DM_STRRCHR(e->name, '.') : NULL;
+				char *vid = (!ethernet___get_ethernet_interface_section(e->name)) ? DM_STRRCHR(e->name, '.') : NULL;
 
 				if (vid && curr_vid && DM_STRCMP(vid+1, curr_vid) == 0) {
 					struct uci_section *s = NULL;
@@ -2517,9 +2541,14 @@ static int set_BridgingBridgeVLAN_VLANID(char *refparam, struct dmctx *ctx, void
 					char name[16] = {0};
 
 					s = get_dup_section_in_config_opt("network", "device", "name", e->name);
-					dmuci_get_value_by_section_string(s, "ifname", &ifname);
+					if (!s)
+						continue;
 
-					if (!s || DM_STRLEN(ifname) == 0)
+					if (dmuci_is_option_value_empty(s, "type"))
+						continue;
+
+					dmuci_get_value_by_section_string(s, "ifname", &ifname);
+					if (DM_STRLEN(ifname) == 0)
 						continue;
 
 					snprintf(name, sizeof(name), "%s.%s", ifname, value);
@@ -2767,7 +2796,7 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 					}
 
 					if (DM_STRCMP(type, "34984") != 0) { // type:34984=>'8021ad'
-						if (!ethernet___is_ethernet_interface_inst(port)) {
+						if (!ethernet___get_ethernet_interface_section(port)) {
 							char *tag = DM_STRRCHR(port, '.');
 							if (tag) tag[0] = '\0';
 						}

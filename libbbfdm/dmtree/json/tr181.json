@@ -20321,9 +20321,9 @@
 					{
 						"type": "uci",
 						"uci": {
-							"file": "ports",
+							"file": "network",
 							"section": {
-								"type": "ethport"
+								"type": "device"
 							}
 						}
 					}
@@ -20401,11 +20401,11 @@
 				"mapping": {
 					"type": "uci",
 					"uci": {
-						"file": "ports",
+						"file": "network",
 						"section": {
-							"type": "ethport"
+							"type": "device"
 						},
-						"dmmapfile": "dmmap_ports"
+						"dmmapfile": "dmmap_ethernet"
 					}
 				},
 				"Enable": {
@@ -20422,9 +20422,9 @@
 						{
 							"type": "uci",
 							"uci": {
-								"file": "ports",
+								"file": "network",
 								"section": {
-									"type": "ethport",
+									"type": "device",
 									"index": "@i-1"
 								},
 								"option": {
@@ -20479,13 +20479,13 @@
 						{
 							"type": "uci",
 							"uci": {
-								"file": "dmmap_ports",
+								"file": "dmmap_network",
 								"section": {
-									"type": "ethport",
+									"type": "device",
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "eth_port_alias"
+									"name": "eth_iface_alias"
 								}
 							}
 						}
@@ -20510,13 +20510,13 @@
 						{
 							"type": "uci",
 							"uci": {
-								"file": "ports",
+								"file": "network",
 								"section": {
-									"type": "ethport",
+									"type": "device",
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "ifname"
+									"name": "name"
 								}
 							}
 						}
@@ -20570,22 +20570,7 @@
 						"usp"
 					],
 					"description": "Indicates whether the interface points towards the Internet (<<true>>) or towards End Devices (<<false>>). For example: * For an Internet Gateway Device, <<param>> will be <<true>> for all WAN interfaces and <<false>> for all LAN interfaces. * For a standalone WiFi Access Point that is connected via Ethernet to an Internet Gateway Device, <<param>> will be <<true>> for the Ethernet interface and <<false>> for the WiFi Radio interface. * For an End Device, <<param>> will be <<true>> for all interfaces.",
-					"datatype": "boolean",
-					"mapping": [
-						{
-							"type": "uci",
-							"uci": {
-								"file": "ports",
-								"section": {
-									"type": "ethport",
-									"index": "@i-1"
-								},
-								"option": {
-									"name": "uplink"
-								}
-							}
-						}
-					]
+					"datatype": "boolean"
 				},
 				"MACAddress": {
 					"type": "string",
@@ -20646,9 +20631,9 @@
 						{
 							"type": "uci",
 							"uci": {
-								"file": "ports",
+								"file": "network",
 								"section": {
-									"type": "ethport",
+									"type": "device",
 									"index": "@i-1"
 								},
 								"option": {
@@ -20702,9 +20687,9 @@
 						{
 							"type": "uci",
 							"uci": {
-								"file": "ports",
+								"file": "network",
 								"section": {
-									"type": "ethport",
+									"type": "device",
 									"index": "@i-1"
 								},
 								"option": {
@@ -20739,9 +20724,9 @@
 						{
 							"type": "uci",
 							"uci": {
-								"file": "ports",
+								"file": "network",
 								"section": {
-									"type": "ethport",
+									"type": "device",
 									"index": "@i-1"
 								},
 								"option": {
@@ -21838,9 +21823,9 @@
 						{
 							"type": "uci",
 							"uci": {
-								"file": "ports",
+								"file": "network",
 								"section": {
-									"type": "ethport",
+									"type": "device",
 									"index": "@i-1"
 								},
 								"option": {
@@ -21889,7 +21874,7 @@
 							"uci": {
 								"file": "dmmap_eth_rmon",
 								"section": {
-									"type": "ethport",
+									"type": "device",
 									"index": "@i-1"
 								},
 								"option": {
@@ -21918,13 +21903,13 @@
 						{
 							"type": "uci",
 							"uci": {
-								"file": "ports",
+								"file": "network",
 								"section": {
-									"type": "ethport",
+									"type": "device",
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "ifname"
+									"name": "name"
 								}
 							}
 						}
@@ -41796,11 +41781,11 @@
 							"uci": {
 								"file": "dmmap_wireless",
 								"section": {
-									"type": "wifi-iface",
+									"type": "ssid",
 									"index": "@i-1"
 								},
 								"option": {
-									"name": "ssidalias"
+									"name": "ssid_alias"
 								}
 							}
 						}

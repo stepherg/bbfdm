@@ -930,6 +930,18 @@ bool dmuci_string_to_boolean(char *value)
 	return false;
 }
 
+bool dmuci_is_option_value_empty(struct uci_section *s, char *option_name)
+{
+	char *option_value = NULL;
+
+	if (!s || !option_name)
+		return false;
+
+	dmuci_get_value_by_section_string(s, option_name, &option_value);
+
+	return (DM_STRLEN(option_value) == 0) ? true : false;
+}
+
 int dmuci_get_section_name(char *sec_name, char **value)
 {
 	if (!sec_name)

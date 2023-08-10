@@ -393,6 +393,7 @@ int dmuci_set_value_varstate(char *package, char *section, char *option, char *v
 int dmuci_get_section_name(char *sec_name, char **value);
 int dmuci_set_section_name(char *sec_name, char *str, size_t size);
 bool dmuci_string_to_boolean(char *value);
+bool dmuci_is_option_value_empty(struct uci_section *s, char *option_name);
 
 #endif
 

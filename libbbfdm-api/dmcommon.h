@@ -133,6 +133,7 @@ extern char *RateAdjAlgorithm[];
 #define DHCP_LEASES_FILE "/tmp/dhcp.leases"
 #define DHCP_CLIENT_OPTIONS_FILE "/var/dhcp.client.options"
 #define SYSTEM_CERT_PATH "/etc/ssl/certs"
+#define BOARD_JSON_FILE "/etc/board.json"
 #define DMMAP "dmmap"
 #define LIST_KEY (const char *[])
 #define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)

@@ -28,7 +28,7 @@ extern DMLEAF tEthernetVLANTerminationParams[];
 extern DMLEAF tEthernetVLANTerminationStatsParams[];
 extern DMLEAF tEthernetRMONStatsParams[];
 
+struct uci_section *ethernet___get_ethernet_interface_section(const char *device_name);
 bool ethernet___check_vlan_termination_section(const char *name);
-bool ethernet___is_ethernet_interface_inst(const char *device_name);
 
 #endif //__ETHERNET_H

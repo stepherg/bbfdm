@@ -303,7 +303,8 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmuci_get_value_by_section_string(s, "type", &type);
 		dmuci_get_value_by_section_string(s, "name", &name);
 		dmuci_get_value_by_section_string(s, "ifname", &ifname);
-		if (DM_LSTRCMP(type, "bridge") == 0 ||
+		if (DM_STRLEN(type) == 0 ||
+			DM_LSTRCMP(type, "bridge") == 0 ||
 			DM_LSTRCMP(type, "macvlan") == 0 ||
 			(*name != 0 && !ethernet___check_vlan_termination_section(name)) ||
 			(*name == 0 && strncmp(section_name(s), "br_", 3) == 0))
@@ -372,9 +373,9 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		// The lower layer is Device.Ethernet.Interface.{i}.
 		if (found == false) {
 			adm_entry_get_linker_param(dmctx, "Device.Ethernet.Interface.", linker, &value);
-			struct uci_section *port_s = get_dup_section_in_config_opt("ports", "ethport", "ifname", linker);
-			loweralias = get_alias_by_section("dmmap_ports", "ethport", port_s, "eth_port_alias");
-			layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_ports", "ethport", "section_name", section_name(port_s), "eth_port_instance", "eth_port_alias");
+			struct uci_section *port_s = ethernet___get_ethernet_interface_section(linker);
+			loweralias = get_alias_by_section("dmmap_ethernet", "device", port_s, "eth_iface_alias");
+			layer_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_ethernet", "device", "section_name", section_name(port_s), "eth_iface_instance", "eth_iface_alias");
 		}
 
 		snprintf(buf_lowerlayer, sizeof(buf_lowerlayer), "%s", value ? value : "");
@@ -442,11 +443,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			adm_entry_get_linker_param(dmctx, "Device.Ethernet.Interface.", device, &value);
 			if (value != NULL) {
 				DM_STRNCPY(package, "ports", sizeof(package));
-				struct uci_section *port_s = NULL;
-				uci_foreach_option_eq("ports", "ethport", "ifname", device, port_s) {
-					loweralias = get_alias_by_section("dmmap_ports", "ethport", port_s, "eth_port_alias");
-					bridge_port_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_ports", "ethport", "section_name", section_name(port_s), "eth_port_instance", "eth_port_alias");
-					break;
+				struct uci_section *port_s = ethernet___get_ethernet_interface_section(device);
+				if (port_s) {
+					loweralias = get_alias_by_section("dmmap_ethernet", "device", port_s, "eth_iface_alias");
+					bridge_port_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_ethernet", "device", "section_name", section_name(port_s), "eth_iface_instance", "eth_iface_alias");
 				}
 				found = 1;
 			}
@@ -457,12 +457,9 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 			if (!found && value != NULL) {
 				DM_STRNCPY(package, "wireless", sizeof(package));
-				struct uci_section *wl_s = NULL;
-				uci_foreach_option_eq("wireless", "wifi-iface", "ifname", device, wl_s) {
-					loweralias = get_alias_by_section("dmmap_wireless", "wifi-iface", wl_s, "ssidalias");
-					bridge_port_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_wireless", "wifi-iface", "section_name", section_name(wl_s), "ssidinstance", "ssidalias");
-					break;
-				}
+				struct uci_section *wl_s = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ifname", device);
+				dmuci_get_value_by_section_string(wl_s, "ssid_alias", &loweralias);
+				bridge_port_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_wireless", "ssid", "ifname", device, "ssid_instance", "ssid_alias");
 				found = 1;
 			}
 
@@ -511,11 +508,10 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 			if (!found && value != NULL) {
 				DM_STRNCPY(package, "ports", sizeof(package));
-				struct uci_section *port_s = NULL;
-				uci_foreach_option_eq("ports", "ethport", "ifname", device, port_s) {
-					loweralias = get_alias_by_section("dmmap_ports", "ethport", port_s, "eth_port_alias");
-					bridge_port_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_ports", "ethport", "section_name", section_name(port_s), "eth_port_instance", "eth_port_alias");
-					break;
+				struct uci_section *port_s = ethernet___get_ethernet_interface_section(device);
+				if (port_s) {
+					loweralias = get_alias_by_section("dmmap_ethernet", "device", port_s, "eth_iface_alias");
+					bridge_port_inst = get_instance_by_section(dmctx->instance_mode, "dmmap_ethernet", "device", "section_name", section_name(port_s), "eth_iface_instance", "eth_iface_alias");
 				}
 			}
 
