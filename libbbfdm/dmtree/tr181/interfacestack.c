@@ -452,8 +452,11 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			}
 
 			// The lower layer is Device.WiFi.SSID.{i}.
-			if (!found && value == NULL)
-				adm_entry_get_linker_param(dmctx, "Device.WiFi.SSID.", device, &value);
+			if (!found && value == NULL) {
+				struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", device);
+				if (iface_s)
+					adm_entry_get_linker_param(dmctx, "Device.WiFi.SSID.", section_name(iface_s), &value);
+			}
 
 			if (!found && value != NULL) {
 				DM_STRNCPY(package, "wireless", sizeof(package));

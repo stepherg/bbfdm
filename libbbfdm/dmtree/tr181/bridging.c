@@ -2036,8 +2036,11 @@ static int get_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 		}
 
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", port, value);
-		if (!(*value) || (*value)[0] == 0)
-			adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", port, value);
+		if (!(*value) || (*value)[0] == 0) {
+			struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", port);
+			if (iface_s)
+				adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", section_name(iface_s), value);
+		}
 	}
 	return 0;
 }

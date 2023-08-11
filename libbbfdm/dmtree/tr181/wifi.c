@@ -58,7 +58,9 @@ static int get_linker_Wifi_Radio(char *refparam, struct dmctx *dmctx, void *data
 
 static int get_linker_Wifi_Ssid(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	*linker = (data && ((struct wifi_ssid_args *)data)->ifname) ? ((struct wifi_ssid_args *)data)->ifname : "";
+	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "ap_section_name", linker);
+	if (DM_STRLEN(*linker) == 0)
+		*linker = dmstrdup(instance);
 	return 0;
 }
 
@@ -321,14 +323,12 @@ static struct uci_section *find_mapcontroller_section(struct uci_section *wirele
 static int add_wifi_ssid(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *dmmap = NULL;
-	char ssid[32] = {0}, ifname[32] = {0};
+	char ssid[32] = {0};
 
 	snprintf(ssid, sizeof(ssid), "ssid_%s", *instance);
-	snprintf(ifname, sizeof(ifname), "wl%s", *instance);
 
 	dmuci_add_section_bbfdm("dmmap_wireless", "ssid", &dmmap);
 	dmuci_set_value_by_section(dmmap, "enabled", "0");
-	dmuci_set_value_by_section(dmmap, "ifname", ifname);
 	dmuci_set_value_by_section(dmmap, "ssid", ssid);
 	dmuci_set_value_by_section(dmmap, "name", ssid);
 	dmuci_set_value_by_section(dmmap, "added_by_user", "1");
@@ -338,30 +338,32 @@ static int add_wifi_ssid(char *refparam, struct dmctx *ctx, void *data, char **i
 
 static int delete_wifi_ssid(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *ssid_s = NULL, *stmp = NULL;
+	struct uci_section *ssid_s = NULL, *stmp = NULL, *dmmap_s = NULL;
 
 	switch (del_action) {
 		case DEL_INST:
 			if (((struct wifi_ssid_args *)data)->config_s) {
 				dmuci_delete_by_section(((struct wifi_ssid_args *)data)->config_s, "device", NULL);
-				dmuci_delete_by_section(((struct wifi_ssid_args *)data)->config_s, "ifname", NULL);
 				dmuci_delete_by_section(((struct wifi_ssid_args *)data)->config_s, "ssid", NULL);
+
+				dmmap_s = get_dup_section_in_dmmap("dmmap_wireless", "wifi-iface", section_name(((struct wifi_ssid_args *)data)->config_s));
+				dmuci_set_value_by_section(dmmap_s, "added_by_user", "1");
 			}
 
 			dmuci_delete_by_section(((struct wifi_ssid_args *)data)->dmmap_s, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_path_foreach_sections_safe(bbfdm, "dmmap_wireless", "ssid", stmp, ssid_s) {
-				struct uci_section *s = NULL;
-				char *ifname = NULL;
+				char *ap_sec_name = NULL;
 
-				dmuci_get_value_by_section_string(ssid_s, "ifname", &ifname);
-
-				s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", ifname);
-				if (s) {
+				dmuci_get_value_by_section_string(ssid_s, "ap_section_name", &ap_sec_name);
+				if (DM_STRLEN(ap_sec_name)) {
+					struct uci_section *s = get_origin_section_from_config("wireless", "wifi-iface", ap_sec_name);
 					dmuci_delete_by_section(s, "device", NULL);
-					dmuci_delete_by_section(s, "ifname", NULL);
 					dmuci_delete_by_section(s, "ssid", NULL);
+
+					dmmap_s = get_dup_section_in_dmmap("dmmap_wireless", "wifi-iface", section_name(s));
+					dmuci_set_value_by_section(dmmap_s, "added_by_user", "1");
 				}
 
 				dmuci_delete_by_section(ssid_s, NULL, NULL);
@@ -386,6 +388,7 @@ static int add_wifi_accesspoint(char *refparam, struct dmctx *ctx, void *data, c
 
 	dmuci_add_section_bbfdm("dmmap_wireless", "wifi-iface", &dmmap_wifi);
 	dmuci_set_value_by_section(dmmap_wifi, "section_name", s_name);
+	dmuci_set_value_by_section(dmmap_wifi, "added_by_user", "1");
 	dmuci_set_value_by_section(dmmap_wifi, "ap_instance", *instance);
 	return 0;
 }
@@ -485,7 +488,7 @@ static int browseWifiRadioInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 static void dmmap_synchronizeWiFiSSID(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct uci_section *s = NULL, *ss = NULL, *stmp = NULL;
-	char *user_s = NULL, *ifname = NULL;
+	char *user_s = NULL, *ap_sec_name = NULL;
 
 	uci_path_foreach_sections_safe(bbfdm, "dmmap_wireless", "ssid", stmp, s) {
 
@@ -495,10 +498,12 @@ static void dmmap_synchronizeWiFiSSID(struct dmctx *dmctx, DMNODE *parent_node, 
 			continue;
 
 		// check config section ==> if it exists then skip it
-		dmuci_get_value_by_section_string(s, "ifname", &ifname);
-		ss = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", ifname);
-		if (ss)
-			continue;
+		dmuci_get_value_by_section_string(s, "ap_section_name", &ap_sec_name);
+		if (DM_STRLEN(ap_sec_name)) {
+			ss = get_origin_section_from_config("wireless", "wifi-iface", ap_sec_name);
+			if (ss)
+				continue;
+		}
 
 		// else ==> delete section
 		dmuci_delete_by_section(s, NULL, NULL);
@@ -507,14 +512,15 @@ static void dmmap_synchronizeWiFiSSID(struct dmctx *dmctx, DMNODE *parent_node, 
 	uci_foreach_sections("wireless", "wifi-iface", s) {
 		char *disabled = NULL, *ssid = NULL, *device = NULL;
 
-		// if ifname is empty ==> skip it
-		dmuci_get_value_by_section_string(s, "ifname", &ifname);
-		if (DM_STRLEN(ifname) == 0)
+		// if dmmap section exits ==> skip it
+		ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", section_name(s));
+		if (ss)
 			continue;
 
-		// if dmmap section exits ==> skip it
-		ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ifname", ifname);
-		if (ss)
+		// section added by user ==> skip it
+		ss = get_dup_section_in_dmmap("dmmap_wireless", "wifi-iface", section_name(s));
+		dmuci_get_value_by_section_string(ss, "added_by_user", &user_s);
+		if (DM_LSTRCMP(user_s, "1") == 0)
 			continue;
 
 		dmuci_get_value_by_section_string(s, "disabled", &disabled);
@@ -522,8 +528,8 @@ static void dmmap_synchronizeWiFiSSID(struct dmctx *dmctx, DMNODE *parent_node, 
 		dmuci_get_value_by_section_string(s, "device", &device);
 
 		dmuci_add_section_bbfdm("dmmap_wireless", "ssid", &ss);
+		dmuci_set_value_by_section(ss, "ap_section_name", section_name(s));
 		dmuci_set_value_by_section(ss, "enabled", DM_STRLEN(disabled) ? ((*disabled == '1') ? "0" : "1") : "1");
-		dmuci_set_value_by_section(ss, "ifname", ifname);
 		dmuci_set_value_by_section(ss, "ssid", ssid);
 		dmuci_set_value_by_section(ss, "device", device);
 		dmuci_set_value_by_section(ss, "name", section_name(s));
@@ -541,11 +547,13 @@ static int browseWifiSsidInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 
 	uci_path_foreach_sections(bbfdm, "dmmap_wireless", "ssid", dmmap_s) {
 		struct uci_section *config_s = NULL;
-		char *ifname = NULL;
+		char *ap_sec_name = NULL, *ifname = "";
 
-		dmuci_get_value_by_section_string(dmmap_s, "ifname", &ifname);
-
-		config_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", ifname);
+		dmuci_get_value_by_section_string(dmmap_s, "ap_section_name", &ap_sec_name);
+		if (DM_STRLEN(ap_sec_name)) {
+			config_s = get_origin_section_from_config("wireless", "wifi-iface", ap_sec_name);
+			if (config_s) dmuci_get_value_by_section_string(config_s, "ifname", &ifname);
+		}
 
 		init_wifi_ssid(&curr_wifi_ssid_args, config_s, dmmap_s, ifname);
 
@@ -736,10 +744,7 @@ static int set_wifi_ssid_enable(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_wifi_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ifname = NULL;
-
-	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "ifname", &ifname);
-	return get_net_device_status(ifname, value);
+	return get_net_device_status(((struct wifi_ssid_args *)data)->ifname, value);
 }
 
 /*#Device.WiFi.SSID.{i}.SSID!UCI:wireless/wifi-iface,@i-1/ssid*/
@@ -2252,7 +2257,9 @@ static int set_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_WiFiEndPoint_SSIDReference(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", ((struct wifi_enp_args *)data)->ifname, value);
+	struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", ((struct wifi_enp_args *)data)->ifname);
+	if (iface_s)
+		adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", section_name(iface_s), value);
 	return 0;
 }
 
@@ -2694,13 +2701,24 @@ static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", ((struct wifi_acp_args *)data)->ifname, value);
+	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->dmmap_section, "LowerLayers", value);
+
+	if ((*value)[0] == '\0') {
+		adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", section_name((((struct wifi_acp_args *)data)->sections)->config_section), value);
+	} else {
+		char *linker = NULL;
+
+		adm_entry_get_linker_value(ctx, *value, &linker);
+		if (!linker || *linker == 0)
+			*value = "";
+	}
 	return 0;
 }
 
 static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.WiFi.SSID.", NULL};
+	struct uci_section *ss = NULL;
 	char *linker = NULL;
 
 	switch (action)	{
@@ -2715,11 +2733,18 @@ static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 		case VALUESET:
 			adm_entry_get_linker_value(ctx, value, &linker);
 
+			// Store LowerLayers value under dmmap_wireless section
+			dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->dmmap_section, "LowerLayers", value);
+
 			if (linker) {
-				struct uci_section *ss = NULL;
 				char *device = NULL, *ssid = NULL, *enabled = NULL;
 
-				ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ifname", linker);
+				ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", linker);
+				if (ss == NULL) {
+					ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ssid_instance", linker);
+				}
+
+				dmuci_set_value_by_section(ss, "ap_section_name", section_name((((struct wifi_acp_args *)data)->sections)->config_section));
 
 				dmuci_get_value_by_section_string(ss, "device", &device);
 				dmuci_get_value_by_section_string(ss, "ssid", &ssid);
@@ -2727,13 +2752,13 @@ static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 
 				bool b = dmuci_string_to_boolean(enabled);
 
-				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "device", device);
 				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "ssid", ssid);
+				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "device", device);
 				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "disabled", b ? "0" : "1");
-
-				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "ifname", linker);
 			} else {
-				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "ifname", "");
+				ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", section_name((((struct wifi_acp_args *)data)->sections)->config_section));
+				dmuci_set_value_by_section(ss, "ap_section_name", "");
+
 				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "ssid", "");
 				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "device", "");
 			}
