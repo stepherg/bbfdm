@@ -351,7 +351,17 @@ void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list)
 	if (list_empty(pv_list))
 		return;
 
+	size_t count = 0;
 	list_for_each_entry(pv, pv_list, list) {
+		count++;
+	}
+
+	struct pvNode *sortedPV = sort_pv_path(pv_list, count);
+	if (sortedPV == NULL)
+		return;
+
+	for (size_t i = 0; i < count; i++) {
+		struct pvNode *pv = &sortedPV[i];
 		ptr = pv->param;
 		if (list_empty(&result_stack)) {
 			DEBUG("stack empty Processing (%s)", ptr);
@@ -381,6 +391,8 @@ void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list)
 			}
 		}
 	}
+
+	free(sortedPV);
 
 	// Close the stack entry if left
 	list_for_each_entry(rnode, &result_stack, list) {

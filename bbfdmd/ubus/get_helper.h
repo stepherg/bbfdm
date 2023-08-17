@@ -48,5 +48,6 @@ int transaction_status(struct blob_buf *bb, int trans_id);
 bool is_transaction_running(void);
 bool is_transaction_valid(int trans_id);
 int configure_transaction_timeout(int timeout);
+struct pvNode *sort_pv_path(struct list_head *pv_list, size_t pv_count);
 
 #endif /* GET_HELPER_H */
