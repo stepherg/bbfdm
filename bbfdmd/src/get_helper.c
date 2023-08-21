@@ -36,6 +36,10 @@ DMOBJ *DEAMON_DM_ROOT_OBJ = NULL;
 DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2] = {0};
 DM_MAP_VENDOR_EXCLUDE *DEAMON_DM_VENDOR_EXTENSION_EXCLUDE = NULL;
 
+// uloop.h does not have versions, below line is to use
+// deprecated uloop_timeout_remaining for the time being
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 static struct {
 	int trans_id;
 	struct uloop_timeout trans_timeout;
@@ -247,7 +251,7 @@ int transaction_start(char *app, uint32_t max_timeout)
 int transaction_status(struct blob_buf *bb)
 {
 	if (g_current_trans.trans_id) {
-		int64_t rem = uloop_timeout_remaining64(&g_current_trans.trans_timeout);
+		int64_t rem = uloop_timeout_remaining(&g_current_trans.trans_timeout);
 		blobmsg_add_string(bb, "app", g_current_trans.app);
 		blobmsg_add_string(bb, "tstatus", "running");
 		blobmsg_add_u64(bb, "remaining_time", rem / 1000);
