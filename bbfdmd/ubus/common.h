@@ -76,6 +76,9 @@ int get_resolved_paths(struct dmctx *bbf_ctx, char *qpath, struct list_head *res
 // strncpy with always 0 terminated string
 static inline void strncpyt(char *dst, const char *src, size_t n)
 {
+	if (dst == NULL || src == NULL)
+		return;
+
         if (n > 1) {
                 strncpy(dst, src, n - 1);
                 dst[n - 1] = 0;

@@ -24,14 +24,11 @@ DMOBJ *DEAMON_DM_ROOT_OBJ = NULL;
 DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2] = {0};
 DM_MAP_VENDOR_EXCLUDE *DEAMON_DM_VENDOR_EXTENSION_EXCLUDE = NULL;
 
-// uloop.h does not have versions, below line is to use
-// deprecated uloop_timeout_remaining for the time being
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
 static struct {
 	int trans_id;
 	struct uloop_timeout trans_timeout;
 	int timeout_ms;
+	char app[32];
 } g_current_trans = {.trans_id=0, .timeout_ms=10000};
 
 static jmp_buf gs_jump_location;
@@ -274,13 +271,13 @@ static int compare_path(const void *arg1, const void *arg2)
 }
 
 // Returns transaction id if successful, otherwise 0
-int transaction_start(uint32_t max_timeout)
+int transaction_start(char *app, uint32_t max_timeout)
 {
 	int ret = 0;
 	uint32_t timeout;
 
 	if (g_current_trans.trans_id) {
-		WARNING("Transaction already in-process");
+		WARNING("%s Transaction locked by %s", app, g_current_trans.app);
 		return 0;
 	}
 
@@ -289,23 +286,27 @@ int transaction_start(uint32_t max_timeout)
 	} else {
 		timeout = g_current_trans.timeout_ms;
 	}
+
 	ret = get_random_id();
+	strncpyt(g_current_trans.app, app, 32);
+
 	g_current_trans.trans_id = ret;
 	g_current_trans.trans_timeout.cb = transaction_timeout_handler;
 	uloop_timeout_set(&g_current_trans.trans_timeout, timeout);
-	INFO("Transaction started with id %d, timeout %zd", g_current_trans.trans_id, timeout);
+	INFO("Transaction created by [%s] id %d, timeout %zd", g_current_trans.app, g_current_trans.trans_id, timeout);
 
 	return ret;
 }
 
-int transaction_status(struct blob_buf *bb, int trans_id)
+int transaction_status(struct blob_buf *bb)
 {
-	if (g_current_trans.trans_id == trans_id) {
-		int rem = uloop_timeout_remaining(&g_current_trans.trans_timeout);
-		blobmsg_add_string(bb, "status", "on-going");
-		blobmsg_add_u32(bb, "remaining_time", rem / 1000);
+	if (g_current_trans.trans_id) {
+		int64_t rem = uloop_timeout_remaining64(&g_current_trans.trans_timeout);
+		blobmsg_add_string(bb, "app", g_current_trans.app);
+		blobmsg_add_string(bb, "tstatus", "running");
+		blobmsg_add_u64(bb, "remaining_time", rem / 1000);
 	} else {
-		blobmsg_add_string(bb, "status", "not-exists");
+		blobmsg_add_string(bb, "tstatus", "Idle");
 	}
 
 	return 0;
@@ -329,9 +330,10 @@ int transaction_commit(int trans_id, struct blob_buf *bb, bool is_service_restar
 	int ret = -1;
 
 	if (is_transaction_valid(trans_id)) {
-		INFO("Commit on-going transaction");
+		INFO("Commit on-going transaction by %s", g_current_trans.app);
 		uloop_timeout_cancel(&g_current_trans.trans_timeout);
 		g_current_trans.trans_id = 0;
+		g_current_trans.app[0] = '\0';
 
 		bbf_entry_restart_services(bb, is_service_restart);
 
@@ -348,9 +350,10 @@ int transaction_abort(int trans_id, struct blob_buf *bb)
 	int ret = -1;
 
 	if (is_transaction_valid(trans_id)) {
-		INFO("Abort on-going transaction");
+		INFO("Abort on-going transaction by %s", g_current_trans.app);
 		uloop_timeout_cancel(&g_current_trans.trans_timeout);
 		g_current_trans.trans_id = 0;
+		g_current_trans.app[0] = '\0';
 
 		bbf_entry_revert_changes(bb);
 

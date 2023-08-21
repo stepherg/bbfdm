@@ -568,7 +568,7 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		trans_id = transaction_start(0);
+		trans_id = transaction_start("INT_SET", 0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
@@ -685,7 +685,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		trans_id = transaction_start(0);
+		trans_id = transaction_start("INT_ADD", 0);
 		if (trans_id == 0) {
 			ERR("Failed to get the lock for the transaction");
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
@@ -805,7 +805,7 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		trans_id = transaction_start(0);
+		trans_id = transaction_start("INT_DEL", 0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
@@ -875,21 +875,20 @@ static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_objec
 		is_service_restart = blobmsg_get_bool(tb[TRANS_RESTART]);
 
 	fill_optional_data(&data, tb[TRANS_OPTIONAL]);
-	if (!is_str_eq(trans_cmd, "start") && data.trans_id == 0)
-		return UBUS_STATUS_INVALID_ARGUMENT;
 
-	INFO("ubus method|%s|, name|%s|", method, obj->name);
+	INFO("ubus method|%s|, name|%s|, cmd [%s]", method, obj->name, trans_cmd);
 
 	bbf_init(&data.bbf_ctx);
 	blob_buf_init(&data.bb, 0);
 
 	if (is_str_eq(trans_cmd, "start")) {
-		ret = transaction_start(max_timeout);
+		ret = transaction_start("API", max_timeout);
 		if (ret) {
 			blobmsg_add_u8(&data.bb, "status", true);
 			blobmsg_add_u32(&data.bb, "transaction_id", ret);
 		} else {
 			blobmsg_add_u8(&data.bb, "status", false);
+			transaction_status(&data.bb);
 		}
 	} else if (is_str_eq(trans_cmd, "commit")) {
 		ret = transaction_commit(data.trans_id, &data.bb, is_service_restart);
@@ -898,7 +897,7 @@ static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_objec
 		ret = transaction_abort(data.trans_id, &data.bb);
 		blobmsg_add_u8(&data.bb, "status", (ret == 0));
 	} else if (is_str_eq(trans_cmd, "status")) {
-		transaction_status(&data.bb, data.trans_id);
+		transaction_status(&data.bb);
 	} else {
 		WARNING("method(%s) not supported", method);
 	}
