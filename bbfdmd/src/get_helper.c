@@ -203,7 +203,7 @@ void fill_err_code_array(bbfdm_data_t *data, int fault)
 
 static void transaction_timeout_handler(struct uloop_timeout *t __attribute__((unused)))
 {
-	INFO("Transaction timeout called");
+	INFO("Transaction timeout called, aborting tid %d", g_current_trans.trans_id);
 	transaction_abort(g_current_trans.trans_id, NULL);
 }
 
@@ -231,7 +231,7 @@ int transaction_start(uint32_t max_timeout)
 	}
 
 	if (max_timeout > 0) {
-		timeout = max_timeout * 1000;
+		timeout = max_timeout;
 	} else {
 		timeout = g_current_trans.timeout_ms;
 	}
