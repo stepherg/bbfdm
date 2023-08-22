@@ -54,9 +54,6 @@ extern struct list_head json_memhead;
 
 LIST_HEAD(head_registered_service);
 
-static void register_periodic_timers(struct ubus_context *ctx);
-static void cancel_periodic_timers(struct ubus_context *ctx);
-
 // Global variables
 static unsigned int g_refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
 static int g_subprocess_level = BBF_SUBPROCESS_DEPTH;
@@ -576,7 +573,7 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		trans_id = transaction_start("INT_SET", 0);
+		trans_id = transaction_start(0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
@@ -693,7 +690,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		trans_id = transaction_start("INT_ADD", 0);
+		trans_id = transaction_start(0);
 		if (trans_id == 0) {
 			ERR("Failed to get the lock for the transaction");
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
@@ -813,7 +810,7 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		trans_id = transaction_start("INT_DEL", 0);
+		trans_id = transaction_start(0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
@@ -883,32 +880,30 @@ static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_objec
 		is_service_restart = blobmsg_get_bool(tb[TRANS_RESTART]);
 
 	fill_optional_data(&data, tb[TRANS_OPTIONAL]);
+	if (!is_str_eq(trans_cmd, "start") && data.trans_id == 0)
+		return UBUS_STATUS_INVALID_ARGUMENT;
 
-	INFO("ubus method|%s|, name|%s|, cmd [%s]", method, obj->name, trans_cmd);
+	INFO("ubus method|%s|, name|%s|", method, obj->name);
 
 	bbf_init(&data.bbf_ctx);
 	blob_buf_init(&data.bb, 0);
 
 	if (is_str_eq(trans_cmd, "start")) {
-		cancel_periodic_timers(ctx);
-		ret = transaction_start("API", max_timeout);
+		ret = transaction_start(max_timeout);
 		if (ret) {
 			blobmsg_add_u8(&data.bb, "status", true);
 			blobmsg_add_u32(&data.bb, "transaction_id", ret);
 		} else {
 			blobmsg_add_u8(&data.bb, "status", false);
-			transaction_status(&data.bb);
 		}
 	} else if (is_str_eq(trans_cmd, "commit")) {
-		register_periodic_timers(ctx);
 		ret = transaction_commit(data.trans_id, &data.bb, is_service_restart);
 		blobmsg_add_u8(&data.bb, "status", (ret == 0));
 	} else if (is_str_eq(trans_cmd, "abort")) {
-		register_periodic_timers(ctx);
 		ret = transaction_abort(data.trans_id, &data.bb);
 		blobmsg_add_u8(&data.bb, "status", (ret == 0));
 	} else if (is_str_eq(trans_cmd, "status")) {
-		transaction_status(&data.bb);
+		transaction_status(&data.bb, data.trans_id);
 	} else {
 		WARNING("method(%s) not supported", method);
 	}
@@ -1186,10 +1181,8 @@ static void instance_fork_done(struct uloop_process *p, int ret)
 		INFO("Instance updater(%d) completed, starting a new instance timer", r->process.pid);
 		struct bbfdm_context *u = (struct bbfdm_context *)r->result;
 
-		if (g_refresh_time != 0) {
-			u->instance_timer.cb = periodic_instance_updater;
-			uloop_timeout_set(&u->instance_timer, g_refresh_time);
-		}
+		u->instance_timer.cb = periodic_instance_updater;
+		uloop_timeout_set(&u->instance_timer, g_refresh_time);
 		free_path_list(&u->old_instances);
 		async_req_free(r);
 	}
@@ -1228,10 +1221,8 @@ static int fork_instance_checker(struct bbfdm_context *u)
 	r = async_req_new();
 	if (r == NULL) {
 		ERR("Error allocating instance req");
-		if (g_refresh_time != 0) {
-			u->instance_timer.cb = periodic_instance_updater;
-			uloop_timeout_set(&u->instance_timer, g_refresh_time);
-		}
+		u->instance_timer.cb = periodic_instance_updater;
+		uloop_timeout_set(&u->instance_timer, g_refresh_time);
 		free_path_list(&u->old_instances);
 		goto err_out;
 	}
@@ -1274,10 +1265,6 @@ err_out:
 static void periodic_instance_updater(struct uloop_timeout *t)
 {
 	struct bbfdm_context *u;
-
-	if (g_refresh_time == 0) {
-		return; // periodic refresh disabled
-	}
 
 	u = container_of(t, struct bbfdm_context, instance_timer);
 	if (u == NULL) {
@@ -1465,43 +1452,6 @@ static void lookup_event_cb(struct ubus_context *ctx,
 	}
 }
 
-static void cancel_periodic_timers(struct ubus_context *ctx)
-{
-	struct bbfdm_context *u;
-
-	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
-	if (u == NULL) {
-		ERR("Failed to get the bbfdm context");
-		return;
-	}
-
-	DEBUG("Cancelling schema_timer and instance_timer");
-	uloop_timeout_cancel(&u->schema_timer);
-	if (g_refresh_time != 0) {
-		uloop_timeout_cancel(&u->instance_timer);
-	}
-}
-
-static void register_periodic_timers(struct ubus_context *ctx)
-{
-	struct bbfdm_context *u;
-
-	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
-	if (u == NULL) {
-		ERR("Failed to get the bbfdm context");
-		return;
-	}
-
-	DEBUG("Register schema_timer %d and instance_timer %d", BBF_SCHEMA_UPDATE_TIMEOUT, g_refresh_time);
-	u->schema_timer.cb = periodic_schema_updater;
-	uloop_timeout_set(&u->schema_timer, BBF_SCHEMA_UPDATE_TIMEOUT);
-
-	if (g_refresh_time != 0) {
-		u->instance_timer.cb = periodic_instance_updater;
-		uloop_timeout_set(&u->instance_timer, g_refresh_time);
-	}
-}
-
 int main(int argc, char **argv)
 {
 	struct bbfdm_context bbfdm_ctx;
@@ -1563,7 +1513,13 @@ int main(int argc, char **argv)
 		if (err != 0)
 			goto exit;
 
-		register_periodic_timers(&bbfdm_ctx.ubus_ctx);
+		bbfdm_ctx.schema_timer.cb = periodic_schema_updater;
+		uloop_timeout_set(&bbfdm_ctx.schema_timer, BBF_SCHEMA_UPDATE_TIMEOUT);
+
+		// initial timer should be bigger to give more space to other applications to initialize
+		bbfdm_ctx.instance_timer.cb = periodic_instance_updater;
+		uloop_timeout_set(&bbfdm_ctx.instance_timer, 3 * g_refresh_time);
+
 	} else { // It's a micro-service instance
 
 		bool is_registred = register_service(&bbfdm_ctx.ubus_ctx);

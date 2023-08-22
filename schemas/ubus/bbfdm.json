@@ -121,7 +121,6 @@
       "maximum": 1
     },
     "trans_id_t": {
-      "description": "Required for CUD operation, it shall be same number as got from transaction->start",
       "type": "integer",
       "minimum": 1
     }
@@ -745,11 +744,9 @@
             },
             "timeout": {
               "type": "integer",
-              "description": "Timeout (in milliseconds) for the transaction, on timeout changes will be reverted",
               "minimum":0
             },
             "restart_services": {
-              "description": "If yes, bbfdmd restart the service after CUD operation, else return list of updated uci to handler restart externally.",
               "type": "boolean"
             },
             "optional": {

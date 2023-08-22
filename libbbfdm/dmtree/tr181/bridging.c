@@ -2029,13 +2029,8 @@ static int get_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 		dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "config", &config);
 
 		if (DM_LSTRCMP(config, "network") == 0) {
-			adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", port, value);
-			if (!(*value) || (*value)[0] == 0) {
-				char *tag = DM_STRCHR(port, '.');
-				if (tag) tag[0] = '\0';
-			} else {
-				return 0;
-			}
+			char *tag = DM_STRCHR(port, '.');
+			if (tag) tag[0] = '\0';
 		}
 
 		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", port, value);
@@ -2086,10 +2081,6 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 				return 0;
 			}
 
-			dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "port", &port_device);
-			if (DM_STRCMP(linker, port_device) == 0) // Same as already configured
-				return 0;
-
 			// Update config section on dmmap_bridge_port if the linker is wirelss port or network port
 			if (DM_LSTRNCMP(value, "Device.WiFi.SSID.", 17) == 0) {
 				dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "config", "wireless");
@@ -2105,6 +2096,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 			}
 
 			dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "enabled", &port_enabled);
+			dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "port", &port_device);
 			if (port_device[0] == '\0') {
 
 				if (DM_STRCMP(port_enabled, "1") == 0) {
