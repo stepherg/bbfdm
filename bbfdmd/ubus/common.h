@@ -20,6 +20,8 @@
 #define BBF_ADD_EVENT "AddObj"
 #define BBF_DEL_EVENT "DelObj"
 #define BBF_EVENT "event"
+#define BBF_UPDATE_SCHEMA_EVENT "UpdateSchema"
+
 #define BBF_JSON_INPUT "/etc/bbfdm/input.json"
 
 #define MAX_DM_KEY_LEN 256

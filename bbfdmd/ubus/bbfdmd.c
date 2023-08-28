@@ -301,8 +301,10 @@ static bool is_object_schema_update_available(struct bbfdm_context *u)
 
 	ll = blobmsg_len(data.bb.head);
 	if (ll - u->dm_schema_len > min_len) {
-		INFO("DM Schema update available old:new[%zd:%zd]", u->dm_schema_len, ll);
-		ret = true;
+		DEBUG("DM Schema update available old:new[%zd:%zd]", u->dm_schema_len, ll);
+		if (u->dm_schema_len != 0) {
+			ret = true;
+		}
 	}
 
 	u->dm_schema_len = ll;
@@ -1077,6 +1079,7 @@ static void periodic_schema_updater(struct uloop_timeout *t)
 	bool ret;
 	struct bbfdm_context *u;
 	struct blob_buf bb;
+	char method_name[45] = {0};
 
 	u = container_of(t, struct bbfdm_context, schema_timer);
 	if (u == NULL) {
@@ -1084,21 +1087,13 @@ static void periodic_schema_updater(struct uloop_timeout *t)
 		return;
 	}
 
-	if (is_transaction_running()) {
-		DEBUG("Transaction ongoing, schedule schema update timer after %dsec", BBF_SCHEMA_UPDATE_TIMEOUT);
-		u->schema_timer.cb = periodic_schema_updater;
-		uloop_timeout_set(&u->schema_timer, BBF_SCHEMA_UPDATE_TIMEOUT);
-		return;
-	}
-
 	memset(&bb, 0, sizeof(struct blob_buf));
-
 	ret = is_object_schema_update_available(u);
 	if (ret) {
 		INFO("Schema update available");
+		snprintf(method_name, sizeof(method_name), "%s.%s", UBUS_METHOD_NAME, BBF_UPDATE_SCHEMA_EVENT);
 		blob_buf_init(&bb, 0);
-		blobmsg_add_string(&bb, "action", "schema_update_available");
-		ubus_notify(&u->ubus_ctx, &bbf_object, UBUS_METHOD_NAME, bb.head, 1000);
+		ubus_send_event(&u->ubus_ctx, method_name, bb.head);
 		blob_buf_free(&bb);
 	}
 
@@ -1555,7 +1550,8 @@ int main(int argc, char **argv)
 		if (err != 0)
 			goto exit;
 
-		register_periodic_timers(&bbfdm_ctx.ubus_ctx);
+		periodic_schema_updater(&bbfdm_ctx.schema_timer);
+		periodic_instance_updater(&bbfdm_ctx.instance_timer);
 	} else { // It's a micro-service instance
 
 		err = bbfdm_init(&bbfdm_ctx.ubus_ctx);
