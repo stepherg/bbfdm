@@ -1530,7 +1530,7 @@ DMOBJ tDeviceInfoObj[] = {
 {"Processor", &DMREAD, NULL, NULL, NULL, browseDeviceInfoProcessorInst, NULL, NULL, NULL, tDeviceInfoProcessorParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {"VendorLogFile", &DMREAD, NULL, NULL, NULL, browseVlfInst, NULL, NULL, NULL, tDeviceInfoVendorLogFileParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
 {"SupportedDataModel", &DMREAD, NULL, NULL, NULL, browseDeviceInfoSupportedDataModelInst, NULL, NULL, NULL, tDeviceInfoSupportedDataModelParams, NULL, BBFDM_CWMP, LIST_KEY{"URL", "Alias", "UUID", NULL}},
-{"FirmwareImage", &DMREAD, NULL, NULL, "ubus:fwbank->dump", browseDeviceInfoFirmwareImageInst, NULL, NULL, NULL, tDeviceInfoFirmwareImageParams, get_device_fwimage_linker, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"FirmwareImage", &DMREAD, NULL, NULL, "file:/usr/libexec/rpcd/fwbank", browseDeviceInfoFirmwareImageInst, NULL, NULL, NULL, tDeviceInfoFirmwareImageParams, get_device_fwimage_linker, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
 {0}
 };
 
