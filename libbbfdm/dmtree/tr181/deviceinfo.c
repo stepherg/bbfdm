@@ -1041,7 +1041,14 @@ static int set_DeviceInfoFirmwareImage_Alias(char *refparam, struct dmctx *ctx, 
 
 static int get_DeviceInfoFirmwareImage_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "fwver");
+	char *name;
+
+	name = dmstrdup(dmjson_get_value((json_object *)data, 1, "fwver"));
+	if (DM_STRLEN(name) > 64 ) {
+		name[64] = '\0';
+	}
+
+	*value = name;
 	return 0;
 }
 
