@@ -37,7 +37,7 @@ static char *get_host_linker(char *ipaddr)
 	char *macaddr = "";
 	int i = 0;
 
-	dmubus_call("topology", "hosts", UBUS_ARGS{0}, 0, &res);
+	dmubus_call("hosts", "show", UBUS_ARGS{0}, 0, &res);
 	if (res == NULL)
 		return "";
 
