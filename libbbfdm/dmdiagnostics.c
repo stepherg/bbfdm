@@ -14,17 +14,17 @@
 
 #ifdef LOPENSSL
 #include <openssl/sha.h>
+#include <openssl/evp.h>
 #endif
 
 #ifdef LWOLFSSL
 #include <wolfssl/options.h>
 #include <wolfssl/openssl/sha.h>
+#include <wolfssl/openssl/evp.h>
 #endif
 
 #ifdef LMBEDTLS
-#include <mbedtls/sha1.h>
-#include <mbedtls/sha256.h>
-#include <mbedtls/sha512.h>
+#include <mbedtls/md.h>
 #endif
 
 #include "dmdiagnostics.h"
@@ -238,272 +238,78 @@ const bool validate_file_system_size(const char *file_size)
 	return true;
 }
 
-#if defined(LOPENSSL) || defined(LWOLFSSL)
-#define SHA1_DLEN SHA_DIGEST_LENGTH
-#define SHA1_CTX SHA_CTX
-#define SHA1_UPDATE SHA1_Update
-#define SHA1_FINAL SHA1_Final
-#else
-#define SHA1_DLEN (20)
-#define SHA1_CTX mbedtls_sha1_context
-#define SHA1_UPDATE mbedtls_sha1_update_ret
-#define SHA1_FINAL(X, Y) mbedtls_sha1_finish_ret(Y, X)
-#endif
-const bool validate_sha1sum_value(const char *file_path, const char *checksum)
-{
-	unsigned char hash[SHA1_DLEN];
-	unsigned char buffer[READ_BUF_SIZE];
-	char sha1_res[1 + SHA1_DLEN * 2];
-	bool res = false;
-	int bytes = 0;
-	SHA1_CTX ctx;
 
-	FILE *file = fopen(file_path, "rb");
+const bool validate_hash_value(const char *algo, const char *file_path, const char *checksum)
+{
+	unsigned char buffer[READ_BUF_SIZE] = {0};
+	char hash[BUFSIZ] = {0};
+	bool res = false;
+	unsigned int bytes = 0;
+	FILE *file;
+
+#ifdef LMBEDTLS
+	mbedtls_md_context_t enpctx;
+	mbedtls_md_context_t *mdctx = &enpctx;
+	const mbedtls_md_info_t *md;
+	unsigned char md_value[MBEDTLS_MD_MAX_SIZE];
+#else
+	EVP_MD_CTX *mdctx;
+	const EVP_MD *md;
+	unsigned char md_value[EVP_MAX_MD_SIZE];
+#endif
+
+	file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
-#if defined(LOPENSSL) || defined(LWOLFSSL)
-	if (!SHA1_Init(&ctx))
-		goto end;
-#else
-	mbedtls_sha1_init(&ctx);
+#ifndef LMBEDTLS
+	// makes all algorithms available to the EVP* routines
+	OpenSSL_add_all_algorithms();
 #endif
+
+#ifdef LMBEDTLS
+	md = mbedtls_md_info_from_string(algo);
+	mbedtls_md_init(mdctx);
+	mbedtls_md_init_ctx(mdctx, md);
+#else
+	md = EVP_get_digestbyname(algo);
+	mdctx = EVP_MD_CTX_create();
+	EVP_DigestInit_ex(mdctx, md, NULL);
+#endif
+
+	if (md == NULL)
+		goto end;
+
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA1_UPDATE(&ctx, buffer, bytes))
-			goto end;
+#ifdef LMBEDTLS
+		mbedtls_md_update(mdctx, buffer, bytes);
+#else
+		EVP_DigestUpdate(mdctx, buffer, bytes);
+#endif
 	}
 
-	if (!SHA1_FINAL(hash, &ctx))
-		goto end;
+#ifdef LMBEDTLS
+	mbedtls_md_finish(mdctx, md_value);
+	bytes = mbedtls_md_get_size(md);
+#else
+	bytes = 0;
+	EVP_DigestFinal_ex(mdctx, md_value, &bytes);
+#endif
 
-	for (int i = 0; i < SHA1_DLEN; i++)
-		snprintf(&sha1_res[i * 2], sizeof(sha1_res) - (i * 2), "%02x", hash[i]);
+	for (int i = 0; i < bytes; i++)
+		snprintf(&hash[i * 2], sizeof(hash) - (i * 2), "%02x", md_value[i]);
 
-	if (DM_STRCMP(sha1_res, checksum) == 0)
+	if (DM_STRCMP(hash, checksum) == 0)
 		res = true;
 
 end:
-	fclose(file);
-	return res;
-}
-
-#if defined(LOPENSSL)
-#define SHA224_DLEN SHA256_DIGEST_LENGTH
-#define SHA224_CTX_t SHA256_CTX
-#define SHA224_INIT SHA224_Init
-#define SHA224_UPDATE SHA224_Update
-#define SHA224_FINAL SHA224_Final
-#elif defined(LWOLFSSL)
-#define SHA224_DLEN SHA256_DIGEST_LENGTH
-#define SHA224_CTX_t SHA256_CTX
-#define SHA224_INIT SHA256_Init
-#define SHA224_UPDATE SHA256_Update
-#define SHA224_FINAL SHA256_Final
+#ifdef LMBEDTLS
+	mbedtls_md_free(mdctx);
 #else
-#define SHA224_DLEN (32)
-#define SHA224_CTX_t mbedtls_sha256_context
-#define SHA224_UPDATE mbedtls_sha256_update_ret
-#define SHA224_FINAL(X, Y) mbedtls_sha256_finish_ret(Y, X)
-#endif
-const bool validate_sha224sum_value(const char *file_path, const char *checksum)
-{
-	unsigned char hash[SHA224_DLEN];
-	unsigned char buffer[READ_BUF_SIZE];
-	char sha224_res[1 + SHA224_DLEN * 2];
-	bool res = false;
-	int bytes = 0;
-	SHA224_CTX_t ctx;
-
-	FILE *file = fopen(file_path, "rb");
-	if (!file)
-		return false;
-
-#if defined(LOPENSSL) || defined(LWOLFSSL)
-	if (!SHA224_INIT(&ctx))
-		goto end;
-#else
-	mbedtls_sha256_init(&ctx);
-	if (!mbedtls_sha256_starts_ret(&ctx, 1))
-		goto end;
+	EVP_MD_CTX_destroy(mdctx);
+	EVP_cleanup();
 #endif
 
-	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA224_UPDATE(&ctx, buffer, bytes))
-			goto end;
-	}
-
-	if (!SHA224_FINAL(hash, &ctx))
-		goto end;
-
-	for (int i = 0; i < SHA224_DLEN; i++)
-		snprintf(&sha224_res[i * 2], sizeof(sha224_res) - (i * 2), "%02x", hash[i]);
-
-	if (DM_STRCMP(sha224_res, checksum) == 0)
-		res = true;
-
-end:
-	fclose(file);
-	return res;
-}
-
-#if defined(LOPENSSL) || defined(LWOLFSSL)
-#define SHA256_DLEN SHA256_DIGEST_LENGTH
-#define SHA256_CTX_t SHA256_CTX
-#define SHA256_UPDATE SHA256_Update
-#define SHA256_FINAL SHA256_Final
-#else
-#define SHA256_DLEN (32)
-#define SHA256_CTX_t mbedtls_sha256_context
-#define SHA256_UPDATE mbedtls_sha256_update_ret
-#define SHA256_FINAL(X, Y) mbedtls_sha256_finish_ret(Y, X)
-#endif
-const bool validate_sha256sum_value(const char *file_path, const char *checksum)
-{
-	unsigned char hash[SHA256_DLEN];
-	unsigned char buffer[READ_BUF_SIZE];
-	char sha256_res[1 + SHA256_DLEN * 2];
-	bool res = false;
-	int bytes = 0;
-	SHA256_CTX_t ctx;
-
-	FILE *file = fopen(file_path, "rb");
-	if (!file)
-		return false;
-
-#if defined(LOPENSSL) || defined(LWOLFSSL)
-	if (!SHA256_Init(&ctx))
-		goto end;
-#else
-	mbedtls_sha256_init(&ctx);
-	if (!mbedtls_sha256_starts_ret(&ctx, 0))
-		goto end;
-#endif
-
-	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA256_UPDATE(&ctx, buffer, bytes))
-			goto end;
-	}
-
-	if (!SHA256_FINAL(hash, &ctx))
-		goto end;
-
-	for (int i = 0; i < SHA256_DLEN; i++)
-		snprintf(&sha256_res[i * 2], sizeof(sha256_res) - (i * 2), "%02x", hash[i]);
-
-	if (DM_STRCMP(sha256_res, checksum) == 0)
-		res = true;
-
-end:
-	fclose(file);
-	return res;
-}
-
-#if defined(LOPENSSL)
-#define SHA384_DLEN SHA384_DIGEST_LENGTH
-#define SHA384_CTX_t SHA512_CTX
-#define SHA384_UPDATE SHA384_Update
-#define SHA384_FINAL SHA384_Final
-#elif defined(LWOLFSSL)
-#define SHA384_DLEN SHA384_DIGEST_LENGTH
-#define SHA384_CTX_t SHA384_CTX
-#define SHA384_UPDATE SHA384_Update
-#define SHA384_FINAL SHA384_Final
-#else
-#define SHA384_DLEN (64)
-#define SHA384_CTX_t mbedtls_sha512_context
-#define SHA384_UPDATE mbedtls_sha512_update_ret
-#define SHA384_FINAL(X, Y) mbedtls_sha512_finish_ret(Y, X)
-#endif
-const bool validate_sha384sum_value(const char *file_path, const char *checksum)
-{
-	unsigned char hash[SHA384_DLEN];
-	unsigned char buffer[READ_BUF_SIZE];
-	char sha384_res[1 + SHA384_DLEN * 2];
-	bool res = false;
-	int bytes = 0;
-	SHA384_CTX_t ctx;
-
-	FILE *file = fopen(file_path, "rb");
-	if (!file)
-		return false;
-
-#if defined(LOPENSSL) || defined(LWOLFSSL)
-	if (!SHA384_Init(&ctx))
-		goto end;
-#else
-	mbedtls_sha512_init(&ctx);
-	if (!mbedtls_sha512_starts_ret(&ctx, 1))
-		goto end;
-#endif
-
-	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA384_UPDATE(&ctx, buffer, bytes))
-			goto end;
-	}
-
-	if (!SHA384_FINAL(hash, &ctx))
-		goto end;
-
-	for (int i = 0; i < SHA384_DLEN; i++)
-		snprintf(&sha384_res[i * 2], sizeof(sha384_res) - (i * 2), "%02x", hash[i]);
-
-	if (DM_STRCMP(sha384_res, checksum) == 0)
-		res = true;
-
-end:
-	fclose(file);
-
-	return res;
-}
-
-#if defined(LOPENSSL) || defined(LWOLFSSL)
-#define SHA512_DLEN SHA512_DIGEST_LENGTH
-#define SHA512_CTX_t SHA512_CTX
-#define SHA512_UPDATE SHA512_Update
-#define SHA512_FINAL SHA512_Final
-#else
-#define SHA512_DLEN (64)
-#define SHA512_CTX_t mbedtls_sha512_context
-#define SHA512_UPDATE mbedtls_sha512_update_ret
-#define SHA512_FINAL(X, Y) mbedtls_sha512_finish_ret(Y, X)
-#endif
-const bool validate_sha512sum_value(const char *file_path, const char *checksum)
-{
-	unsigned char hash[SHA512_DLEN];
-	unsigned char buffer[READ_BUF_SIZE];
-	char sha512_res[1 + SHA512_DLEN * 2];
-	bool res = false;
-	int bytes = 0;
-	SHA512_CTX_t ctx;
-
-	FILE *file = fopen(file_path, "rb");
-	if (!file)
-		return false;
-
-#if defined(LOPENSSL) || defined(LWOLFSSL)
-	if (!SHA512_Init(&ctx))
-		goto end;
-#else
-	mbedtls_sha512_init(&ctx);
-	if (!mbedtls_sha512_starts_ret(&ctx, 0))
-		goto end;
-#endif
-
-	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-		if (!SHA512_UPDATE(&ctx, buffer, bytes))
-			goto end;
-	}
-
-	if (!SHA512_FINAL(hash, &ctx))
-		goto end;
-
-	for (int i = 0; i < SHA512_DLEN; i++)
-		snprintf(&sha512_res[i * 2], sizeof(sha512_res) - (i * 2), "%02x", hash[i]);
-
-	if (DM_STRCMP(sha512_res, checksum) == 0)
-		res = true;
-
-end:
 	fclose(file);
 	return res;
 }
@@ -513,15 +319,15 @@ const bool validate_checksum_value(const char *file_path, const char *checksum_a
 	if (checksum && *checksum) {
 
 		if (strcmp(checksum_algorithm, "SHA-1") == 0)
-			return validate_sha1sum_value(file_path, checksum);
+			return validate_hash_value("SHA1", file_path, checksum);
 		else if (strcmp(checksum_algorithm, "SHA-224") == 0)
-			return validate_sha224sum_value(file_path, checksum);
+			return validate_hash_value("SHA224", file_path, checksum);
 		else if (strcmp(checksum_algorithm, "SHA-256") == 0)
-			return validate_sha256sum_value(file_path, checksum);
+			return validate_hash_value("SHA256", file_path, checksum);
 		else if (strcmp(checksum_algorithm, "SHA-384") == 0)
-			return validate_sha384sum_value(file_path, checksum);
+			return validate_hash_value("SHA384", file_path, checksum);
 		else if (strcmp(checksum_algorithm, "SHA-512") == 0)
-			return validate_sha512sum_value(file_path, checksum);
+			return validate_hash_value("SHA512", file_path, checksum);
 		else
 			return false;
 	}
