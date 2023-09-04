@@ -12,6 +12,7 @@
  */
 
 #include "dhcpv4.h"
+#include "dns.h"
 
 #define DHCP_OPTION_VENDORID 60
 #define DHCP_OPTION_CLIENTID 61
@@ -570,11 +571,13 @@ static char *get_dhcp_option_name(int tag)
 /*#Device.DHCPv4.Server.Pool.{i}.!UCI:dhcp/dhcp/dmmap_dhcp*/
 static int browseDHCPv4ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *ignore = NULL, *interface, *inst = NULL, *v;
+	char *ignore = NULL, *interface, *inst = NULL, *v, *instance;
 	struct dhcp_args curr_dhcp_args = {0};
 	struct dmmap_dup *p = NULL;
 	LIST_HEAD(leases);
 	LIST_HEAD(dup_list);
+
+	char *relay_sec = get_dnsmasq_section_name();
 
 	synchronize_specific_config_sections_with_dmmap("dhcp", "dhcp", "dmmap_dhcp", &dup_list);
 
@@ -587,6 +590,11 @@ static int browseDHCPv4ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, 
 		dmuci_get_value_by_section_string(p->config_section, "ignore", &ignore);
 		if (ignore && DM_LSTRCMP(ignore, "1") == 0)
 			continue;
+
+		// if dns_relay instance not present, add in the section
+		dmuci_get_value_by_section_string(p->config_section, "instance", &instance);
+		if (DM_STRLEN(instance) == 0)
+			dmuci_set_value_by_section(p->config_section, "instance", relay_sec); 
 
 		dmuci_get_value_by_section_string(p->config_section, "interface", &interface);
 		init_dhcp_args(&curr_dhcp_args, p, interface);
@@ -995,6 +1003,7 @@ static int addObjDHCPv4ServerPool(char *refparam, struct dmctx *ctx, void *data,
 	dmuci_rename_section_by_section(s, dhcp_sname);
 	dmuci_set_value_by_section(s, "ignore", "0");
 	dmuci_set_value_by_section(s, "dhcpv4", "disabled");
+	dmuci_set_value_by_section(s, "instance", get_dnsmasq_section_name());
 	// Defaults to uci defaults value
 	dmuci_set_value_by_section(s, "start", "100");
 	dmuci_set_value_by_section(s, "limit", "150");
@@ -2776,13 +2785,19 @@ static int set_DHCPv4ClientReqOption_Tag(char *refparam, struct dmctx *ctx, void
 /*#Device.DHCPv4.Server.Enable!UCI:dhcp/dnsmasq,@dnsmasq[0]/dhcpv4server*/
 static int get_DHCPv4Server_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("dhcp", "@dnsmasq[0]", "dhcpv4server", "1");
+	char *sec = get_dnsmasq_section_name();
+
+	if (DM_STRLEN(sec) == 0)
+		return 0;
+
+	*value = dmuci_get_option_value_fallback_def("dhcp", sec, "dhcpv4server", "1");
 	return 0;
 }
 
 static int set_DHCPv4Server_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
+	char *sec;
 
 	switch (action) {
 		case VALUECHECK:
@@ -2790,8 +2805,12 @@ static int set_DHCPv4Server_Enable(char *refparam, struct dmctx *ctx, void *data
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			sec = get_dnsmasq_section_name();
+			if (DM_STRLEN(sec) == 0)
+				return 0;
+
 			string_to_bool(value, &b);
-			dmuci_set_value("dhcp", "@dnsmasq[0]", "dhcpv4server", b ? "1" : "0");
+			dmuci_set_value("dhcp", sec, "dhcpv4server", b ? "1" : "0");
 			return 0;
 	}
 	return 0;

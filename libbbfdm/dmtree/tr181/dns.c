@@ -11,6 +11,20 @@
 #include "dmdiagnostics.h"
 #include "dns.h"
 
+/* Returns dnsmasq section name belongs to LAN network */
+char *get_dnsmasq_section_name(void)
+{
+	struct uci_section *s = NULL;
+
+	uci_foreach_sections("dhcp", "dnsmasq", s) {
+		char *sec = section_name(s);
+		if (DM_STRCMP(sec, "dns_client") != 0)
+			return sec;
+	}
+
+	return "";
+}
+
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
@@ -125,6 +139,57 @@ static int dmmap_synchronizeDNSClientRelayServer(struct dmctx *dmctx, DMNODE *pa
 	return 0;
 }
 
+static void sync_dns_client_relay_section(void)
+{
+	struct uci_section *s = NULL;
+	struct uci_section *relay_sec = NULL;
+	struct uci_section *client_sec = NULL;
+
+	uci_foreach_sections("dhcp", "dnsmasq", s) {
+		char *name = section_name(s);
+		if (DM_STRCMP(name, "dns_client") == 0)
+			client_sec = s;
+		else
+			relay_sec = s;
+	}
+
+	if (client_sec) // already synced
+		return;
+
+	if (relay_sec) {
+		s = NULL;
+		uci_foreach_sections("dhcp", "dhcp", s) {
+			char *str;
+			dmuci_get_value_by_section_string(s, "ignore", &str);
+			if (str[0] == '1')
+				continue;
+
+			dmuci_set_value_by_section(s, "instance", section_name(relay_sec));
+		}
+
+		dmuci_add_list_value_by_section(relay_sec, "notinterface", "loopback");
+	}
+
+	dmuci_add_section("dhcp", "dnsmasq", &client_sec);
+	dmuci_rename_section_by_section(client_sec, "dns_client");
+	dmuci_set_value_by_section(client_sec, "domainneeded", "1");
+	dmuci_set_value_by_section(client_sec, "boguspriv", "1");
+	dmuci_set_value_by_section(client_sec, "filterwin2k", "0");
+	dmuci_set_value_by_section(client_sec, "localise_queries", "1");
+	dmuci_set_value_by_section(client_sec, "localservice", "0");
+	dmuci_set_value_by_section(client_sec, "rebind_protection", "0");
+	dmuci_set_value_by_section(client_sec, "rebind_localhost", "1");
+	dmuci_set_value_by_section(client_sec, "expandhosts", "1");
+	dmuci_set_value_by_section(client_sec, "nonegcache", "0");
+	dmuci_set_value_by_section(client_sec, "authoritative", "1");
+	dmuci_set_value_by_section(client_sec, "readethers", "1");
+	dmuci_set_value_by_section(client_sec, "resolvfile", 
+		dmuci_get_value_by_section_fallback_def(relay_sec, "resolvfile", "/tmp/resolv.conf.d/resolv.conf.auto"));
+	dmuci_set_value_by_section(client_sec, "nonwildcard", "1");
+	dmuci_set_value_by_section(client_sec, "ednspacket_max", "1232");
+	dmuci_add_list_value_by_section(client_sec, "interface", "loopback");
+}
+
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -222,13 +287,19 @@ static int get_dns_supported_record_types(char *refparam, struct dmctx *ctx, voi
 
 static int get_client_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "1";
+	char *v;
+
+	dmuci_get_option_value_string("dhcp", "dns_client", "port", &v);
+	*value = (*v == '0') ? "0" : "1";
 	return 0;
 }
 
 static int get_client_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "Enabled";
+	char *v;
+
+	dmuci_get_option_value_string("dhcp", "dns_client", "port", &v);
+	*value = (*v == '0') ? "Disabled" : "Enabled";
 	return 0;
 }
 
@@ -291,17 +362,27 @@ static int get_dns_type(char *refparam, struct dmctx *ctx, void *data, char *ins
 
 static int get_relay_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *path = "/etc/rc.d/*dnsmasq";
-	if (check_file(path))
-		*value = "1";
-	else
-		*value = "0";
+	char *v, *sec;
+
+	sec = get_dnsmasq_section_name();
+	if (DM_STRLEN(sec) == 0)
+		return 0;
+
+	dmuci_get_option_value_string("dhcp", sec, "port", &v);
+	*value = (*v == '0') ? "0" : "1";
 	return 0;
 }
 
 static int get_relay_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = (check_file("/etc/rc.d/*dnsmasq")) ? "Enabled" : "Disabled";
+	char *v, *sec;
+
+	sec = get_dnsmasq_section_name();
+	if (DM_STRLEN(sec) == 0)
+		return 0;
+
+	dmuci_get_option_value_string("dhcp", sec, "port", &v);
+	*value = (*v == '0') ? "Disabled" : "Enabled";
 	return 0;
 }
 
@@ -426,12 +507,19 @@ static int get_result_response_time(char *refparam, struct dmctx *ctx, void *dat
 
 static int set_client_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	bool b;
+
+	sync_dns_client_relay_section();
+
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			string_to_bool(value, &b);
+			char *port = b ? "" : "0";
+			dmuci_set_value("dhcp", "dns_client", "port", port);
 			break;
 	}
 	return 0;
@@ -570,6 +658,9 @@ static int set_dns_interface(char *refparam, struct dmctx *ctx, void *data, char
 static int set_relay_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
+	char *port, *sec;
+
+	sync_dns_client_relay_section();
 
 	switch (action) {
 		case VALUECHECK:
@@ -577,8 +668,13 @@ static int set_relay_enable(char *refparam, struct dmctx *ctx, void *data, char 
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			sec = get_dnsmasq_section_name();
+			if (DM_STRLEN(sec) == 0)
+				return 0;
+
 			string_to_bool(value, &b);
-			dmcmd("/etc/init.d/dnsmasq", 1, b ? "enable" : "disable");
+			port = b ? "" : "0";
+			dmuci_set_value("dhcp", sec, "port", port);
 			break;
 	}
 	return 0;

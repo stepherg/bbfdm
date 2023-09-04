@@ -27,4 +27,5 @@ extern DMLEAF tDNSDiagnosticsNSLookupDiagnosticsParams[];
 extern DMOBJ tDNSDiagnosticsNSLookupDiagnosticsObj[];
 extern DMLEAF tDNSDiagnosticsNSLookupDiagnosticsResultParams[];
 
+char *get_dnsmasq_section_name(void);
 #endif

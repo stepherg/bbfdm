@@ -9,6 +9,7 @@
  */
 
 #include "dhcpv4.h"
+#include "dns.h"
 #include "routeradvertisement.h"
 
 struct radv_option_args {
@@ -193,13 +194,19 @@ static int delObjRouterAdvertisementInterfaceSettingOption(char *refparam, struc
 /*#Device.RouterAdvertisement.Enable!UCI:dhcp/dnsmasq,@dnsmasq[0]/raserver*/
 static int get_RouterAdvertisement_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("dhcp", "@dnsmasq[0]", "raserver", "1");
+	char *sec = get_dnsmasq_section_name();
+
+	if (DM_STRLEN(sec) == 0)
+		return 0;
+
+	*value = dmuci_get_option_value_fallback_def("dhcp", sec, "raserver", "1");
 	return 0;
 }
 
 static int set_RouterAdvertisement_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	bool b;
+	char *sec;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -207,8 +214,12 @@ static int set_RouterAdvertisement_Enable(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			sec = get_dnsmasq_section_name();
+			if (DM_STRLEN(sec) == 0)
+				return 0;
+
 			string_to_bool(value, &b);
-			dmuci_set_value("dhcp", "@dnsmasq[0]", "raserver", b ? "1" : "0");
+			dmuci_set_value("dhcp", sec, "raserver", b ? "1" : "0");
 			break;
 	}
 	return 0;
