@@ -12,6 +12,8 @@
  *
  */
 
+#include <math.h>
+
 #include "wifi.h"
 
 #ifdef BBF_WIFI_DATAELEMENTS

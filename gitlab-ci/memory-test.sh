@@ -4,15 +4,15 @@ echo "Functional API Tests"
 pwd
 . ./gitlab-ci/shared.sh
 
-date +%s > timestamp.log
+echo "Starting services..."
+cp ./gitlab-ci/bbfdm_services.conf /etc/supervisor/conf.d/
 
-echo "Starting supervisor"
-supervisorctl shutdown
-sleep 1
-supervisord -c /etc/supervisor/supervisord.conf
-sleep 3
+supervisorctl reread
+supervisorctl update
+sleep 10
 
 supervisorctl status all
+exec_cmd ubus wait_for bbfdm
 
 function run_valgrind()
 {

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-echo "preparation script"
-pwd
+echo "# Preparation script ..."
 
 # link '/bin/sh' to bash instead of dash
 ln -sf bash /bin/sh
@@ -12,8 +11,11 @@ cp -r ./test/files/var/* /var/
 cp -r ./test/files/tmp/* /tmp/
 cp -r ./test/files/lib/* /lib/
 
-[ -z "${1}" ] && cp ./gitlab-ci/iopsys-supervisord.conf /etc/supervisor/conf.d/
+cp ./gitlab-ci/core_service.conf /etc/supervisor/conf.d/
 
 rm -f /etc/bbfdm/dmmap/*
 
-ls /etc/config/
+echo "Starting base services..."
+supervisorctl reread
+supervisorctl update
+sleep 10

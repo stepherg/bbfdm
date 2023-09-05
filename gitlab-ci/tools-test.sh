@@ -6,11 +6,8 @@ source ./gitlab-ci/shared.sh
 
 # install required packages
 exec_cmd apt update
-exec_cmd apt install -y python3-pip
-exec_cmd apt install -y libxml2-utils
-exec_cmd pip3 install jsonschema
-exec_cmd pip3 install xlwt
-exec_cmd pip3 install pylint
+exec_cmd apt install -y python3-pip libxml2-utils
+exec_cmd pip3 install jsonschema xlwt pylint
 
 echo "Validating PEP8 syntax on tools"
 exec_cmd_verbose pylint -d R,C,W0603 tools/*.py

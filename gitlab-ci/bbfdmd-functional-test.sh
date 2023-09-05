@@ -5,15 +5,15 @@ pwd
 
 source ./gitlab-ci/shared.sh
 
-echo "Starting supervisor"
-supervisorctl shutdown
-sleep 1
-supervisord -c /etc/supervisor/supervisord.conf
-sleep 3
+echo "Starting services..."
+cp ./gitlab-ci/bbfdm_services.conf /etc/supervisor/conf.d/
+
+supervisorctl reread
+supervisorctl update
+sleep 10
 
 supervisorctl status all
 exec_cmd ubus wait_for bbfdm
-supervisorctl status all
 
 # debug logging
 echo "Checking ubus status [$(date '+%d/%m/%Y %H:%M:%S')]"
@@ -54,8 +54,8 @@ supervisorctl status
 #report part
 gcovr -r . --xml -o ./funl-test-coverage.xml
 gcovr -r .
-date +%s > timestamp.log
 
+echo > memory-report.xml
 check_valgrind_xml "Main Service bbfdmd" "/tmp/memory-report.xml"
 check_valgrind_xml "Micro Service bbfdm_dataelementsd" "/tmp/memory-report-dataelements.xml"
 check_valgrind_xml "Micro Service bbfdm_bulkdatad" "/tmp/memory-report-bulkdata.xml"

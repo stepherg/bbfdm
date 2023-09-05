@@ -30,7 +30,6 @@ run_unit_test:
   artifacts:
     when: always
     paths:
-      - timestamp.log
       - unit-test-coverage.xml
 
 run_tools_test:
@@ -43,7 +42,6 @@ run_tools_test:
   artifacts:
       when: always
       paths:
-          - timestamp.log
           - tools/out/datamodel_default.xml
           - tools/out/datamodel_hdm.xml
           - tools/out/datamodel.xls
@@ -60,7 +58,6 @@ run_libbbfdm_api_functional_test:
   artifacts:
       when: always
       paths:
-          - timestamp.log
           - functional-api-test-coverage.xml
 
 run_libbbfdm_functional_test:
@@ -75,7 +72,6 @@ run_libbbfdm_functional_test:
   artifacts:
       when: always
       paths:
-          - timestamp.log
           - functional-test-coverage.xml
 
 run_libbbfdm_memory_test:
@@ -89,7 +85,6 @@ run_libbbfdm_memory_test:
   artifacts:
       when: always
       paths:
-          - timestamp.log
           - output-report-device-get.txt
 
 run_bbfd_functional_test:
@@ -107,6 +102,5 @@ run_bbfd_functional_test:
         paths:
             - funl-result.log
             - funl-test-coverage.xml
-            - /tmp/memory-report.xml
-            - timestamp.log
+            - memory-report.xml
             - report/

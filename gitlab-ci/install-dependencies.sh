@@ -5,9 +5,9 @@ echo "install dependencies of bbf"
 source ./gitlab-ci/shared.sh
 
 # install required packages
-apt update
-apt install -y python3-pip iproute2 libmxml-dev uuid-dev zip
-pip3 install pexpect ubus
+exec_cmd apt update
+exec_cmd apt install -y python3-pip iproute2 libmxml-dev uuid-dev zip
+exec_cmd pip3 install pexpect ubus
 
 # compile and install libbbf
 install_libbbf ${1}
@@ -42,6 +42,3 @@ if [ -z "${1}" ]; then
 	# install cwmpdm plugin
 	install_libcwmpdm
 fi
-
-ls /usr/lib/bbfdm/
-ls /etc/bbfdm/json/
