@@ -655,10 +655,6 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	long res_code = download_file(fw_image_path, url, username, password);
 	time_t complete_time = time(NULL);
 
-	// Send Transfer Complete Event
-	// TODO according to tr069 standard TransferComplete should be sent after applying the downloaded image
-	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time,commandKey, "Download");
-
 	// Check if the download operation was successful
 	if (!get_response_code_status(url, res_code)) {
 		res = -1;
@@ -682,8 +678,12 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 	}
 
 	sleep(30); // Wait for the image to become available
+
+	// Send the transfer complete after image applied
+	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, commandKey, "Download");
 	// Reboot the device if auto activation is true
 	if (activate) {
+		sleep(5); // added additional buffer for TransferComplete! event
 		if (dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) != 0)
 			res = -1;
 		sleep(10); // Wait for reboot to take action
