@@ -1008,7 +1008,7 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 
 			dmuci_set_value_by_section((struct uci_section *)data, "is_eth", !DM_STRNCMP(value, "Device.Ethernet.", strlen("Device.Ethernet.")) ? "1" : "0");
 
-			if (match(value, "Device.Bridging.Bridge.*.Port.")) {
+			if (match(value, "Device.Bridging.Bridge.*.Port.", 0, NULL)) {
 				dmuci_set_value_by_section((struct uci_section *)data, "is_eth", "1");
 
 				// Remove unused Interface section created by Bridge Object if it exists

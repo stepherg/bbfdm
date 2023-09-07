@@ -4,8 +4,6 @@
 #include "bbfdmd.h"
 #include "common.h"
 
-#include "libbbfdm-api/dmbbf.h"
-
 enum {
 	DM_SET_PATH,
 	DM_SET_VALUE,

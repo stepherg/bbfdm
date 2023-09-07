@@ -65,6 +65,7 @@
 #include "dmuci.h"
 #include "dmubus.h"
 #include "dmjson.h"
+#include "dmentry.h"
 
 extern char *Encapsulation[];
 extern char *LinkType[];
@@ -224,9 +225,11 @@ void get_dmmap_section_of_config_section(char* dmmap_package, char* section_type
 void get_dmmap_section_of_config_section_eq(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section);
 void get_dmmap_section_of_config_section_cont(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section);
 void get_config_section_of_dmmap_section(char* package, char* section_type, char *section_name, struct uci_section **config_section);
+int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, char **value);
 int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value);
 int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
 int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
+int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
 char *check_create_dmmap_package(const char *dmmap_package);
 unsigned int count_occurrences(char *str, char c);
 unsigned char isdigit_str(char *str);
@@ -266,7 +269,7 @@ void convert_string_to_hex(const char *str, char *hex, size_t size);
 void convert_hex_to_string(const char *hex, char *str, size_t size);
 void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, size_t size);
 void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, size_t size);
-bool match(const char *string, const char *pattern);
+bool match(const char *string, const char *pattern, size_t nmatch, regmatch_t pmatch[]);
 void bbfdm_set_fault_message(struct dmctx *ctx, const char *format, ...);
 int bbfdm_validate_boolean(struct dmctx *ctx, char *value);
 int bbfdm_validate_unsignedInt(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
@@ -284,6 +287,8 @@ int bbfdm_validate_string_list(struct dmctx *ctx, char *value, int min_item, int
 int bbfdm_validate_hexBinary_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char **value);
 int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char *value);
+int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value);
+int bbf_get_reference_args(char *value, struct dm_reference *reference_args);
 char *base64_decode(const char *src);
 void string_to_mac(const char *str, size_t str_len, char *out, size_t out_len);
 bool folder_exists(const char *path);

@@ -4,8 +4,6 @@
 #include "bbfdmd.h"
 #include "common.h"
 
-#include "libbbfdm-api/dmbbf.h"
-
 enum {
 	DM_OPERATE_COMMAND,
 	DM_OPERATE_COMMAND_KEY,

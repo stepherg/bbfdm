@@ -3,7 +3,6 @@
 
 #include "bbfdmd.h"
 #include "common.h"
-#include "libbbfdm-api/dmbbf.h"
 
 #include <libubus.h>
 

@@ -2097,7 +2097,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 			} else
 				dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "config", "network");
 
-			if (match(value, "Device.Bridging.Bridge.*.Port.")) {
+			if (match(value, "Device.Bridging.Bridge.*.Port.", 0, NULL)) {
 				struct uci_section *s = get_origin_section_from_dmmap("dmmap_bridge_port", "bridge_port", linker);
 				dmuci_get_value_by_section_string(s, "port", &linker);
 

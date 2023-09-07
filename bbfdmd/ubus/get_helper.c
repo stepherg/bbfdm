@@ -18,8 +18,6 @@
 #include "common.h"
 #include "pretty_print.h"
 
-#include "libbbfdm-api/dmentry.h"
-
 DMOBJ *DEAMON_DM_ROOT_OBJ = NULL;
 DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2] = {0};
 DM_MAP_VENDOR_EXCLUDE *DEAMON_DM_VENDOR_EXTENSION_EXCLUDE = NULL;

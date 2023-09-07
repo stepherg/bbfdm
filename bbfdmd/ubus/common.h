@@ -14,6 +14,8 @@
 #include <libubox/utils.h>
 #include <libubox/list.h>
 
+#include "libbbfdm-api/dmcommon.h"
+
 #include "bbfdmd.h"
 
 #define ROOT_NODE "Device."
@@ -43,7 +45,6 @@ extern DMOBJ *DEAMON_DM_ROOT_OBJ;
 extern DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2];
 extern DM_MAP_VENDOR_EXCLUDE *DEAMON_DM_VENDOR_EXTENSION_EXCLUDE;
 
-bool match(const char *string, const char *pattern);
 bool is_str_eq(const char *s1, const char *s2);
 bool is_node_instance(char *path);
 int count_delim(const char *path);

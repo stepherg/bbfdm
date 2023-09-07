@@ -280,7 +280,7 @@ int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *obje
 
 	for (; *objects; objects++) {
 
-		if (match(value, *objects)) {
+		if (match(value, *objects, 0, NULL)) {
 			char *linker = NULL;
 
 			adm_entry_get_linker_value(ctx, value, &linker);
@@ -291,6 +291,46 @@ int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *obje
 
 	bbfdm_set_fault_message(ctx, "'%s' value is not allowed.", value);
 	return -1;
+}
+
+int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *value, char *objects[])
+{
+	if (!value || !objects)
+		return -1;
+
+	if (*value == '\0')
+		return 0;
+
+	for (; *objects; objects++) {
+
+		if (match(value, *objects, 0, NULL))
+			return 0;
+	}
+
+	bbfdm_set_fault_message(ctx, "'%s' value is not allowed.", value);
+	return -1;
+}
+
+int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, char **value)
+{
+	struct dmctx dmctx = {0};
+	*value = "";
+
+	if (!param || !linker || *linker == 0)
+		return 0;
+
+	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj, ctx->dm_vendor_extension, ctx->dm_vendor_extension_exclude);
+
+	dmctx.iswildcard = 1;
+	dmctx.inparam_isparam = 1;
+	dmctx.in_param = param;
+	dmctx.linker = linker;
+
+	dm_entry_get_reference_param(&dmctx);
+	*value = dmctx.linker_param;
+
+	bbf_ctx_clean_sub(&dmctx);
+	return 0;
 }
 
 int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value)

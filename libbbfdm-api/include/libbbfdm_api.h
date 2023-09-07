@@ -586,6 +586,36 @@ int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, c
 
 /*********************************************************************//**
 **
+** bbf_get_reference_param
+**
+** This API is used to get the reference parameter value
+**
+** \param   path - parent path object
+** \param   key_name - parameter name used to identify the object
+** \param   key_value - value of parameter name used to identify the object
+** \param   value - the value to be set
+**
+** \return  0 if operation is successful, -1 otherwise
+**
+**************************************************************************/
+int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value);
+
+/*********************************************************************//**
+**
+** bbf_get_reference_args
+**
+** This API is used to get the reference arguments in order to set eexternal linker
+**
+** \param   value -
+** \param   reference -
+**
+** \return  0 if operation is successful, -1 otherwise
+**
+**************************************************************************/
+int bbf_get_reference_args(char *value, struct dm_reference *reference_args);
+
+/*********************************************************************//**
+**
 ** bbfdm_validate_string
 **
 ** This API is to validate a string value

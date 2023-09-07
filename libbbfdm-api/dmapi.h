@@ -121,7 +121,8 @@ typedef struct dm_leaf_s {
 	int (*getvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 	int (*setvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
 	int bbfdm_type;
-	char version[10] __attribute__((deprecated));
+	uint32_t dm_falgs;
+
 } DMLEAF;
 
 typedef struct dm_obj_s {
@@ -139,7 +140,6 @@ typedef struct dm_obj_s {
 	int (*get_linker)(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker);
 	int bbfdm_type;
 	const char **unique_keys;
-	char version[10] __attribute__((deprecated));
 } DMOBJ;
 
 struct dm_parameter {
@@ -165,6 +165,11 @@ typedef struct dm_map_vendor_exclude {
 	char *vendor;
 	char **vendor_obj;
 } DM_MAP_VENDOR_EXCLUDE;
+
+struct dm_reference {
+	char *path;
+	char *value;
+};
 
 struct dmctx {
 	bool stop;
@@ -232,6 +237,11 @@ typedef struct {
 typedef struct {
 	const char **param;
 } event_args;
+
+enum dm_flags_enum {
+	DM_FLAG_REFERENCE = 1,
+	DM_FLAG_UNIQUE = 1<<1
+};
 
 enum set_value_action {
 	VALUECHECK,

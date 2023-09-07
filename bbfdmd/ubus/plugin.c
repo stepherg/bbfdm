@@ -13,7 +13,7 @@
 #include <dlfcn.h>
 
 #include "common.h"
-#include "libbbfdm-api/dmapi.h"
+
 #include "libbbfdm-api/plugin/json_plugin.h"
 
 extern struct list_head global_memhead;

@@ -29,8 +29,6 @@
 #include "get_helper.h"
 #include "plugin.h"
 #include "cli.h"
-#include "libbbfdm-api/dmentry.h"
-#include "libbbfdm-api/dmjson.h"
 
 extern struct list_head loaded_json_files;
 extern struct list_head json_list;

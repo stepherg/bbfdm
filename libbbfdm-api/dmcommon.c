@@ -1241,14 +1241,18 @@ void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, 
 		str[pos - 1] = 0;
 }
 
-bool match(const char *string, const char *pattern)
+bool match(const char *string, const char *pattern, size_t nmatch, regmatch_t pmatch[])
 {
 	regex_t re;
-	if (regcomp(&re, pattern, REG_EXTENDED) != 0) return 0;
-	int status = regexec(&re, string, 0, NULL, 0);
+
+	if (regcomp(&re, pattern, REG_EXTENDED) != 0)
+		return 0;
+
+	int status = regexec(&re, string, nmatch, pmatch, 0);
+
 	regfree(&re);
-	if (status != 0) return false;
-	return true;
+
+	return (status != 0) ? false : true;
 }
 
 void bbfdm_set_fault_message(struct dmctx *ctx, const char *format, ...)
@@ -1293,7 +1297,7 @@ static int bbfdm_validate_string_enumeration(struct dmctx *ctx, char *value, cha
 static int bbfdm_validate_string_pattern(struct dmctx *ctx, char *value, char *pattern[])
 {
 	for (; *pattern; pattern++) {
-		if (match(value, *pattern))
+		if (match(value, *pattern, 0, NULL))
 			return 0;
 	}
 

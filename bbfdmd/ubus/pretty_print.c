@@ -22,7 +22,7 @@ struct resultstack {
 static bool is_search_by_reference(char *path)
 {
 	DEBUG("Entry |%s|", path);
-	if (match(path, "[+]+")) {
+	if (match(path, "[+]+", 0, NULL)) {
 		size_t pindex = 0, bindex = 0;
 		char *last_plus, *last_bracket;
 
@@ -47,7 +47,7 @@ static bool is_res_required(char *str, size_t *start, size_t *len)
 {
 
 	DEBUG("Entry |%s|", str);
-	if (match(str, GLOB_CHAR)) {
+	if (match(str, GLOB_CHAR, 0, NULL)) {
 		size_t s_len, b_len, p_len;
 		char *star, *b_start, *b_end, *plus;
 		char temp_char[MAX_DM_KEY_LEN] = {'\0'};
@@ -89,10 +89,10 @@ static bool is_res_required(char *str, size_t *start, size_t *len)
 
 		// Check if naming with aliases used
 		snprintf(temp_char, *len+1, "%s", str + *start);
-		if (match(temp_char, GLOB_EXPR))
+		if (match(temp_char, GLOB_EXPR, 0, NULL))
 			return true;
 
-		if (match(temp_char, "[*+]+"))
+		if (match(temp_char, "[*+]+", 0, NULL))
 			return true;
 	}
 	*start = DM_STRLEN(str);
@@ -335,6 +335,23 @@ static bool add_paths_to_stack(struct blob_buf *bb, char *path, size_t begin,
 	return true;
 }
 
+static void bb_add_flags_arr(struct blob_buf *bb, char *data)
+{
+	uint32_t *dm_falgs = (uint32_t *)data;
+
+	if (!bb || !dm_falgs)
+		return;
+
+	void *flags_arr = blobmsg_open_array(bb, "flags");
+
+	if (*dm_falgs & DM_FLAG_REFERENCE)
+		bb_add_string(bb, NULL, "Reference");
+	else if (*dm_falgs & DM_FLAG_UNIQUE)
+		bb_add_string(bb, NULL, "Unique");
+
+	blobmsg_close_array(bb, flags_arr);
+}
+
 // public functions
 void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list)
 {
@@ -419,6 +436,7 @@ void prepare_raw_result(struct blob_buf *bb, struct dmctx *bbf_ctx, struct list_
 					bb_add_string(bb, "path", n->name);
 					bb_add_string(bb, "data", n->data);
 					bb_add_string(bb, "type", n->type);
+					bb_add_flags_arr(bb, n->additional_data);
 					blobmsg_close_table(bb, table);
 				}
 			} else {
@@ -427,6 +445,7 @@ void prepare_raw_result(struct blob_buf *bb, struct dmctx *bbf_ctx, struct list_
 					bb_add_string(bb, "path", n->name);
 					bb_add_string(bb, "data", n->data);
 					bb_add_string(bb, "type", n->type);
+					bb_add_flags_arr(bb, n->additional_data);
 					blobmsg_close_table(bb, table);
 				}
 			}

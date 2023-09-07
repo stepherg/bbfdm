@@ -110,7 +110,7 @@ bool is_node_instance(char *path)
 		rb = strchr(path, ']');
 		shift = (size_t) labs(rb - path);
 		strncpyt(temp_char, path, shift + 1);
-		if (!match(temp_char, GLOB_EXPR))
+		if (!match(temp_char, GLOB_EXPR, 0, NULL))
 			ret = true;
 	} else {
 		if (strtol(path, NULL, 10))
@@ -120,22 +120,6 @@ bool is_node_instance(char *path)
 }
 
 // RE utilities
-bool match(const char *string, const char *pattern)
-{
-	int status;
-	regex_t re;
-
-	if (regcomp(&re, pattern, REG_EXTENDED) != 0)
-		return 0;
-
-	status = regexec(&re, string, 0, NULL, 0);
-	regfree(&re);
-	if (status != 0)
-		return false;
-
-	return true;
-}
-
 int count_delim(const char *path)
 {
 	int count = 0;

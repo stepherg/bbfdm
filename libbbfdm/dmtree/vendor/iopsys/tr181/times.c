@@ -24,23 +24,24 @@ static int get_time_source_interface(char *refparam, struct dmctx *ctx, void *da
 	char *iface = NULL;
 
 	dmuci_get_option_value_string("system", "ntp", "interface", &iface);
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface, value);
-	return 0;
+
+	return bbf_get_reference_param("Device.IP.Interface.", "Name", iface, value);
 }
 
 static int set_time_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *iface = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_entry_validate_allowed_objects(ctx, reference.path, allowed_objects))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &iface);
-			dmuci_set_value("system", "ntp", "interface", iface ? iface : "");
+			dmuci_set_value("system", "ntp", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -52,6 +53,6 @@ static int set_time_source_interface(char *refparam, struct dmctx *ctx, void *da
 DMLEAF tIOPSYS_TimeParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {BBF_VENDOR_PREFIX"LocalTimeZoneName", &DMREAD, DMT_STRING, get_local_time_zone_name, NULL, BBFDM_BOTH},
-{BBF_VENDOR_PREFIX"SourceInterface", &DMWRITE, DMT_STRING, get_time_source_interface, set_time_source_interface, BBFDM_BOTH},
+{BBF_VENDOR_PREFIX"SourceInterface", &DMWRITE, DMT_STRING, get_time_source_interface, set_time_source_interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {0}
 };

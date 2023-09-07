@@ -12,7 +12,6 @@
 #include "get.h"
 #include "get_helper.h"
 #include "pretty_print.h"
-#include "libbbfdm-api/dmentry.h"
 
 #include <libubus.h>
 
@@ -680,7 +679,7 @@ static int solve_all_filters(struct dmctx *bbf_ctx, char *bPath, char *param, st
 
 		INFO("Filter Para(%s), oper(%d), Val(%s)", para, oper, value);
 
-		if (match(para, "[*]+"))
+		if (match(para, "[*]+", 0, NULL))
 			ret = USP_FAULT_INVALID_TYPE;
 		else
 			ret = search_n_apply(bPath, para, oper, value, &pv_local, &plist_local);

@@ -13,9 +13,6 @@
 
 #include "common.h"
 #include "plugin.h"
-#include "libbbfdm-api/dmapi.h"
-#include "libbbfdm-api/dmjson.h"
-#include "libbbfdm-api/dmentry.h"
 
 extern struct list_head loaded_json_files;
 extern struct list_head json_list;
