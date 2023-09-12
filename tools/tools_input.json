@@ -95,6 +95,22 @@
       ]
     },
     {
+      "repo": "https://dev.iopsys.eu/iopsys/hostmngr.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/bbf_plugin/hosts.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/timemngr.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/times.c"
+      ]
+    },
+    {
       "repo": "https://dev.iopsys.eu/voice/tr104.git",
       "proto": "git",
       "version": "devel",

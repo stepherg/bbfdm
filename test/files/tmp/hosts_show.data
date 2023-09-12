@@ -1,0 +1,63 @@
+{
+	"hosts": [
+		{
+			"macaddr": "00:90:9e:9f:f6:d5",
+			"hostname": "D_wan_48_1",
+			"active": true,
+			"active_last_change": "2023-09-11T12:36:05Z",
+			"ipaddr": "192.168.1.170",
+			"address_source": "Static",
+			"lease_time_remaining": 0,
+			"interface_type": "Ethernet",
+			"is1905": false,
+			"ndm_state": "reachable",
+			"num_tcp": 0,
+			"num_udp": 2,
+			"active_connections": 2,
+			"device": "eth1",
+			"network": "lan",
+			"ipv4addr": [
+				"192.168.1.170"
+			],
+			"ipv6addr": [
+				"fd5f:43fa:1630::23d",
+				"9999:1234:480::23d"
+			],
+			"stats": {
+				"tx_packets": 552,
+				"tx_bytes": 46230,
+				"rx_packets": 551,
+				"rx_bytes": 46444
+			}
+		},
+		{
+			"macaddr": "24:18:1d:e2:f7:dd",
+			"hostname": "D_wan_49_1",
+			"active": true,
+			"active_last_change": "2023-09-07T21:32:13Z",
+			"ipaddr": "192.168.1.141",
+			"address_source": "DHCP",
+			"lease_time_remaining": 0,
+			"interface_type": "Wi-Fi",
+			"is1905": false,
+			"ndm_state": "stale",
+			"num_tcp": 0,
+			"num_udp": 4,
+			"active_connections": 4,
+			"device": "test2_0",
+			"network": "lan",
+			"ipv4addr": [
+				"192.168.1.141"
+			],
+			"ipv6addr": [
+				"9999:1234:480::1f0"
+			],
+			"stats": {
+				"tx_packets": 1358,
+				"tx_bytes": 114484,
+				"rx_packets": 1192,
+				"rx_bytes": 105966
+			}
+		}
+	]
+}

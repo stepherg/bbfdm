@@ -4,12 +4,12 @@
 
 case "$1" in
         list)
-                echo '{ "hosts" : {} }'
+                echo '{ "show" : {} }'
         ;;
         call)
                 case "$2" in
-                        hosts)
-                                cat /tmp/topology_hosts.data 2>/dev/null
+                        show)
+                                cat /tmp/hosts_show.data 2>/dev/null
                         ;;
                 esac
         ;;
