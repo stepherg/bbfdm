@@ -1987,6 +1987,8 @@ static int mparam_set_value(DMPARAM_ARGS)
 		return set_ubus_value(dmctx, node);
 	} else {
 		char refparam[MAX_DM_PATH];
+		char *value = "";
+		bool val = false;
 
 		snprintf(refparam, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
 		if (DM_STRCMP(refparam, dmctx->in_param) != 0)
@@ -1994,20 +1996,29 @@ static int mparam_set_value(DMPARAM_ARGS)
 
 		dmctx->stop = 1;
 
-		if (dmctx->setaction == VALUECHECK) {
-			char *perm = leaf->permission->val;
-			if (leaf->permission->get_permission != NULL)
-				perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
+		char *perm = leaf->permission->val;
+		if (leaf->permission->get_permission != NULL)
+			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
-			if (perm[0] == '0' || !leaf->setvalue)
-				return FAULT_9008;
+		if (perm[0] == '0' || !leaf->setvalue)
+			return FAULT_9008;
 
-			return (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUECHECK);
-		} else if (dmctx->setaction == VALUESET) {
-			return (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, VALUESET);
+		(leaf->getvalue)(refparam, dmctx, data, instance, &value);
+
+		if (leaf->type == DMT_BOOL) {
+			string_to_bool(dmctx->in_value, &val);
+			if (dmuci_string_to_boolean(value) == val) {
+				TRACE("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
+				return 0;
+			}
+		} else {
+			if (DM_STRCMP(value, dmctx->in_value) == 0) {
+				TRACE("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
+				return 0;
+			}
 		}
 
-		return 0;
+		return (leaf->setvalue)(refparam, dmctx, data, instance, dmctx->in_value, dmctx->setaction);
 	}
 }
 
