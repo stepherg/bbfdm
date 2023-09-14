@@ -2114,9 +2114,10 @@ static int mparam_set_value(DMPARAM_ARGS)
 
 		if (leaf->type == DMT_BOOL) {
 			bool val = false;
+			int res = 0;
 
-			string_to_bool(dmctx->in_value, &val);
-			if (dmuci_string_to_boolean(value) == val) {
+			res = string_to_bool(dmctx->in_value, &val);
+			if (res == 0 && dmuci_string_to_boolean(value) == val) {
 				TRACE("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
 				return 0;
 			}
