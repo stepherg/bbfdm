@@ -1191,15 +1191,14 @@ static int set_IPInterface_Enable(char *refparam, struct dmctx *ctx, void *data,
 static int get_IPInterface_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *device = get_device(section_name((struct uci_section *)data));
-	char *ipv6 = NULL;
-
-	get_sysctl_disable_ipv6_per_device(device, &ipv6);
-	*value = (DM_LSTRCMP(ipv6, "1") == 0) ? "0" : "1";
+	struct uci_section *dev_s = get_dup_section_in_config_opt("network", "device", "name", device);
+	*value = dmuci_get_value_by_section_fallback_def(dev_s, "ipv6", "1");
 	return 0;
 }
 
 static int set_IPInterface_IPv6Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *dev_s = NULL;
 	char *device = NULL;
 	bool b;
 
@@ -1211,7 +1210,8 @@ static int set_IPInterface_IPv6Enable(char *refparam, struct dmctx *ctx, void *d
 		case VALUESET:
 			string_to_bool(value, &b);
 			device = get_device(section_name((struct uci_section *)data));
-			set_sysctl_disable_ipv6_per_device(device, b);
+			dev_s = get_dup_section_in_config_opt("network", "device", "name", device);
+			dmuci_set_value_by_section(dev_s, "ipv6", b ? "1" : "0");
 			break;
 	}
 	return 0;
