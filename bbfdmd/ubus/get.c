@@ -1085,15 +1085,94 @@ static void fill_param_schema(struct blob_buf *bb, struct dm_parameter *param)
 	}
 }
 
+
+struct blob_attr *get_parameters(struct blob_attr *msg, const char *key)
+{
+	struct blob_attr *params = NULL;
+	struct blob_attr *cur;
+	int rem;
+
+	blobmsg_for_each_attr(cur, msg, rem) {
+		const char *name = blobmsg_name(cur);
+
+		if (strcmp(key, name) == 0) {
+			params = cur;
+			break;
+		}
+	}
+	return params;
+}
+
+
+bool valid_entry(bbfdm_data_t *data, struct blob_attr *input)
+{
+	bool ret = false;
+	struct blob_attr *p;
+	char *name;
+	size_t len;
+	struct pathNode *pn;
+
+	p = get_parameters(input, "path");
+	if (p) {
+		name = blobmsg_get_string(p);
+		list_for_each_entry(pn, data->plist, list) {
+			len = strlen(pn->path);
+			if (strncmp(pn->path, name, len) == 0) {
+				ret = true;
+				break;
+			}
+		}
+	}
+
+	return ret;
+}
+
+void get_schema_from_blob(struct blob_buf *schema_bp, bbfdm_data_t *data)
+{
+	struct blob_buf *bp = &data->bb;
+	struct blob_attr *schema_blob = NULL;
+	struct blob_attr *params;
+	struct blob_attr *cur;
+	size_t rem = 0;
+
+	void *array = blobmsg_open_array(bp, "results");
+
+	schema_blob = blob_memdup(schema_bp->head);
+	if (schema_blob == NULL) {
+		goto end;
+	}
+
+	params = get_parameters(schema_blob, "results");
+	if (params == NULL) {
+		goto end;
+	}
+
+	blobmsg_for_each_attr(cur, params, rem) {
+		if (valid_entry(data, cur)) {
+			blobmsg_add_blob(bp, cur);
+		}
+	}
+end:
+	blobmsg_close_array(bp, array);
+	FREE(schema_blob);
+}
+
 int bbf_dm_get_supported_dm(bbfdm_data_t *data)
 {
 	struct dm_parameter *param;
 	struct pathNode *pn;
 	int fault = 0;
+	struct blob_buf *bp;
 
 	bbf_init(&data->bbf_ctx);
 
-	void *array = blobmsg_open_array(&data->bb, "results");
+	if (data->bbp) {
+		bp = data->bbp;
+	} else {
+		bp = &data->bb;
+	}
+
+	void *array = blobmsg_open_array(bp, "results");
 
 	list_for_each_entry(pn, data->plist, list) {
 		bbf_sub_init(&data->bbf_ctx);
@@ -1109,21 +1188,21 @@ int bbf_dm_get_supported_dm(bbfdm_data_t *data)
 			list_for_each_entry(param, &data->bbf_ctx.list_parameter, list) {
 				int cmd = get_dm_type(param->type);
 
-				void *table = blobmsg_open_table(&data->bb, NULL);
+				void *table = blobmsg_open_table(bp, NULL);
 				if (cmd == DMT_COMMAND) {
-					fill_operate_schema(&data->bb, param);
+					fill_operate_schema(bp, param);
 				} else if (cmd == DMT_EVENT) {
-					fill_event_schema(&data->bb, param);
+					fill_event_schema(bp, param);
 				} else {
-					fill_param_schema(&data->bb, param);
+					fill_param_schema(bp, param);
 				}
-				blobmsg_close_table(&data->bb, table);
+				blobmsg_close_table(bp, table);
 			}
 		}
 		bbf_sub_cleanup(&data->bbf_ctx);
 	}
 
-	blobmsg_close_array(&data->bb, array);
+	blobmsg_close_array(bp, array);
 
 	bbf_cleanup(&data->bbf_ctx);
 

@@ -16,8 +16,7 @@ struct bbfdm_async_req {
 
 struct bbfdm_context {
 	struct ubus_context ubus_ctx;
-	size_t dm_schema_len;
-	struct uloop_timeout schema_timer;
+	struct blob_buf dm_schema;
 	struct uloop_timeout instance_timer;
 	struct list_head event_handlers;
 	struct list_head instances;
@@ -34,6 +33,7 @@ typedef struct bbfdm_data {
 	struct ubus_request_data *req;
 	struct list_head *plist;
 	struct dmctx bbf_ctx;
+	struct blob_buf *bbp;
 	struct blob_buf bb;
 	uint8_t depth;
 	bool is_raw;

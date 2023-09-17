@@ -24,9 +24,6 @@ enum {
 	DM_SCHEMA_PATH,
 	DM_SCHEMA_PATHS,
 	DM_SCHEMA_FIRST_LEVEL,
-	DM_SCHEMA_COMMANDS,
-	DM_SCHEMA_EVENTS,
-	DM_SCHEMA_PARAMS,
 	DM_SCHEMA_OPTIONAL,
 	__DM_SCHEMA_MAX
 };
@@ -39,4 +36,5 @@ void bbfdm_get_instances(bbfdm_data_t *data);
 
 int bbf_dm_get_supported_dm(bbfdm_data_t *data);
 
+void get_schema_from_blob(struct blob_buf *schema_bp, bbfdm_data_t *data);
 #endif /* GET_H */

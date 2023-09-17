@@ -35,13 +35,13 @@ extern struct list_head json_list;
 extern struct list_head json_memhead;
 
 #define BBF_SUBPROCESS_DEPTH (2)
-#define BBF_SCHEMA_UPDATE_TIMEOUT (60 * 1000)
 #define BBF_INSTANCES_UPDATE_TIMEOUT (25 * 1000)
 
 LIST_HEAD(head_registered_service);
 
 static void register_periodic_timers(struct ubus_context *ctx);
 static void cancel_periodic_timers(struct ubus_context *ctx);
+static void run_schema_updater(struct bbfdm_context *u);
 
 // Global variables
 static unsigned int g_refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
@@ -274,39 +274,30 @@ static bool is_object_schema_update_available(struct bbfdm_context *u)
 	};
 
 	memset(&data.bb, 0, sizeof(struct blob_buf));
+	int schema_len = blobmsg_len(u->dm_schema.head);
+	blob_buf_free(&u->dm_schema);
+	blob_buf_init(&u->dm_schema, 0);
+	data.bbp = &u->dm_schema;
 
 	// If new parameter gets added it would be a minimum tuple of three params
-	blob_buf_init(&data.bb, 0);
-	void *array = blobmsg_open_array(&data.bb, "results");
-	void *table = blobmsg_open_table(&data.bb, NULL);
-	blobmsg_add_string(&data.bb, "path", "Device.");
-	blobmsg_add_string(&data.bb, "data", "0");
-	blobmsg_add_string(&data.bb, "type", "xsd:string");
-	blobmsg_close_table(&data.bb, table);
-	blobmsg_close_array(&data.bb, array);
-	min_len = blobmsg_len(data.bb.head);
-	blob_buf_free(&data.bb);
+	min_len = 100;
 
-	blob_buf_init(&data.bb, 0);
 	add_path_list(ROOT_NODE, &paths_list);
 	bool ret = bbf_dm_get_supported_dm(&data);
 	if (ret != 0) {
 		WARNING("Failed to get schema");
-		blob_buf_free(&data.bb);
 		free_path_list(&paths_list);
 		return ret;
 	}
 
-	ll = blobmsg_len(data.bb.head);
-	if (ll - u->dm_schema_len > min_len) {
-		DEBUG("DM Schema update available old:new[%zd:%zd]", u->dm_schema_len, ll);
-		if (u->dm_schema_len != 0) {
+	ll = blobmsg_len(data.bbp->head);
+	if (ll - schema_len > min_len) {
+		DEBUG("DM Schema update available old:new[%zd:%zd]", schema_len, ll);
+		if (schema_len != 0) {
 			ret = true;
 		}
 	}
 
-	u->dm_schema_len = ll;
-	blob_buf_free(&data.bb);
 	free_path_list(&paths_list);
 
 	return ret;
@@ -384,9 +375,6 @@ static const struct blobmsg_policy dm_schema_policy[] = {
 	[DM_SCHEMA_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
 	[DM_SCHEMA_PATHS] = { .name = "paths", .type = BLOBMSG_TYPE_ARRAY },
 	[DM_SCHEMA_FIRST_LEVEL] = { .name = "first_level", .type = BLOBMSG_TYPE_BOOL},
-	[DM_SCHEMA_COMMANDS] = { .name = "commands", .type = BLOBMSG_TYPE_BOOL},
-	[DM_SCHEMA_EVENTS] = { .name = "events", .type = BLOBMSG_TYPE_BOOL},
-	[DM_SCHEMA_PARAMS] = { .name = "params", .type = BLOBMSG_TYPE_BOOL},
 	[DM_SCHEMA_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE},
 };
 
@@ -397,6 +385,14 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 	struct blob_attr *tb[__DM_SCHEMA_MAX];
 	LIST_HEAD(paths_list);
 	bbfdm_data_t data;
+	struct bbfdm_context *u;
+	size_t len;
+
+	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
+	if (u == NULL) {
+		ERR("Failed to get the bbfdm context");
+		return UBUS_STATUS_UNKNOWN_ERROR;
+	}
 
 	memset(&data, 0, sizeof(bbfdm_data_t));
 
@@ -410,6 +406,12 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 
 	if (tb[DM_SCHEMA_PATH]) {
 		char *path = blobmsg_get_string(tb[DM_SCHEMA_PATH]);
+
+		len = strlen(path);
+		if (path[len-1] != '.') {
+			ERR("Invalid path %s", path);
+			return UBUS_STATUS_INVALID_ARGUMENT;
+		}
 		add_path_list(path, &paths_list);
 	}
 
@@ -421,6 +423,11 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 		blobmsg_for_each_attr(path, paths, rem) {
 			char *path_str = blobmsg_get_string(path);
 
+			len = strlen(path_str);
+			if (path_str[len-1] != '.') {
+				ERR("Invalid path %s", path);
+				return UBUS_STATUS_INVALID_ARGUMENT;
+			}
 			add_path_list(path_str, &paths_list);
 		}
 	}
@@ -430,19 +437,20 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 	unsigned int dm_type = data.bbf_ctx.dm_type;
 
 	data.bbf_ctx.nextlevel = (tb[DM_SCHEMA_FIRST_LEVEL]) ? blobmsg_get_bool(tb[DM_SCHEMA_FIRST_LEVEL]) : false;
-	data.bbf_ctx.iscommand = (tb[DM_SCHEMA_COMMANDS]) ? blobmsg_get_bool(tb[DM_SCHEMA_COMMANDS]) : (dm_type == BBFDM_CWMP) ? false : true;
-	data.bbf_ctx.isevent = (tb[DM_SCHEMA_EVENTS]) ? blobmsg_get_bool(tb[DM_SCHEMA_EVENTS]) : (dm_type == BBFDM_CWMP) ? false : true;
-	data.bbf_ctx.isinfo = (tb[DM_SCHEMA_PARAMS]) ? blobmsg_get_bool(tb[DM_SCHEMA_PARAMS]) : (dm_type == BBFDM_CWMP) ? false : true;
+	data.bbf_ctx.iscommand = (dm_type == BBFDM_CWMP) ? false : true;
+	data.bbf_ctx.isevent = (dm_type == BBFDM_CWMP) ? false : true;
+	data.bbf_ctx.isinfo = (dm_type == BBFDM_CWMP) ? false : true;
 	data.plist = &paths_list;
 
 	blob_buf_init(&data.bb, 0);
 
-	if (dm_type == BBFDM_CWMP)
+	if (dm_type == BBFDM_CWMP) {
 		bbfdm_get_names(&data);
-	else
-		bbf_dm_get_supported_dm(&data);
-
-	ubus_send_reply(ctx, req, data.bb.head);
+		ubus_send_reply(ctx, req, data.bb.head);
+	} else {
+		get_schema_from_blob(&u->dm_schema, &data);
+		ubus_send_reply(ctx, req, data.bb.head);
+	}
 
 	blob_buf_free(&data.bb);
 	free_path_list(&paths_list);
@@ -950,9 +958,15 @@ static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *o
 {
 	struct blob_attr *tb[__BBF_SERVICE_MAX] = {NULL};
 	struct blob_buf bb;
+	struct bbfdm_context *u;
+
+	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
+	if (u == NULL) {
+		ERR("Failed to get the bbfdm context");
+		return 0;
+	}
 
 	memset(&bb, 0, sizeof(struct blob_buf));
-
 	blob_buf_init(&bb, 0);
 
 	if (blobmsg_parse(service_policy, __BBF_SERVICE_MAX, tb, blob_data(msg), blob_len(msg))) {
@@ -998,6 +1012,7 @@ static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *o
 		bool res = load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, srv_name, srv_parent_dm, srv_obj);
 
 		blobmsg_add_u8(&bb, "status", res);
+		run_schema_updater(u);
 	} else {
 		service_list(&bb);
 	}
@@ -1072,32 +1087,22 @@ static struct ubus_object bbf_object = {
 	.n_methods = ARRAY_SIZE(bbf_methods)
 };
 
-static void periodic_schema_updater(struct uloop_timeout *t)
+static void run_schema_updater(struct bbfdm_context *u)
 {
 	bool ret;
-	struct bbfdm_context *u;
-	struct blob_buf bb;
 	char method_name[45] = {0};
 
-	u = container_of(t, struct bbfdm_context, schema_timer);
-	if (u == NULL) {
-		ERR("Failed to get the bbfdm context");
-		return;
-	}
-
-	memset(&bb, 0, sizeof(struct blob_buf));
 	ret = is_object_schema_update_available(u);
 	if (ret) {
+		struct blob_buf bb;
+
+		memset(&bb, 0, sizeof(struct blob_buf));
 		INFO("Schema update available");
 		snprintf(method_name, sizeof(method_name), "%s.%s", UBUS_METHOD_NAME, BBF_UPDATE_SCHEMA_EVENT);
 		blob_buf_init(&bb, 0);
 		ubus_send_event(&u->ubus_ctx, method_name, bb.head);
 		blob_buf_free(&bb);
 	}
-
-	DEBUG("## Update schema after %us ##", BBF_SCHEMA_UPDATE_TIMEOUT);
-	u->schema_timer.cb = periodic_schema_updater;
-	uloop_timeout_set(&u->schema_timer, BBF_SCHEMA_UPDATE_TIMEOUT);
 }
 
 static void broadcast_add_del_event(struct list_head *inst, bool is_add)
@@ -1417,10 +1422,19 @@ exit:
 	return err;
 }
 
-static int bbfdm_init(struct ubus_context *ctx)
+static int bbfdm_init(struct ubus_context *ctx, bool is_daemon)
 {
-	INFO("Registering ubus objects....");
-	return ubus_add_object(ctx, &bbf_object);
+	int ret;
+
+	INFO("Registering UBUS objects daemon %d", is_daemon);
+	if (is_daemon == true) {
+		ret = ubus_add_object(ctx, &bbf_object);
+	} else {
+		bbf_object.n_methods = bbf_object.n_methods - 2;
+		bbf_object.type->n_methods = bbf_object.n_methods;
+		ret = ubus_add_object(ctx, &bbf_object);
+	}
+	return ret;
 }
 
 static void lookup_event_cb(struct ubus_context *ctx,
@@ -1458,8 +1472,7 @@ static void cancel_periodic_timers(struct ubus_context *ctx)
 		return;
 	}
 
-	DEBUG("Cancelling schema_timer and instance_timer");
-	uloop_timeout_cancel(&u->schema_timer);
+	DEBUG("Cancelling Instance_timer");
 	if (g_refresh_time != 0) {
 		uloop_timeout_cancel(&u->instance_timer);
 	}
@@ -1475,10 +1488,7 @@ static void register_periodic_timers(struct ubus_context *ctx)
 		return;
 	}
 
-	DEBUG("Register schema_timer %d and instance_timer %d", BBF_SCHEMA_UPDATE_TIMEOUT, g_refresh_time);
-	u->schema_timer.cb = periodic_schema_updater;
-	uloop_timeout_set(&u->schema_timer, BBF_SCHEMA_UPDATE_TIMEOUT);
-
+	DEBUG("Register instance_timer %d", g_refresh_time);
 	if (g_refresh_time != 0) {
 		u->instance_timer.cb = periodic_instance_updater;
 		uloop_timeout_set(&u->instance_timer, g_refresh_time);
@@ -1522,6 +1532,7 @@ int main(int argc, char **argv)
 	openlog(UBUS_METHOD_NAME, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
 	memset(&bbfdm_ctx, 0, sizeof(struct bbfdm_context));
+	blob_buf_init(&bbfdm_ctx.dm_schema, 0);
 
 	err = ubus_connect_ctx(&bbfdm_ctx.ubus_ctx, ubus_socket);
 	if (err != UBUS_STATUS_OK) {
@@ -1531,12 +1542,13 @@ int main(int argc, char **argv)
 
 	uloop_init();
 	ubus_add_uloop(&bbfdm_ctx.ubus_ctx);
+	run_schema_updater(&bbfdm_ctx);
 
 	if (!input_json) { // It's not a micro-service instance
 
 		bbf_global_init(DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE, true);
 
-		err = bbfdm_init(&bbfdm_ctx.ubus_ctx);
+		err = bbfdm_init(&bbfdm_ctx.ubus_ctx, true);
 		if (err != UBUS_STATUS_OK)
 			goto exit;
 
@@ -1548,13 +1560,14 @@ int main(int argc, char **argv)
 		if (err != 0)
 			goto exit;
 
-		periodic_schema_updater(&bbfdm_ctx.schema_timer);
 		periodic_instance_updater(&bbfdm_ctx.instance_timer);
 	} else { // It's a micro-service instance
 
-		err = bbfdm_init(&bbfdm_ctx.ubus_ctx);
-		if (err != 0)
+		err = bbfdm_init(&bbfdm_ctx.ubus_ctx, false);
+		if (err != 0) {
+			ERR("Failed to register ubus objects");
 			goto exit;
+		}
 		bool is_registred = register_service(&bbfdm_ctx.ubus_ctx);
 		if (is_registred == false) {
 			// register for add event
