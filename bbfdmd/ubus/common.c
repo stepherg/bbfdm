@@ -208,3 +208,44 @@ int get_instance_mode(int instance_mode)
 
 	return instance_mode;
 }
+
+
+int run_cmd(const char *cmd, char *output, size_t out_len)
+{
+	int ret = -1;
+	FILE *pp;
+
+	if (cmd == NULL)
+		return 0;
+
+	if (output == NULL || out_len == 0) {
+		return ret;
+	}
+
+	memset(output, 0, out_len);
+
+	pp = popen(cmd, "r");
+	if (pp != NULL) {
+		char line[512] = {0};
+
+		fgets(line, sizeof(line), pp);
+		strncpyt(output, line, out_len);
+		pclose(pp);
+		ret = 0;
+	}
+
+	return ret;
+}
+
+// glibc doesn't guarantee a 0 termianted string on strncpy
+// strncpy with always 0 terminated string
+void strncpyt(char *dst, const char *src, size_t n)
+{
+	if (dst == NULL || src == NULL)
+		return;
+
+        if (n > 1) {
+                strncpy(dst, src, n - 1);
+                dst[n - 1] = 0;
+        }
+}
