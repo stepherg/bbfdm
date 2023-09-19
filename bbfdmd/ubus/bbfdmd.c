@@ -386,7 +386,6 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 	LIST_HEAD(paths_list);
 	bbfdm_data_t data;
 	struct bbfdm_context *u;
-	size_t len;
 
 	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
 	if (u == NULL) {
@@ -407,11 +406,6 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 	if (tb[DM_SCHEMA_PATH]) {
 		char *path = blobmsg_get_string(tb[DM_SCHEMA_PATH]);
 
-		len = strlen(path);
-		if (path[len-1] != '.') {
-			ERR("Invalid path %s", path);
-			return UBUS_STATUS_INVALID_ARGUMENT;
-		}
 		add_path_list(path, &paths_list);
 	}
 
@@ -423,11 +417,6 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 		blobmsg_for_each_attr(path, paths, rem) {
 			char *path_str = blobmsg_get_string(path);
 
-			len = strlen(path_str);
-			if (path_str[len-1] != '.') {
-				ERR("Invalid path %s", path);
-				return UBUS_STATUS_INVALID_ARGUMENT;
-			}
 			add_path_list(path_str, &paths_list);
 		}
 	}

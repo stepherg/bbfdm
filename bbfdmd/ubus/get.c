@@ -1117,6 +1117,9 @@ bool valid_entry(bbfdm_data_t *data, struct blob_attr *input)
 		name = blobmsg_get_string(p);
 		list_for_each_entry(pn, data->plist, list) {
 			len = strlen(pn->path);
+			if (pn->path[len - 1] != '.') {
+				continue;
+			}
 			if (strncmp(pn->path, name, len) == 0) {
 				ret = true;
 				break;
