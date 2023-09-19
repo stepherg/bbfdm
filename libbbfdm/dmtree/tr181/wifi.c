@@ -514,20 +514,29 @@ static void dmmap_synchronizeWiFiSSID(struct dmctx *dmctx, DMNODE *parent_node, 
 	uci_foreach_sections("wireless", "wifi-iface", s) {
 		char *disabled = NULL, *ssid = NULL, *device = NULL;
 
+		dmuci_get_value_by_section_string(s, "disabled", &disabled);
+		dmuci_get_value_by_section_string(s, "ssid", &ssid);
+		dmuci_get_value_by_section_string(s, "device", &device);
+
 		// if dmmap section exits ==> skip it
 		ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", section_name(s));
-		if (ss)
+		if (ss) {
+			char *dm_ssid = NULL;
+
+			dmuci_get_value_by_section_string(ss, "ssid", &dm_ssid);
+			if (DM_STRCMP(dm_ssid, ssid)) { // if ssid does not match, sync it
+				dmuci_set_value_by_section(ss, "enabled", DM_STRLEN(disabled) ? ((*disabled == '1') ? "0" : "1") : "1");
+				dmuci_set_value_by_section(ss, "ssid", ssid);
+				dmuci_set_value_by_section(ss, "device", device);
+			}
 			continue;
+		}
 
 		// section added by user ==> skip it
 		ss = get_dup_section_in_dmmap("dmmap_wireless", "wifi-iface", section_name(s));
 		dmuci_get_value_by_section_string(ss, "added_by_user", &user_s);
 		if (DM_LSTRCMP(user_s, "1") == 0)
 			continue;
-
-		dmuci_get_value_by_section_string(s, "disabled", &disabled);
-		dmuci_get_value_by_section_string(s, "ssid", &ssid);
-		dmuci_get_value_by_section_string(s, "device", &device);
 
 		dmuci_add_section_bbfdm("dmmap_wireless", "ssid", &ss);
 		dmuci_set_value_by_section(ss, "ap_section_name", section_name(s));
