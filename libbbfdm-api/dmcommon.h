@@ -206,6 +206,7 @@ struct option_tag_type {
 };
 
 pid_t get_pid(const char *pname);
+char *get_uptime(void);
 int check_file(char *path);
 char *cidr2netmask(int bits);
 bool is_strword_in_optionvalue(char *optionvalue, char *str);

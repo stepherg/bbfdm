@@ -176,6 +176,24 @@ pid_t get_pid(const char *pname)
 	return -1;
 }
 
+char *get_uptime(void)
+{
+    FILE *fp = fopen(UPTIME, "r");
+    char *uptime = "0";
+
+	if (fp != NULL) {
+		char *pch = NULL, *spch = NULL, buf[64] = {0};
+
+		if (fgets(buf, 64, fp) != NULL) {
+			pch = strtok_r(buf, ".", &spch);
+			uptime = (pch) ? dmstrdup(pch) : "0";
+		}
+		fclose(fp);
+	}
+
+    return uptime;
+}
+
 int check_file(char *path)
 {
 	glob_t globbuf;

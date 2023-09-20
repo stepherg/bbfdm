@@ -695,16 +695,7 @@ static int get_device_description(char *refparam, struct dmctx *ctx, void *data,
 /*#Device.DeviceInfo.UpTime!PROCFS:/proc/uptime*/
 static int get_device_info_uptime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	FILE *fp = fopen(UPTIME, "r");
-	if (fp != NULL) {
-		char *pch = NULL, *spch = NULL, buf[64] = {0};
-
-		if (fgets(buf, 64, fp) != NULL) {
-			pch = strtok_r(buf, ".", &spch);
-			*value = (pch) ? dmstrdup(pch) : "0";
-		}
-		fclose(fp);
-	}
+	*value = get_uptime();
 	return 0;
 }
 

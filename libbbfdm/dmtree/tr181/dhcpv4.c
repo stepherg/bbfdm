@@ -2446,14 +2446,6 @@ static int get_DHCPv4Client_DNSServers(char *refparam, struct dmctx *ctx, void *
 static int get_DHCPv4Client_LeaseTimeRemaining(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *dhcpv4_s = ((struct dhcp_client_args *)data)->iface_s;
-	FILE *fp = NULL;
-	int  lease_time;
-	char *uptime_str;
-	char *uptime = 0;
-	int lease_uptime = 0;
-	char *pch = NULL, *spch = NULL;
-	char buf[16];
-	int lease_remaining;
 
 	if (dhcpv4_s) {
 		json_object *res = NULL;
@@ -2461,24 +2453,16 @@ static int get_DHCPv4Client_LeaseTimeRemaining(char *refparam, struct dmctx *ctx
 		char *if_name = section_name(dhcpv4_s);
 		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
 		DM_ASSERT(res, *value = "0");
-		*value = dmjson_get_value(res, 2, "data", "leasetime");
-		lease_time = atoi(*value);
-		if (lease_time == 0xFFFFFFFF) {
+		char *lease_time = dmjson_get_value(res, 2, "data", "leasetime");
+		char *uptime_str = dmjson_get_value(res, 2, "data", "uptime");
+
+		if (!DM_STRLEN(uptime_str) || !DM_STRLEN(lease_time) || DM_STRTOL(lease_time) == 0xFFFFFFFF) {
 			*value = "-1";
 			return 0;
 		}
-		fp = fopen("/proc/uptime", "r");
-		if (fp != NULL) {
-			if (fgets(buf, 16, fp) != NULL) {
-				pch = strtok_r(buf, ".", &spch);
-				uptime = (pch) ? dmstrdup(pch) : "0";
-				uptime_str = dmjson_get_value(res, 2, "data", "uptime");
-				lease_uptime = atoi(uptime_str);
-				lease_remaining = lease_time - (atoi(uptime) - lease_uptime);
-				sprintf(*value, "%d", lease_remaining);
-			}
-			fclose(fp);
-		}
+
+		char *uptime = get_uptime();
+		dmasprintf(value, "%ld", DM_STRTOL(lease_time) - (DM_STRTOL(uptime) -  DM_STRTOL(uptime_str)));
 	}
 	return 0;
 }

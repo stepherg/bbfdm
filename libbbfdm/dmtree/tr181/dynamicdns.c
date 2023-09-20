@@ -767,15 +767,7 @@ static int get_DynamicDNSClientHostname_LastUpdate(char *refparam, struct dmctx 
 	} else
 		last_time = "0";
 
-	fp = fopen("/proc/uptime", "r");
-	if (fp != NULL) {
-		if (fgets(buf, 16, fp) != NULL) {
-			pch = strtok_r(buf, ".", &spch);
-			uptime = (pch) ? dmstrdup(pch) : "0";
-		}
-		fclose(fp);
-	} else
-		uptime = "0";
+	uptime = get_uptime();
 
 	epoch_time = now - DM_STRTOL(uptime) + DM_STRTOL(last_time);
 	if ((ts = gmtime(&epoch_time)) == NULL)
