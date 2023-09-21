@@ -436,35 +436,37 @@ static int get_mldp_cgrp_stats_lrcvd(char *refparam, struct dmctx *ctx, void *da
 static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *linker = NULL, *interface_linker = NULL;
+	struct dm_reference reference = {0};
+	char *interface_linker = NULL;
 	char ifname[16];
 	char *up, *f_inst, *if_type;
 	struct uci_section *d_sec = NULL, *s = NULL;
 	bool b;
 
+	bbf_get_reference_args(value, &reference);
+
 	switch (action) {
 	case VALUECHECK:
-		if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+		if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 			return FAULT_9007;
 
-		if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+		if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 			return FAULT_9007;
 
 		break;
 	case VALUESET:
 		// First check if this is a bridge type interface
-		if (get_mcast_snooping_interface_val(ctx, value, ifname, sizeof(ifname)) == 0) {
+		if (get_mcast_snooping_interface_val(&reference, ifname, sizeof(ifname)) == 0) {
 			interface_linker = dmstrdup(ifname);
 		} else {
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
+			if (DM_STRLEN(reference.value)) {
 				uci_foreach_sections("network", "interface", s) {
-					if(strcmp(section_name(s), linker) != 0) {
+					if(strcmp(section_name(s), reference.value) != 0) {
 						continue;
 					}
 					dmuci_get_value_by_section_string(s, "type", &if_type);
 					if (DM_LSTRCMP(if_type, "bridge") == 0)
-						dmasprintf(&interface_linker, "br-%s", linker);
+						dmasprintf(&interface_linker, "br-%s", reference.value);
 					else
 						dmuci_get_value_by_section_string(s, "device", &interface_linker);
 					break;
@@ -539,10 +541,10 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 			dmuci_get_value_by_section_string(intf_s, "proto", &proto);
 			if (proto && proto[0] != '\0') {
 				// It is a L3 bridge, get the linker accordingly
-				adm_entry_get_linker_param(ctx, "Device.IP.Interface.", sec_name, value);
+				adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", sec_name, value);
 			} else {
 				// It is a L2 bridge, get the linker accordingly
-				adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", mldp_ifname, value);
+				adm_entry_get_reference_param(ctx, "Device.Bridging.Bridge.*.Port.*.Name", mldp_ifname, value);
 			}
 			break;
 		}
@@ -558,7 +560,7 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 			}
 		}
 
-		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", tmp_linker, value);
+		adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", tmp_linker, value);
 	}
 
 end:
@@ -709,7 +711,7 @@ DMLEAF MLDProxyClientGroupStatsParams[] = {
 };
 
 DMLEAF MLDProxyInterfaceParams[] = {
-{"Interface", &DMWRITE, DMT_STRING, get_mldp_interface_iface, set_mldp_interface_iface, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_mldp_interface_iface, set_mldp_interface_iface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"Upstream", &DMWRITE, DMT_BOOL, get_mcastp_interface_upstream, set_mldp_interface_upstream, BBFDM_BOTH},
 {"SnoopingMode", &DMWRITE, DMT_STRING, get_mcastp_iface_snoop_mode, set_mcastp_iface_snoop_mode, BBFDM_BOTH},
 {0}

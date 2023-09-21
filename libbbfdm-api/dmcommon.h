@@ -136,7 +136,7 @@ extern char *RateAdjAlgorithm[];
 #define SYSTEM_CERT_PATH "/etc/ssl/certs"
 #define BOARD_JSON_FILE "/etc/board.json"
 #define DMMAP "dmmap"
-#define LIST_KEY (const char *[])
+#define LIST_KEY (const char *[]) // To be removed later!!!!!!!!!!!!
 #define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
 
 #define DM_ASSERT(X, Y) \
@@ -227,10 +227,12 @@ void get_dmmap_section_of_config_section_eq(char* dmmap_package, char* section_t
 void get_dmmap_section_of_config_section_cont(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section);
 void get_config_section_of_dmmap_section(char* package, char* section_type, char *section_name, struct uci_section **config_section);
 int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, char **value);
+int adm_entry_get_reference_value(struct dmctx *ctx, char *param, char **value);
 int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value);
 int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
 int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
 int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
+int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *reference, char *objects[]);
 char *check_create_dmmap_package(const char *dmmap_package);
 unsigned int count_occurrences(char *str, char c);
 unsigned char isdigit_str(char *str);

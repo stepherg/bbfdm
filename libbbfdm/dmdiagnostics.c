@@ -72,22 +72,8 @@ char *get_diagnostics_interface_option(struct dmctx *ctx, char *value)
 	if (strncmp(value, "Device.IP.Interface.", 20) != 0)
 		return "";
 
-	adm_entry_get_linker_value(ctx, value, &linker);
+	adm_entry_get_reference_value(ctx, value, &linker);
 	return linker ? linker : "";
-}
-
-void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value)
-{
-	char *linker = NULL;
-
-	if (!value || *value == 0)
-		return;
-
-	if (strncmp(value, "Device.IP.Interface.", 20) != 0)
-		return;
-
-	adm_entry_get_linker_value(ctx, value, &linker);
-	set_diagnostics_option(sec_name, "interface", linker ? linker : "");
 }
 
 static bool get_response_code_status(const char *url, int response_code)

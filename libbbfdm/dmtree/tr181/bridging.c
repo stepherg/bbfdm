@@ -1974,12 +1974,7 @@ static int get_BridgingBridgePort_Name(char *refparam, struct dmctx *ctx, void *
 {
 	struct bridge_port_args *args = (struct bridge_port_args *)data;
 
-	if (args->is_management_port) {
-		*value = "";
-	} else {
-		dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "port", value);
-	}
-
+	dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "port", value);
 	return 0;
 }
 
@@ -1989,59 +1984,70 @@ static int get_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 	struct uci_section *port_s = NULL;
 
 	if (args->is_management_port) {
-		char lbuf[1024] = {0};
+		char buf[1024] = {0};
 		unsigned pos = 0;
 
-		lbuf[0] = 0;
-		uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", args->br_inst, port_s) {
-			char *curr_port_s = section_name(port_s);
+		buf[0] = 0;
 
-			if (strcmp(curr_port_s, section_name(args->bridge_port_dmmap_sec)) == 0)
+		uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", args->br_inst, port_s) {
+			char *mg_port = NULL;
+			char *port = NULL;
+			char br_buf[64] = {0};
+
+			snprintf(br_buf, sizeof(br_buf), "Device.Bridging.Bridge.%s.Port.*.Name", args->br_inst);
+
+			dmuci_get_value_by_section_string(port_s, "management", &mg_port);
+			if (DM_LSTRCMP(mg_port, "1") == 0)
 				continue;
 
-			adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", curr_port_s, value);
-			if (*value && (*value)[0] != 0)
-				pos += snprintf(&lbuf[pos], sizeof(lbuf) - pos, "%s,", *value);
+			dmuci_get_value_by_section_string(port_s, "port", &port);
+
+			adm_entry_get_reference_param(ctx, br_buf, port, value);
+			if (DM_STRLEN(*value))
+				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", *value);
 		}
 
 		if (pos)
-			lbuf[pos - 1] = 0;
+			buf[pos - 1] = 0;
 
-		*value = dmstrdup(lbuf);
+		*value = dmstrdup(buf);
 	} else {
-		char *type = NULL;
-		char *port = NULL;
-		char *config = NULL;
+		dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "LowerLayers", value);
 
-		dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "port", &port);
-		if (DM_STRLEN(port) == 0)
-			return 0;
+		if ((*value)[0] == '\0') {
+			char *type = NULL, *port = NULL, *config = NULL;
 
-		dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "type", &type);
-		if (DM_STRCMP(type, "34984") == 0) {
-			dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "LowerLayer", value);
-			return 0;
-		}
-
-		dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "config", &config);
-
-		if (DM_LSTRCMP(config, "network") == 0) {
-			adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", port, value);
-			if (!(*value) || (*value)[0] == 0) {
-				char *tag = DM_STRRCHR(port, '.');
-				if (tag) tag[0] = '\0';
-			} else {
+			dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "type", &type);
+			if (DM_STRCMP(type, "34984") == 0)
 				return 0;
-			}
-		}
 
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", port, value);
-		if (!(*value) || (*value)[0] == 0) {
-			struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", port);
-			if (iface_s)
-				adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", section_name(iface_s), value);
+			dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "port", &port);
+			if (DM_STRLEN(port) == 0)
+				return 0;
+
+			dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "config", &config);
+
+			if (DM_LSTRCMP(config, "network") == 0) {
+				struct uci_section *eth_iface_s = ethernet___get_ethernet_interface_section(port);
+				if (!eth_iface_s) {
+					char *tag = DM_STRRCHR(port, '.');
+					if (tag) tag[0] = '\0';
+				}
+
+				adm_entry_get_reference_param(ctx, "Device.Ethernet.Interface.*.Name", port, value);
+			} else {
+				struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", port);
+				adm_entry_get_reference_param(ctx, "Device.WiFi.SSID.*.Name", section_name(iface_s), value);
+			}
+
+			// Store LowerLayers value
+			dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "LowerLayers", *value);
+		} else {
+			if (!adm_entry_object_exists(ctx, *value))
+				*value = "";
 		}
 	}
+
 	return 0;
 }
 
@@ -2051,23 +2057,25 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 	bool is_wireless_config = false;
 	char *port_enabled = NULL;
 	char *port_device = NULL;
-	char *linker = NULL;
 	char *type = NULL;
 	char *allowed_objects[] = {
 			"Device.Ethernet.Interface.",
 			"Device.WiFi.SSID.",
 			"Device.Bridging.Bridge.*.Port.",
 			NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, reference.path, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
 			if (args->is_management_port)
 				return 0;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "type", &type);
@@ -2079,41 +2087,35 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 			if (args->is_management_port)
 				return 0;
 
-			adm_entry_get_linker_value(ctx, value, &linker);
+			// Store LowerLayers value under dmmap section
+			dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "LowerLayers", reference.path);
 
-			if (!linker || *linker == 0) {
+			if (DM_STRLEN(reference.value) == 0) {
 				dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "port", "");
 				return 0;
 			}
 
 			dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "port", &port_device);
-			if (DM_STRCMP(linker, port_device) == 0) // Same as already configured
+			if (DM_STRCMP(reference.value, port_device) == 0) // Same as already configured
 				return 0;
 
 			// Update config section on dmmap_bridge_port if the linker is wirelss port or network port
-			if (DM_LSTRNCMP(value, "Device.WiFi.SSID.", 17) == 0) {
+			if (DM_LSTRNCMP(reference.path, "Device.WiFi.SSID.", 17) == 0) {
 				dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "config", "wireless");
 				is_wireless_config = true;
 			} else
 				dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "config", "network");
-
-			if (match(value, "Device.Bridging.Bridge.*.Port.", 0, NULL)) {
-				struct uci_section *s = get_origin_section_from_dmmap("dmmap_bridge_port", "bridge_port", linker);
-				dmuci_get_value_by_section_string(s, "port", &linker);
-
-				dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "LowerLayer", value);
-			}
 
 			dmuci_get_value_by_section_string(args->bridge_port_dmmap_sec, "enabled", &port_enabled);
 			if (port_device[0] == '\0') {
 
 				if (DM_STRCMP(port_enabled, "1") == 0) {
 					// Add port to ports list
-					add_port_to_bridge_sections(args->bridge_sec, args->bridge_dmmap_sec, linker);
+					add_port_to_bridge_sections(args->bridge_sec, args->bridge_dmmap_sec, reference.value);
 				}
 
 				// Update port option in dmmap
-				dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "port", linker);
+				dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "port", reference.value);
 			} else {
 
 				if (DM_STRCMP(port_enabled, "1") == 0) {
@@ -2126,7 +2128,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 				if (tag && !is_wireless_config) {
 					char new_name[32] = {0};
 
-					snprintf(new_name, sizeof(new_name), "%s.%s", linker, tag + 1);
+					snprintf(new_name, sizeof(new_name), "%s.%s", reference.value, tag + 1);
 
 					if (DM_STRCMP(port_enabled, "1") == 0) {
 						// Add port to ports list
@@ -2140,7 +2142,7 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 					if (args->bridge_port_sec) {
 						struct uci_section *s = NULL;
 
-						dmuci_set_value_by_section(args->bridge_port_sec, "ifname", linker);
+						dmuci_set_value_by_section(args->bridge_port_sec, "ifname", reference.value);
 						dmuci_set_value_by_section(args->bridge_port_sec, "name", new_name);
 						s = get_dup_section_in_dmmap("dmmap_bridge_vlanport", "bridge_vlanport", section_name(args->bridge_port_sec));
 						dmuci_set_value_by_section(s, "name", new_name);
@@ -2148,11 +2150,11 @@ static int set_BridgingBridgePort_LowerLayers(char *refparam, struct dmctx *ctx,
 				} else {
 					if (DM_STRCMP(port_enabled, "1") == 0) {
 						// Add port to ports list
-						add_port_to_bridge_sections(args->bridge_sec, args->bridge_dmmap_sec, linker);
+						add_port_to_bridge_sections(args->bridge_sec, args->bridge_dmmap_sec, reference.value);
 					}
 
 					// Update port option in dmmap
-					dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "port", linker);
+					dmuci_set_value_by_section(args->bridge_port_dmmap_sec, "port", reference.value);
 				}
 			}
 			return 0;
@@ -2623,10 +2625,10 @@ static int get_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 	if (DM_STRLEN(vid) == 0) {
 		*value = "";
 	} else {
-		char br_vlan_path[32] = {0};
+		char br_vlan_path[64] = {0};
 
-		snprintf(br_vlan_path, sizeof(br_vlan_path),"Device.Bridging.Bridge.%s.VLAN.", args->br_inst);
-		adm_entry_get_linker_param(ctx, br_vlan_path, vid, value);
+		snprintf(br_vlan_path, sizeof(br_vlan_path), "Device.Bridging.Bridge.%s.VLAN.*.VLANID", args->br_inst);
+		adm_entry_get_reference_param(ctx, br_vlan_path, vid, value);
 	}
 	return 0;
 }
@@ -2639,17 +2641,19 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 			lower_layer_path,
 			NULL};
 	char *ifname = NULL, *name = NULL, *vid = NULL;
-	char *linker = NULL;
 	char new_name[32] = {0};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.VLAN.", args->br_inst);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
@@ -2659,16 +2663,14 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 			dmuci_get_value_by_section_string(args->bridge_vlanport_sec, "name", &name);
 			dmuci_get_value_by_section_string(args->bridge_vlanport_sec, "vid", &vid);
 
-			adm_entry_get_linker_value(ctx, value, &linker);
-
-			if (DM_STRLEN(linker) == 0 && DM_STRLEN(vid) == 0)
+			if (DM_STRLEN(reference.value) == 0 && DM_STRLEN(vid) == 0)
 				return 0;
 
 			if (DM_STRLEN(name) != 0) {
 				char *enable = NULL;
 
 				/* create name option */
-				snprintf(new_name, sizeof(new_name), "%s%s%s", ifname , (DM_STRLEN(linker) == 0) ? "": ".", (DM_STRLEN(linker) == 0) ? "": linker);
+				snprintf(new_name, sizeof(new_name), "%s%s%s", ifname , (DM_STRLEN(reference.value) == 0) ? "": ".", (DM_STRLEN(reference.value) == 0) ? "": reference.value);
 
 				/* Update device network section */
 				dmuci_set_value_by_section(args->bridge_vlanport_sec, "name", new_name);
@@ -2690,7 +2692,7 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 				dmuci_set_value_by_section(args->bridge_vlanport_dmmap_sec, "name", new_name);
 			}
 
-			dmuci_set_value_by_section(args->bridge_vlanport_sec, "vid", (DM_STRLEN(linker) == 0) ? "": linker);
+			dmuci_set_value_by_section(args->bridge_vlanport_sec, "vid", reference.value);
 			return 0;
 	}
 	return 0;
@@ -2699,16 +2701,16 @@ static int set_BridgingBridgeVLANPort_VLAN(char *refparam, struct dmctx *ctx, vo
 static int get_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct bridge_vlanport_args *args = (struct bridge_vlanport_args *)data;
-	char *port_name = NULL;
+	char *name = NULL;
 
-	dmuci_get_value_by_section_string(args->bridge_vlanport_dmmap_sec, "port_name", &port_name);
-	if (DM_STRLEN(port_name) == 0) {
+	dmuci_get_value_by_section_string(args->bridge_vlanport_dmmap_sec, "name", &name);
+	if (DM_STRLEN(name) == 0) {
 		*value = "";
 	} else {
 		char br_port_path[128] = {0};
 
-		snprintf(br_port_path, sizeof(br_port_path), "Device.Bridging.Bridge.%s.Port.", args->br_inst);
-		adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", port_name, value);
+		snprintf(br_port_path, sizeof(br_port_path), "Device.Bridging.Bridge.%s.Port.*.Name", args->br_inst);
+		adm_entry_get_reference_param(ctx, br_port_path, name, value);
 	}
 	return 0;
 }
@@ -2721,23 +2723,23 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 	char *allowed_objects[] = {
 			lower_layer_path,
 			NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	snprintf(lower_layer_path, sizeof(lower_layer_path), "Device.Bridging.Bridge.%s.Port.", args->br_inst);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-
-			if (!linker || *linker == '\0') {
+			if (DM_STRLEN(reference.value) == 0) {
 				char *ifname = NULL;
 				char *name = NULL;
 				char *enable = NULL;
@@ -2769,14 +2771,14 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 				}
 			} else {
 				char *vid = NULL;
-				char *port = NULL;
 				char *enable = NULL;
 				char *type = NULL;
 
+				char *port = dmstrdup(reference.value);
+
 				dmuci_get_value_by_section_string(args->bridge_vlanport_sec, "vid", &vid);
 
-				s = get_origin_section_from_dmmap("dmmap_bridge_port", "bridge_port", linker);
-				dmuci_get_value_by_section_string(s, "port", &port);
+				s = get_dup_section_in_dmmap_opt("dmmap_bridge_port", "bridge_port", "port", port);
 				dmuci_get_value_by_section_string(s, "enabled", &enable);
 				dmuci_get_value_by_section_string(s, "type", &type);
 
@@ -2826,7 +2828,7 @@ static int set_BridgingBridgeVLANPort_Port(char *refparam, struct dmctx *ctx, vo
 					dmuci_set_value_by_section(s, "port", port_name);
 				}
 
-				dmuci_set_value_by_section(args->bridge_vlanport_dmmap_sec, "port_name", linker);
+				dmuci_set_value_by_section(args->bridge_vlanport_dmmap_sec, "port_name", section_name(s));
 			}
 			return 0;
 	}
@@ -3004,7 +3006,7 @@ static int set_BridgingBridgeProviderBridge_CVLANcomponents(char *refparam, stru
 /* *** Device.Bridging. *** */
 DMOBJ tBridgingObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Bridge", &DMWRITE, addObjBridgingBridge, delObjBridgingBridge, NULL, browseBridgingBridgeInst, NULL, NULL, tBridgingBridgeObj, tBridgingBridgeParams, get_linker_bridge, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"Bridge", &DMWRITE, addObjBridgingBridge, delObjBridgingBridge, NULL, browseBridgingBridgeInst, NULL, NULL, tBridgingBridgeObj, tBridgingBridgeParams, get_linker_bridge, BBFDM_BOTH, NULL},
 {"ProviderBridge", &DMWRITE, addObjBridgingProviderBridge, delObjBridgingProviderBridge, NULL, browseBridgingProviderBridgeInst, NULL, NULL, NULL, tBridgingProviderBridgeParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
@@ -3025,10 +3027,10 @@ DMLEAF tBridgingParams[] = {
 /*** Bridging.Bridge.{i}. ***/
 DMOBJ tBridgingBridgeObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"STP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tBridgingBridgeSTPParams, NULL, BBFDM_BOTH, NULL},
-{"Port", &DMWRITE, addObjBridgingBridgePort, delObjBridgingBridgePort, NULL, browseBridgingBridgePortInst, NULL, NULL, tBridgingBridgePortObj, tBridgingBridgePortParams, get_linker_br_port, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"VLAN", &DMWRITE, addObjBridgingBridgeVLAN, delObjBridgingBridgeVLAN, NULL, browseBridgingBridgeVLANInst, NULL, NULL, NULL, tBridgingBridgeVLANParams, get_linker_br_vlan, BBFDM_BOTH, LIST_KEY{"VLANID", "Alias", NULL}},
-{"VLANPort", &DMWRITE, addObjBridgingBridgeVLANPort, delObjBridgingBridgeVLANPort, NULL, browseBridgingBridgeVLANPortInst, NULL, NULL, NULL, tBridgingBridgeVLANPortParams, NULL, BBFDM_BOTH, LIST_KEY{"VLAN", "Port", "Alias", NULL}},
+{"STP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tBridgingBridgeSTPParams, NULL, BBFDM_BOTH},
+{"Port", &DMWRITE, addObjBridgingBridgePort, delObjBridgingBridgePort, NULL, browseBridgingBridgePortInst, NULL, NULL, tBridgingBridgePortObj, tBridgingBridgePortParams, get_linker_br_port, BBFDM_BOTH, NULL},
+{"VLAN", &DMWRITE, addObjBridgingBridgeVLAN, delObjBridgingBridgeVLAN, NULL, browseBridgingBridgeVLANInst, NULL, NULL, NULL, tBridgingBridgeVLANParams, get_linker_br_vlan, BBFDM_BOTH, NULL},
+{"VLANPort", &DMWRITE, addObjBridgingBridgeVLANPort, delObjBridgingBridgeVLANPort, NULL, browseBridgingBridgeVLANPortInst, NULL, NULL, NULL, tBridgingBridgeVLANPortParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -3036,7 +3038,7 @@ DMLEAF tBridgingBridgeParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_BridgingBridge_Enable, set_BridgingBridge_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_BridgingBridge_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_BridgingBridge_Alias, set_BridgingBridge_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_BridgingBridge_Alias, set_BridgingBridge_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Standard", &DMWRITE, DMT_STRING, get_BridgingBridge_Standard, set_BridgingBridge_Standard, BBFDM_BOTH},
 {"PortNumberOfEntries", &DMREAD, DMT_UNINT, get_BridgingBridge_PortNumberOfEntries, NULL, BBFDM_BOTH},
 {"VLANNumberOfEntries", &DMREAD, DMT_UNINT, get_BridgingBridge_VLANNumberOfEntries, NULL, BBFDM_BOTH},
@@ -3068,10 +3070,10 @@ DMLEAF tBridgingBridgePortParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_BridgingBridgePort_Enable, set_BridgingBridgePort_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_BridgingBridgePort_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_BridgingBridgePort_Alias, set_BridgingBridgePort_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_BridgingBridgePort_Name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_BridgingBridgePort_Alias, set_BridgingBridgePort_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_BridgingBridgePort_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 //{"LastChange", &DMREAD, DMT_UNINT, get_BridgingBridgePort_LastChange, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_BridgingBridgePort_LowerLayers, set_BridgingBridgePort_LowerLayers, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_BridgingBridgePort_LowerLayers, set_BridgingBridgePort_LowerLayers, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"ManagementPort", &DMWRITE, DMT_BOOL, get_BridgingBridgePort_ManagementPort, set_BridgingBridgePort_ManagementPort, BBFDM_BOTH},
 //{"Type", &DMWRITE, DMT_STRING, get_BridgingBridgePort_Type, set_BridgingBridgePort_Type, BBFDM_BOTH},
 //{"DefaultUserPriority", &DMWRITE, DMT_UNINT, get_BridgingBridgePort_DefaultUserPriority, set_BridgingBridgePort_DefaultUserPriority, BBFDM_BOTH},
@@ -3107,9 +3109,9 @@ DMLEAF tBridgingBridgePortStatsParams[] = {
 DMLEAF tBridgingBridgeVLANParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_BridgingBridgeVLAN_Enable, set_BridgingBridgeVLAN_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_BridgingBridgeVLAN_Alias, set_BridgingBridgeVLAN_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_BridgingBridgeVLAN_Alias, set_BridgingBridgeVLAN_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Name", &DMWRITE, DMT_STRING, get_BridgingBridgeVLAN_Name, set_BridgingBridgeVLAN_Name, BBFDM_BOTH},
-{"VLANID", &DMWRITE, DMT_INT, get_BridgingBridgeVLAN_VLANID, set_BridgingBridgeVLAN_VLANID, BBFDM_BOTH},
+{"VLANID", &DMWRITE, DMT_INT, get_BridgingBridgeVLAN_VLANID, set_BridgingBridgeVLAN_VLANID, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {0}
 };
 
@@ -3117,9 +3119,9 @@ DMLEAF tBridgingBridgeVLANParams[] = {
 DMLEAF tBridgingBridgeVLANPortParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_BridgingBridgeVLANPort_Enable, set_BridgingBridgeVLANPort_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING,  get_BridgingBridgeVLANPort_Alias, set_BridgingBridgeVLANPort_Alias, BBFDM_BOTH},
-{"VLAN", &DMWRITE, DMT_STRING,  get_BridgingBridgeVLANPort_VLAN, set_BridgingBridgeVLANPort_VLAN, BBFDM_BOTH},
-{"Port", &DMWRITE, DMT_STRING, get_BridgingBridgeVLANPort_Port, set_BridgingBridgeVLANPort_Port, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING,  get_BridgingBridgeVLANPort_Alias, set_BridgingBridgeVLANPort_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"VLAN", &DMWRITE, DMT_STRING,  get_BridgingBridgeVLANPort_VLAN, set_BridgingBridgeVLANPort_VLAN, BBFDM_BOTH, DM_FLAG_REFERENCE|DM_FLAG_UNIQUE},
+{"Port", &DMWRITE, DMT_STRING, get_BridgingBridgeVLANPort_Port, set_BridgingBridgeVLANPort_Port, BBFDM_BOTH, DM_FLAG_REFERENCE|DM_FLAG_UNIQUE},
 {"Untagged", &DMWRITE, DMT_BOOL, get_BridgingBridgeVLANPort_Untagged, set_BridgingBridgeVLANPort_Untagged, BBFDM_BOTH},
 {0}
 };

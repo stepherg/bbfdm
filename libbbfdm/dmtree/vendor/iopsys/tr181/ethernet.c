@@ -143,25 +143,29 @@ static int get_EthernetMACVLAN_Name(char *refparam, struct dmctx *ctx, void *dat
 
 static int get_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = NULL;
-
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", value);
 
 	if ((*value)[0] == '\0') {
+		char *linker = NULL;
+
 		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &linker);
 		if (!linker || *linker == '\0')
 			return 0;
 
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", linker, value);
-		if (*value != NULL && (*value)[0] != 0)
-			return 0;
+		adm_entry_get_reference_param(ctx, "Device.Ethernet.VLANTermination.*.Name", linker, value);
+		if (DM_STRLEN(*value))
+			goto end;
 
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", linker, value);
+		adm_entry_get_reference_param(ctx, "Device.Ethernet.Link.*.Name", linker, value);
+
+end:
+		// Store LowerLayers value
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", *value);
 	} else {
-		adm_entry_get_linker_value(ctx, *value, &linker);
-		if (!linker || *linker == 0)
+		if (!adm_entry_object_exists(ctx, *value))
 			*value = "";
 	}
+
 	return 0;
 }
 
@@ -171,34 +175,34 @@ static int set_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 			"Device.Ethernet.VLANTermination.",
 			"Device.Ethernet.Link.",
 			NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, reference.path, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-
 			// Store LowerLayers value under dmmap section
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", reference.path);
 
-			if (DM_STRLEN(linker)) {
+			if (DM_STRLEN(reference.value)) {
 				char name[16] = {0};
 
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", linker);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", reference.value);
 
-				if (DM_STRNCMP(value, allowed_objects[0], strlen(allowed_objects[0])) == 0) {
-					char *vid = DM_STRRCHR(linker, '.');
+				if (DM_STRNCMP(reference.path, allowed_objects[0], strlen(allowed_objects[0])) == 0) {
+					char *vid = DM_STRRCHR(reference.value, '.');
 					if (vid) *vid = 0;
 				}
 
-				snprintf(name, sizeof(name), "%s_%s", linker, instance);
+				snprintf(name, sizeof(name), "%s_%s", reference.value, instance);
 
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", name);
 			} else {
@@ -297,8 +301,8 @@ DMLEAF tEthernetMACVLANParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_EthernetMACVLAN_Enable, set_EthernetMACVLAN_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_EthernetMACVLAN_Status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_Alias, set_EthernetMACVLAN_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_EthernetMACVLAN_Name, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_LowerLayers, set_EthernetMACVLAN_LowerLayers, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_EthernetMACVLAN_Name, NULL, BBFDM_BOTH, DM_FLAG_LINKER},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_LowerLayers, set_EthernetMACVLAN_LowerLayers, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"MACAddress", &DMWRITE, DMT_STRING, get_EthernetMACVLAN_MACAddress, set_EthernetMACVLAN_MACAddress, BBFDM_BOTH},
 {0}
 };

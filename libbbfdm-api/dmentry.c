@@ -229,13 +229,6 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 		fault = dm_entry_get_name(ctx);
 		break;
 	case BBF_SET_VALUE:
-		ctx->setaction = VALUECHECK;
-		fault = dm_entry_set_value(ctx);
-		if (fault)
-			break;
-
-		ctx->setaction = VALUESET;
-		ctx->stop = false;
 		fault = dm_entry_set_value(ctx);
 		if (!fault)
 			dmuci_change_packages(&head_package_change);
@@ -270,7 +263,7 @@ void bbf_global_clean(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], D
 	dm_dynamic_cleanmem(&global_memhead);
 }
 
-int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[])
+int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]) // To be removed later!!!!!!!!!!!!
 {
 	if (!value || !objects)
 		return -1;
@@ -293,7 +286,7 @@ int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *obje
 	return -1;
 }
 
-int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *value, char *objects[])
+int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *value, char *objects[]) // To be removed later!!!!!!!!!!!!
 {
 	if (!value || !objects)
 		return -1;
@@ -308,6 +301,27 @@ int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *v
 	}
 
 	bbfdm_set_fault_message(ctx, "'%s' value is not allowed.", value);
+	return -1;
+}
+
+int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *reference, char *objects[])
+{
+	if (!reference || !objects)
+		return -1;
+
+	if (DM_STRLEN(reference->path) == 0)
+		return 0;
+
+	for (; *objects; objects++) {
+
+		if (match(reference->path, *objects, 0, NULL)) {
+
+			if (DM_STRLEN(reference->value))
+				return 0;
+		}
+	}
+
+	bbfdm_set_fault_message(ctx, "'%s' value is not allowed.", reference->path);
 	return -1;
 }
 
@@ -327,13 +341,37 @@ int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, 
 	dmctx.linker = linker;
 
 	dm_entry_get_reference_param(&dmctx);
-	*value = dmctx.linker_param;
+
+	*value = dmctx.linker_param ? dmctx.linker_param : "";
 
 	bbf_ctx_clean_sub(&dmctx);
 	return 0;
 }
 
-int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value)
+int adm_entry_get_reference_value(struct dmctx *ctx, char *param, char **value)
+{
+	struct dmctx dmctx = {0};
+	char linker[256] = {0};
+	*value = NULL;
+
+	if (!param || param[0] == '\0')
+		return 0;
+
+	snprintf(linker, sizeof(linker), "%s%c", param, (param[DM_STRLEN(param) - 1] != '.') ? '.' : '\0');
+
+	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj, ctx->dm_vendor_extension, ctx->dm_vendor_extension_exclude);
+
+	dmctx.in_param = linker;
+
+	dm_entry_get_reference_value(&dmctx);
+
+	*value = dmctx.linker;
+
+	bbf_ctx_clean_sub(&dmctx);
+	return 0;
+}
+
+int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value) // To be removed later!!!!!!!!!!!!
 {
 	struct dmctx dmctx = {0};
 	*value = "";
@@ -353,7 +391,7 @@ int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, cha
 	return 0;
 }
 
-int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value)
+int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value) // To be removed later!!!!!!!!!!!!
 {
 	struct dmctx dmctx = {0};
 	char linker[256] = {0};
@@ -373,6 +411,27 @@ int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value)
 
 	bbf_ctx_clean_sub(&dmctx);
 	return 0;
+}
+
+bool adm_entry_object_exists(struct dmctx *ctx, char *param)
+{
+	struct dmctx dmctx = {0};
+	char linker[256] = {0};
+
+	if (!param || param[0] == '\0')
+		return false;
+
+	snprintf(linker, sizeof(linker), "%s%c", param, (param[DM_STRLEN(param) - 1] != '.') ? '.' : '\0');
+
+	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj, ctx->dm_vendor_extension, ctx->dm_vendor_extension_exclude);
+
+	dmctx.in_param = linker;
+
+	dm_entry_object_exists(&dmctx);
+
+	bbf_ctx_clean_sub(&dmctx);
+
+	return dmctx.match;
 }
 
 void bbf_entry_restart_services(struct blob_buf *bb, bool restart_services)

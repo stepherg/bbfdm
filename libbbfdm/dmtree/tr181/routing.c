@@ -42,15 +42,6 @@ enum enum_route_type {
 
 #define MAX_ROUTE_LEN 512
 
-/**************************************************************************
-* LINKER
-***************************************************************************/
-static int get_linker_router(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	dmuci_get_value_by_section_string((struct uci_section *)data, "rt_table", linker);
-	return 0;
-}
-
 /********************************
  * init function
  ********************************/
@@ -739,27 +730,28 @@ static int get_RoutingRouterForwarding_Interface(char *refparam, struct dmctx *c
 	char *linker = NULL;
 
 	dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "interface", &linker);
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value); // MEM WILL BE FREED IN DMMEMCLEAN
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
 static int set_RoutingRouterForwarding_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "interface", linker ? linker : "");
+			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -1035,7 +1027,7 @@ static int get_RoutingRouteInformationInterfaceSetting_Interface(char *refparam,
 		}
 	}
 
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", iface, value);
 	return 0;
 }
 
@@ -1065,12 +1057,13 @@ static int get_RoutingRouteInformationInterfaceSetting_RouteLifetime(char *refpa
 **************************************************************/
 static int get_RoutingRouter_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, (struct uci_section *)data, "router_alias", instance, value);
+	dmuci_get_value_by_section_string((struct uci_section *)data, "rt_table", value);
+	return 0;
 }
 
 static int set_RoutingRouter_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, (struct uci_section *)data, "router_alias", instance, value);
+	return 0;
 }
 
 static int get_router_ipv4forwarding_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1328,7 +1321,7 @@ static int delete_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, 
 /* *** Device.Routing. *** */
 DMOBJ tRoutingObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Router", &DMWRITE, add_router, delete_router, NULL, browseRouterInst, NULL, NULL, tRoutingRouterObj, tRoutingRouterParams, get_linker_router, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"Router", &DMWRITE, add_router, delete_router, NULL, browseRouterInst, NULL, NULL, tRoutingRouterObj, tRoutingRouterParams, NULL, BBFDM_BOTH, NULL},
 {"RouteInformation", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tRoutingRouteInformationObj, tRoutingRouteInformationParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
@@ -1342,8 +1335,8 @@ DMLEAF tRoutingParams[] = {
 /* *** Device.Routing.Router.{i}. *** */
 DMOBJ tRoutingRouterObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"IPv4Forwarding", &DMWRITE, add_ipv4forwarding, delete_ipv4forwarding, NULL, browseIPv4ForwardingInst, NULL, NULL, NULL, tRoutingRouterIPv4ForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DestIPAddress", "DestSubnetMask", "ForwardingPolicy", "GatewayIPAddress", "Interface", "ForwardingMetric", "Alias", NULL}},
-{"IPv6Forwarding", &DMWRITE, add_ipv6Forwarding, delete_ipv6Forwarding, NULL, browseIPv6ForwardingInst, NULL, NULL, NULL, tRoutingRouterIPv6ForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DestIPPrefix", "ForwardingPolicy", "NextHop", "Interface", "ForwardingMetric", "Alias", NULL}},
+{"IPv4Forwarding", &DMWRITE, add_ipv4forwarding, delete_ipv4forwarding, NULL, browseIPv4ForwardingInst, NULL, NULL, NULL, tRoutingRouterIPv4ForwardingParams, NULL, BBFDM_BOTH, NULL},
+{"IPv6Forwarding", &DMWRITE, add_ipv6Forwarding, delete_ipv6Forwarding, NULL, browseIPv6ForwardingInst, NULL, NULL, NULL, tRoutingRouterIPv6ForwardingParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1351,7 +1344,7 @@ DMLEAF tRoutingRouterParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_RoutingRouter_Enable, set_RoutingRouter_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_RoutingRouter_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_RoutingRouter_Alias, set_RoutingRouter_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_RoutingRouter_Alias, set_RoutingRouter_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {"IPv4ForwardingNumberOfEntries", &DMREAD, DMT_UNINT, get_RoutingRouter_IPv4ForwardingNumberOfEntries, NULL, BBFDM_BOTH},
 {"IPv6ForwardingNumberOfEntries", &DMREAD, DMT_UNINT, get_RoutingRouter_IPv6ForwardingNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
@@ -1362,15 +1355,15 @@ DMLEAF tRoutingRouterIPv4ForwardingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMRouting, DMT_BOOL, get_router_ipv4forwarding_enable, set_router_ipv4forwarding_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_router_ipv4forwarding_status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_router_ipv4forwarding_alias, set_router_ipv4forwarding_alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_router_ipv4forwarding_alias, set_router_ipv4forwarding_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"StaticRoute", &DMREAD, DMT_BOOL, get_router_ipv4forwarding_static_route, NULL, BBFDM_BOTH},
-{"DestIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destip, set_router_ipv4forwarding_destip, BBFDM_BOTH},
-{"DestSubnetMask", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destmask, set_router_ipv4forwarding_destmask, BBFDM_BOTH},
-{"ForwardingPolicy", &DMRouting, DMT_INT, get_router_ipv4forwarding_forwarding_policy, set_router_ipv4forwarding_forwarding_policy, BBFDM_BOTH},
-{"GatewayIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_gatewayip, set_router_ipv4forwarding_gatewayip, BBFDM_BOTH},
-{"Interface", &DMRouting, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH},
+{"DestIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destip, set_router_ipv4forwarding_destip, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"DestSubnetMask", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destmask, set_router_ipv4forwarding_destmask, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"ForwardingPolicy", &DMRouting, DMT_INT, get_router_ipv4forwarding_forwarding_policy, set_router_ipv4forwarding_forwarding_policy, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"GatewayIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_gatewayip, set_router_ipv4forwarding_gatewayip, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Interface", &DMRouting, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 {"Origin", &DMREAD, DMT_STRING, get_router_ipv4forwarding_origin, NULL, BBFDM_BOTH},
-{"ForwardingMetric", &DMRouting, DMT_INT, get_router_ipv4forwarding_metric, set_router_ipv4forwarding_metric, BBFDM_BOTH},
+{"ForwardingMetric", &DMRouting, DMT_INT, get_router_ipv4forwarding_metric, set_router_ipv4forwarding_metric, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {0}
 };
 
@@ -1379,13 +1372,13 @@ DMLEAF tRoutingRouterIPv6ForwardingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMRouting, DMT_BOOL, get_RoutingRouterIPv6Forwarding_Enable, set_RoutingRouterIPv6Forwarding_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_RoutingRouterIPv6Forwarding_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_RoutingRouterIPv6Forwarding_Alias, set_RoutingRouterIPv6Forwarding_Alias, BBFDM_BOTH},
-{"DestIPPrefix", &DMRouting, DMT_STRING, get_RoutingRouterIPv6Forwarding_DestIPPrefix, set_RoutingRouterIPv6Forwarding_DestIPPrefix, BBFDM_BOTH},
-{"ForwardingPolicy", &DMRouting, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingPolicy, set_RoutingRouterIPv6Forwarding_ForwardingPolicy, BBFDM_BOTH},
-{"NextHop", &DMRouting, DMT_STRING, get_RoutingRouterIPv6Forwarding_NextHop, set_RoutingRouterIPv6Forwarding_NextHop, BBFDM_BOTH},
-{"Interface", &DMRouting, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_RoutingRouterIPv6Forwarding_Alias, set_RoutingRouterIPv6Forwarding_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"DestIPPrefix", &DMRouting, DMT_STRING, get_RoutingRouterIPv6Forwarding_DestIPPrefix, set_RoutingRouterIPv6Forwarding_DestIPPrefix, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"ForwardingPolicy", &DMRouting, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingPolicy, set_RoutingRouterIPv6Forwarding_ForwardingPolicy, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"NextHop", &DMRouting, DMT_STRING, get_RoutingRouterIPv6Forwarding_NextHop, set_RoutingRouterIPv6Forwarding_NextHop, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Interface", &DMRouting, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 {"Origin", &DMREAD, DMT_STRING, get_RoutingRouterIPv6Forwarding_Origin, NULL, BBFDM_BOTH},
-{"ForwardingMetric", &DMRouting, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingMetric, set_RoutingRouterIPv6Forwarding_ForwardingMetric, BBFDM_BOTH},
+{"ForwardingMetric", &DMRouting, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingMetric, set_RoutingRouterIPv6Forwarding_ForwardingMetric, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"ExpirationTime", &DMREAD, DMT_TIME, get_RoutingRouterIPv6Forwarding_ExpirationTime, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1393,7 +1386,7 @@ DMLEAF tRoutingRouterIPv6ForwardingParams[] = {
 /* *** Device.Routing.RouteInformation. *** */
 DMOBJ tRoutingRouteInformationObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"InterfaceSetting", &DMREAD, NULL, NULL, NULL, browseRoutingRouteInformationInterfaceSettingInst, NULL, NULL, NULL, tRoutingRouteInformationInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", NULL}},
+{"InterfaceSetting", &DMREAD, NULL, NULL, NULL, browseRoutingRouteInformationInterfaceSettingInst, NULL, NULL, NULL, tRoutingRouteInformationInterfaceSettingParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1408,7 +1401,7 @@ DMLEAF tRoutingRouteInformationParams[] = {
 DMLEAF tRoutingRouteInformationInterfaceSettingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Status", &DMREAD, DMT_STRING, get_RoutingRouteInformationInterfaceSetting_Status, NULL, BBFDM_BOTH},
-{"Interface", &DMREAD, DMT_STRING, get_RoutingRouteInformationInterfaceSetting_Interface, NULL, BBFDM_BOTH},
+{"Interface", &DMREAD, DMT_STRING, get_RoutingRouteInformationInterfaceSetting_Interface, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 {"SourceRouter", &DMREAD, DMT_STRING, get_RoutingRouteInformationInterfaceSetting_SourceRouter, NULL, BBFDM_BOTH},
 {"RouteLifetime", &DMREAD, DMT_TIME, get_RoutingRouteInformationInterfaceSetting_RouteLifetime, NULL, BBFDM_BOTH},
 {0}

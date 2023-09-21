@@ -2269,8 +2269,8 @@ static int set_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data,
 static int get_WiFiEndPoint_SSIDReference(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", ((struct wifi_enp_args *)data)->ifname);
-	if (iface_s)
-		adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", section_name(iface_s), value);
+
+	adm_entry_get_reference_param(ctx, "Device.WiFi.SSID.*.Name", section_name(iface_s), value);
 	return 0;
 }
 
@@ -2678,33 +2678,48 @@ static int set_access_point_alias(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *device = NULL;
+	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "LowerLayers", value);
 
-	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "device", &device);
-	adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", device, value);
+	if ((*value)[0] == '\0') {
+		char *device = NULL;
+
+		dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "device", &device);
+		adm_entry_get_reference_param(ctx, "Device.WiFi.Radio.*.Name", device, value);
+
+		// Store LowerLayers value
+		dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->dmmap_s, "LowerLayers", *value);
+	} else {
+		if (!adm_entry_object_exists(ctx, *value))
+			*value = "";
+	}
+
 	return 0;
 }
 
 static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.WiFi.Radio.", NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, reference.path, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->dmmap_s, "device", linker ? linker : "");
+			// Store LowerLayers value under dmmap section
+			dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->dmmap_s, "LowerLayers", reference.path);
+
+			dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->dmmap_s, "device", reference.value);
 
 			if (((struct wifi_ssid_args *)data)->config_s)
-				dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->config_s, "device", linker ? linker : "");
+				dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->config_s, "device", reference.value);
 			return 0;
 	}
 	return 0;
@@ -2715,44 +2730,45 @@ static int get_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->dmmap_section, "LowerLayers", value);
 
 	if ((*value)[0] == '\0') {
-		adm_entry_get_linker_param(ctx, "Device.WiFi.SSID.", section_name((((struct wifi_acp_args *)data)->sections)->config_section), value);
-	} else {
-		char *linker = NULL;
+		adm_entry_get_reference_param(ctx, "Device.WiFi.SSID.*.Name", section_name((((struct wifi_acp_args *)data)->sections)->config_section), value);
 
-		adm_entry_get_linker_value(ctx, *value, &linker);
-		if (!linker || *linker == 0)
+		// Store LowerLayers value
+		dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->dmmap_section, "LowerLayers", *value);
+	} else {
+		if (!adm_entry_object_exists(ctx, *value))
 			*value = "";
 	}
+
 	return 0;
 }
 
 static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.WiFi.SSID.", NULL};
+	struct dm_reference reference = {0};
 	struct uci_section *ss = NULL;
-	char *linker = NULL;
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-
 			// Store LowerLayers value under dmmap_wireless section
-			dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->dmmap_section, "LowerLayers", value);
+			dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->dmmap_section, "LowerLayers", reference.path);
 
-			if (linker) {
+			if (DM_STRLEN(reference.value)) {
 				char *device = NULL, *ssid = NULL, *enabled = NULL;
 
-				ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", linker);
+				ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", reference.value);
 				if (ss == NULL) {
-					ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ssid_instance", linker);
+					ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ssid_instance", reference.value);
 				}
 
 				dmuci_set_value_by_section(ss, "ap_section_name", section_name((((struct wifi_acp_args *)data)->sections)->config_section));
@@ -3588,11 +3604,11 @@ DMOBJ tWiFiObj[] = {
 #ifdef BBF_WIFI_DATAELEMENTS
 {"DataElements", &DMREAD, NULL, NULL, "file:/etc/init.d/decollector", NULL, NULL, NULL, tWiFiDataElementsObj, NULL, NULL, BBFDM_BOTH, NULL},
 #endif
-{"Radio", &DMREAD, NULL, NULL, "file:/etc/config/wireless", browseWifiRadioInst, NULL, NULL, tWiFiRadioObj, tWiFiRadioParams, get_linker_Wifi_Radio, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"SSID", &DMWRITE, add_wifi_ssid, delete_wifi_ssid, "file:/etc/config/wireless", browseWifiSsidInst, NULL, NULL, tWiFiSSIDObj, tWiFiSSIDParams, get_linker_Wifi_Ssid, BBFDM_BOTH, LIST_KEY{"Name", "Alias", "BSSID", NULL}},
-{"AccessPoint", &DMWRITE, add_wifi_accesspoint, delete_wifi_accesspoint, "file:/etc/config/wireless", browseWifiAccessPointInst, NULL, NULL, tWiFiAccessPointObj, tWiFiAccessPointParams, get_linker_Wifi_AccessPoint, BBFDM_BOTH, LIST_KEY{"SSIDReference", "Alias", NULL}},
+{"Radio", &DMREAD, NULL, NULL, "file:/etc/config/wireless", browseWifiRadioInst, NULL, NULL, tWiFiRadioObj, tWiFiRadioParams, get_linker_Wifi_Radio, BBFDM_BOTH, NULL},
+{"SSID", &DMWRITE, add_wifi_ssid, delete_wifi_ssid, "file:/etc/config/wireless", browseWifiSsidInst, NULL, NULL, tWiFiSSIDObj, tWiFiSSIDParams, get_linker_Wifi_Ssid, BBFDM_BOTH, NULL},
+{"AccessPoint", &DMWRITE, add_wifi_accesspoint, delete_wifi_accesspoint, "file:/etc/config/wireless", browseWifiAccessPointInst, NULL, NULL, tWiFiAccessPointObj, tWiFiAccessPointParams, get_linker_Wifi_AccessPoint, BBFDM_BOTH, NULL},
 {"NeighboringWiFiDiagnostic", &DMREAD, NULL, NULL, "file:/etc/config/wireless", NULL, NULL, NULL, tWiFiNeighboringWiFiDiagnosticObj, tWiFiNeighboringWiFiDiagnosticParams, NULL, BBFDM_BOTH, NULL},
-{"EndPoint", &DMWRITE, addObjWiFiEndPoint, delObjWiFiEndPoint, "file:/etc/config/wireless", browseWiFiEndPointInst, NULL, NULL, tWiFiEndPointObj, tWiFiEndPointParams, NULL, BBFDM_BOTH, LIST_KEY{"SSIDReference", "Alias", NULL}},
+{"EndPoint", &DMWRITE, addObjWiFiEndPoint, delObjWiFiEndPoint, "file:/etc/config/wireless", browseWiFiEndPointInst, NULL, NULL, tWiFiEndPointObj, tWiFiEndPointParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -3616,11 +3632,11 @@ DMOBJ tWiFiRadioObj[] = {
 
 DMLEAF tWiFiRadioParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_radio_alias, set_radio_alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_radio_alias, set_radio_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Enable", &DMWRITE, DMT_BOOL, get_radio_enable, set_radio_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_radio_status, NULL, BBFDM_BOTH},
 {"LowerLayers", &DMWRITE, DMT_STRING, get_WiFiRadio_LowerLayers, set_WiFiRadio_LowerLayers, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_WiFiRadio_Name, NULL, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_WiFiRadio_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {"MaxBitRate", &DMREAD, DMT_UNINT, get_radio_max_bit_rate, NULL, BBFDM_BOTH},
 {"SupportedFrequencyBands", &DMREAD, DMT_STRING, get_radio_supported_frequency_bands, NULL, BBFDM_BOTH},
 {"OperatingFrequencyBand", &DMWRITE, DMT_STRING, get_radio_frequency, set_radio_frequency, BBFDM_BOTH},
@@ -3700,12 +3716,12 @@ DMOBJ tWiFiSSIDObj[] = {
 
 DMLEAF tWiFiSSIDParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_ssid_alias, set_ssid_alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ssid_alias, set_ssid_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Enable", &DMWRITE, DMT_BOOL, get_wifi_ssid_enable, set_wifi_ssid_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_wifi_status, NULL, BBFDM_BOTH},
-{"SSID", &DMWRITE, DMT_STRING, get_wlan_ssid, set_wlan_ssid, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING,  get_wlan_name, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_ssid_lower_layer, set_ssid_lower_layer, BBFDM_BOTH},
+{"SSID", &DMWRITE, DMT_STRING, get_wlan_ssid, set_wlan_ssid, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING,  get_wlan_name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_ssid_lower_layer, set_ssid_lower_layer, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"BSSID", &DMREAD, DMT_STRING, get_wlan_bssid, NULL, BBFDM_BOTH},
 {"MACAddress", &DMREAD, DMT_STRING, get_WiFiSSID_MACAddress, NULL, BBFDM_BOTH},
 {0}
@@ -3742,7 +3758,7 @@ DMLEAF tWiFiSSIDStatsParams[] = {
 DMOBJ tWiFiAccessPointObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiAccessPointSecurityParams, NULL, BBFDM_BOTH, NULL},
-{"AssociatedDevice", &DMREAD, NULL, NULL, NULL, browse_wifi_associated_device, NULL, NULL, tWiFiAccessPointAssociatedDeviceObj, tWiFiAccessPointAssociatedDeviceParams, get_linker_associated_device, BBFDM_BOTH, LIST_KEY{"MACAddress", NULL}},
+{"AssociatedDevice", &DMREAD, NULL, NULL, NULL, browse_wifi_associated_device, NULL, NULL, tWiFiAccessPointAssociatedDeviceObj, tWiFiAccessPointAssociatedDeviceParams, get_linker_associated_device, BBFDM_BOTH, NULL},
 {"WPS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiAccessPointWPSParams, NULL, BBFDM_BOTH, NULL},
 {"Accounting", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiAccessPointAccountingParams, NULL, BBFDM_BOTH, NULL},
 {0}
@@ -3750,10 +3766,10 @@ DMOBJ tWiFiAccessPointObj[] = {
 
 DMLEAF tWiFiAccessPointParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_access_point_alias, set_access_point_alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_access_point_alias, set_access_point_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Enable", &DMWRITE, DMT_BOOL,  get_access_point_enable, set_access_point_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_wifi_access_point_status, NULL, BBFDM_BOTH},
-{"SSIDReference", &DMWRITE, DMT_STRING, get_ap_ssid_ref, set_ap_ssid_ref, BBFDM_BOTH},
+{"SSIDReference", &DMWRITE, DMT_STRING, get_ap_ssid_ref, set_ap_ssid_ref, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 {"SSIDAdvertisementEnabled", &DMWRITE, DMT_BOOL, get_wlan_ap_advertisement_enable, set_wlan_ap_advertisement_enable, BBFDM_BOTH},
 {"WMMEnable", &DMWRITE, DMT_BOOL, get_wmm_enabled, set_wmm_enabled, BBFDM_BOTH},
 {"UAPSDEnable", &DMWRITE, DMT_BOOL, get_WiFiAccessPoint_UAPSDEnable, set_WiFiAccessPoint_UAPSDEnable, BBFDM_BOTH},
@@ -3809,7 +3825,7 @@ DMLEAF tWiFiAccessPointAssociatedDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Active", &DMREAD, DMT_BOOL, get_WiFiAccessPointAssociatedDevice_Active, NULL, BBFDM_BOTH},
 {"Noise", &DMREAD, DMT_INT, get_WiFiAccessPointAssociatedDevice_Noise, NULL, BBFDM_BOTH},
-{"MACAddress", &DMREAD, DMT_STRING, get_WiFiAccessPointAssociatedDevice_MACAddress, NULL, BBFDM_BOTH},
+{"MACAddress", &DMREAD, DMT_STRING, get_WiFiAccessPointAssociatedDevice_MACAddress, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"LastDataDownlinkRate", &DMREAD, DMT_UNINT, get_WiFiAccessPointAssociatedDevice_LastDataDownlinkRate, NULL, BBFDM_BOTH},
 {"LastDataUplinkRate", &DMREAD, DMT_UNINT, get_WiFiAccessPointAssociatedDevice_LastDataUplinkRate, NULL, BBFDM_BOTH},
 {"SignalStrength", &DMREAD, DMT_INT, get_WiFiAccessPointAssociatedDevice_SignalStrength, NULL, BBFDM_BOTH},
@@ -3852,7 +3868,7 @@ DMOBJ tWiFiEndPointObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiEndPointStatsParams, NULL, BBFDM_BOTH, NULL},
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiEndPointSecurityParams, NULL, BBFDM_BOTH, NULL},
-{"Profile", &DMREAD, NULL, NULL, NULL, browseWiFiEndPointProfileInst, NULL, NULL, tWiFiEndPointProfileObj, tWiFiEndPointProfileParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "SSID", "Location", "Priority", NULL}},
+{"Profile", &DMREAD, NULL, NULL, NULL, browseWiFiEndPointProfileInst, NULL, NULL, tWiFiEndPointProfileObj, tWiFiEndPointProfileParams, NULL, BBFDM_BOTH, NULL},
 {"WPS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiEndPointWPSParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
@@ -3861,9 +3877,9 @@ DMLEAF tWiFiEndPointParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_WiFiEndPoint_Enable, set_WiFiEndPoint_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_WiFiEndPoint_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_WiFiEndPoint_Alias, set_WiFiEndPoint_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_WiFiEndPoint_Alias, set_WiFiEndPoint_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"ProfileReference", &DMWRITE, DMT_STRING, get_WiFiEndPoint_ProfileReference, set_WiFiEndPoint_ProfileReference, BBFDM_BOTH},
-{"SSIDReference", &DMREAD, DMT_STRING, get_WiFiEndPoint_SSIDReference, NULL, BBFDM_BOTH},
+{"SSIDReference", &DMREAD, DMT_STRING, get_WiFiEndPoint_SSIDReference, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 //{"ProfileNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiEndPoint_ProfileNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
@@ -3896,10 +3912,10 @@ DMLEAF tWiFiEndPointProfileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_WiFiEndPointProfile_Enable, set_WiFiEndPointProfile_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_WiFiEndPointProfile_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_WiFiEndPointProfile_Alias, set_WiFiEndPointProfile_Alias, BBFDM_BOTH},
-{"SSID", &DMWRITE, DMT_STRING, get_WiFiEndPointProfile_SSID, set_WiFiEndPointProfile_SSID, BBFDM_BOTH},
-{"Location", &DMWRITE, DMT_STRING, get_WiFiEndPointProfile_Location, set_WiFiEndPointProfile_Location, BBFDM_BOTH},
-//{"Priority", &DMWRITE, DMT_UNINT, get_WiFiEndPointProfile_Priority, set_WiFiEndPointProfile_Priority, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_WiFiEndPointProfile_Alias, set_WiFiEndPointProfile_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"SSID", &DMWRITE, DMT_STRING, get_WiFiEndPointProfile_SSID, set_WiFiEndPointProfile_SSID, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Location", &DMWRITE, DMT_STRING, get_WiFiEndPointProfile_Location, set_WiFiEndPointProfile_Location, BBFDM_BOTH, DM_FLAG_UNIQUE},
+//{"Priority", &DMWRITE, DMT_UNINT, get_WiFiEndPointProfile_Priority, set_WiFiEndPointProfile_Priority, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {0}
 };
 

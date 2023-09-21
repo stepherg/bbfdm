@@ -469,30 +469,30 @@ static int set_http_access_type(char *refparam, struct dmctx *ctx, void *data, c
 static int get_http_access_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = NULL;
-	dmuci_get_value_by_section_string(((struct dmmap_http *)data)->config_section, "uci_interface", &linker);
-	if (DM_STRLEN(linker) != 0)
-		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
 
+	dmuci_get_value_by_section_string(((struct dmmap_http *)data)->config_section, "uci_interface", &linker);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
 static int set_http_access_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *linker = NULL;
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section(((struct dmmap_http *)data)->config_section, "uci_interface", linker ? linker : "");
+			dmuci_set_value_by_section(((struct dmmap_http *)data)->config_section, "uci_interface", reference.value);
 			break;
 	}
 	return 0;	
@@ -738,16 +738,16 @@ DMLEAF tUIParams[] = {
 
 DMOBJ tUIHTTPAccessObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"HTTPAccess", &DMWRITE, addHTTPAccess, delHTTPAccess, "file:/etc/config/nginx", browseHTTPAccess, NULL, NULL, tHTTPSessionObj, tHTTPAccessParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias","Port",NULL}},
+{"HTTPAccess", &DMWRITE, addHTTPAccess, delHTTPAccess, "file:/etc/config/nginx", browseHTTPAccess, NULL, NULL, tHTTPSessionObj, tHTTPAccessParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tHTTPAccessParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_http_access_enable, set_http_access_enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_http_access_alias, set_http_access_alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_http_access_alias, set_http_access_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"AccessType", &DMWRITE, DMT_STRING, get_http_access_type, set_http_access_type, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_http_access_interface, set_http_access_interface, BBFDM_BOTH},
-{"Port", &DMWRITE, DMT_UNINT, get_http_access_port, set_http_access_port, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_http_access_interface, set_http_access_interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
+{"Port", &DMWRITE, DMT_UNINT, get_http_access_port, set_http_access_port, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Protocol", &DMREAD, DMT_STRING, get_http_access_protocol, NULL, BBFDM_BOTH},
 {"AllowedHosts", &DMWRITE, DMT_STRING, get_http_access_hosts, set_http_access_hosts, BBFDM_BOTH},
 {"AllowedPathPrefixes", &DMWRITE, DMT_STRING, get_http_access_path, set_http_access_path, BBFDM_BOTH},

@@ -429,7 +429,7 @@ static int get_SecurityCertificate_SignatureAlgorithm(char *refparam, struct dmc
 /* *** Device.Security. *** */
 DMOBJ tSecurityObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Certificate", &DMREAD, NULL, NULL, NULL, browseSecurityCertificateInst, NULL, NULL, NULL, tSecurityCertificateParams, NULL, BBFDM_BOTH, LIST_KEY{"SerialNumber", "Issuer", NULL}},
+{"Certificate", &DMREAD, NULL, NULL, NULL, browseSecurityCertificateInst, NULL, NULL, NULL, tSecurityCertificateParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -444,8 +444,8 @@ DMLEAF tSecurityCertificateParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 //{"Enable", &DMWRITE, DMT_BOOL, get_SecurityCertificate_Enable, set_SecurityCertificate_Enable, BBFDM_BOTH},
 {"LastModif", &DMREAD, DMT_TIME, get_SecurityCertificate_LastModif, NULL, BBFDM_BOTH},
-{"SerialNumber", &DMREAD, DMT_STRING, get_SecurityCertificate_SerialNumber, NULL, BBFDM_BOTH},
-{"Issuer", &DMREAD, DMT_STRING, get_SecurityCertificate_Issuer, NULL, BBFDM_BOTH},
+{"SerialNumber", &DMREAD, DMT_STRING, get_SecurityCertificate_SerialNumber, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Issuer", &DMREAD, DMT_STRING, get_SecurityCertificate_Issuer, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"NotBefore", &DMREAD, DMT_TIME, get_SecurityCertificate_NotBefore, NULL, BBFDM_BOTH},
 {"NotAfter", &DMREAD, DMT_TIME, get_SecurityCertificate_NotAfter, NULL, BBFDM_BOTH},
 {"Subject", &DMREAD, DMT_STRING, get_SecurityCertificate_Subject, NULL, BBFDM_BOTH},

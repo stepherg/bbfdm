@@ -40,6 +40,8 @@ struct dm_permession_s DMWRITE = {"1", NULL};
 struct dm_permession_s DMSYNC = {"sync", NULL};
 struct dm_permession_s DMASYNC = {"async", NULL};
 
+bool is_micro_service = false;
+
 static bool is_instance_number_alias(char **str)
 {
 	char *s = *str;
@@ -840,15 +842,20 @@ static int is64digit(char c)
 	return 0;
 }
 
-static char *get_value_by_reference(struct dmctx *ctx, char *value, bool is_micro_service)
+static char *get_value_by_reference(struct dmctx *ctx, char *value)
 {
 	char *pch = NULL, *spch = NULL, *val = NULL;
 	char buf[MAX_DM_PATH * 4] = {0};
+	char buf_val[MAX_DM_PATH * 4] = {0};
+	bool path_resolved = false;
+	unsigned pos = 0;
 
-	if (DM_STRLEN(value) == 0)
+	if (DM_STRLEN(value) == 0 || !DM_STRSTR(value, "=="))
 		return value;
 
 	DM_STRNCPY(buf, value, sizeof(buf));
+
+	buf_val[0] = 0;
 
 	for (pch = strtok_r(buf, ",", &spch); pch; pch = strtok_r(NULL, ",", &spch)) {
 		char path[MAX_DM_PATH] = {0};
@@ -876,12 +883,19 @@ static char *get_value_by_reference(struct dmctx *ctx, char *value, bool is_micr
 
 		adm_entry_get_reference_param(ctx, path, key_value, &val);
 
-		if (DM_STRLEN(val))
-			return val;
+		if (DM_STRLEN(val)) {
+			path_resolved = true;
+			pos += snprintf(&buf_val[pos], sizeof(buf_val) - pos, "%s,", val);
+		}
+	}
+
+	if (path_resolved) {
+		buf_val[pos - 1] = 0;
+		return dmstrdup(buf_val);
 	}
 
 end:
-	return !is_micro_service ? value : "";
+	return is_micro_service ? value : "";
 }
 
 static char *check_value_by_type(char *value, int type)
@@ -1030,7 +1044,7 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 				const char *flag = json_object_get_string(flag_obj);
 
 				if (DM_STRCMP(flag, "Reference") == 0) {
-					data = get_value_by_reference(dmctx, data, true);
+					data = get_value_by_reference(dmctx, data);
 					dm_falgs |= DM_FLAG_REFERENCE;
 				} else if (DM_STRCMP(flag, "Unique") == 0) {
 					dm_falgs |= DM_FLAG_UNIQUE;
@@ -1340,7 +1354,7 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	if (is_reference_parameter(ubus_name, dmctx->in_param, in_args)) {
 		char *linker = NULL;
 
-		adm_entry_get_linker_value(dmctx, dmctx->in_value, &linker);
+		adm_entry_get_reference_value(dmctx, dmctx->in_value, &linker);
 
 		snprintf(param_value, sizeof(param_value), "%s=>%s", dmctx->in_value, linker ? linker : "");
 	} else {
@@ -1519,7 +1533,7 @@ static int get_value_param(DMPARAM_ARGS)
 
 		if (value && *value) {
 			if (leaf->dm_falgs & DM_FLAG_REFERENCE) {
-				value = get_value_by_reference(dmctx, value, false);
+				value = get_value_by_reference(dmctx, value);
 			} else
 				value = check_value_by_type(value, leaf->type);
 		} else {
@@ -1567,7 +1581,7 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 
 		if (value && *value) {
 			if (leaf->dm_falgs & DM_FLAG_REFERENCE) {
-				value = get_value_by_reference(dmctx, value, false);
+				value = get_value_by_reference(dmctx, value);
 			} else
 				value = check_value_by_type(value, leaf->type);
 		} else {
@@ -1828,8 +1842,22 @@ static int mobj_get_supported_dm(DMOBJECT_ARGS)
 		const char **unique_keys = NULL;
 
 		if (node->matched && dmctx->isinfo) {
-			if (node->obj)
-				unique_keys = node->obj->unique_keys;
+			if (node->obj) {
+				unique_keys = node->obj->unique_keys; // To be removed later!!!!!!!!!!!!
+				if (unique_keys == NULL) {
+					struct dm_leaf_s *leaf = node->obj->leaf;
+					unsigned int idx = 1;
+
+					for (; (leaf && leaf->parameter); leaf++) {
+						if (leaf->dm_falgs & DM_FLAG_UNIQUE) {
+							idx++;
+							unique_keys = dmrealloc(unique_keys, idx * sizeof(char *));
+							unique_keys[idx - 2] = dmstrdup(leaf->parameter);
+							unique_keys[idx - 1] = NULL;
+						}
+					}
+				}
+			}
 
 			add_list_parameter(dmctx, refparam, perm, "xsd:object", (char *)unique_keys);
 		}
@@ -2102,6 +2130,7 @@ static int mparam_set_value(DMPARAM_ARGS)
 			return FAULT_9005;
 
 		dmctx->stop = 1;
+		dmctx->setaction = VALUECHECK;
 
 		char *perm = leaf->permission->val;
 		if (leaf->permission->get_permission != NULL)
@@ -2131,14 +2160,22 @@ static int mparam_set_value(DMPARAM_ARGS)
 		if ((leaf->dm_falgs & DM_FLAG_REFERENCE) && !DM_STRSTR(dmctx->in_value, "=>")) {
 			char *linker = NULL;
 
-			adm_entry_get_linker_value(dmctx, dmctx->in_value, &linker);
+			adm_entry_get_reference_value(dmctx, dmctx->in_value, &linker);
 
 			snprintf(param_value, sizeof(param_value), "%s=>%s", dmctx->in_value, linker ? linker : "");
 		} else {
 			snprintf(param_value, sizeof(param_value), "%s", dmctx->in_value);
 		}
 
-		return (leaf->setvalue)(refparam, dmctx, data, instance, param_value, dmctx->setaction);
+		char *param_val = dmstrdup(param_value);
+
+		int fault = (leaf->setvalue)(refparam, dmctx, data, instance, param_value, dmctx->setaction);
+		if (fault)
+			return fault;
+
+		dmctx->setaction = VALUESET;
+
+		return (leaf->setvalue)(refparam, dmctx, data, instance, param_val, dmctx->setaction);
 	}
 }
 
@@ -2304,6 +2341,100 @@ int dm_entry_get_linker_value(struct dmctx *dmctx)
 
 	dmctx->method_obj = get_linker_value_check_obj;
 	dmctx->method_param = get_linker_value_check_param;
+	dmctx->checkobj = plugin_obj_match;
+	dmctx->checkleaf = plugin_leaf_match;
+	dmentry_instance_lookup_inparam(dmctx);
+
+	err = dm_browse(dmctx, &node, root, NULL, NULL);
+
+	return (dmctx->stop) ? err : FAULT_9005;
+}
+
+/******************
+ * get reference value
+ *****************/
+static int get_reference_value_check_obj(DMOBJECT_ARGS)
+{
+	if (DM_STRCMP(node->current_object, dmctx->in_param) == 0) {
+
+		if (!data || !instance)
+			return FAULT_9005;
+
+		struct dm_leaf_s *leaf = node->obj->leaf;
+		if (!leaf)
+			return FAULT_9005;
+
+		for (; (leaf && leaf->parameter); leaf++) {
+
+			if (leaf->dm_falgs & DM_FLAG_LINKER) {
+				char *full_param = NULL;
+				char *link_val = NULL;
+
+				dmastrcat(&full_param, node->current_object, leaf->parameter);
+
+				(leaf->getvalue)(full_param, dmctx, data, instance, &link_val);
+
+				dmctx->linker = link_val ? dmstrdup(link_val) : "";
+				dmctx->stop = true;
+				return 0;
+			}
+		}
+	}
+
+	return FAULT_9005;
+}
+
+static int get_reference_value_check_param(DMPARAM_ARGS)
+{
+	return FAULT_9005;
+}
+
+int dm_entry_get_reference_value(struct dmctx *dmctx)
+{
+	int err = 0;
+	DMOBJ *root = dmctx->dm_entryobj;
+	DMNODE node = { .current_object = "" };
+
+	dmctx->method_obj = get_reference_value_check_obj;
+	dmctx->method_param = get_reference_value_check_param;
+	dmctx->checkobj = plugin_obj_match;
+	dmctx->checkleaf = plugin_leaf_match;
+	dmentry_instance_lookup_inparam(dmctx);
+
+	err = dm_browse(dmctx, &node, root, NULL, NULL);
+
+	return (dmctx->stop) ? err : FAULT_9005;
+}
+
+/******************
+ * object exists
+ *****************/
+static int object_exists_check_obj(DMOBJECT_ARGS)
+{
+	if (!get_linker)
+		return FAULT_9005;
+
+	if (DM_STRCMP(node->current_object, dmctx->in_param) == 0) {
+		dmctx->match = true;
+		dmctx->stop = true;
+		return 0;
+	}
+	return FAULT_9005;
+}
+
+static int object_exists_check_param(DMPARAM_ARGS)
+{
+	return FAULT_9005;
+}
+
+int dm_entry_object_exists(struct dmctx *dmctx)
+{
+	int err = 0;
+	DMOBJ *root = dmctx->dm_entryobj;
+	DMNODE node = { .current_object = "" };
+
+	dmctx->method_obj = object_exists_check_obj;
+	dmctx->method_param = object_exists_check_param;
 	dmctx->checkobj = plugin_obj_match;
 	dmctx->checkleaf = plugin_leaf_match;
 	dmentry_instance_lookup_inparam(dmctx);

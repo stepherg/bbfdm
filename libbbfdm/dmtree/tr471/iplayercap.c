@@ -98,26 +98,29 @@ int get_IPDiagnosticsIPLayerCapacity_SupportedMetrics(char *refparam, struct dmc
 static int get_IPDiagnosticsIPLayerCapacity_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("iplayercapacity", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
 static int set_IPDiagnosticsIPLayerCapacity_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_interface_option(ctx, "iplayercapacity", value);
+			set_diagnostics_option("iplayercapacity", "interface", reference.value);
 			return 0;
 	}
 	return 0;

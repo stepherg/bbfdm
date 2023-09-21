@@ -46,7 +46,6 @@ char *get_diagnostics_option_fallback_def(char *sec_name, char *option, char *de
 void set_diagnostics_option(char *sec_name, char *option, char *value);
 void reset_diagnostic_state(char *sec_name);
 char *get_diagnostics_interface_option(struct dmctx *ctx, char *value);
-void set_diagnostics_interface_option(struct dmctx *ctx, char *sec_name, char *value);
 int bbf_upload_log(const char *url, const char *username, const char *password,
 		char *config_name, const char *command, const char *obj_path);
 int bbf_config_backup(const char *url, const char *username, const char *password,

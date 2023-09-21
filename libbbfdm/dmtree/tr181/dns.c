@@ -341,7 +341,7 @@ static int get_dns_interface(char *refparam, struct dmctx *ctx, void *data, char
 	char *linker = NULL;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &linker);
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
@@ -428,7 +428,7 @@ static int get_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 static int get_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("nslookup", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
@@ -608,17 +608,18 @@ static int set_dns_server(char *refparam, struct dmctx *ctx, void *data, char *i
 static int set_dns_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
 	char *interface = NULL, *enable = NULL;
-	char *peerdns = NULL;
-	char *linker = NULL;
-	char *oip = NULL;
+	char *peerdns = NULL, *oip = NULL;
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			// If peerdns = '1' then it is a dynamic dns and not allowed to set this parameter
@@ -628,28 +629,26 @@ static int set_dns_interface(char *refparam, struct dmctx *ctx, void *data, char
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-
 			dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &interface);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "ip", &oip);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "enable", &enable);
 
-			if (!linker || linker[0] == 0) {
+			if (DM_STRLEN(reference.value) == 0) {
 				dmuci_del_list_value("network", interface, "dns", oip);
 				dmuci_set_value_by_section((struct uci_section *)data, "interface", "");
 				return 0;
 			}
 
-			if (DM_STRCMP(interface, linker) == 0)
+			if (DM_STRCMP(interface, reference.value) == 0)
 				return 0;
 
 			if (DM_STRLEN(interface))
 				dmuci_del_list_value("network", interface, "dns", oip);
 
 			if (DM_LSTRCMP(enable, "1") == 0)
-				dmuci_add_list_value("network", linker, "dns", oip);
+				dmuci_add_list_value("network", reference.value, "dns", oip);
 
-			dmuci_set_value_by_section((struct uci_section *)data, "interface", linker);
+			dmuci_set_value_by_section((struct uci_section *)data, "interface", reference.value);
 			break;
 	}
 	return 0;
@@ -703,19 +702,22 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 static int set_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("nslookup");
-			set_diagnostics_interface_option(ctx, "nslookup", value);
+			set_diagnostics_option("nslookup", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -908,7 +910,7 @@ DMLEAF tDNSParams[] = {
 /* *** Device.DNS.Client. *** */
 DMOBJ tDNSClientObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Server", &DMWRITE, add_dns_server, delete_dns_server, NULL, browseDNSServerInst, NULL, NULL, NULL, tDNSClientServerParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}},
+{"Server", &DMWRITE, add_dns_server, delete_dns_server, NULL, browseDNSServerInst, NULL, NULL, NULL, tDNSClientServerParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -925,9 +927,9 @@ DMLEAF tDNSClientServerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_server_enable, set_dns_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_server_status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_server_alias, set_server_alias, BBFDM_BOTH},
-{"DNSServer", &DMWRITE, DMT_STRING, get_server_dns_server, set_dns_server, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_dns_interface, set_dns_interface, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_server_alias, set_server_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"DNSServer", &DMWRITE, DMT_STRING, get_server_dns_server, set_dns_server, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Interface", &DMWRITE, DMT_STRING, get_dns_interface, set_dns_interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"Type", &DMREAD, DMT_STRING, get_dns_type, NULL, BBFDM_BOTH},
 {0}
 };
@@ -935,7 +937,7 @@ DMLEAF tDNSClientServerParams[] = {
 /* *** Device.DNS.Relay. *** */
 DMOBJ tDNSRelayObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Forwarding", &DMWRITE, add_dns_server, delete_dns_server, NULL, browseDNSServerInst, NULL, NULL, NULL, tDNSRelayForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"DNSServer", "Alias", NULL}},
+{"Forwarding", &DMWRITE, add_dns_server, delete_dns_server, NULL, browseDNSServerInst, NULL, NULL, NULL, tDNSRelayForwardingParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -952,9 +954,9 @@ DMLEAF tDNSRelayForwardingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_forwarding_enable, set_dns_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_forwarding_status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_forwarding_alias, set_forwarding_alias, BBFDM_BOTH},
-{"DNSServer", &DMWRITE, DMT_STRING, get_forwarding_dns_server, set_dns_server, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_dns_interface, set_dns_interface, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_forwarding_alias, set_forwarding_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"DNSServer", &DMWRITE, DMT_STRING, get_forwarding_dns_server, set_dns_server, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Interface", &DMWRITE, DMT_STRING, get_dns_interface, set_dns_interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"Type", &DMREAD, DMT_STRING, get_dns_type, NULL, BBFDM_BOTH},
 {0}
 };
@@ -982,7 +984,7 @@ DMOBJ tDNSDiagnosticsNSLookupDiagnosticsObj[] = {
 DMLEAF tDNSDiagnosticsNSLookupDiagnosticsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"DiagnosticsState", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_diagnostics_state, set_nslookupdiagnostics_diagnostics_state, BBFDM_CWMP},
-{"Interface", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_interface, set_nslookupdiagnostics_interface, BBFDM_CWMP},
+{"Interface", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_interface, set_nslookupdiagnostics_interface, BBFDM_CWMP, DM_FLAG_REFERENCE},
 {"HostName", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_host_name, set_nslookupdiagnostics_host_name, BBFDM_CWMP},
 {"DNSServer", &DMWRITE, DMT_STRING, get_nslookupdiagnostics_d_n_s_server, set_nslookupdiagnostics_d_n_s_server, BBFDM_CWMP},
 {"Timeout", &DMWRITE, DMT_UNINT, get_nslookupdiagnostics_timeout, set_nslookupdiagnostics_timeout, BBFDM_CWMP},

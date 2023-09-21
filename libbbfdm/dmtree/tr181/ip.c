@@ -313,7 +313,7 @@ static struct uci_section *update_dmmap_network_interface(char *dmmap_file_name,
 		dmuci_set_value_by_section_bbfdm(dmmap_section, "parent_section", parent_section);
 		dmuci_set_value_by_section_bbfdm(dmmap_section, "section_name", section_name);
 		dmuci_set_value_by_section_bbfdm(dmmap_section, option, value);
-		if (assign) dmuci_set_value_by_section_bbfdm(dmmap_section, "assign", "1");
+		dmuci_set_value_by_section_bbfdm(dmmap_section, "assign", assign ? "1" : "0");
 	}
 
 	return dmmap_section;
@@ -831,9 +831,21 @@ static int browseIPInterfaceIPv6PrefixInst(struct dmctx *dmctx, DMNODE *parent_n
 
 		} else {
 
+			dmjson_foreach_obj_in_array(res, arrobj, ipv6_prefix_obj, i, 1, "ipv6-prefix") {
+				char *address = dmjson_get_value(ipv6_prefix_obj, 1, "address");
+				char *mask = dmjson_get_value(ipv6_prefix_obj, 1, "mask");
+				if (*address == '\0' || *mask == '\0')
+					continue;
+
+				snprintf(ipv6_prefix, sizeof(ipv6_prefix), "%s/%s", address, mask);
+
+				if (DM_STRCMP(ipv6_prefix, ip6prefix) == 0)
+					break;
+			}
+
 			dmmap_s = update_dmmap_network_interface("dmmap_network_ipv6_prefix","intf_ipv6_prefix", section_name(parent_sec), section_name(intf_s), "address", ip6prefix, false);
 
-			init_interface_ip_args(&curr_intf_ip_args, intf_s, dmmap_s, NULL, !strcmp(section_name(parent_sec), section_name(intf_s)));
+			init_interface_ip_args(&curr_intf_ip_args, intf_s, dmmap_s, ipv6_prefix_obj, !strcmp(section_name(parent_sec), section_name(intf_s)));
 
 			inst = handle_instance(dmctx, parent_node, dmmap_s, "ipv6_prefix_instance", "ipv6_prefix_alias");
 
@@ -1253,27 +1265,15 @@ static int get_IPInterface_Alias(char *refparam, struct dmctx *ctx, void *data, 
 	struct uci_section *dmmap_section = NULL;
 
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
-	dmuci_get_value_by_section_string(dmmap_section, "ip_int_alias", value);
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
+	return bbf_get_alias(ctx, dmmap_section, "ip_int_alias", instance, value);
 }
 
 static int set_IPInterface_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *dmmap_section = NULL;
 
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
-			dmuci_set_value_by_section(dmmap_section, "ip_int_alias", value);
-			break;
-	}
-	return 0;
+	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
+	return bbf_set_alias(ctx, dmmap_section, "ip_int_alias", instance, value);
 }
 
 static int get_IPInterface_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1309,26 +1309,28 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 				return 0;
 		}
 
-		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", device, value);
-		if (*value != NULL && (*value)[0] != 0)
-			return 0;
+		adm_entry_get_reference_param(ctx, "Device.PPP.Interface.*.Name", device, value);
+		if (DM_STRLEN(*value))
+			goto end;
 
-		adm_entry_get_linker_param(ctx, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN", device, value);
-		if (*value != NULL && (*value)[0] != 0)
-			return 0;
+		adm_entry_get_reference_param(ctx, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN.*.Name", device, value);
+		if (DM_STRLEN(*value))
+			goto end;
 
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", device, value);
-		if (*value != NULL && (*value)[0] != 0)
-			return 0;
+		adm_entry_get_reference_param(ctx, "Device.Ethernet.VLANTermination.*.Name", device, value);
+		if (DM_STRLEN(*value))
+			goto end;
 
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", device, value);
+		adm_entry_get_reference_param(ctx, "Device.Ethernet.Link.*.Name", device, value);
+
+end:
+		// Store LowerLayers value
+		dmuci_set_value_by_section(dmmap_section, "LowerLayers", *value);
 	} else {
-		char *linker = NULL;
-
-		adm_entry_get_linker_value(ctx, *value, &linker);
-		if (!linker || *linker == 0)
+		if (!adm_entry_object_exists(ctx, *value))
 			*value = "";
 	}
+
 	return 0;
 }
 
@@ -1342,26 +1344,26 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 			"Device.Ethernet.VLANTermination.",
 			"Device.Ethernet.Link.",
 			NULL};
-	char *linker = NULL;
 	char *curr_device = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, reference.path, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-
 			// Store LowerLayers value under dmmap_network section
 			get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
-			dmuci_set_value_by_section(dmmap_section, "LowerLayers", value);
+			dmuci_set_value_by_section(dmmap_section, "LowerLayers", reference.path);
 
-			if (DM_STRLEN(linker) == 0) {
+			if (DM_STRLEN(reference.value) == 0) {
 				char *curr_proto = NULL;
 
 				// Update device option
@@ -1381,10 +1383,10 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 			}
 
 			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &curr_device);
-			update_child_interfaces(curr_device, "device", linker);
+			update_child_interfaces(curr_device, "device", reference.value);
 
-			if (DM_STRNCMP(value, "Device.PPP.Interface.", strlen("Device.PPP.Interface.")) == 0) {
-				struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "device", linker);
+			if (DM_STRNCMP(reference.path, "Device.PPP.Interface.", strlen("Device.PPP.Interface.")) == 0) {
+				struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "device", reference.value);
 				dmuci_set_value_by_section_bbfdm(ppp_s, "iface_name", section_name((struct uci_section *)data));
 				ppp___update_sections(ppp_s, (struct uci_section *)data);
 			}
@@ -1404,49 +1406,50 @@ static int get_IPInterface_Router(char *refparam, struct dmctx *ctx, void *data,
 		char *ip4table = NULL;
 
 		dmuci_get_value_by_section_string((struct uci_section *)data, "ip4table", &ip4table);
-		adm_entry_get_linker_param(ctx, "Device.Routing.Router.", DM_STRLEN(ip4table) ? ip4table : "254", value);
-	} else {
-		char *linker = NULL;
 
-		adm_entry_get_linker_value(ctx, *value, &linker);
-		if (!linker || *linker == 0)
-			*value = "Device.Routing.Router.1";
+		adm_entry_get_reference_param(ctx, "Device.Routing.Router.*.Alias", DM_STRLEN(ip4table) ? ip4table : "254", value);
+
+		// Store LowerLayers value
+		dmuci_set_value_by_section(dmmap_section, "Router", *value);
 	}
+
 	return 0;
 }
 
 static int set_IPInterface_Router(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.Routing.Router.", NULL};
+	struct dm_reference reference = {0};
 	struct uci_section *s = NULL;
-	char *rt_table = NULL;
 	char *device = NULL;
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &rt_table);
-			if (!rt_table || *rt_table == 0)
+			if (DM_STRLEN(reference.value) == 0)
 				return FAULT_9007;
 
+			// Store LowerLayers value
 			get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &s);
-			dmuci_set_value_by_section(s, "Router", value);
+			dmuci_set_value_by_section(s, "Router", reference.path);
 
-			dmuci_set_value_by_section((struct uci_section *)data, "ip4table", rt_table);
-			dmuci_set_value_by_section((struct uci_section *)data, "ip6table", rt_table);
+			dmuci_set_value_by_section((struct uci_section *)data, "ip4table", reference.value);
+			dmuci_set_value_by_section((struct uci_section *)data, "ip6table", reference.value);
 
 			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
 
 			uci_foreach_option_eq("network", "interface", "device", device, s) {
-				dmuci_set_value_by_section(s, "ip4table", rt_table);
-				dmuci_set_value_by_section(s, "ip6table", rt_table);
+				dmuci_set_value_by_section(s, "ip4table", reference.value);
+				dmuci_set_value_by_section(s, "ip6table", reference.value);
 			}
 			break;
 	}
@@ -2045,10 +2048,15 @@ static int get_IPInterfaceIPv6Prefix_Origin(char *refparam, struct dmctx *ctx, v
 
 static int get_IPInterfaceIPv6Prefix_ParentPrefix(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = NULL;
+	char *assign = NULL;
 
-	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "address", &linker);
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "assign", &assign);
+	if (DM_LSTRCMP(assign, "1") == 0) {
+		char *linker = NULL;
+
+		dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "address", &linker);
+		adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.IPv6Prefix.*.ChildPrefixBits", linker, value);
+	}
 	return 0;
 }
 
@@ -2216,7 +2224,7 @@ static int operate_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *da
 /* *** Device.IP. *** */
 DMOBJ tIPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Interface", &DMWRITE, addObjIPInterface, delObjIPInterface, NULL, browseIPInterfaceInst, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}},
+{"Interface", &DMWRITE, addObjIPInterface, delObjIPInterface, NULL, browseIPInterfaceInst, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, get_linker_ip_interface, BBFDM_BOTH, NULL},
 #if defined(BBF_TR143) || defined(BBF_TR471)
 {"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsObj, tIPDiagnosticsParams, NULL, BBFDM_BOTH, NULL},
 #endif
@@ -2239,9 +2247,9 @@ DMLEAF tIPParams[] = {
 /* *** Device.IP.Interface.{i}. *** */
 DMOBJ tIPInterfaceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"IPv4Address", &DMWRITE, addObjIPInterfaceIPv4Address, delObjIPInterfaceIPv4Address, NULL, browseIPInterfaceIPv4AddressInst, NULL, NULL, NULL, tIPInterfaceIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", "SubnetMask", NULL}},
-{"IPv6Address", &DMWRITE, addObjIPInterfaceIPv6Address, delObjIPInterfaceIPv6Address, NULL, browseIPInterfaceIPv6AddressInst, NULL, NULL, NULL, tIPInterfaceIPv6AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "IPAddress", NULL}},
-{"IPv6Prefix", &DMWRITE, addObjIPInterfaceIPv6Prefix, delObjIPInterfaceIPv6Prefix, NULL, browseIPInterfaceIPv6PrefixInst, NULL, NULL, NULL, tIPInterfaceIPv6PrefixParams, get_linker_ipv6_prefix, BBFDM_BOTH, LIST_KEY{"Alias", "Prefix", NULL}},
+{"IPv4Address", &DMWRITE, addObjIPInterfaceIPv4Address, delObjIPInterfaceIPv4Address, NULL, browseIPInterfaceIPv4AddressInst, NULL, NULL, NULL, tIPInterfaceIPv4AddressParams, NULL, BBFDM_BOTH, NULL},
+{"IPv6Address", &DMWRITE, addObjIPInterfaceIPv6Address, delObjIPInterfaceIPv6Address, NULL, browseIPInterfaceIPv6AddressInst, NULL, NULL, NULL, tIPInterfaceIPv6AddressParams, NULL, BBFDM_BOTH, NULL},
+{"IPv6Prefix", &DMWRITE, addObjIPInterfaceIPv6Prefix, delObjIPInterfaceIPv6Prefix, NULL, browseIPInterfaceIPv6PrefixInst, NULL, NULL, NULL, tIPInterfaceIPv6PrefixParams, get_linker_ipv6_prefix, BBFDM_BOTH, NULL},
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
@@ -2253,11 +2261,11 @@ DMLEAF tIPInterfaceParams[] = {
 {"IPv6Enable", &DMWRITE, DMT_BOOL, get_IPInterface_IPv6Enable, set_IPInterface_IPv6Enable, BBFDM_BOTH},
 {"ULAEnable", &DMWRITE, DMT_BOOL, get_IPInterface_ULAEnable, set_IPInterface_ULAEnable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_IPInterface_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterface_Alias, set_IPInterface_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_IPInterface_Name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterface_Alias, set_IPInterface_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_IPInterface_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {"LastChange", &DMREAD, DMT_UNINT, get_IPInterface_LastChange, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_IPInterface_LowerLayers, set_IPInterface_LowerLayers, BBFDM_BOTH},
-{"Router", &DMWRITE, DMT_STRING, get_IPInterface_Router, set_IPInterface_Router, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_IPInterface_LowerLayers, set_IPInterface_LowerLayers, BBFDM_BOTH, DM_FLAG_REFERENCE},
+{"Router", &DMWRITE, DMT_STRING, get_IPInterface_Router, set_IPInterface_Router, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"Reset", &DMWRITE, DMT_BOOL, get_IPInterface_Reset, set_IPInterface_Reset, BBFDM_CWMP},
 {"MaxMTUSize", &DMWRITE, DMT_UNINT, get_IPInterface_MaxMTUSize, set_IPInterface_MaxMTUSize, BBFDM_BOTH},
 {"Type", &DMREAD, DMT_STRING, get_IPInterface_Type, NULL, BBFDM_BOTH},
@@ -2275,9 +2283,9 @@ DMLEAF tIPInterfaceIPv4AddressParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv4Address_Enable, set_IPInterfaceIPv4Address_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv4Address_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_Alias, set_IPInterfaceIPv4Address_Alias, BBFDM_BOTH},
-{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_IPAddress, set_IPInterfaceIPv4Address_IPAddress, BBFDM_BOTH},
-{"SubnetMask", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_SubnetMask, set_IPInterfaceIPv4Address_SubnetMask, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_Alias, set_IPInterfaceIPv4Address_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_IPAddress, set_IPInterfaceIPv4Address_IPAddress, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"SubnetMask", &DMWRITE, DMT_STRING, get_IPInterfaceIPv4Address_SubnetMask, set_IPInterfaceIPv4Address_SubnetMask, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"AddressingType", &DMREAD, DMT_STRING, get_IPInterfaceIPv4Address_AddressingType, NULL, BBFDM_BOTH},
 {0}
 };
@@ -2288,8 +2296,8 @@ DMLEAF tIPInterfaceIPv6AddressParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Address_Enable, set_IPInterfaceIPv6Address_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_Status, NULL, BBFDM_BOTH},
 {"IPAddressStatus", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_IPAddressStatus, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_Alias, set_IPInterfaceIPv6Address_Alias, BBFDM_BOTH},
-{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_IPAddress, set_IPInterfaceIPv6Address_IPAddress, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_Alias, set_IPInterfaceIPv6Address_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"IPAddress", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_IPAddress, set_IPInterfaceIPv6Address_IPAddress, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Origin", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Address_Origin, NULL, BBFDM_BOTH},
 {"Prefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Address_Prefix, set_IPInterfaceIPv6Address_Prefix, BBFDM_BOTH},
 {"PreferredLifetime", &DMWRITE, DMT_TIME, get_IPInterfaceIPv6Address_PreferredLifetime, set_IPInterfaceIPv6Address_PreferredLifetime, BBFDM_BOTH},
@@ -2304,11 +2312,11 @@ DMLEAF tIPInterfaceIPv6PrefixParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_Enable, set_IPInterfaceIPv6Prefix_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_Status, NULL, BBFDM_BOTH},
 {"PrefixStatus", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_PrefixStatus, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Alias, set_IPInterfaceIPv6Prefix_Alias, BBFDM_BOTH},
-{"Prefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Prefix, set_IPInterfaceIPv6Prefix_Prefix, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Alias, set_IPInterfaceIPv6Prefix_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Prefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_Prefix, set_IPInterfaceIPv6Prefix_Prefix, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Origin", &DMREAD, DMT_STRING, get_IPInterfaceIPv6Prefix_Origin, NULL, BBFDM_BOTH},
 //{"StaticType", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_StaticType, set_IPInterfaceIPv6Prefix_StaticType, BBFDM_BOTH},
-{"ParentPrefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_ParentPrefix, set_IPInterfaceIPv6Prefix_ParentPrefix, BBFDM_BOTH},
+{"ParentPrefix", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_ParentPrefix, set_IPInterfaceIPv6Prefix_ParentPrefix, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"ChildPrefixBits", &DMWRITE, DMT_STRING, get_IPInterfaceIPv6Prefix_ChildPrefixBits, set_IPInterfaceIPv6Prefix_ChildPrefixBits, BBFDM_BOTH},
 //{"OnLink", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_OnLink, set_IPInterfaceIPv6Prefix_OnLink, BBFDM_BOTH},
 //{"Autonomous", &DMWRITE, DMT_BOOL, get_IPInterfaceIPv6Prefix_Autonomous, set_IPInterfaceIPv6Prefix_Autonomous, BBFDM_BOTH},

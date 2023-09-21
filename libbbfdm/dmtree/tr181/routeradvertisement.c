@@ -281,27 +281,28 @@ static int get_RouterAdvertisementInterfaceSetting_Interface(char *refparam, str
 	char *linker = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &linker);
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
 static int set_RouterAdvertisementInterfaceSetting_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", linker ? linker : "");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", reference.value);
 			break;
 	}
 	return 0;
@@ -686,7 +687,7 @@ static int set_RouterAdvertisementInterfaceSettingOption_Value(char *refparam, s
 /* *** Device.RouterAdvertisement. *** */
 DMOBJ tRouterAdvertisementObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"InterfaceSetting", &DMWRITE, addObjRouterAdvertisementInterfaceSetting, delObjRouterAdvertisementInterfaceSetting, NULL, browseRouterAdvertisementInterfaceSettingInst, NULL, NULL, tRouterAdvertisementInterfaceSettingObj, tRouterAdvertisementInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Interface", NULL}},
+{"InterfaceSetting", &DMWRITE, addObjRouterAdvertisementInterfaceSetting, delObjRouterAdvertisementInterfaceSetting, NULL, browseRouterAdvertisementInterfaceSettingInst, NULL, NULL, tRouterAdvertisementInterfaceSettingObj, tRouterAdvertisementInterfaceSettingParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -700,7 +701,7 @@ DMLEAF tRouterAdvertisementParams[] = {
 /* *** Device.RouterAdvertisement.InterfaceSetting.{i}. *** */
 DMOBJ tRouterAdvertisementInterfaceSettingObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Option", &DMWRITE, addObjRouterAdvertisementInterfaceSettingOption, delObjRouterAdvertisementInterfaceSettingOption, NULL, browseRouterAdvertisementInterfaceSettingOptionInst, NULL, NULL, NULL, tRouterAdvertisementInterfaceSettingOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Tag", NULL}},
+{"Option", &DMWRITE, addObjRouterAdvertisementInterfaceSettingOption, delObjRouterAdvertisementInterfaceSettingOption, NULL, browseRouterAdvertisementInterfaceSettingOptionInst, NULL, NULL, NULL, tRouterAdvertisementInterfaceSettingOptionParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -708,8 +709,8 @@ DMLEAF tRouterAdvertisementInterfaceSettingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSetting_Enable, set_RouterAdvertisementInterfaceSetting_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Alias, set_RouterAdvertisementInterfaceSetting_Alias, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Interface, set_RouterAdvertisementInterfaceSetting_Interface, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Alias, set_RouterAdvertisementInterfaceSetting_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Interface", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Interface, set_RouterAdvertisementInterfaceSetting_Interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 //{"ManualPrefixes", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSetting_ManualPrefixes, set_RouterAdvertisementInterfaceSetting_ManualPrefixes, BBFDM_BOTH},
 {"Prefixes", &DMREAD, DMT_STRING, get_RouterAdvertisementInterfaceSetting_Prefixes, NULL, BBFDM_BOTH},
 {"MaxRtrAdvInterval", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSetting_MaxRtrAdvInterval, set_RouterAdvertisementInterfaceSetting_MaxRtrAdvInterval, BBFDM_BOTH},
@@ -732,8 +733,8 @@ DMLEAF tRouterAdvertisementInterfaceSettingParams[] = {
 DMLEAF tRouterAdvertisementInterfaceSettingOptionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_RouterAdvertisementInterfaceSettingOption_Enable, set_RouterAdvertisementInterfaceSettingOption_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSettingOption_Alias, set_RouterAdvertisementInterfaceSettingOption_Alias, BBFDM_BOTH},
-{"Tag", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSettingOption_Tag, set_RouterAdvertisementInterfaceSettingOption_Tag, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_RouterAdvertisementInterfaceSettingOption_Alias, set_RouterAdvertisementInterfaceSettingOption_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Tag", &DMWRITE, DMT_UNINT, get_RouterAdvertisementInterfaceSettingOption_Tag, set_RouterAdvertisementInterfaceSettingOption_Tag, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Value", &DMWRITE, DMT_HEXBIN, get_RouterAdvertisementInterfaceSettingOption_Value, set_RouterAdvertisementInterfaceSettingOption_Value, BBFDM_BOTH},
 {0}
 };

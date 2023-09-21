@@ -53,45 +53,6 @@ struct upnp_description_file_info {
 	struct uci_section *dmmap_sect;
 };
 
-/**************************************************************************
-* LINKER
-***************************************************************************/
-static int get_root_device_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	if (data && ((struct upnpdiscovery *)data)->uuid)
-		dmasprintf(linker, "%s", ((struct upnpdiscovery *)data)->uuid);
-	else
-		*linker = "" ;
-	return 0;
-}
-
-static int get_device_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	if (data && ((struct upnpdiscovery *)data)->uuid)
-		dmasprintf(linker, "%s", ((struct upnpdiscovery *)data)->uuid);
-	else
-		*linker = "" ;
-	return 0;
-}
-
-static int get_device_instance_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	if (data && ((struct upnp_device_inst *)data)->udn)
-		dmasprintf(linker, "%s", ((struct upnp_device_inst *)data)->udn);
-	else
-		*linker = "" ;
-	return 0;
-}
-
-static int get_service_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	if (data && ((struct upnpdiscovery *)data)->usn)
-		dmasprintf(linker, "%s", ((struct upnpdiscovery *)data)->usn);
-	else
-		*linker = "" ;
-	return 0;
-}
-
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -514,9 +475,11 @@ static int get_UPnPDiscoveryService_Location(char *refparam, struct dmctx *ctx, 
 
 static int get_UPnPDiscoveryService_ParentDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.Device.", ((struct upnpdiscovery *)data)->uuid, value);
-	if (!(*value) || (*value)[0] == 0)
-		adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.RootDevice.", ((struct upnpdiscovery *)data)->uuid, value);
+	adm_entry_get_reference_param(ctx, "Device.UPnP.Discovery.Device.*.UUID", ((struct upnpdiscovery *)data)->uuid, value);
+
+	if (!DM_STRLEN(*value))
+		adm_entry_get_reference_param(ctx, "Device.UPnP.Discovery.RootDevice.*.UUID", ((struct upnpdiscovery *)data)->uuid, value);
+
 	return 0;
 }
 
@@ -557,7 +520,7 @@ static int get_UPnPDescriptionDeviceInstance_UDN(char *refparam, struct dmctx *c
 
 static int get_UPnPDescriptionDeviceInstance_ParentDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_linker_param(ctx, "Device.UPnP.Description.DeviceInstance.", ((struct upnp_device_inst *)data)->parentudn, value);
+	adm_entry_get_reference_param(ctx, "Device.UPnP.Description.DeviceInstance.*.UDN", ((struct upnp_device_inst *)data)->parentudn, value);
 	return 0;
 }
 
@@ -566,13 +529,17 @@ static int get_UPnPDescriptionDeviceInstance_DiscoveryDevice(char *refparam, str
 	struct upnp_device_inst *upnpdevinst = (struct upnp_device_inst *)data;
 
 	if (upnpdevinst->udn && upnpdevinst->udn[0]) {
-		char **udnarray = NULL;
 		size_t length = 0;
 
-		udnarray = strsplit(upnpdevinst->udn, ":", &length);
-		adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.Device.", udnarray[1], value);
-		if (!(*value) || (*value)[0] == 0)
-			adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.RootDevice.", udnarray[1], value);
+		char **udnarray = strsplit(upnpdevinst->udn, ":", &length);
+
+		if (length != 2)
+			return 0;
+
+		adm_entry_get_reference_param(ctx, "Device.UPnP.Discovery.Device.*.UUID", udnarray[1], value);
+
+		if (!DM_STRLEN(*value))
+			adm_entry_get_reference_param(ctx, "Device.UPnP.Discovery.RootDevice.*.UUID", udnarray[1], value);
 	}
 
 	return 0;
@@ -657,7 +624,7 @@ static int get_UPnPDescriptionDeviceInstance_PresentationURL(char *refparam, str
 
 static int get_UPnPDescriptionServiceInstance_ParentDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_linker_param(ctx, "Device.UPnP.Description.DeviceInstance.", ((struct upnp_service_inst *)data)->parentudn, value);
+	adm_entry_get_reference_param(ctx, "Device.UPnP.Description.DeviceInstance.*.UDN", ((struct upnp_service_inst *)data)->parentudn, value);
 	return 0;
 }
 
@@ -673,7 +640,8 @@ static int get_UPnPDescriptionServiceInstance_ServiceDiscovery(char *refparam, s
 	char usn[512] = {0};
 
 	snprintf(usn, sizeof(usn), "%s::%s", ((struct upnp_service_inst *)data)->parentudn, ((struct upnp_service_inst *)data)->servicetype);
-	adm_entry_get_linker_param(ctx, "Device.UPnP.Discovery.Service.", usn, value);
+
+	adm_entry_get_reference_param(ctx, "Device.UPnP.Discovery.Service.*.USN", usn, value);
 	return 0;
 }
 
@@ -751,9 +719,9 @@ DMLEAF tUPnPDeviceCapabilitiesParams[] = {
 /* *** Device.UPnP.Discovery. *** */
 DMOBJ tUPnPDiscoveryObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"RootDevice", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryRootDeviceInst, NULL, NULL, NULL, tUPnPDiscoveryRootDeviceParams, get_root_device_linker, BBFDM_BOTH, LIST_KEY{"UUID", NULL}},
-{"Device", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryDeviceInst, NULL, NULL, NULL, tUPnPDiscoveryDeviceParams, get_device_linker, BBFDM_BOTH, LIST_KEY{"UUID", NULL}},
-{"Service", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryServiceInst, NULL, NULL, NULL, tUPnPDiscoveryServiceParams, get_service_linker, BBFDM_BOTH, LIST_KEY{"USN", NULL}},
+{"RootDevice", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryRootDeviceInst, NULL, NULL, NULL, tUPnPDiscoveryRootDeviceParams, NULL, BBFDM_BOTH, NULL},
+{"Device", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryDeviceInst, NULL, NULL, NULL, tUPnPDiscoveryDeviceParams, NULL, BBFDM_BOTH, NULL},
+{"Service", &DMREAD, NULL, NULL, NULL, browseUPnPDiscoveryServiceInst, NULL, NULL, NULL, tUPnPDiscoveryServiceParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -769,7 +737,7 @@ DMLEAF tUPnPDiscoveryParams[] = {
 DMLEAF tUPnPDiscoveryRootDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 //{"Status", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_Status, NULL, BBFDM_BOTH},
-{"UUID", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_UUID, NULL, BBFDM_BOTH},
+{"UUID", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_UUID, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"USN", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_USN, NULL, BBFDM_BOTH},
 //{"LeaseTime", &DMREAD, DMT_UNINT, get_UPnPDiscoveryRootDevice_LeaseTime, NULL, BBFDM_BOTH},
 {"Location", &DMREAD, DMT_STRING, get_UPnPDiscoveryRootDevice_Location, NULL, BBFDM_BOTH},
@@ -783,7 +751,7 @@ DMLEAF tUPnPDiscoveryRootDeviceParams[] = {
 DMLEAF tUPnPDiscoveryDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 //{"Status", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_Status, NULL, BBFDM_BOTH},
-{"UUID", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_UUID, NULL, BBFDM_BOTH},
+{"UUID", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_UUID, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"USN", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_USN, NULL, BBFDM_BOTH},
 //{"LeaseTime", &DMREAD, DMT_UNINT, get_UPnPDiscoveryDevice_LeaseTime, NULL, BBFDM_BOTH},
 {"Location", &DMREAD, DMT_STRING, get_UPnPDiscoveryDevice_Location, NULL, BBFDM_BOTH},
@@ -797,7 +765,7 @@ DMLEAF tUPnPDiscoveryDeviceParams[] = {
 DMLEAF tUPnPDiscoveryServiceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 //{"Status", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_Status, NULL, BBFDM_BOTH},
-{"USN", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_USN, NULL, BBFDM_BOTH},
+{"USN", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_USN, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"LeaseTime", &DMREAD, DMT_UNINT, get_UPnPDiscoveryService_LeaseTime, NULL, BBFDM_BOTH},
 {"Location", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_Location, NULL, BBFDM_BOTH},
 //{"Server", &DMREAD, DMT_STRING, get_UPnPDiscoveryService_Server, NULL, BBFDM_BOTH},
@@ -810,9 +778,9 @@ DMLEAF tUPnPDiscoveryServiceParams[] = {
 /* *** Device.UPnP.Description. *** */
 DMOBJ tUPnPDescriptionObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"DeviceDescription", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceDescriptionInst, NULL, NULL, NULL, tUPnPDescriptionDeviceDescriptionParams, NULL, BBFDM_BOTH, LIST_KEY{"URLBase", NULL}},
-{"DeviceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceInstanceInst, NULL, NULL, NULL, tUPnPDescriptionDeviceInstanceParams, get_device_instance_linker, BBFDM_BOTH, LIST_KEY{"UDN", NULL}},
-{"ServiceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionServiceInstanceInst, NULL, NULL, NULL, tUPnPDescriptionServiceInstanceParams, NULL, BBFDM_BOTH, LIST_KEY{"ParentDevice", "ServiceId", NULL}},
+{"DeviceDescription", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceDescriptionInst, NULL, NULL, NULL, tUPnPDescriptionDeviceDescriptionParams, NULL, BBFDM_BOTH, NULL},
+{"DeviceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionDeviceInstanceInst, NULL, NULL, NULL, tUPnPDescriptionDeviceInstanceParams, NULL, BBFDM_BOTH, NULL},
+{"ServiceInstance", &DMREAD, NULL, NULL, NULL, browseUPnPDescriptionServiceInstanceInst, NULL, NULL, NULL, tUPnPDescriptionServiceInstanceParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -827,7 +795,7 @@ DMLEAF tUPnPDescriptionParams[] = {
 /* *** Device.UPnP.Description.DeviceDescription.{i}. *** */
 DMLEAF tUPnPDescriptionDeviceDescriptionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"URLBase", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceDescription_URLBase, NULL, BBFDM_BOTH},
+{"URLBase", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceDescription_URLBase, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"SpecVersion", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceDescription_SpecVersion, NULL, BBFDM_BOTH},
 //{"Host", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceDescription_Host, NULL, BBFDM_BOTH},
 {0}
@@ -836,8 +804,8 @@ DMLEAF tUPnPDescriptionDeviceDescriptionParams[] = {
 /* *** Device.UPnP.Description.DeviceInstance.{i}. *** */
 DMLEAF tUPnPDescriptionDeviceInstanceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"UDN", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_UDN, NULL, BBFDM_BOTH},
-{"ParentDevice", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ParentDevice, NULL, BBFDM_BOTH},
+{"UDN", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_UDN, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"ParentDevice", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_ParentDevice, NULL, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"DiscoveryDevice", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_DiscoveryDevice, NULL, BBFDM_BOTH},
 {"DeviceType", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_DeviceType, NULL, BBFDM_BOTH},
 {"FriendlyName", &DMREAD, DMT_STRING, get_UPnPDescriptionDeviceInstance_FriendlyName, NULL, BBFDM_BOTH},
@@ -858,8 +826,8 @@ DMLEAF tUPnPDescriptionDeviceInstanceParams[] = {
 /* *** Device.UPnP.Description.ServiceInstance.{i}. *** */
 DMLEAF tUPnPDescriptionServiceInstanceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ParentDevice", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ParentDevice, NULL, BBFDM_BOTH},
-{"ServiceId", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ServiceId, NULL, BBFDM_BOTH},
+{"ParentDevice", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ParentDevice, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
+{"ServiceId", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ServiceId, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"ServiceDiscovery", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ServiceDiscovery, NULL, BBFDM_BOTH},
 {"ServiceType", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_ServiceType, NULL, BBFDM_BOTH},
 {"SCPDURL", &DMREAD, DMT_STRING, get_UPnPDescriptionServiceInstance_SCPDURL, NULL, BBFDM_BOTH},

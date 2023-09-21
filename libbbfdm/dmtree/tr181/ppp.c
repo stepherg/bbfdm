@@ -997,22 +997,24 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 		if (DM_STRLEN(device) == 0)
 			return 0;
 
-		adm_entry_get_linker_param(ctx, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN", device, value);
-		if (*value != NULL && (*value)[0] != 0)
-			return 0;
+		adm_entry_get_reference_param(ctx, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN.*.Name", device, value);
+		if (DM_STRLEN(*value))
+			goto end;
 
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", device, value);
-		if (*value != NULL && (*value)[0] != 0)
-			return 0;
+		adm_entry_get_reference_param(ctx, "Device.Ethernet.VLANTermination.*.Name", device, value);
+		if (DM_STRLEN(*value))
+			goto end;
 
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", device, value);
+		adm_entry_get_reference_param(ctx, "Device.Ethernet.Link.*.Name", device, value);
+
+end:
+		// Store LowerLayers value
+		dmuci_set_value_by_section(ppp->dmmap_s, "LowerLayers", *value);
 	} else {
-		char *linker = NULL;
-
-		adm_entry_get_linker_value(ctx, *value, &linker);
-		if (!linker || *linker == 0)
+		if (!adm_entry_object_exists(ctx, *value))
 			*value = "";
 	}
+
 	return 0;
 }
 
@@ -1025,32 +1027,32 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 			"Device.Ethernet.VLANTermination.",
 			"Device.Ethernet.Link.",
 			NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, reference.path, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-
 			// Store LowerLayers value under dmmap_ppp section
-			dmuci_set_value_by_section(ppp->dmmap_s, "LowerLayers", value);
+			dmuci_set_value_by_section(ppp->dmmap_s, "LowerLayers", reference.path);
 
 			// Update proto option
 			dmuci_set_value_by_section(ppp->dmmap_s, "proto", "pppoe");
 			if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "proto", "pppoe");
 
-			if (DM_STRNCMP(value, "Device.Ethernet.Link.", DM_STRLEN("Device.Ethernet.Link.")) == 0) {
+			if (DM_STRNCMP(reference.path, "Device.Ethernet.Link.", DM_STRLEN("Device.Ethernet.Link.")) == 0) {
 				struct uci_section *eth_link_s = NULL;
 				char *is_eth = NULL;
 
-				get_dmmap_section_of_config_section_eq("dmmap_ethernet", "link", "device", linker, &eth_link_s);
+				get_dmmap_section_of_config_section_eq("dmmap_ethernet", "link", "device", reference.value, &eth_link_s);
 				if (eth_link_s) dmuci_get_value_by_section_string(eth_link_s, "is_eth", &is_eth);
 
 				// Update proto option
@@ -1059,8 +1061,8 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 			}
 
 			// Update device option
-			dmuci_set_value_by_section(ppp->dmmap_s, "device", DM_STRLEN(linker) ? linker : "");
-			if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "device", DM_STRLEN(linker) ? linker : "");
+			dmuci_set_value_by_section(ppp->dmmap_s, "device", reference.value);
+			if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "device", reference.value);
 			return 0;
 	}
 	return 0;
@@ -1193,7 +1195,7 @@ static int operate_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *d
 /* *** Device.PPP. *** */
 DMOBJ tPPPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Interface", &DMWRITE, add_ppp_interface, delete_ppp_interface, NULL, browseInterfaceInst, NULL, NULL, tPPPInterfaceObj, tPPPInterfaceParams, get_linker_ppp_interface, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Interface", &DMWRITE, add_ppp_interface, delete_ppp_interface, NULL, browseInterfaceInst, NULL, NULL, tPPPInterfaceObj, tPPPInterfaceParams, get_linker_ppp_interface, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1207,22 +1209,22 @@ DMLEAF tPPPParams[] = {
 /* *** Device.PPP.Interface.{i}. *** */
 DMOBJ tPPPInterfaceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"PPPoE", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfacePPPoEParams, NULL, BBFDM_BOTH, NULL},
-{"IPCP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceIPCPParams, NULL, BBFDM_BOTH, NULL},
-{"IPv6CP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceIPv6CPParams, NULL, BBFDM_BOTH, NULL},
-{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceStatsParams, NULL, BBFDM_BOTH, NULL},
+{"PPPoE", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfacePPPoEParams, NULL, BBFDM_BOTH},
+{"IPCP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceIPCPParams, NULL, BBFDM_BOTH},
+{"IPv6CP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceIPv6CPParams, NULL, BBFDM_BOTH},
+{"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tPPPInterfaceStatsParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tPPPInterfaceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_ppp_alias, set_ppp_alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ppp_alias, set_ppp_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Enable", &DMWRITE, DMT_BOOL, get_ppp_enable, set_ppp_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_PPPInterface_Status, NULL, BBFDM_BOTH},
 {"LastChange", &DMREAD, DMT_UNINT, get_PPPInterface_LastChange, NULL, BBFDM_BOTH},
 {"Reset", &DMWRITE, DMT_BOOL, get_PPPInterface_Reset, set_PPPInterface_Reset, BBFDM_CWMP},
-{"Name", &DMREAD, DMT_STRING, get_ppp_name, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_ppp_lower_layer, set_ppp_lower_layer, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_ppp_name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_ppp_lower_layer, set_ppp_lower_layer, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"ConnectionStatus", &DMREAD, DMT_STRING, get_ppp_status, NULL, BBFDM_BOTH},
 {"LastConnectionError", &DMREAD, DMT_STRING, get_PPPInterface_LastConnectionError, NULL, BBFDM_BOTH},
 {"Username", &DMWRITE, DMT_STRING, get_ppp_username, set_ppp_username, BBFDM_BOTH},

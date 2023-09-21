@@ -1423,28 +1423,28 @@ static int set_DHCPv4ServerPool_Order(char *refparam, struct dmctx *ctx, void *d
 
 static int get_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = dmstrdup(((struct dhcp_args *)data)->interface);
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", ((struct dhcp_args *)data)->interface, value);
 	return 0;
 }
 
 static int set_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "interface", linker ? linker : "");
+			dmuci_set_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -2173,26 +2173,11 @@ static int set_DHCPv4Client_Alias(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct dhcp_client_args *dhcpv4_client = (struct dhcp_client_args *)data;
 	char *iface_name = NULL;
 
-	dmuci_get_value_by_section_string(dhcpv4_client->dmmap_s, "iface_name", &iface_name);
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface_name, value);
+	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dmmap_s, "iface_name", &iface_name);
 
-	if (DM_STRLEN(*value) == 0 && dhcpv4_client->iface_s) {
-		struct uci_section *s = NULL;
-		char *device = NULL;
-
-		dmuci_get_value_by_section_string(dhcpv4_client->iface_s, "device", &device);
-		if (DM_STRLEN(device) == 0)
-			return 0;
-
-		uci_foreach_option_eq("network", "interface", "device", device, s) {
-			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", section_name(s), value);
-			if (DM_STRLEN(*value))
-				return 0;
-		}
-	}
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", iface_name, value);
 	return 0;
 }
 
@@ -2200,22 +2185,21 @@ static int set_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 {
 	struct dhcp_client_args *dhcpv4_client = (struct dhcp_client_args *)data;
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
 	char *dhcp_client_key = NULL;
-	char *linker = NULL;
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			// Get linker
-			adm_entry_get_linker_value(ctx, value, &linker);
-
 			if (dhcpv4_client->iface_s) {
 				dmuci_set_value_by_section(dhcpv4_client->iface_s, "proto", "none");
 				dmuci_set_value_by_section(dhcpv4_client->iface_s, "clientid", "");
@@ -2225,12 +2209,12 @@ static int set_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 				dmuci_set_value_by_section(dhcpv4_client->iface_s, "reqopts", "");
 			}
 
-			if (!linker || *linker == 0) {
+			if (DM_STRLEN(reference.value) == 0) {
 				dmuci_set_value_by_section_bbfdm(dhcpv4_client->dmmap_s, "iface_name", "");
 			} else {
 				struct uci_section *interface_s = NULL;
 
-				get_config_section_of_dmmap_section("network", "interface", linker, &interface_s);
+				get_config_section_of_dmmap_section("network", "interface", reference.value, &interface_s);
 				if (interface_s == NULL)
 					return FAULT_9007;
 
@@ -2238,7 +2222,7 @@ static int set_DHCPv4Client_Interface(char *refparam, struct dmctx *ctx, void *d
 				dmuci_set_value_by_section(interface_s, "proto", "dhcp");
 
 				// Update dmmap section
-				dmuci_set_value_by_section_bbfdm(dhcpv4_client->dmmap_s, "iface_name", linker);
+				dmuci_set_value_by_section_bbfdm(dhcpv4_client->dmmap_s, "iface_name", reference.value);
 
 				dmuci_get_value_by_section_string(dhcpv4_client->dmmap_s, "dhcp_client_key", &dhcp_client_key);
 				if (DM_STRLEN(dhcp_client_key)) {
@@ -3113,7 +3097,8 @@ static int get_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx
 	char *iface_name = NULL;
 
 	dmuci_get_value_by_section_string(((struct dhcp_client_args *)data)->dmmap_s, "iface_name", &iface_name);
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", iface_name, value);
+
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", iface_name, value);
 	return 0;
 }
 
@@ -3121,28 +3106,27 @@ static int set_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx
 {
 	struct dhcp_client_args *dhcp_relay = (struct dhcp_client_args *)data;
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
 	struct uci_section *interface_s = NULL;
 	char *curr_iface_name = NULL;
-	char *linker = NULL;
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			// Get linker
-			adm_entry_get_linker_value(ctx, value, &linker);
-
 			dmuci_get_value_by_section_string(dhcp_relay->dmmap_s, "iface_name", &curr_iface_name);
 
 			// Get the corresponding network config
-			if (linker && *linker != 0)
-				get_config_section_of_dmmap_section("network", "interface", linker, &interface_s);
+			if (DM_STRLEN(reference.value))
+				get_config_section_of_dmmap_section("network", "interface", reference.value, &interface_s);
 
 			// break if interface section is not found
 			if (interface_s && (strcmp(section_name(interface_s), curr_iface_name) == 0))
@@ -3150,7 +3134,7 @@ static int set_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx
 
 			dmuci_set_value_by_section(dhcp_relay->iface_s, "proto", "none");
 
-			if (!linker || *linker == 0) {
+			if (DM_STRLEN(reference.value) == 0) {
 				dmuci_set_value_by_section_bbfdm(dhcp_relay->dmmap_s, "added_by_controller", "1");
 				dmuci_set_value_by_section_bbfdm(dhcp_relay->dmmap_s, "iface_name", "");
 			} else {
@@ -3158,7 +3142,7 @@ static int set_DHCPv4RelayForwarding_Interface(char *refparam, struct dmctx *ctx
 				dmuci_set_value_by_section(interface_s, "proto", "relay");
 
 				// Update dmmap section
-				dmuci_set_value_by_section_bbfdm(dhcp_relay->dmmap_s, "iface_name", linker);
+				dmuci_set_value_by_section_bbfdm(dhcp_relay->dmmap_s, "iface_name", reference.value);
 			}
 			break;
 	}
@@ -3316,7 +3300,7 @@ static int operate_DHCPv4Client_Renew(char *refparam, struct dmctx *ctx, void *d
 /* *** Device.DHCPv4. *** */
 DMOBJ tDHCPv4Obj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Client", &DMWRITE, addObjDHCPv4Client, delObjDHCPv4Client, NULL, browseDHCPv4ClientInst, NULL, NULL, tDHCPv4ClientObj, tDHCPv4ClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
+{"Client", &DMWRITE, addObjDHCPv4Client, delObjDHCPv4Client, NULL, browseDHCPv4ClientInst, NULL, NULL, tDHCPv4ClientObj, tDHCPv4ClientParams, NULL, BBFDM_BOTH, NULL},
 {"Server", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDHCPv4ServerObj, tDHCPv4ServerParams, NULL, BBFDM_BOTH, NULL},
 {"Relay", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDHCPv4RelayObj, tDHCPv4RelayParams, NULL, BBFDM_BOTH, NULL},
 {0}
@@ -3331,16 +3315,16 @@ DMLEAF tDHCPv4Params[] = {
 /* *** Device.DHCPv4.Client.{i}. *** */
 DMOBJ tDHCPv4ClientObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"SentOption", &DMWRITE, addObjDHCPv4ClientSentOption, delObjDHCPv4ClientSentOption, NULL, browseDHCPv4ClientSentOptionInst, NULL, NULL, NULL, tDHCPv4ClientSentOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
-{"ReqOption", &DMWRITE, addObjDHCPv4ClientReqOption, delObjDHCPv4ClientReqOption, NULL, browseDHCPv4ClientReqOptionInst, NULL, NULL, NULL, tDHCPv4ClientReqOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
+{"SentOption", &DMWRITE, addObjDHCPv4ClientSentOption, delObjDHCPv4ClientSentOption, NULL, browseDHCPv4ClientSentOptionInst, NULL, NULL, NULL, tDHCPv4ClientSentOptionParams, NULL, BBFDM_BOTH, NULL},
+{"ReqOption", &DMWRITE, addObjDHCPv4ClientReqOption, delObjDHCPv4ClientReqOption, NULL, browseDHCPv4ClientReqOptionInst, NULL, NULL, NULL, tDHCPv4ClientReqOptionParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tDHCPv4ClientParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4Client_Enable, set_DHCPv4Client_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4Client_Alias, set_DHCPv4Client_Alias, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4Client_Interface, set_DHCPv4Client_Interface, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4Client_Alias, set_DHCPv4Client_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4Client_Interface, set_DHCPv4Client_Interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 {"Status", &DMREAD, DMT_STRING, get_DHCPv4Client_Status, NULL, BBFDM_BOTH},
 {"DHCPStatus", &DMREAD, DMT_STRING, get_DHCPv4Client_DHCPStatus, NULL, BBFDM_BOTH},
 {"Renew", &DMWRITE, DMT_BOOL, get_DHCPv4Client_Renew, set_DHCPv4Client_Renew, BBFDM_CWMP},
@@ -3362,8 +3346,8 @@ DMLEAF tDHCPv4ClientParams[] = {
 DMLEAF tDHCPv4ClientSentOptionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ClientSentOption_Enable, set_DHCPv4ClientSentOption_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ClientSentOption_Alias, set_DHCPv4ClientSentOption_Alias, BBFDM_BOTH},
-{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ClientSentOption_Tag, set_DHCPv4ClientSentOption_Tag, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ClientSentOption_Alias, set_DHCPv4ClientSentOption_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ClientSentOption_Tag, set_DHCPv4ClientSentOption_Tag, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Value", &DMWRITE, DMT_HEXBIN, get_DHCPv4ClientSentOption_Value, set_DHCPv4ClientSentOption_Value, BBFDM_BOTH},
 {0}
 };
@@ -3373,8 +3357,8 @@ DMLEAF tDHCPv4ClientReqOptionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ClientReqOption_Enable, set_DHCPv4ClientReqOption_Enable, BBFDM_BOTH},
 //{"Order", &DMWRITE, DMT_UNINT, get_DHCPv4ClientReqOption_Order, set_DHCPv4ClientReqOption_Order, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ClientReqOption_Alias, set_DHCPv4ClientReqOption_Alias, BBFDM_BOTH},
-{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ClientReqOption_Tag, set_DHCPv4ClientReqOption_Tag, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ClientReqOption_Alias, set_DHCPv4ClientReqOption_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ClientReqOption_Tag, set_DHCPv4ClientReqOption_Tag, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"Value", &DMREAD, DMT_HEXBIN, get_DHCPv4ClientReqOption_Value, NULL, BBFDM_BOTH},
 {0}
 };
@@ -3382,7 +3366,7 @@ DMLEAF tDHCPv4ClientReqOptionParams[] = {
 /* *** Device.DHCPv4.Server. *** */
 DMOBJ tDHCPv4ServerObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Pool", &DMWRITE, addObjDHCPv4ServerPool, delObjDHCPv4ServerPool, NULL, browseDHCPv4ServerPoolInst, NULL, NULL, tDHCPv4ServerPoolObj, tDHCPv4ServerPoolParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"Pool", &DMWRITE, addObjDHCPv4ServerPool, delObjDHCPv4ServerPool, NULL, browseDHCPv4ServerPoolInst, NULL, NULL, tDHCPv4ServerPoolObj, tDHCPv4ServerPoolParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -3396,9 +3380,9 @@ DMLEAF tDHCPv4ServerParams[] = {
 /* *** Device.DHCPv4.Server.Pool.{i}. *** */
 DMOBJ tDHCPv4ServerPoolObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"StaticAddress", &DMWRITE, addObjDHCPv4ServerPoolStaticAddress, delObjDHCPv4ServerPoolStaticAddress, NULL, browseDHCPv4ServerPoolStaticAddressInst, NULL, NULL, NULL, tDHCPv4ServerPoolStaticAddressParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Chaddr", NULL}},
-{"Option", &DMWRITE, addObjDHCPv4ServerPoolOption, delObjDHCPv4ServerPoolOption, NULL, browseDHCPv4ServerPoolOptionInst, NULL, NULL, NULL, tDHCPv4ServerPoolOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", "Alias", NULL}},
-{"Client", &DMREAD, NULL, NULL, NULL, browseDhcpClientInst, NULL, NULL, tDHCPv4ServerPoolClientObj, tDHCPv4ServerPoolClientParams, get_dhcp_client_linker, BBFDM_BOTH, LIST_KEY{"Chaddr", "Alias", NULL}},
+{"StaticAddress", &DMWRITE, addObjDHCPv4ServerPoolStaticAddress, delObjDHCPv4ServerPoolStaticAddress, NULL, browseDHCPv4ServerPoolStaticAddressInst, NULL, NULL, NULL, tDHCPv4ServerPoolStaticAddressParams, NULL, BBFDM_BOTH, NULL},
+{"Option", &DMWRITE, addObjDHCPv4ServerPoolOption, delObjDHCPv4ServerPoolOption, NULL, browseDHCPv4ServerPoolOptionInst, NULL, NULL, NULL, tDHCPv4ServerPoolOptionParams, NULL, BBFDM_BOTH, NULL},
+{"Client", &DMREAD, NULL, NULL, NULL, browseDhcpClientInst, NULL, NULL, tDHCPv4ServerPoolClientObj, tDHCPv4ServerPoolClientParams, get_dhcp_client_linker, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -3406,9 +3390,9 @@ DMLEAF tDHCPv4ServerPoolParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_Enable, set_DHCPv4ServerPool_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_DHCPv4ServerPool_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_Alias, set_DHCPv4ServerPool_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_Alias, set_DHCPv4ServerPool_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Order", &DMWRITE, DMT_UNINT, get_DHCPv4ServerPool_Order, set_DHCPv4ServerPool_Order, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_Interface, set_DHCPv4ServerPool_Interface, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_Interface, set_DHCPv4ServerPool_Interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 //{"VendorClassID", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_VendorClassID, set_DHCPv4ServerPool_VendorClassID, BBFDM_BOTH},
 //{"VendorClassIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPool_VendorClassIDExclude, set_DHCPv4ServerPool_VendorClassIDExclude, BBFDM_BOTH},
 //{"VendorClassIDMode", &DMWRITE, DMT_STRING, get_DHCPv4ServerPool_VendorClassIDMode, set_DHCPv4ServerPool_VendorClassIDMode, BBFDM_BOTH},
@@ -3438,8 +3422,8 @@ DMLEAF tDHCPv4ServerPoolParams[] = {
 DMLEAF tDHCPv4ServerPoolStaticAddressParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPoolStaticAddress_Enable, set_DHCPv4ServerPoolStaticAddress_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolStaticAddress_Alias, set_DHCPv4ServerPoolStaticAddress_Alias, BBFDM_BOTH},
-{"Chaddr", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolStaticAddress_Chaddr, set_DHCPv4ServerPoolStaticAddress_Chaddr, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolStaticAddress_Alias, set_DHCPv4ServerPoolStaticAddress_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Chaddr", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolStaticAddress_Chaddr, set_DHCPv4ServerPoolStaticAddress_Chaddr, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Yiaddr", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolStaticAddress_Yiaddr, set_DHCPv4ServerPoolStaticAddress_Yiaddr, BBFDM_BOTH},
 {0}
 };
@@ -3448,8 +3432,8 @@ DMLEAF tDHCPv4ServerPoolStaticAddressParams[] = {
 DMLEAF tDHCPv4ServerPoolOptionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4ServerPoolOption_Enable, set_DHCPv4ServerPoolOption_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolOption_Alias, set_DHCPv4ServerPoolOption_Alias, BBFDM_BOTH},
-{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ServerPoolOption_Tag, set_DHCPv4ServerPoolOption_Tag, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4ServerPoolOption_Alias, set_DHCPv4ServerPoolOption_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Tag", &DMWRITE, DMT_UNINT, get_DHCPv4ServerPoolOption_Tag, set_DHCPv4ServerPoolOption_Tag, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Value", &DMWRITE, DMT_HEXBIN, get_DHCPv4ServerPoolOption_Value, set_DHCPv4ServerPoolOption_Value, BBFDM_BOTH},
 {0}
 };
@@ -3457,15 +3441,15 @@ DMLEAF tDHCPv4ServerPoolOptionParams[] = {
 /* *** Device.DHCPv4.Server.Pool.{i}.Client.{i}. *** */
 DMOBJ tDHCPv4ServerPoolClientObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseDhcpClientIPv4Inst, NULL, NULL, NULL, tDHCPv4ServerPoolClientIPv4AddressParams, NULL, BBFDM_BOTH, LIST_KEY{"IPAddress", NULL}},
-{"Option", &DMREAD, NULL, NULL, NULL, browseDHCPv4ServerPoolClientOptionInst, NULL, NULL, NULL, tDHCPv4ServerPoolClientOptionParams, NULL, BBFDM_BOTH, LIST_KEY{"Tag", NULL}},
+{"IPv4Address", &DMREAD, NULL, NULL, NULL, browseDhcpClientIPv4Inst, NULL, NULL, NULL, tDHCPv4ServerPoolClientIPv4AddressParams, NULL, BBFDM_BOTH, NULL},
+{"Option", &DMREAD, NULL, NULL, NULL, browseDHCPv4ServerPoolClientOptionInst, NULL, NULL, NULL, tDHCPv4ServerPoolClientOptionParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tDHCPv4ServerPoolClientParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING,  get_DHCPv4ServerPoolClient_Alias, set_DHCPv4ServerPoolClient_Alias, BBFDM_BOTH},
-{"Chaddr", &DMREAD, DMT_STRING,  get_DHCPv4ServerPoolClient_Chaddr, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING,  get_DHCPv4ServerPoolClient_Alias, set_DHCPv4ServerPoolClient_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Chaddr", &DMREAD, DMT_STRING,  get_DHCPv4ServerPoolClient_Chaddr, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Active", &DMREAD, DMT_BOOL,  get_DHCPv4ServerPoolClient_Active, NULL, BBFDM_BOTH},
 {"IPv4AddressNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClient_IPv4AddressNumberOfEntries, NULL, BBFDM_BOTH},
 {"OptionNumberOfEntries", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClient_OptionNumberOfEntries, NULL, BBFDM_BOTH},
@@ -3475,7 +3459,7 @@ DMLEAF tDHCPv4ServerPoolClientParams[] = {
 /* *** Device.DHCPv4.Server.Pool.{i}.Client.{i}.IPv4Address.{i}. *** */
 DMLEAF tDHCPv4ServerPoolClientIPv4AddressParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"IPAddress", &DMREAD, DMT_STRING, get_DHCPv4ServerPoolClientIPv4Address_IPAddress, NULL, BBFDM_BOTH},
+{"IPAddress", &DMREAD, DMT_STRING, get_DHCPv4ServerPoolClientIPv4Address_IPAddress, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"LeaseTimeRemaining", &DMREAD, DMT_TIME, get_DHCPv4ServerPoolClientIPv4Address_LeaseTimeRemaining, NULL, BBFDM_BOTH},
 {0}
 };
@@ -3483,7 +3467,7 @@ DMLEAF tDHCPv4ServerPoolClientIPv4AddressParams[] = {
 /* *** Device.DHCPv4.Server.Pool.{i}.Client.{i}.Option.{i}. *** */
 DMLEAF tDHCPv4ServerPoolClientOptionParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Tag", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClientOption_Tag, NULL, BBFDM_BOTH},
+{"Tag", &DMREAD, DMT_UNINT, get_DHCPv4ServerPoolClientOption_Tag, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Value", &DMREAD, DMT_HEXBIN, get_DHCPv4ServerPoolClientOption_Value, NULL, BBFDM_BOTH},
 {0}
 };
@@ -3491,7 +3475,7 @@ DMLEAF tDHCPv4ServerPoolClientOptionParams[] = {
 /* *** Device.DHCPv4.Relay. *** */
 DMOBJ tDHCPv4RelayObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Forwarding", &DMWRITE, addObjDHCPv4RelayForwarding, delObjDHCPv4RelayForwarding, NULL, browseDHCPv4RelayForwardingInst, NULL, NULL, NULL, tDHCPv4RelayForwardingParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"Forwarding", &DMWRITE, addObjDHCPv4RelayForwarding, delObjDHCPv4RelayForwarding, NULL, browseDHCPv4RelayForwardingInst, NULL, NULL, NULL, tDHCPv4RelayForwardingParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -3508,9 +3492,9 @@ DMLEAF tDHCPv4RelayForwardingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_Enable, set_DHCPv4RelayForwarding_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_DHCPv4RelayForwarding_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_Alias, set_DHCPv4RelayForwarding_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_Alias, set_DHCPv4RelayForwarding_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"Order", &DMWRITE, DMT_UNINT, get_DHCPv4RelayForwarding_Order, set_DHCPv4RelayForwarding_Order, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_Interface, set_DHCPv4RelayForwarding_Interface, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_Interface, set_DHCPv4RelayForwarding_Interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"VendorClassID", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_VendorClassID, set_DHCPv4RelayForwarding_VendorClassID, BBFDM_BOTH},
 //{"VendorClassIDExclude", &DMWRITE, DMT_BOOL, get_DHCPv4RelayForwarding_VendorClassIDExclude, set_DHCPv4RelayForwarding_VendorClassIDExclude, BBFDM_BOTH},
 //{"VendorClassIDMode", &DMWRITE, DMT_STRING, get_DHCPv4RelayForwarding_VendorClassIDMode, set_DHCPv4RelayForwarding_VendorClassIDMode, BBFDM_BOTH},

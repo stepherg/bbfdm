@@ -238,7 +238,7 @@ static int get_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 		char *ifaceobj = NULL;
 
 		uci_foreach_element(v, e) {
-			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
+			adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", e->name, &ifaceobj);
 			if (ifaceobj && *ifaceobj)
 				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", ifaceobj);
 		}
@@ -255,24 +255,22 @@ static int get_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 static int set_nat_interface_setting_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *iface, *pch, *pchr, buf[256] = "";
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			DM_STRNCPY(buf, value, sizeof(buf));
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "network", "");
-			for(pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
-				adm_entry_get_linker_value(ctx, pch, &iface);
-				dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "network", iface);
-			}
+			dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "network", reference.value);
 			return 0;
 	}
 	return 0;
@@ -347,7 +345,7 @@ static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 		char *ifaceobj = NULL;
 
 		uci_foreach_element(v, e) {
-			adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj); // MEM WILL BE FREED IN DMMEMCLEAN
+			adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", e->name, &ifaceobj);
 			if (ifaceobj && *ifaceobj)
 				pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", ifaceobj);
 		}
@@ -364,20 +362,21 @@ static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *iface = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &iface);
-			if (iface && *iface) {
+			if (DM_STRLEN(reference.value)) {
 				struct uci_section *s = NULL;
 				bool zone_enable, sect_enable;
 
@@ -385,7 +384,7 @@ static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 					char *network = NULL;
 
 					dmuci_get_value_by_section_string(s, "network", &network);
-					if (is_strword_in_optionvalue(network, iface)) {
+					if (is_strword_in_optionvalue(network, reference.value)) {
 						char *zone_name = NULL;
 						char *zone_masq = NULL;
 						char *val = NULL;
@@ -404,7 +403,6 @@ static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 						break;
 					}
 				}
-				dmfree(iface);
 			} else {
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src", "");
 			}
@@ -695,8 +693,8 @@ static int set_nat_port_mapping_description(char *refparam, struct dmctx *ctx, v
 /* *** Device.NAT. *** */
 DMOBJ tNATObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"InterfaceSetting", &DMWRITE, add_NAT_InterfaceSetting, delete_NAT_InterfaceSetting, NULL, browseInterfaceSettingInst, NULL, NULL, NULL, tNATInterfaceSettingParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
-{"PortMapping", &DMWRITE, add_NAT_PortMapping, delete_NAT_PortMapping, NULL, browsePortMappingInst, NULL, NULL, NULL, tNATPortMappingParams, NULL, BBFDM_BOTH, LIST_KEY{"RemoteHost", "ExternalPort", "Protocol", "Alias", NULL}},
+{"InterfaceSetting", &DMWRITE, add_NAT_InterfaceSetting, delete_NAT_InterfaceSetting, NULL, browseInterfaceSettingInst, NULL, NULL, NULL, tNATInterfaceSettingParams, NULL, BBFDM_BOTH, NULL},
+{"PortMapping", &DMWRITE, add_NAT_PortMapping, delete_NAT_PortMapping, NULL, browsePortMappingInst, NULL, NULL, NULL, tNATPortMappingParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -712,8 +710,8 @@ DMLEAF tNATInterfaceSettingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_nat_interface_setting_enable, set_nat_interface_setting_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_nat_interface_setting_status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_nat_interface_setting_alias, set_nat_interface_setting_alias, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_nat_interface_setting_interface, set_nat_interface_setting_interface, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_nat_interface_setting_alias, set_nat_interface_setting_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Interface", &DMWRITE, DMT_STRING, get_nat_interface_setting_interface, set_nat_interface_setting_interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 {0}
 };
 
@@ -722,15 +720,15 @@ DMLEAF tNATPortMappingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_nat_port_mapping_enable, set_nat_port_mapping_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_nat_port_mapping_status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_nat_port_mapping_alias, set_nat_port_mapping_alias, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_nat_port_mapping_interface, set_nat_port_mapping_interface, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_nat_port_mapping_alias, set_nat_port_mapping_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Interface", &DMWRITE, DMT_STRING, get_nat_port_mapping_interface, set_nat_port_mapping_interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"AllInterfaces", &DMWRITE, DMT_BOOL, get_nat_port_mapping_all_interface, set_nat_port_mapping_all_interface, BBFDM_BOTH},
 {"LeaseDuration", &DMWRITE, DMT_UNINT, get_nat_port_mapping_lease_duration, set_nat_port_mapping_lease_duration, BBFDM_BOTH},
-{"RemoteHost", &DMWRITE, DMT_STRING, get_nat_port_mapping_remote_host, set_nat_port_mapping_remote_host, BBFDM_BOTH},
-{"ExternalPort", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port, set_nat_port_mapping_external_port, BBFDM_BOTH},
+{"RemoteHost", &DMWRITE, DMT_STRING, get_nat_port_mapping_remote_host, set_nat_port_mapping_remote_host, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"ExternalPort", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port, set_nat_port_mapping_external_port, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"ExternalPortEndRange", &DMWRITE, DMT_UNINT, get_nat_port_mapping_external_port_end_range, set_nat_port_mapping_external_port_end_range, BBFDM_BOTH},
 {"InternalPort", &DMWRITE, DMT_UNINT, get_nat_port_mapping_internal_port, set_nat_port_mapping_internal_port, BBFDM_BOTH},
-{"Protocol", &DMWRITE, DMT_STRING, get_nat_port_mapping_protocol, set_nat_port_mapping_protocol, BBFDM_BOTH},
+{"Protocol", &DMWRITE, DMT_STRING, get_nat_port_mapping_protocol, set_nat_port_mapping_protocol, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"InternalClient", &DMWRITE, DMT_STRING, get_nat_port_mapping_internal_client, set_nat_port_mapping_internal_client, BBFDM_BOTH},
 {"Description", &DMWRITE, DMT_STRING, get_nat_port_mapping_description, set_nat_port_mapping_description, BBFDM_BOTH},
 {0}

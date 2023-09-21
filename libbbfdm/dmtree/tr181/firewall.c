@@ -797,7 +797,7 @@ static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 
 			src_iface[0] = 0;
 			uci_foreach_element(net_list, e) {
-				adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj);
+				adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", e->name, &ifaceobj);
 				if (ifaceobj && *ifaceobj)
 					pos += snprintf(&src_iface[pos], sizeof(src_iface) - pos, "%s,", ifaceobj);
 			}
@@ -810,7 +810,7 @@ static int get_rule_source_interface(char *refparam, struct dmctx *ctx, void *da
 		}
 	}
 
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", src, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", src, value);
 	return 0;
 }
 
@@ -866,7 +866,7 @@ static int get_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 
 			dst_iface[0] = 0;
 			uci_foreach_element(net_list, e) {
-				adm_entry_get_linker_param(ctx, "Device.IP.Interface.", e->name, &ifaceobj);
+				adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", e->name, &ifaceobj);
 				if (ifaceobj && *ifaceobj)
 					pos += snprintf(&dst_iface[pos], sizeof(dst_iface) - pos, "%s,", ifaceobj);
 			}
@@ -879,7 +879,7 @@ static int get_rule_dest_interface(char *refparam, struct dmctx *ctx, void *data
 		}
 	}
 
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", dest, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", dest, value);
 	return 0;
 }
 
@@ -1463,32 +1463,33 @@ static int set_rule_log(char *refparam, struct dmctx *ctx, void *data, char *ins
 static int set_rule_interface(struct dmctx *ctx, void *data, char *type, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *iface = NULL, *option = NULL;
+	struct dm_reference reference = {0};
+	char *option = NULL;
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
 			dmuci_get_value_by_section_string(((struct rule_sec *)data)->config_section, type, &option);
 
-			if (*value == '\0') {
+			if (DM_STRLEN(reference.path) == 0) {
 				dmuci_set_value_by_section((option && DM_LSTRCMP(option, "*") == 0) ? ((struct rule_sec *)data)->dmmap_section : ((struct rule_sec *)data)->config_section, type, "");
 			} else {
-				adm_entry_get_linker_value(ctx, value, &iface);
-				if (iface && iface[0] != '\0') {
+				if (DM_STRLEN(reference.value)) {
 
 					// check if firewall zone exists
-					if (!firewall_zone_exists(iface))
-						firewall__create_zone_section(iface);
+					if (!firewall_zone_exists(reference.value))
+						firewall__create_zone_section(reference.value);
 
-					dmuci_set_value_by_section((option && DM_LSTRCMP(option, "*") == 0) ? ((struct rule_sec *)data)->dmmap_section : ((struct rule_sec *)data)->config_section, type, iface);
-					dmfree(iface);
+					dmuci_set_value_by_section((option && DM_LSTRCMP(option, "*") == 0) ? ((struct rule_sec *)data)->dmmap_section : ((struct rule_sec *)data)->config_section, type, reference.value);
 				}
 			}
 			break;
@@ -1819,8 +1820,8 @@ static int set_rule_source_port_range_max(char *refparam, struct dmctx *ctx, voi
 /* *** Device.Firewall. *** */
 DMOBJ tFirewallObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH, NULL},
+{"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1837,8 +1838,8 @@ DMLEAF tFirewallParams[] = {
 /* *** Device.Firewall.Level.{i}. *** */
 DMLEAF tFirewallLevelParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_level_alias, set_level_alias, BBFDM_BOTH},
-{"Name", &DMWRITE, DMT_STRING, get_level_name, set_level_name, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_level_alias, set_level_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMWRITE, DMT_STRING, get_level_name, set_level_name, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Description", &DMWRITE, DMT_STRING, get_level_description, set_level_description, BBFDM_BOTH},
 {"Chain", &DMREAD, DMT_STRING, get_level_chain, NULL, BBFDM_BOTH},
 {"PortMappingEnabled", &DMWRITE, DMT_BOOL, get_level_port_mapping_enabled, set_level_port_mapping_enabled, BBFDM_BOTH},
@@ -1850,15 +1851,15 @@ DMLEAF tFirewallLevelParams[] = {
 /* *** Device.Firewall.Chain.{i}. *** */
 DMOBJ tFirewallChainObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Rule", &DMWRITE, add_firewall_rule, delete_firewall_rule, NULL, browseRuleInst, NULL, NULL, NULL, tFirewallChainRuleParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"Rule", &DMWRITE, add_firewall_rule, delete_firewall_rule, NULL, browseRuleInst, NULL, NULL, NULL, tFirewallChainRuleParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tFirewallChainParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_chain_enable, set_chain_enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_chain_alias, set_chain_alias, BBFDM_BOTH},
-{"Name", &DMWRITE, DMT_STRING, get_chain_name, set_chain_name, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_chain_alias, set_chain_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMWRITE, DMT_STRING, get_chain_name, set_chain_name, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Creator", &DMREAD, DMT_STRING, get_chain_creator, NULL, BBFDM_BOTH},
 {"RuleNumberOfEntries", &DMREAD, DMT_UNINT, get_chain_rule_number_of_entries, NULL, BBFDM_BOTH},
 {0}
@@ -1870,16 +1871,16 @@ DMLEAF tFirewallChainRuleParams[] = {
 {"Enable", &DMRule, DMT_BOOL, get_rule_enable, set_rule_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_rule_status, NULL, BBFDM_BOTH},
 {"Order", &DMRule, DMT_UNINT, get_rule_order, set_rule_order, BBFDM_BOTH},
-{"Alias", &DMRule, DMT_STRING, get_rule_alias, set_rule_alias, BBFDM_BOTH},
+{"Alias", &DMRule, DMT_STRING, get_rule_alias, set_rule_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Description", &DMRule, DMT_STRING, get_rule_description, set_rule_description, BBFDM_BOTH},
 {"Target", &DMRule, DMT_STRING, get_rule_target, set_rule_target, BBFDM_BOTH},
 //{"TargetChain", &DMRule, DMT_STRING, get_rule_target_chain, set_rule_target_chain, BBFDM_BOTH},
 {"Log", &DMRule, DMT_BOOL, get_rule_log, set_rule_log, BBFDM_BOTH},
 {"CreationDate", &DMREAD, DMT_TIME, get_FirewallChainRule_CreationDate, NULL, BBFDM_BOTH},
 {"ExpiryDate", &DMRule, DMT_TIME, get_FirewallChainRule_ExpiryDate, set_FirewallChainRule_ExpiryDate, BBFDM_BOTH},
-{"SourceInterface", &DMRule, DMT_STRING, get_rule_source_interface, set_rule_source_interface, BBFDM_BOTH},
+{"SourceInterface", &DMRule, DMT_STRING, get_rule_source_interface, set_rule_source_interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"SourceAllInterfaces", &DMRule, DMT_BOOL, get_rule_source_all_interfaces, set_rule_source_all_interfaces, BBFDM_BOTH},
-{"DestInterface", &DMRule, DMT_STRING, get_rule_dest_interface, set_rule_dest_interface, BBFDM_BOTH},
+{"DestInterface", &DMRule, DMT_STRING, get_rule_dest_interface, set_rule_dest_interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"DestAllInterfaces", &DMRule, DMT_BOOL, get_rule_dest_all_interfaces, set_rule_dest_all_interfaces, BBFDM_BOTH},
 {"IPVersion", &DMRule, DMT_INT, get_rule_i_p_version, set_rule_i_p_version, BBFDM_BOTH},
 {"DestIP", &DMRule, DMT_STRING, get_rule_dest_ip, set_rule_dest_ip, BBFDM_BOTH},

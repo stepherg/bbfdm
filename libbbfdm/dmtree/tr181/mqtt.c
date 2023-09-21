@@ -210,31 +210,28 @@ static int get_MQTTBroker_Interface(char *refparam, struct dmctx *ctx, void *dat
 	char *intf = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &intf);
-	if (DM_STRLEN(intf) == 0)
-		return 0;
-
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", intf, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", intf, value);
 	return 0;
 }
 
 static int set_MQTTBroker_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *iface = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &iface);
-			if (DM_STRLEN(iface) != 0)
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", iface);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", reference.value);
 			break;
 	}
 	return 0;
@@ -293,7 +290,7 @@ static int set_MQTTBroker_Password(char *refparam, struct dmctx *ctx, void *data
 /* *** Device.MQTT.Broker. *** */
 DMOBJ tMQTTObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Broker", &DMWRITE, addMQTTBroker, delMQTTBroker, NULL, browseMQTTBrokerInst, NULL, NULL, NULL, tMQTTBrokerParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Name", NULL}},
+{"Broker", &DMWRITE, addMQTTBroker, delMQTTBroker, NULL, browseMQTTBrokerInst, NULL, NULL, NULL, tMQTTBrokerParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -306,11 +303,11 @@ DMLEAF tMQTTParams[] = {
 DMLEAF tMQTTBrokerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Enable", &DMWRITE, DMT_BOOL, get_MQTTBroker_Enable, set_MQTTBroker_Enable, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_MQTTBroker_Alias, set_MQTTBroker_Alias, BBFDM_BOTH},
-{"Name", &DMWRITE, DMT_STRING, get_MQTTBroker_Name, set_MQTTBroker_Name, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_MQTTBroker_Alias, set_MQTTBroker_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMWRITE, DMT_STRING, get_MQTTBroker_Name, set_MQTTBroker_Name, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"Status", &DMREAD, DMT_STRING, get_MQTTBroker_Status, NULL, BBFDM_BOTH},
 {"Port", &DMWRITE, DMT_UNINT, get_MQTTBroker_Port, set_MQTTBroker_Port, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_MQTTBroker_Interface, set_MQTTBroker_Interface, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_MQTTBroker_Interface, set_MQTTBroker_Interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"Username", &DMWRITE, DMT_STRING, get_MQTTBroker_Username, set_MQTTBroker_Username, BBFDM_BOTH},
 {"Password", &DMWRITE, DMT_STRING, get_MQTTBroker_Password, set_MQTTBroker_Password, BBFDM_BOTH},
 {0}

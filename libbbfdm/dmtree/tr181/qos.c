@@ -65,15 +65,6 @@ static void qos_update_order(const char *order, bool is_del)
 }
 
 /*************************************************************
-* LINKER
-**************************************************************/
-static int get_linker_qqueue(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	*linker = data ? dmstrdup(section_name(((struct dmmap_dup *)data)->config_section)) : "";
-	return 0;
-}
-
-/*************************************************************
  * ENTRY METHOD
 *************************************************************/
 static int browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
@@ -121,6 +112,8 @@ static int browseQoSQueueInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 
 	synchronize_specific_config_sections_with_dmmap("qos", "queue", "dmmap_qos", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
+
+		dmuci_set_value_by_section(p->dmmap_section, "queuealias", section_name(p->config_section));
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "queueinstance", "queuealias");
 
@@ -386,16 +379,20 @@ static int delObjQoSShaper(char *refparam, struct dmctx *ctx, void *data, char *
 **************************************************************/
 static int get_QInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ifname = NULL;
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
+	char *linker = NULL;
 
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", ifname, value);
-	if (!(*value) || (*value)[0] == 0)
-		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", ifname, value);
-	if (!(*value) || (*value)[0] == 0)
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", ifname, value);
-	if (!(*value) || (*value)[0] == 0)
-		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", ifname, value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &linker);
+
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
+
+	if (!DM_STRLEN(*value))
+		adm_entry_get_reference_param(ctx, "Device.PPP.Interface.*.Name", linker, value);
+
+	if (!DM_STRLEN(*value))
+		adm_entry_get_reference_param(ctx, "Device.Ethernet.Interface.*.Name", linker, value);
+
+	if (!DM_STRLEN(*value))
+		adm_entry_get_reference_param(ctx, "Device.WiFi.Radio.*.Name", linker, value);
 
 	return 0;
 }
@@ -408,20 +405,21 @@ static int set_QInterface(char *refparam, struct dmctx *ctx, void *data, char *i
 			"Device.Ethernet.Interface.",
 			"Device.WiFi.Radio.",
 			NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 	case VALUECHECK:
-		if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+		if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 			return FAULT_9007;
 
-		if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+		if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 			return FAULT_9007;
 
 		break;
 	case VALUESET:
-		adm_entry_get_linker_value(ctx, value, &linker);
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", linker ? linker : "");
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", reference.value);
 		break;
 	}
 	return 0;
@@ -1512,12 +1510,13 @@ static int get_QoSQueue_Status(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_QoSQueue_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "queuealias", instance, value);
+	*value = dmstrdup(section_name(((struct dmmap_dup *)data)->config_section));
+	return 0;
 }
 
 static int set_QoSQueue_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "queuealias", instance, value);
+	return 0;
 }
 
 static int get_QoSQueue_TrafficClasses(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1697,27 +1696,28 @@ static int get_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data
 	char *queue_link = NULL;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "queue", &queue_link);
-	adm_entry_get_linker_param(ctx, "Device.QoS.Queue.", queue_link, value);
+	adm_entry_get_reference_param(ctx, "Device.QoS.Queue.*.Alias", queue_link, value);
 	return 0;
 }
 
 static int set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.QoS.Queue.", NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section((struct uci_section *)data, "queue", linker ? linker : "");
+			dmuci_set_value_by_section((struct uci_section *)data, "queue", reference.value);
 			break;
 	}
 	return 0;
@@ -1725,14 +1725,17 @@ static int set_QoSQueueStats_Queue(char *refparam, struct dmctx *ctx, void *data
 
 static int get_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *intf_link = NULL;
+	char *linker = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &intf_link);
-	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", intf_link, value);
-	if (!(*value) || (*value)[0] == 0)
-		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", intf_link, value);
-	if (!(*value) || (*value)[0] == 0)
-		adm_entry_get_linker_param(ctx, "Device.PPP.Interface.", intf_link, value);
+	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &linker);
+
+	adm_entry_get_reference_param(ctx, "Device.Ethernet.Interface.*.Name", linker, value);
+
+	if (!DM_STRLEN(*value))
+		adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
+
+	if (!DM_STRLEN(*value))
+		adm_entry_get_reference_param(ctx, "Device.PPP.Interface.*.Name", linker, value);
 
 	return 0;
 }
@@ -1744,20 +1747,21 @@ static int set_QoSQueueStats_Interface(char *refparam, struct dmctx *ctx, void *
 			"Device.IP.Interface.",
 			"Device.PPP.Interface.",
 			NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section((struct uci_section *)data, "interface", linker ? linker : "");
+			dmuci_set_value_by_section((struct uci_section *)data, "interface", reference.value);
 			break;
 	}
 	return 0;
@@ -1899,13 +1903,13 @@ static int set_QoSShaper_ShapingBurstSize(char *refparam, struct dmctx *ctx, voi
 /* *** Device.QoS. *** */
 DMOBJ tQoSObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Classification", &DMWRITE, addObjQoSClassification, delObjQoSClassification, NULL, browseQoSClassificationInst, NULL, NULL, NULL, tQoSClassificationParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{"QueueStats", &DMWRITE, addObjQoSQueueStats, delObjQoSQueueStats, NULL, browseQoSQueueStatsInst, NULL, NULL, NULL, tQoSQueueStatsParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Queue", "Interface", NULL}},
-//{"App", &DMWRITE, addObjQoSApp, delObjQoSApp, NULL, browseQoSAppInst, NULL, NULL, NULL, tQoSAppParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-//{"Flow", &DMWRITE, addObjQoSFlow, delObjQoSFlow, NULL, browseQoSFlowInst, NULL, NULL, NULL, tQoSFlowParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{"Policer", &DMWRITE, addObjQoSPolicer, delObjQoSPolicer, NULL, browseQoSPolicerInst, NULL, NULL, NULL, tQoSPolicerParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{"Queue", &DMWRITE, addObjQoSQueue, delObjQoSQueue, NULL, browseQoSQueueInst, NULL, NULL, NULL, tQoSQueueParams, get_linker_qqueue, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{"Shaper", &DMWRITE, addObjQoSShaper, delObjQoSShaper, NULL, browseQoSShaperInst, NULL, NULL, NULL, tQoSShaperParams, NULL, BBFDM_BOTH, LIST_KEY{"Interface", "Alias", NULL}},
+{"Classification", &DMWRITE, addObjQoSClassification, delObjQoSClassification, NULL, browseQoSClassificationInst, NULL, NULL, NULL, tQoSClassificationParams, NULL, BBFDM_BOTH, NULL},
+{"QueueStats", &DMWRITE, addObjQoSQueueStats, delObjQoSQueueStats, NULL, browseQoSQueueStatsInst, NULL, NULL, NULL, tQoSQueueStatsParams, NULL, BBFDM_BOTH, NULL},
+//{"App", &DMWRITE, addObjQoSApp, delObjQoSApp, NULL, browseQoSAppInst, NULL, NULL, NULL, tQoSAppParams, NULL, BBFDM_BOTH, NULL},
+//{"Flow", &DMWRITE, addObjQoSFlow, delObjQoSFlow, NULL, browseQoSFlowInst, NULL, NULL, NULL, tQoSFlowParams, NULL, BBFDM_BOTH, NULL},
+{"Policer", &DMWRITE, addObjQoSPolicer, delObjQoSPolicer, NULL, browseQoSPolicerInst, NULL, NULL, NULL, tQoSPolicerParams, NULL, BBFDM_BOTH, NULL},
+{"Queue", &DMWRITE, addObjQoSQueue, delObjQoSQueue, NULL, browseQoSQueueInst, NULL, NULL, NULL, tQoSQueueParams, NULL, BBFDM_BOTH, NULL},
+{"Shaper", &DMWRITE, addObjQoSShaper, delObjQoSShaper, NULL, browseQoSShaperInst, NULL, NULL, NULL, tQoSShaperParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1941,9 +1945,9 @@ DMLEAF tQoSClassificationParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_QoSClassification_Enable, set_QoSClassification_Enable, BBFDM_BOTH},
 //{"Status", &DMREAD, DMT_STRING, get_QoSClassification_Status, NULL, BBFDM_BOTH},
 {"Order", &DMWRITE, DMT_UNINT, get_QoSClassification_Order, set_QoSClassification_Order, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_QoSClassification_Alias, set_QoSClassification_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_QoSClassification_Alias, set_QoSClassification_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"DHCPType", &DMWRITE, DMT_STRING, get_QoSClassification_DHCPType, set_QoSClassification_DHCPType, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_QoSClassification_Interface, set_QoSClassification_Interface, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_QoSClassification_Interface, set_QoSClassification_Interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 //{"AllInterfaces", &DMWRITE, DMT_BOOL, get_QoSClassification_AllInterfaces, set_QoSClassification_AllInterfaces, BBFDM_BOTH},
 {"DestIP", &DMWRITE, DMT_STRING, get_QoSClassification_DestIP, set_QoSClassification_DestIP, BBFDM_BOTH},
 {"DestMask", &DMWRITE, DMT_STRING, get_QoSClassification_DestMask, set_QoSClassification_DestMask, BBFDM_BOTH},
@@ -2066,7 +2070,7 @@ DMLEAF tQoSPolicerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_QoSPolicer_Enable, set_QoSPolicer_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_QoSPolicer_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_QoSPolicer_Alias, set_QoSPolicer_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_QoSPolicer_Alias, set_QoSPolicer_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"CommittedRate", &DMWRITE, DMT_UNINT, get_QoSPolicer_CommittedRate, set_QoSPolicer_CommittedRate, BBFDM_BOTH},
 {"CommittedBurstSize", &DMWRITE, DMT_UNINT, get_QoSPolicer_CommittedBurstSize, set_QoSPolicer_CommittedBurstSize, BBFDM_BOTH},
 {"ExcessBurstSize", &DMWRITE, DMT_UNINT, get_QoSPolicer_ExcessBurstSize, set_QoSPolicer_ExcessBurstSize, BBFDM_BOTH},
@@ -2093,9 +2097,9 @@ DMLEAF tQoSQueueParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_QoSQueue_Enable, set_QoSQueue_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_QoSQueue_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_QoSQueue_Alias, set_QoSQueue_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_QoSQueue_Alias, set_QoSQueue_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {"TrafficClasses", &DMWRITE, DMT_STRING, get_QoSQueue_TrafficClasses, set_QoSQueue_TrafficClasses, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_QoSQueue_Interface, set_QoSQueue_Interface, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_QoSQueue_Interface, set_QoSQueue_Interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 //{"AllInterfaces", &DMWRITE, DMT_BOOL, get_QoSQueue_AllInterfaces, set_QoSQueue_AllInterfaces, BBFDM_BOTH},
 //{"HardwareAssisted", &DMREAD, DMT_BOOL, get_QoSQueue_HardwareAssisted, NULL, BBFDM_BOTH},
 //{"BufferLength", &DMREAD, DMT_UNINT, get_QoSQueue_BufferLength, NULL, BBFDM_BOTH},
@@ -2115,9 +2119,9 @@ DMLEAF tQoSQueueStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_QoSQueueStats_Enable, set_QoSQueueStats_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_QoSQueueStats_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_QoSQueueStats_Alias, set_QoSQueueStats_Alias, BBFDM_BOTH},
-{"Queue", &DMWRITE, DMT_STRING, get_QoSQueueStats_Queue, set_QoSQueueStats_Queue, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_QoSQueueStats_Interface, set_QoSQueueStats_Interface, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_QoSQueueStats_Alias, set_QoSQueueStats_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Queue", &DMWRITE, DMT_STRING, get_QoSQueueStats_Queue, set_QoSQueueStats_Queue, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
+{"Interface", &DMWRITE, DMT_STRING, get_QoSQueueStats_Interface, set_QoSQueueStats_Interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 {"OutputPackets", &DMREAD, DMT_UNINT, get_QoSQueueStats_OutputPackets, NULL, BBFDM_BOTH},
 {"OutputBytes", &DMREAD, DMT_UNINT, get_QoSQueueStats_OutputBytes, NULL, BBFDM_BOTH},
 {"DroppedPackets", &DMREAD, DMT_UNINT, get_QoSQueueStats_DroppedPackets, NULL, BBFDM_BOTH},
@@ -2132,8 +2136,8 @@ DMLEAF tQoSShaperParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_QoSShaper_Enable, set_QoSShaper_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_QoSShaper_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_QoSShaper_Alias, set_QoSShaper_Alias, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_QoSShaper_Interface, set_QoSShaper_Interface, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_QoSShaper_Alias, set_QoSShaper_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Interface", &DMWRITE, DMT_STRING, get_QoSShaper_Interface, set_QoSShaper_Interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 {"ShapingRate", &DMWRITE, DMT_INT, get_QoSShaper_ShapingRate, set_QoSShaper_ShapingRate, BBFDM_BOTH},
 {"ShapingBurstSize", &DMWRITE, DMT_UNINT, get_QoSShaper_ShapingBurstSize, set_QoSShaper_ShapingBurstSize, BBFDM_BOTH},
 {0}

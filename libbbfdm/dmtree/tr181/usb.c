@@ -474,9 +474,7 @@ static int get_USBInterface_Name(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_USBInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	const struct usb_interface *iface = (struct usb_interface *)data;
-
-	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", iface->iface_name, value);
+	adm_entry_get_reference_param(ctx, "Device.Ethernet.Interface.*.Name", ((struct usb_interface *)data)->iface_name, value);
 	return 0;
 }
 
@@ -852,8 +850,7 @@ out:
 
 static int get_USBUSBHostsHostDevice_USBPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct usb_port *port = (struct usb_port *)data;
-	adm_entry_get_linker_param(ctx, "Device.USB.Port.", port->folder_name, value);
+	adm_entry_get_reference_param(ctx, "Device.USB.Port.*.Name", ((struct usb_port *)data)->folder_name, value);
 	return 0;
 }
 
@@ -864,19 +861,28 @@ static int get_USBUSBHostsHostDevice_Rate(char *refparam, struct dmctx *ctx, voi
 
 static int get_USBUSBHostsHostDevice_Parent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct usb_port *port = (struct usb_port*)data;
+	struct usb_port *usbdev = (struct usb_port*)data;
 	char *host_inst, usb_host_path[128] = {0};
-	regex_t regex1 = {};
+	regex_t regex1 = {0};
+	size_t length;
 
 	regcomp(&regex1, "^[0-9][0-9]*-[0-9]*[0-9]\\.[0-9]*[0-9]$", 0);
-	if (regexec(&regex1, port->folder_name, 0, NULL, 0) != 0 || port->dmsect == NULL) {
+	if (regexec(&regex1, usbdev->folder_name, 0, NULL, 0) != 0 || usbdev->dmsect == NULL) {
 		*value = "";
 		goto out;
 	}
 
-	dmuci_get_value_by_section_string(port->dmsect, "usb_host_instance", &host_inst);
-	snprintf(usb_host_path, sizeof(usb_host_path), "Device.USB.USBHosts.Host.%s.Device.", host_inst);
-	adm_entry_get_linker_param(ctx, usb_host_path, port->folder_name, value);
+	char **filename = strsplit(usbdev->folder_name, "-", &length);
+	char **port = strsplit(filename[1], ".", &length);
+	if (!port || port[0] == NULL) {
+		*value = "";
+		goto out;
+	}
+
+	dmuci_get_value_by_section_string(usbdev->dmsect, "usb_host_instance", &host_inst);
+	snprintf(usb_host_path, sizeof(usb_host_path), "Device.USB.USBHosts.Host.%s.Device.*.DeviceNumber", host_inst);
+
+	adm_entry_get_reference_param(ctx, usb_host_path, port[0], value);
 
 out:
 	regfree(&regex1);
@@ -965,9 +971,9 @@ static int get_linker_usb_host_device(char *refparam, struct dmctx *dmctx, void 
 /* *** Device.USB. *** */
 DMOBJ tUSBObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Interface", &DMREAD, NULL, NULL, NULL, browseUSBInterfaceInst, NULL, NULL, tUSBInterfaceObj, tUSBInterfaceParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"Port", &DMREAD, NULL, NULL, NULL, browseUSBPortInst, NULL, NULL, NULL, tUSBPortParams, get_linker_usb_port, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"USBHosts", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUSBUSBHostsObj, tUSBUSBHostsParams, NULL, BBFDM_BOTH},
+{"Interface", &DMREAD, NULL, NULL, NULL, browseUSBInterfaceInst, NULL, NULL, tUSBInterfaceObj, tUSBInterfaceParams, NULL, BBFDM_BOTH, NULL},
+{"Port", &DMREAD, NULL, NULL, NULL, browseUSBPortInst, NULL, NULL, NULL, tUSBPortParams, get_linker_usb_port, BBFDM_BOTH, NULL},
+{"USBHosts", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUSBUSBHostsObj, tUSBUSBHostsParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -989,10 +995,10 @@ DMLEAF tUSBInterfaceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_USBInterface_Enable, set_USBInterface_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_USBInterface_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_USBInterface_Alias, set_USBInterface_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_USBInterface_Name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_USBInterface_Alias, set_USBInterface_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_USBInterface_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"LastChange", &DMREAD, DMT_UNINT, get_USBInterface_LastChange, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_USBInterface_LowerLayers, set_USBInterface_LowerLayers, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_USBInterface_LowerLayers, set_USBInterface_LowerLayers, BBFDM_BOTH, DM_FLAG_REFERENCE},
 //{"Upstream", &DMREAD, DMT_BOOL, get_USBInterface_Upstream, NULL, BBFDM_BOTH},
 {"MACAddress", &DMREAD, DMT_STRING, get_USBInterface_MACAddress, NULL, BBFDM_BOTH},
 {"MaxBitRate", &DMREAD, DMT_UNINT, get_USBInterface_MaxBitRate, NULL, BBFDM_BOTH},
@@ -1024,8 +1030,8 @@ DMLEAF tUSBInterfaceStatsParams[] = {
 /* *** Device.USB.Port.{i}. *** */
 DMLEAF tUSBPortParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_USBPort_Alias, set_USBPort_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_USBPort_Name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_USBPort_Alias, set_USBPort_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_USBPort_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Standard", &DMREAD, DMT_STRING, get_USBPort_Standard, NULL, BBFDM_BOTH},
 {"Type", &DMREAD, DMT_STRING, get_USBPort_Type, NULL, BBFDM_BOTH},
 //{"Receptacle", &DMREAD, DMT_STRING, get_USBPort_Receptacle, NULL, BBFDM_BOTH},
@@ -1037,7 +1043,7 @@ DMLEAF tUSBPortParams[] = {
 /* *** Device.USB.USBHosts. *** */
 DMOBJ tUSBUSBHostsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Host", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostInst, NULL, NULL, tUSBUSBHostsHostObj, tUSBUSBHostsHostParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Host", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostInst, NULL, NULL, tUSBUSBHostsHostObj, tUSBUSBHostsHostParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1050,15 +1056,15 @@ DMLEAF tUSBUSBHostsParams[] = {
 /* *** Device.USB.USBHosts.Host.{i}. *** */
 DMOBJ tUSBUSBHostsHostObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Device", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceInst, NULL, NULL, tUSBUSBHostsHostDeviceObj, tUSBUSBHostsHostDeviceParams, get_linker_usb_host_device, BBFDM_BOTH, LIST_KEY{"DeviceNumber", NULL}},
+{"Device", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceInst, NULL, NULL, tUSBUSBHostsHostDeviceObj, tUSBUSBHostsHostDeviceParams, get_linker_usb_host_device, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tUSBUSBHostsHostParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_USBUSBHostsHost_Alias, set_USBUSBHostsHost_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_USBUSBHostsHost_Alias, set_USBUSBHostsHost_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Enable", &DMWRITE, DMT_BOOL, get_USBUSBHostsHost_Enable, set_USBUSBHostsHost_Enable, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_USBUSBHostsHost_Name, NULL, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_USBUSBHostsHost_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Type", &DMREAD, DMT_STRING, get_USBUSBHostsHost_Type, NULL, BBFDM_BOTH},
 //{"Reset", &DMWRITE, DMT_BOOL, get_USBUSBHostsHost_Reset, set_USBUSBHostsHost_Reset, BBFDM_BOTH},
 {"PowerManagementEnable", &DMWRITE, DMT_BOOL, get_USBUSBHostsHost_PowerManagementEnable, set_USBUSBHostsHost_PowerManagementEnable, BBFDM_BOTH},
@@ -1070,13 +1076,13 @@ DMLEAF tUSBUSBHostsHostParams[] = {
 /* *** Device.USB.USBHosts.Host.{i}.Device.{i}. *** */
 DMOBJ tUSBUSBHostsHostDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Configuration", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInst, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationObj, tUSBUSBHostsHostDeviceConfigurationParams, NULL, BBFDM_BOTH, LIST_KEY{"ConfigurationNumber", NULL}},
+{"Configuration", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInst, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationObj, tUSBUSBHostsHostDeviceConfigurationParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tUSBUSBHostsHostDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"DeviceNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_DeviceNumber, NULL, BBFDM_BOTH},
+{"DeviceNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_DeviceNumber, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"USBVersion", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_USBVersion, NULL, BBFDM_BOTH},
 {"DeviceClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDevice_DeviceClass, NULL, BBFDM_BOTH},
 {"DeviceSubClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDevice_DeviceSubClass, NULL, BBFDM_BOTH},
@@ -1088,9 +1094,9 @@ DMLEAF tUSBUSBHostsHostDeviceParams[] = {
 {"ProductClass", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_ProductClass, NULL, BBFDM_BOTH},
 {"SerialNumber", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_SerialNumber, NULL, BBFDM_BOTH},
 {"Port", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_Port, NULL, BBFDM_BOTH},
-{"USBPort", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_USBPort, NULL, BBFDM_BOTH},
+{"USBPort", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_USBPort, NULL, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"Rate", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_Rate, NULL, BBFDM_BOTH},
-{"Parent", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_Parent, NULL, BBFDM_BOTH},
+{"Parent", &DMREAD, DMT_STRING, get_USBUSBHostsHostDevice_Parent, NULL, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"MaxChildren", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDevice_MaxChildren, NULL, BBFDM_BOTH},
 {"IsSuspended", &DMREAD, DMT_BOOL, get_USBUSBHostsHostDevice_IsSuspended, NULL, BBFDM_BOTH},
 //{"IsSelfPowered", &DMREAD, DMT_BOOL, get_USBUSBHostsHostDevice_IsSelfPowered, NULL, BBFDM_BOTH},
@@ -1101,13 +1107,13 @@ DMLEAF tUSBUSBHostsHostDeviceParams[] = {
 /* *** Device.USB.USBHosts.Host.{i}.Device.{i}.Configuration.{i}. *** */
 DMOBJ tUSBUSBHostsHostDeviceConfigurationObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Interface", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInterfaceInst, NULL, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationInterfaceParams, NULL, BBFDM_BOTH, LIST_KEY{"InterfaceNumber", NULL}},
+{"Interface", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceConfigurationInterfaceInst, NULL, NULL, NULL, tUSBUSBHostsHostDeviceConfigurationInterfaceParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
 DMLEAF tUSBUSBHostsHostDeviceConfigurationParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ConfigurationNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDeviceConfiguration_ConfigurationNumber, NULL, BBFDM_BOTH},
+{"ConfigurationNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDeviceConfiguration_ConfigurationNumber, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDeviceConfiguration_InterfaceNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1115,7 +1121,7 @@ DMLEAF tUSBUSBHostsHostDeviceConfigurationParams[] = {
 /* *** Device.USB.USBHosts.Host.{i}.Device.{i}.Configuration.{i}.Interface.{i}. *** */
 DMLEAF tUSBUSBHostsHostDeviceConfigurationInterfaceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"InterfaceNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceNumber, NULL, BBFDM_BOTH},
+{"InterfaceNumber", &DMREAD, DMT_UNINT, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceNumber, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"InterfaceClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceClass, NULL, BBFDM_BOTH},
 {"InterfaceSubClass", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceSubClass, NULL, BBFDM_BOTH},
 {"InterfaceProtocol", &DMREAD, DMT_HEXBIN, get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceProtocol, NULL, BBFDM_BOTH},

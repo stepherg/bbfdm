@@ -237,19 +237,17 @@ static int get_br_key_from_lower_layer(char *lower_layer, char *key, size_t s_ke
 	return 0;
 }
 
-int get_mcast_snooping_interface_val(struct dmctx *ctx, char *value, char *ifname, size_t s_ifname)
+int get_mcast_snooping_interface_val(struct dm_reference *reference_args, char *ifname, size_t s_ifname)
 {
 	/* Check if the value is valid or not. */
-	if (DM_LSTRNCMP(value, "Device.Bridging.Bridge.", 23) != 0)
+	if (DM_LSTRNCMP(reference_args->path, "Device.Bridging.Bridge.", 23) != 0)
 		return -1;
 
 	char key[10] = {0};
-	if (get_br_key_from_lower_layer(value, key, sizeof(key)) != 0)
+	if (get_br_key_from_lower_layer(reference_args->path, key, sizeof(key)) != 0)
 		return -1;
 
-	char *linker = NULL;
-	adm_entry_get_linker_value(ctx, value, &linker);
-	snprintf(ifname, s_ifname, "%s", linker);
+	snprintf(ifname, s_ifname, "%s", reference_args->value);
 
 	return 0;
 }
@@ -921,7 +919,7 @@ int set_mcast_snooping_aggregation(char *refparam, struct dmctx *ctx, void *data
 
 int get_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char val[16] = {0}, sec_name[16] = {0}; // taking 16 here is same as that is size of linux names usually supported
+	char val[16] = {0}; // taking 16 here is same as that is size of linux names usually supported
 	char *val1;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "interface", &val1);
@@ -938,24 +936,26 @@ int get_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, 
 	if (DM_LSTRCMP(tok, "br") != 0)
 		return 0;
 
-	DM_STRNCPY(sec_name, end, sizeof(sec_name));
 	// In the dmmap_bridge file, the details related to the instance id etc. associated with this bridge
 	// is stored, we now switch our focus to it to extract the necessary information.
-	adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", val1, value);
+	adm_entry_get_reference_param(ctx, "Device.Bridging.Bridge.*.Port.*.Name", val1, value);
 	return 0;
 }
 
 int set_mcast_snooping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char ifname[16];
+	struct dm_reference reference = {0};
+	char ifname[16] = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 	case VALUECHECK:
-		if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
+		if (bbfdm_validate_string_list(ctx, reference.path, -1, -1, 1024, -1, -1, NULL, NULL))
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		if (get_mcast_snooping_interface_val(ctx, value, ifname, sizeof(ifname)) != 0)
+		if (get_mcast_snooping_interface_val(&reference, ifname, sizeof(ifname)) != 0)
 			return -1;
 
 		dmuci_set_value_by_section((struct uci_section *)data, "interface", ifname);
@@ -1315,7 +1315,7 @@ static int get_igmp_cgrp_assoc_dev_no_of_entries(char *refparam, struct dmctx *c
 static int get_igmp_cgrp_adev_iface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *ifname = dmjson_get_value((json_object *)data, 1, "device");
-	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", ifname, value);
+	adm_entry_get_reference_param(ctx, "Device.Ethernet.Interface.*.Name", ifname, value);
 	return 0;
 }
 
@@ -1323,7 +1323,8 @@ static int get_igmp_cgrp_adev_host(char *refparam, struct dmctx *ctx, void *data
 {
 	char *ipaddr = dmjson_get_value((json_object *)data, 1, "ipaddr");
 	char *linker = get_host_linker(ipaddr);
-	adm_entry_get_linker_param(ctx, "Device.Hosts.Host.", linker, value);
+
+	adm_entry_get_reference_param(ctx, "Device.Hosts.Host.*.PhysAddress", linker, value);
 	return 0;
 }
 
@@ -1695,37 +1696,40 @@ static void set_igmpp_iface_val(void *data, char *instance, char *linker, char *
 static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *linker = NULL, *interface_linker = NULL;
+	struct dm_reference reference = {0};
+	char *interface_linker = NULL;
 	char ifname[16] = {0};
 	char *if_type = NULL;
 	struct uci_section *s = NULL;
 	bool is_br = false;
 
+
+	bbf_get_reference_args(value, &reference);
+
 	switch (action) {
 	case VALUECHECK:
-		if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+		if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 			return FAULT_9007;
 
-		if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+		if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 			return FAULT_9007;
 
 		break;
 	case VALUESET:
 		// First check if this is a bridge type interface
-		if (get_mcast_snooping_interface_val(ctx, value, ifname, sizeof(ifname)) == 0) {
+		if (get_mcast_snooping_interface_val(&reference, ifname, sizeof(ifname)) == 0) {
 			interface_linker = dmstrdup(ifname);
 			is_br = true;
 		} else {
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
+			if (DM_STRLEN(reference.value)) {
 				uci_foreach_sections("network", "interface", s) {
 
-					if (strcmp(section_name(s), linker) != 0)
+					if (strcmp(section_name(s), reference.value) != 0)
 						continue;
 
 					dmuci_get_value_by_section_string(s, "type", &if_type);
 					if (if_type && DM_LSTRCMP(if_type, "bridge") == 0) {
-						dmasprintf(&interface_linker, "br-%s", linker);
+						dmasprintf(&interface_linker, "br-%s", reference.value);
 						is_br = true;
 					} else {
 						dmuci_get_value_by_section_string(s, "device", &interface_linker);
@@ -1737,7 +1741,7 @@ static int set_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 			}
 		}
 
-		set_igmpp_iface_val(data, instance, linker, interface_linker, is_br);
+		set_igmpp_iface_val(data, instance, reference.value, interface_linker, is_br);
 		break;
 	}
 
@@ -1787,10 +1791,10 @@ static int get_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 			dmuci_get_value_by_section_string(interface_s, "proto", &proto);
 			if (proto && proto[0] != '\0') {
 				// It is a L3 bridge, get the linker accordingly
-				adm_entry_get_linker_param(ctx, "Device.IP.Interface.", sec_name, value);
+				adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", sec_name, value);
 			} else {
 				// It is a L2 bridge, get the linker accordingly
-				adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", igmpp_ifname, value);
+				adm_entry_get_reference_param(ctx, "Device.Bridging.Bridge.*.Port.*.Name", igmpp_ifname, value);
 			}
 			break;
 		}
@@ -1798,7 +1802,7 @@ static int get_igmpp_interface_iface(char *refparam, struct dmctx *ctx, void *da
 		// in case its a L3 interface, the ifname would be section name of network file in the dmmap file,
 		// which infact is the linker, just use that directly.
 
-		adm_entry_get_linker_param(ctx, "Device.IP.Interface.", igmpp_ifname, value);
+		adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", igmpp_ifname, value);
 	}
 
 end:
@@ -1984,8 +1988,8 @@ DMLEAF IGMPSnoopingFilterParams[] = {
 };
 
 DMLEAF IGMPSnoopingClientGroupAssociatedDeviceParams[] = {
-{"Interface", &DMREAD, DMT_STRING, get_igmp_cgrp_adev_iface, NULL, BBFDM_BOTH},
-{"Host", &DMREAD, DMT_STRING, get_igmp_cgrp_adev_host, NULL, BBFDM_BOTH},
+{"Interface", &DMREAD, DMT_STRING, get_igmp_cgrp_adev_iface, NULL, BBFDM_BOTH, DM_FLAG_REFERENCE},
+{"Host", &DMREAD, DMT_STRING, get_igmp_cgrp_adev_host, NULL, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"Timeout", &DMREAD, DMT_UNINT, get_igmp_cgrp_adev_timeout, NULL, BBFDM_BOTH},
 {0}
 };
@@ -2005,7 +2009,7 @@ DMLEAF X_IOPSYS_EU_IGMPSnoopingParams[] = {
 {"Version", &DMWRITE, DMT_STRING, get_igmp_version, set_igmp_version, BBFDM_BOTH},
 {"Robustness", &DMWRITE, DMT_UNINT, get_mcast_snooping_robustness, set_mcast_snooping_robustness, BBFDM_BOTH},
 {"Aggregation", &DMWRITE, DMT_BOOL, get_mcast_snooping_aggregation, set_mcast_snooping_aggregation, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_mcast_snooping_interface, set_mcast_snooping_interface, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_mcast_snooping_interface, set_mcast_snooping_interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"Mode", &DMWRITE, DMT_STRING, get_mcast_snooping_mode, set_mcast_snooping_mode, BBFDM_BOTH},
 {"LastMemberQueryInterval", &DMWRITE, DMT_UNINT, get_mcasts_last_mq_interval, set_mcasts_last_mq_interval, BBFDM_BOTH},
 {"ImmediateLeave", &DMWRITE, DMT_BOOL, get_mcasts_fast_leave, set_mcasts_fast_leave, BBFDM_BOTH},
@@ -2057,7 +2061,7 @@ DMLEAF IGMPProxyClientGroupStatsParams[] = {
 };
 
 DMLEAF IGMPProxyInterfaceParams[] = {
-{"Interface", &DMWRITE, DMT_STRING, get_igmpp_interface_iface, set_igmpp_interface_iface, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_igmpp_interface_iface, set_igmpp_interface_iface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"Upstream", &DMWRITE, DMT_BOOL, get_mcastp_interface_upstream, set_igmpp_interface_upstream, BBFDM_BOTH},
 {"SnoopingMode", &DMWRITE, DMT_STRING, get_mcastp_iface_snoop_mode, set_mcastp_iface_snoop_mode, BBFDM_BOTH},
 {0}

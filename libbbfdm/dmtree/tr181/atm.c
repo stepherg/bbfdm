@@ -266,31 +266,38 @@ static int set_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 
 static int get_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = NULL;
-	char atm_file[128];
+	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->dmmap_section, "LowerLayers", value);
 
-	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->dmmap_section, "atm_ll_link", &linker);
-	adm_entry_get_linker_param(ctx, "Device.DSL.Channel.", linker, value);
-	if (*value != NULL && (*value)[0] != '\0')
-		return 0;
+	if ((*value)[0] == '\0') {
+		char atm_file[128];
 
-	snprintf(atm_file, sizeof(atm_file), "/sys/class/net/atm%ld", DM_STRTOL(instance) - 1);
-	if (folder_exists(atm_file)) {
-		*value = "Device.DSL.Channel.1";
-		dmuci_set_value_by_section((((struct atm_args *)data)->sections)->dmmap_section, "atm_ll_link", "dsl_channel_1");
+		snprintf(atm_file, sizeof(atm_file), "/sys/class/net/atm%ld", DM_STRTOL(instance) - 1);
+		if (folder_exists(atm_file))
+			adm_entry_get_reference_param(ctx, "Device.DSL.Channel.*.Name", instance, value);
+
+		// Store LowerLayers value
+		dmuci_set_value_by_section((((struct atm_args *)data)->sections)->dmmap_section, "LowerLayers", *value);
+	} else {
+		if (!adm_entry_object_exists(ctx, *value))
+			*value = "";
 	}
+
 	return 0;
 }
 
 static int set_atm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
+
 	switch (action) {
 		case VALUECHECK:
-			if (DM_LSTRNCMP(value, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0)
+			if (DM_LSTRNCMP(reference.path, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0)
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct atm_args *)data)->sections)->dmmap_section, "atm_ll_link", "dsl_channel_1");
+			dmuci_set_value_by_section((((struct atm_args *)data)->sections)->dmmap_section, "LowerLayers", reference.path);
 			break;
 	}
 	return 0;
@@ -382,7 +389,7 @@ static int set_atm_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 /*** ATM. ***/
 DMOBJ tATMObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Link", &DMWRITE, add_atm_link, delete_atm_link, NULL, browseAtmLinkInst, NULL, NULL, tATMLinkObj, tATMLinkParams, get_atm_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Link", &DMWRITE, add_atm_link, delete_atm_link, NULL, browseAtmLinkInst, NULL, NULL, tATMLinkObj, tATMLinkParams, get_atm_linker, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -395,11 +402,11 @@ DMOBJ tATMLinkObj[] = {
 
 DMLEAF tATMLinkParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_atm_alias, set_atm_alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_atm_alias, set_atm_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Enable", &DMWRITE, DMT_BOOL, get_atm_enable, set_atm_enable, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_atm_link_name, NULL, BBFDM_BOTH},
+{"Name", &DMREAD, DMT_STRING, get_atm_link_name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {"Status", &DMREAD, DMT_STRING, get_atm_status, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_atm_lower_layer, set_atm_lower_layer, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_atm_lower_layer, set_atm_lower_layer, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"LinkType", &DMWRITE, DMT_STRING, get_atm_link_type, set_atm_link_type, BBFDM_BOTH},
 {"DestinationAddress", &DMWRITE, DMT_STRING, get_atm_destination_address, set_atm_destination_address, BBFDM_BOTH},
 {"Encapsulation", &DMWRITE, DMT_STRING, get_atm_encapsulation, set_atm_encapsulation, BBFDM_BOTH},

@@ -62,26 +62,29 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 static int get_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("ipping", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
 static int set_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("ipping");
-			set_diagnostics_interface_option(ctx, "ipping", value);
+			set_diagnostics_option("ipping", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -295,26 +298,29 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 static int get_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("traceroute", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
 static int set_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("traceroute");
-			set_diagnostics_interface_option(ctx, "traceroute", value);
+			set_diagnostics_option("traceroute", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -537,26 +543,29 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 static int get_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("download", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
 static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("download");
-			set_diagnostics_interface_option(ctx, "download", value);
+			set_diagnostics_option("download", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -863,26 +872,29 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 static int get_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("upload", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
 static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("upload");
-			set_diagnostics_interface_option(ctx, "upload", value);
+			set_diagnostics_option("upload", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -1205,26 +1217,29 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 static int get_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("udpechodiag", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
 static int set_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("udpechodiag");
-			set_diagnostics_interface_option(ctx, "udpechodiag", value);
+			set_diagnostics_option("udpechodiag", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -1462,26 +1477,29 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 static int get_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = get_diagnostics_option("serverselection", "interface");
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
 static int set_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("serverselection");
-			set_diagnostics_interface_option(ctx, "serverselection", value);
+			set_diagnostics_option("serverselection", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -2414,7 +2432,7 @@ DMLEAF tIPDiagnosticsParams[] = {
 DMLEAF tIPDiagnosticsIPPingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"DiagnosticsState", &DMWRITE, DMT_STRING, get_ip_ping_diagnostics_state, set_ip_ping_diagnostics_state, BBFDM_CWMP},
-{"Interface", &DMWRITE, DMT_STRING, get_ip_ping_interface, set_ip_ping_interface, BBFDM_CWMP},
+{"Interface", &DMWRITE, DMT_STRING, get_ip_ping_interface, set_ip_ping_interface, BBFDM_CWMP, DM_FLAG_REFERENCE},
 {"ProtocolVersion", &DMWRITE, DMT_STRING, get_ip_ping_protocolversion, set_ip_ping_protocolversion, BBFDM_CWMP},
 {"Host", &DMWRITE, DMT_STRING, get_ip_ping_host, set_ip_ping_host, BBFDM_CWMP},
 {"NumberOfRepetitions", &DMWRITE, DMT_UNINT, get_ip_ping_repetition_number, set_ip_ping_repetition_number, BBFDM_CWMP},
@@ -2443,7 +2461,7 @@ DMOBJ tIPDiagnosticsTraceRouteObj[] = {
 DMLEAF tIPDiagnosticsTraceRouteParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"DiagnosticsState", &DMWRITE, DMT_STRING, get_IPDiagnosticsTraceRoute_DiagnosticsState, set_IPDiagnosticsTraceRoute_DiagnosticsState, BBFDM_CWMP},
-{"Interface", &DMWRITE, DMT_STRING, get_IPDiagnosticsTraceRoute_Interface, set_IPDiagnosticsTraceRoute_Interface, BBFDM_CWMP},
+{"Interface", &DMWRITE, DMT_STRING, get_IPDiagnosticsTraceRoute_Interface, set_IPDiagnosticsTraceRoute_Interface, BBFDM_CWMP, DM_FLAG_REFERENCE},
 {"ProtocolVersion", &DMWRITE, DMT_STRING, get_IPDiagnosticsTraceRoute_ProtocolVersion, set_IPDiagnosticsTraceRoute_ProtocolVersion, BBFDM_CWMP},
 {"Host", &DMWRITE, DMT_STRING, get_IPDiagnosticsTraceRoute_Host, set_IPDiagnosticsTraceRoute_Host, BBFDM_CWMP},
 {"NumberOfTries", &DMWRITE, DMT_UNINT, get_IPDiagnosticsTraceRoute_NumberOfTries, set_IPDiagnosticsTraceRoute_NumberOfTries, BBFDM_CWMP},
@@ -2477,7 +2495,7 @@ DMOBJ tIPDiagnosticsDownloadDiagnosticsObj[] = {
 DMLEAF tIPDiagnosticsDownloadDiagnosticsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"DiagnosticsState", &DMWRITE, DMT_STRING, get_IPDiagnosticsDownloadDiagnostics_DiagnosticsState, set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState, BBFDM_CWMP},
-{"Interface", &DMWRITE, DMT_STRING, get_IPDiagnosticsDownloadDiagnostics_Interface, set_IPDiagnosticsDownloadDiagnostics_Interface, BBFDM_CWMP},
+{"Interface", &DMWRITE, DMT_STRING, get_IPDiagnosticsDownloadDiagnostics_Interface, set_IPDiagnosticsDownloadDiagnostics_Interface, BBFDM_CWMP, DM_FLAG_REFERENCE},
 {"DownloadURL", &DMWRITE, DMT_STRING, get_IPDiagnosticsDownloadDiagnostics_DownloadURL, set_IPDiagnosticsDownloadDiagnostics_DownloadURL, BBFDM_CWMP},
 {"DownloadTransports", &DMREAD, DMT_STRING, get_IPDiagnosticsDownloadDiagnostics_DownloadTransports, NULL, BBFDM_CWMP},
 {"DownloadDiagnosticMaxConnections", &DMREAD, DMT_UNINT, get_IPDiagnosticsDownloadDiagnostics_DownloadDiagnosticMaxConnections,NULL, BBFDM_CWMP},
@@ -2527,7 +2545,7 @@ DMOBJ tIPDiagnosticsUploadDiagnosticsObj[] = {
 DMLEAF tIPDiagnosticsUploadDiagnosticsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"DiagnosticsState", &DMWRITE, DMT_STRING, get_IPDiagnosticsUploadDiagnostics_DiagnosticsState, set_IPDiagnosticsUploadDiagnostics_DiagnosticsState, BBFDM_CWMP},
-{"Interface", &DMWRITE, DMT_STRING, get_IPDiagnosticsUploadDiagnostics_Interface, set_IPDiagnosticsUploadDiagnostics_Interface, BBFDM_CWMP},
+{"Interface", &DMWRITE, DMT_STRING, get_IPDiagnosticsUploadDiagnostics_Interface, set_IPDiagnosticsUploadDiagnostics_Interface, BBFDM_CWMP, DM_FLAG_REFERENCE},
 {"UploadURL", &DMWRITE, DMT_STRING, get_IPDiagnosticsUploadDiagnostics_UploadURL, set_IPDiagnosticsUploadDiagnostics_UploadURL, BBFDM_CWMP},
 {"UploadTransports", &DMREAD, DMT_STRING, get_IPDiagnosticsUploadDiagnostics_UploadTransports, NULL, BBFDM_CWMP},
 {"DSCP", &DMWRITE, DMT_UNINT, get_IPDiagnosticsUploadDiagnostics_DSCP, set_IPDiagnosticsUploadDiagnostics_DSCP, BBFDM_CWMP},
@@ -2571,7 +2589,7 @@ DMLEAF tIPDiagnosticsUploadDiagnosticsPerConnectionResultParams[] = {
 DMLEAF tIPDiagnosticsUDPEchoDiagnosticsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"DiagnosticsState", &DMWRITE, DMT_STRING, get_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState, set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState, BBFDM_CWMP},
-{"Interface", &DMWRITE, DMT_STRING, get_IPDiagnosticsUDPEchoDiagnostics_Interface, set_IPDiagnosticsUDPEchoDiagnostics_Interface, BBFDM_CWMP},
+{"Interface", &DMWRITE, DMT_STRING, get_IPDiagnosticsUDPEchoDiagnostics_Interface, set_IPDiagnosticsUDPEchoDiagnostics_Interface, BBFDM_CWMP, DM_FLAG_REFERENCE},
 {"Host", &DMWRITE, DMT_STRING, get_IPDiagnosticsUDPEchoDiagnostics_Host, set_IPDiagnosticsUDPEchoDiagnostics_Host, BBFDM_CWMP},
 {"Port", &DMWRITE, DMT_UNINT, get_IPDiagnosticsUDPEchoDiagnostics_Port, set_IPDiagnosticsUDPEchoDiagnostics_Port, BBFDM_CWMP},
 {"NumberOfRepetitions", &DMWRITE, DMT_UNINT, get_IPDiagnosticsUDPEchoDiagnostics_NumberOfRepetitions, set_IPDiagnosticsUDPEchoDiagnostics_NumberOfRepetitions, BBFDM_CWMP},
@@ -2593,7 +2611,7 @@ DMLEAF tIPDiagnosticsUDPEchoDiagnosticsParams[] = {
 DMLEAF tIPDiagnosticsServerSelectionDiagnosticsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"DiagnosticsState", &DMWRITE, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState, set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState, BBFDM_CWMP},
-{"Interface", &DMWRITE, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_Interface, set_IPDiagnosticsServerSelectionDiagnostics_Interface, BBFDM_CWMP},
+{"Interface", &DMWRITE, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_Interface, set_IPDiagnosticsServerSelectionDiagnostics_Interface, BBFDM_CWMP, DM_FLAG_REFERENCE},
 {"ProtocolVersion", &DMWRITE, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_ProtocolVersion, set_IPDiagnosticsServerSelectionDiagnostics_ProtocolVersion, BBFDM_CWMP},
 {"Protocol", &DMWRITE, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_Protocol, set_IPDiagnosticsServerSelectionDiagnostics_Protocol, BBFDM_CWMP},
 {"HostList", &DMWRITE, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_HostList, set_IPDiagnosticsServerSelectionDiagnostics_HostList, BBFDM_CWMP},

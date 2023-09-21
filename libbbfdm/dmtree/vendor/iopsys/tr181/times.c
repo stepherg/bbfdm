@@ -24,8 +24,8 @@ static int get_time_source_interface(char *refparam, struct dmctx *ctx, void *da
 	char *iface = NULL;
 
 	dmuci_get_option_value_string("system", "ntp", "interface", &iface);
-
-	return bbf_get_reference_param("Device.IP.Interface.", "Name", iface, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", iface, value);
+	return 0;
 }
 
 static int set_time_source_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -37,7 +37,7 @@ static int set_time_source_interface(char *refparam, struct dmctx *ctx, void *da
 
 	switch (action) {
 		case VALUECHECK:
-			if (dm_entry_validate_allowed_objects(ctx, reference.path, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 			break;
 		case VALUESET:

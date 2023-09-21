@@ -329,8 +329,8 @@ static int get_GRETunnelInterfaceStats_ErrorsReceived(char *refparam, struct dmc
 /* *** Device.GRE. *** */
 DMOBJ tGREObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Tunnel", &DMWRITE, addObjGRETunnel, delObjGRETunnel, NULL, browseGRETunnelInst, NULL, NULL, tGRETunnelObj, tGRETunnelParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-//{"Filter", &DMWRITE, addObjGREFilter, delObjGREFilter, NULL, browseGREFilterInst, NULL, NULL, NULL, tGREFilterParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"Tunnel", &DMWRITE, addObjGRETunnel, delObjGRETunnel, NULL, browseGRETunnelInst, NULL, NULL, tGRETunnelObj, tGRETunnelParams, NULL, BBFDM_BOTH, NULL},
+//{"Filter", &DMWRITE, addObjGREFilter, delObjGREFilter, NULL, browseGREFilterInst, NULL, NULL, NULL, tGREFilterParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -345,7 +345,7 @@ DMLEAF tGREParams[] = {
 DMOBJ tGRETunnelObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Stats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGRETunnelStatsParams, NULL, BBFDM_BOTH, NULL},
-{"Interface", &DMWRITE, addObjGRETunnelInterface, delObjGRETunnelInterface, NULL, browseGRETunnelInterfaceInst, NULL, NULL, tGRETunnelInterfaceObj, tGRETunnelInterfaceParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Interface", &DMWRITE, addObjGRETunnelInterface, delObjGRETunnelInterface, NULL, browseGRETunnelInterfaceInst, NULL, NULL, tGRETunnelInterfaceObj, tGRETunnelInterfaceParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -353,7 +353,7 @@ DMLEAF tGRETunnelParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 //{"Enable", &DMWRITE, DMT_BOOL, get_GRETunnel_Enable, set_GRETunnel_Enable, BBFDM_BOTH},
 //{"Status", &DMREAD, DMT_STRING, get_GRETunnel_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_GRETunnel_Alias, set_GRETunnel_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_GRETunnel_Alias, set_GRETunnel_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"RemoteEndpoints", &DMWRITE, DMT_STRING, get_GRETunnel_RemoteEndpoints, set_GRETunnel_RemoteEndpoints, BBFDM_BOTH},
 //{"KeepAlivePolicy", &DMWRITE, DMT_STRING, get_GRETunnel_KeepAlivePolicy, set_GRETunnel_KeepAlivePolicy, BBFDM_BOTH},
 //{"KeepAliveTimeout", &DMWRITE, DMT_UNINT, get_GRETunnel_KeepAliveTimeout, set_GRETunnel_KeepAliveTimeout, BBFDM_BOTH},
@@ -390,8 +390,8 @@ DMLEAF tGRETunnelInterfaceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 //{"Enable", &DMWRITE, DMT_BOOL, get_GRETunnelInterface_Enable, set_GRETunnelInterface_Enable, BBFDM_BOTH},
 //{"Status", &DMREAD, DMT_STRING, get_GRETunnelInterface_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_GRETunnelInterface_Alias, set_GRETunnelInterface_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_GRETunnelInterface_Name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_GRETunnelInterface_Alias, set_GRETunnelInterface_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_GRETunnelInterface_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"LastChange", &DMREAD, DMT_UNINT, get_GRETunnelInterface_LastChange, NULL, BBFDM_BOTH},
 //{"LowerLayers", &DMWRITE, DMT_STRING, get_GRETunnelInterface_LowerLayers, set_GRETunnelInterface_LowerLayers, BBFDM_BOTH},
 //{"ProtocolIdOverride", &DMWRITE, DMT_UNINT, get_GRETunnelInterface_ProtocolIdOverride, set_GRETunnelInterface_ProtocolIdOverride, BBFDM_BOTH},

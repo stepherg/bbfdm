@@ -32,6 +32,8 @@ extern struct dm_permession_s DMASYNC;
 
 extern char *DMT_TYPE[];
 
+extern bool is_micro_service;
+
 #ifndef BBF_MAX_OBJECT_INSTANCES
 #define BBF_MAX_OBJECT_INSTANCES (255)
 #endif
@@ -76,7 +78,7 @@ do { \
 
 #define UBUS_ARGS (struct ubus_arg[])
 #define RANGE_ARGS (struct range_args[])
-#define LIST_KEY (const char *[])
+#define LIST_KEY (const char *[]) // To be removed later!!!!!!!!!!!!
 
 #define DMPARAM_ARGS \
 	struct dmctx *dmctx, \
@@ -139,7 +141,7 @@ typedef struct dm_obj_s {
 	struct dm_leaf_s *leaf;
 	int (*get_linker)(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker);
 	int bbfdm_type;
-	const char **unique_keys;
+	const char **unique_keys; // To be removed later!!!!!!!!!!!!
 } DMOBJ;
 
 struct dm_parameter {
@@ -240,7 +242,8 @@ typedef struct {
 
 enum dm_flags_enum {
 	DM_FLAG_REFERENCE = 1,
-	DM_FLAG_UNIQUE = 1<<1
+	DM_FLAG_UNIQUE = 1<<1,
+	DM_FLAG_LINKER = 1<<2
 };
 
 enum set_value_action {

@@ -978,10 +978,7 @@ static int get_DSLChannel_Name(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_DSLChannel_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char linker[8];
-
-	snprintf(linker, sizeof(linker), "line_%s", ((struct dsl_line_args *)data)->id);
-	adm_entry_get_linker_param(ctx, "Device.DSL.Line.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.DSL.Line.*.Name", ((struct dsl_line_args *)data)->id, value);
 	return 0;
 }
 
@@ -1432,8 +1429,8 @@ static int get_DSLChannelStatsQuarterHour_XTUCCRCErrors(char *refparam, struct d
 /* *** Device.DSL. *** */
 DMOBJ tDSLObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Line", &DMREAD, NULL, NULL, NULL, browseDSLLineInst, NULL, NULL, tDSLLineObj, tDSLLineParams, get_dsl_line_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"Channel", &DMREAD, NULL, NULL, NULL, browseDSLChannelInst, NULL, NULL, tDSLChannelObj, tDSLChannelParams, get_dsl_channel_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Line", &DMREAD, NULL, NULL, NULL, browseDSLLineInst, NULL, NULL, tDSLLineObj, tDSLLineParams, get_dsl_line_linker, BBFDM_BOTH, NULL},
+{"Channel", &DMREAD, NULL, NULL, NULL, browseDSLChannelInst, NULL, NULL, tDSLChannelObj, tDSLChannelParams, get_dsl_channel_linker, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1455,8 +1452,8 @@ DMLEAF tDSLLineParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_DSLLine_Enable, set_DSLLine_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_DSLLine_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DSLLine_Alias, set_DSLLine_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_DSLLine_Name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DSLLine_Alias, set_DSLLine_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_DSLLine_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"LowerLayers", &DMWRITE, DMT_STRING, get_DSLLine_LowerLayers, set_DSLLine_LowerLayers, BBFDM_BOTH},
 {"Upstream", &DMREAD, DMT_BOOL, get_DSLLine_Upstream, NULL, BBFDM_BOTH},
 {"FirmwareVersion", &DMREAD, DMT_STRING, get_DSLLine_FirmwareVersion, NULL, BBFDM_BOTH},
@@ -1585,9 +1582,9 @@ DMLEAF tDSLChannelParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_DSLChannel_Enable, set_DSLChannel_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_DSLChannel_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DSLChannel_Alias, set_DSLChannel_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_DSLChannel_Name, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMREAD, DMT_STRING, get_DSLChannel_LowerLayers, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DSLChannel_Alias, set_DSLChannel_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_DSLChannel_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"LowerLayers", &DMREAD, DMT_STRING, get_DSLChannel_LowerLayers, NULL, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"LinkEncapsulationSupported", &DMREAD, DMT_STRING, get_DSLChannel_LinkEncapsulationSupported, NULL, BBFDM_BOTH},
 {"LinkEncapsulationUsed", &DMREAD, DMT_STRING, get_DSLChannel_LinkEncapsulationUsed, NULL, BBFDM_BOTH},
 {"LPATH", &DMREAD, DMT_UNINT, get_DSLChannel_LPATH, NULL, BBFDM_BOTH},

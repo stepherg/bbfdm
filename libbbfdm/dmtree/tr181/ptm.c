@@ -170,69 +170,49 @@ static int get_ptm_link_name(char *refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
-static int find_lower_layer_by_dmmap_link(struct dmctx *ctx, void *data, char* dm_object, char **value)
-{
-	char *linker = NULL;
-
-	dmuci_get_value_by_section_string((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", &linker);
-	adm_entry_get_linker_param(ctx, dm_object, linker, value);
-	return 0;
-}
-
-static int get_ptm_dsl_channel(struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	char *ptm_file = NULL;
-
-	dmasprintf(&ptm_file, "/sys/class/net/ptm%ld", DM_STRTOL(instance) - 1);
-	if (folder_exists(ptm_file)) {
-		*value = "Device.DSL.Channel.1";
-		dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", "fast_line_1");
-	}
-
-	return 0;
-}
-
-static int get_ptm_fast_line(struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	json_object *res = NULL, *line_obj = NULL;
-
-	dmubus_call("fast", "status", UBUS_ARGS{0}, 0, &res);
-	if (!res)
-		return 0;
-	line_obj = dmjson_select_obj_in_array_idx(res, 0, 1, "line");
-	if (!line_obj)
-		return 0;
-	if ( DM_LSTRCMP(dmjson_get_value(line_obj, 1, "status"), "up") == 0) {
-		*value = "Device.FAST.Line.1";
-		dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", "fast_line_1");
-	}
-	return 0;
-}
-
 static int get_ptm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	get_ptm_fast_line(ctx, data, instance, value);
-	if (*value == NULL || (*value)[0] == '\0')
-		get_ptm_dsl_channel(ctx, data, instance, value);
-	if (*value == NULL || (*value)[0] == '\0')
-		find_lower_layer_by_dmmap_link(ctx, data, "Device.FAST.Line.", value);
-	if (*value == NULL || (*value)[0] == '\0')
-		find_lower_layer_by_dmmap_link(ctx, data, "Device.DSL.Channel.", value);
+	dmuci_get_value_by_section_string((((struct ptm_args *)data)->sections)->dmmap_section, "LowerLayers", value);
+
+	if ((*value)[0] == '\0') {
+		char ptm_file[128] = {0};
+
+		adm_entry_get_reference_param(ctx, "Device.FAST.Line.*.Status", "Up", value);
+		if (DM_STRLEN(*value))
+			return 0;
+
+		snprintf(ptm_file, sizeof(ptm_file), "/sys/class/net/ptm%ld", DM_STRTOL(instance) - 1);
+		if (folder_exists(ptm_file)) {
+			adm_entry_get_reference_param(ctx, "Device.DSL.Channel.*.Name", "1", value);
+			if (DM_STRLEN(*value))
+				return 0;
+		}
+
+		adm_entry_get_reference_param(ctx, "Device.FAST.Line.*.Name", "1", value);
+
+		// Store LowerLayers value
+		dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "LowerLayers", *value);
+	} else {
+		if (!adm_entry_object_exists(ctx, *value))
+			*value = "";
+	}
+
 	return 0;
 }
 
 static int set_ptm_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
+
 	switch (action) {
 		case VALUECHECK:
-			if (DM_LSTRNCMP(value, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0 && DM_LSTRNCMP(value, "Device.FAST.Line.1", strlen("Device.FAST.Line.1")) != 0)
+			if (DM_LSTRNCMP(reference.path, "Device.DSL.Channel.1", strlen("Device.DSL.Channel.1")) != 0 && DM_LSTRNCMP(reference.path, "Device.FAST.Line.1", strlen("Device.FAST.Line.1")) != 0)
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			if (DM_LSTRCMP(value, "Device.DSL.Channel.1") == 0)
-				dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", "dsl_channel_1");
-			else
-				dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "ptm_ll_link", "fast_line_1");
+			dmuci_set_value_by_section((((struct ptm_args *)data)->sections)->dmmap_section, "LowerLayers", reference.path);
 			break;
 	}
 	return 0;
@@ -279,7 +259,7 @@ static int get_ptm_stats_pack_sent(char *refparam, struct dmctx *ctx, void *data
 /* *** Device.PTM. *** */
 DMOBJ tPTMObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Link", &DMWRITE, add_ptm_link, delete_ptm_link, NULL, browsePtmLinkInst, NULL, NULL, tPTMLinkObj, tPTMLinkParams, get_ptm_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Link", &DMWRITE, add_ptm_link, delete_ptm_link, NULL, browsePtmLinkInst, NULL, NULL, tPTMLinkObj, tPTMLinkParams, get_ptm_linker, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -294,9 +274,9 @@ DMLEAF tPTMLinkParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_ptm_enable, set_ptm_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_ptm_status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_ptm_alias, set_ptm_alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_ptm_link_name, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_ptm_lower_layer, set_ptm_lower_layer, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_ptm_alias, set_ptm_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_ptm_link_name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_ptm_lower_layer, set_ptm_lower_layer, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {0}
 };
 

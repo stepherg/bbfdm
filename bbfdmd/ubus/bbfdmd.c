@@ -1513,6 +1513,8 @@ int main(int argc, char **argv)
 		}
 	}
 
+	is_micro_service = input_json ? true : false;
+
 	if (!input_json) // It's not a micro-service instance
 		signal_init();
 

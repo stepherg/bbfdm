@@ -194,8 +194,12 @@ int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, c
 		return -1;
 
 	dmuci_get_value_by_section_string(s, option_name, value);
-	if ((*value)[0] == '\0')
+	if ((*value)[0] == '\0') {
 		dmasprintf(value, "cpe-%s", instance);
+
+		// Store Alias value
+		dmuci_set_value_by_section(s, option_name, *value);
+	}
 
 	return 0;
 }

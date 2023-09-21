@@ -55,22 +55,6 @@ struct Supported_Data_Models Data_Models[] = {
 {"http://www.broadband-forum.org/cwmp/tr-157-1-3-0.xml","urn:broadband-forum-org:tr-157-1-3-0", "Bulkdata,SoftwareModules"},
 };
 
-/**************************************************************************
-* LINKER
-***************************************************************************/
-static int get_device_fwimage_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	char *id = dmjson_get_value((json_object *)data, 1, "id");
-	dmasprintf(linker, "fw_image:%s", id);
-	return 0;
-}
-
-static int get_linker_process(char* refparam, struct dmctx *ctx, void *data, char *instance, char **linker)
-{
-	*linker = data ? ((struct process_entry *)data)->pid : "";
-	return 0;
-}
-
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
@@ -571,79 +555,75 @@ static int get_device_softwareversion(char *refparam, struct dmctx *ctx, void *d
 static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *bank_obj = NULL, *arrobj = NULL;
-	char *active = NULL, *id = NULL;
-	char linker[32];
+	char *linker = NULL;
 	int i = 0;
 
 	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
-		active = dmjson_get_value(bank_obj, 1, "active");
+		char *active = dmjson_get_value(bank_obj, 1, "active");
 		if (active && DM_LSTRCMP(active, "true") == 0) {
-			id = dmjson_get_value(bank_obj, 1, "id");
+			linker = dmjson_get_value(bank_obj, 1, "id");
 			break;
 		}
 	}
 
-	snprintf(linker, sizeof(linker), "fw_image:%s", id ? id : "");
-	adm_entry_get_linker_param(ctx, "Device.DeviceInfo.FirmwareImage.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.DeviceInfo.FirmwareImage.*.Alias", linker, value);
 	return 0;
 }
 
 static int get_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *bank_obj = NULL, *arrobj = NULL;
-	char *boot = NULL, *id = NULL;
-	char linker[32];
+	char *linker = NULL;
 	int i = 0;
 
 	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
-		boot = dmjson_get_value(bank_obj, 1, "boot");
+		char *boot = dmjson_get_value(bank_obj, 1, "boot");
 		if (boot && DM_LSTRCMP(boot, "true") == 0) {
-			id = dmjson_get_value(bank_obj, 1, "id");
+			linker = dmjson_get_value(bank_obj, 1, "id");
 			break;
 		}
 	}
 
-	snprintf(linker, sizeof(linker), "fw_image:%s", id ? id : "");
-	adm_entry_get_linker_param(ctx, "Device.DeviceInfo.FirmwareImage.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.DeviceInfo.FirmwareImage.*.Alias", linker, value);
 	return 0;
 }
 
 static int set_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.DeviceInfo.FirmwareImage.", NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker) {
+			if (DM_STRLEN(reference.value)) {
 				struct uci_section *dmmap_s = NULL;
+				json_object *res = NULL;
 				char *available = NULL;
 
-				get_dmmap_section_of_config_section_eq("dmmap_fw_image", "fw_image", "name", linker, &dmmap_s);
+				char *bank_id = reference.value;
+
+				get_dmmap_section_of_config_section_cont("dmmap_fw_image", "fw_image", "id", bank_id, &dmmap_s);
 				dmuci_get_value_by_section_string(dmmap_s, "available", &available);
 				if (DM_LSTRCMP(available, "false") == 0)
 					return FAULT_9001;
 
-				char *bank_id = DM_STRCHR(linker, ':');
-				if (bank_id) {
-					json_object *res = NULL;
+				dmubus_call("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id, Integer}}, 1, &res);
+				char *success = dmjson_get_value(res, 1, "success");
+				if (DM_LSTRCMP(success, "true") != 0)
+					return FAULT_9001;
 
-					dmubus_call("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id+1, Integer}}, 1, &res);
-					char *success = dmjson_get_value(res, 1, "success");
-					if (DM_LSTRCMP(success, "true") != 0)
-						return FAULT_9001;
-				}
 			}
 			break;
 	}
@@ -992,47 +972,12 @@ static int get_DeviceInfoSupportedDataModel_Features(char *refparam, struct dmct
 
 static int get_DeviceInfoFirmwareImage_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	char name[32] = {0};
-	char *id = NULL;
-
-	id = dmjson_get_value((json_object *)data, 1, "id");
-	snprintf(name, sizeof(name), "fw_image:%s", id);
-
-	uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "name", name, s) {
-		dmuci_get_value_by_section_string(s, "alias", value);
-		break;
-	}
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
+	*value = dmjson_get_value((json_object *)data, 1, "id");
 	return 0;
 }
 
 static int set_DeviceInfoFirmwareImage_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s = NULL, *dmmap = NULL;
-	char name[32] = {0};
-	char *id = NULL;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			id = dmjson_get_value((json_object *)data, 1, "id");
-			snprintf(name, sizeof(name), "fw_image:%s", id);
-
-			uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "name", name, s) {
-				dmuci_set_value_by_section_bbfdm(s, "alias", value);
-				return 0;
-			}
-
-			dmuci_add_section_bbfdm("dmmap_fw_image", "fw_image", &dmmap);
-			dmuci_set_value_by_section(dmmap, "name", name);
-			dmuci_set_value_by_section(dmmap, "alias", value);
-			break;
-	}
 	return 0;
 }
 
@@ -1058,13 +1003,10 @@ static int get_DeviceInfoFirmwareImage_Version(char *refparam, struct dmctx *ctx
 static int get_DeviceInfoFirmwareImage_Available(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *s = NULL;
-	char name[32] = {0};
-	char *id = NULL;
 
-	id = dmjson_get_value((json_object *)data, 1, "id");
-	snprintf(name, sizeof(name), "fw_image:%s", id);
+	char *id = dmjson_get_value((json_object *)data, 1, "id");
 
-	uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "name", name, s) {
+	uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "id", id, s) {
 		dmuci_get_value_by_section_string(s, "available", value);
 		break;
 	}
@@ -1077,7 +1019,6 @@ static int get_DeviceInfoFirmwareImage_Available(char *refparam, struct dmctx *c
 static int set_DeviceInfoFirmwareImage_Available(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *s = NULL, *dmmap = NULL;
-	char name[32] = {0};
 	char *id = NULL;
 	bool b;
 
@@ -1097,15 +1038,14 @@ static int set_DeviceInfoFirmwareImage_Available(char *refparam, struct dmctx *c
 			}
 
 			id = dmjson_get_value((json_object *)data, 1, "id");
-			snprintf(name, sizeof(name), "fw_image:%s", id);
 
-			uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "name", name, s) {
+			uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "id", id, s) {
 				dmuci_set_value_by_section_bbfdm(s, "available", b ? "true" : "false");
 				return 0;
 			}
 
 			dmuci_add_section_bbfdm("dmmap_fw_image", "fw_image", &dmmap);
-			dmuci_set_value_by_section(dmmap, "name", name);
+			dmuci_set_value_by_section(dmmap, "id", id);
 			dmuci_set_value_by_section(dmmap, "available", b ? "true" : "false");
 			break;
 	}
@@ -1528,13 +1468,13 @@ static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx
 /* *** Device.DeviceInfo. *** */
 DMOBJ tDeviceInfoObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"VendorConfigFile", &DMREAD, NULL, NULL, NULL, browseVcfInst, NULL, NULL, NULL, tDeviceInfoVendorConfigFileParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"VendorConfigFile", &DMREAD, NULL, NULL, NULL, browseVcfInst, NULL, NULL, NULL, tDeviceInfoVendorConfigFileParams, NULL, BBFDM_BOTH, NULL},
 {"MemoryStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoMemoryStatusParams, NULL, BBFDM_BOTH, NULL},
 {"ProcessStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoProcessStatusObj, tDeviceInfoProcessStatusParams, NULL, BBFDM_BOTH, NULL},
-{"Processor", &DMREAD, NULL, NULL, NULL, browseDeviceInfoProcessorInst, NULL, NULL, NULL, tDeviceInfoProcessorParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
-{"VendorLogFile", &DMREAD, NULL, NULL, NULL, browseVlfInst, NULL, NULL, NULL, tDeviceInfoVendorLogFileParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"SupportedDataModel", &DMREAD, NULL, NULL, NULL, browseDeviceInfoSupportedDataModelInst, NULL, NULL, NULL, tDeviceInfoSupportedDataModelParams, NULL, BBFDM_CWMP, LIST_KEY{"URL", "Alias", "UUID", NULL}},
-{"FirmwareImage", &DMREAD, NULL, NULL, "file:/usr/libexec/rpcd/fwbank", browseDeviceInfoFirmwareImageInst, NULL, NULL, NULL, tDeviceInfoFirmwareImageParams, get_device_fwimage_linker, BBFDM_BOTH, LIST_KEY{"Alias", NULL}},
+{"Processor", &DMREAD, NULL, NULL, NULL, browseDeviceInfoProcessorInst, NULL, NULL, NULL, tDeviceInfoProcessorParams, NULL, BBFDM_BOTH, NULL},
+{"VendorLogFile", &DMREAD, NULL, NULL, NULL, browseVlfInst, NULL, NULL, NULL, tDeviceInfoVendorLogFileParams, NULL, BBFDM_BOTH, NULL},
+{"SupportedDataModel", &DMREAD, NULL, NULL, NULL, browseDeviceInfoSupportedDataModelInst, NULL, NULL, NULL, tDeviceInfoSupportedDataModelParams, NULL, BBFDM_CWMP, NULL},
+{"FirmwareImage", &DMREAD, NULL, NULL, "file:/usr/libexec/rpcd/fwbank", browseDeviceInfoFirmwareImageInst, NULL, NULL, NULL, tDeviceInfoFirmwareImageParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1549,8 +1489,8 @@ DMLEAF tDeviceInfoParams[] = {
 {"SerialNumber", &DMREAD, DMT_STRING, get_device_serialnumber, NULL, BBFDM_BOTH},
 {"HardwareVersion", &DMREAD, DMT_STRING, get_device_hardwareversion, NULL, BBFDM_BOTH},
 {"SoftwareVersion", &DMREAD, DMT_STRING, get_device_softwareversion, NULL, BBFDM_BOTH},
-{"ActiveFirmwareImage", &DMREAD, DMT_STRING, get_device_active_fwimage, NULL, BBFDM_BOTH},
-{"BootFirmwareImage", &DMWRITE, DMT_STRING, get_device_boot_fwimage, set_device_boot_fwimage, BBFDM_BOTH},
+{"ActiveFirmwareImage", &DMREAD, DMT_STRING, get_device_active_fwimage, NULL, BBFDM_BOTH, DM_FLAG_REFERENCE},
+{"BootFirmwareImage", &DMWRITE, DMT_STRING, get_device_boot_fwimage, set_device_boot_fwimage, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"AdditionalHardwareVersion", &DMREAD, DMT_STRING, get_device_additionalhardwareversion, NULL, BBFDM_BOTH},
 {"AdditionalSoftwareVersion", &DMREAD, DMT_STRING, get_device_additionalsoftwareversion, NULL, BBFDM_BOTH},
 {"ProvisioningCode", &DMWRITE, DMT_STRING, get_device_provisioningcode, set_device_provisioningcode, BBFDM_BOTH},
@@ -1570,8 +1510,8 @@ DMLEAF tDeviceInfoParams[] = {
 /* *** Device.DeviceInfo.VendorConfigFile.{i}. *** */
 DMLEAF tDeviceInfoVendorConfigFileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_vcf_alias, set_vcf_alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_vcf_name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_vcf_alias, set_vcf_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_vcf_name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Version", &DMREAD, DMT_STRING, get_vcf_version, NULL, BBFDM_BOTH},
 {"Date", &DMREAD, DMT_TIME, get_vcf_date, NULL, BBFDM_BOTH},
 {"Description", &DMREAD, DMT_STRING, get_vcf_desc, NULL, BBFDM_BOTH},
@@ -1593,7 +1533,7 @@ DMLEAF tDeviceInfoMemoryStatusParams[] = {
 /* *** Device.DeviceInfo.ProcessStatus. *** */
 DMOBJ tDeviceInfoProcessStatusObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Process", &DMREAD, NULL, NULL, NULL, browseProcessEntriesInst, NULL, NULL, NULL, tDeviceInfoProcessStatusProcessParams, get_linker_process, BBFDM_BOTH, LIST_KEY{"PID", NULL}},
+{"Process", &DMREAD, NULL, NULL, NULL, browseProcessEntriesInst, NULL, NULL, NULL, tDeviceInfoProcessStatusProcessParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1607,7 +1547,7 @@ DMLEAF tDeviceInfoProcessStatusParams[] = {
 /* *** Device.DeviceInfo.ProcessStatus.Process.{i}. *** */
 DMLEAF tDeviceInfoProcessStatusProcessParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"PID", &DMREAD, DMT_UNINT, get_process_pid, NULL, BBFDM_BOTH},
+{"PID", &DMREAD, DMT_UNINT, get_process_pid, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Command", &DMREAD, DMT_STRING, get_process_command, NULL, BBFDM_BOTH},
 {"Size", &DMREAD, DMT_UNINT, get_process_size, NULL, BBFDM_BOTH},
 {"Priority", &DMREAD, DMT_UNINT, get_process_priority, NULL, BBFDM_BOTH},
@@ -1619,8 +1559,8 @@ DMLEAF tDeviceInfoProcessStatusProcessParams[] = {
 /* *** Device.DeviceInfo.VendorLogFile.{i}. *** */
 DMLEAF tDeviceInfoVendorLogFileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_vlf_alias, set_vlf_alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_vlf_name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_vlf_alias, set_vlf_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_vlf_name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"MaximumSize", &DMREAD, DMT_UNINT, get_vlf_max_size, NULL, BBFDM_BOTH},
 {"Persistent", &DMREAD, DMT_BOOL, get_vlf_persistent, NULL, BBFDM_BOTH},
 {"Upload()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoVendorLogFile_Upload, operate_DeviceInfoVendorLogFile_Upload, BBFDM_USP},
@@ -1630,7 +1570,7 @@ DMLEAF tDeviceInfoVendorLogFileParams[] = {
 /* *** Device.DeviceInfo.Processor.{i}. *** */
 DMLEAF tDeviceInfoProcessorParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoProcessor_Alias, set_DeviceInfoProcessor_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoProcessor_Alias, set_DeviceInfoProcessor_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Architecture", &DMREAD, DMT_STRING, get_DeviceInfoProcessor_Architecture, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1638,8 +1578,8 @@ DMLEAF tDeviceInfoProcessorParams[] = {
 /* *** Device.DeviceInfo.SupportedDataModel.{i}. *** */
 DMLEAF tDeviceInfoSupportedDataModelParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoSupportedDataModel_Alias, set_DeviceInfoSupportedDataModel_Alias, BBFDM_CWMP},
-{"URL", &DMREAD, DMT_STRING, get_DeviceInfoSupportedDataModel_URL, NULL, BBFDM_CWMP},
+{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoSupportedDataModel_Alias, set_DeviceInfoSupportedDataModel_Alias, BBFDM_CWMP, DM_FLAG_UNIQUE},
+{"URL", &DMREAD, DMT_STRING, get_DeviceInfoSupportedDataModel_URL, NULL, BBFDM_CWMP, DM_FLAG_UNIQUE},
 {"URN", &DMREAD, DMT_STRING, get_DeviceInfoSupportedDataModel_URN, NULL, BBFDM_CWMP},
 {"Features", &DMREAD, DMT_STRING, get_DeviceInfoSupportedDataModel_Features, NULL, BBFDM_CWMP},
 {0}
@@ -1648,7 +1588,7 @@ DMLEAF tDeviceInfoSupportedDataModelParams[] = {
 /* *** Device.DeviceInfo.FirmwareImage.{i}. *** */
 DMLEAF tDeviceInfoFirmwareImageParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoFirmwareImage_Alias, set_DeviceInfoFirmwareImage_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoFirmwareImage_Alias, set_DeviceInfoFirmwareImage_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {"Name", &DMREAD, DMT_STRING, get_DeviceInfoFirmwareImage_Name, NULL, BBFDM_BOTH},
 {"Version", &DMREAD, DMT_STRING, get_DeviceInfoFirmwareImage_Version, NULL, BBFDM_BOTH},
 {"Available", &DMWRITE, DMT_BOOL, get_DeviceInfoFirmwareImage_Available, set_DeviceInfoFirmwareImage_Available, BBFDM_BOTH},

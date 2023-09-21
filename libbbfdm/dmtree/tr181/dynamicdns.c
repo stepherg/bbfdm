@@ -14,15 +14,6 @@
 #define DDNS_SERVICES_CUSTOM "/usr/share/ddns/custom"
 #define DDNS_SERVICES_BACKUP "/usr/share/ddns/backup"
 
-/**************************************************************************
-* LINKER
-***************************************************************************/
-static int get_linker_dynamicdns_server(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	dmuci_get_value_by_section_string((struct uci_section *)data, "service_name", linker);
-	return 0;
-}
-
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
@@ -555,27 +546,28 @@ static int get_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *
 	char *service_name = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "service_name", &service_name);
-	adm_entry_get_linker_param(ctx, "Device.DynamicDNS.Server.", service_name, value);
+	adm_entry_get_reference_param(ctx, "Device.DynamicDNS.Server.*.ServiceName", service_name, value);
 	return 0;
 }
 
 static int set_DynamicDNSClient_Server(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.DynamicDNS.Server.", NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "service_name", linker ? linker : "");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "service_name", reference.value);
 			break;
 	}
 	return 0;
@@ -587,28 +579,29 @@ static int get_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, voi
 	char *interface = NULL;
 
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &interface);
-	adm_entry_get_linker_param(ctx, "Device.IP.Interface.", interface, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", interface, value);
 	return 0;
 }
 
 static int set_DynamicDNSClient_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", linker ? linker : "");
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ip_network", linker ? linker : "");
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", reference.value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ip_network", reference.value);
 			break;
 	}
 	return 0;
@@ -986,8 +979,8 @@ static int set_DynamicDNSServer_Protocol(char *refparam, struct dmctx *ctx, void
 /* *** Device.DynamicDNS. *** */
 DMOBJ tDynamicDNSObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Client", &DMWRITE, addObjDynamicDNSClient, delObjDynamicDNSClient, NULL, browseDynamicDNSClientInst, NULL, NULL, tDynamicDNSClientObj, tDynamicDNSClientParams, NULL, BBFDM_BOTH, LIST_KEY{"Server", "Username", "Alias", NULL}},
-{"Server", &DMWRITE, addObjDynamicDNSServer, delObjDynamicDNSServer, NULL, browseDynamicDNSServerInst, NULL, NULL, NULL, tDynamicDNSServerParams, get_linker_dynamicdns_server, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Client", &DMWRITE, addObjDynamicDNSClient, delObjDynamicDNSClient, NULL, browseDynamicDNSClientInst, NULL, NULL, tDynamicDNSClientObj, tDynamicDNSClientParams, NULL, BBFDM_BOTH, NULL},
+{"Server", &DMWRITE, addObjDynamicDNSServer, delObjDynamicDNSServer, NULL, browseDynamicDNSServerInst, NULL, NULL, NULL, tDynamicDNSServerParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1002,7 +995,7 @@ DMLEAF tDynamicDNSParams[] = {
 /* *** Device.DynamicDNS.Client.{i}. *** */
 DMOBJ tDynamicDNSClientObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Hostname", &DMWRITE, addObjDynamicDNSClientHostname, delObjDynamicDNSClientHostname, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", NULL}},
+{"Hostname", &DMWRITE, addObjDynamicDNSClientHostname, delObjDynamicDNSClientHostname, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1010,11 +1003,11 @@ DMLEAF tDynamicDNSClientParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_DynamicDNSClient_Enable, set_DynamicDNSClient_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_DynamicDNSClient_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Alias, set_DynamicDNSClient_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Alias, set_DynamicDNSClient_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"LastError", &DMREAD, DMT_STRING, get_DynamicDNSClient_LastError, NULL, BBFDM_BOTH},
-{"Server", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Server, set_DynamicDNSClient_Server, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Interface, set_DynamicDNSClient_Interface, BBFDM_BOTH},
-{"Username", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Username, set_DynamicDNSClient_Username, BBFDM_BOTH},
+{"Server", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Server, set_DynamicDNSClient_Server, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
+{"Interface", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Interface, set_DynamicDNSClient_Interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
+{"Username", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Username, set_DynamicDNSClient_Username, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Password", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Password, set_DynamicDNSClient_Password, BBFDM_BOTH},
 {"HostnameNumberOfEntries", &DMREAD, DMT_UNINT, get_DynamicDNSClient_HostnameNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
@@ -1025,7 +1018,7 @@ DMLEAF tDynamicDNSClientHostnameParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_DynamicDNSClientHostname_Enable, set_DynamicDNSClientHostname_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_DynamicDNSClientHostname_Status, NULL, BBFDM_BOTH},
-{"Name", &DMWRITE, DMT_STRING, get_DynamicDNSClientHostname_Name, set_DynamicDNSClientHostname_Name, BBFDM_BOTH},
+{"Name", &DMWRITE, DMT_STRING, get_DynamicDNSClientHostname_Name, set_DynamicDNSClientHostname_Name, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"LastUpdate", &DMREAD, DMT_TIME, get_DynamicDNSClientHostname_LastUpdate, NULL, BBFDM_BOTH},
 {0}
 };
@@ -1034,9 +1027,9 @@ DMLEAF tDynamicDNSClientHostnameParams[] = {
 DMLEAF tDynamicDNSServerParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Enable, set_DynamicDNSServer_Enable, BBFDM_BOTH},
-{"Name", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Name, set_DynamicDNSServer_Name, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Alias, set_DynamicDNSServer_Alias, BBFDM_BOTH},
-{"ServiceName", &DMServer, DMT_STRING, get_DynamicDNSServer_ServiceName, set_DynamicDNSServer_ServiceName, BBFDM_BOTH},
+{"Name", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Name, set_DynamicDNSServer_Name, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Alias", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Alias, set_DynamicDNSServer_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"ServiceName", &DMServer, DMT_STRING, get_DynamicDNSServer_ServiceName, set_DynamicDNSServer_ServiceName, BBFDM_BOTH, DM_FLAG_LINKER},
 {"ServerAddress", &DMServer, DMT_STRING, get_DynamicDNSServer_ServerAddress, set_DynamicDNSServer_ServerAddress, BBFDM_BOTH},
 //{"ServerPort", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_ServerPort, set_DynamicDNSServer_ServerPort, BBFDM_BOTH},
 {"SupportedProtocols", &DMREAD, DMT_STRING, get_DynamicDNSServer_SupportedProtocols, NULL, BBFDM_BOTH},

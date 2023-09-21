@@ -888,7 +888,7 @@ static int get_FASTLineStatsQuarterHour_SuccessTIGA(char *refparam, struct dmctx
 /* *** Device.FAST. *** */
 DMOBJ tFASTObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Line", &DMREAD, NULL, NULL, NULL, browseFASTLineInst, NULL, NULL, tFASTLineObj, tFASTLineParams, get_fast_line_linker, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
+{"Line", &DMREAD, NULL, NULL, NULL, browseFASTLineInst, NULL, NULL, tFASTLineObj, tFASTLineParams, get_fast_line_linker, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -909,8 +909,8 @@ DMLEAF tFASTLineParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_FASTLine_Enable, set_FASTLine_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_FASTLine_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_FASTLine_Alias, set_FASTLine_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_FASTLine_Name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_FASTLine_Alias, set_FASTLine_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_FASTLine_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"LowerLayers", &DMWRITE, DMT_STRING, get_FASTLine_LowerLayers, set_FASTLine_LowerLayers, BBFDM_BOTH},
 {"Upstream", &DMREAD, DMT_BOOL, get_FASTLine_Upstream, NULL, BBFDM_BOTH},
 {"FirmwareVersion", &DMREAD, DMT_STRING, get_FASTLine_FirmwareVersion, NULL, BBFDM_BOTH},

@@ -951,33 +951,37 @@ static int get_EthernetLink_LastChange(char *refparam, struct dmctx *ctx, void *
 
 static int get_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = NULL;
-
 	dmuci_get_value_by_section_string((struct uci_section *)data, "LowerLayers", value);
 
 	if ((*value)[0] == '\0') {
+		char *linker = NULL;
+
 		dmuci_get_value_by_section_string((struct uci_section *)data, "device", &linker);
-		if (!linker || *linker == '\0')
+		if (DM_STRLEN(linker) == 0)
 			return 0;
 
-		adm_entry_get_linker_param(ctx, "Device.ATM.Link.", linker, value);
-		if (*value != NULL && (*value)[0] != 0)
-			return 0;
+		adm_entry_get_reference_param(ctx, "Device.ATM.Link.*.Name", linker, value);
+		if (DM_STRLEN(*value))
+			goto end;
 
-		adm_entry_get_linker_param(ctx, "Device.PTM.Link.", linker, value);
-		if (*value != NULL && (*value)[0] != 0)
-			return 0;
+		adm_entry_get_reference_param(ctx, "Device.PTM.Link.*.Name", linker, value);
+		if (DM_STRLEN(*value))
+			goto end;
 
-		adm_entry_get_linker_param(ctx, "Device.Bridging.Bridge.", linker, value);
-		if (*value != NULL && (*value)[0] != 0)
-			return 0;
+		adm_entry_get_reference_param(ctx, "Device.Bridging.Bridge.*.Port.*.Name", linker, value);
+		if (DM_STRLEN(*value))
+			goto end;
 
-		adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
+		adm_entry_get_reference_param(ctx, "Device.Ethernet.Interface.*.Name", linker, value);
+
+end:
+		// Store LowerLayers value
+		dmuci_set_value_by_section((struct uci_section *)data, "LowerLayers", *value);
 	} else {
-		adm_entry_get_linker_value(ctx, *value, &linker);
-		if (!linker || *linker == 0)
+		if (!adm_entry_object_exists(ctx, *value))
 			*value = "";
 	}
+
 	return 0;
 }
 
@@ -989,34 +993,34 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 			"Device.ATM.Link.",
 			"Device.PTM.Link.",
 			NULL};
-	char *linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, reference.path, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &linker);
-
 			// Store LowerLayers value under dmmap section
-			dmuci_set_value_by_section((struct uci_section *)data, "LowerLayers", value);
+			dmuci_set_value_by_section((struct uci_section *)data, "LowerLayers", reference.path);
 
-			dmuci_set_value_by_section((struct uci_section *)data, "is_eth", !DM_STRNCMP(value, "Device.Ethernet.", strlen("Device.Ethernet.")) ? "1" : "0");
+			dmuci_set_value_by_section((struct uci_section *)data, "is_eth", !DM_STRNCMP(reference.path, "Device.Ethernet.", strlen("Device.Ethernet.")) ? "1" : "0");
 
-			if (match(value, "Device.Bridging.Bridge.*.Port.", 0, NULL)) {
+			if (match(reference.path, "Device.Bridging.Bridge.*.Port.", 0, NULL)) {
 				dmuci_set_value_by_section((struct uci_section *)data, "is_eth", "1");
 
 				// Remove unused Interface section created by Bridge Object if it exists
-				struct uci_section *s = get_dup_section_in_config_opt("network", "interface", "device", linker);
+				struct uci_section *s = get_dup_section_in_config_opt("network", "interface", "device", reference.value);
 				dmuci_delete_by_section(s, NULL, NULL);
 			}
 
-			dmuci_set_value_by_section((struct uci_section *)data, "device", DM_STRLEN(linker) ? linker : "");
+			dmuci_set_value_by_section((struct uci_section *)data, "device", reference.value);
 			break;
 	}
 	return 0;
@@ -1288,7 +1292,7 @@ static int set_EthernetVLANTermination_Alias(char *refparam, struct dmctx *ctx, 
 
 static int get_EthernetVLANTermination_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmstrdup(section_name(((struct dmmap_dup *)data)->config_section));
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", value);
 	return 0;
 }
 
@@ -1303,15 +1307,15 @@ static int get_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
 
 		if (DM_LSTRCMP(type, "8021ad") == 0) {
-			adm_entry_get_linker_param(ctx, "Device.Ethernet.VLANTermination.", ifname, value);
+			adm_entry_get_reference_param(ctx, "Device.Ethernet.VLANTermination.*.Name", ifname, value);
 		} else {
-			adm_entry_get_linker_param(ctx, "Device.Ethernet.Link.", ifname, value);
+			adm_entry_get_reference_param(ctx, "Device.Ethernet.Link.*.Name", ifname, value);
 		}
-	} else {
-		char *linker = NULL;
 
-		adm_entry_get_linker_value(ctx, *value, &linker);
-		if (!linker || *linker == 0)
+		// Store LowerLayers value
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", *value);
+	} else {
+		if (!adm_entry_object_exists(ctx, *value))
 			*value = "";
 	}
 
@@ -1324,30 +1328,30 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 			"Device.Ethernet.VLANTermination.",
 			"Device.Ethernet.Link.",
 			NULL};
-	char *vlan_linker = NULL;
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string_list(ctx, value, -1, -1, 1024, -1, -1, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, reference.path, -1, -1, 1024, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			adm_entry_get_linker_value(ctx, value, &vlan_linker);
-
 			// Store LowerLayers value under dmmap section
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", reference.path);
 
-			if (DM_STRLEN(vlan_linker) == 0) {
+			if (DM_STRLEN(reference.value) == 0) {
 				// Set ifname and name options of device section to empty value
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", "");
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", "");
 			}
 
-			if (DM_STRNCMP(value, "Device.Ethernet.Link.", DM_STRLEN("Device.Ethernet.Link.")) == 0) {
+			if (DM_STRNCMP(reference.path, "Device.Ethernet.Link.", DM_STRLEN("Device.Ethernet.Link.")) == 0) {
 				char new_name[16] = {0};
 				char *old_name = NULL;
 				char *vid = NULL;
@@ -1356,7 +1360,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &old_name);
 				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid", &vid);
 
-				snprintf(new_name, sizeof(new_name), "%s%s%s", vlan_linker, DM_STRLEN(vid) ? "." : "", DM_STRLEN(vid) ? vid : "");
+				snprintf(new_name, sizeof(new_name), "%s%s%s", reference.value, DM_STRLEN(vid) ? "." : "", DM_STRLEN(vid) ? vid : "");
 
 				if (name_exists_in_devices(new_name))
 					return -1;
@@ -1398,22 +1402,22 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 				}
 
 				// Set ifname and name options of device section
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", vlan_linker);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", reference.value);
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
 			}
 
-			if (DM_STRNCMP(value, "Device.Ethernet.VLANTermination.", DM_STRLEN("Device.Ethernet.VLANTermination.")) == 0) {
+			if (DM_STRNCMP(reference.path, "Device.Ethernet.VLANTermination.", DM_STRLEN("Device.Ethernet.VLANTermination.")) == 0) {
 				char new_name[32] = {0};
 				char *vid = NULL;
 
 				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid", &vid);
 
-				snprintf(new_name, sizeof(new_name), "%s%s%s", vlan_linker, DM_STRLEN(vid) ? "." : "", DM_STRLEN(vid) ? vid : "");
+				snprintf(new_name, sizeof(new_name), "%s%s%s", reference.value, DM_STRLEN(vid) ? "." : "", DM_STRLEN(vid) ? vid : "");
 
 				if (name_exists_in_devices(new_name))
 					return -1;
 
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", vlan_linker);
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", reference.value);
 				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
 			}
 
@@ -1644,7 +1648,7 @@ static int get_EthernetRMONStats_Interface(char *refparam, struct dmctx *ctx, vo
 	char *linker = NULL;
 
 	dmuci_get_value_by_section_string((((struct eth_rmon_args *)data)->sections)->config_section, "name", &linker);
-	adm_entry_get_linker_param(ctx, "Device.Ethernet.Interface.", linker, value);
+	adm_entry_get_reference_param(ctx, "Device.Ethernet.Interface.*.Name", linker, value);
 	return 0;
 }
 
@@ -1796,10 +1800,10 @@ static int get_EthernetRMONStats_Packets1024to1518Bytes(char *refparam, struct d
 /* *** Device.Ethernet. *** */
 DMOBJ tEthernetObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Interface", &DMREAD, NULL, NULL, NULL, browseEthernetInterfaceInst, NULL, NULL, tEthernetInterfaceObj, tEthernetInterfaceParams, get_linker_interface, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"Link", &DMWRITE, addObjEthernetLink, delObjEthernetLink, NULL, browseEthernetLinkInst, NULL, NULL, tEthernetLinkObj, tEthernetLinkParams, get_linker_link, BBFDM_BOTH, LIST_KEY{"Name", "Alias", "MACAddress", NULL}},
-{"VLANTermination", &DMWRITE, addObjEthernetVLANTermination, delObjEthernetVLANTermination, NULL, browseEthernetVLANTerminationInst, NULL, NULL, tEthernetVLANTerminationObj, tEthernetVLANTerminationParams, get_linker_vlan_term, BBFDM_BOTH, LIST_KEY{"Name", "Alias", NULL}},
-{"RMONStats", &DMREAD, NULL, NULL, "ubus:ethernet->rmonstats", browseEthernetRMONStatsInst, NULL, NULL, NULL, tEthernetRMONStatsParams, NULL, BBFDM_BOTH, LIST_KEY{"Alias", "Interface", "VLANID", NULL}},
+{"Interface", &DMREAD, NULL, NULL, NULL, browseEthernetInterfaceInst, NULL, NULL, tEthernetInterfaceObj, tEthernetInterfaceParams, get_linker_interface, BBFDM_BOTH, NULL},
+{"Link", &DMWRITE, addObjEthernetLink, delObjEthernetLink, NULL, browseEthernetLinkInst, NULL, NULL, tEthernetLinkObj, tEthernetLinkParams, get_linker_link, BBFDM_BOTH, NULL},
+{"VLANTermination", &DMWRITE, addObjEthernetVLANTermination, delObjEthernetVLANTermination, NULL, browseEthernetVLANTerminationInst, NULL, NULL, tEthernetVLANTerminationObj, tEthernetVLANTerminationParams, get_linker_vlan_term, BBFDM_BOTH, NULL},
+{"RMONStats", &DMREAD, NULL, NULL, "ubus:ethernet->rmonstats", browseEthernetRMONStatsInst, NULL, NULL, NULL, tEthernetRMONStatsParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1824,8 +1828,8 @@ DMLEAF tEthernetInterfaceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_EthernetInterface_Enable, set_EthernetInterface_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_EthernetInterface_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_EthernetInterface_Alias, set_EthernetInterface_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_EthernetInterface_Name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_EthernetInterface_Alias, set_EthernetInterface_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_EthernetInterface_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {"LastChange", &DMREAD, DMT_UNINT, get_EthernetInterface_LastChange, NULL, BBFDM_BOTH},
 {"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetInterface_LowerLayers, set_EthernetInterface_LowerLayers, BBFDM_BOTH},
 {"Upstream", &DMREAD, DMT_BOOL, get_EthernetInterface_Upstream, NULL, BBFDM_BOTH},
@@ -1870,11 +1874,11 @@ DMLEAF tEthernetLinkParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_EthernetLink_Enable, set_EthernetLink_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_EthernetLink_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_EthernetLink_Alias, set_EthernetLink_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_EthernetLink_Name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_EthernetLink_Alias, set_EthernetLink_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_EthernetLink_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {"LastChange", &DMREAD, DMT_UNINT, get_EthernetLink_LastChange, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetLink_LowerLayers, set_EthernetLink_LowerLayers, BBFDM_BOTH},
-{"MACAddress", &DMREAD, DMT_STRING, get_EthernetLink_MACAddress, NULL, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetLink_LowerLayers, set_EthernetLink_LowerLayers, BBFDM_BOTH, DM_FLAG_REFERENCE},
+{"MACAddress", &DMREAD, DMT_STRING, get_EthernetLink_MACAddress, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"FlowControl", &DMWRITE, DMT_BOOL, get_EthernetLink_FlowControl, set_EthernetLink_FlowControl, BBFDM_BOTH},
 {0}
 };
@@ -1911,10 +1915,10 @@ DMLEAF tEthernetVLANTerminationParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_EthernetVLANTermination_Enable, set_EthernetVLANTermination_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_EthernetVLANTermination_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_EthernetVLANTermination_Alias, set_EthernetVLANTermination_Alias, BBFDM_BOTH},
-{"Name", &DMREAD, DMT_STRING, get_EthernetVLANTermination_Name, NULL, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_EthernetVLANTermination_Alias, set_EthernetVLANTermination_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_EthernetVLANTermination_Name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 //{"LastChange", &DMREAD, DMT_UNINT, get_EthernetVLANTermination_LastChange, NULL, BBFDM_BOTH},
-{"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetVLANTermination_LowerLayers, set_EthernetVLANTermination_LowerLayers, BBFDM_BOTH},
+{"LowerLayers", &DMWRITE, DMT_STRING, get_EthernetVLANTermination_LowerLayers, set_EthernetVLANTermination_LowerLayers, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"VLANID", &DMWRITE, DMT_UNINT, get_EthernetVLANTermination_VLANID, set_EthernetVLANTermination_VLANID, BBFDM_BOTH},
 {"TPID", &DMWRITE, DMT_UNINT, get_EthernetVLANTermination_TPID, set_EthernetVLANTermination_TPID, BBFDM_BOTH},
 {0}
@@ -1946,10 +1950,10 @@ DMLEAF tEthernetRMONStatsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_EthernetRMONStats_Enable, set_EthernetRMONStats_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_EthernetRMONStats_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_EthernetRMONStats_Alias, set_EthernetRMONStats_Alias, BBFDM_BOTH},
+{"Alias", &DMWRITE, DMT_STRING, get_EthernetRMONStats_Alias, set_EthernetRMONStats_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Name", &DMREAD, DMT_STRING, get_EthernetRMONStats_Name, NULL, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_EthernetRMONStats_Interface, set_EthernetRMONStats_Interface, BBFDM_BOTH},
-{"VLANID", &DMWRITE, DMT_UNINT, get_EthernetRMONStats_VLANID, set_EthernetRMONStats_VLANID, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_EthernetRMONStats_Interface, set_EthernetRMONStats_Interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
+{"VLANID", &DMWRITE, DMT_UNINT, get_EthernetRMONStats_VLANID, set_EthernetRMONStats_VLANID, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"Queue", &DMWRITE, DMT_STRING, get_EthernetRMONStats_Queue, set_EthernetRMONStats_Queue, BBFDM_BOTH},
 {"AllQueues", &DMWRITE, DMT_BOOL, get_EthernetRMONStats_AllQueues, set_EthernetRMONStats_AllQueues, BBFDM_BOTH},
 //{"DropEvents", &DMREAD, DMT_UNINT, get_EthernetRMONStats_DropEvents, NULL, BBFDM_BOTH},
