@@ -840,7 +840,7 @@ static int is64digit(char c)
 	return 0;
 }
 
-static char *get_value_by_reference(struct dmctx *ctx, char *value)
+static char *get_value_by_reference(struct dmctx *ctx, char *value, bool is_micro_service)
 {
 	char *pch = NULL, *spch = NULL, *val = NULL;
 	char buf[MAX_DM_PATH * 4] = {0};
@@ -857,21 +857,20 @@ static char *get_value_by_reference(struct dmctx *ctx, char *value)
 
 		bool res = match(pch, "\\[(.*?)\\]", 2, pmatch);
 		if (!res)
-			return value;
+			goto end;
 
 		snprintf(path, pmatch[0].rm_so + 1, "%s", pch);
 		int len = DM_STRLEN(path);
 		if (!len)
-			return value;
-
+			goto end;
 
 		char *match_str = pch + pmatch[1].rm_so;
 		if (DM_STRLEN(match_str) == 0)
-			return value;
+			goto end;
 
 		int n = sscanf(match_str, "%[^=]==\"%[^\"]\"", key_name, key_value);
 		if (n != 2)
-			return value;
+			goto end;
 
 		snprintf(path + len, sizeof(path) - len, "*.%s", key_name);
 
@@ -881,7 +880,8 @@ static char *get_value_by_reference(struct dmctx *ctx, char *value)
 			return val;
 	}
 
-	return value;
+end:
+	return !is_micro_service ? value : "";
 }
 
 static char *check_value_by_type(char *value, int type)
@@ -1030,7 +1030,7 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 				const char *flag = json_object_get_string(flag_obj);
 
 				if (DM_STRCMP(flag, "Reference") == 0) {
-					data = get_value_by_reference(dmctx, data);
+					data = get_value_by_reference(dmctx, data, true);
 					dm_falgs |= DM_FLAG_REFERENCE;
 				} else if (DM_STRCMP(flag, "Unique") == 0) {
 					dm_falgs |= DM_FLAG_UNIQUE;
@@ -1519,7 +1519,7 @@ static int get_value_param(DMPARAM_ARGS)
 
 		if (value && *value) {
 			if (leaf->dm_falgs & DM_FLAG_REFERENCE) {
-				value = get_value_by_reference(dmctx, value);
+				value = get_value_by_reference(dmctx, value, false);
 			} else
 				value = check_value_by_type(value, leaf->type);
 		} else {
@@ -1567,7 +1567,7 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 
 		if (value && *value) {
 			if (leaf->dm_falgs & DM_FLAG_REFERENCE) {
-				value = get_value_by_reference(dmctx, value);
+				value = get_value_by_reference(dmctx, value, false);
 			} else
 				value = check_value_by_type(value, leaf->type);
 		} else {
