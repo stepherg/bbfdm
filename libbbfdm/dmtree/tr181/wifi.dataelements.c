@@ -1514,265 +1514,265 @@ static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_CapableOperatingCl
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_HE160(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "HE160");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "HE160");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_HE8080(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "HE8080");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "HE8080");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MCSNSS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "MCSNSS");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "MCSNSS");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_SUBeamformer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "SUBeamformer");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "SUBeamformer");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_SUBeamformee(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "SUBeamformee");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "SUBeamformee");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MUBeamformer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "MUBeamformer");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "MUBeamformer");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_Beamformee80orLess(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "Beamformee80orLess");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "Beamformee80orLess");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_BeamformeeAbove80(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "BeamformeeAbove80");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "BeamformeeAbove80");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_ULMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "ULMUMIMO");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "ULMUMIMO");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_ULOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "ULOFDMA");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "ULOFDMA");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxDLMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "MaxDLMUMIMO");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "MaxDLMUMIMO");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxULMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "MaxULMUMIMO");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "MaxULMUMIMO");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxDLOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "MaxDLOFDMA");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "MaxDLOFDMA");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MaxULOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "MaxULOFDMA");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "MaxULOFDMA");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_RTS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "RTS");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "RTS");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MURTS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "MURTS");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "MURTS");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MultiBSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "MultiBSSID");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "MultiBSSID");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_MUEDCA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "MUEDCA");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "MUEDCA");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_TWTRequestor(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "TWTRequestor");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "TWTRequestor");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_TWTResponder(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "TWTResponder");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "TWTResponder");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_SpatialReuse(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "SpatialReuse");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "SpatialReuse");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6APRole_AnticipatedChannelUsage(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6APRole", "AnticipatedChannelUsage");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6APRole", "AnticipatedChannelUsage");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_HE160(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "HE160");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "HE160");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_HE8080(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "HE8080");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "HE8080");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MCSNSS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "MCSNSS");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "MCSNSS");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_SUBeamformer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "SUBeamformer");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "SUBeamformer");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_SUBeamformee(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "SUBeamformee");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "SUBeamformee");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MUBeamformer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "MUBeamformer");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "MUBeamformer");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_Beamformee80orLess(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "Beamformee80orLess");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "Beamformee80orLess");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_BeamformeeAbove80(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "BeamformeeAbove80");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "BeamformeeAbove80");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_ULMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "ULMUMIMO");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "ULMUMIMO");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_ULOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "ULOFDMA");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "ULOFDMA");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxDLMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "MaxDLMUMIMO");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "MaxDLMUMIMO");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxULMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "MaxULMUMIMO");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "MaxULMUMIMO");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxDLOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "MaxDLOFDMA");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "MaxDLOFDMA");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MaxULOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "MaxULOFDMA");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "MaxULOFDMA");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_RTS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "RTS");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "RTS");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MURTS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "MURTS");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "MURTS");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MultiBSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "MultiBSSID");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "MultiBSSID");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_MUEDCA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "MUEDCA");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "MUEDCA");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_TWTRequestor(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "TWTRequestor");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "TWTRequestor");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_TWTResponder(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "TWTResponder");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "TWTResponder");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_SpatialReuse(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "SpatialReuse");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "SpatialReuse");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilitiesWiFi6bSTARole_AnticipatedChannelUsage(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilites", "WiFi6bSTARole", "AnticipatedChannelUsage");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 3, "Capabilities", "WiFi6bSTARole", "AnticipatedChannelUsage");
 	return 0;
 }
 

@@ -212,7 +212,7 @@
 									"WiFi6APRole": {
 										"HE160": "true",
 										"HE8080": "true",
-										"MCSNSS": "TODO base64​(4:12)",
+										"MCSNSS": "qv+q/w==",
 										"SUBeamformer": "true",
 										"SUBeamformee": "true",
 										"MUBeamformer": "true",
@@ -236,7 +236,7 @@
 									"WiFi6bSTARole": {
 										"HE160": "true",
 										"HE8080": "true",
-										"MCSNSS": "TODO base64​(4:12)",
+										"MCSNSS": "+v/6/w==",
 										"SUBeamformer": "true",
 										"SUBeamformee": "true",
 										"MUBeamformer": "true",
@@ -388,7 +388,7 @@
 												"WiFi6Capabilities": {
 													"HE160": "true",
 													"HE8080": "true",
-													"MCSNSS": "TODO base64​(4:12)",
+													"MCSNSS": "+v/6/w==",
 													"SUBeamformer": "true",
 													"SUBeamformee": "true",
 													"MUBeamformer": "true",
@@ -525,7 +525,7 @@
 									"WiFi6APRole": {
 										"HE160": "true",
 										"HE8080": "true",
-										"MCSNSS": "TODO base64​(4:12)",
+										"MCSNSS": "qv+q/w==",
 										"SUBeamformer": "true",
 										"SUBeamformee": "true",
 										"MUBeamformer": "true",
@@ -549,7 +549,7 @@
 									"WiFi6bSTARole": {
 										"HE160": "true",
 										"HE8080": "true",
-										"MCSNSS": "TODO base64​(4:12)",
+										"MCSNSS": "qv+q/w==",
 										"SUBeamformer": "true",
 										"SUBeamformee": "true",
 										"MUBeamformer": "true",
