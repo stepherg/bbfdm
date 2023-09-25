@@ -7,7 +7,7 @@ variables:
 include:
   - project: 'iopsys/gitlab-ci-pipeline'
     file: '/static-code-analysis.yml'
-    ref: '0.30'
+    ref: '0.31'
   - project: 'docs/portal2/pipeline-template'
     file: 'MkDocs.gitlab-ci.yml'
     rules:
