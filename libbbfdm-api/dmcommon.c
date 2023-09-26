@@ -783,44 +783,6 @@ char **strsplit(const char *str, const char *delim, size_t *numtokens)
 	return tokens;
 }
 
-char **strsplit_by_str(const char str[], char *delim)
-{
-	char *substr = NULL;
-	size_t tokens_alloc = 1;
-	size_t tokens_used = 0;
-	char **tokens = dmcalloc(tokens_alloc, sizeof(char*));
-	char *strparse = strdup(str);
-	do {
-		if (strparse == NULL || strparse[0] == '\0')
-			break;
-
-		substr = DM_STRSTR(strparse, delim);
-
-		if (substr == NULL) {
-			substr = strdup(strparse);
-			tokens[tokens_used] = dmcalloc(DM_STRLEN(substr)+1, sizeof(char));
-			DM_STRNCPY(tokens[tokens_used], strparse, DM_STRLEN(substr)+1);
-			tokens_used++;
-			FREE(strparse);
-			break;
-		}
-
-		if (tokens_used == tokens_alloc) {
-			tokens_alloc += 2;
-			tokens = dmrealloc(tokens, tokens_alloc * sizeof(char*));
-		}
-
-		tokens[tokens_used] = dmcalloc(substr-strparse+1, sizeof(char));
-		DM_STRNCPY(tokens[tokens_used], strparse, substr - strparse + 1);
-		tokens_used++;
-		FREE(strparse);
-		strparse = strdup(substr+DM_STRLEN(delim));
-	} while (substr != NULL);
-	FREE(strparse);
-	tokens[tokens_used] = NULL;
-	return tokens;
-}
-
 void convert_str_to_uppercase(char *str)
 {
 	for (int i = 0; str[i] != '\0'; i++) {

@@ -239,7 +239,6 @@ bool special_char_exits(const char *str);
 void replace_special_char(char *str, char c);
 char *dm_strword(char *src, char *str);
 char **strsplit(const char* str, const char* delim, size_t* numtokens);
-char **strsplit_by_str(const char str[], char *delim);
 void convert_str_to_uppercase(char *str);
 char *get_macaddr(char *interface_name);
 char *get_device(char *interface_name);
