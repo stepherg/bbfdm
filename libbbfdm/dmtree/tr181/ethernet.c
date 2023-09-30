@@ -44,25 +44,6 @@ static inline int init_eth_rmon(struct eth_rmon_args *args, struct dmmap_dup *s,
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
-bool ethernet___check_vlan_termination_section(const char *name)
-{
-	struct uci_section *s = NULL;
-
-	uci_foreach_option_eq("network", "device", "type", "bridge", s) {
-		struct uci_list *uci_list = NULL;
-
-		dmuci_get_value_by_section_list(s, "ports", &uci_list);
-
-		if (uci_list == NULL)
-			continue;
-
-		if (value_exists_in_uci_list(uci_list, name))
-			return false;
-	}
-
-	return true;
-}
-
 struct uci_section *ethernet___get_ethernet_interface_section(const char *device_name)
 {
 	struct uci_section *s = NULL;
@@ -80,6 +61,25 @@ struct uci_section *ethernet___get_ethernet_interface_section(const char *device
 	}
 
 	return NULL;
+}
+
+static bool check_vlan_termination_section(const char *name)
+{
+	struct uci_section *s = NULL;
+
+	uci_foreach_option_eq("network", "device", "type", "bridge", s) {
+		struct uci_list *uci_list = NULL;
+
+		dmuci_get_value_by_section_list(s, "ports", &uci_list);
+
+		if (uci_list == NULL)
+			continue;
+
+		if (value_exists_in_uci_list(uci_list, name))
+			return false;
+	}
+
+	return true;
 }
 
 static int eth_iface_sysfs(const struct uci_section *data, const char *name, char **value)
@@ -277,7 +277,7 @@ static int browseEthernetVLANTerminationInst(struct dmctx *dmctx, DMNODE *parent
 		if (DM_STRLEN(type) == 0 ||
 			DM_LSTRCMP(type, "bridge") == 0 ||
 			DM_LSTRCMP(type, "macvlan") == 0 ||
-			(*name != 0 && !ethernet___check_vlan_termination_section(name)) ||
+			(*name != 0 && !check_vlan_termination_section(name)) ||
 			(*name == 0 && strncmp(section_name(p->config_section), "br_", 3) == 0))
 			continue;
 
@@ -455,7 +455,7 @@ static int delObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 			if (DM_STRLEN(type) == 0 ||
 				DM_LSTRCMP(type, "bridge") == 0 ||
 				DM_LSTRCMP(type, "macvlan") == 0 ||
-				(*name != 0 && !ethernet___check_vlan_termination_section(name)) ||
+				(*name != 0 && !check_vlan_termination_section(name)) ||
 				(*name == 0 && strncmp(section_name(s_dev), "br_", 3) == 0))
 				continue;
 
