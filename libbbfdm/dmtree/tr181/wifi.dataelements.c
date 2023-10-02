@@ -506,7 +506,7 @@ static int browseWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingC
 	char *inst = NULL;
 	int id = 0, i = 0;
 
-	dmjson_foreach_obj_in_array(wifi_da_radio, opclass_arr, opclass_obj, i, 2, "Capabilites", "OperatingClasses") {
+	dmjson_foreach_obj_in_array(wifi_da_radio, opclass_arr, opclass_obj, i, 2, "Capabilities", "OperatingClasses") {
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)opclass_obj, inst) == DM_STOP)
 			break;
@@ -1485,14 +1485,14 @@ static int get_WiFiDataElementsNetworkDeviceRadioBackhaulSta_MACAddress(char *re
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.HTCapabilities!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.HTCapabilities*/
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_HTCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilites", "HTCapabilities");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilities", "HTCapabilities");
 	return 0;
 }
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.VHTCapabilities!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.VHTCapabilities*/
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_VHTCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *cap = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilites", "VHTCapabilities");
+	char *cap = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilities", "VHTCapabilities");
 	*value = (DM_STRLEN(cap)) ? cap : "AAA=";
 	return 0;
 }
@@ -1500,7 +1500,7 @@ static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_VHTCapabilities(ch
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.HECapabilities!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.HECapabilities*/
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_HECapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *cap = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilites", "HECapabilities");
+	char *cap = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilities", "HECapabilities");
 	*value = (DM_STRLEN(cap)) ? cap : "AAAAAA==";
 	return 0;
 }
@@ -1508,7 +1508,7 @@ static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_HECapabilities(cha
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.CapableOperatingClassProfileNumberOfEntries!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.NumberOfOpClass*/
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_CapableOperatingClassProfileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilites", "NumberOfOpClass");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilities", "NumberOfOpClass");
 	return 0;
 }
 

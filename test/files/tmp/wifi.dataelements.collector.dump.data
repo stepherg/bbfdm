@@ -98,7 +98,7 @@
                                                                                 ]
                                                                         }
                                                                 ],
-                                                                "Capabilites": {
+                                                                "Capabilities": {
                                                                         "NumberOfOpClass": 11,
                                                                         "OperatingClasses": [
                                                                                 {
@@ -267,7 +267,7 @@
                                                                                 ]
                                                                         }
                                                                 ],
-                                                                "Capabilites": {
+                                                                "Capabilities": {
                                                                         "NumberOfOpClass": 3,
                                                                         "OperatingClasses": [
                                                                                 {
