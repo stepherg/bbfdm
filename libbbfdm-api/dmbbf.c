@@ -1048,6 +1048,8 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 					dm_falgs |= DM_FLAG_REFERENCE;
 				} else if (DM_STRCMP(flag, "Unique") == 0) {
 					dm_falgs |= DM_FLAG_UNIQUE;
+				} else if (DM_STRCMP(flag, "Linker") == 0) {
+					dm_falgs |= DM_FLAG_LINKER;
 				}
 			}
 		}
@@ -2411,9 +2413,6 @@ int dm_entry_get_reference_value(struct dmctx *dmctx)
  *****************/
 static int object_exists_check_obj(DMOBJECT_ARGS)
 {
-	if (!get_linker)
-		return FAULT_9005;
-
 	if (DM_STRCMP(node->current_object, dmctx->in_param) == 0) {
 		dmctx->match = true;
 		dmctx->stop = true;

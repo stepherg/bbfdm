@@ -50,35 +50,6 @@ struct wifi_enp_args
 };
 
 /**************************************************************************
-* LINKER
-***************************************************************************/
-static int get_linker_Wifi_Radio(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	*linker = (data && (((struct wifi_radio_args *)data)->sections)->config_section) ? section_name((((struct wifi_radio_args *)data)->sections)->config_section) : "";
-	return 0;
-}
-
-static int get_linker_Wifi_Ssid(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "ap_section_name", linker);
-	if (DM_STRLEN(*linker) == 0)
-		*linker = dmstrdup(instance);
-	return 0;
-}
-
-static int get_linker_Wifi_AccessPoint(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	*linker = (data && ((struct wifi_acp_args *)data)->ifname) ? ((struct wifi_acp_args *)data)->ifname : "";
-	return 0;
-}
-
-static int get_linker_associated_device(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	*linker = data ? dmjson_get_value((json_object *)data, 1, "macaddr") : "";
-	return 0;
-}
-
-/**************************************************************************
 * INIT
 ***************************************************************************/
 static inline int init_wifi_radio(struct wifi_radio_args *args, struct dmmap_dup *s)
@@ -3604,9 +3575,9 @@ DMOBJ tWiFiObj[] = {
 #ifdef BBF_WIFI_DATAELEMENTS
 {"DataElements", &DMREAD, NULL, NULL, "file:/etc/init.d/decollector", NULL, NULL, NULL, tWiFiDataElementsObj, NULL, NULL, BBFDM_BOTH, NULL},
 #endif
-{"Radio", &DMREAD, NULL, NULL, "file:/etc/config/wireless", browseWifiRadioInst, NULL, NULL, tWiFiRadioObj, tWiFiRadioParams, get_linker_Wifi_Radio, BBFDM_BOTH, NULL},
-{"SSID", &DMWRITE, add_wifi_ssid, delete_wifi_ssid, "file:/etc/config/wireless", browseWifiSsidInst, NULL, NULL, tWiFiSSIDObj, tWiFiSSIDParams, get_linker_Wifi_Ssid, BBFDM_BOTH, NULL},
-{"AccessPoint", &DMWRITE, add_wifi_accesspoint, delete_wifi_accesspoint, "file:/etc/config/wireless", browseWifiAccessPointInst, NULL, NULL, tWiFiAccessPointObj, tWiFiAccessPointParams, get_linker_Wifi_AccessPoint, BBFDM_BOTH, NULL},
+{"Radio", &DMREAD, NULL, NULL, "file:/etc/config/wireless", browseWifiRadioInst, NULL, NULL, tWiFiRadioObj, tWiFiRadioParams, NULL, BBFDM_BOTH, NULL},
+{"SSID", &DMWRITE, add_wifi_ssid, delete_wifi_ssid, "file:/etc/config/wireless", browseWifiSsidInst, NULL, NULL, tWiFiSSIDObj, tWiFiSSIDParams, NULL, BBFDM_BOTH, NULL},
+{"AccessPoint", &DMWRITE, add_wifi_accesspoint, delete_wifi_accesspoint, "file:/etc/config/wireless", browseWifiAccessPointInst, NULL, NULL, tWiFiAccessPointObj, tWiFiAccessPointParams, NULL, BBFDM_BOTH, NULL},
 {"NeighboringWiFiDiagnostic", &DMREAD, NULL, NULL, "file:/etc/config/wireless", NULL, NULL, NULL, tWiFiNeighboringWiFiDiagnosticObj, tWiFiNeighboringWiFiDiagnosticParams, NULL, BBFDM_BOTH, NULL},
 {"EndPoint", &DMWRITE, addObjWiFiEndPoint, delObjWiFiEndPoint, "file:/etc/config/wireless", browseWiFiEndPointInst, NULL, NULL, tWiFiEndPointObj, tWiFiEndPointParams, NULL, BBFDM_BOTH, NULL},
 {0}
@@ -3758,7 +3729,7 @@ DMLEAF tWiFiSSIDStatsParams[] = {
 DMOBJ tWiFiAccessPointObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiAccessPointSecurityParams, NULL, BBFDM_BOTH, NULL},
-{"AssociatedDevice", &DMREAD, NULL, NULL, NULL, browse_wifi_associated_device, NULL, NULL, tWiFiAccessPointAssociatedDeviceObj, tWiFiAccessPointAssociatedDeviceParams, get_linker_associated_device, BBFDM_BOTH, NULL},
+{"AssociatedDevice", &DMREAD, NULL, NULL, NULL, browse_wifi_associated_device, NULL, NULL, tWiFiAccessPointAssociatedDeviceObj, tWiFiAccessPointAssociatedDeviceParams, NULL, BBFDM_BOTH, NULL},
 {"WPS", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiAccessPointWPSParams, NULL, BBFDM_BOTH, NULL},
 {"Accounting", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiAccessPointAccountingParams, NULL, BBFDM_BOTH, NULL},
 {0}

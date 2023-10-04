@@ -323,27 +323,6 @@ static int browseEthernetRMONStatsInst(struct dmctx *dmctx, DMNODE *parent_node,
 }
 
 /*************************************************************
-* LINKER
-**************************************************************/
-static int get_linker_interface(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	*linker = data ? ((struct eth_port_args *)data)->ifname : "";
-	return 0;
-}
-
-static int get_linker_link(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	dmuci_get_value_by_section_string((struct uci_section *)data, "device", linker);
-	return 0;
-}
-
-static int get_linker_vlan_term(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", linker);
-	return 0;
-}
-
-/*************************************************************
 * ADD & DEL OBJ
 **************************************************************/
 static int addObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, char **instance)
@@ -1800,9 +1779,9 @@ static int get_EthernetRMONStats_Packets1024to1518Bytes(char *refparam, struct d
 /* *** Device.Ethernet. *** */
 DMOBJ tEthernetObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Interface", &DMREAD, NULL, NULL, NULL, browseEthernetInterfaceInst, NULL, NULL, tEthernetInterfaceObj, tEthernetInterfaceParams, get_linker_interface, BBFDM_BOTH, NULL},
-{"Link", &DMWRITE, addObjEthernetLink, delObjEthernetLink, NULL, browseEthernetLinkInst, NULL, NULL, tEthernetLinkObj, tEthernetLinkParams, get_linker_link, BBFDM_BOTH, NULL},
-{"VLANTermination", &DMWRITE, addObjEthernetVLANTermination, delObjEthernetVLANTermination, NULL, browseEthernetVLANTerminationInst, NULL, NULL, tEthernetVLANTerminationObj, tEthernetVLANTerminationParams, get_linker_vlan_term, BBFDM_BOTH, NULL},
+{"Interface", &DMREAD, NULL, NULL, NULL, browseEthernetInterfaceInst, NULL, NULL, tEthernetInterfaceObj, tEthernetInterfaceParams, NULL, BBFDM_BOTH, NULL},
+{"Link", &DMWRITE, addObjEthernetLink, delObjEthernetLink, NULL, browseEthernetLinkInst, NULL, NULL, tEthernetLinkObj, tEthernetLinkParams, NULL, BBFDM_BOTH, NULL},
+{"VLANTermination", &DMWRITE, addObjEthernetVLANTermination, delObjEthernetVLANTermination, NULL, browseEthernetVLANTerminationInst, NULL, NULL, tEthernetVLANTerminationObj, tEthernetVLANTerminationParams, NULL, BBFDM_BOTH, NULL},
 {"RMONStats", &DMREAD, NULL, NULL, "ubus:ethernet->rmonstats", browseEthernetRMONStatsInst, NULL, NULL, NULL, tEthernetRMONStatsParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };

@@ -18,20 +18,6 @@ struct fast_line_args
 };
 
 /**************************************************************************
-* LINKER
-***************************************************************************/
-
-static int get_fast_line_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	if (instance) {
-		dmasprintf(linker, "fast_line_%s", instance);
-		return 0;
-	}
-	*linker = "" ;
-	return 0;
-}
-
-/**************************************************************************
 * INIT
 ***************************************************************************/
 static inline int init_fast_line(struct fast_line_args *args, struct uci_section *s)
@@ -888,7 +874,7 @@ static int get_FASTLineStatsQuarterHour_SuccessTIGA(char *refparam, struct dmctx
 /* *** Device.FAST. *** */
 DMOBJ tFASTObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Line", &DMREAD, NULL, NULL, NULL, browseFASTLineInst, NULL, NULL, tFASTLineObj, tFASTLineParams, get_fast_line_linker, BBFDM_BOTH, NULL},
+{"Line", &DMREAD, NULL, NULL, NULL, browseFASTLineInst, NULL, NULL, tFASTLineObj, tFASTLineParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 

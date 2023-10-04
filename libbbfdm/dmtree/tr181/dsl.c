@@ -23,29 +23,6 @@ struct dsl_channel_args
 };
 
 /**************************************************************************
-* LINKER
-***************************************************************************/
-static int get_dsl_line_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	if (data && ((struct dsl_line_args *)data)->id) {
-		dmasprintf(linker, "line_%s", ((struct dsl_line_args *)data)->id);
-		return 0;
-	}
-	*linker = "" ;
-	return 0;
-}
-
-static int get_dsl_channel_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	if (instance) {
-		dmasprintf(linker, "dsl_channel_%s", instance);
-		return 0;
-	}
-	*linker = "" ;
-	return 0;
-}
-
-/**************************************************************************
 * INIT
 ***************************************************************************/
 static inline int init_dsl_line(struct dsl_line_args *args, struct uci_section *s)
@@ -1429,8 +1406,8 @@ static int get_DSLChannelStatsQuarterHour_XTUCCRCErrors(char *refparam, struct d
 /* *** Device.DSL. *** */
 DMOBJ tDSLObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Line", &DMREAD, NULL, NULL, NULL, browseDSLLineInst, NULL, NULL, tDSLLineObj, tDSLLineParams, get_dsl_line_linker, BBFDM_BOTH, NULL},
-{"Channel", &DMREAD, NULL, NULL, NULL, browseDSLChannelInst, NULL, NULL, tDSLChannelObj, tDSLChannelParams, get_dsl_channel_linker, BBFDM_BOTH, NULL},
+{"Line", &DMREAD, NULL, NULL, NULL, browseDSLLineInst, NULL, NULL, tDSLLineObj, tDSLLineParams, NULL, BBFDM_BOTH, NULL},
+{"Channel", &DMREAD, NULL, NULL, NULL, browseDSLChannelInst, NULL, NULL, tDSLChannelObj, tDSLChannelParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 

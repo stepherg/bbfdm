@@ -3268,13 +3268,13 @@ static int operate_WiFiDataElementsNetwork_SetPreferredBackhauls(char *refparam,
 			break;
 		}
 
-		adm_entry_get_linker_value(ctx, device_path, &linker);
+		adm_entry_get_reference_value(ctx, device_path, &linker);
 		if (linker == NULL || *linker == '\0') {
 			status = "Error_Invalid_Input";
 			break;
 		}
 
-		struct uci_section *s = get_origin_section_from_config("mapcontroller", "node", linker);
+		struct uci_section *s = get_dup_section_in_config_opt("mapcontroller", "node", "agent_id", linker);
 		if (*(operate_args[i].arg1) != '\0')
 			dmuci_set_value_by_section(s, "backhaul_ul_macaddr", operate_args[i].arg1);
 
@@ -3701,7 +3701,7 @@ DMOBJ tWiFiDataElementsNetworkDeviceObj[] = {
 
 DMLEAF tWiFiDataElementsNetworkDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_ID, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"ID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDevice_ID, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {"MultiAPCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsNetworkDevice_MultiAPCapabilities, NULL, BBFDM_BOTH},
 {"CollectionInterval", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_CollectionInterval, NULL, BBFDM_BOTH},
 {"ReportUnsuccessfulAssociations", &DMWRITE, DMT_BOOL, get_WiFiDataElementsNetworkDevice_ReportUnsuccessfulAssociations, set_WiFiDataElementsNetworkDevice_ReportUnsuccessfulAssociations, BBFDM_BOTH},

@@ -1155,22 +1155,6 @@ static int set_PPPInterfacePPPoE_ServiceName(char *refparam, struct dmctx *ctx, 
 	return 0;
 }
 
-/**************************************************************************
-* LINKER
-***************************************************************************/
-static int get_linker_ppp_interface(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	if (((struct ppp_args *)data)->iface_s) {
-		*linker = get_device(section_name(((struct ppp_args *)data)->iface_s));
-		if (DM_STRLEN(*linker) == 0)
-			dmuci_get_value_by_section_string(((struct ppp_args *)data)->iface_s, "device", linker);
-	} else {
-		dmuci_get_value_by_section_string(((struct ppp_args *)data)->dmmap_s, "device", linker);
-	}
-
-	return 0;
-}
-
 /*************************************************************
  * OPERATE COMMANDS
  *************************************************************/
@@ -1195,7 +1179,7 @@ static int operate_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *d
 /* *** Device.PPP. *** */
 DMOBJ tPPPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Interface", &DMWRITE, add_ppp_interface, delete_ppp_interface, NULL, browseInterfaceInst, NULL, NULL, tPPPInterfaceObj, tPPPInterfaceParams, get_linker_ppp_interface, BBFDM_BOTH, NULL},
+{"Interface", &DMWRITE, add_ppp_interface, delete_ppp_interface, NULL, browseInterfaceInst, NULL, NULL, tPPPInterfaceObj, tPPPInterfaceParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 

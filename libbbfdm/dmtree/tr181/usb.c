@@ -941,30 +941,6 @@ static int get_USBUSBHostsHostDeviceConfigurationInterface_InterfaceProtocol(cha
 	return read_sysfs_usb_port(data, "bInterfaceProtocol", value);
 }
 
-static int get_linker_usb_port(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	struct usb_port *port = (struct usb_port *)data;
-	if (port && port->folder_name) {
-		*linker = dmstrdup(port->folder_name);
-		return 0;
-	} else {
-		*linker = "";
-		return 0;
-	}
-}
-
-static int get_linker_usb_host_device(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	struct usb_port *port = (struct usb_port *)data;
-	if(port && port->folder_name) {
-		*linker = dmstrdup(port->folder_name);
-		return 0;
-	} else {
-		*linker = "";
-		return 0;
-	}
-}
-
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -972,7 +948,7 @@ static int get_linker_usb_host_device(char *refparam, struct dmctx *dmctx, void 
 DMOBJ tUSBObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Interface", &DMREAD, NULL, NULL, NULL, browseUSBInterfaceInst, NULL, NULL, tUSBInterfaceObj, tUSBInterfaceParams, NULL, BBFDM_BOTH, NULL},
-{"Port", &DMREAD, NULL, NULL, NULL, browseUSBPortInst, NULL, NULL, NULL, tUSBPortParams, get_linker_usb_port, BBFDM_BOTH, NULL},
+{"Port", &DMREAD, NULL, NULL, NULL, browseUSBPortInst, NULL, NULL, NULL, tUSBPortParams, NULL, BBFDM_BOTH, NULL},
 {"USBHosts", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUSBUSBHostsObj, tUSBUSBHostsParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
@@ -1056,7 +1032,7 @@ DMLEAF tUSBUSBHostsParams[] = {
 /* *** Device.USB.USBHosts.Host.{i}. *** */
 DMOBJ tUSBUSBHostsHostObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Device", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceInst, NULL, NULL, tUSBUSBHostsHostDeviceObj, tUSBUSBHostsHostDeviceParams, get_linker_usb_host_device, BBFDM_BOTH},
+{"Device", &DMREAD, NULL, NULL, NULL, browseUSBUSBHostsHostDeviceInst, NULL, NULL, tUSBUSBHostsHostDeviceObj, tUSBUSBHostsHostDeviceParams, NULL, BBFDM_BOTH},
 {0}
 };
 

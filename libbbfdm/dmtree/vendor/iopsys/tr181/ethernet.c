@@ -33,15 +33,6 @@ static int browseEthernetMACVLANInst(struct dmctx *dmctx, DMNODE *parent_node, v
 }
 
 /*************************************************************
-* LINKER
-**************************************************************/
-static int get_linker_mac_vlan(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", linker);
-	return 0;
-}
-
-/*************************************************************
 * ADD & DEL OBJ
 **************************************************************/
 static int addObjEthernetMACVLAN(char *refparam, struct dmctx *ctx, void *data, char **instance)
@@ -292,7 +283,7 @@ static int get_EthernetMACVLANStats_MulticastPacketsReceived(char *refparam, str
 ***********************************************************************************************************************************/
 DMOBJ tIOPSYS_EthernetObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{BBF_VENDOR_PREFIX"MACVLAN", &DMWRITE, addObjEthernetMACVLAN, delObjEthernetMACVLAN, NULL, browseEthernetMACVLANInst, NULL, NULL, tEthernetMACVLANObj, tEthernetMACVLANParams, get_linker_mac_vlan, BBFDM_BOTH, NULL},
+{BBF_VENDOR_PREFIX"MACVLAN", &DMWRITE, addObjEthernetMACVLAN, delObjEthernetMACVLAN, NULL, browseEthernetMACVLANInst, NULL, NULL, tEthernetMACVLANObj, tEthernetMACVLANParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 

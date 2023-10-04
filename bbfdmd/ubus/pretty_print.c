@@ -346,8 +346,10 @@ static void bb_add_flags_arr(struct blob_buf *bb, char *data)
 
 	if (*dm_falgs & DM_FLAG_REFERENCE)
 		bb_add_string(bb, NULL, "Reference");
-	else if (*dm_falgs & DM_FLAG_UNIQUE)
+	if (*dm_falgs & DM_FLAG_UNIQUE)
 		bb_add_string(bb, NULL, "Unique");
+	if (*dm_falgs & DM_FLAG_LINKER)
+		bb_add_string(bb, NULL, "Linker");
 
 	blobmsg_close_array(bb, flags_arr);
 }

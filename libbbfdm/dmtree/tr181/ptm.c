@@ -19,15 +19,6 @@ struct ptm_args
 };
 
 /**************************************************************************
-* LINKER
-***************************************************************************/
-static int get_ptm_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	*linker = (data && ((struct ptm_args *)data)->device) ? ((struct ptm_args *)data)->device : "";
-	return 0;
-}
-
-/**************************************************************************
 * INIT
 ***************************************************************************/
 static inline int init_ptm_link(struct ptm_args *args, struct dmmap_dup *s, char *device)
@@ -259,7 +250,7 @@ static int get_ptm_stats_pack_sent(char *refparam, struct dmctx *ctx, void *data
 /* *** Device.PTM. *** */
 DMOBJ tPTMObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Link", &DMWRITE, add_ptm_link, delete_ptm_link, NULL, browsePtmLinkInst, NULL, NULL, tPTMLinkObj, tPTMLinkParams, get_ptm_linker, BBFDM_BOTH, NULL},
+{"Link", &DMWRITE, add_ptm_link, delete_ptm_link, NULL, browsePtmLinkInst, NULL, NULL, tPTMLinkObj, tPTMLinkParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 

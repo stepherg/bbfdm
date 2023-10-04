@@ -18,15 +18,6 @@ struct atm_args
 };
 
 /**************************************************************************
-* LINKER
-***************************************************************************/
-static int get_atm_linker(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	*linker = (data && ((struct atm_args *)data)->device) ? ((struct atm_args *)data)->device : "";
-	return 0;
-}
-
-/**************************************************************************
 * INIT
 ***************************************************************************/
 static inline int init_atm_link(struct atm_args *args, struct dmmap_dup *s, char *device)
@@ -389,7 +380,7 @@ static int set_atm_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 /*** ATM. ***/
 DMOBJ tATMObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Link", &DMWRITE, add_atm_link, delete_atm_link, NULL, browseAtmLinkInst, NULL, NULL, tATMLinkObj, tATMLinkParams, get_atm_linker, BBFDM_BOTH, NULL},
+{"Link", &DMWRITE, add_atm_link, delete_atm_link, NULL, browseAtmLinkInst, NULL, NULL, tATMLinkObj, tATMLinkParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 

@@ -46,31 +46,6 @@ struct provider_bridge_args
 /**************************************************************************
 * LINKER FUNCTIONS
 ***************************************************************************/
-static int get_linker_br_port(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	struct bridge_port_args *data_args = (struct bridge_port_args *)data;
-
-	if (!data_args)
-		return -1;
-
-	if (data_args->is_management_port)
-		dmuci_get_value_by_section_string(data_args->bridge_port_dmmap_sec, "port", linker);
-	else
-		*linker = dmstrdup(section_name(data_args->bridge_port_dmmap_sec));
-	return 0;
-}
-
-static int get_linker_br_vlan(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	struct bridge_vlan_args *data_args = (struct bridge_vlan_args *)data;
-
-	if (!data_args)
-		return -1;
-
-	dmuci_get_value_by_section_string(data_args->bridge_vlan_sec, "vid", linker);
-	return 0;
-}
-
 static int get_linker_bridge(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
 	dmasprintf(linker, "%s", data ? ((struct bridge_args *)data)->br_inst : "");
@@ -291,7 +266,7 @@ static void remove_port_from_bridge_sections(struct uci_section *br_sec, struct 
 	}
 }
 
-static void set_Provider_bridge_component(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, char *component)
+static void set_Provider_bridge_component(char *refparam, struct dmctx *ctx, void *data, char *instance, char *br_inst, char *component)
 {
 	/* *value=Device.Bridging.Bridge.{i}.
 	 * In file dmmap_provider_bridge set "option svlan_br_inst {i}" or "list cvlan_br_inst {i}" in this(refered "provider_bridge" section)
@@ -300,10 +275,8 @@ static void set_Provider_bridge_component(char *refparam, struct dmctx *ctx, voi
 	struct uci_section *network_bridge_sec_from = NULL, *network_bridge_sec_to = NULL;
 	char pr_br_sec_name[64] = {0};
 	char *br_sec_name = NULL;
-	char *br_inst = NULL;
 
 	// Get candidate bridge instance
-	adm_entry_get_linker_value(ctx, value, &br_inst);
 	if (DM_STRLEN(br_inst) == 0)
 		return;
 
@@ -1689,12 +1662,13 @@ static int get_BridgingBridge_Status(char *refparam, struct dmctx *ctx, void *da
 /*#Device.Bridging.Bridge.{i}.Alias!UCI:dmmap_bridge/device,@i-1/bridge_alias*/
 static int get_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct bridge_args *)data)->bridge_dmmap_sec, "bridge_alias", instance, value);
+	*value = dmstrdup(((struct bridge_args *)data)->br_inst);
+	return 0;
 }
 
 static int set_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct bridge_args *)data)->bridge_dmmap_sec, "bridge_alias", instance, value);
+	return 0;
 }
 
 static int get_BridgingBridge_Standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -2929,18 +2903,21 @@ static int get_BridgingBridgeProviderBridge_SVLANcomponent(char *refparam, struc
 static int set_BridgingBridgeProviderBridge_SVLANcomponent(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.Bridging.Bridge.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
 
 	switch (action)	{
 	case VALUECHECK:
-		if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+		if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
 			return FAULT_9007;
 
-		if (dm_entry_validate_allowed_objects(ctx, value, allowed_objects))
+		if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 			return FAULT_9007;
 
 		break;
 	case VALUESET:
-		set_Provider_bridge_component(refparam, ctx, data, instance, value, "SVLAN");
+		set_Provider_bridge_component(refparam, ctx, data, instance, reference.value, "SVLAN");
 		break;
 	}
 	return 0;
@@ -2973,28 +2950,31 @@ static int get_BridgingBridgeProviderBridge_CVLANcomponents(char *refparam, stru
 static int set_BridgingBridgeProviderBridge_CVLANcomponents(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.Bridging.Bridge.", NULL};
+	struct dm_reference reference = {0};
 	char *pch = NULL, *pchr = NULL;
 	char buf[512] = {0};
 
-	DM_STRNCPY(buf, value, sizeof(buf));
+	bbf_get_reference_args(value, &reference);
+
+	DM_STRNCPY(buf, reference.path, sizeof(buf));
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, 256, NULL, NULL))
+			if (bbfdm_validate_string_list(ctx, reference.path, -1, -1, -1, -1, 256, NULL, NULL))
 				return FAULT_9007;
 
 			// Validate each item in list and Check if bridge is present
 			for (pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
 				// Parse each Bridge path and validate:
 
-				if (dm_entry_validate_allowed_objects(ctx, pch, allowed_objects))
+				if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
 					return FAULT_9007;
 			}
 
 			break;
 		case VALUESET:
 			for (pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr))
-				set_Provider_bridge_component(refparam, ctx, data, instance, pch, "CVLAN");
+				set_Provider_bridge_component(refparam, ctx, data, instance, reference.value, "CVLAN");
 			break;
 	}
 	return 0;
@@ -3028,8 +3008,8 @@ DMLEAF tBridgingParams[] = {
 DMOBJ tBridgingBridgeObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"STP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tBridgingBridgeSTPParams, NULL, BBFDM_BOTH},
-{"Port", &DMWRITE, addObjBridgingBridgePort, delObjBridgingBridgePort, NULL, browseBridgingBridgePortInst, NULL, NULL, tBridgingBridgePortObj, tBridgingBridgePortParams, get_linker_br_port, BBFDM_BOTH, NULL},
-{"VLAN", &DMWRITE, addObjBridgingBridgeVLAN, delObjBridgingBridgeVLAN, NULL, browseBridgingBridgeVLANInst, NULL, NULL, NULL, tBridgingBridgeVLANParams, get_linker_br_vlan, BBFDM_BOTH, NULL},
+{"Port", &DMWRITE, addObjBridgingBridgePort, delObjBridgingBridgePort, NULL, browseBridgingBridgePortInst, NULL, NULL, tBridgingBridgePortObj, tBridgingBridgePortParams, NULL, BBFDM_BOTH, NULL},
+{"VLAN", &DMWRITE, addObjBridgingBridgeVLAN, delObjBridgingBridgeVLAN, NULL, browseBridgingBridgeVLANInst, NULL, NULL, NULL, tBridgingBridgeVLANParams, NULL, BBFDM_BOTH, NULL},
 {"VLANPort", &DMWRITE, addObjBridgingBridgeVLANPort, delObjBridgingBridgeVLANPort, NULL, browseBridgingBridgeVLANPortInst, NULL, NULL, NULL, tBridgingBridgeVLANPortParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
@@ -3038,7 +3018,7 @@ DMLEAF tBridgingBridgeParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_BridgingBridge_Enable, set_BridgingBridge_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_BridgingBridge_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_BridgingBridge_Alias, set_BridgingBridge_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Alias", &DMWRITE, DMT_STRING, get_BridgingBridge_Alias, set_BridgingBridge_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {"Standard", &DMWRITE, DMT_STRING, get_BridgingBridge_Standard, set_BridgingBridge_Standard, BBFDM_BOTH},
 {"PortNumberOfEntries", &DMREAD, DMT_UNINT, get_BridgingBridge_PortNumberOfEntries, NULL, BBFDM_BOTH},
 {"VLANNumberOfEntries", &DMREAD, DMT_UNINT, get_BridgingBridge_VLANNumberOfEntries, NULL, BBFDM_BOTH},
@@ -3132,7 +3112,7 @@ DMLEAF tBridgingProviderBridgeParams[] = {
 {"Enable", &DMWRITE, DMT_BOOL, get_BridgingBridgeProviderBridge_Enable, set_BridgingBridgeProviderBridge_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_BridgingBridgeProviderBridge_Status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_BridgingBridgeProviderBridge_Alias, set_BridgingBridgeProviderBridge_Alias, BBFDM_BOTH},
-{"SVLANcomponent", &DMWRITE, DMT_STRING, get_BridgingBridgeProviderBridge_SVLANcomponent, set_BridgingBridgeProviderBridge_SVLANcomponent, BBFDM_BOTH},
-{"CVLANcomponents", &DMWRITE, DMT_STRING, get_BridgingBridgeProviderBridge_CVLANcomponents, set_BridgingBridgeProviderBridge_CVLANcomponents, BBFDM_BOTH},
+{"SVLANcomponent", &DMWRITE, DMT_STRING, get_BridgingBridgeProviderBridge_SVLANcomponent, set_BridgingBridgeProviderBridge_SVLANcomponent, BBFDM_BOTH, DM_FLAG_REFERENCE},
+{"CVLANcomponents", &DMWRITE, DMT_STRING, get_BridgingBridgeProviderBridge_CVLANcomponents, set_BridgingBridgeProviderBridge_CVLANcomponents, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {0}
 };
