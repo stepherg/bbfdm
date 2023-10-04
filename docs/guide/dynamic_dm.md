@@ -341,7 +341,7 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 					"name": "profile"
 				}
 			},
-			"linker_obj": "Device.{BBF_VENDOR_PREFIX}URLFilter.Profile."
+			"linker_obj": "Device.{BBF_VENDOR_PREFIX}URLFilter.Profile.*.Name"
 		}
 	]
 }

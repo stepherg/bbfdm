@@ -147,6 +147,10 @@
 						"max": 64
 					}
 				],
+				"flags": [
+					"Unique",
+					"Linker"
+				],
 				"mapping": [
 					{
 						"type": "uci",
@@ -156,7 +160,7 @@
 								"type": "profile"
 							},
 							"option": {
-								"name": "@Name"
+								"name": "name"
 							}
 						}
 					}
@@ -295,6 +299,9 @@
 					"cwmp",
 					"usp"
 				],
+				"flags": [
+					"Reference"
+				],
 				"mapping": [
 					{
 						"type": "uci",
@@ -307,7 +314,7 @@
 								"name": "profile"
 							}
 						},
-						"linker_obj": "Device.{BBF_VENDOR_PREFIX}URLFilter.Profile."
+						"linker_obj": "Device.{BBF_VENDOR_PREFIX}URLFilter.Profile.*.Name"
 					}
 				]
 			},

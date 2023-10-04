@@ -6,11 +6,13 @@ config globals 'globals'
 	list blacklist_url 'facebook.com'
 	list blacklist_url 'instagram.com'
 
-config profile 'homeoffice'
+config profile 'profile_1'
+	option name 'homeoffice'
 	list whitelist_url 'facebook.com'
 	list whitelist_url 'instagram.com'
 
-config profile 'kids'
+config profile 'profile_2'
+	option name 'kids'
 	list blacklist_url 'youtube.com'
 	list blacklist_url 'game.com'
 
