@@ -251,12 +251,11 @@ static int browseDynamicDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, 
 
 static int browseDynamicDNSClientHostnameInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *hostname = NULL;
+	char *hostname_inst = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)prev_data)->config_section, "domain", &hostname);
-	if (DM_STRLEN(hostname) != 0) {
-		DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, "1");
-	}
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)prev_data)->dmmap_section, "hostname_instance", &hostname_inst);
+	if (DM_STRLEN(hostname_inst) != 0)
+		DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, hostname_inst);
 
 	return 0;
 }
@@ -307,13 +306,12 @@ static int delObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 
 static int addObjDynamicDNSClientHostname(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	char *hostname = NULL;
-
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "domain", &hostname);
-	if (DM_STRLEN(hostname) != 0)
+	if (DM_STRCMP(*instance, "1") != 0) {
+		bbfdm_set_fault_message(ctx, "The current implementation only supports one 'Hostname' instance per 'Client', so it's not permitted to add a new 'Hostname' instance.");
 		return FAULT_9003;
+	}
 
-	dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "domain", "yourhost.example.com");
+	dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "hostname_instance", "1");
 	return 0;
 }
 
@@ -323,13 +321,11 @@ static int delObjDynamicDNSClientHostname(char *refparam, struct dmctx *ctx, voi
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, "domain", NULL);
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, "lookup_host", NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, "hostname_instance", NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_sections("ddns", "service", s) {
-				dmuci_delete_by_section(s, "domain", NULL);
-				dmuci_delete_by_section(s, "lookup_host", NULL);
+			uci_path_foreach_sections(bbfdm, "dmmap_ddns", "service", s) {
+				dmuci_delete_by_section(s, "hostname_instance", NULL);
 			}
 			break;
 	}
