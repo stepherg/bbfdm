@@ -998,26 +998,14 @@ static int get_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx 
 /*#Device.WiFi.Radio.{i}.SupportedOperatingChannelBandwidths!UBUS:wifi.radio.@Name/status//supp_channels[0].bandwidth*/
 static int get_WiFiRadio_SupportedOperatingChannelBandwidths(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *supp_channels = NULL, *arrobj = NULL;
-	char bandwidth_list[128], object[UBUS_OBJ_LEN];
-	int i = 0, pos = 0;
+	json_object *res = NULL;
+	char object[32];
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "Auto");
 
-	bandwidth_list[0] = 0;
-	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
-		char *bandwidth = dmjson_get_value(supp_channels, 1, "bandwidth");
-		if (bandwidth && !strstr(bandwidth_list, !DM_LSTRCMP(bandwidth, "8080") ? "80+80" : !DM_LSTRCMP(bandwidth, "80") ? ",80MHz" : bandwidth)) {
-			pos += snprintf(&bandwidth_list[pos], sizeof(bandwidth_list) - pos, "%sMHz,", !DM_LSTRCMP(bandwidth, "8080") ? "80+80" : bandwidth);
-		}
-	}
-
-	if (pos)
-		bandwidth_list[pos - 1] = 0;
-
-	*value = dmstrdup(bandwidth_list);
+	*value = dmjson_get_value_array_all(res, ",", 1, "supp_bw");
 	return 0;
 }
 
@@ -3310,12 +3298,15 @@ static int get_neighboring_wifi_diagnostics_result_noise(char *refparam, struct 
 static int get_WiFiRadio_CurrentOperatingChannelBandwidth(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL;
-	char object[UBUS_OBJ_LEN];
+	char object[32];
+	char *bw;
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "20MHz");
-	dmasprintf(value, "%sMHz", dmjson_get_value(res, 1, "bandwidth"));
+	bw = dmjson_get_value(res, 1, "bandwidth");
+
+	dmasprintf(value, "%sMHz", (bw[0] == '0') ? "20" : bw);
 	return 0;
 }
 
