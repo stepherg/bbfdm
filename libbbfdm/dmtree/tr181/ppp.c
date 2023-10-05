@@ -121,6 +121,7 @@ static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 	uci_path_foreach_sections(bbfdm, "dmmap_ppp", "interface", s) {
 		struct uci_section *iface_s = NULL;
 		char *iface_name = NULL;
+		char *curr_name = NULL;
 
 		dmuci_get_value_by_section_string(s, "iface_name", &iface_name);
 		if (DM_STRLEN(iface_name))
@@ -130,6 +131,14 @@ static int browseInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *p
 		curr_ppp_args.dmmap_s = s;
 
 		inst = handle_instance(dmctx, parent_node, s, "ppp_int_instance", "ppp_int_alias");
+
+		dmuci_get_value_by_section_string(s, "name", &curr_name);
+		if (!DM_STRLEN(curr_name)) {
+			char name[8] = {0};
+
+			snprintf(name, sizeof(name), "ppp_%s", inst);
+			dmuci_set_value_by_section(s, "name", name);
+		}
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_ppp_args, inst) == DM_STOP)
 			break;
@@ -284,8 +293,6 @@ static int set_PPPInterface_Reset(char *refparam, struct dmctx *ctx, void *data,
 static int get_ppp_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct ppp_args *)data)->dmmap_s, "name", value);
-	if ((*value)[0] == '\0')
-		*value = dmstrdup(section_name(((struct ppp_args *)data)->iface_s));
 	return 0;
 }
 

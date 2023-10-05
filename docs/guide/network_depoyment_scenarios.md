@@ -1728,6 +1728,69 @@ Device.DHCPv4.Client.1.Interface => Device.IP.Interface.1
 $ obuspa -c get Device.Bridging.Bridge.*.Port.*.LowerLayers
 ```
 
+### 21. PPPoE WAN connection
+
+- **TR-181 Commands**
+
+```bash
+obuspa -c del Device.DHCPv4.Client.*
+obuspa -c del Device.DHCPv6.Client.*
+obuspa -c del Device.Ethernet.Link.*
+obuspa -c del Device.Bridging.Bridge.*
+obuspa -c del Device.IP.Interface.*
+
+obuspa -c add Device.Ethernet.Link.
+obuspa -c set Device.Ethernet.Link.1.LowerLayers Device.Ethernet.Interface.3
+
+obuspa -c add Device.PPP.Interface.
+obuspa -c set Device.PPP.Interface.1.LowerLayers Device.Ethernet.Link.1
+obuspa -c set Device.PPP.Interface.1.Username test
+obuspa -c set Device.PPP.Interface.1.Password test
+obuspa -c set Device.PPP.Interface.1.Enable 1
+
+obuspa -c add Device.IP.Interface.
+obuspa -c set Device.IP.Interface.1.LowerLayers Device.PPP.Interface.1
+obuspa -c set Device.IP.Interface.1.Enable 1
+```
+
+- **Network UCI Config**
+
+```bash
+$ cat /etc/config/network 
+
+config interface 'loopback'
+        option device 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config globals 'globals'
+        option ula_prefix 'fd64:742f:d82c::/48'
+
+config interface 'iface1'
+        option device 'eth4'
+        option proto 'pppoe'
+        option username 'test'
+        option password 'test'
+        option disabled '0'
+        option macaddr '44:D4:37:71:B5:53'
+
+```
+
+- **TR-181 Data Model**
+
+```bash
+$ obuspa -c get Device.IP.Interface.*.LowerLayers
+Device.IP.Interface.1.LowerLayers => Device.PPP.Interface.1
+$ obuspa -c get Device.PPP.Interface.*.LowerLayers
+Device.PPP.Interface.1.LowerLayers => Device.Ethernet.Link.1
+$ obuspa -c get Device.Ethernet.VLANTermination.*.LowerLayers
+$ obuspa -c get Device.Ethernet.Link.*.LowerLayers
+Device.Ethernet.Link.1.LowerLayers => Device.Ethernet.Interface.3
+$ obuspa -c get Device.DHCPv4.Client.*.Interface
+$ obuspa -c get Device.Bridging.Bridge.*.Port.*.LowerLayers
+```
+
 ## Limitations
 
 - Regarding above scenarios, it's better to follow the sequence as described in each scenario to avoid misconfiguration issues

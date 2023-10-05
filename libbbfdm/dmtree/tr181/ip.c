@@ -1359,13 +1359,22 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 			}
 
 			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &curr_device);
-			update_child_interfaces(curr_device, "device", reference.value);
 
 			if (DM_STRNCMP(reference.path, "Device.PPP.Interface.", strlen("Device.PPP.Interface.")) == 0) {
-				struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "device", reference.value);
-				dmuci_set_value_by_section_bbfdm(ppp_s, "iface_name", section_name((struct uci_section *)data));
-				ppp___update_sections(ppp_s, (struct uci_section *)data);
+				struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "name", reference.value);
+				if (ppp_s) {
+					char *new_device = NULL;
+
+					dmuci_get_value_by_section_string(ppp_s, "device", &new_device);
+					update_child_interfaces(curr_device, "device", new_device);
+
+					dmuci_set_value_by_section_bbfdm(ppp_s, "iface_name", section_name((struct uci_section *)data));
+					ppp___update_sections(ppp_s, (struct uci_section *)data);
+				}
+			} else {
+				update_child_interfaces(curr_device, "device", reference.value);
 			}
+
 			break;
 	}
 	return 0;
