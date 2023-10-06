@@ -2216,6 +2216,17 @@ static int get_key_check_param(DMPARAM_ARGS)
 	char *full_param;
 	char *value = "";
 
+	// Entry not found
+	if (leaf == NULL) {
+		dmctx->stop = true;
+		return 0;
+	}
+
+	if (DM_STRLEN(leaf->parameter) == 0) {
+		dmctx->stop = true;
+		return FAULT_9005;
+	}
+
 	dmastrcat(&full_param, node->current_object, leaf->parameter);
 
 	if (dm_strcmp_wildcard(dmctx->in_param, full_param) != 0) {
