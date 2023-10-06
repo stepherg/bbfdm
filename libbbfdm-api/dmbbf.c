@@ -2204,8 +2204,60 @@ int dm_entry_set_value(struct dmctx *dmctx)
 }
 
 /******************
- * get linker param
+ * get reference param
  *****************/
+static int get_key_ubus_value(struct dmctx *dmctx, struct dmnode *node)
+{
+	json_object *res = NULL, *res_obj = NULL;
+	char *ubus_name = node->obj->checkdep;
+
+	json_object *in_args = json_object_new_object();
+	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
+	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
+	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+
+	dmubus_call(ubus_name, "get",
+			UBUS_ARGS{
+						{"path", dmctx->in_param, String},
+						{"optional", json_object_to_json_string(in_args), Table}
+			},
+			2, &res);
+
+	json_object_put(in_args);
+
+	if (!res)
+		return FAULT_9005;
+
+	json_object *res_array = dmjson_get_obj(res, 1, "results");
+	if (!res_array)
+		return FAULT_9005;
+
+	size_t nbre_obj = json_object_array_length(res_array);
+
+	if (nbre_obj == 0)
+		return FAULT_9005;
+
+	for (size_t i = 0; i < nbre_obj; i++) {
+		res_obj = json_object_array_get_idx(res_array, i);
+
+		char *fault = dmjson_get_value(res_obj, 1, "fault");
+		if (DM_STRLEN(fault))
+			return DM_STRTOUL(fault);
+
+		char *path = dmjson_get_value(res_obj, 1, "path");
+		char *data = dmjson_get_value(res_obj, 1, "data");
+
+		if (data && DM_STRCMP(data, dmctx->linker) == 0) {
+			dmctx->linker_param = dmstrdup(path);
+			char *p = strrchr(dmctx->linker_param, '.');
+			if (p) *p = 0;
+			return 0;
+		}
+	}
+
+	return 0;
+}
+
 static int get_key_check_obj(DMOBJECT_ARGS)
 {
 	return FAULT_9005;
@@ -2213,35 +2265,30 @@ static int get_key_check_obj(DMOBJECT_ARGS)
 
 static int get_key_check_param(DMPARAM_ARGS)
 {
-	char *full_param;
-	char *value = "";
-
-	// Entry not found
-	if (leaf == NULL) {
+	if (node->is_ubus_service) {
+		int err = get_key_ubus_value(dmctx, node);
 		dmctx->stop = true;
-		return 0;
-	}
+		return err ? err : 0;
+	} else {
+		char *full_param;
+		char *value = "";
 
-	if (DM_STRLEN(leaf->parameter) == 0) {
-		dmctx->stop = true;
-		return FAULT_9005;
-	}
+		dmastrcat(&full_param, node->current_object, leaf->parameter);
 
-	dmastrcat(&full_param, node->current_object, leaf->parameter);
+		if (dm_strcmp_wildcard(dmctx->in_param, full_param) != 0) {
+			dmfree(full_param);
+			return FAULT_9005;
+		}
 
-	if (dm_strcmp_wildcard(dmctx->in_param, full_param) != 0) {
-		dmfree(full_param);
-		return FAULT_9005;
-	}
+		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
-	(leaf->getvalue)(full_param, dmctx, data, instance, &value);
-
-	if (value && value[0] != '\0' && DM_STRCMP(value, dmctx->linker) == 0) {
-		if (node->current_object[DM_STRLEN(node->current_object) - 1] == '.')
-			node->current_object[DM_STRLEN(node->current_object) - 1] = 0;
-		dmctx->linker_param = dmstrdup(node->current_object);
-		dmctx->stop = true;
-		return 0;
+		if (value && value[0] != '\0' && DM_STRCMP(value, dmctx->linker) == 0) {
+			if (node->current_object[DM_STRLEN(node->current_object) - 1] == '.')
+				node->current_object[DM_STRLEN(node->current_object) - 1] = 0;
+			dmctx->linker_param = dmstrdup(node->current_object);
+			dmctx->stop = true;
+			return 0;
+		}
 	}
 
 	return FAULT_9005;

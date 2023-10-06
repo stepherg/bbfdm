@@ -154,6 +154,49 @@ function install_libcwmpdm()
 	cd /builds/bbf/bbfdm
 }
 
+
+function install_hosts_micro_service()
+{
+	# clone and compile hostdm
+	[ -d "/opt/dev/hostmngr" ] && rm -rf /opt/dev/hostmngr
+	
+	if [ -n "${HOSTS_BRANCH}" ]; then
+		exec_cmd git clone -b ${HOSTS_BRANCH} --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/iopsys/hostmngr.git /opt/dev/hostmngr
+	else
+		exec_cmd git clone -b devel --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/iopsys/hostmngr.git /opt/dev/hostmngr
+	fi
+
+	echo "Compiling hosts micro-service"
+	exec_cmd_verbose make clean -C /opt/dev/hostmngr/src/bbf_plugin
+	exec_cmd_verbose make -C /opt/dev/hostmngr/src/bbf_plugin
+
+	echo "installing hosts micro-service"
+	mkdir -p /etc/hostmngr
+	cp -f /opt/dev/hostmngr/src/bbf_plugin/libhostmngr.so /etc/hostmngr/
+	cp -f /opt/dev/iopsys/hostmngr/files/etc/hostmngr/input.json /etc/hostmngr
+}
+
+function install_time_micro_service()
+{
+	# clone and compile timedm
+	[ -d "/opt/dev/timemngr" ] && rm -rf /opt/dev/timemngr
+	
+	if [ -n "${TIME_BRANCH}" ]; then
+		exec_cmd git clone -b ${TIME_BRANCH} --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/timemngr.git /opt/dev/timemngr
+	else
+		exec_cmd git clone -b devel --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/timemngr.git /opt/dev/timemngr
+	fi
+
+	echo "Compiling time micro-service"
+	exec_cmd_verbose make clean -C /opt/dev/timemngr/src
+	exec_cmd_verbose make -C /opt/dev/timemngr/src
+
+	echo "installing time micro-service"
+	mkdir -p /etc/timemngr
+	cp -f /opt/dev/timemngr/src/libtimemngr.so /etc/timemngr/
+	cp -f /opt/dev/iopsys/timemngr/files/etc/timemngr/input.json /etc/timemngr
+}
+
 function error_on_zero()
 {
 	ret=$1

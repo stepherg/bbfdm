@@ -18,7 +18,7 @@ install_libbbf_test ${1}
 #compile and install libwifi_dataelements dynamic extension library
 install_libwifi_dataelements ${1}
 
-# Install datamodel plugins only when pipeline trigger for bbfdm
+# Install datamodel plugins/micro-service only when pipeline trigger for bbfdm
 if [ -z "${1}" ]; then
 	git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/feed/iopsys.git /opt/dev/iopsys
 	git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/bulkdata.git /opt/dev/bulkdata
@@ -29,6 +29,7 @@ if [ -z "${1}" ]; then
 	cp -f /opt/dev/iopsys/icwmp/files/etc/bbfdm/json/CWMPManagementServer.json /etc/bbfdm/json
 	cp -f /opt/dev/iopsys/ponmngr/files/etc/bbfdm/json/xpon.json /etc/bbfdm/json
 	
+	# install bulkdata micro-service
 	mkdir -p /etc/bulkdata
 	cp -f /opt/dev/bulkdata/bbf_plugin/bulkdata.json /etc/bulkdata
 	cp -f /opt/dev/iopsys/bulkdata/files/etc/bulkdata/input.json /etc/bulkdata
@@ -36,9 +37,15 @@ if [ -z "${1}" ]; then
 	# install usermngr plugin
 	install_libusermngr
 
-	# install periodicstats plugin
-	install_libperiodicstats
+	# install periodicstats micro-service
+	install_periodicstats
 
 	# install cwmpdm plugin
 	install_libcwmpdm
+	
+	# install hosts micro-service
+	install_hosts_micro_service
+	
+	# install time micro-service
+	install_time_micro_service
 fi
