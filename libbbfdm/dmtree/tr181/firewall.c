@@ -353,6 +353,25 @@ static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 	return 0;
 }
 
+/*#Device.Firewall.DMZ.{i}.!UCI:firewall/dmz/dmmap_dmz*/
+static int browseFirewallDMZInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct dmmap_dup *p = NULL;
+	char *inst = NULL;
+	LIST_HEAD(dup_list);
+
+	synchronize_specific_config_sections_with_dmmap("firewall", "dmz", "dmmap_dmz", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "dmz_instance", "dmz_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
 /*************************************************************
 * ADD & DEL OBJ
 **************************************************************/
@@ -432,6 +451,46 @@ static int delete_firewall_rule(char *refparam, struct dmctx *ctx, void *data, c
 				struct uci_section *dmmap_section = NULL;
 
 				get_dmmap_section_of_config_section("dmmap_firewall", "rule", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+			break;
+	}
+	return 0;
+}
+
+static int addObjFirewallDMZ(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	struct uci_section *s = NULL, *dmmap = NULL;
+	char s_name[16] = {0};
+
+	snprintf(s_name, sizeof(s_name), "dmz_%s", *instance);
+
+	dmuci_add_section("firewall", "dmz", &s);
+	dmuci_rename_section_by_section(s, s_name);
+	dmuci_set_value_by_section(s, "enabled", "0");
+
+	dmuci_add_section_bbfdm("dmmap_dmz", "dmz", &dmmap);
+	dmuci_set_value_by_section(dmmap, "section_name", section_name(s));
+	dmuci_set_value_by_section(dmmap, "dmz_instance", *instance);
+	return 0;
+}
+
+static int delObjFirewallDMZ(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			break;
+		case DEL_ALL:
+			uci_foreach_sections_safe("firewall", "dmz", stmp, s) {
+				struct uci_section *dmmap_section = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_dmz", "dmz", section_name(s), &dmmap_section);
 				dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
 				dmuci_delete_by_section(s, NULL, NULL);
@@ -1811,7 +1870,187 @@ static int set_rule_source_port_range_max(char *refparam, struct dmctx *ctx, voi
 			dmuci_set_value_by_section(((struct rule_sec *)data)->config_section, "src_port", buffer);
 			break;
 	}
-        return 0;
+	return 0;
+}
+
+static int get_firewall_dmz_number_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseFirewallDMZInst);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
+/*#Device.Firewall.DMZ.{i}.Alias!UCI:dmmap_dmz/DMZ,@i-1/alias*/
+static int get_FirewallDMZ_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "dmz_alias", instance, value);
+}
+
+static int set_FirewallDMZ_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "dmz_alias", instance, value);
+}
+
+/*#Device.Firewall.DMZ.{i}.Enable!UCI:firewall/dmz,@i-1/enabled*/
+static int get_FirewallDMZ_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "0");
+	return 0;
+}
+
+static int set_FirewallDMZ_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b = 0;
+
+	switch (action) {
+		case VALUECHECK:
+			if (bbfdm_validate_boolean(ctx, value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Firewall.DMZ.{i}.Status!UCI:firewall/dmz,@i-1/status*/
+static int get_FirewallDMZ_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct dmmap_dup *dmz_args = (struct dmmap_dup *)data;
+	char *v, *destip, *interface;
+
+	dmuci_get_value_by_section_string(dmz_args->config_section, "interface", &interface);
+	dmuci_get_value_by_section_string(dmz_args->config_section, "dest_ip", &destip);
+	if (DM_STRLEN(destip) == 0 || DM_STRLEN(interface) == 0) {
+		*value = "Error_Misconfigured";
+		return 0;
+	}
+
+	dmuci_get_value_by_section_string(dmz_args->config_section, "enabled", &v);
+	*value = (dmuci_string_to_boolean(v)) ? "Enabled" : "Disabled";
+	return 0;
+}
+
+/*#Device.Firewall.DMZ.{i}.Origin!UCI:firewall/dmz,@i-1/origin*/
+static int get_FirewallDMZ_Origin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "origin", "Controller");
+	return 0;
+}
+
+static int set_FirewallDMZ_Origin(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *Origin[] = {"User", "System", "Controller", NULL};
+
+	switch (action) {
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, -1, Origin, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "origin", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Firewall.DMZ.{i}.Description!UCI:firewall/dmz,@i-1/description*/
+static int get_FirewallDMZ_Description(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "description", value);
+	return 0;
+}
+
+static int set_FirewallDMZ_Description(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "description", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Firewall.DMZ.{i}.Interface!UCI:firewall/dmz,@i-1/interface*/
+static int get_FirewallDMZ_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *interf = NULL;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &interf);
+
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", interf, value);
+	return 0;
+}
+
+static int set_FirewallDMZ_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
+
+	switch (action) {
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+				return FAULT_9007;
+
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
+				return FAULT_9007;
+
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", reference.value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Firewall.DMZ.{i}.DestIP!UCI:firewall/dmz,@i-1/dest_ip*/
+static int get_FirewallDMZ_DestIP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dest_ip", value);
+	return 0;
+}
+
+static int set_FirewallDMZ_DestIP(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, 15, NULL, IPv4Address))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_ip", value);
+			break;
+	}
+	return 0;
+}
+
+/*#Device.Firewall.DMZ.{i}.SourcePrefix!UCI:firewall/dmz,@i-1/source_prefix*/
+static int get_FirewallDMZ_SourcePrefix(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "source_prefix", value);
+	return 0;
+}
+
+static int set_FirewallDMZ_SourcePrefix(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action) {
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, 18, NULL, IPv4Prefix))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "source_prefix", value);
+			break;
+	}
+	return 0;
 }
 
 /**********************************************************************************************************************************
@@ -1822,6 +2061,7 @@ DMOBJ tFirewallObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Level", &DMREAD, NULL, NULL, NULL, browseLevelInst, NULL, NULL, NULL, tFirewallLevelParams, NULL, BBFDM_BOTH, NULL},
 {"Chain", &DMREAD, NULL, NULL, NULL, browseChainInst, NULL, NULL, tFirewallChainObj, tFirewallChainParams, NULL, BBFDM_BOTH, NULL},
+{"DMZ", &DMWRITE, addObjFirewallDMZ, delObjFirewallDMZ, NULL, browseFirewallDMZInst, NULL, NULL, NULL, tFirewallDMZParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -1832,6 +2072,7 @@ DMLEAF tFirewallParams[] = {
 {"AdvancedLevel", &DMWRITE, DMT_STRING, get_firewall_advanced_level, set_firewall_advanced_level, BBFDM_BOTH},
 {"LevelNumberOfEntries", &DMREAD, DMT_UNINT, get_firewall_level_number_of_entries, NULL, BBFDM_BOTH},
 {"ChainNumberOfEntries", &DMREAD, DMT_UNINT, get_firewall_chain_number_of_entries, NULL, BBFDM_BOTH},
+{"DMZNumberOfEntries", &DMREAD, DMT_UNINT, get_firewall_dmz_number_of_entries, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -1892,5 +2133,19 @@ DMLEAF tFirewallChainRuleParams[] = {
 {"DestPortRangeMax", &DMRule, DMT_INT, get_rule_dest_port_range_max, set_rule_dest_port_range_max, BBFDM_BOTH},
 {"SourcePort", &DMRule, DMT_INT, get_rule_source_port, set_rule_source_port, BBFDM_BOTH},
 {"SourcePortRangeMax", &DMRule, DMT_INT, get_rule_source_port_range_max, set_rule_source_port_range_max, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.Firewall.DMZ.{i}. *** */
+DMLEAF tFirewallDMZParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version */
+{"Alias", &DMWRITE, DMT_STRING, get_FirewallDMZ_Alias, set_FirewallDMZ_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Enable", &DMWRITE, DMT_BOOL, get_FirewallDMZ_Enable, set_FirewallDMZ_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_FirewallDMZ_Status, NULL, BBFDM_BOTH},
+{"Origin", &DMWRITE, DMT_STRING, get_FirewallDMZ_Origin, set_FirewallDMZ_Origin, BBFDM_BOTH},
+{"Description", &DMWRITE, DMT_STRING, get_FirewallDMZ_Description, set_FirewallDMZ_Description, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_FirewallDMZ_Interface, set_FirewallDMZ_Interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
+{"DestIP", &DMWRITE, DMT_STRING, get_FirewallDMZ_DestIP, set_FirewallDMZ_DestIP, BBFDM_BOTH},
+{"SourcePrefix", &DMWRITE, DMT_STRING, get_FirewallDMZ_SourcePrefix, set_FirewallDMZ_SourcePrefix, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {0}
 };
