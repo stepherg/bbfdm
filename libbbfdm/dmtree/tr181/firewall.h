@@ -20,6 +20,7 @@ extern DMLEAF tFirewallChainParams[];
 extern DMOBJ tFirewallChainObj[];
 extern DMLEAF tFirewallChainRuleParams[];
 extern DMLEAF tFirewallDMZParams[];
+extern DMLEAF tFirewallServiceParams[];
 
 void firewall__create_zone_section(char *s_name);
 
