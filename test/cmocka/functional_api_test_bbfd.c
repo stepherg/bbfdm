@@ -73,7 +73,7 @@ static void test_bbf_api_uci(void **state)
 	// dmuci_get_option_value_string: test correct config/section/option
 	uci_res = dmuci_get_option_value_string("network", "wan", "vendorid", &value);
 	assert_int_equal(uci_res, 0);
-	assert_string_equal(value, "eg400");
+	assert_string_equal(value, "dslforum.org");
 
 	// dmuci_get_option_value_string: test correct config/section/option
 	uci_res = dmuci_get_option_value_string("dropbear", "@dropbear[0]", "Port", &value);

@@ -172,6 +172,7 @@ enum fs_size_type_enum {
 enum option_type_enum {
 	OPTION_IP,
 	OPTION_INT,
+	OPTION_STRING,
 	OPTION_HEX
 };
 
@@ -197,7 +198,8 @@ struct browse_args {
 	char *value;
 };
 
-struct option_tag_type {
+struct dhcp_options_type {
+	char *config_name;
 	int tag;
 	int type;
 	int len;
@@ -227,7 +229,8 @@ int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, cha
 int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
 int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
 char *check_create_dmmap_package(const char *dmmap_package);
-unsigned char isdigit_str(char *str);
+bool isdigit_str(const char *str);
+bool ishex_str(const char *str);
 bool special_char(char c);
 bool special_char_exits(const char *str);
 void replace_special_char(char *str, char c);
@@ -239,9 +242,9 @@ char *get_macaddr(char *interface_name);
 char *get_device(char *interface_name);
 char *get_l3_device(char *interface_name);
 bool value_exists_in_uci_list(struct uci_list *list, const char *value);
-bool value_exits_in_str_list(char *str_list, const char *delimitor, const char *value);
-void add_elt_to_str_list(char **str_list, char *elt);
-void remove_elt_from_str_list(char **str_list, char *ifname);
+bool value_exits_in_str_list(char *str_list, const char *delimitor, const char *str);
+char *add_str_to_str_list(char *str_list, const char *delimitor, const char *str);
+char *remove_str_from_str_list(char *str_list, const char *delimitor, const char *str);
 struct uci_section *get_origin_section_from_config(char *package, char *section_type, char *orig_section_name);
 struct uci_section *get_origin_section_from_dmmap(char *package, char *section_type, char *orig_section_name);
 struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_type, char *orig_section_name);
@@ -249,7 +252,6 @@ struct uci_section *get_dup_section_in_config_opt(char *package, char *section_t
 struct uci_section *get_dup_section_in_dmmap_opt(char *dmmap_package, char *section_type, char *opt_name, char *opt_value);
 struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* section_type, char*sect_name, char *opt_name, char* opt_value);
 struct uci_section *get_section_in_dmmap_with_options_eq(char *dmmap_package, char *section_type, char *opt1_name, char *opt1_value, char *opt2_name, char *opt2_value);
-bool elt_exists_in_array(char **str_array, char *str, int length);
 int get_shift_utc_time(int shift_time, char *utc_time, int size);
 int get_shift_time_time(int shift_time, char *local_time, int size);
 struct uci_section *is_dmmap_section_exist(char* package, char* section);
@@ -264,6 +266,7 @@ void convert_string_to_hex(const char *str, char *hex, size_t size);
 void convert_hex_to_string(const char *hex, char *str, size_t size);
 void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, size_t size);
 void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, size_t size);
+int get_dhcp_option_number_by_name(const char *tag_name);
 bool match(const char *string, const char *pattern);
 int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
 int dm_validate_boolean(char *value);
