@@ -70,77 +70,97 @@ char *IPPrefix[] = {"^$", "^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01
 char *IPv4Prefix[] = {"^$", "^/(3[0-2]|[012]?[0-9])$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])/(3[0-2]|[012]?[0-9])$", NULL};
 char *IPv6Prefix[] = {"^$", "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/(12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$", NULL};
 
-struct option_tag_type TYPE_TAG_ARRAY[] = {
-{1, OPTION_IP, 4},
-{2, OPTION_INT, 4},
-{3, OPTION_IP, 4},
-{4, OPTION_IP, 4},
-{5, OPTION_IP, 4},
-{6, OPTION_IP, 4},
-{7, OPTION_IP, 4},
-{8, OPTION_IP, 4},
-{9, OPTION_IP, 4},
-{10, OPTION_IP, 4},
-{11, OPTION_IP, 4},
-{13, OPTION_INT, 2},
-{16, OPTION_IP, 4},
-{19, OPTION_INT, 1},
-{20, OPTION_INT, 1},
-{21, OPTION_IP, 4},
-{22, OPTION_INT, 2},
-{23, OPTION_INT, 1},
-{24, OPTION_INT, 4},
-{25, OPTION_INT, 2},
-{26, OPTION_INT, 2},
-{27, OPTION_INT, 1},
-{28, OPTION_IP, 4},
-{29, OPTION_INT, 1},
-{30, OPTION_INT, 1},
-{31, OPTION_INT, 1},
-{32, OPTION_IP, 4},
-{33, OPTION_IP, 4},
-{34, OPTION_INT, 1},
-{35, OPTION_INT, 4},
-{36, OPTION_INT, 1},
-{37, OPTION_INT, 1},
-{38, OPTION_INT, 4},
-{39, OPTION_INT, 1},
-{41, OPTION_IP, 4},
-{42, OPTION_IP, 4},
-{43, OPTION_HEX, 1},
-{44, OPTION_IP, 4},
-{45, OPTION_IP, 4},
-{46, OPTION_INT, 1},
-{48, OPTION_IP, 4},
-{49, OPTION_IP, 4},
-{50, OPTION_IP, 4},
-{51, OPTION_IP, 4},
-{52, OPTION_INT, 1},
-{53, OPTION_INT, 1},
-{54, OPTION_INT, 4},
-{57, OPTION_INT, 2},
-{58, OPTION_INT, 4},
-{59, OPTION_INT, 4},
-{65, OPTION_IP, 4},
-{68, OPTION_IP, 4},
-{69, OPTION_IP, 4},
-{70, OPTION_IP, 4},
-{71, OPTION_IP, 4},
-{72, OPTION_IP, 4},
-{73, OPTION_IP, 4},
-{74, OPTION_IP, 4},
-{75, OPTION_IP, 4},
-{76, OPTION_IP, 4},
-{118, OPTION_IP, 4},
-{125, OPTION_HEX, 1},
-{145, OPTION_INT, 1},
-{152, OPTION_INT, 4},
-{153, OPTION_INT, 4},
-{154, OPTION_INT, 4},
-{155, OPTION_INT, 4},
-{156, OPTION_INT, 1},
-{157, OPTION_INT, 1},
-{159, OPTION_INT, 4}
+struct dhcp_options_type DHCP_OPTIONS_ARRAY[] = {
+/* config_name, tag, type, length */
+{"subnet", 1, OPTION_IP, 4},                /* DHCP_SUBNET             */
+{"timezone", 2, OPTION_INT, 4},             /* DHCP_TIME_OFFSET        */
+{"router", 3, OPTION_IP, 4},                /* DHCP_ROUTER             */
+{"timesrv", 4, OPTION_IP, 4},               /* DHCP_TIME_SERVER        */
+{"namesrv", 5, OPTION_IP, 4},               /* DHCP_NAME_SERVER        */
+{"dns", 6, OPTION_IP, 4},                   /* DHCP_DNS_SERVER         */
+{"logsrv", 7, OPTION_IP, 4},                /* DHCP_LOG_SERVER         */
+{"cookiesrv", 8, OPTION_IP, 4},             /* DHCP_COOKIE_SERVER      */
+{"lprsrv", 9, OPTION_IP, 4},                /* DHCP_LPR_SERVER         */
+{"", 10, OPTION_IP, 4},                     /* DHCP_IMPRESS_SERVER     */
+{"", 11, OPTION_IP, 4},                     /* DHCP_RLP SERVER         */
+{"hostname", 12, OPTION_STRING, 0},         /* DHCP_HOST_NAME          */
+{"bootsize", 13, OPTION_INT, 2},            /* DHCP_BOOT_SIZE          */
+{"domain", 15, OPTION_STRING, 0},           /* DHCP_DOMAIN_NAME        */
+{"swapsrv", 16, OPTION_IP, 4},              /* DHCP_SWAP_SERVER        */
+{"rootpath", 17, OPTION_STRING, 0},         /* DHCP_ROOT_PATH          */
+{"", 19, OPTION_INT, 1},                    /* DHCP_FORWARD            */
+{"", 20, OPTION_INT, 1},                    /* DHCP_SOURCE_ROUTING     */
+{"", 21, OPTION_IP, 4},                     /* DHCP_POLICY_FILTER      */
+{"", 22, OPTION_INT, 2},                    /* DHCP_MAX_DG_ASSEMBLY    */
+{"ipttl", 23, OPTION_INT, 1},               /* DHCP_IP_TTL             */
+{"", 24, OPTION_INT, 4},                    /* DHCP_MTU_TIMEOUT        */
+{"", 25, OPTION_INT, 2},                    /* DHCP_MTU_PLATEAU        */
+{"mtu", 26, OPTION_INT, 2},                 /* DHCP_MTU_INTERFACE      */
+{"", 27, OPTION_INT, 1},                    /* DHCP_MTU_SUBNET         */
+{"broadcast", 28, OPTION_IP, 4},            /* DHCP_BROADCAST          */
+{"", 29, OPTION_INT, 1},                    /* DHCP_MASK_DISCOVERY     */
+{"", 30, OPTION_INT, 1},                    /* DHCP_MASK_SUPPLIER      */
+{"", 31, OPTION_INT, 1},                    /* DHCP_ROUTER_DISCOVERY   */
+{"", 32, OPTION_IP, 4},                     /* DHCP_ROUTER_REQUEST     */
+{"routes", 33, OPTION_IP, 4},               /* DHCP_ROUTES             */
+{"", 34, OPTION_INT, 1},                    /* DHCP_TRAILER            */
+{"", 35, OPTION_INT, 4},                    /* DHCP_ARP_TIMEOUT        */
+{"", 36, OPTION_INT, 1},                    /* DHCP_ETHERNET           */
+{"", 37, OPTION_INT, 1},                    /* DHCP_DEFAULT_TCP_TTL    */
+{"", 38, OPTION_INT, 4},                    /* DHCP_KEEPALIVE_TIME     */
+{"", 39, OPTION_INT, 1},                    /* DHCP_KEEPALIVE_DATA     */
+{"nisdomain", 40, OPTION_STRING, 0},        /* DHCP_NIS_DOMAIN         */
+{"nissrv", 41, OPTION_IP, 4},               /* DHCP_NIS_SERVER         */
+{"ntpsrv", 42, OPTION_IP, 4},               /* DHCP_NTP_SERVER         */
+{"", 43, OPTION_HEX, 1},                    /* DHCP_VENDOR_SPECIFIC    */
+{"wins", 44, OPTION_IP, 4},                 /* DHCP_WINS_SERVER        */
+{"", 46, OPTION_INT, 1},                    /* DHCP_NETBIOS            */
+{"", 50, OPTION_IP, 4},                     /* DHCP_ADDRESS_REQUEST    */
+{"lease", 51, OPTION_INT, 4},               /* DHCP_LEASE_TIME         */
+{"", 52, OPTION_INT, 1},                    /* DHCP_OVERLOAD           */
+{"", 53, OPTION_INT, 1},                    /* DHCP_MESSSAGE_TYPE      */
+{"serverid", 54, OPTION_IP, 4},             /* DHCP_SERVER_ID          */
+{"message", 56, OPTION_STRING, 0},          /* DHCP_ERR_MESSAGE        */
+{"", 57, OPTION_INT, 2},                    /* DHCP_MAX_MESSAGE_SIZE   */
+{"", 58, OPTION_INT, 4},                    /* DHCP_RENEWAL_TIME       */
+{"", 59, OPTION_INT, 4},                    /* DHCP_REBINDING_TIME     */
+{"vendor", 60, OPTION_STRING, 0},           /* DHCP_VENDOR             */
+{"", 65, OPTION_IP, 4},                     /* DHCP_NIS_SERVER_ADDR    */
+{"tftp", 66, OPTION_STRING, 0},             /* DHCP_TFTP_SERVER_NAME   */
+{"bootfile", 67, OPTION_STRING, 0},         /* DHCP_BOOT_FILE          */
+{"", 68, OPTION_IP, 4},                     /* DHCP_HOME_AGENT         */
+{"", 69, OPTION_IP, 4},                     /* DHCP_SMTP_SERVER        */
+{"", 70, OPTION_IP, 4},                     /* DHCP_POP3_SERVER        */
+{"", 71, OPTION_IP, 4},                     /* DHCP_NNTP_SERVER        */
+{"", 72, OPTION_IP, 4},                     /* DHCP_WWW_SERVER         */
+{"", 73, OPTION_IP, 4},                     /* DHCP_FINGER_SERVER      */
+{"", 74, OPTION_IP, 4},                     /* DHCP_IRC_SERVER         */
+{"", 75, OPTION_IP, 4},                     /* DHCP_STREET_TALK_SERVER */
+{"", 76, OPTION_IP, 4},                     /* DHCP_STDA_SERVER        */
+{"userclass", 77, OPTION_STRING, 0},        /* DHCP_USER_CLASS         */
+{"tzstr", 100, OPTION_STRING, 0},           /* DHCP_PCODE              */
+{"tzdbstr", 101, OPTION_STRING, 0},         /* DHCP_TCODE              */
+{"", 118, OPTION_IP, 4},                    /* DHCP_SUBNET_SELECTION   */
+{"search", 119, OPTION_STRING, 0},          /* DHCP_DOMAIN_SEARCH      */
+{"sipsrv", 120, OPTION_STRING, 0},          /* DHCP_SIP_SERVERS        */
+{"staticroutes", 121, OPTION_STRING, 0},    /* DHCP_STATIC_ROUTES      */
+{"", 125, OPTION_HEX, 1},                   /* DHCP_VI_VENDOR_SPECIFIC */
+{"vlanid", 132, OPTION_INT, 2},             /* DHCP_VLAN_ID            */
+{"vlanpriority", 133, OPTION_INT, 1},       /* DHCP_VLAN_PRIORITY      */
+{"", 145, OPTION_INT, 1},                   /* DHCP_FORCERENEW         */
+{"", 152, OPTION_INT, 4},                   /* DHCP_BASE_TIME          */
+{"", 153, OPTION_INT, 4},                   /* DHCP_START_TIME         */
+{"", 154, OPTION_INT, 4},                   /* DHCP_QUERY_START_TIME   */
+{"", 155, OPTION_INT, 4},                   /* DHCP_QUERY_END_TIME     */
+{"", 156, OPTION_INT, 1},                   /* DHCP_STATE              */
+{"", 157, OPTION_INT, 1},                   /* DHCP_DATA_SOURCE        */
+{"", 159, OPTION_INT, 4},                   /* DHCP_PORT_PARAMS        */
+{"pxeconffile", 209, OPTION_STRING, 0},     /* DHCP_PXE_CONF_FILE      */
+{"pxepathprefix", 210, OPTION_STRING, 0},   /* DHCP_PXE_PATH_PREFIX    */
+{"reboottime", 211, OPTION_INT, 4},         /* DHCP_REBOOT_TIME        */
+{"ip6rd", 212, OPTION_STRING, 0},           /* DHCP_6RD                */
+{"msstaticroutes", 249, OPTION_STRING, 0},  /* DHCP_MS_STATIC_ROUTES   */
+{"wpad", 225, OPTION_STRING, 0},            /* DHCP_WPAD               */
 };
 
 pid_t get_pid(const char *pname)
@@ -687,11 +707,29 @@ unsigned int count_occurrences(char *str, char c)
 	return count;
 }
 
-unsigned char isdigit_str(char *str)
+bool isdigit_str(const char *str)
 {
-	if (!(*str)) return 0;
+	if (!DM_STRLEN(str))
+		return 0;
+
 	while(isdigit(*str++));
-	return ((*(str-1)) ? 0 : 1);
+
+	return (*(str-1)) ? 0 : 1;
+}
+
+bool ishex_str(const char *str)
+{
+	char *endptr = NULL;
+
+	if (DM_STRLEN(str) < 2)
+		return 0;
+
+	if (str[0] != '0' || (str[1] != 'x' && str[1] != 'X'))
+		return 0;
+
+	strtol(str, &endptr, 0);
+
+	return DM_STRLEN(endptr) ? 0 : 1;
 }
 
 bool special_char(char c)
@@ -831,7 +869,7 @@ bool value_exists_in_uci_list(struct uci_list *list, const char *value)
 {
 	struct uci_element *e = NULL;
 
-	if (list == NULL)
+	if (list == NULL || value == NULL)
 		return false;
 
 	uci_foreach_element(list, e) {
@@ -842,78 +880,63 @@ bool value_exists_in_uci_list(struct uci_list *list, const char *value)
 	return false;
 }
 
-bool value_exits_in_str_list(char *str_list, const char *delimitor, const char *value)
+bool value_exits_in_str_list(char *str_list, const char *delimitor, const char *str)
 {
-	char *pch, *spch;
+	char *pch = NULL, *spch = NULL;
 
-	if (str_list == NULL || *str_list == '\0')
+	if (!DM_STRLEN(str_list) || !delimitor || !str)
 		return false;
 
 	char *list = dmstrdup(str_list);
+
 	for (pch = strtok_r(list, delimitor, &spch); pch != NULL; pch = strtok_r(NULL, delimitor, &spch)) {
-		if (DM_STRCMP(pch, value) == 0)
+		if (DM_STRCMP(pch, str) == 0)
 			return true;
 	}
+
 	return false;
 }
 
-void add_elt_to_str_list(char **str_list, char *elt)
+char *add_str_to_str_list(char *str_list, const char *delimitor, const char *str)
 {
-	if (*str_list == NULL || DM_STRLEN(*str_list) == 0) {
-		dmasprintf(str_list, "%s", elt);
-		return;
-	}
+	char *res = "";
 
-	char *list = dmstrdup(*str_list);
-	dmfree(*str_list);
-	*str_list = NULL;
-	dmasprintf(str_list, "%s %s", list, elt);
+	if (!str_list || !delimitor || !str)
+		return "";
+
+	dmasprintf(&res, "%s%s%s", str_list, strlen(str_list) ? delimitor : "", str);
+
+	return res;
 }
 
-void remove_elt_from_str_list(char **str_list, char *ifname)
+char *remove_str_from_str_list(char *str_list, const char *delimitor, const char *str)
 {
-	char *list = NULL, *tmp = NULL, *pch = NULL, *spch = NULL;
+	char *pch = NULL, *spch = NULL;
+	unsigned pos = 0;
 
-	if (*str_list == NULL || DM_STRLEN(*str_list) == 0)
-		return;
+	if (!str_list || !delimitor || !str)
+		return "";
 
-	list = dmstrdup(*str_list);
-	dmfree(*str_list);
-	*str_list = NULL;
+	int len = strlen(str_list);
+	int del_len = strlen(delimitor);
 
-	for (pch = strtok_r(list, " ", &spch); pch != NULL; pch = strtok_r(NULL, " ", &spch)) {
-		if (DM_STRCMP(pch, ifname) == 0)
+	char *res = (char *)dmcalloc(len + 1, sizeof(char));
+	char *list = dmstrdup(str_list);
+
+	for (pch = strtok_r(list, delimitor, &spch); pch != NULL; pch = strtok_r(NULL, delimitor, &spch)) {
+
+		if (DM_STRCMP(pch, str) == 0)
 			continue;
 
-		if (tmp == NULL)
-			dmasprintf(str_list, "%s", pch);
-		else
-			dmasprintf(str_list, "%s %s", tmp, pch);
-
-		if (tmp) {
-			dmfree(tmp);
-			tmp = NULL;
-		}
-
-		if (*str_list) {
-			tmp = dmstrdup(*str_list);
-			dmfree(*str_list);
-			*str_list = NULL;
-		}
+		pos += snprintf(&res[pos], len + 1 - pos, "%s%s", pch, delimitor);
 	}
 
-	dmasprintf(str_list, "%s", tmp ? tmp : "");
-}
+	dmfree(list);
 
-bool elt_exists_in_array(char **str_array, char *str, int length)
-{
-	int i;
+	if (pos)
+		res[pos - del_len] = 0;
 
-	for (i = 0; i < length; i++) {
-		if (DM_STRCMP(str_array[i], str) == 0)
-			return true;
-	}
-	return false;
+	return res;
 }
 
 int get_shift_utc_time(int shift_time, char *utc_time, int size)
@@ -1114,6 +1137,23 @@ void convert_hex_to_string(const char *hex, char *str, size_t size)
 	str[pos] = '\0';
 }
 
+int get_dhcp_option_number_by_name(const char *tag_name)
+{
+	if (!DM_STRLEN(tag_name))
+		return -1;
+
+	for (int i = 0; i < ARRAY_SIZE(DHCP_OPTIONS_ARRAY); i++) {
+
+		if (DM_STRLEN(DHCP_OPTIONS_ARRAY[i].config_name) == 0)
+			continue;
+
+		if (strcmp(DHCP_OPTIONS_ARRAY[i].config_name, tag_name) == 0)
+			return DHCP_OPTIONS_ARRAY[i].tag;
+	}
+
+	return -1;
+}
+
 void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, size_t size)
 {
 	int idx = -1;
@@ -1121,8 +1161,8 @@ void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, siz
 	if (str == NULL || hex == NULL || size == 0)
 		return;
 
-	for (int i = 0; i < ARRAY_SIZE(TYPE_TAG_ARRAY); i++) {
-		if (TYPE_TAG_ARRAY[i].tag == tag) {
+	for (int i = 0; i < ARRAY_SIZE(DHCP_OPTIONS_ARRAY); i++) {
+		if (DHCP_OPTIONS_ARRAY[i].tag == tag) {
 			idx = i;
 			break;
 		}
@@ -1139,7 +1179,7 @@ void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, siz
 
 	DM_STRNCPY(buf, str, sizeof(buf));
 	for (pch = strtok_r(buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
-		if (TYPE_TAG_ARRAY[idx].type == OPTION_IP) {
+		if (DHCP_OPTIONS_ARRAY[idx].type == OPTION_IP) {
 			struct in_addr ip_bin;
 
 			if (!inet_aton(pch, &ip_bin))
@@ -1147,24 +1187,26 @@ void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, siz
 
 			unsigned int ip = ntohl(ip_bin.s_addr);
 
-			if (size - pos < TYPE_TAG_ARRAY[idx].len * 2)
+			if (size - pos < DHCP_OPTIONS_ARRAY[idx].len * 2)
 				return;
 
 			pos += snprintf(&hex[pos], size - pos, "%08X", ip);
-		} else if (TYPE_TAG_ARRAY[idx].type == OPTION_HEX) {
+		} else if (DHCP_OPTIONS_ARRAY[idx].type == OPTION_HEX) {
 			for (int j = 0; j < DM_STRLEN(pch) && pos < size - 1; j++) {
 				if (pch[j] == ':')
 					continue;
 
 				pos += snprintf(&hex[pos], size - pos, "%c", pch[j]);
 			}
+		} else if (DHCP_OPTIONS_ARRAY[idx].type == OPTION_STRING) {
+			convert_string_to_hex(pch, hex, size);
 		} else {
 			long int val = DM_STRTOL(pch);
 
-			if (size - pos < TYPE_TAG_ARRAY[idx].len * 2)
+			if (size - pos < DHCP_OPTIONS_ARRAY[idx].len * 2)
 				return;
 
-			pos += snprintf(&hex[pos], size - pos, (TYPE_TAG_ARRAY[idx].len == 4) ? "%08lX" : (TYPE_TAG_ARRAY[idx].len == 2) ? "%04lX" : "%02lX", val);
+			pos += snprintf(&hex[pos], size - pos, (DHCP_OPTIONS_ARRAY[idx].len == 4) ? "%08lX" : (DHCP_OPTIONS_ARRAY[idx].len == 2) ? "%04lX" : "%02lX", val);
 		}
 	}
 }
@@ -1176,8 +1218,8 @@ void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, 
 	if (hex == NULL || str == NULL || size == 0)
 		return;
 
-	for (int i = 0; i < ARRAY_SIZE(TYPE_TAG_ARRAY); i++) {
-		if (TYPE_TAG_ARRAY[i].tag == tag) {
+	for (int i = 0; i < ARRAY_SIZE(DHCP_OPTIONS_ARRAY); i++) {
+		if (DHCP_OPTIONS_ARRAY[i].tag == tag) {
 			idx = i;
 			break;
 		}
@@ -1190,14 +1232,14 @@ void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, 
 
 	unsigned pos = 0;
 	unsigned int str_len = DM_STRLEN(hex);
-	unsigned int len = TYPE_TAG_ARRAY[idx].len * 2;
+	unsigned int len = DHCP_OPTIONS_ARRAY[idx].len * 2;
 	char buffer[32] = {0};
 	char buf[16] = {0};
 
 	for (int i = 0; i + len <= str_len; i = i + len) {
 		DM_STRNCPY(buf, &hex[i], len + 1);
 
-		if (TYPE_TAG_ARRAY[idx].type == OPTION_IP) {
+		if (DHCP_OPTIONS_ARRAY[idx].type == OPTION_IP) {
 			struct in_addr addr;
 			unsigned int ip;
 
@@ -1205,7 +1247,7 @@ void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, 
 			addr.s_addr = htonl(ip);
 			char *ipaddr = inet_ntoa(addr);
 			snprintf(buffer, sizeof(buffer), "%s,", ipaddr);
-		} else if (TYPE_TAG_ARRAY[idx].type == OPTION_HEX) {
+		} else if (DHCP_OPTIONS_ARRAY[idx].type == OPTION_HEX) {
 			snprintf(buffer, sizeof(buffer), "%s:", buf);
 		} else {
 			snprintf(buffer, sizeof(buffer), "%d,", (int)strtol(buf, NULL, 16));
