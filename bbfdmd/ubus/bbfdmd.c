@@ -1033,7 +1033,7 @@ static int bbfdm_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 			    struct blob_attr *msg)
 {
 	struct blob_attr *tb[__BBF_NOTIFY_MAX] = {NULL};
-	char *event_name;
+	char method_name[40] = {0};
 
 	if (blobmsg_parse(dm_notify_event_policy, __BBF_NOTIFY_MAX, tb, blob_data(msg), blob_len(msg))) {
 		ERR("Failed to parse blob");
@@ -1044,16 +1044,8 @@ static int bbfdm_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 		return UBUS_STATUS_INVALID_ARGUMENT;
 
 	INFO("ubus method|%s|, name|%s|", method, obj->name);
-	event_name = blobmsg_get_string(tb[BBF_NOTIFY_NAME]);
-	if (is_registered_event(event_name)) {
-		char method_name[40] = {0};
-
-		snprintf(method_name, sizeof(method_name), "%s.%s", UBUS_METHOD_NAME, BBF_EVENT);
-
-		ubus_send_event(ctx, method_name, msg);
-	} else {
-		WARNING("Event %s not registered", event_name);
-	}
+	snprintf(method_name, sizeof(method_name), "%s.%s", UBUS_METHOD_NAME, BBF_EVENT);
+	ubus_send_event(ctx, method_name, msg);
 
 	return 0;
 }
