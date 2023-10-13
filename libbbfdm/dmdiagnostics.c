@@ -425,7 +425,7 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 {
 	char fw_image_path[256] = "/tmp/firmware-XXXXXX";
 	json_object *json_obj = NULL;
-	bool activate = false;
+	bool activate = false, valid = false;
 	int res = 0;
 
 	// Check the file system size if there is sufficient space for downloading the firmware image
@@ -461,11 +461,27 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 
 	string_to_bool((char *)auto_activate, &activate);
 	char *act = (activate) ? "1" : "0";
-	// Apply Firmware Image
-	dmubus_call_blocking("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", act, Boolean}, {"bank", bank_id, Integer}}, 3, &json_obj);
 
+	dmubus_call_blocking("system", "validate_firmware_image", UBUS_ARGS{{"path", fw_image_path, String}}, 1, &json_obj);
 	if (json_obj == NULL) {
 		res = -1;
+		goto end;
+	}
+
+	char *val = dmjson_get_value(json_obj, 1, "valid");
+	string_to_bool(val, &valid);
+	json_object_put(json_obj);
+	json_obj = NULL;
+	if (valid == false) {
+		send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, commandKey, "Download");
+		res = -1;
+		goto end;
+	}
+
+	// Apply Firmware Image
+	dmubus_call_blocking("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", act, Boolean}, {"bank", bank_id, Integer}}, 3, &json_obj);
+	if (json_obj == NULL) {
+		res = 1;
 		goto end;
 	}
 

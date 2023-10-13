@@ -1337,6 +1337,10 @@ static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx
 
 	int res = bbf_fw_image_download(url, auto_activate, username, password, file_size, checksum_algorithm, checksum, bank_id, command, obj_path, commandKey);
 
+	if (res == 1) {
+		bbfdm_set_fault_message(ctx, "Firmware validation failed");
+	}
+
 	return res ? USP_FAULT_COMMAND_FAILURE : 0;
 }
 
