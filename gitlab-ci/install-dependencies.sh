@@ -25,7 +25,6 @@ if [ -z "${1}" ]; then
 
 	cp -f /opt/dev/iopsys/urlfilter/files/etc/bbfdm/json/urlfilter.json /etc/bbfdm/json
 	cp -f /opt/dev/iopsys/obuspa/files/etc/bbfdm/json/USPAgent.json /etc/bbfdm/json
-	cp -f /opt/dev/iopsys/obuspa/files/etc/bbfdm/json/TransferComplete.json /etc/bbfdm/json
 	cp -f /opt/dev/iopsys/icwmp/files/etc/bbfdm/json/CWMPManagementServer.json /etc/bbfdm/json
 	cp -f /opt/dev/iopsys/ponmngr/files/etc/bbfdm/json/xpon.json /etc/bbfdm/json
 	
