@@ -421,6 +421,10 @@ static void dm_browse_service(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *e
 	node.parent = parent_node;
 	node.is_ubus_service = true;
 
+	if (dmctx->disable_mservice_browse == true) {
+		return;
+	}
+
 	dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
 
 	if (dmctx->checkobj) {

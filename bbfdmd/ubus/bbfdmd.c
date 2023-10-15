@@ -35,7 +35,7 @@ extern struct list_head json_list;
 extern struct list_head json_memhead;
 
 #define BBF_SUBPROCESS_DEPTH (2)
-#define BBF_INSTANCES_UPDATE_TIMEOUT (25 * 1000)
+#define BBF_INSTANCES_UPDATE_TIMEOUT (60 * 1000)
 
 LIST_HEAD(head_registered_service);
 
@@ -86,9 +86,9 @@ static void bbfdm_cleanup(struct bbfdm_context *u)
 {
 	bbf_global_clean(DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE, input_json ? false : true);
 
+	free_path_list(&u->instances);
+	free_path_list(&u->old_instances);
 	if (!input_json) { // It's not a micro-service instance
-		free_path_list(&u->instances);
-		free_path_list(&u->old_instances);
 		free_services_from_list(&head_registered_service);
 	}
 
@@ -1119,7 +1119,7 @@ static void broadcast_add_del_event(struct list_head *inst, bool is_add)
 	}
 	blobmsg_close_array(&bb, a);
 
-	snprintf(method_name, sizeof(method_name), "%s.%s", UBUS_METHOD_NAME, is_add ? BBF_ADD_EVENT : BBF_DEL_EVENT);
+	snprintf(method_name, sizeof(method_name), "%s.%s", UBUS_MAIN_METHOD_NAME, is_add ? BBF_ADD_EVENT : BBF_DEL_EVENT);
 
 	if (is_add)
 		ubus_send_event(&ctx, method_name, bb.head);
@@ -1136,6 +1136,7 @@ static void update_instances_list(struct list_head *inst)
 			.in_param = ROOT_NODE,
 			.nextlevel = false,
 			.enable_plugins = input_json ? false : true,
+			.disable_mservice_browse = true,
 			.instance_mode = INSTANCE_MODE_NUMBER,
 			.dm_type = BBFDM_USP
 	};
@@ -1407,16 +1408,15 @@ exit:
 	return err;
 }
 
-static int bbfdm_init(struct ubus_context *ctx, bool is_daemon)
+static int bbfdm_init(struct ubus_context *ctx)
 {
 	int ret;
 
-	INFO("Registering UBUS objects daemon %d", is_daemon);
-	if (is_daemon == true) {
-		ret = ubus_add_object(ctx, &bbf_object);
-	} else {
+	if (is_micro_service) {
 		bbf_object.n_methods = bbf_object.n_methods - 2;
 		bbf_object.type->n_methods = bbf_object.n_methods;
+		ret = ubus_add_object(ctx, &bbf_object);
+	} else {
 		ret = ubus_add_object(ctx, &bbf_object);
 	}
 	return ret;
@@ -1527,34 +1527,27 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	INIT_LIST_HEAD(&bbfdm_ctx.instances);
+	INIT_LIST_HEAD(&bbfdm_ctx.old_instances);
+	INIT_LIST_HEAD(&bbfdm_ctx.event_handlers);
+
 	uloop_init();
 	ubus_add_uloop(&bbfdm_ctx.ubus_ctx);
 	run_schema_updater(&bbfdm_ctx);
+	periodic_instance_updater(&bbfdm_ctx.instance_timer);
 
-	if (!input_json) { // It's not a micro-service instance
+	err = bbfdm_init(&bbfdm_ctx.ubus_ctx);
+	if (err != UBUS_STATUS_OK)
+		goto exit;
+
+	if (is_micro_service == false) { // It's not a micro-service instance
 
 		bbf_global_init(DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE, true);
-
-		err = bbfdm_init(&bbfdm_ctx.ubus_ctx, true);
-		if (err != UBUS_STATUS_OK)
-			goto exit;
-
-		INIT_LIST_HEAD(&bbfdm_ctx.instances);
-		INIT_LIST_HEAD(&bbfdm_ctx.old_instances);
-		INIT_LIST_HEAD(&bbfdm_ctx.event_handlers);
-
 		err = register_events_to_ubus(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);
 		if (err != 0)
 			goto exit;
 
-		periodic_instance_updater(&bbfdm_ctx.instance_timer);
 	} else { // It's a micro-service instance
-
-		err = bbfdm_init(&bbfdm_ctx.ubus_ctx, false);
-		if (err != 0) {
-			ERR("Failed to register ubus objects");
-			goto exit;
-		}
 		bool is_registred = register_service(&bbfdm_ctx.ubus_ctx);
 		if (is_registred == false) {
 			// register for add event
@@ -1565,12 +1558,11 @@ int main(int argc, char **argv)
 			ubus_register_event_handler(&bbfdm_ctx.ubus_ctx, &add_event, "ubus.object.add");
 		}
 	}
-
 	INFO("Waiting on uloop....");
 	uloop_run();
 
 exit:
-	if (!input_json) // It's not a micro-service instance
+	if (is_micro_service == false) // It's not a micro-service instance
 		free_ubus_event_handler(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);
 
 	ubus_shutdown(&bbfdm_ctx.ubus_ctx);

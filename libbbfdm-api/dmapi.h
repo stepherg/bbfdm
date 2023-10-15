@@ -206,6 +206,7 @@ struct dmctx {
 	bool isevent;
 	bool isinfo;
 	bool enable_plugins;
+	bool disable_mservice_browse;
 };
 
 typedef struct dmnode {
