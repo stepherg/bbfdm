@@ -170,10 +170,11 @@ enum fs_size_type_enum {
 };
 
 enum option_type_enum {
-	OPTION_IP,
-	OPTION_INT,
-	OPTION_STRING,
-	OPTION_HEX
+	OPTION_IP = 1<<0,
+	OPTION_INT = 1<<1,
+	OPTION_STRING = 1<<2,
+	OPTION_HEX = 1<<3,
+	OPTION_LIST = 1<<4
 };
 
 #define sysfs_foreach_file(path,dir,ent) \
@@ -200,9 +201,9 @@ struct browse_args {
 
 struct dhcp_options_type {
 	char *config_name;
-	int tag;
-	int type;
-	int len;
+	uint8_t tag;
+	uint8_t type;
+	uint8_t len;
 };
 
 pid_t get_pid(const char *pname);

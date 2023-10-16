@@ -72,95 +72,95 @@ char *IPv6Prefix[] = {"^$", "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-f
 
 struct dhcp_options_type DHCP_OPTIONS_ARRAY[] = {
 /* config_name, tag, type, length */
-{"subnet", 1, OPTION_IP, 4},                /* DHCP_SUBNET             */
-{"timezone", 2, OPTION_INT, 4},             /* DHCP_TIME_OFFSET        */
-{"router", 3, OPTION_IP, 4},                /* DHCP_ROUTER             */
-{"timesrv", 4, OPTION_IP, 4},               /* DHCP_TIME_SERVER        */
-{"namesrv", 5, OPTION_IP, 4},               /* DHCP_NAME_SERVER        */
-{"dns", 6, OPTION_IP, 4},                   /* DHCP_DNS_SERVER         */
-{"logsrv", 7, OPTION_IP, 4},                /* DHCP_LOG_SERVER         */
-{"cookiesrv", 8, OPTION_IP, 4},             /* DHCP_COOKIE_SERVER      */
-{"lprsrv", 9, OPTION_IP, 4},                /* DHCP_LPR_SERVER         */
-{"", 10, OPTION_IP, 4},                     /* DHCP_IMPRESS_SERVER     */
-{"", 11, OPTION_IP, 4},                     /* DHCP_RLP SERVER         */
-{"hostname", 12, OPTION_STRING, 0},         /* DHCP_HOST_NAME          */
-{"bootsize", 13, OPTION_INT, 2},            /* DHCP_BOOT_SIZE          */
-{"domain", 15, OPTION_STRING, 0},           /* DHCP_DOMAIN_NAME        */
-{"swapsrv", 16, OPTION_IP, 4},              /* DHCP_SWAP_SERVER        */
-{"rootpath", 17, OPTION_STRING, 0},         /* DHCP_ROOT_PATH          */
-{"", 19, OPTION_INT, 1},                    /* DHCP_FORWARD            */
-{"", 20, OPTION_INT, 1},                    /* DHCP_SOURCE_ROUTING     */
-{"", 21, OPTION_IP, 4},                     /* DHCP_POLICY_FILTER      */
-{"", 22, OPTION_INT, 2},                    /* DHCP_MAX_DG_ASSEMBLY    */
-{"ipttl", 23, OPTION_INT, 1},               /* DHCP_IP_TTL             */
-{"", 24, OPTION_INT, 4},                    /* DHCP_MTU_TIMEOUT        */
-{"", 25, OPTION_INT, 2},                    /* DHCP_MTU_PLATEAU        */
-{"mtu", 26, OPTION_INT, 2},                 /* DHCP_MTU_INTERFACE      */
-{"", 27, OPTION_INT, 1},                    /* DHCP_MTU_SUBNET         */
-{"broadcast", 28, OPTION_IP, 4},            /* DHCP_BROADCAST          */
-{"", 29, OPTION_INT, 1},                    /* DHCP_MASK_DISCOVERY     */
-{"", 30, OPTION_INT, 1},                    /* DHCP_MASK_SUPPLIER      */
-{"", 31, OPTION_INT, 1},                    /* DHCP_ROUTER_DISCOVERY   */
-{"", 32, OPTION_IP, 4},                     /* DHCP_ROUTER_REQUEST     */
-{"routes", 33, OPTION_IP, 4},               /* DHCP_ROUTES             */
-{"", 34, OPTION_INT, 1},                    /* DHCP_TRAILER            */
-{"", 35, OPTION_INT, 4},                    /* DHCP_ARP_TIMEOUT        */
-{"", 36, OPTION_INT, 1},                    /* DHCP_ETHERNET           */
-{"", 37, OPTION_INT, 1},                    /* DHCP_DEFAULT_TCP_TTL    */
-{"", 38, OPTION_INT, 4},                    /* DHCP_KEEPALIVE_TIME     */
-{"", 39, OPTION_INT, 1},                    /* DHCP_KEEPALIVE_DATA     */
-{"nisdomain", 40, OPTION_STRING, 0},        /* DHCP_NIS_DOMAIN         */
-{"nissrv", 41, OPTION_IP, 4},               /* DHCP_NIS_SERVER         */
-{"ntpsrv", 42, OPTION_IP, 4},               /* DHCP_NTP_SERVER         */
-{"", 43, OPTION_HEX, 1},                    /* DHCP_VENDOR_SPECIFIC    */
-{"wins", 44, OPTION_IP, 4},                 /* DHCP_WINS_SERVER        */
-{"", 46, OPTION_INT, 1},                    /* DHCP_NETBIOS            */
-{"", 50, OPTION_IP, 4},                     /* DHCP_ADDRESS_REQUEST    */
-{"lease", 51, OPTION_INT, 4},               /* DHCP_LEASE_TIME         */
-{"", 52, OPTION_INT, 1},                    /* DHCP_OVERLOAD           */
-{"", 53, OPTION_INT, 1},                    /* DHCP_MESSSAGE_TYPE      */
-{"serverid", 54, OPTION_IP, 4},             /* DHCP_SERVER_ID          */
-{"message", 56, OPTION_STRING, 0},          /* DHCP_ERR_MESSAGE        */
-{"", 57, OPTION_INT, 2},                    /* DHCP_MAX_MESSAGE_SIZE   */
-{"", 58, OPTION_INT, 4},                    /* DHCP_RENEWAL_TIME       */
-{"", 59, OPTION_INT, 4},                    /* DHCP_REBINDING_TIME     */
-{"vendor", 60, OPTION_STRING, 0},           /* DHCP_VENDOR             */
-{"", 65, OPTION_IP, 4},                     /* DHCP_NIS_SERVER_ADDR    */
-{"tftp", 66, OPTION_STRING, 0},             /* DHCP_TFTP_SERVER_NAME   */
-{"bootfile", 67, OPTION_STRING, 0},         /* DHCP_BOOT_FILE          */
-{"", 68, OPTION_IP, 4},                     /* DHCP_HOME_AGENT         */
-{"", 69, OPTION_IP, 4},                     /* DHCP_SMTP_SERVER        */
-{"", 70, OPTION_IP, 4},                     /* DHCP_POP3_SERVER        */
-{"", 71, OPTION_IP, 4},                     /* DHCP_NNTP_SERVER        */
-{"", 72, OPTION_IP, 4},                     /* DHCP_WWW_SERVER         */
-{"", 73, OPTION_IP, 4},                     /* DHCP_FINGER_SERVER      */
-{"", 74, OPTION_IP, 4},                     /* DHCP_IRC_SERVER         */
-{"", 75, OPTION_IP, 4},                     /* DHCP_STREET_TALK_SERVER */
-{"", 76, OPTION_IP, 4},                     /* DHCP_STDA_SERVER        */
-{"userclass", 77, OPTION_STRING, 0},        /* DHCP_USER_CLASS         */
-{"tzstr", 100, OPTION_STRING, 0},           /* DHCP_PCODE              */
-{"tzdbstr", 101, OPTION_STRING, 0},         /* DHCP_TCODE              */
-{"", 118, OPTION_IP, 4},                    /* DHCP_SUBNET_SELECTION   */
-{"search", 119, OPTION_STRING, 0},          /* DHCP_DOMAIN_SEARCH      */
-{"sipsrv", 120, OPTION_STRING, 0},          /* DHCP_SIP_SERVERS        */
-{"staticroutes", 121, OPTION_STRING, 0},    /* DHCP_STATIC_ROUTES      */
-{"", 125, OPTION_HEX, 1},                   /* DHCP_VI_VENDOR_SPECIFIC */
-{"vlanid", 132, OPTION_INT, 2},             /* DHCP_VLAN_ID            */
-{"vlanpriority", 133, OPTION_INT, 1},       /* DHCP_VLAN_PRIORITY      */
-{"", 145, OPTION_INT, 1},                   /* DHCP_FORCERENEW         */
-{"", 152, OPTION_INT, 4},                   /* DHCP_BASE_TIME          */
-{"", 153, OPTION_INT, 4},                   /* DHCP_START_TIME         */
-{"", 154, OPTION_INT, 4},                   /* DHCP_QUERY_START_TIME   */
-{"", 155, OPTION_INT, 4},                   /* DHCP_QUERY_END_TIME     */
-{"", 156, OPTION_INT, 1},                   /* DHCP_STATE              */
-{"", 157, OPTION_INT, 1},                   /* DHCP_DATA_SOURCE        */
-{"", 159, OPTION_INT, 4},                   /* DHCP_PORT_PARAMS        */
-{"pxeconffile", 209, OPTION_STRING, 0},     /* DHCP_PXE_CONF_FILE      */
-{"pxepathprefix", 210, OPTION_STRING, 0},   /* DHCP_PXE_PATH_PREFIX    */
-{"reboottime", 211, OPTION_INT, 4},         /* DHCP_REBOOT_TIME        */
-{"ip6rd", 212, OPTION_STRING, 0},           /* DHCP_6RD                */
-{"msstaticroutes", 249, OPTION_STRING, 0},  /* DHCP_MS_STATIC_ROUTES   */
-{"wpad", 225, OPTION_STRING, 0},            /* DHCP_WPAD               */
+{"subnet", 1, OPTION_IP, 4},                            /* DHCP_SUBNET             */
+{"timezone", 2, OPTION_INT, 4},                         /* DHCP_TIME_OFFSET        */
+{"router", 3, OPTION_IP|OPTION_LIST, 4},                /* DHCP_ROUTER             */
+{"timesrv", 4, OPTION_IP|OPTION_LIST, 4},               /* DHCP_TIME_SERVER        */
+{"namesrv", 5, OPTION_IP|OPTION_LIST, 4},               /* DHCP_NAME_SERVER        */
+{"dns", 6, OPTION_IP|OPTION_LIST, 4},                   /* DHCP_DNS_SERVER         */
+{"logsrv", 7, OPTION_IP|OPTION_LIST, 4},                /* DHCP_LOG_SERVER         */
+{"cookiesrv", 8, OPTION_IP|OPTION_LIST, 4},             /* DHCP_COOKIE_SERVER      */
+{"lprsrv", 9, OPTION_IP|OPTION_LIST, 4},                /* DHCP_LPR_SERVER         */
+{"", 10, OPTION_IP|OPTION_LIST, 4},                     /* DHCP_IMPRESS_SERVER     */
+{"", 11, OPTION_IP|OPTION_LIST, 4},                     /* DHCP_RLP SERVER         */
+{"hostname", 12, OPTION_STRING, 0},                     /* DHCP_HOST_NAME          */
+{"bootsize", 13, OPTION_INT, 2},                        /* DHCP_BOOT_SIZE          */
+{"domain", 15, OPTION_STRING, 0},                       /* DHCP_DOMAIN_NAME        */
+{"swapsrv", 16, OPTION_IP, 4},                          /* DHCP_SWAP_SERVER        */
+{"rootpath", 17, OPTION_STRING, 0},                     /* DHCP_ROOT_PATH          */
+{"", 19, OPTION_INT, 1},                                /* DHCP_FORWARD            */
+{"", 20, OPTION_INT, 1},                                /* DHCP_SOURCE_ROUTING     */
+{"", 21, OPTION_IP, 4},                                 /* DHCP_POLICY_FILTER      */
+{"", 22, OPTION_INT, 2},                                /* DHCP_MAX_DG_ASSEMBLY    */
+{"ipttl", 23, OPTION_INT, 1},                           /* DHCP_IP_TTL             */
+{"", 24, OPTION_INT, 4},                                /* DHCP_MTU_TIMEOUT        */
+{"", 25, OPTION_INT, 2},                                /* DHCP_MTU_PLATEAU        */
+{"mtu", 26, OPTION_INT, 2},                             /* DHCP_MTU_INTERFACE      */
+{"", 27, OPTION_INT, 1},                                /* DHCP_MTU_SUBNET         */
+{"broadcast", 28, OPTION_IP, 4},                        /* DHCP_BROADCAST          */
+{"", 29, OPTION_INT, 1},                                /* DHCP_MASK_DISCOVERY     */
+{"", 30, OPTION_INT, 1},                                /* DHCP_MASK_SUPPLIER      */
+{"", 31, OPTION_INT, 1},                                /* DHCP_ROUTER_DISCOVERY   */
+{"", 32, OPTION_IP, 4},                                 /* DHCP_ROUTER_REQUEST     */
+{"routes", 33, OPTION_IP|OPTION_LIST, 4},               /* DHCP_ROUTES             */
+{"", 34, OPTION_INT, 1},                                /* DHCP_TRAILER            */
+{"", 35, OPTION_INT, 4},                                /* DHCP_ARP_TIMEOUT        */
+{"", 36, OPTION_INT, 1},                                /* DHCP_ETHERNET           */
+{"", 37, OPTION_INT, 1},                                /* DHCP_DEFAULT_TCP_TTL    */
+{"", 38, OPTION_INT, 4},                                /* DHCP_KEEPALIVE_TIME     */
+{"", 39, OPTION_INT, 1},                                /* DHCP_KEEPALIVE_DATA     */
+{"nisdomain", 40, OPTION_STRING, 0},                    /* DHCP_NIS_DOMAIN         */
+{"nissrv", 41, OPTION_IP|OPTION_LIST, 4},               /* DHCP_NIS_SERVER         */
+{"ntpsrv", 42, OPTION_IP|OPTION_LIST, 4},               /* DHCP_NTP_SERVER         */
+{"", 43, OPTION_HEX, 1},                                /* DHCP_VENDOR_SPECIFIC    */
+{"wins", 44, OPTION_IP|OPTION_LIST, 4},                 /* DHCP_WINS_SERVER        */
+{"", 46, OPTION_INT, 1},                                /* DHCP_NETBIOS            */
+{"", 50, OPTION_IP, 4},                                 /* DHCP_ADDRESS_REQUEST    */
+{"lease", 51, OPTION_INT, 4},                           /* DHCP_LEASE_TIME         */
+{"", 52, OPTION_INT, 1},                                /* DHCP_OVERLOAD           */
+{"", 53, OPTION_INT, 1},                                /* DHCP_MESSSAGE_TYPE      */
+{"serverid", 54, OPTION_IP, 4},                         /* DHCP_SERVER_ID          */
+{"message", 56, OPTION_STRING, 0},                      /* DHCP_ERR_MESSAGE        */
+{"", 57, OPTION_INT, 2},                                /* DHCP_MAX_MESSAGE_SIZE   */
+{"", 58, OPTION_INT, 4},                                /* DHCP_RENEWAL_TIME       */
+{"", 59, OPTION_INT, 4},                                /* DHCP_REBINDING_TIME     */
+{"vendor", 60, OPTION_STRING, 0},                       /* DHCP_VENDOR             */
+{"", 65, OPTION_IP, 4},                                 /* DHCP_NIS_SERVER_ADDR    */
+{"tftp", 66, OPTION_STRING, 0},                         /* DHCP_TFTP_SERVER_NAME   */
+{"bootfile", 67, OPTION_STRING, 0},                     /* DHCP_BOOT_FILE          */
+{"", 68, OPTION_IP, 4},                                 /* DHCP_HOME_AGENT         */
+{"", 69, OPTION_IP, 4},                                 /* DHCP_SMTP_SERVER        */
+{"", 70, OPTION_IP, 4},                                 /* DHCP_POP3_SERVER        */
+{"", 71, OPTION_IP, 4},                                 /* DHCP_NNTP_SERVER        */
+{"", 72, OPTION_IP, 4},                                 /* DHCP_WWW_SERVER         */
+{"", 73, OPTION_IP, 4},                                 /* DHCP_FINGER_SERVER      */
+{"", 74, OPTION_IP, 4},                                 /* DHCP_IRC_SERVER         */
+{"", 75, OPTION_IP, 4},                                 /* DHCP_STREET_TALK_SERVER */
+{"", 76, OPTION_IP, 4},                                 /* DHCP_STDA_SERVER        */
+{"userclass", 77, OPTION_STRING, 0},                    /* DHCP_USER_CLASS         */
+{"tzstr", 100, OPTION_STRING, 0},                       /* DHCP_PCODE              */
+{"tzdbstr", 101, OPTION_STRING, 0},                     /* DHCP_TCODE              */
+{"", 118, OPTION_IP, 4},                                /* DHCP_SUBNET_SELECTION   */
+{"search", 119, OPTION_STRING|OPTION_LIST, 0},          /* DHCP_DOMAIN_SEARCH      */
+{"sipsrv", 120, OPTION_STRING, 0},                      /* DHCP_SIP_SERVERS        */
+{"staticroutes", 121, OPTION_STRING|OPTION_LIST, 0},    /* DHCP_STATIC_ROUTES      */
+{"", 125, OPTION_HEX, 1},                               /* DHCP_VI_VENDOR_SPECIFIC */
+{"vlanid", 132, OPTION_INT, 2},                         /* DHCP_VLAN_ID            */
+{"vlanpriority", 133, OPTION_INT, 1},                   /* DHCP_VLAN_PRIORITY      */
+{"", 145, OPTION_INT, 1},                               /* DHCP_FORCERENEW         */
+{"", 152, OPTION_INT, 4},                               /* DHCP_BASE_TIME          */
+{"", 153, OPTION_INT, 4},                               /* DHCP_START_TIME         */
+{"", 154, OPTION_INT, 4},                               /* DHCP_QUERY_START_TIME   */
+{"", 155, OPTION_INT, 4},                               /* DHCP_QUERY_END_TIME     */
+{"", 156, OPTION_INT, 1},                               /* DHCP_STATE              */
+{"", 157, OPTION_INT, 1},                               /* DHCP_DATA_SOURCE        */
+{"", 159, OPTION_INT, 4},                               /* DHCP_PORT_PARAMS        */
+{"pxeconffile", 209, OPTION_STRING, 0},                 /* DHCP_PXE_CONF_FILE      */
+{"pxepathprefix", 210, OPTION_STRING, 0},               /* DHCP_PXE_PATH_PREFIX    */
+{"reboottime", 211, OPTION_INT, 4},                     /* DHCP_REBOOT_TIME        */
+{"ip6rd", 212, OPTION_STRING, 0},                       /* DHCP_6RD                */
+{"msstaticroutes", 249, OPTION_STRING|OPTION_LIST, 0},  /* DHCP_MS_STATIC_ROUTES   */
+{"wpad", 225, OPTION_STRING, 0},                        /* DHCP_WPAD               */
 };
 
 pid_t get_pid(const char *pname)
@@ -1182,8 +1182,11 @@ void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, siz
 	char buf[512] = {0};
 
 	DM_STRNCPY(buf, str, sizeof(buf));
-	for (pch = strtok_r(buf, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
-		if (DHCP_OPTIONS_ARRAY[idx].type == OPTION_IP) {
+
+	char *separator = (DHCP_OPTIONS_ARRAY[idx].type & OPTION_LIST) ? "," : "\0";
+
+	for (pch = strtok_r(buf, separator, &spch); pch != NULL; pch = strtok_r(NULL, separator, &spch)) {
+		if (DHCP_OPTIONS_ARRAY[idx].type & OPTION_IP) {
 			struct in_addr ip_bin;
 
 			if (!inet_aton(pch, &ip_bin))
@@ -1195,14 +1198,14 @@ void convert_str_option_to_hex(unsigned int tag, const char *str, char *hex, siz
 				return;
 
 			pos += snprintf(&hex[pos], size - pos, "%08X", ip);
-		} else if (DHCP_OPTIONS_ARRAY[idx].type == OPTION_HEX) {
+		} else if (DHCP_OPTIONS_ARRAY[idx].type & OPTION_HEX) {
 			for (int j = 0; j < DM_STRLEN(pch) && pos < size - 1; j++) {
 				if (pch[j] == ':')
 					continue;
 
 				pos += snprintf(&hex[pos], size - pos, "%c", pch[j]);
 			}
-		} else if (DHCP_OPTIONS_ARRAY[idx].type == OPTION_STRING) {
+		} else if (DHCP_OPTIONS_ARRAY[idx].type & OPTION_STRING) {
 			convert_string_to_hex(pch, hex, size);
 		} else {
 			long int val = DM_STRTOL(pch);
@@ -1243,7 +1246,7 @@ void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, 
 	for (int i = 0; i + len <= str_len; i = i + len) {
 		DM_STRNCPY(buf, &hex[i], len + 1);
 
-		if (DHCP_OPTIONS_ARRAY[idx].type == OPTION_IP) {
+		if (DHCP_OPTIONS_ARRAY[idx].type & OPTION_IP) {
 			struct in_addr addr;
 			unsigned int ip;
 
@@ -1251,7 +1254,7 @@ void convert_hex_option_to_string(unsigned int tag, const char *hex, char *str, 
 			addr.s_addr = htonl(ip);
 			char *ipaddr = inet_ntoa(addr);
 			snprintf(buffer, sizeof(buffer), "%s,", ipaddr);
-		} else if (DHCP_OPTIONS_ARRAY[idx].type == OPTION_HEX) {
+		} else if (DHCP_OPTIONS_ARRAY[idx].type & OPTION_HEX) {
 			snprintf(buffer, sizeof(buffer), "%s:", buf);
 		} else {
 			snprintf(buffer, sizeof(buffer), "%d,", (int)strtol(buf, NULL, 16));
