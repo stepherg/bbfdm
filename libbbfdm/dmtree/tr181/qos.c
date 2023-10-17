@@ -682,6 +682,29 @@ static int set_QoSClassification_Interface(char *refparam, struct dmctx *ctx, vo
 	return set_QInterface(refparam, ctx, data, instance, value, action);
 }
 
+static int get_QoSClassification_AllInterfaces(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "all_interfaces", "0");
+	return 0;
+}
+
+static int set_QoSClassification_AllInterfaces(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+
+	switch (action) {
+	case VALUECHECK:
+		if (bbfdm_validate_boolean(ctx, value))
+			return FAULT_9007;
+		break;
+	case VALUESET:
+		string_to_bool(value, &b);
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "all_interfaces", (b) ? "1" : "0");
+		break;
+	}
+	return 0;
+}
+
 static int get_QoSClassification_DestIP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *dest_ip = NULL;
@@ -1948,7 +1971,7 @@ DMLEAF tQoSClassificationParams[] = {
 {"Alias", &DMWRITE, DMT_STRING, get_QoSClassification_Alias, set_QoSClassification_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 //{"DHCPType", &DMWRITE, DMT_STRING, get_QoSClassification_DHCPType, set_QoSClassification_DHCPType, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, get_QoSClassification_Interface, set_QoSClassification_Interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
-//{"AllInterfaces", &DMWRITE, DMT_BOOL, get_QoSClassification_AllInterfaces, set_QoSClassification_AllInterfaces, BBFDM_BOTH},
+{"AllInterfaces", &DMWRITE, DMT_BOOL, get_QoSClassification_AllInterfaces, set_QoSClassification_AllInterfaces, BBFDM_BOTH},
 {"DestIP", &DMWRITE, DMT_STRING, get_QoSClassification_DestIP, set_QoSClassification_DestIP, BBFDM_BOTH},
 {"DestMask", &DMWRITE, DMT_STRING, get_QoSClassification_DestMask, set_QoSClassification_DestMask, BBFDM_BOTH},
 //{"DestIPExclude", &DMWRITE, DMT_BOOL, get_QoSClassification_DestIPExclude, set_QoSClassification_DestIPExclude, BBFDM_BOTH},
