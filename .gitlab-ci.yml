@@ -86,6 +86,7 @@ run_libbbfdm_memory_test:
       when: always
       paths:
           - output-report-device-get.txt
+          - memory-*.xml
 
 run_bbfd_functional_test:
     stage: functional_test
@@ -102,5 +103,5 @@ run_bbfd_functional_test:
         paths:
             - funl-result.log
             - funl-test-coverage.xml
-            - memory-report.xml
             - report/
+            - memory-*.xml

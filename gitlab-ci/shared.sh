@@ -9,6 +9,7 @@ function check_ret()
 	ret=$1
 	if [ "$ret" -ne 0 ]; then
 		echo "Validation of last command failed, ret(${ret})"
+		cp /tmp/memory-*.xml .
 		exit $ret
 	fi
 
@@ -17,10 +18,11 @@ function check_ret()
 function exec_cmd()
 {
 	echo "executing $@"
-	$@ >/dev/null 2>&1
+	$@ >/dev/null
 
 	if [ $? -ne 0 ]; then
 		echo "Failed to execute $@"
+		cp /tmp/memory-*.xml .
 		exit 1
 	fi
 }
@@ -32,8 +34,14 @@ function exec_cmd_verbose()
 
 	if [ $? -ne 0 ]; then
 		echo "Failed to execute $@"
+		cp /tmp/memory-*.xml .
 		exit 1
 	fi
+}
+
+function install_plugin()
+{
+	exec_cmd cp -f "${1}" /etc/bbfdm/plugins/
 }
 
 function install_libusermngr()
@@ -52,7 +60,7 @@ function install_libusermngr()
 	exec_cmd_verbose make -C /opt/dev/usermngr/src/
 
 	echo "installing libusermngr"
-	cp -f /opt/dev/usermngr/src/libusermngr.so /usr/lib/bbfdm
+	install_plugin /opt/dev/usermngr/src/libusermngr.so
 }
 
 function install_libbbf()
@@ -73,7 +81,7 @@ function install_libbbf()
 
 	mkdir -p build
 	cd build
-	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS -lm" -DWITH_OPENSSL=ON -DBBF_JSON_PLUGIN=ON -DBBF_DOTSO_PLUGIN=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_WIFI_DATAELEMENTS=OFF -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
+	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS -lm" -DWITH_OPENSSL=ON -DBBF_VENDOR_EXTENSION=ON -DBBF_WIFI_DATAELEMENTS=OFF -DBBF_VENDOR_LIST="$VENDOR_LIST" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
 	exec_cmd_verbose make
 
 	echo "installing libbbf"
@@ -93,7 +101,7 @@ function install_libbbf_test()
 	exec_cmd_verbose make -C test/bbf_test/
 
 	echo "installing libbbf_test"
-	cp -f test/bbf_test/libbbf_test.so /usr/lib/bbfdm
+	install_plugin ./test/bbf_test/libbbf_test.so
 }
 
 function install_libwifi_dataelements()
@@ -149,7 +157,7 @@ function install_libcwmpdm()
 	exec_cmd_verbose make
 
 	echo "installing libcwmpdm"
-	cp -f /opt/dev/icwmp/libcwmpdm.so /usr/lib/bbfdm
+	install_plugin /opt/dev/icwmp/libcwmpdm.so
 
 	cd /builds/bbf/bbfdm
 }
@@ -202,6 +210,7 @@ function error_on_zero()
 	ret=$1
 	if [ "$ret" -eq 0 ]; then
 		echo "Validation of last command failed, ret(${ret})"
+		cp /tmp/memory-*.xml .
 		exit $ret
 	fi
 

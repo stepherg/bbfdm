@@ -93,8 +93,7 @@ INSTALL(TARGETS bbfdm
 
 INSTALL(DIRECTORY DESTINATION etc/bbfdm)
 INSTALL(DIRECTORY DESTINATION etc/bbfdm/dmmap)
-INSTALL(DIRECTORY DESTINATION etc/bbfdm/json)
-INSTALL(DIRECTORY DESTINATION usr/lib/bbfdm)
+INSTALL(DIRECTORY DESTINATION etc/bbfdm/plugins)
 
 FILE(GLOB root_device dmtree/tr181/device.h dmtree/vendor/vendor.h)
 INSTALL(FILES ${root_device}

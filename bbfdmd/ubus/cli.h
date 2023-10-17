@@ -8,4 +8,4 @@
  * See LICENSE file for license related information.
  */
 
-int bbfdm_cli_exec_command(int argc, char *argv[]);
+int bbfdm_cli_exec_command(const char *input, int argc, char *argv[]);

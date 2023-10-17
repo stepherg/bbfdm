@@ -11,21 +11,12 @@
 #include "dmapi.h"
 #include "dmplugin.h"
 
-#ifdef BBFDM_ENABLE_JSON_PLUGIN
 #include "plugin/json_plugin.h"
-static char json_hash[64] = {0};
-#endif /* BBFDM_ENABLE_JSON_PLUGIN */
-
-#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
 #include "plugin/dotso_plugin.h"
-static char library_hash[64] = {0};
-#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
 
 #ifdef BBF_VENDOR_EXTENSION
 #include "plugin/vendor_plugin.h"
 #endif
-
-static bool first_boot = false;
 
 extern struct list_head global_memhead;
 
@@ -36,87 +27,6 @@ struct service
 	char *parent_dm;
 	char *object;
 };
-
-#if defined(BBFDM_ENABLE_JSON_PLUGIN) || defined(BBFDM_ENABLE_DOTSO_PLUGIN)
-static char *get_folder_path(bool json_path)
-{
-	if (json_path) {
-#ifdef BBFDM_ENABLE_JSON_PLUGIN
-		return JSON_FOLDER_PATH;
-#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
-	} else {
-#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
-		return LIBRARY_FOLDER_PATH;
-#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
-	}
-
-	return NULL;
-}
-
-static int get_stats_folder(bool json_path, int *count, unsigned long *size)
-{
-	const char *path = get_folder_path(json_path);
-	if (path == NULL)
-		return 0;
-
-	if (folder_exists(path)) {
-		struct dirent *entry = NULL;
-		struct stat stats;
-		int file_count = 0;
-		unsigned long file_size = 0;
-		char buf[512] = {0};
-
-		DIR *dirp = opendir(path);
-		while ((entry = readdir(dirp)) != NULL) {
-			if ((entry->d_type == DT_REG) && (strstr(entry->d_name, json_path ? ".json" : ".so"))) {
-				file_count++;
-				snprintf(buf, sizeof(buf), "%s/%s", path, entry->d_name);
-				if (!stat(buf, &stats))
-					file_size += stats.st_size;
-			}
-		}
-
-		if (dirp)
-			closedir(dirp);
-
-		*count = file_count;
-		*size = file_size;
-		return 1;
-	}
-	return 0;
-}
-
-static bool check_stats_folder(bool json_path)
-{
-	int count = 0;
-	unsigned long size = 0;
-	char buf[64] = {0};
-
-	if (!get_stats_folder(json_path, &count, &size))
-		return false;
-
-	snprintf(buf, sizeof(buf), "count:%d,size:%lu", count, size);
-
-	if (json_path) {
-#ifdef BBFDM_ENABLE_JSON_PLUGIN
-		if (DM_STRCMP(buf, json_hash) != 0) {
-			DM_STRNCPY(json_hash, buf, sizeof(json_hash));
-			return true;
-		}
-#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
-	} else {
-#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
-		if (DM_STRCMP(buf, library_hash) != 0) {
-			DM_STRNCPY(library_hash, buf, sizeof(library_hash));
-			return true;
-		}
-#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
-	}
-
-	return false;
-}
-#endif  /* (BBFDM_ENABLE_JSON_PLUGIN || BBFDM_ENABLE_DOTSO_PLUGIN) */
-
 
 static void disable_srv_obj(DMOBJ *entryobj, char *srv_parent_dm, char *srv_obj)
 {
@@ -422,50 +332,51 @@ int get_leaf_idx(DMLEAF **entryleaf)
 	return idx;
 }
 
-void load_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, bool enable_plugins)
+int load_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, const char *plugin_path)
 {
-	if (enable_plugins) {
-#ifdef BBFDM_ENABLE_JSON_PLUGIN
-		// Load dynamic objects and parameters exposed via JSON file plugin
-		if (check_stats_folder(true)) {
-			free_json_plugins();
-			free_specific_dynamic_node(dm_entryobj, INDX_JSON_MOUNT);
-			load_json_plugins(dm_entryobj);
-		}
-#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
-
-#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
-		// Load dynamic objects and parameters exposed via a dotso plugin
-		if (check_stats_folder(false)) {
-			free_dotso_plugins();
-			free_specific_dynamic_node(dm_entryobj, INDX_LIBRARY_MOUNT);
-			load_dotso_plugins(dm_entryobj);
-		}
-#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
+	struct dirent *ent = NULL;
+	DIR *dir = NULL;
 
 #ifdef BBF_VENDOR_EXTENSION
-		// Load objects and parameters exposed via vendor extension plugin
-		if (first_boot == false) {
-			free_specific_dynamic_node(dm_entryobj, INDX_VENDOR_MOUNT);
-			load_vendor_dynamic_arrays(dm_entryobj, dm_VendorExtension, dm_VendorExtensionExclude);
-		}
+	// Load objects and parameters exposed via vendor extension plugin
+	free_specific_dynamic_node(dm_entryobj, INDX_VENDOR_MOUNT);
+	load_vendor_dynamic_arrays(dm_entryobj, dm_VendorExtension, dm_VendorExtensionExclude);
 #endif /* BBF_VENDOR_EXTENSION */
+
+	if (DM_STRLEN(plugin_path) == 0)
+		return 0;
+
+	if (!folder_exists(plugin_path)) {
+		return 0;
 	}
 
-	first_boot = true;
+	free_json_plugins();
+	free_specific_dynamic_node(dm_entryobj, INDX_JSON_MOUNT);
+	free_dotso_plugins();
+	free_specific_dynamic_node(dm_entryobj, INDX_LIBRARY_MOUNT);
+
+	sysfs_foreach_file(plugin_path, dir, ent) {
+		char buf[512] = {0};
+
+		snprintf(buf, sizeof(buf), "%s/%s", plugin_path, ent->d_name);
+
+		if (strstr(ent->d_name, ".json")) {
+			load_json_plugins(dm_entryobj, buf);
+		} else if (strstr(ent->d_name, ".so")) {
+			load_dotso_plugins(dm_entryobj, buf);
+		}
+	}
+
+	if (dir) {
+		closedir(dir);
+	}
+	return 0;
 }
 
-void free_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, bool enable_plugins)
+void free_plugins(DMOBJ *dm_entryobj)
 {
 	free_all_dynamic_nodes(dm_entryobj);
 
-	if (enable_plugins) {
-#ifdef BBFDM_ENABLE_JSON_PLUGIN
-		free_json_plugins();
-#endif  /* BBFDM_ENABLE_JSON_PLUGIN */
-
-#ifdef BBFDM_ENABLE_DOTSO_PLUGIN
-		free_dotso_plugins();
-#endif  /* BBFDM_ENABLE_DOTSO_PLUGIN */
-	}
+	free_json_plugins();
+	free_dotso_plugins();
 }

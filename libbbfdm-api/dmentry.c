@@ -208,10 +208,7 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 		return bbf_fault_map(ctx, FAULT_9005);
 	}
 
-	load_plugins(ctx->dm_entryobj, ctx->dm_vendor_extension, ctx->dm_vendor_extension_exclude, ctx->enable_plugins);
-
 	dmentry_instance_lookup_inparam(ctx);
-
 	ctx->iswildcard = DM_STRCHR(ctx->in_param, '*') ? 1 : 0;
 	ctx->stop = false;
 
@@ -252,14 +249,14 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 	return bbf_fault_map(ctx, fault);
 }
 
-void bbf_global_init(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, bool enable_plugins)
+void bbf_global_init(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, const char *plugin_path)
 {
-	load_plugins(dm_entryobj, dm_VendorExtension, dm_VendorExtensionExclude, enable_plugins);
+	load_plugins(dm_entryobj, dm_VendorExtension,dm_VendorExtensionExclude, plugin_path);
 }
 
-void bbf_global_clean(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, bool enable_plugins)
+void bbf_global_clean(DMOBJ *dm_entryobj)
 {
-	free_plugins(dm_entryobj, dm_VendorExtension, dm_VendorExtensionExclude, enable_plugins);
+	free_plugins(dm_entryobj);
 	dm_dynamic_cleanmem(&global_memhead);
 }
 

@@ -15,8 +15,6 @@
 
 #include <libubus.h>
 
-extern char *input_json;
-
 enum operation {
 	OPER_EQUAL_EQUAL,
 	OPER_NOT_EQUAL,
@@ -724,7 +722,6 @@ static int append_all_instances(unsigned int dm_type, char *bPath, struct list_h
 	struct dmctx bbf_ctx = {
 			.in_param = bPath,
 			.nextlevel = true,
-			.enable_plugins = input_json ? false : true,
 			.instance_mode = INSTANCE_MODE_NUMBER,
 			.dm_type = dm_type
 	};

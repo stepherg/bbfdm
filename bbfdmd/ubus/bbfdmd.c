@@ -50,10 +50,10 @@ static int g_subprocess_level = BBF_SUBPROCESS_DEPTH;
 static void *deamon_lib_handle = NULL;
 
 char UBUS_MAIN_METHOD_NAME[32] = "bbfdm";
+char CONFIG_PLUGIN_PATH[256] = {0};
 char UBUS_METHOD_NAME[32] = "bbfdm";
 char PARENT_DM[512] = {0};
 char MICRO_SERVICE_OBJ_NAME[64] = {0};
-char *input_json = NULL;
 
 static void sig_handler(int sig)
 {
@@ -84,14 +84,15 @@ static void usage(char *prog)
 
 static void bbfdm_cleanup(struct bbfdm_context *u)
 {
-	bbf_global_clean(DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE, input_json ? false : true);
+	bbf_global_clean(DEAMON_DM_ROOT_OBJ);
 
 	free_path_list(&u->instances);
 	free_path_list(&u->old_instances);
-	if (!input_json) { // It's not a micro-service instance
+	if (!is_micro_service) { // It's not a micro-service instance
 		free_services_from_list(&head_registered_service);
 	}
 
+	blob_buf_free(&u->dm_schema);
 	/* DotSo Plugin */
 	free_dotso_plugin(deamon_lib_handle);
 
@@ -145,8 +146,6 @@ static void fill_optional_data(bbfdm_data_t *data, struct blob_attr *msg)
 		if (is_str_eq(blobmsg_name(attr), "format"))
 			data->is_raw = is_str_eq(blobmsg_get_string(attr), "raw") ? true : false;
 	}
-
-	data->bbf_ctx.enable_plugins = input_json ? false : true;
 
 	DEBUG("Proto:|%s|, Inst Mode:|%s|, Tran-id:|%d|, Format:|%s|",
 			(data->bbf_ctx.dm_type == BBFDM_BOTH) ? "both" : (data->bbf_ctx.dm_type == BBFDM_CWMP) ? "cwmp" : "usp",
@@ -269,7 +268,6 @@ static bool is_object_schema_update_available(struct bbfdm_context *u)
 			.bbf_ctx.iscommand = true,
 			.bbf_ctx.isevent = true,
 			.bbf_ctx.isinfo = true,
-			.bbf_ctx.enable_plugins = input_json ? false : true,
 			.bbf_ctx.dm_type = BBFDM_USP
 	};
 
@@ -969,8 +967,8 @@ static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *o
 
 	INFO("ubus method|%s|, name|%s|", method, obj->name);
 
-	if (input_json) { // It's a micro-service instance
-		blobmsg_add_string(&bb, "error", "you are not allowed to register a micro-service for another micro-service!!");
+	if (is_micro_service) { // It's a micro-service instance
+		blobmsg_add_string(&bb, "error", "Its not allowed to register a micro-service for another micro-service!!");
 		goto end;
 	}
 
@@ -1078,7 +1076,7 @@ static void run_schema_updater(struct bbfdm_context *u)
 	char method_name[45] = {0};
 
 	ret = is_object_schema_update_available(u);
-	if (ret) {
+	if (ret && (is_micro_service == false)) {
 		struct blob_buf bb;
 
 		memset(&bb, 0, sizeof(struct blob_buf));
@@ -1135,7 +1133,6 @@ static void update_instances_list(struct list_head *inst)
 	struct dmctx bbf_ctx = {
 			.in_param = ROOT_NODE,
 			.nextlevel = false,
-			.enable_plugins = input_json ? false : true,
 			.disable_mservice_browse = true,
 			.instance_mode = INSTANCE_MODE_NUMBER,
 			.dm_type = BBFDM_USP
@@ -1311,9 +1308,9 @@ static bool register_service(struct ubus_context *ctx)
 	return true;
 }
 
-static int bbfdm_load_deamon_config(void)
+static int bbfdm_load_deamon_config(const char *input)
 {
-	const char *json_path = input_json ? input_json : BBF_JSON_INPUT;
+	const char *json_path = input ? input : BBF_JSON_INPUT;
 	char *opt_val = NULL;
 	int err = 0;
 
@@ -1361,7 +1358,7 @@ static int bbfdm_load_deamon_config(void)
 		goto exit;
 	}
 
-	if (input_json) {
+	if (input) {
 		opt_val = dmjson_get_value(deamon_obj, 2, "output", "parent_dm");
 		if (opt_val && strlen(opt_val)) {
 			strncpyt(PARENT_DM, opt_val, sizeof(PARENT_DM));
@@ -1382,6 +1379,11 @@ static int bbfdm_load_deamon_config(void)
 		if (opt_val && strlen(opt_val)) {
 			strncpyt(UBUS_MAIN_METHOD_NAME, opt_val, sizeof(UBUS_MAIN_METHOD_NAME));
 		}
+	}
+
+	opt_val = dmjson_get_value(deamon_obj, 2, "input", "plugin_dir");
+	if (opt_val && strlen(opt_val)) {
+		strncpyt(CONFIG_PLUGIN_PATH, opt_val, sizeof(CONFIG_PLUGIN_PATH));
 	}
 
 	opt_val = dmjson_get_value(deamon_obj, 2, "input", "type");
@@ -1408,7 +1410,7 @@ exit:
 	return err;
 }
 
-static int bbfdm_init(struct ubus_context *ctx)
+static int bbfdm_regiter_ubus(struct ubus_context *ctx)
 {
 	int ret;
 
@@ -1480,10 +1482,19 @@ static void register_periodic_timers(struct ubus_context *ctx)
 	}
 }
 
+void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
+{
+	memset(bbfdm_ctx, 0, sizeof(struct bbfdm_context));
+	blob_buf_init(&bbfdm_ctx->dm_schema, 0);
+	INIT_LIST_HEAD(&bbfdm_ctx->instances);
+	INIT_LIST_HEAD(&bbfdm_ctx->old_instances);
+	INIT_LIST_HEAD(&bbfdm_ctx->event_handlers);
+}
+
 int main(int argc, char **argv)
 {
 	struct bbfdm_context bbfdm_ctx;
-	const char *ubus_socket = NULL;
+	const char *ubus_socket = NULL, *input_file = NULL;
 	int err = 0, ch;
 
 	while ((ch = getopt(argc, argv, "hs:m:c:")) != -1) {
@@ -1492,10 +1503,11 @@ int main(int argc, char **argv)
 			ubus_socket = optarg;
 			break;
 		case 'm':
-			input_json = optarg;
+			input_file = optarg;
+			is_micro_service = input_file ? true : false;
 			break;
 		case 'c':
-			err = bbfdm_cli_exec_command(argc-optind+1, &argv[optind-1]);
+			err = bbfdm_cli_exec_command(input_file, argc-optind+1, &argv[optind-1]);
 			exit(err);
 		case 'h':
 			usage(argv[0]);
@@ -1505,21 +1517,18 @@ int main(int argc, char **argv)
 		}
 	}
 
-	is_micro_service = input_json ? true : false;
 
-	if (!input_json) // It's not a micro-service instance
+	if (is_micro_service == false) // It's not a micro-service instance
 		signal_init();
 
-	err = bbfdm_load_deamon_config();
+	err = bbfdm_load_deamon_config(input_file);
 	if (err != UBUS_STATUS_OK) {
-		fprintf(stderr, "Failed to load %s config from json file (%s)\n", UBUS_METHOD_NAME, input_json ? input_json : BBF_JSON_INPUT);
+		fprintf(stderr, "Failed to load %s config from json file (%s)\n", UBUS_METHOD_NAME, input_file ? input_file : BBF_JSON_INPUT);
 		return -1;
 	}
 
 	openlog(UBUS_METHOD_NAME, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
-
-	memset(&bbfdm_ctx, 0, sizeof(struct bbfdm_context));
-	blob_buf_init(&bbfdm_ctx.dm_schema, 0);
+	bbfdm_ctx_init(&bbfdm_ctx);
 
 	err = ubus_connect_ctx(&bbfdm_ctx.ubus_ctx, ubus_socket);
 	if (err != UBUS_STATUS_OK) {
@@ -1527,22 +1536,17 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	INIT_LIST_HEAD(&bbfdm_ctx.instances);
-	INIT_LIST_HEAD(&bbfdm_ctx.old_instances);
-	INIT_LIST_HEAD(&bbfdm_ctx.event_handlers);
-
 	uloop_init();
 	ubus_add_uloop(&bbfdm_ctx.ubus_ctx);
-	run_schema_updater(&bbfdm_ctx);
 	periodic_instance_updater(&bbfdm_ctx.instance_timer);
 
-	err = bbfdm_init(&bbfdm_ctx.ubus_ctx);
+	err = bbfdm_regiter_ubus(&bbfdm_ctx.ubus_ctx);
 	if (err != UBUS_STATUS_OK)
 		goto exit;
 
+	bbf_global_init(DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE, CONFIG_PLUGIN_PATH);
+	run_schema_updater(&bbfdm_ctx);
 	if (is_micro_service == false) { // It's not a micro-service instance
-
-		bbf_global_init(DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE, true);
 		err = register_events_to_ubus(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);
 		if (err != 0)
 			goto exit;

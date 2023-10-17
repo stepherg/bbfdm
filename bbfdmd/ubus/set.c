@@ -14,8 +14,6 @@
 
 #include <libubus.h>
 
-extern char *input_json;
-
 int bbfdm_set_value(bbfdm_data_t *data)
 {
 	struct pvNode *pv = NULL;
@@ -48,7 +46,6 @@ static int set_resolved_paths(unsigned int dm_type, char *path, char *value, str
 {
 	int fault = 0;
 	struct dmctx bbf_ctx = {
-			.enable_plugins = input_json ? false : true,
 			.instance_mode = INSTANCE_MODE_NUMBER,
 			.dm_type = dm_type
 	};

@@ -42,87 +42,75 @@ static void free_all_list_open_library(struct list_head *library_list)
 	}
 }
 
-int load_dotso_plugins(DMOBJ *entryobj)
+int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 {
-	struct dirent *ent = NULL;
-	DIR *dir = NULL;
+	void *handle = dlopen(plugin_path, RTLD_NOW|RTLD_LOCAL);
+	if (!handle) {
+		fprintf(stderr, "Plugin failed [%s]\n", dlerror());
+		return 0;
+	}
 
-	if (folder_exists(LIBRARY_FOLDER_PATH)) {
-		sysfs_foreach_file(LIBRARY_FOLDER_PATH, dir, ent) {
+	//Load Dynamic Object handler
+	DM_MAP_OBJ *dynamic_obj = NULL;
+	*(void **) (&dynamic_obj) = dlsym(handle, "tDynamicObj");
 
-			if (!strstr(ent->d_name, ".so"))
-				continue;
+	if (dynamic_obj == NULL) {
+		dlclose(handle);
+		TRACE("Plugin %s missing init symbol ...", plugin_path);
+		return 0;
+	}
 
-			char buf[512] = {0};
-			snprintf(buf, sizeof(buf), "%s/%s", LIBRARY_FOLDER_PATH, ent->d_name);
+	for (int i = 0; dynamic_obj[i].path; i++) {
 
-			void *handle = dlopen(buf, RTLD_NOW|RTLD_LOCAL);
-			if (!handle) {
-				fprintf(stderr, "Plugin failed [%s]\n", dlerror());
-				continue;
+		DMOBJ *dm_entryobj = NULL;
+		bool obj_exists = find_entry_obj(entryobj, dynamic_obj[i].path, &dm_entryobj);
+		if (obj_exists == false || !dm_entryobj)
+			continue;
+
+		if (dynamic_obj[i].root_obj) {
+
+			if (dm_entryobj->nextdynamicobj == NULL) {
+				dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
+				dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
+				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
+				dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
 			}
 
-			//Dynamic Object
-			DM_MAP_OBJ *dynamic_obj = NULL;
-			*(void **) (&dynamic_obj) = dlsym(handle, "tDynamicObj");
-			if (dynamic_obj) {
-
-				for (int i = 0; dynamic_obj[i].path; i++) {
-
-					DMOBJ *dm_entryobj = NULL;
-					bool obj_exists = find_entry_obj(entryobj, dynamic_obj[i].path, &dm_entryobj);
-					if (obj_exists == false || !dm_entryobj)
-						continue;
-
-					if (dynamic_obj[i].root_obj) {
-
-						if (dm_entryobj->nextdynamicobj == NULL) {
-							dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
-							dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
-							dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-							dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
-						}
-
-						if (dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj == NULL) {
-							dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj = calloc(2, sizeof(DMOBJ *));
-							dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[0] = dynamic_obj[i].root_obj;
-						} else {
-							int idx = get_obj_idx(dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj);
-							dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj = realloc(dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj, (idx + 2) * sizeof(DMOBJ *));
-							dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[idx] = dynamic_obj[i].root_obj;
-							dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[idx+1] = NULL;
-						}
-
-					}
-
-					if (dynamic_obj[i].root_leaf) {
-
-						if (dm_entryobj->dynamicleaf == NULL) {
-							dm_entryobj->dynamicleaf = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_leaf));
-							dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
-							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-							dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
-						}
-
-						if (dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf == NULL) {
-							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = calloc(2, sizeof(DMLEAF *));
-							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[0] = dynamic_obj[i].root_leaf;
-						} else {
-							int idx = get_leaf_idx(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf);
-							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = realloc(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf, (idx + 2) * sizeof(DMLEAF *));
-							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[idx] = dynamic_obj[i].root_leaf;
-							dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[idx+1] = NULL;
-						}
-
-					}
-				}
+			if (dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj == NULL) {
+				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj = calloc(2, sizeof(DMOBJ *));
+				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[0] = dynamic_obj[i].root_obj;
+			} else {
+				int idx = get_obj_idx(dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj);
+				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj = realloc(dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj, (idx + 2) * sizeof(DMOBJ *));
+				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[idx] = dynamic_obj[i].root_obj;
+				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[idx+1] = NULL;
 			}
-
-			add_list_loaded_libraries(&loaded_library_list, handle);
 
 		}
-		if (dir) closedir(dir);
+
+		if (dynamic_obj[i].root_leaf) {
+
+			if (dm_entryobj->dynamicleaf == NULL) {
+				dm_entryobj->dynamicleaf = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_leaf));
+				dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
+				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
+				dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
+			}
+
+			if (dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf == NULL) {
+				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = calloc(2, sizeof(DMLEAF *));
+				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[0] = dynamic_obj[i].root_leaf;
+			} else {
+				int idx = get_leaf_idx(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf);
+				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = realloc(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf, (idx + 2) * sizeof(DMLEAF *));
+				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[idx] = dynamic_obj[i].root_leaf;
+				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[idx+1] = NULL;
+			}
+
+		}
 	}
+	add_list_loaded_libraries(&loaded_library_list, handle);
+
 	return 0;
 }
 

@@ -25,9 +25,6 @@ static int setup(void **state)
 
 	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
-	// Enable Plugins
-	ctx->enable_plugins = true;
-
 	*state = ctx;
 
 	return 0;
@@ -46,13 +43,13 @@ static int teardown_commit(void **state)
 
 static int group_init(void **state)
 {
-	bbf_global_init(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, true);
+	bbf_global_init(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, "/etc/bbfdm/plugins");
 	return 0;
 }
 
 static int group_teardown(void **state)
 {
-	bbf_global_clean(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, true);
+	bbf_global_clean(TR181_ROOT_TREE);
 	return 0;
 }
 

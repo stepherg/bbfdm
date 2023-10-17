@@ -17,11 +17,6 @@ static DM_MAP_VENDOR *TR181_VENDOR_EXTENSION[2] = {
 };
 static DM_MAP_VENDOR_EXCLUDE *TR181_VENDOR_EXTENSION_EXCLUDE = tVendorExtensionExclude;
 
-#define DROPBEAR_FILE_PATH "../files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json"
-#define DROPBEAR_JSON_PATH "/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json"
-#define LIBBBF_TEST_PATH "../bbf_test/libbbf_test.so"
-#define LIBBBF_TEST_BBFDM_PATH "/usr/lib/bbfdm/libbbf_test.so"
-
 static int setup(void **state)
 {
 	struct dmctx *ctx = calloc(1, sizeof(struct dmctx));
@@ -29,9 +24,6 @@ static int setup(void **state)
 		return -1;
 
 	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
-
-	// Enable Plugins
-	ctx->enable_plugins = true;
 
 	*state = ctx;
 
@@ -62,13 +54,13 @@ static int teardown_revert(void **state)
 
 static int group_init(void **state)
 {
-	bbf_global_init(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, true);
+	bbf_global_init(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, "/etc/bbfdm/plugins");
 	return 0;
 }
 
 static int group_teardown(void **state)
 {
-	bbf_global_clean(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, true);
+	bbf_global_clean(TR181_ROOT_TREE);
 	return 0;
 }
 
@@ -602,9 +594,6 @@ static void test_api_bbfdm_json_get_value(void **state)
 	bbf_ctx_clean_sub(ctx);
 	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
-	// Enable Plugins
-	ctx->enable_plugins = true;
-
 	/*
 	 * Test of JSON Parameter Path
 	 */
@@ -617,38 +606,6 @@ static void test_api_bbfdm_json_get_value(void **state)
 
 	bbf_ctx_clean_sub(ctx);
 	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
-
-	// Enable Plugins
-	ctx->enable_plugins = true;
-
-	remove(DROPBEAR_JSON_PATH);
-
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
-	assert_int_equal(fault, FAULT_9005);
-
-	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
-	assert_true(&first_entry->list == &ctx->list_parameter);
-}
-
-static void test_api_bbfdm_json_set_value(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	dmcmd("/bin/cp", 2, DROPBEAR_FILE_PATH, DROPBEAR_JSON_PATH);
-
-	ctx->in_param = "Device.UserInterface.Enable";
-	ctx->in_value = "true";
-
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
-	assert_int_equal(fault, 0);
-
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.Port";
-	ctx->in_value = "9856";
-
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
-	assert_int_equal(fault, 0);
 }
 
 static void test_api_bbfdm_json_add_object(void **state)
@@ -698,9 +655,6 @@ static void test_api_bbfdm_library_get_value(void **state)
 	bbf_ctx_clean_sub(ctx);
 	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
-	// Enable Plugins
-	ctx->enable_plugins = true;
-
 	ctx->in_param = "Device.WiFi.SSID.1.Enable";
 
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
@@ -710,40 +664,6 @@ static void test_api_bbfdm_library_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
-
-	// Enable Plugins
-	ctx->enable_plugins = true;
-
-	remove(LIBBBF_TEST_BBFDM_PATH);
-
-	ctx->in_param = "Device.X_IOPSYS_EU_Syslog.";
-
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
-	assert_int_equal(fault, FAULT_9005);
-
-	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
-	assert_true(&first_entry->list == &ctx->list_parameter);
-}
-
-static void test_api_bbfdm_library_set_value(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	dmcmd("/bin/cp", 2, LIBBBF_TEST_PATH, LIBBBF_TEST_BBFDM_PATH);
-
-	ctx->in_param = "Device.WiFi.SSID.1.Enable";
-	ctx->in_value = "true";
-
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
-	assert_int_equal(fault, 0);
-
-	ctx->in_param = "Device.X_IOPSYS_EU_Syslog.ServerPort";
-	ctx->in_value = "9856";
-
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
-	assert_int_equal(fault, 0);
 }
 
 static void test_api_bbfdm_library_add_object(void **state)
@@ -839,9 +759,6 @@ int main(void)
 		// JSON: Get Value method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_json_get_value, setup, teardown_commit),
 
-		// JSON: Set Value method test cases
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_json_set_value, setup, teardown_commit),
-
 		// JSON: Add Object method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_json_add_object, setup, teardown_commit),
 
@@ -850,9 +767,6 @@ int main(void)
 
 		// Library: Get Value method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_library_get_value, setup, teardown_commit),
-
-		// Library: Set Value method test cases
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_library_set_value, setup, teardown_commit),
 
 		// Library: Add Object method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_library_add_object, setup, teardown_commit),

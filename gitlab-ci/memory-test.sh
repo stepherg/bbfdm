@@ -9,10 +9,10 @@ cp ./gitlab-ci/bbfdm_services.conf /etc/supervisor/conf.d/
 
 supervisorctl reread
 supervisorctl update
-sleep 10
+exec_cmd ubus wait_for bbfdm
+sleep 20
 
 supervisorctl status all
-exec_cmd ubus wait_for bbfdm
 
 function run_valgrind()
 {
@@ -34,15 +34,17 @@ function run_valgrind_redirect()
 
 echo "Running memory check on datamodel"
 
+run_valgrind_redirect -c get Device.
+
+run_valgrind_redirect -c schema Device.
+
+run_valgrind_redirect -c instances Device.
+
 run_valgrind -c get Device.
 
 run_valgrind -c instances Device.
 
 run_valgrind -c schema Device.
-
-run_valgrind_redirect -c get Device.
-
-run_valgrind_redirect -c schema Device.
 
 run_valgrind_verbose -c get Device.BulkData.
 

@@ -14,9 +14,7 @@
 
 #include "../dmcommon.h"
 
-#define LIBRARY_FOLDER_PATH "/usr/lib/bbfdm"
-
-int load_dotso_plugins(DMOBJ *entryobj);
+int load_dotso_plugins(DMOBJ *entryobj, const char *path);
 int free_dotso_plugins(void);
 
 #endif //__DOTSO_PLUGIN_H__

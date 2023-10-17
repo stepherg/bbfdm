@@ -1860,74 +1860,60 @@ void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json
 	FREE(full_obj);
 }
 
-int load_json_plugins(DMOBJ *entryobj)
+int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 {
-	struct dirent *ent = NULL;
-	DIR *dir = NULL;
+	int json_plugin_version = JSON_VERSION_0;
 
-	if (folder_exists(JSON_FOLDER_PATH)) {
-		sysfs_foreach_file(JSON_FOLDER_PATH, dir, ent) {
+	json_object *json = json_object_from_file(plugin_path);
+	if (!json)
+		return 0;
 
-			if (!strstr(ent->d_name, ".json"))
-				continue;
+	json_object_object_foreach(json, key, jobj) {
+		if (!key)
+			break;
 
-			char buf[512] = {0};
-			int json_plugin_version = JSON_VERSION_0;
-
-			snprintf(buf, sizeof(buf), "%s/%s", JSON_FOLDER_PATH, ent->d_name);
-
-			json_object *json = json_object_from_file(buf);
-			if (!json) continue;
-
-			json_object_object_foreach(json, key, jobj) {
-				if (!key)
-					break;
-
-				if (strcmp(key, "json_plugin_version") == 0) {
-					json_plugin_version = json_object_get_int(jobj);
-					continue;
-				}
-
-				DMOBJ *dm_entryobj = NULL;
-				char obj_prefix[MAX_DM_LENGTH] = {0};
-
-				char *obj_path = replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
-				find_prefix_obj(obj_path, obj_prefix, MAX_DM_LENGTH);
-
-				bool obj_exists = find_entry_obj(entryobj, obj_prefix, &dm_entryobj);
-				if (obj_exists == 0 || !dm_entryobj) {
-					FREE(obj_path);
-					continue;
-				}
-
-				if (dm_entryobj->nextdynamicobj == NULL) {
-					dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
-					dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
-					dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-					dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
-					dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
-				}
-
-				if (dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj == NULL) {
-					dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj = calloc(2, sizeof(struct dm_obj_s *));
-				}
-
-				if (dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] == NULL) {
-					dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_calloc(&json_memhead, 2, sizeof(struct dm_obj_s));
-					parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], 0, json_plugin_version, &json_list);
-				} else {
-					int idx = get_entry_idx(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0]);
-					dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_realloc(&json_memhead, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
-					memset(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
-					parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], idx, json_plugin_version, &json_list);
-				}
-
-				FREE(obj_path);
-			}
-			save_loaded_json_files(&loaded_json_files, json);
+		if (strcmp(key, "json_plugin_version") == 0) {
+			json_plugin_version = json_object_get_int(jobj);
+			continue;
 		}
-		if (dir) closedir(dir);
+
+		DMOBJ *dm_entryobj = NULL;
+		char obj_prefix[MAX_DM_LENGTH] = {0};
+
+		char *obj_path = replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
+		find_prefix_obj(obj_path, obj_prefix, MAX_DM_LENGTH);
+
+		bool obj_exists = find_entry_obj(entryobj, obj_prefix, &dm_entryobj);
+		if (obj_exists == 0 || !dm_entryobj) {
+			FREE(obj_path);
+			continue;
+		}
+
+		if (dm_entryobj->nextdynamicobj == NULL) {
+			dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
+			dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
+			dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
+			dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
+			dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
+		}
+
+		if (dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj == NULL) {
+			dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj = calloc(2, sizeof(struct dm_obj_s *));
+		}
+
+		if (dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] == NULL) {
+			dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_calloc(&json_memhead, 2, sizeof(struct dm_obj_s));
+			parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], 0, json_plugin_version, &json_list);
+		} else {
+			int idx = get_entry_idx(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0]);
+			dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_realloc(&json_memhead, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
+			memset(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
+			parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], idx, json_plugin_version, &json_list);
+		}
+
+		FREE(obj_path);
 	}
+	save_loaded_json_files(&loaded_json_files, json);
 	return 0;
 }
 

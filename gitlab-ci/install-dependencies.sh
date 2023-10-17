@@ -11,6 +11,7 @@ exec_cmd pip3 install pexpect ubus
 
 # compile and install libbbf
 install_libbbf ${1}
+mkdir -p /etc/bbfdm/plugins
 
 #compile and install libbbf_test dynamic extension library
 install_libbbf_test ${1}
@@ -23,10 +24,10 @@ if [ -z "${1}" ]; then
 	git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/feed/iopsys.git /opt/dev/iopsys
 	git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/bulkdata.git /opt/dev/bulkdata
 
-	cp -f /opt/dev/iopsys/urlfilter/files/etc/bbfdm/json/urlfilter.json /etc/bbfdm/json
-	cp -f /opt/dev/iopsys/obuspa/files/etc/bbfdm/json/USPAgent.json /etc/bbfdm/json
-	cp -f /opt/dev/iopsys/icwmp/files/etc/bbfdm/json/CWMPManagementServer.json /etc/bbfdm/json
-	cp -f /opt/dev/iopsys/ponmngr/files/etc/bbfdm/json/xpon.json /etc/bbfdm/json
+	install_plugin /opt/dev/iopsys/urlfilter/files/etc/bbfdm/json/urlfilter.json
+	install_plugin /opt/dev/iopsys/obuspa/files/etc/bbfdm/json/USPAgent.json
+	install_plugin /opt/dev/iopsys/icwmp/files/etc/bbfdm/json/CWMPManagementServer.json
+	install_plugin /opt/dev/iopsys/ponmngr/files/etc/bbfdm/json/xpon.json
 	
 	# install bulkdata micro-service
 	mkdir -p /etc/bulkdata
@@ -47,4 +48,6 @@ if [ -z "${1}" ]; then
 	
 	# install time micro-service
 	install_time_micro_service
+
+	ls -l /etc/bbfdm/plugins/
 fi

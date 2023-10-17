@@ -17,8 +17,7 @@
 extern struct list_head loaded_json_files;
 extern struct list_head json_list;
 extern struct list_head json_memhead;
-
-extern char *input_json;
+extern const char *CONFIG_PLUGIN_PATH;
 
 #define UNUSED  __attribute__((unused))
 
@@ -258,9 +257,8 @@ static int in_ubus_out_cli_exec_cmd(cli_data_t *cli_data, const char *path, cons
 	return err;
 }
 
-static int bbfdm_load_cli_config(cli_data_t *cli_data)
+static int bbfdm_load_cli_config(const char *json_path, cli_data_t *cli_data)
 {
-	const char *json_path = input_json ? input_json : BBF_JSON_INPUT;
 	char *opt_val = NULL;
 
 	if (!json_path || !strlen(json_path)) {
@@ -642,13 +640,12 @@ static int cli_exec_command(cli_data_t *cli_data, int argc, char *argv[])
 			goto end;
 		}
 
-		bbf_global_init(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, input_json ? false : true);
+		bbf_global_init(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, CONFIG_PLUGIN_PATH);
 
 		bbf_ctx_init(&cli_data->bbf_ctx, CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE);
 
 		cli_data->bbf_ctx.dm_type = cli_data->proto;
 		cli_data->bbf_ctx.instance_mode = cli_data->instance_mode;
-		cli_data->bbf_ctx.enable_plugins = input_json ? false : true;
 	} else if (strcasecmp(cli_data->in_type, "UBUS") != 0) {
 		return -1;
 	}
@@ -681,13 +678,13 @@ end:
 	if (strcasecmp(cli_data->in_type, "DotSO") == 0) {
 		if (CLI_DM_ROOT_OBJ) {
 			bbf_ctx_clean(&cli_data->bbf_ctx);
-			bbf_global_clean(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, input_json ? false : true);
+			bbf_global_clean(CLI_DM_ROOT_OBJ);
 		}
 		free_dotso_plugin(cli_lib_handle);
 	} else if (strcasecmp(cli_data->in_type, "JSON") == 0) {
 		if (CLI_DM_ROOT_OBJ) {
 			bbf_ctx_clean(&cli_data->bbf_ctx);
-			bbf_global_clean(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, input_json ? false : true);
+			bbf_global_clean(CLI_DM_ROOT_OBJ);
 		}
 		free_json_plugin();
 	}
@@ -695,14 +692,15 @@ end:
 	return err;
 }
 
-int bbfdm_cli_exec_command(int argc, char *argv[])
+int bbfdm_cli_exec_command(const char *input, int argc, char *argv[])
 {
 	cli_data_t cli_data = {0};
 	int err = EXIT_SUCCESS;
+	const char *json_input = (input) ? input : BBF_JSON_INPUT;
 
 	memset(&cli_data, 0, sizeof(cli_data_t));
 
-	err = bbfdm_load_cli_config(&cli_data);
+	err = bbfdm_load_cli_config(json_input, &cli_data);
 	if (err)
 		return EXIT_FAILURE;
 

@@ -23,23 +23,23 @@ echo "Validate BBF TR-104 JSON Plugin"
 check_ret $?
 
 echo "Validate X_IOPSYS_EU_Dropbear JSON Plugin"
-./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json
+./tools/validate_json_plugin.py test/files/etc/bbfdm/plugins/X_IOPSYS_EU_Dropbear.json
 check_ret $?
 
 echo "Validate X_IOPSYS_EU_TEST JSON Plugin"
-./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
+./tools/validate_json_plugin.py test/files/etc/bbfdm/plugins/X_IOPSYS_EU_TEST.json
 check_ret $?
 
 echo "Validate X_IOPSYS_EU_WiFi JSON Plugin"
-./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_WiFi.json
+./tools/validate_json_plugin.py test/files/etc/bbfdm/plugins/X_IOPSYS_EU_WiFi.json
 check_ret $?
 
 echo "Validate X_IOPSYS_EU_URLFilter JSON Plugin"
-./tools/validate_json_plugin.py test/files/etc/bbfdm/json/urlfilter.json
+./tools/validate_json_plugin.py test/files/etc/bbfdm/plugins/urlfilter.json
 check_ret $?
 
 echo "Validate CWMPManagementServer JSON Plugin"
-./tools/validate_json_plugin.py test/files/etc/bbfdm/json/CWMPManagementServer.json
+./tools/validate_json_plugin.py test/files/etc/bbfdm/plugins/CWMPManagementServer.json
 check_ret $?
 
 echo "Validate TR-181 JSON Plugin after generating from XML"
