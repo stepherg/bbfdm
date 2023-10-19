@@ -14,7 +14,7 @@
 
 #include "common.h"
 
-#include "libbbfdm-api/plugin/json_plugin.h"
+#include "plugin/json_plugin.h"
 
 extern struct list_head global_memhead;
 

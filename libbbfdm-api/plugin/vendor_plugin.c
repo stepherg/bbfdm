@@ -12,6 +12,10 @@
 #include "vendor_plugin.h"
 #include "../dmplugin.h"
 
+#ifndef BBF_VENDOR_LIST
+#define BBF_VENDOR_LIST ""
+#endif
+
 static void overwrite_param(DMOBJ *entryobj, DMLEAF *leaf)
 {
 	if (entryobj->leaf) {

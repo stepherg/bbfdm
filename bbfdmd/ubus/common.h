@@ -14,7 +14,7 @@
 #include <libubox/utils.h>
 #include <libubox/list.h>
 
-#include "libbbfdm-api/dmcommon.h"
+#include "dmcommon.h"
 
 #include "bbfdmd.h"
 

@@ -5,7 +5,7 @@
 #include <libubox/blobmsg.h>
 #include <libubox/list.h>
 
-#include "libbbfdm-api/dmbbf.h"
+#include "dmbbf.h"
 
 struct bbfdm_async_req {
 	struct ubus_context *ctx;
