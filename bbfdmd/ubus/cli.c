@@ -26,15 +26,14 @@ static DM_MAP_VENDOR *CLI_DM_VENDOR_EXTENSION[2] = {0};
 static DM_MAP_VENDOR_EXCLUDE *CLI_DM_VENDOR_EXTENSION_EXCLUDE = NULL;
 
 static void *cli_lib_handle = NULL;
-static json_object *cli_json_obj = NULL;
 
 typedef struct {
 	struct dmctx bbf_ctx;
 	unsigned int instance_mode;
 	unsigned int proto;
 	char in_name[128];
-	char in_type[8];
-	char out_type[8];
+	char in_type[32];
+	char out_type[32];
 	char *cmd;
 	bool ubus_status;
 } cli_data_t;
@@ -257,37 +256,14 @@ static int in_ubus_out_cli_exec_cmd(cli_data_t *cli_data, const char *path, cons
 	return err;
 }
 
-static int bbfdm_load_cli_config(const char *json_path, cli_data_t *cli_data)
+static int bbfdm_load_cli_config(bbfdm_config_t *bbf_config, cli_data_t *cli_data)
 {
 	char *opt_val = NULL;
 
-	if (!json_path || !strlen(json_path)) {
-		printf("ERROR: json file not specified\n");
-		return -1;
-	}
+	cli_data->proto = bbf_config->proto;
+	cli_data->instance_mode = bbf_config->instance_mode;
 
-	cli_json_obj = json_object_from_file(json_path);
-	if (!cli_json_obj) {
-		printf("ERROR: not possible to load json file (%s)\n", json_path);
-		return -1;
-	}
-
-	opt_val = dmjson_get_value(cli_json_obj, 3, "cli", "config", "proto");
-	if (opt_val && strlen(opt_val)) {
-		cli_data->proto = get_proto_type(opt_val);
-	} else {
-		cli_data->proto = BBFDM_BOTH;
-	}
-
-	opt_val = dmjson_get_value(cli_json_obj, 3, "cli", "config", "instance_mode");
-	if (opt_val && strlen(opt_val)) {
-		int inst_mode = (int) strtol(opt_val, NULL, 10);
-		cli_data->instance_mode = get_instance_mode(inst_mode);
-	} else {
-		cli_data->instance_mode = INSTANCE_MODE_NUMBER;
-	}
-
-	opt_val = dmjson_get_value(cli_json_obj, 3, "cli", "input", "type");
+	opt_val = bbf_config->cli_in_type;
 	if (opt_val && strlen(opt_val)) {
 		snprintf(cli_data->in_type, sizeof(cli_data->in_type), "%s", opt_val);
 	} else {
@@ -295,7 +271,7 @@ static int bbfdm_load_cli_config(const char *json_path, cli_data_t *cli_data)
 		return -1;
 	}
 
-	opt_val = dmjson_get_value(cli_json_obj, 3, "cli", "input", "name");
+	opt_val = bbf_config->cli_in_name;
 	if (opt_val && strlen(opt_val)) {
 		snprintf(cli_data->in_name, sizeof(cli_data->in_name), "%s", opt_val);
 	} else {
@@ -303,7 +279,7 @@ static int bbfdm_load_cli_config(const char *json_path, cli_data_t *cli_data)
 		return -1;
 	}
 
-	opt_val = dmjson_get_value(cli_json_obj, 3, "cli", "output", "type");
+	opt_val = bbf_config->cli_out_type;
 	if (opt_val && strlen(opt_val)) {
 		snprintf(cli_data->out_type, sizeof(cli_data->out_type), "%s", opt_val);
 	} else {
@@ -640,7 +616,7 @@ static int cli_exec_command(cli_data_t *cli_data, int argc, char *argv[])
 			goto end;
 		}
 
-		bbf_global_init(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, CONFIG_PLUGIN_PATH);
+		bbf_global_init(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, NULL);
 
 		bbf_ctx_init(&cli_data->bbf_ctx, CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE);
 
@@ -692,17 +668,10 @@ end:
 	return err;
 }
 
-int bbfdm_cli_exec_command(const char *input, int argc, char *argv[])
+int bbfdm_cli_exec_command(bbfdm_config_t *bbf_config, int argc, char *argv[])
 {
 	cli_data_t cli_data = {0};
 	int err = EXIT_SUCCESS;
-	const char *json_input = (input) ? input : BBF_JSON_INPUT;
-
-	memset(&cli_data, 0, sizeof(cli_data_t));
-
-	err = bbfdm_load_cli_config(json_input, &cli_data);
-	if (err)
-		return EXIT_FAILURE;
 
 	// Exit if no command specified
 	if (argc < 1) {
@@ -710,11 +679,13 @@ int bbfdm_cli_exec_command(const char *input, int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	err = cli_exec_command(&cli_data, argc, argv);
-
-	if (cli_json_obj) {
-		json_object_put(cli_json_obj);
-		cli_json_obj = NULL;
+	memset(&cli_data, 0, sizeof(cli_data_t));
+	err = bbfdm_load_cli_config(bbf_config, &cli_data);
+	if (err) {
+		printf("ERROR: required cli config missing\n");
+		return EXIT_FAILURE;
 	}
+
+	err = cli_exec_command(&cli_data, argc, argv);
 	return err;
 }

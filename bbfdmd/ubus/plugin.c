@@ -28,7 +28,7 @@ int load_dotso_plugin(void **lib_handle, const char *file_path,
 
 	void *handle = dlopen(file_path, RTLD_NOW|RTLD_LOCAL);
 	if (!handle) {
-		fprintf(stderr, "ERROR: Plugin failed [%s]\n", dlerror());
+		ERR("Plugin failed [%s]\n", dlerror());
 		return -1;
 	}
 
@@ -42,13 +42,13 @@ int load_dotso_plugin(void **lib_handle, const char *file_path,
 		unsigned int len = strlen(node_obj);
 
 		if (strncmp(node_obj, ROOT_NODE, strlen(ROOT_NODE)) != 0 || node_obj[len-1] != '.') {
-			fprintf(stderr, "ERROR: Object (%s) not valid\n", node_obj);
+			ERR("Object (%s) not valid\n", node_obj);
 			return -1;
 		}
 
 		DMOBJ *dm_entryobj = (DMOBJ *)dm_dynamic_calloc(&global_memhead, 2, sizeof(DMOBJ));
 		if (dm_entryobj == NULL) {
-			fprintf(stderr, "ERROR: No Memory exists\n");
+			ERR("No Memory exists\n");
 			return -1;
 		}
 
@@ -62,7 +62,7 @@ int load_dotso_plugin(void **lib_handle, const char *file_path,
 
 		*main_entry = dm_entryobj;
 	} else {
-		fprintf(stderr, "ERROR: Main entry not available");
+		ERR("Main entry not available");
 		return -1;
 	}
 
@@ -119,7 +119,7 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 		unsigned int len = strlen(node_obj);
 
 		if (strncmp(node_obj, ROOT_NODE, strlen(ROOT_NODE)) != 0 || node_obj[len-1] != '.') {
-			fprintf(stderr, "ERROR: Object (%s) not valid\n", node_obj);
+			ERR("ERROR: Object (%s) not valid\n", node_obj);
 			return -1;
 		}
 
@@ -129,7 +129,7 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 
 		DMOBJ *dm_entryobj = (DMOBJ *)dm_dynamic_calloc(json_memhead, 2, sizeof(DMOBJ));
 		if (dm_entryobj == NULL) {
-			fprintf(stderr, "ERROR: No Memory exists\n");
+			ERR("ERROR: No Memory exists\n");
 			return -1;
 		}
 

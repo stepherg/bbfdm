@@ -14,8 +14,6 @@
 #include "get_helper.h"
 #include <libubus.h>
 
-extern char UBUS_METHOD_NAME[32];
-
 static struct event_map_list ev_map_list[] = {
 	/* { event name,                     DM Path,   .arguments[] = { event_args, dm_args } } */
 	{ "wifi.dataelements.Associated", "Device.WiFi.DataElements.AssociationEvent.Associated!",
@@ -148,6 +146,13 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 				const char *type, struct blob_attr *msg)
 {
 	(void)ev;
+	struct bbfdm_context *u;
+
+	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
+	if (u == NULL) {
+		ERR("Failed to get the bbfdm context");
+		return;
+	}
 
 	if (!msg || !type)
 		return;
@@ -169,7 +174,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	blob_buf_init(&b, 0);
 	blob_buf_init(&bb, 0);
 
-	snprintf(method_name, sizeof(method_name), "%s.%s", UBUS_METHOD_NAME, BBF_EVENT);
+	snprintf(method_name, sizeof(method_name), "%s.%s", u->config.out_name, BBF_EVENT);
 
 	blobmsg_add_string(&b, "name", dm_path);
 	generate_blob_input(&bb, type, &pv_list);

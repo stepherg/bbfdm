@@ -14,7 +14,28 @@ struct bbfdm_async_req {
 	void *result;
 };
 
+typedef struct bbfdm_config {
+	int proto;
+	int instance_mode;
+	int transaction_timeout;
+	int subprocess_level;
+	uint8_t log_level;
+	uint32_t refresh_time;
+	char in_type[32];
+	char in_name[128];
+	char in_plugin_dir[128];
+	char out_type[32];
+	char out_name[32];
+	char out_parent_dm[32];
+	char out_object[32];
+	char out_root_obj[32];
+	char cli_in_type[32];
+	char cli_in_name[128];
+	char cli_out_type[32];
+} bbfdm_config_t;
+
 struct bbfdm_context {
+	bbfdm_config_t config;
 	struct ubus_context ubus_ctx;
 	struct blob_buf dm_schema;
 	struct uloop_timeout instance_timer;
