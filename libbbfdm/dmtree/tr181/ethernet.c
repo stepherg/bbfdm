@@ -132,7 +132,7 @@ static void dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_no
 
 		// Skip this interface section if its device starts with prfix 'link_'
 		dmuci_get_value_by_section_string(s, "device", &device);
-		if (DM_STRNCMP(device, "link_", 5) == 0 || DM_STRNCMP(device, "iface", 5) == 0)
+		if (DM_STRNCMP(device, "link_", 5) == 0 || strcmp(device, section_name(s)) == 0)
 			continue;
 
 		// Skip this interface section if its device is empty

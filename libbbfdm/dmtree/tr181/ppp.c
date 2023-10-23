@@ -49,7 +49,7 @@ void ppp___update_sections(struct uci_section *s_from, struct uci_section *s_to)
 
 void ppp___reset_options(struct uci_section *ppp_s)
 {
-	dmuci_set_value_by_section(ppp_s, "device", "");
+	dmuci_set_value_by_section(ppp_s, "device", section_name(ppp_s));
 	dmuci_set_value_by_section(ppp_s, "username", "");
 	dmuci_set_value_by_section(ppp_s, "password", "");
 	dmuci_set_value_by_section(ppp_s, "pppd_options", "");
