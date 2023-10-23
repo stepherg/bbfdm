@@ -75,6 +75,7 @@ All supported tools are presented in this file[BBFDM Tools](./docs/guide/tools.m
 * [How to Configure MACVLAN](./docs/guide/macvlan_interface.md)
 * [Explain Policy Based Routing Management](./docs/guide/policy_based_routing.md)
 * [TR181 DNS datamodel](./docs/guide/device_dns.md)
+* [Linker design](./docs/guide/linker_design.md)
 
 ## External dependencies for datamodel objects
 
