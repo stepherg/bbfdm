@@ -1221,12 +1221,19 @@ static int get_ubus_instances(struct dmctx *dmctx, struct dmnode *node)
 
 	size_t nbre_obj = json_object_array_length(res_array);
 
+	if (nbre_obj == 0) {
+		dmctx->findparam = 1;
+		return 0;
+	}
+
 	for (size_t i = 0; i < nbre_obj; i++) {
 		res_obj = json_object_array_get_idx(res_array, i);
 
 		char *fault = dmjson_get_value(res_obj, 1, "fault");
 		if (DM_STRLEN(fault))
 			return DM_STRTOUL(fault);
+
+		dmctx->findparam = 1;
 
 		char *path = dmjson_get_value(res_obj, 1, "path");
 
