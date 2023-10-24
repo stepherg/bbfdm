@@ -69,13 +69,6 @@ static bool get_base_path(const char *query_path, char *base_path)
 				}
 			}
 			break;
-		case '*':
-			if (query_path[i - 1] != '.' ||
-			    query_path[i + 1] != '.' ||
-				query_path[i + 2] == 0)
-				return false;
-			found = true;
-			break;
 		}
 
 		if (found)
@@ -137,20 +130,6 @@ static bool get_next_param(char *qPath, size_t *pos, char *param)
 	if (qlen > 0) {
 		if (param[qlen - 1] == '.')
 			param[qlen - 1] = '\0';
-	}
-
-	if (param[0] == '*') {
-		size_t param_len = DM_STRLEN(param);
-		if (param_len > 1) {
-			ERR("* followed by other characters(%s)", param);
-			return false;
-		}
-
-		// * is not followed by .
-		if (qPath[*pos - 1] != '.') {
-			ERR("* not followed by dot(%c)", qPath[*pos - 1]);
-			return false;
-		}
 	}
 
 	return true;
@@ -715,35 +694,6 @@ static void refresh_path_list(struct list_head *path_list, struct list_head *pli
 	}
 }
 
-static int append_all_instances(unsigned int dm_type, char *bPath, struct list_head *plist_local)
-{
-	char temp[MAX_DM_PATH];
-	int fault = 0;
-	struct dmctx bbf_ctx = {
-			.in_param = bPath,
-			.nextlevel = true,
-			.instance_mode = INSTANCE_MODE_NUMBER,
-			.dm_type = dm_type
-	};
-
-	bbf_sub_init(&bbf_ctx);
-
-	if (0 == (fault = bbfdm_cmd_exec(&bbf_ctx, BBF_INSTANCES))) {
-		struct dm_parameter *n = NULL;
-
-		list_for_each_entry(n, &bbf_ctx.list_parameter, list) {
-			temp[0] = '\0';
-
-			// Add .
-			snprintf(temp, MAX_DM_PATH, "%s.", n->name);
-			add_path_list(temp, plist_local);
-		}
-	}
-
-	bbf_sub_cleanup(&bbf_ctx);
-	return fault;
-}
-
 static int resolve_path(struct dmctx *bbf_ctx, char *qPath, size_t pos, struct list_head *resolved_plist)
 {
 	char temp[MAX_DM_PATH + 5] = {0};
@@ -788,8 +738,6 @@ static int resolve_path(struct dmctx *bbf_ctx, char *qPath, size_t pos, struct l
 		if (param[0] == '[') {
 			param[plen-1] = 0;
 			fault = solve_all_filters(bbf_ctx, temp, param+1, &plist_local);
-		} else if (param[0] == '*') {
-			fault = append_all_instances(bbf_ctx->dm_type, temp, &plist_local);
 		} else {
 			char buff[MAX_DM_VALUE] = {0};
 			if (non_leaf)

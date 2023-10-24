@@ -171,7 +171,7 @@ static void resulting(uint8_t maxdepth, char *path, struct dmctx *bbf_ctx, struc
 				}
 			}
 		} else {
-			if (!strcmp(n->name, path)) {
+			if (match(n->name, path, 0, NULL)) {
 				if (is_search_by_reference(bbf_ctx->in_param))
 					plen = 0;
 
@@ -442,7 +442,7 @@ void prepare_raw_result(struct blob_buf *bb, struct dmctx *bbf_ctx, struct list_
 					blobmsg_close_table(bb, table);
 				}
 			} else {
-				if (!strcmp(n->name, iter->path)) {
+				if (match(n->name, iter->path, 0, NULL)) {
 					table = blobmsg_open_table(bb, NULL);
 					bb_add_string(bb, "path", n->name);
 					bb_add_string(bb, "data", n->data);
