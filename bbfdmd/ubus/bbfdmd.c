@@ -33,7 +33,7 @@
 #ifndef DAEMON_JSON_INPUT
 #define BBFDM_JSON_INPUT "/etc/bbfdm/input.json"
 #else
-#define BBFDM_JSON_INPUT TO_STR(DAEMON_JSON_INPUT)
+#define BBFDM_JSON_INPUT DAEMON_JSON_INPUT
 #endif
 
 extern struct list_head loaded_json_files;
