@@ -1670,17 +1670,47 @@ static void sync_proxy_interface_sections(struct uci_section *s, char *section,
 
 static void set_igmpp_iface_val(void *data, char *instance, char *linker, char *interface_linker, bool is_br)
 {
-	struct uci_section *d_sec = NULL;
-	char *up, *f_inst;
-	bool b;
+	struct uci_section *d_sec = NULL, *interface_s = NULL, *device_s = NULL;
+	char *up, *f_inst, *interface_name, *device_name, *device_type;
+	bool b, is_bridge_interface = false;
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface",
 			"section_name", section_name((struct uci_section *)data), d_sec) {
 		dmuci_get_value_by_section_string(d_sec, "iface_instance", &f_inst);
 		if (DM_STRCMP(instance, f_inst) == 0) {
+
+			// Read the interface name from dmmap before updating it
+			dmuci_get_value_by_section_string(d_sec, "ifname", &interface_name);
 			dmuci_set_value_by_section(d_sec, "ifname", is_br ? interface_linker : linker);
 			dmuci_get_value_by_section_string(d_sec, "upstream", &up);
 			string_to_bool(up, &b);
+
+			// Checking if it is a bridge interface
+			// Read the device name of bridge interface
+			uci_foreach_sections("network", "device", device_s) {
+                                dmuci_get_value_by_section_string(device_s, "type", &device_type);
+                                dmuci_get_value_by_section_string(device_s, "name", &device_name);
+
+                                if ((strcmp(device_type, "bridge") == 0) && (strcmp(device_name, interface_name) == 0)) {
+					is_bridge_interface = true;
+                                        break;
+				}
+                        }
+
+                        if (!is_bridge_interface) {
+                                uci_foreach_sections("network", "interface", interface_s) {
+                                        if(strcmp(section_name(interface_s), interface_name) != 0)
+                                                continue;
+                                        dmuci_get_value_by_section_string(interface_s, "device", &device_name);
+                                }
+		        }
+
+                        // Delete the previous upstream_interface/downstream_interface from the uci
+			// file as it is updated in dmmap file, and will be updated after sync in
+			// sync_proxy_interface_sections function
+                        dmuci_del_list_value_by_section((struct uci_section *)data,
+                                                        (b) ? "upstream_interface" : "downstream_interface" , device_name);
+
 			sync_proxy_interface_sections((struct uci_section *)data,
 					"downstream_interface", interface_linker, !b);
 
