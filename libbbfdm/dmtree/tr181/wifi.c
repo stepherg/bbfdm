@@ -154,6 +154,26 @@ static char *get_data_model_mode(const char *ubus_mode)
 		return "None";
 }
 
+static char *get_data_model_standard(char *standard)
+{
+	char *p = DM_LSTRSTR(standard, "802.11");
+	if (p) {
+		char *res = dmstrdup(p + strlen("802.11"));
+		replace_char(res, '/', ',');
+		return res;
+	}
+
+	return standard;
+}
+
+static char *get_data_model_band(const char *bandwidth)
+{
+	char *band = NULL;
+
+	dmasprintf(&band, "%sMHz", (DM_STRLEN(bandwidth) == 0) ? "20" : bandwidth);
+	return band;
+}
+
 static int get_supported_modes(const char *ubus_method, const char *ifname, char **value)
 {
 	char *dm_default_modes_supported = "None,WEP-64,WEP-128,WPA-Personal,WPA2-Personal,WPA3-Personal,WPA-WPA2-Personal,WPA3-Personal-Transition,WPA-Enterprise,WPA2-Enterprise,WPA3-Enterprise,WPA-WPA2-Enterprise";
@@ -3294,19 +3314,46 @@ static int get_neighboring_wifi_diagnostics_result_noise(char *refparam, struct 
 	return 0;
 }
 
+static int get_neighboring_wifi_diagnostics_result_radio(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "radio", value);
+	return 0;
+}
+
+static int get_neighboring_wifi_diagnostics_result_operating_ch_band(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "bandwidth", value);
+	return 0;
+}
+
+static int get_neighboring_wifi_diagnostics_result_op_std(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "standard", value);
+	return 0;
+}
+
+static int get_neighboring_wifi_diagnostics_result_sec_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", value);
+	return 0;
+}
+
+static int get_neighboring_wifi_diagnostics_result_enc_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section *)data, "ciphers", value);
+	return 0;
+}
+
 /*#Device.WiFi.Radio.{i}.CurrentOperatingChannelBandwidth!UBUS:wifi.radio.@Name/status//bandwidth*/
 static int get_WiFiRadio_CurrentOperatingChannelBandwidth(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL;
 	char object[32];
-	char *bw;
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "20MHz");
-	bw = dmjson_get_value(res, 1, "bandwidth");
-
-	dmasprintf(value, "%sMHz", (bw[0] == '0') ? "20" : bw);
+	*value = get_data_model_band(dmjson_get_value(res, 1, "bandwidth"));
 	return 0;
 }
 
@@ -3338,19 +3385,12 @@ static int get_radio_supported_standard(char *refparam, struct dmctx *ctx, void 
 static int get_radio_operating_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL;
-	char standard_list[32] = {0};
 	char object[UBUS_OBJ_LEN] = {0};
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "n,ax");
-	char *standard = dmjson_get_value(res, 1, "standard");
-	if (DM_LSTRSTR(standard, "802.11")) {
-		DM_STRNCPY(standard_list, standard + strlen("802.11"), sizeof(standard_list));
-		replace_char(standard_list, '/', ',');
-	}
-
-	*value = dmstrdup(standard_list);
+	*value = get_data_model_standard(dmjson_get_value(res, 1, "standard"));
 	return 0;
 }
 
@@ -3474,12 +3514,19 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 			char *channel[2] = {0};
 			char *frequency[2] = {0};
 			char *signal_strength[2] = {0};
+			char *standard[2] = {0};
+			char *bandwidth[2] = {0};
+			char *radio[2] = {0};
+			char *encryption[2] = {0};
+			char *ciphers[2] = {0};
 
 			char *radio_name = dmjson_get_value(radios, 1, "name");
 			if (!DM_STRLEN(radio_name))
 				continue;
 
 			snprintf(object, sizeof(object), "wifi.radio.%s", radio_name);
+
+			adm_entry_get_reference_param(ctx, "Device.WiFi.Radio.*.Name", radio_name, &radio[1]);
 
 			struct blob_buf bb;
 			memset(&bb, 0, sizeof(struct blob_buf));
@@ -3510,31 +3557,50 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 				frequency[1] = dmjson_get_value(array_obj, 1, "band");
 				signal_strength[1] = dmjson_get_value(array_obj, 1, "rssi");
 				noise[1] = dmjson_get_value(array_obj, 1, "noise");
+				bandwidth[1] = get_data_model_band(dmjson_get_value(array_obj, 1, "bandwidth"));
+				standard[1] = get_data_model_standard(dmjson_get_value(array_obj, 1, "standard"));
+				encryption[1] = get_data_model_mode(dmjson_get_value(array_obj, 1, "encryption"));
+				ciphers[1] = dmjson_get_value(array_obj, 1, "ciphers");
 
 				if (ctx->dm_type != BBFDM_USP) {
 					struct uci_section *dmmap_s = NULL;
 					dmuci_add_section_bbfdm("dmmap_wifi_neighboring", "result", &dmmap_s);
+					dmuci_set_value_by_section(dmmap_s, "radio", radio[1]);
 					dmuci_set_value_by_section(dmmap_s, "ssid", ssid[1]);
 					dmuci_set_value_by_section(dmmap_s, "bssid", bssid[1]);
 					dmuci_set_value_by_section(dmmap_s, "channel", channel[1]);
 					dmuci_set_value_by_section(dmmap_s, "rssi", signal_strength[1]);
 					dmuci_set_value_by_section(dmmap_s, "band", frequency[1]);
 					dmuci_set_value_by_section(dmmap_s, "noise", noise[1]);
+					dmuci_set_value_by_section(dmmap_s, "bandwidth", bandwidth[1]);
+					dmuci_set_value_by_section(dmmap_s, "standard", standard[1]);
+					dmuci_set_value_by_section(dmmap_s, "encryption", encryption[1]);
+					dmuci_set_value_by_section(dmmap_s, "ciphers", ciphers[1]);
 				}
 
+				dmasprintf(&radio[0], "Result.%d.Radio", index);
 				dmasprintf(&ssid[0], "Result.%d.SSID", index);
 				dmasprintf(&bssid[0], "Result.%d.BSSID", index);
 				dmasprintf(&channel[0], "Result.%d.Channel", index);
 				dmasprintf(&frequency[0], "Result.%d.OperatingFrequencyBand", index);
 				dmasprintf(&signal_strength[0], "Result.%d.SignalStrength", index);
 				dmasprintf(&noise[0], "Result.%d.Noise", index);
+				dmasprintf(&bandwidth[0], "Result.%d.OperatingChannelBandwidth", index);
+				dmasprintf(&standard[0], "Result.%d.OperatingStandards", index);
+				dmasprintf(&encryption[0], "Result.%d.SecurityModeEnabled", index);
+				dmasprintf(&ciphers[0], "Result.%d.EncryptionMode", index);
 
+				add_list_parameter(ctx, radio[0], radio[1], DMT_TYPE[DMT_STRING], NULL);
 				add_list_parameter(ctx, ssid[0], ssid[1], DMT_TYPE[DMT_STRING], NULL);
 				add_list_parameter(ctx, bssid[0], bssid[1], DMT_TYPE[DMT_STRING], NULL);
 				add_list_parameter(ctx, channel[0], channel[1], DMT_TYPE[DMT_UNINT], NULL);
 				add_list_parameter(ctx, frequency[0], frequency[1], DMT_TYPE[DMT_STRING], NULL);
 				add_list_parameter(ctx, signal_strength[0], signal_strength[1], DMT_TYPE[DMT_INT], NULL);
 				add_list_parameter(ctx, noise[0], noise[1], DMT_TYPE[DMT_INT], NULL);
+				add_list_parameter(ctx, bandwidth[0], bandwidth[1], DMT_TYPE[DMT_STRING], NULL);
+				add_list_parameter(ctx, standard[0], standard[1], DMT_TYPE[DMT_STRING], NULL);
+				add_list_parameter(ctx, encryption[0], encryption[1], DMT_TYPE[DMT_STRING], NULL);
+				add_list_parameter(ctx, ciphers[0], ciphers[1], DMT_TYPE[DMT_STRING], NULL);
 				index++;
 			}
 		}
@@ -3660,12 +3726,17 @@ DMLEAF tWiFiNeighboringWiFiDiagnosticParams[] = {
 /* *** Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}. *** */
 DMLEAF tWiFiNeighboringWiFiDiagnosticResultParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+{"Radio", &DMREAD, DMT_STRING, get_neighboring_wifi_diagnostics_result_radio, NULL, BBFDM_CWMP},
 {"SSID", &DMREAD, DMT_STRING, get_neighboring_wifi_diagnostics_result_ssid, NULL, BBFDM_CWMP},
 {"BSSID", &DMREAD, DMT_STRING, get_neighboring_wifi_diagnostics_result_bssid, NULL, BBFDM_CWMP},
 {"Channel", &DMREAD, DMT_UNINT, get_neighboring_wifi_diagnostics_result_channel, NULL, BBFDM_CWMP},
 {"SignalStrength", &DMREAD, DMT_INT, get_neighboring_wifi_diagnostics_result_signal_strength, NULL, BBFDM_CWMP},
 {"OperatingFrequencyBand", &DMREAD, DMT_STRING, get_neighboring_wifi_diagnostics_result_operating_frequency_band, NULL, BBFDM_CWMP},
 {"Noise", &DMREAD, DMT_INT, get_neighboring_wifi_diagnostics_result_noise, NULL, BBFDM_CWMP},
+{"OperatingChannelBandwidth", &DMREAD, DMT_STRING, get_neighboring_wifi_diagnostics_result_operating_ch_band, NULL, BBFDM_CWMP},
+{"OperatingStandards", &DMREAD, DMT_STRING, get_neighboring_wifi_diagnostics_result_op_std, NULL, BBFDM_CWMP},
+{"SecurityModeEnabled", &DMREAD, DMT_STRING, get_neighboring_wifi_diagnostics_result_sec_mode, NULL, BBFDM_CWMP},
+{"EncryptionMode", &DMREAD, DMT_STRING, get_neighboring_wifi_diagnostics_result_enc_mode, NULL, BBFDM_CWMP},
 {0}
 };
 
