@@ -289,7 +289,7 @@ static int get_HostsHost_Layer1Interface(char *refparam, struct dmctx *ctx, void
 		adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
 		if (!(*value) || (*value)[0] == 0) {
 			char *device = dmjson_get_value((json_object *)data, 1, "parent_device");
-			struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", device);
+			struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", DM_STRLEN(device) ? device : linker);
 			dmuci_get_value_by_section_string(iface_s, "device", &linker);
 			adm_entry_get_linker_param(ctx, "Device.WiFi.Radio.", linker, value);
 		}
