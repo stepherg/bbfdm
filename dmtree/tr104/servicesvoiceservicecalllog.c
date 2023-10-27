@@ -187,24 +187,31 @@ static int get_ServicesVoiceServiceCallLog_Src_PacketsSent(char *refparam, struc
 	return 0;
 }
 
+static int get_ServicesVoiceServiceCallLog_Src_ReceiveInterarrivalJitter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->receiveInterarrivalJitter) : "0";
+	return 0;
+}
+
 static int get_ServicesVoiceServiceCallLog_Src_AverageReceiveInterarrivalJitter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
-	*value = (entry) ? dmstrdup(entry->jbAvg) : "0";
+	*value = (entry) ? dmstrdup(entry->averageReceiveInterarrivalJitter) : "0";
 	return 0;
 }
 
 static int get_ServicesVoiceServiceCallLog_Src_FarEndInterarrivalJitter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
-	*value = (entry) ? dmstrdup(entry->jitter) : "0";
+	*value = (entry) ? dmstrdup(entry->farEndInterarrivalJitter) : "0";
 	return 0;
 }
 
-static int get_ServicesVoiceServiceCallLog_Src_FarEndPacketLossRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_ServicesVoiceServiceCallLog_Src_AverageFarEndInterarrivalJitter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
-	*value = (entry) ? dmstrdup(entry->uLossRate) : "0";
+	*value = (entry) ? dmstrdup(entry->averageFarEndInterarrivalJitter) : "0";
 	return 0;
 }
 
@@ -222,10 +229,17 @@ static int get_ServicesVoiceServiceCallLog_Src_AverageRoundTripDelay(char *refpa
 	return 0;
 }
 
-static int get_ServicesVoiceServiceCallLog_Src_AverageFarEndInterarrivalJitter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_ServicesVoiceServiceCallLog_Src__ReceivePacketLossRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
-	*value = (entry) ? dmstrdup(entry->averageFarEndInterarrivalJitter) : "0";
+	*value = (entry) ? dmstrdup(entry->localLossRate) : "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLog_Src_FarEndPacketLossRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->remoteLossRate) : "0";
 	return 0;
 }
 
@@ -337,11 +351,13 @@ DMLEAF tServicesVoiceServiceCallLogSessionSourceRTPParams[] = {
 {"PacketsLost", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Src_PacketsLost, NULL, BBFDM_BOTH},
 {"PacketsReceived", &DMREAD, DMT_UNLONG, get_ServicesVoiceServiceCallLog_Src_PacketsReceived, NULL, BBFDM_BOTH},
 {"PacketsSent", &DMREAD, DMT_UNLONG, get_ServicesVoiceServiceCallLog_Src_PacketsSent, NULL, BBFDM_BOTH},
+{"ReceiveInterarrivalJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_ReceiveInterarrivalJitter, NULL, BBFDM_BOTH},
 {"AverageReceiveInterarrivalJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_AverageReceiveInterarrivalJitter, NULL, BBFDM_BOTH},
 {"FarEndInterarrivalJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_FarEndInterarrivalJitter, NULL, BBFDM_BOTH},
+{"AverageFarEndInterarrivalJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_AverageFarEndInterarrivalJitter, NULL, BBFDM_BOTH},
 {"FarEndPacketLossRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Src_FarEndPacketLossRate, NULL, BBFDM_BOTH},
 {"MaxJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_MaxJitter, NULL, BBFDM_BOTH},
 {"AverageRoundTripDelay", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_AverageRoundTripDelay, NULL, BBFDM_BOTH},
-{"AverageFarEndInterarrivalJitter", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_AverageFarEndInterarrivalJitter, NULL, BBFDM_BOTH},
+{"ReceivePacketLossRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Src__ReceivePacketLossRate, NULL, BBFDM_BOTH},
 {0}
 };

@@ -54,7 +54,8 @@ struct call_log_entry {
 	char localJbAbsMax[20];
 	char remoteJbAbsMax[20];
 	char jbAvg[20];
-	char uLossRate[20];
+	char localLossRate[20];
+	char remoteLossRate[20];
 	char discarded[20];
 	char lost[20];
 	char rxpkts[20];
@@ -62,7 +63,10 @@ struct call_log_entry {
 	char jitter[20];
 	char maxJitter[20];
 	char averageRoundTripDelay[20];
+	char farEndInterarrivalJitter[20];
 	char averageFarEndInterarrivalJitter[20];
+	char receiveInterarrivalJitter[20];
+	char averageReceiveInterarrivalJitter[20];
 };
 
 #define MAX_SUPPORTED_CODECS 8

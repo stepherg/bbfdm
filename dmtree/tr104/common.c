@@ -472,7 +472,14 @@ int init_call_log(void)
 				token += 1;
 				end = DM_LSTRSTR(token, ",");
 				CHECK_RESULT(end);
-				DM_STRNCPY(cdr.uLossRate, token, end - token + 1);
+				DM_STRNCPY(cdr.localLossRate, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.remoteLossRate, token, end - token + 1);
 
 				token = DM_LSTRSTR(token, ",");
 				CHECK_RESULT(token);
@@ -528,7 +535,28 @@ int init_call_log(void)
 				token += 1;
 				end = DM_LSTRSTR(token, ",");
 				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.farEndInterarrivalJitter, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
 				DM_STRNCPY(cdr.averageFarEndInterarrivalJitter, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.receiveInterarrivalJitter, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.averageReceiveInterarrivalJitter, token, end - token + 1);
 			}
 			// Skip invalid call logs
 			if (cdr.calling_num[0] == '\0' || cdr.called_num[0] == '\0' ||
