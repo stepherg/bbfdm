@@ -2699,6 +2699,7 @@ static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 
 			if (((struct wifi_ssid_args *)data)->config_s)
 				dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->config_s, "device", reference.value);
+
 			return 0;
 	}
 	return 0;
@@ -2745,9 +2746,9 @@ static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 			if (DM_STRLEN(reference.value)) {
 				char *device = NULL, *ssid = NULL, *enabled = NULL;
 
-				ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", reference.value);
+				ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", section_name((((struct wifi_acp_args *)data)->sections)->config_section));
 				if (ss == NULL) {
-					ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ssid_instance", reference.value);
+					ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "name", reference.value);
 				}
 
 				dmuci_set_value_by_section(ss, "ap_section_name", section_name((((struct wifi_acp_args *)data)->sections)->config_section));
