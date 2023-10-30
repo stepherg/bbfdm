@@ -11,7 +11,7 @@
 #ifndef _FIREWALL_H
 #define _FIREWALL_H
 
-#include "libbbfdm-api/dmcommon.h"
+#include "dmcommon.h"
 
 extern DMOBJ tFirewallObj[];
 extern DMLEAF tFirewallParams[];
@@ -21,7 +21,5 @@ extern DMOBJ tFirewallChainObj[];
 extern DMLEAF tFirewallChainRuleParams[];
 extern DMLEAF tFirewallDMZParams[];
 extern DMLEAF tFirewallServiceParams[];
-
-void firewall__create_zone_section(char *s_name);
 
 #endif

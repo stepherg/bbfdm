@@ -9,7 +9,7 @@
  *
  */
 
-#include "dmdiagnostics.h"
+#include "dmcommon.h"
 #include "iplayercap.h"
 
 #define IPLAYER_CAP_DIAGNOSTIC_PATH "/usr/share/bbfdm/iplayercap"

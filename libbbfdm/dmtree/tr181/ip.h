@@ -13,7 +13,7 @@
 #ifndef __IP_H
 #define __IP_H
 
-#include "libbbfdm-api/dmcommon.h"
+#include "dmcommon.h"
 
 extern DMOBJ tIPObj[];
 extern DMLEAF tIPParams[];
@@ -23,8 +23,6 @@ extern DMLEAF tIPInterfaceIPv4AddressParams[];
 extern DMLEAF tIPInterfaceIPv6AddressParams[];
 extern DMLEAF tIPInterfaceIPv6PrefixParams[];
 extern DMLEAF tIPInterfaceStatsParams[];
-
-bool ip___is_ipinterface_exists(const char *sec_name, const char *device);
 
 #endif //__IP_H
 

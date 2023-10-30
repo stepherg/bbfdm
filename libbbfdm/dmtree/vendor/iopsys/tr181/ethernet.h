@@ -12,7 +12,7 @@
 #ifndef __IOPSYS_ETHERNET_H
 #define __IOPSYS_ETHERNET_H
 
-#include "libbbfdm-api/dmcommon.h"
+#include "dmcommon.h"
 
 extern DMOBJ tIOPSYS_EthernetObj[];
 extern DMLEAF tEthernetMACVLANParams[];

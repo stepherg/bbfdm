@@ -56,10 +56,11 @@ static int addObjEthernetMACVLAN(char *refparam, struct dmctx *ctx, void *data, 
 
 static int delObjEthernetMACVLAN(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *stmp = NULL;
-
 	switch (del_action) {
 	case DEL_INST:
+		// Update Ethernet MAC VLAN Top Layers
+		ethernet___Update_MAC_VLAN_Top_Layers(refparam, "");
+
 		// Remove device section
 		dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
 
@@ -67,16 +68,6 @@ static int delObjEthernetMACVLAN(char *refparam, struct dmctx *ctx, void *data, 
 		dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 		break;
 	case DEL_ALL:
-		uci_foreach_option_eq_safe("network", "device", "type", "macvlan", stmp, s) {
-
-			// Remove dmmap section
-			struct uci_section *dmmap_section = NULL;
-			get_dmmap_section_of_config_section("dmmap_network", "device", section_name(s), &dmmap_section);
-			dmuci_delete_by_section(dmmap_section, NULL, NULL);
-
-			// Remove device section
-			dmuci_delete_by_section(s, NULL, NULL);
-		}
 		break;
 	}
 	return 0;
@@ -167,6 +158,7 @@ static int set_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 			"Device.Ethernet.Link.",
 			NULL};
 	struct dm_reference reference = {0};
+	char name[32] = {0};
 
 	bbf_get_reference_args(value, &reference);
 
@@ -183,24 +175,20 @@ static int set_EthernetMACVLAN_LowerLayers(char *refparam, struct dmctx *ctx, vo
 			// Store LowerLayers value under dmmap section
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", reference.path);
 
+			// Update ifname option
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", reference.value);
+
 			if (DM_STRLEN(reference.value)) {
-				char name[16] = {0};
+				char *dev_name = ethernet___get_ethernet_interface_name(reference.value);
 
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", reference.value);
-
-				if (DM_STRNCMP(reference.path, allowed_objects[0], strlen(allowed_objects[0])) == 0) {
-					char *vid = DM_STRRCHR(reference.value, '.');
-					if (vid) *vid = 0;
-				}
-
-				snprintf(name, sizeof(name), "%s_%s", reference.value, instance);
-
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", name);
-			} else {
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", "");
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", "");
-
+				snprintf(name, sizeof(name), "%s_%s", dev_name, instance);
 			}
+
+			// Update name option
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", name);
+
+			// Update Ethernet MAC VLAN Top Layers
+			ethernet___Update_MAC_VLAN_Top_Layers(refparam, name);
 			break;
 	}
 	return 0;

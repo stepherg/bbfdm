@@ -184,7 +184,7 @@ static int set_atm_destination_address(char *refparam, struct dmctx *ctx, void *
 /*#Device.ATM.Link.{i}.Name!UCI:dsl/atm-device,@i-1/name*/
 static int get_atm_link_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct atm_args *)data)->sections)->config_section, "name", value);
+	*value = dmstrdup(((struct atm_args *)data)->device);
 	return 0;
 }
 

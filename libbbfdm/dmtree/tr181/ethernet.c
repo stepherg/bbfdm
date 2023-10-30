@@ -44,25 +44,6 @@ static inline int init_eth_rmon(struct eth_rmon_args *args, struct dmmap_dup *s,
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
-struct uci_section *ethernet___get_ethernet_interface_section(const char *device_name)
-{
-	struct uci_section *s = NULL;
-
-	uci_foreach_sections("network", "device", s) {
-		char *name = NULL;
-
-		if (!dmuci_is_option_value_empty(s, "type"))
-			continue;
-
-		dmuci_get_value_by_section_string(s, "name", &name);
-
-		if (DM_STRCMP(name, device_name) == 0)
-			return s;
-	}
-
-	return NULL;
-}
-
 static bool check_vlan_termination_section(const char *name)
 {
 	struct uci_section *s = NULL;
@@ -109,16 +90,6 @@ static struct uci_section *is_ethernet_link_exist(char *device)
 	return NULL;
 }
 
-static bool name_exists_in_devices(char *name)
-{
-	struct uci_section *s = NULL;
-
-	uci_foreach_option_eq("network", "device", "name", name, s) {
-		return true;
-	}
-	return false;
-}
-
 static bool is_mac_vlan_interface(char *device_name)
 {
 	struct uci_section *s = NULL;
@@ -144,16 +115,16 @@ static void add_ethernet_link_section(char *device, char *macaddr)
 
 	dmuci_set_value_by_section(dmmap_s, "mac", macaddr);
 	dmuci_set_value_by_section(dmmap_s, "device", device);
-	dmuci_set_value_by_section(dmmap_s, "is_eth", (!DM_LSTRNCMP(device, "atm", 3) || !DM_LSTRNCMP(device, "ptm", 3)) ? "0" : "1");
 }
 
 static void dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct uci_section *s = NULL;
+	struct uci_section *s = NULL, *dmmap_s = NULL;
+	char *ip_instance = NULL;
 	char *proto = NULL;
 	char *macaddr = NULL;
 	char *device = NULL;
-	char dev_name[32] = {0};
+	char *dev_name = NULL;
 
 	uci_foreach_sections("network", "interface", s) {
 
@@ -166,9 +137,15 @@ static void dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_no
 		if (strcmp(section_name(s), "loopback") == 0)
 			continue;
 
-		// Skip this interface section if its device starts with prfix 'link_'
+		// Skip this interface section if there is no IP.Interface instance map on it
+		dmmap_s = get_dup_section_in_dmmap("dmmap_network", "interface", section_name(s));
+		dmuci_get_value_by_section_string(dmmap_s, "ip_int_instance", &ip_instance);
+		if (!dmmap_s || DM_STRLEN(ip_instance) == 0)
+			continue;
+
+		// Skip this interface section if its device option has the section_name value
 		dmuci_get_value_by_section_string(s, "device", &device);
-		if (DM_STRNCMP(device, "link_", 5) == 0 || DM_STRNCMP(device, "iface", 5) == 0)
+		if (strcmp(section_name(s), device) == 0)
 			continue;
 
 		// Skip this interface section if its device is empty
@@ -178,28 +155,7 @@ static void dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_no
 
 		get_net_device_sysfs(device, "address", &macaddr);
 
-		DM_STRNCPY(dev_name, device, sizeof(dev_name));
-
-		if (!ethernet___get_ethernet_interface_section(dev_name)) {
-			struct uci_section *dev_s = NULL;
-
-			dev_s = get_dup_section_in_config_opt("network", "device", "name", dev_name);
-
-			char *has_vid = DM_STRRCHR(dev_name, '.');
-			if (has_vid)
-				*has_vid = '\0';
-
-			if (dev_s) { // Verify if the device has dual tags
-				char *type = NULL;
-
-				dmuci_get_value_by_section_string(dev_s, "type", &type);
-				if (DM_STRCMP(type, "8021ad") == 0) {
-					char *has_vid = DM_STRRCHR(dev_name, '.');
-					if (has_vid)
-						*has_vid = '\0';
-				}
-			}
-		}
+		dev_name = ethernet___get_ethernet_interface_name(device);
 
 		if (is_mac_vlan_interface(dev_name)) {
 			char *p = DM_STRRCHR(dev_name, '_');
@@ -334,59 +290,22 @@ static int addObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, cha
 
 	/* Add link section in dmmap_ethernet file */
 	dmuci_add_section_bbfdm("dmmap_ethernet", "link", &dmmap_link);
-	dmuci_set_value_by_section(dmmap_link, "is_eth", "1");
 	dmuci_set_value_by_section(dmmap_link, "link_instance", *instance);
 	return 0;
 }
 
-static void update_all_interfaces(char *old_device)
-{
-	struct uci_section *s = NULL;
-	char buf[32] = {0};
-
-	if (DM_STRLEN(old_device) == 0)
-		return;
-
-	snprintf(buf, sizeof(buf), "link_%s", old_device);
-	replace_special_char(buf, '_');
-
-	uci_foreach_option_eq("network", "interface", "device", old_device, s) {
-		dmuci_set_value_by_section(s, "device", buf);
-	}
-}
-
 static int delObjEthernetLink(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *stmp = NULL;
-	char *device_iface = NULL;
-	char *device = NULL;
-
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
-			if (DM_STRLEN(device)) {
-				uci_foreach_option_cont("network", "interface", "device", device, s) {
-					dmuci_get_value_by_section_string(s, "device", &device_iface);
-					update_all_interfaces(device_iface);
-				}
-			}
+			// Update Ethernet Link Top Layers
+			ethernet___Update_Link_Top_Layers(refparam, "");
 
 			// Remove link section
 			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
 			return 0;
 		case DEL_ALL:
-			uci_path_foreach_sections_safe(bbfdm, "dmmap_ethernet", "link", stmp, s) {
-				dmuci_get_value_by_section_string(s, "device", &device);
-				if (DM_STRLEN(device)) {
-					uci_foreach_option_cont("network", "interface", "device", device, s) {
-						dmuci_get_value_by_section_string(s, "device", &device_iface);
-						update_all_interfaces(device_iface);
-					}
-				}
-
-				// Remove link section
-				dmuci_delete_by_section(s, NULL, NULL);
-			}
+			break;
 	}
 	return 0;
 }
@@ -412,11 +331,11 @@ static int addObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 
 static int delObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s_dev = NULL, *sdevtmp = NULL;
-	char *name, *type;
-
 	switch (del_action) {
 	case DEL_INST:
+		// Update Ethernet VLAN Termination Top Layers
+		ethernet___Update_VLAN_Termination_Top_Layers(refparam, "");
+
 		// Remove device section
 		dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
 
@@ -424,26 +343,6 @@ static int delObjEthernetVLANTermination(char *refparam, struct dmctx *ctx, void
 		dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
 		break;
 	case DEL_ALL:
-		uci_foreach_sections_safe("network", "device", sdevtmp, s_dev) {
-			struct uci_section *dmmap_section = NULL;
-
-			get_dmmap_section_of_config_section("dmmap_network", "device", section_name(s_dev), &dmmap_section);
-
-			dmuci_get_value_by_section_string(s_dev, "type", &type);
-			dmuci_get_value_by_section_string(s_dev, "name", &name);
-			if (DM_STRLEN(type) == 0 ||
-				DM_LSTRCMP(type, "bridge") == 0 ||
-				DM_LSTRCMP(type, "macvlan") == 0 ||
-				(*name != 0 && !check_vlan_termination_section(name)) ||
-				(*name == 0 && strncmp(section_name(s_dev), "br_", 3) == 0))
-				continue;
-
-			// Remove device section in dmmap_network file
-			dmuci_delete_by_section(dmmap_section, NULL, NULL);
-
-			// Remove device section
-			dmuci_delete_by_section(s_dev, NULL, NULL);
-		}
 		break;
 	}
 	return 0;
@@ -989,17 +888,17 @@ static int set_EthernetLink_LowerLayers(char *refparam, struct dmctx *ctx, void 
 			// Store LowerLayers value under dmmap section
 			dmuci_set_value_by_section((struct uci_section *)data, "LowerLayers", reference.path);
 
-			dmuci_set_value_by_section((struct uci_section *)data, "is_eth", !DM_STRNCMP(reference.path, "Device.Ethernet.", strlen("Device.Ethernet.")) ? "1" : "0");
+			// Update device option
+			dmuci_set_value_by_section((struct uci_section *)data, "device", reference.value);
 
 			if (match(reference.path, "Device.Bridging.Bridge.*.Port.", 0, NULL)) {
-				dmuci_set_value_by_section((struct uci_section *)data, "is_eth", "1");
-
 				// Remove unused Interface section created by Bridge Object if it exists
 				struct uci_section *s = get_dup_section_in_config_opt("network", "interface", "device", reference.value);
 				dmuci_delete_by_section(s, NULL, NULL);
 			}
 
-			dmuci_set_value_by_section((struct uci_section *)data, "device", reference.value);
+			// Update Ethernet Link Top Layers
+			ethernet___Update_Link_Top_Layers(refparam, reference.value);
 			break;
 	}
 	return 0;
@@ -1014,14 +913,13 @@ static int get_EthernetLink_MACAddress(char *refparam, struct dmctx *ctx, void *
 static int get_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *port_s = NULL;
-	char *device = NULL, *is_eth = NULL;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "is_eth", &is_eth);
-	if (!is_eth || *is_eth == '0')
-		goto end;
+	char *device = NULL;
 
 	dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
 	if (!DM_STRLEN(device))
+		goto end;
+
+	if (!DM_LSTRNCMP(device, "atm", 3) || !DM_LSTRNCMP(device, "ptm", 3))
 		goto end;
 
 	char *is_bridge = DM_LSTRSTR(device, "br-");
@@ -1079,7 +977,7 @@ end:
 static int set_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *port_s = NULL;
-	char *device = NULL, *is_eth = NULL;
+	char *device = NULL;
 	bool b;
 
 	switch (action)	{
@@ -1090,12 +988,11 @@ static int set_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void 
 		case VALUESET:
 			string_to_bool(value, &b);
 
-			dmuci_get_value_by_section_string((struct uci_section *)data, "is_eth", &is_eth);
-			if (!is_eth || *is_eth == '0')
-				break;
-
 			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
 			if (!DM_STRLEN(device))
+				break;
+
+			if (!DM_LSTRNCMP(device, "atm", 3) || !DM_LSTRNCMP(device, "ptm", 3))
 				break;
 
 			char *is_bridge = DM_LSTRSTR(device, "br-");
@@ -1308,6 +1205,7 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 			"Device.Ethernet.Link.",
 			NULL};
 	struct dm_reference reference = {0};
+	char name[32] = {0};
 
 	bbf_get_reference_args(value, &reference);
 
@@ -1324,82 +1222,20 @@ static int set_EthernetVLANTermination_LowerLayers(char *refparam, struct dmctx 
 			// Store LowerLayers value under dmmap section
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "LowerLayers", reference.path);
 
-			if (DM_STRLEN(reference.value) == 0) {
-				// Set ifname and name options of device section to empty value
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", "");
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", "");
-			}
-
-			if (DM_STRNCMP(reference.path, "Device.Ethernet.Link.", DM_STRLEN("Device.Ethernet.Link.")) == 0) {
-				char new_name[16] = {0};
-				char *old_name = NULL;
-				char *vid = NULL;
-
-				// Get name and vid options from the current device section
-				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &old_name);
-				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid", &vid);
-
-				snprintf(new_name, sizeof(new_name), "%s%s%s", reference.value, DM_STRLEN(vid) ? "." : "", DM_STRLEN(vid) ? vid : "");
-
-				if (name_exists_in_devices(new_name))
-					return -1;
-
-				if (DM_STRLEN(old_name)) {
-					{ // Check if there is a X_IOPSYS_EU_MACVLAN linked to this VLANTermination
-						struct uci_section *macvlan_s = NULL;
-						char *ifname = NULL;
-
-						uci_foreach_option_eq("network", "device", "type", "macvlan", macvlan_s) {
-							dmuci_set_value_by_section(macvlan_s, "ifname", ifname);
-							if (DM_STRLEN(ifname) == 0 || DM_STRCMP(ifname, old_name) != 0)
-								continue;
-
-							dmuci_set_value_by_section(macvlan_s, "ifname", new_name);
-							dmuci_set_value_by_section(macvlan_s, "name", new_name);
-						}
-					}
-
-					{ // Check if there is a PPP.Interface linked to this VLANTermination
-						struct uci_section *ppp_s = get_dup_section_in_dmmap_opt("dmmap_ppp", "interface", "device", old_name);
-						if (ppp_s) {
-							char *iface_name = NULL;
-
-							dmuci_get_value_by_section_string(ppp_s, "iface_name", &iface_name);
-							if (DM_STRLEN(iface_name)) {
-								struct uci_section *s = get_origin_section_from_config("network", "interface", iface_name);
-								dmuci_set_value_by_section(s, "device", new_name);
-							}
-
-							dmuci_set_value_by_section(ppp_s, "device", new_name);
-						}
-					}
-
-					{ // Check if there is an IP.Interface linked to this VLANTermination
-						struct uci_section *iface_s = get_dup_section_in_config_opt("network", "interface", "device", old_name);
-						dmuci_set_value_by_section(iface_s, "device", new_name);
-					}
-				}
-
-				// Set ifname and name options of device section
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", reference.value);
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
-			}
-
-			if (DM_STRNCMP(reference.path, "Device.Ethernet.VLANTermination.", DM_STRLEN("Device.Ethernet.VLANTermination.")) == 0) {
-				char new_name[32] = {0};
+			if (DM_STRLEN(reference.value)) {
 				char *vid = NULL;
 
 				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid", &vid);
 
-				snprintf(new_name, sizeof(new_name), "%s%s%s", reference.value, DM_STRLEN(vid) ? "." : "", DM_STRLEN(vid) ? vid : "");
-
-				if (name_exists_in_devices(new_name))
-					return -1;
-
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", reference.value);
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
+				snprintf(name, sizeof(name), "%s%s%s", reference.value, DM_STRLEN(vid) ? "." : "", DM_STRLEN(vid) ? vid : "");
 			}
 
+			// Update ifname and name options
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", reference.value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", name);
+
+			// Update Ethernet VLAN Termination Top Layers
+			ethernet___Update_VLAN_Termination_Top_Layers(refparam, name);
 			break;
 	}
 	return 0;
@@ -1415,7 +1251,7 @@ static int get_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *ifname = NULL;
-	char *vid = NULL;
+	char name[32] = {0};
 
 	switch (action) {
 		case VALUECHECK:
@@ -1423,57 +1259,15 @@ static int set_EthernetVLANTermination_VLANID(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
-			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid", &vid);
-
-			if (DM_STRLEN(ifname) != 0 && DM_STRLEN(vid) != 0) {
-				struct uci_section *uci_s = NULL;
-				char old_name[32] = {0};
-				char new_name[32] = {0};
-				char *name = NULL;
-
-				snprintf(old_name, sizeof(old_name), "%s.%s", ifname, vid);
-				snprintf(new_name, sizeof(new_name), "%s.%s", ifname, value);
-
-				if (name_exists_in_devices(new_name))
-					return 0;
-
-				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &name);
-
-				uci_foreach_option_eq("network", "device", "type", "8021ad", uci_s) {
-					char *curr_ifname = NULL;
-
-					dmuci_get_value_by_section_string(uci_s, "ifname", &curr_ifname);
-
-					if (DM_STRCMP(curr_ifname, name) == 0) {
-						char __new_name[32] = {0};
-						char *curr_name = NULL;
-						char *curr_vid = NULL;
-
-						dmuci_get_value_by_section_string(uci_s, "name", &curr_name);
-						dmuci_get_value_by_section_string(uci_s, "vid", &curr_vid);
-
-						snprintf(__new_name, sizeof(__new_name), "%s.%s.%s", ifname, value, curr_vid);
-
-						dmuci_set_value_by_section(uci_s, "ifname", new_name);
-						dmuci_set_value_by_section(uci_s, "name", __new_name);
-
-						struct uci_section *iface_s = get_dup_section_in_config_opt("network", "interface", "device", curr_name);
-						dmuci_set_value_by_section(iface_s, "device", __new_name);
-					}
-				}
-
-				// set device option of the corresponding interface section
-				uci_s = get_dup_section_in_config_opt("network", "interface", "device", old_name);
-				dmuci_set_value_by_section(uci_s, "device", new_name);
-
-
-				// set name option of the device section
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", new_name);
-			}
-
-			// set vid option of the device section
+			// Update vid option
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "vid", value);
+
+			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &ifname);
+
+			snprintf(name, sizeof(name), "%s%s%s", DM_STRLEN(ifname) ? ifname : "", DM_STRLEN(ifname) ? "." : "", DM_STRLEN(ifname) ? value : "");
+
+			// Update Ethernet VLAN Termination Top Layers
+			ethernet___Update_VLAN_Termination_Top_Layers(refparam, name);
 			return 0;
 	}
 	return 0;

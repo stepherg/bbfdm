@@ -380,7 +380,7 @@ static int browseRouterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 		if (strcmp(section_name(s), "loopback") == 0 ||
 			*proto == '\0' ||
 			DM_STRCHR(device, '@') ||
-			ip___is_ipinterface_exists(section_name(s), device))
+			ip___is_ip_interface_instance_exists(section_name(s), device))
 			continue;
 
 		if (DM_STRLEN(idx))

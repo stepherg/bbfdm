@@ -157,7 +157,7 @@ static int set_ptm_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 /*#Device.PTM.Link.{i}.Name!UCI:dsl/ptm-device,@i-1/name*/
 static int get_ptm_link_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct ptm_args *)data)->sections)->config_section, "name", value);
+	*value = dmstrdup(((struct ptm_args *)data)->device);
 	return 0;
 }
 

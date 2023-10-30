@@ -10,7 +10,7 @@
  *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
-#include "dmdiagnostics.h"
+#include "dmcommon.h"
 #include "deviceinfo.h"
 #include "sys/statvfs.h"
 

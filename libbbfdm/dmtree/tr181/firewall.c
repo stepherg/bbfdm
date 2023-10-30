@@ -24,27 +24,6 @@ struct rule_sec
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
-void firewall__create_zone_section(char *s_name)
-{
-	struct uci_section *s = NULL;
-	char *input = NULL;
-	char *output = NULL;
-	char *forward = NULL;
-
-	dmuci_get_option_value_string("firewall", "@defaults[0]", "input", &input);
-	dmuci_get_option_value_string("firewall", "@defaults[0]", "output", &output);
-	dmuci_get_option_value_string("firewall", "@defaults[0]", "forward", &forward);
-
-	dmuci_add_section("firewall", "zone", &s);
-	dmuci_rename_section_by_section(s, s_name);
-	dmuci_set_value_by_section(s, "name", s_name);
-	dmuci_set_value_by_section(s, "input", input);
-	dmuci_set_value_by_section(s, "output", output);
-	dmuci_set_value_by_section(s, "forward", forward);
-
-	dmuci_add_list_value_by_section(s, "network", s_name);
-}
-
 static bool firewall_zone_exists(char *s_name)
 {
 	struct uci_section *s = NULL;

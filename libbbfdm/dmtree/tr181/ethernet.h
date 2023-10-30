@@ -13,7 +13,7 @@
 #ifndef __ETHERNET_H
 #define __ETHERNET_H
 
-#include "libbbfdm-api/dmcommon.h"
+#include "dmcommon.h"
 
 extern DMOBJ tEthernetObj[];
 extern DMLEAF tEthernetParams[];
@@ -27,7 +27,5 @@ extern DMOBJ tEthernetVLANTerminationObj[];
 extern DMLEAF tEthernetVLANTerminationParams[];
 extern DMLEAF tEthernetVLANTerminationStatsParams[];
 extern DMLEAF tEthernetRMONStatsParams[];
-
-struct uci_section *ethernet___get_ethernet_interface_section(const char *device_name);
 
 #endif //__ETHERNET_H

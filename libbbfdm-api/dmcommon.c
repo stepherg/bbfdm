@@ -442,7 +442,7 @@ struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* secti
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section_type, "section_name", sect_name, s) {
 		dmuci_get_value_by_section_string(s, opt_name, &v);
-		if (opt_value && DM_STRCMP(v, opt_value) == 0)
+		if (DM_STRCMP(v, opt_value) == 0)
 			return s;
 	}
 	return NULL;
@@ -456,7 +456,7 @@ struct uci_section *get_section_in_dmmap_with_options_eq(char *dmmap_package, ch
 		char *value = NULL;
 
 		dmuci_get_value_by_section_string(s, opt2_name, &value);
-		if (opt2_value && value && DM_STRCMP(value, opt2_value) == 0)
+		if (DM_STRCMP(value, opt2_value) == 0)
 			return s;
 	}
 

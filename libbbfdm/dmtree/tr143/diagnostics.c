@@ -9,7 +9,7 @@
  *
  */
 
-#include "dmdiagnostics.h"
+#include "dmcommon.h"
 #include "diagnostics.h"
 #ifdef BBF_TR471
 #include "iplayercap.h"

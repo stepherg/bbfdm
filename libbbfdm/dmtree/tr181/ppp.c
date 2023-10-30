@@ -20,43 +20,6 @@ struct ppp_args
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
-void ppp___update_sections(struct uci_section *s_from, struct uci_section *s_to)
-{
-	char *proto = NULL;
-	char *device = NULL;
-	char *username = NULL;
-	char *password = NULL;
-	char *pppd_options = NULL;
-	char *service = NULL;
-	char *ac = NULL;
-
-	dmuci_get_value_by_section_string(s_from, "proto", &proto);
-	dmuci_get_value_by_section_string(s_from, "device", &device);
-	dmuci_get_value_by_section_string(s_from, "username", &username);
-	dmuci_get_value_by_section_string(s_from, "password", &password);
-	dmuci_get_value_by_section_string(s_from, "pppd_options", &pppd_options);
-	dmuci_get_value_by_section_string(s_from, "service", &service);
-	dmuci_get_value_by_section_string(s_from, "ac", &ac);
-
-	dmuci_set_value_by_section(s_to, "proto", proto);
-	dmuci_set_value_by_section(s_to, "device", device);
-	dmuci_set_value_by_section(s_to, "username", username);
-	dmuci_set_value_by_section(s_to, "password", password);
-	dmuci_set_value_by_section(s_to, "pppd_options", pppd_options);
-	dmuci_set_value_by_section(s_to, "service", service);
-	dmuci_set_value_by_section(s_to, "ac", ac);
-}
-
-void ppp___reset_options(struct uci_section *ppp_s)
-{
-	dmuci_set_value_by_section(ppp_s, "device", "");
-	dmuci_set_value_by_section(ppp_s, "username", "");
-	dmuci_set_value_by_section(ppp_s, "password", "");
-	dmuci_set_value_by_section(ppp_s, "pppd_options", "");
-	dmuci_set_value_by_section(ppp_s, "service", "");
-	dmuci_set_value_by_section(ppp_s, "ac", "");
-}
-
 static bool is_ppp_section_exist(char *sec_name)
 {
 	struct uci_section *s = NULL;
@@ -167,33 +130,20 @@ static int add_ppp_interface(char *refparam, struct dmctx *ctx, void *data, char
 
 static int delete_ppp_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *stmp = NULL;
-
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_delete_by_section(((struct ppp_args *)data)->dmmap_s, NULL, NULL);
-
 			if (((struct ppp_args *)data)->iface_s) {
 				dmuci_set_value_by_section(((struct ppp_args *)data)->iface_s, "proto", "none");
 				ppp___reset_options(((struct ppp_args *)data)->iface_s);
 			}
+
+			// Update PPP Interface Top Layers
+			ppp___Update_PPP_Interface_Top_Layers(refparam, "");
+
+			// Remove dmmap section
+			dmuci_delete_by_section(((struct ppp_args *)data)->dmmap_s, NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_path_foreach_sections_safe(bbfdm, "dmmap_ppp", "interface", stmp, s) {
-				struct uci_section *iface_s = NULL;
-				char *iface_name = NULL;
-
-				dmuci_get_value_by_section_string(s, "iface_name", &iface_name);
-				if (DM_STRLEN(iface_name))
-					get_config_section_of_dmmap_section("network", "interface", iface_name, &iface_s);
-
-				dmuci_delete_by_section(s, NULL, NULL);
-
-				if (iface_s) {
-					dmuci_set_value_by_section(iface_s, "proto", "none");
-					ppp___reset_options(iface_s);
-				}
-			}
 			break;
 	}
 	return 0;
@@ -1035,6 +985,7 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 			"Device.Ethernet.Link.",
 			NULL};
 	struct dm_reference reference = {0};
+	char proto[8] = {0};
 
 	bbf_get_reference_args(value, &reference);
 
@@ -1051,25 +1002,18 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 			// Store LowerLayers value under dmmap_ppp section
 			dmuci_set_value_by_section(ppp->dmmap_s, "LowerLayers", reference.path);
 
+			snprintf(proto, sizeof(proto), "ppp%s", (DM_STRLEN(reference.value))  ? (!DM_LSTRNCMP(reference.value, "atm", 3) || !DM_LSTRNCMP(reference.value, "ptm", 3)) ? "oa" : "oe" : "");
+
 			// Update proto option
-			dmuci_set_value_by_section(ppp->dmmap_s, "proto", "pppoe");
-			if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "proto", "pppoe");
-
-			if (DM_STRNCMP(reference.path, "Device.Ethernet.Link.", DM_STRLEN("Device.Ethernet.Link.")) == 0) {
-				struct uci_section *eth_link_s = NULL;
-				char *is_eth = NULL;
-
-				get_dmmap_section_of_config_section_eq("dmmap_ethernet", "link", "device", reference.value, &eth_link_s);
-				if (eth_link_s) dmuci_get_value_by_section_string(eth_link_s, "is_eth", &is_eth);
-
-				// Update proto option
-				dmuci_set_value_by_section(ppp->dmmap_s, "proto", !DM_LSTRCMP(is_eth, "1") ? "pppoe" : "pppoa");
-				if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "proto", !DM_LSTRCMP(is_eth, "1") ? "pppoe" : "pppoa");
-			}
+			dmuci_set_value_by_section(ppp->dmmap_s, "proto", proto);
+			if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "proto", proto);
 
 			// Update device option
 			dmuci_set_value_by_section(ppp->dmmap_s, "device", reference.value);
-			if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "device", reference.value);
+			if (ppp->iface_s) dmuci_set_value_by_section(ppp->iface_s, "device", DM_STRLEN(reference.value) ? reference.value : section_name(ppp->iface_s));
+
+			// Update PPP Interface Top Layers
+			ppp___Update_PPP_Interface_Top_Layers(refparam, reference.value);
 			return 0;
 	}
 	return 0;

@@ -313,7 +313,7 @@ int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *referenc
 
 		if (match(reference->path, *objects, 0, NULL)) {
 
-			if (DM_STRLEN(reference->value))
+			if (adm_entry_object_exists(ctx, reference->path))
 				return 0;
 		}
 	}

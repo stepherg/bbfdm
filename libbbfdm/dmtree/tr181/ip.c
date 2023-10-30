@@ -10,8 +10,6 @@
  *
  */
 
-#include "ppp.h"
-#include "firewall.h"
 #include "ip.h"
 #if defined(BBF_TR143) || defined(BBF_TR471)
 #include "diagnostics.h"
@@ -40,37 +38,6 @@ static int init_interface_ip_args(struct intf_ip_args *args, struct uci_section 
 /*************************************************************
 * COMMON Functions
 **************************************************************/
-bool ip___is_ipinterface_exists(const char *sec_name, const char *device)
-{
-	struct uci_section *s = NULL;
-	char *curr_dev = NULL;
-
-	if (DM_STRLEN(sec_name) == 0 ||
-		DM_STRLEN(device) == 0)
-		return false;
-
-	uci_foreach_sections("network", "interface", s) {
-
-		dmuci_get_value_by_section_string(s, "device", &curr_dev);
-		if (DM_STRLEN(curr_dev) == 0 ||
-			DM_STRCMP(curr_dev, device) != 0)
-			continue;
-
-		struct uci_section *dmmap_s = NULL;
-		char *ip_inst = NULL;
-
-		if ((dmmap_s = get_dup_section_in_dmmap("dmmap_network", "interface", section_name(s))) != NULL) {
-			dmuci_get_value_by_section_string(dmmap_s, "ip_int_instance", &ip_inst);
-
-			if (strcmp(sec_name, section_name(s)) != 0 &&
-				DM_STRLEN(ip_inst) != 0)
-				return true;
-		}
-	}
-
-	return false;
-}
-
 static int get_sysctl_disable_ipv6_per_device(const char *device, char **value)
 {
 	char file[256];
@@ -136,18 +103,6 @@ static int set_sysctl_disable_ipv6_per_device(const char *device, bool value)
 	fclose(fp);
 
 	return 0;
-}
-
-static void update_child_interfaces(char *device, char *option_name, char *option_value)
-{
-	struct uci_section *s = NULL;
-
-	if (DM_STRLEN(device) == 0)
-		return;
-
-	uci_foreach_option_eq("network", "interface", "device", device, s) {
-		dmuci_set_value_by_section(s, option_name, option_value);
-	}
 }
 
 static int get_ip_iface_sysfs(const struct uci_section *data, const char *name, char **value)
@@ -600,7 +555,7 @@ static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 		if (strcmp(section_name(p->config_section), "loopback") == 0 ||
 			*proto == '\0' ||
 			DM_STRCHR(device, '@') ||
-			ip___is_ipinterface_exists(section_name(p->config_section), device))
+			ip___is_ip_interface_instance_exists(section_name(p->config_section), device))
 			continue;
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "ip_int_instance", "ip_int_alias");
@@ -895,7 +850,7 @@ static int delObjIPInterface(char *refparam, struct dmctx *ctx, void *data, char
 				if (strcmp(section_name(s), "loopback") == 0 ||
 					*proto == '\0' ||
 					DM_STRCHR(device, '@') ||
-					ip___is_ipinterface_exists(section_name(s), device))
+					ip___is_ip_interface_instance_exists(section_name(s), device))
 					continue;
 
 				delete_ip_intertace_instance(s);
@@ -1170,7 +1125,7 @@ static int set_IPInterface_Enable(char *refparam, struct dmctx *ctx, void *data,
 		case VALUESET:
 			string_to_bool(value, &b);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
-			update_child_interfaces(device, "disabled", b ? "0" : "1");
+			ip___update_child_interfaces(device, "disabled", b ? "0" : "1");
 			break;
 	}
 	return 0;
@@ -1366,13 +1321,14 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 					char *new_device = NULL;
 
 					dmuci_get_value_by_section_string(ppp_s, "device", &new_device);
-					update_child_interfaces(curr_device, "device", new_device);
+					if (DM_STRLEN(new_device))
+						ip___update_child_interfaces(curr_device, "device", new_device);
 
 					dmuci_set_value_by_section_bbfdm(ppp_s, "iface_name", section_name((struct uci_section *)data));
 					ppp___update_sections(ppp_s, (struct uci_section *)data);
 				}
 			} else {
-				update_child_interfaces(curr_device, "device", reference.value);
+				ip___update_child_interfaces(curr_device, "device", reference.value);
 			}
 
 			break;

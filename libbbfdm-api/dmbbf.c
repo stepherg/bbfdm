@@ -991,6 +991,40 @@ void dmentry_instance_lookup_inparam(struct dmctx *ctx)
 	ctx->nbrof_instance = i;
 }
 
+static void get_reference_paramater_value(struct dmctx *dmctx, char *in_value, char *str, size_t size)
+{
+	char *pch = NULL, *pchr = NULL;
+	char buf[2048] = {0};
+	unsigned int pos = 0;
+
+	if (!in_value || !str || !size)
+		return;
+
+	memset(str, 0, size);
+
+	if (DM_STRLEN(in_value) == 0) {
+		DM_STRNCPY(str, "=>", size);
+		return;
+	}
+
+	DM_STRNCPY(buf, in_value, sizeof(buf));
+
+	for (pch = strtok_r(buf, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
+		uint32_t len = DM_STRLEN(pch);
+		char *linker = NULL;
+
+		if (len && pch[len - 1] == '.')
+			pch[len - 1] = 0;
+
+		adm_entry_get_reference_value(dmctx, pch, &linker);
+
+		pos += snprintf((char *)str + pos, size - pos, "%s=>%s,", pch, linker ? linker : "");
+	}
+
+	if (pos)
+		str[pos - 1] = 0;
+}
+
 static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 {
 	json_object *res = NULL, *res_obj = NULL;
@@ -1357,7 +1391,7 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 {
 	json_object *res = NULL, *res_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
-	char param_value[512] = {0};
+	char param_value[2048] = {0};
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
@@ -1365,11 +1399,7 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 
 	if (is_reference_parameter(ubus_name, dmctx->in_param, in_args)) {
-		char *linker = NULL;
-
-		adm_entry_get_reference_value(dmctx, dmctx->in_value, &linker);
-
-		snprintf(param_value, sizeof(param_value), "%s=>%s", dmctx->in_value, linker ? linker : "");
+		get_reference_paramater_value(dmctx, dmctx->in_value, param_value, sizeof(param_value));
 	} else {
 		snprintf(param_value, sizeof(param_value), "%s", dmctx->in_value);
 	}
@@ -2135,7 +2165,7 @@ static int mparam_set_value(DMPARAM_ARGS)
 		return set_ubus_value(dmctx, node);
 	} else {
 		char refparam[MAX_DM_PATH] = {0};
-		char param_value[512] = {0};
+		char param_value[2048] = {0};
 		char *value = "";
 
 		snprintf(refparam, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
@@ -2171,11 +2201,7 @@ static int mparam_set_value(DMPARAM_ARGS)
 		}
 
 		if ((leaf->dm_falgs & DM_FLAG_REFERENCE) && !DM_STRSTR(dmctx->in_value, "=>")) {
-			char *linker = NULL;
-
-			adm_entry_get_reference_value(dmctx, dmctx->in_value, &linker);
-
-			snprintf(param_value, sizeof(param_value), "%s=>%s", dmctx->in_value, linker ? linker : "");
+			get_reference_paramater_value(dmctx, dmctx->in_value, param_value, sizeof(param_value));
 		} else {
 			snprintf(param_value, sizeof(param_value), "%s", dmctx->in_value);
 		}

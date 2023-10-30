@@ -9,12 +9,22 @@
  *
  */
 
-#include "tr181/bridging.h"
+#include "dmcommon.h"
 #include "bridging.h"
+
+struct bridge_port_args
+{
+	struct uci_section *bridge_sec;
+	struct uci_section *bridge_dmmap_sec;
+	struct uci_section *bridge_port_sec;
+	struct uci_section *bridge_port_dmmap_sec;
+	bool is_management_port;
+	char *br_inst;
+};
 
 static int get_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	bridging_get_priority_list("egress_qos_mapping", data, value);
+	bridging___get_priority_list(((struct bridge_port_args *)data)->bridge_port_sec, "egress_qos_mapping", data, value);
 	return 0;
 }
 
@@ -33,7 +43,7 @@ static int set_BridgingBridgePort_Egress_PriorityRegeneration(char *refparam, st
 
 			return 0;
 		case VALUESET:
-			bridging_set_priority_list("egress_qos_mapping", data, value);
+			bridging___set_priority_list(((struct bridge_port_args *)data)->bridge_port_sec, "egress_qos_mapping", data, value);
 			return 0;
 	}
 	return 0;

@@ -8,7 +8,7 @@
  *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
-#include "dmdiagnostics.h"
+#include "dmcommon.h"
 #include "dns.h"
 
 /* Returns dnsmasq section name belongs to LAN network */

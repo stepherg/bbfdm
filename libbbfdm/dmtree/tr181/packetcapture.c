@@ -9,7 +9,7 @@
  *
  */
 
-#include "dmdiagnostics.h"
+#include "dmcommon.h"
 #include "packetcapture.h"
 
 #define PACKET_CAPTURE_DIAGNOSTIC_PATH "/usr/share/bbfdm/packetcapture"
