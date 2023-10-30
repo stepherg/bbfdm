@@ -485,7 +485,7 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 		goto end;
 	}
 
-	sleep(30); // Wait for the image to become available
+	sleep(60); // Wait for the image to become available
 
 	// Send the transfer complete after image applied
 	send_transfer_complete_event(command, obj_path, url, res_code, start_time, complete_time, commandKey, "Download");
