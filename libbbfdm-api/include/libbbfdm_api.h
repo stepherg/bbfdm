@@ -862,19 +862,19 @@ void bbfdm_set_fault_message(struct dmctx *ctx, const char *format, ...);
  *
  **********************/
 
-__attribute__ ((deprecated)) int bbf_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
-__attribute__ ((deprecated)) int bbf_validate_boolean(char *value);
-__attribute__ ((deprecated)) int bbf_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int bbf_validate_int(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int bbf_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int bbf_validate_long(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int bbf_validate_dateTime(char *value);
-__attribute__ ((deprecated)) int bbf_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int bbf_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
-__attribute__ ((deprecated)) int bbf_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int bbf_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int bbf_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int bbf_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int bbf_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_string"))) int bbf_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
+__attribute__ ((deprecated("Use bbfdm_validate_boolean"))) int bbf_validate_boolean(char *value);
+__attribute__ ((deprecated("Use bbfdm_validate_unsignedInt"))) int bbf_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_int"))) int bbf_validate_int(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_unsignedLong"))) int bbf_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_long"))) int bbf_validate_long(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_dateTime"))) int bbf_validate_dateTime(char *value);
+__attribute__ ((deprecated("Use bbfdm_validate_hexBinary"))) int bbf_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_string_list"))) int bbf_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
+__attribute__ ((deprecated("Use bbfdm_validate_unsignedInt_list"))) int bbf_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_int_list"))) int bbf_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_unsignedLong_list"))) int bbf_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_long_list"))) int bbf_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_hexBinary_list"))) int bbf_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 
 #endif //__LIBBBFDM_API_H__

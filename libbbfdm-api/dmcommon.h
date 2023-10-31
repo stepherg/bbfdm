@@ -314,20 +314,20 @@ void strip_lead_trail_whitespace(char *str);
 int dm_buf_to_file(char *buf, const char *filename);
 
 /* Deprecated functions */
-__attribute__ ((deprecated)) int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
-__attribute__ ((deprecated)) int dm_validate_boolean(char *value);
-__attribute__ ((deprecated)) int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int dm_validate_int(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int dm_validate_long(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int dm_validate_dateTime(char *value);
-__attribute__ ((deprecated)) int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int dm_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
-__attribute__ ((deprecated)) int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int dm_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int dm_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int dm_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated)) int dm_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_string"))) int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
+__attribute__ ((deprecated("Use bbfdm_validate_boolean"))) int dm_validate_boolean(char *value);
+__attribute__ ((deprecated("Use bbfdm_validate_unsignedInt"))) int dm_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_int"))) int dm_validate_int(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_unsignedLong"))) int dm_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_long"))) int dm_validate_long(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_dateTime"))) int dm_validate_dateTime(char *value);
+__attribute__ ((deprecated("Use bbfdm_validate_hexBinary"))) int dm_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_string_list"))) int dm_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
+__attribute__ ((deprecated("Use bbfdm_validate_unsignedInt_list"))) int dm_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_int_list"))) int dm_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_unsignedLong_list"))) int dm_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_long_list"))) int dm_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_validate_hexBinary_list"))) int dm_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 /************************/
 
 #endif
