@@ -43,6 +43,7 @@
 #include "ssh.h"
 #include "userinterface.h"
 #include "packetcapture.h"
+#include "selftest.h"
 
 /*************************************************************
 * GET & SET PARAM
@@ -131,6 +132,7 @@ DMOBJ tDeviceObj[] = {
 {"SSH", &DMREAD, NULL, NULL, "file:/etc/config/dropbear", NULL, NULL, NULL, tSSHObj, tSSHParams, NULL, BBFDM_BOTH, NULL},
 {"UserInterface", &DMREAD, NULL, NULL, "file:/etc/config/userinterface", NULL, NULL, NULL, tUIHTTPAccessObj, tUIParams, NULL, BBFDM_BOTH, NULL},
 {"PacketCaptureDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tPacketCaptureObj, tPacketCaptureParams, NULL, BBFDM_CWMP, NULL},
+{"SelfTestDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tSelfTestParams, NULL, BBFDM_CWMP, NULL},
 {0}
 };
 
@@ -141,6 +143,7 @@ DMLEAF tDeviceParams[] = {
 {"Reboot()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_Reboot, BBFDM_USP},
 {"FactoryReset()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_FactoryReset, BBFDM_USP},
 {"PacketCaptureDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_packetCapture, operate_Device_packetCapture, BBFDM_USP},
+{"SelfTestDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_SelfTest, operate_Device_SelfTest, BBFDM_USP},
 //{"Boot!", &DMREAD, DMT_EVENT, NULL, NULL, BBFDM_USP},
 {0}
 };

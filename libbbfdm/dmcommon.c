@@ -167,26 +167,29 @@ static long upload_file(const char *file_path, const char *url, const char *user
 
 	if (strncmp(url, FILE_URI, strlen(FILE_URI)) == 0) {
 		char dst_path[2046] = {0};
-		snprintf(dst_path, sizeof(dst_path), "%s", url+strlen(FILE_URI));
-		FILE *fp = fopen(file_path, "r");
-		if (fp == NULL) {
+		char buff[BUFSIZ] = {0};
+		FILE *sfp, *dfp;
+		int n, count=0;
+
+		sfp = fopen(file_path, "rb");
+		if (sfp == NULL) {
 			return -1;
 		}
 
-		fseek(fp, 0, SEEK_END);
-		unsigned int length = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-		fclose(fp);
-
-		char buff[length];
-		memset(buff, 0, length);
-
-		if (dm_file_to_buf(file_path, buff, length) > 0) {
-			if (dm_buf_to_file(buff, dst_path) < 0)
-				res_code = -1;
-		} else {
-			res_code = -1;
+		snprintf(dst_path, sizeof(dst_path), "%s", url+strlen(FILE_URI));
+		dfp = fopen(dst_path, "wb");
+		if (dfp == NULL) {
+			fclose(sfp);
+			return -1;
 		}
+
+		while ((n = fread(buff, 1, BUFSIZ, sfp)) != 0) {
+			fwrite(buff, 1, n, dfp);
+			count+=n;
+		}
+
+		fclose(sfp);
+		fclose(dfp);
 	} else {
 		CURL *curl = curl_easy_init();
 		if (curl) {

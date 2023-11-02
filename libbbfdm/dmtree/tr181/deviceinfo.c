@@ -1564,7 +1564,7 @@ DMLEAF tDeviceInfoProcessStatusProcessParams[] = {
 DMLEAF tDeviceInfoVendorLogFileParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Alias", &DMWRITE, DMT_STRING, get_vlf_alias, set_vlf_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"Name", &DMREAD, DMT_STRING, get_vlf_name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_vlf_name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
 {"MaximumSize", &DMREAD, DMT_UNINT, get_vlf_max_size, NULL, BBFDM_BOTH},
 {"Persistent", &DMREAD, DMT_BOOL, get_vlf_persistent, NULL, BBFDM_BOTH},
 {"Upload()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoVendorLogFile_Upload, operate_DeviceInfoVendorLogFile_Upload, BBFDM_USP},
