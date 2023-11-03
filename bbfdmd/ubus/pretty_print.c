@@ -152,36 +152,20 @@ static void resulting(uint8_t maxdepth, char *path, struct dmctx *bbf_ctx, struc
 
 	size_t plen = get_glob_len(bbf_ctx->in_param);
 	size_t path_len = DM_STRLEN(path);
+	if (path_len == 0)
+		return;
 
 	list_for_each_entry(n, &bbf_ctx->list_parameter, list) {
-		if (path_len == 0)
-			continue;
+		if (match(n->name, path, 0, NULL)) {
+			if (is_search_by_reference(bbf_ctx->in_param))
+				plen = 0;
 
-		if (path[path_len - 1] == DELIM) {
-			if (!strncmp(n->name, path, path_len)) {
-				if (is_search_by_reference(bbf_ctx->in_param))
-					plen = 0;
-
-				if (maxdepth > 4 || maxdepth == 0) {
+			if (maxdepth > 4 || maxdepth == 0) {
+				add_pv_list(n->name + plen, n->data, n->type, pv_local);
+			} else {
+				count = count_delim(n->name + path_len);
+				if (count < maxdepth)
 					add_pv_list(n->name + plen, n->data, n->type, pv_local);
-				} else {
-					count = count_delim(n->name + path_len);
-					if (count < maxdepth)
-						add_pv_list(n->name + plen, n->data, n->type, pv_local);
-				}
-			}
-		} else {
-			if (match(n->name, path, 0, NULL)) {
-				if (is_search_by_reference(bbf_ctx->in_param))
-					plen = 0;
-
-				if (maxdepth > 4 || maxdepth == 0) {
-					add_pv_list(n->name + plen, n->data, n->type, pv_local);
-				} else {
-					count = count_delim(n->name + path_len);
-					if (count < maxdepth)
-						add_pv_list(n->name + plen, n->data, n->type, pv_local);
-				}
 			}
 		}
 	}
@@ -427,29 +411,17 @@ void prepare_raw_result(struct blob_buf *bb, struct dmctx *bbf_ctx, struct list_
 	void *table = NULL;
 
 	list_for_each_entry(iter, rslvd, list) {
-		size_t ilen = DM_STRLEN(iter->path);
-		if (ilen == 0)
+		if (DM_STRLEN(iter->path) == 0)
 			continue;
 
 		list_for_each_entry(n, &bbf_ctx->list_parameter, list) {
-			if (iter->path[ilen - 1] == DELIM) {
-				if (!strncmp(n->name, iter->path, ilen)) {
-					table = blobmsg_open_table(bb, NULL);
-					bb_add_string(bb, "path", n->name);
-					bb_add_string(bb, "data", n->data);
-					bb_add_string(bb, "type", n->type);
-					bb_add_flags_arr(bb, n->additional_data);
-					blobmsg_close_table(bb, table);
-				}
-			} else {
-				if (match(n->name, iter->path, 0, NULL)) {
-					table = blobmsg_open_table(bb, NULL);
-					bb_add_string(bb, "path", n->name);
-					bb_add_string(bb, "data", n->data);
-					bb_add_string(bb, "type", n->type);
-					bb_add_flags_arr(bb, n->additional_data);
-					blobmsg_close_table(bb, table);
-				}
+			if (match(n->name, iter->path, 0, NULL)) {
+				table = blobmsg_open_table(bb, NULL);
+				bb_add_string(bb, "path", n->name);
+				bb_add_string(bb, "data", n->data);
+				bb_add_string(bb, "type", n->type);
+				bb_add_flags_arr(bb, n->additional_data);
+				blobmsg_close_table(bb, table);
 			}
 		}
 	}
