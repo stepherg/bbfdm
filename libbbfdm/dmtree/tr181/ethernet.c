@@ -100,6 +100,23 @@ bool ethernet___name_exists_in_devices(char *name)
 	return false;
 }
 
+static bool is_mac_vlan_interface(char *device_name)
+{
+	struct uci_section *s = NULL;
+	char *type = NULL, *name = NULL;
+
+	uci_foreach_sections("network", "device", s) {
+
+		dmuci_get_value_by_section_string(s, "type", &type);
+		dmuci_get_value_by_section_string(s, "name", &name);
+
+		if (DM_STRCMP(type, "macvlan") == 0 && DM_STRCMP(name, device_name) == 0)
+			return true;
+	}
+
+	return false;
+}
+
 static void add_ethernet_link_section(char *device, char *macaddr)
 {
 	struct uci_section *dmmap_s = NULL;
@@ -144,13 +161,15 @@ static void dmmap_synchronizeEthernetLink(struct dmctx *dmctx, DMNODE *parent_no
 
 		DM_STRNCPY(dev_name, device, sizeof(dev_name));
 
-		char *has_vid = DM_STRCHR(dev_name, '.');
+		char *has_vid = DM_STRRCHR(dev_name, '.');
 		if (has_vid)
 			*has_vid = '\0';
 
-		char *is_mac_vlan = DM_STRCHR(dev_name, '_');
-		if (is_mac_vlan)
-			*is_mac_vlan = '\0';
+		if (is_mac_vlan_interface(dev_name)) {
+			char *p = DM_STRRCHR(dev_name, '_');
+			if (p)
+				*p = '\0';
+		}
 
 		if (is_ethernet_link_exist(dev_name))
 			continue;
