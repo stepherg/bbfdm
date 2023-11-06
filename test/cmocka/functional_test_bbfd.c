@@ -1050,6 +1050,12 @@ static void test_api_bbfdm_add_del_library_object(void **state)
 	int fault = 0;
 
 	// Get name object ==> expected "0" error
+	ctx->in_param = "Device.WiFi.AccessPoint.";
+	ctx->nextlevel = true;
+	fault = bbf_entry_method(ctx, BBF_GET_NAME);
+	assert_int_equal(fault, 0);
+
+	// Get name object ==> expected "0" error
 	ctx->in_param = "Device.WiFi.SSID.";
 	ctx->nextlevel = true;
 	fault = bbf_entry_method(ctx, BBF_GET_NAME);
@@ -1070,7 +1076,7 @@ static void test_api_bbfdm_add_del_library_object(void **state)
 	assert_int_equal(fault, 0);
 
 	// Get name object after deleting instance 2 ==> expected "9005" error
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.2.";
+	ctx->in_param = "Device.WiFi.SSID.2.";
 	ctx->nextlevel = true;
 	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, FAULT_9005);
