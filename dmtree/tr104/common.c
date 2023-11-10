@@ -177,6 +177,7 @@ int init_call_log(void)
 	struct list_head *pos = NULL;
 	FILE *fp = NULL;
 	char line[1024];
+	float localLossRate, remoteLossRate;
 
 	// Check if there are any new call logs since the last time
 	if (stat(CALL_LOG_FILE, &cur_stat) == 0) {
@@ -570,6 +571,12 @@ int init_call_log(void)
 					cdr.called_num, cdr.destination);
 				continue;
 			}
+
+			// convert local and remote lossRate from DSP to tr104 values (0-100%)
+			localLossRate = (float)((atoi(cdr.localLossRate) * 100)) / 256 + 0.5;
+			remoteLossRate = (float)((atoi(cdr.remoteLossRate) * 100)) / 256 + 0.5;
+			snprintf(cdr.localLossRate, sizeof(cdr.localLossRate), "%u", (unsigned int)localLossRate);
+			snprintf(cdr.remoteLossRate, sizeof(cdr.remoteLossRate), "%u", (unsigned int)remoteLossRate);
 
 			// Calculate the call duration
 			struct tm tm_start, tm_end;
