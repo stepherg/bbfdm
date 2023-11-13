@@ -1308,8 +1308,11 @@ static int add_ubus_object(struct dmctx *dmctx, struct dmnode *node)
 		res_obj = json_object_array_get_idx(res_array, i);
 
 		char *fault = dmjson_get_value(res_obj, 1, "fault");
-		if (DM_STRLEN(fault))
+		if (DM_STRLEN(fault)) {
+			char *fault_msg = dmjson_get_value(res_obj, 1, "fault_msg");
+			bbfdm_set_fault_message(dmctx, "%s", fault_msg);
 			return DM_STRTOUL(fault);
+		}
 
 		char *data = dmjson_get_value(res_obj, 1, "data");
 
@@ -1353,8 +1356,11 @@ static int del_ubus_object(struct dmctx *dmctx, struct dmnode *node)
 		dmctx->stop = 1;
 
 		char *fault = dmjson_get_value(res_obj, 1, "fault");
-		if (DM_STRLEN(fault))
+		if (DM_STRLEN(fault)) {
+			char *fault_msg = dmjson_get_value(res_obj, 1, "fault_msg");
+			bbfdm_set_fault_message(dmctx, "%s", fault_msg);
 			return DM_STRTOUL(fault);
+		}
 	}
 
 	return 0;
@@ -1428,8 +1434,11 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 		dmctx->stop = 1;
 
 		char *fault = dmjson_get_value(res_obj, 1, "fault");
-		if (DM_STRLEN(fault))
+		if (DM_STRLEN(fault)) {
+			char *fault_msg = dmjson_get_value(res_obj, 1, "fault_msg");
+			bbfdm_set_fault_message(dmctx, "%s", fault_msg);
 			return DM_STRTOUL(fault);
+		}
 	}
 
 	return 0;
