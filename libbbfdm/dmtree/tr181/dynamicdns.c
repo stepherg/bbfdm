@@ -202,15 +202,6 @@ static void dmmap_synchronizeDynamicDNSServer(void)
 	update_dmmap_ddns_global_settings(file_count);
 }
 
-static char *get_server_perm(char *refparam, struct dmctx *dmctx, void *data, char *instance)
-{
-	char *server_perm = NULL;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "is_custom", &server_perm);
-	return server_perm;
-}
-
-struct dm_permession_s DMServer = {"1", &get_server_perm};
 /*************************************************************
 * ENTRY METHOD
 *************************************************************/
@@ -865,6 +856,7 @@ static int set_DynamicDNSServer_ServiceName(char *refparam, struct dmctx *ctx, v
 	char *enabled = NULL;
 	char *file_name = NULL;
 	char *server_address = NULL;
+	char *server_perm = NULL;
 	char file_path[128] = {0};
 
 	switch (action)	{
@@ -873,6 +865,10 @@ static int set_DynamicDNSServer_ServiceName(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			dmuci_get_value_by_section_string((struct uci_section *)data, "is_custom", &server_perm);
+			if (DM_STRCMP(server_perm, "0") == 0)
+				break;
+
 			dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", &enabled);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "file_name", &file_name);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "server_address", &server_address);
@@ -909,6 +905,7 @@ static int set_DynamicDNSServer_ServerAddress(char *refparam, struct dmctx *ctx,
 	char *enabled = NULL;
 	char *file_name = NULL;
 	char *service_name = NULL;
+	char *server_perm = NULL;
 	char file_path[128] = {0};
 
 	switch (action)	{
@@ -917,6 +914,10 @@ static int set_DynamicDNSServer_ServerAddress(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			dmuci_get_value_by_section_string((struct uci_section *)data, "is_custom", &server_perm);
+			if (DM_STRCMP(server_perm, "0") == 0)
+				break;
+
 			dmuci_get_value_by_section_string((struct uci_section *)data, "enabled", &enabled);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "file_name", &file_name);
 			dmuci_get_value_by_section_string((struct uci_section *)data, "service_name", &service_name);
@@ -1025,11 +1026,11 @@ DMLEAF tDynamicDNSServerParams[] = {
 {"Enable", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Enable, set_DynamicDNSServer_Enable, BBFDM_BOTH},
 {"Name", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Name, set_DynamicDNSServer_Name, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Alias", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Alias, set_DynamicDNSServer_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"ServiceName", &DMServer, DMT_STRING, get_DynamicDNSServer_ServiceName, set_DynamicDNSServer_ServiceName, BBFDM_BOTH, DM_FLAG_LINKER},
-{"ServerAddress", &DMServer, DMT_STRING, get_DynamicDNSServer_ServerAddress, set_DynamicDNSServer_ServerAddress, BBFDM_BOTH},
+{"ServiceName", &DMWRITE, DMT_STRING, get_DynamicDNSServer_ServiceName, set_DynamicDNSServer_ServiceName, BBFDM_BOTH, DM_FLAG_LINKER},
+{"ServerAddress", &DMWRITE, DMT_STRING, get_DynamicDNSServer_ServerAddress, set_DynamicDNSServer_ServerAddress, BBFDM_BOTH},
 //{"ServerPort", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_ServerPort, set_DynamicDNSServer_ServerPort, BBFDM_BOTH},
 {"SupportedProtocols", &DMREAD, DMT_STRING, get_DynamicDNSServer_SupportedProtocols, NULL, BBFDM_BOTH},
-{"Protocol", &DMServer, DMT_STRING, get_DynamicDNSServer_Protocol, set_DynamicDNSServer_Protocol, BBFDM_BOTH},
+{"Protocol", &DMWRITE, DMT_STRING, get_DynamicDNSServer_Protocol, set_DynamicDNSServer_Protocol, BBFDM_BOTH},
 //{"CheckInterval", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_CheckInterval, set_DynamicDNSServer_CheckInterval, BBFDM_BOTH},
 //{"RetryInterval", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_RetryInterval, set_DynamicDNSServer_RetryInterval, BBFDM_BOTH},
 //{"MaxRetries", &DMWRITE, DMT_UNINT, get_DynamicDNSServer_MaxRetries, set_DynamicDNSServer_MaxRetries, BBFDM_BOTH},
