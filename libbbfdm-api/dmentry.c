@@ -313,8 +313,13 @@ int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *referenc
 
 		if (match(reference->path, *objects, 0, NULL)) {
 
-			if (adm_entry_object_exists(ctx, reference->path))
-				return 0;
+			if (is_micro_service) {
+				if (DM_STRLEN(reference->value))
+					return 0;
+			} else {
+				if (adm_entry_object_exists(ctx, reference->path))
+					return 0;
+			}
 		}
 	}
 
