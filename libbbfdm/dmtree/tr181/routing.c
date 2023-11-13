@@ -30,7 +30,6 @@ struct route6_args {
 
 struct routingfwdargs
 {
-	char *permission;
 	struct uci_section *routefwdsection;
 	int type;
 };
@@ -45,17 +44,8 @@ enum enum_route_type {
 /********************************
  * init function
  ********************************/
-static inline int init_args_ipv4forward(struct routingfwdargs *args, struct uci_section *s, char *permission, int type)
+static inline int init_args_route_forwarding(struct routingfwdargs *args, struct uci_section *s, int type)
 {
-	args->permission = permission;
-	args->routefwdsection = s;
-	args->type = type;
-	return 0;
-}
-
-static inline int init_args_ipv6forward(struct routingfwdargs *args, struct uci_section *s, char *permission, int type)
-{
-	args->permission = permission;
 	args->routefwdsection = s;
 	args->type = type;
 	return 0;
@@ -419,7 +409,7 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		if (DM_STRCMP(rt_table, table) != 0 || (DM_STRLEN(table) == 0 && DM_STRCMP(rt_table, "254") != 0))
 			continue;
 
-		init_args_ipv4forward(&curr_routefwdargs, p->config_section, "1", ROUTE_STATIC);
+		init_args_route_forwarding(&curr_routefwdargs, p->config_section, ROUTE_STATIC);
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "route_instance", "route_alias");
 
@@ -432,7 +422,7 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	dmmap_synchronizeRoutingRouterIPv4Forwarding(dmctx, parent_node, prev_data, prev_instance);
 	uci_path_foreach_option_eq(bbfdm, "dmmap_routing", "route_dynamic", "table", rt_table, s) {
 
-		init_args_ipv4forward(&curr_routefwdargs, s, "0", ROUTE_DYNAMIC);
+		init_args_route_forwarding(&curr_routefwdargs, s, ROUTE_DYNAMIC);
 
 		inst = handle_instance(dmctx, parent_node, s, "route_instance", "route_alias");
 
@@ -466,7 +456,7 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 		if (DM_STRCMP(rt_table, table) != 0 || (DM_STRLEN(table) == 0 && DM_STRCMP(rt_table, "254") != 0))
 			continue;
 
-		init_args_ipv6forward(&curr_route6fwdargs, p->config_section, "1", ROUTE_STATIC);
+		init_args_route_forwarding(&curr_route6fwdargs, p->config_section, ROUTE_STATIC);
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "route6_instance", "route6_alias");
 
@@ -479,7 +469,7 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	dmmap_synchronizeRoutingRouterIPv6Forwarding(dmctx, parent_node, prev_data, prev_instance);
 	uci_path_foreach_option_eq(bbfdm, "dmmap_routing", "route6_dynamic", "table", rt_table, s) {
 
-		init_args_ipv6forward(&curr_route6fwdargs, s, "0", ROUTE_DYNAMIC);
+		init_args_route_forwarding(&curr_route6fwdargs, s, ROUTE_DYNAMIC);
 
 		inst = handle_instance(dmctx, parent_node, s, "route6_instance", "route6_alias");
 
@@ -590,6 +580,9 @@ static int set_router_ipv4forwarding_enable(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			string_to_bool(value, &b);
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "disabled", b ? "0" : "1");
 			return 0;
@@ -619,6 +612,9 @@ static int set_router_ipv4forwarding_destip(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "target", value);
 			return 0;
 	}
@@ -640,6 +636,9 @@ static int set_router_ipv4forwarding_destmask(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "netmask", value);
 			return 0;
 	}
@@ -678,6 +677,9 @@ static int set_router_ipv4forwarding_forwarding_policy(char *refparam, struct dm
 			bbfdm_set_fault_message(ctx, "Route table '%s' value doesn't exist on the device. It's only allowed to set an available route table.");
 			return FAULT_9007;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "table", value);
 
 			get_dmmap_section_of_config_section("dmmap_routing", "route", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
@@ -719,6 +721,9 @@ static int set_router_ipv4forwarding_gatewayip(char *refparam, struct dmctx *ctx
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "gateway", value);
 			return 0;
 	}
@@ -751,6 +756,9 @@ static int set_RoutingRouterForwarding_Interface(char *refparam, struct dmctx *c
 
 			return 0;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "interface", reference.value);
 			return 0;
 	}
@@ -772,6 +780,9 @@ static int set_router_ipv4forwarding_metric(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "metric", value);
 			return 0;
 	}
@@ -801,6 +812,9 @@ static int set_RoutingRouterIPv6Forwarding_Enable(char *refparam, struct dmctx *
 				return FAULT_9007;
 			break;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			string_to_bool(value, &b);
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "disabled", b ? "0" : "1");
 			break;
@@ -830,6 +844,9 @@ static int set_RoutingRouterIPv6Forwarding_DestIPPrefix(char *refparam, struct d
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "target", value);
 			return 0;
 	}
@@ -862,6 +879,9 @@ static int set_RoutingRouterIPv6Forwarding_ForwardingPolicy(char *refparam, stru
 			bbfdm_set_fault_message(ctx, "Route table '%s' value doesn't exist on the device. It's only allowed to set an available route table.");
 			return FAULT_9007;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "table", value);
 
 			get_dmmap_section_of_config_section("dmmap_routing", "route6", section_name(((struct routingfwdargs *)data)->routefwdsection), &dmmap_section);
@@ -886,6 +906,9 @@ static int set_RoutingRouterIPv6Forwarding_NextHop(char *refparam, struct dmctx 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "gateway", value);
 			return 0;
 	}
@@ -913,6 +936,9 @@ static int set_RoutingRouterIPv6Forwarding_ForwardingMetric(char *refparam, stru
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
+			if (((struct routingfwdargs *)data)->type == ROUTE_DYNAMIC)
+				return 0;
+
 			dmuci_set_value_by_section(((struct routingfwdargs *)data)->routefwdsection, "metric", value);
 			return 0;
 	}
@@ -1142,16 +1168,6 @@ static int set_RoutingRouterIPv6Forwarding_Alias(char *refparam, struct dmctx *c
 	return 0;
 }
 
-static char *get_routing_perm(char *refparam, struct dmctx *dmctx, void *data, char *instance)
-{
-	if (data != NULL)
-		return ((struct routingfwdargs *)data)->permission;
-
-	return NULL;
-}
-
-struct dm_permession_s DMRouting = {"1", &get_routing_perm};
-
 /*************************************************************
 * ADD DEL OBJ
 **************************************************************/
@@ -1353,32 +1369,32 @@ DMLEAF tRoutingRouterParams[] = {
 /* *** Device.Routing.Router.{i}.IPv4Forwarding.{i}. *** */
 DMLEAF tRoutingRouterIPv4ForwardingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMRouting, DMT_BOOL, get_router_ipv4forwarding_enable, set_router_ipv4forwarding_enable, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_router_ipv4forwarding_enable, set_router_ipv4forwarding_enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_router_ipv4forwarding_status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_router_ipv4forwarding_alias, set_router_ipv4forwarding_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"StaticRoute", &DMREAD, DMT_BOOL, get_router_ipv4forwarding_static_route, NULL, BBFDM_BOTH},
-{"DestIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destip, set_router_ipv4forwarding_destip, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"DestSubnetMask", &DMRouting, DMT_STRING, get_router_ipv4forwarding_destmask, set_router_ipv4forwarding_destmask, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"ForwardingPolicy", &DMRouting, DMT_INT, get_router_ipv4forwarding_forwarding_policy, set_router_ipv4forwarding_forwarding_policy, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"GatewayIPAddress", &DMRouting, DMT_STRING, get_router_ipv4forwarding_gatewayip, set_router_ipv4forwarding_gatewayip, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"Interface", &DMRouting, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
+{"DestIPAddress", &DMWRITE, DMT_STRING, get_router_ipv4forwarding_destip, set_router_ipv4forwarding_destip, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"DestSubnetMask", &DMWRITE, DMT_STRING, get_router_ipv4forwarding_destmask, set_router_ipv4forwarding_destmask, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"ForwardingPolicy", &DMWRITE, DMT_INT, get_router_ipv4forwarding_forwarding_policy, set_router_ipv4forwarding_forwarding_policy, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"GatewayIPAddress", &DMWRITE, DMT_STRING, get_router_ipv4forwarding_gatewayip, set_router_ipv4forwarding_gatewayip, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Interface", &DMWRITE, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 {"Origin", &DMREAD, DMT_STRING, get_router_ipv4forwarding_origin, NULL, BBFDM_BOTH},
-{"ForwardingMetric", &DMRouting, DMT_INT, get_router_ipv4forwarding_metric, set_router_ipv4forwarding_metric, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"ForwardingMetric", &DMWRITE, DMT_INT, get_router_ipv4forwarding_metric, set_router_ipv4forwarding_metric, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {0}
 };
 
 /* *** Device.Routing.Router.{i}.IPv6Forwarding.{i}. *** */
 DMLEAF tRoutingRouterIPv6ForwardingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Enable", &DMRouting, DMT_BOOL, get_RoutingRouterIPv6Forwarding_Enable, set_RoutingRouterIPv6Forwarding_Enable, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_RoutingRouterIPv6Forwarding_Enable, set_RoutingRouterIPv6Forwarding_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_RoutingRouterIPv6Forwarding_Status, NULL, BBFDM_BOTH},
 {"Alias", &DMWRITE, DMT_STRING, get_RoutingRouterIPv6Forwarding_Alias, set_RoutingRouterIPv6Forwarding_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"DestIPPrefix", &DMRouting, DMT_STRING, get_RoutingRouterIPv6Forwarding_DestIPPrefix, set_RoutingRouterIPv6Forwarding_DestIPPrefix, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"ForwardingPolicy", &DMRouting, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingPolicy, set_RoutingRouterIPv6Forwarding_ForwardingPolicy, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"NextHop", &DMRouting, DMT_STRING, get_RoutingRouterIPv6Forwarding_NextHop, set_RoutingRouterIPv6Forwarding_NextHop, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"Interface", &DMRouting, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
+{"DestIPPrefix", &DMWRITE, DMT_STRING, get_RoutingRouterIPv6Forwarding_DestIPPrefix, set_RoutingRouterIPv6Forwarding_DestIPPrefix, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"ForwardingPolicy", &DMWRITE, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingPolicy, set_RoutingRouterIPv6Forwarding_ForwardingPolicy, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"NextHop", &DMWRITE, DMT_STRING, get_RoutingRouterIPv6Forwarding_NextHop, set_RoutingRouterIPv6Forwarding_NextHop, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Interface", &DMWRITE, DMT_STRING, get_RoutingRouterForwarding_Interface, set_RoutingRouterForwarding_Interface, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 {"Origin", &DMREAD, DMT_STRING, get_RoutingRouterIPv6Forwarding_Origin, NULL, BBFDM_BOTH},
-{"ForwardingMetric", &DMRouting, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingMetric, set_RoutingRouterIPv6Forwarding_ForwardingMetric, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"ForwardingMetric", &DMWRITE, DMT_INT, get_RoutingRouterIPv6Forwarding_ForwardingMetric, set_RoutingRouterIPv6Forwarding_ForwardingMetric, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"ExpirationTime", &DMREAD, DMT_TIME, get_RoutingRouterIPv6Forwarding_ExpirationTime, NULL, BBFDM_BOTH},
 {0}
 };

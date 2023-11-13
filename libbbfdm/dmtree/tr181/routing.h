@@ -15,8 +15,6 @@
 
 #include "libbbfdm-api/dmcommon.h"
 
-extern struct dm_permession_s DMRouting;
-
 extern DMOBJ tRoutingObj[];
 extern DMLEAF tRoutingParams[];
 extern DMOBJ tRoutingRouterObj[];
