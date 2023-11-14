@@ -166,11 +166,21 @@ static char *get_data_model_standard(char *standard)
 	return standard;
 }
 
+// Use 20MHz as default value, in case of null or 0
 static char *get_data_model_band(const char *bandwidth)
 {
 	char *band = NULL;
+	const char *tmp = "20";
 
-	dmasprintf(&band, "%sMHz", (DM_STRLEN(bandwidth) == 0) ? "20" : bandwidth);
+	if (DM_STRLEN(bandwidth) == 0) {
+		tmp = "20";
+	} else if (bandwidth[0] == '0') {
+		tmp = "20";
+	} else {
+		tmp = bandwidth;
+	}
+
+	dmasprintf(&band, "%sMHz", tmp);
 	return band;
 }
 
