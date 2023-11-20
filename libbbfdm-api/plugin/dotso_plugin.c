@@ -46,7 +46,7 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 {
 	void *handle = dlopen(plugin_path, RTLD_NOW|RTLD_LOCAL);
 	if (!handle) {
-		fprintf(stderr, "Plugin failed [%s]\n", dlerror());
+		TRACE("Plugin failed [%s]\n", dlerror());
 		return 0;
 	}
 

@@ -180,8 +180,20 @@ enum option_type_enum {
 };
 
 #define sysfs_foreach_file(path,dir,ent) \
-        if ((dir = opendir(path)) == NULL) return 0; \
-        while ((ent = readdir (dir)) != NULL) \
+	if ((dir = opendir(path)) == NULL) return 0; \
+	while ((ent = readdir(dir)) != NULL) \
+
+#define sysfs_foreach_file_sorted(path,max_num_files) \
+	struct dirent *ent = NULL; \
+	DIR *dir = NULL; \
+	if ((dir = opendir(path)) == NULL) return 0; \
+	int num_files = 0; \
+	char *files[max_num_files]; \
+	while ((ent = readdir(dir)) != NULL && num_files < max_num_files) \
+		files[num_files++] = dmstrdup(ent->d_name); \
+	closedir(dir); \
+	qsort(files, num_files, sizeof(char*), compare_strings); \
+	for (int i = 0; i < num_files; i++)
 
 struct dmmap_sect {
 	struct list_head list;
@@ -209,6 +221,7 @@ struct dhcp_options_type {
 };
 
 pid_t get_pid(const char *pname);
+int compare_strings(const void *a, const void *b);
 char *get_uptime(void);
 int check_file(char *path);
 char *cidr2netmask(int bits);

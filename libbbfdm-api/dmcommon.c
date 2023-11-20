@@ -196,6 +196,11 @@ pid_t get_pid(const char *pname)
 	return -1;
 }
 
+int compare_strings(const void *a, const void *b)
+{
+	return DM_STRCMP(*(const char **)a, *(const char **)b);
+}
+
 char *get_uptime(void)
 {
     FILE *fp = fopen(UPTIME, "r");

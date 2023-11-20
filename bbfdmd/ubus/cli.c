@@ -17,7 +17,6 @@
 extern struct list_head loaded_json_files;
 extern struct list_head json_list;
 extern struct list_head json_memhead;
-extern const char *CONFIG_PLUGIN_PATH;
 
 #define UNUSED  __attribute__((unused))
 

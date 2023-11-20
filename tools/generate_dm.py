@@ -19,15 +19,6 @@ def print_dm_usage():
     exit(1)
 
 
-def get_vendor_list(val):
-    vendor_list = ""
-    if isinstance(val, list):
-        for vendor in val:
-            vendor_list = vendor if not vendor_list else (
-                vendor_list + "," + vendor)
-    return vendor_list
-
-
 ### main ###
 if len(sys.argv) < 2:
     print_dm_usage()
@@ -91,15 +82,12 @@ for option, value in json_data.items():
         OUTPUT = value
         continue
 
-    elif option == "root_node":
-        bbf.set_root_node(value)
-        continue
-
     else:
         print_dm_usage()
         exit(1)
 
 bbf.generate_supported_dm(VENDOR_PREFIX, VENDOR_LIST, PLUGINS)
+
 
 file_format = bbf.get_option_value(OUTPUT, "file_format", ['xml'])
 output_file_prefix = bbf.get_option_value(OUTPUT, "output_file_prefix", "datamodel")
@@ -115,7 +103,6 @@ if isinstance(file_format, list):
             if isinstance(acs, list):
                 for acs_format in acs:
 
-                    bbf.clean_supported_dm_list()
                     output_file_name = output_dir + '/' + output_file_prefix + '_' + acs_format + '.xml'
                     if acs_format == "hdm":
                         bbf_xml.generate_xml('HDM', DM_JSON_FILES, output_file_name)
@@ -123,12 +110,9 @@ if isinstance(file_format, list):
                     if acs_format == "default":
                         bbf_xml.generate_xml('default', DM_JSON_FILES, output_file_name)
 
-
         if _format == "xls":
-            bbf.clean_supported_dm_list()
             output_file_name = output_dir + '/' + output_file_prefix + '.xls'
             bbf_excel.generate_excel(['tr181', 'tr104'], output_file_name)
 
-bbf.remove_file(bbf.DATA_MODEL_FILE)
 print("Datamodel generation completed, aritifacts shall be available in out directory or as per input json configuration")
 sys.exit(bbf.BBF_ERROR_CODE)

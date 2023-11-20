@@ -1,0 +1,252 @@
+# Datamodel diagnostics and support tools
+
+bbfdm offers several tools/utilities to facilitate(s)
+
+- Generation of json based datamodel definition from broadband forum xml based definition
+- Generation of "C" code templates based on json definition
+- Generate xml definition of supported datamodel for Nokia HDM ACS
+- Generate xml definition of supported datamodel for other ACS
+- Generate list of supported data models in XML format for both USP and CWMP variants
+- Provide tools to validate JSON based datamodel plugins
+
+## Dependencies
+
+Tools are mostly written in python and shell script, some requires docker images
+
+- python3-pip
+- libxml2-utils
+- docker.io
+- jsonschema
+- xlwt
+- ubus
+
+System utilities: python3-pip, libxml2-utils docker.io
+
+```bash
+$ sudo apt install -y python3-pip
+$ sudo apt install -y libxml2-utils
+```
+
+Python utilities: jsonschema, xlwt, ubus
+
+```bash
+$ pip3 install jsonschema xlwt ubus
+```
+
+To install docker follow [external link](https://docs.docker.com/engine/install)
+
+
+## Tools
+
+Below are the list of tools
+
+| Tools                     | Description                                                  |
+| ------------------------- | ------------------------------------------------------------ |
+| convert_dm_xml_to_json.py | Tool to convert Broadband forum's xml based datamodel definition to JSON based datamodel Definition |
+| convert_dm_json_to_c.py   | Tool to generate json based datamodel definition with ubus/uci mappings to C code |
+| validate_json_plugin.py   | Validate json based datamodel plugin files |
+| generate_dm.sh            | Generate list of supported/un-supported parameters based of json input|
+
+
+### convert_dm_xml_to_json.py
+[Broadband Forum](https://www.broadband-forum.org/) provides TR181 and other datamodel definitions in two formats xml(machine friendly) and html(User friendly),
+
+- [CWMP Specific datamodels](https://cwmp-data-models.broadband-forum.org/#sec:current-data-models)
+- [USP specific datamodels](https://usp-data-models.broadband-forum.org/#sec:current-data-models)
+
+In bbfdm, we needed a unified file which can be used for machine translations as well as at the same time readable to humans, so we provide a this tools to convert Data Model from Broadband Forum XML format to JSON format.
+
+This tools can be used as shown below
+
+```bash
+$ ./tools/convert_dm_xml_to_json.py
+Usage: ./tools/convert_dm_xml_to_json.py <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]
+Examples:
+  - ./tools/convert_dm_xml_to_json.py test/tools/tr-181-2-*-cwmp-full.xml test/tools/tr-181-2-*-usp-full.xml Device.
+    ==> Generate the json file of the sub tree Device. in tr181.json
+  - ./tools/convert_dm_xml_to_json.py test/tools/tr-104-2-0-2-cwmp-full.xml test/tools/tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.
+    ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json
+
+Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-*-cwmp-full.xml
+```
+
+### convert_dm_json_to_c.py
+
+To add the datamodel via bbfdm, it is required to follow [datamodel guide](https://dev.iopsys.eu/bbf/bbfdm/-/blob/devel/docs/guide/datamodel_as_microservice.md), which allows to add the datamodel with json plugins, or with DotSO plugins.
+
+This tool can generate template "C" code from JSON datamodel definitions.
+
+```bash
+$ ./tools/convert_dm_json_to_c.py
+Usage: ./tools/convert_dm_json_to_c.py <data model name> [Object path]
+data model name:   The data model(s) to be used, for ex: tr181 or tr181,tr104
+Examples:
+  - ./tools/convert_dm_json_to_c.py tr181
+    ==> Generate the C code of tr181 data model in datamodel/ folder
+  - ./tools/convert_dm_json_to_c.py tr104
+    ==> Generate the C code of tr104 data model in datamodel/ folder
+  - ./tools/convert_dm_json_to_c.py tr181,tr104
+    ==> Generate the C code of tr181 and tr104 data model in datamodel/ folder
+  - ./tools/convert_dm_json_to_c.py tr181 Device.DeviceInfo.
+    ==> Generate the C code of Device.DeviceInfo object in datamodel/ folder
+  - ./tools/convert_dm_json_to_c.py tr104 Device.Services.VoiceService.{i}.Capabilities.
+    ==> Generate the C code of Device.Services.VoiceService.{i}.Capabilities. object in datamodel/ folder
+```
+
+
+### validate_json_plugin.py
+
+This tool helps in validating the json schema, which is very helpful in the development of a JSON based plugins.
+
+```bash
+$ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
+$ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
+$ ./tools/validate_json_plugin.py dmtree/json/tr181.json
+```
+
+More examples available in [this path](https://dev.iopsys.eu/bbf/bbfdm/-/tree/devel/test/files/etc/bbfdm/plugins).
+
+### generate_dm.sh
+
+This tool generates the list of supported datamodel objects/parameters in xml and xls format, based on the input.
+
+Historically bbfdm tools used to do text parsing to provide list of supported datamodel parameters, which has many limitations:
+- Strict binding of datamodel definitions
+- Need to maintain specific sequence in definition
+
+This improved tool usages an docker image to get the list of supported datamodel to provide the accurate output.
+
+#### How this works
+
+Based on plugins listed in tools_input.json file, it simulates a runtime environment with docker image and get the datamodel from `bbfdm` ubus object(exposed by bbfdmd) which gets the data from all supported plugins and microservices.
+
+
+```bash
+Usage: ./tools/generate_dm.sh [OPTIONS]...
+
+    -I <docker image>
+    -i json input file path relative to top directory
+    -h help
+
+
+examples:
+~/git/bbfdm$ ./tools/generate_dm.sh -i tools/tools_input.json
+```
+
+The parameters/keys used in tools_input.json file are mostly self-explanatory but few parameters are required a bit more details.
+
+| Key | Description |
+|-----|-------------|
+| manufacturer | The manufacturer's name, e.g., "IOPSYS" |
+| protocol | The device protocol, e.g., "DEVICE_PROTOCOL_DSLFTR069v1 |
+| manufacturer_oui | The Manufacturer's Organizationally Unique Identifier (OUI) in hexadecimal format, e.g., "002207" |
+| product_class" | The product class, e.g., "DG400PRIME" |
+| model_name | The model name, e.g., "DG400PRIME-A" |
+| software_version | The software version, e.g., "1.2.3.4" |
+| vendor_list | This option should have the same name of the vendor directory names, e.g., ["iopsys"] |
+| dm_json_files | This should contain the list of json file path, where each file contains the definition of DM objects/parameters |
+| vendor_prefix | The prefix used by vendor for vendor extension in DM objects/parameters, e.g., "X_IOPSYS_EU_" |
+| plugins | A list of plugins with associated repositories and data model files |
+| | repo: The URL of the plugin repository |
+| | version: (optional): The version of the git plugin |
+| | dm_files: A list of data model files associated with the plugin |
+| | extra_dependencies: (optional): Extra dependencies for the plugin, if any |
+| | micro-service: (optional): Information about the micro-service, including its name, parent data model, object, and root object |
+| output.acs | Currently the tool support two variants of xml definitions of DM objects/parameters |
+| | hdm: This variant of xml is compatible with Nokia HDM ACS |
+| | default: This contains the generic definition which has the capability to define more descriptive DM objects/parameters |
+| output.file_format | Output file formats, e.g., ["xls", "xml"] |
+| output.output_dir | The output directory for generated files, e.g., "./out" |
+| output.output_file_prefix | The prefix for output file names, e.g., "datamodel" |
+
+
+> Note:
+> To add more description about the vendor extended DM objects/parameters, it is required to add the definition of the required/related DM objects/parameters in a json file (The json structure should follow same format as given in [tr181.json](../libbbfdm/dmtree/json/tr181.json)), The same json file need to be defined in dm_json_files list.
+
+
+The input json file should be defined as follow:
+
+```bash
+{
+	"manufacturer": "iopsys",
+	"protocol": "DEVICE_PROTOCOL_DSLFTR069v1",
+	"manufacturer_oui": "002207",
+	"product_class": "DG400PRIME",
+	"model_name": "DG400PRIME-A",
+	"software_version": "1.2.3.4",
+	"vendor_list": [
+		"iopsys",
+		"test"
+	],
+	"dm_json_files": [
+		"../libbbfdm/dmtree/json/tr181.json",
+		"../libbbfdm/dmtree/json/tr104.json"
+	]
+	"vendor_prefix": "X_IOPSYS_EU_",
+	"plugins": [
+		{
+			"repo": "https://dev.iopsys.eu/bbf/mydatamodel.git",
+			"version": "tag/hash/branch",
+			"dm_files": [
+				"src/datamodel.c",
+				"src/additional_datamodel.c"
+			]
+		},
+		{
+			"repo": "https://dev.iopsys.eu/bbf/mybbfplugin.git",
+			"version": "tag/hash/branch",
+			"dm_files": [
+				"dm.c"
+			]
+		},
+		{
+			"repo": "https://dev.iopsys.eu/bbf/mydatamodeljson.git",
+			"version": "tag/hash/branch",
+			"dm_files": [
+				"src/plugin/datamodel.json"
+			],
+			"micro-service": {
+				"name": "bbfdm.wifi",
+				"parent_dm": "Device.WiFi.",
+				"object": "DataElements",
+				"root_obj": "bbfdm"
+			}
+		},
+		{
+			"repo": "/home/iopsys/sdk/mypackage/",
+			"dm_files": [
+				"src/datamodel.c",
+				"additional_datamodel.c"
+			]
+		},
+		{
+			"repo": "/src/feeds/mypackage/",
+			"dm_files": [
+				"datamodel.c",
+				"src/datamodel.json"
+			]
+		}
+	],
+	"output": {
+		"acs": [
+			"hdm",
+			"default"
+		],
+		"file_format": [
+			"xml",
+			"xls"
+		],
+		"output_dir": "./out",
+		"output_file_prefix": "datamodel"
+	}
+}
+```
+
+---
+**NOTE**
+
+  1. All defined plugins will be treated as plugins except the ones that have the micro-service option defined will be treated as micro-services.
+  2. The `micro-service` option should be defined in the plugin only if you want to overwrite a specific Object introduced in the main tree.
+  3. All the tools need to be executed from the top directory.
+---
+

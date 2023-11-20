@@ -18,7 +18,7 @@ function check_ret()
 function exec_cmd()
 {
 	echo "executing $@"
-	$@ >/dev/null
+	$@ >/dev/null 2>&1
 
 	if [ $? -ne 0 ]; then
 		echo "Failed to execute $@"

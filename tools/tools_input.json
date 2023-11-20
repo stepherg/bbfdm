@@ -5,30 +5,37 @@
   "product_class": "DG400PRIME",
   "model_name": "DG400PRIME-A",
   "software_version": "1.2.3.4",
-  "root_node": "Device.",
   "vendor_list": [
     "iopsys"
   ],
   "dm_json_files": [
-    "../libbbfdm/dmtree/json/tr181.json",
-    "../libbbfdm/dmtree/vendor/iopsys/vendor.json"
+    "libbbfdm/dmtree/json/tr181.json",
+    "libbbfdm/dmtree/json/tr104.json",
+    "libbbfdm/dmtree/vendor/iopsys/vendor.json"
   ],
   "vendor_prefix": "X_IOPSYS_EU_",
   "plugins": [
     {
+      "repo": "https://dev.iopsys.eu/bbf/icwmp.git",
+      "version": "devel",
+      "dm_files": [
+        "src/cwmp_dm/datamodel.c"
+      ]
+    },
+    {
       "repo": "https://dev.iopsys.eu/bbf/bulkdata.git",
-      "proto": "git",
       "dm_files": [
         "bbf_plugin/bulkdata.json"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/xmppc.git",
-      "proto": "git"
+      "dm_files": [
+        "src/datamodel.c"
+      ]
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/stunc.git",
-      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/datamodel.c"
@@ -36,7 +43,6 @@
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/udpecho.git",
-      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/datamodel.c"
@@ -44,7 +50,6 @@
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/twamp-light.git",
-      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/datamodel.c"
@@ -52,7 +57,6 @@
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/periodicstats.git",
-      "proto": "git",
       "version": "devel",
       "dm_files": [
         "bbf_plugin/bbf_plugin.c"
@@ -60,7 +64,6 @@
     },
     {
       "repo": "https://dev.iopsys.eu/feed/iopsys.git",
-      "proto": "git",
       "version": "devel",
       "dm_files": [
         "urlfilter/files/etc/bbfdm/json/urlfilter.json",
@@ -71,7 +74,6 @@
     },
     {
       "repo": "https://dev.iopsys.eu/lcm/swmodd.git",
-      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/datamodel.c"
@@ -79,23 +81,16 @@
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/usermngr.git",
-      "proto": "git",
       "version": "devel",
+      "extra_dependencies": [
+      	"-lcrypt"
+      ],
       "dm_files": [
         "src/users.c"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/bbf/icwmp.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/cwmp_dm/datamodel.c"
-      ]
-    },
-    {
       "repo": "https://dev.iopsys.eu/iopsys/hostmngr.git",
-      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/bbf_plugin/hosts.c"
@@ -103,10 +98,37 @@
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/timemngr.git",
-      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/times.c"
+      ],
+      "micro-service": {
+      	"name": "bbfdm.time",
+      	"parent_dm": "Device.",
+      	"object": "Time",
+      	"root_obj": "bbfdm"
+      }
+    },
+    {
+      "repo": "https://dev.iopsys.eu/voice/tr104.git",
+      "version": "devel",
+      "dm_files": [
+        "libdm/tr104/*.c"
+      ],
+      "extra_dependencies": [
+        "-I libdmtree",
+        "-I libdm/common"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/voice/tr104.git",
+      "version": "devel",
+      "dm_files": [
+        "libdm/extensions/iowrt/*.c"
+      ],
+      "extra_dependencies": [
+        "-I libdmtree",
+        "-I libdm/common"
       ]
     }
   ],

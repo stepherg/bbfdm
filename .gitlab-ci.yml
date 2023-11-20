@@ -38,13 +38,14 @@ run_tools_test:
   allow_failure: false
   script:
   - "./gitlab-ci/tools-test.sh"
+  - "./gitlab-ci/generate_supported_dm.sh"
 
   artifacts:
       when: always
       paths:
-          - tools/out/datamodel_default.xml
-          - tools/out/datamodel_hdm.xml
-          - tools/out/datamodel.xls
+          - out/datamodel_default.xml
+          - out/datamodel_hdm.xml
+          - out/datamodel.xls
 
 run_libbbfdm_api_functional_test:
   stage: functional_test

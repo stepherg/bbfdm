@@ -53,7 +53,7 @@ More explanation on how this daemon works and all supported methods are presente
 All APIs exposed by libbbfdm-api are presented in this header file [libbbfdm_api.h](./libbbfdm-api/include/libbbfdm_api.h).
 
 - `tools` folder which contains some tools to generate Data Model in C, JSON, XML and Excel format.
-All supported tools are presented in this file[BBFDM Tools](./docs/guide/tools.md)
+All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 
 - `docs` folder which contains all documentation files.
 
@@ -62,7 +62,7 @@ All supported tools are presented in this file[BBFDM Tools](./docs/guide/tools.m
 * [BBFDMD Design](./docs/arch/bbfdmd.md)
 * [Datamodel extension using JSON plugin](./docs/guide/json_plugin_v1.md)
 * [Datamodel Plugins and Microservice](./docs/guide/datamodel_as_microservice.md)
-* [BBFDM Tools](./docs/guide/tools.md)
+* [BBFDM Tools](./tools/README.md)
 
 ## Important Topics
 * [Add support of a new Object/Parameter](./docs/guide/obj_param_extension.md)

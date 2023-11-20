@@ -12,183 +12,160 @@ import argparse
 import xlwt
 import bbf_common as bbf
 
+LIST_USP_DM = []
+LIST_CWMP_DM = []
 
-LIST_DM = []
-
-def getprotocols(value):
-    if isinstance(value, dict):
-        for obj, val in value.items():
-            if obj == "protocols" and isinstance(val, list):
-                if len(val) == 2:
-                    return "CWMP+USP"
-                elif val[0] == "usp":
-                    return "USP"
-                else:
-                    return "CWMP"
-    return "CWMP+USP"
-
-
-def is_param_obj_command_event_supported(dmobject):
-    for value in bbf.LIST_SUPPORTED_DM:
-        obj = json.loads(value)
-        param = bbf.get_option_value(obj, "param", None)
-        if param is None:
-            continue
+def is_dm_supported(supported_dm_list, dmobject):
+    for entry in supported_dm_list:
+        param = entry.get("param")
         if param == dmobject:
-            bbf.LIST_SUPPORTED_DM.remove(value)
+            supported_dm_list.remove(entry)
             return "Yes"
     return "No"
 
 
-def add_data_to_list_dm(obj, supported, protocols, types, version):
-    rootdm = bbf.get_root_node()
-    if (rootdm):
-        if (obj.startswith(rootdm)):
-            LIST_DM.append(obj + "," + protocols + "," + supported + "," + types + "," + version)
-    else:
-        LIST_DM.append(obj + "," + protocols + "," + supported + "," + types + "," + version)
+def add_data_to_list_dm(dm_list, obj, supported):
+    dm_list.append(obj + "," + supported)
 
-def parse_standard_object(dmobject, value):
+def parse_standard_object(list_read, list_write, dmobject, value, proto):
     hasobj = bbf.obj_has_child(value)
     hasparam = bbf.obj_has_param(value)
 
-    supported = is_param_obj_command_event_supported(dmobject)
-    version = bbf.get_option_value(value, "version", "2.0")
-    add_data_to_list_dm(dmobject, supported, getprotocols(value), "object", version)
+    if bbf.is_proto_exist(value, proto) is True:
+        supported = is_dm_supported(list_read, dmobject)
+        add_data_to_list_dm(list_write, dmobject, supported)
+    
+        if hasparam:
+            if isinstance(value, dict):
+                for k, v in value.items():
+                    if k == "mapping":
+                        continue
+                    if isinstance(v, dict):
+                        for k1, v1 in v.items():
+                            if k1 == "type" and v1 != "object":
+                                if bbf.is_proto_exist(v, proto) is False:
+                                    continue
+                                supported = is_dm_supported(list_read, dmobject + k)
+                                add_data_to_list_dm(list_write, dmobject + k, supported)
+                                break
+    
+        if hasobj:
+            if isinstance(value, dict):
+                for k, v in value.items():
+                    if isinstance(v, dict):
+                        for k1, v1 in v.items():
+                            if k1 == "type" and v1 == "object":
+                                parse_standard_object(list_read, list_write, k, v, proto)
+                            
 
-    if hasparam:
-        if isinstance(value, dict):
-            for k, v in value.items():
-                if k == "mapping":
-                    continue
-                if isinstance(v, dict):
-                    for k1, v1 in v.items():
-                        if k1 == "type" and v1 != "object":
-                            supported = is_param_obj_command_event_supported(dmobject + k)
-                            version = bbf.get_option_value(v, "version", "2.0")
-                            add_data_to_list_dm(dmobject + k, supported, getprotocols(v), "operate" if "()" in k else "event" if "!" in k else "parameter", version)
-                            break
+def parse_vendor_object(list_read, list_write):
+    for entry in list_read:
+        param = entry.get("param")
+        add_data_to_list_dm(list_write, param, "Yes")
+    
 
-    if hasobj:
-        if isinstance(value, dict):
-            for k, v in value.items():
-                if isinstance(v, dict):
-                    for k1, v1 in v.items():
-                        if k1 == "type" and v1 == "object":
-                            parse_standard_object(k, v)
-
-
-def parse_dynamic_object(dm_name_list):
-    if isinstance(dm_name_list, list) is False:
+def load_json_data(dm_name):
+    JSON_FILE = bbf.ARRAY_JSON_FILES.get(dm_name, None)
+    if JSON_FILE is None:
+        print(f"!!!! {dm_name} : Data Model doesn't exist")
         return None
 
-    for value in bbf.LIST_SUPPORTED_DM:
-        obj = json.loads(value)
-        param = bbf.get_option_value(obj, "param", None)
-        p_type = bbf.get_option_value(obj, "type", None)
-        version = bbf.get_option_value(obj, "version", "2.0")
-        if param is None or p_type is None:
-            continue
+    with open(JSON_FILE, "r", encoding='utf-8') as file:
+        return json.load(file, object_pairs_hook=OrderedDict)
 
-        for dm in dm_name_list:
+def parse_object(dm_name_list, list_read, list_write, proto):
+    for dm in dm_name_list:
+        data = load_json_data(dm)
+        if data is not None:
+            for obj, value in data.items():
+                if obj is None:
+                    print(f'!!!! {dm} : Wrong JSON Data model format!')
+                else:
+                    parse_standard_object(list_read, list_write, obj, value, proto)
 
-            JSON_FILE = bbf.ARRAY_JSON_FILES.get(dm, None)
-
-            if JSON_FILE is None:
-                continue
-
-            if dm == "tr181" and ".Services." in param:
-                continue
-
-            if dm == "tr104" and ".Services." not in param:
-                continue
-
-            if dm == "tr135" and ".Services." not in param:
-                continue
-
-            dmType = "object" if p_type == "DMT_OBJ" else "parameter"
-            add_data_to_list_dm(param, "Yes", "CWMP+USP", dmType, version)
+    parse_vendor_object(list_read, list_write)
 
 
 def parse_object_tree(dm_name_list):
     if isinstance(dm_name_list, list) is False:
         return None
 
-    for dm in dm_name_list:
+    # Usage for USP Data Model
+    LIST_SUPPORTED_USP_DM = bbf.LIST_SUPPORTED_USP_DM
+    parse_object(dm_name_list, LIST_SUPPORTED_USP_DM, LIST_USP_DM, "usp")
+    
+    # Usage for CWMP Data Model
+    LIST_SUPPORTED_CWMP_DM = bbf.LIST_SUPPORTED_CWMP_DM[:]
+    parse_object(dm_name_list, LIST_SUPPORTED_CWMP_DM, LIST_CWMP_DM, "cwmp")
 
-        JSON_FILE = bbf.ARRAY_JSON_FILES.get(dm, None)
+def generate_excel_sheet(sheet, title, data, style_mapping):
+    style_title = style_mapping["title"]
+    style_default = style_mapping["default"]
+    style_suffix = style_mapping["suffix"]
 
-        if JSON_FILE is not None:
-            file = open(JSON_FILE, "r", encoding='utf-8')
-            data = json.loads(file.read(), object_pairs_hook=OrderedDict)
+    sheet.write(0, 0, title, style_title)
+    sheet.write(0, 1, 'Supported', style_title)
 
-            for obj, value in data.items():
-                if obj is None:
-                    print(f'!!!! {dm} : Wrong JSON Data model format!')
-                    continue
+    for i, value in enumerate(data):
+        param = value.split(",")
+        suffix = None
 
-                parse_standard_object(obj, value)
+        for suffix_candidate, suffix_style in style_suffix.items():
+            if param[0].endswith(suffix_candidate):
+                suffix = suffix_style
+                break
+                
+        style_name, style = suffix or (None, style_default)
+
+        if style_name is not None:
+            sheet.write(i + 1, 0, param[0], style_name)
         else:
-            print(f"!!!! {dm} : Data Model doesn't exist")
+            sheet.write(i + 1, 0, param[0])
 
-    parse_dynamic_object(dm_name_list)
+        sheet.write(i + 1, 1, param[1], style)
+
+    sheet.col(0).width = 1300 * 20
+    sheet.col(1).width = 175 * 20
 
 
 def generate_excel_file(output_file):
     bbf.remove_file(output_file)
 
-    LIST_DM.sort(reverse=False)
+    LIST_USP_DM.sort(reverse=False)
+    LIST_CWMP_DM.sort(reverse=False)
 
     wb = xlwt.Workbook(style_compression=2)
-    sheet = wb.add_sheet('CWMP-USP')
 
     xlwt.add_palette_colour("custom_colour_yellow", 0x10)
     xlwt.add_palette_colour("custom_colour_green", 0x20)
     xlwt.add_palette_colour("custom_colour_grey", 0x30)
-
+    
     wb.set_colour_RGB(0x10, 255, 255, 153)
     wb.set_colour_RGB(0x20, 102, 205, 170)
     wb.set_colour_RGB(0x30, 153, 153, 153)
 
-    style_title = xlwt.easyxf(
-        'pattern: pattern solid, fore_colour custom_colour_grey;' + 'font: bold 1, color black;' + 'alignment: horizontal center;')
-    sheet.write(0, 0, 'OBJ/PARAM/OPERATE', style_title)
-    sheet.write(0, 1, 'Protocols', style_title)
-    sheet.write(0, 2, 'Version', style_title)
-    sheet.write(0, 3, 'Supported', style_title)
+    style_mapping = {
+        "title": xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_grey;' +
+                             'font: bold 1, color black;' + 'alignment: horizontal center;'),
+        "default": xlwt.easyxf('alignment: horizontal center;'),
+        "suffix": {
+            ".": (xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_yellow'),
+                  xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_yellow;' +
+                              'alignment: horizontal center;')),
+            "()" : (xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_green'),
+                    xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_green;' +
+                                'alignment: horizontal center;')),
+            "!" : (xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_green'),
+                   xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_green;' +
+                               'alignment: horizontal center;')),
+        }
+    }
+    
+    usp_sheet = wb.add_sheet('USP')
+    generate_excel_sheet(usp_sheet, 'OBJ/PARAM/OPERATE/EVENT', LIST_USP_DM, style_mapping)
 
-    i = 0
-    for value in LIST_DM:
-        param = value.split(",")
-        i += 1
-
-        if param[3] == "object":
-            style_name = xlwt.easyxf(
-                'pattern: pattern solid, fore_colour custom_colour_yellow')
-            style = xlwt.easyxf(
-                'pattern: pattern solid, fore_colour custom_colour_yellow;' + 'alignment: horizontal center;')
-        elif param[3] == "operate" or param[3] == "event":
-            style_name = xlwt.easyxf(
-                'pattern: pattern solid, fore_colour custom_colour_green')
-            style = xlwt.easyxf(
-                'pattern: pattern solid, fore_colour custom_colour_green;' + 'alignment: horizontal center;')
-        else:
-            style_name = None
-            style = xlwt.easyxf('alignment: horizontal center;')
-
-        if style_name is not None:
-            sheet.write(i, 0, param[0], style_name)
-        else:
-            sheet.write(i, 0, param[0])
-
-        sheet.write(i, 1, param[1], style)
-        sheet.write(i, 2, param[4], style)
-        sheet.write(i, 3, param[2], style)
-
-    sheet.col(0).width = 1300*20
-    sheet.col(1).width = 175*20
-    sheet.col(2).width = 175*20
-    sheet.col(3).width = 175*20
+    cwmp_sheet = wb.add_sheet('CWMP')
+    generate_excel_sheet(cwmp_sheet, 'OBJ/PARAM', LIST_CWMP_DM, style_mapping)
 
     wb.save(output_file)
 
@@ -196,7 +173,6 @@ def generate_excel_file(output_file):
 def generate_excel(dm_name_list, output_file="datamodel.xml"):
     print("Generating BBF Data Models in Excel format...")
 
-    bbf.fill_list_supported_dm()
     parse_object_tree(dm_name_list)
     generate_excel_file(output_file)
 
@@ -265,7 +241,6 @@ if __name__ == '__main__':
             plugins.append(r)
 
     bbf.generate_supported_dm(args.vendor_prefix, args.vendor_list, plugins)
-    bbf.clean_supported_dm_list()
     generate_excel(args.datamodel, args.output)
     print(f'Datamodel generation completed, aritifacts available in {args.output}')
     sys.exit(bbf.BBF_ERROR_CODE)

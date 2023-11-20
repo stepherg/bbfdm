@@ -1865,8 +1865,10 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 	int json_plugin_version = JSON_VERSION_0;
 
 	json_object *json = json_object_from_file(plugin_path);
-	if (!json)
+	if (!json) {
+		TRACE("Plugin failed [%s]\n", plugin_path);
 		return 0;
+	}
 
 	json_object_object_foreach(json, key, jobj) {
 		if (!key)

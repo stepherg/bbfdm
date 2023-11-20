@@ -334,8 +334,7 @@ int get_leaf_idx(DMLEAF **entryleaf)
 
 int load_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, const char *plugin_path)
 {
-	struct dirent *ent = NULL;
-	DIR *dir = NULL;
+	int max_num_files = 256;
 
 #ifdef BBF_VENDOR_EXTENSION
 	// Load objects and parameters exposed via vendor extension plugin
@@ -355,21 +354,20 @@ int load_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP
 	free_dotso_plugins();
 	free_specific_dynamic_node(dm_entryobj, INDX_LIBRARY_MOUNT);
 
-	sysfs_foreach_file(plugin_path, dir, ent) {
+	sysfs_foreach_file_sorted(plugin_path, max_num_files) {
 		char buf[512] = {0};
 
-		snprintf(buf, sizeof(buf), "%s/%s", plugin_path, ent->d_name);
+		snprintf(buf, sizeof(buf), "%s/%s", plugin_path, files[i]);
 
-		if (strstr(ent->d_name, ".json")) {
+		if (DM_STRSTR(files[i], ".json")) {
 			load_json_plugins(dm_entryobj, buf);
-		} else if (strstr(ent->d_name, ".so")) {
+		} else if (DM_STRSTR(files[i], ".so")) {
 			load_dotso_plugins(dm_entryobj, buf);
 		}
+
+		dmfree(files[i]);
 	}
 
-	if (dir) {
-		closedir(dir);
-	}
 	return 0;
 }
 

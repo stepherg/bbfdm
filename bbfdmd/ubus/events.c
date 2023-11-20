@@ -254,38 +254,3 @@ int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list)
 
 	return 0;
 }
-
-bool is_registered_event(char *name)
-{
-	bool ret = false;
-
-	if (!name)
-		return false;
-
-	struct dmctx bbf_ctx = {
-			.in_param = ROOT_NODE,
-			.nextlevel = false,
-			.iscommand = false,
-			.isevent = true,
-			.isinfo = false,
-			.instance_mode = INSTANCE_MODE_NUMBER,
-			.dm_type = BBFDM_USP
-	};
-
-	bbf_init(&bbf_ctx);
-
-	if (0 == bbfdm_cmd_exec(&bbf_ctx, BBF_SCHEMA)) {
-		struct dm_parameter *param;
-
-		list_for_each_entry(param, &bbf_ctx.list_parameter, list) {
-			if (strcmp(param->name, name) == 0) {
-				ret = true;
-				break;
-			}
-		}
-	}
-
-	bbf_cleanup(&bbf_ctx);
-
-	return ret;
-}

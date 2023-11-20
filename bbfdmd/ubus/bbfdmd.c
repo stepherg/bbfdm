@@ -449,13 +449,17 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 
 	blob_buf_init(&data.bb, 0);
 
-	if (dm_type == BBFDM_CWMP) {
+#ifdef BBF_SCHEMA_FULL_TREE
+	data.bbf_ctx.isinfo = true;
+	bbf_dm_get_supported_dm(&data);
+#else
+	if (dm_type == BBFDM_CWMP)
 		bbfdm_get_names(&data);
-		ubus_send_reply(ctx, req, data.bb.head);
-	} else {
+	else
 		get_schema_from_blob(&u->dm_schema, &data);
-		ubus_send_reply(ctx, req, data.bb.head);
-	}
+#endif
+
+	ubus_send_reply(ctx, req, data.bb.head);
 
 	blob_buf_free(&data.bb);
 	free_path_list(&paths_list);

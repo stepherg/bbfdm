@@ -4,10 +4,17 @@ echo "Verification of BBF Tools"
 pwd
 source ./gitlab-ci/shared.sh
 
+cp ./gitlab-ci/core_service.conf /etc/supervisor/conf.d/
+
+# starting base services
+supervisorctl reread
+supervisorctl update
+sleep 5
+
 # install required packages
 exec_cmd apt update
 exec_cmd apt install -y python3-pip libxml2-utils
-exec_cmd pip3 install jsonschema xlwt pylint
+exec_cmd pip3 install jsonschema xlwt ubus pylint
 
 echo "Validating PEP8 syntax on tools"
 exec_cmd_verbose pylint -d R,C,W0603 tools/*.py
@@ -57,29 +64,5 @@ json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-135-1-4-1-cwmp-full.
 ./tools/validate_json_plugin.py $json_path
 check_ret $?
 
-
-echo "********* Validate XML File *********"
-if [ -n "${CI_SERVER_HOST}" ]; then
-	echo "machine ${CI_SERVER_HOST}" >>~/.netrc
-	echo "login gitlab-ci-token" >>~/.netrc
-	echo "password ${CI_JOB_TOKEN}" >>~/.netrc
-fi
-
-cd tools
-./generate_dm.py tools_input.json
-check_ret $?
-
-echo "Check if the required tools are generated"
-[ ! -f "out/datamodel.xls" ] && echo "Excel file doesn't exist" && exit 1
-[ ! -f "out/datamodel_hdm.xml" ] && echo "XML file with HDM format doesn't exist" && exit 1
-[ ! -f "out/datamodel_default.xml" ] && echo "XML file with BBF format doesn't exist" && exit 1
-
-cd ..
-
-echo "Validate datamodel_default generated XML file"
-xmllint --schema test/tools/cwmp-datamodel-1-8.xsd tools/out/datamodel_default.xml --noout
-check_ret $?
-
 date +%s > timestamp.log
-
 echo "Tools Test :: PASS"

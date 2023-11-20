@@ -17,6 +17,5 @@ struct event_map_list {
 
 void free_ubus_event_handler(struct ubus_context *ctx, struct list_head *ev_list);
 int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list);
-bool is_registered_event(char *name);
 
 #endif /* EVENT_H */

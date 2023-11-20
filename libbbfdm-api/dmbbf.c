@@ -320,6 +320,7 @@ static int bbfdatamodel_matches(unsigned int dm_type, const enum bbfdm_type_enum
 
 static bool check_dependency(const char *conf_obj)
 {
+#ifndef BBF_SCHEMA_FULL_TREE
 	/* Available cases */
 	/* one file => "file:/etc/config/network" */
 	/* multiple files => "file:/etc/config/network,/lib/netifd/proto/dhcp.sh" */
@@ -360,6 +361,7 @@ static bool check_dependency(const char *conf_obj)
 			}
 		}
 	}
+#endif
 
 	return true;
 }
@@ -468,11 +470,15 @@ static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *ent
 			return;
 	}
 
+#ifndef BBF_SCHEMA_FULL_TREE
 	if ((entryobj->browseinstobj && dmctx->isgetschema) || !dmctx->isgetschema) {
+#endif
 		*err = dmctx->method_obj(dmctx, &node, entryobj->permission, entryobj->addobj, entryobj->delobj, entryobj->get_linker, data, instance);
 		if (dmctx->stop)
 			return;
+#ifndef BBF_SCHEMA_FULL_TREE
 	}
+#endif
 
 	if (entryobj->browseinstobj && !dmctx->isgetschema) {
 		entryobj->browseinstobj(dmctx, &node, data, instance);

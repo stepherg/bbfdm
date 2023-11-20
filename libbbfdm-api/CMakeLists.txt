@@ -11,6 +11,7 @@ IF(${BBF_MAX_OBJECT_INSTANCES})
 ENDIF()
 
 OPTION(BBF_VENDOR_EXTENSION "build with vendor extension enabled" ON)
+OPTION(BBF_SCHEMA_FULL_TREE "build with schema full tree" OFF)
 
 SET(BBF_PLUGIN_SOURCES plugin/dotso_plugin.c plugin/json_plugin.c)
 
@@ -21,6 +22,10 @@ IF(BBF_VENDOR_EXTENSION)
 	SET(BBF_VENDOR_LIST "iopsys" CACHE STRING "vendor list to be used")
 	STRING(REPLACE "," ";" VENDOR_LIST ${BBF_VENDOR_LIST})
 ENDIF(BBF_VENDOR_EXTENSION)
+
+IF(BBF_SCHEMA_FULL_TREE)
+	add_compile_definitions(BBF_SCHEMA_FULL_TREE)
+ENDIF(BBF_SCHEMA_FULL_TREE)
 
 FILE(GLOB BBF_API_SOURCES *.c)
 

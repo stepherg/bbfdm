@@ -5,7 +5,7 @@
 		"input": {
 			"type": "DotSo",
 			"name": "/lib/libbbfdm.so",
-			"plugin_dir": "/etc/bbfdm/plugins/"
+			"plugin_dir": "/etc/bbfdm/plugins"
 		},
 		"output": {
 			"type": "UBUS",
