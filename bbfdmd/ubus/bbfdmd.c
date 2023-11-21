@@ -232,8 +232,8 @@ static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t
 		// child initialise signal to prevent segfaults
 		signal_init();
 		/* free fd's and memory inherited from parent */
-		ubus_shutdown(data->ctx);
 		uloop_done();
+		ubus_shutdown(data->ctx);
 		async_req_free(r);
 		fclose(stdin);
 		fclose(stdout);
@@ -1252,8 +1252,8 @@ static int fork_instance_checker(struct bbfdm_context *u)
 		// child initialise signal to prevent segfaults
 		signal_init();
 		/* free fd's and memory inherited from parent */
-		ubus_shutdown(&u->ubus_ctx);
 		uloop_done();
+		ubus_shutdown(&u->ubus_ctx);
 		async_req_free(r);
 		fclose(stdin);
 		fclose(stdout);
