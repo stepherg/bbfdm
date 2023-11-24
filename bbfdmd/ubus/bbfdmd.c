@@ -31,7 +31,7 @@
 #include "cli.h"
 
 #ifndef DAEMON_JSON_INPUT
-#define BBFDM_JSON_INPUT "/etc/bbfdm/input.json"
+#define BBFDM_JSON_INPUT "/tmp/bbfdm/input.json"
 #else
 #define BBFDM_JSON_INPUT DAEMON_JSON_INPUT
 #endif
@@ -1358,8 +1358,9 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_pat
 		return -1;
 
 	json_object *json_obj = json_object_from_file(json_path);
-	if (!json_obj)
-		return -1;
+	if (!json_obj) {
+		goto exit;
+	}
 
 	json_object *deamon_obj = dmjson_get_obj(json_obj, 1, "daemon");
 	if (!deamon_obj) {
@@ -1457,7 +1458,30 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_pat
 	}
 
 exit:
-	json_object_put(json_obj);
+	if (json_obj) {
+		json_object_put(json_obj);
+	}
+
+	if (is_micro_service == false) {
+		ERR("Failed to read default input file, switching to defaults");
+		config->transaction_timeout = 30;
+		config->refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
+		config->subprocess_level = BBF_SUBPROCESS_DEPTH;
+		strncpyt(config->out_name, "bbfdm", 6);
+		strncpyt(config->in_plugin_dir, "/etc/bbfdm/plugins", 19);
+		strncpyt(config->in_type, "DotSo", 6);
+		strncpyt(config->in_name, "/lib/libbbfdm.so", 17);
+		config->proto = BBFDM_BOTH;
+		config->instance_mode = INSTANCE_MODE_NUMBER;
+		snprintf(config->cli_in_type, sizeof(config->cli_in_type), "%s", "UBUS");
+		snprintf(config->cli_in_name, sizeof(config->cli_in_name), "%s", "bbfdm");
+		snprintf(config->cli_out_type, sizeof(config->cli_out_type), "%s", "CLI");
+
+		set_debug_level(config->log_level);
+		configure_transaction_timeout(config->transaction_timeout);
+
+		err = 0;
+	}
 
 	return err;
 }
