@@ -1353,12 +1353,14 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_pat
 {
 	char *opt_val = NULL;
 	int err = 0;
+	json_object *json_obj = NULL;
 
 	if (!json_path || !strlen(json_path))
 		return -1;
 
-	json_object *json_obj = json_object_from_file(json_path);
+	json_obj = json_object_from_file(json_path);
 	if (!json_obj) {
+		ERR("Failed to read input %s file", json_path);
 		goto exit;
 	}
 
@@ -1457,13 +1459,15 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_pat
 		snprintf(config->cli_out_type, sizeof(config->cli_out_type), "%s", opt_val);
 	}
 
+	json_object_put(json_obj);
+	return err;
 exit:
 	if (json_obj) {
 		json_object_put(json_obj);
 	}
 
 	if (is_micro_service == false) {
-		ERR("Failed to read default input file, switching to defaults");
+		ERR("Switching to internal defaults");
 		config->transaction_timeout = 30;
 		config->refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
 		config->subprocess_level = BBF_SUBPROCESS_DEPTH;
