@@ -229,6 +229,7 @@ bool is_strword_in_optionvalue(char *optionvalue, char *str);
 void remove_new_line(char *buf);
 int dmcmd(char *cmd, int n, ...);
 int dmcmd_no_wait(char *cmd, int n, ...);
+int run_cmd(const char *cmd, char *output, size_t out_len);
 void hex_to_ip(char *address, char *ret, size_t size);
 void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section);
 void free_dmmap_config_dup_list(struct list_head *dup_list);

@@ -1075,11 +1075,7 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 
 	snprintf(cmd, sizeof(cmd), "sh %s %s", IPLAYER_CAP_DIAGNOSTIC_PATH, input);
 
-	FILE *pp = popen(cmd, "r");
-	if (pp != NULL) {
-		fgets(output, sizeof(output), pp);
-		pclose(pp);
-	} else {
+	if (run_cmd(cmd, output, sizeof(output)) != 0) {
 		bbfdm_set_fault_message(ctx, "IPLayerCapacity: 'sh %s {input}' command failed to run", IPLAYER_CAP_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
 	}

@@ -117,11 +117,7 @@ int operate_Device_packetCapture(char *refparam, struct dmctx *ctx, void *data, 
 
 	snprintf(cmd, sizeof(cmd), "sh %s %s", PACKET_CAPTURE_DIAGNOSTIC_PATH, input);
 
-	FILE *pp = popen(cmd, "r");
-	if (pp != NULL) {
-		fgets(output, sizeof(output), pp);
-		pclose(pp);
-	} else {
+	if (run_cmd(cmd, output, sizeof(output)) != 0) {
 		bbfdm_set_fault_message(ctx, "PacketCapture: 'sh %s {input}' command failed to run", PACKET_CAPTURE_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
 	}

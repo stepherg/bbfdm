@@ -1852,11 +1852,7 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 
 	snprintf(cmd, sizeof(cmd), "sh %s %s", TRACEROUTE_DIAGNOSTIC_PATH, input);
 
-	FILE *pp = popen(cmd, "r");
-	if (pp != NULL) {
-		fgets(output, sizeof(output) , pp);
-		pclose(pp);
-	} else {
+	if (run_cmd(cmd, output, sizeof(output)) != 0) {
 		bbfdm_set_fault_message(ctx, "TraceRoute: 'sh %s {input}' command failed to run", TRACEROUTE_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
 	}
@@ -1990,11 +1986,7 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 
 	snprintf(cmd, sizeof(cmd), "sh %s %s", DOWNLOAD_DIAGNOSTIC_PATH, input);
 
-	FILE *pp = popen(cmd, "r");
-	if (pp != NULL) {
-		fgets(output, sizeof(output) , pp);
-		pclose(pp);
-	} else {
+	if (run_cmd(cmd, output, sizeof(output)) != 0) {
 		bbfdm_set_fault_message(ctx, "DownloadDiagnostics: 'sh %s {input}' command failed to run", DOWNLOAD_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
 	}
@@ -2136,11 +2128,7 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 
 	snprintf(cmd, sizeof(cmd), "sh %s %s", UPLOAD_DIAGNOSTIC_PATH, input);
 
-	FILE *pp = popen(cmd, "r");
-	if (pp != NULL) {
-		fgets(output, sizeof(output) , pp);
-		pclose(pp);
-	} else {
+	if (run_cmd(cmd, output, sizeof(output)) != 0) {
 		bbfdm_set_fault_message(ctx, "UploadDiagnostics: 'sh %s {input}' command failed to run", UPLOAD_DIAGNOSTIC_PATH);
 		return USP_FAULT_COMMAND_FAILURE;
 	}

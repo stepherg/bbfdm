@@ -59,13 +59,8 @@ int operate_Device_SelfTest(char *refparam, struct dmctx *ctx, void *data, char 
 
 	snprintf(cmd, sizeof(cmd), "sh %s", DIAG_BIN);
 
-	FILE *pp = popen(cmd, "r");
-	if (pp != NULL) {
-		fgets(output, sizeof(output), pp);
-		pclose(pp);
-	} else {
+	if (run_cmd(cmd, output, sizeof(output)) != 0)
 		goto err;
-	}
 
 	// truncate the new line char from end
 	remove_new_line(output);

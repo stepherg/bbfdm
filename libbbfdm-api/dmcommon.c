@@ -336,6 +336,32 @@ int dmcmd_no_wait(char *cmd, int n, ...)
 	return 0;
 }
 
+int run_cmd(const char *cmd, char *output, size_t out_len)
+{
+	int ret = -1;
+	FILE *pp;
+
+	if (cmd == NULL) {
+		return 0;
+	}
+
+	if (output == NULL || out_len == 0) {
+		return ret;
+	}
+
+	memset(output, 0, out_len);
+
+	pp = popen(cmd, "r");
+	if (pp != NULL) {
+		if (!(fgets(output, out_len, pp) == NULL && ferror(pp) != 0)) {
+			ret = 0;
+		}
+		pclose(pp);
+	}
+
+	return ret;
+}
+
 void hex_to_ip(char *address, char *ret, size_t size)
 {
 	unsigned int ip[4] = {0};

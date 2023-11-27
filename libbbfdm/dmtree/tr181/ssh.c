@@ -283,7 +283,9 @@ static void close_active_sessions(struct uci_section *s)
 			continue;
 
 		snprintf(cmd, sizeof(cmd), "kill -15 %s", line);
-		system(cmd);
+		if (system(cmd) == -1) {
+			break;
+		}
 	}
 
 	pclose(pp);

@@ -1193,7 +1193,9 @@ static int operate_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *
 		vlf_file_path = DEF_VENDOR_LOG_FILE;
 		char cmd[64] = {0};
 		snprintf(cmd, sizeof(cmd), "logread > %s", DEF_VENDOR_LOG_FILE);
-		system(cmd);
+		if (system(cmd) == -1) {
+			return USP_FAULT_COMMAND_FAILURE;
+		}
 	}
 
 	int res = bbf_upload_log(url, user, pass, vlf_file_path, upload_command, upload_path);

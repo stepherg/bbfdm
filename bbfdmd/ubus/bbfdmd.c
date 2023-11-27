@@ -623,7 +623,7 @@ static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *o
 		struct blob_attr *msg)
 {
 	struct blob_attr *tb[__DM_OPERATE_MAX] = {NULL};
-	char path[MAX_DM_PATH] = {0};
+	char path[PATH_MAX] = {0};
 	bbfdm_data_t data;
 
 	memset(&data, 0, sizeof(bbfdm_data_t));
@@ -958,7 +958,7 @@ static void service_list(struct blob_buf *bb)
 	blobmsg_add_string(bb, NULL, "list");
 	blobmsg_close_array(bb, array);
 
-	run_cmd(cmd, val, 32);
+	run_cmd(cmd, val, sizeof(val));
 	blobmsg_add_u32(bb, "expected_services_num", atoi(val));
 	array = blobmsg_open_array(bb, "registered_service");
 	get_list_of_registered_service(&head_registered_service, bb);

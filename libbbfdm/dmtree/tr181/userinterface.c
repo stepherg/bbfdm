@@ -212,7 +212,7 @@ static void add_new_host(char **list, char *host)
 		*end = '\0';
 
 	if (*list == NULL) {
-		asprintf(list, "%s", tmp);
+		dmasprintf(list, "%s", tmp);
 		return;
 	} else {
 		prev = dmstrdup(*list);
@@ -220,7 +220,7 @@ static void add_new_host(char **list, char *host)
 		*list = NULL;
 	}
 
-	asprintf(list, "%s,%s", prev, tmp);
+	dmasprintf(list, "%s,%s", prev, tmp);
 }
 
 /*************************************************************
@@ -604,7 +604,6 @@ static int get_http_access_hosts(char *refparam, struct dmctx *ctx, void *data, 
 
 	if (res) {
 		*value = dmstrdup(res);
-		free(res);
 	}
 
 	return 0;

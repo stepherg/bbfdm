@@ -958,4 +958,3 @@ char *ethernet___get_ethernet_interface_name(char *device_name)
 
 	return dev_name;
 }
-
