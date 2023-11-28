@@ -48,4 +48,7 @@ void get_list_of_registered_service(struct list_head *srvlist, struct blob_buf *
 bool load_service(DMOBJ *main_dm, struct list_head *srv_list, char *srv_name, char *srv_parent_dm, char *srv_obj);
 void free_services_from_list(struct list_head *clist);
 
+int handle_transaction_of_registered_service(struct ubus_context *ctx, struct blob_buf *trans_bb, struct list_head *srvlist,
+		const char *trans_cmd, int trans_id, uint32_t max_timeout, bool service_restart);
+
 #endif //__DMENTRY_H__

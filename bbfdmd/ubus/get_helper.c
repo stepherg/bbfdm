@@ -18,6 +18,8 @@
 #include "common.h"
 #include "pretty_print.h"
 
+extern struct list_head head_registered_service;
+
 DMOBJ *DEAMON_DM_ROOT_OBJ = NULL;
 DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2] = {0};
 DM_MAP_VENDOR_EXCLUDE *DEAMON_DM_VENDOR_EXTENSION_EXCLUDE = NULL;
@@ -187,7 +189,7 @@ void fill_err_code_array(bbfdm_data_t *data, int fault)
 static void transaction_timeout_handler(struct uloop_timeout *t __attribute__((unused)))
 {
 	INFO("Transaction timeout called, aborting tid %d", g_current_trans.trans_id);
-	transaction_abort(g_current_trans.trans_id, NULL);
+	transaction_abort(NULL, g_current_trans.trans_id);
 }
 
 static int get_random_id(void)
@@ -269,7 +271,7 @@ static int compare_path(const void *arg1, const void *arg2)
 }
 
 // Returns transaction id if successful, otherwise 0
-int transaction_start(char *app, uint32_t max_timeout)
+int transaction_start(bbfdm_data_t *data, char *app, uint32_t max_timeout)
 {
 	int ret = 0;
 	uint32_t timeout;
@@ -280,18 +282,23 @@ int transaction_start(char *app, uint32_t max_timeout)
 	}
 
 	if (max_timeout > 0) {
-		timeout = max_timeout;
+		timeout = max_timeout * 1000;
 	} else {
 		timeout = g_current_trans.timeout_ms;
 	}
 
-	ret = get_random_id();
+	ret = data->trans_id ? data->trans_id : get_random_id();
 	strncpyt(g_current_trans.app, app, 32);
 
 	g_current_trans.trans_id = ret;
 	g_current_trans.trans_timeout.cb = transaction_timeout_handler;
 	uloop_timeout_set(&g_current_trans.trans_timeout, timeout);
 	INFO("Transaction created by [%s] id %d, timeout %zd", g_current_trans.app, g_current_trans.trans_id, timeout);
+
+	if (data->trans_id) {
+		// Call transaction for registered services only if transaction id is defined
+		handle_transaction_of_registered_service(data->ctx, NULL, &head_registered_service, "start", ret, timeout/1000, 0);
+	}
 
 	return ret;
 }
@@ -323,17 +330,26 @@ bool is_transaction_valid(int trans_id)
 	return (trans_id == g_current_trans.trans_id);
 }
 
-int transaction_commit(int trans_id, struct blob_buf *bb, bool is_service_restart)
+int transaction_commit(bbfdm_data_t *data, int trans_id, bool is_service_restart)
 {
 	int ret = -1;
 
 	if (is_transaction_valid(trans_id)) {
+		struct blob_buf *bb = data ? &data->bb : NULL;
+		void *arr = NULL;
+
 		INFO("Commit on-going transaction by %s", g_current_trans.app);
 		uloop_timeout_cancel(&g_current_trans.trans_timeout);
 		g_current_trans.trans_id = 0;
 		g_current_trans.app[0] = '\0';
 
+		if (bb) arr = blobmsg_open_array(bb, "updated_services");
 		bbf_entry_restart_services(bb, is_service_restart);
+		if (data && data->trans_id) {
+			// Call transaction for registered services only if transaction id is defined
+			handle_transaction_of_registered_service(data->ctx, bb, &head_registered_service, "commit", data->trans_id, 0, is_service_restart);
+		}
+		if (bb) blobmsg_close_array(bb, arr);
 
 		ret = 0;
 	} else {
@@ -343,17 +359,26 @@ int transaction_commit(int trans_id, struct blob_buf *bb, bool is_service_restar
 	return ret;
 }
 
-int transaction_abort(int trans_id, struct blob_buf *bb)
+int transaction_abort(bbfdm_data_t *data, int trans_id)
 {
 	int ret = -1;
 
 	if (is_transaction_valid(trans_id)) {
+		struct blob_buf *bb = data ? &data->bb : NULL;
+		void *arr = NULL;
+
 		INFO("Abort on-going transaction by %s", g_current_trans.app);
 		uloop_timeout_cancel(&g_current_trans.trans_timeout);
 		g_current_trans.trans_id = 0;
 		g_current_trans.app[0] = '\0';
 
+		if (bb) arr = blobmsg_open_array(bb, "reverted_configs");
 		bbf_entry_revert_changes(bb);
+		if (data && data->trans_id) {
+			// Call transaction for registered services only if transaction id is defined
+			handle_transaction_of_registered_service(data->ctx, bb, &head_registered_service, "abort", data->trans_id, 0, 0);
+		}
+		if (bb) blobmsg_close_array(bb, arr);
 
 		ret = 0;
 	} else {

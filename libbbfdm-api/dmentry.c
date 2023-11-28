@@ -439,9 +439,6 @@ bool adm_entry_object_exists(struct dmctx *ctx, char *param)
 void bbf_entry_restart_services(struct blob_buf *bb, bool restart_services)
 {
 	struct package_change *pc = NULL;
-	void *arr = NULL;
-
-	if (bb) arr = blobmsg_open_array(bb, "updated_services");
 
 	list_for_each_entry(pc, &head_package_change, list) {
 
@@ -454,8 +451,6 @@ void bbf_entry_restart_services(struct blob_buf *bb, bool restart_services)
 		}
 	}
 
-	if (bb) blobmsg_close_array(bb, arr);
-
 	dmuci_commit_bbfdm();
 
 	free_all_list_package_change(&head_package_change);
@@ -464,9 +459,6 @@ void bbf_entry_restart_services(struct blob_buf *bb, bool restart_services)
 void bbf_entry_revert_changes(struct blob_buf *bb)
 {
 	struct package_change *pc = NULL;
-	void *arr = NULL;
-
-	if (bb) arr = blobmsg_open_array(bb, "reverted_configs");
 
 	list_for_each_entry(pc, &head_package_change, list) {
 
@@ -474,8 +466,6 @@ void bbf_entry_revert_changes(struct blob_buf *bb)
 
 		dmubus_call_set("uci", "revert", UBUS_ARGS{{"config", pc->package, String}}, 1);
 	}
-
-	if (bb) blobmsg_close_array(bb, arr);
 
 	dmuci_revert_bbfdm();
 

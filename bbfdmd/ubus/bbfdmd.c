@@ -562,6 +562,7 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	blob_buf_init(&data.bb, 0);
 	bbf_init(&data.bbf_ctx);
 
+	data.ctx = ctx;
 	data.bbf_ctx.in_param = path;
 
 	fault = fill_pvlist_set(&data, path, tb[DM_SET_VALUE] ? blobmsg_get_string(tb[DM_SET_VALUE]) : NULL, tb[DM_SET_OBJ_PATH], &pv_list);
@@ -584,11 +585,13 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		WARNING("Transaction not started yet");
 		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
 		goto end;
+	} else {
+		data.bbf_ctx.trans_id = data.trans_id;
 	}
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		trans_id = transaction_start("INT_SET", 0);
+		trans_id = transaction_start(&data, "INT_SET", 0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
@@ -600,7 +603,7 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Internal transaction: need to commit the changes
-		transaction_commit(trans_id, NULL, true);
+		transaction_commit(NULL, trans_id, true);
 	}
 
 end:
@@ -687,6 +690,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	snprintf(path, PATH_MAX, "%s", (char *)blobmsg_data(tb[DM_ADD_PATH]));
 
+	data.ctx = ctx;
 	data.bbf_ctx.in_param = path;
 
 	fill_optional_data(&data, tb[DM_ADD_OPTIONAL]);
@@ -701,11 +705,13 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		WARNING("Transaction not started yet");
 		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
 		goto end;
+	} else {
+		data.bbf_ctx.trans_id = data.trans_id;
 	}
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		trans_id = transaction_start("INT_ADD", 0);
+		trans_id = transaction_start(&data, "INT_ADD", 0);
 		if (trans_id == 0) {
 			ERR("Failed to get the lock for the transaction");
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
@@ -719,7 +725,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 		if (data.trans_id == 0) {
 			// Internal transaction: need to abort the changes
-			transaction_abort(trans_id, NULL);
+			transaction_abort(NULL, trans_id);
 		}
 
 		goto end;
@@ -737,7 +743,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 			if (data.trans_id == 0) {
 				// Internal transaction: need to abort the changes
-				transaction_abort(trans_id, NULL);
+				transaction_abort(NULL, trans_id);
 			}
 
 			free_pv_list(&pv_list);
@@ -753,7 +759,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Internal transaction: need to commit the changes
-		transaction_commit(trans_id, NULL, true);
+		transaction_commit(NULL, trans_id, true);
 	}
 
 end:
@@ -805,6 +811,7 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		}
 	}
 
+	data.ctx = ctx;
 	data.plist = &paths_list;
 
 	fill_optional_data(&data, tb[DM_DEL_OPTIONAL]);
@@ -821,11 +828,13 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		WARNING("Transaction not started yet");
 		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
 		goto end;
+	} else {
+		data.bbf_ctx.trans_id = data.trans_id;
 	}
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		trans_id = transaction_start("INT_DEL", 0);
+		trans_id = transaction_start(&data, "INT_DEL", 0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
@@ -837,7 +846,7 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Internal transaction: need to commit the changes
-		transaction_commit(trans_id, NULL, true);
+		transaction_commit(NULL, trans_id, true);
 	}
 
 end:
@@ -901,9 +910,11 @@ static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_objec
 	bbf_init(&data.bbf_ctx);
 	blob_buf_init(&data.bb, 0);
 
+	data.ctx = ctx;
+
 	if (is_str_eq(trans_cmd, "start")) {
 		cancel_periodic_timers(ctx);
-		ret = transaction_start("API", max_timeout);
+		ret = transaction_start(&data, "API", max_timeout);
 		if (ret) {
 			blobmsg_add_u8(&data.bb, "status", true);
 			blobmsg_add_u32(&data.bb, "transaction_id", ret);
@@ -913,11 +924,11 @@ static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_objec
 		}
 	} else if (is_str_eq(trans_cmd, "commit")) {
 		register_periodic_timers(ctx);
-		ret = transaction_commit(data.trans_id, &data.bb, is_service_restart);
+		ret = transaction_commit(&data, data.trans_id, is_service_restart);
 		blobmsg_add_u8(&data.bb, "status", (ret == 0));
 	} else if (is_str_eq(trans_cmd, "abort")) {
 		register_periodic_timers(ctx);
-		ret = transaction_abort(data.trans_id, &data.bb);
+		ret = transaction_abort(&data, data.trans_id);
 		blobmsg_add_u8(&data.bb, "status", (ret == 0));
 	} else if (is_str_eq(trans_cmd, "status")) {
 		transaction_status(&data.bb);
