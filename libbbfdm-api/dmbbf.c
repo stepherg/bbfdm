@@ -858,7 +858,6 @@ static char *get_value_by_reference(struct dmctx *ctx, char *value)
 	char buf[MAX_DM_PATH * 4] = {0};
 	char buf_val[MAX_DM_PATH * 4] = {0};
 	bool path_resolved = false;
-	unsigned pos = 0;
 
 	if (DM_STRLEN(value) == 0 || !DM_STRSTR(value, "=="))
 		return value;
@@ -895,12 +894,12 @@ static char *get_value_by_reference(struct dmctx *ctx, char *value)
 
 		if (DM_STRLEN(val)) {
 			path_resolved = true;
-			pos += snprintf(&buf_val[pos], sizeof(buf_val) - pos, "%s,", val);
+			snprintf(buf_val, sizeof(buf_val), "%s", val);
+			break;
 		}
 	}
 
 	if (path_resolved) {
-		buf_val[pos - 1] = 0;
 		return dmstrdup(buf_val);
 	}
 
