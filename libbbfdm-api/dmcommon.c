@@ -125,6 +125,7 @@ struct dhcp_options_type DHCP_OPTIONS_ARRAY[] = {
 {"", 58, OPTION_INT, 4},                                /* DHCP_RENEWAL_TIME       */
 {"", 59, OPTION_INT, 4},                                /* DHCP_REBINDING_TIME     */
 {"vendor", 60, OPTION_STRING, 0},                       /* DHCP_VENDOR             */
+{"", 61, OPTION_HEX, 1},                                /* DHCP_CLIENT_IDENTIFIER  */
 {"", 65, OPTION_IP, 4},                                 /* DHCP_NIS_SERVER_ADDR    */
 {"tftp", 66, OPTION_STRING, 0},                         /* DHCP_TFTP_SERVER_NAME   */
 {"bootfile", 67, OPTION_STRING, 0},                     /* DHCP_BOOT_FILE          */

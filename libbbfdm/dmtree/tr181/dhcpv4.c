@@ -2641,7 +2641,7 @@ static int set_DHCPv4ClientSentOption_Enable(char *refparam, struct dmctx *ctx, 
 					char str[256] = {0};
 
 					convert_hex_to_string(dhcp_client_s->value, str, sizeof(str));
-					dmuci_set_value_by_section(dhcp_client_s->client_sect, option_name, b ? str : "");
+					dmuci_set_value_by_section(dhcp_client_s->client_sect, option_name, b ? (DM_STRTOL(dhcp_client_s->option_tag) == DHCP_OPTION_CLIENTID) ? dhcp_client_s->value : str : "");
 				}
 			}
 
@@ -2716,7 +2716,7 @@ static int set_DHCPv4ClientSentOption_Tag(char *refparam, struct dmctx *ctx, voi
 						dmuci_set_value_by_section(dhcp_client_s->client_sect, "sendopts", sendopts);
 					} else {
 						convert_hex_to_string(dhcp_client_s->value, str, sizeof(str));
-						dmuci_set_value_by_section(dhcp_client_s->client_sect, option_name, str);
+						dmuci_set_value_by_section(dhcp_client_s->client_sect, option_name, (DM_STRTOL(value) == DHCP_OPTION_CLIENTID) ? dhcp_client_s->value : str);
 					}
 				}
 			}
@@ -2771,7 +2771,7 @@ static int set_DHCPv4ClientSentOption_Value(char *refparam, struct dmctx *ctx, v
 						dmuci_set_value_by_section(dhcp_client_s->client_sect, "sendopts", sendopts);
 					} else {
 						convert_hex_to_string(value, str, sizeof(str));
-						dmuci_set_value_by_section(dhcp_client_s->client_sect, option_name, str);
+						dmuci_set_value_by_section(dhcp_client_s->client_sect, option_name, (DM_STRTOL(dhcp_client_s->option_tag) == DHCP_OPTION_CLIENTID) ? value : str);
 					}
 				}
 			}
