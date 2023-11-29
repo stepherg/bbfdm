@@ -282,7 +282,7 @@ int transaction_start(bbfdm_data_t *data, char *app, uint32_t max_timeout)
 	}
 
 	if (max_timeout > 0) {
-		timeout = max_timeout * 1000;
+		timeout = max_timeout;
 	} else {
 		timeout = g_current_trans.timeout_ms;
 	}
@@ -295,9 +295,9 @@ int transaction_start(bbfdm_data_t *data, char *app, uint32_t max_timeout)
 	uloop_timeout_set(&g_current_trans.trans_timeout, timeout);
 	INFO("Transaction created by [%s] id %d, timeout %zd", g_current_trans.app, g_current_trans.trans_id, timeout);
 
-	if (data->trans_id) {
+	if (strcmp(app, "API") == 0) {
 		// Call transaction for registered services only if transaction id is defined
-		handle_transaction_of_registered_service(data->ctx, NULL, &head_registered_service, "start", ret, timeout/1000, 0);
+		handle_transaction_of_registered_service(data->ctx, NULL, &head_registered_service, "start", ret, timeout, 0);
 	}
 
 	return ret;
