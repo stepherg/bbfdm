@@ -54,7 +54,7 @@ udpecho_launch() {
 	[ -z "${dscp}" ] && dscp=0
 	[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.l3_device) && device="-i $device" || device=""
 	ip_addr_used=$(get_ip_addr_used "${ip_proto}" "${iface}")
-	if [ "$ip_proto" = "IPv4" ]; then ip_proto="4"; elif [ "$ip_proto" = "IPv6" ]; then ip_proto="6"; else ip_proto="4"; fi
+	if [ "$ip_proto" = "IPv4" ]; then ip_proto="--protocol 4"; elif [ "$ip_proto" = "IPv6" ]; then ip_proto="--protocol 6"; else ip_proto=""; fi
 	[ -z "${timeout}" ] && timeout=1 || timeout=$((timeout/1000))
 	[ -z "${inter_time}" ] && inter_time=1 || inter_time=$((inter_time/1000))
 	tos=$((dscp<<2))
@@ -64,8 +64,6 @@ udpecho_launch() {
 		udpecho_error "Error_Internal" "${nbr_of_rep}" "${proto}"
 		return
 	}
-
-	[[ "$host" = *"."* ]] && ip_proto="4" || ip_proto="6"
 
 	micros=1000
 	success_count=0
@@ -77,7 +75,7 @@ udpecho_launch() {
 	while [ $i -lt "$nbr_of_rep" ]; do
 		i=$((i+1))
 
-		res=$(udpechoclientd -c 1 -t $timeout --host "$host" --data-length "$dsize" --port "$port" --protocol "$ip_proto" $device 2>&1)
+		res=$(udpechoclientd -c 1 -t $timeout --host "$host" --data-length "$dsize" --port "$port" $ip_proto $device 2>&1)
 
 		ba=$(echo "$res" | grep "Can't Resolve Host Name")
 		[ -n "$ba" ] && {

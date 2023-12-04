@@ -47,7 +47,6 @@ serverselection_launch() {
 	[ -z "${port}" ] && port=7
 	[ -z "${protocol_used}" ] && protocol_used="ICMP"
 	ip_addr_used=$(get_ip_addr_used "${ip_proto}" "${iface}")
-	if [ "$ip_proto" = "IPv4" ]; then ip_proto="-4"; elif [ "$ip_proto" = "IPv6" ]; then ip_proto="-6"; else ip_proto=""; fi
 	[ -z "${timeout}" ] && timeout=1 || timeout=$((timeout/1000))
 
 	# Fail if hostlist is empty
@@ -66,6 +65,7 @@ serverselection_launch() {
 
 	for host in $(echo "$hostlist" | tr "," "\n"); do
 		if [ "$protocol_used" = "ICMP" ]; then
+			if [ "$ip_proto" = "IPv4" ]; then ip_proto="-4"; elif [ "$ip_proto" = "IPv6" ]; then ip_proto="-6"; else ip_proto=""; fi
 			[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.l3_device) && device="-I $device" || device=""
 			
 			while [ $i -lt "$nbr_of_rep" ]; do
@@ -112,13 +112,13 @@ serverselection_launch() {
 				avg_time_sum=$((avg_time_sum+avg_time))
 			done
 		else
-			[[ "$host" == *"."* ]] && ip_proto="4" || ip_proto="6"
+			if [ "$ip_proto" = "IPv4" ]; then ip_proto="--protocol 4"; elif [ "$ip_proto" = "IPv6" ]; then ip_proto="--protocol 6"; else ip_proto=""; fi
 			[ -n "${iface}" ] && device=$(ifstatus "${iface}" | jsonfilter -e @.l3_device) && device="-i $device" || device=""
 			
 			while [ $i -lt "$nbr_of_rep" ]; do
 				i=$((i+1))
 
-				res=$(udpechoclientd -c 1 -t $timeout --host "$host" --port "$port" --protocol "$ip_proto" $device 2>&1)
+				res=$(udpechoclientd -c 1 -t $timeout --host "$host" --port "$port" $ip_proto $device 2>&1)
 
 				ba=$(echo "$res" | grep "Can't Resolve Host Name")
 				[ -n "$ba" ] && {
