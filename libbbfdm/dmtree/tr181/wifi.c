@@ -3542,8 +3542,8 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 			struct blob_buf bb;
 			memset(&bb, 0, sizeof(struct blob_buf));
 			blob_buf_init(&bb, 0);
-			blobmsg_add_string(&bb, "radio", radio_name);
-			blobmsg_add_string(&bb, "action", "scan_finished");
+			blobmsg_add_string(&bb, "ifname", radio_name);
+			blobmsg_add_string(&bb, "event", "scan_finished");
 
 			dmubus_call_set(object, "scan", UBUS_ARGS{0}, 0);
 
