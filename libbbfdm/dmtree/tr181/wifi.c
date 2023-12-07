@@ -3506,6 +3506,25 @@ static int get_operate_args_WiFi_NeighboringWiFiDiagnostic(char *refparam, struc
 	return 0;
 }
 
+static void dmubus_receive_wifi_radio(struct ubus_context *ctx, struct ubus_event_handler *ev,
+				const char *type, struct blob_attr *msg)
+{
+	struct dmubus_event_data *data;
+
+	if (!msg || !ev)
+		return;
+
+	data = container_of(ev, struct dmubus_event_data, ev);
+	if (data == NULL)
+		return;
+
+	if (validate_blob_message(data->ev_data, msg) == true) {
+		uloop_end();
+	}
+
+	return;
+}
+
 static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	json_object *res = NULL;
@@ -3547,7 +3566,7 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 
 			dmubus_call_set(object, "scan", UBUS_ARGS{0}, 0);
 
-			dmubus_register_event_blocking("wifi.radio", 30, bb.head);
+			dmubus_wait_for_event("wifi.radio", 30, bb.head, dmubus_receive_wifi_radio);
 			blob_buf_free(&bb);
 
 			dmubus_call(object, "scanresults", UBUS_ARGS{0}, 0, &scan_res);

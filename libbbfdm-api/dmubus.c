@@ -163,36 +163,14 @@ int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_arg
 	return rc;
 }
 
-struct dmubus_event_data {
-	struct uloop_timeout tm;
-	struct ubus_event_handler ev;
-	struct blob_attr *ev_msg;
-};
-
-static void dmubus_receive_event(struct ubus_context *ctx, struct ubus_event_handler *ev,
-				const char *type, struct blob_attr *msg)
-{
-	struct dmubus_event_data *data;
-
-	if (!msg || !ev)
-		return;
-
-	data = container_of(ev, struct dmubus_event_data, ev);
-	if (validate_blob_message(data->ev_msg, msg) == true) {
-		uloop_end();
-	}
-
-	return;
-}
-
 static void dmubus_listen_timeout(struct uloop_timeout *timeout)
 {
 	uloop_end();
 }
 
-/*********************************************************************//**
+/*******************************************************************************
 **
-** dmubus_register_event_blocking
+** dmubus_wait_for_event
 **
 ** This API is to wait for the specified event to arrive on ubus or the timeout
 ** whichever is earlier
@@ -200,23 +178,27 @@ static void dmubus_listen_timeout(struct uloop_timeout *timeout)
 ** NOTE: since this is a blocking call so it should only be called from DM_ASYNC
 **       operations.
 **
-** \param   event - event to be listened on ubus
+** \param   event - wait for this <event> to arrive on ubus
 ** \param   timeout - max time (seconds) to wait for the event
-** \param   type - event type for which the process need to wait
+** \param   ev_data - data to be passed to the callback method
+** \param   ev_callback - callback method to be invoked on arrival of the event
 **
-** E.G: event: wifi.radio, type: {"radio":"wl1","action":"scan_finished"}
+** E.G: event: sysupgrade, type: {"status":"Downloading","bank_id":"2"}
 **
-**************************************************************************/
-void dmubus_register_event_blocking(char *event, int timeout, struct blob_attr *type)
+*******************************************************************************/
+void dmubus_wait_for_event(const char *event, int timeout, void *ev_data, CB_FUNC_PTR ev_callback)
 {
+	if (DM_STRLEN(event) == 0)
+		return;
+
 	struct ubus_context *ctx = ubus_connect(NULL);
 	if (!ctx)
 		return;
 
 	struct dmubus_event_data data = {
 		.tm.cb = dmubus_listen_timeout,
-		.ev.cb = dmubus_receive_event,
-		.ev_msg = type,
+		.ev.cb = ev_callback,
+		.ev_data = ev_data
 	};
 
 	uloop_init();

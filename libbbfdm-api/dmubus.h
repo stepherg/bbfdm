@@ -18,14 +18,23 @@
 #include <libubus.h>
 #include "dmapi.h"
 
+struct dmubus_event_data {
+	struct uloop_timeout tm;
+	struct ubus_event_handler ev;
+	void *ev_data;
+};
+
+typedef void (*CB_FUNC_PTR)(struct ubus_context *ctx, struct ubus_event_handler *ev,
+			const char *type, struct blob_attr *msg);
+
+void dmubus_wait_for_event(const char *event, int timeout, void *ev_data, CB_FUNC_PTR ev_callback);
+
 int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
 int dmubus_call_blocking(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
 int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size);
 
 int dmubus_call_blob(char *obj, char *method, void *value, json_object **resp);
 int dmubus_call_blob_set(char *obj, char *method, void *value);
-
-void dmubus_register_event_blocking(char *event, int timeout, struct blob_attr *type);
 
 void dmubus_free();
 
