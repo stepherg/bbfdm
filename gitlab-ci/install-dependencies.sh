@@ -24,7 +24,7 @@ if [ -z "${1}" ]; then
 	git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/feed/iopsys.git /opt/dev/iopsys
 	git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.iopsys.eu/bbf/bulkdata.git /opt/dev/bulkdata
 
-	install_plugin /opt/dev/iopsys/urlfilter/files/etc/bbfdm/json/urlfilter.json
+	install_plugin /opt/dev/iopsys/urlfilter/files/etc/bbfdm/plugins/urlfilter.json
 	install_plugin /opt/dev/iopsys/obuspa/files/etc/bbfdm/json/USPAgent.json
 	install_plugin /opt/dev/iopsys/icwmp/files/etc/bbfdm/json/CWMPManagementServer.json
 	install_plugin /opt/dev/iopsys/ponmngr/files/etc/bbfdm/json/xpon.json

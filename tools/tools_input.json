@@ -66,7 +66,7 @@
       "repo": "https://dev.iopsys.eu/feed/iopsys.git",
       "version": "devel",
       "dm_files": [
-        "urlfilter/files/etc/bbfdm/json/urlfilter.json",
+        "urlfilter/files/etc/bbfdm/plugins/urlfilter.json",
         "obuspa/files/etc/bbfdm/json/USPAgent.json",
         "icwmp/files/etc/bbfdm/json/CWMPManagementServer.json",
         "ponmngr/files/etc/bbfdm/json/xpon.json"
