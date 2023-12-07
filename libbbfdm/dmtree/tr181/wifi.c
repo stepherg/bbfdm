@@ -3533,7 +3533,7 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 	if (res) {
 		json_object *radios = NULL, *arrobj = NULL;
 		int i = 0;
-		uint8_t index = 1;
+		uint32_t index = 1;
 
 		dmjson_foreach_obj_in_array(res, arrobj, radios, i, 1, "radios") {
 			json_object *scan_res = NULL, *obj = NULL;
@@ -3552,6 +3552,15 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 
 			char *radio_name = dmjson_get_value(radios, 1, "name");
 			if (!DM_STRLEN(radio_name))
+				continue;
+
+			char *isup = dmjson_get_value(radios, 1, "isup");
+			if (!DM_STRLEN(isup))
+				continue;
+
+			bool ifup = false;
+			string_to_bool(isup, &ifup);
+			if (!ifup)
 				continue;
 
 			snprintf(object, sizeof(object), "wifi.radio.%s", radio_name);
@@ -3577,8 +3586,10 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 			if (!json_object_object_get_ex(scan_res,"accesspoints", &obj))
 				continue;
 
-			uint8_t len = obj ? json_object_array_length(obj) : 0;
-			for (uint8_t j = 0; j < len; j++ ) {
+			uint32_t len = obj ? json_object_array_length(obj) : 0;
+			for (uint32_t j = 0; j < len; j++ ) {
+				if (index == 0)
+					break;
 
 				json_object *array_obj = json_object_array_get_idx(obj, j);
 				ssid[1] = dmjson_get_value(array_obj, 1, "ssid");
