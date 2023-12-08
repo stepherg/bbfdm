@@ -555,7 +555,7 @@ int bbf_fw_image_download(const char *url, const char *auto_activate, const char
 		.status = false,
 	};
 
-	dmubus_wait_for_event("sysupgrade", 120, &ev_data, dmubus_receive_sysupgrade);
+	dmubus_wait_for_event("sysupgrade", 120, &ev_data, dmubus_receive_sysupgrade, NULL);
 
 	if (ev_data.status == false) {
 		res = 1;

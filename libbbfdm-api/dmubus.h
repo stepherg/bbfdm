@@ -24,10 +24,17 @@ struct dmubus_event_data {
 	void *ev_data;
 };
 
+struct dmubus_ev_subtask {
+	struct uloop_timeout sub_tm;
+	void *subtask_data;
+	uint32_t timeout;
+};
+
 typedef void (*CB_FUNC_PTR)(struct ubus_context *ctx, struct ubus_event_handler *ev,
 			const char *type, struct blob_attr *msg);
 
-void dmubus_wait_for_event(const char *event, int timeout, void *ev_data, CB_FUNC_PTR ev_callback);
+void dmubus_wait_for_event(const char *event, int timeout, void *ev_data, CB_FUNC_PTR ev_callback,
+			struct dmubus_ev_subtask *subtask);
 
 int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
 int dmubus_call_blocking(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);

@@ -182,13 +182,22 @@ static void dmubus_listen_timeout(struct uloop_timeout *timeout)
 ** \param   timeout - max time (seconds) to wait for the event
 ** \param   ev_data - data to be passed to the callback method
 ** \param   ev_callback - callback method to be invoked on arrival of the event
+** \param   subtask - If not NULL then executes an operation before arrival of
+**                    the event and the timeout expiry.
+**                    subtask timeout must be less than actual timeout. Subtask
+**                    may not be executed if event arrives prior the expiry of
+**                    the subtask timer.
 **
 ** E.G: event: sysupgrade, type: {"status":"Downloading","bank_id":"2"}
 **
 *******************************************************************************/
-void dmubus_wait_for_event(const char *event, int timeout, void *ev_data, CB_FUNC_PTR ev_callback)
+void dmubus_wait_for_event(const char *event, int timeout, void *ev_data,
+		CB_FUNC_PTR ev_callback, struct dmubus_ev_subtask *subtask)
 {
 	if (DM_STRLEN(event) == 0)
+		return;
+
+	if (subtask && subtask->timeout >= timeout)
 		return;
 
 	struct ubus_context *ctx = ubus_connect(NULL);
@@ -207,6 +216,9 @@ void dmubus_wait_for_event(const char *event, int timeout, void *ev_data, CB_FUN
 	int ret = ubus_register_event_handler(ctx, &data.ev, event);
 	if (ret)
 		goto end;
+
+	if (subtask)
+		uloop_timeout_set(&(subtask->sub_tm), subtask->timeout * 1000);
 
 	uloop_timeout_set(&data.tm, timeout * 1000);
 	uloop_run();

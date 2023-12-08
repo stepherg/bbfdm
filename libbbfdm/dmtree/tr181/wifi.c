@@ -23,6 +23,19 @@
 #define MAX_POWER_INDEX 64
 #define UBUS_OBJ_LEN 32
 
+struct radio_obj
+{
+	char obj_name[15];
+	bool scan_done;
+};
+
+struct radio_scan_args
+{
+	struct radio_obj *radio;
+	uint32_t obj_count;
+	struct blob_attr *msg;
+};
+
 struct wifi_radio_args
 {
 	struct dmmap_dup *sections;
@@ -3518,11 +3531,119 @@ static void dmubus_receive_wifi_radio(struct ubus_context *ctx, struct ubus_even
 	if (data == NULL)
 		return;
 
-	if (validate_blob_message(data->ev_data, msg) == true) {
-		uloop_end();
+	struct radio_scan_args *ev_data = data->ev_data;
+	if (ev_data == NULL)
+		return;
+
+	struct blob_attr *res = (struct blob_attr *)ev_data->msg;
+	if (res == NULL)
+		return;
+
+	struct blob_attr *event_list = NULL;
+	struct blob_attr *cur = NULL;
+	int rem = 0;
+
+	struct blob_attr *tb_event[1] = {0};
+	const struct blobmsg_policy p_event_table[1] = {
+		{ "event_data", BLOBMSG_TYPE_ARRAY }
+	};
+
+	blobmsg_parse(p_event_table, 1, tb_event, blobmsg_data(res), blobmsg_len(res));
+	if (tb_event[0] == NULL)
+		return;
+
+	event_list = tb_event[0];
+
+	const struct blobmsg_policy p_event[2] = {
+		{ "ifname", BLOBMSG_TYPE_STRING },
+		{ "event", BLOBMSG_TYPE_STRING }
+	};
+
+	struct blob_attr *tb1[2] = { 0, 0 };
+	blobmsg_parse(p_event, 2, tb1, blobmsg_data(msg), blobmsg_len(msg));
+	if (!tb1[0] || !tb1[1])
+		return;
+
+	char *ifname = blobmsg_get_string(tb1[0]);
+	char *action = blobmsg_get_string(tb1[1]);
+
+	blobmsg_for_each_attr(cur, event_list, rem) {
+		struct blob_attr *tb2[2] = { 0, 0 };
+
+		blobmsg_parse(p_event, 2, tb2, blobmsg_data(cur), blobmsg_len(cur));
+		if (!tb2[0] || !tb2[1])
+			continue;
+
+		if (DM_STRCMP(ifname, blobmsg_get_string(tb2[0])) != 0 || DM_STRCMP(action, blobmsg_get_string(tb2[1])) != 0)
+			continue;
+
+		for (uint32_t i = 0; i < ev_data->obj_count; i++) {
+			if (DM_STRCMP(ifname, ev_data->radio[i].obj_name) == 0) {
+				ev_data->radio[i].scan_done = true;
+				break;
+			}
+		}
+
+		break;
 	}
 
+	// If scan finished for all radios then end the uloop
+	bool scan_finished = true;
+	for (uint32_t i = 0; i < ev_data->obj_count; i++) {
+		if (!ev_data->radio[i].scan_done) {
+			scan_finished = false;
+			break;
+		}
+	}
+
+	if (scan_finished)
+		uloop_end();
+
 	return;
+}
+
+static void start_wifi_radio_scan(struct uloop_timeout *timeout)
+{
+	struct blob_attr *object_list = NULL;
+	struct blob_attr *cur = NULL;
+	int rem = 0;
+
+	struct dmubus_ev_subtask *data = container_of(timeout, struct dmubus_ev_subtask, sub_tm);
+
+	if (data == NULL)
+		return;
+
+	struct blob_attr *task_data = (struct blob_attr *)(data->subtask_data);
+
+	struct blob_attr *tb_data[1] = {0};
+	const struct blobmsg_policy p_task_table[1] = {
+		{ "task_data", BLOBMSG_TYPE_ARRAY }
+	};
+
+	blobmsg_parse(p_task_table, 1, tb_data, blobmsg_data(task_data), blobmsg_len(task_data));
+	if (tb_data[0] == NULL)
+		return;
+
+	object_list = tb_data[0];
+
+	const struct blobmsg_policy p_object[1] = {
+		{ "object", BLOBMSG_TYPE_STRING }
+	};
+
+	blobmsg_for_each_attr(cur, object_list, rem) {
+		struct blob_attr *tb[1] = {0};
+
+		blobmsg_parse(p_object, 1, tb, blobmsg_data(cur), blobmsg_len(cur));
+		if (!tb[0])
+			continue;
+
+		char *radio_object = blobmsg_get_string(tb[0]);
+
+		if (DM_STRLEN(radio_object) == 0)
+			continue;
+
+		dmubus_call_set(radio_object, "scan", UBUS_ARGS{0}, 0);
+	}
 }
 
 static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -3530,126 +3651,183 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 	json_object *res = NULL;
 
 	dmubus_call("wifi", "status", UBUS_ARGS{0}, 0, &res);
-	if (res) {
-		json_object *radios = NULL, *arrobj = NULL;
-		int i = 0;
-		uint32_t index = 1;
+	if (!res)
+		goto end;
 
-		dmjson_foreach_obj_in_array(res, arrobj, radios, i, 1, "radios") {
-			json_object *scan_res = NULL, *obj = NULL;
-			char object[UBUS_OBJ_LEN] = {0};
-			char *ssid[2] = {0};
-			char *bssid[2] = {0};
-			char *noise[2] = {0};
-			char *channel[2] = {0};
-			char *frequency[2] = {0};
-			char *signal_strength[2] = {0};
-			char *standard[2] = {0};
-			char *bandwidth[2] = {0};
-			char *radio[2] = {0};
-			char *encryption[2] = {0};
-			char *ciphers[2] = {0};
+	json_object *radios = NULL, *arrobj = NULL;
+	int i = 0, j = 0;
+	uint32_t index = 1;
+	uint32_t radio_count = 0;
+	struct blob_buf ev_data;
+	struct blob_buf task_data;
+	struct radio_scan_args events;
 
-			char *radio_name = dmjson_get_value(radios, 1, "name");
-			if (!DM_STRLEN(radio_name))
-				continue;
+	json_object *radio_list = dmjson_get_obj(res, 1, "radios");
+	if (!radio_list || json_object_get_type(radio_list) != json_type_array)
+		goto end;
 
-			char *isup = dmjson_get_value(radios, 1, "isup");
-			if (!DM_STRLEN(isup))
-				continue;
+	radio_count = json_object_array_length(radio_list);
+	if (!radio_count)
+		goto end;
 
-			bool ifup = false;
-			string_to_bool(isup, &ifup);
-			if (!ifup)
-				continue;
+	events.radio = (struct radio_obj *)malloc(sizeof(struct radio_obj) * radio_count);
+	if (!events.radio)
+		goto end;
 
+	memset(&ev_data, 0, sizeof(struct blob_buf));
+	memset(&task_data, 0, sizeof(struct blob_buf));
+	memset(events.radio, 0, sizeof(struct radio_obj) * radio_count);
+
+	blob_buf_init(&ev_data, 0);
+	blob_buf_init(&task_data, 0);
+
+	void *ev_arr = blobmsg_open_array(&ev_data, "event_data");
+	void *task_arr = blobmsg_open_array(&task_data, "task_data");
+
+	dmjson_foreach_obj_in_array(res, arrobj, radios, i, 1, "radios") {
+		char object[UBUS_OBJ_LEN] = {0};
+
+		char *radio_name = dmjson_get_value(radios, 1, "name");
+		if (!DM_STRLEN(radio_name))
+			continue;
+
+		char *isup = dmjson_get_value(radios, 1, "isup");
+		if (!DM_STRLEN(isup))
+			continue;
+
+		bool ifup = false;
+		string_to_bool(isup, &ifup);
+		if (!ifup)
+			continue;
+
+		if (j < radio_count) {
 			snprintf(object, sizeof(object), "wifi.radio.%s", radio_name);
+			snprintf(events.radio[j].obj_name, sizeof(events.radio[j].obj_name), "%s", radio_name);
 
-			adm_entry_get_reference_param(ctx, "Device.WiFi.Radio.*.Name", radio_name, &radio[1]);
+			void *ev_table = blobmsg_open_table(&ev_data, "");
+			blobmsg_add_string(&ev_data, "ifname", radio_name);
+			blobmsg_add_string(&ev_data, "event", "scan_finished");
+			blobmsg_close_table(&ev_data, ev_table);
 
-			struct blob_buf bb;
-			memset(&bb, 0, sizeof(struct blob_buf));
-			blob_buf_init(&bb, 0);
-			blobmsg_add_string(&bb, "ifname", radio_name);
-			blobmsg_add_string(&bb, "event", "scan_finished");
+			void *task_table = blobmsg_open_table(&task_data, "");
+			blobmsg_add_string(&task_data, "object", object);
+			blobmsg_close_table(&task_data, task_table);
 
-			dmubus_call_set(object, "scan", UBUS_ARGS{0}, 0);
+			j++;
+		}
+	}
 
-			dmubus_wait_for_event("wifi.radio", 30, bb.head, dmubus_receive_wifi_radio);
-			blob_buf_free(&bb);
+	blobmsg_close_array(&ev_data, ev_arr);
+	blobmsg_close_array(&task_data, task_arr);
 
-			dmubus_call(object, "scanresults", UBUS_ARGS{0}, 0, &scan_res);
+	if (j) {
+		events.obj_count = j;
+		events.msg = ev_data.head;
 
-			if (!scan_res)
-				continue;
+		struct dmubus_ev_subtask subtask = {
+			.sub_tm.cb = start_wifi_radio_scan,
+			.subtask_data = task_data.head,
+			.timeout = 1
+		};
 
-			if (!json_object_object_get_ex(scan_res,"accesspoints", &obj))
-				continue;
+		dmubus_wait_for_event("wifi.radio", 30, &events, dmubus_receive_wifi_radio, &subtask);
+	}
 
-			uint32_t len = obj ? json_object_array_length(obj) : 0;
-			for (uint32_t j = 0; j < len; j++ ) {
-				if (index == 0)
-					break;
+	blob_buf_free(&ev_data);
+	blob_buf_free(&task_data);
 
-				json_object *array_obj = json_object_array_get_idx(obj, j);
-				ssid[1] = dmjson_get_value(array_obj, 1, "ssid");
-				bssid[1] = dmjson_get_value(array_obj, 1, "bssid");
-				channel[1] = dmjson_get_value(array_obj, 1, "channel");
-				frequency[1] = dmjson_get_value(array_obj, 1, "band");
-				signal_strength[1] = dmjson_get_value(array_obj, 1, "rssi");
-				noise[1] = dmjson_get_value(array_obj, 1, "noise");
-				bandwidth[1] = get_data_model_band(dmjson_get_value(array_obj, 1, "bandwidth"));
-				standard[1] = get_data_model_standard(dmjson_get_value(array_obj, 1, "standard"));
-				encryption[1] = get_data_model_mode(dmjson_get_value(array_obj, 1, "encryption"));
-				ciphers[1] = dmjson_get_value(array_obj, 1, "ciphers");
+	for (i = 0; i < j; i++) {
+		json_object *scan_res = NULL, *obj = NULL;
+		char object[UBUS_OBJ_LEN] = {0};
+		char *ssid[2] = {0};
+		char *bssid[2] = {0};
+		char *noise[2] = {0};
+		char *channel[2] = {0};
+		char *frequency[2] = {0};
+		char *signal_strength[2] = {0};
+		char *standard[2] = {0};
+		char *bandwidth[2] = {0};
+		char *radio[2] = {0};
+		char *encryption[2] = {0};
+		char *ciphers[2] = {0};
 
-				if (ctx->dm_type != BBFDM_USP) {
-					struct uci_section *dmmap_s = NULL;
-					dmuci_add_section_bbfdm("dmmap_wifi_neighboring", "result", &dmmap_s);
-					dmuci_set_value_by_section(dmmap_s, "radio", radio[1]);
-					dmuci_set_value_by_section(dmmap_s, "ssid", ssid[1]);
-					dmuci_set_value_by_section(dmmap_s, "bssid", bssid[1]);
-					dmuci_set_value_by_section(dmmap_s, "channel", channel[1]);
-					dmuci_set_value_by_section(dmmap_s, "rssi", signal_strength[1]);
-					dmuci_set_value_by_section(dmmap_s, "band", frequency[1]);
-					dmuci_set_value_by_section(dmmap_s, "noise", noise[1]);
-					dmuci_set_value_by_section(dmmap_s, "bandwidth", bandwidth[1]);
-					dmuci_set_value_by_section(dmmap_s, "standard", standard[1]);
-					dmuci_set_value_by_section(dmmap_s, "encryption", encryption[1]);
-					dmuci_set_value_by_section(dmmap_s, "ciphers", ciphers[1]);
-				}
+		snprintf(object, sizeof(object), "wifi.radio.%s", events.radio[i].obj_name);
+		adm_entry_get_reference_param(ctx, "Device.WiFi.Radio.*.Name", events.radio[i].obj_name, &radio[1]);
 
-				dmasprintf(&radio[0], "Result.%d.Radio", index);
-				dmasprintf(&ssid[0], "Result.%d.SSID", index);
-				dmasprintf(&bssid[0], "Result.%d.BSSID", index);
-				dmasprintf(&channel[0], "Result.%d.Channel", index);
-				dmasprintf(&frequency[0], "Result.%d.OperatingFrequencyBand", index);
-				dmasprintf(&signal_strength[0], "Result.%d.SignalStrength", index);
-				dmasprintf(&noise[0], "Result.%d.Noise", index);
-				dmasprintf(&bandwidth[0], "Result.%d.OperatingChannelBandwidth", index);
-				dmasprintf(&standard[0], "Result.%d.OperatingStandards", index);
-				dmasprintf(&encryption[0], "Result.%d.SecurityModeEnabled", index);
-				dmasprintf(&ciphers[0], "Result.%d.EncryptionMode", index);
+		dmubus_call(object, "scanresults", UBUS_ARGS{0}, 0, &scan_res);
 
-				add_list_parameter(ctx, radio[0], radio[1], DMT_TYPE[DMT_STRING], NULL);
-				add_list_parameter(ctx, ssid[0], ssid[1], DMT_TYPE[DMT_STRING], NULL);
-				add_list_parameter(ctx, bssid[0], bssid[1], DMT_TYPE[DMT_STRING], NULL);
-				add_list_parameter(ctx, channel[0], channel[1], DMT_TYPE[DMT_UNINT], NULL);
-				add_list_parameter(ctx, frequency[0], frequency[1], DMT_TYPE[DMT_STRING], NULL);
-				add_list_parameter(ctx, signal_strength[0], signal_strength[1], DMT_TYPE[DMT_INT], NULL);
-				add_list_parameter(ctx, noise[0], noise[1], DMT_TYPE[DMT_INT], NULL);
-				add_list_parameter(ctx, bandwidth[0], bandwidth[1], DMT_TYPE[DMT_STRING], NULL);
-				add_list_parameter(ctx, standard[0], standard[1], DMT_TYPE[DMT_STRING], NULL);
-				add_list_parameter(ctx, encryption[0], encryption[1], DMT_TYPE[DMT_STRING], NULL);
-				add_list_parameter(ctx, ciphers[0], ciphers[1], DMT_TYPE[DMT_STRING], NULL);
-				index++;
+		if (!scan_res)
+			continue;
+
+		if (!json_object_object_get_ex(scan_res,"accesspoints", &obj))
+			continue;
+
+		uint32_t len = obj ? json_object_array_length(obj) : 0;
+
+		for (uint32_t k = 0; k < len; k++ ) {
+			if (index == 0)
+				break;
+
+			json_object *array_obj = json_object_array_get_idx(obj, k);
+			ssid[1] = dmjson_get_value(array_obj, 1, "ssid");
+			bssid[1] = dmjson_get_value(array_obj, 1, "bssid");
+			channel[1] = dmjson_get_value(array_obj, 1, "channel");
+			frequency[1] = dmjson_get_value(array_obj, 1, "band");
+			signal_strength[1] = dmjson_get_value(array_obj, 1, "rssi");
+			noise[1] = dmjson_get_value(array_obj, 1, "noise");
+			bandwidth[1] = get_data_model_band(dmjson_get_value(array_obj, 1, "bandwidth"));
+			standard[1] = get_data_model_standard(dmjson_get_value(array_obj, 1, "standard"));
+			encryption[1] = get_data_model_mode(dmjson_get_value(array_obj, 1, "encryption"));
+			ciphers[1] = dmjson_get_value(array_obj, 1, "ciphers");
+
+			if (ctx->dm_type != BBFDM_USP) {
+				struct uci_section *dmmap_s = NULL;
+				dmuci_add_section_bbfdm("dmmap_wifi_neighboring", "result", &dmmap_s);
+				dmuci_set_value_by_section(dmmap_s, "radio", radio[1]);
+				dmuci_set_value_by_section(dmmap_s, "ssid", ssid[1]);
+				dmuci_set_value_by_section(dmmap_s, "bssid", bssid[1]);
+				dmuci_set_value_by_section(dmmap_s, "channel", channel[1]);
+				dmuci_set_value_by_section(dmmap_s, "rssi", signal_strength[1]);
+				dmuci_set_value_by_section(dmmap_s, "band", frequency[1]);
+				dmuci_set_value_by_section(dmmap_s, "noise", noise[1]);
+				dmuci_set_value_by_section(dmmap_s, "bandwidth", bandwidth[1]);
+				dmuci_set_value_by_section(dmmap_s, "standard", standard[1]);
+				dmuci_set_value_by_section(dmmap_s, "encryption", encryption[1]);
+				dmuci_set_value_by_section(dmmap_s, "ciphers", ciphers[1]);
 			}
-		}
 
-		if (ctx->dm_type != BBFDM_USP) {
-			dmuci_set_value_bbfdm("dmmap_wifi_neighboring", "@diagnostic_status[0]", "DiagnosticsState", "Complete");
-			dmuci_commit_package_bbfdm("dmmap_wifi_neighboring");
+			dmasprintf(&radio[0], "Result.%d.Radio", index);
+			dmasprintf(&ssid[0], "Result.%d.SSID", index);
+			dmasprintf(&bssid[0], "Result.%d.BSSID", index);
+			dmasprintf(&channel[0], "Result.%d.Channel", index);
+			dmasprintf(&frequency[0], "Result.%d.OperatingFrequencyBand", index);
+			dmasprintf(&signal_strength[0], "Result.%d.SignalStrength", index);
+			dmasprintf(&noise[0], "Result.%d.Noise", index);
+			dmasprintf(&bandwidth[0], "Result.%d.OperatingChannelBandwidth", index);
+			dmasprintf(&standard[0], "Result.%d.OperatingStandards", index);
+			dmasprintf(&encryption[0], "Result.%d.SecurityModeEnabled", index);
+			dmasprintf(&ciphers[0], "Result.%d.EncryptionMode", index);
+
+			add_list_parameter(ctx, radio[0], radio[1], DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, ssid[0], ssid[1], DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, bssid[0], bssid[1], DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, channel[0], channel[1], DMT_TYPE[DMT_UNINT], NULL);
+			add_list_parameter(ctx, frequency[0], frequency[1], DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, signal_strength[0], signal_strength[1], DMT_TYPE[DMT_INT], NULL);
+			add_list_parameter(ctx, noise[0], noise[1], DMT_TYPE[DMT_INT], NULL);
+			add_list_parameter(ctx, bandwidth[0], bandwidth[1], DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, standard[0], standard[1], DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, encryption[0], encryption[1], DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, ciphers[0], ciphers[1], DMT_TYPE[DMT_STRING], NULL);
+			index++;
 		}
+	}
+
+	FREE(events.radio);
+end:
+	if (ctx->dm_type != BBFDM_USP) {
+		dmuci_set_value_bbfdm("dmmap_wifi_neighboring", "@diagnostic_status[0]", "DiagnosticsState", "Complete");
+		dmuci_commit_package_bbfdm("dmmap_wifi_neighboring");
 	}
 
 	return 0;
