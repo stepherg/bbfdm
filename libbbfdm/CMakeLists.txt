@@ -18,7 +18,8 @@ OPTION(WITH_OPENSSL "build with lib openssl" OFF)
 OPTION(WITH_MBEDTLS "build with lib mbedtls" OFF)
 
 IF(NOT WITH_WOLFSSL AND NOT WITH_OPENSSL AND NOT WITH_MBEDTLS)
-	MESSAGE(FATAL_ERROR "You must enable one of the SSL libraries: {'WOLFSSL','OPENSSL','MBEDTLS'}")
+	MESSAGE(WARNING "NO SSL library selected: {'WOLFSSL','OPENSSL','MBEDTLS'}, proceeding with OPENSSL")
+	SET(WITH_OPENSSL ON)
 ENDIF()
 
 SET(BBF_DM_SOURCES dmcommon.c)
