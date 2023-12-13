@@ -1019,8 +1019,11 @@ static int set_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void 
 							}
 
 							port_s = ethernet___get_ethernet_interface_section(buf);
-							if (port_s)
+							if (port_s) {
 								dmuci_set_value_by_section(port_s, "pause", b ? "1" : "0");
+								dmuci_set_value_by_section(port_s, "rxpause", b ? "1" : "0");
+								dmuci_set_value_by_section(port_s, "txpause", b ? "1" : "0");
+							}
 						}
 					}
 				}
@@ -1028,8 +1031,11 @@ static int set_EthernetLink_FlowControl(char *refparam, struct dmctx *ctx, void 
 				/* Ethernet.Link.{i}. ---> Ethernet.Interface.{i}. */
 
 				port_s = ethernet___get_ethernet_interface_section(device);
-				if (port_s)
+				if (port_s) {
 					dmuci_set_value_by_section(port_s, "pause", b ? "1" : "0");
+					dmuci_set_value_by_section(port_s, "rxpause", b ? "1" : "0");
+					dmuci_set_value_by_section(port_s, "txpause", b ? "1" : "0");
+				}
 			}
 			break;
 	}
