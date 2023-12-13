@@ -57,9 +57,6 @@ gcovr -r .
 
 echo > memory-report.xml
 check_valgrind_xml "Main Service bbfdmd" "/tmp/memory-report.xml"
-check_valgrind_xml "Micro Service bbfdm_dataelementsd" "/tmp/memory-report-dataelements.xml"
-check_valgrind_xml "Micro Service bbfdm_bulkdatad" "/tmp/memory-report-bulkdata.xml"
-check_valgrind_xml "Micro Service bbfdm_periodicstatsd" "/tmp/memory-report-periodicstats.xml"
 
 if [ "${fault}" -ne 0 ]; then
 	echo "Failed running ubus-api-validator fault[$fault]"

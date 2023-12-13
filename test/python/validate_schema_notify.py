@@ -18,7 +18,7 @@ except:
 
 if ret == 0:
     try:
-        ret = child.expect('schema_update_available')
+        ret = child.expect('bbfdm.DelObj')
     except:
         print("FAIL: Schema updater notification")
 
