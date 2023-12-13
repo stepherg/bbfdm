@@ -89,9 +89,8 @@ static void load_vendor_extension_arrays(DMOBJ *entryobj, DM_MAP_VENDOR *vendor_
 
 			for (int i = 0; vendor_obj[i].path; i++) {
 
-				DMOBJ *dm_entryobj = NULL;
-				bool obj_exists = find_entry_obj(entryobj, vendor_obj[i].path, &dm_entryobj);
-				if (obj_exists == false || !dm_entryobj)
+				DMOBJ *dm_entryobj = find_entry_obj(entryobj, vendor_obj[i].path);
+				if (!dm_entryobj)
 					continue;
 
 				if (vendor_obj[i].root_obj) {
@@ -157,12 +156,11 @@ static void load_vendor_extension_overwrite_arrays(DMOBJ *entryobj, DM_MAP_VENDO
 				continue;
 
 			DM_MAP_OBJ *dynamic_overwrite_obj = vendor_map_obj[j].vendor_obj;
-			DMOBJ *dm_entryobj = NULL;
 
 			for (int i = 0; dynamic_overwrite_obj[i].path; i++) {
 
-				bool obj_exists = find_entry_obj(entryobj, dynamic_overwrite_obj[i].path, &dm_entryobj);
-				if (obj_exists == false || !dm_entryobj)
+				DMOBJ *dm_entryobj = find_entry_obj(entryobj, dynamic_overwrite_obj[i].path);
+				if (!dm_entryobj)
 					continue;
 
 				if (dynamic_overwrite_obj[i].root_obj) {
@@ -198,7 +196,6 @@ static void exclude_obj(DMOBJ *dm_entryobj, char *in_obj)
 
 static void exclude_param(DMOBJ *dm_entryobj, char *in_param)
 {
-	DMOBJ *entryobj = NULL;
 	char obj_prefix[256] = {'\0'};
 
 	if (in_param == NULL)
@@ -208,9 +205,9 @@ static void exclude_param(DMOBJ *dm_entryobj, char *in_param)
 	if (ret)
 		DM_STRNCPY(obj_prefix, in_param, ret - in_param + 2);
 
-	bool obj_exists = find_entry_obj(dm_entryobj, obj_prefix, &entryobj);
+	DMOBJ *entryobj = find_entry_obj(dm_entryobj, obj_prefix);
 
-	if (entryobj && obj_exists == true) {
+	if (entryobj) {
 		DMLEAF *leaf = entryobj->leaf;
 
 		for (; (leaf && leaf->parameter); leaf++) {

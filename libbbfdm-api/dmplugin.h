@@ -11,7 +11,8 @@
 #ifndef __DMPLUGIN_H__
 #define __DMPLUGIN_H__
 
-bool find_entry_obj(DMOBJ *root_entry, char *in_param, DMOBJ **entryobj);
+DMOBJ *find_entry_obj(DMOBJ *entryobj, char *obj_path);
+void disable_entry_obj(DMOBJ *entryobj, char *obj_path);
 
 void dm_exclude_obj(DMOBJ *entryobj, DMNODE *parent_node, char *obj_path);
 

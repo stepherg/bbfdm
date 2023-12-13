@@ -31,6 +31,7 @@ typedef struct {
 	unsigned int instance_mode;
 	unsigned int proto;
 	char in_name[128];
+	char in_plugin_dir[128];
 	char in_type[32];
 	char out_type[32];
 	char *cmd;
@@ -107,7 +108,6 @@ static struct blob_attr *get_results_array(struct blob_attr *msg)
 static void __ubus_callback(struct ubus_request *req, int type __attribute__((unused)), struct blob_attr *msg)
 {
 	struct blob_attr *cur = NULL;
-	bool print_msg = false;
 	int rem = 0;
 	const struct blobmsg_policy p[7] = {
 			{ "path", BLOBMSG_TYPE_STRING },
@@ -163,56 +163,7 @@ static void __ubus_callback(struct ubus_request *req, int type __attribute__((un
 			char *type = tb[2] ? blobmsg_get_string(tb[2]) : "";
 			int cmd = get_dm_type(type);
 
-			if (print_msg == false) {
-				printf("\nDumping %s Schema...\n\n", name);
-				print_msg = true;
-			}
-
-			printf("%s\n", name);
-
-			if (cmd == DMT_COMMAND) {
-				struct blob_attr *input = tb[4];
-				struct blob_attr *output = tb[5];
-				struct blob_attr *in_cur = NULL, *out_cur = NULL;
-				int in_rem = 0, out_rem = 0;
-
-				if (input) {
-					blobmsg_for_each_attr(in_cur, input, in_rem) {
-						struct blob_attr *in_tb[7] = {0};
-
-						blobmsg_parse(p, 7, in_tb, blobmsg_data(in_cur), blobmsg_len(in_cur));
-
-						char *arg = in_tb[0] ? blobmsg_get_string(in_tb[0]) : "";
-						printf("%s input:%s\n", name, arg);
-					}
-				}
-
-				if (output) {
-					blobmsg_for_each_attr(out_cur, output, out_rem) {
-						struct blob_attr *out_tb[7] = {0};
-
-						blobmsg_parse(p, 7, out_tb, blobmsg_data(out_cur), blobmsg_len(out_cur));
-
-						char *arg = out_tb[0] ? blobmsg_get_string(out_tb[0]) : "";
-						printf("%s output:%s\n", name, arg);
-					}
-				}
-			} else if (cmd == DMT_EVENT) {
-				struct blob_attr *input = tb[4];
-				struct blob_attr *in_cur = NULL;
-				int in_rem = 0;
-
-				if (input) {
-					blobmsg_for_each_attr(in_cur, input, in_rem) {
-						struct blob_attr *in_tb[7] = {0};
-
-						blobmsg_parse(p, 7, in_tb, blobmsg_data(in_cur), blobmsg_len(in_cur));
-
-						char *arg = in_tb[0] ? blobmsg_get_string(in_tb[0]) : "";
-						printf("%s event_arg:%s\n", name, arg);
-					}
-				}
-			}
+			printf("%s %s %s\n", name, type, (cmd != DMT_EVENT && cmd != DMT_COMMAND) ? data : "0");
 		}
 
 		cli_data->ubus_status = true;
@@ -276,6 +227,11 @@ static int bbfdm_load_cli_config(bbfdm_config_t *bbf_config, cli_data_t *cli_dat
 	} else {
 		printf("ERROR: [cli.input.name] not specified\n");
 		return -1;
+	}
+
+	opt_val = bbf_config->cli_in_plugin_dir;
+	if (opt_val && strlen(opt_val)) {
+		snprintf(cli_data->in_plugin_dir, sizeof(cli_data->in_plugin_dir), "%s", opt_val);
 	}
 
 	opt_val = bbf_config->cli_out_type;
@@ -514,46 +470,9 @@ static int in_dotso_out_cli_exec_schema(cli_data_t *cli_data, char *argv[])
 	if (!err) {
 		struct dm_parameter *n;
 
-	    printf("\nDumping %s Schema...\n\n", cli_data->bbf_ctx.in_param);
-
 		list_for_each_entry(n, &cli_data->bbf_ctx.list_parameter, list) {
 			int cmd = get_dm_type(n->type);
-
-			printf("%s\n", n->name);
-
-			if (cmd == DMT_COMMAND) {
-				if (n->data) {
-					const char **in, **out;
-					operation_args *args;
-					int i;
-
-					args = (operation_args *) n->data;
-					in = args->in;
-					if (in) {
-						for (i = 0; in[i] != NULL; i++)
-							printf("%s input:%s\n", n->name, in[i]);
-					}
-
-					out = args->out;
-					if (out) {
-						for (i = 0; out[i] != NULL; i++)
-							printf("%s output:%s\n", n->name, out[i]);
-					}
-				}
-			} else if (cmd == DMT_EVENT) {
-				if (n->data) {
-					event_args *ev;
-
-					ev = (event_args *)n->data;
-
-					if (ev->param) {
-						const char **in = ev->param;
-
-						for (int i = 0; in[i] != NULL; i++)
-							printf("%s event_arg:%s\n", n->name, in[i]);
-					}
-				}
-			}
+			printf("%s %s %s\n", n->name, n->type, (cmd != DMT_EVENT && cmd != DMT_COMMAND) ? n->data : "0");
 		}
 	} else {
 		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);
@@ -615,7 +534,7 @@ static int cli_exec_command(cli_data_t *cli_data, int argc, char *argv[])
 			goto end;
 		}
 
-		bbf_global_init(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, NULL);
+		bbf_global_init(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, cli_data->in_plugin_dir);
 
 		bbf_ctx_init(&cli_data->bbf_ctx, CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE);
 
@@ -679,6 +598,7 @@ int bbfdm_cli_exec_command(bbfdm_config_t *bbf_config, int argc, char *argv[])
 	}
 
 	memset(&cli_data, 0, sizeof(cli_data_t));
+
 	err = bbfdm_load_cli_config(bbf_config, &cli_data);
 	if (err) {
 		printf("ERROR: required cli config missing\n");

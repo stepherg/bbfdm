@@ -1465,6 +1465,11 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_pat
 		snprintf(config->cli_in_name, sizeof(config->cli_in_name), "%s", opt_val);
 	}
 
+	opt_val = dmjson_get_value(json_obj, 3, "cli", "input", "plugin_dir");
+	if (DM_STRLEN(opt_val)) {
+		snprintf(config->cli_in_plugin_dir, sizeof(config->cli_in_plugin_dir), "%s", opt_val);
+	}
+
 	opt_val = dmjson_get_value(json_obj, 3, "cli", "output", "type");
 	if (DM_STRLEN(opt_val)) {
 		snprintf(config->cli_out_type, sizeof(config->cli_out_type), "%s", opt_val);
@@ -1691,8 +1696,9 @@ int main(int argc, char **argv)
 	}
 
 	openlog(bbfdm_ctx.config.out_name, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+
 	if (cli_argc) {
-		err = bbfdm_cli_exec_command(&bbfdm_ctx.config , cli_argc, cli_argv);
+		err = bbfdm_cli_exec_command(&bbfdm_ctx.config, cli_argc, cli_argv);
 		goto exit;
 	}
 

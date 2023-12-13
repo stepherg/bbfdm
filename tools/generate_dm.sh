@@ -2,7 +2,7 @@
 
 # Set variables
 CONTAINER_NAME="generate_dm_tools"
-IMAGE_NAME="dev.iopsys.eu:5050/iopsys/gitlab-ci-pipeline/code-analysis:latest"
+IMAGE_NAME="dev.iopsys.eu:5050/bbf/bbfdm/tools:latest"
 INPUT=""
 root="${PWD/tools}"
 

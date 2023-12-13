@@ -17,25 +17,29 @@
   "plugins": [
     {
       "repo": "https://dev.iopsys.eu/bbf/icwmp.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
-        "src/cwmp_dm/datamodel.c"
+        "bbf_plugin/datamodel.c"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/bulkdata.git",
+      "proto": "git",
       "dm_files": [
         "bbf_plugin/bulkdata.json"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/xmppc.git",
+      "proto": "git",
       "dm_files": [
         "src/datamodel.c"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/stunc.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/datamodel.c"
@@ -43,6 +47,7 @@
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/udpecho.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/datamodel.c"
@@ -50,6 +55,7 @@
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/twamp-light.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/datamodel.c"
@@ -57,6 +63,7 @@
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/periodicstats.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "bbf_plugin/bbf_plugin.c"
@@ -64,6 +71,7 @@
     },
     {
       "repo": "https://dev.iopsys.eu/feed/iopsys.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "urlfilter/files/etc/bbfdm/plugins/urlfilter.json",
@@ -74,6 +82,7 @@
     },
     {
       "repo": "https://dev.iopsys.eu/lcm/swmodd.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/datamodel.c"
@@ -81,6 +90,7 @@
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/usermngr.git",
+      "proto": "git",
       "version": "devel",
       "extra_dependencies": [
       	"-lcrypt"
@@ -91,6 +101,7 @@
     },
     {
       "repo": "https://dev.iopsys.eu/iopsys/hostmngr.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/bbf_plugin/hosts.c"
@@ -98,19 +109,15 @@
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/timemngr.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "src/times.c"
-      ],
-      "micro-service": {
-      	"name": "bbfdm.time",
-      	"parent_dm": "Device.",
-      	"object": "Time",
-      	"root_obj": "bbfdm"
-      }
+      ]
     },
     {
       "repo": "https://dev.iopsys.eu/voice/tr104.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "libdm/tr104/*.c"
@@ -122,6 +129,7 @@
     },
     {
       "repo": "https://dev.iopsys.eu/voice/tr104.git",
+      "proto": "git",
       "version": "devel",
       "dm_files": [
         "libdm/extensions/iowrt/*.c"

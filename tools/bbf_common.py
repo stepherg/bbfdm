@@ -8,8 +8,6 @@ import os
 import subprocess
 import shutil
 import json
-import ubus
-import time
 import glob
 
 # Constants
@@ -226,60 +224,67 @@ def build_and_install_bbfdm(vendor_prefix, vendor_list):
     print('Compiling and installing bbfdmd done')
 
 
-def run_command(command):
-    try:
-        # Use subprocess.Popen to start the daemon process
-        subprocess.Popen(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-        # The daemon process will continue running in the background
-        time.sleep(1)
-
-    except subprocess.CalledProcessError as e:
-        # Handle subprocess errors here
-        print(f"Error running the daemon process: {e}")
-        sys.exit(1)
-
-
-def create_input_json_file(file_path, input_type, input_name, micro_service_config):
+def create_bbfdm_input_json_file(proto):
     data = {
         "daemon": {
+        },
+        "cli": {
+            "config": {
+                "proto": proto,
+                "instance_mode": 0
+            },
             "input": {
-                "type": input_type,
-                "name": input_name
+                "type": "DotSo",
+                "name": "/lib/libbbfdm.so",
+                "plugin_dir": "/etc/bbfdm/plugins"
             },
             "output": {
-                "type": "UBUS",
-                "name": micro_service_config.get("name"),
-                "parent_dm": micro_service_config.get("parent_dm"),
-                "object": micro_service_config.get("object"),
-                "root_obj": micro_service_config.get("root_obj")
+                "type": "CLI"
             }
         }
     }
+    
+    file_path = '/tmp/bbfdm/input.json'
+    
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
+    # Open the file in 'w' mode (create or truncate)
     with open(file_path, 'w', encoding='utf-8') as json_file:
         json.dump(data, json_file, indent=4)
 
 
-def transform_schema_to_dm(schema_out, dm_list):
-    if not schema_out or not isinstance(schema_out, list) or len(schema_out) == 0:
-        return
+def fill_list_dm(proto, dm_list):
+    create_bbfdm_input_json_file(proto)
+    
+    command = "bbfdmd -c schema Device."
+    try:
+        # Run the command
+        result = subprocess.run(command, shell=True, text=True, capture_output=True, check=True)
+        
+        # Get the output from the result
+        output = result.stdout
 
-    result_list = schema_out[0].get("results", [])
+        # Split the output into lines
+        lines = output.strip().split('\n')
+        
+        # Iterate through each line and parse the information
+        for line in lines:
+            parts = line.split()
+            path, n_type, data = parts[0], parts[1], parts[2]
+            permission = "readWrite" if data == "1" else "readOnly"
+            p_type = n_type[4:]
+            entry = {
+                "param": path,
+                "permission": permission,
+                "type": p_type,
+            }
+            dm_list.append(entry)
 
-    for result in result_list:
-        path = result.get("path", "")
-        data = result.get("data", "0")
-        permission = "readOnly" if data == "0" else "readWrite"
-        p_type = result.get("type", "xsd:string")[4:]
-
-        entry = {
-            "param": path,
-            "permission": permission,
-            "type": p_type,
-        }
-
-        dm_list.append(entry)
+    except subprocess.CalledProcessError as e:
+        # Handle subprocess errors here
+        print(f"Error running command: {e}")
+        sys.exit(1)    
 
 
 def remove_duplicate_elements(input_list):
@@ -296,41 +301,14 @@ def remove_duplicate_elements(input_list):
 
 
 def fill_list_supported_dm():
-    # Wait for 5 seconds to be sure that all micro-services started successfully
-    time.sleep(5)
 
-    # pylint: disable=E1101
-    ubus.connect()
-
-    usp_schema_out = ubus.call('bbfdm', 'schema', {"path": "Device.", "optional": {"proto": "usp"}})
-    transform_schema_to_dm(usp_schema_out, LIST_SUPPORTED_USP_DM)
+    fill_list_dm("usp", LIST_SUPPORTED_USP_DM)
     LIST_SUPPORTED_USP_DM.sort(key=lambda x: x['param'], reverse=False)
     LIST_SUPPORTED_USP_DM[:] = remove_duplicate_elements(LIST_SUPPORTED_USP_DM)
 
-    cwmp_schema_out = ubus.call('bbfdm', 'schema', {"path": "Device.", "optional": {"proto": "cwmp"}})
-    transform_schema_to_dm(cwmp_schema_out, LIST_SUPPORTED_CWMP_DM)
+    fill_list_dm("cwmp", LIST_SUPPORTED_CWMP_DM)
     LIST_SUPPORTED_CWMP_DM.sort(key=lambda x: x['param'], reverse=False)
     LIST_SUPPORTED_CWMP_DM[:] = remove_duplicate_elements(LIST_SUPPORTED_CWMP_DM)
-
-    ubus.disconnect()
-    # pylint: enable=E1101
-
-
-def get_micro_service_config(micro_service):
-    parent_dm = get_option_value(micro_service, "parent_dm")
-    root_obj = get_option_value(micro_service, "root_obj")
-    obj = get_option_value(micro_service, "object")
-    name = get_option_value(micro_service, "name")
-
-    if not isinstance(micro_service, dict) or None in (parent_dm, root_obj, obj, name):
-        return None
-
-    return {
-        "parent_dm": parent_dm,
-        "root_obj": root_obj,
-        "object": obj,
-        "name": name
-    }
 
 
 def clone_git_repository(repo, version=None):
@@ -351,32 +329,6 @@ def get_repo_version_info(repo, version=None):
     return f'{repo}^{version}'
 
 
-def process_json_file(filename, idx, micro_service, micro_service_config):
-    if micro_service is None:
-        move_file(filename, "/etc/bbfdm/plugins")
-    else:
-        micro_srv_path = f"/etc/app{idx}"
-        micro_srv_lib_path = f"{micro_srv_path}/file{idx}.json"
-        micro_srv_input_path = f"{micro_srv_path}/input.json"
-        create_folder(micro_srv_path)
-        move_file(filename, micro_srv_lib_path)
-        create_input_json_file(micro_srv_input_path, "JSON", micro_srv_lib_path, micro_service_config)
-        run_command(f"/usr/sbin/bbfdmd -m {micro_srv_input_path}")
-
-
-def process_c_files(LIST_FILES, vendor_prefix, extra_dependencies, idx, micro_service, micro_service_config):
-    if micro_service is None:
-        generate_shared_library(f"/etc/bbfdm/plugins/lib{idx}.so", LIST_FILES, vendor_prefix, extra_dependencies)
-    else:
-        micro_srv_path = f"/etc/app{idx}"
-        micro_srv_lib_path = f"{micro_srv_path}/lib{idx}.so"
-        micro_srv_input_path = f"{micro_srv_path}/input.json"
-        create_folder(micro_srv_path)
-        generate_shared_library(micro_srv_lib_path, LIST_FILES, vendor_prefix, extra_dependencies)
-        create_input_json_file(micro_srv_input_path, "DotSo", micro_srv_lib_path, micro_service_config)
-        run_command(f"/usr/sbin/bbfdmd -m {micro_srv_input_path}")
-
-
 def download_and_build_plugins(plugins, vendor_prefix):
     global BBF_ERROR_CODE
 
@@ -387,40 +339,37 @@ def download_and_build_plugins(plugins, vendor_prefix):
     print("Generating data models from defined plugins...")
 
     for plugin_index, plugin in enumerate(plugins):
-        micro_service_config = None
 
         repo = get_option_value(plugin, "repo")
+        proto = get_option_value(plugin, "proto")
         dm_files = get_option_value(plugin, "dm_files")
         extra_dependencies = get_option_value(plugin, "extra_dependencies", [])
 
-        if repo is None or dm_files is None or not isinstance(dm_files, list):
+        if repo is None or proto is None or dm_files is None or not isinstance(dm_files, list):
             print("Necessary input missing")
             BBF_ERROR_CODE += 1
             continue
 
-        micro_service = get_option_value(plugin, "micro-service")
-        if micro_service is not None:
-            micro_service_config = get_micro_service_config(micro_service)
-            if micro_service_config is None:
-                print("Micro service config not defined")
-                BBF_ERROR_CODE += 1
-                continue
-
         print(f' - Processing plugin: {plugin}')
 
-        version = get_option_value(plugin, "version")
+        if proto == "git":
+            repo_path = ".repo/"
+            version = get_option_value(plugin, "version")
 
-        remove_folder(".repo")
+            remove_folder(".repo")
 
-        if not clone_git_repository(repo, version):
-            print(f"Failed to clone {repo}")
-            BBF_ERROR_CODE += 1
-            continue
-
-        print(f'    Processing {get_repo_version_info(repo, version)}')
+            if not clone_git_repository(repo, version):
+                print(f"Failed to clone {repo}")
+                BBF_ERROR_CODE += 1
+                continue
+                
+            print(f'    Processing {get_repo_version_info(repo, version)}')
+        elif proto == "local":
+            repo_path = repo
+            print(f'    Processing {get_repo_version_info(repo, proto)}')
 
         LIST_FILES = []
-        os.chdir(".repo/")
+        os.chdir(repo_path)
         for dm_file in dm_files:
             filename = dm_file
             if filename.endswith('*.c'):
@@ -430,19 +379,19 @@ def download_and_build_plugins(plugins, vendor_prefix):
                     if filename.endswith('.c'):
                         LIST_FILES.append(filename)
                     elif filename.endswith('.json'):
-                        process_json_file(filename, plugin_index, micro_service, micro_service_config)
+                        move_file(filename, "/etc/bbfdm/plugins")
                     else:
                         print(f"Unknown file format {filename}")
                         BBF_ERROR_CODE += 1
                 else:
-                    print(f"File not accessible {filename}")
+                    print(f"Error: File not accessible {filename} !!!!!!")
                     BBF_ERROR_CODE += 1
 
         if len(LIST_FILES) > 0:
-            process_c_files(LIST_FILES, vendor_prefix, extra_dependencies, plugin_index, micro_service, micro_service_config)
+            generate_shared_library(f"/etc/bbfdm/plugins/lib{plugin_index}.so", LIST_FILES, vendor_prefix, extra_dependencies)
 
         clear_list(LIST_FILES)
-        os.chdir("..")
+        cd_dir(CURRENT_PATH)
 
         remove_folder(".repo")
 
@@ -465,12 +414,6 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
     # Download && Build Plugins Data Models
     download_and_build_plugins(plugins, vendor_prefix)
 
-    # Run bbfdm daemon
-    run_command("/usr/sbin/bbfdmd")
-
     # Fill the list supported data model
     fill_list_supported_dm()
-
-    # kill all related bbfdm daemon
-    run_command("kill -9 $(pidof bbfdmd)")
 

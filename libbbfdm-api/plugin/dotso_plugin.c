@@ -44,7 +44,11 @@ static void free_all_list_open_library(struct list_head *library_list)
 
 int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 {
+#ifndef BBF_SCHEMA_FULL_TREE
 	void *handle = dlopen(plugin_path, RTLD_NOW|RTLD_LOCAL);
+#else
+	void *handle = dlopen(plugin_path, RTLD_LAZY);
+#endif
 	if (!handle) {
 		TRACE("Plugin failed [%s]\n", dlerror());
 		return 0;
@@ -62,12 +66,14 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 
 	for (int i = 0; dynamic_obj[i].path; i++) {
 
-		DMOBJ *dm_entryobj = NULL;
-		bool obj_exists = find_entry_obj(entryobj, dynamic_obj[i].path, &dm_entryobj);
-		if (obj_exists == false || !dm_entryobj)
+		DMOBJ *dm_entryobj = find_entry_obj(entryobj, dynamic_obj[i].path);
+		if (!dm_entryobj)
 			continue;
 
 		if (dynamic_obj[i].root_obj) {
+
+			// Disable object if it already exists in the main tree
+			disable_entry_obj(dm_entryobj, dynamic_obj[i].root_obj->obj);
 
 			if (dm_entryobj->nextdynamicobj == NULL) {
 				dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));

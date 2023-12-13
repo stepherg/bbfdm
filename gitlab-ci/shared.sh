@@ -152,12 +152,12 @@ function install_libcwmpdm()
 	fi
 
 	echo "Compiling libcwmpdm"
-	cd /opt/dev/icwmp
-	cmake -DWITH_OPENSSL=ON -DCMAKE_INSTALL_PREFIX=/
+	cd /opt/dev/icwmp/bbf_plugin
+	cmake -DCMAKE_INSTALL_PREFIX=/
 	exec_cmd_verbose make
 
 	echo "installing libcwmpdm"
-	install_plugin /opt/dev/icwmp/libcwmpdm.so
+	install_plugin /opt/dev/icwmp/bbf_plugin/libcwmpdm.so
 
 	cd /builds/bbf/bbfdm
 }

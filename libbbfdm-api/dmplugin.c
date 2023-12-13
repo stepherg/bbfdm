@@ -28,31 +28,14 @@ struct service
 	char *object;
 };
 
-static void disable_srv_obj(DMOBJ *entryobj, char *srv_parent_dm, char *srv_obj)
-{
-	DMOBJ *dm_entryobj = NULL;
-	char obj_path[1024];
-
-	if (!entryobj || !srv_parent_dm || !srv_obj)
-		return;
-
-	snprintf(obj_path, sizeof(obj_path), "%s%s.", srv_parent_dm, srv_obj);
-
-	bool obj_exists = find_entry_obj(entryobj, obj_path, &dm_entryobj);
-	if (obj_exists == true && dm_entryobj)
-		dm_entryobj->bbfdm_type = BBFDM_NONE;
-}
-
 static bool add_service_to_main_tree(DMOBJ *main_dm, char *srv_name, char *srv_parent_dm, char *srv_obj)
 {
-	DMOBJ *dm_entryobj = NULL;
-
-	bool obj_exists = find_entry_obj(main_dm, srv_parent_dm, &dm_entryobj);
-	if (obj_exists == false || !dm_entryobj)
+	DMOBJ *dm_entryobj = find_entry_obj(main_dm, srv_parent_dm);
+	if (!dm_entryobj)
 		return false;
 
 	// Disable service object if it already exists in the main tree
-	disable_srv_obj(main_dm, srv_parent_dm, srv_obj);
+	disable_entry_obj(dm_entryobj, srv_obj);
 
 	if (dm_entryobj->nextdynamicobj == NULL) {
 		dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
@@ -249,6 +232,15 @@ static void free_all_dynamic_nodes(DMOBJ *entryobj)
 		if (entryobj->nextdynamicobj) {
 			for (int i = 0; i < __INDX_DYNAMIC_MAX; i++) {
 				struct dm_dynamic_obj *next_dyn_array = entryobj->nextdynamicobj + i;
+
+				if (next_dyn_array->nextobj) {
+					for (int j = 0; next_dyn_array->nextobj[j]; j++) {
+						DMOBJ *jentryobj = next_dyn_array->nextobj[j];
+						if (jentryobj)
+							free_all_dynamic_nodes(jentryobj);
+					}
+				}
+
 				FREE(next_dyn_array->nextobj);
 			}
 			FREE(entryobj->nextdynamicobj);
@@ -283,8 +275,8 @@ static int plugin_obj_match(char *in_param, struct dmnode *node)
 	return FAULT_9005;
 }
 
-static void dm_check_dynamic_obj(DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, DMOBJ **root_entry, bool *obj_found);
-static void dm_check_dynamic_obj_entry(DMNODE *parent_node, DMOBJ *entryobj, char *parent_obj, char *full_obj, DMOBJ **root_entry, bool *obj_found)
+static void dm_check_dynamic_obj(DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, DMOBJ **root_entry);
+static void dm_check_dynamic_obj_entry(DMNODE *parent_node, DMOBJ *entryobj, char *parent_obj, char *full_obj, DMOBJ **root_entry)
 {
 	DMNODE node = {0};
 	node.obj = entryobj;
@@ -295,7 +287,6 @@ static void dm_check_dynamic_obj_entry(DMNODE *parent_node, DMOBJ *entryobj, cha
 	dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
 	if (DM_STRCMP(node.current_object, full_obj) == 0) {
 		*root_entry = entryobj;
-		*obj_found = true;
 		return;
 	}
 
@@ -304,16 +295,16 @@ static void dm_check_dynamic_obj_entry(DMNODE *parent_node, DMOBJ *entryobj, cha
 		return;
 
 	if (entryobj->nextobj || entryobj->nextdynamicobj)
-		dm_check_dynamic_obj(&node, entryobj->nextobj, full_obj, root_entry, obj_found);
+		dm_check_dynamic_obj(&node, entryobj->nextobj, full_obj, root_entry);
 }
 
-static void dm_check_dynamic_obj(DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, DMOBJ **root_entry, bool *obj_found)
+static void dm_check_dynamic_obj(DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, DMOBJ **root_entry)
 {
 	char *parent_obj = parent_node->current_object;
 
 	for (; (entryobj && entryobj->obj); entryobj++) {
-		dm_check_dynamic_obj_entry(parent_node, entryobj, parent_obj, full_obj, root_entry, obj_found);
-		if (*obj_found == true)
+		dm_check_dynamic_obj_entry(parent_node, entryobj, parent_obj, full_obj, root_entry);
+		if (*root_entry != NULL)
 			return;
 	}
 
@@ -325,8 +316,8 @@ static void dm_check_dynamic_obj(DMNODE *parent_node, DMOBJ *entryobj, char *ful
 					for (int j = 0; next_dyn_array->nextobj[j]; j++) {
 						DMOBJ *jentryobj = next_dyn_array->nextobj[j];
 						for (; (jentryobj && jentryobj->obj); jentryobj++) {
-							dm_check_dynamic_obj_entry(parent_node, jentryobj, parent_obj, full_obj, root_entry, obj_found);
-							if (*obj_found == true)
+							dm_check_dynamic_obj_entry(parent_node, jentryobj, parent_obj, full_obj, root_entry);
+							if (*root_entry != NULL)
 								return;
 						}
 					}
@@ -336,19 +327,35 @@ static void dm_check_dynamic_obj(DMNODE *parent_node, DMOBJ *entryobj, char *ful
 	}
 }
 
-bool find_entry_obj(DMOBJ *root_entry, char *in_param, DMOBJ **entryobj)
+DMOBJ *find_entry_obj(DMOBJ *entryobj, char *obj_path)
 {
-	if (!root_entry || !in_param || !entryobj)
+	if (!entryobj || !obj_path)
 		return false;
 
 	DMNODE node = {.current_object = ""};
-	bool obj_found = false;
+	DMOBJ *obj = NULL;
 
-	char *obj_path = replace_str(in_param, ".{i}.", ".");
-	dm_check_dynamic_obj(&node, root_entry, obj_path, entryobj, &obj_found);
-	FREE(obj_path);
+	char *in_obj = replace_str(obj_path, ".{i}.", ".");
+	dm_check_dynamic_obj(&node, entryobj, in_obj, &obj);
+	FREE(in_obj);
 
-	return (obj_found && *entryobj) ? true : false;
+	return obj;
+}
+
+void disable_entry_obj(DMOBJ *entryobj, char *obj_path)
+{
+	if (!entryobj || DM_STRLEN(obj_path) == 0)
+		return;
+
+	DMOBJ *nextobj = entryobj->nextobj;
+
+	for (; (nextobj && nextobj->obj); nextobj++) {
+
+		if (DM_STRCMP(nextobj->obj, obj_path) == 0) {
+			nextobj->bbfdm_type = BBFDM_NONE;
+			return;
+		}
+	}
 }
 
 void dm_exclude_obj(DMOBJ *entryobj, DMNODE *parent_node, char *obj_path)

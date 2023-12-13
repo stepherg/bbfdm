@@ -147,11 +147,11 @@ The parameters/keys used in tools_input.json file are mostly self-explanatory bu
 | dm_json_files | This should contain the list of json file path, where each file contains the definition of DM objects/parameters |
 | vendor_prefix | The prefix used by vendor for vendor extension in DM objects/parameters, e.g., "X_IOPSYS_EU_" |
 | plugins | A list of plugins with associated repositories and data model files |
-| | repo: The URL of the plugin repository |
+| | repo: The path of the plugin repository. Could be 'URL' or 'folder_path' |
+| | proto: The protocol of the plugin repository. Could be 'git' or 'local' |
 | | version: (optional): The version of the git plugin |
 | | dm_files: A list of data model files associated with the plugin |
 | | extra_dependencies: (optional): Extra dependencies for the plugin, if any |
-| | micro-service: (optional): Information about the micro-service, including its name, parent data model, object, and root object |
 | output.acs | Currently the tool support two variants of xml definitions of DM objects/parameters |
 | | hdm: This variant of xml is compatible with Nokia HDM ACS |
 | | default: This contains the generic definition which has the capability to define more descriptive DM objects/parameters |
@@ -186,6 +186,7 @@ The input json file should be defined as follow:
 	"plugins": [
 		{
 			"repo": "https://dev.iopsys.eu/bbf/mydatamodel.git",
+			"proto": "git",
 			"version": "tag/hash/branch",
 			"dm_files": [
 				"src/datamodel.c",
@@ -194,6 +195,7 @@ The input json file should be defined as follow:
 		},
 		{
 			"repo": "https://dev.iopsys.eu/bbf/mybbfplugin.git",
+			"proto": "git",
 			"version": "tag/hash/branch",
 			"dm_files": [
 				"dm.c"
@@ -201,19 +203,15 @@ The input json file should be defined as follow:
 		},
 		{
 			"repo": "https://dev.iopsys.eu/bbf/mydatamodeljson.git",
+			"proto": "git",
 			"version": "tag/hash/branch",
 			"dm_files": [
 				"src/plugin/datamodel.json"
-			],
-			"micro-service": {
-				"name": "bbfdm.wifi",
-				"parent_dm": "Device.WiFi.",
-				"object": "DataElements",
-				"root_obj": "bbfdm"
-			}
+			]
 		},
 		{
 			"repo": "/home/iopsys/sdk/mypackage/",
+			"proto": "local",
 			"dm_files": [
 				"src/datamodel.c",
 				"additional_datamodel.c"
@@ -221,6 +219,7 @@ The input json file should be defined as follow:
 		},
 		{
 			"repo": "/src/feeds/mypackage/",
+			"proto": "local",
 			"dm_files": [
 				"datamodel.c",
 				"src/datamodel.json"
@@ -245,8 +244,6 @@ The input json file should be defined as follow:
 ---
 **NOTE**
 
-  1. All defined plugins will be treated as plugins except the ones that have the micro-service option defined will be treated as micro-services.
-  2. The `micro-service` option should be defined in the plugin only if you want to overwrite a specific Object introduced in the main tree.
-  3. All the tools need to be executed from the top directory.
+> All the tools need to be executed from the top directory.
 ---
 

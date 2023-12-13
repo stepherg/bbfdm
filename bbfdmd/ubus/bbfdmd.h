@@ -31,6 +31,7 @@ typedef struct bbfdm_config {
 	char out_root_obj[32];
 	char cli_in_type[32];
 	char cli_in_name[128];
+	char cli_in_plugin_dir[128];
 	char cli_out_type[32];
 } bbfdm_config_t;
 

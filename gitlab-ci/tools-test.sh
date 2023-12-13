@@ -4,17 +4,10 @@ echo "Verification of BBF Tools"
 pwd
 source ./gitlab-ci/shared.sh
 
-cp ./gitlab-ci/core_service.conf /etc/supervisor/conf.d/
-
-# starting base services
-supervisorctl reread
-supervisorctl update
-sleep 5
-
 # install required packages
 exec_cmd apt update
-exec_cmd apt install -y python3-pip libxml2-utils
-exec_cmd pip3 install jsonschema xlwt ubus pylint
+exec_cmd apt install -y python3-pip
+exec_cmd pip3 install jsonschema xlwt pylint
 
 echo "Validating PEP8 syntax on tools"
 exec_cmd_verbose pylint -d R,C,W0603 tools/*.py
