@@ -273,8 +273,10 @@ static int in_dotso_out_cli_exec_get(cli_data_t *cli_data, char *argv[])
 		list_for_each_entry(n, &cli_data->bbf_ctx.list_parameter, list) {
 			printf("%s => %s\n", n->name, n->data);
 		}
+		dmuci_commit_bbfdm();
 	} else {
 		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);
+		dmuci_revert_bbfdm();
 		err = EXIT_FAILURE;
 	}
 
