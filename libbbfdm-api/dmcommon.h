@@ -320,6 +320,7 @@ void remove_char(char *str, const char c);
 char *replace_char(char *str, char find, char replace);
 char *replace_str(const char *str, const char *substr, const char *replacement);
 int dm_file_to_buf(const char *filename, void *buf, size_t buf_size);
+int dm_file_copy(char *src, char *dst);
 int check_browse_section(struct uci_section *s, void *data);
 int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, size_t str_len);
 char *ioctl_get_ipv4(char *interface_name);

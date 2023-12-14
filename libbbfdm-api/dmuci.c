@@ -28,6 +28,7 @@ int dmuci_init(void)
 		uci_ctx = uci_alloc_context();
 		if (!uci_ctx)
 			return -1;
+		uci_set_confdir(uci_ctx, UCI_CONFIG_DIR);
 	}
 
 	return 0;

@@ -24,11 +24,17 @@
 #include <uci.h>
 #include <libubox/list.h>
 
+#ifndef ETC_DB_CONFIG
 #define ETC_DB_CONFIG "/etc/board-db/config"
+#endif
 #define VARSTATE_CONFIG "/var/state"
+#ifndef BBFDM_CONFIG
 #define BBFDM_CONFIG "/etc/bbfdm/dmmap"
+#endif
 #define BBFDM_SAVEDIR "/tmp/.bbfdm"
+#ifndef UCI_CONFIG_DIR
 #define UCI_CONFIG_DIR "/etc/config/"
+#endif
 #define VARSTATE_CONFDIR "/var/state/"
 #define VARSTATE_SAVEDIR "/tmp/.bbfdm_var"
 

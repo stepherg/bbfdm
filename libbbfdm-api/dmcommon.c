@@ -2146,6 +2146,39 @@ int dm_file_to_buf(const char *filename, void *buf, size_t buf_size)
 	return ret;
 }
 
+int dm_file_copy(char *src, char *dst)
+{
+	size_t n;
+	char buf[1024];
+	int ret = -1;
+	FILE *file_src = NULL, *file_dst = NULL;
+
+	if (DM_STRLEN(src) == 0 || DM_STRLEN(dst) == 0) {
+		return -1;
+	}
+
+	file_src = fopen(src, "r");
+	if (!file_src)
+		goto exit;
+
+	file_dst = fopen(dst, "w");
+	if (!file_dst)
+		goto exit;
+
+	while ((n = fread(buf, 1, sizeof(buf), file_src)) > 0) {
+		if (fwrite(buf, 1, n, file_dst) != n)
+			goto exit;
+	}
+
+	ret = 0;
+exit:
+	if (file_dst)
+		fclose(file_dst);
+	if (file_src)
+		fclose(file_src);
+	return ret;
+}
+
 int check_browse_section(struct uci_section *s, void *data)
 {
 	struct browse_args *browse_args = (struct browse_args *)data;
