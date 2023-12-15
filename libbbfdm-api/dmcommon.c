@@ -957,7 +957,7 @@ char *remove_str_from_str_list(char *str_list, const char *delimitor, const char
 
 	for (pch = strtok_r(list, delimitor, &spch); pch != NULL; pch = strtok_r(NULL, delimitor, &spch)) {
 
-		if (DM_STRCMP(pch, str) == 0)
+		if (DM_LSTRCMP(str, pch) == 0)
 			continue;
 
 		pos += snprintf(&res[pos], len + 1 - pos, "%s%s", pch, delimitor);

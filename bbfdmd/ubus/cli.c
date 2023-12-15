@@ -577,6 +577,7 @@ end:
 			bbf_global_clean(CLI_DM_ROOT_OBJ);
 		}
 		free_dotso_plugin(cli_lib_handle);
+		cli_lib_handle = NULL;
 	} else if (strcasecmp(cli_data->in_type, "JSON") == 0) {
 		if (CLI_DM_ROOT_OBJ) {
 			bbf_ctx_clean(&cli_data->bbf_ctx);

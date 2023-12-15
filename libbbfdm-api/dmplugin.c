@@ -330,7 +330,7 @@ static void dm_check_dynamic_obj(DMNODE *parent_node, DMOBJ *entryobj, char *ful
 DMOBJ *find_entry_obj(DMOBJ *entryobj, char *obj_path)
 {
 	if (!entryobj || !obj_path)
-		return false;
+		return NULL;
 
 	DMNODE node = {.current_object = ""};
 	DMOBJ *obj = NULL;
@@ -441,9 +441,9 @@ int load_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP
 
 		snprintf(buf, sizeof(buf), "%s/%s", plugin_path, files[i]);
 
-		if (DM_STRSTR(files[i], ".json")) {
+		if (DM_LSTRSTR(files[i], ".json")) {
 			load_json_plugins(dm_entryobj, buf);
-		} else if (DM_STRSTR(files[i], ".so")) {
+		} else if (DM_LSTRSTR(files[i], ".so")) {
 			load_dotso_plugins(dm_entryobj, buf);
 		}
 

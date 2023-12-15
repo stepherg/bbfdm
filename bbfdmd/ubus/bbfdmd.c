@@ -106,6 +106,7 @@ static void bbfdm_cleanup(struct bbfdm_context *u)
 	blob_buf_free(&u->dm_schema);
 	/* DotSo Plugin */
 	free_dotso_plugin(deamon_lib_handle);
+	deamon_lib_handle = NULL;
 
 	/* JSON Plugin */
 	free_json_plugin();

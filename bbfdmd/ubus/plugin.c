@@ -86,10 +86,8 @@ int load_dotso_plugin(void **lib_handle, const char *file_path,
 
 int free_dotso_plugin(void *lib_handle)
 {
-	if (lib_handle) {
+	if (lib_handle)
 		dlclose(lib_handle);
-		lib_handle = NULL;
-	}
 
 	return 0;
 }

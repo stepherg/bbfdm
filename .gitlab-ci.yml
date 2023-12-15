@@ -2,7 +2,7 @@ variables:
   DEBUG: 'TRUE'
   SOURCE_FOLDER: "."
   FLAWFINDER_OPTIONS: "-m 4 --error-level=5"
-  CPPCHECK_OPTIONS: " --enable=information -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBF_TR181 -DBBF_VENDOR_IOPSYS --inline-suppr -i test/"
+  CPPCHECK_OPTIONS: " --enable=warning --enable=performance --enable=portability --enable=information -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBF_TR181 -DBBF_VENDOR_IOPSYS --inline-suppr -i test/"
 
 include:
   - project: 'iopsys/gitlab-ci-pipeline'

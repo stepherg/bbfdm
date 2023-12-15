@@ -1581,6 +1581,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	struct json_object *type = NULL, *protocols = NULL, *write = NULL, *async = NULL, *flags = NULL;
 	char full_param[512] = {0};
 	size_t n_proto, n_flags;
+	// cppcheck-suppress nullPointerRedundantCheck
 	char **in_p = NULL, **out_p = NULL, **ev_arg = NULL, **tmp = NULL;
 
 	if (!jobj || !pleaf)

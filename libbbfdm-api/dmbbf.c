@@ -859,7 +859,7 @@ static char *get_value_by_reference(struct dmctx *ctx, char *value)
 	char buf_val[MAX_DM_PATH * 4] = {0};
 	bool path_resolved = false;
 
-	if (DM_STRLEN(value) == 0 || !DM_STRSTR(value, "=="))
+	if (DM_STRLEN(value) == 0 || !DM_LSTRSTR(value, "=="))
 		return value;
 
 	DM_STRNCPY(buf, value, sizeof(buf));
@@ -884,7 +884,7 @@ static char *get_value_by_reference(struct dmctx *ctx, char *value)
 		if (DM_STRLEN(match_str) == 0)
 			goto end;
 
-		int n = sscanf(match_str, "%[^=]==\"%[^\"]\"", key_name, key_value);
+		int n = sscanf(match_str, "%255[^=]==\"%255[^\"]\"", key_name, key_value);
 		if (n != 2)
 			goto end;
 
@@ -1089,12 +1089,12 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 
 				const char *flag = json_object_get_string(flag_obj);
 
-				if (DM_STRCMP(flag, "Reference") == 0) {
+				if (DM_LSTRCMP(flag, "Reference") == 0) {
 					data = get_value_by_reference(dmctx, data);
 					*dm_flags |= DM_FLAG_REFERENCE;
-				} else if (DM_STRCMP(flag, "Unique") == 0) {
+				} else if (DM_LSTRCMP(flag, "Unique") == 0) {
 					*dm_flags |= DM_FLAG_UNIQUE;
-				} else if (DM_STRCMP(flag, "Linker") == 0) {
+				} else if (DM_LSTRCMP(flag, "Linker") == 0) {
 					*dm_flags |= DM_FLAG_LINKER;
 				}
 			}
@@ -1149,7 +1149,7 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 		char *data = dmjson_get_value(res_obj, 1, "data");
 		char *type = dmjson_get_value(res_obj, 1, "type");
 
-		if (DM_STRCMP(type, "xsd:object") == 0) { //Object
+		if (DM_LSTRCMP(type, "xsd:object") == 0) { //Object
 			const char **unique_keys = NULL;
 
 			json_object *input_array = dmjson_get_obj(res_obj, 1, "input");
@@ -1169,7 +1169,7 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 			}
 
 			add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), "xsd:object", (char *)unique_keys);
-		} else if (DM_STRCMP(type, "xsd:command") == 0) { //Command Leaf
+		} else if (DM_LSTRCMP(type, "xsd:command") == 0) { //Command Leaf
 			operation_args *op = NULL;
 
 			op = dmcalloc(1, sizeof(operation_args));
@@ -1205,7 +1205,7 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 			}
 
 			add_list_parameter(dmctx, dmstrdup(path), (char *)op, "xsd:command", dmstrdup(data));
-		} else if (DM_STRCMP(type, "xsd:event") == 0) { //Event Leaf
+		} else if (DM_LSTRCMP(type, "xsd:event") == 0) { //Event Leaf
 			event_args *ev = NULL;
 
 			json_object *input_array = dmjson_get_obj(res_obj, 1, "input");
@@ -1400,7 +1400,7 @@ static bool is_reference_parameter(char *ubus_name, char *param_name, json_objec
 
 	char *flags_list = dmjson_get_value_array_all(res_obj, ",", 1, "flags");
 
-	return DM_STRSTR(flags_list, "Reference") ? true : false;
+	return DM_LSTRSTR(flags_list, "Reference") ? true : false;
 }
 
 static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
@@ -1628,7 +1628,7 @@ static int get_ubus_reference_value(struct dmctx *dmctx, struct dmnode *node)
 
 				const char *flag = json_object_get_string(flag_obj);
 
-				if (DM_STRCMP(flag, "Linker") == 0) {
+				if (DM_LSTRCMP(flag, "Linker") == 0) {
 					char *data = dmjson_get_value(res_obj, 1, "data");
 					dmctx->linker = data ? dmstrdup(data) : "";
 					dmctx->stop = true;
@@ -2287,7 +2287,7 @@ static int mparam_set_value(DMPARAM_ARGS)
 			}
 		}
 
-		if ((leaf->dm_falgs & DM_FLAG_REFERENCE) && !DM_STRSTR(dmctx->in_value, "=>")) {
+		if ((leaf->dm_falgs & DM_FLAG_REFERENCE) && !DM_LSTRSTR(dmctx->in_value, "=>")) {
 			get_reference_paramater_value(dmctx, dmctx->in_value, param_value, sizeof(param_value));
 		} else {
 			snprintf(param_value, sizeof(param_value), "%s", dmctx->in_value);
