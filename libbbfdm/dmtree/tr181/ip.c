@@ -1345,10 +1345,12 @@ static int get_IPInterface_Router(char *refparam, struct dmctx *ctx, void *data,
 
 	if ((*value)[0] == '\0') {
 		char *ip4table = NULL;
+		char linker[32] = {0};
 
 		dmuci_get_value_by_section_string((struct uci_section *)data, "ip4table", &ip4table);
 
-		adm_entry_get_reference_param(ctx, "Device.Routing.Router.*.Alias", DM_STRLEN(ip4table) ? ip4table : "254", value);
+		snprintf(linker, sizeof(linker), "route_table-%s", DM_STRLEN(ip4table) ? ip4table : "254");
+		adm_entry_get_reference_param(ctx, "Device.Routing.Router.*.Alias", linker, value);
 
 		// Store LowerLayers value
 		dmuci_set_value_by_section(dmmap_section, "Router", *value);
@@ -1379,18 +1381,22 @@ static int set_IPInterface_Router(char *refparam, struct dmctx *ctx, void *data,
 			if (DM_STRLEN(reference.value) == 0)
 				return FAULT_9007;
 
+			char *rt_table = DM_STRCHR(reference.value, '-'); // Get rt_table 'X' which is linker from Alias prefix 'route_table-X'
+			if (!rt_table)
+				return FAULT_9007;
+
 			// Store LowerLayers value
 			get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &s);
 			dmuci_set_value_by_section(s, "Router", reference.path);
 
-			dmuci_set_value_by_section((struct uci_section *)data, "ip4table", reference.value);
-			dmuci_set_value_by_section((struct uci_section *)data, "ip6table", reference.value);
+			dmuci_set_value_by_section((struct uci_section *)data, "ip4table", rt_table + 1);
+			dmuci_set_value_by_section((struct uci_section *)data, "ip6table", rt_table + 1);
 
 			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
 
 			uci_foreach_option_eq("network", "interface", "device", device, s) {
-				dmuci_set_value_by_section(s, "ip4table", reference.value);
-				dmuci_set_value_by_section(s, "ip6table", reference.value);
+				dmuci_set_value_by_section(s, "ip4table", rt_table + 1);
+				dmuci_set_value_by_section(s, "ip6table", rt_table + 1);
 			}
 			break;
 	}

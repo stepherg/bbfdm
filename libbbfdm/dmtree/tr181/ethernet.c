@@ -422,7 +422,7 @@ static int get_EthernetInterface_Alias(char *refparam, struct dmctx *ctx, void *
 {
 	dmuci_get_value_by_section_string((((struct eth_port_args *)data)->sections)->dmmap_section, "eth_iface_alias", value);
 	if ((*value)[0] == '\0') {
-		dmuci_get_value_by_section_string((((struct eth_port_args *)data)->sections)->config_section, "name", value);
+		*value = dmstrdup(section_name((((struct eth_port_args *)data)->sections)->config_section));
 		dmuci_set_value_by_section((((struct eth_port_args *)data)->sections)->dmmap_section, "eth_iface_alias", *value);
 	}
 	return 0;

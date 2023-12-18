@@ -1083,12 +1083,24 @@ static int get_RoutingRouteInformationInterfaceSetting_RouteLifetime(char *refpa
 **************************************************************/
 static int get_RoutingRouter_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "rt_table", value);
+	char *rt_table = NULL;
+
+	dmuci_get_value_by_section_string((struct uci_section *)data, "rt_table", &rt_table);
+	dmasprintf(value, "route_table-%s", rt_table ? rt_table : instance);
 	return 0;
 }
 
 static int set_RoutingRouter_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			bbfdm_set_fault_message(ctx, "Internal designated unique identifier, not allowed to update");
+			return FAULT_9007;
+	}
 	return 0;
 }
 

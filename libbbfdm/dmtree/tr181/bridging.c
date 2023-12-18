@@ -180,7 +180,7 @@ static void remove_port_from_bridge_sections(struct uci_section *br_sec, struct 
 	}
 }
 
-static void set_Provider_bridge_component(char *refparam, struct dmctx *ctx, void *data, char *instance, char *br_inst, char *component)
+static void set_Provider_bridge_component(char *refparam, struct dmctx *ctx, void *data, char *instance, char *linker, char *component)
 {
 	/* *value=Device.Bridging.Bridge.{i}.
 	 * In file dmmap_provider_bridge set "option svlan_br_inst {i}" or "list cvlan_br_inst {i}" in this(refered "provider_bridge" section)
@@ -190,8 +190,11 @@ static void set_Provider_bridge_component(char *refparam, struct dmctx *ctx, voi
 	char pr_br_sec_name[64] = {0};
 	char *br_sec_name = NULL;
 
-	// Get candidate bridge instance
-	if (DM_STRLEN(br_inst) == 0)
+	if (DM_STRLEN(linker) == 0) // Linker should be like "cpe-X"
+		return;
+
+	char *br_inst = DM_STRCHR(linker, '-'); // Get bridge instance 'X' which is linker from Alias prefix 'cpe-X'
+	if (!br_inst)
 		return;
 
 	// section name of bridge in network file
@@ -213,16 +216,16 @@ static void set_Provider_bridge_component(char *refparam, struct dmctx *ctx, voi
 	if (DM_LSTRCMP(component, "CVLAN") == 0) {
 		// Set svlan_br_inst in dmmap_provider_bridge->provider_bridge section
 
-		dmuci_add_list_value_by_section(((struct provider_bridge_args *)data)->provider_bridge_sec, "cvlan_br_inst", br_inst);
+		dmuci_add_list_value_by_section(((struct provider_bridge_args *)data)->provider_bridge_sec, "cvlan_br_inst", br_inst + 1);
 	} else if (DM_LSTRCMP(component, "SVLAN") == 0) {
 		// Set svlan_br_inst in dmmap_provider_bridgei->provider_bridge section
 
-		dmuci_set_value_by_section(((struct provider_bridge_args *)data)->provider_bridge_sec, "svlan_br_inst", br_inst);
+		dmuci_set_value_by_section(((struct provider_bridge_args *)data)->provider_bridge_sec, "svlan_br_inst", br_inst + 1);
 	}
 
 	/* Add candidate bridge to this provider bridge instance(network->device->pr_br_{i}) */
 	// Get network->device(bridge) section name from dmmap_bridge_port->bridge_port->device_section_name
-	dmmap_bridge_section = get_dup_section_in_dmmap_opt("dmmap_bridge", "device", "bridge_instance", br_inst);
+	dmmap_bridge_section = get_dup_section_in_dmmap_opt("dmmap_bridge", "device", "bridge_instance", br_inst + 1);
 	dmuci_get_value_by_section_string(dmmap_bridge_section, "section_name", &br_sec_name);
 
 	if (!dmmap_bridge_section || DM_STRLEN(br_sec_name) == 0)
@@ -1517,12 +1520,21 @@ static int get_BridgingBridge_Status(char *refparam, struct dmctx *ctx, void *da
 /*#Device.Bridging.Bridge.{i}.Alias!UCI:dmmap_bridge/device,@i-1/bridge_alias*/
 static int get_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmstrdup(((struct bridge_args *)data)->br_inst);
+	dmasprintf(value, "cpe-%s", ((struct bridge_args *)data)->br_inst ? ((struct bridge_args *)data)->br_inst : instance);
 	return 0;
 }
 
 static int set_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			bbfdm_set_fault_message(ctx, "Internal designated unique identifier, not allowed to update");
+			return FAULT_9007;
+	}
 	return 0;
 }
 

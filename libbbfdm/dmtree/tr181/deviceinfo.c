@@ -555,18 +555,24 @@ static int get_device_softwareversion(char *refparam, struct dmctx *ctx, void *d
 static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *bank_obj = NULL, *arrobj = NULL;
-	char *linker = NULL;
+	char linker[16] = {0}, *id = NULL;
 	int i = 0;
 
 	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
 		char *active = dmjson_get_value(bank_obj, 1, "active");
 		if (active && DM_LSTRCMP(active, "true") == 0) {
-			linker = dmjson_get_value(bank_obj, 1, "id");
+			id = dmjson_get_value(bank_obj, 1, "id");
 			break;
 		}
 	}
 
+	if (DM_STRLEN(id) == 0) {
+		*value = "";
+		return 0;
+	}
+
+	snprintf(linker, sizeof(linker), "cpe-%s", id);
 	adm_entry_get_reference_param(ctx, "Device.DeviceInfo.FirmwareImage.*.Alias", linker, value);
 	return 0;
 }
@@ -574,18 +580,24 @@ static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *da
 static int get_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL, *bank_obj = NULL, *arrobj = NULL;
-	char *linker = NULL;
+	char linker[16] = {0}, *id = NULL;
 	int i = 0;
 
 	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
 		char *boot = dmjson_get_value(bank_obj, 1, "boot");
 		if (boot && DM_LSTRCMP(boot, "true") == 0) {
-			linker = dmjson_get_value(bank_obj, 1, "id");
+			id = dmjson_get_value(bank_obj, 1, "id");
 			break;
 		}
 	}
 
+	if (DM_STRLEN(id) == 0) {
+		*value = "";
+		return 0;
+	}
+
+	snprintf(linker, sizeof(linker), "cpe-%s", id);
 	adm_entry_get_reference_param(ctx, "Device.DeviceInfo.FirmwareImage.*.Alias", linker, value);
 	return 0;
 }
@@ -612,14 +624,16 @@ static int set_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 				json_object *res = NULL;
 				char *available = NULL;
 
-				char *bank_id = reference.value;
+				char *bank_id = DM_STRCHR(reference.value, '-'); // Get bank id 'X' which is linker from Alias prefix 'cpe-X'
+				if (!bank_id)
+					return FAULT_9001;
 
-				get_dmmap_section_of_config_section_cont("dmmap_fw_image", "fw_image", "id", bank_id, &dmmap_s);
+				get_dmmap_section_of_config_section_cont("dmmap_fw_image", "fw_image", "id", bank_id + 1, &dmmap_s);
 				dmuci_get_value_by_section_string(dmmap_s, "available", &available);
 				if (DM_LSTRCMP(available, "false") == 0)
 					return FAULT_9001;
 
-				dmubus_call("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id, Integer}}, 1, &res);
+				dmubus_call("fwbank", "set_bootbank", UBUS_ARGS{{"bank", bank_id + 1, Integer}}, 1, &res);
 				char *success = dmjson_get_value(res, 1, "success");
 				if (DM_LSTRCMP(success, "true") != 0)
 					return FAULT_9001;
@@ -972,12 +986,22 @@ static int get_DeviceInfoSupportedDataModel_Features(char *refparam, struct dmct
 
 static int get_DeviceInfoFirmwareImage_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "id");
+	char *id = dmjson_get_value((json_object *)data, 1, "id");
+	dmasprintf(value, "cpe-%s", id ? id : instance);
 	return 0;
 }
 
 static int set_DeviceInfoFirmwareImage_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			bbfdm_set_fault_message(ctx, "Internal designated unique identifier, not allowed to update");
+			return FAULT_9007;
+	}
 	return 0;
 }
 
