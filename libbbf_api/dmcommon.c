@@ -1854,6 +1854,22 @@ void string_to_mac(const char *str, size_t str_len, char *out, size_t out_len)
 	}
 }
 
+void remove_char(char *str, const char c)
+{
+	int i = 0, j = 0;
+
+	if (DM_STRLEN(str) == 0)
+		return;
+
+	while (str[i]) {
+		if (str[i] != c)
+			str[j++] = str[i];
+		i++;
+	}
+
+	str[j] = 0;
+}
+
 char *replace_char(char *str, char find, char replace)
 {
 	char *current_pos = DM_STRCHR(str, find);

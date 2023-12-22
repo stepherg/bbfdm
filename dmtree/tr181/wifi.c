@@ -40,9 +40,9 @@ struct wifi_enp_args
 
 struct wifi_data_element_args
 {
-	struct dmmap_dup *uci_s;
 	struct json_object *dump_obj;
-	struct json_object *dump2_obj;
+	struct json_object *dump_fallback;
+	struct uci_section *uci_s;
 };
 
 struct wifi_event_args
@@ -51,6 +51,11 @@ struct wifi_event_args
 	char *event_time;
 };
 
+struct wifi_ap_fronthaul_args
+{
+	char *ssid;
+	char *band_list;
+};
 
 /**************************************************************************
 * LINKER
@@ -81,7 +86,7 @@ static int get_linker_associated_device(char *refparam, struct dmctx *dmctx, voi
 
 static int get_linker_wfdata_Device(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
 {
-	*linker = data ? section_name((((struct wifi_data_element_args *)data)->uci_s)->config_section) : "";
+	*linker = data ? section_name(((struct wifi_data_element_args *)data)->uci_s) : "";
 	return 0;
 }
 
@@ -460,25 +465,6 @@ static int delObjWiFiEndPoint(char *refparam, struct dmctx *ctx, void *data, cha
 	return 0;
 }
 
-/*static int addObjWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels(char *refparam, struct dmctx *ctx, void *data, char **instance)
-{
-	//TODO
-	return 0;
-}
-
-static int delObjWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
-{
-	switch (del_action) {
-		case DEL_INST:
-			//TODO
-			break;
-		case DEL_ALL:
-			//TODO
-			break;
-	}
-	return 0;
-}*/
-
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
@@ -651,16 +637,71 @@ static int browse_wifi_associated_device(struct dmctx *dmctx, DMNODE *parent_nod
 	return 0;
 }
 
+static bool is_ssid_exists(const char *sec_name, const char *ssid, char **band_list)
+{
+	struct uci_section *s = NULL;
+	char *curr_ssid = NULL;
+	char buf[256] = {0};
+	unsigned pos = 0;
+
+	*band_list = NULL;
+
+	if (DM_STRLEN(sec_name) == 0 || DM_STRLEN(ssid) == 0)
+		return false;
+
+	uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
+		struct uci_section *dmmap_s = NULL;
+		char *ap_inst = NULL;
+
+		// skip the disabled fronthaul interfaces
+		char *enabled = NULL;
+		dmuci_get_value_by_section_string(s, "enabled", &enabled);
+		if (DM_STRLEN(enabled)) {
+			bool b = false;
+
+			string_to_bool(enabled, &b);
+			if (b == false)
+				continue;
+		}
+
+		dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
+		if (DM_STRLEN(curr_ssid) == 0 ||
+			DM_STRCMP(curr_ssid, ssid) != 0)
+			continue;
+
+		if ((dmmap_s = get_dup_section_in_dmmap("dmmap_mapcontroller", "ap", section_name(s))) != NULL) {
+			dmuci_get_value_by_section_string(dmmap_s, "wifi_da_ssid_instance", &ap_inst);
+
+			if (strcmp(sec_name, section_name(s)) != 0 && DM_STRLEN(ap_inst) != 0)
+				return true;
+		}
+
+		// Update band list
+		char *band = NULL;
+		dmuci_get_value_by_section_string(s, "band", &band);
+		pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", (!DM_LSTRCMP(band, "2")) ? "2.4" : (!DM_LSTRCMP(band, "5")) ? "5" : "6");
+	}
+
+	if (pos)
+		buf[pos - 1] = 0;
+
+	*band_list = dmstrdup(buf);
+	return false;
+}
+
 static int browseWiFiDataElementsNetworkSSIDInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
+	struct wifi_ap_fronthaul_args curr_wifi_ap_fronthaul_args = {0};
 	struct dmmap_dup *p = NULL;
 	char *inst = NULL;
+	char *band_list = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("mapcontroller", "ap", "dmmap_mapcontroller", &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 		char *type = NULL;
 		char *enabled = NULL;
+		char *ssid = NULL;
 		bool b = false;
 
 		dmuci_get_value_by_section_string(p->config_section, "type", &type);
@@ -675,23 +716,33 @@ static int browseWiFiDataElementsNetworkSSIDInst(struct dmctx *dmctx, DMNODE *pa
 				continue;
 		}
 
+		dmuci_get_value_by_section_string(p->config_section, "ssid", &ssid);
+		if (DM_STRLEN(ssid) == 0)
+			continue;
+
+		if (is_ssid_exists(section_name(p->config_section), ssid, &band_list))
+			continue;
+
+		curr_wifi_ap_fronthaul_args.ssid = ssid;
+		curr_wifi_ap_fronthaul_args.band_list = band_list;
+
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "wifi_da_ssid_instance", "wifi_da_ssid_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_ap_fronthaul_args, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
 	return 0;
 }
 
-static json_object *find_device_object(char *method_name, const char *unique_key)
+static json_object *find_device_json_object(const char *unique_key)
 {
 	json_object *data_arr = NULL;
 	json_object *data_obj = NULL;
 	json_object *res = NULL;
 	int i = 0;
 
-	dmubus_call("wifi.dataelements.collector", method_name, UBUS_ARGS{0}, 0, &res);
+	dmubus_call("wifi.dataelements.collector", "dump", UBUS_ARGS{0}, 0, &res);
 	dmjson_foreach_obj_in_array(res, data_arr, data_obj, i, 1, "data") {
 		json_object *dev_arr = NULL;
 		json_object *dev_obj = NULL;
@@ -708,7 +759,33 @@ static json_object *find_device_object(char *method_name, const char *unique_key
 	return NULL;
 }
 
-static json_object *find_radio_object(json_object *device_obj, const char *unique_key)
+static struct uci_section *find_device_uci_section(char *unique_key)
+{
+	struct uci_section *s = NULL;
+
+	uci_foreach_sections("mapcontroller", "node", s) {
+		char *agent_id = NULL;
+
+		dmuci_get_value_by_section_string(s, "agent_id", &agent_id);
+
+		// Device found ==> return the current device uci section
+		if (DM_STRCMP(agent_id, unique_key) == 0)
+			return s;
+	}
+
+	// Device not found ==> create a new device uci section
+	char node_name[32];
+
+	snprintf(node_name, sizeof(node_name), "node_%s", unique_key);
+	remove_char(node_name, ':');
+
+	dmuci_add_section("mapcontroller", "node", &s);
+	dmuci_rename_section_by_section(s, node_name);
+	dmuci_set_value_by_section(s, "agent_id", unique_key);
+	return s;
+}
+
+static json_object *find_radio_json_object(json_object *device_obj, const char *unique_key)
 {
 	json_object *radio_arr = NULL;
 	json_object *radio_obj = NULL;
@@ -719,42 +796,78 @@ static json_object *find_radio_object(json_object *device_obj, const char *uniqu
 		char mac[32] = {0};
 		char *id = dmjson_get_value(radio_obj, 1, "ID");
 		char *str = base64_decode(id);
-		string_to_mac(str, DM_STRLEN(str), mac, sizeof(mac));
-		if (DM_STRCMP(unique_key, mac) == 0)
-			return radio_obj;
+
+		/* Cant use strlen on byte array that might genuinely include 0x00 */
+		/* but to get 6 bytes, need 8 input BASE64 chars - check for that */
+		if ((str != NULL) && (DM_STRLEN(id) == 8)) {
+			string_to_mac(str, 6, mac, sizeof(mac));
+			if (DM_STRCMP(unique_key, mac) == 0)
+				return radio_obj;
+		}
 	}
 
 	return NULL;
 }
 
+static struct uci_section *find_radio_uci_section(char *agent_id, char *unique_key)
+{
+	struct uci_section *s = NULL;
+
+	uci_foreach_option_eq("mapcontroller", "radio", "agent_id", agent_id, s) {
+		char *macaddr = NULL;
+
+		dmuci_get_value_by_section_string(s, "macaddr", &macaddr);
+
+		// Radio found ==> return the current radio uci section
+		if (DM_STRCMP(macaddr, unique_key) == 0)
+			return s;
+	}
+
+	// Radio not found ==> create a new radio uci section
+	char radio_name[64];
+
+	snprintf(radio_name, sizeof(radio_name), "radio_%s", unique_key);
+	remove_char(radio_name, ':');
+
+	dmuci_add_section("mapcontroller", "radio", &s);
+	dmuci_rename_section_by_section(s, radio_name);
+	dmuci_set_value_by_section(s, "agent_id", agent_id);
+	dmuci_set_value_by_section(s, "macaddr", unique_key);
+	return s;
+}
+
 static int browseWiFiDataElementsNetworkDeviceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct wifi_data_element_args wifi_da_device_args = {0};
-	struct dmmap_dup *p = NULL;
+	json_object *data_arr = NULL;
+	json_object *data_obj = NULL;
+	json_object *res = NULL;
 	char *inst = NULL;
-	LIST_HEAD(dup_list);
+	int i = 0, id = 0;
 
-	synchronize_specific_config_sections_with_dmmap("mapcontroller", "node", "dmmap_mapcontroller", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-		char *key = NULL;
+	dmubus_call("wifi.dataelements.collector", "dump2", UBUS_ARGS{0}, 0, &res);
+	dmjson_foreach_obj_in_array(res, data_arr, data_obj, i, 1, "data") {
+		json_object *dev_arr = NULL;
+		json_object *dev_obj = NULL;
+		int j = 0;
 
-		dmuci_get_value_by_section_string(p->config_section, "agent_id", &key);
-		if (!key || *key == '\0')
-			continue;
+		dmjson_foreach_obj_in_array(data_obj, dev_arr, dev_obj, j, 2, "wfa-dataelements:Network", "DeviceList") {
 
-		wifi_da_device_args.uci_s = p;
-		wifi_da_device_args.dump_obj = find_device_object("dump", key);
-		wifi_da_device_args.dump2_obj = find_device_object("dump2", key);
+			char *key = dmjson_get_value(dev_obj, 1, "ID");
+			if (!key || *key == '\0')
+				continue;
 
-		if (wifi_da_device_args.dump_obj == NULL && wifi_da_device_args.dump2_obj == NULL)
-			continue;
+			wifi_da_device_args.dump_obj = dev_obj;
+			wifi_da_device_args.dump_fallback = find_device_json_object(key);
+			wifi_da_device_args.uci_s = find_device_uci_section(key);
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "wifi_da_device_instance", "wifi_da_device_alias");
+			inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&wifi_da_device_args, inst) == DM_STOP)
-			break;
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&wifi_da_device_args, inst) == DM_STOP)
+				return 0;
+		}
 	}
-	free_dmmap_config_dup_list(&dup_list);
+
 	return 0;
 }
 
@@ -766,7 +879,7 @@ static int browseWiFiDataElementsNetworkDeviceDefault8021QInst(struct dmctx *dmc
 
 static int browseWiFiDataElementsNetworkDeviceSSIDtoVIDMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *wifi_da_device_dump2 = ((struct wifi_data_element_args *)prev_data)->dump2_obj;
+	json_object *wifi_da_device_dump2 = ((struct wifi_data_element_args *)prev_data)->dump_obj;
 	json_object *ssid_to_vid_arr = NULL, *ssid_to_vid_obj = NULL;
 	char *inst = NULL;
 	int id = 0, i = 0;
@@ -783,36 +896,42 @@ static int browseWiFiDataElementsNetworkDeviceRadioInst(struct dmctx *dmctx, DMN
 {
 	struct wifi_data_element_args *wifi_da_device = (struct wifi_data_element_args *)prev_data;
 	struct wifi_data_element_args wifi_da_radio_args = {0};
-	struct dmmap_dup *p = NULL;
-	char *inst = NULL, *agent_id = NULL;
-	LIST_HEAD(dup_list);
+	struct json_object *radio_arr = NULL, *radio_obj = NULL;
+	char *inst = NULL;
+	int i = 0, id = 0;
 
-	dmuci_get_value_by_section_string(wifi_da_device->uci_s->config_section, "agent_id", &agent_id);
+	char *agent_id = dmjson_get_value(wifi_da_device->dump_obj, 1, "ID");
 
-	synchronize_specific_config_sections_with_dmmap_eq("mapcontroller", "radio", "dmmap_mapcontroller", "agent_id", agent_id, &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-		char *key = NULL;
+	dmjson_foreach_obj_in_array(wifi_da_device->dump_obj, radio_arr, radio_obj, i, 1, "RadioList") {
 
-		dmuci_get_value_by_section_string(p->config_section, "macaddr", &key);
-		if (!key || *key == '\0')
+		char mac[32] = {0};
+		char *radio_id = dmjson_get_value(radio_obj, 1, "ID");
+		char *str = base64_decode(radio_id);
+
+		/* Cant use strlen on byte array that might genuinely include 0x00 */
+		/* but to get 6 bytes, need 8 input BASE64 chars - check for that */
+		if ((str != NULL) && (DM_STRLEN(radio_id) == 8))
+			string_to_mac(str, 6, mac, sizeof(mac));
+
+		if (DM_STRLEN(mac) == 0)
 			continue;
 
-		wifi_da_radio_args.uci_s = p;
-		wifi_da_radio_args.dump_obj = find_radio_object(wifi_da_device->dump_obj, key);
-		wifi_da_radio_args.dump2_obj = find_radio_object(wifi_da_device->dump2_obj, key);
+		wifi_da_radio_args.dump_obj = radio_obj;
+		wifi_da_radio_args.dump_fallback = find_radio_json_object(wifi_da_device->dump_fallback, mac);
+		wifi_da_radio_args.uci_s = find_radio_uci_section(agent_id, mac);
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "wifi_da_device_instance", "wifi_da_device_alias");
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&wifi_da_radio_args, inst) == DM_STOP)
-			break;
+			return 0;
 	}
-	free_dmmap_config_dup_list(&dup_list);
+
 	return 0;
 }
 
 static int browseWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *wifi_da_radio = ((struct wifi_data_element_args *)prev_data)->dump_obj;
+	json_object *wifi_da_radio = ((struct wifi_data_element_args *)prev_data)->dump_fallback;
 	json_object *opclass_arr = NULL, *opclass_obj = NULL;
 	char *inst = NULL;
 	int id = 0, i = 0;
@@ -827,7 +946,7 @@ static int browseWiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfileI
 
 static int browseWiFiDataElementsNetworkDeviceRadioBSSInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *wifi_da_radio = ((struct wifi_data_element_args *)prev_data)->dump2_obj;
+	json_object *wifi_da_radio = ((struct wifi_data_element_args *)prev_data)->dump_obj;
 	json_object *bss_arr = NULL, *bss_obj = NULL;
 	char *inst = NULL;
 	int id = 0, i = 0;
@@ -855,31 +974,9 @@ static int browseWiFiDataElementsNetworkDeviceRadioScanResultInst(struct dmctx *
 	return 0;
 }
 
-/*static int browseWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannelsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	//TODO
-	return 0;
-}
-
-static int browseWiFiDataElementsNetworkDeviceRadioUnassociatedSTAInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	json_object *wifi_da_radio = ((struct wifi_data_element_args *)prev_data)->dump_obj;
-	json_object *unassoc_arr = NULL, *unassoc_obj = NULL;
-	char *inst = NULL;
-	int id = 0, i = 0;
-
-	dmjson_foreach_obj_in_array(wifi_da_radio, unassoc_arr, unassoc_obj, i, 1, "UnassociatedStaList") {
-		inst = handle_instance_without_section(dmctx, parent_node, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)unassoc_obj, inst) == DM_STOP)
-			break;
-	}
-	return 0;
-}
-*/
-
 static int browseWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingClassProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	json_object *wifi_da_radio = ((struct wifi_data_element_args *)prev_data)->dump_obj;
+	json_object *wifi_da_radio = ((struct wifi_data_element_args *)prev_data)->dump_fallback;
 	json_object *opclass_arr = NULL, *opclass_obj = NULL;
 	char *inst = NULL;
 	int id = 0, i = 0;
@@ -891,22 +988,6 @@ static int browseWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingC
 	}
 	return 0;
 }
-
-/*
-static int browseWiFiDataElementsNetworkDeviceRadioBSSQMDescriptorInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	json_object *qmdescriptor_arr = NULL, *qmdescriptor_obj = NULL;
-	char *inst = NULL;
-	int id = 0, i = 0;
-
-	dmjson_foreach_obj_in_array((json_object *)prev_data, qmdescriptor_arr, qmdescriptor_obj, i, 1, "QMDescriptor") {
-		inst = handle_instance_without_section(dmctx, parent_node, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)qmdescriptor_obj, inst) == DM_STOP)
-			break;
-	}
-	return 0;
-}
-*/
 
 static int browseWiFiDataElementsNetworkDeviceRadioBSSSTAInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -963,68 +1044,6 @@ static int browseWiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelS
 	}
 	return 0;
 }
-
-/*
-static int browseWiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannelsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	json_object *wifi_da_radio = ((struct wifi_data_element_args *)prev_data)->dump2_obj;
-	json_object *opclass_arr = NULL, *opclass_obj = NULL;
-	char *inst = NULL;
-	int id = 0, i = 0;
-
-	dmjson_foreach_obj_in_array(wifi_da_radio, opclass_arr, opclass_obj, i, 1, "OpClassChannels") {
-		inst = handle_instance_without_section(dmctx, parent_node, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)opclass_obj, inst) == DM_STOP)
-			break;
-	}
-	return 0;
-}
-
-static int browseWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	json_object *wifi_da_radio = ((struct wifi_data_element_args *)prev_data)->dump2_obj;
-	json_object *cacmethod_arr = NULL, *cacmethod_obj = NULL;
-	char *inst = NULL;
-	int id = 0, i = 0;
-
-	dmjson_foreach_obj_in_array(wifi_da_radio, cacmethod_arr, cacmethod_obj, i, 2, "CACCapability", "CACMethod") {
-		inst = handle_instance_without_section(dmctx, parent_node, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)cacmethod_obj, inst) == DM_STOP)
-			break;
-	}
-	return 0;
-}
-
-static int browseWiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannelsInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	json_object *cacmethod_obj = (json_object *)prev_data;
-	json_object *op_class_arr = NULL, *op_class_obj = NULL;
-	char *inst = NULL;
-	int id = 0, i = 0;
-
-	dmjson_foreach_obj_in_array(cacmethod_obj, op_class_arr, op_class_obj, i, 1, "OpClassChannels") {
-		inst = handle_instance_without_section(dmctx, parent_node, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)op_class_obj, inst) == DM_STOP)
-			break;
-	}
-	return 0;
-}
-
-static int browseWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	json_object *wifi_da_device = ((struct wifi_data_element_args *)prev_data)->dump2_obj;
-	json_object *curropclass_arr = NULL, *curropclass_obj = NULL;
-	char *inst = NULL;
-	int id = 0, i = 0;
-
-	dmjson_foreach_obj_in_array(wifi_da_device, curropclass_arr, curropclass_obj, i, 2, "MultiAPDevice", "Backhaul_CurrentOperatingClassProfile") {
-		inst = handle_instance_without_section(dmctx, parent_node, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curropclass_obj, inst) == DM_STOP)
-			break;
-	}
-	return 0;
-}
-*/
 
 static int browseWiFiDataElementsAssociationEventAssociationEventDataInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -3813,16 +3832,17 @@ static int get_WiFiDataElementsNetwork_SSIDNumberOfEntries(char *refparam, struc
 
 static int get_WiFiDataElementsNetworkSSID_SSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ssid", value);
+	struct wifi_ap_fronthaul_args *data_args = (struct wifi_ap_fronthaul_args *)data;
+
+	*value = (data_args && data_args->ssid) ? data_args->ssid : "";
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkSSID_Band(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *band = NULL;
+	struct wifi_ap_fronthaul_args *data_args = (struct wifi_ap_fronthaul_args *)data;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "band", &band);
-	*value = (!DM_LSTRCMP(band, "2")) ? "2.4" : (!DM_LSTRCMP(band, "5")) ? "5" : "6";
+	*value = (data_args && data_args->band_list) ? data_args->band_list : "";
 	return 0;
 }
 
@@ -3885,55 +3905,23 @@ static int get_WiFiDataElementsNetworkDevice_ID(char *refparam, struct dmctx *ct
 	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "ID");
 	return 0;
 }
-/*
-static int get_WiFiDataElementsNetworkDevice_MultiAPCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "MultiAPCapabilities");
-	return 0;
-}
-*/
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.CollectionInterval!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].CollectionInterval*/
 static int get_WiFiDataElementsNetworkDevice_CollectionInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "CollectionInterval");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 1, "CollectionInterval");
 	return 0;
 }
-
-/*
-static int get_WiFiDataElementsNetworkDevice_ReportUnsuccessfulAssociations(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_sta_assocfails", "1");
-	return 0;
-}
-
-static int set_WiFiDataElementsNetworkDevice_ReportUnsuccessfulAssociations(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	bool b;
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_sta_assocfails", b ? "1" : "0");
-			return 0;
-	}
-	return 0;
-}
-*/
 
 static int get_WiFiDataElementsNetworkDevice_MaxReportingRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "MaxReportingRate");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "MaxReportingRate");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDevice_APMetricsReportingInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_metric_periodic", value);
+	dmuci_get_value_by_section_string(((struct wifi_data_element_args *)data)->uci_s, "report_metric_periodic", value);
 	return 0;
 }
 
@@ -3945,114 +3933,16 @@ static int set_WiFiDataElementsNetworkDevice_APMetricsReportingInterval(char *re
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_metric_periodic", value);
+			dmuci_set_value_by_section(((struct wifi_data_element_args *)data)->uci_s, "report_metric_periodic", value);
 			return 0;
 	}
 	return 0;
 }
-
-/*
-static int get_WiFiDataElementsNetworkDevice_Manufacturer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "Manufacturer");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_SerialNumber(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "SerialNumber");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_ManufacturerModel(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "ManufacturerModel");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_SoftwareVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "SoftwareVersion");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_ExecutionEnv(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "ExecutionEnv");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_DSCPMap(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "DSCPMap");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_MaxPrioritizationRules(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "MaxPrioritizationRules");
-	return 0;
-}
-*/
-
-/*
-static int get_WiFiDataElementsNetworkDevice_PrioritizationSupport(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "PrioritizationSupport");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_MaxVIDs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "MaxVIDs");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_APMetricsWiFi6(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "APMetricsWiFi6");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_CountryCode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "CountryCode");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_LocalSteeringDisallowedSTAList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct uci_list *uci_list = NULL;
-	dmuci_get_value_by_section_list((((struct wifi_data_element_args *)data)->uci_s)->config_section, "steer_exclude", &uci_list);
-	*value = dmuci_list_to_string(uci_list, ",");
-	return 0;
-}
-
-static int set_WiFiDataElementsNetworkDevice_LocalSteeringDisallowedSTAList(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	size_t length = 0;
-	char **arr = NULL;
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, 17, NULL, MACAddress))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			arr = strsplit(value, ",", &length);
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "steer_exclude", "");
-			for (int i = 0; i < length; i++)
-				dmuci_add_list_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "steer_exclude", arr[i]);
-			return 0;
-	}
-	return 0;
-}
-*/
 
 static int get_WiFiDataElementsNetworkDevice_BTMSteeringDisallowedSTAList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_list *uci_list = NULL;
-	dmuci_get_value_by_section_list((((struct wifi_data_element_args *)data)->uci_s)->config_section, "steer_exclude_btm", &uci_list);
+	dmuci_get_value_by_section_list(((struct wifi_data_element_args *)data)->uci_s, "steer_exclude_btm", &uci_list);
 	*value = dmuci_list_to_string(uci_list, ",");
 	return 0;
 }
@@ -4069,24 +3959,17 @@ static int set_WiFiDataElementsNetworkDevice_BTMSteeringDisallowedSTAList(char *
 			return 0;
 		case VALUESET:
 			arr = strsplit(value, ",", &length);
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "steer_exclude_btm", "");
+			dmuci_set_value_by_section(((struct wifi_data_element_args *)data)->uci_s, "steer_exclude_btm", "");
 			for (int i = 0; i < length; i++)
-				dmuci_add_list_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "steer_exclude_btm", arr[i]);
+				dmuci_add_list_value_by_section(((struct wifi_data_element_args *)data)->uci_s, "steer_exclude_btm", arr[i]);
 			return 0;
 	}
 	return 0;
 }
-/*
-static int get_WiFiDataElementsNetworkDevice_DFSEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "DFSEnable");
-	return 0;
-}
-*/
 
 static int get_WiFiDataElementsNetworkDevice_ReportIndependentScans(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "ReportIndependentScans");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "ReportIndependentScans");
 	return 0;
 }
 
@@ -4101,143 +3984,64 @@ static int set_WiFiDataElementsNetworkDevice_ReportIndependentScans(char *refpar
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_scan", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct wifi_data_element_args *)data)->uci_s, "report_scan", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
 }
-
-/*
-static int get_WiFiDataElementsNetworkDevice_AssociatedSTAinAPMetricsWiFi6(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "AssociatedSTAinAPMetricsWiFi6");
-	return 0;
-}
-
-static int set_WiFiDataElementsNetworkDevice_AssociatedSTAinAPMetricsWiFi6(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			//TODO
-			break;
-	}
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_MaxUnsuccessfulAssociationReportingRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "MaxUnsuccessfulAssociationReportingRate");
-	return 0;
-}
-
-static int set_WiFiDataElementsNetworkDevice_MaxUnsuccessfulAssociationReportingRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,NULL}}, 1))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_sta_assocfails_rate", value);
-			return 0;
-	}
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDevice_STASteeringState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "STASteeringState");
-	return 0;
-}
-*/
-
-/*
-static int get_WiFiDataElementsNetworkDevice_CoordinatedCACAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "CoordinatedCACAllowed");
-	return 0;
-}
-
-static int set_WiFiDataElementsNetworkDevice_CoordinatedCACAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	bool b;
-
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_boolean(value))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "coordinated_cac", b ? "1" : "0");
-			return 0;
-	}
-	return 0;
-}*/
 
 static int get_WiFiDataElementsNetworkDevice_TrafficSeparationAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_option_value_fallback_def("mapcontroller", "controller", "enable_ts", "1");
+	*value = dmuci_get_option_value_fallback_def("mapcontroller", "controller", "enable_ts", "0");
 	return 0;
 }
-
-/*static int get_WiFiDataElementsNetworkDevice_ServicePrioritizationAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "ServicePrioritizationAllowed");
-	return 0;
-}
-*/
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.RadioNumberOfEntries!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].NumberOfRadios*/
 static int get_WiFiDataElementsNetworkDevice_RadioNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "NumberOfRadios");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "RadioNumberOfEntries");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDevice_Default8021QNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "Default8021QNumberOfEntries");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "Default8021QNumberOfEntries");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDevice_SSIDtoVIDMappingNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "SSIDtoVIDMappingNumberOfEntries");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "SSIDtoVIDMappingNumberOfEntries");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDevice_CACStatusNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "CACStatusNumberOfEntries");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "CACStatusNumberOfEntries");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDevice_IEEE1905SecurityNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "IEEE1905SecurityNumberOfEntries");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "IEEE1905SecurityNumberOfEntries");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDevice_SPRuleNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "SPRuleNumberOfEntries");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "SPRuleNumberOfEntries");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDevice_AnticipatedChannelsNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "AnticipatedChannelsNumberOfEntries");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "AnticipatedChannelsNumberOfEntries");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDevice_AnticipatedChannelUsageNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "AnticipatedChannelUsageNumberOfEntries");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "AnticipatedChannelUsageNumberOfEntries");
 	return 0;
 }
 
@@ -4286,47 +4090,14 @@ static int get_WiFiDataElementsNetworkDeviceRadio_ReceiveSelf(char *refparam, st
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ReceiveOther!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].RecieveOther*/
 static int get_WiFiDataElementsNetworkDeviceRadio_ReceiveOther(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "RecieveOther");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 1, "RecieveOther");
 	return 0;
 }
 
-/*
-static int get_WiFiDataElementsNetworkDeviceRadio_TrafficSeparationCombinedFronthaul(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "TrafficSeparationCombinedFronthaul");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadio_TrafficSeparationCombinedBackhaul(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "TrafficSeparationCombinedBackhaul");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadio_SteeringPolicy(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "steer_policy", value);
-	return 0;
-}
-
-static int set_WiFiDataElementsNetworkDeviceRadio_SteeringPolicy(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"2"}}, 1))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "steer_policy", value);
-			return 0;
-	}
-	return 0;
-}
-*/
 
 static int get_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "util_threshold", value);
+	dmuci_get_value_by_section_string(((struct wifi_data_element_args *)data)->uci_s, "util_threshold", value);
 	return 0;
 }
 
@@ -4338,7 +4109,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationThreshold(ch
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "util_threshold", value);
+			dmuci_set_value_by_section(((struct wifi_data_element_args *)data)->uci_s, "util_threshold", value);
 			return 0;
 	}
 	return 0;
@@ -4346,7 +4117,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationThreshold(ch
 
 static int get_WiFiDataElementsNetworkDeviceRadio_RCPISteeringThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "rcpi_threshold", value);
+	dmuci_get_value_by_section_string(((struct wifi_data_element_args *)data)->uci_s, "rcpi_threshold", value);
 	return 0;
 }
 
@@ -4358,7 +4129,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_RCPISteeringThreshold(char *re
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "rcpi_threshold", value);
+			dmuci_set_value_by_section(((struct wifi_data_element_args *)data)->uci_s, "rcpi_threshold", value);
 			return 0;
 	}
 	return 0;
@@ -4366,7 +4137,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_RCPISteeringThreshold(char *re
 
 static int get_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_rcpi_threshold", value);
+	dmuci_get_value_by_section_string(((struct wifi_data_element_args *)data)->uci_s, "report_rcpi_threshold", value);
 	return 0;
 }
 
@@ -4378,7 +4149,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIThreshold(char
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_rcpi_threshold", value);
+			dmuci_set_value_by_section(((struct wifi_data_element_args *)data)->uci_s, "report_rcpi_threshold", value);
 			return 0;
 	}
 	return 0;
@@ -4386,7 +4157,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIThreshold(char
 
 static int get_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIHysteresisMarginOverride(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_rcpi_hysteresis_margin", value);
+	dmuci_get_value_by_section_string(((struct wifi_data_element_args *)data)->uci_s, "report_rcpi_hysteresis_margin", value);
 	return 0;
 }
 
@@ -4398,7 +4169,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIHysteresisMarg
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_rcpi_hysteresis_margin", value);
+			dmuci_set_value_by_section(((struct wifi_data_element_args *)data)->uci_s, "report_rcpi_hysteresis_margin", value);
 			return 0;
 	}
 	return 0;
@@ -4406,7 +4177,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_STAReportingRCPIHysteresisMarg
 
 static int get_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationReportingThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_util_threshold", value);
+	dmuci_get_value_by_section_string(((struct wifi_data_element_args *)data)->uci_s, "report_util_threshold", value);
 	return 0;
 }
 
@@ -4418,7 +4189,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationReportingThr
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "report_util_threshold", value);
+			dmuci_set_value_by_section(((struct wifi_data_element_args *)data)->uci_s, "report_util_threshold", value);
 			return 0;
 	}
 	return 0;
@@ -4426,7 +4197,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_ChannelUtilizationReportingThr
 
 static int get_WiFiDataElementsNetworkDeviceRadio_AssociatedSTATrafficStatsInclusionPolicy(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_data_element_args *)data)->uci_s)->config_section, "include_sta_stats", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_data_element_args *)data)->uci_s, "include_sta_stats", "1");
 	return 0;
 }
 
@@ -4441,7 +4212,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_AssociatedSTATrafficStatsInclu
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "include_sta_stats", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct wifi_data_element_args *)data)->uci_s, "include_sta_stats", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -4449,7 +4220,7 @@ static int set_WiFiDataElementsNetworkDeviceRadio_AssociatedSTATrafficStatsInclu
 
 static int get_WiFiDataElementsNetworkDeviceRadio_AssociatedSTALinkMetricsInclusionPolicy(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_data_element_args *)data)->uci_s)->config_section, "include_sta_metric", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct wifi_data_element_args *)data)->uci_s, "include_sta_metric", "1");
 	return 0;
 }
 
@@ -4464,58 +4235,36 @@ static int set_WiFiDataElementsNetworkDeviceRadio_AssociatedSTALinkMetricsInclus
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "include_sta_metric", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct wifi_data_element_args *)data)->uci_s, "include_sta_metric", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
 }
-/*
-static int get_WiFiDataElementsNetworkDeviceRadio_ChipsetVendor(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "ChipsetVendor");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadio_APMetricsWiFi6(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "APMetricsWiFi6");
-	return 0;
-}
-*/
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.CurrentOperatingClassProfileNumberOfEntries!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].NumberOfCurrOpClass*/
 static int get_WiFiDataElementsNetworkDeviceRadio_CurrentOperatingClassProfileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "NumberOfCurrOpClass");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 1, "NumberOfCurrOpClass");
 	return 0;
 }
-
-/*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.UnassociatedSTANumberOfEntries!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].NumberOfUnassocSta*/
-/*
-static int get_WiFiDataElementsNetworkDeviceRadio_UnassociatedSTANumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "NumberOfUnassocSta");
-	return 0;
-}
-*/
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSSNumberOfEntries!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].NumberOfBSS*/
 static int get_WiFiDataElementsNetworkDeviceRadio_BSSNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "NumberOfBSS");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "BSSNumberOfEntries");
 	return 0;
 }
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResultNumberOfEntries!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].NumberOfScanRes*/
 static int get_WiFiDataElementsNetworkDeviceRadio_ScanResultNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "ScanResultNumberOfEntries");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "ScanResultNumberOfEntries");
 	return 0;
 }
 
 static int get_WiFiDataElementsNetworkDeviceRadio_DisAllowedOpClassChannelsNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "DisAllowedOpClassChannelsNumberOfEntries");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "DisAllowedOpClassChannelsNumberOfEntries");
 	return 0;
 }
 
@@ -4529,14 +4278,14 @@ static int get_WiFiDataElementsNetworkDeviceRadioBackhaulSta_MACAddress(char *re
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.HTCapabilities!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.HTCapabilities*/
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_HTCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 2, "Capabilites", "HTCapabilities");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilites", "HTCapabilities");
 	return 0;
 }
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.VHTCapabilities!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.VHTCapabilities*/
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_VHTCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *cap = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 2, "Capabilites", "VHTCapabilities");
+	char *cap = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilites", "VHTCapabilities");
 	*value = (DM_STRLEN(cap)) ? cap : "AAA=";
 	return 0;
 }
@@ -4544,7 +4293,7 @@ static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_VHTCapabilities(ch
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.HECapabilities!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.HECapabilities*/
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_HECapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *cap = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 2, "Capabilites", "HECapabilities");
+	char *cap = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilites", "HECapabilities");
 	*value = (DM_STRLEN(cap)) ? cap : "AAAAAA==";
 	return 0;
 }
@@ -4552,7 +4301,7 @@ static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_HECapabilities(cha
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.CapableOperatingClassProfileNumberOfEntries!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].Capabilites.NumberOfOpClass*/
 static int get_WiFiDataElementsNetworkDeviceRadioCapabilities_CapableOperatingClassProfileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 2, "Capabilites", "NumberOfOpClass");
+	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_fallback, 2, "Capabilites", "NumberOfOpClass");
 	return 0;
 }
 
@@ -4604,13 +4353,7 @@ static int get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_Tx
 	*value = dmjson_get_value((json_object *)data, 1, "TxPower");
 	return 0;
 }
-/*
-static int get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_TransmitPowerLimit(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "TransmitPowerLimit");
-	return 0;
-}
-*/
+
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.CurrentOperatingClassProfile.{i}.TimeStamp!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].CurrentOperatingClasses[@i-1].TimeStamp*/
 static int get_WiFiDataElementsNetworkDeviceRadioCurrentOperatingClassProfile_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -4638,15 +4381,6 @@ static int get_WiFiDataElementsNetworkDeviceRadioBSS_Enabled(char *refparam, str
 	*value = dmjson_get_value((json_object *)data, 1, "Enabled");
 	return 0;
 }
-
-/*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.LastChange!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].LastChange*/
-/*
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_LastChange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "LastChange");
-	return 0;
-}
-*/
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.TimeStamp!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].TimeStamp*/
 static int get_WiFiDataElementsNetworkDeviceRadioBSS_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -4697,14 +4431,6 @@ static int get_WiFiDataElementsNetworkDeviceRadioBSS_BroadcastBytesReceived(char
 	return 0;
 }
 
-/*
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_ByteCounterUnits(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "ByteCounterUnits");
-	return 0;
-}
-*/
-
 static int get_WiFiDataElementsNetworkDeviceRadioBSS_Profile1bSTAsDisallowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "Profile1bSTAsDisallowed");
@@ -4717,144 +4443,18 @@ static int get_WiFiDataElementsNetworkDeviceRadioBSS_Profile2bSTAsDisallowed(cha
 	return 0;
 }
 
-/*
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_AssociationAllowanceStatus(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "AssociationAllowanceStatus");
-	return 0;
-}
-*/
-
-/*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.EstServiceParametersBE!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].EstServiceParametersBE*/
-/*
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBE(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "EstServiceParametersBE");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersBK(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "EstServiceParametersBK");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVI(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "EstServiceParametersVI");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_EstServiceParametersVO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "EstServiceParametersVO");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_BackhaulUse(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "BackhaulUse");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_FronthaulUse(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "FronthaulUse");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_R1disallowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "R1disallowed");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_R2disallowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "R2disallowed");
-	return 0;
-}
-*/
-
 static int get_WiFiDataElementsNetworkDeviceRadioBSS_MultiBSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "MultiBSSID");
 	return 0;
 }
 
-/*
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_TransmittedBSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "TransmittedBSSID");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_FronthaulAKMsAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value_array_all((json_object *)data, ",", 1, "FronthaulAKMsAllowed");
-	return 0;
-}
-
-static int set_WiFiDataElementsNetworkDeviceRadioBSS_FronthaulAKMsAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, AKMsAllowed, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			//TODO
-			break;
-	}
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_BackhaulAKMsAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value_array_all((json_object *)data, ",", 1, "BackhaulAKMsAllowed");
-	return 0;
-}
-
-static int set_WiFiDataElementsNetworkDeviceRadioBSS_BackhaulAKMsAllowed(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string_list(value, -1, -1, -1, -1, -1, AKMsAllowed, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			//TODO
-			break;
-	}
-	return 0;
-}
-*/
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STANumberOfEntries!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].NumberofSTA*/
 static int get_WiFiDataElementsNetworkDeviceRadioBSS_STANumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "NumberofSTA");
 	return 0;
 }
-
-/*
-static int get_WiFiDataElementsNetworkDeviceRadioBSS_QMDescriptorNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "QMDescriptorNumberOfEntries");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSSQMDescriptor_ClientMAC(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "ClientMAC");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSSQMDescriptor_DescriptorElement(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "DescriptorElement");
-	return 0;
-}
-*/
 
 static int get_WiFiDataElementsNetworkDeviceRadioBSSMultiAPSteering_BlacklistAttempts(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -4880,13 +4480,6 @@ static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_MACAddress(char *refpara
 	*value = dmjson_get_value((json_object *)data, 1, "MACAddress");
 	return 0;
 }
-
-/*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.TimeStamp!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].TimeStamp*/
-//static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-//{
-//	*value = dmjson_get_value((json_object *)data, 1, "TimeStamp");
-//	return 0;
-//}
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.HTCapabilities!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].HTCapabilities*/
 static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_HTCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -4922,20 +4515,6 @@ static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_LastDataUplinkRate(char 
 	*value = dmjson_get_value((json_object *)data, 1, "LastDataUplinkRate");
 	return 0;
 }
-
-/*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.UtilizationReceive!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].UtilizationReceive*/
-//static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_UtilizationReceive(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-//{
-//	*value = dmjson_get_value((json_object *)data, 1, "UtilizationReceive");
-//	return 0;
-//}
-
-/*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.UtilizationTransmit!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].UtilizationTransmit*/
-//static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_UtilizationTransmit(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-//{
-//	*value = dmjson_get_value((json_object *)data, 1, "UtilizationTransmit");
-//	return 0;
-//}
 
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.EstMACDataRateDownlink!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].EstMACDataRateDownlink*/
 static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_EstMACDataRateDownlink(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -5027,67 +4606,12 @@ static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_NumberOfMeasureReports(c
 	return 0;
 }
 
-/*
-static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV4Address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "IPV4Address");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_IPV6Address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "IPV6Address");
-	return 0;
-}
-*/
-
 /*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.Hostname!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].BSSList[@i-1].STAList[@i-1].Hostname*/
 static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_Hostname(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 1, "Hostname");
 	return 0;
 }
-/*
-static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_CellularDataPreference(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "CellularDataPreference");
-	return 0;
-}
-
-static int set_WiFiDataElementsNetworkDeviceRadioBSSSTA_CellularDataPreference(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_string(value, -1, -1, CellularDataPreference, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			//TODO
-			break;
-	}
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_ReAssociationDelay(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "ReAssociationDelay");
-	return 0;
-}
-
-static int set_WiFiDataElementsNetworkDeviceRadioBSSSTA_ReAssociationDelay(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action)	{
-		case VALUECHECK:
-			if (dm_validate_unsignedInt(value, RANGE_ARGS{{NULL,"65535"}}, 1))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			//TODO
-			break;
-	}
-	return 0;
-}
-*/
 
 static int get_WiFiDataElementsNetworkDeviceRadioBSSSTA_TIDQueueSizesNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -5200,251 +4724,12 @@ static int get_WiFiDataElementsNetworkDeviceRadioScanResultOpClassScanChannelSca
 	return 0;
 }
 
-/*static int get_WiFiDataElementsNetworkDeviceRadioScanCapability_OnBootOnly(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioScanCapability_Impact(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioScanCapability_MinimumInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioScanCapability_OpClassChannelsNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannels_OpClass(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioScanCapabilityOpClassChannels_ChannelList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioCACCapability_CACMethodNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 2, "CACCapability", "CACMethodNumberOfEntries");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethod_Method(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "Method");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethod_NumberOfSeconds(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "NumberOfSeconds");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethod_OpClassChannelsNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "OpClassChannelsNumberOfEntries");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannels_OpClass(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "OpClass");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceRadioCACCapabilityCACMethodOpClassChannels_ChannelList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value_array_all((json_object *)data, ",", 1, "ChannelList");
-	return 0;
-}
-*/
-
-/*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.UnassociatedSTA.{i}.MACAddress!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].UnassociatedStaList[@i-1].MACAddress*/
-/*
-static int get_WiFiDataElementsNetworkDeviceRadioUnassociatedSTA_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "MACAddress");
-	return 0;
-}
-*/
-
-/*#Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.UnassociatedSTA.{i}.SignalStrength!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.DeviceList[@i-1].RadioList[@i-1].UnassociatedStaList[@i-1].SignalStrength*/
-/*
-static int get_WiFiDataElementsNetworkDeviceRadioUnassociatedSTA_SignalStrength(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "SignalStrength");
-	return 0;
-}
-*/
-
-/*
-static int get_WiFiDataElementsNetworkDeviceMultiAPDevice_ManufacturerOUI(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 2, "MultiAPDevice", "ManufacturerOUI");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDevice_LastContactTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 2, "MultiAPDevice", "LastContactTime");
-	return 0;
-}
-*/
-
 static int get_WiFiDataElementsNetworkDeviceMultiAPDevice_AssocIEEE1905DeviceRef(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *device_id = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 1, "ID");
+	char *device_id = dmjson_get_value(((struct wifi_data_element_args *)data)->dump_obj, 1, "ID");
 	adm_entry_get_linker_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", device_id, value);
 	return 0;
 }
-
-/*
-static int get_WiFiDataElementsNetworkDeviceMultiAPDevice_EasyMeshControllerOperationMode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 2, "MultiAPDevice", "EasyMeshControllerOperationMode");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDevice_EasyMeshAgentOperationMode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 2, "MultiAPDevice", "EasyMeshAgentOperationMode");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_LinkType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 3, "MultiAPDevice", "Backhaul", "LinkType");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulMACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 3, "MultiAPDevice", "Backhaul", "BackhaulMACAddress");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulDeviceID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 3, "MultiAPDevice", "Backhaul", "BackhaulDeviceID");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 3, "MultiAPDevice", "Backhaul", "MACAddress");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_CurrentOperatingClassProfileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 3, "MultiAPDevice", "Backhaul", "CurrentOperatingClassProfileNumberOfEntries");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_Class(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "Class");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_Channel(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "Channel");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_TxPower(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "TxPower");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperatingClassProfile_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value((json_object *)data, 1, "TimeStamp");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 4, "MultiAPDevice", "Backhaul", "Stats", "BytesSent");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 4, "MultiAPDevice", "Backhaul", "Stats", "BytesReceived");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 4, "MultiAPDevice", "Backhaul", "Stats", "PacketsSent");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 4, "MultiAPDevice", "Backhaul", "Stats", "PacketsReceived");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 4, "MultiAPDevice", "Backhaul", "Stats", "ErrorsSent");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_ErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 4, "MultiAPDevice", "Backhaul", "Stats", "ErrorsReceived");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_LinkUtilization(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 4, "MultiAPDevice", "Backhaul", "Stats", "LinkUtilization");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_SignalStrength(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 4, "MultiAPDevice", "Backhaul", "Stats", "SignalStrength");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_LastDataDownlinkRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 4, "MultiAPDevice", "Backhaul", "Stats", "LastDataDownlinkRate");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_LastDataUplinkRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 4, "MultiAPDevice", "Backhaul", "Stats", "LastDataUplinkRate");
-	return 0;
-}
-
-static int get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulStats_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_data_element_args *)data)->dump2_obj, 4, "MultiAPDevice", "Backhaul", "Stats", "TimeStamp");
-	return 0;
-}
-*/
 
 static int get_WiFiDataElementsNetworkDeviceDefault8021Q_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -5569,140 +4854,6 @@ static int get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp(ch
 	*value = ((struct wifi_event_args *)data)->event_time;
 	return 0;
 }
-
-/*
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_HE160(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_HE8080(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MCSNSS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SUBeamformer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SUBeamformee(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MUBeamformer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_Beamformee80orLess(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_BeamformeeAbove80(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_ULMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_ULOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxDLMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxULMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxDLOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxULOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_RTS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MURTS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MultiBSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MUEDCA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_TWTRequestor(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_TWTResponder(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SpatialReuse(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_AnticipatedChannelUsage(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-*/
 
 static int get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -5976,79 +5127,6 @@ end:
 
 #undef MAX_ARGS
 }
-/*
-static operation_args WiFiDataElementsNetwork_SetPreferredBackhauls_args = {
-	.in = (const char *[]) {
-		"PreferredBackhauls.{i}.BackhaulMACAddress",
-		"PreferredBackhauls.{i}.bSTAMACAddress",
-		NULL
-	},
-	.out = (const char *[]) {
-		"Status",
-		NULL
-	}
-};
-
-static int get_operate_args_WiFiDataElementsNetwork_SetPreferredBackhauls(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = (char *)&WiFiDataElementsNetwork_SetPreferredBackhauls_args;
-	return 0;
-}
-
-static int operate_WiFiDataElementsNetwork_SetPreferredBackhauls(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	struct wifi_operate_args operate_args[16] = {0};
-	char *status = "Success";
-
-	for (int i = 0;; i++) {
-
-		char device_path[64] = {0};
-		char backhaul_mac[64] = {0};
-		char bsta_mac[64] = {0};
-		char *linker = NULL;
-
-		snprintf(device_path, sizeof(device_path), "Device.WiFi.DataElements.Network.Device.%d.", i+1);
-		snprintf(backhaul_mac, sizeof(backhaul_mac), "PreferredBackHauls.%d.BackhaulMACAddress", i+1);
-		snprintf(bsta_mac, sizeof(bsta_mac), "PreferredBackHauls.%d.bSTAMACAddress", i+1);
-
-		operate_args[i].arg1 = dmjson_get_value((json_object *)value, 1, backhaul_mac);
-		operate_args[i].arg2 = dmjson_get_value((json_object *)value, 1, bsta_mac);
-
-		if (*(operate_args[i].arg1) == '\0' && *(operate_args[i].arg2) == '\0')
-			break;
-
-		if (*(operate_args[i].arg1) && dm_validate_string(operate_args[i].arg1, -1, 17, NULL, MACAddress)) {
-			status = "Error_Invalid_Input";
-			break;
-		}
-
-		if (*(operate_args[i].arg2) && dm_validate_string(operate_args[i].arg2, -1, 17, NULL, MACAddress)) {
-			status = "Error_Invalid_Input";
-			break;
-		}
-
-		adm_entry_get_linker_value(ctx, device_path, &linker);
-		if (linker == NULL || *linker == '\0') {
-			status = "Error_Invalid_Input";
-			break;
-		}
-
-		struct uci_section *s = get_origin_section_from_config("mapcontroller", "node", linker);
-		if (*(operate_args[i].arg1) != '\0')
-			dmuci_set_value_by_section(s, "backhaul_ul_macaddr", operate_args[i].arg1);
-
-		if (*(operate_args[i].arg2) != '\0')
-			dmuci_set_value_by_section(s, "backhaul_dl_macaddr", operate_args[i].arg2);
-
-	}
-
-	dmuci_save_package("mapcontroller");
-	dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", "mapcontroller", String}}, 1);
-
-	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
-	return CMD_SUCCESS;
-}
-*/
 
 static operation_args WiFiDataElementsNetwork_SetSSID_args = {
 	.in = (const char *[]) {
@@ -6072,11 +5150,12 @@ static int get_operate_args_WiFiDataElementsNetwork_SetSSID(char *refparam, stru
 
 static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *s = NULL, *stmp = NULL;
+	struct uci_section *s = NULL;
 	char *status = "Success";
-	char *curr_ssid = NULL;
-	char *curr_band = NULL;
+	char *curr_ssid = NULL, *curr_band = NULL;
+	char *pch = NULL, *spch = NULL;
 	bool ssid_exist = false, b = false;
+	char band_list[64] = {0};
 
 	char *add_remove = dmjson_get_value((json_object *)value, 1, "AddRemove");
 	if (!add_remove || *add_remove == '\0' || dm_validate_boolean(add_remove)) {
@@ -6087,60 +5166,90 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 	char *ssid = dmjson_get_value((json_object *)value, 1, "SSID");
 	char *key = dmjson_get_value((json_object *)value, 1, "PassPhrase");
 	char *band = dmjson_get_value((json_object *)value, 1, "Band");
-	if (!ssid || *ssid == '\0' || !band || *band == '\0') {
+	if (DM_STRLEN(ssid) == 0 || DM_STRLEN(band) == 0) {
 		status = "Error_Invalid_Input";
 		goto end;
 	}
 
+	// Check band list
+	DM_STRNCPY(band_list, band, sizeof(band_list));
+	for (pch = strtok_r(band_list, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+		if (DM_STRCMP(pch, "2.4") != 0 && DM_STRCMP(pch, "5") != 0 && DM_STRCMP(pch, "6") != 0) {
+			status = "Error_Invalid_Input";
+			goto end;
+		}
+	}
+
+	DM_STRNCPY(band_list, band, sizeof(band_list));
 	string_to_bool(add_remove, &b);
 
 	if (b) {
 		// Add this SSID
-		uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
-			dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
-			dmuci_get_value_by_section_string(s, "band", &curr_band);
-			if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, band, 1) == 0) {
+
+		for (pch = strtok_r(band_list, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+			ssid_exist = false;
+
+			uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
+				dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
+				dmuci_get_value_by_section_string(s, "band", &curr_band);
+				if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, pch, 1) == 0) {
+					dmuci_set_value_by_section(s, "enabled", "1");
+					if (*key) dmuci_set_value_by_section(s, "key", key);
+					ssid_exist = true;
+					break;
+				}
+			}
+
+			if (!ssid_exist) {
+				char sec_name[32];
+				unsigned idx = 1;
+
+				uci_foreach_sections("mapcontroller", "ap", s)
+					idx++;
+
+				snprintf(sec_name, sizeof(sec_name), "ap_%s_%u", (*pch == '2') ? "2" : pch, idx);
+
+				dmuci_add_section("mapcontroller", "ap", &s);
+				dmuci_rename_section_by_section(s, sec_name);
+				dmuci_set_value_by_section(s, "ssid", ssid);
+				dmuci_set_value_by_section(s, "key", key);
+				dmuci_set_value_by_section(s, "type", "fronthaul");
+				dmuci_set_value_by_section(s, "band", (*pch == '2') ? "2" : pch);
 				dmuci_set_value_by_section(s, "enabled", "1");
-				if (*key) dmuci_set_value_by_section(s, "key", key);
-				ssid_exist = true;
-				break;
 			}
 		}
-
-		if (!ssid_exist) {
-			char sec_name[32];
-			unsigned idx = 1;
-
-			uci_foreach_sections("mapcontroller", "ap", s)
-				idx++;
-
-			snprintf(sec_name, sizeof(sec_name), "ap_%s_%u", (*band == '5') ? "5" : (*band == '6') ? "6" : "2", idx);
-
-			dmuci_add_section("mapcontroller", "ap", &s);
-			dmuci_rename_section_by_section(s, sec_name);
-			dmuci_set_value_by_section(s, "ssid", ssid);
-			dmuci_set_value_by_section(s, "key", key);
-			dmuci_set_value_by_section(s, "type", "fronthaul");
-			dmuci_set_value_by_section(s, "band", (*band == '5') ? "5" : (*band == '6') ? "6" : "2");
-			dmuci_set_value_by_section(s, "enabled", "1");
-		}
-
 	} else {
-		// Remove this SSID
-		uci_foreach_option_eq_safe("mapcontroller", "ap", "type", "fronthaul", stmp, s) {
-			dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
-			dmuci_get_value_by_section_string(s, "band", &curr_band);
-			if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, band, 1) == 0) {
-				dmuci_set_value_by_section(s, "enabled", "0");
-				ssid_exist = true;
-				break;
+		// Remove each band in the list linked to this SSID
+
+		for (pch = strtok_r(band_list, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
+			ssid_exist = false;
+
+			uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
+				dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
+				dmuci_get_value_by_section_string(s, "band", &curr_band);
+				if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, pch, 1) == 0) {
+					dmuci_set_value_by_section(s, "enabled", "0");
+					ssid_exist = true;
+					break;
+				}
+			}
+
+			if (!ssid_exist) {
+				status = "Error_Invalid_Input";
+				dmuci_revert_package("mapcontroller");
+				goto end;
 			}
 		}
-
-		if (!ssid_exist)
-			status = "Error_Invalid_Input";
 	}
 
+	// Commit dmmap_mapcontroller changes
+	uci_path_foreach_sections(bbfdm, "dmmap_mapcontroller", "ap", s) {
+		dmuci_delete_by_section(s, "wifi_da_ssid_instance", NULL);
+	}
+
+	dmuci_commit_package_bbfdm("dmmap_mapcontroller");
+
+	// Commit mapcontroller config changes
 	dmuci_save_package("mapcontroller");
 	dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", "mapcontroller", String}}, 1);
 
@@ -6148,68 +5257,6 @@ end:
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
 	return CMD_SUCCESS;
 }
-
-/*
-static operation_args WiFiDataElementsNetworkDevice_SetSTASteeringState_args = {
-	.in = (const char *[]) {
-		"Disallowed",
-		NULL
-	},
-	.out = (const char *[]) {
-		"Status",
-		NULL
-	}
-};
-
-static int get_operate_args_WiFiDataElementsNetworkDevice_SetSTASteeringState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = (char *)&WiFiDataElementsNetworkDevice_SetSTASteeringState_args;
-	return 0;
-}
-
-static int operate_WiFiDataElementsNetworkDevice_SetSTASteeringState(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	char *status = "Success";
-	bool b = false;
-
-	char *disallowed = dmjson_get_value((json_object *)value, 1, "Disallowed");
-	if (!disallowed || *disallowed == '\0' || dm_validate_boolean(disallowed)) {
-		status = "Error_Invalid_Input";
-		goto end;
-	}
-
-	string_to_bool(disallowed, &b);
-	dmuci_set_value_by_section((((struct wifi_data_element_args *)data)->uci_s)->config_section, "steer_disallow", b ? "1" : "0");
-	dmuci_save_package("mapcontroller");
-	dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", "mapcontroller", String}}, 1);
-
-end:
-	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
-	return CMD_SUCCESS;
-}
-
-static operation_args WiFiDataElementsNetworkDevice_SetDFSState_args = {
-	.in = (const char *[]) {
-		"DFSEnable",
-		NULL
-	},
-	.out = (const char *[]) {
-		"Status",
-		NULL
-	}
-};
-
-static int get_operate_args_WiFiDataElementsNetworkDevice_SetDFSState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = (char *)&WiFiDataElementsNetworkDevice_SetDFSState_args;
-	return 0;
-}
-
-static int operate_WiFiDataElementsNetworkDevice_SetDFSState(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	//TODO
-	return CMD_SUCCESS;
-}*/
 
 static operation_args wifidataelementsnetworkdeviceradio_channelscanrequest_args = {
     .in = (const char *[]) {
@@ -6237,8 +5284,8 @@ static int operate_WiFiDataElementsNetworkDeviceRadio_ChannelScanRequest(char *r
 	char *pch = NULL;
 	char *spch = NULL;
 
-	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "agent_id", &agent_id);
-	dmuci_get_value_by_section_string((((struct wifi_data_element_args *)data)->uci_s)->config_section, "macaddr", &macaddr);
+	dmuci_get_value_by_section_string(((struct wifi_data_element_args *)data)->uci_s, "agent_id", &agent_id);
+	dmuci_get_value_by_section_string(((struct wifi_data_element_args *)data)->uci_s, "macaddr", &macaddr);
 
 	if ((dm_validate_string(agent_id, -1, 17, NULL, MACAddress)) ||
 		(dm_validate_string(macaddr, -1, 17, NULL, MACAddress))) {
@@ -6280,25 +5327,6 @@ end:
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
     return CMD_SUCCESS;
 }
-
-/*static operation_args wifidataelementsnetworkdeviceradio_wifirestart_args = {
-    .out = (const char *[]) {
-        "Status",
-        NULL
-    }
-};
-
-static int get_operate_args_WiFiDataElementsNetworkDeviceRadio_WiFiRestart(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-    *value = (char *)&wifidataelementsnetworkdeviceradio_wifirestart_args;
-    return 0;
-}
-
-static int operate_WiFiDataElementsNetworkDeviceRadio_WiFiRestart(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-    //TODO
-    return CMD_SUCCESS;
-}*/
 
 /*************************************************************
  * EVENTS
