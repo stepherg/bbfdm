@@ -225,6 +225,7 @@ int compare_strings(const void *a, const void *b);
 char *get_uptime(void);
 int check_file(char *path);
 char *cidr2netmask(int bits);
+int netmask2cidr(const char *netmask);
 bool is_strword_in_optionvalue(char *optionvalue, char *str);
 void remove_new_line(char *buf);
 int dmcmd(char *cmd, int n, ...);
