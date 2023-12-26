@@ -232,15 +232,42 @@ int check_file(char *path)
 
 char *cidr2netmask(int bits)
 {
-	uint32_t mask;
-	struct in_addr ip_addr;
-	uint8_t u_bits = (uint8_t)bits;
+	static char buf[INET_ADDRSTRLEN];
 
-	mask = ((0xFFFFFFFFUL << (32 - u_bits)) & 0xFFFFFFFFUL);
+	uint32_t mask = (bits >= 32) ? 0xFFFFFFFFUL : (0xFFFFFFFFUL << (32 - bits));
 	mask = htonl(mask);
+
+	struct in_addr ip_addr;
 	ip_addr.s_addr = mask;
-	return inet_ntoa(ip_addr);
+
+	if (inet_ntop(AF_INET, &ip_addr, buf, INET_ADDRSTRLEN) == NULL) {
+		// Error converting binary to presentation format
+		return "";
+	}
+
+	return buf;
 }
+
+int netmask2cidr(const char *netmask)
+{
+	struct in_addr addr;
+	int bits = 0;
+
+	if (!netmask || inet_aton(netmask, &addr) == 0) {
+		// Invalid netmask format
+		return -1;
+	}
+
+	uint32_t mask = ntohl(addr.s_addr);
+
+	while (mask & 0x80000000) {
+		bits++;
+		mask <<= 1;
+	}
+
+	return bits;
+}
+
 
 bool is_strword_in_optionvalue(char *optionvalue, char *str)
 {
