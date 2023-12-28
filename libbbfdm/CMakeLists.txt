@@ -13,14 +13,6 @@ OPTION(BBF_TR143 "build with tr143 datamodel" ON)
 OPTION(BBF_TR471 "build with tr471 datamodel" ON)
 OPTION(BBF_VENDOR_EXTENSION "build with vendor extension enabled" ON)
 OPTION(BBF_WIFI_DATAELEMENTS "build with wifi dataelements datamodel" ON)
-OPTION(WITH_WOLFSSL "build with lib wolfssl" OFF)
-OPTION(WITH_OPENSSL "build with lib openssl" OFF)
-OPTION(WITH_MBEDTLS "build with lib mbedtls" OFF)
-
-IF(NOT WITH_WOLFSSL AND NOT WITH_OPENSSL AND NOT WITH_MBEDTLS)
-	MESSAGE(WARNING "NO SSL library selected: {'WOLFSSL','OPENSSL','MBEDTLS'}, proceeding with OPENSSL")
-	SET(WITH_OPENSSL ON)
-ENDIF()
 
 SET(BBF_DM_SOURCES dmcommon.c)
 
@@ -49,24 +41,6 @@ IF(BBF_TR471)
 	add_compile_definitions(BBF_TR471)
 ENDIF(BBF_TR471)
 
-IF(WITH_WOLFSSL)
-	SET(SSL_LIBS wolfssl)
-	SET(CRYPTO_LIBS crypto)
-	add_compile_definitions(LWOLFSSL)
-ENDIF(WITH_WOLFSSL)
-
-IF(WITH_OPENSSL)
-	SET(SSL_LIBS ssl)
-	SET(CRYPTO_LIBS crypto)
-	add_compile_definitions(LOPENSSL)
-ENDIF(WITH_OPENSSL)
-
-IF(WITH_MBEDTLS)
-	SET(SSL_LIBS mbedtls)
-	SET(CRYPTO_LIBS mbedcrypto)
-	add_compile_definitions(LMBEDTLS)
-ENDIF(WITH_MBEDTLS)
-
 IF(BBF_VENDOR_EXTENSION)
 	SET(BBF_VENDOR_EXTENSION_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dmtree/vendor/vendor.c)
 	ADD_DEFINITIONS(-DBBF_VENDOR_LIST="${BBF_VENDOR_LIST}")
@@ -87,7 +61,7 @@ ENDIF(BBF_VENDOR_EXTENSION)
 
 ADD_LIBRARY(bbfdm SHARED ${BBF_DM_SOURCES} ${BBF_TR181_SOURCES} ${BBF_TR143_SOURCES} ${BBF_TR471_SOURCES} ${BBF_VENDOR_EXTENSION_SOURCES})
 
-TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json curl m bbfdm-api ${SSL_LIBS} ${CRYPTO_LIBS})
+TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json curl m bbfdm-api ssl crypto)
 
 INSTALL(TARGETS bbfdm
 		LIBRARY DESTINATION usr/lib)

@@ -12,20 +12,8 @@
 #include <stdlib.h>
 #include <curl/curl.h>
 
-#ifdef LOPENSSL
 #include <openssl/sha.h>
 #include <openssl/evp.h>
-#endif
-
-#ifdef LWOLFSSL
-#include <wolfssl/options.h>
-#include <wolfssl/openssl/sha.h>
-#include <wolfssl/openssl/evp.h>
-#endif
-
-#ifdef LMBEDTLS
-#include <mbedtls/md.h>
-#endif
 
 #include "dmcommon.h"
 
@@ -233,54 +221,27 @@ const bool validate_hash_value(const char *algo, const char *file_path, const ch
 	unsigned int bytes = 0;
 	FILE *file;
 
-#ifdef LMBEDTLS
-	mbedtls_md_context_t enpctx;
-	mbedtls_md_context_t *mdctx = &enpctx;
-	const mbedtls_md_info_t *md;
-	unsigned char md_value[MBEDTLS_MD_MAX_SIZE];
-#else
 	EVP_MD_CTX *mdctx;
 	const EVP_MD *md;
 	unsigned char md_value[EVP_MAX_MD_SIZE];
-#endif
 
 	file = fopen(file_path, "rb");
 	if (!file)
 		return false;
 
-#ifndef LMBEDTLS
-	// makes all algorithms available to the EVP* routines
-	OpenSSL_add_all_algorithms();
-#endif
-
-#ifdef LMBEDTLS
-	md = mbedtls_md_info_from_string(algo);
-	mbedtls_md_init(mdctx);
-	mbedtls_md_init_ctx(mdctx, md);
-#else
 	md = EVP_get_digestbyname(algo);
 	mdctx = EVP_MD_CTX_create();
 	EVP_DigestInit_ex(mdctx, md, NULL);
-#endif
 
 	if (md == NULL)
 		goto end;
 
 	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
-#ifdef LMBEDTLS
-		mbedtls_md_update(mdctx, buffer, bytes);
-#else
 		EVP_DigestUpdate(mdctx, buffer, bytes);
-#endif
 	}
 
-#ifdef LMBEDTLS
-	mbedtls_md_finish(mdctx, md_value);
-	bytes = mbedtls_md_get_size(md);
-#else
 	bytes = 0;
 	EVP_DigestFinal_ex(mdctx, md_value, &bytes);
-#endif
 
 	for (int i = 0; i < bytes; i++)
 		snprintf(&hash[i * 2], sizeof(hash) - (i * 2), "%02x", md_value[i]);
@@ -289,12 +250,8 @@ const bool validate_hash_value(const char *algo, const char *file_path, const ch
 		res = true;
 
 end:
-#ifdef LMBEDTLS
-	mbedtls_md_free(mdctx);
-#else
 	EVP_MD_CTX_destroy(mdctx);
 	EVP_cleanup();
-#endif
 
 	fclose(file);
 	return res;
