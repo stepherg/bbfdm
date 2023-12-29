@@ -40,12 +40,13 @@ extern struct list_head loaded_json_files;
 extern struct list_head json_list;
 extern struct list_head json_memhead;
 
-#define BBF_SUBPROCESS_DEPTH (2)
-#define BBF_INSTANCES_UPDATE_TIMEOUT (60 * 1000)
+// micro-services should not use fork by default
+#define BBF_SUBPROCESS_DEPTH (0)
+// default instance updater timeout
+#define BBF_INSTANCES_UPDATE_TIMEOUT (30 * 1000)
 
 LIST_HEAD(head_registered_service);
 
-static void register_periodic_timers(struct ubus_context *ctx);
 static void cancel_periodic_timers(struct ubus_context *ctx);
 static void run_schema_updater(struct bbfdm_context *u);
 
@@ -226,7 +227,7 @@ static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t
 	} else if (child == 0) {
 		u = container_of(data->ctx, struct bbfdm_context, ubus_ctx);
 		if (u == NULL) {
-			ERR("Failed to get the bbfdm context");
+			ERR("{fork} Failed to get the bbfdm context");
 			exit(EXIT_FAILURE);
 		}
 
@@ -240,7 +241,7 @@ static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t
 		fclose(stdout);
 		fclose(stderr);
 
-		INFO("Calling from subprocess");
+		INFO("{fork} Calling from subprocess");
 		EXEC_CB(data, result);
 
 		bbfdm_cleanup(u);
@@ -1171,6 +1172,7 @@ static void broadcast_add_del_event(const char *method, struct list_head *inst, 
 
 static void update_instances_list(struct list_head *inst)
 {
+        int ret;
 	struct dmctx bbf_ctx = {
 			.in_param = ROOT_NODE,
 			.nextlevel = false,
@@ -1181,14 +1183,15 @@ static void update_instances_list(struct list_head *inst)
 
 	bbf_init(&bbf_ctx);
 
-	if (0 == bbfdm_cmd_exec(&bbf_ctx, BBF_INSTANCES)) {
+	ret = bbfdm_cmd_exec(&bbf_ctx, BBF_INSTANCES);
+	if (ret == 0) {
 		struct dm_parameter *nptr_dp;
 
 		list_for_each_entry(nptr_dp, &bbf_ctx.list_parameter, list) {
 			add_path_list(nptr_dp->name, inst);
 		}
 	} else {
-		WARNING("Failed to get instances");
+		WARNING("Failed to get instances, err code %d", ret);
 	}
 
 	bbf_cleanup(&bbf_ctx);
@@ -1211,7 +1214,7 @@ static void instance_fork_done(struct uloop_process *p, int ret)
 		async_req_free(r);
 	}
 	if (ret) {
-		DEBUG("Instance updater cb failed %d", ret);
+		WARNING("Instance updater cb failed %d", ret);
 	}
 }
 
@@ -1260,6 +1263,7 @@ static int fork_instance_checker(struct bbfdm_context *u)
 	}
 	child = fork();
 	if (child == 0) {
+		INFO("{fork} Instances checker entry");
 		prctl(PR_SET_NAME, (unsigned long) "bbfdm_instance");
 		// child initialise signal to prevent segfaults
 		signal_init();
@@ -1271,16 +1275,16 @@ static int fork_instance_checker(struct bbfdm_context *u)
 		fclose(stdout);
 		fclose(stderr);
 
-		DEBUG("subprocess instances checker");
 		instance_compare_publish(u);
 		bbfdm_cleanup(u);
 		closelog();
+		INFO("{fork} Instances checker exit");
 		/* write result and exit */
 		exit(EXIT_SUCCESS);
 	}
 
 	// parent
-	DEBUG("Creating instance checker process child %d", child);
+	INFO("# Creating instance checker process child %d", child);
 	r->result = u;
 	r->process.pid = child;
 	r->process.cb = instance_fork_done;
@@ -1323,8 +1327,16 @@ static void periodic_instance_updater(struct uloop_timeout *t)
 		return;
 	}
 
+	free_path_list(&u->old_instances);
 	list_splice_init(&u->instances, &u->old_instances);
 	update_instances_list(&u->instances);
+	if (list_empty(&u->instances)) {
+		update_instances_list(&u->instances);
+		WARNING("Failed to get current instances, restart the timer");
+		u->instance_timer.cb = periodic_instance_updater;
+		uloop_timeout_set(&u->instance_timer, u->config.refresh_time);
+		return;
+	}
 
 	// fork a process and send it to compare, when process completes
 	// delete the old instances and add a new timer
@@ -1578,7 +1590,7 @@ static void cancel_periodic_timers(struct ubus_context *ctx)
 	}
 }
 
-static void register_periodic_timers(struct ubus_context *ctx)
+void register_periodic_timers(struct ubus_context *ctx)
 {
 	struct bbfdm_context *u;
 

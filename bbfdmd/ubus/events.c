@@ -12,6 +12,7 @@
 #include "common.h"
 #include "events.h"
 #include "get_helper.h"
+#include "bbfdmd.h"
 #include <libubus.h>
 
 static struct event_map_list ev_map_list[] = {
@@ -160,6 +161,9 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	char *dm_path = get_events_dm_path(type);
 	if (dm_path == NULL)
 		return;
+
+	// restart instance timer
+	register_periodic_timers(ctx);
 
 	LIST_HEAD(pv_list);
 

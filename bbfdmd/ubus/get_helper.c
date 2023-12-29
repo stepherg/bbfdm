@@ -164,6 +164,7 @@ void free_path_list(struct list_head *plist)
 		list_del(&iter->list);
 		free(iter);
 	}
+	INIT_LIST_HEAD(plist);
 }
 
 void fill_err_code_table(bbfdm_data_t *data, int fault)
