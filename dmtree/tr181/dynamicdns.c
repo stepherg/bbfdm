@@ -260,7 +260,12 @@ static int browseDynamicDNSServerInst(struct dmctx *dmctx, DMNODE *parent_node, 
 
 static int browseDynamicDNSClientHostnameInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, "1");
+	char *hostname_inst = NULL;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)prev_data)->dmmap_section, "hostname_instance", &hostname_inst);
+	if (DM_STRLEN(hostname_inst) != 0)
+		DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, hostname_inst);
+
 	return 0;
 }
 
@@ -277,15 +282,7 @@ static int addObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 	dmuci_add_section("ddns", "service", &s);
 	dmuci_rename_section_by_section(s, s_name);
 	dmuci_set_value_by_section(s, "enabled", "0");
-	dmuci_set_value_by_section(s, "use_syslog", "0");
-	dmuci_set_value_by_section(s, "use_https", "0");
-	dmuci_set_value_by_section(s, "force_interval", "72");
-	dmuci_set_value_by_section(s, "force_unit", "hours");
-	dmuci_set_value_by_section(s, "check_interval", "10");
-	dmuci_set_value_by_section(s, "check_unit", "minutes");
-	dmuci_set_value_by_section(s, "retry_interval", "60");
-	dmuci_set_value_by_section(s, "retry_unit", "value");
-	dmuci_set_value_by_section(s, "ip_source", "interface");
+	dmuci_set_value_by_section(s, "domain", "yourhost.example.com");
 
 	dmuci_add_section_bbfdm("dmmap_ddns", "service", &dmmap_s);
 	dmuci_set_value_by_section(dmmap_s, "section_name", section_name(s));
@@ -310,6 +307,32 @@ static int delObjDynamicDNSClient(char *refparam, struct dmctx *ctx, void *data,
 				dmuci_delete_by_section(dmmap_section, NULL, NULL);
 
 				dmuci_delete_by_section(s, NULL, NULL);
+			}
+			break;
+	}
+	return 0;
+}
+
+static int addObjDynamicDNSClientHostname(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	if (DM_STRCMP(*instance, "1") != 0)
+		return FAULT_9003;
+
+	dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "hostname_instance", "1");
+	return 0;
+}
+
+static int delObjDynamicDNSClientHostname(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, "hostname_instance", NULL);
+			break;
+		case DEL_ALL:
+			uci_path_foreach_sections(bbfdm, "dmmap_ddns", "service", s) {
+				dmuci_delete_by_section(s, "hostname_instance", NULL);
 			}
 			break;
 	}
@@ -438,9 +461,13 @@ static int get_DynamicDNSClient_Status(char *refparam, struct dmctx *ctx, void *
 {
 	char status[32] = {0}, *enable, *logdir = NULL;
 
+	int cnt = get_number_of_entries(ctx, data, instance, browseDynamicDNSClientHostnameInst);
+
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enabled", &enable);
 	if (*enable == '\0' || DM_LSTRCMP(enable, "0") == 0) {
 		DM_STRNCPY(status, "Disabled", sizeof(status));
+	} else if (cnt == 0) {
+		DM_STRNCPY(status, "Error_Misconfigured", sizeof(status));
 	} else {
 		char path[64] = {0};
 
@@ -498,9 +525,13 @@ static int get_DynamicDNSClient_LastError(char *refparam, struct dmctx *ctx, voi
 {
 	char last_err[64] = {0}, *enable = NULL;
 
+	int cnt = get_number_of_entries(ctx, data, instance, browseDynamicDNSClientHostnameInst);
+
 	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enabled", &enable);
 	if (enable && (*enable == '\0' || DM_LSTRCMP(enable, "0") == 0)) {
 		DM_STRNCPY(last_err, "NO_ERROR", sizeof(last_err));
+	} else if (cnt == 0) {
+		DM_STRNCPY(last_err, "MISCONFIGURATION_ERROR", sizeof(last_err));
 	} else {
 		char path[128] = {0}, *logdir = NULL;
 
@@ -640,7 +671,8 @@ static int set_DynamicDNSClient_Password(char *refparam, struct dmctx *ctx, void
 
 static int get_DynamicDNSClient_HostnameNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "1";
+	int cnt = get_number_of_entries(ctx, data, instance, browseDynamicDNSClientHostnameInst);
+	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
@@ -693,6 +725,8 @@ static int get_DynamicDNSClientHostname_Status(char *refparam, struct dmctx *ctx
 					DM_STRNCPY(status, "UpdateNeeded", sizeof(status));
 				else if (DM_LSTRSTR(buf, "NO valid IP found"))
 					DM_STRNCPY(status, "Error", sizeof(status));
+				else if (DM_LSTRSTR(buf, "nslookup error"))
+					DM_STRNCPY(status, "Error", sizeof(status));
 			}
 			fclose(fp);
 		} else
@@ -705,7 +739,7 @@ static int get_DynamicDNSClientHostname_Status(char *refparam, struct dmctx *ctx
 /*#Device.DynamicDNS.Client.{i}.Hostname.{i}.Name!UCI:ddns/service,@i-1/domain*/
 static int get_DynamicDNSClientHostname_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "domain", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "lookup_host", value);
 	return 0;
 }
 
@@ -717,8 +751,8 @@ static int set_DynamicDNSClientHostname_Name(char *refparam, struct dmctx *ctx, 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "domain", value);
 			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "lookup_host", value);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "domain", value);
 			break;
 	}
 	return 0;
@@ -1003,7 +1037,7 @@ DMLEAF tDynamicDNSParams[] = {
 /* *** Device.DynamicDNS.Client.{i}. *** */
 DMOBJ tDynamicDNSClientObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Hostname", &DMREAD, NULL, NULL, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", NULL}, "2.10"},
+{"Hostname", &DMWRITE, addObjDynamicDNSClientHostname, delObjDynamicDNSClientHostname, NULL, browseDynamicDNSClientHostnameInst, NULL, NULL, NULL, tDynamicDNSClientHostnameParams, NULL, BBFDM_BOTH, LIST_KEY{"Name", NULL}, "2.10"},
 {0}
 };
 
