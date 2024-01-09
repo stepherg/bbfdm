@@ -136,7 +136,6 @@ extern char *RateAdjAlgorithm[];
 #define SYSTEM_CERT_PATH "/etc/ssl/certs"
 #define BOARD_JSON_FILE "/etc/board.json"
 #define DMMAP "dmmap"
-#define LIST_KEY (const char *[]) // To be removed later!!!!!!!!!!!!
 #define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
 
 #define DM_ASSERT(X, Y) \

@@ -1752,6 +1752,17 @@ static int set_access_point_security_modes(char *refparam, struct dmctx *ctx, vo
 	return 0;
 }
 
+static int get_access_point_security_wepkey(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *key_index = NULL, buf[16];
+
+	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "key", &key_index);
+	snprintf(buf, sizeof(buf),"key%s", DM_STRLEN(key_index) ? key_index : "1");
+
+	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, buf, value);
+	return 0;
+}
+
 static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *map_s = NULL;
@@ -1776,7 +1787,7 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 				char *key_index = NULL, buf[16];
 
 				dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "key", &key_index);
-				snprintf(buf, sizeof(buf),"key%s", key_index ? key_index : "1");
+				snprintf(buf, sizeof(buf),"key%s", DM_STRLEN(key_index) ? key_index : "1");
 
 				// wireless config: Update key option
 				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, buf, value);
@@ -1787,6 +1798,12 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 			}
 			return 0;
 	}
+	return 0;
+}
+
+static int get_access_point_security_shared_key(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "key", value);
 	return 0;
 }
 
@@ -1822,6 +1839,12 @@ static int set_access_point_security_shared_key(char *refparam, struct dmctx *ct
 
 			return 0;
 	}
+	return 0;
+}
+
+static int get_access_point_security_passphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "key", value);
 	return 0;
 }
 
@@ -1869,6 +1892,12 @@ static int set_access_point_security_rekey_interval(char *refparam, struct dmctx
 }
 
 /*#Device.WiFi.AccessPoint.{i}.Security.SAEPassphrase!UCI:wireless/wifi-iface,@i-1/key*/
+static int get_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "key", value);
+	return 0;
+}
+
 static int set_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *map_s = NULL;
@@ -1950,6 +1979,12 @@ static int set_access_point_security_radius_server_port(char *refparam, struct d
 				dmuci_set_value_by_section((((struct wifi_acp_args *)data)->sections)->config_section, "auth_port", value);
 			return 0;
 	}
+	return 0;
+}
+
+static int get_access_point_security_radius_secret(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "auth_secret", value);
 	return 0;
 }
 
@@ -2211,6 +2246,13 @@ static int set_WiFiAccessPointAccounting_ServerPort(char *refparam, struct dmctx
 	return 0;
 }
 
+/*#Device.WiFi.AccessPoint.{i}.Accounting.Secret!UCI:wireless/wifi-iface,@i-1/acct_secret*/
+static int get_WiFiAccessPointAccounting_Secret(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "acct_secret", value);
+	return 0;
+}
+
 static int set_WiFiAccessPointAccounting_Secret(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
@@ -2469,6 +2511,17 @@ static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 	return 0;
 }
 
+static int get_WiFiEndPointProfileSecurity_WEPKey(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *key_index = NULL, buf[16];
+
+	dmuci_get_value_by_section_string((struct uci_section*)data, "key", &key_index);
+	snprintf(buf, sizeof(buf),"key%s", DM_STRLEN(key_index) ? key_index : "1");
+
+	dmuci_get_value_by_section_string((struct uci_section*)data, buf, value);
+	return 0;
+}
+
 static int set_WiFiEndPointProfileSecurity_WEPKey(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *encryption;
@@ -2484,11 +2537,17 @@ static int set_WiFiEndPointProfileSecurity_WEPKey(char *refparam, struct dmctx *
 				char *key_index = NULL, buf[16];
 
 				dmuci_get_value_by_section_string((struct uci_section*)data, "key", &key_index);
-				snprintf(buf, sizeof(buf),"key%s", key_index ? key_index : "1");
+				snprintf(buf, sizeof(buf),"key%s", DM_STRLEN(key_index) ? key_index : "1");
 				dmuci_set_value_by_section((struct uci_section*)data, buf, value);
 			}
 			return 0;
 	}
+	return 0;
+}
+
+static int get_WiFiEndPointProfileSecurity_PreSharedKey(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section*)data, "key", value);
 	return 0;
 }
 
@@ -2507,6 +2566,12 @@ static int set_WiFiEndPointProfileSecurity_PreSharedKey(char *refparam, struct d
 				dmuci_set_value_by_section((struct uci_section*)data, "key", value);
 			return 0;
 	}
+	return 0;
+}
+
+static int get_WiFiEndPointProfileSecurity_KeyPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section*)data, "key", value);
 	return 0;
 }
 
@@ -2529,6 +2594,12 @@ static int set_WiFiEndPointProfileSecurity_KeyPassphrase(char *refparam, struct 
 }
 
 /*#Device.WiFi.EndPoint.{i}.Profile.{i}.Security.SAEPassphrase!UCI:wireless/wifi-iface,@i-1/key*/
+static int get_WiFiEndPointProfileSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string((struct uci_section*)data, "key", value);
+	return 0;
+}
+
 static int set_WiFiEndPointProfileSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *encryption;
@@ -4040,14 +4111,14 @@ DMLEAF tWiFiAccessPointSecurityParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"ModesSupported", &DMREAD, DMT_STRING, get_access_point_security_supported_modes, NULL, BBFDM_BOTH},
 {"ModeEnabled", &DMWRITE, DMT_STRING, get_access_point_security_modes, set_access_point_security_modes, BBFDM_BOTH},
-{"WEPKey", &DMWRITE, DMT_HEXBIN, get_empty, set_access_point_security_wepkey, BBFDM_BOTH},
-{"PreSharedKey", &DMWRITE, DMT_HEXBIN, get_empty, set_access_point_security_shared_key, BBFDM_BOTH},
-{"KeyPassphrase", &DMWRITE, DMT_STRING, get_empty, set_access_point_security_passphrase, BBFDM_BOTH},
+{"WEPKey", &DMWRITE, DMT_HEXBIN, get_access_point_security_wepkey, set_access_point_security_wepkey, BBFDM_BOTH, DM_FLAG_SECURE},
+{"PreSharedKey", &DMWRITE, DMT_HEXBIN, get_access_point_security_shared_key, set_access_point_security_shared_key, BBFDM_BOTH, DM_FLAG_SECURE},
+{"KeyPassphrase", &DMWRITE, DMT_STRING, get_access_point_security_passphrase, set_access_point_security_passphrase, BBFDM_BOTH, DM_FLAG_SECURE},
 {"RekeyingInterval", &DMWRITE, DMT_UNINT, get_access_point_security_rekey_interval, set_access_point_security_rekey_interval, BBFDM_BOTH},
-{"SAEPassphrase", &DMWRITE, DMT_STRING, get_empty, set_WiFiAccessPointSecurity_SAEPassphrase, BBFDM_BOTH},
+{"SAEPassphrase", &DMWRITE, DMT_STRING, get_WiFiAccessPointSecurity_SAEPassphrase, set_WiFiAccessPointSecurity_SAEPassphrase, BBFDM_BOTH, DM_FLAG_SECURE},
 {"RadiusServerIPAddr", &DMWRITE, DMT_STRING, get_access_point_security_radius_ip_address, set_access_point_security_radius_ip_address, BBFDM_BOTH},
 {"RadiusServerPort", &DMWRITE, DMT_UNINT, get_access_point_security_radius_server_port, set_access_point_security_radius_server_port, BBFDM_BOTH},
-{"RadiusSecret", &DMWRITE, DMT_STRING, get_empty, set_access_point_security_radius_secret, BBFDM_BOTH},
+{"RadiusSecret", &DMWRITE, DMT_STRING, get_access_point_security_radius_secret, set_access_point_security_radius_secret, BBFDM_BOTH, DM_FLAG_SECURE},
 {"MFPConfig", &DMWRITE, DMT_STRING, get_WiFiAccessPointSecurity_MFPConfig, set_WiFiAccessPointSecurity_MFPConfig, BBFDM_BOTH},
 {"Reset()", &DMSYNC, DMT_COMMAND, NULL, operate_WiFiAccessPointSecurity_Reset, BBFDM_USP},
 {0}
@@ -4061,7 +4132,7 @@ DMLEAF tWiFiAccessPointWPSParams[] = {
 {"ConfigMethodsEnabled", &DMWRITE, DMT_STRING, get_WiFiAccessPointWPS_ConfigMethodsEnabled, set_WiFiAccessPointWPS_ConfigMethodsEnabled, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_WiFiAccessPointWPS_Status, NULL, BBFDM_BOTH},
 //{"Version", &DMREAD, DMT_STRING, get_WiFiAccessPointWPS_Version, NULL, BBFDM_BOTH},
-//{"PIN", &DMWRITE, DMT_STRING, get_empty, set_WiFiAccessPointWPS_PIN, BBFDM_BOTH},
+//{"PIN", &DMWRITE, DMT_STRING, get_WiFiAccessPointWPS_PIN, set_WiFiAccessPointWPS_PIN, BBFDM_BOTH, DM_FLAG_SECURE},
 {"InitiateWPSPBC()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiAccessPointWPS_InitiateWPSPBC, operate_WiFiAccessPointWPS_InitiateWPSPBC, BBFDM_USP},
 {0}
 };
@@ -4109,7 +4180,7 @@ DMLEAF tWiFiAccessPointAccountingParams[] = {
 //{"SecondaryServerIPAddr", &DMWRITE, DMT_STRING, get_WiFiAccessPointAccounting_SecondaryServerIPAddr, set_WiFiAccessPointAccounting_SecondaryServerIPAddr, BBFDM_BOTH},
 {"ServerPort", &DMWRITE, DMT_UNINT, get_WiFiAccessPointAccounting_ServerPort, set_WiFiAccessPointAccounting_ServerPort, BBFDM_BOTH},
 //{"SecondaryServerPort", &DMWRITE, DMT_UNINT, get_WiFiAccessPointAccounting_SecondaryServerPort, set_WiFiAccessPointAccounting_SecondaryServerPort, BBFDM_BOTH},
-{"Secret", &DMWRITE, DMT_STRING, get_empty, set_WiFiAccessPointAccounting_Secret, BBFDM_BOTH},
+{"Secret", &DMWRITE, DMT_STRING, get_WiFiAccessPointAccounting_Secret, set_WiFiAccessPointAccounting_Secret, BBFDM_BOTH, DM_FLAG_SECURE},
 //{"SecondarySecret", &DMWRITE, DMT_STRING, get_WiFiAccessPointAccounting_SecondarySecret, set_WiFiAccessPointAccounting_SecondarySecret, BBFDM_BOTH},
 //{"InterimInterval", &DMWRITE, DMT_UNINT, get_WiFiAccessPointAccounting_InterimInterval, set_WiFiAccessPointAccounting_InterimInterval, BBFDM_BOTH},
 {0}
@@ -4175,10 +4246,10 @@ DMLEAF tWiFiEndPointProfileParams[] = {
 DMLEAF tWiFiEndPointProfileSecurityParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"ModeEnabled", &DMWRITE, DMT_STRING, get_WiFiEndPointProfileSecurity_ModeEnabled, set_WiFiEndPointProfileSecurity_ModeEnabled, BBFDM_BOTH},
-{"WEPKey", &DMWRITE, DMT_HEXBIN, get_empty, set_WiFiEndPointProfileSecurity_WEPKey, BBFDM_BOTH},
-{"PreSharedKey", &DMWRITE, DMT_HEXBIN, get_empty, set_WiFiEndPointProfileSecurity_PreSharedKey, BBFDM_BOTH},
-{"KeyPassphrase", &DMWRITE, DMT_STRING, get_empty, set_WiFiEndPointProfileSecurity_KeyPassphrase, BBFDM_BOTH},
-{"SAEPassphrase", &DMWRITE, DMT_STRING, get_empty, set_WiFiEndPointProfileSecurity_SAEPassphrase, BBFDM_BOTH},
+{"WEPKey", &DMWRITE, DMT_HEXBIN, get_WiFiEndPointProfileSecurity_WEPKey, set_WiFiEndPointProfileSecurity_WEPKey, BBFDM_BOTH, DM_FLAG_SECURE},
+{"PreSharedKey", &DMWRITE, DMT_HEXBIN, get_WiFiEndPointProfileSecurity_PreSharedKey, set_WiFiEndPointProfileSecurity_PreSharedKey, BBFDM_BOTH, DM_FLAG_SECURE},
+{"KeyPassphrase", &DMWRITE, DMT_STRING, get_WiFiEndPointProfileSecurity_KeyPassphrase, set_WiFiEndPointProfileSecurity_KeyPassphrase, BBFDM_BOTH, DM_FLAG_SECURE},
+{"SAEPassphrase", &DMWRITE, DMT_STRING, get_WiFiEndPointProfileSecurity_SAEPassphrase, set_WiFiEndPointProfileSecurity_SAEPassphrase, BBFDM_BOTH, DM_FLAG_SECURE},
 {"MFPConfig", &DMWRITE, DMT_STRING, get_WiFiEndPointProfileSecurity_MFPConfig, set_WiFiEndPointProfileSecurity_MFPConfig, BBFDM_BOTH},
 {0}
 };

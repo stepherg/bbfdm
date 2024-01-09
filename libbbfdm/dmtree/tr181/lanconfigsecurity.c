@@ -13,7 +13,7 @@
 /*#Device.LANConfigSecurity.ConfigPassword!UCI:users/user,user/password*/
 static int get_LANConfigSecurity_ConfigPassword(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
+	dmuci_get_option_value_string("users", "user", "password", value);
 	return 0;
 }
 
@@ -36,6 +36,6 @@ static int set_LANConfigSecurity_ConfigPassword(char *refparam, struct dmctx *ct
 ***********************************************************************************************************************************/
 DMLEAF tLANConfigSecurityParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"ConfigPassword", &DMWRITE, DMT_STRING, get_LANConfigSecurity_ConfigPassword, set_LANConfigSecurity_ConfigPassword, BBFDM_BOTH},
+{"ConfigPassword", &DMWRITE, DMT_STRING, get_LANConfigSecurity_ConfigPassword, set_LANConfigSecurity_ConfigPassword, BBFDM_BOTH, DM_FLAG_SECURE},
 {0}
 };

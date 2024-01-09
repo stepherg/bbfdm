@@ -78,7 +78,6 @@ do { \
 
 #define UBUS_ARGS (struct ubus_arg[])
 #define RANGE_ARGS (struct range_args[])
-#define LIST_KEY (const char *[]) // To be removed later!!!!!!!!!!!!
 
 #define DMPARAM_ARGS \
 	struct dmctx *dmctx, \
@@ -244,7 +243,8 @@ typedef struct {
 enum dm_flags_enum {
 	DM_FLAG_REFERENCE = 1,
 	DM_FLAG_UNIQUE = 1<<1,
-	DM_FLAG_LINKER = 1<<2
+	DM_FLAG_LINKER = 1<<2,
+	DM_FLAG_SECURE = 1<<3
 };
 
 enum set_value_action {

@@ -618,7 +618,7 @@ static int set_DynamicDNSClient_Username(char *refparam, struct dmctx *ctx, void
 /*#Device.DynamicDNS.Client.{i}.Password!UCI:ddns/service,@i-1/password*/
 static int get_DynamicDNSClient_Password(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "password", value);
 	return 0;
 }
 
@@ -1005,7 +1005,7 @@ DMLEAF tDynamicDNSClientParams[] = {
 {"Server", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Server, set_DynamicDNSClient_Server, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_REFERENCE},
 {"Interface", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Interface, set_DynamicDNSClient_Interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"Username", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Username, set_DynamicDNSClient_Username, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"Password", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Password, set_DynamicDNSClient_Password, BBFDM_BOTH},
+{"Password", &DMWRITE, DMT_STRING, get_DynamicDNSClient_Password, set_DynamicDNSClient_Password, BBFDM_BOTH, DM_FLAG_SECURE},
 {"HostnameNumberOfEntries", &DMREAD, DMT_UNINT, get_DynamicDNSClient_HostnameNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };

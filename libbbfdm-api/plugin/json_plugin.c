@@ -1555,26 +1555,6 @@ static char** fill_command_param(int count, struct json_object *obj)
 	return res_p;
 }
 
-static char** fill_unique_keys(size_t count, struct json_object *obj)
-{
-	char **res_p = NULL;
-	if (!obj || !count)
-		return res_p;
-
-	res_p = malloc(sizeof(char *) * (count + 1));
-	if (res_p) {
-		res_p[count] = NULL;
-
-
-		for (int id = 0; id < count; id++) {
-			struct json_object *key_val = json_object_array_get_idx(obj, id);
-			res_p[id] = dm_dynamic_strdup(&json_memhead, json_object_get_string(key_val));
-		}
-	}
-
-	return res_p;
-}
-
 static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pleaf, int i, int json_version, struct list_head *list)
 {
 	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(6)*/
@@ -1722,6 +1702,8 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 			pleaf[i].dm_falgs |= DM_FLAG_REFERENCE;
 		else if (falg_val && strcmp(json_object_get_string(falg_val), "Unique") == 0)
 			pleaf[i].dm_falgs |= DM_FLAG_UNIQUE;
+		else if (falg_val && strcmp(json_object_get_string(falg_val), "Secure") == 0)
+			pleaf[i].dm_falgs |= DM_FLAG_SECURE;
 	}
 
 	snprintf(full_param, sizeof(full_param), "%s%s", object, param_ext);
@@ -1807,15 +1789,8 @@ void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json
 				pobj[index].bbfdm_type = BBFDM_BOTH;
 		}
 
-		if (strcmp(key, "uniqueKeys") == 0) {
-			//uniqueKeys
-			size_t n_keys = json_obj ? json_object_array_length(json_obj) : 0;
-			keys_p = fill_unique_keys(n_keys, json_obj);
-			pobj[index].unique_keys = (const char **)keys_p;
-
-			//linker
-			pobj[index].get_linker = NULL;
-		}
+		//linker
+		pobj[index].get_linker = NULL;
 
 		if (strcmp(key, "access") == 0) {
 			//permission

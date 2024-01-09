@@ -356,6 +356,15 @@ static int set_ppp_username(char *refparam, struct dmctx *ctx, void *data, char 
 }
 
 /*#Device.PPP.Interface.{i}.Password!UCI:network/interface,@i-1/password*/
+static int get_ppp_password(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct ppp_args *ppp = (struct ppp_args *)data;
+
+	dmuci_get_value_by_section_string(ppp->iface_s ? ppp->iface_s : ppp->dmmap_s, "password", value);
+	return 0;
+}
+
+/*#Device.PPP.Interface.{i}.Password!UCI:network/interface,@i-1/password*/
 static int set_ppp_password(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct ppp_args *ppp = (struct ppp_args *)data;
@@ -1163,7 +1172,7 @@ DMLEAF tPPPInterfaceParams[] = {
 {"ConnectionStatus", &DMREAD, DMT_STRING, get_ppp_status, NULL, BBFDM_BOTH},
 {"LastConnectionError", &DMREAD, DMT_STRING, get_PPPInterface_LastConnectionError, NULL, BBFDM_BOTH},
 {"Username", &DMWRITE, DMT_STRING, get_ppp_username, set_ppp_username, BBFDM_BOTH},
-{"Password", &DMWRITE, DMT_STRING, get_empty, set_ppp_password, BBFDM_BOTH},
+{"Password", &DMWRITE, DMT_STRING, get_ppp_password, set_ppp_password, BBFDM_BOTH, DM_FLAG_SECURE},
 {"Reset()", &DMSYNC, DMT_COMMAND, NULL, operate_PPPInterface_Reset, BBFDM_USP},
 {"MaxMRUSize", &DMWRITE, DMT_UNINT, get_PPPInterface_MaxMRUSize, set_PPPInterface_MaxMRUSize, BBFDM_BOTH},
 {"CurrentMRUSize", &DMREAD, DMT_UNINT, get_PPPInterface_CurrentMRUSize, NULL, BBFDM_BOTH},

@@ -1011,23 +1011,10 @@ static void fill_event_schema(struct blob_buf *bb, struct dm_parameter *param)
 
 static void fill_param_schema(struct blob_buf *bb, struct dm_parameter *param)
 {
-	blobmsg_add_string(bb, "path", param->name);
-	blobmsg_add_string(bb, "data", param->data ? param->data : "0");
-	blobmsg_add_string(bb, "type", param->type);
-
-	if (param->additional_data) {
-		const char **uniq_keys = (const char **)param->additional_data;
-		void *key = blobmsg_open_array(bb, "input");
-		void *table = NULL;
-
-		for (int i = 0; uniq_keys[i] != NULL; i++) {
-			table = blobmsg_open_table(bb, NULL);
-			blobmsg_add_string(bb, "path", uniq_keys[i]);
-			blobmsg_close_table(bb, table);
-		}
-
-		blobmsg_close_array(bb, key);
-	}
+	bb_add_string(bb, "path", param->name);
+	bb_add_string(bb, "data", param->data ? param->data : "0");
+	bb_add_string(bb, "type", param->type);
+	bb_add_flags_arr(bb, param->additional_data);
 }
 
 

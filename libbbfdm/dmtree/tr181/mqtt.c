@@ -266,7 +266,7 @@ static int set_MQTTBroker_Username(char *refparam, struct dmctx *ctx, void *data
 
 static int get_MQTTBroker_Password(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "password", value);
 	return 0;
 }
 
@@ -309,7 +309,7 @@ DMLEAF tMQTTBrokerParams[] = {
 {"Port", &DMWRITE, DMT_UNINT, get_MQTTBroker_Port, set_MQTTBroker_Port, BBFDM_BOTH},
 {"Interface", &DMWRITE, DMT_STRING, get_MQTTBroker_Interface, set_MQTTBroker_Interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
 {"Username", &DMWRITE, DMT_STRING, get_MQTTBroker_Username, set_MQTTBroker_Username, BBFDM_BOTH},
-{"Password", &DMWRITE, DMT_STRING, get_MQTTBroker_Password, set_MQTTBroker_Password, BBFDM_BOTH},
+{"Password", &DMWRITE, DMT_STRING, get_MQTTBroker_Password, set_MQTTBroker_Password, BBFDM_BOTH, DM_FLAG_SECURE},
 {0}
 };
 

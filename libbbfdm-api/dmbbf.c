@@ -1096,6 +1096,8 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 					*dm_flags |= DM_FLAG_UNIQUE;
 				} else if (DM_LSTRCMP(flag, "Linker") == 0) {
 					*dm_flags |= DM_FLAG_LINKER;
+				} else if (DM_LSTRCMP(flag, "Secure") == 0) {
+					*dm_flags |= DM_FLAG_SECURE;
 				}
 			}
 		}
@@ -1150,25 +1152,7 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 		char *type = dmjson_get_value(res_obj, 1, "type");
 
 		if (DM_LSTRCMP(type, "xsd:object") == 0) { //Object
-			const char **unique_keys = NULL;
-
-			json_object *input_array = dmjson_get_obj(res_obj, 1, "input");
-			if (input_array) {
-				size_t j = 0;
-				size_t in_nbre = json_object_array_length(input_array);
-
-				unique_keys = dmcalloc(in_nbre + 1, sizeof(char *));
-
-				for (j = 0; j < in_nbre; j++) {
-					json_object *res_obj = json_object_array_get_idx(input_array, j);
-
-					char *in_path = dmjson_get_value(res_obj, 1, "path");
-					unique_keys[j] = dmstrdup(in_path);
-				}
-				unique_keys[j] = NULL;
-			}
-
-			add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), "xsd:object", (char *)unique_keys);
+			add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), "xsd:object", NULL);
 		} else if (DM_LSTRCMP(type, "xsd:command") == 0) { //Command Leaf
 			operation_args *op = NULL;
 
@@ -1227,7 +1211,33 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 
 			add_list_parameter(dmctx, dmstrdup(path), (char *)ev, "xsd:event", NULL);
 		} else { //Param Leaf
-			add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), NULL);
+			uint32_t *dm_flags = NULL;
+
+			json_object *flags_array = dmjson_get_obj(res_obj, 1, "flags");
+			if (flags_array) {
+				size_t nbre_falgs = json_object_array_length(flags_array);
+
+				dm_flags = (uint32_t *)dmcalloc(1, sizeof(uint32_t));
+
+				for (size_t j = 0; j < nbre_falgs; j++) {
+					json_object *flag_obj = json_object_array_get_idx(flags_array, j);
+
+					const char *flag = json_object_get_string(flag_obj);
+
+					if (DM_LSTRCMP(flag, "Reference") == 0) {
+						data = get_value_by_reference(dmctx, data);
+						*dm_flags |= DM_FLAG_REFERENCE;
+					} else if (DM_LSTRCMP(flag, "Unique") == 0) {
+						*dm_flags |= DM_FLAG_UNIQUE;
+					} else if (DM_LSTRCMP(flag, "Linker") == 0) {
+						*dm_flags |= DM_FLAG_LINKER;
+					} else if (DM_LSTRCMP(flag, "Secure") == 0) {
+						*dm_flags |= DM_FLAG_SECURE;
+					}
+				}
+			}
+
+			add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), (char *)dm_flags);
 		}
 	}
 
@@ -1660,7 +1670,9 @@ static int get_value_param(DMPARAM_ARGS)
 		dmastrcat(&full_param, node->current_object, leaf->parameter);
 		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
-		if (value && *value) {
+		if ((leaf->dm_falgs & DM_FLAG_SECURE) && (dmctx->dm_type == BBFDM_CWMP)) {
+			value = "";
+		} else if (value && *value) {
 			if (leaf->dm_falgs & DM_FLAG_REFERENCE) {
 				value = get_value_by_reference(dmctx, value);
 			} else {
@@ -1709,7 +1721,9 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 
 		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
-		if (value && *value) {
+		if ((leaf->dm_falgs & DM_FLAG_SECURE) && (dmctx->dm_type == BBFDM_CWMP)) {
+			value = "";
+		} else if (value && *value) {
 			if (leaf->dm_falgs & DM_FLAG_REFERENCE) {
 				value = get_value_by_reference(dmctx, value);
 			} else
@@ -1969,27 +1983,9 @@ static int mobj_get_supported_dm(DMOBJECT_ARGS)
 	} else {
 		char *perm = permission ? permission->val : "0";
 		char *refparam = node->current_object;
-		const char **unique_keys = NULL;
 
 		if (node->matched && dmctx->isinfo) {
-			if (node->obj) {
-				unique_keys = node->obj->unique_keys; // To be removed later!!!!!!!!!!!!
-				if (unique_keys == NULL) {
-					struct dm_leaf_s *leaf = node->obj->leaf;
-					unsigned int idx = 1;
-
-					for (; (leaf && leaf->parameter); leaf++) {
-						if (leaf->dm_falgs & DM_FLAG_UNIQUE) {
-							idx++;
-							unique_keys = dmrealloc(unique_keys, idx * sizeof(char *));
-							unique_keys[idx - 2] = dmstrdup(leaf->parameter);
-							unique_keys[idx - 1] = NULL;
-						}
-					}
-				}
-			}
-
-			add_list_parameter(dmctx, refparam, perm, "xsd:object", (char *)unique_keys);
+			add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL);
 		}
 	}
 
@@ -2024,7 +2020,7 @@ static int mparam_get_supported_dm(DMPARAM_ARGS)
 					add_list_parameter(dmctx, refparam, value, DMT_TYPE[leaf->type], leaf->permission->val);
 				}
 			} else {
-				add_list_parameter(dmctx, refparam, leaf->permission->val, DMT_TYPE[leaf->type], NULL);
+				add_list_parameter(dmctx, refparam, leaf->permission->val, DMT_TYPE[leaf->type], leaf->dm_falgs ? (char *)&leaf->dm_falgs : NULL);
 			}
 		}
 

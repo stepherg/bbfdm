@@ -319,25 +319,6 @@ static bool add_paths_to_stack(struct blob_buf *bb, char *path, size_t begin,
 	return true;
 }
 
-static void bb_add_flags_arr(struct blob_buf *bb, char *data)
-{
-	uint32_t *dm_falgs = (uint32_t *)data;
-
-	if (!bb || !dm_falgs)
-		return;
-
-	void *flags_arr = blobmsg_open_array(bb, "flags");
-
-	if (*dm_falgs & DM_FLAG_REFERENCE)
-		bb_add_string(bb, NULL, "Reference");
-	if (*dm_falgs & DM_FLAG_UNIQUE)
-		bb_add_string(bb, NULL, "Unique");
-	if (*dm_falgs & DM_FLAG_LINKER)
-		bb_add_string(bb, NULL, "Linker");
-
-	blobmsg_close_array(bb, flags_arr);
-}
-
 // public functions
 void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list)
 {
