@@ -19,5 +19,8 @@ extern DMOBJ tNATObj[];
 extern DMLEAF tNATParams[];
 extern DMLEAF tNATInterfaceSettingParams[];
 extern DMLEAF tNATPortMappingParams[];
+extern DMOBJ tNATPortTriggerObj[];
+extern DMLEAF tNATPortTriggerParams[];
+extern DMLEAF tNATPortTriggerRuleParams[];
 
 #endif

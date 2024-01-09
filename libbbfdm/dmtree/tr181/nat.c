@@ -687,6 +687,481 @@ static int set_nat_port_mapping_description(char *refparam, struct dmctx *ctx, v
 	return 0;
 }
 
+/*#Device.NAT.PortTrigger.{i}.!UCI:porttrigger/port_trigger/dmmap_port_trigger*/
+static int browseNATPortTriggerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL;
+	struct dmmap_dup *p = NULL;
+	LIST_HEAD(dup_list);
+
+	synchronize_specific_config_sections_with_dmmap("porttrigger", "port_trigger", "dmmap_port_trigger", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
+
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "porttriggerinstance", "porttriggeralias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+			break;
+	}
+	free_dmmap_config_dup_list(&dup_list);
+	return 0;
+}
+
+static int browseNATPortTriggerRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct uci_section *p_t = ((struct dmmap_dup *)prev_data)->config_section;
+        struct dmmap_dup *p = NULL;
+	char *inst = NULL;
+        LIST_HEAD(dup_list);
+
+	synchronize_specific_config_sections_with_dmmap_eq("porttrigger", "rule", "dmmap_port_trigger", "dm_parent", section_name(p_t), &dup_list);
+        list_for_each_entry(p, &dup_list, list) {
+                inst = handle_instance(dmctx, parent_node, p->dmmap_section, "ruleinstance", "rulealias");
+
+                if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+                        break;
+        }
+        free_dmmap_config_dup_list(&dup_list);
+        return 0;
+}
+
+/*************************************************************
+* ADD & DEL OBJ
+**************************************************************/
+static int addObjNATPortTrigger(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+	struct uci_section *s = NULL, *dmmap_port_trigger = NULL;
+	char port_trigger_name[16] = {0};
+	char name[16] = {0};
+
+	snprintf(port_trigger_name, sizeof(port_trigger_name), "port_trigger_%s", *instance);
+	snprintf(name, sizeof(name), "trigger_%s", *instance);
+
+	dmuci_add_section("porttrigger", "port_trigger", &s);
+	dmuci_rename_section_by_section(s, port_trigger_name);
+	dmuci_set_value_by_section(s, "name", name);
+	dmuci_set_value_by_section(s, "end_port_range", "0");
+
+	dmuci_add_section_bbfdm("dmmap_port_trigger", "port_trigger", &dmmap_port_trigger);
+	dmuci_set_value_by_section(dmmap_port_trigger, "section_name", port_trigger_name);
+
+	return 0;
+}
+
+static int delObjNATPortTrigger(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *s = NULL, *stmp = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			struct uci_section *dmmap = NULL;
+			uci_foreach_option_eq_safe("porttrigger", "rule", "dm_parent", section_name(((struct dmmap_dup *)data)->config_section), stmp, s) {
+                                get_dmmap_section_of_config_section("dmmap_port_trigger", "rule", section_name(s), &dmmap);
+                                dmuci_delete_by_section(dmmap, NULL, NULL);
+                                dmuci_delete_by_section(s, NULL, NULL);
+                        }
+
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			break;
+		case DEL_ALL:
+			uci_foreach_sections_safe("porttrigger", "port_trigger", stmp, s) {
+				struct uci_section *dmmap_port_trigger = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_port_trigger", "port_trigger", section_name(s), &dmmap_port_trigger);
+				dmuci_delete_by_section(dmmap_port_trigger, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+			uci_foreach_sections_safe("porttrigger", "rule", stmp, s) {
+				struct uci_section *dmmap = NULL;
+
+				get_dmmap_section_of_config_section("dmmap_port_trigger", "rule", section_name(s), &dmmap);
+				dmuci_delete_by_section(dmmap, NULL, NULL);
+
+				dmuci_delete_by_section(s, NULL, NULL);
+			}
+			break;
+	}
+	return 0;
+}
+
+static int addObjNATPortTriggerRule(char *refparam, struct dmctx *ctx, void *data, char **instance)
+{
+        struct uci_section *port_trigger = ((struct dmmap_dup *)data)->config_section;
+        struct uci_section *s = NULL, *dmmap = NULL;
+        char s_name[50] = {0};
+
+        snprintf(s_name, sizeof(s_name), "%s_rule_%s", section_name(port_trigger),*instance);
+
+	dmuci_add_section("porttrigger", "rule", &s);
+        dmuci_rename_section_by_section(s, s_name);
+	dmuci_set_value_by_section(s, "dm_parent", section_name(port_trigger));
+
+        dmuci_add_section_bbfdm("dmmap_port_trigger", "rule", &dmmap);
+        dmuci_set_value_by_section(dmmap, "section_name", s_name);
+	dmuci_set_value_by_section(dmmap, "ruleinstance", *instance);
+        return 0;
+}
+
+static int delObjNATPortTriggerRule(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
+{
+	struct uci_section *p_t_s = NULL, *s = NULL, *stmp = NULL;
+
+	switch (del_action) {
+		case DEL_INST:
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			break;
+		case DEL_ALL:
+	                p_t_s = ((struct dmmap_dup *)data)->config_section;
+
+                        uci_foreach_option_eq_safe("porttrigger", "rule", "dm_parent", section_name(p_t_s), stmp, s) {
+                                struct uci_section *dmmap = NULL;
+
+                                get_dmmap_section_of_config_section("dmmap_port_trigger", "rule", section_name(s), &dmmap);
+                                dmuci_delete_by_section(dmmap, NULL, NULL);
+
+                                dmuci_delete_by_section(s, NULL, NULL);
+                        }
+			break;
+	}
+	return 0;
+}
+
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
+/*#Device.NAT.PortTriggerNumberOfEntries!UCI:porttrigger/port_trigger/*/
+static int get_NAT_PortTriggerNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseNATPortTriggerInst);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
+static int get_NATPortTrigger_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "port_trigger_alias", instance, value);
+}
+
+static int set_NATPortTrigger_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "port_trigger_alias", instance, value);
+}
+
+static int get_NATPortTrigger_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *val;
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enable", &val);
+	*value = (*val == '1') ? "1" : "0";
+	return 0;
+}
+
+static int set_NATPortTrigger_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	bool b;
+	time_t now = time(NULL);
+	char activation_date[32] = {0};
+
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_boolean(ctx, value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			string_to_bool(value, &b);
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", b ? "1" : "0");
+
+			if (b == 1) {
+				strftime(activation_date, sizeof(activation_date), "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
+				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "activation_date", activation_date);
+			}
+			break;
+	}
+	return 0;
+}
+
+static int get_NATPortTrigger_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	/*TODO*/
+	return 0;
+}
+
+static int get_NATPortTrigger_Origin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "origin", "Controller");
+	return 0;
+}
+
+static int set_NATPortTrigger_Origin(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *Origin[] = {"User", "System", "Controller", NULL};
+
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, -1, Origin, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "origin", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_NATPortTrigger_Description(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "description", value);
+	return 0;
+}
+
+static int set_NATPortTrigger_Description(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "description", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_NATPortTrigger_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *interf = NULL;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src", &interf);
+
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", interf, value);
+
+	return 0;
+}
+
+static int set_NATPortTrigger_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
+	struct dm_reference reference = {0};
+
+	bbf_get_reference_args(value, &reference);
+
+	switch (action) {
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, reference.path, -1, 256, NULL, NULL))
+				return FAULT_9007;
+
+			if (dm_validate_allowed_objects(ctx, &reference, allowed_objects))
+				return FAULT_9007;
+
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src", reference.value);
+			break;
+	}
+	return 0;
+}
+
+static int get_NATPortTrigger_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "port", "0");
+	return 0;
+}
+
+static int set_NATPortTrigger_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "port", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_NATPortTrigger_PortEndRange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "port_end_range", "0");
+	return 0;
+}
+
+static int set_NATPortTrigger_PortEndRange(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *port;
+	uint16_t s_port, end_port;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "port", &port);
+	s_port = DM_STRTOL(port);
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
+				return FAULT_9007;
+			end_port = DM_STRTOL(value);
+			if (s_port > end_port)
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "port_end_range", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_NATPortTrigger_AutoDisableDuration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "auto_disable_duration", value);
+	return 0;
+}
+
+static int set_NATPortTrigger_AutoDisableDuration(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "auto_disable_duration", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_NATPortTrigger_ActivationDate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "activation_date", "0001-01-01T00:00:00Z");
+	return 0;
+}
+
+static int set_NATPortTrigger_ActivationDate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char activation_date[16] = {0};
+	struct tm tm;
+
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_dateTime(ctx, value))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			strptime(value, "%Y-%m-%dT%H:%M:%SZ", &tm);
+			snprintf(activation_date, sizeof(activation_date), "%lld", (long long)timegm(&tm));
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "activation_date", activation_date);
+			break;
+	}
+	return 0;
+}
+
+static int get_NATPortTrigger_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "protocol", value);
+	return 0;
+}
+
+static int set_NATPortTrigger_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, -1, NATProtocol, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "protocol", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_NATPortTrigger_RuleNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseNATPortTriggerRuleInst);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
+static int get_NATPortTriggerRule_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "port_trigger_rule_alias", instance, value);
+}
+
+static int set_NATPortTriggerRule_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "port_trigger_rule_alias", instance, value);
+}
+
+static int get_NATPortTriggerRule_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "port", "0");
+	return 0;
+}
+
+static int set_NATPortTriggerRule_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "port", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_NATPortTriggerRule_PortEndRange(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "port_end_range", "0");
+	return 0;
+}
+
+static int set_NATPortTriggerRule_PortEndRange(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+
+	char *port;
+	uint16_t s_port, end_port;
+
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "port", &port);
+	s_port = DM_STRTOL(port);
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
+				return FAULT_9007;
+			end_port = DM_STRTOL(value);
+			if (s_port > end_port)
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "port_end_range", value);
+			break;
+	}
+	return 0;
+}
+
+static int get_NATPortTriggerRule_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "protocol", value);
+	return 0;
+}
+
+static int set_NATPortTriggerRule_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, -1, NATProtocol, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "protocol", value);
+			break;
+	}
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -695,6 +1170,7 @@ DMOBJ tNATObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"InterfaceSetting", &DMWRITE, add_NAT_InterfaceSetting, delete_NAT_InterfaceSetting, NULL, browseInterfaceSettingInst, NULL, NULL, NULL, tNATInterfaceSettingParams, NULL, BBFDM_BOTH, NULL},
 {"PortMapping", &DMWRITE, add_NAT_PortMapping, delete_NAT_PortMapping, NULL, browsePortMappingInst, NULL, NULL, NULL, tNATPortMappingParams, NULL, BBFDM_BOTH, NULL},
+{"PortTrigger", &DMWRITE, addObjNATPortTrigger, delObjNATPortTrigger, NULL, browseNATPortTriggerInst, NULL, NULL, tNATPortTriggerObj, tNATPortTriggerParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -702,6 +1178,7 @@ DMLEAF tNATParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"InterfaceSettingNumberOfEntries", &DMREAD, DMT_UNINT, get_nat_interface_setting_number_of_entries, NULL, BBFDM_BOTH},
 {"PortMappingNumberOfEntries", &DMREAD, DMT_UNINT, get_nat_port_mapping_number_of_entries, NULL, BBFDM_BOTH},
+{"PortTriggerNumberOfEntries", &DMREAD, DMT_UNINT, get_NAT_PortTriggerNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -731,5 +1208,39 @@ DMLEAF tNATPortMappingParams[] = {
 {"Protocol", &DMWRITE, DMT_STRING, get_nat_port_mapping_protocol, set_nat_port_mapping_protocol, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"InternalClient", &DMWRITE, DMT_STRING, get_nat_port_mapping_internal_client, set_nat_port_mapping_internal_client, BBFDM_BOTH},
 {"Description", &DMWRITE, DMT_STRING, get_nat_port_mapping_description, set_nat_port_mapping_description, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.NAT.PortTrigger.{i}. *** */
+DMOBJ tNATPortTriggerObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys */
+{"Rule", &DMWRITE, addObjNATPortTriggerRule, delObjNATPortTriggerRule, NULL, browseNATPortTriggerRuleInst, NULL, NULL, NULL, tNATPortTriggerRuleParams, NULL, BBFDM_BOTH, NULL},
+{0}
+};
+
+DMLEAF tNATPortTriggerParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type */
+{"Alias", &DMWRITE, DMT_STRING, get_NATPortTrigger_Alias, set_NATPortTrigger_Alias, BBFDM_BOTH},
+{"Enable", &DMWRITE, DMT_BOOL, get_NATPortTrigger_Enable, set_NATPortTrigger_Enable, BBFDM_BOTH},
+{"Status", &DMREAD, DMT_STRING, get_NATPortTrigger_Status, NULL, BBFDM_BOTH},
+{"Origin", &DMWRITE, DMT_STRING, get_NATPortTrigger_Origin, set_NATPortTrigger_Origin, BBFDM_BOTH},
+{"Description", &DMWRITE, DMT_STRING, get_NATPortTrigger_Description, set_NATPortTrigger_Description, BBFDM_BOTH},
+{"Interface", &DMWRITE, DMT_STRING, get_NATPortTrigger_Interface, set_NATPortTrigger_Interface, BBFDM_BOTH, DM_FLAG_REFERENCE},
+{"Port", &DMWRITE, DMT_UNINT, get_NATPortTrigger_Port, set_NATPortTrigger_Port, BBFDM_BOTH},
+{"PortEndRange", &DMWRITE, DMT_UNINT, get_NATPortTrigger_PortEndRange, set_NATPortTrigger_PortEndRange, BBFDM_BOTH},
+{"AutoDisableDuration", &DMWRITE, DMT_UNINT, get_NATPortTrigger_AutoDisableDuration, set_NATPortTrigger_AutoDisableDuration, BBFDM_BOTH},
+{"ActivationDate", &DMWRITE, DMT_TIME, get_NATPortTrigger_ActivationDate, set_NATPortTrigger_ActivationDate, BBFDM_BOTH},
+{"Protocol", &DMWRITE, DMT_STRING, get_NATPortTrigger_Protocol, set_NATPortTrigger_Protocol, BBFDM_BOTH},
+{"RuleNumberOfEntries", &DMREAD, DMT_UNINT, get_NATPortTrigger_RuleNumberOfEntries, NULL, BBFDM_BOTH},
+{0}
+};
+
+/* *** Device.NAT.PortTrigger.{i}.Rule.{i}. *** */
+DMLEAF tNATPortTriggerRuleParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type */
+{"Alias", &DMWRITE, DMT_STRING, get_NATPortTriggerRule_Alias, set_NATPortTriggerRule_Alias, BBFDM_BOTH},
+{"Port", &DMWRITE, DMT_UNINT, get_NATPortTriggerRule_Port, set_NATPortTriggerRule_Port, BBFDM_BOTH},
+{"PortEndRange", &DMWRITE, DMT_UNINT, get_NATPortTriggerRule_PortEndRange, set_NATPortTriggerRule_PortEndRange, BBFDM_BOTH},
+{"Protocol", &DMWRITE, DMT_STRING, get_NATPortTriggerRule_Protocol, set_NATPortTriggerRule_Protocol, BBFDM_BOTH},
 {0}
 };
