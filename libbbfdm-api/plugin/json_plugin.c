@@ -358,21 +358,7 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 		json_object_object_get_ex(uci_obj, "dmmapfile", &dmmap_file);
 
 		if (file && section_type && dmmap_file) {
-			char buf_instance[128];
-			char buf_alias[128];
-
-			char *uci_sec_name = json_object_get_string(section_type);
-
-			snprintf(buf_instance, sizeof(buf_instance), "%s_instance", uci_sec_name);
-			snprintf(buf_alias, sizeof(buf_alias), "%s_alias", uci_sec_name);
-
-			for (int i = 0; buf_instance[i]; i++)
-				buf_instance[i] = tolower(buf_instance[i]);
-
-			for (int i = 0; buf_alias[i]; i++)
-				buf_alias[i] = tolower(buf_alias[i]);
-
-			synchronize_specific_config_sections_with_dmmap(json_object_get_string(file), uci_sec_name, json_object_get_string(dmmap_file), &dup_list);
+			synchronize_specific_config_sections_with_dmmap(json_object_get_string(file), json_object_get_string(section_type), json_object_get_string(dmmap_file), &dup_list);
 			list_for_each_entry(p, &dup_list, list) {
 				char *dm_parent = NULL;
 
@@ -382,7 +368,7 @@ static int browse_obj(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data,
 						continue;
 				}
 
-				inst = handle_instance(dmctx, parent_node, p->dmmap_section, buf_instance, buf_alias);
+				inst = handle_instance(dmctx, parent_node, p->dmmap_section, "instance", "alias");
 
 				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
 					break;
@@ -482,19 +468,13 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 
 		if (file && section_type && dmmap_file) {
 			struct uci_section *s = NULL, *dmmap_s = NULL;
-			char buf_instance[128];
 			char sec_name[128];
 
 			char *uci_sec_name = json_object_get_string(section_type);
 
-			snprintf(buf_instance, sizeof(buf_instance), "%s_instance", uci_sec_name);
 			snprintf(sec_name, sizeof(sec_name), "%s%s%s_%s", data ? section_name((struct uci_section *)data) : "", data ? "_" : "", uci_sec_name, *instance);
 
-			for (int i = 0; buf_instance[i]; i++)
-				buf_instance[i] = tolower(buf_instance[i]);
-
-			for (int i = 0; sec_name[i]; i++)
-				sec_name[i] = tolower(sec_name[i]);
+			replace_special_char(sec_name, '_');
 
 			if (dmuci_add_section(json_object_get_string(file), uci_sec_name, &s))
 				return -1;
@@ -514,7 +494,7 @@ static int add_obj(char *refparam, struct dmctx *ctx, void *data, char **instanc
 			if (dmuci_set_value_by_section(dmmap_s, "dm_parent", section_name((struct uci_section *)data)))
 				return -1;
 
-			if (dmuci_set_value_by_section(dmmap_s, buf_instance, *instance))
+			if (dmuci_set_value_by_section(dmmap_s, "instance", *instance))
 				return -1;
 		}
 	}
