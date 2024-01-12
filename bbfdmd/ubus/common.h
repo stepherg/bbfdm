@@ -24,7 +24,7 @@
 #define ROOT_NODE "Device."
 #define BBF_ADD_EVENT "AddObj"
 #define BBF_DEL_EVENT "DelObj"
-#define BBF_EVENT "event"
+#define BBF_EVENT_NAME "event"
 #define BBF_UPDATE_SCHEMA_EVENT "UpdateSchema"
 
 #define MAX_DM_KEY_LEN 256

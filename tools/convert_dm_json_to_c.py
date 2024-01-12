@@ -509,6 +509,7 @@ def cprintEvent(geteventargs, param_args, struct_name):
         ############################## OPERATE ARGUMENTS ########################################
         print("static event_args %s = {" % struct_name, file=fp)
         if isinstance(param_args, dict):
+            print("    .name = \"\"", file=fp)
             print("    .param = (const char *[]) {", file=fp)
             for obj, _val in param_args.items():
                 print("        \"%s\"," % obj, file=fp)

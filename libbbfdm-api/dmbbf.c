@@ -423,9 +423,8 @@ static void dm_browse_service(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *e
 	node.parent = parent_node;
 	node.is_ubus_service = true;
 
-	if (dmctx->disable_mservice_browse == true) {
+	if (dmctx->disable_mservice_browse == true)
 		return;
-	}
 
 	dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
 
@@ -2650,7 +2649,7 @@ static int mparam_operate(DMPARAM_ARGS)
 			return USP_FAULT_COMMAND_FAILURE;
 
 		json_object *j_input = (dmctx->in_value) ? json_tokener_parse(dmctx->in_value) : NULL;
-		int fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, VALUESET);
+		int fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, 0);
 		json_object_put(j_input);
 
 		return fault;
@@ -2673,6 +2672,57 @@ int dm_entry_operate(struct dmctx *dmctx)
 	dmctx->checkleaf = plugin_leaf_match;
 	dmctx->method_obj = mobj_operate;
 	dmctx->method_param = mparam_operate;
+
+	err = dm_browse(dmctx, &node, root, NULL, NULL);
+
+	return (dmctx->stop) ? err : USP_FAULT_INVALID_PATH;
+}
+
+/* **************
+ * Event
+ * **************/
+static int mobj_event(DMOBJECT_ARGS)
+{
+	return USP_FAULT_INVALID_PATH;
+}
+
+static int mparam_event(DMPARAM_ARGS)
+{
+	char full_param[MAX_DM_PATH];
+
+	snprintf(full_param, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
+
+	if (DM_STRCMP(full_param, dmctx->in_param) != 0)
+		return USP_FAULT_INVALID_PATH;
+
+	dmctx->stop = 1;
+
+	if (!leaf->setvalue)
+		return USP_FAULT_INTERNAL_ERROR;
+
+	json_object *j_input = (dmctx->in_value) ? json_tokener_parse(dmctx->in_value) : NULL;
+	int fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, 0);
+	json_object_put(j_input);
+
+	return fault;
+}
+
+int dm_entry_event(struct dmctx *dmctx)
+{
+	DMOBJ *root = dmctx->dm_entryobj;
+	DMNODE node = { .current_object = "" };
+	int err = 0;
+
+	if (dmctx->in_param == NULL || dmctx->in_param[0] == '\0' || (*(dmctx->in_param + DM_STRLEN(dmctx->in_param) - 1) != '!'))
+		return USP_FAULT_INVALID_PATH;
+
+	dmctx->isevent = 1;
+	dmctx->inparam_isparam = 1;
+	dmctx->stop = 0;
+	dmctx->checkobj = plugin_obj_match;
+	dmctx->checkleaf = plugin_leaf_match;
+	dmctx->method_obj = mobj_event;
+	dmctx->method_param = mparam_event;
 
 	err = dm_browse(dmctx, &node, root, NULL, NULL);
 

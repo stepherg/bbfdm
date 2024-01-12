@@ -46,6 +46,8 @@ struct bbfdm_context {
 };
 
 struct ev_handler_node {
+	char *dm_path;
+	char *ev_name;
 	struct ubus_event_handler *ev_handler;
 	struct list_head list;
 };

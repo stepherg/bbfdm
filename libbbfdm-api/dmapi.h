@@ -237,6 +237,7 @@ typedef struct {
 } operation_args;
 
 typedef struct {
+	const char *name;
 	const char **param;
 } event_args;
 
@@ -272,6 +273,7 @@ enum {
 	BBF_ADD_OBJECT,
 	BBF_DEL_OBJECT,
 	BBF_OPERATE,
+	BBF_EVENT,
 };
 
 enum usp_fault_code_enum {

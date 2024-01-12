@@ -142,6 +142,7 @@ static int operate_DeviceXIOPSYSEUPingTEST_Run(char *refparam, struct dmctx *ctx
  * EVENTS
  *************************************************************/
 static event_args boot_event_args = {
+	.name = "",
 	.param = (const char *[]) {
 		"CommandKey",
 		"Cause",

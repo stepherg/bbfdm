@@ -3512,6 +3512,7 @@ static int operate_WiFiDataElementsNetworkDeviceRadio_WiFiRestart(char *refparam
  * EVENTS
  *************************************************************/
 static event_args wifidataelementsassociationevent_associated_args = {
+	.name = "wifi.dataelements.Associated",
     .param = (const char *[]) {
         "type",
         "version",
@@ -3533,7 +3534,29 @@ static int get_event_args_WiFiDataElementsAssociationEvent_Associated(char *refp
     return 0;
 }
 
+static int event_WiFiDataElementsAssociationEvent_Associated(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *event_time = dmjson_get_value((json_object *)value, 1, "eventTime");
+	char *bssid = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "BSSID");
+	char *mac_addr = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "MACAddress");
+	char *status_code = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "StatusCode");
+	char *ht_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "HTCapabilities");
+	char *vht_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "VHTCapabilities");
+	char *he_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "HECapabilities");
+
+	add_list_parameter(ctx, dmstrdup("TimeStamp"), dmstrdup(event_time), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("BSSID"), dmstrdup(bssid), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("MACAddress"), dmstrdup(mac_addr), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("StatusCode"), dmstrdup(status_code), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("HTCapabilities"), dmstrdup(ht_cap), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("VHTCapabilities"), dmstrdup(vht_cap), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("HECapabilities"), dmstrdup(he_cap), DMT_TYPE[DMT_STRING], NULL);
+
+    return 0;
+}
+
 static event_args wifidataelementsdisassociationevent_disassociated_args = {
+	.name = "wifi.dataelements.Disassociated",
     .param = (const char *[]) {
         "type",
         "version",
@@ -3556,6 +3579,35 @@ static event_args wifidataelementsdisassociationevent_disassociated_args = {
 static int get_event_args_WiFiDataElementsDisassociationEvent_Disassociated(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
     *value = (char *)&wifidataelementsdisassociationevent_disassociated_args;
+    return 0;
+}
+
+static int event_WiFiDataElementsDisassociationEvent_Disassociated(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	char *event_time = dmjson_get_value((json_object *)value, 1, "eventTime");
+	char *bssid = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BSSID");
+	char *mac_addr = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "MACAddress");
+	char *reason_code = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ReasonCode");
+	char *bytes_sent = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BytesSent");
+	char *bytes_received = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BytesReceived");
+	char *packet_sent = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "PacketsSent");
+	char *packet_received = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "PacketsReceived");
+	char *errors_sent = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ErrorsSent");
+	char *errors_received = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ErrorsReceived");
+	char *retrans_count = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "RetransCount");
+
+	add_list_parameter(ctx, dmstrdup("TimeStamp"), dmstrdup(event_time), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("BSSID"), dmstrdup(bssid), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("MACAddress"), dmstrdup(mac_addr), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("ReasonCode"), dmstrdup(reason_code), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("BytesSent"), dmstrdup(bytes_sent), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("BytesReceived"), dmstrdup(bytes_received), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("PacketsSent"), dmstrdup(packet_sent), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("PacketsReceived"), dmstrdup(packet_received), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("ErrorsSent"), dmstrdup(errors_sent), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("ErrorsReceived"), dmstrdup(errors_received), DMT_TYPE[DMT_STRING], NULL);
+	add_list_parameter(ctx, dmstrdup("RetransCount"), dmstrdup(retrans_count), DMT_TYPE[DMT_STRING], NULL);
+
     return 0;
 }
 
@@ -4389,7 +4441,7 @@ DMOBJ tWiFiDataElementsAssociationEventObj[] = {
 DMLEAF tWiFiDataElementsAssociationEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"AssociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
-{"Associated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsAssociationEvent_Associated, NULL, BBFDM_USP},
+{"Associated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsAssociationEvent_Associated, event_WiFiDataElementsAssociationEvent_Associated, BBFDM_USP},
 {0}
 };
 
@@ -4450,7 +4502,7 @@ DMOBJ tWiFiDataElementsDisassociationEventObj[] = {
 DMLEAF tWiFiDataElementsDisassociationEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"DisassociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
-{"Disassociated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsDisassociationEvent_Disassociated, NULL, BBFDM_USP},
+{"Disassociated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsDisassociationEvent_Disassociated, event_WiFiDataElementsDisassociationEvent_Disassociated, BBFDM_USP},
 {0}
 };
 

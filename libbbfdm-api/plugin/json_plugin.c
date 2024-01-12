@@ -25,6 +25,7 @@ static operation_args empty_cmd = {
 };
 
 static event_args empty_event = {
+	.name = (const char *)NULL,
 	.param = (const char**)NULL,
 };
 

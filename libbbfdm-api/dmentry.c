@@ -243,6 +243,9 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 	case BBF_OPERATE:
 		fault = dm_entry_operate(ctx);
 		break;
+	case BBF_EVENT:
+		fault = dm_entry_event(ctx);
+		break;
 	}
 
 	dmuci_save();

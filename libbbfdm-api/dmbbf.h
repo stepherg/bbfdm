@@ -44,6 +44,7 @@ int dm_entry_delete_object(struct dmctx *dmctx);
 int dm_entry_set_value(struct dmctx *dmctx);
 int dm_entry_object_exists(struct dmctx *dmctx);
 int dm_entry_operate(struct dmctx *dmctx);
+int dm_entry_event(struct dmctx *dmctx);
 int dm_entry_get_reference_param(struct dmctx *dmctx);
 int dm_entry_get_reference_value(struct dmctx *dmctx);
 int dm_entry_get_linker(struct dmctx *dmctx);

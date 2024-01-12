@@ -1084,7 +1084,7 @@ static int bbfdm_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 		return UBUS_STATUS_INVALID_ARGUMENT;
 
 	INFO("ubus method|%s|, name|%s|", method, obj->name);
-	snprintf(method_name, sizeof(method_name), "%s.%s", u->config.out_name, BBF_EVENT);
+	snprintf(method_name, sizeof(method_name), "%s.%s", DM_STRLEN(u->config.out_root_obj) ? u->config.out_root_obj : u->config.out_name, BBF_EVENT_NAME);
 	ubus_send_event(ctx, method_name, msg);
 
 	return 0;
@@ -1172,7 +1172,7 @@ static void broadcast_add_del_event(const char *method, struct list_head *inst, 
 
 static void update_instances_list(struct list_head *inst)
 {
-        int ret;
+	int ret;
 	struct dmctx bbf_ctx = {
 			.in_param = ROOT_NODE,
 			.nextlevel = false,
@@ -1737,12 +1737,12 @@ int main(int argc, char **argv)
 		goto exit;
 
 	run_schema_updater(&bbfdm_ctx);
-	if (is_micro_service == false) { // It's not a micro-service instance
-		err = register_events_to_ubus(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);
-		if (err != 0)
-			goto exit;
 
-	} else { // It's a micro-service instance
+	err = register_events_to_ubus(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);
+	if (err != 0)
+		goto exit;
+
+	if (is_micro_service == true) { // It's a micro-service instance
 		bool is_registred = register_service(&bbfdm_ctx.ubus_ctx);
 		if (is_registred == false) {
 			// register for add event
@@ -1757,8 +1757,7 @@ int main(int argc, char **argv)
 	uloop_run();
 
 exit:
-	if (is_micro_service == false) // It's not a micro-service instance
-		free_ubus_event_handler(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);
+	free_ubus_event_handler(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);
 
 	if (ubus_init_done) {
 		uloop_done();
