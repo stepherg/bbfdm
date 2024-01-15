@@ -1870,6 +1870,25 @@ void remove_char(char *str, const char c)
 	str[j] = 0;
 }
 
+bool special_char(char c)
+{
+	if ((c >= 'a' && c <= 'z') ||
+	    (c >= 'A' && c <= 'Z') ||
+		(c >= '0' && c <= '9') ||
+		(c == '_'))
+		return false;
+	else
+		return true;
+}
+
+void replace_special_char(char *str, char c)
+{
+	for (int i = 0; i < DM_STRLEN(str); i++) {
+		if (special_char(str[i]))
+			str[i] = c;
+	}
+}
+
 char *replace_char(char *str, char find, char replace)
 {
 	char *current_pos = DM_STRCHR(str, find);

@@ -281,6 +281,7 @@ bool file_exists(const char *path);
 bool is_regular_file(const char *path);
 unsigned long file_system_size(const char *path, const enum fs_size_type_enum type);
 void remove_char(char *str, const char c);
+void replace_special_char(char *str, char c);
 char *replace_char(char *str, char find, char replace);
 char *replace_str(const char *str, const char *substr, const char *replacement);
 int dm_file_to_buf(const char *filename, void *buf, size_t buf_size);
