@@ -265,16 +265,20 @@ static bool handle_string(char *v1, char *v2, enum operation op, int *fault)
 		return false;
 	}
 
-	if (v2[0] != '"' || v2[v2_len - 1] != '"') {
+	if ((v2[0] == '"' && v2[v2_len - 1] != '"') ||
+		(v2[0] != '"' && v2[v2_len - 1] == '"')) {
 		*fault = USP_FAULT_INVALID_PATH_SYNTAX;
 		return false;
 	}
+
+	bool has_quote = v2[0] == '"';
 
 	// Check for %22 and %25 special escape sequences
 	char buff[MAX_DM_VALUE] = {0};
 	handle_special_escape_sequence(v2, buff, MAX_DM_VALUE);
 
-	snprintf(temp, MAX_DM_VALUE, "\"%s\"", v1);
+	snprintf(temp, MAX_DM_VALUE, "%s%s%s", has_quote ? "\"": "", v1, has_quote ? "\"": "");
+
 	switch (op) {
 	case OPER_EQUAL_EQUAL:
 		return !strcmp(temp, buff);
