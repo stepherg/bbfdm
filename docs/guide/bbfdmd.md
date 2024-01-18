@@ -133,7 +133,7 @@ Below is another example of json input file:
 
 > NOTE1: `bbfdmd` CLI mode is an experimentation feature and it can be updated later.
 
-> NOTE2: If `-m` option is not passed when starting `bbfdmd`, so configuration options will be loaded from the default [INPUT.JSON](../../json/input.json) located in '/etc/bbfdm/input.json'.
+> NOTE2: If `-m` option is not passed when starting `bbfdmd`, so configuration options will be loaded from the default [INPUT.JSON](../../test/files/tmp/bbfdm/input.json) located in '/tmp/bbfdm/input.json'.
 
 * To see the currently implemented data model use:
 
@@ -164,10 +164,10 @@ $ bbfdmd -c set "parameter" "value"
 
 
 ## Important topics
-* [UBUS methods](../guide/bbfdm_ubus_methods.md)
-* [UBUS Errors](../guide/bbfdm_ubus_errors.md)
-* [Parallel UBUS call](../guide/bbfdm_ubus_parallel_call.md)
-* [Third party datamodel integration](../guide/bbfdm_dm_integration.md)
+* [UBUS methods](bbfdmd_ubus_methods.md)
+* [UBUS Errors](bbfdmd_ubus_errors.md)
+* [Parallel UBUS call](bbfdmd_ubus_parallel_call.md)
+* [Third party datamodel integration](bbfdmd_dm_integration.md)
 
 
 ## Dependencies

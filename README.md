@@ -31,7 +31,7 @@
 ```
 
 - `bbfdmd` folder which contains the source code of bbfdm deamon.
-More explanation on how this daemon works and all supported methods are presented in this file [BBFDMD](./docs/arch/bbfdmd.md)
+More explanation on how this daemon works and all supported methods are presented in this file [BBFDMD](./docs/guide/bbfdmd.md)
 
 - `libbbfdm` folder which contains the different data models supported by iopsys
 
@@ -59,22 +59,22 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 
 
 ## Design
-* [BBFDMD Design](./docs/arch/bbfdmd.md)
-* [Datamodel extension using JSON plugin](./docs/guide/json_plugin_v1.md)
-* [Datamodel Plugins and Microservice](./docs/guide/datamodel_as_microservice.md)
+* [BBFDMD Design](./docs/guide/bbfdmd.md)
+* [Datamodel extension using JSON plugin](./docs/guide/libbbfdm-api_json_plugin_v1.md)
+* [Datamodel Plugins and Microservice](./docs/guide/libbbfdm-api_datamodel_as_microservice.md)
 * [BBFDM Tools](./tools/README.md)
 
 ## Important Topics
-* [Add support of a new Object/Parameter](./docs/guide/obj_param_extension.md)
-* [How to add new vendor](./docs/guide/vendor.md)
-* [Dynamic Object/Parameter/Operate/Event](./docs/guide/dynamic_dm.md)
-* [Design for firmware activation](./docs/guide/FirmwareImage.md)
-* [TR181 Firewall datamodel mappings](./docs/guide/firewall.md)
-* [Wireless Configuration handling](./docs/guide/WiFi.DataElements.md)
+* [Add support of a new Object/Parameter](./docs/guide/libbbfdm-api_obj_param_extension.md)
+* [How to add new vendor](./docs/guide/libbbfdm-api_vendor.md)
+* [Dynamic Object/Parameter/Operate/Event](./docs/guide/libbbfdm-api_dynamic_dm.md)
+* [Design for firmware activation](./docs/guide/libbbfdm_DeviceInfo_FirmwareImage.md)
+* [TR181 Firewall datamodel mappings](./docs/guide/libbbfdm_Firewall.md)
+* [Wireless Configuration handling](./docs/guide/libbbfdm_WiFi.md)
 * [Explain the different Network Deployment Scenarios](./docs/guide/network_depoyment_scenarios.md)
-* [How to Configure MACVLAN](./docs/guide/macvlan_interface.md)
-* [Explain Policy Based Routing Management](./docs/guide/policy_based_routing.md)
-* [TR181 DNS datamodel](./docs/guide/device_dns.md)
+* [How to Configure MACVLAN](./docs/guide/libbbfdm_Ethernet_X_IOPSYS_EU_MACVLAN.md)
+* [Explain Policy Based Routing Management](./docs/guide/libbbfdm_Routing.md)
+* [TR181 DNS datamodel](./docs/guide/libbbfdm_DNS.md)
 
 ## External dependencies for datamodel objects
 
@@ -91,7 +91,9 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 | STUN parameters                          | stunc          | https://dev.iopsys.eu/bbf/stunc.git          |
 | Device.XPON.                             | ponmngr        | https://dev.iopsys.eu/hal/ponmngr.git        |
 | Device.UPNP.                             | ssdpd          | https://github.com/miniupnp/miniupnp.git     |
-| Device.Users.				   | usermngr       | https://dev.iopsys.eu/bbf/usermngr.git       |
-| Device.PeriodicStatistics.		   | periodicstats  | https://dev.iopsys.eu/bbf/periodicstats.git  |
-| Device.SoftwareModules.		   | swmodd         | https://dev.iopsys.eu/lcm/swmodd.git         |
+| Device.Users.				               | usermngr       | https://dev.iopsys.eu/bbf/usermngr.git       |
+| Device.PeriodicStatistics.		       | periodicstats  | https://dev.iopsys.eu/bbf/periodicstats.git  |
+| Device.SoftwareModules.		           | swmodd         | https://dev.iopsys.eu/lcm/swmodd.git         |
+| Device.Time.		                       | timemngr       | https://dev.iopsys.eu/bbf/timemngr.git       |
+| Device.Hosts.		                       | hostmngr       | https://dev.iopsys.eu/iopsys/hostmngr.git    |
 | Device.Services.VoiceService.            | tr104          | https://dev.iopsys.eu/voice/tr104.git        |
