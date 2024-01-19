@@ -57,7 +57,7 @@ static int get_Device_InterfaceStackNumberOfEntries(char *refparam, struct dmctx
 
 static int get_Device_RootDataModelVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "2.16";
+	*value = "2.17";
 	return 0;
 }
 

@@ -993,6 +993,8 @@ def getParamDesc(dmparam, key):
     text = text.replace("\'", "")
     text = text.replace("\"", "")
     text = text.replace("\n", "")
+    text = text.replace("\\d", "\\\\d")
+    text = text.replace("\\.", "\\\\.")
     desc = ' '.join(text.split())
     return desc
 
