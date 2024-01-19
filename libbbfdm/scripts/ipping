@@ -25,8 +25,9 @@ ipping_error() {
 	# Store data in dmmap_diagnostics for both protocols (cwmp/usp)
 	[ "$3" = "both_proto" ] && {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState="$1"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.IPAddressUsed=""
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.SuccessCount=0
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.FailureCount="$cnt"
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.FailureCount="$2"
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.AverageResponseTime=0
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MinimumResponseTime=9999
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MaximumResponseTime=0
@@ -80,13 +81,7 @@ ipping_launch() {
 
 		res=$(ping -q ${ip_proto} -c 1 -s ${dsize} -W ${timeout} ${device} "${host}" 2>&1)
 
-		ba=$(echo "$res" | grep "bad address")
-		[ -n "$ba" ] && {
-			ipping_error "Error_CannotResolveHostName" "${nbr_of_rep}" "${proto}"
-			return
-		}
-
-		ba=$(echo "$res" | grep "unknown host")
+		ba=$(echo "$res" | grep -E "bad address|unknown host|Name does not resolve")
 		[ -n "$ba" ] && {
 			ipping_error "Error_CannotResolveHostName" "${nbr_of_rep}" "${proto}"
 			return

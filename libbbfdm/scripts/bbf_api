@@ -33,7 +33,7 @@ get_ip_addr_used() {
 		if [ -n "$interface" ]; then
 			ip_addr_used=$(ifstatus "$interface" | jsonfilter -e '@["ipv6-address"][0].address')
 		else
-			ip_addr_used=$(ip -6 route | grep default | awk -F ' ' '{print $9}')
+			ip_addr_used=$(ip -6 route | grep default | awk -F ' ' '{print $3}' | head -n 1)
 		fi
 	else
 		if [ -n "$interface" ]; then
