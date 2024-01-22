@@ -40,7 +40,7 @@ struct dhcp_args {
 };
 
 struct dhcp_host_args {
-	struct dhcp_iface_args *dhcp_iface_args;
+	struct dhcp_args *dhcp_args;
 	struct dmmap_dup *host_sections;
 };
 
@@ -75,9 +75,9 @@ static inline void init_dhcp_args(struct dhcp_args *args, struct dmmap_dup *s)
 	args->n_leases = 0;
 }
 
-static inline void init_args_dhcp_host(struct dhcp_host_args *args, struct dhcp_iface_args *dhcp_iface_args, struct dmmap_dup *host_s)
+static inline void init_args_dhcp_host(struct dhcp_host_args *args, struct dhcp_args *dhcp_args, struct dmmap_dup *host_s)
 {
-	args->dhcp_iface_args = dhcp_iface_args;
+	args->dhcp_args = dhcp_args;
 	args->host_sections = host_s;
 }
 
@@ -356,28 +356,12 @@ static void dhcp_leases_assign_to_interface(struct dhcp_args *dhcp, struct list_
 	}
 }
 
-static bool check_dhcp_host_alias_exists(char *dhcp_interface, char *option, char *value)
+static bool check_dhcp_host_option_exists(char *dhcp_pool_name, char *option, char *value)
 {
 	struct uci_section *s = NULL;
 	char *opt_value;
 
-	uci_path_foreach_option_eq(bbfdm, "dmmap_dhcp", "host", "dhcp", dhcp_interface, s) {
-
-		dmuci_get_value_by_section_string(s, option, &opt_value);
-
-		if (DM_STRCMP(opt_value, value) == 0)
-			return true;
-	}
-
-	return false;
-}
-
-static bool check_dhcp_host_option_exists(char *dhcp_interface, char *option, char *value)
-{
-	struct uci_section *s = NULL;
-	char *opt_value;
-
-	uci_foreach_option_eq("dhcp", "host", "dhcp", dhcp_interface, s) {
+	uci_foreach_option_eq("dhcp", "host", "dhcp_pool", dhcp_pool_name, s) {
 
 		dmuci_get_value_by_section_string(s, option, &opt_value);
 
@@ -807,17 +791,16 @@ static int browseDHCPv4ServerPoolStaticAddressInst(struct dmctx *dmctx, DMNODE *
 	LIST_HEAD(dup_list);
 	char *inst = NULL;
 
-	synchronize_specific_config_sections_with_dmmap_cont("dhcp", "host", "dmmap_dhcp", "dhcp", ((struct dhcp_args *)prev_data)->iface_args.name, &dup_list);
+	synchronize_specific_config_sections_with_dmmap_cont("dhcp", "host", "dmmap_dhcp", "dhcp_pool", section_name((((struct dhcp_args *)prev_data)->sections)->config_section), &dup_list);
 	list_for_each_entry(p, &dup_list, list) {
 
 		// Skip all reserved hosts
 		char *host_name = NULL;
 		dmuci_get_value_by_section_string(p->config_section, "name", &host_name);
-		if (host_name && DM_LSTRCMP(host_name, "reserved") == 0)
+		if (DM_LSTRCMP(host_name, "reserved") == 0)
 			continue;
 
-		dmuci_set_value_by_section(p->dmmap_section, "dhcp", ((struct dhcp_args *)prev_data)->iface_args.name);
-		init_args_dhcp_host(&curr_dhcp_host_args, &((struct dhcp_args *)prev_data)->iface_args, p);
+		init_args_dhcp_host(&curr_dhcp_host_args, (struct dhcp_args *)prev_data, p);
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "dhcp_host_instance", "dhcp_host_alias");
 
@@ -1195,41 +1178,30 @@ static int delObjDHCPv4ServerPool(char *refparam, struct dmctx *ctx, void *data,
 static int addObjDHCPv4ServerPoolStaticAddress(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
 	struct uci_section *s = NULL, *dmmap_dhcp_host = NULL;
+	char *dhcp_pool = section_name((((struct dhcp_args *)data)->sections)->config_section);
 	char host_name[32];
 
-	snprintf(host_name, sizeof(host_name), "host_%s", *instance);
+	snprintf(host_name, sizeof(host_name), "%s_host_%s", dhcp_pool, *instance);
 
 	dmuci_add_section("dhcp", "host", &s);
 	dmuci_rename_section_by_section(s, host_name);
-	dmuci_set_value_by_section(s, "name", host_name);
-	dmuci_set_value_by_section(s, "dhcp", ((struct dhcp_args *)data)->iface_args.name);
+	dmuci_set_value_by_section(s, "dhcp_pool", dhcp_pool);
 	dmuci_set_value_by_section(s, "enable", "0");
 
 	dmuci_add_section_bbfdm("dmmap_dhcp", "host", &dmmap_dhcp_host);
 	dmuci_set_value_by_section(dmmap_dhcp_host, "section_name", host_name);
-	dmuci_set_value_by_section(dmmap_dhcp_host, "dhcp", ((struct dhcp_args *)data)->iface_args.name);
 	dmuci_set_value_by_section(dmmap_dhcp_host, "dhcp_host_instance", *instance);
 	return 0;
 }
 
 static int delObjDHCPv4ServerPoolStaticAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, unsigned char del_action)
 {
-	struct uci_section *s = NULL, *stmp = NULL;
-	
 	switch (del_action) {
 		case DEL_INST:
 			dmuci_delete_by_section((((struct dhcp_host_args *)data)->host_sections)->config_section, NULL, NULL);
 			dmuci_delete_by_section((((struct dhcp_host_args *)data)->host_sections)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
-			uci_foreach_option_eq_safe("dhcp", "host", "dhcp", ((struct dhcp_args *)data)->iface_args.name, stmp, s) {
-				struct uci_section *dmmap_section = NULL;
-
-				get_dmmap_section_of_config_section("dmmap_dhcp", "host", section_name(s), &dmmap_section);
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
-
-				dmuci_delete_by_section(s, NULL, NULL);
-			}
 			break;
 	}
 	return 0;
@@ -1770,15 +1742,13 @@ static int set_DHCPv4ServerPool_MaxAddress(char *refparam, struct dmctx *ctx, vo
 static int get_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct dhcp_iface_args *iface_args = &((struct dhcp_args *)data)->iface_args;
+	char *dhcp_pool = section_name((((struct dhcp_args *)data)->sections)->config_section);
 	struct uci_section *s = NULL;
 	char list_val[512];
 	unsigned pos = 0;
 
-	if (DM_STRLEN(iface_args->name) == 0)
-		return 0;
-
 	list_val[0] = 0;
-	uci_foreach_option_eq("dhcp", "host", "dhcp", iface_args->name, s) {
+	uci_foreach_option_eq("dhcp", "host", "dhcp_pool", dhcp_pool, s) {
 
 		char *host_name = NULL;
 		dmuci_get_value_by_section_string(s, "name", &host_name);
@@ -1810,6 +1780,7 @@ static int set_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 {
 	struct uci_section *s = NULL, *stmp = NULL;
 	char *local_value, *pch, *spch = NULL;
+	char *dhcp_pool = section_name((((struct dhcp_args *)data)->sections)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
@@ -1829,7 +1800,7 @@ static int set_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 
 			return 0;
 		case VALUESET:
-			uci_foreach_option_eq_safe("dhcp", "host", "dhcp", ((struct dhcp_args *)data)->iface_args.name, stmp, s) {
+			uci_foreach_option_eq_safe("dhcp", "host", "dhcp_pool", dhcp_pool, stmp, s) {
 
 				char *host_name = NULL;
 				dmuci_get_value_by_section_string(s, "name", &host_name);
@@ -1850,7 +1821,7 @@ static int set_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 			for (pch = strtok_r(local_value, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
 
 				// Check if host exists
-				bool host_exist = check_dhcp_host_option_exists(((struct dhcp_args *)data)->iface_args.name, "ip", pch);
+				bool host_exist = check_dhcp_host_option_exists(dhcp_pool, "ip", pch);
 
 				// host exists -> skip it
 				if (host_exist)
@@ -1860,7 +1831,7 @@ static int set_DHCPv4ServerPool_ReservedAddresses(char *refparam, struct dmctx *
 				struct uci_section *dhcp_host_section = NULL;
 				dmuci_add_section("dhcp", "host", &dhcp_host_section);
 				dmuci_set_value_by_section(dhcp_host_section, "name", "reserved");
-				dmuci_set_value_by_section(dhcp_host_section, "dhcp", ((struct dhcp_args *)data)->iface_args.name);
+				dmuci_set_value_by_section(dhcp_host_section, "dhcp_pool", dhcp_pool);
 				dmuci_set_value_by_section(dhcp_host_section, "ip", pch);
 			}
 			dmfree(local_value);
@@ -2089,28 +2060,14 @@ static int get_DHCPv4ServerPoolStaticAddress_Alias(char *refparam, struct dmctx 
 
 static int set_DHCPv4ServerPoolStaticAddress_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *curr_alias = NULL, *alias_assigned = NULL;
-
 	switch (action) {
 		case VALUECHECK:
-			// Validate value string -> length
 			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-
-			// Check if alias is assigned by user
-			dmuci_get_value_by_section_string((((struct dhcp_host_args *)data)->host_sections)->dmmap_section, "dhcp_host_alias_assigned", &alias_assigned);
-			if (alias_assigned && DM_LSTRCMP(alias_assigned, "1") == 0)
-				return FAULT_9007;
-
-			// Check if alias exists
-			dmuci_get_value_by_section_string((((struct dhcp_host_args *)data)->host_sections)->dmmap_section, "dhcp_host_alias", &curr_alias);
-			if (DM_STRCMP(curr_alias, value) != 0 && check_dhcp_host_alias_exists((((struct dhcp_host_args *)data)->dhcp_iface_args)->name, "dhcp_host_alias", value))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
 			dmuci_set_value_by_section((((struct dhcp_host_args *)data)->host_sections)->dmmap_section, "dhcp_host_alias", value);
-			dmuci_set_value_by_section((((struct dhcp_host_args *)data)->host_sections)->dmmap_section, "dhcp_host_alias_assigned", "1");
 			return 0;
 	}
 	return 0;
@@ -2135,7 +2092,7 @@ static int set_DHCPv4ServerPoolStaticAddress_Chaddr(char *refparam, struct dmctx
 
 			// Check if mac exists
 			dmuci_get_value_by_section_string((((struct dhcp_host_args *)data)->host_sections)->config_section, "mac", &curr_mac);
-			if (DM_STRCMP(curr_mac, value) != 0 && check_dhcp_host_option_exists((((struct dhcp_host_args *)data)->dhcp_iface_args)->name, "mac", value))
+			if (check_dhcp_host_option_exists(section_name(((((struct dhcp_host_args *)data)->dhcp_args)->sections)->config_section), "mac", value))
 				return FAULT_9007;
 
 			return 0;
@@ -2165,12 +2122,12 @@ static int set_DHCPv4ServerPoolStaticAddress_Yiaddr(char *refparam, struct dmctx
 				return FAULT_9007;
 
 			// Check if ip address is out dhcp pool
-			if (check_ipv4_in_dhcp_pool(host_args->dhcp_iface_args, value))
+			if (check_ipv4_in_dhcp_pool(&(host_args->dhcp_args)->iface_args, value))
 				return FAULT_9007;
 
 			// Check if ip exists
 			dmuci_get_value_by_section_string((((struct dhcp_host_args *)data)->host_sections)->config_section, "ip", &curr_ip);
-			if (DM_STRCMP(curr_ip, value) != 0 && check_dhcp_host_option_exists(host_args->dhcp_iface_args->name, "ip", value))
+			if (check_dhcp_host_option_exists(section_name(((((struct dhcp_host_args *)data)->dhcp_args)->sections)->config_section), "ip", value))
 				return FAULT_9007;
 
 			return 0;
